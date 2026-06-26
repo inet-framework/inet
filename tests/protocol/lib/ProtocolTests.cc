@@ -302,5 +302,33 @@ Define_ProtocolTest(wifi_aggregation)
                   .describe("an A-MSDU aggregated QoS data frame").within(0.2));
 }
 
+// The full IEEE 802.11 Block Ack sequence from the originator (host1), including the
+// immediate ACKs, exactly as the standard describes setting up and using the agreement:
+//   ADDBA Request -> ACK -> ADDBA Response -> ACK -> (block-acked QoS data) ->
+//   Block Ack Request -> Block Ack.
+// Frame types: ST_ACTION=13, ST_ACK=29, ST_DATA_WITH_QOS=40, ST_BLOCKACK_REQ=24,
+// ST_BLOCKACK=25; QoS-data ackPolicy BLOCK_ACK=3.
+Define_ProtocolTest(wifi_block_ack_full)
+{
+    return ProtocolTest("wifi_block_ack_full")
+        // --- Create the Block Ack agreement (ADDBA handshake, each frame ACKed) ---
+        .expect(on("host1").sentToLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 13").describe("ADDBA Request").within(0.1))
+        .expect(on("host1").receivedFromLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 29").describe("ACK (recipient acknowledges the ADDBA Request)").within(0.002))
+        .expect(on("host1").receivedFromLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 13").describe("ADDBA Response").within(0.01))
+        .expect(on("host1").sentToLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 29").describe("ACK (originator acknowledges the ADDBA Response)").within(0.002))
+        // --- Use the agreement ---
+        .expect(on("host1").sentToLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 40 && Ieee80211DataHeader.ackPolicy == 3")
+                  .describe("a QoS data frame with Block Ack policy").within(0.5))
+        .expect(on("host1").sentToLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 24").describe("Block Ack Request").within(0.5))
+        .expect(on("host1").receivedFromLower().layer(Layer::Link)
+                  .match("ieee80211mac.type == 25").describe("Block Ack").within(0.01));
+}
+
 } // namespace protocoltest
 } // namespace inet
