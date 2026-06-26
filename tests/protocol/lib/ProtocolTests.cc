@@ -50,37 +50,28 @@ Define_ProtocolTest(udp_basic_fail)
 // (INET's Tcp module does not emit packetSentToLower, so outgoing segments are not
 // observed at the transport layer -- see plan Phase 2 findings.)
 
-static intval_t tcpSeq(const PacketEvent& e) { return (intval_t)e.packet->peekAtFront<TcpHeader>()->getSequenceNo(); }
-static intval_t tcpAck(const PacketEvent& e) { return (intval_t)e.packet->peekAtFront<TcpHeader>()->getAckNo(); }
-
-// Should PASS: the handshake's ack numbers follow seq+1 at each step.
+// Should PASS: the handshake's ack numbers follow seq+1 at each step. Matching and
+// capturing are declarative (PacketFilter expressions + "protocol.field" captures);
+// {name} in an expression is substituted with an earlier captured value.
 Define_ProtocolTest(tcp_handshake_seq)
 {
     return ProtocolTest("tcp_handshake_seq")
         // host2 receives host1's SYN; remember host1's initial sequence number.
         .expect(on("host2").receivedFromLower().layer(Layer::Transport)
-                  .match([](const MatchContext& m) {
-                      auto tcp = m.event.packet->peekAtFront<TcpHeader>();
-                      return tcp->getSynBit() && !tcp->getAckBit();
-                  })
-                  .capture("isn", [](const PacketEvent& e) { return cValue(tcpSeq(e)); })
+                  .match("tcp.synBit == true && tcp.ackBit == false")
+                  .describe("host1's SYN")
+                  .capture("isn", "tcp.sequenceNo")
                   .within(0.2))
         // host1 receives the SYN+ACK; it must acknowledge isn+1. Remember host2's ISN.
         .expect(on("host1").receivedFromLower().layer(Layer::Transport)
-                  .match([](const MatchContext& m) {
-                      auto tcp = m.event.packet->peekAtFront<TcpHeader>();
-                      return tcp->getSynBit() && tcp->getAckBit()
-                          && tcpAck(m.event) == m.get("isn").intValue() + 1;
-                  })
-                  .capture("peerIsn", [](const PacketEvent& e) { return cValue(tcpSeq(e)); })
+                  .match("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
+                  .describe("the SYN+ACK acknowledging host1's ISN+1")
+                  .capture("peerIsn", "tcp.sequenceNo")
                   .within(0.5))
         // host2 receives the final ACK; it must acknowledge peerIsn+1.
         .expect(on("host2").receivedFromLower().layer(Layer::Transport)
-                  .match([](const MatchContext& m) {
-                      auto tcp = m.event.packet->peekAtFront<TcpHeader>();
-                      return tcp->getAckBit() && !tcp->getSynBit()
-                          && tcpAck(m.event) == m.get("peerIsn").intValue() + 1;
-                  })
+                  .match("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {peerIsn} + 1")
+                  .describe("the final ACK acknowledging the peer's ISN+1")
                   .within(0.5));
 }
 
@@ -89,18 +80,11 @@ Define_ProtocolTest(tcp_handshake_seq_bad)
 {
     return ProtocolTest("tcp_handshake_seq_bad")
         .expect(on("host2").receivedFromLower().layer(Layer::Transport)
-                  .match([](const MatchContext& m) {
-                      auto tcp = m.event.packet->peekAtFront<TcpHeader>();
-                      return tcp->getSynBit() && !tcp->getAckBit();
-                  })
-                  .capture("isn", [](const PacketEvent& e) { return cValue(tcpSeq(e)); })
+                  .match("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("isn", "tcp.sequenceNo")
                   .within(0.2))
         .expect(on("host1").receivedFromLower().layer(Layer::Transport)
-                  .match([](const MatchContext& m) {
-                      auto tcp = m.event.packet->peekAtFront<TcpHeader>();
-                      return tcp->getSynBit() && tcp->getAckBit()
-                          && tcpAck(m.event) == m.get("isn").intValue() + 2; // wrong on purpose
-                  })
+                  .match("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 2") // wrong
                   .within(0.5));
 }
 
@@ -205,25 +189,17 @@ Define_ProtocolTest(tcp_handshake_peer)
     return ProtocolTest("tcp_handshake_peer")
         // 1. host1's outgoing SYN; capture its ISN and ephemeral source port.
         .expect(on("host1").receivedFromUpper().layer(Layer::Network)
-                  .match([](const MatchContext& m) {
-                      auto tcp = m.event.packet->peekAtFront<TcpHeader>();
-                      return tcp->getSynBit() && !tcp->getAckBit();
-                  })
+                  .match("tcp.synBit == true && tcp.ackBit == false")
                   .describe("host1's SYN (SYN set, ACK clear)")
-                  .capture("isn", [](const PacketEvent& e) { return cValue(tcpSeq(e)); })
-                  .capture("clientPort", [](const PacketEvent& e) {
-                      return cValue((intval_t)e.packet->peekAtFront<TcpHeader>()->getSrcPort());
-                  })
+                  .capture("isn", "tcp.sequenceNo")
+                  .capture("clientPort", "tcp.srcPort")
                   .within(1.0))
         // 2. Reactively inject a SYN+ACK acknowledging host1's ISN+1.
         .inject(inject("host1").into("eth[0]", "upperLayerOut").after(0.001)
                   .describe("a SYN+ACK acknowledging host1's ISN+1").packet(buildSynAck))
         // 3. host1's final ACK, acknowledging the peer's ISN+1 (5000+1).
         .expect(on("host1").receivedFromUpper().layer(Layer::Network)
-                  .match([](const MatchContext& m) {
-                      auto tcp = m.event.packet->peekAtFront<TcpHeader>();
-                      return tcp->getAckBit() && !tcp->getSynBit() && tcpAck(m.event) == 5001;
-                  })
+                  .match("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == 5001")
                   .describe("host1's final ACK (acknowledging the peer's ISN+1)")
                   .within(1.0));
 }

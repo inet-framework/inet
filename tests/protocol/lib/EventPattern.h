@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "PacketEvent.h"
+#include "PacketField.h"
 
 namespace inet { class PacketFilter; }
 
@@ -81,6 +82,13 @@ class INET_API EventPattern
     EventPattern& match(MatchPredicate p) { predicate = std::move(p); return *this; }
     EventPattern& describe(const char *phrase) { description = phrase; return *this; }
     EventPattern& capture(const char *name, CaptureFn fn) { captures.emplace_back(name, std::move(fn)); return *this; }
+    // Declarative capture: remember a "protocol.field" value (e.g. "tcp.sequenceNo").
+    EventPattern& capture(const char *name, const char *fieldPath)
+    {
+        std::string path = fieldPath;
+        captures.emplace_back(name, [path](const PacketEvent& e) { return evalPacketField(e.packet, path); });
+        return *this;
+    }
     EventPattern& within(double t) { selHasWithin = true; selWithin = t; return *this; }
     EventPattern& after(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }
     EventPattern& notBefore(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }
@@ -89,6 +97,10 @@ class INET_API EventPattern
     bool selectorMatches(const MatchContext& context) const;
     // Human-readable form for diagnostics (full English rendering is Phase 8).
     std::string str() const;
+
+  private:
+    // Evaluate the content expression, substituting {capture} placeholders.
+    bool matchesExpression(const MatchContext& context) const;
 };
 
 // Entry point of the fluent selector chain.
