@@ -8,6 +8,8 @@
 #ifndef __INET_NETWORKCONNECTIONCANVASVISUALIZER_H
 #define __INET_NETWORKCONNECTIONCANVASVISUALIZER_H
 
+#include <vector>
+
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/NetworkConnectionVisualizerBase.h"
 
@@ -21,8 +23,16 @@ class INET_API NetworkConnectionCanvasVisualizer : public NetworkConnectionVisua
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
 
+    struct ConnectionVisualization {
+        cLineFigure *figure = nullptr;
+        const cModule *startNetworkNode = nullptr;
+        const cModule *endNetworkNode = nullptr;
+    };
+    std::vector<ConnectionVisualization> connectionVisualizations;
+
   protected:
     virtual void initialize(int stage) override;
+    virtual void refreshDisplay() const override;
 
     void createNetworkConnectionVisualization(cModule *startNetworkNode, cModule *endNetworkNode) override;
 };

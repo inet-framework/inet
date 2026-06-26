@@ -31,15 +31,25 @@ void NetworkConnectionCanvasVisualizer::createNetworkConnectionVisualization(cMo
     lineFigure->setLineColor(lineColor);
     lineFigure->setLineStyle(lineStyle);
     lineFigure->setLineWidth(lineWidth);
-    cFigure::Point start = canvasProjection->computeCanvasPoint(getPosition(startNetworkNode));
-    cFigure::Point end = canvasProjection->computeCanvasPoint(getPosition(endNetworkNode));
-    bool visible = canvasProjection->clipLine(start, end); // clip to the map area, hide if fully outside
-    lineFigure->setStart(start);
-    lineFigure->setEnd(end);
-    lineFigure->setVisible(visible);
     lineFigure->setEndArrowhead(cFigure::ARROW_BARBED);
     lineFigure->setZIndex(zIndex);
     visualizationTargetModule->getCanvas()->addFigure(lineFigure);
+    // the endpoints are projected and clipped to the map area in refreshDisplay(), once the shared
+    // canvas projection (and its clip rect) is configured; clipping here would depend on the relative
+    // initialization order of this visualizer and the map visualizer that installs the clip rect
+    connectionVisualizations.push_back({lineFigure, startNetworkNode, endNetworkNode});
+}
+
+void NetworkConnectionCanvasVisualizer::refreshDisplay() const
+{
+    for (auto& connection : connectionVisualizations) {
+        cFigure::Point start = canvasProjection->computeCanvasPoint(getPosition(connection.startNetworkNode));
+        cFigure::Point end = canvasProjection->computeCanvasPoint(getPosition(connection.endNetworkNode));
+        bool visible = canvasProjection->clipLine(start, end); // clip to the map area, hide if fully outside
+        connection.figure->setStart(start);
+        connection.figure->setEnd(end);
+        connection.figure->setVisible(visible);
+    }
 }
 
 } // namespace visualizer

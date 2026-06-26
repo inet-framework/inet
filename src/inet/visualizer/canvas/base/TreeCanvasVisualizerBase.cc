@@ -130,7 +130,10 @@ void TreeCanvasVisualizerBase::refreshDisplay() const
                 if (index == segments.size() - 1)
                     points.push_back(canvasProjection->computeCanvasPoint(segments[index].getPoint2()));
             }
+            // clip the polyline to the map area (no-op when no clip rect is set)
+            points = canvasProjection->clipPolyline(points);
             figure->setPoints(points);
+            figure->setVisible(points.size() >= 2);
         }
     }
 }

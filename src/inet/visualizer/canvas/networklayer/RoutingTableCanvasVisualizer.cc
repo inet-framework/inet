@@ -63,8 +63,12 @@ void RoutingTableCanvasVisualizer::refreshDisplay() const
         auto sourcePosition = getContactPosition(sourceModule, getPosition(destinationModule), lineContactMode, lineContactSpacing);
         auto destinationPosition = getContactPosition(destinationModule, getPosition(sourceModule), lineContactMode, lineContactSpacing);
         auto shift = lineManager->getLineShift(routeVisualization->sourceModuleId, routeVisualization->destinationModuleId, sourcePosition, destinationPosition, lineShiftMode, routeVisualization->shiftOffset) * lineShift;
-        figure->setStart(canvasProjection->computeCanvasPoint(sourcePosition + shift));
-        figure->setEnd(canvasProjection->computeCanvasPoint(destinationPosition + shift));
+        cFigure::Point start = canvasProjection->computeCanvasPoint(sourcePosition + shift);
+        cFigure::Point end = canvasProjection->computeCanvasPoint(destinationPosition + shift);
+        bool visible = canvasProjection->clipLine(start, end); // clip to the map area, hide if fully outside
+        figure->setStart(start);
+        figure->setEnd(end);
+        figure->setVisible(visible);
     }
     for (auto it : multicastRouteVisualizations) {
         auto routeVisualization = it.second;
@@ -75,8 +79,12 @@ void RoutingTableCanvasVisualizer::refreshDisplay() const
         auto sourcePosition = getContactPosition(sourceModule, getPosition(destinationModule), lineContactMode, lineContactSpacing);
         auto destinationPosition = getContactPosition(destinationModule, getPosition(sourceModule), lineContactMode, lineContactSpacing);
         auto shift = lineManager->getLineShift(routeVisualization->sourceModuleId, routeVisualization->destinationModuleId, sourcePosition, destinationPosition, lineShiftMode, routeVisualization->shiftOffset) * lineShift;
-        figure->setStart(canvasProjection->computeCanvasPoint(sourcePosition + shift));
-        figure->setEnd(canvasProjection->computeCanvasPoint(destinationPosition + shift));
+        cFigure::Point start = canvasProjection->computeCanvasPoint(sourcePosition + shift);
+        cFigure::Point end = canvasProjection->computeCanvasPoint(destinationPosition + shift);
+        bool visible = canvasProjection->clipLine(start, end); // clip to the map area, hide if fully outside
+        figure->setStart(start);
+        figure->setEnd(end);
+        figure->setVisible(visible);
     }
 }
 

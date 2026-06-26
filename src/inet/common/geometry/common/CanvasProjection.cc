@@ -164,6 +164,26 @@ std::vector<cFigure::Point> CanvasProjection::clipPolygon(const std::vector<cFig
     return clipPolygonToRect(polygon, clipRect.x, clipRect.y, clipRect.x + clipRect.width, clipRect.y + clipRect.height);
 }
 
+std::vector<cFigure::Point> CanvasProjection::clipPolyline(const std::vector<cFigure::Point>& polyline) const
+{
+    if (!clipEnabled || polyline.size() < 2)
+        return polyline;
+    // each segment is clipped independently and the visible parts are re-joined into one connected
+    // polyline; a route that leaves and re-enters the window is bridged by a chord between the two
+    // boundary points (a single cPolylineFigure cannot show disjoint pieces) - kept inside the map
+    std::vector<cFigure::Point> clipped;
+    for (size_t i = 0; i + 1 < polyline.size(); i++) {
+        cFigure::Point a = polyline[i], b = polyline[i + 1];
+        if (clipLine(a, b)) {
+            // append the entry point unless it (near-)coincides with the previous exit point
+            if (clipped.empty() || (clipped.back() - a).getLength() > 1e-6)
+                clipped.push_back(a);
+            clipped.push_back(b);
+        }
+    }
+    return clipped;
+}
+
 CanvasProjection *CanvasProjection::getCanvasProjection(const cCanvas *canvas)
 {
     static int canvasProjectionsHandle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::canvasProjections");

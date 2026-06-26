@@ -45,7 +45,9 @@ void LinkBreakCanvasVisualizer::refreshDisplay() const
         auto transmitterPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(transmitter)));
         auto receiverPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(receiver)));
         auto figure = linkBreakVisualization->figure;
-        figure->setPosition((transmitterPosition + receiverPosition) / 2);
+        cFigure::Point center = (transmitterPosition + receiverPosition) / 2;
+        figure->setPosition(center);
+        figure->setVisible(canvasProjection->isPointInsideClip(center)); // hide on a limited map when outside
     }
     visualizationTargetModule->getCanvas()->setAnimationSpeed(linkBreakVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }

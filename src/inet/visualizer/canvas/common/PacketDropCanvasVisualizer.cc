@@ -98,7 +98,10 @@ void PacketDropCanvasVisualizer::setAlpha(const PacketDropVisualization *packetD
     double zoomLevel = getEnvir()->getZoomLevel(packetDropCanvasVisualization->packetDrop->getNetworkNode()->getParentModule());
     if (std::isnan(zoomLevel))
         zoomLevel = 1;
-    figure->setPosition(canvasProjection->computeCanvasPoint(position) + cFigure::Point(px, -py) / zoomLevel);
+    cFigure::Point base = canvasProjection->computeCanvasPoint(position);
+    cFigure::Point drawPosition = base + cFigure::Point(px, -py) / zoomLevel;
+    figure->setPosition(drawPosition);
+    figure->setVisible(canvasProjection->isPointInsideClip(drawPosition)); // hide on a limited map when the drawn icon is outside
 }
 
 } // namespace visualizer

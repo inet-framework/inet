@@ -56,8 +56,13 @@ void LinkCanvasVisualizerBase::refreshDisplay() const
             auto sourcePosition = getContactPosition(sourceModule, getPosition(destinationModule), lineContactMode, lineContactSpacing);
             auto destinationPosition = getContactPosition(destinationModule, getPosition(sourceModule), lineContactMode, lineContactSpacing);
             auto shift = lineManager->getLineShift(linkVisualization->sourceModuleId, linkVisualization->destinationModuleId, sourcePosition, destinationPosition, lineShiftMode, linkVisualization->shiftOffset) * lineShift;
-            figure->setStart(canvasProjection->computeCanvasPoint(sourcePosition + shift));
-            figure->setEnd(canvasProjection->computeCanvasPoint(destinationPosition + shift));
+            cFigure::Point start = canvasProjection->computeCanvasPoint(sourcePosition + shift);
+            cFigure::Point end = canvasProjection->computeCanvasPoint(destinationPosition + shift);
+            // clip the link line to the map area (no-op when no clip rect is set); hide if fully outside
+            bool visible = canvasProjection->clipLine(start, end);
+            figure->setStart(start);
+            figure->setEnd(end);
+            figure->setVisible(visible);
         }
     }
     visualizationTargetModule->getCanvas()->setAnimationSpeed(linkVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
