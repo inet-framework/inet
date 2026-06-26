@@ -511,8 +511,19 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     once `Tcp` gained `packetSentToLower` (see Phase 2 finding), `tcp_handshake_peer` was
     switched to observe at `tcp sentToLower` like `tcp_handshake_seq`.)
 
-- **Phase 5 — Combinators.** `unordered/optional/repeat/anyOf/expectNo/delivery`,
-  per-flow scoping, `strict()` mode. *Exit:* a multi-flow test with negative assertions.
+- **Phase 5 — Combinators. ◐ PARTIAL.** `unordered/optional/repeat/anyOf/expectNo/delivery`,
+  per-flow scoping, `strict()` mode. *Exit:* a multi-flow test with negative assertions — **met.**
+  - Done: `expectNo` (negative window — fail if a match occurs, else advance), `optional`
+    (match-or-skip), `unordered({...})` (all patterns match in any order; group window =
+    longest sub-`within`). Engine generalised from a single cursor: `enterStep` arms a
+    window per kind; deadline expiry means fail / skip / pass by kind; `Unordered` tracks
+    per-pattern matched flags. `finish()` treats trailing `ExpectNo`/`Optional` as
+    satisfied. Describer renders must/may/must-not and "In any order: …".
+  - Verified: `multi_flow` PASS (unordered two UDP flows + `expectNo` 9999); `multi_flow_bad`
+    FAIL with `forbidden event occurred at t=0.1 … [udp.destPort == 5000 …]`; `optional_skip`
+    PASS. The negative diagnostic shows the offending event time + pattern.
+  - Remaining: `anyOf` (alternation), `repeat` (n / until), `delivery` (cross-node
+    send→receive by treeId), explicit per-flow scoping, and `strict()` (closed-world).
 
 - **Phase 6 — MITM/intercept & peer-node shapes.** `PacketTap` drop/delay/mutate;
   standalone peer node wiring; fault-injection example. *Exit:* a retransmission test
