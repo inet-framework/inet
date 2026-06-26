@@ -48,5 +48,30 @@ ProtocolTest ProtocolTestRegistry::build(const char *name)
     return (it->second)();
 }
 
+static ProtocolTestBuilderFn& defaultBuilder()
+{
+    static ProtocolTestBuilderFn builder = nullptr;
+    return builder;
+}
+
+void ProtocolTestRegistry::setDefault(ProtocolTestBuilderFn builder)
+{
+    if (defaultBuilder() != nullptr)
+        throw cRuntimeError("ProtocolTest: more than one Define_ProtocolTestProgram() in this build");
+    defaultBuilder() = builder;
+}
+
+bool ProtocolTestRegistry::hasDefault()
+{
+    return defaultBuilder() != nullptr;
+}
+
+ProtocolTest ProtocolTestRegistry::buildDefault()
+{
+    if (defaultBuilder() == nullptr)
+        throw cRuntimeError("ProtocolTest: no Define_ProtocolTestProgram() in this build");
+    return defaultBuilder()();
+}
+
 } // namespace protocoltest
 } // namespace inet

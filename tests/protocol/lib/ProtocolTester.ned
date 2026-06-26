@@ -10,6 +10,8 @@
 // event, and (in logEvents mode) prints a one-line trace. Place one instance at
 // the top level of a network.
 //
+package inet.protocoltest;
+
 simple ProtocolTester
 {
     parameters:
@@ -17,5 +19,5 @@ simple ProtocolTester
         bool logEvents = default(testName == ""); // print a one-line trace per observed packet event
         bool printDescription = default(true); // print the program's English description at startup
         @display("i=block/cogwheel;is=s");
-        @class(inet::protocoltest::ProtocolTester);
+        @class(ProtocolTester);
 }

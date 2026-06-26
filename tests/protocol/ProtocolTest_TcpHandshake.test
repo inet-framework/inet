@@ -1,28 +1,72 @@
 %description:
 
-Protocol Test Framework -- example opp_test wrapper.
+Protocol Test Framework -- self-contained TCP handshake test (network included).
 
-Runs the `tcp_handshake_seq` ProtocolTest program: it observes host1's TCP three-way
-handshake at the transport layer (SYN sent, SYN+ACK received acknowledging ISN+1, final
-ACK sent) and emits a PASS/FAIL verdict line. The test passes when the framework prints
-"PROTOCOLTEST tcp_handshake_seq: PASS".
+Everything is here: the program (%global) and the network (%file). The network is an
+ordinary two-host TCP setup with NO tester module -- defining a Define_ProtocolTestProgram
+makes the framework attach a ProtocolTester to whatever network runs (at LF_POST_NETWORK_-
+INITIALIZE), so the same program would work against an unmodified external network just by
+pointing `network =` at it.
 
-This file illustrates how a ProtocolTest is wrapped as an opp_test `.test` case for a CI
-run: select a scenario + the program name via the ProtocolTester's `testName`, then assert
-the verdict line with a contains-check. The prebuilt framework library and its NED are loaded
-with the -l/-n arguments (adjust the paths to your build); wiring this into INET's
-fingerprint/CI runner is the separate harness step.
+Build dependency: compile/link against the framework library (libprotocoltest) and INET; the
+framework's ProtocolTester NED type must be on the NED path (so it can be created at runtime).
 
-%extraargs: -l ../lib/libprotocoltest.so -n ../../../src;../lib
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The one program for this run. Defining it (a) registers it and (b) arranges for a
+// ProtocolTester to be attached to the running network -- no tester in the NED, no testName.
+// The name "tcp_handshake" is used only in the verdict line.
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("tcp_handshake")
+        // host1 sends the SYN; remember its initial sequence number.
+        .once(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("isn", "tcp.sequenceNo").describe("host1's SYN").within(0.2))
+        // host1 receives the SYN+ACK acknowledging isn+1.
+        .once(on("host1").receivedFromLower().layer(Layer::Transport)
+                  .match("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
+                  .describe("the SYN+ACK acknowledging host1's ISN+1").within(0.5))
+        // host1 sends the final ACK.
+        .once(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("tcp.ackBit == true && tcp.synBit == false")
+                  .describe("host1's final ACK").within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "tcp_handshake compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// An ordinary network -- note: NO ProtocolTester here. (Could be any existing INET network.)
+network HandshakeNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
 
 %inifile: omnetpp.ini
 
 [General]
-network = ProtocolTestDemo
+network = HandshakeNet
 sim-time-limit = 1s
 seed-set = 0
 
-# host1 opens a TCP connection to host2's echo server.
 *.host1.numApps = 1
 *.host1.app[0].typename = "TcpSessionApp"
 *.host1.app[0].connectAddress = "host2"
@@ -35,8 +79,5 @@ seed-set = 0
 *.host2.app[0].typename = "TcpEchoApp"
 *.host2.app[0].localPort = 1000
 
-# select the protocol-test program to run
-*.tester.testName = "tcp_handshake_seq"
-
 %contains: stdout
-PROTOCOLTEST tcp_handshake_seq: PASS
+PROTOCOLTEST tcp_handshake: PASS

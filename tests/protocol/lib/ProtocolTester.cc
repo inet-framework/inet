@@ -70,11 +70,21 @@ void ProtocolTester::initialize()
     for (auto& it : signalKinds)
         subscriptionModule->subscribe(it.first, this);
 
-    // Matching mode: load the named program and arm the first step.
+    // Matching mode: load a program and arm the first step. A `testName` selects a named
+    // program from the registry; otherwise, if the build defines a single unnamed program
+    // (Define_ProtocolTestProgram), run that -- no name or selection needed.
     std::string testName = par("testName").stdstringValue();
     if (!testName.empty()) {
         matchingMode = true;
         program = ProtocolTestRegistry::build(testName.c_str());
+    }
+    else if (ProtocolTestRegistry::hasDefault()) {
+        matchingMode = true;
+        program = ProtocolTestRegistry::buildDefault();
+        logEvents = false;   // a program is running, so don't also dump the raw trace
+    }
+
+    if (matchingMode) {
         if (par("printDescription").boolValue())
             std::cout << describe(*program);
         installInterceptions();
