@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+package inet.protocoltest;
+
 import inet.node.inet.StandardHost;
 import inet.node.ethernet.Eth100M;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;

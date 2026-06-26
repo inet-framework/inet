@@ -224,10 +224,17 @@ class INET_API ProtocolTestRegistry
     static void add(const char *name, ProtocolTestBuilderFn builder);
     static bool has(const char *name);
     static ProtocolTest build(const char *name);
+
+    // The single unnamed "default" program (Define_ProtocolTestProgram). The ProtocolTester
+    // runs it when no testName is set, so a self-contained test needs no name/selection.
+    static void setDefault(ProtocolTestBuilderFn builder);
+    static bool hasDefault();
+    static ProtocolTest buildDefault();
 };
 
 struct INET_API ProtocolTestRegistrar {
     ProtocolTestRegistrar(const char *name, ProtocolTestBuilderFn builder) { ProtocolTestRegistry::add(name, builder); }
+    explicit ProtocolTestRegistrar(ProtocolTestBuilderFn builder) { ProtocolTestRegistry::setDefault(builder); }
 };
 
 //
@@ -244,6 +251,20 @@ struct INET_API ProtocolTestRegistrar {
     static inet::protocoltest::ProtocolTest protocolTestBuilder_##id();                              \
     static inet::protocoltest::ProtocolTestRegistrar protocolTestRegistrar_##id(#id, &protocolTestBuilder_##id); \
     static inet::protocoltest::ProtocolTest protocolTestBuilder_##id()
+
+//
+// Defines the single program for this build (no name, no selection): the ProtocolTester
+// runs it automatically when its `testName` is empty. Use this for a self-contained test
+// where exactly one program is compiled in. Usage:
+//
+//   Define_ProtocolTestProgram() {
+//       return ProtocolTest("my_test").once(...);
+//   }
+//
+#define Define_ProtocolTestProgram()                                                                 \
+    static inet::protocoltest::ProtocolTest protocolTestDefaultBuilder_();                           \
+    static inet::protocoltest::ProtocolTestRegistrar protocolTestDefaultRegistrar_(&protocolTestDefaultBuilder_); \
+    static inet::protocoltest::ProtocolTest protocolTestDefaultBuilder_()
 
 } // namespace protocoltest
 } // namespace inet

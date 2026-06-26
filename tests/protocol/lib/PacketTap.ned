@@ -20,6 +20,8 @@
 // the ProtocolTester from a test program's intercept(...) clause. The ProtocolTester
 // observes the resulting trace as usual.
 //
+package inet.protocoltest;
+
 simple PacketTap
 {
     parameters:
@@ -30,7 +32,7 @@ simple PacketTap
         double delayTime @unit(s) = default(0s); // hold time for action == "delay"
         @networkNode(); // let the Ipv4 configurator traverse the tap (join both sides into one link)
         @display("i=block/tunnel");
-        @class(inet::protocoltest::PacketTap);
+        @class(PacketTap);
     gates:
         inout a;   // one side of the spliced link
         inout b;   // the other side

@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+package inet.protocoltest;
+
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
