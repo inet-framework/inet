@@ -102,9 +102,22 @@ static std::string renderAnyOf(const std::vector<EventPattern>& group)
     return os.str() + ".";
 }
 
-static std::string renderRepeat(const EventPattern& p, int count)
+static std::string renderExactlyTimes(const EventPattern& p, int count)
 {
     return std::to_string(count) + " times: " + stripPeriod(renderPattern(p, "must")) + ".";
+}
+
+// Greedy count range [lo, hi] (hi < 0 = unbounded), as produced by the *Times builders.
+static std::string renderCount(const EventPattern& p, int lo, int hi)
+{
+    std::string times;
+    if (hi < 0 && lo == 0)      times = "any number of times";
+    else if (hi < 0 && lo == 1) times = "one or more times";
+    else if (hi < 0)            times = "at least " + std::to_string(lo) + " times";
+    else if (lo == 0)           times = "at most " + std::to_string(hi) + " times";
+    else if (lo == hi)          times = std::to_string(lo) + " times";
+    else                        times = "between " + std::to_string(lo) + " and " + std::to_string(hi) + " times";
+    return capitalize(times) + ": " + stripPeriod(renderPattern(p, "must")) + ".";
 }
 
 static std::string contentPhrase(const EventPattern& p)
@@ -145,12 +158,13 @@ std::string describe(const ProtocolTest& test)
         const Step& step = test.steps[i];
         std::string clause;
         switch (step.type) {
-            case StepType::Expect:    clause = renderPattern(step.pattern, "must"); break;
-            case StepType::Optional:  clause = renderPattern(step.pattern, "may"); break;
-            case StepType::ExpectNo:  clause = renderPattern(step.pattern, "must not"); break;
-            case StepType::Unordered: clause = renderUnordered(step.group); break;
-            case StepType::AnyOf:     clause = renderAnyOf(step.group); break;
-            case StepType::Repeat:    clause = renderRepeat(step.pattern, step.count); break;
+            case StepType::Once:         clause = renderPattern(step.pattern, "must"); break;
+            case StepType::AtMostOnce:   clause = renderPattern(step.pattern, "may"); break;
+            case StepType::Never:        clause = renderPattern(step.pattern, "must not"); break;
+            case StepType::Unordered:    clause = renderUnordered(step.group); break;
+            case StepType::AnyOf:        clause = renderAnyOf(step.group); break;
+            case StepType::ExactlyTimes: clause = renderExactlyTimes(step.pattern, step.count); break;
+            case StepType::Count:        clause = renderCount(step.pattern, step.cardMin, step.cardMax); break;
             case StepType::Delivery:  clause = renderDelivery(step.pattern, step.pattern2); break;
             case StepType::Inject:    clause = renderInject(step.injection); break;
         }

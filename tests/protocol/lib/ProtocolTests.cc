@@ -29,9 +29,9 @@ using inet::tcp::TcpHeader;
 Define_ProtocolTest(udp_basic_pass)
 {
     return ProtocolTest("udp_basic_pass")
-        .expect(on("host1").sentToLower().layer(Layer::Transport)
+        .once(on("host1").sentToLower().layer(Layer::Transport)
                   .match("udp.destPort == 5000").within(0.2))
-        .expect(on("host2").receivedFromLower().layer(Layer::Transport)
+        .once(on("host2").receivedFromLower().layer(Layer::Transport)
                   .match("udp.destPort == 5000").within(0.1));
 }
 
@@ -39,7 +39,7 @@ Define_ProtocolTest(udp_basic_pass)
 Define_ProtocolTest(udp_basic_fail)
 {
     return ProtocolTest("udp_basic_fail")
-        .expect(on("host1").sentToLower()
+        .once(on("host1").sentToLower()
                   .match("udp.destPort == 9999").within(0.3));
 }
 
@@ -51,19 +51,19 @@ Define_ProtocolTest(tcp_handshake_seq)
 {
     return ProtocolTest("tcp_handshake_seq")
         // host1 sends the SYN; remember its initial sequence number.
-        .expect(on("host1").sentToLower().layer(Layer::Transport)
+        .once(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.synBit == true && tcp.ackBit == false")
                   .describe("host1's SYN")
                   .capture("isn", "tcp.sequenceNo")
                   .within(0.2))
         // host1 receives the SYN+ACK acknowledging isn+1; remember the peer's ISN.
-        .expect(on("host1").receivedFromLower().layer(Layer::Transport)
+        .once(on("host1").receivedFromLower().layer(Layer::Transport)
                   .match("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
                   .describe("the SYN+ACK acknowledging host1's ISN+1")
                   .capture("peerIsn", "tcp.sequenceNo")
                   .within(0.5))
         // host1 sends the final ACK acknowledging the peer's ISN+1.
-        .expect(on("host1").sentToLower().layer(Layer::Transport)
+        .once(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {peerIsn} + 1")
                   .describe("host1's final ACK acknowledging the peer's ISN+1")
                   .within(0.5));
@@ -73,11 +73,11 @@ Define_ProtocolTest(tcp_handshake_seq)
 Define_ProtocolTest(tcp_handshake_seq_bad)
 {
     return ProtocolTest("tcp_handshake_seq_bad")
-        .expect(on("host1").sentToLower().layer(Layer::Transport)
+        .once(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.synBit == true && tcp.ackBit == false")
                   .capture("isn", "tcp.sequenceNo")
                   .within(0.2))
-        .expect(on("host1").receivedFromLower().layer(Layer::Transport)
+        .once(on("host1").receivedFromLower().layer(Layer::Transport)
                   .match("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 2") // wrong
                   .within(0.5));
 }
@@ -126,7 +126,7 @@ Define_ProtocolTest(udp_inject_echo)
         .inject(inject("host2").into("eth[0]", "upperLayerOut").at(0.5)
                   .describe("a UDP datagram to port 5000").packet(buildInjectedUdpDatagram))
         // The inject is an ordered step, so this expect is anchored at the injection time.
-        .expect(on("host2").sentToLower().layer(Layer::Transport)
+        .once(on("host2").sentToLower().layer(Layer::Transport)
                   .match("udp.srcPort == 5000").within(0.2));
 }
 
@@ -177,7 +177,7 @@ Define_ProtocolTest(tcp_handshake_peer)
 {
     return ProtocolTest("tcp_handshake_peer")
         // 1. host1's outgoing SYN; capture its ISN and ephemeral source port.
-        .expect(on("host1").sentToLower().layer(Layer::Transport)
+        .once(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.synBit == true && tcp.ackBit == false")
                   .describe("host1's SYN (SYN set, ACK clear)")
                   .capture("isn", "tcp.sequenceNo")
@@ -187,7 +187,7 @@ Define_ProtocolTest(tcp_handshake_peer)
         .inject(inject("host1").into("eth[0]", "upperLayerOut").after(0.001)
                   .describe("a SYN+ACK acknowledging host1's ISN+1").packet(buildSynAck))
         // 3. host1's final ACK, acknowledging the peer's ISN+1 (5000+1).
-        .expect(on("host1").sentToLower().layer(Layer::Transport)
+        .once(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == 5001")
                   .describe("host1's final ACK (acknowledging the peer's ISN+1)")
                   .within(1.0));
@@ -205,7 +205,7 @@ Define_ProtocolTest(multi_flow)
             on("host1").sentToLower().layer(Layer::Transport)
               .match("udp.destPort == 5001").describe("a datagram to port 5001").within(1.0)
         })
-        .expectNo(on("host1").sentToLower()
+        .never(on("host1").sentToLower()
                     .match("udp.destPort == 9999").describe("any datagram to port 9999").within(0.3));
 }
 
@@ -213,7 +213,7 @@ Define_ProtocolTest(multi_flow)
 Define_ProtocolTest(multi_flow_bad)
 {
     return ProtocolTest("multi_flow_bad")
-        .expectNo(on("host1").sentToLower().layer(Layer::Transport)
+        .never(on("host1").sentToLower().layer(Layer::Transport)
                     .match("udp.destPort == 5000").describe("any datagram to port 5000").within(0.3));
 }
 
@@ -222,9 +222,9 @@ Define_ProtocolTest(multi_flow_bad)
 Define_ProtocolTest(optional_skip)
 {
     return ProtocolTest("optional_skip")
-        .optional(on("host1").sentToLower().layer(Layer::Transport)
+        .atMostOnce(on("host1").sentToLower().layer(Layer::Transport)
                     .match("udp.destPort == 9999").describe("a datagram to port 9999").within(0.3))
-        .expect(on("host1").sentToLower().layer(Layer::Transport)
+        .once(on("host1").sentToLower().layer(Layer::Transport)
                   .match("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0));
 }
 
@@ -252,12 +252,30 @@ Define_ProtocolTest(udp_anyof)
         });
 }
 
-// repeat: host1 sends three datagrams to port 5000 within 2s. Should PASS.
+// exactlyTimes: host1 sends three datagrams to port 5000 within 2s. Should PASS.
 Define_ProtocolTest(udp_repeat)
 {
     return ProtocolTest("udp_repeat")
-        .repeat(on("host1").sentToLower().layer(Layer::Transport)
-                  .match("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0), 3);
+        .exactlyTimes(3, on("host1").sentToLower().layer(Layer::Transport)
+                  .match("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0));
+}
+
+// greedy count (lower bound): host1 sends a datagram to port 5000 every 0.2s (5 within
+// the window). The greedy window consumes them all; "at least 3" is satisfied. PASS.
+Define_ProtocolTest(udp_count_pass)
+{
+    return ProtocolTest("udp_count_pass")
+        .atLeastTimes(3, on("host1").sentToLower().layer(Layer::Transport)
+                  .match("udp.destPort == 5000").describe("a datagram to port 5000").within(0.95));
+}
+
+// greedy count (upper bound): at most 2 such datagrams are allowed, but host1 sends 5 --
+// the third match overflows the window's upper bound. Should FAIL.
+Define_ProtocolTest(udp_count_overflow)
+{
+    return ProtocolTest("udp_count_overflow")
+        .atMostTimes(2, on("host1").sentToLower().layer(Layer::Transport)
+                  .match("udp.destPort == 5000").describe("a datagram to port 5000").within(0.95));
 }
 
 // strict: closed-world. host1 sends to port 5000 at the transport layer, but this strict
@@ -266,7 +284,7 @@ Define_ProtocolTest(udp_strict_bad)
 {
     return ProtocolTest("udp_strict_bad")
         .strict()
-        .expect(on("host1").sentToLower().layer(Layer::Transport)
+        .once(on("host1").sentToLower().layer(Layer::Transport)
                   .match("udp.destPort == 9999").describe("a datagram to port 9999").within(1.0));
 }
 
@@ -282,14 +300,14 @@ Define_ProtocolTest(wifi_block_ack)
 {
     return ProtocolTest("wifi_block_ack")
         // ADDBA setup: host1 sends the ADDBA request, then receives the ADDBA response.
-        .expect(on("host1").sentToLower().layer(Layer::Link)
+        .once(on("host1").sentToLower().layer(Layer::Link)
                   .match("ieee80211mac.type == 13").describe("an ADDBA request (action frame)").within(0.1))
-        .expect(on("host1").receivedFromLower().layer(Layer::Link)
+        .once(on("host1").receivedFromLower().layer(Layer::Link)
                   .match("ieee80211mac.type == 13").describe("the ADDBA response").within(0.5))
         // Block Ack in use: host1 sends a Block Ack Request and receives the Block Ack.
-        .expect(on("host1").sentToLower().layer(Layer::Link)
+        .once(on("host1").sentToLower().layer(Layer::Link)
                   .match("ieee80211mac.type == 24").describe("a Block Ack Request").within(0.5))
-        .expect(on("host1").receivedFromLower().layer(Layer::Link)
+        .once(on("host1").receivedFromLower().layer(Layer::Link)
                   .match("ieee80211mac.type == 25").describe("the Block Ack").within(0.5));
 }
 
@@ -297,7 +315,7 @@ Define_ProtocolTest(wifi_block_ack)
 Define_ProtocolTest(wifi_aggregation)
 {
     return ProtocolTest("wifi_aggregation")
-        .expect(on("host1").sentToLower().layer(Layer::Link)
+        .once(on("host1").sentToLower().layer(Layer::Link)
                   .match("ieee80211mac.type == 40 && Ieee80211DataHeader.aMsduPresent == true")
                   .describe("an A-MSDU aggregated QoS data frame").within(0.2));
 }
@@ -320,17 +338,17 @@ Define_ProtocolTest(wifi_block_ack_full)
 
     return ProtocolTest("wifi_block_ack_full")
         // --- Create the Block Ack agreement (ADDBA handshake, each frame ACKed) ---
-        .expect(sends   ("ieee80211mac.type == 13", "ADDBA Request", 0.1))
-        .expect(receives("ieee80211mac.type == 29", "ACK (recipient acknowledges the ADDBA Request)", 0.002))
-        .expect(receives("ieee80211mac.type == 13", "ADDBA Response", 0.01))
-        .expect(sends   ("ieee80211mac.type == 29", "ACK (originator acknowledges the ADDBA Response)", 0.002))
+        .once(sends   ("ieee80211mac.type == 13", "ADDBA Request", 0.1))
+        .once(receives("ieee80211mac.type == 29", "ACK (recipient acknowledges the ADDBA Request)", 0.002))
+        .once(receives("ieee80211mac.type == 13", "ADDBA Response", 0.01))
+        .once(sends   ("ieee80211mac.type == 29", "ACK (originator acknowledges the ADDBA Response)", 0.002))
         // --- Use the agreement: a block of 5 QoS data frames (Block Ack policy, no
         //     immediate ACK), then one Block Ack Request, then a single Block Ack
         //     covering the whole block. ---
-        .repeat(sends   ("ieee80211mac.type == 40 && Ieee80211DataHeader.ackPolicy == 3",
-                         "a QoS data frame with Block Ack policy", 0.5), 5)
-        .expect(sends   ("ieee80211mac.type == 24", "a Block Ack Request", 0.5))
-        .expect(receives("ieee80211mac.type == 25", "a Block Ack covering the block", 0.01));
+        .exactlyTimes(5, sends("ieee80211mac.type == 40 && Ieee80211DataHeader.ackPolicy == 3",
+                         "a QoS data frame with Block Ack policy", 0.5))
+        .once(sends   ("ieee80211mac.type == 24", "a Block Ack Request", 0.5))
+        .once(receives("ieee80211mac.type == 25", "a Block Ack covering the block", 0.01));
 }
 
 } // namespace protocoltest
