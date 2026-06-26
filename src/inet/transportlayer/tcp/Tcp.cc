@@ -120,6 +120,7 @@ void Tcp::sendToIp(Packet *segment)
     Enter_Method("sendToIp");
     take(segment);
     numSegmentsSent++;
+    emit(packetSentToLowerSignal, segment);
     send(segment, "ipOut");
 }
 
