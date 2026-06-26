@@ -1,0 +1,2 @@
+Source of 3rd-party code: 
+https://github.com/CelesTrak/fundamentals-of-astrodynamics/tree/42961941824cd71957d2ee4fc1f7168691332049/software/cpp/SGP4/SGP4
