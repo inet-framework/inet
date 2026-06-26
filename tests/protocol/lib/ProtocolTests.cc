@@ -310,27 +310,27 @@ Define_ProtocolTest(wifi_aggregation)
 // ST_BLOCKACK=25; QoS-data ackPolicy BLOCK_ACK=3.
 Define_ProtocolTest(wifi_block_ack_full)
 {
+    // host1's MAC-layer transmit / receive of an 802.11 frame matching `expr`.
+    auto sends = [](const char *expr, const char *desc, double w) {
+        return on("host1").sentToLower().layer(Layer::Link).match(expr).describe(desc).within(w);
+    };
+    auto receives = [](const char *expr, const char *desc, double w) {
+        return on("host1").receivedFromLower().layer(Layer::Link).match(expr).describe(desc).within(w);
+    };
+
     return ProtocolTest("wifi_block_ack_full")
         // --- Create the Block Ack agreement (ADDBA handshake, each frame ACKed) ---
-        .expect(on("host1").sentToLower().layer(Layer::Link)
-                  .match("ieee80211mac.type == 13").describe("ADDBA Request").within(0.1))
-        .expect(on("host1").receivedFromLower().layer(Layer::Link)
-                  .match("ieee80211mac.type == 29").describe("ACK (recipient acknowledges the ADDBA Request)").within(0.002))
-        .expect(on("host1").receivedFromLower().layer(Layer::Link)
-                  .match("ieee80211mac.type == 13").describe("ADDBA Response").within(0.01))
-        .expect(on("host1").sentToLower().layer(Layer::Link)
-                  .match("ieee80211mac.type == 29").describe("ACK (originator acknowledges the ADDBA Response)").within(0.002))
-        // --- Use the agreement: a block of QoS data frames, then one Block Ack ---
-        // host1 sends 5 QoS data frames (Block Ack policy, no immediate ACK)...
-        .repeat(on("host1").sentToLower().layer(Layer::Link)
-                  .match("ieee80211mac.type == 40 && Ieee80211DataHeader.ackPolicy == 3")
-                  .describe("a QoS data frame with Block Ack policy").within(0.5), 5)
-        // ...then solicits acknowledgement with a Block Ack Request...
-        .expect(on("host1").sentToLower().layer(Layer::Link)
-                  .match("ieee80211mac.type == 24").describe("a Block Ack Request").within(0.5))
-        // ...and receives a single Block Ack covering the whole block of 5 frames.
-        .expect(on("host1").receivedFromLower().layer(Layer::Link)
-                  .match("ieee80211mac.type == 25").describe("a Block Ack covering the block").within(0.01));
+        .expect(sends   ("ieee80211mac.type == 13", "ADDBA Request", 0.1))
+        .expect(receives("ieee80211mac.type == 29", "ACK (recipient acknowledges the ADDBA Request)", 0.002))
+        .expect(receives("ieee80211mac.type == 13", "ADDBA Response", 0.01))
+        .expect(sends   ("ieee80211mac.type == 29", "ACK (originator acknowledges the ADDBA Response)", 0.002))
+        // --- Use the agreement: a block of 5 QoS data frames (Block Ack policy, no
+        //     immediate ACK), then one Block Ack Request, then a single Block Ack
+        //     covering the whole block. ---
+        .repeat(sends   ("ieee80211mac.type == 40 && Ieee80211DataHeader.ackPolicy == 3",
+                         "a QoS data frame with Block Ack policy", 0.5), 5)
+        .expect(sends   ("ieee80211mac.type == 24", "a Block Ack Request", 0.5))
+        .expect(receives("ieee80211mac.type == 25", "a Block Ack covering the block", 0.01));
 }
 
 } // namespace protocoltest
