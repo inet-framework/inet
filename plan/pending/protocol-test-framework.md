@@ -457,6 +457,14 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     (the bad-handshake FAIL shows only the selector) — `.describe()` / Phase 8 will fix.
   - `use()` (reading captures inside *inject* field values) is deferred to Phase 3 where
     injection exists; in Phase 2 captures are consumed only inside predicates.
+  - **Refinement (declarative matching, no lambdas):** to keep test *matching* free of C++
+    lambdas, two facilities were added and all tests rewritten to use them: (a) string
+    captures `capture("isn", "tcp.sequenceNo")` via `evalPacketField()` (dissect +
+    class-descriptor read, same path as `PacketFilter`); (b) `{name}` placeholders in a
+    `match` expression substituted with an earlier captured value, e.g.
+    `match("tcp.ackNo == {isn} + 1")`. Lambda `match`/`capture` overloads remain for
+    advanced use but are no longer used by the sample tests. Packet *construction* for
+    injects still uses (named) builder functions — that is not "testing".
 
 - **Phase 3 — Injection (time-scheduled). ✅ DONE.** Builder `inject(node).into(module,
   gate).at(t).packet(fn)`, tag setup, push path. *Exit:* inject a UDP packet that the DUT
