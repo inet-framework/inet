@@ -511,19 +511,26 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     once `Tcp` gained `packetSentToLower` (see Phase 2 finding), `tcp_handshake_peer` was
     switched to observe at `tcp sentToLower` like `tcp_handshake_seq`.)
 
-- **Phase 5 — Combinators. ◐ PARTIAL.** `unordered/optional/repeat/anyOf/expectNo/delivery`,
-  per-flow scoping, `strict()` mode. *Exit:* a multi-flow test with negative assertions — **met.**
-  - Done: `expectNo` (negative window — fail if a match occurs, else advance), `optional`
-    (match-or-skip), `unordered({...})` (all patterns match in any order; group window =
-    longest sub-`within`). Engine generalised from a single cursor: `enterStep` arms a
-    window per kind; deadline expiry means fail / skip / pass by kind; `Unordered` tracks
-    per-pattern matched flags. `finish()` treats trailing `ExpectNo`/`Optional` as
-    satisfied. Describer renders must/may/must-not and "In any order: …".
-  - Verified: `multi_flow` PASS (unordered two UDP flows + `expectNo` 9999); `multi_flow_bad`
-    FAIL with `forbidden event occurred at t=0.1 … [udp.destPort == 5000 …]`; `optional_skip`
-    PASS. The negative diagnostic shows the offending event time + pattern.
-  - Remaining: `anyOf` (alternation), `repeat` (n / until), `delivery` (cross-node
-    send→receive by treeId), explicit per-flow scoping, and `strict()` (closed-world).
+- **Phase 5 — Combinators. ✅ DONE.** `unordered/optional/repeat/anyOf/expectNo/delivery`,
+  `strict()` mode. *Exit:* a multi-flow test with negative assertions — met.
+  - Engine generalised from a single cursor to a group/stage-aware matcher: `enterStep`
+    arms a window per kind; deadline expiry means fail / skip / pass by kind.
+    - `expectNo` — negative window (fail on match, else advance); `optional` — match-or-skip;
+      `unordered({...})` — all patterns, any order (window = longest sub-`within`); `anyOf({...})`
+      — first matching alternative wins; `repeat(p, n)` — n occurrences within the window;
+      `delivery(from, to, window)` — send correlated to receive of the **same packet by treeId**,
+      window measures send→receive latency (armed at the send); `strict()` — closed-world,
+      an in-scope-but-wrong packet fails an Expect (`EventPattern::scopeMatches` splits scope
+      from content). `finish()` treats trailing `ExpectNo`/`Optional` as satisfied.
+  - Describer extended for every kind: "must/may/must not", "In any order: …", "One of: …",
+    "N times: …", and the delivery sentence.
+  - Verified (13 configs total): `multi_flow`, `udp_delivery`, `udp_anyof`, `udp_repeat`,
+    `optional_skip` PASS; `multi_flow_bad` FAIL (`forbidden event occurred at t=0.1 …`),
+    `udp_strict_bad` FAIL (`strict: unexpected in-scope packet at t=0.1 …`).
+  - **Deferred (not blocking):** explicit auto **per-flow scoping** (concurrent flow-cursors)
+    — the most NFA-heavy piece; `unordered` already covers explicit interleaving, and
+    specific selectors keep flows separated. `repeatUntil(cond)` also deferred (only fixed-
+    count `repeat`).
 
 - **Phase 6 — MITM/intercept & peer-node shapes.** `PacketTap` drop/delay/mutate;
   standalone peer node wiring; fault-injection example. *Exit:* a retransmission test
