@@ -1,27 +1,68 @@
 %description:
 
-Protocol Test Framework -- example opp_test wrapper (fault injection / MITM).
+Protocol Test Framework -- self-contained fault-injection test (MITM, network included).
 
-Runs the `tcp_retransmit` program on the MITM demo network: a PacketTap spliced on the wire
-drops host1's first TCP data segment (driven by the program's intercept(...) clause), and
-the test asserts that host1 retransmits the same segment (same sequence number) after the
-retransmission timeout. Passes when the framework prints
-"PROTOCOLTEST tcp_retransmit: PASS".
+The network below splices a PacketTap onto the wire but has NO tester. The program drives
+the tap to drop host1's first TCP data segment, then asserts host1 retransmits the same
+segment (same sequence number) after the RTO. A ProtocolTester is attached to the network
+at runtime.
 
-Shows a fault-injection ProtocolTest wrapped as a `.test` case. The tap is a sibling module
-in the network; the program names it ("tap") and the ProtocolTester installs the drop rule
-at startup, so no tap parameters are needed here.
+%includes:
+#include "ProtocolTest.h"
 
-%extraargs: -l ../lib/libprotocoltest.so -n ../../../src;../lib
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("tcp_retransmit")
+        // the tap drops the first data-bearing segment to host2's port (not the SYN/ACKs).
+        .intercept(intercept("tap")
+                     .match("tcp.destPort == 1000 && tcp.synBit == false").minBytes(100).nth(1)
+                     .drop().describe("the first data segment"))
+        // host1 sends the data segment after the handshake; remember its sequence number.
+        .once(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("tcp.destPort == 1000 && tcp.synBit == false").after(0.15)
+                  .capture("dataSeq", "tcp.sequenceNo").describe("the data segment").within(0.3))
+        // the tap dropped it, so host1 retransmits the same segment after the RTO.
+        .once(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("tcp.sequenceNo == {dataSeq} && tcp.synBit == false").notBefore(0.3)
+                  .describe("the retransmitted data segment").within(5.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "tcp_retransmit compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a PacketTap spliced on the link -- note: NO tester (attached at runtime).
+network RetransmitNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        tap: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> tap.a;
+        tap.b       <--> Eth100M <--> host2.ethg++;
+}
 
 %inifile: omnetpp.ini
 
 [General]
-network = ProtocolTestMitmDemo
+network = RetransmitNet
 sim-time-limit = 8s
 seed-set = 0
 
-# host1 -> host2 TCP, with a PacketTap (module "tap") spliced on the Ethernet link.
 *.host1.numApps = 1
 *.host1.app[0].typename = "TcpSessionApp"
 *.host1.app[0].connectAddress = "host2"
@@ -34,8 +75,6 @@ seed-set = 0
 *.host2.app[0].typename = "TcpEchoApp"
 *.host2.app[0].localPort = 1000
 *.host*.ipv4.arp.typename = "GlobalArp"
-
-*.tester.testName = "tcp_retransmit"
 
 %contains: stdout
 PROTOCOLTEST tcp_retransmit: PASS

@@ -216,9 +216,27 @@ cd tests/protocol/lib
 A scenario is an ini config selecting a network and a `testName`. Share common settings via
 [`protocoltest-base.ini`](protocoltest-base.ini) (`include protocoltest-base.ini`).
 
-To wrap a test as an `opp_test` `.test` case for CI, see the examples in
-[`../`](..): `ProtocolTest_TcpHandshake.test`, `ProtocolTest_TcpRetransmit.test`,
-`ProtocolTest_ViolationDetected.test`. Each runs a config and asserts the verdict line.
+### Self-contained `.test` cases (program + network in one file)
+
+A test does not need a `ProtocolTester` declared in its network. Define the program with
+`Define_ProtocolTestProgram()` (one per build, no name/selection) and the framework attaches
+a `ProtocolTester` to whatever network runs — so a test can target an **unmodified external
+network** just by pointing `network =` at it. See the `opp_test` examples in [`../`](..):
+`ProtocolTest_TcpHandshake.test`, `ProtocolTest_ViolationDetected.test`,
+`ProtocolTest_TcpRetransmit.test`. Each carries its program in `%global`, its (tester-less)
+network in `%file`, and asserts the verdict line with `%contains`.
+
+How the attach works: defining a `Define_ProtocolTestProgram()` registers it as the default
+program; a simulation lifecycle listener (`ProtocolTestAttach.cc`) creates a `ProtocolTester`
+under the network at `LF_POST_NETWORK_INITIALIZE` (a real, Qtenv-inspectable module, just not
+in the NED) and runs the default program. If the network already has its own tester, the
+listener leaves it alone. The framework's NED types live in package `inet.protocoltest` with
+an explicit `@namespace`, which keeps them immune to a consumer `.test`'s root `@namespace`.
+
+> Note on `%global`: opp_test only compiles the embedded C++ when an `%activity` is also
+> present, so each example carries a one-line `%activity` that never runs (the network is the
+> one in `%inifile`). And avoid writing a literal `%word` in a `%description` — opp_test reads
+> it as a section directive.
 
 ---
 

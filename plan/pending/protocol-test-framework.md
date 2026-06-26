@@ -617,13 +617,29 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
   - **New cookbook tests** added and passing: `arp_resolution` (`ArpResolution` config — ARP
     request/reply via `arp.opcode`) and `ipv4_fragmentation` (`Fragmentation` config — a
     4000 B datagram over the 1500 B MTU, asserting `ipv4.moreFragments` / `fragmentOffset`).
-  - **`.test` examples** (`tests/protocol/`): `ProtocolTest_TcpHandshake.test` (PASS),
-    `ProtocolTest_TcpRetransmit.test` (MITM PASS), `ProtocolTest_ViolationDetected.test`
-    (asserts the framework reports a FAIL on a wrong assertion). Each inlines its scenario,
-    loads the prebuilt lib + NED via `-l`/`-n`, and asserts the verdict line with `%contains`.
-    Validated: `opp_test gen` parses all three, and a generated case runs end-to-end to the
-    expected `PROTOCOLTEST ...: PASS` line.
-  - Full suite: **22 configs, 17 PASS + 5 intentional FAIL**, no errors.
+  - **Self-contained `.test` examples** (`tests/protocol/`): `ProtocolTest_TcpHandshake.test`
+    (PASS), `ProtocolTest_ViolationDetected.test` (asserts the framework reports a FAIL on a
+    wrong assertion), `ProtocolTest_TcpRetransmit.test` (MITM PASS). Each carries its **program
+    in `%global`** and its **(tester-less) network in `%file`** — the network needs no
+    `ProtocolTester`, so the same program runs against any unmodified external network.
+    Validated end-to-end: `opp_test gen` → `opp_makemake`/`make` → run, each reaching its
+    expected verdict (the runtime-attached tester appears as `<Net>.protocolTester`).
+  - **Runtime tester attach** (`ProtocolTestAttach.cc`): `Define_ProtocolTestProgram()` (no
+    name, no `testName`) registers the single program as the default; a
+    `cISimulationLifecycleListener` (installed via `EXECUTE_ON_STARTUP`) creates a
+    `ProtocolTester` under the running network at `LF_POST_NETWORK_INITIALIZE` and runs that
+    default — a real, Qtenv-inspectable module, just not declared in the NED. It is a no-op for
+    the normal workflow (a network with its own tester + a named program) and skips creation if
+    a tester already exists. Added `ProtocolTestRegistry::setDefault/hasDefault/buildDefault`
+    and the tester's empty-`testName` fallback.
+  - **NED packaging fix:** the framework NED types moved from the default package into
+    **package `inet.protocoltest` with `@namespace(inet::protocoltest)`** (new `package.ned` +
+    a `package` line per file; `@class` simplified to `@class(ProtocolTester)` etc.). This
+    insulates them from a consumer `.test`'s root `@namespace` — opp_test's generated
+    `package.ned` sets `@namespace(<TestName>)` on the *root* package, which had been rewriting
+    the `@class` of the default-package tester to a non-existent class. (Demo configs still
+    reference networks by simple name, e.g. `network = ProtocolTestDemo`, which resolves.)
+  - Full suite: **22 configs, 17 PASS + 5 intentional FAIL**, no errors, after the repackaging.
   - **Deferred (the opp_test / opp_ci CI *harness* itself):** wiring these `.test` cases into
     INET's regression runner (Makefile/runner that links `libprotocoltest.so`), the
     fingerprint hookup, and a golden-file CI check on `describe()` output. The `.test` files

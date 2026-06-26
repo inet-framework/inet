@@ -1,19 +1,56 @@
 %description:
 
-Protocol Test Framework -- example opp_test wrapper (negative / violation detection).
+Protocol Test Framework -- self-contained negative test (the framework detects a violation).
 
-Demonstrates that the framework *catches* a protocol violation. The `tcp_handshake_seq_bad`
-program asserts a wrong relationship for the SYN+ACK host1 receives (it expects the ack
-number to be ISN+2 instead of ISN+1), so the matcher must NOT find a matching event and the
-run ends in a FAIL verdict. This `.test` passes precisely because the framework reports the
-failure -- i.e. it confirms the matcher rejects an incorrect trace.
+The program asserts a wrong relationship for the SYN+ACK host1 receives (ack number ISN+2
+instead of ISN+1), so the matcher must NOT find a matching event and the run ends in a FAIL
+verdict. This test passes precisely because the framework reports the failure -- confirming
+the matcher rejects an incorrect trace. As in the other examples the network has no tester:
+one is attached at runtime.
 
-%extraargs: -l ../lib/libprotocoltest.so -n ../../../src;../lib
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("tcp_handshake_bad")
+        .once(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("isn", "tcp.sequenceNo").within(0.2))
+        .once(on("host1").receivedFromLower().layer(Layer::Transport)
+                  .match("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 2") // wrong
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "tcp_handshake_bad compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network HandshakeNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
 
 %inifile: omnetpp.ini
 
 [General]
-network = ProtocolTestDemo
+network = HandshakeNet
 sim-time-limit = 1s
 seed-set = 0
 
@@ -29,7 +66,5 @@ seed-set = 0
 *.host2.app[0].typename = "TcpEchoApp"
 *.host2.app[0].localPort = 1000
 
-*.tester.testName = "tcp_handshake_seq_bad"
-
 %contains: stdout
-PROTOCOLTEST tcp_handshake_seq_bad: FAIL
+PROTOCOLTEST tcp_handshake_bad: FAIL
