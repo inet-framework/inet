@@ -22,7 +22,10 @@ namespace protocoltest {
 //  ExpectNo  -- fail if a matching event occurs within the window; else advance
 //  Inject    -- fire a crafted packet (reactively), then advance
 //  Unordered -- a group of patterns that must all match, in any order
-enum class StepType { Expect, Optional, ExpectNo, Inject, Unordered };
+//  AnyOf     -- a group of patterns; the first to match wins
+//  Repeat    -- a pattern that must match `count` times within its window
+//  Delivery  -- a "from" send correlated to a "to" receive of the same packet (treeId)
+enum class StepType { Expect, Optional, ExpectNo, Inject, Unordered, AnyOf, Repeat, Delivery };
 
 //
 // A packet injection. When the engine reaches an inject step it resolves the target
@@ -52,9 +55,11 @@ class INET_API Injection
 
 struct Step {
     StepType type = StepType::Expect;
-    EventPattern pattern;              // Expect / Optional / ExpectNo
+    EventPattern pattern;              // Expect / Optional / ExpectNo / Repeat / Delivery "from"
     Injection injection;               // Inject
-    std::vector<EventPattern> group;   // Unordered
+    std::vector<EventPattern> group;   // Unordered / AnyOf
+    EventPattern pattern2;             // Delivery "to" (holds the delivery window in its within)
+    int count = 0;                     // Repeat
 };
 
 // Entry point of the fluent injection chain.
@@ -73,8 +78,13 @@ class INET_API ProtocolTest
   public:
     std::string name;
     std::vector<Step> steps;
+    bool strictMode = false;   // closed-world: an in-scope but non-matching event fails an Expect
 
     explicit ProtocolTest(const char *name) : name(name) {}
+
+    // Closed-world matching: a packet matching an Expect step's selector scope
+    // (node/kind/layer/iface) but not its content predicate is a failure.
+    ProtocolTest& strict() { strictMode = true; return *this; }
 
     ProtocolTest& expect(const EventPattern& pattern)
     {
@@ -101,6 +111,30 @@ class INET_API ProtocolTest
     ProtocolTest& unordered(std::vector<EventPattern> patterns)
     {
         steps.push_back(Step{StepType::Unordered, {}, {}, std::move(patterns)});
+        return *this;
+    }
+
+    // The first of the given patterns to match wins; advance on it (fail on deadline).
+    ProtocolTest& anyOf(std::vector<EventPattern> patterns)
+    {
+        steps.push_back(Step{StepType::AnyOf, {}, {}, std::move(patterns)});
+        return *this;
+    }
+
+    // The pattern must match `count` times within its window.
+    ProtocolTest& repeat(const EventPattern& pattern, int count)
+    {
+        steps.push_back(Step{StepType::Repeat, pattern, {}, {}, {}, count});
+        return *this;
+    }
+
+    // A packet matching `from` (a send) is then received matching `to` -- the same
+    // packet (correlated by treeId) -- within `window`.
+    ProtocolTest& delivery(const EventPattern& from, const EventPattern& to, double window)
+    {
+        EventPattern toWindowed = to;
+        toWindowed.within(window);
+        steps.push_back(Step{StepType::Delivery, from, {}, {}, toWindowed, 0});
         return *this;
     }
 

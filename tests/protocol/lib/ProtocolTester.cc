@@ -116,6 +116,18 @@ void ProtocolTester::handleMessage(cMessage *msg)
                               std::to_string(groupRemaining) + " of " + std::to_string(step.group.size()) +
                               " patterns did not match within the window");
                 break;
+            case StepType::AnyOf:
+                decide(false, "anyOf step " + std::to_string(currentStep) + ": no alternative matched within the window");
+                break;
+            case StepType::Repeat:
+                decide(false, "repeat step " + std::to_string(currentStep) + ": " +
+                              std::to_string(step.count - repeatRemaining) + " of " + std::to_string(step.count) +
+                              " occurrences within the window [" + step.pattern.str() + "]");
+                break;
+            case StepType::Delivery:
+                decide(false, "delivery step " + std::to_string(currentStep) +
+                              ": the matching receive did not arrive within the window after the send");
+                break;
             case StepType::ExpectNo:  // window passed with no violation -> success
             case StepType::Optional:  // window passed with no match -> skip
                 advance(simTime());
@@ -279,7 +291,8 @@ void ProtocolTester::enterStep()
             // step if it expires (fail / skip / pass, depending on the kind).
             armDeadline(step.pattern.selHasWithin ? step.pattern.selWithin : simtime_t(0));
             break;
-        case StepType::Unordered: {
+        case StepType::Unordered:
+        case StepType::AnyOf: {
             groupMatched.assign(step.group.size(), 0);
             groupRemaining = (int)step.group.size();
             simtime_t window = 0;
@@ -287,10 +300,22 @@ void ProtocolTester::enterStep()
                 if (pattern.selHasWithin && pattern.selWithin > window)
                     window = pattern.selWithin;
             armDeadline(window);
-            if (groupRemaining == 0)
+            if (step.type == StepType::Unordered && groupRemaining == 0)
                 advance(simTime());
             break;
         }
+        case StepType::Repeat:
+            repeatRemaining = step.count;
+            armDeadline(step.pattern.selHasWithin ? step.pattern.selWithin : simtime_t(0));
+            if (repeatRemaining <= 0)
+                advance(simTime());
+            break;
+        case StepType::Delivery:
+            // Wait (unbounded) for the send; the window applies to send->receive and is
+            // armed once the send is observed (see processMatch).
+            deliveryStage = 0;
+            deliveryTreeId = -1;
+            break;
         case StepType::Inject: {
             const Injection& injection = step.injection;
             simtime_t fireTime = injection.hasAtTime ? injection.atTime
@@ -344,6 +369,45 @@ void ProtocolTester::processMatch(const PacketEvent& event)
                 runCaptures(step.pattern, event);
                 EV_INFO << "ProtocolTest " << program->name << ": step " << currentStep
                         << " matched at t=" << event.time << " by " << event.module->getFullPath() << endl;
+                advance(event.time);
+            }
+            // strict (closed-world): an in-scope packet that isn't the expected one fails.
+            else if (program->strictMode && step.type == StepType::Expect
+                     && !(step.pattern.selHasNotBefore && event.time < anchorTime + step.pattern.selNotBefore)
+                     && step.pattern.scopeMatches(event)) {
+                decide(false, "strict: unexpected in-scope packet at t=" + event.time.str() +
+                              " (" + event.module->getFullPath() + ") for step " +
+                              std::to_string(currentStep) + " [" + step.pattern.str() + "]");
+            }
+            break;
+        case StepType::AnyOf:
+            for (auto& pattern : step.group) {
+                if (patternMatches(pattern, event)) {
+                    runCaptures(pattern, event);
+                    advance(event.time);
+                    break;
+                }
+            }
+            break;
+        case StepType::Repeat:
+            if (patternMatches(step.pattern, event)) {
+                runCaptures(step.pattern, event);
+                if (--repeatRemaining <= 0)
+                    advance(event.time);
+            }
+            break;
+        case StepType::Delivery:
+            if (deliveryStage == 0) {
+                if (patternMatches(step.pattern, event)) {
+                    deliveryTreeId = event.treeId;
+                    runCaptures(step.pattern, event);
+                    deliveryStage = 1;
+                    anchorTime = event.time;   // the receive window starts at the send
+                    armDeadline(step.pattern2.selHasWithin ? step.pattern2.selWithin : simtime_t(0));
+                }
+            }
+            else if (event.treeId == deliveryTreeId && patternMatches(step.pattern2, event)) {
+                runCaptures(step.pattern2, event);
                 advance(event.time);
             }
             break;

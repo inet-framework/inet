@@ -86,6 +86,43 @@ static std::string renderUnordered(const std::vector<EventPattern>& group)
     return os.str() + ".";
 }
 
+static std::string stripPeriod(std::string s)
+{
+    if (!s.empty() && s.back() == '.')
+        s.pop_back();
+    return s;
+}
+
+static std::string renderAnyOf(const std::vector<EventPattern>& group)
+{
+    std::ostringstream os;
+    os << "One of: ";
+    for (size_t i = 0; i < group.size(); i++)
+        os << (i ? "; or " : "") << stripPeriod(renderPattern(group[i], "must"));
+    return os.str() + ".";
+}
+
+static std::string renderRepeat(const EventPattern& p, int count)
+{
+    return std::to_string(count) + " times: " + stripPeriod(renderPattern(p, "must")) + ".";
+}
+
+static std::string contentPhrase(const EventPattern& p)
+{
+    if (!p.description.empty()) return p.description;
+    if (!p.selExpr.empty()) return "a packet matching \"" + p.selExpr + "\"";
+    return "a packet";
+}
+
+static std::string renderDelivery(const EventPattern& from, const EventPattern& to)
+{
+    std::ostringstream os;
+    os << "Within " << (to.selHasWithin ? formatTime(to.selWithin) : std::string("the window")) << ", "
+       << contentPhrase(from) << " sent by " << (from.selNode.empty() ? "some node" : from.selNode)
+       << " is received by " << (to.selNode.empty() ? "some node" : to.selNode) << " (same packet).";
+    return os.str();
+}
+
 static std::string renderInject(const Injection& inj)
 {
     std::ostringstream os;
@@ -112,6 +149,9 @@ std::string describe(const ProtocolTest& test)
             case StepType::Optional:  clause = renderPattern(step.pattern, "may"); break;
             case StepType::ExpectNo:  clause = renderPattern(step.pattern, "must not"); break;
             case StepType::Unordered: clause = renderUnordered(step.group); break;
+            case StepType::AnyOf:     clause = renderAnyOf(step.group); break;
+            case StepType::Repeat:    clause = renderRepeat(step.pattern, step.count); break;
+            case StepType::Delivery:  clause = renderDelivery(step.pattern, step.pattern2); break;
             case StepType::Inject:    clause = renderInject(step.injection); break;
         }
         os << "  " << (i + 1) << ". " << clause << "\n";
