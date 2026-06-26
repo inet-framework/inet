@@ -1,8 +1,8 @@
 //
-// Protocol Test Framework for INET -- Phase 1 sample programs.
+// Protocol Test Framework for INET -- sample test programs.
 //
-// These exercise the matching engine against the two-host UDP demo network. They
-// are registered by name; select one via the ProtocolTester's `testName` parameter.
+// These exercise the matching engine and injector against the two-host demo network.
+// They are registered by name; select one via the ProtocolTester's `testName` parameter.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
@@ -43,16 +43,13 @@ Define_ProtocolTest(udp_basic_fail)
                   .match("udp.destPort == 9999").within(0.3));
 }
 
-// --- Phase 2: lambda predicates + captures over a TCP handshake ---
-//
-// Asserts the seq/ack relationship of the three-way handshake using only incoming
-// (receivedFromLower) TCP segments, correlated across the two endpoints by captures.
-// (INET's Tcp module does not emit packetSentToLower, so outgoing segments are not
-// observed at the transport layer -- see plan Phase 2 findings.)
+// TCP three-way handshake: assert the seq/ack relationship using only incoming
+// (receivedFromLower) segments, correlated across the two endpoints by captures. INET's
+// Tcp module does not emit packetSentToLower, so a node's outgoing segments are not
+// observable at the transport layer; the two endpoints' received segments suffice.
 
-// Should PASS: the handshake's ack numbers follow seq+1 at each step. Matching and
-// capturing are declarative (PacketFilter expressions + "protocol.field" captures);
-// {name} in an expression is substituted with an earlier captured value.
+// Should PASS: the handshake's ack numbers follow seq+1 at each step. {name} in a match
+// expression is the value captured by an earlier step.
 Define_ProtocolTest(tcp_handshake_seq)
 {
     return ProtocolTest("tcp_handshake_seq")
@@ -88,12 +85,10 @@ Define_ProtocolTest(tcp_handshake_seq_bad)
                   .within(0.5));
 }
 
-// --- Phase 3: time-scheduled packet injection ---
-//
-// Crafts an IP/UDP datagram and pushes it up host2's Ethernet interface as if it had
-// just arrived from the wire (the interface's inbound seam, like INET emulation uses).
-// host2 runs a UdpEchoApp, so it echoes the datagram back; the program asserts that
-// host2 then emits a UDP segment to the lower layer (the echo).
+// Time-scheduled injection: craft an IP/UDP datagram and push it up host2's Ethernet
+// interface as if it arrived from the wire (the interface's inbound seam, as INET
+// emulation uses). host2 runs a UdpEchoApp, so it echoes the datagram back; the program
+// asserts that host2 then emits a UDP segment to the lower layer (the echo).
 
 static Packet *buildInjectedUdpDatagram(const CaptureStore&)
 {
@@ -133,19 +128,17 @@ Define_ProtocolTest(udp_inject_echo)
     return ProtocolTest("udp_inject_echo")
         .inject(inject("host2").into("eth[0]", "upperLayerOut").at(0.5)
                   .describe("a UDP datagram to port 5000").packet(buildInjectedUdpDatagram))
-        // inject is now an ordered step, so this expect is anchored at the injection.
+        // The inject is an ordered step, so this expect is anchored at the injection time.
         .expect(on("host2").sentToLower().layer(Layer::Transport)
                   .match("udp.srcPort == 5000").within(0.2));
 }
 
-// --- Phase 4: reactive injection (stimulus/response) ---
-//
-// The test is the sole TCP peer. host1 actively opens a connection to a phantom IP
-// (10.0.0.99, owned by nobody), so no real peer competes. The test observes host1's
-// SYN, reactively injects a crafted SYN+ACK that acknowledges host1's ISN+1, and then
-// observes host1's final ACK -- a full three-way handshake driven by injection.
-// host1's outgoing segments are observed at the IP layer (ipv4.ip receivedFromUpper),
-// since INET's Tcp emits no send-side signal.
+// Reactive injection (stimulus/response): the test is the sole TCP peer. host1 actively
+// opens a connection to a phantom IP (10.0.0.99, owned by nobody), so no real peer
+// competes. The test observes host1's SYN, reactively injects a crafted SYN+ACK that
+// acknowledges host1's ISN+1, then observes host1's final ACK -- a full three-way
+// handshake driven by injection. host1's outgoing segments are observed at the IP layer
+// (ipv4.ip receivedFromUpper), since INET's Tcp emits no send-side signal.
 
 static Packet *buildSynAck(const CaptureStore& captures)
 {
