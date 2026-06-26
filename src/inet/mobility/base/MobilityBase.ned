@@ -23,6 +23,9 @@ import inet.mobility.contract.IMobility;
 //  - %S angular speed
 //  - %A angular acceleration
 //
+// Expression directives (in curly braces) resolve watched values, e.g. {position}, {velocity}, and:
+//  - {geo_position} geographic position (latitude, longitude, altitude; requires a coordinate system)
+//
 simple MobilityBase extends SimpleModule like IMobility
 {
     parameters:

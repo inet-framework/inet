@@ -5,6 +5,8 @@
 
 #include "inet/mobility/base/MobilityBase.h"
 
+#include <cstdio>
+
 #include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
@@ -71,8 +73,20 @@ std::string MobilityBase::resolveDirective(char directive) const
         case 'A':
             return constthis->getCurrentAngularAcceleration().str();
         default:
-            return SimpleModule::resolveDirective(directive);   
+            return SimpleModule::resolveDirective(directive);
     }
+}
+
+std::string MobilityBase::getGeographicPositionText()
+{
+    // geographic position (latitude/longitude/altitude), empty if there is no coordinate system
+    if (coordinateSystem == nullptr)
+        return "";
+    GeoCoord geographicPosition = coordinateSystem->computeGeographicCoordinate(getCurrentPosition());
+    char buf[80];
+    snprintf(buf, sizeof(buf), "lat %.3f° lon %.3f° alt %.0fm",
+            geographicPosition.latitude.get<deg>(), geographicPosition.longitude.get<deg>(), geographicPosition.altitude.get<m>());
+    return buf;
 }
 
 void MobilityBase::initialize(int stage)
@@ -91,6 +105,8 @@ void MobilityBase::initialize(int stage)
             auto visualizationTarget = subjectModule->getParentModule();
             canvasProjection = CanvasProjection::getCanvasProjection(visualizationTarget->getCanvas());
         }
+        // resolve the optional geographic coordinate system once (used by the {geo_position} directive)
+        coordinateSystem = findModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this);
         WATCH(constraintAreaMin);
         WATCH(constraintAreaMax);
         WATCH(lastPosition);
@@ -101,6 +117,7 @@ void MobilityBase::initialize(int stage)
         initializePosition();
         WATCH_EXPR("position", getCurrentPosition());
         WATCH_EXPR("velocity", getCurrentVelocity());
+        WATCH_EXPR("geo_position", getGeographicPositionText());
     }
 }
 

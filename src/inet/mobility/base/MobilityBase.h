@@ -16,6 +16,8 @@
 
 namespace inet {
 
+class IGeographicCoordinateSystem;
+
 /**
  * @brief Abstract base class for mobility modules.
  *
@@ -56,6 +58,9 @@ class INET_API MobilityBase : public SimpleModule, public IMobility
     /** @brief The 2D projection used on the canvas. */
     const CanvasProjection *canvasProjection;
 
+    /** @brief The geographic coordinate system (from coordinateSystemModule), resolved once; null if none. */
+    const IGeographicCoordinateSystem *coordinateSystem = nullptr;
+
     /** @brief 3 dimensional position and size of the constraint area (in meters). */
     Coord constraintAreaMin, constraintAreaMax;
 
@@ -92,6 +97,8 @@ class INET_API MobilityBase : public SimpleModule, public IMobility
     virtual void refreshDisplay() const override;
     virtual void updateDisplayStringFromMobilityState() const;
     virtual std::string resolveDirective(char directive) const override;
+    /** @brief Geographic latitude/longitude/altitude as a display string (empty if there is no coordinate system); watched as "geo_position". */
+    virtual std::string getGeographicPositionText();
 
     /** @brief This modules should only receive self-messages. */
     virtual void handleMessage(cMessage *msg) override;
