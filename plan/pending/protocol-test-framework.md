@@ -1,6 +1,7 @@
 # Protocol Test Suite Framework for INET — Design & Implementation Plan
 
-Status: **pending** (design agreed, not yet implemented)
+Status: **in progress** — Phases 0–5 and 8 implemented; Phases 6 (MITM/intercept) and 7
+(harness/CI/docs) remain. See the per-phase status in §14.
 Author: brainstormed with Claude, 2026-06-25
 
 ## 1. Purpose
