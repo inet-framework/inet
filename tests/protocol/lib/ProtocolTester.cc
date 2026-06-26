@@ -6,6 +6,7 @@
 
 #include "ProtocolTester.h"
 #include "ProtocolTestDescriber.h"
+#include "PacketTap.h"
 
 #include <iostream>
 
@@ -76,9 +77,24 @@ void ProtocolTester::initialize()
         program = ProtocolTestRegistry::build(testName.c_str());
         if (par("printDescription").boolValue())
             std::cout << describe(*program);
+        installInterceptions();
         currentStep = 0;
         anchorTime = simTime();
         enterStep();
+    }
+}
+
+void ProtocolTester::installInterceptions()
+{
+    // Push each standing intercept(...) rule onto its named PacketTap (a sibling module).
+    for (const auto& interception : program->interceptions) {
+        cModule *module = getParentModule()->getSubmodule(interception.tapName.c_str());
+        auto tap = dynamic_cast<PacketTap *>(module);
+        if (tap == nullptr)
+            throw cRuntimeError("ProtocolTest '%s': intercept target '%s' is not a PacketTap",
+                                program->name.c_str(), interception.tapName.c_str());
+        tap->configure(interception.matchExpression, interception.minimumBytes, interception.occurrence,
+                       interception.action, interception.delayTime, interception.mutator);
     }
 }
 
