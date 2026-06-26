@@ -31,20 +31,24 @@ simple MobilityVisualizerBase extends VisualizerBase
         string positionCircleLineColor = default("dark"); // Position circle line color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
         string positionCircleFillColor = default("dark"); // Position circle fill color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default
 
-        bool displayOrientations = default(false); // Display a pie indicating the current orientation, disabled by default
-        double orientationPieRadius = default(32); // Radius of the pie
-        double orientationPieSize = default(0.2); // Relative size of the pie compared to the full circle
-        double orientationPieOpacity = default(0.25); // Opacity of the pie
+        bool displayOrientations = default(false); // Display a 3D cone indicating the current orientation, disabled by default
+        double orientationPieRadius = default(32); // On-screen radius of the orientation cone, in pixels
+        double orientationPieSize = default(0.2); // Angular half-width of the orientation cone as a fraction of a full circle; must be in the open interval (0, 0.5)
+        double orientationPieOpacity = default(0.25); // Opacity of the orientation cone
         string orientationLineColor = default("black"); // Orientation line color, black by default
         string orientationLineStyle = default("solid"); // Orientation line style (solid, dashed, dotted)
         double orientationLineWidth = default(1); // Orientation line width
-        string orientationFillColor = default("blue"); // Orientation fill color, blue by default
+        string orientationFillColorUp = default("blue"); // Fill color of the orientation base disc when the cone points up (toward the viewer); empty means the disc is not filled
+        string orientationFillColorDown = default("red"); // Fill color of the orientation base disc when the cone points down (away from the viewer); empty means the disc is not filled
 
         bool displayVelocities = default(false); // Display an arrow indicating the current velocity, disabled by default
         double velocityArrowScale = default(1); // Velocity scaling factor to pixels
         string velocityLineColor = default("black"); // Velocity line color, black by default
         string velocityLineStyle = default("solid"); // Velocity line style (solid, dashed, dotted)
         double velocityLineWidth = default(1); // Velocity line width
+
+        string velocityProjection @enum("projected", "trueLength", "isometric") = default("projected"); // How the velocity arrow is projected on an equirectangular map: "projected" applies the full equirectangular distortion; "trueLength" uses the map heading (sheared direction) at true length; "isometric" preserves true heading and length. No effect without a geographic/equirectangular projection.
+        string orientationProjection @enum("projected", "trueLength", "isometric") = default("projected"); // How the orientation cone is projected on an equirectangular map: "projected" shears the base disc per the equirectangular distortion; "isometric" preserves true heading and length (the base disc stays circular); "trueLength" uses the map heading at true length. No effect without a geographic/equirectangular projection.
 
         bool displayMovementTrails = default(false); // Display a line along the recent path of mobilities, disabled by default
         string movementTrailLineColor = default("dark"); // Movement trail line color is a list of colors or a color group name (e.g. dark, light), a set of dark colors by default

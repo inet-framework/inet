@@ -49,7 +49,10 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
     cFigure::Color orientationLineColor;
     cFigure::LineStyle orientationLineStyle;
     double orientationLineWidth = NaN;
-    cFigure::Color orientationFillColor;
+    bool orientationFillUp = false; // whether the base disc is filled when the cone points up (toward the viewer)
+    cFigure::Color orientationFillColorUp;
+    bool orientationFillDown = false; // whether the base disc is filled when the cone points down (away from the viewer)
+    cFigure::Color orientationFillColorDown;
     // velocity
     bool displayVelocities = false;
     double velocityArrowScale = NaN;

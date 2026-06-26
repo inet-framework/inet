@@ -44,11 +44,23 @@ void MobilityVisualizerBase::initialize(int stage)
         displayOrientations = par("displayOrientations");
         orientationPieRadius = par("orientationPieRadius");
         orientationPieSize = par("orientationPieSize");
+        // orientationPieSize is the orientation cone's half-angle as a fraction of a full circle; the
+        // canvas visualizer uses tan(pi*orientationPieSize) for the cone radius, which is only finite
+        // and positive for sizes in the open interval (0, 0.5)
+        if (orientationPieSize <= 0 || orientationPieSize >= 0.5)
+            throw cRuntimeError("orientationPieSize must be in the open interval (0, 0.5), got %g", orientationPieSize);
         orientationPieOpacity = par("orientationPieOpacity");
         orientationLineColor = cFigure::parseColor(par("orientationLineColor"));
         orientationLineStyle = cFigure::parseLineStyle(par("orientationLineStyle"));
         orientationLineWidth = par("orientationLineWidth");
-        orientationFillColor = cFigure::parseColor(par("orientationFillColor"));
+        const char *orientationFillUpColor = par("orientationFillColorUp");
+        orientationFillUp = *orientationFillUpColor != '\0';
+        if (orientationFillUp)
+            orientationFillColorUp = cFigure::parseColor(orientationFillUpColor);
+        const char *orientationFillDownColor = par("orientationFillColorDown");
+        orientationFillDown = *orientationFillDownColor != '\0';
+        if (orientationFillDown)
+            orientationFillColorDown = cFigure::parseColor(orientationFillDownColor);
         // velocity
         displayVelocities = par("displayVelocities");
         velocityArrowScale = par("velocityArrowScale");
