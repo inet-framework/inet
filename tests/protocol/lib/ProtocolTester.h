@@ -40,12 +40,15 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     std::optional<ProtocolTest> program;
     size_t currentStep = 0;
     CaptureStore captureStore;                     // values bound by capture(...) as steps match
+    std::vector<char> groupMatched;                // per-pattern matched flags for an Unordered step
+    int groupRemaining = 0;                        // unmatched patterns left in the Unordered group
     simtime_t anchorTime = 0;                      // start time of the current step's window
     cMessage *deadlineMsg = nullptr;               // fires when the current expect step misses its deadline
     cMessage *injectMsg = nullptr;                 // fires when the current inject step is due
     cMessage *endMsg = nullptr;                    // ends the simulation once a verdict is reached
     bool decided = false;
     bool verdictPass = false;
+    bool finishing = false;                        // true once finish() runs (no scheduling allowed)
 
   protected:
     virtual void initialize() override;
@@ -59,10 +62,13 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     static Layer inferLayer(const cComponent *source);
 
     // matching engine
-    void enterStep();              // begin the current step (arm an expect, or schedule an inject)
+    void enterStep();              // begin the current step (arm/schedule per step kind)
     void processMatch(const PacketEvent& event);
+    void advance(simtime_t at);    // cancel deadline, set anchor, move to the next step
     void performInjection(const Injection& injection);
-    void armCurrentDeadline();
+    bool patternMatches(const EventPattern& pattern, const PacketEvent& event) const; // selector + earliest gate
+    void runCaptures(const EventPattern& pattern, const PacketEvent& event);
+    void armDeadline(simtime_t window);
     void cancelDeadline();
     void decide(bool pass, const std::string& reason);
 

@@ -44,12 +44,12 @@ static std::string kindPhrase(const EventPattern& p)
     }
 }
 
-static std::string renderExpect(const EventPattern& p)
+static std::string renderPattern(const EventPattern& p, const char *modal)
 {
     std::ostringstream os;
     if (p.selHasWithin)
         os << "within " << formatTime(p.selWithin) << ", ";
-    os << (p.selNode.empty() ? "some node" : p.selNode) << " must " << kindPhrase(p);
+    os << (p.selNode.empty() ? "some node" : p.selNode) << " " << modal << " " << kindPhrase(p);
     if (p.selHasLayer)
         os << " at the " << getLayerName(p.selLayer) << " layer";
     if (!p.selIface.empty())
@@ -73,6 +73,19 @@ static std::string renderExpect(const EventPattern& p)
     return capitalize(os.str()) + ".";
 }
 
+static std::string renderUnordered(const std::vector<EventPattern>& group)
+{
+    std::ostringstream os;
+    os << "In any order: ";
+    for (size_t i = 0; i < group.size(); i++) {
+        std::string clause = renderPattern(group[i], "must");
+        if (!clause.empty() && clause.back() == '.')
+            clause.pop_back();
+        os << (i ? "; " : "") << clause;
+    }
+    return os.str() + ".";
+}
+
 static std::string renderInject(const Injection& inj)
 {
     std::ostringstream os;
@@ -93,9 +106,15 @@ std::string describe(const ProtocolTest& test)
     os << "ProtocolTest \"" << test.name << "\":\n";
     for (size_t i = 0; i < test.steps.size(); i++) {
         const Step& step = test.steps[i];
-        os << "  " << (i + 1) << ". "
-           << (step.type == StepType::Expect ? renderExpect(step.pattern) : renderInject(step.injection))
-           << "\n";
+        std::string clause;
+        switch (step.type) {
+            case StepType::Expect:    clause = renderPattern(step.pattern, "must"); break;
+            case StepType::Optional:  clause = renderPattern(step.pattern, "may"); break;
+            case StepType::ExpectNo:  clause = renderPattern(step.pattern, "must not"); break;
+            case StepType::Unordered: clause = renderUnordered(step.group); break;
+            case StepType::Inject:    clause = renderInject(step.injection); break;
+        }
+        os << "  " << (i + 1) << ". " << clause << "\n";
     }
     return os.str();
 }

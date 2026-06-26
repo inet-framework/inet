@@ -16,9 +16,13 @@
 namespace inet {
 namespace protocoltest {
 
-// expect: advance when a matching event is observed. inject: fire a crafted packet
-// (reactively, relative to the previous step) then advance. (expectNo / combinators later.)
-enum class StepType { Expect, Inject };
+// Step kinds:
+//  Expect    -- advance when a matching event is observed (fail on deadline)
+//  Optional  -- advance on a matching event, or skip when the deadline passes
+//  ExpectNo  -- fail if a matching event occurs within the window; else advance
+//  Inject    -- fire a crafted packet (reactively), then advance
+//  Unordered -- a group of patterns that must all match, in any order
+enum class StepType { Expect, Optional, ExpectNo, Inject, Unordered };
 
 //
 // A packet injection. When the engine reaches an inject step it resolves the target
@@ -48,8 +52,9 @@ class INET_API Injection
 
 struct Step {
     StepType type = StepType::Expect;
-    EventPattern pattern;   // valid when type == Expect
-    Injection injection;    // valid when type == Inject
+    EventPattern pattern;              // Expect / Optional / ExpectNo
+    Injection injection;               // Inject
+    std::vector<EventPattern> group;   // Unordered
 };
 
 // Entry point of the fluent injection chain.
@@ -73,13 +78,35 @@ class INET_API ProtocolTest
 
     ProtocolTest& expect(const EventPattern& pattern)
     {
-        steps.push_back(Step{StepType::Expect, pattern, {}});
+        steps.push_back(Step{StepType::Expect, pattern, {}, {}});
+        return *this;
+    }
+
+    // 0-or-1: match if it occurs within the window, otherwise skip and advance.
+    ProtocolTest& optional(const EventPattern& pattern)
+    {
+        steps.push_back(Step{StepType::Optional, pattern, {}, {}});
+        return *this;
+    }
+
+    // Negative: fail if a matching event occurs within the window, else advance.
+    ProtocolTest& expectNo(const EventPattern& pattern)
+    {
+        steps.push_back(Step{StepType::ExpectNo, pattern, {}, {}});
+        return *this;
+    }
+
+    // All patterns must match, in any order, before advancing. The group window is
+    // the longest within() among its patterns.
+    ProtocolTest& unordered(std::vector<EventPattern> patterns)
+    {
+        steps.push_back(Step{StepType::Unordered, {}, {}, std::move(patterns)});
         return *this;
     }
 
     ProtocolTest& inject(const Injection& injection)
     {
-        steps.push_back(Step{StepType::Inject, {}, injection});
+        steps.push_back(Step{StepType::Inject, {}, injection, {}});
         return *this;
     }
 };

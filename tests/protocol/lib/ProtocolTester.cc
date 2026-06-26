@@ -95,34 +95,66 @@ ProtocolTester::~ProtocolTester()
 
 void ProtocolTester::handleMessage(cMessage *msg)
 {
-    if (msg == endMsg)
+    if (msg == endMsg) {
         endSimulation();
-    else if (msg == deadlineMsg) {
-        const auto& step = program->steps[currentStep].pattern;
-        decide(false, "deadline missed for step " + std::to_string(currentStep) + " [" + step.str() + "]");
+        return;
     }
-    else if (msg == injectMsg) {
+    if (msg == injectMsg) {
         performInjection(program->steps[currentStep].injection);
-        anchorTime = simTime();
-        currentStep++;
-        enterStep();
+        advance(simTime());
+        return;
     }
-    else
-        throw cRuntimeError("Unexpected message");
+    if (msg == deadlineMsg) {
+        // Deadline expiry means different things per step kind.
+        Step& step = program->steps[currentStep];
+        switch (step.type) {
+            case StepType::Expect:
+                decide(false, "deadline missed for step " + std::to_string(currentStep) + " [" + step.pattern.str() + "]");
+                break;
+            case StepType::Unordered:
+                decide(false, "unordered step " + std::to_string(currentStep) + ": " +
+                              std::to_string(groupRemaining) + " of " + std::to_string(step.group.size()) +
+                              " patterns did not match within the window");
+                break;
+            case StepType::ExpectNo:  // window passed with no violation -> success
+            case StepType::Optional:  // window passed with no match -> skip
+                advance(simTime());
+                break;
+            default:
+                break;
+        }
+        return;
+    }
+    throw cRuntimeError("Unexpected message");
 }
 
 void ProtocolTester::finish()
 {
-    if (matchingMode) {
-        if (!decided) {
-            Step& step = program->steps[currentStep];
-            std::string what = step.type == StepType::Expect ? "[" + step.pattern.str() + "]" : "[inject]";
-            decide(false, "simulation ended with step " + std::to_string(currentStep) +
-                          " still pending " + what);
-        }
-    }
-    else
+    if (!matchingMode) {
         EV_INFO << "ProtocolTester observed " << numObserved << " packet events" << endl;
+        return;
+    }
+    finishing = true;
+    if (decided)
+        return;
+
+    // ExpectNo/Optional steps are satisfied by reaching end-of-sim without a
+    // violation/match, so skip any trailing run of them.
+    while (currentStep < program->steps.size() &&
+           (program->steps[currentStep].type == StepType::ExpectNo ||
+            program->steps[currentStep].type == StepType::Optional))
+        currentStep++;
+
+    if (currentStep >= program->steps.size())
+        decide(true, "all steps satisfied at end of simulation");
+    else {
+        Step& step = program->steps[currentStep];
+        std::string what = step.type == StepType::Unordered
+                             ? "[unordered: " + std::to_string(groupRemaining) + " pattern(s) unmatched]"
+                         : step.type == StepType::Inject ? "[inject pending]"
+                         : "[" + step.pattern.str() + "]";
+        decide(false, "simulation ended with step " + std::to_string(currentStep) + " pending " + what);
+    }
 }
 
 void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -239,18 +271,59 @@ void ProtocolTester::enterStep()
         return;
     }
     Step& step = program->steps[currentStep];
-    if (step.type == StepType::Expect)
-        armCurrentDeadline();   // wait for a matching event (see processMatch)
-    else {
-        // Inject step: schedule the injection, then advance once it fires.
-        const Injection& injection = step.injection;
-        simtime_t fireTime = injection.hasAtTime ? injection.atTime
-                           : injection.hasAfter ? anchorTime + injection.afterDelay
-                           : simTime();
-        if (injectMsg == nullptr)
-            injectMsg = new cMessage("inject");
-        scheduleAt(fireTime, injectMsg);
+    switch (step.type) {
+        case StepType::Expect:
+        case StepType::Optional:
+        case StepType::ExpectNo:
+            // Wait for a matching event (see processMatch); the deadline resolves the
+            // step if it expires (fail / skip / pass, depending on the kind).
+            armDeadline(step.pattern.selHasWithin ? step.pattern.selWithin : simtime_t(0));
+            break;
+        case StepType::Unordered: {
+            groupMatched.assign(step.group.size(), 0);
+            groupRemaining = (int)step.group.size();
+            simtime_t window = 0;
+            for (auto& pattern : step.group)
+                if (pattern.selHasWithin && pattern.selWithin > window)
+                    window = pattern.selWithin;
+            armDeadline(window);
+            if (groupRemaining == 0)
+                advance(simTime());
+            break;
+        }
+        case StepType::Inject: {
+            const Injection& injection = step.injection;
+            simtime_t fireTime = injection.hasAtTime ? injection.atTime
+                               : injection.hasAfter ? anchorTime + injection.afterDelay
+                               : simTime();
+            if (injectMsg == nullptr)
+                injectMsg = new cMessage("inject");
+            scheduleAt(fireTime, injectMsg);
+            break;
+        }
     }
+}
+
+bool ProtocolTester::patternMatches(const EventPattern& pattern, const PacketEvent& event) const
+{
+    if (pattern.selHasNotBefore && event.time < anchorTime + pattern.selNotBefore)
+        return false;
+    MatchContext context{event, captureStore};
+    return pattern.selectorMatches(context);
+}
+
+void ProtocolTester::runCaptures(const EventPattern& pattern, const PacketEvent& event)
+{
+    for (auto& capture : pattern.captures)
+        captureStore[capture.first] = capture.second(event);
+}
+
+void ProtocolTester::advance(simtime_t at)
+{
+    cancelDeadline();
+    anchorTime = at;
+    currentStep++;
+    enterStep();
 }
 
 void ProtocolTester::processMatch(const PacketEvent& event)
@@ -261,30 +334,43 @@ void ProtocolTester::processMatch(const PacketEvent& event)
 
     if (currentStep >= program->steps.size())
         return;
-    Step& current = program->steps[currentStep];
-    if (current.type != StepType::Expect)   // while an inject is pending, ignore events
-        return;
-    const EventPattern& step = current.pattern;
+    Step& step = program->steps[currentStep];
 
-    // Earliest gate: events before the window opens cannot satisfy this step.
-    if (step.selHasNotBefore && event.time < anchorTime + step.selNotBefore)
-        return;
-    // Open-world: events that don't match the current step are simply ignored.
-    MatchContext context{event, captureStore};
-    if (!step.selectorMatches(context))
-        return;
-
-    // Bind this step's captures from the matched packet, for use by later steps.
-    for (auto& capture : step.captures)
-        captureStore[capture.first] = capture.second(event);
-
-    EV_INFO << "ProtocolTest " << program->name << ": step " << currentStep
-            << " matched at t=" << event.time << " by " << event.module->getFullPath() << endl;
-
-    cancelDeadline();
-    anchorTime = event.time;
-    currentStep++;
-    enterStep();
+    switch (step.type) {
+        case StepType::Expect:
+        case StepType::Optional:
+            // Open-world: non-matching events are ignored.
+            if (patternMatches(step.pattern, event)) {
+                runCaptures(step.pattern, event);
+                EV_INFO << "ProtocolTest " << program->name << ": step " << currentStep
+                        << " matched at t=" << event.time << " by " << event.module->getFullPath() << endl;
+                advance(event.time);
+            }
+            break;
+        case StepType::ExpectNo:
+            // A match within the window is a violation.
+            if (patternMatches(step.pattern, event))
+                decide(false, "forbidden event occurred at t=" + event.time.str() +
+                              " for step " + std::to_string(currentStep) + " [" + step.pattern.str() + "]");
+            break;
+        case StepType::Unordered:
+            // Offer the event to each still-unmatched pattern; consume the first it satisfies.
+            for (size_t i = 0; i < step.group.size(); i++) {
+                if (!groupMatched[i] && patternMatches(step.group[i], event)) {
+                    groupMatched[i] = 1;
+                    runCaptures(step.group[i], event);
+                    groupRemaining--;
+                    EV_INFO << "ProtocolTest " << program->name << ": unordered step " << currentStep
+                            << " matched pattern " << i << " at t=" << event.time << endl;
+                    break;
+                }
+            }
+            if (groupRemaining == 0)
+                advance(event.time);
+            break;
+        default:
+            break;   // Inject: ignore observed events while pending
+    }
 }
 
 void ProtocolTester::performInjection(const Injection& injection)
@@ -314,16 +400,15 @@ void ProtocolTester::performInjection(const Injection& injection)
     sink->pushPacket(packet, gate);
 }
 
-void ProtocolTester::armCurrentDeadline()
+void ProtocolTester::armDeadline(simtime_t window)
 {
-    const auto& step = program->steps[currentStep].pattern;
-    if (step.selHasWithin) {
-        if (deadlineMsg == nullptr)
-            deadlineMsg = new cMessage("deadline");
-        if (deadlineMsg->isScheduled())
-            cancelEvent(deadlineMsg);
-        scheduleAt(anchorTime + step.selWithin, deadlineMsg);
-    }
+    if (window <= SIMTIME_ZERO)
+        return; // no window -> wait indefinitely (resolved at sim end)
+    if (deadlineMsg == nullptr)
+        deadlineMsg = new cMessage("deadline");
+    if (deadlineMsg->isScheduled())
+        cancelEvent(deadlineMsg);
+    scheduleAt(anchorTime + window, deadlineMsg);
 }
 
 void ProtocolTester::cancelDeadline()
@@ -345,10 +430,13 @@ void ProtocolTester::decide(bool pass, const std::string& reason)
         std::cout << "  reason: " << reason << std::endl;
 
     // End the simulation right after the current event so the verdict is prompt.
-    if (endMsg == nullptr)
-        endMsg = new cMessage("endTest");
-    if (!endMsg->isScheduled())
-        scheduleAt(simTime(), endMsg);
+    // (Not when deciding from finish() -- the simulation is already ending.)
+    if (!finishing) {
+        if (endMsg == nullptr)
+            endMsg = new cMessage("endTest");
+        if (!endMsg->isScheduled())
+            scheduleAt(simTime(), endMsg);
+    }
 }
 
 } // namespace protocoltest

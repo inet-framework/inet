@@ -193,5 +193,40 @@ Define_ProtocolTest(tcp_handshake_peer)
                   .within(1.0));
 }
 
+// Combinators: host1 runs two UDP flows (to ports 5000 and 5001). Assert that both
+// datagrams leave in any order (unordered), then that nothing goes to port 9999 for a
+// while (negative). Should PASS.
+Define_ProtocolTest(multi_flow)
+{
+    return ProtocolTest("multi_flow")
+        .unordered({
+            on("host1").sentToLower().layer(Layer::Transport)
+              .match("udp.destPort == 5000").describe("a datagram to port 5000").within(1.0),
+            on("host1").sentToLower().layer(Layer::Transport)
+              .match("udp.destPort == 5001").describe("a datagram to port 5001").within(1.0)
+        })
+        .expectNo(on("host1").sentToLower()
+                    .match("udp.destPort == 9999").describe("any datagram to port 9999").within(0.3));
+}
+
+// Should FAIL: the forbidden datagram (to port 5000) does occur within the window.
+Define_ProtocolTest(multi_flow_bad)
+{
+    return ProtocolTest("multi_flow_bad")
+        .expectNo(on("host1").sentToLower().layer(Layer::Transport)
+                    .match("udp.destPort == 5000").describe("any datagram to port 5000").within(0.3));
+}
+
+// Should PASS: the optional datagram (to port 9999) never occurs and is skipped, then
+// the required datagram (to port 5000) is matched.
+Define_ProtocolTest(optional_skip)
+{
+    return ProtocolTest("optional_skip")
+        .optional(on("host1").sentToLower().layer(Layer::Transport)
+                    .match("udp.destPort == 9999").describe("a datagram to port 9999").within(0.3))
+        .expect(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0));
+}
+
 } // namespace protocoltest
 } // namespace inet
