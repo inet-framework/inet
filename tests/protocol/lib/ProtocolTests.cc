@@ -329,26 +329,26 @@ Define_ProtocolTest(wifi_aggregation)
 Define_ProtocolTest(wifi_block_ack_full)
 {
     // host1's MAC-layer transmit / receive of an 802.11 frame matching `expr`.
-    auto sends = [](const char *expr, const char *desc, double w) {
+    auto send = [](const char *expr, const char *desc, double w) {
         return on("host1").sentToLower().layer(Layer::Link).match(expr).describe(desc).within(w);
     };
-    auto receives = [](const char *expr, const char *desc, double w) {
+    auto receive = [](const char *expr, const char *desc, double w) {
         return on("host1").receivedFromLower().layer(Layer::Link).match(expr).describe(desc).within(w);
     };
 
     return ProtocolTest("wifi_block_ack_full")
         // --- Create the Block Ack agreement (ADDBA handshake, each frame ACKed) ---
-        .once(sends   ("ieee80211mac.type == 13", "ADDBA Request", 0.1))
-        .once(receives("ieee80211mac.type == 29", "ACK (recipient acknowledges the ADDBA Request)", 0.002))
-        .once(receives("ieee80211mac.type == 13", "ADDBA Response", 0.01))
-        .once(sends   ("ieee80211mac.type == 29", "ACK (originator acknowledges the ADDBA Response)", 0.002))
+        .once(send   ("ieee80211mac.type == 13", "ADDBA Request", 0.1))
+        .once(receive("ieee80211mac.type == 29", "ACK (recipient acknowledges the ADDBA Request)", 0.002))
+        .once(receive("ieee80211mac.type == 13", "ADDBA Response", 0.01))
+        .once(send   ("ieee80211mac.type == 29", "ACK (originator acknowledges the ADDBA Response)", 0.002))
         // --- Use the agreement: a block of 5 QoS data frames (Block Ack policy, no
         //     immediate ACK), then one Block Ack Request, then a single Block Ack
         //     covering the whole block. ---
-        .exactlyTimes(5, sends("ieee80211mac.type == 40 && Ieee80211DataHeader.ackPolicy == 3",
+        .exactlyTimes(5, send("ieee80211mac.type == 40 && Ieee80211DataHeader.ackPolicy == 3",
                          "a QoS data frame with Block Ack policy", 0.5))
-        .once(sends   ("ieee80211mac.type == 24", "a Block Ack Request", 0.5))
-        .once(receives("ieee80211mac.type == 25", "a Block Ack covering the block", 0.01));
+        .once(send   ("ieee80211mac.type == 24", "a Block Ack Request", 0.5))
+        .once(receive("ieee80211mac.type == 25", "a Block Ack covering the block", 0.01));
 }
 
 } // namespace protocoltest
