@@ -1,9 +1,7 @@
 # Protocol Test Suite Framework for INET — Design & Implementation Plan
 
-Status: **in progress** — Phases 0–5 and 8 done; Phase 6 (MITM/intercept) partial — the
-inline `PacketTap` drop/delay and the retransmission exit criterion are met, with mutate /
-builder-driven `intercept()` / peer-node shapes remaining; Phase 7 (harness/CI/docs) not
-started. See the per-phase status in §14.
+Status: **in progress** — Phases 0–6 and 8 done; only Phase 7 (harness/CI/docs) remains.
+See the per-phase status in §14.
 Author: brainstormed with Claude, 2026-06-25
 
 ## 1. Purpose
@@ -563,34 +561,49 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     — the most NFA-heavy piece; `unordered` already covers explicit interleaving, and
     specific selectors keep flows separated. `repeatUntil(cond)` also deferred.
 
-- **Phase 6 — MITM/intercept & peer-node shapes. 🟡 PARTIAL (drop done; exit met).**
-  `PacketTap` inline man-in-the-middle on a link; fault-injection example. *Exit: a
-  retransmission test driven by dropping a frame — MET (`tcp_retransmit` PASSes).*
+- **Phase 6 — MITM/intercept & peer-node shapes. ✅ DONE.** `PacketTap` inline
+  man-in-the-middle with drop/delay/mutate, driven either by params or from the test
+  program. *Exit: a retransmission test driven by dropping a frame — MET (`tcp_retransmit`
+  + `tcp_retransmit_mutate` PASS).*
   - `PacketTap` (`PacketTap.{ned,h,cc}`): a `SimpleModule` with two inout gates `a`/`b`,
     spliced onto an existing link in the demo network (`ProtocolTestMitmDemo`:
     `host1.ethg <--> Eth100M <--> tap.a; tap.b <--> Eth100M <--> host2.ethg`). It is a
     **store-and-forward relay** (per-direction `cPacketQueue` + a transmit timer keyed off
     `cGate::getTransmissionChannel()->getTransmissionFinishTime()`), because the Ethernet
-    sides are datarate channels — a naive `send()` hits "channel busy". Self-contained:
-    configured by params (`matchExpression` PacketFilter + `minPacketBytes` + `occurrence`
-    + `action` = drop/delay/pass + `delayTime`), independent of the ProtocolTest program.
+    sides are datarate channels — a naive `send()` hits "channel busy". Selects frames by a
+    `matchExpression` PacketFilter + `minPacketBytes` + `occurrence`; actions
+    `drop`/`delay`/`mutate`/`pass` (default `pass` → a bare tap is transparent).
   - On the Ethernet PHY gate the message is an `EthernetSignal` encapsulating the frame
     `Packet`; the tap unwraps it to run the filter, but forwards the whole signal (preserving
     the transmission). Zero INET source changes.
+  - **Two configuration paths:** (a) self-contained via NED/ini params; (b) **from the test
+    program** via `intercept("tap").match(...).minBytes(n).nth(k).drop()/.delay(t)/.mutate(fn)`.
+    The `ProtocolTester` resolves the named tap at startup and calls `PacketTap::configure(...)`,
+    which **wins over params regardless of module init order** (a `programmaticallyConfigured`
+    flag). `mutate(fn)` carries a C++ lambda `void(Packet*)`, so it is only reachable via the
+    program path. Interceptions are *standing* rules (armed for the whole run), held in
+    `ProtocolTest::interceptions` (not ordered steps).
   - **Key integration findings (for Phase 7 docs):** (a) a top-level tap *splits the link*,
     so the `Ipv4NetworkConfigurator` saw two separate links and address assignment failed —
     fixed by giving the tap **`@networkNode()`** so the configurator traverses it and merges
     both sides into one link (the same marker `ThruputMeter` carries); (b) `GlobalArp` keeps
     the wire to just the TCP/IP frames; (c) INET's initial TCP RTO is ~3s, so the
-    retransmission window must clear that (the demo uses `within(5)` and `sim-time-limit=8s`).
-  - **`tcp_retransmit` test** (`MitmRetransmit` config): the tap drops host1's first data
-    segment (`tcp.destPort==1000 && synBit==false`, `minPacketBytes=100`, `occurrence=1`);
-    the test captures the dropped segment's `sequenceNo` and asserts host1 re-sends a segment
-    with the same seq after the RTO. PASS.
-  - **Remaining for this phase (deferred):** `mutate` action (drop/delay/pass implemented;
-    mutate not yet); engine/builder-driven `intercept(on(...).match(...)).drop()` surface
-    (today the tap is configured by params, not from the ProtocolTest program); standalone
-    **peer-node** wiring shape; describer rendering for intercept steps.
+    retransmission window must clear that (the demo uses `within(5)` and `sim-time-limit=8s`);
+    (d) a `mutate` that calls `Packet::setBitError(true)` makes the receiving Ethernet MAC
+    discard the frame (`EthernetCsmaMac.cc:375` checks `hasBitError()`), so corruption forces
+    a retransmission just like a drop.
+  - **Tests** (`MitmRetransmit` / `MitmMutate`): the program drives the tap to drop / corrupt
+    host1's first data segment; the test captures the segment's `sequenceNo` and asserts host1
+    re-sends a segment with the same seq after the RTO. Both PASS. The describer renders the
+    standing rule, e.g. "Fault injection: on tap 'tap', drop the first data segment (≥ 100
+    bytes), occurrence 1."
+  - **Peer-node shape:** the §9 "test as the remote peer" deployment is realized by the Phase 4
+    reactive-injection pattern — `tcp_handshake_peer` drives the whole far end (SYN→inject
+    SYN+ACK→ACK) against a phantom IP, no real peer node needed. A dedicated standalone peer
+    *node* would be a thin NED wrapper over the same injection mechanism; not built (redundant).
+  - **Deferred (not blocking):** auto-translating an `EventPattern` (node/direction) into the
+    tap's wire-level filter, so one could write `intercept(on("host1")...).drop()` instead of a
+    raw `match("tcp...")` string; multiple simultaneous rules per tap.
 
 - **Phase 7 — Harness, CI, docs.** `tests/protocol/` dir, `Define_ProtocolTest` registry,
   runner network, fingerprint hookup, `protocoltest-base.ini`, authoring guide +

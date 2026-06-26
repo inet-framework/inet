@@ -58,6 +58,36 @@ class INET_API Injection
     Injection& packet(std::function<Packet *(const CaptureStore&)> fn) { builder = std::move(fn); return *this; }
 };
 
+//
+// A man-in-the-middle interception rule, applied by a named PacketTap spliced on a link.
+// The tap selects frames by a PacketFilter expression (over the dissected frame), an
+// optional minimum size, and an occurrence index, and applies an action:
+//   drop  -- discard the frame (force a retransmission)
+//   delay -- forward it after a hold time
+//   mutate-- run a C++ mutator on the (inner) frame, then forward it
+// The ProtocolTester installs these on the tap module at startup (see intercept(...)).
+//
+class INET_API Interception
+{
+  public:
+    std::string tapName;          // PacketTap module name (a sibling of the tester)
+    std::string matchExpression;  // PacketFilter expression over the dissected frame
+    long minimumBytes = 0;        // also require the (inner) frame to be at least this big
+    int occurrence = 0;           // act on the Nth selected frame (1-based); 0 = every
+    std::string action = "drop";  // "drop" | "delay" | "mutate"
+    simtime_t delayTime = 0;
+    std::function<void(Packet *)> mutator; // for action == "mutate"
+    std::string description;      // optional human phrase
+
+    Interception& match(const char *expr) { matchExpression = expr; return *this; }
+    Interception& minBytes(long n) { minimumBytes = n; return *this; }
+    Interception& nth(int k) { occurrence = k; return *this; }
+    Interception& drop() { action = "drop"; return *this; }
+    Interception& delay(double t) { action = "delay"; delayTime = t; return *this; }
+    Interception& mutate(std::function<void(Packet *)> fn) { action = "mutate"; mutator = std::move(fn); return *this; }
+    Interception& describe(const char *phrase) { description = phrase; return *this; }
+};
+
 struct Step {
     StepType type = StepType::Once;
     EventPattern pattern;              // Once / AtMostOnce / Never / ExactlyTimes / Count / Delivery "from"
@@ -70,6 +100,9 @@ struct Step {
 
 // Entry point of the fluent injection chain.
 Injection inject(const char *nodeName);
+
+// Entry point of the fluent interception chain (names the PacketTap to drive).
+Interception intercept(const char *tapName);
 
 //
 // A protocol test program: an ordered list of steps with a name. Built with the
@@ -84,6 +117,7 @@ class INET_API ProtocolTest
   public:
     std::string name;
     std::vector<Step> steps;
+    std::vector<Interception> interceptions;  // standing MITM rules, installed on taps at startup
     bool strictMode = false;   // closed-world: an in-scope but non-matching event fails an Expect
 
     explicit ProtocolTest(const char *name) : name(name) {}
@@ -157,6 +191,14 @@ class INET_API ProtocolTest
     ProtocolTest& inject(const Injection& injection)
     {
         steps.push_back(Step{StepType::Inject, {}, injection, {}});
+        return *this;
+    }
+
+    // A standing man-in-the-middle rule installed on the named PacketTap at startup. Not
+    // an ordered step -- it is armed for the whole run.
+    ProtocolTest& intercept(const Interception& interception)
+    {
+        interceptions.push_back(interception);
         return *this;
     }
 
