@@ -445,13 +445,13 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     evaluates captures on match. Captures are **string-keyed** (read with `ctx.get("isn")`).
     `tcp_handshake_seq` → PASS (asserts `ackNo==isn+1`, `ackNo==peerIsn+1` across the two
     endpoints); `tcp_handshake_seq_bad` → FAIL (wrong `isn+2`).
-  - **Major finding (signal coverage):** INET's `Tcp` emits **no `packetSentToLower`** —
-    a sent SYN is first observable at the *IP* layer (`ipv4.ip receivedFromUpper`), not at
-    `tcp`. Per the §15 policy the right fix is to *add* a transport-layer send signal, but
-    that is a **substantial edit to existing INET source → needs sign-off**, so it was not
-    done. Worked around by asserting from **incoming** segments correlated across nodes by
-    captures. → Candidate change to propose: emit `packetSentToLower` (or a dedicated
-    observation signal) in `Tcp` and other protocols lacking it.
+  - **Major finding (signal coverage) — RESOLVED:** INET's `Tcp` emitted **no
+    `packetSentToLower`** (it routed segments to IP via a raw `send()` in `sendToIp()`),
+    so a node's outgoing TCP segments were not observable at the transport layer. Per the
+    §15 policy this was fixed by **adding the signal to `Tcp`** (emit in `sendToIp` +
+    `@signal` in `Tcp.ned`, mirroring `Udp`) — a minimal INET edit, approved. The handshake
+    tests now observe the initiator's SYN/ACK naturally at `tcp sentToLower`. (Originally
+    worked around by asserting from incoming segments.)
   - Robustness: lambda predicates are wrapped in try/catch like string expressions (a
     peek of an absent chunk is a non-match). Lambda bodies are opaque in diagnostics
     (the bad-handshake FAIL shows only the selector) — `.describe()` / Phase 8 will fix.
@@ -502,13 +502,14 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     SYN+ACK acking ISN+1, and observes host1's final ACK acking the peer ISN+1. Trace
     confirms SYN(dropped)→injSYNACK→TcpAck(dropped) — a real three-way handshake driven
     entirely by injection. Phase 3's time-scheduled inject is now an inject step with `.at()`.
-  - Findings: (a) the **phantom-IP + observe-at-IP-layer** pattern lets the test be the sole
-    peer without modifying INET or fighting a real responder — the SYN/ACK are observed
-    before ARP drops them; (b) reactive injection needs the inject to fire as a *future*
+  - Findings: (a) the **phantom-IP** pattern lets the test be the sole peer without fighting
+    a real responder — the SYN/ACK leave the stack before ARP drops them, so they are
+    observed regardless; (b) reactive injection needs the inject to fire as a *future*
     self-message (never re-entrantly in the matching callback) — `enterStep` schedules it,
     matching the plan's §14 caution; (c) `TcpSessionApp` requires `sendBytes>0` even when
-    only the handshake is under test. Did **not** need the TCP send-signal addition after
-    all (IP-layer observation sufficed), so no INET edit was made.
+    only the handshake is under test. (Originally observed host1's segments at the IP layer;
+    once `Tcp` gained `packetSentToLower` (see Phase 2 finding), `tcp_handshake_peer` was
+    switched to observe at `tcp sentToLower` like `tcp_handshake_seq`.)
 
 - **Phase 5 — Combinators.** `unordered/optional/repeat/anyOf/expectNo/delivery`,
   per-flow scoping, `strict()` mode. *Exit:* a multi-flow test with negative assertions.
