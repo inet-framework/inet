@@ -43,40 +43,37 @@ Define_ProtocolTest(udp_basic_fail)
                   .match("udp.destPort == 9999").within(0.3));
 }
 
-// TCP three-way handshake: assert the seq/ack relationship using only incoming
-// (receivedFromLower) segments, correlated across the two endpoints by captures. INET's
-// Tcp module does not emit packetSentToLower, so a node's outgoing segments are not
-// observable at the transport layer; the two endpoints' received segments suffice.
-
-// Should PASS: the handshake's ack numbers follow seq+1 at each step. {name} in a match
-// expression is the value captured by an earlier step.
+// TCP three-way handshake, observed from the initiator (host1) at the transport layer:
+// host1 sends the SYN, receives the SYN+ACK, and sends the final ACK, with the ack
+// numbers following seq+1 at each step. {name} in a match expression is the value
+// captured by an earlier step.
 Define_ProtocolTest(tcp_handshake_seq)
 {
     return ProtocolTest("tcp_handshake_seq")
-        // host2 receives host1's SYN; remember host1's initial sequence number.
-        .expect(on("host2").receivedFromLower().layer(Layer::Transport)
+        // host1 sends the SYN; remember its initial sequence number.
+        .expect(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.synBit == true && tcp.ackBit == false")
                   .describe("host1's SYN")
                   .capture("isn", "tcp.sequenceNo")
                   .within(0.2))
-        // host1 receives the SYN+ACK; it must acknowledge isn+1. Remember host2's ISN.
+        // host1 receives the SYN+ACK acknowledging isn+1; remember the peer's ISN.
         .expect(on("host1").receivedFromLower().layer(Layer::Transport)
                   .match("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
                   .describe("the SYN+ACK acknowledging host1's ISN+1")
                   .capture("peerIsn", "tcp.sequenceNo")
                   .within(0.5))
-        // host2 receives the final ACK; it must acknowledge peerIsn+1.
-        .expect(on("host2").receivedFromLower().layer(Layer::Transport)
+        // host1 sends the final ACK acknowledging the peer's ISN+1.
+        .expect(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {peerIsn} + 1")
-                  .describe("the final ACK acknowledging the peer's ISN+1")
+                  .describe("host1's final ACK acknowledging the peer's ISN+1")
                   .within(0.5));
 }
 
-// Should FAIL: asserts a wrong ack relationship (isn+2) for the SYN+ACK.
+// Should FAIL: asserts a wrong ack relationship (isn+2) for the SYN+ACK host1 receives.
 Define_ProtocolTest(tcp_handshake_seq_bad)
 {
     return ProtocolTest("tcp_handshake_seq_bad")
-        .expect(on("host2").receivedFromLower().layer(Layer::Transport)
+        .expect(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.synBit == true && tcp.ackBit == false")
                   .capture("isn", "tcp.sequenceNo")
                   .within(0.2))
@@ -137,8 +134,7 @@ Define_ProtocolTest(udp_inject_echo)
 // opens a connection to a phantom IP (10.0.0.99, owned by nobody), so no real peer
 // competes. The test observes host1's SYN, reactively injects a crafted SYN+ACK that
 // acknowledges host1's ISN+1, then observes host1's final ACK -- a full three-way
-// handshake driven by injection. host1's outgoing segments are observed at the IP layer
-// (ipv4.ip receivedFromUpper), since INET's Tcp emits no send-side signal.
+// handshake driven by injection.
 
 static Packet *buildSynAck(const CaptureStore& captures)
 {
@@ -181,7 +177,7 @@ Define_ProtocolTest(tcp_handshake_peer)
 {
     return ProtocolTest("tcp_handshake_peer")
         // 1. host1's outgoing SYN; capture its ISN and ephemeral source port.
-        .expect(on("host1").receivedFromUpper().layer(Layer::Network)
+        .expect(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.synBit == true && tcp.ackBit == false")
                   .describe("host1's SYN (SYN set, ACK clear)")
                   .capture("isn", "tcp.sequenceNo")
@@ -191,7 +187,7 @@ Define_ProtocolTest(tcp_handshake_peer)
         .inject(inject("host1").into("eth[0]", "upperLayerOut").after(0.001)
                   .describe("a SYN+ACK acknowledging host1's ISN+1").packet(buildSynAck))
         // 3. host1's final ACK, acknowledging the peer's ISN+1 (5000+1).
-        .expect(on("host1").receivedFromUpper().layer(Layer::Network)
+        .expect(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == 5001")
                   .describe("host1's final ACK (acknowledging the peer's ISN+1)")
                   .within(1.0));
