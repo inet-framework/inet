@@ -1,0 +1,35 @@
+%description:
+
+Protocol Test Framework -- example opp_test wrapper (negative / violation detection).
+
+Demonstrates that the framework *catches* a protocol violation. The `tcp_handshake_seq_bad`
+program asserts a wrong relationship for the SYN+ACK host1 receives (it expects the ack
+number to be ISN+2 instead of ISN+1), so the matcher must NOT find a matching event and the
+run ends in a FAIL verdict. This `.test` passes precisely because the framework reports the
+failure -- i.e. it confirms the matcher rejects an incorrect trace.
+
+%extraargs: -l ../lib/libprotocoltest.so -n ../../../src;../lib
+
+%inifile: omnetpp.ini
+
+[General]
+network = ProtocolTestDemo
+sim-time-limit = 1s
+seed-set = 0
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 100B
+*.host1.app[0].tClose = 2s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+
+*.tester.testName = "tcp_handshake_seq_bad"
+
+%contains: stdout
+PROTOCOLTEST tcp_handshake_seq_bad: FAIL

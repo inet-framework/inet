@@ -337,6 +337,31 @@ Define_ProtocolTest(udp_strict_bad)
                   .match("udp.destPort == 9999").describe("a datagram to port 9999").within(1.0));
 }
 
+// Cookbook: ARP resolution. Before host1 can send to host2 it resolves host2's MAC --
+// host1 broadcasts an ARP request and receives host2's reply (opcode 1 = request, 2 = reply).
+Define_ProtocolTest(arp_resolution)
+{
+    return ProtocolTest("arp_resolution")
+        .once(on("host1").sentToLower().layer(Layer::Link)
+                  .match("arp.opcode == 1").describe("an ARP request").within(0.2))
+        .once(on("host1").receivedFromLower().layer(Layer::Link)
+                  .match("arp.opcode == 2").describe("host2's ARP reply").within(0.2));
+}
+
+// Cookbook: IPv4 fragmentation. A 4000-byte datagram exceeds the 1500-byte Ethernet MTU,
+// so host1 emits several IPv4 fragments -- non-final ones carry the more-fragments flag,
+// and later fragments sit at a non-zero offset.
+Define_ProtocolTest(ipv4_fragmentation)
+{
+    return ProtocolTest("ipv4_fragmentation")
+        .once(on("host1").sentToLower().layer(Layer::Link)
+                  .match("ipv4.moreFragments == true")
+                  .describe("an IPv4 fragment with the more-fragments flag set").within(0.2))
+        .once(on("host1").sentToLower().layer(Layer::Link)
+                  .match("ipv4.fragmentOffset > 0")
+                  .describe("a later fragment at a non-zero offset").within(0.2));
+}
+
 // WiFi 802.11 frame-sequence tests. Frame types use the Ieee80211 MAC header `type`
 // field: ST_ACTION=13 (ADDBA action frames), ST_BLOCKACK_REQ=24, ST_BLOCKACK=25,
 // ST_DATA_WITH_QOS=40. (A-MSDU aggregation and Block Ack are exercised by separate
