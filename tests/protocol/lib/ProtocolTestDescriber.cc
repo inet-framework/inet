@@ -150,10 +150,29 @@ static std::string renderInject(const Injection& inj)
     return capitalize(os.str()) + ".";
 }
 
+static std::string renderInterception(const Interception& i)
+{
+    std::ostringstream os;
+    os << "on tap '" << i.tapName << "', ";
+    if (i.action == "delay")       os << "delay (by " << formatTime(i.delayTime) << ") ";
+    else if (i.action == "mutate") os << "mutate ";
+    else                           os << "drop ";
+    if (!i.description.empty())          os << i.description;
+    else if (!i.matchExpression.empty()) os << "frames matching \"" << i.matchExpression << "\"";
+    else                                 os << "every frame";
+    if (i.minimumBytes > 0)
+        os << " (≥ " << i.minimumBytes << " bytes)";
+    if (i.occurrence > 0)
+        os << ", occurrence " << i.occurrence;
+    return capitalize(os.str()) + ".";
+}
+
 std::string describe(const ProtocolTest& test)
 {
     std::ostringstream os;
     os << "ProtocolTest \"" << test.name << "\":\n";
+    for (const auto& interception : test.interceptions)
+        os << "  * Fault injection: " << renderInterception(interception) << "\n";
     for (size_t i = 0; i < test.steps.size(); i++) {
         const Step& step = test.steps[i];
         std::string clause;

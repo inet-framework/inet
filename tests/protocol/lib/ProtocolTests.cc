@@ -82,12 +82,16 @@ Define_ProtocolTest(tcp_handshake_seq_bad)
                   .within(0.5));
 }
 
-// Phase 6 fault injection: a PacketTap spliced on the wire drops host1's first TCP data
-// segment, so host1's TCP retransmits the same segment (same sequence number) after the
-// retransmission timeout. The tester only observes -- the drop is done by the tap.
+// Phase 6 fault injection: the test program drives a PacketTap (spliced on the wire) to
+// drop host1's first TCP data segment, so host1's TCP retransmits the same segment (same
+// sequence number) after the retransmission timeout.
 Define_ProtocolTest(tcp_retransmit)
 {
     return ProtocolTest("tcp_retransmit")
+        // drop the first data-bearing segment to host2's port (not the bare SYN/ACK frames).
+        .intercept(intercept("tap")
+                     .match("tcp.destPort == 1000 && tcp.synBit == false").minBytes(100).nth(1)
+                     .drop().describe("the first data segment"))
         // host1 sends the data segment after the handshake; remember its sequence number.
         .once(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.destPort == 1000 && tcp.synBit == false")
@@ -97,6 +101,29 @@ Define_ProtocolTest(tcp_retransmit)
                   .within(0.3))
         // the tap drops it on the wire, so host1 retransmits the same segment (same
         // sequence number) once the retransmission timer fires.
+        .once(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("tcp.sequenceNo == {dataSeq} && tcp.synBit == false")
+                  .notBefore(0.3)
+                  .describe("the retransmitted data segment (same sequence number)")
+                  .within(5.0));
+}
+
+// Same outcome via the mutate action: instead of dropping, the tap corrupts the first data
+// segment (sets a bit error); host2's MAC discards the corrupted frame, so host1 still
+// retransmits. Demonstrates intercept(...).mutate(lambda).
+Define_ProtocolTest(tcp_retransmit_mutate)
+{
+    return ProtocolTest("tcp_retransmit_mutate")
+        .intercept(intercept("tap")
+                     .match("tcp.destPort == 1000 && tcp.synBit == false").minBytes(100).nth(1)
+                     .mutate([](Packet *frame) { frame->setBitError(true); })
+                     .describe("the first data segment (corrupt it)"))
+        .once(on("host1").sentToLower().layer(Layer::Transport)
+                  .match("tcp.destPort == 1000 && tcp.synBit == false")
+                  .after(0.15)
+                  .capture("dataSeq", "tcp.sequenceNo")
+                  .describe("the data segment")
+                  .within(0.3))
         .once(on("host1").sentToLower().layer(Layer::Transport)
                   .match("tcp.sequenceNo == {dataSeq} && tcp.synBit == false")
                   .notBefore(0.3)

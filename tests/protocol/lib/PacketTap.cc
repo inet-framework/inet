@@ -19,17 +19,42 @@ PacketTap::~PacketTap()
 
 void PacketTap::initialize()
 {
+    pumpA = new cMessage("pumpA");
+    pumpB = new cMessage("pumpB");
+    // A test program may have already driven us via configure(); if so, keep that and
+    // ignore the parameters (configure() always wins, whatever the init order).
+    if (programmaticallyConfigured)
+        return;
     matchExpression = par("matchExpression").stdstringValue();
     minPacketBytes = par("minPacketBytes").intValue();
     action = par("action").stdstringValue();
     occurrence = par("occurrence").intValue();
     delayTime = par("delayTime");
+    compileFilter();
+}
+
+void PacketTap::compileFilter()
+{
     if (!matchExpression.empty()) {
         filter.setExpression(matchExpression.c_str());
         hasFilter = true;
     }
-    pumpA = new cMessage("pumpA");
-    pumpB = new cMessage("pumpB");
+    else
+        hasFilter = false;
+}
+
+void PacketTap::configure(const std::string& matchExpr, long minBytes, int occ,
+                          const std::string& act, simtime_t delay, std::function<void(Packet *)> mut)
+{
+    matchExpression = matchExpr;
+    minPacketBytes = minBytes;
+    occurrence = occ;
+    action = act;
+    delayTime = delay;
+    mutator = std::move(mut);
+    numSelected = 0;
+    compileFilter();
+    programmaticallyConfigured = true;
 }
 
 cGate *PacketTap::forwardGate(const cGate *arrivalGate)
@@ -133,6 +158,13 @@ void PacketTap::handleMessage(cMessage *msg)
             scheduleAt(simTime() + delayTime, release);
             return;
         }
+        if (action == "mutate") {
+            EV_INFO << "PacketTap mutating " << inner->getName() << " (selected #" << numSelected << ")" << endl;
+            if (mutator)
+                mutator(inner);
+            numMutated++;
+            // fall through to forward the (now mutated) frame
+        }
         // "pass": fall through to a plain forward.
     }
 
@@ -142,7 +174,7 @@ void PacketTap::handleMessage(cMessage *msg)
 void PacketTap::finish()
 {
     EV_INFO << "PacketTap: forwarded " << numForwarded << ", dropped " << numDropped
-            << " (" << numSelected << " selected)" << endl;
+            << ", mutated " << numMutated << " (" << numSelected << " selected)" << endl;
 }
 
 } // namespace protocoltest

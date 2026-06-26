@@ -16,6 +16,13 @@ Injection inject(const char *nodeName)
     return injection;
 }
 
+Interception intercept(const char *tapName)
+{
+    Interception interception;
+    interception.tapName = tapName;
+    return interception;
+}
+
 std::map<std::string, ProtocolTestBuilderFn>& ProtocolTestRegistry::all()
 {
     // Function-local static: safe across static-initializer registration order.

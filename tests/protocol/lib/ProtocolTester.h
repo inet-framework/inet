@@ -66,6 +66,7 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     static Layer inferLayer(const cComponent *source);
 
     // matching engine
+    void installInterceptions();   // push the program's intercept(...) rules onto their taps
     void enterStep();              // begin the current step (arm/schedule per step kind)
     void processMatch(const PacketEvent& event);
     void advance(simtime_t at);    // cancel deadline, set anchor, move to the next step
