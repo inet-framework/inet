@@ -93,6 +93,9 @@ class INET_API EventPattern
     EventPattern& after(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }
     EventPattern& notBefore(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }
 
+    // True if the selector scope (node / kind / direction / layer / interface) matches,
+    // ignoring the content expression/predicate. Used by strict mode.
+    bool scopeMatches(const PacketEvent& event) const;
     // True if the (non-timing) selector + content + predicate parts match.
     bool selectorMatches(const MatchContext& context) const;
     // Human-readable form for diagnostics (full English rendering is Phase 8).
