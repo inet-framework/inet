@@ -1,0 +1,24 @@
+<VrrpConfig>
+    <Router id="gw1">
+        <VRRP>
+            <Interface name="eth0">
+                <Group id="10">
+                    <IPAddress>192.168.1.254</IPAddress>
+                    <Priority>200</Priority>
+                    <Description>Working group</Description>
+                </Group>
+            </Interface>
+        </VRRP>
+    </Router>
+    <Router id="gw2">
+        <VRRP>
+            <Interface name="eth0">
+                <Group id="10">
+                    <IPAddress>192.168.1.254</IPAddress>
+                    <Priority>100</Priority>
+                    <Description>Working group</Description>
+                </Group>
+            </Interface>
+        </VRRP>
+    </Router>
+</VrrpConfig>
