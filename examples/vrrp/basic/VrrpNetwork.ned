@@ -6,6 +6,7 @@
 
 package inet.examples.vrrp.basic;
 
+import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
@@ -22,6 +23,9 @@ network VrrpNetwork
     submodules:
         configurator: Ipv4NetworkConfigurator {
             @display("p=50,50");
+        }
+        scenarioManager: ScenarioManager {
+            @display("p=50,120");
         }
         gw1: Router {
             hasVrrp = true;

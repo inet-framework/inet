@@ -1,0 +1,6 @@
+<scenario>
+    <!-- shut down the VRRP master; the backup (gw2) must take over the virtual IP -->
+    <at t="20">
+        <shutdown module="gw1"/>
+    </at>
+</scenario>
