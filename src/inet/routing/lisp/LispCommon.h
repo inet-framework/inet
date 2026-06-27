@@ -32,6 +32,15 @@ inline constexpr short DATA_PORT_VAL = 4341;
 inline constexpr short CONTROL_PORT_VAL = 4342;
 inline constexpr unsigned short LISPHDR_SIZE = 8;
 
+// XML configuration tags / attribute names
+inline constexpr const char *ENABLED_VAL = "enabled";
+inline constexpr const char *EID_TAG = "EID";
+inline constexpr const char *RLOC_TAG = "RLOC";
+inline constexpr const char *ADDRESS_ATTR = "address";
+inline constexpr const char *PRIORITY_ATTR = "priority";
+inline constexpr const char *WEIGHT_ATTR = "weight";
+inline constexpr const char *LOCAL_ATTR = "local";
+
 /**
  * Constants, enumerations and address/prefix helpers shared across the LISP
  * implementation.
