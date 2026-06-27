@@ -67,8 +67,12 @@ class INET_API CanvasProjection
     const cFigure::Point& getTranslation() const { return translation; }
     void setTranslation(const cFigure::Point& translation) { this->translation = translation; }
 
-    cFigure::Point computeCanvasPoint(const Coord& point) const;
-    cFigure::Point computeCanvasPoint(const Coord& point, double& depth) const;
+    // Pass applyMapProjection = false to skip the optional map-projection first stage and run the affine
+    // view transform only. For callers that pass synthetic scene coordinates (axis basis vectors, a
+    // heat-map grid origin) which must not be reinterpreted as geographic positions when a map projection
+    // is attached to this shared projection.
+    cFigure::Point computeCanvasPoint(const Coord& point, bool applyMapProjection = true) const;
+    cFigure::Point computeCanvasPoint(const Coord& point, double& depth, bool applyMapProjection = true) const;
     Coord computeCanvasPointInverse(const cFigure::Point& point, double depth) const;
 
     // Projects a direction (tangent) vector anchored at the given scene point to a canvas-space vector.

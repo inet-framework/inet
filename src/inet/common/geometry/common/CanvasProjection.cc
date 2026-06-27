@@ -20,16 +20,17 @@ CanvasProjection::~CanvasProjection()
 {
 }
 
-cFigure::Point CanvasProjection::computeCanvasPoint(const Coord& point) const
+cFigure::Point CanvasProjection::computeCanvasPoint(const Coord& point, bool applyMapProjection) const
 {
     double depth;
-    return computeCanvasPoint(point, depth);
+    return computeCanvasPoint(point, depth, applyMapProjection);
 }
 
-cFigure::Point CanvasProjection::computeCanvasPoint(const Coord& point, double& depth) const
+cFigure::Point CanvasProjection::computeCanvasPoint(const Coord& point, double& depth, bool applyMapProjection) const
 {
-    // optional first projection stage (e.g. equirectangular), then the affine view transform
-    Coord projected = mapProjection ? mapProjection->applyForward(point) : point;
+    // optional first projection stage (e.g. equirectangular), then the affine view transform; pass
+    // applyMapProjection = false to skip the first stage (see the header)
+    Coord projected = (applyMapProjection && mapProjection) ? mapProjection->applyForward(point) : point;
     Coord rotatedPoint = rotation.rotateVector(projected);
     depth = rotatedPoint.z;
     return cFigure::Point(rotatedPoint.x * scale.x + translation.x, rotatedPoint.y * scale.y + translation.y);

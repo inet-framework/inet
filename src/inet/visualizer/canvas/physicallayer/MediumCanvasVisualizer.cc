@@ -71,9 +71,11 @@ void MediumCanvasVisualizer::initialize(int stage)
             const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
             Coord min = mediumLimitCache->getMinConstraintArea();
             Coord max = mediumLimitCache->getMaxConstraintArea();
-            cFigure::Point o = canvasProjection->computeCanvasPoint(Coord::ZERO);
-            cFigure::Point x = canvasProjection->computeCanvasPoint(Coord(1, 0, 0));
-            cFigure::Point y = canvasProjection->computeCanvasPoint(Coord(0, 1, 0));
+            // synthetic basis vectors for the heat-map affine; use the affine-only transform so they are
+            // not reinterpreted as geographic positions when a map projection is attached to the canvas
+            cFigure::Point o = canvasProjection->computeCanvasPoint(Coord::ZERO, false);
+            cFigure::Point x = canvasProjection->computeCanvasPoint(Coord(1, 0, 0), false);
+            cFigure::Point y = canvasProjection->computeCanvasPoint(Coord(0, 1, 0), false);
             double t1 = o.x;
             double t2 = o.y;
             double a = x.x - t1;
