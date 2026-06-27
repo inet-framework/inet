@@ -13,6 +13,7 @@ import inet.routing.contract.IBgp;
 import inet.routing.contract.IOspf;
 import inet.routing.contract.IPim;
 import inet.routing.contract.IEigrp;
+import inet.routing.contract.IVrrp;
 
 //
 // A network router device with support for multiple routing protocols
@@ -36,6 +37,7 @@ module Router extends ApplicationLayerNodeBase
         bool hasRip = default(false);
         bool hasBgp = default(false);
         bool hasPim = default(false);
+        bool hasVrrp = default(false);
         bool hasDhcp = default(false);
         hasUdp = default(hasRip || hasDhcp);
         hasTcp = default(hasBgp);
@@ -69,6 +71,10 @@ module Router extends ApplicationLayerNodeBase
                 enableIPv4 = parent.hasIpv4;
                 @display("p=1113,225");
         }
+        vrrp: <"Vrrp"> like IVrrp if hasVrrp {
+            parameters:
+                @display("p=825,376");
+        }
 
     connections allowunconnected:
         ospf.ipOut --> tn.in++ if hasOspf;
@@ -76,6 +82,9 @@ module Router extends ApplicationLayerNodeBase
 
         eigrp.ipOut --> tn.in++ if hasEigrp;
         eigrp.ipIn <-- tn.out++ if hasEigrp;
+
+        vrrp.ipOut --> tn.in++ if hasVrrp;
+        vrrp.ipIn <-- tn.out++ if hasVrrp;
 
         bgp.socketOut --> at.in++ if hasBgp;
         bgp.socketIn <-- at.out++ if hasBgp;

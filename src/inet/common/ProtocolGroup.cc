@@ -129,6 +129,7 @@ static const ProtocolGroup::Protocols ipProtocols {
     { IP_PROT_EIGRP, &Protocol::eigrp },
     { IP_PROT_OSPF, &Protocol::ospf },
     { IP_PROT_PIM, &Protocol::pim },
+    { IP_PROT_VRRP, &Protocol::vrrp },
     { IP_PROT_SCTP, &Protocol::sctp },
     { IP_PROT_IPv6EXT_MOB, &Protocol::mobileipv6 },
     { IP_PROT_MANET, &Protocol::manet },

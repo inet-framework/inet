@@ -295,6 +295,21 @@
         linkerFlags = ""
         />
     <feature
+        id = "Vrrp"
+        name = "VRRP"
+        description = "Virtual Router Redundancy Protocol version 2 (RFC 3768)."
+        initiallyEnabled = "true"
+        requires = "Ipv4"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.routing.vrrp
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_VRRP"
+        linkerFlags = ""
+        />
+    <feature
         id = "EigrpExamples"
         name = "EIGRP routing examples"
         description = "EIGRP routing examples."
