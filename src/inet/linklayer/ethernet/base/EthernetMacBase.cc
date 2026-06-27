@@ -363,6 +363,9 @@ bool EthernetMacBase::dropFrameNotForUs(Packet *packet, const Ptr<const Ethernet
     if (frame->getDest().equals(getMacAddress()))
         return false;
 
+    if (networkInterface->matchesVirtualForwarderMacAddress(frame->getDest()))
+        return false;
+
     if (frame->getDest().isBroadcast())
         return false;
 

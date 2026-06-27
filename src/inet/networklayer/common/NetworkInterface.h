@@ -29,6 +29,7 @@ namespace inet {
 // since that would create dependence on Ipv4 and Ipv6 stuff!
 class NetworkInterface;
 class IInterfaceTable;
+class VirtualForwarder;
 
 enum McastSourceFilterMode { MCAST_INCLUDE_SOURCES, MCAST_EXCLUDE_SOURCES };
 
@@ -125,6 +126,7 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     MacAddress macAddr; ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
     InterfaceToken token; ///< for Ipv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
     std::vector<MacAddress> multicastAddresses;
+    std::vector<VirtualForwarder *> virtualForwarders; ///< virtual MAC/IP forwarders (FHRP, e.g. VRRP); not owned
 
     TagSet protocolDataSet;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
@@ -270,6 +272,17 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     void addMulticastMacAddress(const MacAddress& address);
     void removeMulticastMacAddress(const MacAddress& address);
     bool matchesMulticastMacAddress(const MacAddress& address) const;
+    //@}
+
+    /** @name Virtual forwarder (FHRP, e.g. VRRP) related functions */
+    //@{
+    void addVirtualForwarder(VirtualForwarder *vforwarder);
+    void removeVirtualForwarder(VirtualForwarder *vforwarder);
+    const std::vector<VirtualForwarder *>& getVirtualForwarders() const { return virtualForwarders; }
+    /** Returns true if an *enabled* virtual forwarder owns the given (unicast) MAC address. */
+    bool matchesVirtualForwarderMacAddress(const MacAddress& address) const;
+    /** Returns an *enabled* virtual forwarder owning the given IPv4 address, or nullptr. */
+    VirtualForwarder *findVirtualForwarderForIpAddress(const L3Address& address) const;
     //@}
 
     /** @name Tag related functions */

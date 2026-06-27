@@ -124,6 +124,8 @@ NetworkInterface *InterfaceTable::findInterfaceByAddress(const L3Address& addres
                         if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>())
                             if (ipv4Data->getIPAddress() == address.toIpv4())
                                 return ie;
+                        if (ie->findVirtualForwarderForIpAddress(address)) // active FHRP/VRRP virtual IP
+                            return ie;
                         break;
 #endif // ifdef INET_WITH_IPv4
 

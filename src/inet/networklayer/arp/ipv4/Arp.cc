@@ -17,6 +17,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
+#include "inet/networklayer/common/VirtualForwarder.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -367,6 +368,10 @@ void Arp::processArpPacket(Packet *packet)
 
 MacAddress Arp::resolveMacAddressForArpReply(const NetworkInterface *ie, const ArpPacket *arp)
 {
+    // If the requested address is owned by an active virtual forwarder (e.g. a
+    // VRRP master), answer with the virtual MAC address instead of the burned-in one.
+    if (auto vforwarder = ie->findVirtualForwarderForIpAddress(arp->getDestIpAddress()))
+        return vforwarder->getMacAddress();
     return ie->getMacAddress();
 }
 

@@ -17,6 +17,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/VirtualForwarder.h"
 
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -414,7 +415,8 @@ bool NetworkInterface::matchesMacAddress(const MacAddress& address) const
 {
     return address.isBroadcast()
             || (address.isMulticast() && matchesMulticastMacAddress(address))
-            || macAddr == address;
+            || macAddr == address
+            || matchesVirtualForwarderMacAddress(address);
 }
 
 bool NetworkInterface::matchesMulticastMacAddress(const MacAddress& address) const
@@ -435,6 +437,40 @@ void NetworkInterface::removeMulticastMacAddress(const MacAddress& address)
     if (it == multicastAddresses.end())
         throw cRuntimeError("Multicast MacAddress not found: '%s'", address.str().c_str());
     multicastAddresses.erase(it);
+}
+
+void NetworkInterface::addVirtualForwarder(VirtualForwarder *vforwarder)
+{
+    if (contains(virtualForwarders, vforwarder))
+        throw cRuntimeError("VirtualForwarder already added");
+    virtualForwarders.push_back(vforwarder);
+}
+
+void NetworkInterface::removeVirtualForwarder(VirtualForwarder *vforwarder)
+{
+    auto it = find(virtualForwarders, vforwarder);
+    if (it == virtualForwarders.end())
+        throw cRuntimeError("VirtualForwarder not found");
+    virtualForwarders.erase(it);
+}
+
+bool NetworkInterface::matchesVirtualForwarderMacAddress(const MacAddress& address) const
+{
+    for (auto vforwarder : virtualForwarders)
+        if (vforwarder->isEnabled() && vforwarder->getMacAddress() == address)
+            return true;
+    return false;
+}
+
+VirtualForwarder *NetworkInterface::findVirtualForwarderForIpAddress(const L3Address& address) const
+{
+    if (address.getType() != L3Address::IPv4)
+        return nullptr;
+    Ipv4Address ipv4Address = address.toIpv4();
+    for (auto vforwarder : virtualForwarders)
+        if (vforwarder->isEnabled() && vforwarder->hasIpAddress(ipv4Address))
+            return vforwarder;
+    return nullptr;
 }
 
 const L3Address NetworkInterface::getNetworkAddress() const
