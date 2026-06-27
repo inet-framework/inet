@@ -101,19 +101,23 @@ void SceneCanvasVisualizer::refreshAxis(double axisLength)
 void SceneCanvasVisualizer::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
-    if (!strcmp(name, "viewAngle")) {
-        bool invertY;
-        canvasProjection->setRotation(parseViewAngle(par("viewAngle"), invertY));
-        canvasProjection->setScale(parse2D(par("viewScale"), invertY));
-        // TODO update all visualizers
-    }
-    else if (!strcmp(name, "viewScale")) {
-        canvasProjection->setScale(parse2D(par("viewScale")));
-        // TODO update all visualizers
-    }
-    else if (!strcmp(name, "viewTranslation")) {
-        canvasProjection->setTranslation(parse2D(par("viewTranslation")));
-        // TODO update all visualizers
+    // when a map projection is installed (e.g. by a GeoMapCanvasVisualizer) it owns the canvas affine;
+    // overriding rotation/scale/translation here would corrupt the equirectangular mapping
+    if (canvasProjection->getMapProjection() == nullptr) {
+        if (!strcmp(name, "viewAngle")) {
+            bool invertY;
+            canvasProjection->setRotation(parseViewAngle(par("viewAngle"), invertY));
+            canvasProjection->setScale(parse2D(par("viewScale"), invertY));
+            // TODO update all visualizers
+        }
+        else if (!strcmp(name, "viewScale")) {
+            canvasProjection->setScale(parse2D(par("viewScale")));
+            // TODO update all visualizers
+        }
+        else if (!strcmp(name, "viewTranslation")) {
+            canvasProjection->setTranslation(parse2D(par("viewTranslation")));
+            // TODO update all visualizers
+        }
     }
     double axisLength = par("axisLength");
     if (!std::isnan(axisLength))
