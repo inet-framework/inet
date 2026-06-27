@@ -295,6 +295,21 @@
         linkerFlags = ""
         />
     <feature
+        id = "Lisp"
+        name = "LISP"
+        description = "Locator/ID Separation Protocol (RFC 6830)."
+        initiallyEnabled = "true"
+        requires = "Ipv4 Ipv6 Udp"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.routing.lisp
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_LISP"
+        linkerFlags = ""
+        />
+    <feature
         id = "EigrpExamples"
         name = "EIGRP routing examples"
         description = "EIGRP routing examples."
