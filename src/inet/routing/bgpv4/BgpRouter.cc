@@ -1034,6 +1034,16 @@ void BgpRouter::printOpenMessage(const BgpOpenMessage& openMsg)
         EV_INFO << "  Optional parameter " << i + 1 << ": \n";
         EV_INFO << "    Parameter type: " << optParam->getParameterType() << "\n";
         EV_INFO << "    Parameter length: " << optParam->getParameterValueLength() << "\n";
+        if (auto caps = dynamic_cast<const BgpOptionalParameterCapabilities *>(optParam)) {
+            for (size_t c = 0; c < caps->getCapabilityArraySize(); c++) {
+                auto cap = caps->getCapability(c);
+                if (auto mp = dynamic_cast<const BgpCapabilityMultiprotocol *>(cap))
+                    EV_INFO << "    Capability: Multiprotocol Extensions, AFI=" << mp->getAfi()
+                            << " SAFI=" << (int)mp->getSafi() << "\n";
+                else
+                    EV_INFO << "    Capability: code " << (int)cap->getCapabilityCode() << "\n";
+            }
+        }
     }
 }
 

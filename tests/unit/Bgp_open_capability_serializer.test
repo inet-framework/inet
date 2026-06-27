@@ -1,0 +1,90 @@
+%description:
+Round-trip serialization of the BGP OPEN message carrying the RFC 5492 Capabilities
+optional parameter with an RFC 4760 Multiprotocol Extensions capability (AFI/SAFI).
+Verifies serialize->bytes->deserialize reproduces the capability and the expected
+on-wire length, for both the IPv6 (AFI=2) and IPv4 (AFI=1) advertisements.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
+
+using namespace inet;
+using namespace inet::bgp;
+
+%global:
+
+// build an OPEN advertising one Multiprotocol capability for the given AFI/SAFI,
+// exactly as BgpSession::sendOpenMessage() does
+static Ptr<BgpOpenMessage> makeOpen(uint16_t afi, uint8_t safi)
+{
+    auto open = makeShared<BgpOpenMessage>();
+    open->setMyAS(64500);
+    open->setHoldTime(SimTime(180, SIMTIME_S));
+    open->setBgpIdentifier(Ipv4Address("1.2.3.4"));
+
+    auto *mp = new BgpCapabilityMultiprotocol();
+    mp->setAfi(afi);
+    mp->setSafi(safi);
+    auto *caps = new BgpOptionalParameterCapabilities();
+    caps->setCapabilityArraySize(1);
+    caps->setCapability(0, mp);
+    caps->setParameterValueLength(2 + mp->getCapabilityLength());
+    open->setOptionalParameterArraySize(1);
+    open->setOptionalParameter(0, caps);
+    unsigned short optLen = 2 + caps->getParameterValueLength();
+    open->setOptionalParametersLength(optLen);
+    open->setTotalLength((BGP_HEADER_OCTETS + BGP_OPEN_OCTETS).get<B>() + optLen);
+    open->setChunkLength(BGP_HEADER_OCTETS + BGP_OPEN_OCTETS + B(optLen));
+    return open;
+}
+
+static Ptr<const BgpOpenMessage> roundTrip(const Ptr<const BgpOpenMessage>& original)
+{
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();      // forces serialize()
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    auto hdr = pkt2.popAtFront<BgpHeader>(); // forces deserialize()
+    return dynamicPtrCast<const BgpOpenMessage>(hdr);
+}
+
+static void checkAf(uint16_t afi, uint8_t safi)
+{
+    auto open = makeOpen(afi, safi);
+
+    // OPEN base (29) + one capabilities param (2) + one MP capability (2 + 4) = 37 octets
+    Packet sz("sz"); sz.insertAtFront(open);
+    ASSERT(sz.getDataLength() == B(37));
+
+    auto o2 = roundTrip(staticPtrCast<const BgpOpenMessage>(open));
+    ASSERT(o2 != nullptr);
+    ASSERT(o2->getMyAS() == 64500);
+    ASSERT(o2->getBgpIdentifier() == Ipv4Address("1.2.3.4"));
+    ASSERT(o2->getOptionalParametersLength() == 8);
+    ASSERT(o2->getOptionalParameterArraySize() == 1);
+
+    auto caps = dynamic_cast<const BgpOptionalParameterCapabilities *>(o2->getOptionalParameter(0));
+    ASSERT(caps != nullptr);
+    ASSERT(caps->getParameterType() == 2);
+    ASSERT(caps->getCapabilityArraySize() == 1);
+
+    auto mp = dynamic_cast<const BgpCapabilityMultiprotocol *>(caps->getCapability(0));
+    ASSERT(mp != nullptr);
+    ASSERT(mp->getCapabilityCode() == 1);
+    ASSERT(mp->getCapabilityLength() == 4);
+    ASSERT(mp->getAfi() == afi);
+    ASSERT(mp->getSafi() == safi);
+    EV << "  AFI=" << afi << " SAFI=" << (int)safi << " round-trip PASS" << endl;
+}
+
+%activity:
+
+EV << "=== BGP OPEN Multiprotocol capability round-trip ===" << endl;
+checkAf(2, 1);   // IPv6 unicast
+checkAf(1, 1);   // IPv4 unicast
+EV << "All BGP OPEN capability round-trips passed." << endl;
+
+%contains: stdout
+All BGP OPEN capability round-trips passed.

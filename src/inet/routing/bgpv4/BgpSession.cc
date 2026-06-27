@@ -150,6 +150,28 @@ void BgpSession::sendOpenMessage()
     // BGP Identifier is a 4-octet router id; for IPv6 it cannot be the (IPv6) local address
     openMsg->setBgpIdentifier(bgpRouter.isIpv6() ? bgpRouter.getRouterId() : _info.socket->getLocalAddress().toIpv4());
 
+    // For an IPv6 session, advertise the Multiprotocol Extensions capability (RFC 4760 /
+    // RFC 5492) so the peer learns we use the IPv6 (AFI=2, SAFI=1) address family. IPv4
+    // unicast is BGP's default address family (RFC 4271), so for IPv4 sessions the OPEN
+    // carries no capabilities (and stays byte-identical to the pre-MP-BGP encoding).
+    if (bgpRouter.isIpv6()) {
+        auto *mpCap = new BgpCapabilityMultiprotocol();
+        mpCap->setAfi(2); // IPv6
+        mpCap->setSafi(1); // unicast
+        auto *capsParam = new BgpOptionalParameterCapabilities();
+        capsParam->setCapabilityArraySize(1);
+        capsParam->setCapability(0, mpCap);
+        // parameter value = the capability list: capCode(1) + capLen(1) + value(capabilityLength)
+        capsParam->setParameterValueLength(2 + mpCap->getCapabilityLength());
+        openMsg->setOptionalParameterArraySize(1);
+        openMsg->setOptionalParameter(0, capsParam);
+        // optional parameters total = paramType(1) + paramLen(1) + parameter value
+        unsigned short optParamsLength = 2 + capsParam->getParameterValueLength();
+        openMsg->setOptionalParametersLength(optParamsLength);
+        openMsg->setTotalLength((BGP_HEADER_OCTETS + BGP_OPEN_OCTETS).get<B>() + optParamsLength);
+        openMsg->setChunkLength(BGP_HEADER_OCTETS + BGP_OPEN_OCTETS + B(optParamsLength));
+    }
+
     EV_INFO << "Sending BGP Open message to " << _info.peerAddr.str()
             << " on interface " << _info.linkIntf->getInterfaceName()
             << "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";

@@ -79,13 +79,31 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
             stream.writeByte(optionalParametersLength);
             unsigned short numOptionalParametersBytes = 0;
             for (size_t i = 0; i < bgpOpenMessage->getOptionalParameterArraySize(); ++i) {
-                const BgpOptionalParameterRaw *optionalParameter = static_cast<const BgpOptionalParameterRaw *>(bgpOpenMessage->getOptionalParameter(i));
+                const BgpOptionalParameterBase *optionalParameter = bgpOpenMessage->getOptionalParameter(i);
                 stream.writeByte(optionalParameter->getParameterType());
                 unsigned short parameterValueLength = optionalParameter->getParameterValueLength();
                 stream.writeByte(parameterValueLength);
-                for (size_t e = 0; optionalParameter->getValueArraySize(); ++e) {
-                    stream.writeByte(optionalParameter->getValue(e));
+                if (auto caps = dynamic_cast<const BgpOptionalParameterCapabilities *>(optionalParameter)) {
+                    // RFC 5492 Capabilities: a list of <code, length, value> capabilities
+                    for (size_t c = 0; c < caps->getCapabilityArraySize(); ++c) {
+                        const BgpCapabilityBase *cap = caps->getCapability(c);
+                        stream.writeByte(cap->getCapabilityCode());
+                        stream.writeByte(cap->getCapabilityLength());
+                        if (auto mp = dynamic_cast<const BgpCapabilityMultiprotocol *>(cap)) {
+                            stream.writeUint16Be(mp->getAfi());
+                            stream.writeByte(mp->getReserved());
+                            stream.writeByte(mp->getSafi());
+                        }
+                        else
+                            throw cRuntimeError("Cannot serialize BGP OPEN Message: unknown BGP capability code %d.", cap->getCapabilityCode());
+                    }
                 }
+                else if (auto raw = dynamic_cast<const BgpOptionalParameterRaw *>(optionalParameter)) {
+                    for (size_t e = 0; e < raw->getValueArraySize(); ++e)
+                        stream.writeByte(raw->getValue(e));
+                }
+                else
+                    throw cRuntimeError("Cannot serialize BGP OPEN Message: unknown optional parameter type %d.", optionalParameter->getParameterType());
                 numOptionalParametersBytes += 2 + parameterValueLength;
             }
             if (numOptionalParametersBytes != optionalParametersLength)
@@ -262,11 +280,43 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
             bgpOpenMessage->setOptionalParametersLength(optionalParametersLength);
             for (size_t i = 0; optionalParametersLength > 0; ++i) {
                 bgpOpenMessage->setOptionalParameterArraySize(i + 1);
-                BgpOptionalParameterRaw *optionalParameter = new BgpOptionalParameterRaw();
-                optionalParameter->setParameterType(stream.readByte());
+                uint8_t parameterType = stream.readByte();
                 uint8_t parameterValueLength = stream.readByte();
-                optionalParameter->setParameterValueLength(parameterValueLength);
                 optionalParametersLength -= (2 + parameterValueLength);
+                if (parameterType == 2) {
+                    // RFC 5492 Capabilities optional parameter: a list of capabilities
+                    BgpOptionalParameterCapabilities *caps = new BgpOptionalParameterCapabilities();
+                    caps->setParameterValueLength(parameterValueLength);
+                    uint8_t remaining = parameterValueLength;
+                    for (size_t c = 0; remaining > 0; ++c) {
+                        uint8_t capabilityCode = stream.readByte();
+                        uint8_t capabilityLength = stream.readByte();
+                        remaining -= (2 + capabilityLength);
+                        caps->setCapabilityArraySize(c + 1);
+                        if (capabilityCode == 1 && capabilityLength == 4) {
+                            // Multiprotocol Extensions (RFC 4760)
+                            BgpCapabilityMultiprotocol *mp = new BgpCapabilityMultiprotocol();
+                            mp->setAfi(stream.readUint16Be());
+                            mp->setReserved(stream.readByte());
+                            mp->setSafi(stream.readByte());
+                            caps->setCapability(c, mp);
+                        }
+                        else {
+                            // unknown capability: keep its header, skip the value bytes
+                            BgpCapabilityBase *cap = new BgpCapabilityBase();
+                            cap->setCapabilityCode(capabilityCode);
+                            cap->setCapabilityLength(capabilityLength);
+                            for (uint8_t k = 0; k < capabilityLength; ++k)
+                                stream.readByte();
+                            caps->setCapability(c, cap);
+                        }
+                    }
+                    bgpOpenMessage->setOptionalParameter(i, caps);
+                    continue;
+                }
+                BgpOptionalParameterRaw *optionalParameter = new BgpOptionalParameterRaw();
+                optionalParameter->setParameterType(parameterType);
+                optionalParameter->setParameterValueLength(parameterValueLength);
                 for (size_t e = 0; parameterValueLength > 0; ++e) {
                     optionalParameter->setValueArraySize(e + 1);
                     optionalParameter->setValue(e, stream.readByte());

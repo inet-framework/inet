@@ -76,11 +76,43 @@ class BgpOptionalParameterBase
     unsigned short parameterValueLength;
 }
 
-//TODO add accepted BgpOptionalParameter variants
-
 class BgpOptionalParameterRaw extends BgpOptionalParameterBase
 {
     char value[];
+}
+
+//
+// Base for a BGP capability advertised inside a Capabilities optional parameter
+// (RFC 5492). On the wire: Capability Code (1 octet) + Capability Length (1 octet)
+// + Capability Value (Capability Length octets).
+//
+class BgpCapabilityBase
+{
+    @packetData;
+    uint8_t capabilityCode;
+    uint8_t capabilityLength;   // length (in octets) of the capability value
+}
+
+//
+// Multiprotocol Extensions capability (RFC 4760, section 8); advertises one
+// (AFI, SAFI) pair the speaker supports. AFI=1 IPv4, AFI=2 IPv6; SAFI=1 unicast.
+//
+class BgpCapabilityMultiprotocol extends BgpCapabilityBase
+{
+    capabilityCode = 1;
+    capabilityLength = 4;
+    uint16_t afi;               // Address Family Identifier
+    uint8_t reserved = 0;       // 1 octet, sent as 0
+    uint8_t safi;               // Subsequent Address Family Identifier
+}
+
+//
+// Capabilities Optional Parameter (RFC 5492); carries one or more capabilities.
+//
+class BgpOptionalParameterCapabilities extends BgpOptionalParameterBase
+{
+    parameterType = 2;          // Capabilities (RFC 5492)
+    BgpCapabilityBase *capability[] @owned;
 }
 
 //
