@@ -78,6 +78,35 @@ std::string LispMapEntry::getActionString() const
     }
 }
 
+LispRlocator *LispMapEntry::getBestUnicastLocator(cRNG *rng)
+{
+    // collect the UP locators with the lowest (best) priority value
+    std::vector<LispRlocator *> best;
+    int bestPriority = 256;
+    for (auto& rloc : RLOCs) {
+        if (rloc.getState() != LispRlocator::UP)
+            continue;
+        if (rloc.getPriority() < bestPriority) {
+            best.clear();
+            best.push_back(&rloc);
+            bestPriority = rloc.getPriority();
+        }
+        else if (rloc.getPriority() == bestPriority)
+            best.push_back(&rloc);
+    }
+    if (best.empty())
+        return nullptr;
+    // pick one weighted by its weight
+    double dice = rng->doubleRandIncl1();
+    double accumulated = 0;
+    for (auto *rloc : best) {
+        accumulated += rloc->getWeight() / 100.0;
+        if (dice <= accumulated)
+            return rloc;
+    }
+    return best.front();
+}
+
 std::string LispMapEntry::str() const
 {
     std::stringstream os;

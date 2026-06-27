@@ -70,8 +70,11 @@ class INET_API LispMapEntry
     virtual LispRlocator *getLocator(const L3Address& address);
     virtual void removeLocator(L3Address& address);
 
-    // TODO getBestUnicastLocator() (weighted RLOC selection) is added with the data plane,
-    // where the owning module's RNG is available.
+    /**
+     * Selects an outgoing locator among the UP locators of the lowest (best) priority,
+     * weighted by their weights, using the given RNG. Returns nullptr if none is UP.
+     */
+    LispRlocator *getBestUnicastLocator(cRNG *rng);
 };
 
 std::ostream& operator<<(std::ostream& os, const LispMapEntry& me);
