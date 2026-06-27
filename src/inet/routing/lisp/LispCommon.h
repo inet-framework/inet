@@ -34,12 +34,26 @@ inline constexpr unsigned short LISPHDR_SIZE = 8;
 
 // XML configuration tags / attribute names
 inline constexpr const char *ENABLED_VAL = "enabled";
+inline constexpr const char *LISP_TAG = "LISP";
+inline constexpr const char *ROUTING_TAG = "Routing";
 inline constexpr const char *EID_TAG = "EID";
 inline constexpr const char *RLOC_TAG = "RLOC";
+inline constexpr const char *ETRMAPSERVER_TAG = "EtrMapServer";
+inline constexpr const char *ITRMAPRESOLVER_TAG = "ItrMapResolver";
+inline constexpr const char *MAPSERVER_TAG = "MapServer";
+inline constexpr const char *MAPRESOLVER_TAG = "MapResolver";
+inline constexpr const char *ETRMAP_TAG = "EtrMapping";
+inline constexpr const char *MAPCACHE_TAG = "MapCache";
 inline constexpr const char *ADDRESS_ATTR = "address";
 inline constexpr const char *PRIORITY_ATTR = "priority";
 inline constexpr const char *WEIGHT_ATTR = "weight";
 inline constexpr const char *LOCAL_ATTR = "local";
+inline constexpr const char *KEY_ATTR = "key";
+inline constexpr const char *PROXY_ATTR = "proxy";
+inline constexpr const char *NOTIFY_ATTR = "want-map-notify";
+inline constexpr const char *QUICKREG_ATTR = "quick-registration";
+inline constexpr const char *IPV4_ATTR = "ipv4";
+inline constexpr const char *IPV6_ATTR = "ipv6";
 
 /**
  * Constants, enumerations and address/prefix helpers shared across the LISP

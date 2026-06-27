@@ -34,6 +34,21 @@ simple Lisp extends SimpleModule like IApp
         int controlPort = default(4342);   // LISP control messages
         int dataPort = default(4341);      // LISP encapsulated data
         xml configData = default(xml("<LISP/>"));
+
+        // roles (may be overridden by the <MapServer>/<MapResolver> config tags)
+        bool mapServerV4 = default(false);
+        bool mapServerV6 = default(false);
+        bool mapResolverV4 = default(false);
+        bool mapResolverV6 = default(false);
+        bool hasSiteDB = default(false);
+
+        // behaviour
+        bool acceptMapRequestMapping = default(false); // cache the mapping carried in a Map-Request
+        bool advertOnlyOwnEids = default(false);       // only register EIDs of this node's interfaces
+        bool echoNonceAlgo = default(false);
+        bool ciscoStartupDelays = default(false);
+        int mapCacheTtl = default(1440);               // minutes
+        string rlocProbingAlgo @enum("Cisco","Simple","Sophisticated") = default("Cisco");
     gates:
         input socketIn;
         output socketOut;
