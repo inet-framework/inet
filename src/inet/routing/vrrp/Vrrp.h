@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/networklayer/arp/ipv4/Arp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
@@ -36,6 +37,7 @@ class INET_API Vrrp : public RoutingProtocolBase, protected cListener
     cModule *host = nullptr; // the network node that contains this module
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Arp> arp;
     std::vector<VrrpVirtualRouter *> virtualRouters; // owned submodules
 
   protected:
@@ -58,6 +60,7 @@ class INET_API Vrrp : public RoutingProtocolBase, protected cListener
     virtual ~Vrrp() {}
 
     IInterfaceTable *getInterfaceTable() { return ift.get(); }
+    Arp *getArp() { return arp.get(); }
 
     /** Called by a VrrpVirtualRouter to transmit an advertisement out the IP layer. */
     void sendAdvertisement(VrrpVirtualRouter *vr, const Ptr<VrrpAdvertisement>& adv);

@@ -11,6 +11,7 @@
 #include "inet/routing/vrrp/VrrpVirtualRouter.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/arp/ipv4/Arp.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/vrrp/Vrrp.h"
 
@@ -332,7 +333,11 @@ void VrrpVirtualRouter::sendAdvertisement()
 
 void VrrpVirtualRouter::sendBroadcast()
 {
-    // TODO send gratuitous ARP for each virtual IP (implemented in V5)
+    // announce the virtual MAC for each virtual IP so hosts and switches update their tables
+    Arp *arp = vrrp->getArp();
+    for (auto& addr : virtualIps)
+        arp->sendArpGratuitous(ie, virtualMac, addr, (ArpOpcode)arpType);
+    emit(sentArpSignal, (long)virtualIps.size());
 }
 
 bool VrrpVirtualRouter::validateAdvertisement(const Ptr<const VrrpAdvertisement>& adv, int receivedTtl)

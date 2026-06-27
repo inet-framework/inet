@@ -37,6 +37,7 @@ simple Vrrp extends SimpleModule like IVrrp
         @display("i=block/network2");
         string interfaceTableModule = default("^.interfaceTable");
         string routingTableModule = default("^.ipv4.routingTable");
+        string arpModule = default("^.ipv4.arp");
         xml configData = default(xml("<VRRP/>"));
 
         // per-virtual-router defaults (overridable from configData)

@@ -42,6 +42,7 @@ void Vrrp::initialize(int stage)
         host = getContainingNode(this);
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        arp.reference(this, "arpModule", true);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerProtocol(Protocol::vrrp, gate("ipOut"), gate("ipIn"));
