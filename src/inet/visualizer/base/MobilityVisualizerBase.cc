@@ -147,9 +147,12 @@ void MobilityVisualizerBase::receiveSignal(cComponent *source, simsignal_t signa
     else if (signal == PRE_MODEL_CHANGE) {
         if (dynamic_cast<cPreModuleDeleteNotification *>(object)) {
             if (auto mobility = dynamic_cast<IMobility *>(source)) {
-                auto mobilityVisualization = getMobilityVisualization(mobility);
-                removeMobilityVisualization(mobilityVisualization);
-                delete mobilityVisualization;
+                // a matching mobility may have no visualization yet (it never emitted a state-change
+                // signal, or was filtered out), so guard against a null lookup before removing/deleting
+                if (auto mobilityVisualization = getMobilityVisualization(mobility)) {
+                    removeMobilityVisualization(mobilityVisualization);
+                    delete mobilityVisualization;
+                }
             }
         }
     }
