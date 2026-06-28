@@ -110,6 +110,22 @@ static IsisIpReachability readIpReachability(MemoryInputStream& s)
     return r;
 }
 
+static void writeIpv6Reachability(MemoryOutputStream& s, const IsisIpv6Reachability& r)
+{
+    s.writeUint32Be(r.metric);
+    s.writeIpv6Address(r.address);
+    s.writeUint8(r.prefixLength);
+}
+
+static IsisIpv6Reachability readIpv6Reachability(MemoryInputStream& s)
+{
+    IsisIpv6Reachability r;
+    r.metric = s.readUint32Be();
+    r.address = s.readIpv6Address();
+    r.prefixLength = s.readUint8();
+    return r;
+}
+
 static void writeLspEntry(MemoryOutputStream& s, const IsisLspEntry& e)
 {
     s.writeUint16Be(e.remainingLifetime);
@@ -148,6 +164,9 @@ void IsisLanHelloSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     stream.writeUint8(pdu->getIpInterfaceAddressesArraySize());
     for (size_t i = 0; i < pdu->getIpInterfaceAddressesArraySize(); i++)
         stream.writeIpv4Address(pdu->getIpInterfaceAddresses(i));
+    stream.writeUint8(pdu->getIpv6InterfaceAddressesArraySize());
+    for (size_t i = 0; i < pdu->getIpv6InterfaceAddressesArraySize(); i++)
+        stream.writeIpv6Address(pdu->getIpv6InterfaceAddresses(i));
     stream.writeUint8(pdu->getLanNeighboursArraySize());
     for (size_t i = 0; i < pdu->getLanNeighboursArraySize(); i++)
         stream.writeMacAddress(pdu->getLanNeighbours(i));
@@ -172,6 +191,9 @@ const Ptr<Chunk> IsisLanHelloSerializer::deserialize(MemoryInputStream& stream) 
     n = stream.readUint8();
     pdu->setIpInterfaceAddressesArraySize(n);
     for (uint8_t i = 0; i < n; i++) pdu->setIpInterfaceAddresses(i, stream.readIpv4Address());
+    n = stream.readUint8();
+    pdu->setIpv6InterfaceAddressesArraySize(n);
+    for (uint8_t i = 0; i < n; i++) pdu->setIpv6InterfaceAddresses(i, stream.readIpv6Address());
     n = stream.readUint8();
     pdu->setLanNeighboursArraySize(n);
     for (uint8_t i = 0; i < n; i++) pdu->setLanNeighbours(i, stream.readMacAddress());
@@ -202,6 +224,9 @@ void IsisPtpHelloSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     stream.writeUint8(pdu->getIpInterfaceAddressesArraySize());
     for (size_t i = 0; i < pdu->getIpInterfaceAddressesArraySize(); i++)
         stream.writeIpv4Address(pdu->getIpInterfaceAddresses(i));
+    stream.writeUint8(pdu->getIpv6InterfaceAddressesArraySize());
+    for (size_t i = 0; i < pdu->getIpv6InterfaceAddressesArraySize(); i++)
+        stream.writeIpv6Address(pdu->getIpv6InterfaceAddresses(i));
 }
 
 const Ptr<Chunk> IsisPtpHelloSerializer::deserialize(MemoryInputStream& stream) const
@@ -227,6 +252,9 @@ const Ptr<Chunk> IsisPtpHelloSerializer::deserialize(MemoryInputStream& stream) 
     n = stream.readUint8();
     pdu->setIpInterfaceAddressesArraySize(n);
     for (uint8_t i = 0; i < n; i++) pdu->setIpInterfaceAddresses(i, stream.readIpv4Address());
+    n = stream.readUint8();
+    pdu->setIpv6InterfaceAddressesArraySize(n);
+    for (uint8_t i = 0; i < n; i++) pdu->setIpv6InterfaceAddresses(i, stream.readIpv6Address());
     return pdu;
 }
 
@@ -256,6 +284,9 @@ void IsisLspSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Ch
     stream.writeUint8(pdu->getIpExternalReachabilitiesArraySize());
     for (size_t i = 0; i < pdu->getIpExternalReachabilitiesArraySize(); i++)
         writeIpReachability(stream, pdu->getIpExternalReachabilities(i));
+    stream.writeUint8(pdu->getIpv6ReachabilitiesArraySize());
+    for (size_t i = 0; i < pdu->getIpv6ReachabilitiesArraySize(); i++)
+        writeIpv6Reachability(stream, pdu->getIpv6Reachabilities(i));
 }
 
 const Ptr<Chunk> IsisLspSerializer::deserialize(MemoryInputStream& stream) const
@@ -283,6 +314,9 @@ const Ptr<Chunk> IsisLspSerializer::deserialize(MemoryInputStream& stream) const
     n = stream.readUint8();
     pdu->setIpExternalReachabilitiesArraySize(n);
     for (uint8_t i = 0; i < n; i++) pdu->setIpExternalReachabilities(i, readIpReachability(stream));
+    n = stream.readUint8();
+    pdu->setIpv6ReachabilitiesArraySize(n);
+    for (uint8_t i = 0; i < n; i++) pdu->setIpv6Reachabilities(i, readIpv6Reachability(stream));
     return pdu;
 }
 

@@ -18,6 +18,7 @@
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.MacAddress;
 import inet.networklayer.contract.ipv4.Ipv4Address;
+import inet.networklayer.contract.ipv6.Ipv6Address;
 
 cplusplus {{
 #include "inet/routing/isis/IsisCommon.h"
@@ -104,7 +105,8 @@ class IsisHelloPacket extends IsisPdu
     uint16_t holdTime = 40;         // adjacency hold time in seconds
     AreaId areaAddresses[];
     uint8_t protocolsSupported[];   // NLPIDs, see IsisNlpid
-    Ipv4Address ipInterfaceAddresses[];
+    Ipv4Address ipInterfaceAddresses[];      // TLV 132
+    Ipv6Address ipv6InterfaceAddresses[];    // TLV 232 (RFC 5308), link-local next hops
 }
 
 //
@@ -161,6 +163,19 @@ struct IsisIpReachability
 }
 
 //
+// One entry of the IPv6 Reachability TLV (TLV 236, RFC 5308) of a Link State
+// PDU: an IPv6 prefix reachable from the originator, used by Integrated IS-IS
+// to install IPv6 routes.
+//
+struct IsisIpv6Reachability
+{
+    @packetData;
+    uint32_t metric = 10;
+    Ipv6Address address;
+    uint8_t prefixLength;
+}
+
+//
 // One entry of the LSP Entries TLV (TLV 9), describing a single LSP by ID,
 // sequence number, remaining lifetime and checksum. Carried in CSNPs (to
 // advertise the database contents) and PSNPs (to request or acknowledge LSPs).
@@ -192,6 +207,7 @@ class IsisLspPacket extends IsisPdu
     IsisIsReachability isReachabilities[];         // TLV 2
     IsisIpReachability ipInternalReachabilities[]; // TLV 128
     IsisIpReachability ipExternalReachabilities[]; // TLV 130
+    IsisIpv6Reachability ipv6Reachabilities[];     // TLV 236 (RFC 5308)
 }
 
 //

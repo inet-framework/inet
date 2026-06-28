@@ -317,6 +317,7 @@ void Isis::sendLanHello(IsisInterface *isisIft, int level)
             + 1 + (int)hello->getAreaAddressesArraySize() * 3
             + 1 + (int)hello->getProtocolsSupportedArraySize()
             + 1 + (int)hello->getIpInterfaceAddressesArraySize() * 4
+            + 1 + (int)hello->getIpv6InterfaceAddressesArraySize() * 16
             + 1 + (int)hello->getLanNeighboursArraySize() * 6;
     hello->setChunkLength(B(len));
 
@@ -471,7 +472,8 @@ void Isis::installAndFloodOwnLsp(const Ptr<IsisLspPacket>& lsp)
             + 1 + (int)lsp->getProtocolsSupportedArraySize()
             + 1 + (int)lsp->getIsReachabilitiesArraySize() * 11
             + 1 + (int)lsp->getIpInternalReachabilitiesArraySize() * 12
-            + 1 + (int)lsp->getIpExternalReachabilitiesArraySize() * 12;
+            + 1 + (int)lsp->getIpExternalReachabilitiesArraySize() * 12
+            + 1 + (int)lsp->getIpv6ReachabilitiesArraySize() * 21;
     lsp->setChunkLength(B(len));
 
     Ptr<const IsisLspPacket> constLsp = lsp;
@@ -777,8 +779,8 @@ void Isis::purgeLsp(IsisLsp *entry, int exceptInterfaceId)
     purge->setLspId(entry->lspId);
     purge->setSequenceNumber(entry->sequenceNumber);
     purge->setRemainingLifetime(0);
-    // empty LSP: header + fixed fields + 5 empty TLV count bytes (matches serializer)
-    purge->setChunkLength(B(8 + 2 + 8 + 4 + 2 + 1 + 5));
+    // empty LSP: header + fixed fields + 6 empty TLV count bytes (matches serializer)
+    purge->setChunkLength(B(8 + 2 + 8 + 4 + 2 + 1 + 6));
     floodLsp(purge, exceptInterfaceId);
 
     lspDatabase.erase(entry->lspId.toInt());
