@@ -31,8 +31,9 @@ simple Isis extends SimpleModule like IIsis
         @class(Isis);
         @display("i=block/network");
 
-        string interfaceTableModule;             // path to the InterfaceTable module
-        string routingTableModule = default(""); // path to the IRoutingTable to install routes into (Integrated IS-IS)
+        string interfaceTableModule;              // path to the InterfaceTable module
+        string routingTableModule = default("");  // IPv4 routing table to install routes into (Integrated IS-IS)
+        string routingTableModule6 = default(""); // IPv6 routing table to install routes into (Integrated IS-IS)
 
         xml configData = default(xml("<config/>")); // NET address, IS levels, and per-interface IS-IS settings
 

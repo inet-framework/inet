@@ -23,6 +23,8 @@ module IsisRouter extends Router
         llc.registerProtocol = default(true);
     submodules:
         isis: <"Isis"> like IIsis {
+            routingTableModule = default(parent.hasIpv4 ? "^.ipv4.routingTable" : "");
+            routingTableModule6 = default(parent.hasIpv6 ? "^.ipv6.routingTable" : "");
             @display("p=825,376");
         }
     connections allowunconnected:

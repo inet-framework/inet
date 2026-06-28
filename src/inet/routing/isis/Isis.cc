@@ -22,6 +22,8 @@
 #include "inet/networklayer/contract/clns/ClnsAddress.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6Route.h"
 
 namespace inet {
 namespace isis {
@@ -53,6 +55,25 @@ static bool isLocalNetwork(IInterfaceTable *ift, Ipv4Address dest, Ipv4Address m
     return false;
 }
 
+// Returns true if the IPv6 prefix is one of this router's directly-connected networks.
+static bool isLocalNetwork6(IInterfaceTable *ift, Ipv6Address prefix, int prefixLength)
+{
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        auto *ie = ift->getInterface(i);
+        if (ie->isLoopback())
+            continue;
+        auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+        if (ipv6Data == nullptr)
+            continue;
+        for (int j = 0; j < ipv6Data->getNumAddresses(); j++) {
+            Ipv6Address a = ipv6Data->getAddress(j);
+            if (!a.isLinkLocal() && !a.isUnspecified() && a.getPrefix(prefixLength) == prefix)
+                return true;
+        }
+    }
+    return false;
+}
+
 const MacAddress Isis::ALL_L1_ISS("01:80:C2:00:00:14");
 const MacAddress Isis::ALL_L2_ISS("01:80:C2:00:00:15");
 
@@ -70,6 +91,9 @@ void Isis::initialize(int stage)
         const char *rtModule = par("routingTableModule").stringValue();
         if (rtModule && rtModule[0])
             rt.reference(this, "routingTableModule", true);
+        const char *rt6Module = par("routingTableModule6").stringValue();
+        if (rt6Module && rt6Module[0])
+            rt6.reference(this, "routingTableModule6", true);
         adjacencyChangedSignal = registerSignal("adjacencyChanged");
         llcSocket.setOutputGate(gate("socketOut"));
         llcSocket.setCallback(this);
@@ -300,11 +324,30 @@ void Isis::sendLanHello(IsisInterface *isisIft, int level)
     hello->setLanId(isisIft->disValid ? isisIft->disPseudonodeId : PseudonodeId(systemId, 0));
 
     hello->appendAreaAddresses(areaId);
-    hello->appendProtocolsSupported(NLPID_IPV4);
+    if (rt)
+        hello->appendProtocolsSupported(NLPID_IPV4);
+    if (rt6)
+        hello->appendProtocolsSupported(NLPID_IPV6);
 
-    auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
-    if (ipv4Data != nullptr && !ipv4Data->getIPAddress().isUnspecified())
-        hello->appendIpInterfaceAddresses(ipv4Data->getIPAddress());
+    if (rt) {
+        auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+        if (ipv4Data != nullptr && !ipv4Data->getIPAddress().isUnspecified())
+            hello->appendIpInterfaceAddresses(ipv4Data->getIPAddress());
+    }
+    if (rt6) {
+        // Advertise the interface's global IPv6 address as the IPv6 next hop
+        // (directly resolvable via the on-link prefix, like the IPv4 next hop).
+        auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+        if (ipv6Data != nullptr) {
+            for (int j = 0; j < ipv6Data->getNumAddresses(); j++) {
+                Ipv6Address a = ipv6Data->getAddress(j);
+                if (!a.isLinkLocal() && !a.isUnspecified()) {
+                    hello->appendIpv6InterfaceAddresses(a);
+                    break;
+                }
+            }
+        }
+    }
 
     // IS Neighbours TLV: SNPAs of the neighbours already heard on this circuit.
     for (auto *adj : adjacencies)
@@ -372,6 +415,8 @@ void Isis::processHello(Packet *packet)
         adj->neighbourAreaId = hello->getAreaAddresses(0);
     if (hello->getIpInterfaceAddressesArraySize() > 0)
         adj->neighbourIpAddress = hello->getIpInterfaceAddresses(0);
+    if (hello->getIpv6InterfaceAddressesArraySize() > 0)
+        adj->neighbourIpv6Address = hello->getIpv6InterfaceAddresses(0);
 
     // Two-way check: are we listed in the neighbour's IS Neighbours TLV?
     MacAddress myMac = ift->getInterfaceById(interfaceId)->getMacAddress();
@@ -502,7 +547,10 @@ void Isis::originateLsp()
     lsp->setLspId(LspId(PseudonodeId(systemId, 0)));
     lsp->setLspFlags(0x01); // Level-1 IS
     lsp->appendAreaAddresses(areaId);
-    lsp->appendProtocolsSupported(NLPID_IPV4);
+    if (rt)
+        lsp->appendProtocolsSupported(NLPID_IPV4);
+    if (rt6)
+        lsp->appendProtocolsSupported(NLPID_IPV6);
 
     // IS reachability: to the pseudonode of each LAN circuit with an elected DIS
     // (the pseudonode LSP in turn lists every IS on that LAN).
@@ -517,21 +565,44 @@ void Isis::originateLsp()
         lsp->appendIsReachabilities(reach);
     }
 
-    // IP reachability: every directly-connected IPv4 prefix (Integrated IS-IS),
+    // IP reachability: every directly-connected prefix (Integrated IS-IS),
     // including subnets on non-IS-IS (passive) interfaces.
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        auto *ie = ift->getInterface(i);
-        if (ie->isLoopback())
-            continue;
-        auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
-        if (ipv4Data == nullptr || ipv4Data->getIPAddress().isUnspecified())
-            continue;
-        auto *isisIft = findInterface(ie->getInterfaceId());
-        IsisIpReachability ipReach;
-        ipReach.metric = isisIft ? isisIft->metric : 10;
-        ipReach.address = ipv4Data->getIPAddress().doAnd(ipv4Data->getNetmask());
-        ipReach.mask = ipv4Data->getNetmask();
-        lsp->appendIpInternalReachabilities(ipReach);
+    if (rt) {
+        for (int i = 0; i < ift->getNumInterfaces(); i++) {
+            auto *ie = ift->getInterface(i);
+            if (ie->isLoopback())
+                continue;
+            auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+            if (ipv4Data == nullptr || ipv4Data->getIPAddress().isUnspecified())
+                continue;
+            auto *isisIft = findInterface(ie->getInterfaceId());
+            IsisIpReachability ipReach;
+            ipReach.metric = isisIft ? isisIft->metric : 10;
+            ipReach.address = ipv4Data->getIPAddress().doAnd(ipv4Data->getNetmask());
+            ipReach.mask = ipv4Data->getNetmask();
+            lsp->appendIpInternalReachabilities(ipReach);
+        }
+    }
+    if (rt6) {
+        for (int i = 0; i < ift->getNumInterfaces(); i++) {
+            auto *ie = ift->getInterface(i);
+            if (ie->isLoopback())
+                continue;
+            auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+            if (ipv6Data == nullptr)
+                continue;
+            auto *isisIft = findInterface(ie->getInterfaceId());
+            for (int j = 0; j < ipv6Data->getNumAddresses(); j++) {
+                Ipv6Address a = ipv6Data->getAddress(j);
+                if (a.isLinkLocal() || a.isUnspecified())
+                    continue;
+                IsisIpv6Reachability r;
+                r.metric = isisIft ? isisIft->metric : 10;
+                r.address = a.getPrefix(64);
+                r.prefixLength = 64;
+                lsp->appendIpv6Reachabilities(r);
+            }
+        }
     }
     installAndFloodOwnLsp(lsp);
 
@@ -816,11 +887,15 @@ void Isis::removeIsisRoutes()
         for (auto *route : isisRoutes)
             rt->deleteRoute(route);
     isisRoutes.clear();
+    if (rt6)
+        for (auto *route : isisRoutes6)
+            rt6->deleteRoute(route);
+    isisRoutes6.clear();
 }
 
 void Isis::runSpf()
 {
-    if (!rt)
+    if (!rt && !rt6)
         return;
 
     // A node in the shortest-path computation.
@@ -828,6 +903,7 @@ void Isis::runSpf()
         uint32_t distance = 0;
         int firstHopInterfaceId = -1;
         Ipv4Address nextHop;
+        Ipv6Address nextHopV6;
     };
 
     // Nodes are keyed by PseudonodeId::toInt(), so both real ISs (circuit id 0)
@@ -863,6 +939,7 @@ void Isis::runSpf()
                 // first hop already resolved earlier on the path
                 vNode.firstHopInterfaceId = uNode.firstHopInterfaceId;
                 vNode.nextHop = uNode.nextHop;
+                vNode.nextHopV6 = uNode.nextHopV6;
             }
             else if ((v & 0xFF) == 0) {
                 // v is a real IS one hop away (directly, or across a LAN
@@ -872,6 +949,7 @@ void Isis::runSpf()
                     continue;
                 vNode.firstHopInterfaceId = adj->interfaceId;
                 vNode.nextHop = adj->neighbourIpAddress;
+                vNode.nextHopV6 = adj->neighbourIpv6Address;
             }
             // else: v is a pseudonode reached from us -> first hop still unresolved
             auto it = tentative.find(v);
@@ -889,40 +967,69 @@ void Isis::runSpf()
     std::sort(ordered.begin(), ordered.end());
 
     std::set<std::pair<uint32_t, uint32_t>> installed;
+    std::set<std::string> installed6;
     for (auto& [dist, u] : ordered) {
         SpfNode& node = paths[u];
-        if (node.firstHopInterfaceId < 0 || node.nextHop.isUnspecified())
+        if (node.firstHopInterfaceId < 0)
             continue;
         IsisLsp *lspEntry = lookupLsp(u);
         if (lspEntry == nullptr)
             continue;
         auto *outIe = ift->getInterfaceById(node.firstHopInterfaceId);
         const auto& lsp = lspEntry->lsp;
-        for (size_t k = 0; k < lsp->getIpInternalReachabilitiesArraySize(); k++) {
-            const auto& ipr = lsp->getIpInternalReachabilities(k);
-            Ipv4Address dest = ipr.address;
-            Ipv4Address mask = ipr.mask;
-            if (dest.isUnspecified())
-                continue;
-            auto key = std::make_pair(dest.getInt(), mask.getInt());
-            if (installed.count(key) || isLocalNetwork(ift, dest, mask))
-                continue;
-            installed.insert(key);
 
-            auto *route = new Ipv4Route();
-            route->setDestination(dest);
-            route->setNetmask(mask);
-            route->setGateway(node.nextHop);
-            route->setInterface(outIe);
-            route->setSourceType(IRoute::ISIS);
-            route->setAdminDist(Ipv4Route::dISIS);
-            route->setMetric(node.distance + ipr.metric);
-            rt->addRoute(route);
-            isisRoutes.push_back(route);
+        if (rt && !node.nextHop.isUnspecified()) {
+            for (size_t k = 0; k < lsp->getIpInternalReachabilitiesArraySize(); k++) {
+                const auto& ipr = lsp->getIpInternalReachabilities(k);
+                Ipv4Address dest = ipr.address;
+                Ipv4Address mask = ipr.mask;
+                if (dest.isUnspecified())
+                    continue;
+                auto key = std::make_pair(dest.getInt(), mask.getInt());
+                if (installed.count(key) || isLocalNetwork(ift, dest, mask))
+                    continue;
+                installed.insert(key);
 
-            EV_INFO << "Installed IS-IS route " << dest << "/" << mask.getNetmaskLength()
-                    << " via " << node.nextHop << " dev " << outIe->getInterfaceName()
-                    << " metric " << route->getMetric() << "\n";
+                auto *route = new Ipv4Route();
+                route->setDestination(dest);
+                route->setNetmask(mask);
+                route->setGateway(node.nextHop);
+                route->setInterface(outIe);
+                route->setSourceType(IRoute::ISIS);
+                route->setAdminDist(Ipv4Route::dISIS);
+                route->setMetric(node.distance + ipr.metric);
+                rt->addRoute(route);
+                isisRoutes.push_back(route);
+
+                EV_INFO << "Installed IS-IS route " << dest << "/" << mask.getNetmaskLength()
+                        << " via " << node.nextHop << " dev " << outIe->getInterfaceName()
+                        << " metric " << route->getMetric() << "\n";
+            }
+        }
+        if (rt6 && !node.nextHopV6.isUnspecified()) {
+            for (size_t k = 0; k < lsp->getIpv6ReachabilitiesArraySize(); k++) {
+                const auto& ipr = lsp->getIpv6Reachabilities(k);
+                Ipv6Address dest = ipr.address;
+                int plen = ipr.prefixLength;
+                if (dest.isUnspecified())
+                    continue;
+                std::string key = dest.str() + "/" + std::to_string(plen);
+                if (installed6.count(key) || isLocalNetwork6(ift, dest, plen))
+                    continue;
+                installed6.insert(key);
+
+                auto *route = new Ipv6Route(dest, plen, IRoute::ISIS);
+                route->setNextHop(node.nextHopV6);
+                route->setInterface(outIe);
+                route->setAdminDist(Ipv6Route::dISIS);
+                route->setMetric(node.distance + ipr.metric);
+                rt6->addRoute(route);
+                isisRoutes6.push_back(route);
+
+                EV_INFO << "Installed IS-IS route " << dest << "/" << plen
+                        << " via " << node.nextHopV6 << " dev " << outIe->getInterfaceName()
+                        << " metric " << route->getMetric() << "\n";
+            }
         }
     }
 }
@@ -998,6 +1105,7 @@ void Isis::clearState()
         spfTimer = nullptr;
     }
     isisRoutes.clear();
+    isisRoutes6.clear();
 }
 
 } // namespace isis

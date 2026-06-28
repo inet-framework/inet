@@ -20,6 +20,7 @@
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/isis/IsisCommon.h"
 #include "inet/routing/isis/IsisMessages_m.h"
@@ -27,6 +28,7 @@
 namespace inet {
 
 class Ipv4Route;
+class Ipv6Route;
 
 namespace isis {
 
@@ -70,7 +72,8 @@ struct IsisAdjacency {
     SystemId neighbourSystemId;
     AreaId neighbourAreaId;
     MacAddress snpa;                  // neighbour's MAC (SNPA)
-    Ipv4Address neighbourIpAddress;   // neighbour's IP on this link (next hop for routes)
+    Ipv4Address neighbourIpAddress;   // neighbour's IPv4 on this link (next hop for routes)
+    Ipv6Address neighbourIpv6Address; // neighbour's IPv6 link-local (next hop for IPv6 routes)
     int priority = 0;                 // neighbour's DIS priority (from its Hello)
     PseudonodeId lanId;               // the DIS pseudonode the neighbour advertises
     IsisAdjacencyState state = ISIS_ADJ_DOWN;
@@ -109,6 +112,7 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
     std::vector<IsisAdjacency *> adjacencies;
 
     ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<Ipv6RoutingTable> rt6;
 
     // Level-1 link-state database, keyed by LspId::toInt().
     std::map<uint64_t, IsisLsp *> lspDatabase;
@@ -117,8 +121,9 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
     cMessage *ageTimer = nullptr;
     cMessage *spfTimer = nullptr;
 
-    // IPv4 routes installed by IS-IS (Integrated IS-IS), for clean recomputation.
+    // Routes installed by IS-IS (Integrated IS-IS), for clean recomputation.
     std::vector<Ipv4Route *> isisRoutes;
+    std::vector<Ipv6Route *> isisRoutes6;
 
     simsignal_t adjacencyChangedSignal;
 
