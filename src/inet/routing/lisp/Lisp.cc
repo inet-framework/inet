@@ -12,11 +12,13 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/routing/lisp/LispCommon.h"
 #include "inet/routing/lisp/LispMessages_m.h"
+#include "inet/routing/lisp/LispTimers_m.h"
 
 namespace inet {
 namespace lisp {
@@ -106,6 +108,7 @@ void Lisp::parseConfig(cXMLElement *config)
             mapServerV4 = true;
         if (ms->getAttribute(IPV6_ATTR) && !strcmp(ms->getAttribute(IPV6_ATTR), ENABLED_VAL))
             mapServerV6 = true;
+        siteDatabase.parseSites(ms);
     }
     if (cXMLElement *mr = config->getFirstChildWithTag(MAPRESOLVER_TAG)) {
         if (mr->getAttribute(IPV4_ATTR) && !strcmp(mr->getAttribute(IPV4_ATTR), ENABLED_VAL))
@@ -157,6 +160,10 @@ void Lisp::handleStartOperation(LifecycleOperation *operation)
     }
     else
         EV_INFO << "No TUN interface '" << par("tunInterface").stringValue() << "', LISP data plane disabled\n";
+
+    // ETR: register our local EID database with the configured Map-Servers
+    if (!mapServers.empty() && !mapDatabase.getMappingStorage().empty())
+        scheduleRegistration();
 }
 
 void Lisp::installEidRoutes()
@@ -180,22 +187,42 @@ void Lisp::installEidRoutes()
 void Lisp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage())
-        throw cRuntimeError("Unexpected self message '%s'", msg->getName());
+        handleSelfMessage(msg);
     else if (ISocket *socket = socketMap.findSocketFor(msg))
         socket->processMessage(msg);
     else
         throw cRuntimeError("Unknown message '%s'", msg->getName());
 }
 
+void Lisp::handleSelfMessage(cMessage *msg)
+{
+    if (dynamic_cast<LispRegisterTimer *>(msg))
+        expireRegisterTimer(msg);
+    else
+        throw cRuntimeError("Unknown self message '%s'", msg->getName());
+}
+
 void Lisp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     if (socket == &dataSocket)
         decapsulate(packet);
-    else {
-        // TODO control-plane messages (Map-Request/Reply/Register/Notify)
-        EV_INFO << "LISP control message: " << UdpSocket::getReceivedPacketInfo(packet) << "\n";
-        delete packet;
+    else
+        handleControlMessage(packet);
+}
+
+void Lisp::handleControlMessage(Packet *packet)
+{
+    const auto& ctrl = packet->peekAtFront<LispControlMessage>();
+    switch (ctrl->getType()) {
+        case LISP_REGISTER:
+            receiveMapRegister(packet);
+            break;
+        // TODO REPLY / REQUEST / NOTIFY handled with the request/reply flow
+        default:
+            EV_WARN << "Unhandled LISP control message type " << (int)ctrl->getType() << "\n";
+            break;
     }
+    delete packet;
 }
 
 void Lisp::socketDataArrived(TunSocket *socket, Packet *packet)
@@ -246,6 +273,111 @@ void Lisp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 void Lisp::socketClosed(UdpSocket *socket)
 {
     // TODO proper async stop completion (added together with the lifecycle work)
+}
+
+//
+// Control plane: registration (ETR <-> Map-Server)
+//
+
+LispMapRecord Lisp::makeMapRecord(const LispMapEntry& entry, bool aBit, int action)
+{
+    LispMapRecord rec;
+    rec.setRecordTTL(mapCacheTtl);
+    rec.setEidPrefix(entry.getEidPrefix().getEidAddr());
+    rec.setEidMaskLength(entry.getEidPrefix().getEidLength());
+    rec.setMapVersion(0);
+    rec.setABit(aBit);
+    rec.setAct(action);
+    rec.setLocatorsArraySize(entry.getRlocs().size());
+    size_t i = 0;
+    for (const auto& rloc : entry.getRlocs()) {
+        LispLocatorRecord loc;
+        loc.priority = rloc.getPriority();
+        loc.weight = rloc.getWeight();
+        loc.mpriority = rloc.getMpriority();
+        loc.mweight = rloc.getMweight();
+        loc.localLocBit = aBit && rloc.isLocal();
+        loc.probedBit = false;
+        loc.reachableBit = rloc.getState() == LispRlocator::UP;
+        loc.rloc = rloc.getRlocAddr();
+        rec.setLocators(i++, loc);
+    }
+    return rec;
+}
+
+void Lisp::scheduleRegistration()
+{
+    for (auto& server : mapServers) {
+        auto timer = new LispRegisterTimer("LISP Register Timer");
+        timer->setServerAddress(server.getAddress());
+        scheduleAfter(ciscoStartupDelays ? (double)DEFAULT_REGTIMER_VAL : 0.0, timer);
+    }
+}
+
+void Lisp::expireRegisterTimer(cMessage *timer)
+{
+    auto regtim = check_and_cast<LispRegisterTimer *>(timer);
+    if (LispServerEntry *se = findServerEntryByAddress(mapServers, regtim->getServerAddress())) {
+        sendMapRegister(*se);
+        scheduleAfter(DEFAULT_REGTIMER_VAL, regtim);
+    }
+    else
+        cancelAndDelete(regtim);
+}
+
+void Lisp::sendMapRegister(LispServerEntry& se)
+{
+    auto lmreg = makeShared<LispMapRegister>();
+    lmreg->setNonce(getRNG(0)->intRand());
+    lmreg->setProxyBit(se.isProxyReply());
+    lmreg->setMapNotifyBit(se.isMapNotify());
+    lmreg->setKeyId(LispCommon::KID_NONE);
+    lmreg->setAuthDataLen(se.getKey().size());
+    lmreg->setAuthData(se.getKey().c_str());
+
+    auto& storage = mapDatabase.getMappingStorage();
+    lmreg->setRecordsArraySize(storage.size());
+    size_t i = 0;
+    for (const auto& entry : storage)
+        lmreg->setRecords(i++, makeMapRecord(entry, true, LispCommon::NO_ACTION));
+    lmreg->setRecordCount(storage.size());
+
+    auto packet = new Packet("LispMapRegister");
+    packet->insertAtBack(lmreg);
+    EV_INFO << "ETR: registering " << storage.size() << " EID record(s) with Map-Server " << se.getAddress() << "\n";
+    controlSocket.sendTo(packet, se.getAddress(), controlPort);
+}
+
+void Lisp::receiveMapRegister(Packet *packet)
+{
+    const auto& lmreg = packet->peekAtFront<LispMapRegister>();
+    L3Address src = packet->getTag<L3AddressInd>()->getSrcAddress();
+
+    if (!isMapServer()) {
+        EV_WARN << "Non-Map-Server received a Map-Register, ignoring\n";
+        return;
+    }
+    if (lmreg->getRecordCount() == 0 || lmreg->getKeyId() != 0)
+        return;
+
+    std::string authData = lmreg->getAuthData();
+    LispSite *si = siteDatabase.findSiteInfoByKey(authData);
+    if (!si) {
+        EV_WARN << "Map-Register for an unknown LISP site, ignoring\n";
+        return;
+    }
+
+    LispSiteRecord *srec = siteDatabase.updateSiteEtr(si, src, lmreg->getProxyBit());
+    for (size_t i = 0; i < lmreg->getRecordsArraySize(); i++) {
+        const LispMapRecord& rec = lmreg->getRecords(i);
+        bool isV6 = rec.getEidPrefix().getType() == L3Address::IPv6;
+        if ((isV6 && !mapServerV6) || (!isV6 && !mapServerV4))
+            continue;
+        if (!si->isEidMaintained(rec.getEidPrefix()))
+            continue;
+        siteDatabase.updateEtrEntries(srec, rec);
+    }
+    EV_INFO << "MS: registered ETR " << src << " for site '" << si->getSiteName() << "'\n";
 }
 
 void Lisp::handleStopOperation(LifecycleOperation *operation)

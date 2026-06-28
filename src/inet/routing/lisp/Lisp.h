@@ -19,7 +19,9 @@
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/routing/lisp/LispMapDatabase.h"
 #include "inet/routing/lisp/LispMapStorageBase.h"
+#include "inet/routing/lisp/LispMessages_m.h"
 #include "inet/routing/lisp/LispServerEntry.h"
+#include "inet/routing/lisp/LispSiteDatabase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
@@ -49,8 +51,9 @@ class INET_API Lisp : public ApplicationBase, public UdpSocket::ICallback, publi
     int tunInterfaceId = -1;
 
     // mapping system (owned as members; no separate submodules)
-    LispMapDatabase mapDatabase; // this ETR's own static EID-to-RLOC mappings
-    LispMapStorageBase mapCache; // dynamic EID-to-RLOC cache learned from Map-Replies
+    LispMapDatabase mapDatabase;     // this ETR's own static EID-to-RLOC mappings
+    LispMapStorageBase mapCache;     // dynamic EID-to-RLOC cache learned from Map-Replies
+    LispSiteDatabase siteDatabase;   // Map-Server: registered sites/ETRs
 
     // Map-Server / Map-Resolver lists
     ServerAddresses mapServers;
@@ -86,6 +89,15 @@ class INET_API Lisp : public ApplicationBase, public UdpSocket::ICallback, publi
     void installEidRoutes();        ///< route the cached EID prefixes to the TUN interface (ITR capture)
     void encapsulate(Packet *packet); ///< ITR: LISP-encapsulate an EID-destined packet and send to the RLOC
     void decapsulate(Packet *packet); ///< ETR: strip the LISP header and re-inject the inner datagram
+
+    // control plane
+    void handleSelfMessage(cMessage *msg);
+    void handleControlMessage(Packet *packet);
+    LispMapRecord makeMapRecord(const LispMapEntry& entry, bool aBit, int action);
+    void scheduleRegistration();                  ///< ETR: schedule Map-Register for each Map-Server
+    void expireRegisterTimer(cMessage *timer);    ///< ETR: (re)send a Map-Register
+    void sendMapRegister(LispServerEntry& se);    ///< ETR: build and send a Map-Register
+    void receiveMapRegister(Packet *packet);      ///< MS: store a received registration
 
     // UdpSocket::ICallback
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;

@@ -31,6 +31,8 @@ inline constexpr unsigned short DEFAULT_MAPVER_VAL = 0;
 inline constexpr short DATA_PORT_VAL = 4341;
 inline constexpr short CONTROL_PORT_VAL = 4342;
 inline constexpr unsigned short LISPHDR_SIZE = 8;
+inline constexpr unsigned short DEFAULT_REGTIMER_VAL = 60; // seconds between Map-Registers
+inline constexpr unsigned short DEFAULT_ETRTIMEOUT_VAL = 180; // seconds before a registration expires
 
 // XML configuration tags / attribute names
 inline constexpr const char *ENABLED_VAL = "enabled";
