@@ -22,6 +22,7 @@
 #include "inet/routing/babel/BabelNeighbourTable.h"
 #include "inet/routing/babel/BabelPenSRTable.h"
 #include "inet/routing/babel/BabelSourceTable.h"
+#include "inet/routing/babel/BabelToAck.h"
 #include "inet/routing/babel/BabelTopologyTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
@@ -58,6 +59,7 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     cMessage *triggeredUpdate = nullptr; ///< one-shot, damped triggered-update self message
     std::vector<BabelBuffer *> buffers; ///< per-destination output buffers
     cMessage *bufferGc = nullptr; ///< periodic garbage collection of idle buffers
+    std::vector<BabelToAck *> ackwait; ///< messages sent reliably, awaiting acknowledgment
 
     BabelInterfaceTable bit;
     BabelNeighbourTable bnt;
@@ -97,16 +99,16 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     void processRSResendTimer(BabelPenSR *request);
 
     // send (buffering layer + the actual packet send)
-    void sendTLVs(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs, double maxtime = SEND_URGENT);
+    void sendTLVs(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs, double maxtime = SEND_URGENT, bool reliable = false);
     void sendBabelMessage(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs);
     BabelBuffer *findOrCreateBuffer(const L3Address& dst, BabelInterface *iface);
     void flushBuffer(BabelBuffer *buff);
     void deleteUnusedBuffers();
     void deleteBuffers();
     void sendHello(BabelInterface *iface);
-    void sendUpdateMessage(const L3Address& dst, BabelInterface *iface, const rid& originator, const L3Address& nexthop, const netPrefix<L3Address>& prefix, const routeDistance& dist, uint16_t interval);
-    void sendUpdate(BabelInterface *iface, BabelRoute *route, const L3Address& dst);
-    void sendUpdate(BabelInterface *iface, BabelRoute *route);
+    void sendUpdateMessage(const L3Address& dst, BabelInterface *iface, const rid& originator, const L3Address& nexthop, const netPrefix<L3Address>& prefix, const routeDistance& dist, uint16_t interval, bool reliable = false);
+    void sendUpdate(BabelInterface *iface, BabelRoute *route, const L3Address& dst, bool reliable = false);
+    void sendUpdate(BabelInterface *iface, BabelRoute *route, bool reliable = false);
     void sendFullDump(BabelInterface *iface);
     void sendRouteReq(BabelInterface *iface, const L3Address& dst, int ae, const netPrefix<L3Address>& prefix);
     void triggerUpdate(); ///< schedule a damped triggered update to propagate a change quickly
@@ -118,6 +120,15 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     bool processUpdate(const Ptr<const BabelUpdateTlv>& update, BabelInterface *iface, const L3Address& src, const rid& originator, const L3Address& nexthop);
     void processRouteReq(const Ptr<const BabelRouteReqTlv>& req, BabelInterface *iface, const L3Address& src, const L3Address& dst);
     void processSeqnoReq(const Ptr<const BabelSeqnoReqTlv>& req, BabelInterface *iface, const L3Address& src);
+    void processAckReq(const Ptr<const BabelAckReqTlv>& req, BabelInterface *iface, const L3Address& src);
+    void processAck(const Ptr<const BabelAckTlv>& ack, const L3Address& src);
+
+    // reliable delivery (acknowledgments)
+    uint16_t generateNonce();
+    BabelToAck *findToAck(uint16_t nonce);
+    void deleteToAck(BabelToAck *toack);
+    void checkAndResendToAck(BabelToAck *toack);
+    void deleteToAcks();
 
     // seqno requests (loop-free recovery)
     void incSeqno();

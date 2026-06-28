@@ -32,6 +32,7 @@ Babel::~Babel()
     cancelAndDelete(triggeredUpdate);
     cancelAndDelete(bufferGc);
     deleteBuffers();
+    deleteToAcks();
     // cancel and delete any timers still owned by the interfaces/neighbours
     for (auto iface : bit.getInterfaces()) {
         iface->deleteHTimer();
@@ -71,6 +72,7 @@ void Babel::initialize(int stage)
         WATCH_PTRVECTOR(bst.getSources());
         WATCH_PTRVECTOR(bpsrt.getRequests());
         WATCH_PTRVECTOR(buffers);
+        WATCH_PTRVECTOR(ackwait);
     }
 }
 
@@ -165,6 +167,7 @@ void Babel::handleStopOperation(LifecycleOperation *operation)
     if (bufferGc->isScheduled())
         cancelEvent(bufferGc);
     deleteBuffers();
+    deleteToAcks();
     socket.close();
 }
 
@@ -173,6 +176,7 @@ void Babel::handleCrashOperation(LifecycleOperation *operation)
     if (bufferGc->isScheduled())
         cancelEvent(bufferGc);
     deleteBuffers();
+    deleteToAcks();
     socket.destroy();
 }
 
@@ -296,6 +300,9 @@ void Babel::processTimer(cMessage *timer)
             deleteUnusedBuffers();
             resetTimer(bufferGc, defval::BUFFER_GC_INTERVAL);
             break;
+        case timerT::TOACKRESEND:
+            checkAndResendToAck(check_and_cast<BabelToAck *>(static_cast<cObject *>(timer->getContextPointer())));
+            break;
         default:
             throw cRuntimeError("Babel: received timer of unknown type: %d", timer->getKind());
     }
@@ -318,7 +325,7 @@ void Babel::processRouteExpiryTimer(BabelRoute *route)
         // first expiry: mark as retracted and re-advertise, keep the entry around briefly
         route->getRDistance().setMetric(COST_INF);
         route->resetETimer();
-        sendUpdate(nullptr, route); // multicast retraction on all interfaces
+        sendUpdate(nullptr, route, true); // reliably retract on all interfaces
         selectRoutes();
     }
     else {
@@ -427,7 +434,7 @@ BabelBuffer *Babel::findOrCreateBuffer(const L3Address& dst, BabelInterface *ifa
     return buff;
 }
 
-void Babel::sendTLVs(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs, double maxtime)
+void Babel::sendTLVs(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs, double maxtime, bool reliable)
 {
     if (!iface->getEnabled() || iface->getAfSend() == AF::NONE || tlvs.empty())
         return;
@@ -443,6 +450,8 @@ void Babel::sendTLVs(const L3Address& dst, BabelInterface *iface, const std::vec
 
     for (const auto& tlv : tlvs)
         buff->addTlv(tlv);
+    if (reliable)
+        buff->setNeedsAck(true);
 
     BabelTimer *ft = buff->getFlushTimer();
     if (maxtime == SEND_NOW)
@@ -462,14 +471,28 @@ void Babel::sendTLVs(const L3Address& dst, BabelInterface *iface, const std::vec
 void Babel::flushBuffer(BabelBuffer *buff)
 {
     auto& tlvs = buff->getTlvs();
-    bool v6 = buff->getDst().getType() == L3Address::IPv6;
-    int maxbody = buff->getOutIface()->getInterface()->getMtu()
+    const L3Address& dst = buff->getDst();
+    BabelInterface *iface = buff->getOutIface();
+
+    // a reliable flush leads with an Acknowledgment Request (RFC 6126, 3.1)
+    uint16_t nonce = 0;
+    if (buff->getNeedsAck()) {
+        nonce = generateNonce();
+        auto ackreq = makeShared<BabelAckReqTlv>();
+        ackreq->setNonce(nonce);
+        ackreq->setInterval(iface->getHInterval() / 2);
+        tlvs.insert(tlvs.begin(), ackreq);
+    }
+
+    bool v6 = dst.getType() == L3Address::IPv6;
+    int maxbody = iface->getInterface()->getMtu()
             - (v6 ? IPV6_HEADER_SIZE : IPV4_HEADER_SIZE) - UDP_HEADER_SIZE - BABEL_HEADER_SIZE;
     if (maxbody < 512 - BABEL_HEADER_SIZE)
         maxbody = 512 - BABEL_HEADER_SIZE;
 
     // pack the queued TLVs into as few messages as the MTU allows
     size_t i = 0;
+    bool firstGroup = true;
     while (i < tlvs.size()) {
         std::vector<Ptr<BabelTlv>> group;
         int bodyLen = 0;
@@ -481,7 +504,27 @@ void Babel::flushBuffer(BabelBuffer *buff)
             bodyLen += len;
             ++i;
         }
-        sendBabelMessage(buff->getDst(), buff->getOutIface(), group);
+        sendBabelMessage(dst, iface, group);
+
+        // the first message carries the Acknowledgment Request -> track it for retransmission
+        if (firstGroup && buff->getNeedsAck()) {
+            BabelToAck *toack = new BabelToAck(nonce, defval::RESEND_NUM, createTimer(timerT::TOACKRESEND, nullptr), dst, iface, group);
+            if (dst.isMulticast()) {
+                for (auto neigh : bnt.getNeighbours())
+                    if (neigh->getInterface() == iface && (neigh->getAddress().getType() == L3Address::IPv6) == v6)
+                        toack->addDstNode(neigh->getAddress());
+            }
+            else
+                toack->addDstNode(dst);
+
+            if (toack->dstNodesSize() > 0) {
+                ackwait.push_back(toack);
+                toack->resetResendTimer(CStoS(iface->getHInterval() / 2));
+            }
+            else
+                delete toack; // nobody to acknowledge
+        }
+        firstGroup = false;
     }
 
     buff->clear();
@@ -516,7 +559,8 @@ void Babel::sendBabelMessage(const L3Address& dst, BabelInterface *iface, const 
 
     B bodyLength = B(0);
     for (auto& tlv : tlvs) {
-        tlv->setChunkLength(babelTlvLength(tlv.get()));
+        if (tlv->isMutable()) // already immutable when this is a retransmission
+            tlv->setChunkLength(babelTlvLength(tlv.get()));
         bodyLength += tlv->getChunkLength();
     }
 
@@ -604,8 +648,14 @@ void Babel::processUdpPacket(Packet *packet)
             case BABEL_SEQNOREQ:
                 processSeqnoReq(staticPtrCast<const BabelSeqnoReqTlv>(tlv), iface, src);
                 break;
+            case BABEL_ACKREQ:
+                processAckReq(staticPtrCast<const BabelAckReqTlv>(tlv), iface, src);
+                break;
+            case BABEL_ACK:
+                processAck(staticPtrCast<const BabelAckTlv>(tlv), src);
+                break;
             default:
-                // Pad1/PadN/AckReq/Ack: ignored (Acks are a later phase)
+                // Pad1/PadN: nothing to do
                 break;
         }
     }
@@ -768,7 +818,7 @@ void Babel::originateConnectedRoutes()
 // ---- update send ----
 
 void Babel::sendUpdateMessage(const L3Address& dst, BabelInterface *iface, const rid& originator,
-        const L3Address& nexthop, const netPrefix<L3Address>& prefix, const routeDistance& dist, uint16_t interval)
+        const L3Address& nexthop, const netPrefix<L3Address>& prefix, const routeDistance& dist, uint16_t interval, bool reliable)
 {
     // record the feasibility distance for everything we advertise (RFC 6126, 3.7.3)
     if (dist.getMetric() != COST_INF)
@@ -795,10 +845,10 @@ void Babel::sendUpdateMessage(const L3Address& dst, BabelInterface *iface, const
     upd->setPrefixLen(prefix.getLen());
     tlvs.push_back(upd);
 
-    sendTLVs(dst, iface, tlvs);
+    sendTLVs(dst, iface, tlvs, SEND_URGENT, reliable);
 }
 
-void Babel::sendUpdate(BabelInterface *iface, BabelRoute *route, const L3Address& dst)
+void Babel::sendUpdate(BabelInterface *iface, BabelRoute *route, const L3Address& dst, bool reliable)
 {
     // split horizon: don't echo a route back to the neighbour it was learned from
     if (route->getNeighbour() != nullptr && iface->getSplitHorizon() && route->getNeighbour()->getInterface() == iface)
@@ -810,19 +860,19 @@ void Babel::sendUpdate(BabelInterface *iface, BabelRoute *route, const L3Address
         return; // the interface has no address of this family
 
     sendUpdateMessage(dst, iface, route->getOriginator(), nh, route->getPrefix(),
-            routeDistance(route->getRDistance().getSeqno(), route->metric()), iface->getUInterval());
+            routeDistance(route->getRDistance().getSeqno(), route->metric()), iface->getUInterval(), reliable);
 }
 
-void Babel::sendUpdate(BabelInterface *iface, BabelRoute *route)
+void Babel::sendUpdate(BabelInterface *iface, BabelRoute *route, bool reliable)
 {
     if (iface == nullptr) {
         for (auto bi : bit.getInterfaces())
             if (bi->getEnabled() && bi->getAfSend() != AF::NONE)
-                sendUpdate(bi, route);
+                sendUpdate(bi, route, reliable);
         return;
     }
     bool v4prefix = route->getPrefix().getAddr().getType() == L3Address::IPv4;
-    sendUpdate(iface, route, v4prefix ? defval::MCASTG4 : defval::MCASTG6);
+    sendUpdate(iface, route, v4prefix ? defval::MCASTG4 : defval::MCASTG6, reliable);
 }
 
 void Babel::sendFullDump(BabelInterface *iface)
@@ -950,6 +1000,73 @@ void Babel::processRSResendTimer(BabelPenSR *request)
     }
     else
         bpsrt.removePenSR(request);
+}
+
+// ---- reliable delivery / acknowledgments (RFC 6126, 3.1) ----
+
+uint16_t Babel::generateNonce()
+{
+    uint16_t nonce;
+    do {
+        nonce = intuniform(0, UINT16_MAX);
+    } while (findToAck(nonce) != nullptr);
+    return nonce;
+}
+
+BabelToAck *Babel::findToAck(uint16_t n)
+{
+    for (auto t : ackwait)
+        if (t->getNonce() == n)
+            return t;
+    return nullptr;
+}
+
+void Babel::deleteToAck(BabelToAck *todel)
+{
+    for (auto it = ackwait.begin(); it != ackwait.end(); ++it) {
+        if (*it == todel) {
+            delete *it;
+            ackwait.erase(it);
+            return;
+        }
+    }
+}
+
+void Babel::deleteToAcks()
+{
+    for (auto t : ackwait)
+        delete t;
+    ackwait.clear();
+}
+
+void Babel::checkAndResendToAck(BabelToAck *toack)
+{
+    if (toack->decResendNum() >= 0 && toack->dstNodesSize() > 0) {
+        sendBabelMessage(toack->getDst(), toack->getOutIface(), toack->getTlvs());
+        toack->resetResendTimer(CStoS(toack->getOutIface()->getHInterval() / 2));
+    }
+    else
+        deleteToAck(toack);
+}
+
+void Babel::processAckReq(const Ptr<const BabelAckReqTlv>& req, BabelInterface *iface, const L3Address& src)
+{
+    // acknowledge by sending an Ack with the same nonce back to the requester
+    auto ack = makeShared<BabelAckTlv>();
+    ack->setNonce(req->getNonce());
+    std::vector<Ptr<BabelTlv>> tlvs;
+    tlvs.push_back(ack);
+    sendTLVs(src, iface, tlvs, CStoS(req->getInterval() / 2));
+}
+
+void Babel::processAck(const Ptr<const BabelAckTlv>& ack, const L3Address& src)
+{
+    BabelToAck *toack = findToAck(ack->getNonce());
+    if (toack != nullptr) {
+        toack->removeDstNode(src);
+        if (toack->dstNodesSize() == 0) // everybody acknowledged -> done
+            deleteToAck(toack);
+    }
 }
 
 // ---- update receive ----
