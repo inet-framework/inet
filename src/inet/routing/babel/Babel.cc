@@ -58,6 +58,7 @@ void Babel::initialize(int stage)
         triggeredUpdate = new cMessage("BabelTriggeredUpdate");
         host->subscribe(interfaceStateChangedSignal, this);
         host->subscribe(ipv6AddressAssignedSignal, this);
+        host->subscribe(routeDeletedSignal, this); // the table may drop our routes (e.g. on interface down)
         WATCH(routerId);
         WATCH(seqno);
         WATCH(udpPort);
@@ -65,6 +66,7 @@ void Babel::initialize(int stage)
         WATCH_PTRVECTOR(bnt.getNeighbours());
         WATCH_PTRVECTOR(btt.getRoutes());
         WATCH_PTRVECTOR(bst.getSources());
+        WATCH_PTRVECTOR(bpsrt.getRequests());
     }
 }
 
@@ -196,16 +198,16 @@ void Babel::deactivateInterface(BabelInterface *iface)
     iface->deleteHTimer();
     iface->deleteUTimer();
 
-    // drop routes learned via this interface before deleting their neighbours
-    bool changed = false;
-    for (auto neigh : bnt.getNeighbours())
-        if (neigh->getInterface() == iface)
-            changed = removeRoutesByNeigh(neigh) || changed;
-    bnt.removeNeighboursOnIface(iface);
+    // retract (do not delete) the routes learned via this interface, so that
+    // selectRoutes() can request a fresh seqno and switch to an alternate path;
+    // the neighbours themselves time out on their own Hello timers
+    bool changed = btt.retractRoutesOnIface(iface);
 
     iface->setEnabled(false);
-    if (changed)
+    if (changed) {
         selectRoutes();
+        triggerUpdate();
+    }
 }
 
 cMessage *Babel::createTimer(short kind, void *context)
@@ -258,6 +260,9 @@ void Babel::processTimer(cMessage *timer)
             break;
         case timerT::SOURCEGC:
             processSourceGCTimer(check_and_cast<BabelSource *>(static_cast<cObject *>(timer->getContextPointer())));
+            break;
+        case timerT::SRRESEND:
+            processRSResendTimer(check_and_cast<BabelPenSR *>(static_cast<cObject *>(timer->getContextPointer())));
             break;
         default:
             throw cRuntimeError("Babel: received timer of unknown type: %d", timer->getKind());
@@ -314,6 +319,7 @@ void Babel::processNeighHelloTimer(BabelNeighbour *neigh)
     bool changed = false;
     if (neigh->getHistory() == 0) {
         EV_INFO << "Babel: neighbour " << neigh->getAddress() << " on " << neigh->getInterface()->getIfaceName() << " lost." << endl;
+        bpsrt.removePenSRsByNeigh(neigh);
         changed = removeRoutesByNeigh(neigh);
         bnt.removeNeighbour(neigh);
     }
@@ -459,8 +465,11 @@ void Babel::processUdpPacket(Packet *packet)
             case BABEL_ROUTEREQ:
                 processRouteReq(staticPtrCast<const BabelRouteReqTlv>(tlv), iface, src, dst);
                 break;
+            case BABEL_SEQNOREQ:
+                processSeqnoReq(staticPtrCast<const BabelSeqnoReqTlv>(tlv), iface, src);
+                break;
             default:
-                // Pad1/PadN/SeqnoReq: SeqnoReq added in P5
+                // Pad1/PadN/AckReq/Ack: ignored (Acks are a later phase)
                 break;
         }
     }
@@ -711,6 +720,100 @@ void Babel::triggerUpdate()
         scheduleAfter(SEND_URGENT, triggeredUpdate);
 }
 
+// ---- seqno requests (RFC 6126, 3.8) ----
+
+void Babel::incSeqno()
+{
+    seqno = plusmod16(seqno, 1);
+    for (auto route : btt.getRoutes())
+        if (route->getNeighbour() == nullptr)
+            route->getRDistance().setSeqno(seqno);
+}
+
+void Babel::sendSeqnoReq(BabelInterface *iface, const L3Address& dst, const netPrefix<L3Address>& prefix,
+        const rid& orig, uint16_t reqSeqno, uint8_t hopcount, BabelNeighbour *recfrom)
+{
+    if (iface == nullptr) {
+        for (auto bi : bit.getInterfaces())
+            if (bi->getEnabled() && bi->getAfSend() != AF::NONE)
+                sendSeqnoReq(bi, dst, prefix, orig, reqSeqno, hopcount, recfrom);
+        return;
+    }
+
+    L3Address actualDst = !dst.isUnspecified() ? dst
+            : (prefix.getAddr().getType() == L3Address::IPv4 ? defval::MCASTG4 : defval::MCASTG6);
+
+    // remember the pending request (deduplicated per prefix+interface) with a resend timer
+    if (bpsrt.findPenSR(prefix, iface) == nullptr) {
+        BabelPenSR *pensr = new BabelPenSR(prefix, orig, reqSeqno, hopcount, recfrom,
+                defval::RESEND_NUM, iface, actualDst, createTimer(timerT::SRRESEND, nullptr));
+        pensr->resetResendTimer();
+        if (bpsrt.addPenSR(pensr) != pensr)
+            delete pensr;
+    }
+
+    auto sr = makeShared<BabelSeqnoReqTlv>();
+    sr->setAe(getAeOfPrefix(prefix.getAddr()));
+    sr->setSeqno(reqSeqno);
+    sr->setHopcount(hopcount);
+    sr->setRouterIdHi(orig.getRid()[0]);
+    sr->setRouterIdLo(orig.getRid()[1]);
+    sr->setPrefix(prefix.getAddr());
+    sr->setPrefixLen(prefix.getLen());
+
+    std::vector<Ptr<BabelTlv>> tlvs;
+    tlvs.push_back(sr);
+    sendBabelMessage(actualDst, iface, tlvs);
+}
+
+void Babel::processSeqnoReq(const Ptr<const BabelSeqnoReqTlv>& req, BabelInterface *iface, const L3Address& src)
+{
+    int ae = req->getAe();
+    if (ae != AE::IPv4 && ae != AE::IPv6)
+        return;
+
+    netPrefix<L3Address> prefix(req->getPrefix(), req->getPrefixLen());
+    uint16_t reqSeqno = req->getSeqno();
+    uint8_t hopcount = req->getHopcount();
+    rid origrid(req->getRouterIdHi(), req->getRouterIdLo());
+
+    if (bpsrt.findPenSR(prefix) != nullptr)
+        return; // we are already (forwarding) a request for this prefix -> suppress duplicate
+
+    BabelRoute *intable = btt.findSelectedRoute(prefix);
+    if (intable == nullptr || intable->getRDistance().getMetric() == COST_INF)
+        return;
+
+    if (origrid != intable->getOriginator() || comparemod16(reqSeqno, intable->getRDistance().getSeqno()) != 1) {
+        // we already hold a good-enough route -> answer with an update
+        sendUpdate(iface, intable);
+    }
+    else if (origrid == routerId) {
+        // we originate this prefix -> bump our seqno and re-advertise
+        incSeqno();
+        sendUpdate(iface, intable);
+    }
+    else {
+        // forward the request along another route, if any (RFC 6126, 3.8.2.3)
+        BabelRoute *another = btt.findRouteNotNH(prefix, src);
+        BabelNeighbour *neigh = bnt.findNeighbour(iface, src);
+        if (another != nullptr && another->getNeighbour() != nullptr && neigh != nullptr && hopcount >= 2)
+            sendSeqnoReq(another->getNeighbour()->getInterface(), another->getNeighbour()->getAddress(),
+                    prefix, origrid, reqSeqno, hopcount - 1, neigh);
+    }
+}
+
+void Babel::processRSResendTimer(BabelPenSR *request)
+{
+    if (request->decResendNum() >= 0) {
+        sendSeqnoReq(request->getOutIface(), request->getForwardTo(), request->getPrefix(),
+                request->getOriginator(), request->getReqSeqno(), request->getHopcount(), request->getReceivedFrom());
+        request->resetResendTimer();
+    }
+    else
+        bpsrt.removePenSR(request);
+}
+
 // ---- update receive ----
 
 bool Babel::processUpdate(const Ptr<const BabelUpdateTlv>& update, BabelInterface *iface, const L3Address& src, const rid& originator, const L3Address& nexthop)
@@ -740,6 +843,25 @@ bool Babel::processUpdate(const Ptr<const BabelUpdateTlv>& update, BabelInterfac
         return false; // unsupported AE
 
     netPrefix<L3Address> prefix(update->getPrefix(), update->getPrefixLen());
+
+    // did this update answer a pending Seqno Request? (RFC 6126, 3.8.2.3)
+    if (BabelPenSR *pending = bpsrt.findPenSR(prefix, iface)) {
+        if (pending->getReceivedFrom() != nullptr) {
+            // relay the answer back toward the node that originally asked
+            BabelInterface *backIface = pending->getReceivedFrom()->getInterface();
+            int af = (prefix.getAddr().getType() == L3Address::IPv4) ? AF::IPv4 : AF::IPv6;
+            L3Address backNh = interfaceAddressForAf(backIface, af);
+            if (!backNh.isUnspecified()) {
+                unsigned int m = std::min<unsigned int>(dist.getMetric() + neigh->getCost(), COST_INF);
+                sendUpdateMessage(pending->getReceivedFrom()->getAddress(), backIface, originator, backNh,
+                        prefix, routeDistance(dist.getSeqno(), m), backIface->getUInterval());
+                bpsrt.removePenSR(pending);
+            }
+        }
+        else if (comparemod16(dist.getSeqno(), pending->getReqSeqno()) != -1)
+            bpsrt.removePenSR(prefix); // our own request is satisfied
+    }
+
     BabelRoute *intable = btt.findRoute(prefix, neigh, originator);
 
     if (intable != nullptr) {
@@ -747,7 +869,10 @@ bool Babel::processUpdate(const Ptr<const BabelUpdateTlv>& update, BabelInterfac
             // unfeasible update for a selected route
             if (intable->getOriginator() != originator)
                 return addOrUpdateRoute(prefix, neigh, originator, routeDistance(dist.getSeqno(), COST_INF), nexthop, interval);
-            return false; // (a Seqno Request would speed recovery here -- added in P5)
+            // request a fresher seqno so this route can become feasible again (RFC 6126, 3.8.2.2)
+            sendSeqnoReq(neigh->getInterface(), neigh->getAddress(), prefix, intable->getOriginator(),
+                    plusmod16(intable->getRDistance().getSeqno(), 1), defval::SEQNUMREQ_HOPCOUNT, nullptr);
+            return false;
         }
         if (isFeasible(prefix, originator, dist))
             return addOrUpdateRoute(prefix, neigh, originator, dist, nexthop, interval);
@@ -912,8 +1037,14 @@ void Babel::selectRoutes()
             if (ts != tc)
                 removeFromRT(tc);
         }
-        else if (!btt.containShorterCovRoute(tc->getPrefix()))
-            removeFromRT(tc); // (a Seqno Request would speed recovery here -- added in P5)
+        else {
+            // the previously-selected route is gone and no feasible replacement exists:
+            // ask for a fresher seqno so an unfeasible alternative can be used (RFC 6126, 3.8.2.1)
+            sendSeqnoReq(nullptr, L3Address(), tc->getPrefix(), tc->getOriginator(),
+                    plusmod16(tc->getRDistance().getSeqno(), 1), defval::SEQNUMREQ_HOPCOUNT, nullptr);
+            if (!btt.containShorterCovRoute(tc->getPrefix()))
+                removeFromRT(tc);
+        }
     }
 
     // install the chosen routes
@@ -1035,6 +1166,14 @@ void Babel::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         originateConnectedRoutes();
         selectRoutes();
         triggerUpdate();
+    }
+    else if (signalID == routeDeletedSignal) {
+        // the routing table removed a route (possibly one of ours, e.g. its interface
+        // went down) -> drop our now-dangling reference to it
+        const IRoute *deleted = check_and_cast<const IRoute *>(obj);
+        for (auto route : btt.getRoutes())
+            if (route->getRTEntry() == deleted)
+                route->setRTEntry(nullptr);
     }
 }
 

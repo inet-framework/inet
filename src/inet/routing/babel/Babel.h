@@ -19,6 +19,7 @@
 #include "inet/routing/babel/BabelInterfaceTable.h"
 #include "inet/routing/babel/BabelMessage_m.h"
 #include "inet/routing/babel/BabelNeighbourTable.h"
+#include "inet/routing/babel/BabelPenSRTable.h"
 #include "inet/routing/babel/BabelSourceTable.h"
 #include "inet/routing/babel/BabelTopologyTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
@@ -59,6 +60,7 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     BabelNeighbourTable bnt;
     BabelTopologyTable btt;
     BabelSourceTable bst;
+    BabelPenSRTable bpsrt;
     BabelCostKoutofj wiredCost; ///< default link-cost strategy for wired links
 
   protected:
@@ -88,6 +90,7 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     void processRouteExpiryTimer(BabelRoute *route);
     void processBefRouteExpiryTimer(BabelRoute *route);
     void processSourceGCTimer(BabelSource *source);
+    void processRSResendTimer(BabelPenSR *request);
 
     // send
     void sendBabelMessage(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs);
@@ -105,6 +108,11 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     void processIhu(const Ptr<const BabelIhuTlv>& ihu, BabelInterface *iface, const L3Address& src, const L3Address& dst);
     bool processUpdate(const Ptr<const BabelUpdateTlv>& update, BabelInterface *iface, const L3Address& src, const rid& originator, const L3Address& nexthop);
     void processRouteReq(const Ptr<const BabelRouteReqTlv>& req, BabelInterface *iface, const L3Address& src, const L3Address& dst);
+    void processSeqnoReq(const Ptr<const BabelSeqnoReqTlv>& req, BabelInterface *iface, const L3Address& src);
+
+    // seqno requests (loop-free recovery)
+    void incSeqno();
+    void sendSeqnoReq(BabelInterface *iface, const L3Address& dst, const netPrefix<L3Address>& prefix, const rid& orig, uint16_t reqSeqno, uint8_t hopcount, BabelNeighbour *recfrom);
 
     // route management
     void originateConnectedRoutes();

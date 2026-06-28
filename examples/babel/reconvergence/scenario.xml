@@ -1,0 +1,7 @@
+<script>
+    <!-- break the direct r1-to-r2 link (both ends); Babel must reroute via r3 -->
+    <at t="30s">
+        <shutdown module="r1.eth[1]"/>
+        <shutdown module="r2.eth[0]"/>
+    </at>
+</script>
