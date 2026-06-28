@@ -12,7 +12,11 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/routing/lisp/LispCommon.h"
+#include "inet/routing/lisp/LispMessages_m.h"
 
 namespace inet {
 namespace lisp {
@@ -27,6 +31,7 @@ void Lisp::initialize(int stage)
         controlPort = par("controlPort");
         dataPort = par("dataPort");
         ift.reference(this, "interfaceTableModule", true);
+        rt.reference(this, "routingTableModule", true);
 
         acceptMapRequestMapping = par("acceptMapRequestMapping");
         advertOnlyOwnEids = par("advertOnlyOwnEids");
@@ -112,8 +117,13 @@ void Lisp::parseConfig(cXMLElement *config)
     // load this ETR's own EID database and any static map-cache entries
     if (cXMLElement *etrMap = config->getFirstChildWithTag(ETRMAP_TAG))
         mapDatabase.load(etrMap, ift.get(), advertOnlyOwnEids);
-    if (cXMLElement *mc = config->getFirstChildWithTag(MAPCACHE_TAG))
+    if (cXMLElement *mc = config->getFirstChildWithTag(MAPCACHE_TAG)) {
         mapCache.parseMapEntry(mc);
+        // statically configured cache locators are assumed reachable (no RLOC probing yet)
+        for (auto& entry : mapCache.getMappingStorage())
+            for (auto& rloc : entry.getRlocs())
+                rloc.setState(LispRlocator::UP);
+    }
 }
 
 LispServerEntry *Lisp::findServerEntryByAddress(ServerAddresses& list, const L3Address& addr)
@@ -135,6 +145,36 @@ void Lisp::handleStartOperation(LifecycleOperation *operation)
     dataSocket.setCallback(this);
     dataSocket.bind(L3Address(), dataPort);
     socketMap.addSocket(&dataSocket);
+
+    // data plane over the TUN interface (optional: only if the node has one)
+    if (NetworkInterface *tunIe = ift->findInterfaceByName(par("tunInterface"))) {
+        tunInterfaceId = tunIe->getInterfaceId();
+        tunSocket.setOutputGate(gate("socketOut"));
+        tunSocket.setCallback(this);
+        tunSocket.open(tunInterfaceId);
+        socketMap.addSocket(&tunSocket);
+        installEidRoutes();
+    }
+    else
+        EV_INFO << "No TUN interface '" << par("tunInterface").stringValue() << "', LISP data plane disabled\n";
+}
+
+void Lisp::installEidRoutes()
+{
+    // route every cached EID prefix to the TUN interface so that EID-destined
+    // traffic is captured and LISP-encapsulated by this ITR
+    NetworkInterface *tunIe = ift->getInterfaceById(tunInterfaceId);
+    for (auto& entry : mapCache.getMappingStorage()) {
+        const L3Address& eid = entry.getEidPrefix().getEidAddr();
+        if (eid.getType() != L3Address::IPv4)
+            continue; // IPv6 EID routing added with the IPv6 data plane
+        Ipv4Route *route = new Ipv4Route();
+        route->setDestination(eid.toIpv4());
+        route->setNetmask(Ipv4Address::makeNetmask(entry.getEidPrefix().getEidLength()));
+        route->setInterface(tunIe);
+        route->setSourceType(IRoute::MANUAL);
+        rt->addRoute(route);
+    }
 }
 
 void Lisp::handleMessageWhenUp(cMessage *msg)
@@ -149,10 +189,52 @@ void Lisp::handleMessageWhenUp(cMessage *msg)
 
 void Lisp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
-    // TODO dispatch control (4342) vs data (4341) messages (added in later steps)
-    EV_INFO << "LISP received " << UdpSocket::getReceivedPacketInfo(packet)
-            << " on " << (socket == &controlSocket ? "control" : "data") << " socket\n";
-    delete packet;
+    if (socket == &dataSocket)
+        decapsulate(packet);
+    else {
+        // TODO control-plane messages (Map-Request/Reply/Register/Notify)
+        EV_INFO << "LISP control message: " << UdpSocket::getReceivedPacketInfo(packet) << "\n";
+        delete packet;
+    }
+}
+
+void Lisp::socketDataArrived(TunSocket *socket, Packet *packet)
+{
+    encapsulate(packet);
+}
+
+void Lisp::socketClosed(TunSocket *socket)
+{
+}
+
+void Lisp::encapsulate(Packet *packet)
+{
+    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+    L3Address dstEid = ipv4Header->getDestAddress();
+
+    LispMapEntry *me = mapCache.lookupMapEntry(dstEid);
+    LispRlocator *rloc = me ? me->getBestUnicastLocator(getRNG(0)) : nullptr;
+    if (!rloc) {
+        EV_WARN << "ITR: no usable RLOC for EID " << dstEid << ", dropping\n";
+        // TODO trigger a Map-Request on a cache miss
+        delete packet;
+        return;
+    }
+
+    auto lispHeader = makeShared<LispHeader>();
+    lispHeader->setNonce(0);
+    packet->insertAtFront(lispHeader);
+    packet->clearTags();
+    EV_INFO << "ITR: encapsulating EID " << dstEid << " -> RLOC " << rloc->getRlocAddr() << "\n";
+    dataSocket.sendTo(packet, rloc->getRlocAddr(), dataPort);
+}
+
+void Lisp::decapsulate(Packet *packet)
+{
+    packet->popAtFront<LispHeader>();
+    packet->clearTags();
+    EV_INFO << "ETR: decapsulating, re-injecting inner datagram via TUN\n";
+    tunSocket.send(packet);
 }
 
 void Lisp::socketErrorArrived(UdpSocket *socket, Indication *indication)
@@ -170,12 +252,16 @@ void Lisp::handleStopOperation(LifecycleOperation *operation)
 {
     controlSocket.close();
     dataSocket.close();
+    if (tunInterfaceId != -1)
+        tunSocket.close();
 }
 
 void Lisp::handleCrashOperation(LifecycleOperation *operation)
 {
     controlSocket.destroy();
     dataSocket.destroy();
+    if (tunInterfaceId != -1)
+        tunSocket.destroy();
 }
 
 } // namespace lisp

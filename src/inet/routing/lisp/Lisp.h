@@ -14,7 +14,9 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/socket/SocketMap.h"
+#include "inet/linklayer/tun/TunSocket.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/routing/lisp/LispMapDatabase.h"
 #include "inet/routing/lisp/LispMapStorageBase.h"
 #include "inet/routing/lisp/LispServerEntry.h"
@@ -24,12 +26,14 @@ namespace inet {
 namespace lisp {
 
 /**
- * Locator/ID Separation Protocol (LISP, RFC 6830). See the NED file. This is a
- * scaffold: it binds the LISP control (UDP 4342) and data (UDP 4341) sockets;
- * the message handling, mapping system (map-cache / map-database / site-database)
- * and the ITR/ETR data-plane (via network-layer hooks) are added in later steps.
+ * Locator/ID Separation Protocol (LISP, RFC 6830). See the NED file. Binds the
+ * LISP control (UDP 4342) and data (UDP 4341) sockets and runs the ITR/ETR data
+ * plane over a TUN interface: EID-destined traffic is routed to the TUN
+ * interface, captured, LISP-encapsulated and sent to the remote RLOC; received
+ * encapsulated traffic is decapsulated and re-injected through the TUN interface.
+ * The control plane (Map-Request/Reply/Register/Notify) is added in later steps.
  */
-class INET_API Lisp : public ApplicationBase, public UdpSocket::ICallback
+class INET_API Lisp : public ApplicationBase, public UdpSocket::ICallback, public TunSocket::ICallback
 {
   protected:
     int controlPort = 4342;
@@ -37,9 +41,12 @@ class INET_API Lisp : public ApplicationBase, public UdpSocket::ICallback
 
     UdpSocket controlSocket; // LISP control messages (Map-Request/Reply/Register/Notify)
     UdpSocket dataSocket;    // LISP-encapsulated data packets
-    SocketMap socketMap;     // demultiplexes inbound UDP packets to the right socket
+    TunSocket tunSocket;     // capture of EID traffic (ITR) and re-injection (ETR)
+    SocketMap socketMap;     // demultiplexes inbound packets to the right socket
 
     ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<IIpv4RoutingTable> rt;
+    int tunInterfaceId = -1;
 
     // mapping system (owned as members; no separate submodules)
     LispMapDatabase mapDatabase; // this ETR's own static EID-to-RLOC mappings
@@ -75,10 +82,19 @@ class INET_API Lisp : public ApplicationBase, public UdpSocket::ICallback
     bool isMapServer() const { return mapServerV4 || mapServerV6; }
     bool isMapResolver() const { return mapResolverV4 || mapResolverV6; }
 
+    // data plane
+    void installEidRoutes();        ///< route the cached EID prefixes to the TUN interface (ITR capture)
+    void encapsulate(Packet *packet); ///< ITR: LISP-encapsulate an EID-destined packet and send to the RLOC
+    void decapsulate(Packet *packet); ///< ETR: strip the LISP header and re-inject the inner datagram
+
     // UdpSocket::ICallback
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     virtual void socketClosed(UdpSocket *socket) override;
+
+    // TunSocket::ICallback
+    virtual void socketDataArrived(TunSocket *socket, Packet *packet) override;
+    virtual void socketClosed(TunSocket *socket) override;
 
     // ApplicationBase lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override;

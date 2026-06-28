@@ -33,6 +33,7 @@ simple Lisp extends SimpleModule like IApp
         string networkProtocolModule = default("^.ipv4.ip"); // for data-plane hooks (ITR/ETR)
         int controlPort = default(4342);   // LISP control messages
         int dataPort = default(4341);      // LISP encapsulated data
+        string tunInterface = default("tun0"); // TUN interface used for the ITR/ETR data plane
         xml configData = default(xml("<LISP/>"));
 
         // roles (may be overridden by the <MapServer>/<MapResolver> config tags)
