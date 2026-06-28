@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<BGPConfig>
+
+    <!-- BGP timers (connectRetryTime, holdTime, keepAliveTime, startDelay) are
+         Bgp module parameters now; the defaults match the former values here. -->
+
+    <!-- AS 65001: rA1, rA2, rA3 form an iBGP full mesh (created automatically from
+         the Router list). rA1 originates hostA's subnet. rA3 is the eBGP border. -->
+    <AS id="65001">
+        <Router interAddr="2001:db8:1:12::1"> <!-- rA1 -->
+            <Network address="2001:db8:1:1::"/> <!-- the subnet behind rA1 (hostA) -->
+        </Router>
+        <Router interAddr="2001:db8:1:12::2"/> <!-- rA2 -->
+        <Router interAddr="2001:db8:1:23::3"/> <!-- rA3 (border) -->
+    </AS>
+
+    <!-- AS 65002: rB1, rB2, rB3 iBGP full mesh. rB3 originates hostB's subnet.
+         rB1 is the eBGP border. -->
+    <AS id="65002">
+        <Router interAddr="2001:db8:2:12::1"/> <!-- rB1 (border) -->
+        <Router interAddr="2001:db8:2:12::2"/> <!-- rB2 -->
+        <Router interAddr="2001:db8:2:23::3"> <!-- rB3 -->
+            <Network address="2001:db8:2:3::"/> <!-- the subnet behind rB3 (hostB) -->
+        </Router>
+    </AS>
+
+    <!-- eBGP session over the inter-AS link rA3 <-> rB1 -->
+    <Session id="1">
+        <Router exterAddr="2001:db8:0:ab::a"/> <!-- rA3 -->
+        <Router exterAddr="2001:db8:0:ab::b"/> <!-- rB1 -->
+    </Session>
+
+</BGPConfig>
