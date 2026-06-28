@@ -310,6 +310,22 @@
         linkerFlags = ""
         />
     <feature
+        id = "Isis"
+        name = "IS-IS routing"
+        description = "Integrated IS-IS link-state routing protocol (ISO/IEC 10589, RFC 1195).
+                       PDUs are carried directly over IEEE 802.2 LLC."
+        initiallyEnabled = "true"
+        requires = "Ipv4 Ethernet"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.routing.isis
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_ISIS"
+        linkerFlags = ""
+        />
+    <feature
         id = "Ethernet"
         name = "Ethernet"
         description = "IEEE 802.3 models (MAC, LLC, Encap) with support for classic
