@@ -166,22 +166,24 @@ void Lisp::handleStartOperation(LifecycleOperation *operation)
         scheduleRegistration();
 }
 
+void Lisp::installEidRoute(const L3Address& eid, int maskLength)
+{
+    // route an EID prefix to the TUN interface so that traffic to it is captured
+    // and LISP-encapsulated by this ITR
+    if (tunInterfaceId < 0 || eid.getType() != L3Address::IPv4)
+        return; // IPv6 EID routing added with the IPv6 data plane
+    Ipv4Route *route = new Ipv4Route();
+    route->setDestination(eid.toIpv4());
+    route->setNetmask(Ipv4Address::makeNetmask(maskLength));
+    route->setInterface(ift->getInterfaceById(tunInterfaceId));
+    route->setSourceType(IRoute::MANUAL);
+    rt->addRoute(route);
+}
+
 void Lisp::installEidRoutes()
 {
-    // route every cached EID prefix to the TUN interface so that EID-destined
-    // traffic is captured and LISP-encapsulated by this ITR
-    NetworkInterface *tunIe = ift->getInterfaceById(tunInterfaceId);
-    for (auto& entry : mapCache.getMappingStorage()) {
-        const L3Address& eid = entry.getEidPrefix().getEidAddr();
-        if (eid.getType() != L3Address::IPv4)
-            continue; // IPv6 EID routing added with the IPv6 data plane
-        Ipv4Route *route = new Ipv4Route();
-        route->setDestination(eid.toIpv4());
-        route->setNetmask(Ipv4Address::makeNetmask(entry.getEidPrefix().getEidLength()));
-        route->setInterface(tunIe);
-        route->setSourceType(IRoute::MANUAL);
-        rt->addRoute(route);
-    }
+    for (auto& entry : mapCache.getMappingStorage())
+        installEidRoute(entry.getEidPrefix().getEidAddr(), entry.getEidPrefix().getEidLength());
 }
 
 void Lisp::handleMessageWhenUp(cMessage *msg)
@@ -217,7 +219,13 @@ void Lisp::handleControlMessage(Packet *packet)
         case LISP_REGISTER:
             receiveMapRegister(packet);
             break;
-        // TODO REPLY / REQUEST / NOTIFY handled with the request/reply flow
+        case LISP_REQUEST:
+            receiveMapRequest(packet);
+            break;
+        case LISP_REPLY:
+            receiveMapReply(packet);
+            break;
+        // TODO NOTIFY / encapsulated control message
         default:
             EV_WARN << "Unhandled LISP control message type " << (int)ctrl->getType() << "\n";
             break;
@@ -240,10 +248,15 @@ void Lisp::encapsulate(Packet *packet)
     L3Address dstEid = ipv4Header->getDestAddress();
 
     LispMapEntry *me = mapCache.lookupMapEntry(dstEid);
-    LispRlocator *rloc = me ? me->getBestUnicastLocator(getRNG(0)) : nullptr;
+    if (!me) {
+        EV_INFO << "ITR: cache miss for EID " << dstEid << ", sending Map-Request\n";
+        sendMapRequest(dstEid);
+        delete packet;
+        return;
+    }
+    LispRlocator *rloc = me->getBestUnicastLocator(getRNG(0));
     if (!rloc) {
         EV_WARN << "ITR: no usable RLOC for EID " << dstEid << ", dropping\n";
-        // TODO trigger a Map-Request on a cache miss
         delete packet;
         return;
     }
@@ -378,6 +391,86 @@ void Lisp::receiveMapRegister(Packet *packet)
         siteDatabase.updateEtrEntries(srec, rec);
     }
     EV_INFO << "MS: registered ETR " << src << " for site '" << si->getSiteName() << "'\n";
+}
+
+//
+// Control plane: Map-Request / Map-Reply (ITR <-> Map-Resolver / Map-Server)
+//
+
+void Lisp::sendMapRequest(const L3Address& dstEid)
+{
+    if (mapResolvers.empty()) {
+        EV_WARN << "ITR: no Map-Resolver configured, cannot resolve " << dstEid << "\n";
+        return;
+    }
+    auto lmreq = makeShared<LispMapRequest>();
+    lmreq->setNonce(getRNG(0)->intRand());
+    lmreq->setProbeBit(false);
+    LispEidRecord rec;
+    rec.eidPrefix = dstEid;
+    rec.eidMaskLength = dstEid.getType() == L3Address::IPv6 ? 128 : 32;
+    lmreq->setRecsArraySize(1);
+    lmreq->setRecs(0, rec);
+    lmreq->setRecordCount(1);
+
+    auto packet = new Packet("LispMapRequest");
+    packet->insertAtBack(lmreq);
+    const L3Address& mr = mapResolvers.front().getAddress();
+    EV_INFO << "ITR: Map-Request for EID " << dstEid << " to Map-Resolver " << mr << "\n";
+    controlSocket.sendTo(packet, mr, controlPort);
+}
+
+void Lisp::receiveMapRequest(Packet *packet)
+{
+    const auto& lmreq = packet->peekAtFront<LispMapRequest>();
+    L3Address src = packet->getTag<L3AddressInd>()->getSrcAddress();
+    if (!isMapResolver()) {
+        EV_WARN << "Non-Map-Resolver received a Map-Request, ignoring\n";
+        return;
+    }
+    for (size_t i = 0; i < lmreq->getRecsArraySize(); i++) {
+        L3Address eid = lmreq->getRecs(i).eidPrefix;
+        LispSite *si = siteDatabase.findSiteByAggregate(eid);
+        if (!si) {
+            EV_WARN << "MS: no site matches EID " << eid << "\n";
+            continue;
+        }
+        Etrs res = si->findAllRecordsByEid(eid);
+        if (res.empty()) {
+            EV_WARN << "MS: no registered ETR for EID " << eid << "\n";
+            continue;
+        }
+        sendMapReply(lmreq->getNonce(), src, res.front(), eid);
+    }
+}
+
+void Lisp::sendMapReply(uint64_t nonce, const L3Address& dst, LispSiteRecord& etr, const L3Address& eid)
+{
+    LispMapEntry *me = etr.lookupMapEntry(eid);
+    if (!me)
+        return;
+    auto lmrep = makeShared<LispMapReply>();
+    lmrep->setNonce(nonce);
+    lmrep->setProbeBit(false);
+    lmrep->setRecordsArraySize(1);
+    lmrep->setRecords(0, makeMapRecord(*me, false, LispCommon::NO_ACTION));
+    lmrep->setRecordCount(1);
+
+    auto packet = new Packet("LispMapReply");
+    packet->insertAtBack(lmrep);
+    EV_INFO << "MS: Map-Reply to ITR " << dst << " for EID " << eid << "\n";
+    controlSocket.sendTo(packet, dst, controlPort);
+}
+
+void Lisp::receiveMapReply(Packet *packet)
+{
+    const auto& lmrep = packet->peekAtFront<LispMapReply>();
+    for (size_t i = 0; i < lmrep->getRecordsArraySize(); i++) {
+        const LispMapRecord& rec = lmrep->getRecords(i);
+        mapCache.updateMapEntry(rec);
+        installEidRoute(rec.getEidPrefix(), rec.getEidMaskLength());
+        EV_INFO << "ITR: cached mapping for EID " << rec.getEidPrefix() << "/" << (int)rec.getEidMaskLength() << "\n";
+    }
 }
 
 void Lisp::handleStopOperation(LifecycleOperation *operation)

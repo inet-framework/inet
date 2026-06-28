@@ -99,6 +99,12 @@ class INET_API Lisp : public ApplicationBase, public UdpSocket::ICallback, publi
     void sendMapRegister(LispServerEntry& se);    ///< ETR: build and send a Map-Register
     void receiveMapRegister(Packet *packet);      ///< MS: store a received registration
 
+    void sendMapRequest(const L3Address& dstEid); ///< ITR: query a Map-Resolver for an EID (cache miss)
+    void receiveMapRequest(Packet *packet);       ///< MR/MS: answer from the site database
+    void sendMapReply(uint64_t nonce, const L3Address& dst, LispSiteRecord& etr, const L3Address& eid);
+    void receiveMapReply(Packet *packet);         ///< ITR: cache the mapping and install the EID route
+    void installEidRoute(const L3Address& eid, int maskLength); ///< route an EID prefix to the TUN interface
+
     // UdpSocket::ICallback
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;

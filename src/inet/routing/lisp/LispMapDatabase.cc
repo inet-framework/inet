@@ -67,8 +67,10 @@ void LispMapDatabase::load(cXMLElement *etrMappingConfig, IInterfaceTable *ift, 
         getInterfaceAddresses(ift->getInterface(i), a4, a6);
         for (auto& entry : MappingStorage)
             for (auto& rloc : entry.getRlocs())
-                if (rloc.getRlocAddr() == a4 || rloc.getRlocAddr() == a6)
+                if (rloc.getRlocAddr() == a4 || rloc.getRlocAddr() == a6) {
                     rloc.setLocal(true);
+                    rloc.setState(LispRlocator::UP); // the ETR's own locators are reachable
+                }
     }
 }
 
