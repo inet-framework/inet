@@ -1,0 +1,257 @@
+%description:
+Round-trip serialization of the Babel TLVs (RFC 6126): the BabelHeader and every TLV type
+(Pad1/PadN, AckReq/Ack, Hello, IHU, RouterId, NextHop, Update, RouteReq, SeqnoReq), exercising the
+address-encoding codec for IPv4 (AE 1), IPv6 (AE 2) and link-local IPv6 (AE 3, compressed to 8 bytes),
+as well as wildcard prefixes. Verifies encode->decode reproduces every field and that the modules'
+computed chunkLength matches the serialized length.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/routing/babel/BabelDefs.h"
+#include "inet/routing/babel/BabelSerializer.h"
+
+using namespace inet;
+using namespace inet::babel;
+
+%global:
+
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<const T>& original)
+{
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();           // forces serialize()
+
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    return pkt2.popAtFront<T>(pkt2.getDataLength());   // forces deserialize()
+}
+
+// set chunkLength from the wire-length helper, then round-trip
+template<typename T>
+Ptr<const T> sizedRoundTrip(const Ptr<T>& tlv)
+{
+    tlv->setChunkLength(babelTlvLength(tlv.get()));
+    return roundTrip(staticPtrCast<const T>(tlv));
+}
+
+%activity:
+
+// === 1. BabelHeader ===
+{
+    EV << "=== BabelHeader ===" << endl;
+    auto h = makeShared<BabelHeader>();
+    h->setBodyLength(123);
+    Packet pkt("sz");
+    pkt.insertAtFront(h);
+    ASSERT(pkt.getDataLength() == B(4));
+    auto h2 = roundTrip(staticPtrCast<const BabelHeader>(h));
+    ASSERT(h2->getMagic() == 42);
+    ASSERT(h2->getVersion() == 2);
+    ASSERT(h2->getBodyLength() == 123);
+    EV << "  PASS" << endl;
+}
+
+// === 2. Pad1 / PadN ===
+{
+    EV << "=== Pad1 / PadN ===" << endl;
+    auto p1 = makeShared<BabelPad1Tlv>();
+    Packet pkt("sz");
+    pkt.insertAtFront(p1);
+    ASSERT(pkt.getDataLength() == B(1));
+    auto p1b = roundTrip(staticPtrCast<const BabelPad1Tlv>(p1));
+    ASSERT(p1b->getTlvType() == BABEL_PAD1);
+
+    auto pn = makeShared<BabelPadNTlv>();
+    pn->setN(5);
+    auto pnb = sizedRoundTrip(pn);
+    ASSERT(pnb->getTlvType() == BABEL_PADN);
+    ASSERT(pnb->getN() == 5);
+    ASSERT(pnb->getChunkLength() == B(7));
+    EV << "  PASS" << endl;
+}
+
+// === 3. AckReq / Ack ===
+{
+    EV << "=== AckReq / Ack ===" << endl;
+    auto req = makeShared<BabelAckReqTlv>();
+    req->setNonce(0xbeef);
+    req->setInterval(150);
+    Packet pkt("sz");
+    pkt.insertAtFront(req);
+    ASSERT(pkt.getDataLength() == B(8));
+    auto req2 = roundTrip(staticPtrCast<const BabelAckReqTlv>(req));
+    ASSERT(req2->getNonce() == 0xbeef);
+    ASSERT(req2->getInterval() == 150);
+
+    auto ack = makeShared<BabelAckTlv>();
+    ack->setNonce(0xbeef);
+    auto ack2 = roundTrip(staticPtrCast<const BabelAckTlv>(ack));
+    ASSERT(ack2->getNonce() == 0xbeef);
+    EV << "  PASS" << endl;
+}
+
+// === 4. Hello ===
+{
+    EV << "=== Hello ===" << endl;
+    auto hello = makeShared<BabelHelloTlv>();
+    hello->setSeqno(0x1234);
+    hello->setInterval(400);
+    auto hello2 = roundTrip(staticPtrCast<const BabelHelloTlv>(hello));
+    ASSERT(hello2->getTlvType() == BABEL_HELLO);
+    ASSERT(hello2->getSeqno() == 0x1234);
+    ASSERT(hello2->getInterval() == 400);
+    EV << "  PASS" << endl;
+}
+
+// === 5. IHU (IPv4 / IPv6 / link-local) ===
+{
+    EV << "=== IHU ===" << endl;
+    auto ihu4 = makeShared<BabelIhuTlv>();
+    ihu4->setAe(AE::IPv4);
+    ihu4->setRxcost(96);
+    ihu4->setInterval(1200);
+    ihu4->setAddress(L3Address(Ipv4Address("10.0.0.2")));
+    auto ihu4b = sizedRoundTrip(ihu4);
+    ASSERT(ihu4b->getRxcost() == 96);
+    ASSERT(ihu4b->getInterval() == 1200);
+    ASSERT(ihu4b->getAddress() == L3Address(Ipv4Address("10.0.0.2")));
+    ASSERT(ihu4b->getChunkLength() == B(12));
+
+    auto ihu6 = makeShared<BabelIhuTlv>();
+    ihu6->setAe(AE::IPv6);
+    ihu6->setRxcost(256);
+    ihu6->setAddress(L3Address(Ipv6Address("2001:db8::2")));
+    auto ihu6b = sizedRoundTrip(ihu6);
+    ASSERT(ihu6b->getAddress() == L3Address(Ipv6Address("2001:db8::2")));
+    ASSERT(ihu6b->getChunkLength() == B(24));
+
+    auto ihull = makeShared<BabelIhuTlv>();
+    ihull->setAe(AE::LLIPv6);
+    ihull->setAddress(L3Address(Ipv6Address("fe80::21f:ff:fe00:1")));
+    auto ihullb = sizedRoundTrip(ihull);
+    ASSERT(ihullb->getAddress() == L3Address(Ipv6Address("fe80::21f:ff:fe00:1")));
+    ASSERT(ihullb->getChunkLength() == B(16));
+    EV << "  PASS" << endl;
+}
+
+// === 6. RouterId ===
+{
+    EV << "=== RouterId ===" << endl;
+    auto rid = makeShared<BabelRouterIdTlv>();
+    rid->setRouterIdHi(0x01020304);
+    rid->setRouterIdLo(0x05060708);
+    Packet pkt("sz");
+    pkt.insertAtFront(rid);
+    ASSERT(pkt.getDataLength() == B(12));
+    auto rid2 = roundTrip(staticPtrCast<const BabelRouterIdTlv>(rid));
+    ASSERT(rid2->getRouterIdHi() == 0x01020304);
+    ASSERT(rid2->getRouterIdLo() == 0x05060708);
+    EV << "  PASS" << endl;
+}
+
+// === 7. NextHop (link-local IPv6 + IPv4) ===
+{
+    EV << "=== NextHop ===" << endl;
+    auto nh = makeShared<BabelNextHopTlv>();
+    nh->setAe(AE::LLIPv6);
+    nh->setNextHop(L3Address(Ipv6Address("fe80::1")));
+    auto nh2 = sizedRoundTrip(nh);
+    ASSERT(nh2->getNextHop() == L3Address(Ipv6Address("fe80::1")));
+    ASSERT(nh2->getChunkLength() == B(12));
+
+    auto nh4 = makeShared<BabelNextHopTlv>();
+    nh4->setAe(AE::IPv4);
+    nh4->setNextHop(L3Address(Ipv4Address("10.0.0.1")));
+    auto nh4b = sizedRoundTrip(nh4);
+    ASSERT(nh4b->getNextHop() == L3Address(Ipv4Address("10.0.0.1")));
+    ASSERT(nh4b->getChunkLength() == B(8));
+    EV << "  PASS" << endl;
+}
+
+// === 8. Update (IPv4 prefix / IPv6 prefix / wildcard retraction) ===
+{
+    EV << "=== Update ===" << endl;
+    auto u4 = makeShared<BabelUpdateTlv>();
+    u4->setAe(AE::IPv4);
+    u4->setInterval(1600);
+    u4->setSeqno(7);
+    u4->setMetric(256);
+    u4->setPrefix(L3Address(Ipv4Address("192.168.1.0")));
+    u4->setPrefixLen(24);
+    auto u4b = sizedRoundTrip(u4);
+    ASSERT(u4b->getSeqno() == 7);
+    ASSERT(u4b->getMetric() == 256);
+    ASSERT(u4b->getPrefixLen() == 24);
+    ASSERT(u4b->getPrefix() == L3Address(Ipv4Address("192.168.1.0")));
+    ASSERT(u4b->getChunkLength() == B(15)); // 12 + 3
+
+    auto u6 = makeShared<BabelUpdateTlv>();
+    u6->setAe(AE::IPv6);
+    u6->setSeqno(9);
+    u6->setMetric(512);
+    u6->setPrefix(L3Address(Ipv6Address("2001:db8:1::")));
+    u6->setPrefixLen(48);
+    auto u6b = sizedRoundTrip(u6);
+    ASSERT(u6b->getPrefix() == L3Address(Ipv6Address("2001:db8:1::")));
+    ASSERT(u6b->getPrefixLen() == 48);
+    ASSERT(u6b->getChunkLength() == B(18)); // 12 + 6
+
+    // wildcard Update (AE 0, plen 0) - "retract all" / default
+    auto uw = makeShared<BabelUpdateTlv>();
+    uw->setAe(AE::WILDCARD);
+    uw->setMetric(0xFFFF);
+    uw->setPrefixLen(0);
+    auto uwb = sizedRoundTrip(uw);
+    ASSERT(uwb->getAe() == AE::WILDCARD);
+    ASSERT(uwb->getMetric() == 0xFFFF);
+    ASSERT(uwb->getChunkLength() == B(12));
+    EV << "  PASS" << endl;
+}
+
+// === 9. RouteReq (wildcard full-dump + specific prefix) ===
+{
+    EV << "=== RouteReq ===" << endl;
+    auto rr = makeShared<BabelRouteReqTlv>();
+    rr->setAe(AE::WILDCARD);
+    rr->setPrefixLen(0);
+    auto rrb = sizedRoundTrip(rr);
+    ASSERT(rrb->getAe() == AE::WILDCARD);
+    ASSERT(rrb->getChunkLength() == B(4));
+
+    auto rr6 = makeShared<BabelRouteReqTlv>();
+    rr6->setAe(AE::IPv6);
+    rr6->setPrefix(L3Address(Ipv6Address("2001:db8:2::")));
+    rr6->setPrefixLen(48);
+    auto rr6b = sizedRoundTrip(rr6);
+    ASSERT(rr6b->getPrefix() == L3Address(Ipv6Address("2001:db8:2::")));
+    ASSERT(rr6b->getChunkLength() == B(10)); // 4 + 6
+    EV << "  PASS" << endl;
+}
+
+// === 10. SeqnoReq ===
+{
+    EV << "=== SeqnoReq ===" << endl;
+    auto sr = makeShared<BabelSeqnoReqTlv>();
+    sr->setAe(AE::IPv4);
+    sr->setSeqno(42);
+    sr->setHopcount(127);
+    sr->setRouterIdHi(0xaabbccdd);
+    sr->setRouterIdLo(0x11223344);
+    sr->setPrefix(L3Address(Ipv4Address("10.1.2.0")));
+    sr->setPrefixLen(24);
+    auto srb = sizedRoundTrip(sr);
+    ASSERT(srb->getSeqno() == 42);
+    ASSERT(srb->getHopcount() == 127);
+    ASSERT(srb->getRouterIdHi() == 0xaabbccdd);
+    ASSERT(srb->getRouterIdLo() == 0x11223344);
+    ASSERT(srb->getPrefix() == L3Address(Ipv4Address("10.1.2.0")));
+    ASSERT(srb->getChunkLength() == B(19)); // 16 + 3
+    EV << "  PASS" << endl;
+}
+
+EV << "All Babel serializer round-trips passed." << endl;
+
+%contains: stdout
+All Babel serializer round-trips passed.
