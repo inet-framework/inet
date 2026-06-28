@@ -1,0 +1,5 @@
+# working directory,                   command line arguments,                                     simulation time limit,  fingerprint,                    expected result, tags
+/examples/isis/adjacency/,             -f omnetpp.ini -c General -r 0,                             20s,                    a815-4eb3/tplx;0b68-e23d/~tNl,  PASS,            isis EthernetMac Ipv4
+/examples/isis/routing/,               -f omnetpp.ini -c General -r 0,                             20s,                    1b02-1a8e/tplx;458a-fa50/~tNl,  PASS,            isis EthernetMac Ipv4
+/examples/isis/lan/,                   -f omnetpp.ini -c General -r 0,                             20s,                    7038-9577/tplx;fac2-c8da/~tNl,  PASS,            isis EthernetMac Ipv4
+/examples/isis/failure/,               -f omnetpp.ini -c General -r 0,                             25s,                    e36e-9e9f/tplx;eb21-649a/~tNl,  PASS,            isis EthernetMac Ipv4
