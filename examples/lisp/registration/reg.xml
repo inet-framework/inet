@@ -1,0 +1,21 @@
+<LispConfig>
+    <Router id="xtr">
+        <LISP>
+            <EtrMapServer address="10.0.0.2" key="abc" proxy="enabled"/>
+            <EtrMapping>
+                <EID address="192.168.1.0/24">
+                    <RLOC address="10.0.0.1" priority="1" weight="100"/>
+                </EID>
+            </EtrMapping>
+        </LISP>
+    </Router>
+    <Router id="ms">
+        <LISP>
+            <MapServer ipv4="enabled">
+                <Site name="siteA" key="abc">
+                    <EID address="192.168.1.0/24"/>
+                </Site>
+            </MapServer>
+        </LISP>
+    </Router>
+</LispConfig>
