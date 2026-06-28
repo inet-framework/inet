@@ -5,3 +5,4 @@
 /examples/isis/failure/,               -f omnetpp.ini -c General -r 0,                             25s,                    b92b-07d5/tplx;cddf-4383/~tNl,  PASS,            isis EthernetMac Ipv4
 /examples/isis/ipv6/,                  -f omnetpp.ini -c General -r 0,                             25s,                    148f-cfa2/tplx;93b0-6138/~tNl,  PASS,            isis EthernetMac Ipv6
 /examples/isis/dualstack/,             -f omnetpp.ini -c General -r 0,                             30s,                    1e80-7580/tplx;0395-5d48/~tNl,  PASS,            isis EthernetMac Ipv4 Ipv6
+/examples/isis/bgp/,                   -f omnetpp.ini -c General -r 0,                             100s,                   6966-1108/tplx;1f39-81de/~tNl,  PASS,            isis Bgp EthernetMac Ipv6
