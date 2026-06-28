@@ -11,6 +11,7 @@
 #ifndef __INET_ISIS_H
 #define __INET_ISIS_H
 
+#include <map>
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
@@ -63,6 +64,15 @@ struct IsisAdjacency {
 };
 
 //
+// One Link State PDU held in the link-state database (LSPDB).
+//
+struct IsisLsp {
+    LspId lspId;
+    uint32_t sequenceNumber = 0;
+    Ptr<const IsisLspPacket> lsp;     // the stored LSP chunk
+};
+
+//
 // Implements the IS-IS routing protocol (ISO/IEC 10589 / RFC 1195). See the
 // NED file for an overview. PDUs are exchanged over the link layer through an
 // `Ieee8022LlcSocket`.
@@ -82,6 +92,11 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
 
     std::vector<IsisInterface *> isisInterfaces;
     std::vector<IsisAdjacency *> adjacencies;
+
+    // Level-1 link-state database, keyed by LspId::toInt().
+    std::map<uint64_t, IsisLsp *> lspDatabase;
+    uint32_t myLspSequenceNumber = 0;
+    cMessage *regenerateLspTimer = nullptr;
 
     simsignal_t adjacencyChangedSignal;
 
@@ -106,11 +121,21 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
     // configuration
     virtual void parseConfig();
 
+    // PDU dispatch
+    virtual void processPdu(Packet *packet);
+
     // Hello / adjacency
     virtual void sendLanHello(IsisInterface *isisIft, int level);
     virtual void processHello(Packet *packet);
     virtual void handleHelloTimer(IsisInterface *isisIft);
     virtual void handleHoldTimer(IsisAdjacency *adj);
+
+    // Link-state PDUs (Level 1)
+    virtual void scheduleLspRegeneration();
+    virtual void originateLsp();
+    virtual void floodLsp(const Ptr<const IsisLspPacket>& lsp, int exceptInterfaceId);
+    virtual void processLsp(Packet *packet);
+    virtual bool hasUpAdjacency(int interfaceId, int level);
 
     virtual IsisInterface *findInterface(int interfaceId);
     virtual IsisAdjacency *findAdjacency(int interfaceId, int level, const SystemId& sysId);

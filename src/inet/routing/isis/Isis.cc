@@ -30,7 +30,7 @@ Define_Module(Isis);
 static const int ISIS_SAP = 0xFE;
 
 // Self-message kinds.
-enum IsisTimerKind { HELLO_TIMER = 1, HOLD_TIMER = 2 };
+enum IsisTimerKind { HELLO_TIMER = 1, HOLD_TIMER = 2, REGENERATE_LSP_TIMER = 3 };
 
 const MacAddress Isis::ALL_L1_ISS("01:80:C2:00:00:14");
 const MacAddress Isis::ALL_L2_ISS("01:80:C2:00:00:15");
@@ -105,6 +105,9 @@ void Isis::handleMessageWhenUp(cMessage *msg)
             case HOLD_TIMER:
                 handleHoldTimer(static_cast<IsisAdjacency *>(msg->getContextPointer()));
                 break;
+            case REGENERATE_LSP_TIMER:
+                originateLsp();
+                break;
             default:
                 throw cRuntimeError("Unknown self message kind %d", msg->getKind());
         }
@@ -117,8 +120,32 @@ void Isis::handleMessageWhenUp(cMessage *msg)
 
 void Isis::socketDataArrived(Ieee8022LlcSocket *socket, Packet *packet)
 {
-    processHello(packet);
+    processPdu(packet);
     delete packet;
+}
+
+void Isis::processPdu(Packet *packet)
+{
+    const auto& pdu = packet->peekAtFront<IsisPdu>();
+    switch (pdu->getPduType()) {
+        case LAN_L1_HELLO:
+        case LAN_L2_HELLO:
+            processHello(packet);
+            break;
+        case L1_LSP:
+        case L2_LSP:
+            processLsp(packet);
+            break;
+        case L1_CSNP:
+        case L2_CSNP:
+        case L1_PSNP:
+        case L2_PSNP:
+            // TODO sequence-number PDU processing (reliable flooding)
+            break;
+        default:
+            EV_WARN << "Ignoring unknown IS-IS PDU type " << (int)pdu->getPduType() << "\n";
+            break;
+    }
 }
 
 void Isis::socketClosed(Ieee8022LlcSocket *socket)
@@ -309,9 +336,139 @@ void Isis::handleHoldTimer(IsisAdjacency *adj)
     delete adj;
 }
 
+void Isis::scheduleLspRegeneration()
+{
+    if (regenerateLspTimer == nullptr)
+        regenerateLspTimer = new cMessage("regenerateLspTimer", REGENERATE_LSP_TIMER);
+    if (!regenerateLspTimer->isScheduled())
+        scheduleAfter(0.1, regenerateLspTimer);
+}
+
+void Isis::originateLsp()
+{
+    if (!(isType & L1_TYPE))
+        return; // only Level-1 LSPs are generated so far
+
+    auto lsp = makeShared<IsisLspPacket>();
+    lsp->setPduType(L1_LSP);
+    LspId myLspId(PseudonodeId(systemId, 0)); // own (non-pseudonode) LSP, fragment 0
+    lsp->setLspId(myLspId);
+    lsp->setSequenceNumber(++myLspSequenceNumber);
+    lsp->setRemainingLifetime(1200);
+    lsp->setLspFlags(0x01); // Level-1 IS
+
+    lsp->appendAreaAddresses(areaId);
+    lsp->appendProtocolsSupported(NLPID_IPV4);
+
+    // IS reachability: one entry per UP Level-1 adjacency.
+    for (auto *adj : adjacencies) {
+        if (adj->level != 1 || adj->state != ISIS_ADJ_UP)
+            continue;
+        IsisIsReachability reach;
+        auto *isisIft = findInterface(adj->interfaceId);
+        reach.metric = isisIft ? isisIft->metric : 10;
+        reach.neighbourId = PseudonodeId(adj->neighbourSystemId, 0);
+        lsp->appendIsReachabilities(reach);
+    }
+
+    // IP reachability: the prefix of each IS-IS interface.
+    for (auto *isisIft : isisInterfaces) {
+        auto *ie = ift->getInterfaceById(isisIft->interfaceId);
+        auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+        if (ipv4Data == nullptr || ipv4Data->getIPAddress().isUnspecified())
+            continue;
+        IsisIpReachability ipReach;
+        ipReach.metric = isisIft->metric;
+        ipReach.address = ipv4Data->getIPAddress().doAnd(ipv4Data->getNetmask());
+        ipReach.mask = ipv4Data->getNetmask();
+        lsp->appendIpInternalReachabilities(ipReach);
+    }
+
+    int len = 8 + (2 + 8 + 4 + 2 + 1)
+            + (2 + (int)lsp->getAreaAddressesArraySize() * 4)
+            + (2 + (int)lsp->getProtocolsSupportedArraySize())
+            + (2 + (int)lsp->getIsReachabilitiesArraySize() * 11)
+            + (2 + (int)lsp->getIpInternalReachabilitiesArraySize() * 12);
+    lsp->setChunkLength(B(len));
+
+    Ptr<const IsisLspPacket> constLsp = lsp;
+    IsisLsp *&entry = lspDatabase[myLspId.toInt()];
+    if (entry == nullptr)
+        entry = new IsisLsp();
+    entry->lspId = myLspId;
+    entry->sequenceNumber = myLspSequenceNumber;
+    entry->lsp = constLsp;
+
+    EV_INFO << "Originated own LSP " << myLspId << " seq " << myLspSequenceNumber
+            << " (" << lsp->getIsReachabilitiesArraySize() << " IS, "
+            << lsp->getIpInternalReachabilitiesArraySize() << " IP reachabilities)\n";
+
+    floodLsp(constLsp, -1);
+}
+
+bool Isis::hasUpAdjacency(int interfaceId, int level)
+{
+    for (auto *adj : adjacencies)
+        if (adj->interfaceId == interfaceId && adj->level == level && adj->state == ISIS_ADJ_UP)
+            return true;
+    return false;
+}
+
+void Isis::floodLsp(const Ptr<const IsisLspPacket>& lsp, int exceptInterfaceId)
+{
+    for (auto *isisIft : isisInterfaces) {
+        if (isisIft->interfaceId == exceptInterfaceId)
+            continue;
+        if (!hasUpAdjacency(isisIft->interfaceId, 1))
+            continue;
+        auto *packet = new Packet("IsisL1Lsp");
+        packet->insertAtBack(lsp);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::isis);
+        packet->addTag<InterfaceReq>()->setInterfaceId(isisIft->interfaceId);
+        packet->addTag<MacAddressReq>()->setDestAddress(ALL_L1_ISS);
+        llcSocket.send(packet);
+    }
+}
+
+void Isis::processLsp(Packet *packet)
+{
+    int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
+    const auto& lsp = packet->peekAtFront<IsisLspPacket>();
+    if (lsp->getPduType() != L1_LSP)
+        return; // only Level-1 so far
+
+    LspId lspId = lsp->getLspId();
+    uint64_t key = lspId.toInt();
+    uint32_t seq = lsp->getSequenceNumber();
+
+    auto it = lspDatabase.find(key);
+    if (it == lspDatabase.end() || seq > it->second->sequenceNumber) {
+        IsisLsp *entry = (it != lspDatabase.end()) ? it->second : (lspDatabase[key] = new IsisLsp());
+        entry->lspId = lspId;
+        entry->sequenceNumber = seq;
+        entry->lsp = lsp;
+        EV_INFO << "Installed LSP " << lspId << " seq " << seq << " from interface "
+                << ift->getInterfaceById(interfaceId)->getInterfaceName()
+                << " (" << lspDatabase.size() << " LSPs in database)\n";
+        floodLsp(lsp, interfaceId); // forward to the other interfaces
+        // TODO trigger SPF (Phase 6)
+    }
+    else if (seq < it->second->sequenceNumber) {
+        // Our copy is newer: send it back out the arrival interface.
+        auto *p = new Packet("IsisL1Lsp");
+        p->insertAtBack(it->second->lsp);
+        p->addTag<PacketProtocolTag>()->setProtocol(&Protocol::isis);
+        p->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+        p->addTag<MacAddressReq>()->setDestAddress(ALL_L1_ISS);
+        llcSocket.send(p);
+    }
+    // equal sequence number: synchronized (acknowledgement handled later)
+}
+
 void Isis::setAdjacencyState(IsisAdjacency *adj, IsisAdjacencyState newState)
 {
-    if (adj->state == newState)
+    IsisAdjacencyState oldState = adj->state;
+    if (oldState == newState)
         return;
     adj->state = newState;
     const char *stateName = newState == ISIS_ADJ_UP ? "UP"
@@ -319,6 +476,11 @@ void Isis::setAdjacencyState(IsisAdjacency *adj, IsisAdjacencyState newState)
     EV_INFO << "Level-" << adj->level << " adjacency to " << adj->neighbourSystemId
             << " is now " << stateName << "\n";
     emit(adjacencyChangedSignal, (long)newState);
+
+    // Entering or leaving the UP state changes our advertised reachability, so
+    // (re)originate our LSP.
+    if (newState == ISIS_ADJ_UP || oldState == ISIS_ADJ_UP)
+        scheduleLspRegeneration();
 }
 
 IsisInterface *Isis::findInterface(int interfaceId)
@@ -349,6 +511,14 @@ void Isis::clearState()
         delete adj;
     }
     adjacencies.clear();
+    for (auto& kv : lspDatabase)
+        delete kv.second;
+    lspDatabase.clear();
+    if (regenerateLspTimer != nullptr) {
+        cancelAndDelete(regenerateLspTimer);
+        regenerateLspTimer = nullptr;
+    }
+    myLspSequenceNumber = 0;
 }
 
 } // namespace isis
