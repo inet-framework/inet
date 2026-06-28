@@ -15,6 +15,7 @@
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
+#include "inet/routing/isis/IsisCommon.h"
 
 namespace inet {
 namespace isis {
@@ -28,6 +29,10 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
 {
   protected:
     ModuleRefByPar<IInterfaceTable> ift;
+
+    // This router's IS-IS identity, derived from the configured NET address.
+    SystemId systemId;
+    AreaId areaId;
 
     // PDUs ride directly on IEEE 802.2 LLC (SAP 0xFE), not on IP.
     Ieee8022LlcSocket llcSocket;
@@ -48,6 +53,9 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
 
   public:
     Isis() {}
+
+    const SystemId& getSystemId() const { return systemId; }
+    const AreaId& getAreaId() const { return areaId; }
 };
 
 } // namespace isis
