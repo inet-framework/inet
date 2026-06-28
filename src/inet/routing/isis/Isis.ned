@@ -39,6 +39,9 @@ simple Isis extends SimpleModule like IIsis
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);
         double stopOperationTimeout @unit(s) = default(2s);
+
+        @signal[adjacencyChanged](type=long);
+        @statistic[adjacencyChanged](title="adjacency state changes"; record=count,vector; interpolationmode=none);
     gates:
         input socketIn;
         output socketOut;

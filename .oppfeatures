@@ -320,6 +320,7 @@
         labels = ""
         nedPackages = "
                        inet.routing.isis
+                       inet.node.isis
                       "
         extraSourceFolders = ""
         compileFlags = "-DINET_WITH_ISIS"

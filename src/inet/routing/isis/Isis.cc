@@ -10,12 +10,35 @@
 
 #include "inet/routing/isis/Isis.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/networklayer/contract/clns/ClnsAddress.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 namespace isis {
 
 Define_Module(Isis);
+
+// IS-IS PDU LLC SAP (ISO/IEC 10589).
+static const int ISIS_SAP = 0xFE;
+
+// Self-message kinds.
+enum IsisTimerKind { HELLO_TIMER = 1, HOLD_TIMER = 2 };
+
+const MacAddress Isis::ALL_L1_ISS("01:80:C2:00:00:14");
+const MacAddress Isis::ALL_L2_ISS("01:80:C2:00:00:15");
+
+Isis::~Isis()
+{
+    clearState();
+}
 
 void Isis::initialize(int stage)
 {
@@ -23,6 +46,7 @@ void Isis::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
+        adjacencyChangedSignal = registerSignal("adjacencyChanged");
         llcSocket.setOutputGate(gate("socketOut"));
         llcSocket.setCallback(this);
     }
@@ -30,27 +54,61 @@ void Isis::initialize(int stage)
 
 void Isis::handleStartOperation(LifecycleOperation *operation)
 {
-    // TODO (adjacency phase): open an LLC socket on each participating
-    // interface (SAP 0xFE), subscribe to the AllL1ISs/AllL2ISs multicast MACs,
-    // and start sending IIH Hello PDUs.
+    parseConfig();
+
+    if (isisInterfaces.empty()) {
+        EV_WARN << "IS-IS has no configured/enabled interfaces; staying idle\n";
+        return;
+    }
+
+    // A single LLC socket receives IS-IS PDUs (DSAP/SSAP 0xFE) from every
+    // interface; the egress interface is selected per packet with an
+    // InterfaceReq tag.
+    llcSocket.open(-1, ISIS_SAP, ISIS_SAP);
+
+    for (auto *isisIft : isisInterfaces) {
+        auto *ie = ift->getInterfaceById(isisIft->interfaceId);
+        if (isType & L1_TYPE)
+            ie->addMulticastMacAddress(ALL_L1_ISS);
+        if (isType & L2_TYPE)
+            ie->addMulticastMacAddress(ALL_L2_ISS);
+
+        isisIft->helloTimer = new cMessage("helloTimer", HELLO_TIMER);
+        isisIft->helloTimer->setContextPointer(isisIft);
+        scheduleAfter(uniform(0, isisIft->helloInterval), isisIft->helloTimer);
+    }
+    EV_INFO << "IS-IS started, system ID " << systemId << ", area " << areaId
+            << ", on " << isisInterfaces.size() << " interface(s)\n";
 }
 
 void Isis::handleStopOperation(LifecycleOperation *operation)
 {
     if (llcSocket.isOpen())
         llcSocket.close();
+    clearState();
 }
 
 void Isis::handleCrashOperation(LifecycleOperation *operation)
 {
     if (llcSocket.isOpen())
         llcSocket.destroy();
+    clearState();
 }
 
 void Isis::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-        throw cRuntimeError("Unexpected self message '%s'", msg->getName());
+    if (msg->isSelfMessage()) {
+        switch (msg->getKind()) {
+            case HELLO_TIMER:
+                handleHelloTimer(static_cast<IsisInterface *>(msg->getContextPointer()));
+                break;
+            case HOLD_TIMER:
+                handleHoldTimer(static_cast<IsisAdjacency *>(msg->getContextPointer()));
+                break;
+            default:
+                throw cRuntimeError("Unknown self message kind %d", msg->getKind());
+        }
+    }
     else if (llcSocket.belongsToSocket(msg))
         llcSocket.processMessage(msg);
     else
@@ -59,12 +117,238 @@ void Isis::handleMessageWhenUp(cMessage *msg)
 
 void Isis::socketDataArrived(Ieee8022LlcSocket *socket, Packet *packet)
 {
-    // TODO (adjacency phase): dispatch the received IS-IS PDU by type.
+    processHello(packet);
     delete packet;
 }
 
 void Isis::socketClosed(Ieee8022LlcSocket *socket)
 {
+}
+
+void Isis::parseConfig()
+{
+    cXMLElement *config = par("configData");
+    if (config == nullptr)
+        return;
+
+    const char *net = config->getAttribute("net");
+    if (net == nullptr || !net[0]) {
+        EV_WARN << "IS-IS: no NET configured\n";
+        return;
+    }
+
+    ClnsAddress address(net);
+    systemId.setSystemId(address.getSystemId());
+    areaId.setAreaId(address.getAreaId());
+
+    const char *isTypeStr = config->getAttribute("isType");
+    if (isTypeStr == nullptr || !strcmp(isTypeStr, "L1L2"))
+        isType = L1L2_TYPE;
+    else if (!strcmp(isTypeStr, "L1"))
+        isType = L1_TYPE;
+    else if (!strcmp(isTypeStr, "L2"))
+        isType = L2_TYPE;
+    else
+        throw cRuntimeError("IS-IS: invalid isType '%s' (expected L1, L2 or L1L2)", isTypeStr);
+
+    cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
+    if (!interfaceElements.empty()) {
+        for (auto *element : interfaceElements) {
+            const char *name = element->getAttribute("name");
+            if (name == nullptr)
+                throw cRuntimeError("IS-IS: <interface> without a 'name' attribute");
+            auto *ie = ift->findInterfaceByName(name);
+            if (ie == nullptr)
+                throw cRuntimeError("IS-IS: no such interface '%s'", name);
+
+            auto *isisIft = new IsisInterface();
+            isisIft->interfaceId = ie->getInterfaceId();
+            const char *metric = element->getAttribute("metric");
+            if (metric)
+                isisIft->metric = atoi(metric);
+            const char *priority = element->getAttribute("priority");
+            if (priority)
+                isisIft->priority = atoi(priority);
+            const char *helloInterval = element->getAttribute("helloInterval");
+            isisIft->helloInterval = helloInterval ? SimTime::parse(helloInterval) : SimTime(10, SIMTIME_S);
+            const char *type = element->getAttribute("type");
+            isisIft->broadcast = (type == nullptr || !strcmp(type, "broadcast"));
+            isisIft->circuitType = isType;
+            isisInterfaces.push_back(isisIft);
+        }
+    }
+    else {
+        // No explicit interface list: enable IS-IS on every non-loopback interface.
+        for (int i = 0; i < ift->getNumInterfaces(); i++) {
+            auto *ie = ift->getInterface(i);
+            if (ie->isLoopback() || !ie->isBroadcast())
+                continue;
+            auto *isisIft = new IsisInterface();
+            isisIft->interfaceId = ie->getInterfaceId();
+            isisIft->helloInterval = SimTime(10, SIMTIME_S);
+            isisIft->circuitType = isType;
+            isisInterfaces.push_back(isisIft);
+        }
+    }
+}
+
+void Isis::handleHelloTimer(IsisInterface *isisIft)
+{
+    if ((isType & L1_TYPE) && (isisIft->circuitType & L1_TYPE))
+        sendLanHello(isisIft, 1);
+    if ((isType & L2_TYPE) && (isisIft->circuitType & L2_TYPE))
+        sendLanHello(isisIft, 2);
+    scheduleAfter(isisIft->helloInterval, isisIft->helloTimer);
+}
+
+void Isis::sendLanHello(IsisInterface *isisIft, int level)
+{
+    auto *ie = ift->getInterfaceById(isisIft->interfaceId);
+
+    auto hello = makeShared<IsisLanHelloPacket>();
+    hello->setPduType(level == 1 ? LAN_L1_HELLO : LAN_L2_HELLO);
+    hello->setCircuitType(isisIft->circuitType);
+    hello->setSourceId(systemId);
+    hello->setHoldTime((uint16_t)std::ceil((isisIft->helloInterval * isisIft->holdMultiplier).dbl()));
+    hello->setPriority(isisIft->priority);
+    hello->setLanId(PseudonodeId(systemId, 0)); // DIS election deferred
+
+    hello->appendAreaAddresses(areaId);
+    hello->appendProtocolsSupported(NLPID_IPV4);
+
+    auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+    if (ipv4Data != nullptr && !ipv4Data->getIPAddress().isUnspecified())
+        hello->appendIpInterfaceAddresses(ipv4Data->getIPAddress());
+
+    // IS Neighbours TLV: SNPAs of the neighbours already heard on this circuit.
+    for (auto *adj : adjacencies)
+        if (adj->interfaceId == isisIft->interfaceId && adj->level == level && adj->state != ISIS_ADJ_DOWN)
+            hello->appendLanNeighbours(adj->snpa);
+
+    // Nominal on-wire length (no serializer yet): header + fixed Hello fields + TLVs.
+    int len = 8 + (1 + 6 + 2 + 1 + 7)
+            + (2 + (int)hello->getAreaAddressesArraySize() * 4)
+            + (2 + (int)hello->getProtocolsSupportedArraySize())
+            + (hello->getIpInterfaceAddressesArraySize() ? 2 + (int)hello->getIpInterfaceAddressesArraySize() * 4 : 0)
+            + (hello->getLanNeighboursArraySize() ? 2 + (int)hello->getLanNeighboursArraySize() * 6 : 0);
+    hello->setChunkLength(B(len));
+
+    auto *packet = new Packet(level == 1 ? "IsisL1Hello" : "IsisL2Hello");
+    packet->insertAtBack(hello);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::isis);
+    packet->addTag<InterfaceReq>()->setInterfaceId(isisIft->interfaceId);
+    packet->addTag<MacAddressReq>()->setDestAddress(level == 1 ? ALL_L1_ISS : ALL_L2_ISS);
+
+    EV_DETAIL << "Sending Level-" << level << " LAN Hello on interface "
+              << ie->getInterfaceName() << "\n";
+    llcSocket.send(packet);
+}
+
+void Isis::processHello(Packet *packet)
+{
+    int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
+    MacAddress srcMac = packet->getTag<MacAddressInd>()->getSrcAddress();
+
+    const auto& pdu = packet->peekAtFront<IsisPdu>();
+    int level;
+    switch (pdu->getPduType()) {
+        case LAN_L1_HELLO: level = 1; break;
+        case LAN_L2_HELLO: level = 2; break;
+        default:
+            EV_WARN << "Ignoring unsupported IS-IS PDU type " << (int)pdu->getPduType() << "\n";
+            return;
+    }
+
+    auto *isisIft = findInterface(interfaceId);
+    if (isisIft == nullptr)
+        return; // not an IS-IS interface
+
+    const auto& hello = packet->peekAtFront<IsisLanHelloPacket>();
+    if (hello->getSourceId() == systemId)
+        return; // our own Hello, ignore
+
+    auto *adj = findAdjacency(interfaceId, level, hello->getSourceId());
+    if (adj == nullptr) {
+        adj = new IsisAdjacency();
+        adj->interfaceId = interfaceId;
+        adj->level = level;
+        adj->neighbourSystemId = hello->getSourceId();
+        adjacencies.push_back(adj);
+        EV_INFO << "New Level-" << level << " neighbour " << hello->getSourceId()
+                << " heard on interface " << ift->getInterfaceById(interfaceId)->getInterfaceName() << "\n";
+    }
+    adj->snpa = srcMac;
+    if (hello->getAreaAddressesArraySize() > 0)
+        adj->neighbourAreaId = hello->getAreaAddresses(0);
+
+    // Two-way check: are we listed in the neighbour's IS Neighbours TLV?
+    MacAddress myMac = ift->getInterfaceById(interfaceId)->getMacAddress();
+    bool weAreListed = false;
+    for (size_t k = 0; k < hello->getLanNeighboursArraySize(); k++)
+        if (hello->getLanNeighbours(k) == myMac) {
+            weAreListed = true;
+            break;
+        }
+    setAdjacencyState(adj, weAreListed ? ISIS_ADJ_UP : ISIS_ADJ_INITIALIZING);
+
+    // (Re)arm the hold timer.
+    if (adj->holdTimer == nullptr) {
+        adj->holdTimer = new cMessage("holdTimer", HOLD_TIMER);
+        adj->holdTimer->setContextPointer(adj);
+    }
+    rescheduleAfter(hello->getHoldTime(), adj->holdTimer);
+}
+
+void Isis::handleHoldTimer(IsisAdjacency *adj)
+{
+    EV_INFO << "Hold time expired for Level-" << adj->level << " neighbour "
+            << adj->neighbourSystemId << "; tearing down adjacency\n";
+    setAdjacencyState(adj, ISIS_ADJ_DOWN);
+    adjacencies.erase(std::remove(adjacencies.begin(), adjacencies.end(), adj), adjacencies.end());
+    cancelAndDelete(adj->holdTimer);
+    delete adj;
+}
+
+void Isis::setAdjacencyState(IsisAdjacency *adj, IsisAdjacencyState newState)
+{
+    if (adj->state == newState)
+        return;
+    adj->state = newState;
+    const char *stateName = newState == ISIS_ADJ_UP ? "UP"
+                          : newState == ISIS_ADJ_INITIALIZING ? "INITIALIZING" : "DOWN";
+    EV_INFO << "Level-" << adj->level << " adjacency to " << adj->neighbourSystemId
+            << " is now " << stateName << "\n";
+    emit(adjacencyChangedSignal, (long)newState);
+}
+
+IsisInterface *Isis::findInterface(int interfaceId)
+{
+    for (auto *isisIft : isisInterfaces)
+        if (isisIft->interfaceId == interfaceId)
+            return isisIft;
+    return nullptr;
+}
+
+IsisAdjacency *Isis::findAdjacency(int interfaceId, int level, const SystemId& sysId)
+{
+    for (auto *adj : adjacencies)
+        if (adj->interfaceId == interfaceId && adj->level == level && adj->neighbourSystemId == sysId)
+            return adj;
+    return nullptr;
+}
+
+void Isis::clearState()
+{
+    for (auto *isisIft : isisInterfaces) {
+        cancelAndDelete(isisIft->helloTimer);
+        delete isisIft;
+    }
+    isisInterfaces.clear();
+    for (auto *adj : adjacencies) {
+        cancelAndDelete(adj->holdTimer);
+        delete adj;
+    }
+    adjacencies.clear();
 }
 
 } // namespace isis
