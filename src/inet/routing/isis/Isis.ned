@@ -38,6 +38,7 @@ simple Isis extends SimpleModule like IIsis
 
         double lspRefreshInterval @unit(s) = default(900s);  // how often a router re-originates its own LSPs
         double lspMaxLifetime @unit(s) = default(1200s);     // lifetime stamped into originated LSPs
+        double csnpInterval @unit(s) = default(10s);         // how often the DIS sends a CSNP on a LAN
 
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);

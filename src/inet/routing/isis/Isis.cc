@@ -34,7 +34,7 @@ static const int ISIS_SAP = 0xFE;
 // Self-message kinds.
 enum IsisTimerKind {
     HELLO_TIMER = 1, HOLD_TIMER = 2, REGENERATE_LSP_TIMER = 3, SPF_TIMER = 4,
-    REFRESH_TIMER = 5, AGE_TIMER = 6
+    REFRESH_TIMER = 5, AGE_TIMER = 6, CSNP_TIMER = 7
 };
 
 // Returns true if dest/mask is one of this router's directly-connected networks.
@@ -100,6 +100,12 @@ void Isis::handleStartOperation(LifecycleOperation *operation)
         isisIft->helloTimer = new cMessage("helloTimer", HELLO_TIMER);
         isisIft->helloTimer->setContextPointer(isisIft);
         scheduleAfter(uniform(0, isisIft->helloInterval), isisIft->helloTimer);
+
+        if (isisIft->broadcast) {
+            isisIft->csnpTimer = new cMessage("csnpTimer", CSNP_TIMER);
+            isisIft->csnpTimer->setContextPointer(isisIft);
+            scheduleAfter(par("csnpInterval").doubleValue(), isisIft->csnpTimer);
+        }
     }
 
     refreshTimer = new cMessage("refreshTimer", REFRESH_TIMER);
@@ -150,6 +156,13 @@ void Isis::handleMessageWhenUp(cMessage *msg)
                 ageLsps();
                 scheduleAfter(1.0, ageTimer);
                 break;
+            case CSNP_TIMER: {
+                auto *isisIft = static_cast<IsisInterface *>(msg->getContextPointer());
+                if (isisIft->isDis)
+                    sendCsnp(isisIft);
+                scheduleAfter(par("csnpInterval").doubleValue(), isisIft->csnpTimer);
+                break;
+            }
             default:
                 throw cRuntimeError("Unknown self message kind %d", msg->getKind());
         }
@@ -180,9 +193,11 @@ void Isis::processPdu(Packet *packet)
             break;
         case L1_CSNP:
         case L2_CSNP:
+            processCsnp(packet);
+            break;
         case L1_PSNP:
         case L2_PSNP:
-            // TODO sequence-number PDU processing (reliable flooding)
+            processPsnp(packet);
             break;
         default:
             EV_WARN << "Ignoring unknown IS-IS PDU type " << (int)pdu->getPduType() << "\n";
@@ -572,18 +587,117 @@ void Isis::floodLsp(const Ptr<const IsisLspPacket>& lsp, int exceptInterfaceId)
     }
 }
 
+void Isis::sendLspOnInterface(const Ptr<const IsisLspPacket>& lsp, int interfaceId)
+{
+    auto *packet = new Packet("IsisL1Lsp");
+    packet->insertAtBack(lsp);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::isis);
+    packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+    packet->addTag<MacAddressReq>()->setDestAddress(ALL_L1_ISS);
+    llcSocket.send(packet);
+}
+
 void Isis::sendDatabaseToInterface(int interfaceId)
 {
     // Send every known LSP out one interface; used to synchronize the database
     // with a neighbour when an adjacency comes up (so a late-forming adjacency
     // still receives LSPs that were flooded before it existed).
+    for (auto& kv : lspDatabase)
+        sendLspOnInterface(kv.second->lsp, interfaceId);
+}
+
+void Isis::sendCsnp(IsisInterface *isisIft)
+{
+    // A Complete Sequence Numbers PDU summarizes the whole database. On a LAN it
+    // is sent periodically by the DIS so the other ISs can detect missing or
+    // stale LSPs.
+    auto csnp = makeShared<IsisCsnpPacket>();
+    csnp->setPduType(L1_CSNP);
+    csnp->setSourceId(PseudonodeId(systemId, isisIft->localCircuitId));
+    LspId start, end;
+    end.setMax();
+    csnp->setStartLspId(start);
+    csnp->setEndLspId(end);
     for (auto& kv : lspDatabase) {
-        auto *packet = new Packet("IsisL1Lsp");
-        packet->insertAtBack(kv.second->lsp);
-        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::isis);
-        packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
-        packet->addTag<MacAddressReq>()->setDestAddress(ALL_L1_ISS);
-        llcSocket.send(packet);
+        IsisLspEntry e;
+        e.remainingLifetime = (uint16_t)std::max(0.0, (kv.second->expiryTime - simTime()).dbl());
+        e.lspId = kv.second->lspId;
+        e.sequenceNumber = kv.second->sequenceNumber;
+        e.checksum = 0;
+        csnp->appendLspEntries(e);
+    }
+    csnp->setChunkLength(B(8 + 7 + 8 + 8 + (int)csnp->getLspEntriesArraySize() * 16));
+
+    auto *packet = new Packet("IsisL1Csnp");
+    packet->insertAtBack(csnp);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::isis);
+    packet->addTag<InterfaceReq>()->setInterfaceId(isisIft->interfaceId);
+    packet->addTag<MacAddressReq>()->setDestAddress(ALL_L1_ISS);
+    EV_DETAIL << "Sending CSNP on " << ift->getInterfaceById(isisIft->interfaceId)->getInterfaceName()
+              << " (" << csnp->getLspEntriesArraySize() << " LSP entries)\n";
+    llcSocket.send(packet);
+}
+
+void Isis::processCsnp(Packet *packet)
+{
+    int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
+    const auto& csnp = packet->peekAtFront<IsisCsnpPacket>();
+    if (csnp->getPduType() != L1_CSNP)
+        return;
+
+    std::set<uint64_t> reported;
+    auto requests = makeShared<IsisPsnpPacket>();
+    requests->setPduType(L1_PSNP);
+    requests->setSourceId(PseudonodeId(systemId, 0));
+
+    for (size_t i = 0; i < csnp->getLspEntriesArraySize(); i++) {
+        const auto& e = csnp->getLspEntries(i);
+        uint64_t key = e.lspId.toInt();
+        reported.insert(key);
+        auto it = lspDatabase.find(key);
+        if (it == lspDatabase.end() || it->second->sequenceNumber < e.sequenceNumber) {
+            // we lack it or have an older copy -> request it
+            IsisLspEntry req;
+            req.lspId = e.lspId;
+            req.sequenceNumber = (it != lspDatabase.end()) ? it->second->sequenceNumber : 0;
+            req.remainingLifetime = 0;
+            req.checksum = 0;
+            requests->appendLspEntries(req);
+        }
+        else if (it->second->sequenceNumber > e.sequenceNumber) {
+            // our copy is newer -> send it back
+            sendLspOnInterface(it->second->lsp, interfaceId);
+        }
+    }
+    // LSPs we hold that the CSNP did not list -> the sender is missing them.
+    for (auto& kv : lspDatabase)
+        if (!reported.count(kv.first))
+            sendLspOnInterface(kv.second->lsp, interfaceId);
+
+    if (requests->getLspEntriesArraySize() > 0) {
+        requests->setChunkLength(B(8 + 7 + (int)requests->getLspEntriesArraySize() * 16));
+        auto *p = new Packet("IsisL1Psnp");
+        p->insertAtBack(requests);
+        p->addTag<PacketProtocolTag>()->setProtocol(&Protocol::isis);
+        p->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+        p->addTag<MacAddressReq>()->setDestAddress(ALL_L1_ISS);
+        llcSocket.send(p);
+    }
+}
+
+void Isis::processPsnp(Packet *packet)
+{
+    int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
+    const auto& psnp = packet->peekAtFront<IsisPsnpPacket>();
+    if (psnp->getPduType() != L1_PSNP)
+        return;
+    // Each entry requests an LSP newer than the reported sequence number; send
+    // ours if we have a newer copy.
+    for (size_t i = 0; i < psnp->getLspEntriesArraySize(); i++) {
+        const auto& e = psnp->getLspEntries(i);
+        auto it = lspDatabase.find(e.lspId.toInt());
+        if (it != lspDatabase.end() && it->second->sequenceNumber > e.sequenceNumber)
+            sendLspOnInterface(it->second->lsp, interfaceId);
     }
 }
 
@@ -849,6 +963,7 @@ void Isis::clearState()
 {
     for (auto *isisIft : isisInterfaces) {
         cancelAndDelete(isisIft->helloTimer);
+        cancelAndDelete(isisIft->csnpTimer);
         delete isisIft;
     }
     isisInterfaces.clear();

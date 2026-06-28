@@ -52,6 +52,7 @@ struct IsisInterface {
     simtime_t helloInterval;
     int holdMultiplier = 3;
     cMessage *helloTimer = nullptr;
+    cMessage *csnpTimer = nullptr;    // periodic CSNP (sent only while this router is the DIS)
 
     // Designated IS (DIS) election state for this LAN circuit (Level 1).
     bool isDis = false;               // is this router the DIS on this circuit?
@@ -165,6 +166,12 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
     virtual void ageLsps();
     virtual void purgeLsp(IsisLsp *entry, int exceptInterfaceId);
     virtual bool hasUpAdjacency(int interfaceId, int level);
+
+    // Sequence-number PDUs (reliable database synchronization)
+    virtual void sendCsnp(IsisInterface *isisIft);
+    virtual void processCsnp(Packet *packet);
+    virtual void processPsnp(Packet *packet);
+    virtual void sendLspOnInterface(const Ptr<const IsisLspPacket>& lsp, int interfaceId);
 
     // Shortest-path computation and route installation (Integrated IS-IS)
     virtual void scheduleSpf();
