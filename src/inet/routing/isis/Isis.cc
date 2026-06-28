@@ -32,7 +32,10 @@ Define_Module(Isis);
 static const int ISIS_SAP = 0xFE;
 
 // Self-message kinds.
-enum IsisTimerKind { HELLO_TIMER = 1, HOLD_TIMER = 2, REGENERATE_LSP_TIMER = 3, SPF_TIMER = 4 };
+enum IsisTimerKind {
+    HELLO_TIMER = 1, HOLD_TIMER = 2, REGENERATE_LSP_TIMER = 3, SPF_TIMER = 4,
+    REFRESH_TIMER = 5, AGE_TIMER = 6
+};
 
 // Returns true if dest/mask is one of this router's directly-connected networks.
 static bool isLocalNetwork(IInterfaceTable *ift, Ipv4Address dest, Ipv4Address mask)
@@ -98,6 +101,12 @@ void Isis::handleStartOperation(LifecycleOperation *operation)
         isisIft->helloTimer->setContextPointer(isisIft);
         scheduleAfter(uniform(0, isisIft->helloInterval), isisIft->helloTimer);
     }
+
+    refreshTimer = new cMessage("refreshTimer", REFRESH_TIMER);
+    scheduleAfter(par("lspRefreshInterval").doubleValue(), refreshTimer);
+    ageTimer = new cMessage("ageTimer", AGE_TIMER);
+    scheduleAfter(1.0, ageTimer);
+
     EV_INFO << "IS-IS started, system ID " << systemId << ", area " << areaId
             << ", on " << isisInterfaces.size() << " interface(s)\n";
 }
@@ -132,6 +141,14 @@ void Isis::handleMessageWhenUp(cMessage *msg)
                 break;
             case SPF_TIMER:
                 runSpf();
+                break;
+            case REFRESH_TIMER:
+                originateLsp();
+                scheduleAfter(par("lspRefreshInterval").doubleValue(), refreshTimer);
+                break;
+            case AGE_TIMER:
+                ageLsps();
+                scheduleAfter(1.0, ageTimer);
                 break;
             default:
                 throw cRuntimeError("Unknown self message kind %d", msg->getKind());
@@ -428,8 +445,9 @@ void Isis::installAndFloodOwnLsp(const Ptr<IsisLspPacket>& lsp)
     uint64_t key = lspId.toInt();
     auto it = lspDatabase.find(key);
     uint32_t seq = (it != lspDatabase.end()) ? it->second->sequenceNumber + 1 : 1;
+    int lifetime = (int)par("lspMaxLifetime").doubleValue();
     lsp->setSequenceNumber(seq);
-    lsp->setRemainingLifetime(1200);
+    lsp->setRemainingLifetime((uint16_t)lifetime);
 
     int len = 8 + (2 + 8 + 4 + 2 + 1)
             + (2 + (int)lsp->getAreaAddressesArraySize() * 4)
@@ -444,6 +462,7 @@ void Isis::installAndFloodOwnLsp(const Ptr<IsisLspPacket>& lsp)
         entry = new IsisLsp();
     entry->lspId = lspId;
     entry->sequenceNumber = seq;
+    entry->expiryTime = simTime() + lifetime;
     entry->lsp = constLsp;
 
     EV_INFO << "Originated LSP " << lspId << " seq " << seq
@@ -578,12 +597,25 @@ void Isis::processLsp(Packet *packet)
     LspId lspId = lsp->getLspId();
     uint64_t key = lspId.toInt();
     uint32_t seq = lsp->getSequenceNumber();
-
     auto it = lspDatabase.find(key);
+
+    if (lsp->getRemainingLifetime() == 0) {
+        // A purge: drop the LSP if we hold it and the purge is not stale.
+        if (it != lspDatabase.end() && seq >= it->second->sequenceNumber) {
+            EV_INFO << "Purging LSP " << lspId << " (received purge)\n";
+            delete it->second;
+            lspDatabase.erase(it);
+            floodLsp(lsp, interfaceId); // forward the purge
+            scheduleSpf();
+        }
+        return;
+    }
+
     if (it == lspDatabase.end() || seq > it->second->sequenceNumber) {
         IsisLsp *entry = (it != lspDatabase.end()) ? it->second : (lspDatabase[key] = new IsisLsp());
         entry->lspId = lspId;
         entry->sequenceNumber = seq;
+        entry->expiryTime = simTime() + lsp->getRemainingLifetime();
         entry->lsp = lsp;
         EV_INFO << "Installed LSP " << lspId << " seq " << seq << " from interface "
                 << ift->getInterfaceById(interfaceId)->getInterfaceName()
@@ -600,7 +632,39 @@ void Isis::processLsp(Packet *packet)
         p->addTag<MacAddressReq>()->setDestAddress(ALL_L1_ISS);
         llcSocket.send(p);
     }
-    // equal sequence number: synchronized (acknowledgement handled later)
+    else {
+        // Same sequence number: still alive, refresh our copy's expiry.
+        it->second->expiryTime = simTime() + lsp->getRemainingLifetime();
+    }
+}
+
+void Isis::ageLsps()
+{
+    std::vector<IsisLsp *> expired;
+    for (auto& kv : lspDatabase)
+        if (simTime() >= kv.second->expiryTime)
+            expired.push_back(kv.second);
+    for (auto *entry : expired) {
+        EV_INFO << "LSP " << entry->lspId << " expired; purging\n";
+        purgeLsp(entry, -1);
+    }
+    if (!expired.empty())
+        scheduleSpf();
+}
+
+void Isis::purgeLsp(IsisLsp *entry, int exceptInterfaceId)
+{
+    // Flood a zero-lifetime purge so neighbours also drop the LSP.
+    auto purge = makeShared<IsisLspPacket>();
+    purge->setPduType(L1_LSP);
+    purge->setLspId(entry->lspId);
+    purge->setSequenceNumber(entry->sequenceNumber);
+    purge->setRemainingLifetime(0);
+    purge->setChunkLength(B(8 + 17));
+    floodLsp(purge, exceptInterfaceId);
+
+    lspDatabase.erase(entry->lspId.toInt());
+    delete entry;
 }
 
 IsisLsp *Isis::lookupLsp(uint64_t nodeKey)
@@ -799,6 +863,14 @@ void Isis::clearState()
     if (regenerateLspTimer != nullptr) {
         cancelAndDelete(regenerateLspTimer);
         regenerateLspTimer = nullptr;
+    }
+    if (refreshTimer != nullptr) {
+        cancelAndDelete(refreshTimer);
+        refreshTimer = nullptr;
+    }
+    if (ageTimer != nullptr) {
+        cancelAndDelete(ageTimer);
+        ageTimer = nullptr;
     }
     if (spfTimer != nullptr) {
         cancelAndDelete(spfTimer);

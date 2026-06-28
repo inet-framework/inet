@@ -82,6 +82,7 @@ struct IsisAdjacency {
 struct IsisLsp {
     LspId lspId;
     uint32_t sequenceNumber = 0;
+    simtime_t expiryTime;             // when this LSP ages out (unless refreshed)
     Ptr<const IsisLspPacket> lsp;     // the stored LSP chunk
 };
 
@@ -111,6 +112,8 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
     // Level-1 link-state database, keyed by LspId::toInt().
     std::map<uint64_t, IsisLsp *> lspDatabase;
     cMessage *regenerateLspTimer = nullptr;
+    cMessage *refreshTimer = nullptr;
+    cMessage *ageTimer = nullptr;
     cMessage *spfTimer = nullptr;
 
     // IPv4 routes installed by IS-IS (Integrated IS-IS), for clean recomputation.
@@ -159,6 +162,8 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
     virtual void floodLsp(const Ptr<const IsisLspPacket>& lsp, int exceptInterfaceId);
     virtual void sendDatabaseToInterface(int interfaceId);
     virtual void processLsp(Packet *packet);
+    virtual void ageLsps();
+    virtual void purgeLsp(IsisLsp *entry, int exceptInterfaceId);
     virtual bool hasUpAdjacency(int interfaceId, int level);
 
     // Shortest-path computation and route installation (Integrated IS-IS)

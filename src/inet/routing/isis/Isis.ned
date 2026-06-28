@@ -36,6 +36,9 @@ simple Isis extends SimpleModule like IIsis
 
         xml configData = default(xml("<config/>")); // NET address, IS levels, and per-interface IS-IS settings
 
+        double lspRefreshInterval @unit(s) = default(900s);  // how often a router re-originates its own LSPs
+        double lspMaxLifetime @unit(s) = default(1200s);     // lifetime stamped into originated LSPs
+
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);
         double stopOperationTimeout @unit(s) = default(2s);
