@@ -48,6 +48,21 @@ class BindingUpdate extends MobilityHeader
 
     // for CN communication; value different from 0 shows that it is used
     int bindingAuthorizationData = 0; // 28.08.07 - CB
+
+    //
+    // Proxy Mobile IPv6 (RFC 5213). When proxyRegistrationFlag (the P-flag) is
+    // set, this Binding Update is a Proxy Binding Update (PBU) sent by a Mobile
+    // Access Gateway on behalf of an unmodified mobile node, and it carries the
+    // proxy mobility options below. The options are serialized on the wire only
+    // when the P-flag is set, so plain MIPv6 BUs are byte-identical to before.
+    //
+    bool proxyRegistrationFlag = false;        // P-flag (RFC 5213 Section 8.1)
+    string mobileNodeIdentifier;               // Mobile Node Identifier option (NAI), RFC 4283
+    Ipv6Address homeNetworkPrefix;             // Home Network Prefix option, RFC 5213 Section 8.3
+    uint8_t homeNetworkPrefixLength = 0;
+    uint8_t handoffIndicator = 0;              // Handoff Indicator option, RFC 5213 Section 8.4
+    uint8_t accessTechnologyType = 0;          // Access Technology Type option, RFC 5213 Section 8.5
+    uint64_t timestampValue = 0;               // Timestamp option, RFC 5213 Section 8.8 (0 = ordered by sequence number)
 }
 
 //Defining the status fields for the Binding Acknowledgement Message
@@ -67,6 +82,18 @@ enum BaStatus
     EXPIRED_CARE_OF_NONCE_INDEX = 137;
     EXPIRED_NONCES = 138;
     REGISTRATION_TYPE_CHANGE_DISALLOWED = 139;
+    // Proxy Mobile IPv6 status codes (RFC 5213 Section 8.1.1)
+    PROXY_REG_NOT_ENABLED = 152;
+    NOT_LMA_FOR_THIS_MOBILE_NODE = 153;
+    MAG_NOT_AUTHORIZED_FOR_PROXY_REG = 154;
+    NOT_AUTHORIZED_FOR_HOME_NETWORK_PREFIX = 155;
+    TIMESTAMP_MISMATCH = 156;
+    TIMESTAMP_LOWER_THAN_PREV_ACCEPTED = 157;
+    MISSING_HOME_NETWORK_PREFIX_OPTION = 159;
+    BCE_PBU_PREFIX_SET_DO_NOT_MATCH = 160;
+    MISSING_MN_IDENTIFIER_OPTION = 161;
+    MISSING_HANDOFF_INDICATOR_OPTION = 162;
+    MISSING_ACCESS_TECH_TYPE_OPTION = 163;
 }
 
 //==================Defining Binding Acknowledgement Message===================
@@ -80,6 +107,18 @@ class BindingAcknowledgement extends MobilityHeader
 
     // for CN communication; value different from 0 shows that it is used
     int bindingAuthorizationData = 0; // 28.08.07 - CB
+
+    //
+    // Proxy Mobile IPv6 (RFC 5213). When proxyRegistrationFlag (the P-flag) is
+    // set, this is a Proxy Binding Acknowledgement (PBA) and carries the proxy
+    // mobility options below (only serialized when the P-flag is set, so plain
+    // MIPv6 BAs are byte-identical to before).
+    //
+    bool proxyRegistrationFlag = false;        // P-flag (RFC 5213 Section 8.1)
+    string mobileNodeIdentifier;               // Mobile Node Identifier option (NAI), echoed back
+    Ipv6Address homeNetworkPrefix;             // Home Network Prefix option (assigned/confirmed)
+    uint8_t homeNetworkPrefixLength = 0;
+    uint64_t timestampValue = 0;               // Timestamp option, RFC 5213 Section 8.8
 }
 
 //==================Defining Binding Error Status====================

@@ -10,6 +10,7 @@ Ipv6Redirect, MobilityHeader subtypes, and Destination Options with HomeAddressO
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/mipv6/MobilityHeader_m.h"
+#include "inet/networklayer/mipv6/MobilityHeaderSerializer.h"
 
 using namespace inet;
 
@@ -109,6 +110,75 @@ Ptr<const T> roundTrip(const Ptr<const T>& original)
     EV << "  sequenceNumber: " << ba2->getSequenceNumber() << endl;
     EV << "  lifetime: " << ba2->getLifetime() << endl;
     EV << "  K-flag: " << ba2->getKeyManagementFlag() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 3a. ProxyBindingUpdate (RFC 5213) ===
+{
+    EV << "=== ProxyBindingUpdate ===" << endl;
+    const char *nai = "mn1@example.com";
+    auto pbu = makeShared<BindingUpdate>();
+    pbu->setMobilityHeaderType(BINDING_UPDATE);
+    pbu->setSequence(7);
+    pbu->setLifetime(3600);
+    pbu->setAckFlag(true);
+    pbu->setHomeRegistrationFlag(true);
+    pbu->setProxyRegistrationFlag(true);
+    pbu->setMobileNodeIdentifier(nai);
+    pbu->setHomeNetworkPrefix(Ipv6Address("2001:db8:1::"));
+    pbu->setHomeNetworkPrefixLength(64);
+    pbu->setHandoffIndicator(1);
+    pbu->setAccessTechnologyType(4);
+    pbu->setTimestampValue(0x1122334455667788ULL);
+    pbu->setChunkLength(MobilityHeaderSerializer::getProxyBindingUpdateLength(std::string(nai).size()));
+
+    auto r = roundTrip(staticPtrCast<const MobilityHeader>(pbu));
+    auto pbu2 = dynamicPtrCast<const BindingUpdate>(r);
+    ASSERT(pbu2 != nullptr);
+    ASSERT(pbu2->getProxyRegistrationFlag() == true);
+    ASSERT(std::string(pbu2->getMobileNodeIdentifier()) == nai);
+    ASSERT(pbu2->getHomeNetworkPrefix() == Ipv6Address("2001:db8:1::"));
+    ASSERT(pbu2->getHomeNetworkPrefixLength() == 64);
+    ASSERT(pbu2->getHandoffIndicator() == 1);
+    ASSERT(pbu2->getAccessTechnologyType() == 4);
+    ASSERT(pbu2->getTimestampValue() == 0x1122334455667788ULL);
+    ASSERT(pbu2->getSequence() == 7);
+    ASSERT(pbu2->getLifetime() == 3600);
+    EV << "  P-flag: " << pbu2->getProxyRegistrationFlag() << endl;
+    EV << "  mnId: " << pbu2->getMobileNodeIdentifier() << endl;
+    EV << "  HNP: " << pbu2->getHomeNetworkPrefix() << "/" << (int)pbu2->getHomeNetworkPrefixLength() << endl;
+    EV << "  HI: " << (int)pbu2->getHandoffIndicator() << " ATT: " << (int)pbu2->getAccessTechnologyType() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 3b. ProxyBindingAcknowledgement (RFC 5213) ===
+{
+    EV << "=== ProxyBindingAcknowledgement ===" << endl;
+    const char *nai = "mn1@example.com";
+    auto pba = makeShared<BindingAcknowledgement>();
+    pba->setMobilityHeaderType(BINDING_ACKNOWLEDGEMENT);
+    pba->setStatus(BINDING_UPDATE_ACCEPTED);
+    pba->setSequenceNumber(7);
+    pba->setLifetime(3600);
+    pba->setProxyRegistrationFlag(true);
+    pba->setMobileNodeIdentifier(nai);
+    pba->setHomeNetworkPrefix(Ipv6Address("2001:db8:1::"));
+    pba->setHomeNetworkPrefixLength(64);
+    pba->setTimestampValue(0x1122334455667788ULL);
+    pba->setChunkLength(MobilityHeaderSerializer::getProxyBindingAcknowledgementLength(std::string(nai).size()));
+
+    auto r = roundTrip(staticPtrCast<const MobilityHeader>(pba));
+    auto pba2 = dynamicPtrCast<const BindingAcknowledgement>(r);
+    ASSERT(pba2 != nullptr);
+    ASSERT(pba2->getProxyRegistrationFlag() == true);
+    ASSERT(std::string(pba2->getMobileNodeIdentifier()) == nai);
+    ASSERT(pba2->getHomeNetworkPrefix() == Ipv6Address("2001:db8:1::"));
+    ASSERT(pba2->getHomeNetworkPrefixLength() == 64);
+    ASSERT(pba2->getTimestampValue() == 0x1122334455667788ULL);
+    ASSERT(pba2->getStatus() == BINDING_UPDATE_ACCEPTED);
+    EV << "  P-flag: " << pba2->getProxyRegistrationFlag() << endl;
+    EV << "  mnId: " << pba2->getMobileNodeIdentifier() << endl;
+    EV << "  HNP: " << pba2->getHomeNetworkPrefix() << "/" << (int)pba2->getHomeNetworkPrefixLength() << endl;
     EV << "  PASS" << endl;
 }
 
@@ -328,6 +398,17 @@ EV << "All serializer round-trip tests passed." << endl;
   sequenceNumber: 42
   lifetime: 300
   K-flag: 1
+  PASS
+=== ProxyBindingUpdate ===
+  P-flag: 1
+  mnId: mn1@example.com
+  HNP: 2001:db8:1::/64
+  HI: 1 ATT: 4
+  PASS
+=== ProxyBindingAcknowledgement ===
+  P-flag: 1
+  mnId: mn1@example.com
+  HNP: 2001:db8:1::/64
   PASS
 === HomeTestInit ===
   homeInitCookie: 0xdeadbeef

@@ -7,6 +7,7 @@
 #include "inet/networklayer/mipv6/MobilityHeaderSerializer.h"
 
 #include <algorithm>
+#include <cstring>
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/mipv6/MobilityHeader_m.h"
@@ -18,6 +19,54 @@ namespace inet {
 // this quantization is applied only here, at the wire boundary, and over-long
 // lifetimes are clamped to the field maximum (0xFFFF * 4 s) rather than wrapping.
 static constexpr int BINDING_LIFETIME_UNIT = 4;
+
+// RFC 5213 proxy mobility option block, serialized after the fixed BU/BA fields
+// when the P-flag is set. We carry the options back-to-back in a fixed order
+// (this is a simulation model, not strict on-wire TLV typing): the Mobile Node
+// Identifier is length-prefixed, the others are fixed size. A Proxy Binding
+// Update carries MN-Id + Home Network Prefix + Handoff Indicator + Access
+// Technology Type + Timestamp; a Proxy Binding Acknowledgement omits the
+// Handoff Indicator and Access Technology Type.
+static constexpr int PROXY_HNP_OPTION_SIZE = 1 + 16;            // prefix length + 128-bit prefix
+static constexpr int PROXY_BU_FIXED_OPTIONS_SIZE = PROXY_HNP_OPTION_SIZE + 1 + 1 + 8; // + HI + ATT + timestamp
+static constexpr int PROXY_BA_FIXED_OPTIONS_SIZE = PROXY_HNP_OPTION_SIZE + 8;          // + timestamp
+
+static B roundUpToMobilityHeaderBoundary(int numBytes)
+{
+    return B((numBytes + 7) / 8 * 8); // Mobility Header length is a multiple of 8 octets (RFC 6275 6.1)
+}
+
+B MobilityHeaderSerializer::getProxyBindingUpdateLength(size_t mobileNodeIdentifierLength)
+{
+    // 6 (common MH) + 6 (BU fixed) + 1 (MN-Id length) + MN-Id + fixed proxy options
+    return roundUpToMobilityHeaderBoundary(6 + 6 + 1 + (int)mobileNodeIdentifierLength + PROXY_BU_FIXED_OPTIONS_SIZE);
+}
+
+B MobilityHeaderSerializer::getProxyBindingAcknowledgementLength(size_t mobileNodeIdentifierLength)
+{
+    // 6 (common MH) + 6 (BA fixed) + 1 (MN-Id length) + MN-Id + fixed proxy options
+    return roundUpToMobilityHeaderBoundary(6 + 6 + 1 + (int)mobileNodeIdentifierLength + PROXY_BA_FIXED_OPTIONS_SIZE);
+}
+
+// Writes/reads the length-prefixed Mobile Node Identifier (NAI). NAIs in the
+// model are short, so a single length octet (max 255) is sufficient.
+static void writeMobileNodeIdentifier(MemoryOutputStream& stream, const char *nai)
+{
+    size_t len = strlen(nai);
+    ASSERT(len <= 255);
+    stream.writeByte((uint8_t)len);
+    for (size_t i = 0; i < len; i++)
+        stream.writeByte((uint8_t)nai[i]);
+}
+
+static std::string readMobileNodeIdentifier(MemoryInputStream& stream)
+{
+    uint8_t len = stream.readByte();
+    std::string nai;
+    for (uint8_t i = 0; i < len; i++)
+        nai += (char)stream.readByte();
+    return nai;
+}
 
 Register_Serializer(MobilityHeader, MobilityHeaderSerializer);
 Register_Serializer(BindingUpdate, MobilityHeaderSerializer);
@@ -108,9 +157,19 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
             uint16_t flags = (bu->getAckFlag() ? 0x8000u : 0)
                     | (bu->getHomeRegistrationFlag() ? 0x4000u : 0)
                     | (bu->getLinkLocalAddressCompatibilityFlag() ? 0x2000u : 0)
-                    | (bu->getKeyManagementFlag() ? 0x1000u : 0);
+                    | (bu->getKeyManagementFlag() ? 0x1000u : 0)
+                    | (bu->getProxyRegistrationFlag() ? 0x0200u : 0); // P-flag (RFC 5213)
             stream.writeUint16Be(flags);
             stream.writeUint16Be(std::min(bu->getLifetime() / BINDING_LIFETIME_UNIT, 0xFFFFu));
+            // RFC 5213 proxy mobility options (only present when this is a Proxy Binding Update)
+            if (bu->getProxyRegistrationFlag()) {
+                writeMobileNodeIdentifier(stream, bu->getMobileNodeIdentifier());
+                stream.writeByte(bu->getHomeNetworkPrefixLength());
+                stream.writeIpv6Address(bu->getHomeNetworkPrefix());
+                stream.writeByte(bu->getHandoffIndicator());
+                stream.writeByte(bu->getAccessTechnologyType());
+                stream.writeUint64Be(bu->getTimestampValue());
+            }
             // Mobility options: write remaining bytes as padding
             b dataWritten = stream.getLength() - startPos;
             b remaining = b(totalLen) - dataWritten;
@@ -123,9 +182,17 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
             // RFC 6275 Section 6.1.8: status (1 byte) + K flag + reserved (1 byte) + sequence (2 bytes) + lifetime (2 bytes)
             auto ba = staticPtrCast<const BindingAcknowledgement>(chunk);
             stream.writeByte(ba->getStatus());
-            stream.writeByte(ba->getKeyManagementFlag() ? 0x80u : 0);
+            stream.writeByte((ba->getKeyManagementFlag() ? 0x80u : 0)
+                    | (ba->getProxyRegistrationFlag() ? 0x40u : 0)); // P-flag (RFC 5213)
             stream.writeUint16Be(ba->getSequenceNumber());
             stream.writeUint16Be(std::min(ba->getLifetime() / BINDING_LIFETIME_UNIT, 0xFFFFu));
+            // RFC 5213 proxy mobility options (only present when this is a Proxy Binding Acknowledgement)
+            if (ba->getProxyRegistrationFlag()) {
+                writeMobileNodeIdentifier(stream, ba->getMobileNodeIdentifier());
+                stream.writeByte(ba->getHomeNetworkPrefixLength());
+                stream.writeIpv6Address(ba->getHomeNetworkPrefix());
+                stream.writeUint64Be(ba->getTimestampValue());
+            }
             // Mobility options: write remaining bytes as padding
             b dataWritten = stream.getLength() - startPos;
             b remaining = b(totalLen) - dataWritten;
@@ -220,7 +287,17 @@ const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream
             bu->setHomeRegistrationFlag((flags & 0x4000u) != 0);
             bu->setLinkLocalAddressCompatibilityFlag((flags & 0x2000u) != 0);
             bu->setKeyManagementFlag((flags & 0x1000u) != 0);
+            bu->setProxyRegistrationFlag((flags & 0x0200u) != 0); // P-flag (RFC 5213)
             bu->setLifetime(stream.readUint16Be() * BINDING_LIFETIME_UNIT);
+            // RFC 5213 proxy mobility options (only present in a Proxy Binding Update)
+            if (bu->getProxyRegistrationFlag()) {
+                bu->setMobileNodeIdentifier(readMobileNodeIdentifier(stream).c_str());
+                bu->setHomeNetworkPrefixLength(stream.readByte());
+                bu->setHomeNetworkPrefix(stream.readIpv6Address());
+                bu->setHandoffIndicator(stream.readByte());
+                bu->setAccessTechnologyType(stream.readByte());
+                bu->setTimestampValue(stream.readUint64Be());
+            }
             // Skip remaining mobility options
             b consumed = stream.getPosition() - startPos;
             b remaining = b(totalLen) - consumed;
@@ -236,8 +313,16 @@ const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream
             ba->setStatus(static_cast<BaStatus>(stream.readByte()));
             uint8_t kFlag = stream.readByte();
             ba->setKeyManagementFlag((kFlag & 0x80u) != 0);
+            ba->setProxyRegistrationFlag((kFlag & 0x40u) != 0); // P-flag (RFC 5213)
             ba->setSequenceNumber(stream.readUint16Be());
             ba->setLifetime(stream.readUint16Be() * BINDING_LIFETIME_UNIT);
+            // RFC 5213 proxy mobility options (only present in a Proxy Binding Acknowledgement)
+            if (ba->getProxyRegistrationFlag()) {
+                ba->setMobileNodeIdentifier(readMobileNodeIdentifier(stream).c_str());
+                ba->setHomeNetworkPrefixLength(stream.readByte());
+                ba->setHomeNetworkPrefix(stream.readIpv6Address());
+                ba->setTimestampValue(stream.readUint64Be());
+            }
             // Skip remaining mobility options
             b consumed = stream.getPosition() - startPos;
             b remaining = b(totalLen) - consumed;
