@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <set>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
@@ -20,6 +21,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/contract/clns/ClnsAddress.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4Route.h"
 
 namespace inet {
 namespace isis {
@@ -30,7 +32,23 @@ Define_Module(Isis);
 static const int ISIS_SAP = 0xFE;
 
 // Self-message kinds.
-enum IsisTimerKind { HELLO_TIMER = 1, HOLD_TIMER = 2, REGENERATE_LSP_TIMER = 3 };
+enum IsisTimerKind { HELLO_TIMER = 1, HOLD_TIMER = 2, REGENERATE_LSP_TIMER = 3, SPF_TIMER = 4 };
+
+// Returns true if dest/mask is one of this router's directly-connected networks.
+static bool isLocalNetwork(IInterfaceTable *ift, Ipv4Address dest, Ipv4Address mask)
+{
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        auto *ie = ift->getInterface(i);
+        if (ie->isLoopback())
+            continue;
+        auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+        if (ipv4Data == nullptr || ipv4Data->getIPAddress().isUnspecified())
+            continue;
+        if (ipv4Data->getNetmask() == mask && ipv4Data->getIPAddress().doAnd(mask) == dest)
+            return true;
+    }
+    return false;
+}
 
 const MacAddress Isis::ALL_L1_ISS("01:80:C2:00:00:14");
 const MacAddress Isis::ALL_L2_ISS("01:80:C2:00:00:15");
@@ -46,6 +64,9 @@ void Isis::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         ift.reference(this, "interfaceTableModule", true);
+        const char *rtModule = par("routingTableModule").stringValue();
+        if (rtModule && rtModule[0])
+            rt.reference(this, "routingTableModule", true);
         adjacencyChangedSignal = registerSignal("adjacencyChanged");
         llcSocket.setOutputGate(gate("socketOut"));
         llcSocket.setCallback(this);
@@ -85,6 +106,7 @@ void Isis::handleStopOperation(LifecycleOperation *operation)
 {
     if (llcSocket.isOpen())
         llcSocket.close();
+    removeIsisRoutes();
     clearState();
 }
 
@@ -107,6 +129,9 @@ void Isis::handleMessageWhenUp(cMessage *msg)
                 break;
             case REGENERATE_LSP_TIMER:
                 originateLsp();
+                break;
+            case SPF_TIMER:
+                runSpf();
                 break;
             default:
                 throw cRuntimeError("Unknown self message kind %d", msg->getKind());
@@ -307,6 +332,8 @@ void Isis::processHello(Packet *packet)
     adj->snpa = srcMac;
     if (hello->getAreaAddressesArraySize() > 0)
         adj->neighbourAreaId = hello->getAreaAddresses(0);
+    if (hello->getIpInterfaceAddressesArraySize() > 0)
+        adj->neighbourIpAddress = hello->getIpInterfaceAddresses(0);
 
     // Two-way check: are we listed in the neighbour's IS Neighbours TLV?
     MacAddress myMac = ift->getInterfaceById(interfaceId)->getMacAddress();
@@ -371,14 +398,18 @@ void Isis::originateLsp()
         lsp->appendIsReachabilities(reach);
     }
 
-    // IP reachability: the prefix of each IS-IS interface.
-    for (auto *isisIft : isisInterfaces) {
-        auto *ie = ift->getInterfaceById(isisIft->interfaceId);
+    // IP reachability: every directly-connected IPv4 prefix (Integrated IS-IS),
+    // including subnets on non-IS-IS (passive) interfaces.
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        auto *ie = ift->getInterface(i);
+        if (ie->isLoopback())
+            continue;
         auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
         if (ipv4Data == nullptr || ipv4Data->getIPAddress().isUnspecified())
             continue;
+        auto *isisIft = findInterface(ie->getInterfaceId());
         IsisIpReachability ipReach;
-        ipReach.metric = isisIft->metric;
+        ipReach.metric = isisIft ? isisIft->metric : 10;
         ipReach.address = ipv4Data->getIPAddress().doAnd(ipv4Data->getNetmask());
         ipReach.mask = ipv4Data->getNetmask();
         lsp->appendIpInternalReachabilities(ipReach);
@@ -404,6 +435,7 @@ void Isis::originateLsp()
             << lsp->getIpInternalReachabilitiesArraySize() << " IP reachabilities)\n";
 
     floodLsp(constLsp, -1);
+    scheduleSpf();
 }
 
 bool Isis::hasUpAdjacency(int interfaceId, int level)
@@ -430,6 +462,21 @@ void Isis::floodLsp(const Ptr<const IsisLspPacket>& lsp, int exceptInterfaceId)
     }
 }
 
+void Isis::sendDatabaseToInterface(int interfaceId)
+{
+    // Send every known LSP out one interface; used to synchronize the database
+    // with a neighbour when an adjacency comes up (so a late-forming adjacency
+    // still receives LSPs that were flooded before it existed).
+    for (auto& kv : lspDatabase) {
+        auto *packet = new Packet("IsisL1Lsp");
+        packet->insertAtBack(kv.second->lsp);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::isis);
+        packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+        packet->addTag<MacAddressReq>()->setDestAddress(ALL_L1_ISS);
+        llcSocket.send(packet);
+    }
+}
+
 void Isis::processLsp(Packet *packet)
 {
     int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
@@ -451,7 +498,7 @@ void Isis::processLsp(Packet *packet)
                 << ift->getInterfaceById(interfaceId)->getInterfaceName()
                 << " (" << lspDatabase.size() << " LSPs in database)\n";
         floodLsp(lsp, interfaceId); // forward to the other interfaces
-        // TODO trigger SPF (Phase 6)
+        scheduleSpf();
     }
     else if (seq < it->second->sequenceNumber) {
         // Our copy is newer: send it back out the arrival interface.
@@ -463,6 +510,141 @@ void Isis::processLsp(Packet *packet)
         llcSocket.send(p);
     }
     // equal sequence number: synchronized (acknowledgement handled later)
+}
+
+IsisLsp *Isis::lookupLsp(uint64_t sysId)
+{
+    LspId id(PseudonodeId(SystemId(sysId), 0));
+    auto it = lspDatabase.find(id.toInt());
+    return it != lspDatabase.end() ? it->second : nullptr;
+}
+
+IsisAdjacency *Isis::findUpAdjacencyTo(uint64_t sysId)
+{
+    for (auto *adj : adjacencies)
+        if (adj->state == ISIS_ADJ_UP && adj->neighbourSystemId.getSystemId() == sysId)
+            return adj;
+    return nullptr;
+}
+
+void Isis::scheduleSpf()
+{
+    if (spfTimer == nullptr)
+        spfTimer = new cMessage("spfTimer", SPF_TIMER);
+    if (!spfTimer->isScheduled())
+        scheduleAfter(0.2, spfTimer);
+}
+
+void Isis::removeIsisRoutes()
+{
+    if (rt)
+        for (auto *route : isisRoutes)
+            rt->deleteRoute(route);
+    isisRoutes.clear();
+}
+
+void Isis::runSpf()
+{
+    if (!rt)
+        return;
+
+    // A node in the shortest-path computation.
+    struct SpfNode {
+        uint32_t distance = 0;
+        int firstHopInterfaceId = -1;
+        Ipv4Address nextHop;
+    };
+
+    uint64_t self = systemId.getSystemId();
+    std::map<uint64_t, SpfNode> paths;     // finalized shortest paths
+    std::map<uint64_t, SpfNode> tentative;
+    tentative[self] = SpfNode();
+
+    // Dijkstra over the Level-1 link-state database.
+    while (!tentative.empty()) {
+        auto best = tentative.begin();
+        for (auto it = tentative.begin(); it != tentative.end(); ++it)
+            if (it->second.distance < best->second.distance)
+                best = it;
+        uint64_t u = best->first;
+        SpfNode uNode = best->second;
+        tentative.erase(best);
+        paths[u] = uNode;
+
+        IsisLsp *lspEntry = lookupLsp(u);
+        if (lspEntry == nullptr)
+            continue;
+        const auto& lsp = lspEntry->lsp;
+        for (size_t k = 0; k < lsp->getIsReachabilitiesArraySize(); k++) {
+            const auto& reach = lsp->getIsReachabilities(k);
+            uint64_t v = reach.neighbourId.getSystemId().getSystemId();
+            if (paths.count(v))
+                continue;
+            SpfNode vNode;
+            vNode.distance = uNode.distance + reach.metric;
+            if (u == self) {
+                // direct neighbour: the first hop is our adjacency to v
+                auto *adj = findUpAdjacencyTo(v);
+                if (adj == nullptr)
+                    continue;
+                vNode.firstHopInterfaceId = adj->interfaceId;
+                vNode.nextHop = adj->neighbourIpAddress;
+            }
+            else {
+                vNode.firstHopInterfaceId = uNode.firstHopInterfaceId;
+                vNode.nextHop = uNode.nextHop;
+            }
+            auto it = tentative.find(v);
+            if (it == tentative.end() || vNode.distance < it->second.distance)
+                tentative[v] = vNode;
+        }
+    }
+
+    // Install IP routes, shortest distance first so duplicates keep the best path.
+    removeIsisRoutes();
+    std::vector<std::pair<uint32_t, uint64_t>> ordered;
+    for (auto& kv : paths)
+        if (kv.first != self)
+            ordered.push_back({ kv.second.distance, kv.first });
+    std::sort(ordered.begin(), ordered.end());
+
+    std::set<std::pair<uint32_t, uint32_t>> installed;
+    for (auto& [dist, u] : ordered) {
+        SpfNode& node = paths[u];
+        if (node.firstHopInterfaceId < 0 || node.nextHop.isUnspecified())
+            continue;
+        IsisLsp *lspEntry = lookupLsp(u);
+        if (lspEntry == nullptr)
+            continue;
+        auto *outIe = ift->getInterfaceById(node.firstHopInterfaceId);
+        const auto& lsp = lspEntry->lsp;
+        for (size_t k = 0; k < lsp->getIpInternalReachabilitiesArraySize(); k++) {
+            const auto& ipr = lsp->getIpInternalReachabilities(k);
+            Ipv4Address dest = ipr.address;
+            Ipv4Address mask = ipr.mask;
+            if (dest.isUnspecified())
+                continue;
+            auto key = std::make_pair(dest.getInt(), mask.getInt());
+            if (installed.count(key) || isLocalNetwork(ift, dest, mask))
+                continue;
+            installed.insert(key);
+
+            auto *route = new Ipv4Route();
+            route->setDestination(dest);
+            route->setNetmask(mask);
+            route->setGateway(node.nextHop);
+            route->setInterface(outIe);
+            route->setSourceType(IRoute::ISIS);
+            route->setAdminDist(Ipv4Route::dISIS);
+            route->setMetric(node.distance + ipr.metric);
+            rt->addRoute(route);
+            isisRoutes.push_back(route);
+
+            EV_INFO << "Installed IS-IS route " << dest << "/" << mask.getNetmaskLength()
+                    << " via " << node.nextHop << " dev " << outIe->getInterfaceName()
+                    << " metric " << route->getMetric() << "\n";
+        }
+    }
 }
 
 void Isis::setAdjacencyState(IsisAdjacency *adj, IsisAdjacencyState newState)
@@ -481,6 +663,10 @@ void Isis::setAdjacencyState(IsisAdjacency *adj, IsisAdjacencyState newState)
     // (re)originate our LSP.
     if (newState == ISIS_ADJ_UP || oldState == ISIS_ADJ_UP)
         scheduleLspRegeneration();
+
+    // Synchronize our whole database with a newly established neighbour.
+    if (newState == ISIS_ADJ_UP)
+        sendDatabaseToInterface(adj->interfaceId);
 }
 
 IsisInterface *Isis::findInterface(int interfaceId)
@@ -518,6 +704,11 @@ void Isis::clearState()
         cancelAndDelete(regenerateLspTimer);
         regenerateLspTimer = nullptr;
     }
+    if (spfTimer != nullptr) {
+        cancelAndDelete(spfTimer);
+        spfTimer = nullptr;
+    }
+    isisRoutes.clear();
     myLspSequenceNumber = 0;
 }
 

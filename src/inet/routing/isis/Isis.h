@@ -19,11 +19,15 @@
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/isis/IsisCommon.h"
 #include "inet/routing/isis/IsisMessages_m.h"
 
 namespace inet {
+
+class Ipv4Route;
+
 namespace isis {
 
 //
@@ -59,6 +63,7 @@ struct IsisAdjacency {
     SystemId neighbourSystemId;
     AreaId neighbourAreaId;
     MacAddress snpa;                  // neighbour's MAC (SNPA)
+    Ipv4Address neighbourIpAddress;   // neighbour's IP on this link (next hop for routes)
     IsisAdjacencyState state = ISIS_ADJ_DOWN;
     cMessage *holdTimer = nullptr;
 };
@@ -93,10 +98,16 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
     std::vector<IsisInterface *> isisInterfaces;
     std::vector<IsisAdjacency *> adjacencies;
 
+    ModuleRefByPar<IIpv4RoutingTable> rt;
+
     // Level-1 link-state database, keyed by LspId::toInt().
     std::map<uint64_t, IsisLsp *> lspDatabase;
     uint32_t myLspSequenceNumber = 0;
     cMessage *regenerateLspTimer = nullptr;
+    cMessage *spfTimer = nullptr;
+
+    // IPv4 routes installed by IS-IS (Integrated IS-IS), for clean recomputation.
+    std::vector<Ipv4Route *> isisRoutes;
 
     simsignal_t adjacencyChangedSignal;
 
@@ -134,8 +145,16 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
     virtual void scheduleLspRegeneration();
     virtual void originateLsp();
     virtual void floodLsp(const Ptr<const IsisLspPacket>& lsp, int exceptInterfaceId);
+    virtual void sendDatabaseToInterface(int interfaceId);
     virtual void processLsp(Packet *packet);
     virtual bool hasUpAdjacency(int interfaceId, int level);
+
+    // Shortest-path computation and route installation (Integrated IS-IS)
+    virtual void scheduleSpf();
+    virtual void runSpf();
+    virtual void removeIsisRoutes();
+    virtual IsisLsp *lookupLsp(uint64_t systemId);
+    virtual IsisAdjacency *findUpAdjacencyTo(uint64_t systemId);
 
     virtual IsisInterface *findInterface(int interfaceId);
     virtual IsisAdjacency *findAdjacency(int interfaceId, int level, const SystemId& sysId);
