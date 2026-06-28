@@ -1,0 +1,4 @@
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+/examples/lisp/basic/,        -f omnetpp.ini -c General -r 0,   20s,  b40d-b994/tplx;491d-a1da/~tNl, PASS, lisp Ipv4 Udp
+/examples/lisp/registration/, -f omnetpp.ini -c General -r 0,   10s,  3784-105f/tplx, PASS, lisp Ipv4 Udp
+/examples/lisp/mapserver/,    -f omnetpp.ini -c General -r 0,   30s,  89aa-087c/tplx, PASS, lisp Ipv4 Udp
