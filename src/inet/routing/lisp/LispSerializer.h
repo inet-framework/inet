@@ -12,6 +12,7 @@
 #define __INET_LISPSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
+#include "inet/routing/lisp/LispMessages_m.h"
 
 namespace inet {
 namespace lisp {
@@ -29,8 +30,27 @@ class INET_API LispHeaderSerializer : public FieldsChunkSerializer
     LispHeaderSerializer() : FieldsChunkSerializer() {}
 };
 
-// TODO control-message serializers (Map-Request/Reply/Register/Notify) need the
-// modules to set the exact chunkLength of their variable-length records first.
+/**
+ * Serializes/deserializes the LISP control messages (Map-Request/Reply/Register/Notify,
+ * RFC 6830, section 6), including their AFI-encoded addresses and EID-to-RLOC records.
+ * The concrete message is selected by the leading type octet.
+ */
+class INET_API LispControlMessageSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+
+  public:
+    LispControlMessageSerializer() : FieldsChunkSerializer() {}
+};
+
+// Wire-length helpers so the modules can set each chunk's exact length before it is serialized.
+B lispAfiAddressLength(const L3Address& address);
+B lispMapRecordLength(const LispMapRecord& record);
+B lispMapRegisterLength(const LispMapRegister& msg);
+B lispMapReplyLength(const LispMapReply& msg);
+B lispMapRequestLength(const LispMapRequest& msg);
 
 } // namespace lisp
 } // namespace inet

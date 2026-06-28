@@ -18,6 +18,7 @@
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/routing/lisp/LispCommon.h"
 #include "inet/routing/lisp/LispMessages_m.h"
+#include "inet/routing/lisp/LispSerializer.h"
 #include "inet/routing/lisp/LispTimers_m.h"
 
 namespace inet {
@@ -354,6 +355,7 @@ void Lisp::sendMapRegister(LispServerEntry& se)
     for (const auto& entry : storage)
         lmreg->setRecords(i++, makeMapRecord(entry, true, LispCommon::NO_ACTION));
     lmreg->setRecordCount(storage.size());
+    lmreg->setChunkLength(lispMapRegisterLength(*lmreg));
 
     auto packet = new Packet("LispMapRegister");
     packet->insertAtBack(lmreg);
@@ -412,6 +414,7 @@ void Lisp::sendMapRequest(const L3Address& dstEid)
     lmreq->setRecsArraySize(1);
     lmreq->setRecs(0, rec);
     lmreq->setRecordCount(1);
+    lmreq->setChunkLength(lispMapRequestLength(*lmreq));
 
     auto packet = new Packet("LispMapRequest");
     packet->insertAtBack(lmreq);
@@ -455,6 +458,7 @@ void Lisp::sendMapReply(uint64_t nonce, const L3Address& dst, LispSiteRecord& et
     lmrep->setRecordsArraySize(1);
     lmrep->setRecords(0, makeMapRecord(*me, false, LispCommon::NO_ACTION));
     lmrep->setRecordCount(1);
+    lmrep->setChunkLength(lispMapReplyLength(*lmrep));
 
     auto packet = new Packet("LispMapReply");
     packet->insertAtBack(lmrep);
