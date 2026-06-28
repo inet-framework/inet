@@ -134,3 +134,84 @@ class IsisPtpHelloPacket extends IsisHelloPacket
     SystemId neighbourSystemId;
     uint32_t neighbourExtendedLocalCircuitId = 0;
 }
+
+//
+// One entry of the IS Neighbours TLV (TLV 2) of a Link State PDU: a neighbouring
+// IS or pseudonode reachable from the originator, with the metric of the link.
+// Wide (RFC 5305 style) metric.
+//
+struct IsisIsReachability
+{
+    @packetData;
+    uint32_t metric = 10;
+    PseudonodeId neighbourId;
+}
+
+//
+// One entry of an IP Reachability TLV (TLV 128 internal / TLV 130 external) of a
+// Link State PDU: an IPv4 prefix reachable from the originator, used by
+// Integrated IS-IS (RFC 1195) to install IP routes.
+//
+struct IsisIpReachability
+{
+    @packetData;
+    uint32_t metric = 10;
+    Ipv4Address address;
+    Ipv4Address mask;
+}
+
+//
+// One entry of the LSP Entries TLV (TLV 9), describing a single LSP by ID,
+// sequence number, remaining lifetime and checksum. Carried in CSNPs (to
+// advertise the database contents) and PSNPs (to request or acknowledge LSPs).
+//
+struct IsisLspEntry
+{
+    @packetData;
+    uint16_t remainingLifetime;
+    LspId lspId;
+    uint32_t sequenceNumber;
+    uint16_t checksum;
+}
+
+//
+// Link State PDU (Level 1 or Level 2). Carries the originator's area addresses,
+// supported protocols, IS-neighbour reachability (for the SPF graph) and IP
+// reachability (for Integrated IS-IS route installation).
+//
+class IsisLspPacket extends IsisPdu
+{
+    uint16_t remainingLifetime = 1200;
+    LspId lspId;
+    uint32_t sequenceNumber = 1;
+    uint16_t checksum = 0;
+    // P (1b) | ATT (4b) | OL (1b) | IS Type (2b); default = Level-1 IS.
+    uint8_t lspFlags = 0x01;
+    AreaId areaAddresses[];
+    uint8_t protocolsSupported[];                  // NLPIDs, see IsisNlpid
+    IsisIsReachability isReachabilities[];         // TLV 2
+    IsisIpReachability ipInternalReachabilities[]; // TLV 128
+    IsisIpReachability ipExternalReachabilities[]; // TLV 130
+}
+
+//
+// Complete Sequence Numbers PDU (Level 1 or Level 2): advertises, over the range
+// [startLspId, endLspId], the sender's full set of known LSPs as LSP entries.
+//
+class IsisCsnpPacket extends IsisPdu
+{
+    PseudonodeId sourceId;
+    LspId startLspId;
+    LspId endLspId;
+    IsisLspEntry lspEntries[];   // TLV 9
+}
+
+//
+// Partial Sequence Numbers PDU (Level 1 or Level 2): requests or acknowledges a
+// partial set of LSPs, listed as LSP entries.
+//
+class IsisPsnpPacket extends IsisPdu
+{
+    PseudonodeId sourceId;
+    IsisLspEntry lspEntries[];   // TLV 9
+}
