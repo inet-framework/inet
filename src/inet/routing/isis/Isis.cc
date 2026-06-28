@@ -215,6 +215,7 @@ void Isis::parseConfig()
 
             auto *isisIft = new IsisInterface();
             isisIft->interfaceId = ie->getInterfaceId();
+            isisIft->localCircuitId = (int)isisInterfaces.size() + 1;
             const char *metric = element->getAttribute("metric");
             if (metric)
                 isisIft->metric = atoi(metric);
@@ -237,6 +238,7 @@ void Isis::parseConfig()
                 continue;
             auto *isisIft = new IsisInterface();
             isisIft->interfaceId = ie->getInterfaceId();
+            isisIft->localCircuitId = (int)isisInterfaces.size() + 1;
             isisIft->helloInterval = SimTime(10, SIMTIME_S);
             isisIft->circuitType = isType;
             isisInterfaces.push_back(isisIft);
@@ -263,7 +265,7 @@ void Isis::sendLanHello(IsisInterface *isisIft, int level)
     hello->setSourceId(systemId);
     hello->setHoldTime((uint16_t)std::ceil((isisIft->helloInterval * isisIft->holdMultiplier).dbl()));
     hello->setPriority(isisIft->priority);
-    hello->setLanId(PseudonodeId(systemId, 0)); // DIS election deferred
+    hello->setLanId(isisIft->disValid ? isisIft->disPseudonodeId : PseudonodeId(systemId, 0));
 
     hello->appendAreaAddresses(areaId);
     hello->appendProtocolsSupported(NLPID_IPV4);
@@ -330,6 +332,8 @@ void Isis::processHello(Packet *packet)
                 << " heard on interface " << ift->getInterfaceById(interfaceId)->getInterfaceName() << "\n";
     }
     adj->snpa = srcMac;
+    adj->priority = hello->getPriority();
+    adj->lanId = hello->getLanId();
     if (hello->getAreaAddressesArraySize() > 0)
         adj->neighbourAreaId = hello->getAreaAddresses(0);
     if (hello->getIpInterfaceAddressesArraySize() > 0)
@@ -351,6 +355,8 @@ void Isis::processHello(Packet *packet)
         adj->holdTimer->setContextPointer(adj);
     }
     rescheduleAfter(hello->getHoldTime(), adj->holdTimer);
+
+    runDisElection(isisIft);
 }
 
 void Isis::handleHoldTimer(IsisAdjacency *adj)
@@ -359,8 +365,53 @@ void Isis::handleHoldTimer(IsisAdjacency *adj)
             << adj->neighbourSystemId << "; tearing down adjacency\n";
     setAdjacencyState(adj, ISIS_ADJ_DOWN);
     adjacencies.erase(std::remove(adjacencies.begin(), adjacencies.end(), adj), adjacencies.end());
+    int interfaceId = adj->interfaceId;
     cancelAndDelete(adj->holdTimer);
     delete adj;
+    if (auto *isisIft = findInterface(interfaceId))
+        runDisElection(isisIft);
+}
+
+void Isis::runDisElection(IsisInterface *isisIft)
+{
+    if (!isisIft->broadcast)
+        return; // DIS election applies to LAN circuits only
+
+    // Highest priority wins; ties are broken by the highest SNPA (MAC address).
+    int bestPriority = isisIft->priority;
+    MacAddress bestSnpa = ift->getInterfaceById(isisIft->interfaceId)->getMacAddress();
+    IsisAdjacency *bestAdj = nullptr; // null => this router is the DIS
+
+    for (auto *adj : adjacencies) {
+        if (adj->interfaceId != isisIft->interfaceId || adj->level != 1 || adj->state != ISIS_ADJ_UP)
+            continue;
+        if (adj->priority > bestPriority || (adj->priority == bestPriority && adj->snpa > bestSnpa)) {
+            bestPriority = adj->priority;
+            bestSnpa = adj->snpa;
+            bestAdj = adj;
+        }
+    }
+
+    bool wasDis = isisIft->isDis;
+    bool oldValid = isisIft->disValid;
+    PseudonodeId oldDis = isisIft->disPseudonodeId;
+
+    if (bestAdj == nullptr) {
+        isisIft->isDis = true;
+        isisIft->disPseudonodeId = PseudonodeId(systemId, isisIft->localCircuitId);
+    }
+    else {
+        isisIft->isDis = false;
+        isisIft->disPseudonodeId = bestAdj->lanId; // the DIS advertises its own pseudonode
+    }
+    isisIft->disValid = true;
+
+    if (isisIft->isDis != wasDis || !oldValid || !(isisIft->disPseudonodeId == oldDis)) {
+        EV_INFO << "DIS on " << ift->getInterfaceById(isisIft->interfaceId)->getInterfaceName()
+                << " is " << (isisIft->isDis ? "this router" : "a neighbour")
+                << ", pseudonode " << isisIft->disPseudonodeId << "\n";
+        scheduleLspRegeneration();
+    }
 }
 
 void Isis::scheduleLspRegeneration()
@@ -371,30 +422,59 @@ void Isis::scheduleLspRegeneration()
         scheduleAfter(0.1, regenerateLspTimer);
 }
 
+void Isis::installAndFloodOwnLsp(const Ptr<IsisLspPacket>& lsp)
+{
+    LspId lspId = lsp->getLspId();
+    uint64_t key = lspId.toInt();
+    auto it = lspDatabase.find(key);
+    uint32_t seq = (it != lspDatabase.end()) ? it->second->sequenceNumber + 1 : 1;
+    lsp->setSequenceNumber(seq);
+    lsp->setRemainingLifetime(1200);
+
+    int len = 8 + (2 + 8 + 4 + 2 + 1)
+            + (2 + (int)lsp->getAreaAddressesArraySize() * 4)
+            + (2 + (int)lsp->getProtocolsSupportedArraySize())
+            + (2 + (int)lsp->getIsReachabilitiesArraySize() * 11)
+            + (2 + (int)lsp->getIpInternalReachabilitiesArraySize() * 12);
+    lsp->setChunkLength(B(len));
+
+    Ptr<const IsisLspPacket> constLsp = lsp;
+    IsisLsp *&entry = lspDatabase[key];
+    if (entry == nullptr)
+        entry = new IsisLsp();
+    entry->lspId = lspId;
+    entry->sequenceNumber = seq;
+    entry->lsp = constLsp;
+
+    EV_INFO << "Originated LSP " << lspId << " seq " << seq
+            << " (" << lsp->getIsReachabilitiesArraySize() << " IS, "
+            << lsp->getIpInternalReachabilitiesArraySize() << " IP reachabilities)\n";
+    floodLsp(constLsp, -1);
+}
+
 void Isis::originateLsp()
 {
     if (!(isType & L1_TYPE))
         return; // only Level-1 LSPs are generated so far
 
+    // This router's own (non-pseudonode) LSP.
     auto lsp = makeShared<IsisLspPacket>();
     lsp->setPduType(L1_LSP);
-    LspId myLspId(PseudonodeId(systemId, 0)); // own (non-pseudonode) LSP, fragment 0
-    lsp->setLspId(myLspId);
-    lsp->setSequenceNumber(++myLspSequenceNumber);
-    lsp->setRemainingLifetime(1200);
+    lsp->setLspId(LspId(PseudonodeId(systemId, 0)));
     lsp->setLspFlags(0x01); // Level-1 IS
-
     lsp->appendAreaAddresses(areaId);
     lsp->appendProtocolsSupported(NLPID_IPV4);
 
-    // IS reachability: one entry per UP Level-1 adjacency.
-    for (auto *adj : adjacencies) {
-        if (adj->level != 1 || adj->state != ISIS_ADJ_UP)
+    // IS reachability: to the pseudonode of each LAN circuit with an elected DIS
+    // (the pseudonode LSP in turn lists every IS on that LAN).
+    for (auto *isisIft : isisInterfaces) {
+        if (!isisIft->broadcast || !isisIft->disValid)
+            continue;
+        if (!hasUpAdjacency(isisIft->interfaceId, 1))
             continue;
         IsisIsReachability reach;
-        auto *isisIft = findInterface(adj->interfaceId);
-        reach.metric = isisIft ? isisIft->metric : 10;
-        reach.neighbourId = PseudonodeId(adj->neighbourSystemId, 0);
+        reach.metric = isisIft->metric;
+        reach.neighbourId = isisIft->disPseudonodeId;
         lsp->appendIsReachabilities(reach);
     }
 
@@ -414,28 +494,39 @@ void Isis::originateLsp()
         ipReach.mask = ipv4Data->getNetmask();
         lsp->appendIpInternalReachabilities(ipReach);
     }
+    installAndFloodOwnLsp(lsp);
 
-    int len = 8 + (2 + 8 + 4 + 2 + 1)
-            + (2 + (int)lsp->getAreaAddressesArraySize() * 4)
-            + (2 + (int)lsp->getProtocolsSupportedArraySize())
-            + (2 + (int)lsp->getIsReachabilitiesArraySize() * 11)
-            + (2 + (int)lsp->getIpInternalReachabilitiesArraySize() * 12);
-    lsp->setChunkLength(B(len));
+    // Pseudonode LSPs for the LAN circuits on which this router is the DIS.
+    for (auto *isisIft : isisInterfaces)
+        if (isisIft->broadcast && isisIft->isDis)
+            originatePseudonodeLsp(isisIft);
 
-    Ptr<const IsisLspPacket> constLsp = lsp;
-    IsisLsp *&entry = lspDatabase[myLspId.toInt()];
-    if (entry == nullptr)
-        entry = new IsisLsp();
-    entry->lspId = myLspId;
-    entry->sequenceNumber = myLspSequenceNumber;
-    entry->lsp = constLsp;
-
-    EV_INFO << "Originated own LSP " << myLspId << " seq " << myLspSequenceNumber
-            << " (" << lsp->getIsReachabilitiesArraySize() << " IS, "
-            << lsp->getIpInternalReachabilitiesArraySize() << " IP reachabilities)\n";
-
-    floodLsp(constLsp, -1);
     scheduleSpf();
+}
+
+void Isis::originatePseudonodeLsp(IsisInterface *isisIft)
+{
+    auto lsp = makeShared<IsisLspPacket>();
+    lsp->setPduType(L1_LSP);
+    lsp->setLspId(LspId(PseudonodeId(systemId, isisIft->localCircuitId)));
+    lsp->setLspFlags(0x01);
+    lsp->appendAreaAddresses(areaId);
+    lsp->appendProtocolsSupported(NLPID_IPV4);
+
+    // The pseudonode reaches the DIS itself and every IS on the LAN, metric 0.
+    IsisIsReachability self;
+    self.metric = 0;
+    self.neighbourId = PseudonodeId(systemId, 0);
+    lsp->appendIsReachabilities(self);
+    for (auto *adj : adjacencies) {
+        if (adj->interfaceId != isisIft->interfaceId || adj->level != 1 || adj->state != ISIS_ADJ_UP)
+            continue;
+        IsisIsReachability reach;
+        reach.metric = 0;
+        reach.neighbourId = PseudonodeId(adj->neighbourSystemId, 0);
+        lsp->appendIsReachabilities(reach);
+    }
+    installAndFloodOwnLsp(lsp);
 }
 
 bool Isis::hasUpAdjacency(int interfaceId, int level)
@@ -512,10 +603,10 @@ void Isis::processLsp(Packet *packet)
     // equal sequence number: synchronized (acknowledgement handled later)
 }
 
-IsisLsp *Isis::lookupLsp(uint64_t sysId)
+IsisLsp *Isis::lookupLsp(uint64_t nodeKey)
 {
-    LspId id(PseudonodeId(SystemId(sysId), 0));
-    auto it = lspDatabase.find(id.toInt());
+    // nodeKey is a PseudonodeId::toInt(); the (fragment-0) LSP key is nodeKey << 8.
+    auto it = lspDatabase.find(nodeKey << 8);
     return it != lspDatabase.end() ? it->second : nullptr;
 }
 
@@ -555,7 +646,9 @@ void Isis::runSpf()
         Ipv4Address nextHop;
     };
 
-    uint64_t self = systemId.getSystemId();
+    // Nodes are keyed by PseudonodeId::toInt(), so both real ISs (circuit id 0)
+    // and LAN pseudonodes (circuit id != 0) participate in the graph.
+    uint64_t self = PseudonodeId(systemId, 0).toInt();
     std::map<uint64_t, SpfNode> paths;     // finalized shortest paths
     std::map<uint64_t, SpfNode> tentative;
     tentative[self] = SpfNode();
@@ -577,23 +670,26 @@ void Isis::runSpf()
         const auto& lsp = lspEntry->lsp;
         for (size_t k = 0; k < lsp->getIsReachabilitiesArraySize(); k++) {
             const auto& reach = lsp->getIsReachabilities(k);
-            uint64_t v = reach.neighbourId.getSystemId().getSystemId();
+            uint64_t v = reach.neighbourId.toInt();
             if (paths.count(v))
                 continue;
             SpfNode vNode;
             vNode.distance = uNode.distance + reach.metric;
-            if (u == self) {
-                // direct neighbour: the first hop is our adjacency to v
-                auto *adj = findUpAdjacencyTo(v);
+            if (uNode.firstHopInterfaceId != -1) {
+                // first hop already resolved earlier on the path
+                vNode.firstHopInterfaceId = uNode.firstHopInterfaceId;
+                vNode.nextHop = uNode.nextHop;
+            }
+            else if ((v & 0xFF) == 0) {
+                // v is a real IS one hop away (directly, or across a LAN
+                // pseudonode we are on): the first hop is our adjacency to it
+                auto *adj = findUpAdjacencyTo(v >> 8);
                 if (adj == nullptr)
                     continue;
                 vNode.firstHopInterfaceId = adj->interfaceId;
                 vNode.nextHop = adj->neighbourIpAddress;
             }
-            else {
-                vNode.firstHopInterfaceId = uNode.firstHopInterfaceId;
-                vNode.nextHop = uNode.nextHop;
-            }
+            // else: v is a pseudonode reached from us -> first hop still unresolved
             auto it = tentative.find(v);
             if (it == tentative.end() || vNode.distance < it->second.distance)
                 tentative[v] = vNode;
@@ -709,7 +805,6 @@ void Isis::clearState()
         spfTimer = nullptr;
     }
     isisRoutes.clear();
-    myLspSequenceNumber = 0;
 }
 
 } // namespace isis

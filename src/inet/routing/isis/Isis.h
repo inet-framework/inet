@@ -48,9 +48,15 @@ struct IsisInterface {
     uint8_t circuitType = L1L2_TYPE;  // IsisCircuitType
     uint32_t metric = 10;
     uint8_t priority = 64;            // DIS election priority (LAN)
+    int localCircuitId = 0;           // this router's circuit number (pseudonode id when DIS)
     simtime_t helloInterval;
     int holdMultiplier = 3;
     cMessage *helloTimer = nullptr;
+
+    // Designated IS (DIS) election state for this LAN circuit (Level 1).
+    bool isDis = false;               // is this router the DIS on this circuit?
+    bool disValid = false;            // has a DIS been elected yet?
+    PseudonodeId disPseudonodeId;     // the elected DIS's pseudonode id (LAN id)
 };
 
 //
@@ -64,6 +70,8 @@ struct IsisAdjacency {
     AreaId neighbourAreaId;
     MacAddress snpa;                  // neighbour's MAC (SNPA)
     Ipv4Address neighbourIpAddress;   // neighbour's IP on this link (next hop for routes)
+    int priority = 0;                 // neighbour's DIS priority (from its Hello)
+    PseudonodeId lanId;               // the DIS pseudonode the neighbour advertises
     IsisAdjacencyState state = ISIS_ADJ_DOWN;
     cMessage *holdTimer = nullptr;
 };
@@ -102,7 +110,6 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
 
     // Level-1 link-state database, keyed by LspId::toInt().
     std::map<uint64_t, IsisLsp *> lspDatabase;
-    uint32_t myLspSequenceNumber = 0;
     cMessage *regenerateLspTimer = nullptr;
     cMessage *spfTimer = nullptr;
 
@@ -141,9 +148,14 @@ class INET_API Isis : public RoutingProtocolBase, public Ieee8022LlcSocket::ICal
     virtual void handleHelloTimer(IsisInterface *isisIft);
     virtual void handleHoldTimer(IsisAdjacency *adj);
 
+    // DIS election (LAN)
+    virtual void runDisElection(IsisInterface *isisIft);
+
     // Link-state PDUs (Level 1)
     virtual void scheduleLspRegeneration();
     virtual void originateLsp();
+    virtual void originatePseudonodeLsp(IsisInterface *isisIft);
+    virtual void installAndFloodOwnLsp(const Ptr<IsisLspPacket>& lsp);
     virtual void floodLsp(const Ptr<const IsisLspPacket>& lsp, int exceptInterfaceId);
     virtual void sendDatabaseToInterface(int interfaceId);
     virtual void processLsp(Packet *packet);
