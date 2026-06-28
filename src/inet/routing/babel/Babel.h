@@ -131,6 +131,7 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     // helpers
     bool isMyAddressOnInterface(const L3Address& address, BabelInterface *iface) const;
     L3Address interfaceAddressForAf(BabelInterface *iface, int af) const;
+    void multicastGroupsFor(BabelInterface *iface, std::vector<L3Address>& groups) const;
 
   public:
     Babel() {}

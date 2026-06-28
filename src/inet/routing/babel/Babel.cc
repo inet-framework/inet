@@ -109,13 +109,18 @@ void Babel::generateRouterId()
 
 void Babel::configureInterfaces()
 {
-    // P3 default: run Babel (IPv6) on every multicast, non-loopback interface
+    // run Babel on every multicast, non-loopback interface, in the address
+    // families the node actually supports (dual-stack when both are present)
+    bool hasV4 = rt4.getNullable() != nullptr;
+    bool hasV6 = rt6.getNullable() != nullptr;
+    int af = (hasV4 && hasV6) ? AF::IPvX : (hasV4 ? AF::IPv4 : AF::IPv6);
+
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         NetworkInterface *ie = ift->getInterface(i);
         if (ie->isMulticast() && !ie->isLoopback()) {
             BabelInterface *biface = new BabelInterface(ie, seqno);
-            biface->setAfSend(AF::IPv6);
-            biface->setAfDist(AF::IPv6);
+            biface->setAfSend(af);
+            biface->setAfDist(af);
             biface->setWired(!ie->isWireless());
             biface->setNominalRxcost(ie->isWireless() ? defval::NOM_RXCOST_WIRELESS : defval::NOM_RXCOST_WIRED);
             biface->setCostComputationModule(&wiredCost);
@@ -163,7 +168,10 @@ void Babel::activateInterface(BabelInterface *iface)
     if (!iface->getInterface()->isUp())
         return;
 
-    socket.joinMulticastGroup(defval::MCASTG6, iface->getInterfaceId());
+    std::vector<L3Address> groups;
+    multicastGroupsFor(iface, groups);
+    for (const auto& group : groups)
+        socket.joinMulticastGroup(group, iface->getInterfaceId());
 
     if (iface->getAfSend() != AF::NONE) {
         if (iface->getHTimer() == nullptr)
@@ -177,16 +185,19 @@ void Babel::activateInterface(BabelInterface *iface)
 
     iface->setEnabled(true);
 
-    // say hello and request a full route dump
+    // say hello and request a full route dump in each address family
     if (iface->getAfSend() != AF::NONE) {
-        std::vector<Ptr<BabelTlv>> tlvs;
-        auto hello = makeShared<BabelHelloTlv>();
-        hello->setSeqno(iface->getIncHSeqno());
-        hello->setInterval(iface->getHInterval());
-        tlvs.push_back(hello);
-        sendBabelMessage(defval::MCASTG6, iface, tlvs);
+        uint16_t hseqno = iface->getIncHSeqno();
+        for (const auto& group : groups) {
+            std::vector<Ptr<BabelTlv>> tlvs;
+            auto hello = makeShared<BabelHelloTlv>();
+            hello->setSeqno(hseqno);
+            hello->setInterval(iface->getHInterval());
+            tlvs.push_back(hello);
+            sendBabelMessage(group, iface, tlvs);
 
-        sendRouteReq(iface, defval::MCASTG6, AE::WILDCARD, netPrefix<L3Address>());
+            sendRouteReq(iface, group, AE::WILDCARD, netPrefix<L3Address>());
+        }
     }
 
     EV_INFO << "Babel: interface " << iface->getIfaceName() << " activated." << endl;
@@ -346,30 +357,41 @@ void Babel::processNeighIhuTimer(BabelNeighbour *neigh)
 void Babel::sendHello(BabelInterface *iface)
 {
     uint16_t hseqno = iface->getIncHSeqno();
-
-    std::vector<Ptr<BabelTlv>> tlvs;
-    auto hello = makeShared<BabelHelloTlv>();
-    hello->setSeqno(hseqno);
-    hello->setInterval(iface->getHInterval());
-    tlvs.push_back(hello);
-
-    // append an IHU per neighbour every IHU_INTERVAL_MULT Hellos, or sooner on a lossy link
     bool periodicIhu = (hseqno % defval::IHU_INTERVAL_MULT == 0);
-    for (auto neigh : bnt.getNeighbours()) {
-        if (neigh->getInterface() != iface)
-            continue;
-        bool lossy = ((neigh->getHistory() & 0xF000) != 0xF000) || neigh->getTxcost() >= 384;
-        if (periodicIhu || lossy) {
-            auto ihu = makeShared<BabelIhuTlv>();
-            ihu->setAe(getAeOfAddr(neigh->getAddress()));
-            ihu->setRxcost(neigh->computeRxcost());
-            ihu->setInterval(defval::IHU_INTERVAL_MULT * iface->getHInterval());
-            ihu->setAddress(neigh->getAddress());
-            tlvs.push_back(ihu);
+
+    std::vector<L3Address> groups;
+    multicastGroupsFor(iface, groups);
+
+    // send a Hello to each address family's group, with the IHUs of the
+    // neighbours discovered in that family appended
+    for (const auto& group : groups) {
+        bool groupIsV6 = group.getType() == L3Address::IPv6;
+
+        std::vector<Ptr<BabelTlv>> tlvs;
+        auto hello = makeShared<BabelHelloTlv>();
+        hello->setSeqno(hseqno);
+        hello->setInterval(iface->getHInterval());
+        tlvs.push_back(hello);
+
+        for (auto neigh : bnt.getNeighbours()) {
+            if (neigh->getInterface() != iface)
+                continue;
+            if ((neigh->getAddress().getType() == L3Address::IPv6) != groupIsV6)
+                continue; // IHU goes to its neighbour's own address family
+            bool lossy = ((neigh->getHistory() & 0xF000) != 0xF000) || neigh->getTxcost() >= 384;
+            if (periodicIhu || lossy) {
+                auto ihu = makeShared<BabelIhuTlv>();
+                ihu->setAe(getAeOfAddr(neigh->getAddress()));
+                ihu->setRxcost(neigh->computeRxcost());
+                ihu->setInterval(defval::IHU_INTERVAL_MULT * iface->getHInterval());
+                ihu->setAddress(neigh->getAddress());
+                tlvs.push_back(ihu);
+            }
         }
+
+        sendBabelMessage(group, iface, tlvs);
     }
 
-    sendBabelMessage(defval::MCASTG6, iface, tlvs);
     iface->resetHTimer();
 }
 
@@ -573,6 +595,15 @@ L3Address Babel::interfaceAddressForAf(BabelInterface *iface, int af) const
     }
 }
 
+void Babel::multicastGroupsFor(BabelInterface *iface, std::vector<L3Address>& groups) const
+{
+    int af = iface->getAfSend();
+    if (af == AF::IPv4 || af == AF::IPvX)
+        groups.push_back(defval::MCASTG4);
+    if (af == AF::IPv6 || af == AF::IPvX)
+        groups.push_back(defval::MCASTG6);
+}
+
 // ---- route origination ----
 
 void Babel::originateConnectedRoutes()
@@ -609,20 +640,13 @@ void Babel::originateConnectedRoutes()
                 }
             }
         }
-    }
 
-    // IPv4: connected routes are stored in the routing table
-    if (IRoutingTable *rt = rt4.getNullable()) {
-        for (int i = 0; i < rt->getNumRoutes(); i++) {
-            IRoute *r = rt->getRoute(i);
-            if (!r->getNextHopAsGeneric().isUnspecified())
-                continue;
-            NetworkInterface *ie = r->getInterface();
-            if (ie == nullptr || bit.findInterfaceById(ie->getInterfaceId()) == nullptr)
-                continue;
-            if (r->getPrefixLength() <= 0 || r->getPrefixLength() >= 32)
-                continue;
-            originate(netPrefix<L3Address>(r->getDestinationAsGeneric(), r->getPrefixLength()));
+        // IPv4: derive the connected subnet from the interface address and netmask
+        if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>()) {
+            Ipv4Address addr = ipv4Data->getIPAddress();
+            Ipv4Address mask = ipv4Data->getNetmask();
+            if (!addr.isUnspecified() && !mask.isUnspecified())
+                originate(netPrefix<L3Address>(L3Address(addr), mask.getNetmaskLength()));
         }
     }
 }
