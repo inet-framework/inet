@@ -61,6 +61,21 @@
         linkerFlags = ""
         />
     <feature
+        id = "Babel"
+        name = "Babel routing"
+        description = "Babel routing protocol (RFC 6126), a loop-free dual-stack distance-vector protocol."
+        initiallyEnabled = "true"
+        requires = "Ipv4 Ipv6 Udp"
+        recommended = ""
+        labels = "routing"
+        nedPackages = "
+                       inet.routing.babel
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_BABEL"
+        linkerFlags = ""
+        />
+    <feature
         id = "BgpTutorial"
         name = "BGP routing tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to BGP routing."
