@@ -1,0 +1,13 @@
+<config>
+    <interface hosts="hostA" address="2001:db8:1::100"/>
+    <interface hosts="r1" towards="hostA" address="2001:db8:1::1"/>
+
+    <interface hosts="r1" towards="r2" address="2001:db8:12::1"/>
+    <interface hosts="r2" towards="r1" address="2001:db8:12::2"/>
+
+    <interface hosts="r2" towards="r3" address="2001:db8:23::2"/>
+    <interface hosts="r3" towards="r2" address="2001:db8:23::3"/>
+
+    <interface hosts="r3" towards="hostB" address="2001:db8:3::3"/>
+    <interface hosts="hostB" address="2001:db8:3::100"/>
+</config>

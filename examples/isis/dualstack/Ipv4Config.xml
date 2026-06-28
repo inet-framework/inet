@@ -1,0 +1,13 @@
+<config>
+    <interface hosts="hostA" address="10.0.1.10" netmask="255.255.255.0"/>
+    <interface hosts="r1" towards="hostA" address="10.0.1.1" netmask="255.255.255.0"/>
+    <interface hosts="r1" towards="r2" address="10.0.12.1" netmask="255.255.255.0"/>
+    <interface hosts="r2" towards="r1" address="10.0.12.2" netmask="255.255.255.0"/>
+    <interface hosts="r2" towards="r3" address="10.0.23.2" netmask="255.255.255.0"/>
+    <interface hosts="r3" towards="r2" address="10.0.23.3" netmask="255.255.255.0"/>
+    <interface hosts="r3" towards="hostB" address="10.0.3.3" netmask="255.255.255.0"/>
+    <interface hosts="hostB" address="10.0.3.10" netmask="255.255.255.0"/>
+
+    <route hosts="hostA" destination="0.0.0.0" netmask="0.0.0.0" gateway="10.0.1.1"/>
+    <route hosts="hostB" destination="0.0.0.0" netmask="0.0.0.0" gateway="10.0.3.3"/>
+</config>
