@@ -1,0 +1,5 @@
+# working directory,             command line arguments,          simulation time limit,  fingerprint,                   expected result, tags
+/examples/babel/adjacency/,      -f omnetpp.ini -c General -r 0,           60s,          e94b-2afd/tplx;514a-d7fd/~tNl,  PASS,  babel Ipv6 Udp
+/examples/babel/routing/,        -f omnetpp.ini -c General -r 0,           30s,          a132-da2e/tplx;e100-b16f/~tNl,  PASS,  babel Ipv6 Udp
+/examples/babel/reconvergence/,  -f omnetpp.ini -c General -r 0,           60s,          8f4c-8f11/tplx;0f46-c76c/~tNl,  PASS,  babel Ipv6 Udp
+/examples/babel/dualstack/,      -f omnetpp.ini -c General -r 0,           30s,          142e-c43f/tplx;12f1-157e/~tNl,  PASS,  babel Ipv4 Ipv6 Udp
