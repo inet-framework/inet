@@ -15,6 +15,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/routing/babel/BabelBuffer.h"
 #include "inet/routing/babel/BabelCost.h"
 #include "inet/routing/babel/BabelInterfaceTable.h"
 #include "inet/routing/babel/BabelMessage_m.h"
@@ -55,6 +56,8 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     NetworkInterface *mainInterface = nullptr;
     UdpSocket socket;
     cMessage *triggeredUpdate = nullptr; ///< one-shot, damped triggered-update self message
+    std::vector<BabelBuffer *> buffers; ///< per-destination output buffers
+    cMessage *bufferGc = nullptr; ///< periodic garbage collection of idle buffers
 
     BabelInterfaceTable bit;
     BabelNeighbourTable bnt;
@@ -93,8 +96,13 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     void processSourceGCTimer(BabelSource *source);
     void processRSResendTimer(BabelPenSR *request);
 
-    // send
+    // send (buffering layer + the actual packet send)
+    void sendTLVs(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs, double maxtime = SEND_URGENT);
     void sendBabelMessage(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs);
+    BabelBuffer *findOrCreateBuffer(const L3Address& dst, BabelInterface *iface);
+    void flushBuffer(BabelBuffer *buff);
+    void deleteUnusedBuffers();
+    void deleteBuffers();
     void sendHello(BabelInterface *iface);
     void sendUpdateMessage(const L3Address& dst, BabelInterface *iface, const rid& originator, const L3Address& nexthop, const netPrefix<L3Address>& prefix, const routeDistance& dist, uint16_t interval);
     void sendUpdate(BabelInterface *iface, BabelRoute *route, const L3Address& dst);

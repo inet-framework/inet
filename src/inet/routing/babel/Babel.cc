@@ -30,6 +30,8 @@ Define_Module(Babel);
 Babel::~Babel()
 {
     cancelAndDelete(triggeredUpdate);
+    cancelAndDelete(bufferGc);
+    deleteBuffers();
     // cancel and delete any timers still owned by the interfaces/neighbours
     for (auto iface : bit.getInterfaces()) {
         iface->deleteHTimer();
@@ -56,6 +58,7 @@ void Babel::initialize(int stage)
         seqno = intuniform(0, UINT16_MAX);
         socket.setOutputGate(gate("socketOut"));
         triggeredUpdate = new cMessage("BabelTriggeredUpdate");
+        bufferGc = createTimer(timerT::BUFFERGC, nullptr);
         host->subscribe(interfaceStateChangedSignal, this);
         host->subscribe(ipv6AddressAssignedSignal, this);
         host->subscribe(routeDeletedSignal, this); // the table may drop our routes (e.g. on interface down)
@@ -67,6 +70,7 @@ void Babel::initialize(int stage)
         WATCH_PTRVECTOR(btt.getRoutes());
         WATCH_PTRVECTOR(bst.getSources());
         WATCH_PTRVECTOR(bpsrt.getRequests());
+        WATCH_PTRVECTOR(buffers);
     }
 }
 
@@ -149,6 +153,8 @@ void Babel::handleStartOperation(LifecycleOperation *operation)
     originateConnectedRoutes();
     selectRoutes();
 
+    resetTimer(bufferGc, defval::BUFFER_GC_INTERVAL);
+
     EV_INFO << "Babel started on UDP port " << udpPort << "." << endl;
 }
 
@@ -156,11 +162,17 @@ void Babel::handleStopOperation(LifecycleOperation *operation)
 {
     for (auto biface : bit.getInterfaces())
         deactivateInterface(biface);
+    if (bufferGc->isScheduled())
+        cancelEvent(bufferGc);
+    deleteBuffers();
     socket.close();
 }
 
 void Babel::handleCrashOperation(LifecycleOperation *operation)
 {
+    if (bufferGc->isScheduled())
+        cancelEvent(bufferGc);
+    deleteBuffers();
     socket.destroy();
 }
 
@@ -196,7 +208,7 @@ void Babel::activateInterface(BabelInterface *iface)
             hello->setSeqno(hseqno);
             hello->setInterval(iface->getHInterval());
             tlvs.push_back(hello);
-            sendBabelMessage(group, iface, tlvs);
+            sendTLVs(group, iface, tlvs);
 
             sendRouteReq(iface, group, AE::WILDCARD, netPrefix<L3Address>());
         }
@@ -276,6 +288,13 @@ void Babel::processTimer(cMessage *timer)
             break;
         case timerT::SRRESEND:
             processRSResendTimer(check_and_cast<BabelPenSR *>(static_cast<cObject *>(timer->getContextPointer())));
+            break;
+        case timerT::BUFFER:
+            flushBuffer(check_and_cast<BabelBuffer *>(static_cast<cObject *>(timer->getContextPointer())));
+            break;
+        case timerT::BUFFERGC:
+            deleteUnusedBuffers();
+            resetTimer(bufferGc, defval::BUFFER_GC_INTERVAL);
             break;
         default:
             throw cRuntimeError("Babel: received timer of unknown type: %d", timer->getKind());
@@ -391,10 +410,100 @@ void Babel::sendHello(BabelInterface *iface)
             }
         }
 
-        sendBabelMessage(group, iface, tlvs);
+        sendTLVs(group, iface, tlvs);
     }
 
     iface->resetHTimer();
+}
+
+BabelBuffer *Babel::findOrCreateBuffer(const L3Address& dst, BabelInterface *iface)
+{
+    for (auto buff : buffers)
+        if (buff->getDst() == dst && buff->getOutIface()->getInterfaceId() == iface->getInterfaceId())
+            return buff;
+    BabelBuffer *buff = new BabelBuffer(dst, iface, createTimer(timerT::BUFFER, nullptr));
+    buff->getFlushTimer()->setContextPointer(buff);
+    buffers.push_back(buff);
+    return buff;
+}
+
+void Babel::sendTLVs(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs, double maxtime)
+{
+    if (!iface->getEnabled() || iface->getAfSend() == AF::NONE || tlvs.empty())
+        return;
+
+    BabelBuffer *buff = findOrCreateBuffer(dst, iface);
+
+    // a packet must not carry two Hellos -> flush what is buffered first
+    bool addingHello = false;
+    for (const auto& tlv : tlvs)
+        if (tlv->getTlvType() == BABEL_HELLO) { addingHello = true; break; }
+    if (addingHello && buff->containsHello())
+        flushBuffer(buff);
+
+    for (const auto& tlv : tlvs)
+        buff->addTlv(tlv);
+
+    BabelTimer *ft = buff->getFlushTimer();
+    if (maxtime == SEND_NOW)
+        flushBuffer(buff);
+    else {
+        double delay = (maxtime == SEND_BUFFERED) ? CStoS(iface->getHInterval() / defval::BUFFER_MT_DIVISOR) : maxtime;
+        if (!ft->isScheduled())
+            scheduleAfter(delay, ft);
+        else if ((ft->getArrivalTime() - simTime()).dbl() > delay)
+            rescheduleAfter(delay, ft);
+    }
+}
+
+void Babel::flushBuffer(BabelBuffer *buff)
+{
+    auto& tlvs = buff->getTlvs();
+    bool v6 = buff->getDst().getType() == L3Address::IPv6;
+    int maxbody = buff->getOutIface()->getInterface()->getMtu()
+            - (v6 ? IPV6_HEADER_SIZE : IPV4_HEADER_SIZE) - UDP_HEADER_SIZE - BABEL_HEADER_SIZE;
+    if (maxbody < 512 - BABEL_HEADER_SIZE)
+        maxbody = 512 - BABEL_HEADER_SIZE;
+
+    // pack the queued TLVs into as few messages as the MTU allows
+    size_t i = 0;
+    while (i < tlvs.size()) {
+        std::vector<Ptr<BabelTlv>> group;
+        int bodyLen = 0;
+        while (i < tlvs.size()) {
+            int len = babelTlvLength(tlvs[i].get()).get<B>();
+            if (!group.empty() && bodyLen + len > maxbody)
+                break;
+            group.push_back(tlvs[i]);
+            bodyLen += len;
+            ++i;
+        }
+        sendBabelMessage(buff->getDst(), buff->getOutIface(), group);
+    }
+
+    buff->clear();
+    if (buff->getFlushTimer()->isScheduled())
+        cancelEvent(buff->getFlushTimer());
+}
+
+void Babel::deleteUnusedBuffers()
+{
+    for (auto it = buffers.begin(); it != buffers.end();) {
+        BabelTimer *ft = (*it)->getFlushTimer();
+        if (ft == nullptr || !ft->isScheduled()) {
+            delete *it;
+            it = buffers.erase(it);
+        }
+        else
+            ++it;
+    }
+}
+
+void Babel::deleteBuffers()
+{
+    for (auto buff : buffers)
+        delete buff;
+    buffers.clear();
 }
 
 void Babel::sendBabelMessage(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs)
@@ -683,7 +792,7 @@ void Babel::sendUpdateMessage(const L3Address& dst, BabelInterface *iface, const
     upd->setPrefixLen(prefix.getLen());
     tlvs.push_back(upd);
 
-    sendBabelMessage(dst, iface, tlvs);
+    sendTLVs(dst, iface, tlvs);
 }
 
 void Babel::sendUpdate(BabelInterface *iface, BabelRoute *route, const L3Address& dst)
@@ -736,7 +845,7 @@ void Babel::sendRouteReq(BabelInterface *iface, const L3Address& dst, int ae, co
     }
     std::vector<Ptr<BabelTlv>> tlvs;
     tlvs.push_back(req);
-    sendBabelMessage(dst, iface, tlvs);
+    sendTLVs(dst, iface, tlvs);
 }
 
 void Babel::triggerUpdate()
@@ -789,7 +898,7 @@ void Babel::sendSeqnoReq(BabelInterface *iface, const L3Address& dst, const netP
 
     std::vector<Ptr<BabelTlv>> tlvs;
     tlvs.push_back(sr);
-    sendBabelMessage(actualDst, iface, tlvs);
+    sendTLVs(actualDst, iface, tlvs);
 }
 
 void Babel::processSeqnoReq(const Ptr<const BabelSeqnoReqTlv>& req, BabelInterface *iface, const L3Address& src)
