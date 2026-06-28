@@ -14,10 +14,13 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/routing/babel/BabelCost.h"
 #include "inet/routing/babel/BabelInterfaceTable.h"
 #include "inet/routing/babel/BabelMessage_m.h"
 #include "inet/routing/babel/BabelNeighbourTable.h"
+#include "inet/routing/babel/BabelSourceTable.h"
+#include "inet/routing/babel/BabelTopologyTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
@@ -39,6 +42,8 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     // environment
     cModule *host = nullptr;
     ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<IRoutingTable> rt4; ///< IPv4 routing table (may be absent)
+    ModuleRefByPar<IRoutingTable> rt6; ///< IPv6 routing table (may be absent)
 
     // configuration
     int udpPort = defval::PORT;
@@ -48,9 +53,12 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     uint16_t seqno = 0;
     NetworkInterface *mainInterface = nullptr;
     UdpSocket socket;
+    cMessage *triggeredUpdate = nullptr; ///< one-shot, damped triggered-update self message
 
     BabelInterfaceTable bit;
     BabelNeighbourTable bnt;
+    BabelTopologyTable btt;
+    BabelSourceTable bst;
     BabelCostKoutofj wiredCost; ///< default link-cost strategy for wired links
 
   protected:
@@ -76,18 +84,45 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     void processTimer(cMessage *timer);
     void processNeighHelloTimer(BabelNeighbour *neigh);
     void processNeighIhuTimer(BabelNeighbour *neigh);
+    void processUpdateTimer(BabelInterface *iface);
+    void processRouteExpiryTimer(BabelRoute *route);
+    void processBefRouteExpiryTimer(BabelRoute *route);
+    void processSourceGCTimer(BabelSource *source);
 
     // send
     void sendBabelMessage(const L3Address& dst, BabelInterface *iface, const std::vector<Ptr<BabelTlv>>& tlvs);
     void sendHello(BabelInterface *iface);
+    void sendUpdateMessage(const L3Address& dst, BabelInterface *iface, const rid& originator, const L3Address& nexthop, const netPrefix<L3Address>& prefix, const routeDistance& dist, uint16_t interval);
+    void sendUpdate(BabelInterface *iface, BabelRoute *route, const L3Address& dst);
+    void sendUpdate(BabelInterface *iface, BabelRoute *route);
+    void sendFullDump(BabelInterface *iface);
+    void sendRouteReq(BabelInterface *iface, const L3Address& dst, int ae, const netPrefix<L3Address>& prefix);
+    void triggerUpdate(); ///< schedule a damped triggered update to propagate a change quickly
 
     // receive
     void processUdpPacket(Packet *packet);
     void processHello(const Ptr<const BabelHelloTlv>& hello, BabelInterface *iface, const L3Address& src);
     void processIhu(const Ptr<const BabelIhuTlv>& ihu, BabelInterface *iface, const L3Address& src, const L3Address& dst);
+    bool processUpdate(const Ptr<const BabelUpdateTlv>& update, BabelInterface *iface, const L3Address& src, const rid& originator, const L3Address& nexthop);
+    void processRouteReq(const Ptr<const BabelRouteReqTlv>& req, BabelInterface *iface, const L3Address& src, const L3Address& dst);
+
+    // route management
+    void originateConnectedRoutes();
+    bool isFeasible(const netPrefix<L3Address>& prefix, const rid& orig, const routeDistance& dist);
+    bool addOrUpdateRoute(const netPrefix<L3Address>& prefix, BabelNeighbour *neigh, const rid& orig, const routeDistance& dist, const L3Address& nh, uint16_t interval);
+    void addOrUpdateSource(const netPrefix<L3Address>& p, const rid& orig, const routeDistance& dist);
+    void selectRoutes();
+    bool removeRoutesByNeigh(BabelNeighbour *neigh);
+
+    // routing-table install
+    bool prepareToAdd(IRoutingTable *rt, IRoute *ro);
+    void addToRT(BabelRoute *route);
+    void removeFromRT(BabelRoute *route);
+    void updateRT(BabelRoute *route);
 
     // helpers
     bool isMyAddressOnInterface(const L3Address& address, BabelInterface *iface) const;
+    L3Address interfaceAddressForAf(BabelInterface *iface, int af) const;
 
   public:
     Babel() {}
