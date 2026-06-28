@@ -45,6 +45,19 @@ class INET_API BabelCostKoutofj : public IBabelCostComputation
     virtual uint16_t computeCost(uint16_t history, uint16_t nominalrxcost, uint16_t txcost) override;
 };
 
+/**
+ * The ETX (expected transmission count) strategy (RFC 6126, appendix A.2.2),
+ * appropriate for lossy/wireless links: the cost grows smoothly with the
+ * fraction of Hellos lost, combining the inbound and outbound delivery
+ * probabilities.
+ */
+class INET_API BabelCostEtx : public IBabelCostComputation
+{
+  public:
+    virtual uint16_t computeRxcost(uint16_t history, uint16_t nominalrxcost) override;
+    virtual uint16_t computeCost(uint16_t history, uint16_t nominalrxcost, uint16_t txcost) override;
+};
+
 } // namespace babel
 } // namespace inet
 

@@ -10,6 +10,8 @@
 
 #include "inet/routing/babel/BabelCost.h"
 
+#include <algorithm>
+
 #include "inet/routing/babel/BabelDefs.h"
 
 namespace inet {
@@ -33,6 +35,27 @@ uint16_t BabelCostKoutofj::computeCost(uint16_t history, uint16_t nominalrxcost,
 {
     // if the link is usable in the receive direction, the cost is the txcost reported by the neighbour
     return computeRxcost(history, nominalrxcost) != COST_INF ? txcost : COST_INF;
+}
+
+uint16_t BabelCostEtx::computeRxcost(uint16_t history, uint16_t nominalrxcost)
+{
+    // rate the history: the last 3 intervals count fully, older ones with decreasing weight
+    unsigned int histrate = ((history & 0x8000) >> 2) + ((history & 0x4000) >> 1) + (history & 0x3FFF);
+    // with no loss the divisor is 0x8000, giving rxcost == nominalrxcost
+    unsigned int rxcost = (0x8000u * nominalrxcost) / (histrate + 1);
+    return (rxcost >= COST_INF) ? COST_INF : static_cast<uint16_t>(rxcost & 0xFFFF);
+}
+
+uint16_t BabelCostEtx::computeCost(uint16_t history, uint16_t nominalrxcost, uint16_t txcost)
+{
+    uint16_t rxcost = computeRxcost(history, nominalrxcost);
+    if (rxcost >= COST_INF)
+        return COST_INF;
+    if (txcost < 256 && rxcost < 256)
+        return txcost; // both directions better than 100% delivery
+    unsigned int a = std::max<uint16_t>(txcost, 256);
+    unsigned int b = std::max<uint16_t>(rxcost, 256);
+    return static_cast<uint16_t>((a * b) >> 8);
 }
 
 } // namespace babel

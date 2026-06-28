@@ -123,7 +123,9 @@ void Babel::configureInterfaces()
             biface->setAfDist(af);
             biface->setWired(!ie->isWireless());
             biface->setNominalRxcost(ie->isWireless() ? defval::NOM_RXCOST_WIRELESS : defval::NOM_RXCOST_WIRED);
-            biface->setCostComputationModule(&wiredCost);
+            biface->setCostComputationModule(ie->isWireless()
+                    ? static_cast<IBabelCostComputation *>(&wirelessCost)
+                    : static_cast<IBabelCostComputation *>(&wiredCost));
             bit.addInterface(biface);
         }
     }

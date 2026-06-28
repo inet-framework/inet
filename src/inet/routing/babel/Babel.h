@@ -61,7 +61,8 @@ class INET_API Babel : public RoutingProtocolBase, protected cListener
     BabelTopologyTable btt;
     BabelSourceTable bst;
     BabelPenSRTable bpsrt;
-    BabelCostKoutofj wiredCost; ///< default link-cost strategy for wired links
+    BabelCostKoutofj wiredCost; ///< link-cost strategy for wired links (k-out-of-j)
+    BabelCostEtx wirelessCost; ///< link-cost strategy for wireless links (ETX)
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
