@@ -22,6 +22,7 @@ import inet.networklayer.mipv6.Mipv6;
 import inet.networklayer.ipsec.IPsec;
 import inet.networklayer.ipsec.SecurityPolicyDatabase;
 import inet.networklayer.ipsec.SecurityAssociationDatabase;
+import inet.networklayer.pmipv6.Pmipv6;
 
 //
 // Represents a complete IPv6 network layer (L3), to be used within hosts and
@@ -49,6 +50,13 @@ import inet.networklayer.ipsec.SecurityAssociationDatabase;
 // node types ~MobileHost6, ~HomeAgent6 and ~CorrespondentNode6 enable it and
 // select the role via the `isMobileNode` / `isHomeAgent` parameters of ~Mipv6.
 //
+// <b>Proxy Mobile IPv6</b>
+//
+// When `hasPmipv6` is set, the layer contains the Proxy Mobile IPv6 (RFC 5213)
+// engine ~Pmipv6 instead, which implements network-based mobility: the mobile
+// node runs no mobility software. The node types ~LocalMobilityAnchor and
+// ~MobileAccessGateway enable it and select the role.
+//
 // <b>IPsec</b>
 //
 // When `hasIpsec` is set, the layer additionally contains the ~IPsec engine and its
@@ -60,6 +68,7 @@ module Ipv6NetworkLayer like INetworkLayer
 {
     parameters:
         bool hasMipv6 = default(false);
+        bool hasPmipv6 = default(false);
         bool hasMld = default(false);
         bool hasIpsec = default(false);
         bool forwarding = default(false);
@@ -139,6 +148,10 @@ module Ipv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=850,550");
         }
+        pmipv6: Pmipv6 if hasPmipv6 {
+            parameters:
+                @display("p=700,500");
+        }
         mld: <default("Mldv1")> like IMld if hasMld {
             parameters:
                 @display("p=800,200");
@@ -165,6 +178,9 @@ module Ipv6NetworkLayer like INetworkLayer
 
         mipv6.fromIPv6 <-- lp.out++ if hasMipv6;
         mipv6.toIPv6 --> lp.in++ if hasMipv6;
+
+        pmipv6.fromIPv6 <-- lp.out++ if hasPmipv6;
+        pmipv6.toIPv6 --> lp.in++ if hasPmipv6;
 
         mld.ipIn <-- lp.out++ if hasMld;
         mld.ipOut --> lp.in++ if hasMld;

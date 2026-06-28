@@ -1943,6 +1943,37 @@
         linkerFlags = ""
         />
     <feature
+        id = "Pmipv6"
+        name = "Proxy Mobile IPv6 protocol"
+        description = "Proxy Mobile IPv6 (RFC 5213) network-based mobility support."
+        initiallyEnabled = "true"
+        requires = "Ipv6"
+        recommended = ""
+        labels = "protocols"
+        nedPackages = "
+                       inet.networklayer.pmipv6
+                       inet.node.pmipv6
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_PMIPV6"
+        linkerFlags = ""
+        />
+    <feature
+        id = "Pmipv6Examples"
+        name = "Proxy Mobile IPv6 protocol examples"
+        description = "Examples for Proxy Mobile IPv6 (RFC 5213) support."
+        initiallyEnabled = "true"
+        requires = "Ethernet Ieee80211 Ipv6 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Queueing Udp Pmipv6"
+        recommended = ""
+        labels = ""
+        nedPackages = "
+                       inet.examples.ipv6.pmipv6
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Z3GateSchedulingConfigurator"
         name = "Z3 Gate Scheduling Configurator"
         description = "Z3 SAT solver based TSN gate scheduling configurator (requires external libz3-dev or z3-devel installed.)"
