@@ -1,0 +1,18 @@
+<config>
+    <!-- Only the wired (backhaul) interfaces are configured here. The access
+         (wlan) interfaces of the MAGs are deliberately left unconfigured: they
+         advertise Router Advertisements (because the node is a router) but carry
+         NO statically-assigned global prefix. The mobile node's home network
+         prefix (2001:db8:1::/64) is advertised dynamically by the serving MAG. -->
+
+    <!-- LMA <-> correspondent node link (the CN autoconfigures from the LMA's RA) -->
+    <interface hosts="lma" towards="cn" address="2001:db8:ff::1"/>
+
+    <!-- LMA <-> MAG1 backhaul -->
+    <interface hosts="lma"  towards="mag1" address="2001:db8:0:1::1"/>
+    <interface hosts="mag1" towards="lma"  address="2001:db8:0:1::2"/>
+
+    <!-- LMA <-> MAG2 backhaul -->
+    <interface hosts="lma"  towards="mag2" address="2001:db8:0:2::1"/>
+    <interface hosts="mag2" towards="lma"  address="2001:db8:0:2::2"/>
+</config>

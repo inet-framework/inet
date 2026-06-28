@@ -1,0 +1,9 @@
+<movement>
+    <!-- The mobile node starts under mag1, dwells, then dashes to mag2's coverage
+         area, performing a single PMIPv6 handover, then dwells again. -->
+    <set x="250" y="400"/>
+    <set speed="20"/>
+    <wait t="20"/>
+    <moveto x="550" y="400"/>
+    <wait t="100"/>
+</movement>

@@ -1,0 +1,56 @@
+Proxy Mobile IPv6 (RFC 5213)
+============================
+
+This example demonstrates network-based mobility management with Proxy Mobile
+IPv6 (RFC 5213). In contrast to Mobile IPv6 (see examples/ipv6/mipv6*), the
+mobile node runs NO mobility software: it is a plain wireless IPv6 host that
+simply autoconfigures an address from Router Advertisements. The network does
+all the mobility work, through two entities:
+
+  - the Local Mobility Anchor (LMA, node `lma`): the topological anchor for the
+    mobile node's home network prefix; it holds the binding cache and one end of
+    the tunnel to each access gateway; and
+  - two Mobile Access Gateways (MAGs, nodes `mag1` and `mag2`): access routers
+    that double as 802.11 access points. When the mobile node attaches, the
+    serving MAG sends a Proxy Binding Update to the LMA on the node's behalf,
+    sets up a bidirectional tunnel to the LMA, and advertises the node's home
+    network prefix on the access link.
+
+Topology:
+
+    cn --- lma === mag1 ((  )) mn  ... roams ...  mag2
+                 \                                 /
+                  =================================
+
+`cn` (correspondent node) and the two MAGs hang off the LMA on separate wired
+links. `mn` (mobile node) is wireless.
+
+Scenario (config General):
+
+  - `mn` starts in mag1's coverage, associates, and mag1 registers it with the
+    LMA. The LMA routes the home network prefix (2001:db8:1::/64) into the tunnel
+    toward mag1, and mag1 advertises that prefix on its access link, so `mn`
+    autoconfigures its home address 2001:db8:1:0:8aa:ff:fe00:b.
+  - At t=20s `mn` moves toward mag2. When it re-associates there, mag2 registers
+    it with the LMA, which re-points the prefix route toward mag2. Because mag2
+    advertises the SAME prefix, `mn` keeps the SAME address across the handover.
+  - `cn` pings `mn`'s home address throughout. The echo replies follow `mn`
+    across the handover (a few packets are lost only during the brief L2
+    re-association/re-binding window), demonstrating session continuity.
+
+What to look for:
+
+  - the Proxy Binding Update / Acknowledgement exchanges (mag1->lma, then
+    mag2->lma after the move) and the "LMA handover: re-pointing prefix" log line;
+  - `mn`'s address stays constant before and after the handover;
+  - the correspondent node's ping loss rate is near zero.
+
+Files:
+
+  - Pmipv6Network.ned  - the topology
+  - config.xml         - IPv6 addressing of the wired links (access links are
+                         left unconfigured; the home prefix is advertised
+                         dynamically by the serving MAG)
+  - movement.xml       - the mobile node's movement schedule
+  - omnetpp.ini        - simulation parameters, including the per-MAG PMIPv6
+                         policy (mobile-node identifier, home network prefix, LMA)
