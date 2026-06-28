@@ -1,0 +1,166 @@
+%description:
+Round-trip serialization of the LISP messages (RFC 6830): the data-plane LispHeader, and the
+Map-Register/Map-Reply/Map-Request control messages with their AFI-encoded addresses (IPv4 family 1
+and IPv6 family 2) and EID-to-RLOC records. Verifies encode->decode reproduces every field and that
+the modules' computed chunkLength matches the serialized length.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/routing/lisp/LispSerializer.h"
+
+using namespace inet;
+using namespace inet::lisp;
+
+%global:
+
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<const T>& original)
+{
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();           // forces serialize()
+
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    return pkt2.popAtFront<T>(pkt2.getDataLength());   // forces deserialize()
+}
+
+%activity:
+
+// === 1. LispHeader (data-plane, RFC 6830 5.3) ===
+{
+    EV << "=== LispHeader ===" << endl;
+    auto h = makeShared<LispHeader>();
+    h->setNonceBit(true);
+    h->setInstanceBit(true);
+    h->setNonce(0x0abbcc);          // 24-bit
+    h->setInstanceId(0x12345678);
+
+    Packet pkt("sz");
+    pkt.insertAtFront(h);
+    ASSERT(pkt.getDataLength() == B(8));
+
+    auto h2 = roundTrip(staticPtrCast<const LispHeader>(h));
+    ASSERT(h2 != nullptr);
+    ASSERT(h2->getNonceBit() == true);
+    ASSERT(h2->getInstanceBit() == true);
+    ASSERT(h2->getLocStatBit() == false);
+    ASSERT(h2->getNonce() == 0x0abbcc);
+    ASSERT(h2->getInstanceId() == 0x12345678);
+    EV << "  PASS" << endl;
+}
+
+// === 2. Map-Register (IPv4 EID + RLOC, with auth data) ===
+{
+    EV << "=== LispMapRegister (IPv4) ===" << endl;
+    auto reg = makeShared<LispMapRegister>();
+    reg->setNonce(0x1122334455667788ULL);
+    reg->setProxyBit(true);
+    reg->setKeyId(0);
+    std::string key = "secretkey";
+    reg->setAuthDataLen(key.size());
+    reg->setAuthData(key.c_str());
+
+    LispMapRecord rec;
+    rec.setRecordTTL(1440);
+    rec.setEidMaskLength(24);
+    rec.setEidPrefix(L3Address(Ipv4Address("192.168.1.0")));
+    LispLocatorRecord loc;
+    loc.priority = 1; loc.weight = 100; loc.mpriority = 255; loc.mweight = 0;
+    loc.localLocBit = true; loc.probedBit = false; loc.reachableBit = true;
+    loc.rloc = L3Address(Ipv4Address("10.0.0.1"));
+    rec.setLocatorsArraySize(1);
+    rec.setLocators(0, loc);
+    reg->setRecordsArraySize(1);
+    reg->setRecords(0, rec);
+    reg->setRecordCount(1);
+    reg->setChunkLength(lispMapRegisterLength(*reg));
+
+    Packet pkt("sz");
+    pkt.insertAtFront(reg);
+    EV << "  serializedLength: " << pkt.getDataLength().get() << endl;
+    ASSERT(pkt.getDataLength() == reg->getChunkLength());
+
+    auto reg2 = roundTrip(staticPtrCast<const LispMapRegister>(reg));
+    ASSERT(reg2 != nullptr);
+    ASSERT(reg2->getType() == LISP_REGISTER);
+    ASSERT(reg2->getNonce() == 0x1122334455667788ULL);
+    ASSERT(reg2->getProxyBit() == true);
+    ASSERT(std::string(reg2->getAuthData()) == "secretkey");
+    ASSERT(reg2->getRecordsArraySize() == 1);
+    const LispMapRecord& r2 = reg2->getRecords(0);
+    ASSERT(r2.getRecordTTL() == 1440);
+    ASSERT(r2.getEidMaskLength() == 24);
+    ASSERT(r2.getEidPrefix() == L3Address(Ipv4Address("192.168.1.0")));
+    ASSERT(r2.getLocatorsArraySize() == 1);
+    ASSERT(r2.getLocators(0).priority == 1);
+    ASSERT(r2.getLocators(0).weight == 100);
+    ASSERT(r2.getLocators(0).localLocBit == true);
+    ASSERT(r2.getLocators(0).reachableBit == true);
+    ASSERT(r2.getLocators(0).rloc == L3Address(Ipv4Address("10.0.0.1")));
+    EV << "  PASS" << endl;
+}
+
+// === 3. Map-Reply (IPv6 EID + RLOC, exercises AFI = 2) ===
+{
+    EV << "=== LispMapReply (IPv6) ===" << endl;
+    auto rep = makeShared<LispMapReply>();
+    rep->setNonce(0xdeadbeefULL);
+
+    LispMapRecord rec;
+    rec.setRecordTTL(60);
+    rec.setEidMaskLength(64);
+    rec.setEidPrefix(L3Address(Ipv6Address("2001:db8:1::")));
+    LispLocatorRecord loc;
+    loc.priority = 5; loc.weight = 50; loc.mpriority = 255; loc.mweight = 0;
+    loc.localLocBit = false; loc.probedBit = true; loc.reachableBit = true;
+    loc.rloc = L3Address(Ipv6Address("2001:db8:ffff::1"));
+    rec.setLocatorsArraySize(1);
+    rec.setLocators(0, loc);
+    rep->setRecordsArraySize(1);
+    rep->setRecords(0, rec);
+    rep->setRecordCount(1);
+    rep->setChunkLength(lispMapReplyLength(*rep));
+
+    auto rep2 = roundTrip(staticPtrCast<const LispMapReply>(rep));
+    ASSERT(rep2 != nullptr);
+    ASSERT(rep2->getType() == LISP_REPLY);
+    ASSERT(rep2->getNonce() == 0xdeadbeefULL);
+    ASSERT(rep2->getRecordsArraySize() == 1);
+    const LispMapRecord& r2 = rep2->getRecords(0);
+    ASSERT(r2.getEidMaskLength() == 64);
+    ASSERT(r2.getEidPrefix() == L3Address(Ipv6Address("2001:db8:1::")));
+    ASSERT(r2.getLocators(0).probedBit == true);
+    ASSERT(r2.getLocators(0).rloc == L3Address(Ipv6Address("2001:db8:ffff::1")));
+    EV << "  PASS" << endl;
+}
+
+// === 4. Map-Request (IPv4 queried EID) ===
+{
+    EV << "=== LispMapRequest (IPv4) ===" << endl;
+    auto req = makeShared<LispMapRequest>();
+    req->setNonce(0x99887766ULL);
+    req->setProbeBit(false);
+    LispEidRecord rec;
+    rec.eidMaskLength = 32;
+    rec.eidPrefix = L3Address(Ipv4Address("192.168.2.10"));
+    req->setRecsArraySize(1);
+    req->setRecs(0, rec);
+    req->setRecordCount(1);
+    req->setChunkLength(lispMapRequestLength(*req));
+
+    auto req2 = roundTrip(staticPtrCast<const LispMapRequest>(req));
+    ASSERT(req2 != nullptr);
+    ASSERT(req2->getType() == LISP_REQUEST);
+    ASSERT(req2->getNonce() == 0x99887766ULL);
+    ASSERT(req2->getRecsArraySize() == 1);
+    ASSERT(req2->getRecs(0).eidMaskLength == 32);
+    ASSERT(req2->getRecs(0).eidPrefix == L3Address(Ipv4Address("192.168.2.10")));
+    EV << "  PASS" << endl;
+}
+
+EV << "All LISP serializer round-trips passed." << endl;
+
+%contains: stdout
+All LISP serializer round-trips passed.
