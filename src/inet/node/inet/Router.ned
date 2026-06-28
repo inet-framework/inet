@@ -34,10 +34,11 @@ module Router extends ApplicationLayerNodeBase
         bool hasEigrp = default(false);
         bool hasOspf = default(false);
         bool hasRip = default(false);
+        bool hasBabel = default(false);
         bool hasBgp = default(false);
         bool hasPim = default(false);
         bool hasDhcp = default(false);
-        hasUdp = default(hasRip || hasDhcp);
+        hasUdp = default(hasRip || hasBabel || hasDhcp);
         hasTcp = default(hasBgp);
         *.routingTableModule = default("^.ipv4.routingTable");
 
@@ -54,6 +55,10 @@ module Router extends ApplicationLayerNodeBase
         rip: <"Rip"> like IApp if hasRip {
             parameters:
                 @display("p=975,76");
+        }
+        babel: <"Babel"> like IApp if hasBabel {
+            parameters:
+                @display("p=975,151");
         }
         pim: <"Pim"> like IPim if hasPim {
             parameters:
@@ -82,6 +87,9 @@ module Router extends ApplicationLayerNodeBase
 
         rip.socketOut --> at.in++ if hasRip;
         rip.socketIn <-- at.out++ if hasRip;
+
+        babel.socketOut --> at.in++ if hasBabel;
+        babel.socketIn <-- at.out++ if hasBabel;
 
         pim.networkLayerOut --> tn.in++ if hasPim;
         pim.networkLayerIn <-- tn.out++ if hasPim;
