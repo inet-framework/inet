@@ -360,6 +360,14 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
   public:
     virtual void sendUnsolicitedNa(NetworkInterface *ie);
 
+    /**
+     * Sends an unsolicited multicast Router Advertisement out the given advertising
+     * interface immediately. Used by network-based mobility (Proxy Mobile IPv6) so a
+     * Mobile Access Gateway can push a newly assigned home network prefix to an
+     * attached mobile node without waiting for the next periodic advertisement.
+     */
+    virtual void sendUnsolicitedRa(NetworkInterface *ie);
+
   protected:
 
     virtual void processNaPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na);

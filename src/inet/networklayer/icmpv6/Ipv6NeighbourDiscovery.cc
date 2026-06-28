@@ -2109,6 +2109,14 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     sendPacketToIpv6Module(packet, Ipv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
 }
 
+void Ipv6NeighbourDiscovery::sendUnsolicitedRa(NetworkInterface *ie)
+{
+    Enter_Method("sendUnsolicitedRa");
+    // createAndSendRaPacket() sends only on advertising interfaces and includes
+    // the interface's current advertised prefixes.
+    createAndSendRaPacket(Ipv6Address::ALL_NODES_2, ie);
+}
+
 void Ipv6NeighbourDiscovery::processNaPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na)
 {
     if (validateNaPacket(packet, na) == false) {
