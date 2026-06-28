@@ -449,6 +449,9 @@ void Babel::sendTLVs(const L3Address& dst, BabelInterface *iface, const std::vec
         flushBuffer(buff);
     else {
         double delay = (maxtime == SEND_BUFFERED) ? CStoS(iface->getHInterval() / defval::BUFFER_MT_DIVISOR) : maxtime;
+        // jitter the deadline so that distinct buffers (and other nodes) do not flush at
+        // exactly the same instant -- important on a shared wireless medium (RFC 6126, 3.1)
+        delay *= uniform(0.5, 1.0);
         if (!ft->isScheduled())
             scheduleAfter(delay, ft);
         else if ((ft->getArrivalTime() - simTime()).dbl() > delay)
