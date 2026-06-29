@@ -104,11 +104,24 @@ void ProtocolTester::subscribeStateSignals()
 {
     std::set<std::string> names;
 
-    // signals named by the program's reaches/neverReaches steps (so matching can observe them)
+    // Non-packet (scalar) signals named by the program's signal() steps. The packet signals
+    // are already subscribed above (signalKinds); scalar signals (FSM state, counters, IDs)
+    // are subscribed here and delivered to the intval_t receiveSignal overload.
+    static const std::set<std::string> packetSignals = {
+        "packetSentToLower", "packetReceivedFromLower", "packetSentToUpper",
+        "packetReceivedFromUpper", "packetSentToPeer", "packetReceivedFromPeer", "packetDropped"
+    };
+    auto collect = [&](const EventPattern& p) {
+        if (!p.selSignal.empty() && packetSignals.find(p.selSignal) == packetSignals.end())
+            names.insert(p.selSignal);
+    };
     if (matchingMode)
-        for (const auto& step : program->steps)
-            if (step.type == StepType::Reaches || step.type == StepType::NeverReaches)
-                names.insert(step.statePattern.signalName);
+        for (const auto& step : program->steps) {
+            collect(step.pattern);
+            collect(step.pattern2);
+            for (const auto& g : step.group)
+                collect(g);
+        }
 
     // signals named by the stateSignals parameter (space-separated) -- enables the trace dump
     std::string param = par("stateSignals").stdstringValue();
@@ -277,14 +290,27 @@ void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, cOb
 void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
     // State channel: only the scalar signals we explicitly subscribed to (FSM state,
-    // counters, IDs). Everything else is ignored.
+    // counters, IDs). Everything else is ignored. Normalised into the same PacketEvent the
+    // packet channel uses (no packet, a scalar value) and fed to the same matching engine.
     if (stateSignalNames.find(signalID) == stateSignalNames.end())
         return;
-    StateEvent event = normalizeState(source, signalID, (long)value);
+    PacketEvent event;
+    event.module = source;
+    if (auto module = dynamic_cast<cModule *>(source))
+        event.node = findContainingNode(module);
+    event.signalName = cComponent::getSignalName(signalID);
+    std::string fullPath = source->getFullPath();
+    auto firstDot = fullPath.find('.');
+    event.sourcePath = (firstDot == std::string::npos) ? fullPath : fullPath.substr(firstDot + 1);
+    event.hasValue = true;
+    event.value = (long)value;
+    event.time = simTime();
+    numObserved++;
     if (traceState)
-        logStateEvent(event);
+        std::cout << "SE t=" << event.time << " mod=" << fullPath
+                  << " signal=" << event.signalName << " value=" << event.value << std::endl;
     if (matchingMode && !decided)
-        processStateMatch(event);
+        processMatch(event);
 }
 
 StateEvent ProtocolTester::normalizeState(cComponent *source, simsignal_t signalID, long value)
