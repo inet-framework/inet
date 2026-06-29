@@ -122,10 +122,21 @@ void Bgp::startBgp()
 {
     ASSERT(bgpRouter == nullptr);
     simtime_t startupTime = par("startupTime");
-    if (startupTime == 0)
-        createBgpRouter();
-    else
+    if (simTime() > SIMTIME_ZERO) {
+        // this is a restart
+        // use the self-message path even for 0s startup so lifecycle restarts happen after the
+        // node has finished bringing its interfaces back up.
+        if (startupTime == SIMTIME_ZERO)
+            startupTime = SimTime(1, SIMTIME_S);  // TODO what value should go here?
         scheduleAfter(startupTime, startupTimer);
+    }
+    else {
+        // this is startup at initialization
+        if (startupTime == SIMTIME_ZERO)
+            createBgpRouter();
+        else
+            scheduleAfter(startupTime, startupTimer);
+    }
 }
 
 void Bgp::stopBgp(bool abort)
