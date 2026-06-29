@@ -441,28 +441,28 @@ Define_ProtocolTest(plca_beacon_cycle)
 {
     return ProtocolTest("plca_beacon_cycle")
         // 1. The controller (local_nodeID 0) starts a PLCA cycle by sending the BEACON.
-        .reaches(state("controller.eth[0].plca", "controlStateChanged")
+        .once(on("controller.eth[0].plca").signal("controlStateChanged")
                    .is(EthernetPlca::CS_SEND_BEACON).describe("the controller sends a BEACON").within(0.001))
         // 2. The controller signals BEACON to the PHY while doing so.
-        .reaches(state("controller.eth[0].plca", "txCmd")
+        .once(on("controller.eth[0].plca").signal("txCmd")
                    .is(EthernetPlca::CMD_BEACON).describe("the controller's TX command is BEACON").within(0.001))
         // 3. node[0] detects the beacon and synchronises its cycle to it.
-        .reaches(state("node[0].eth[0].plca", "controlStateChanged")
+        .once(on("node[0].eth[0].plca").signal("controlStateChanged")
                    .is(EthernetPlca::CS_SYNCING).describe("node[0] synchronises to the beacon").within(0.001))
         // 4. The transmit opportunity rotates from the controller (curID 0) to node[0] (curID 1).
-        .reaches(state("node[0].eth[0].plca", "curID")
+        .once(on("node[0].eth[0].plca").signal("curID")
                    .is(1).describe("the transmit opportunity reaches node[0]").within(0.001))
         // 5. node[0] has a pending frame, so it COMMITs to transmit in its opportunity.
-        .reaches(state("node[0].eth[0].plca", "controlStateChanged")
+        .once(on("node[0].eth[0].plca").signal("controlStateChanged")
                    .is(EthernetPlca::CS_COMMIT).describe("node[0] commits to transmit in its opportunity").within(0.001))
         // 6. node[0]'s data state machine transmits the frame.
-        .reaches(state("node[0].eth[0].plca", "dataStateChanged")
+        .once(on("node[0].eth[0].plca").signal("dataStateChanged")
                    .is(EthernetPlca::DS_TRANSMIT).describe("node[0]'s data FSM transmits the frame").within(0.001))
         // 7. The controller receives node[0]'s frame in turn (its data FSM enters RECEIVE).
-        .reaches(state("controller.eth[0].plca", "dataStateChanged")
+        .once(on("controller.eth[0].plca").signal("dataStateChanged")
                    .is(EthernetPlca::DS_RECEIVE).describe("the controller receives node[0]'s frame").within(0.001))
         // 8. Throughout, the control FSM must never enter its ABORT state.
-        .neverReaches(state("node[0].eth[0].plca", "controlStateChanged")
+        .never(on("node[0].eth[0].plca").signal("controlStateChanged")
                    .is(EthernetPlca::CS_ABORT).describe("node[0]'s control FSM must not abort").within(0.001));
 }
 
@@ -471,9 +471,9 @@ Define_ProtocolTest(plca_beacon_cycle)
 Define_ProtocolTest(plca_beacon_cycle_bad)
 {
     return ProtocolTest("plca_beacon_cycle_bad")
-        .reaches(state("controller.eth[0].plca", "controlStateChanged")
+        .once(on("controller.eth[0].plca").signal("controlStateChanged")
                    .is(EthernetPlca::CS_SEND_BEACON).describe("the controller sends a BEACON").within(0.001))
-        .reaches(state("controller.eth[0].plca", "controlStateChanged")
+        .once(on("controller.eth[0].plca").signal("controlStateChanged")
                    .is(EthernetPlca::CS_TRANSMIT).describe("the controller transmits (it never does)").within(0.001));
 }
 

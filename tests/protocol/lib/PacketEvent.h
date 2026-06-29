@@ -45,6 +45,8 @@ struct PacketEvent {
     std::string dispatchName;         // packet's DispatchProtocolReq protocol name, else empty
     std::string signalName;           // the registered name of the emitting signal
     std::string sourcePath;           // emitting module path, relative to the network
+    bool hasValue = false;            // true for a scalar (non-packet) signal, e.g. an FSM state
+    long value = 0;                   // the scalar signal value when hasValue
     Layer layer = Layer::Unknown;
     simtime_t time = 0;
     long treeId = -1;                 // packet identity, for cross-node correlation

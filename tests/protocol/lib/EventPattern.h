@@ -58,6 +58,7 @@ class INET_API EventPattern
     std::string selSignal;                                // signal(name): registered signal name ("" = any)
     std::string selProtocol;                              // protocol(name): packet's PacketProtocolTag ("" = any)
     std::string selDispatch;                              // dispatch(name): packet's DispatchProtocolReq ("" = any)
+    bool selHasValue = false; long selValue = 0;          // is(v): scalar signal value (e.g. an FSM state index)
     std::string attributeToPath;                          // attributeTo(path): description-only point of view
     bool protocolSubject = false;                         // describe the protocol module as the subject (set by sends()/receives())
     std::string selIface;                                 // "" = any interface
@@ -81,6 +82,7 @@ class INET_API EventPattern
     EventPattern& signal(const char *name) { selSignal = name; return *this; }     // which signal (registered name)
     EventPattern& dispatch(const char *name) { selDispatch = name; return *this; } // DispatchProtocolReq protocol
     EventPattern& packet(const char *expression) { selExpr = expression; return *this; } // PacketFilter content (value is a packet)
+    EventPattern& is(long v) { selHasValue = true; selValue = v; return *this; } // a scalar signal's value (e.g. an FSM state)
     EventPattern& attributeTo(const char *path) { attributeToPath = path; return *this; } // description point of view
 
     // Narrow to packets of a given protocol (the PacketProtocolTag name, e.g. "mobileipv6").

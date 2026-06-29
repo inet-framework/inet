@@ -175,7 +175,17 @@ static std::string renderNewPattern(const EventPattern& p, const char *modal)
     bool isDropped = p.selSignal.find("Dropped") != std::string::npos;
     bool isSent = p.selSignal.find("Sent") != std::string::npos;
 
-    if (!p.attributeToPath.empty()) {
+    if (p.selHasValue) {
+        // Scalar / state-signal assertion: "<module>'s <signal> must reach <value>".
+        std::string subject = !p.selSource.empty() ? p.selSource
+                            : (p.selNode.empty() ? "some module" : p.selNode);
+        os << subject << "'s " << p.selSignal << " " << modal << " reach ";
+        if (!p.description.empty())
+            os << p.description << " (value " << p.selValue << ")";
+        else
+            os << "value " << p.selValue;
+    }
+    else if (!p.attributeToPath.empty()) {
         // Narrate from the attributed (up/down counterpart) module: it does the opposite of
         // the emitting layer (a packet the layer "received from upper" was *sent* by the module
         // above it).
