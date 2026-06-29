@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="BGP.xsd">
+
+    <AS id="65001">
+        <Router interAddr="10.0.1.1">
+            <Network address="10.0.1.0"/>
+        </Router>
+    </AS>
+
+    <AS id="65002">
+        <Router interAddr="10.0.12.2"/>
+    </AS>
+
+    <AS id="65003">
+        <Router interAddr="10.0.3.1">
+            <Network address="10.0.3.0"/>
+        </Router>
+    </AS>
+
+    <AS id="65004">
+        <Router interAddr="10.0.14.4"/>
+    </AS>
+
+    <Session id="1">
+        <Router exterAddr="10.0.12.1"/>
+        <Router exterAddr="10.0.12.2"/>
+    </Session>
+
+    <Session id="2">
+        <Router exterAddr="10.0.23.2"/>
+        <Router exterAddr="10.0.23.3"/>
+    </Session>
+
+    <Session id="10">
+        <Router exterAddr="10.0.14.1"/>
+        <Router exterAddr="10.0.14.4"/>
+    </Session>
+
+    <Session id="11">
+        <Router exterAddr="10.0.43.4"/>
+        <Router exterAddr="10.0.43.3"/>
+    </Session>
+
+</BGPConfig>
