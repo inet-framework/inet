@@ -184,10 +184,17 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     virtual void fragmentAndSend(Packet *packet);
 
     /**
-     * Perform reassembly of fragmented datagrams, then send them up to the
-     * higher layers using sendToHL().
+     * Perform reassembly of fragmented datagrams, run the LOCAL_IN netfilter hook,
+     * then continue local delivery in localDeliverFinish().
      */
-    virtual void localDeliver(Packet *packet, const NetworkInterface *fromIE);
+    virtual void localDeliver(Packet *packet);
+
+    /**
+     * Continue local delivery after the LOCAL_IN hook: process extension headers and
+     * dispatch to the upper layer. Packet-only (fromIE is recovered from the
+     * InterfaceInd tag), so it doubles as the LOCAL_IN netfilter reinject continuation.
+     */
+    virtual void localDeliverFinish(Packet *packet);
 
     /**
      * Decapsulate packet.
@@ -222,7 +229,7 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     /**
      * called before a packet arriving from the network is delivered locally
      */
-    IHook::Result datagramLocalInHook(Packet *packet, const NetworkInterface *inIE);
+    IHook::Result datagramLocalInHook(Packet *packet);
 
     /**
      * called before a packet arriving locally is delivered

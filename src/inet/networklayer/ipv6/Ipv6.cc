@@ -459,7 +459,7 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
         EV_INFO << "local delivery\n";
 
         numLocalDeliver++;
-        localDeliver(packet, fromIE);
+        localDeliver(packet);
         return;
     }
 
@@ -633,7 +633,7 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
     {
         EV_INFO << "local delivery of multicast packet\n";
         numLocalDeliver++;
-        localDeliver(packet->dup(), fromIE);
+        localDeliver(packet->dup());
     }
 
     // forward only if forwarding is enabled on this node
@@ -720,7 +720,7 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
     delete packet;
 }
 
-void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
+void Ipv6::localDeliver(Packet *packet)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
 
@@ -762,6 +762,19 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
         // Re-peek header from the reassembled packet (old reference is stale)
         ipv6Header = packet->peekAtFront<Ipv6Header>();
     }
+
+    // LOCAL_IN netfilter hook: fires after reassembly and before extension-header
+    // processing -- the point at which an inbound IPsec hook strips AH/ESP and restores
+    // the inner protocol. The continuation (localDeliverFinish) is packet-only so a
+    // QUEUE'd datagram can be resumed by reinjectQueuedDatagram(). (cf. Ipv4.cc)
+    if (datagramLocalInHook(packet) == INetfilter::IHook::ACCEPT)
+        localDeliverFinish(packet);
+}
+
+void Ipv6::localDeliverFinish(Packet *packet)
+{
+    const NetworkInterface *fromIE = getSourceInterfaceFrom(packet);
+    auto ipv6Header = packet->peekAtFront<Ipv6Header>();
 
     // check for extension headers
     if (!processExtensionHeaders(packet)) {
@@ -1317,8 +1330,7 @@ void Ipv6::reinjectQueuedDatagram(const Packet *packet)
                     break;
 
                 case INetfilter::IHook::LOCALIN:
-//                    reassembleAndDeliverFinish(datagram);
-                    throw cRuntimeError("Re-injection of datagram queued for LOCALIN hook not implemented");
+                    localDeliverFinish(datagram);
                     break;
 
                 case INetfilter::IHook::FORWARD:
@@ -1413,7 +1425,7 @@ INetfilter::IHook::Result Ipv6::datagramPostRoutingHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result Ipv6::datagramLocalInHook(Packet *packet, const NetworkInterface *inIE)
+INetfilter::IHook::Result Ipv6::datagramLocalInHook(Packet *packet)
 {
     for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalInHook(packet);
