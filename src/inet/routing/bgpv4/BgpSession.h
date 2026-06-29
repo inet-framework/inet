@@ -84,6 +84,7 @@ public:
     void sendOpenMessage();
     void sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content, BgpUpdateNlri& nlri);
     void sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content); // MP-BGP UPDATE (no legacy NLRI)
+    void sendWithdrawMessage(const L3Address& prefix, int prefixLength);
     void sendNotificationMessage();
     void sendKeepAliveMessage();
 
@@ -112,6 +113,7 @@ public:
     NetworkInterface *getLinkIntf() const { return _info.linkIntf; }
     bool getCheckConnection() const { return _info.checkConnection; }
     L3Address getPeerAddr() const { return _info.peerAddr; }
+    L3Address getMyAddr() const { return _info.myAddr; }
     bool getNextHopSelf() const { return _info.nextHopSelf; }
     int getLocalPreference() const { return _info.localPreference; }
     TcpSocket *getSocket() const { return _info.socket; }
@@ -121,6 +123,7 @@ public:
     BgpRouteInfo *createBgpRoutingTableEntry(const IRoute *from) const { return bgpRouter.createBgpRoutingTableEntry(from); }
     Macho::Machine<fsm::TopState>& getFsm() const { return *_fsm; }
     void updateSendProcess(BgpRouteInfo *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionId, entry); }
+    void withdrawRoutesFromSession() const { bgpRouter.withdrawRoutesFromSession(_info.sessionId); }
     bool isRouteExcluded(const IRoute& rtEntry) const { return bgpRouter.isRouteExcluded(rtEntry); }
 };
 

@@ -58,7 +58,12 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     L3Address internalAddress;
 
     typedef std::vector<BgpRouteInfo *> RoutingTableEntryVector;
-    RoutingTableEntryVector bgpRoutingTable; // The BGP routing table
+    struct PrefixKey {
+        L3Address prefix;
+        int prefixLength = 0;
+    };
+    RoutingTableEntryVector bgpRoutingTable; // Loc-RIB: selected BGP routes
+    RoutingTableEntryVector adjRibInTable; // Adj-RIB-In: all peer-learned routes
     std::vector<L3Address> advertiseList;
     RoutingTableEntryVector _prefixListIN;
     RoutingTableEntryVector _prefixListOUT;
@@ -169,6 +174,21 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     void processMessage(const BgpUpdateMessage& msg);
 
     bool deleteBgpRoutingEntry(BgpRouteInfo *entry);
+    bool deleteLocRibEntry(BgpRouteInfo *entry);
+    BgpRouteInfo *findLocRibEntry(const L3Address& prefix, int prefixLength) const;
+    BgpRouteInfo *selectBestAdjRibInRoute(const L3Address& prefix, int prefixLength) const;
+    void upsertAdjRibInRoute(BgpRouteInfo *entry);
+    bool removeAdjRibInRoute(SessionId sessionId, const L3Address& prefix, int prefixLength);
+    std::vector<PrefixKey> removeAdjRibInRoutesFromSession(SessionId sessionId);
+    void installBestRouteForPrefix(const L3Address& prefix, int prefixLength, SessionId triggeringSessionId);
+    void withdrawRoutesFromSession(SessionId sessionId);
+    void withdrawSendProcess(SessionId sessionIndex, const BgpRouteInfo *entry);
+    static void addAffectedPrefix(std::vector<PrefixKey>& prefixes, const L3Address& prefix, int prefixLength);
+    static bool prefixMatches(const BgpRouteInfo *entry, const L3Address& prefix, int prefixLength);
+    static bool samePrefix(const BgpRouteInfo *first, const BgpRouteInfo *second);
+    static bool samePath(const BgpRouteInfo *first, const BgpRouteInfo *second);
+    bool isBetterRoute(const BgpRouteInfo *candidate, const BgpRouteInfo *current) const;
+    BgpRouteInfo *cloneRoute(const BgpRouteInfo *entry) const;
 
     /**
      * \brief RFC 4271: 9.1. : Decision Process used when an UPDATE message is received

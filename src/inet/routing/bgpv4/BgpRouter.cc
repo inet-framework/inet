@@ -34,6 +34,9 @@ BgpRouter::~BgpRouter(void)
     for (auto& elem : _bgpSessions)
         delete (elem).second;
 
+    for (auto& elem : adjRibInTable)
+        delete elem;
+
     for (auto& elem : _prefixListINOUT)
         delete elem;
 
@@ -66,6 +69,7 @@ void BgpRouter::addWatches()
     WATCH(myAsId);
     WATCH(_bgpSessions);
     WATCH(bgpRoutingTable);
+    WATCH(adjRibInTable);
     _socketMap.addWatch();
 }
 
@@ -240,6 +244,7 @@ void BgpRouter::addToAdvertiseList(const L3Address& address)
     bgpEntry->addAS(myAsId);
     bgpEntry->setPathType(IGP);
     bgpEntry->setLocalPreference(bgpModule->par("localPreference").intValue());
+    bgpEntry->setSourceSessionId(0);
     bgpRoutingTable.push_back(bgpEntry);
 }
 
@@ -331,6 +336,15 @@ void BgpRouter::processMessageFromTcp(cMessage *msg)
 {
     TcpSocket *socket = check_and_cast_nullable<TcpSocket *>(_socketMap.findSocketFor(msg));
     if (!socket) {
+        if (dynamic_cast<Packet *>(msg) != nullptr ||
+            (msg->getKind() != TCP_I_AVAILABLE && msg->getKind() != TCP_I_ESTABLISHED))
+        {
+            // A restarted peer may still deliver late TCP payloads or control indications for a
+            // socket id that has already been replaced locally. Ignore those stale messages
+            // instead of rebuilding a new TcpSocket for the defunct connection.
+            delete msg;
+            return;
+        }
         socket = new TcpSocket(msg);
         socket->setOutputGate(bgpModule->gate("socketOut"));
         L3Address peerAddr = socket->getRemoteAddress();
@@ -427,7 +441,7 @@ void BgpRouter::openTcpConnectionToPeer(SessionId sessionId)
         if (intfEntry == nullptr)
             throw cRuntimeError("No configuration interface for external peer address: %s", _bgpSessions[sessionId]->getPeerAddr().str().c_str());
         // note: port=-1 stands for ephemeral port (=0 would be literally port 0)
-        socket->bind(getInterfaceAddress(intfEntry), -1);
+        socket->bind(_bgpSessions[sessionId]->getMyAddr(), -1);
 
         int ebgpMH = _bgpSessions[sessionId]->getEbgpMultihop();
         if (ebgpMH > 1)
@@ -560,49 +574,54 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
     printUpdateMessage(msg);
     session->getFsm()->UpdateMsgEvent();
 
-    BgpRouteInfo *entry = createBgpRoutingTableEntry();
-    entry->setLocalPreference(bgpModule->par("localPreference").intValue());
+    std::vector<PrefixKey> affectedPrefixes;  // prefixes whose best path may need to be reselected
+    std::vector<PrefixKey> withdrawnPrefixes; // prefixes explicitly withdrawn by this peer in this UPDATE
+
+    for (size_t i = 0; i < msg.getWithdrawnRoutesArraySize(); ++i)
+        addAffectedPrefix(withdrawnPrefixes, msg.getWithdrawnRoutes(i).prefix, msg.getWithdrawnRoutes(i).length);
+
+    for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
+        if (msg.getPathAttributes(i)->getTypeCode() == BgpUpdateAttributeTypeCode::MP_UNREACH_NLRI) {
+            auto& mp = *check_and_cast<const BgpUpdatePathAttributesMpUnreachNlri *>(msg.getPathAttributes(i));
+            for (size_t n = 0; n < mp.getWithdrawnRoutesArraySize(); ++n)
+                addAffectedPrefix(withdrawnPrefixes, mp.getWithdrawnRoutes(n).prefix, mp.getWithdrawnRoutes(n).length);
+        }
+    }
+
     if (isIpv6()) {
-        // RFC 4760: IPv6 reachability and the next hop arrive in MP_REACH_NLRI, not the legacy fields
         for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
             if (msg.getPathAttributes(i)->getTypeCode() == BgpUpdateAttributeTypeCode::MP_REACH_NLRI) {
                 auto& mp = *check_and_cast<const BgpUpdatePathAttributesMpReachNlri *>(msg.getPathAttributes(i));
-                if (mp.getNlriArraySize() > 0) {
-                    entry->setDestination(mp.getNlri(0).prefix);
-                    entry->setPrefixLength(mp.getNlri(0).length);
+                for (size_t n = 0; n < mp.getNlriArraySize(); ++n) {
+                    BgpRouteInfo *entry = createBgpRoutingTableEntry();
+                    entry->setDestination(mp.getNlri(n).prefix);
+                    entry->setPrefixLength(mp.getNlri(n).length);
+                    BgpProcessResult result = decisionProcess(msg, entry, _currSessionId);
+                    if (result == NEW_ROUTE_ADDED || result == ROUTE_DESTINATION_CHANGED)
+                        addAffectedPrefix(affectedPrefixes, entry->getDestinationAsGeneric(), entry->getPrefixLength());
                 }
-                entry->setNextHop(mp.getNextHop());
             }
         }
     }
     else {
-        entry->setDestination(msg.getNlri(0).prefix);
-        entry->setPrefixLength(msg.getNlri(0).length);
-    }
-
-    for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
-        if (msg.getPathAttributes(i)->getTypeCode() == BgpUpdateAttributeTypeCode::AS_PATH) {
-            auto& asPath = *check_and_cast<const BgpUpdatePathAttributesAsPath *>(msg.getPathAttributes(i));
-            for (size_t k = 0; k < asPath.getValueArraySize(); k++) {
-                const BgpAsPathSegment& asPathVal = asPath.getValue(k);
-                for (size_t n = 0; n < asPathVal.getAsValueArraySize(); n++) {
-                    entry->addAS(asPathVal.getAsValue(n));
-                }
-            }
+        for (size_t i = 0; i < msg.getNlriArraySize(); ++i) {
+            BgpRouteInfo *entry = createBgpRoutingTableEntry();
+            entry->setDestination(msg.getNlri(i).prefix);
+            entry->setPrefixLength(msg.getNlri(i).length);
+            BgpProcessResult result = decisionProcess(msg, entry, _currSessionId);
+            if (result == NEW_ROUTE_ADDED || result == ROUTE_DESTINATION_CHANGED)
+                addAffectedPrefix(affectedPrefixes, entry->getDestinationAsGeneric(), entry->getPrefixLength());
         }
     }
 
-    BgpProcessResult decisionProcessResult = asLoopDetection(entry, myAsId);
-
-    if (decisionProcessResult == ASLOOP_NO_DETECTED) {
-        // RFC 4271, 9.1.  Decision Process
-        decisionProcessResult = decisionProcess(msg, entry, _currSessionId);
-        // RFC 4271, 9.2.  Update-Send Process
-        if (decisionProcessResult != 0)
-            updateSendProcess(decisionProcessResult, _currSessionId, entry);
+    for (const auto& prefix : withdrawnPrefixes) {
+        removeAdjRibInRoute(_currSessionId, prefix.prefix, prefix.prefixLength);
+        addAffectedPrefix(affectedPrefixes, prefix.prefix, prefix.prefixLength);
     }
-    else
-        delete entry;
+
+    // Re-run best-path selection only for prefixes touched by this UPDATE.
+    for (const auto& prefix : affectedPrefixes)
+        installBestRouteForPrefix(prefix.prefix, prefix.prefixLength, _currSessionId);
 }
 
 BgpProcessResult BgpRouter::asLoopDetection(BgpRouteInfo *entry, AsId myAS)
@@ -614,23 +633,8 @@ BgpProcessResult BgpRouter::asLoopDetection(BgpRouteInfo *entry, AsId myAS)
     return ASLOOP_NO_DETECTED;
 }
 
-/* add entry to routing table, or delete entry */
 BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouteInfo *entry, SessionId sessionIndex)
 {
-    // Don't add the route if it exists in PrefixListINTable or in ASListINTable
-    if (isInTable(_prefixListIN, entry) != (unsigned long)-1 || isInASList(_ASListIN, entry)) {
-        delete entry;
-        return RESULT0;
-    }
-
-    /*If the AS_PATH attribute of a BGP route contains an AS loop, the BGP
-       route should be excluded from the decision process. */
-#if 0
-    entry->setPathType(msg.getPathAttributeList(0).getOrigin().getValue());
-    entry->setGateway(msg.getPathAttributeList(0).getNextHop().getValue());
-    if (msg.getPathAttributeList(0).getLocalPrefArraySize() != 0)
-        entry->setLocalPreference(msg.getPathAttributeList(0).getLocalPref(0).getValue());
-#else
     for (size_t i = 0; i < msg.getPathAttributesArraySize(); i++) {
         switch (msg.getPathAttributes(i)->getTypeCode()) {
             case BgpUpdateAttributeTypeCode::ORIGIN: {
@@ -648,11 +652,38 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
                 entry->setLocalPreference(attr->getValue());
                 break;
             }
+            case BgpUpdateAttributeTypeCode::AS_PATH: {
+                auto& asPath = *check_and_cast<const BgpUpdatePathAttributesAsPath *>(msg.getPathAttributes(i));
+                for (size_t k = 0; k < asPath.getValueArraySize(); k++) {
+                    const BgpAsPathSegment& asPathVal = asPath.getValue(k);
+                    for (size_t n = 0; n < asPathVal.getAsValueArraySize(); n++)
+                        entry->addAS(asPathVal.getAsValue(n));
+                }
+                break;
+            }
+            case BgpUpdateAttributeTypeCode::MP_REACH_NLRI: {
+                auto attr = check_and_cast<const BgpUpdatePathAttributesMpReachNlri *>(msg.getPathAttributes(i));
+                entry->setNextHop(attr->getNextHop());
+                break;
+            }
             default:
                 break;
         }
     }
-#endif
+
+    if (entry->getLocalPreference() == 0)
+        entry->setLocalPreference(bgpModule->par("localPreference").intValue());
+
+    if (asLoopDetection(entry, myAsId) != ASLOOP_NO_DETECTED) {
+        delete entry;
+        return ASLOOP_DETECTED;
+    }
+
+    // Don't add the route if it exists in PrefixListINTable or in ASListINTable
+    if (isInTable(_prefixListIN, entry) != (unsigned long)-1 || isInASList(_ASListIN, entry)) {
+        delete entry;
+        return RESULT0;
+    }
 
     BgpSessionType type = _bgpSessions[sessionIndex]->getType();
     if (type == IGP) {
@@ -663,116 +694,19 @@ BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRout
         entry->setAdminDist(Ipv4Route::dBGPExternal);
     else
         entry->setAdminDist(Ipv4Route::dUnknown);
-
-    // if the route already exists in BGP routing table, tieBreakingProcess();
-    // (RFC 4271: 9.1.2.2 Breaking Ties)
-    unsigned long bgpIndex = isInTable(bgpRoutingTable, entry);
-    if (bgpIndex != (unsigned long)-1) {
-        if (tieBreakingProcess(bgpRoutingTable[bgpIndex], entry)) {
-            delete entry;
-            return RESULT0;
-        }
-        else {
-            entry->setInterface(_bgpSessions[sessionIndex]->getLinkIntf());
-            bgpRoutingTable.push_back(entry);
-            rt->addRoute(entry->asRoute());
-            return ROUTE_DESTINATION_CHANGED;
-        }
-    }
-
-    int indexIp = isInRoutingTable(rt, entry->getDestinationAsGeneric());
-    // if the route already exists in the IPv4 routing table
-    if (indexIp != -1) {
-        // and it was not added by BGP before
-        if (rt->getRoute(indexIp)->getSourceType() != IRoute::BGP) {
-            // and the Update msg is coming from IGP session
-            if (_bgpSessions[sessionIndex]->getType() == IGP) {
-                // works for both IPv4 and IPv6: createBgpRoutingTableEntry() takes the
-                // generic IRoute and builds the right (v4/v6) BGP entry
-                IRoute *oldEntry = rt->getRoute(indexIp);
-                BgpRouteInfo *bgpEntry = createBgpRoutingTableEntry(oldEntry);
-                bgpEntry->addAS(myAsId);
-                bgpEntry->setPathType(IGP);
-                bgpEntry->setAdminDist(Ipv4Route::dBGPInternal);
-                bgpEntry->setIBgpLearned(true);
-                bgpEntry->setLocalPreference(entry->getLocalPreference());
-                rt->addRoute(bgpEntry->asRoute());
-                // Note: No need to delete the existing route. Let the administrative distance decides.
-//                rt->deleteRoute(oldEntry);
-            }
-            else {
-                delete entry;
-                return RESULT0;
-            }
-        }
-    }
-    else {
-        // and the Update msg is coming from IGP session
-        if (_bgpSessions[sessionIndex]->getType() == IGP) {
-            // if the next hop is reachable
-            if (isReachable(entry->getNextHopAsGeneric())) {
-                // Resolve the (i)BGP next hop recursively through the IGP. An installed route
-                // must point at an on-link next hop, but an iBGP next hop can be several IGP
-                // hops away (e.g. behind an OSPF/OSPFv3 path); in that case replace it with the
-                // IGP's immediate next hop. A directly-connected next hop resolves to
-                // "unspecified" here and is kept as-is (so directly-connected iBGP is unchanged).
-                L3Address onLinkNextHop = rt->getNextHopForDestination(entry->getNextHopAsGeneric());
-                if (!onLinkNextHop.isUnspecified())
-                    entry->setNextHop(onLinkNextHop);
-                entry->setInterface(_bgpSessions[sessionIndex]->getLinkIntf());
-                rt->addRoute(entry->asRoute());
-            }
-        }
-    }
-
+    entry->setSourceSessionId(sessionIndex);
+    entry->setSourcePeerAddress(_bgpSessions[sessionIndex]->getPeerAddr());
     entry->setInterface(_bgpSessions[sessionIndex]->getLinkIntf());
-    bgpRoutingTable.push_back(entry);
 
-    if (_bgpSessions[sessionIndex]->getType() == EGP) {
-        if (isReachable(entry->getNextHopAsGeneric()))
-            rt->addRoute(entry->asRoute());
-
-        // if redistributeInternal is true, then insert the new external route into the OSPF (if exists).
-        // The OSPF module then floods AS-External LSA into the AS and lets other routers know
-        // about the new external route.
-        if (ospfExist(rt) && redistributeInternal) {
-            NetworkInterface *ie = entry->getInterface();
-            if (!ie)
-                throw cRuntimeError("Model error: interface entry is nullptr");
-            ospfv2::Ipv4AddressRange ospfNetAddr;
-            ospfNetAddr.address = entry->getDestinationAsGeneric().toIpv4();
-            ospfNetAddr.mask = Ipv4Address::makeNetmask(entry->getPrefixLength());
-            if (!ospfModule)
-                throw cRuntimeError("Cannot find the OSPF module on router %s", bgpModule->getFullName());
-            ospfModule->insertExternalRoute(ie->getInterfaceId(), ospfNetAddr);
-        }
-    }
-    return NEW_ROUTE_ADDED; // FIXME model error: When returns NEW_ROUTE_ADDED then entry stored in bgpRoutingTable, but sometimes not stored in rt
+    // Adj-RIB-In keeps every path learned from every peer; best-path selection is deferred
+    // to installBestRouteForPrefix(), which populates the Loc-RIB and the routing table.
+    upsertAdjRibInRoute(entry);
+    return NEW_ROUTE_ADDED;
 }
 
 bool BgpRouter::tieBreakingProcess(BgpRouteInfo *oldEntry, BgpRouteInfo *entry)
 {
-    if (entry->getLocalPreference() > oldEntry->getLocalPreference()) {
-        deleteBgpRoutingEntry(oldEntry);
-        return false;
-    }
-
-    /* Remove from consideration all routes that are not tied for
-         having the smallest number of AS numbers present in their
-         AS_PATH attributes.*/
-    if (entry->getASCount() < oldEntry->getASCount()) {
-        deleteBgpRoutingEntry(oldEntry);
-        return false;
-    }
-
-    /* Remove from consideration all routes that are not tied for
-         having the lowest Origin number in their Origin attribute.*/
-    if (entry->getPathType() < oldEntry->getPathType()) {
-        deleteBgpRoutingEntry(oldEntry);
-        return false;
-    }
-
-    return true;
+    return !isBetterRoute(entry, oldEntry);
 }
 
 void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex, BgpRouteInfo *entry)
@@ -786,7 +720,9 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
         if (isInTable(_prefixListOUT, entry) != (unsigned long)-1 || isInASList(_ASListOUT, entry) ||
             ((elem).first == sessionIndex && type != NEW_SESSION_ESTABLISHED) ||
             (type == NEW_SESSION_ESTABLISHED && (elem).first != sessionIndex) ||
-            !(elem).second->isEstablished())
+            !(elem).second->isEstablished() ||
+            elem.second->getSocket() == nullptr ||
+            elem.second->getSocket()->getState() != TcpSocket::CONNECTED)
         {
             continue;
         }
@@ -907,18 +843,259 @@ void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex,
  */
 bool BgpRouter::deleteBgpRoutingEntry(BgpRouteInfo *entry)
 {
-    for (auto it = bgpRoutingTable.begin();
-         it != bgpRoutingTable.end(); it++)
-    {
-        if ((*it)->getDestinationAsGeneric().getPrefix((*it)->getPrefixLength()) ==
-            entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength()))
-        {
-            bgpRoutingTable.erase(it);
-            rt->deleteRoute(entry->asRoute());
+    if (deleteLocRibEntry(entry))
+        return true;
+
+    for (auto it = adjRibInTable.begin(); it != adjRibInTable.end(); ++it) {
+        if (*it == entry) {
+            delete *it;
+            adjRibInTable.erase(it);
             return true;
         }
     }
     return false;
+}
+
+bool BgpRouter::deleteLocRibEntry(BgpRouteInfo *entry)
+{
+    for (auto it = bgpRoutingTable.begin();
+         it != bgpRoutingTable.end(); it++) {
+        if (*it == entry) {
+            bgpRoutingTable.erase(it);
+            for (int i = 0; i < rt->getNumRoutes(); ++i) {
+                IRoute *route = rt->getRoute(i);
+                if (route->getSourceType() == IRoute::BGP &&
+                    route->getDestinationAsGeneric().getPrefix(route->getPrefixLength()) == entry->getDestinationAsGeneric().getPrefix(entry->getPrefixLength()) &&
+                    route->getPrefixLength() == entry->getPrefixLength())
+                {
+                    rt->deleteRoute(route);
+                    break;
+                }
+            }
+            delete entry;
+            return true;
+        }
+    }
+    return false;
+}
+
+BgpRouteInfo *BgpRouter::findLocRibEntry(const L3Address& prefix, int prefixLength) const
+{
+    for (auto entry : bgpRoutingTable) {
+        if (prefixMatches(entry, prefix, prefixLength))
+            return entry;
+    }
+    return nullptr;
+}
+
+BgpRouteInfo *BgpRouter::selectBestAdjRibInRoute(const L3Address& prefix, int prefixLength) const
+{
+    BgpRouteInfo *best = nullptr;
+    for (auto entry : adjRibInTable) {
+        if (!prefixMatches(entry, prefix, prefixLength))
+            continue;
+        if (entry->isIBgpLearned() && !isReachable(entry->getNextHopAsGeneric()))
+            continue;
+        if (!entry->isIBgpLearned() && !isReachable(entry->getNextHopAsGeneric()))
+            continue;
+        if (best == nullptr || isBetterRoute(entry, best))
+            best = entry;
+    }
+    return best;
+}
+
+void BgpRouter::upsertAdjRibInRoute(BgpRouteInfo *entry)
+{
+    for (auto it = adjRibInTable.begin(); it != adjRibInTable.end(); ++it) {
+        BgpRouteInfo *current = *it;
+        if (current->getSourceSessionId() == entry->getSourceSessionId() && samePrefix(current, entry)) {
+            delete current;
+            *it = entry;
+            return;
+        }
+    }
+    adjRibInTable.push_back(entry);
+}
+
+bool BgpRouter::removeAdjRibInRoute(SessionId sessionId, const L3Address& prefix, int prefixLength)
+{
+    for (auto it = adjRibInTable.begin(); it != adjRibInTable.end(); ++it) {
+        BgpRouteInfo *entry = *it;
+        if (entry->getSourceSessionId() == sessionId && prefixMatches(entry, prefix, prefixLength)) {
+            delete entry;
+            adjRibInTable.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<BgpRouter::PrefixKey> BgpRouter::removeAdjRibInRoutesFromSession(SessionId sessionId)
+{
+    std::vector<PrefixKey> affectedPrefixes;
+    for (auto it = adjRibInTable.begin(); it != adjRibInTable.end(); ) {
+        BgpRouteInfo *entry = *it;
+        if (entry->getSourceSessionId() == sessionId) {
+            addAffectedPrefix(affectedPrefixes, entry->getDestinationAsGeneric(), entry->getPrefixLength());
+            delete entry;
+            it = adjRibInTable.erase(it);
+        }
+        else
+            ++it;
+    }
+    return affectedPrefixes;
+}
+
+void BgpRouter::installBestRouteForPrefix(const L3Address& prefix, int prefixLength, SessionId triggeringSessionId)
+{
+    BgpRouteInfo *current = findLocRibEntry(prefix, prefixLength);
+    if (current != nullptr && current->getSourceSessionId() == 0)
+        return;
+
+    BgpRouteInfo *best = selectBestAdjRibInRoute(prefix, prefixLength);
+    if (current != nullptr && best != nullptr && samePath(current, best))
+        return;
+
+    // Keep a snapshot of the old Loc-RIB route so we can send an explicit withdraw if
+    // no alternative remains after re-running the decision process.
+    BgpRouteInfo *oldEntry = current;
+    BgpRouteInfo *oldSnapshot = oldEntry != nullptr ? cloneRoute(oldEntry) : nullptr;
+    if (oldEntry != nullptr)
+        deleteLocRibEntry(oldEntry);
+
+    if (best == nullptr) {
+        if (oldSnapshot != nullptr)
+            withdrawSendProcess(triggeringSessionId, oldSnapshot);
+        delete oldSnapshot;
+        return;
+    }
+
+    BgpRouteInfo *selected = cloneRoute(best);
+    SessionId sessionId = selected->getSourceSessionId();
+    if (sessionId != 0) {
+        selected->setInterface(_bgpSessions.at(sessionId)->getLinkIntf());
+        if (selected->isIBgpLearned()) {
+            L3Address onLinkNextHop = rt->getNextHopForDestination(selected->getNextHopAsGeneric());
+            if (!onLinkNextHop.isUnspecified())
+                selected->setNextHop(onLinkNextHop);
+        }
+    }
+    bgpRoutingTable.push_back(selected);
+
+    int indexIp = isInRoutingTable(rt, selected->getDestinationAsGeneric());
+    if (indexIp != -1 && rt->getRoute(indexIp)->getSourceType() == IRoute::BGP)
+        rt->deleteRoute(rt->getRoute(indexIp));
+
+    // The Loc-RIB entry and the forwarding-table entry are kept separate so removing
+    // one cannot invalidate pointers stored in the other structure.
+    if (selected->getSourceSessionId() != 0 && isReachable(selected->getNextHopAsGeneric())) {
+        BgpRouteInfo *routeForRt = cloneRoute(selected);
+        rt->addRoute(routeForRt->asRoute());
+    }
+
+    auto selectedSession = _bgpSessions.find(selected->getSourceSessionId());
+    if (selectedSession != _bgpSessions.end() && selectedSession->second->getType() == EGP && ospfExist(rt) && redistributeInternal) {
+        NetworkInterface *ie = selected->getInterface();
+        if (!ie)
+            throw cRuntimeError("Model error: interface entry is nullptr");
+        ospfv2::Ipv4AddressRange ospfNetAddr;
+        ospfNetAddr.address = selected->getDestinationAsGeneric().toIpv4();
+        ospfNetAddr.mask = Ipv4Address::makeNetmask(selected->getPrefixLength());
+        if (!ospfModule)
+            throw cRuntimeError("Cannot find the OSPF module on router %s", bgpModule->getFullName());
+        ospfModule->insertExternalRoute(ie->getInterfaceId(), ospfNetAddr);
+    }
+
+    updateSendProcess(oldEntry == nullptr ? NEW_ROUTE_ADDED : ROUTE_DESTINATION_CHANGED, selected->getSourceSessionId(), selected);
+    delete oldSnapshot;
+}
+
+void BgpRouter::withdrawRoutesFromSession(SessionId sessionId)
+{
+    auto affectedPrefixes = removeAdjRibInRoutesFromSession(sessionId);
+    for (const auto& prefix : affectedPrefixes)
+        installBestRouteForPrefix(prefix.prefix, prefix.prefixLength, sessionId);
+}
+
+void BgpRouter::withdrawSendProcess(SessionId sessionIndex, const BgpRouteInfo *entry)
+{
+    if (entry == nullptr)
+        return;
+
+    for (auto& elem : _bgpSessions) {
+        if (isInTable(_prefixListOUT, const_cast<BgpRouteInfo *>(entry)) != (unsigned long)-1 || isInASList(_ASListOUT, const_cast<BgpRouteInfo *>(entry)) ||
+            elem.first == sessionIndex || !elem.second->isEstablished() ||
+            elem.second->getSocket() == nullptr ||
+            elem.second->getSocket()->getState() != TcpSocket::CONNECTED)
+        {
+            continue;
+        }
+
+        auto sourceSession = _bgpSessions.find(sessionIndex);
+        if (sourceSession == _bgpSessions.end())
+            continue;
+        BgpSessionType sourceType = sourceSession->second->getType();
+        if (entry->isIBgpLearned() && sourceType == IGP && elem.second->getType() == IGP)
+            continue;
+
+        if ((sourceType == IGP && elem.second->getType() == EGP) || sourceType == EGP || sourceType == INCOMPLETE)
+            elem.second->sendWithdrawMessage(entry->getDestinationAsGeneric(), entry->getPrefixLength());
+    }
+}
+
+void BgpRouter::addAffectedPrefix(std::vector<PrefixKey>& prefixes, const L3Address& prefix, int prefixLength)
+{
+    for (const auto& entry : prefixes) {
+        if (entry.prefix == prefix && entry.prefixLength == prefixLength)
+            return;
+    }
+    prefixes.push_back({prefix.getPrefix(prefixLength), prefixLength});
+}
+
+bool BgpRouter::prefixMatches(const BgpRouteInfo *entry, const L3Address& prefix, int prefixLength)
+{
+    return entry->getPrefixLength() == prefixLength &&
+           entry->getDestinationAsGeneric().getPrefix(prefixLength) == prefix.getPrefix(prefixLength);
+}
+
+bool BgpRouter::samePrefix(const BgpRouteInfo *first, const BgpRouteInfo *second)
+{
+    return prefixMatches(first, second->getDestinationAsGeneric(), second->getPrefixLength());
+}
+
+bool BgpRouter::samePath(const BgpRouteInfo *first, const BgpRouteInfo *second)
+{
+    if (!samePrefix(first, second))
+        return false;
+    if (first->getLocalPreference() != second->getLocalPreference() ||
+        first->getPathType() != second->getPathType() ||
+        first->isIBgpLearned() != second->isIBgpLearned() ||
+        first->getSourceSessionId() != second->getSourceSessionId() ||
+        first->getASCount() != second->getASCount())
+    {
+        return false;
+    }
+    for (unsigned int i = 0; i < first->getASCount(); ++i) {
+        if (first->getAS(i) != second->getAS(i))
+            return false;
+    }
+    return true;
+}
+
+bool BgpRouter::isBetterRoute(const BgpRouteInfo *candidate, const BgpRouteInfo *current) const
+{
+    if (candidate->getLocalPreference() != current->getLocalPreference())
+        return candidate->getLocalPreference() > current->getLocalPreference();
+    if (candidate->getASCount() != current->getASCount())
+        return candidate->getASCount() < current->getASCount();
+    if (candidate->getPathType() != current->getPathType())
+        return candidate->getPathType() < current->getPathType();
+    return candidate->getSourcePeerAddress() < current->getSourcePeerAddress();
+}
+
+BgpRouteInfo *BgpRouter::cloneRoute(const BgpRouteInfo *entry) const
+{
+    return entry->clone();
 }
 
 /*return index of the Ipv4 table if the route is found, -1 else*/

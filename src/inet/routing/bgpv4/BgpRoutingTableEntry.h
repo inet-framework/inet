@@ -32,6 +32,8 @@ class INET_API BgpRouteInfo
     std::vector<AsId> _ASList;
     int localPreference = 0;
     bool iBgpLearned = false;
+    SessionId sourceSessionId = 0;
+    L3Address sourcePeerAddress;
 
   public:
     virtual ~BgpRouteInfo() {}
@@ -39,6 +41,7 @@ class INET_API BgpRouteInfo
     // the underlying address-family route (this object, viewed as an IRoute)
     virtual IRoute *asRoute() = 0;
     virtual const IRoute *asRoute() const = 0;
+    virtual BgpRouteInfo *clone() const = 0;
 
     // BGP attributes
     void setPathType(RoutingPathType type) { _pathType = type; }
@@ -51,6 +54,10 @@ class INET_API BgpRouteInfo
     void setLocalPreference(int l) { localPreference = l; }
     bool isIBgpLearned() const { return iBgpLearned; }
     void setIBgpLearned(bool i) { iBgpLearned = i; }
+    SessionId getSourceSessionId() const { return sourceSessionId; }
+    void setSourceSessionId(SessionId id) { sourceSessionId = id; }
+    const L3Address& getSourcePeerAddress() const { return sourcePeerAddress; }
+    void setSourcePeerAddress(const L3Address& addr) { sourcePeerAddress = addr; }
 
     // generic route accessors, forwarded to the underlying IRoute
     L3Address getDestinationAsGeneric() const { return asRoute()->getDestinationAsGeneric(); }
@@ -79,6 +86,7 @@ class INET_API BgpRoutingTableEntry : public Ipv4Route, public BgpRouteInfo
     virtual ~BgpRoutingTableEntry() {}
     virtual IRoute *asRoute() override { return this; }
     virtual const IRoute *asRoute() const override { return this; }
+    virtual BgpRouteInfo *clone() const override { return new BgpRoutingTableEntry(*this); }
     virtual std::string str() const override { return bgpStr(); }
 };
 
@@ -109,6 +117,7 @@ class INET_API BgpRoutingTableEntry6 : public Ipv6Route, public BgpRouteInfo
     virtual ~BgpRoutingTableEntry6() {}
     virtual IRoute *asRoute() override { return this; }
     virtual const IRoute *asRoute() const override { return this; }
+    virtual BgpRouteInfo *clone() const override { return new BgpRoutingTableEntry6(*this); }
     virtual std::string str() const override { return bgpStr(); }
 };
 

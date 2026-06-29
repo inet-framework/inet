@@ -36,6 +36,10 @@ void BgpSession::setInfo(SessionInfo info)
     _info.ASValue = info.ASValue;
     _info.routerId = info.routerId;
     _info.peerAddr = info.peerAddr;
+    _info.myAddr = info.myAddr;
+    _info.nextHopSelf = info.nextHopSelf;
+    _info.localPreference = info.localPreference;
+    _info.checkConnection = info.checkConnection;
     _info.sessionId = info.sessionId;
     _info.linkIntf = info.linkIntf;
     _info.ebgpMultihop = info.ebgpMultihop;
@@ -196,6 +200,11 @@ void BgpSession::sendOpenMessage()
 
 void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content, BgpUpdateNlri& nlri)
 {
+    if (_info.socket == nullptr || _info.socket->getState() != TcpSocket::CONNECTED) {
+        EV_WARN << "Skipping BGP Update to " << _info.peerAddr << ": TCP socket is not connected\n";
+        return;
+    }
+
     const auto& updateMsg = makeShared<BgpUpdateMessage>();
 
     updateMsg->setWithDrawnRoutesLength(0);
@@ -228,6 +237,11 @@ void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& conte
 
 void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& content)
 {
+    if (_info.socket == nullptr || _info.socket->getState() != TcpSocket::CONNECTED) {
+        EV_WARN << "Skipping BGP Update to " << _info.peerAddr << ": TCP socket is not connected\n";
+        return;
+    }
+
     // MP-BGP UPDATE (RFC 4760): reachability rides in an MP_REACH_NLRI path attribute, so the
     // legacy NLRI field is left empty.
     const auto& updateMsg = makeShared<BgpUpdateMessage>();
@@ -256,6 +270,56 @@ void BgpSession::sendUpdateMessage(std::vector<BgpUpdatePathAttributes *>& conte
     _updateMsgSent++;
 }
 
+void BgpSession::sendWithdrawMessage(const L3Address& prefix, int prefixLength)
+{
+    if (_info.socket == nullptr || _info.socket->getState() != TcpSocket::CONNECTED) {
+        EV_WARN << "Skipping BGP Withdraw to " << _info.peerAddr << ": TCP socket is not connected\n";
+        return;
+    }
+
+    const auto& updateMsg = makeShared<BgpUpdateMessage>();
+
+    if (bgpRouter.isIpv6()) {
+        auto mpUnreach = new BgpUpdatePathAttributesMpUnreachNlri();
+        mpUnreach->setAfi(2);
+        mpUnreach->setSafi(1);
+        mpUnreach->setWithdrawnRoutesArraySize(1);
+        BgpUpdateNlri6 withdrawn;
+        withdrawn.length = prefixLength;
+        withdrawn.prefix = prefix.getPrefix(prefixLength);
+        mpUnreach->setWithdrawnRoutes(0, withdrawn);
+        mpUnreach->setLength(computePathAttributeBytes(*mpUnreach) - 3);
+        updateMsg->setPathAttributesArraySize(1);
+        updateMsg->setPathAttributes(0, mpUnreach);
+        unsigned short attrLength = computePathAttributeBytes(*mpUnreach);
+        updateMsg->setTotalPathAttributeLength(attrLength);
+        updateMsg->addChunkLength(B(attrLength));
+    }
+    else {
+        BgpUpdateWithdrawnRoutes withdrawn;
+        withdrawn.length = prefixLength;
+        withdrawn.prefix = prefix.getPrefix(prefixLength).toIpv4();
+        updateMsg->setWithdrawnRoutesArraySize(1);
+        updateMsg->setWithdrawnRoutes(0, withdrawn);
+        unsigned short withdrawnLength = 1 + (prefixLength + 7) / 8;
+        updateMsg->setWithDrawnRoutesLength(withdrawnLength);
+        updateMsg->addChunkLength(B(withdrawnLength));
+    }
+
+    updateMsg->setTotalLength(updateMsg->getChunkLength().get<B>());
+
+    EV_INFO << "Sending BGP Withdraw message to " << _info.peerAddr.str()
+            << " on interface " << _info.linkIntf->getInterfaceName()
+            << "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
+    bgpRouter.printUpdateMessage(*updateMsg);
+
+    Packet *pk = new Packet("BgpWithdraw");
+    pk->insertAtFront(updateMsg);
+
+    _info.socket->send(pk);
+    _updateMsgSent++;
+}
+
 void BgpSession::sendNotificationMessage()
 {
     // TODO
@@ -275,6 +339,11 @@ void BgpSession::sendNotificationMessage()
 
 void BgpSession::sendKeepAliveMessage()
 {
+    if (_info.socket == nullptr || _info.socket->getState() != TcpSocket::CONNECTED) {
+        EV_WARN << "Skipping BGP Keep-alive to " << _info.peerAddr << ": TCP socket is not connected\n";
+        return;
+    }
+
     const auto& keepAliveMsg = makeShared<BgpKeepAliveMessage>();
 
     EV_INFO << "Sending BGP Keep-alive message to " << _info.peerAddr.str()
