@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <BGPConfig>
 
-    <TimerParams>
-        <connectRetryTime> 120 </connectRetryTime>
-        <holdTime> 180 </holdTime>
-        <keepAliveTime> 60 </keepAliveTime>
-        <startDelay> 1 </startDelay>
-    </TimerParams>
-
     <!-- AS 65001: rA1, rA2, rA3 form an iBGP full mesh (created automatically from
          the Router list). rA1 originates hostA's subnet. rA3 is the eBGP border. -->
     <AS id="65001">
