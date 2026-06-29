@@ -19,7 +19,7 @@
 #define __INET_SECURITYASSOCIATION_H_
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/ipv4/ipsec/IPsecRule.h"
+#include "inet/networklayer/ipsec/IPsecRule.h"
 
 namespace inet {
 namespace ipsec {

@@ -15,22 +15,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/networklayer/ipv4/ipsec/SecurityAssociation.h"
+package inet.networklayer.ipsec;
 
-namespace inet {
-namespace ipsec {
+import inet.common.SimpleModule;
 
-std::string SecurityAssociation::str() const
+//
+// Represents the IPsec Security Association Database (SAD).
+// The database is filled by the IPsec module.
+//
+simple SecurityAssociationDatabase extends SimpleModule
 {
-    std::stringstream out;
-
-    out << "SPI: " << spi;
-    out << " " << rule;
-    out << " SeqNum: " << seqNum;
-
-    return out.str();
+    parameters:
+        @class(SecurityAssociationDatabase);
+        displayStringTextFormat = default("entries: {numEntries}");
+        @display("i=block/table2;is=s");
 }
-
-}    //ipsec namespace
-}    //namespace
-

@@ -20,8 +20,8 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/ipv4/ipsec/PacketInfo.h"
-#include "inet/networklayer/ipv4/ipsec/rangelist.h"
+#include "inet/networklayer/ipsec/PacketInfo.h"
+#include "inet/networklayer/ipsec/rangelist.h"
 
 namespace inet {
 namespace ipsec {

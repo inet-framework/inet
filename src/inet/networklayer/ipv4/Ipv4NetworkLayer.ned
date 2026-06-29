@@ -12,9 +12,9 @@ import inet.common.MessageDispatcher;
 import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 import inet.networklayer.contract.IArp;
 import inet.networklayer.contract.INetworkLayer;
-import inet.networklayer.ipv4.ipsec.SecurityAssociationDatabase;
-import inet.networklayer.ipv4.ipsec.SecurityPolicyDatabase;
-import inet.networklayer.ipv4.ipsec.IPsec;
+import inet.networklayer.ipsec.SecurityAssociationDatabase;
+import inet.networklayer.ipsec.SecurityPolicyDatabase;
+import inet.networklayer.ipsec.IPsec;
 
 //
 // Network layer of an IPv4 node.

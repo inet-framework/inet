@@ -5,12 +5,12 @@
 //
 
 
-#include "inet/networklayer/ipv4/ipsec/IpSecProtocolPrinter.h"
+#include "inet/networklayer/ipsec/IpSecProtocolPrinter.h"
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
-#include "inet/networklayer/ipv4/ipsec/IPsecAuthenticationHeader_m.h"
-#include "inet/networklayer/ipv4/ipsec/IPsecEncapsulatingSecurityPayload_m.h"
+#include "inet/networklayer/ipsec/IPsecAuthenticationHeader_m.h"
+#include "inet/networklayer/ipsec/IPsecEncapsulatingSecurityPayload_m.h"
 
 namespace inet {
 namespace ipsec {

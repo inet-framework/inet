@@ -16,7 +16,7 @@
 //  along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/networklayer/ipv4/ipsec/IPsecRule.h"
+#include "inet/networklayer/ipsec/IPsecRule.h"
 
 namespace inet {
 namespace ipsec {

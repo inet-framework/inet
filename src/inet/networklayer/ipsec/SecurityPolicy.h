@@ -19,8 +19,8 @@
 #define __INET_SECURITYPOLICY_H_
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/ipv4/ipsec/IPsecRule.h"
-#include "inet/networklayer/ipv4/ipsec/SecurityAssociation.h"
+#include "inet/networklayer/ipsec/IPsecRule.h"
+#include "inet/networklayer/ipsec/SecurityAssociation.h"
 
 namespace inet {
 namespace ipsec {

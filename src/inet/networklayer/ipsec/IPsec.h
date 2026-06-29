@@ -25,8 +25,8 @@
 #include "inet/networklayer/ipv4/Ipv4.h"
 #include "SecurityPolicy.h"
 #include "SecurityAssociation.h"
-#include "inet/networklayer/ipv4/ipsec/SecurityAssociationDatabase.h"
-#include "inet/networklayer/ipv4/ipsec/SecurityPolicyDatabase.h"
+#include "inet/networklayer/ipsec/SecurityAssociationDatabase.h"
+#include "inet/networklayer/ipsec/SecurityPolicyDatabase.h"
 
 namespace inet {
 namespace ipsec {

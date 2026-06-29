@@ -15,7 +15,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/networklayer/ipv4/ipsec/SecurityPolicyDatabase.h"
+#include "inet/networklayer/ipsec/SecurityPolicyDatabase.h"
 
 namespace inet {
 namespace ipsec {

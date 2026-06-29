@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#include "inet/networklayer/ipv4/ipsec/IPsec.h"
+#include "inet/networklayer/ipsec/IPsec.h"
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
@@ -25,8 +25,8 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/networklayer/ipv4/ipsec/IPsecAuthenticationHeader_m.h"
-#include "inet/networklayer/ipv4/ipsec/IPsecEncapsulatingSecurityPayload_m.h"
+#include "inet/networklayer/ipsec/IPsecAuthenticationHeader_m.h"
+#include "inet/networklayer/ipsec/IPsecEncapsulatingSecurityPayload_m.h"
 
 #ifdef INET_WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TcpHeader.h"

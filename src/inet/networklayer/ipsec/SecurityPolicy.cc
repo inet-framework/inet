@@ -15,31 +15,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/networklayer/ipv4/ipsec/PacketInfo.h"
-#include "inet/networklayer/common/IpProtocolId_m.h"
+#include "inet/networklayer/ipsec/SecurityPolicy.h"
 
 namespace inet {
 namespace ipsec {
 
-std::string PacketInfo::str() const
+std::string SecurityPolicy::str() const
 {
     std::stringstream out;
-
-    out << "Protocol: " << nextProtocol;
-    switch (nextProtocol) {
-        case IP_PROT_TCP:
-        case IP_PROT_UDP:
-            out << " Local: " << localAddress.str() << ":" << localPort << ";";
-            out << " Remote: " << remoteAddress.str() << ":" << remotePort << ";";
-            break;
-
-        default:
-            out << " Local: " << localAddress.str() << ";";
-            out << " Remote: " << remoteAddress.str() << ";";
-    }
+    out << rule;
     return out.str();
 }
 
-}  // namespace ipsec
-}  // namespace inet
+}    // namespace ipsec
+}    // namespace inet
 

@@ -5,12 +5,12 @@
 //
 
 
-#include "inet/networklayer/ipv4/ipsec/IpSecProtocolDissector.h"
+#include "inet/networklayer/ipsec/IpSecProtocolDissector.h"
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/networklayer/ipv4/ipsec/IPsecAuthenticationHeader_m.h"
-#include "inet/networklayer/ipv4/ipsec/IPsecEncapsulatingSecurityPayload_m.h"
+#include "inet/networklayer/ipsec/IPsecAuthenticationHeader_m.h"
+#include "inet/networklayer/ipsec/IPsecEncapsulatingSecurityPayload_m.h"
 
 namespace inet {
 namespace ipsec {

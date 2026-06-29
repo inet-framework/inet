@@ -21,8 +21,8 @@
 #include <vector>
 #include "inet/common/INETDefs.h"
 #include "inet/common/SimpleModule.h"
-#include "inet/networklayer/ipv4/ipsec/IPsecRule.h"
-#include "inet/networklayer/ipv4/ipsec/SecurityAssociation.h"
+#include "inet/networklayer/ipsec/IPsecRule.h"
+#include "inet/networklayer/ipsec/SecurityAssociation.h"
 
 namespace inet {
 namespace ipsec {

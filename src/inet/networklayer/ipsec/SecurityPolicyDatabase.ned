@@ -15,7 +15,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.networklayer.ipv4.ipsec;
+package inet.networklayer.ipsec;
 
 import inet.common.SimpleModule;
 

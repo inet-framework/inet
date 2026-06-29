@@ -15,18 +15,22 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/networklayer/ipv4/ipsec/SecurityPolicy.h"
+#include "inet/networklayer/ipsec/SecurityAssociation.h"
 
 namespace inet {
 namespace ipsec {
 
-std::string SecurityPolicy::str() const
+std::string SecurityAssociation::str() const
 {
     std::stringstream out;
-    out << rule;
+
+    out << "SPI: " << spi;
+    out << " " << rule;
+    out << " SeqNum: " << seqNum;
+
     return out.str();
 }
 
-}    // namespace ipsec
-}    // namespace inet
+}    //ipsec namespace
+}    //namespace
 

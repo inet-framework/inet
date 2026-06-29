@@ -20,9 +20,9 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/SimpleModule.h"
-#include "inet/networklayer/ipv4/ipsec/IPsecRule.h"
-#include "inet/networklayer/ipv4/ipsec/SecurityAssociationDatabase.h"
-#include "inet/networklayer/ipv4/ipsec/SecurityPolicy.h"
+#include "inet/networklayer/ipsec/IPsecRule.h"
+#include "inet/networklayer/ipsec/SecurityAssociationDatabase.h"
+#include "inet/networklayer/ipsec/SecurityPolicy.h"
 
 namespace inet {
 namespace ipsec {

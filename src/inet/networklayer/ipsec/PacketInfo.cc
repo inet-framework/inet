@@ -15,18 +15,31 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.networklayer.ipv4.ipsec;
+#include "inet/networklayer/ipsec/PacketInfo.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 
-import inet.common.SimpleModule;
+namespace inet {
+namespace ipsec {
 
-//
-// Represents the IPsec Security Association Database (SAD).
-// The database is filled by the IPsec module.
-//
-simple SecurityAssociationDatabase extends SimpleModule
+std::string PacketInfo::str() const
 {
-    parameters:
-        @class(SecurityAssociationDatabase);
-        displayStringTextFormat = default("entries: {numEntries}");
-        @display("i=block/table2;is=s");
+    std::stringstream out;
+
+    out << "Protocol: " << nextProtocol;
+    switch (nextProtocol) {
+        case IP_PROT_TCP:
+        case IP_PROT_UDP:
+            out << " Local: " << localAddress.str() << ":" << localPort << ";";
+            out << " Remote: " << remoteAddress.str() << ":" << remotePort << ";";
+            break;
+
+        default:
+            out << " Local: " << localAddress.str() << ";";
+            out << " Remote: " << remoteAddress.str() << ";";
+    }
+    return out.str();
 }
+
+}  // namespace ipsec
+}  // namespace inet
+
