@@ -13,7 +13,14 @@
 namespace inet {
 
 /**
- * Returns true if the given protocol ID corresponds to an IPv6 extension header.
+ * Returns true if the given protocol ID corresponds to an IPv6 extension header
+ * that the IPv6 core walks/processes.
+ *
+ * AH (51) and ESP (50) are deliberately excluded: the IPv6 core does not implement
+ * them, so it treats them as terminal (upper-layer) headers that end the extension
+ * header chain. The IPsec module (a netfilter hook) strips AH/ESP before the chain is
+ * walked; if no IPsec module is present, AH/ESP are dispatched to the registered
+ * AH/ESP protocol (dissector) like any other upper-layer protocol.
  */
 inline bool isIpv6ExtensionHeader(IpProtocolId id)
 {
@@ -22,8 +29,6 @@ inline bool isIpv6ExtensionHeader(IpProtocolId id)
         case IP_PROT_IPv6EXT_DEST:
         case IP_PROT_IPv6EXT_ROUTING:
         case IP_PROT_IPv6EXT_FRAGMENT:
-        case IP_PROT_IPv6EXT_AUTH:
-        case IP_PROT_IPv6EXT_ESP:
             return true;
         default:
             return false;
