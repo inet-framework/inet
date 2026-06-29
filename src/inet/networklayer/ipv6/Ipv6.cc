@@ -538,7 +538,32 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
         }
     }
 
+    // FORWARD netfilter hook: only for datagrams being forwarded (received from the
+    // network); locally-originated ones already passed the LOCAL_OUT hook. Mirrors Ipv4
+    // (routeUnicastPacket). The routing decision is reduced to packet tags only when the
+    // datagram is actually queued, so the common (ACCEPT) path is byte-for-byte unchanged.
+    if (!fromHL) {
+        INetfilter::IHook::Result verdict = datagramForwardHook(packet);
+        if (verdict == INetfilter::IHook::QUEUE) {
+            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+            packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(nextHop);
+            return;
+        }
+        if (verdict != INetfilter::IHook::ACCEPT)
+            return; // DROP (datagram already deleted) or STOLEN
+    }
+
     resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
+}
+
+void Ipv6::routePacketFinish(Packet *packet)
+{
+    // FORWARD reinject continuation: recover the routing decision from the tags set in
+    // routePacket() when the datagram was queued. Only forwarded datagrams reach the
+    // FORWARD hook, so fromHL is false.
+    int interfaceId = packet->getTag<InterfaceReq>()->getInterfaceId();
+    Ipv6Address nextHop = getNextHop(packet);
+    resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, false);
 }
 
 void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6Address nextHop, bool fromHL)
@@ -1317,12 +1342,25 @@ void Ipv6::reinjectQueuedDatagram(const Packet *packet)
         if (iter->packet == packet) {
             Packet *datagram = iter->packet;
             switch (iter->hookType) {
-                case INetfilter::IHook::LOCALOUT:
-                    datagramLocalOut(datagram, iter->outIE, iter->nextHopAddr);
+                case INetfilter::IHook::LOCALOUT: {
+                    // Resume exactly as the LOCAL_OUT hook's ACCEPT path would (see
+                    // handleMessageFromHL/handleMessageWhenUp): recover the pinned output
+                    // interface (InterfaceReq, e.g. set by ND or a tunnel) and the requested
+                    // next hop (NextHopAddressReq) from the datagram's tags. Passing null/
+                    // unspecified instead would force re-routing and can hit an unspecified
+                    // next hop (e.g. for a NeighbourAdvertisement sent to an on-link peer).
+                    const auto& ifReq = datagram->findTag<InterfaceReq>();
+                    const NetworkInterface *destIE = ifReq ? ift->getInterfaceById(ifReq->getInterfaceId()) : nullptr;
+                    datagramLocalOut(datagram, destIE, getNextHop(datagram));
                     break;
+                }
 
                 case INetfilter::IHook::PREROUTING:
-                    preroutingFinish(datagram, iter->inIE, iter->outIE, iter->nextHopAddr);
+                    // Resume exactly as the PRE_ROUTING hook's ACCEPT path would: fromIE from
+                    // the InterfaceInd tag (a reinjected multicast datagram needs a non-null
+                    // fromIE), no pinned output interface, next hop from the NextHopAddressReq
+                    // tag (routePacket recomputes it when unspecified).
+                    preroutingFinish(datagram, getSourceInterfaceFrom(datagram), nullptr, getNextHop(datagram));
                     break;
 
                 case INetfilter::IHook::POSTROUTING:
@@ -1334,7 +1372,7 @@ void Ipv6::reinjectQueuedDatagram(const Packet *packet)
                     break;
 
                 case INetfilter::IHook::FORWARD:
-                    throw cRuntimeError("Re-injection of datagram queued for FORWARD hook not implemented");
+                    routePacketFinish(datagram);
                     break;
 
                 default:

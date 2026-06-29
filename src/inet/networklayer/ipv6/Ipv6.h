@@ -40,14 +40,10 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     class QueuedDatagramForHook {
       public:
         QueuedDatagramForHook(Packet *packet, IHook::Type hookType) :
-            packet(packet), inIE(nullptr), outIE(nullptr),
-            hookType(hookType) {}
+            packet(packet), hookType(hookType) {}
         virtual ~QueuedDatagramForHook() {}
 
         Packet *packet = nullptr;
-        const NetworkInterface *inIE = nullptr;
-        const NetworkInterface *outIE = nullptr;
-        Ipv6Address nextHopAddr;
         const IHook::Type hookType = static_cast<IHook::Type>(-1);
     };
 
@@ -166,6 +162,13 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
      * it's unroutable or forwarding is off.
      */
     virtual void routePacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL);
+
+    /**
+     * Continuation of routePacket() after the FORWARD hook: resolves the next-hop MAC and
+     * sends. Packet-only (interface and next hop recovered from the InterfaceReq /
+     * NextHopAddressReq tags), so it serves as the FORWARD netfilter reinject continuation.
+     */
+    virtual void routePacketFinish(Packet *packet);
     virtual void resolveMACAddressAndSendPacket(Packet *packet, int interfaceID, Ipv6Address nextHop, bool fromHL);
 
     /**
