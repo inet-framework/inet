@@ -41,6 +41,7 @@ struct PacketEvent {
     cComponent *module = nullptr;     // emitting component
     int interfaceId = -1;             // from Interface{Ind,Req} tag, else -1
     std::string interfaceName;        // resolved from interfaceId, else empty
+    std::string protocolName;         // packet's PacketProtocolTag protocol name, else empty
     Layer layer = Layer::Unknown;
     simtime_t time = 0;
     long treeId = -1;                 // packet identity, for cross-node correlation

@@ -25,14 +25,25 @@ static std::string formatCaptureValue(const cValue& value)
 
 EventPattern on(const char *nodeName)
 {
+    // "node" or "node.protocol" (e.g. "MN[0].mobileipv6"): the part after the first dot is
+    // the protocol, used both as a packet filter and as the subject in descriptions.
     EventPattern pattern;
-    pattern.selNode = nodeName;
+    std::string spec = nodeName;
+    auto dot = spec.find('.');
+    if (dot == std::string::npos)
+        pattern.selNode = spec;
+    else {
+        pattern.selNode = spec.substr(0, dot);
+        pattern.selProtocol = spec.substr(dot + 1);
+    }
     return pattern;
 }
 
 bool EventPattern::scopeMatches(const PacketEvent& event) const
 {
     if (!selNode.empty() && (event.node == nullptr || selNode != event.node->getFullName()))
+        return false;
+    if (!selProtocol.empty() && selProtocol != event.protocolName)
         return false;
     if (selHasKind && event.kind != selKind)
         return false;
@@ -114,6 +125,7 @@ std::string EventPattern::str() const
 {
     std::ostringstream os;
     os << "on " << (selNode.empty() ? "*" : selNode);
+    if (!selProtocol.empty()) os << "." << selProtocol;
     if (selHasKind) os << " " << getEventKindName(selKind);
     if (selHasDirection) os << " dir=" << (selDirection == 0 ? "IN" : "OUT");
     if (selHasLayer) os << " layer=" << getLayerName(selLayer);

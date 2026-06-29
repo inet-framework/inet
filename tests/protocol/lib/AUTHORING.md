@@ -361,3 +361,27 @@ and the controller receives the frame — while the control FSM must never `CS_A
 ```
 Author it by first running `PlcaTrace` (`stateSignals = "controlStateChanged dataStateChanged
 curID rxCmd txCmd"`) to read the real sequence. See `plca_beacon_cycle` in `ProtocolTests.cc`.
+
+### Mobile IPv6 registration + route optimization (`Mipv6`, RFC 6275)
+MIPv6 is a message-exchange protocol (no FSM-state signal), so this asserts the Mobility Header
+sequence as packets. On a minimal MN/HA/CN handover network (`Mipv6Demo`), after the mobile node
+roams to a foreign link it registers with its Home Agent (Binding Update → Binding Acknowledgement),
+then route-optimizes with the correspondent node via the return-routability procedure (HoTI/CoTI →
+HoT/CoT with the cookies echoed) and a direct Binding Update.
+```cpp
+// send  = on("MN[0]").receivedFromUpper().layer(Layer::Network)...   (a message the MN sends)
+// receive = on("MN[0]").sentToUpper().layer(Layer::Network)...       (a message the MN receives)
+.once(send("BindingUpdate.homeRegistrationFlag == true && BindingUpdate.ackFlag == true", ...))
+.once(receive("BindingAcknowledgement.status == 0", ...))
+.unordered({ send("HomeTestInit.homeInitCookie >= 0", ...).capture("hoCookie", "HomeTestInit.homeInitCookie"),
+             send("CareOfTestInit.careOfInitCookie >= 0", ...).capture("coCookie", "CareOfTestInit.careOfInitCookie") })
+.unordered({ receive("HomeTest.homeInitCookie == {hoCookie}", ...),     // cookie echoed back
+             receive("CareOfTest.careOfInitCookie == {coCookie}", ...) })
+.once(send("BindingUpdate.homeRegistrationFlag == false", ...));        // route-optimized BU direct to the CN
+```
+Two authoring notes: **(a)** observe at the MN's **IPv6 layer**, where the message is still the bare
+Mobility Header (`mobileipv6` protocol) so PacketFilter can read its chunk fields (`BindingUpdate.*`,
+`HomeTestInit.*`, `HomeTest.*`, …); on the wire it is buried inside the IPv6/802.11 frame and those
+fields are not reachable. **(b)** From the IPv6 layer's perspective a message the MN *sends* is
+"received from upper" and one it *receives* is "sent to upper" — hence the `send`/`receive` helpers.
+Run `Mipv6Trace` first to read the real message sequence and timing. See `mipv6_registration_and_ro`.

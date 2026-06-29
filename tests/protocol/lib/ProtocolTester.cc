@@ -354,6 +354,10 @@ PacketEvent ProtocolTester::normalize(cComponent *source, EventKind kind, const 
                 event.interfaceName = networkInterface->getInterfaceName();
     }
 
+    if (auto protocolTag = packet->findTag<PacketProtocolTag>())
+        if (auto protocol = protocolTag->findProtocol())
+            event.protocolName = protocol->getName();
+
     event.layer = inferLayer(source);
     return event;
 }
@@ -374,10 +378,7 @@ Layer ProtocolTester::inferLayer(const cComponent *source)
 
 void ProtocolTester::logEvent(const PacketEvent& event)
 {
-    const char *protocolName = "-";
-    if (auto protocolTag = event.packet->findTag<PacketProtocolTag>())
-        if (auto protocol = protocolTag->findProtocol())
-            protocolName = protocol->getName();
+    const char *protocolName = event.protocolName.empty() ? "-" : event.protocolName.c_str();
 
     const char *directionName = event.direction == DIRECTION_INBOUND ? "IN"
                               : event.direction == DIRECTION_OUTBOUND ? "OUT" : "-";
