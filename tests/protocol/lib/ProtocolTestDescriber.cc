@@ -49,8 +49,172 @@ static std::string kindPhrase(const EventPattern& p)
     }
 }
 
+// "BindingUpdate" -> "Binding Update"; "homeInitCookie" -> "home init cookie" (lowercased).
+static std::string spaceCamel(const std::string& s, bool lower)
+{
+    std::string out;
+    for (size_t i = 0; i < s.size(); i++) {
+        char c = s[i];
+        if (i > 0 && std::isupper((unsigned char)c) && !std::isupper((unsigned char)s[i - 1]))
+            out += ' ';
+        out += lower ? (char)std::tolower((unsigned char)c) : c;
+    }
+    return out;
+}
+
+static std::string protocolHumanName(const std::string& name)
+{
+    if (auto protocol = Protocol::findProtocol(name.c_str()))
+        return protocol->getDescriptiveName();
+    return name;
+}
+
+static std::string firstComponent(const std::string& path)
+{
+    auto dot = path.find('.');
+    return dot == std::string::npos ? path : path.substr(0, dot);
+}
+
+static std::string lastComponent(const std::string& path)
+{
+    auto dot = path.rfind('.');
+    return dot == std::string::npos ? path : path.substr(dot + 1);
+}
+
+static std::string trimSpace(const std::string& s)
+{
+    auto a = s.find_first_not_of(" \t");
+    if (a == std::string::npos) return "";
+    auto b = s.find_last_not_of(" \t");
+    return s.substr(a, b - a + 1);
+}
+
+// Translate a PacketFilter expression into a noun phrase, e.g.
+// "a Binding Update (home registration flag set, ack flag set)". Returns false (caller falls
+// back to the raw expression) for anything it can't cleanly parse.
+static bool translateExpr(const std::string& expr, std::string& out)
+{
+    if (expr.find("||") != std::string::npos)
+        return false;
+    std::vector<std::string> clauses;
+    size_t start = 0;
+    while (true) {
+        size_t amp = expr.find("&&", start);
+        clauses.push_back(expr.substr(start, amp == std::string::npos ? std::string::npos : amp - start));
+        if (amp == std::string::npos) break;
+        start = amp + 2;
+    }
+    std::string chunkNoun;
+    std::vector<std::string> phrases;
+    static const char *ops[] = {"==", "!=", ">=", "<=", ">", "<"};
+    for (const auto& rawClause : clauses) {
+        std::string clause = trimSpace(rawClause);
+        size_t opPos = std::string::npos, opLen = 0;
+        std::string op;
+        for (auto o : ops) {
+            size_t pos = clause.find(o);
+            if (pos != std::string::npos && (opPos == std::string::npos || pos < opPos)) { opPos = pos; op = o; opLen = std::strlen(o); }
+        }
+        if (opPos == std::string::npos) return false;
+        std::string lhs = trimSpace(clause.substr(0, opPos));
+        std::string rhs = trimSpace(clause.substr(opPos + opLen));
+        size_t dot = lhs.find('.');
+        if (dot == std::string::npos) return false;
+        std::string chunk = lhs.substr(0, dot);
+        std::string field = lhs.substr(dot + 1);
+        if (field.find('.') != std::string::npos) return false;
+        if (chunk.empty() || !std::isupper((unsigned char)chunk[0])) return false; // need a CamelCase class noun
+        if (chunkNoun.empty()) chunkNoun = spaceCamel(chunk, false);
+        std::string f = spaceCamel(field, true);
+        std::string phrase;
+        if (op == "==" && rhs == "true") phrase = f + " set";
+        else if (op == "==" && rhs == "false") phrase = f + " clear";
+        else if (op == ">=" && rhs == "0") phrase = ""; // presence-only check
+        else if (!rhs.empty() && rhs[0] == '{') {
+            size_t close = rhs.find('}');
+            if (close == std::string::npos) return false;
+            std::string cap = rhs.substr(1, close - 1);
+            if (rhs != "{" + cap + "}" || op != "==") return false; // arithmetic etc. -> fall back
+            phrase = f + " equal to the remembered " + cap;
+        }
+        else if (op == "==") phrase = f + " " + rhs;
+        else phrase = f + " " + op + " " + rhs;
+        if (!phrase.empty()) phrases.push_back(phrase);
+    }
+    if (chunkNoun.empty()) return false;
+    out = "a " + chunkNoun;
+    if (!phrases.empty()) {
+        out += " (";
+        for (size_t i = 0; i < phrases.size(); i++) out += (i ? ", " : "") + phrases[i];
+        out += ")";
+    }
+    return true;
+}
+
+// The message/value phrase: an explicit description wins, else the translated expression,
+// else the raw expression / predicate.
+static std::string contentNoun(const EventPattern& p)
+{
+    if (!p.description.empty()) return p.description;
+    std::string noun;
+    if (!p.selExpr.empty() && translateExpr(p.selExpr, noun)) return noun;
+    if (!p.selExpr.empty()) return "a packet matching \"" + p.selExpr + "\"";
+    if (p.predicate) return "a packet matching a custom predicate";
+    return "a packet";
+}
+
+// New-vocabulary rendering: subject (the attributed counterpart module, named via its
+// protocol; else the honest source) + verb (from the signal, flipped under attributeTo) + the
+// translated message phrase.
+static std::string renderNewPattern(const EventPattern& p, const char *modal)
+{
+    std::ostringstream os;
+    if (p.selHasWithin)
+        os << "within " << formatTime(p.selWithin) << ", ";
+
+    bool isDropped = p.selSignal.find("Dropped") != std::string::npos;
+    bool isSent = p.selSignal.find("Sent") != std::string::npos;
+
+    if (!p.attributeToPath.empty()) {
+        // Narrate from the attributed (up/down counterpart) module: it does the opposite of
+        // the emitting layer (a packet the layer "received from upper" was *sent* by the module
+        // above it).
+        std::string node = firstComponent(p.attributeToPath);
+        std::string name = !p.selProtocol.empty() ? protocolHumanName(p.selProtocol) : lastComponent(p.attributeToPath);
+        const char *verb = isDropped ? "drop" : (isSent ? "receive" : "send");
+        os << node << "'s " << name << " " << modal << " " << verb << " " << contentNoun(p);
+    }
+    else {
+        // Honest source point of view.
+        std::string subject = !p.selSource.empty() ? p.selSource
+                            : (p.selNode.empty() ? "some module" : p.selNode);
+        os << subject << " " << modal << " ";
+        if (isDropped)
+            os << "drop " << contentNoun(p);
+        else {
+            bool isUpper = p.selSignal.find("Upper") != std::string::npos;
+            os << (isSent ? "send " : "receive ") << contentNoun(p)
+               << (isSent ? " to the " : " from the ") << (isUpper ? "upper" : "lower") << " layer";
+        }
+    }
+
+    if (!p.selIface.empty())
+        os << " on interface " << p.selIface;
+    if (!p.captures.empty()) {
+        os << ", remembering ";
+        for (size_t i = 0; i < p.captures.size(); i++)
+            os << (i ? ", " : "") << p.captures[i].first;
+    }
+    if (p.selHasNotBefore)
+        os << " (but not before " << formatTime(p.selNotBefore) << " after the previous step)";
+    return capitalize(os.str()) + ".";
+}
+
 static std::string renderPattern(const EventPattern& p, const char *modal)
 {
+    if (!p.selSignal.empty())   // new orthogonal vocabulary (signal()-based)
+        return renderNewPattern(p, modal);
+
     std::ostringstream os;
     if (p.selHasWithin)
         os << "within " << formatTime(p.selWithin) << ", ";
