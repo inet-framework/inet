@@ -159,13 +159,13 @@ void IPsec::parseSelector(const cXMLElement *selectorElem, PacketSelector& selec
 {
     checkTags(selectorElem, "LocalAddress RemoteAddress Protocol LocalPort RemotePort ICMPType ICMPCode");
 
-    auto addrConv = [](std::string s) {return L3AddressResolver().resolve(s.c_str(), L3AddressResolver::ADDR_IPv4).toIpv4();};
+    auto addrConv = [](std::string s) {return L3AddressResolver().resolve(s.c_str());};
     auto intConv = [](std::string s) {return atoi(s.c_str());};
     auto protocolConv = [](std::string s) {return parseProtocol(s);};
     if (const cXMLElement *localAddressElem = getUniqueChildIfExists(selectorElem, "LocalAddress"))
-        selector.setLocalAddress(rangelist<Ipv4Address>::parse(localAddressElem->getNodeValue(), addrConv));
+        selector.setLocalAddress(rangelist<L3Address>::parse(localAddressElem->getNodeValue(), addrConv));
     if (const cXMLElement *remoteAddressElem = getUniqueChildIfExists(selectorElem, "RemoteAddress"))
-        selector.setRemoteAddress(rangelist<Ipv4Address>::parse(remoteAddressElem->getNodeValue(), addrConv));
+        selector.setRemoteAddress(rangelist<L3Address>::parse(remoteAddressElem->getNodeValue(), addrConv));
     if (const cXMLElement *protocolElem = getUniqueChildIfExists(selectorElem, "Protocol"))
         selector.setNextProtocol(rangelist<unsigned int>::parse(protocolElem->getNodeValue(), protocolConv));
     if (const cXMLElement *localPortElem = getUniqueChildIfExists(selectorElem, "LocalPort"))

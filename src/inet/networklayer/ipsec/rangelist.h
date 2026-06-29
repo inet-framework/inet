@@ -49,8 +49,9 @@ struct rangelist {
     bool empty() const {return ranges.empty();}
 
     bool contains(T x) const {
+        // expressed with operator< only (L3Address provides <, ==, > but not <=)
         for (const auto& r : ranges)
-            if (r.first <= x && x <= r.second)
+            if (!(x < r.first) && !(r.second < x))
                 return true;
         return false;
     }

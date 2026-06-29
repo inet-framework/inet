@@ -19,7 +19,7 @@
 #define INET_NETWORKLAYER_IPV4_IPSEC_PACKETSELECTOR_H_
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/ipsec/PacketInfo.h"
 #include "inet/networklayer/ipsec/rangelist.h"
 
@@ -35,8 +35,8 @@ namespace ipsec {
 class INET_API PacketSelector
 {
   private:
-    rangelist<Ipv4Address> localAddress;
-    rangelist<Ipv4Address> remoteAddress;
+    rangelist<L3Address> localAddress;
+    rangelist<L3Address> remoteAddress;
     rangelist<unsigned int> nextProtocol; // next layer protocol
     rangelist<unsigned int> localPort;
     rangelist<unsigned int> remotePort;
@@ -45,10 +45,10 @@ class INET_API PacketSelector
 
   public:
     PacketSelector() {}
-    const rangelist<Ipv4Address>& getLocalAddress() const { return localAddress; }
-    void setLocalAddress(const rangelist<Ipv4Address> &localAddress) { this->localAddress = localAddress; }
-    const rangelist<Ipv4Address>& getRemoteAddress() const { return remoteAddress; }
-    void setRemoteAddress(const rangelist<Ipv4Address> &remoteAddress) { this->remoteAddress = remoteAddress; }
+    const rangelist<L3Address>& getLocalAddress() const { return localAddress; }
+    void setLocalAddress(const rangelist<L3Address> &localAddress) { this->localAddress = localAddress; }
+    const rangelist<L3Address>& getRemoteAddress() const { return remoteAddress; }
+    void setRemoteAddress(const rangelist<L3Address> &remoteAddress) { this->remoteAddress = remoteAddress; }
     const rangelist<unsigned int>& getNextProtocol() const { return nextProtocol; }
     void setNextProtocol(const rangelist<unsigned int>& nextProtocol) { this->nextProtocol = nextProtocol; }
     const rangelist<unsigned int>& getLocalPort() const { return localPort; }
