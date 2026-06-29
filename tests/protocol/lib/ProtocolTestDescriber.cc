@@ -6,7 +6,12 @@
 
 #include "ProtocolTestDescriber.h"
 
+#include <cctype>
+#include <cstring>
 #include <sstream>
+#include <vector>
+
+#include "inet/common/Protocol.h"
 
 #include "ProtocolTest.h"
 

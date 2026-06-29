@@ -54,6 +54,8 @@ class INET_API EventPattern
   public:
     // selector
     std::string selNode;                                  // "" = any node
+    std::string selProtocol;                              // "" = any protocol (matches the packet's PacketProtocolTag)
+    bool protocolSubject = false;                         // describe the protocol module as the subject (set by sends()/receives())
     std::string selIface;                                 // "" = any interface
     bool selHasKind = false; EventKind selKind = EventKind::Other;
     bool selHasDirection = false; int selDirection = -1;  // 0=IN, 1=OUT
@@ -70,6 +72,18 @@ class INET_API EventPattern
 
   public:
     EventPattern& iface(const char *name) { selIface = name; return *this; }
+    // Narrow to packets of a given protocol (the PacketProtocolTag name, e.g. "mobileipv6").
+    // Usually set via on("node.protocol"); the protocol also names the subject in descriptions.
+    EventPattern& protocol(const char *name) { selProtocol = name; return *this; }
+
+    // Protocol-module perspective. The named protocol (see protocol()/on("node.protocol"))
+    // sends a packet down to / receives a packet up from the layer below it -- written and
+    // described with the protocol module as the subject, not the layer that carries it.
+    // Mechanically: sends() observes the lower layer "received from upper", receives() its
+    // "sent to upper", filtered to this protocol.
+    EventPattern& sends(const char *matchExpr) { selHasKind = true; selKind = EventKind::ReceivedFromUpper; protocolSubject = true; selExpr = matchExpr; return *this; }
+    EventPattern& receives(const char *matchExpr) { selHasKind = true; selKind = EventKind::SentToUpper; protocolSubject = true; selExpr = matchExpr; return *this; }
+
     EventPattern& sentToLower() { selHasKind = true; selKind = EventKind::SentToLower; return *this; }
     EventPattern& receivedFromLower() { selHasKind = true; selKind = EventKind::ReceivedFromLower; return *this; }
     EventPattern& sentToUpper() { selHasKind = true; selKind = EventKind::SentToUpper; return *this; }
