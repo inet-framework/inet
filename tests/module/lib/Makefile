@@ -32,6 +32,7 @@ OBJS = \
     $O/EthTestApp.o \
     $O/IGMPTester.o \
     $O/MeterTestApp.o \
+    $O/NetfilterHookProbe.o \
     $O/PacketDump.o \
     $O/PacketLoggerChannel.o \
     $O/PolyhedronTest.o \

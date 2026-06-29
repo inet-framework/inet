@@ -1,0 +1,133 @@
+%description:
+Exercises all five IPv6 netfilter hooks AND every QUEUE/reinject path.
+
+Topology: a --- r --- b  (a, b are hosts; r forwards). A NetfilterHookProbe is
+attached to the Ipv6 module of every node and returns QUEUE for every hook, so each
+datagram is deferred and then reinjected at each pipeline stage. A single UDP flow
+a -> b therefore traverses:
+  a:  LOCAL_OUT  -> POST_ROUTING
+  r:  PRE_ROUTING -> FORWARD -> POST_ROUTING
+  b:  PRE_ROUTING -> LOCAL_IN
+
+The packet is delivered only if every one of those hooks fired AND every QUEUE was
+correctly resumed by reinjectQueuedDatagram(). We assert that each hook fired, that
+the router reinjected datagrams, and that the UDP payload reached b -- which is the
+end-to-end proof that all five reinject continuations work.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.test.moduletest.lib.NetfilterHookProbe;
+import ned.DatarateChannel;
+
+module ProbedHost6 extends StandardHost6
+{
+    submodules:
+        netfilterProbe: NetfilterHookProbe {
+            networkProtocolModule = "^.ipv6.ipv6";
+            @display("p=100,50");
+        }
+}
+
+module ProbedRouter6 extends Router6
+{
+    submodules:
+        netfilterProbe: NetfilterHookProbe {
+            networkProtocolModule = "^.ipv6.ipv6";
+            @display("p=100,50");
+        }
+}
+
+network NetfilterHooks6
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        a: ProbedHost6;
+        r: ProbedRouter6;
+        b: ProbedHost6;
+    connections:
+        a.ethg++ <--> ethline <--> r.ethg++;
+        r.ethg++ <--> ethline <--> b.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = NetfilterHooks6
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# statically assign global addresses (2001:db8::/64) to every node so the a->b flow
+# is routed through r (link-local destinations would not be forwarded); wire each
+# node's Ipv6NodeConfigurator to the global configurator
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# every probe queues every hook, then reinjects after 1ms
+**.netfilterProbe.preRouting = "QUEUE"
+**.netfilterProbe.localIn = "QUEUE"
+**.netfilterProbe.forward = "QUEUE"
+**.netfilterProbe.postRouting = "QUEUE"
+**.netfilterProbe.localOut = "QUEUE"
+**.netfilterProbe.reinjectDelay = 1ms
+
+# UDP flow a -> b
+**.a.numApps = 1
+**.a.app[0].typename = "UdpBasicApp"
+**.a.app[0].destAddresses = "b"
+**.a.app[0].destPort = 1000
+**.a.app[0].messageLength = 64B
+**.a.app[0].startTime = 1s
+**.a.app[0].stopTime = 4s
+**.a.app[0].sendInterval = 1s
+
+**.b.numApps = 1
+**.b.app[0].typename = "UdpSink"
+**.b.app[0].localPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# source host: LOCAL_OUT then POST_ROUTING
+%contains: stdout
+a.netfilterProbe LOCALOUT -> QUEUE
+%contains: stdout
+a.netfilterProbe POSTROUTING -> QUEUE
+%# router: PRE_ROUTING, FORWARD (the newly-wired hook), POST_ROUTING
+%contains: stdout
+r.netfilterProbe PREROUTING -> QUEUE
+%contains: stdout
+r.netfilterProbe FORWARD -> QUEUE
+%contains: stdout
+r.netfilterProbe POSTROUTING -> QUEUE
+%# destination host: PRE_ROUTING then LOCAL_IN (the previously-uninvoked hook)
+%contains: stdout
+b.netfilterProbe PREROUTING -> QUEUE
+%contains: stdout
+b.netfilterProbe LOCALIN -> QUEUE
+%# QUEUE was actually resumed
+%contains: stdout
+r.netfilterProbe reinjecting packet
+%# end-to-end delivery despite every hook deferring every datagram
+%contains: stdout
+b.app[0]: Received packet
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

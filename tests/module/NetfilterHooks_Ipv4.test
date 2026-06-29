@@ -1,0 +1,118 @@
+%description:
+IPv4 control for the all-hooks netfilter test (see NetfilterHooks_Ipv6.test).
+
+Identical scenario over IPv4, where all five netfilter hooks and all five reinject
+continuations have always been implemented. Running the same NetfilterHookProbe with
+the same assertions on IPv4 and IPv6 and getting the same result demonstrates that the
+completed IPv6 hook support is a faithful peer of IPv4's.
+
+Topology a --- r --- b; every node's Ipv4 module gets a probe that QUEUEs every hook.
+A UDP flow a -> b is delivered only if every hook fired and every QUEUE was resumed.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.test.moduletest.lib.NetfilterHookProbe;
+import ned.DatarateChannel;
+
+module ProbedHost4 extends StandardHost
+{
+    submodules:
+        netfilterProbe: NetfilterHookProbe {
+            networkProtocolModule = "^.ipv4.ip";
+            @display("p=100,50");
+        }
+}
+
+module ProbedRouter4 extends Router
+{
+    submodules:
+        netfilterProbe: NetfilterHookProbe {
+            networkProtocolModule = "^.ipv4.ip";
+            @display("p=100,50");
+        }
+}
+
+network NetfilterHooks4
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        a: ProbedHost4;
+        r: ProbedRouter4;
+        b: ProbedHost4;
+    connections:
+        a.ethg++ <--> ethline <--> r.ethg++;
+        r.ethg++ <--> ethline <--> b.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = NetfilterHooks4
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+# every probe queues every hook, then reinjects after 1ms
+**.netfilterProbe.preRouting = "QUEUE"
+**.netfilterProbe.localIn = "QUEUE"
+**.netfilterProbe.forward = "QUEUE"
+**.netfilterProbe.postRouting = "QUEUE"
+**.netfilterProbe.localOut = "QUEUE"
+**.netfilterProbe.reinjectDelay = 1ms
+
+# UDP flow a -> b
+**.a.numApps = 1
+**.a.app[0].typename = "UdpBasicApp"
+**.a.app[0].destAddresses = "b"
+**.a.app[0].destPort = 1000
+**.a.app[0].messageLength = 64B
+**.a.app[0].startTime = 1s
+**.a.app[0].stopTime = 4s
+**.a.app[0].sendInterval = 1s
+
+**.b.numApps = 1
+**.b.app[0].typename = "UdpSink"
+**.b.app[0].localPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+a.netfilterProbe LOCALOUT -> QUEUE
+%contains: stdout
+a.netfilterProbe POSTROUTING -> QUEUE
+%contains: stdout
+r.netfilterProbe PREROUTING -> QUEUE
+%contains: stdout
+r.netfilterProbe FORWARD -> QUEUE
+%contains: stdout
+r.netfilterProbe POSTROUTING -> QUEUE
+%contains: stdout
+b.netfilterProbe PREROUTING -> QUEUE
+%contains: stdout
+b.netfilterProbe LOCALIN -> QUEUE
+%contains: stdout
+r.netfilterProbe reinjecting packet
+%contains: stdout
+b.app[0]: Received packet
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
