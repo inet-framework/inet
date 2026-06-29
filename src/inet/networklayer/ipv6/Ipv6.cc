@@ -991,15 +991,25 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
             return;
         }
     }
-    const NetworkInterface *fromIe = fromHL ? nullptr : ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    L3Address nextHopAddr_(nextHopAddr);
-    if (datagramPostRoutingHook(packet, fromIe, ie, nextHopAddr_) == INetfilter::IHook::ACCEPT) {
-        fragmentAndSend(packet, ie, nextHopAddr_.toMac(), fromHL);
-    }
+    // Reduce the (already resolved) egress decision to packet tags so that the
+    // POST_ROUTING continuation -- fragmentAndSend(), possibly reached via a hook's
+    // QUEUE/reinject -- can recover it from the packet alone (cf. IPv4). MAC resolution
+    // has already happened (in resolveMACAddressAndSendPacket), so the POST_ROUTING hook
+    // cannot redirect the next hop; that is correct, as it is past the routing decision.
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(nextHopAddr);
+    if (datagramPostRoutingHook(packet) == INetfilter::IHook::ACCEPT)
+        fragmentAndSend(packet);
 }
 
-void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const MacAddress& nextHopAddr, bool fromHL)
+void Ipv6::fragmentAndSend(Packet *packet)
 {
+    // The egress decision was reduced to packet tags by fragmentPostRouting(); recover
+    // it here so this function (the POST_ROUTING reinject continuation) is packet-only.
+    const NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
+    MacAddress nextHopAddr = packet->getTag<MacAddressReq>()->getDestAddress();
+    // a forwarded packet carries an InterfaceInd tag; a locally-originated one does not
+    bool fromHL = (packet->findTag<InterfaceInd>() == nullptr);
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
     // hop counter check
     if (ipv6Header->getHopLimit() <= 0) {
@@ -1303,8 +1313,7 @@ void Ipv6::reinjectQueuedDatagram(const Packet *packet)
                     break;
 
                 case INetfilter::IHook::POSTROUTING:
-//                    fragmentAndSend(datagram, iter->outIE, iter->nextHopAddr);
-                    throw cRuntimeError("Re-injection of datagram queued for POSTROUTING hook not implemented");
+                    fragmentAndSend(datagram);
                     break;
 
                 case INetfilter::IHook::LOCALIN:
@@ -1378,7 +1387,7 @@ INetfilter::IHook::Result Ipv6::datagramForwardHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result Ipv6::datagramPostRoutingHook(Packet *packet, const NetworkInterface *inIE, const NetworkInterface *& outIE, L3Address& nextHopAddr)
+INetfilter::IHook::Result Ipv6::datagramPostRoutingHook(Packet *packet)
 {
     for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPostRoutingHook(packet);

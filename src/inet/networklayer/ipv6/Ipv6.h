@@ -176,10 +176,12 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     virtual void fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const MacAddress& nextHopAddr, bool fromHL);
 
     /**
-     * Performs fragmentation if needed, and sends the original datagram or the fragments
-     * through the specified interface.
+     * Performs fragmentation if needed, and sends the original datagram or the fragments.
+     * Packet-only: the egress interface (`InterfaceReq`) and resolved next-hop MAC
+     * (`MacAddressReq`) are recovered from packet tags, so this doubles as the
+     * POST_ROUTING netfilter reinject continuation.
      */
-    virtual void fragmentAndSend(Packet *packet, const NetworkInterface *destIE, const MacAddress& nextHopAddr, bool fromHL);
+    virtual void fragmentAndSend(Packet *packet);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
@@ -215,7 +217,7 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     /**
      * called before a packet is delivered via the network
      */
-    IHook::Result datagramPostRoutingHook(Packet *packet, const NetworkInterface *inIE, const NetworkInterface *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPostRoutingHook(Packet *packet);
 
     /**
      * called before a packet arriving from the network is delivered locally
