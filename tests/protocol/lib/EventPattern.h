@@ -53,8 +53,12 @@ class INET_API EventPattern
 {
   public:
     // selector
-    std::string selNode;                                  // "" = any node
-    std::string selProtocol;                              // "" = any protocol (matches the packet's PacketProtocolTag)
+    std::string selNode;                                  // on(path): subscribe/source-subtree (matched as a path prefix on the emitter)
+    std::string selSource;                                // source(path): emitting-module filter (path prefix)
+    std::string selSignal;                                // signal(name): registered signal name ("" = any)
+    std::string selProtocol;                              // protocol(name): packet's PacketProtocolTag ("" = any)
+    std::string selDispatch;                              // dispatch(name): packet's DispatchProtocolReq ("" = any)
+    std::string attributeToPath;                          // attributeTo(path): description-only point of view
     bool protocolSubject = false;                         // describe the protocol module as the subject (set by sends()/receives())
     std::string selIface;                                 // "" = any interface
     bool selHasKind = false; EventKind selKind = EventKind::Other;
@@ -72,8 +76,14 @@ class INET_API EventPattern
 
   public:
     EventPattern& iface(const char *name) { selIface = name; return *this; }
+    // --- new orthogonal selector vocabulary (pattern-language refactor) ---
+    EventPattern& source(const char *path) { selSource = path; return *this; }     // emitting-module filter
+    EventPattern& signal(const char *name) { selSignal = name; return *this; }     // which signal (registered name)
+    EventPattern& dispatch(const char *name) { selDispatch = name; return *this; } // DispatchProtocolReq protocol
+    EventPattern& packet(const char *expression) { selExpr = expression; return *this; } // PacketFilter content (value is a packet)
+    EventPattern& attributeTo(const char *path) { attributeToPath = path; return *this; } // description point of view
+
     // Narrow to packets of a given protocol (the PacketProtocolTag name, e.g. "mobileipv6").
-    // Usually set via on("node.protocol"); the protocol also names the subject in descriptions.
     EventPattern& protocol(const char *name) { selProtocol = name; return *this; }
 
     // Protocol-module perspective. The named protocol (see protocol()/on("node.protocol"))

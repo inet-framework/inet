@@ -477,45 +477,40 @@ Define_ProtocolTest(plca_beacon_cycle_bad)
                    .is(EthernetPlca::CS_TRANSMIT).describe("the controller transmits (it never does)").within(0.001));
 }
 
-// Mobile IPv6 (RFC 6275) home registration + route optimization. MIPv6 is a message-exchange
-// protocol (no FSM state signal), so this asserts the Mobility Header message sequence. The
-// messages are observed at the MN's IPv6 layer, where each is still the bare Mobility Header
-// (PacketProtocolTag = mobileipv6) so PacketFilter can read its chunk-class fields. Note the
-// perspective: a message the MN *sends* leaves the mipv6 module and is "received from upper"
-// by the IPv6 layer; a message the MN *receives* is "sent to upper" by the IPv6 layer.
+// Mobile IPv6 (RFC 6275) home registration + route optimization -- new orthogonal vocabulary.
+// MIPv6 is a message-exchange protocol; this asserts the Mobility Header sequence. The mipv6
+// module emits no packet signals, so the messages are observed at the IPv6 boundary by their
+// `mobileipv6` protocol tag (where they are still the bare Mobility Header, so PacketFilter can
+// read the chunk fields), and attributed to the mipv6 module's point of view for the narration:
+// a message mipv6 *sends* is the IPv6 layer's `packetReceivedFromUpper`; one it *receives* is
+// `packetSentToUpper`.
 Define_ProtocolTest(mipv6_registration_and_ro)
 {
-    // a Mobility Header message the MN sends (down to IPv6) / receives (up from IPv6).
-    auto send    = [](const char *expr, const char *desc, double w) {
-        return on("MN[0]").receivedFromUpper().layer(Layer::Network).match(expr).describe(desc).within(w);
+    auto sends = [](const char *expr, double w) {
+        return on("MN[0]").signal("packetReceivedFromUpper").protocol("mobileipv6")
+                 .attributeTo("MN[0].ipv6.mipv6").packet(expr).within(w);
     };
-    auto receive = [](const char *expr, const char *desc, double w) {
-        return on("MN[0]").sentToUpper().layer(Layer::Network).match(expr).describe(desc).within(w);
+    auto receives = [](const char *expr, double w) {
+        return on("MN[0]").signal("packetSentToUpper").protocol("mobileipv6")
+                 .attributeTo("MN[0].ipv6.mipv6").packet(expr).within(w);
     };
 
     return ProtocolTest("mipv6_registration_and_ro")
-        // --- Home registration: the MN registers its care-of address with its Home Agent ---
-        .once(send("BindingUpdate.homeRegistrationFlag == true && BindingUpdate.ackFlag == true",
-                   "the MN's home-registration Binding Update (H+A flags) to its Home Agent", 72))
-        .once(receive("BindingAcknowledgement.status == 0",
-                   "the Home Agent's accepting Binding Acknowledgement", 6))
-        // --- Return routability: the MN probes the CN over both paths, in any order, and
-        //     remembers each init cookie. ---
+        // --- Home registration with the Home Agent ---
+        .once(sends("BindingUpdate.homeRegistrationFlag == true && BindingUpdate.ackFlag == true", 72))
+        .once(receives("BindingAcknowledgement.status == 0", 6))
+        // --- Return routability: probe both paths (any order), remembering each init cookie ---
         .unordered({
-            send("HomeTestInit.homeInitCookie >= 0", "a Home Test Init (HoTI) to the CN", 7)
-                .capture("hoCookie", "HomeTestInit.homeInitCookie"),
-            send("CareOfTestInit.careOfInitCookie >= 0", "a Care-of Test Init (CoTI) to the CN", 7)
-                .capture("coCookie", "CareOfTestInit.careOfInitCookie")
+            sends("HomeTestInit.homeInitCookie >= 0", 7).capture("hoCookie", "HomeTestInit.homeInitCookie"),
+            sends("CareOfTestInit.careOfInitCookie >= 0", 7).capture("coCookie", "CareOfTestInit.careOfInitCookie")
         })
-        // --- The CN's test replies must echo those cookies (return-routability correctness). ---
+        // --- The CN's replies must echo those cookies (return-routability correctness) ---
         .unordered({
-            receive("HomeTest.homeInitCookie == {hoCookie}", "the Home Test (HoT) echoing the home cookie", 4),
-            receive("CareOfTest.careOfInitCookie == {coCookie}", "the Care-of Test (CoT) echoing the care-of cookie", 4)
+            receives("HomeTest.homeInitCookie == {hoCookie}", 4),
+            receives("CareOfTest.careOfInitCookie == {coCookie}", 4)
         })
-        // --- Route optimization complete: the MN sends a non-home Binding Update directly to
-        //     the CN (no Home-Registration flag). ---
-        .once(send("BindingUpdate.homeRegistrationFlag == false",
-                   "the route-optimization Binding Update directly to the CN", 5));
+        // --- Route optimization: a non-home Binding Update directly to the CN ---
+        .once(sends("BindingUpdate.homeRegistrationFlag == false", 5));
 }
 
 // Should FAIL: the Home Agent accepts the registration, so the MN never receives a Binding
@@ -523,12 +518,12 @@ Define_ProtocolTest(mipv6_registration_and_ro)
 Define_ProtocolTest(mipv6_registration_and_ro_bad)
 {
     return ProtocolTest("mipv6_registration_and_ro_bad")
-        .once(on("MN[0]").receivedFromUpper().layer(Layer::Network)
-                  .match("BindingUpdate.homeRegistrationFlag == true")
-                  .describe("the MN's home-registration Binding Update").within(72))
-        .once(on("MN[0]").sentToUpper().layer(Layer::Network)
-                  .match("BindingAcknowledgement.status == 130") // INSUFFICIENT_RESOURCES -- never happens
-                  .describe("a Binding Acknowledgement rejecting for insufficient resources").within(6));
+        .once(on("MN[0]").signal("packetReceivedFromUpper").protocol("mobileipv6")
+                  .attributeTo("MN[0].ipv6.mipv6")
+                  .packet("BindingUpdate.homeRegistrationFlag == true").within(72))
+        .once(on("MN[0]").signal("packetSentToUpper").protocol("mobileipv6")
+                  .attributeTo("MN[0].ipv6.mipv6")
+                  .packet("BindingAcknowledgement.status == 130").within(6)); // INSUFFICIENT_RESOURCES -- never happens
 }
 
 } // namespace protocoltest

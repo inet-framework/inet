@@ -23,27 +23,39 @@ static std::string formatCaptureValue(const cValue& value)
     }
 }
 
-EventPattern on(const char *nodeName)
+EventPattern on(const char *path)
 {
-    // "node" or "node.protocol" (e.g. "MN[0].mobileipv6"): the part after the first dot is
-    // the protocol, used both as a packet filter and as the subject in descriptions.
+    // A module path (the subscribe/source subtree): "MN[0]", "MN[0].wlan[0]",
+    // "MN[0].ipv6.ipv6". Matched as a component-aligned prefix of the emitting module.
     EventPattern pattern;
-    std::string spec = nodeName;
-    auto dot = spec.find('.');
-    if (dot == std::string::npos)
-        pattern.selNode = spec;
-    else {
-        pattern.selNode = spec.substr(0, dot);
-        pattern.selProtocol = spec.substr(dot + 1);
-    }
+    pattern.selNode = path;
     return pattern;
+}
+
+// Component-aligned path prefix: pattern "MN[0]" matches "MN[0]" and "MN[0].wlan[0].mac"
+// but not "MN[0]extra"; an empty pattern matches anything.
+static bool pathMatches(const std::string& pattern, const std::string& path)
+{
+    if (pattern.empty())
+        return true;
+    if (path == pattern)
+        return true;
+    return path.size() > pattern.size() &&
+           path.compare(0, pattern.size(), pattern) == 0 &&
+           path[pattern.size()] == '.';
 }
 
 bool EventPattern::scopeMatches(const PacketEvent& event) const
 {
-    if (!selNode.empty() && (event.node == nullptr || selNode != event.node->getFullName()))
+    if (!pathMatches(selNode, event.sourcePath))    // on(path): emitter subtree
+        return false;
+    if (!pathMatches(selSource, event.sourcePath))  // source(path): emitter filter
+        return false;
+    if (!selSignal.empty() && selSignal != event.signalName)
         return false;
     if (!selProtocol.empty() && selProtocol != event.protocolName)
+        return false;
+    if (!selDispatch.empty() && selDispatch != event.dispatchName)
         return false;
     if (selHasKind && event.kind != selKind)
         return false;
@@ -125,7 +137,10 @@ std::string EventPattern::str() const
 {
     std::ostringstream os;
     os << "on " << (selNode.empty() ? "*" : selNode);
-    if (!selProtocol.empty()) os << "." << selProtocol;
+    if (!selSource.empty()) os << " source=" << selSource;
+    if (!selSignal.empty()) os << " signal=" << selSignal;
+    if (!selProtocol.empty()) os << " protocol=" << selProtocol;
+    if (!selDispatch.empty()) os << " dispatch=" << selDispatch;
     if (selHasKind) os << " " << getEventKindName(selKind);
     if (selHasDirection) os << " dir=" << (selDirection == 0 ? "IN" : "OUT");
     if (selHasLayer) os << " layer=" << getLayerName(selLayer);

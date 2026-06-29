@@ -42,6 +42,9 @@ struct PacketEvent {
     int interfaceId = -1;             // from Interface{Ind,Req} tag, else -1
     std::string interfaceName;        // resolved from interfaceId, else empty
     std::string protocolName;         // packet's PacketProtocolTag protocol name, else empty
+    std::string dispatchName;         // packet's DispatchProtocolReq protocol name, else empty
+    std::string signalName;           // the registered name of the emitting signal
+    std::string sourcePath;           // emitting module path, relative to the network
     Layer layer = Layer::Unknown;
     simtime_t time = 0;
     long treeId = -1;                 // packet identity, for cross-node correlation
