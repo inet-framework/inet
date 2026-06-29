@@ -150,6 +150,26 @@ static std::string renderInject(const Injection& inj)
     return capitalize(os.str()) + ".";
 }
 
+static std::string renderState(const StatePattern& p, const char *modal)
+{
+    std::ostringstream os;
+    if (p.selHasWithin)
+        os << "within " << formatTime(p.selWithin) << ", ";
+    os << p.modulePath << "'s " << p.signalName << " " << modal << " reach ";
+    if (!p.description.empty()) {
+        os << p.description;
+        if (p.hasValue)
+            os << " (value " << p.value << ")";
+    }
+    else if (p.hasValue)
+        os << "value " << p.value;
+    else
+        os << "any value";
+    if (p.selHasNotBefore)
+        os << " (but not before " << formatTime(p.selNotBefore) << " after the previous step)";
+    return capitalize(os.str()) + ".";
+}
+
 static std::string renderInterception(const Interception& i)
 {
     std::ostringstream os;
@@ -186,6 +206,8 @@ std::string describe(const ProtocolTest& test)
             case StepType::Count:        clause = renderCount(step.pattern, step.cardMin, step.cardMax); break;
             case StepType::Delivery:  clause = renderDelivery(step.pattern, step.pattern2); break;
             case StepType::Inject:    clause = renderInject(step.injection); break;
+            case StepType::Reaches:      clause = renderState(step.statePattern, "must"); break;
+            case StepType::NeverReaches: clause = renderState(step.statePattern, "must not"); break;
         }
         os << "  " << (i + 1) << ". " << clause << "\n";
     }

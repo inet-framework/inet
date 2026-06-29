@@ -2,7 +2,9 @@
 
 Status: **in progress** — Phases 0–6 and 8 done; Phase 7 docs/examples done, only the
 opp_test/opp_ci CI *harness wiring* (linking the `.test` cases into INET's regression runner
-+ fingerprint hookup) remains. See the per-phase status in §14.
++ fingerprint hookup) remains. **Phase 9 (state-machine / value-signal observation) done** —
+observe non-packet scalar signals (FSM state, counters) and assert state sequences; first
+subject is Ethernet PLCA (10BASE-T1S). See the per-phase status in §14.
 Author: brainstormed with Claude, 2026-06-25
 
 ## 1. Purpose
@@ -660,6 +662,63 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
     ISN+1 into host1's eth[0] (upperLayerOut). 3. …host1's final ACK…".
   - As each later phase adds constructs (combinators, intercept actions), it extends the
     renderer with their templates.
+
+- **Phase 9 — State-machine / value-signal observation. ✅ DONE.** A second observation
+  channel beside the packet stream: scalar (`intval_t`/`long`) signals such as an FSM's state
+  index, a transmit-opportunity ID, or a counter. Motivated by the WATCH brainstorm (assert
+  *module state*, not just the packet trace); realized via **signals** rather than polling
+  WATCHes, because the interesting state machines already emit a change-signal (INET's
+  `Fsm::setStateChangedSignal` → `emit(sig, stateIndex)` on every transition). This is the §15
+  "prefer a signal over a tap/poll" policy applied to state.
+  - **Subject: Ethernet PLCA (10BASE-T1S, IEEE 802.3cg).** `EthernetPlca` runs two FSMs
+    (`controlFsm`, `dataFsm`) and emits `controlStateChanged` / `dataStateChanged` (state
+    index, `type=long`), plus `curID` (transmit-opportunity owner), `rxCmd`/`txCmd`
+    (NONE/BEACON/COMMIT), `carrierSenseChanged`, `collisionChanged`. None of these are
+    packets — the PLCA cycle (beacons, transmit opportunities) is invisible in the packet
+    trace, so observing the state signals is the *only* way to test PLCA-specific behaviour.
+  - **Design:**
+    - `StateEvent { module, node, signal, signalName, value(long), time }` — normalised
+      scalar-signal emission (parallel to `PacketEvent`).
+    - `StatePattern` + `state(modulePath, signalName)` fluent entry; `.is(value)` (the
+      `intval_t`, typically a public enum like `EthernetPlca::CS_TRANSMIT`), `.within(t)`,
+      `.notBefore(t)`/`.after(t)`, `.describe(...)`.
+    - Step kinds `Reaches` (the signal takes the value within the window — once, advance on
+      match) and `NeverReaches` (it must NOT, within the window — negative). They reuse the
+      engine's anchor/deadline/verdict machinery; a state event only matches a state step
+      and a packet event only matches a packet step (one cursor, two event sources).
+    - **State-trace mode** (the authoring/discoverability analogue of `logEvents`): a
+      `stateSignals` parameter (space-separated signal names) makes the tester subscribe to
+      and dump every matching scalar emission (`SE t=… mod=… signal=… value=…`), so an
+      author can read the real FSM sequence before writing assertions.
+    - Observation: override `receiveSignal(…, intval_t, …)`; subscribe network-wide to the
+      union of the signal names referenced by the program's state steps and the `stateSignals`
+      param (signals propagate to the ancestor listener, as for packet signals).
+  - **Self-contained network** (`PlcaMultidropDemo.ned`): a controller (nodeID 0) + N data
+    nodes on a 10BASE-T1S multidrop bus (`WireJunction` + `EthernetMultidropLink`), each an
+    `EthernetPlcaHost`, plus a `ProtocolTester`. Raw-Ethernet traffic (`EthernetSourceApp`/
+    `EthernetSinkApp`) so a node has something to send in its transmit opportunity.
+  - *Exit:* a PLCA test that asserts the control/data FSM sequence (beacon → syncing →
+    transmit-opportunity → a node's COMMIT/TRANSMIT) PASSes, and a deliberately-wrong variant
+    FAILs with a clear "state not reached" diagnostic. No INET source changes. **MET.**
+  - **Implemented** in `tests/protocol/lib/`: `StateEvent.h`; `StatePattern` + `state()` +
+    `reaches`/`neverReaches` (`ProtocolTest.{h,cc}`); the `receiveSignal(intval_t)` channel,
+    `subscribeStateSignals()`, `normalizeState`/`logStateEvent`/`processStateMatch`, the
+    `stateSignals` trace parameter, and the `Reaches`/`NeverReaches` engine handling
+    (`ProtocolTester.{h,cc,ned}`); describer `renderState`. Network `PlcaMultidropDemo.ned` +
+    `PlcaScenario`/`PlcaTrace`/`Plca`/`PlcaBad` configs; tests `plca_beacon_cycle`(+`_bad`).
+  - **Verified:** `Plca` → PASS (8 ordered state steps: controller BEACON + txCmd=BEACON →
+    node[0] SYNCING → curID rotates to node[0] → node[0] COMMIT → node[0] DS_TRANSMIT →
+    controller DS_RECEIVE → node[0] never CS_ABORT). `PlcaBad` → FAIL (`state step 1: signal
+    did not reach the expected value …` — the sink-only controller never enters CS_TRANSMIT).
+    Full suite after the change: **24 configs, 18 PASS + 6 intentional FAIL**, no regressions.
+  - **Findings:** (a) `Fsm::setState` emits the state *index* via the context module, so the
+    plca submodule's two FSMs surface as the `controlStateChanged`/`dataStateChanged` signals
+    (value = the public `EthernetPlca::CS_*`/`DS_*` enum); (b) the state-trace mode was
+    essential — the real sequence (controller RESYNC→SEND_BEACON→SYNCING→WAIT_TO→YIELD; a
+    data node EARLY_RECEIVE→SYNCING→…→COMMIT→TRANSMIT) was read from `PlcaTrace`, not guessed;
+    (c) generous `within(1ms)` windows make the assertions robust to which ~20µs beacon cycle
+    each step lands in; (d) one engine cursor drives both channels cleanly — a state event only
+    matches a state step and a packet event only a packet step.
 
 ## 15. Risks & open questions
 
