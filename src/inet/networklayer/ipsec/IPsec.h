@@ -22,7 +22,9 @@
 #include "inet/common/SimpleModule.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/ipv4/Ipv4.h"
+#include "inet/common/Protocol.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
 #include "SecurityPolicy.h"
 #include "SecurityAssociation.h"
 #include "inet/networklayer/ipsec/SecurityAssociationDatabase.h"
@@ -32,7 +34,7 @@ namespace inet {
 namespace ipsec {
 
 /**
- * Implements IPsec for IPv4. Supports AH and ESP in transport mode.
+ * Implements IPsec for IPv4 and IPv6. Supports AH and ESP in transport mode.
  * See the NED documentation for more info.
  */
 class INET_API IPsec : public SimpleModule, NetfilterBase::HookBase
@@ -46,7 +48,8 @@ class INET_API IPsec : public SimpleModule, NetfilterBase::HookBase
     typedef IPsecRule::AuthenticationAlg AuthenticationAlg;
 
   private:
-    Ipv4 *ipLayer;
+    INetfilter *ipLayer;
+    const Protocol *networkProtocol = nullptr; // Protocol::ipv4 or Protocol::ipv6 (the family this instance protects)
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     SecurityPolicyDatabase *spdModule;
     SecurityAssociationDatabase *sadModule;
@@ -89,7 +92,11 @@ class INET_API IPsec : public SimpleModule, NetfilterBase::HookBase
     static E parseEnumElem(const Enum<E>& enum_, const cXMLElement *parentElem, const char *childElemName, E defaultValue=(E)-1, E defaultValue2=(E)-1);
 
     virtual PacketInfo extractIngressPacketInfo(Packet *packet);
-    virtual PacketInfo extractEgressPacketInfo(Packet *ipv4datagram, const Ipv4Address& localAddress);
+    virtual PacketInfo extractEgressPacketInfo(Packet *datagram, const L3Address& localAddress);
+
+    // peek/remove the network header (Ipv4Header or Ipv6Header) according to networkProtocol
+    const Ptr<const NetworkHeaderBase> peekNetworkHeader(Packet *packet) const;
+    const Ptr<NetworkHeaderBase> removeNetworkHeader(Packet *packet) const;
 
     virtual void espProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType, bool tfcEnabled);
     virtual void ahProtect(Packet *transport, SecurityAssociation *sadEntry, int transportType);
@@ -112,7 +119,7 @@ class INET_API IPsec : public SimpleModule, NetfilterBase::HookBase
     virtual void handleMessage(cMessage *msg) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    INetfilter::IHook::Result processEgressPacket(Packet *ipv4datagram, const Ipv4Address& localAddress);
+    INetfilter::IHook::Result processEgressPacket(Packet *datagram, const L3Address& localAddress);
     INetfilter::IHook::Result processIngressPacket(Packet *ipv4datagram);
 
     /* Netfilter hooks */

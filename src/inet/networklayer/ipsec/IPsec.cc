@@ -25,6 +25,8 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipsec/IPsecAuthenticationHeader_m.h"
 #include "inet/networklayer/ipsec/IPsecEncapsulatingSecurityPayload_m.h"
 
@@ -53,6 +55,73 @@ simsignal_t IPsec::inProcessDelaySignal = registerSignal("inProcessDelay");
 simsignal_t IPsec::outProcessDelaySignal = registerSignal("outProcessDelay");
 
 Define_Module(IPsec);
+
+namespace {
+// IPsec processes both Ipv4Header and Ipv6Header; these helpers branch on the concrete
+// network header type for the few operations that are not common to both.
+IpProtocolId networkHeaderProtocol(const Ptr<const NetworkHeaderBase>& nh)
+{
+#ifdef INET_WITH_IPv4
+    if (auto v4 = dynamicPtrCast<const Ipv4Header>(nh)) return v4->getProtocolId();
+#endif
+#ifdef INET_WITH_IPv6
+    if (auto v6 = dynamicPtrCast<const Ipv6Header>(nh)) return v6->getProtocolId();
+#endif
+    throw cRuntimeError("IPsec: unsupported network protocol header");
+}
+
+void setNetworkHeaderProtocol(const Ptr<NetworkHeaderBase>& nh, IpProtocolId protocol)
+{
+#ifdef INET_WITH_IPv4
+    if (auto v4 = dynamicPtrCast<Ipv4Header>(nh)) { v4->setProtocolId(protocol); return; }
+#endif
+#ifdef INET_WITH_IPv6
+    if (auto v6 = dynamicPtrCast<Ipv6Header>(nh)) { v6->setProtocolId(protocol); return; }
+#endif
+    throw cRuntimeError("IPsec: unsupported network protocol header");
+}
+
+// bytes the lower layer appended beyond the declared IP payload (link-layer padding)
+b trailingPaddingLength(Packet *payload, const Ptr<const NetworkHeaderBase>& nh)
+{
+#ifdef INET_WITH_IPv4
+    if (auto v4 = dynamicPtrCast<const Ipv4Header>(nh)) return payload->getDataLength() + v4->getChunkLength() - v4->getTotalLengthField();
+#endif
+#ifdef INET_WITH_IPv6
+    if (auto v6 = dynamicPtrCast<const Ipv6Header>(nh)) return payload->getDataLength() - v6->getPayloadLength();
+#endif
+    return b(0);
+}
+
+// set the IP header's length field to match the current payload length
+void updateNetworkHeaderLength(const Ptr<NetworkHeaderBase>& nh, Packet *payload)
+{
+#ifdef INET_WITH_IPv4
+    if (auto v4 = dynamicPtrCast<Ipv4Header>(nh)) { v4->setTotalLengthField(v4->getChunkLength() + payload->getDataLength()); return; }
+#endif
+#ifdef INET_WITH_IPv6
+    if (auto v6 = dynamicPtrCast<Ipv6Header>(nh)) { v6->setPayloadLength(payload->getDataLength()); return; }
+#endif
+}
+} // namespace
+
+const Ptr<const NetworkHeaderBase> IPsec::peekNetworkHeader(Packet *packet) const
+{
+#ifdef INET_WITH_IPv6
+    if (networkProtocol == &Protocol::ipv6)
+        return packet->peekAtFront<Ipv6Header>();
+#endif
+    return packet->peekAtFront<Ipv4Header>();
+}
+
+const Ptr<NetworkHeaderBase> IPsec::removeNetworkHeader(Packet *packet) const
+{
+#ifdef INET_WITH_IPv6
+    if (networkProtocol == &Protocol::ipv6)
+        return packet->removeAtFront<Ipv6Header>();
+#endif
+    return packet->removeAtFront<Ipv4Header>();
+}
 
 IPsec::IPsec()
 {
@@ -229,7 +298,8 @@ void IPsec::initialize(int stage)
         espProtectOutDelay = &par("espProtectOutDelay");
         espProtectInDelay = &par("espProtectInDelay");
 
-        ipLayer = getModuleFromPar<Ipv4>(par("networkProtocolModule"), this);
+        ipLayer = check_and_cast<INetfilter *>(getModuleFromPar<cModule>(par("networkProtocolModule"), this));
+        networkProtocol = strcmp(par("networkProtocol").stringValue(), "ipv6") == 0 ? &Protocol::ipv6 : &Protocol::ipv4;
         interfaceTable.reference(this, "interfaceTableModule", true);
 
         //register IPsec hook
@@ -273,57 +343,58 @@ INetfilter::IHook::Result IPsec::datagramForwardHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const Ipv4Address& localAddress)
+PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const L3Address& localAddress)
 {
     PacketInfo packetInfo;
-    const auto& ipv4datagram = packet->peekAtFront<Ipv4Header>();
+    const auto& datagram = peekNetworkHeader(packet);
 
     packetInfo.setLocalAddress(localAddress);
-    packetInfo.setRemoteAddress(ipv4datagram->getDestAddress());
+    packetInfo.setRemoteAddress(datagram->getDestinationAddress());
 
-    packetInfo.setNextProtocol(ipv4datagram->getProtocolId());
+    IpProtocolId protocol = networkHeaderProtocol(datagram);
+    packetInfo.setNextProtocol(protocol);
+    b transportOffset = datagram->getChunkLength();
 
     if (false) ;
 #ifdef INET_WITH_TCP_COMMON
-    else if (ipv4datagram->getProtocolId() == IP_PROT_TCP) {
-        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4datagram->getChunkLength());
+    else if (protocol == IP_PROT_TCP) {
+        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(transportOffset);
         packetInfo.setLocalPort(tcpHeader->getSourcePort());
         packetInfo.setRemotePort(tcpHeader->getDestinationPort());
         packetInfo.setTfcSupported(false);
     }
 #endif
 #ifdef INET_WITH_UDP
-    else if (ipv4datagram->getProtocolId() == IP_PROT_UDP) {
-        const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4datagram->getChunkLength());
+    else if (protocol == IP_PROT_UDP) {
+        const auto& udpHeader = packet->peekDataAt<UdpHeader>(transportOffset);
         packetInfo.setLocalPort(udpHeader->getSourcePort());
         packetInfo.setRemotePort(udpHeader->getDestinationPort());
         packetInfo.setTfcSupported(true);
     }
 #endif
-    else if (ipv4datagram->getProtocolId() == IP_PROT_ICMP) {
-        const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(ipv4datagram->getChunkLength());
+    else if (protocol == IP_PROT_ICMP) {
+        const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(transportOffset);
         packetInfo.setIcmpType(icmpHeader->getType());
         packetInfo.setIcmpCode(icmpHeader->getCode());
         packetInfo.setTfcSupported(false);
     }
+    // ICMPv6 and any other protocol are matched on protocol number only
     return packetInfo;
 }
 
 INetfilter::IHook::Result IPsec::datagramPostRoutingHook(Packet *packet)
 {
-    auto outIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
-    return processEgressPacket(packet, outIE->getIpv4Address());
+    // the local address is the datagram's source address (filled in by routing)
+    return processEgressPacket(packet, peekNetworkHeader(packet)->getSourceAddress());
 }
 
-INetfilter::IHook::Result IPsec::processEgressPacket(Packet *packet, const Ipv4Address& localAddress)
+INetfilter::IHook::Result IPsec::processEgressPacket(Packet *packet, const L3Address& localAddress)
 {
     // packet will be fragmented (if necessary) later
 
     PacketInfo egressPacketInfo = extractEgressPacketInfo(packet, localAddress);
 
-    const auto& ipv4datagram = packet->peekAtFront<Ipv4Header>();
-
-    if (ipv4datagram->getDestAddress().isMulticast()) {
+    if (egressPacketInfo.getRemoteAddress().isMulticast()) {
         EV_INFO << "IPsec OUT BYPASS due to multicast, packet: " << egressPacketInfo.str() << std::endl;
         emit(outBypassSignal, 1L);
         outBypass++;
@@ -361,35 +432,38 @@ PacketInfo IPsec::extractIngressPacketInfo(Packet *packet)
 {
     PacketInfo packetInfo;
 
-    const auto& ipv4datagram = packet->peekAtFront<Ipv4Header>();
-    packetInfo.setLocalAddress(ipv4datagram->getDestAddress());
-    packetInfo.setRemoteAddress(ipv4datagram->getSrcAddress());
+    const auto& datagram = peekNetworkHeader(packet);
+    packetInfo.setLocalAddress(datagram->getDestinationAddress());
+    packetInfo.setRemoteAddress(datagram->getSourceAddress());
 
-    packetInfo.setNextProtocol(ipv4datagram->getProtocolId());
+    IpProtocolId protocol = networkHeaderProtocol(datagram);
+    packetInfo.setNextProtocol(protocol);
+    b transportOffset = datagram->getChunkLength();
 
     if (false) ;
 #ifdef INET_WITH_TCP_COMMON
-    else if (ipv4datagram->getProtocolId() == IP_PROT_TCP) {
-        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4datagram->getChunkLength());
+    else if (protocol == IP_PROT_TCP) {
+        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(transportOffset);
         packetInfo.setLocalPort(tcpHeader->getDestinationPort());
         packetInfo.setRemotePort(tcpHeader->getSourcePort());
         packetInfo.setTfcSupported(false);
     }
 #endif
 #ifdef INET_WITH_UDP
-    else if (ipv4datagram->getProtocolId() == IP_PROT_UDP) {
-        const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4datagram->getChunkLength());
+    else if (protocol == IP_PROT_UDP) {
+        const auto& udpHeader = packet->peekDataAt<UdpHeader>(transportOffset);
         packetInfo.setLocalPort(udpHeader->getDestinationPort());
         packetInfo.setRemotePort(udpHeader->getSourcePort());
         packetInfo.setTfcSupported(true);
     }
 #endif
-    else if (ipv4datagram->getProtocolId() == IP_PROT_ICMP) {
-        const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(ipv4datagram->getChunkLength());
+    else if (protocol == IP_PROT_ICMP) {
+        const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(transportOffset);
         packetInfo.setIcmpType(icmpHeader->getType());
         packetInfo.setIcmpCode(icmpHeader->getCode());
         packetInfo.setTfcSupported(false);
     }
+    // ICMPv6 and any other protocol are matched on protocol number only
     return packetInfo;
 }
 
@@ -629,9 +703,9 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
     Enter_Method_Silent();
 
     bool tfcEnabled = packetInfo.isTfcSupported();
-    auto ipv4Header = packet->removeAtFront<Ipv4Header>();
+    auto netHeader = removeNetworkHeader(packet);
 
-    auto padding = packet->getDataLength() + ipv4Header->getChunkLength() - ipv4Header->getTotalLengthField();
+    auto padding = trailingPaddingLength(packet, netHeader);
     if (padding > b(0))
         packet->removeAtBack(padding);
 
@@ -643,9 +717,9 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
             if (saEntry->getProtection() == Protection::ESP && !espProtected && !ahProtected) { // ESP protection must precede possible AH protection
                 EV_INFO << "IPsec OUT ESP PROTECT packet: " << packetInfo.str() << std::endl;
 
-                int transportType = ipv4Header->getProtocolId();
+                int transportType = networkHeaderProtocol(netHeader);
                 espProtect(packet, (saEntry), transportType, tfcEnabled);
-                ipv4Header->setProtocolId(IP_PROT_ESP);
+                setNetworkHeaderProtocol(netHeader, IP_PROT_ESP);
 
                 delay += espProtectOutDelay->doubleValue();
                 espProtected = true;
@@ -653,8 +727,8 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
             else if (saEntry->getProtection() == Protection::AH && !ahProtected) {
                 EV_INFO << "IPsec OUT AH PROTECT packet: " << packetInfo.str() << std::endl;
 
-                int transportType = ipv4Header->getProtocolId();
-                ipv4Header->setProtocolId(IP_PROT_AH);
+                int transportType = networkHeaderProtocol(netHeader);
+                setNetworkHeaderProtocol(netHeader, IP_PROT_AH);
                 ahProtect(packet, saEntry, transportType);
 
                 delay += ahProtectOutDelay->doubleValue();
@@ -666,8 +740,8 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
         }
     }
 
-    ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + packet->getDataLength());
-    packet->insertAtFront(ipv4Header);
+    updateNetworkHeaderLength(netHeader, packet);
+    packet->insertAtFront(netHeader);
 
     if (delay > 0 || lastProtectedOut > simTime()) {
         cMessage *selfmsg = new cMessage("IPsecProtectOutDelay");
@@ -710,7 +784,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
 
     double delay = 0.0;
     if (transportProtocol == IP_PROT_AH) {
-        auto ipv4Header = packet->removeAtFront<Ipv4Header>();
+        auto netHeader = removeNetworkHeader(packet);
 
         auto ah = packet->removeAtFront<IPsecAuthenticationHeader>();
 
@@ -733,9 +807,9 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             packet->removeData(Chunk::PF_ALLOW_EMPTY);
             auto data = encryptedData->getChunk();
             packet->insertData(data);
-            ipv4Header->setProtocolId((IpProtocolId)ahHeader->getNextHeader());
-            ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + data->getChunkLength());
-            packet->insertAtFront(ipv4Header);
+            setNetworkHeaderProtocol(netHeader, (IpProtocolId)ahHeader->getNextHeader());
+            updateNetworkHeaderLength(netHeader, packet);
+            packet->insertAtFront(netHeader);
 
             // TODO check icv, ...
 
@@ -773,7 +847,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
     }
 
     if (transportProtocol == IP_PROT_ESP) {
-        auto ipv4Header = packet->removeAtFront<Ipv4Header>();
+        auto netHeader = removeNetworkHeader(packet);
         auto espHeader = packet->removeAtFront<IPsecEspHeader>();
 
         SecurityAssociation *sadEntry = sadModule->findEntry(Direction::IN, espHeader->getSpi());
@@ -802,9 +876,9 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             auto espTrailer = packet->removeAtBack<IPsecEspTrailer>(B(ESP_FIXED_PAYLOAD_TRAILER_BYTES));
             if (espTrailer->getPadLength() > 0)
                 packet->removeAtBack(B(espTrailer->getPadLength()));
-            ipv4Header->setProtocolId((IpProtocolId)espTrailer->getNextHeader());
-            ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + packet->getDataLength());
-            packet->insertAtFront(ipv4Header);
+            setNetworkHeaderProtocol(netHeader, (IpProtocolId)espTrailer->getNextHeader());
+            updateNetworkHeaderLength(netHeader, packet);
+            packet->insertAtFront(netHeader);
 
             delay += espProtectInDelay->doubleValue();
 

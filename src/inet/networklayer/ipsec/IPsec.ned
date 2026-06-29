@@ -185,6 +185,7 @@ simple IPsec extends SimpleModule
         @display("i=block/control;is=s");
 
         string networkProtocolModule = default("^.ip");
+        string networkProtocol @enum("ipv4","ipv6") = default("ipv4"); // address family this instance protects (set to "ipv6" in Ipv6NetworkLayer)
         string interfaceTableModule;
         string spdModule = default("^.spd");
         string sadModule = default("^.sad");
