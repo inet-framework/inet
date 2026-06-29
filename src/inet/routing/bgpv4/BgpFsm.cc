@@ -477,6 +477,7 @@ void Established::ConnectRetryTimer_Expires()
 {
     EV_TRACE << "Processing Established::ConnectRetryTimer_Expires" << std::endl;
     BgpSession& session = TopState::box().getModule();
+    session.withdrawRoutesFromSession();
     // In response to any other event (Events 9, 12-13, 20-22), the local system:
     // TODO- deletes all routes associated with this connection,
     // - sets the ConnectRetryTimer to zero,
@@ -499,6 +500,7 @@ void Established::HoldTimer_Expires()
 {
     EV_TRACE << "Processing Established::HoldTimer_Expires" << std::endl;
     BgpSession& session = TopState::box().getModule();
+    session.withdrawRoutesFromSession();
     // If the HoldTimer_Expires event occurs (Event 10), the local system:
     // - sets the ConnectRetryTimer to zero,
     session.restartConnectRetryTimer();
@@ -533,6 +535,7 @@ void Established::TcpConnectionFails()
 {
     EV_TRACE << "Processing Established::TcpConnectionFails" << std::endl;
     BgpSession& session = TopState::box().getModule();
+    session.withdrawRoutesFromSession();
     session.restartConnectRetryTimer();
     session._info.socket->abort();
     ++session._connectRetryCounter;
