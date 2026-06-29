@@ -477,5 +477,59 @@ Define_ProtocolTest(plca_beacon_cycle_bad)
                    .is(EthernetPlca::CS_TRANSMIT).describe("the controller transmits (it never does)").within(0.001));
 }
 
+// Mobile IPv6 (RFC 6275) home registration + route optimization. MIPv6 is a message-exchange
+// protocol (no FSM state signal), so this asserts the Mobility Header message sequence. The
+// messages are observed at the MN's IPv6 layer, where each is still the bare Mobility Header
+// (PacketProtocolTag = mobileipv6) so PacketFilter can read its chunk-class fields. Note the
+// perspective: a message the MN *sends* leaves the mipv6 module and is "received from upper"
+// by the IPv6 layer; a message the MN *receives* is "sent to upper" by the IPv6 layer.
+Define_ProtocolTest(mipv6_registration_and_ro)
+{
+    // a Mobility Header message the MN sends (down to IPv6) / receives (up from IPv6).
+    auto send    = [](const char *expr, const char *desc, double w) {
+        return on("MN[0]").receivedFromUpper().layer(Layer::Network).match(expr).describe(desc).within(w);
+    };
+    auto receive = [](const char *expr, const char *desc, double w) {
+        return on("MN[0]").sentToUpper().layer(Layer::Network).match(expr).describe(desc).within(w);
+    };
+
+    return ProtocolTest("mipv6_registration_and_ro")
+        // --- Home registration: the MN registers its care-of address with its Home Agent ---
+        .once(send("BindingUpdate.homeRegistrationFlag == true && BindingUpdate.ackFlag == true",
+                   "the MN's home-registration Binding Update (H+A flags) to its Home Agent", 72))
+        .once(receive("BindingAcknowledgement.status == 0",
+                   "the Home Agent's accepting Binding Acknowledgement", 6))
+        // --- Return routability: the MN probes the CN over both paths, in any order, and
+        //     remembers each init cookie. ---
+        .unordered({
+            send("HomeTestInit.homeInitCookie >= 0", "a Home Test Init (HoTI) to the CN", 7)
+                .capture("hoCookie", "HomeTestInit.homeInitCookie"),
+            send("CareOfTestInit.careOfInitCookie >= 0", "a Care-of Test Init (CoTI) to the CN", 7)
+                .capture("coCookie", "CareOfTestInit.careOfInitCookie")
+        })
+        // --- The CN's test replies must echo those cookies (return-routability correctness). ---
+        .unordered({
+            receive("HomeTest.homeInitCookie == {hoCookie}", "the Home Test (HoT) echoing the home cookie", 4),
+            receive("CareOfTest.careOfInitCookie == {coCookie}", "the Care-of Test (CoT) echoing the care-of cookie", 4)
+        })
+        // --- Route optimization complete: the MN sends a non-home Binding Update directly to
+        //     the CN (no Home-Registration flag). ---
+        .once(send("BindingUpdate.homeRegistrationFlag == false",
+                   "the route-optimization Binding Update directly to the CN", 5));
+}
+
+// Should FAIL: the Home Agent accepts the registration, so the MN never receives a Binding
+// Acknowledgement reporting INSUFFICIENT_RESOURCES (status 130) -- the deadline is missed.
+Define_ProtocolTest(mipv6_registration_and_ro_bad)
+{
+    return ProtocolTest("mipv6_registration_and_ro_bad")
+        .once(on("MN[0]").receivedFromUpper().layer(Layer::Network)
+                  .match("BindingUpdate.homeRegistrationFlag == true")
+                  .describe("the MN's home-registration Binding Update").within(72))
+        .once(on("MN[0]").sentToUpper().layer(Layer::Network)
+                  .match("BindingAcknowledgement.status == 130") // INSUFFICIENT_RESOURCES -- never happens
+                  .describe("a Binding Acknowledgement rejecting for insufficient resources").within(6));
+}
+
 } // namespace protocoltest
 } // namespace inet
