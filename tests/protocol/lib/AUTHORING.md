@@ -186,7 +186,49 @@ transparent unless a rule fires. A bare tap (default `action = "pass"`) changes 
 
 ---
 
-## 8. Self-description
+## 8. State machines — assert FSM / scalar-signal state
+
+Some behaviour lives in a module's **state machine or counters**, not in the packet trace
+(e.g. Ethernet PLCA's beacon / transmit-opportunity cycle is invisible to packet observation).
+The framework observes any scalar (`intval_t`) signal — an FSM state index, an ID, a counter —
+as a second channel beside packets. INET's `Fsm` already emits its state on every transition
+(`setStateChangedSignal`), so the state machine needs no modification.
+
+```cpp
+.reaches(state("node[0].eth[0].plca", "controlStateChanged")   // module path, signal name
+           .is(EthernetPlca::CS_COMMIT)                         // the value (a public enum)
+           .describe("node[0] commits in its transmit opportunity")
+           .within(0.001))
+.neverReaches(state("node[0].eth[0].plca", "controlStateChanged")
+           .is(EthernetPlca::CS_ABORT).within(0.001))           // negative: must not enter this state
+```
+
+| Clause | Meaning |
+|---|---|
+| `state("path", "signalName")` | name the emitting module (relative to the network) and its scalar signal |
+| `.is(value)` | require this exact value (typically a public enum, e.g. `EthernetPlca::CS_TRANSMIT`); omit to match any emission |
+| `.within(t)` / `.notBefore(t)` / `.describe(...)` | as for packet steps |
+| `reaches(p)` | the signal takes the value within the window (advance on match; fail on deadline) — the state analogue of `once` |
+| `neverReaches(p)` | it must **not** take the value within the window (negative) |
+
+`reaches`/`neverReaches` steps interleave with packet steps in one ordered program: a state
+event only matches a state step, a packet event only a packet step.
+
+**Discovering signals (the authoring step).** Set `stateSignals` to a space-separated list of
+signal names; the tester then dumps every scalar emission (`SE t=… mod=… signal=… value=…`), so
+you can read the real FSM sequence before writing assertions:
+
+```
+*.tester.stateSignals = "controlStateChanged dataStateChanged curID rxCmd txCmd"
+```
+
+The value is the raw index; map it with the module's public enum or its `@statistic[...] enum=`
+declaration, and write assertions against the enum (`EthernetPlca::CS_*` / `DS_*`), not the bare
+number.
+
+---
+
+## 9. Self-description
 
 Set `*.tester.printDescription = true` to print the program as English at startup, e.g.:
 
@@ -201,7 +243,7 @@ Interception rules render as `* Fault injection: on tap 'tap', drop the first da
 
 ---
 
-## 9. Running tests
+## 10. Running tests
 
 Build the library and run a config:
 
@@ -240,7 +282,7 @@ an explicit `@namespace`, which keeps them immune to a consumer `.test`'s root `
 
 ---
 
-## 10. Cookbook
+## 11. Cookbook
 
 All snippets are from [`ProtocolTests.cc`](ProtocolTests.cc); the config column is the
 `omnetpp.ini` section that runs them.
@@ -302,3 +344,20 @@ exchange as a sequence of `once` steps matching the message type at the applicat
 DISCOVER (client → broadcast) · OFFER (server → client) · REQUEST (client → broadcast) ·
 ACK (server → client). Add a scenario with `DhcpClient`/`DhcpServer` apps and assert each
 `bootp`/`dhcp` message in order, the same way the handshake example asserts TCP flags.
+
+### Ethernet PLCA state machine (`Plca`, 10BASE-T1S) — state channel
+PLCA's beacon / transmit-opportunity cycle lives in two state machines, not the packet
+trace, so this asserts the FSM signals (§8) instead. On a controller + 2-node multidrop bus
+(`PlcaMultidropDemo`): the controller sends the BEACON, node[0] synchronises, the transmit
+opportunity rotates to node[0] (`curID == 1`), node[0] COMMITs and its data FSM transmits,
+and the controller receives the frame — while the control FSM must never `CS_ABORT`.
+```cpp
+.reaches(state("controller.eth[0].plca", "controlStateChanged").is(EthernetPlca::CS_SEND_BEACON).within(0.001))
+.reaches(state("node[0].eth[0].plca", "controlStateChanged").is(EthernetPlca::CS_SYNCING).within(0.001))
+.reaches(state("node[0].eth[0].plca", "curID").is(1).within(0.001))
+.reaches(state("node[0].eth[0].plca", "controlStateChanged").is(EthernetPlca::CS_COMMIT).within(0.001))
+.reaches(state("node[0].eth[0].plca", "dataStateChanged").is(EthernetPlca::DS_TRANSMIT).within(0.001))
+.neverReaches(state("node[0].eth[0].plca", "controlStateChanged").is(EthernetPlca::CS_ABORT).within(0.001));
+```
+Author it by first running `PlcaTrace` (`stateSignals = "controlStateChanged dataStateChanged
+curID rxCmd txCmd"`) to read the real sequence. See `plca_beacon_cycle` in `ProtocolTests.cc`.

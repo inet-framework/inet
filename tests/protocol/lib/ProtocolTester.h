@@ -12,6 +12,7 @@
 
 #include "inet/common/SimpleModule.h"
 #include "PacketEvent.h"
+#include "StateEvent.h"
 #include "ProtocolTest.h"
 
 namespace inet {
@@ -31,7 +32,9 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
 {
   protected:
     std::map<simsignal_t, EventKind> signalKinds; // signal -> normalised kind
+    std::map<simsignal_t, std::string> stateSignalNames; // subscribed scalar signal -> name (state channel)
     bool logEvents = true;
+    bool traceState = false;                      // dump every observed scalar (state) emission
     cModule *subscriptionModule = nullptr;        // where we attached the listener
     int numObserved = 0;
 
@@ -46,6 +49,7 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     int cardCount = 0;                             // matches seen so far for a Count step
     int deliveryStage = 0;                         // 0 = awaiting send, 1 = awaiting matching receive
     long deliveryTreeId = -1;                      // treeId of the sent packet to correlate
+    cModule *stateTarget = nullptr;                // resolved target module of the current Reaches/NeverReaches step
     simtime_t anchorTime = 0;                      // start time of the current step's window
     cMessage *deadlineMsg = nullptr;               // fires when the current expect step misses its deadline
     cMessage *injectMsg = nullptr;                 // fires when the current inject step is due
@@ -59,11 +63,18 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
-    // observation
+    // observation (packet channel)
     PacketEvent normalize(cComponent *source, EventKind kind, const Packet *packet);
     void logEvent(const PacketEvent& event);
     static Layer inferLayer(const cComponent *source);
+
+    // observation (state channel: scalar signals)
+    void subscribeStateSignals();  // subscribe to the program's + the stateSignals param's signal names
+    StateEvent normalizeState(cComponent *source, simsignal_t signalID, long value);
+    void logStateEvent(const StateEvent& event);
+    void processStateMatch(const StateEvent& event);
 
     // matching engine
     void installInterceptions();   // push the program's intercept(...) rules onto their taps

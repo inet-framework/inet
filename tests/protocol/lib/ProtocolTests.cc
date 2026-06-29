@@ -19,11 +19,13 @@
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPlca.h"
 
 namespace inet {
 namespace protocoltest {
 
 using inet::tcp::TcpHeader;
+using inet::physicallayer::EthernetPlca;
 
 // host1 sends a UDP datagram to port 5000; host2 receives it. Should PASS.
 Define_ProtocolTest(udp_basic_pass)
@@ -423,6 +425,56 @@ Define_ProtocolTest(wifi_block_ack_full)
                          "a QoS data frame with Block Ack policy", 0.5))
         .once(send   ("ieee80211mac.type == 24", "a Block Ack Request", 0.5))
         .once(receive("ieee80211mac.type == 25", "a Block Ack covering the block", 0.01));
+}
+
+// Phase 9 -- state-machine observation (Ethernet PLCA, 10BASE-T1S). PLCA's behaviour
+// (beacons, transmit opportunities, the cycle) lives in two state machines, not in the
+// packet trace, so the test observes the FSM state-change signals directly. EthernetPlca
+// wires controlFsm/dataFsm to emit their state index on every transition (controlStateChanged
+// / dataStateChanged), and also emits curID (the transmit-opportunity owner) and txCmd/rxCmd.
+// The state values are the public EthernetPlca::ControlState / DataState enums.
+//
+// This asserts one full beacon -> sync -> transmit-opportunity -> node-transmit handover on a
+// controller + 2-node multidrop bus. node[0] has a frame to send (EthernetSourceApp), so it
+// uses its transmit opportunity; the sink-only controller does not.
+Define_ProtocolTest(plca_beacon_cycle)
+{
+    return ProtocolTest("plca_beacon_cycle")
+        // 1. The controller (local_nodeID 0) starts a PLCA cycle by sending the BEACON.
+        .reaches(state("controller.eth[0].plca", "controlStateChanged")
+                   .is(EthernetPlca::CS_SEND_BEACON).describe("the controller sends a BEACON").within(0.001))
+        // 2. The controller signals BEACON to the PHY while doing so.
+        .reaches(state("controller.eth[0].plca", "txCmd")
+                   .is(EthernetPlca::CMD_BEACON).describe("the controller's TX command is BEACON").within(0.001))
+        // 3. node[0] detects the beacon and synchronises its cycle to it.
+        .reaches(state("node[0].eth[0].plca", "controlStateChanged")
+                   .is(EthernetPlca::CS_SYNCING).describe("node[0] synchronises to the beacon").within(0.001))
+        // 4. The transmit opportunity rotates from the controller (curID 0) to node[0] (curID 1).
+        .reaches(state("node[0].eth[0].plca", "curID")
+                   .is(1).describe("the transmit opportunity reaches node[0]").within(0.001))
+        // 5. node[0] has a pending frame, so it COMMITs to transmit in its opportunity.
+        .reaches(state("node[0].eth[0].plca", "controlStateChanged")
+                   .is(EthernetPlca::CS_COMMIT).describe("node[0] commits to transmit in its opportunity").within(0.001))
+        // 6. node[0]'s data state machine transmits the frame.
+        .reaches(state("node[0].eth[0].plca", "dataStateChanged")
+                   .is(EthernetPlca::DS_TRANSMIT).describe("node[0]'s data FSM transmits the frame").within(0.001))
+        // 7. The controller receives node[0]'s frame in turn (its data FSM enters RECEIVE).
+        .reaches(state("controller.eth[0].plca", "dataStateChanged")
+                   .is(EthernetPlca::DS_RECEIVE).describe("the controller receives node[0]'s frame").within(0.001))
+        // 8. Throughout, the control FSM must never enter its ABORT state.
+        .neverReaches(state("node[0].eth[0].plca", "controlStateChanged")
+                   .is(EthernetPlca::CS_ABORT).describe("node[0]'s control FSM must not abort").within(0.001));
+}
+
+// Should FAIL: the controller runs only a sink app, so it never has a frame to send and its
+// control FSM never enters the TRANSMIT state -- the deadline on this state is missed.
+Define_ProtocolTest(plca_beacon_cycle_bad)
+{
+    return ProtocolTest("plca_beacon_cycle_bad")
+        .reaches(state("controller.eth[0].plca", "controlStateChanged")
+                   .is(EthernetPlca::CS_SEND_BEACON).describe("the controller sends a BEACON").within(0.001))
+        .reaches(state("controller.eth[0].plca", "controlStateChanged")
+                   .is(EthernetPlca::CS_TRANSMIT).describe("the controller transmits (it never does)").within(0.001));
 }
 
 } // namespace protocoltest
