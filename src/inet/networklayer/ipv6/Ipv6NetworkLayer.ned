@@ -19,6 +19,9 @@ import inet.networklayer.mipv6.BindingUpdateList;
 import inet.networklayer.icmpv6.IMld;
 import inet.networklayer.icmpv6.Mldv1;
 import inet.networklayer.mipv6.Mipv6;
+import inet.networklayer.ipsec.IPsec;
+import inet.networklayer.ipsec.SecurityPolicyDatabase;
+import inet.networklayer.ipsec.SecurityAssociationDatabase;
 
 //
 // Represents a complete IPv6 network layer (L3), to be used within hosts and
@@ -46,11 +49,19 @@ import inet.networklayer.mipv6.Mipv6;
 // node types ~MobileHost6, ~HomeAgent6 and ~CorrespondentNode6 enable it and
 // select the role via the `isMobileNode` / `isHomeAgent` parameters of ~Mipv6.
 //
+// <b>IPsec</b>
+//
+// When `hasIpsec` is set, the layer additionally contains the ~IPsec engine and its
+// ~SecurityPolicyDatabase and ~SecurityAssociationDatabase. ~IPsec plugs into ~Ipv6
+// through netfilter hooks (the same dual-stack module the IPv4 layer uses); configure
+// it via the `spdConfig` XML parameter of the `ipsec` submodule.
+//
 module Ipv6NetworkLayer like INetworkLayer
 {
     parameters:
         bool hasMipv6 = default(false);
         bool hasMld = default(false);
+        bool hasIpsec = default(false);
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         *.mipv6Module = hasMipv6 ? absPath(".mipv6") : "";
@@ -101,6 +112,20 @@ module Ipv6NetworkLayer like INetworkLayer
         ipv6: Ipv6 {
             parameters:
                 @display("p=550,400");
+        }
+        ipsec: IPsec if hasIpsec {
+            parameters:
+                networkProtocolModule = "^.ipv6";
+                networkProtocol = "ipv6";
+                @display("p=300,500");
+        }
+        spd: SecurityPolicyDatabase if hasIpsec {
+            parameters:
+                @display("p=160,460;is=s");
+        }
+        sad: SecurityAssociationDatabase if hasIpsec {
+            parameters:
+                @display("p=160,540;is=s");
         }
         mipv6: Mipv6 if hasMipv6 {
             parameters:
