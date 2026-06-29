@@ -22,7 +22,9 @@ import inet.common.SimpleModule;
 //
 // Implements basic IPsec (RFC 4301) functionality. It supports Authentication
 // Header (AH) and Encapsulating Security Payload (ESP), in transport mode,
-// for IPv4 unicast traffic (UDP/TCP/ICMP). A simple performance model to
+// for IPv4 and IPv6 unicast traffic (UDP/TCP/ICMP/ICMPv6). The address family is
+// selected per instance via the `networkProtocol` parameter; the same module type is
+// used in both the IPv4 and IPv6 network layers. A simple performance model to
 // account for the overhead of cryptography is included. The IPsec databases
 // SPD and SAD are stored in separate modules (~SecurityPolicyDatabase,
 // ~SecurityAssociationDatabase).
@@ -39,6 +41,9 @@ import inet.common.SimpleModule;
 // - Multicast traffic is not supported. (Any multicast packet is let through unchanged.)
 // - Anti-replay mechanism is not implemented.
 // - DSCP-based SA selection is not implemented.
+// - For IPv6, AH/ESP are modelled as transport-mode headers inserted after the base
+//   header (next-header 51/50); selectors match on protocol number for ICMPv6 (ICMPv6
+//   type/code selectors are not supported).
 //
 //
 // <b>Configuration:</b>
