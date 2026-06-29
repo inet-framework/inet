@@ -73,6 +73,8 @@ bool EventPattern::selectorMatches(const MatchContext& context) const
     const PacketEvent& event = context.event;
     if (!scopeMatches(event))
         return false;
+    if (selHasValue && (!event.hasValue || event.value != selValue))  // scalar signal value
+        return false;
     if (event.packet == nullptr && (!selExpr.empty() || predicate))
         return false;
     if (!selExpr.empty() && !matchesExpression(context))
