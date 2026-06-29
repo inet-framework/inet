@@ -17,6 +17,7 @@ simple ProtocolTester
     parameters:
         string testName = default(""); // name of a registered ProtocolTest program to run; empty = observe/log only
         bool logEvents = default(testName == ""); // print a one-line trace per observed packet event
+        string stateSignals = default(""); // space-separated scalar-signal names to observe + dump (state channel, e.g. "controlStateChanged dataStateChanged"); for authoring state assertions
         bool printDescription = default(true); // print the program's English description at startup
         @display("i=block/cogwheel;is=s");
         @class(ProtocolTester);
