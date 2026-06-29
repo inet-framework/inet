@@ -266,6 +266,7 @@ void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, cOb
     if (packet == nullptr)
         return;
     PacketEvent event = normalize(source, it->second, packet);
+    event.signalName = cComponent::getSignalName(signalID);
     numObserved++;
     if (logEvents)
         logEvent(event);
@@ -357,6 +358,14 @@ PacketEvent ProtocolTester::normalize(cComponent *source, EventKind kind, const 
     if (auto protocolTag = packet->findTag<PacketProtocolTag>())
         if (auto protocol = protocolTag->findProtocol())
             event.protocolName = protocol->getName();
+    if (auto dispatchReq = packet->findTag<DispatchProtocolReq>())
+        if (auto protocol = dispatchReq->getProtocol())
+            event.dispatchName = protocol->getName();
+
+    // Source module path, relative to the network (strip the leading network-name component).
+    std::string fullPath = source->getFullPath();
+    auto firstDot = fullPath.find('.');
+    event.sourcePath = (firstDot == std::string::npos) ? fullPath : fullPath.substr(firstDot + 1);
 
     event.layer = inferLayer(source);
     return event;
