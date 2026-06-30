@@ -36,6 +36,9 @@ slow_level = df[(df["station"] == "sta[0]") & (df["scenario"].str.startswith("Ra
 plt.gca().axhline(slow_level, color=inet.scave.plot.default_colors[1], linewidth=1.6, zorder=3)
 
 utils.postconfigure_plot(props)
+ax = plt.gca()                      # bar charts: horizontal dashed grid behind the bars
+ax.grid(False)                      # (the one allowed axis-specific grid exception)
+ax.grid(True, axis="y")
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]>                
@@ -726,7 +729,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="matplotlibrc" value="savefig.bbox : tight&#10;savefig.transparent : True&#10;grid.linestyle : --&#10;axes.axisbelow : True"/>
             <property name="image_export_filename" value="per-station-throughput"/>
             <property name="image_export_width" value="8"/>
             <property name="image_export_height" value="6"/>
@@ -1486,7 +1489,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="matplotlibrc" value="savefig.bbox : tight&#10;savefig.transparent : True&#10;grid.linestyle : --&#10;axes.axisbelow : True"/>
             <property name="image_export_filename" value="throughput-vs-rate"/>
             <property name="image_export_width" value="8"/>
             <property name="image_export_height" value="6"/>
@@ -1516,6 +1519,9 @@ inet.scave.plot.plot_bars(valuedf, errorsdf, metadf, props)
 inet.scave.plot.annotate_barchart(plt.gca(), offset=10, result_type="int")
 
 utils.postconfigure_plot(props)
+ax = plt.gca()                      # bar charts: horizontal dashed grid behind the bars
+ax.grid(False)                      # (the one allowed axis-specific grid exception)
+ax.grid(True, axis="y")
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]>                
@@ -2206,7 +2212,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="matplotlibrc" value="savefig.bbox : tight&#10;savefig.transparent : True&#10;grid.linestyle : --&#10;axes.axisbelow : True"/>
             <property name="image_export_filename" value="frames-per-station"/>
             <property name="image_export_width" value="8"/>
             <property name="image_export_height" value="6"/>
