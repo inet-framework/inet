@@ -117,6 +117,13 @@ void Connect::TcpConnectionConfirmed()
 
 void Connect::TcpConnectionFails()
 {
+    EV_INFO << "Processing Connect::TcpConnectionFails" << std::endl;
+    BgpSession& session = TopState::box().getModule();
+    // If the TCP connection fails (Event 18), the local
+    // system:
+    // - restarts the ConnectRetryTimer with the initial value,
+    session.restartConnectRetryTimer();
+    // - changes its state to Active.
     setState<Active>();
 }
 
