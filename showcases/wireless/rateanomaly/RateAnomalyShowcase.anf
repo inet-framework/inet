@@ -1,11 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" ?>
 <analysis version="2">
     <inputs>
         <input pattern="results/*.sca"/>
+        <input pattern="results/*.vec"/>
     </inputs>
-    <charts>
-        <chart createdWith="" icon="icons/full/obj/barchart.png" id="101" name="Per-station throughput" resultTypes="" template="barchart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[from omnetpp.scave import results, chart, utils
+    <charts id="0" name="">
+        <chart id="1" type="MATPLOTLIB" name="Per-station throughput" template="barchart_mpl" icon="icons/full/obj/barchart.png">
+            <script>
+<![CDATA[from omnetpp.scave import results, chart, utils
 import inet.scave.plot
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -40,13 +42,20 @@ ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 utils.postconfigure_plot(props)
+if props.get("xaxis_title"):
+    ax.set_xlabel(props["xaxis_title"])
+if props.get("yaxis_title"):
+    ax.set_ylabel(props["yaxis_title"])
 ax.legend(loc="upper right", framealpha=0.95)
 ax.grid(axis="y", linestyle="--", linewidth=0.7, color="0.85", zorder=0)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </script>
+            <dialogPage id="INPUT" label="Input">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -93,8 +102,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="BARS" label="Bars"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="BARS" label="Bars">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -170,8 +182,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="CONFINT" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="CONFINT" label="Confidence Interval">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -212,8 +227,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="PLOT" label="Plot">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -268,6 +286,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -330,7 +353,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -356,8 +378,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -427,8 +452,11 @@ utils.export_data_if_needed(df, props)
 
 
   </x:children>
-</xswt>]]></dialogPage>
-            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+</xswt>]]>                
+
+            </dialogPage>
+            <dialogPage id="ORDERING" label="Ordering">
+<![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
 
   <import xmlns='http://sweet_swt.sf.net/xswt'>
@@ -478,8 +506,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="STYLING" label="Styling">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -586,8 +617,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="ADVANCED" label="Advanced">
+<![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -606,8 +640,11 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="EXPORT" label="Export">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -662,53 +699,55 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
+]]>                
+
+            </dialogPage>
+            <property name="filter" value="name =~ &quot;packetReceived:count&quot; AND module =~ &quot;*.server.app*&quot;"/>
+            <property name="include_fields" value=""/>
+            <property name="simplify" value=""/>
+            <property name="groups" value=""/>
+            <property name="series" value=""/>
+            <property name="baseline" value="0"/>
+            <property name="bar_placement" value="Aligned"/>
+            <property name="xlabel_rotation" value="0"/>
+            <property name="confidence_level" value="95%"/>
+            <property name="cap_size" value="4"/>
+            <property name="title" value="Per-station throughput"/>
+            <property name="xaxis_title" value=""/>
+            <property name="yaxis_title" value="Application-level throughput [Mbps]"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="yaxis_min" value=""/>
+            <property name="yaxis_max" value=""/>
+            <property name="yaxis_log" value="false"/>
+            <property name="grid_show" value="false"/>
+            <property name="grid_density" value="Major"/>
+            <property name="legend_show" value="false"/>
+            <property name="legend_placement" value="upper right"/>
+            <property name="legend_automatic" value="true"/>
+            <property name="legend_prefer_result_titles" value="true"/>
+            <property name="legend_prefer_module_display_paths" value="true"/>
+            <property name="legend_manual" value=""/>
+            <property name="legend_format" value=""/>
+            <property name="legend_replacements" value=""/>
+            <property name="ordering_regex_list" value=""/>
+            <property name="secondary_ordering_regex_list" value=""/>
+            <property name="sorting" value="true"/>
+            <property name="plt.style" value="default"/>
+            <property name="cycle_seed" value="0"/>
+            <property name="matplotlibrc.figure.facecolor" value=""/>
+            <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="false"/>
-            <property name="confidence_level" value="none"/>
-            <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="yaxis_title" value="Application-level throughput [Mbps]"/>
-            <property name="title" value="Per-station throughput"/>
-            <property name="cycle_seed" value="0"/>
-            <property name="bar_placement" value="Aligned"/>
-            <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="6"/>
-            <property name="legend_placement" value="upper right"/>
-            <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
-            <property name="xlabel_rotation" value="0"/>
-            <property name="grid_density" value="Major"/>
-            <property name="groups" value="experiment"/>
-            <property name="yaxis_min" value=""/>
-            <property name="baseline" value="0"/>
-            <property name="image_export_filename" value="per-station-throughput"/>
-            <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="cap_size" value="4"/>
-            <property name="filter" value="name =~ &quot;packetReceived:count&quot; AND module =~ &quot;*.server.app*&quot;"/>
-            <property name="series" value="inifile"/>
-            <property name="plt.style" value="default"/>
-            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="simplify" value="false"/>
-            <property name="yaxis_max" value=""/>
-            <property name="image_export_width" value="9"/>
-            <property name="matplotlibrc" value="savefig.bbox: tight&#10;savefig.transparent : True"/>
-            <property name="legend_prefer_module_display_paths" value="true"/>
-            <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value="false"/>
-            <property name="legend_replacements" value=""/>
-            <property name="legend_automatic" value="true"/>
-            <property name="legend_format" value=""/>
-            <property name="include_fields" value="false"/>
-            <property name="ordering_regex_list" value=""/>
-            <property name="sorting" value="true"/>
-            <property name="secondary_ordering_regex_list" value=""/>
-                    <property name="xaxis_min" value=""/>
-                    <property name="xaxis_max" value=""/>
+            <property name="matplotlibrc" value=""/>
+            <property name="image_export_filename" value="per-station-throughput"/>
+            <property name="image_export_width" value="8"/>
+            <property name="image_export_height" value="6"/>
+            <property name="data_export_filename" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="102" name="Throughput vs slow-station rate" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[from omnetpp.scave import results, chart, utils
+        <chart id="2" type="MATPLOTLIB" name="Throughput vs slow-station rate" template="linechart_mpl" icon="icons/full/obj/linechart.png">
+            <script>
+<![CDATA[from omnetpp.scave import results, chart, utils
 import inet.scave.plot
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -743,13 +782,20 @@ ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 utils.postconfigure_plot(props)
+if props.get("xaxis_title"):
+    ax.set_xlabel(props["xaxis_title"])
+if props.get("yaxis_title"):
+    ax.set_ylabel(props["yaxis_title"])
 ax.legend(loc="upper left", framealpha=0.95)
 ax.grid(True, linestyle="--", linewidth=0.7, color="0.85")
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </script>
+            <dialogPage id="INPUT" label="Input">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -808,8 +854,11 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="LINES" label="Lines">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -924,8 +973,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="PLOT" label="Plot">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -968,6 +1020,11 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
+    <label text="Unit:"/>
+    <text x:id="xaxis_unit" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
     <label text="Min:"/>
     <text x:id="xaxis_min" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -994,6 +1051,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -1056,7 +1118,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -1082,8 +1143,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1153,8 +1217,11 @@ utils.export_data_if_needed(df, props)
 
 
   </x:children>
-</xswt>]]></dialogPage>
-            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+</xswt>]]>                
+
+            </dialogPage>
+            <dialogPage id="ORDERING" label="Ordering">
+<![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
 
   <import xmlns='http://sweet_swt.sf.net/xswt'>
@@ -1204,8 +1271,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="STYLING" label="Styling">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1312,8 +1382,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="ADVANCED" label="Advanced">
+<![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1332,8 +1405,11 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="EXPORT" label="Export">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1388,56 +1464,61 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
+]]>                
+
+            </dialogPage>
+            <property name="filter" value="name =~ &quot;packetReceived:count&quot; AND module =~ &quot;*.server.app*&quot;"/>
+            <property name="omit_empty_vectors" value="false"/>
+            <property name="simplify" value=""/>
+            <property name="vector_start_time" value=""/>
+            <property name="vector_end_time" value=""/>
+            <property name="vector_operations" value=""/>
+            <property name="drawstyle" value="auto"/>
+            <property name="linecolor" value=""/>
+            <property name="linestyle" value="solid"/>
+            <property name="linewidth" value="1.5"/>
+            <property name="marker" value="none"/>
+            <property name="markersize" value="5"/>
+            <property name="title" value="Throughput vs. slow-station bitrate"/>
+            <property name="xaxis_title" value="Slow station's bitrate [Mbps]"/>
+            <property name="xaxis_unit" value=""/>
+            <property name="xaxis_min" value=""/>
+            <property name="xaxis_max" value=""/>
+            <property name="xaxis_log" value="false"/>
+            <property name="yaxis_title" value="Application-level throughput [Mbps]"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="yaxis_min" value=""/>
+            <property name="yaxis_max" value=""/>
+            <property name="yaxis_log" value="false"/>
+            <property name="grid_show" value="false"/>
+            <property name="grid_density" value="Major"/>
+            <property name="legend_show" value="false"/>
+            <property name="legend_placement" value="upper right"/>
+            <property name="legend_automatic" value="true"/>
+            <property name="legend_prefer_result_titles" value="true"/>
+            <property name="legend_prefer_module_display_paths" value="true"/>
+            <property name="legend_manual" value=""/>
+            <property name="legend_format" value=""/>
+            <property name="legend_replacements" value=""/>
+            <property name="ordering_regex_list" value=""/>
+            <property name="secondary_ordering_regex_list" value=""/>
+            <property name="sorting" value="true"/>
+            <property name="plt.style" value="default"/>
+            <property name="cycle_seed" value="0"/>
+            <property name="matplotlibrc.figure.facecolor" value=""/>
+            <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="false"/>
-            <property name="vector_end_time" value=""/>
-            <property name="linecolor" value=""/>
-            <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="yaxis_title" value="Application-level throughput [Mbps]"/>
-            <property name="title" value="Throughput vs. slow-station bitrate"/>
-            <property name="vector_operations" value="apply: divide_by(1000000)"/>
-            <property name="cycle_seed" value="0"/>
-            <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="6"/>
-            <property name="xaxis_log" value="false"/>
-            <property name="legend_placement" value="upper right"/>
-            <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Slow station's bitrate [Mbps]"/>
-            <property name="grid_density" value="Major"/>
-            <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value="throughput-vs-rate"/>
-            <property name="xaxis_min" value=""/>
-            <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="linewidth" value="1.5"/>
-            <property name="filter" value="name =~ &quot;packetReceived:count&quot; AND module =~ &quot;*.server.app*&quot;"/>
-            <property name="vector_start_time" value=""/>
-            <property name="linestyle" value="solid"/>
-            <property name="markersize" value="5"/>
-            <property name="drawstyle" value="auto"/>
-            <property name="marker" value="none"/>
-            <property name="plt.style" value="default"/>
-            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="simplify" value="false"/>
-            <property name="yaxis_max" value=""/>
-            <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="9"/>
-            <property name="matplotlibrc" value="savefig.bbox : tight&#10;savefig.transparent : True"/>
-            <property name="legend_prefer_module_display_paths" value="true"/>
-            <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value="false"/>
-            <property name="legend_replacements" value=""/>
-            <property name="legend_automatic" value="true"/>
-            <property name="legend_format" value=""/>
-            <property name="ordering_regex_list" value=""/>
-            <property name="sorting" value="true"/>
-            <property name="secondary_ordering_regex_list" value=""/>
-            <property name="omit_empty_vectors" value="false"/>
+            <property name="matplotlibrc" value=""/>
+            <property name="image_export_filename" value="throughput-vs-rate"/>
+            <property name="image_export_width" value="8"/>
+            <property name="image_export_height" value="6"/>
+            <property name="data_export_filename" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/barchart.png" id="103" name="Frames per station" resultTypes="" template="barchart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[from omnetpp.scave import results, chart, utils
+        <chart id="3" type="MATPLOTLIB" name="Frames per station" template="barchart_mpl" icon="icons/full/obj/barchart.png">
+            <script>
+<![CDATA[from omnetpp.scave import results, chart, utils
 import inet.scave.plot
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -1463,12 +1544,19 @@ ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 utils.postconfigure_plot(props)
+if props.get("xaxis_title"):
+    ax.set_xlabel(props["xaxis_title"])
+if props.get("yaxis_title"):
+    ax.set_ylabel(props["yaxis_title"])
 ax.grid(axis="y", linestyle="--", linewidth=0.7, color="0.85", zorder=0)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </script>
+            <dialogPage id="INPUT" label="Input">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1515,8 +1603,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="BARS" label="Bars"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="BARS" label="Bars">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1592,8 +1683,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="CONFINT" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="CONFINT" label="Confidence Interval">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1634,8 +1728,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="PLOT" label="Plot">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1690,6 +1787,11 @@ utils.export_data_if_needed(df, props)
 
     <label text="Label:"/>
     <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Unit:"/>
+    <text x:id="yaxis_unit" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
 
@@ -1752,7 +1854,6 @@ utils.export_data_if_needed(df, props)
       <add x:p0="upper left"/>
       <add x:p0="lower left"/>
       <add x:p0="lower right"/>
-      <add x:p0="right"/>
       <add x:p0="center left"/>
       <add x:p0="center right"/>
       <add x:p0="lower center"/>
@@ -1778,8 +1879,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1849,8 +1953,11 @@ utils.export_data_if_needed(df, props)
 
 
   </x:children>
-</xswt>]]></dialogPage>
-            <dialogPage id="ORDERING" label="Ordering"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+</xswt>]]>                
+
+            </dialogPage>
+            <dialogPage id="ORDERING" label="Ordering">
+<![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
 
   <import xmlns='http://sweet_swt.sf.net/xswt'>
@@ -1900,8 +2007,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="STYLING" label="Styling">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2008,8 +2118,11 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="ADVANCED" label="Advanced">
+<![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -2028,8 +2141,11 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>                
+
+            </dialogPage>
+            <dialogPage id="EXPORT" label="Export">
+<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2084,50 +2200,51 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
+]]>                
+
+            </dialogPage>
+            <property name="filter" value="name =~ &quot;packetReceived:count&quot; AND module =~ &quot;*.server.app*&quot;"/>
+            <property name="include_fields" value=""/>
+            <property name="simplify" value=""/>
+            <property name="groups" value=""/>
+            <property name="series" value=""/>
+            <property name="baseline" value="0"/>
+            <property name="bar_placement" value="Aligned"/>
+            <property name="xlabel_rotation" value="0"/>
+            <property name="confidence_level" value="95%"/>
+            <property name="cap_size" value="4"/>
+            <property name="title" value="Frames per station"/>
+            <property name="xaxis_title" value=""/>
+            <property name="yaxis_title" value="Frames successfully transmitted"/>
+            <property name="yaxis_unit" value=""/>
+            <property name="yaxis_min" value=""/>
+            <property name="yaxis_max" value=""/>
+            <property name="yaxis_log" value="false"/>
+            <property name="grid_show" value="false"/>
+            <property name="grid_density" value="Major"/>
+            <property name="legend_show" value="false"/>
+            <property name="legend_placement" value="upper right"/>
+            <property name="legend_automatic" value="true"/>
+            <property name="legend_prefer_result_titles" value="true"/>
+            <property name="legend_prefer_module_display_paths" value="true"/>
+            <property name="legend_manual" value=""/>
+            <property name="legend_format" value=""/>
+            <property name="legend_replacements" value=""/>
+            <property name="ordering_regex_list" value=""/>
+            <property name="secondary_ordering_regex_list" value=""/>
+            <property name="sorting" value="true"/>
+            <property name="plt.style" value="default"/>
+            <property name="cycle_seed" value="0"/>
+            <property name="matplotlibrc.figure.facecolor" value=""/>
+            <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="false"/>
-            <property name="confidence_level" value="none"/>
-            <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="yaxis_title" value="Frames successfully transmitted"/>
-            <property name="title" value="Frames per station"/>
-            <property name="cycle_seed" value="0"/>
-            <property name="bar_placement" value="Aligned"/>
-            <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="6"/>
-            <property name="legend_placement" value="upper right"/>
-            <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
-            <property name="xlabel_rotation" value="0"/>
-            <property name="grid_density" value="Major"/>
-            <property name="groups" value="experiment"/>
-            <property name="yaxis_min" value=""/>
-            <property name="baseline" value="0"/>
-            <property name="image_export_filename" value="frames-per-station"/>
-            <property name="matplotlibrc.axes.facecolor" value=""/>
-            <property name="cap_size" value="4"/>
-            <property name="filter" value="name =~ &quot;packetReceived:count&quot; AND module =~ &quot;*.server.app*&quot;"/>
-            <property name="series" value="inifile"/>
-            <property name="plt.style" value="default"/>
-            <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
-            <property name="simplify" value="false"/>
-            <property name="yaxis_max" value=""/>
-            <property name="image_export_width" value="9"/>
-            <property name="matplotlibrc" value="savefig.bbox: tight&#10;savefig.transparent : True"/>
-            <property name="legend_prefer_module_display_paths" value="true"/>
-            <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value="false"/>
-            <property name="legend_replacements" value=""/>
-            <property name="legend_automatic" value="true"/>
-            <property name="legend_format" value=""/>
-            <property name="include_fields" value="false"/>
-            <property name="ordering_regex_list" value=""/>
-            <property name="sorting" value="true"/>
-            <property name="secondary_ordering_regex_list" value=""/>
-                    <property name="xaxis_min" value=""/>
-                    <property name="xaxis_max" value=""/>
+            <property name="matplotlibrc" value=""/>
+            <property name="image_export_filename" value="frames-per-station"/>
+            <property name="image_export_width" value="8"/>
+            <property name="image_export_height" value="6"/>
+            <property name="data_export_filename" value=""/>
         </chart>
     </charts>
 </analysis>

@@ -141,7 +141,7 @@ level, settling just above the floor it sets:
 ..
    FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
    type:     chart (matplotlib)
-   anf:      RateAnomalyShowcase.anf   chart "Per-station throughput" (id 101)
+   anf:      RateAnomalyShowcase.anf   chart "Per-station throughput"
    inputs:   results/*.sca   from configs Homogeneous + RateAnomaly (already recorded)
    shows:    per-station application throughput, Homogeneous (all 54 Mbps) vs the
              rate anomaly (sta[0] at 6 Mbps); the four fast stations collapse to the
@@ -150,7 +150,7 @@ level, settling just above the floor it sets:
              If the per-station series set changes, the scenario/recording changed -> re-derive.
    backend:  matplotlib -> identical in IDE and headless
    export:   opp_charttool imageexport RateAnomalyShowcase.anf -n "Per-station throughput"
-             -f png --dpi 96 -d doc/media/   ; size 864x576, 9x6 in via image_export_width/height
+             -f png --dpi 150 -d doc/media/   ; size 1200x900, 8x6 in via image_export_width/height
    stamp:    captured 2026-06, INET 4.6
 
 The reason is visible in the raw frame counts: over the measurement interval every
@@ -165,7 +165,7 @@ most of the channel time and left little for the others.
 ..
    FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
    type:     chart (matplotlib)
-   anf:      RateAnomalyShowcase.anf   chart "Frames per station" (id 103)
+   anf:      RateAnomalyShowcase.anf   chart "Frames per station"
    inputs:   results/*.sca   from config RateAnomaly slowBitrate=6 (already recorded)
    shows:    frames successfully transmitted per station in the rate-anomaly case
              (slow = 6 Mbps); near-equal counts = DCF's equal transmission opportunities
@@ -173,7 +173,7 @@ most of the channel time and left little for the others.
              slowBitrate=6 run. If that run is absent or counts diverge, re-derive.
    backend:  matplotlib -> identical in IDE and headless
    export:   opp_charttool imageexport RateAnomalyShowcase.anf -n "Frames per station"
-             -f png --dpi 96 -d doc/media/   ; size 864x576, 9x6 in via image_export_width/height
+             -f png --dpi 150 -d doc/media/   ; size 1200x900, 8x6 in via image_export_width/height
    stamp:    captured 2026-06, INET 4.6
 
 The damage scales with the rate gap. As the slow station's rate falls from 54 to
@@ -184,7 +184,7 @@ station halves the capacity of the entire cell:
 ..
    FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
    type:     chart (matplotlib)
-   anf:      RateAnomalyShowcase.anf   chart "Throughput vs slow-station rate" (id 102)
+   anf:      RateAnomalyShowcase.anf   chart "Throughput vs slow-station rate"
    inputs:   results/*.sca   from configs Homogeneous + RateAnomaly (already recorded)
    shows:    aggregate, fast-station-average, and slow-station throughput vs the slow
              station's bitrate (54 = Homogeneous baseline, 36..6 = RateAnomaly sweep)
@@ -192,7 +192,7 @@ station halves the capacity of the entire cell:
              slowBitrate itervar (Homogeneous -> 54). If the sweep points change, re-derive.
    backend:  matplotlib -> identical in IDE and headless
    export:   opp_charttool imageexport RateAnomalyShowcase.anf -n "Throughput vs slow-station rate"
-             -f png --dpi 96 -d doc/media/   ; size 864x576, 9x6 in via image_export_width/height
+             -f png --dpi 150 -d doc/media/   ; size 1200x900, 8x6 in via image_export_width/height
    stamp:    captured 2026-06, INET 4.6
 
 ============================  ===============  ==============  ====================
