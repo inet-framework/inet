@@ -32,6 +32,10 @@ B.bgp: Sending BGP Withdraw message to 10.0.23.3 ...
 C.bgp: delete route BGP 10.0.1.0/24 ...
 ```
 
+The `Restart` config (`-c Restart`) extends the scenario: it also restarts `A` at `100s`,
+so the session to `B` re-establishes (exercising the RFC 4271 §6.8 connection-collision
+handling on reconnect), `10.0.1.0/24` is re-advertised `A-B-C`, and the ping recovers.
+
 Notes:
 
 - This example intentionally uses shortened BGP timers (`connectRetryTime = 5s`,

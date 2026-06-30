@@ -28,6 +28,9 @@ B.bgp: Prefix 2001:db8:1::/64: no alternative path in Adj-RIB-In, sending explic
 B.bgp: Sending BGP Withdraw message to 2001:db8:23::3 ...   MP_UNREACH_NLRI: afi=2 safi=1 (1 prefixes)
 ```
 
+The `Restart` config (`-c Restart`) also restarts `A` at `100s`, so the session to `B`
+re-establishes, `2001:db8:1::/64` is re-advertised `A-B-C`, and the ping recovers.
+
 Notes:
 
 - This example intentionally uses shortened BGP timers (`connectRetryTime = 5s`,
