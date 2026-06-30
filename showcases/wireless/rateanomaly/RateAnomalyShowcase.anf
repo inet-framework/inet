@@ -6,10 +6,12 @@
     <charts>
         <chart createdWith="" icon="icons/full/obj/barchart.png" id="101" name="Per-station throughput" resultTypes="" template="barchart_mpl" type="MATPLOTLIB">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
+import inet.scave.plot
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+colors = inet.scave.plot.default_colors
 props = chart.get_properties()
 utils.preconfigure_plot(props)
 
@@ -20,7 +22,6 @@ if df.empty:
 
 df["station"] = df["module"].str.extract(r"app\[(\d+)\]").astype(int)
 df["mbps"] = df["value"] * 0.002
-
 stations = sorted(df["station"].unique())
 homog = df[df["configname"] == "Homogeneous"].set_index("station")["mbps"].reindex(stations)
 anom = df[(df["configname"] == "RateAnomaly") & (df["slowBitrate"].astype(str) == "6")].set_index("station")["mbps"].reindex(stations)
@@ -28,20 +29,19 @@ anom = df[(df["configname"] == "RateAnomaly") & (df["slowBitrate"].astype(str) =
 x = np.arange(len(stations))
 w = 0.38
 ax = plt.gca()
-ax.bar(x - w/2, homog.values, w, label="Homogeneous (all 54 Mbps)", color="#4C72B0", zorder=2)
-ax.bar(x + w/2, anom.values, w, label="Rate anomaly (sta[0] at 6 Mbps)", color="#C44E52", zorder=2)
-ax.axhline(anom.loc[0], color="#C44E52", linestyle=":", linewidth=1.2, zorder=1,
-           label="slow station's throughput")
+ax.bar(x - w/2, homog.values, w, label="Homogeneous (all 54 Mbps)", color=colors[0], zorder=2)
+ax.bar(x + w/2, anom.values, w, label="Rate anomaly (sta[0] at 6 Mbps)", color=colors[1], zorder=2)
+ax.axhline(anom.loc[0], color=colors[1], linestyle="-", linewidth=1.8, zorder=3, label="slow station's throughput")
 ax.set_xticks(x)
 ax.set_xticklabels([f"sta[{s}]" + ("\n(slowed)" if s == 0 else "") for s in stations])
-ax.set_ylabel("Application-level throughput [Mbps]")
-ax.set_title("Per-station throughput")
+ax.set_title(props["title"])
 ax.set_ylim(0, float(np.nanmax([homog.max(), anom.max()])) * 1.32)
-ax.legend(loc="upper right", framealpha=0.95)
-ax.grid(axis="y", linestyle="--", zorder=0)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
-plt.tight_layout()
+
+utils.postconfigure_plot(props)
+ax.legend(loc="upper right", framealpha=0.95)
+ax.grid(axis="y", linestyle="--", linewidth=0.7, color="0.85", zorder=0)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -665,10 +665,10 @@ utils.export_data_if_needed(df, props)
 ]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="true"/>
+            <property name="grid_show" value="false"/>
             <property name="confidence_level" value="none"/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="yaxis_title" value=""/>
+            <property name="yaxis_title" value="Application-level throughput [Mbps]"/>
             <property name="title" value="Per-station throughput"/>
             <property name="cycle_seed" value="0"/>
             <property name="bar_placement" value="Aligned"/>
@@ -704,13 +704,17 @@ utils.export_data_if_needed(df, props)
             <property name="ordering_regex_list" value=""/>
             <property name="sorting" value="true"/>
             <property name="secondary_ordering_regex_list" value=""/>
+                    <property name="xaxis_min" value=""/>
+                    <property name="xaxis_max" value=""/>
         </chart>
         <chart createdWith="" icon="icons/full/obj/linechart.png" id="102" name="Throughput vs slow-station rate" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
+import inet.scave.plot
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+colors = inet.scave.plot.default_colors
 props = chart.get_properties()
 utils.preconfigure_plot(props)
 
@@ -721,28 +725,26 @@ if df.empty:
 df["station"] = df["module"].str.extract(r"app\[(\d+)\]").astype(int)
 df["mbps"] = df["value"] * 0.002
 # Homogeneous is the no-gap reference point at 54 Mbps; RateAnomaly contributes 36..6
-df["slowrate"] = np.where(df["configname"] == "Homogeneous", 54.0,
-                          pd.to_numeric(df["slowBitrate"], errors="coerce"))
+df["slowrate"] = np.where(df["configname"] == "Homogeneous", 54.0, pd.to_numeric(df["slowBitrate"], errors="coerce"))
 
 agg = df.groupby("slowrate")["mbps"].sum().sort_index()
 fast = df[df["station"] != 0].groupby("slowrate")["mbps"].mean().sort_index()
 slow = df[df["station"] == 0].groupby("slowrate")["mbps"].mean().sort_index()
 
 ax = plt.gca()
-ax.plot(agg.index, agg.values, "o-", color="#4C72B0", label="Aggregate (all 5 stations)")
-ax.plot(fast.index, fast.values, "s-", color="#C44E52", label="Fast stations (avg of the four at 54 Mbps)")
-ax.plot(slow.index, slow.values, "^--", color="#808080", label="Slow station (sta[0])")
-ax.set_xlabel("Slow station's bitrate [Mbps]")
-ax.set_ylabel("Application-level throughput [Mbps]")
-ax.set_title("Throughput vs. slow-station bitrate")
+ax.plot(agg.index, agg.values, "o-", color=colors[0], label="Aggregate (all 5 stations)")
+ax.plot(fast.index, fast.values, "s-", color=colors[1], label="Fast stations (avg of the four at 54 Mbps)")
+ax.plot(slow.index, slow.values, "^--", color=colors[2], label="Slow station (sta[0])")
 ax.set_xticks([6, 9, 12, 18, 24, 36, 54])
+ax.set_title(props["title"])
 ax.set_ylim(0, float(agg.max()) * 1.12)
 ax.margins(x=0.05)
-ax.grid(True, linestyle="--")
-ax.legend(loc="center right", framealpha=0.95)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
-plt.tight_layout()
+
+utils.postconfigure_plot(props)
+ax.legend(loc="upper left", framealpha=0.95)
+ax.grid(True, linestyle="--", linewidth=0.7, color="0.85")
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1389,11 +1391,11 @@ utils.export_data_if_needed(df, props)
 ]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="true"/>
+            <property name="grid_show" value="false"/>
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="yaxis_title" value="Application throughput [Mbps]"/>
+            <property name="yaxis_title" value="Application-level throughput [Mbps]"/>
             <property name="title" value="Throughput vs. slow-station bitrate"/>
             <property name="vector_operations" value="apply: divide_by(1000000)"/>
             <property name="cycle_seed" value="0"/>
@@ -1402,11 +1404,11 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Simulation time [s]"/>
+            <property name="xaxis_title" value="Slow station's bitrate [Mbps]"/>
             <property name="grid_density" value="Major"/>
-            <property name="yaxis_min" value="0"/>
+            <property name="yaxis_min" value=""/>
             <property name="image_export_filename" value="throughput-vs-rate"/>
-            <property name="xaxis_min" value="0"/>
+            <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="name =~ &quot;packetReceived:count&quot; AND module =~ &quot;*.server.app*&quot;"/>
@@ -1419,8 +1421,8 @@ utils.export_data_if_needed(df, props)
             <property name="legend_show" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
-            <property name="yaxis_max" value="100"/>
-            <property name="xaxis_max" value="1"/>
+            <property name="yaxis_max" value=""/>
+            <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.bbox : tight&#10;savefig.transparent : True"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
@@ -1436,10 +1438,12 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart createdWith="" icon="icons/full/obj/barchart.png" id="103" name="Frames per station" resultTypes="" template="barchart_mpl" type="MATPLOTLIB">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
+import inet.scave.plot
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+colors = inet.scave.plot.default_colors
 props = chart.get_properties()
 utils.preconfigure_plot(props)
 
@@ -1451,16 +1455,15 @@ df["station"] = df["module"].str.extract(r"app\[(\d+)\]").astype(int)
 sel = df[(df["configname"] == "RateAnomaly") & (df["slowBitrate"].astype(str) == "6")].set_index("station")["value"].sort_index()
 
 ax = plt.gca()
-bars = ax.bar([f"sta[{s}]" + ("\n(slowed)" if s == 0 else "") for s in sel.index], sel.values,
-              color="#55A868", zorder=2)
+bars = ax.bar([f"sta[{s}]" + ("\n(slowed)" if s == 0 else "") for s in sel.index], sel.values, color=colors[0], zorder=2)
 ax.bar_label(bars, fmt="%d", padding=3, fontsize=9)
-ax.set_ylabel("Frames successfully transmitted")
-ax.set_title("Frames per station")
+ax.set_title(props["title"])
 ax.set_ylim(0, float(sel.max()) * 1.18)
-ax.grid(axis="y", linestyle="--", zorder=0)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
-plt.tight_layout()
+
+utils.postconfigure_plot(props)
+ax.grid(axis="y", linestyle="--", linewidth=0.7, color="0.85", zorder=0)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -2084,10 +2087,10 @@ utils.export_data_if_needed(df, props)
 ]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="true"/>
+            <property name="grid_show" value="false"/>
             <property name="confidence_level" value="none"/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="yaxis_title" value=""/>
+            <property name="yaxis_title" value="Frames successfully transmitted"/>
             <property name="title" value="Frames per station"/>
             <property name="cycle_seed" value="0"/>
             <property name="bar_placement" value="Aligned"/>
@@ -2123,6 +2126,8 @@ utils.export_data_if_needed(df, props)
             <property name="ordering_regex_list" value=""/>
             <property name="sorting" value="true"/>
             <property name="secondary_ordering_regex_list" value=""/>
+                    <property name="xaxis_min" value=""/>
+                    <property name="xaxis_max" value=""/>
         </chart>
     </charts>
 </analysis>

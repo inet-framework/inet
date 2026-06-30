@@ -25,6 +25,7 @@ IEEE 802.11:
    :maxdepth: 1
 
    throughput/doc/index
+   rateanomaly/doc/index
    handover/doc/index
    ratecontrol/doc/index
    fragmentation/doc/index
