@@ -96,9 +96,10 @@ frame, or a greedy step will swallow it.
 
 ## 4. Content matching & captures
 
-`.match("expr")` uses INET's `PacketFilter` expression engine over the dissected packet.
+`.packet("expr")` uses INET's `PacketFilter` expression engine over the dissected packet
+(it asserts the signal value is a packet; for a scalar signal use `.is(value)` instead).
 Protocol names are lowercase (`tcp`, `udp`, `ipv4`, `arp`, `ieee80211mac`), chunk class
-names are as declared (`Ieee80211DataHeader`). Examples:
+names are as declared (`BindingUpdate`, `Ieee80211DataHeader`). Examples:
 
 ```
 udp.destPort == 5000
@@ -115,11 +116,11 @@ non-match, never an error.
 `{name}` substitution:
 
 ```cpp
-.once(on("host1").sentToLower().layer(Layer::Transport)
-          .match("tcp.synBit == true")
+.once(on("host1.tcp").signal("packetSentToLower")
+          .packet("tcp.synBit == true")
           .capture("isn", "tcp.sequenceNo"))           // remember the ISN
-.once(on("host1").receivedFromLower().layer(Layer::Transport)
-          .match("tcp.ackNo == {isn} + 1"))            // refer back to it
+.once(on("host1.tcp").signal("packetReceivedFromLower")
+          .packet("tcp.ackNo == {isn} + 1"))           // refer back to it
 ```
 
 For predicates the engine can't introspect, use a lambda plus `.describe("...")` so the
@@ -297,14 +298,14 @@ All snippets are from [`ProtocolTests.cc`](ProtocolTests.cc); the config column 
 Observe SYN / SYN+ACK / ACK at the initiator, asserting the ack numbers follow seq+1 via
 captures.
 ```cpp
-.once(on("host1").sentToLower().layer(Layer::Transport)
-          .match("tcp.synBit == true && tcp.ackBit == false")
+.once(on("host1.tcp").signal("packetSentToLower")
+          .packet("tcp.synBit == true && tcp.ackBit == false")
           .capture("isn", "tcp.sequenceNo").within(0.2))
-.once(on("host1").receivedFromLower().layer(Layer::Transport)
-          .match("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
+.once(on("host1.tcp").signal("packetReceivedFromLower")
+          .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
           .capture("peerIsn", "tcp.sequenceNo").within(0.5))
-.once(on("host1").sentToLower().layer(Layer::Transport)
-          .match("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {peerIsn} + 1").within(0.5));
+.once(on("host1.tcp").signal("packetSentToLower")
+          .packet("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {peerIsn} + 1").within(0.5));
 ```
 
 ### TCP retransmission via a dropped segment (`MitmRetransmit`)
@@ -324,18 +325,18 @@ ISN+1, then observes host1's final ACK — a handshake driven entirely by inject
 
 ### ARP resolution (`ArpResolution`)
 ```cpp
-.once(on("host1").sentToLower().layer(Layer::Link).match("arp.opcode == 1")
+.once(on("host1.eth[0].mac").signal("packetSentToLower").packet("arp.opcode == 1")
           .describe("an ARP request").within(0.2))
-.once(on("host1").receivedFromLower().layer(Layer::Link).match("arp.opcode == 2")
+.once(on("host1.eth[0].mac").signal("packetReceivedFromLower").packet("arp.opcode == 2")
           .describe("host2's ARP reply").within(0.2));
 ```
 
 ### IPv4 fragmentation (`Fragmentation`)
 A 4000-byte datagram over a 1500-byte MTU yields several fragments.
 ```cpp
-.once(on("host1").sentToLower().layer(Layer::Link).match("ipv4.moreFragments == true")
+.once(on("host1.eth[0].mac").signal("packetSentToLower").packet("ipv4.moreFragments == true")
           .describe("a fragment with the more-fragments flag set").within(0.2))
-.once(on("host1").sentToLower().layer(Layer::Link).match("ipv4.fragmentOffset > 0")
+.once(on("host1.eth[0].mac").signal("packetSentToLower").packet("ipv4.fragmentOffset > 0")
           .describe("a later fragment at a non-zero offset").within(0.2));
 ```
 
@@ -358,12 +359,12 @@ trace, so this asserts the FSM signals (§8) instead. On a controller + 2-node m
 opportunity rotates to node[0] (`curID == 1`), node[0] COMMITs and its data FSM transmits,
 and the controller receives the frame — while the control FSM must never `CS_ABORT`.
 ```cpp
-.reaches(state("controller.eth[0].plca", "controlStateChanged").is(EthernetPlca::CS_SEND_BEACON).within(0.001))
-.reaches(state("node[0].eth[0].plca", "controlStateChanged").is(EthernetPlca::CS_SYNCING).within(0.001))
-.reaches(state("node[0].eth[0].plca", "curID").is(1).within(0.001))
-.reaches(state("node[0].eth[0].plca", "controlStateChanged").is(EthernetPlca::CS_COMMIT).within(0.001))
-.reaches(state("node[0].eth[0].plca", "dataStateChanged").is(EthernetPlca::DS_TRANSMIT).within(0.001))
-.neverReaches(state("node[0].eth[0].plca", "controlStateChanged").is(EthernetPlca::CS_ABORT).within(0.001));
+.once(on("controller.eth[0].plca").signal("controlStateChanged").is(EthernetPlca::CS_SEND_BEACON).within(0.001))
+.once(on("node[0].eth[0].plca").signal("controlStateChanged").is(EthernetPlca::CS_SYNCING).within(0.001))
+.once(on("node[0].eth[0].plca").signal("curID").is(1).within(0.001))
+.once(on("node[0].eth[0].plca").signal("controlStateChanged").is(EthernetPlca::CS_COMMIT).within(0.001))
+.once(on("node[0].eth[0].plca").signal("dataStateChanged").is(EthernetPlca::DS_TRANSMIT).within(0.001))
+.never(on("node[0].eth[0].plca").signal("controlStateChanged").is(EthernetPlca::CS_ABORT).within(0.001));
 ```
 Author it by first running `PlcaTrace` (`stateSignals = "controlStateChanged dataStateChanged
 curID rxCmd txCmd"`) to read the real sequence. See `plca_beacon_cycle` in `ProtocolTests.cc`.
@@ -375,8 +376,8 @@ roams to a foreign link it registers with its Home Agent (Binding Update → Bin
 then route-optimizes with the correspondent node via the return-routability procedure (HoTI/CoTI →
 HoT/CoT with the cookies echoed) and a direct Binding Update.
 ```cpp
-// send  = on("MN[0]").receivedFromUpper().layer(Layer::Network)...   (a message the MN sends)
-// receive = on("MN[0]").sentToUpper().layer(Layer::Network)...       (a message the MN receives)
+// send  = on("MN[0]").signal("packetReceivedFromUpper").protocol("mobileipv6").attributeTo("MN[0].ipv6.mipv6")...
+// receive = on("MN[0]").signal("packetSentToUpper").protocol("mobileipv6").attributeTo("MN[0].ipv6.mipv6")...
 .once(send("BindingUpdate.homeRegistrationFlag == true && BindingUpdate.ackFlag == true", ...))
 .once(receive("BindingAcknowledgement.status == 0", ...))
 .unordered({ send("HomeTestInit.homeInitCookie >= 0", ...).capture("hoCookie", "HomeTestInit.homeInitCookie"),
@@ -385,9 +386,11 @@ HoT/CoT with the cookies echoed) and a direct Binding Update.
              receive("CareOfTest.careOfInitCookie == {coCookie}", ...) })
 .once(send("BindingUpdate.homeRegistrationFlag == false", ...));        // route-optimized BU direct to the CN
 ```
-Two authoring notes: **(a)** observe at the MN's **IPv6 layer**, where the message is still the bare
-Mobility Header (`mobileipv6` protocol) so PacketFilter can read its chunk fields (`BindingUpdate.*`,
-`HomeTestInit.*`, `HomeTest.*`, …); on the wire it is buried inside the IPv6/802.11 frame and those
-fields are not reachable. **(b)** From the IPv6 layer's perspective a message the MN *sends* is
-"received from upper" and one it *receives* is "sent to upper" — hence the `send`/`receive` helpers.
-Run `Mipv6Trace` first to read the real message sequence and timing. See `mipv6_registration_and_ro`.
+Notes: **(a)** observe at the MN's **IPv6 boundary**, where the message is still the bare Mobility
+Header (`protocol("mobileipv6")`), and `attributeTo("MN[0].ipv6.mipv6")` narrates it from the mipv6
+module's point of view (so `packetReceivedFromUpper` reads as the mipv6 module *sending*). **(b)** the
+**same case at the network-interface level** (`mipv6_registration_and_ro_interface`) just swaps the
+observation point to `on("MN[0].wlan[0]").signal("packetSentToLower"/"packetReceivedFromLower")` — the
+field/cookie assertions are identical (PacketFilter's PacketDissector reaches the Mobility Header even
+through the IPv6/802.11 encapsulation). Run `Mipv6Trace` first to read the real sequence. See
+`mipv6_registration_and_ro` and `…_interface`.
