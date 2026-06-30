@@ -522,7 +522,6 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
     if (interfaceId == -1)
         if (!determineOutputInterface(destAddress, nextHop, interfaceId, packet, fromHL))
             // no interface found; sent to ND or to ICMP for error processing
-//            throw cRuntimeError("No interface found!");//return;
             return;
     // don't raise error if sent to ND or ICMP!
 
@@ -866,7 +865,7 @@ void Ipv6::localDeliverFinish(Packet *packet)
         EV_INFO << "Transport layer gate not connected - dropping packet!\n";
         sendIcmpError(origPacket, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
         origPacket = nullptr; // for not delete
-        delete packet; // delete decapsulated packet
+        delete packet;
     }
     else {
         // the packet was delivered to one or more sockets above (a copy per socket) and

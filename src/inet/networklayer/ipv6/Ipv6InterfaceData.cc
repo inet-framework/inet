@@ -233,7 +233,7 @@ Ipv6InterfaceData::~Ipv6InterfaceData()
 
 std::string Ipv6InterfaceData::str() const
 {
-    // FIXME FIXME FIXME FIXME info() should never print a newline
+    // FIXME info() should never print a newline
     std::ostringstream os;
     os << "Ipv6:{" << endl;
     for (int i = 0; i < getNumAddresses(); i++) {
@@ -273,22 +273,12 @@ std::string Ipv6InterfaceData::str() const
     // uncomment the following as needed!
     os << "\tNode:";
     os << " dupAddrDetectTrans=" << nodeVars.dupAddrDetectTransmits;
-//    os << " curHopLimit=" << hostVars.curHopLimit;
-//    os << " retransTimer=" << hostVars.retransTimer;
-//    os << " baseReachableTime=" << hostVars.baseReachableTime;
     os << " reachableTime=" << hostVars.reachableTime << endl;
 
     if (rtrVars.advSendAdvertisements) {
         os << "\tRouter:";
         os << " maxRtrAdvInt=" << rtrVars.maxRtrAdvInterval;
         os << " minRtrAdvInt=" << rtrVars.minRtrAdvInterval << endl;
-//        os << " advManagedFlag=" << rtrVars.advManagedFlag;
-//        os << " advOtherFlag=" << rtrVars.advOtherFlag;
-//        os << " advLinkMTU=" << rtrVars.advLinkMTU;
-//        os << " advReachableTime=" << rtrVars.advReachableTime;
-//        os << " advRetransTimer=" << rtrVars.advRetransTimer;
-//        os << " advCurHopLimit=" << rtrVars.advCurHopLimit;
-//        os << " advDefaultLifetime=" << rtrVars.advDefaultLifetime;
     }
 
     os << "   }" << endl;
@@ -568,9 +558,9 @@ void Ipv6InterfaceData::changeMulticastGroupMembership(Ipv6Address multicastAddr
         McastSourceFilterMode newFilterMode, const Ipv6AddressVector& newSourceList)
 {
     if (ownerp && !ownerp->isMulticast())
-        throw cRuntimeError("Ipv6InterfaceData::changeMulticastGroupMembership(): multicast interface expected, received %s.", ownerp->getInterfaceFullPath().c_str());
+        throw cRuntimeError("Ipv6InterfaceData::changeMulticastGroupMembership(): multicast interface expected, received %s", ownerp->getInterfaceFullPath().c_str());
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("Ipv6InterfaceData::changeMulticastGroupMembership(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv6InterfaceData::changeMulticastGroupMembership(): multicast address expected, received %s", multicastAddress.str().c_str());
 
     HostMulticastGroupData *entry = findHostGroupData(multicastAddress);
     if (!entry) {
@@ -584,7 +574,7 @@ void Ipv6InterfaceData::changeMulticastGroupMembership(Ipv6Address multicastAddr
     for (const auto& elem : oldSourceList) {
         auto count = counts->find(elem);
         if (count == counts->end())
-            throw cRuntimeError("Inconsistent reference counts in Ipv6InterfaceData.");
+            throw cRuntimeError("Inconsistent reference counts in Ipv6InterfaceData");
         else if (count->second == 1)
             counts->erase(count);
         else
@@ -691,7 +681,7 @@ bool Ipv6InterfaceData::hasMulticastListener(const Ipv6Address& multicastAddress
 void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress)
 {
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("Ipv6InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv6InterfaceData::addMulticastListener(): multicast address expected, received %s", multicastAddress.str().c_str());
 
     RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
     if (!groupData) {
@@ -711,7 +701,7 @@ void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress
 void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress, const Ipv6Address& sourceAddress)
 {
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("Ipv6InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv6InterfaceData::addMulticastListener(): multicast address expected, received %s", multicastAddress.str().c_str());
 
     RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
     if (!groupData) {
@@ -756,7 +746,7 @@ void Ipv6InterfaceData::removeMulticastListener(const Ipv6Address& multicastAddr
 void Ipv6InterfaceData::setMulticastListeners(Ipv6Address multicastAddress, McastSourceFilterMode filterMode, const Ipv6AddressVector& sourceList)
 {
     if (!multicastAddress.isMulticast())
-        throw cRuntimeError("Ipv6InterfaceData::setMulticastListeners(): multicast address expected, received %s.", multicastAddress.str().c_str());
+        throw cRuntimeError("Ipv6InterfaceData::setMulticastListeners(): multicast address expected, received %s", multicastAddress.str().c_str());
 
     RouterMulticastGroupData *groupData = findRouterGroupData(multicastAddress);
     if (!groupData) {

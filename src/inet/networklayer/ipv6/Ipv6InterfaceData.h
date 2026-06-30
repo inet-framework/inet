@@ -421,9 +421,6 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
          *  Default: 3 * MaxRtrAdvInterval
          */
         simtime_t advDefaultLifetime; // integer seconds in ND rfc but for MIPv6 really need better granularity
-//        bool fastRA;
-//        uint maxFastRAS;
-//        mutable uint fastRACounter;
 
         // These are either learned from routers or configured manually(router)
         AdvPrefixList advPrefixList;

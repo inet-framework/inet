@@ -137,9 +137,6 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                 options.appendOption(option);
                 break;
             }
-//            case IPv6ND_REDIRECTED_HEADER: {
-//                break;
-//            }
             case IPv6ND_MTU: {
                 auto option = new Ipv6NdMtu();
                 option->setReserved(stream.readUint16Be());
@@ -301,7 +298,7 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
         }
 
         default:
-            throw cRuntimeError("Cannot serialize ICMPv6 packet: type %d  not supported.", pkt->getType());
+            throw cRuntimeError("Cannot serialize ICMPv6 packet: type %d not supported", pkt->getType());
     }
 }
 

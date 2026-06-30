@@ -127,8 +127,6 @@ void Ipv6RoutingTable::parseXmlConfigFile()
     // configure interfaces from XML config file
     cXMLElement *config = par("routes");
     for (cXMLElement *child = config->getFirstChild(); child; child = child->getNextSibling()) {
-//        std::cout << "configuring interfaces from XML file." << endl;
-//        std::cout << "selected element is: " << child->getTagName() << endl;
         // we ensure that the selected element is local.
         if (opp_strcmp(child->getTagName(), "local") != 0)
             continue;
@@ -136,11 +134,9 @@ void Ipv6RoutingTable::parseXmlConfigFile()
         if (opp_strcmp(child->getAttribute("node"), host->getFullName()) != 0)
             continue;
         // Go one level deeper.
-//        child = child->getFirstChild();
         for (cXMLElement *ifTag = child->getFirstChild(); ifTag; ifTag = ifTag->getNextSibling()) {
             // The next tag should be "interface".
             if (opp_strcmp(ifTag->getTagName(), "interface") == 0) {
-//                std::cout << "Getting attribute: name" << endl;
                 const char *ifname = ifTag->getAttribute("name");
                 if (!ifname)
                     throw cRuntimeError("<interface> without name attribute at %s", child->getSourceLocation());
@@ -176,9 +172,7 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
     printSignalBanner(signalID, obj, details);
 
     if (signalID == interfaceCreatedSignal) {
-        // TODO something like this:
-//        NetworkInterface *ie = check_and_cast<NetworkInterface*>(details);
-//        configureInterfaceForIPv6(ie);
+        // TODO something like this: configureInterfaceForIPv6(ie)
     }
     else if (signalID == interfaceDeletedSignal) {
         // remove all routes that point to that interface
@@ -209,8 +203,6 @@ void Ipv6RoutingTable::routeChanged(Ipv6Route *entry, int fieldCode)
         entry = internalRemoveRoute(entry);
         ASSERT(entry != nullptr); // failure means inconsistency: route was not found in this routing table
         internalAddRoute(entry);
-
-//        invalidateCache();
     }
     emit(routeChangedSignal, entry); // TODO include fieldCode in the notification
 }
@@ -275,10 +267,10 @@ void Ipv6RoutingTable::assignRequiredNodeAddresses(NetworkInterface *ie)
     /*o  Any additional Unicast and Anycast Addresses that have been configured
        for the node's interfaces (manually or automatically).*/
 
-    // FIXME FIXME Andras: commented out the following lines, because these addresses
-    // are implicitly checked for in isLocalAddress()  (we don't want redundancy,
+    // FIXME: commented out the following lines, because these addresses
+    // are implicitly checked for in isLocalAddress() (we don't want redundancy,
     // and manually adding solicited-node mcast address for each and every address
-    // is very error-prone!)
+    // is very error-prone)
     //
     // o  The All-Nodes Multicast Addresses defined in section 2.7.1.
 
@@ -620,7 +612,7 @@ void Ipv6RoutingTable::addOrUpdateOnLinkPrefix(const Ipv6Address& destPrefix, in
 void Ipv6RoutingTable::addOrUpdateOwnAdvPrefix(const Ipv6Address& destPrefix, int prefixLength,
         int interfaceId, simtime_t expiryTime)
 {
-    // FIXME this is very similar to the one above -- refactor!!
+    // FIXME this is very similar to addOrUpdateOnLinkPrefix() above -- consider refactoring
 
     // see if prefix exists in table
     Ipv6Route *route = nullptr;
@@ -851,16 +843,16 @@ void Ipv6RoutingTable::internalAddMulticastRoute(Ipv6MulticastRoute *entry)
 
     // check that the interfaces exist and are multicast-capable
     if (entry->getInInterface() && !entry->getInInterface()->getInterface()->isMulticast())
-        throw cRuntimeError("addMulticastRoute(): input interface must be multicast capable");
+        throw cRuntimeError("addMulticastRoute(): input interface %s must be multicast capable", entry->getInInterface()->getInterface()->getInterfaceName());
 
     for (unsigned int i = 0; i < entry->getNumOutInterfaces(); i++) {
         Ipv6MulticastRoute::OutInterface *outInterface = entry->getOutInterface(i);
         if (!outInterface)
             throw cRuntimeError("addMulticastRoute(): output interface cannot be nullptr");
         else if (!outInterface->getInterface()->isMulticast())
-            throw cRuntimeError("addMulticastRoute(): output interface must be multicast capable");
+            throw cRuntimeError("addMulticastRoute(): output interface %s must be multicast capable", outInterface->getInterface()->getInterfaceName());
         else if (entry->getInInterface() && outInterface->getInterface() == entry->getInInterface()->getInterface())
-            throw cRuntimeError("addMulticastRoute(): output interface cannot be the same as the input interface");
+            throw cRuntimeError("addMulticastRoute(): output interface %s cannot be the same as the input interface", outInterface->getInterface()->getInterfaceName());
     }
 
     // add to table, keeping entries sorted by prefix length desc so that we can
@@ -1034,7 +1026,7 @@ void Ipv6RoutingTable::deleteInterfaceRoutes(const NetworkInterface *entry)
     //   2. remove entry from children list
 
     if (changed) {
-//        invalidateCache();
+        //TODO
     }
 }
 

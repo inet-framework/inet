@@ -442,7 +442,7 @@ void Icmpv6::insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& 
             break;
         }
         default:
-            throw cRuntimeError("Unknown checksum mode");
+            throw cRuntimeError("Unknown checksum mode %d", (int)checksumMode);
     }
 }
 
@@ -464,7 +464,7 @@ bool Icmpv6::verifyChecksum(const Packet *packet)
             return checksum == 0 && icmpHeader->isCorrect();
         }
         default:
-            throw cRuntimeError("Unknown checksum mode");
+            throw cRuntimeError("Unknown checksum mode %d", (int)icmpHeader->getChecksumMode());
     }
 }
 

@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& os, const Mipv6InterfaceData::HomeNetwork
 
 void Mipv6InterfaceData::updateHomeNetworkInfo(const Ipv6Address& hoa, const Ipv6Address& ha, const Ipv6Address& prefix, const int prefixLength)
 {
-    EV_INFO << "\n++++++ Updating the Home Network Information \n";
+    EV_INFO << "Updating home network information\n";
     homeInfo.HoA = hoa;
     homeInfo.homeAgentAddr = ha;
     homeInfo.prefix = prefix;

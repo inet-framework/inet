@@ -371,7 +371,7 @@ void Mldv2::handleMessageWhenUp(cMessage *msg)
         if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mld)
             processMldMessage(packet);
         else
-            throw cRuntimeError("Mldv2: Unknown message type received.");
+            throw cRuntimeError("Received packet '%s' (%s) with unexpected protocol", packet->getName(), packet->getClassName());
     }
     else if (auto indication = dynamic_cast<Indication *>(msg)) {
         // The IPv6 layer reports an ICMPv6 error for an MLD message we sent; discard it.
