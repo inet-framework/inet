@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<BGPConfig>
+
+    <AS id="65001">
+        <Router interAddr="2001:db8:1::1">
+            <Network address="2001:db8:1::"/>
+        </Router>
+    </AS>
+
+    <AS id="65002">
+        <Router interAddr="2001:db8:12::2"/>
+    </AS>
+
+    <AS id="65003">
+        <Router interAddr="2001:db8:3::1">
+            <Network address="2001:db8:3::"/>
+        </Router>
+    </AS>
+
+    <Session id="1">
+        <Router exterAddr="2001:db8:12::1"/>
+        <Router exterAddr="2001:db8:12::2"/>
+    </Session>
+
+    <Session id="2">
+        <Router exterAddr="2001:db8:23::2"/>
+        <Router exterAddr="2001:db8:23::3"/>
+    </Session>
+
+</BGPConfig>

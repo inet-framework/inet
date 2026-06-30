@@ -1,0 +1,15 @@
+<config>
+  <interface hosts='hostA' names='eth0' address='10.0.1.100' netmask='255.255.255.0'/>
+  <interface hosts='A' names='eth0' address='10.0.1.1' netmask='255.255.255.0'/>
+
+  <interface hosts='A' names='eth1' address='10.0.12.1' netmask='255.255.255.0'/>
+  <interface hosts='B' names='eth0' address='10.0.12.2' netmask='255.255.255.0'/>
+
+  <interface hosts='B' names='eth1' address='10.0.23.2' netmask='255.255.255.0'/>
+  <interface hosts='C' names='eth0' address='10.0.23.3' netmask='255.255.255.0'/>
+
+  <interface hosts='C' names='eth1' address='10.0.3.1' netmask='255.255.255.0'/>
+  <interface hosts='hostC' names='eth0' address='10.0.3.100' netmask='255.255.255.0'/>
+
+  <route hosts='hostA hostC' destination='*' netmask='*' interface='eth0'/>
+</config>
