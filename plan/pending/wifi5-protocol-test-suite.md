@@ -1,5 +1,35 @@
 # Plan: Conformance-oriented WiFi Protocol Test Suite (up to & including WiFi 5)
 
+## Implementation status (2026-06-30)
+
+**Implemented and committed** in `tests/protocol/wifi/` (38 tests; `opp_test` aggregate PASS:
+27 CONFORMS / 11 NOT-MODELED / 0 DEVIATES). See `tests/protocol/wifi/README.md` for the full
+conformance matrix + findings.
+
+Design as built (refinements agreed during implementation):
+- **Packaging**: each test is an `opp_test` `.test` file with its program in `%file: <Name>.cc`
+  (named `Define_ProtocolTest`); `opp_test gen` + a single `--deep` build → one `wifitests`
+  binary, selected by `*.tester.testName`; `run-tests.sh` drives it. (Chosen over loose `.cc`
+  per user: "single binary + thin `.test` wrappers", CC inside the `.test`.)
+- **One shared network** `ned/WifiInfraNetwork` (AP + 2 STA); per-generation PHY via
+  `ini/_<gen>.ini` includes; `NEDPATH` from `run-tests.sh`; network referenced by FQN.
+- **NOT-MODELED tests are expected-FAIL** (`%contains` expects the `FAIL` verdict, like the
+  repo's `ViolationDetected.test`), so the suite is a green CI gate yet still surfaces every gap
+  in the README matrix. (The `.cc` assertion stays faithful to the spec.)
+- PHY mode asserted via C++ lambdas over the `Ieee80211ModeReq` tag (`WifiTestSupport.h`);
+  80/160 MHz and high-MCS/multi-SS modes forced via `rateSelection.dataFrameBitrate/Bandwidth/
+  NumSpatialStreams`.
+
+Headline findings: **A-MPDU is not implemented** in INET (policy returns nullptr) though it is
+mandatory for 11ac; spatial streams cap at 4 (spec allows 8); MU-MIMO/Group-ID/beamforming/
+OpMode-Notification/multi-TID-BA and amendments 11e-ADDTS/11h-DFS/11i-RSN are not modeled.
+
+**Not yet authored** (remaining plan rows — mostly additional optional/edge features, each
+would add another CONFORMS or expected-FAIL gap-marker): per-generation rate sweeps, 11b short
+preamble/PBCC, PCF, fragmentation/reassembly, reassociation, disassoc/deauth, duplicate
+detection, ERP protection (mixed b/g), short-slot/short-GI, RD/PSMP/greenfield/2040-coex,
+delayed BA/U-APSD, 80+80 MHz, country IE (11d), TPC (11h), radio measurement (11k), PMF (11w).
+
 ## Context
 
 The INET protocol test framework (`/home/levy/workspace/inet-protocoltest/tests/protocol/lib/`)
