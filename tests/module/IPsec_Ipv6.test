@@ -1,0 +1,217 @@
+%description:
+IPsec over IPv6 -- end-to-end drop/deliver assertions (stronger than the ipv6.ini
+fingerprint example, which only pins byte output). Four UDP streams run between two
+IPv6 hosts, each matched by a different Security Policy, proving that all four IPsec
+egress/ingress outcomes behave correctly over IPv6:
+
+  app[0]  1000->2000  ESP-protected     -> delivered (egress ESP PROTECT, ingress ACCEPT ESP)
+  app[1]  1001->2001  BYPASS rule        -> delivered (no protection)
+  app[2]  1002->2002  no matching rule   -> dropped at egress (default DROP)
+  app[3]  1003->2003  AH-protected       -> delivered (egress AH PROTECT, ingress ACCEPT AH)
+
+The AH stream is the point of this test: the AH ingress path had a latent
+double-remove bug (it removed the IPsecAuthenticationHeader twice, so the second
+removeAtFront<> hit the following EncryptedChunk and crashed). No prior example used
+AH, so neither a fingerprint nor the existing examples could have caught it. Here we
+require an AH datagram to be de-protected and delivered end to end.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network IPsecIpv6Test
+{
+    submodules:
+        client1: StandardHost6 { @display("p=80,100;i=device/pc3"); }
+        server: StandardHost6 { @display("p=280,100;i=device/pc2"); }
+        configurator: Ipv6NetworkConfigurator { @display("p=80,180"); }
+    connections:
+        client1.pppg++ <--> { datarate = 10Mbps; delay = 0.1us; } <--> server.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: ipsecConfig.xml
+<ipsecConfig>
+    <Devices>
+        <Device id="client1">
+            <!-- app[0] 1000->2000 UDP: ESP -->
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>client1</LocalAddress>
+                    <RemoteAddress>server</RemoteAddress>
+                    <Protocol>UDP</Protocol>
+                    <LocalPort>1000</LocalPort>
+                    <RemotePort>2000</RemotePort>
+                </Selector>
+                <Direction>OUT</Direction>
+                <Action>PROTECT</Action>
+                <Protection>ESP</Protection>
+                <EspMode>CONFIDENTIALITY</EspMode>
+                <EncryptionAlg>AES_CBC_128</EncryptionAlg>
+                <SecurityAssociation><SPI>101</SPI></SecurityAssociation>
+            </SecurityPolicy>
+
+            <!-- app[1] 1001->2001 UDP: BYPASS -->
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>client1</LocalAddress>
+                    <RemoteAddress>server</RemoteAddress>
+                    <Protocol>UDP</Protocol>
+                    <LocalPort>1001</LocalPort>
+                    <RemotePort>2001</RemotePort>
+                </Selector>
+                <Direction>OUT</Direction>
+                <Action>BYPASS</Action>
+            </SecurityPolicy>
+
+            <!-- app[3] 1003->2003 UDP: AH -->
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>client1</LocalAddress>
+                    <RemoteAddress>server</RemoteAddress>
+                    <Protocol>UDP</Protocol>
+                    <LocalPort>1003</LocalPort>
+                    <RemotePort>2003</RemotePort>
+                </Selector>
+                <Direction>OUT</Direction>
+                <Action>PROTECT</Action>
+                <Protection>AH</Protection>
+                <AuthenticationAlg>HMAC_SHA1</AuthenticationAlg>
+                <SecurityAssociation><SPI>103</SPI></SecurityAssociation>
+            </SecurityPolicy>
+
+            <!-- app[2] 1002->2002 has NO policy => default DROP at egress -->
+        </Device>
+
+        <Device id="server">
+            <!-- app[0] 2000<-1000 UDP: ESP, same SPI as client1's OUT rule -->
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>server</LocalAddress>
+                    <RemoteAddress>client1</RemoteAddress>
+                    <Protocol>UDP</Protocol>
+                    <LocalPort>2000</LocalPort>
+                    <RemotePort>1000</RemotePort>
+                </Selector>
+                <Direction>IN</Direction>
+                <Action>PROTECT</Action>
+                <Protection>ESP</Protection>
+                <EspMode>CONFIDENTIALITY</EspMode>
+                <EncryptionAlg>AES_CBC_128</EncryptionAlg>
+                <SecurityAssociation><SPI>101</SPI></SecurityAssociation>
+            </SecurityPolicy>
+
+            <!-- app[1] 2001<-1001 UDP: BYPASS -->
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>server</LocalAddress>
+                    <RemoteAddress>client1</RemoteAddress>
+                    <Protocol>UDP</Protocol>
+                    <LocalPort>2001</LocalPort>
+                    <RemotePort>1001</RemotePort>
+                </Selector>
+                <Direction>IN</Direction>
+                <Action>BYPASS</Action>
+            </SecurityPolicy>
+
+            <!-- app[3] 2003<-1003 UDP: AH, same SPI as client1's OUT rule -->
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>server</LocalAddress>
+                    <RemoteAddress>client1</RemoteAddress>
+                    <Protocol>UDP</Protocol>
+                    <LocalPort>2003</LocalPort>
+                    <RemotePort>1003</RemotePort>
+                </Selector>
+                <Direction>IN</Direction>
+                <Action>PROTECT</Action>
+                <Protection>AH</Protection>
+                <AuthenticationAlg>HMAC_SHA1</AuthenticationAlg>
+                <SecurityAssociation><SPI>103</SPI></SecurityAssociation>
+            </SecurityPolicy>
+        </Device>
+    </Devices>
+</ipsecConfig>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = IPsecIpv6Test
+sim-time-limit = 10s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# static global IPv6 addresses so "client1"/"server" in the SPD selectors resolve to
+# routable addresses (wire each node's Ipv6NodeConfigurator to the global configurator)
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+
+**.client*.**.hasIpsec = true
+**.server.**.hasIpsec = true
+**.client1.**spdConfig = xmldoc("ipsecConfig.xml", "ipsecConfig/Devices/Device[@id='client1']/")
+**.server.**spdConfig = xmldoc("ipsecConfig.xml", "ipsecConfig/Devices/Device[@id='server']/")
+
+# zero delays -> deterministic ACCEPT path (the QUEUE/reinject path is covered by the
+# ipv6.ini example and NetfilterHooks_Ipv6 test)
+**.ipsec.ahProtectOutDelay = 0s
+**.ipsec.ahProtectInDelay  = 0s
+**.ipsec.espProtectOutDelay = 0s
+**.ipsec.espProtectInDelay  = 0s
+
+**.numApps = 4
+**.client1.app[*].typename = "UdpBasicApp"
+**.client1.app[0].localPort = 1000
+**.client1.app[1].localPort = 1001
+**.client1.app[2].localPort = 1002
+**.client1.app[3].localPort = 1003
+**.client1.app[*].destAddresses = "server"
+**.client1.app[0].destPort = 2000
+**.client1.app[1].destPort = 2001
+**.client1.app[2].destPort = 2002
+**.client1.app[3].destPort = 2003
+**.client1.app[*].startTime = 1s
+**.client1.app[*].stopTime = 4s
+**.client1.app[*].sendInterval = 1s
+**.client1.app[*].messageLength = 100B
+
+**.server.app[*].typename = "UdpSink"
+**.server.app[0].localPort = 2000
+**.server.app[1].localPort = 2001
+**.server.app[2].localPort = 2002
+**.server.app[3].localPort = 2003
+
+%#--------------------------------------------------------------------------------------------------------------
+%# ===== egress decisions on client1 =====
+%contains: stdout
+IPsec OUT ESP PROTECT
+%contains: stdout
+IPsec OUT AH PROTECT
+%contains: stdout
+IPsec OUT BYPASS rule
+%# app[2] has no policy -> default DROP at egress
+%contains: stdout
+IPsec OUT BYPASS, no matching rule
+%# ===== ingress decisions on server =====
+%contains: stdout
+IPsec IN ACCEPT ESP
+%# the AH de-protection that the double-remove fix unlocks:
+%contains: stdout
+IPsec IN ACCEPT AH
+%contains: stdout
+IPsec BYPASS rule
+%# ===== end-to-end delivery: ESP, BYPASS and AH streams arrive; the no-rule stream does not =====
+%contains: stdout
+server.app[0]: Received packet
+%contains: stdout
+server.app[1]: Received packet
+%contains: stdout
+server.app[3]: Received packet
+%not-contains: stdout
+server.app[2]: Received packet
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
