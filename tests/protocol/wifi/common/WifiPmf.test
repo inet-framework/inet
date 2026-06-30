@@ -1,0 +1,37 @@
+%description:
+802.11w Protected Management Frames: a management frame (e.g. Deauthentication type 12)
+carries the protected bit set in the frame control field. [NOT-MODELED -- INET has no
+PMF/802.11w implementation; no management frame encryption module or protected bit exists
+in Ieee80211Frame.msg or the mgmt layer]
+
+%file: WifiPmf.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Spec assertion: a Deauth or Disassoc frame is cryptographically protected (PMF).
+// INET has no management frame protection; the assertion will never match.
+// We assert the protected bit (bit 14 of Frame Control) is set; INET's frame model
+// has no such field -- filter on a non-existent chunk that signals PMF protection.
+Define_ProtocolTest(wifi_pmf)
+{
+    return ProtocolTest("wifi_pmf")
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .packet("Ieee80211PmfProtectedFrame.length >= 0")
+                  .describe("a PMF-protected management frame from AP").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_pmf"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_pmf: FAIL

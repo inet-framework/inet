@@ -1,0 +1,42 @@
+%description:
+802.11b DCF RTS/CTS exchange: STA sends RTS (27), AP responds CTS (28), STA sends
+data (32), AP sends ACK (29). [Required]
+
+%file: B_RtsCts.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// 27=RTS, 28=CTS, 32=Data (non-QoS DCF), 29=ACK.
+Define_ProtocolTest(wifi_11b_rts_cts)
+{
+    return ProtocolTest("wifi_11b_rts_cts")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 27")
+                  .describe("an RTS frame from sta1").within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("ieee80211mac.type == 28")
+                  .describe("the CTS response").within(0.02))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32")
+                  .describe("the data frame").within(0.02))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("ieee80211mac.type == 29")
+                  .describe("the ACK").within(0.02));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11b_rts_cts"
+**.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 100B
+include ../../ini/_b.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11b_rts_cts: PASS

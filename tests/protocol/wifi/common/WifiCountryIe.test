@@ -1,0 +1,35 @@
+%description:
+802.11d Country information element in Beacon: the AP includes a Country IE identifying
+the regulatory domain, max TX power per channel, etc. [NOT-MODELED -- INET's
+Ieee80211BeaconFrame has no Country IE field; the 802.11d amendment (country element)
+is not implemented in the management layer]
+
+%file: WifiCountryIe.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Spec assertion: Beacon frames from an AP in a regulated domain include the Country IE
+// (IEEE 802.11-2020 Section 9.4.2.9). INET's beacon frame model has no such element.
+Define_ProtocolTest(wifi_country_ie)
+{
+    return ProtocolTest("wifi_country_ie")
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 8 && Ieee80211CountryElement.length >= 0")
+                  .describe("a Beacon containing a Country IE").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_country_ie"
+include ../../ini/_a.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_country_ie: FAIL

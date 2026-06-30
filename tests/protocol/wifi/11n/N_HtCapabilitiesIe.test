@@ -1,0 +1,37 @@
+%description:
+802.11n HT Capabilities information element in Association Request (type 0): an
+Ieee80211HtCapabilities chunk is present in the frame. [NOT-MODELED -- INET's
+Ieee80211MgmtFrame.msg defines AssociationRequestFrame with only SSID and
+supportedRates fields; no HT Capabilities or HT Operation IE chunk is generated;
+the classes Ieee80211HtCapabilities and Ieee80211HtOperation do not exist in INET]
+
+%file: N_HtCapabilitiesIe.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Spec-required assertion: an Association Request from an HT STA must include the
+// HT Capabilities element (IEEE 802.11-2020 Section 9.4.2.56). INET's mgmt layer
+// never inserts this chunk; the filter will never match.
+Define_ProtocolTest(wifi_11n_ht_capabilities_ie)
+{
+    return ProtocolTest("wifi_11n_ht_capabilities_ie")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 0 && Ieee80211HtCapabilities.length >= 0")
+                  .describe("an Association Request containing HT Capabilities IE").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_ht_capabilities_ie"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_ht_capabilities_ie: FAIL

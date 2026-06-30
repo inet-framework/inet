@@ -1,0 +1,57 @@
+%description:
+802.11n short guard interval (400 ns): a data frame is transmitted in an HT mode with
+HT_GUARD_INTERVAL_SHORT. [CONFORMS]
+
+Force bitrate to 144.4 Mbps (2SS 20MHz MCS7 short-GI) with bandwidth and NSS pinned.
+The mode-set entry for htMcs15BW20MHz with SHORT GI is non-mandatory but present in the
+n(mixed-2.4Ghz) mode set.
+
+%file: N_ShortGi.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::physicallayer;
+
+// Assert the HT data mode uses the short (400 ns) guard interval.
+Define_ProtocolTest(wifi_11n_short_gi)
+{
+    return ProtocolTest("wifi_11n_short_gi")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      auto m = dynamic_cast<const Ieee80211HtMode *>(txMode(c.event));
+                      return m != nullptr &&
+                             m->getDataMode()->getGuardIntervalType() ==
+                                 Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT;
+                  })
+                  .describe("QoS data frame in HT mode with short GI (400 ns)").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_short_gi"
+# 2SS / BW20MHz / MCS7 short-GI = 144.4 Mbps (unique short-GI bitrate for these params).
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameBitrate = 144.4Mbps
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameBandwidth = 20MHz
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameNumSpatialStreams = 2
+*.ap.wlan[*].mac.*.rateSelection.dataFrameBitrate = 144.4Mbps
+*.ap.wlan[*].mac.*.rateSelection.dataFrameBandwidth = 20MHz
+*.ap.wlan[*].mac.*.rateSelection.dataFrameNumSpatialStreams = 2
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_short_gi: PASS

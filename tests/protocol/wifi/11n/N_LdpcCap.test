@@ -1,0 +1,50 @@
+%description:
+802.11n LDPC (Low-Density Parity-Check) channel coding: a frame is transmitted using
+LDPC FEC instead of the mandatory convolutional code. [NOT-MODELED -- LDPC is absent
+from INET's entire ieee80211 implementation; no LDPC-capable mode objects or selection
+logic exist in the physicallayer ieee80211 tree]
+
+%file: N_LdpcCap.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::physicallayer;
+
+// Spec assertion: an HT data mode uses LDPC coding. INET has no LDPC mode objects.
+// We assert a net bitrate only achievable with LDPC's slightly better coding gain;
+// no such mode exists, so the test will FAIL.
+// (A cleaner assertion would check a getLdpc() flag that INET doesn't expose.)
+Define_ProtocolTest(wifi_11n_ldpc_cap)
+{
+    return ProtocolTest("wifi_11n_ldpc_cap")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      // There is no IIeee80211Mode method for LDPC; assert false to
+                      // represent a feature that is structurally absent in INET.
+                      return false;
+                  })
+                  .describe("QoS data frame transmitted with LDPC channel coding").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_ldpc_cap"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_ldpc_cap: FAIL

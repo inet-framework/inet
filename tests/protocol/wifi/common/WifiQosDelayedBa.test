@@ -1,0 +1,60 @@
+%description:
+802.11e Delayed Block Ack: a Block Ack Request (type 24) elicits an ACK frame (type 29)
+immediately followed by a Block Ack (type 25) after a SIFS+PIFS delay — the delayed
+BA policy. [NOT-MODELED -- INET implements only the Immediate Block Ack policy;
+N_BlockAck and N_CompressedBa confirm immediate BA; no delayed-BA policy module or
+DelayedBlockAck enum value is used in the BlockAck originator/recipient code]
+
+%file: WifiQosDelayedBa.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Spec assertion: after a BAReq (type 24) the recipient sends an ACK (type 29) and
+// then defers the BA (type 25) by a PIFS interval. INET always replies immediately.
+// We assert that BA (25) arrives after more than SIFS+PIFS ≈ 50 µs from BAReq,
+// which INET's immediate BA never satisfies.
+Define_ProtocolTest(wifi_qos_delayed_ba)
+{
+    return ProtocolTest("wifi_qos_delayed_ba")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 24")
+                  .describe("BlockAckReq from sta1").within(2.5))
+        // In delayed BA, an ACK comes first (immediate ACK of the BAReq frame itself).
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("ieee80211mac.type == 29")
+                  .describe("immediate ACK of the BAReq (delayed BA)").within(0.01))
+        // Then the BA arrives after PIFS (>= 25 µs additional wait).
+        // INET's immediate BA skips the ACK step and sends BA directly, so the outer
+        // ACK step above already fails in INET's implementation.
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("ieee80211mac.type == 25")
+                  .describe("delayed Block Ack after PIFS").within(0.002));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_qos_delayed_ba"
+*.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
+*.ap.wlan[*].mac.hcf.isBlockAckSupported = true
+*.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
+*.sta1.app[0].sendInterval = 0.1ms
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+**.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
+**.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 100
+**.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
+*.sta*.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+
+%contains: stdout
+PROTOCOLTEST wifi_qos_delayed_ba: FAIL

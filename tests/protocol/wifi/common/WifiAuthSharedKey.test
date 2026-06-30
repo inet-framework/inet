@@ -1,0 +1,37 @@
+%description:
+802.11 WEP Shared-Key authentication: the 4-frame challenge-response handshake (Auth
+frame with sequence 3 = Challenge Text, then sequence 4 = final Auth). [NOT-MODELED --
+INET implements only Open System authentication; the WifiAuthOpen test confirms this.
+The Ieee80211AuthenticationFrame has no challenge text field and no WEP challenge
+processing module exists in the MAC layer]
+
+%file: WifiAuthSharedKey.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Spec assertion: shared-key auth sends Auth sequence 3 (challenge text) as the third
+// frame. Frame type 11 = ST_AUTH. seqNumber field on Ieee80211AuthenticationFrame would
+// be 3 for the challenge. INET never sends this.
+Define_ProtocolTest(wifi_auth_sharedkey)
+{
+    return ProtocolTest("wifi_auth_sharedkey")
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 11 && ieee80211mac.sequenceNumber == 3")
+                  .describe("Auth frame sequence 3 (WEP challenge text) from AP").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_auth_sharedkey"
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_auth_sharedkey: FAIL
