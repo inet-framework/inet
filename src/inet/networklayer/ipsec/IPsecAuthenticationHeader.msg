@@ -21,7 +21,7 @@ import inet.common.packet.chunk.Chunk;
 namespace inet::ipsec;
 
 cplusplus {{
-const int IP_AH_HEADER_BYTES = 24;  // IPsec AH header length (variable-length ICV field not included)
+const int IP_AH_HEADER_BYTES = 12;  // fixed part of the IPsec AH header (Next Header, Payload Len, Reserved, SPI, Sequence Number); the variable-length ICV is modeled as a separate trailing chunk
 }}
 
 //
@@ -29,6 +29,7 @@ const int IP_AH_HEADER_BYTES = 24;  // IPsec AH header length (variable-length I
 //
 class IPsecAuthenticationHeader extends FieldsChunk
 {
+    chunkLength = B(IP_AH_HEADER_BYTES); // mirror IPsecEspHeader; without this a FieldsChunk has length 0 and insertAtFront() rejects it as empty
     uint8_t nextHeader; // IP Protocol number defined by IANA (4 = IPv4; 41 = IPv6; 6 = TCP)
     uint8_t payloadLength;
     uint16_t reserved;

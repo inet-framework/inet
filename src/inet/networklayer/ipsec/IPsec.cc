@@ -799,15 +799,16 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
                 return INetfilter::IHook::DROP;
             }
 
-            // found SA
-            auto ahHeader = packet->removeAtFront<IPsecAuthenticationHeader>();
+            // found SA (the AH header was already removed above to read its SPI,
+            // mirroring the ESP branch; removing it a second time here would try to
+            // convert the following EncryptedChunk to an AH header and crash)
 
             // decrypting:
             auto encryptedData = packet->removeAtFront<EncryptedChunk>();
             packet->removeData(Chunk::PF_ALLOW_EMPTY);
             auto data = encryptedData->getChunk();
             packet->insertData(data);
-            setNetworkHeaderProtocol(netHeader, (IpProtocolId)ahHeader->getNextHeader());
+            setNetworkHeaderProtocol(netHeader, (IpProtocolId)ah->getNextHeader());
             updateNetworkHeaderLength(netHeader, packet);
             packet->insertAtFront(netHeader);
 
@@ -815,7 +816,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
 
             delay = ahProtectInDelay->doubleValue();
 
-            if (ahHeader->getNextHeader() != IP_PROT_ESP) {
+            if (ah->getNextHeader() != IP_PROT_ESP) {
                 emit(inProtectedAcceptSignal, 1L);
                 inAccept++;
 
