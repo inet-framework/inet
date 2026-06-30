@@ -1,0 +1,33 @@
+%description:
+802.11 DCF data + ACK exchange. [Required]
+
+%file: Legacy_DataAck.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// 32 = data (ST_DATA), 40 = QoS data, 29 = ACK (ST_ACK).
+Define_ProtocolTest(wifi_legacy_data_ack)
+{
+    return ProtocolTest("wifi_legacy_data_ack")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .describe("a data frame").within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("ieee80211mac.type == 29").describe("the ACK").within(0.02));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_legacy_data_ack"
+include ../../ini/_legacy.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_legacy_data_ack: PASS
