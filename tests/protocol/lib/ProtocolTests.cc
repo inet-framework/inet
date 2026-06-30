@@ -526,5 +526,33 @@ Define_ProtocolTest(mipv6_registration_and_ro_bad)
                   .packet("BindingAcknowledgement.status == 130").within(6)); // INSUFFICIENT_RESOURCES -- never happens
 }
 
+// The same MIPv6 case observed one level down -- at the MN's network interface (wlan[0]),
+// i.e. the frames actually transmitted/received on the wire (signal packetSentToLower /
+// packetReceivedFromLower). The Mobility Header is encapsulated in IPv6/802.11 here, but
+// PacketFilter's PacketDissector still descends to its chunk fields, so the same field/cookie
+// assertions hold -- only the observation point (on/signal) differs from the module-level test.
+Define_ProtocolTest(mipv6_registration_and_ro_interface)
+{
+    auto tx = [](const char *expr, double w) {
+        return on("MN[0].wlan[0]").signal("packetSentToLower").packet(expr).within(w);
+    };
+    auto rx = [](const char *expr, double w) {
+        return on("MN[0].wlan[0]").signal("packetReceivedFromLower").packet(expr).within(w);
+    };
+
+    return ProtocolTest("mipv6_registration_and_ro_interface")
+        .once(tx("BindingUpdate.homeRegistrationFlag == true && BindingUpdate.ackFlag == true", 72))
+        .once(rx("BindingAcknowledgement.status == 0", 6))
+        .unordered({
+            tx("HomeTestInit.homeInitCookie >= 0", 7).capture("hoCookie", "HomeTestInit.homeInitCookie"),
+            tx("CareOfTestInit.careOfInitCookie >= 0", 7).capture("coCookie", "CareOfTestInit.careOfInitCookie")
+        })
+        .unordered({
+            rx("HomeTest.homeInitCookie == {hoCookie}", 4),
+            rx("CareOfTest.careOfInitCookie == {coCookie}", 4)
+        })
+        .once(tx("BindingUpdate.homeRegistrationFlag == false", 5));
+}
+
 } // namespace protocoltest
 } // namespace inet
