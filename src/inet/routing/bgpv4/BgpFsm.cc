@@ -84,6 +84,9 @@ void Connect::HoldTimer_Expires()
     // - performs peer oscillation damping if the DampPeerOscillations attribute is set to True, and
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
     session.scheduleReconnect();
 }
@@ -163,6 +166,9 @@ void Active::HoldTimer_Expires()
     ++session._connectRetryCounter;
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
     session.scheduleReconnect();
 }
@@ -193,6 +199,9 @@ void Active::TcpConnectionFails()
 {
     BgpSession& session = TopState::box().getModule();
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
 }
 
@@ -237,6 +246,9 @@ void OpenSent::ConnectRetryTimer_Expires()
     // - (optionally) performs peer oscillation damping if the DampPeerOscillations attribute is set to TRUE, and
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
 }
 
@@ -255,6 +267,9 @@ void OpenSent::HoldTimer_Expires()
     // - (optionally) performs peer oscillation damping if the DampPeerOscillations attribute is set to TRUE, and
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
 }
 
@@ -330,6 +345,9 @@ void OpenConfirm::ConnectRetryTimer_Expires()
     ++session._connectRetryCounter;
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
 }
 
@@ -347,6 +365,9 @@ void OpenConfirm::HoldTimer_Expires()
     ++session._connectRetryCounter;
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
 }
 
@@ -367,6 +388,9 @@ void OpenConfirm::TcpConnectionFails()
     EV_TRACE << "OpenConfirm::TcpConnectionFails" << std::endl;
     BgpSession& session = TopState::box().getModule();
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
 }
 
@@ -457,6 +481,9 @@ void Established::ConnectRetryTimer_Expires()
     ++session._connectRetryCounter;
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
     session.scheduleReconnect();
 }
@@ -475,6 +502,9 @@ void Established::HoldTimer_Expires()
     ++session._connectRetryCounter;
     // - changes its state to Idle.
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
     session.scheduleReconnect();
 }
@@ -500,6 +530,9 @@ void Established::TcpConnectionFails()
     session._info.socket->abort();
     ++session._connectRetryCounter;
     session._info.sessionEstablished = false;
+    session.stopHoldTimer();
+    session.stopKeepAliveTimer();
+    session.stopConnectRetryTimer();
     setState<Idle>();
     session.scheduleReconnect();
 }
