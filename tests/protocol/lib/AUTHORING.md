@@ -19,10 +19,10 @@ A test is a registered builder function returning a `ProtocolTest`:
 Define_ProtocolTest(udp_basic_pass)
 {
     return ProtocolTest("udp_basic_pass")
-        .once(on("host1").sentToLower().layer(Layer::Transport)
-                  .match("udp.destPort == 5000").within(0.2))
-        .once(on("host2").receivedFromLower().layer(Layer::Transport)
-                  .match("udp.destPort == 5000").within(0.1));
+        .once(on("host1.udp").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000").within(0.2))
+        .once(on("host2.udp").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000").within(0.1));
 }
 ```
 

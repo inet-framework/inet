@@ -44,10 +44,10 @@ typedef std::function<bool(const MatchContext&)> MatchPredicate;
 typedef std::function<cValue(const PacketEvent&)> CaptureFn;
 
 //
-// A fluent selector + timing clause, as produced by on("node").sentToLower()...
-// In Phase 1 it backs `expect` steps. The selector part (node/iface/kind/direction/
-// layer + a PacketFilter content expression) decides which events match; the timing
-// part (within/notBefore, relative to the step's anchor) is interpreted by the engine.
+// A fluent selector + timing clause, as produced by on("path").signal(...).packet(...).
+// The selector part (module path / source / signal / protocol / dispatch / iface + a
+// PacketFilter content expression, or a scalar value via is()) decides which events match;
+// the timing part (within/notBefore, relative to the step's anchor) is interpreted by the engine.
 //
 class INET_API EventPattern
 {
@@ -60,11 +60,8 @@ class INET_API EventPattern
     std::string selDispatch;                              // dispatch(name): packet's DispatchProtocolReq ("" = any)
     bool selHasValue = false; long selValue = 0;          // is(v): scalar signal value (e.g. an FSM state index)
     std::string attributeToPath;                          // attributeTo(path): description-only point of view
-    bool protocolSubject = false;                         // describe the protocol module as the subject (set by sends()/receives())
     std::string selIface;                                 // "" = any interface
-    bool selHasKind = false; EventKind selKind = EventKind::Other;
     bool selHasDirection = false; int selDirection = -1;  // 0=IN, 1=OUT
-    bool selHasLayer = false; Layer selLayer = Layer::Unknown;
     std::string selExpr;                                  // "" = no content expression
     MatchPredicate predicate;                             // optional typed lambda predicate
     std::string description;                              // optional human phrase for the content (esp. a lambda)
@@ -88,22 +85,8 @@ class INET_API EventPattern
     // Narrow to packets of a given protocol (the PacketProtocolTag name, e.g. "mobileipv6").
     EventPattern& protocol(const char *name) { selProtocol = name; return *this; }
 
-    // Protocol-module perspective. The named protocol (see protocol()/on("node.protocol"))
-    // sends a packet down to / receives a packet up from the layer below it -- written and
-    // described with the protocol module as the subject, not the layer that carries it.
-    // Mechanically: sends() observes the lower layer "received from upper", receives() its
-    // "sent to upper", filtered to this protocol.
-    EventPattern& sends(const char *matchExpr) { selHasKind = true; selKind = EventKind::ReceivedFromUpper; protocolSubject = true; selExpr = matchExpr; return *this; }
-    EventPattern& receives(const char *matchExpr) { selHasKind = true; selKind = EventKind::SentToUpper; protocolSubject = true; selExpr = matchExpr; return *this; }
-
-    EventPattern& sentToLower() { selHasKind = true; selKind = EventKind::SentToLower; return *this; }
-    EventPattern& receivedFromLower() { selHasKind = true; selKind = EventKind::ReceivedFromLower; return *this; }
-    EventPattern& sentToUpper() { selHasKind = true; selKind = EventKind::SentToUpper; return *this; }
-    EventPattern& receivedFromUpper() { selHasKind = true; selKind = EventKind::ReceivedFromUpper; return *this; }
-    EventPattern& dropped() { selHasKind = true; selKind = EventKind::Dropped; return *this; }
     EventPattern& inbound() { selHasDirection = true; selDirection = 0; return *this; }
     EventPattern& outbound() { selHasDirection = true; selDirection = 1; return *this; }
-    EventPattern& layer(Layer l) { selHasLayer = true; selLayer = l; return *this; }
     EventPattern& match(const char *expression) { selExpr = expression; return *this; }
     EventPattern& match(MatchPredicate p) { predicate = std::move(p); return *this; }
     EventPattern& describe(const char *phrase) { description = phrase; return *this; }

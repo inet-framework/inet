@@ -26,16 +26,16 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("tcp_handshake")
         // host1 sends the SYN; remember its initial sequence number.
-        .once(on("host1").sentToLower().layer(Layer::Transport)
-                  .match("tcp.synBit == true && tcp.ackBit == false")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
                   .capture("isn", "tcp.sequenceNo").describe("host1's SYN").within(0.2))
         // host1 receives the SYN+ACK acknowledging isn+1.
-        .once(on("host1").receivedFromLower().layer(Layer::Transport)
-                  .match("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
                   .describe("the SYN+ACK acknowledging host1's ISN+1").within(0.5))
         // host1 sends the final ACK.
-        .once(on("host1").sentToLower().layer(Layer::Transport)
-                  .match("tcp.ackBit == true && tcp.synBit == false")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.ackBit == true && tcp.synBit == false")
                   .describe("host1's final ACK").within(0.5));
 }
 
