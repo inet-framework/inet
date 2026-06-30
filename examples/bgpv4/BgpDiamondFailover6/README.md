@@ -1,17 +1,21 @@
 # BgpDiamondFailover6
 
-This example demonstrates IPv6 MP-BGP failover and failback in a pure-BGP diamond topology:
+This example demonstrates IPv6 MP-BGP failover, failback, and a second failure in a pure-BGP diamond topology:
 
 `hostA - A - B - C - hostC`
 
 `hostA - A - D - C - hostC`
 
-Routers `A`, `B`, `C`, and `D` are in different ASes. The preferred path initially goes through `A-B-C`.
-The `A-B-C` branch also uses lower link delays than `A-D-C`, so the active path change is visible in the ping RTT results.
+Routers `A`, `B`, `C`, and `D` are in different ASes. Router `A` advertises the `2001:db8:1::/64` network, router `C` advertises the `2001:db8:3::/64` network, and the hosts use default routes toward their adjacent routers. The preferred BGP path initially goes through `A-B-C`.
 
-At `60s`, router `B` is shut down. After the shortened BGP hold timer expires, traffic switches to the alternate `A-D-C` path using the routes already stored in Adj-RIB-In.
+The `A-B-C` branch uses `50us` links and the alternate `A-D-C` branch uses `300us` links, so the active path change is visible in the ping RTT results.
 
-At `100s`, router `B` is started again. Once the BGP sessions re-establish and exchange routes again, the preferred route returns to `A-B-C`.
+The scenario timeline is:
+
+- At `20s`, `hostA` starts pinging `hostC` at `2001:db8:3::100`.
+- At `60s`, router `B` is shut down. After the shortened BGP hold timer expires, traffic switches to the alternate `A-D-C` path using the routes already stored in Adj-RIB-In.
+- At `100s`, router `B` is started again. Once the BGP sessions re-establish and exchange routes again, the preferred route returns to `A-B-C`.
+- At `140s`, router `B` crashes. This exercises failover again after the network has already failed back to the preferred branch.
 
 Notes:
 
