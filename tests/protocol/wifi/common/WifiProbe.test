@@ -1,0 +1,34 @@
+%description:
+STA sends ProbeReq (type 4) during active scanning, then receives ProbeResp (type 5). [Required]
+
+%file: WifiProbe.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(wifi_probe)
+{
+    return ProtocolTest("wifi_probe")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 4")
+                  .describe("a ProbeReq from STA").within(2.0))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("ieee80211mac.type == 5")
+                  .describe("a ProbeResp to STA").within(0.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_probe"
+**.wlan[*].agent.activeScan = true
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_probe: PASS

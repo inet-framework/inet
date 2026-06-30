@@ -1,0 +1,36 @@
+%description:
+802.11n MIMO 2-spatial-stream HT mode. [Required]
+
+%file: N_Mimo2ss.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+// MCS15 at 20 MHz LGI = 130 Mbps uses 2 spatial streams.
+// isHt(c.event, 2) checks that the mode has >= 2 spatial streams.
+Define_ProtocolTest(wifi_11n_mimo_2ss)
+{
+    return ProtocolTest("wifi_11n_mimo_2ss")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) { return isHt(c.event, 2); })
+                  .describe("a QoS data frame in HT mode with >= 2 spatial streams").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_mimo_2ss"
+# MCS15 (2SS, 20 MHz, LGI) = 130 Mbps -- forces 2-stream HT mode.
+*.sta*.wlan[*].bitrate = 130Mbps
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_mimo_2ss: PASS

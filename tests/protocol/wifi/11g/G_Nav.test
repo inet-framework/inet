@@ -1,0 +1,32 @@
+%description:
+802.11g data frame carries a non-zero NAV (durationField > 0). [Required]
+
+%file: G_Nav.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Every data frame in DCF sets the Duration/ID field to cover SIFS+ACK,
+// protecting the medium via NAV at all overhearing stations.
+Define_ProtocolTest(wifi_11g_nav)
+{
+    return ProtocolTest("wifi_11g_nav")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 && ieee80211mac.durationField > 0")
+                  .describe("a data frame with non-zero NAV (durationField > 0)").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11g_nav"
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11g_nav: PASS

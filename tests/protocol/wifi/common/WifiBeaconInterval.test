@@ -1,0 +1,31 @@
+%description:
+AP sends at least 3 Beacon frames within 0.5s (default 100ms beacon interval). [Required]
+
+%file: WifiBeaconInterval.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(wifi_beacon_interval)
+{
+    return ProtocolTest("wifi_beacon_interval")
+        .atLeastTimes(3,
+            on("ap.wlan[0].mac").signal("packetSentToLower")
+                .packet("ieee80211mac.type == 8")
+                .describe("Beacon frames from the AP").within(0.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_beacon_interval"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_beacon_interval: PASS

@@ -1,0 +1,52 @@
+%description:
+802.11ac Multi-TID Block Ack frame. [NOT-MODELED -- Ieee80211MultiTidBlockAck is marked TODO unimplemented in INET]
+
+%file: Ac_MultiTidBa.cc
+
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::ieee80211;
+
+// Multi-TID Block Ack allows acknowledging frames from multiple TIDs in a
+// single BlockAck frame. Ieee80211MultiTidBlockAck is declared in INET but
+// its body is marked "TODO unimplemented". This test will FAIL as NOT-MODELED.
+Define_ProtocolTest(wifi_11ac_multi_tid_ba)
+{
+    return ProtocolTest("wifi_11ac_multi_tid_ba")
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      if (!c.event.packet) return false;
+                      auto ba = c.event.packet->peekAtFront<Ieee80211MultiTidBlockAck>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+                      return ba != nullptr;
+                  })
+                  .describe("a Multi-TID BlockAck received at sta1").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_multi_tid_ba"
+*.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
+*.ap.wlan[*].mac.hcf.isBlockAckSupported = true
+*.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
+*.sta1.app[0].sendInterval = 0.1ms
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+# Override radio settings after base.ini (last value wins in omnetpp ini):
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+**.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
+**.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 100
+**.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_multi_tid_ba: FAIL

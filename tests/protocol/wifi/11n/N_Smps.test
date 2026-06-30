@@ -1,0 +1,34 @@
+%description:
+802.11n SM Power Save action frame (type 13). [NOT-MODELED -- INET does not implement SMPS]
+
+%file: N_Smps.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// SM Power Save (SMPS) is an 802.11n feature where a STA can disable one or
+// more antenna chains to save power, signalled via a SMPS action frame (type 13).
+// INET does not implement SMPS. This test asserts an
+// Ieee80211SmPowerSaveActionFrame is sent; it will FAIL as NOT-MODELED.
+Define_ProtocolTest(wifi_11n_smps)
+{
+    return ProtocolTest("wifi_11n_smps")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("Ieee80211SmPowerSaveActionFrame.smPowerSaveMode >= 0")
+                  .describe("an SM Power Save action frame from sta1").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_smps"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_smps: FAIL

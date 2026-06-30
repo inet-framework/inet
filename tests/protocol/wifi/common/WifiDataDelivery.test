@@ -1,0 +1,33 @@
+%description:
+End-to-end data delivery: sta1 sends QoS data (type 40) and sta2 receives it. [Required]
+
+%file: WifiDataDelivery.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(wifi_data_delivery)
+{
+    return ProtocolTest("wifi_data_delivery")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .describe("a QoS data frame from sta1").within(2.5))
+        .once(on("sta2.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("ieee80211mac.type == 40")
+                  .describe("the QoS data frame received at sta2").within(0.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_data_delivery"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_data_delivery: PASS

@@ -1,0 +1,63 @@
+%description:
+802.11n Block Ack received at sta1 with non-empty bitmap (acknowledges at least one frame). [Required]
+
+%file: N_CompressedBa.cc
+
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::ieee80211;
+
+// INET sends Ieee80211BasicBlockAck (not CompressedBlockAck) for all block ack sessions.
+// The Basic Block Ack carries a 64x16-bit bitmap acknowledging MPDUs.
+// We assert that a BasicBlockAck is received and its bitmap has at least one bit set,
+// confirming the AP has positively acknowledged at least one received data MPDU.
+Define_ProtocolTest(wifi_11n_compressed_ba)
+{
+    return ProtocolTest("wifi_11n_compressed_ba")
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("ieee80211mac.type == 25")
+                  .match([](const MatchContext& c) {
+                      if (!c.event.packet) return false;
+                      auto ba = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+                      if (!ba) return false;
+                      // At least one bit set means at least one MPDU was acknowledged.
+                      for (int i = 0; i < 64; i++) {
+                          const auto& bv = ba->getBlockAckBitmap(i);
+                          for (unsigned int j = 0; j < bv.getSize(); j++) {
+                              if (bv.getBit(j)) return true;
+                          }
+                      }
+                      return false;
+                  })
+                  .describe("a BasicBlockAck with at least one acknowledged MPDU").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_compressed_ba"
+*.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
+*.ap.wlan[*].mac.hcf.isBlockAckSupported = true
+*.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
+*.sta1.app[0].sendInterval = 0.1ms
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+# Override radio settings after base.ini (last value wins in omnetpp ini):
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+**.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
+**.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 100
+**.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
+*.sta*.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_compressed_ba: PASS

@@ -1,0 +1,33 @@
+%description:
+802.11n HT PHY mode on transmitted QoS data frame. [Required]
+
+%file: N_HtPhy.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+// 40 = QoS data. isHt() reads the Ieee80211ModeReq tag and casts to Ieee80211HtMode.
+Define_ProtocolTest(wifi_11n_ht_phy)
+{
+    return ProtocolTest("wifi_11n_ht_phy")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) { return isHt(c.event, 1); })
+                  .describe("a QoS data frame in HT mode").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_ht_phy"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_ht_phy: PASS
