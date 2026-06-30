@@ -1,0 +1,36 @@
+%description:
+802.11 Deauthentication: the AP or STA sends a Deauthentication frame (type 12) when
+tearing down the session. [NOT-MODELED -- INET's Ieee80211MgmtAp/Sta do not send
+Deauthentication frames during normal simulation teardown; teardown happens by process
+destruction, not by a proper 802.11 deauth exchange; no trigger exists to fire Deauth
+within the simulation time limit]
+
+%file: WifiDeauth.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// 12 = ST_DEAUTHENTICATION. INET's mgmt layer never sends this frame during a
+// normal simulation run; teardown is silent.
+Define_ProtocolTest(wifi_deauth)
+{
+    return ProtocolTest("wifi_deauth")
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 12")
+                  .describe("a Deauthentication frame from the AP").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_deauth"
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_deauth: FAIL

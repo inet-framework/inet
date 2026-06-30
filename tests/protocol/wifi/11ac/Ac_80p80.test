@@ -1,0 +1,47 @@
+%description:
+802.11ac 80+80 MHz non-contiguous channel: a VHT data frame uses 80+80 MHz bandwidth.
+[NOT-MODELED -- INET's VHT mode set contains only 20/40/80/160 MHz contiguous-channel
+entries; there are no 80+80 MHz mode objects and no Ieee80211VhtMode::BAND_80PLUS80MHZ
+enum value; 80+80 MHz is structurally absent from the PHY layer]
+
+%file: Ac_80p80.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::units::values;
+
+// Spec assertion: a VHT frame uses 80+80 MHz (total 160 MHz non-contiguous bandwidth).
+// INET's isVht() checks dataMode->getBandwidth(); 80+80 MHz would require a dedicated
+// bandwidth enum that doesn't exist. We assert MHz(160) as a proxy (closest real mode),
+// but even that would only match contiguous 160 MHz. The test FAILs because no 80+80 mode
+// is ever selected.
+Define_ProtocolTest(wifi_11ac_80p80)
+{
+    return ProtocolTest("wifi_11ac_80p80")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      // 80+80 MHz is not representable; assert a non-contiguous mode
+                      // which INET cannot produce.
+                      return false;
+                  })
+                  .describe("a VHT data frame using 80+80 MHz non-contiguous channel")
+                  .within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_80p80"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_80p80: FAIL

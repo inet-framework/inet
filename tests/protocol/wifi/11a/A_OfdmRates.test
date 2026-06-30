@@ -1,0 +1,39 @@
+%description:
+802.11a OFDM mandatory rate: 6 Mbps. Assert isOfdm and txNetBitrateMbps == 6. [Required]
+
+%file: A_OfdmRates.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+// 6 Mbps is the lowest mandatory 802.11a OFDM rate (BPSK 1/2).
+// Force it via RateSelection.dataFrameBitrate so the test is deterministic.
+Define_ProtocolTest(wifi_11a_ofdm_rates)
+{
+    return ProtocolTest("wifi_11a_ofdm_rates")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      return isOfdm(c.event) &&
+                             std::abs(txNetBitrateMbps(c.event) - 6.0) < 0.1;
+                  })
+                  .describe("a data frame in plain OFDM mode at 6 Mbps").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11a_ofdm_rates"
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameBitrate = 6Mbps
+*.ap.wlan[*].mac.*.rateSelection.dataFrameBitrate = 6Mbps
+include ../../ini/_a.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11a_ofdm_rates: PASS

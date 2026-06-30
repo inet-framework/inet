@@ -1,0 +1,50 @@
+%description:
+802.11b HR/DSSS short preamble: a transmitted frame uses a short-preamble HR/DSSS mode.
+[NOT-MODELED -- short preamble is encoded in the PHY mode object but there is no MAC-layer
+NED parameter to select it; INET's rate selection always picks the long-preamble mode at any
+given bitrate, so getShortPreamble() is not exercised from above the PHY]
+
+%file: B_ShortPreamble.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::physicallayer;
+
+// The spec-required assertion: a data frame is transmitted with the short-preamble
+// HR/DSSS mode (preamble == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT).
+// INET's rate selection module always picks the long-preamble variant at a given bitrate;
+// no NED parameter overrides the preamble type, so this will never match.
+Define_ProtocolTest(wifi_11b_short_preamble)
+{
+    return ProtocolTest("wifi_11b_short_preamble")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      auto m = dynamic_cast<const Ieee80211HrDsssMode *>(txMode(c.event));
+                      if (!m) return false;
+                      auto pm = dynamic_cast<const Ieee80211HrDsssPreambleMode *>(m->getPreambleMode());
+                      return pm != nullptr &&
+                             pm->getPreambleType() == IEEE80211_HRDSSS_PREAMBLE_TYPE_SHORT;
+                  })
+                  .describe("a data frame with short-preamble HR/DSSS mode").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11b_short_preamble"
+*.sta*.wlan[*].bitrate = 11Mbps
+*.ap.wlan[*].bitrate = 11Mbps
+include ../../ini/_b.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11b_short_preamble: FAIL

@@ -1,0 +1,45 @@
+%description:
+802.11a 5 GHz / 20 MHz OFDM channel. Assert plain OFDM mode with 20 MHz bandwidth.
+[Required]
+
+%file: A_5ghz.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+// 802.11a operates in the 5 GHz band with 20 MHz channel spacing.
+// Assert: plain OFDM mode (not ERP-OFDM) and 20 MHz data bandwidth.
+Define_ProtocolTest(wifi_11a_5ghz)
+{
+    return ProtocolTest("wifi_11a_5ghz")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      if (!isOfdm(c.event))
+                          return false;
+                      auto m = dynamic_cast<const Ieee80211OfdmMode *>(txMode(c.event));
+                      return m != nullptr &&
+                             m->getDataMode()->getBandwidth() == MHz(20);
+                  })
+                  .describe("a data frame in OFDM mode at 20 MHz (802.11a 5 GHz channel)").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11a_5ghz"
+include ../../ini/_a.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11a_5ghz: PASS

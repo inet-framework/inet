@@ -1,0 +1,48 @@
+%description:
+802.11ac LDPC and STBC capabilities: a VHT frame is transmitted with either STBC
+(getSTBC() > 0 in the signal mode) or LDPC coding. [NOT-MODELED -- INET's VHT signal
+mode hardcodes getSTBC() = 0 (inheriting the HT limitation), and LDPC is entirely absent
+from the physicallayer tree; neither capability is supported in INET's VHT implementation]
+
+%file: Ac_LdpcStbcCap.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::physicallayer;
+
+// Spec assertion: VHT STBC or LDPC is used on a data frame.
+// INET's VHT signal mode always returns STBC=0; no LDPC capability exists.
+Define_ProtocolTest(wifi_11ac_ldpc_stbc_cap)
+{
+    return ProtocolTest("wifi_11ac_ldpc_stbc_cap")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      auto m = dynamic_cast<const Ieee80211VhtMode *>(txMode(c.event));
+                      // getSTBC() hardcoded to 0; no LDPC API exists.
+                      return m != nullptr && m->getPreambleMode()->getSignalMode()->getSTBC() > 0;
+                  })
+                  .describe("a VHT data frame with STBC or LDPC encoding").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_ldpc_stbc_cap"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_ldpc_stbc_cap: FAIL

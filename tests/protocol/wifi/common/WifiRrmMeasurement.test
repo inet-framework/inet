@@ -1,0 +1,35 @@
+%description:
+802.11k Radio Resource Management: a Measurement Request action frame (type 13,
+category Radio Measurement) is sent from AP to STA. [NOT-MODELED -- INET has no
+802.11k RRM module; no Measurement Request/Report action frames are generated;
+WifiDfsChannelSwitch already confirms amendments are absent]
+
+%file: WifiRrmMeasurement.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Spec assertion: AP sends a Measurement Request action frame (type 13).
+// INET has no RRM implementation.
+Define_ProtocolTest(wifi_rrm_measurement)
+{
+    return ProtocolTest("wifi_rrm_measurement")
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 13 && Ieee80211MeasurementRequest.length >= 0")
+                  .describe("a Measurement Request action frame from AP").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_rrm_measurement"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_rrm_measurement: FAIL

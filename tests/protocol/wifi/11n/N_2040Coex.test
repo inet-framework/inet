@@ -1,0 +1,35 @@
+%description:
+802.11n 20/40 MHz BSS Coexistence Management: a 20/40 BSS Coexistence action frame
+(type 13, Action category 0 = Public, action 0 = 2040Coex) is sent. [NOT-MODELED --
+INET has no 20/40 BSS Coexistence module, no coexistence scanning, and no action
+frame encoding for this category; Ieee80211MgmtFrame.msg has no 2040 coex fields]
+
+%file: N_2040Coex.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Spec assertion: when a 40 MHz capable STA detects a 20-MHz-only or OBSS, it sends
+// a 20/40 BSS Coexistence action (type 13). INET never emits this frame.
+Define_ProtocolTest(wifi_11n_2040_coex)
+{
+    return ProtocolTest("wifi_11n_2040_coex")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 13 && Ieee802011_20_40CoexistenceInformation.length >= 0")
+                  .describe("a 20/40 BSS Coexistence action frame").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_2040_coex"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_2040_coex: FAIL

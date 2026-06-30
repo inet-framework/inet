@@ -1,0 +1,54 @@
+%description:
+802.11b PBCC (Packet Binary Convolutional Coding) at 5.5 or 11 Mbps. [NOT-MODELED --
+INET defines hrDsssDataMode5_5MbpsPbccLongPreamble mode objects but the rate selection
+never chooses PBCC; no NED parameter selects PBCC over CCK at the same bitrate]
+
+%file: B_Pbcc.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::physicallayer;
+
+// Spec-required assertion: a data frame uses the PBCC coding scheme.
+// INET's HrDsss mode set contains PBCC mode objects, but rate selection always picks
+// CCK for a given bitrate; PBCC is never selected in practice.
+Define_ProtocolTest(wifi_11b_pbcc)
+{
+    return ProtocolTest("wifi_11b_pbcc")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      auto m = dynamic_cast<const Ieee80211HrDsssMode *>(txMode(c.event));
+                      if (!m) return false;
+                      // PBCC data modes have "Pbcc" in the class name (no direct API);
+                      // check that the mode is not CCK by comparing modulation type string.
+                      // A PBCC data mode's getModulation() returns an Ieee80211HrDsssDataMode
+                      // with modulationScheme == PBCC; no public enum exposes this, so we
+                      // assert by net bitrate that only PBCC achieves: 5.5 Mbps PBCC is
+                      // distinct from 5.5 Mbps CCK only by the mode object identity, which we
+                      // cannot distinguish at runtime without a dedicated accessor. We assert
+                      // false to represent "not observable": the test correctly FAILs.
+                      return false;
+                  })
+                  .describe("a data frame transmitted with PBCC coding").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11b_pbcc"
+*.sta*.wlan[*].bitrate = 5.5Mbps
+*.ap.wlan[*].bitrate = 5.5Mbps
+include ../../ini/_b.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11b_pbcc: FAIL

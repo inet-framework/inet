@@ -1,0 +1,35 @@
+%description:
+802.11 Reassociation: when a STA roams to a new AP it sends a Reassociation Request
+(type 2) and receives a Reassociation Response (type 3). [NOT-MODELED -- INET's
+Ieee80211MgmtSta does not implement roaming or reassociation; the simulation uses a
+single AP and STAs never reassociate; ReassocReq/Resp frames (types 2/3) are never sent]
+
+%file: WifiReassociation.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// 2 = ST_REASSOC_REQUEST, 3 = ST_REASSOC_RESPONSE.
+// INET does not trigger reassociation in normal operation.
+Define_ProtocolTest(wifi_reassociation)
+{
+    return ProtocolTest("wifi_reassociation")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 2")
+                  .describe("a Reassociation Request from sta1").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_reassociation"
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_reassociation: FAIL

@@ -1,0 +1,46 @@
+%description:
+802.11e TXOP burst: within a single TXOP multiple QoS data frames are sent back-to-back
+without re-contending for the channel. Approximated here by two type-40 frames within
+1 ms (a coarse proxy; the framework cannot observe SIFS-vs-backoff spacing directly). [CONFORMS]
+
+A short sendInterval and a positive txopLimit on the BE access category allows bursting.
+
+%file: N_TxopBurst.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// 40 = ST_DATA_WITH_QOS. Assert at least 2 QoS data frames sent within 0.5 ms (burst).
+Define_ProtocolTest(wifi_qos_txop_burst)
+{
+    return ProtocolTest("wifi_qos_txop_burst")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .describe("first QoS data frame of TXOP burst").within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .describe("a second QoS data frame within 1 ms (TXOP burst)").within(0.001));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_qos_txop_burst"
+# Very fast send interval so frames queue up; TXOP allows burst after single contention win.
+*.sta1.app[0].sendInterval = 0.05ms
+# edcaf[1] = AC_BE; set a 3 ms TXOP limit so multiple frames transmit in one burst.
+*.sta*.wlan[*].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 3ms
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_qos_txop_burst: PASS

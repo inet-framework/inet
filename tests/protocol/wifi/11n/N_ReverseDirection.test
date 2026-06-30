@@ -1,0 +1,40 @@
+%description:
+802.11n Reverse Direction Grant (RDG): during a TXOP the HT control field Reverse
+Direction Grant bit allows the peer to transmit in the reverse direction. [NOT-MODELED --
+INET has no HT Control field implementation; no RDG bit is set in any transmitted frame;
+the RDG feature is absent from the INET HT MAC implementation]
+
+%file: N_ReverseDirection.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Spec assertion: an HT QoS data frame carries the HT Control field with the RD
+// Grant bit set, allowing the peer to reverse-transmit within the TXOP.
+// INET has no HT Control field in its MAC frame model.
+Define_ProtocolTest(wifi_11n_reverse_direction)
+{
+    return ProtocolTest("wifi_11n_reverse_direction")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40 && Ieee80211HtControl.length >= 0")
+                  .describe("QoS data frame with HT Control RD Grant bit").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_reverse_direction"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_reverse_direction: FAIL

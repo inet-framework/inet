@@ -1,0 +1,45 @@
+%description:
+802.11g short slot time (9 µs) in ERP-only mode: the mode set's getSlotTime() returns
+9 µs when all STAs are ERP-capable (opMode g(erp)). The MAC's Dcaf reads modeSet->
+getSlotTime() which in turn calls entries[0].mode->getSlotTime(); for g(erp) all entries
+are erpOnlyOfdmMode objects with isErpOnly=true so getSlotTime() returns 9 µs. [CONFORMS]
+
+%file: G_ShortSlot.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::physicallayer;
+
+// Assert that the mode used on the data frame is an erpOnly-ERP-OFDM mode
+// with slot time == 9 µs (the short slot time that Dcaf/Edcaf pick up via
+// modeSet->getSlotTime() for g(erp) networks).
+Define_ProtocolTest(wifi_11g_short_slot)
+{
+    return ProtocolTest("wifi_11g_short_slot")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      auto m = dynamic_cast<const Ieee80211ErpOfdmMode *>(txMode(c.event));
+                      // erp-only modes: getSlotTime() == 9 µs (short slot)
+                      return m != nullptr && m->getSlotTime() < SimTime(15, SIMTIME_US);
+                  })
+                  .describe("ERP-OFDM data frame using 9 µs short slot time").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11g_short_slot"
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11g_short_slot: PASS

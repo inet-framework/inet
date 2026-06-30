@@ -1,0 +1,32 @@
+%description:
+802.11 legacy NAV: every data frame sets the Duration/ID field (durationField > 0) to
+reserve the medium for the SIFS+ACK exchange. [Required]
+
+%file: Legacy_Nav.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// 32 = ST_DATA. The Duration/ID field must be > 0 (covers SIFS + ACK duration).
+Define_ProtocolTest(wifi_legacy_nav)
+{
+    return ProtocolTest("wifi_legacy_nav")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 && ieee80211mac.durationField > 0")
+                  .describe("a data frame with non-zero NAV (durationField > 0)").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_legacy_nav"
+include ../../ini/_legacy.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_legacy_nav: PASS
