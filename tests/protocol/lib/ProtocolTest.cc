@@ -25,27 +25,6 @@ Interception intercept(const char *tapName)
     return interception;
 }
 
-StatePattern state(const char *modulePath, const char *signalName)
-{
-    StatePattern pattern;
-    pattern.modulePath = modulePath;
-    pattern.signalName = signalName;
-    return pattern;
-}
-
-std::string StatePattern::str() const
-{
-    std::ostringstream os;
-    os << modulePath << " " << signalName;
-    if (hasValue)
-        os << "==" << value;
-    if (selHasWithin)
-        os << " within=" << selWithin;
-    if (selHasNotBefore)
-        os << " notBefore=" << selNotBefore;
-    return os.str();
-}
-
 std::map<std::string, ProtocolTestBuilderFn>& ProtocolTestRegistry::all()
 {
     // Function-local static: safe across static-initializer registration order.

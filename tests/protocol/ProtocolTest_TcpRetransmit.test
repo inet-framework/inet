@@ -23,12 +23,12 @@ Define_ProtocolTestProgram()
                      .match("tcp.destPort == 1000 && tcp.synBit == false").minBytes(100).nth(1)
                      .drop().describe("the first data segment"))
         // host1 sends the data segment after the handshake; remember its sequence number.
-        .once(on("host1").sentToLower().layer(Layer::Transport)
-                  .match("tcp.destPort == 1000 && tcp.synBit == false").after(0.15)
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.destPort == 1000 && tcp.synBit == false").after(0.15)
                   .capture("dataSeq", "tcp.sequenceNo").describe("the data segment").within(0.3))
         // the tap dropped it, so host1 retransmits the same segment after the RTO.
-        .once(on("host1").sentToLower().layer(Layer::Transport)
-                  .match("tcp.sequenceNo == {dataSeq} && tcp.synBit == false").notBefore(0.3)
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.sequenceNo == {dataSeq} && tcp.synBit == false").notBefore(0.3)
                   .describe("the retransmitted data segment").within(5.0));
 }
 
