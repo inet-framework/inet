@@ -37,6 +37,11 @@ BgpRouter::~BgpRouter(void)
     for (auto& elem : adjRibInTable)
         delete elem;
 
+    // Loc-RIB entries are clones exclusively owned by bgpRoutingTable (the forwarding-table
+    // copies in 'rt' are separate objects freed by the routing table), so free them here.
+    for (auto& elem : bgpRoutingTable)
+        delete elem;
+
     for (auto& elem : _prefixListINOUT)
         delete elem;
 
@@ -959,9 +964,10 @@ void BgpRouter::installBestRouteForPrefix(const L3Address& prefix, int prefixLen
     // Keep a snapshot of the old Loc-RIB route so we can send an explicit withdraw if
     // no alternative remains after re-running the decision process.
     BgpRouteInfo *oldEntry = current;
+    bool hadPreviousRoute = (oldEntry != nullptr);
     BgpRouteInfo *oldSnapshot = oldEntry != nullptr ? cloneRoute(oldEntry) : nullptr;
     if (oldEntry != nullptr)
-        deleteLocRibEntry(oldEntry);
+        deleteLocRibEntry(oldEntry); // frees *oldEntry; do not dereference oldEntry past this point
 
     if (best == nullptr) {
         if (oldSnapshot != nullptr)
@@ -1006,7 +1012,7 @@ void BgpRouter::installBestRouteForPrefix(const L3Address& prefix, int prefixLen
         ospfModule->insertExternalRoute(ie->getInterfaceId(), ospfNetAddr);
     }
 
-    updateSendProcess(oldEntry == nullptr ? NEW_ROUTE_ADDED : ROUTE_DESTINATION_CHANGED, selected->getSourceSessionId(), selected);
+    updateSendProcess(hadPreviousRoute ? ROUTE_DESTINATION_CHANGED : NEW_ROUTE_ADDED, selected->getSourceSessionId(), selected);
     delete oldSnapshot;
 }
 
