@@ -57,11 +57,7 @@ bool EventPattern::scopeMatches(const PacketEvent& event) const
         return false;
     if (!selDispatch.empty() && selDispatch != event.dispatchName)
         return false;
-    if (selHasKind && event.kind != selKind)
-        return false;
     if (selHasDirection && event.direction != selDirection)
-        return false;
-    if (selHasLayer && event.layer != selLayer)
         return false;
     if (!selIface.empty() && selIface != event.interfaceName)
         return false;
@@ -143,9 +139,7 @@ std::string EventPattern::str() const
     if (!selSignal.empty()) os << " signal=" << selSignal;
     if (!selProtocol.empty()) os << " protocol=" << selProtocol;
     if (!selDispatch.empty()) os << " dispatch=" << selDispatch;
-    if (selHasKind) os << " " << getEventKindName(selKind);
     if (selHasDirection) os << " dir=" << (selDirection == 0 ? "IN" : "OUT");
-    if (selHasLayer) os << " layer=" << getLayerName(selLayer);
     if (!selIface.empty()) os << " iface=" << selIface;
     if (!selExpr.empty()) os << " match='" << selExpr << "'";
     if (selHasNotBefore) os << " notBefore=" << selNotBefore;

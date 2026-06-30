@@ -12,7 +12,6 @@
 
 #include "inet/common/SimpleModule.h"
 #include "PacketEvent.h"
-#include "StateEvent.h"
 #include "ProtocolTest.h"
 
 namespace inet {
@@ -49,7 +48,6 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     int cardCount = 0;                             // matches seen so far for a Count step
     int deliveryStage = 0;                         // 0 = awaiting send, 1 = awaiting matching receive
     long deliveryTreeId = -1;                      // treeId of the sent packet to correlate
-    cModule *stateTarget = nullptr;                // resolved target module of the current Reaches/NeverReaches step
     simtime_t anchorTime = 0;                      // start time of the current step's window
     cMessage *deadlineMsg = nullptr;               // fires when the current expect step misses its deadline
     cMessage *injectMsg = nullptr;                 // fires when the current inject step is due
@@ -72,9 +70,6 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
 
     // observation (state channel: scalar signals)
     void subscribeStateSignals();  // subscribe to the program's + the stateSignals param's signal names
-    StateEvent normalizeState(cComponent *source, simsignal_t signalID, long value);
-    void logStateEvent(const StateEvent& event);
-    void processStateMatch(const StateEvent& event);
 
     // matching engine
     void installInterceptions();   // push the program's intercept(...) rules onto their taps

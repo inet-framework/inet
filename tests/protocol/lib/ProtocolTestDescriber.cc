@@ -33,20 +33,9 @@ static std::string capitalize(std::string s)
 }
 
 // "<verb> a packet <locus>" for the observed event kind.
-static std::string kindPhrase(const EventPattern& p)
+static std::string kindPhrase(const EventPattern& /*p*/)
 {
-    if (!p.selHasKind)
-        return "have a packet event";
-    switch (p.selKind) {
-        case EventKind::SentToLower: return "send a packet to the lower layer";
-        case EventKind::ReceivedFromLower: return "receive a packet from the lower layer";
-        case EventKind::SentToUpper: return "send a packet to the upper layer";
-        case EventKind::ReceivedFromUpper: return "receive a packet from the upper layer";
-        case EventKind::SentToPeer: return "send a packet to the peer";
-        case EventKind::ReceivedFromPeer: return "receive a packet from the peer";
-        case EventKind::Dropped: return "drop a packet";
-        default: return "have a packet event";
-    }
+    return "have a packet event";
 }
 
 // "BindingUpdate" -> "Binding Update"; "homeInitCookie" -> "home init cookie" (lowercased).
@@ -229,8 +218,6 @@ static std::string renderPattern(const EventPattern& p, const char *modal)
     if (p.selHasWithin)
         os << "within " << formatTime(p.selWithin) << ", ";
     os << (p.selNode.empty() ? "some node" : p.selNode) << " " << modal << " " << kindPhrase(p);
-    if (p.selHasLayer)
-        os << " at the " << getLayerName(p.selLayer) << " layer";
     if (!p.selIface.empty())
         os << " on interface " << p.selIface;
 
@@ -329,26 +316,6 @@ static std::string renderInject(const Injection& inj)
     return capitalize(os.str()) + ".";
 }
 
-static std::string renderState(const StatePattern& p, const char *modal)
-{
-    std::ostringstream os;
-    if (p.selHasWithin)
-        os << "within " << formatTime(p.selWithin) << ", ";
-    os << p.modulePath << "'s " << p.signalName << " " << modal << " reach ";
-    if (!p.description.empty()) {
-        os << p.description;
-        if (p.hasValue)
-            os << " (value " << p.value << ")";
-    }
-    else if (p.hasValue)
-        os << "value " << p.value;
-    else
-        os << "any value";
-    if (p.selHasNotBefore)
-        os << " (but not before " << formatTime(p.selNotBefore) << " after the previous step)";
-    return capitalize(os.str()) + ".";
-}
-
 static std::string renderInterception(const Interception& i)
 {
     std::ostringstream os;
@@ -385,8 +352,6 @@ std::string describe(const ProtocolTest& test)
             case StepType::Count:        clause = renderCount(step.pattern, step.cardMin, step.cardMax); break;
             case StepType::Delivery:  clause = renderDelivery(step.pattern, step.pattern2); break;
             case StepType::Inject:    clause = renderInject(step.injection); break;
-            case StepType::Reaches:      clause = renderState(step.statePattern, "must"); break;
-            case StepType::NeverReaches: clause = renderState(step.statePattern, "must not"); break;
         }
         os << "  " << (i + 1) << ". " << clause << "\n";
     }

@@ -30,10 +30,9 @@ namespace protocoltest {
 //  Unordered    -- a group of patterns that must all match, in any order
 //  AnyOf        -- a group of patterns; the first to match wins
 //  Delivery     -- a "from" send correlated to a "to" receive of the same packet (treeId)
-//  Reaches      -- a module's scalar signal (e.g. an FSM state) takes a value within the
-//                  window (state channel, not packets): advance on match, fail on deadline
-//  NeverReaches -- that scalar signal must NOT take the value within the window (negative)
-enum class StepType { Once, AtMostOnce, Never, ExactlyTimes, Count, Inject, Unordered, AnyOf, Delivery, Reaches, NeverReaches };
+// A pattern may select a packet signal or a scalar signal (e.g. an FSM state via is(v)); the
+// same cardinalities apply to both (once = "reaches the value", never = "must not").
+enum class StepType { Once, AtMostOnce, Never, ExactlyTimes, Count, Inject, Unordered, AnyOf, Delivery };
 
 //
 // A packet injection. When the engine reaches an inject step it resolves the target
@@ -91,34 +90,6 @@ class INET_API Interception
     Interception& describe(const char *phrase) { description = phrase; return *this; }
 };
 
-//
-// A scalar-signal (state) assertion clause: name a module's scalar signal (e.g. an FSM's
-// "controlStateChanged") and, optionally, the value it must take. Backs the reaches /
-// neverReaches steps. The state channel is observed via INET signals, so the interesting
-// state machines need no modification -- INET's Fsm emits its state index on every change
-// (setStateChangedSignal), and counters/IDs are emitted as ordinary scalar signals. Timing
-// (within/notBefore) is relative to the step anchor, exactly like an EventPattern.
-//
-class INET_API StatePattern
-{
-  public:
-    std::string modulePath;     // emitting module, relative to the network, e.g. "node[0].eth[0].plca"
-    std::string signalName;     // registered signal name, e.g. "controlStateChanged"
-    bool hasValue = false; long value = 0;                     // .is(v): require this exact value
-    std::string description;    // optional human phrase (e.g. the symbolic state name)
-    bool selHasWithin = false; simtime_t selWithin = 0;        // deadline
-    bool selHasNotBefore = false; simtime_t selNotBefore = 0;  // earliest
-
-    StatePattern& is(long v) { hasValue = true; value = v; return *this; }
-    StatePattern& within(double t) { selHasWithin = true; selWithin = t; return *this; }
-    StatePattern& notBefore(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }
-    StatePattern& after(double t) { selHasNotBefore = true; selNotBefore = t; return *this; }
-    StatePattern& describe(const char *phrase) { description = phrase; return *this; }
-
-    bool valueMatches(long v) const { return !hasValue || v == value; }
-    std::string str() const;
-};
-
 struct Step {
     StepType type = StepType::Once;
     EventPattern pattern;              // Once / AtMostOnce / Never / ExactlyTimes / Count / Delivery "from"
@@ -127,7 +98,6 @@ struct Step {
     EventPattern pattern2;             // Delivery "to" (holds the delivery window in its within)
     int count = 0;                     // ExactlyTimes
     int cardMin = 0, cardMax = 0;      // Count: required occurrences [min, max]; max < 0 = unbounded
-    StatePattern statePattern;         // Reaches / NeverReaches
 };
 
 // Entry point of the fluent injection chain.
@@ -135,9 +105,6 @@ Injection inject(const char *nodeName);
 
 // Entry point of the fluent interception chain (names the PacketTap to drive).
 Interception intercept(const char *tapName);
-
-// Entry point of the fluent state-signal chain (names the module and its scalar signal).
-StatePattern state(const char *modulePath, const char *signalName);
 
 //
 // A protocol test program: an ordered list of steps with a name. Built with the
@@ -226,29 +193,6 @@ class INET_API ProtocolTest
     ProtocolTest& inject(const Injection& injection)
     {
         steps.push_back(Step{StepType::Inject, {}, injection, {}});
-        return *this;
-    }
-
-    // State channel: the named module's scalar signal (e.g. an FSM state) takes the given
-    // value within the window -- advance on the first match, fail on the deadline. The
-    // signal-based analogue of once(), for asserting state-machine progress.
-    ProtocolTest& reaches(const StatePattern& pattern)
-    {
-        Step step;
-        step.type = StepType::Reaches;
-        step.statePattern = pattern;
-        steps.push_back(step);
-        return *this;
-    }
-
-    // State channel: the named scalar signal must NOT take the given value within the
-    // window (a negative assertion on state -- e.g. an FSM must not enter an error state).
-    ProtocolTest& neverReaches(const StatePattern& pattern)
-    {
-        Step step;
-        step.type = StepType::NeverReaches;
-        step.statePattern = pattern;
-        steps.push_back(step);
         return *this;
     }
 

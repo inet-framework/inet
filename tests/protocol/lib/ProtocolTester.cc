@@ -209,13 +209,7 @@ void ProtocolTester::handleMessage(cMessage *msg)
                 decide(false, "delivery step " + std::to_string(currentStep) +
                               ": the matching receive did not arrive within the window after the send");
                 break;
-            case StepType::Reaches:
-                decide(false, "state step " + std::to_string(currentStep) +
-                              ": signal did not reach the expected value within the window [" +
-                              step.statePattern.str() + "]");
-                break;
             case StepType::Never:        // window passed with no violation -> success
-            case StepType::NeverReaches: // window passed with the forbidden state never reached -> success
             case StepType::AtMostOnce:   // window passed with no match -> skip
                 advance(simTime());
                 break;
@@ -245,7 +239,6 @@ void ProtocolTester::finish()
     while (currentStep < program->steps.size()) {
         const Step& step = program->steps[currentStep];
         bool satisfied = step.type == StepType::Never ||
-                         step.type == StepType::NeverReaches ||
                          step.type == StepType::AtMostOnce ||
                          (step.type == StepType::Count &&
                           cardCount >= step.cardMin &&
@@ -263,8 +256,6 @@ void ProtocolTester::finish()
         std::string what = step.type == StepType::Unordered
                              ? "[unordered: " + std::to_string(groupRemaining) + " pattern(s) unmatched]"
                          : step.type == StepType::Inject ? "[inject pending]"
-                         : (step.type == StepType::Reaches || step.type == StepType::NeverReaches)
-                             ? "[" + step.statePattern.str() + "]"
                          : "[" + step.pattern.str() + "]";
         decide(false, "simulation ended with step " + std::to_string(currentStep) + " pending " + what);
     }
@@ -311,31 +302,6 @@ void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, int
                   << " signal=" << event.signalName << " value=" << event.value << std::endl;
     if (matchingMode && !decided)
         processMatch(event);
-}
-
-StateEvent ProtocolTester::normalizeState(cComponent *source, simsignal_t signalID, long value)
-{
-    StateEvent event;
-    event.module = dynamic_cast<cModule *>(source);
-    if (event.module != nullptr)
-        event.node = findContainingNode(event.module);
-    event.signal = signalID;
-    event.signalName = stateSignalNames[signalID];
-    event.value = value;
-    event.time = simTime();
-    return event;
-}
-
-void ProtocolTester::logStateEvent(const StateEvent& event)
-{
-    // Printed on stdout (like the packet trace) so it is clean and parseable.
-    std::cout << "SE"
-              << " t=" << event.time
-              << " node=" << (event.node ? event.node->getFullName() : "?")
-              << " mod=" << (event.module ? event.module->getFullPath() : "?")
-              << " signal=" << event.signalName
-              << " value=" << event.value
-              << std::endl;
 }
 
 PacketEvent ProtocolTester::normalize(cComponent *source, EventKind kind, const Packet *packet)
@@ -494,18 +460,6 @@ void ProtocolTester::enterStep()
             scheduleAt(fireTime, injectMsg);
             break;
         }
-        case StepType::Reaches:
-        case StepType::NeverReaches: {
-            // Resolve the target module once (relative to the network) and wait for its
-            // scalar signal (see processStateMatch); the deadline resolves the step.
-            const StatePattern& sp = step.statePattern;
-            stateTarget = getSystemModule()->getModuleByPath(("." + sp.modulePath).c_str());
-            if (stateTarget == nullptr)
-                throw cRuntimeError("ProtocolTest '%s': state step %d target module '%s' not found",
-                                    program->name.c_str(), (int)currentStep, sp.modulePath.c_str());
-            armDeadline(sp.selHasWithin ? sp.selWithin : simtime_t(0));
-            break;
-        }
     }
 }
 
@@ -626,36 +580,6 @@ void ProtocolTester::processMatch(const PacketEvent& event)
         default:
             break;   // Inject: ignore observed events while pending
     }
-}
-
-void ProtocolTester::processStateMatch(const StateEvent& event)
-{
-    // receiveSignal runs in the emitting module's context; switch to ours so the engine's
-    // scheduleAt()/cancelEvent() and self-message ownership are valid.
-    Enter_Method_Silent("processStateMatch");
-
-    if (currentStep >= program->steps.size())
-        return;
-    Step& step = program->steps[currentStep];
-    // A state event only matches a state step; packet steps ignore it (open-world).
-    if (step.type != StepType::Reaches && step.type != StepType::NeverReaches)
-        return;
-
-    const StatePattern& sp = step.statePattern;
-    if (sp.selHasNotBefore && event.time < anchorTime + sp.selNotBefore)
-        return;
-    if (event.module != stateTarget || event.signalName != sp.signalName || !sp.valueMatches(event.value))
-        return;
-
-    if (step.type == StepType::Reaches) {
-        EV_INFO << "ProtocolTest " << program->name << ": state step " << currentStep
-                << " matched (" << sp.str() << ") at t=" << event.time
-                << " by " << event.module->getFullPath() << endl;
-        advance(event.time);
-    }
-    else // NeverReaches: reaching the forbidden state within the window is a violation
-        decide(false, "forbidden state reached at t=" + event.time.str() + " for step " +
-                      std::to_string(currentStep) + " [" + sp.str() + "]");
 }
 
 void ProtocolTester::performInjection(const Injection& injection)

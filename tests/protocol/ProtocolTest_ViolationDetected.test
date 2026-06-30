@@ -19,11 +19,11 @@ using namespace inet::protocoltest;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("tcp_handshake_bad")
-        .once(on("host1").sentToLower().layer(Layer::Transport)
-                  .match("tcp.synBit == true && tcp.ackBit == false")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
                   .capture("isn", "tcp.sequenceNo").within(0.2))
-        .once(on("host1").receivedFromLower().layer(Layer::Transport)
-                  .match("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 2") // wrong
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 2") // wrong
                   .within(0.5));
 }
 
