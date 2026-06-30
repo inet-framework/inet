@@ -175,6 +175,7 @@
 /examples/inet/ipsec/,               -f omnetpp.ini -c Multicast -r 0,              200s,            e53d-f92e/tplx;6ac3-ef6b/~tNl, PASS, IPSec
 /examples/inet/ipsec/,               -f ipv6.ini -c UDPTraffic6 -r 0,              200s,            bac2-fae6/tplx;d5ee-ccc0/~tNl, PASS, IPSec
 /examples/inet/ipsec/,               -f ipv6.ini -c TCPTraffic6 -r 0,              200s,            50b3-6ddd/tplx;c410-879b/~tNl, PASS, IPSec
+/examples/inet/ipsec/,               -f ipv6.ini -c Multicast6 -r 0,               200s,            e6f7-0820/tplx;1222-ffd8/~tNl, PASS, IPSec
 
 /examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            1afb-5eeb/tplx;3df8-bb36/~tNl;2891-5a4e/~tND;48e1-2966/tyf, PASS, EthernetMac Ipv4
 
