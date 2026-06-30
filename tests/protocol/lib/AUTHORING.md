@@ -40,23 +40,29 @@ long the step waits.
 
 ## 2. Selectors — which event
 
-`on("node")` starts a selector; chain to narrow it:
+`on("path")` names the module (sub)tree to observe; chain to narrow it. There is **one
+functional per concern**:
 
-| Clause | Meaning |
-|---|---|
-| `on("host1")` | the node that emitted the event |
-| `.iface("eth0")` | restrict to an interface |
-| `.sentToLower()` / `.receivedFromLower()` | direction + seam (the usual ones) |
-| `.sentToUpper()` / `.receivedFromUpper()` | up-stack seams |
-| `.dropped()` | a packet-drop event |
-| `.inbound()` / `.outbound()` | direction only |
-| `.layer(Layer::Link)` | `Physical` / `Link` / `Network` / `Transport` / `Application` |
-| `.match("expr")` | content predicate (PacketFilter expression, §4) |
-| `.match([](const MatchContext& c){ ... })` | content predicate as a C++ lambda |
-| `.describe("phrase")` | human phrase used by `describe()` and diagnostics |
-| `.capture("name", "proto.field")` | remember a field value for later steps (§4) |
-| `.within(t)` | deadline: the step must be satisfied within `t` of its anchor |
-| `.after(t)` / `.notBefore(t)` | earliest time (relative to the previous step's match) |
+| Clause | Concern | Meaning |
+|---|---|---|
+| `on("host1")` / `on("host1.wlan[0].mac")` | where (subscribe) | module path to observe — a node, or a specific submodule (matched as a path prefix on the emitter) |
+| `.source("host1.eth[0].mac")` | where (emitter) | narrow to a specific emitting module within `on` |
+| `.signal("packetSentToLower")` | which signal | packet signals, or scalar signals like `controlStateChanged` / `curID` (§8) |
+| `.protocol("mobileipv6")` | packet protocol | the packet's `PacketProtocolTag` |
+| `.dispatch("ipv4")` | dispatch protocol | the packet's `DispatchProtocolReq` (where it's headed) |
+| `.iface("eth0")` | interface | restrict to an interface |
+| `.packet("expr")` | packet content | content predicate over the packet (PacketFilter, §4) |
+| `.match([](const MatchContext& c){ ... })` | content (lambda) | typed content predicate |
+| `.is(value)` | scalar value | a scalar signal's value, e.g. an FSM state index (§8) |
+| `.attributeTo("host1.ipv6.mipv6")` | narration POV | description point of view only — never affects matching (§8b) |
+| `.describe("phrase")` | narration | human phrase (rarely needed — `packet()` auto-translates) |
+| `.capture("name", "proto.field")` | capture | remember a field value for later steps (§4) |
+| `.within(t)` | timing | deadline: satisfy the step within `t` of its anchor |
+| `.after(t)` / `.notBefore(t)` | timing | earliest time, relative to the previous step's match |
+
+`on("host1")` matches `host1` and any descendant; `on("host1.udp")` pins the transport module.
+Choose the path that scopes the observation (this is how you target a "layer" — by its module
+path, e.g. `host1.udp`, `host1.eth[0].mac`, `host1.wlan[0].mac`).
 
 The *anchor* of a step is when the previous step matched (the simulation start for the
 first step). `within`/`after` are measured from it.
@@ -194,25 +200,25 @@ The framework observes any scalar (`intval_t`) signal — an FSM state index, an
 as a second channel beside packets. INET's `Fsm` already emits its state on every transition
 (`setStateChangedSignal`), so the state machine needs no modification.
 
+A scalar signal is just another `signal()` — selected the same way as a packet signal, with
+`.is(value)` for its value and the ordinary cardinality builders (`once`/`never`/…):
+
 ```cpp
-.reaches(state("node[0].eth[0].plca", "controlStateChanged")   // module path, signal name
-           .is(EthernetPlca::CS_COMMIT)                         // the value (a public enum)
-           .describe("node[0] commits in its transmit opportunity")
-           .within(0.001))
-.neverReaches(state("node[0].eth[0].plca", "controlStateChanged")
-           .is(EthernetPlca::CS_ABORT).within(0.001))           // negative: must not enter this state
+.once(on("node[0].eth[0].plca").signal("controlStateChanged")   // module path, then the signal
+          .is(EthernetPlca::CS_COMMIT)                           // the value (a public enum)
+          .within(0.001))
+.never(on("node[0].eth[0].plca").signal("controlStateChanged")
+          .is(EthernetPlca::CS_ABORT).within(0.001))             // negative: must not enter this state
 ```
 
 | Clause | Meaning |
 |---|---|
-| `state("path", "signalName")` | name the emitting module (relative to the network) and its scalar signal |
+| `on("path").signal("name")` | the emitting module and its scalar signal (e.g. `controlStateChanged`) |
 | `.is(value)` | require this exact value (typically a public enum, e.g. `EthernetPlca::CS_TRANSMIT`); omit to match any emission |
-| `.within(t)` / `.notBefore(t)` / `.describe(...)` | as for packet steps |
-| `reaches(p)` | the signal takes the value within the window (advance on match; fail on deadline) — the state analogue of `once` |
-| `neverReaches(p)` | it must **not** take the value within the window (negative) |
+| `once(p)` / `never(p)` / … | the same cardinality builders as packets — `once` = "reaches the value", `never` = "must not" |
 
-`reaches`/`neverReaches` steps interleave with packet steps in one ordered program: a state
-event only matches a state step, a packet event only a packet step.
+A scalar signal flows through the **same engine** as packets: a scalar step matches a scalar
+emission, a packet step a packet — they interleave freely in one ordered program.
 
 **Discovering signals (the authoring step).** Set `stateSignals` to a space-separated list of
 signal names; the tester then dumps every scalar emission (`SE t=… mod=… signal=… value=…`), so
