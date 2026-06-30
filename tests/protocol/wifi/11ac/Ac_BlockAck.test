@@ -1,0 +1,51 @@
+%description:
+802.11ac Block Ack session: ADDBA action (type 13), BlockAckReq (type 24), BlockAck (type 25). [Required]
+
+%file: Ac_BlockAck.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Block Ack session on 11ac: STA sends ADDBA Request (type 13),
+// then BlockAckReq (type 24), AP replies with BlockAck (type 25).
+Define_ProtocolTest(wifi_11ac_block_ack)
+{
+    return ProtocolTest("wifi_11ac_block_ack")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 13")
+                  .describe("ADDBA action frame from sta1").within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 24")
+                  .describe("BlockAckReq from sta1").within(1.0))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("ieee80211mac.type == 25")
+                  .describe("BlockAck received at sta1").within(0.02));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_block_ack"
+*.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
+*.ap.wlan[*].mac.hcf.isBlockAckSupported = true
+*.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
+*.sta1.app[0].sendInterval = 0.1ms
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+# Override radio settings after base.ini (last value wins in omnetpp ini):
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+**.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
+**.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 100
+**.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
+*.sta*.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_block_ack: PASS

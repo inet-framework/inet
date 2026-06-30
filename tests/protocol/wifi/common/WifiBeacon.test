@@ -1,0 +1,30 @@
+%description:
+AP sends a Beacon frame (type 8). [Required -- all generations]
+
+%file: WifiBeacon.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(wifi_beacon)
+{
+    return ProtocolTest("wifi_beacon")
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 8")
+                  .describe("a Beacon from the AP").within(1.1));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_beacon"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_beacon: PASS

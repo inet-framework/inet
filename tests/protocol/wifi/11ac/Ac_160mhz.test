@@ -1,0 +1,49 @@
+%description:
+802.11ac VHT 160 MHz channel mode. [Required]
+
+%file: Ac_160mhz.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+// VHT 160 MHz 1SS MCS7 (64-QAM 5/6 SHORT GI) = 650 Mbps.
+// isVht(c.event, MHz(160), 1) asserts the frame uses a 160 MHz VHT mode.
+Define_ProtocolTest(wifi_11ac_160mhz)
+{
+    return ProtocolTest("wifi_11ac_160mhz")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) { return isVht(c.event, MHz(160), 1); })
+                  .describe("a QoS data frame in VHT mode at 160 MHz").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_160mhz"
+# VHT 160 MHz 1SS MCS7 (64-QAM 5/6 SHORT GI) = 650 Mbps.
+# bandName must be set BEFORE including _ac.ini: identical "**" patterns use
+# first-occurrence-wins, so the 160 MHz band must appear before _ac.ini's 80 MHz.
+**.bandName = "5 GHz (160 MHz)"
+# Pin the data-frame mode to exactly 160 MHz 1SS so findMode() does not pick the
+# first 650 Mbps match (80 MHz 2SS MCS7 SHORT GI, which appears earlier in the table).
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameBitrate = 650Mbps
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameBandwidth = 160MHz
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameNumSpatialStreams = 1
+*.ap.wlan[*].mac.*.rateSelection.dataFrameBitrate = 650Mbps
+*.ap.wlan[*].mac.*.rateSelection.dataFrameBandwidth = 160MHz
+*.ap.wlan[*].mac.*.rateSelection.dataFrameNumSpatialStreams = 1
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+# ScalarMediumAnalogModel does not support partial interference between
+# overlapping 160 MHz signals; allow it to continue.
+**.analogModel.ignorePartialInterference = true
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_160mhz: PASS

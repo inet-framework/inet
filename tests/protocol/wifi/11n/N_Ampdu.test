@@ -1,0 +1,44 @@
+%description:
+802.11n A-MPDU aggregation: frame contains Ieee80211MpduSubframeHeader. [NOT-MODELED -- BasicMpduAggregationPolicy.computeAggregateFrames() returns nullptr in INET]
+
+%file: N_Ampdu.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// A-MPDU aggregation wraps each MPDU in an Ieee80211MpduSubframeHeader.
+// INET's BasicMpduAggregationPolicy.computeAggregateFrames() returns nullptr,
+// so A-MPDU is not actually implemented. This test will FAIL as NOT-MODELED.
+Define_ProtocolTest(wifi_11n_ampdu)
+{
+    return ProtocolTest("wifi_11n_ampdu")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("Ieee80211MpduSubframeHeader.length >= 0")
+                  .describe("a frame containing an A-MPDU subframe header").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_ampdu"
+*.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
+*.ap.wlan[*].mac.hcf.isBlockAckSupported = true
+*.sta1.app[0].sendInterval = 0.1ms
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+# Override radio settings after base.ini (last value wins in omnetpp ini):
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+**.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
+**.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+**.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 100
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_ampdu: FAIL

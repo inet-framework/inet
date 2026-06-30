@@ -1,0 +1,43 @@
+%description:
+802.11n A-MSDU aggregation: QoS data frame with aMsduPresent == true. [Required]
+
+%file: N_Amsdu.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// A-MSDU aggregation sets the A-MSDU Present bit in the QoS Control field.
+// Packet filter uses ieee80211mac.aMsduPresent (field on Ieee80211DataHeader).
+Define_ProtocolTest(wifi_11n_amsdu)
+{
+    return ProtocolTest("wifi_11n_amsdu")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40 && ieee80211mac.aMsduPresent == true")
+                  .describe("a QoS data frame with A-MSDU Present bit set").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_amsdu"
+*.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
+*.ap.wlan[*].mac.hcf.isBlockAckSupported = true
+*.sta1.app[0].sendInterval = 0.1ms
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+# Override radio settings after base.ini (last value wins in omnetpp ini):
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+**.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
+**.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+**.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 100
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_amsdu: PASS

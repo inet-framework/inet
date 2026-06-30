@@ -1,0 +1,48 @@
+%description:
+802.11ac VHT spatial multiplexing -- 4 spatial streams. [Optional]
+
+802.11ac optionally allows up to 8 spatial streams; INET models up to 4. This test
+asserts the realistic maximum (4 SS) and CONFORMS; true 5-8 stream support is a
+documented gap (see README). VHT 80 MHz 4SS MCS8 (256-QAM 3/4, short GI) = 1560 Mbps,
+pinned so the rate lookup returns exactly that mode.
+
+%file: Ac_4ss.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(wifi_11ac_4ss)
+{
+    return ProtocolTest("wifi_11ac_4ss")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) { return isVht(c.event, MHz(80), 4); })
+                  .describe("a QoS data frame in VHT mode with 4 spatial streams "
+                            "(INET's maximum; 802.11ac optionally allows up to 8)").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_4ss"
+*.sta*.wlan[*].radio.antenna.numAntennas = 8
+*.ap.wlan[*].radio.antenna.numAntennas = 8
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameBitrate = 1560Mbps
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameBandwidth = 80MHz
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameNumSpatialStreams = 4
+*.ap.wlan[*].mac.*.rateSelection.dataFrameBitrate = 1560Mbps
+*.ap.wlan[*].mac.*.rateSelection.dataFrameBandwidth = 80MHz
+*.ap.wlan[*].mac.*.rateSelection.dataFrameNumSpatialStreams = 4
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+# Some probed rates may span non-matching bandwidths; ignore partial interference.
+**.analogModel.ignorePartialInterference = true
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_4ss: PASS
