@@ -77,6 +77,8 @@ public:
     void restartHoldTimer();
     void restartKeepAliveTimer();
     void restartConnectRetryTimer();
+    void stopHoldTimer();
+    void stopKeepAliveTimer();
     void stopConnectRetryTimer();
 
     void sendOpenMessage();

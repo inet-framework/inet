@@ -137,6 +137,16 @@ void BgpSession::restartConnectRetryTimer()
     bgpRouter.scheduleAt(simTime() + _connectRetryTime, _ptrConnectRetryTimer);
 }
 
+void BgpSession::stopHoldTimer()
+{
+    bgpRouter.cancelEvent(_ptrHoldTimer);
+}
+
+void BgpSession::stopKeepAliveTimer()
+{
+    bgpRouter.cancelEvent(_ptrKeepAliveTimer);
+}
+
 void BgpSession::stopConnectRetryTimer()
 {
     bgpRouter.cancelEvent(_ptrConnectRetryTimer);
