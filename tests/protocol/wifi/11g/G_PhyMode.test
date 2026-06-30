@@ -1,0 +1,32 @@
+%description:
+802.11g ERP-OFDM PHY (2.4 GHz). [Required]
+
+%file: G_PhyMode.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(wifi_11g_erp_ofdm_phy)
+{
+    return ProtocolTest("wifi_11g_erp_ofdm_phy")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) { return isErpOfdm(c.event); })
+                  .describe("a data frame transmitted in ERP-OFDM mode").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11g_erp_ofdm_phy"
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11g_erp_ofdm_phy: PASS
