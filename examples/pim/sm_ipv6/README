@@ -1,0 +1,33 @@
+IPv6 PIM-SM (Sparse Mode) Example
+=================================
+
+This is the pure-IPv6 counterpart of the IPv4 PIM-SM example (see ../sm),
+demonstrating the rendezvous-point machinery over IPv6: Register /
+Register-Stop, the shared (*,G) tree, and the switchover to the (S,G) source
+tree. It uses MulticastRouter6 nodes running PIM in sparse mode, with
+Ipv6FlatNetworkConfigurator for addressing and MLD for group membership.
+
+The three routers form a triangle so that the shortest path from the receiver
+side to the source does NOT go through the RP:
+
+    Source --- DR_S ===== RP
+                 \\       //
+                  \\     //
+                   == DR_R --- Receiver
+
+DR_S is the source's designated router, RP is the (statically configured)
+rendezvous point at aaaa:1:65:0:8aa:ff:fe00:4, and DR_R is the receiver's
+designated router. The Receiver joins group ff0e::8 before the source starts,
+so the shared (*,G) tree toward the RP is built first. When the Source starts
+sending (t=20s), DR_S encapsulates the traffic in PIM Register messages to the
+RP; the RP forwards it down the shared tree to the Receiver and joins the
+source tree. The last-hop router DR_R then switches to the shortest-path tree,
+joining (S,G) toward the Source over the direct DR_S--DR_R link (bypassing the
+RP).
+
+Duplicate Address Detection is disabled (dupAddrDetectTransmits = 0) for a
+fast, deterministic startup.
+
+To run the example:
+
+    inet -u Cmdenv -c General

@@ -1,0 +1,34 @@
+IPv6 PIM-SM Source-Specific Multicast (SSM) Example
+===================================================
+
+This example demonstrates IPv6 source-specific multicast (SSM, RFC 4607) with
+PIM-SM. There is NO rendezvous point: SSM groups (the FF3x::/32 range) are
+served by (S,G) source trees built directly toward the source. It uses
+MulticastRouter6 nodes running PIM in sparse mode, Ipv6FlatNetworkConfigurator
+for addressing, and MLDv2 (required for source-specific membership) for group
+membership.
+
+    Source1 --\
+               R1 ----- R2 ----- Receiver
+    Source2 --/
+
+Both sources send to the same SSM group ff3e::8 (Source1 from t=20s, Source2
+from t=21s). The Receiver (behind R2) uses MLDv2 to subscribe in INCLUDE mode
+to Source1 only. R2 therefore sends a PIM-SM Join(Source1, ff3e::8) toward the
+source (via R1), and the Receiver gets Source1's stream -- but never Source2's,
+since no (Source2, ff3e::8) tree is ever built.
+
+Note on the source address: the Receiver's multicastSources is set to Source1's
+*global* address (aaaa:2:65:0:8aa:ff:fe00:1, assigned by the
+Ipv6FlatNetworkConfigurator), not the link-local one. It is hardcoded rather
+than resolved with "Source1(ipv6)" because the resolver returns the link-local
+address, whereas Source1 sources its global-scope ff3e:: traffic from its
+global address -- an INCLUDE filter naming the link-local would match nothing.
+(This was discovered by a dry run; it is stable for this fixed topology.)
+
+Duplicate Address Detection is disabled (dupAddrDetectTransmits = 0) for a
+fast, deterministic startup.
+
+To run the example:
+
+    inet -u Cmdenv -c General

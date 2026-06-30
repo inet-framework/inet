@@ -1,0 +1,28 @@
+IPv6 PIM-DM (Dense Mode) Example
+================================
+
+This is the pure-IPv6 counterpart of the IPv4 PIM-DM example (see ../dm). It
+uses the MulticastRouter6 node (which extends Router6, has no IPv4 stack, and
+runs PIM with addressFamily = "ipv6"); all addressing and multicast routing
+is IPv6 (Ipv6FlatNetworkConfigurator + PIM6), with MLD providing multicast
+group membership.
+
+Three multicast routers R1, R2 and R3 run PIM-DM in dense mode, connecting a
+source (Source1, behind R1) and three hosts (Host1 and Host2 behind R2,
+Host3 behind R3). Source1 sends to the IPv6 multicast group ff0e::1 starting
+at t=30s.
+
+  - Host2 joins ff0e::1 for the whole run, so its branch always receives the
+    stream (flooded and never pruned).
+  - Host3 has no receiver at first, so R3's branch is pruned after the initial
+    flood; Host3 joins at t=70s, which makes R3 send a Graft upstream and the
+    branch starts forwarding again.
+  - Host1 never joins, so its downstream interface is pruned and stays pruned.
+
+Duplicate Address Detection is disabled (dupAddrDetectTransmits = 0) for a
+fast, deterministic startup, so addresses, PIM Hellos and unicast routes are
+usable from t=0.
+
+To run the example:
+
+    inet -u Cmdenv -c General
