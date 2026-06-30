@@ -1,0 +1,47 @@
+%description:
+802.11n STBC (Space-Time Block Coding): a frame is transmitted with STBC enabled
+(getSTBC() > 0 in the HT signal mode). [NOT-MODELED -- INET's Ieee80211HtSignalMode::
+getSTBC() is hardcoded to return 0 with an explicit "Limitation: We assume that STBC is
+not used" comment; no STBC encoding is ever performed]
+
+%file: N_StbcCap.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::physicallayer;
+
+// Spec assertion: the HT signal mode's STBC field is non-zero. INET always returns 0.
+Define_ProtocolTest(wifi_11n_stbc_cap)
+{
+    return ProtocolTest("wifi_11n_stbc_cap")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      auto m = dynamic_cast<const Ieee80211HtMode *>(txMode(c.event));
+                      return m != nullptr &&
+                             m->getPreambleMode()->getSignalMode()->getSTBC() > 0;
+                  })
+                  .describe("QoS data frame transmitted with STBC enabled").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_stbc_cap"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_stbc_cap: FAIL

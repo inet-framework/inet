@@ -1,0 +1,34 @@
+%description:
+802.11 PCF (Point Coordination Function): CF-Poll (type 26 PS-Poll) or a beacon
+with the CF Parameter Set. [NOT-MODELED -- Ieee80211Mac.ned explicitly notes "PCF is
+missing"; the Pcf C++ class is a non-functional stub]
+
+%file: Legacy_Pcf.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// PCF uses PS-Poll (type 0x1a = 26) for polled access. INET's Pcf class is a stub;
+// no CF-Poll frames are ever emitted. This assertion will never be satisfied.
+Define_ProtocolTest(wifi_legacy_pcf)
+{
+    return ProtocolTest("wifi_legacy_pcf")
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 26")
+                  .describe("a PS-Poll / CF-Poll frame from AP (PCF)").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_legacy_pcf"
+include ../../ini/_legacy.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_legacy_pcf: FAIL

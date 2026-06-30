@@ -1,0 +1,49 @@
+%description:
+802.11n HT Greenfield preamble: a frame is transmitted with the greenfield preamble
+format (HT_PREAMBLE_GREENFIELD). [NOT-MODELED -- the HT_PREAMBLE_GREENFIELD enum value
+exists in Ieee80211HtMode and its timing is computed, but no MAC-layer or NED parameter
+selects greenfield mode; the rate selection and mode set always use HT_PREAMBLE_MIXED]
+
+%file: N_Greenfield.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::physicallayer;
+
+// Spec assertion: a frame using HT greenfield preamble (eliminates the L-STF/L-LTF/L-SIG
+// non-HT portion). INET always uses HT_PREAMBLE_MIXED; greenfield is not selectable.
+Define_ProtocolTest(wifi_11n_greenfield)
+{
+    return ProtocolTest("wifi_11n_greenfield")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      auto m = dynamic_cast<const Ieee80211HtMode *>(txMode(c.event));
+                      return m != nullptr &&
+                             m->getPreambleMode()->getPreambleFormat() ==
+                                 Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD;
+                  })
+                  .describe("QoS data frame with HT greenfield preamble").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11n_greenfield"
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.wlan[*].radio.transmitter.power = 0.12mW
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_greenfield: FAIL

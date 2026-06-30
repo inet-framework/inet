@@ -1,0 +1,43 @@
+%description:
+802.11 DCF retransmission: when a frame is not acknowledged, the MAC retransmits with
+the Retry bit set (ieee80211mac.retry == true). [NOT-MODELED-ASSERTABLE]
+
+INET does implement the retry bit — the Ieee80211MacHeader.retry field is set and
+BasicRecoveryProcedure.doRetry() is called. However, reliably triggering a retry without
+modifying the shared NED (no PacketTap module in WifiInfraNetwork) is not deterministic:
+the radio settings that cause ACKs to be dropped also prevent association from completing,
+and there is no per-frame-type radio filtering in ini. A PacketTap injector could solve
+this, but adding it would modify the harness (forbidden). Therefore this test is marked
+NOT-MODELED-ASSERTABLE and expected to FAIL at the deadline.
+
+%file: WifiRetransmission.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// 32 = ST_DATA, 40 = ST_DATA_WITH_QOS.
+// The Retry bit (ieee80211mac.retry) is set on retransmissions by BasicRecoveryProcedure.
+// Without a PacketTap to selectively drop ACKs, we cannot deterministically trigger
+// retry; the test will miss its deadline.
+Define_ProtocolTest(wifi_retransmission)
+{
+    return ProtocolTest("wifi_retransmission")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("(ieee80211mac.type == 32 || ieee80211mac.type == 40) && ieee80211mac.retry == true")
+                  .describe("a retransmitted data frame with Retry bit set").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_retransmission"
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_retransmission: FAIL

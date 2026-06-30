@@ -1,0 +1,43 @@
+%description:
+802.11g ERP protection: when a 802.11b-only STA is present in the BSS, the AP/STA must
+use CTS-to-self (type 28) or RTS/CTS (type 27) before ERP-OFDM transmissions. [NOT-MODELED
+-- INET's MAC has no ERP protection mechanism; no CtsToSelf or erpProtection module exists;
+Ieee80211Mac.ned has no protection mode; no CTS-to-self frame is ever emitted]
+
+%file: G_ErpProtection.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Spec-required assertion: a CTS-to-self (type 28) or RTS (type 27) precedes each
+// ERP-OFDM data frame when a non-ERP STA is associated. INET never emits such protection
+// frames, so this will FAIL.
+Define_ProtocolTest(wifi_11g_erp_protection)
+{
+    return ProtocolTest("wifi_11g_erp_protection")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 28 || ieee80211mac.type == 27")
+                  .describe("CTS-to-self or RTS for ERP protection before a data frame")
+                  .within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11g_erp_protection"
+# Mixed mode: AP supports both 11b and 11g; this should trigger ERP protection.
+*.sta*.wlan[*].opMode = "g(mixed)"
+*.ap.wlan[*].opMode = "g(mixed)"
+**.bandName = "2.4 GHz"
+**.wlan[*].radio.antenna.numAntennas = 1
+*.sta*.wlan[*].mac.qosStation = false
+*.ap.wlan[*].mac.qosStation = false
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11g_erp_protection: FAIL
