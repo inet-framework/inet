@@ -970,6 +970,8 @@ void BgpRouter::installBestRouteForPrefix(const L3Address& prefix, int prefixLen
         deleteLocRibEntry(oldEntry); // frees *oldEntry; do not dereference oldEntry past this point
 
     if (best == nullptr) {
+        EV_INFO << "Prefix " << prefix.getPrefix(prefixLength) << "/" << prefixLength
+                << ": no alternative path in Adj-RIB-In, sending explicit BGP withdrawal\n";
         if (oldSnapshot != nullptr)
             withdrawSendProcess(triggeringSessionId, oldSnapshot);
         delete oldSnapshot;
@@ -1019,6 +1021,11 @@ void BgpRouter::installBestRouteForPrefix(const L3Address& prefix, int prefixLen
 void BgpRouter::withdrawRoutesFromSession(SessionId sessionId)
 {
     auto affectedPrefixes = removeAdjRibInRoutesFromSession(sessionId);
+    auto sessionIt = _bgpSessions.find(sessionId);
+    EV_INFO << "BGP session " << sessionId << " to peer "
+            << (sessionIt != _bgpSessions.end() ? sessionIt->second->getPeerAddr().str() : std::string("?"))
+            << " lost: removed its Adj-RIB-In routes, re-running best-path selection for "
+            << affectedPrefixes.size() << " affected prefix(es)\n";
     for (const auto& prefix : affectedPrefixes)
         installBestRouteForPrefix(prefix.prefix, prefix.prefixLength, sessionId);
 }

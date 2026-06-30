@@ -475,7 +475,7 @@ void Established::entry()
 
 void Established::ConnectRetryTimer_Expires()
 {
-    EV_TRACE << "Processing Established::ConnectRetryTimer_Expires" << std::endl;
+    EV_DEBUG << "Processing Established::ConnectRetryTimer_Expires" << std::endl;
     BgpSession& session = TopState::box().getModule();
     session.withdrawRoutesFromSession();
     // In response to any other event (Events 9, 12-13, 20-22), the local system:
@@ -498,7 +498,7 @@ void Established::ConnectRetryTimer_Expires()
 
 void Established::HoldTimer_Expires()
 {
-    EV_TRACE << "Processing Established::HoldTimer_Expires" << std::endl;
+    EV_DEBUG << "Processing Established::HoldTimer_Expires" << std::endl;
     BgpSession& session = TopState::box().getModule();
     session.withdrawRoutesFromSession();
     // If the HoldTimer_Expires event occurs (Event 10), the local system:
@@ -533,7 +533,7 @@ void Established::KeepaliveTimer_Expires()
 
 void Established::TcpConnectionFails()
 {
-    EV_TRACE << "Processing Established::TcpConnectionFails" << std::endl;
+    EV_DEBUG << "Processing Established::TcpConnectionFails" << std::endl;
     BgpSession& session = TopState::box().getModule();
     session.withdrawRoutesFromSession();
     session.restartConnectRetryTimer();
