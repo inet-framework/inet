@@ -2837,7 +2837,8 @@ void Mipv6::cancelEntries(int interfaceId, Ipv6Address& CoA)
             // destroy tunnel (if we have a BU entry here)
             if ((*oldIt).first.type == KEY_BU)
                 destroyTunnelForEntryAndTrigger(CoA, (*oldIt).first.dest);
-                removeRouteOptimizationForTrigger((*oldIt).first.dest);
+
+            removeRouteOptimizationForTrigger((*oldIt).first.dest);
 
             // then cancel the pending event
             cancelTimerIfEntry((*oldIt).first.dest, (*oldIt).first.interfaceID, (*oldIt).first.type);
