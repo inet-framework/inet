@@ -1,19 +1,19 @@
-//
-// WiFi conformance suite -- cross-generation: infrastructure association FSM.
-//
-// 802.11 connection setup, observed at the STA MAC: the STA receives a Beacon from
-// the AP, then completes open-system Authentication and Association. The frames are
-// identical across b/a/g/n/ac, so this runs on any generation's config.
-//
-// Required (mandatory) behavior. SPDX-License-Identifier: LGPL-3.0-or-later
-//
+%description:
+802.11 infrastructure association FSM. [Required -- all generations]
+
+Connection setup observed at the STA MAC: the STA receives a Beacon from the AP, then
+completes open-system Authentication and Association. The frames are identical across
+b/a/g/n/ac, so this is a cross-generation test (run here on the 11ac config).
+
+%file: WifiAssociation.cc
+
 #include "ProtocolTest.h"
 
 namespace inet {
 namespace protocoltest {
 
-// Frame type (combined type+subtype byte) values used here:
-//   0 = Association Request, 1 = Association Response, 8 = Beacon, 11 = Authentication.
+// Frame type (combined type+subtype byte): 0=Assoc Request, 1=Assoc Response,
+// 8=Beacon, 11=Authentication.
 Define_ProtocolTest(wifi_association)
 {
     return ProtocolTest("wifi_association")
@@ -31,3 +31,13 @@ Define_ProtocolTest(wifi_association)
 
 } // namespace protocoltest
 } // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_association"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_association: PASS

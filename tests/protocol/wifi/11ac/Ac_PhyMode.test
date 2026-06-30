@@ -1,0 +1,43 @@
+%description:
+802.11ac (WiFi 5) -- VHT 80 MHz PHY mode. [Required]
+
+A transmitted QoS data frame must use a VHT mode at 80 MHz. Read via a C++ lambda over
+the Ieee80211ModeReq tag (the PHY mode is an opaque pointer the PacketFilter string engine
+cannot follow). The 292.5 Mbps data rate selects an 80 MHz / 1-stream VHT mode (MCS7);
+without it INET's rate selection would default to a 20 MHz VHT mode.
+
+%file: Ac_PhyMode.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+// 40 = QoS data (ST_DATA_WITH_QOS).
+Define_ProtocolTest(wifi_11ac_vht_80mhz)
+{
+    return ProtocolTest("wifi_11ac_vht_80mhz")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) { return isVht(c.event, MHz(80), 1); })
+                  .describe("a data frame transmitted in VHT mode at 80 MHz")
+                  .within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_vht_80mhz"
+# Force an 80 MHz / 1-stream VHT mode (MCS7) for this PHY assertion; the default rate
+# selection would use a 20 MHz VHT mode. TX-only test, so reception SNR is moot.
+*.sta*.wlan[*].bitrate = 292.5Mbps
+*.ap.wlan[*].bitrate = 292.5Mbps
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_vht_80mhz: PASS

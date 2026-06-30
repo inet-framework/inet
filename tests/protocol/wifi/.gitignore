@@ -1,4 +1,5 @@
 # generated / machine-specific build artifacts
+work/
 Makefile
 makefrag
 out/
