@@ -370,6 +370,9 @@ void BgpRouter::processMessageFromTcp(cMessage *msg)
         // (== peerAddr). The connection opened by the higher-Identifier speaker survives; both
         // ends compute the same winner, so they agree.
         TcpSocket *current = _bgpSessions[i]->getSocket();
+        EV_INFO << "Incoming BGP connection from " << peerAddr << " for session " << i
+                << "; existing socket state="
+                << (current ? TcpSocket::stateName(current->getState()) : "none") << "\n";
         if (current && (current->getState() == TcpSocket::CONNECTING || current->getState() == TcpSocket::CONNECTED)) {
             L3Address ourId = (_bgpSessions[i]->getType() == EGP)
                 ? getInterfaceAddress(_bgpSessions[i]->getLinkIntf())
@@ -379,13 +382,19 @@ void BgpRouter::processMessageFromTcp(cMessage *msg)
                                   : (ourId.toIpv4().getInt() > peerAddr.toIpv4().getInt());
             if (weWin) {
                 // we win: keep our connection, reject the peer's colliding one
+                EV_INFO << "Connection collision (RFC 4271 6.8): our id " << ourId
+                        << " > peer " << peerAddr << ", rejecting peer's incoming connection\n";
                 socket->abort();
                 delete socket;
                 delete msg;
                 return;
             }
             // else peer wins: fall through and adopt the incoming connection (dropping ours)
+            EV_INFO << "Connection collision (RFC 4271 6.8): peer id " << peerAddr
+                    << " > our " << ourId << ", adopting peer's incoming connection\n";
         }
+
+        EV_INFO << "Adopting incoming connection from " << peerAddr << " for session " << i << "\n";
 
         socket->setCallback(this);
         socket->setUserData((void *)(uintptr_t)i);
