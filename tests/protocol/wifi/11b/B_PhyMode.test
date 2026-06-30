@@ -1,0 +1,32 @@
+%description:
+802.11b HR/DSSS-CCK PHY (11 Mbps). [Required]
+
+%file: B_PhyMode.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(wifi_11b_cck_phy)
+{
+    return ProtocolTest("wifi_11b_cck_phy")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) { return isHrDsss(c.event); })
+                  .describe("a data frame transmitted in HR/DSSS-CCK mode").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11b_cck_phy"
+include ../../ini/_b.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11b_cck_phy: PASS

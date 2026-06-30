@@ -1,0 +1,32 @@
+%description:
+802.11a OFDM PHY (5 GHz, 20 MHz). [Required]
+
+%file: A_PhyMode.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(wifi_11a_ofdm_phy)
+{
+    return ProtocolTest("wifi_11a_ofdm_phy")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 32 || ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) { return isOfdm(c.event); })
+                  .describe("a data frame transmitted in OFDM mode").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11a_ofdm_phy"
+include ../../ini/_a.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11a_ofdm_phy: PASS
