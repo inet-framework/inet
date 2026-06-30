@@ -36,7 +36,9 @@
 /examples/bgpv4/BgpDiamondFailover/, -f omnetpp.ini -c General -r 0,                160s,            819b-726f/tplx;759b-8711/~tNl;f690-850d/~tND;fc56-f343/tyf, PASS, ospf EthernetMac Ipv4 lifecycle
 /examples/bgpv4/BgpDiamondFailover6/,-f omnetpp.ini -c General -r 0,                160s,            a666-6758/tplx;d51e-c4d6/~tNl;2735-bd52/~tND;5c49-0569/tyf, PASS, ospf EthernetMac Ipv6 lifecycle
 /examples/bgpv4/BgpWithdrawal/,      -f omnetpp.ini -c General -r 0,                100s,            5c56-7cbf/tplx;8250-4312/~tNl;4fe4-ce94/~tND;4b70-109c/tyf, PASS, ospf EthernetMac Ipv4 lifecycle
+/examples/bgpv4/BgpWithdrawal/,      -f omnetpp.ini -c Restart -r 0,                160s,            ca6f-1994/tplx;93e2-ddd6/~tNl;e095-19d7/~tND;6886-9c54/tyf, PASS, ospf EthernetMac Ipv4 lifecycle
 /examples/bgpv4/BgpWithdrawal6/,     -f omnetpp.ini -c General -r 0,                100s,            ab2e-3ef8/tplx;9719-7216/~tNl;3f7c-49a9/~tND;e5cd-25cd/tyf, PASS, ospf EthernetMac Ipv6 lifecycle
+/examples/bgpv4/BgpWithdrawal6/,     -f omnetpp.ini -c Restart -r 0,                160s,            1049-f3fa/tplx;9430-9652/~tNl;16c8-e8fa/~tND;92cc-81f6/tyf, PASS, ospf EthernetMac Ipv6 lifecycle
 
 /examples/clock/,                    -f omnetpp.ini -c General -r 0,                10ms,            35c3-8325/tplx;0000-0000/~tNl;0000-0000/~tND;a4b7-bff5/tyf, PASS,
 

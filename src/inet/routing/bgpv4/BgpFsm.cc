@@ -288,13 +288,19 @@ void OpenSent::KeepaliveTimer_Expires()
 
 void OpenSent::TcpConnectionFails()
 {
-    EV_TRACE << "Processing OpenSent::BgpOpen" << std::endl;
+    EV_TRACE << "Processing OpenSent::TcpConnectionFails" << std::endl;
     BgpSession& session = TopState::box().getModule();
     // If a TcpConnectionFails event (Event 18) is received, the local system:
     // - closes the BGP connection,
     session._info.socket->abort();
-    // - restarts the ConnectRetryTimer,
-    session.stopConnectRetryTimer();
+    // - restarts the ConnectRetryTimer (so the node actively retries from the Active state;
+    //   the previous code stopped it, leaving the node to wait passively forever if the peer
+    //   did not initiate),
+    session.restartConnectRetryTimer();
+    // - stops the HoldTimer set on entry to OpenSent, so this connection's "large value"
+    //   HoldTimer cannot expire later in the Active state and tear down a connection that
+    //   has since been (re)adopted from the peer (RFC 4271 8.2.2: Active has no HoldTimer),
+    session.stopHoldTimer();
     // - continues to listen for a connection that may be initiated by the remote BGP peer, and
     session.listenConnectionFromPeer();
     // - changes its state to Active.
