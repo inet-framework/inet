@@ -2,9 +2,9 @@
 
 ## Implementation status (2026-06-30)
 
-**Implemented and committed** in `tests/protocol/wifi/` (38 tests; `opp_test` aggregate PASS:
-27 CONFORMS / 11 NOT-MODELED / 0 DEVIATES). See `tests/protocol/wifi/README.md` for the full
-conformance matrix + findings.
+**Fully implemented and committed** in `tests/protocol/wifi/` (**74 tests**; `opp_test` aggregate
+PASS: **39 CONFORMS / 35 NOT-MODELED / 0 DEVIATES**). See `tests/protocol/wifi/README.md` for the
+full conformance matrix + findings.
 
 Design as built (refinements agreed during implementation):
 - **Packaging**: each test is an `opp_test` `.test` file with its program in `%file: <Name>.cc`
@@ -24,11 +24,13 @@ Headline findings: **A-MPDU is not implemented** in INET (policy returns nullptr
 mandatory for 11ac; spatial streams cap at 4 (spec allows 8); MU-MIMO/Group-ID/beamforming/
 OpMode-Notification/multi-TID-BA and amendments 11e-ADDTS/11h-DFS/11i-RSN are not modeled.
 
-**Not yet authored** (remaining plan rows — mostly additional optional/edge features, each
-would add another CONFORMS or expected-FAIL gap-marker): per-generation rate sweeps, 11b short
-preamble/PBCC, PCF, fragmentation/reassembly, reassociation, disassoc/deauth, duplicate
-detection, ERP protection (mixed b/g), short-slot/short-GI, RD/PSMP/greenfield/2040-coex,
-delayed BA/U-APSD, 80+80 MHz, country IE (11d), TPC (11h), radio measurement (11k), PMF (11w).
+**All planned feature rows are implemented** (74 tests). The earlier "remaining" optional/edge
+rows — rate sweeps, fragmentation, RTS/CTS variants, short-slot/short-GI, EDCA/TXOP, the HT/VHT
+management IEs, ERP protection, PCF/PBCC/short-preamble/greenfield/RDG/STBC/LDPC/2040-coex/
+80+80MHz, reassociation/deauth, shared-key/RSN/PMF/U-APSD/delayed-BA/ADDTS, DFS/TPC/country-IE/
+RRM — are all present, classified CONFORMS or NOT-MODELED honestly (see the README matrix). One
+caveat: `WifiRetransmission` is a test-coverage gap (the Retry bit *is* modeled but the loss-free
+shared network never triggers a retransmission), not an INET gap.
 
 ## Context
 
