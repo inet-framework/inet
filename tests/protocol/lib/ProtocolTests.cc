@@ -31,9 +31,9 @@ using inet::physicallayer::EthernetPlca;
 Define_ProtocolTest(udp_basic_pass)
 {
     return ProtocolTest("udp_basic_pass")
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.udp").signal("packetSentToLower")
                   .packet("udp.destPort == 5000").within(0.2))
-        .once(on("host2").signal("packetReceivedFromLower").layer(Layer::Transport)
+        .once(on("host2.udp").signal("packetReceivedFromLower")
                   .packet("udp.destPort == 5000").within(0.1));
 }
 
@@ -53,19 +53,19 @@ Define_ProtocolTest(tcp_handshake_seq)
 {
     return ProtocolTest("tcp_handshake_seq")
         // host1 sends the SYN; remember its initial sequence number.
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetSentToLower")
                   .packet("tcp.synBit == true && tcp.ackBit == false")
                   .describe("host1's SYN")
                   .capture("isn", "tcp.sequenceNo")
                   .within(0.2))
         // host1 receives the SYN+ACK acknowledging isn+1; remember the peer's ISN.
-        .once(on("host1").signal("packetReceivedFromLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
                   .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 1")
                   .describe("the SYN+ACK acknowledging host1's ISN+1")
                   .capture("peerIsn", "tcp.sequenceNo")
                   .within(0.5))
         // host1 sends the final ACK acknowledging the peer's ISN+1.
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetSentToLower")
                   .packet("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {peerIsn} + 1")
                   .describe("host1's final ACK acknowledging the peer's ISN+1")
                   .within(0.5));
@@ -75,11 +75,11 @@ Define_ProtocolTest(tcp_handshake_seq)
 Define_ProtocolTest(tcp_handshake_seq_bad)
 {
     return ProtocolTest("tcp_handshake_seq_bad")
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetSentToLower")
                   .packet("tcp.synBit == true && tcp.ackBit == false")
                   .capture("isn", "tcp.sequenceNo")
                   .within(0.2))
-        .once(on("host1").signal("packetReceivedFromLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
                   .packet("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == {isn} + 2") // wrong
                   .within(0.5));
 }
@@ -95,7 +95,7 @@ Define_ProtocolTest(tcp_retransmit)
                      .match("tcp.destPort == 1000 && tcp.synBit == false").minBytes(100).nth(1)
                      .drop().describe("the first data segment"))
         // host1 sends the data segment after the handshake; remember its sequence number.
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetSentToLower")
                   .packet("tcp.destPort == 1000 && tcp.synBit == false")
                   .after(0.15)
                   .capture("dataSeq", "tcp.sequenceNo")
@@ -103,7 +103,7 @@ Define_ProtocolTest(tcp_retransmit)
                   .within(0.3))
         // the tap drops it on the wire, so host1 retransmits the same segment (same
         // sequence number) once the retransmission timer fires.
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetSentToLower")
                   .packet("tcp.sequenceNo == {dataSeq} && tcp.synBit == false")
                   .notBefore(0.3)
                   .describe("the retransmitted data segment (same sequence number)")
@@ -120,13 +120,13 @@ Define_ProtocolTest(tcp_retransmit_mutate)
                      .match("tcp.destPort == 1000 && tcp.synBit == false").minBytes(100).nth(1)
                      .mutate([](Packet *frame) { frame->setBitError(true); })
                      .describe("the first data segment (corrupt it)"))
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetSentToLower")
                   .packet("tcp.destPort == 1000 && tcp.synBit == false")
                   .after(0.15)
                   .capture("dataSeq", "tcp.sequenceNo")
                   .describe("the data segment")
                   .within(0.3))
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetSentToLower")
                   .packet("tcp.sequenceNo == {dataSeq} && tcp.synBit == false")
                   .notBefore(0.3)
                   .describe("the retransmitted data segment (same sequence number)")
@@ -177,7 +177,7 @@ Define_ProtocolTest(udp_inject_echo)
         .inject(inject("host2").into("eth[0]", "upperLayerOut").at(0.5)
                   .describe("a UDP datagram to port 5000").packet(buildInjectedUdpDatagram))
         // The inject is an ordered step, so this expect is anchored at the injection time.
-        .once(on("host2").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host2.udp").signal("packetSentToLower")
                   .packet("udp.srcPort == 5000").within(0.2));
 }
 
@@ -228,7 +228,7 @@ Define_ProtocolTest(tcp_handshake_peer)
 {
     return ProtocolTest("tcp_handshake_peer")
         // 1. host1's outgoing SYN; capture its ISN and ephemeral source port.
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetSentToLower")
                   .packet("tcp.synBit == true && tcp.ackBit == false")
                   .describe("host1's SYN (SYN set, ACK clear)")
                   .capture("isn", "tcp.sequenceNo")
@@ -238,7 +238,7 @@ Define_ProtocolTest(tcp_handshake_peer)
         .inject(inject("host1").into("eth[0]", "upperLayerOut").after(0.001)
                   .describe("a SYN+ACK acknowledging host1's ISN+1").packet(buildSynAck))
         // 3. host1's final ACK, acknowledging the peer's ISN+1 (5000+1).
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.tcp").signal("packetSentToLower")
                   .packet("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == 5001")
                   .describe("host1's final ACK (acknowledging the peer's ISN+1)")
                   .within(1.0));
@@ -251,9 +251,9 @@ Define_ProtocolTest(multi_flow)
 {
     return ProtocolTest("multi_flow")
         .unordered({
-            on("host1").signal("packetSentToLower").layer(Layer::Transport)
+            on("host1.udp").signal("packetSentToLower")
               .packet("udp.destPort == 5000").describe("a datagram to port 5000").within(1.0),
-            on("host1").signal("packetSentToLower").layer(Layer::Transport)
+            on("host1.udp").signal("packetSentToLower")
               .packet("udp.destPort == 5001").describe("a datagram to port 5001").within(1.0)
         })
         .never(on("host1").signal("packetSentToLower")
@@ -264,7 +264,7 @@ Define_ProtocolTest(multi_flow)
 Define_ProtocolTest(multi_flow_bad)
 {
     return ProtocolTest("multi_flow_bad")
-        .never(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .never(on("host1.udp").signal("packetSentToLower")
                     .packet("udp.destPort == 5000").describe("any datagram to port 5000").within(0.3));
 }
 
@@ -273,9 +273,9 @@ Define_ProtocolTest(multi_flow_bad)
 Define_ProtocolTest(optional_skip)
 {
     return ProtocolTest("optional_skip")
-        .atMostOnce(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .atMostOnce(on("host1.udp").signal("packetSentToLower")
                     .packet("udp.destPort == 9999").describe("a datagram to port 9999").within(0.3))
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.udp").signal("packetSentToLower")
                   .packet("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0));
 }
 
@@ -284,9 +284,9 @@ Define_ProtocolTest(optional_skip)
 Define_ProtocolTest(udp_delivery)
 {
     return ProtocolTest("udp_delivery")
-        .delivery(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .delivery(on("host1.udp").signal("packetSentToLower")
                     .packet("udp.destPort == 5000").describe("a datagram to port 5000"),
-                  on("host2").signal("packetReceivedFromLower").layer(Layer::Transport)
+                  on("host2.udp").signal("packetReceivedFromLower")
                     .packet("udp.destPort == 5000"),
                   0.1);
 }
@@ -296,9 +296,9 @@ Define_ProtocolTest(udp_anyof)
 {
     return ProtocolTest("udp_anyof")
         .anyOf({
-            on("host1").signal("packetSentToLower").layer(Layer::Transport)
+            on("host1.udp").signal("packetSentToLower")
               .packet("udp.destPort == 9999").describe("a datagram to port 9999").within(1.0),
-            on("host1").signal("packetSentToLower").layer(Layer::Transport)
+            on("host1.udp").signal("packetSentToLower")
               .packet("udp.destPort == 5000").describe("a datagram to port 5000").within(1.0)
         });
 }
@@ -307,7 +307,7 @@ Define_ProtocolTest(udp_anyof)
 Define_ProtocolTest(udp_repeat)
 {
     return ProtocolTest("udp_repeat")
-        .exactlyTimes(3, on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .exactlyTimes(3, on("host1.udp").signal("packetSentToLower")
                   .packet("udp.destPort == 5000").describe("a datagram to port 5000").within(2.0));
 }
 
@@ -316,7 +316,7 @@ Define_ProtocolTest(udp_repeat)
 Define_ProtocolTest(udp_count_pass)
 {
     return ProtocolTest("udp_count_pass")
-        .atLeastTimes(3, on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .atLeastTimes(3, on("host1.udp").signal("packetSentToLower")
                   .packet("udp.destPort == 5000").describe("a datagram to port 5000").within(0.95));
 }
 
@@ -325,7 +325,7 @@ Define_ProtocolTest(udp_count_pass)
 Define_ProtocolTest(udp_count_overflow)
 {
     return ProtocolTest("udp_count_overflow")
-        .atMostTimes(2, on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .atMostTimes(2, on("host1.udp").signal("packetSentToLower")
                   .packet("udp.destPort == 5000").describe("a datagram to port 5000").within(0.95));
 }
 
@@ -335,7 +335,7 @@ Define_ProtocolTest(udp_strict_bad)
 {
     return ProtocolTest("udp_strict_bad")
         .strict()
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Transport)
+        .once(on("host1.udp").signal("packetSentToLower")
                   .packet("udp.destPort == 9999").describe("a datagram to port 9999").within(1.0));
 }
 
@@ -344,9 +344,9 @@ Define_ProtocolTest(udp_strict_bad)
 Define_ProtocolTest(arp_resolution)
 {
     return ProtocolTest("arp_resolution")
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Link)
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
                   .packet("arp.opcode == 1").describe("an ARP request").within(0.2))
-        .once(on("host1").signal("packetReceivedFromLower").layer(Layer::Link)
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
                   .packet("arp.opcode == 2").describe("host2's ARP reply").within(0.2));
 }
 
@@ -356,10 +356,10 @@ Define_ProtocolTest(arp_resolution)
 Define_ProtocolTest(ipv4_fragmentation)
 {
     return ProtocolTest("ipv4_fragmentation")
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Link)
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
                   .packet("ipv4.moreFragments == true")
                   .describe("an IPv4 fragment with the more-fragments flag set").within(0.2))
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Link)
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
                   .packet("ipv4.fragmentOffset > 0")
                   .describe("a later fragment at a non-zero offset").within(0.2));
 }
@@ -376,14 +376,14 @@ Define_ProtocolTest(wifi_block_ack)
 {
     return ProtocolTest("wifi_block_ack")
         // ADDBA setup: host1 sends the ADDBA request, then receives the ADDBA response.
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Link)
+        .once(on("host1.wlan[0].mac").signal("packetSentToLower")
                   .packet("ieee80211mac.type == 13").describe("an ADDBA request (action frame)").within(0.1))
-        .once(on("host1").signal("packetReceivedFromLower").layer(Layer::Link)
+        .once(on("host1.wlan[0].mac").signal("packetReceivedFromLower")
                   .packet("ieee80211mac.type == 13").describe("the ADDBA response").within(0.5))
         // Block Ack in use: host1 sends a Block Ack Request and receives the Block Ack.
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Link)
+        .once(on("host1.wlan[0].mac").signal("packetSentToLower")
                   .packet("ieee80211mac.type == 24").describe("a Block Ack Request").within(0.5))
-        .once(on("host1").signal("packetReceivedFromLower").layer(Layer::Link)
+        .once(on("host1.wlan[0].mac").signal("packetReceivedFromLower")
                   .packet("ieee80211mac.type == 25").describe("the Block Ack").within(0.5));
 }
 
@@ -391,7 +391,7 @@ Define_ProtocolTest(wifi_block_ack)
 Define_ProtocolTest(wifi_aggregation)
 {
     return ProtocolTest("wifi_aggregation")
-        .once(on("host1").signal("packetSentToLower").layer(Layer::Link)
+        .once(on("host1.wlan[0].mac").signal("packetSentToLower")
                   .packet("ieee80211mac.type == 40 && Ieee80211DataHeader.aMsduPresent == true")
                   .describe("an A-MSDU aggregated QoS data frame").within(0.2));
 }
@@ -406,10 +406,10 @@ Define_ProtocolTest(wifi_block_ack_full)
 {
     // host1's MAC-layer transmit / receive of an 802.11 frame matching `expr`.
     auto send = [](const char *expr, const char *desc, double w) {
-        return on("host1").signal("packetSentToLower").layer(Layer::Link).match(expr).describe(desc).within(w);
+        return on("host1.wlan[0].mac").signal("packetSentToLower").match(expr).describe(desc).within(w);
     };
     auto receive = [](const char *expr, const char *desc, double w) {
-        return on("host1").signal("packetReceivedFromLower").layer(Layer::Link).match(expr).describe(desc).within(w);
+        return on("host1.wlan[0].mac").signal("packetReceivedFromLower").match(expr).describe(desc).within(w);
     };
 
     return ProtocolTest("wifi_block_ack_full")
