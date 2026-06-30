@@ -10,45 +10,32 @@
 <![CDATA[from omnetpp.scave import results, chart, utils
 import inet.scave.plot
 import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
 
-colors = inet.scave.plot.default_colors
 props = chart.get_properties()
 utils.preconfigure_plot(props)
 
-# count * 1000 bytes * 8 bits / 4 s window / 1e6 -> Mbps
 df = results.get_scalars(props["filter"], include_runattrs=True, include_itervars=True)
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-df["station"] = df["module"].str.extract(r"app\[(\d+)\]").astype(int)
-df["mbps"] = df["value"] * 0.002
-stations = sorted(df["station"].unique())
-homog = df[df["configname"] == "Homogeneous"].set_index("station")["mbps"].reindex(stations)
-anom = df[(df["configname"] == "RateAnomaly") & (df["slowBitrate"].astype(str) == "6")].set_index("station")["mbps"].reindex(stations)
+# --- custom aggregation: count -> Mbps, label stations, pick the two scenarios ---
+df["station"] = "sta[" + df["module"].str.extract(r"app\[(\d+)\]")[0] + "]"
+df["value"] = df["value"] * 0.002
+df["name"] = "Application-level throughput [Mbps]"   # data-first: name drives the y-axis label
+df["unit"] = ""
+df = df[(df["configname"] == "Homogeneous") |
+        ((df["configname"] == "RateAnomaly") & (df["slowBitrate"].astype(str) == "6"))].copy()
+df["scenario"] = df["configname"].map({"Homogeneous": "Homogeneous (all 54 Mbps)",
+                                        "RateAnomaly": "Rate anomaly (sta[0] at 6 Mbps)"})
 
-x = np.arange(len(stations))
-w = 0.38
-ax = plt.gca()
-ax.bar(x - w/2, homog.values, w, label="Homogeneous (all 54 Mbps)", color=colors[0], zorder=2)
-ax.bar(x + w/2, anom.values, w, label="Rate anomaly (sta[0] at 6 Mbps)", color=colors[1], zorder=2)
-ax.axhline(anom.loc[0], color=colors[1], linestyle="-", linewidth=1.8, zorder=3, label="slow station's throughput")
-ax.set_xticks(x)
-ax.set_xticklabels([f"sta[{s}]" + ("\n(slowed)" if s == 0 else "") for s in stations])
-ax.set_title(props["title"])
-ax.set_ylim(0, float(np.nanmax([homog.max(), anom.max()])) * 1.32)
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
+valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, ["station"], ["scenario"])
+metadf["legend"] = list(valuedf.index)   # clean legend labels (no "scenario=" prefix)
+inet.scave.plot.plot_bars(valuedf, errorsdf, metadf, props)
+
+slow_level = df[(df["station"] == "sta[0]") & (df["scenario"].str.startswith("Rate anomaly"))]["value"].iloc[0]
+plt.gca().axhline(slow_level, color=inet.scave.plot.default_colors[1], linewidth=1.6, zorder=3)
 
 utils.postconfigure_plot(props)
-if props.get("xaxis_title"):
-    ax.set_xlabel(props["xaxis_title"])
-if props.get("yaxis_title"):
-    ax.set_ylabel(props["yaxis_title"])
-ax.legend(loc="upper right", framealpha=0.95)
-ax.grid(axis="y", linestyle="--", linewidth=0.7, color="0.85", zorder=0)
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]>                
@@ -719,15 +706,15 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_min" value=""/>
             <property name="yaxis_max" value=""/>
             <property name="yaxis_log" value="false"/>
-            <property name="grid_show" value="false"/>
+            <property name="grid_show" value="true"/>
             <property name="grid_density" value="Major"/>
-            <property name="legend_show" value="false"/>
+            <property name="legend_show" value="true"/>
             <property name="legend_placement" value="upper right"/>
             <property name="legend_automatic" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
-            <property name="legend_manual" value=""/>
-            <property name="legend_format" value=""/>
+            <property name="legend_manual" value="true"/>
+            <property name="legend_format" value="${scenario}"/>
             <property name="legend_replacements" value=""/>
             <property name="ordering_regex_list" value=""/>
             <property name="secondary_ordering_regex_list" value=""/>
@@ -748,12 +735,9 @@ utils.export_data_if_needed(df, props)
         <chart id="2" type="MATPLOTLIB" name="Throughput vs slow-station rate" template="linechart_mpl" icon="icons/full/obj/linechart.png">
             <script>
 <![CDATA[from omnetpp.scave import results, chart, utils
-import inet.scave.plot
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-colors = inet.scave.plot.default_colors
 props = chart.get_properties()
 utils.preconfigure_plot(props)
 
@@ -763,32 +747,24 @@ if df.empty:
 
 df["station"] = df["module"].str.extract(r"app\[(\d+)\]").astype(int)
 df["mbps"] = df["value"] * 0.002
-# Homogeneous is the no-gap reference point at 54 Mbps; RateAnomaly contributes 36..6
 df["slowrate"] = np.where(df["configname"] == "Homogeneous", 54.0, pd.to_numeric(df["slowBitrate"], errors="coerce"))
 
 agg = df.groupby("slowrate")["mbps"].sum().sort_index()
 fast = df[df["station"] != 0].groupby("slowrate")["mbps"].mean().sort_index()
 slow = df[df["station"] == 0].groupby("slowrate")["mbps"].mean().sort_index()
 
-ax = plt.gca()
-ax.plot(agg.index, agg.values, "o-", color=colors[0], label="Aggregate (all 5 stations)")
-ax.plot(fast.index, fast.values, "s-", color=colors[1], label="Fast stations (avg of the four at 54 Mbps)")
-ax.plot(slow.index, slow.values, "^--", color=colors[2], label="Slow station (sta[0])")
-ax.set_xticks([6, 9, 12, 18, 24, 36, 54])
-ax.set_title(props["title"])
-ax.set_ylim(0, float(agg.max()) * 1.12)
-ax.margins(x=0.05)
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
+lines = pd.DataFrame([
+    {"x": agg.index.to_numpy(),  "y": agg.to_numpy(),  "legend": "Aggregate (all 5 stations)"},
+    {"x": fast.index.to_numpy(), "y": fast.to_numpy(), "legend": "Fast stations (avg of the four at 54 Mbps)"},
+    {"x": slow.index.to_numpy(), "y": slow.to_numpy(), "legend": "Slow station (sta[0])"},
+])
+utils.plot_lines(lines, props)
 
 utils.postconfigure_plot(props)
-if props.get("xaxis_title"):
-    ax.set_xlabel(props["xaxis_title"])
-if props.get("yaxis_title"):
-    ax.set_ylabel(props["yaxis_title"])
-ax.legend(loc="upper left", framealpha=0.95)
-ax.grid(True, linestyle="--", linewidth=0.7, color="0.85")
-
+# TEMP: postconfigure_plot applies yaxis_title but not xaxis_title for matplotlib line charts;
+# the prop is correct in the .anf, so set the x label here until the helper is fixed.
+import matplotlib.pyplot as plt
+plt.gca().set_xlabel(props.get("xaxis_title", ""))
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]>                
@@ -1490,10 +1466,10 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_min" value=""/>
             <property name="yaxis_max" value=""/>
             <property name="yaxis_log" value="false"/>
-            <property name="grid_show" value="false"/>
+            <property name="grid_show" value="true"/>
             <property name="grid_density" value="Major"/>
-            <property name="legend_show" value="false"/>
-            <property name="legend_placement" value="upper right"/>
+            <property name="legend_show" value="true"/>
+            <property name="legend_placement" value="upper left"/>
             <property name="legend_automatic" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
@@ -1521,10 +1497,7 @@ utils.export_data_if_needed(df, props)
 <![CDATA[from omnetpp.scave import results, chart, utils
 import inet.scave.plot
 import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
 
-colors = inet.scave.plot.default_colors
 props = chart.get_properties()
 utils.preconfigure_plot(props)
 
@@ -1532,24 +1505,17 @@ df = results.get_scalars(props["filter"], include_runattrs=True, include_itervar
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-df["station"] = df["module"].str.extract(r"app\[(\d+)\]").astype(int)
-sel = df[(df["configname"] == "RateAnomaly") & (df["slowBitrate"].astype(str) == "6")].set_index("station")["value"].sort_index()
+df["station"] = "sta[" + df["module"].str.extract(r"app\[(\d+)\]")[0] + "]"
+df = df[(df["configname"] == "RateAnomaly") & (df["slowBitrate"].astype(str) == "6")].copy()
+df["name"] = "Frames successfully transmitted"   # data-first y-axis label
+df["unit"] = ""
+df["series"] = "frames transmitted"
 
-ax = plt.gca()
-bars = ax.bar([f"sta[{s}]" + ("\n(slowed)" if s == 0 else "") for s in sel.index], sel.values, color=colors[0], zorder=2)
-ax.bar_label(bars, fmt="%d", padding=3, fontsize=9)
-ax.set_title(props["title"])
-ax.set_ylim(0, float(sel.max()) * 1.18)
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
+valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, ["station"], ["series"])
+inet.scave.plot.plot_bars(valuedf, errorsdf, metadf, props)
+inet.scave.plot.annotate_barchart(plt.gca(), offset=10, result_type="int")
 
 utils.postconfigure_plot(props)
-if props.get("xaxis_title"):
-    ax.set_xlabel(props["xaxis_title"])
-if props.get("yaxis_title"):
-    ax.set_ylabel(props["yaxis_title"])
-ax.grid(axis="y", linestyle="--", linewidth=0.7, color="0.85", zorder=0)
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]>                
@@ -2220,7 +2186,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_min" value=""/>
             <property name="yaxis_max" value=""/>
             <property name="yaxis_log" value="false"/>
-            <property name="grid_show" value="false"/>
+            <property name="grid_show" value="true"/>
             <property name="grid_density" value="Major"/>
             <property name="legend_show" value="false"/>
             <property name="legend_placement" value="upper right"/>
