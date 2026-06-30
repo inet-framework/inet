@@ -1,0 +1,50 @@
+%description:
+802.11ac VHT 256-QAM (MCS index >= 8). [Required]
+
+%file: Ac_256qam.cc
+
+#include "ProtocolTest.h"
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+
+namespace inet {
+namespace protocoltest {
+
+using namespace inet::physicallayer;
+
+// VHT MCS8 (256-QAM 3/4) at 80 MHz 1SS = 390 Mbps.
+// getMcsIndex() on the VHT data mode returns the MCS index (8 or 9 for 256-QAM).
+Define_ProtocolTest(wifi_11ac_256qam)
+{
+    return ProtocolTest("wifi_11ac_256qam")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 40")
+                  .match([](const MatchContext& c) {
+                      auto m = dynamic_cast<const Ieee80211VhtMode *>(txMode(c.event));
+                      return m != nullptr && m->getDataMode()->getMcsIndex() >= 8;
+                  })
+                  .describe("a QoS data frame using 256-QAM (VHT MCS >= 8)").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_256qam"
+# Fix the data rate to VHT 80 MHz 1SS MCS8 (256-QAM 3/4 = 390 Mbps).
+# Without dataFrameBandwidth and dataFrameNumSpatialStreams, INET's mode lookup
+# at 390 Mbps picks the first table match -- which is 20 MHz 6SS MCS6 at 390 Mbps.
+# Pinning bandwidth=80MHz and NSS=1 ensures the lookup returns 80MHz 1SS MCS8.
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameBitrate = 390Mbps
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameBandwidth = 80MHz
+*.sta*.wlan[*].mac.*.rateSelection.dataFrameNumSpatialStreams = 1
+*.ap.wlan[*].mac.*.rateSelection.dataFrameBitrate = 390Mbps
+*.ap.wlan[*].mac.*.rateSelection.dataFrameBandwidth = 80MHz
+*.ap.wlan[*].mac.*.rateSelection.dataFrameNumSpatialStreams = 1
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_256qam: PASS

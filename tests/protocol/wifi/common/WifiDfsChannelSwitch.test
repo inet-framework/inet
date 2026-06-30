@@ -1,0 +1,34 @@
+%description:
+DFS Channel Switch Announcement frame. [NOT-MODELED -- INET does not implement DFS/CSA]
+
+%file: WifiDfsChannelSwitch.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// The AP should send a Channel Switch Announcement (CSA) action frame (type 13)
+// when DFS triggers a channel change. INET does not implement DFS or CSA.
+// This test asserts an Ieee80211ChannelSwitchAnnouncementActionFrame is sent by the AP.
+// Because INET does not generate CSA frames, this test will FAIL as NOT-MODELED.
+Define_ProtocolTest(wifi_dfs_channel_switch)
+{
+    return ProtocolTest("wifi_dfs_channel_switch")
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .packet("Ieee80211ChannelSwitchAnnouncementActionFrame.channelSwitchCount >= 0")
+                  .describe("a Channel Switch Announcement action frame from AP").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_dfs_channel_switch"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_dfs_channel_switch: FAIL

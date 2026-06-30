@@ -1,0 +1,35 @@
+%description:
+QoS ADDTS Request action frame (type 13) for TSPEC admission. [NOT-MODELED -- INET does not implement ADDTS/TSPEC admission control]
+
+%file: WifiQosAddts.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// ADDTS (Add Traffic Stream) is an 802.11e/WMM admission-control frame.
+// INET models EDCA but does not implement TSPEC/ADDTS admission control.
+// This test asserts that a STA sends an Ieee80211AddtsRequestActionFrame
+// (which is a subtype of action frame / type 13). Because INET does not
+// generate ADDTS frames, this test will FAIL as NOT-MODELED.
+Define_ProtocolTest(wifi_qos_addts)
+{
+    return ProtocolTest("wifi_qos_addts")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("Ieee80211AddtsRequestActionFrame.dialogToken >= 0")
+                  .describe("an ADDTS Request action frame from STA").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_qos_addts"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_qos_addts: FAIL

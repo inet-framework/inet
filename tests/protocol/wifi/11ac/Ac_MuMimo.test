@@ -1,0 +1,35 @@
+%description:
+802.11ac MU-MIMO downlink transmission. [NOT-MODELED -- INET does not implement MU-MIMO]
+
+%file: Ac_MuMimo.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// MU-MIMO (Multi-User MIMO) allows the AP to simultaneously transmit to
+// multiple STAs in the same TXOP using VHT SIG-B and per-user fields.
+// INET models SU-MIMO only; MU-MIMO is not implemented.
+// The specific chunk class Ieee80211VhtMuMimoHeader does not exist in INET.
+// This test will FAIL as NOT-MODELED.
+Define_ProtocolTest(wifi_11ac_mu_mimo)
+{
+    return ProtocolTest("wifi_11ac_mu_mimo")
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+                  .packet("Ieee80211VhtMuMimoHeader.groupId >= 0")
+                  .describe("an AP MU-MIMO downlink frame").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_mu_mimo"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_mu_mimo: FAIL

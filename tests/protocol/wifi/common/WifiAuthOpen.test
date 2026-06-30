@@ -1,0 +1,33 @@
+%description:
+Open-system Authentication: STA sends Auth (type 11) then receives Auth (type 11). [Required]
+
+%file: WifiAuthOpen.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(wifi_auth_open)
+{
+    return ProtocolTest("wifi_auth_open")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("ieee80211mac.type == 11")
+                  .describe("an Authentication request from STA").within(2.0))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("ieee80211mac.type == 11")
+                  .describe("an Authentication response from AP").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_auth_open"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_auth_open: PASS

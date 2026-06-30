@@ -1,0 +1,35 @@
+%description:
+802.11ac VHT NDP Announcement (beamforming sounding). [NOT-MODELED -- INET does not implement beamforming]
+
+%file: Ac_Beamforming.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// VHT explicit beamforming requires the beamformer to send a Null Data Packet
+// Announcement (NDPA) action frame followed by an NDP to allow the beamformee
+// to compute channel feedback. INET does not implement beamforming sounding.
+// The specific chunk class Ieee80211NdpAnnouncementActionFrame does not exist in INET.
+// This test will FAIL as NOT-MODELED.
+Define_ProtocolTest(wifi_11ac_beamforming)
+{
+    return ProtocolTest("wifi_11ac_beamforming")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("Ieee80211NdpAnnouncementActionFrame.soundingDialogToken >= 0")
+                  .describe("a VHT NDP Announcement action frame from sta1").within(2.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_beamforming"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_beamforming: FAIL

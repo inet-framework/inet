@@ -1,0 +1,35 @@
+%description:
+802.11ac VHT Operating Mode Notification action frame. [NOT-MODELED -- INET does not implement VHT OMN]
+
+%file: Ac_OpModeNotification.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// VHT Operating Mode Notification is an action frame sent by a STA to notify
+// associated APs of a change in its operating mode (bandwidth, NSS).
+// INET does not implement VHT OMN. The specific frame chunk class
+// Ieee80211VhtOperatingModeNotificationActionFrame does not exist in INET.
+// This test will FAIL as NOT-MODELED.
+Define_ProtocolTest(wifi_11ac_opmode_notification)
+{
+    return ProtocolTest("wifi_11ac_opmode_notification")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("Ieee80211VhtOperatingModeNotificationActionFrame.operatingModeField >= 0")
+                  .describe("a VHT Operating Mode Notification action frame").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_11ac_opmode_notification"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_opmode_notification: FAIL

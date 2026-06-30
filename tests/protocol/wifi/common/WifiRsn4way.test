@@ -1,0 +1,35 @@
+%description:
+RSN/WPA2 4-way EAPOL handshake. [NOT-MODELED -- INET does not implement RSN/WPA2 security]
+
+%file: WifiRsn4way.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// The RSN 4-way handshake uses EAPOL frames exchanged between STA and AP
+// to derive pairwise transient keys. INET does not implement WPA2/RSN.
+// This test asserts that an Ieee80211EapolFrame is sent by the STA shortly
+// after association (before t=0.5s). Because INET does not generate EAPOL
+// frames, this test will FAIL as NOT-MODELED.
+Define_ProtocolTest(wifi_rsn_4way)
+{
+    return ProtocolTest("wifi_rsn_4way")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .packet("Ieee80211EapolFrame.version >= 0")
+                  .describe("an EAPOL frame from STA (RSN 4-way handshake)").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "wifi_rsn_4way"
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_rsn_4way: FAIL
