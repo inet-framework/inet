@@ -127,7 +127,7 @@ void Bgp::startBgp()
         // use the self-message path even for 0s startup so lifecycle restarts happen after the
         // node has finished bringing its interfaces back up.
         if (startupTime == SIMTIME_ZERO)
-            startupTime = SimTime(1, SIMTIME_S);  // TODO what value should go here?
+            startupTime = par("restartDelay");
         scheduleAfter(startupTime, startupTimer);
     }
     else {

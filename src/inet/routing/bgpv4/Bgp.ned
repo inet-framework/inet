@@ -56,6 +56,7 @@ simple Bgp extends SimpleModule like IBgp
         string routerId = default(""); // the 4-octet BGP Identifier (RFC 4271/6286); required for IPv6, where there is no IPv4 router id to derive it from
         string ospfRoutingModule;
         volatile double startupTime @unit(s) = default(0s); // Delay before starting BGP
+        double restartDelay @unit(s) = default(1s); // On a lifecycle restart (after a stop or crash), the delay before BGP comes back up when startupTime is 0s, so the node can bring its interfaces back up first
         double shutdownTime @unit(s) = default(1s); // On graceful stop, delay before destroying BGP state so TCP can flush the session teardown (FIN)
         double stopOperationTimeout @unit(s) = default(2s); // Timeout for the lifecycle stop operation
         double connectRetryTime @unit(s) = default(120s); // ConnectRetryTimer interval (RFC 4271), applied to all sessions
