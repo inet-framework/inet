@@ -72,6 +72,55 @@ static ref_ptr<T> getPipelineState(GraphicsPipelineConfigurator *config)
     return t;
 }
 
+// Patch the alpha-channel blend factors in a pipeline built by the VSG Builder (createSphere /
+// createBox / createTexturedQuad). The Builder uses configureAttachments(true) which sets the
+// alpha blend to srcA*srcA (nearly 0) — the same "black blob" bug as createGeometry. The Builder
+// bakes the VkPipeline during createSphere (via graphicsPipelineConfig->init()), so we can't just
+// edit pipelineStates; we rebuild the pipeline from the existing one's state with the corrected
+// alpha factors and swap the BindGraphicsPipeline in the returned StateGroup.
+// See createGeometry's blend comment for the full explanation of the alpha-channel fix.
+static void fixBuilderBlendAlpha(const ref_ptr<Node>& node)
+{
+    if (!node) return;
+    // Collect EVERY BindGraphicsPipeline in the returned scene graph. Builder::createSphere /
+    // createBox / createQuad currently each emit a single pipeline, but a future VSG version could
+    // split multi-part geometry across several StateGroups, so patch them all rather than stopping
+    // at the first one found.
+    struct FindBindPipelines : public ::vsg::Visitor {
+        std::vector<BindGraphicsPipeline *> bgps;
+        void apply(Object& o) override { o.traverse(*this); }
+        void apply(StateGroup& sg) override {
+            for (auto& sc : sg.stateCommands)
+                if (auto b = dynamic_cast<BindGraphicsPipeline *>(sc.get()))
+                    bgps.push_back(b);
+            sg.traverse(*this);
+        }
+    } v;
+    node->accept(v);
+    for (auto bgp : v.bgps) {
+        if (!bgp->pipeline) continue;
+        // Clone the pipeline states (don't mutate the originals in place): the Builder may cache and
+        // reuse the same ColorBlendState ref_ptr across pipelines, so in-place edits would corrupt
+        // the cached state. Build a fresh GraphicsPipelineStates vector with cloned ColorBlendStates.
+        auto orig = bgp->pipeline;
+        GraphicsPipelineStates states;
+        for (auto& s : orig->pipelineStates) {
+            if (auto cbs = dynamic_cast<ColorBlendState *>(s.get())) {
+                auto cloned = ColorBlendState::create(*cbs);
+                for (auto& att : cloned->attachments) {
+                    att.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+                    att.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+                    att.alphaBlendOp = VK_BLEND_OP_ADD;
+                }
+                states.push_back(cloned);
+            }
+            else
+                states.push_back(s);
+        }
+        bgp->pipeline = GraphicsPipeline::create(orig->layout, orig->stages, states, orig->subpass);
+    }
+}
+
 // ---------------------------------------------------------------------------------------------
 // The pipeline layer: turn a vertex array + topology + colour into a renderable node.
 // ---------------------------------------------------------------------------------------------
@@ -89,8 +138,23 @@ ref_ptr<Node> createGeometry(ref_ptr<vec3Array> vertices, ref_ptr<vec3Array> nor
     rasterization->cullMode = cullBackFace ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE;
     rasterization->lineWidth = (float)lineWidth; // clamps to 1 where wideLines is unsupported (e.g. MoltenVK)
 
-    if (opacity < 1.0)
-        getPipelineState<ColorBlendState>(config)->configureAttachments(true);
+    if (opacity < 1.0) {
+        // Enable standard alpha blending for the RGB channels. Override the ALPHA-channel blend
+        // factors: VSG's configureAttachments(true) sets srcAlpha=SRC_ALPHA, dstAlpha=ZERO, which
+        // makes the output alpha = srcA*srcA (nearly 0 for translucent geometry). The off-screen
+        // viewer hands the framebuffer to Qt as a QImage with per-pixel alpha, so a near-0 alpha
+        // makes Qt composite the (dark) widget background over the disc -> the disc appears as a
+        // "black blob" even though the RGB blended correctly. Fix: keep the output alpha opaque by
+        // blending srcA*1 + dstA*(1-srcA), so a translucent pixel over an opaque background stays
+        // alpha=1 and Qt displays the blended RGB as-is.
+        auto blend = getPipelineState<ColorBlendState>(config);
+        blend->configureAttachments(true);
+        for (auto& att : blend->attachments) {
+            att.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            att.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+            att.alphaBlendOp = VK_BLEND_OP_ADD;
+        }
+    }
 
     if (!depthTest) {
         auto depth = getPipelineState<DepthStencilState>(config);
@@ -131,14 +195,16 @@ ref_ptr<Node> createGeometry(ref_ptr<vec3Array> vertices, ref_ptr<vec3Array> nor
 
 // A radially-subdivided ring (annulus) whose PER-VERTEX opacity reproduces the OSG signal wave: a
 // distance fade pow(fadingFactor, -d/fadingDistance) times a cosine ripple across the radius (period
-// waveLength, leading edge at waveOffset; 'a' = waveAmplitude/2). The medium visualizer rebuilds this
-// each frame with the current radii/waveOffset; per-vertex vsg_Color (interpolated) + alpha blending
-// produce the gradient with no custom shader/uniforms (which don't work in the off-screen path).
+// waveLength, leading edge at waveOffset; 'a' = waveAmplitude * waveFadingFactor / 2). The medium
+// visualizer rebuilds this each frame with the current radii/waveOffset; per-vertex vsg_Color
+// (interpolated) + alpha blending produce the gradient with no custom shader/uniforms (which don't
+// work in the off-screen path). waveFadingFactor mirrors the OSG shader uniform: it scales the ripple
+// amplitude so the wave flattens toward a smooth disc as the animation speed increases.
 ref_ptr<Node> createWaveRing(const Coord& center, double innerRadius, double outerRadius,
         const cFigure::Color& color, double waveLength, double waveAmplitude, double waveOffset,
-        double fadingFactor, double fadingDistance, int segments)
+        double fadingFactor, double fadingDistance, double waveFadingFactor, int segments)
 {
-    double a = waveAmplitude / 2.0;
+    double a = waveAmplitude * waveFadingFactor / 2.0;
     auto alphaAt = [&](double d) {
         double fade = (fadingDistance > 0 && fadingFactor > 1.0) ? std::pow(fadingFactor, -d / fadingDistance) : 1.0;
         double phi = (waveLength > 0) ? (d - waveOffset) / waveLength * 2.0 * M_PI : 0.0;
@@ -184,7 +250,17 @@ ref_ptr<Node> createWaveRing(const Coord& center, double innerRadius, double out
     auto config = GraphicsPipelineConfigurator::create(getFlatShaderSet());
     getPipelineState<InputAssemblyState>(config)->topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     getPipelineState<RasterizationState>(config)->cullMode = VK_CULL_MODE_NONE;
-    getPipelineState<ColorBlendState>(config)->configureAttachments(true);
+    {
+        // Same alpha-channel fix as createGeometry (see comment there): keep output alpha opaque
+        // so Qt's display composite doesn't show the dark widget bg through the translucent ring.
+        auto blend = getPipelineState<ColorBlendState>(config);
+        blend->configureAttachments(true);
+        for (auto& att : blend->attachments) {
+            att.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+            att.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+            att.alphaBlendOp = VK_BLEND_OP_ADD;
+        }
+    }
     auto material = PhongMaterialValue::create();
     material->value().diffuse = ::vsg::vec4(1, 1, 1, 1);
     material->value().ambient = ::vsg::vec4(1, 1, 1, 1);
@@ -422,7 +498,9 @@ ref_ptr<Node> createSphere(const Coord& center, double radius, const cFigure::Co
     gi.dz = ::vsg::vec3(0, 0, (float)(2 * radius));
     gi.color = toVsgColor(color, opacity);
     if (opacity < 1.0) si.blending = true;
-    return getBuilder()->createSphere(gi, si);
+    auto node = getBuilder()->createSphere(gi, si);
+    if (opacity < 1.0) fixBuilderBlendAlpha(node);
+    return node;
 }
 
 ref_ptr<Node> createBox(const Coord& center, const Coord& size, const cFigure::Color& color, double opacity)
@@ -435,7 +513,9 @@ ref_ptr<Node> createBox(const Coord& center, const Coord& size, const cFigure::C
     gi.dz = ::vsg::vec3(0, 0, (float)size.z);
     gi.color = toVsgColor(color, opacity);
     if (opacity < 1.0) si.blending = true;
-    return getBuilder()->createBox(gi, si);
+    auto node = getBuilder()->createBox(gi, si);
+    if (opacity < 1.0) fixBuilderBlendAlpha(node);
+    return node;
 }
 
 ref_ptr<Text> createText(const char *string, const Coord& position, const cFigure::Color& color, double characterSize)
@@ -575,7 +655,9 @@ ref_ptr<Node> createTexturedQuad(ref_ptr<Data> image, double screenSize, const c
     si.lighting = false;
     si.blending = true;
     si.two_sided = true;
-    return getBuilder()->createQuad(gi, si);
+    auto node = getBuilder()->createQuad(gi, si);
+    fixBuilderBlendAlpha(node);  // always blended — patch the alpha-channel blend factors
+    return node;
 }
 
 // A textured-quad icon that always faces the camera at a constant on-screen size (textured quad in a
