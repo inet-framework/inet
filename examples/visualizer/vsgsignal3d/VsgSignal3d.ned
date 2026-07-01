@@ -36,12 +36,12 @@ network VsgSignal3dShowcase
             @display("p=40,180");
         }
         host1: WirelessHost { // ground station
-            @display("p=110,150");
+            @display("p=110,150;i=device/antennatower");
         }
         host2: WirelessHost { // ground station
-            @display("p=190,150");
+            @display("p=190,150;i=device/antennatower");
         }
         host3: WirelessHost { // drone flying through the 3D volume
-            @display("p=150,150");
+            @display("p=150,150;i=misc/drone");
         }
 }

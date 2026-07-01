@@ -73,6 +73,9 @@ ref_ptr<Node> createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhea
         const cFigure::Color& color, const cFigure::LineStyle& style = cFigure::LINE_SOLID, double width = 1.0, double opacity = 1.0);
 ref_ptr<Node> createCircle(const Coord& center, double radius, const cFigure::Color& color,
         const cFigure::LineStyle& style = cFigure::LINE_SOLID, double width = 1.0, int polygonSize = 64);
+// A "loose mesh" wireframe sphere (latitude + meridian line rings) for 3D range indicators.
+ref_ptr<Node> createWireframeSphere(const Coord& center, double radius, const cFigure::Color& color,
+        double width = 1.0, int latRings = 5, int lonRings = 6, int segments = 24);
 ref_ptr<Node> createAnnulus(const Coord& center, double outerRadius, double innerRadius,
         const cFigure::Color& color, double opacity = 1.0, int polygonSize = 64);
 // Radially-subdivided ring with wave-modulated, distance-faded per-vertex opacity (the propagating
@@ -84,10 +87,21 @@ ref_ptr<Node> createWaveRing(const Coord& center, double innerRadius, double out
         double fadingFactor, double fadingDistance, double waveFadingFactor = 1.0, int segments = 100);
 // Shader-based wave ring (OSG-equivalent): a minimal annulus band whose per-pixel opacity is computed
 // by a cached GLSL fragment shader, so the ripple flows outward smoothly (animate waveOffset) at high
-// FPS with no per-frame pipeline rebuild. Drop-in alternative to createWaveRing; see the .cc.
+// FPS with no per-frame pipeline rebuild.
+// CONTRACT: center.xy MUST be 0 (position the ring via an enclosing MatrixTransform) -- the shader
+// derives the radial distance as length(vertex.xy), so a non-zero center.xy would offset the fade/
+// ripple. Only center.z (a ground-lift) is honoured. (This is the one way it is NOT a drop-in for
+// createWaveRing, whose alpha is computed from the true per-vertex radius.)
 ref_ptr<Node> createWaveRingShader(const Coord& center, double innerRadius, double outerRadius,
         const cFigure::Color& color, double waveLength, double waveAmplitude, double waveOffset,
         double fadingFactor, double fadingDistance, double waveFadingFactor = 1.0, int segments = 100);
+// Shader-based VOLUMETRIC sphere wavefront (the 3D counterpart of createWaveRingShader): the shell
+// [inner, outer] is filled with `shells` concentric UV spheres whose per-pixel opacity is the same
+// distance-fade x moving ripple, so it reads as an expanding, rippling glowing ball. Built at the local
+// origin (position it with an enclosing MatrixTransform); one cached pipeline, rebuilt vertices per frame.
+ref_ptr<Node> createSphereWaveShader(double innerRadius, double outerRadius, const cFigure::Color& color,
+        double waveLength, double waveAmplitude, double waveOffset, double fadingFactor, double fadingDistance,
+        int shells = 18, int latSegments = 12, int lonSegments = 18);
 ref_ptr<Node> createQuad(const Coord& min, const Coord& max, const cFigure::Color& color, double opacity = 1.0);
 ref_ptr<Node> createPolygon(const std::vector<Coord>& points, const cFigure::Color& color, double opacity = 1.0, const Coord& translation = Coord::ZERO);
 ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width = 10.0, double height = 20.0, double opacity = 1.0);

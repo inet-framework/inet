@@ -53,6 +53,7 @@ void MediumVsgVisualizer::initialize(int stage)
         signalWaveAmplitude = par("signalWaveAmplitude");
         signalWaveFadingAnimationSpeedFactor = par("signalWaveFadingAnimationSpeedFactor");
         signalWaveShader = par("signalWaveShader");
+        rangeSphere = par("rangeSphere");
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
@@ -360,39 +361,59 @@ void MediumVsgVisualizer::refreshSphereTransmissionNode(const ITransmission *tra
     double startRadius = propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getStartTime()).dbl();
     double endRadius   = std::max(0.0, propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getEndTime()).dbl());
 
-    // Bound the drawn radius to the transmitter's interference range, exactly as the ring path does: at
-    // light speed both wavefronts reach hundreds of km within a packet's duration, and an unclamped
-    // translucent sphere would balloon out and blanket the whole scene. Clamping makes the sphere grow
-    // to the range limit and then hold there until the transmission is removed.
+    // Bound the drawn radius to the transmitter's interference range AND to the fade-visible extent
+    // (the same two caps the ring path uses): at light speed both wavefronts reach hundreds of km within
+    // a packet's duration, and an unclamped translucent sphere would blanket the scene. The fade cap
+    // makes the sphere size a function of signalFadingDistance rather than the transmit power, so a power
+    // high enough for real communication (data-link arrows) doesn't inflate the sphere.
     double maxRadius = 1e18;
     if (auto transmitterRadio = transmission->getTransmitterRadio())
         maxRadius = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(transmitterRadio).get();
+    if (signalFadingDistance > 0 && signalFadingFactor > 1.0) {
+        const double alphaFloor = 0.02;
+        maxRadius = std::min(maxRadius, signalFadingDistance * std::log(1.0 / alphaFloor) / std::log(signalFadingFactor));
+    }
     startRadius = std::min(startRadius, maxRadius);
     endRadius   = std::min(endRadius, maxRadius);
 
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
 
-    // node is the Group holding [0] startSphereTransform, [1] endSphereTransform.
+    // node is the Group holding [0] startSphereTransform, [1] endSphereTransform, both at the emission point.
     auto group = static_cast<::vsg::Group *>(node);
-
-    // --- start wavefront ---
     auto startTransform = static_cast<::vsg::MatrixTransform *>(group->children[0].get());
     auto startHolder    = static_cast<::vsg::Group *>(startTransform->children[0].get());
+    auto endTransform   = static_cast<::vsg::MatrixTransform *>(group->children[1].get());
+    auto endHolder      = static_cast<::vsg::Group *>(endTransform->children[0].get());
     startHolder->children.clear();
+    endHolder->children.clear();
+
+    if (signalWaveShader) {
+        // SHADER PATH: one VOLUMETRIC rippling shell region [endRadius, startRadius] (concentric
+        // translucent shells with per-pixel fade x ripple), drawn into the start holder; the end holder
+        // stays empty. The ripple flows in animation time (same as the ring), so it doesn't strobe or
+        // race at light speed. A finished transmission expands, hollows out from the centre, and fades.
+        const double ripplesPerAnimSecond = 1.2;
+        double animationTime = getSimulation()->getEnvir()->getAnimationTime();
+        double rippleOffset = (signalWaveLength > 0)
+            ? std::fmod(animationTime * ripplesPerAnimSecond, 1.0) * signalWaveLength
+            : 0.0;
+        double outer = startRadius;
+        double inner = std::min(endRadius, outer);
+        if (outer > 0 && outer > inner)
+            startHolder->addChild(inet::vsg::createSphereWaveShader(inner, outer, color,
+                    signalWaveLength, signalWaveAmplitude, rippleOffset, signalFadingFactor, signalFadingDistance));
+        return;
+    }
+
+    // BAKED PATH (default): two solid translucent wavefront spheres (leading + trailing edge), each with
+    // a single distance-faded alpha (floored so far spheres stay faintly visible).
     if (startRadius > 0) {
         double startAlpha = (signalFadingDistance > 0 && signalFadingFactor > 1.0)
             ? std::min(1.0, pow(signalFadingFactor, -startRadius / signalFadingDistance))
             : 0.99;
         startAlpha = std::max(0.1, startAlpha);
-        // TODO: the OSG version mutates osg::Material alpha in-place; VSG requires geometry
-        //       rebuild.  This matches the approach in PacketDropVsgVisualizer::setAlpha.
         startHolder->addChild(inet::vsg::createSphere(Coord::ZERO, startRadius, color, startAlpha));
     }
-
-    // --- end wavefront ---
-    auto endTransform = static_cast<::vsg::MatrixTransform *>(group->children[1].get());
-    auto endHolder    = static_cast<::vsg::Group *>(endTransform->children[0].get());
-    endHolder->children.clear();
     if (endRadius > 0) {
         double endAlpha = (signalFadingDistance > 0 && signalFadingFactor > 1.0)
             ? std::min(1.0, pow(signalFadingFactor, -endRadius / signalFadingDistance))
@@ -445,20 +466,23 @@ void MediumVsgVisualizer::handleRadioAdded(const IRadio *radio)
             annotationGroup->addChild(::vsg::Group::create()); // placeholder child 1
         }
 
+        // A radio's range is a sphere, so in rangeSphere mode draw a 3D wireframe sphere (meaningful for
+        // nodes off the ground plane, e.g. drones); otherwise the conventional flat xy-plane circle
+        // (which honors the line style via real dash geometry; width clamps to 1px without wideLines).
         if (displayInterferenceRanges) {
             auto maxInterferenceRange = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(radio);
-            // createCircle draws an xy-plane circle and now honors the line style (solid/dotted/dashed
-            // via real dash geometry). Line width still clamps to 1px where wideLines is unsupported.
-            auto circle = inet::vsg::createCircle(Coord::ZERO, maxInterferenceRange.get(),
-                interferenceRangeLineColor, interferenceRangeLineStyle, interferenceRangeLineWidth);
-            networkNodeVisualization->addChild(circle);
+            auto node = rangeSphere
+                ? inet::vsg::createWireframeSphere(Coord::ZERO, maxInterferenceRange.get(), interferenceRangeLineColor, interferenceRangeLineWidth)
+                : inet::vsg::createCircle(Coord::ZERO, maxInterferenceRange.get(), interferenceRangeLineColor, interferenceRangeLineStyle, interferenceRangeLineWidth);
+            networkNodeVisualization->addChild(node);
         }
 
         if (displayCommunicationRanges) {
             auto maxCommunicationRange = radioMedium->getMediumLimitCache()->getMaxCommunicationRange(radio);
-            auto circle = inet::vsg::createCircle(Coord::ZERO, maxCommunicationRange.get(),
-                communicationRangeLineColor, communicationRangeLineStyle, communicationRangeLineWidth);
-            networkNodeVisualization->addChild(circle);
+            auto node = rangeSphere
+                ? inet::vsg::createWireframeSphere(Coord::ZERO, maxCommunicationRange.get(), communicationRangeLineColor, communicationRangeLineWidth)
+                : inet::vsg::createCircle(Coord::ZERO, maxCommunicationRange.get(), communicationRangeLineColor, communicationRangeLineStyle, communicationRangeLineWidth);
+            networkNodeVisualization->addChild(node);
         }
 
         // Attach the departure/arrival indicator group as an annotation on the network node.

@@ -340,8 +340,9 @@ static ref_ptr<GraphicsPipeline> getWaveRingPipeline()
     // off-screen viewer's own compile path would run the shader compiler on source-only stages.
     ShaderStages shaderStages{vertexShader, fragmentShader};
     auto shaderCompiler = ShaderCompiler::create();
-    if (shaderCompiler->supported())
-        shaderCompiler->compile(shaderStages);
+    if (!shaderCompiler->supported() || !shaderCompiler->compile(shaderStages))
+        throw cRuntimeError("signalWaveShader needs a VSG built with the GLSL compiler (glslang), and the "
+                            "wave shaders must compile; set signalWaveShader=false to use the baked wavefront");
 
     // set 0, binding 0: the wave-parameter uniform buffer (fragment stage).
     auto descriptorSetLayout = DescriptorSetLayout::create(DescriptorSetLayoutBindings{
@@ -437,6 +438,207 @@ ref_ptr<Node> createWaveRingShader(const Coord& center, double innerRadius, doub
     commands->addChild(Draw::create(vertices->size(), 1, 0, 0));
     stateGroup->addChild(commands);
     return stateGroup;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Shader-based VOLUMETRIC sphere wavefront: the 3D counterpart of createWaveRingShader. The signal
+// shell [inner, outer] is filled with N concentric translucent sphere shells; a GLSL fragment shader
+// sets each shell's per-pixel opacity from its 3D radius (distance fade x moving cosine ripple), so
+// the ripples read as an expanding, rippling glowing ball. Geometry is built at the LOCAL ORIGIN (the
+// enclosing MatrixTransform places it at the emission point), so d = length(localPos) IS the true
+// radial distance — no origin-vs-centre offset to worry about. One cached pipeline; per frame only the
+// shell vertices + a small uniform are rebuilt. A per-shell alpha scale keeps the stack translucent.
+// ---------------------------------------------------------------------------------------------
+
+static const char *sphereWaveVertexShader = R"(#version 450
+layout(push_constant) uniform PushConstants { mat4 projection; mat4 modelView; } pc;
+layout(location = 0) in vec3 vsg_Vertex;
+layout(location = 0) out vec3 vLocal;
+void main() {
+    vLocal = vsg_Vertex;
+    gl_Position = (pc.projection * pc.modelView) * vec4(vsg_Vertex, 1.0);
+}
+)";
+
+static const char *sphereWaveFragmentShader = R"(#version 450
+layout(location = 0) in vec3 vLocal;
+layout(set = 0, binding = 0) uniform WaveParams {
+    vec4 colorOffset;  // rgb = colour, w = waveOffset
+    vec4 fadeWave;     // x = fadingFactor, y = fadingDistance, z = waveLength, w = amplitude
+    vec4 bounds;       // x = innerRadius, y = outerRadius, z = per-shell alpha scale
+} wp;
+layout(location = 0) out vec4 fragColor;
+void main() {
+    float d = length(vLocal);   // 3D radial distance = this shell's radius
+    float a = wp.fadeWave.w * 0.5;
+    float phi = (wp.fadeWave.z > 0.0) ? (d - wp.colorOffset.w) / wp.fadeWave.z * 6.283185307179586 : 0.0;
+    float fade = (wp.fadeWave.y > 0.0 && wp.fadeWave.x > 1.0) ? pow(wp.fadeWave.x, -d / wp.fadeWave.y) : 1.0;
+    fade = max(fade, 0.22);
+    fade *= 1.0 - smoothstep(wp.bounds.y * 0.8, wp.bounds.y, d);
+    // Scale down per shell: the eye looks through many stacked shells, so a full-strength alpha would
+    // blend to near-opaque. bounds.z keeps the accumulated glow translucent.
+    float alpha = clamp(fade * (1.0 - a + cos(phi) * a) * wp.bounds.z, 0.0, 1.0);
+    fragColor = vec4(wp.colorOffset.rgb, alpha);
+}
+)";
+
+// The sphere-wavefront graphics pipeline, cached (intentionally leaked, like getWaveRingPipeline).
+static ref_ptr<GraphicsPipeline> getSphereWavePipeline()
+{
+    static ref_ptr<GraphicsPipeline>& pipeline = *(new ref_ptr<GraphicsPipeline>());
+    if (pipeline) return pipeline;
+
+    auto vertexShader = ShaderStage::create(VK_SHADER_STAGE_VERTEX_BIT, "main", sphereWaveVertexShader);
+    auto fragmentShader = ShaderStage::create(VK_SHADER_STAGE_FRAGMENT_BIT, "main", sphereWaveFragmentShader);
+    ShaderStages shaderStages{vertexShader, fragmentShader};
+    auto shaderCompiler = ShaderCompiler::create();
+    if (!shaderCompiler->supported() || !shaderCompiler->compile(shaderStages))
+        throw cRuntimeError("signalWaveShader needs a VSG built with the GLSL compiler (glslang), and the "
+                            "wave shaders must compile; set signalWaveShader=false to use the baked wavefront");
+
+    auto descriptorSetLayout = DescriptorSetLayout::create(DescriptorSetLayoutBindings{
+        {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr}});
+    auto pipelineLayout = PipelineLayout::create(DescriptorSetLayouts{descriptorSetLayout},
+        PushConstantRanges{{VK_SHADER_STAGE_VERTEX_BIT, 0, 128}});
+
+    VertexInputState::Bindings vertexBindings{{0, sizeof(::vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX}};
+    VertexInputState::Attributes vertexAttributes{{0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0}};
+
+    auto inputAssembly = InputAssemblyState::create();
+    inputAssembly->topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    auto rasterization = RasterizationState::create();
+    rasterization->cullMode = VK_CULL_MODE_NONE;
+    auto depthStencil = DepthStencilState::create();
+    depthStencil->depthTestEnable = VK_TRUE;
+    depthStencil->depthWriteEnable = VK_FALSE; // translucent overlay: test but don't write
+
+    auto colorBlend = ColorBlendState::create();
+    VkPipelineColorBlendAttachmentState blendAttachment{};
+    blendAttachment.blendEnable = VK_TRUE;
+    blendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    blendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    blendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+    blendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+    blendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    blendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+    blendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlend->attachments = ColorBlendState::ColorBlendAttachments{blendAttachment};
+
+    GraphicsPipelineStates pipelineStates{
+        VertexInputState::create(vertexBindings, vertexAttributes),
+        inputAssembly, rasterization, MultisampleState::create(), depthStencil, colorBlend};
+
+    pipeline = GraphicsPipeline::create(pipelineLayout, shaderStages, pipelineStates);
+    return pipeline;
+}
+
+// Append one UV-sphere shell (radius R, centred at the local origin) as a triangle list into `out`,
+// starting at vertex index k; returns the new index. latSegments x lonSegments quads, 6 verts each.
+static size_t appendSphereShell(vec3Array& out, size_t k, double radius, int latSegments, int lonSegments)
+{
+    float R = (float)radius;
+    auto P = [&](double th, double ph) {
+        return ::vsg::vec3(R * (float)(std::sin(th) * std::cos(ph)),
+                           R * (float)(std::sin(th) * std::sin(ph)),
+                           R * (float)std::cos(th));
+    };
+    for (int i = 0; i < latSegments; i++) {
+        double th0 = M_PI * i / latSegments, th1 = M_PI * (i + 1) / latSegments;
+        for (int j = 0; j < lonSegments; j++) {
+            double ph0 = 2.0 * M_PI * j / lonSegments, ph1 = 2.0 * M_PI * (j + 1) / lonSegments;
+            ::vsg::vec3 p00 = P(th0, ph0), p01 = P(th0, ph1), p10 = P(th1, ph0), p11 = P(th1, ph1);
+            out.set(k++, p00); out.set(k++, p10); out.set(k++, p11);
+            out.set(k++, p00); out.set(k++, p11); out.set(k++, p01);
+        }
+    }
+    return k;
+}
+
+ref_ptr<Node> createSphereWaveShader(double innerRadius, double outerRadius, const cFigure::Color& color,
+        double waveLength, double waveAmplitude, double waveOffset, double fadingFactor, double fadingDistance,
+        int shells, int latSegments, int lonSegments)
+{
+    double inner = std::max(0.0, innerRadius);
+    double outer = outerRadius;
+    // Same fade cutoff as the ring: cap the outer radius to where the wave becomes invisible, so a
+    // light-speed wavefront doesn't tessellate the whole scene.
+    const double alphaFloor = 0.02;
+    if (fadingDistance > 0 && fadingFactor > 1.0)
+        outer = std::min(outer, fadingDistance * std::log(1.0 / alphaFloor) / std::log(fadingFactor));
+    if (outer <= inner || shells < 1 || latSegments < 2 || lonSegments < 3)
+        return Group::create();
+
+    size_t vertsPerShell = (size_t)latSegments * lonSegments * 6;
+    auto vertices = vec3Array::create(vertsPerShell * shells);
+    size_t k = 0;
+    for (int s = 0; s < shells; s++) {
+        double r = (shells == 1) ? outer : inner + (outer - inner) * s / (shells - 1);
+        k = appendSphereShell(*vertices, k, r, latSegments, lonSegments);
+    }
+
+    // Per-shell alpha scale: a viewer ray crosses ~half the shells, so ~2/shells keeps the stack from
+    // blending to near-opaque while still reading as a solid volume.
+    double shellAlphaScale = std::min(1.0, 2.0 / std::max(1, shells));
+
+    auto params = vec4Array::create(3);
+    params->properties.dataVariance = DataVariance::STATIC_DATA;
+    params->set(0, ::vsg::vec4((float)color.red / 255.0f, (float)color.green / 255.0f, (float)color.blue / 255.0f, (float)waveOffset));
+    params->set(1, ::vsg::vec4((float)fadingFactor, (float)fadingDistance, (float)waveLength, (float)waveAmplitude));
+    params->set(2, ::vsg::vec4((float)inner, (float)outer, (float)shellAlphaScale, 0.0f));
+
+    auto pipeline = getSphereWavePipeline();
+    auto uniform = DescriptorBuffer::create(params, 0, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    auto descriptorSet = DescriptorSet::create(pipeline->layout->setLayouts[0], Descriptors{uniform});
+    auto bindDescriptorSet = BindDescriptorSet::create(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, descriptorSet);
+
+    auto stateGroup = StateGroup::create();
+    stateGroup->add(BindGraphicsPipeline::create(pipeline));
+    stateGroup->add(bindDescriptorSet);
+    auto commands = Commands::create();
+    DataList vertexArrays{vertices};
+    commands->addChild(BindVertexBuffers::create(0, vertexArrays));
+    commands->addChild(Draw::create(vertices->size(), 1, 0, 0));
+    stateGroup->addChild(commands);
+    return stateGroup;
+}
+
+// A "loose mesh" wireframe sphere: latRings latitude circles + lonRings meridian great circles, drawn
+// as a LINE_LIST in the given colour/width. Used for 3D range indicators (a radio's communication /
+// interference range is a sphere, so a flat circle is meaningless once nodes leave the ground plane).
+ref_ptr<Node> createWireframeSphere(const Coord& center, double radius, const cFigure::Color& color,
+        double width, int latRings, int lonRings, int segments)
+{
+    if (radius <= 0 || segments < 3 || latRings < 2 || lonRings < 1)
+        return Group::create();
+    float cx = (float)center.x, cy = (float)center.y, cz = (float)center.z, R = (float)radius;
+    std::vector<::vsg::vec3> pts;
+    // latitude circles (horizontal, poles excluded)
+    for (int i = 1; i < latRings; i++) {
+        double th = M_PI * i / latRings;
+        float z = R * (float)std::cos(th), r = R * (float)std::sin(th);
+        for (int j = 0; j < segments; j++) {
+            double a0 = 2.0 * M_PI * j / segments, a1 = 2.0 * M_PI * (j + 1) / segments;
+            pts.push_back(::vsg::vec3(cx + r * (float)std::cos(a0), cy + r * (float)std::sin(a0), cz + z));
+            pts.push_back(::vsg::vec3(cx + r * (float)std::cos(a1), cy + r * (float)std::sin(a1), cz + z));
+        }
+    }
+    // meridian great circles (vertical, through the poles)
+    for (int k = 0; k < lonRings; k++) {
+        double phi = M_PI * k / lonRings;
+        float cph = (float)std::cos(phi), sph = (float)std::sin(phi);
+        auto Meridian = [&](double t) {
+            float st = (float)std::sin(t), ct = (float)std::cos(t);
+            return ::vsg::vec3(cx + R * st * cph, cy + R * st * sph, cz + R * ct);
+        };
+        for (int j = 0; j < segments; j++) {
+            pts.push_back(Meridian(2.0 * M_PI * j / segments));
+            pts.push_back(Meridian(2.0 * M_PI * (j + 1) / segments));
+        }
+    }
+    auto vertices = vec3Array::create(pts.size());
+    for (size_t i = 0; i < pts.size(); i++)
+        vertices->set(i, pts[i]);
+    return createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_LINE_LIST, color, 1.0, /*lit*/ false, width);
 }
 
 // ---------------------------------------------------------------------------------------------
