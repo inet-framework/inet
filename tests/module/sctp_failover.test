@@ -14,12 +14,6 @@ cmdenv-express-mode = true
 cmdenv-log-finalization = true
 ned-path = .;../../../../src;../../lib
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 **.testing = false
 **.testTimeout = 0s
 
@@ -55,12 +49,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.hasSctp = true
 **.sctp.sctpAlgorithmClass = "SctpAlg"
 %#--------------------------------------------------------------------------------------------------------------
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar failover.sctp_client.sctp.assoc-1 "Fast RTX" 0
 %#--------------------------------------------------------------------------------------------------------------
-%contains-regex: results/General-0.sca
+%contains-regex: results/General-#0.sca
 scalar failover\.sctp_client\.sctp\.assoc-1 "Timer-Based RTX" [1-9][0-9]*
 %#--------------------------------------------------------------------------------------------------------------
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar failover.sctp_client.sctp.assoc-1 "Acked Bytes" 72600
 %#--------------------------------------------------------------------------------------------------------------

@@ -63,12 +63,6 @@ cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
 ned-path = .;../../../../src
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 # RP owns the embedded RP address aaaa:2:66::1 (decoded from the group below) on
 # its link toward DR_R; that link uses the encoded prefix aaaa:2:66::/64. Every
 # other link gets an auto-assigned unique 2001:db8:N::/64. Autorouting (on by

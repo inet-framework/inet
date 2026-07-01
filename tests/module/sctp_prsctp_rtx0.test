@@ -12,12 +12,6 @@ cmdenv-express-mode = true
 cmdenv-log-finalization = true
 ned-path = .;../../../../src;../../lib
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 **.testing = false
 **.testTimeout = 0s
 
@@ -60,15 +54,15 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 #**.ppp[*].queue.packetCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
 %#--------------------------------------------------------------------------------------------------------------
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar SctpFeatureTest.sctp_client.sctp.assoc-1 "Fast RTX" 0
 %#--------------------------------------------------------------------------------------------------------------
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar SctpFeatureTest.sctp_client.sctp.assoc-1 "Timer-Based RTX" 0
 %#--------------------------------------------------------------------------------------------------------------
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar SctpFeatureTest.sctp_client.sctp.assoc-1 "Path failures" 0
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains-regex: results/General-0.sca
+%not-contains-regex: results/General-#0.sca
 scalar SctpFeatureTest.sctp_client.sctp.assoc-1\w+ "Forward TSN" 0
 %#--------------------------------------------------------------------------------------------------------------

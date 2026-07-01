@@ -56,12 +56,6 @@ cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
 ned-path = .;../../../../src
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 # RP owns the static RP address 2001:db8:99::1 on its link toward DR_R, so DR_R
 # reaches the RP via an ON-LINK route (unspecified next hop) -- the case the fix
 # targets. Every other link gets an auto-assigned unique 2001:db8:N::/64.

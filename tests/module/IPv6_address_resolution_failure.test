@@ -43,12 +43,6 @@ sim-time-limit = 20s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 # udp apps: send to a non-existent address on otherHost's prefix
 # The router's eth[1] (toward otherHost) gets prefix aaaa:0:66:0::/64.
 # We send to aaaa:0:66:0::dead which nobody owns -> AR failure at router.

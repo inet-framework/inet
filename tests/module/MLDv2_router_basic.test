@@ -83,11 +83,6 @@ cmdenv-log-prefix = "%C: "
 # Fix RNG seed for deterministic behavior of uniform(0, maxRespDelay) in the host timer
 seed-set = 0
 
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 # Enable MLDv2 on all nodes so they can receive inbound Reports
 **.ipv6.hasMld = true
 **.ipv6.mld.typename = "Mldv2"

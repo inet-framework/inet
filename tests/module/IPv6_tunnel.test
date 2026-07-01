@@ -45,10 +45,6 @@ sim-time-limit = 5s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
 
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-
 **.ipv6.configurator.networkConfiguratorModule = "configurator"
 **.configurator.dumpAddresses = true
 **.configurator.dumpRoutes = true

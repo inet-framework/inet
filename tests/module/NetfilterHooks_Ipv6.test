@@ -72,12 +72,6 @@ cmdenv-log-prefix = "%C: "
 # node's Ipv6NodeConfigurator to the global configurator
 **.ipv6.configurator.networkConfiguratorModule = "configurator"
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 # every probe queues every hook, then reinjects after 1ms
 **.netfilterProbe.preRouting = "QUEUE"
 **.netfilterProbe.localIn = "QUEUE"

@@ -9,12 +9,6 @@ Transmission starts at the end of reception plus IFG.
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.EthTestNetwork
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 cmdenv-event-banners=false
 cmdenv-express-mode=false
 
@@ -31,18 +25,18 @@ cmdenv-express-mode=false
 *.host*.eth.queue.typename = ${"EthernetQueue", "DropTailQueue"}
 *.host*.eth.duplexMode = false     # Half duplex
 
-#*.host1.ethg$o.channel.logfile="logfile-${runnumber}.txt"
-**.ethch2.logfile="logfile-${runnumber}.txt"
+#*.host1.ethg$o.channel.logfile="logfile-#${runnumber}.txt"
+**.ethch2.logfile="logfile-#${runnumber}.txt"
 
 # these contains are for omnetpp 5.0. (rounding when converting double to simtime)
 %#--------------------------------------------------------------------------------------------------------------
-%contains: logfile-0.txt
+%contains: logfile-#0.txt
 #1:10000000000000: 'PK at 10: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
 #2:10000008960000: 'PK at 10: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:10000008960000 (100 byte) discard:0, delay:0, duration:8000000
 #3:20000080600000: 'PK at 20: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:20000080600000 (100 byte) discard:0, delay:0, duration:8000000
 #4:20000089560000: 'PK at 20: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:20000089560000 (100 byte) discard:0, delay:0, duration:8000000
 %#--------------------------------------------------------------------------------------------------------------
-%contains: logfile-1.txt
+%contains: logfile-#1.txt
 #1:10000000000000: 'PK at 10: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
 #2:10000008960000: 'PK at 10: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:10000008960000 (100 byte) discard:0, delay:0, duration:8000000
 #3:20000080600000: 'PK at 20: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:20000080600000 (100 byte) discard:0, delay:0, duration:8000000

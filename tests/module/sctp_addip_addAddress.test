@@ -13,12 +13,6 @@ cmdenv-express-mode = false
 #cmdenv-module-messages=false
 ned-path = .;../../../../src;../../lib
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 **.testing = false
 **.testTimeout = 0s
 
@@ -75,6 +69,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_server.pcapRecorder[0].pcapNetwork = 204
 **.sctp_client.pcapRecorder[0].pcapNetwork = 204
 %#--------------------------------------------------------------------------------------------------------------
-%contains-regex: results/General-0.sca
+%contains-regex: results/General-#0.sca
 scalar multihomed\.sctp_server\.sctp\.assoc-\d+ "Number of Heartbeat ACKs Sent 10\.2\.1\.1" [1-9]
 %#--------------------------------------------------------------------------------------------------------------

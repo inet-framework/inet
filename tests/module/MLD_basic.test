@@ -93,11 +93,6 @@ cmdenv-log-prefix = "%C: "
 # Fix RNG seed for deterministic behavior of uniform(0, maxRespTime) in startHostTimer
 seed-set = 0
 
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 # Enable MLD on all nodes so the host can receive Queries and the router can receive Reports/Dones
 **.ipv6.hasMld = true
 # Disable DAD for fast startup (no 1s+ delay before addresses become ready)

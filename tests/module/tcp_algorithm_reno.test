@@ -8,12 +8,7 @@ Test tcp algorithms with PER
 [General]
 ned-path = .;../../../../src;../../lib
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
 cmdenv-event-banners=false
 cmdenv-express-mode=true
 
@@ -33,8 +28,8 @@ total-stack = 7MiB
 description = "inet_TCP <---> inet_TCP with algorithms"
 *.server*.tcpType = "Tcp"
 *.client*.tcpType = "Tcp"
-**.tcp.tcpAlgorithmClass = "TcpReno"  # ${"DumbTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpVegas", "TcpWestwood"}
-*.per = 0.01 * ${0, 0.1, 0.2, 0.5, 1, 2, 5}
+**.tcp.tcpAlgorithmClass = "TcpReno"
+*.per = 0.01 * ${per=0, 0.1, 0.2, 0.5, 1, 2, 5}
 
 
 
@@ -64,25 +59,25 @@ description = "inet_TCP <---> inet_TCP with algorithms"
 
 %#################################################################################################################
 
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
 
-%contains: results/General-1.sca
+%contains: results/General-#1.sca
 scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
 
-%contains: results/General-2.sca
+%contains: results/General-#2.sca
 scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
 
-%contains: results/General-3.sca
+%contains: results/General-#3.sca
 scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
 
-%contains: results/General-4.sca
+%contains: results/General-#4.sca
 scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
 
-%contains: results/General-5.sca
+%contains: results/General-#5.sca
 scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
 
-%contains: results/General-6.sca
+%contains: results/General-#6.sca
 scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
 
 %#--------------------------------------------------------------------------------------------------------------

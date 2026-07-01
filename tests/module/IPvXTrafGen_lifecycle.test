@@ -12,12 +12,6 @@ network = Test
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 **.hasStatus = true
 *.sender[0].*.initialStatus = "down"
 *.recip.*.initialStatus = "down"
@@ -169,17 +163,17 @@ Sending packet: \(inet::Packet\)appData-10 [^\n]*
 ([^\n]*\n)*?\*\* Event \#\d+  t=6  on sendTimer \(cMessage\)  in Test\.sender\[1\]\.trafGen \(IpvxTrafGen, id=\d+\)
 Sending packet: \(inet::Packet\)appData-10 [^\n]*
 %#--------------------------------------------------------------------------------------------------------------
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar Test.sender[0].trafGen packetSent:count 15
 attr
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar Test.sender[1].trafGen packetSent:count 13
 attr
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar Test.recip.trafGen packetReceived:count 21
 attr
 %#--------------------------------------------------------------------------------------------------------------

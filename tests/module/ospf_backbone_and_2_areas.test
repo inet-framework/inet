@@ -132,15 +132,10 @@ network = Test1
 ned-path = .;../../../../src;../../lib
 sim-time-limit = 200s
 cmdenv-express-mode = true
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
 
 **.vector-recording = false
 **.cmdenv-log-level = "info"
-
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.ospf.ospfConfig = xmldoc("ASConfig.xml")
 
@@ -218,89 +213,89 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 </OSPFASConfig>
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar Test1.H1.app[0] packetSent:count 100
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar Test1.H1.app[0] packetReceived:count 100
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar Test1.H1.app[1] echoedPk:count 100
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar Test1.H2.app[0] packetSent:count 100
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar Test1.H2.app[0] packetReceived:count 100
-%contains: results/General-0.sca
+%contains: results/General-#0.sca
 scalar Test1.H2.app[1] echoedPk:count 100
-%contains: results/General-1.sca
+%contains: results/General-#1.sca
 scalar Test1.H1.app[0] packetSent:count 100
-%contains: results/General-1.sca
+%contains: results/General-#1.sca
 scalar Test1.H1.app[0] packetReceived:count 100
-%contains: results/General-1.sca
+%contains: results/General-#1.sca
 scalar Test1.H1.app[1] echoedPk:count 100
-%contains: results/General-1.sca
+%contains: results/General-#1.sca
 scalar Test1.H2.app[0] packetSent:count 100
-%contains: results/General-1.sca
+%contains: results/General-#1.sca
 scalar Test1.H2.app[0] packetReceived:count 100
-%contains: results/General-1.sca
+%contains: results/General-#1.sca
 scalar Test1.H2.app[1] echoedPk:count 100
-%contains: results/General-2.sca
+%contains: results/General-#2.sca
 scalar Test1.H1.app[0] packetSent:count 100
-%contains: results/General-2.sca
+%contains: results/General-#2.sca
 scalar Test1.H1.app[0] packetReceived:count 100
-%contains: results/General-2.sca
+%contains: results/General-#2.sca
 scalar Test1.H1.app[1] echoedPk:count 100
-%contains: results/General-2.sca
+%contains: results/General-#2.sca
 scalar Test1.H2.app[0] packetSent:count 100
-%contains: results/General-2.sca
+%contains: results/General-#2.sca
 scalar Test1.H2.app[0] packetReceived:count 100
-%contains: results/General-2.sca
+%contains: results/General-#2.sca
 scalar Test1.H2.app[1] echoedPk:count 100
-%contains: results/General-3.sca
+%contains: results/General-#3.sca
 scalar Test1.H1.app[0] packetSent:count 100
-%contains: results/General-3.sca
+%contains: results/General-#3.sca
 scalar Test1.H1.app[0] packetReceived:count 100
-%contains: results/General-3.sca
+%contains: results/General-#3.sca
 scalar Test1.H1.app[1] echoedPk:count 100
-%contains: results/General-3.sca
+%contains: results/General-#3.sca
 scalar Test1.H2.app[0] packetSent:count 100
-%contains: results/General-3.sca
+%contains: results/General-#3.sca
 scalar Test1.H2.app[0] packetReceived:count 100
-%contains: results/General-3.sca
+%contains: results/General-#3.sca
 scalar Test1.H2.app[1] echoedPk:count 100
-%contains: results/General-4.sca
+%contains: results/General-#4.sca
 scalar Test1.H1.app[0] packetSent:count 100
-%contains: results/General-4.sca
+%contains: results/General-#4.sca
 scalar Test1.H1.app[0] packetReceived:count 100
-%contains: results/General-4.sca
+%contains: results/General-#4.sca
 scalar Test1.H1.app[1] echoedPk:count 100
-%contains: results/General-4.sca
+%contains: results/General-#4.sca
 scalar Test1.H2.app[0] packetSent:count 100
-%contains: results/General-4.sca
+%contains: results/General-#4.sca
 scalar Test1.H2.app[0] packetReceived:count 100
-%contains: results/General-4.sca
+%contains: results/General-#4.sca
 scalar Test1.H2.app[1] echoedPk:count 100
-%contains: results/General-5.sca
+%contains: results/General-#5.sca
 scalar Test1.H1.app[0] packetSent:count 100
-%contains: results/General-5.sca
+%contains: results/General-#5.sca
 scalar Test1.H1.app[0] packetReceived:count 100
-%contains: results/General-5.sca
+%contains: results/General-#5.sca
 scalar Test1.H1.app[1] echoedPk:count 100
-%contains: results/General-5.sca
+%contains: results/General-#5.sca
 scalar Test1.H2.app[0] packetSent:count 100
-%contains: results/General-5.sca
+%contains: results/General-#5.sca
 scalar Test1.H2.app[0] packetReceived:count 100
-%contains: results/General-5.sca
+%contains: results/General-#5.sca
 scalar Test1.H2.app[1] echoedPk:count 100
-%contains: results/General-6.sca
+%contains: results/General-#6.sca
 scalar Test1.H1.app[0] packetSent:count 100
-%contains: results/General-6.sca
+%contains: results/General-#6.sca
 scalar Test1.H1.app[0] packetReceived:count 100
-%contains: results/General-6.sca
+%contains: results/General-#6.sca
 scalar Test1.H1.app[1] echoedPk:count 100
-%contains: results/General-6.sca
+%contains: results/General-#6.sca
 scalar Test1.H2.app[0] packetSent:count 100
-%contains: results/General-6.sca
+%contains: results/General-#6.sca
 scalar Test1.H2.app[0] packetReceived:count 100
-%contains: results/General-6.sca
+%contains: results/General-#6.sca
 scalar Test1.H2.app[1] echoedPk:count 100
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

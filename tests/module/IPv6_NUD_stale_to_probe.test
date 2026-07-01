@@ -42,12 +42,6 @@ sim-time-limit = 25s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 # Short reachable time so NUD kicks in quickly
 **.router.ipv6.neighbourDiscovery.advReachableTime = 3s
 

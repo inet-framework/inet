@@ -14,12 +14,6 @@ cmdenv-event-banners=false
 cmdenv-express-mode = false
 ned-path = .;../../../../src;../../lib
 
-#omnetpp 5.0 - 5.1 compatibility:
-eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
-output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
-output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
-snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
-
 **.testing = false
 **.testTimeout = 0s
 
@@ -55,12 +49,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp.auth = true
 **.sctp.chunks = "SACK,DATA"
 %#--------------------------------------------------------------------------------------------------------------
-%contains-regex: results/General-0.sca
+%contains-regex: results/General-#0.sca
 scalar SctpFeatureTest\.sctp_client\.sctp\.assoc-\d+ "Number of AUTH chunks sent" [1-9][0-9]*
 scalar SctpFeatureTest\.sctp_client\.sctp\.assoc-\d+ "Number of AUTH chunks accepted" [1-9][0-9]*
 scalar SctpFeatureTest\.sctp_client\.sctp\.assoc-\d+ "Number of AUTH chunks rejected" 0
 %#--------------------------------------------------------------------------------------------------------------
-%contains-regex: results/General-0.sca
+%contains-regex: results/General-#0.sca
 scalar SctpFeatureTest\.sctp_server\.sctp\.assoc-\d+ "Number of AUTH chunks sent" [1-9][0-9]*
 scalar SctpFeatureTest\.sctp_server\.sctp\.assoc-\d+ "Number of AUTH chunks accepted" [1-9][0-9]*
 scalar SctpFeatureTest\.sctp_server\.sctp\.assoc-\d+ "Number of AUTH chunks rejected" 0
