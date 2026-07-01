@@ -8,7 +8,6 @@
         <chart id="1" type="MATPLOTLIB" name="Per-station throughput" template="barchart_mpl" icon="icons/full/obj/barchart.png">
             <script>
 <![CDATA[from omnetpp.scave import results, chart, utils
-import inet.scave.plot
 import matplotlib.pyplot as plt
 
 props = chart.get_properties()
@@ -32,7 +31,7 @@ metadf["legend"] = list(valuedf.index)   # clean legend labels (no "scenario=" p
 utils.plot_bars(valuedf, errorsdf, metadf, props)
 
 slow_level = df[(df["station"] == "sta[0]") & (df["scenario"].str.startswith("Rate anomaly"))]["value"].iloc[0]
-plt.gca().axhline(slow_level, color=inet.scave.plot.default_colors[1], linewidth=1.6, zorder=3)
+plt.gca().axhline(slow_level, color="0.2", linestyle="--", linewidth=1.5, zorder=3)
 
 utils.postconfigure_plot(props)
 ax = plt.gca()                      # bar charts: horizontal dashed grid behind the bars
