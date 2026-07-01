@@ -77,9 +77,11 @@ ref_ptr<Node> createAnnulus(const Coord& center, double outerRadius, double inne
         const cFigure::Color& color, double opacity = 1.0, int polygonSize = 64);
 // Radially-subdivided ring with wave-modulated, distance-faded per-vertex opacity (the propagating
 // signal wavefront — reproduces the OSG signal GLSL shader). See the .cc for the alpha formula.
+// waveFadingFactor scales the ripple amplitude (the OSG shader's uniform of the same name): 1.0 = full
+// ripple, 0.0 = a smooth distance-faded disc with no ripple (used to damp the ripple at fast animation).
 ref_ptr<Node> createWaveRing(const Coord& center, double innerRadius, double outerRadius,
         const cFigure::Color& color, double waveLength, double waveAmplitude, double waveOffset,
-        double fadingFactor, double fadingDistance, int segments = 100);
+        double fadingFactor, double fadingDistance, double waveFadingFactor = 1.0, int segments = 100);
 ref_ptr<Node> createQuad(const Coord& min, const Coord& max, const cFigure::Color& color, double opacity = 1.0);
 ref_ptr<Node> createPolygon(const std::vector<Coord>& points, const cFigure::Color& color, double opacity = 1.0, const Coord& translation = Coord::ZERO);
 ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width = 10.0, double height = 20.0, double opacity = 1.0);
