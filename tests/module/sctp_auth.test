@@ -12,7 +12,7 @@ The number of rejected AUTH chunks should be equal to 0.
 record-vector-results = false
 network = inet.test.moduletest.lib.SctpFeatureTest
 cmdenv-event-banners=false
-cmdenv-express-mode = false
+cmdenv-express-mode = true
 ned-path = .;../../../../src;../../lib
 
 **.testing = false

@@ -64,6 +64,7 @@ network AODVTest
 %inifile: omnetpp.ini
 [General]
 record-vector-results = false
+cmdenv-express-mode = true
 network = AODVTest
 ned-path = .;../../../../src;../../lib
 num-rngs = 3

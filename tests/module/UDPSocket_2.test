@@ -46,7 +46,7 @@ simple TestApp like IApp
 record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.SimpleTestNetwork
-cmdenv-express-mode = false
+cmdenv-express-mode = true
 cmdenv-event-banner-details = true
 
 **.client.numApps = 1

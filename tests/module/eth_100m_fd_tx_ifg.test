@@ -8,7 +8,7 @@ ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.EthTestNetwork
 
 cmdenv-event-banners=false
-cmdenv-express-mode=false
+cmdenv-express-mode = true
 
 **.ethch*.datarate = 100Mbps
 

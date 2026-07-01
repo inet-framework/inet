@@ -24,6 +24,7 @@ network LocalUDP
 ned-path = .;../../../../src;../../lib
 
 record-vector-results = false
+cmdenv-express-mode = true
 
 network = LocalUDP
 #debug-on-errors = true

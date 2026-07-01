@@ -104,6 +104,7 @@ network Test1
 
 [General]
 record-vector-results = false
+cmdenv-express-mode = true
 description = "Dynamic test"
 network = Test1
 ned-path = .;../../../../src;../../lib
