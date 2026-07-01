@@ -108,6 +108,9 @@ sim-time-limit = 200s
 output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
 
 record-vector-results = false
+**.status.cmdenv-log-level = trace
+**.cmdenv-log-level = off
+cmdenv-event-banners = false
 **.status.cmdenv-log-level = "info"
 **.cmdenv-log-level = "warn"
 

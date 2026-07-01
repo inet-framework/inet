@@ -29,6 +29,9 @@ network Test
 
 [General]
 record-vector-results = false
+**.app[*].cmdenv-log-level = trace
+**.cmdenv-log-level = off
+cmdenv-event-banners = false
 network = Test
 ned-path = .;../../../../src;../../lib
 sim-time-limit = 100s

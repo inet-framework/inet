@@ -72,6 +72,9 @@ cmdenv-express-mode = false
 ned-path = .;../../../../src;../../lib
 
 record-vector-results = false
+**.stpTester.cmdenv-log-level = trace
+**.cmdenv-log-level = off
+cmdenv-event-banners = false
 **.agingTime = 1s
 network = LargeNet
 
