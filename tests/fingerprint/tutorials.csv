@@ -41,7 +41,7 @@
 
 /tutorials/bgp/,                -f omnetpp.ini -c Step1 -r 0,                         1000s,           0b8e-54dc/tplx;31cf-7de1/~tNl;cc58-4ab4/~tND;bf25-b616/tyf, PASS,
 /tutorials/bgp/,                -f omnetpp.ini -c Step2 -r 0,                         1000s,           8bac-70ac/tplx;449b-67e5/~tNl;2b12-6020/~tND;6a56-47bc/tyf, PASS,
-/tutorials/bgp/,                -f omnetpp.ini -c Step3 -r 0,                         1000s,           9887-ad2d/tplx;624c-828e/~tNl;3ea4-502e/~tND;7bfc-4f53/tyf, PASS,
+/tutorials/bgp/,                -f omnetpp.ini -c Step3 -r 0,                         1000s,           5a29-992c/tplx;7cda-7bd9/~tNl;541c-5372/~tND;ccee-f2c9/tyf, PASS,
 /tutorials/bgp/,                -f omnetpp.ini -c Step1 -r 0,                         1000s,           0b8e-54dc/tplx;31cf-7de1/~tNl;cc58-4ab4/~tND;bf25-b616/tyf, PASS,
 /tutorials/bgp/,                -f omnetpp.ini -c Step4a -r 0,                         1000s,           c5a4-e0e2/tplx;c6cc-46dd/~tNl;960b-d1be/~tND;47c2-6656/tyf, PASS,
 /tutorials/bgp/,                -f omnetpp.ini -c Step5 -r 0,                         1000s,           e6e6-5451/tplx;6880-2d0c/~tNl;ba0b-0051/~tND;73bc-1909/tyf, PASS,
@@ -51,7 +51,7 @@
 /tutorials/bgp/,                -f omnetpp.ini -c Step7 -r 0,                         1000s,           3141-cd00/tplx;f068-1e19/~tNl;c24b-b7a9/~tND;0157-a97b/tyf, PASS,
 /tutorials/bgp/,                -f omnetpp.ini -c Step8 -r 0,                         1000s,           341b-7461/tplx;f93c-d626/~tNl;896a-d046/~tND;4368-88b2/tyf, PASS,
 /tutorials/bgp/,                -f omnetpp.ini -c Step9 -r 0,                         1000s,           eebc-9d6b/tplx;4d97-3660/~tNl;8dc6-9281/~tND;3460-8876/tyf, PASS,
-/tutorials/bgp/,                -f omnetpp.ini -c Step10 -r 0,                         1000s,           129b-12aa/tplx;d2cb-3b1d/~tNl;e811-a1c7/~tND;4b35-7726/tyf, PASS,
+/tutorials/bgp/,                -f omnetpp.ini -c Step10 -r 0,                         1000s,           796b-f31d/tplx;177f-68eb/~tNl;2ffb-9541/~tND;e0f6-66df/tyf, PASS,
 /tutorials/bgp/,                -f omnetpp.ini -c Step11 -r 0,                         1000s,           cf37-6279/tplx;3c95-e619/~tNl;075f-f8e0/~tND;ccd2-5d2a/tyf, PASS,
 
 /tutorials/ospf/,                -f omnetpp.ini -c Step1 -r 0,                         1000s,           dae5-8e27/tplx;09f0-c133/~tNl;9229-92b2/~tND;339a-c757/tyf, PASS,
