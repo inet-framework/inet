@@ -32,7 +32,7 @@ network Ipv4RouteConflictNetwork
 [General]
 record-vector-results = false
 network = Ipv4RouteConflictNetwork
-ned-path = ../../../../src
+ned-path = .;../../../../src
 sim-time-limit = 1s
 cmdenv-express-mode = false
 
