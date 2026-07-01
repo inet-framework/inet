@@ -40,6 +40,7 @@ class INET_API MediumVsgVisualizer : public MediumVisualizerBase
     double signalWaveAmplitude = NaN;
     double signalWaveFadingAnimationSpeedFactor = NaN;
     bool signalWaveShader = false; // experimental: draw the ring with the GLSL wave shader (smooth flowing ripple) instead of baked per-vertex alpha
+    bool rangeSphere = false;      // draw communication/interference range indicators as 3D wireframe spheres instead of flat circles
     //@}
 
     /** @name Internal state */
