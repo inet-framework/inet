@@ -14,6 +14,10 @@ possible via the Router Solicitation sent on L2 (re)association.
 %inifile: omnetpp.ini
 [General]
 record-vector-results = false
+**.mipv6.cmdenv-log-level = trace
+**.app[*].cmdenv-log-level = trace
+**.cmdenv-log-level = off
+cmdenv-event-banners = false
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.Mipv6Network
 sim-time-limit = 60s
