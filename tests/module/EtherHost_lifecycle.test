@@ -101,18 +101,19 @@ Generating packet `req-\d+-\d+'
 %contains-regex: stdout
 \*\* Event #\d+  t=2  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <startup> command\.\.\.
-Doing stage 0/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
+Doing stage 0/9 of operation inet::ModuleStartOperation on Test\.sender\[0\]
 Test\.sender\[0\] starting up
-Doing stage 1/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
-Doing stage 2/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
-Doing stage 3/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
-Doing stage 4/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
-Doing stage 5/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
-Doing stage 6/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
+Doing stage 1/9 of operation inet::ModuleStartOperation on Test\.sender\[0\]
+Doing stage 2/9 of operation inet::ModuleStartOperation on Test\.sender\[0\]
+Doing stage 3/9 of operation inet::ModuleStartOperation on Test\.sender\[0\]
+Doing stage 4/9 of operation inet::ModuleStartOperation on Test\.sender\[0\]
+Doing stage 5/9 of operation inet::ModuleStartOperation on Test\.sender\[0\]
+Doing stage 6/9 of operation inet::ModuleStartOperation on Test\.sender\[0\]
+Doing stage 7/9 of operation inet::ModuleStartOperation on Test\.sender\[0\]
 Starting application
 Test\.sender\[0\]\.srv registering DSAP 241
 Sending message, .*\(Request\).*LLC_OPEN.*\.
-Doing stage 7/8 of operation inet::ModuleStartOperation on Test\.sender\[0\]
+Doing stage 8/9 of operation inet::ModuleStartOperation on Test\.sender\[0\]
 Test\.sender\[0\] started
 \*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
@@ -177,18 +178,19 @@ Generating packet `req-\d+-14'
 %contains-regex: stdout
 \*\* Event #\d+  t=9  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <shutdown> command\.\.\.
-Doing stage 0/8 of operation inet::ModuleStopOperation on Test.sender\[0\]
+Doing stage 0/9 of operation inet::ModuleStopOperation on Test.sender\[0\]
 Test\.sender\[0\] shutting down
-Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
+Doing stage 1/9 of operation inet::ModuleStopOperation on Test\.sender\[0\]
 Sending message, .*\(Request\).*CLOSE.*\.
 Stop the application
 .*
-Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
-Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
-Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
-Doing stage 5/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
-Doing stage 6/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
-Doing stage 7/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
+Doing stage 2/9 of operation inet::ModuleStopOperation on Test\.sender\[0\]
+Doing stage 3/9 of operation inet::ModuleStopOperation on Test\.sender\[0\]
+Doing stage 4/9 of operation inet::ModuleStopOperation on Test\.sender\[0\]
+Doing stage 5/9 of operation inet::ModuleStopOperation on Test\.sender\[0\]
+Doing stage 6/9 of operation inet::ModuleStopOperation on Test\.sender\[0\]
+Doing stage 7/9 of operation inet::ModuleStopOperation on Test\.sender\[0\]
+Doing stage 8/9 of operation inet::ModuleStopOperation on Test\.sender\[0\]
 Test\.sender\[0\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains-regex: stdout
@@ -235,18 +237,19 @@ Generating packet `req-\d+-8'
 %contains-regex: stdout
 \*\* Event #\d+  t=5\.1  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <shutdown> command\.\.\.
-Doing stage 0/8 of operation inet::ModuleStopOperation on Test.sender\[1\]
+Doing stage 0/9 of operation inet::ModuleStopOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
-Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 1/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Sending message, .*\(Request\).*CLOSE.*\.
 Stop the application
 .*
-Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Doing stage 5/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Doing stage 6/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Doing stage 7/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 2/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 3/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 4/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 5/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 6/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 7/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 8/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Test\.sender\[1\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains-regex: stdout
@@ -256,18 +259,19 @@ Generating packet `req-\d+-\d+'
 %contains-regex: stdout
 \*\* Event #\d+  t=6\.1  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <startup> command\.\.\.
-Doing stage 0/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
+Doing stage 0/9 of operation inet::ModuleStartOperation on Test\.sender\[1\]
 Test\.sender\[1\] starting up
-Doing stage 1/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
-Doing stage 2/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
-Doing stage 3/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
-Doing stage 4/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
-Doing stage 5/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
-Doing stage 6/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
+Doing stage 1/9 of operation inet::ModuleStartOperation on Test\.sender\[1\]
+Doing stage 2/9 of operation inet::ModuleStartOperation on Test\.sender\[1\]
+Doing stage 3/9 of operation inet::ModuleStartOperation on Test\.sender\[1\]
+Doing stage 4/9 of operation inet::ModuleStartOperation on Test\.sender\[1\]
+Doing stage 5/9 of operation inet::ModuleStartOperation on Test\.sender\[1\]
+Doing stage 6/9 of operation inet::ModuleStartOperation on Test\.sender\[1\]
+Doing stage 7/9 of operation inet::ModuleStartOperation on Test\.sender\[1\]
 Starting application
 Test\.sender\[1\]\.srv registering DSAP 241
 Sending message, .*\(Request\).*LLC_OPEN.*\.
-Doing stage 7/8 of operation inet::ModuleStartOperation on Test\.sender\[1\]
+Doing stage 8/9 of operation inet::ModuleStartOperation on Test\.sender\[1\]
 Test.sender\[1\] started
 \*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
@@ -300,18 +304,19 @@ Generating packet `req-\d+-14'
 %contains-regex: stdout
 \*\* Event #\d+  t=9\.1  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <shutdown> command\.\.\.
-Doing stage 0/8 of operation inet::ModuleStopOperation on Test.sender\[1\]
+Doing stage 0/9 of operation inet::ModuleStopOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
-Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 1/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Sending message, .*\(Request\).*CLOSE.*\.
 Stop the application
 .*
-Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Doing stage 5/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Doing stage 6/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-Doing stage 7/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 2/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 3/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 4/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 5/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 6/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 7/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
+Doing stage 8/9 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Test\.sender\[1\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
@@ -320,36 +325,38 @@ Test\.sender\[1\] shut down
 %contains-regex: stdout
 \*\* Event #\d+  t=1\.7  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <startup> command\.\.\.
-Doing stage 0/8 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 0/9 of operation inet::ModuleStartOperation on Test\.recip
 Test\.recip starting up
-Doing stage 1/8 of operation inet::ModuleStartOperation on Test\.recip
-Doing stage 2/8 of operation inet::ModuleStartOperation on Test\.recip
-Doing stage 3/8 of operation inet::ModuleStartOperation on Test\.recip
-Doing stage 4/8 of operation inet::ModuleStartOperation on Test\.recip
-Doing stage 5/8 of operation inet::ModuleStartOperation on Test\.recip
-Doing stage 6/8 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 1/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 2/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 3/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 4/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 5/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 6/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 7/9 of operation inet::ModuleStartOperation on Test\.recip
 Starting application
 Test\.recip\.srv registering DSAP 241
 Sending message, .*\(Request\).*LLC_OPEN.*\.
-Doing stage 7/8 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 8/9 of operation inet::ModuleStartOperation on Test\.recip
 Test\.recip started
 \*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=3\.2  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <shutdown> command\.\.\.
-Doing stage 0/8 of operation inet::ModuleStopOperation on Test.recip
+Doing stage 0/9 of operation inet::ModuleStopOperation on Test.recip
 Test\.recip shutting down
-Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.recip
+Doing stage 1/9 of operation inet::ModuleStopOperation on Test\.recip
 Sending message, .*\(Request\).*CLOSE.*\.
 Stop the application
 .*
-Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.recip
-Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.recip
-Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.recip
-Doing stage 5/8 of operation inet::ModuleStopOperation on Test\.recip
-Doing stage 6/8 of operation inet::ModuleStopOperation on Test\.recip
-Doing stage 7/8 of operation inet::ModuleStopOperation on Test\.recip
+Doing stage 2/9 of operation inet::ModuleStopOperation on Test\.recip
+Doing stage 3/9 of operation inet::ModuleStopOperation on Test\.recip
+Doing stage 4/9 of operation inet::ModuleStopOperation on Test\.recip
+Doing stage 5/9 of operation inet::ModuleStopOperation on Test\.recip
+Doing stage 6/9 of operation inet::ModuleStopOperation on Test\.recip
+Doing stage 7/9 of operation inet::ModuleStopOperation on Test\.recip
+Doing stage 8/9 of operation inet::ModuleStopOperation on Test\.recip
 Test\.recip shut down
 \*\* Event #\d+  t=
 
@@ -357,18 +364,19 @@ Test\.recip shut down
 %contains-regex: stdout
 \*\* Event #\d+  t=4\.2  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <startup> command\.\.\.
-Doing stage 0/8 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 0/9 of operation inet::ModuleStartOperation on Test\.recip
 Test\.recip starting up
-Doing stage 1/8 of operation inet::ModuleStartOperation on Test\.recip
-Doing stage 2/8 of operation inet::ModuleStartOperation on Test\.recip
-Doing stage 3/8 of operation inet::ModuleStartOperation on Test\.recip
-Doing stage 4/8 of operation inet::ModuleStartOperation on Test\.recip
-Doing stage 5/8 of operation inet::ModuleStartOperation on Test\.recip
-Doing stage 6/8 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 1/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 2/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 3/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 4/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 5/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 6/9 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 7/9 of operation inet::ModuleStartOperation on Test\.recip
 Starting application
 Test\.recip\.srv registering DSAP 241
 Sending message, .*\(Request\).*LLC_OPEN.*\.
-Doing stage 7/8 of operation inet::ModuleStartOperation on Test\.recip
+Doing stage 8/9 of operation inet::ModuleStartOperation on Test\.recip
 Test\.recip started
 \*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
@@ -378,30 +386,32 @@ Test\.recip started
 %contains-regex: stdout
 \*\* Event #\d+  t=7\.3  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <shutdown> command\.\.\.
-Doing stage 0/8 of operation inet::ModuleStopOperation on Test.switch
+Doing stage 0/9 of operation inet::ModuleStopOperation on Test.switch
 Test\.switch shutting down
-Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.switch
-Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.switch
-Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.switch
-Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.switch
-Doing stage 5/8 of operation inet::ModuleStopOperation on Test\.switch
-Doing stage 6/8 of operation inet::ModuleStopOperation on Test\.switch
-Doing stage 7/8 of operation inet::ModuleStopOperation on Test\.switch
+Doing stage 1/9 of operation inet::ModuleStopOperation on Test\.switch
+Doing stage 2/9 of operation inet::ModuleStopOperation on Test\.switch
+Doing stage 3/9 of operation inet::ModuleStopOperation on Test\.switch
+Doing stage 4/9 of operation inet::ModuleStopOperation on Test\.switch
+Doing stage 5/9 of operation inet::ModuleStopOperation on Test\.switch
+Doing stage 6/9 of operation inet::ModuleStopOperation on Test\.switch
+Doing stage 7/9 of operation inet::ModuleStopOperation on Test\.switch
+Doing stage 8/9 of operation inet::ModuleStopOperation on Test\.switch
 Test\.switch shut down
 \*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=8\.3  on scenario-event \(inet::ScenarioTimer\)  in Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <startup> command\.\.\.
-Doing stage 0/8 of operation inet::ModuleStartOperation on Test\.switch
+Doing stage 0/9 of operation inet::ModuleStartOperation on Test\.switch
 Test\.switch starting up
-Doing stage 1/8 of operation inet::ModuleStartOperation on Test\.switch
-Doing stage 2/8 of operation inet::ModuleStartOperation on Test\.switch
-Doing stage 3/8 of operation inet::ModuleStartOperation on Test\.switch
-Doing stage 4/8 of operation inet::ModuleStartOperation on Test\.switch
-Doing stage 5/8 of operation inet::ModuleStartOperation on Test\.switch
-Doing stage 6/8 of operation inet::ModuleStartOperation on Test\.switch
-Doing stage 7/8 of operation inet::ModuleStartOperation on Test\.switch
+Doing stage 1/9 of operation inet::ModuleStartOperation on Test\.switch
+Doing stage 2/9 of operation inet::ModuleStartOperation on Test\.switch
+Doing stage 3/9 of operation inet::ModuleStartOperation on Test\.switch
+Doing stage 4/9 of operation inet::ModuleStartOperation on Test\.switch
+Doing stage 5/9 of operation inet::ModuleStartOperation on Test\.switch
+Doing stage 6/9 of operation inet::ModuleStartOperation on Test\.switch
+Doing stage 7/9 of operation inet::ModuleStartOperation on Test\.switch
+Doing stage 8/9 of operation inet::ModuleStartOperation on Test\.switch
 Test\.switch started
 \*\* Event #\d+  t=
 %#--------------------------------------------------------------------------------------------------------------
