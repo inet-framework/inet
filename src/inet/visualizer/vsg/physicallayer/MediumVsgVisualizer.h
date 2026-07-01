@@ -39,6 +39,7 @@ class INET_API MediumVsgVisualizer : public MediumVisualizerBase
     double signalWaveLength = NaN;
     double signalWaveAmplitude = NaN;
     double signalWaveFadingAnimationSpeedFactor = NaN;
+    bool signalWaveShader = false; // experimental: draw the ring with the GLSL wave shader (smooth flowing ripple) instead of baked per-vertex alpha
     //@}
 
     /** @name Internal state */

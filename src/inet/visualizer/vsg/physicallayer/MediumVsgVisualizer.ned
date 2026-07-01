@@ -36,6 +36,7 @@ simple MediumVsgVisualizer extends MediumVisualizerBase like IMediumVisualizer
         double signalWaveLength @unit(m) = default(100m); // Distance between signal waves, value must be in the range (0, +inf)
         double signalWaveAmplitude = default(0.5); // Relative opacity amplitude of signal waves, value must be in the range [0, 1]
         double signalWaveFadingAnimationSpeedFactor = default(1.0); // Value must be in the range [0, 1]
+        bool signalWaveShader = default(false); // Experimental: render the ring wavefront with a GLSL fragment shader (per-pixel, smoothly flowing ripple) instead of baked per-vertex alpha
 
         string transmissionPlane @enum("camera","xy","xz","yz") = default("camera"); // Plane for transmission indicator
         string receptionPlane @enum("camera","xy","xz","yz") = default("camera"); // Plane for reception indicator

@@ -283,6 +283,163 @@ ref_ptr<Node> createWaveRing(const Coord& center, double innerRadius, double out
 }
 
 // ---------------------------------------------------------------------------------------------
+// Shader-based wave ring: the OSG-equivalent. A minimal annulus band [inner, outer] whose PER-PIXEL
+// opacity is computed by a GLSL fragment shader (distance fade x moving cosine ripple), so the ripple
+// flows outward smoothly (waveOffset animates each frame) with no tessellation strobing. The graphics
+// pipeline (shaders/blend/depth) is created ONCE and cached, so per frame we only rebuild the tiny
+// vertex band + a small uniform buffer and rebind the cached pipeline — no per-frame pipeline recompile.
+// ---------------------------------------------------------------------------------------------
+
+// GLSL is compiled to SPIR-V at runtime (VSG_SUPPORTS_ShaderCompiler). The vertex shader forwards the
+// local xy so the fragment shader can compute the exact radial distance per pixel. The wave parameters
+// arrive in a small uniform block (packed into three vec4s).
+static const char *waveRingVertexShader = R"(#version 450
+layout(push_constant) uniform PushConstants { mat4 projection; mat4 modelView; } pc;
+layout(location = 0) in vec3 vsg_Vertex;
+layout(location = 0) out vec2 vLocal;
+void main() {
+    vLocal = vsg_Vertex.xy;
+    gl_Position = (pc.projection * pc.modelView) * vec4(vsg_Vertex, 1.0);
+}
+)";
+
+static const char *waveRingFragmentShader = R"(#version 450
+layout(location = 0) in vec2 vLocal;
+layout(set = 0, binding = 0) uniform WaveParams {
+    vec4 colorOffset;  // rgb = colour, w = waveOffset
+    vec4 fadeWave;     // x = fadingFactor, y = fadingDistance, z = waveLength, w = amplitude
+    vec4 bounds;       // x = innerRadius, y = outerRadius
+} wp;
+layout(location = 0) out vec4 fragColor;
+void main() {
+    // The geometry band is already [inner, outer], so no radial clipping is needed here (an earlier
+    // shader-side discard on wp.bounds silently blanked everything whenever the uniform read as 0).
+    float d = length(vLocal);
+    float a = wp.fadeWave.w * 0.5;
+    float phi = (wp.fadeWave.z > 0.0) ? (d - wp.colorOffset.w) / wp.fadeWave.z * 6.283185307179586 : 0.0;
+    float fade = (wp.fadeWave.y > 0.0 && wp.fadeWave.x > 1.0) ? pow(wp.fadeWave.x, -d / wp.fadeWave.y) : 1.0;
+    // Don't let the distance fade take the wavefront all the way to invisible: floor it so the outer
+    // ripples stay readable, then ramp smoothly to zero only in the outermost margin so there is no
+    // hard ring at the disc edge.
+    fade = max(fade, 0.22);
+    fade *= 1.0 - smoothstep(wp.bounds.y * 0.8, wp.bounds.y, d);
+    float alpha = clamp(fade * (1.0 - a + cos(phi) * a), 0.0, 1.0);
+    fragColor = vec4(wp.colorOffset.rgb, alpha);
+}
+)";
+
+// The wave-ring graphics pipeline, cached (intentionally leaked, as the other shared vsg singletons).
+static ref_ptr<GraphicsPipeline> getWaveRingPipeline()
+{
+    static ref_ptr<GraphicsPipeline>& pipeline = *(new ref_ptr<GraphicsPipeline>());
+    if (pipeline) return pipeline;
+
+    auto vertexShader = ShaderStage::create(VK_SHADER_STAGE_VERTEX_BIT, "main", waveRingVertexShader);
+    auto fragmentShader = ShaderStage::create(VK_SHADER_STAGE_FRAGMENT_BIT, "main", waveRingFragmentShader);
+    // Pre-compile GLSL -> SPIR-V now so the pipeline holds ready SPIR-V, regardless of whether the
+    // off-screen viewer's own compile path would run the shader compiler on source-only stages.
+    ShaderStages shaderStages{vertexShader, fragmentShader};
+    auto shaderCompiler = ShaderCompiler::create();
+    if (shaderCompiler->supported())
+        shaderCompiler->compile(shaderStages);
+
+    // set 0, binding 0: the wave-parameter uniform buffer (fragment stage).
+    auto descriptorSetLayout = DescriptorSetLayout::create(DescriptorSetLayoutBindings{
+        {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr}});
+    // 128 bytes of vertex push constants = projection + modelView, pushed automatically by the
+    // RecordTraversal for the enclosing MatrixTransform (the standard vsg convention).
+    auto pipelineLayout = PipelineLayout::create(DescriptorSetLayouts{descriptorSetLayout},
+        PushConstantRanges{{VK_SHADER_STAGE_VERTEX_BIT, 0, 128}});
+
+    // vertex input: one vec3 position per vertex.
+    VertexInputState::Bindings vertexBindings{{0, sizeof(::vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX}};
+    VertexInputState::Attributes vertexAttributes{{0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0}};
+
+    auto inputAssembly = InputAssemblyState::create();
+    inputAssembly->topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    auto rasterization = RasterizationState::create();
+    rasterization->cullMode = VK_CULL_MODE_NONE;
+    auto depthStencil = DepthStencilState::create();
+    depthStencil->depthTestEnable = VK_TRUE;
+    depthStencil->depthWriteEnable = VK_FALSE; // translucent overlay: test but don't write (no z-fighting)
+
+    // Standard alpha blend for RGB; keep the OUTPUT alpha opaque (srcA*1 + dstA*(1-srcA)) so the
+    // off-screen framebuffer isn't near-transparent for Qt's composite — same fix as createGeometry.
+    auto colorBlend = ColorBlendState::create();
+    VkPipelineColorBlendAttachmentState blendAttachment{};
+    blendAttachment.blendEnable = VK_TRUE;
+    blendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    blendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    blendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+    blendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+    blendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    blendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+    blendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlend->attachments = ColorBlendState::ColorBlendAttachments{blendAttachment};
+
+    GraphicsPipelineStates pipelineStates{
+        VertexInputState::create(vertexBindings, vertexAttributes),
+        inputAssembly,
+        rasterization,
+        MultisampleState::create(),
+        depthStencil,
+        colorBlend};
+
+    pipeline = GraphicsPipeline::create(pipelineLayout, shaderStages, pipelineStates);
+    return pipeline;
+}
+
+ref_ptr<Node> createWaveRingShader(const Coord& center, double innerRadius, double outerRadius,
+        const cFigure::Color& color, double waveLength, double waveAmplitude, double waveOffset,
+        double fadingFactor, double fadingDistance, double waveFadingFactor, int segments)
+{
+    double inner = std::max(0.0, innerRadius);
+    double outer = outerRadius;
+    // Clamp the outer radius to where the distance fade renders the wave invisible (same cutoff the
+    // baked createWaveRing uses), so a light-speed wavefront doesn't try to tessellate the whole scene.
+    const double alphaFloor = 0.02;
+    if (fadingDistance > 0 && fadingFactor > 1.0)
+        outer = std::min(outer, fadingDistance * std::log(1.0 / alphaFloor) / std::log(fadingFactor));
+    if (outer <= inner || segments < 3)
+        return Group::create();
+
+    // Minimal geometry: a single annulus band [inner, outer] as a triangle strip around the ring. The
+    // fragment shader paints the full radial gradient/ripple per pixel, so no radial subdivision needed.
+    auto vertices = vec3Array::create((segments + 1) * 2);
+    float cx = (float)center.x, cy = (float)center.y, cz = (float)center.z;
+    for (int j = 0; j <= segments; j++) {
+        double t = 2.0 * M_PI * (j % segments) / segments;
+        float ct = (float)std::cos(t), st = (float)std::sin(t);
+        vertices->set(j * 2,     ::vsg::vec3(cx + (float)inner * ct, cy + (float)inner * st, cz));
+        vertices->set(j * 2 + 1, ::vsg::vec3(cx + (float)outer * ct, cy + (float)outer * st, cz));
+    }
+
+    // Wave parameters (three packed vec4s) in a per-frame uniform buffer.
+    auto params = vec4Array::create(3);
+    params->properties.dataVariance = DataVariance::STATIC_DATA; // rebuilt fresh each frame
+    float amplitude = (float)(waveAmplitude * waveFadingFactor);
+    params->set(0, ::vsg::vec4((float)color.red / 255.0f, (float)color.green / 255.0f, (float)color.blue / 255.0f, (float)waveOffset));
+    params->set(1, ::vsg::vec4((float)fadingFactor, (float)fadingDistance, (float)waveLength, amplitude));
+    params->set(2, ::vsg::vec4((float)inner, (float)outer, 0.0f, 0.0f));
+
+    auto pipeline = getWaveRingPipeline();
+    auto uniform = DescriptorBuffer::create(params, 0, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    auto descriptorSet = DescriptorSet::create(pipeline->layout->setLayouts[0], Descriptors{uniform});
+    auto bindDescriptorSet = BindDescriptorSet::create(VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->layout, descriptorSet);
+
+    auto stateGroup = StateGroup::create();
+    stateGroup->add(BindGraphicsPipeline::create(pipeline));
+    stateGroup->add(bindDescriptorSet);
+
+    auto commands = Commands::create();
+    DataList vertexArrays{vertices};
+    commands->addChild(BindVertexBuffers::create(0, vertexArrays));
+    commands->addChild(Draw::create(vertices->size(), 1, 0, 0));
+    stateGroup->addChild(commands);
+    return stateGroup;
+}
+
+// ---------------------------------------------------------------------------------------------
 // Vertex-array builders
 // ---------------------------------------------------------------------------------------------
 
