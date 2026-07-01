@@ -283,6 +283,15 @@ void MediumVsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
     double maxRadius = 1e18;
     if (auto transmitterRadio = transmission->getTransmitterRadio())
         maxRadius = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(transmitterRadio).get();
+    // Also cap the disc to where the distance fade renders it invisible (the same cutoff createWaveRing
+    // uses). This makes the disc's on-screen size a function of the fade parameters — a visualization
+    // choice — rather than the transmit power: otherwise a power high enough for the nodes to actually
+    // communicate (so the data-link visualizer draws arrows) would balloon the interference-range disc
+    // far past the scene, since the interference range is many times the communication range.
+    if (signalFadingDistance > 0 && signalFadingFactor > 1.0) {
+        const double alphaFloor = 0.02;
+        maxRadius = std::min(maxRadius, signalFadingDistance * std::log(1.0 / alphaFloor) / std::log(signalFadingFactor));
+    }
 
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
     // Damp the ripple as the animation speeds up, mirroring the OSG signal shader's waveFadingFactor
@@ -304,15 +313,21 @@ void MediumVsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
     //    interference range (maxRadius, above), so draw a persistent translucent filled disc
     //    (createAnnulus) covering the entire range at a constant 20% opacity. The wave-ring's distance
     //    fade is wrong here (it fades to ~0 well inside the range), so a uniform fill is used instead.
+    // Lift the disc a hair above the ground plane. On a flat scene the disc and the floor are both at
+    // the transmitter's z, and coplanar surfaces z-fight — the depth buffer can't decide which is in
+    // front, producing a rotating pinwheel of light/dark wedges. A tiny offset (invisible at scene
+    // scale) breaks the tie so the disc sits cleanly on top. (OSG instead disables depth writes; the
+    // lift is the robust equivalent for the baked-geometry path.)
+    Coord discCenter(0.0, 0.0, std::clamp(maxRadius * 0.02, 0.5, 3.0));
     double outer = std::min(startRadius, maxRadius);
     double inner = std::min(endRadius, outer);
     if (endRadius >= maxRadius && maxRadius > 0) {
         // FILLED RANGE: trailing edge past the whole range -> uniform translucent fill.
-        annulusHolder->addChild(inet::vsg::createAnnulus(Coord::ZERO, maxRadius, 0.0, color, 0.2, 100));
+        annulusHolder->addChild(inet::vsg::createAnnulus(discCenter, maxRadius, 0.0, color, 0.2, 100));
     }
     else if (outer > 0 && outer > inner) {
         // EXPANDING: ripple-modulated, distance-faded disc (the growing wavefront).
-        annulusHolder->addChild(inet::vsg::createWaveRing(Coord::ZERO, inner, outer,
+        annulusHolder->addChild(inet::vsg::createWaveRing(discCenter, inner, outer,
                 color, signalWaveLength, signalWaveAmplitude, 0.0,
                 signalFadingFactor, signalFadingDistance, waveFadingFactor));
     }
@@ -331,6 +346,16 @@ void MediumVsgVisualizer::refreshSphereTransmissionNode(const ITransmission *tra
     auto propagation = radioMedium->getPropagation();
     double startRadius = propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getStartTime()).dbl();
     double endRadius   = std::max(0.0, propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getEndTime()).dbl());
+
+    // Bound the drawn radius to the transmitter's interference range, exactly as the ring path does: at
+    // light speed both wavefronts reach hundreds of km within a packet's duration, and an unclamped
+    // translucent sphere would balloon out and blanket the whole scene. Clamping makes the sphere grow
+    // to the range limit and then hold there until the transmission is removed.
+    double maxRadius = 1e18;
+    if (auto transmitterRadio = transmission->getTransmitterRadio())
+        maxRadius = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(transmitterRadio).get();
+    startRadius = std::min(startRadius, maxRadius);
+    endRadius   = std::min(endRadius, maxRadius);
 
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
 
