@@ -766,11 +766,11 @@ void SctpAssociation::retransmitInit()
     sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
     SctpInitChunk *sctpinit; // = new SctpInitChunk("INIT");
 
-    EV_INFO << "Retransmit InitChunk=" << &sctpinit << "\n";
-
     sctpinit = check_and_cast<SctpInitChunk *>(state->initChunk->dup());
     sctpinit->setSctpChunkType(INIT);
     sctpmsg->appendSctpChunks(sctpinit);
+
+    EV_INFO << "Retransmit InitChunk=" << &sctpinit << "\n";
 
     Packet *fp = new Packet("INIT RTX");
     sendToIP(fp, sctpmsg);
