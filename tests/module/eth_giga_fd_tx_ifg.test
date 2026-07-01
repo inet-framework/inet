@@ -3,6 +3,7 @@ EthernetCsmaMacPhy and EthernetMacPhy module: tests IFG in full duplex mode on g
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.EthTestNetwork
 

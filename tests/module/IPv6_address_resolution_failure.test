@@ -37,6 +37,7 @@ network ArFailNetwork
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = ArFailNetwork
 sim-time-limit = 20s

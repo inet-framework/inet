@@ -67,6 +67,7 @@ network PimSmTest6
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = PimSmTest6
 sim-time-limit = 60s
 cmdenv-express-mode = false

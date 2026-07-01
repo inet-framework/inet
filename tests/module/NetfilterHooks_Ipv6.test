@@ -61,6 +61,7 @@ network NetfilterHooks6
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = NetfilterHooks6
 sim-time-limit = 5s

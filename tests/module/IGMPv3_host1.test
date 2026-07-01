@@ -7,6 +7,7 @@ See RFC 3376 5.1.
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 sim-time-limit=10s
 cmdenv-express-mode = false

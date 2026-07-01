@@ -31,6 +31,7 @@ network TrafficDuringDadNetwork
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = TrafficDuringDadNetwork
 sim-time-limit = 10s

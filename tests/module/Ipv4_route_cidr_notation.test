@@ -30,6 +30,7 @@ network Ipv4RouteCidrNetwork
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = Ipv4RouteCidrNetwork
 ned-path = ../../../../src
 sim-time-limit = 1s

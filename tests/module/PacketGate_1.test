@@ -133,6 +133,7 @@ network TestNetwork
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = TestNetwork
 cmdenv-event-banners = false

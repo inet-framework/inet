@@ -8,6 +8,7 @@ It is checked that the server receives the datagram.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../examples;../../../../src
 network = inet.examples.inet.nclients.NClients
 sim-time-limit=15s

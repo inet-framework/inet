@@ -16,6 +16,7 @@ the v1-host-present marker.
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 sim-time-limit=30s
 cmdenv-express-mode = false

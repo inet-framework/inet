@@ -40,6 +40,7 @@ NON MEMBER --> join group --> DELAYING MEMBER --> timer expired --> IDLE MEMBER 
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 sim-time-limit=400s
 cmdenv-express-mode = true

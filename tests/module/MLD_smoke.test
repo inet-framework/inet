@@ -41,6 +41,7 @@ network MldSmokeNetwork
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = MldSmokeNetwork
 sim-time-limit = 5s

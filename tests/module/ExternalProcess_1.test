@@ -19,6 +19,7 @@ network TestNetwork
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = TestNetwork
 ned-path = .;../../../../src
 scheduler-class = "inet::RealTimeScheduler"

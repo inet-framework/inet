@@ -92,6 +92,7 @@ network MldHostGroupstatesNetwork
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = MldHostGroupstatesNetwork
 sim-time-limit = 30s

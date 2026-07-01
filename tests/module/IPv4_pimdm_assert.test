@@ -64,6 +64,7 @@ network PimDmAssertTest
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = PimDmAssertTest
 sim-time-limit = 25s
 cmdenv-express-mode = false

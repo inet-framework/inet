@@ -43,6 +43,7 @@ network ExplicitAddressTest6
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = ExplicitAddressTest6
 sim-time-limit = 5s
 cmdenv-express-mode = false

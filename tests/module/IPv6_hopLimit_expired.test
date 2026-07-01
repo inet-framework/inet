@@ -11,6 +11,7 @@ transport layer.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../examples;../../../../src
 network = inet.examples.ipv6.nclients.NClientsEth
 sim-time-limit = 15s

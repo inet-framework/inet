@@ -5,6 +5,7 @@ Here: packet loss (5%), packet delays (20%, by mean=1s), packet duplication
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.TcpTestNet2
 

@@ -10,6 +10,7 @@ but r2 drops it because forwarding is disabled.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../examples;../../../../src
 network = inet.examples.ipv6.nclients.NClientsEth
 sim-time-limit = 15s

@@ -4,6 +4,7 @@ that is, cwnd=1,2,4,8,...
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 
 cmdenv-event-banners=false

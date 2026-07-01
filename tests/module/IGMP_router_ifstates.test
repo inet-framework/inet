@@ -41,6 +41,7 @@ INITIAL --> initialize --> QUERIER --> query received (lower IP) --> NON QUERIER
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 sim-time-limit=500s
 cmdenv-express-mode = true

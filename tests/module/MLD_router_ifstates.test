@@ -62,6 +62,7 @@ network MldRouterIfstatesNetwork
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = MldRouterIfstatesNetwork
 sim-time-limit = 20s

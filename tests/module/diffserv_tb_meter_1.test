@@ -26,6 +26,7 @@ network TestNetwork
 }
 
 %inifile: omnetpp.ini
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 sim-time-limit=100s
 cmdenv-express-mode = true

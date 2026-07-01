@@ -6,6 +6,7 @@ Transmission starts at the end of reception plus IFG.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.EthTestNetwork
 

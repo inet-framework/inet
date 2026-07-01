@@ -53,7 +53,7 @@ ned-path = .;../../../../src;../../lib
 #**.ppp[*].queue.packetCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
 
-#**.vector-recording = false
+record-vector-results = false
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-#0.sca

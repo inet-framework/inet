@@ -12,6 +12,7 @@ but not the router's own address, the router drops the packet.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../examples;../../../../src
 network = inet.examples.ipv6.nclients.NClientsPPP
 sim-time-limit = 15s

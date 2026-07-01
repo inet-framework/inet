@@ -5,6 +5,7 @@ Test for basic DHCP lifecycle handling.
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = Test
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false

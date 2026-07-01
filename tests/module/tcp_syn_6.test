@@ -10,6 +10,7 @@ Note: results are a bit weird, because both sides try very hard...
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 
 #cmdenv-event-banners=false

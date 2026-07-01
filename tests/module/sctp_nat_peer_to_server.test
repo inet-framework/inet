@@ -7,6 +7,7 @@ Testing SCTP_NAT: One peer sends data over two separate paths and two NATs to a 
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = inet.test.moduletest.lib.multinat
 cmdenv-express-mode = true
 cmdenv-log-finalization = true

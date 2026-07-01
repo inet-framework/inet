@@ -42,6 +42,7 @@ network CloudAndHosts
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = CloudAndHosts
 ned-path = .;../../../../src;../../lib
 

@@ -3,6 +3,7 @@ EthernetCsmaMacPhy module: tests framebursting in half duplex mode on gigabit et
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.EthTestNetwork
 

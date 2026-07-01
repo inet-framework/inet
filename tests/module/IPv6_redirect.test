@@ -47,6 +47,7 @@ network RedirectTestNetwork
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = RedirectTestNetwork
 sim-time-limit = 20s

@@ -31,6 +31,7 @@ network IPv6LifecycleTest
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = IPv6LifecycleTest
 sim-time-limit = 20s

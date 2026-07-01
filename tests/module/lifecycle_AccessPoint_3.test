@@ -6,6 +6,7 @@ Test startup operation on AccessPoint that is initially down.
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = Test
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false

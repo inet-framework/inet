@@ -19,6 +19,7 @@ network Test
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = Test
 ned-path = .;../../../../src
 sim-time-limit = 20s

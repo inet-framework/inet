@@ -5,6 +5,7 @@ Tested with data >MSS sent by user.
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 
 cmdenv-event-banners=false

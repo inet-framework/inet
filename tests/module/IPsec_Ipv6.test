@@ -138,6 +138,7 @@ network IPsecIpv6Test
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = IPsecIpv6Test
 sim-time-limit = 10s

@@ -134,7 +134,7 @@ sim-time-limit = 200s
 cmdenv-express-mode = true
 output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
 
-**.vector-recording = false
+record-vector-results = false
 **.cmdenv-log-level = "info"
 
 **.ospf.ospfConfig = xmldoc("ASConfig.xml")

@@ -5,6 +5,7 @@ Test ping stop followed by node shutdown.
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = Test
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false

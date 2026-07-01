@@ -59,6 +59,7 @@ network MulticastTest6
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = MulticastTest6
 sim-time-limit = 10s
 cmdenv-express-mode = false

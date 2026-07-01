@@ -29,6 +29,7 @@ network MtuTestNetwork
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = MtuTestNetwork
 sim-time-limit = 5s

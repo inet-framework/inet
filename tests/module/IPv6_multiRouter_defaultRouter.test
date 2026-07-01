@@ -40,6 +40,7 @@ network MultiRouterNetwork
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = MultiRouterNetwork
 sim-time-limit = 15s

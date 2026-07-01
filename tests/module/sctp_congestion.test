@@ -9,6 +9,7 @@ based retransmissions.
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = inet.test.moduletest.lib.multihomed
 cmdenv-express-mode = true
 cmdenv-log-finalization = true

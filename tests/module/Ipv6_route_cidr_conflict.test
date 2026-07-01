@@ -30,6 +30,7 @@ network Ipv6RouteConflictNetwork
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = Ipv6RouteConflictNetwork
 ned-path = ../../../../src
 sim-time-limit = 1s

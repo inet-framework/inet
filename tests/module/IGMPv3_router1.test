@@ -6,6 +6,7 @@ Checks that a router sends general queries.
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 sim-time-limit=300s
 cmdenv-express-mode = false

@@ -3,6 +3,7 @@ Test connection setup: A performs active open and A's ACK of SYN gets lost.
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 
 #cmdenv-event-banners=false

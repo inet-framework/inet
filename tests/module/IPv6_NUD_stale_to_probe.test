@@ -36,6 +36,7 @@ network NudTestNetwork
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = NudTestNetwork
 sim-time-limit = 25s

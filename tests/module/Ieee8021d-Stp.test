@@ -71,7 +71,7 @@ sim-time-limit = 50s
 cmdenv-express-mode = false
 ned-path = .;../../../../src;../../lib
 
-**.vector-recording = false
+record-vector-results = false
 **.agingTime = 1s
 network = LargeNet
 

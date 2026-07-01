@@ -81,6 +81,7 @@ network MldQuerierGroupstatesNetwork
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = MldQuerierGroupstatesNetwork
 sim-time-limit = 20s

@@ -6,6 +6,7 @@ Test tcp algorithms with PER
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 
 output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"

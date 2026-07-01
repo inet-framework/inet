@@ -53,6 +53,7 @@ network AODVTest
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 network = AODVTest
 ned-path = .;../../../../src;../../lib
 

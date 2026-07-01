@@ -16,6 +16,7 @@ network Test
 
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
+record-vector-results = false
 
 network = Test
 debug-on-errors = true

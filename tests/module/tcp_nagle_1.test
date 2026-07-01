@@ -4,6 +4,7 @@ outstanding data (everything sent previously has been acked).
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 
 cmdenv-event-banners=false

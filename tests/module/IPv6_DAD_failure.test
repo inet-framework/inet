@@ -35,6 +35,7 @@ network DadFailureNetwork
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = DadFailureNetwork
 sim-time-limit = 5s

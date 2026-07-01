@@ -7,6 +7,7 @@ separate binding per mobile node.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.Mipv6Network
 sim-time-limit = 70s

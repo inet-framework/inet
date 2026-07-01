@@ -78,6 +78,7 @@ network MldRouterBasicNetwork
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = MldRouterBasicNetwork
 sim-time-limit = 15s

@@ -42,6 +42,7 @@ network DhcpExample
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 sim-time-limit = 1000s

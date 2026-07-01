@@ -17,6 +17,7 @@ correctly redone for the second care-of address.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.Mipv6RoamingNetwork
 sim-time-limit = 90s

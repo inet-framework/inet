@@ -6,6 +6,7 @@ be invoked while the server is down.
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 network = LifecycleTest
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false

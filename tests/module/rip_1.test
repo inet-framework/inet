@@ -99,6 +99,7 @@ network Test1
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 description = "Simple test"
 network = Test1
 ned-path = .;../../../../src;../../lib

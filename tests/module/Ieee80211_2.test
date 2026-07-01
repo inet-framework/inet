@@ -20,6 +20,7 @@ network Test
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = Test
 sim-time-limit = 100us
 record-eventlog = true

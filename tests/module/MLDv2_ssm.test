@@ -63,6 +63,7 @@ network Mldv2SsmNetwork
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 ned-path = .;../../../../src
 network = Mldv2SsmNetwork
 sim-time-limit = 10s

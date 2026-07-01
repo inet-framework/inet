@@ -39,6 +39,7 @@ network Ipv6TunnelTestNetwork
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = Ipv6TunnelTestNetwork
 ned-path = ../../../../src
 sim-time-limit = 5s

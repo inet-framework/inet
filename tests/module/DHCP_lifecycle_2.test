@@ -9,6 +9,7 @@ before its first success.
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 network = LifecycleTest
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false

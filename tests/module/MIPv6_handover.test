@@ -10,6 +10,7 @@ that the MN initiates the MIPv6 protocol and the HA accepts the binding.
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 network = inet.test.moduletest.lib.Mipv6Network
 sim-time-limit = 60s

@@ -9,6 +9,7 @@ retransmissions, but still the expected amount of data.
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = inet.test.moduletest.lib.failover
 cmdenv-express-mode = true
 cmdenv-log-finalization = true

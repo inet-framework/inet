@@ -62,6 +62,7 @@ network AODVTest
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 network = AODVTest
 sim-time-limit = 100s
 num-rngs = 3

@@ -21,6 +21,7 @@ EXCLUDE state instead of the IS_IN expected here.
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 sim-time-limit=300s
 cmdenv-express-mode = false

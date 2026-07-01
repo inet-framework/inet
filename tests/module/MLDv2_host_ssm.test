@@ -23,6 +23,7 @@ TestMld::handleMessage as "TestMld: Received: inet::Mldv2Report<...>".
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 sim-time-limit=10s
 cmdenv-express-mode = false

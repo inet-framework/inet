@@ -6,6 +6,7 @@ Checks that the router updates the list of listeners in response to reports.
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 sim-time-limit=100s
 cmdenv-express-mode = false

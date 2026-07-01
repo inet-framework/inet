@@ -16,6 +16,7 @@ host then emits an Igmpv1Report (and suppresses Leaves) instead.
 
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 sim-time-limit=30s
 cmdenv-express-mode = false

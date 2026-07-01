@@ -17,6 +17,7 @@ network ConvCoder
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 

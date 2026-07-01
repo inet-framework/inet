@@ -15,6 +15,7 @@ network Test
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 ned-path = .;../../../../src;../../lib
 debug-on-errors = true
 

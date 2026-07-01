@@ -24,7 +24,7 @@ network LocalUDP
 [General]
 ned-path = .;../../../../src;../../lib
 
-**.vector-recording=false
+record-vector-results = false
 
 network = LocalUDP
 #debug-on-errors = true

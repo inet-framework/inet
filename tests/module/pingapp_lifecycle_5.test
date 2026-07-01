@@ -5,6 +5,7 @@ Test node startup followed by ping start.
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = Test
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false

@@ -35,6 +35,7 @@ network RetransmissionTest
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 
 network = RetransmissionTest
 ned-path = .;../../../../src;../../lib

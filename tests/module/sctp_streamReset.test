@@ -60,7 +60,7 @@ ned-path = .;../../../../src;../../lib
 #**.ppp[*].queue.packetCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
 
-#**.vector-recording = false
+record-vector-results = false
 
 **.sctp.checksumMode = "computed"
 **.ipv4.**.checksumMode = "computed"

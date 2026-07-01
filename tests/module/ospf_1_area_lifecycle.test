@@ -107,7 +107,7 @@ cmdenv-express-mode = false
 sim-time-limit = 200s
 output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
 
-**.vector-recording = false
+record-vector-results = false
 **.status.cmdenv-log-level = "info"
 **.cmdenv-log-level = "warn"
 

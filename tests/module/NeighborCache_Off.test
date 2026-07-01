@@ -61,6 +61,7 @@ network NeighborCacheTest
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = NeighborCacheTest
 num-rngs = 3
 sim-time-limit = 60s

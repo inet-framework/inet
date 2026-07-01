@@ -46,6 +46,7 @@ network Test
 %inifile: omnetpp.ini
 
 [General]
+record-vector-results = false
 network = Test
 cmdenv-express-mode = false
 ned-path = .;../../../../src;../../lib

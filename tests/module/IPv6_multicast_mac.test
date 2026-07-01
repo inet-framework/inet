@@ -41,6 +41,7 @@ network MulticastMacTestNetwork
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 [General]
+record-vector-results = false
 ned-path = ../../../../src
 network = MulticastMacTestNetwork
 sim-time-limit = 10s
