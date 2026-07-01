@@ -13,10 +13,13 @@ import inet.visualizer.vsg.integrated.IntegratedVsgVisualizer;
 
 //
 // A small wireless network for tuning the VSG signal-propagation visualization.
-// Three hosts on a 300x300 ground plane, within each other's communication range
-// (~150m), so the translucent transmission discs are a sensible size relative to
-// the scene. host3 moves to show growing transmissions as nodes move around.
-// Run under Qtenv and switch to the 3D view.
+// Three hosts on a 300x300 ground plane, positioned within each other's ~100m
+// communication range (the transmitter power in omnetpp.ini is set so the range
+// is ~100m, keeping the translucent transmission discs a sensible size relative
+// to the scene). Because the nodes are in range, transmissions are received, so
+// the data-link visualizer also draws connection arrows. host3 moves slowly to
+// show growing transmissions as nodes move around. Run under Qtenv, switch to the
+// 3D view, and press Run.
 //
 network VsgSignalShowcase
 {
@@ -32,12 +35,12 @@ network VsgSignalShowcase
             @display("p=40,180");
         }
         host1: WirelessHost {
-            @display("p=80,200");
+            @display("p=135,165");
         }
         host2: WirelessHost {
-            @display("p=220,200");
+            @display("p=165,165");
         }
         host3: WirelessHost {
-            @display("p=150,100");
+            @display("p=150,135");
         }
 }

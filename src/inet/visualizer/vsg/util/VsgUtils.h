@@ -82,6 +82,12 @@ ref_ptr<Node> createAnnulus(const Coord& center, double outerRadius, double inne
 ref_ptr<Node> createWaveRing(const Coord& center, double innerRadius, double outerRadius,
         const cFigure::Color& color, double waveLength, double waveAmplitude, double waveOffset,
         double fadingFactor, double fadingDistance, double waveFadingFactor = 1.0, int segments = 100);
+// Shader-based wave ring (OSG-equivalent): a minimal annulus band whose per-pixel opacity is computed
+// by a cached GLSL fragment shader, so the ripple flows outward smoothly (animate waveOffset) at high
+// FPS with no per-frame pipeline rebuild. Drop-in alternative to createWaveRing; see the .cc.
+ref_ptr<Node> createWaveRingShader(const Coord& center, double innerRadius, double outerRadius,
+        const cFigure::Color& color, double waveLength, double waveAmplitude, double waveOffset,
+        double fadingFactor, double fadingDistance, double waveFadingFactor = 1.0, int segments = 100);
 ref_ptr<Node> createQuad(const Coord& min, const Coord& max, const cFigure::Color& color, double opacity = 1.0);
 ref_ptr<Node> createPolygon(const std::vector<Coord>& points, const cFigure::Color& color, double opacity = 1.0, const Coord& translation = Coord::ZERO);
 ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width = 10.0, double height = 20.0, double opacity = 1.0);

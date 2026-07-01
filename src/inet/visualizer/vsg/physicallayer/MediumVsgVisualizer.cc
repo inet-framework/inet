@@ -52,6 +52,7 @@ void MediumVsgVisualizer::initialize(int stage)
         signalWaveLength = par("signalWaveLength");
         signalWaveAmplitude = par("signalWaveAmplitude");
         signalWaveFadingAnimationSpeedFactor = par("signalWaveFadingAnimationSpeedFactor");
+        signalWaveShader = par("signalWaveShader");
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
@@ -283,6 +284,15 @@ void MediumVsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
     double maxRadius = 1e18;
     if (auto transmitterRadio = transmission->getTransmitterRadio())
         maxRadius = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(transmitterRadio).get();
+    // Also cap the disc to where the distance fade renders it invisible (the same cutoff createWaveRing
+    // uses). This makes the disc's on-screen size a function of the fade parameters — a visualization
+    // choice — rather than the transmit power: otherwise a power high enough for the nodes to actually
+    // communicate (so the data-link visualizer draws arrows) would balloon the interference-range disc
+    // far past the scene, since the interference range is many times the communication range.
+    if (signalFadingDistance > 0 && signalFadingFactor > 1.0) {
+        const double alphaFloor = 0.02;
+        maxRadius = std::min(maxRadius, signalFadingDistance * std::log(1.0 / alphaFloor) / std::log(signalFadingFactor));
+    }
 
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
     // Damp the ripple as the animation speeds up, mirroring the OSG signal shader's waveFadingFactor
@@ -294,27 +304,45 @@ void MediumVsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
     double waveFadingFactor = (animationSpeed > 0 && signalWaveFadingAnimationSpeedFactor > 0)
         ? std::min(1.0, signalPropagationAnimationSpeed / animationSpeed / signalWaveFadingAnimationSpeedFactor)
         : 1.0;
-    // The signal propagates at light speed, so within microseconds both wavefronts cross maxRadius.
-    // Two visual phases:
-    //  - EXPANDING (leading edge still inside the range): the wavefront is a growing, ripple-modulated
-    //    translucent disc (createWaveRing) from the trailing edge to the leading edge. waveOffset is
-    //    FIXED (0) so the ripple phase stays anchored in space as the disc grows (else the interior
-    //    strobes between opaque/transparent each time the edge crosses a wavelength boundary).
-    //  - FILLED RANGE (trailing edge has passed the range): the signal has fully swept the whole
-    //    interference range (maxRadius, above), so draw a persistent translucent filled disc
-    //    (createAnnulus) covering the entire range at a constant 20% opacity. The wave-ring's distance
-    //    fade is wrong here (it fades to ~0 well inside the range), so a uniform fill is used instead.
     double outer = std::min(startRadius, maxRadius);
     double inner = std::min(endRadius, outer);
-    if (endRadius >= maxRadius && maxRadius > 0) {
-        // FILLED RANGE: trailing edge past the whole range -> uniform translucent fill.
-        annulusHolder->addChild(inet::vsg::createAnnulus(Coord::ZERO, maxRadius, 0.0, color, 0.2, 100));
+    // Lift the disc a hair above the ground plane so its coplanar triangles don't z-fight the floor
+    // (both sit at the transmitter's z); invisible at scene scale. The shader path also disables depth
+    // writes, but keeps the lift so it wins the depth test cleanly over the opaque floor.
+    Coord discCenter(0.0, 0.0, std::clamp(maxRadius * 0.02, 0.5, 3.0));
+
+    if (signalWaveShader) {
+        // SHADER PATH (OSG-equivalent): a single wave ring [inner, outer] whose per-pixel opacity is a
+        // moving ripple. The shader's distance fade makes far parts vanish, so no separate FILLED phase
+        // is needed: a finished transmission simply expands, empties from the centre as the trailing edge
+        // grows, and fades away.
+        //
+        // Drive the ripple from ANIMATION time (not the light-speed leading edge): anchoring waveOffset to
+        // startRadius made the ripple race past too fast to see during the long "holding while sending"
+        // window. With a fixed visual rate the waves flow outward steadily for the whole transmission and
+        // then fade out. Wrapped to one wavelength to stay precise over long runs. waveFadingFactor is
+        // pinned to 1 here — the ripple never strobes (it advances in animation time, not sim time), so
+        // the animation-speed damping that the baked path needs would only dim it for no reason.
+        const double ripplesPerAnimSecond = 1.2;
+        double animationTime = getSimulation()->getEnvir()->getAnimationTime();
+        double rippleOffset = (signalWaveLength > 0)
+            ? std::fmod(animationTime * ripplesPerAnimSecond, 1.0) * signalWaveLength
+            : 0.0;
+        if (outer > 0 && outer > inner)
+            annulusHolder->addChild(inet::vsg::createWaveRingShader(discCenter, inner, outer,
+                    color, signalWaveLength, signalWaveAmplitude, rippleOffset,
+                    signalFadingFactor, signalFadingDistance, /*waveFadingFactor*/ 1.0));
     }
-    else if (outer > 0 && outer > inner) {
-        // EXPANDING: ripple-modulated, distance-faded disc (the growing wavefront).
-        annulusHolder->addChild(inet::vsg::createWaveRing(Coord::ZERO, inner, outer,
-                color, signalWaveLength, signalWaveAmplitude, 0.0,
-                signalFadingFactor, signalFadingDistance, waveFadingFactor));
+    else {
+        // BAKED PATH (default): two phases. EXPANDING = growing ripple disc with a FIXED waveOffset=0 (a
+        // moving offset strobes against the coarse radial tessellation). FILLED RANGE (trailing edge past
+        // maxRadius) = uniform fill, since the baked wave's distance fade goes to ~0 well inside the range.
+        if (endRadius >= maxRadius && maxRadius > 0)
+            annulusHolder->addChild(inet::vsg::createAnnulus(discCenter, maxRadius, 0.0, color, 0.2, 100));
+        else if (outer > 0 && outer > inner)
+            annulusHolder->addChild(inet::vsg::createWaveRing(discCenter, inner, outer,
+                    color, signalWaveLength, signalWaveAmplitude, 0.0,
+                    signalFadingFactor, signalFadingDistance, waveFadingFactor));
     }
 
     // Update label position (placed at edge of inner radius in the direction of transmission->getId()).
@@ -331,6 +359,16 @@ void MediumVsgVisualizer::refreshSphereTransmissionNode(const ITransmission *tra
     auto propagation = radioMedium->getPropagation();
     double startRadius = propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getStartTime()).dbl();
     double endRadius   = std::max(0.0, propagation->getPropagationSpeed().get<mps>() * (simTime() - transmission->getEndTime()).dbl());
+
+    // Bound the drawn radius to the transmitter's interference range, exactly as the ring path does: at
+    // light speed both wavefronts reach hundreds of km within a packet's duration, and an unclamped
+    // translucent sphere would balloon out and blanket the whole scene. Clamping makes the sphere grow
+    // to the range limit and then hold there until the transmission is removed.
+    double maxRadius = 1e18;
+    if (auto transmitterRadio = transmission->getTransmitterRadio())
+        maxRadius = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(transmitterRadio).get();
+    startRadius = std::min(startRadius, maxRadius);
+    endRadius   = std::min(endRadius, maxRadius);
 
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
 
