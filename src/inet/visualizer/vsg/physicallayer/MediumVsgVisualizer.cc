@@ -277,12 +277,6 @@ void MediumVsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
     // Rebuild the wavefront geometry with the current radii (VSG bakes geometry, so clear + re-add).
     annulusHolder->children.clear();
 
-    // The signal is drawn as OPAQUE thin expanding circles at the wavefront edges, not a faded/
-    // wave-modulated translucent disc: the off-screen backend cannot composite transparency over opaque
-    // geometry (a translucent overlay reads the background, not the floor behind it), so any alpha-based
-    // signal renders as a dark blob. Opaque circles avoid that entirely. (createWaveRing remains in
-    // VsgUtils for when the backend transparency bug is fixed.)
-    //
     // Bound the drawn radius to the transmitter's interference range: a signal propagates at light
     // speed, so within a packet's duration its radius reaches hundreds of km — past the range there is
     // nothing meaningful to show, and an off-scene circle would just clutter the horizon.
@@ -291,19 +285,28 @@ void MediumVsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
         maxRadius = radioMedium->getMediumLimitCache()->getMaxInterferenceRange(transmitterRadio).get();
 
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
-    // OPAQUE band at each wavefront edge (a solid filled annulus a few % of the radius wide), not a
-    // translucent fill: the backend can't composite transparency over the floor, so a translucent fill
-    // blends with the background (pale over a light view, BLACK over a dark view) — unreliable. An
-    // opaque band always shows the true signal color, and a thin band (vs a full disc) keeps the floor
-    // visible. (Wide lines clamp to 1px on MoltenVK, so a band is also how we get a thick-looking ring.)
-    auto edgeBand = [&](double r) {
-        double w = std::max(4.0, r * 0.05);   // band thickness ~5% of the radius
-        annulusHolder->addChild(inet::vsg::createAnnulus(Coord::ZERO, r, std::max(0.0, r - w), color, 1.0, 100));
-    };
-    if (startRadius > 0 && startRadius <= maxRadius)  // leading edge
-        edgeBand(startRadius);
-    if (endRadius > 0 && endRadius <= maxRadius)       // trailing edge (after the transmission ends)
-        edgeBand(endRadius);
+    // The signal propagates at light speed, so within microseconds both wavefronts cross maxRadius.
+    // Two visual phases:
+    //  - EXPANDING (leading edge still inside the range): the wavefront is a growing, ripple-modulated
+    //    translucent disc (createWaveRing) from the trailing edge to the leading edge. waveOffset is
+    //    FIXED (0) so the ripple phase stays anchored in space as the disc grows (else the interior
+    //    strobes between opaque/transparent each time the edge crosses a wavelength boundary).
+    //  - FILLED RANGE (trailing edge has passed the range): the signal has fully reached its whole
+    //    communication range, so draw a persistent translucent filled disc (createAnnulus) covering the
+    //    entire range at a constant ~35% opacity. The wave-ring's distance fade is wrong here (it fades
+    //    to ~0 well inside the range), so a uniform fill is used instead.
+    double outer = std::min(startRadius, maxRadius);
+    double inner = std::min(endRadius, outer);
+    if (endRadius >= maxRadius && maxRadius > 0) {
+        // FILLED RANGE: trailing edge past the whole range -> uniform translucent fill.
+        annulusHolder->addChild(inet::vsg::createAnnulus(Coord::ZERO, maxRadius, 0.0, color, 0.2, 100));
+    }
+    else if (outer > 0 && outer > inner) {
+        // EXPANDING: ripple-modulated, distance-faded disc (the growing wavefront).
+        annulusHolder->addChild(inet::vsg::createWaveRing(Coord::ZERO, inner, outer,
+                color, signalWaveLength, signalWaveAmplitude, 0.0,
+                signalFadingFactor, signalFadingDistance));
+    }
 
     // Update label position (placed at edge of inner radius in the direction of transmission->getId()).
     double phi = transmission->getId();
