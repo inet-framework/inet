@@ -30,7 +30,7 @@ df["scenario"] = df["configname"].map({"Homogeneous": "Homogeneous (all 54 Mbps)
 
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, ["station"], ["scenario"])
 metadf["legend"] = list(valuedf.index)   # clean legend labels (no "scenario=" prefix)
-inet.scave.plot.plot_bars(valuedf, errorsdf, metadf, props)
+utils.plot_bars(valuedf, errorsdf, metadf, props)
 
 slow_level = df[(df["station"] == "sta[0]") & (df["scenario"].str.startswith("Rate anomaly"))]["value"].iloc[0]
 plt.gca().axhline(slow_level, color=inet.scave.plot.default_colors[1], linewidth=1.6, zorder=3)
@@ -1456,7 +1456,7 @@ utils.export_data_if_needed(df, props)
             <property name="linecolor" value=""/>
             <property name="linestyle" value="solid"/>
             <property name="linewidth" value="1.5"/>
-            <property name="marker" value="none"/>
+            <property name="marker" value="s (square)"/>
             <property name="markersize" value="5"/>
             <property name="title" value="Throughput vs. slow-station bitrate"/>
             <property name="xaxis_title" value="Slow station's bitrate [Mbps]"/>
@@ -1515,7 +1515,7 @@ df["unit"] = ""
 df["series"] = "frames transmitted"
 
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, ["station"], ["series"])
-inet.scave.plot.plot_bars(valuedf, errorsdf, metadf, props)
+utils.plot_bars(valuedf, errorsdf, metadf, props)
 inet.scave.plot.annotate_barchart(plt.gca(), offset=10, result_type="int")
 
 utils.postconfigure_plot(props)
