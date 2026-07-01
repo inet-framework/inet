@@ -767,7 +767,9 @@ utils.postconfigure_plot(props)
 # TEMP: postconfigure_plot applies yaxis_title but not xaxis_title for matplotlib line charts;
 # the prop is correct in the .anf, so set the x label here until the helper is fixed.
 import matplotlib.pyplot as plt
-plt.gca().set_xlabel(props.get("xaxis_title", ""))
+_ax = plt.gca()
+_ax.set_xlabel(props.get("xaxis_title", ""))
+_ax.set_xticks(agg.index)   # tick at the actual slow-station bitrates (6,9,12,18,24,36,54)
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]>                
