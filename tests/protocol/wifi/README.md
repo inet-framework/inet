@@ -24,13 +24,20 @@ wifi/
 Each test is one **`.test`** file: its program lives in a `%file: <Name>.cc`
 (a named `Define_ProtocolTest(...)`); `opp_test gen` extracts all of them and a single
 `--deep` build links them into **one `wifitests` binary**, selected per test by the
-`ProtocolTester.testName` parameter. `%contains` asserts the verdict.
+`ProtocolTester.testName` parameter. `%contains` asserts the (honest, spec-conformant) verdict;
+[`report_expected_results.py`](report_expected_results.py) then pairs each result with its
+`%# expected-result` declaration (see *Outcome semantics*).
 
 ```sh
 . /home/levy/workspace/omnetpp/setenv -q
 ./run-tests.sh                       # all 74 tests
 ./run-tests.sh 11n/N_BlockAck.test   # a subset
 ```
+
+`run-tests.sh` builds + runs via `opp_test`, then delegates the verdict to
+`report_expected_results.py`, which reuses opp_repl's result model (`opp_repl` must be
+importable — set `OPP_REPL_PATH=<checkout>` to use an uninstalled one). `INET_DIR`/`LIB_DIR`
+may be overridden to build against a prebuilt INET + `protocoltest`.
 
 PHY-layer mode (VHT/HT/OFDM/DSSS, MCS, bandwidth, spatial streams, guard interval, slot
 time) rides on the `Ieee80211ModeReq` tag as an opaque `IIeee80211Mode*` that the
