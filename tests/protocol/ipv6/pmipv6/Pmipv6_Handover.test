@@ -1,0 +1,35 @@
+%description:
+On handover the new MAG re-registers the mobile node. [Required -- RFC 5213 6.9.1.1]
+
+When the mobile node moves from one access gateway to another, the new serving MAG detects the
+attachment and sends its own Proxy Binding Update to the LMA, which updates the binding to point the
+tunnel at the new MAG -- all without any signalling from the node. The node roams from mag1 to mag2;
+observed on the wire at mag2's backhaul interface as it transmits a Proxy Binding Update after the
+move.
+
+%file: Pmipv6_Handover.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_pmipv6_handover)
+{
+    return ProtocolTest("ipv6_pmipv6_handover")
+        .once(on("mag2.eth[0].mac").signal("packetSentToLower")
+                  .packet("BindingUpdate.proxyRegistrationFlag == true")
+                  .describe("mag2's Proxy Binding Update after the handover").notBefore(20).within(50));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_pmipv6_handover"
+include ../../ini/_pmipv6.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_pmipv6_handover: PASS

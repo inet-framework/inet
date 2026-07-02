@@ -1,0 +1,35 @@
+%description:
+The Mobile Access Gateway registers the mobile node with a Proxy Binding Update. [Required -- RFC 5213 6.9.1]
+
+In Proxy Mobile IPv6 the network, not the host, manages mobility: when a mobile node attaches, its
+serving Mobile Access Gateway (MAG) registers it with the Local Mobility Anchor (LMA) by sending a
+Proxy Binding Update -- a Binding Update with the Proxy-Registration (P) flag set -- over the
+backhaul, on the node's behalf. The mobile node itself runs no mobility software. Observed on the
+wire at mag1's backhaul interface as it transmits the Proxy Binding Update.
+
+%file: Pmipv6_ProxyBindingUpdate.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_pmipv6_proxy_binding_update)
+{
+    return ProtocolTest("ipv6_pmipv6_proxy_binding_update")
+        .once(on("mag1.eth[0].mac").signal("packetSentToLower")
+                  .packet("BindingUpdate.proxyRegistrationFlag == true")
+                  .describe("mag1's Proxy Binding Update to the LMA").within(8));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_pmipv6_proxy_binding_update"
+include ../../ini/_pmipv6.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_pmipv6_proxy_binding_update: PASS

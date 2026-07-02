@@ -1,0 +1,39 @@
+%description:
+The mobile node keeps its address across a handover. [Required -- RFC 5213 6.2]
+
+The defining property of Proxy Mobile IPv6: because both gateways advertise the same home network
+prefix and register the same node with the LMA, the mobile node keeps its address as it moves and
+stays reachable at it -- with no address change, no DAD, and no signalling of its own. A
+correspondent node pings the node's fixed home address throughout; observed on the wire at the
+node's wireless interface as it receives that ping both before and after roaming from mag1 to mag2.
+
+%file: Pmipv6_AddressConstancy.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_pmipv6_address_constancy)
+{
+    return ProtocolTest("ipv6_pmipv6_address_constancy")
+        .once(on("mn.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("Icmpv6EchoRequestMsg.code == 0")
+                  .describe("the mobile node receives a ping while served by mag1").within(15))
+        .once(on("mn.wlan[0].mac").signal("packetReceivedFromLower")
+                  .packet("Icmpv6EchoRequestMsg.code == 0")
+                  .describe("...and still receives it at the same address after moving to mag2")
+                  .notBefore(25).within(50));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_pmipv6_address_constancy"
+include ../../ini/_pmipv6.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_pmipv6_address_constancy: PASS

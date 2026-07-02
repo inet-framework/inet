@@ -1,0 +1,39 @@
+%description:
+Mobile-node traffic is tunnelled between the LMA and the serving MAG. [Required -- RFC 5213 5.6.1]
+
+The LMA is the topological anchor for the mobile node's home network prefix: it intercepts traffic
+addressed to the node and forwards it, IPv6-in-IPv6 tunnelled, to the node's currently serving MAG,
+which de-tunnels it and delivers it on the access link. A correspondent node pings the mobile node;
+observed on the wire at mag1's backhaul interface as it receives a doubly-encapsulated (two IPv6
+headers) datagram carrying the Echo Request.
+
+%file: Pmipv6_Tunnel.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_pmipv6_tunnel)
+{
+    return ProtocolTest("ipv6_pmipv6_tunnel")
+        .once(on("mag1.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      return isIpv6Tunneled(c.event)
+                             && chunkOfType<Icmpv6EchoRequestMsg>(c.event) != nullptr;
+                  })
+                  .describe("a tunnelled Echo Request from the LMA to mag1").within(15));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_pmipv6_tunnel"
+include ../../ini/_pmipv6.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_pmipv6_tunnel: PASS

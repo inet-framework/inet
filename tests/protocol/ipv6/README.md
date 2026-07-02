@@ -10,7 +10,8 @@ in [`../lib`](../lib) — a sibling of the [`../wifi`](../wifi) suite. It covers
   Packet Too Big);
 - **Multicast Listener Discovery** (RFC 2710 / 3810, MLDv1 + MLDv2);
 - **Forwarding, fragmentation & Path MTU Discovery** (RFC 8200 / 8201);
-- **Mobile IPv6** (RFC 6275): home registration, return-routability, route optimization;
+- **Mobile IPv6** (RFC 6275): home registration, return-routability, route optimization, return-home;
+- **Proxy Mobile IPv6** (RFC 5213): network-based mobility (PBU/PBA, tunnelling, handover);
 - **DHCPv6** (RFC 8415): stateful configuration — a gap (not modeled in INET).
 
 Tests are written against the **standard**, not against INET's implementation. A test that fails
@@ -33,6 +34,7 @@ ipv6/
   mld/                Multicast Listener Discovery (RFC 2710 / 3810)
   forwarding/         Hop Limit decrement + fragmentation (RFC 8200)
   mipv6/              Mobile IPv6 registration + route optimization (RFC 6275)
+  pmipv6/             Proxy Mobile IPv6 network-based mobility (RFC 5213)
   dhcpv6/             Stateful address configuration (RFC 8415, NOT-MODELED)
 ```
 
@@ -63,9 +65,13 @@ Each test is one **`.test`** file: its program lives in a `%file: <Name>.cc`
   the next-hop router. Modelled on INET's own `tests/module/IPv6_redirect`.
 
 - **`Mipv6Demo`** (from [`../lib`](../lib)) — a wireless network (Home Agent, Correspondent Node,
-  two routers + access points, and a roaming mobile node) for the Mobile IPv6 test. The MN roams
+  two routers + access points, and a roaming mobile node) for the Mobile IPv6 tests. The MN roams
   from its home to a foreign AP over tens of seconds; the config (`ini/_mipv6.ini`) mirrors the
-  `[Config Mipv6Scenario]` in `../lib/omnetpp.ini`.
+  `[Config Mipv6Scenario]` in `../lib/omnetpp.ini` (and `ini/_mipv6_returnhome.ini` a faster roam so
+  the MN returns home).
+- **`Pmipv6Demo`** (`ned/`) — a Proxy Mobile IPv6 domain: a Local Mobility Anchor, two Mobile Access
+  Gateways, a correspondent node, and a plain wireless mobile node (no mobility software) that roams
+  mag1→mag2 keeping its address. Modelled on `examples/ipv6/pmipv6`; config in `ini/_pmipv6.ini`.
 
 Per-test knobs (traffic, DAD disabled, same-MAC collision, MTU, MLD on) are layered in each
 `.test`'s `%inifile` after `include ../../ini/_base.ini` (or `_routed.ini` / `_mipv6.ini`).
@@ -94,7 +100,7 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 - **NOT-MODELED ⛔** — INET does not implement the feature (or applies it inconsistently); the
   faithful spec assertion FAILs on its deadline; `%contains` expects `FAIL` (an *expected failure*).
 
-**Today: 44 CONFORMS, 5 NOT-MODELED across 49 tests — aggregate PASS.**
+**Today: 49 CONFORMS, 5 NOT-MODELED across 54 tests — aggregate PASS.**
 
 ## Conformance matrix
 
@@ -175,6 +181,15 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 | `Mipv6_RouteOptimization` | Correspondent-registration Binding Update (H flag clear) | R | ✅ |
 | `Mipv6_Tunneling` | Correspondent traffic to the home address tunnelled to the care-of address | R | ✅ |
 | `Mipv6_ReturnHome` | De-registration Binding Update (lifetime 0) on returning home | R | ✅ |
+
+### pmipv6 — Proxy Mobile IPv6 (RFC 5213)
+| Test | Feature | R/O | |
+|------|---------|-----|--|
+| `Pmipv6_ProxyBindingUpdate` | MAG registers the MN with a Proxy Binding Update (P flag) | R | ✅ |
+| `Pmipv6_ProxyBindingAck` | LMA replies with a Proxy Binding Acknowledgement (P flag) | R | ✅ |
+| `Pmipv6_Handover` | The new MAG re-registers the MN on handover | R | ✅ |
+| `Pmipv6_Tunnel` | MN traffic tunnelled (IPv6-in-IPv6) between LMA and MAG | R | ✅ |
+| `Pmipv6_AddressConstancy` | The MN keeps its address (and reachability) across the handover | R | ✅ |
 
 ### dhcpv6 — Stateful address configuration (RFC 8415)
 | Test | Feature | R/O | |
