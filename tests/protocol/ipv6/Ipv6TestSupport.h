@@ -121,6 +121,33 @@ inline bool raHasAutonomousPrefix(const PacketEvent& e)
     return pi != nullptr && pi->getAutoAddressConfFlag();
 }
 
+// A Neighbour Solicitation carries a Source Link-Layer Address option (RFC 4861 4.6.1) --
+// present on an address-resolution NS, absent on a DAD probe (unspecified source).
+inline bool nsHasSllaOption(const PacketEvent& e)
+{
+    auto ns = chunkOfType<Ipv6NeighbourSolicitation>(e);
+    if (ns == nullptr)
+        return false;
+    const Ipv6NdOptions& opts = ns->getOptions();
+    for (size_t i = 0; i < opts.getOptionArraySize(); i++)
+        if (opts.getOption(i)->getType() == IPv6ND_SOURCE_LINK_LAYER_ADDR_OPTION)
+            return true;
+    return false;
+}
+
+// A Neighbour Advertisement carries a Target Link-Layer Address option (RFC 4861 4.6.1).
+inline bool naHasTllaOption(const PacketEvent& e)
+{
+    auto na = chunkOfType<Ipv6NeighbourAdvertisement>(e);
+    if (na == nullptr)
+        return false;
+    const Ipv6NdOptions& opts = na->getOptions();
+    for (size_t i = 0; i < opts.getOptionArraySize(); i++)
+        if (opts.getOption(i)->getType() == IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION)
+            return true;
+    return false;
+}
+
 // The RA carries an MTU option (RFC 4861 4.6.4).
 inline bool raHasMtuOption(const PacketEvent& e)
 {

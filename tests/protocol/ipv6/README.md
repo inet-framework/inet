@@ -94,7 +94,7 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 - **NOT-MODELED ⛔** — INET does not implement the feature (or applies it inconsistently); the
   faithful spec assertion FAILs on its deadline; `%contains` expects `FAIL` (an *expected failure*).
 
-**Today: 37 CONFORMS, 5 NOT-MODELED across 42 tests — aggregate PASS.**
+**Today: 40 CONFORMS, 5 NOT-MODELED across 45 tests — aggregate PASS.**
 
 ## Conformance matrix
 
@@ -108,6 +108,7 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 | `Dad_GlobalAddress` | DAD is also run for the SLAAC global address | R | ✅ |
 | `Slaac_PrefixToAddress` | SLAAC address formed within the advertised prefix | R | ✅ |
 | `Dad_Collision` | Duplicate detected (dadFailed) on same-MAC collision | R | ✅ |
+| `Dad_Defends` | Owner defends an assigned address with an unsolicited NA | R | ✅ |
 | `Dad_Disabled` | DupAddrDetectTransmits=0 suppresses the link-local probe | O | ✅ |
 | `Dad_DisabledGlobal` | …should suppress the global probe too (RFC 4862 5.1) | O | ⛔ still probes global |
 | `Dad_GratuitousNa` | Unsolicited NA after DAD (RFC 4862 5.4.4) | O | ⛔ NAs only on request |
@@ -128,6 +129,8 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 | `Nd_AddressResolution` | NS → solicited NA resolves a neighbour | R | ✅ |
 | `Nd_NaSolicitedFlag` | Solicited NA sets S=1, host clears R=0 | R | ✅ |
 | `Nd_NsSolicitedNodeMulticast` | Resolution NS to the target's solicited-node mcast | R | ✅ |
+| `Nd_NsHasSlla` | Resolution NS carries the Source Link-Layer Address option | R | ✅ |
+| `Nd_NaHasTlla` | Solicited NA carries the Target Link-Layer Address option | R | ✅ |
 | `Nd_Redirect` | Router sends an ICMPv6 Redirect (RFC 4861 8) | R | ✅ |
 | `Nd_RedirectTarget` | Redirect names an on-link (link-local) better next hop | R | ✅ |
 | `Nd_RouterPreference` | RFC 4191 Default Router Preference | O | ⛔ not implemented |

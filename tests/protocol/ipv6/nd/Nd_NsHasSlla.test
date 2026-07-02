@@ -1,0 +1,48 @@
+%description:
+Address-resolution NS carries the Source Link-Layer Address option. [Required -- RFC 4861 4.3/4.6.1]
+
+A Neighbour Solicitation sent for address resolution includes the Source Link-Layer Address option,
+so the target learns the sender's link-layer address from the same packet and can reply without
+resolving it in turn. (A DAD probe, whose source is unspecified, must NOT include it -- covered by
+Dad_LinkLocalNs.) A host1->host2 flow triggers the resolution NS; observed on the wire as host1
+transmits it with the option present.
+
+%file: Nd_NsHasSlla.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_ns_has_slla)
+{
+    return ProtocolTest("ipv6_nd_ns_has_slla")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return nsHasSllaOption(c.event); })
+                  .describe("an address-resolution NS with a Source Link-Layer Address option")
+                  .notBefore(3.9).within(8.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_ns_has_slla"
+include ../../ini/_base.ini
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 5000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_ns_has_slla: PASS

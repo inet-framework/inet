@@ -1,0 +1,46 @@
+%description:
+Solicited NA carries the Target Link-Layer Address option. [Required -- RFC 4861 4.4/4.6.1]
+
+A Neighbour Advertisement answering an address-resolution NS includes the Target Link-Layer Address
+option, giving the requester the link-layer address it was resolving. A host1->host2 flow triggers
+the exchange; observed on the wire as host1 receives host2's advertisement with the option present.
+
+%file: Nd_NaHasTlla.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_na_has_tlla)
+{
+    return ProtocolTest("ipv6_nd_na_has_tlla")
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) { return naHasTllaOption(c.event); })
+                  .describe("a solicited NA with a Target Link-Layer Address option")
+                  .notBefore(3.9).within(8.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_na_has_tlla"
+include ../../ini/_base.ini
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 5000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_na_has_tlla: PASS

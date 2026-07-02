@@ -1,0 +1,43 @@
+%description:
+A node defends an assigned address against a later duplicate. [Required -- RFC 4862 5.4.3]
+
+If a node whose address is already assigned (no longer tentative) receives a DAD probe (a Neighbour
+Solicitation from the unspecified source) for that address, it defends by sending an unsolicited
+Neighbour Advertisement so the newcomer detects the duplicate. host1 and host2 share a MAC (hence a
+link-local address); host1 boots first and completes DAD, then host2 boots and probes. Observed on
+the wire as host1 transmits the defending (unsolicited) NA.
+
+%file: Dad_Defends.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_dad_defends)
+{
+    return ProtocolTest("ipv6_dad_defends")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6NeighbourAdvertisement.solicitedFlag == false")
+                  .describe("host1's unsolicited NA defending its assigned address")
+                  .notBefore(2.0).within(6.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_dad_defends"
+include ../../ini/_base.ini
+
+# Same MAC -> same link-local. host1 boots first and claims the address; host2 boots after
+# it is assigned, so host1 (the owner) defends it instead of both giving up.
+*.host1.eth[0].address = "0A-AA-00-00-00-05"
+*.host2.eth[0].address = "0A-AA-00-00-00-05"
+*.host1.ipv6.neighbourDiscovery.hostBootupTime = 0.4s
+*.host2.ipv6.neighbourDiscovery.hostBootupTime = 2.5s
+
+%contains: stdout
+PROTOCOLTEST ipv6_dad_defends: PASS
