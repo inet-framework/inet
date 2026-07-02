@@ -1,0 +1,35 @@
+%description:
+Mobile IPv6 return-home de-registration. [Required -- RFC 6275 11.5.4]
+
+When a mobile node returns to its home link it detects its home prefix on-link again, stops using a
+care-of address, and de-registers with its Home Agent by sending a Binding Update with a lifetime of
+zero (and the Home-Registration flag set), which tears down the binding and the home tunnel. In this
+scenario the MN roams to a foreign link and back; observed on the wire at the MN's wireless interface
+as it transmits the zero-lifetime de-registration Binding Update on returning home.
+
+%file: Mipv6_ReturnHome.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_mipv6_return_home)
+{
+    return ProtocolTest("ipv6_mipv6_return_home")
+        .once(on("MN[0].wlan[0]").signal("packetSentToLower")
+                  .packet("BindingUpdate.lifetime == 0 && BindingUpdate.homeRegistrationFlag == true")
+                  .describe("the MN's de-registration Binding Update (lifetime 0) on returning home").within(52));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_mipv6_return_home"
+include ../../ini/_mipv6_returnhome.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_mipv6_return_home: PASS
