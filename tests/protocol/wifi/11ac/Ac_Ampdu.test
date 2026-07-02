@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11ac A-MPDU aggregation: frame contains Ieee80211MpduSubframeHeader. [NOT-MODELED -- BasicMpduAggregationPolicy.computeAggregateFrames() returns nullptr in INET]
 
@@ -41,4 +42,4 @@ include ../../ini/_base.ini
 **.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 100
 
 %contains: stdout
-PROTOCOLTEST wifi_11ac_ampdu: FAIL
+PROTOCOLTEST wifi_11ac_ampdu: PASS

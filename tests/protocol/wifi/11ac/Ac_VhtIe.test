@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11ac VHT Capabilities information element in Association Request / VHT Operation IE
 in Beacon: an Ieee80211VhtCapabilities chunk appears in management frames. [NOT-MODELED
@@ -32,4 +33,4 @@ include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11ac_vht_ie: FAIL
+PROTOCOLTEST wifi_11ac_vht_ie: PASS

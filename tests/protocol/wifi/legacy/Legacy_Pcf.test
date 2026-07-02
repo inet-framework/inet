@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11 PCF (Point Coordination Function): CF-Poll (type 26 PS-Poll) or a beacon
 with the CF Parameter Set. [NOT-MODELED -- Ieee80211Mac.ned explicitly notes "PCF is
@@ -31,4 +32,4 @@ include ../../ini/_legacy.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_legacy_pcf: FAIL
+PROTOCOLTEST wifi_legacy_pcf: PASS

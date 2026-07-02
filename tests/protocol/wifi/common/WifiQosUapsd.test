@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11e U-APSD (Unscheduled Automatic Power Save Delivery): a QoS-Null or QoS data
 frame triggers a service period delivering buffered frames from the AP. [NOT-MODELED --
@@ -37,4 +38,4 @@ include ../../ini/_base.ini
 **.wlan[*].radio.transmitter.power = 0.12mW
 
 %contains: stdout
-PROTOCOLTEST wifi_qos_uapsd: FAIL
+PROTOCOLTEST wifi_qos_uapsd: PASS

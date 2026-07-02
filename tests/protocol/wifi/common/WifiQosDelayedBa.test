@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11e Delayed Block Ack: a Block Ack Request (type 24) elicits an ACK frame (type 29)
 immediately followed by a Block Ack (type 25) after a SIFS+PIFS delay — the delayed
@@ -57,4 +58,4 @@ include ../../ini/_base.ini
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
 
 %contains: stdout
-PROTOCOLTEST wifi_qos_delayed_ba: FAIL
+PROTOCOLTEST wifi_qos_delayed_ba: PASS

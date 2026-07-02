@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11ac VHT NDP Announcement (beamforming sounding). [NOT-MODELED -- INET does not implement beamforming]
 
@@ -32,4 +33,4 @@ include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11ac_beamforming: FAIL
+PROTOCOLTEST wifi_11ac_beamforming: PASS

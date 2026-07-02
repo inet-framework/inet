@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11 Deauthentication: the AP or STA sends a Deauthentication frame (type 12) when
 tearing down the session. [NOT-MODELED -- INET's Ieee80211MgmtAp/Sta do not send
@@ -33,4 +34,4 @@ include ../../ini/_g.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_deauth: FAIL
+PROTOCOLTEST wifi_deauth: PASS

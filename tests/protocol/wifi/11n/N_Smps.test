@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11n SM Power Save action frame (type 13). [NOT-MODELED -- INET does not implement SMPS]
 
@@ -31,4 +32,4 @@ include ../../ini/_n.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11n_smps: FAIL
+PROTOCOLTEST wifi_11n_smps: PASS

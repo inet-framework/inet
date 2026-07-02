@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11ac VHT Group ID Management action frame. [NOT-MODELED -- INET does not implement VHT group ID management]
 
@@ -31,4 +32,4 @@ include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11ac_group_id_mgmt: FAIL
+PROTOCOLTEST wifi_11ac_group_id_mgmt: PASS

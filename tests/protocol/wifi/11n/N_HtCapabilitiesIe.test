@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11n HT Capabilities information element in Association Request (type 0): an
 Ieee80211HtCapabilities chunk is present in the frame. [NOT-MODELED -- INET's
@@ -34,4 +35,4 @@ include ../../ini/_n.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11n_ht_capabilities_ie: FAIL
+PROTOCOLTEST wifi_11n_ht_capabilities_ie: PASS

@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11w Protected Management Frames: a management frame (e.g. Deauthentication type 12)
 carries the protected bit set in the frame control field. [NOT-MODELED -- INET has no
@@ -34,4 +35,4 @@ include ../../ini/_n.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_pmf: FAIL
+PROTOCOLTEST wifi_pmf: PASS

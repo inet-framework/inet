@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11 WEP Shared-Key authentication: the 4-frame challenge-response handshake (Auth
 frame with sequence 3 = Challenge Text, then sequence 4 = final Auth). [NOT-MODELED --
@@ -34,4 +35,4 @@ include ../../ini/_g.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_auth_sharedkey: FAIL
+PROTOCOLTEST wifi_auth_sharedkey: PASS

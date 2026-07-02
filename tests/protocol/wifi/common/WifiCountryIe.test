@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11d Country information element in Beacon: the AP includes a Country IE identifying
 the regulatory domain, max TX power per channel, etc. [NOT-MODELED -- INET's
@@ -32,4 +33,4 @@ include ../../ini/_a.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_country_ie: FAIL
+PROTOCOLTEST wifi_country_ie: PASS

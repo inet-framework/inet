@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11n STBC (Space-Time Block Coding): a frame is transmitted with STBC enabled
 (getSTBC() > 0 in the HT signal mode). [NOT-MODELED -- INET's Ieee80211HtSignalMode::
@@ -44,4 +45,4 @@ include ../../ini/_base.ini
 **.wlan[*].radio.transmitter.power = 0.12mW
 
 %contains: stdout
-PROTOCOLTEST wifi_11n_stbc_cap: FAIL
+PROTOCOLTEST wifi_11n_stbc_cap: PASS
