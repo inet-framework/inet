@@ -1,0 +1,44 @@
+%description:
+UDP to a closed port yields ICMPv6 Destination Unreachable (Port Unreachable). [Required -- RFC 4443 3.1]
+
+When a datagram arrives for a UDP port with no listener, the destination returns a Destination
+Unreachable message with code 4 (Port Unreachable). host1 sends a UDP datagram to a closed port
+on host2; observed on the wire at host1's interface as it receives the error.
+
+%file: Icmpv6_PortUnreachable.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Icmpv6DestUnav: NO_ROUTE_TO_DEST=0, ADDRESS_UNREACHABLE=3, PORT_UNREACHABLE=4.
+Define_ProtocolTest(ipv6_icmpv6_port_unreachable)
+{
+    return ProtocolTest("ipv6_icmpv6_port_unreachable")
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Icmpv6DestUnreachableMsg.code == 4")
+                  .describe("a Destination Unreachable (Port Unreachable) from host2").within(6.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_icmpv6_port_unreachable"
+include ../../ini/_base.ini
+
+# host1 sends UDP to a port on host2 that has no listener.
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 6000
+*.host1.app[0].messageLength = 50B
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+*.host2.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST ipv6_icmpv6_port_unreachable: PASS

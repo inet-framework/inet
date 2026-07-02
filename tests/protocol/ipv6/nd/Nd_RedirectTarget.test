@@ -1,0 +1,50 @@
+%description:
+The Redirect names an on-link (link-local) better next hop. [Required -- RFC 4861 8.1]
+
+A Redirect's Target Address is the link-local address of the better first-hop router (when the
+target differs from the destination, i.e. it is a router, not the destination host itself), so
+the receiver installs it as the next hop for that destination. Observed on the wire as host1
+receives a Redirect whose target is a link-local address.
+
+%file: Nd_RedirectTarget.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_redirect_target)
+{
+    return ProtocolTest("ipv6_nd_redirect_target")
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      auto r = chunkOfType<Ipv6Redirect>(c.event);
+                      return r != nullptr && r->getTargetAddress().isLinkLocal()
+                             && r->getTargetAddress() != r->getDestinationAddress();
+                  })
+                  .describe("a Redirect whose target is a link-local next-hop router").within(18.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_redirect_target"
+include ../../ini/_routed.ini
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 1000
+*.host1.app[0].messageLength = 64B
+*.host1.app[0].startTime = 5s
+*.host1.app[0].sendInterval = 1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_redirect_target: PASS

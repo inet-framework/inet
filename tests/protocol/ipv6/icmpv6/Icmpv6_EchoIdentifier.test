@@ -1,0 +1,45 @@
+%description:
+Echo Reply echoes the Request's Identifier and Sequence Number. [Required -- RFC 4443 4.2]
+
+The Echo Reply must return the identifier and sequence number of the Echo Request that
+prompted it, so the sender can correlate replies to requests. Observed on the wire at host1's
+interface: the identifier and sequence number captured from the outgoing Echo Request must
+reappear in the incoming Echo Reply.
+
+%file: Icmpv6_EchoIdentifier.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_icmpv6_echo_identifier)
+{
+    return ProtocolTest("ipv6_icmpv6_echo_identifier")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("Icmpv6EchoRequestMsg.code == 0")
+                  .capture("id", "Icmpv6EchoRequestMsg.identifier")
+                  .capture("seq", "Icmpv6EchoRequestMsg.seqNumber")
+                  .describe("host1's Echo Request").within(6.0))
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Icmpv6EchoReplyMsg.identifier == {id} && Icmpv6EchoReplyMsg.seqNumber == {seq}")
+                  .describe("an Echo Reply echoing that identifier and sequence number").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_icmpv6_echo_identifier"
+include ../../ini/_base.ini
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+
+%contains: stdout
+PROTOCOLTEST ipv6_icmpv6_echo_identifier: PASS

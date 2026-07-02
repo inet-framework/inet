@@ -1,0 +1,41 @@
+%description:
+The router (MLD querier) sends Multicast Listener Queries. [Required -- RFC 2710 4]
+
+The multicast router elected querier periodically sends Multicast Listener Query messages
+(type 130) to discover which groups have listeners on the link. Observed on the wire as the
+router transmits a Query.
+
+%file: Mld_Query.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_mld_query)
+{
+    return ProtocolTest("ipv6_mld_query")
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return chunkOfType<MldQuery>(c.event) != nullptr; })
+                  .describe("a Multicast Listener Query from the router").within(8.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_mld_query"
+include ../../ini/_base.ini
+
+**.ipv6.hasMld = true
+*.router.multicastForwarding = true
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpSink"
+*.host1.app[0].localPort = 5000
+*.host1.app[0].multicastGroup = "ff0e::1"
+
+%contains: stdout
+PROTOCOLTEST ipv6_mld_query: PASS

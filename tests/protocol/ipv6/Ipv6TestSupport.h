@@ -25,6 +25,7 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
+#include "inet/networklayer/icmpv6/MldMessage_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header_m.h"
 
 namespace inet {
@@ -117,6 +118,14 @@ inline bool raHasAutonomousPrefix(const PacketEvent& e)
 {
     auto pi = raPrefixOption(e);
     return pi != nullptr && pi->getAutoAddressConfFlag();
+}
+
+// The multicast group address of an MLD message (Query/Report/Done share MldMessage's
+// multicastAddress field), or UNSPECIFIED if the packet is not MLD.
+inline Ipv6Address mldGroup(const PacketEvent& e)
+{
+    auto m = chunkOfType<MldMessage>(e);
+    return m ? m->getMulticastAddress() : Ipv6Address::UNSPECIFIED_ADDRESS;
 }
 
 } // namespace protocoltest

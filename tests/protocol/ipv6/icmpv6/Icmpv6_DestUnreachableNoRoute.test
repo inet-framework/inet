@@ -1,0 +1,41 @@
+%description:
+No route to a destination yields ICMPv6 Destination Unreachable (No Route). [Required -- RFC 4443 3.1]
+
+When a router has no route towards a packet's destination it discards the packet and returns a
+Destination Unreachable with code 0 (No Route To Destination). host1 pings an address outside any
+configured prefix; observed on the wire as host1 receives the error.
+
+%file: Icmpv6_DestUnreachableNoRoute.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Icmpv6DestUnav: NO_ROUTE_TO_DEST=0, ADDRESS_UNREACHABLE=3, PORT_UNREACHABLE=4.
+Define_ProtocolTest(ipv6_icmpv6_dest_unreachable_no_route)
+{
+    return ProtocolTest("ipv6_icmpv6_dest_unreachable_no_route")
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Icmpv6DestUnreachableMsg.code == 0")
+                  .describe("a Destination Unreachable (No Route) from the router").within(10.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_icmpv6_dest_unreachable_no_route"
+include ../../ini/_routed.ini
+
+# Ping an address with no route in the network.
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "2001:db8:dead::1"
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+
+%contains: stdout
+PROTOCOLTEST ipv6_icmpv6_dest_unreachable_no_route: PASS

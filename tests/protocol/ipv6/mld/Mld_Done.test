@@ -1,0 +1,47 @@
+%description:
+A host leaving a group sends an MLD Multicast Listener Done. [Required -- RFC 2710 5]
+
+When the last listener for a group on a link stops listening, it notifies the querier with a
+Multicast Listener Done (type 132) so the router can prune the group. host2 is the sole
+listener for ff0e::1 and leaves partway through the run; observed on the wire as it transmits
+the Done.
+
+%file: Mld_Done.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_mld_done)
+{
+    return ProtocolTest("ipv6_mld_done")
+        .once(on("host2.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return chunkOfType<MldDone>(c.event) != nullptr
+                             && mldGroup(c.event) == Ipv6Address("ff0e::1");
+                  })
+                  .describe("host2's Multicast Listener Done for ff0e::1").within(9.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_mld_done"
+include ../../ini/_base.ini
+
+**.ipv6.hasMld = true
+*.router.multicastForwarding = true
+# host2 is the sole listener for ff0e::1, and leaves at t=6s -> it sends a Done.
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+*.host2.app[0].multicastGroup = "ff0e::1"
+*.host2.app[0].stopTime = 6s
+
+%contains: stdout
+PROTOCOLTEST ipv6_mld_done: PASS

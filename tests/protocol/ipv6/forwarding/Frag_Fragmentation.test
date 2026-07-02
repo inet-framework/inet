@@ -1,0 +1,46 @@
+%description:
+The source fragments a datagram larger than the outgoing link MTU. [Required -- RFC 8200 4.5]
+
+In IPv6 only the source may fragment: a node sending a datagram larger than the path/link MTU
+splits it into fragments carrying a Fragment extension header, all but the last with the
+More-Fragments flag set. host1 sends a 2000-byte datagram over its 1500-byte-MTU link; observed on
+the wire as host1 transmits a fragment with More-Fragments set.
+
+%file: Frag_Fragmentation.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_frag_fragmentation)
+{
+    return ProtocolTest("ipv6_frag_fragmentation")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6FragmentHeader.moreFragments == true")
+                  .describe("a fragment with the More-Fragments flag set").within(8.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_frag_fragmentation"
+include ../../ini/_routed.ini
+
+# A datagram larger than the 1500-byte link MTU, so host1 must fragment it.
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 1000
+*.host1.app[0].messageLength = 2000B
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST ipv6_frag_fragmentation: PASS

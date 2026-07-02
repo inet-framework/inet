@@ -1,0 +1,46 @@
+%description:
+A packet larger than a downstream link MTU yields ICMPv6 Packet Too Big (Path MTU Discovery).
+[Required -- RFC 4443 3.2 / RFC 8201]
+
+IPv6 routers never fragment; a router that cannot forward a packet because it exceeds the next
+link's MTU discards it and returns an ICMPv6 Packet Too Big (type 2), which the source uses for
+Path MTU Discovery. routerB's MTU is reduced to 1280 so it cannot forward host1's 1400-byte
+datagram to host2; observed on the wire as host1 receives the Packet Too Big.
+
+%file: Icmpv6_PacketTooBig.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_icmpv6_packet_too_big)
+{
+    return ProtocolTest("ipv6_icmpv6_packet_too_big")
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Icmpv6PacketTooBigMsg.code == 0")
+                  .describe("a Packet Too Big from the router").within(15.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_icmpv6_packet_too_big"
+include ../../ini/_routed.ini
+
+# Reduce routerB's host2-facing interface MTU to 1280 so it can't forward host1's
+# 1400-byte datagram (only eth[1], so the Packet Too Big returns unfragmented via eth[0]).
+**.routerB.eth[1].**.mtu = 1280B
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].packetSize = 1400B
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+*.host2.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST ipv6_icmpv6_packet_too_big: PASS

@@ -1,0 +1,42 @@
+%description:
+ICMPv6 Echo Request is answered by an Echo Reply (ping6). [Required -- RFC 4443 4.1/4.2]
+
+A node that receives an Echo Request (type 128) returns an Echo Reply (type 129) to the
+source. host1 pings host2 on the shared link; observed on the wire at host1's interface as it
+transmits the Echo Request and then receives host2's Echo Reply.
+
+%file: Icmpv6_EchoRequestReply.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_icmpv6_echo_request_reply)
+{
+    return ProtocolTest("ipv6_icmpv6_echo_request_reply")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("Icmpv6EchoRequestMsg.code == 0")
+                  .describe("host1's Echo Request").within(6.0))
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Icmpv6EchoReplyMsg.code == 0")
+                  .describe("host2's Echo Reply").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_icmpv6_echo_request_reply"
+include ../../ini/_base.ini
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+
+%contains: stdout
+PROTOCOLTEST ipv6_icmpv6_echo_request_reply: PASS

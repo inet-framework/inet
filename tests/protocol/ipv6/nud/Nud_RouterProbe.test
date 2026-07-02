@@ -1,0 +1,58 @@
+%description:
+Neighbour Unreachability Detection probes a stale next hop with a unicast NS. [Required -- RFC 4861 7.3]
+
+While a neighbour (here host1's next-hop router for the off-link host2) is used, its cache entry
+is confirmed REACHABLE; after the reachable time passes with no confirmation it becomes STALE, and
+the next use starts NUD: after a short delay the node re-verifies the neighbour with a *unicast*
+Neighbour Solicitation sent to the neighbour's address (not the solicited-node multicast used for
+address resolution, and not from the unspecified source used for DAD). Two traffic bursts to host2,
+separated by more than the reachable time, drive the transition; observed on the wire as host1
+transmits a unicast NS.
+
+%file: Nud_RouterProbe.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nud_router_probe)
+{
+    return ProtocolTest("ipv6_nud_router_probe")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return chunkOfType<Ipv6NeighbourSolicitation>(c.event) != nullptr
+                             && !ipv6Src(c.event).isUnspecified()
+                             && !ipv6Dst(c.event).isMulticast();
+                  })
+                  .describe("a unicast NUD probe (NS to the neighbour's unicast address)")
+                  .notBefore(9.0).within(19.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nud_router_probe"
+include ../../ini/_routed.ini
+
+# Short reachable time so the next-hop entry goes STALE between the two bursts.
+**.ipv6.neighbourDiscovery.advReachableTime = 3s
+# Two UDP bursts to the off-link host2, separated by more than the reachable time.
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 1000
+*.host1.app[0].messageLength = 64B
+*.host1.app[0].startTime = 4s
+*.host1.app[0].stopTime = 15s
+*.host1.app[0].sendInterval = 6s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST ipv6_nud_router_probe: PASS

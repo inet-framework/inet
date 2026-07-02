@@ -1,0 +1,42 @@
+%description:
+A router drops a packet whose Hop Limit reaches zero and returns Time Exceeded. [Required -- RFC 4443 3.3 / RFC 8200]
+
+A router decrements the Hop Limit of every forwarded packet; when it reaches zero the packet is
+discarded and the router sends an ICMPv6 Time Exceeded (type 3, code 0) to the source. host1 pings
+the off-link host2 with Hop Limit 1, so the first router drops it; observed on the wire as host1
+receives the Time Exceeded.
+
+%file: Icmpv6_TimeExceeded.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_icmpv6_time_exceeded)
+{
+    return ProtocolTest("ipv6_icmpv6_time_exceeded")
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Icmpv6TimeExceededMsg.code == 0")
+                  .describe("a Time Exceeded (Hop Limit exceeded) from the router").within(10.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_icmpv6_time_exceeded"
+include ../../ini/_routed.ini
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].hopLimit = 1
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+*.host2.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST ipv6_icmpv6_time_exceeded: PASS

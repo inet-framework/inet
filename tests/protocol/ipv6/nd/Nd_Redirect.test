@@ -1,0 +1,47 @@
+%description:
+Router sends an ICMPv6 Redirect for a better first hop. [Required -- RFC 4861 8]
+
+When a router forwards a packet back out the interface it arrived on -- because a better
+first-hop router for that destination is on the same link as the sender -- it sends the
+sender an ICMPv6 Redirect (type 137) naming the better next hop. On the routed network host1's
+traffic to host2 goes via routerA, whose best next hop (routerB) is on host1's link; observed
+on the wire as host1 receives the Redirect.
+
+%file: Nd_Redirect.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_redirect)
+{
+    return ProtocolTest("ipv6_nd_redirect")
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) { return chunkOfType<Ipv6Redirect>(c.event) != nullptr; })
+                  .describe("an ICMPv6 Redirect received by host1").within(18.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_redirect"
+include ../../ini/_routed.ini
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 1000
+*.host1.app[0].messageLength = 64B
+*.host1.app[0].startTime = 5s
+*.host1.app[0].sendInterval = 1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_redirect: PASS

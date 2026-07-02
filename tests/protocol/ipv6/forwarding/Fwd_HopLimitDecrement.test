@@ -1,0 +1,48 @@
+%description:
+A router decrements the Hop Limit of forwarded packets. [Required -- RFC 8200 3]
+
+Every router that forwards a packet decrements its IPv6 Hop Limit by one. host1 sends UDP to the
+off-link host2 through the routers; observed on the wire as the Hop Limit host2 receives is lower
+than the Hop Limit host1 transmitted.
+
+%file: Fwd_HopLimitDecrement.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_fwd_hop_limit_decrement)
+{
+    return ProtocolTest("ipv6_fwd_hop_limit_decrement")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 1000")
+                  .capture("hl", "ipv6.hopLimit")
+                  .describe("host1's UDP datagram, remembering its Hop Limit").within(8.0))
+        .once(on("host2.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 1000 && ipv6.hopLimit < {hl}")
+                  .describe("host2 receives it with a decremented Hop Limit").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_fwd_hop_limit_decrement"
+include ../../ini/_routed.ini
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 1000
+*.host1.app[0].messageLength = 64B
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST ipv6_fwd_hop_limit_decrement: PASS
