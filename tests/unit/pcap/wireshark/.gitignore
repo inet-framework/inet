@@ -1,0 +1,5 @@
+# Third-party captures downloaded by ../fetch_wireshark_captures.sh are ignored by
+# default: review each file's license/provenance first, then force-add the vetted
+# ones with:  git add -f tests/unit/pcap/wireshark/<file>
+*
+!.gitignore
