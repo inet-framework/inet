@@ -40,14 +40,25 @@ C++ via `EventPattern::match(lambda)`. PHY rates are pinned with
 
 ## Outcome semantics
 
-- **CONFORMS** — INET produces the spec behavior; the program PASSes; `%contains` expects `PASS`.
-- **NOT-MODELED** — INET does not implement the feature; the faithful spec assertion FAILs on
-  its deadline; `%contains` expects `FAIL` (an *expected failure*, like the repo's
-  `ViolationDetected.test`). The `.cc` assertion stays honest to the standard.
-- A red `opp_test` result therefore signals a **change**: a CONFORMS test regressed, or a
-  NOT-MODELED feature started working (update the matrix).
+Expected-vs-actual is a **separate dimension** from pass/fail. Every test asserts the honest
+spec-conformant `PROTOCOLTEST <name>: PASS` line (so opp_test's *actual* result is the true
+conformance outcome); a `%# expected-result:` comment declares the *expected* outcome (opp_test
+ignores `%#` lines — the opp_repl wrapper reads it). The wrapper then reports the pair:
 
-**Today: 39 CONFORMS, 35 NOT-MODELED, 0 DEVIATES across 74 tests — aggregate PASS.**
+- **CONFORMS** — INET produces the spec behavior. The program PASSes; no expectation declared
+  (defaults `PASS`) → **`PASS`**.
+- **NOT-MODELED** — INET does not implement the feature; the faithful assertion genuinely FAILs
+  on its deadline. The test declares `%# expected-result: FAIL` → **`FAIL (expected)`** — a real
+  failure, honestly marked, *not* a fake PASS.
+- **Regression** — a CONFORMS test that starts failing → **`FAIL (unexpected)`**.
+- **Closed gap** — a NOT-MODELED feature that starts working → **`PASS (unexpected)`** ("update
+  the matrix").
+
+Only `(unexpected)` outcomes fail the run (non-zero exit); expected PASS and expected FAIL are
+both green.
+
+**Today: 39 CONFORMS (expected PASS) + 35 NOT-MODELED (expected FAIL), 0 DEVIATES across 74
+tests — all results as expected, run exits 0.**
 
 ## Conformance matrix
 

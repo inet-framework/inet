@@ -287,6 +287,24 @@ an explicit `@namespace`, which keeps them immune to a consumer `.test`'s root `
 > one in `%inifile`). And avoid writing a literal `%word` in a `%description` — opp_test reads
 > it as a section directive.
 
+### Declaring an expected result (`%# expected-result`)
+
+A test's verdict (pass/fail) is one dimension; whether that verdict was *expected* is a
+separate one. Always assert the honest, spec-conformant line with `%contains`
+(`PROTOCOLTEST <name>: PASS`). If a feature is known to be unimplemented so the faithful
+assertion currently *fails*, declare that up front instead of faking it:
+
+    %# expected-result: FAIL
+
+opp_test ignores `%#` comment lines, so this is metadata for the opp_repl test wrapper
+(`opp_run_opp_tests`), which reads it and reports the pair: a matching failure shows
+**`FAIL (expected)`** (green — a real failure, honestly marked, not a fake PASS); a regression
+shows **`FAIL (unexpected)`**; and a gap that *closes* shows **`PASS (unexpected)`**. The last
+two fail the run. Allowed values: `PASS` (the default when absent), `FAIL`, `ERROR`.
+
+> Never invert `%contains` to expect the failure line (`… : FAIL`) — that lies: a genuinely
+> failing test reports PASS, and a gap closing looks like a regression.
+
 ---
 
 ## 11. Cookbook
