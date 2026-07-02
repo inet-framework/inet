@@ -16,7 +16,7 @@ cd "$(dirname "$0")"
 . /home/levy/workspace/omnetpp/setenv -q 2>/dev/null || true
 
 INET_DIR="${INET_DIR:-$(cd ../../.. && pwd)}"
-LIB_DIR="$(cd ../lib && pwd)"
+LIB_DIR="${LIB_DIR:-$(cd ../lib && pwd)}"
 WIFI_DIR="$(pwd)"
 TESTS="${*:-$(find . -name '*.test' | sort)}"
 
@@ -38,4 +38,13 @@ cd ..
 
 # NED path for the run (test inis carry no ned-path; they rely on this).
 export NEDPATH="$WIFI_DIR/ned:$LIB_DIR:$INET_DIR/src"
-opp_test run -p wifitests $TESTS
+# Run opp_test (each test asserts the honest 'PROTOCOLTEST <name>: PASS' line, so opp_test's
+# per-test result IS the true conformance outcome) and delegate the verdict to the opp_repl-backed
+# reporter, which pairs each result with its '%# expected-result' declaration: a NOT-MODELED test
+# reads 'FAIL (expected)' (green, not a fake PASS) and a closed gap surfaces as 'PASS (unexpected)'.
+# opp_test's own aggregate exit is expected to be non-zero (the 35 NOT-MODELED tests fail on
+# purpose); the reporter recomputes the real pass/fail from the expected-vs-actual comparison.
+set +e
+opp_test run -p wifitests $TESTS > work/opp_test.out 2>&1
+set -e
+python3 "$WIFI_DIR/report_expected_results.py" work/opp_test.out $TESTS
