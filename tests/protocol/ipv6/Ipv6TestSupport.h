@@ -142,6 +142,19 @@ inline Ipv6Address mldGroup(const PacketEvent& e)
     return m ? m->getMulticastAddress() : Ipv6Address::UNSPECIFIED_ADDRESS;
 }
 
+// An MLDv2 Report carrying a source-specific record (a group record with a non-empty source
+// list) -- i.e. source-specific multicast (INCLUDE/EXCLUDE filtering), RFC 3810.
+inline bool mldv2HasSourceRecord(const PacketEvent& e)
+{
+    auto r = chunkOfType<Mldv2Report>(e);
+    if (r == nullptr)
+        return false;
+    for (size_t i = 0; i < r->getMulticastAddressRecordArraySize(); i++)
+        if (r->getMulticastAddressRecord(i).getSourceList().size() > 0)
+            return true;
+    return false;
+}
+
 } // namespace protocoltest
 } // namespace inet
 

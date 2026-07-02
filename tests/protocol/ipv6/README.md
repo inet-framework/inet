@@ -10,7 +10,8 @@ in [`../lib`](../lib) — a sibling of the [`../wifi`](../wifi) suite. It covers
   Packet Too Big);
 - **Multicast Listener Discovery** (RFC 2710 / 3810, MLDv1 + MLDv2);
 - **Forwarding, fragmentation & Path MTU Discovery** (RFC 8200 / 8201);
-- **Mobile IPv6** (RFC 6275): home registration, return-routability, route optimization.
+- **Mobile IPv6** (RFC 6275): home registration, return-routability, route optimization;
+- **DHCPv6** (RFC 8415): stateful configuration — a gap (not modeled in INET).
 
 Tests are written against the **standard**, not against INET's implementation. A test that fails
 because INET is incomplete is a **finding**, not a suite defect — the suite doubles as a
@@ -32,6 +33,7 @@ ipv6/
   mld/                Multicast Listener Discovery (RFC 2710 / 3810)
   forwarding/         Hop Limit decrement + fragmentation (RFC 8200)
   mipv6/              Mobile IPv6 registration + route optimization (RFC 6275)
+  dhcpv6/             Stateful address configuration (RFC 8415, NOT-MODELED)
 ```
 
 Each test is one **`.test`** file: its program lives in a `%file: <Name>.cc`
@@ -92,7 +94,7 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 - **NOT-MODELED ⛔** — INET does not implement the feature (or applies it inconsistently); the
   faithful spec assertion FAILs on its deadline; `%contains` expects `FAIL` (an *expected failure*).
 
-**Today: 35 CONFORMS, 4 NOT-MODELED across 39 tests — aggregate PASS.**
+**Today: 37 CONFORMS, 5 NOT-MODELED across 42 tests — aggregate PASS.**
 
 ## Conformance matrix
 
@@ -153,17 +155,24 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 | `Mld_Query` | Router querier sends Multicast Listener Queries | R | ✅ |
 | `Mld_Done` | Last listener leaving sends a Multicast Listener Done | R | ✅ |
 | `Mldv2_Report` | MLDv2 Version 2 Report (type 143) with group records | R | ✅ |
+| `Mldv2_SourceInclude` | MLDv2 source-specific membership (INCLUDE filter) | R | ✅ |
 
 ### forwarding — Forwarding + Fragmentation (RFC 8200)
 | Test | Feature | R/O | |
 |------|---------|-----|--|
 | `Fwd_HopLimitDecrement` | Router decrements Hop Limit of forwarded packets | R | ✅ |
 | `Frag_Fragmentation` | Source fragments a datagram larger than the link MTU | R | ✅ |
+| `Frag_Reassembly` | Fragments delivered end-to-end to the destination | R | ✅ |
 
 ### mipv6 — Mobile IPv6 (RFC 6275)
 | Test | Feature | R/O | |
 |------|---------|-----|--|
 | `Mipv6_RegistrationAndRo` | Home registration (BU/BA) + return-routability + route optimization | R | ✅ |
+
+### dhcpv6 — Stateful address configuration (RFC 8415)
+| Test | Feature | R/O | |
+|------|---------|-----|--|
+| `Dhcpv6_Solicit` | DHCPv6 SOLICIT (stateful config) | O | ⛔ no DHCPv6 client |
 
 ## Findings & notes
 
@@ -171,6 +180,8 @@ positive packet on the wire (success is the *absence* of a defence): those tests
   equivalent; the RA carries no preference (reserved bits stay zero).
 - **No gratuitous NA after DAD** (`Dad_GratuitousNa`): INET sends NAs only in response to an NS;
   RFC 4862 5.4.4's optional unsolicited announcement is not sent (a natural `Ipv6` module option).
+- **DHCPv6 is not modeled** (`Dhcpv6_Solicit`): INET has no DHCPv6 client (no message set or module),
+  so stateful address configuration cannot occur; hosts only ever use SLAAC.
 - **DAD-disable is applied inconsistently** (`Dad_DisabledGlobal`): `DupAddrDetectTransmits=0`
   suppresses DAD for the link-local address but the SLAAC global address is still probed once.
 - **Packet Too Big carries no MTU** (`Icmpv6_PacketTooBigMtu`): INET generates the message but leaves
@@ -192,8 +203,8 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 
 ## Out of scope (this cut)
 
-MLDv2 source-specific-multicast filtering specifics, stateful DHCPv6, and IPsec-over-IPv6 (covered
-elsewhere). The suite is structured so these drop in later as new `.test` files.
+MLDv2 EXCLUDE-mode / state-change record specifics, and IPsec-over-IPv6 (covered elsewhere). The
+suite is structured so these drop in later as new `.test` files.
 
 ## Adding a test
 

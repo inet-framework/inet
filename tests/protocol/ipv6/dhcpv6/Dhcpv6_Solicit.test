@@ -1,0 +1,35 @@
+%description:
+Stateful address configuration via DHCPv6. [RFC 8415; NOT-MODELED]
+
+Where stateless autoconfiguration is not used (e.g. a Router Advertisement with the Managed-address
+flag set, or no autonomous prefix), a host obtains its address from a DHCPv6 server, beginning with
+a SOLICIT to the All-DHCP-Relay-Agents-and-Servers multicast on UDP port 547. INET has no DHCPv6
+client -- there is no DHCPv6 message set or module at all -- so no host ever sends a SOLICIT; the
+faithful spec assertion times out (an expected failure: DHCPv6 is not modeled).
+
+%file: Dhcpv6_Solicit.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_dhcpv6_solicit)
+{
+    return ProtocolTest("ipv6_dhcpv6_solicit")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 547")
+                  .describe("a DHCPv6 SOLICIT from host1").within(8.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_dhcpv6_solicit"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_dhcpv6_solicit: FAIL

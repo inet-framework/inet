@@ -1,0 +1,47 @@
+%description:
+Fragments are delivered end-to-end to the destination for reassembly. [Required -- RFC 8200 4.5]
+
+IPv6 routers forward fragments unchanged (they never reassemble); only the destination reassembles.
+host1 sends a 2000-byte datagram to the off-link host2, so it is fragmented at the source and the
+fragments traverse the routers to host2. Observed on the wire at host2's interface as it receives a
+non-first, last fragment (More-Fragments clear, Fragment Offset > 0) -- the fragment stream that its
+IPv6 layer reassembles.
+
+%file: Frag_Reassembly.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_frag_reassembly)
+{
+    return ProtocolTest("ipv6_frag_reassembly")
+        .once(on("host2.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Ipv6FragmentHeader.moreFragments == false && Ipv6FragmentHeader.fragmentOffset > 0")
+                  .describe("host2 receives a last fragment to reassemble").within(10.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_frag_reassembly"
+include ../../ini/_routed.ini
+
+# A datagram larger than the 1500-byte link MTU, fragmented at host1 and delivered to host2.
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 1000
+*.host1.app[0].messageLength = 2000B
+*.host1.app[0].startTime = 4s
+*.host1.app[0].sendInterval = 1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 1000
+
+%contains: stdout
+PROTOCOLTEST ipv6_frag_reassembly: PASS
