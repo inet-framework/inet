@@ -146,24 +146,35 @@ korlát a **licenc/redisztribúció**, mert commitolt korpuszról van szó (INET
 - Minden forrás `tshark`-kal validálható (független orákulum).
 
 ### 2. munkacsomag — Lefedettség-riport + nyers-bájt jelölés (a következő lépés)
-Egyetlen műszerezés, ami a #1 (nyers-bájt) és a lefedettség kérdést is megoldja.
-- **`src` módosítás:** `ChunkSerializerRegistry`-be publikus felsoroló
-  (pl. `std::vector<std::type_index> getRegisteredTypes() const`) → a **regisztrált**
-  halmaz.
-- **Exercised-halmaz:** a dissection `visitChunk`-ja minden érintett chunk
-  `typeid`-jét rögzíti → a **tesztelt** halmaz. A `BytesChunk`/`BitsChunk`-ként látott
-  régiók = **nyers/nem tesztelt** (a #1 esete) — külön listázva, a top-level azonnali
-  bájtra-esést kiemelve (gyanús), a mély levél-payloadot csak halkan jelezve.
-- **Kimenet:** `tested serializers` lista + `untested serializers` lista
-  (`regisztrált − tesztelt`) + nyers-bájt régiók → a run végén a stdout-ra.
+Két, külön célú műszerezés:
+
+**(a) Serializer-lefedettség — a `getSerializer` diszpécs-pontnál mérve.** A
+`Chunk::serialize` (`Chunk.cc:188`) és `Chunk::deserialize` (`Chunk.cc:202`) egyaránt
+a `ChunkSerializerRegistry::getSerializer`-en át hív → ez az **egyetlen choke-point**,
+ami a **beágyazott** (szülő által hívott) serializereket is elkapja, nem csak a
+top-level disszektált chunkokat. Ezért itt mérünk, NEM a `visitChunk`-nál.
+- **`src` módosítás:** a registrybe (1) publikus felsoroló
+  `getRegisteredTypes()` → a **regisztrált** halmaz; (2) egy opcionális, null-gated
+  gyűjtő (`std::set<std::type_index>* usedRecorder`) + `getSerializer`-beli
+  `if (usedRecorder) usedRecorder->insert(typeInfo);` → a **used** halmaz. Production:
+  `nullptr` → elhanyagolható. **Egyelőre EGY halmaz** (serialize+deserialize nincs
+  szétválasztva; ha később kell, a két Chunk-ponton külön gyűjthető).
+- **Kimenet:** `used`/`untested = registered − used` listák a run végén.
+- **Reziduális caveat (szűk):** az **inline-kódolt opciók** (pl. TCP MSS/SACK a
+  `TcpHeaderSerializer` saját metódusaiban) **nem regisztrált serializerek** → nincsenek
+  a `registered` halmazban, tehát nem jelennek meg hamis „untested"-ként; a helyességük
+  a szülő serializer lefedettségének része. Az egyes opció-*variánsok* nyomon követése
+  már ág-/mező-lefedettség (más metrika: fuzz/korpusz vagy `gcov`), nem ez.
+
+**(b) Nyers-bájt jelölés (#1) — a `visitChunk`-nál.** A dissection során a
+`BytesChunk`/`BitsChunk`-ként visszaadott régiók = **nem tesztelt** (nincs disszektor):
+külön listázva, a **top-level azonnali bájtra-esést** kiemelve (gyanús), a mély
+levél-payloadot halkan jelezve.
+
 - **Gate-forma (brittleness-kezelés):** a **teljes listát printeljük** (test.out),
   de hard `%contains`-gate csak **kurált baseline-ra / darabszámra** (coverage-ratchet:
   jelez, ha a lefedettség csökken), NEM a pontos listára — különben minden új
   serializer/pcap elmozdítaná. (A pontos-lista-gate opció, ha explicit kaput akarsz.)
-- **Caveat:** a `visitChunk` a **top-level disszektált** chunkokat látja; az opció-/
-  al-chunk serializerek (a fejléc `serialize`-én belül futnak) „untested"-ként
-  jelenhetnek meg, pedig használódnak — a riport „top-level érintettség"-et mér,
-  dokumentálni kell.
 
 ### 3. munkacsomag — Wire-helyesség: egyszer-hitelesített kanonikus snapshot
 (`tshark` telepítve: 4.6.4.) A wire-helyesség orákuluma egy **befagyasztott,
