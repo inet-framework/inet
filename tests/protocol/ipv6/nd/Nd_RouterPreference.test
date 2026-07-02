@@ -1,0 +1,36 @@
+%description:
+Default Router Preference in Router Advertisements. [Optional -- RFC 4191; NOT-MODELED]
+
+RFC 4191 lets a router advertise a High/Medium/Low preference (two bits of the RA flags
+octet, modelled here as the message's reserved field) so hosts can choose among several
+default routers. INET does not implement it -- all routers are equivalent and the reserved
+bits stay zero -- so the faithful spec assertion (a non-default preference) times out (an
+expected failure).
+
+%file: Nd_RouterPreference.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_router_preference)
+{
+    return ProtocolTest("ipv6_nd_router_preference")
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6RouterAdvertisement.reserved != 0")
+                  .describe("an RA advertising a non-default router preference (RFC 4191)")
+                  .within(4.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_router_preference"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_router_preference: FAIL

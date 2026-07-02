@@ -1,0 +1,35 @@
+%description:
+Unsolicited (gratuitous) Neighbour Advertisement after DAD. [Optional -- RFC 4862 5.4.4;
+NOT-MODELED] To speed neighbour caches, a node MAY announce a freshly-verified address by
+sending an unsolicited Neighbour Advertisement (solicitedFlag = false, target = its own
+address, to all-nodes). INET does not do this -- it only sends NAs in response to a
+Neighbour Solicitation -- so the faithful spec assertion times out (an expected failure;
+the behaviour could be added as an Ipv6 module option).
+
+%file: Dad_GratuitousNa.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_dad_gratuitous_na)
+{
+    return ProtocolTest("ipv6_dad_gratuitous_na")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6NeighbourAdvertisement.solicitedFlag == false")
+                  .describe("an unsolicited NA announcing host1's own address")
+                  .within(6.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_dad_gratuitous_na"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_dad_gratuitous_na: FAIL

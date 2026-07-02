@@ -1,0 +1,37 @@
+%description:
+All ND messages use IPv6 Hop Limit 255. [Required -- RFC 4861 6.1.1/6.1.2, 11.2]
+
+Neighbor Discovery messages are link-local by definition; a receiver validates that the Hop
+Limit is 255 (an on-link sender cannot be forged from off-link because a router would have
+decremented it). Observed on the wire at host1's interface: both a received Neighbour
+Solicitation (a DAD probe from another node) and a received Router Advertisement carry Hop Limit 255.
+
+%file: Nd_HopLimit255.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_hop_limit_255)
+{
+    return ProtocolTest("ipv6_nd_hop_limit_255")
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Ipv6NeighbourSolicitation.code == 0 && ipv6.hopLimit == 255")
+                  .describe("a received Neighbour Solicitation with Hop Limit 255").within(2.0))
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Ipv6RouterAdvertisement.code == 0 && ipv6.hopLimit == 255")
+                  .describe("a received Router Advertisement with Hop Limit 255").within(3.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_hop_limit_255"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_hop_limit_255: PASS

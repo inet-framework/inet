@@ -1,0 +1,42 @@
+%description:
+Disabling DAD should also suppress the global (SLAAC) DAD probe. [RFC 4862 5.1; NOT-MODELED]
+
+RFC 4862 5.1 says a DupAddrDetectTransmits of zero disables Duplicate Address Detection for
+*every* address the interface configures, not just the link-local one. INET honours this for
+the link-local address (see Dad_Disabled) but still sends a DAD probe for the autoconfigured
+global address, so the faithful "no DAD probe at all" assertion -- observed on the wire at
+host1's interface -- is violated (an expected failure: the disable is applied inconsistently
+across address types).
+
+%file: Dad_DisabledGlobal.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_dad_disabled_global)
+{
+    return ProtocolTest("ipv6_dad_disabled_global")
+        .never(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return isDadProbe(c.event) && nsTarget(c.event).isGlobal();
+                  })
+                  .describe("no global DAD probe may appear when DAD is disabled").within(4.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_dad_disabled_global"
+include ../../ini/_base.ini
+
+# Disable DAD everywhere.
+**.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+%contains: stdout
+PROTOCOLTEST ipv6_dad_disabled_global: FAIL

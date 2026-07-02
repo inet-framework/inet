@@ -1,0 +1,36 @@
+%description:
+Router sends a Router Advertisement. [Required -- RFC 4861 6.2.3]
+
+An advertising router announces its presence and parameters in a Router Advertisement sent
+to the all-nodes multicast address (ff02::1). Observed on the wire as the router transmits
+the RA.
+
+%file: Nd_RouterAdvertisement.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_router_advertisement)
+{
+    return ProtocolTest("ipv6_nd_router_advertisement")
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6RouterAdvertisement.code == 0")
+                  .match([](const MatchContext& c) { return ipv6Dst(c.event) == Ipv6Address("ff02::1"); })
+                  .describe("a Router Advertisement to the all-nodes multicast")
+                  .within(3.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_router_advertisement"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_router_advertisement: PASS

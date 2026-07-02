@@ -1,0 +1,36 @@
+%description:
+DAD runs to completion for the link-local address. [Required -- RFC 4862 5.4]
+
+DAD completion is an internal state transition with no positive packet on the wire (success
+is the *absence* of a defence), so it is observed on the host's DAD state channel rather than
+at the interface: host1 starts DAD for its tentative link-local address (startDad) and, when
+no defence arrives within the retransmit window, makes the address permanent (dadCompleted).
+Asserted at the host level, treating host1 as a black box that emits these signals.
+
+%file: Dad_StartThenComplete.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_dad_start_then_complete)
+{
+    return ProtocolTest("ipv6_dad_start_then_complete")
+        .once(on("host1").signal("startDad")
+                  .is(1).describe("host1 starts DAD for its tentative link-local address").within(1.5))
+        .once(on("host1").signal("dadCompleted")
+                  .is(1).describe("DAD completes and the address becomes permanent").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_dad_start_then_complete"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_dad_start_then_complete: PASS

@@ -1,0 +1,38 @@
+%description:
+Duplicate Address Detection probe for a link-local address. [Required -- RFC 4862 5.4.2]
+
+On boot each node forms a tentative link-local address and verifies its uniqueness by
+sending a Neighbour Solicitation from the unspecified source (::) to the target's
+solicited-node multicast address, with the tentative address as the NS target. Observed on
+the wire, at host1's interface, as it transmits the link-local DAD probe.
+
+%file: Dad_LinkLocalNs.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_dad_link_local_ns)
+{
+    return ProtocolTest("ipv6_dad_link_local_ns")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return isDadProbe(c.event) && nsTarget(c.event).isLinkLocal();
+                  })
+                  .describe("a link-local DAD probe (NS from :: to the solicited-node multicast)")
+                  .within(1.5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_dad_link_local_ns"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_dad_link_local_ns: PASS

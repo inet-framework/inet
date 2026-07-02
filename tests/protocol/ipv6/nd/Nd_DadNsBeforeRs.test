@@ -1,0 +1,38 @@
+%description:
+Address configuration precedes router discovery. [RFC 4862 5.4 / RFC 4861 6.3.7]
+
+A node first forms and verifies its link-local address (DAD), and only then starts router
+discovery by sending Router Solicitations from that address. Observed on the wire at host1's
+interface: it transmits a link-local DAD probe before it transmits its first Router
+Solicitation.
+
+%file: Nd_DadNsBeforeRs.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_dad_ns_before_rs)
+{
+    return ProtocolTest("ipv6_nd_dad_ns_before_rs")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) { return isDadProbe(c.event); })
+                  .describe("a link-local DAD probe").within(1.5))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6RouterSolicitation.code == 0")
+                  .describe("a Router Solicitation, sent only after DAD").within(2.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_dad_ns_before_rs"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_dad_ns_before_rs: PASS

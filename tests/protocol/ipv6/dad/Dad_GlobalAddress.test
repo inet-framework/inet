@@ -1,0 +1,38 @@
+%description:
+DAD is also run for the autoconfigured global address. [Required -- RFC 4862 5.4]
+
+After a host receives a Router Advertisement carrying an autonomous prefix, it forms a
+global address by SLAAC and -- exactly as for the link-local address -- verifies it with a
+DAD probe (NS from :: to the solicited-node multicast) before using it. Observed on the wire
+as host1 transmits a DAD probe whose target is a global unicast address.
+
+%file: Dad_GlobalAddress.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_dad_global_address)
+{
+    return ProtocolTest("ipv6_dad_global_address")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return isDadProbe(c.event) && nsTarget(c.event).isGlobal();
+                  })
+                  .describe("a DAD probe for a SLAAC-formed global address")
+                  .within(4.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_dad_global_address"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_dad_global_address: PASS

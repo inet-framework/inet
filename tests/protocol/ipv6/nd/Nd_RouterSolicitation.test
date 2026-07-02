@@ -1,0 +1,36 @@
+%description:
+Host sends a Router Solicitation. [Required -- RFC 4861 6.3.7]
+
+A host with no default router yet solicits one by sending a Router Solicitation to the
+all-routers multicast address (ff02::2) with IPv6 Hop Limit 255. Observed on the wire as
+host1 transmits the solicitation.
+
+%file: Nd_RouterSolicitation.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_router_solicitation)
+{
+    return ProtocolTest("ipv6_nd_router_solicitation")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6RouterSolicitation.code == 0 && ipv6.hopLimit == 255")
+                  .match([](const MatchContext& c) { return ipv6Dst(c.event) == Ipv6Address("ff02::2"); })
+                  .describe("a Router Solicitation to the all-routers multicast, Hop Limit 255")
+                  .within(3.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_router_solicitation"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_router_solicitation: PASS

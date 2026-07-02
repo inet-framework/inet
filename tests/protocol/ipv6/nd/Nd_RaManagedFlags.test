@@ -1,0 +1,34 @@
+%description:
+Router Advertisement M/O flags reflect stateless configuration. [RFC 4861 4.2]
+
+With SLAAC (autonomous prefix) and no DHCPv6, the router advertises the Managed-address
+(M) and Other-config (O) flags both clear, telling hosts to autoconfigure statelessly.
+Observed on the wire as the router transmits the RA.
+
+%file: Nd_RaManagedFlags.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_ra_managed_flags)
+{
+    return ProtocolTest("ipv6_nd_ra_managed_flags")
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6RouterAdvertisement.managedAddrConfFlag == false && Ipv6RouterAdvertisement.otherStatefulConfFlag == false")
+                  .describe("an RA advertising stateless configuration (M=0, O=0)")
+                  .within(3.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_ra_managed_flags"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_ra_managed_flags: PASS

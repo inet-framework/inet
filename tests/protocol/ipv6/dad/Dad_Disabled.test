@@ -1,0 +1,42 @@
+%description:
+Disabling DAD suppresses the link-local DAD probe. [RFC 4862 5.1]
+
+With DupAddrDetectTransmits = 0 a node performs no Duplicate Address Detection and assigns
+its link-local address without probing, so no link-local DAD Neighbour Solicitation appears
+on the link. Asserted as the absence, on the wire at host1's interface, of any DAD probe
+(NS from ::) targeting a link-local address. (INET still fires an internal startDad signal
+and, separately, still probes the SLAAC *global* address -- see Dad_DisabledGlobal -- so the
+honoured, observable effect is the missing link-local probe.)
+
+%file: Dad_Disabled.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_dad_disabled)
+{
+    return ProtocolTest("ipv6_dad_disabled")
+        .never(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .match([](const MatchContext& c) {
+                      return isDadProbe(c.event) && nsTarget(c.event).isLinkLocal();
+                  })
+                  .describe("no link-local DAD probe may appear when DAD is disabled").within(3.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_dad_disabled"
+include ../../ini/_base.ini
+
+# Disable DAD everywhere.
+**.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+%contains: stdout
+PROTOCOLTEST ipv6_dad_disabled: PASS

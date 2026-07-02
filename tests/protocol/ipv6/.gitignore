@@ -1,0 +1,10 @@
+# generated / machine-specific build artifacts
+work/
+Makefile
+makefrag
+out/
+*.so
+ipv6tests
+*_m.cc
+*_m.h
+_trace.test

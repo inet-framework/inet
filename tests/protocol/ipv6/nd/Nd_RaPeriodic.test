@@ -1,0 +1,37 @@
+%description:
+Router sends unsolicited Router Advertisements periodically. [Required -- RFC 4861 6.2.1]
+
+Independently of any solicitation, an advertising router re-sends Router Advertisements at
+random intervals in [MinRtrAdvInterval, MaxRtrAdvInterval] (turned down to 3-4 s here).
+Asserted as a first RA followed by another RA at least 1.5 s later -- i.e. a periodic,
+unsolicited re-advertisement rather than a one-off reply.
+
+%file: Nd_RaPeriodic.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_ra_periodic)
+{
+    return ProtocolTest("ipv6_nd_ra_periodic")
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6RouterAdvertisement.code == 0")
+                  .describe("a Router Advertisement").within(3.0))
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6RouterAdvertisement.code == 0")
+                  .describe("a later, periodic Router Advertisement").notBefore(1.5).within(6.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_ra_periodic"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_ra_periodic: PASS

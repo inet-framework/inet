@@ -1,0 +1,44 @@
+%description:
+Solicited Neighbour Advertisement sets S=1, R=0 (from a host). [Required -- RFC 4861 4.4/7.2.4]
+
+A Neighbour Advertisement sent in response to a Neighbour Solicitation has the Solicited
+flag set; a non-router target also clears the Router flag. Observed on the wire at host1's
+interface as it receives host2's advertisement during address resolution.
+
+%file: Nd_NaSolicitedFlag.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_na_solicited_flag)
+{
+    return ProtocolTest("ipv6_nd_na_solicited_flag")
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Ipv6NeighbourAdvertisement.solicitedFlag == true && Ipv6NeighbourAdvertisement.routerFlag == false")
+                  .describe("host2's solicited NA (S=1, R=0)").notBefore(3.9).within(6.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_na_solicited_flag"
+include ../../ini/_base.ini
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 5000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].sendInterval = 1s
+*.host1.app[0].startTime = 4s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_na_solicited_flag: PASS

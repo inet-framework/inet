@@ -1,0 +1,41 @@
+%description:
+DAD detects a duplicate address. [Required -- RFC 4862 5.4.3/5.4.5]
+
+When two nodes on the same link would form the same address, DAD must fail for the node
+that discovers the duplicate. host1 and host2 are given the same MAC address (hence the
+same EUI-64 link-local address) and staggered boot times; host2 -- booting second -- discovers
+the duplicate and reports DAD failure (dadFailed) instead of assigning it. Failure is an
+internal state transition, so it is observed on host2's DAD state channel (host level).
+
+%file: Dad_Collision.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_dad_collision)
+{
+    return ProtocolTest("ipv6_dad_collision")
+        .once(on("host2").signal("dadFailed")
+                  .is(1).describe("host2 detects the duplicate and DAD fails").within(3.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_dad_collision"
+include ../../ini/_base.ini
+
+# Force a link-local collision: identical MAC -> identical EUI-64 link-local address.
+*.host1.eth[0].address = "0A-AA-00-00-00-05"
+*.host2.eth[0].address = "0A-AA-00-00-00-05"
+# Stagger boot so host2 discovers host1 already on the address.
+*.host1.ipv6.neighbourDiscovery.hostBootupTime = 0.4s
+*.host2.ipv6.neighbourDiscovery.hostBootupTime = 0.9s
+
+%contains: stdout
+PROTOCOLTEST ipv6_dad_collision: PASS

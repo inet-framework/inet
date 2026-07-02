@@ -1,0 +1,125 @@
+//
+// IPv6 conformance suite -- shared test support.
+//
+// C++ predicates for the parts of an ND message the PacketFilter string engine cannot
+// address: the IPv6 source/destination of the carrying datagram (to recognise a DAD
+// probe or a solicited-node multicast target) and the TLV options nested inside a
+// Router Advertisement (the Prefix Information option that drives SLAAC). Used from a
+// test via EventPattern::match(lambda):
+//
+//   .match([](const MatchContext& c){ return isDadProbe(c.event); })
+//   .match([](const MatchContext& c){ return raHasAutonomousPrefix(c.event); })
+//
+// Plain scalar/flag/address-equality assertions do NOT need this header -- write them as
+// PacketFilter strings, e.g. .packet("ipv6.srcAddress == \"::\"") or
+// .packet("Ipv6NeighbourAdvertisement.solicitedFlag == true").
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
+#ifndef __INET_PROTOCOLTEST_IPV6_IPV6TESTSUPPORT_H
+#define __INET_PROTOCOLTEST_IPV6_IPV6TESTSUPPORT_H
+
+#include "ProtocolTest.h"
+
+#include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Dissects a packet and keeps every visited chunk, so a test can reach a nested chunk
+// (e.g. the concrete ND message, or -- via its getOptions() -- an RA's Prefix option).
+class Ipv6ChunkCollector : public PacketDissector::ICallback
+{
+  public:
+    std::vector<Ptr<const Chunk>> chunks;
+    bool shouldDissectProtocolDataUnit(const Protocol *) override { return true; }
+    void startProtocolDataUnit(const Protocol *) override {}
+    void endProtocolDataUnit(const Protocol *) override {}
+    void markIncorrect() override {}
+    void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *) override { chunks.push_back(chunk); }
+};
+
+// The first dissected chunk of type T in the event's packet, or nullptr.
+template<typename T>
+inline const T *chunkOfType(const PacketEvent& e)
+{
+    if (e.packet == nullptr)
+        return nullptr;
+    Ipv6ChunkCollector collector;
+    PacketDissector dissector(ProtocolDissectorRegistry::getInstance(), collector);
+    dissector.dissectPacket(const_cast<Packet *>(e.packet));
+    for (const auto& chunk : collector.chunks)
+        if (auto typed = dynamicPtrCast<const T>(chunk))
+            return typed.get();
+    return nullptr;
+}
+
+// IPv6 source / destination address of the observed datagram (UNSPECIFIED if not IPv6).
+inline Ipv6Address ipv6Src(const PacketEvent& e)
+{
+    auto h = chunkOfType<Ipv6Header>(e);
+    return h ? h->getSrcAddress() : Ipv6Address::UNSPECIFIED_ADDRESS;
+}
+inline Ipv6Address ipv6Dst(const PacketEvent& e)
+{
+    auto h = chunkOfType<Ipv6Header>(e);
+    return h ? h->getDestAddress() : Ipv6Address::UNSPECIFIED_ADDRESS;
+}
+
+// RFC 4291: solicited-node multicast is ff02::1:ff00:0/104.
+inline bool isSolicitedNodeMulticast(const Ipv6Address& a)
+{
+    return a.matches(Ipv6Address::SOLICITED_NODE_PREFIX, 104);
+}
+
+// A DAD probe (RFC 4862 5.4.2): a Neighbour Solicitation whose IPv6 source is the
+// unspecified address and whose destination is the target's solicited-node multicast.
+inline bool isDadProbe(const PacketEvent& e)
+{
+    auto ns = chunkOfType<Ipv6NeighbourSolicitation>(e);
+    if (ns == nullptr)
+        return false;
+    return ipv6Src(e).isUnspecified() && isSolicitedNodeMulticast(ipv6Dst(e));
+}
+
+// The Neighbour Solicitation / Advertisement target address (UNSPECIFIED if none).
+inline Ipv6Address nsTarget(const PacketEvent& e)
+{
+    auto ns = chunkOfType<Ipv6NeighbourSolicitation>(e);
+    return ns ? ns->getTargetAddress() : Ipv6Address::UNSPECIFIED_ADDRESS;
+}
+inline Ipv6Address naTarget(const PacketEvent& e)
+{
+    auto na = chunkOfType<Ipv6NeighbourAdvertisement>(e);
+    return na ? na->getTargetAddress() : Ipv6Address::UNSPECIFIED_ADDRESS;
+}
+
+// The Prefix Information option (with the autonomous/SLAAC flag) inside a Router
+// Advertisement, or nullptr.
+inline const Ipv6NdPrefixInformation *raPrefixOption(const PacketEvent& e)
+{
+    auto ra = chunkOfType<Ipv6RouterAdvertisement>(e);
+    if (ra == nullptr)
+        return nullptr;
+    const Ipv6NdOptions& opts = ra->getOptions();
+    for (size_t i = 0; i < opts.getOptionArraySize(); i++)
+        if (auto pi = dynamic_cast<const Ipv6NdPrefixInformation *>(opts.getOption(i)))
+            return pi;
+    return nullptr;
+}
+
+// The RA carries a Prefix Information option with the autonomous (SLAAC) flag set.
+inline bool raHasAutonomousPrefix(const PacketEvent& e)
+{
+    auto pi = raPrefixOption(e);
+    return pi != nullptr && pi->getAutoAddressConfFlag();
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+#endif

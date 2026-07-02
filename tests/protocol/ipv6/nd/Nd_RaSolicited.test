@@ -1,0 +1,36 @@
+%description:
+Router answers a Router Solicitation with a Router Advertisement. [Required -- RFC 4861 6.2.6]
+
+On receiving a Router Solicitation, an advertising router responds with a Router
+Advertisement (after a small random delay). Observed on the wire at the router's interface:
+it receives an RS and then transmits an RA shortly afterwards.
+
+%file: Nd_RaSolicited.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_nd_ra_solicited)
+{
+    return ProtocolTest("ipv6_nd_ra_solicited")
+        .once(on("router.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("Ipv6RouterSolicitation.code == 0")
+                  .describe("a Router Solicitation from a host").within(3.0))
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+                  .packet("Ipv6RouterAdvertisement.code == 0")
+                  .describe("the router's Router Advertisement in response").within(1.0));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_nd_ra_solicited"
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_nd_ra_solicited: PASS
