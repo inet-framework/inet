@@ -31,5 +31,7 @@ Define_ProtocolTest(ipv6_dad_gratuitous_na)
 *.tester.testName = "ipv6_dad_gratuitous_na"
 include ../../ini/_base.ini
 
+%expected-failure: INET sends no unsolicited NA after DAD (RFC 4862 5.4.4, optional)
+
 %contains: stdout
-PROTOCOLTEST ipv6_dad_gratuitous_na: FAIL
+PROTOCOLTEST ipv6_dad_gratuitous_na: PASS

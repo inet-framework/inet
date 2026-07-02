@@ -96,11 +96,18 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 
 ## Outcome semantics
 
-- **CONFORMS ✅** — INET produces the spec behavior; the program PASSes; `%contains` expects `PASS`.
-- **NOT-MODELED ⛔** — INET does not implement the feature (or applies it inconsistently); the
-  faithful spec assertion FAILs on its deadline; `%contains` expects `FAIL` (an *expected failure*).
+Every test asserts the RFC-required behavior, so `%contains` always expects the program to
+`PASS`. The two outcomes differ only in whether INET actually does it:
 
-**Today: 49 CONFORMS, 5 NOT-MODELED across 54 tests — aggregate PASS.**
+- **CONFORMS ✅** — INET produces the spec behavior; the program PASSes → opp_test **PASS**.
+- **NOT-MODELED ⛔** — INET does not implement the feature (or applies it inconsistently), so the
+  faithful assertion misses its deadline and the program FAILs. The `.test` carries an
+  `%expected-failure:` directive, so opp_test reports it as **EXPECTEDFAIL** (yellow) — an honest,
+  first-class "expected failure", *not* a disguised PASS, and it does not fail the run. If INET
+  later implements the feature the program PASSes and the test flips EXPECTEDFAIL → PASS — a
+  visible signal to move the row from ⛔ to ✅. A real regression turns a ✅ test **FAIL** (red).
+
+**Today: 49 CONFORMS (PASS), 5 NOT-MODELED (EXPECTEDFAIL) across 54 tests — aggregate PASS.**
 
 ## Conformance matrix
 
@@ -233,8 +240,9 @@ suite is structured so these drop in later as new `.test` files.
 Copy an existing `.test` (e.g. `nd/Nd_RouterSolicitation.test`). Put the program in
 `%file: <Name>.cc` (unique basename) with a `Define_ProtocolTest(ipv6_<name>)`, select it via
 `*.tester.testName`, `include ../../ini/_base.ini` (on-link) or `../../ini/_routed.ini` (routed) plus
-any inline overrides, and set `%contains` to the expected verdict (`PASS` for CONFORMS, `FAIL` for a
-faithful NOT-MODELED assertion). Observe sends at `X.eth[0].mac` `packetSentToLower`, receives at
+any inline overrides. Assert the RFC behavior and set `%contains` to `PROTOCOLTEST <name>: PASS`; for
+a NOT-MODELED point INET can't satisfy, also add `%expected-failure: <reason>` so it is reported as
+EXPECTEDFAIL rather than a red FAIL. Observe sends at `X.eth[0].mac` `packetSentToLower`, receives at
 `packetReceivedFromLower`, and DAD state via the host-level `startDad`/`dadCompleted`/`dadFailed`
 signals. To author against the real trace, add a tester with `logEvents=true` and read
 `work/<Name>/test.out`.

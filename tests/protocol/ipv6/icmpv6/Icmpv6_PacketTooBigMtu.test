@@ -40,5 +40,7 @@ include ../../ini/_routed.ini
 *.host1.app[0].sendInterval = 1s
 *.host2.numApps = 0
 
+%expected-failure: Packet Too Big MTU field left 0 (// TODO set MTU in Ipv6.cc); PMTUD can't converge
+
 %contains: stdout
-PROTOCOLTEST ipv6_icmpv6_packet_too_big_mtu: FAIL
+PROTOCOLTEST ipv6_icmpv6_packet_too_big_mtu: PASS

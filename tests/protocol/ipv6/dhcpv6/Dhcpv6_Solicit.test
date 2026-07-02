@@ -31,5 +31,7 @@ Define_ProtocolTest(ipv6_dhcpv6_solicit)
 *.tester.testName = "ipv6_dhcpv6_solicit"
 include ../../ini/_base.ini
 
+%expected-failure: INET has no DHCPv6 client (RFC 8415 not modeled)
+
 %contains: stdout
-PROTOCOLTEST ipv6_dhcpv6_solicit: FAIL
+PROTOCOLTEST ipv6_dhcpv6_solicit: PASS

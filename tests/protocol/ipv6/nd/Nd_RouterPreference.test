@@ -32,5 +32,7 @@ Define_ProtocolTest(ipv6_nd_router_preference)
 *.tester.testName = "ipv6_nd_router_preference"
 include ../../ini/_base.ini
 
+%expected-failure: RFC 4191 Default Router Preference not implemented (all routers equivalent)
+
 %contains: stdout
-PROTOCOLTEST ipv6_nd_router_preference: FAIL
+PROTOCOLTEST ipv6_nd_router_preference: PASS

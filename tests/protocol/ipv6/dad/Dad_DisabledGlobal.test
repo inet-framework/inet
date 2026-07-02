@@ -38,5 +38,7 @@ include ../../ini/_base.ini
 # Disable DAD everywhere.
 **.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
 
+%expected-failure: DupAddrDetectTransmits=0 still probes the SLAAC global address (RFC 4862 5.1)
+
 %contains: stdout
-PROTOCOLTEST ipv6_dad_disabled_global: FAIL
+PROTOCOLTEST ipv6_dad_disabled_global: PASS
