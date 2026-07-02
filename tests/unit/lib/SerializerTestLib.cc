@@ -65,11 +65,13 @@ class CoverageBuilder : public PacketDissector::ICallback
   public:
     bool topLevelRaw = false; // the very first visited chunk was raw => nothing was parsed
     long rawChunkCount = 0;
+    const Protocol *lastProtocol = nullptr; // deepest protocol entered (for diagnostics)
+    b bytesParsed = b(0); // total length successfully dissected so far (= offset of the next chunk)
 
     const Ptr<const Chunk> getContent() { return builder.getContent(); }
 
     virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
-    virtual void startProtocolDataUnit(const Protocol *protocol) override {}
+    virtual void startProtocolDataUnit(const Protocol *protocol) override { if (protocol != nullptr) lastProtocol = protocol; }
     virtual void endProtocolDataUnit(const Protocol *protocol) override {}
     virtual void markIncorrect() override {}
 
@@ -83,6 +85,7 @@ class CoverageBuilder : public PacketDissector::ICallback
         }
         if (isRaw)
             rawChunkCount++;
+        bytesParsed += chunk->getChunkLength();
         builder.visitChunk(chunk, protocol);
     }
 };
@@ -98,60 +101,107 @@ struct LogSilencer
     ~LogSilencer() { cLog::logLevel = saved; }
 };
 
+// A space-separated hex dump of a packet's bytes (capped), so a failing frame can
+// be inspected/reproduced.
+std::string hexDump(Packet *packet, size_t maxBytes = 128)
+{
+    const auto& bytes = packet->peekDataAsBytes()->getBytes();
+    std::string out;
+    char buf[4];
+    size_t n = bytes.size() < maxBytes ? bytes.size() : maxBytes;
+    for (size_t i = 0; i < n; i++) {
+        snprintf(buf, sizeof(buf), "%02x ", bytes[i]);
+        out += buf;
+    }
+    if (bytes.size() > maxBytes)
+        out += "... (" + std::to_string(bytes.size() - maxBytes) + " more bytes)";
+    return out;
+}
+
 } // anonymous namespace
 
+// Convenience: " of protocol 'X'" if a protocol was entered, else "".
+static std::string protocolContext(const Protocol *protocol)
+{
+    return protocol != nullptr ? std::string(" of protocol '") + protocol->getName() + "'" : std::string();
+}
+
 // Deserialize (dissect) the packet into typed chunks, re-serialize the result,
-// and compare it byte-by-byte with the original content. Also record which
-// regions stayed raw (unparsed) for the coverage report.
-static bool roundTripOneRecord(Packet *packet, const char *filename, int frame)
+// and compare it byte-by-byte with the original content. Records raw (unparsed)
+// regions for the coverage report, and reports any exception or mismatch with
+// enough context (phase, deepest protocol, frame hex) to locate the culprit.
+// Returns true iff the frame round-trips identically.
+static bool roundTripOneRecord(Packet *packet, const char *filename, int frame, bool hasFcs)
 {
     Ptr<const BytesChunk> originalBytes;
     Ptr<const BytesChunk> rebuiltBytes;
-    bool topLevelRaw = false;
-    long rawChunkCount = 0;
-    {
+    CoverageBuilder builder; // declared out here so lastProtocol survives an exception
+    const char *phase = "deserialize";
+    try {
         // mute serializer logging during (de)serialization (see LogSilencer)
         LogSilencer silence;
 
-        // reference bytes: the frame exactly as it enters the round-trip (raw wire
-        // bytes plus any FCS the caller appended)
+        // real captures usually omit the FCS, but the Ethernet dissector expects a
+        // 4-byte FCS trailer -- append a computed one, matching the input on both sides
+        auto protocolTag = packet->findTag<PacketProtocolTag>();
+        const Protocol *protocol = protocolTag != nullptr ? protocolTag->getProtocol() : nullptr;
+        if (!hasFcs && protocol == &Protocol::ethernetMac) {
+            const auto& data = packet->peekDataAsBytes();
+            auto fcsChunk = makeShared<EthernetFcs>();
+            fcsChunk->setFcs(ethernetFcs(data->getBytes()));
+            fcsChunk->setFcsMode(FCS_COMPUTED);
+            packet->insertAtBack(fcsChunk);
+        }
+
+        // reference bytes: the frame exactly as it enters the round-trip
         originalBytes = packet->peekDataAsBytes();
 
-        // deserialize: dissect the raw bytes into their most specific typed chunks
-        // and reassemble them into a single content chunk (uses PacketProtocolTag)
-        CoverageBuilder builder;
+        // deserialize: dissect into typed chunks and reassemble the content
         PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), builder);
         packetDissector.dissectPacket(packet);
-        topLevelRaw = builder.topLevelRaw;
-        rawChunkCount = builder.rawChunkCount;
 
         // re-serialize
+        phase = "re-serialize";
         Packet rebuilt("roundtrip");
         rebuilt.insertAtBack(builder.getContent());
         rebuiltBytes = rebuilt.peekAllAsBytes();
     }
+    catch (const std::exception& e) {
+        // during deserialize, the length parsed so far is the byte offset where the
+        // failing chunk begins; during re-serialize the whole packet was already parsed
+        std::string where = protocolContext(builder.lastProtocol);
+        if (std::string(phase) == "deserialize")
+            where += " at byte offset " + std::to_string(builder.bytesParsed.get<b>() / 8);
+        EV_WARN << "  Frame " << frame << " EXCEPTION during " << phase << where
+                << ": " << sanitize(e.what()) << "\n"
+                << "    frame bytes: " << hexDump(packet) << "\n";
+        return false;
+    }
 
     // note unparsed (raw-bytes) regions
-    if (topLevelRaw) {
+    if (builder.topLevelRaw) {
         std::stringstream ss;
         ss << "TOPLEVEL-RAWBYTES " << filename << " frame " << frame
            << ": outermost protocol not parsed";
         topLevelRawLines.push_back(ss.str());
     }
-    rawLeafRegionCount += topLevelRaw ? rawChunkCount - 1 : rawChunkCount;
+    rawLeafRegionCount += builder.topLevelRaw ? builder.rawChunkCount - 1 : builder.rawChunkCount;
 
     if (originalBytes->getChunkLength() != rebuiltBytes->getChunkLength()) {
-        EV_WARN << "  Length differs: original " << originalBytes->getChunkLength()
-           << " vs rebuilt " << rebuiltBytes->getChunkLength() << "\n";
+        EV_WARN << "  Frame " << frame << " differs: length original "
+                << originalBytes->getChunkLength() << " vs rebuilt " << rebuiltBytes->getChunkLength()
+                << protocolContext(builder.lastProtocol) << "\n"
+                << "    frame bytes: " << hexDump(packet) << "\n";
         return false;
     }
     const auto& a = originalBytes->getBytes();
     const auto& b = rebuiltBytes->getBytes();
     for (size_t i = 0; i < a.size(); i++) {
         if (a[i] != b[i]) {
-            EV_WARN << "  Bytes differ at offset " << i << "\n"
-               << "    original: " << originalBytes->str() << "\n"
-               << "    rebuilt:  " << rebuiltBytes->str() << "\n";
+            EV_WARN << "  Frame " << frame << " differs at byte offset " << i
+                    << protocolContext(builder.lastProtocol) << "\n"
+                    << "    original: " << originalBytes->str() << "\n"
+                    << "    rebuilt:  " << rebuiltBytes->str() << "\n";
             return false;
         }
     }
@@ -183,30 +233,16 @@ bool testPcapSerialization(const char *filename, bool hasFcs)
             continue;
         }
 
-        // a serializer that throws on some real frame must not abort the whole run;
-        // report the frame and carry on to the rest of the file/corpus
+        // roundTripOneRecord reports any exception/mismatch (with context) and never
+        // throws for a serializer failure; the fallback catch here guards the rest.
         try {
-            // real captures usually omit the FCS, but the Ethernet dissector expects a
-            // 4-byte FCS trailer -- append a computed one, matching the input on both sides
-            auto protocolTag = packet->findTag<PacketProtocolTag>();
-            const Protocol *protocol = protocolTag != nullptr ? protocolTag->getProtocol() : nullptr;
-            if (!hasFcs && protocol == &Protocol::ethernetMac) {
-                const auto& data = packet->peekDataAsBytes();
-                auto fcsChunk = makeShared<EthernetFcs>();
-                fcsChunk->setFcs(ethernetFcs(data->getBytes()));
-                fcsChunk->setFcsMode(FCS_COMPUTED);
-                packet->insertAtBack(fcsChunk);
-            }
-
-            if (roundTripOneRecord(packet, filename, i))
+            if (roundTripOneRecord(packet, filename, i, hasFcs))
                 EV_TRACE << "  Frame " << i << " is the same\n";
-            else {
-                EV_WARN << "  Frame " << i << " differs\n";
+            else
                 allGood = false;
-            }
         }
         catch (const std::exception& e) {
-            EV_WARN << "  Frame " << i << " EXCEPTION: " << sanitize(e.what()) << "\n";
+            EV_WARN << "  Frame " << i << " EXCEPTION (uncaught): " << sanitize(e.what()) << "\n";
             allGood = false;
         }
         delete packet;

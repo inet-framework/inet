@@ -21,7 +21,7 @@ pcaps, it also runs real captures from the Wireshark wiki (pcap/wireshark/,
 fetched by fetch_wireshark_captures.sh) whose expected result is a clean
 round-trip -- but several surface genuine serializer bugs, so the test fails
 until they are fixed. Known failures (each fix removes one):
-  - ospf.cap        : "Cannot convert between integer units" (OSPF serializer)
+  - ospf.cap        : "Cannot convert between integer units" (in the IPv4 deserializer)
   - IGMP-dataset.pcap: IGMP type 0xff not supported (round-trip of that type)
   - sctp-www.cap    : "simtime_t: Cannot represent ..." (large value into simtime)
   - mpls-basic.cap  : "Cannot find serializer for inet::RsvpMessage" (dissector without serializer)
