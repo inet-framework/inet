@@ -26,6 +26,7 @@
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/icmpv6/MldMessage_m.h"
+#include "inet/networklayer/icmpv6/Mldv2Message_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header_m.h"
 
 namespace inet {
@@ -118,6 +119,19 @@ inline bool raHasAutonomousPrefix(const PacketEvent& e)
 {
     auto pi = raPrefixOption(e);
     return pi != nullptr && pi->getAutoAddressConfFlag();
+}
+
+// The RA carries an MTU option (RFC 4861 4.6.4).
+inline bool raHasMtuOption(const PacketEvent& e)
+{
+    auto ra = chunkOfType<Ipv6RouterAdvertisement>(e);
+    if (ra == nullptr)
+        return false;
+    const Ipv6NdOptions& opts = ra->getOptions();
+    for (size_t i = 0; i < opts.getOptionArraySize(); i++)
+        if (dynamic_cast<const Ipv6NdMtu *>(opts.getOption(i)))
+            return true;
+    return false;
 }
 
 // The multicast group address of an MLD message (Query/Report/Done share MldMessage's

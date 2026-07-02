@@ -1,0 +1,58 @@
+%description:
+Mobile IPv6 home registration + route optimization. [Required -- RFC 6275]
+
+After the mobile node (MN) roams to a foreign link it registers its care-of address with its
+Home Agent (Binding Update with the Home-Registration and Ack flags set -> Binding Acknowledgement,
+status 0), then route-optimizes with the correspondent node (CN): the return-routability procedure
+(HoTI + CoTI probes -> HoT + CoT with the home/care-of cookies echoed back) followed by a direct
+Binding Update to the CN (Home-Registration flag clear). Observed on the wire at the MN's wireless
+interface -- the Mobility Header is readable through the IPv6/802.11 encapsulation. (Runs on the
+wireless Mipv6Demo network from ../lib; the roam + registration take tens of seconds.)
+
+%file: Mipv6_RegistrationAndRo.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+// Observed at the MN's wireless interface (the frames actually on the air): the Mobility
+// Header rides inside IPv6/802.11, but PacketFilter's dissector reaches its chunk fields.
+Define_ProtocolTest(ipv6_mipv6_registration_and_ro)
+{
+    auto tx = [](const char *expr, double w) {
+        return on("MN[0].wlan[0]").signal("packetSentToLower").packet(expr).within(w);
+    };
+    auto rx = [](const char *expr, double w) {
+        return on("MN[0].wlan[0]").signal("packetReceivedFromLower").packet(expr).within(w);
+    };
+
+    return ProtocolTest("ipv6_mipv6_registration_and_ro")
+        // --- Home registration with the Home Agent ---
+        .once(tx("BindingUpdate.homeRegistrationFlag == true && BindingUpdate.ackFlag == true", 72))
+        .once(rx("BindingAcknowledgement.status == 0", 6))
+        // --- Return routability: probe both paths (any order), remembering each init cookie ---
+        .unordered({
+            tx("HomeTestInit.homeInitCookie >= 0", 7).capture("hoCookie", "HomeTestInit.homeInitCookie"),
+            tx("CareOfTestInit.careOfInitCookie >= 0", 7).capture("coCookie", "CareOfTestInit.careOfInitCookie")
+        })
+        // --- The CN's replies must echo those cookies (return-routability correctness) ---
+        .unordered({
+            rx("HomeTest.homeInitCookie == {hoCookie}", 4),
+            rx("CareOfTest.careOfInitCookie == {coCookie}", 4)
+        })
+        // --- Route optimization: a non-home Binding Update directly to the CN ---
+        .once(tx("BindingUpdate.homeRegistrationFlag == false", 5));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_mipv6_registration_and_ro"
+include ../../ini/_mipv6.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_mipv6_registration_and_ro: PASS

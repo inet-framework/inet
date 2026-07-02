@@ -8,8 +8,9 @@ in [`../lib`](../lib) — a sibling of the [`../wifi`](../wifi) suite. It covers
 - **SLAAC + Duplicate Address Detection** (RFC 4862);
 - **ICMPv6** (RFC 4443): Echo, and the error messages (Destination Unreachable, Time Exceeded,
   Packet Too Big);
-- **Multicast Listener Discovery** (RFC 2710 / 3810);
-- **Forwarding, fragmentation & Path MTU Discovery** (RFC 8200 / 8201).
+- **Multicast Listener Discovery** (RFC 2710 / 3810, MLDv1 + MLDv2);
+- **Forwarding, fragmentation & Path MTU Discovery** (RFC 8200 / 8201);
+- **Mobile IPv6** (RFC 6275): home registration, return-routability, route optimization.
 
 Tests are written against the **standard**, not against INET's implementation. A test that fails
 because INET is incomplete is a **finding**, not a suite defect — the suite doubles as a
@@ -30,6 +31,7 @@ ipv6/
   icmpv6/             ICMPv6 Echo + errors (RFC 4443)
   mld/                Multicast Listener Discovery (RFC 2710 / 3810)
   forwarding/         Hop Limit decrement + fragmentation (RFC 8200)
+  mipv6/              Mobile IPv6 registration + route optimization (RFC 6275)
 ```
 
 Each test is one **`.test`** file: its program lives in a `%file: <Name>.cc`
@@ -43,7 +45,7 @@ Each test is one **`.test`** file: its program lives in a `%file: <Name>.cc`
 ./run-tests.sh nd/Nd_RouterSolicitation.test   # a subset
 ```
 
-### The two networks
+### The networks
 
 - **`Ipv6LanNetwork`** — an advertising `Router6` and two `StandardHost6` hosts joined by an
   `EthernetSwitch` into a single IPv6 link. From this one configuration the whole boot sequence
@@ -58,8 +60,13 @@ Each test is one **`.test`** file: its program lives in a `%file: <Name>.cc`
   the ICMPv6 errors (Time Exceeded, Packet Too Big, No-Route), source fragmentation, and NUD of
   the next-hop router. Modelled on INET's own `tests/module/IPv6_redirect`.
 
+- **`Mipv6Demo`** (from [`../lib`](../lib)) — a wireless network (Home Agent, Correspondent Node,
+  two routers + access points, and a roaming mobile node) for the Mobile IPv6 test. The MN roams
+  from its home to a foreign AP over tens of seconds; the config (`ini/_mipv6.ini`) mirrors the
+  `[Config Mipv6Scenario]` in `../lib/omnetpp.ini`.
+
 Per-test knobs (traffic, DAD disabled, same-MAC collision, MTU, MLD on) are layered in each
-`.test`'s `%inifile` after `include ../../ini/_base.ini` (or `_routed.ini`).
+`.test`'s `%inifile` after `include ../../ini/_base.ini` (or `_routed.ini` / `_mipv6.ini`).
 
 ### Observation model
 
@@ -85,7 +92,7 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 - **NOT-MODELED ⛔** — INET does not implement the feature (or applies it inconsistently); the
   faithful spec assertion FAILs on its deadline; `%contains` expects `FAIL` (an *expected failure*).
 
-**Today: 32 CONFORMS, 4 NOT-MODELED across 36 tests — aggregate PASS.**
+**Today: 35 CONFORMS, 4 NOT-MODELED across 39 tests — aggregate PASS.**
 
 ## Conformance matrix
 
@@ -115,6 +122,7 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 | `Nd_RaRouterLifetime` | Non-zero Router Lifetime (a default router) | R | ✅ |
 | `Nd_RaPrefixOption` | Prefix Information option (autonomous) drives SLAAC | R | ✅ |
 | `Nd_HopLimit255` | ND messages sent with IPv6 Hop Limit 255 | R | ✅ |
+| `Nd_RaMtuOption` | RA carries an MTU option (RFC 4861 4.6.4) | O | ✅ |
 | `Nd_AddressResolution` | NS → solicited NA resolves a neighbour | R | ✅ |
 | `Nd_NaSolicitedFlag` | Solicited NA sets S=1, host clears R=0 | R | ✅ |
 | `Nd_NsSolicitedNodeMulticast` | Resolution NS to the target's solicited-node mcast | R | ✅ |
@@ -144,12 +152,18 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 | `Mld_Report` | Host joining a group sends a Multicast Listener Report | R | ✅ |
 | `Mld_Query` | Router querier sends Multicast Listener Queries | R | ✅ |
 | `Mld_Done` | Last listener leaving sends a Multicast Listener Done | R | ✅ |
+| `Mldv2_Report` | MLDv2 Version 2 Report (type 143) with group records | R | ✅ |
 
 ### forwarding — Forwarding + Fragmentation (RFC 8200)
 | Test | Feature | R/O | |
 |------|---------|-----|--|
 | `Fwd_HopLimitDecrement` | Router decrements Hop Limit of forwarded packets | R | ✅ |
 | `Frag_Fragmentation` | Source fragments a datagram larger than the link MTU | R | ✅ |
+
+### mipv6 — Mobile IPv6 (RFC 6275)
+| Test | Feature | R/O | |
+|------|---------|-----|--|
+| `Mipv6_RegistrationAndRo` | Home registration (BU/BA) + return-routability + route optimization | R | ✅ |
 
 ## Findings & notes
 
@@ -178,9 +192,8 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 
 ## Out of scope (this cut)
 
-MLDv2 source-specific specifics, stateful DHCPv6, IPsec-over-IPv6 (covered elsewhere), and Mobile
-IPv6 (cookbook programs in [`../lib/ProtocolTests.cc`](../lib/ProtocolTests.cc)). The suite is
-structured so these drop in later as new `.test` files.
+MLDv2 source-specific-multicast filtering specifics, stateful DHCPv6, and IPsec-over-IPv6 (covered
+elsewhere). The suite is structured so these drop in later as new `.test` files.
 
 ## Adding a test
 
