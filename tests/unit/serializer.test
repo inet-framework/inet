@@ -38,6 +38,10 @@ using namespace inet;
 
 %activity:
 
+// keep the output quiet: per-frame progress is logged at EV_TRACE (drop the log
+// level to see it when debugging a hard crash); results are logged at EV_WARN
+cLog::logLevel = LOGLEVEL_WARN;
+
 beginSerializerCoverage();
 
 testPcapSerialization("../../pcap/rarp_request.pcap", false);

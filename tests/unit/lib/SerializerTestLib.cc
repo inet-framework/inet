@@ -141,7 +141,7 @@ static bool roundTripOneRecord(Packet *packet, const char *filename, int frame)
     rawLeafRegionCount += topLevelRaw ? rawChunkCount - 1 : rawChunkCount;
 
     if (originalBytes->getChunkLength() != rebuiltBytes->getChunkLength()) {
-        EV << "  Length differs: original " << originalBytes->getChunkLength()
+        EV_WARN << "  Length differs: original " << originalBytes->getChunkLength()
            << " vs rebuilt " << rebuiltBytes->getChunkLength() << "\n";
         return false;
     }
@@ -149,7 +149,7 @@ static bool roundTripOneRecord(Packet *packet, const char *filename, int frame)
     const auto& b = rebuiltBytes->getBytes();
     for (size_t i = 0; i < a.size(); i++) {
         if (a[i] != b[i]) {
-            EV << "  Bytes differ at offset " << i << "\n"
+            EV_WARN << "  Bytes differ at offset " << i << "\n"
                << "    original: " << originalBytes->str() << "\n"
                << "    rebuilt:  " << rebuiltBytes->str() << "\n";
             return false;
@@ -160,7 +160,7 @@ static bool roundTripOneRecord(Packet *packet, const char *filename, int frame)
 
 bool testPcapSerialization(const char *filename, bool hasFcs)
 {
-    EV << "=== Testing file " << filename << "\n";
+    EV_TRACE << "=== Testing file " << filename << "\n";
     PcapReader reader;
     // pass a null name format: naming would dissect every packet (needlessly, and it
     // would choke on Ethernet frames whose FCS we only append below for the round-trip)
@@ -173,12 +173,12 @@ bool testPcapSerialization(const char *filename, bool hasFcs)
         if (packet == nullptr)
             break;
         i++;
-        EV << "  === Frame " << i << "\n";
+        EV_TRACE << "  === Frame " << i << "\n";
 
         // skip truncated records (only the first incl_len bytes were captured)
         const auto& rawData = packet->peekData(Chunk::PF_ALLOW_ALL);
         if (rawData->isIncomplete()) {
-            EV << "  Skipped truncated frame " << i << "\n";
+            EV_WARN << "  Skipped truncated frame " << i << "\n";
             delete packet;
             continue;
         }
@@ -199,23 +199,23 @@ bool testPcapSerialization(const char *filename, bool hasFcs)
             }
 
             if (roundTripOneRecord(packet, filename, i))
-                EV << "  Frame " << i << " is the same\n";
+                EV_TRACE << "  Frame " << i << " is the same\n";
             else {
-                EV << "  Frame " << i << " differs\n";
+                EV_WARN << "  Frame " << i << " differs\n";
                 allGood = false;
             }
         }
         catch (const std::exception& e) {
-            EV << "  Frame " << i << " EXCEPTION: " << sanitize(e.what()) << "\n";
+            EV_WARN << "  Frame " << i << " EXCEPTION: " << sanitize(e.what()) << "\n";
             allGood = false;
         }
         delete packet;
     }
     reader.closePcap();
     if (allGood)
-        EV << "All frames are the same in file " << filename << "\n";
+        EV_WARN << "All frames are the same in file " << filename << "\n";
     else
-        EV << "Some frames differ in file " << filename << "\n";
+        EV_WARN << "Some frames differ in file " << filename << "\n";
     return allGood;
 }
 
@@ -238,21 +238,21 @@ void reportSerializerCoverage()
         if (usedSerializers.find(name) == usedSerializers.end())
             untested.push_back(name);
 
-    EV << "\n=== Serializer coverage (this run) ===\n";
-    EV << "Registered serializers: " << registered.size() << "\n";
-    EV << "Exercised: " << usedSerializers.size() << "\n";
+    EV_WARN << "\n=== Serializer coverage (this run) ===\n";
+    EV_WARN << "Registered serializers: " << registered.size() << "\n";
+    EV_WARN << "Exercised: " << usedSerializers.size() << "\n";
     for (const auto& name : usedSerializers) // std::set -> sorted
-        EV << "  USED " << name << "\n";
-    EV << "Untested (registered but never invoked): " << untested.size() << "\n";
+        EV_WARN << "  USED " << name << "\n";
+    EV_WARN << "Untested (registered but never invoked): " << untested.size() << "\n";
     for (const auto& name : untested)
-        EV << "  UNTESTED " << name << "\n";
+        EV_WARN << "  UNTESTED " << name << "\n";
 
-    EV << "\n=== Unparsed (raw-bytes) regions ===\n";
-    EV << "Raw-bytes leaf regions: " << rawLeafRegionCount << " (expected: opaque payloads)\n";
+    EV_WARN << "\n=== Unparsed (raw-bytes) regions ===\n";
+    EV_WARN << "Raw-bytes leaf regions: " << rawLeafRegionCount << " (expected: opaque payloads)\n";
     for (const auto& line : topLevelRawLines)
-        EV << "  " << line << "\n";
+        EV_WARN << "  " << line << "\n";
     if (topLevelRawLines.empty())
-        EV << "  (none)\n";
+        EV_WARN << "  (none)\n";
 }
 
 } // namespace inet
