@@ -1,6 +1,37 @@
 # Plan: `%# expected-result` — expected-vs-actual via the opp_repl wrapper (no opp_test change)
 
-## Status: pending
+## Status: DONE (2026-07-02)
+
+## Implementation outcome
+
+Implemented across two repos (branch `topic/expected-result` in each), verified end-to-end.
+
+- **opp_repl** (`af35bd5`): `OppTestTask.get_expected_result()` parses a
+  `%# expected-result: PASS|FAIL|ERROR` comment and threads it into every `TestTaskResult`
+  (reusable for any suite run via `opp_run_opp_tests`); plus the display fix in
+  `common/task.py` so an *unexpected PASS* is annotated `(unexpected)` (was silently green).
+  Exit already keys off `is_all_results_expected()`. Unit-verified.
+- **inet-protocoltest** (`b873296bec`, `895b737aa3`, `39706cc081`, `9cb9d46b9b`): the 35
+  NOT-MODELED tests now assert the honest `PROTOCOLTEST <name>: PASS` line and declare
+  `%# expected-result: FAIL`; README + AUTHORING document the model.
+
+**Invocation decision (resolved with the user):** running our nested, two-library,
+single-binary suite through `opp_run_opp_tests` would require generalizing `OppTestTask` to
+link multiple libraries (a shared opp_repl build-path change, regression-risk to INET's own
+suites) **and** a `.opp` descriptor, **and** would force 74 slow per-test builds. Chose the
+plan's documented **thin-delegator** fallback instead: `run-tests.sh` keeps its fast
+single-binary build and pipes `opp_test`'s per-test output to `report_expected_results.py`,
+which reuses opp_repl's `TestTaskResult` model to pair each result with its declaration.
+
+**Verified:** full suite = 39 `PASS` + 35 `FAIL (expected)` → "All results as expected", exit 0.
+A synthetic closed-gap → `PASS (unexpected)` and a regression → `FAIL (unexpected)`, exit 1.
+`opp_test gen` still accepts the `%#` comment (no "invalid entry").
+
+**Follow-up for the user:** the opp_repl changes live on `topic/expected-result`; merge/install
+opp_repl so `run-tests.sh` finds the fixed model without `OPP_REPL_PATH=<checkout>`.
+
+The decision points below were resolved: (1) fix the shared display — done; (2) `%# expected-result`
+syntax — done; (3) invocation — thin delegator (above).
 
 ## Problem
 
