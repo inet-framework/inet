@@ -16,6 +16,19 @@ are printed for humans to drive corpus expansion; only a small baseline of core
 serializers is gated below (so a silent coverage loss is caught), together with
 the requirement that no whole packet fall back to raw bytes (TOPLEVEL-RAWBYTES).
 
+NOTE: this test currently FAILS on purpose. Beyond the always-green baseline
+pcaps, it also runs real captures from the Wireshark wiki (pcap/wireshark/,
+fetched by fetch_wireshark_captures.sh) whose expected result is a clean
+round-trip -- but several surface genuine serializer bugs, so the test fails
+until they are fixed. Known failures (each fix removes one):
+  - ospf.cap        : "Cannot convert between integer units" (OSPF serializer)
+  - IGMP-dataset.pcap: IGMP type 0xff not supported (round-trip of that type)
+  - sctp-www.cap    : "simtime_t: Cannot represent ..." (large value into simtime)
+  - mpls-basic.cap  : "Cannot find serializer for inet::RsvpMessage" (dissector without serializer)
+  - ptpv2.pcap      : gPTP GptpSync/GptpMessageType unimplemented
+The pim-reg.cap, v6-http.cap, vlan.cap and PPP-config.cap captures round-trip
+cleanly today.
+
 %includes:
 #include "SerializerTestLib.h"
 
@@ -32,6 +45,17 @@ testPcapSerialization("../../pcap/rarp_req_reply.pcap", false);
 testPcapSerialization("../../pcap/Ethernet_Pause_Frame.pcap", false);
 testPcapSerialization("../../pcap/eth_fcs_good.pcap", true);
 testPcapSerialization("../../pcap/v6.pcap", false);
+
+// captures downloaded from the Wireshark wiki (see fetch_wireshark_captures.sh)
+testPcapSerialization("../../pcap/wireshark/ospf.cap", false);
+testPcapSerialization("../../pcap/wireshark/IGMP-dataset.pcap", false);
+testPcapSerialization("../../pcap/wireshark/pim-reg.cap", false);
+testPcapSerialization("../../pcap/wireshark/sctp-www.cap", false);
+testPcapSerialization("../../pcap/wireshark/v6-http.cap", false);
+testPcapSerialization("../../pcap/wireshark/vlan.cap", false);
+testPcapSerialization("../../pcap/wireshark/mpls-basic.cap", false);
+testPcapSerialization("../../pcap/wireshark/PPP-config.cap", false);
+testPcapSerialization("../../pcap/wireshark/ptpv2.pcap", false);
 
 reportSerializerCoverage();
 
@@ -50,8 +74,38 @@ All frames are the same in file ../../pcap/eth_fcs_good.pcap
 %contains: stdout
 All frames are the same in file ../../pcap/v6.pcap
 
+%contains: stdout
+All frames are the same in file ../../pcap/wireshark/ospf.cap
+
+%contains: stdout
+All frames are the same in file ../../pcap/wireshark/IGMP-dataset.pcap
+
+%contains: stdout
+All frames are the same in file ../../pcap/wireshark/pim-reg.cap
+
+%contains: stdout
+All frames are the same in file ../../pcap/wireshark/sctp-www.cap
+
+%contains: stdout
+All frames are the same in file ../../pcap/wireshark/v6-http.cap
+
+%contains: stdout
+All frames are the same in file ../../pcap/wireshark/vlan.cap
+
+%contains: stdout
+All frames are the same in file ../../pcap/wireshark/mpls-basic.cap
+
+%contains: stdout
+All frames are the same in file ../../pcap/wireshark/PPP-config.cap
+
+%contains: stdout
+All frames are the same in file ../../pcap/wireshark/ptpv2.pcap
+
 %not-contains: stdout
 differ
+
+%not-contains: stdout
+EXCEPTION
 
 %contains: stdout
 USED inet::EthernetMacHeader
