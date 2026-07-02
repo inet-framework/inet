@@ -10,7 +10,10 @@
 #include <vsgXchange/all.h>
 
 #include <cmath>
+#include <cstring>
+#include <fstream>
 #include <map>
+#include <sstream>
 
 namespace inet {
 
@@ -639,6 +642,216 @@ ref_ptr<Node> createWireframeSphere(const Coord& center, double radius, const cF
     for (size_t i = 0; i < pts.size(); i++)
         vertices->set(i, pts[i]);
     return createGeometry(vertices, {}, VK_PRIMITIVE_TOPOLOGY_LINE_LIST, color, 1.0, /*lit*/ false, width);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Point-cloud terrain from a PLY file (e.g. a LIDAR scan used as the scene ground). We parse the PLY
+// ourselves (ascii or binary_little_endian) rather than lean on a mesh importer: LIDAR clouds have no
+// faces and often no colours, and we need to recentre huge projected coordinates, fit to the scene box,
+// and colour by elevation. Rendered as a coloured POINT_LIST with a tiny cached pipeline.
+// ---------------------------------------------------------------------------------------------
+
+static const char *pointCloudVertexShader = R"(#version 450
+layout(push_constant) uniform PushConstants { mat4 projection; mat4 modelView; } pc;
+layout(location = 0) in vec3 vsg_Vertex;
+layout(location = 1) in vec4 vsg_Color;
+layout(location = 0) out vec4 vColor;
+void main() {
+    vColor = vsg_Color;
+    gl_Position = (pc.projection * pc.modelView) * vec4(vsg_Vertex, 1.0);
+    gl_PointSize = 3.0;   // fat enough to read as a surface (clamps to 1 without the largePoints feature)
+}
+)";
+
+static const char *pointCloudFragmentShader = R"(#version 450
+layout(location = 0) in vec4 vColor;
+layout(location = 0) out vec4 fragColor;
+void main() { fragColor = vColor; }
+)";
+
+// Cached opaque point-cloud pipeline (per-vertex position + colour, POINT_LIST, depth test + write).
+static ref_ptr<GraphicsPipeline> getPointCloudPipeline()
+{
+    static ref_ptr<GraphicsPipeline>& pipeline = *(new ref_ptr<GraphicsPipeline>());
+    if (pipeline) return pipeline;
+
+    auto vertexShader = ShaderStage::create(VK_SHADER_STAGE_VERTEX_BIT, "main", pointCloudVertexShader);
+    auto fragmentShader = ShaderStage::create(VK_SHADER_STAGE_FRAGMENT_BIT, "main", pointCloudFragmentShader);
+    ShaderStages shaderStages{vertexShader, fragmentShader};
+    auto shaderCompiler = ShaderCompiler::create();
+    if (!shaderCompiler->supported() || !shaderCompiler->compile(shaderStages))
+        throw cRuntimeError("sceneModel point-cloud rendering needs a VSG built with the GLSL compiler (glslang)");
+
+    auto pipelineLayout = PipelineLayout::create(DescriptorSetLayouts{},
+        PushConstantRanges{{VK_SHADER_STAGE_VERTEX_BIT, 0, 128}});
+    VertexInputState::Bindings vertexBindings{
+        {0, sizeof(::vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX},
+        {1, sizeof(::vsg::vec4), VK_VERTEX_INPUT_RATE_VERTEX}};
+    VertexInputState::Attributes vertexAttributes{
+        {0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0},
+        {1, 1, VK_FORMAT_R32G32B32A32_SFLOAT, 0}};
+    auto inputAssembly = InputAssemblyState::create();
+    inputAssembly->topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+    auto rasterization = RasterizationState::create();
+    rasterization->cullMode = VK_CULL_MODE_NONE;
+    auto depthStencil = DepthStencilState::create();   // defaults: depth test + write on (opaque)
+    auto colorBlend = ColorBlendState::create();
+    VkPipelineColorBlendAttachmentState att{};
+    att.blendEnable = VK_FALSE;                          // opaque terrain
+    att.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlend->attachments = ColorBlendState::ColorBlendAttachments{att};
+
+    GraphicsPipelineStates pipelineStates{
+        VertexInputState::create(vertexBindings, vertexAttributes),
+        inputAssembly, rasterization, MultisampleState::create(), depthStencil, colorBlend};
+    pipeline = GraphicsPipeline::create(pipelineLayout, shaderStages, pipelineStates);
+    return pipeline;
+}
+
+static int plyTypeSize(const std::string& t) {
+    if (t == "double" || t == "float64") return 8;
+    if (t == "float" || t == "float32" || t == "int" || t == "int32" || t == "uint" || t == "uint32") return 4;
+    if (t == "short" || t == "int16" || t == "ushort" || t == "uint16") return 2;
+    if (t == "char" || t == "int8" || t == "uchar" || t == "uint8") return 1;
+    return 0;
+}
+static double plyRead(const char* p, const std::string& t) {
+    if (t == "double" || t == "float64") { double v; std::memcpy(&v, p, 8); return v; }
+    if (t == "float" || t == "float32")  { float v; std::memcpy(&v, p, 4); return (double)v; }
+    if (t == "int" || t == "int32")      { int32_t v; std::memcpy(&v, p, 4); return (double)v; }
+    if (t == "uint" || t == "uint32")    { uint32_t v; std::memcpy(&v, p, 4); return (double)v; }
+    if (t == "short" || t == "int16")    { int16_t v; std::memcpy(&v, p, 2); return (double)v; }
+    if (t == "ushort" || t == "uint16")  { uint16_t v; std::memcpy(&v, p, 2); return (double)v; }
+    if (t == "char" || t == "int8")      { int8_t v; std::memcpy(&v, p, 1); return (double)v; }
+    if (t == "uchar" || t == "uint8")    { uint8_t v; std::memcpy(&v, p, 1); return (double)v; }
+    return 0.0;
+}
+// Terrain elevation ramp for a normalised height t in [0,1]: teal (low) -> green -> tan -> brown -> white.
+static ::vsg::vec4 elevationColor(double t) {
+    t = std::max(0.0, std::min(1.0, t));
+    static const double stops[5] = {0.0, 0.30, 0.60, 0.85, 1.0};
+    static const float rgb[5][3] = {
+        {0.16f, 0.36f, 0.36f}, {0.24f, 0.55f, 0.28f}, {0.72f, 0.68f, 0.40f}, {0.55f, 0.42f, 0.32f}, {0.95f, 0.95f, 0.97f}};
+    int i = 0; while (i < 4 && t > stops[i + 1]) i++;
+    double f = (stops[i + 1] > stops[i]) ? (t - stops[i]) / (stops[i + 1] - stops[i]) : 0.0;
+    return ::vsg::vec4((float)(rgb[i][0] + (rgb[i + 1][0] - rgb[i][0]) * f),
+                       (float)(rgb[i][1] + (rgb[i + 1][1] - rgb[i][1]) * f),
+                       (float)(rgb[i][2] + (rgb[i + 1][2] - rgb[i][2]) * f), 1.0f);
+}
+
+ref_ptr<Node> createTerrainFromPLY(const std::string& path, const Coord& sceneMin, const Coord& sceneMax)
+{
+    std::ifstream in(path, std::ios::binary);
+    if (!in)
+        throw cRuntimeError("sceneModel: cannot open PLY file '%s' (resolved relative to the working directory)", path.c_str());
+
+    // --- header ---
+    std::string line;
+    std::getline(in, line);
+    if (line.rfind("ply", 0) != 0) return Group::create();
+    std::string format;
+    int vertexCount = 0;
+    std::vector<std::pair<std::string, std::string>> props; // (type, name) of the vertex element, in order
+    std::string curElement;
+    while (std::getline(in, line)) {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        std::istringstream ss(line);
+        std::string tok; ss >> tok;
+        if (tok == "format") ss >> format;
+        else if (tok == "element") { ss >> curElement; if (curElement == "vertex") ss >> vertexCount; }
+        else if (tok == "property" && curElement == "vertex") {
+            std::string type; ss >> type;
+            if (type == "list") continue; // e.g. face vertex-index lists — not a vertex scalar
+            std::string name; ss >> name;
+            props.emplace_back(type, name);
+        }
+        else if (tok == "end_header") break;
+    }
+    bool ascii = (format.rfind("ascii", 0) == 0);
+    bool binaryLE = (format.rfind("binary_little_endian", 0) == 0);
+    if (vertexCount <= 0 || props.empty() || (!ascii && !binaryLE))
+        return Group::create();
+
+    // locate x/y/z (+ optional r/g/b) by property name; compute byte offsets and column indices
+    int stride = 0, offX = -1, offY = -1, offZ = -1, offR = -1, offG = -1, offB = -1;
+    int idxX = -1, idxY = -1, idxZ = -1, idxR = -1, idxG = -1, idxB = -1;
+    std::string tX, tY, tZ, tR;
+    for (size_t i = 0; i < props.size(); i++) {
+        const std::string& ty = props[i].first;
+        const std::string& n = props[i].second;
+        if (n == "x") { offX = stride; tX = ty; idxX = (int)i; }
+        else if (n == "y") { offY = stride; tY = ty; idxY = (int)i; }
+        else if (n == "z") { offZ = stride; tZ = ty; idxZ = (int)i; }
+        else if (n == "red" || n == "r") { offR = stride; tR = ty; idxR = (int)i; }
+        else if (n == "green" || n == "g") { offG = stride; idxG = (int)i; }
+        else if (n == "blue" || n == "b") { offB = stride; idxB = (int)i; }
+        stride += plyTypeSize(ty);
+    }
+    if (offX < 0 || offY < 0 || offZ < 0) return Group::create();
+    bool hasRGB = (offR >= 0 && offG >= 0 && offB >= 0);
+    double rgbScale = (tR == "uchar" || tR == "uint8") ? 1.0 / 255.0 : 1.0;
+
+    // --- read the vertices ---
+    std::vector<double> xs(vertexCount), ys(vertexCount), zs(vertexCount);
+    std::vector<::vsg::vec4> rgbs(hasRGB ? vertexCount : 0);
+    if (binaryLE) {
+        std::vector<char> buf(stride);
+        for (int i = 0; i < vertexCount; i++) {
+            in.read(buf.data(), stride);
+            if (!in) return Group::create();
+            xs[i] = plyRead(buf.data() + offX, tX); ys[i] = plyRead(buf.data() + offY, tY); zs[i] = plyRead(buf.data() + offZ, tZ);
+            if (hasRGB)
+                rgbs[i] = ::vsg::vec4((float)(plyRead(buf.data() + offR, tR) * rgbScale),
+                                      (float)(plyRead(buf.data() + offG, tR) * rgbScale),
+                                      (float)(plyRead(buf.data() + offB, tR) * rgbScale), 1.0f);
+        }
+    }
+    else { // ascii
+        for (int i = 0; i < vertexCount; i++) {
+            if (!std::getline(in, line)) return Group::create();
+            std::istringstream ss(line);
+            std::vector<double> v; double d; while (ss >> d) v.push_back(d);
+            if ((int)v.size() < (int)props.size()) return Group::create();
+            xs[i] = v[idxX]; ys[i] = v[idxY]; zs[i] = v[idxZ];
+            if (hasRGB) rgbs[i] = ::vsg::vec4((float)(v[idxR] * rgbScale), (float)(v[idxG] * rgbScale), (float)(v[idxB] * rgbScale), 1.0f);
+        }
+    }
+
+    // --- recentre, fit into the scene box (aspect-preserving), colour by elevation if no RGB ---
+    double minX = xs[0], maxX = xs[0], minY = ys[0], maxY = ys[0], minZ = zs[0], maxZ = zs[0];
+    for (int i = 1; i < vertexCount; i++) {
+        minX = std::min(minX, xs[i]); maxX = std::max(maxX, xs[i]);
+        minY = std::min(minY, ys[i]); maxY = std::max(maxY, ys[i]);
+        minZ = std::min(minZ, zs[i]); maxZ = std::max(maxZ, zs[i]);
+    }
+    double cx = (minX + maxX) / 2, cy = (minY + maxY) / 2, dz = (maxZ - minZ);
+    double plyW = maxX - minX, plyH = maxY - minY;
+    double sceneW = sceneMax.x - sceneMin.x, sceneH = sceneMax.y - sceneMin.y;
+    double scale = 1.0;
+    if (plyW > 0 && plyH > 0 && std::isfinite(sceneW) && std::isfinite(sceneH) && sceneW > 0 && sceneH > 0)
+        scale = std::min(sceneW / plyW, sceneH / plyH);
+    double centerX = (std::isfinite(sceneMin.x) && std::isfinite(sceneMax.x)) ? (sceneMin.x + sceneMax.x) / 2 : 0.0;
+    double centerY = (std::isfinite(sceneMin.y) && std::isfinite(sceneMax.y)) ? (sceneMin.y + sceneMax.y) / 2 : 0.0;
+    double baseZ = std::isfinite(sceneMin.z) ? sceneMin.z : 0.0;
+
+    auto vertices = vec3Array::create(vertexCount);
+    auto colors = vec4Array::create(vertexCount);
+    for (int i = 0; i < vertexCount; i++) {
+        vertices->set(i, ::vsg::vec3((float)((xs[i] - cx) * scale + centerX),
+                                     (float)((ys[i] - cy) * scale + centerY),
+                                     (float)((zs[i] - minZ) * scale + baseZ)));
+        colors->set(i, hasRGB ? rgbs[i] : elevationColor(dz > 0 ? (zs[i] - minZ) / dz : 0.0));
+    }
+
+    // --- build the node (fit baked into the vertices, so no transform needed) ---
+    auto stateGroup = StateGroup::create();
+    stateGroup->add(BindGraphicsPipeline::create(getPointCloudPipeline()));
+    auto commands = Commands::create();
+    DataList arrays{vertices, colors};
+    commands->addChild(BindVertexBuffers::create(0, arrays));
+    commands->addChild(Draw::create(vertices->size(), 1, 0, 0));
+    stateGroup->addChild(commands);
+    return stateGroup;
 }
 
 // ---------------------------------------------------------------------------------------------

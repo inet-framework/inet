@@ -69,12 +69,21 @@ void SceneVsgVisualizerBase::initializeAxis(double axisLength)
 void SceneVsgVisualizerBase::initializeSceneFloor()
 {
     Box sceneBounds = getSceneBounds();
-    if (sceneBounds.getMin() != sceneBounds.getMax()) {
+    if (sceneBounds.getMin() == sceneBounds.getMax())
+        return;
+    auto scene = inet::vsg::TopLevelScene::getSimulationScene(visualizationTargetModule);
+    const char *sceneModel = par("sceneModel");
+    if (sceneModel != nullptr && *sceneModel != '\0') {
+        // Load an external terrain model (a PLY point cloud, e.g. a LIDAR scan) as the ground, in place
+        // of the flat quad. The path is resolved relative to the working directory (the example dir).
+        auto terrain = inet::vsg::createTerrainFromPLY(sceneModel, sceneBounds.getMin(), sceneBounds.getMax());
+        scene->addChild(terrain);
+    }
+    else {
         auto color = cFigure::Color(par("sceneColor"));
         double opacity = par("sceneOpacity");
         // TODO: textured floor (sceneImage) and exponential edge shading (sceneShading) not yet ported.
         auto sceneFloor = createSceneFloor(sceneBounds.getMin(), sceneBounds.getMax(), color, opacity);
-        auto scene = inet::vsg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         scene->addChild(sceneFloor);
     }
 }

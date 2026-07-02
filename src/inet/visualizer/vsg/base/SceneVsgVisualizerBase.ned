@@ -31,6 +31,7 @@ simple SceneVsgVisualizerBase extends SceneVisualizerBase
         string sceneImage = default(""); // Scene texture (repeated), no image by default
         double sceneImageSize @unit(m) = default(1m); // Scene texture size
         bool sceneShading = default(true); // Exponential shading for scene color, enabled by default
+        string sceneModel = default(""); // Path to an external terrain model (a PLY point cloud, e.g. a LIDAR scan) to use as the ground instead of the flat quad; recentred and aspect-fit into the scene bounds. Resolved relative to the working directory. Empty = flat floor.
 
         @class(SceneVsgVisualizerBase);
 }

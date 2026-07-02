@@ -327,6 +327,45 @@ in-scene distances).
   billboard path as any other node icon; there is nothing sphere/drone-specific
   in the node-rendering code, only in how the examples position/label nodes.
 
+## Scene terrain from a point cloud (`sceneModel`)
+
+By default the scene ground is a flat colored quad (`SceneVsgVisualizerBase::createSceneFloor` →
+`createQuad`, color `sceneColor`, at `z ≈ 0`). Setting the scene parameter **`sceneModel`** to a PLY
+file path replaces that quad with a real 3D terrain loaded from the file — e.g. a LIDAR scan — so
+nodes fly over actual landscape instead of a flat plane:
+
+```ini
+*.visualizer.sceneVisualizer.sceneModel = "terrain.ply"
+```
+
+The path is resolved **relative to the working directory** (the example folder when you run
+`inet -u Qtenv omnetpp.ini` there); an absolute path also works. If the file can't be opened the
+simulation stops with a clear `cRuntimeError` instead of silently drawing nothing.
+
+**How it works** (`inet::vsg::createTerrainFromPLY`, `util/VsgUtils.cc`) — the PLY is parsed directly
+(no mesh importer), which keeps it general and lets us handle raw LIDAR:
+
+- **Any PLY point cloud** — ascii or `binary_little_endian`, any property layout. It reads the
+  `element vertex` block, locates `x`/`y`/`z` by name (and `red`/`green`/`blue` if present), and skips
+  the other properties by their declared byte sizes. Faces are ignored — it renders points, not a mesh.
+- **Coordinate fit** — LIDAR tiles use huge projected coordinates (e.g. UTM easting/northing in the
+  millions). The cloud is **recentered** to its own centroid and **aspect-preserving-scaled to fit the
+  configured scene bounds** (`sceneMinX..sceneMaxZ`), base sitting at `sceneMinZ`. So any PLY, at any
+  real-world scale, drops into the scene box — set the scene bounds to roughly the tile's footprint
+  aspect for a natural ~1:1 look.
+- **Color** — the file's `red/green/blue` if present, otherwise points are colored by **elevation**
+  (a teal → green → tan → brown → white height ramp), which reads as a heightmap.
+- **Rendering** — a colored `POINT_LIST` through a small cached custom pipeline
+  (`getPointCloudPipeline`) that sets `gl_PointSize` so the points read as a surface rather than 1px
+  specks (point size clamps to 1 on GPUs without the `largePoints` feature). Loaded once at scene init.
+
+This is separate from per-*node* 3D models (still a TODO — nodes are icon billboards); `sceneModel` is
+specifically the scene ground/terrain, and works with **any** `.ply` point cloud, not a specific file.
+
+**Example — `vsglidar`** (see below): a 5-drone swarm flying over a subsampled USGS Hurricane-Sandy
+LIDAR tile of New York (`terrain.ply`, buildings included). To reuse it, drop any other `.ply` point
+cloud into an example folder and point `sceneModel` at it.
+
 ## Examples (`examples/visualizer/`)
 
 | Example | Demonstrates |
@@ -338,6 +377,7 @@ in-scene distances).
 | `vsgsignalwave` | Showcases the GLSL **shader** ring wavefront (`signalWaveShader = true`) with the proven `signalPropagationAnimationSpeed`/`signalTransmissionAnimationSpeed` pair from `radiomediumactivity`; a hub + 4 spokes all transmit so several color-coded, continuously-rippling discs overlap and pulse at once. |
 | `vsgsignalwave3d` | The volumetric 3D counterpart: `signalShape = "sphere"` + `signalWaveShader = true` + `rangeSphere = true`; a ground control station plus a 4-drone swarm flying through a 3D box, each transmission an expanding, rippling glowing sphere in the air. |
 | `vsgwireless` | A comprehensive "everything at once" checkpoint: signals, data links, network routes, interface tables, statistics, and mobility trails, all through `IntegratedVsgVisualizer`, on a simple 3-host ad-hoc network (settings proven by the `radiomediumactivity` showcase). |
+| `vsglidar` | A **LIDAR point-cloud terrain** as the scene ground (`sceneVisualizer.sceneModel = "terrain.ply"`, a subsampled USGS Sandy scan of New York, elevation-colored): a 5-drone swarm flies over the landscape exchanging UDP, each transmission a volumetric shader sphere; range indicators off to keep the view clean. Shows the general `sceneModel` mechanism (works with any `.ply`). |
 
 All examples import `inet.visualizer.vsg.integrated.IntegratedVsgVisualizer`
 (except `vsgsmoketest`, which wires up individual VSG visualizer modules to
@@ -410,6 +450,14 @@ switching to the 3D view, and pressing Run.
   by generating real dash-segment geometry in world-space units
   (`dashifyVertices` in `VsgUtils.cc`), rather than a true screen-space
   stipple.
+- **`sceneModel` terrain is points-only** — a PLY loaded via `sceneModel`
+  renders as a `POINT_LIST` (`createTerrainFromPLY`), not a meshed/triangulated
+  surface; point size relies on `gl_PointSize`, which clamps to 1px on GPUs
+  without the `largePoints` feature (a fallback to world-space point quads would
+  be more robust for sparse clouds). Only PLY is parsed — ascii /
+  `binary_little_endian`, `x`/`y`/`z` + optional `red`/`green`/`blue`; other
+  formats and `binary_big_endian` aren't handled, and the whole cloud is read
+  into memory once at scene init.
 - Assorted per-visualizer approximations, each flagged with an inline `TODO`
   in its `.cc`: `EnergyStorageVsgVisualizer` (unimplemented, same as the OSG
   original), `GateScheduleVsgVisualizer` (no gantt-style timeline bar yet),
@@ -436,10 +484,14 @@ switching to the 3D view, and pressing Run.
   driven by animation time, plus the fade-cap/animation-speed tuning
   (`signalFadingDistance`-bounded disc size decoupled from transmit power)
   proven out by the `vsgsignal`/`vsgsignalwave` example showcases.
-- **Follow-up (in progress on `fix/vsg-signal-sphere-shader`)** — extended the
-  shader wavefront to true 3D: `createSphereWaveShader` (a volumetric,
-  concentric-shell rippling sphere) as the `signalShape = "sphere"`
+- **PR #1114** (`fix/vsg-signal-sphere-shader`, merged as `07bcfdb61c`) —
+  extended the shader wavefront to true 3D: `createSphereWaveShader` (a
+  volumetric, concentric-shell rippling sphere) as the `signalShape = "sphere"`
   counterpart to the ring shader, plus `createWireframeSphere` and the
   `rangeSphere` parameter for physically-meaningful 3D range indicators, and
-  the `vsgsignal3d`/`vsgsignalwave3d` drone-swarm showcases that exercise
-  them.
+  the `vsgsignal3d`/`vsgsignalwave3d` drone-swarm showcases that exercise them.
+  Also added this README and addressed the #1113 review feedback.
+- **Follow-up** — `sceneModel`: load an external PLY point cloud (e.g. a LIDAR
+  scan) as the scene ground (`createTerrainFromPLY`), recentered, auto-fit to
+  the scene bounds, and elevation-colored; the `vsglidar` drone-swarm-over-terrain
+  showcase demonstrates it.
