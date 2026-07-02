@@ -748,7 +748,9 @@ ref_ptr<Node> createTerrainFromPLY(const std::string& path, const Coord& sceneMi
     // --- header ---
     std::string line;
     std::getline(in, line);
-    if (line.rfind("ply", 0) != 0) return Group::create();
+    if (!line.empty() && line.back() == '\r') line.pop_back();
+    if (line.rfind("ply", 0) != 0)
+        throw cRuntimeError("sceneModel: '%s' is not a PLY file (missing 'ply' magic)", path.c_str());
     std::string format;
     int vertexCount = 0;
     std::vector<std::pair<std::string, std::string>> props; // (type, name) of the vertex element, in order
@@ -769,13 +771,15 @@ ref_ptr<Node> createTerrainFromPLY(const std::string& path, const Coord& sceneMi
     }
     bool ascii = (format.rfind("ascii", 0) == 0);
     bool binaryLE = (format.rfind("binary_little_endian", 0) == 0);
-    if (vertexCount <= 0 || props.empty() || (!ascii && !binaryLE))
-        return Group::create();
+    if (!ascii && !binaryLE)
+        throw cRuntimeError("sceneModel: '%s' has unsupported PLY format '%s' (only ascii and binary_little_endian are supported)", path.c_str(), format.c_str());
+    if (vertexCount <= 0 || props.empty())
+        throw cRuntimeError("sceneModel: '%s' has no readable vertex element", path.c_str());
 
     // locate x/y/z (+ optional r/g/b) by property name; compute byte offsets and column indices
     int stride = 0, offX = -1, offY = -1, offZ = -1, offR = -1, offG = -1, offB = -1;
     int idxX = -1, idxY = -1, idxZ = -1, idxR = -1, idxG = -1, idxB = -1;
-    std::string tX, tY, tZ, tR;
+    std::string tX, tY, tZ, tR, tG, tB;
     for (size_t i = 0; i < props.size(); i++) {
         const std::string& ty = props[i].first;
         const std::string& n = props[i].second;
@@ -783,13 +787,16 @@ ref_ptr<Node> createTerrainFromPLY(const std::string& path, const Coord& sceneMi
         else if (n == "y") { offY = stride; tY = ty; idxY = (int)i; }
         else if (n == "z") { offZ = stride; tZ = ty; idxZ = (int)i; }
         else if (n == "red" || n == "r") { offR = stride; tR = ty; idxR = (int)i; }
-        else if (n == "green" || n == "g") { offG = stride; idxG = (int)i; }
-        else if (n == "blue" || n == "b") { offB = stride; idxB = (int)i; }
+        else if (n == "green" || n == "g") { offG = stride; tG = ty; idxG = (int)i; }
+        else if (n == "blue" || n == "b") { offB = stride; tB = ty; idxB = (int)i; }
         stride += plyTypeSize(ty);
     }
-    if (offX < 0 || offY < 0 || offZ < 0) return Group::create();
+    if (offX < 0 || offY < 0 || offZ < 0)
+        throw cRuntimeError("sceneModel: '%s' has no x/y/z vertex properties", path.c_str());
     bool hasRGB = (offR >= 0 && offG >= 0 && offB >= 0);
-    double rgbScale = (tR == "uchar" || tR == "uint8") ? 1.0 / 255.0 : 1.0;
+    // 8-bit channels are 0..255, float channels 0..1 — normalise each channel by ITS OWN type.
+    auto colScale = [](const std::string& t) { return (t == "uchar" || t == "uint8") ? 1.0 / 255.0 : 1.0; };
+    double scaleR = colScale(tR), scaleG = colScale(tG), scaleB = colScale(tB);
 
     // --- read the vertices ---
     std::vector<double> xs(vertexCount), ys(vertexCount), zs(vertexCount);
@@ -798,22 +805,25 @@ ref_ptr<Node> createTerrainFromPLY(const std::string& path, const Coord& sceneMi
         std::vector<char> buf(stride);
         for (int i = 0; i < vertexCount; i++) {
             in.read(buf.data(), stride);
-            if (!in) return Group::create();
+            if (!in)
+                throw cRuntimeError("sceneModel: '%s' is truncated (expected %d vertices)", path.c_str(), vertexCount);
             xs[i] = plyRead(buf.data() + offX, tX); ys[i] = plyRead(buf.data() + offY, tY); zs[i] = plyRead(buf.data() + offZ, tZ);
             if (hasRGB)
-                rgbs[i] = ::vsg::vec4((float)(plyRead(buf.data() + offR, tR) * rgbScale),
-                                      (float)(plyRead(buf.data() + offG, tR) * rgbScale),
-                                      (float)(plyRead(buf.data() + offB, tR) * rgbScale), 1.0f);
+                rgbs[i] = ::vsg::vec4((float)(plyRead(buf.data() + offR, tR) * scaleR),
+                                      (float)(plyRead(buf.data() + offG, tG) * scaleG),
+                                      (float)(plyRead(buf.data() + offB, tB) * scaleB), 1.0f);
         }
     }
     else { // ascii
         for (int i = 0; i < vertexCount; i++) {
-            if (!std::getline(in, line)) return Group::create();
+            if (!std::getline(in, line))
+                throw cRuntimeError("sceneModel: '%s' is truncated (expected %d vertices)", path.c_str(), vertexCount);
             std::istringstream ss(line);
             std::vector<double> v; double d; while (ss >> d) v.push_back(d);
-            if ((int)v.size() < (int)props.size()) return Group::create();
+            if ((int)v.size() < (int)props.size())
+                throw cRuntimeError("sceneModel: '%s' has a short vertex line (%d values, expected %d)", path.c_str(), (int)v.size(), (int)props.size());
             xs[i] = v[idxX]; ys[i] = v[idxY]; zs[i] = v[idxZ];
-            if (hasRGB) rgbs[i] = ::vsg::vec4((float)(v[idxR] * rgbScale), (float)(v[idxG] * rgbScale), (float)(v[idxB] * rgbScale), 1.0f);
+            if (hasRGB) rgbs[i] = ::vsg::vec4((float)(v[idxR] * scaleR), (float)(v[idxG] * scaleG), (float)(v[idxB] * scaleB), 1.0f);
         }
     }
 
