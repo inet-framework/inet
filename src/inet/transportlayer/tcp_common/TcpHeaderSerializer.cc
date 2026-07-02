@@ -186,7 +186,10 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     tcpHeader->setUrgentPointer(ntohs(tcp.th_urp));
 
     if (headerLength > TCP_MIN_HEADER_LENGTH) {
-        while (stream.getPosition() - position < headerLength) {
+        // guard against a declared header length that exceeds the available bytes
+        // (truncated/snaplen'd or corrupt input): once the stream is exhausted its
+        // position stops advancing, so without this the loop would spin forever
+        while (stream.getPosition() - position < headerLength && !stream.isReadBeyondEnd()) {
             TcpOption *option = deserializeOption(stream);
             tcpHeader->appendHeaderOption(option);
         }
