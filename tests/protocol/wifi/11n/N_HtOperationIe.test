@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11n HT Operation information element in Beacon (type 8): an Ieee80211HtOperation
 chunk is present in the Beacon frame. [NOT-MODELED -- INET's Ieee80211BeaconFrame
@@ -32,4 +33,4 @@ include ../../ini/_n.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11n_ht_operation_ie: FAIL
+PROTOCOLTEST wifi_11n_ht_operation_ie: PASS

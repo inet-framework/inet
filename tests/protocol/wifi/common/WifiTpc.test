@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11h TPC (Transmit Power Control): a TPC Report action frame (type 13) or a Power
 Constraint IE in a Beacon indicates power-level management. [NOT-MODELED -- INET's DFS/
@@ -32,4 +33,4 @@ include ../../ini/_a.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_tpc: FAIL
+PROTOCOLTEST wifi_tpc: PASS

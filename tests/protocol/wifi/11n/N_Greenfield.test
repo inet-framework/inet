@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11n HT Greenfield preamble: a frame is transmitted with the greenfield preamble
 format (HT_PREAMBLE_GREENFIELD). [NOT-MODELED -- the HT_PREAMBLE_GREENFIELD enum value
@@ -46,4 +47,4 @@ include ../../ini/_base.ini
 **.wlan[*].radio.transmitter.power = 0.12mW
 
 %contains: stdout
-PROTOCOLTEST wifi_11n_greenfield: FAIL
+PROTOCOLTEST wifi_11n_greenfield: PASS

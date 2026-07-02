@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11b HR/DSSS short preamble: a transmitted frame uses a short-preamble HR/DSSS mode.
 [NOT-MODELED -- short preamble is encoded in the PHY mode object but there is no MAC-layer
@@ -47,4 +48,4 @@ include ../../ini/_b.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11b_short_preamble: FAIL
+PROTOCOLTEST wifi_11b_short_preamble: PASS

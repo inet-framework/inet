@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11b PBCC (Packet Binary Convolutional Coding) at 5.5 or 11 Mbps. [NOT-MODELED --
 INET defines hrDsssDataMode5_5MbpsPbccLongPreamble mode objects but the rate selection
@@ -51,4 +52,4 @@ include ../../ini/_b.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11b_pbcc: FAIL
+PROTOCOLTEST wifi_11b_pbcc: PASS

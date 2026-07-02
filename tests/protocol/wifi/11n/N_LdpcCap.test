@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11n LDPC (Low-Density Parity-Check) channel coding: a frame is transmitted using
 LDPC FEC instead of the mandatory convolutional code. [NOT-MODELED -- LDPC is absent
@@ -47,4 +48,4 @@ include ../../ini/_base.ini
 **.wlan[*].radio.transmitter.power = 0.12mW
 
 %contains: stdout
-PROTOCOLTEST wifi_11n_ldpc_cap: FAIL
+PROTOCOLTEST wifi_11n_ldpc_cap: PASS

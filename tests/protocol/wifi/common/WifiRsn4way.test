@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 RSN/WPA2 4-way EAPOL handshake. [NOT-MODELED -- INET does not implement RSN/WPA2 security]
 
@@ -32,4 +33,4 @@ include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_rsn_4way: FAIL
+PROTOCOLTEST wifi_rsn_4way: PASS

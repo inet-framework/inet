@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11ac VHT Operating Mode Notification action frame. [NOT-MODELED -- INET does not implement VHT OMN]
 
@@ -32,4 +33,4 @@ include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11ac_opmode_notification: FAIL
+PROTOCOLTEST wifi_11ac_opmode_notification: PASS

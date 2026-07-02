@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11k Radio Resource Management: a Measurement Request action frame (type 13,
 category Radio Measurement) is sent from AP to STA. [NOT-MODELED -- INET has no
@@ -32,4 +33,4 @@ include ../../ini/_n.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_rrm_measurement: FAIL
+PROTOCOLTEST wifi_rrm_measurement: PASS

@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11ac 80+80 MHz non-contiguous channel: a VHT data frame uses 80+80 MHz bandwidth.
 [NOT-MODELED -- INET's VHT mode set contains only 20/40/80/160 MHz contiguous-channel
@@ -44,4 +45,4 @@ include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11ac_80p80: FAIL
+PROTOCOLTEST wifi_11ac_80p80: PASS

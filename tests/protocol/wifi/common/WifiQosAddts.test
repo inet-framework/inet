@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 QoS ADDTS Request action frame (type 13) for TSPEC admission. [NOT-MODELED -- INET does not implement ADDTS/TSPEC admission control]
 
@@ -32,4 +33,4 @@ include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_qos_addts: FAIL
+PROTOCOLTEST wifi_qos_addts: PASS

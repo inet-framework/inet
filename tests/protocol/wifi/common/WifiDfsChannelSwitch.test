@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 DFS Channel Switch Announcement frame. [NOT-MODELED -- INET does not implement DFS/CSA]
 
@@ -31,4 +32,4 @@ include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_dfs_channel_switch: FAIL
+PROTOCOLTEST wifi_dfs_channel_switch: PASS

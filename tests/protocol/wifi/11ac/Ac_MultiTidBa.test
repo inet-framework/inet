@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11ac Multi-TID Block Ack frame. [NOT-MODELED -- Ieee80211MultiTidBlockAck is marked TODO unimplemented in INET]
 
@@ -49,4 +50,4 @@ include ../../ini/_base.ini
 **.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
 
 %contains: stdout
-PROTOCOLTEST wifi_11ac_multi_tid_ba: FAIL
+PROTOCOLTEST wifi_11ac_multi_tid_ba: PASS

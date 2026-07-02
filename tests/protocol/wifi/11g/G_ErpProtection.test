@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11g ERP protection: when a 802.11b-only STA is present in the BSS, the AP/STA must
 use CTS-to-self (type 28) or RTS/CTS (type 27) before ERP-OFDM transmissions. [NOT-MODELED
@@ -40,4 +41,4 @@ Define_ProtocolTest(wifi_11g_erp_protection)
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11g_erp_protection: FAIL
+PROTOCOLTEST wifi_11g_erp_protection: PASS

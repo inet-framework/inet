@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11ac LDPC and STBC capabilities: a VHT frame is transmitted with either STBC
 (getSTBC() > 0 in the signal mode) or LDPC coding. [NOT-MODELED -- INET's VHT signal
@@ -45,4 +46,4 @@ include ../../ini/_base.ini
 **.wlan[*].radio.transmitter.power = 0.12mW
 
 %contains: stdout
-PROTOCOLTEST wifi_11ac_ldpc_stbc_cap: FAIL
+PROTOCOLTEST wifi_11ac_ldpc_stbc_cap: PASS

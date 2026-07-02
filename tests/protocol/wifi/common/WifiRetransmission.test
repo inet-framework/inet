@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11 DCF retransmission: when a frame is not acknowledged, the MAC retransmits with
 the Retry bit set (ieee80211mac.retry == true). [NOT-MODELED-ASSERTABLE]
@@ -40,4 +41,4 @@ include ../../ini/_g.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_retransmission: FAIL
+PROTOCOLTEST wifi_retransmission: PASS

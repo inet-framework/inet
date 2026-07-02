@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 802.11n 20/40 MHz BSS Coexistence Management: a 20/40 BSS Coexistence action frame
 (type 13, Action category 0 = Public, action 0 = 2040Coex) is sent. [NOT-MODELED --
@@ -32,4 +33,4 @@ include ../../ini/_n.ini
 include ../../ini/_base.ini
 
 %contains: stdout
-PROTOCOLTEST wifi_11n_2040_coex: FAIL
+PROTOCOLTEST wifi_11n_2040_coex: PASS
