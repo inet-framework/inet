@@ -33,5 +33,7 @@ Define_ProtocolTest(wifi_11n_ht_capabilities_ie)
 include ../../ini/_n.ini
 include ../../ini/_base.ini
 
+%expected-failure: Ieee80211HtCapabilities IE does not exist in INET's AssociationRequestFrame
+
 %contains: stdout
-PROTOCOLTEST wifi_11n_ht_capabilities_ie: FAIL
+PROTOCOLTEST wifi_11n_ht_capabilities_ie: PASS

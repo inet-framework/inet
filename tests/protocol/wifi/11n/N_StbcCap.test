@@ -43,5 +43,7 @@ include ../../ini/_base.ini
 **.wlan[*].radio.receiver.snirThreshold = 0dB
 **.wlan[*].radio.transmitter.power = 0.12mW
 
+%expected-failure: Ieee80211HtSignalMode::getSTBC() is hardcoded to 0 in INET
+
 %contains: stdout
-PROTOCOLTEST wifi_11n_stbc_cap: FAIL
+PROTOCOLTEST wifi_11n_stbc_cap: PASS

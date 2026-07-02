@@ -31,5 +31,7 @@ Define_ProtocolTest(wifi_reassociation)
 include ../../ini/_g.ini
 include ../../ini/_base.ini
 
+%expected-failure: Ieee80211MgmtSta does not implement roaming/reassociation
+
 %contains: stdout
-PROTOCOLTEST wifi_reassociation: FAIL
+PROTOCOLTEST wifi_reassociation: PASS

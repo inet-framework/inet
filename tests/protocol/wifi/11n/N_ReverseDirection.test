@@ -36,5 +36,7 @@ include ../../ini/_base.ini
 **.wlan[*].radio.receiver.snirThreshold = 0dB
 **.wlan[*].radio.transmitter.power = 0.12mW
 
+%expected-failure: INET has no HT Control field implementation, so no RDG bit is ever set
+
 %contains: stdout
-PROTOCOLTEST wifi_11n_reverse_direction: FAIL
+PROTOCOLTEST wifi_11n_reverse_direction: PASS

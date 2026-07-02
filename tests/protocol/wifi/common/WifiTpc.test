@@ -31,5 +31,7 @@ Define_ProtocolTest(wifi_tpc)
 include ../../ini/_a.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET does not implement 802.11h TPC (no TPC Report/Power Constraint IE)
+
 %contains: stdout
-PROTOCOLTEST wifi_tpc: FAIL
+PROTOCOLTEST wifi_tpc: PASS

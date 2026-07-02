@@ -48,5 +48,7 @@ include ../../ini/_base.ini
 **.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 100
 **.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
 
+%expected-failure: Multi-TID Block Ack is // TODO unimplemented in INET
+
 %contains: stdout
-PROTOCOLTEST wifi_11ac_multi_tid_ba: FAIL
+PROTOCOLTEST wifi_11ac_multi_tid_ba: PASS

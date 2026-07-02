@@ -31,5 +31,7 @@ Define_ProtocolTest(wifi_11ac_beamforming)
 include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET does not implement beamforming
+
 %contains: stdout
-PROTOCOLTEST wifi_11ac_beamforming: FAIL
+PROTOCOLTEST wifi_11ac_beamforming: PASS

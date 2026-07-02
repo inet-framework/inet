@@ -46,5 +46,7 @@ Define_ProtocolTest(wifi_11b_short_preamble)
 include ../../ini/_b.ini
 include ../../ini/_base.ini
 
+%expected-failure: no MAC-layer parameter to select HR/DSSS short preamble mode
+
 %contains: stdout
-PROTOCOLTEST wifi_11b_short_preamble: FAIL
+PROTOCOLTEST wifi_11b_short_preamble: PASS

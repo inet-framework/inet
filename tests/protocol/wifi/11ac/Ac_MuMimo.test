@@ -31,5 +31,7 @@ Define_ProtocolTest(wifi_11ac_mu_mimo)
 include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET does not implement MU-MIMO
+
 %contains: stdout
-PROTOCOLTEST wifi_11ac_mu_mimo: FAIL
+PROTOCOLTEST wifi_11ac_mu_mimo: PASS

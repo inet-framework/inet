@@ -56,5 +56,7 @@ include ../../ini/_base.ini
 **.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
 
+%expected-failure: INET implements only the Immediate Block Ack policy, no delayed-BA
+
 %contains: stdout
-PROTOCOLTEST wifi_qos_delayed_ba: FAIL
+PROTOCOLTEST wifi_qos_delayed_ba: PASS

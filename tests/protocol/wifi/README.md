@@ -40,14 +40,19 @@ C++ via `EventPattern::match(lambda)`. PHY rates are pinned with
 
 ## Outcome semantics
 
-- **CONFORMS** — INET produces the spec behavior; the program PASSes; `%contains` expects `PASS`.
-- **NOT-MODELED** — INET does not implement the feature; the faithful spec assertion FAILs on
-  its deadline; `%contains` expects `FAIL` (an *expected failure*, like the repo's
-  `ViolationDetected.test`). The `.cc` assertion stays honest to the standard.
-- A red `opp_test` result therefore signals a **change**: a CONFORMS test regressed, or a
-  NOT-MODELED feature started working (update the matrix).
+Every test asserts the spec behavior, so `%contains` always expects the program to `PASS`;
+the two outcomes differ only in whether INET actually does it:
 
-**Today: 39 CONFORMS, 35 NOT-MODELED, 0 DEVIATES across 74 tests — aggregate PASS.**
+- **CONFORMS** — INET produces the spec behavior; the program PASSes → opp_test **PASS**.
+- **NOT-MODELED** — INET does not implement the feature, so the faithful assertion misses its
+  deadline and the program FAILs. The `.test` carries an `%expected-failure:` directive, so
+  opp_test reports it as **EXPECTEDFAIL** (yellow) — an honest, first-class "expected failure",
+  not a disguised PASS, and it does not fail the run. If INET later implements the feature the
+  program PASSes and the test flips EXPECTEDFAIL → PASS (a cue to move the row to CONFORMS). The
+  `.cc` assertion stays honest to the standard.
+- A **FAIL** (red) `opp_test` result therefore signals a real **regression** of a CONFORMS test.
+
+**Today: 39 CONFORMS (PASS), 35 NOT-MODELED (EXPECTEDFAIL) across 74 tests — aggregate PASS.**
 
 ## Conformance matrix
 

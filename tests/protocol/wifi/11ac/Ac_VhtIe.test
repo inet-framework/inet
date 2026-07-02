@@ -31,5 +31,7 @@ Define_ProtocolTest(wifi_11ac_vht_ie)
 include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
+%expected-failure: no VHT Capabilities/Operation IE fields in Ieee80211MgmtFrame.msg
+
 %contains: stdout
-PROTOCOLTEST wifi_11ac_vht_ie: FAIL
+PROTOCOLTEST wifi_11ac_vht_ie: PASS

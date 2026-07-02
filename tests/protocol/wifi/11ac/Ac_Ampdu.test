@@ -40,5 +40,7 @@ include ../../ini/_base.ini
 **.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
 **.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 100
 
+%expected-failure: BasicMpduAggregationPolicy.computeAggregateFrames() returns nullptr in INET
+
 %contains: stdout
-PROTOCOLTEST wifi_11ac_ampdu: FAIL
+PROTOCOLTEST wifi_11ac_ampdu: PASS

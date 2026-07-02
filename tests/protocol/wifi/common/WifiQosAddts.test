@@ -31,5 +31,7 @@ Define_ProtocolTest(wifi_qos_addts)
 include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET does not implement ADDTS/TSPEC admission control
+
 %contains: stdout
-PROTOCOLTEST wifi_qos_addts: FAIL
+PROTOCOLTEST wifi_qos_addts: PASS

@@ -30,5 +30,7 @@ Define_ProtocolTest(wifi_11n_smps)
 include ../../ini/_n.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET does not implement SM Power Save (SMPS)
+
 %contains: stdout
-PROTOCOLTEST wifi_11n_smps: FAIL
+PROTOCOLTEST wifi_11n_smps: PASS

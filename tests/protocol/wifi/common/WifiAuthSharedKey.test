@@ -33,5 +33,7 @@ Define_ProtocolTest(wifi_auth_sharedkey)
 include ../../ini/_g.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET implements only Open System authentication, no WEP challenge handshake
+
 %contains: stdout
-PROTOCOLTEST wifi_auth_sharedkey: FAIL
+PROTOCOLTEST wifi_auth_sharedkey: PASS

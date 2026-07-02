@@ -30,5 +30,7 @@ Define_ProtocolTest(wifi_11ac_group_id_mgmt)
 include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET does not implement VHT Group ID Management
+
 %contains: stdout
-PROTOCOLTEST wifi_11ac_group_id_mgmt: FAIL
+PROTOCOLTEST wifi_11ac_group_id_mgmt: PASS

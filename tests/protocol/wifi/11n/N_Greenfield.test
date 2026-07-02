@@ -45,5 +45,7 @@ include ../../ini/_base.ini
 **.wlan[*].radio.receiver.snirThreshold = 0dB
 **.wlan[*].radio.transmitter.power = 0.12mW
 
+%expected-failure: no MAC-layer/NED parameter selects HT greenfield preamble; always HT_PREAMBLE_MIXED
+
 %contains: stdout
-PROTOCOLTEST wifi_11n_greenfield: FAIL
+PROTOCOLTEST wifi_11n_greenfield: PASS

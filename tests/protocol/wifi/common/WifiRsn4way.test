@@ -31,5 +31,7 @@ Define_ProtocolTest(wifi_rsn_4way)
 include ../../ini/_ac.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET does not implement RSN/WPA2 security
+
 %contains: stdout
-PROTOCOLTEST wifi_rsn_4way: FAIL
+PROTOCOLTEST wifi_rsn_4way: PASS

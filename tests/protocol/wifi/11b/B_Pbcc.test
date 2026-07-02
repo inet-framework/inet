@@ -50,5 +50,7 @@ Define_ProtocolTest(wifi_11b_pbcc)
 include ../../ini/_b.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET's rate selection never chooses PBCC over CCK at the same bitrate
+
 %contains: stdout
-PROTOCOLTEST wifi_11b_pbcc: FAIL
+PROTOCOLTEST wifi_11b_pbcc: PASS

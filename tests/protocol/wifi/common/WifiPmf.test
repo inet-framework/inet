@@ -33,5 +33,7 @@ Define_ProtocolTest(wifi_pmf)
 include ../../ini/_n.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET has no 802.11w Protected Management Frames implementation
+
 %contains: stdout
-PROTOCOLTEST wifi_pmf: FAIL
+PROTOCOLTEST wifi_pmf: PASS

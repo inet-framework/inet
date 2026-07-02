@@ -30,5 +30,7 @@ Define_ProtocolTest(wifi_legacy_pcf)
 include ../../ini/_legacy.ini
 include ../../ini/_base.ini
 
+%expected-failure: Ieee80211Mac.ned notes "PCF is missing"; the Pcf class is a non-functional stub
+
 %contains: stdout
-PROTOCOLTEST wifi_legacy_pcf: FAIL
+PROTOCOLTEST wifi_legacy_pcf: PASS

@@ -31,5 +31,7 @@ Define_ProtocolTest(wifi_11n_ht_operation_ie)
 include ../../ini/_n.ini
 include ../../ini/_base.ini
 
+%expected-failure: no HT Operation IE generated in INET's Beacon frame
+
 %contains: stdout
-PROTOCOLTEST wifi_11n_ht_operation_ie: FAIL
+PROTOCOLTEST wifi_11n_ht_operation_ie: PASS

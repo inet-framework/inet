@@ -31,5 +31,7 @@ Define_ProtocolTest(wifi_11n_2040_coex)
 include ../../ini/_n.ini
 include ../../ini/_base.ini
 
+%expected-failure: INET has no 20/40 BSS Coexistence module or action frame encoding
+
 %contains: stdout
-PROTOCOLTEST wifi_11n_2040_coex: FAIL
+PROTOCOLTEST wifi_11n_2040_coex: PASS
