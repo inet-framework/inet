@@ -29,6 +29,22 @@ namespace inet {
  */
 bool testPcapSerialization(const char *filename, bool hasFcs = true);
 
+/**
+ * Starts recording serializer coverage: installs a recorder on the
+ * ChunkSerializerRegistry and resets the accumulated coverage / raw-bytes state.
+ * Call once before the testPcapSerialization() calls whose coverage should be
+ * measured together.
+ */
+void beginSerializerCoverage();
+
+/**
+ * Stops recording and prints the coverage report to EV: the exercised
+ * serializers (USED ...), the registered-but-never-invoked ones (UNTESTED ...),
+ * and the raw-bytes summary (leaf-region count + any TOPLEVEL-RAWBYTES frames,
+ * i.e. a whole frame whose outermost protocol was not parsed at all).
+ */
+void reportSerializerCoverage();
+
 } // namespace inet
 
 #endif

@@ -10,6 +10,12 @@ deserialization chain.
 
 The engine lives in tests/unit/lib/SerializerTestLib.{h,cc}.
 
+It also reports serializer coverage: the exercised (USED ...) and never-invoked
+(UNTESTED ...) registered serializers, plus a raw-bytes summary. The full lists
+are printed for humans to drive corpus expansion; only a small baseline of core
+serializers is gated below (so a silent coverage loss is caught), together with
+the requirement that no whole packet fall back to raw bytes (TOPLEVEL-RAWBYTES).
+
 %includes:
 #include "SerializerTestLib.h"
 
@@ -19,11 +25,15 @@ using namespace inet;
 
 %activity:
 
+beginSerializerCoverage();
+
 testPcapSerialization("../../pcap/rarp_request.pcap", false);
 testPcapSerialization("../../pcap/rarp_req_reply.pcap", false);
 testPcapSerialization("../../pcap/Ethernet_Pause_Frame.pcap", false);
 testPcapSerialization("../../pcap/eth_fcs_good.pcap", true);
 testPcapSerialization("../../pcap/v6.pcap", false);
+
+reportSerializerCoverage();
 
 %contains: stdout
 All frames are the same in file ../../pcap/rarp_request.pcap
@@ -42,3 +52,33 @@ All frames are the same in file ../../pcap/v6.pcap
 
 %not-contains: stdout
 differ
+
+%contains: stdout
+USED inet::EthernetMacHeader
+
+%contains: stdout
+USED inet::EthernetFcs
+
+%contains: stdout
+USED inet::ArpPacket
+
+%contains: stdout
+USED inet::Ipv4Header
+
+%contains: stdout
+USED inet::Ipv6Header
+
+%contains: stdout
+USED inet::IcmpHeader
+
+%contains: stdout
+USED inet::Icmpv6Header
+
+%contains: stdout
+USED inet::tcp::TcpHeader
+
+%contains: stdout
+USED inet::UdpHeader
+
+%not-contains: stdout
+TOPLEVEL-RAWBYTES
