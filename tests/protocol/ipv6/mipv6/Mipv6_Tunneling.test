@@ -1,0 +1,38 @@
+%description:
+Correspondent traffic to the home address is tunnelled to the care-of address. [Required -- RFC 6275 5.1/9.5.4]
+
+While a mobile node is away from home, packets a correspondent sends to its home address are
+intercepted by the Home Agent and tunnelled (IPv6-in-IPv6) to the node's registered care-of
+address. The CN pings the MN's home address; observed on the wire at the MN's wireless interface as
+it receives a doubly-encapsulated (two IPv6 headers) datagram carrying the Echo Request.
+
+%file: Mipv6_Tunneling.cc
+
+#include "ProtocolTest.h"
+#include "Ipv6TestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_mipv6_tunneling)
+{
+    return ProtocolTest("ipv6_mipv6_tunneling")
+        .once(on("MN[0].wlan[0]").signal("packetReceivedFromLower")
+                  .match([](const MatchContext& c) {
+                      return isIpv6Tunneled(c.event)
+                             && chunkOfType<Icmpv6EchoRequestMsg>(c.event) != nullptr;
+                  })
+                  .describe("a tunnelled Echo Request delivered to the MN's care-of address").within(80));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_mipv6_tunneling"
+include ../../ini/_mipv6.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_mipv6_tunneling: PASS

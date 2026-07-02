@@ -94,7 +94,7 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 - **NOT-MODELED ⛔** — INET does not implement the feature (or applies it inconsistently); the
   faithful spec assertion FAILs on its deadline; `%contains` expects `FAIL` (an *expected failure*).
 
-**Today: 40 CONFORMS, 5 NOT-MODELED across 45 tests — aggregate PASS.**
+**Today: 43 CONFORMS, 5 NOT-MODELED across 48 tests — aggregate PASS.**
 
 ## Conformance matrix
 
@@ -170,7 +170,10 @@ positive packet on the wire (success is the *absence* of a defence): those tests
 ### mipv6 — Mobile IPv6 (RFC 6275)
 | Test | Feature | R/O | |
 |------|---------|-----|--|
-| `Mipv6_RegistrationAndRo` | Home registration (BU/BA) + return-routability + route optimization | R | ✅ |
+| `Mipv6_HomeRegistration` | Binding Update (H+A, lifetime) → Binding Ack (status 0, matching seq) | R | ✅ |
+| `Mipv6_ReturnRoutability` | HoTI/CoTI → HoT/CoT with cookies echoed + keygen tokens | R | ✅ |
+| `Mipv6_RouteOptimization` | Correspondent-registration Binding Update (H flag clear) | R | ✅ |
+| `Mipv6_Tunneling` | Correspondent traffic to the home address tunnelled to the care-of address | R | ✅ |
 
 ### dhcpv6 — Stateful address configuration (RFC 8415)
 | Test | Feature | R/O | |

@@ -24,6 +24,7 @@
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/icmpv6/MldMessage_m.h"
 #include "inet/networklayer/icmpv6/Mldv2Message_m.h"
@@ -58,6 +59,22 @@ inline const T *chunkOfType(const PacketEvent& e)
         if (auto typed = dynamicPtrCast<const T>(chunk))
             return typed.get();
     return nullptr;
+}
+
+// True if the packet is IPv6-in-IPv6 tunneled (carries two or more IPv6 headers) -- e.g. a
+// Home Agent tunneling a correspondent's packet to a mobile node's care-of address (MIPv6).
+inline bool isIpv6Tunneled(const PacketEvent& e)
+{
+    if (e.packet == nullptr)
+        return false;
+    Ipv6ChunkCollector collector;
+    PacketDissector dissector(ProtocolDissectorRegistry::getInstance(), collector);
+    dissector.dissectPacket(const_cast<Packet *>(e.packet));
+    int headers = 0;
+    for (const auto& chunk : collector.chunks)
+        if (dynamicPtrCast<const Ipv6Header>(chunk))
+            headers++;
+    return headers >= 2;
 }
 
 // IPv6 source / destination address of the observed datagram (UNSPECIFIED if not IPv6).

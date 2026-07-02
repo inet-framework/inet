@@ -1,0 +1,48 @@
+%description:
+Mobile IPv6 return-routability procedure. [Required -- RFC 6275 5.2.5 / 11.6]
+
+Before route-optimizing with a correspondent node (CN), the MN proves it is reachable at both its
+home and care-of addresses. It sends a Home Test Init (via the Home Agent) and a Care-of Test Init
+(directly), each carrying an init cookie; the CN answers with a Home Test and a Care-of Test that
+echo the respective cookie and carry a keygen token the MN combines into the binding management key.
+Observed on the wire at the MN's wireless interface: both Inits go out, and both Tests come back
+with the cookies echoed and non-zero keygen tokens.
+
+%file: Mipv6_ReturnRoutability.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_mipv6_return_routability)
+{
+    auto tx = [](const char *expr, double w) {
+        return on("MN[0].wlan[0]").signal("packetSentToLower").packet(expr).within(w);
+    };
+    auto rx = [](const char *expr, double w) {
+        return on("MN[0].wlan[0]").signal("packetReceivedFromLower").packet(expr).within(w);
+    };
+
+    return ProtocolTest("ipv6_mipv6_return_routability")
+        .unordered({
+            tx("HomeTestInit.homeInitCookie >= 0", 75).capture("hoCookie", "HomeTestInit.homeInitCookie"),
+            tx("CareOfTestInit.careOfInitCookie >= 0", 75).capture("coCookie", "CareOfTestInit.careOfInitCookie")
+        })
+        .unordered({
+            rx("HomeTest.homeInitCookie == {hoCookie} && HomeTest.homeKeyGenToken != 0", 5),
+            rx("CareOfTest.careOfInitCookie == {coCookie} && CareOfTest.careOfKeyGenToken != 0", 5)
+        });
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_mipv6_return_routability"
+include ../../ini/_mipv6.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_mipv6_return_routability: PASS

@@ -1,0 +1,40 @@
+%description:
+Mobile IPv6 home registration. [Required -- RFC 6275 11.7.1 / 5.1]
+
+After roaming to a foreign link, the mobile node (MN) registers its care-of address with its Home
+Agent by sending a Binding Update with the Home-Registration (H) and Acknowledge (A) flags set, a
+non-zero binding lifetime, and its home address; the Home Agent replies with a Binding
+Acknowledgement whose status is 0 (Binding Update accepted) and whose sequence number echoes the
+Binding Update's. Observed on the wire at the MN's wireless interface. (Wireless Mipv6Demo network;
+the roam + registration take tens of seconds.)
+
+%file: Mipv6_HomeRegistration.cc
+
+#include "ProtocolTest.h"
+
+namespace inet {
+namespace protocoltest {
+
+Define_ProtocolTest(ipv6_mipv6_home_registration)
+{
+    return ProtocolTest("ipv6_mipv6_home_registration")
+        .once(on("MN[0].wlan[0]").signal("packetSentToLower")
+                  .packet("BindingUpdate.homeRegistrationFlag == true && BindingUpdate.ackFlag == true && BindingUpdate.lifetime > 0")
+                  .capture("seq", "BindingUpdate.sequence")
+                  .describe("the MN's home-registration Binding Update").within(72))
+        .once(on("MN[0].wlan[0]").signal("packetReceivedFromLower")
+                  .packet("BindingAcknowledgement.status == 0 && BindingAcknowledgement.sequenceNumber == {seq} && BindingAcknowledgement.lifetime > 0")
+                  .describe("the Home Agent's Binding Acknowledgement (accepted, matching sequence)").within(6));
+}
+
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+
+[General]
+*.tester.testName = "ipv6_mipv6_home_registration"
+include ../../ini/_mipv6.ini
+
+%contains: stdout
+PROTOCOLTEST ipv6_mipv6_home_registration: PASS
