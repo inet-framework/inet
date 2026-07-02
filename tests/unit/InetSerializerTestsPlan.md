@@ -17,6 +17,21 @@ A round-trip **önmagában csak önkonzisztenciát bizonyít** (serialize∘dese
 megőrzi a bájtokat), a wire-formátum helyességét nem. Ezért több módszer kell, és
 a hibás round-trip-eltéréseket külső orákulummal (tshark) érdemes szűrni.
 
+### Állapot (mi van kész)
+- **WP0 + WP1 kész és zöld:** a `serializer.test` az új, generikus motorra állt
+  (`PcapReader` + `PacketDissector`/`ChunkBuilder`, közös `tests/unit/lib/SerializerTestLib`).
+  Mind az 5 meglévő pcap round-trippel (`opp_test` PASS).
+- **PcapReader src-fixek** (külön commit): fejléc a tagba, veszteségmentes
+  `PcapRecordTime` időbélyeg, tiszta EOF, csak-ha-kért névadás.
+- **TcpHeaderSerializer** végtelen-ciklus javítva (`!isReadBeyondEnd()` guard) —
+  menet közben talált valós robusztussági bug; csonkolt/sérült TCP-fejléc is
+  kiváltja.
+- Commitok a `topic/bz/serializertest` branchen: plan, PcapReader-fix,
+  serializer.test-átírás, TCP-fix.
+
+Következő: **WP2 (lefedettség + nyers-bájt riport)**, majd a wire-helyesség
+egyszeri-hitelesített kanonikus snapshotja (lásd WP3 átdolgozva).
+
 ## Meglévő, újrahasználandó elemek
 
 - `PcapReader::readPacket()` → `Packet*`, kezeli a byte-swapet/fejléceket
@@ -99,43 +114,87 @@ emberi tudás kell (a protokoll + az INET objektummodell):
   driver csak önkonzisztensen (nem *helyesen*) ellenőriz; kézi teszt a pontos elvárt
   bájtokat állítja.
 
-### 1. munkacsomag — PCAP-készlet alapú round-trip (első prioritás)
-- `PcapReader`-re épül (a kézi pcap-parser eldobása).
-- **`src` módosítás:** `PcapReader::getNetworkType()` getter hozzáadása.
-- linktype→`Protocol*` leképző tábla (ETHERNET, IPv4/IPv6 raw, PPP, 802.11,
-  LINUX_SLL…).
+### 1. munkacsomag — PCAP-készlet alapú round-trip (KÉSZ)
+- `PcapReader`-re épül (a kézi pcap-parser eldobva). A linktype→`Protocol` leképzést
+  és a `PacketProtocolTag`-et már a `PcapReader` adja (nem kellett külön getter, a
+  `fileHeader`-bug javítása aktiválta).
 - A kézi `deserialize()` láncot **`PacketDissector` + `ChunkBuilder`** váltja ki
   → egy kódból minden regisztrált protokollra megy.
-- Folyamat rekordonként: read → dissect a linktype protokolljával → `ChunkBuilder`
-  visszaépíti a tartalmat egy új `Packet`-be → `peekAllAsBytes()` → bájt-összevetés
-  az eredetivel; eltérésnél az **első eltérő offset** + környezet kiírása.
-- Kezelendő: FCS, snaplen, csonkolt rekordok, padding, checksum-normalizálás;
-  per-fájl „ismert-eltérés" jelölés a jóindulatú normalizálásokra.
-- Korpusz: valós capture-ök `tests/unit/pcap/<protokoll>/` alá.
+- Folyamat rekordonként: `PcapReader::readPacket` → (FCS-mentes ethernetnél számított
+  FCS hozzáfűzése) → `dissectPacket` (a tag protokolljával) → `ChunkBuilder`
+  visszaépíti a tartalmat → `peekAllAsBytes()` → bájt-összevetés; eltérésnél az
+  **első eltérő offset** + környezet kiírása. Csonkolt (incomplete) rekord kihagyva.
 
-### 2. munkacsomag — „Teszteletlen serializerek" riport
+**Nyers-bájt figyelmeztetés (fontos korlát):** amelyik régióhoz **nincs disszektor**,
+azt a `DefaultProtocolDissector` egy `BytesChunk`-ként adja tovább, ami **triviálisan
+round-trippel** → a „frame is the same" arra a régióra **vak-zöld** (nulla serializer-
+logika futott). Tehát a **pcap-PASS nem jelent lefedettséget** — ezt a WP2 teszi
+láthatóvá. (Levél-payload jogosan bájt; a „parse-olni kellett volna" fejléc a gond.)
+
+- Korpusz `tests/unit/pcap/<protokoll>/` alá — forrásokról lásd a „PCAP-források" szakaszt.
+
+### PCAP-források (a korpuszhoz — élő rögzítés nélkül)
+Kimenő hálózat **elérhető** ebből a környezetből (letöltés működik) — de a valódi
+korlát a **licenc/redisztribúció**, mert commitolt korpuszról van szó (INET = LGPL-3.0).
+- **Elsődleges: `text2pcap` RFC-/kézi hexből** (telepítve). Self-authored → nincs
+  harmadik feles licenc, teljesen újraterjeszthető, és **független** wire-igazság.
+- **INET `PcapRecorder`** (a sim maga generálja): olcsó, offline, széles — de a bájtok
+  az INET saját serializereiből jönnek → **csak self-consistency/regresszió**, nem
+  wire-helyesség (körkörös), hacsak tsharkkal nem hitelesítjük.
+- **Publikus capture** csak licenc-tiszta, INET-kompatibilis esetben (fájlonként).
+- **Runtime-letöltés kizárva** — a CI-nek offline/determinisztikusnak kell lennie.
+- Minden forrás `tshark`-kal validálható (független orákulum).
+
+### 2. munkacsomag — Lefedettség-riport + nyers-bájt jelölés (a következő lépés)
+Egyetlen műszerezés, ami a #1 (nyers-bájt) és a lefedettség kérdést is megoldja.
 - **`src` módosítás:** `ChunkSerializerRegistry`-be publikus felsoroló
-  (pl. `std::vector<std::type_index> getRegisteredTypes() const`).
-- Exercised-halmaz: a dissector `visitChunk`-ja minden érintett chunk `typeid`-jét
-  naplózza a pcap- és field-tesztek futása közben.
-- Riport a futás végén: `regisztrált − érintett = teszteletlen` lista →
-  gap-analízis, ami vezérli a korpusz-bővítést.
+  (pl. `std::vector<std::type_index> getRegisteredTypes() const`) → a **regisztrált**
+  halmaz.
+- **Exercised-halmaz:** a dissection `visitChunk`-ja minden érintett chunk
+  `typeid`-jét rögzíti → a **tesztelt** halmaz. A `BytesChunk`/`BitsChunk`-ként látott
+  régiók = **nyers/nem tesztelt** (a #1 esete) — külön listázva, a top-level azonnali
+  bájtra-esést kiemelve (gyanús), a mély levél-payloadot csak halkan jelezve.
+- **Kimenet:** `tested serializers` lista + `untested serializers` lista
+  (`regisztrált − tesztelt`) + nyers-bájt régiók → a run végén a stdout-ra.
+- **Gate-forma (brittleness-kezelés):** a **teljes listát printeljük** (test.out),
+  de hard `%contains`-gate csak **kurált baseline-ra / darabszámra** (coverage-ratchet:
+  jelez, ha a lefedettség csökken), NEM a pontos listára — különben minden új
+  serializer/pcap elmozdítaná. (A pontos-lista-gate opció, ha explicit kaput akarsz.)
+- **Caveat:** a `visitChunk` a **top-level disszektált** chunkokat látja; az opció-/
+  al-chunk serializerek (a fejléc `serialize`-én belül futnak) „untested"-ként
+  jelenhetnek meg, pedig használódnak — a riport „top-level érintettség"-et mér,
+  dokumentálni kell.
 
-### 3. munkacsomag — tshark mint orákulum (telepítve: TShark 4.6.4)
-`tshark` **elérhető** (4.6.4) → aktív; ha máshol hiányzik, a keret skippel.
-- **PDML** (`tshark -T pdml`): a teljesen disszektált csomagfa XML-ben; mezőnként
-  `<field name="ip.src" pos="26" size="4" show="10.0.0.1" value="0a000001"/>` —
-  kanonikus mezőnév + nyers hex + dekódolt érték + bájt-offszet/hossz. Alternatíva
-  `-T json` (scriptből könnyebb). Ajánlás: `-T json`, PDML ha a `pos/size` kell.
-- **(a) Round-trip eltérés szűrése:** ha a visszaírt bájtok eltérnek, mindkét
-  változatot tsharkon átfuttatva, ha a mezőértékek egyeznek → jóindulatú
-  normalizálás (nem bug); ha a mezők is eltérnek → valódi bug.
-- **(b) Wire-helyesség:** a mi disszekciónk / mezőértékeink a tshark mezőivel
-  összevetve megfogható az „önkonzisztensen rossz" kódolás is; a golden-hex
-  vektorok is tsharkkal validálhatók/generálhatók.
+### 3. munkacsomag — Wire-helyesség: egyszer-hitelesített kanonikus snapshot
+(`tshark` telepítve: 4.6.4.) A wire-helyesség orákuluma egy **befagyasztott,
+kanonikus mező-dump snapshot** protokollonként/csomagonként, amit **egyszer**,
+létrehozáskor hitelesítünk függetlenül. Ez leváltja a korábban tervezett drága,
+karbantartandó tshark↔INET **mezőnév-tábla + érték-normalizáló** kódot.
 
-Megjegyzés: az (a) arbitrációhoz **nem** kell INET-névtábla (mindkét oldal tshark);
-a tshark↔INET mezőnév-megfeleltetés csak a WP6 field-compare-jéhez kell — ott is van.
+Munkafolyamat:
+1. **Kanonikus dump** az INET dekódjából: rekurzív descriptor→JSON (a WP6
+   `ChunkJsonDump`-ja), NEM a formázás-érzékeny „szép" `PacketPrinter`-szöveg.
+2. **Egyszeri, független hitelesítés (authoring-idő, nem CI):** a csomag bájtjait
+   `tshark -T json`-nal is dekódoljuk, és **AI-val** vetjük össze az INET-dumppal —
+   az AI szemantikusan hidalja a mezőnév-eltérést, így **nem kell névtáblát/normalizálót
+   írni és karbantartani**. Egyezés → a snapshot elfogadva (blessed).
+3. **Auditnyom:** a snapshot mellé mentjük a **tshark-kimenetet is** és egy
+   `verified: <dátum/eszköz>` jelölőt → később bárki újraellenőrizheti; az „AI
+   hitelesítette" ne legyen láthatatlan bizalom.
+4. **CI:** a run csak az INET-dumpot veti a **befagyasztott** snapshothoz
+   (`%contains`/fájl-diff) — gyors, offline, determinisztikus, és **már hitelesített**.
+5. **Re-bless:** szándékos serializer-változásnál a snapshot diffel → az egyszeri
+   AI+tshark hitelesítést újrafuttatjuk az új snapshotra → újrafagyasztás
+   (approval-testing minta).
+
+Ez tisztán **megtöri a körkörösséget** a létrehozáskor (tshark = független bíró),
+utána viszont olcsó. Korlát: csak azt fedi, amit az INET disszektál — a nyers-bájt
+régiók (WP2/#1) itt is nyersen jelennek meg.
+
+Külön, olcsó felhasználás névtábla nélkül: **round-trip bájt-eltérés arbitrációja** —
+ha a re-serialize bájtjai eltérnek, ugyanazt a két bájtsort tsharkon átfuttatva, ha a
+dekódolt mezők egyeznek → jóindulatú normalizálás (nem bug); ha eltérnek → valódi
+bug. (Ehhez nincs szükség INET-névtáblára, mindkét oldal tshark.)
 
 ### 4. munkacsomag — Fuzz / robusztusság (két irány)
 
@@ -256,20 +315,18 @@ beágyazottat, a hossz már helyes (valós bájtból jött), az altípus `__type
 normalizálás kell, mint a pcap round-tripnél; a golden vektorokat kanonikusra
 választjuk.
 
-**Egyesített pcap+tshark pipeline (a hex-elsődlegű forma automatizálása skálán):**
+**Egyesített pcap-pipeline (a hex-elsődlegű forma automatizálása skálán):**
 ez összeköti a WP1 + WP3 + WP6-ot:
 - pcap rekord = az elsődleges hex;
-- INET deserialize → objektum → JSON-dump;
-- `tshark -T json` ugyanazon a bájton = **független** „elvárt JSON" (nem kézzel);
-- INET-JSON vs tshark-JSON → szemantikus helyesség; serialize vissza → pcap hex.
-- **Mezőnév-megfeleltetés (a fő költség):** (1) per-protokoll névtábla kézzel a
-  top-protokollokra (`ip.ttl`↔`timeToLive`, ~10–30 mező/protokoll); (2) név-független
-  érték/offszet-illesztés backstopként (PDML `pos`/`size`/`value` ↔ INET bájt-tartomány,
-  chunk-granularitáson ingyen, field-szinthez stream-instrumentálás); (3) per-típus
-  érték-normalizáló (tshark-hex ↔ INET dekódolt string).
-- **Snapshot-figyelmeztetés:** ha az elvárt JSON az INET saját dekódjából jön
-  (snapshot), az csak *regressziót* fog, nem a jelenlegi hibát → független igazsághoz
-  a JSON kézzel ellenőrzött **vagy** tshark-ból való.
+- INET deserialize → objektum → kanonikus descriptor→JSON-dump;
+- a dumpot a **WP3 egyszer-hitelesített snapshotjához** diffeljük (CI-ben gyors,
+  offline); a snapshot wire-helyességét **egyszer**, létrehozáskor a `tshark -T json`
+  + **AI** összevetés adja → **nincs karbantartandó mezőnév-tábla/normalizáló** (ezt
+  a korábbi „fő költséget" az egyszeri AI-hitelesítés váltja ki, lásd WP3);
+- serialize vissza → az eredeti hex (round-trip a serialize-oldalra).
+- **Snapshot vs független igazság:** a befagyasztott snapshot magában csak
+  *regressziót* fog — ezért kötelező a **WP3 szerinti egyszeri független hitelesítés**
+  (tshark+AI) + auditnyom, hogy a snapshot ne az INET esetleges hibáját rögzítse.
 
 **Vektor-generálás (nem kézzel írjuk a hex-json párokat — generáljuk):**
 A generálás és a tesztelés ugyanaz a pipeline. Bemenet egy pcap rekord (vagy hex),
@@ -336,55 +393,58 @@ a filler+repair nem elégít ki (típusra kulcsolt callback, nem egész `.test`)
 
 ## Módosítandó / létrehozandó fájlok
 
-- `tests/unit/lib/SerializerTestLib.h` + `.cc` — **új**, közös `roundTrip<T>` +
-  pcap-motor + lefedettség-gyűjtő + fuzz-orákulum.
-- `tests/unit/lib/RandomPacketFiller.h` + `.cc` — **új**, descriptor + `@bit`/`@enum`/
-  típus-tudatos kitöltés + repair-menet (WP4c); a WP6 meghajtó is ezt használja.
-- `tests/unit/lib/GenericSerializerRoundTrip.h` + `.cc` — **új**, a WP7 generikus,
-  descriptor-vezérelt random meghajtó (registry-típuslistán iterál).
-- `tests/unit/lib/ChunkJsonDump.h` + `.cc` — **új**, rekurzív descriptor→JSON dump
-  (a hex-elsődlegű összevetéshez; polimorf altípusnév `__type__`-ként).
-- `tests/unit/lib/TsharkOracle.h` + `.cc` — **új**, `tshark -T json` futtatás +
-  per-protokoll névtábla + per-típus érték-normalizáló (WP3 + hex-pipeline).
-- `tests/unit/lib/Makefile` — a lib build kiterjesztése az új fájlokra (ha kell).
-- `src/inet/common/packet/recorder/PcapReader.h/.cc` — `getNetworkType()` getter.
+Kész (landolt):
+- `tests/unit/lib/SerializerTestLib.h` + `.cc` — a pcap round-trip motor + FCS-kezelés
+  (a lefedettség-gyűjtő és a nyers-bájt jelölés WP2-ben bővül majd).
+- `tests/unit/lib/Makefile` — kiegészítve az új objektummal.
+- `src/inet/common/packet/recorder/PcapReader.h/.cc` — `fileHeader` tárolás,
+  veszteségmentes `PcapRecordTime`, tiszta EOF, csak-ha-kért névadás.
+- `src/inet/queueing/source/PcapFilePacketProducer.cc` — a simtime-konverzió a
+  `PcapRecordTime`-ból (a policy itt lakik).
+- `src/inet/transportlayer/tcp_common/TcpHeaderSerializer.cc` — opció-ciklus guard.
+- `tests/unit/serializer.test` — átírva a generikus motorra (5 pcap zöld).
+
+Hátralévő:
 - `src/inet/common/packet/serializer/ChunkSerializerRegistry.h/.cc` — publikus
-  típus-felsoroló (WP2 + WP6 alapja).
-- `tests/unit/serializer.test` — átírás az új motorra (a jelenlegi 5 pcap zöld marad).
+  típus-felsoroló (WP2 + WP7 alapja).
+- `tests/unit/lib/RandomPacketFiller.h` + `.cc` — descriptor + `@bit`/`@enum`/típus-
+  tudatos kitöltés + repair-menet (WP4c); a WP7 meghajtó is ezt használja.
+- `tests/unit/lib/GenericSerializerRoundTrip.h` + `.cc` — a WP7 generikus random meghajtó.
+- `tests/unit/lib/ChunkJsonDump.h` + `.cc` — rekurzív descriptor→JSON kanonikus dump
+  (WP3 snapshot + WP6 összevetés; polimorf altípusnév `__type__`-ként).
+- `tests/unit/lib/verify_snapshots` — **authoring-idejű** eszköz: `tshark -T json` +
+  AI-összevetés az egyszeri hitelesítéshez; a snapshot mellé tshark-kimenet + `verified`
+  jelölő (WP3). NEM CI-lépés.
 - `tests/unit/IPv6_serializers.test` + a többi per-protokoll `.test` — átállás a
   közös `roundTrip`-re; hosszú távon a kurált maradékká zsugorodnak (WP6, 0b).
-- `tests/unit/generic_serializer_roundtrip.test` — **új**, a WP7 random meghajtót futtatja.
-- `tests/unit/hex_vectors/<protokoll>.json` — **új**, hex-elsődlegű golden vektorok
-  (`{hex, expected_json}`), egy generikus WP6 `.test`-ből futtatva.
-- `tests/unit/pcap/<protokoll>/*.pcap` — bővülő korpusz (egyben a pcap+tshark
-  hex-pipeline bemenete).
+- `tests/unit/generic_serializer_roundtrip.test` — a WP7 random meghajtót futtatja.
+- `tests/unit/snapshots/<protokoll>.json` — befagyasztott, egyszer-hitelesített
+  kanonikus mező-dumpok (+ a hozzájuk mentett tshark-kimenet és `verified` jelölő).
+- `tests/unit/pcap/<protokoll>/*.pcap` — bővülő korpusz (forrás: WP1 „PCAP-források").
 
 ## Javasolt sorrend
-1. 0. + 1. + 2. csomag együtt (közös lib + pcap-motor + lefedettség-riport).
-   **Előbb a meglévő 5 pcap fájlon zöld** az új `PacketDissector`-alapú motor
-   (regresszió: a jelenlegi viselkedést megőrizzük), és fut a teszteletlen-riport.
-2. **Csak ezután korpusz-bővítés a teljes lefedettségért**, a 2. csomag
-   „teszteletlen serializerek" riportjától vezérelve (célzottan azokra a
-   protokollokra/linktype-okra, amik hiányoznak) + ismert-eltérés mechanizmus.
-3. WP3 (tshark-orákulum) — a pcap round-trip bájt-eltéréseinek arbitrációja.
-4. WP6 (hex-elsődlegű korrektség-motor) — a WP1 korpuszra + WP3 tsharkra épül;
-   ez a fő korrektség-tesztelés (pcap+tshark pipeline + golden vektorok).
-5. WP4 (fuzz/robusztusság).
-6. WP7 (generikus random meghajtó) — a WP2 típuslistára és a WP4c fillerre épül,
-   ezért azok után; a teszteletlen serializerek olcsó, széles lefedése.
-7. WP5 (fingerprint `~tND` regressziós háló) — bármikor futtatható a meglévő
-   fingerprint-suiteon, végső széles ellenőrzésként.
+1. ~~WP0 + WP1: közös lib + pcap round-trip motor, 5 pcap zöld.~~ **KÉSZ.**
+2. **WP2 — lefedettség-riport + nyers-bájt jelölés (a következő lépés):** registry-
+   felsoroló + `visitChunk` typeid-gyűjtő + tested/untested listák + bytes-régiók.
+3. **Korpusz-bővítés** a WP2 riporttól vezérelve (célzottan a hiányzó protokollokra),
+   `text2pcap` RFC-hexből az elsődleges forrás (lásd „PCAP-források").
+4. WP3 — wire-helyesség: kanonikus JSON snapshot, egyszeri tshark+AI hitelesítéssel.
+5. WP6 — hex-elsődlegű korrektség-motor a snapshotokra épülve.
+6. WP4 (fuzz/robusztusság).
+7. WP7 (generikus random meghajtó) — a WP2 típuslistára + WP4c fillerre épül.
+8. WP5 (fingerprint `~tND` regressziós háló) — bármikor futtatható, végső háló.
 
 ## Ellenőrzés
-- `cd /home/zoli/Projects/OMNET/inet/tests/unit && ./runtest serializer.test` —
-  a pcap round-trip minden mintafájlon zöld; a régi 5 pcap továbbra is átmegy.
-- A lefedettség-riport listázza a teszteletlen serializereket (`%contains`-szal
-  vagy külön stdout-ellenőrzéssel rögzíthető a lista).
+- **pcap round-trip (kész):** `opp_test run -v -p serializer/out/clang-debug/serializer_dbg
+  serializer.test` a `tests/unit`-ban → PASS; mind az 5 pcap átmegy, `test.err` üres.
+  (A `runtest` script hiányzik ebből a munkamásolatból; a klasszikus `opp_test` flow-t
+  használjuk: `make` a `lib`-ben, `opp_test gen`, `make` a `work/serializer`-ben, majd
+  `opp_test run`.)
+- **WP2:** a lefedettség-riport a stdout-ra kerül; hard gate a kurált baseline-ra/darabszámra.
 - A per-protokoll `.test`-ek a közös `roundTrip` után is átmennek (regresszió-check).
-- Fuzz: fix seeddel determinisztikus futás, nincs abort/hang; a talált valódi
-  bugok külön triage-listára.
-- Ha van `tshark`: a normalizálás miatti eltérések automatikusan „nem-bug"-ként
-  szűrődnek; hiánya esetén a keret skippel.
-- Fingerprint-háló: a fingerprint-suite `~tND` hozzávalókkal futtatva ugyanazt a
-  `tplx` fingerprintet adja, mint a sima `tplx` futás (ugyanazon a lokális
-  buildon összevetve); eltérés vagy serialize-kivétel = serializer-hiba.
+- **WP3 snapshot:** CI-ben a kanonikus dump a befagyasztott snapshothoz diffel; a
+  snapshot egyszer, authoring-időben lett tshark+AI-val hitelesítve (auditnyommal).
+- Fuzz: fix seeddel determinisztikus futás, nincs abort/hang; a talált valódi bugok
+  külön triage-listára.
+- Fingerprint-háló: `~tND` futás ugyanazt a `tplx` fingerprintet adja, mint a sima
+  `tplx` (ugyanazon a lokális buildon); eltérés vagy serialize-kivétel = serializer-hiba.
