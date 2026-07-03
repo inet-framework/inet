@@ -15,6 +15,8 @@
 #include <map>
 #include <sstream>
 
+#include "inet/common/geometry/common/PlyPointCloudReader.h"
+
 namespace inet {
 
 namespace vsg {
@@ -708,24 +710,6 @@ static ref_ptr<GraphicsPipeline> getPointCloudPipeline()
     return pipeline;
 }
 
-static int plyTypeSize(const std::string& t) {
-    if (t == "double" || t == "float64") return 8;
-    if (t == "float" || t == "float32" || t == "int" || t == "int32" || t == "uint" || t == "uint32") return 4;
-    if (t == "short" || t == "int16" || t == "ushort" || t == "uint16") return 2;
-    if (t == "char" || t == "int8" || t == "uchar" || t == "uint8") return 1;
-    return 0;
-}
-static double plyRead(const char* p, const std::string& t) {
-    if (t == "double" || t == "float64") { double v; std::memcpy(&v, p, 8); return v; }
-    if (t == "float" || t == "float32")  { float v; std::memcpy(&v, p, 4); return (double)v; }
-    if (t == "int" || t == "int32")      { int32_t v; std::memcpy(&v, p, 4); return (double)v; }
-    if (t == "uint" || t == "uint32")    { uint32_t v; std::memcpy(&v, p, 4); return (double)v; }
-    if (t == "short" || t == "int16")    { int16_t v; std::memcpy(&v, p, 2); return (double)v; }
-    if (t == "ushort" || t == "uint16")  { uint16_t v; std::memcpy(&v, p, 2); return (double)v; }
-    if (t == "char" || t == "int8")      { int8_t v; std::memcpy(&v, p, 1); return (double)v; }
-    if (t == "uchar" || t == "uint8")    { uint8_t v; std::memcpy(&v, p, 1); return (double)v; }
-    return 0.0;
-}
 // Terrain elevation ramp for a normalised height t in [0,1]: teal (low) -> green -> tan -> brown -> white.
 static ::vsg::vec4 elevationColor(double t) {
     t = std::max(0.0, std::min(1.0, t));
@@ -741,99 +725,17 @@ static ::vsg::vec4 elevationColor(double t) {
 
 ref_ptr<Node> createTerrainFromPLY(const std::string& path, const Coord& sceneMin, const Coord& sceneMax)
 {
-    std::ifstream in(path, std::ios::binary);
-    if (!in)
-        throw cRuntimeError("sceneModel: cannot open PLY file '%s' (resolved relative to the working directory)", path.c_str());
-
-    // --- header ---
-    std::string line;
-    std::getline(in, line);
-    if (!line.empty() && line.back() == '\r') line.pop_back();
-    if (line.rfind("ply", 0) != 0)
-        throw cRuntimeError("sceneModel: '%s' is not a PLY file (missing 'ply' magic)", path.c_str());
-    std::string format;
-    int vertexCount = 0;
-    std::vector<std::pair<std::string, std::string>> props; // (type, name) of the vertex element, in order
-    std::string curElement;
-    while (std::getline(in, line)) {
-        if (!line.empty() && line.back() == '\r') line.pop_back();
-        std::istringstream ss(line);
-        std::string tok; ss >> tok;
-        if (tok == "format") ss >> format;
-        else if (tok == "element") { ss >> curElement; if (curElement == "vertex") ss >> vertexCount; }
-        else if (tok == "property" && curElement == "vertex") {
-            std::string type; ss >> type;
-            if (type == "list") continue; // e.g. face vertex-index lists — not a vertex scalar
-            std::string name; ss >> name;
-            props.emplace_back(type, name);
-        }
-        else if (tok == "end_header") break;
-    }
-    bool ascii = (format.rfind("ascii", 0) == 0);
-    bool binaryLE = (format.rfind("binary_little_endian", 0) == 0);
-    if (!ascii && !binaryLE)
-        throw cRuntimeError("sceneModel: '%s' has unsupported PLY format '%s' (only ascii and binary_little_endian are supported)", path.c_str(), format.c_str());
-    if (vertexCount <= 0 || props.empty())
-        throw cRuntimeError("sceneModel: '%s' has no readable vertex element", path.c_str());
-
-    // locate x/y/z (+ optional r/g/b) by property name; compute byte offsets and column indices
-    int stride = 0, offX = -1, offY = -1, offZ = -1, offR = -1, offG = -1, offB = -1;
-    int idxX = -1, idxY = -1, idxZ = -1, idxR = -1, idxG = -1, idxB = -1;
-    std::string tX, tY, tZ, tR, tG, tB;
-    for (size_t i = 0; i < props.size(); i++) {
-        const std::string& ty = props[i].first;
-        const std::string& n = props[i].second;
-        if (n == "x") { offX = stride; tX = ty; idxX = (int)i; }
-        else if (n == "y") { offY = stride; tY = ty; idxY = (int)i; }
-        else if (n == "z") { offZ = stride; tZ = ty; idxZ = (int)i; }
-        else if (n == "red" || n == "r") { offR = stride; tR = ty; idxR = (int)i; }
-        else if (n == "green" || n == "g") { offG = stride; tG = ty; idxG = (int)i; }
-        else if (n == "blue" || n == "b") { offB = stride; tB = ty; idxB = (int)i; }
-        stride += plyTypeSize(ty);
-    }
-    if (offX < 0 || offY < 0 || offZ < 0)
-        throw cRuntimeError("sceneModel: '%s' has no x/y/z vertex properties", path.c_str());
-    bool hasRGB = (offR >= 0 && offG >= 0 && offB >= 0);
-    // 8-bit channels are 0..255, float channels 0..1 — normalise each channel by ITS OWN type.
-    auto colScale = [](const std::string& t) { return (t == "uchar" || t == "uint8") ? 1.0 / 255.0 : 1.0; };
-    double scaleR = colScale(tR), scaleG = colScale(tG), scaleB = colScale(tB);
-
-    // --- read the vertices ---
-    std::vector<double> xs(vertexCount), ys(vertexCount), zs(vertexCount);
-    std::vector<::vsg::vec4> rgbs(hasRGB ? vertexCount : 0);
-    if (binaryLE) {
-        std::vector<char> buf(stride);
-        for (int i = 0; i < vertexCount; i++) {
-            in.read(buf.data(), stride);
-            if (!in)
-                throw cRuntimeError("sceneModel: '%s' is truncated (expected %d vertices)", path.c_str(), vertexCount);
-            xs[i] = plyRead(buf.data() + offX, tX); ys[i] = plyRead(buf.data() + offY, tY); zs[i] = plyRead(buf.data() + offZ, tZ);
-            if (hasRGB)
-                rgbs[i] = ::vsg::vec4((float)(plyRead(buf.data() + offR, tR) * scaleR),
-                                      (float)(plyRead(buf.data() + offG, tG) * scaleG),
-                                      (float)(plyRead(buf.data() + offB, tB) * scaleB), 1.0f);
-        }
-    }
-    else { // ascii
-        for (int i = 0; i < vertexCount; i++) {
-            if (!std::getline(in, line))
-                throw cRuntimeError("sceneModel: '%s' is truncated (expected %d vertices)", path.c_str(), vertexCount);
-            std::istringstream ss(line);
-            std::vector<double> v; double d; while (ss >> d) v.push_back(d);
-            if ((int)v.size() < (int)props.size())
-                throw cRuntimeError("sceneModel: '%s' has a short vertex line (%d values, expected %d)", path.c_str(), (int)v.size(), (int)props.size());
-            xs[i] = v[idxX]; ys[i] = v[idxY]; zs[i] = v[idxZ];
-            if (hasRGB) rgbs[i] = ::vsg::vec4((float)(v[idxR] * scaleR), (float)(v[idxG] * scaleG), (float)(v[idxB] * scaleB), 1.0f);
-        }
-    }
+    // shared PLY reader (also used by the physical terrain models); coordinates
+    // arrive untransformed, colors (if any) already normalized to [0,1]
+    PlyPointCloud cloud = PlyPointCloudReader::read(path);
+    int vertexCount = cloud.getNumPoints();
+    const std::vector<double>& xs = cloud.xs;
+    const std::vector<double>& ys = cloud.ys;
+    const std::vector<double>& zs = cloud.zs;
+    bool hasRGB = cloud.hasRGB;
 
     // --- recentre, fit into the scene box (aspect-preserving), colour by elevation if no RGB ---
-    double minX = xs[0], maxX = xs[0], minY = ys[0], maxY = ys[0], minZ = zs[0], maxZ = zs[0];
-    for (int i = 1; i < vertexCount; i++) {
-        minX = std::min(minX, xs[i]); maxX = std::max(maxX, xs[i]);
-        minY = std::min(minY, ys[i]); maxY = std::max(maxY, ys[i]);
-        minZ = std::min(minZ, zs[i]); maxZ = std::max(maxZ, zs[i]);
-    }
+    double minX = cloud.minX, maxX = cloud.maxX, minY = cloud.minY, maxY = cloud.maxY, minZ = cloud.minZ, maxZ = cloud.maxZ;
     double cx = (minX + maxX) / 2, cy = (minY + maxY) / 2, dz = (maxZ - minZ);
     double plyW = maxX - minX, plyH = maxY - minY;
     double sceneW = sceneMax.x - sceneMin.x, sceneH = sceneMax.y - sceneMin.y;
@@ -850,7 +752,8 @@ ref_ptr<Node> createTerrainFromPLY(const std::string& path, const Coord& sceneMi
         vertices->set(i, ::vsg::vec3((float)((xs[i] - cx) * scale + centerX),
                                      (float)((ys[i] - cy) * scale + centerY),
                                      (float)((zs[i] - minZ) * scale + baseZ)));
-        colors->set(i, hasRGB ? rgbs[i] : elevationColor(dz > 0 ? (zs[i] - minZ) / dz : 0.0));
+        colors->set(i, hasRGB ? ::vsg::vec4((float)cloud.rs[i], (float)cloud.gs[i], (float)cloud.bs[i], 1.0f)
+                              : elevationColor(dz > 0 ? (zs[i] - minZ) / dz : 0.0));
     }
 
     // --- build the node (fit baked into the vertices, so no transform needed) ---
