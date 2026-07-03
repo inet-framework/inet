@@ -7,6 +7,8 @@
 
 #include "inet/visualizer/osg/util/OsgScene.h"
 
+#include "qtenv/osg/osgscenehandle.h"   // omnetpp::createScene3DNode(osg::Node*), getOsgRoot()
+
 namespace inet {
 
 namespace osg {
@@ -35,7 +37,7 @@ SimulationScene *TopLevelScene::getSimulationScene()
 SimulationScene *TopLevelScene::getSimulationScene(cModule *module)
 {
     auto osgCanvas = module->getOsgCanvas();
-    auto topLevelScene = dynamic_cast<TopLevelScene *>(osgCanvas->getScene());
+    auto topLevelScene = dynamic_cast<TopLevelScene *>(omnetpp::getOsgRoot(osgCanvas->getScene()));
     if (topLevelScene != nullptr)
         return topLevelScene->getSimulationScene();
     else {
@@ -43,7 +45,7 @@ SimulationScene *TopLevelScene::getSimulationScene(cModule *module)
         topLevelScene = new TopLevelScene();
         topLevelScene->addChild(simulationScene);
         // NOTE: these are the default values when there's no SceneOsgVisualizer
-        osgCanvas->setScene(topLevelScene);
+        osgCanvas->setScene(omnetpp::createScene3DNode(topLevelScene));
         osgCanvas->setClearColor(cFigure::Color("#FFFFFF"));
         osgCanvas->setZNear(0.1);
         osgCanvas->setZFar(100000);
