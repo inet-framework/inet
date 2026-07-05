@@ -17,8 +17,10 @@ import inet.applications.contract.IApp;
 // The model communicates with the server in sessions. During a session, the
 // client opens a single TCP connection to the server, sends several requests
 // (always waiting for the complete reply to arrive before sending a new
-// request), and closes the connection. Requests and responses are represented
-// by messages of class ~GenericAppMsg.
+// request), and closes the connection. A request is opaque data of the
+// configured length carrying a ~GenericAppMsgReq region tag that tells the
+// server how large a reply to send back; the reply is opaque data of that
+// length.
 //
 // By default, reading from the socket is not rate limited. To allow rate
 // limiting, set autoRead=false, and use the `readSize` and `readDelay` parameters
@@ -36,7 +38,7 @@ import inet.applications.contract.IApp;
 //    replyLength = 1B*int(exponential(2000))
 // </pre>
 //
-// @see ~TcpGenericServerApp, ~GenericAppMsg, ~TelnetApp
+// @see ~TcpGenericServerApp, ~GenericAppMsgReq, ~TelnetApp
 //
 simple TcpBasicClientApp extends SimpleModule like IApp
 {

@@ -108,27 +108,45 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         sendOrScheduleReadCommandIfNeeded(connId);
 
         bool doClose = false;
-        while (queue.has<GenericAppMsg>(b(-1))) {
-            const auto& appmsg = queue.pop<GenericAppMsg>(b(-1));
+        // Frame the received byte stream using the GenericAppMsgReq region tags the
+        // client attached to each request (see GenericAppMsg.msg). The request length
+        // is read from the tag's requestLength field rather than from the tag's span,
+        // so framing survives TCP segmentation splitting a request across segments.
+        while (queue.getLength() > b(0)) {
+            const auto& data = queue.peek(queue.getLength());
+            const GenericAppMsgReq *req = nullptr;
+            for (const auto& regionTag : data->getAllTags<GenericAppMsgReq>()) {
+                if (regionTag.getOffset() == b(0)) {
+                    req = regionTag.getTag().get();
+                    break;
+                }
+            }
+            if (req == nullptr)
+                throw cRuntimeError("Received %s of TCP data without a GenericAppMsgReq region tag "
+                        "at its front. GenericApp request/reply needs a transport that preserves "
+                        "region tags; it cannot run over TcpLwip or emulation, where application "
+                        "data crosses as raw bytes.", queue.getLength().str().c_str());
+            B requestLength = req->getRequestLength();
+            if (queue.getLength() < requestLength)
+                break; // the whole request has not been received yet
+            B requestedBytes = req->getExpectedReplyLength();
+            simtime_t msgDelay = req->getReplyDelay();
+            bool serverClose = req->getServerClose();
+            queue.pop(requestLength);
             msgsRcvd++;
-            bytesRcvd += appmsg->getChunkLength().get<B>();
-            B requestedBytes = appmsg->getExpectedReplyLength();
-            simtime_t msgDelay = appmsg->getReplyDelay();
+            bytesRcvd += requestLength.get<B>();
             if (msgDelay > maxMsgDelay)
                 maxMsgDelay = msgDelay;
 
             if (requestedBytes > B(0)) {
                 Packet *outPacket = new Packet(msg->getName(), TCP_C_SEND);
                 outPacket->addTag<SocketReq>()->setSocketId(connId);
-                const auto& payload = makeShared<GenericAppMsg>();
-                payload->setChunkLength(requestedBytes);
-                payload->setExpectedReplyLength(B(0));
-                payload->setReplyDelay(0);
+                const auto& payload = makeShared<ByteCountChunk>(requestedBytes);
                 payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
                 outPacket->insertAtBack(payload);
                 sendOrSchedule(outPacket, delay + msgDelay);
             }
-            if (appmsg->getServerClose()) {
+            if (serverClose) {
                 doClose = true;
                 break;
             }

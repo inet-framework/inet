@@ -12,6 +12,7 @@
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 
 namespace inet {
 
@@ -84,12 +85,18 @@ void TcpBasicClientApp::sendRequest()
         replyLength = 1;
     waitedReplyLength = replyLength;
 
-    const auto& payload = makeShared<GenericAppMsg>();
+    // The payload is opaque data of the requested length. The request/reply
+    // control the server needs is carried in a GenericAppMsgReq region tag (model
+    // metadata that rides along with the data but is never serialized onto the
+    // wire); see GenericAppMsg.msg.
+    const auto& payload = makeShared<ByteCountChunk>(B(requestLength));
     Packet *packet = new Packet("data");
-    payload->setChunkLength(B(requestLength));
-    payload->setExpectedReplyLength(B(replyLength));
-    payload->setServerClose(false);
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    const auto& req = payload->addTag<GenericAppMsgReq>();
+    req->setRequestLength(B(requestLength));
+    req->setExpectedReplyLength(B(replyLength));
+    req->setReplyDelay(0);
+    req->setServerClose(false);
     packet->insertAtBack(payload);
 
     numRequestsToSend--;

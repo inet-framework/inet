@@ -24,15 +24,26 @@ void TcpGenericServerThread::established()
 void TcpGenericServerThread::dataArrived(Packet *msg, bool)
 {
     Enter_Method("dataArrived");
-    const auto& appmsg = msg->peekData<GenericAppMsg>();
+    // Read the request control from its GenericAppMsgReq region tag (see
+    // GenericAppMsg.msg). This simple thread assumes one request per received
+    // packet; it does not reassemble a segmented stream.
+    const auto& data = msg->peekData();
+    const GenericAppMsgReq *appmsg = nullptr;
+    for (const auto& regionTag : data->getAllTags<GenericAppMsgReq>()) {
+        if (regionTag.getOffset() == b(0)) {
+            appmsg = regionTag.getTag().get();
+            break;
+        }
+    }
 
     if (!appmsg)
-        throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- probably wrong client app",
+        throw cRuntimeError("Message (%s)%s has no GenericAppMsgReq region tag -- either the wrong "
+                "client app, or a transport that does not preserve region tags (e.g. TcpLwip)",
                 msg->getClassName(), msg->getName());
 
     if (appmsg->getReplyDelay() > 0)
-        throw cRuntimeError("Cannot process (%s)%s: %s class doesn't support replyDelay field"
-                            " of GenericAppMsg, try to use TcpGenericServerApp instead",
+        throw cRuntimeError("Cannot process (%s)%s: %s class doesn't support the replyDelay field,"
+                            " try to use TcpGenericServerApp instead",
                 msg->getClassName(), msg->getName(), getClassName());
 
     // process message: send back requested number of bytes, then close

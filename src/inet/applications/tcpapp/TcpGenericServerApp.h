@@ -16,10 +16,11 @@
 namespace inet {
 
 /**
- * Generic server application. It serves requests coming in GenericAppMsg
- * request messages. Clients are usually subclassed from TcpAppBase.
+ * Generic server application. It serves requests whose control is carried in a
+ * GenericAppMsgReq region tag on the received data. Clients are usually
+ * subclassed from TcpAppBase.
  *
- * @see GenericAppMsg, TcpAppBase
+ * @see GenericAppMsgReq, TcpAppBase
  */
 class INET_API TcpGenericServerApp : public SimpleModule, public LifecycleUnsupported
 {

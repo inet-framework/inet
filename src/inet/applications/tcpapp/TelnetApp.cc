@@ -13,6 +13,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 
 namespace inet {
 
@@ -134,12 +135,16 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
 {
     EV_INFO << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << endl;
 
-    const auto& payload = makeShared<GenericAppMsg>();
+    // Opaque payload of numBytes; the server-side control (echo length) travels
+    // in a GenericAppMsgReq region tag, not on the wire (see GenericAppMsg.msg).
+    const auto& payload = makeShared<ByteCountChunk>(B(numBytes));
     Packet *packet = new Packet("data");
-    payload->setChunkLength(B(numBytes));
-    payload->setExpectedReplyLength(B(expectedReplyBytes));
-    payload->setServerClose(false);
     payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+    const auto& req = payload->addTag<GenericAppMsgReq>();
+    req->setRequestLength(B(numBytes));
+    req->setExpectedReplyLength(B(expectedReplyBytes));
+    req->setReplyDelay(0);
+    req->setServerClose(false);
     packet->insertAtBack(payload);
 
     sendPacket(packet);

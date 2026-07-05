@@ -16,11 +16,16 @@ import inet.applications.contract.IApp;
 //
 // The module listens on the designated TCP port, accepting incoming TCP
 // connections. When a TCP connection is established, the model expects to
-// receive messages of class ~GenericAppMsg on it. A message should contain how
-// large the reply should be (number of bytes). For each received
-// ~GenericAppMsg, ~TcpGenericServerApp will create another ~GenericAppMsg with
-// the requested length as a response and send it back. The reply can be delayed
-// by a constant time (`replyDelay` parameter).
+// receive opaque request data carrying a ~GenericAppMsgReq region tag on it. The
+// tag specifies how large the reply should be (number of bytes), an optional
+// reply delay, and whether to close afterwards. For each received request,
+// ~TcpGenericServerApp sends back the requested number of bytes. The reply can
+// be delayed by a constant time (`replyDelay` parameter).
+//
+// Because the request/reply control is carried in region tags (see
+// ~GenericAppMsgReq) rather than serialized onto the wire, this app works over
+// the ~Tcp module but not over ~TcpLwip or emulation, where region tags are
+// lost; in those cases it raises an error on the first request received.
 //
 // By default, the server does not impose rate limiting on data reads from the
 // socket. To enable rate limiting, you can set `autoRead` to "false" and
@@ -29,7 +34,7 @@ import inet.applications.contract.IApp;
 //
 // Compatible with both ~Ipv4 and ~Ipv6.
 //
-// @see ~GenericAppMsg, ~TcpBasicClientApp, ~TelnetApp
+// @see ~GenericAppMsgReq, ~TcpBasicClientApp, ~TelnetApp
 //
 simple TcpGenericServerApp extends SimpleModule like IApp
 {

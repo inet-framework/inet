@@ -196,6 +196,15 @@ Limitations
    remote addresses/ports of the connection and the MSS, SND.NXT,
    SND.WND, SND.WL1, SND.WL2, RCV.NXT, RCV.WND variables.
 
+-  **Region tags on application data are not preserved.** Because
+   :ned:`TcpLwip` wraps the real lwIP C stack, outgoing data is serialized
+   into a raw byte buffer and incoming data is rebuilt from raw bytes; no
+   ``inet::Packet`` survives the round trip, so all region tags are lost
+   (unlike the native :ned:`Tcp` module, which carries them end-to-end).
+   This breaks features that rely on region tags: for example
+   ``CreationTimeTag`` (used for end-to-end delay statistics) and the
+   ``GenericAppMsgReq`` control tag of the generic request/reply apps.
+
 .. _ug:sec:transport:tcpnsc:
 
 TcpNsc
