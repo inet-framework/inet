@@ -17,6 +17,7 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            4999-d547/tplx, PASS, Ipv4
 
 
+# nclients uses TelnetApp + TcpGenericServerApp, whose request/reply control is carried in a GenericAppMsgReq region tag; TcpLwip cannot preserve region tags, so the server errors out. GenericApp request/reply cannot run over TcpLwip (by design).
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,                 200s,            e194-036d/tplx, ERROR,
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,                 200s,            0de9-dea9/tplx, ERROR,
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0,                 200s,            53b3-7f25/tplx, ERROR,
