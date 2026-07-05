@@ -23,6 +23,7 @@ void Ieee80211Mib::initialize(int stage)
         WATCH(bssStationData.stationType);
         WATCH(bssStationData.isAssociated);
         WATCH(bssAccessPointData.stations);
+        WATCH(bssAccessPointData.associationIds);
         WATCH_EXPR("modeStr", getModeStr(mode));
         WATCH_EXPR("stationTypeStr", getStationTypeStr(bssStationData.stationType));
         WATCH_EXPR("qosStr", qos ? ", QoS" : ", Non-QoS");
@@ -58,7 +59,31 @@ const char *Ieee80211Mib::getStationTypeStr(Ieee80211Mib::BssStationType station
     }
 }
 
+short Ieee80211Mib::allocateAssociationId(const MacAddress& address)
+{
+    auto existing = bssAccessPointData.associationIds.find(address);
+    if (existing != bssAccessPointData.associationIds.end())
+        return existing->second;
+    for (short aid = 1; aid <= 2007; aid++) {
+        bool used = false;
+        for (const auto& entry : bssAccessPointData.associationIds)
+            if (entry.second == aid) {
+                used = true;
+                break;
+            }
+        if (!used) {
+            bssAccessPointData.associationIds[address] = aid;
+            return aid;
+        }
+    }
+    throw cRuntimeError("No IEEE 802.11 association ID is available");
+}
+
+void Ieee80211Mib::releaseAssociationId(const MacAddress& address)
+{
+    bssAccessPointData.associationIds.erase(address);
+}
+
 } // namespace ieee80211
 
 } // namespace inet
-
