@@ -62,7 +62,7 @@ class Ieee80211DsssPhyPreamble extends Ieee80211PhyPreamble
 
 class Ieee80211DsssPhyHeader extends Ieee80211PhyHeader
 {
-    chunkLength = b(32);
+    chunkLength = B(6);
     uint8_t signal;
     uint8_t service;
     // TODO B lengthField;
