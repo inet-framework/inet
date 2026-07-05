@@ -377,7 +377,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     if (isCompliant) {
         auto packet = signalFieldPacketModel != nullptr ? signalFieldPacketModel->getPacket() : packetModel->getPacket();
         const auto& signalFieldBytesChunk = packet->peekAllAsBytes();
-        uint8_t rate = signalFieldBytesChunk->getByte(0) >> 4;
+        uint8_t rate = signalFieldBytesChunk->getByte(0) & 0x0F;
         mode = Ieee80211OfdmCompliantModes::findCompliantMode(rate, channelSpacing);
         if (mode == nullptr)
             const_cast<Packet *>(packet)->setBitError(true);
@@ -492,4 +492,3 @@ Ieee80211LayeredOfdmReceiver::~Ieee80211LayeredOfdmReceiver()
 
 } // namespace physicallayer
 } // namespace inet
-
