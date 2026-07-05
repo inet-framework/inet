@@ -59,6 +59,23 @@ void copyBlockAckFrameFields(const Ptr<ieee80211::Ieee80211BlockAck> to, const P
     to->setReserved(from->getReserved());
 }
 
+uint16_t packSequenceControl(uint8_t fragmentNumber, uint16_t sequenceNumber)
+{
+    return (fragmentNumber & 0xF) | ((sequenceNumber & 0xFFF) << 4);
+}
+
+void writeSequenceControl(MemoryOutputStream& stream, uint8_t fragmentNumber, uint16_t sequenceNumber)
+{
+    stream.writeUint16Le(packSequenceControl(fragmentNumber, sequenceNumber));
+}
+
+void readSequenceControl(MemoryInputStream& stream, int& fragmentNumber, ieee80211::SequenceNumberCyclic& sequenceNumber)
+{
+    auto sequenceControl = stream.readUint16Le();
+    fragmentNumber = sequenceControl & 0xF;
+    sequenceNumber = ieee80211::SequenceNumberCyclic((sequenceControl >> 4) & 0xFFF);
+}
+
 } // namespace
 
 namespace ieee80211 {
@@ -162,8 +179,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeMacAddress(mgmtHeader->getReceiverAddress());
             stream.writeMacAddress(mgmtHeader->getTransmitterAddress());
             stream.writeMacAddress(mgmtHeader->getAddress3());
-            stream.writeUint4(mgmtHeader->getFragmentNumber());
-            stream.writeNBitsOfUint64Be(mgmtHeader->getSequenceNumber().get(), 12);
+            writeSequenceControl(stream, mgmtHeader->getFragmentNumber(), mgmtHeader->getSequenceNumber().get());
             if (mgmtHeader->getOrder())
                 stream.writeUint32Be(0);
             if (type == ST_ACTION) {
@@ -325,8 +341,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeMacAddress(dataHeader->getReceiverAddress());
             stream.writeMacAddress(dataHeader->getTransmitterAddress());
             stream.writeMacAddress(dataHeader->getAddress3());
-            stream.writeUint4(dataHeader->getFragmentNumber());
-            stream.writeNBitsOfUint64Be(dataHeader->getSequenceNumber().get(), 12);
+            writeSequenceControl(stream, dataHeader->getFragmentNumber(), dataHeader->getSequenceNumber().get());
             if (dataHeader->getFromDS() && dataHeader->getToDS())
                 stream.writeMacAddress(dataHeader->getAddress4());
             if (type == ST_DATA_WITH_QOS) {
@@ -385,8 +400,11 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             mgmtHeader->setReceiverAddress(stream.readMacAddress());
             mgmtHeader->setTransmitterAddress(stream.readMacAddress());
             mgmtHeader->setAddress3(stream.readMacAddress());
-            mgmtHeader->setFragmentNumber(stream.readUint4());
-            mgmtHeader->setSequenceNumber(SequenceNumberCyclic(stream.readNBitsToUint64Be(12)));
+            int fragmentNumber;
+            SequenceNumberCyclic sequenceNumber;
+            readSequenceControl(stream, fragmentNumber, sequenceNumber);
+            mgmtHeader->setFragmentNumber(fragmentNumber);
+            mgmtHeader->setSequenceNumber(sequenceNumber);
             if (order)
                 stream.readUint32Be();
             return mgmtHeader;
@@ -398,8 +416,11 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             actionFrame->setReceiverAddress(stream.readMacAddress());
             actionFrame->setTransmitterAddress(stream.readMacAddress());
             actionFrame->setAddress3(stream.readMacAddress());
-            actionFrame->setFragmentNumber(stream.readUint4());
-            actionFrame->setSequenceNumber(SequenceNumberCyclic(stream.readNBitsToUint64Be(12)));
+            int fragmentNumber;
+            SequenceNumberCyclic sequenceNumber;
+            readSequenceControl(stream, fragmentNumber, sequenceNumber);
+            actionFrame->setFragmentNumber(fragmentNumber);
+            actionFrame->setSequenceNumber(sequenceNumber);
             if (order)
                 stream.readUint32Be();
             actionFrame->setCategory(stream.readByte());
@@ -572,8 +593,11 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             dataHeader->setReceiverAddress(stream.readMacAddress());
             dataHeader->setTransmitterAddress(stream.readMacAddress());
             dataHeader->setAddress3(stream.readMacAddress());
-            dataHeader->setFragmentNumber(stream.readUint4());
-            dataHeader->setSequenceNumber(SequenceNumberCyclic(stream.readNBitsToUint64Be(12)));
+            int fragmentNumber;
+            SequenceNumberCyclic sequenceNumber;
+            readSequenceControl(stream, fragmentNumber, sequenceNumber);
+            dataHeader->setFragmentNumber(fragmentNumber);
+            dataHeader->setSequenceNumber(sequenceNumber);
             if (dataHeader->getFromDS() && dataHeader->getToDS())
                 dataHeader->setAddress4(stream.readMacAddress());
             if (type == ST_DATA_WITH_QOS) {
@@ -618,4 +642,3 @@ const Ptr<Chunk> Ieee80211MacTrailerSerializer::deserialize(MemoryInputStream& s
 } // namespace ieee80211
 
 } // namespace inet
-
