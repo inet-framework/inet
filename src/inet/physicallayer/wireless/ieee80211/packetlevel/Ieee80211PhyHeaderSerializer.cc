@@ -14,6 +14,39 @@ namespace inet {
 
 namespace  physicallayer {
 
+namespace {
+
+uint32_t packOfdmSignal(uint8_t rate, bool reserved, uint16_t length, bool parity, uint8_t tail)
+{
+    return (rate & 0xF) |
+            (reserved ? 0x10 : 0) |
+            ((length & 0xFFF) << 5) |
+            (parity ? 0x20000 : 0) |
+            ((tail & 0x3F) << 18);
+}
+
+void writeOfdmSignal(MemoryOutputStream& stream, uint8_t rate, bool reserved, uint16_t length, bool parity, uint8_t tail)
+{
+    auto signal = packOfdmSignal(rate, reserved, length, parity, tail);
+    stream.writeByte(signal & 0xFF);
+    stream.writeByte((signal >> 8) & 0xFF);
+    stream.writeByte((signal >> 16) & 0xFF);
+}
+
+void readOfdmSignal(MemoryInputStream& stream, uint8_t& rate, bool& reserved, uint16_t& length, bool& parity, uint8_t& tail)
+{
+    uint32_t signal = stream.readByte();
+    signal |= stream.readByte() << 8;
+    signal |= stream.readByte() << 16;
+    rate = signal & 0xF;
+    reserved = (signal & 0x10) != 0;
+    length = (signal >> 5) & 0xFFF;
+    parity = (signal & 0x20000) != 0;
+    tail = (signal >> 18) & 0x3F;
+}
+
+} // namespace
+
 Register_Serializer(Ieee80211FhssPhyHeader, Ieee80211FhssPhyHeaderSerializer);
 Register_Serializer(Ieee80211IrPhyHeader, Ieee80211IrPhyHeaderSerializer);
 Register_Serializer(Ieee80211DsssPhyHeader, Ieee80211DsssPhyHeaderSerializer);
@@ -67,19 +100,19 @@ const Ptr<Chunk> Ieee80211IrPhyHeaderSerializer::deserialize(MemoryInputStream& 
 void Ieee80211DsssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto dsssPhyHeader = dynamicPtrCast<const Ieee80211DsssPhyHeader>(chunk);
-    stream.writeUint16Be(0);
     stream.writeByte(dsssPhyHeader->getSignal());
     stream.writeByte(dsssPhyHeader->getService());
-    stream.writeUint16Be(dsssPhyHeader->getLengthField().get<B>());
+    stream.writeUint16Le(dsssPhyHeader->getLengthField().get<B>());
+    stream.writeUint16Le(dsssPhyHeader->getFcs());
 }
 
 const Ptr<Chunk> Ieee80211DsssPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto dsssPhyHeader = makeShared<Ieee80211DsssPhyHeader>();
-    stream.readUint16Be();
     dsssPhyHeader->setSignal(stream.readByte());
     dsssPhyHeader->setService(stream.readByte());
-    dsssPhyHeader->setLengthField(B(stream.readUint16Be()));
+    dsssPhyHeader->setLengthField(B(stream.readUint16Le()));
+    dsssPhyHeader->setFcs(stream.readUint16Le());
     dsssPhyHeader->setFcsMode(FCS_COMPUTED);
     return dsssPhyHeader;
 }
@@ -90,19 +123,19 @@ const Ptr<Chunk> Ieee80211DsssPhyHeaderSerializer::deserialize(MemoryInputStream
 void Ieee80211HrDsssPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto hrDsssPhyHeader = dynamicPtrCast<const Ieee80211HrDsssPhyHeader>(chunk);
-    stream.writeUint16Be(0);
     stream.writeByte(hrDsssPhyHeader->getSignal());
     stream.writeByte(hrDsssPhyHeader->getService());
-    stream.writeUint16Be(hrDsssPhyHeader->getLengthField().get<B>());
+    stream.writeUint16Le(hrDsssPhyHeader->getLengthField().get<B>());
+    stream.writeUint16Le(hrDsssPhyHeader->getFcs());
 }
 
 const Ptr<Chunk> Ieee80211HrDsssPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto hrDsssPhyHeader = makeShared<Ieee80211HrDsssPhyHeader>();
-    stream.readUint16Be();
     hrDsssPhyHeader->setSignal(stream.readByte());
     hrDsssPhyHeader->setService(stream.readByte());
-    hrDsssPhyHeader->setLengthField(B(stream.readUint16Be()));
+    hrDsssPhyHeader->setLengthField(B(stream.readUint16Le()));
+    hrDsssPhyHeader->setFcs(stream.readUint16Le());
     hrDsssPhyHeader->setFcsMode(FCS_COMPUTED);
     return hrDsssPhyHeader;
 }
@@ -113,23 +146,25 @@ const Ptr<Chunk> Ieee80211HrDsssPhyHeaderSerializer::deserialize(MemoryInputStre
 void Ieee80211OfdmPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto ofdmPhyHeader = dynamicPtrCast<const Ieee80211OfdmPhyHeader>(chunk);
-    stream.writeUint4(ofdmPhyHeader->getRate());
-    stream.writeBit(ofdmPhyHeader->getReserved());
-    stream.writeNBitsOfUint64Be(ofdmPhyHeader->getLengthField().get<B>(), 12);
-    stream.writeBit(ofdmPhyHeader->getParity());
-    stream.writeNBitsOfUint64Be(ofdmPhyHeader->getTail(), 6);
-    stream.writeUint16Be(ofdmPhyHeader->getService());
+    writeOfdmSignal(stream, ofdmPhyHeader->getRate(), ofdmPhyHeader->getReserved(), ofdmPhyHeader->getLengthField().get<B>(), ofdmPhyHeader->getParity(), ofdmPhyHeader->getTail());
+    stream.writeUint16Le(ofdmPhyHeader->getService());
 }
 
 const Ptr<Chunk> Ieee80211OfdmPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ofdmPhyHeader = makeShared<Ieee80211OfdmPhyHeader>();
-    ofdmPhyHeader->setRate(stream.readUint4());
-    ofdmPhyHeader->setReserved(stream.readBit());
-    ofdmPhyHeader->setLengthField(B(stream.readNBitsToUint64Be(12)));
-    ofdmPhyHeader->setParity(stream.readBit());
-    ofdmPhyHeader->setTail(stream.readNBitsToUint64Be(6));
-    ofdmPhyHeader->setService(stream.readUint16Be());
+    uint8_t rate;
+    bool reserved;
+    uint16_t length;
+    bool parity;
+    uint8_t tail;
+    readOfdmSignal(stream, rate, reserved, length, parity, tail);
+    ofdmPhyHeader->setRate(rate);
+    ofdmPhyHeader->setReserved(reserved);
+    ofdmPhyHeader->setLengthField(B(length));
+    ofdmPhyHeader->setParity(parity);
+    ofdmPhyHeader->setTail(tail);
+    ofdmPhyHeader->setService(stream.readUint16Le());
     return ofdmPhyHeader;
 }
 
@@ -139,23 +174,25 @@ const Ptr<Chunk> Ieee80211OfdmPhyHeaderSerializer::deserialize(MemoryInputStream
 void Ieee80211ErpOfdmPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto erpOfdmPhyHeader = dynamicPtrCast<const Ieee80211ErpOfdmPhyHeader>(chunk);
-    stream.writeUint4(erpOfdmPhyHeader->getRate());
-    stream.writeBit(erpOfdmPhyHeader->getReserved());
-    stream.writeNBitsOfUint64Be(erpOfdmPhyHeader->getLengthField().get<B>(), 12);
-    stream.writeBit(erpOfdmPhyHeader->getParity());
-    stream.writeNBitsOfUint64Be(erpOfdmPhyHeader->getTail(), 6);
-    stream.writeUint16Be(erpOfdmPhyHeader->getService());
+    writeOfdmSignal(stream, erpOfdmPhyHeader->getRate(), erpOfdmPhyHeader->getReserved(), erpOfdmPhyHeader->getLengthField().get<B>(), erpOfdmPhyHeader->getParity(), erpOfdmPhyHeader->getTail());
+    stream.writeUint16Le(erpOfdmPhyHeader->getService());
 }
 
 const Ptr<Chunk> Ieee80211ErpOfdmPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto erpOfdmPhyHeader = makeShared<Ieee80211ErpOfdmPhyHeader>();
-    erpOfdmPhyHeader->setRate(stream.readUint4());
-    erpOfdmPhyHeader->setReserved(stream.readBit());
-    erpOfdmPhyHeader->setLengthField(B(stream.readNBitsToUint64Be(12)));
-    erpOfdmPhyHeader->setParity(stream.readBit());
-    erpOfdmPhyHeader->setTail(stream.readNBitsToUint64Be(6));
-    erpOfdmPhyHeader->setService(stream.readUint16Be());
+    uint8_t rate;
+    bool reserved;
+    uint16_t length;
+    bool parity;
+    uint8_t tail;
+    readOfdmSignal(stream, rate, reserved, length, parity, tail);
+    erpOfdmPhyHeader->setRate(rate);
+    erpOfdmPhyHeader->setReserved(reserved);
+    erpOfdmPhyHeader->setLengthField(B(length));
+    erpOfdmPhyHeader->setParity(parity);
+    erpOfdmPhyHeader->setTail(tail);
+    erpOfdmPhyHeader->setService(stream.readUint16Le());
     return erpOfdmPhyHeader;
 }
 
@@ -190,4 +227,3 @@ const Ptr<Chunk> Ieee80211VhtPhyHeaderSerializer::deserialize(MemoryInputStream&
 } // namespace physicallayer
 
 } // namespace inet
-
