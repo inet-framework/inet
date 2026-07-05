@@ -8,6 +8,7 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeaderSerializer.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211OfdmSignalField.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 
 namespace inet {
@@ -16,18 +17,9 @@ namespace  physicallayer {
 
 namespace {
 
-uint32_t packOfdmSignal(uint8_t rate, bool reserved, uint16_t length, bool parity, uint8_t tail)
-{
-    return (rate & 0xF) |
-            (reserved ? 0x10 : 0) |
-            ((length & 0xFFF) << 5) |
-            (parity ? 0x20000 : 0) |
-            ((tail & 0x3F) << 18);
-}
-
 void writeOfdmSignal(MemoryOutputStream& stream, uint8_t rate, bool reserved, uint16_t length, bool parity, uint8_t tail)
 {
-    auto signal = packOfdmSignal(rate, reserved, length, parity, tail);
+    auto signal = packIeee80211OfdmSignalField(rate, reserved, length, parity, tail);
     stream.writeByte(signal & 0xFF);
     stream.writeByte((signal >> 8) & 0xFF);
     stream.writeByte((signal >> 16) & 0xFF);
@@ -38,11 +30,12 @@ void readOfdmSignal(MemoryInputStream& stream, uint8_t& rate, bool& reserved, ui
     uint32_t signal = stream.readByte();
     signal |= stream.readByte() << 8;
     signal |= stream.readByte() << 16;
-    rate = signal & 0xF;
-    reserved = (signal & 0x10) != 0;
-    length = (signal >> 5) & 0xFFF;
-    parity = (signal & 0x20000) != 0;
-    tail = (signal >> 18) & 0x3F;
+    auto field = unpackIeee80211OfdmSignalField(signal);
+    rate = field.rate;
+    reserved = field.reserved;
+    length = field.length;
+    parity = field.parity;
+    tail = field.tail;
 }
 
 } // namespace
