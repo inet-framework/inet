@@ -397,7 +397,9 @@ void TcpLwipConnection::processAppCommand(cMessage *msgP)
             break;
 
         case TCP_C_CLOSE:
-            ASSERT(tcpCommand);
+            // tcpCommand may be nullptr: a CLOSE command carries no payload and
+            // is often sent with only a SocketReq tag (e.g. TcpGenericServerApp's
+            // peer-closed path). The regular Tcp module tolerates this too.
             process_CLOSE(tcpCommand, msgP);
             break;
 
