@@ -12,7 +12,7 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/Checksum.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -48,7 +48,7 @@ TcpLwip::TcpLwip()
 
 void TcpLwip::initialize(int stage)
 {
-    SimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     EV_TRACE << this << ": initialize stage " << stage << endl;
 
@@ -76,11 +76,6 @@ void TcpLwip::initialize(int stage)
         EV_INFO << "TcpLwip " << this << " has stack " << pLwipTcpLayerM << "\n";
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        cModule *node = findContainingNode(this);
-        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
         registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
         registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
 
@@ -101,9 +96,6 @@ void TcpLwip::initialize(int stage)
                 ipv6->registerHook(0, checksumInsertion);
 #endif
         }
-    }
-    else if (stage == INITSTAGE_LAST) {
-        isAliveM = true;
     }
 }
 
@@ -242,7 +234,17 @@ err_t TcpLwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
         LwipTcpLayer::lwip_event event, struct pbuf *p, u16_t size, err_t err)
 {
     TcpLwipConnection *conn = static_cast<TcpLwipConnection *>(arg);
-    ASSERT(conn != nullptr);
+
+    if (conn == nullptr) {
+        // The connection this PCB belonged to has already been removed (its PCB
+        // was detached in removeConnection() but not yet freed by lwIP). This can
+        // happen during the connection churn caused by a node/app shutdown and
+        // restart. Discard the stray event: free any carried data and, unless the
+        // PCB is already being torn down (ERR), ask lwIP to abort it.
+        if (p != nullptr)
+            pbuf_free(p);
+        return (event == LwipTcpLayer::LWIP_EVENT_ERR) ? err : ERR_ABRT;
+    }
 
     switch (event) {
         case LwipTcpLayer::LWIP_EVENT_ACCEPT:
@@ -421,7 +423,7 @@ simtime_t roundTime(const simtime_t& timeP, int secSlicesP)
     return ret;
 }
 
-void TcpLwip::handleMessage(cMessage *msgP)
+void TcpLwip::handleMessageWhenUp(cMessage *msgP)
 {
     if (msgP->isSelfMessage()) {
         // timer expired
@@ -469,6 +471,44 @@ void TcpLwip::handleMessage(cMessage *msgP)
         if (nullptr != pLwipTcpLayerM->tcp_active_pcbs || nullptr != pLwipTcpLayerM->tcp_tw_pcbs)
             scheduleAfter(roundTime(simTime() + 0.250, 4) - simTime(), pLwipFastTimerM);
     }
+}
+
+void TcpLwip::reset()
+{
+    // Delete every connection submodule while the lwIP stack is still alive: each
+    // ~TcpLwipConnection() detaches its callback and frees its own PCB. The
+    // destructor does not touch tcpAppConnMapM, so iterating it here is safe.
+    for (auto& elem : tcpAppConnMapM)
+        elem.second->deleteModule();
+    tcpAppConnMapM.clear();
+
+    // Recreate the lwIP stack from scratch, discarding any remaining PCBs (e.g.
+    // half-open connections spawned from a listen PCB) and all internal state, so
+    // that a subsequent startup begins from a clean slate.
+    delete pLwipTcpLayerM;
+    pLwipTcpLayerM = new LwipTcpLayer(*this);
+
+    cancelEvent(pLwipFastTimerM);
+}
+
+void TcpLwip::handleStartOperation(LifecycleOperation *operation)
+{
+    // Nothing to do: the lwIP stack is created in initialize() on first boot and
+    // re-created by reset() on the preceding stop/crash; connections are (re)opened
+    // on demand when the application issues commands.
+    isAliveM = true;
+}
+
+void TcpLwip::handleStopOperation(LifecycleOperation *operation)
+{
+    reset();
+    isAliveM = false;
+}
+
+void TcpLwip::handleCrashOperation(LifecycleOperation *operation)
+{
+    reset();
+    isAliveM = false;
 }
 
 std::string TcpLwip::getTcpStatusString() const

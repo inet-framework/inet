@@ -12,7 +12,8 @@
 #include "inet/common/SimpleModule.h"
 #include <map>
 
-#include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -31,7 +32,7 @@ namespace tcp {
 /**
  * Module for using the LwIP TCP stack.
  */
-class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public LifecycleUnsupported
+class INET_API TcpLwip : public OperationalBase, public LwipTcpStackIf
 {
   public:
     TcpLwip();
@@ -42,9 +43,23 @@ class INET_API TcpLwip : public SimpleModule, public LwipTcpStackIf, public Life
     //@{
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msgP) override;
+    virtual void handleMessageWhenUp(cMessage *msgP) override;
     virtual void finish() override;
     virtual std::string getTcpStatusString() const;
+    //@}
+
+    /** @name Lifecycle handling (shutdown/restart), see OperationalBase */
+    //@{
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_TRANSPORT_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_TRANSPORT_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_TRANSPORT_LAYER; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    // Tear down all connections and the lwIP stack so the module can be
+    // (re)started cleanly after a node shutdown or crash.
+    virtual void reset();
     //@}
 
     /** @name LwipTcpStackIf functions */
