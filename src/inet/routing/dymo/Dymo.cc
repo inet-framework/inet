@@ -304,11 +304,13 @@ void Dymo::scheduleRreqWaitRrepTimer(RreqWaitRrepTimer *message)
 void Dymo::processRreqWaitRrepTimer(RreqWaitRrepTimer *message)
 {
     EV_DETAIL << "Processing RREQ wait RREP timer" << endl;
-    const L3Address& target = message->getTarget();
+    // Note: 'message' is the timer stored in targetAddressToRREQTimer[target] and is
+    // deleted at the end of this method, so we must not delete it via deleteRreqTimer()
+    // here (that would double-free it). We also take 'target' by value because the
+    // reference would dangle once 'message' is deleted.
+    const L3Address target = message->getTarget();
     if (message->getRetryCount() == discoveryAttemptsMax - 1) {
         cancelRouteDiscovery(target);
-        cancelRreqTimer(target);
-        deleteRreqTimer(target);
         eraseRreqTimer(target);
         scheduleRreqHolddownTimer(createRreqHolddownTimer(target));
     }

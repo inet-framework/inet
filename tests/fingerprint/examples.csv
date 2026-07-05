@@ -357,7 +357,7 @@
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             0354-6dd4/tplx;735c-957d/~tNl;31f0-2788/tyf, PASS,  wireless adhoc
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c _Dynamic -r 0   # abstract-config
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            22s,             2f57-3280/tplx;8f96-3d9c/~tNl;c33f-4f8c/tyf, PASS,  wireless adhoc Ipv4
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv6 -r 0,            22s,             5fe9-22ea/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless adhoc # IPv6: Shutdown not supported
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicIPv6 -r 0,            22s,             1e32-4f69/tplx;c684-e25f/~tNl;3469-a611/tyf, PASS,  wireless adhoc
 /examples/manetrouting/dymo/,        -f omnetpp.ini -c DynamicGeneric -r 0,         22s,             b68e-dfe3/tplx;9c68-c2d4/~tNl;8c4d-6bc7/tyf, PASS,  wireless adhoc
 
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Random -r 0,    # abstract-config
