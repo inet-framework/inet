@@ -75,6 +75,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
 
     /** Called by the signal handler whenever a change occurs we're interested in */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /** Utility function: return sender STA's entry from our STA list, or nullptr if not in there */
     virtual StaInfo *lookupSenderSTA(const Ptr<const Ieee80211MgmtHeader>& header);
@@ -117,4 +118,3 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
 } // namespace inet
 
 #endif
-
