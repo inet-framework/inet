@@ -374,7 +374,7 @@
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c Manual -r 0,                 20s,             41d0-4325/tplx;b911-bca9/~tNl;8a0e-d569/tyf, PASS,  wireless adhoc Ipv4
 # /examples/manetrouting/gpsr/,        -f omnetpp.ini -c _Dynamic -r 0,  # abstract-config
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv4 -r 0,            20s,             ce31-f8ed/tplx;8a3b-235d/~tNl;3ecd-bfef/tyf, PASS,  wireless adhoc Ipv4
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv6 -r 0,            20s,             0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless adhoc # This module doesn't support starting in node DOWN state
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicIPv6 -r 0,            20s,             6299-3bf9/tplx;3617-890d/~tNl;2653-aa28/tyf, PASS,  wireless adhoc
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c DynamicGeneric -r 0,         20s,             732c-c576/tplx;03c2-f3ec/~tNl;fb81-3dac/tyf, PASS,  wireless adhoc
 
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             20s,             ec17-5cc2/tplx;55f5-0894/~tNl, PASS,  wireless adhoc Ipv4
