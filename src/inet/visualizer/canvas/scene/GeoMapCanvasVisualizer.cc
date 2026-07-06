@@ -53,19 +53,19 @@ void GeoMapCanvasVisualizer::initialize(int stage)
         mapImage = par("mapImage").stringValue();
         double mapWidth = par("mapWidth");
         double mapHeight = par("mapHeight");
-        double minLatitude = deg(par("minLatitude")).get<deg>();
-        double maxLatitude = deg(par("maxLatitude")).get<deg>();
+        double minLatitude = par("minLatitude");
+        double maxLatitude = par("maxLatitude");
         if (maxLatitude <= minLatitude)
             throw cRuntimeError("maxLatitude (%g deg) must be greater than minLatitude (%g deg)", maxLatitude, minLatitude);
-        double minLongitude = deg(par("minLongitude")).get<deg>();
-        double maxLongitude = deg(par("maxLongitude")).get<deg>();
+        double minLongitude = par("minLongitude");
+        double maxLongitude = par("maxLongitude");
         projection.setWindow(minLatitude, maxLatitude, minLongitude, maxLongitude, mapWidth, mapHeight);
         adjustBackgroundBox = par("adjustBackgroundBox");
         clipFigures = par("clipFigures");
         // graticule
         displayGraticule = par("displayGraticule");
-        graticuleLatSpacing = deg(par("graticuleLatSpacing")).get<deg>();
-        graticuleLonSpacing = deg(par("graticuleLonSpacing")).get<deg>();
+        graticuleLatSpacing = par("graticuleLatSpacing");
+        graticuleLonSpacing = par("graticuleLonSpacing");
         graticuleLineColor = cFigure::parseColor(par("graticuleLineColor"));
         graticuleLineWidth = par("graticuleLineWidth");
         if (displayMap) {

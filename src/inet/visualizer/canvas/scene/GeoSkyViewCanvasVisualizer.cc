@@ -45,7 +45,7 @@ void GeoSkyViewCanvasVisualizer::initialize(int stage)
         plotRadius = par("plotRadius");
         plotOffsetX = par("plotOffsetX");
         plotOffsetY = par("plotOffsetY");
-        elevationMask = deg(par("elevationMask")).get<deg>();
+        elevationMask = par("elevationMask");
         backgroundColor = cFigure::parseColor(par("backgroundColor"));
         backgroundOpacity = par("backgroundOpacity");
         ringColor = cFigure::parseColor(par("ringColor"));
