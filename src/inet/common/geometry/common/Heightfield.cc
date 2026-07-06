@@ -7,6 +7,7 @@
 
 #include "inet/common/geometry/common/Heightfield.h"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -55,33 +56,46 @@ void Heightfield::buildFromPoints(const std::vector<double>& xs, const std::vect
             cell = z;
     }
 
-    // clamp isolated single-cell spikes (stray LIDAR returns) that exceed ALL
-    // non-NaN neighbors by more than the threshold; real structures survive
-    // because their edge cells have same-height neighbors
+    // clamp spikes (stray LIDAR returns: birds, atmospheric noise) that stand more
+    // than the threshold above their SECOND-highest non-NaN neighbor, pulling each
+    // down to that level. Testing the second-highest (rather than the highest, as
+    // before) also catches two-cell spikes — where each cell's single tall neighbor
+    // is the other half of the spike — while genuine structures survive: any cell on
+    // a real edge or surface has at least two neighbors sharing its height, so its
+    // second-highest neighbor is high and it is left alone. A few erosion passes peel
+    // wider spike clusters from the outside in.
     if (despikeThreshold > 0) {
-        std::vector<std::pair<size_t, float>> clamps;
-        for (int iy = 0; iy < numCellsY; iy++) {
-            for (int ix = 0; ix < numCellsX; ix++) {
-                float v = getCell(ix, iy);
-                if (std::isnan(v))
-                    continue;
-                float maxNeighbor = -std::numeric_limits<float>::infinity();
-                int n = 0;
-                for (int dy = -1; dy <= 1; dy++) {
-                    for (int dx = -1; dx <= 1; dx++) {
-                        if (dx == 0 && dy == 0) continue;
-                        int jx = ix + dx, jy = iy + dy;
-                        if (jx < 0 || jx >= numCellsX || jy < 0 || jy >= numCellsY) continue;
-                        float w = getCell(jx, jy);
-                        if (!std::isnan(w)) { maxNeighbor = std::max(maxNeighbor, w); n++; }
+        for (int pass = 0; pass < 3; pass++) {
+            std::vector<std::pair<size_t, float>> clamps;
+            for (int iy = 0; iy < numCellsY; iy++) {
+                for (int ix = 0; ix < numCellsX; ix++) {
+                    float v = getCell(ix, iy);
+                    if (std::isnan(v))
+                        continue;
+                    float highest = -std::numeric_limits<float>::infinity();
+                    float secondHighest = -std::numeric_limits<float>::infinity();
+                    int n = 0;
+                    for (int dy = -1; dy <= 1; dy++) {
+                        for (int dx = -1; dx <= 1; dx++) {
+                            if (dx == 0 && dy == 0) continue;
+                            int jx = ix + dx, jy = iy + dy;
+                            if (jx < 0 || jx >= numCellsX || jy < 0 || jy >= numCellsY) continue;
+                            float w = getCell(jx, jy);
+                            if (std::isnan(w)) continue;
+                            n++;
+                            if (w > highest) { secondHighest = highest; highest = w; }
+                            else if (w > secondHighest) secondHighest = w;
+                        }
                     }
+                    if (n >= 3 && v > secondHighest + despikeThreshold)
+                        clamps.emplace_back((size_t)(iy * numCellsX + ix), secondHighest);
                 }
-                if (n >= 3 && v > maxNeighbor + despikeThreshold)
-                    clamps.emplace_back((size_t)(iy * numCellsX + ix), maxNeighbor);
             }
+            if (clamps.empty())
+                break;
+            for (auto& c : clamps)
+                cells[c.first] = c.second;
         }
-        for (auto& c : clamps)
-            cells[c.first] = c.second;
     }
 
     // bounded hole filling: NaN cells take the average of their non-NaN 8-neighbors
