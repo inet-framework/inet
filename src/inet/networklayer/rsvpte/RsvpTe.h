@@ -218,6 +218,9 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual void sendPathNotify(int handler, const SessionObj& session, const SenderTemplateObj& sender, int status, simtime_t delay);
 
     virtual void setupHello();
+    virtual void addHelloPeer(Ipv4Address peer);
+    // True if the node owning peerInterface runs RSVP (used to auto-derive peers).
+    virtual bool peerRunsRsvp(Ipv4Address peerInterface);
     virtual void startHello(Ipv4Address peer, simtime_t delay);
     virtual void removeHello(HelloState *h);
 

@@ -301,6 +301,25 @@ std::vector<RsvpTe::traffic_path_t>::iterator RsvpTe::findPath(traffic_session_t
     return it;
 }
 
+// Recursively tests whether a network node contains an RSVP-TE module.
+static bool moduleContainsRsvp(cModule *module)
+{
+    for (cModule::SubmoduleIterator it(module); !it.end(); ++it) {
+        cModule *submodule = *it;
+        if (dynamic_cast<RsvpTe *>(submodule) != nullptr)
+            return true;
+        if (moduleContainsRsvp(submodule))
+            return true;
+    }
+    return false;
+}
+
+bool RsvpTe::peerRunsRsvp(Ipv4Address peerInterface)
+{
+    cModule *peerNode = L3AddressResolver().findHostWithAddress(L3Address(peerInterface));
+    return peerNode != nullptr && moduleContainsRsvp(peerNode);
+}
+
 void RsvpTe::setupHello()
 {
     routerId = rt->getRouterId();
@@ -308,37 +327,61 @@ void RsvpTe::setupHello()
     helloInterval = par("helloInterval");
     helloTimeout = par("helloTimeout");
 
-    cStringTokenizer tokenizer(par("peers"));
-    const char *token;
-    while ((token = tokenizer.nextToken()) != nullptr) {
-        Ipv4Address peer = tedmod->getPeerByLocalAddress(CHK(ift->findInterfaceByName(token))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
-
-        HelloState h;
-
-        h.timer = new HelloTimerMsg("hello timer");
-        h.timer->setPeer(peer);
-
-        h.timeout = new HelloTimeoutMsg("hello timeout");
-        h.timeout->setPeer(peer);
-
-        h.peer = peer;
-
-        if (helloInterval > 0.0) {
-            // peer is down until we know he is ok
-
-            h.ok = false;
+    const char *peers = par("peers");
+    if (!strcmp(peers, "auto")) {
+        // Derive the RSVP peers automatically from the Traffic Engineering
+        // Database (TED), which has already discovered every directly-connected
+        // neighbour by walking the topology -- analogous to how a real RSVP-TE
+        // speaker learns its adjacencies from the IGP-TE. Set up a HELLO with each
+        // directly-connected neighbour that actually runs RSVP (this skips plain
+        // IP routers and end hosts, which would never answer a HELLO).
+        for (auto& link : tedmod->ted) {
+            if (link.advrouter != routerId) // not one of our local links
+                continue;
+            if (link.linkid.isUnspecified()) // neighbour has no router id (e.g. a host)
+                continue;
+            if (!peerRunsRsvp(link.remote)) // neighbour does not speak RSVP
+                continue;
+            addHelloPeer(link.linkid);
         }
-        else {
-            // don't use HELLO at all, consider all peers running all the time
-
-            h.ok = true;
+    }
+    else {
+        cStringTokenizer tokenizer(peers);
+        const char *token;
+        while ((token = tokenizer.nextToken()) != nullptr) {
+            Ipv4Address peer = tedmod->getPeerByLocalAddress(CHK(ift->findInterfaceByName(token))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+            addHelloPeer(peer);
         }
+    }
+}
 
-        HelloList.push_back(h);
+void RsvpTe::addHelloPeer(Ipv4Address peer)
+{
+    HelloState h;
 
-        if (helloInterval > 0.0) {
-            startHello(peer, exponential(helloInterval));
-        }
+    h.timer = new HelloTimerMsg("hello timer");
+    h.timer->setPeer(peer);
+
+    h.timeout = new HelloTimeoutMsg("hello timeout");
+    h.timeout->setPeer(peer);
+
+    h.peer = peer;
+
+    if (helloInterval > 0.0) {
+        // peer is down until we know he is ok
+
+        h.ok = false;
+    }
+    else {
+        // don't use HELLO at all, consider all peers running all the time
+
+        h.ok = true;
+    }
+
+    HelloList.push_back(h);
+
+    if (helloInterval > 0.0) {
+        startHello(peer, exponential(helloInterval));
     }
 }
 

@@ -91,7 +91,7 @@ simple RsvpTe extends SimpleModule
         string tedModule;
         string classifierModule; // The path to the module which implements the IIngressClassifier C++ interface
         xml traffic = default(xml("<sessions/>")); // Specifies paths to set up
-        string peers; // Names of the interfaces towards RSVP peers
+        string peers = default("auto"); // "auto" (default) derives the RSVP peers from the TED (every directly-connected RSVP-speaking neighbour); otherwise a space-separated list of the interface names towards the RSVP peers
         double helloInterval @unit(s);
         double helloTimeout @unit(s);
         @display("i=block/control");

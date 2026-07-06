@@ -31,7 +31,7 @@ module MplsRouterBase extends Router
 {
     parameters:
         @display("i=abstract/router");
-        string peers;
+        string peers = default("auto"); // RSVP peers; "auto" derives them from the TED (see ~RsvpTe)
         string routerId = default("auto");
         *.routingTable.routerId = this.routerId;
         *.tedModule = default(absPath(".ted"));

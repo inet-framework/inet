@@ -13,6 +13,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/stlutils.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
@@ -32,6 +33,20 @@ LinkStateRouting::~LinkStateRouting()
     cancelAndDelete(announceMsg);
 }
 
+// Recursively tests whether a network node runs link-state routing (i.e. is an
+// RSVP-TE peer we should flood our TE link-state to).
+static bool moduleContainsLinkStateRouting(cModule *module)
+{
+    for (cModule::SubmoduleIterator it(module); !it.end(); ++it) {
+        cModule *submodule = *it;
+        if (dynamic_cast<LinkStateRouting *>(submodule) != nullptr)
+            return true;
+        if (moduleContainsLinkStateRouting(submodule))
+            return true;
+    }
+    return false;
+}
+
 void LinkStateRouting::initialize(int stage)
 {
     SimpleModule::initialize(stage);
@@ -46,13 +61,30 @@ void LinkStateRouting::initialize(int stage)
         cModule *host = getContainingNode(this);
         host->subscribe(tedChangedSignal, this);
 
-        // peers are given as interface names in the "peers" module parameter;
-        // store corresponding interface addresses in peerIfAddrs[]
-        cStringTokenizer tokenizer(par("peers"));
-        IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        const char *token;
-        while ((token = tokenizer.nextToken()) != nullptr) {
-            peerIfAddrs.push_back(CHK(ift->findInterfaceByName(token))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+        // Determine the local interfaces facing our RSVP-TE peers, and store their
+        // addresses in peerIfAddrs[]. With peers="auto" (the default) they are
+        // derived from the TED -- every directly-connected neighbour that also runs
+        // link-state routing (skipping hosts and non-TE routers); otherwise "peers"
+        // is a space-separated list of the peer-facing interface names.
+        const char *peers = par("peers");
+        if (!strcmp(peers, "auto")) {
+            for (auto& link : tedmod->ted) {
+                if (link.advrouter != routerId) // not one of our local links
+                    continue;
+                if (link.linkid.isUnspecified()) // neighbour has no router id (e.g. a host)
+                    continue;
+                cModule *peerNode = L3AddressResolver().findHostWithAddress(L3Address(link.remote));
+                if (peerNode != nullptr && moduleContainsLinkStateRouting(peerNode))
+                    peerIfAddrs.push_back(link.local);
+            }
+        }
+        else {
+            cStringTokenizer tokenizer(peers);
+            IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+            const char *token;
+            while ((token = tokenizer.nextToken()) != nullptr) {
+                peerIfAddrs.push_back(CHK(ift->findInterfaceByName(token))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+            }
         }
 
         // schedule start of flooding link state info
