@@ -49,12 +49,22 @@ station occupies is time the fast stations cannot use. The fast stations are the
 throttled down toward the slow station's throughput. In the limit, *all* stations end
 up with roughly the **same** throughput, close to what the slowest station would
 achieve on its own. This is the IEEE 802.11 performance anomaly, first characterized by
-Heusse, Rousseau, Berger-Sabbatel, and Duda (INFOCOM 2003).
+`Heusse, Rousseau, Berger-Sabbatel, and Duda
+<https://ieeexplore.ieee.org/document/1208921/>`__ (INFOCOM 2003).
 
 The root cause is that standard DCF provides **transmission-opportunity fairness**
 (equal access count) rather than **airtime fairness** (equal channel time). Scheduling
 disciplines that enforce airtime fairness avoid the anomaly, but they are outside plain
 DCF.
+
+In practice this is how the problem is handled today: modern access points schedule
+stations by **airtime** rather than by packets. The Linux ``mac80211`` stack, for
+example, uses a deficit round-robin scheduler whose deficit is counted in airtime
+(microseconds) instead of bytes, so a slow station is held to its fair *time* share and
+can no longer drag the others down. That scheme — described by Høiland-Jørgensen et al.,
+`"Ending the Anomaly" <https://arxiv.org/abs/1703.00064>`__ (USENIX ATC 2017) — ships in
+mainline Linux, and many commercial access points expose an equivalent "airtime
+fairness" feature.
 
 The Model
 ---------
@@ -306,6 +316,16 @@ workspace and then open an interactive shell:
 
 Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
 then start exploring.
+
+References
+----------
+
+- M. Heusse, F. Rousseau, G. Berger-Sabbatel, and A. Duda, "Performance Anomaly of
+  802.11b," *Proc. IEEE INFOCOM 2003*, pp. 836–843.
+  https://ieeexplore.ieee.org/document/1208921/
+- T. Høiland-Jørgensen, M. Kazior, D. Täht, P. Hurtig, and A. Brunström, "Ending the
+  Anomaly: Achieving Low Latency and Airtime Fairness in WiFi," *Proc. USENIX ATC 2017*,
+  pp. 139–151. https://arxiv.org/abs/1703.00064
 
 Discussion
 ----------
