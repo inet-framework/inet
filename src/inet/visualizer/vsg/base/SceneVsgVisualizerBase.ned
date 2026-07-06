@@ -32,6 +32,7 @@ simple SceneVsgVisualizerBase extends SceneVisualizerBase
         double sceneImageSize @unit(m) = default(1m); // Scene texture size
         bool sceneShading = default(true); // Exponential shading for scene color, enabled by default
         string sceneModel = default(""); // Path to an external terrain model (a PLY point cloud, e.g. a LIDAR scan) to use as the ground instead of the flat quad; recentred and aspect-fit into the scene bounds. Resolved relative to the working directory. Empty = flat floor.
+        string groundModel = default(""); // Network-relative path of a PointCloudGround module whose heightfield is rendered as a shaded surface mesh, so the displayed ground is exactly the one the physics samples. Takes precedence over sceneModel. Empty = use sceneModel/flat floor.
 
         @class(SceneVsgVisualizerBase);
 }

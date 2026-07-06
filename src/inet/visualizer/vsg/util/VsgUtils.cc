@@ -15,6 +15,7 @@
 #include <map>
 #include <sstream>
 
+#include "inet/common/geometry/common/Heightfield.h"
 #include "inet/common/geometry/common/PlyPointCloudReader.h"
 
 namespace inet {
@@ -763,6 +764,142 @@ ref_ptr<Node> createTerrainFromPLY(const std::string& path, const Coord& sceneMi
     DataList arrays{vertices, colors};
     commands->addChild(BindVertexBuffers::create(0, arrays));
     commands->addChild(Draw::create(vertices->size(), 1, 0, 0));
+    stateGroup->addChild(commands);
+    return stateGroup;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Ground mesh from a Heightfield (renders the SAME surface the physics uses)
+// ---------------------------------------------------------------------------------------------
+
+static const char *terrainMeshVertexShader = R"(#version 450
+layout(push_constant) uniform PushConstants { mat4 projection; mat4 modelView; } pc;
+layout(location = 0) in vec3 vsg_Vertex;
+layout(location = 1) in vec4 vsg_Color;
+layout(location = 2) in vec3 vsg_Normal;
+layout(location = 0) out vec4 vColor;
+layout(location = 1) out vec3 vWorldNormal;
+void main() {
+    vColor = vsg_Color;
+    vWorldNormal = vsg_Normal;   // heightfield normals are already world/up-referenced (no model rotation)
+    gl_Position = (pc.projection * pc.modelView) * vec4(vsg_Vertex, 1.0);
+}
+)";
+
+static const char *terrainMeshFragmentShader = R"(#version 450
+layout(location = 0) in vec4 vColor;
+layout(location = 1) in vec3 vWorldNormal;
+layout(location = 0) out vec4 fragColor;
+void main() {
+    vec3 n = normalize(vWorldNormal);
+    vec3 lightDir = normalize(vec3(0.35, 0.35, 0.87));   // upper-front, mirrors the scene key light
+    float diffuse = max(dot(n, lightDir), 0.0);
+    float shade = 0.40 + 0.60 * diffuse;                 // ambient floor + diffuse, so buildings read as 3D
+    fragColor = vec4(vColor.rgb * shade, vColor.a);
+}
+)";
+
+// Cached opaque terrain-mesh pipeline (position + colour + normal, TRIANGLE_LIST, two-sided, depth test + write).
+static ref_ptr<GraphicsPipeline> getTerrainMeshPipeline()
+{
+    static ref_ptr<GraphicsPipeline>& pipeline = *(new ref_ptr<GraphicsPipeline>());
+    if (pipeline) return pipeline;
+
+    auto vertexShader = ShaderStage::create(VK_SHADER_STAGE_VERTEX_BIT, "main", terrainMeshVertexShader);
+    auto fragmentShader = ShaderStage::create(VK_SHADER_STAGE_FRAGMENT_BIT, "main", terrainMeshFragmentShader);
+    ShaderStages shaderStages{vertexShader, fragmentShader};
+    auto shaderCompiler = ShaderCompiler::create();
+    if (!shaderCompiler->supported() || !shaderCompiler->compile(shaderStages))
+        throw cRuntimeError("groundModel terrain-mesh rendering needs a VSG built with the GLSL compiler (glslang)");
+
+    auto pipelineLayout = PipelineLayout::create(DescriptorSetLayouts{},
+        PushConstantRanges{{VK_SHADER_STAGE_VERTEX_BIT, 0, 128}});
+    VertexInputState::Bindings vertexBindings{
+        {0, sizeof(::vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX},
+        {1, sizeof(::vsg::vec4), VK_VERTEX_INPUT_RATE_VERTEX},
+        {2, sizeof(::vsg::vec3), VK_VERTEX_INPUT_RATE_VERTEX}};
+    VertexInputState::Attributes vertexAttributes{
+        {0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0},
+        {1, 1, VK_FORMAT_R32G32B32A32_SFLOAT, 0},
+        {2, 2, VK_FORMAT_R32G32B32_SFLOAT, 0}};
+    auto inputAssembly = InputAssemblyState::create();
+    inputAssembly->topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    auto rasterization = RasterizationState::create();
+    rasterization->cullMode = VK_CULL_MODE_NONE;                 // viewable from above or below
+    auto depthStencil = DepthStencilState::create();            // defaults: depth test + write on (opaque)
+    auto colorBlend = ColorBlendState::create();
+    VkPipelineColorBlendAttachmentState att{};
+    att.blendEnable = VK_FALSE;                                  // opaque terrain
+    att.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlend->attachments = ColorBlendState::ColorBlendAttachments{att};
+
+    GraphicsPipelineStates pipelineStates{
+        VertexInputState::create(vertexBindings, vertexAttributes),
+        inputAssembly, rasterization, MultisampleState::create(), depthStencil, colorBlend};
+    pipeline = GraphicsPipeline::create(pipelineLayout, shaderStages, pipelineStates);
+    return pipeline;
+}
+
+ref_ptr<Node> createTerrainMeshFromHeightfield(const Heightfield& heightfield)
+{
+    // The heightfield is already in simulation coordinates (the ground module baked
+    // its transform in), so its cells map 1:1 onto the scene the nodes live in — the
+    // rendered surface is exactly the surface the physics samples. Sample one vertex
+    // per cell center; a cell with no data (NaN) drops the triangles that touch it.
+    int nx = heightfield.getNumCellsX(), ny = heightfield.getNumCellsY();
+    if (nx < 2 || ny < 2)
+        return ::vsg::Group::create();
+    double cell = heightfield.getCellSize();
+    double x0 = heightfield.getMinX() + cell * 0.5, y0 = heightfield.getMinY() + cell * 0.5;
+
+    std::vector<float> zs(nx * ny);
+    double minZ = INFINITY, maxZ = -INFINITY;
+    for (int iy = 0; iy < ny; iy++)
+        for (int ix = 0; ix < nx; ix++) {
+            double z = heightfield.getElevation(x0 + ix * cell, y0 + iy * cell);
+            zs[iy * nx + ix] = (float)z;
+            if (std::isfinite(z)) { minZ = std::min(minZ, z); maxZ = std::max(maxZ, z); }
+        }
+    double dz = (std::isfinite(minZ) && maxZ > minZ) ? maxZ - minZ : 1.0;
+
+    auto vertices = vec3Array::create(nx * ny);
+    auto colors = vec4Array::create(nx * ny);
+    auto normals = vec3Array::create(nx * ny);
+    for (int iy = 0; iy < ny; iy++)
+        for (int ix = 0; ix < nx; ix++) {
+            int i = iy * nx + ix;
+            double x = x0 + ix * cell, y = y0 + iy * cell;
+            float z = zs[i];
+            vertices->set(i, ::vsg::vec3((float)x, (float)y, std::isfinite(z) ? z : (float)minZ));
+            colors->set(i, elevationColor(std::isfinite(z) ? (z - minZ) / dz : 0.0));
+            Coord n = heightfield.getNormal(x, y);
+            normals->set(i, std::isfinite(n.z) ? ::vsg::vec3((float)n.x, (float)n.y, (float)n.z) : ::vsg::vec3(0.0f, 0.0f, 1.0f));
+        }
+
+    // two triangles per cell, skipping any quad with a missing (NaN) corner
+    std::vector<uint32_t> idx;
+    idx.reserve((size_t)(nx - 1) * (ny - 1) * 6);
+    auto valid = [&](int ix, int iy) { return std::isfinite(zs[iy * nx + ix]); };
+    for (int iy = 0; iy < ny - 1; iy++)
+        for (int ix = 0; ix < nx - 1; ix++) {
+            if (!valid(ix, iy) || !valid(ix + 1, iy) || !valid(ix, iy + 1) || !valid(ix + 1, iy + 1))
+                continue;
+            uint32_t a = iy * nx + ix, b = iy * nx + ix + 1, c = (iy + 1) * nx + ix, d = (iy + 1) * nx + ix + 1;
+            idx.insert(idx.end(), {a, c, b, b, c, d});
+        }
+    if (idx.empty())
+        return ::vsg::Group::create();
+    auto indices = uintArray::create(idx.size());
+    for (size_t i = 0; i < idx.size(); i++)
+        indices->set(i, idx[i]);
+
+    auto stateGroup = StateGroup::create();
+    stateGroup->add(BindGraphicsPipeline::create(getTerrainMeshPipeline()));
+    auto commands = Commands::create();
+    DataList arrays{vertices, colors, normals};
+    commands->addChild(BindVertexBuffers::create(0, arrays));
+    commands->addChild(BindIndexBuffer::create(indices));
+    commands->addChild(DrawIndexed::create(indices->size(), 1, 0, 0, 0));
     stateGroup->addChild(commands);
     return stateGroup;
 }
