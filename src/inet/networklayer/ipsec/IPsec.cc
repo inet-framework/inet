@@ -24,9 +24,14 @@
 #include "inet/common/XMLUtils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#endif
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
+#endif
 #include "inet/networklayer/ipsec/IPsecAuthenticationHeader_m.h"
 #include "inet/networklayer/ipsec/IPsecEncapsulatingSecurityPayload_m.h"
 
@@ -111,7 +116,11 @@ const Ptr<const NetworkHeaderBase> IPsec::peekNetworkHeader(Packet *packet) cons
     if (networkProtocol == &Protocol::ipv6)
         return packet->peekAtFront<Ipv6Header>();
 #endif
+#ifdef INET_WITH_IPv4
     return packet->peekAtFront<Ipv4Header>();
+#else
+    throw cRuntimeError("IPsec: unsupported network protocol header IPv4");
+#endif
 }
 
 const Ptr<NetworkHeaderBase> IPsec::removeNetworkHeader(Packet *packet) const
@@ -120,7 +129,11 @@ const Ptr<NetworkHeaderBase> IPsec::removeNetworkHeader(Packet *packet) const
     if (networkProtocol == &Protocol::ipv6)
         return packet->removeAtFront<Ipv6Header>();
 #endif
+#ifdef INET_WITH_IPv4
     return packet->removeAtFront<Ipv4Header>();
+#else
+    throw cRuntimeError("IPsec: unsupported network protocol header IPv4");
+#endif
 }
 
 IPsec::IPsec()
@@ -372,12 +385,14 @@ PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const L3Address& local
         packetInfo.setTfcSupported(true);
     }
 #endif
+#ifdef INET_WITH_IPv4
     else if (protocol == IP_PROT_ICMP) {
         const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(transportOffset);
         packetInfo.setIcmpType(icmpHeader->getType());
         packetInfo.setIcmpCode(icmpHeader->getCode());
         packetInfo.setTfcSupported(false);
     }
+#endif
     // ICMPv6 and any other protocol are matched on protocol number only
     return packetInfo;
 }
@@ -457,12 +472,14 @@ PacketInfo IPsec::extractIngressPacketInfo(Packet *packet)
         packetInfo.setTfcSupported(true);
     }
 #endif
+#ifdef INET_WITH_IPv4
     else if (protocol == IP_PROT_ICMP) {
         const auto& icmpHeader = packet->peekDataAt<IcmpHeader>(transportOffset);
         packetInfo.setIcmpType(icmpHeader->getType());
         packetInfo.setIcmpCode(icmpHeader->getCode());
         packetInfo.setTfcSupported(false);
     }
+#endif
     // ICMPv6 and any other protocol are matched on protocol number only
     return packetInfo;
 }

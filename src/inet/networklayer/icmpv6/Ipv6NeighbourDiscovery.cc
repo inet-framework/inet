@@ -23,7 +23,9 @@
 #include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
+#ifdef INET_WITH_MIPV6
 #include "inet/networklayer/mipv6/Mipv6.h"
+#endif
 
 namespace inet {
 
@@ -126,7 +128,11 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         if (rt6->isMobileNode())
+#ifdef INET_WITH_MIPV6
             mipv6.reference(this, "mipv6Module", true);
+#else
+            throw cRuntimeError("Node is configured as a mobile node, but INET was compiled without Mobile IPv6 (MIPv6) support");
+#endif
     }
 }
 
@@ -906,12 +912,14 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
             ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->permanentlyAssign(addr);
         }
 
+#ifdef INET_WITH_MIPV6
         // if we have MIPv6 protocols on this node we will eventually have to
         // call some appropriate methods
         if (rt6->isMobileNode()) {
             if (entry.hFlag == false) // if we are not in the home network, send BUs
                 mipv6->initiateMipv6Protocol(ie, tentativeAddr);
         }
+#endif
 
         dadGlobalList.erase(it->first);
     }
@@ -2518,7 +2526,9 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
 
             // initiate the returning home procedure
             ASSERT(!CoA.isUnspecified());
+#ifdef INET_WITH_MIPV6
             mipv6->returningHome(CoA, ie);
+#endif
         }
         else { // non-mobile nodes will never have returnedHome == true, so they will always assign a new address
             CoA = ie->getProtocolData<Ipv6InterfaceData>()->getGlobalAddress(Ipv6InterfaceData::CoA);

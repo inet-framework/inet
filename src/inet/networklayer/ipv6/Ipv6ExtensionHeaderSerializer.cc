@@ -9,7 +9,9 @@
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/TlvOptions_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#ifdef INET_WITH_MIPV6
 #include "inet/networklayer/mipv6/MobilityHeader_m.h"
+#endif
 
 namespace inet {
 
@@ -35,12 +37,14 @@ static void serializeIpv6TlvOptions(MemoryOutputStream& stream, const TlvOptions
             stream.writeByte(opt->getLength());
             stream.writeByteRepeatedly(0, opt->getLength());
         }
+#ifdef INET_WITH_MIPV6
         else if (opt->getType() == IPv6TLVOPTION_HOME_ADDRESS) {
             auto *hao = check_and_cast<const HomeAddressOption *>(opt);
             stream.writeByte(hao->getType());
             stream.writeByte(16); // length: 16 bytes for IPv6 address
             stream.writeIpv6Address(hao->getHomeAddress());
         }
+#endif
         else if (auto *raw = dynamic_cast<const TlvOptionRaw *>(opt)) {
             stream.writeByte(raw->getType());
             stream.writeByte(raw->getBytesArraySize());
@@ -77,12 +81,14 @@ static void deserializeIpv6TlvOptions(MemoryInputStream& stream, TlvOptions& tlv
                 stream.readByteRepeatedly(0, length);
                 tlvOptions.appendTlvOption(opt);
             }
+#ifdef INET_WITH_MIPV6
             else if (type == IPv6TLVOPTION_HOME_ADDRESS) {
                 auto *hao = new HomeAddressOption();
                 hao->setLength(length);
                 hao->setHomeAddress(stream.readIpv6Address());
                 tlvOptions.appendTlvOption(hao);
             }
+#endif
             else {
                 auto *raw = new TlvOptionRaw();
                 raw->setType(type);
