@@ -2,10 +2,13 @@
 Test TerrainObstacleLoss::computeKnifeEdgeLoss: the ITU-R P.526 single
 knife-edge diffraction curve J(v). Checks the no-loss region below the
 v = -0.78 cutoff, continuity at the cutoff, the ~6 dB grazing value at v = 0,
-reference points in the shadow region, and monotonicity.
+reference points in the shadow region, and monotonicity. Also tests the
+Deygout multi-edge construction (computeDeygoutLoss): single-edge equivalence,
+clear path, superadditivity of a second ridge, and the edge-count cap.
 
 %includes:
 #include <cmath>
+#include <vector>
 #include "inet/physicallayer/wireless/common/obstacleloss/TerrainObstacleLoss.h"
 
 using namespace inet;
@@ -44,6 +47,43 @@ CHECK("shadow v=2", std::fabs(TerrainObstacleLoss::computeKnifeEdgeLoss(2) - 19.
     CHECK("monotone", monotone);
 }
 
+// --- Deygout: a single knife edge equals J(v) of that edge ---
+{
+    double lambda = 0.125, d = 100.0;
+    std::vector<double> z = {0.0, 30.0, 0.0}; // one peak, endpoints at ground
+    double v = 30.0 * std::sqrt(2.0 * (d + d) / (lambda * d * d)); // dominant edge at index 1
+    double single = TerrainObstacleLoss::computeKnifeEdgeLoss(v);
+    double deygout = TerrainObstacleLoss::computeDeygoutLoss(z, d, lambda, 0, 2, 3);
+    CHECK("deygout single edge", std::fabs(deygout - single) < 1e-9);
+}
+
+// --- Deygout: a path clear of every sample has no loss ---
+{
+    std::vector<double> z = {0.0, -10.0, -5.0, -8.0, 0.0};
+    CHECK("deygout clear", TerrainObstacleLoss::computeDeygoutLoss(z, 50.0, 0.125, 0, 4, 3) == 0);
+}
+
+// --- Deygout: a second ridge adds loss beyond the dominant edge alone ---
+{
+    double lambda = 0.125, d = 50.0;
+    std::vector<double> one = {0.0, 40.0, 0.0, 0.0, 0.0};  // single dominant ridge
+    std::vector<double> two = {0.0, 40.0, 0.0, 25.0, 0.0}; // plus a secondary ridge
+    double lossOne = TerrainObstacleLoss::computeDeygoutLoss(one, d, lambda, 0, 4, 3);
+    double lossTwo = TerrainObstacleLoss::computeDeygoutLoss(two, d, lambda, 0, 4, 3);
+    CHECK("deygout second ridge adds loss", lossTwo > lossOne + 0.5);
+}
+
+// --- Deygout: the edge cap limits how many edges are charged ---
+{
+    double lambda = 0.125, d = 50.0;
+    std::vector<double> z = {0.0, 40.0, 0.0, 25.0, 0.0};
+    double capped = TerrainObstacleLoss::computeDeygoutLoss(z, d, lambda, 0, 4, 1); // dominant edge only
+    double full   = TerrainObstacleLoss::computeDeygoutLoss(z, d, lambda, 0, 4, 3);
+    CHECK("deygout edge cap limits loss", capped < full);
+    double v1 = 40.0 * std::sqrt(2.0 * (4 * d) / (lambda * (1 * d) * (3 * d))); // dominant edge at index 1
+    CHECK("deygout cap equals dominant edge", std::fabs(capped - TerrainObstacleLoss::computeKnifeEdgeLoss(v1)) < 1e-9);
+}
+
 EV << "done\n";
 
 %contains: stdout
@@ -54,4 +94,9 @@ grazing v=0: OK
 shadow v=1: OK
 shadow v=2: OK
 monotone: OK
+deygout single edge: OK
+deygout clear: OK
+deygout second ridge adds loss: OK
+deygout edge cap limits loss: OK
+deygout cap equals dominant edge: OK
 done

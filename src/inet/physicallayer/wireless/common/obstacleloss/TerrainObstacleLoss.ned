@@ -27,6 +27,11 @@ import inet.physicallayer.wireless.common.base.packetlevel.TracingObstacleLossBa
 //   about 6 dB with the terrain right at the direct ray, deepening smoothly
 //   (and frequency-dependently) as the ray sinks below the terrain. Links
 //   thus degrade progressively instead of dropping at an invisible boundary.
+// - "diffraction": multi-edge — the Deygout construction charges the dominant
+//   knife edge along the profile, then recurses into the sub-paths on either
+//   side of it (up to maxDiffractionEdges edges), summing the losses. This
+//   models the added attenuation behind a row of ridges/buildings, where the
+//   single-edge "fresnel" mode would underestimate the shadow.
 //
 // Emits obstaclePenetrated events at the critical terrain point (with no
 // associated physical object, world coordinates), so tracing obstacle loss
@@ -45,9 +50,10 @@ import inet.physicallayer.wireless.common.base.packetlevel.TracingObstacleLossBa
 module TerrainObstacleLoss extends TracingObstacleLossBase
 {
     parameters:
-        string mode @enum("los", "fresnel") = default("los"); // binary line-of-sight blocking, or graded Fresnel/knife-edge attenuation
+        string mode @enum("los", "fresnel", "diffraction") = default("los"); // binary line-of-sight blocking, graded single knife-edge (Fresnel), or multi-edge Deygout diffraction
         string markerStyle @enum("depth", "ray") = default("depth"); // geometry of the emitted obstruction markers (see module description)
         double sampleStep @unit(m) = default(0m); // spacing of the line-of-sight samples; 0 = the ground heightfield's cell size
+        int maxDiffractionEdges = default(3); // in "diffraction" mode, the maximum number of Deygout knife edges summed along a path
         bool logLinkEvents = default(true); // log line-of-sight transitions per node pair (established / lost / re-established / cannot be established)
         @class(TerrainObstacleLoss);
 }

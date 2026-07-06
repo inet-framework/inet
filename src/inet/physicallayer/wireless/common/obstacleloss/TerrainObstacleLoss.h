@@ -35,7 +35,7 @@ namespace physicallayer {
 class INET_API TerrainObstacleLoss : public TracingObstacleLossBase
 {
   protected:
-    enum Mode { LOS, FRESNEL };
+    enum Mode { LOS, FRESNEL, DIFFRACTION };
     enum MarkerStyle { DEPTH, RAY };
 
     ModuleRefByPar<physicalenvironment::IPhysicalEnvironment> physicalEnvironment;
@@ -43,6 +43,7 @@ class INET_API TerrainObstacleLoss : public TracingObstacleLossBase
     Mode mode = LOS;
     MarkerStyle markerStyle = DEPTH;
     double sampleStep = 0;
+    int maxDiffractionEdges = 3;
     bool logLinkEvents = false;
 
     // line-of-sight bookkeeping for logging: last known blocked/clear state per node pair
@@ -63,6 +64,15 @@ class INET_API TerrainObstacleLoss : public TracingObstacleLossBase
      * is continuous at the cutoff).
      */
     static double computeKnifeEdgeLoss(double v);
+
+    /**
+     * Total multi-edge diffraction loss in dB over the terrain profile z (heights
+     * sampled at uniform horizontal spacing unitDistance, with z[i0] and z[i1] the
+     * path endpoints) using the Deygout construction: charge the dominant knife
+     * edge in [i0, i1], then recurse into the two sub-paths on either side of it,
+     * up to depth edges. z[i] == -infinity marks a sample with no terrain data.
+     */
+    static double computeDeygoutLoss(const std::vector<double>& z, double unitDistance, double waveLength, int i0, int i1, int depth);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual double computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const override;

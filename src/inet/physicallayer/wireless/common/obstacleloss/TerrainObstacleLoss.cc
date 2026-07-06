@@ -27,8 +27,11 @@ void TerrainObstacleLoss::initialize(int stage)
             mode = LOS;
         else if (!strcmp(modeString, "fresnel"))
             mode = FRESNEL;
+        else if (!strcmp(modeString, "diffraction"))
+            mode = DIFFRACTION;
         else
             throw cRuntimeError("Unknown mode '%s'", modeString);
+        maxDiffractionEdges = par("maxDiffractionEdges");
         const char *markerStyleString = par("markerStyle");
         if (!strcmp(markerStyleString, "depth"))
             markerStyle = DEPTH;
@@ -49,6 +52,40 @@ double TerrainObstacleLoss::computeKnifeEdgeLoss(double v)
     if (v <= -0.78)
         return 0;
     return 6.9 + 20 * std::log10(std::sqrt((v - 0.1) * (v - 0.1) + 1) + v - 0.1);
+}
+
+double TerrainObstacleLoss::computeDeygoutLoss(const std::vector<double>& z, double unitDistance, double waveLength, int i0, int i1, int depth)
+{
+    // Deygout multi-edge diffraction: find the dominant knife edge (the interior
+    // sample with the largest diffraction parameter v, measured above the chord
+    // joining the two sub-path endpoints), charge its J(v), then recurse into the
+    // paths on either side of it — up to `depth` edges total. This captures the
+    // graded shadowing behind a row of buildings, where each successive ridge adds
+    // its own diffraction loss, better than a single dominant edge alone.
+    if (depth <= 0 || i1 - i0 < 2)
+        return 0;
+    double za = z[i0], zb = z[i1];
+    int span = i1 - i0;
+    double bestV = -INFINITY;
+    int bestIndex = -1;
+    for (int i = i0 + 1; i < i1; i++) {
+        if (std::isinf(z[i]))
+            continue; // no terrain data at this sample: nothing to diffract over
+        double d1 = (i - i0) * unitDistance;
+        double d2 = (i1 - i) * unitDistance;
+        double chord = za + (zb - za) * (double)(i - i0) / span;
+        double h = z[i] - chord;
+        double v = h * std::sqrt(2.0 * (d1 + d2) / (waveLength * d1 * d2));
+        if (v > bestV) {
+            bestV = v;
+            bestIndex = i;
+        }
+    }
+    if (bestIndex < 0 || bestV <= -0.78)
+        return 0; // no edge intrudes far enough into the Fresnel zone to matter
+    return computeKnifeEdgeLoss(bestV)
+           + computeDeygoutLoss(z, unitDistance, waveLength, i0, bestIndex, depth - 1)
+           + computeDeygoutLoss(z, unitDistance, waveLength, bestIndex, i1, depth - 1);
 }
 
 void TerrainObstacleLoss::emitObstaclePenetrated(const Coord& intersection1, const Coord& intersection2, double lossFactor) const
@@ -128,8 +165,10 @@ const Heightfield *TerrainObstacleLoss::getHeightfield() const
 std::ostream& TerrainObstacleLoss::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "TerrainObstacleLoss";
-    if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(mode, mode == LOS ? "los" : "fresnel") << EV_FIELD(sampleStep);
+    if (level <= PRINT_LEVEL_TRACE) {
+        const char *modeName = mode == LOS ? "los" : mode == FRESNEL ? "fresnel" : "diffraction";
+        stream << EV_FIELD(mode, modeName) << EV_FIELD(sampleStep);
+    }
     return stream;
 }
 
@@ -145,19 +184,29 @@ double TerrainObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& trans
     int numSamples = std::min(4096, std::max(2, (int)(horizontalDistance / step) + 1));
     double waveLength = SPEED_OF_LIGHT / frequency.get<Hz>();
     // Walk interior samples only, so an antenna standing on the surface does not
-    // occlude itself. LOS mode stops at the first obstruction; FRESNEL mode scans
-    // the whole profile for the worst diffraction parameter v (the deepest
-    // intrusion into the first Fresnel zone, in zone-normalized units), which the
-    // single knife-edge curve J(v) then maps to a graded loss.
+    // occlude itself. LOS mode stops at the first obstruction; the graded modes
+    // scan the whole profile for the worst diffraction parameter v (the deepest
+    // intrusion into the first Fresnel zone, in zone-normalized units) — which is
+    // also the dominant Deygout edge, hence the marker point and the FRESNEL loss.
+    // DIFFRACTION additionally records the full profile so the Deygout recursion
+    // can sum the loss over several ridges.
     bool blocked = false;
     double worstV = -INFINITY;
     int worstIndex = -1;
     double worstGroundZ = NaN;
+    std::vector<double> profile;
+    if (mode == DIFFRACTION) {
+        profile.assign(numSamples, -INFINITY);
+        profile.front() = transmissionPosition.z;
+        profile.back() = receptionPosition.z;
+    }
     for (int i = 1; i < numSamples - 1; i++) {
         double t = (double)i / (numSamples - 1);
         double groundZ = hf->getElevation(transmissionPosition.x + dx * t, transmissionPosition.y + dy * t);
         if (std::isnan(groundZ))
-            continue; // outside the data extent: nothing to block there
+            continue; // outside the data extent: nothing to block there (profile stays -inf)
+        if (mode == DIFFRACTION)
+            profile[i] = groundZ;
         double rayZ = transmissionPosition.z + dz * t;
         if (mode == LOS) {
             if (groundZ > rayZ) {
@@ -182,7 +231,11 @@ double TerrainObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& trans
     if (mode == LOS)
         lossFactor = blocked ? 0 : 1;
     else {
-        double lossDb = std::isfinite(worstV) ? computeKnifeEdgeLoss(worstV) : 0;
+        double lossDb;
+        if (mode == DIFFRACTION)
+            lossDb = computeDeygoutLoss(profile, horizontalDistance / (numSamples - 1), waveLength, 0, numSamples - 1, maxDiffractionEdges);
+        else
+            lossDb = std::isfinite(worstV) ? computeKnifeEdgeLoss(worstV) : 0;
         lossFactor = std::pow(10.0, -lossDb / 10.0);
         blocked = worstV > 0; // the direct ray itself is geometrically obstructed
     }
