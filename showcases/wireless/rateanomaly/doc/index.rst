@@ -31,14 +31,15 @@ Averaged over time, this random backoff gives every contending station a statist
 
 802.11 is also a multi-rate technology. A station with a weaker or noisier link falls
 back to a lower bitrate so that its frames remain decodable. The catch is that a frame
-sent at a low bitrate occupies the channel *longer*. The data take proportionally longer
-to send — about nine times longer at 6 Mbps than at 54 Mbps, since the rate is nine
-times lower. The total channel cost grows by a smaller factor, because every frame also
-carries fixed-duration overhead that does not shrink with the data rate: a physical-layer
-preamble and header, interframe spaces, the random backoff, and the acknowledgment (which
-for the slow station is itself sent at a low rate). Counting that overhead, a slow frame
-still ties up the channel several times longer than a fast one — roughly six times, for
-6 versus 54 Mbps.
+sent at a low bitrate occupies the channel *longer*. The data bits take proportionally
+longer to clock out — about nine times longer at 6 Mbps than at 54 Mbps, since the rate
+is nine times lower. The whole on-air frame grows by a slightly smaller factor, about
+eight times, because the physical-layer preamble and header take a fixed time that does
+not shrink with the data rate. And the full channel cost of a transmission — the frame
+plus the fixed interframe spaces and the acknowledgment (which for the slow station is
+itself sent at a low rate) — comes to a smaller factor still, roughly six times for
+6 versus 54 Mbps. However it is counted, a slow frame ties up the shared medium several
+times longer than a fast one.
 
 Now combine the two facts. DCF equalizes the *number* of transmissions, not the *time*
 each station spends transmitting. A slow station transmits about as often as everyone
@@ -139,7 +140,8 @@ Results
 -------
 
 Each station's application-level throughput is measured at the server over the
-steady-state interval, after association settles.
+steady-state interval, after association settles. Each run lasts 5 s, with the first
+1 s discarded as warmup, so throughput is averaged over the remaining 4 s.
 
 In the **Homogeneous** baseline, all five stations achieve nearly the same throughput,
 about 4.6–5.0 Mbps each, for an aggregate of roughly 24 Mbps — full 802.11g saturation
@@ -171,7 +173,7 @@ station — fast or slow — successfully transmits a similar *number* of frames
 roughly 1,150 and 1,300). DCF gave each station a nearly equal number of transmission
 opportunities, exactly as designed. But each of the slow station's frame exchanges tied
 up the channel several times longer — around six times, once the rate-independent
-preamble, interframe spaces, backoff, and acknowledgment are included — so it consumed
+preamble, interframe spaces, and acknowledgment are included — so it consumed
 most of the channel time and left little for the others.
 
 .. figure:: media/frames-per-station.png
