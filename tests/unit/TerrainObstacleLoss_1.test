@@ -4,7 +4,8 @@ knife-edge diffraction curve J(v). Checks the no-loss region below the
 v = -0.78 cutoff, continuity at the cutoff, the ~6 dB grazing value at v = 0,
 reference points in the shadow region, and monotonicity. Also tests the
 Deygout multi-edge construction (computeDeygoutLoss): single-edge equivalence,
-clear path, superadditivity of a second ridge, and the edge-count cap.
+clear path, superadditivity of a second ridge, the edge-count cap, and a
+hand-derived two-edge worked example (total == J(v1) + J(v') to 1e-6).
 
 %includes:
 #include <cmath>
@@ -84,6 +85,30 @@ CHECK("shadow v=2", std::fabs(TerrainObstacleLoss::computeKnifeEdgeLoss(2) - 19.
     CHECK("deygout cap equals dominant edge", std::fabs(capped - TerrainObstacleLoss::computeKnifeEdgeLoss(v1)) < 1e-9);
 }
 
+// --- Deygout worked example (two edges, hand-derived). Profile z = [0, 30, 0, 22, 0] at 50 m
+//     spacing, lambda = 0.06 m. Deygout charges the dominant edge, then recurses on the sub-path
+//     beyond it and charges that dominant edge, and so on:
+//       * Dominant edge over the whole path [0..4] is index 1 (h = 30 m above the flat endpoint
+//         chord; d1 = 50 m, d2 = 150 m)  ->  v1 = 30 * sqrt(2*(d1+d2)/(lambda*d1*d2)) ~= 28.28.
+//       * Recurse on [1..4]. The endpoint chord runs from z=30 (index 1) to z=0 (index 4); at
+//         index 3 it is 30 * (1 - 2/3) = 10 m, so that edge stands h' = 22 - 10 = 12 m above it,
+//         with d1' = 100 m, d2' = 50 m  ->  v' = 12 * sqrt(2*(d1'+d2')/(lambda*d1'*d2')) = 12.0.
+//         (Index 2 sits below its chord, so it is not an edge; [1..3] and [3..4] add nothing.)
+//     Total loss must be exactly J(v1) + J(v'); depth-capped to one edge it must be J(v1) alone. ---
+{
+    double lambda = 0.06, d = 50.0;
+    std::vector<double> prof = {0.0, 30.0, 0.0, 22.0, 0.0};
+    double v1 = 30.0 * std::sqrt(2.0 * (1 * d + 3 * d) / (lambda * (1 * d) * (3 * d)));   // ~28.28
+    double chordAt3 = 30.0 + (0.0 - 30.0) * (double)(3 - 1) / (4 - 1);                    // 10 m
+    double vPrime = (22.0 - chordAt3) * std::sqrt(2.0 * (2 * d + 1 * d) / (lambda * (2 * d) * (1 * d))); // 12.0
+    double expected = TerrainObstacleLoss::computeKnifeEdgeLoss(v1) + TerrainObstacleLoss::computeKnifeEdgeLoss(vPrime);
+    double total = TerrainObstacleLoss::computeDeygoutLoss(prof, d, lambda, 0, 4, 3);
+    CHECK("deygout worked example total", std::fabs(total - expected) < 1e-6);
+    CHECK("deygout worked example magnitude ~76 dB", total > 74.0 && total < 79.0);
+    double capped = TerrainObstacleLoss::computeDeygoutLoss(prof, d, lambda, 0, 4, 1);
+    CHECK("deygout worked example one edge", std::fabs(capped - TerrainObstacleLoss::computeKnifeEdgeLoss(v1)) < 1e-6);
+}
+
 EV << "done\n";
 
 %contains: stdout
@@ -99,4 +124,7 @@ deygout clear: OK
 deygout second ridge adds loss: OK
 deygout edge cap limits loss: OK
 deygout cap equals dominant edge: OK
+deygout worked example total: OK
+deygout worked example magnitude ~76 dB: OK
+deygout worked example one edge: OK
 done
