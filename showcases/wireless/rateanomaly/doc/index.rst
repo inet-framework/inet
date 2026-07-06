@@ -189,6 +189,49 @@ most of the channel time and left little for the others.
              -f png --dpi 150 -d doc/media/   ; size 1200x900, 8x6 in via image_export_width/height
    stamp:    captured 2026-06, INET 4.6
 
+Where the frame counts show that each station gets an equal *number* of turns, a
+sequence chart shows how unequal those turns are in *duration*. The chart below captures
+about 2.6 ms of the shared channel in a reduced two-station illustration — one station
+fixed at 6 Mbps, the other at 54 Mbps, each sending a light, collision-free stream (the
+other three stations idle) so every frame stands alone. Each frame is drawn as a block
+whose width is the time it holds the medium:
+
+.. figure:: media/frame-airtime-sequence.png
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart
+   config:   RateAnomaly run 5 (slowBitrate=6), reduced to two active stations (apps on
+             sta[2..4] disabled) at LIGHT load so frames don't collide: sta[0]=6 Mbps
+             sending every 3 ms, sta[1]=54 Mbps sending every 0.8 ms
+   seed:     default
+   shows:    four narrow 54 Mbps frames (sta[1], seq 2500-2503) then one wide 6 Mbps frame
+             (sta[0], seq 667) carrying the same 1000-byte payload -- block width = airtime,
+             so the slow frame occupies the channel ~8x longer (measured 7.8x on-air)
+   record:   inet -u Cmdenv -c RateAnomaly -r 5
+               --*.sta[2].numApps=0 --*.sta[3].numApps=0 --*.sta[4].numApps=0
+               --*.sta[0].app[0].sendInterval=3ms --*.sta[1].app[0].sendInterval=0.8ms
+               --record-eventlog=true --eventlog-recording-intervals=2s..2.05s
+               --sim-time-limit=2.06s --result-dir=results/elog3
+   source:   results/elog3/RateAnomaly-slowBitrate=6-#0.elog
+   axes:     sta[0] (6 Mbps), sta[1] (54 Mbps), accessPoint   (this top-to-bottom order)
+   display:  NETWORK_COMMUNICATION; timeline SIMULATION_TIME (linear -- required so block
+             width equals airtime; NONLINEAR flattens the contrast)
+   anchor:   window 2.004000s..2.006650s -- the collision-free 6 Mbps frame occupies
+             [2.005044s, 2.006494s]. Any clean (non-colliding) slow frame works; if the
+             wide/narrow width ratio stops being ~8x, the bitrates changed.
+   capture:  Sequence Chart screenshot, cropped to the window; was 1630x560
+   stamp:    captured 2026-07, INET 4.6
+
+Each narrow block is a 54 Mbps frame; the wide block is a single 6 Mbps frame carrying
+the same 1000 bytes, so its on-air time is about eight times longer — the data alone
+would take nine times as long at the lower rate, but the fixed preamble keeps the whole
+frame just under that. The slow frame alone holds the channel about as long as the whole
+run of fast frames beside it. That per-frame airtime gap is the mechanism behind the
+anomaly: because DCF hands the stations a similar *number* of transmissions (the
+frame-count chart above), the slow station's far longer frames let it swallow a
+correspondingly larger share of channel time — dragging every station's throughput down
+toward its own.
+
 The damage scales with the rate gap. As the slow station's rate falls from 54 to
 6 Mbps, the aggregate network throughput falls from about 24 to 12 Mbps — a single slow
 station halves the capacity of the entire cell:
