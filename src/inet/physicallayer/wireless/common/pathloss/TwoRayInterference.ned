@@ -30,5 +30,9 @@ module TwoRayInterference extends Module like IPathLoss
         @display("i=block/control");
         double epsilon_r = default(1.02);
         string polarization = default("horizontal");
+        string physicalEnvironmentModule = default(""); // optional path of a physical environment module; when set, antenna
+                                                        // heights are measured above its ground model (e.g. terrain) instead
+                                                        // of assuming flat ground at z=0 (the default, which preserves the
+                                                        // original Veins-model behavior)
 }
 
