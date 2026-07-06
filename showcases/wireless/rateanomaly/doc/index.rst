@@ -105,8 +105,21 @@ The network contains an access point with five wireless stations clustered nearb
 a wired server reachable through the access point. All five stations upload a saturating
 UDP flow to the server at the same time, so they continuously contend for the channel.
 
-.. todo:: capture network screenshot (``media/network.png``) — access point, five
-   ``sta[*]`` stations, and the wired server. Pending the chart/figure discussion.
+.. figure:: media/network.png
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     canvas
+   config:   Homogeneous   # ../omnetpp.ini (node positions are identical across configs)
+   seed:     default
+   shows:    topology -- the configurator/radioMedium/visualizer infrastructure modules,
+             five sta[*] wireless hosts clustered ~8-9 m from the accessPoint, and the
+             wired server reachable over Eth100M
+   anchor:   initial state (t=0, before run). Structural -- no timing; if the module set
+             or links differ, the NED changed.
+   capture:  Qtenv + MCP server; set_canvas_view {module_path:"<root>", fit:true} then
+             get_canvas_image {module_path:"<root>", area:"viewport"}; green canvas
+             margin trimmed with `convert -fuzz 6% -trim`. Was 858x688.
+   stamp:    captured 2026-07, INET 4.6
 
 Homogeneous and RateAnomaly Configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
