@@ -29,7 +29,7 @@ import inet.applications.contract.IApp;
 simple Aodv extends SimpleModule like IApp
 {
     parameters:
-        @class(aodv::Aodv);
+        @class(Aodv);
         @display("i=block/network2");
         string routingTableModule = default("^.ipv4.routingTable");
         string interfaceTableModule = default("^.interfaceTable");
