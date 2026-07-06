@@ -31,12 +31,21 @@ namespace visualizer {
 
 Define_Module(SceneRockyVisualizer);
 
+SceneRockyVisualizer::~SceneRockyVisualizer()
+{
+    // The VsgScene3DNode (owned by the parent module, which outlives this submodule) still holds
+    // callbacks that capture `this`; flip the shared flag so they stop touching freed memory.
+    if (alive)
+        *alive = false;
+}
+
 void SceneRockyVisualizer::initialize(int stage)
 {
     SceneVsgVisualizer::initialize(stage);
     if (!hasGUI())
         return;
     if (stage == INITSTAGE_LOCAL) {
+        alive = std::make_shared<bool>(true);
         coordinateSystem.reference(this, "coordinateSystemModule", true);
         // Rocky loads its terrain shaders/data at runtime via vsg::findFile; point it at the
         // Rocky install's share dir (ROCKY_FILE_PATH), or it asserts "may not find its shaders".
@@ -55,10 +64,14 @@ void SceneRockyVisualizer::initialize(int stage)
         // Attach to the backend's render hook: build the map when the viewer becomes available
         // (and rebuild if it is recreated, e.g. on resize), and pump Rocky's per-frame update().
         auto sceneNode = visualizationTargetModule->getOsgCanvas()->getScene();
-        if (sceneNode != nullptr && sceneNode->getBackendType() == omnetpp::cScene3DNode::BACKEND_VSG) {
+        if (sceneNode == nullptr)
+            throw cRuntimeError("SceneRockyVisualizer: no 3D scene on the canvas (is the VSG 3D backend active?)");
+        if (sceneNode->getBackendType() == omnetpp::cScene3DNode::BACKEND_VSG) {
             auto vsgSceneNode = static_cast<omnetpp::VsgScene3DNode *>(sceneNode);
-            vsgSceneNode->onViewerChanged = [this](vsg::ref_ptr<vsg::Viewer> viewer) { setupRockyMap(viewer); };
-            vsgSceneNode->perFrameCallbacks.push_back([this]() { if (context != nullptr) context->update(); });
+            // capture the shared 'alive' flag so the callbacks no-op after this module is destroyed
+            auto flag = alive;
+            vsgSceneNode->onViewerChanged = [this, flag](vsg::ref_ptr<vsg::Viewer> viewer) { if (*flag) setupRockyMap(viewer); };
+            vsgSceneNode->perFrameCallbacks.push_back([this, flag]() { if (*flag && context != nullptr) context->update(); });
         }
         else
             throw cRuntimeError("SceneRockyVisualizer requires the VSG 3D backend");
@@ -69,11 +82,15 @@ void SceneRockyVisualizer::setupRockyMap(const vsg::ref_ptr<vsg::Viewer>& viewer
 {
     auto scene = inet::vsg::TopLevelScene::getSimulationScene(visualizationTargetModule);
 
-    // Drop any previously-built map (the viewer was recreated, e.g. on resize).
+    // Drop any previously-built map (the viewer was recreated, e.g. on resize). Release the old
+    // MapNode BEFORE recreating the context: MapNode/terrain hold GPU resources built against the
+    // old context's device, so the context must outlive them (the reverse of member-destruction
+    // order would destroy the device while the old map is still alive -> Vulkan validation error).
     if (mapTransform != nullptr) {
         auto& children = scene->children;
         children.erase(std::remove(children.begin(), children.end(), vsg::ref_ptr<vsg::Node>(mapTransform)), children.end());
         mapTransform = nullptr;
+        mapNode = nullptr;
     }
 
     // Bind a Rocky context to the live viewer and build the map + layers.
@@ -111,6 +128,12 @@ void SceneRockyVisualizer::setupRockyMap(const vsg::ref_ptr<vsg::Viewer>& viewer
     // Rocky renders a geocentric (ECEF) globe; the scene is a local ENU tangent plane at the
     // coordinate system's geographic origin. Place the map so that origin sits at the scene
     // origin with ENU orientation: transform by the inverse of the ENU->ECEF tangent matrix.
+    //
+    // NOTE: this is an ellipsoidal (WGS84) tangent-plane placement. If nodes/physics use
+    // SimpleGeographicCoordinateSystem (a flat equirectangular approximation), the two projections
+    // agree exactly only at the origin and drift apart with distance (metres, growing to more at
+    // tens of km). For exact agreement over large areas a coordinate system derived from the map's
+    // SRS would be needed (cf. the OSG-era OsgGeographicCoordinateSystem).
     auto origin = coordinateSystem->getScenePosition();
     rocky::GeoPoint originGeo(rocky::SRS::WGS84, origin.longitude.get<deg>(), origin.latitude.get<deg>(), origin.altitude.get<m>());
     rocky::GeoPoint originEcef = originGeo.transform(rocky::SRS::ECEF);

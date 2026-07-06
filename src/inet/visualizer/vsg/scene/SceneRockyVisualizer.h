@@ -12,6 +12,8 @@
 
 #if defined(WITH_ROCKY)
 
+#include <memory>
+
 #include <rocky/Context.h>
 #include <rocky/vsg/MapNode.h>
 #include <rocky/vsg/VSGContext.h>
@@ -44,7 +46,12 @@ class INET_API SceneRockyVisualizer : public SceneVsgVisualizer
     rocky::VSGContext context = nullptr;
     vsg::ref_ptr<rocky::MapNode> mapNode;
     vsg::ref_ptr<vsg::MatrixTransform> mapTransform; // ECEF->ENU wrapper currently in the scene
+    // The callbacks registered on the (parent-owned, longer-lived) VsgScene3DNode capture `this`;
+    // this shared flag lets them no-op after the visualizer is destroyed instead of using freed
+    // memory (submodules are destroyed before their parent, so the scene node outlives us).
+    std::shared_ptr<bool> alive;
 
+    virtual ~SceneRockyVisualizer();
     virtual void initialize(int stage) override;
     // (Re)build the map bound to the given viewer and place it in the scene (called when the
     // backend (re)creates its viewer, e.g. on resize).
