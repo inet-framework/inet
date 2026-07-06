@@ -66,6 +66,14 @@ void ProtocolTester::initialize()
     signalKinds[packetReceivedFromPeerSignal] = EventKind::ReceivedFromPeer;
     signalKinds[packetDroppedSignal] = EventKind::Dropped;
 
+    // Simu5G RLC/PDCP boundary signals: the same inet::Packet* emissions under Simu5G's
+    // own names. Selectors match by signal-name string, so these become observable as
+    // soon as they are subscribed. (See Simu5G/tests/protocol/rlc/.)
+    signalKinds[registerSignal("sentPacketToLowerLayer")] = EventKind::SentToLower;
+    signalKinds[registerSignal("receivedPacketFromLowerLayer")] = EventKind::ReceivedFromLower;
+    signalKinds[registerSignal("sentPacketToUpperLayer")] = EventKind::SentToUpper;
+    signalKinds[registerSignal("receivedPacketFromUpperLayer")] = EventKind::ReceivedFromUpper;
+
     // Subscribe network-wide (PcapRecorder style): signals propagate to ancestor
     // listeners, so attaching at the network module catches every node.
     subscriptionModule = getSystemModule();
@@ -109,7 +117,10 @@ void ProtocolTester::subscribeStateSignals()
     // are subscribed here and delivered to the intval_t receiveSignal overload.
     static const std::set<std::string> packetSignals = {
         "packetSentToLower", "packetReceivedFromLower", "packetSentToUpper",
-        "packetReceivedFromUpper", "packetSentToPeer", "packetReceivedFromPeer", "packetDropped"
+        "packetReceivedFromUpper", "packetSentToPeer", "packetReceivedFromPeer", "packetDropped",
+        // Simu5G RLC/PDCP boundary signals (subscribed via signalKinds in initialize()).
+        "sentPacketToLowerLayer", "receivedPacketFromLowerLayer",
+        "sentPacketToUpperLayer", "receivedPacketFromUpperLayer"
     };
     auto collect = [&](const EventPattern& p) {
         if (!p.selSignal.empty() && packetSignals.find(p.selSignal) == packetSignals.end())
