@@ -21,7 +21,7 @@ simple Dymo extends SimpleModule like IManetRouting
 {
     parameters:
         // properties
-        @class(dymo::Dymo);
+        @class(Dymo);
         @display("i=block/routing");
 
         // context parameters
