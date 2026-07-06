@@ -189,15 +189,15 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=750,300");
         }
-        geoMapVisualizer[numGeoMapVisualizers]: <default("")> like IGeoMapVisualizer {
+        geoMapVisualizer[numGeoMapVisualizers]: <default("GeoMapCanvasVisualizer")> like IGeoMapVisualizer {
             parameters:
                 @display("p=750,400");
         }
-        geoSkyViewVisualizer[numGeoSkyViewVisualizers]: <default("")> like IGeoSkyViewVisualizer {
+        geoSkyViewVisualizer[numGeoSkyViewVisualizers]: <default("GeoSkyViewCanvasVisualizer")> like IGeoSkyViewVisualizer {
             parameters:
                 @display("p=750,500");
         }
-        geoHorizonVisualizer[numGeoHorizonVisualizers]: <default("")> like IGeoHorizonVisualizer {
+        geoHorizonVisualizer[numGeoHorizonVisualizers]: <default("GeoHorizonCanvasVisualizer")> like IGeoHorizonVisualizer {
             parameters:
                 // pair each horizon overlay with the map of the same index; the scalar default
                 // "^.geoMapVisualizer" would not resolve against this vector submodule

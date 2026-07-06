@@ -18,4 +18,5 @@ moduleinterface IGeoHorizonVisualizer extends IVisualizer
 {
     parameters:
         @display("i=block/app");
+        string mapVisualizer;
 }
