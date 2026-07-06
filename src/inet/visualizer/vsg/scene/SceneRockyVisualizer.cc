@@ -124,7 +124,11 @@ void SceneRockyVisualizer::setupRockyMap(const vsg::ref_ptr<vsg::Viewer>& viewer
 
     mapTransform = vsg::MatrixTransform::create(matrix);
     mapTransform->addChild(mapNode);
-    scene->addChild(mapTransform);
+    // Insert the (opaque) map at the FRONT of the scene so it is drawn before the transparent
+    // node icons/labels. If it is drawn after them, the icons (already in the scene) write depth
+    // that occludes the map within their billboard quad, so their transparent pixels show the
+    // background clear colour instead of the map behind them.
+    scene->children.insert(scene->children.begin(), vsg::ref_ptr<vsg::Node>(mapTransform));
 
     EV_INFO << "SceneRockyVisualizer: Rocky map built and placed at the scene origin ("
             << origin.latitude.get<deg>() << ", " << origin.longitude.get<deg>() << ")\n";

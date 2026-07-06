@@ -10,7 +10,7 @@ package inet.examples.visualizer.vsgrocky;
 import inet.common.geometry.common.SimpleGeographicCoordinateSystem;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
 import inet.visualizer.vsg.integrated.IntegratedVsgVisualizer;
 
 //
@@ -24,7 +24,7 @@ network RockyMapShowcase
         visualizer: IntegratedVsgVisualizer;
         coordinateSystem: SimpleGeographicCoordinateSystem;
         configurator: Ipv4NetworkConfigurator;
-        radioMedium: Ieee80211ScalarRadioMedium;
+        radioMedium: <default("Ieee80211ScalarRadioMedium")> like IRadioMedium;
         host1: WirelessHost;
         host2: WirelessHost;
         host3: WirelessHost;
