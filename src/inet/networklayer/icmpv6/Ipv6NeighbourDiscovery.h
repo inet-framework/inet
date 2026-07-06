@@ -125,6 +125,7 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
         int interfaceId;
         unsigned int numRASent; // number of Router Advertisements sent since start of sim
         simtime_t nextScheduledRATime; // stores time when next RA will be sent.
+        simtime_t lastMulticastRATime = -1; // time the last multicast RA was sent (-1 = none yet); used to rate-limit RAs to MIN_DELAY_BETWEEN_RAS (RFC 4861 Section 6.2.6)
         cMessage *raTimeoutMsg; // the message to cancel when resetting RA timer
     };
     typedef std::vector<AdvIfEntry *> AdvIfList;
@@ -163,6 +164,10 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
     // mobile node solicits a Router Advertisement and detects movement immediately
     // instead of waiting for the next unsolicited RA. Set from the NED parameter.
     bool detectL2Movement = false;
+
+    // When true, a gratuitous (unsolicited) Neighbor Advertisement is multicast for
+    // each address as it becomes permanent (DAD completes). Set from the NED parameter.
+    bool sendGratuitousNa = false;
 
   protected:
     /************************Miscellaneous Stuff***************************/
@@ -362,7 +367,7 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
     virtual void sendSolicitedNa(Packet *packet, const Ipv6NeighbourSolicitation *ns, NetworkInterface *ie);
 
   public:
-    virtual void sendUnsolicitedNa(NetworkInterface *ie);
+    virtual void sendUnsolicitedNa(NetworkInterface *ie, const Ipv6Address& forAddress = Ipv6Address::UNSPECIFIED_ADDRESS);
 
     /**
      * Sends an unsolicited multicast Router Advertisement out the given advertising

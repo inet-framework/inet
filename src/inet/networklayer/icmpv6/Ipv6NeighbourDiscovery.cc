@@ -95,6 +95,8 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
         if (detectL2Movement)
             getContainingNode(this)->subscribe(l2AssociatedSignal, this);
 
+        sendGratuitousNa = par("sendGratuitousNa");
+
         pendingQueue.setName("pendingQueue");
     }
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
@@ -799,12 +801,9 @@ void Ipv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
         }
 
         // Before we can use this address, we MUST initiate DAD first.
-        if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(linkLocalAddr)) {
-            if (ie->getProtocolData<Ipv6InterfaceData>()->getDupAddrDetectTransmits() > 0)
-                initiateDad(linkLocalAddr, ie);
-            else
-                makeTentativeAddressPermanent(linkLocalAddr, ie);
-        }
+        // initiateDad() makes the address permanent directly if DAD is disabled.
+        if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(linkLocalAddr))
+            initiateDad(linkLocalAddr, ie);
     }
     assignLinkLocalAddrTimer = nullptr;
     delete timerMsg;
@@ -813,6 +812,14 @@ void Ipv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
 void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, NetworkInterface *ie)
 {
     Enter_Method("initiateDad");
+    // RFC 4862 Section 5.4: if DupAddrDetectTransmits is zero, Duplicate Address
+    // Detection is not performed on this interface -- make the address permanent
+    // right away without sending any Neighbor Solicitation probe.
+    if (ie->getProtocolData<Ipv6InterfaceData>()->getDupAddrDetectTransmits() == 0) {
+        makeTentativeAddressPermanent(tentativeAddr, ie);
+        return;
+    }
+
     EV_INFO << "----------INITIATING DUPLICATE ADDRESS DISCOVERY----------" << endl;
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(true);
 
@@ -881,6 +888,11 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->permanentlyAssign(tentativeAddr);
 
     emit(dadCompletedSignal, 1);
+
+    // Optionally announce the newly-configured address with a gratuitous (unsolicited)
+    // Neighbor Advertisement so neighbors update their caches without waiting for NUD.
+    if (sendGratuitousNa)
+        sendUnsolicitedNa(ie, tentativeAddr);
 
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
 
@@ -1177,24 +1189,30 @@ void Ipv6NeighbourDiscovery::processRsPacket(Packet *packet, const Ipv6RouterSol
            delay and send the advertisement at the already-scheduled time.*/
         cMessage *msg = new cMessage("sendSolicitedRA", MK_SEND_SOL_RTRADV);
         msg->setContextPointer(ie);
-        simtime_t interval = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRaDelayTime());
-        if (interval < advIfEntry->nextScheduledRATime) {
-            scheduleAfter(interval, msg);
-            advIfEntry->nextScheduledRATime = simTime() + interval;
-        }
-        // else we ignore the generate interval and send it at the next scheduled time.
+        simtime_t delay = uniform(0, ie->getProtocolData<Ipv6InterfaceData>()->_getMaxRaDelayTime());
+        simtime_t scheduledTime = simTime() + delay;
 
-        // We need to keep a log here each time an RA is sent. Not implemented yet.
-        // Assume the first course of action.
         /*- If the router sent a multicast Router Advertisement (solicited or
-           unsolicited) within the last MIN_DELAY_BETWEEN_RAS seconds,
-           schedule the advertisement to be sent at a time corresponding to
-           MIN_DELAY_BETWEEN_RAS plus the random value after the previous
-           advertisement was sent. This ensures that the multicast Router
-           Advertisements are rate limited.
+           unsolicited) within the last MIN_DELAY_BETWEEN_RAS seconds, schedule the
+           advertisement to be sent at a time corresponding to MIN_DELAY_BETWEEN_RAS
+           plus the random value after the previous advertisement was sent. This
+           ensures that the multicast Router Advertisements are rate limited.
+           - Otherwise, schedule the sending of a Router Advertisement at the time
+           given by the random value.*/
+        simtime_t minDelayBetweenRAs = ie->getProtocolData<Ipv6InterfaceData>()->_getMinDelayBetweenRAs();
+        if (advIfEntry->lastMulticastRATime >= SIMTIME_ZERO
+                && scheduledTime < advIfEntry->lastMulticastRATime + minDelayBetweenRAs)
+            scheduledTime = advIfEntry->lastMulticastRATime + minDelayBetweenRAs + delay;
 
-           - Otherwise, schedule the sending of a Router Advertisement at the
-           time given by the random value.*/
+        // If a multicast RA is already scheduled to be sent no later than our
+        // computed time, ignore the random delay and let that advertisement serve
+        // this solicitation (RFC 4861 Section 6.2.6).
+        if (scheduledTime < advIfEntry->nextScheduledRATime) {
+            scheduleAt(scheduledTime, msg);
+            advIfEntry->nextScheduledRATime = scheduledTime;
+        }
+        else
+            delete msg;
     }
     else {
         EV_INFO << "This interface is a host, discarding RA message\n";
@@ -1335,6 +1353,13 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
         Icmpv6::insertChecksum(checksumMode, ra, packet);
         packet->insertAtFront(ra);
         sendPacketToIpv6Module(packet, destAddr, sourceAddr, ie->getInterfaceId());
+
+        // Remember when we last sent a multicast RA so that solicited RAs can be
+        // rate-limited to at most one per MIN_DELAY_BETWEEN_RAS (RFC 4861 Section 6.2.6).
+        if (destAddr.isMulticast()) {
+            if (AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie))
+                advIfEntry->lastMulticastRATime = simTime();
+        }
     }
 }
 
@@ -2033,7 +2058,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     sendPacketToIpv6Module(naPacket, naDestAddr, myIPv6Addr, ie->getInterfaceId());
 }
 
-void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
+void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie, const Ipv6Address& forAddress)
 {
     // RFC 2461
     // Section 7.2.6: Sending Unsolicited Neighbor Advertisements
@@ -2047,7 +2072,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     // multicast address.  These advertisements MUST be separated by at
     // least RetransTimer seconds.
     auto na = makeShared<Ipv6NeighbourAdvertisement>();
-    Ipv6Address myIPv6Addr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
+    Ipv6Address myIPv6Addr = forAddress.isUnspecified() ? ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress() : forAddress;
 
     // The Target Address field in the unsolicited advertisement is set to
     // an IP address of the interface, and the Target Link-Layer Address
