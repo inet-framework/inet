@@ -9,6 +9,8 @@
 #ifndef __INET_TCPLWIPQUEUES_H
 #define __INET_TCPLWIPQUEUES_H
 
+#include <map>
+
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -129,6 +131,13 @@ class INET_API TcpLwipSendQueue : public cObject
   protected:
     TcpLwipConnection *connM = nullptr;
     ChunkQueue dataBuffer; // dataBuffer
+
+    // Region tags of the queued application data, keyed by the TCP sequence
+    // number of each chunk's first byte. dataBuffer is drained as soon as the data
+    // is handed to the lwIP C stack (which drops the tags), so we cache the tags
+    // here in enqueueAppData() and re-attach them to each outgoing segment in
+    // createSegmentWithBytes(); entries are dropped once acknowledged.
+    std::map<uint32_t, Ptr<const Chunk>> taggedSegments;
 };
 
 /**
@@ -156,8 +165,11 @@ class INET_API TcpLwipReceiveQueue : public cObject
      * The method called when data received from LWIP
      * The method should set status of the data in queue to received
      * called after socket->read_data() successful
+     *
+     * seqNoP is the TCP sequence number of the first delivered byte; it is used
+     * to re-attach the region tags cached in notifyAboutIncomingSegmentProcessing().
      */
-    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP);
+    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP, uint32_t seqNoP);
 
     virtual B getExtractableBytesUpTo() const;
 
@@ -194,10 +206,24 @@ class INET_API TcpLwipReceiveQueue : public cObject
      */
     virtual void notifyAboutSending(const TcpHeader *tcpsegP);
 
+    /**
+     * Assembles the (region-tagged) application data for the given sequence-number
+     * range from the tags cached by notifyAboutIncomingSegmentProcessing(). Returns
+     * nullptr if the range is not fully covered by cached segments (in which case
+     * the caller falls back to plain, tag-less bytes).
+     */
+    virtual const Ptr<const Chunk> getCachedTaggedData(uint32_t seqNoP, unsigned int lengthP);
+
   protected:
     TcpLwipConnection *connM = nullptr;
     ChunkQueue dataBuffer; // fifo dataBuffer
     // ReorderBuffer reorderBuffer;     // ReorderBuffer not needed, because the original lwIP code manages the unordered buffer
+
+    // Region tags carried by incoming segment payloads, keyed by TCP sequence
+    // number of the segment's first data byte. The lwIP C stack works on raw
+    // bytes and drops these tags, so we cache them here as each segment arrives
+    // and re-attach them when lwIP delivers the (reassembled) data to the app.
+    std::map<uint32_t, Ptr<const Chunk>> taggedSegments;
 };
 
 } // namespace tcp

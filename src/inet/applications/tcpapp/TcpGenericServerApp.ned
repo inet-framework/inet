@@ -23,9 +23,11 @@ import inet.applications.contract.IApp;
 // be delayed by a constant time (`replyDelay` parameter).
 //
 // Because the request/reply control is carried in region tags (see
-// ~GenericAppMsgReq) rather than serialized onto the wire, this app works over
-// the ~Tcp module but not over ~TcpLwip or emulation, where region tags are
-// lost; in those cases it raises an error on the first request received.
+// ~GenericAppMsgReq) rather than serialized onto the wire, this app requires a
+// transport that preserves region tags: the ~Tcp module, or ~TcpLwip between
+// simulated endpoints (it re-attaches the tags around the lwIP stack). It does
+// not work over emulation (external interfaces), where region tags are lost;
+// there it raises an error on the first request received.
 //
 // By default, the server does not impose rate limiting on data reads from the
 // socket. To enable rate limiting, you can set `autoRead` to "false" and

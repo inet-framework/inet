@@ -327,8 +327,14 @@ err_t TcpLwip::tcp_event_recv(TcpLwipConnection& conn, struct pbuf *p, err_t err
     else {
         EV_DETAIL << this << ": tcp_event_recv(" << conn.connIdM << ", pbuf[" << p->len << ", "
                   << p->tot_len << "], " << (int)err << ")\n";
-        for (auto c = p; c; c = c->next)
-            conn.receiveQueueM->enqueueTcpLayerData(c->payload, c->len);
+        // The delivered pbuf chain covers [rcv_nxt - tot_len, rcv_nxt); pass each
+        // fragment's start sequence number so the receive queue can re-attach the
+        // region tags it cached as the segments arrived.
+        uint32_t seqNo = conn.pcbM->rcv_nxt - p->tot_len;
+        for (auto c = p; c; c = c->next) {
+            conn.receiveQueueM->enqueueTcpLayerData(c->payload, c->len, seqNo);
+            seqNo += c->len;
+        }
         pLwipTcpLayerM->tcp_recved(conn.pcbM, p->tot_len);
         pbuf_free(p);
     }

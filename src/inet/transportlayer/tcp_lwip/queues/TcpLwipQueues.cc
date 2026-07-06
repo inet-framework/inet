@@ -7,6 +7,8 @@
 
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 
+#include <algorithm>
+
 #include "inet/common/packet/serializer/BytesChunkSerializer.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
@@ -20,6 +22,47 @@ Register_Class(TcpLwipSendQueue);
 
 Register_Class(TcpLwipReceiveQueue);
 
+// Assembles the region-tagged data for [seqNo, seqNo+length) from a seqno-keyed
+// cache of segment payloads, slicing and concatenating as needed. Returns nullptr
+// if any part of the range is not covered by the cache.
+static const Ptr<const Chunk> assembleTaggedData(const std::map<uint32_t, Ptr<const Chunk>>& cache,
+        uint32_t seqNo, unsigned int length)
+{
+    ChunkQueue assembled;
+    uint32_t pos = seqNo;
+    unsigned int remaining = length;
+
+    while (remaining > 0) {
+        auto it = cache.upper_bound(pos); // first entry starting after pos
+        if (it == cache.begin())
+            return nullptr; // no entry starts at or before pos
+        --it; // entry with the greatest start <= pos
+        uint32_t segSeq = it->first;
+        const auto& segChunk = it->second;
+        unsigned int segLen = segChunk->getChunkLength().get<B>();
+        if ((int32_t)(pos - (segSeq + segLen)) >= 0)
+            return nullptr; // pos is past this entry -> gap
+        unsigned int sliceOffset = pos - segSeq;
+        unsigned int sliceLen = std::min(remaining, segLen - sliceOffset);
+        assembled.push(segChunk->peek(Chunk::Iterator(true, B(sliceOffset), -1), B(sliceLen)));
+        pos += sliceLen;
+        remaining -= sliceLen;
+    }
+    return assembled.pop(B(length));
+}
+
+// Drops cache entries whose data is entirely before upToSeq (delivered/acked).
+static void pruneTaggedData(std::map<uint32_t, Ptr<const Chunk>>& cache, uint32_t upToSeq)
+{
+    for (auto it = cache.begin(); it != cache.end();) {
+        uint32_t segEnd = it->first + it->second->getChunkLength().get<B>();
+        if ((int32_t)(segEnd - upToSeq) <= 0)
+            it = cache.erase(it);
+        else
+            ++it;
+    }
+}
+
 TcpLwipSendQueue::TcpLwipSendQueue()
 {
 }
@@ -31,13 +74,22 @@ TcpLwipSendQueue::~TcpLwipSendQueue()
 void TcpLwipSendQueue::setConnection(TcpLwipConnection *connP)
 {
     dataBuffer.clear();
+    taggedSegments.clear();
     connM = connP;
 }
 
 void TcpLwipSendQueue::enqueueAppData(Packet *msg)
 {
     ASSERT(msg);
-    dataBuffer.push(msg->peekDataAt(B(0), B(msg->getByteLength())));
+    const auto& data = msg->peekDataAt(B(0), B(msg->getByteLength()));
+    // Cache the region tags before dataBuffer is drained into the (tag-less) lwIP
+    // stack. This chunk will be buffered by lwIP right after the not-yet-sent data
+    // already in dataBuffer, i.e. at sequence number snd_lbb + dataBuffer length.
+    if (connM != nullptr && connM->pcbM != nullptr && data->getChunkLength() > b(0)) {
+        uint32_t seq = connM->pcbM->snd_lbb + dataBuffer.getLength().get<B>();
+        taggedSegments[seq] = data;
+    }
+    dataBuffer.push(data);
     delete msg;
 }
 
@@ -73,6 +125,21 @@ Packet *TcpLwipSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned 
     auto packet = new Packet(nullptr, bytes);
     auto tcpHdr = packet->removeAtFront<TcpHeader>();
     int64_t numBytes = packet->getByteLength();
+
+    // The lwIP stack works on raw bytes and has stripped the application data's
+    // region tags. Restore them by replacing this segment's payload with the
+    // corresponding (still region-tagged) chunk held in the send buffer, so the
+    // tags travel to the peer. The send buffer's front byte has sequence number
+    // SND.UNA (== pcb->lastack), which maps the segment to a buffer offset.
+    if (numBytes > 0 && connM != nullptr && connM->pcbM != nullptr) {
+        uint32_t seq = tcpHdr->getSequenceNo();
+        const auto& appData = assembleTaggedData(taggedSegments, seq, numBytes);
+        if (appData != nullptr) {
+            packet->eraseAll();
+            packet->insertAtBack(appData);
+        }
+        pruneTaggedData(taggedSegments, connM->pcbM->lastack);
+    }
     packet->insertAtFront(tcpHdr);
 
 //    auto payload = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
@@ -110,6 +177,7 @@ void TcpLwipReceiveQueue::setConnection(TcpLwipConnection *connP)
     ASSERT(connM == nullptr);
 
     dataBuffer.clear();
+    taggedSegments.clear();
     connM = connP;
 }
 
@@ -117,11 +185,32 @@ void TcpLwipReceiveQueue::notifyAboutIncomingSegmentProcessing(Packet *packet, u
 {
     ASSERT(packet);
     ASSERT(bufferP);
+
+    // Cache the region tags carried by this segment's payload, keyed by its TCP
+    // sequence number, so they can be re-attached when lwIP delivers the
+    // (possibly reassembled) data. Called for every arriving data segment,
+    // in-order or out-of-order.
+    if (bufferLengthP > 0) {
+        const auto& tcpHdr = packet->peekAtFront<TcpHeader>();
+        taggedSegments[seqno] = packet->peekAt(tcpHdr->getChunkLength(), B(bufferLengthP));
+    }
 }
 
-void TcpLwipReceiveQueue::enqueueTcpLayerData(void *dataP, unsigned int dataLengthP)
+const Ptr<const Chunk> TcpLwipReceiveQueue::getCachedTaggedData(uint32_t seqNoP, unsigned int lengthP)
 {
-    dataBuffer.push(makeShared<BytesChunk>(static_cast<uint8_t *>(dataP), dataLengthP));
+    return assembleTaggedData(taggedSegments, seqNoP, lengthP);
+}
+
+void TcpLwipReceiveQueue::enqueueTcpLayerData(void *dataP, unsigned int dataLengthP, uint32_t seqNoP)
+{
+    // Prefer the region-tagged application data cached as the segments arrived;
+    // fall back to plain bytes if the range is not (fully) cached (e.g. a tag-less
+    // transport on the far side).
+    Ptr<const Chunk> chunk = getCachedTaggedData(seqNoP, dataLengthP);
+    if (chunk == nullptr)
+        chunk = makeShared<BytesChunk>(static_cast<uint8_t *>(dataP), dataLengthP);
+    dataBuffer.push(chunk);
+    pruneTaggedData(taggedSegments, seqNoP + dataLengthP);
 }
 
 B TcpLwipReceiveQueue::getExtractableBytesUpTo() const
