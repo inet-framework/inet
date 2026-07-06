@@ -36,7 +36,7 @@ import inet.common.SimpleModule;
 simple GateScheduleConfiguratorBase extends SimpleModule
 {
     parameters:
-        @class(GateScheduleConfiguratorBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         double gateCycleDuration @unit(s); // The globally used gate scheduling period in each PeriodicGate module
         object configuration @mutable = default([]); // Array of objects, see ~GateScheduleConfiguratorBase module documentation for more details
                                                      // example: [{name: "s1", type: "unicast", application: "app[0]", pcp: 0, gateIndex: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us, maxJitter: 10us, pathFragments: [["a", "b", "c"]]}]

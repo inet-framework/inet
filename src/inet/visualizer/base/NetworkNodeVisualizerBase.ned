@@ -21,6 +21,6 @@ simple NetworkNodeVisualizerBase extends VisualizerBase
         double annotationSpacing = default(4);
         double placementPenalty = default(10);
 
-        @class(NetworkNodeVisualizerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

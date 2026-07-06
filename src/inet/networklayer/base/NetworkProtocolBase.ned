@@ -15,6 +15,7 @@ import inet.common.LayeredProtocolBase;
 simple NetworkProtocolBase extends LayeredProtocolBase
 {
     parameters:
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         string interfaceTableModule;
         @display("i=block/fork");
     gates:

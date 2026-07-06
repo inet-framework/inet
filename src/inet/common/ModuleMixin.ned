@@ -17,5 +17,6 @@ package inet.common;
 simple ModuleMixin
 {
     parameters:
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         string displayStringTextFormat @mutable = default(""); // Determines the text that is written on top of the submodule, supports displaying pars, watches, and module-specific information
 }

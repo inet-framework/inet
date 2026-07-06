@@ -15,8 +15,8 @@ package inet.queueing.base;
 simple PacketServerBase extends PacketProcessorBase
 {
     parameters:
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         displayStringTextFormat = default("served %p pk (%l)");
-        @class(PacketServerBase);
         @display("i=block/server");
         @signal[packetPushed](type=inet::Packet);
         @signal[packetPulled](type=inet::Packet);

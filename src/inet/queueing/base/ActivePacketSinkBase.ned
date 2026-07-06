@@ -15,7 +15,7 @@ package inet.queueing.base;
 simple ActivePacketSinkBase extends PacketSinkBase
 {
     parameters:
-        @class(ActivePacketSinkBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @signal[packetPulled](type=inet::Packet);
         // the statistical value is the packet
         @statistic[packets](title="packets"; source=packetPulled; record=count; unit=pk);

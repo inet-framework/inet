@@ -14,6 +14,6 @@ package inet.queueing.base;
 simple PacketDuplicatorBase extends PacketProcessorBase
 {
     parameters:
-        @class(PacketDuplicatorBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/star");
 }

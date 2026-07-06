@@ -19,7 +19,7 @@ import inet.power.contract.ICcEnergyGenerator;
 simple CcEnergyGeneratorBase extends SimpleModule like ICcEnergyGenerator
 {
     parameters:
-        @class(CcEnergyGeneratorBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/plug");
         @signal[currentGenerationChanged];
         @statistic[currentGeneration](title="Current generation"; source=currentGenerationChanged; record=vector; interpolationmode=sample-hold; unit=A);

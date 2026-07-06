@@ -12,6 +12,7 @@ import inet.queueing.base.PacketProcessorBase;
 simple PacketReceiverBase extends PacketProcessorBase
 {
     parameters:
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         double datarate @unit(bps);
         @display("i=block/wrx");
         @signal[receptionStarted](type=inet::physicallayer::Signal);

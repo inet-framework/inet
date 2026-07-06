@@ -57,6 +57,6 @@ simple MobilityVisualizerBase extends VisualizerBase
         int trailLength = default(100); // Number of sections in the trail
         double movementTrailSegmentHideThreshold = default(inf); // Trail segments longer than this many pixels (e.g. a node wrapping across the map on an equirectangular projection) are treated as discontinuities and hidden, so the trail shows as disjoint pieces; the default (positive infinity) hides nothing
 
-        @class(MobilityVisualizerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

@@ -24,6 +24,6 @@ simple ChecksumInserterBase extends PacketFlowBase
     parameters:
         string checksumType @enum("internet","ethernet-fcs","crc32c","crc16-ibm","crc16-ccitt") = default("ethernet-fcs");
         string checksumMode @enum("disabled","declared","computed") = default("declared");
-        @class(ChecksumInserterBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/inserter");
 }

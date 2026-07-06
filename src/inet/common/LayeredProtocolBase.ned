@@ -15,7 +15,7 @@ import inet.common.SimpleModule;
 simple LayeredProtocolBase extends SimpleModule
 {
     parameters:
-        @class(LayeredProtocolBase);
+        @class(abstract);   //# set to 'abstract' to prevent unintentional instantiation and also suppress(missing-cpp-class) in linter
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[packetSentToLower](type=cPacket);

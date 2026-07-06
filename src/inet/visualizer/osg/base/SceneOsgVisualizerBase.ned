@@ -32,6 +32,6 @@ simple SceneOsgVisualizerBase extends SceneVisualizerBase
         double sceneImageSize @unit(m) = default(1m); // Scene texture size
         bool sceneShading = default(true); // Exponential shading for scene color, enabled by default
 
-        @class(SceneOsgVisualizerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

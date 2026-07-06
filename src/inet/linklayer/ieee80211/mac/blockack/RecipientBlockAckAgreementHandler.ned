@@ -19,7 +19,7 @@ import inet.common.SimpleModule;
 simple RecipientBlockAckAgreementHandler extends SimpleModule
 {
     parameters:
-        @class(RecipientBlockAckAgreementHandler);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         string rateSelectionModule;
 
         @display("i=block/cogwheel");

@@ -15,8 +15,8 @@ package inet.queueing.base;
 simple PacketSinkBase extends PacketProcessorBase
 {
     parameters:
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         displayStringTextFormat = default("received %p pk (%l)");
-        @class(PacketSinkBase);
         @display("i=block/sink");
         @signal[packetDropped](type=inet::Packet);
         // the statistical value is the dropped packet

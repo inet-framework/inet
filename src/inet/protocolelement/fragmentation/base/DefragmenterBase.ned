@@ -19,5 +19,5 @@ simple DefragmenterBase extends PacketPusherBase
     parameters:
         bool deleteSelf = default(false);
         @display("i=block/join");
-        @class(DefragmenterBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }

@@ -43,7 +43,7 @@ simple PacketSourceBase extends PacketProcessorBase
         bool attachIdentityTag = default(true);
         bool attachDirectionTag = default(true);
         displayStringTextFormat = default("created %p pk (%l)");
-        @class(PacketSourceBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/source");
         @signal[packetCreated](type=inet::Packet);
 }

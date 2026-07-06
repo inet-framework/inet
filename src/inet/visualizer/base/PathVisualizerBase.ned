@@ -65,6 +65,6 @@ simple PathVisualizerBase extends VisualizerBase
         double fadeOutTime @unit(s) = default(1s); // How quickly inactive routes fade away, 1 second by default
         double fadeOutAnimationSpeed = default(0); // Animation speed while there are active routes, value must be in the range (0, +inf)
 
-        @class(PathVisualizerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

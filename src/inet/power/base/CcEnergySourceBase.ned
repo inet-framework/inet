@@ -19,7 +19,7 @@ import inet.power.contract.ICcEnergySource;
 simple CcEnergySourceBase extends SimpleModule like ICcEnergySource
 {
     parameters:
-        @class(CcEnergySourceBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/plug");
         @signal[currentConsumptionChanged];
         @statistic[currentConsumption](title="Current consumption"; source=currentConsumptionChanged; record=vector; interpolationmode=sample-hold; unit=A);

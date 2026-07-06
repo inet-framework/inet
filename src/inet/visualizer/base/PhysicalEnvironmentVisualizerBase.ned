@@ -22,6 +22,6 @@ simple PhysicalEnvironmentVisualizerBase extends VisualizerBase
 
         bool displayObjects = default(true);
 
-        @class(PhysicalEnvironmentVisualizerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

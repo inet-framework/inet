@@ -13,7 +13,7 @@ package inet.queueing.base;
 simple PacketPullerBase extends PacketProcessorBase
 {
     parameters:
-        @class(PacketPullerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
     gates:
         input in;
         output out;

@@ -12,7 +12,7 @@ import inet.common.SimpleModule;
 simple NetworkConfiguratorBase extends SimpleModule
 {
     parameters:
-        @class(NetworkConfiguratorBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/cogwheel");
 }
 

@@ -32,6 +32,6 @@ simple DriftingOscillatorBase extends OscillatorBase
         double tickOffset @unit(s) = default(0s); // Shifts ticks to the past, must be in the range of [0, current tick length)
         @signal[preOscillatorStateChanged];
         @signal[postOscillatorStateChanged];
-        @class(DriftingOscillatorBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

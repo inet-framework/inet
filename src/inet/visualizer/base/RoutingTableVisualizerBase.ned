@@ -55,6 +55,6 @@ simple RoutingTableVisualizerBase extends VisualizerBase
         string labelFont = default("<default>, 8px"); // Label font, automatic by default
         string labelColor = default("black"); // Label color, black by default
 
-        @class(RoutingTableVisualizerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

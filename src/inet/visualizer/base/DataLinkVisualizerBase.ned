@@ -31,6 +31,6 @@ simple DataLinkVisualizerBase extends LinkVisualizerBase
     parameters:
         lineColor = default("darkcyan");
         labelColor = default("darkcyan");
-        @class(DataLinkVisualizerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

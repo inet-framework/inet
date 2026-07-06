@@ -15,7 +15,7 @@ package inet.queueing.base;
 simple ActivePacketSourceBase extends PacketSourceBase
 {
     parameters:
-        @class(ActivePacketSourceBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @signal[packetPushed](type=inet::Packet);
         // the statistical value is the packet
         @statistic[packets](title="packets"; source=packetPushed; record=count; unit=pk);

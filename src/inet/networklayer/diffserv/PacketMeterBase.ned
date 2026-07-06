@@ -13,6 +13,7 @@ import inet.queueing.base.PacketProcessorBase;
 simple PacketMeterBase extends PacketProcessorBase
 {
     parameters:
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/classifier");
         @signal[packetPushed](type=inet::Packet);
         @signal[packetPulled](type=inet::Packet);

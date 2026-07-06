@@ -23,6 +23,6 @@ simple ChecksumCheckerBase extends PacketFilterBase
 {
     parameters:
         string checksumType @enum("internet","ethernet-fcs","crc32c","crc16-ibm","crc16-ccitt") = default("ethernet-fcs");
-        @class(ChecksumCheckerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/checker");
 }

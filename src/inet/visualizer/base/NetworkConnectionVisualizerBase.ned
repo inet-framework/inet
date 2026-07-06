@@ -24,6 +24,6 @@ simple NetworkConnectionVisualizerBase extends VisualizerBase
         string lineStyle = default("solid"); // Connection line style (solid, dashed, dotted).
         double lineWidth = default(1); // Connection line width.
 
-        @class(NetworkConnectionVisualizerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

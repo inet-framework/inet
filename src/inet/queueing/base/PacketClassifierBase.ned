@@ -19,7 +19,7 @@ simple PacketClassifierBase extends PacketProcessorBase
     parameters:
         bool reverseOrder = default(false);
         displayStringTextFormat = default("classified %p pk (%l)");
-        @class(PacketClassifierBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/classifier");
         @signal[packetPushed](type=inet::Packet);
         // the statistical value is the classified packet

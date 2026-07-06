@@ -19,7 +19,7 @@ import inet.power.contract.IEpEnergySource;
 simple EpEnergySourceBase extends SimpleModule like IEpEnergySource
 {
     parameters:
-        @class(EpEnergySourceBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/plug");
         @signal[powerConsumptionChanged];
         @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold; unit=W);

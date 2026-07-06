@@ -18,5 +18,5 @@ simple PacketMarkerBase extends PacketFlowBase
 {
     parameters:
         displayStringTextFormat = default("marked %p pk (%l)");
-        @class(PacketMarkerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }

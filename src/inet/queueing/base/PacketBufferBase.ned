@@ -23,6 +23,7 @@ package inet.queueing.base;
 simple PacketBufferBase extends PacketProcessorBase
 {
     parameters:
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         displayStringTextFormat = default("contains {numPackets} pk ({totalLength})\nadded {numAddedPackets} removed {numRemovedPackets} dropped {numDroppedPackets}"); // Determines display string text above the submodule
         @display("i=block/buffer");
     gates:

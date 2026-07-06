@@ -10,5 +10,5 @@ package inet.protocolelement.transceiver.base;
 simple StreamingReceiverBase extends PacketReceiverBase
 {
     parameters:
-        @class(StreamingReceiverBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }

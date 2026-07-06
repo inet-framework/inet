@@ -16,7 +16,7 @@ import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 simple L3NetworkConfiguratorBase extends SimpleModule like IL3NetworkConfigurator
 {
     parameters:
-        @class(L3NetworkConfiguratorBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         double minLinkWeight = default(1E-3);
         bool configureIsolatedNetworksSeparatly = default(false);
 }

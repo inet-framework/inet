@@ -19,7 +19,7 @@ import inet.power.contract.IEpEnergyGenerator;
 simple EpEnergyGeneratorBase extends SimpleModule like IEpEnergyGenerator
 {
     parameters:
-        @class(EpEnergyGeneratorBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/plug");
         @signal[powerGenerationChanged];
         @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold; unit=W);

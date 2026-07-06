@@ -19,7 +19,7 @@ simple PacketFilterBase extends PacketProcessorBase
     parameters:
         bool backpressure = default(false);
         displayStringTextFormat = default("dropped {numDroppedPackets}/{numProcessedPackets} pk ({droppedTotalLength}/{processedTotalLength})"); // Determines the text that is written on top of the submodule
-        @class(PacketFilterBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/downarrow");
         @signal[packetPushedIn](type=inet::Packet);
         @signal[packetPushedOut](type=inet::Packet);

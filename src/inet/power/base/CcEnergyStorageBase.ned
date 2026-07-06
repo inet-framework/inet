@@ -19,7 +19,7 @@ import inet.power.contract.ICcEnergyStorage;
 simple CcEnergyStorageBase extends SimpleModule like ICcEnergyStorage
 {
     parameters:
-        @class(CcEnergyStorageBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/plug");
         @signal[currentConsumptionChanged];
         @signal[currentGenerationChanged];

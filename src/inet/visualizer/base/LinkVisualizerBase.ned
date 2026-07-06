@@ -56,6 +56,6 @@ simple LinkVisualizerBase extends VisualizerBase
 
         double holdAnimationTime @unit(s) = default(0s); // Hold simulation (no progress) for the specified amount of animation time when the link is activated
 
-        @class(LinkVisualizerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

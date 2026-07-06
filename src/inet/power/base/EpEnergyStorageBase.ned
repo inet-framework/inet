@@ -19,7 +19,7 @@ import inet.power.contract.IEpEnergyStorage;
 simple EpEnergyStorageBase extends SimpleModule like IEpEnergyStorage
 {
     parameters:
-        @class(EpEnergyStorageBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/plug");
         @signal[powerConsumptionChanged];
         @signal[powerGenerationChanged];

@@ -17,9 +17,9 @@ package inet.queueing.base;
 simple PacketSchedulerBase extends PacketProcessorBase
 {
     parameters:
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         bool reverseOrder = default(false);
         displayStringTextFormat = default("scheduled %p pk (%l)");
-        @class(PacketSchedulerBase);
         @display("i=block/join");
         @signal[packetPulled](type=inet::Packet);
         // the statistical value is the scheduled packet

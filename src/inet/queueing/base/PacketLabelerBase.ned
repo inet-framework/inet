@@ -14,6 +14,6 @@ simple PacketLabelerBase extends PacketMarkerBase
 {
     parameters:
         string labels = default(""); // A space-separated list of labels
-        @class(PacketLabelerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/star");
 }

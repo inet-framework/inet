@@ -19,5 +19,5 @@ simple PacketMeterBase extends PacketFlowBase
     parameters:
         displayStringTextFormat = default("metered %p pk (%l)");
         @display("i=block/star");
-        @class(PacketMeterBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }

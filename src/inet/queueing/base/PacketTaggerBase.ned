@@ -24,6 +24,6 @@ simple PacketTaggerBase extends PacketMarkerBase
         double transmissionPower @unit(W) = default(nan W); // Specifies signal transmission power, unused by default
         object encapsulationProtocols = default([]);
         displayStringTextFormat = default("tagged %p pk (%l)");
-        @class(PacketTaggerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/star");
 }

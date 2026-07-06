@@ -32,6 +32,6 @@ simple PhysicalLinkVisualizerBase extends LinkVisualizerBase
         lineColor = default("olive");
         lineStyle = default("dotted");
         labelColor = default("olive");
-        @class(PhysicalLinkVisualizerBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
 }
 

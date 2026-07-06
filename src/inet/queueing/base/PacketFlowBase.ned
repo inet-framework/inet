@@ -17,7 +17,7 @@ package inet.queueing.base;
 simple PacketFlowBase extends PacketProcessorBase
 {
     parameters:
-        @class(PacketFlowBase);
+        @class(-);  //# set to '-' to prevent unintentional instantiation. Also disable the linter: suppress(missing-cpp-class)
         @display("i=block/rightarrow");
         @signal[packetPushedIn](type=inet::Packet);
         @signal[packetPushedOut](type=inet::Packet);
