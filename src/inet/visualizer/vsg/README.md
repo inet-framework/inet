@@ -387,16 +387,23 @@ switching to the 3D view, and pressing Run.
 ## Building & running
 
 - Requires a VSG-enabled OMNeT++ build (in this environment: the
-  `omnetpp-dev` checkout, configured/built with VSG support,
-  i.e. `WITH_VSG=yes`).
-- INET side: the `VisualizationVsg` feature (`.oppfeatures`, id
-  `VisualizationVsg`) must be enabled; it compiles with
-  `-DINET_WITH_VISUALIZATIONVSG`, requires the `PhysicalEnvironment` and
-  `VisualizationCommon` features, and is **mutually exclusive** with
-  `VisualizationOsg` — an OMNeT++ build has either OSG or VSG support, never
-  both, so the two visualizer features cannot be enabled simultaneously.
+  `omnetpp-dev` checkout, configured with `WITH_VSG=yes`).
+- **OSG and VSG can now coexist in one build.** Since OMNeT++'s `cScene3DNode`
+  became a backend-neutral handle (omnetpp-dev `topic/VSG`, the
+  "backend-neutral `cScene3DNode`" change), a single OMNeT++ build can contain
+  **both** 3D backends and choose one **per simulation**. To get this,
+  configure OMNeT++ with **both** `WITH_OSG=yes` *and* `WITH_VSG=yes`: the
+  Qtenv loader then builds and loads both `liboppqtenv-osg` and
+  `liboppqtenv-vsg` and selects the matching one per `cOsgCanvas` (via
+  `cScene3DNode::getBackendType()`). Building with only one backend still works.
+- INET side: enable the `VisualizationVsg` feature (`.oppfeatures`; compiles
+  with `-DINET_WITH_VISUALIZATIONVSG`; requires `PhysicalEnvironment` and
+  `VisualizationCommon`). `VisualizationOsg` **may be enabled at the same
+  time** — a scene renders on whichever backend its visualizer creates. (An
+  earlier revision of this doc said the two were mutually exclusive; that was
+  true only before the backend-neutral `cScene3DNode` change.)
 - Build with `make MODE=release` (from the INET root, after
-  `opp_featuretool` / configure has enabled `VisualizationVsg`).
+  `opp_featuretool` / configure has enabled the desired feature(s)).
 - Run an example with `inet -u Qtenv` from its directory (e.g.
   `examples/visualizer/vsgsignalwave3d`), then switch to the 3D view in the
   Qtenv toolbar and press Run.

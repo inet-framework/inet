@@ -60,6 +60,11 @@ endif
 WITH_VISUALIZATIONOSG := $(shell (cd .. && $(FEATURETOOL) -q isenabled VisualizationOsg && echo enabled) )
 ifeq ($(WITH_VISUALIZATIONOSG), enabled)
   ifeq ($(WITH_OSG), yes)
+    # -I$(OMNETPP_ROOT)/src gives access to the plugin's qtenv/osg/osgscenehandle.h
+    # (createScene3DNode / getOsgRoot / cScene3DNode), needed by the OSG scene
+    # visualizers now that cScene3DNode is backend-neutral. Mirrors the
+    # VisualizationVsg block below; required for OSG-only builds (VSG disabled).
+    CFLAGS += -I$(OMNETPP_ROOT)/src
     OMNETPP_LIBS += -losg -losgText -losgDB -losgGA -losgViewer -losgUtil -lOpenThreads # TODO: use $(OSG_LIBS) from Makefile.inc? Does that include -losgText? Why not?
     ifeq ($(WITH_OSGEARTH), yes)
       OMNETPP_LIBS += -losgEarth -losgEarthUtil # TODO: use $(OSGEARTH_LIBS) from Makefile.inc? -lgeos_c might also be needed. Is that included? Should it be?

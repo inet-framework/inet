@@ -8,6 +8,7 @@
 #ifndef __INET_PACKETDROPOSGVISUALIZER_H
 #define __INET_PACKETDROPOSGVISUALIZER_H
 
+#include <osg/Node>
 #include <osg/ref_ptr>
 
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"

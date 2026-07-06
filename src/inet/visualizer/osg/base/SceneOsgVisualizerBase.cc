@@ -12,6 +12,8 @@
 #include <osg/ShapeDrawable>
 #include <osgDB/ReadFile>
 
+#include "qtenv/osg/osgscenehandle.h"   // omnetpp::createScene3DNode(osg::Node*)
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 #include "inet/visualizer/osg/util/OsgScene.h"
@@ -28,7 +30,7 @@ void SceneOsgVisualizerBase::initializeScene()
         throw cRuntimeError("OSG canvas scene at '%s' has been already initialized", visualizationTargetModule->getFullPath().c_str());
     else {
         auto topLevelScene = new inet::osg::TopLevelScene();
-        osgCanvas->setScene(topLevelScene);
+        osgCanvas->setScene(omnetpp::createScene3DNode(topLevelScene));
         const char *clearColor = par("clearColor");
         if (*clearColor != '\0')
             osgCanvas->setClearColor(cFigure::Color(clearColor));

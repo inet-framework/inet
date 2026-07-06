@@ -6,6 +6,7 @@
 
 package inet.examples.visualizer.vsglidar;
 
+import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -51,5 +52,26 @@ network VsgLidarShowcase
         }
         drone5: WirelessHost {
             @display("p=150,330;i=misc/drone");
+        }
+}
+
+//
+// The same drone swarm, but with a physical environment so the LIDAR terrain
+// can also act on the radio physics (see the TerrainTwoRay config): the
+// physicalEnvironment.ground submodule loads the SAME terrain.ply through
+// ~PointCloudGround, giving ground-aware path-loss models (e.g.
+// ~TwoRayGroundReflection) the real surface elevation under each drone.
+// A stationary ground station (gcs) sits at street level next to the tallest
+// building; the drones report to it, so drone-to-base links pass right by the
+// tower — the natural test case for terrain occlusion models.
+//
+network VsgLidarTerrainShowcase extends VsgLidarShowcase
+{
+    submodules:
+        physicalEnvironment: PhysicalEnvironment {
+            @display("p=60,300");
+        }
+        gcs: WirelessHost { // ground control station at the foot of the tower
+            @display("p=400,400;i=device/antennatower");
         }
 }

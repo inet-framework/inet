@@ -39,6 +39,8 @@
 
 namespace inet {
 
+class Heightfield;
+
 namespace vsg {
 
 using namespace ::vsg;
@@ -106,6 +108,11 @@ ref_ptr<Node> createSphereWaveShader(double innerRadius, double outerRadius, con
 // and return it as a coloured POINT_LIST node, recentred and aspect-fit into [sceneMin, sceneMax] and
 // coloured by elevation when the file has no colours. For a LIDAR/terrain "ground". Empty group on failure.
 ref_ptr<Node> createTerrainFromPLY(const std::string& path, const Coord& sceneMin, const Coord& sceneMax);
+
+// Renders a Heightfield (a ground module's digital surface model) as a shaded, elevation-colored
+// triangle mesh, in the heightfield's own (simulation) coordinates — so the displayed surface is
+// exactly the one the physics samples. Cells with no data drop the triangles that touch them.
+ref_ptr<Node> createTerrainMeshFromHeightfield(const Heightfield& heightfield);
 ref_ptr<Node> createQuad(const Coord& min, const Coord& max, const cFigure::Color& color, double opacity = 1.0);
 ref_ptr<Node> createPolygon(const std::vector<Coord>& points, const cFigure::Color& color, double opacity = 1.0, const Coord& translation = Coord::ZERO);
 ref_ptr<Node> createArrowhead(const Coord& start, const Coord& end, const cFigure::Color& color, double width = 10.0, double height = 20.0, double opacity = 1.0);

@@ -31,7 +31,7 @@ SimulationScene *TopLevelScene::getSimulationScene(cModule *module)
     // Under WITH_VSG the cOsgCanvas scene is an opaque omnetpp::cScene3DNode that
     // wraps the VSG scene-root group; recover our TopLevelScene from its root.
     auto sceneNode = osgCanvas->getScene();
-    ::vsg::ref_ptr<Group> root = sceneNode != nullptr ? sceneNode->getRoot() : ::vsg::ref_ptr<Group>();
+    ::vsg::ref_ptr<Group> root = omnetpp::getVsgRoot(sceneNode);   // null / wrong-backend safe
     auto topLevelScene = root ? dynamic_cast<TopLevelScene *>(root.get()) : nullptr;
     if (topLevelScene != nullptr)
         return topLevelScene->getSimulationScene();

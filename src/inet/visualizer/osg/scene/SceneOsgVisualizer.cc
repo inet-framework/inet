@@ -10,6 +10,8 @@
 #include <osg/Group>
 #include <osgDB/ReadFile>
 
+#include "qtenv/osg/osgscenehandle.h"   // omnetpp::getOsgRoot()
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/visualizer/osg/util/OsgScene.h"
 #include "inet/visualizer/osg/util/OsgUtils.h"
@@ -39,7 +41,7 @@ void SceneOsgVisualizer::initialize(int stage)
 void SceneOsgVisualizer::initializeScene()
 {
     SceneOsgVisualizerBase::initializeScene();
-    auto topLevelScene = check_and_cast<inet::osg::TopLevelScene *>(visualizationTargetModule->getOsgCanvas()->getScene());
+    auto topLevelScene = check_and_cast<inet::osg::TopLevelScene *>(omnetpp::getOsgRoot(visualizationTargetModule->getOsgCanvas()->getScene()));
     topLevelScene->addChild(new inet::osg::SimulationScene());
 }
 
