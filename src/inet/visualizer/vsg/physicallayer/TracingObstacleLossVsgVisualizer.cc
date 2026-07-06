@@ -50,8 +50,10 @@ TracingObstacleLossVsgVisualizer::createObstacleLossVisualization(const ITracing
     auto normal2       = obstaclePenetratedEvent->normal2;
     // TODO: display obstaclePenetratedEvent->loss as a label or color
 
-    const RotationMatrix rotation(object->getOrientation().toEulerAngles());
-    const Coord& position = object->getPosition();
+    // A nullptr object (e.g. terrain from TerrainObstacleLoss) means the intersection
+    // points and normals are already world-frame: identity rotation, no offset.
+    const RotationMatrix rotation = object != nullptr ? RotationMatrix(object->getOrientation().toEulerAngles()) : RotationMatrix();
+    const Coord position = object != nullptr ? object->getPosition() : Coord::ZERO;
     const Coord rotatedIntersection1 = rotation.rotateVector(intersection1) + position;
     const Coord rotatedIntersection2 = rotation.rotateVector(intersection2) + position;
 

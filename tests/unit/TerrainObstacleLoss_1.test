@@ -1,0 +1,57 @@
+%description:
+Test TerrainObstacleLoss::computeKnifeEdgeLoss: the ITU-R P.526 single
+knife-edge diffraction curve J(v). Checks the no-loss region below the
+v = -0.78 cutoff, continuity at the cutoff, the ~6 dB grazing value at v = 0,
+reference points in the shadow region, and monotonicity.
+
+%includes:
+#include <cmath>
+#include "inet/physicallayer/wireless/common/obstacleloss/TerrainObstacleLoss.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+%global:
+
+#define CHECK(label, cond)  EV << label << ": " << ((cond) ? "OK" : "FAIL") << "\n";
+
+%activity:
+
+// --- no loss while the obstruction stays outside ~0.55 of the first Fresnel zone ---
+CHECK("clear v=-2", TerrainObstacleLoss::computeKnifeEdgeLoss(-2) == 0);
+CHECK("clear v=-0.9", TerrainObstacleLoss::computeKnifeEdgeLoss(-0.9) == 0);
+
+// --- the curve is continuous at the v=-0.78 cutoff (~0 dB just above it) ---
+CHECK("continuity at cutoff", std::fabs(TerrainObstacleLoss::computeKnifeEdgeLoss(-0.78 + 1e-6)) < 0.02);
+
+// --- grazing incidence: terrain exactly at the direct ray costs ~6 dB ---
+CHECK("grazing v=0", std::fabs(TerrainObstacleLoss::computeKnifeEdgeLoss(0) - 6.03) < 0.05);
+
+// --- reference points in the shadow region ---
+CHECK("shadow v=1", std::fabs(TerrainObstacleLoss::computeKnifeEdgeLoss(1) - 13.93) < 0.1);
+CHECK("shadow v=2", std::fabs(TerrainObstacleLoss::computeKnifeEdgeLoss(2) - 19.04) < 0.1);
+
+// --- strictly monotone increasing through the transition and shadow regions ---
+{
+    bool monotone = true;
+    double previous = TerrainObstacleLoss::computeKnifeEdgeLoss(-0.7);
+    for (double v = -0.6; v <= 4.0 + 1e-9; v += 0.1) {
+        double loss = TerrainObstacleLoss::computeKnifeEdgeLoss(v);
+        if (loss <= previous)
+            monotone = false;
+        previous = loss;
+    }
+    CHECK("monotone", monotone);
+}
+
+EV << "done\n";
+
+%contains: stdout
+clear v=-2: OK
+clear v=-0.9: OK
+continuity at cutoff: OK
+grazing v=0: OK
+shadow v=1: OK
+shadow v=2: OK
+monotone: OK
+done
