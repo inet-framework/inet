@@ -82,17 +82,20 @@ endif
 #
 # Optional Rocky geospatial SDK (github.com/pelicanmapping/rocky, the VSG-based
 # successor to osgEarth): enables RockyGround / SceneRockyVisualizer. Off by default.
-# ROCKY_ROOT is the Rocky install prefix.
-# DEV NOTE: ROCKY_ROOT below is a local development default; for upstreaming, resolve
-# it via pkg-config / a configure check instead of a hardcoded path.
+# ROCKY_ROOT is the Rocky install prefix; it defaults to pkg-config's prefix (if Rocky
+# ships a .pc) or the standard /usr/local, and is meant to be overridden on the command
+# line: make WITH_ROCKY=yes ROCKY_ROOT=/path/to/rocky-install
 WITH_ROCKY ?= no
-ROCKY_ROOT ?= /Users/gabortabi/rocky-install
+ROCKY_ROOT ?= $(shell pkg-config --variable=prefix rocky 2>/dev/null || echo /usr/local)
 WITH_VISUALIZATIONVSG := $(shell (cd .. && $(FEATURETOOL) -q isenabled VisualizationVsg && echo enabled) )
 ifeq ($(WITH_VISUALIZATIONVSG), enabled)
   ifeq ($(WITH_VSG), yes)
     CFLAGS += $(VSG_CFLAGS) -I$(OMNETPP_ROOT)/src
     OMNETPP_LIBS += $(VSG_LIBS)
     ifeq ($(WITH_ROCKY), yes)
+      ifeq ($(wildcard $(ROCKY_ROOT)/include/rocky),)
+        $(error WITH_ROCKY=yes but the Rocky SDK was not found under ROCKY_ROOT=$(ROCKY_ROOT). Set ROCKY_ROOT to your Rocky install prefix, e.g. make WITH_ROCKY=yes ROCKY_ROOT=/path/to/rocky-install)
+      endif
       # -DWITH_ROCKY here (rather than via the generated opp_defines.h) keeps the macro and the
       # include path in the same CFLAGS, so they can never get out of sync when toggling WITH_ROCKY.
       CFLAGS += -DWITH_ROCKY -I$(ROCKY_ROOT)/include
