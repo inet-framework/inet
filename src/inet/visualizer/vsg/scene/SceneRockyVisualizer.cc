@@ -46,6 +46,10 @@ void SceneRockyVisualizer::initialize(int stage)
         // A map fills the ground but not the sky; give the empty area above the horizon a sky
         // colour instead of the default backdrop so the map doesn't look cut off at the horizon.
         visualizationTargetModule->getOsgCanvas()->setClearColor(cFigure::Color(135, 206, 235));
+        // A map is best seen from above: start the camera looking straight down. Wheel zoom only
+        // changes distance (not tilt), so the view stays top-down — you always look at the global
+        // map instead of across it at the horizon, which avoids the map appearing to clip away.
+        visualizationTargetModule->getOsgCanvas()->setCameraManipulatorType(cOsgCanvas::CAM_OVERVIEW);
     }
     else if (stage == INITSTAGE_LAST) {
         // Attach to the backend's render hook: build the map when the viewer becomes available
