@@ -29,6 +29,13 @@ void TerrainObstacleLoss::initialize(int stage)
             mode = FRESNEL;
         else
             throw cRuntimeError("Unknown mode '%s'", modeString);
+        const char *markerStyleString = par("markerStyle");
+        if (!strcmp(markerStyleString, "depth"))
+            markerStyle = DEPTH;
+        else if (!strcmp(markerStyleString, "ray"))
+            markerStyle = RAY;
+        else
+            throw cRuntimeError("Unknown markerStyle '%s'", markerStyleString);
         sampleStep = par("sampleStep");
         logLinkEvents = par("logLinkEvents");
     }
@@ -44,13 +51,14 @@ double TerrainObstacleLoss::computeKnifeEdgeLoss(double v)
     return 6.9 + 20 * std::log10(std::sqrt((v - 0.1) * (v - 0.1) + 1) + v - 0.1);
 }
 
-void TerrainObstacleLoss::emitObstaclePenetrated(const Coord& rayPoint, const Coord& groundPoint, double lossFactor) const
+void TerrainObstacleLoss::emitObstaclePenetrated(const Coord& intersection1, const Coord& intersection2, double lossFactor) const
 {
     // No physical object is associated with terrain: coordinates are world-frame
-    // (see ObstaclePenetratedEvent). The intersection segment connects the direct
-    // ray to the terrain surface at the critical point, making the obstruction
-    // (or near-grazing pinch) visible in the tracing obstacle loss visualizers.
-    ObstaclePenetratedEvent event(nullptr, rayPoint, groundPoint, getHeightfield()->getNormal(groundPoint.x, groundPoint.y), Coord(0, 0, 1), lossFactor);
+    // (see ObstaclePenetratedEvent). The intersection segment geometry depends on
+    // markerStyle — see the NED documentation.
+    const Heightfield *hf = getHeightfield();
+    ObstaclePenetratedEvent event(nullptr, intersection1, intersection2,
+            hf->getNormal(intersection1.x, intersection1.y), hf->getNormal(intersection2.x, intersection2.y), lossFactor);
     const_cast<TerrainObstacleLoss *>(this)->emit(obstaclePenetratedSignal, &event);
 }
 
@@ -143,7 +151,7 @@ double TerrainObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& trans
     // single knife-edge curve J(v) then maps to a graded loss.
     bool blocked = false;
     double worstV = -INFINITY;
-    double worstT = NaN;
+    int worstIndex = -1;
     double worstGroundZ = NaN;
     for (int i = 1; i < numSamples - 1; i++) {
         double t = (double)i / (numSamples - 1);
@@ -154,7 +162,7 @@ double TerrainObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& trans
         if (mode == LOS) {
             if (groundZ > rayZ) {
                 blocked = true; // terrain or building blocks the direct ray
-                worstT = t;
+                worstIndex = i;
                 worstGroundZ = groundZ;
                 break;
             }
@@ -165,7 +173,7 @@ double TerrainObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& trans
             double v = (groundZ - rayZ) * std::sqrt(2 * totalDistance / (waveLength * d1 * d2));
             if (v > worstV) {
                 worstV = v;
-                worstT = t;
+                worstIndex = i;
                 worstGroundZ = groundZ;
             }
         }
@@ -178,10 +186,41 @@ double TerrainObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& trans
         lossFactor = std::pow(10.0, -lossDb / 10.0);
         blocked = worstV > 0; // the direct ray itself is geometrically obstructed
     }
-    if (lossFactor < 1) {
-        Coord rayPoint(transmissionPosition.x + dx * worstT, transmissionPosition.y + dy * worstT, transmissionPosition.z + dz * worstT);
-        Coord groundPoint(rayPoint.x, rayPoint.y, worstGroundZ);
-        emitObstaclePenetrated(rayPoint, groundPoint, lossFactor);
+    if (lossFactor < 1 && worstIndex > 0) {
+        auto rayPointAt = [&](double tt) {
+            return Coord(transmissionPosition.x + dx * tt, transmissionPosition.y + dy * tt, transmissionPosition.z + dz * tt);
+        };
+        Coord intersection1, intersection2;
+        if (markerStyle == RAY) {
+            if (blocked) {
+                // the chord of the direct ray below the terrain surface: the contiguous
+                // obstructed run of samples around the worst point
+                auto isObstructedAt = [&](int i) {
+                    Coord p = rayPointAt((double)i / (numSamples - 1));
+                    double groundZ = hf->getElevation(p.x, p.y);
+                    return !std::isnan(groundZ) && groundZ > p.z;
+                };
+                int first = worstIndex, last = worstIndex;
+                while (first > 1 && isObstructedAt(first - 1))
+                    first--;
+                while (last < numSamples - 2 && isObstructedAt(last + 1))
+                    last++;
+                intersection1 = rayPointAt((double)first / (numSamples - 1));
+                intersection2 = rayPointAt((double)last / (numSamples - 1));
+            }
+            else {
+                // near-grazing attenuation without geometric obstruction (fresnel mode):
+                // a one-sample-long tick along the ray at the pinch point
+                intersection1 = rayPointAt((worstIndex - 0.5) / (numSamples - 1));
+                intersection2 = rayPointAt((worstIndex + 0.5) / (numSamples - 1));
+            }
+        }
+        else { // DEPTH: vertical gauge from the direct ray up to the terrain surface
+            Coord rayPoint = rayPointAt((double)worstIndex / (numSamples - 1));
+            intersection1 = rayPoint;
+            intersection2 = Coord(rayPoint.x, rayPoint.y, worstGroundZ);
+        }
+        emitObstaclePenetrated(intersection1, intersection2, lossFactor);
     }
     if (logLinkEvents)
         logLineOfSightChange(transmissionPosition, receptionPosition, blocked);

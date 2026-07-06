@@ -36,10 +36,12 @@ class INET_API TerrainObstacleLoss : public TracingObstacleLossBase
 {
   protected:
     enum Mode { LOS, FRESNEL };
+    enum MarkerStyle { DEPTH, RAY };
 
     ModuleRefByPar<physicalenvironment::IPhysicalEnvironment> physicalEnvironment;
     mutable const Heightfield *heightfield = nullptr; // resolved lazily: the ground module may initialize after this one
     Mode mode = LOS;
+    MarkerStyle markerStyle = DEPTH;
     double sampleStep = 0;
     bool logLinkEvents = false;
 
@@ -52,7 +54,7 @@ class INET_API TerrainObstacleLoss : public TracingObstacleLossBase
     const Heightfield *getHeightfield() const;
     const cModule *findNodeAt(const Coord& position) const;
     void logLineOfSightChange(const Coord& transmissionPosition, const Coord& receptionPosition, bool blocked) const;
-    void emitObstaclePenetrated(const Coord& rayPoint, const Coord& groundPoint, double lossFactor) const;
+    void emitObstaclePenetrated(const Coord& intersection1, const Coord& intersection2, double lossFactor) const;
 
   public:
     /**

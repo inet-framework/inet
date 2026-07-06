@@ -30,7 +30,15 @@ import inet.physicallayer.wireless.common.base.packetlevel.TracingObstacleLossBa
 //
 // Emits obstaclePenetrated events at the critical terrain point (with no
 // associated physical object, world coordinates), so tracing obstacle loss
-// visualizers can display where links are obstructed.
+// visualizers can display where links are obstructed. The marker geometry is
+// selectable via markerStyle:
+// - "depth" (default): a vertical segment from the direct ray up to the
+//   terrain surface at the worst point — its length shows how deeply the
+//   link is buried below the skyline.
+// - "ray": the chord of the direct ray below the terrain surface (entry to
+//   exit around the worst point), matching the look of physical-object
+//   obstacle loss models; near-grazing links (fresnel mode, zone intruded
+//   but ray clear) draw a short tick along the ray at the pinch point.
 //
 // Multi-edge (Deygout) diffraction is future work.
 //
@@ -38,6 +46,7 @@ module TerrainObstacleLoss extends TracingObstacleLossBase
 {
     parameters:
         string mode @enum("los", "fresnel") = default("los"); // binary line-of-sight blocking, or graded Fresnel/knife-edge attenuation
+        string markerStyle @enum("depth", "ray") = default("depth"); // geometry of the emitted obstruction markers (see module description)
         double sampleStep @unit(m) = default(0m); // spacing of the line-of-sight samples; 0 = the ground heightfield's cell size
         bool logLinkEvents = default(true); // log line-of-sight transitions per node pair (established / lost / re-established / cannot be established)
         @class(TerrainObstacleLoss);
