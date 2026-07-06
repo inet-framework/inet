@@ -21,10 +21,12 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6MulticastRoute.h"
 #include "inet/networklayer/ipv6/Ipv6Route.h"
+#endif
 
 namespace inet {
 
@@ -261,35 +263,42 @@ L3Address PimBase::getInterfaceAddress(NetworkInterface *ie) const
     // what unicast next hops resolve to (ND), so the RPF neighbor learned from a
     // unicast route matches the neighbor's PIM address. (For IPv4 it is the
     // interface IPv4 address, unchanged.)
+#ifdef INET_WITH_IPv6
     if (isIpv6())
         return ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
-    else
-        return ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+#endif
+    return ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
 }
 
 void PimBase::joinMulticastGroup(NetworkInterface *ie, const L3Address& group)
 {
+#ifdef INET_WITH_IPv6
     if (isIpv6())
         ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->joinMulticastGroup(group.toIpv6());
     else
+#endif
         ie->getProtocolDataForUpdate<Ipv4InterfaceData>()->joinMulticastGroup(group.toIpv4());
 }
 
 bool PimBase::hasMulticastListener(NetworkInterface *ie, const L3Address& group) const
 {
+#ifdef INET_WITH_IPv6
     if (isIpv6())
         return ie->getProtocolData<Ipv6InterfaceData>()->hasMulticastListener(group.toIpv6());
-    else
-        return ie->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(group.toIpv4());
+#endif
+    return ie->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(group.toIpv4());
 }
 
 bool PimBase::isMemberOfMulticastGroup(NetworkInterface *ie, const L3Address& group) const
 {
+#ifdef INET_WITH_IPv6
     if (isIpv6()) {
         auto data = ie->findProtocolData<Ipv6InterfaceData>();
         return data != nullptr && data->isMemberOfMulticastGroup(group.toIpv6());
     }
-    else {
+    else
+#endif
+    {
         auto data = ie->findProtocolData<Ipv4InterfaceData>();
         return data != nullptr && data->isMemberOfMulticastGroup(group.toIpv4());
     }
@@ -297,16 +306,21 @@ bool PimBase::isMemberOfMulticastGroup(NetworkInterface *ie, const L3Address& gr
 
 IMulticastRoute *PimBase::createMulticastRoute()
 {
-    return isIpv6() ? static_cast<IMulticastRoute *>(new Ipv6MulticastRoute())
-                    : static_cast<IMulticastRoute *>(new Ipv4MulticastRoute());
+#ifdef INET_WITH_IPv6
+    if (isIpv6())
+        return static_cast<IMulticastRoute *>(new Ipv6MulticastRoute());
+#endif
+    return static_cast<IMulticastRoute *>(new Ipv4MulticastRoute());
 }
 
 NetworkInterface *PimBase::getInInterface(IMulticastRoute *route)
 {
+#ifdef INET_WITH_IPv6
     if (auto ipv6Route = dynamic_cast<Ipv6MulticastRoute *>(route)) {
         auto in = ipv6Route->getInInterface();
         return in ? in->getInterface() : nullptr;
     }
+#endif
     auto ipv4Route = check_and_cast<Ipv4MulticastRoute *>(route);
     auto in = ipv4Route->getInInterface();
     return in ? in->getInterface() : nullptr;
@@ -314,15 +328,19 @@ NetworkInterface *PimBase::getInInterface(IMulticastRoute *route)
 
 bool PimBase::hasOutInterface(IMulticastRoute *route, const NetworkInterface *ie)
 {
+#ifdef INET_WITH_IPv6
     if (auto ipv6Route = dynamic_cast<Ipv6MulticastRoute *>(route))
         return ipv6Route->hasOutInterface(ie);
+#endif
     return check_and_cast<Ipv4MulticastRoute *>(route)->hasOutInterface(ie);
 }
 
 unsigned int PimBase::getAdminDist(IRoute *route)
 {
+#ifdef INET_WITH_IPv6
     if (auto ipv6Route = dynamic_cast<Ipv6Route *>(route))
         return ipv6Route->getAdminDist();
+#endif
     return check_and_cast<Ipv4Route *>(route)->getAdminDist();
 }
 
@@ -372,13 +390,16 @@ bool PimBase::isSsmGroup(const L3Address& group) const
 
 void PimBase::getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Address& destAddr, unsigned short& ttl) const
 {
+#ifdef INET_WITH_IPv6
     if (isIpv6()) {
         auto ipv6Header = check_and_cast<const Ipv6Header *>(obj);
         srcAddr = ipv6Header->getSrcAddress();
         destAddr = ipv6Header->getDestAddress();
         ttl = ipv6Header->getHopLimit();
     }
-    else {
+    else
+#endif
+    {
         auto ipv4Header = check_and_cast<const Ipv4Header *>(obj);
         srcAddr = ipv4Header->getSrcAddress();
         destAddr = ipv4Header->getDestAddress();
@@ -388,12 +409,15 @@ void PimBase::getMulticastPacketAddresses(cObject *obj, L3Address& srcAddr, L3Ad
 
 void PimBase::getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress) const
 {
+#ifdef INET_WITH_IPv6
     if (isIpv6()) {
         auto info = check_and_cast<const Ipv6MulticastGroupInfo *>(obj);
         ie = info->ie;
         groupAddress = info->groupAddress;
     }
-    else {
+    else
+#endif
+    {
         auto info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         ie = info->ie;
         groupAddress = info->groupAddress;
@@ -403,6 +427,7 @@ void PimBase::getMulticastGroupInfo(cObject *obj, NetworkInterface *& ie, L3Addr
 void PimBase::getMulticastListenerSources(cObject *obj, NetworkInterface *& ie, L3Address& groupAddress, McastSourceFilterMode& filterMode, std::vector<L3Address>& sources) const
 {
     sources.clear();
+#ifdef INET_WITH_IPv6
     if (isIpv6()) {
         auto info = check_and_cast<const Ipv6MulticastGroupSourceInfo *>(obj);
         ie = info->ie;
@@ -411,7 +436,9 @@ void PimBase::getMulticastListenerSources(cObject *obj, NetworkInterface *& ie, 
         for (auto& source : info->sourceList.sources)
             sources.push_back(source);
     }
-    else {
+    else
+#endif
+    {
         auto info = check_and_cast<const Ipv4MulticastGroupSourceInfo *>(obj);
         ie = info->ie;
         groupAddress = info->groupAddress;

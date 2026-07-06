@@ -9,7 +9,9 @@
 #include <algorithm>
 
 #include "inet/common/ModuleAccess.h"
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#endif
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
@@ -193,15 +195,19 @@ void BgpRouter::setDefaultConfig()
 
 BgpRouteInfo *BgpRouter::createBgpRoutingTableEntry()
 {
+#ifdef INET_WITH_IPv6
     if (isIpv6())
         return new BgpRoutingTableEntry6();
+#endif
     return new BgpRoutingTableEntry();
 }
 
 BgpRouteInfo *BgpRouter::createBgpRoutingTableEntry(const IRoute *from)
 {
+#ifdef INET_WITH_IPv6
     if (isIpv6())
         return new BgpRoutingTableEntry6(from);
+#endif
     return new BgpRoutingTableEntry(from);
 }
 
@@ -220,8 +226,10 @@ L3Address BgpRouter::getInterfaceAddress(NetworkInterface *ie)
 {
     // the local BGP source address on a link: IPv4 interface address, or (for IPv6) the
     // preferred global address -- sessions need a routable address, not link-local.
+#ifdef INET_WITH_IPv6
     if (isIpv6())
         return ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
+#endif
     return ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
 }
 

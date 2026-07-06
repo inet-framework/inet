@@ -19,10 +19,12 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6MulticastRoute.h"
 #include "inet/networklayer/ipv6/Ipv6Route.h"
+#endif
 
 namespace inet {
 

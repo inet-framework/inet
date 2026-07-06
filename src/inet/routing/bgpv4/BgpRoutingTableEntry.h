@@ -9,7 +9,9 @@
 
 #include "inet/networklayer/contract/IRoute.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Route.h"
+#endif
 #include "inet/routing/bgpv4/BgpCommon.h"
 
 namespace inet {
@@ -108,6 +110,7 @@ inline BgpRoutingTableEntry::BgpRoutingTableEntry(const IRoute *entry)
     Ipv4Route::setAdminDist(Ipv4Route::dBGPExternal);
 }
 
+#ifdef INET_WITH_IPv6
 // IPv6 BGP RIB entry: an Ipv6Route carrying BGP attributes.
 class INET_API BgpRoutingTableEntry6 : public Ipv6Route, public BgpRouteInfo
 {
@@ -135,6 +138,7 @@ inline BgpRoutingTableEntry6::BgpRoutingTableEntry6(const IRoute *entry)
     Ipv6Route::setMetric(DEFAULT_COST);
     Ipv6Route::setAdminDist(Ipv6Route::dBGPExternal);
 }
+#endif // INET_WITH_IPv6
 
 inline const std::string BgpRouteInfo::getPathTypeString(RoutingPathType type)
 {

@@ -22,7 +22,9 @@
 #include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header_m.h"
+#endif
 
 namespace inet {
 
@@ -1572,6 +1574,7 @@ void PimSm::sendPIMRegisterNull(L3Address multOrigin, L3Address multGroup)
         pk->insertAtFront(msg);
 
         // set encapsulated packet (IP header only)
+#ifdef INET_WITH_IPv6
         if (isIpv6()) {
             const auto& ipv6Header = makeShared<Ipv6Header>();
             ipv6Header->setSrcAddress(multOrigin.toIpv6());
@@ -1580,7 +1583,9 @@ void PimSm::sendPIMRegisterNull(L3Address multOrigin, L3Address multGroup)
             ipv6Header->setPayloadLength(B(0));
             pk->insertAtBack(ipv6Header);
         }
-        else {
+        else
+#endif
+        {
             const auto& ipv4Header = makeShared<Ipv4Header>();
             ipv4Header->setDestAddress(multGroup.toIpv4());
             ipv4Header->setSrcAddress(multOrigin.toIpv4());
@@ -1602,7 +1607,11 @@ void PimSm::sendPIMRegisterNull(L3Address multOrigin, L3Address multGroup)
 
 void PimSm::sendPIMRegister(Packet *ipPacket, L3Address dest, int outInterfaceId)
 {
+#ifdef INET_WITH_IPv6
     ASSERT(isIpv6() ? (ipPacket->peekAtFront<Ipv6Header>() != nullptr) : (ipPacket->peekAtFront<Ipv4Header>() != nullptr));
+#else
+    ASSERT(ipPacket->peekAtFront<Ipv4Header>() != nullptr);
+#endif
 
     EV << "pimSM::sendPIMRegister - encapsulating data packet into Register packet and sending to RP" << endl;
 
@@ -1702,13 +1711,16 @@ void PimSm::forwardMulticastData(Packet *data, int outInterfaceId)
     //
     const Protocol *payloadProtocol;
     L3Address srcAddr, destAddr;
+#ifdef INET_WITH_IPv6
     if (isIpv6()) {
         const auto& ipv6Header = data->popAtFront<Ipv6Header>();
         payloadProtocol = ipv6Header->getProtocol();
         srcAddr = ipv6Header->getSrcAddress();
         destAddr = ipv6Header->getDestAddress();
     }
-    else {
+    else
+#endif
+    {
         const auto& ipv4Header = data->popAtFront<Ipv4Header>();
         payloadProtocol = ipv4Header->getProtocol();
         srcAddr = ipv4Header->getSrcAddress();
@@ -1920,12 +1932,15 @@ L3Address PimSm::getUnspecifiedAddress() const
 
 void PimSm::getEncapsulatedAddresses(Packet *pk, L3Address& source, L3Address& group) const
 {
+#ifdef INET_WITH_IPv6
     if (isIpv6()) {
         const auto& ipv6Header = pk->peekAtFront<Ipv6Header>();
         source = ipv6Header->getSrcAddress();
         group = ipv6Header->getDestAddress();
     }
-    else {
+    else
+#endif
+    {
         const auto& ipv4Header = pk->peekAtFront<Ipv4Header>();
         source = ipv4Header->getSrcAddress();
         group = ipv4Header->getDestAddress();

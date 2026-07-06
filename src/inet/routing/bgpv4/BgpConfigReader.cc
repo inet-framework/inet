@@ -7,7 +7,9 @@
 #include "inet/routing/bgpv4/BgpConfigReader.h"
 
 #include "inet/common/ModuleAccess.h"
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#endif
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
@@ -240,12 +242,14 @@ int BgpConfigReader::isInInterfaceTable(IInterfaceTable *ifTable, const L3Addres
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
         NetworkInterface *ie = ifTable->getInterface(i);
         if (addr.getType() == L3Address::IPv6) {
+#ifdef INET_WITH_IPv6
             auto data = ie->findProtocolData<Ipv6InterfaceData>();
             if (data) {
                 for (int k = 0; k < data->getNumAddresses(); k++)
                     if (data->getAddress(k) == addr.toIpv6())
                         return i;
             }
+#endif
         }
         else {
             auto data = ie->findProtocolData<Ipv4InterfaceData>();
