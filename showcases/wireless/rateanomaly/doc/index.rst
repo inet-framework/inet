@@ -57,14 +57,19 @@ The root cause is that standard DCF provides **transmission-opportunity fairness
 disciplines that enforce airtime fairness avoid the anomaly, but they are outside plain
 DCF.
 
-In practice this is how the problem is handled today: modern access points schedule
-stations by **airtime** rather than by packets. The Linux ``mac80211`` stack, for
-example, uses a deficit round-robin scheduler whose deficit is counted in airtime
-(microseconds) instead of bytes, so a slow station is held to its fair *time* share and
-can no longer drag the others down. That scheme — described by Høiland-Jørgensen et al.,
-`"Ending the Anomaly" <https://arxiv.org/abs/1703.00064>`__ (USENIX ATC 2017) — ships in
-mainline Linux, and many commercial access points expose an equivalent "airtime
-fairness" feature.
+These airtime-fair disciplines take two forms, because the anomaly itself does. The form
+this showcase reproduces is *uplink* — independent stations contending, each running its own
+DCF — and fixing it means every *contending* station must bound its own share. That is what
+the 802.11e standard adds with the transmission opportunity (TXOP), demonstrated later in this
+showcase. The mirror-image *downlink* form appears when one access point serves many clients
+of mixed rates: now a single transmitter divides *its own* airtime, a scheduling problem
+rather than a contention one. That is what production access points solve — the Linux
+``mac80211`` stack schedules its own frames with a deficit-round-robin whose deficit is counted
+in airtime (microseconds) instead of bytes (Høiland-Jørgensen et al.,
+`"Ending the Anomaly" <https://arxiv.org/abs/1703.00064>`__, USENIX ATC 2017), and many
+commercial access points expose an equivalent "airtime fairness" knob. That transmit-side
+scheduler only governs the frames a node sends itself, so it cures the downlink case; it does
+nothing for the distributed uplink contention shown here.
 
 The Model
 ---------
@@ -338,9 +343,12 @@ stops monopolising the medium and the others get their time back. (TXOP also sit
 *above* the DCF baseline even at small gaps — bursting amortises the fixed per-frame overhead,
 a modest efficiency bonus on top of the fairness fix.)
 
-This is the standardised, in-MAC counterpart to the software airtime-fair scheduling that
-production access points run (the Linux ``mac80211`` scheduler mentioned earlier): both
-allocate channel *time* rather than transmission *count*.
+TXOP and the access-point airtime scheduler noted earlier are two fixes for two faces of the
+same anomaly, not the same fix twice. TXOP is *distributed* — it bounds each *contending*
+station's win, so it is the one that applies to the uplink scenario shown here. The
+``mac80211`` scheduler is *centralised* — it apportions a single transmitter's airtime among
+its own destinations, so it is the fix for the *downlink*, AP-to-clients form. Both act on the
+same principle — allocate channel *time*, not transmission *count* — but in different places.
 
 One honest caveat — and the reason the chart plots only aggregate and group-average curves.
 TXOP restores the *aggregate* capacity and the fast-station *group* reliably, but it does
