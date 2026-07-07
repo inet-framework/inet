@@ -1185,6 +1185,26 @@ void Ospfv3Interface::processLSU(Packet *packet, Ospfv3Neighbor *neighbor)
                     EV_DEBUG << "Flooding the LSA out\n";
                     if (currentLSA->getHeader().getLsaType() != LINK_LSA)
                         ackFlags.floodedBackOut = this->getArea()->getInstance()->getProcess()->floodLSA(currentLSA, areaID, this, neighbor);
+                    else {
+                        // Link-LSAs have link-local flooding scope, so the area flooding path above is
+                        // skipped for them. That path is also where a received LSA is cleared from
+                        // neighbors' link state request lists; do that cleanup here for Link-LSAs,
+                        // otherwise a requested Link-LSA is installed but never removed from the request
+                        // list and the neighbor's Loading state never completes.
+                        LSAKeyType linkLsaKey;
+                        linkLsaKey.linkStateID = currentLSA->getHeader().getLinkStateID();
+                        linkLsaKey.advertisingRouter = currentLSA->getHeader().getAdvertisingRouter();
+                        linkLsaKey.LSType = currentLSA->getHeader().getLsaType();
+                        long linkNeighborCount = this->getNeighborCount();
+                        for (long ni = 0; ni < linkNeighborCount; ni++) {
+                            Ospfv3Neighbor *linkNeighbor = this->getNeighbor(ni);
+                            if (linkNeighbor->getState() < Ospfv3Neighbor::EXCHANGE_STATE)
+                                continue;
+                            Ospfv3LsaHeader *requestedHeader = linkNeighbor->findOnRequestList(linkLsaKey);
+                            if ((requestedHeader != nullptr) && !(currentLSA->getHeader() < (*requestedHeader)))
+                                linkNeighbor->removeFromRequestList(linkLsaKey);
+                        }
+                    }
 
                     // if this is BACKBONE area, flood Inter-Area-Prefix LSAs to other areas
                     if ((currentLSA->getHeader().getLsaType() == INTER_AREA_PREFIX_LSA) &&

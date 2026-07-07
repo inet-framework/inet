@@ -62,13 +62,13 @@ void Ospfv3NeighborStateExchange::processEvent(Ospfv3Neighbor *neighbor, Ospfv3N
     }
     else if (event == Ospfv3Neighbor::EXCHANGE_DONE) {
         EV_DEBUG << "Ospfv3Neighbor::EXCHANGE_DONE caught in ExchangeState\n";
-        if (!neighbor->isLinkStateRequestListEmpty()) {
+        if (neighbor->isLinkStateRequestListEmpty()) {
             neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getDDRetransmissionTimer(), neighbor->getInterface()->getDeadInterval());
             neighbor->clearRequestRetransmissionTimer();
             changeState(neighbor, new Ospfv3NeighborStateFull, this);
         }
         else {
-            neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getDDRetransmissionTimer(), neighbor->getInterface()->getRetransmissionInterval());
+            neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getDDRetransmissionTimer(), neighbor->getInterface()->getDeadInterval());
             changeState(neighbor, new Ospfv3NeighborStateLoading, this);
         }
     }
