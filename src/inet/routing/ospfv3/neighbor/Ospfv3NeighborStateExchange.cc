@@ -74,12 +74,12 @@ void Ospfv3NeighborStateExchange::processEvent(Ospfv3Neighbor *neighbor, Ospfv3N
     }
     if (event == Ospfv3Neighbor::UPDATE_RETRANSMISSION_TIMER) {
         EV_DEBUG << "Ospfv3Neighbor::UPDATE_RETRANSMISSION_TIMER caught in ExchangeState\n";
-        neighbor->retransmitUpdatePacket(); // ZAKOMENTOVANE PRED MIGRACIOU .  PRECO ?
+        neighbor->retransmitUpdatePacket();
         neighbor->startUpdateRetransmissionTimer();
     }
     if (event == Ospfv3Neighbor::REQUEST_RETRANSMISSION_TIMER) {
         EV_DEBUG << "Ospfv3Neighbor::REQUEST_RETRANSMISSION_TIMER caught in ExchangeState\n";
-        neighbor->sendLinkStateRequestPacket(); // ZAKOMENTOVANE PRED MIGRACIOU .  PRECO ?
+        neighbor->sendLinkStateRequestPacket();
         neighbor->startRequestRetransmissionTimer();
     }
 }

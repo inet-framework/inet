@@ -43,7 +43,7 @@ void Ospfv3NeighborStateExStart::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Ne
     if (event == Ospfv3Neighbor::IS_ADJACENCY_OK) {
         EV_DEBUG << "Ospfv3Neighbor::IS_ADJACENCY_OK caught in ExStartState for neighbor " << neighbor->getNeighborID() << "\n";
         if (!neighbor->needAdjacency()) {
-            EV_DEBUG << "The adjacency is needed for neighbor " << neighbor->getNeighborID() << "\n";
+            EV_DEBUG << "The adjacency is no longer needed for neighbor " << neighbor->getNeighborID() << ", dropping to 2-Way\n";
             neighbor->reset();
             changeState(neighbor, new Ospfv3NeighborState2Way, this);
         }

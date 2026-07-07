@@ -60,10 +60,6 @@ void Ospfv3InterfaceStateDrOther::processEvent(Ospfv3Interface *interface, Ospfv
     if (event == Ospfv3Interface::ACKNOWLEDGEMENT_TIMER_EVENT) {
         interface->sendDelayedAcknowledgements();
     }
-//    if (event == Ospfv3Interface::NEIGHBOR_REVIVED_EVENT) {
-//        changeState(interface, new Ospfv3InterfaceStateWaiting, this);
-//        this->getArea()->getInstance()->getProcess()->setTimer(interface->getWaitTimer(), interface->getDeadInterval());
-//    }
 } // processEvent
 
 } // namespace ospfv3

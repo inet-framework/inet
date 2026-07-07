@@ -27,7 +27,6 @@ void Ospfv3NeighborStateDown::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
         int hopLimit = (neighbor->getInterface()->getType() == Ospfv3Interface::VIRTUAL_TYPE) ? VIRTUAL_LINK_TTL : 1;
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->clearTimer(neighbor->getPollTimer());
         Packet *hello = neighbor->getInterface()->prepareHello();
-//        Ospfv3HelloPacket* hello = neighbor->getInterface()->prepareHello();
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->sendPacket(hello, neighbor->getNeighborIP(), neighbor->getInterface()->getIntName().c_str(), hopLimit);
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getInactivityTimer(), neighbor->getInterface()->getDeadInterval());
         this->changeState(neighbor, new Ospfv3NeighborStateAttempt, this);
