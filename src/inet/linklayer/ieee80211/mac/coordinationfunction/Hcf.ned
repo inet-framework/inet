@@ -50,6 +50,7 @@ module Hcf extends Module like IHcf
         @signal[datarateSelected](type=double);
         @signal[blockAckAgreementAdded];
         @signal[blockAckAgreementDeleted];
+        @signal[frameTransmittedAirtime]; // carries an Ieee80211AirtimeInd (receiver + on-air time) per transmitted frame
         @statistic[packetSentToPeer](title="packets sent"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetSentToPeerUnicast](title="packets sent: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetSentToPeerMulticast](title="packets sent: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

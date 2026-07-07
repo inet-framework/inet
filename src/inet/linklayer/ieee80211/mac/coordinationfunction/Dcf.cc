@@ -9,6 +9,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/common/Ieee80211AirtimeInd.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/DcfFs.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
@@ -17,6 +18,8 @@ namespace inet {
 namespace ieee80211 {
 
 using namespace inet::physicallayer;
+
+simsignal_t Dcf::frameTransmittedAirtimeSignal = cComponent::registerSignal("frameTransmittedAirtime");
 
 Define_Module(Dcf);
 
@@ -248,6 +251,18 @@ void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
 {
     Enter_Method("transmissionComplete");
     if (frameSequenceHandler->isSequenceRunning()) {
+        // Account the on-air time of the just-transmitted unicast data/mgmt frame to its
+        // receiver, a-posteriori (so each retransmission is charged), for airtime-fair
+        // transmit scheduling in AirtimeFairnessQueue. Control frames and multicast are
+        // excluded; the duration is exact (computed from the selected mode and length).
+        if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
+            auto receiver = dataOrMgmtHeader->getReceiverAddress();
+            if (!receiver.isMulticast()) {
+                auto mode = rateSelection->computeMode(packet, header);
+                Ieee80211AirtimeInd info(receiver, mode->getDuration(packet->getDataLength()));
+                emit(frameTransmittedAirtimeSignal, &info);
+            }
+        }
         frameSequenceHandler->transmissionComplete();
     }
     else
