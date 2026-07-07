@@ -23,15 +23,15 @@ void Ospfv3InterfaceStateBackup::processEvent(Ospfv3Interface *interface, Ospfv3
     if (event == Ospfv3Interface::NEIGHBOR_CHANGE_EVENT) {
         calculateDesignatedRouter(interface);
     }
-    if (event == Ospfv3Interface::INTERFACE_DOWN_EVENT) {
+    else if (event == Ospfv3Interface::INTERFACE_DOWN_EVENT) {
         interface->reset();
         changeState(interface, new Ospfv3InterfaceStateDown, this);
     }
-    if (event == Ospfv3Interface::LOOP_IND_EVENT) {
+    else if (event == Ospfv3Interface::LOOP_IND_EVENT) {
         interface->reset();
         changeState(interface, new Ospfv3InterfaceStateLoopback, this);
     }
-    if (event == Ospfv3Interface::HELLO_TIMER_EVENT) {
+    else if (event == Ospfv3Interface::HELLO_TIMER_EVENT) {
         if (interface->getType() == Ospfv3Interface::BROADCAST_TYPE) {
             EV_DEBUG << "Sending Hello to all in " << this->getInterfaceStateString() << "\n";
             Packet *hello = interface->prepareHello();
@@ -49,10 +49,10 @@ void Ospfv3InterfaceStateBackup::processEvent(Ospfv3Interface *interface, Ospfv3
         }
         interface->getArea()->getInstance()->getProcess()->setTimer(interface->getHelloTimer(), interface->getHelloInterval());
     }
-    if (event == Ospfv3Interface::ACKNOWLEDGEMENT_TIMER_EVENT) {
+    else if (event == Ospfv3Interface::ACKNOWLEDGEMENT_TIMER_EVENT) {
         interface->sendDelayedAcknowledgements();
     }
-    if (event == Ospfv3Interface::NEIGHBOR_REVIVED_EVENT) {
+    else if (event == Ospfv3Interface::NEIGHBOR_REVIVED_EVENT) {
         changeState(interface, new Ospfv3InterfaceStateWaiting, this);
         interface->getArea()->getInstance()->getProcess()->setTimer(interface->getWaitTimer(), interface->getDeadInterval());
     }

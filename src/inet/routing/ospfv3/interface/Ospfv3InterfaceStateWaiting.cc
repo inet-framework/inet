@@ -23,15 +23,15 @@ void Ospfv3InterfaceStateWaiting::processEvent(Ospfv3Interface *interface, Ospfv
     {
         calculateDesignatedRouter(interface);
     }
-    if (event == Ospfv3Interface::INTERFACE_DOWN_EVENT) {
+    else if (event == Ospfv3Interface::INTERFACE_DOWN_EVENT) {
         interface->reset();
         changeState(interface, new Ospfv3InterfaceStateDown, this);
     }
-    if (event == Ospfv3Interface::LOOP_IND_EVENT) {
+    else if (event == Ospfv3Interface::LOOP_IND_EVENT) {
         interface->reset();
         changeState(interface, new Ospfv3InterfaceStateLoopback, this);
     }
-    if (event == Ospfv3Interface::HELLO_TIMER_EVENT) {
+    else if (event == Ospfv3Interface::HELLO_TIMER_EVENT) {
         if (interface->getType() == Ospfv3Interface::BROADCAST_TYPE) {
             Packet *hello = interface->prepareHello();
             interface->getArea()->getInstance()->getProcess()->sendPacket(hello, Ipv6Address::ALL_OSPF_ROUTERS_MCAST, interface->getIntName().c_str());
@@ -50,7 +50,7 @@ void Ospfv3InterfaceStateWaiting::processEvent(Ospfv3Interface *interface, Ospfv
         }
         interface->getArea()->getInstance()->getProcess()->setTimer(interface->getHelloTimer(), interface->getHelloInterval());
     }
-    if (event == Ospfv3Interface::ACKNOWLEDGEMENT_TIMER_EVENT) {
+    else if (event == Ospfv3Interface::ACKNOWLEDGEMENT_TIMER_EVENT) {
         interface->sendDelayedAcknowledgements();
     }
 } // processEvent

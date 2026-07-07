@@ -37,13 +37,13 @@ void Ospfv3NeighborStateDown::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
       timer's later firing would indicate that the
       neighbor is dead.
     */
-    if (event == Ospfv3Neighbor::HELLO_RECEIVED) {
+    else if (event == Ospfv3Neighbor::HELLO_RECEIVED) {
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->clearTimer(neighbor->getPollTimer());
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getInactivityTimer(), neighbor->getInterface()->getDeadInterval());
         EV_DEBUG << "HELLO_RECEIVED, number of neighbors: " << neighbor->getInterface()->getNeighborCount() << endl;
         changeState(neighbor, new Ospfv3NeighborStateInit, this);
     }
-    if (event == Ospfv3Neighbor::POLL_TIMER) {
+    else if (event == Ospfv3Neighbor::POLL_TIMER) {
         int hopLimit = (neighbor->getInterface()->getType() == Ospfv3Interface::VIRTUAL_TYPE) ? VIRTUAL_LINK_TTL : 1;
         Packet *hello = neighbor->getInterface()->prepareHello();
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->sendPacket(hello, neighbor->getNeighborIP(), neighbor->getInterface()->getIntName().c_str(), hopLimit);

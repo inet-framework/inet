@@ -28,29 +28,29 @@ void Ospfv3NeighborStateFull::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new Ospfv3NeighborStateDown, this);
     }
-    if (event == Ospfv3Neighbor::INACTIVITY_TIMER) {
+    else if (event == Ospfv3Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
         if (neighbor->getInterface()->getType() == Ospfv3Interface::NBMA_TYPE)
             neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
 
         changeState(neighbor, new Ospfv3NeighborStateDown, this);
     }
-    if (event == Ospfv3Neighbor::ONEWAY_RECEIVED) {
+    else if (event == Ospfv3Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
         changeState(neighbor, new Ospfv3NeighborStateInit, this);
     }
-    if (event == Ospfv3Neighbor::HELLO_RECEIVED) {
+    else if (event == Ospfv3Neighbor::HELLO_RECEIVED) {
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->clearTimer(neighbor->getInactivityTimer());
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getInactivityTimer(), neighbor->getInterface()->getDeadInterval());
     }
-    if (event == Ospfv3Neighbor::IS_ADJACENCY_OK) {
+    else if (event == Ospfv3Neighbor::IS_ADJACENCY_OK) {
         EV_DEBUG << "Ospfv3Neighbor::IS_ADJACENCY_OK caught in FullState\n";
         if (!neighbor->needAdjacency()) {
             neighbor->reset();
             changeState(neighbor, new Ospfv3NeighborState2Way, this);
         }
     }
-    if ((event == Ospfv3Neighbor::SEQUENCE_NUMBER_MISMATCH) || (event == Ospfv3Neighbor::BAD_LINK_STATE_REQUEST)) {
+    else if ((event == Ospfv3Neighbor::SEQUENCE_NUMBER_MISMATCH) || (event == Ospfv3Neighbor::BAD_LINK_STATE_REQUEST)) {
         EV_DEBUG << "Ospfv3Neighbor::SEQUENCE_NUMBER_MISMATCH or BAD_LINK_STATE_REQUEST caught in FullState\n";
         neighbor->reset();
         neighbor->incrementDDSequenceNumber();
@@ -58,7 +58,7 @@ void Ospfv3NeighborStateFull::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getDDRetransmissionTimer(), neighbor->getInterface()->getRetransmissionInterval());
         changeState(neighbor, new Ospfv3NeighborStateExStart, this);
     }
-    if (event == Ospfv3Neighbor::UPDATE_RETRANSMISSION_TIMER) {
+    else if (event == Ospfv3Neighbor::UPDATE_RETRANSMISSION_TIMER) {
         EV_DEBUG << "Ospfv3Neighbor::UPDATE_RETRANSMISSION_TIMER caught in FullState\n";
         if (!neighbor->isRetransmissionListEmpty()) {
             neighbor->retransmitUpdatePacket();
@@ -71,7 +71,7 @@ void Ospfv3NeighborStateFull::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
         }
         EV_DEBUG << "END\n";
     }
-    if (event == Ospfv3Neighbor::DD_RETRANSMISSION_TIMER) {
+    else if (event == Ospfv3Neighbor::DD_RETRANSMISSION_TIMER) {
         EV_DEBUG << "Ospfv3Neighbor::DD_RETRANSMISSION_TIMER caught in FullState\n";
         neighbor->deleteLastSentDDPacket();
     }

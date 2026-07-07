@@ -16,7 +16,7 @@ void Ospfv3InterfaceStateLoopback::processEvent(Ospfv3Interface *interface, Ospf
         interface->reset();
         changeState(interface, new Ospfv3InterfaceStateDown, this);
     }
-    if (event == Ospfv3Interface::UNLOOP_IND_EVENT) {
+    else if (event == Ospfv3Interface::UNLOOP_IND_EVENT) {
         changeState(interface, new Ospfv3InterfaceStateDown, this);
     }
 } // processEvent

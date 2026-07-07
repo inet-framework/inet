@@ -25,22 +25,22 @@ void Ospfv3NeighborStateExStart::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Ne
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new Ospfv3NeighborStateDown, this);
     }
-    if (event == Ospfv3Neighbor::INACTIVITY_TIMER) {
+    else if (event == Ospfv3Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
         if (neighbor->getInterface()->getType() == Ospfv3Interface::NBMA_TYPE)
             neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
 
         changeState(neighbor, new Ospfv3NeighborStateDown, this);
     }
-    if (event == Ospfv3Neighbor::ONEWAY_RECEIVED) {
+    else if (event == Ospfv3Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
         changeState(neighbor, new Ospfv3NeighborStateInit, this);
     }
-    if (event == Ospfv3Neighbor::HELLO_RECEIVED) {
+    else if (event == Ospfv3Neighbor::HELLO_RECEIVED) {
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->clearTimer(neighbor->getInactivityTimer());
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getInactivityTimer(), neighbor->getInterface()->getDeadInterval());
     }
-    if (event == Ospfv3Neighbor::IS_ADJACENCY_OK) {
+    else if (event == Ospfv3Neighbor::IS_ADJACENCY_OK) {
         EV_DEBUG << "Ospfv3Neighbor::IS_ADJACENCY_OK caught in ExStartState for neighbor " << neighbor->getNeighborID() << "\n";
         if (!neighbor->needAdjacency()) {
             EV_DEBUG << "The adjacency is no longer needed for neighbor " << neighbor->getNeighborID() << ", dropping to 2-Way\n";
@@ -48,12 +48,12 @@ void Ospfv3NeighborStateExStart::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Ne
             changeState(neighbor, new Ospfv3NeighborState2Way, this);
         }
     }
-    if (event == Ospfv3Neighbor::DD_RETRANSMISSION_TIMER) {
+    else if (event == Ospfv3Neighbor::DD_RETRANSMISSION_TIMER) {
         EV_DEBUG << "Ospfv3Neighbor::DD_RETRANSMISSION_TIMER caught in ExStartState\n";
         neighbor->retransmitDatabaseDescriptionPacket();
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getDDRetransmissionTimer(), neighbor->getInterface()->getRetransmissionInterval());
     }
-    if (event == Ospfv3Neighbor::NEGOTIATION_DONE) {
+    else if (event == Ospfv3Neighbor::NEGOTIATION_DONE) {
         EV_DEBUG << "Ospfv3Neighbor::NEGOTIATION_DONE caught in ExStartState\n";
         neighbor->createDatabaseSummary();
         EV_DEBUG << "SummaryListCount " << neighbor->getDatabaseSummaryListCount() << endl;

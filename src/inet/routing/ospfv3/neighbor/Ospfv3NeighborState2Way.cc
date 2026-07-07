@@ -24,22 +24,22 @@ void Ospfv3NeighborState2Way::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new Ospfv3NeighborStateDown, this);
     }
-    if (event == Ospfv3Neighbor::INACTIVITY_TIMER) {
+    else if (event == Ospfv3Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
         if (neighbor->getInterface()->getType() == Ospfv3Interface::NBMA_TYPE)
             neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
 
         changeState(neighbor, new Ospfv3NeighborStateDown, this);
     }
-    if (event == Ospfv3Neighbor::ONEWAY_RECEIVED) {
+    else if (event == Ospfv3Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
         changeState(neighbor, new Ospfv3NeighborStateInit, this);
     }
-    if (event == Ospfv3Neighbor::HELLO_RECEIVED) {
+    else if (event == Ospfv3Neighbor::HELLO_RECEIVED) {
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->clearTimer(neighbor->getInactivityTimer());
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getInactivityTimer(), neighbor->getInterface()->getDeadInterval());
     }
-    if (event == Ospfv3Neighbor::IS_ADJACENCY_OK) {
+    else if (event == Ospfv3Neighbor::IS_ADJACENCY_OK) {
         EV_DEBUG << "IS_ADJACENCY_OK in Neighbor state 2way\n";
         if (neighbor->needAdjacency()) {
             if (!(neighbor->isFirstAdjacencyInited())) {

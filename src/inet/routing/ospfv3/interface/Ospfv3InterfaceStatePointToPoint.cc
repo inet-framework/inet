@@ -18,11 +18,11 @@ void Ospfv3InterfaceStatePointToPoint::processEvent(Ospfv3Interface *interface, 
         interface->reset();
         changeState(interface, new Ospfv3InterfaceStateDown, this);
     }
-    if (event == Ospfv3Interface::LOOP_IND_EVENT) {
+    else if (event == Ospfv3Interface::LOOP_IND_EVENT) {
         interface->reset();
         changeState(interface, new Ospfv3InterfaceStateLoopback, this);
     }
-    if (event == Ospfv3Interface::HELLO_TIMER_EVENT) {
+    else if (event == Ospfv3Interface::HELLO_TIMER_EVENT) {
         if (interface->getType() == Ospfv3Interface::VIRTUAL_TYPE) {
             if (interface->getNeighborCount() > 0) {
                 Packet *hello = interface->prepareHello();
@@ -36,7 +36,7 @@ void Ospfv3InterfaceStatePointToPoint::processEvent(Ospfv3Interface *interface, 
         }
         interface->getArea()->getInstance()->getProcess()->setTimer(interface->getHelloTimer(), interface->getHelloInterval());
     }
-    if (event == Ospfv3Interface::ACKNOWLEDGEMENT_TIMER_EVENT) {
+    else if (event == Ospfv3Interface::ACKNOWLEDGEMENT_TIMER_EVENT) {
         interface->sendDelayedAcknowledgements();
     }
 } // processEvent
