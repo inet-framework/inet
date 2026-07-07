@@ -29,7 +29,7 @@ void Ospfv3NeighborStateAttempt::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Ne
     }
     if (event == Ospfv3Neighbor::HELLO_RECEIVED) {
         neighbor->getInterface()->getArea()->getInstance()->getProcess()->clearTimer(neighbor->getInactivityTimer());
-        neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getInactivityTimer(), neighbor->getNeighborDeadInterval());
+        neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getInactivityTimer(), neighbor->getInterface()->getDeadInterval());
         changeState(neighbor, new Ospfv3NeighborStateInit, this);
     }
 }

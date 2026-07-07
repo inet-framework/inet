@@ -153,7 +153,7 @@ class INET_API Ospfv3Neighbor
     bool requestRetransmissionTimerActive = false;
     Ospfv3DatabaseExchangeRelationshipType databaseExchangeRelationship = static_cast<Ospfv3DatabaseExchangeRelationshipType>(-1);
     bool firstAdjacencyInited = false;
-    unsigned long ddSequenceNumber; // TODO - what is the initial number?
+    unsigned long ddSequenceNumber = 0; // set from the shared init seed (ddSequenceNumberInitSeed) when the first adjacency starts
     Ospfv3DdPacketId lastReceivedDDPacket;
     unsigned short neighborRtrPriority; // neighbor priority
     Ipv4Address neighborId;
