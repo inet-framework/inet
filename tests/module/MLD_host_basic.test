@@ -28,17 +28,20 @@ HOST-02 (delayed Report on General Query):
   and then a subsequent "sending Multicast Listener Report".
 
 HOST-04 (Done on leave):
-  host1's UdpSink has stopTime=5s, which closes the socket and fires
-  ipv6MulticastGroupLeftSignal -> Mldv1::multicastGroupLeft -> Done sent to
-  ff02::2 (ALL_ROUTERS_2). After the Query-driven Report (t~2..3s),
-  host1's flag=true, so Done is sent.
+  BOTH hosts' UdpSinks have stopTime=5s. On close, ipv6MulticastGroupLeftSignal ->
+  Mldv1::multicastGroupLeft sends a Done ONLY if the host holds flag=true. Exactly one
+  host is the reporter (holds flag=true after the Query race) -- host1 at the pinned
+  seed -- so host1 sends the Done and host2 leaves silently. The test asserts host1's
+  Done and, as a %not-contains, that host2 sends none. This is the seed-pinned form of
+  the relational property "the host that Reported is the one that sends the Done".
 
 Network: host1, host2, and router all connect to a shared EthernetHub, putting
 them on the same Ethernet segment. Ipv6FlatNetworkConfigurator assigns addresses.
 All three nodes have hasMld=true. The router is a real querier (router.multicastForwarding
 enabled -- set at node level so NetworkLayerNodeBase propagates it to the routing table)
 with short startup timer so the General Query arrives within the 10s limit.
-RNG seed is fixed for reproducibility.
+The RNG seed is pinned (see the seed-set note below): an RNG shift swaps which host wins
+the race, so the seed may need re-picking so host1 stays the reporter.
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
@@ -80,8 +83,17 @@ sim-time-limit = 10s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
 
-# Fix RNG seed for deterministic behavior of uniform(0, maxRespTime) in startHostTimer
-seed-set = 0
+# MLDv1 answers a General Query after a random uniform(0, maxRespDelay) delay; when two hosts share
+# a group, the shorter delay reports first and the other suppresses (Mldv1.cc:311 and :410). So
+# which host ends up as the reporter -- and therefore holds flag=true and sends the Done on leave --
+# is an RNG coin flip. opp_test cannot express the relational property "the reporter is the host that
+# sends the Done, and the other sends none", so we PIN the seed to fix the roles: at seed 1 host1 is
+# the reporter, so host1 sends the Done and host2 (which also leaves) sends none -- exactly one Done,
+# from host1, as asserted below.
+# NOTE: a change elsewhere that shifts how many random numbers are drawn before this point can swap
+# the roles. If that happens, re-pick a seed where host1 wins (seeds 1, 3, 4, 6 do; 0, 2, 5, 7 do
+# not) -- the behavior is unchanged, only which host plays which role.
+seed-set = 1
 
 # Enable MLD on all nodes
 **.ipv6.hasMld = true
@@ -100,14 +112,16 @@ seed-set = 0
 **.host1.app[0].typename = "UdpSink"
 **.host1.app[0].localPort = 1000
 **.host1.app[0].multicastGroup = "ff0e::1:2:3"
-# HOST-04: host1 leaves at t=5s (socket close fires ipv6MulticastGroupLeftSignal -> Done).
-# After the Query-driven Report (flag=true), Done is sent to ff02::2.
+# HOST-04: BOTH hosts leave at t=5s (socket close -> ipv6MulticastGroupLeftSignal). Only the host
+# holding flag=true (the reporter, host1 at this seed) sends a Done; the suppressed host leaves
+# silently. host2 also leaving is what makes "host2 sends no Done" a real check, not a tautology.
 **.host1.app[0].stopTime = 5s
 
 **.host2.numApps = 1
 **.host2.app[0].typename = "UdpSink"
 **.host2.app[0].localPort = 1000
 **.host2.app[0].multicastGroup = "ff0e::1:2:3"
+**.host2.app[0].stopTime = 5s
 
 # HOST-02: enable real querier on the router (multicastForwarding at node level so
 # NetworkLayerNodeBase propagates *.multicastForwarding = this.multicastForwarding
@@ -144,6 +158,14 @@ MldHostBasicNetwork.host1.ipv6.mld: Mldv1: sending Multicast Listener Report for
 %# HOST-04: Done sent to ff02::2 when host1 leaves at t=5s (flag=true after Query-driven Report)
 %contains: stdout
 MldHostBasicNetwork.host1.ipv6.mld: Mldv1: sending Multicast Listener Done for group=ff0e::1:2:3
+
+%#--------------------------------------------------------------------------------------------------------------
+%# CORRELATION (the other host): host2 also leaves at t=5s, but as the suppressed loser at this seed
+%# it holds flag=false and sends NO Done -- only the reporter (host1) does. This is the seed-pinned
+%# "the reporter sends the Done, the other does not" check. (See the seed-set note above: an RNG
+%# shift swaps the roles, and the seed would need to be re-picked so host1 is the reporter again.)
+%not-contains: stdout
+MldHostBasicNetwork.host2.ipv6.mld: Mldv1: sending Multicast Listener Done
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
