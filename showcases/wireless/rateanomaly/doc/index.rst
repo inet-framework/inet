@@ -281,6 +281,77 @@ The fast stations' own throughput — the rightmost column — falls almost in s
 slow station's, even though their configuration never changes. That drop is the rate
 anomaly: equal access, unequal airtime.
 
+Solving the Anomaly with Airtime Fairness
+-----------------------------------------
+
+The anomaly follows from DCF sharing *transmission opportunities* equally. The IEEE 802.11e
+amendment adds a mechanism that shares *airtime* instead: the **transmission opportunity
+(TXOP)**. 802.11e replaces DCF with EDCA, which sorts traffic into four access categories;
+ordinary best-effort traffic uses AC_BE. A station that wins the channel for a category may
+then transmit a burst of frames for up to a bounded *time* — that category's ``txopLimit`` —
+before it has to contend again. DCF still hands out wins equally often, so an equal *time* per
+win means an equal share of airtime: a fast station simply packs many frames into its slice, a
+slow station only a few.
+
+The ``[Config Txop]`` configuration switches the interface to the QoS (EDCA) MAC and grants
+best-effort traffic a time-based TXOP. AC_BE's *default* TXOP limit is zero — one frame per
+win, i.e. plain DCF behaviour — so the fix is simply to set a nonzero limit; here we borrow
+the standard's Video-category value (3.008 ms). The MAC queue is deepened too, so a fast
+station has enough frames buffered to fill a burst; those are the only changes:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: [Config Txop]
+   :end-at: pendingQueue.packetCapacity
+   :language: ini
+
+Rerunning the rate sweep tells a very different story. Where plain DCF's throughput
+collapses as the slow station slows — dragging the fast stations down with it — TXOP holds
+the aggregate roughly flat and keeps the fast stations near their full throughput:
+
+.. figure:: media/txop-throughput-vs-rate.png
+..
+   FIGURE RECIPE (redo via ../txop-chart.py)
+   type:     chart (matplotlib)
+   shows:    aggregate and fast-station-average application throughput vs the slow station's
+             bitrate, plain DCF vs 802.11e TXOP; DCF collapses as the slow rate drops, TXOP
+             stays flat and high
+   inputs:   results/solve/RateAnomaly-*.sca and results/solve/Txop-*.sca, BOTH 3 reps
+             (DCF is not deterministic -- same RNG/backoff -- so both are averaged alike);
+             results/Homogeneous-#0.sca for the all-fast baseline line
+   record:   inet -u Cmdenv -c RateAnomaly  -r 0..17 --repeat=3 --result-dir=results/solve
+             inet -u Cmdenv -c Txop        -r 0..17 --repeat=3 --result-dir=results/solve
+             inet -u Cmdenv -c Homogeneous -r 0               --result-dir=results
+   metric:   server.app[*] packetReceived:count x 0.002 -> Mbps; aggregate = sum over the 5
+             apps per run, fast-avg = mean over app[1..4]; both configs averaged over 3 reps
+   anchor:   structural -- if the RateAnomaly/Txop configs or sweep points change, re-derive.
+             Txop results are kept out of results/ root so they don't contaminate the
+             DCF-only .anf charts (whose filters match packetReceived:count of any config).
+   plot:     ../txop-chart.py (matplotlib; DCF red/orange, TXOP blue; 8x6 in @ dpi 150)
+   stamp:    captured 2026-07, INET 4.6
+
+At the widest gap — the slow station at 6 Mbps — the fast-station average recovers from about
+2.5 Mbps under DCF to about 5.5 Mbps under TXOP, and the aggregate climbs from ~12 back to ~23
+Mbps, most of the way to the ~24 Mbps all-fast baseline (the dashed line). The slow station
+itself falls from ~2.3 to ~0.9 Mbps — and that *is* airtime fairness, not a side-effect: given
+only its fair share of time, a 6 Mbps station can clock out proportionally fewer bits, so it
+stops monopolising the medium and the others get their time back. (TXOP also sits a little
+*above* the DCF baseline even at small gaps — bursting amortises the fixed per-frame overhead,
+a modest efficiency bonus on top of the fairness fix.)
+
+This is the standardised, in-MAC counterpart to the software airtime-fair scheduling that
+production access points run (the Linux ``mac80211`` scheduler mentioned earlier): both
+allocate channel *time* rather than transmission *count*.
+
+One honest caveat — and the reason the chart plots only aggregate and group-average curves.
+TXOP restores the *aggregate* capacity and the fast-station *group* reliably, but it does
+**not** hand each individual station equal airtime here. Under this permanent, extreme
+saturation INET's EDCA sometimes locks a station out completely: in several of the runs a
+fast station receives *zero* throughput for the whole measurement window while its neighbours
+absorb its share. Averaging over repetitions is what makes the group curves smooth — a
+per-station plot would be dominated by that run-to-run lockout, so it is deliberately left
+out. The system-level result (capacity recovered, the fast group no longer penalised) is
+robust; perfect per-station fairness is not.
+
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`RateAnomalyShowcase.ned <../RateAnomalyShowcase.ned>`
 
