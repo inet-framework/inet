@@ -75,12 +75,23 @@ void AirtimeFairnessQueue::pushPacket(Packet *packet, const cGate *gate)
     numPackets++;
     if (!wasBacklogged)
         activeList.push_back(address); // station became backlogged -> joins the round-robin
-    // tail drop: keep the total number of stored packets within capacity
+    // Overflow policy: drop from the station with the most queued frames, not the arriving
+    // frame. Dropping the arriving frame would let a slow station (whose frames drain slowly
+    // and thus pile up) fill the shared capacity and lock the other stations out; dropping
+    // from the longest sub-queue caps the hog instead and keeps room for everyone -- the
+    // same reason FQ-CoDel drops from the globally longest queue on overload.
     while (packetCapacity != -1 && numPackets > packetCapacity) {
-        // drop the just-pushed packet (drop-tail on the arriving station)
-        Packet *droppedPacket = state.frames.back();
-        removeStoredPacket(address, droppedPacket);
-        EV_INFO << "Dropping packet" << EV_FIELD(droppedPacket) << EV_ENDL;
+        MacAddress longestAddress;
+        size_t longest = 0;
+        for (auto& element : stations) {
+            if (element.second.frames.size() > longest) {
+                longest = element.second.frames.size();
+                longestAddress = element.first;
+            }
+        }
+        Packet *droppedPacket = stations.at(longestAddress).frames.back();
+        removeStoredPacket(longestAddress, droppedPacket);
+        EV_INFO << "Dropping packet from longest sub-queue (" << longestAddress << ")" << EV_FIELD(droppedPacket) << EV_ENDL;
         dropPacket(droppedPacket, QUEUE_OVERFLOW, packetCapacity);
     }
     cNamedObject packetPushEndedDetails("atomicOperationEnded");
