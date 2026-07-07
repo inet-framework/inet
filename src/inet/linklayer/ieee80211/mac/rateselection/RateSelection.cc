@@ -60,6 +60,27 @@ void RateSelection::initialize(int stage)
     }
 }
 
+void RateSelection::ensurePerReceiverModesResolved()
+{
+    if (perReceiverResolved)
+        return;
+    perReceiverResolved = true;
+    auto perReceiverBitrate = check_and_cast<cValueMap *>(par("dataFrameBitratePerReceiver").objectValue());
+    for (auto& [path, value] : perReceiverBitrate->getFields()) {
+        auto module = findModuleByPath(path.c_str());
+        if (module == nullptr)
+            throw cRuntimeError("dataFrameBitratePerReceiver: cannot resolve receiver interface module path '%s'", path.c_str());
+        auto networkInterface = check_and_cast<NetworkInterface *>(module);
+        try {
+            auto mode = modeSet->getMode(bps(value.doubleValueInUnit("bps")), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"));
+            perReceiverDataFrameMode[networkInterface->getMacAddress()] = mode;
+        }
+        catch (const cRuntimeError& e) {
+            throw cRuntimeError("dataFrameBitratePerReceiver: cannot use rate '%s' for receiver '%s': %s", value.str().c_str(), path.c_str(), e.what());
+        }
+    }
+}
+
 const IIeee80211Mode *RateSelection::getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     const auto& modeReqTag = packet->findTag<Ieee80211ModeReq>();
@@ -114,6 +135,15 @@ const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet,
 //
 const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
+    // Per-receiver override for originated unicast data frames (see dataFrameBitratePerReceiver).
+    // Wins over the interface-wide dataFrameMode / rate control; group-addressed and management
+    // frames are left to the existing rules below.
+    if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && !dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
+        ensurePerReceiverModesResolved();
+        auto it = perReceiverDataFrameMode.find(dataOrMgmtHeader->getReceiverAddress());
+        if (it != perReceiverDataFrameMode.end())
+            return it->second;
+    }
     if (dataOrMgmtHeader->getReceiverAddress().isMulticast() && multicastFrameMode)
         return multicastFrameMode;
     if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
