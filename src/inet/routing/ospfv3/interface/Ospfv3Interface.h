@@ -56,14 +56,15 @@ class INET_API Ospfv3Interface : public cObject
         VIRTUAL_TYPE           = 5
     };
 
-    const char *ospfv3IntStateOutput[7] = {
+    const char *ospfv3IntStateOutput[8] = {
         "Down",
         "Loopback",
         "Waiting",
         "Point-to-Point",
         "DROther",
         "Backup",
-        "DR"
+        "DR",
+        "Passive"
     };
 
     const char *ospfv3IntTypeOutput[6] = {

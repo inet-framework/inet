@@ -73,10 +73,10 @@ void Ospfv3InterfaceStateDown::processEvent(Ospfv3Interface *interface, Ospfv3In
             }
             changeState(interface, new Ospfv3InterfacePassive, this);
         }
-        if (event == Ospfv3Interface::LOOP_IND_EVENT) {
-            interface->reset();
-            changeState(interface, new Ospfv3InterfaceStateLoopback, this);
-        }
+    }
+    if (event == Ospfv3Interface::LOOP_IND_EVENT) {
+        interface->reset();
+        changeState(interface, new Ospfv3InterfaceStateLoopback, this);
     }
 } // processEvent
 

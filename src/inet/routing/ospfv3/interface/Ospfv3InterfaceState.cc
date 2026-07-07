@@ -27,7 +27,7 @@ void Ospfv3InterfaceState::changeState(Ospfv3Interface *interface, Ospfv3Interfa
         (oldState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED) ||
         (nextState == Ospfv3Interface::INTERFACE_STATE_DESIGNATED) ||
 
-        ((intfType == Ospfv3Interface::POINTTOMULTIPOINT_TYPE) && ((oldState == Ospfv3Interface::INTERFACE_STATE_POINTTOPOINT) ||
+        ((intfType == Ospfv3Interface::POINTTOPOINT_TYPE) && ((oldState == Ospfv3Interface::INTERFACE_STATE_POINTTOPOINT) ||
                                                                    (nextState == Ospfv3Interface::INTERFACE_STATE_POINTTOPOINT))) ||
 
         (((intfType == Ospfv3Interface::BROADCAST_TYPE) ||
