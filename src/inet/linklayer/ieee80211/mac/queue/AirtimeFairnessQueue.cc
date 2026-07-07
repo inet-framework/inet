@@ -33,6 +33,7 @@ void AirtimeFairnessQueue::initialize(int stage)
             throw cRuntimeError("The weight parameter must be positive");
         frameTransmittedAirtimeSignal = registerSignal("frameTransmittedAirtime");
         WATCH(numPackets);
+        WATCH_EXPR("numStations", (int)activeList.size()); // backlogged stations currently in the round-robin
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         // The coordination function (Dcf/Hcf) emits frameTransmittedAirtime from within

@@ -36,7 +36,7 @@ simple AirtimeFairnessQueue extends PacketQueueBase like IPacketQueue
         double quantum @unit(s) = default(1500us); // base DRR quantum in airtime units; ~one max-length frame's airtime
         double weight = default(1); // per-station airtime weight; equal weight means equal airtime share
         bool fairnessEnabled = default(true); // when false, degrades to a plain FIFO passthrough (for OFF/ON contrast)
-        displayStringTextFormat = default("contains %p pk (%l)\npushed %u pulled %o dropped %d");
+        displayStringTextFormat = default("{numStations} stations, %p pk (%l)\npulled %o dropped %d"); // See ~PacketQueueBase for the legacy '%' directives
         @class(AirtimeFairnessQueue);
         @signal[packetPushStarted](type=inet::Packet);
         @signal[packetPushEnded](type=inet::Packet?);
