@@ -1,0 +1,37 @@
+Airtime Fairness (802.11 downlink)
+==================================
+
+This example demonstrates the downlink form of the 802.11 performance ("rate")
+anomaly and how a per-station airtime-fair transmit scheduler at the access point
+fixes it.
+
+An access point saturates three wireless clients with downlink UDP traffic (one
+flow per client, sourced by a wired server). All links are equally good, but the
+AP transmits to sta[0] at 6 Mbps and to sta[1] and sta[2] at 54 Mbps -- the way a
+real AP rate-adapts to clients with different link quality (configured statically
+here via the per-receiver data-frame rate of RateSelection).
+
+The AP's transmit queue is an AirtimeFairnessQueue (one FIFO sub-queue per client).
+The two configurations flip only its fairnessEnabled switch:
+
+  Anomaly     - fairnessEnabled = false: the AP serves each client an equal number
+                of FRAMES (round-robin). sta[0]'s 9x-longer frames then dominate the
+                airtime and every client collapses to sta[0]'s throughput.
+
+  AirtimeFair - fairnessEnabled = true: the AP gives each client an equal share of
+                on-air TIME. The fast clients pack more frames into their slice and
+                recover; sta[0] is held to its fair time share.
+
+Typical per-client UDP goodput (measured over the steady-state window):
+
+                   sta[0] (6 Mbps)   sta[1..2] (54 Mbps)   total
+  Anomaly              1.77                1.77            5.31 Mbps
+  AirtimeFair          1.46                2.55            6.56 Mbps
+
+The fast clients recover (+44%) and total throughput rises, while the slow client
+is capped at its airtime share.
+
+See also:
+  - inet.linklayer.ieee80211.mac.queue.AirtimeFairnessQueue
+  - the showcases/wireless/rateanomaly showcase (uplink anomaly + TXOP, and this
+    downlink case with documentation and charts)
