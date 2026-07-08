@@ -304,7 +304,6 @@ void Ospfv3Interface::processHelloPacket(Packet *packet)
     const auto& hello = packet->peekAtFront<Ospfv3HelloPacket>();
     bool neighborChanged = false;
     bool backupSeen = false;
-    (void)backupSeen; // FIXME set but not used variable
     bool neighborsDRStateChanged = false;
     bool drChanged = false;
     bool shouldRebuildRoutingTable = false;
@@ -523,6 +522,11 @@ void Ospfv3Interface::processHelloPacket(Packet *packet)
              */
             if (i == neighborsNeighborCount) {
                 neighbor->processEvent(Ospfv3Neighbor::ONEWAY_RECEIVED);
+            }
+
+            if (backupSeen) {
+                EV_DEBUG << "Backup Designated Router seen in Hello packet\n";
+                this->processEvent(Ospfv3InterfaceEvent::BACKUP_SEEN_EVENT);
             }
 
             if (neighborChanged) {
