@@ -34,6 +34,14 @@ void Ospfv3NeighborStateFull::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neigh
             neighbor->getInterface()->getArea()->getInstance()->getProcess()->setTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
 
         changeState(neighbor, new Ospfv3NeighborStateDown, this);
+
+        // the dead neighbor was the DR and this router is the BDR: re-run the DR election
+        // promptly instead of waiting for the next Hello (mirrors OSPFv2)
+        if (neighbor->getInterface()->getState() == Ospfv3Interface::INTERFACE_STATE_BACKUP &&
+            neighbor->getInterface()->getDesignatedID() == neighbor->getNeighborID())
+        {
+            neighbor->getInterface()->processEvent(Ospfv3Interface::NEIGHBOR_CHANGE_EVENT);
+        }
     }
     else if (event == Ospfv3Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
