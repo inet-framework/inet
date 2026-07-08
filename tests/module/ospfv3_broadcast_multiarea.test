@@ -1,0 +1,261 @@
+%description:
+Testing OSPFv3 (IPv6) convergence on a shared broadcast segment with many routers
+across many areas.
+
+Router1..Router5 all share one broadcast Ethernet segment in backbone area 0.0.0.0,
+so a designated router is elected among five routers and each of them runs the
+Database Exchange against the DR and BDR while the others flood the same LSAs. Each
+Router(i) is additionally the area border router into stub area 0.0.0.(i), where
+leaf Router(i+5) lives. UDP traffic is exchanged between Router6 (area 0.0.0.1) and
+Router8 (area 0.0.0.3); it only gets through once every adjacency on the shared
+segment completes the Loading state and the inter-area-prefix LSAs are flooded both
+ways across the area borders. This is the multi-router, multi-area broadcast
+configuration whose Database Exchange convergence the OSPFv3 fixes address.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.misc.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ospfv3.Ospfv3Router;
+
+network Test1
+{
+    types:
+        channel C extends ThruputMeteringChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            parameters:
+                config = xml("<config/>");
+                addStaticRoutes = false;
+                addDefaultRoutes = false;
+                addSubnetRoutes = false;
+                @display("p=50,50");
+        }
+        N0: EthernetSwitch {
+            parameters:
+                @display("p=340,150");
+            gates:
+                ethg[5];
+        }
+        Router1: Ospfv3Router { @display("p=210,240"); gates: ethg[2]; }
+        Router2: Ospfv3Router { @display("p=300,240"); gates: ethg[2]; }
+        Router3: Ospfv3Router { @display("p=390,240"); gates: ethg[2]; }
+        Router4: Ospfv3Router { @display("p=480,240"); gates: ethg[2]; }
+        Router5: Ospfv3Router { @display("p=570,240"); gates: ethg[2]; }
+        Router6: Ospfv3Router { @display("p=210,340"); gates: ethg[1]; }
+        Router7: Ospfv3Router { @display("p=300,340"); gates: ethg[1]; }
+        Router8: Ospfv3Router { @display("p=390,340"); gates: ethg[1]; }
+        Router9: Ospfv3Router { @display("p=480,340"); gates: ethg[1]; }
+        Router10: Ospfv3Router { @display("p=570,340"); gates: ethg[1]; }
+    connections:
+        Router1.ethg[0] <--> C <--> N0.ethg++;
+        Router2.ethg[0] <--> C <--> N0.ethg++;
+        Router3.ethg[0] <--> C <--> N0.ethg++;
+        Router4.ethg[0] <--> C <--> N0.ethg++;
+        Router5.ethg[0] <--> C <--> N0.ethg++;
+        Router1.ethg[1] <--> C <--> Router6.ethg[0];
+        Router2.ethg[1] <--> C <--> Router7.ethg[0];
+        Router3.ethg[1] <--> C <--> Router8.ethg[0];
+        Router4.ethg[1] <--> C <--> Router9.ethg[0];
+        Router5.ethg[1] <--> C <--> Router10.ethg[0];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+description = "OSPFv3 many routers one segment, many areas"
+network = Test1
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 130s
+cmdenv-express-mode = true
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+record-vector-results = false
+**.cmdenv-log-level = "info"
+
+**.Router1.ospf.ospfv3Splitter.ospfv3RoutingConfig = xmldoc("config.xml", "Devices/Router[@id='Router1']/Routing6/OSPFv3")
+**.Router2.ospf.ospfv3Splitter.ospfv3RoutingConfig = xmldoc("config.xml", "Devices/Router[@id='Router2']/Routing6/OSPFv3")
+**.Router3.ospf.ospfv3Splitter.ospfv3RoutingConfig = xmldoc("config.xml", "Devices/Router[@id='Router3']/Routing6/OSPFv3")
+**.Router4.ospf.ospfv3Splitter.ospfv3RoutingConfig = xmldoc("config.xml", "Devices/Router[@id='Router4']/Routing6/OSPFv3")
+**.Router5.ospf.ospfv3Splitter.ospfv3RoutingConfig = xmldoc("config.xml", "Devices/Router[@id='Router5']/Routing6/OSPFv3")
+**.Router6.ospf.ospfv3Splitter.ospfv3RoutingConfig = xmldoc("config.xml", "Devices/Router[@id='Router6']/Routing6/OSPFv3")
+**.Router7.ospf.ospfv3Splitter.ospfv3RoutingConfig = xmldoc("config.xml", "Devices/Router[@id='Router7']/Routing6/OSPFv3")
+**.Router8.ospf.ospfv3Splitter.ospfv3RoutingConfig = xmldoc("config.xml", "Devices/Router[@id='Router8']/Routing6/OSPFv3")
+**.Router9.ospf.ospfv3Splitter.ospfv3RoutingConfig = xmldoc("config.xml", "Devices/Router[@id='Router9']/Routing6/OSPFv3")
+**.Router10.ospf.ospfv3Splitter.ospfv3RoutingConfig = xmldoc("config.xml", "Devices/Router[@id='Router10']/Routing6/OSPFv3")
+**.Router1.ospf.ospfv3Splitter.ospfv3IntConfig = xmldoc("config.xml", "Devices/Router[@id='Router1']/Interfaces")
+**.Router2.ospf.ospfv3Splitter.ospfv3IntConfig = xmldoc("config.xml", "Devices/Router[@id='Router2']/Interfaces")
+**.Router3.ospf.ospfv3Splitter.ospfv3IntConfig = xmldoc("config.xml", "Devices/Router[@id='Router3']/Interfaces")
+**.Router4.ospf.ospfv3Splitter.ospfv3IntConfig = xmldoc("config.xml", "Devices/Router[@id='Router4']/Interfaces")
+**.Router5.ospf.ospfv3Splitter.ospfv3IntConfig = xmldoc("config.xml", "Devices/Router[@id='Router5']/Interfaces")
+**.Router6.ospf.ospfv3Splitter.ospfv3IntConfig = xmldoc("config.xml", "Devices/Router[@id='Router6']/Interfaces")
+**.Router7.ospf.ospfv3Splitter.ospfv3IntConfig = xmldoc("config.xml", "Devices/Router[@id='Router7']/Interfaces")
+**.Router8.ospf.ospfv3Splitter.ospfv3IntConfig = xmldoc("config.xml", "Devices/Router[@id='Router8']/Interfaces")
+**.Router9.ospf.ospfv3Splitter.ospfv3IntConfig = xmldoc("config.xml", "Devices/Router[@id='Router9']/Interfaces")
+**.Router10.ospf.ospfv3Splitter.ospfv3IntConfig = xmldoc("config.xml", "Devices/Router[@id='Router10']/Interfaces")
+
+# UDP traffic between Router6 (area 0.0.0.1) and Router8 (area 0.0.0.3)
+**.Router6.hasUdp = true
+**.Router8.hasUdp = true
+**.Router6.numApps = 2
+**.Router8.numApps = 2
+**.app[0].typename = "UdpBasicApp"
+**.app[0].destPort = 1234
+**.app[0].messageLength = 32 bytes
+**.app[0].sendInterval = 1s
+**.app[0].startTime = 70s
+**.app[0].stopTime = this.startTime + 40s
+**.Router6.app[0].destAddresses = "2001:db8:3::2"
+**.Router8.app[0].destAddresses = "2001:db8:1::2"
+**.app[1].typename = "UdpEchoApp"
+**.app[1].localPort = 1234
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: config.xml
+<Devices>
+	<Router id="Router1">
+		<Routing6><OSPFv3><Process id="100"><RouterID>10.10.10.1</RouterID></Process></OSPFv3></Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:100/64</IPv6Address>
+				<IPv6Address>2001:db8:0::1/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.1</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:110/64</IPv6Address>
+				<IPv6Address>2001:db8:1::1/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router2">
+		<Routing6><OSPFv3><Process id="100"><RouterID>10.10.10.2</RouterID></Process></OSPFv3></Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:200/64</IPv6Address>
+				<IPv6Address>2001:db8:0::2/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.2</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:210/64</IPv6Address>
+				<IPv6Address>2001:db8:2::1/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router3">
+		<Routing6><OSPFv3><Process id="100"><RouterID>10.10.10.3</RouterID></Process></OSPFv3></Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:300/64</IPv6Address>
+				<IPv6Address>2001:db8:0::3/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.3</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:310/64</IPv6Address>
+				<IPv6Address>2001:db8:3::1/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router4">
+		<Routing6><OSPFv3><Process id="100"><RouterID>10.10.10.4</RouterID></Process></OSPFv3></Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:400/64</IPv6Address>
+				<IPv6Address>2001:db8:0::4/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.4</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:410/64</IPv6Address>
+				<IPv6Address>2001:db8:4::1/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router5">
+		<Routing6><OSPFv3><Process id="100"><RouterID>10.10.10.5</RouterID></Process></OSPFv3></Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.0</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:500/64</IPv6Address>
+				<IPv6Address>2001:db8:0::5/64</IPv6Address>
+			</Interface>
+			<Interface name="eth1">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.5</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:510/64</IPv6Address>
+				<IPv6Address>2001:db8:5::1/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router6">
+		<Routing6><OSPFv3><Process id="100"><RouterID>10.10.10.6</RouterID></Process></OSPFv3></Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.1</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:600/64</IPv6Address>
+				<IPv6Address>2001:db8:1::2/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router7">
+		<Routing6><OSPFv3><Process id="100"><RouterID>10.10.10.7</RouterID></Process></OSPFv3></Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.2</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:700/64</IPv6Address>
+				<IPv6Address>2001:db8:2::2/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router8">
+		<Routing6><OSPFv3><Process id="100"><RouterID>10.10.10.8</RouterID></Process></OSPFv3></Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.3</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:800/64</IPv6Address>
+				<IPv6Address>2001:db8:3::2/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router9">
+		<Routing6><OSPFv3><Process id="100"><RouterID>10.10.10.9</RouterID></Process></OSPFv3></Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.4</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:900/64</IPv6Address>
+				<IPv6Address>2001:db8:4::2/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+	<Router id="Router10">
+		<Routing6><OSPFv3><Process id="100"><RouterID>10.10.10.10</RouterID></Process></OSPFv3></Routing6>
+		<Interfaces>
+			<Interface name="eth0">
+				<Process id="100"><Instance AF="IPv6"><InterfaceType>Broadcast</InterfaceType><Area>0.0.0.5</Area></Instance></Process>
+				<IPv6Address>fe80::a8bb:ccff:fe00:1000/64</IPv6Address>
+				<IPv6Address>2001:db8:5::2/64</IPv6Address>
+			</Interface>
+		</Interfaces>
+	</Router>
+</Devices>
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-#0.sca
+scalar Test1.Router6.app[0] packetSent:count 40
+%contains: results/General-#0.sca
+scalar Test1.Router6.app[0] packetReceived:count 40
+%contains: results/General-#0.sca
+scalar Test1.Router8.app[0] packetSent:count 40
+%contains: results/General-#0.sca
+scalar Test1.Router8.app[0] packetReceived:count 40
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
