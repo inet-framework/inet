@@ -454,11 +454,11 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,         500s,            73cc-e6f7/tplx;bc6e-6aa5/~tNl;1700-f363/~tND;8ea5-1a49/tyf, PASS, EthernetMac Ipv4
 
 /examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c General -r 0,             500s,            5a6c-7b26/tplx;1cb8-4b4c/~tNl;c96e-af34/tyf;2d23-dc61/~tND, PASS, EthernetMac
-/examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c LinkDown -r 0,            500s,            3254-6e75/tplx;1394-905a/~tNl;058d-fbf3/tyf;ded1-b619/~tND, PASS, EthernetMac
-/examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c LinkDownLinkUp -r 0,      500s,            e324-d853/tplx;2c01-9da5/~tNl;7d65-aa4c/tyf;835c-3ff5/~tND, PASS, EthernetMac
+/examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c LinkDown -r 0,            500s,            0a8e-1d2c/tplx;026a-465c/~tNl;058d-fbf3/tyf;5859-a357/~tND, PASS, EthernetMac
+/examples/ospfv3/multiple_areas_FINAL/, -f omnetpp.ini -c LinkDownLinkUp -r 0,      500s,            ca28-5d2b/tplx;e812-c9a5/~tNl;7d65-aa4c/tyf;8767-9c3b/~tND, PASS, EthernetMac
 /examples/ospfv3/small/,             -f omnetpp.ini -c General -r 0,                200s,            a507-2349/tplx;78bf-31e2/~tNl;441a-9244/tyf;4b8b-fb7a/~tND, PASS, EthernetMac
 /examples/ospfv3/v3_2_routers/,      -f omnetpp.ini -c General -r 0,                400s,            b94b-8c51/tplx;536c-1525/~tNl;993e-1af3/tyf;bb52-b309/~tND, PASS, EthernetMac
-/examples/ospfv3/v3_2_routers/,      -f omnetpp.ini -c LinkDownAndUp -r 0,          400s,            c60e-2ffd/tplx;6370-bc46/~tNl;c4df-4e3f/tyf;6edf-d6d4/~tND, PASS, EthernetMac
+/examples/ospfv3/v3_2_routers/,      -f omnetpp.ini -c LinkDownAndUp -r 0,          400s,            24d9-8a90/tplx;d598-192b/~tNl;c4df-4e3f/tyf;b19b-722d/~tND, PASS, EthernetMac
 /examples/ospfv3/v3_3_areas/,        -f omnetpp.ini -c General -r 0,               3000s,            7cc4-6f54/tplx;18bf-6f31/~tNl;ddbf-753a/tyf;89ed-849f/~tND, PASS, EthernetMac
 /examples/ospfv3/v3_4_routers_2_areas/, -f omnetpp.ini -c General -r 0,             300s,            9698-8849/tplx;c2a6-27a3/~tNl;5989-8844/tyf;4602-9c81/~tND, PASS, EthernetMac
 /examples/ospfv3/v3_mesh/,           -f omnetpp.ini -c General -r 0,                500s,            818e-e6c0/tplx;dab9-97be/~tNl;7efe-6b32/tyf;7882-4096/~tND, PASS, EthernetMac

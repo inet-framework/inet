@@ -104,7 +104,18 @@ Ospfv3Interface::Ospfv3InterfaceFaState Ospfv3Interface::getState() const
 
 void Ospfv3Interface::reset()
 {
-    EV_DEBUG << "Resetting interface " << this->getIntName() << " - not implemented yet!\n";
+    EV_DEBUG << "Resetting interface " << this->getIntName() << "\n";
+    Ospfv3Process *process = this->getArea()->getInstance()->getProcess();
+    process->clearTimer(helloTimer);
+    process->clearTimer(waitTimer);
+    process->clearTimer(acknowledgementTimer);
+    setDesignatedID(Ipv4Address::UNSPECIFIED_ADDRESS);
+    setBackupID(Ipv4Address::UNSPECIFIED_ADDRESS);
+    setDesignatedIP(Ipv6Address::UNSPECIFIED_ADDRESS);
+    setBackupIP(Ipv6Address::UNSPECIFIED_ADDRESS);
+    long neighborCount = neighbors.size();
+    for (long i = 0; i < neighborCount; i++)
+        neighbors[i]->processEvent(Ospfv3Neighbor::KILL_NEIGHBOR);
 } // reset
 
 bool Ospfv3Interface::hasAnyNeighborInState(int state) const

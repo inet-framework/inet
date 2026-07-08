@@ -94,7 +94,12 @@ class INET_API Ospfv3Process : protected cListener, public SimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     void parseConfig(cXMLElement *areaConfig);
+
+    // reacts to a network interface losing/regaining carrier or going down/up
+    void handleInterfaceDown(const NetworkInterface *ie);
+    void handleInterfaceUp(const NetworkInterface *ie);
 
     // backbone area structure
     // virtual links

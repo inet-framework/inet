@@ -1,6 +1,7 @@
 #include "inet/routing/ospfv3/process/Ospfv3Process.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/routing/ospfv3/Ospfv3Checksum.h"
 
 namespace inet {
@@ -15,6 +16,8 @@ Ospfv3Process::Ospfv3Process()
 
 Ospfv3Process::~Ospfv3Process()
 {
+    if (containingModule)
+        containingModule->unsubscribe(interfaceStateChangedSignal, this);
     long instanceCount = instances.size();
     for (long i = 0; i < instanceCount; i++) {
         delete instances[i];
@@ -36,6 +39,7 @@ void Ospfv3Process::initialize(int stage)
 {
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         this->containingModule = findContainingNode(this);
+        containingModule->subscribe(interfaceStateChangedSignal, this);
         ift.reference(this, "interfaceTableModule", true);
         rt6.reference(this, "routingTableModule6", true);
         rt4.reference(this, "routingTableModule", false);
@@ -60,6 +64,65 @@ void Ospfv3Process::initialize(int stage)
         ageTimer->setContextPointer(this);
 
         this->setTimer(ageTimer, 1.0);
+    }
+}
+
+void Ospfv3Process::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
+    // interfaces going down while the network is being torn down must not drive the FSM
+    // (e.g. a DR-state exit would try to leave a multicast group on a half-deleted interface)
+#if OMNETPP_BUILDNUM < 2001
+    if (getSimulation()->getSimulationStage() == STAGE(CLEANUP))
+#else
+    if (getSimulation()->getStage() == STAGE(CLEANUP))
+#endif
+        return;
+
+    if (signalID == interfaceStateChangedSignal) {
+        const auto *change = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
+        if (change->getFieldId() == NetworkInterface::F_STATE || change->getFieldId() == NetworkInterface::F_CARRIER) {
+            const NetworkInterface *ie = change->getNetworkInterface();
+            if (!ie->isUp() || !ie->hasCarrier())
+                handleInterfaceDown(ie);
+            else
+                handleInterfaceUp(ie);
+        }
+    }
+}
+
+void Ospfv3Process::handleInterfaceDown(const NetworkInterface *ie)
+{
+    EV_INFO << "Interface " << ie->getInterfaceName() << " went down; taking down its OSPFv3 interface(s)\n";
+    // A single network interface may back several Ospfv3Interfaces (one per instance/area).
+    for (auto instance : instances) {
+        for (int a = 0; a < instance->getAreaCount(); a++) {
+            Ospfv3Area *area = instance->getArea(a);
+            for (int j = 0; j < area->getInterfaceCount(); j++) {
+                Ospfv3Interface *intf = area->getInterface(j);
+                if (intf->getInterfaceId() == ie->getInterfaceId())
+                    intf->processEvent(Ospfv3Interface::INTERFACE_DOWN_EVENT);
+            }
+        }
+    }
+}
+
+void Ospfv3Process::handleInterfaceUp(const NetworkInterface *ie)
+{
+    EV_INFO << "Interface " << ie->getInterfaceName() << " came up; bringing up its OSPFv3 interface(s)\n";
+    // INTERFACE_UP is only acted upon in the Down state, so delivering it unconditionally is safe
+    // (already-up interfaces ignore it). Unlike OSPFv2, OSPFv3 re-activates an interface on carrier
+    // restore so that a link which went down and came back re-forms its adjacencies.
+    for (auto instance : instances) {
+        for (int a = 0; a < instance->getAreaCount(); a++) {
+            Ospfv3Area *area = instance->getArea(a);
+            for (int j = 0; j < area->getInterfaceCount(); j++) {
+                Ospfv3Interface *intf = area->getInterface(j);
+                if (intf->getInterfaceId() == ie->getInterfaceId())
+                    intf->processEvent(Ospfv3Interface::INTERFACE_UP_EVENT);
+            }
+        }
     }
 }
 
