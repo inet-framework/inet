@@ -1281,6 +1281,14 @@ void Ospfv3Interface::processLSU(Packet *packet, Ospfv3Neighbor *neighbor)
                     }
                     continue;
                 }
+                // RFC 2328 Section 13, step 7: the received LSA is not newer than the database
+                // copy, yet it is still on this neighbor's link state request list -- the Database
+                // Exchange process is out of sync, so restart it. (OSPFv3 inherits the flooding
+                // procedure from OSPFv2 per RFC 5340 Section 4.5.2.)
+                if (neighbor->isLSAOnRequestList(lsaKey)) {
+                    neighbor->processEvent(Ospfv3Neighbor::BAD_LINK_STATE_REQUEST);
+                    break;
+                }
                 if (ackFlags.lsaIsDuplicate) {
                     if (neighbor->isLinkStateRequestListEmpty(lsaKey)) {
                         neighbor->removeFromRetransmissionList(lsaKey);
