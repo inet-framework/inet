@@ -12,6 +12,7 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
 import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 import inet.visualizer.contract.IGateScheduleVisualizer;
+import inet.visualizer.contract.IIeee80211RateVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -66,6 +67,7 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         int numDataLinkVisualizers = default(1);
         int numLinkBreakVisualizers = default(1);
         int numIeee80211Visualizers = default(1);
+        int numRateVisualizers = default(1);
         int numNetworkRouteVisualizers = default(1);
         int numRoutingTableVisualizers = default(1);
         int numTransportRouteVisualizers = default(1);
@@ -152,6 +154,10 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         ieee80211Visualizer[numIeee80211Visualizers]: <default("Ieee80211CanvasVisualizer")> like IIeee80211Visualizer {
             parameters:
                 @display("p=450,800,row,25,row,100");
+        }
+        rateVisualizer[numRateVisualizers]: <default("Ieee80211RateCanvasVisualizer")> like IIeee80211RateVisualizer {
+            parameters:
+                @display("p=450,850,row,100");
         }
         networkRouteVisualizer[numNetworkRouteVisualizers]: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer {
             parameters:

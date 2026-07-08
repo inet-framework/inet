@@ -69,6 +69,10 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
     virtual bool isControlResponseFrame(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure);
 
   public:
+    // Per-receiver configured data-frame modes (resolved lazily from dataFrameBitratePerReceiver);
+    // used by the IEEE 802.11 rate visualizer to show configured rates before any traffic.
+    const std::map<MacAddress, const physicallayer::IIeee80211Mode *>& getPerReceiverDataFrameModes() { ensurePerReceiverModesResolved(); return perReceiverDataFrameMode; }
+
     // A control response frame is a control frame that is transmitted as a response to the reception of a frame a SIFS
     // time after the PPDU containing the frame that elicited the response, e.g. a CTS in response to an RTS
     // reception, an ACK in response to a DATA reception, a BlockAck in response to a BlockAckReq reception. In

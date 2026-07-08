@@ -67,6 +67,10 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
     virtual const physicallayer::IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
 
   public:
+    // Per-receiver configured data-frame modes (resolved lazily from dataFrameBitratePerReceiver);
+    // used by the IEEE 802.11 rate visualizer to show configured rates before any traffic.
+    const std::map<MacAddress, const physicallayer::IIeee80211Mode *>& getPerReceiverDataFrameModes() { ensurePerReceiverModesResolved(); return perReceiverDataFrameMode; }
+
     static void setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const physicallayer::IIeee80211Mode *mode);
 
     // A control response frame is a control frame that is transmitted as a response to the reception of a frame a SIFS
