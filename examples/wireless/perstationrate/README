@@ -1,0 +1,9 @@
+Demonstrates per-station IEEE 802.11 data rate selection.
+
+An access point transmits to each associated station at a different PHY data
+rate, configured per receiver via the dataFrameBitratePerReceiver rate-selection
+parameter. A wired server sends UDP downlink traffic through the access point to
+three wireless stations, which the access point serves at 6, 24 and 54 Mbps.
+
+Secondarily, the per-station rates can be watched live as a bar chart above the
+access point: run in Qtenv (the Ieee80211RateVisualizer is enabled in the ini).

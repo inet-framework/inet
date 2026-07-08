@@ -5,7 +5,7 @@
 //
 
 
-package inet.examples.visualizer.ratevisualizer;
+package inet.examples.wireless.perstationrate;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
@@ -16,13 +16,16 @@ import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMed
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 //
-// Example network for the per-station IEEE 802.11 data rate bar chart visualizer
-// (~Ieee80211RateVisualizer). A wired server sends UDP downlink traffic through
-// the access point to three wireless stations; the access point transmits to each
-// station at a different PHY data rate (6/24/54 Mbps), which the rate visualizer
-// shows as a bar chart above the access point.
+// Demonstrates per-station IEEE 802.11 data rate selection: the access point
+// transmits to each station at a different, per-receiver configured PHY data
+// rate (the `dataFrameBitratePerReceiver` rate-selection parameter). A wired
+// server sends UDP downlink traffic through the access point to three wireless
+// stations, which the access point serves at 6, 24 and 54 Mbps respectively.
 //
-network RateVisualizerExample
+// The per-station rates can be watched live above the access point with the
+// IEEE 802.11 rate visualizer (secondary; enabled in the ini file).
+//
+network PerStationRateExample
 {
     submodules:
         visualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
