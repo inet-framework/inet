@@ -578,7 +578,8 @@ void Ospfv3Neighbor::removeFromRetransmissionList(LSAKeyType lsaKey)
     while (it != linkStateRetransmissionList.end()) {
 
         EV_DEBUG << counter++ << " - HEADER in retransmition list:\n" << (*it)->getHeader() << "\n";
-        if (((*it)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
+        if (((*it)->getHeader().getLsaType() == lsaKey.LSType) &&
+            ((*it)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             delete *it;
@@ -593,7 +594,8 @@ void Ospfv3Neighbor::removeFromRetransmissionList(LSAKeyType lsaKey)
 bool Ospfv3Neighbor::isLinkStateRequestListEmpty(LSAKeyType lsaKey) const
 {
     for (auto lsa : linkStateRetransmissionList) {
-        if ((lsa->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
+        if ((lsa->getHeader().getLsaType() == lsaKey.LSType) &&
+            (lsa->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
             (lsa->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             return true;
@@ -605,7 +607,8 @@ bool Ospfv3Neighbor::isLinkStateRequestListEmpty(LSAKeyType lsaKey) const
 Ospfv3Lsa *Ospfv3Neighbor::findOnRetransmissionList(LSAKeyType lsaKey)
 {
     for (auto& elem : linkStateRetransmissionList) {
-        if (((elem)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
+        if (((elem)->getHeader().getLsaType() == lsaKey.LSType) &&
+            ((elem)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
             ((elem)->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             return elem;
@@ -649,7 +652,8 @@ Ospfv3LsaHeader *Ospfv3Neighbor::findOnRequestList(LSAKeyType lsaKey)
 {
     // linkStateRequestList - list of LSAs that need to be received from the neighbor
     for (auto it = linkStateRequestList.begin(); it != linkStateRequestList.end(); it++) {
-        if (((*it)->getLinkStateID() == lsaKey.linkStateID) &&
+        if (((*it)->getLsaType() == lsaKey.LSType) &&
+            ((*it)->getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             return *it;
@@ -662,7 +666,8 @@ void Ospfv3Neighbor::removeFromRequestList(LSAKeyType lsaKey)
 {
     auto it = linkStateRequestList.begin();
     while (it != linkStateRequestList.end()) {
-        if (((*it)->getLinkStateID() == lsaKey.linkStateID) &&
+        if (((*it)->getLsaType() == lsaKey.LSType) &&
+            ((*it)->getLinkStateID() == lsaKey.linkStateID) &&
             ((*it)->getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             delete *it;
@@ -691,7 +696,8 @@ void Ospfv3Neighbor::addToTransmittedLSAList(LSAKeyType lsaKey)
 bool Ospfv3Neighbor::isOnTransmittedLSAList(LSAKeyType lsaKey) const
 {
     for (std::list<TransmittedLSA>::const_iterator it = transmittedLSAs.begin(); it != transmittedLSAs.end(); it++) {
-        if ((it->lsaKey.linkStateID == lsaKey.linkStateID) &&
+        if ((it->lsaKey.LSType == lsaKey.LSType) &&
+            (it->lsaKey.linkStateID == lsaKey.linkStateID) &&
             (it->lsaKey.advertisingRouter == lsaKey.advertisingRouter))
         {
             return true;

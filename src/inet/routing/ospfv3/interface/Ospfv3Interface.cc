@@ -181,6 +181,7 @@ bool Ospfv3Interface::ageDatabase()
 
             lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
+            lsaKey.LSType = lsa->getHeader().getLsaType();
 
             if (!isOnAnyRetransmissionList(lsaKey) &&
                 (
@@ -852,7 +853,8 @@ void Ospfv3Interface::processLSR(Packet *packet, Ospfv3Neighbor *neighbor)
             }
             else {
                 error = true;
-                EV_DEBUG << "Somehow I got here...BAD_LINK_STATE_REQUEST\n ";
+                EV_DEBUG << "Requested LSA type " << lsaKey.LSType << " ID " << lsaKey.linkStateID
+                         << " advertised by " << lsaKey.advertisingRouter << " is not in the database -> BadLSReq\n";
                 neighbor->processEvent(Ospfv3Neighbor::BAD_LINK_STATE_REQUEST);
                 break;
             }
@@ -1323,6 +1325,7 @@ void Ospfv3Interface::processLSAck(Packet *packet, Ospfv3Neighbor *neighbor)
             LSAKeyType lsaKey;
             lsaKey.linkStateID = lsaHeader.getLinkStateID();
             lsaKey.advertisingRouter = lsaHeader.getAdvertisingRouter();
+            lsaKey.LSType = lsaHeader.getLsaType();
 
             if ((lsaOnRetransmissionList = neighbor->findOnRetransmissionList(lsaKey)) != nullptr) {
                 if (operator==(lsaHeader, lsaOnRetransmissionList->getHeader())) {

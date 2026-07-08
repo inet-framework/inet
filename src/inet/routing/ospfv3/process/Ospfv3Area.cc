@@ -140,39 +140,13 @@ Ospfv3Interface *Ospfv3Area::getInterfaceByIndex(Ipv4Address LinkStateID)
 
 const Ospfv3LsaHeader *Ospfv3Area::findLSA(LSAKeyType lsaKey)
 {
-    switch (lsaKey.LSType) {
-        case ROUTER_LSA: {
-            RouterLSA *lsa = this->getRouterLSAbyKey(lsaKey);
-            if (lsa == nullptr) {
-                return nullptr;
-            }
-            else {
-                const Ospfv3LsaHeader *lsaHeader = &(lsa->getHeader());
-                return lsaHeader;
-            }
-        }
-        break;
-        case NETWORK_LSA: {
-            NetworkLSA *lsa = this->getNetworkLSAbyKey(lsaKey);
-            if (lsa == nullptr) {
-                return nullptr;
-            }
-            else {
-                const Ospfv3LsaHeader *lsaHeader = &(lsa->getHeader());
-                return lsaHeader;
-            }
-        }
-        break;
-//        case INTER_AREA_PREFIX_LSA:
-//        case INTER_AREA_ROUTER_LSA:
-//        case LINK_LSA:
-//        case AS_EXTERNAL_LSA:
-
-        default:
-//            ASSERT(false);
-            break;
-    }
-    return nullptr;
+    // Look up ALL LSA types. This backs the Database Description processing: an LSA listed in a
+    // neighbor's Database summary may only be put on the link state request list if it is newer
+    // than the database copy (RFC 2328 Section 10.6). Failing to find an existing copy here makes
+    // the router request LSAs it already has; the responses then arrive as duplicates, which never
+    // remove anything from the request list, and the neighbor is stuck in Loading forever.
+    const Ospfv3Lsa *lsa = this->getLSAbyKey(lsaKey);
+    return (lsa != nullptr) ? &lsa->getHeader() : nullptr;
 }
 
 Ipv4Address Ospfv3Area::getNewRouterLinkStateID()
@@ -239,6 +213,7 @@ void Ospfv3Area::ageDatabase()
 
             lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
+            lsaKey.LSType = lsa->getHeader().getLsaType();
 
             if (!isOnAnyRetransmissionList(lsaKey) &&
                 !hasAnyNeighborInStates(Ospfv3Neighbor::EXCHANGE_STATE | Ospfv3Neighbor::LOADING_STATE))
@@ -341,6 +316,7 @@ void Ospfv3Area::ageDatabase()
 
             lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
+            lsaKey.LSType = lsa->getHeader().getLsaType();
 
             if (!isOnAnyRetransmissionList(lsaKey) &&
                 !hasAnyNeighborInStates(Ospfv3Neighbor::EXCHANGE_STATE | Ospfv3Neighbor::LOADING_STATE)) // Final state for Neighbor is FULL_STATE
@@ -460,6 +436,7 @@ void Ospfv3Area::ageDatabase()
 
             lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
+            lsaKey.LSType = lsa->getHeader().getLsaType();
 
             if (!isOnAnyRetransmissionList(lsaKey) &&
                 !hasAnyNeighborInStates(Ospfv3Neighbor::EXCHANGE_STATE | Ospfv3Neighbor::LOADING_STATE))
@@ -595,6 +572,7 @@ void Ospfv3Area::ageDatabase()
 
             lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
             lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
+            lsaKey.LSType = lsa->getHeader().getLsaType();
 
             if (!isOnAnyRetransmissionList(lsaKey)) {
                 if (!hasAnyNeighborInStates(Ospfv3Neighbor::EXCHANGE_STATE | Ospfv3Neighbor::LOADING_STATE)) {
@@ -1140,9 +1118,7 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa *lsa, Ospf
         Ospfv3LsaHeader& newHeader = newLsa->getHeaderForUpdate();
         newHeader.setLsaAge(0);
         newHeader.setLsaType(INTER_AREA_PREFIX_LSA);
-        newHeader.setLinkStateID(this->getInstance()->getNewInterAreaPrefixLinkStateID());
         newHeader.setAdvertisingRouter(this->getInstance()->getProcess()->getRouterID());
-        newHeader.setLsaSequenceNumber(this->getCurrentInterAreaPrefixSequence());
 
         Ospfv3LsaPrefixMetric& prefix = lsa->getPrefixesForUpdate(ref);
         auto& newPrefix = newLsa->getPrefixForUpdate();
@@ -1155,42 +1131,35 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa *lsa, Ospf
         newPrefix.prefixLen = prefix.prefixLen;
         newPrefix.addressPrefix = prefix.addressPrefix;
 
-        B packetLength = calculateLSASize(newLsa);
-        newHeader.setLsaLength(packetLength.get());
-        setLsaChecksum(*newLsa, this->getInstance()->getProcess()->getChecksumMode());
-
-        int duplicateForArea = 0;
         for (int i = 0; i < this->getInstance()->getAreaCount(); i++) {
             Ospfv3Area *area = this->getInstance()->getArea(i);
             if (area->getAreaID() == fromArea->getAreaID())
                 continue;
 
-            if (checkDuplicate) {
-                InterAreaPrefixLSA *lsaDuplicate = area->InterAreaPrefixLSAAlreadyExists(newLsa);
-                if (lsaDuplicate != nullptr && lsaDuplicate->getHeader().getLsaAge() != MAX_AGE) { // LSA like this already exist
-                    duplicateForArea++;
-                }
-                else {
-                    this->incrementInterAreaPrefixSequence();
-                    if (area->installInterAreaPrefixLSA(newLsa))
-                        area->floodLSA(newLsa);
-//                    newLsa->getHeaderForUpdate().setLinkStateID(lsaDuplicate->getHeader().getLinkStateID());
-//                    if (area->installInterAreaPrefixLSA(newLsa))
-//                        area->floodLSA(newLsa);
-                }
+            // An LSA is identified by (LS type, Link State ID, Advertising Router). When this
+            // router already advertises this prefix into the target area, refresh that LSA in
+            // place -- keep its Link State ID and increment its own sequence number -- instead of
+            // originating a new instance under a freshly minted Link State ID. Renumbering a live
+            // LSA invalidates the copies of its header that neighbors hold on their Database
+            // summary and link state request lists, and the failing LSR then aborts the whole
+            // exchange with BadLSReq.
+            InterAreaPrefixLSA *existing = area->InterAreaPrefixLSAAlreadyExists(newLsa);
+            if (checkDuplicate && existing != nullptr && existing->getHeader().getLsaAge() != MAX_AGE)
+                continue; // this prefix is already advertised into this area
+
+            if (existing != nullptr) {
+                newHeader.setLinkStateID(existing->getHeader().getLinkStateID());
+                newHeader.setLsaSequenceNumber(existing->getHeader().getLsaSequenceNumber() + 1);
             }
             else {
-//                if (area->installInterAreaPrefixLSA(newLsa))
-//                        area->floodLSA(newLsa);
-                area->installInterAreaPrefixLSA(newLsa);
-                area->floodLSA(newLsa);
+                newHeader.setLinkStateID(this->getInstance()->getNewInterAreaPrefixLinkStateID());
+                newHeader.setLsaSequenceNumber(area->getCurrentInterAreaPrefixSequence());
+                area->incrementInterAreaPrefixSequence();
             }
-//            delete newLsa;
-
-        }
-        if (duplicateForArea == this->getInstance()->getAreaCount() - 1) {
-            // new LSA was not installed anywhere, so subtract LinkStateID counter
-            this->getInstance()->subtractInterAreaPrefixLinkStateID();
+            newHeader.setLsaLength(calculateLSASize(newLsa).get<B>());
+            setLsaChecksum(*newLsa, this->getInstance()->getProcess()->getChecksumMode());
+            if (area->installInterAreaPrefixLSA(newLsa))
+                area->floodLSA(newLsa);
         }
         delete newLsa;
     }
@@ -1198,62 +1167,42 @@ void Ospfv3Area::originateInterAreaPrefixLSA(Ospfv3IntraAreaPrefixLsa *lsa, Ospf
 
 void Ospfv3Area::originateInterAreaPrefixLSA(const Ospfv3Lsa *prefLsa, Ospfv3Area *fromArea)
 {
-    LSAKeyType lsaKey;
-    lsaKey.linkStateID = prefLsa->getHeader().getLinkStateID();
-    lsaKey.advertisingRouter = prefLsa->getHeader().getAdvertisingRouter();
-    lsaKey.LSType = prefLsa->getHeader().getLsaType();
+    // cast unspecified LSA into InterAreaPrefix LSA
+    const Ospfv3InterAreaPrefixLsa *lsa = check_and_cast<const Ospfv3InterAreaPrefixLsa *>(prefLsa);
+    bool invalidate = (prefLsa->getHeader().getLsaAge() == MAX_AGE); // the processed LSA is flooded for its invalidation
 
     for (int i = 0; i < this->getInstance()->getAreaCount(); i++) {
         Ospfv3Area *area = this->getInstance()->getArea(i);
         if (area->getAreaID() == fromArea->getAreaID())
             continue;
 
-        // cast unspecified LSA into InterAreaPrefix LSA
-        const Ospfv3InterAreaPrefixLsa *lsa = check_and_cast<const Ospfv3InterAreaPrefixLsa *>(prefLsa);
-
-        // find out wheter such LSA in actual area exists
-        InterAreaPrefixLSA *lsaInDatabase = area->findInterAreaPrefixLSAbyAddress(lsa->getPrefix().addressPrefix, lsa->getPrefix().prefixLen);
-
-//        B packetLength = OSPFV3_LSA_HEADER_LENGTH + OSPFV3_INTER_AREA_PREFIX_LSA_HEADER_LENGTH;
-//        int prefixCount = 0;
-
         InterAreaPrefixLSA *newLsa = new InterAreaPrefixLSA();
+        Ospfv3LsaHeader& newHeader = newLsa->getHeaderForUpdate();
+        newHeader.setLsaType(INTER_AREA_PREFIX_LSA);
+        newHeader.setAdvertisingRouter(this->getInstance()->getProcess()->getRouterID());
+        newHeader.setLsaAge(invalidate ? MAX_AGE : 0);
+        newLsa->setPrefix(lsa->getPrefix());
+        newLsa->setMetric(lsa->getMetric());
+        newHeader.setLsaLength(calculateLSASize(newLsa).get<B>());
 
-        // this part of code was put aside because it was hard work with memory correctly
-        if (lsaInDatabase != nullptr) // I've probably made already LSA type 3 from this prefLsa
-            (*newLsa) = (*lsaInDatabase);
-//            for (int inter = 0; inter < area->getInterAreaPrefixLSACount(); inter++)
-//            {
-//               InterAreaPrefixLSA* iterLsa = area->getInterAreaPrefixLSA(inter);
-//               if ((iterLsa->getHeader().getAdvertisingRouter() == this->getInstance()->getProcess()->getRouterID()) &&
-//                       (iterLsa->getPrefix() == lsa->getPrefix()) &&
-//                       (iterLsa->getPrefixLen() == lsa->getPrefixLen()))
-//               {
-//                   // this have already been processed.  So update old one and flood it away
-//                   (*newLsa) = (*iterLsa);
-//                   break;
-//               }
-//
-//            }
-        else { // (newLsa == nullptr)
-            // Only one Inter-Area-Prefix LSA for an area so only one header will suffice
-//            newLsa = new InterAreaPrefixLSA();
-            Ospfv3LsaHeader& newHeader = newLsa->getHeaderForUpdate();
-            newHeader.setLsaType(INTER_AREA_PREFIX_LSA);
+        // Re-advertising a prefix this router already advertises into the target area must
+        // refresh the existing LSA -- same Link State ID, next sequence number -- not originate a
+        // new instance under a new ID (see originateInterAreaPrefixLSA above). When nothing about
+        // the advertisement changed, no new instance is needed at all.
+        InterAreaPrefixLSA *existing = area->InterAreaPrefixLSAAlreadyExists(newLsa);
+        if (existing != nullptr) {
+            if (!area->interAreaPrefixLSADiffersFrom(existing, newLsa)) {
+                delete newLsa;
+                continue;
+            }
+            newHeader.setLinkStateID(existing->getHeader().getLinkStateID());
+            newHeader.setLsaSequenceNumber(existing->getHeader().getLsaSequenceNumber() + 1);
+        }
+        else {
             newHeader.setLinkStateID(area->getInstance()->getNewInterAreaPrefixLinkStateID());
-            newHeader.setAdvertisingRouter(this->getInstance()->getProcess()->getRouterID());
             newHeader.setLsaSequenceNumber(area->getCurrentInterAreaPrefixSequence());
             area->incrementInterAreaPrefixSequence();
         }
-        Ospfv3LsaHeader& newHeader2 = newLsa->getHeaderForUpdate();
-        if (prefLsa->getHeader().getLsaAge() == MAX_AGE) // if this processed LSA is flooded for its invalidation
-            newHeader2.setLsaAge(MAX_AGE);
-        else
-            newHeader2.setLsaAge(0);
-        newLsa->setPrefix(lsa->getPrefix());
-        newLsa->setMetric(lsa->getMetric());
-
-        newHeader2.setLsaLength(calculateLSASize(newLsa).get<B>());
         setLsaChecksum(*newLsa, this->getInstance()->getProcess()->getChecksumMode());
         if (area->installInterAreaPrefixLSA(newLsa))
             area->floodLSA(newLsa);
@@ -1327,9 +1276,13 @@ bool Ospfv3Area::installInterAreaPrefixLSA(const Ospfv3InterAreaPrefixLsa *lsa)
     lsaKey.linkStateID = lsa->getHeader().getLinkStateID();
     lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
     lsaKey.LSType = lsa->getHeader().getLsaType();
-//    InterAreaPrefixLSA* lsaInDatabase = (InterAreaPrefixLSA*)this->getLSAbyKey(lsaKey);
 
-    InterAreaPrefixLSA *lsaInDatabase = this->InterAreaPrefixLSAAlreadyExists(lsa);
+    // An LSA is identified by (LS type, Link State ID, Advertising Router); look the database
+    // copy up by that key. Matching by advertising router and prefix instead would overwrite the
+    // Link State ID of the stored LSA whenever an instance with a different ID arrives, silently
+    // renaming the LSA under neighbors that hold its old header on a Database summary or request
+    // list -- their next LSR then fails and aborts the exchange with BadLSReq.
+    InterAreaPrefixLSA *lsaInDatabase = check_and_cast_nullable<InterAreaPrefixLSA *>(this->getLSAbyKey(lsaKey));
 
     if (lsaInDatabase != nullptr) {
         this->removeFromAllRetransmissionLists(lsaKey);
