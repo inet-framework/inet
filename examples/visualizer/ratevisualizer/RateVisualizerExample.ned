@@ -5,7 +5,7 @@
 //
 
 
-package inet.showcases.wireless.ratevisualizer;
+package inet.examples.visualizer.ratevisualizer;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
@@ -16,13 +16,13 @@ import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMed
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 //
-// Demonstrates the per-station IEEE 802.11 data rate bar chart visualizer. A
-// wired server sends UDP downlink traffic through the access point to three
-// wireless stations. The access point transmits to each station at a different
-// configured PHY data rate (6/24/54 Mbps), which the rate visualizer shows as a
-// bar chart above the access point.
+// Example network for the per-station IEEE 802.11 data rate bar chart visualizer
+// (~Ieee80211RateVisualizer). A wired server sends UDP downlink traffic through
+// the access point to three wireless stations; the access point transmits to each
+// station at a different PHY data rate (6/24/54 Mbps), which the rate visualizer
+// shows as a bar chart above the access point.
 //
-network RateVisualizerShowcase
+network RateVisualizerExample
 {
     submodules:
         visualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
