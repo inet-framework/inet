@@ -26,10 +26,21 @@ Typical per-client UDP goodput (measured over the steady-state window):
 
                    sta[0] (6 Mbps)   sta[1..2] (54 Mbps)   total
   Anomaly              1.77                1.77            5.31 Mbps
-  AirtimeFair          1.46                2.55            6.56 Mbps
+  AirtimeFair          0.86                4.01            8.88 Mbps
 
-The fast clients recover (+44%) and total throughput rises, while the slow client
-is capped at its airtime share.
+The fast clients recover (from 1.77 to 4.01 Mbps) and total throughput rises, while
+the slow client is capped at its airtime share.
+
+The stations use simplified 802.11 management (Ieee80211MgmtStaSimplified /
+Ieee80211MgmtApSimplified): they are treated as associated from the start, with no
+scan/authenticate/associate handshake and no beacons, which keeps the example focused
+on the transmit scheduling.
+
+Run in the Qtenv GUI to see the built-in visualizers (one IntegratedCanvasVisualizer):
+  - per-station downlink throughput above each station (statisticVisualizer);
+  - a bar chart above the AP of the PHY data rate it uses towards each station -- the
+    per-client rate heterogeneity that drives the anomaly (rateVisualizer);
+  - each UdpSink also shows its received-packet count in its own display string.
 
 See also:
   - inet.linklayer.ieee80211.mac.queue.AirtimeFairnessQueue
