@@ -19,6 +19,13 @@ namespace ieee80211 {
 
 Define_Module(AirtimeFairnessQueue);
 
+AirtimeFairnessQueue::~AirtimeFairnessQueue()
+{
+    for (auto& element : stations)
+        for (auto packet : element.second.frames)
+            delete packet;
+}
+
 void AirtimeFairnessQueue::initialize(int stage)
 {
     PacketQueueBase::initialize(stage);

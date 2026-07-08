@@ -75,6 +75,8 @@ class INET_API AirtimeFairnessQueue : public queueing::PacketQueueBase, public c
     virtual void removeStoredPacket(const MacAddress& address, Packet *packet);
 
   public:
+    virtual ~AirtimeFairnessQueue();
+
     virtual int getMaxNumPackets() const override { return packetCapacity; }
     virtual int getNumPackets() const override { return numPackets; }
 
