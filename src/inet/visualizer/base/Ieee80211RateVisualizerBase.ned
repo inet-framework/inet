@@ -42,21 +42,21 @@ simple Ieee80211RateVisualizerBase extends VisualizerBase
 
         double maxRate @unit(bps) = default(54Mbps); // Data rate mapped to the full bar height and to the fast end of the color gradient
 
-        double barWidth = default(8); // Width of each bar in pixels
-        double barSpacing = default(6); // Horizontal spacing between adjacent bars in pixels
-        double maxBarHeight = default(40); // Height of a full (>= maxRate) bar in pixels
+        double barWidth = default(12); // Width of each bar in pixels
+        double barSpacing = default(8); // Horizontal spacing between adjacent bars in pixels
+        double maxBarHeight = default(60); // Height of a full (>= maxRate) bar in pixels
 
         string rateColor = default("red orange yellow lime green"); // Rate to color gradient from slow (first) to fast (last), a list of colors or a color group name
-        string rateFormat = default("%r"); // Rate label format: %r prints the rate rounded to the nearest Mbps with an "M" suffix (e.g. "54M"), %g prints the rate in bps
+        string rateFormat = default("%m"); // Rate label format: %m prints the rate rounded to the nearest Mbps (e.g. "54"), %r appends an "M" suffix (e.g. "54M"), %g prints the rate in bps
 
-        string rateLabelFont = default("<default>,6"); // Rate label font, small by default
+        string rateLabelFont = default("<default>,8"); // Rate label font (family and point size)
         string rateLabelColor = default("black"); // Rate label color, black by default
-        string stationLabelFont = default("<default>,6"); // Station name label font, small by default
+        string stationLabelFont = default("<default>,8"); // Station name label font (family and point size)
         string stationLabelColor = default("black"); // Station name label color, black by default
         double nameRotation @unit(deg) = default(45deg); // Rotation angle of the station name labels, 45 degrees by default
 
         bool displayTitle = default(true); // Display a small title (the access point interface name) above the chart
-        string titleFont = default("<default>,7"); // Chart title font
+        string titleFont = default("<default>,9"); // Chart title font (family and point size)
         string titleColor = default("black"); // Chart title color
 
         double holdTime @unit(s) = default(0s); // How long an observed rate bar is kept after the last data frame to the station, 0 means forever

@@ -80,8 +80,9 @@ void Ieee80211RateCanvasVisualizer::refreshChart(Ieee80211RateCanvasVisualizatio
         return a->staName < b->staName;
     });
 
-    double titleHeight = displayTitle ? 12 : 0;
-    double rateLabelHeight = 10; // space reserved above the bars for the rate labels
+    // reserve vertical space for the title and the rate labels that scales with their font size
+    double titleHeight = displayTitle ? (titleFont.pointSize > 0 ? titleFont.pointSize : 8) + 5 : 0;
+    double rateLabelHeight = (rateLabelFont.pointSize > 0 ? rateLabelFont.pointSize : 8) + 4;
     double baselineY = titleHeight + rateLabelHeight + maxBarHeight;
     double chartWidth = entries.empty() ? 0 : (entries.size() * barWidth + (entries.size() - 1) * barSpacing);
 
@@ -154,6 +155,7 @@ void Ieee80211RateCanvasVisualizer::refreshChart(Ieee80211RateCanvasVisualizatio
 void Ieee80211RateCanvasVisualizer::refreshDisplay() const
 {
     VisualizerBase::refreshDisplay();
+    const_cast<Ieee80211RateCanvasVisualizer *>(this)->ensureConfiguredVisualizations();
     auto simulation = getSimulation();
     L3AddressResolver addressResolver;
     for (auto& entry : ieee80211RateVisualizations) {

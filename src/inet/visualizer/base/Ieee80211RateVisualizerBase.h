@@ -97,6 +97,11 @@ class INET_API Ieee80211RateVisualizerBase : public VisualizerBase, public cList
     // and prunes stale observed entries according to holdTime.
     virtual void refreshRateEntries(cModule *networkNode, NetworkInterface *networkInterface, Ieee80211RateVisualization *rateVisualization) const;
 
+    // Creates a visualization for each interface (matching the filters) that has configured
+    // per-receiver rates (dataFrameBitratePerReceiver) but no visualization yet, so the chart
+    // appears immediately from the configured rates, before any traffic.
+    virtual void ensureConfiguredVisualizations();
+
     // Resolves a station MAC address to a network node (for labeling); returns nullptr if unknown.
     virtual cModule *findNetworkNodeByMacAddress(const MacAddress& address) const;
 

@@ -220,6 +220,47 @@ void Ieee80211RateVisualizerBase::refreshRateEntries(cModule *networkNode, Netwo
 #endif // INET_WITH_IEEE80211
 }
 
+void Ieee80211RateVisualizerBase::ensureConfiguredVisualizations()
+{
+    if (!displayRates)
+        return;
+#ifdef INET_WITH_IEEE80211
+    using namespace inet::ieee80211;
+    L3AddressResolver addressResolver;
+    for (cModule::SubmoduleIterator it(getSimulation()->getSystemModule()); !it.end(); ++it) {
+        cModule *node = *it;
+        if (!isNetworkNode(node) || !nodeFilter.matches(node))
+            continue;
+        auto interfaceTable = addressResolver.findInterfaceTableOf(node);
+        if (interfaceTable == nullptr)
+            continue;
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+            auto networkInterface = interfaceTable->getInterface(i);
+            if (!interfaceFilter.matches(networkInterface))
+                continue;
+            if (getRateVisualization(node->getId(), networkInterface->getInterfaceId()) != nullptr)
+                continue;
+            auto mac = networkInterface->getSubmodule("mac");
+            if (mac == nullptr)
+                continue;
+            bool hasConfigured = false;
+            if (auto dcf = mac->getSubmodule("dcf")) {
+                if (auto rs = dynamic_cast<RateSelection *>(dcf->getSubmodule("rateSelection")))
+                    hasConfigured = !rs->getPerReceiverDataFrameModes().empty();
+            }
+            if (!hasConfigured) {
+                if (auto hcf = mac->getSubmodule("hcf")) {
+                    if (auto qrs = dynamic_cast<QosRateSelection *>(hcf->getSubmodule("rateSelection")))
+                        hasConfigured = !qrs->getPerReceiverDataFrameModes().empty();
+                }
+            }
+            if (hasConfigured)
+                addRateVisualization(createRateVisualization(node, networkInterface));
+        }
+    }
+#endif // INET_WITH_IEEE80211
+}
+
 std::string Ieee80211RateVisualizerBase::formatRate(double bitrate) const
 {
     std::string result;
@@ -229,6 +270,10 @@ std::string Ieee80211RateVisualizerBase::formatRate(double bitrate) const
             char code = rateFormat[++i];
             char buf[32];
             switch (code) {
+                case 'm': // rounded Mbps, no unit suffix
+                    snprintf(buf, sizeof(buf), "%g", std::round(bitrate / 1e6));
+                    result += buf;
+                    break;
                 case 'r': // rounded Mbps with an "M" suffix
                     snprintf(buf, sizeof(buf), "%g", std::round(bitrate / 1e6));
                     result += buf;
