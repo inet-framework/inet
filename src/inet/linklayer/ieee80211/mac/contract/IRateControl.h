@@ -9,6 +9,7 @@
 #define __INET_IRATECONTROL_H
 
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
@@ -25,7 +26,8 @@ class INET_API IRateControl
   public:
     virtual ~IRateControl() {}
 
-    virtual const physicallayer::IIeee80211Mode *getRate() = 0;
+    // Returns the rate to use for a unicast frame addressed to the given receiver.
+    virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) = 0;
     virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) = 0;
     virtual void frameReceived(Packet *frame) = 0;
 };

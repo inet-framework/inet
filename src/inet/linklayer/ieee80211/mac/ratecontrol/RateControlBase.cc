@@ -33,9 +33,21 @@ const IIeee80211Mode *RateControlBase::decreaseRateIfPossible(const IIeee80211Mo
     return newMode == nullptr ? currentMode : newMode;
 }
 
-void RateControlBase::emitDatarateChangedSignal()
+MacAddress RateControlBase::getReceiverAddress(Packet *frame) const
 {
-    bps rate = currentMode->getDataMode()->getNetBitrate();
+    const auto& header = frame->peekAtFront<Ieee80211MacHeader>();
+    return header->getReceiverAddress();
+}
+
+const IIeee80211Mode *RateControlBase::getInitialMode()
+{
+    double initialRate = par("initialRate");
+    return initialRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initialRate));
+}
+
+void RateControlBase::emitDatarateChangedSignal(const IIeee80211Mode *mode)
+{
+    bps rate = mode->getDataMode()->getNetBitrate();
     emit(datarateChangedSignal, rate.get());
 }
 
@@ -45,9 +57,7 @@ void RateControlBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
 
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        double initRate = par("initialRate");
-        currentMode = initRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initRate));
-        emitDatarateChangedSignal();
+        resetRateControl();
     }
 }
 

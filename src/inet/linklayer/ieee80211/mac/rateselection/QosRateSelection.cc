@@ -172,7 +172,7 @@ const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
         // that is not yet associated with a BSS), the frame shall be transmitted in a non-HT PPDU using one of the
         // mandatory PHY rates.
         if (dataOrMgmtRateControl)
-            return dataOrMgmtRateControl->getRate();
+            return dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress());
         else
             return fastestMandatoryMode;
     }
@@ -190,7 +190,7 @@ const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
         // TODO Supported Rates element, Extended Supported Rates element
         // TODO OperationalRateSet or the HTOperationalMCSset
         if (dataOrMgmtRateControl)
-            return dataOrMgmtRateControl->getRate();
+            return dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress());
         else
             return fastestMandatoryMode;
     }

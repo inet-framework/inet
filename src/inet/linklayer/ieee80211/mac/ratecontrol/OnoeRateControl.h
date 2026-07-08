@@ -19,28 +19,36 @@ namespace ieee80211 {
 class INET_API OnoeRateControl : public RateControlBase
 {
   protected:
-    simtime_t timer = SIMTIME_ZERO;
+    // Per-receiver adaptive state (formerly single-instance module members).
+    struct State {
+        const physicallayer::IIeee80211Mode *mode = nullptr;
+        simtime_t timer = SIMTIME_ZERO;
+        int numOfRetries = 0;
+        int numOfSuccTransmissions = 0;
+        int numOfGivenUpTransmissions = 0;
+        double avgRetriesPerFrame = 0;
+        int credit = 0;
+    };
+    std::map<MacAddress, State> stations;
+
+    // configuration, shared across stations
     simtime_t interval = SIMTIME_ZERO;
-
-    int numOfRetries = 0;
-    int numOfSuccTransmissions = 0;
-    int numOfGivenUpTransmissions = 0;
-
-    double avgRetriesPerFrame = 0;
-    int credit = 0;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void computeMode();
-    virtual void resetStatisticalVariables();
-    virtual void computeModeIfTimerIsExpired();
+    virtual State& stateFor(const MacAddress& receiverAddress);
+    virtual void resetRateControl() override { stations.clear(); }
+
+    virtual void computeMode(State& state);
+    virtual void resetStatisticalVariables(State& state);
+    virtual void computeModeIfTimerIsExpired(State& state);
     virtual void refreshDisplay() const override;
 
   public:
-    virtual const physicallayer::IIeee80211Mode *getRate() override;
+    virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) override;
     virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) override;
     virtual void frameReceived(Packet *frame) override;
 };

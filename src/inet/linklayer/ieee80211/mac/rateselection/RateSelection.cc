@@ -151,7 +151,7 @@ const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const 
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
         return mgmtFrameMode;
     if (dataOrMgmtRateControl)
-        return dataOrMgmtRateControl->getRate();
+        return dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress());
     else
         return fastestMandatoryMode;
 }
