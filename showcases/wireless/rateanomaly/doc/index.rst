@@ -57,19 +57,19 @@ The root cause is that standard DCF provides **transmission-opportunity fairness
 disciplines that enforce airtime fairness avoid the anomaly, but they are outside plain
 DCF.
 
-These airtime-fair disciplines take two forms, because the anomaly itself does. The form
-this showcase reproduces is *uplink* — independent stations contending, each running its own
-DCF — and fixing it means every *contending* station must bound its own share. That is what
-the 802.11e standard adds with the transmission opportunity (TXOP), demonstrated later in this
-showcase. The mirror-image *downlink* form appears when one access point serves many clients
-of mixed rates: now a single transmitter divides *its own* airtime, a scheduling problem
-rather than a contention one. That is what production access points solve — the Linux
-``mac80211`` stack schedules its own frames with a deficit-round-robin whose deficit is counted
-in airtime (microseconds) instead of bytes (Høiland-Jørgensen et al.,
-`"Ending the Anomaly" <https://arxiv.org/abs/1703.00064>`__, USENIX ATC 2017), and many
-commercial access points expose an equivalent "airtime fairness" knob. That transmit-side
-scheduler only governs the frames a node sends itself, so it cures the downlink case; it does
-nothing for the distributed uplink contention shown here.
+These airtime-fair disciplines take two forms, because the anomaly itself does — and this
+showcase reproduces both. One form is *uplink* — independent stations contending, each running
+its own DCF — and fixing it means every *contending* station must bound its own share. That is
+what the 802.11e standard adds with the transmission opportunity (TXOP). The mirror-image
+*downlink* form appears when one access point serves many clients of mixed rates: now a single
+transmitter divides *its own* airtime, a scheduling problem rather than a contention one. That
+is what production access points solve — the Linux ``mac80211`` stack schedules its own frames
+with a deficit-round-robin whose deficit is counted in airtime (microseconds) instead of bytes
+(Høiland-Jørgensen et al., `"Ending the Anomaly" <https://arxiv.org/abs/1703.00064>`__,
+USENIX ATC 2017), and many commercial access points expose an equivalent "airtime fairness"
+knob. That transmit-side scheduler only governs the frames a node sends itself, so it cures the
+downlink case but does nothing for distributed uplink contention — the two forms need separate
+fixes, both shown below.
 
 The Model
 ---------
@@ -359,6 +359,112 @@ absorb its share. Averaging over repetitions is what makes the group curves smoo
 per-station plot would be dominated by that run-to-run lockout, so it is deliberately left
 out. The system-level result (capacity recovered, the fast group no longer penalised) is
 robust; perfect per-station fairness is not.
+
+The Downlink Form: Airtime Fairness at the Access Point
+-------------------------------------------------------
+
+Everything so far has been *uplink*: independent stations contending, cured by bounding each
+station's own airtime with TXOP. The anomaly has a mirror image on the **downlink**, when one
+access point serves many clients of mixed rates. There is no contention to arbitrate now — a
+single transmitter holds the channel and must divide *its own* airtime among its destinations,
+so the fix is a **scheduling** decision inside the access point's transmit queue rather than a
+contention rule in the MAC. This is the form production access points face, and the one the
+Linux ``mac80211`` deficit-airtime scheduler cures; INET models that scheduler as the
+:ned:`AirtimeFairnessQueue`.
+
+A far, rate-adapted slow client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``[Config DownlinkBase]`` reverses the traffic — the server sources one saturating UDP flow per
+station and the access point relays them over the air — and changes *how* the slow station is
+slow. The uplink configs pin the slow rate by hand. Here ``sta[0]`` is simply placed **far**
+from the access point (~55 m, against ~9 m for the others) on a realistic radio, and rate
+control does the rest:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: # Realistic radio
+   :end-at: initialRate = 54Mbps
+   :language: ini
+
+At that distance the link can no longer carry 54 Mbps, so **AARF** (Adaptive Auto-Rate Fallback,
+INET's rate-control algorithm — this is the first config to switch rate control on, in place of
+the pinned rate the uplink used) adapts the ``sta[0]`` link down on its own, settling near
+6 Mbps, while the four near clients stay at 54 Mbps. The slow rate now *emerges* from the link,
+as a real distant client's would, instead of being configured.
+
+Making a rate that adapts *with distance* takes a realistic radio. INET's default radio *does*
+model rate-dependent packet loss, but with free-space path loss (α = 2) and the default −85 dBm
+sensitivity the signal stays strong enough for 54 Mbps right up to the point where it drops below
+that sensitivity and the link fails outright — the rate never gets room to step down. A steeper
+path-loss exponent (α = 4), an explicit −95 dBm noise floor, and a more sensitive −92 dBm receiver
+stretch the signal-versus-distance curve so a station's SNR falls gradually across the cell: past
+a range each bitrate can no longer be decoded and rate control steps down, giving the
+54→6 Mbps transition a workable span of distance to unfold over.
+
+A client at the cell edge might also fail to *associate* in the first place, right where the link
+is weakest — which would confound a scheduling experiment with association failures. To keep the
+demo about scheduling, the stations are pre-associated with :ned:`Ieee80211MgmtStaSimplified`.
+And crucially the access point rate-adapts **per client**: INET's rate control keeps separate
+state per destination MAC address, so one AP radio is, at the same instant, a 6 Mbps transmitter
+to ``sta[0]`` and a 54 Mbps transmitter to the other four — the mixed-rate downlink cell that
+makes airtime scheduling necessary in the first place.
+
+Frame fairness versus airtime fairness at the AP
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The access point's transmit queue chooses which client's frame to send next; the two configs
+flip a single switch on it:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: # Per-client transmit queue
+   :end-at: pendingQueue.quantum = 1500us
+   :language: ini
+
+``[Config DownlinkAnomaly]`` runs the queue **frame-fair** (``fairnessEnabled = false``): it serves
+each client an equal number of *frames*, round-robin — the downlink analog of DCF's equal channel
+access. ``[Config DownlinkAirtimeFair]`` runs it **airtime-fair** with a *deficit round-robin*:
+each client carries a time budget that a fixed *quantum* (here 1500 µs) tops up every round, and
+each frame it sends is charged its own on-air duration — computed from the frame's rate and length,
+so a slow client's long frames drain its budget fast. A client whose budget runs out waits for the
+next round's top-up, so over time every client gets the same share of transmit time whatever its
+frame size. (The charge is the frame's own air time — preamble, header and payload — not the
+acknowledgment and interframe gaps around it.)
+
+.. figure:: media/downlink-throughput.png
+..
+   FIGURE RECIPE (redo via ../dl-chart.py)
+   type:     chart (matplotlib)
+   shows:    per-station application throughput, frame-fair (anomaly) vs airtime-fair AP queue;
+             frame-fair collapses all five clients to ~2.7 Mbps, airtime-fair lifts the four fast
+             clients to ~5.3 while holding the far sta[0] to its ~0.6 Mbps time share
+   inputs:   results/dl/DownlinkAnomaly-*.sca, results/dl/DownlinkAirtimeFair-*.sca, BOTH 3 reps
+             (DCF backoff uses the RNG, so both configs are averaged alike)
+   record:   inet -u Cmdenv -c DownlinkAnomaly     -r 0..2 --repeat=3 --result-dir=results/dl
+             inet -u Cmdenv -c DownlinkAirtimeFair -r 0..2 --repeat=3 --result-dir=results/dl
+   metric:   sta[i].app[0] packetReceived:count x 0.002 -> Mbps; per-station mean over 3 reps
+   anchor:   structural -- if the Downlink configs or the ~55 m distance change, re-derive
+   plot:     ../dl-chart.py (matplotlib; anomaly red, fix blue; 8x6 in @ dpi 150)
+   stamp:    captured 2026-07, INET 4.6
+
+Frame-fair scheduling reproduces the anomaly. ``sta[0]``'s frames sit on the air several times
+longer, and serving them one-for-one with the fast clients' frames lets them swallow most of the
+airtime — so all five clients collapse to about 2.7 Mbps and the aggregate falls to ~13 Mbps.
+Airtime fairness reverses it: charged for the time they occupy, the four fast clients climb back
+to about 5.3 Mbps each — almost exactly double — and the aggregate recovers to ~22 Mbps. (They
+stop a little short of the ~5.5 Mbps a fast station reaches under uplink TXOP: here all five flows
+funnel through the one access-point queue rather than five independent radios.)
+
+``sta[0]`` moves the other way, down to ~0.6 Mbps — and that is the fairness *working*, not the
+slow client being punished. Under frame-fair scheduling ``sta[0]`` was the culprit rather than the
+victim: it had been taking far more than its one-fifth share of channel *time*, so its 2.7 Mbps was
+inflated by exactly the airtime it stole from the others. Airtime fairness holds it to an equal
+*time* share, and ~0.6 Mbps is honestly all a 6 Mbps link delivers in one-fifth of the airtime —
+while the aggregate *rises* from ~13 to ~22 Mbps, so nothing is taken from anyone. The fast
+clients' recovery is precisely the airtime ``sta[0]`` was monopolising, handed back.
+
+And unlike the uplink TXOP result, this fix is cleanly *per-station* fair: a single transmitter
+running a deterministic scheduler has no contention lockout to average away, so all four fast
+clients land on the same throughput.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`RateAnomalyShowcase.ned <../RateAnomalyShowcase.ned>`
