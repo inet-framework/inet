@@ -121,8 +121,19 @@ Packet *AirtimeFairnessQueue::pullPacket(const cGate *gate)
             state.frames.pop_front();
             numPackets--;
             activeList.pop_front();
-            if (!state.frames.empty())
-                activeList.push_back(address); // rotate: give the other stations a turn
+            if (!state.frames.empty()) {
+                // Airtime-fair: keep this station at the FRONT so it drains its whole airtime
+                // deficit before yielding -- a fast station sends many small frames (one per
+                // pull, its async airtime charge landing before the next pull) until its deficit
+                // goes negative, then tops up and rotates in the else branch below; that matches
+                // the slow station's single large frame, so each yields after ~one quantum of
+                // airtime. Rotating after a single frame instead (as frame-fair does) caps the
+                // fast station at one small frame per pass and degrades to round-robin.
+                if (fairnessEnabled)
+                    activeList.push_front(address);
+                else
+                    activeList.push_back(address); // frame-fair: one frame each, plain round-robin
+            }
             // else the station drained -> leaves the round-robin; its deficit is kept so a
             // still-pending airtime charge (or its later return) is accounted correctly.
             EV_INFO << "Pulling packet" << EV_FIELD(packet) << EV_ENDL;
