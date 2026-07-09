@@ -84,6 +84,8 @@ Ldp::~Ldp()
         cancelAndDelete(elem.timeout);
 
     cancelAndDelete(sendHelloMsg);
+    for (auto *m : retryMsgs)
+        cancelAndDelete(m);
     for (auto *s : deadSockets)
         delete s;
     socketMap.deleteSockets();
@@ -189,6 +191,7 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
             processHelloTimeout(msg);
         }
         else {
+            retryMsgs.erase(std::remove(retryMsgs.begin(), retryMsgs.end(), msg), retryMsgs.end());
             auto ldpPacket = check_and_cast<Packet *>(msg)->popAtFront<LdpPacket>();
             processNOTIFICATION(ldpPacket, /*rescheduled*/ true);
             delete msg;
@@ -257,15 +260,20 @@ void Ldp::socketClosed(UdpSocket *socket)
 
 void Ldp::handleStartOperation(LifecycleOperation *operation)
 {
+    // OperationalMixin calls this with operation==nullptr during initialize()
+    // (before the socket-setup init stage); a real restart passes a non-null
+    // operation and must re-open the sockets and rebuild the FEC state that stop
+    // tore down.
+    if (operation != nullptr) {
+        setupSockets();
+        rebuildFecList();
+    }
     scheduleAfter(exponential(0.1), sendHelloMsg);
 }
 
 void Ldp::handleStopOperation(LifecycleOperation *operation)
 {
-    for (auto& elem : myPeers)
-        cancelAndDelete(elem.timeout);
-    myPeers.clear();
-    cancelEvent(sendHelloMsg);
+    clearState();
     udpSocket.close();
     for (auto& s : udpSockets)
         s.close();
@@ -277,17 +285,29 @@ void Ldp::handleStopOperation(LifecycleOperation *operation)
 
 void Ldp::handleCrashOperation(LifecycleOperation *operation)
 {
-    for (auto& elem : myPeers)
-        cancelAndDelete(elem.timeout);
-    myPeers.clear();
-    cancelEvent(sendHelloMsg);
-
+    clearState();
     udpSocket.destroy();
     for (auto& s : udpSockets)
         s.destroy();
     serverSocket.destroy();
     for (auto s : socketMap.getMap())
         s.second->destroy();
+}
+
+void Ldp::clearState()
+{
+    for (auto& elem : myPeers)
+        cancelAndDelete(elem.timeout);
+    myPeers.clear();
+    cancelEvent(sendHelloMsg);
+    for (auto *m : retryMsgs)
+        cancelAndDelete(m);
+    retryMsgs.clear();
+    // drop label bindings so a restart does not resume from stale state
+    fecUp.clear();
+    fecDown.clear();
+    fecList.clear();
+    pending.clear();
 }
 
 void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)
@@ -1012,7 +1032,8 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
                 if (it->nextHop == srcAddr) {
                     if (!rescheduled) {
                         EV_DETAIL << "we are still interesed in this mapping, we will retry later" << endl;
-                        auto pk = new Packet(0, ldpPacket);
+                        auto pk = new Packet("LdpNotifyRetry", ldpPacket);
+                        retryMsgs.push_back(pk);
                         scheduleAfter(1.0 /* FIXME */, pk);
                         return;
                     }

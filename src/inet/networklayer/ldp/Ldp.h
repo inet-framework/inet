@@ -118,6 +118,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
     // hello timeout message
     cMessage *sendHelloMsg = nullptr;
+    std::vector<cMessage *> retryMsgs; // scheduled NOTIFICATION-retry self-messages
 
     int maxFecid = 0;
     long numSent = 0;
@@ -181,6 +182,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void handleMessageWhenUp(cMessage *msg) override;
 
     virtual void setupSockets();
+    virtual void clearState();
     virtual void sendHelloTo(Ipv4Address dest);
     virtual void openTCPConnectionToPeer(int peerIndex);
     virtual void removePeerBindings(Ipv4Address peerIP);
