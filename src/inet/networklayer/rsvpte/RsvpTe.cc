@@ -571,7 +571,9 @@ bool RsvpTe::doCACCheck(const SessionObj& session, const SenderTspecObj& tspec, 
     double sharedBW = 0.0;
 
     for (auto& elem : RSBList) {
-        if ((elem.Session_Object == session) && (elem.Flowspec_Object.req_bandwidth > sharedBW))
+        // SE-style sharing is per outgoing link: only reservations of the same
+        // session on the SAME link (OI) may share bandwidth with this request
+        if ((elem.OI == OI) && (elem.Session_Object == session) && (elem.Flowspec_Object.req_bandwidth > sharedBW))
             sharedBW = elem.Flowspec_Object.req_bandwidth;
     }
 

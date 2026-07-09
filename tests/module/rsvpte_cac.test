@@ -1,0 +1,172 @@
+%description:
+Regression test for RSVP-TE admission control (CAC) sharing bandwidth only with
+same-session reservations on the SAME outgoing link.
+
+Reuses the examples/mpls/testte_reroute network (RSVPTE4). Two permanent LSPs are
+set up, both at the default (lowest) priority so admission hinges on shared
+bandwidth rather than preemption:
+  - tunnel 1, lsp 100, 400k, over LSR1->LSR3->LSR7->LSR5
+  - tunnel 2, lsp 200, 400k, over LSR1->LSR2->LSR4->LSR5
+All links are 600k, so after setup link LSR1->LSR2 has only 200k free.
+
+At t=2s a second LSP for tunnel 1 (lsp 101, 400k) is signalled over
+LSR1->LSR2->LSR4->LSR5. On link LSR1->LSR2 it needs 400k but only 200k is free,
+and SE sharing does not apply (tunnel 1's other reservation, lsp 100, is on a
+DIFFERENT link). So it must be rejected at the ingress.
+
+Before the fix, doCACCheck computed the session-shared bandwidth across ALL links,
+so lsp 100's 400k reservation on LSR1->LSR3 wrongly inflated the admissible
+bandwidth on LSR1->LSR2 and lsp 101 was admitted. That makes the %contains
+assertion below fail (the "couln't be created" message never appears).
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.testte_reroute.RSVPTE4
+sim-time-limit = 3s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host3"
+
+**.host2.numApps = 1
+**.host2.app[0].typename = "UdpBasicApp"
+**.host2.app[0].localPort = 100
+**.host2.app[0].destPort = 100
+**.host2.app[0].messageLength = 128 bytes
+**.host2.app[0].sendInterval = 0.01s
+**.host2.app[0].destAddresses = "host4"
+
+**.host{3..4}.numApps = 1
+**.host{3..4}.app[0].typename = "UdpSink"
+**.host{3..4}.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host4.rt"
+**.host5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host5.rt"
+
+**.LSR1.classifier.config = xmldoc("../../../../examples/mpls/testte_reroute/LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("LSR1_rsvp.xml")
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR5.rt"
+**.LSR6.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR6.rt"
+**.LSR7.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR7.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1_rsvp.xml
+<?xml version="1.0"?>
+<sessions>
+	<session>
+		<endpoint>host3</endpoint>
+		<tunnel_id>1</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>100</lspid>
+
+				<bandwidth>400000</bandwidth>
+				<route>
+					<node>LSR1%routerId</node>
+					<node>LSR3%routerId</node>
+					<node>LSR7%routerId</node>
+					<node>LSR5%routerId</node>
+				</route>
+
+				<permanent>true</permanent>
+				<color>100</color>
+			</path>
+		</paths>
+	</session>
+	<session>
+		<endpoint>host4</endpoint>
+		<tunnel_id>2</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>200</lspid>
+
+				<bandwidth>400000</bandwidth>
+				<route>
+					<node>LSR1%routerId</node>
+					<node>LSR2%routerId</node>
+					<node>LSR4%routerId</node>
+					<node>LSR5%routerId</node>
+				</route>
+
+				<permanent>true</permanent>
+				<color>200</color>
+			</path>
+		</paths>
+	</session>
+</sessions>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<?xml version="1.0"?>
+<scenario>
+	<at t="2s">
+		<add-session module="LSR1.rsvp">
+			<endpoint>host3</endpoint>
+			<tunnel_id>1</tunnel_id>
+
+			<paths>
+				<path>
+					<lspid>101</lspid>
+
+					<bandwidth>400000</bandwidth>
+					<route>
+						<node>LSR1%routerId</node>
+						<node>LSR2%routerId</node>
+						<node>LSR4%routerId</node>
+						<node>LSR5%routerId</node>
+					</route>
+
+					<color>100</color>
+				</path>
+			</paths>
+		</add-session>
+	</at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Sanity: the add-session reached the ingress and tried to create the new path.
+%contains: stdout
+adding new path into an existing session
+%#--------------------------------------------------------------------------------------------------------------
+%# The bug: sharing bandwidth with a same-session reservation on a DIFFERENT link.
+%# tunnel 1's lsp 100 reserves 400k on LSR1->LSR3; before the fix that 400k was
+%# wrongly offered as shared bandwidth on LSR1->LSR2, so lsp 101 was admitted and
+%# a Path for it was signalled ("PATH_MESSAGE: lspid 101") before failing
+%# downstream. With the fix, sharing is per-link, the ingress rejects lsp 101, and
+%# no lspid 101 ever appears.
+%not-contains: stdout
+lspid 101
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
