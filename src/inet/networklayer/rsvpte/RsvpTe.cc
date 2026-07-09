@@ -135,7 +135,7 @@ void RsvpTe::createPath(const SessionObj& session, const SenderTemplateObj& send
         if (!pit->permanent) {
             EV_INFO << "removing path from traffic database" << endl;
 
-            sit->paths.erase(pit--);
+            sit->paths.erase(pit);
         }
         else {
             EV_INFO << "path is permanent, we will try again later" << endl;
@@ -1493,8 +1493,12 @@ void RsvpTe::processPathTearMsg(Packet *pk)
 
     bool modified = false;
 
-    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
-        if (it->OutInterface.getInt() != (uint32_t)lspid)
+    // Collect the ids of the merging-backup PSBs first: removePSB() erases from
+    // PSBList (a std::vector), which would invalidate an iterator/pointer held
+    // into it while iterating.
+    std::vector<int> backupIds;
+    for (auto& elem : PSBList) {
+        if (elem.OutInterface.getInt() != (uint32_t)lspid)
             continue;
 
         // merging backup exists
@@ -1507,14 +1511,22 @@ void RsvpTe::processPathTearMsg(Packet *pk)
 
         EV_DETAIL << "merging backup must be removed too" << endl;
 
-        removePSB(&(*it));
-        --it;
-
+        backupIds.push_back(elem.id);
         modified = true;
     }
 
-    if (modified)
+    for (int id : backupIds)
+        removePSB(findPsbById(id));
+
+    if (modified) {
+        // the pointer obtained above dangles after the erasures; re-fetch it
         psb = findPSB(msg->getSession(), msg->getSenderTemplate());
+        if (!psb) {
+            // the teardown removed the last matching PSB; nothing left to forward
+            delete pk;
+            return;
+        }
+    }
 
     // forward path teardown downstream
 
@@ -1826,7 +1838,7 @@ void RsvpTe::delSession(const cXMLElement& node)
         pathList = paths->getChildrenByTagName("path");
     }
 
-    for (auto it = session->paths.begin(); it != session->paths.end(); it++) {
+    for (auto it = session->paths.begin(); it != session->paths.end(); ) {
         bool remove;
 
         if (paths) {
@@ -1857,8 +1869,10 @@ void RsvpTe::delSession(const cXMLElement& node)
                 removePSB(psb);
             }
 
-            session->paths.erase(it--);
+            it = session->paths.erase(it);
         }
+        else
+            ++it;
     }
 
     if (!paths) {
