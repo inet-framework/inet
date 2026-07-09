@@ -84,8 +84,9 @@ Ldp::~Ldp()
         cancelAndDelete(elem.timeout);
 
     cancelAndDelete(sendHelloMsg);
-    // this causes segfault at the end of simulation       -- Vojta
-//    socketMap.deleteSockets();
+    for (auto *s : deadSockets)
+        delete s;
+    socketMap.deleteSockets();
 }
 
 void Ldp::initialize(int stage)
@@ -120,24 +121,7 @@ void Ldp::initialize(int stage)
         sendHelloMsg = new cMessage("LDPSendHello");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        // bind UDP socket
-        udpSocket.setOutputGate(gate("socketOut"));
-        udpSocket.bind(LDP_PORT);
-        for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-            NetworkInterface *ie = ift->getInterface(i);
-            if (ie->isMulticast()) {
-                udpSockets.push_back(UdpSocket());
-                udpSockets.back().setOutputGate(gate("socketOut"));
-                udpSockets.back().setMulticastLoop(false);
-                udpSockets.back().setMulticastOutputInterface(ie->getInterfaceId());
-            }
-        }
-
-        // start listening for incoming TCP conns
-        EV_INFO << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
-        serverSocket.setOutputGate(gate("socketOut"));
-        serverSocket.bind(LDP_PORT);
-        serverSocket.listen();
+        setupSockets();
 
         // build list of recognized FECs
         rebuildFecList();
@@ -149,8 +133,42 @@ void Ldp::initialize(int stage)
     }
 }
 
+void Ldp::setupSockets()
+{
+    // (re)create fresh socket objects: this also runs on node restart, and a
+    // closed socket cannot be re-bound
+    udpSocket = UdpSocket();
+    udpSockets.clear();
+    serverSocket = TcpSocket();
+
+    // bind UDP socket
+    udpSocket.setOutputGate(gate("socketOut"));
+    udpSocket.bind(LDP_PORT);
+    for (int i = 0; i < ift->getNumInterfaces(); ++i) {
+        NetworkInterface *ie = ift->getInterface(i);
+        if (ie->isMulticast()) {
+            udpSockets.push_back(UdpSocket());
+            udpSockets.back().setOutputGate(gate("socketOut"));
+            udpSockets.back().setMulticastLoop(false);
+            udpSockets.back().setMulticastOutputInterface(ie->getInterfaceId());
+        }
+    }
+
+    // start listening for incoming TCP conns
+    EV_INFO << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
+    serverSocket.setOutputGate(gate("socketOut"));
+    serverSocket.bind(LDP_PORT);
+    serverSocket.listen();
+}
+
 void Ldp::handleMessageWhenUp(cMessage *msg)
 {
+    // delete sockets torn down inside a previous callback (safe now: we are no
+    // longer executing inside their processMessage())
+    for (auto *s : deadSockets)
+        delete s;
+    deadSockets.clear();
+
     EV_INFO << "Received: (" << msg->getClassName() << ")" << msg->getName() << "\n";
     if (msg == sendHelloMsg) {
         ASSERT(msg->isSelfMessage());
@@ -193,7 +211,10 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
                     return;
                 }
             }
-            throw cRuntimeError("model error: no socket found for msg '%s' with socketId %d", msg->getName(), socketId);
+            // an in-flight TCP indication may arrive for a socket we just tore
+            // down on session loss; drop it instead of aborting
+            EV_WARN << "no socket found for msg '" << msg->getName() << "' with socketId " << socketId << ", dropping\n";
+            delete msg;
         }
     }
     // TODO move to separate function and reuse from socketClosed
@@ -510,11 +531,25 @@ void Ldp::processHelloTimeout(cMessage *msg)
 
     ASSERT(!myPeers[i].timeout->isScheduled());
     delete myPeers[i].timeout;
-    ASSERT(myPeers[i].socket);
-    myPeers[i].socket->abort(); // should we only close?
-    delete myPeers[i].socket;
+    if (myPeers[i].socket) {
+        socketMap.removeSocket(myPeers[i].socket);
+        myPeers[i].socket->abort(); // should we only close?
+        delete myPeers[i].socket;
+    }
     myPeers.erase(myPeers.begin() + i);
 
+    removePeerBindings(peerIP);
+
+    // update TED and routing table
+
+    unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
+    tedmod->ted[index].state = false;
+    announceLinkChange(index);
+    tedmod->rebuildRoutingTable();
+}
+
+void Ldp::removePeerBindings(Ipv4Address peerIP)
+{
     EV_INFO << "removing (stale) bindings from fecDown for peer=" << peerIP << endl;
 
     for (auto dit = fecDown.begin(); dit != fecDown.end();) {
@@ -552,13 +587,6 @@ void Ldp::processHelloTimeout(cMessage *msg)
     EV_INFO << "updating fecList" << endl;
 
     updateFecList(peerIP);
-
-    // update TED and routing table
-
-    unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
-    tedmod->ted[index].state = false;
-    announceLinkChange(index);
-    tedmod->rebuildRoutingTable();
 }
 
 void Ldp::processLDPHello(Packet *msg)
@@ -598,6 +626,11 @@ void Ldp::processLDPHello(Packet *msg)
         EV_DETAIL << "already in my peer table, rescheduling timeout" << endl;
         ASSERT(myPeers[i].timeout);
         rescheduleAfter(effectiveHoldTime, myPeers[i].timeout);
+        // if the session died but the hello adjacency survived, re-establish it
+        if (myPeers[i].activeRole && myPeers[i].socket == nullptr) {
+            EV_INFO << "session with peer " << peerAddr << " is down, reconnecting\n";
+            openTCPConnectionToPeer(i);
+        }
         return;
     }
 
@@ -628,7 +661,6 @@ void Ldp::openTCPConnectionToPeer(int peerIndex)
     TcpSocket *socket = new TcpSocket();
     socket->setOutputGate(gate("socketOut"));
     socket->setCallback(this);
-    socket->setUserData((void *)((intptr_t)peerIndex));
     socket->bind(rt->getRouterId(), 0);
     socketMap.addSocket(socket);
     myPeers[peerIndex].socket = socket;
@@ -638,11 +670,15 @@ void Ldp::openTCPConnectionToPeer(int peerIndex)
 
 void Ldp::socketEstablished(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
-    EV_INFO << "TCP connection established with peer " << peer.peerIP << "\n";
+    int i = findPeer(socket->getRemoteAddress().toIpv4());
+    if (i == -1) {
+        EV_WARN << "TCP connection established with an unknown peer, ignoring\n";
+        return;
+    }
+    EV_INFO << "TCP connection established with peer " << myPeers[i].peerIP << "\n";
 
     // we must update all entries with nextHop == peerIP
-    updateFecList(peer.peerIP);
+    updateFecList(myPeers[i].peerIP);
 
     // FIXME start LDP session setup (if we're on the active side?)
 }
@@ -661,23 +697,34 @@ void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInf
     Ipv4Address peerAddr = newSocket->getRemoteAddress().toIpv4();
 
     int i = findPeer(peerAddr);
-    if (i == -1 || myPeers[i].socket) {
-        // nothing known about this guy, or already connected: refuse
+    if (i == -1) {
+        // nothing known about this peer: refuse
         newSocket->close(); // reset()?
         delete newSocket;
         return;
     }
+    if (myPeers[i].socket) {
+        // we already hold a session to this peer. Only the active side connects,
+        // so a fresh incoming connection means the peer restarted and its old
+        // session is stale -- replace it.
+        EV_WARN << "peer " << peerAddr << " reconnected, replacing the stale session\n";
+        socketMap.removeSocket(myPeers[i].socket);
+        myPeers[i].socket->abort();
+        delete myPeers[i].socket;
+        myPeers[i].socket = nullptr;
+        removePeerBindings(peerAddr);
+    }
     myPeers[i].socket = newSocket;
     newSocket->setCallback(this);
-    newSocket->setUserData((void *)((intptr_t)i));
     socketMap.addSocket(newSocket);
     socketocket->accept(availableInfo->getNewSocketId());
 }
 
 void Ldp::socketDataArrived(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
-    EV_INFO << "Message arrived over TCP from peer " << peer.peerIP << "\n";
+    int i = findPeer(socket->getRemoteAddress().toIpv4());
+    if (i != -1)
+        EV_INFO << "Message arrived over TCP from peer " << myPeers[i].peerIP << "\n";
 
     auto queue = socket->getReadBuffer();
     while (queue->has<LdpPacket>()) {
@@ -687,41 +734,45 @@ void Ldp::socketDataArrived(TcpSocket *socket)
     }
 }
 
+void Ldp::handleTcpConnectionDown(TcpSocket *socket)
+{
+    // Discard the session and its label bindings. The hello adjacency (UDP)
+    // stays alive, so the session is re-established the next time a Hello is
+    // received (the active side reconnects) -- RFC 5036 hello-driven recovery.
+    // Deleting the socket here is safe: TcpSocket::processMessage invokes these
+    // callbacks as its last action on the socket, and handleMessageWhenUp does
+    // not touch the socket after processMessage returns.
+    if (socketMap.removeSocket(socket) == nullptr)
+        return; // already torn down (e.g. both socketClosed and socketFailure fired)
+
+    int i = findPeer(socket->getRemoteAddress().toIpv4());
+    if (i != -1 && myPeers[i].socket == socket) {
+        Ipv4Address peerIP = myPeers[i].peerIP;
+        myPeers[i].socket = nullptr;
+        removePeerBindings(peerIP);
+    }
+    // defer the delete: we are called from inside socket->processMessage(), which
+    // still touches the socket after this callback returns
+    deadSockets.push_back(socket);
+}
+
 void Ldp::socketPeerClosed(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
-    EV_INFO << "Peer " << peer.peerIP << " closed TCP connection\n";
-
-    ASSERT(false);
-
-/*
-    // close the connection (if not already closed)
-    if (socket.getState()==TcpSocket::PEER_CLOSED)
-    {
-        EV << "remote TCP closed, closing here as well\n";
-        close();
-    }
- */
+    EV_INFO << "Peer " << socket->getRemoteAddress() << " closed the TCP connection, closing here as well\n";
+    // close our side; the ensuing socketClosed will clean up the session
+    socket->close();
 }
 
 void Ldp::socketClosed(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
-    EV_INFO << "TCP connection to peer " << peer.peerIP << " closed\n";
-
-    ASSERT(false);
-
-    // FIXME what now? reconnect after a delay?
+    EV_WARN << "TCP connection to peer " << socket->getRemoteAddress() << " closed\n";
+    handleTcpConnectionDown(socket);
 }
 
 void Ldp::socketFailure(TcpSocket *socket, int code)
 {
-    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
-    EV_INFO << "TCP connection to peer " << peer.peerIP << " broken\n";
-
-    ASSERT(false);
-
-    // FIXME what now? reconnect after a delay?
+    EV_WARN << "TCP connection to peer " << socket->getRemoteAddress() << " broken\n";
+    handleTcpConnectionDown(socket);
 }
 
 void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)

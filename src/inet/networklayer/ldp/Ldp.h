@@ -114,6 +114,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     std::vector<UdpSocket> udpSockets; // for sending Hello, one socket for each multicast interface
     TcpSocket serverSocket; // for listening on LDP_PORT
     SocketMap socketMap; // holds TCP connections with peers
+    std::vector<TcpSocket *> deadSockets; // sockets torn down in a callback, deleted later
 
     // hello timeout message
     cMessage *sendHelloMsg = nullptr;
@@ -179,8 +180,11 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
 
+    virtual void setupSockets();
     virtual void sendHelloTo(Ipv4Address dest);
     virtual void openTCPConnectionToPeer(int peerIndex);
+    virtual void removePeerBindings(Ipv4Address peerIP);
+    virtual void handleTcpConnectionDown(TcpSocket *socket);
 
     virtual void processLDPHello(Packet *msg);
     virtual void processHelloTimeout(cMessage *msg);
