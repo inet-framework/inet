@@ -39,6 +39,7 @@ simple Ldp extends SimpleModule like IApp
         double holdTime @unit(s) = default(15s);
         double helloInterval @unit(s) = default(5s);
         @display("i=block/control");
+        @signal[tedChanged](type=inet::TedChangeInfo);
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
