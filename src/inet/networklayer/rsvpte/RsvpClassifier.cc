@@ -94,6 +94,7 @@ void RsvpClassifier::bind(const SessionObj& session, const SenderTemplateObj& se
         if (elem.sender != sender)
             continue;
 
+        EV_INFO << "binding fec id " << elem.id << " to in-label " << inLabel << endl;
         elem.inLabel = inLabel;
     }
 }
@@ -166,7 +167,7 @@ void RsvpClassifier::readItemFromXML(const cXMLElement *fec)
         newFec.src = getParameterIPAddressValue(fec, "source", Ipv4Address());
 
         newFec.session.Tunnel_Id = getParameterIntValue(fec, "tunnel_id");
-        newFec.session.Extended_Tunnel_Id = getParameterIPAddressValue(fec, "extened_tunnel_id", routerId).getInt();
+        newFec.session.Extended_Tunnel_Id = getParameterIPAddressValue(fec, "extended_tunnel_id", routerId).getInt();
         newFec.session.DestAddress = getParameterIPAddressValue(fec, "endpoint", newFec.dest); // ??? always use newFec.dest ???
 
         newFec.sender.Lsp_Id = getParameterIntValue(fec, "lspid");
