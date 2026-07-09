@@ -724,17 +724,19 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
 {
     switch (ldpPacket->getType()) {
         case HELLO:
-            throw cRuntimeError("Received LDP HELLO over TCP (should arrive over UDP)");
+            // Hellos belong on UDP; a Hello over TCP is a peer/protocol anomaly, ignore it
+            EV_WARN << "ignoring an LDP HELLO received over TCP (Hellos arrive over UDP)" << endl;
             break;
 
         case ADDRESS:
 //            processADDRESS(ldpPacket);
-            throw cRuntimeError("Received LDP ADDRESS message, unsupported in this version");
+            // Address messages are not modeled; RFC 5036 says ignore unsupported messages
+            EV_WARN << "ignoring an LDP ADDRESS message (not supported in this model)" << endl;
             break;
 
         case ADDRESS_WITHDRAW:
 //            processADDRESS_WITHDRAW(ldpPacket);
-            throw cRuntimeError("LDP PROC DEBUG: Received LDP ADDRESS_WITHDRAW message, unsupported in this version");
+            EV_WARN << "ignoring an LDP ADDRESS_WITHDRAW message (not supported in this model)" << endl;
             break;
 
         case LABEL_MAPPING:
@@ -758,7 +760,8 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
             break;
 
         default:
-            throw cRuntimeError("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", ldpPacket->getType());
+            // an unrecognized message type from a peer must not abort the simulation
+            EV_WARN << "ignoring an unrecognized LDP message of type " << ldpPacket->getType() << endl;
             break;
     }
 }
@@ -971,7 +974,8 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
         }
 
         default:
-            ASSERT(false);
+            // a notification status this model does not act on; log and ignore
+            EV_WARN << "ignoring LDP notification with unhandled status " << status << endl;
             break;
     }
 }
@@ -1153,12 +1157,19 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
     ASSERT(label > 0);
 
     auto it = findFecEntry(fecList, fec.addr, fec.length);
-    if (it == fecList.end())
-        throw cRuntimeError("Model error: fec not in fecList");
+    if (it == fecList.end()) {
+        // a mapping for a FEC we do not recognize (e.g. an unsolicited mapping);
+        // per RFC 5036 this is a legal peer event -- ignore it
+        EV_INFO << "not a recognized FEC, ignoring the mapping" << endl;
+        return;
+    }
 
     auto dit = findFecEntry(fecDown, it->fecid, fromIP);
-    if (dit != fecDown.end())
-        throw cRuntimeError("Model error: found in fecDown");
+    if (dit != fecDown.end()) {
+        // we already hold a mapping for this FEC from this peer (duplicate); ignore
+        EV_INFO << "already have a mapping for this FEC from this peer, ignoring" << endl;
+        return;
+    }
 
     // insert among received mappings
 
