@@ -1115,8 +1115,12 @@ bool RsvpTe::evalNextHopInterface(Ipv4Address destAddr, const EroVector& ERO, Ip
 
         Ipv4Address peer = tedmod->getPeerByLocalAddress(OI);
         HelloState *h = findHello(peer);
-        if (!h)
-            throw cRuntimeError("Peer %s on interface %s is not an RSVP peer", peer.str().c_str(), OI.str().c_str());
+        if (!h) {
+            // the strict ERO points at a next hop that is not an RSVP Hello peer;
+            // treat the path as infeasible so the caller can answer with a PathErr
+            EV_WARN << "next (strict) hop " << peer << " on interface " << OI << " is not an RSVP peer" << endl;
+            return false;
+        }
 
         // ok, only if next hop is up and running
 
@@ -1354,7 +1358,12 @@ void RsvpTe::processHelloMsg(Packet *pk)
     delete pk;
 
     HelloState *h = findHello(peer);
-    ASSERT(h);
+    if (!h) {
+        // a Hello from a peer we are not maintaining a Hello session with
+        // (e.g. a stale or misdirected message); ignore it
+        EV_WARN << "received a Hello from unknown peer " << peer << ", ignoring" << endl;
+        return;
+    }
 
     ASSERT(h->srcInstance);
     ASSERT(rcvSrcInstance);
@@ -1453,7 +1462,10 @@ void RsvpTe::processPathErrMsg(Packet *pk)
                 break;
 
             default:
-                throw cRuntimeError("Invalid errorcode %d in message '%s'", errCode, msg->getName());
+                // an error code this model does not act on; log and ignore
+                EV_WARN << "ignoring PathErr with unhandled error code " << errCode
+                        << " in message '" << msg->getName() << "'" << endl;
+                break;
         }
 
         delete pk;
@@ -1861,7 +1873,7 @@ void RsvpTe::processCommand(const cXMLElement& node)
         delSession(node);
     }
     else
-        ASSERT(false);
+        throw cRuntimeError("Unknown scenario command '%s'", node.getTagName());
 }
 
 void RsvpTe::sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, const SenderTemplateObj& sender, Ipv4Address LIH, Ipv4Address NHOP, bool force)
