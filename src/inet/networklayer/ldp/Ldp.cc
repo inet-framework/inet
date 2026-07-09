@@ -569,8 +569,12 @@ void Ldp::processLDPHello(Packet *msg)
     const auto& ldpHello = msg->peekAtFront<LdpHello>();
 //    Ipv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     Ipv4Address peerAddr = ldpHello->getSenderAddress();
+    double receivedHoldTime = ldpHello->getHoldTime();
     int interfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
     delete msg;
+
+    // RFC 5036 2.4.1: the effective hold time is the smaller of the two proposals
+    simtime_t effectiveHoldTime = receivedHoldTime > 0 ? std::min(holdTime, SimTime(receivedHoldTime)) : holdTime;
 
     EV_INFO << "Received LDP Hello from " << peerAddr << ", ";
 
@@ -593,7 +597,7 @@ void Ldp::processLDPHello(Packet *msg)
     if (i != -1) {
         EV_DETAIL << "already in my peer table, rescheduling timeout" << endl;
         ASSERT(myPeers[i].timeout);
-        rescheduleAfter(holdTime, myPeers[i].timeout);
+        rescheduleAfter(effectiveHoldTime, myPeers[i].timeout);
         return;
     }
 
@@ -604,7 +608,7 @@ void Ldp::processLDPHello(Packet *msg)
     info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
     info.socket = nullptr;
     info.timeout = new cMessage("HelloTimeout");
-    scheduleAfter(holdTime, info.timeout);
+    scheduleAfter(effectiveHoldTime, info.timeout);
     myPeers.push_back(info);
     int peerIndex = myPeers.size() - 1;
 
