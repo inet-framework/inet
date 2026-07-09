@@ -820,7 +820,7 @@ Ipv4Address Ldp::findPeerAddrFromInterface(std::string interfaceName)
     // Return any IP which has default route - not in routing table entries
     for (i = 0; i < myPeers.size(); i++) {
         for (k = 0; k < (size_t)rt->getNumRoutes(); k++) {
-            anEntry = rt->getRoute(i);
+            anEntry = rt->getRoute(k);
             if (anEntry->getDestination() == myPeers[i].peerIP)
                 break;
         }
