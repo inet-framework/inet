@@ -141,12 +141,14 @@ void Ldp::setupSockets()
     udpSockets.clear();
     serverSocket = TcpSocket();
 
-    // bind UDP socket
+    // bind UDP socket and subscribe to the all-routers group so we receive Hellos
     udpSocket.setOutputGate(gate("socketOut"));
+    udpSocket.setCallback(this);
     udpSocket.bind(LDP_PORT);
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         NetworkInterface *ie = ift->getInterface(i);
         if (ie->isMulticast()) {
+            udpSocket.joinMulticastGroup(Ipv4Address::ALL_ROUTERS_MCAST, ie->getInterfaceId());
             udpSockets.push_back(UdpSocket());
             udpSockets.back().setOutputGate(gate("socketOut"));
             udpSockets.back().setMulticastLoop(false);
@@ -157,6 +159,7 @@ void Ldp::setupSockets()
     // start listening for incoming TCP conns
     EV_INFO << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
     serverSocket.setOutputGate(gate("socketOut"));
+    serverSocket.setCallback(this);
     serverSocket.bind(LDP_PORT);
     serverSocket.listen();
 }
