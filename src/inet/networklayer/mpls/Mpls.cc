@@ -11,6 +11,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ldp/Ldp.h"
@@ -208,9 +209,14 @@ void Mpls::processPacketFromL2(Packet *packet)
         }
     }
     else {
-        throw cRuntimeError("Unknown message received");
-        // FIXME remove throw above
-        // sendToL3(packet);
+        // not an IPv4 or MPLS packet (e.g. IPv6): this model cannot label or
+        // forward it, so drop it with a notification instead of aborting
+        EV_WARN << "discarding packet from L2 with unsupported protocol "
+                << packet->getTag<PacketProtocolTag>()->getProtocol()->getName() << endl;
+        PacketDropDetails details;
+        details.setReason(NO_PROTOCOL_FOUND);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
     }
 }
 
