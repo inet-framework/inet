@@ -1084,8 +1084,15 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
     // does upstream have mapping from us?
     auto uit = findFecEntry(fecUp, it->fecid, srcAddr);
 
-    // shouldn't!
-    ASSERT(uit == fecUp.end());
+    if (uit != fecUp.end()) {
+        // we already have an upstream binding for this FEC from this peer (e.g. a
+        // duplicate request after a session reset); re-advertise the current
+        // mapping instead of building a second one
+        EV_INFO << "already have an upstream binding for this FEC, re-advertising" << endl;
+        if (uit->label != -1)
+            sendMapping(LABEL_MAPPING, srcAddr, uit->label, fec.addr, fec.length);
+        return;
+    }
 
     // do we have mapping from downstream?
     auto dit = findFecEntry(fecDown, it->fecid, it->nextHop);
