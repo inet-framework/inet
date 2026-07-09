@@ -216,7 +216,7 @@ void Ppp::handleMessageWhenUp(cMessage *message)
 {
     MacProtocolBase::handleMessageWhenUp(message);
     if (operationalState == State::STOPPING_OPERATION) {
-        if (txQueue->isEmpty()) {
+        if (txQueue->isEmpty() && !endTransmissionEvent->isScheduled()) {
             networkInterface->setCarrier(false);
             networkInterface->setState(NetworkInterface::State::DOWN);
             startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
@@ -363,7 +363,9 @@ void Ppp::decapsulate(Packet *packet)
 
 void Ppp::handleStopOperation(LifecycleOperation *operation)
 {
-    if (!txQueue->isEmpty()) {
+    // stay up until both the queue has drained AND the in-progress transmission
+    // has finished, otherwise endTransmissionEvent would fire while we are down
+    if (!txQueue->isEmpty() || endTransmissionEvent->isScheduled()) {
         networkInterface->setState(NetworkInterface::State::GOING_DOWN);
         delayActiveOperationFinish(par("stopOperationTimeout"));
     }
