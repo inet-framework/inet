@@ -847,7 +847,9 @@ void Ldp::processLDPHello(Packet *msg)
     peer_info info;
     info.peerIP = peerAddr;
     info.linkInterface = ift->getInterfaceById(interfaceId)->getInterfaceName();
-    info.activeRole = peerAddr.getInt() > rt->getRouterId().getInt();
+    // RFC 5036 Section 2.5.2: the LSR with the GREATER transport address plays
+    // the active role and initiates the TCP connection.
+    info.activeRole = rt->getRouterId().getInt() > peerAddr.getInt();
     info.socket = nullptr;
     info.timeout = new cMessage("HelloTimeout");
     scheduleAfter(effectiveHoldTime, info.timeout);
