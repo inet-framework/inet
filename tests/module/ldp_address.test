@@ -1,0 +1,121 @@
+%description:
+Regression test for LDP Address messages (RFC 5036 Section 3.5.5/2.7), in
+examples/mpls/ldp (network LDPTEST): a clone of ldp_session_fsm.test that additionally
+asserts (a) an Address message is sent listing the sender's LDP-capable interface
+addresses once a session reaches OPERATIONAL, and (b) a next-hop address is later
+resolved to an outgoing interface via the new peer-address-table lookup (Ldp::
+findInterfaceFromPeerAddr's peer-table branch), rather than via a routing-table guess.
+
+Falsification: this test FAILS against the parent commit -- there, ADDRESS messages
+received over TCP are logged and ignored ("ignoring an LDP ADDRESS message (not
+supported in this model)"), no Address message is ever sent (LdpAddress exists only as
+an unused wire-format representation), and findInterfaceFromPeerAddr always resolves
+through a plain routing-table lookup (no peer-address-table EV_DETAIL line exists).
+Verified by stashing this commit's source changes (keeping this .test file), rebuilding
+the debug library, re-running (FAIL: neither the "Address message sent" nor the
+"resolved ... via the LDP peer address table" line is found), then restoring the
+changes and rebuilding again (PASS).
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.ldp.LDPTEST
+sim-time-limit = 2s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+%# only the LDP modules log (at detail level, so the new peer-address-table lookup's
+%# EV_DETAIL line is captured too); keeping the log scoped avoids test.out bloat
+**.LSR*.ldp.cmdenv-log-level = detail
+**.LSR*.mpls.cmdenv-log-level = info
+**.cmdenv-log-level = off
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host2"
+
+**.host3.numApps = 1
+**.host3.app[0].typename = "UdpBasicApp"
+**.host3.app[0].localPort = 100
+**.host3.app[0].destPort = 100
+**.host3.app[0].messageLength = 128 bytes
+**.host3.app[0].sendInterval = 0.01s
+**.host3.app[0].destAddresses = "host4"
+
+**.host{2..4}.numApps = 1
+**.host{2..4}.app[0].typename = "UdpSink"
+**.host{2..4}.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host4.rt"
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR5.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.LSR*.holdTime = 6s
+**.LSR*.helloInterval = 2s
+
+**.scenarioManager.script = xml("<scenario/>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# once a session reaches OPERATIONAL, each side advertises its LDP-capable interface
+%# addresses to the peer (RFC 5036 Section 3.5.5/2.7)
+%contains-regex: stdout
+Address message sent to .* listing .* interface address\(es\): .*
+%#--------------------------------------------------------------------------------------------------------------
+%# ... and the peer stores/logs them on receipt
+%contains-regex: stdout
+Address message received from .* listing .* interface address\(es\): .*
+%#--------------------------------------------------------------------------------------------------------------
+%# a next-hop address is resolved to an outgoing interface via the peer address table
+%# (the authoritative map this commit introduces), not a routing-table guess
+%contains-regex: stdout
+resolved .* to peer session .* via the LDP peer address table \(interface .*\)
+%#--------------------------------------------------------------------------------------------------------------
+%# the 4-way session handshake still completes before any label is distributed
+%# (unchanged from ldp_session_fsm.test)
+%contains-regex: stdout
+Init sent to .*
+.*
+Init received from .*
+.*
+KeepAlive (sent to|received from) .*
+.*
+LDP session with .* is now OPERATIONAL
+.*
+Label mapping label=.* received for fec=.*
+%#--------------------------------------------------------------------------------------------------------------
+%# an LDP session still establishes over TCP
+%contains: stdout
+TCP connection established with peer
+%#--------------------------------------------------------------------------------------------------------------
+%# the data plane is still label-switched: an MPLS label is pushed/swapped and forwarded
+%contains: stdout
+doStackOps: {PUSH
+%#--------------------------------------------------------------------------------------------------------------
+%# host traffic is actually delivered -- and since there is no IP route to the host
+%# prefixes, this can only happen over an LDP-established LSP that completed the FSM
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

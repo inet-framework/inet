@@ -394,6 +394,43 @@ void Ldp::sendKeepAlive(Ipv4Address dest)
     EV_INFO << "KeepAlive sent to " << dest << "\n";
 }
 
+void Ldp::sendAddress(Ipv4Address dest)
+{
+    // RFC 5036 Section 3.5.5/2.7: advertise all of this router's LDP-capable
+    // interface addresses. "LDP-capable" is taken to mean the same set of
+    // interfaces LDP itself sends/joins Hellos on (setupSockets' multicast-
+    // capable interfaces), rather than re-deriving a separate notion of
+    // "own addresses" (rebuildFecList's "our own addresses" block serves a
+    // different purpose -- FEC bookkeeping -- and is not reused here).
+    std::vector<Ipv4Address> addrs;
+    for (int i = 0; i < ift->getNumInterfaces(); ++i) {
+        NetworkInterface *ie = ift->getInterface(i);
+        if (!ie->isMulticast())
+            continue;
+        auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+        if (ipv4Data)
+            addrs.push_back(ipv4Data->getIPAddress());
+    }
+
+    Packet *pk = new Packet("Ldp-Address");
+    const auto& addrMsg = makeShared<LdpAddress>();
+    addrMsg->setChunkLength(ldpAddressMessageBytes(addrs.size()));
+    addrMsg->setType(ADDRESS);
+    addrMsg->setLsrId(rt->getRouterId());
+    addrMsg->setAddressFamily(1); // IPv4
+    addrMsg->setAddressesArraySize(addrs.size());
+    for (size_t i = 0; i < addrs.size(); ++i)
+        addrMsg->setAddresses(i, addrs[i]);
+    pk->insertAtBack(addrMsg);
+
+    sendToPeer(dest, pk);
+
+    EV_INFO << "Address message sent to " << dest << " listing " << addrs.size() << " interface address(es):";
+    for (auto& a : addrs)
+        EV_INFO << " " << a;
+    EV_INFO << endl;
+}
+
 void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
 {
     if (!isPeerOperational(dest)) {
@@ -759,6 +796,9 @@ void Ldp::removePeerBindings(Ipv4Address peerIP)
         myPeers[pi].sessionHoldTimer = nullptr;
         myPeers[pi].state = peer_info::NONEXISTENT;
         myPeers[pi].negotiatedKeepaliveTime = 0;
+        // stale until re-advertised by a fresh Address message once the
+        // replacement session reaches OPERATIONAL (see processKEEPALIVE)
+        myPeers[pi].peerAddresses.clear();
     }
 
     EV_INFO << "removing (stale) bindings from fecDown for peer=" << peerIP << endl;
@@ -1013,15 +1053,6 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
             EV_WARN << "ignoring an LDP HELLO received over TCP (Hellos arrive over UDP)" << endl;
             break;
 
-        case ADDRESS:
-            // Address messages are not modeled; RFC 5036 says ignore unsupported messages
-            EV_WARN << "ignoring an LDP ADDRESS message (not supported in this model)" << endl;
-            break;
-
-        case ADDRESS_WITHDRAW:
-            EV_WARN << "ignoring an LDP ADDRESS_WITHDRAW message (not supported in this model)" << endl;
-            break;
-
         case INITIALIZATION:
             processINITIALIZATION(ldpPacket);
             break;
@@ -1033,9 +1064,12 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
         case LABEL_MAPPING:
         case LABEL_REQUEST:
         case LABEL_WITHDRAW:
-        case LABEL_RELEASE: {
-            // RFC 5036 Section 3.5.3: label/binding-plane messages are only valid
-            // once the session has completed Initialization/KeepAlive negotiation
+        case LABEL_RELEASE:
+        case ADDRESS:
+        case ADDRESS_WITHDRAW: {
+            // RFC 5036 Section 3.5.3: label- and address-plane messages are only
+            // valid once the session has completed Initialization/KeepAlive
+            // negotiation
             Ipv4Address srcAddr = ldpPacket->getLsrId();
             if (!isPeerOperational(srcAddr)) {
                 EV_WARN << "rejecting LDP message type " << ldpPacket->getType() << " from " << srcAddr
@@ -1048,7 +1082,10 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
                 case LABEL_MAPPING: processLABEL_MAPPING(ldpPacket); break;
                 case LABEL_REQUEST: processLABEL_REQUEST(ldpPacket); break;
                 case LABEL_WITHDRAW: processLABEL_WITHDRAW(ldpPacket); break;
-                default: processLABEL_RELEASE(ldpPacket); break;
+                case LABEL_RELEASE: processLABEL_RELEASE(ldpPacket); break;
+                case ADDRESS: processADDRESS(ldpPacket); break;
+                case ADDRESS_WITHDRAW: processADDRESS_WITHDRAW(ldpPacket); break;
+                default: break; // unreachable given the outer case list
             }
             break;
         }
@@ -1141,8 +1178,11 @@ void Ldp::processKEEPALIVE(Ptr<const LdpPacket>& ldpPacket)
         scheduleAfter(myPeers[i].negotiatedKeepaliveTime, myPeers[i].sessionHoldTimer);
 
         // now (and only now) that the session is usable, drive the FEC/label
-        // machinery for this peer (RFC 5036 Section 3.5.3)
+        // machinery for this peer (RFC 5036 Section 3.5.3), and let the peer
+        // know which of our interface addresses it can use as a next hop
+        // (RFC 5036 Section 3.5.5/2.7)
         updateFecList(srcAddr);
+        sendAddress(srcAddr);
     }
     else if (myPeers[i].state == peer_info::OPERATIONAL) {
         // steady-state KeepAlive refresh; the session hold timer reset already
@@ -1155,56 +1195,49 @@ void Ldp::processKEEPALIVE(Ptr<const LdpPacket>& ldpPacket)
     }
 }
 
-Ipv4Address Ldp::locateNextHop(Ipv4Address dest)
+void Ldp::processADDRESS(Ptr<const LdpPacket>& ldpPacket)
 {
-    // Mapping L3 IP-host of next hop to L2 peer address.
+    const auto& addr = CHK(dynamicPtrCast<const LdpAddress>(ldpPacket));
+    Ipv4Address srcAddr = addr->getLsrId();
 
-    // RFC 3036 says the receiving LSR should use its routing table to determine its
-    // response, and answer with a No Route Notification unless the table has an entry
-    // that exactly matches the requested Prefix or Host Address. We can't reasonably
-    // expect the destination host to be explicitly in an LSR's routing table, though,
-    // so we use simple IP routing (destination-address lookup) instead. --Andras
-    NetworkInterface *ie = rt->getInterfaceForDestAddr(dest);
-    if (!ie)
-        return Ipv4Address(); // no route
+    int i = findPeer(srcAddr);
+    if (i == -1) {
+        EV_WARN << "Address message from unknown peer " << srcAddr << ", ignoring" << endl;
+        return;
+    }
 
-    return findPeerAddrFromInterface(ie->getInterfaceId());
+    size_t n = addr->getAddressesArraySize();
+    EV_INFO << "Address message received from " << srcAddr << " listing " << n << " interface address(es):";
+    for (size_t k = 0; k < n; ++k) {
+        Ipv4Address a = addr->getAddresses(k);
+        EV_INFO << " " << a;
+        if (std::find(myPeers[i].peerAddresses.begin(), myPeers[i].peerAddresses.end(), a) == myPeers[i].peerAddresses.end())
+            myPeers[i].peerAddresses.push_back(a);
+    }
+    EV_INFO << endl;
 }
 
-// FIXME To allow this to work, make sure there are entries of hosts for all peers
-
-Ipv4Address Ldp::findPeerAddrFromInterface(int interfaceId)
+void Ldp::processADDRESS_WITHDRAW(Ptr<const LdpPacket>& ldpPacket)
 {
-    size_t i = 0;
-    size_t k = 0;
-    NetworkInterface *ie = ift->findInterfaceById(interfaceId);
-    if (ie == nullptr)
-        return Ipv4Address();
+    const auto& addr = CHK(dynamicPtrCast<const LdpAddress>(ldpPacket));
+    Ipv4Address srcAddr = addr->getLsrId();
 
-    const Ipv4Route *anEntry;
-
-    for (i = 0; i < (size_t)rt->getNumRoutes(); i++) {
-        for (k = 0; k < myPeers.size(); k++) {
-            anEntry = rt->getRoute(i);
-            if (anEntry->getDestination() == myPeers[k].peerIP && anEntry->getInterface() == ie) {
-                return myPeers[k].peerIP;
-            }
-        }
+    int i = findPeer(srcAddr);
+    if (i == -1) {
+        EV_WARN << "Address Withdraw from unknown peer " << srcAddr << ", ignoring" << endl;
+        return;
     }
 
-    // Return any IP which has default route - not in routing table entries
-    for (i = 0; i < myPeers.size(); i++) {
-        for (k = 0; k < (size_t)rt->getNumRoutes(); k++) {
-            anEntry = rt->getRoute(k);
-            if (anEntry->getDestination() == myPeers[i].peerIP)
-                break;
-        }
-        if (k == (size_t)rt->getNumRoutes())
-            break;
+    size_t n = addr->getAddressesArraySize();
+    EV_INFO << "Address Withdraw received from " << srcAddr << " for " << n << " interface address(es):";
+    for (size_t k = 0; k < n; ++k) {
+        Ipv4Address a = addr->getAddresses(k);
+        EV_INFO << " " << a;
+        auto it = std::find(myPeers[i].peerAddresses.begin(), myPeers[i].peerAddresses.end(), a);
+        if (it != myPeers[i].peerAddresses.end())
+            myPeers[i].peerAddresses.erase(it);
     }
-
-    // return the peer's address if found, unspecified address otherwise
-    return i == myPeers.size() ? Ipv4Address() : myPeers[i].peerIP;
+    EV_INFO << endl;
 }
 
 // Pre-condition: myPeers vector is finalized
@@ -1214,6 +1247,28 @@ int Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
     if (rt->isLocalAddress(peerIP))
         return CHK(ift->findInterfaceByName("lo0"))->getInterfaceId();
 
+    // RFC 5036 Section 3.5.5: 'peerIP' here may be a peer's LSR-ID (the key
+    // myPeers is indexed by) or one of that peer's interface addresses learned
+    // via an Address message (peerAddresses) -- a FEC's next-hop address comes
+    // from the routing table's gateway field and need not equal the LSR-ID.
+    // The peer table -- populated from real Hello adjacencies and Address
+    // messages -- is the authoritative source of "which peer session owns
+    // this address"; consult it first instead of guessing through a generic
+    // routing-table lookup.
+    for (auto& p : myPeers) {
+        if (p.state != peer_info::OPERATIONAL)
+            continue;
+        bool isPeerAddr = p.peerIP == peerIP ||
+            std::find(p.peerAddresses.begin(), p.peerAddresses.end(), peerIP) != p.peerAddresses.end();
+        if (isPeerAddr) {
+            EV_DETAIL << "resolved " << peerIP << " to peer session " << p.peerIP
+                      << " via the LDP peer address table (interface " << p.linkInterface << ")" << endl;
+            return CHK(ift->findInterfaceByName(p.linkInterface.c_str()))->getInterfaceId();
+        }
+    }
+
+    // no OPERATIONAL peer owns this address (e.g. a FEC whose next hop is not
+    // yet a known LDP peer address): fall back to a generic routing-table lookup
     NetworkInterface *ie = rt->getInterfaceForDestAddr(peerIP);
     if (!ie)
         throw cRuntimeError("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());

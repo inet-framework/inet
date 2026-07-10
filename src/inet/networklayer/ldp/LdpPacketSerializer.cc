@@ -152,8 +152,6 @@ void LdpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
             break;
         case ADDRESS:
         case ADDRESS_WITHDRAW: {
-            // unwired (see Ldp.ned); still fully serializable so an in-flight instance
-            // never aborts a ~tND computation
             const auto& addr = staticPtrCast<const LdpAddress>(ldpPacket);
             size_t n = addr->getAddressesArraySize();
             // Address List TLV (RFC 5036 3.4.2)

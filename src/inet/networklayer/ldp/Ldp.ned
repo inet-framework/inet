@@ -48,17 +48,24 @@ import inet.applications.contract.IApp;
 // latter happens, the surviving Hello adjacency re-establishes the session on
 // the next Hello (see Ldp::processLDPHello).
 //
+// Address / Address Withdraw messages (RFC 5036 Section 3.5.5/2.7): once a
+// session reaches OPERATIONAL, each side advertises all of its LDP-capable
+// interface addresses to the other (~LdpAddress); the receiver stores them
+// per-peer and uses that table -- together with the peer's LSR-ID -- as the
+// authoritative "which peer session owns this address" map (see
+// Ldp::findInterfaceFromPeerAddr), instead of guessing through a routing-table
+// lookup. Explicitly NOT modeled: interface addresses added/removed while a
+// session is up are never re-advertised (no Address Withdraw is ever sent by
+// this module, only received/processed) -- the address table is only ever
+// (re)built at session establishment time; a config change requiring a
+// mid-session Address Withdraw is out of scope.
+//
 // Explicit non-features (RFC 5036 mechanisms not modeled by this module):
 // - No extended/targeted discovery, so only directly-connected peers
 //   (reachable via the basic UDP Hello discovery) can become LDP peers.
 // - Downstream-on-Demand with ordered control only; Downstream Unsolicited,
 //   independent control, and liberal retention are not implemented, and
 //   there is no parameter to select a mode.
-// - No Address / Address Withdraw message support: such messages received
-//   from a peer are logged and ignored rather than causing an error, and
-//   the mapping from a peer to its next-hop interface is instead derived
-//   from the local routing table. (~LdpAddress exists only as a wire-format
-//   representation.)
 // - No loop detection (hop count / path vector TLVs).
 // - No graceful restart, capabilities negotiation, or IGP synchronization.
 // - No Generalized TTL Security Mechanism (GTSM).
