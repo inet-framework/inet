@@ -1,0 +1,100 @@
+%description:
+Regression test for RSVP-TE Hello-based failure detection and permanent-path retry
+(RFC 2205 Section 3.1, RFC 3209 Section 4.7), using the shipped
+examples/mpls/testte_failure network (RSVPTE4) and its own default scenario as-is: LSR4
+(a transit hop on the tunnel's single, explicitly-routed path LSR1->LSR2->LSR4->LSR5) is
+shut down at t=2s and restarted at t=4s.
+
+Asserted, in order:
+  1. the shutdown fires;
+  2. LSR2 (LSR4's neighbor on the path) detects the dead adjacency via Hello timeout
+     (RsvpTe::processHELLO_TIMEOUT) and raises a PathErr for the affected PSB -- the
+     only caller of sendPathErrorMessage(..., PATH_ERR_NEXTHOP_FAILED) in this model,
+     so "error reached ingress router" below is necessarily that error code even
+     though RsvpTe.cc never prints the symbolic constant itself;
+  3. the PathErr reaches the ingress (LSR1), which tears down the failed path and,
+     because the session is marked <permanent>true</permanent>, schedules a retry;
+  4. the startup fires;
+  5. the retried path is (re-)established -- RsvpTe::commitResv's PATH_CREATED
+     notification fires again at the ingress.
+
+Deviation from a natural first guess: this network's session route is a fully
+explicit, hand-written ERO (LSR1_rsvp.xml lists every hop), not a CSPF-computed one,
+so the retry keeps re-trying the SAME route rather than routing around LSR4 -- it
+fails again once (observable as a second "error reached ingress router" before t=4s)
+and only succeeds once LSR4 itself restarts. That is expected behavior for an
+explicitly-routed session in this codebase (CSPF-based rerouting, if present at all,
+is a different workstream's feature), not a bug, so this test asserts recovery via
+LSR4's own restart rather than an alternate path.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.testte_failure.RSVPTE4
+sim-time-limit = 6s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.LSR*.rsvp.cmdenv-log-level = info
+**.scenarioManager.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host3"
+
+**.host3.numApps = 1
+**.host3.app[0].typename = "UdpSink"
+**.host3.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/host4.rt"
+**.host5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/host5.rt"
+
+**.LSR1.classifier.config = xmldoc("../../../../examples/mpls/testte_failure/LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("../../../../examples/mpls/testte_failure/LSR1_rsvp.xml")
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR5.rt"
+**.LSR6.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR6.rt"
+**.LSR7.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR7.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.*.hasStatus = true
+**.scenarioManager.script = xmldoc("../../../../examples/mpls/testte_failure/scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# ordered: LSR4 shuts down -> LSR2 detects the dead Hello adjacency -> the PathErr
+%# reaches the ingress -> LSR4 restarts -> the retried path is established again
+%contains-regex: stdout
+processing <shutdown> command\.\.\.
+.*
+hello timeout, considering .* failed
+.*
+error reached ingress router
+.*
+processing <startup> command\.\.\.
+.*
+Path successfully established
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

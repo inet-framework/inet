@@ -1,0 +1,97 @@
+%description:
+Regression test for RSVP-TE LSP setup and teardown (RFC 2205 Section 3.1), using the
+shipped examples/mpls/testte_reroute network (RSVPTE4) and its own default traffic/
+scenario configuration as-is (LSR1_rsvp.xml, LSR1_fec.xml, scenario.xml): this scenario
+already exercises exactly an add-session followed later by a del-session, rerouting
+tunnel 1 from LSR1->LSR3->LSR7->LSR5 (lspid 100) onto LSR1->LSR2->LSR4->LSR5 (lspid 101,
+added at t=2s) and then tearing down the original path (lspid 100, removed at t=2.4s).
+
+Asserted, in order:
+  1. the add-session command reaches the ingress (LSR1) and creates the new path;
+  2. the new LSP (lspid 101) is fully signaled end to end -- RsvpTe::commitResv's
+     PATH_CREATED notification fires only at the ingress once the label is actually
+     installed, and processPATH_NOTIFY logs it;
+  3. the del-session command removes the ingress's own path state block for the old
+     LSP (lspid 100) -- RsvpTe::removePSB's log line, straight from delSession();
+  4. the resulting PathTear message is observed and forwarded downstream by the next
+     LSR on that path (RsvpTe::processPathTearMsg).
+
+CAC-boundary/preemption behavior is already covered by rsvpte_cac.test and
+rsvpte_preempt_resverr.test and is not re-tested here.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.testte_reroute.RSVPTE4
+sim-time-limit = 3s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host3"
+
+**.host2.numApps = 1
+**.host2.app[0].typename = "UdpBasicApp"
+**.host2.app[0].localPort = 100
+**.host2.app[0].destPort = 100
+**.host2.app[0].messageLength = 128 bytes
+**.host2.app[0].sendInterval = 0.01s
+**.host2.app[0].destAddresses = "host4"
+
+**.host{3..4}.numApps = 1
+**.host{3..4}.app[0].typename = "UdpSink"
+**.host{3..4}.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host4.rt"
+**.host5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host5.rt"
+
+**.LSR1.classifier.config = xmldoc("../../../../examples/mpls/testte_reroute/LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("../../../../examples/mpls/testte_reroute/LSR1_rsvp.xml")
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR5.rt"
+**.LSR6.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR6.rt"
+**.LSR7.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR7.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.scenarioManager.script = xmldoc("../../../../examples/mpls/testte_reroute/scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# ordered: add-session reaches the ingress -> the new LSP is established -> del-session
+%# removes the ingress's PSB for the old LSP -> the downstream LSR receives and forwards
+%# the resulting PathTear
+%contains-regex: stdout
+adding new path into an existing session
+.*
+Path successfully established
+.*
+removing PSB 1 \(lspid 100\)
+.*
+Received PATH_TEAR
+.*
+forward teardown downstream
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

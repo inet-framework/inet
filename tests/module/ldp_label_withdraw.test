@@ -1,0 +1,96 @@
+%description:
+Regression test that LDP withdraws stale label bindings when a route disappears, and
+re-establishes new bindings once the network reconverges, in examples/mpls/ldp (network
+LDPTEST).
+
+The shipped ldp example's own scenario shuts LSR2 down at t=2s and restarts it at t=10s
+(examples/mpls/ldp/scenario.xml). LSR2 is a transit hub in the middle of the mesh, so its
+failure invalidates every FEC whose LDP-computed route went through it. This test asserts,
+in order:
+  1. the shutdown fires and the surviving LSRs detect the dead adjacency (Hello timeout,
+     after holdTime=6s of silence);
+  2. at least one of those now-unreachable FECs triggers an actual LDP Label Withdraw
+     message, received and processed by the upstream peer (Ldp::processLABEL_WITHDRAW);
+  3. LDP then reconverges and issues a fresh Label Mapping for the same FEC over the
+     network's redundant paths (LSR1-LSR4-LSR3 and LSR1-LSR5-LSR3 both bypass LSR2) --
+     this happens well before LSR2 itself comes back, which is expected: RsvpTe/Ldp use
+     TED to recompute routes and forwarding does not wait for the specific failed router
+     to return;
+  4. once LSR2 restarts, the session with it re-establishes and LDP issues a further Label
+     Mapping for a FEC reached through LSR2 again, showing the recovery path also works.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.ldp.LDPTEST
+sim-time-limit = 11s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.LSR*.ldp.cmdenv-log-level = info
+**.scenarioManager.cmdenv-log-level = info
+**.cmdenv-log-level = off
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host2"
+
+**.host3.numApps = 1
+**.host3.app[0].typename = "UdpBasicApp"
+**.host3.app[0].localPort = 100
+**.host3.app[0].destPort = 100
+**.host3.app[0].messageLength = 128 bytes
+**.host3.app[0].sendInterval = 0.01s
+**.host3.app[0].destAddresses = "host4"
+
+**.host{2..4}.numApps = 1
+**.host{2..4}.app[0].typename = "UdpSink"
+**.host{2..4}.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host4.rt"
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR5.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.LSR*.holdTime = 6s
+**.LSR*.helloInterval = 2s
+
+**.scenarioManager.script = xmldoc("../../../../examples/mpls/ldp/scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# ordered sequence: shutdown -> adjacency lost -> withdraw received -> re-mapping ->
+%# startup -> a further re-mapping once LSR2 rejoins
+%contains-regex: stdout
+processing <shutdown> command\.\.\.
+.*
+peer=10\.1\.2\.4 is gone, removing adjacency
+.*
+Mapping withdraw received for label=\d+ fec=addr=[\d.]+  length=\d+ from [\d.]+
+.*
+Label mapping label=\d+ received for fec=addr=[\d.]+  length=\d+ from [\d.]+
+.*
+processing <startup> command\.\.\.
+.*
+Label mapping label=\d+ received for fec=addr=10\.1\.2\.4  length=32 from 10\.1\.2\.4
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
