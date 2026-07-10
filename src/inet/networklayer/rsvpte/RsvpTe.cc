@@ -453,7 +453,7 @@ void RsvpTe::setupHello()
         // speaker learns its adjacencies from the IGP-TE. Set up a HELLO with each
         // directly-connected neighbour that actually runs RSVP (this skips plain
         // IP routers and end hosts, which would never answer a HELLO).
-        for (auto& link : tedmod->ted) {
+        for (auto& link : tedmod->getLinks()) {
             if (link.advrouter != routerId) // not one of our local links
                 continue;
             if (link.linkid.isUnspecified()) // neighbour has no router id (e.g. a host)
@@ -578,14 +578,14 @@ void RsvpTe::processHELLO_TIMEOUT(HelloTimeoutMsg *msg)
     // update TED and routing table
 
     unsigned int index = tedmod->linkIndex(routerId, peer);
-    tedmod->ted[index].state = false;
+    tedmod->setLinkState(index, false, false);
     announceLinkChange(index);
     tedmod->rebuildRoutingTable();
 
     // send PATH_ERROR for existing paths
 
     for (auto& elem : PSBList) {
-        if (elem.OutInterface == tedmod->ted[index].local)
+        if (elem.OutInterface == tedmod->getLink(index).local)
             sendPathErrorMessage(&(elem), PATH_ERR_NEXTHOP_FAILED);
     }
 }
@@ -696,10 +696,10 @@ bool RsvpTe::doCACCheck(const SessionObj& session, const SenderTspecObj& tspec, 
     EV_DETAIL << "CACCheck: link=" << OI
               << " requested=" << tspec.req_bandwidth
               << " shared=" << sharedBW
-              << " available (immediately)=" << tedmod->ted[k].UnResvBandwidth[7]
-              << " available (preemptible)=" << tedmod->ted[k].UnResvBandwidth[session.setupPri] << endl;
+              << " available (immediately)=" << tedmod->getLink(k).UnResvBandwidth[7]
+              << " available (preemptible)=" << tedmod->getLink(k).UnResvBandwidth[session.setupPri] << endl;
 
-    return tedmod->ted[k].UnResvBandwidth[session.setupPri] + sharedBW >= tspec.req_bandwidth;
+    return tedmod->getLink(k).UnResvBandwidth[session.setupPri] + sharedBW >= tspec.req_bandwidth;
 }
 
 void RsvpTe::refreshPath(PathStateBlock *psbEle)
@@ -929,7 +929,7 @@ void RsvpTe::preempt(Ipv4Address OI, int priority, double bandwidth)
                 << ", releasing " << elem.Flowspec_Object.req_bandwidth << ")" << endl;
 
         for (int i = priority; i < 8; i++)
-            tedmod->ted[index].UnResvBandwidth[i] += elem.Flowspec_Object.req_bandwidth;
+            tedmod->adjustUnresvBandwidth(index, i, elem.Flowspec_Object.req_bandwidth);
 
         bandwidth -= elem.Flowspec_Object.req_bandwidth;
         elem.Flowspec_Object.req_bandwidth = 0.0;
@@ -965,14 +965,14 @@ bool RsvpTe::allocateResource(Ipv4Address OI, const SessionObj& session, double 
     // Note: UnRB[7] <= UnRW[setupPri] <= UnRW[holdingPri] <= BW[0]
     // UnRW[7] is the actual BW left on the link
 
-    if (tedmod->ted[index].UnResvBandwidth[setupPri] < bandwidth)
+    if (tedmod->getLink(index).UnResvBandwidth[setupPri] < bandwidth)
         return false;
 
     for (int p = holdingPri; p < 8; p++) {
-        tedmod->ted[index].UnResvBandwidth[p] -= bandwidth;
+        tedmod->adjustUnresvBandwidth(index, p, -bandwidth);
 
-        if (tedmod->ted[index].UnResvBandwidth[p] < 0.0)
-            preempt(OI, p, -tedmod->ted[index].UnResvBandwidth[p]);
+        if (tedmod->getLink(index).UnResvBandwidth[p] < 0.0)
+            preempt(OI, p, -tedmod->getLink(index).UnResvBandwidth[p]);
     }
 
     // announce changes
@@ -1844,7 +1844,7 @@ void RsvpTe::processPathMsg(Packet *pk)
 
         if (tedmod->isLocalAddress(psb->OutInterface)) {
             unsigned int index = tedmod->linkIndex(psb->OutInterface);
-            if (!tedmod->ted[index].state) {
+            if (!tedmod->getLink(index).state) {
                 sendPathErrorMessage(psb, PATH_ERR_NEXTHOP_FAILED);
             }
         }
@@ -1937,8 +1937,8 @@ void RsvpTe::recoveryEvent(Ipv4Address peer)
     // called when peer's operation is restored
 
     unsigned int index = tedmod->linkIndex(routerId, peer);
-    bool rtmodified = !tedmod->ted[index].state;
-    tedmod->ted[index].state = true;
+    bool rtmodified = !tedmod->getLink(index).state;
+    tedmod->setLinkState(index, true, false);
     announceLinkChange(index);
 
     // rebuild routing table if link state changed
@@ -1947,7 +1947,7 @@ void RsvpTe::recoveryEvent(Ipv4Address peer)
 
     // refresh all paths towards this neighbour
     for (auto& elem : PSBList) {
-        if (elem.OutInterface != tedmod->ted[index].local)
+        if (elem.OutInterface != tedmod->getLink(index).local)
             continue;
 
         scheduleRefreshTimer(&(elem), 0.0);

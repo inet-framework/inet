@@ -594,7 +594,7 @@ void Ldp::processHelloTimeout(cMessage *msg)
     // update TED and routing table
 
     unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
-    tedmod->ted[index].state = false;
+    tedmod->setLinkState(index, false, false);
     announceLinkChange(index);
     tedmod->rebuildRoutingTable();
 }
@@ -666,9 +666,8 @@ void Ldp::processLDPHello(Packet *msg)
 
     // mark link as working if it was failed, and rebuild table
     unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerAddr);
-    if (!tedmod->ted[index].state) {
-        tedmod->ted[index].state = true;
-        tedmod->rebuildRoutingTable();
+    if (!tedmod->getLink(index).state) {
+        tedmod->setLinkState(index, true, true);
         announceLinkChange(index);
     }
 
