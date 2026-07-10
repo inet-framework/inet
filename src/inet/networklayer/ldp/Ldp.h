@@ -127,15 +127,15 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual Ipv4Address locateNextHop(Ipv4Address dest);
 
     /**
-     * This method maps the peerIP with the interface name in routing table.
+     * This method maps the peerIP with the interface id in routing table.
      * It is expected that for MPLS host, entries linked to MPLS peers are available.
      * In case no corresponding peerIP found, a peerIP (not deterministic)
      * will be returned.
      */
-    virtual Ipv4Address findPeerAddrFromInterface(std::string interfaceName);
+    virtual Ipv4Address findPeerAddrFromInterface(int interfaceId);
 
     // This method is the reserve of above method
-    std::string findInterfaceFromPeerAddr(Ipv4Address peerIP);
+    int findInterfaceFromPeerAddr(Ipv4Address peerIP);
 
     /** Utility: return peer's index in myPeers table, or -1 if not found */
     virtual int findPeer(Ipv4Address peerAddr);
@@ -214,7 +214,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     //@}
 
     // IIngressClassifier
-    virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, std::string& outInterface) override;
+    virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, int& outInterfaceId) override;
 
     // cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

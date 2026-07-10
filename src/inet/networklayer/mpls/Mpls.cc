@@ -74,19 +74,18 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     (void)ipv4Header; // unused variable
     LabelOpVector outLabel;
-    std::string outInterface; // FIXME set based on interfaceID
+    int outInterfaceId;
 
-    if (!pct->lookupLabel(packet, outLabel, outInterface)) {
+    if (!pct->lookupLabel(packet, outLabel, outInterfaceId)) {
         EV_WARN << "no mapping exists for this packet" << endl;
         return false;
     }
-    int outInterfaceId = CHK(ift->findInterfaceByName(outInterface.c_str()))->getInterfaceId();
 
     ASSERT(outLabel.size() > 0);
 
     doStackOps(packet, outLabel);
 
-    EV_INFO << "forwarding packet to " << outInterface << endl;
+    EV_INFO << "forwarding packet to " << ift->getInterfaceById(outInterfaceId)->getInterfaceName() << endl;
 
     packet->trim();
     packet->removeTagIfPresent<DispatchProtocolReq>();
@@ -195,16 +194,14 @@ void Mpls::processPacketFromL2(Packet *packet)
 void Mpls::processMplsPacketFromL2(Packet *packet)
 {
     int incomingInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
-    NetworkInterface *ie = ift->getInterfaceById(incomingInterfaceId);
-    std::string incomingInterfaceName = ie->getInterfaceName();
     const auto& mplsHeader = packet->peekAtFront<MplsHeader>();
 
-    EV_INFO << "Received " << packet << " from L2, label=" << mplsHeader->getLabel() << " inInterface=" << incomingInterfaceName << endl;
+    EV_INFO << "Received " << packet << " from L2, label=" << mplsHeader->getLabel() << " inInterface=" << ift->getInterfaceById(incomingInterfaceId)->getInterfaceName() << endl;
 
     LabelOpVector outLabel;
-    std::string outInterface;
+    int outInterfaceId;
 
-    bool found = lt->resolveLabel(incomingInterfaceName, mplsHeader->getLabel(), outLabel, outInterface);
+    bool found = lt->resolveLabel(incomingInterfaceId, mplsHeader->getLabel(), outLabel, outInterfaceId);
     if (!found) {
         EV_INFO << "discarding packet, incoming label not resolved" << endl;
 
@@ -212,13 +209,13 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         return;
     }
 
-    NetworkInterface *outgoingInterface = CHK(ift->findInterfaceByName(outInterface.c_str()));
+    NetworkInterface *outgoingInterface = ift->getInterfaceById(outInterfaceId);
 
     doStackOps(packet, outLabel);
 
     if ((packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId())) {
         // forward labeled packet
-        EV_INFO << "forwarding packet to " << outInterface << endl;
+        EV_INFO << "forwarding packet to " << outgoingInterface->getInterfaceName() << endl;
 
 //        ASSERT(labelIf[outgoingPort]);
         packet->removeTagIfPresent<DispatchProtocolReq>();

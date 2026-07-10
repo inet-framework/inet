@@ -352,8 +352,8 @@ void Ldp::updateFecListEntry(Ldp::fec_t oldItem)
             continue;
         }
 
-        std::string inInterface = findInterfaceFromPeerAddr(uit->peer);
-        std::string outInterface = findInterfaceFromPeerAddr(oldItem.nextHop);
+        int inInterface = findInterfaceFromPeerAddr(uit->peer);
+        int outInterface = findInterfaceFromPeerAddr(oldItem.nextHop);
         if (ER) {
             // we are egress, that's easy:
             LabelOpVector outLabel = LibTable::popLabel();
@@ -871,17 +871,16 @@ Ipv4Address Ldp::locateNextHop(Ipv4Address dest)
     if (!ie)
         return Ipv4Address(); // no route
 
-    std::string iName = ie->getInterfaceName(); // FIXME why use name for lookup?
-    return findPeerAddrFromInterface(iName);
+    return findPeerAddrFromInterface(ie->getInterfaceId());
 }
 
 // FIXME To allow this to work, make sure there are entries of hosts for all peers
 
-Ipv4Address Ldp::findPeerAddrFromInterface(std::string interfaceName)
+Ipv4Address Ldp::findPeerAddrFromInterface(int interfaceId)
 {
     size_t i = 0;
     size_t k = 0;
-    NetworkInterface *ie = ift->findInterfaceByName(interfaceName.c_str());
+    NetworkInterface *ie = ift->findInterfaceById(interfaceId);
     if (ie == nullptr)
         return Ipv4Address();
 
@@ -913,7 +912,7 @@ Ipv4Address Ldp::findPeerAddrFromInterface(std::string interfaceName)
 }
 
 // Pre-condition: myPeers vector is finalized
-std::string Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
+int Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
 {
 /*
     int i;
@@ -924,16 +923,16 @@ std::string Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
     }
     return string("X");
  */
-    // Rely on port index to find the interface name
+    // Rely on port index to find the interface
 
     // this function is a misnomer, we must recognize our own address too
     if (rt->isLocalAddress(peerIP))
-        return "lo0";
+        return CHK(ift->findInterfaceByName("lo0"))->getInterfaceId();
 
     NetworkInterface *ie = rt->getInterfaceForDestAddr(peerIP);
     if (!ie)
         throw cRuntimeError("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
-    return ie->getInterfaceName();
+    return ie->getInterfaceId();
 }
 
 //bool Ldp::matches(const FecTlv& a, const FecTlv& b)
@@ -1110,8 +1109,8 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
         uit = fecUp.end() - 1;
     }
 
-    std::string inInterface = findInterfaceFromPeerAddr(srcAddr);
-    std::string outInterface = findInterfaceFromPeerAddr(it->nextHop);
+    int inInterface = findInterfaceFromPeerAddr(srcAddr);
+    int outInterface = findInterfaceFromPeerAddr(it->nextHop);
 
     if (ER) {
         // we are egress, that's easy:
@@ -1274,8 +1273,8 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
 
         EV_DETAIL << "there's pending request for this FEC from " << pit->peer << ", sending mapping" << endl;
 
-        std::string inInterface = findInterfaceFromPeerAddr(pit->peer);
-        std::string outInterface = findInterfaceFromPeerAddr(fromIP);
+        int inInterface = findInterfaceFromPeerAddr(pit->peer);
+        int outInterface = findInterfaceFromPeerAddr(fromIP);
         LabelOpVector outLabel = LibTable::swapLabel(label);
 
         fec_bind_t newItem;
@@ -1321,7 +1320,7 @@ TcpSocket *Ldp::getPeerSocket(Ipv4Address peerAddr)
     return sock;
 }
 
-bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface)
+bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, int& outInterfaceId)
 {
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     Ipv4Address destAddr = ipv4Header->getDestAddress();
@@ -1357,8 +1356,8 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
         auto dit = findFecEntry(fecDown, elem.fecid, elem.nextHop);
         if (dit != fecDown.end()) {
             outLabel = LibTable::pushLabel(dit->label);
-            outInterface = findInterfaceFromPeerAddr(elem.nextHop);
-            EV_DETAIL << "mapping found, outLabel=" << outLabel << ", outInterface=" << outInterface << endl;
+            outInterfaceId = findInterfaceFromPeerAddr(elem.nextHop);
+            EV_DETAIL << "mapping found, outLabel=" << outLabel << ", outInterface=" << outInterfaceId << endl;
             return true;
         }
         else {

@@ -29,13 +29,13 @@ class INET_API IIngressClassifier
 
     /**
      * The packet argument is an input parameter, the rest (outLabel,
-     * outInterface) are output parameters only.
+     * outInterfaceId) are output parameters only.
      *
      * In subclasses, this function should be implemented to determine the forwarding
      * equivalence class for the Ipv4 datagram passed, and map it to an outLabel
-     * and outInterface.
+     * and outInterfaceId.
      */
-    virtual bool lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface) = 0;
+    virtual bool lookupLabel(Packet *packet, LabelOpVector& outLabel, int& outInterfaceId) = 0;
 };
 
 } // namespace inet
