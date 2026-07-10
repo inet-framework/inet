@@ -17,7 +17,6 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/mpls/MplsPacket_m.h"
@@ -30,12 +29,8 @@ namespace inet {
 class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
   protected:
-    simtime_t delay1;
     long numSent = 0;
     long numReceived = 0;
-
-    // no longer used, see comment in intialize
-//    std::vector<bool> labelIf;
 
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<IInterfaceTable> ift;

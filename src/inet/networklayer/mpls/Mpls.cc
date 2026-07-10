@@ -36,7 +36,6 @@ void Mpls::initialize(int stage)
         ift.reference(this, "interfaceTableModule", true);
         pct.reference(this, "classifierModule", true);
 
-        WATCH(delay1);
         WATCH(numReceived);
         WATCH(numSent);
     }
