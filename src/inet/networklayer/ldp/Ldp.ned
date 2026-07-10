@@ -21,7 +21,7 @@ import inet.applications.contract.IApp;
 // Operations
 //
 // All LDP message types are subclassed from ~LdpPacket, and include
-// ~LdpHello, ~LdpNotify, ~LdpLabelRequest, ~LdpIni and ~LdpAddress.
+// ~LdpHello, ~LdpNotify, ~LdpLabelRequest, ~LdpIni, ~LdpKeepAlive and ~LdpAddress.
 //
 // Message processing in the ~Ldp module is explained in
 // <a href="ldp-processing.html">LDP Message Processing</a>
@@ -31,10 +31,15 @@ import inet.applications.contract.IApp;
 // computed for each outgoing packet is simply the 10-byte PDU header plus the
 // length of that single message (its 8-byte message header plus its TLVs).
 //
+// Session establishment (RFC 5036 Section 2.5.2-2.5.5): once the TCP connection
+// is established, the active/passive LSRs exchange Initialization and KeepAlive
+// messages (~LdpIni, ~LdpKeepAlive) to negotiate the session KeepAlive Time
+// (min of both proposals); the session is usable for label/address messages
+// only once this handshake completes (state OPERATIONAL). KeepAlive-based
+// session liveness (periodic sends, hold-timer expiry) is not yet implemented
+// by this commit -- only the initial 4-way handshake is.
+//
 // Explicit non-features (RFC 5036 mechanisms not modeled by this module):
-// - No session establishment FSM: a successful TCP connection stands in for
-//   the Initialization/KeepAlive exchange; there is no session parameter
-//   negotiation. (~LdpIni exists only as a wire-format representation.)
 // - No extended/targeted discovery, so only directly-connected peers
 //   (reachable via the basic UDP Hello discovery) can become LDP peers.
 // - Downstream-on-Demand with ordered control only; Downstream Unsolicited,
@@ -63,6 +68,7 @@ simple Ldp extends SimpleModule like IApp
         string tedModule;
         double holdTime @unit(s) = default(15s);
         double helloInterval @unit(s) = default(5s);
+        double keepaliveTime @unit(s) = default(30s); // Session KeepAlive Time we propose during Initialization (RFC 5036 Section 3.5.3); RFC 5036 mandates no specific default, 30s is the conventional real-world value
         bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a FEC
         @display("i=block/control");
         @signal[sessionUp](type=long); // peer's router id (as a 32-bit integer) when an LDP session comes up

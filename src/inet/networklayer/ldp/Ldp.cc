@@ -54,11 +54,24 @@ std::ostream& operator<<(std::ostream& os, const Ldp::PendingRequest& r)
     return os;
 }
 
+static const char *ldpSessionStateName(Ldp::peer_info::SessionState state)
+{
+    switch (state) {
+        case Ldp::peer_info::NONEXISTENT: return "NONEXISTENT";
+        case Ldp::peer_info::INITIALIZED: return "INITIALIZED";
+        case Ldp::peer_info::OPENSENT: return "OPENSENT";
+        case Ldp::peer_info::OPENREC: return "OPENREC";
+        case Ldp::peer_info::OPERATIONAL: return "OPERATIONAL";
+        default: return "???";
+    }
+}
+
 std::ostream& operator<<(std::ostream& os, const Ldp::peer_info& p)
 {
     os << "peerIP=" << p.peerIP << "  interface=" << p.linkInterface
        << "  activeRole=" << (p.activeRole ? "true" : "false")
-       << "  socket=" << (p.socket ? TcpSocket::stateName(p.socket->getState()) : "nullptr");
+       << "  socket=" << (p.socket ? TcpSocket::stateName(p.socket->getState()) : "nullptr")
+       << "  state=" << ldpSessionStateName(p.state);
     return os;
 }
 
@@ -84,8 +97,11 @@ Ldp::Ldp()
 
 Ldp::~Ldp()
 {
-    for (auto& elem : myPeers)
+    for (auto& elem : myPeers) {
         cancelAndDelete(elem.timeout);
+        cancelAndDelete(elem.keepAliveSendTimer);
+        cancelAndDelete(elem.sessionHoldTimer);
+    }
 
     cancelAndDelete(sendHelloMsg);
     for (auto *m : retryMsgs)
@@ -106,6 +122,7 @@ void Ldp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         holdTime = par("holdTime");
         helloInterval = par("helloInterval");
+        keepaliveTime = par("keepaliveTime");
         advertiseImplicitNull = par("advertiseImplicitNull");
 
         ift.reference(this, "interfaceTableModule", true);
@@ -301,8 +318,11 @@ void Ldp::handleCrashOperation(LifecycleOperation *operation)
 
 void Ldp::clearState()
 {
-    for (auto& elem : myPeers)
+    for (auto& elem : myPeers) {
         cancelAndDelete(elem.timeout);
+        cancelAndDelete(elem.keepAliveSendTimer);
+        cancelAndDelete(elem.sessionHoldTimer);
+    }
     myPeers.clear();
     cancelEvent(sendHelloMsg);
     for (auto *m : retryMsgs)
@@ -322,8 +342,52 @@ void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)
     getPeerSocket(dest)->send(msg);
 }
 
+bool Ldp::isPeerOperational(Ipv4Address peerAddr)
+{
+    int i = findPeer(peerAddr);
+    return i != -1 && myPeers[i].state == peer_info::OPERATIONAL;
+}
+
+void Ldp::sendInit(Ipv4Address dest)
+{
+    Packet *pk = new Packet("Ldp-Init");
+    const auto& ini = makeShared<LdpIni>();
+    ini->setChunkLength(LDP_INITIALIZATION_BYTES);
+    ini->setType(INITIALIZATION);
+    ini->setLsrId(rt->getRouterId());
+    ini->setKeepAliveTime((uint16_t)keepaliveTime.inUnit(SIMTIME_S));
+    // A-bit (advertisement discipline: DU=0/DoD=1 per this model's convention) is
+    // hardcoded to 0 (DU) here; it gets wired to the real distributionMode param
+    // once that param exists (see Ldp.ned; a later commit in this workstream)
+    ini->setAbit(false);
+    ini->setDbit(false);
+    ini->setReceiverLsrId(dest);
+    pk->insertAtBack(ini);
+
+    sendToPeer(dest, pk);
+    EV_INFO << "Init sent to " << dest << " (keepAliveTime=" << keepaliveTime << ")\n";
+}
+
+void Ldp::sendKeepAlive(Ipv4Address dest)
+{
+    Packet *pk = new Packet("Ldp-KeepAlive");
+    const auto& ka = makeShared<LdpKeepAlive>();
+    ka->setChunkLength(LDP_KEEPALIVE_BYTES);
+    ka->setType(KEEP_ALIVE);
+    ka->setLsrId(rt->getRouterId());
+    pk->insertAtBack(ka);
+
+    sendToPeer(dest, pk);
+    EV_INFO << "KeepAlive sent to " << dest << "\n";
+}
+
 void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
 {
+    if (!isPeerOperational(dest)) {
+        EV_WARN << "not sending Label Request to " << dest << ": session is not OPERATIONAL\n";
+        return;
+    }
+
     Packet *pk = new Packet("Lb-Req");
     const auto& requestMsg = makeShared<LdpLabelRequest>();
     requestMsg->setChunkLength(LDP_LABEL_REQUEST_BYTES);
@@ -582,6 +646,8 @@ void Ldp::processHelloTimeout(cMessage *msg)
 
     ASSERT(!myPeers[i].timeout->isScheduled());
     delete myPeers[i].timeout;
+    cancelAndDelete(myPeers[i].keepAliveSendTimer);
+    cancelAndDelete(myPeers[i].sessionHoldTimer);
     if (myPeers[i].socket) {
         socketMap.removeSocket(myPeers[i].socket);
         myPeers[i].socket->abort(); // should we only close?
@@ -599,6 +665,21 @@ void Ldp::processHelloTimeout(cMessage *msg)
 
 void Ldp::removePeerBindings(Ipv4Address peerIP)
 {
+    // reset the session FSM: this is the common teardown point reached whenever a
+    // session dies (handleTcpConnectionDown, a stale-session replacement in
+    // socketAvailable, or a dead Hello adjacency in processHelloTimeout -- in the
+    // last case the peer_info entry has already been erased, so findPeer() below
+    // legitimately finds nothing and there is nothing left to reset)
+    int pi = findPeer(peerIP);
+    if (pi != -1) {
+        cancelAndDelete(myPeers[pi].keepAliveSendTimer);
+        myPeers[pi].keepAliveSendTimer = nullptr;
+        cancelAndDelete(myPeers[pi].sessionHoldTimer);
+        myPeers[pi].sessionHoldTimer = nullptr;
+        myPeers[pi].state = peer_info::NONEXISTENT;
+        myPeers[pi].negotiatedKeepaliveTime = 0;
+    }
+
     EV_INFO << "removing (stale) bindings from fecDown for peer=" << peerIP << endl;
 
     for (auto dit = fecDown.begin(); dit != fecDown.end();) {
@@ -723,12 +804,19 @@ void Ldp::socketEstablished(TcpSocket *socket)
         return;
     }
     EV_INFO << "TCP connection established with peer " << myPeers[i].peerIP << "\n";
-    emit(sessionUpSignal, (long)myPeers[i].peerIP.getInt());
 
-    // we must update all entries with nextHop == peerIP
-    updateFecList(myPeers[i].peerIP);
+    // RFC 5036 Section 2.5.3: the transport connection alone does not make the
+    // session usable -- Initialization/KeepAlive negotiation must complete first
+    // (see processINITIALIZATION/processKEEPALIVE). sessionUp and updateFecList()
+    // are deferred to that OPERATIONAL transition.
+    myPeers[i].state = peer_info::INITIALIZED;
 
-    // FIXME start LDP session setup (if we're on the active side?)
+    if (myPeers[i].activeRole) {
+        // the LSR with the greater transport address plays the active role and
+        // initiates parameter negotiation (RFC 5036 Section 2.5.2/2.5.3)
+        sendInit(myPeers[i].peerIP);
+        myPeers[i].state = peer_info::OPENSENT;
+    }
 }
 
 void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInfo)
@@ -797,8 +885,11 @@ void Ldp::handleTcpConnectionDown(TcpSocket *socket)
     if (i != -1 && myPeers[i].socket == socket) {
         Ipv4Address peerIP = myPeers[i].peerIP;
         myPeers[i].socket = nullptr;
-        emit(sessionDownSignal, (long)peerIP.getInt());
-        removePeerBindings(peerIP);
+        // sessionDown mirrors sessionUp: only meaningful if the session ever
+        // actually reached OPERATIONAL (RFC 5036 session, not just a TCP connection)
+        if (myPeers[i].state == peer_info::OPERATIONAL)
+            emit(sessionDownSignal, (long)peerIP.getInt());
+        removePeerBindings(peerIP); // also resets the session FSM state and timers
     }
     // defer the delete: we are called from inside socket->processMessage(), which
     // still touches the socket after this callback returns
@@ -841,21 +932,36 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
             EV_WARN << "ignoring an LDP ADDRESS_WITHDRAW message (not supported in this model)" << endl;
             break;
 
+        case INITIALIZATION:
+            processINITIALIZATION(ldpPacket);
+            break;
+
+        case KEEP_ALIVE:
+            processKEEPALIVE(ldpPacket);
+            break;
+
         case LABEL_MAPPING:
-            processLABEL_MAPPING(ldpPacket);
-            break;
-
         case LABEL_REQUEST:
-            processLABEL_REQUEST(ldpPacket);
-            break;
-
         case LABEL_WITHDRAW:
-            processLABEL_WITHDRAW(ldpPacket);
+        case LABEL_RELEASE: {
+            // RFC 5036 Section 3.5.3: label/binding-plane messages are only valid
+            // once the session has completed Initialization/KeepAlive negotiation
+            Ipv4Address srcAddr = ldpPacket->getLsrId();
+            if (!isPeerOperational(srcAddr)) {
+                EV_WARN << "rejecting LDP message type " << ldpPacket->getType() << " from " << srcAddr
+                        << ": session is not OPERATIONAL yet" << endl;
+                if (findPeerSocket(srcAddr) != nullptr)
+                    sendNotify(SHUTDOWN, srcAddr, Ipv4Address(), 0);
+                break;
+            }
+            switch (ldpPacket->getType()) {
+                case LABEL_MAPPING: processLABEL_MAPPING(ldpPacket); break;
+                case LABEL_REQUEST: processLABEL_REQUEST(ldpPacket); break;
+                case LABEL_WITHDRAW: processLABEL_WITHDRAW(ldpPacket); break;
+                default: processLABEL_RELEASE(ldpPacket); break;
+            }
             break;
-
-        case LABEL_RELEASE:
-            processLABEL_RELEASE(ldpPacket);
-            break;
+        }
 
         case NOTIFICATION:
             processNOTIFICATION(ldpPacket, /*rescheduled*/ false);
@@ -865,6 +971,87 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
             // an unrecognized message type from a peer must not abort the simulation
             EV_WARN << "ignoring an unrecognized LDP message of type " << ldpPacket->getType() << endl;
             break;
+    }
+}
+
+void Ldp::processINITIALIZATION(Ptr<const LdpPacket>& ldpPacket)
+{
+    const auto& ini = CHK(dynamicPtrCast<const LdpIni>(ldpPacket));
+    Ipv4Address srcAddr = ini->getLsrId();
+    uint16_t peerKeepAliveTime = ini->getKeepAliveTime();
+
+    int i = findPeer(srcAddr);
+    if (i == -1) {
+        EV_WARN << "Init received from unknown peer " << srcAddr << ", ignoring" << endl;
+        return;
+    }
+
+    EV_INFO << "Init received from " << srcAddr << " (peer keepAliveTime=" << peerKeepAliveTime << "s)" << endl;
+
+    if (myPeers[i].state != peer_info::INITIALIZED && myPeers[i].state != peer_info::OPENSENT) {
+        // a duplicate/out-of-sequence Init is a peer/protocol anomaly, not a model error
+        EV_WARN << "unexpected Init from " << srcAddr << " in session state " << ldpSessionStateName(myPeers[i].state)
+                << ", ignoring" << endl;
+        return;
+    }
+
+    if (peerKeepAliveTime == 0) {
+        // RFC 5036 Section 3.5.1.2.2: unacceptable session parameter -> reject and close
+        EV_WARN << "peer " << srcAddr << " proposed an unacceptable KeepAlive Time (0), rejecting session" << endl;
+        sendNotify(SESSION_REJECTED_BAD_KEEPALIVE_TIME, srcAddr, Ipv4Address(), 0);
+        TcpSocket *sock = findPeerSocket(srcAddr);
+        if (sock)
+            sock->close();
+        return;
+    }
+
+    myPeers[i].negotiatedKeepaliveTime = std::min(keepaliveTime, SimTime(peerKeepAliveTime, SIMTIME_S));
+
+    if (myPeers[i].state == peer_info::INITIALIZED) {
+        // passive side: this is the peer's opening move -- reply with our own
+        // Init, then immediately KeepAlive (RFC 5036 Section 2.5.3)
+        sendInit(srcAddr);
+        sendKeepAlive(srcAddr);
+    }
+    else {
+        // active side (OPENSENT): we already sent our Init; peer's Init is
+        // acceptable, so acknowledge with a KeepAlive
+        sendKeepAlive(srcAddr);
+    }
+    myPeers[i].state = peer_info::OPENREC;
+    EV_INFO << "session with " << srcAddr << " negotiated keepAliveTime=" << myPeers[i].negotiatedKeepaliveTime
+            << ", state OPENREC" << endl;
+}
+
+void Ldp::processKEEPALIVE(Ptr<const LdpPacket>& ldpPacket)
+{
+    Ipv4Address srcAddr = ldpPacket->getLsrId();
+
+    int i = findPeer(srcAddr);
+    if (i == -1) {
+        EV_WARN << "KeepAlive received from unknown peer " << srcAddr << ", ignoring" << endl;
+        return;
+    }
+
+    EV_INFO << "KeepAlive received from " << srcAddr << endl;
+
+    if (myPeers[i].state == peer_info::OPENREC) {
+        myPeers[i].state = peer_info::OPERATIONAL;
+        EV_INFO << "LDP session with " << srcAddr << " is now OPERATIONAL" << endl;
+        emit(sessionUpSignal, (long)srcAddr.getInt());
+
+        // now (and only now) that the session is usable, drive the FEC/label
+        // machinery for this peer (RFC 5036 Section 3.5.3)
+        updateFecList(srcAddr);
+    }
+    else if (myPeers[i].state == peer_info::OPERATIONAL) {
+        // steady-state KeepAlive refresh; resetting the session hold timer on it
+        // is wired up by a later commit (KeepAlive-based session liveness)
+        EV_DETAIL << "KeepAlive refresh from " << srcAddr << " (session already OPERATIONAL)" << endl;
+    }
+    else {
+        EV_WARN << "unexpected KeepAlive from " << srcAddr << " in session state " << ldpSessionStateName(myPeers[i].state)
+                << ", ignoring" << endl;
     }
 }
 
@@ -960,7 +1147,7 @@ void Ldp::sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length)
     const auto& lnMessage = makeShared<LdpNotify>();
     lnMessage->setChunkLength(LDP_NOTIFICATION_BYTES);
     lnMessage->setType(NOTIFICATION);
-    lnMessage->setStatus(NO_ROUTE);
+    lnMessage->setStatus(status);
     lnMessage->setLsrId(rt->getRouterId());
 
     FecTlv fec;
@@ -975,6 +1162,11 @@ void Ldp::sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length)
 
 void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, int length)
 {
+    if (!isPeerOperational(dest)) {
+        EV_WARN << "not sending LDP label message (type " << type << ") to " << dest << ": session is not OPERATIONAL\n";
+        return;
+    }
+
     // Send LABEL MAPPING downstream
     Packet *packet = new Packet("Lb-Mapping");
     const auto& lmMessage = makeShared<LdpLabelMapping>();
@@ -1231,6 +1423,12 @@ void Ldp::processLABEL_WITHDRAW(Ptr<const LdpPacket>& ldpPacket)
     EV_INFO << "sending back relase message" << endl;
     auto reply = makeShared<LdpLabelMapping>(*ldpLabelMapping.get());
     reply->setType(LABEL_RELEASE);
+    // pre-existing (not this commit's scope): 'reply' is a copy of the incoming
+    // withdraw and so still carries ITS sender's lsrId, not our own -- the
+    // receiving peer's getLsrId() therefore identifies the wrong LSR for this
+    // message. Harmless today (routing uses fromIP via sendToPeer, and the
+    // mismatch only degrades this reply's own peer-identification on the far
+    // end to a silent no-op), but worth a follow-up: reply->setLsrId(rt->getRouterId()).
     auto pk = new Packet("LDP_RELEASE", reply);
 //    pk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ldp) //FIXME
     // send msg to peer over TCP

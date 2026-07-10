@@ -21,6 +21,7 @@ Register_Serializer(LdpLabelMapping, LdpPacketSerializer);
 Register_Serializer(LdpLabelRequest, LdpPacketSerializer);
 Register_Serializer(LdpNotify, LdpPacketSerializer);
 Register_Serializer(LdpIni, LdpPacketSerializer);
+Register_Serializer(LdpKeepAlive, LdpPacketSerializer);
 Register_Serializer(LdpAddress, LdpPacketSerializer);
 
 // RFC 5036 Section 3.5.3: PDU common header = Version(2) + PDU Length(2) + LSR-Id(4) + Label Space(2)
@@ -146,6 +147,9 @@ void LdpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
             stream.writeUint16Be(ini->getReceiverLabelSpace());
             break;
         }
+        case KEEP_ALIVE:
+            // no message parameters (RFC 5036 Section 3.5.4)
+            break;
         case ADDRESS:
         case ADDRESS_WITHDRAW: {
             // unwired (see Ldp.ned); still fully serializable so an in-flight instance
@@ -239,6 +243,11 @@ const Ptr<Chunk> LdpPacketSerializer::deserialize(MemoryInputStream& stream) con
             ini->setReceiverLsrId(stream.readIpv4Address());
             ini->setReceiverLabelSpace(stream.readUint16Be());
             ldpPacket = ini;
+            break;
+        }
+        case KEEP_ALIVE: {
+            // no message parameters (RFC 5036 Section 3.5.4)
+            ldpPacket = makeShared<LdpKeepAlive>();
             break;
         }
         case ADDRESS:
