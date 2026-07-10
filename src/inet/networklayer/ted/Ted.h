@@ -95,17 +95,24 @@ class INET_API Ted : public RoutingProtocolBase
     // reference into the link database.
     virtual void adjustUnresvBandwidth(int index, int priority, double delta);
 
-    // Flips the up/down state of link `index` and, unless the caller opts
-    // out via `rebuild=false` (used where the caller needs to interleave
-    // its own announce-signal emission between the flip and the rebuild,
-    // to preserve today's per-call-site event ordering), rebuilds the
-    // routing table. This is a mechanical extraction of what today's call
-    // sites in Ldp/RsvpTe do inline -- no behavior change yet; a later
-    // commit moves the announce-signal emission in here too and makes this
-    // the single owner of link-liveness changes.
-    virtual void setLinkState(int index, bool up, bool rebuild = true);
+    // Single owner of link-liveness changes: no-ops if the link is already
+    // in the requested state (so redundant reports from Ldp/RsvpTe -- e.g. a
+    // Hello session re-establishing without the link ever having gone down
+    // in the TED's eyes -- don't cause spurious rebuilds/floods); otherwise
+    // flips the state and, in this canonical order, (1) rebuilds the routing
+    // table (respecting installRoutes) and (2) announces the change via
+    // tedChangedSignal so LinkStateRouting can flood it. Ldp/RsvpTe used to
+    // each perform this flip+rebuild+announce choreography inline (with
+    // per-call-site ordering that differed from each other); now they just
+    // report the observed liveness change and Ted owns what happens next.
+    virtual void setLinkState(int index, bool up);
 
     virtual void rebuildRoutingTable();
+
+    // Emits tedChangedSignal for link `index` without touching its state --
+    // used directly by RsvpTe for bandwidth-only changes (CAC accounting),
+    // which aren't a liveness flip and so don't go through setLinkState().
+    virtual void announceLinkChange(int index);
 
     // Escape hatch for LinkStateRouting's flood-merge/topology-discovery
     // logic: checkLinkValidity() hands back a pointer into the internal

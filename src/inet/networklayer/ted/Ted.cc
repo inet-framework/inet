@@ -461,11 +461,22 @@ void Ted::adjustUnresvBandwidth(int index, int priority, double delta)
     ted[index].UnResvBandwidth[priority] += delta;
 }
 
-void Ted::setLinkState(int index, bool up, bool rebuild)
+void Ted::setLinkState(int index, bool up)
 {
+    if (ted[index].state == up)
+        return; // nothing actually changed; don't rebuild/announce redundantly
+
     ted[index].state = up;
-    if (rebuild)
-        rebuildRoutingTable();
+    rebuildRoutingTable();
+    announceLinkChange(index);
+}
+
+void Ted::announceLinkChange(int index)
+{
+    TedChangeInfo d;
+    d.setTedLinkIndicesArraySize(1);
+    d.setTedLinkIndices(0, index);
+    emit(tedChangedSignal, &d);
 }
 
 Ipv4AddressVector Ted::getLocalAddress()

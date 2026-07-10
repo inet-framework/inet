@@ -124,7 +124,6 @@ simple RsvpTe extends SimpleModule
         double retryInterval @unit(s) = default(1s); // delay before retrying a permanent path whose ingress PSB couldn't be created (model-specific, not an RFC 2205 value)
         bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a tunnel
         @display("i=block/control");
-        @signal[tedChanged](type=inet::TedChangeInfo);
         @signal[lspEstablished](type=simtime_t); // LSP setup latency, emitted at the ingress when commitResv first installs the ingress label for a session
         @signal[psbCount](type=long); // current PSBList size, emitted whenever a PSB is created or removed
         @signal[rsbCount](type=long); // current RSBList size, emitted whenever an RSB is created or removed

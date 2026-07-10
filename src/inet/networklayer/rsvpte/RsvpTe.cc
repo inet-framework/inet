@@ -575,12 +575,11 @@ void RsvpTe::processHELLO_TIMEOUT(HelloTimeoutMsg *msg)
     ASSERT(!hello->timeout->isScheduled());
     cancelEvent(hello->timer);
 
-    // update TED and routing table
+    // report the link as down; Ted decides whether that's actually a
+    // change (and rebuilds/announces accordingly)
 
     unsigned int index = tedmod->linkIndex(routerId, peer);
-    tedmod->setLinkState(index, false, false);
-    announceLinkChange(index);
-    tedmod->rebuildRoutingTable();
+    tedmod->setLinkState(index, false);
 
     // send PATH_ERROR for existing paths
 
@@ -975,19 +974,12 @@ bool RsvpTe::allocateResource(Ipv4Address OI, const SessionObj& session, double 
             preempt(OI, p, -tedmod->getLink(index).UnResvBandwidth[p]);
     }
 
-    // announce changes
+    // announce changes (bandwidth-only; not a liveness flip, so this doesn't
+    // go through Ted::setLinkState())
 
-    announceLinkChange(index);
+    tedmod->announceLinkChange(index);
 
     return true;
-}
-
-void RsvpTe::announceLinkChange(int tedlinkindex)
-{
-    TedChangeInfo d;
-    d.setTedLinkIndicesArraySize(1);
-    d.setTedLinkIndices(0, tedlinkindex);
-    emit(tedChangedSignal, &d);
 }
 
 void RsvpTe::commitResv(ResvStateBlock *rsb)
@@ -1937,13 +1929,7 @@ void RsvpTe::recoveryEvent(Ipv4Address peer)
     // called when peer's operation is restored
 
     unsigned int index = tedmod->linkIndex(routerId, peer);
-    bool rtmodified = !tedmod->getLink(index).state;
-    tedmod->setLinkState(index, true, false);
-    announceLinkChange(index);
-
-    // rebuild routing table if link state changed
-    if (rtmodified)
-        tedmod->rebuildRoutingTable();
+    tedmod->setLinkState(index, true);
 
     // refresh all paths towards this neighbour
     for (auto& elem : PSBList) {

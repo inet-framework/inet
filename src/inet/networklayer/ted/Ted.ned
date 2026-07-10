@@ -55,4 +55,5 @@ simple Ted extends SimpleModule
         string routingTableModule;  // The path to the RoutingTable module
         bool installRoutes = default(true); // Whether Ted installs/maintains host routes in the routing table from its link-state database (see class documentation for the coexistence story)
         @display("i=block/table");
+        @signal[tedChanged](type=inet::TedChangeInfo); // emitted by setLinkState()/announceLinkChange() whenever a link's liveness or bandwidth changes; ~LinkStateRouting subscribes at the host level to flood the change
 }

@@ -176,8 +176,6 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void updateFecList(Ipv4Address nextHop);
     virtual void updateFecListEntry(Fec oldItem);
 
-    virtual void announceLinkChange(int tedlinkindex);
-
     // emits the current total binding count (fecUp.size() + fecDown.size()) on the fecBindingCount signal
     virtual void emitFecBindingCount();
 
