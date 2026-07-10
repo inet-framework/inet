@@ -46,6 +46,12 @@ simple Ldp extends SimpleModule like IApp
         bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a FEC
         @display("i=block/control");
         @signal[tedChanged](type=inet::TedChangeInfo);
+        @signal[sessionUp](type=long); // peer's router id (as a 32-bit integer) when an LDP session comes up
+        @signal[sessionDown](type=long); // peer's router id (as a 32-bit integer) when an LDP session goes down
+        @signal[fecBindingCount](type=long); // fecUp.size() + fecDown.size(), emitted whenever a label binding is added or removed
+        @statistic[sessionUp](title="LDP sessions established"; record=count,"vector(constant1)"; interpolationmode=none);
+        @statistic[sessionDown](title="LDP sessions torn down"; record=count,"vector(constant1)"; interpolationmode=none);
+        @statistic[fecBindingCount](title="number of FEC label bindings"; record=last,vector; interpolationmode=none);
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation

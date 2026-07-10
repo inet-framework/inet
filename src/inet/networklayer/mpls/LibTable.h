@@ -61,7 +61,12 @@ class INET_API LibTable : public SimpleModule
     std::vector<LibEntry> lib;
     ModuleRefByPar<IInterfaceTable> ift;
 
+    static simsignal_t libEntryCountSignal;
+
   protected:
+    // emits the current LIB size on the libEntryCount signal; call after any change to lib
+    virtual void emitLibEntryCount();
+
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;

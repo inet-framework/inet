@@ -55,6 +55,7 @@ simple Mpls extends SimpleModule like IProtocolLayer
         bool writeTcBackOnPop = default(false); // whether popping a label writes tc<<3 back into the IP DSCP (uniform model only); default false because the 3-bit->6-bit mapping is lossy and RFC 5462 keeps the inner DSCP authoritative
         @display("i=block/switch");
         @signal[packetDropped](type=cPacket);
+        @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input upperLayerIn;
         output upperLayerOut;

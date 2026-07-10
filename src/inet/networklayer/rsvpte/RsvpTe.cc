@@ -130,10 +130,24 @@ B computeResvErrorMessageLength(const FlowDescriptorVector& flows)
 
 Define_Module(RsvpTe);
 
+simsignal_t RsvpTe::lspEstablishedSignal = registerSignal("lspEstablished");
+simsignal_t RsvpTe::psbCountSignal = registerSignal("psbCount");
+simsignal_t RsvpTe::rsbCountSignal = registerSignal("rsbCount");
+
 using namespace xmlutils;
 
 RsvpTe::RsvpTe()
 {
+}
+
+void RsvpTe::emitPsbCount()
+{
+    emit(psbCountSignal, (long)PSBList.size());
+}
+
+void RsvpTe::emitRsbCount()
+{
+    emit(rsbCountSignal, (long)RSBList.size());
 }
 
 RsvpTe::~RsvpTe()
@@ -1143,6 +1157,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
         if (IR && rsb->inLabelVector[i] == -1) {
             // path established
             sendPathNotify(psb->handler, psb->Session_Object, psb->Sender_Template_Object, PATH_CREATED, 0.0);
+            emit(lspEstablishedSignal, simTime() - psb->pathCreationTime);
         }
 
         if (rsb->inLabelVector[i] != inLabel) {
@@ -1184,6 +1199,7 @@ RsvpTe::ResvStateBlock *RsvpTe::createRSB(const Ptr<const RsvpResvMsg>& msg)
 
     RSBList.push_back(rsbEle);
     ResvStateBlock *rsb = &(*(RSBList.end() - 1));
+    emitRsbCount();
 
     EV_INFO << "created new RSB " << rsb->id << endl;
 
@@ -1271,6 +1287,7 @@ void RsvpTe::removeRSB(ResvStateBlock *rsb)
     for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
         if (it->id == rsb->id) {
             RSBList.erase(it);
+            emitRsbCount();
             return;
         }
     }
@@ -1303,6 +1320,7 @@ void RsvpTe::removePSB(PathStateBlock *psb)
     for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
         if (it->id == psb->id) {
             PSBList.erase(it);
+            emitPsbCount();
             return;
         }
     }
@@ -1414,9 +1432,11 @@ RsvpTe::PathStateBlock *RsvpTe::createPSB(const Ptr<RsvpPathMsg>& msg)
     psbEle.ERO = ERO;
 
     psbEle.handler = -1;
+    psbEle.pathCreationTime = simTime();
 
     PSBList.push_back(psbEle);
     PathStateBlock *cPSB = &(*(PSBList.end() - 1));
+    emitPsbCount();
 
     EV_INFO << "created new PSB " << cPSB->id << endl;
 
@@ -1461,9 +1481,11 @@ RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const traffic_session_t& sessio
     psbEle.ERO = ERO;
 
     psbEle.handler = path.owner;
+    psbEle.pathCreationTime = simTime();
 
     PSBList.push_back(psbEle);
     PathStateBlock *cPSB = &(*(PSBList.end() - 1));
+    emitPsbCount();
 
     return cPSB;
 }
@@ -1498,6 +1520,7 @@ RsvpTe::ResvStateBlock *RsvpTe::createEgressRSB(PathStateBlock *psb)
 
     RSBList.push_back(rsbEle);
     ResvStateBlock *rsb = &(*(RSBList.end() - 1));
+    emitRsbCount();
 
     EV_INFO << "created new (egress) RSB " << rsb->id << endl;
 

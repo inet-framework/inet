@@ -16,6 +16,8 @@ namespace inet {
 
 Define_Module(LibTable);
 
+simsignal_t LibTable::libEntryCountSignal = registerSignal("libEntryCount");
+
 void LibTable::initialize(int stage)
 {
     SimpleModule::initialize(stage);
@@ -33,7 +35,13 @@ void LibTable::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         // read configuration (by this stage all interfaces are registered in ift)
         readTableFromXML(par("config"));
+        emitLibEntryCount();
     }
+}
+
+void LibTable::emitLibEntryCount()
+{
+    emit(libEntryCountSignal, (long)lib.size());
 }
 
 void LibTable::handleMessage(cMessage *msg)
@@ -71,6 +79,7 @@ int LibTable::installLibEntry(int inLabel, int inInterfaceId, const LabelOpVecto
         newItem.outLabel = outLabel;
         newItem.outInterfaceId = outInterfaceId;
         lib.push_back(newItem);
+        emitLibEntryCount();
         return newItem.inLabel;
     }
     else {
@@ -81,6 +90,7 @@ int LibTable::installLibEntry(int inLabel, int inInterfaceId, const LabelOpVecto
             elem.inInterfaceId = inInterfaceId;
             elem.outLabel = outLabel;
             elem.outInterfaceId = outInterfaceId;
+            emitLibEntryCount();
             return inLabel;
         }
         throw cRuntimeError("Cannot update LIB entry: no entry with inLabel=%d", inLabel);
@@ -94,6 +104,7 @@ void LibTable::removeLibEntry(int inLabel)
             continue;
 
         lib.erase(lib.begin() + i);
+        emitLibEntryCount();
         return;
     }
     throw cRuntimeError("Cannot remove LIB entry: no entry with inLabel=%d", inLabel);

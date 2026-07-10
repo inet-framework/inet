@@ -86,6 +86,10 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
         // handler module
         int handler;
+
+        // sim time this PSB was created (createPSB/createIngressPSB); used at the
+        // ingress to compute LSP setup latency for the lspEstablished signal
+        simtime_t pathCreationTime;
     };
 
     typedef std::vector<PathStateBlock> PsbVector;
@@ -173,7 +177,15 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     RsbVector RSBList;
     HelloVector HelloList;
 
+    static simsignal_t lspEstablishedSignal;
+    static simsignal_t psbCountSignal;
+    static simsignal_t rsbCountSignal;
+
   protected:
+    // emit the current PSBList/RSBList sizes; call after any change to PSBList/RSBList
+    virtual void emitPsbCount();
+    virtual void emitRsbCount();
+
     virtual void processSignallingMessage(SignallingMsg *msg);
     virtual void processPSB_TIMER(PsbTimerMsg *msg);
     virtual void processPSB_TIMEOUT(PsbTimeoutMsg *msg);

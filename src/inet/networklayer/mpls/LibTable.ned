@@ -39,5 +39,7 @@ simple LibTable extends SimpleModule
                                         // the XML config's interface names to interface ids
         xml config = default(xml("<libtable/>")); // Table contents to be loaded on startup
         @display("i=block/table2");
+        @signal[libEntryCount](type=long);
+        @statistic[libEntryCount](title="number of LIB entries"; record=last,vector; interpolationmode=none);
 }
 

@@ -133,6 +133,10 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     long numSent = 0;
     long numReceived = 0;
 
+    static simsignal_t sessionUpSignal;
+    static simsignal_t sessionDownSignal;
+    static simsignal_t fecBindingCountSignal;
+
   protected:
     /**
      * This method finds next peer in upstream direction
@@ -175,6 +179,9 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void updateFecListEntry(fec_t oldItem);
 
     virtual void announceLinkChange(int tedlinkindex);
+
+    // emits the current total binding count (fecUp.size() + fecDown.size()) on the fecBindingCount signal
+    virtual void emitFecBindingCount();
 
   public:
     Ldp();
