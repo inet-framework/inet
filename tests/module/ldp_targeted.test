@@ -1,0 +1,162 @@
+%description:
+Regression test for RFC 5036 Section 2.4.2 extended discovery / targeted Hellos
+(commit C10): ~Ldp.targetedPeers/~acceptTargetedHellos (both default off).
+
+Ad hoc 3-LSR CHAIN: LSR1 -- LSR2 -- LSR3 (two links; LSR1 and LSR3 are NOT directly
+connected -- no shared link, no local TED link between them). LSR1's targetedPeers
+is configured with LSR3's LSR-ID; LSR3 has acceptTargetedHellos=true (the plan's
+"symmetric targetedPeers on both, your choice" alternative -- this file uses the
+asymmetric target/accept split since it exercises both new parameters). Unlike
+ldp_loop_detection.test, this network relies entirely on ~Ted's own default
+(installRoutes=true) shortest-path route computation, fed by ~LinkStateRouting's
+flooding -- LSR1's targeted (unicast) Hello to LSR3 needs a REAL two-hop IPv4 route
+through LSR2, which is exactly what Ted computes automatically for a genuinely
+connected topology (no hand-written routing-loop trickery needed here).
+
+Asserted:
+  1. LSR1 actually attempts the targeted Hello (EV line quoting the destination).
+  2. A session between the non-adjacent pair (LSR1<->LSR3) reaches OPERATIONAL --
+     the same "LDP session with X is now OPERATIONAL" EV line
+     (Ldp::processKEEPALIVE) any regular session uses; there is nothing
+     targeted-specific about session establishment once the Hello adjacency exists.
+  3. The regular hello adjacencies LSR1<->LSR2 and LSR2<->LSR3 ALSO establish their
+     own sessions independently -- asserted via the sessionUp signal's scalar count
+     (@statistic in Ldp.ned): 3 sessions total, each side of each session emits
+     sessionUp once = 6 total emits summed across LSR1/LSR2/LSR3's
+     "sessionUp:count" scalars. This is the precise, unambiguous way to prove
+     "three sessions, not just the targeted one" -- the EV log alone can't
+     disambiguate which of two textually-identical "is now OPERATIONAL" lines
+     (same peer LSR-ID can appear once from the regular-adjacency side and once
+     from the targeted side) came from which relationship.
+
+Falsification: this test FAILS against the parent commit -- targetedPeers/
+acceptTargetedHellos do not exist there (unknown parameter), and even given a
+stashed-in .ned addition alone (no code), LSR1's targeted Hello would never be
+sent (no such code path) and Ted::linkIndex() would ASSERT (debug build) the
+moment LSR3 (not locally adjacent to LSR1) tried to process a Hello from it
+through the old, unconditional TED-link code path -- so this scenario cannot
+even survive to a passing state without this commit's Ted::isLocalPeer() guard.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: TargetedChain.ned
+
+import inet.node.mpls.LdpMplsRouter;
+
+//
+// Ad hoc 3-LSR chain: LSR1 -- LSR2 -- LSR3. LSR1 and LSR3 share no link.
+//
+network TargetedChain
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    submodules:
+        LSR1: LdpMplsRouter {
+            @display("p=200,150");
+            gates: pppg[1];
+        }
+        LSR2: LdpMplsRouter {
+            @display("p=400,150");
+            gates: pppg[2];
+        }
+        LSR3: LdpMplsRouter {
+            @display("p=600,150");
+            gates: pppg[1];
+        }
+    connections:
+        LSR1.pppg[0] <--> { delay = 1ms; datarate = 1Mbps; } <--> LSR2.pppg[0];
+        LSR2.pppg[1] <--> { delay = 1ms; datarate = 1Mbps; } <--> LSR3.pppg[0];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Addressing: LSR1.ppp0=10.1.1.1 <-> LSR2.ppp0=10.1.1.2 (link A)
+%#             LSR2.ppp1=10.1.2.1 <-> LSR3.ppp0=10.1.2.2 (link B)
+%# routerId="auto" picks the HIGHEST interface address per LSR:
+%#   LSR1 routerId = 10.1.1.1 (only interface)
+%#   LSR2 routerId = max(10.1.1.2, 10.1.2.1) = 10.1.2.1
+%#   LSR3 routerId = 10.1.2.2 (only interface)
+%# No unicast routes are hand-written -- Ted (installRoutes left at its default
+%# true) computes them, including the 2-hop LSR1<->LSR3 path, from LinkStateRouting's
+%# flooded topology.
+%file: LSR1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.1.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.1.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.1.2.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.2.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = .;../../../../src
+network = TargetedChain
+sim-time-limit = 10s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.ldp.cmdenv-log-level = info
+**.cmdenv-log-level = off
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.LSR1.ipv4.routingTable.routingFile = "LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "LSR3.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.holdTime = 3s
+**.helloInterval = 1s
+
+# RFC 5036 Section 2.4.2: LSR1 targets LSR3's LSR-ID directly; LSR3 accepts any
+# requesting targeted peer (the asymmetric alternative the plan allows)
+**.LSR1.ldp.targetedPeers = "10.1.2.2"
+**.LSR3.ldp.acceptTargetedHellos = true
+
+%#--------------------------------------------------------------------------------------------------------------
+%# 1. LSR1 actually attempts the targeted Hello toward LSR3's LSR-ID
+%contains: stdout
+Sending targeted LDP Hello to 10.1.2.2
+%#--------------------------------------------------------------------------------------------------------------
+%# 2. the non-adjacent LSR1<->LSR3 session reaches OPERATIONAL (same EV line any
+%# session uses -- Ldp::processKEEPALIVE -- nothing targeted-specific once the
+%# Hello adjacency exists)
+%contains: stdout
+LDP session with 10.1.2.2 is now OPERATIONAL
+%#--------------------------------------------------------------------------------------------------------------
+%# 3. three sessions total (2 regular + 1 targeted), not just the targeted one:
+%# each side of each session emits sessionUp once = 6 total emits summed across
+%# all three LSRs' sessionUp:count scalars
+%postrun-command: grep "sessionUp:count" results/General-#0.sca | awk '{s+=$NF} END{print s}' > sessionup_total.out
+%contains: sessionup_total.out
+6
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

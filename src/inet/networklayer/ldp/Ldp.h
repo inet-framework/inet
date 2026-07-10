@@ -200,6 +200,12 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     bool loopDetection = false;
     int pathVectorLimit = 32;
 
+    // RFC 5036 Section 2.4.2 extended discovery (targeted Hellos); see Ldp.ned.
+    // targetedPeerAddrs is targetedPeers parsed into individual addresses.
+    std::string targetedPeers;
+    std::vector<Ipv4Address> targetedPeerAddrs;
+    bool acceptTargetedHellos = false;
+
     // currently recognized FECs
     FecVector fecList;
     // bindings advertised upstream
@@ -338,7 +344,12 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
     virtual void setupSockets();
     virtual void clearState();
-    virtual void sendHelloTo(Ipv4Address dest);
+    // RFC 5036 Section 2.4.2: 'targeted' sets the Targeted+Request bits (T=1/R=1) for
+    // extended discovery (see Ldp.ned's targetedPeers/acceptTargetedHellos); false (the
+    // default, used for the regular periodic multicast Hello and the ordinary unicast
+    // reply to a locally-adjacent peer's Hello) leaves them at their previous fixed
+    // (unset/false) values -- completely unchanged from before this feature existed.
+    virtual void sendHelloTo(Ipv4Address dest, bool targeted = false);
     virtual void openTCPConnectionToPeer(int peerIndex);
     virtual void removePeerBindings(Ipv4Address peerIP);
     virtual void handleTcpConnectionDown(TcpSocket *socket);

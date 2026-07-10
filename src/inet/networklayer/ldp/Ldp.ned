@@ -82,9 +82,18 @@ import inet.applications.contract.IApp;
 // loop -- it sends a Notification (Loop Detected status) back to the sender instead
 // of propagating or accepting the message.
 //
+// Targeted Hellos / extended discovery (RFC 5036 Section 2.4.2): ~targetedPeers lists
+// (space-separated) IPv4 addresses (peer LSR-IDs) this router sends periodic UNICAST
+// Hellos to (Targeted and Request bits set), on the same cadence as the regular
+// multicast Hello, letting a session form with a peer that has no local link (no TED
+// link index) to this router -- e.g. a future LDP-over-RSVP-TE tunnel endpoint
+// (tunneling itself is out of scope; only the extended-discovery adjacency is
+// modeled). ~acceptTargetedHellos additionally accepts a targeted Hello (and replies
+// in kind) from ANY requesting peer, not just ones this router itself targets. Once
+// the Hello adjacency exists (targeted or regular), session establishment (TCP,
+// Initialization/KeepAlive) is identical either way.
+//
 // Explicit non-features (RFC 5036 mechanisms not modeled by this module):
-// - No extended/targeted discovery, so only directly-connected peers
-//   (reachable via the basic UDP Hello discovery) can become LDP peers.
 // - No graceful restart, capabilities negotiation, or IGP synchronization.
 // - No Generalized TTL Security Mechanism (GTSM).
 // - No IPv6 support (RFC 7552); the whole module is IPv4-only.
@@ -109,6 +118,8 @@ simple Ldp extends SimpleModule like IApp
         string retentionMode @enum("liberal","conservative") = default("liberal"); // RFC 5036 Section 2.6: label retention. "liberal" keeps a Label Mapping received from a peer that is not (or not yet) a FEC's next hop, enabling instant failover to it on a later next-hop change with no new Label Request; "conservative" explicitly releases such mappings (this model's original implicit behavior, now made explicit).
         bool loopDetection = default(false); // RFC 5036 Section 2.8: hop-count/path-vector loop detection for propagated Label Request and Label Mapping messages. Disabled by default -- loop detection is RFC-optional, and disabled is a fully compliant default (no shipped example relies on it, and this keeps this model's default behavior/fingerprint unchanged).
         int pathVectorLimit = default(32); // RFC 5036 Section 3.5.3 (Common Session Parameters TLV, PVLim field): maximum path-vector length (hop count) before a Label Request/Mapping is treated as having looped; only consulted when ~loopDetection is enabled.
+        string targetedPeers = default(""); // RFC 5036 Section 2.4.2 extended discovery: space-separated list of IPv4 addresses (peer LSR-IDs) to send periodic unicast Hellos to (Targeted+Request bits set), enabling a session with a non-locally-adjacent peer. Empty (default) sends none.
+        bool acceptTargetedHellos = default(false); // RFC 5036 Section 2.4.2: accept (and reply to) a targeted Hello requesting one from ANY peer, not only ones listed in ~targetedPeers. Default false keeps this model's default behavior/fingerprint unchanged (no shipped example configures either parameter).
         @display("i=block/control");
         @signal[sessionUp](type=long); // peer's router id (as a 32-bit integer) when an LDP session comes up
         @signal[sessionDown](type=long); // peer's router id (as a 32-bit integer) when an LDP session goes down

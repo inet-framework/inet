@@ -129,6 +129,12 @@ void Ldp::initialize(int stage)
         retentionMode = par("retentionMode").stdstringValue();
         loopDetection = par("loopDetection");
         pathVectorLimit = par("pathVectorLimit");
+        targetedPeers = par("targetedPeers").stdstringValue();
+        acceptTargetedHellos = par("acceptTargetedHellos");
+        targetedPeerAddrs.clear();
+        cStringTokenizer tokenizer(targetedPeers.c_str());
+        while (tokenizer.hasMoreTokens())
+            targetedPeerAddrs.push_back(Ipv4Address(tokenizer.nextToken()));
 
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -208,6 +214,13 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
         // "all routers in the sub-network" multicast address
         EV_INFO << "Multicasting LDP Hello to neighboring routers\n";
         sendHelloTo(Ipv4Address::ALL_ROUTERS_MCAST);
+
+        // RFC 5036 Section 2.4.2: extended discovery -- periodic unicast Hello (T=1/R=1)
+        // to every configured targeted peer, same cadence as the regular multicast Hello
+        for (auto& addr : targetedPeerAddrs) {
+            EV_INFO << "Sending targeted LDP Hello to " << addr << "\n";
+            sendHelloTo(addr, /*targeted*/ true);
+        }
 
         // schedule next hello
         scheduleAfter(helloInterval, sendHelloMsg);
@@ -867,17 +880,22 @@ void Ldp::emitFecBindingCount()
     emit(fecBindingCountSignal, (long)(fecUp.size() + fecDown.size()));
 }
 
-void Ldp::sendHelloTo(Ipv4Address dest)
+void Ldp::sendHelloTo(Ipv4Address dest, bool targeted)
 {
     Packet *pk = new Packet("LDP-Hello");
     const auto& hello = makeShared<LdpHello>();
     hello->setChunkLength(LDP_HELLO_BYTES);
     hello->setType(HELLO);
     hello->setLsrId(rt->getRouterId());
-    // targeted hellos (which would need a destination LSR-Id) and the R-bit/T-bit
-    // (LDP hello state machine extensions) are not modeled; left at their default
-    // (unset/false) values
     hello->setHoldTime((uint16_t)holdTime.inUnit(SIMTIME_S));
+    if (targeted) {
+        // RFC 5036 Section 2.4.2 extended discovery: Targeted bit + Request bit (ask
+        // the recipient to reply in kind, completing the adjacency promptly)
+        hello->setTbit(true);
+        hello->setRbit(true);
+    }
+    // else: left at their default (unset/false) values -- the regular multicast Hello
+    // and the ordinary unicast reply to a locally-adjacent peer's Hello, unchanged
     pk->insertAtBack(hello);
 
     if (dest.isMulticast()) {
@@ -920,10 +938,13 @@ void Ldp::processHelloTimeout(cMessage *msg)
 
     removePeerBindings(peerIP);
 
-    // update TED and routing table
-
-    unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
-    tedmod->setLinkState(index, false);
+    // update TED and routing table -- only meaningful for a locally-adjacent peer; a
+    // targeted (RFC 5036 Section 2.4.2) peer has no TED link to report on (see the
+    // matching guard in processLDPHello)
+    if (tedmod->isLocalPeer(peerIP)) {
+        unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
+        tedmod->setLinkState(index, false);
+    }
 }
 
 void Ldp::processKeepAliveSendTimeout(cMessage *msg)
@@ -1063,6 +1084,7 @@ void Ldp::processLDPHello(Packet *msg)
     const auto& ldpHello = msg->peekAtFront<LdpHello>();
     Ipv4Address peerAddr = ldpHello->getLsrId();
     uint16_t receivedHoldTime = ldpHello->getHoldTime();
+    bool receivedRbit = ldpHello->getRbit();
     int interfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
     delete msg;
 
@@ -1077,10 +1099,27 @@ void Ldp::processLDPHello(Packet *msg)
         return;
     }
 
-    // report the link as working again; Ted decides whether that's actually
-    // a change (and rebuilds/announces accordingly)
-    unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerAddr);
-    tedmod->setLinkState(index, true);
+    // RFC 5036 Section 2.4.2 extended discovery: a peer we have no local TED link to
+    // (not locally adjacent) can only be a targeted-session candidate -- there is no
+    // physical link for Ted to track, so skip its link-state handling entirely (doing
+    // otherwise would mishandle a peer Ted has never heard of -- see Ted::linkIndex);
+    // accept the adjacency only if we ourselves target this peer, or accept any
+    // requesting targeted peer.
+    bool locallyAdjacent = tedmod->isLocalPeer(peerAddr);
+    if (locallyAdjacent) {
+        // report the link as working again; Ted decides whether that's actually
+        // a change (and rebuilds/announces accordingly)
+        unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerAddr);
+        tedmod->setLinkState(index, true);
+    }
+    else {
+        bool weTarget = std::find(targetedPeerAddrs.begin(), targetedPeerAddrs.end(), peerAddr) != targetedPeerAddrs.end();
+        if (!weTarget && !acceptTargetedHellos) {
+            EV_INFO << "not locally adjacent and not a configured/accepted targeted peer, ignoring\n";
+            return;
+        }
+        EV_INFO << "not locally adjacent, accepting as a targeted-session peer\n";
+    }
 
     // peer already in table?
     int i = findPeer(peerAddr);
@@ -1113,7 +1152,13 @@ void Ldp::processLDPHello(Packet *msg)
     EV_INFO << "We'll be " << (info.activeRole ? "ACTIVE" : "PASSIVE") << " in this session\n";
 
     // introduce ourselves with a Hello, then connect if we're in ACTIVE role
-    sendHelloTo(peerAddr);
+    if (locallyAdjacent)
+        sendHelloTo(peerAddr);
+    else if (receivedRbit) {
+        // RFC 5036 Section 2.4.2: reply in kind (targeted, T=1/R=1) since we were asked to
+        EV_INFO << "replying with a targeted Hello (R-bit was set)\n";
+        sendHelloTo(peerAddr, /*targeted*/ true);
+    }
     if (info.activeRole) {
         EV_INFO << "Establishing session with it\n";
         openTCPConnectionToPeer(peerIndex);
