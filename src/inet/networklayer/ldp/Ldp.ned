@@ -35,9 +35,18 @@ import inet.applications.contract.IApp;
 // is established, the active/passive LSRs exchange Initialization and KeepAlive
 // messages (~LdpIni, ~LdpKeepAlive) to negotiate the session KeepAlive Time
 // (min of both proposals); the session is usable for label/address messages
-// only once this handshake completes (state OPERATIONAL). KeepAlive-based
-// session liveness (periodic sends, hold-timer expiry) is not yet implemented
-// by this commit -- only the initial 4-way handshake is.
+// only once this handshake completes (state OPERATIONAL). Once OPERATIONAL,
+// KeepAlive-based session liveness (RFC 5036 Section 2.5.6) keeps the session
+// alive: a KeepAlive is sent whenever a full negotiatedKeepaliveTime/3 elapses
+// without any LDP message having been sent to the peer, and the session is
+// torn down (Notification + transport connection abort + discarded bindings)
+// if a full negotiatedKeepaliveTime elapses without any LDP message being
+// received from the peer. This is deliberately independent from the Hello
+// hold-timer's adjacency-level death detection (~holdTime): that one detects
+// "the peer/link is gone" via UDP Hello, this one detects "the TCP control
+// channel died" while the Hello adjacency may still be alive -- when only the
+// latter happens, the surviving Hello adjacency re-establishes the session on
+// the next Hello (see Ldp::processLDPHello).
 //
 // Explicit non-features (RFC 5036 mechanisms not modeled by this module):
 // - No extended/targeted discovery, so only directly-connected peers

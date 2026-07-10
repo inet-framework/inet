@@ -212,6 +212,12 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
         if (!strcmp(msg->getName(), "HelloTimeout")) {
             processHelloTimeout(msg);
         }
+        else if (!strcmp(msg->getName(), "LDPKeepAliveSendTimer")) {
+            processKeepAliveSendTimeout(msg);
+        }
+        else if (!strcmp(msg->getName(), "LDPSessionHoldTimer")) {
+            processSessionHoldTimeout(msg);
+        }
         else {
             retryMsgs.erase(std::remove(retryMsgs.begin(), retryMsgs.end(), msg), retryMsgs.end());
             auto ldpPacket = check_and_cast<Packet *>(msg)->popAtFront<LdpPacket>();
@@ -340,6 +346,13 @@ void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)
 {
     numSent++;
     getPeerSocket(dest)->send(msg);
+
+    // RFC 5036 Section 2.5.6: sending ANY LDP message resets the KeepAlive send
+    // timer (it only exists once the session is OPERATIONAL -- see
+    // processKEEPALIVE's OPENREC->OPERATIONAL transition)
+    int i = findPeer(dest);
+    if (i != -1 && myPeers[i].keepAliveSendTimer != nullptr)
+        rescheduleAfter(myPeers[i].negotiatedKeepaliveTime / 3, myPeers[i].keepAliveSendTimer);
 }
 
 bool Ldp::isPeerOperational(Ipv4Address peerAddr)
@@ -663,6 +676,74 @@ void Ldp::processHelloTimeout(cMessage *msg)
     tedmod->setLinkState(index, false);
 }
 
+void Ldp::processKeepAliveSendTimeout(cMessage *msg)
+{
+    for (size_t i = 0; i < myPeers.size(); i++) {
+        if (myPeers[i].keepAliveSendTimer == msg) {
+            // RFC 5036 Section 2.5.6: no LDP message was sent to this peer for a
+            // full negotiatedKeepaliveTime/3 -- send an explicit KeepAlive so the
+            // peer's session hold timer never expires on us. sendKeepAlive() ->
+            // sendToPeer() reschedules this very timer, so nothing else to do here.
+            // Guard against the narrow window where the socket has already left
+            // CONNECTED (e.g. a graceful close in progress via socketPeerClosed)
+            // but the teardown callback hasn't fired yet to cancel this timer:
+            // a peer/protocol-adjacent condition must never abort the simulation
+            // (see getPeerSocket()), so just skip this cycle instead of sending.
+            if (findPeerSocket(myPeers[i].peerIP) == nullptr) {
+                EV_DETAIL << "skipping scheduled KeepAlive to " << myPeers[i].peerIP << ": session is closing\n";
+                return;
+            }
+            EV_DETAIL << "no LDP message sent to " << myPeers[i].peerIP << " for "
+                      << (myPeers[i].negotiatedKeepaliveTime / 3) << ", sending KeepAlive" << endl;
+            sendKeepAlive(myPeers[i].peerIP);
+            return;
+        }
+    }
+    // the timer belongs to a peer that no longer exists (session already torn
+    // down through another path); nothing to do
+}
+
+void Ldp::processSessionHoldTimeout(cMessage *msg)
+{
+    for (size_t i = 0; i < myPeers.size(); i++) {
+        if (myPeers[i].sessionHoldTimer == msg) {
+            Ipv4Address peerIP = myPeers[i].peerIP;
+
+            // RFC 5036 Section 2.5.6: no LDP message (Keepalive or otherwise) was
+            // received from this peer within the negotiated KeepAlive Time -- the
+            // control channel is presumed dead even though the Hello adjacency may
+            // still be alive (a stale CONNECTED TcpSocket the transport layer
+            // hasn't itself noticed yet; see the peer_info comment in Ldp.h).
+            // Terminate the session now rather than waiting on TCP's own,
+            // potentially much slower, failure detection.
+            EV_WARN << "KeepAlive Timer Expired for session with " << peerIP << ": no LDP message received within "
+                    << myPeers[i].negotiatedKeepaliveTime << "; closing the session (hello adjacency, if still alive, "
+                    << "will re-establish it on the next Hello -- see processLDPHello)" << endl;
+
+            if (findPeerSocket(peerIP) != nullptr)
+                sendNotify(KEEPALIVE_TIMER_EXPIRED, peerIP, Ipv4Address(), 0);
+
+            // decisive, synchronous teardown of the transport connection -- mirrors
+            // processHelloTimeout's abort() (we cannot trust a graceful close() to
+            // ever complete against a peer that may not even be there any more),
+            // but -- unlike processHelloTimeout -- the peer_info entry itself
+            // (and the Hello adjacency it represents) is NOT erased
+            if (myPeers[i].socket) {
+                socketMap.removeSocket(myPeers[i].socket);
+                myPeers[i].socket->abort();
+                delete myPeers[i].socket;
+                myPeers[i].socket = nullptr;
+            }
+            emit(sessionDownSignal, (long)peerIP.getInt());
+
+            removePeerBindings(peerIP); // resets FSM state/timers (incl. deleting 'msg' itself) and discards bindings
+            return;
+        }
+    }
+    // the timer belongs to a peer that no longer exists (session already torn
+    // down through another path); nothing to do
+}
+
 void Ldp::removePeerBindings(Ipv4Address peerIP)
 {
     // reset the session FSM: this is the common teardown point reached whenever a
@@ -917,6 +998,13 @@ void Ldp::socketFailure(TcpSocket *socket, int code)
 
 void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
 {
+    // RFC 5036 Section 2.5.6: receiving ANY LDP message resets the session hold
+    // timer (it only exists once the session is OPERATIONAL -- see
+    // processKEEPALIVE's OPENREC->OPERATIONAL transition)
+    int hi = findPeer(ldpPacket->getLsrId());
+    if (hi != -1 && myPeers[hi].sessionHoldTimer != nullptr)
+        rescheduleAfter(myPeers[hi].negotiatedKeepaliveTime, myPeers[hi].sessionHoldTimer);
+
     switch (ldpPacket->getType()) {
         case HELLO:
             // Hellos belong on UDP; a Hello over TCP is a peer/protocol anomaly, ignore it
@@ -1040,13 +1128,23 @@ void Ldp::processKEEPALIVE(Ptr<const LdpPacket>& ldpPacket)
         EV_INFO << "LDP session with " << srcAddr << " is now OPERATIONAL" << endl;
         emit(sessionUpSignal, (long)srcAddr.getInt());
 
+        // start KeepAlive-based session liveness (RFC 5036 Section 2.5.6): initial
+        // arm of both timers (before this point they are nullptr, so the
+        // unconditional reset attempts in sendToPeer/processLdpPacketFromTcp are
+        // no-ops)
+        ASSERT(myPeers[i].keepAliveSendTimer == nullptr && myPeers[i].sessionHoldTimer == nullptr);
+        myPeers[i].keepAliveSendTimer = new cMessage("LDPKeepAliveSendTimer");
+        scheduleAfter(myPeers[i].negotiatedKeepaliveTime / 3, myPeers[i].keepAliveSendTimer);
+        myPeers[i].sessionHoldTimer = new cMessage("LDPSessionHoldTimer");
+        scheduleAfter(myPeers[i].negotiatedKeepaliveTime, myPeers[i].sessionHoldTimer);
+
         // now (and only now) that the session is usable, drive the FEC/label
         // machinery for this peer (RFC 5036 Section 3.5.3)
         updateFecList(srcAddr);
     }
     else if (myPeers[i].state == peer_info::OPERATIONAL) {
-        // steady-state KeepAlive refresh; resetting the session hold timer on it
-        // is wired up by a later commit (KeepAlive-based session liveness)
+        // steady-state KeepAlive refresh; the session hold timer reset already
+        // happened unconditionally at the top of processLdpPacketFromTcp
         EV_DETAIL << "KeepAlive refresh from " << srcAddr << " (session already OPERATIONAL)" << endl;
     }
     else {

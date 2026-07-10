@@ -35,6 +35,7 @@ enum LdpStatusTypes
 {
     SHUTDOWN = 10;
     NO_ROUTE = 13;
+    KEEPALIVE_TIMER_EXPIRED = 20; // RFC 5036 Section 2.5.6: no LDP message (Keepalive or otherwise) received from the peer within the negotiated KeepAlive Time; distinct from SESSION_REJECTED_BAD_KEEPALIVE_TIME, which is a negotiation-time rejection, not a runtime liveness failure
     SESSION_REJECTED_BAD_KEEPALIVE_TIME = 24;
 }
 

@@ -104,9 +104,20 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
         SessionState state = NONEXISTENT;
         simtime_t negotiatedKeepaliveTime = 0; // min(ours, peer's KeepAlive Time) once negotiated; 0 until then
-        // KeepAlive-based liveness (send timer / hold timer) is wired up by a later
-        // commit; the fields live here now so every teardown path that already
-        // cleans up 'timeout' also cleans these up correctly from day one.
+        // KeepAlive-based session liveness (RFC 5036 Section 2.5.6), scheduled only
+        // once the session is OPERATIONAL: keepAliveSendTimer fires every
+        // negotiatedKeepaliveTime/3 without an LDP message having been SENT to this
+        // peer (reset in Ldp::sendToPeer on every send) and triggers an explicit
+        // KeepAlive; sessionHoldTimer fires negotiatedKeepaliveTime after the last
+        // LDP message RECEIVED from this peer (reset in
+        // Ldp::processLdpPacketFromTcp on every receive) and tears the session down
+        // (Ldp::processSessionHoldTimeout). This is deliberately a narrower, separate
+        // failure mode from the Hello hold-timer's adjacency-level death detection
+        // in Ldp::processHelloTimeout: that one detects "the peer/link is gone" via
+        // UDP Hello; this one detects "the TCP control channel died while the Hello
+        // adjacency is still alive" (a stale CONNECTED TcpSocket the transport layer
+        // hasn't itself noticed yet) -- the two timeouts are not merged. Cleaned up
+        // by every teardown path (see Ldp::removePeerBindings).
         cMessage *keepAliveSendTimer = nullptr;
         cMessage *sessionHoldTimer = nullptr;
     };
@@ -241,6 +252,10 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
     virtual void processLDPHello(Packet *msg);
     virtual void processHelloTimeout(cMessage *msg);
+    // KeepAlive-based session liveness (RFC 5036 Section 2.5.6); see peer_info's
+    // keepAliveSendTimer/sessionHoldTimer fields for the division of labor
+    virtual void processKeepAliveSendTimeout(cMessage *msg);
+    virtual void processSessionHoldTimeout(cMessage *msg);
     virtual void processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket);
 
     virtual void processINITIALIZATION(Ptr<const LdpPacket>& ldpPacket);
