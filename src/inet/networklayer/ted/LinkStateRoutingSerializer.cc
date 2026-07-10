@@ -9,17 +9,18 @@
 #include <cstring>
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
+#include "inet/networklayer/ted/Ted.h" // for Ted::MAX_SRLGS, the single source of truth for the srlgs[] cap
 
 namespace inet {
 
 Register_Serializer(LinkStateMsg, LinkStateRoutingSerializer);
 
 // ===========================================================================
-// LinkStateSerializer format v1 -- NOT an RFC wire format; see the class
+// LinkStateSerializer format v2 -- NOT an RFC wire format; see the class
 // comment in LinkStateRoutingSerializer.h. This is the ONE place the
 // per-record byte layout is defined.
 //
-// TeLinkStateInfo record (116 bytes, Ted.msg field order):
+// TeLinkStateInfo record (164 bytes, Ted.msg field order):
 //
 //   Field              Wire width   Notes
 //   -----              ----------   -----
@@ -41,32 +42,49 @@ Register_Serializer(LinkStateMsg, LinkStateRoutingSerializer);
 //   sourceId           4
 //   messageId          4
 //   state              1            bool as uint8 (0/1)
-//   pad                3            reserved, always 0 -- rounds the record
-//                                   up to a 4-byte boundary (113 data bytes
-//                                   -> 116)
+//   pad                3            reserved, always 0 -- rounds the v1
+//                                   portion up to a 4-byte boundary (113 data
+//                                   bytes -> 116; this is the v1/v2 boundary)
+//   ----- v2 additions (D3: TE metric/administrative group/SRLGs) -----
+//   teMetric           8            IEEE-754 double, raw bit pattern; 0 means
+//                                   "fall back to metric", see Ted::getTeMetric()
+//   adminGroup         4            uint32, RFC 3630 Section 2.5.9-style color bits
+//   srlgsCount         4            uint32, number of valid entries in srlgs[]
+//                                   below (0..Ted::MAX_SRLGS)
+//   srlgs[MAX_SRLGS]   32 (8x4)     uint32 each; entries at index >= srlgsCount
+//                                   are always 0 and ignored on read. MAX_SRLGS
+//                                   (8) must match Ted::MAX_SRLGS (Ted.h) and
+//                                   the fixed array size in Ted.msg.
 //   -----
-//   total              116
+//   total              164          (116 v1 bytes + 48 v2 bytes; 48 is
+//                                   already a multiple of 4, so no additional
+//                                   padding is needed to keep the record
+//                                   4-byte aligned)
 //
-// Message = 4-byte header (command, flags, count) + count * 116-byte records.
+// Message = 4-byte header (command, flags, count) + count * 164-byte records.
 //
 // LinkStateRouting.cc previously computed the chunk length as a bare
 // B(72) * recordCount, with no message header and a per-record width (72)
 // that does not correspond to any real field-by-field encoding of
 // TeLinkStateInfo (72 < 113 data bytes -- it looks like a leftover
-// placeholder guess predating any serializer). This commit corrects that
-// formula to B(4) + B(116) * recordCount to match this serializer's actual
-// byte output (RsvpTe.cc's compute*MessageLength() precedent: the serializer
-// is the source of truth, the model's setChunkLength() call must match it).
-// Every MPLS example floods LinkStateMsg at startup (MplsRouterBase.ned wires
-// LinkStateRouting unconditionally, and LinkStateRouting::initialize()
-// schedules an announce independent of which signaling protocol -- LDP or
-// RSVP-TE -- the router actually uses), so all 7 fingerprint rows are
-// expected to move, not just the RSVP-TE ones.
+// placeholder guess predating any serializer). A prior commit corrected that
+// formula to B(4) + B(116) * recordCount (format v1) to match this
+// serializer's actual byte output (RsvpTe.cc's compute*MessageLength()
+// precedent: the serializer is the source of truth, the model's
+// setChunkLength() call must match it). This commit grows the per-record
+// width to 164 bytes for the D3 TE-attribute fields; LinkStateRouting.cc's
+// formula is updated in lockstep. Every MPLS example floods LinkStateMsg at
+// startup (MplsRouterBase.ned wires LinkStateRouting unconditionally, and
+// LinkStateRouting::initialize() schedules an announce independent of which
+// signaling protocol -- LDP or RSVP-TE -- the router actually uses), so all
+// fingerprint rows that exercise the MPLS examples/showcases are expected to
+// move (both the serialization ingredients from the wider record, and
+// possibly `tplx` from the larger packets taking longer to transmit).
 // ===========================================================================
 
 namespace {
 
-constexpr int RECORD_BYTES = 116;
+constexpr int RECORD_BYTES = 164;
 
 // See RsvpTeSerializer.cc: C++17 has no std::bit_cast; memcpy-based
 // reinterpretation is the portable way to punch IEEE-754 bits into/out of an
@@ -98,6 +116,14 @@ void LinkStateRoutingSerializer::serializeLinkStateInfo(MemoryOutputStream& stre
     stream.writeByte(info.state ? 1 : 0);
     stream.writeByte(0); // pad
     stream.writeUint16Be(0); // pad
+    // --- v2 additions (D3) ---
+    stream.writeUint64Be(bitCast<uint64_t>(info.teMetric));
+    stream.writeUint32Be(info.adminGroup);
+    if ((int)info.srlgsCount > Ted::MAX_SRLGS)
+        throw cRuntimeError("LinkStateRoutingSerializer: TeLinkStateInfo.srlgsCount=%u exceeds MAX_SRLGS=%d", info.srlgsCount, Ted::MAX_SRLGS);
+    stream.writeUint32Be(info.srlgsCount);
+    for (int i = 0; i < Ted::MAX_SRLGS; i++)
+        stream.writeUint32Be(i < (int)info.srlgsCount ? info.srlgs[i] : 0);
 }
 
 TeLinkStateInfo LinkStateRoutingSerializer::deserializeLinkStateInfo(MemoryInputStream& stream)
@@ -118,6 +144,17 @@ TeLinkStateInfo LinkStateRoutingSerializer::deserializeLinkStateInfo(MemoryInput
     info.state = stream.readByte() != 0;
     stream.readByte(); // pad
     stream.readUint16Be(); // pad
+    // --- v2 additions (D3) ---
+    info.teMetric = bitCast<double>(stream.readUint64Be());
+    info.adminGroup = stream.readUint32Be();
+    info.srlgsCount = stream.readUint32Be();
+    if ((int)info.srlgsCount > Ted::MAX_SRLGS)
+        throw cRuntimeError("LinkStateRoutingSerializer: received srlgsCount=%u exceeds MAX_SRLGS=%d -- corrupt or incompatible wire data", info.srlgsCount, Ted::MAX_SRLGS);
+    for (int i = 0; i < Ted::MAX_SRLGS; i++) {
+        uint32_t value = stream.readUint32Be();
+        if (i < (int)info.srlgsCount)
+            info.srlgs[i] = value;
+    }
     return info;
 }
 

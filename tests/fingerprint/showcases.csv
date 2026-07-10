@@ -38,9 +38,9 @@
 /showcases/mobility/spatial/,        -f omnetpp.ini -c Spiral -r 0,                 100s,         d129-5465/tplx;0000-0000/~tNl;0000-0000/~tND;d7a7-dd7c/tyf, PASS,
 /showcases/mobility/spatial/,        -f omnetpp.ini -c Drone -r 0,                  100s,         9475-d04c/tplx;0000-0000/~tNl;0000-0000/~tND;1ec0-fec3/tyf, PASS,
 
-/showcases/mpls/te/,                 -f omnetpp.ini -c ExplicitRouteBandwidth -r 0, 3s,           1e1a-4575/tplx;3e2b-6da4/~tNl;ac6e-e6a4/~tND;3052-5de0/tyf, PASS, Ipv4
-/showcases/mpls/te/,                 -f omnetpp.ini -c PriorityPreemption -r 0,     4s,           3222-056f/tplx;7386-c684/~tNl;f83b-0bb0/~tND;ff75-d643/tyf, PASS, Ipv4
-/showcases/mpls/te/,                 -f omnetpp.ini -c FailureReroute -r 0,         6s,           788f-56ac/tplx;fe66-85ab/~tNl;45c5-3a34/~tND;38a5-b966/tyf, PASS, Ipv4
+/showcases/mpls/te/,                 -f omnetpp.ini -c ExplicitRouteBandwidth -r 0, 3s,           e713-0dee/tplx;29ea-c57f/~tNl;cab0-b094/~tND;cb8b-a23a/tyf, PASS, Ipv4
+/showcases/mpls/te/,                 -f omnetpp.ini -c PriorityPreemption -r 0,     4s,           9076-6c73/tplx;c07f-a751/~tNl;1d96-3202/~tND;4d4c-1a12/tyf, PASS, Ipv4
+/showcases/mpls/te/,                 -f omnetpp.ini -c FailureReroute -r 0,         6s,           81d7-7329/tplx;3d28-900e/~tNl;a95b-b02d/~tND;c3d7-62d3/tyf, PASS, Ipv4
 
 # /showcases/routing/manet/,           -f omnetpp.ini -c MobileNodesBase -r 0,        100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # MobileNodesBase extended
 /showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         d4f1-1c35/tplx;c268-fae7/~tNl;5a70-e33f/~tND;cfeb-1d46/tyf, PASS,    wireless Ipv4

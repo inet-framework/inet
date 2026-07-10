@@ -7,6 +7,8 @@
 #include "inet/networklayer/ted/Ted.h"
 
 #include <algorithm>
+#include <cstdlib>
+#include <map>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
@@ -54,6 +56,26 @@ void Ted::initializeTED()
 {
     routerId = rt->getRouterId();
     ASSERT(!routerId.isUnspecified());
+
+    //
+    // Parse optional per-interface TE-attribute overrides (D3: teMetric,
+    // adminGroup, srlgs -- see Ted.ned's "linkAttributes" param doc for the
+    // XML schema). Interfaces not mentioned keep the defaults (teMetric=0,
+    // i.e. fall back to `metric`; adminGroup=0; no SRLGs). Unknown interface
+    // names are a configuration error and abort with a cRuntimeError that
+    // includes the offending element's source location.
+    //
+    std::map<std::string, cXMLElement *> linkAttrsByInterface;
+    cXMLElement *linkAttributesXml = par("linkAttributes").xmlValue();
+    for (cXMLElement *linkElem : linkAttributesXml->getChildrenByTagName("link")) {
+        const char *ifName = linkElem->getAttribute("interface");
+        if (!ifName)
+            throw cRuntimeError("Ted's linkAttributes has a <link> element missing the mandatory 'interface' attribute, at %s", linkElem->getSourceLocation());
+        if (!ift->findInterfaceByName(ifName))
+            throw cRuntimeError("Ted's linkAttributes refers to unknown interface '%s', at %s", ifName, linkElem->getSourceLocation());
+        if (!linkAttrsByInterface.emplace(ifName, linkElem).second)
+            throw cRuntimeError("Ted's linkAttributes has more than one <link> entry for interface '%s', at %s", ifName, linkElem->getSourceLocation());
+    }
 
     //
     // Extract initial TED contents from the routing table.
@@ -119,6 +141,31 @@ void Ted::initializeTED()
         entry.sourceId = routerId.getInt();
         entry.messageId = ++maxMessageId;
         entry.timestamp = simTime();
+
+        // D3: apply this interface's TE-attribute overrides, if any (defaults
+        // already set by the generated constructor: teMetric=0, adminGroup=0,
+        // srlgsCount=0, srlgs all-zero).
+        auto linkAttrIt = linkAttrsByInterface.find(ie->getInterfaceName());
+        if (linkAttrIt != linkAttrsByInterface.end()) {
+            cXMLElement *linkElem = linkAttrIt->second;
+            if (const char *teMetricAttr = linkElem->getAttribute("teMetric"))
+                entry.teMetric = atof(teMetricAttr);
+            if (const char *adminGroupAttr = linkElem->getAttribute("adminGroup"))
+                entry.adminGroup = strtoul(adminGroupAttr, nullptr, 0);
+            if (const char *srlgsAttr = linkElem->getAttribute("srlgs")) {
+                cStringTokenizer tokenizer(srlgsAttr);
+                std::vector<uint32_t> srlgs;
+                const char *token;
+                while ((token = tokenizer.nextToken()) != nullptr)
+                    srlgs.push_back(strtoul(token, nullptr, 0));
+                if ((int)srlgs.size() > Ted::MAX_SRLGS)
+                    throw cRuntimeError("Ted's linkAttributes for interface '%s' lists %zu SRLGs, more than the MAX_SRLGS=%d limit, at %s",
+                            ie->getInterfaceName(), srlgs.size(), Ted::MAX_SRLGS, linkElem->getSourceLocation());
+                entry.srlgsCount = srlgs.size();
+                for (size_t k = 0; k < srlgs.size(); k++)
+                    entry.srlgs[k] = srlgs[k];
+            }
+        }
 
         ted.push_back(entry);
     }

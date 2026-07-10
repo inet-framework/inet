@@ -54,6 +54,7 @@ simple Ted extends SimpleModule
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;  // The path to the RoutingTable module
         bool installRoutes = default(true); // Whether Ted installs/maintains host routes in the routing table from its link-state database (see class documentation for the coexistence story)
+        xml linkAttributes = default(xml("<links/>")); // optional per-interface TE-attribute overrides, e.g. <links><link interface="eth0" teMetric="10" adminGroup="0x3" srlgs="7 12"/></links>; unlisted interfaces get teMetric=0 (falls back to `metric`) and adminGroup=0/no SRLGs
         @display("i=block/table");
         @signal[tedChanged](type=inet::TedChangeInfo); // emitted by setLinkState()/announceLinkChange() whenever a link's liveness or bandwidth changes; ~LinkStateRouting subscribes at the host level to flood the change
 }

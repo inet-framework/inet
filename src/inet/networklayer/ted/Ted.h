@@ -27,6 +27,14 @@ class NetworkInterface;
 class INET_API Ted : public RoutingProtocolBase
 {
   public:
+    // Cap on the number of SRLGs a single TeLinkStateInfo can carry (D3).
+    // TeLinkStateInfo.srlgs[] is a fixed-size array (see Ted.msg -- `struct`
+    // msg types don't support true dynamic arrays); this constant is the
+    // single source of truth, kept in sync with the array's literal size in
+    // Ted.msg and with LinkStateRoutingSerializer's wire layout.
+    static constexpr int MAX_SRLGS = 8;
+
+  public:
     /**
      * Only used internally, during shortest path calculation:
      * vertex in the graph we build from links in TeLinkStateInfoVector.
@@ -122,6 +130,26 @@ class INET_API Ted : public RoutingProtocolBase
     // about topology discovery, not liveness ownership.
     virtual bool checkLinkValidity(TeLinkStateInfo link, TeLinkStateInfo *& match);
     virtual void updateTimestamp(int index);
+    //@}
+
+    /** @name TE attribute query helpers (D3)
+     * Not consumed anywhere yet in this workstream -- CSPF-with-affinities
+     * (Workstream C6) and TI-LFA (Workstream F2) are the intended callers.
+     * Static because they only look at the fields already carried by a
+     * TeLinkStateInfo record (populated by initializeTED() from the
+     * "linkAttributes" NED param, or defaulted to 0/empty).
+     */
+    //@{
+    // teMetric==0 means "not configured"; fall back to the IGP metric.
+    static double getTeMetric(const TeLinkStateInfo& link) { return link.teMetric != 0 ? link.teMetric : link.metric; }
+
+    // RFC 3209 Section 4.7.4-style affinity match: the link's adminGroup bits
+    // must intersect includeAny (or includeAny==0, meaning "no include
+    // constraint"), and must not intersect excludeAny.
+    static bool matchesAffinity(const TeLinkStateInfo& link, uint32_t includeAny, uint32_t excludeAny)
+    {
+        return (includeAny == 0 || (link.adminGroup & includeAny) != 0) && (link.adminGroup & excludeAny) == 0;
+    }
     //@}
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;

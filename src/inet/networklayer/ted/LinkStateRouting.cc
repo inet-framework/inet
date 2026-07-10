@@ -182,6 +182,15 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, Ipv4Address sender)
                     match->UnResvBandwidth[i] = link.UnResvBandwidth[i];
                 match->MaxBandwidth = link.MaxBandwidth;
                 match->metric = link.metric;
+                // D3: TE attributes ride along with the rest of the link-state
+                // record, same as metric/bandwidth above (all current examples
+                // leave these at their all-zero defaults, so this is a no-op
+                // in practice today; it matters once linkAttributes is used).
+                match->teMetric = link.teMetric;
+                match->adminGroup = link.adminGroup;
+                match->srlgsCount = link.srlgsCount;
+                for (unsigned int i = 0; i < link.srlgsCount; i++)
+                    match->srlgs[i] = link.srlgs[i];
             }
 
             forward.push_back(link);
@@ -237,14 +246,14 @@ void LinkStateRouting::sendToPeer(Ipv4Address peer, const std::vector<TeLinkStat
         out->setLinkInfo(j, list[j]);
 
     out->setRequest(req);
-    // Message header (4: command + flags + count) + one 116-byte TeLinkStateInfo
-    // record per link (see LinkStateRoutingSerializer.cc's format v1 layout,
+    // Message header (4: command + flags + count) + one 164-byte TeLinkStateInfo
+    // record per link (see LinkStateRoutingSerializer.cc's format v2 layout,
     // which this formula must stay in sync with -- the serializer is the
-    // source of truth). Was a bare B(72) * count with no header and a
-    // per-record width that didn't correspond to any real field encoding
-    // (TeLinkStateInfo needs 113 bytes field-for-field); corrected here now
-    // that a serializer exists to derive the true byte count from.
-    B length = B(4) + B(116) * out->getLinkInfoArraySize();
+    // source of truth). Was 116 bytes/record (format v1) before D3 added the
+    // teMetric/adminGroup/srlgs fields; before any serializer existed it was a
+    // bare B(72) * count with no header and a per-record width that didn't
+    // correspond to any real field encoding.
+    B length = B(4) + B(164) * out->getLinkInfoArraySize();
     out->setChunkLength(length);
     pk->insertAtBack(out);
 
