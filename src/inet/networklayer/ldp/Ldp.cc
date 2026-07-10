@@ -102,6 +102,7 @@ void Ldp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         holdTime = par("holdTime");
         helloInterval = par("helloInterval");
+        advertiseImplicitNull = par("advertiseImplicitNull");
 
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -355,17 +356,31 @@ void Ldp::updateFecListEntry(Ldp::fec_t oldItem)
         int inInterface = findInterfaceFromPeerAddr(uit->peer);
         int outInterface = findInterfaceFromPeerAddr(oldItem.nextHop);
         if (ER) {
-            // we are egress, that's easy:
-            LabelOpVector outLabel = LibTable::popLabel();
-            uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
+            if (advertiseImplicitNull) {
+                // penultimate hop popping: advertise the implicit null label
+                // instead of allocating a local pop entry -- our upstream peer
+                // must pop the label itself, so no labeled traffic for this
+                // FEC should ever reach us
+                uit->label = IMPLICIT_NULL_LABEL;
+                EV_INFO << "advertising implicit null label (penultimate hop popping) for inInterface=" << inInterface
+                        << " outInterface=" << outInterface << endl;
+            }
+            else {
+                // we are egress, that's easy:
+                LabelOpVector outLabel = LibTable::popLabel();
+                uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
 
-            EV_DETAIL << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
-                      << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
+                EV_DETAIL << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
+                          << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
+            }
             uit++;
         }
         else if (dit != fecDown.end()) {
-            // we have mapping from DS, that's easy
-            LabelOpVector outLabel = LibTable::swapLabel(dit->label);
+            // we have mapping from DS, that's easy -- unless the downstream
+            // peer is itself the egress and advertised the implicit null
+            // label, in which case we are the penultimate hop and must pop
+            // rather than swap to label 3
+            LabelOpVector outLabel = (dit->label == IMPLICIT_NULL_LABEL) ? LibTable::popLabel() : LibTable::swapLabel(dit->label);
             uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
 
             EV_DETAIL << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
@@ -489,9 +504,12 @@ void Ldp::rebuildFecList()
 
                 sendMapping(LABEL_WITHDRAW, _uit.peer, _uit.label, elem.addr, elem.length);
 
-                EV_DETAIL << "removing entry inLabel=" << _uit.label << " from LIB" << endl;
+                // an implicit-null advertisement never allocated a LIB entry
+                if (_uit.label != IMPLICIT_NULL_LABEL) {
+                    EV_DETAIL << "removing entry inLabel=" << _uit.label << " from LIB" << endl;
 
-                lt->removeLibEntry(_uit.label);
+                    lt->removeLibEntry(_uit.label);
+                }
             }
         }
     }
@@ -1113,13 +1131,23 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
     int outInterface = findInterfaceFromPeerAddr(it->nextHop);
 
     if (ER) {
-        // we are egress, that's easy:
-        LabelOpVector outLabel = LibTable::popLabel();
+        if (advertiseImplicitNull) {
+            // penultimate hop popping: advertise the implicit null label
+            // instead of allocating a local pop entry -- our upstream peer
+            // must pop the label itself, so no labeled traffic for this
+            // FEC should ever reach us
+            uit->label = IMPLICIT_NULL_LABEL;
+            EV_INFO << "egress: advertising implicit null label (penultimate hop popping) for FEC " << fec << " to " << srcAddr << endl;
+        }
+        else {
+            // we are egress, that's easy:
+            LabelOpVector outLabel = LibTable::popLabel();
 
-        uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
+            uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
 
-        EV_DETAIL << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
-                  << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
+            EV_DETAIL << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
+                      << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
+        }
 
         // We are egress, let our upstream peer know
         // about it by sending back a Label Mapping message
@@ -1127,8 +1155,11 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
         sendMapping(LABEL_MAPPING, srcAddr, uit->label, fec.addr, fec.length);
     }
     else if (dit != fecDown.end()) {
-        // we have mapping from DS, that's easy
-        LabelOpVector outLabel = LibTable::swapLabel(dit->label);
+        // we have mapping from DS, that's easy -- unless the downstream peer
+        // is itself the egress and advertised the implicit null label, in
+        // which case we are the penultimate hop and must pop rather than
+        // swap to label 3
+        LabelOpVector outLabel = (dit->label == IMPLICIT_NULL_LABEL) ? LibTable::popLabel() : LibTable::swapLabel(dit->label);
         uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
 
         EV_DETAIL << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
@@ -1179,8 +1210,11 @@ void Ldp::processLABEL_RELEASE(Ptr<const LdpPacket>& ldpPacket)
         return;
     }
 
-    EV_DETAIL << "removing from LIB table label=" << uit->label << endl;
-    lt->removeLibEntry(uit->label);
+    // an implicit-null advertisement never allocated a LIB entry
+    if (uit->label != IMPLICIT_NULL_LABEL) {
+        EV_DETAIL << "removing from LIB table label=" << uit->label << endl;
+        lt->removeLibEntry(uit->label);
+    }
 
     EV_DETAIL << "removing label from list of sent mappings" << endl;
     fecUp.erase(uit);
@@ -1275,7 +1309,9 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
 
         int inInterface = findInterfaceFromPeerAddr(pit->peer);
         int outInterface = findInterfaceFromPeerAddr(fromIP);
-        LabelOpVector outLabel = LibTable::swapLabel(label);
+        // penultimate hop popping: label 3 from our downstream (egress) peer
+        // means we must pop rather than swap to label 3
+        LabelOpVector outLabel = (label == IMPLICIT_NULL_LABEL) ? LibTable::popLabel() : LibTable::swapLabel(label);
 
         fec_bind_t newItem;
         newItem.fecid = it->fecid;
@@ -1355,7 +1391,17 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, int& outInterface
 
         auto dit = findFecEntry(fecDown, elem.fecid, elem.nextHop);
         if (dit != fecDown.end()) {
+            if (dit->label == IMPLICIT_NULL_LABEL) {
+                // penultimate hop popping: our downstream peer for this FEC is
+                // the egress and advertised the implicit null label, meaning
+                // "send me unlabeled traffic". We are ingress and penultimate
+                // hop at once (a one-hop LSP) -- there is nothing to push, so
+                // fall back to regular L3 routing instead.
+                EV_DETAIL << "downstream mapping for this FEC is the implicit null label, no label to push, doing regular L3 routing" << endl;
+                return false;
+            }
             outLabel = LibTable::pushLabel(dit->label);
+            ASSERT(outLabel[0].label != IMPLICIT_NULL_LABEL); // must never push the implicit null label
             outInterfaceId = findInterfaceFromPeerAddr(elem.nextHop);
             EV_DETAIL << "mapping found, outLabel=" << outLabel << ", outInterface=" << outInterfaceId << endl;
             return true;

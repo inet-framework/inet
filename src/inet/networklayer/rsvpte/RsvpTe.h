@@ -151,6 +151,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     simtime_t helloInterval;
     simtime_t helloTimeout;
     simtime_t retryInterval;
+    bool advertiseImplicitNull = true;
 
   protected:
     ModuleRefByPar<Ted> tedmod;

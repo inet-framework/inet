@@ -79,8 +79,14 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     // to L3 so that Ipv4's own hop-count check generates the ICMP Time Exceeded
     void handleTtlExpiry(Packet *packet, int outInterfaceId);
 
-    // returns false if the packet was already fully handled (TTL expiry) and the
-    // caller must not touch it any further
+    // hands a packet that was label-switched off the packet's Ipv4 PacketProtocolTag
+    // up to L3 as if it had just arrived from the network: replaces the stale
+    // DispatchProtocolReq left over from being dispatched here as an MPLS packet
+    // (otherwise the dispatcher between Mpls and Ipv4 loops it straight back here)
+    void deliverToL3(Packet *packet);
+
+    // returns false if the packet was already fully handled (TTL expiry or a
+    // reserved label) and the caller must not touch it any further
     virtual bool doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInterfaceId);
 
     // IInterfaceRegistrationListener:

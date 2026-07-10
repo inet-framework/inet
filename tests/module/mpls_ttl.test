@@ -15,6 +15,20 @@ the identical scenario except for **.LSR*.mpls.ttlModel; see mpls_ttl_pipe.test
 for the negative case (no expiry, because the pipe model does not derive the
 label TTL from the IP TTL).
 
+**.LSR*.ldp.advertiseImplicitNull is pinned to false: with the default (true,
+penultimate hop popping, added later) LSR2 -- the only transit LSR on this
+3-router path -- would install a POP instead of a SWAP for this FEC (its
+downstream peer LSR3 is the egress and advertises the implicit null label),
+so the label TTL would never be decremented via SWAP and this scenario could
+not demonstrate transit-hop expiry at all. Pinning PHP off keeps LSR2 doing a
+real SWAP, independent of that later feature's default.
+
+host1's app is started only at t=1s (well after LDP has converged, judging by
+the doStackOps traces): the FEC binding for host1->host2 is briefly unstable
+while sessions are still forming, and a packet sent during that window can
+transiently resolve to a not-yet-final label; starting after convergence
+avoids that race so the SWAP at LSR2 is deterministic.
+
 Before RFC 3443 TTL processing was implemented, Mpls::doStackOps never touched
 the MplsHeader's ttl field at all (it stayed at its zero default), so the
 "MPLS label TTL expired" line asserted below did not exist anywhere in the
@@ -39,6 +53,7 @@ cmdenv-express-mode = false
 **.host1.app[0].destPort = 100
 **.host1.app[0].messageLength = 128 bytes
 **.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].startTime = 1s
 **.host1.app[0].destAddresses = "host2"
 **.host1.app[0].timeToLive = 1
 
@@ -70,6 +85,7 @@ cmdenv-express-mode = false
 
 **.LSR*.holdTime = 6s
 **.LSR*.helloInterval = 2s
+**.LSR*.ldp.advertiseImplicitNull = false
 
 **.scenarioManager.script = xml("<scenario/>")
 

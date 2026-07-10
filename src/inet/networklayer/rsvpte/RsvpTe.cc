@@ -74,6 +74,7 @@ void RsvpTe::initialize(int stage)
         maxRsbId = 0;
         maxSrcInstance = 0;
         retryInterval = 1.0;
+        advertiseImplicitNull = par("advertiseImplicitNull");
         WATCH(maxPsbId);
         WATCH(maxRsbId);
         WATCH(maxSrcInstance);
@@ -844,7 +845,9 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
 
                     sendPathErrorMessage(psb, PATH_ERR_PREEMPTED);
 
-                    lt->removeLibEntry(oldInLabel);
+                    // an implicit-null advertisement never allocated a LIB entry
+                    if (oldInLabel != IMPLICIT_NULL_LABEL)
+                        lt->removeLibEntry(oldInLabel);
                 }
                 else {
                     // path not established yet, report as unfeasible
@@ -883,22 +886,38 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
         // outlabel and outgoing interface
 
         LabelOp lop;
+        int inLabel;
 
         if (tedmod->isLocalAddress(psb->OutInterface)) {
             // regular next hop
 
-            lop.optcode = IR ? PUSH_OPER : SWAP_OPER;
-            lop.label = rsb->FlowDescriptor[i].label;
+            if (rsb->FlowDescriptor[i].label == IMPLICIT_NULL_LABEL) {
+                // penultimate hop popping: our downstream peer for this FEC
+                // advertised the implicit null label, so we must pop rather
+                // than push or swap to label 3
+                ASSERT(!IR); // the ingress must never push the implicit null label
+                lop.optcode = POP_OPER;
+            }
+            else {
+                lop.optcode = IR ? PUSH_OPER : SWAP_OPER;
+                lop.label = rsb->FlowDescriptor[i].label;
+            }
             outLabel.push_back(lop);
 
             outInterfaceId = rt->getInterfaceByAddress(psb->OutInterface)->getInterfaceId();
+
+            EV_DETAIL << "installing label for " << lspid << " outLabel=" << outLabel
+                      << " outInterface=" << outInterfaceId << endl;
+
+            ASSERT(rsb->inLabelVector.size() == rsb->FlowDescriptor.size());
+
+            inLabel = lt->installLibEntry(rsb->inLabelVector[i], inInterfaceId,
+                        outLabel, outInterfaceId);
+
+            ASSERT(inLabel >= 0);
         }
         else {
             // egress router
-
-            lop.label = 0;
-            lop.optcode = POP_OPER;
-            outLabel.push_back(lop);
 
             outInterfaceId = CHK(ift->findInterfaceByName("lo0"))->getInterfaceId();
 
@@ -907,17 +926,31 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
                 if (ie)
                     outInterfaceId = ie->getInterfaceId();
             }
+
+            if (advertiseImplicitNull) {
+                // penultimate hop popping: advertise the implicit null label
+                // instead of allocating a local pop entry -- our upstream
+                // peer must pop the label itself, so no labeled traffic for
+                // this tunnel should ever reach us
+                EV_INFO << "advertising implicit null label (penultimate hop popping) for lspid=" << lspid << endl;
+                inLabel = IMPLICIT_NULL_LABEL;
+            }
+            else {
+                lop.label = 0;
+                lop.optcode = POP_OPER;
+                outLabel.push_back(lop);
+
+                EV_DETAIL << "installing label for " << lspid << " outLabel=" << outLabel
+                          << " outInterface=" << outInterfaceId << endl;
+
+                ASSERT(rsb->inLabelVector.size() == rsb->FlowDescriptor.size());
+
+                inLabel = lt->installLibEntry(rsb->inLabelVector[i], inInterfaceId,
+                            outLabel, outInterfaceId);
+
+                ASSERT(inLabel >= 0);
+            }
         }
-
-        EV_DETAIL << "installing label for " << lspid << " outLabel=" << outLabel
-                  << " outInterface=" << outInterfaceId << endl;
-
-        ASSERT(rsb->inLabelVector.size() == rsb->FlowDescriptor.size());
-
-        int inLabel = lt->installLibEntry(rsb->inLabelVector[i], inInterfaceId,
-                    outLabel, outInterfaceId);
-
-        ASSERT(inLabel >= 0);
 
         if (IR && rsb->inLabelVector[i] == -1) {
             // path established
@@ -1021,7 +1054,8 @@ void RsvpTe::removeRsbFilter(ResvStateBlock *rsb, unsigned int index)
 
     EV_INFO << "removing filter (lspid=" << lspid << ")" << endl;
 
-    if (inLabel != -1)
+    // an implicit-null advertisement never allocated a LIB entry
+    if (inLabel != -1 && inLabel != IMPLICIT_NULL_LABEL)
         lt->removeLibEntry(inLabel);
 
     rsb->FlowDescriptor.erase(rsb->FlowDescriptor.begin() + index);

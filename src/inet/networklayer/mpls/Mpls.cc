@@ -197,14 +197,14 @@ void Mpls::handleTtlExpiry(Packet *packet, int outInterfaceId)
     // so the outgoing interface resolved by the label lookup is supplied explicitly to
     // avoid a spurious "destination unreachable" -- Ipv4::fragmentAndSend's own
     // hop-count check then generates the real ICMP Time Exceeded
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
+    deliverToL3(packet);
+}
 
-    // the packet still carries the DispatchProtocolReq that routed it here as an MPLS
-    // packet; replace it (matching the freshly-set ipv4 PacketProtocolTag) so the
-    // dispatcher between Mpls and Ipv4 delivers it to Ipv4 instead of looping it
-    // straight back to this module
+void Mpls::deliverToL3(Packet *packet)
+{
     packet->removeTagIfPresent<DispatchProtocolReq>();
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
     sendToL3(packet);
 }
 
@@ -281,13 +281,33 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 {
     int incomingInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
     const auto& mplsHeader = packet->peekAtFront<MplsHeader>();
+    uint32_t label = mplsHeader->getLabel();
 
-    EV_INFO << "Received " << packet << " from L2, label=" << mplsHeader->getLabel() << " inInterface=" << ift->getInterfaceById(incomingInterfaceId)->getInterfaceName() << endl;
+    EV_INFO << "Received " << packet << " from L2, label=" << label << " inInterface=" << ift->getInterfaceById(incomingInterfaceId)->getInterfaceName() << endl;
+
+    if (label == IPV4_EXPLICIT_NULL_LABEL) {
+        // RFC 3032: the explicit null label always means "pop and process the
+        // datagram as ordinary IPv4", regardless of what the LIB says
+        EV_INFO << "explicit null label, popping and delivering to L3" << endl;
+        popLabel(packet);
+        packet->trim();
+        deliverToL3(packet);
+        return;
+    }
+    if (label > IMPLICIT_NULL_LABEL && label <= RESERVED_LABEL_MAX) {
+        // RFC 3032: labels 4-15 are reserved but currently unassigned
+        EV_WARN << "discarding packet with unassigned reserved label " << label << endl;
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
+    }
 
     LabelOpVector outLabel;
     int outInterfaceId;
 
-    bool found = lt->resolveLabel(incomingInterfaceId, mplsHeader->getLabel(), outLabel, outInterfaceId);
+    bool found = lt->resolveLabel(incomingInterfaceId, label, outLabel, outInterfaceId);
     if (!found) {
         EV_INFO << "discarding packet, incoming label not resolved" << endl;
 
