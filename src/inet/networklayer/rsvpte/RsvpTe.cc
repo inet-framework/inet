@@ -50,8 +50,15 @@ constexpr int RSVP_HOP_OBJECT_BYTES = 12;
 constexpr int TIME_VALUES_OBJECT_BYTES = 8;
 constexpr int LABEL_REQUEST_OBJECT_BYTES = 8;
 constexpr int SENDER_TEMPLATE_OBJECT_BYTES = 12; // also used for FILTER_SPEC (same C-Type)
-constexpr int SENDER_TSPEC_OBJECT_BYTES = 40;
-constexpr int FLOWSPEC_OBJECT_BYTES = 40;
+// RFC 2210 Section 3.1 (SENDER_TSPEC) / 3.2.1 (FLOWSPEC, Controlled-Load): the
+// Int-Serv content is exactly 8 32-bit words (message header + per-service
+// header + per-parameter header + the 5 token-bucket parameters r/b/p/m/M) =
+// 32 bytes, plus the 4-byte outer RSVP object header = 36. Corrected from an
+// earlier 40 (Workstream E, Phase 2 commit 3): the wire serializer's object
+// layout table exposed a 1-word (4-byte) overcount against the RFC diagram --
+// verified directly against RFC 2210 text, not re-derived from guesswork.
+constexpr int SENDER_TSPEC_OBJECT_BYTES = 36;
+constexpr int FLOWSPEC_OBJECT_BYTES = 36;
 constexpr int LABEL_OBJECT_BYTES = 8;
 constexpr int STYLE_OBJECT_BYTES = 8;
 constexpr int ERROR_SPEC_OBJECT_BYTES = 12;
