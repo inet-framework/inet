@@ -93,6 +93,9 @@ simple RsvpTe extends SimpleModule
         string peers = default("auto"); // "auto" (default) derives the RSVP peers from the TED (every directly-connected RSVP-speaking neighbour); otherwise a space-separated list of the interface names towards the RSVP peers
         double helloInterval @unit(s);
         double helloTimeout @unit(s);
+        double refreshInterval @unit(s) = default(30s); // RFC 2205's R: nominal PSB/RSB refresh period; each actual refresh is scheduled at a jittered uniform(0.5, 1.5) * refreshInterval per RFC 2205 Section 3.7
+        int stateLifetimeFactor = default(3); // RFC 2205's K: PSB/RSB state expires (if not refreshed) after (K + 0.5) * 1.5 * refreshInterval
+        double retryInterval @unit(s) = default(1s); // delay before retrying a permanent path whose ingress PSB couldn't be created (model-specific, not an RFC 2205 value)
         bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a tunnel
         @display("i=block/control");
         @signal[tedChanged](type=inet::TedChangeInfo);

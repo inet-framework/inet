@@ -23,12 +23,6 @@
 
 namespace inet {
 
-#define PSB_REFRESH_INTERVAL       5.0
-#define RSB_REFRESH_INTERVAL       6.0
-
-#define PSB_TIMEOUT_INTERVAL       16.0
-#define RSB_TIMEOUT_INTERVAL       19.0
-
 #define PATH_ERR_UNFEASIBLE        1
 #define PATH_ERR_PREEMPTED         2
 #define PATH_ERR_NEXTHOP_FAILED    3
@@ -73,11 +67,15 @@ void RsvpTe::initialize(int stage)
         maxPsbId = 0;
         maxRsbId = 0;
         maxSrcInstance = 0;
-        retryInterval = 1.0;
+        refreshInterval = par("refreshInterval");
+        stateLifetimeFactor = par("stateLifetimeFactor");
+        retryInterval = par("retryInterval");
         advertiseImplicitNull = par("advertiseImplicitNull");
         WATCH(maxPsbId);
         WATCH(maxRsbId);
         WATCH(maxSrcInstance);
+        WATCH(refreshInterval);
+        WATCH(stateLifetimeFactor);
         WATCH(retryInterval);
         WATCH(routerId);
     }
@@ -508,7 +506,7 @@ void RsvpTe::processPSB_TIMER(PsbTimerMsg *msg)
     ASSERT(psb);
 
     refreshPath(psb);
-    scheduleRefreshTimer(psb, PSB_REFRESH_INTERVAL);
+    scheduleRefreshTimer(psb, uniform(0.5, 1.5) * refreshInterval);
 }
 
 void RsvpTe::processPSB_TIMEOUT(PsbTimeoutMsg *msg)
@@ -536,7 +534,7 @@ void RsvpTe::processRSB_REFRESH_TIMER(RsbRefreshTimerMsg *msg)
     else {
         refreshResv(rsb);
 
-        scheduleRefreshTimer(rsb, RSB_REFRESH_INTERVAL);
+        scheduleRefreshTimer(rsb, uniform(0.5, 1.5) * refreshInterval);
     }
 }
 
@@ -1932,7 +1930,8 @@ void RsvpTe::sendToIP(Packet *msg, Ipv4Address destAddr)
 void RsvpTe::scheduleTimeout(PathStateBlock *psbEle)
 {
     ASSERT(psbEle);
-    rescheduleAfter(PSB_TIMEOUT_INTERVAL, psbEle->timeoutMsg);
+    // RFC 2205 Section 3.7: state expires after (K + 0.5) * 1.5 * R if not refreshed
+    rescheduleAfter((stateLifetimeFactor + 0.5) * 1.5 * refreshInterval, psbEle->timeoutMsg);
 }
 
 void RsvpTe::scheduleRefreshTimer(PathStateBlock *psbEle, simtime_t delay)
@@ -1953,7 +1952,8 @@ void RsvpTe::scheduleRefreshTimer(PathStateBlock *psbEle, simtime_t delay)
 void RsvpTe::scheduleTimeout(ResvStateBlock *rsbEle)
 {
     ASSERT(rsbEle);
-    rescheduleAfter(RSB_TIMEOUT_INTERVAL, rsbEle->timeoutMsg);
+    // RFC 2205 Section 3.7: state expires after (K + 0.5) * 1.5 * R if not refreshed
+    rescheduleAfter((stateLifetimeFactor + 0.5) * 1.5 * refreshInterval, rsbEle->timeoutMsg);
 }
 
 void RsvpTe::scheduleRefreshTimer(ResvStateBlock *rsbEle, simtime_t delay)

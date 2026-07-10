@@ -150,6 +150,8 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
     simtime_t helloInterval;
     simtime_t helloTimeout;
+    simtime_t refreshInterval; // RFC 2205's R
+    int stateLifetimeFactor; // RFC 2205's K
     simtime_t retryInterval;
     bool advertiseImplicitNull = true;
 
