@@ -372,42 +372,41 @@ contention rule in the MAC. This is the form production access points face, and 
 Linux ``mac80211`` deficit-airtime scheduler cures; INET models that scheduler as the
 :ned:`AirtimeFairnessQueue`.
 
-A far, rate-adapted slow client
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A rate-adapted client behind a wall
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``[Config DownlinkBase]`` reverses the traffic — the server sources one saturating UDP flow per
 station and the access point relays them over the air — and changes *how* the slow station is
-slow. The uplink configs pin the slow rate by hand. Here ``sta[0]`` is simply placed **far**
-from the access point (~55 m, against ~9 m for the others) on a realistic radio, and rate
-control does the rest:
+slow. The uplink configs pin the slow rate by hand. Here ``sta[0]`` sits close to the others but
+behind a **wall** — a concrete obstacle in the physical environment, between it and the access
+point, that only its link has to cross. :ned:`DielectricObstacleLoss` *attenuates* the signal
+through the wall rather than blocking it, and rate control does the rest:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: # Realistic radio
+   :start-at: # Realistic indoor radio
    :end-at: initialRate = 54Mbps
    :language: ini
 
-At that distance the link can no longer carry 54 Mbps, so **AARF** (Adaptive Auto-Rate Fallback,
-INET's rate-control algorithm — this is the first config to switch rate control on, in place of
-the pinned rate the uplink used) adapts the ``sta[0]`` link down on its own, settling near
-6 Mbps, while the four near clients stay at 54 Mbps. The slow rate now *emerges* from the link,
-as a real distant client's would, instead of being configured.
+Weakened by the wall, the ``sta[0]`` link can no longer carry 54 Mbps, so **AARF** (Adaptive
+Auto-Rate Fallback, INET's rate-control algorithm — this is the first config to switch rate
+control on, in place of the pinned rate the uplink used) adapts it down on its own, settling near
+6 Mbps, while the four unobstructed clients stay at 54 Mbps. The slow rate now *emerges* from a
+blocked link, as for a client in the next room, instead of being configured.
 
-Making a rate that adapts *with distance* takes a realistic radio. INET's default radio *does*
-model rate-dependent packet loss, but with free-space path loss (α = 2) and the default −85 dBm
-sensitivity the signal stays strong enough for 54 Mbps right up to the point where it drops below
-that sensitivity and the link fails outright — the rate never gets room to step down. A steeper
-path-loss exponent (α = 4), an explicit −95 dBm noise floor, and a more sensitive −92 dBm receiver
-stretch the signal-versus-distance curve so a station's SNR falls gradually across the cell: past
-a range each bitrate can no longer be decoded and rate control steps down, giving the
-54→6 Mbps transition a workable span of distance to unfold over.
+For the wall to *slow* the link rather than simply kill it, the radio needs lower rates worth
+falling back to. With INET's default −85 dBm sensitivity sitting well above the noise floor, a
+link is either strong enough for 54 Mbps or below sensitivity and dead — nothing in between.
+Bringing the sensitivity (−92 dBm) and an explicit noise floor (−95 dBm) close together opens that
+middle band, so an attenuated link can settle on any of the lower 802.11g rates instead of
+dropping out; the steeper indoor path loss (α = 4) just keeps the wall a realistic thickness.
 
-A client at the cell edge might also fail to *associate* in the first place, right where the link
-is weakest — which would confound a scheduling experiment with association failures. To keep the
-demo about scheduling, the stations are pre-associated with :ned:`Ieee80211MgmtStaSimplified`.
-And crucially the access point rate-adapts **per client**: INET's rate control keeps separate
-state per destination MAC address, so one AP radio is, at the same instant, a 6 Mbps transmitter
-to ``sta[0]`` and a 54 Mbps transmitter to the other four — the mixed-rate downlink cell that
-makes airtime scheduling necessary in the first place.
+A weak-link client can also fail to *associate* in the first place — which would confound a
+scheduling experiment with association failures. To keep the demo about scheduling, the stations
+are pre-associated with :ned:`Ieee80211MgmtStaSimplified`. And crucially the access point
+rate-adapts **per client**: INET's rate control keeps separate state per destination MAC address,
+so one AP radio is, at the same instant, a 6 Mbps transmitter to ``sta[0]`` and a 54 Mbps
+transmitter to the other four — the mixed-rate downlink cell that makes airtime scheduling
+necessary in the first place.
 
 Frame fairness versus airtime fairness at the AP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -442,7 +441,7 @@ acknowledgment and interframe gaps around it.)
    record:   inet -u Cmdenv -c DownlinkAnomaly     -r 0..2 --repeat=3 --result-dir=results/dl
              inet -u Cmdenv -c DownlinkAirtimeFair -r 0..2 --repeat=3 --result-dir=results/dl
    metric:   sta[i].app[0] packetReceived:count x 0.002 -> Mbps; per-station mean over 3 reps
-   anchor:   structural -- if the Downlink configs or the ~55 m distance change, re-derive
+   anchor:   structural -- if the Downlink configs or the obstacle wall change, re-derive
    plot:     ../dl-chart.py (matplotlib; anomaly red, fix blue; 8x6 in @ dpi 150)
    stamp:    captured 2026-07, INET 4.6
 
