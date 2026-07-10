@@ -57,7 +57,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
      */
     struct PathStateBlock {
         // SESSION object structure
-        SessionObj Session_Object;
+        SessionObj sessionObject;
 
         // SENDER_TEMPLATE structure
         SenderTemplateObj Sender_Template_Object;
@@ -66,7 +66,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         SenderTspecObj Sender_Tspec_Object;
 
         // Previous Hop Ipv4 address from PHOP object
-        Ipv4Address Previous_Hop_Address;
+        Ipv4Address previousHopAddress;
 
         // List of outgoing Interfaces for this (sender, destination) single entry for unicast case
         Ipv4Address OutInterface;
@@ -96,7 +96,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
      */
     struct ResvStateBlock {
         // SESSION object structure
-        SessionObj Session_Object;
+        SessionObj sessionObject;
 
         // Next Hop Ipv4 address from PHOP object
         Ipv4Address Next_Hop_Address;
