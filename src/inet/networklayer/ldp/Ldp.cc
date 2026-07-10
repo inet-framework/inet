@@ -548,10 +548,9 @@ void Ldp::sendHelloTo(Ipv4Address dest)
     hello->setChunkLength(LDP_HELLO_BYTES);
     hello->setType(HELLO);
     hello->setSenderAddress(rt->getRouterId());
-//    hello->setReceiverAddress(...);
+    // receiverAddress (targeted hellos) and the R-bit/T-bit (LDP hello state machine
+    // extensions) are not modeled; left at their default (unset/false) values
     hello->setHoldTime(SIMTIME_DBL(holdTime));
-//    hello->setRbit(...);
-//    hello->setTbit(...);
     pk->insertAtBack(hello);
 
     if (dest.isMulticast()) {
@@ -649,7 +648,6 @@ void Ldp::processLDPHello(Packet *msg)
     ASSERT(socketId == udpSocket.getSocketId());
 
     const auto& ldpHello = msg->peekAtFront<LdpHello>();
-//    Ipv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     Ipv4Address peerAddr = ldpHello->getSenderAddress();
     double receivedHoldTime = ldpHello->getHoldTime();
     int interfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
@@ -840,13 +838,11 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
             break;
 
         case ADDRESS:
-//            processADDRESS(ldpPacket);
             // Address messages are not modeled; RFC 5036 says ignore unsupported messages
             EV_WARN << "ignoring an LDP ADDRESS message (not supported in this model)" << endl;
             break;
 
         case ADDRESS_WITHDRAW:
-//            processADDRESS_WITHDRAW(ldpPacket);
             EV_WARN << "ignoring an LDP ADDRESS_WITHDRAW message (not supported in this model)" << endl;
             break;
 
@@ -881,26 +877,11 @@ Ipv4Address Ldp::locateNextHop(Ipv4Address dest)
 {
     // Mapping L3 IP-host of next hop to L2 peer address.
 
-    // Lookup the routing table, rfc3036
-    // "When the FEC for which a label is requested is a Prefix FEC Element or
-    //  a Host Address FEC Element, the receiving LSR uses its routing table to determine
-    //  its response. Unless its routing table includes an entry that exactly matches
-    //  the requested Prefix or Host Address, the LSR must respond with a
-    //  No Route Notification message."
-    //
-    // FIXME the code below (though seems like that's what the RFC refers to) doesn't work
-    // -- we can't reasonably expect the destination host to be exaplicitly in an
-    // LSR's routing table!!! Use simple IP routing instead. --Andras
-    //
-    // Wrong code:
-//    int i;
-//    for (i=0; i < rt->getNumRoutes(); i++)
-//       if (rt->getRoute(i)->host == dest)
-//           break;
-//
-//    if (i == rt->getNumRoutes())
-//        return Ipv4Address();  // Signal an NOTIFICATION of NO ROUTE
-//
+    // RFC 3036 says the receiving LSR should use its routing table to determine its
+    // response, and answer with a No Route Notification unless the table has an entry
+    // that exactly matches the requested Prefix or Host Address. We can't reasonably
+    // expect the destination host to be explicitly in an LSR's routing table, though,
+    // so we use simple IP routing (destination-address lookup) instead. --Andras
     NetworkInterface *ie = rt->getInterfaceForDestAddr(dest);
     if (!ie)
         return Ipv4Address(); // no route
@@ -926,7 +907,6 @@ Ipv4Address Ldp::findPeerAddrFromInterface(int interfaceId)
             if (anEntry->getDestination() == myPeers[k].peerIP && anEntry->getInterface() == ie) {
                 return myPeers[k].peerIP;
             }
-//            addresses->push_back(peerIP[k]);
         }
     }
 
@@ -948,17 +928,6 @@ Ipv4Address Ldp::findPeerAddrFromInterface(int interfaceId)
 // Pre-condition: myPeers vector is finalized
 int Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
 {
-/*
-    int i;
-    for (unsigned int i=0;i<myPeers.size();i++)
-    {
-        if (myPeers[i].peerIP == peerIP)
-            return string(myPeers[i].linkInterface);
-    }
-    return string("X");
- */
-    // Rely on port index to find the interface
-
     // this function is a misnomer, we must recognize our own address too
     if (rt->isLocalAddress(peerIP))
         return CHK(ift->findInterfaceByName("lo0"))->getInterfaceId();
@@ -968,11 +937,6 @@ int Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
         throw cRuntimeError("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
     return ie->getInterfaceId();
 }
-
-//bool Ldp::matches(const FecTlv& a, const FecTlv& b)
-//{
-//  return b.addr.prefixMatches(a, b.length);
-//}
 
 Ldp::FecBindVector::iterator Ldp::findFecEntry(FecBindVector& fecs, int fecid, Ipv4Address peer)
 {

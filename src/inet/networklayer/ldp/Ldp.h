@@ -165,8 +165,6 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
     virtual void sendToPeer(Ipv4Address dest, Packet *msg);
 
-//    bool matches(const FecTlv& a, const FecTlv& b);
-
     FecVector::iterator findFecEntry(FecVector& fecs, Ipv4Address addr, int length);
     FecBindVector::iterator findFecEntry(FecBindVector& fecs, int fecid, Ipv4Address peer);
 

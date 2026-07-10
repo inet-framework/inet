@@ -171,7 +171,6 @@ RsvpTe::~RsvpTe()
 void RsvpTe::initialize(int stage)
 {
     RoutingProtocolBase::initialize(stage);
-    // TODO INITSTAGE
     if (stage == INITSTAGE_LOCAL) {
         tedmod.reference(this, "tedModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -776,9 +775,6 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
         if (elem.Previous_Hop_Address != PHOP)
             continue;
 
-        //if (it->LIH != LIH)
-//         continue;
-
         if (elem.Session_Object != rsbEle->Session_Object)
             continue;
 
@@ -1077,7 +1073,6 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
         int inInterfaceId, outInterfaceId;
 
         bool IR = (psb->Previous_Hop_Address == routerId);
-//        bool ER = psb->OutInterface.isUnspecified();
         if (!IR) {
             Ipv4Address localInf = tedmod->getInterfaceAddrByPeerAddress(psb->Previous_Hop_Address);
             inInterfaceId = rt->getInterfaceByAddress(localInf)->getInterfaceId();
@@ -1302,7 +1297,7 @@ void RsvpTe::removePSB(PathStateBlock *psb)
 
     EV_INFO << "removing PSB " << psb->id << " (lspid " << lspid << ")" << endl;
 
-    // remove reservation state if exists **************************************
+    // remove reservation state if exists
 
     unsigned int filterIndex;
     ResvStateBlock *rsb = findRSB(psb->Session_Object, psb->Sender_Template_Object, filterIndex);
@@ -1312,7 +1307,7 @@ void RsvpTe::removePSB(PathStateBlock *psb)
         removeRsbFilter(rsb, filterIndex);
     }
 
-    // proceed with actual removal *********************************************
+    // proceed with actual removal
 
     cancelAndDelete(psb->timerMsg);
     cancelAndDelete(psb->timeoutMsg);
@@ -1426,7 +1421,6 @@ RsvpTe::PathStateBlock *RsvpTe::createPSB(const Ptr<RsvpPathMsg>& msg)
     psbEle.Sender_Tspec_Object = msg->getSenderTspec();
 
     psbEle.Previous_Hop_Address = msg->getNHOP();
-//    psbEle.LIH = msg->getLIH();
 
     psbEle.OutInterface = OI;
     psbEle.ERO = ERO;
@@ -1581,7 +1575,6 @@ void RsvpTe::processRSVPMessage(Packet *pk)
 void RsvpTe::processHelloMsg(Packet *pk)
 {
     EV_INFO << "Received RSVP_HELLO" << endl;
-//    print(msg);
     const auto& msg = pk->peekAtFront<RsvpHelloMsg>();
     Ipv4Address sender = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     Ipv4Address peer = tedmod->primaryAddress(sender);
@@ -1669,10 +1662,8 @@ void RsvpTe::processHelloMsg(Packet *pk)
 void RsvpTe::processPathErrMsg(Packet *pk)
 {
     EV_INFO << "Received PATH_ERROR" << endl;
-//    print(msg);
 
     const auto& msg = pk->peekAtFront<RsvpPathError>();
-//    int lspid = msg->getLspId();
     int errCode = msg->getErrorCode();
 
     PathStateBlock *psb = findPSB(msg->getSession(), msg->getSenderTemplate());
@@ -1719,7 +1710,6 @@ void RsvpTe::processPathErrMsg(Packet *pk)
 void RsvpTe::processPathTearMsg(Packet *pk)
 {
     EV_INFO << "Received PATH_TEAR" << endl;
-//    print(msg);
 
     const auto& msg = pk->peekAtFront<RsvpPathTear>();
     int lspid = msg->getLspId();
@@ -1821,7 +1811,7 @@ void RsvpTe::processPathMsg(Packet *pk)
     auto msg = dynamicPtrCast<RsvpPathMsg>(pk->peekAtFront<RsvpPathMsg>()->dupShared());
     print(msg.get());
 
-    // process ERO *************************************************************
+    // process ERO
 
     EroVector ERO = msg->getERO();
 
@@ -1831,7 +1821,7 @@ void RsvpTe::processPathMsg(Packet *pk)
 
     msg->setERO(ERO);
 
-    // create PSB if doesn't exist yet *****************************************
+    // create PSB if doesn't exist yet
 
     PathStateBlock *psb = findPSB(msg->getSession(), msg->getSenderTemplate());
 
@@ -1853,11 +1843,11 @@ void RsvpTe::processPathMsg(Packet *pk)
         }
     }
 
-    // schedule timer&timeout **************************************************
+    // schedule timer&timeout
 
     scheduleTimeout(psb);
 
-    // create RSB if we're egress and doesn't exist yet ************************
+    // create RSB if we're egress and doesn't exist yet
 
     unsigned int index;
     ResvStateBlock *rsb = findRSB(msg->getSession(), msg->getSenderTemplate(), index);
@@ -1884,7 +1874,7 @@ void RsvpTe::processResvMsg(Packet *pk)
 
     Ipv4Address OI = msg->getLIH();
 
-    // find matching PSB for every flow ****************************************
+    // find matching PSB for every flow
 
     for (unsigned int m = 0; m < msg->getFlowDescriptor().size(); m++) {
         PathStateBlock *psb = findPSB(msg->getSession(), (SenderTemplateObj&)msg->getFlowDescriptor()[m].Filter_Spec_Object);
@@ -1902,7 +1892,7 @@ void RsvpTe::processResvMsg(Packet *pk)
         return;
     }
 
-    // find matching RSB *******************************************************
+    // find matching RSB
 
     ResvStateBlock *rsb = nullptr;
     for (auto& elem : RSBList) {

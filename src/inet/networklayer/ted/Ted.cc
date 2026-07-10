@@ -35,7 +35,6 @@ Ted::~Ted()
 void Ted::initialize(int stage)
 {
     RoutingProtocolBase::initialize(stage);
-    // TODO INITSTAGE
     if (stage == INITSTAGE_LOCAL) {
         maxMessageId = 0;
 
@@ -139,7 +138,7 @@ void Ted::initializeTED()
 
 void Ted::handleMessageWhenUp(cMessage *msg)
 {
-    throw cRuntimeError("Message not allowed");
+    throw cRuntimeError("Ted does not process messages, but received '%s'", msg->getName());
 }
 
 std::ostream& operator<<(std::ostream& os, const TeLinkStateInfo& info)
@@ -229,13 +228,6 @@ void Ted::rebuildRoutingTable()
         }
     }
 
-//  for (unsigned int i = 0; i < V.size(); i++)
-//  {
-//      EV << "V[" << i << "].node=" << V[i].node << endl;
-//      EV << "V[" << i << "].parent=" << V[i].parent << endl;
-//      EV << "V[" << i << "].dist=" << V[i].dist << endl;
-//  }
-
     // insert remote destinations
 
     for (unsigned int i = 0; i < V.size(); i++) {
@@ -301,7 +293,7 @@ Ipv4Address Ted::getInterfaceAddrByPeerAddress(Ipv4Address peerIP)
         if (elem.linkid == peerIP && elem.advrouter == routerId)
             return elem.local;
 
-    throw cRuntimeError("not a local peer: %s", peerIP.str().c_str());
+    throw cRuntimeError("getInterfaceAddrByPeerAddress(): %s is not a directly-connected peer", peerIP.str().c_str());
 }
 
 Ipv4Address Ted::peerRemoteInterface(Ipv4Address peerIP)
@@ -311,7 +303,7 @@ Ipv4Address Ted::peerRemoteInterface(Ipv4Address peerIP)
         if (elem.linkid == peerIP && elem.advrouter == routerId)
             return elem.remote;
 
-    throw cRuntimeError("not a local peer: %s", peerIP.str().c_str());
+    throw cRuntimeError("peerRemoteInterface(): %s is not a directly-connected peer", peerIP.str().c_str());
 }
 
 bool Ted::isLocalPeer(Ipv4Address inetAddr)

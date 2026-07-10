@@ -32,9 +32,9 @@ class INET_API Ted : public RoutingProtocolBase
      * vertex in the graph we build from links in TeLinkStateInfoVector.
      */
     struct vertex_t {
-        Ipv4Address node; // FIXME *** is this the routerID? ***
+        Ipv4Address node; // the router id of this vertex
         int parent; // index into the same vertex_t vector
-        double dist; // distance to root (???)
+        double dist; // distance from the root along the shortest path found so far
     };
 
     /**
