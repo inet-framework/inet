@@ -20,10 +20,12 @@ import inet.common.SimpleModule;
 // This is a topology mirror, not a general-purpose routing protocol: it
 // floods the local ~Ted contents to a fixed set of peers configured via the
 // "peers" parameter (no periodic re-origination, no LSA aging, no wraparound
-// handling for message ids) and has no lifecycle support of its own (unlike
-// ~Ted, ~Ldp, and ~RsvpTe, it does not extend the lifecycle-aware routing
-// protocol base class); a node shutdown/restart does not stop or reset its
-// flooding activity.
+// handling for message ids). Like ~Ted, ~Ldp, and ~RsvpTe, it extends the
+// lifecycle-aware routing protocol base class: a node shutdown cancels its
+// pending announce and clears the peer snapshot, and a restart recomputes
+// the peer snapshot from the (by-then possibly changed) ~Ted contents and
+// restarts flooding -- so a restarted node's flooding activity reflects its
+// current topology rather than a stale snapshot taken at simulation start.
 //
 simple LinkStateRouting extends SimpleModule
 {

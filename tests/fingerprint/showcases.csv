@@ -40,7 +40,7 @@
 
 /showcases/mpls/te/,                 -f omnetpp.ini -c ExplicitRouteBandwidth -r 0, 3s,           e713-0dee/tplx;29ea-c57f/~tNl;cab0-b094/~tND;cb8b-a23a/tyf, PASS, Ipv4
 /showcases/mpls/te/,                 -f omnetpp.ini -c PriorityPreemption -r 0,     4s,           9076-6c73/tplx;c07f-a751/~tNl;1d96-3202/~tND;4d4c-1a12/tyf, PASS, Ipv4
-/showcases/mpls/te/,                 -f omnetpp.ini -c FailureReroute -r 0,         6s,           81d7-7329/tplx;3d28-900e/~tNl;a95b-b02d/~tND;c3d7-62d3/tyf, PASS, Ipv4
+/showcases/mpls/te/,                 -f omnetpp.ini -c FailureReroute -r 0,         6s,           9ad0-24ed/tplx;40d2-9b34/~tNl;ab48-5e81/~tND;b8e5-522b/tyf, PASS, Ipv4
 
 # /showcases/routing/manet/,           -f omnetpp.ini -c MobileNodesBase -r 0,        100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # MobileNodesBase extended
 /showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         d4f1-1c35/tplx;c268-fae7/~tNl;5a70-e33f/~tND;cfeb-1d46/tyf, PASS,    wireless Ipv4
