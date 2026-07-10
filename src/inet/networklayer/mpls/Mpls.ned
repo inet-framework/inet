@@ -52,6 +52,7 @@ simple Mpls extends SimpleModule like IProtocolLayer
         string classifierModule; // The path to the module which implements the IIngressClassifier C++ interface
         string ttlModel @enum("uniform","pipe") = default("uniform"); // RFC 3443 TTL propagation model between the IP and MPLS layers
         int defaultTtl = default(255); // label TTL used at push time in "pipe" mode (ignored in "uniform" mode, where the IP TTL is copied instead)
+        bool writeTcBackOnPop = default(false); // whether popping a label writes tc<<3 back into the IP DSCP (uniform model only); default false because the 3-bit->6-bit mapping is lossy and RFC 5462 keeps the inner DSCP authoritative
         @display("i=block/switch");
         @signal[packetDropped](type=cPacket);
     gates:

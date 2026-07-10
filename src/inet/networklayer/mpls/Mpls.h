@@ -38,6 +38,7 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
 
     TtlModel ttlModel = TTL_MODEL_UNIFORM;
     int defaultTtl = 255;
+    bool writeTcBackOnPop = false;
 
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<IInterfaceTable> ift;
@@ -67,6 +68,11 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     // defaultTtl (pipe) when pushing onto bare IP, or the current outer label's TTL
     // when pushing onto an existing label stack
     uint8_t computePushTtl(const Packet *packet) const;
+
+    // returns the Traffic Class to stamp on a freshly pushed label: the top 3 bits
+    // of the IP header's DSCP when pushing onto bare IP, or the current outer
+    // label's tc when pushing onto an existing label stack
+    uint8_t computePushTc(const Packet *packet) const;
 
     // RFC 3443: the label TTL reached zero at a transit LSR; pop the entire label
     // stack, write the expired TTL back into the IP header, and hand the datagram

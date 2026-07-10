@@ -34,6 +34,7 @@ void Mpls::initialize(int stage)
 
         ttlModel = strcmp(par("ttlModel").stringValue(), "pipe") == 0 ? TTL_MODEL_PIPE : TTL_MODEL_UNIFORM;
         defaultTtl = par("defaultTtl");
+        writeTcBackOnPop = par("writeTcBackOnPop");
 
         WATCH(numReceived);
         WATCH(numSent);
@@ -141,6 +142,10 @@ void Mpls::popLabel(Packet *packet)
         if (ttlModel == TTL_MODEL_UNIFORM) {
             auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
             ipv4Header->setTimeToLive(oldMplsHeader->getTtl());
+            // writeTcBackOnPop defaults to false: the 3-bit tc -> 6-bit DSCP mapping
+            // is lossy, and RFC 5462 (short pipe) keeps the inner DSCP authoritative
+            if (writeTcBackOnPop)
+                ipv4Header->setDscp(oldMplsHeader->getTc() << 3);
             ipv4Header->updateChecksum();
             insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
         }
@@ -155,6 +160,17 @@ uint8_t Mpls::computePushTtl(const Packet *packet) const
 
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     return ttlModel == TTL_MODEL_UNIFORM ? (uint8_t)ipv4Header->getTimeToLive() : (uint8_t)defaultTtl;
+}
+
+uint8_t Mpls::computePushTc(const Packet *packet) const
+{
+    if (packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId())
+        // pushing an additional label onto an existing stack: copy the current outer label's tc
+        return packet->peekAtFront<MplsHeader>()->getTc();
+
+    // E-LSP default mapping: the top 3 bits of the 6-bit DSCP become the MPLS Traffic Class
+    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+    return (uint8_t)(ipv4Header->getDscp() >> 3);
 }
 
 void Mpls::handleTtlExpiry(Packet *packet, int outInterfaceId)
@@ -204,12 +220,14 @@ bool Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInte
                 auto mplsHeader = makeShared<MplsHeader>();
                 mplsHeader->setLabel(outLabel[i].label);
                 mplsHeader->setTtl(computePushTtl(packet));
+                mplsHeader->setTc(computePushTc(packet));
                 pushLabel(packet, mplsHeader);
                 break;
             }
             case SWAP_OPER: {
                 ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
-                uint8_t oldTtl = packet->peekAtFront<MplsHeader>()->getTtl();
+                const auto& oldMplsHeader = packet->peekAtFront<MplsHeader>();
+                uint8_t oldTtl = oldMplsHeader->getTtl();
                 if (oldTtl <= 1) {
                     handleTtlExpiry(packet, outInterfaceId);
                     return false;
@@ -217,6 +235,7 @@ bool Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInte
                 auto mplsHeader = makeShared<MplsHeader>();
                 mplsHeader->setLabel(outLabel[i].label);
                 mplsHeader->setTtl(oldTtl - 1);
+                mplsHeader->setTc(oldMplsHeader->getTc());
                 swapLabel(packet, mplsHeader);
                 break;
             }
