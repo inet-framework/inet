@@ -1,8 +1,8 @@
 %description:
 Byte-exact round-trip serialization of LDP packets (RFC 5036): the PDU/message header
 (Section 3.5.3, 3.6), Hello, Label Request, Label Mapping (also used for Label
-Withdraw/Release), Notification (with its FEC TLV), and the unwired-but-serializable
-Initialization and Address messages. Verifies serialize->bytes->deserialize reproduces the
+Withdraw/Release), Notification (with its FEC TLV), Initialization, KeepAlive, and the
+still-unwired Address message. Verifies serialize->bytes->deserialize reproduces the
 fields and the expected on-wire lengths (matching the B(...) constants in Ldp.h).
 
 %includes:
