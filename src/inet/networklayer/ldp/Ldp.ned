@@ -26,6 +26,11 @@ import inet.applications.contract.IApp;
 // Message processing in the ~Ldp module is explained in
 // <a href="ldp-processing.html">LDP Message Processing</a>
 //
+// Model simplification: RFC 5036 allows a PDU to carry multiple LDP messages;
+// this model always sends exactly one message per PDU, so the chunk length
+// computed for each outgoing packet is simply the 10-byte PDU header plus the
+// length of that single message (its 8-byte message header plus its TLVs).
+//
 // @author Vojta Janota
 //
 simple Ldp extends SimpleModule like IApp
