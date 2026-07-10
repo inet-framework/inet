@@ -60,12 +60,23 @@ import inet.applications.contract.IApp;
 // (re)built at session establishment time; a config change requiring a
 // mid-session Address Withdraw is out of scope.
 //
+// Label distribution modes (RFC 5036 Section 2.6): ~distributionMode,
+// ~controlMode and ~retentionMode select, independently, the advertisement
+// discipline, the control mode, and the retention mode. The DEFAULT
+// combination -- Downstream Unsolicited, independent control, liberal
+// retention -- is the real-world/RFC-conventional deployment default (a
+// deliberate compliance choice, not an oversight): every OPERATIONAL peer is
+// proactively sent Label Mappings for every FEC this router can serve,
+// without waiting to be asked, and mappings received from a peer that is not
+// (or not yet) a FEC's next hop are kept rather than discarded, enabling
+// instant failover on a next-hop change (see Ldp::duAdvertiseToPeer). The
+// original Downstream-on-Demand / ordered-control / (implicit) conservative-
+// retention behavior remains fully selectable via the same three parameters
+// and is otherwise unchanged.
+//
 // Explicit non-features (RFC 5036 mechanisms not modeled by this module):
 // - No extended/targeted discovery, so only directly-connected peers
 //   (reachable via the basic UDP Hello discovery) can become LDP peers.
-// - Downstream-on-Demand with ordered control only; Downstream Unsolicited,
-//   independent control, and liberal retention are not implemented, and
-//   there is no parameter to select a mode.
 // - No loop detection (hop count / path vector TLVs).
 // - No graceful restart, capabilities negotiation, or IGP synchronization.
 // - No Generalized TTL Security Mechanism (GTSM).
@@ -86,6 +97,9 @@ simple Ldp extends SimpleModule like IApp
         double helloInterval @unit(s) = default(5s);
         double keepaliveTime @unit(s) = default(30s); // Session KeepAlive Time we propose during Initialization (RFC 5036 Section 3.5.3); RFC 5036 mandates no specific default, 30s is the conventional real-world value
         bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a FEC
+        string distributionMode @enum("du","dod") = default("du"); // RFC 5036 Section 2.6: label advertisement discipline. "du" (Downstream Unsolicited) proactively advertises Label Mappings to every OPERATIONAL peer and is the real-world/RFC-conventional default (a deliberate compliance choice); "dod" (Downstream on Demand) reproduces this model's original Label Request/Mapping request-response flow unchanged. Also wired into the Initialization message's A-bit (RFC 5036 Section 3.5.3): 0=DU, 1=DoD.
+        string controlMode @enum("independent","ordered") = default("independent"); // RFC 5036 Section 2.6: label distribution control, meaningful only for transit FECs under distributionMode="du" (DoD is always effectively ordered along the FEC's next-hop chain). "independent" advertises a transit FEC's mapping as soon as this router is ready, without waiting for its own downstream mapping (the LIB swap entry is installed only once that mapping later arrives; an incoming labeled packet has nowhere to swap to in the meantime and is dropped -- the faithful, not buggy, independent-control transient). "ordered" advertises a transit FEC only once a downstream mapping is held or this router is egress for it.
+        string retentionMode @enum("liberal","conservative") = default("liberal"); // RFC 5036 Section 2.6: label retention. "liberal" keeps a Label Mapping received from a peer that is not (or not yet) a FEC's next hop, enabling instant failover to it on a later next-hop change with no new Label Request; "conservative" explicitly releases such mappings (this model's original implicit behavior, now made explicit).
         @display("i=block/control");
         @signal[sessionUp](type=long); // peer's router id (as a 32-bit integer) when an LDP session comes up
         @signal[sessionDown](type=long); // peer's router id (as a 32-bit integer) when an LDP session goes down

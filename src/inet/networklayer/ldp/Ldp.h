@@ -93,6 +93,15 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
         Ipv4Address peer;
         int label;
+
+        // Only meaningful for fecUp entries under DU/independent control: false
+        // while 'label' has been advertised upstream but is only a reservation
+        // (LibTable::allocateLabel()), with no LIB entry yet -- the downstream
+        // mapping needed to complete the swap (LibTable::installReservedLabel())
+        // hasn't arrived (see Ldp::duAdvertiseToPeer/processLABEL_MAPPING).
+        // Always true for fecDown entries and for the DoD path, which never
+        // defers installation.
+        bool installed = true;
     };
     typedef std::vector<FecBinding> FecBindVector;
 
@@ -152,6 +161,13 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     simtime_t helloInterval;
     simtime_t keepaliveTime; // Session KeepAlive Time we propose in Initialization messages (RFC 5036 Section 3.5.3)
     bool advertiseImplicitNull = true;
+
+    // RFC 5036 Section 2.6 label distribution mode parameters -- see Ldp.ned for
+    // the full semantics; distributionMode also drives the Initialization
+    // message's A-bit (see sendInit/processINITIALIZATION).
+    std::string distributionMode; // "du" (default) or "dod"
+    std::string controlMode; // "independent" (default) or "ordered"; only consulted when distributionMode=="du"
+    std::string retentionMode; // "liberal" (default) or "conservative"
 
     // currently recognized FECs
     FecVector fecList;
@@ -236,6 +252,16 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void rebuildFecList();
     virtual void updateFecList(Ipv4Address nextHop);
     virtual void updateFecListEntry(Fec oldItem);
+
+    // RFC 5036 Section 2.6: Downstream Unsolicited -- (re)advertise our label
+    // mapping for 'fec' to a single OPERATIONAL 'peer', deciding egress/
+    // independent-control/ordered-control/liberal-retention-switchover behavior
+    // from the current state (see Ldp.cc for the full decision tree). Called (a)
+    // once per FEC when a session first reaches OPERATIONAL (processKEEPALIVE) and
+    // (b) once per OPERATIONAL peer whenever updateFecListEntry (called only on
+    // FEC creation or a next-hop change, never for an unchanged FEC) detects
+    // distributionMode=="du".
+    virtual void duAdvertiseToPeer(const Fec& fec, Ipv4Address peer);
 
     // emits the current total binding count (fecUp.size() + fecDown.size()) on the fecBindingCount signal
     virtual void emitFecBindingCount();

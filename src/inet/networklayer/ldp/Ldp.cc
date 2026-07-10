@@ -124,6 +124,9 @@ void Ldp::initialize(int stage)
         helloInterval = par("helloInterval");
         keepaliveTime = par("keepaliveTime");
         advertiseImplicitNull = par("advertiseImplicitNull");
+        distributionMode = par("distributionMode").stdstringValue();
+        controlMode = par("controlMode").stdstringValue();
+        retentionMode = par("retentionMode").stdstringValue();
 
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -369,10 +372,9 @@ void Ldp::sendInit(Ipv4Address dest)
     ini->setType(INITIALIZATION);
     ini->setLsrId(rt->getRouterId());
     ini->setKeepAliveTime((uint16_t)keepaliveTime.inUnit(SIMTIME_S));
-    // A-bit (advertisement discipline: DU=0/DoD=1 per this model's convention) is
-    // hardcoded to 0 (DU) here; it gets wired to the real distributionMode param
-    // once that param exists (see Ldp.ned; a later commit in this workstream)
-    ini->setAbit(false);
+    // RFC 5036 Section 3.5.3 A-bit (Label Advertisement Discipline): 0 signals
+    // Downstream Unsolicited, 1 signals Downstream on Demand.
+    ini->setAbit(distributionMode == "dod");
     ini->setDbit(false);
     ini->setReceiverLsrId(dest);
     pk->insertAtBack(ini);
@@ -454,8 +456,182 @@ void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
     sendToPeer(dest, pk);
 }
 
+void Ldp::duAdvertiseToPeer(const Ldp::Fec& fec, Ipv4Address peer)
+{
+    if (!isPeerOperational(peer))
+        return;
+
+    auto uit = findFecEntry(fecUp, fec.fecid, peer);
+    // is the FEC's next hop our LDP peer, or are WE egress for it?
+    bool ER = findPeerSocket(fec.nextHop) == nullptr;
+    // do we hold a mapping from the FEC's CURRENT next hop? (liberal retention may
+    // already hold one even though it only just became the next hop)
+    auto dit = findFecEntry(fecDown, fec.fecid, fec.nextHop);
+
+    int inInterface = findInterfaceFromPeerAddr(peer);
+
+    bool haveMapping = ER || dit != fecDown.end();
+    if (haveMapping) {
+        // we can offer a real mapping now: either we are egress for this FEC
+        // (ALWAYS advertised, regardless of control mode), or we hold a downstream
+        // mapping for its current next hop -- freshly received, or already held
+        // thanks to liberal retention (e.g. this peer just became the next hop
+        // after a reroute). PHP behavior (advertiseImplicitNull) is unchanged from
+        // the DoD path.
+        bool implicitNull = ER && advertiseImplicitNull;
+        LabelOpVector outLabel;
+        int outInterface = -1;
+        if (!implicitNull) {
+            outInterface = findInterfaceFromPeerAddr(fec.nextHop);
+            if (ER)
+                outLabel = LibTable::popLabel();
+            else
+                outLabel = (dit->label == IMPLICIT_NULL_LABEL) ? LibTable::popLabel() : LibTable::swapLabel(dit->label);
+        }
+
+        int label;
+        if (implicitNull) {
+            // an implicit-null advertisement never allocates/installs a real LIB entry
+            label = IMPLICIT_NULL_LABEL;
+            if (uit == fecUp.end()) {
+                FecBinding newItem;
+                newItem.fecid = fec.fecid;
+                newItem.peer = peer;
+                newItem.label = label;
+                fecUp.push_back(newItem);
+            }
+            else {
+                uit->label = label;
+                uit->installed = true;
+            }
+        }
+        else if (uit == fecUp.end()) {
+            label = lt->installLibEntry(-1, inInterface, outLabel, outInterface);
+            FecBinding newItem;
+            newItem.fecid = fec.fecid;
+            newItem.peer = peer;
+            newItem.label = label;
+            fecUp.push_back(newItem);
+        }
+        else if (!uit->installed || uit->label == IMPLICIT_NULL_LABEL) {
+            // either completing a label reserved earlier by independent control
+            // (no LIB entry exists yet for it), or this peer's previously
+            // advertised label was the implicit-null sentinel (never a real LIB
+            // entry, and not reusable as one) -- either way there is no existing
+            // LIB entry to update, but the label to (re-)use differs: a genuine
+            // reservation must be completed at that SAME label (already on the
+            // wire); a former implicit-null needs a brand new real label instead
+            if (uit->installed) // i.e. was implicit-null
+                label = lt->installLibEntry(-1, inInterface, outLabel, outInterface);
+            else {
+                label = uit->label;
+                lt->installReservedLabel(label, inInterface, outLabel, outInterface);
+            }
+            uit->label = label;
+            uit->installed = true;
+        }
+        else {
+            // already installed (e.g. a prior next hop): refresh the swap target
+            label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
+            uit->label = label;
+        }
+
+        if (ER)
+            EV_INFO << "DU: advertising unsolicited Label Mapping (egress) label=" << label << " for fec addr="
+                    << fec.addr << " length=" << fec.length << " to " << peer << endl;
+        else
+            EV_INFO << "DU: advertising unsolicited Label Mapping label=" << label << " for fec addr=" << fec.addr
+                    << " length=" << fec.length << " to " << peer << " using an already-held downstream mapping from "
+                    << fec.nextHop << " (liberal retention switchover if the next hop just changed)" << endl;
+        sendMapping(LABEL_MAPPING, peer, label, fec.addr, fec.length);
+        return;
+    }
+
+    // no downstream mapping for the FEC's current next hop, and we are not egress
+    if (controlMode == "independent") {
+        if (uit == fecUp.end()) {
+            // independent control: advertise now, without waiting for a downstream
+            // mapping; reserve (but do not install) an inLabel -- the LIB swap
+            // follows once the downstream mapping arrives (see
+            // processLABEL_MAPPING). Until then, an incoming packet for this label
+            // has nowhere to swap to and is dropped by
+            // Mpls::processMplsPacketFromL2's resolveLabel() miss -- this is the
+            // FAITHFUL independent-control transient, not a bug.
+            int label = lt->allocateLabel();
+            FecBinding newItem;
+            newItem.fecid = fec.fecid;
+            newItem.peer = peer;
+            newItem.label = label;
+            newItem.installed = false;
+            fecUp.push_back(newItem);
+
+            EV_INFO << "DU: advertising unsolicited Label Mapping (independent control, no downstream mapping yet) label="
+                    << label << " for fec addr=" << fec.addr << " length=" << fec.length << " to " << peer << endl;
+            sendMapping(LABEL_MAPPING, peer, label, fec.addr, fec.length);
+        }
+        else if (uit->label == IMPLICIT_NULL_LABEL) {
+            // (uit->installed is necessarily true here, see the invariant note on
+            // FecBinding::installed) an implicit-null advertisement never had a
+            // real LIB entry to fall back to "pending" the way a genuine reserved
+            // label can -- 3 must never be reused as a real inLabel either -- so
+            // withdraw it outright instead. If a real mapping becomes available
+            // again later, this function creates a brand new fecUp entry from
+            // scratch (uit == fecUp.end() at that point).
+            EV_INFO << "DU: withdrawing previously-advertised implicit-null mapping for fec addr=" << fec.addr
+                    << " length=" << fec.length << " from " << peer
+                    << ": we are no longer egress and no downstream mapping is held for it" << endl;
+            sendMapping(LABEL_WITHDRAW, peer, uit->label, fec.addr, fec.length);
+            fecUp.erase(uit);
+        }
+        else if (uit->installed) {
+            // we previously advertised this FEC to this peer with a real, installed
+            // LIB entry (e.g. for a former next hop); the next hop has since
+            // changed and we no longer hold a downstream mapping for the new one.
+            // The label we already gave upstream stays valid on the wire (no need
+            // to re-advertise), but the installed entry now points at a stale (no
+            // longer applicable) target -- remove it so traffic drops instead of
+            // being misrouted
+            EV_DETAIL << "DU: next hop changed and no downstream mapping is held for the new one; removing the "
+                      << "(now stale) LIB entry for label=" << uit->label << ", fec addr=" << fec.addr << " length="
+                      << fec.length << endl;
+            lt->removeLibEntryIfExists(uit->label);
+            uit->installed = false;
+        }
+        // else: already reserved-but-not-installed from before; nothing new to do
+    }
+    else {
+        // ordered control: nothing to advertise without a downstream mapping
+        if (uit != fecUp.end()) {
+            // we previously advertised this FEC (we had a downstream mapping back
+            // then) and have since lost it on a next-hop change -- withdraw
+            EV_INFO << "DU: withdrawing previously-advertised mapping label=" << uit->label << " for fec addr="
+                    << fec.addr << " length=" << fec.length << " from " << peer
+                    << ": next hop changed and no downstream mapping is held for it" << endl;
+            sendMapping(LABEL_WITHDRAW, peer, uit->label, fec.addr, fec.length);
+            if (uit->installed && uit->label != IMPLICIT_NULL_LABEL)
+                lt->removeLibEntryIfExists(uit->label);
+            fecUp.erase(uit);
+        }
+    }
+}
+
 void Ldp::updateFecListEntry(Ldp::Fec oldItem)
 {
+    if (distributionMode == "du") {
+        // RFC 5036 Section 2.6: Downstream Unsolicited -- (re)advertise this FEC to
+        // every currently OPERATIONAL peer. Called only when this FEC was just
+        // created or its next hop actually changed (see rebuildFecList), never for
+        // an unchanged FEC.
+        for (auto& p : myPeers) {
+            if (p.state == peer_info::OPERATIONAL)
+                duAdvertiseToPeer(oldItem, p.peerIP);
+        }
+        emitFecBindingCount();
+        return;
+    }
+
+    // DoD path (distributionMode == "dod"): current Request/Mapping flow, unchanged
+
     // do we have mapping from downstream?
     auto dit = findFecEntry(fecDown, oldItem.fecid, oldItem.nextHop);
 
@@ -624,11 +800,15 @@ void Ldp::rebuildFecList()
 
                 sendMapping(LABEL_WITHDRAW, _uit.peer, _uit.label, elem.addr, elem.length);
 
-                // an implicit-null advertisement never allocated a LIB entry
+                // an implicit-null advertisement never allocated a LIB entry, and
+                // under DU independent control a label may have been advertised
+                // (reserved via allocateLabel()) but never actually installed if
+                // no downstream mapping ever arrived before the FEC itself
+                // disappeared -- removeLibEntryIfExists() tolerates both
                 if (_uit.label != IMPLICIT_NULL_LABEL) {
-                    EV_DETAIL << "removing entry inLabel=" << _uit.label << " from LIB" << endl;
+                    EV_DETAIL << "removing entry inLabel=" << _uit.label << " from LIB (if it was ever installed)" << endl;
 
-                    lt->removeLibEntry(_uit.label);
+                    lt->removeLibEntryIfExists(_uit.label);
                 }
             }
         }
@@ -1134,6 +1314,18 @@ void Ldp::processINITIALIZATION(Ptr<const LdpPacket>& ldpPacket)
 
     myPeers[i].negotiatedKeepaliveTime = std::min(keepaliveTime, SimTime(peerKeepAliveTime, SIMTIME_S));
 
+    // RFC 5036 Section 3.5.3: the A-bit signals the peer's own label advertisement
+    // discipline (0=DU, 1=DoD). RFC 5036 allows DU/DoD to be negotiated per link
+    // (falling back to DoD on a mismatch); this model does not implement that
+    // negotiation -- on a mismatch, warn and simply proceed using OUR OWN mode.
+    bool peerWantsDod = ini->getAbit();
+    bool weAreDod = (distributionMode == "dod");
+    if (peerWantsDod != weAreDod) {
+        EV_WARN << "peer " << srcAddr << " advertised distribution mode " << (peerWantsDod ? "DoD" : "DU")
+                << ", which differs from ours (" << (weAreDod ? "DoD" : "DU") << "); RFC 5036 allows per-link "
+                << "DU/DoD negotiation, which this model does not implement -- proceeding using our own mode" << endl;
+    }
+
     if (myPeers[i].state == peer_info::INITIALIZED) {
         // passive side: this is the peer's opening move -- reply with our own
         // Init, then immediately KeepAlive (RFC 5036 Section 2.5.3)
@@ -1181,7 +1373,30 @@ void Ldp::processKEEPALIVE(Ptr<const LdpPacket>& ldpPacket)
         // machinery for this peer (RFC 5036 Section 3.5.3), and let the peer
         // know which of our interface addresses it can use as a next hop
         // (RFC 5036 Section 3.5.5/2.7)
-        updateFecList(srcAddr);
+        if (distributionMode == "du") {
+            // RFC 5036 Section 2.6: Downstream Unsolicited -- advertise EVERY FEC
+            // we recognize to this newly-OPERATIONAL peer, not just the ones whose
+            // next hop happens to be this peer (updateFecList's filter, which the
+            // DoD path below still uses).
+            for (auto& fec : fecList)
+                duAdvertiseToPeer(fec, srcAddr);
+            // This peer's session just became usable as a downstream link too:
+            // any FEC whose next hop IS this peer may already have been
+            // (mis)advertised to OTHER peers as if we were egress for it, because
+            // duAdvertiseToPeer's ER check (findPeerSocket(fec.nextHop)==nullptr)
+            // could not yet distinguish "genuinely egress" from "next hop not
+            // OPERATIONAL yet" at the time of that earlier advertisement.
+            // updateFecListEntry's DU branch re-advertises to every OPERATIONAL
+            // peer (this one included, harmlessly) using the now-correct ER
+            // value, which corrects any such stale implicit-null advertisement.
+            for (auto& fec : fecList) {
+                if (fec.nextHop == srcAddr)
+                    updateFecListEntry(fec);
+            }
+            emitFecBindingCount();
+        }
+        else
+            updateFecList(srcAddr);
         sendAddress(srcAddr);
     }
     else if (myPeers[i].state == peer_info::OPERATIONAL) {
@@ -1532,10 +1747,13 @@ void Ldp::processLABEL_RELEASE(Ptr<const LdpPacket>& ldpPacket)
         return;
     }
 
-    // an implicit-null advertisement never allocated a LIB entry
+    // an implicit-null advertisement never allocated a LIB entry, and under DU
+    // independent control the released label may have been advertised (reserved
+    // via allocateLabel()) but never actually installed if no downstream mapping
+    // ever arrived -- removeLibEntryIfExists() tolerates both
     if (uit->label != IMPLICIT_NULL_LABEL) {
-        EV_DETAIL << "removing from LIB table label=" << uit->label << endl;
-        lt->removeLibEntry(uit->label);
+        EV_DETAIL << "removing from LIB table (if it was ever installed) label=" << uit->label << endl;
+        lt->removeLibEntryIfExists(uit->label);
     }
 
     EV_DETAIL << "removing label from list of sent mappings" << endl;
@@ -1618,7 +1836,32 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
         return;
     }
 
-    // insert among received mappings
+    bool isNextHop = (it->nextHop == fromIP);
+    // Retention mode only governs mappings received from a peer that is not the
+    // FEC's next hop -- a situation that can only systematically arise from
+    // proactive DU flooding to every peer. Under DoD, a mapping is only ever
+    // received in response to a Label Request WE sent to the (then-)next hop;
+    // the FEC's next hop can in principle have since changed before the reply
+    // arrives, and the original Request/Mapping flow always accepted such a
+    // reply unconditionally -- so this gate is scoped to distributionMode=="du"
+    // to keep that DoD flow completely unchanged (verified empirically: without
+    // this scoping, a DoD-configured run diverges from the pre-this-commit
+    // baseline on exactly this race).
+    if (distributionMode == "du" && !isNextHop && retentionMode == "conservative") {
+        // RFC 5036 Section 2.6: conservative label retention -- only keep mappings
+        // from a FEC's CURRENT next hop; explicitly release anything else instead
+        // of silently ignoring it (this model's original implicit behavior, now
+        // made explicit)
+        EV_INFO << "mapping is from a peer that is not this FEC's current next hop and retentionMode is "
+                << "conservative, releasing it" << endl;
+        sendMapping(LABEL_RELEASE, fromIP, label, fec.addr, fec.length);
+        return;
+    }
+
+    // liberal retention (default): keep mappings from ANY peer, not just the
+    // FEC's current next hop -- this is what lets a later next-hop change switch
+    // over instantly (see duAdvertiseToPeer's dit-found branch), without ever
+    // sending a new Label Request
 
     FecBinding newItem;
     newItem.fecid = it->fecid;
@@ -1626,7 +1869,21 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
     newItem.label = label;
     fecDown.push_back(newItem);
 
-    // respond to pending requests
+    if (isNextHop && distributionMode == "du") {
+        // this mapping is for the FEC's CURRENT next hop: (re-)advertise it to
+        // every OPERATIONAL peer via the same per-peer/per-control-mode decision
+        // tree duAdvertiseToPeer always uses -- it transparently handles every
+        // prior state a peer's fecUp entry may be in: none yet (first
+        // advertisement, e.g. a peer that only just went OPERATIONAL), reserved
+        // but not installed (independent control -- this completes it at the
+        // SAME already-advertised label), or already installed (refresh).
+        for (auto& p : myPeers) {
+            if (p.state == peer_info::OPERATIONAL)
+                duAdvertiseToPeer(*it, p.peerIP);
+        }
+    }
+
+    // respond to pending DoD requests for this FEC (unchanged; empty under pure DU)
 
     for (auto pit = pending.begin(); pit != pending.end();) {
         if (pit->fecid != it->fecid) {

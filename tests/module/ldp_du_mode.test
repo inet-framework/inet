@@ -1,0 +1,125 @@
+%description:
+Regression test for the RFC 5036 Section 2.6 label distribution modes (commit C2):
+Downstream Unsolicited distribution, independent control, and liberal retention -- the
+new DEFAULTS (Ldp.ned's distributionMode/controlMode/retentionMode) -- in
+examples/mpls/ldp (network LDPTEST), reusing the shipped example's own scenario (LSR2
+shutdown@2s, startup@10s, examples/mpls/ldp/scenario.xml) run out to its full
+sim-time-limit of 11s.
+
+Two-phase scenario, both asserted via a single ordered contains-regex check plus a
+whole-run not-contains check:
+  1. Normal startup: an unsolicited Label Mapping is advertised (Ldp::duAdvertiseToPeer)
+     WITHOUT ever having sent/received a Label Request first -- this is the defining
+     behavioral difference from the (old-default, still selectable) DoD request/response
+     flow.
+  2. The LSR2 shutdown forces a next-hop change for every FEC that used to route through
+     it (see ldp_label_withdraw.test's description of the redundant LSR1-LSR4-LSR3 /
+     LSR1-LSR5-LSR3 paths). Under liberal retention, the surviving peers had ALREADY been
+     flooded a mapping for these FECs earlier (DU advertises to every OPERATIONAL peer,
+     not just a FEC's current next hop) -- so the switchover reuses that already-held
+     mapping instantly (Ldp::duAdvertiseToPeer's dit-found branch), without ANY new Label
+     Request, at any point in the whole run.
+
+Falsification: this test FAILS against the parent commit -- distributionMode/
+controlMode/retentionMode do not exist there (this ini's `[Config dod]` section, which
+this file only documents -- see ldp_du_mode_dod.test for the config actually exercising
+it -- would fail to parse: "unknown parameter"), and the DEFAULT (and only) behavior is
+the old DoD request/response flow, so neither the "DU: advertising unsolicited Label
+Mapping" line nor the "liberal retention switchover" line exists in the log, and Label
+Request lines are pervasive throughout (violating the not-contains check). Verified by
+stashing this commit's source changes (keeping this .test file), rebuilding the debug
+library, re-running (FAIL: neither contains-regex line is found, and the ini itself
+fails ONLY when `-c dod` is passed -- this General-config run fails on the missing
+contains-regex lines instead), then restoring the changes and rebuilding again (PASS).
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.ldp.LDPTEST
+sim-time-limit = 11s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.LSR*.ldp.cmdenv-log-level = info
+**.scenarioManager.cmdenv-log-level = info
+**.cmdenv-log-level = off
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host2"
+
+**.host3.numApps = 1
+**.host3.app[0].typename = "UdpBasicApp"
+**.host3.app[0].localPort = 100
+**.host3.app[0].destPort = 100
+**.host3.app[0].messageLength = 128 bytes
+**.host3.app[0].sendInterval = 0.01s
+**.host3.app[0].destAddresses = "host4"
+
+**.host{2..4}.numApps = 1
+**.host{2..4}.app[0].typename = "UdpSink"
+**.host{2..4}.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host4.rt"
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR5.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.LSR*.holdTime = 6s
+**.LSR*.helloInterval = 2s
+
+**.scenarioManager.script = xmldoc("../../../../examples/mpls/ldp/scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# documentation only -- the General config above (this file's only executed run) already
+%# IS the distributionMode="du"/controlMode="independent"/retentionMode="liberal" default;
+%# this section spells out the legacy combination for a manual `-c dod` repro. opp_test
+%# runs exactly one config per .test file (no `-c` here means "General" only), so the
+%# actual automated check of this legacy combination lives in the companion file
+%# ldp_du_mode_dod.test (%extraargs: -c dod against the identical network/scenario).
+[Config dod]
+description = "legacy Downstream-on-Demand/ordered/conservative combination (see ldp_du_mode_dod.test)"
+**.LSR*.ldp.distributionMode = "dod"
+**.LSR*.ldp.controlMode = "ordered"
+**.LSR*.ldp.retentionMode = "conservative"
+
+%#--------------------------------------------------------------------------------------------------------------
+%# phase 1 (normal startup): an unsolicited Label Mapping is sent -- proactively, not in
+%# response to a Label Request -- then eventually (phase 2) the LSR2 shutdown fires and a
+%# liberal-retention switchover reuses an already-held mapping for the new next hop
+%contains-regex: stdout
+DU: advertising unsolicited Label Mapping.*processing <shutdown> command\.\.\..*\(liberal retention switchover if the next hop just changed\)
+%#--------------------------------------------------------------------------------------------------------------
+%# across the WHOLE run (both phases), no Label Request is EVER received: DU's proactive
+%# advertisement (independent control especially) never needs one, unlike the old DoD
+%# request/response flow
+%not-contains: stdout
+Label Request from LSR
+%#--------------------------------------------------------------------------------------------------------------
+%# host traffic is still delivered end-to-end across both phases (cumulative over the
+%# whole 11s run, matching ldp_label_withdraw.test/ldp_peer_death.test's convention)
+%postrun-command: grep -E "host(2|4)\.app\[0\] packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

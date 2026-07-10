@@ -15,6 +15,13 @@ mpls_php.test (this file) and mpls_php_disabled.test (advertiseImplicitNull =
 false) run the identical scenario; mpls_php_disabled.test is the negative case
 that locks in the pre-PHP egress-allocates-a-real-pop-label behavior.
 
+Wording note: with the DU/independent/liberal defaults (RFC-conventional label
+distribution, see Ldp.ned's distributionMode/controlMode/retentionMode), the
+egress advertisement is now proactively sent via Ldp::duAdvertiseToPeer rather
+than in reactive response to a Label Request (Ldp::processLABEL_REQUEST) --
+the assertion below matches the new (DU) EV_INFO wording; the underlying PHP
+outcome (implicit null label 3 advertised, LSR2 pops) is unchanged.
+
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: test.ini
 
@@ -67,7 +74,7 @@ doStackOps: {PUSH
 %# LSR3, egress for host2's FEC, advertises the implicit null label instead of
 %# allocating a real pop entry
 %contains: stdout
-egress: advertising implicit null label (penultimate hop popping) for FEC addr=10.0.2.1
+DU: advertising unsolicited Label Mapping (egress) label=3 for fec addr=10.0.2.1
 %#--------------------------------------------------------------------------------------------------------------
 %# LSR2, the penultimate hop, therefore pops the label itself rather than
 %# swapping it -- with only this one live flow in the whole simulation, any

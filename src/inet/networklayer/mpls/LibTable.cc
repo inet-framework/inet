@@ -97,6 +97,28 @@ int LibTable::installLibEntry(int inLabel, int inInterfaceId, const LabelOpVecto
     }
 }
 
+int LibTable::allocateLabel()
+{
+    return ++maxLabel;
+}
+
+int LibTable::installReservedLabel(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
+        int outInterfaceId)
+{
+    for (auto& elem : lib) {
+        if (elem.inLabel == inLabel)
+            throw cRuntimeError("Cannot install reserved LIB entry: an entry with inLabel=%d already exists", inLabel);
+    }
+    LibEntry newItem;
+    newItem.inLabel = inLabel;
+    newItem.inInterfaceId = inInterfaceId;
+    newItem.outLabel = outLabel;
+    newItem.outInterfaceId = outInterfaceId;
+    lib.push_back(newItem);
+    emitLibEntryCount();
+    return inLabel;
+}
+
 void LibTable::removeLibEntry(int inLabel)
 {
     for (unsigned int i = 0; i < lib.size(); i++) {
@@ -108,6 +130,19 @@ void LibTable::removeLibEntry(int inLabel)
         return;
     }
     throw cRuntimeError("Cannot remove LIB entry: no entry with inLabel=%d", inLabel);
+}
+
+bool LibTable::removeLibEntryIfExists(int inLabel)
+{
+    for (unsigned int i = 0; i < lib.size(); i++) {
+        if (lib[i].inLabel != inLabel)
+            continue;
+
+        lib.erase(lib.begin() + i);
+        emitLibEntryCount();
+        return true;
+    }
+    return false;
 }
 
 void LibTable::readTableFromXML(const cXMLElement *libtable)
