@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<scenario>
+    <!--
+         LSR4 is a transit hop of tunnel 1's explicit route (LSR1-LSR2-LSR4-LSR5-LSR8).
+         Shutting it down breaks that LSP; RSVP-TE Hello detects the dead adjacency,
+         the ingress tears the path down and (being permanent) retries it, and once
+         LSR4 comes back up the retried path succeeds again. Tunnel 2, which does not
+         use LSR4, is unaffected throughout.
+    -->
+    <at t="2s">
+        <shutdown module="LSR4"/>
+    </at>
+    <at t="4s">
+        <startup module="LSR4"/>
+    </at>
+</scenario>
