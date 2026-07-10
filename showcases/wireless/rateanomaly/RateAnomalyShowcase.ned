@@ -9,6 +9,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
+import inet.environment.common.PhysicalEnvironment;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
@@ -27,6 +28,9 @@ network RateAnomalyShowcase
         }
         visualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
             @display("p=3,10;is=s");
+        }
+        physicalEnvironment: PhysicalEnvironment {
+            @display("p=3,14;is=s");
         }
         server: StandardHost {
             @display("p=25,12");

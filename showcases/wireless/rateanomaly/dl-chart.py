@@ -35,7 +35,7 @@ b2 = ax.bar(x + w/2, fair,    w, color="#1f618d", label=f"Airtime-fair queue (fi
 ax.bar_label(b1, fmt="%.1f", padding=2, fontsize=8)
 ax.bar_label(b2, fmt="%.1f", padding=2, fontsize=8)
 ax.set_xticks(x)
-ax.set_xticklabels(["sta[0]\n(far, ~6 Mbps)", "sta[1]", "sta[2]", "sta[3]", "sta[4]"])
+ax.set_xticklabels(["sta[0]\n(behind wall)", "sta[1]", "sta[2]", "sta[3]", "sta[4]"])
 ax.set_ylabel("Application throughput [Mbps]")
 ax.set_title("Downlink: airtime fairness lets the fast clients recover")
 ax.grid(True, axis="y", linestyle="--", alpha=0.6)
