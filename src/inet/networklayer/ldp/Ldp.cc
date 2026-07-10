@@ -334,8 +334,7 @@ void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
     fec.length = length;
     requestMsg->setFec(fec);
 
-    requestMsg->setReceiverAddress(dest);
-    requestMsg->setSenderAddress(rt->getRouterId());
+    requestMsg->setLsrId(rt->getRouterId());
     pk->insertAtBack(requestMsg);
 
     sendToPeer(dest, pk);
@@ -547,10 +546,11 @@ void Ldp::sendHelloTo(Ipv4Address dest)
     const auto& hello = makeShared<LdpHello>();
     hello->setChunkLength(LDP_HELLO_BYTES);
     hello->setType(HELLO);
-    hello->setSenderAddress(rt->getRouterId());
-    // receiverAddress (targeted hellos) and the R-bit/T-bit (LDP hello state machine
-    // extensions) are not modeled; left at their default (unset/false) values
-    hello->setHoldTime(SIMTIME_DBL(holdTime));
+    hello->setLsrId(rt->getRouterId());
+    // targeted hellos (which would need a destination LSR-Id) and the R-bit/T-bit
+    // (LDP hello state machine extensions) are not modeled; left at their default
+    // (unset/false) values
+    hello->setHoldTime((uint16_t)holdTime.inUnit(SIMTIME_S));
     pk->insertAtBack(hello);
 
     if (dest.isMulticast()) {
@@ -648,13 +648,13 @@ void Ldp::processLDPHello(Packet *msg)
     ASSERT(socketId == udpSocket.getSocketId());
 
     const auto& ldpHello = msg->peekAtFront<LdpHello>();
-    Ipv4Address peerAddr = ldpHello->getSenderAddress();
-    double receivedHoldTime = ldpHello->getHoldTime();
+    Ipv4Address peerAddr = ldpHello->getLsrId();
+    uint16_t receivedHoldTime = ldpHello->getHoldTime();
     int interfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
     delete msg;
 
     // RFC 5036 2.4.1: the effective hold time is the smaller of the two proposals
-    simtime_t effectiveHoldTime = receivedHoldTime > 0 ? std::min(holdTime, SimTime(receivedHoldTime)) : holdTime;
+    simtime_t effectiveHoldTime = receivedHoldTime > 0 ? std::min(holdTime, SimTime((int)receivedHoldTime, SIMTIME_S)) : holdTime;
 
     EV_INFO << "Received LDP Hello from " << peerAddr << ", ";
 
@@ -966,8 +966,7 @@ void Ldp::sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length)
     lnMessage->setChunkLength(LDP_NOTIFICATION_BYTES);
     lnMessage->setType(NOTIFICATION);
     lnMessage->setStatus(NO_ROUTE);
-    lnMessage->setReceiverAddress(dest);
-    lnMessage->setSenderAddress(rt->getRouterId());
+    lnMessage->setLsrId(rt->getRouterId());
 
     FecTlv fec;
     fec.addr = addr;
@@ -986,8 +985,7 @@ void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, i
     const auto& lmMessage = makeShared<LdpLabelMapping>();
     lmMessage->setChunkLength(LDP_LABEL_MAPPING_BYTES); // also used for LABEL_WITHDRAW/LABEL_RELEASE (see LDP_LABEL_MAPPING_BYTES)
     lmMessage->setType(type);
-    lmMessage->setReceiverAddress(dest);
-    lmMessage->setSenderAddress(rt->getRouterId());
+    lmMessage->setLsrId(rt->getRouterId());
     lmMessage->setLabel(label);
 
     FecTlv fec;
@@ -1004,7 +1002,7 @@ void Ldp::processNOTIFICATION(Ptr<const LdpPacket>& ldpPacket, bool rescheduled)
 {
     const auto& packet = CHK(dynamicPtrCast<const LdpNotify>(ldpPacket));
     FecTlv fec = packet->getFec();
-    Ipv4Address srcAddr = packet->getSenderAddress();
+    Ipv4Address srcAddr = packet->getLsrId();
     int status = packet->getStatus();
 
     // FIXME NO_ROUTE processing should probably be split into two functions,
@@ -1059,7 +1057,7 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
 {
     const auto& packet = CHK(dynamicPtrCast<const LdpLabelRequest>(ldpPacket));
     FecTlv fec = packet->getFec();
-    Ipv4Address srcAddr = packet->getSenderAddress();
+    Ipv4Address srcAddr = packet->getLsrId();
 
     EV_INFO << "Label Request from LSR " << srcAddr << " for FEC " << fec << endl;
 
@@ -1169,7 +1167,7 @@ void Ldp::processLABEL_RELEASE(Ptr<const LdpPacket>& ldpPacket)
     const auto& packet = CHK(dynamicPtrCast<const LdpLabelMapping>(ldpPacket));
     FecTlv fec = packet->getFec();
     int label = packet->getLabel();
-    Ipv4Address fromIP = packet->getSenderAddress();
+    Ipv4Address fromIP = packet->getLsrId();
 
     EV_INFO << "Mapping release received for label=" << label << " fec=" << fec << " from " << fromIP << endl;
 
@@ -1208,7 +1206,7 @@ void Ldp::processLABEL_WITHDRAW(Ptr<const LdpPacket>& ldpPacket)
     const auto& ldpLabelMapping = CHK(dynamicPtrCast<const LdpLabelMapping>(ldpPacket));
     FecTlv fec = ldpLabelMapping->getFec();
     int label = ldpLabelMapping->getLabel();
-    Ipv4Address fromIP = ldpLabelMapping->getSenderAddress();
+    Ipv4Address fromIP = ldpLabelMapping->getLsrId();
 
     EV_INFO << "Mapping withdraw received for label=" << label << " fec=" << fec << " from " << fromIP << endl;
 
@@ -1251,7 +1249,7 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
     const auto& packet = CHK(dynamicPtrCast<const LdpLabelMapping>(ldpPacket));
     FecTlv fec = packet->getFec();
     int label = packet->getLabel();
-    Ipv4Address fromIP = packet->getSenderAddress();
+    Ipv4Address fromIP = packet->getLsrId();
 
     EV_INFO << "Label mapping label=" << label << " received for fec=" << fec << " from " << fromIP << endl;
 
