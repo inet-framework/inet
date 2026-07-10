@@ -1,0 +1,179 @@
+%description:
+Regression test for RSVP-TE ResvErr (RFC 2205 Section 3.5): when an existing
+reservation is preempted, the router doing the preempting sends a ResvErr
+downstream toward the egress, and the egress processes it by logging and
+removing its own local reservation state for the errored flow.
+
+Reuses the examples/mpls/testte_reroute network (RSVPTE4) and its stock
+LSR1_rsvp.xml priorities (unlike rsvpte_cac.test, which strips them to test
+pure CAC bandwidth sharing without preemption):
+  - tunnel 1, lsp 100, 400k, setup_pri=1/holding_pri=1 (better/higher priority),
+    over LSR1->LSR3->LSR7->LSR5
+  - tunnel 2, lsp 200, 400k, default setup_pri=7/holding_pri=7 (worst/lowest
+    priority), over LSR1->LSR2->LSR4->LSR5
+
+At t=2s a second path is added to tunnel 1 (lsp 101, 400k), also inheriting
+tunnel 1's setup_pri=1, routed over LSR1->LSR2->LSR4->LSR5 -- the same links
+tunnel 2 uses. Since lsp 101's setup priority (1) is better than tunnel 2's
+holding priority (7), admitting it preempts tunnel 2's reservation instead of
+being rejected (contrast with rsvpte_cac.test, where both sessions share the
+same low priority and the higher-bandwidth request is rejected instead).
+
+Before this commit, RsvpTe::preempt() silently zeroed the preempted RSB's
+bandwidth and relied on the RSB's own soft-state timeout to eventually notice
+-- it never sent anything, so the "sending ResvErr" and "reservation failed"
+lines below never appeared, and processRSVPMessage's dispatch had no
+RTEAR_MESSAGE/RERROR_MESSAGE cases at all (both fell into the `default:`
+`throw`). This test fails on the parent commit because those log lines are
+simply never produced -- there is nothing to send or receive.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.testte_reroute.RSVPTE4
+sim-time-limit = 3s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host3"
+
+**.host2.numApps = 1
+**.host2.app[0].typename = "UdpBasicApp"
+**.host2.app[0].localPort = 100
+**.host2.app[0].destPort = 100
+**.host2.app[0].messageLength = 128 bytes
+**.host2.app[0].sendInterval = 0.01s
+**.host2.app[0].destAddresses = "host4"
+
+**.host{3..4}.numApps = 1
+**.host{3..4}.app[0].typename = "UdpSink"
+**.host{3..4}.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host4.rt"
+**.host5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host5.rt"
+
+**.LSR1.classifier.config = xmldoc("../../../../examples/mpls/testte_reroute/LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("LSR1_rsvp.xml")
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR5.rt"
+**.LSR6.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR6.rt"
+**.LSR7.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR7.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1_rsvp.xml
+<?xml version="1.0"?>
+<sessions>
+	<session>
+		<endpoint>host3</endpoint>
+		<tunnel_id>1</tunnel_id>
+
+		<setup_pri>1</setup_pri>
+		<holding_pri>1</holding_pri>
+
+		<paths>
+			<path>
+				<lspid>100</lspid>
+
+				<bandwidth>400000</bandwidth>
+				<route>
+					<node>LSR1%routerId</node>
+					<node>LSR3%routerId</node>
+					<node>LSR7%routerId</node>
+					<node>LSR5%routerId</node>
+				</route>
+
+				<permanent>true</permanent>
+			</path>
+		</paths>
+	</session>
+	<session>
+		<endpoint>host4</endpoint>
+		<tunnel_id>2</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>200</lspid>
+
+				<bandwidth>400000</bandwidth>
+				<route>
+					<node>LSR1%routerId</node>
+					<node>LSR2%routerId</node>
+					<node>LSR4%routerId</node>
+					<node>LSR5%routerId</node>
+				</route>
+
+				<permanent>true</permanent>
+			</path>
+		</paths>
+	</session>
+</sessions>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<?xml version="1.0"?>
+<scenario>
+	<at t="2s">
+		<add-session module="LSR1.rsvp">
+			<endpoint>host3</endpoint>
+			<tunnel_id>1</tunnel_id>
+
+			<paths>
+				<path>
+					<lspid>101</lspid>
+
+					<bandwidth>400000</bandwidth>
+					<route>
+						<node>LSR1%routerId</node>
+						<node>LSR2%routerId</node>
+						<node>LSR4%routerId</node>
+						<node>LSR5%routerId</node>
+					</route>
+
+				</path>
+			</paths>
+		</add-session>
+	</at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Sanity: the add-session reached the ingress and tried to create the new (better-priority) path.
+%contains: stdout
+adding new path into an existing session
+%#--------------------------------------------------------------------------------------------------------------
+%# The preempting LSR sends a ResvErr downstream toward the egress for the RSB it just zeroed.
+%contains: stdout
+sending ResvErr (RSB
+%#--------------------------------------------------------------------------------------------------------------
+%# The egress processes the ResvErr: logs the failure and removes its own reservation state.
+%contains: stdout
+reservation failed (errorCode=
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

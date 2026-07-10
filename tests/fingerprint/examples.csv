@@ -423,7 +423,7 @@
 /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            027b-143f/tplx;23a6-8b4e/~tNl;7ade-27de/tyf, PASS, Ipv4
 /examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             5315-8dbe/tplx;5d19-e3d4/~tNl;10d0-50ee/tyf, PASS, Ipv4
 /examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            f3f0-a4df/tplx;e97b-ce7b/~tNl;182f-657e/tyf, PASS, Ipv4
-/examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             41d2-f141/tplx;857d-c35d/~tNl;7e41-890e/tyf, PASS, Ipv4
+/examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             d5c7-ee71/tplx;47a8-fa28/~tNl;d3d4-30b2/tyf, PASS, Ipv4
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             18f0-9e8a/tplx;c2c8-a6d0/~tNl;d707-7683/tyf, PASS, Ipv4
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             ef09-fc39/tplx;cdc6-d6c8/~tNl;8ca7-8978/tyf, PASS, Ipv4
 

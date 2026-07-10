@@ -189,6 +189,8 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual void processResvMsg(Packet *pk);
     virtual void processPathTearMsg(Packet *pk);
     virtual void processPathErrMsg(Packet *pk);
+    virtual void processResvTearMsg(Packet *pk);
+    virtual void processResvErrMsg(Packet *pk);
 
     virtual PathStateBlock *createPSB(const Ptr<RsvpPathMsg>& msg);
     virtual PathStateBlock *createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
@@ -214,6 +216,9 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual void sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, SenderTspecObj tspec, Ipv4Address nextHop, int errCode);
     virtual void sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, const SenderTemplateObj& sender, Ipv4Address LIH, Ipv4Address NHOP, bool force);
     virtual void sendPathNotify(int handler, const SessionObj& session, const SenderTemplateObj& sender, int status, simtime_t delay);
+    virtual void sendResvTearMessage(ResvStateBlock *rsbEle);
+    virtual void sendResvTearMessage(ResvStateBlock *rsbEle, Ipv4Address PHOP);
+    virtual void sendResvErrorMessage(ResvStateBlock *rsbEle, int errCode);
 
     virtual void setupHello();
     virtual void addHelloPeer(Ipv4Address peer);

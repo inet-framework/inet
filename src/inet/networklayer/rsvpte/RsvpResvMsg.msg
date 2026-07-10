@@ -52,6 +52,7 @@ class RsvpResvError extends RsvpPacket
     RsvpHopObj hop;
     Ipv4Address errorNode;
     int errorCode;
+    FlowDescriptorVector flowDescriptor;
     rsvpKind = RERROR_MESSAGE;
 }
 
