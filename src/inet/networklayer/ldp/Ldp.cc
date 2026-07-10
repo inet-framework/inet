@@ -31,24 +31,24 @@ simsignal_t Ldp::sessionUpSignal = registerSignal("sessionUp");
 simsignal_t Ldp::sessionDownSignal = registerSignal("sessionDown");
 simsignal_t Ldp::fecBindingCountSignal = registerSignal("fecBindingCount");
 
-std::ostream& operator<<(std::ostream& os, const Ldp::fec_bind_t& f)
+std::ostream& operator<<(std::ostream& os, const Ldp::FecBinding& f)
 {
     os << "fecid=" << f.fecid << "  peer=" << f.peer << " label=" << f.label;
     return os;
 }
 
-bool fecPrefixCompare(const Ldp::fec_t& a, const Ldp::fec_t& b)
+bool fecPrefixCompare(const Ldp::Fec& a, const Ldp::Fec& b)
 {
     return a.length > b.length;
 }
 
-std::ostream& operator<<(std::ostream& os, const Ldp::fec_t& f)
+std::ostream& operator<<(std::ostream& os, const Ldp::Fec& f)
 {
     os << "fecid=" << f.fecid << "  addr=" << f.addr << "  length=" << f.length << "  nextHop=" << f.nextHop;
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Ldp::pending_req_t& r)
+std::ostream& operator<<(std::ostream& os, const Ldp::PendingRequest& r)
 {
     os << "fecid=" << r.fecid << "  peer=" << r.peer;
     return os;
@@ -341,7 +341,7 @@ void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
     sendToPeer(dest, pk);
 }
 
-void Ldp::updateFecListEntry(Ldp::fec_t oldItem)
+void Ldp::updateFecListEntry(Ldp::Fec oldItem)
 {
     // do we have mapping from downstream?
     auto dit = findFecEntry(fecDown, oldItem.fecid, oldItem.nextHop);
@@ -437,7 +437,7 @@ void Ldp::rebuildFecList()
 
         if (it == oldList.end()) {
             // fec didn't exist, it was just created
-            fec_t newItem;
+            Fec newItem;
             newItem.fecid = ++maxFecid;
             newItem.addr = re->getDestination();
             newItem.length = re->getNetmask().getNetmaskLength();
@@ -475,7 +475,7 @@ void Ldp::rebuildFecList()
 
         auto it = findFecEntry(oldList, ipv4Data->getIPAddress(), 32);
         if (it == oldList.end()) {
-            fec_t newItem;
+            Fec newItem;
             newItem.fecid = ++maxFecid;
             newItem.addr = ipv4Data->getIPAddress();
             newItem.length = 32;
@@ -1099,7 +1099,7 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
     ASSERT(!(ER && dit != fecDown.end())); // can't be egress and have mapping at the same time
 
     if (ER || dit != fecDown.end()) {
-        fec_bind_t newItem;
+        FecBinding newItem;
         newItem.fecid = it->fecid;
         newItem.label = -1;
         newItem.peer = srcAddr;
@@ -1155,7 +1155,7 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
 
         EV_DETAIL << "no mapping for this FEC from the downstream router, marking as pending" << endl;
 
-        pending_req_t newItem;
+        PendingRequest newItem;
         newItem.fecid = it->fecid;
         newItem.peer = srcAddr;
         pending.push_back(newItem);
@@ -1274,7 +1274,7 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
 
     // insert among received mappings
 
-    fec_bind_t newItem;
+    FecBinding newItem;
     newItem.fecid = it->fecid;
     newItem.peer = fromIP;
     newItem.label = label;
@@ -1296,7 +1296,7 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
         // means we must pop rather than swap to label 3
         LabelOpVector outLabel = (label == IMPLICIT_NULL_LABEL) ? LibTable::popLabel() : LibTable::swapLabel(label);
 
-        fec_bind_t newItem;
+        FecBinding newItem;
         newItem.fecid = it->fecid;
         newItem.peer = pit->peer;
         newItem.label = lt->installLibEntry(-1, inInterface, outLabel, outInterface);

@@ -31,9 +31,9 @@ class INET_API Ted : public RoutingProtocolBase
      * Only used internally, during shortest path calculation:
      * vertex in the graph we build from links in TeLinkStateInfoVector.
      */
-    struct vertex_t {
+    struct Vertex {
         Ipv4Address node; // the router id of this vertex
-        int parent; // index into the same vertex_t vector
+        int parent; // index into the same Vertex vector
         double dist; // distance from the root along the shortest path found so far
     };
 
@@ -41,9 +41,9 @@ class INET_API Ted : public RoutingProtocolBase
      * Only used internally, during shortest path calculation:
      * edge in the graph we build from links in TeLinkStateInfoVector.
      */
-    struct edge_t {
-        int src; // index into the vertex_t[] vector
-        int dest; // index into the vertex_t[] vector
+    struct Edge {
+        int src; // index into the Vertex[] vector
+        int dest; // index into the Vertex[] vector
         double metric; // link cost
     };
 
@@ -96,9 +96,9 @@ class INET_API Ted : public RoutingProtocolBase
     int maxMessageId = 0;
 
   protected:
-    virtual int assignIndex(std::vector<vertex_t>& vertices, Ipv4Address nodeAddr);
+    virtual int assignIndex(std::vector<Vertex>& vertices, Ipv4Address nodeAddr);
 
-    std::vector<vertex_t> calculateShortestPaths(const TeLinkStateInfoVector& topology,
+    std::vector<Vertex> calculateShortestPaths(const TeLinkStateInfoVector& topology,
             double req_bandwidth, int priority);
 
   public: // FIXME

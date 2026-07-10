@@ -157,7 +157,7 @@ std::ostream& operator<<(std::ostream& os, const TeLinkStateInfo& info)
 }
 
 // FIXME should this be called findOrCreateVertex() or something like that?
-int Ted::assignIndex(std::vector<vertex_t>& vertices, Ipv4Address nodeAddr)
+int Ted::assignIndex(std::vector<Vertex>& vertices, Ipv4Address nodeAddr)
 {
     // find node in vertices[] whose Ipv4 address is nodeAddr
     for (unsigned int i = 0; i < vertices.size(); i++)
@@ -165,7 +165,7 @@ int Ted::assignIndex(std::vector<vertex_t>& vertices, Ipv4Address nodeAddr)
             return i;
 
     // if not found, create
-    vertex_t newVertex;
+    Vertex newVertex;
     newVertex.node = nodeAddr;
     newVertex.dist = LS_INFINITY;
     newVertex.parent = -1;
@@ -178,7 +178,7 @@ Ipv4AddressVector Ted::calculateShortestPath(Ipv4AddressVector dest,
         const TeLinkStateInfoVector& topology, double req_bandwidth, int priority)
 {
     // FIXME comment: what do we do here?
-    std::vector<vertex_t> V = calculateShortestPaths(topology, req_bandwidth, priority);
+    std::vector<Vertex> V = calculateShortestPaths(topology, req_bandwidth, priority);
 
     double minDist = LS_INFINITY;
     int minIndex = -1;
@@ -213,7 +213,7 @@ void Ted::rebuildRoutingTable()
 {
     EV_INFO << "rebuilding routing table at " << routerId << endl;
 
-    std::vector<vertex_t> V = calculateShortestPaths(ted, 0.0, 7);
+    std::vector<Vertex> V = calculateShortestPaths(ted, 0.0, 7);
 
     // remove all routing entries, except multicast ones (we don't care about them)
     int n = rt->getNumRoutes();
@@ -315,11 +315,11 @@ bool Ted::isLocalPeer(Ipv4Address inetAddr)
     return false;
 }
 
-std::vector<Ted::vertex_t> Ted::calculateShortestPaths(const TeLinkStateInfoVector& topology,
+std::vector<Ted::Vertex> Ted::calculateShortestPaths(const TeLinkStateInfoVector& topology,
         double req_bandwidth, int priority)
 {
-    std::vector<vertex_t> vertices;
-    std::vector<edge_t> edges;
+    std::vector<Vertex> vertices;
+    std::vector<Edge> edges;
 
     // select edges that have enough bandwidth left, and store them into edges[].
     // meanwhile, collect vertices in vectices[].
@@ -330,7 +330,7 @@ std::vector<Ted::vertex_t> Ted::calculateShortestPaths(const TeLinkStateInfoVect
         if (elem.UnResvBandwidth[priority] < req_bandwidth)
             continue;
 
-        edge_t edge;
+        Edge edge;
         edge.src = assignIndex(vertices, elem.advrouter);
         edge.dest = assignIndex(vertices, elem.linkid);
         edge.metric = elem.metric;

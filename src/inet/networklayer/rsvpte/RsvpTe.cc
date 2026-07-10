@@ -297,7 +297,7 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 {
     checkTags(session, "tunnel_id endpoint setup_pri holding_pri paths");
 
-    traffic_session_t newSession;
+    TrafficSession newSession;
 
     newSession.sobj.Tunnel_Id = getParameterIntValue(session, "tunnel_id");
     newSession.sobj.Extended_Tunnel_Id = routerId.getInt();
@@ -338,9 +338,9 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 
         int lspid = getParameterIntValue(path, "lspid");
 
-        std::vector<traffic_path_t>::iterator pit;
+        std::vector<TrafficPath>::iterator pit;
 
-        traffic_path_t newPath;
+        TrafficPath newPath;
 
         newPath.sender.SrcAddress = getParameterIPAddressValue(path, "sender", routerId);
         newPath.sender.Lsp_Id = lspid;
@@ -402,7 +402,7 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
     }
 }
 
-std::vector<RsvpTe::traffic_path_t>::iterator RsvpTe::findPath(traffic_session_t *session, const SenderTemplateObj& sender)
+std::vector<RsvpTe::TrafficPath>::iterator RsvpTe::findPath(TrafficSession *session, const SenderTemplateObj& sender)
 {
     auto it = session->paths.begin();
     for (; it != session->paths.end(); it++) {
@@ -1437,7 +1437,7 @@ RsvpTe::PathStateBlock *RsvpTe::createPSB(const Ptr<RsvpPathMsg>& msg)
     return cPSB;
 }
 
-RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const traffic_session_t& session, const traffic_path_t& path)
+RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const TrafficSession& session, const TrafficPath& path)
 {
     EroVector ERO = path.ERO;
 
@@ -2004,11 +2004,11 @@ void RsvpTe::pathProblem(PathStateBlock *psb)
 
     auto sit = findSession(psb->Session_Object);
     ASSERT(sit != traffic.end());
-    traffic_session_t *s = &(*sit);
+    TrafficSession *s = &(*sit);
 
     auto pit = findPath(s, psb->Sender_Template_Object);
     ASSERT(pit != s->paths.end());
-    traffic_path_t *p = &(*pit);
+    TrafficPath *p = &(*pit);
 
     if (p->permanent) {
         EV_INFO << "this path is permanent, we will try to re-create it later" << endl;
@@ -2057,7 +2057,7 @@ void RsvpTe::processPATH_NOTIFY(PathNotifyMsg *msg)
     delete msg;
 }
 
-std::vector<RsvpTe::traffic_session_t>::iterator RsvpTe::findSession(const SessionObj& session)
+std::vector<RsvpTe::TrafficSession>::iterator RsvpTe::findSession(const SessionObj& session)
 {
     auto it = traffic.begin();
     for (; it != traffic.end(); it++) {
@@ -2088,7 +2088,7 @@ void RsvpTe::delSession(const cXMLElement& node)
 
     auto sit = findSession(sobj);
     ASSERT(sit != traffic.end());
-    traffic_session_t *session = &(*sit);
+    TrafficSession *session = &(*sit);
 
     const cXMLElement *paths = getUniqueChildIfExists(&node, "paths");
     cXMLElementList pathList;

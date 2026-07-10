@@ -55,7 +55,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 {
   public:
 
-    struct fec_t {
+    struct Fec {
         int fecid;
 
         // FEC value
@@ -68,21 +68,21 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
         // possibly also: (speed up)
 //        std::string nextHopInterface
     };
-    typedef std::vector<fec_t> FecVector;
+    typedef std::vector<Fec> FecVector;
 
-    struct fec_bind_t {
+    struct FecBinding {
         int fecid;
 
         Ipv4Address peer;
         int label;
     };
-    typedef std::vector<fec_bind_t> FecBindVector;
+    typedef std::vector<FecBinding> FecBindVector;
 
-    struct pending_req_t {
+    struct PendingRequest {
         int fecid;
         Ipv4Address peer;
     };
-    typedef std::vector<pending_req_t> PendingVector;
+    typedef std::vector<PendingRequest> PendingVector;
 
     struct peer_info {
         Ipv4Address peerIP; // Ipv4 address of LDP peer
@@ -174,7 +174,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
     virtual void rebuildFecList();
     virtual void updateFecList(Ipv4Address nextHop);
-    virtual void updateFecListEntry(fec_t oldItem);
+    virtual void updateFecListEntry(Fec oldItem);
 
     virtual void announceLinkChange(int tedlinkindex);
 

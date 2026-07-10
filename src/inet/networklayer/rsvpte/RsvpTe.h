@@ -34,7 +34,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 {
   protected:
 
-    struct traffic_path_t {
+    struct TrafficPath {
         SenderTemplateObj sender;
         SenderTspecObj tspec;
 
@@ -44,13 +44,13 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         bool permanent;
     };
 
-    struct traffic_session_t {
+    struct TrafficSession {
         SessionObj sobj;
 
-        std::vector<traffic_path_t> paths;
+        std::vector<TrafficPath> paths;
     };
 
-    std::vector<traffic_session_t> traffic;
+    std::vector<TrafficSession> traffic;
 
     /**
      * Path State Block (PSB) structure
@@ -201,7 +201,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual void processResvErrMsg(Packet *pk);
 
     virtual PathStateBlock *createPSB(const Ptr<RsvpPathMsg>& msg);
-    virtual PathStateBlock *createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
+    virtual PathStateBlock *createIngressPSB(const TrafficSession& session, const TrafficPath& path);
     virtual void removePSB(PathStateBlock *psb);
     virtual ResvStateBlock *createRSB(const Ptr<const RsvpResvMsg>& msg);
     virtual ResvStateBlock *createEgressRSB(PathStateBlock *psb);
@@ -252,8 +252,8 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual PathStateBlock *findPsbById(int id);
     virtual ResvStateBlock *findRsbById(int id);
 
-    std::vector<traffic_session_t>::iterator findSession(const SessionObj& session);
-    std::vector<traffic_path_t>::iterator findPath(traffic_session_t *session, const SenderTemplateObj& sender);
+    std::vector<TrafficSession>::iterator findSession(const SessionObj& session);
+    std::vector<TrafficPath>::iterator findPath(TrafficSession *session, const SenderTemplateObj& sender);
 
     virtual HelloState *findHello(Ipv4Address peer);
 
