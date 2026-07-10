@@ -1,0 +1,335 @@
+%description:
+Byte-exact round-trip serialization of RSVP-TE packets (RFC 2205, RFC 3209, RFC 2210):
+the common message header (Section 3.1.2), Path (with a multi-hop ERO), PathTear,
+PathErr, Resv (with 2 flow descriptors, one carrying an RRO), ResvTear, ResvErr, and
+Hello (request and ack). Verifies serialize->bytes->deserialize reproduces the fields
+and the expected on-wire lengths, cross-checked against the B(...) length constants
+in RsvpTe.cc's compute*MessageLength() helpers.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/rsvpte/RsvpHelloMsg_m.h"
+#include "inet/networklayer/rsvpte/RsvpPathMsg_m.h"
+#include "inet/networklayer/rsvpte/RsvpResvMsg_m.h"
+
+using namespace inet;
+
+%global:
+
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<const T>& original)
+{
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    return pkt2.popAtFront<T>(pkt2.getDataLength());
+}
+
+static SessionObj makeSession(Ipv4Address dest, int tunnelId, int extTunnelId)
+{
+    SessionObj s;
+    s.DestAddress = dest;
+    s.Tunnel_Id = tunnelId;
+    s.Extended_Tunnel_Id = extTunnelId;
+    // setupPri/holdingPri are intentionally NOT set here -- they are not on the wire
+    // (see RsvpTeSerializer.cc's "known non-features" list), so round trip always
+    // resets them to 0 regardless of what the original carried.
+    s.setupPri = 3;
+    s.holdingPri = 3;
+    return s;
+}
+
+static RsvpHopObj makeHop(Ipv4Address nhop, Ipv4Address lih)
+{
+    RsvpHopObj h;
+    h.Next_Hop_Address = nhop;
+    h.Logical_Interface_Handle = lih;
+    return h;
+}
+
+// Whole-number bandwidths are exactly representable as IEEE-754 float, so the
+// double -> float -> double round trip through the Int-Serv Tspec/Flowspec
+// encoding (RFC 2210: r/b/p are 32-bit floats) loses no precision here.
+static const double BW = 1000000.0;
+
+%activity:
+
+// === 1. Path (with a 3-hop ERO) ===
+{
+    EV << "=== Path ===" << endl;
+    auto pm = makeShared<RsvpPathMsg>();
+    pm->setRsvpKind(PATH_MESSAGE);
+    pm->setSession(makeSession(Ipv4Address("10.0.0.10"), 1, 100));
+    pm->setHop(makeHop(Ipv4Address("10.0.0.1"), Ipv4Address("10.0.0.2")));
+    pm->setRefreshPeriod(30000);
+    LabelRequestObj lr; lr.l3pid = 0x0800;
+    pm->setLabel_request(lr);
+    EroVector ero;
+    EroObj hop1; hop1.L = false; hop1.node = Ipv4Address("10.0.1.1"); ero.push_back(hop1);
+    EroObj hop2; hop2.L = false; hop2.node = Ipv4Address("10.0.2.1"); ero.push_back(hop2);
+    EroObj hop3; hop3.L = true;  hop3.node = Ipv4Address("10.0.0.10"); ero.push_back(hop3);
+    pm->setERO(ero);
+    SenderDescriptor_t sd;
+    sd.Sender_Template_Object.SrcAddress = Ipv4Address("10.0.0.5");
+    sd.Sender_Template_Object.Lsp_Id = 7; // NOT the -1 default -- that would wrap to 65535 on the wire
+    sd.Sender_Tspec_Object.req_bandwidth = BW;
+    pm->setSender_descriptor(sd);
+    // CommonHdr(8) + SESSION(16) + RSVP_HOP(12) + TIME_VALUES(8) + LABEL_REQUEST(8)
+    // + ERO(4 + 8*3=28) + SENDER_TEMPLATE(12) + SENDER_TSPEC(36) = 128
+    pm->setChunkLength(B(128));
+
+    Packet pkt("sz"); pkt.insertAtFront(pm);
+    ASSERT(pkt.getDataLength() == B(128));
+    auto p2 = dynamicPtrCast<const RsvpPathMsg>(roundTrip(staticPtrCast<const RsvpPathMsg>(pm)));
+    ASSERT(p2 != nullptr);
+    ASSERT(p2->getRsvpKind() == PATH_MESSAGE);
+    // getDestAddress()/getTunnelId()/getExTunnelId()/getSetupPri()/getHoldingPri()
+    // are non-const convenience methods -- go through getSession() (const) instead.
+    ASSERT(p2->getSession().DestAddress == Ipv4Address("10.0.0.10"));
+    ASSERT(p2->getSession().Tunnel_Id == 1 && p2->getSession().Extended_Tunnel_Id == 100);
+    ASSERT(p2->getSession().setupPri == 0 && p2->getSession().holdingPri == 0); // not on the wire
+    // NOTE: getNHOP()/getLIH()/getSrcAddress()/getBW() are non-const convenience
+    // methods on RsvpPathMsg (unlike RsvpResvMsg's), so a const round-tripped Ptr
+    // can't call them here -- go through the underlying const-qualified getters.
+    ASSERT(p2->getHop().Next_Hop_Address == Ipv4Address("10.0.0.1") && p2->getHop().Logical_Interface_Handle == Ipv4Address("10.0.0.2"));
+    ASSERT(p2->getRefreshPeriod() == 30000);
+    ASSERT(p2->getLabel_request().l3pid == 0x0800);
+    ASSERT(p2->getERO().size() == 3);
+    ASSERT(p2->getERO()[0].node == Ipv4Address("10.0.1.1") && p2->getERO()[0].L == false);
+    ASSERT(p2->getERO()[1].node == Ipv4Address("10.0.2.1") && p2->getERO()[1].L == false);
+    ASSERT(p2->getERO()[2].node == Ipv4Address("10.0.0.10") && p2->getERO()[2].L == true);
+    ASSERT(p2->getSender_descriptor().Sender_Template_Object.SrcAddress == Ipv4Address("10.0.0.5"));
+    ASSERT(p2->getLspId() == 7);
+    ASSERT(p2->getSender_descriptor().Sender_Tspec_Object.req_bandwidth == BW);
+    EV << "  PASS" << endl;
+}
+
+// === 2. Path with no ERO (the common case: hop-by-hop, no explicit route) ===
+{
+    EV << "=== Path (no ERO) ===" << endl;
+    auto pm = makeShared<RsvpPathMsg>();
+    pm->setRsvpKind(PATH_MESSAGE);
+    pm->setSession(makeSession(Ipv4Address("10.0.0.20"), 2, 200));
+    pm->setHop(makeHop(Ipv4Address("10.0.0.3"), Ipv4Address("10.0.0.4")));
+    pm->setRefreshPeriod(15000);
+    LabelRequestObj lr; lr.l3pid = 0x0800;
+    pm->setLabel_request(lr);
+    pm->setERO(EroVector());
+    SenderDescriptor_t sd;
+    sd.Sender_Template_Object.SrcAddress = Ipv4Address("10.0.0.6");
+    sd.Sender_Template_Object.Lsp_Id = 42;
+    sd.Sender_Tspec_Object.req_bandwidth = BW;
+    pm->setSender_descriptor(sd);
+    // 8 + 16 + 12 + 8 + 8 + 0(no ERO) + 12 + 36 = 100
+    pm->setChunkLength(B(100));
+
+    Packet pkt("sz"); pkt.insertAtFront(pm);
+    ASSERT(pkt.getDataLength() == B(100));
+    auto p2 = dynamicPtrCast<const RsvpPathMsg>(roundTrip(staticPtrCast<const RsvpPathMsg>(pm)));
+    ASSERT(p2 != nullptr);
+    ASSERT(p2->getERO().size() == 0);
+    ASSERT(p2->getRefreshPeriod() == 15000);
+    ASSERT(p2->getLspId() == 42);
+    EV << "  PASS" << endl;
+}
+
+// === 3. PathTear ===
+{
+    EV << "=== PathTear ===" << endl;
+    auto pt = makeShared<RsvpPathTear>();
+    pt->setRsvpKind(PTEAR_MESSAGE);
+    pt->setSession(makeSession(Ipv4Address("10.0.0.10"), 1, 100));
+    pt->setHop(makeHop(Ipv4Address("10.0.0.1"), Ipv4Address("10.0.0.2")));
+    SenderTemplateObj st; st.SrcAddress = Ipv4Address("10.0.0.5"); st.Lsp_Id = 7;
+    pt->setSenderTemplate(st);
+    pt->setForce(true);
+    // 8 + 16 + 12 + 12 = 48
+    pt->setChunkLength(B(48));
+
+    Packet pkt("sz"); pkt.insertAtFront(pt);
+    ASSERT(pkt.getDataLength() == B(48));
+    auto p2 = dynamicPtrCast<const RsvpPathTear>(roundTrip(staticPtrCast<const RsvpPathTear>(pt)));
+    ASSERT(p2 != nullptr);
+    ASSERT(p2->getRsvpKind() == PTEAR_MESSAGE);
+    ASSERT(p2->getSenderTemplate().SrcAddress == Ipv4Address("10.0.0.5")); // getSrcAddress() is non-const
+    ASSERT(p2->getLspId() == 7);
+    ASSERT(p2->getForce() == false); // model-internal, not on the wire
+    EV << "  PASS" << endl;
+}
+
+// === 4. PathErr ===
+{
+    EV << "=== PathErr ===" << endl;
+    auto pe = makeShared<RsvpPathError>();
+    pe->setRsvpKind(PERROR_MESSAGE);
+    pe->setSession(makeSession(Ipv4Address("10.0.0.10"), 1, 100));
+    pe->setErrorNode(Ipv4Address("10.0.0.9"));
+    pe->setErrorCode(3); // PATH_ERR_NEXTHOP_FAILED
+    SenderDescriptor_t sd;
+    sd.Sender_Template_Object.SrcAddress = Ipv4Address("10.0.0.5");
+    sd.Sender_Template_Object.Lsp_Id = 7;
+    sd.Sender_Tspec_Object.req_bandwidth = BW;
+    pe->setSender_descriptor(sd);
+    // 8 + 16 + 12 + 12 + 36 = 84
+    pe->setChunkLength(B(84));
+
+    Packet pkt("sz"); pkt.insertAtFront(pe);
+    ASSERT(pkt.getDataLength() == B(84));
+    auto p2 = dynamicPtrCast<const RsvpPathError>(roundTrip(staticPtrCast<const RsvpPathError>(pe)));
+    ASSERT(p2 != nullptr);
+    ASSERT(p2->getRsvpKind() == PERROR_MESSAGE);
+    ASSERT(p2->getErrorNode() == Ipv4Address("10.0.0.9"));
+    ASSERT(p2->getErrorCode() == 3);
+    // getSrcAddress()/getBW() are non-const on RsvpPathError -- use the
+    // underlying const-qualified accessor instead.
+    ASSERT(p2->getSender_descriptor().Sender_Template_Object.SrcAddress == Ipv4Address("10.0.0.5"));
+    ASSERT(p2->getSender_descriptor().Sender_Tspec_Object.req_bandwidth == BW);
+    EV << "  PASS" << endl;
+}
+
+// === 5. Resv (2 flow descriptors: first plain, second with an RRO) ===
+{
+    EV << "=== Resv ===" << endl;
+    auto rm = makeShared<RsvpResvMsg>();
+    rm->setRsvpKind(RESV_MESSAGE);
+    rm->setSession(makeSession(Ipv4Address("10.0.0.10"), 1, 100));
+    rm->setHop(makeHop(Ipv4Address("10.0.0.2"), Ipv4Address("10.0.0.1")));
+    rm->setRefreshPeriod(30000);
+
+    FlowDescriptorVector flows;
+    FlowDescriptor_t f1;
+    f1.Flowspec_Object.req_bandwidth = BW;
+    f1.Filter_Spec_Object.SrcAddress = Ipv4Address("10.0.0.5");
+    f1.Filter_Spec_Object.Lsp_Id = 7;
+    f1.label = 1001;
+    flows.push_back(f1);
+
+    FlowDescriptor_t f2;
+    f2.Flowspec_Object.req_bandwidth = 2000000.0;
+    f2.Filter_Spec_Object.SrcAddress = Ipv4Address("10.0.0.55");
+    f2.Filter_Spec_Object.Lsp_Id = 8;
+    f2.label = 1002;
+    f2.RRO.push_back(Ipv4Address("10.0.0.2"));
+    f2.RRO.push_back(Ipv4Address("10.0.0.10"));
+    flows.push_back(f2);
+    rm->setFlowDescriptor(flows);
+
+    // CommonHdr(8)+SESSION(16)+RSVP_HOP(12)+TIME_VALUES(8)+STYLE(8) = 52
+    // flow 1: FLOWSPEC(36)+FILTER_SPEC(12)+LABEL(8) = 56 (no RRO)
+    // flow 2: FLOWSPEC(36)+FILTER_SPEC(12)+LABEL(8)+RRO(4+8*2=20) = 76
+    // total = 52 + 56 + 76 = 184
+    rm->setChunkLength(B(184));
+
+    Packet pkt("sz"); pkt.insertAtFront(rm);
+    ASSERT(pkt.getDataLength() == B(184));
+    auto r2 = dynamicPtrCast<const RsvpResvMsg>(roundTrip(staticPtrCast<const RsvpResvMsg>(rm)));
+    ASSERT(r2 != nullptr);
+    ASSERT(r2->getRsvpKind() == RESV_MESSAGE);
+    ASSERT(r2->getRefreshPeriod() == 30000);
+    ASSERT(r2->getNHOP() == Ipv4Address("10.0.0.2") && r2->getLIH() == Ipv4Address("10.0.0.1"));
+    const FlowDescriptorVector& rf = r2->getFlowDescriptor();
+    ASSERT(rf.size() == 2);
+    ASSERT(rf[0].Flowspec_Object.req_bandwidth == BW);
+    ASSERT(rf[0].Filter_Spec_Object.SrcAddress == Ipv4Address("10.0.0.5") && rf[0].Filter_Spec_Object.Lsp_Id == 7);
+    ASSERT(rf[0].label == 1001);
+    ASSERT(rf[0].RRO.size() == 0);
+    ASSERT(rf[1].Flowspec_Object.req_bandwidth == 2000000.0);
+    ASSERT(rf[1].Filter_Spec_Object.SrcAddress == Ipv4Address("10.0.0.55") && rf[1].Filter_Spec_Object.Lsp_Id == 8);
+    ASSERT(rf[1].label == 1002);
+    ASSERT(rf[1].RRO.size() == 2);
+    ASSERT(rf[1].RRO[0] == Ipv4Address("10.0.0.2") && rf[1].RRO[1] == Ipv4Address("10.0.0.10"));
+    EV << "  PASS" << endl;
+}
+
+// === 6. ResvTear (single flow, no TIME_VALUES on the wire) ===
+{
+    EV << "=== ResvTear ===" << endl;
+    auto rt = makeShared<RsvpResvTear>();
+    rt->setRsvpKind(RTEAR_MESSAGE);
+    rt->setSession(makeSession(Ipv4Address("10.0.0.10"), 1, 100));
+    rt->setHop(makeHop(Ipv4Address("10.0.0.2"), Ipv4Address("10.0.0.1")));
+    FlowDescriptorVector flows;
+    FlowDescriptor_t f1;
+    f1.Flowspec_Object.req_bandwidth = BW;
+    f1.Filter_Spec_Object.SrcAddress = Ipv4Address("10.0.0.5");
+    f1.Filter_Spec_Object.Lsp_Id = 7;
+    f1.label = 1001;
+    flows.push_back(f1);
+    rt->setFlowDescriptor(flows);
+    // 8+16+12+8(style) + 56(flow, no RRO) = 100
+    rt->setChunkLength(B(100));
+
+    Packet pkt("sz"); pkt.insertAtFront(rt);
+    ASSERT(pkt.getDataLength() == B(100));
+    auto r2 = dynamicPtrCast<const RsvpResvTear>(roundTrip(staticPtrCast<const RsvpResvTear>(rt)));
+    ASSERT(r2 != nullptr);
+    ASSERT(r2->getRsvpKind() == RTEAR_MESSAGE);
+    ASSERT(r2->getFlowDescriptor().size() == 1);
+    ASSERT(r2->getFlowDescriptor()[0].label == 1001);
+    EV << "  PASS" << endl;
+}
+
+// === 7. ResvErr ===
+{
+    EV << "=== ResvErr ===" << endl;
+    auto re = makeShared<RsvpResvError>();
+    re->setRsvpKind(RERROR_MESSAGE);
+    re->setSession(makeSession(Ipv4Address("10.0.0.10"), 1, 100));
+    re->setHop(makeHop(Ipv4Address("10.0.0.2"), Ipv4Address("10.0.0.1")));
+    re->setErrorNode(Ipv4Address("10.0.0.9"));
+    re->setErrorCode(1); // RESV_ERR_PREEMPTED
+    FlowDescriptorVector flows;
+    FlowDescriptor_t f1;
+    f1.Flowspec_Object.req_bandwidth = BW;
+    f1.Filter_Spec_Object.SrcAddress = Ipv4Address("10.0.0.5");
+    f1.Filter_Spec_Object.Lsp_Id = 7;
+    f1.label = 1001;
+    flows.push_back(f1);
+    re->setFlowDescriptor(flows);
+    // 8+16+12+12(errorspec)+8(style) + 56(flow) = 112
+    re->setChunkLength(B(112));
+
+    Packet pkt("sz"); pkt.insertAtFront(re);
+    ASSERT(pkt.getDataLength() == B(112));
+    auto r2 = dynamicPtrCast<const RsvpResvError>(roundTrip(staticPtrCast<const RsvpResvError>(re)));
+    ASSERT(r2 != nullptr);
+    ASSERT(r2->getRsvpKind() == RERROR_MESSAGE);
+    ASSERT(r2->getErrorNode() == Ipv4Address("10.0.0.9"));
+    ASSERT(r2->getErrorCode() == 1);
+    ASSERT(r2->getFlowDescriptor().size() == 1);
+    EV << "  PASS" << endl;
+}
+
+// === 8. Hello (request and ack) ===
+{
+    EV << "=== Hello ===" << endl;
+    for (bool isRequest : { true, false }) {
+        auto hm = makeShared<RsvpHelloMsg>();
+        hm->setRsvpKind(HELLO_MESSAGE);
+        hm->setRequest(isRequest);
+        hm->setAck(!isRequest);
+        hm->setSrcInstance(111);
+        hm->setDstInstance(222);
+        // 8 + 12 = 20
+        hm->setChunkLength(B(20));
+
+        Packet pkt("sz"); pkt.insertAtFront(hm);
+        ASSERT(pkt.getDataLength() == B(20));
+        auto h2 = dynamicPtrCast<const RsvpHelloMsg>(roundTrip(staticPtrCast<const RsvpHelloMsg>(hm)));
+        ASSERT(h2 != nullptr);
+        ASSERT(h2->getRsvpKind() == HELLO_MESSAGE);
+        ASSERT(h2->getRequest() == isRequest);
+        ASSERT(h2->getAck() == !isRequest);
+        ASSERT(h2->getSrcInstance() == 111);
+        ASSERT(h2->getDstInstance() == 222);
+    }
+    EV << "  PASS" << endl;
+}
+
+EV << "All RSVP-TE serializer round-trips passed." << endl;
+
+%contains: stdout
+All RSVP-TE serializer round-trips passed.
