@@ -100,7 +100,7 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
 
                 conn->emit(cwndSignal, state->snd_cwnd);
 
-                uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME - Does this formula computes the amount of outstanding data?
+                uint32_t flight_size = conn->getFlightSize();
                 state->ssthresh = std::max(3 * flight_size / 4, 2 * state->snd_mss);
 
                 conn->emit(ssthreshSignal, state->ssthresh);
