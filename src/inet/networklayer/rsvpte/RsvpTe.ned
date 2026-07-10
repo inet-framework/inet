@@ -15,19 +15,18 @@ import inet.common.SimpleModule;
 //
 // An example traffic.xml file:
 //
-//# FIXME: Verify against the code, and document formally (DTD)!
-//# <setup_pri>, <holding_pri>, <sender>, <owner> elements
-//# are implemented but missing from this doc!
-//
 // <pre>
 // <?xml version="1.0"?>
 // <sessions>
 //     <session>
 //         <endpoint>host3</endpoint>
 //         <tunnel_id>1</tunnel_id>
+//         <setup_pri>7</setup_pri>
+//         <holding_pri>7</holding_pri>
 //         <paths>
 //             <path>
 //                 <lspid>100</lspid>
+//                 <sender>10.1.1.1</sender>
 //                 <bandwidth>100000</bandwidth>
 //                 <route>
 //                     <node>10.1.1.1</node>
@@ -36,16 +35,43 @@ import inet.common.SimpleModule;
 //                     <node>10.1.5.1</node>
 //                 </route>
 //                 <permanent>true</permanent>
+//                 <owner>LSR1.app[0]</owner>
 //             </path>
 //         </paths>
 //     </session>
 // </sessions>
 // </pre>
 //
-// In the route, <node> stands for a strict hop, and <lnode> stands for a loose hop.
+// <session> elements accept the following children:
+// - <tunnel_id>: numeric tunnel id of the session (required).
+// - <endpoint>: the session's destination address or resolvable module name (required).
+// - <setup_pri>, <holding_pri>: the session's RSVP setup and holding priority
+//   (0-7, 0 being the highest), used for admission control and preemption;
+//   default 7 if omitted. Set once per session: adding further paths to an
+//   existing session with a different value is a configuration error.
+// - <paths>: one or more <path> elements (see below).
+//
+// <path> elements accept the following children:
+// - <lspid>: numeric LSP id, unique within the session (required).
+// - <sender>: the sender (ingress) address for the SENDER_TEMPLATE object;
+//   defaults to this router's address.
+// - <bandwidth>: requested bandwidth in bits/sec for admission control;
+//   defaults to 0 (best-effort, always admitted).
+// - <route>: an explicit route (ERO), see below; if omitted, the path is
+//   forwarded hop-by-hop according to the routing table (no ERO).
+// - <permanent>: if true (the default), the module keeps retrying to set up
+//   the path (after "retryInterval") if the initial attempt fails.
+// - <owner>: the module (dotted path) that receives this path's status
+//   notifications (created / preempted / failed / unfeasible); defaults to
+//   this ~RsvpTe module.
+//
+// In the route, <node> stands for a strict hop, and <lnode> stands for a loose hop
+// (both take an IPv4 address). Hand-written EROs are the only way to specify an
+// explicit route: this model does not compute one (there is no CSPF/constrained
+// path computation at the ingress).
 //
 // ~RsvpTe understands the "add-session" and "del-session" ~ScenarioManager commands. The contents of the <add-session> element can be the same as the <session> element for the traffic.xml above.
-// The <del-command> element syntax is also similar, but only <endpoint>, <tunnel_id> and <lspid> need to be specified.
+// The <del-session> element syntax is similar, but only <tunnel_id>, <endpoint>, an optional <extended_tunnel_id> (defaults to this router's address), and (optionally) a <paths> list of <path> elements carrying just <lspid> need to be specified; if <paths> is omitted, every path of the session is torn down.
 //
 // The following is an example scenario.xml file:
 //
