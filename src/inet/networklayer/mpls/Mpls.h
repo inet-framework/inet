@@ -28,9 +28,16 @@ namespace inet {
  */
 class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
+  public:
+    // RFC 3443 TTL propagation model between the IP and MPLS layers
+    enum TtlModel { TTL_MODEL_UNIFORM, TTL_MODEL_PIPE };
+
   protected:
     long numSent = 0;
     long numReceived = 0;
+
+    TtlModel ttlModel = TTL_MODEL_UNIFORM;
+    int defaultTtl = 255;
 
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<IInterfaceTable> ift;
@@ -55,7 +62,20 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     void pushLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
     void swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
     void popLabel(Packet *packet);
-    virtual void doStackOps(Packet *packet, const LabelOpVector& outLabel);
+
+    // returns the TTL to stamp on a freshly pushed label: the IP TTL (uniform) or
+    // defaultTtl (pipe) when pushing onto bare IP, or the current outer label's TTL
+    // when pushing onto an existing label stack
+    uint8_t computePushTtl(const Packet *packet) const;
+
+    // RFC 3443: the label TTL reached zero at a transit LSR; pop the entire label
+    // stack, write the expired TTL back into the IP header, and hand the datagram
+    // to L3 so that Ipv4's own hop-count check generates the ICMP Time Exceeded
+    void handleTtlExpiry(Packet *packet, int outInterfaceId);
+
+    // returns false if the packet was already fully handled (TTL expiry) and the
+    // caller must not touch it any further
+    virtual bool doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInterfaceId);
 
     // IInterfaceRegistrationListener:
     virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *in, cGate *out) override;

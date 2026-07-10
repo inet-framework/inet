@@ -50,6 +50,8 @@ simple Mpls extends SimpleModule like IProtocolLayer
         string interfaceTableModule;   // The path to the InterfaceTable module
         string libTableModule;
         string classifierModule; // The path to the module which implements the IIngressClassifier C++ interface
+        string ttlModel @enum("uniform","pipe") = default("uniform"); // RFC 3443 TTL propagation model between the IP and MPLS layers
+        int defaultTtl = default(255); // label TTL used at push time in "pipe" mode (ignored in "uniform" mode, where the IP TTL is copied instead)
         @display("i=block/switch");
         @signal[packetDropped](type=cPacket);
     gates:

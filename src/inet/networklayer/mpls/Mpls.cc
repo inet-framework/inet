@@ -14,6 +14,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 
 namespace inet {
@@ -30,6 +31,9 @@ void Mpls::initialize(int stage)
         lt.reference(this, "libTableModule", true);
         ift.reference(this, "interfaceTableModule", true);
         pct.reference(this, "classifierModule", true);
+
+        ttlModel = strcmp(par("ttlModel").stringValue(), "pipe") == 0 ? TTL_MODEL_PIPE : TTL_MODEL_UNIFORM;
+        defaultTtl = par("defaultTtl");
 
         WATCH(numReceived);
         WATCH(numSent);
@@ -71,8 +75,6 @@ void Mpls::processPacketFromL3(Packet *msg)
 
 bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
 {
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    (void)ipv4Header; // unused variable
     LabelOpVector outLabel;
     int outInterfaceId;
 
@@ -83,7 +85,8 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
 
     ASSERT(outLabel.size() > 0);
 
-    doStackOps(packet, outLabel);
+    if (!doStackOps(packet, outLabel, outInterfaceId))
+        return true; // a freshly pushed label can never expire; kept for symmetry with processMplsPacketFromL2
 
     EV_INFO << "forwarding packet to " << ift->getInterfaceById(outInterfaceId)->getInterfaceName() << endl;
 
@@ -131,10 +134,65 @@ void Mpls::popLabel(Packet *packet)
     auto oldMplsHeader = packet->popAtFront<MplsHeader>();
     if (oldMplsHeader->getS()) {
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+
+        // RFC 3443 §3.2: in uniform mode the (possibly decremented) label TTL is
+        // authoritative and is written back into the IP header; in pipe mode the
+        // original IP TTL was never touched by the MPLS domain, so it is left alone
+        if (ttlModel == TTL_MODEL_UNIFORM) {
+            auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
+            ipv4Header->setTimeToLive(oldMplsHeader->getTtl());
+            ipv4Header->updateChecksum();
+            insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
+        }
     }
 }
 
-void Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel)
+uint8_t Mpls::computePushTtl(const Packet *packet) const
+{
+    if (packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId())
+        // pushing an additional label onto an existing stack: copy the current outer label's TTL
+        return packet->peekAtFront<MplsHeader>()->getTtl();
+
+    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+    return ttlModel == TTL_MODEL_UNIFORM ? (uint8_t)ipv4Header->getTimeToLive() : (uint8_t)defaultTtl;
+}
+
+void Mpls::handleTtlExpiry(Packet *packet, int outInterfaceId)
+{
+    EV_WARN << "MPLS label TTL expired, discarding the label stack and handing the datagram up to L3 for ICMP Time Exceeded processing" << endl;
+
+    // pop every remaining label (RFC 3443: do not forward the packet any further as MPLS)
+    for (bool bottomOfStack = false; !bottomOfStack; ) {
+        auto oldMplsHeader = packet->popAtFront<MplsHeader>();
+        bottomOfStack = oldMplsHeader->getS();
+    }
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+
+    // write the expired TTL back into the IP header; this happens in both TTL
+    // models (RFC 3443: expiry handling is common to uniform and pipe modes)
+    auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
+    ipv4Header->setTimeToLive(0);
+    ipv4Header->updateChecksum();
+    insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
+
+    // hand the packet to L3 as if it just arrived from the network on the interface
+    // this LSR would have forwarded it on; this LSR (and its peers) typically has no
+    // IP route to the packet's ultimate destination (only the MPLS LIB knows the path),
+    // so the outgoing interface resolved by the label lookup is supplied explicitly to
+    // avoid a spurious "destination unreachable" -- Ipv4::fragmentAndSend's own
+    // hop-count check then generates the real ICMP Time Exceeded
+
+    // the packet still carries the DispatchProtocolReq that routed it here as an MPLS
+    // packet; replace it (matching the freshly-set ipv4 PacketProtocolTag) so the
+    // dispatcher between Mpls and Ipv4 delivers it to Ipv4 instead of looping it
+    // straight back to this module
+    packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
+    sendToL3(packet);
+}
+
+bool Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInterfaceId)
 {
     unsigned int n = outLabel.size();
 
@@ -145,12 +203,20 @@ void Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel)
             case PUSH_OPER: {
                 auto mplsHeader = makeShared<MplsHeader>();
                 mplsHeader->setLabel(outLabel[i].label);
+                mplsHeader->setTtl(computePushTtl(packet));
                 pushLabel(packet, mplsHeader);
                 break;
             }
             case SWAP_OPER: {
+                ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
+                uint8_t oldTtl = packet->peekAtFront<MplsHeader>()->getTtl();
+                if (oldTtl <= 1) {
+                    handleTtlExpiry(packet, outInterfaceId);
+                    return false;
+                }
                 auto mplsHeader = makeShared<MplsHeader>();
                 mplsHeader->setLabel(outLabel[i].label);
+                mplsHeader->setTtl(oldTtl - 1);
                 swapLabel(packet, mplsHeader);
                 break;
             }
@@ -163,6 +229,7 @@ void Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel)
                 break;
         }
     }
+    return true;
 }
 
 void Mpls::processPacketFromL2(Packet *packet)
@@ -211,7 +278,8 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 
     NetworkInterface *outgoingInterface = ift->getInterfaceById(outInterfaceId);
 
-    doStackOps(packet, outLabel);
+    if (!doStackOps(packet, outLabel, outInterfaceId))
+        return; // TTL expired: the datagram was already popped and handed to L3
 
     if ((packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId())) {
         // forward labeled packet

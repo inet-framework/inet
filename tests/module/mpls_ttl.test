@@ -1,0 +1,94 @@
+%description:
+Regression test for RFC 3443 MPLS TTL processing (uniform model, the default) in
+examples/mpls/ldp (network LDPTEST).
+
+host1 sends to host2 with a small IP TTL. At the ingress LSR (LSR1) that TTL is
+copied into the pushed label's TTL (uniform model). LSR2 is a genuine transit LSR
+on the host1->host2 path (LSR1 -> LSR2 -> LSR3), so the label TTL is decremented
+there and reaches zero: LSR2 must NOT forward the packet -- it pops the whole
+label stack, writes the expired TTL back into the IP header, and hands the
+datagram to L3, where Ipv4::fragmentAndSend's own hop-count check fires an ICMP
+Time Exceeded back towards host1.
+
+mpls_ttl.test (this file, uniform model) and mpls_ttl_pipe.test (pipe model) run
+the identical scenario except for **.LSR*.mpls.ttlModel; see mpls_ttl_pipe.test
+for the negative case (no expiry, because the pipe model does not derive the
+label TTL from the IP TTL).
+
+Before RFC 3443 TTL processing was implemented, Mpls::doStackOps never touched
+the MplsHeader's ttl field at all (it stayed at its zero default), so the
+"MPLS label TTL expired" line asserted below did not exist anywhere in the
+source and this test failed deterministically (checked directly against the
+parent commit's Mpls.cc, which has no ttl/computePushTtl/handleTtlExpiry logic).
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.ldp.LDPTEST
+sim-time-limit = 2s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host2"
+**.host1.app[0].timeToLive = 1
+
+**.host3.numApps = 1
+**.host3.app[0].typename = "UdpBasicApp"
+**.host3.app[0].localPort = 100
+**.host3.app[0].destPort = 100
+**.host3.app[0].messageLength = 128 bytes
+**.host3.app[0].sendInterval = 0.01s
+**.host3.app[0].destAddresses = "host4"
+
+**.host{2..4}.numApps = 1
+**.host{2..4}.app[0].typename = "UdpSink"
+**.host{2..4}.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host4.rt"
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR5.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.LSR*.holdTime = 6s
+**.LSR*.helloInterval = 2s
+
+**.scenarioManager.script = xml("<scenario/>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# the data plane is label-switched, as usual
+%contains: stdout
+doStackOps: {PUSH
+%#--------------------------------------------------------------------------------------------------------------
+%# the label TTL (copied from the small IP TTL at the ingress) is decremented to
+%# zero at the transit LSR, which pops the entire stack instead of forwarding
+%contains: stdout
+MPLS label TTL expired, discarding the label stack and handing the datagram up to L3 for ICMP Time Exceeded processing
+%#--------------------------------------------------------------------------------------------------------------
+%# Ipv4's own hop-count check (reused, not new ICMP plumbing in Mpls) fires the
+%# ICMP Time Exceeded that travels back towards host1
+%contains: stdout
+sending ICMP_TIME_EXCEEDED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
