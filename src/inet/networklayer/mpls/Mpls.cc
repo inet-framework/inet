@@ -229,16 +229,6 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 
     EV_INFO << "Received " << packet << " from L2, label=" << mplsHeader->getLabel() << " inInterface=" << incomingInterfaceName << endl;
 
-    if (mplsHeader->getLabel() == (uint32_t)-1) { // FIXME
-        // This is a Ipv4 native packet (RSVP/TED traffic)
-        // Decapsulate the message and pass up to L3
-        EV_INFO << ": decapsulating and sending up\n";
-        packet->popAtFront<MplsHeader>();
-        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
-        sendToL3(packet);
-        return;
-    }
-
     LabelOpVector outLabel;
     std::string outInterface;
     int color;
