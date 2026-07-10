@@ -1,0 +1,121 @@
+%description:
+Byte-exact round-trip serialization of LinkStateMsg (the TED/RSVP-TE link-state
+flooding protocol, LinkStatePacket.msg). This is a model-internal format with no RFC
+counterpart ("LinkStateSerializer format v1", see LinkStateRoutingSerializer.h/.cc):
+message header (command, flags, count) + fixed-width TeLinkStateInfo records. Verifies
+serialize->bytes->deserialize reproduces the fields (except timestamp, which is
+intentionally not preserved -- see the format note) and the expected on-wire length
+(4 + 116 bytes per record, matching LinkStateRouting.cc's chunk-length formula).
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/ted/LinkStatePacket_m.h"
+
+using namespace inet;
+
+%global:
+
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<const T>& original)
+{
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    return pkt2.popAtFront<T>(pkt2.getDataLength());
+}
+
+static TeLinkStateInfo makeLinkInfo(Ipv4Address advrouter, Ipv4Address linkid, Ipv4Address local,
+        Ipv4Address remote, double metric, double maxBw, bool state, unsigned int sourceId, unsigned int messageId)
+{
+    TeLinkStateInfo info;
+    info.advrouter = advrouter;
+    info.linkid = linkid;
+    info.local = local;
+    info.remote = remote;
+    info.metric = metric;
+    info.MaxBandwidth = maxBw;
+    for (int i = 0; i < 8; i++)
+        info.UnResvBandwidth[i] = maxBw - i * 1000.0; // varied, nonzero, exact in double
+    info.timestamp = 5.0; // NOT expected to survive the round trip -- see format note
+    info.sourceId = sourceId;
+    info.messageId = messageId;
+    info.state = state;
+    return info;
+}
+
+%activity:
+
+// === 1. LinkStateMsg with 2 records, one up one down, varying UnResvBandwidth ===
+{
+    EV << "=== LinkStateMsg (2 records) ===" << endl;
+    auto msg = makeShared<LinkStateMsg>();
+    msg->setCommand(1);
+    msg->setRequest(true);
+
+    TeLinkStateInfo a = makeLinkInfo(Ipv4Address("10.0.0.1"), Ipv4Address("10.0.0.2"),
+            Ipv4Address("10.0.1.1"), Ipv4Address("10.0.1.2"), 1.0, 1e8, true, 111, 222);
+    TeLinkStateInfo b = makeLinkInfo(Ipv4Address("10.0.0.3"), Ipv4Address("10.0.0.4"),
+            Ipv4Address("10.0.2.1"), Ipv4Address("10.0.2.2"), 10.0, 2e8, false, 333, 444);
+
+    msg->setLinkInfoArraySize(2);
+    msg->setLinkInfo(0, a);
+    msg->setLinkInfo(1, b);
+    // header(4) + 2 * 116 = 236
+    msg->setChunkLength(B(236));
+
+    Packet pkt("sz"); pkt.insertAtFront(msg);
+    ASSERT(pkt.getDataLength() == B(236));
+    auto m2 = dynamicPtrCast<const LinkStateMsg>(roundTrip(staticPtrCast<const LinkStateMsg>(msg)));
+    ASSERT(m2 != nullptr);
+    ASSERT(m2->getCommand() == 1);
+    ASSERT(m2->getRequest() == true);
+    ASSERT(m2->getLinkInfoArraySize() == 2);
+
+    const TeLinkStateInfo& a2 = m2->getLinkInfo(0);
+    ASSERT(a2.advrouter == Ipv4Address("10.0.0.1") && a2.linkid == Ipv4Address("10.0.0.2"));
+    ASSERT(a2.local == Ipv4Address("10.0.1.1") && a2.remote == Ipv4Address("10.0.1.2"));
+    ASSERT(a2.metric == 1.0);
+    ASSERT(a2.MaxBandwidth == 1e8);
+    for (int i = 0; i < 8; i++)
+        ASSERT(a2.UnResvBandwidth[i] == 1e8 - i * 1000.0);
+    ASSERT(a2.sourceId == 111 && a2.messageId == 222);
+    ASSERT(a2.state == true);
+    ASSERT(a2.timestamp == SIMTIME_ZERO); // NOT preserved -- see format note
+
+    const TeLinkStateInfo& b2 = m2->getLinkInfo(1);
+    ASSERT(b2.advrouter == Ipv4Address("10.0.0.3") && b2.linkid == Ipv4Address("10.0.0.4"));
+    ASSERT(b2.local == Ipv4Address("10.0.2.1") && b2.remote == Ipv4Address("10.0.2.2"));
+    ASSERT(b2.metric == 10.0);
+    ASSERT(b2.MaxBandwidth == 2e8);
+    for (int i = 0; i < 8; i++)
+        ASSERT(b2.UnResvBandwidth[i] == 2e8 - i * 1000.0);
+    ASSERT(b2.sourceId == 333 && b2.messageId == 444);
+    ASSERT(b2.state == false);
+    EV << "  PASS" << endl;
+}
+
+// === 2. Empty LinkStateMsg (0 records; header only) ===
+{
+    EV << "=== LinkStateMsg (0 records) ===" << endl;
+    auto msg = makeShared<LinkStateMsg>();
+    msg->setCommand(1);
+    msg->setRequest(false);
+    msg->setLinkInfoArraySize(0);
+    msg->setChunkLength(B(4));
+
+    Packet pkt("sz"); pkt.insertAtFront(msg);
+    ASSERT(pkt.getDataLength() == B(4));
+    auto m2 = dynamicPtrCast<const LinkStateMsg>(roundTrip(staticPtrCast<const LinkStateMsg>(msg)));
+    ASSERT(m2 != nullptr);
+    ASSERT(m2->getRequest() == false);
+    ASSERT(m2->getLinkInfoArraySize() == 0);
+    EV << "  PASS" << endl;
+}
+
+EV << "All LinkState serializer round-trips passed." << endl;
+
+%contains: stdout
+All LinkState serializer round-trips passed.

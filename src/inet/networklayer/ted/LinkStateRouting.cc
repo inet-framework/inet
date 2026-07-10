@@ -237,7 +237,14 @@ void LinkStateRouting::sendToPeer(Ipv4Address peer, const std::vector<TeLinkStat
         out->setLinkInfo(j, list[j]);
 
     out->setRequest(req);
-    B length = B(72) * out->getLinkInfoArraySize();
+    // Message header (4: command + flags + count) + one 116-byte TeLinkStateInfo
+    // record per link (see LinkStateRoutingSerializer.cc's format v1 layout,
+    // which this formula must stay in sync with -- the serializer is the
+    // source of truth). Was a bare B(72) * count with no header and a
+    // per-record width that didn't correspond to any real field encoding
+    // (TeLinkStateInfo needs 113 bytes field-for-field); corrected here now
+    // that a serializer exists to derive the true byte count from.
+    B length = B(4) + B(116) * out->getLinkInfoArraySize();
     out->setChunkLength(length);
     pk->insertAtBack(out);
 
