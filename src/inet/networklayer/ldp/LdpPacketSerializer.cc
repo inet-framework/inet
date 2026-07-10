@@ -31,6 +31,8 @@ static const B LDP_PDU_HEADER_LENGTH = B(10);
 enum LdpTlvType {
     FEC_TLV = 0x0100,
     ADDRESS_LIST_TLV = 0x0101,
+    HOP_COUNT_TLV = 0x0103,
+    PATH_VECTOR_TLV = 0x0104,
     GENERIC_LABEL_TLV = 0x0200,
     STATUS_TLV = 0x0300,
     COMMON_HELLO_PARAMETERS_TLV = 0x0400,
@@ -59,6 +61,37 @@ FecTlv LdpPacketSerializer::deserializeFecTlv(MemoryInputStream& stream)
     fec.length = stream.readByte();
     fec.addr = stream.readIpv4Address();
     return fec;
+}
+
+void LdpPacketSerializer::serializeLoopDetectionTlvs(MemoryOutputStream& stream, uint8_t hopCount, const std::vector<Ipv4Address>& pathVector)
+{
+    // Hop Count TLV (RFC 5036 Section 3.4.4)
+    stream.writeBit(false);
+    stream.writeNBitsOfUint64Be(HOP_COUNT_TLV, 15);
+    stream.writeUint16Be(1); // value length: HC Value (1 octet)
+    stream.writeByte(hopCount);
+
+    // Path Vector TLV (RFC 5036 Section 3.4.5)
+    stream.writeBit(false);
+    stream.writeNBitsOfUint64Be(PATH_VECTOR_TLV, 15);
+    stream.writeUint16Be(4 * pathVector.size());
+    for (auto& lsrId : pathVector)
+        stream.writeIpv4Address(lsrId);
+}
+
+void LdpPacketSerializer::deserializeLoopDetectionTlvs(MemoryInputStream& stream, uint8_t& hopCount, std::vector<Ipv4Address>& pathVector)
+{
+    stream.readBit(); // U-bit
+    stream.readNBitsToUint64Be(15); // TLV type, assumed HOP_COUNT_TLV
+    stream.readUint16Be(); // TLV value length, assumed 1
+    hopCount = stream.readByte();
+
+    stream.readBit(); // U-bit
+    stream.readNBitsToUint64Be(15); // TLV type, assumed PATH_VECTOR_TLV
+    uint16_t pvValueLength = stream.readUint16Be();
+    int n = pvValueLength / 4;
+    for (int i = 0; i < n; ++i)
+        pathVector.push_back(stream.readIpv4Address());
 }
 
 void LdpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
@@ -98,6 +131,12 @@ void LdpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
         case LABEL_REQUEST: {
             const auto& req = staticPtrCast<const LdpLabelRequest>(ldpPacket);
             serializeFecTlv(stream, req->getFec());
+            if (req->getHasLoopDetection()) {
+                std::vector<Ipv4Address> pathVector;
+                for (size_t i = 0; i < req->getPathVectorArraySize(); ++i)
+                    pathVector.push_back(req->getPathVector(i));
+                serializeLoopDetectionTlvs(stream, req->getHopCount(), pathVector);
+            }
             break;
         }
         case LABEL_MAPPING:
@@ -111,6 +150,14 @@ void LdpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
             stream.writeNBitsOfUint64Be(GENERIC_LABEL_TLV, 15);
             stream.writeUint16Be(4); // value length: Label(4)
             stream.writeUint32Be(mapping->getLabel());
+            // RFC 5036 Section 2.8: loop-detection TLVs (LABEL_MAPPING only -- see
+            // Ldp::sendMapping, which never sets hasLoopDetection for a WITHDRAW/RELEASE)
+            if (mapping->getHasLoopDetection()) {
+                std::vector<Ipv4Address> pathVector;
+                for (size_t i = 0; i < mapping->getPathVectorArraySize(); ++i)
+                    pathVector.push_back(mapping->getPathVector(i));
+                serializeLoopDetectionTlvs(stream, mapping->getHopCount(), pathVector);
+            }
             break;
         }
         case NOTIFICATION: {
@@ -177,8 +224,17 @@ const Ptr<Chunk> LdpPacketSerializer::deserialize(MemoryInputStream& stream) con
 
     stream.readBit(); // U-bit
     int type = stream.readNBitsToUint64Be(15);
-    stream.readUint16Be(); // Message Length: redundant with pduLength given one-message-per-PDU; not separately validated
+    // Message Length (RFC 5036 Section 3.6): cumulative length of the Message ID
+    // plus the Mandatory/Optional Parameters that follow. Redundant with pduLength
+    // given one-message-per-PDU for determining the OVERALL packet boundary, but
+    // put to real use below for LABEL_REQUEST/LABEL_MAPPING: it is what tells us
+    // whether the optional loop-detection TLVs (RFC 5036 Section 2.8) are present,
+    // since inferring that from how much data remains in the underlying stream
+    // would be wrong -- this message need not be the last one in the byte stream.
+    uint16_t messageLength = stream.readUint16Be();
     uint32_t messageId = stream.readUint32Be();
+    B paramsLength = B(messageLength) - B(4); // exclude the Message ID's own 4 bytes
+    B messageStart = B(stream.getPosition());
 
     Ptr<LdpPacket> ldpPacket;
     switch (type) {
@@ -197,6 +253,18 @@ const Ptr<Chunk> LdpPacketSerializer::deserialize(MemoryInputStream& stream) con
         case LABEL_REQUEST: {
             auto req = makeShared<LdpLabelRequest>();
             req->setFec(deserializeFecTlv(stream));
+            // RFC 5036 Section 2.8: optional Hop Count + Path Vector TLVs, present iff
+            // the Message Length accounts for more than the mandatory FEC TLV just read
+            if (paramsLength - (B(stream.getPosition()) - messageStart) > B(0)) {
+                uint8_t hopCount;
+                std::vector<Ipv4Address> pathVector;
+                deserializeLoopDetectionTlvs(stream, hopCount, pathVector);
+                req->setHasLoopDetection(true);
+                req->setHopCount(hopCount);
+                req->setPathVectorArraySize(pathVector.size());
+                for (size_t i = 0; i < pathVector.size(); ++i)
+                    req->setPathVector(i, pathVector[i]);
+            }
             ldpPacket = req;
             break;
         }
@@ -209,6 +277,19 @@ const Ptr<Chunk> LdpPacketSerializer::deserialize(MemoryInputStream& stream) con
             stream.readNBitsToUint64Be(15); // TLV type, assumed GENERIC_LABEL_TLV
             stream.readUint16Be(); // TLV value length, assumed 4
             mapping->setLabel(stream.readUint32Be());
+            // RFC 5036 Section 2.8: optional Hop Count + Path Vector TLVs (LABEL_MAPPING
+            // only -- see Ldp::sendMapping); present iff the Message Length accounts for
+            // more than the mandatory FEC + Generic Label TLVs just read
+            if (paramsLength - (B(stream.getPosition()) - messageStart) > B(0)) {
+                uint8_t hopCount;
+                std::vector<Ipv4Address> pathVector;
+                deserializeLoopDetectionTlvs(stream, hopCount, pathVector);
+                mapping->setHasLoopDetection(true);
+                mapping->setHopCount(hopCount);
+                mapping->setPathVectorArraySize(pathVector.size());
+                for (size_t i = 0; i < pathVector.size(); ++i)
+                    mapping->setPathVector(i, pathVector[i]);
+            }
             ldpPacket = mapping;
             break;
         }

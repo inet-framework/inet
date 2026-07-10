@@ -7,6 +7,8 @@
 #ifndef __INET_LDPPACKETSERIALIZER_H
 #define __INET_LDPPACKETSERIALIZER_H
 
+#include <vector>
+
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/networklayer/ldp/LdpPacket_m.h"
 
@@ -29,6 +31,16 @@ class INET_API LdpPacketSerializer : public FieldsChunkSerializer
     // Address Prefix FEC Element (element type 2, address family 1/IP).
     static void serializeFecTlv(MemoryOutputStream& stream, const FecTlv& fec);
     static FecTlv deserializeFecTlv(MemoryInputStream& stream);
+
+    // RFC 5036 Section 2.8/3.4.4-3.4.5: optional Hop Count + Path Vector TLVs,
+    // carried by Label Request/Mapping messages only when Ldp.loopDetection is
+    // enabled. Presence is NOT inferred from how much data remains in the
+    // underlying stream (this message need not be the last one in the byte
+    // stream/queue) -- callers determine presence from the message's own
+    // Message Length field (see deserialize()) before calling
+    // deserializeLoopDetectionTlvs().
+    static void serializeLoopDetectionTlvs(MemoryOutputStream& stream, uint8_t hopCount, const std::vector<Ipv4Address>& pathVector);
+    static void deserializeLoopDetectionTlvs(MemoryInputStream& stream, uint8_t& hopCount, std::vector<Ipv4Address>& pathVector);
 
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;

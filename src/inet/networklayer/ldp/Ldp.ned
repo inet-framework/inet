@@ -74,10 +74,17 @@ import inet.applications.contract.IApp;
 // retention behavior remains fully selectable via the same three parameters
 // and is otherwise unchanged.
 //
+// Loop detection (RFC 5036 Section 2.8): ~loopDetection, disabled by default. When
+// enabled, propagated Label Request messages (downstream) and Label Mapping messages
+// (upstream) carry a Hop Count TLV and a Path Vector TLV (the list of LSR-IDs the
+// message has traversed); a receiving LSR that finds its own LSR-ID already in the
+// path vector, or a hop count beyond ~pathVectorLimit, has detected a forwarding
+// loop -- it sends a Notification (Loop Detected status) back to the sender instead
+// of propagating or accepting the message.
+//
 // Explicit non-features (RFC 5036 mechanisms not modeled by this module):
 // - No extended/targeted discovery, so only directly-connected peers
 //   (reachable via the basic UDP Hello discovery) can become LDP peers.
-// - No loop detection (hop count / path vector TLVs).
 // - No graceful restart, capabilities negotiation, or IGP synchronization.
 // - No Generalized TTL Security Mechanism (GTSM).
 // - No IPv6 support (RFC 7552); the whole module is IPv4-only.
@@ -100,6 +107,8 @@ simple Ldp extends SimpleModule like IApp
         string distributionMode @enum("du","dod") = default("du"); // RFC 5036 Section 2.6: label advertisement discipline. "du" (Downstream Unsolicited) proactively advertises Label Mappings to every OPERATIONAL peer and is the real-world/RFC-conventional default (a deliberate compliance choice); "dod" (Downstream on Demand) reproduces this model's original Label Request/Mapping request-response flow unchanged. Also wired into the Initialization message's A-bit (RFC 5036 Section 3.5.3): 0=DU, 1=DoD.
         string controlMode @enum("independent","ordered") = default("independent"); // RFC 5036 Section 2.6: label distribution control, meaningful only for transit FECs under distributionMode="du" (DoD is always effectively ordered along the FEC's next-hop chain). "independent" advertises a transit FEC's mapping as soon as this router is ready, without waiting for its own downstream mapping (the LIB swap entry is installed only once that mapping later arrives; an incoming labeled packet has nowhere to swap to in the meantime and is dropped -- the faithful, not buggy, independent-control transient). "ordered" advertises a transit FEC only once a downstream mapping is held or this router is egress for it.
         string retentionMode @enum("liberal","conservative") = default("liberal"); // RFC 5036 Section 2.6: label retention. "liberal" keeps a Label Mapping received from a peer that is not (or not yet) a FEC's next hop, enabling instant failover to it on a later next-hop change with no new Label Request; "conservative" explicitly releases such mappings (this model's original implicit behavior, now made explicit).
+        bool loopDetection = default(false); // RFC 5036 Section 2.8: hop-count/path-vector loop detection for propagated Label Request and Label Mapping messages. Disabled by default -- loop detection is RFC-optional, and disabled is a fully compliant default (no shipped example relies on it, and this keeps this model's default behavior/fingerprint unchanged).
+        int pathVectorLimit = default(32); // RFC 5036 Section 3.5.3 (Common Session Parameters TLV, PVLim field): maximum path-vector length (hop count) before a Label Request/Mapping is treated as having looped; only consulted when ~loopDetection is enabled.
         @display("i=block/control");
         @signal[sessionUp](type=long); // peer's router id (as a 32-bit integer) when an LDP session comes up
         @signal[sessionDown](type=long); // peer's router id (as a 32-bit integer) when an LDP session goes down

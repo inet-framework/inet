@@ -35,6 +35,12 @@ const B LDP_GENERIC_LABEL_TLV_BYTES = B(8);
 const B LDP_COMMON_HELLO_PARAMETERS_TLV_BYTES = B(8);
 const B LDP_STATUS_TLV_BYTES = B(14);
 
+// RFC 5036 Section 2.8/3.4.4-3.4.5: loop detection TLVs, optionally carried by Label
+// Request and Label Mapping messages when Ldp.loopDetection is enabled (see
+// Ldp::sendMappingRequest/sendMapping and LdpPacketSerializer).
+const B LDP_HOP_COUNT_TLV_BYTES = B(4 + 1); // Hop Count TLV: 4-byte TLV header + 1-byte HC Value
+const B LDP_PATH_VECTOR_TLV_HEADER_BYTES = B(4); // Path Vector TLV header; the variable part (4 bytes per LSR-ID) is added separately
+
 // RFC 5036 Section 3.5.3: Common Session Parameters TLV (used by the Initialization message)
 const B LDP_COMMON_SESSION_PARAMETERS_TLV_BYTES = B(20);
 
@@ -60,6 +66,16 @@ const B LDP_KEEPALIVE_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES; /
 inline B ldpAddressMessageBytes(size_t numAddresses)
 {
     return LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_ADDRESS_LIST_TLV_HEADER_BYTES + B(4 * numAddresses);
+}
+
+// Extra bytes contributed by the loop detection Hop Count + Path Vector TLVs
+// (RFC 5036 Section 2.8), added on top of LDP_LABEL_REQUEST_BYTES/LDP_LABEL_MAPPING_BYTES
+// when Ldp.loopDetection is enabled and the message actually carries them (see
+// Ldp::sendMappingRequest/sendMapping); with loopDetection disabled (the default) these
+// TLVs are never populated and the base message length is unchanged.
+inline B ldpLoopDetectionTlvBytes(size_t pathVectorLength)
+{
+    return LDP_HOP_COUNT_TLV_BYTES + LDP_PATH_VECTOR_TLV_HEADER_BYTES + B(4 * pathVectorLength);
 }
 
 class IInterfaceTable;
@@ -102,6 +118,16 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
         // Always true for fecDown entries and for the DoD path, which never
         // defers installation.
         bool installed = true;
+
+        // RFC 5036 Section 2.8 loop detection (only meaningful when Ldp.loopDetection
+        // is enabled): for a fecDown entry, the Hop Count/Path Vector carried by the
+        // Label Mapping that established this binding -- re-advertising it to another
+        // peer (see Ldp::duAdvertiseToPeer/processLABEL_MAPPING) forwards this same
+        // vector, incremented and extended with our own LSR-ID, via Ldp::sendMapping.
+        // Left at its default (0/empty) for fecUp entries, which are never themselves
+        // re-forwarded further.
+        uint8_t hopCount = 0;
+        std::vector<Ipv4Address> pathVector;
     };
     typedef std::vector<FecBinding> FecBindVector;
 
@@ -168,6 +194,11 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     std::string distributionMode; // "du" (default) or "dod"
     std::string controlMode; // "independent" (default) or "ordered"; only consulted when distributionMode=="du"
     std::string retentionMode; // "liberal" (default) or "conservative"
+
+    // RFC 5036 Section 2.8 loop detection; see Ldp.ned. Disabled (loopDetection==false)
+    // is the default and leaves Label Request/Mapping processing completely unchanged.
+    bool loopDetection = false;
+    int pathVectorLimit = 32;
 
     // currently recognized FECs
     FecVector fecList;
@@ -236,9 +267,25 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
     // label/binding-plane sends: RFC 5036 Section 3.5.3 -- only valid once the
     // session with 'dest' is OPERATIONAL; a no-op (EV_WARN) otherwise
-    virtual void sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length);
-    virtual void sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, int length);
+    //
+    // 'hopCount'/'pathVector' are only ever consulted when loopDetection is enabled
+    // (see Ldp.ned): an empty 'pathVector' (the default -- used by every call site that
+    // originates a request/mapping, as opposed to propagating one received from a peer)
+    // means "we are the origin", so the message is sent with hopCount=1 and
+    // pathVector=[our own LSR-ID]; a non-empty 'pathVector' (passed by call sites that
+    // are propagating a request/mapping received from another peer -- see
+    // processLABEL_REQUEST/processLABEL_MAPPING) means the message is sent with
+    // hopCount+1 and 'pathVector' plus our own LSR-ID appended (RFC 5036 Section 2.8).
+    virtual void sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length, uint8_t hopCount = 0, const std::vector<Ipv4Address>& pathVector = {});
+    virtual void sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, int length, uint8_t hopCount = 0, const std::vector<Ipv4Address>& pathVector = {});
     virtual void sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length);
+
+    // RFC 5036 Section 2.8: true if 'pathVector' already contains our own LSR-ID, or
+    // 'hopCount' has gone past pathVectorLimit -- either condition means a propagated
+    // Label Request/Mapping has gone all the way around a forwarding loop. Only ever
+    // called when loopDetection is enabled and the received message actually carries
+    // loop-detection state.
+    virtual bool isLoopDetected(uint8_t hopCount, const std::vector<Ipv4Address>& pathVector);
 
     // session establishment (RFC 5036 Section 2.5.3): not gated on OPERATIONAL --
     // these ARE the messages that bring the session to OPERATIONAL

@@ -1,0 +1,197 @@
+%description:
+Regression test for the RFC 5036 Section 2.8 loop detection feature (commit C4):
+hop-count/path-vector TLVs on propagated Label Request messages, ~Ldp.loopDetection
+(default false).
+
+Ad hoc 3-LSR triangle (LSR1 -- LSR2 -- LSR3 -- LSR1, all three links directly
+connected), built entirely within this .test file (no shipped example has a
+topology with an actual forwarding LOOP -- LDPTEST's redundant paths all still
+converge to a single egress). Each LSR's hand-written .rt file gives a static
+route for one specific external prefix (203.0.113.0/24, TEST-NET-3, deliberately
+unreachable/unowned by any of the three) whose next hop cycles: LSR1's route
+points at LSR2, LSR2's points at LSR3, LSR3's points back at LSR1 -- a genuine
+routing loop for that one prefix. None of the three is ever egress for it, and
+none ever holds a real downstream mapping, so ordinary Downstream-on-Demand
+(distributionMode="dod", set explicitly here -- the model's DEFAULT is DU, which
+never issues a Label Request in the first place and so never exercises this
+code path at all) would otherwise let each LSR's Label Request for this FEC
+circulate the loop indefinitely.
+
+With loopDetection=true (this file's only config), each LSR that receives a
+Label Request for this FEC and holds no downstream mapping of its own now
+propagates the request one hop further downstream, carrying an accumulating
+Hop Count/Path Vector (RFC 5036 Section 2.8); once the vector has gone all the
+way around the triangle it contains the originating LSR's own LSR-ID again, so
+that LSR detects the loop, drops the request, and sends back a Notification
+(Loop Detected status). Observed: all three LSRs independently originate a
+request for this FEC once their own session comes up; before the full 3-session
+mesh is OPERATIONAL, an LSR can transiently misjudge itself "egress" for the
+looping FEC (its own downstream session not being up YET is indistinguishable,
+via findPeerSocket(), from genuinely having no downstream peer) and reply with a
+real (wrong) mapping -- a pre-existing DoD/session-establishment race, nothing
+to do with loop detection itself. This self-corrects once the missing session
+comes up (Ldp::updateFecListEntry withdraws the stale upstream mapping and
+re-requests downstream); once the whole mesh is OPERATIONAL, every further
+attempt correctly takes the propagate-downstream path and the accumulating
+vector eventually trips isLoopDetected(). So this test asserts the Loop Detected
+line, AND separately (scoped to everything from the first such line onward, via
+a postrun awk filter) that no FURTHER Label Mapping for this FEC ever appears
+once loop detection has caught it -- rather than "never", which the transient
+race above would make false.
+
+The counterpart file ldp_loop_detection_disabled.test runs the identical
+network/scenario with loopDetection=false and documents/asserts what happens
+instead (no propagation, no Notification -- see that file for what was actually
+observed).
+
+Falsification: this test FAILS against the parent commit -- loopDetection does
+not exist there (unknown parameter), and even stashing just the .ned addition
+back in (to let the ini parse) the "Loop Detected" line can never appear since
+no code path sends it.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LoopTriangle.ned
+
+import inet.node.mpls.LdpMplsRouter;
+
+//
+// Ad hoc 3-LSR triangle, all links directly connected: LSR1 -- LSR2 -- LSR3 -- LSR1.
+// See the .test file's %description for the routing-loop static configuration.
+//
+network LoopTriangle
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    submodules:
+        LSR1: LdpMplsRouter {
+            @display("p=200,150");
+            gates: pppg[2];
+        }
+        LSR2: LdpMplsRouter {
+            @display("p=400,100");
+            gates: pppg[2];
+        }
+        LSR3: LdpMplsRouter {
+            @display("p=400,250");
+            gates: pppg[2];
+        }
+    connections:
+        LSR1.pppg[0] <--> { delay = 1ms; datarate = 1Mbps; } <--> LSR2.pppg[0];
+        LSR2.pppg[1] <--> { delay = 1ms; datarate = 1Mbps; } <--> LSR3.pppg[0];
+        LSR3.pppg[1] <--> { delay = 1ms; datarate = 1Mbps; } <--> LSR1.pppg[1];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Addressing: LSR1.ppp0=10.0.1.1 <-> LSR2.ppp0=10.0.1.2 (link A)
+%#             LSR2.ppp1=10.0.2.1 <-> LSR3.ppp0=10.0.2.2 (link B)
+%#             LSR3.ppp1=10.0.3.1 <-> LSR1.ppp1=10.0.3.2 (link C)
+%# routerId="auto" (default) picks the HIGHEST interface address per LSR:
+%#   LSR1 routerId = max(10.0.1.1, 10.0.3.2) = 10.0.3.2
+%#   LSR2 routerId = max(10.0.1.2, 10.0.2.1) = 10.0.2.1
+%#   LSR3 routerId = max(10.0.2.2, 10.0.3.1) = 10.0.3.1
+%# The routing-loop route's gateway is always the NEXT HOP's routerId (that is what
+%# Ldp::rebuildFecList treats as the FEC's next hop / LDP peer identity).
+%file: LSR1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.3.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+10.0.2.1	10.0.1.2	255.255.255.255	G	0	ppp0
+10.0.3.1	10.0.3.1	255.255.255.255	H	0	ppp1
+203.0.113.0	10.0.2.1	255.255.255.0	G	0	ppp0
+
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.2.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+10.0.3.2	10.0.1.1	255.255.255.255	G	0	ppp0
+10.0.3.1	10.0.2.2	255.255.255.255	G	0	ppp1
+203.0.113.0	10.0.3.1	255.255.255.0	G	0	ppp1
+
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.3.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+10.0.2.1	10.0.2.1	255.255.255.255	H	0	ppp0
+10.0.3.2	10.0.3.2	255.255.255.255	H	0	ppp1
+203.0.113.0	10.0.3.2	255.255.255.0	G	0	ppp1
+
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = .;../../../../src
+network = LoopTriangle
+sim-time-limit = 10s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.ldp.cmdenv-log-level = detail
+**.cmdenv-log-level = off
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.LSR1.ipv4.routingTable.routingFile = "LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "LSR3.rt"
+
+# Ted::rebuildRoutingTable() otherwise unconditionally recomputes/overwrites every
+# non-multicast route from its own link-state view (installRoutes default true) --
+# this test needs its own hand-written routes (including the deliberate routing
+# LOOP) to actually stick, so this LSR-only concern (LDP's own peer/session
+# discovery and TED link tracking are unaffected -- see Ted.ned) is disabled here.
+**.ted.installRoutes = false
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.holdTime = 3s
+**.helloInterval = 1s
+
+**.ldp.distributionMode = "dod"
+**.ldp.loopDetection = true
+
+%#--------------------------------------------------------------------------------------------------------------
+%# the accumulating hop-count/path-vector eventually detects the loop and drops/notifies;
+%# fires once per LSR (each is the "loop closes back on me" point for its own originated
+%# request) with hopCount=3 (one increment per hop all the way around the triangle)
+%contains-regex: stdout
+Loop Detected in Label Request for fec=addr=203\.0\.113\.0  length=24 from \S+ \(hopCount=3, pathVectorLimit=32\)
+%#--------------------------------------------------------------------------------------------------------------
+%# once loop detection has caught on (first such line onward), no FURTHER Label Mapping
+%# for the looping FEC ever appears -- unlike "never" over the WHOLE run, which would be
+%# false: an early, pre-existing DoD/session-establishment race (an LSR whose own
+%# downstream session isn't OPERATIONAL yet is indistinguishable from "no downstream
+%# peer" via findPeerSocket(), so it transiently misjudges itself egress) does let one
+%# real (wrong) mapping through per LSR before the full mesh converges -- self-corrected
+%# via Withdraw/re-request, nothing to do with loop detection itself (see %description)
+%postrun-command: awk '/Loop Detected in Label Request for fec=addr=203\.0\.113\.0/{p=1} p' test.out > after_loop_detected.out
+%not-contains: after_loop_detected.out
+Label mapping label=
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

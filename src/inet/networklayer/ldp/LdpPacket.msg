@@ -34,6 +34,7 @@ enum LdpMessageTypes
 enum LdpStatusTypes
 {
     SHUTDOWN = 10;
+    LOOP_DETECTED = 11; // RFC 5036 Section 2.8/3.4.6; IANA "LDP Status Code Name Space" registry: 0x0000000B "Loop Detected" -- sent when a propagated Label Request/Mapping's hop count or path vector (see Ldp.ned's loopDetection) indicates it has gone all the way around a forwarding loop
     NO_ROUTE = 13;
     KEEPALIVE_TIMER_EXPIRED = 20; // RFC 5036 Section 2.5.6: no LDP message (Keepalive or otherwise) received from the peer within the negotiated KeepAlive Time; distinct from SESSION_REJECTED_BAD_KEEPALIVE_TIME, which is a negotiation-time rejection, not a runtime liveness failure
     SESSION_REJECTED_BAD_KEEPALIVE_TIME = 24;
@@ -73,6 +74,16 @@ class LdpLabelMapping extends LdpPacket
 {
     FecTlv fec;
     int label;
+
+    // RFC 5036 Section 2.8 loop detection (only ever populated when Ldp.loopDetection
+    // is enabled -- see LdpPacketSerializer for the on-wire optional-TLV convention:
+    // presence is determined from this message's own Message Length field, not from
+    // how much data remains in the underlying byte stream, since further LDP messages
+    // may already be queued behind this one). Never populated for LABEL_WITHDRAW/
+    // LABEL_RELEASE, which reuse this same class's wire fields (see Ldp::sendMapping).
+    bool hasLoopDetection = false;
+    uint8_t hopCount = 0; // Hop Count TLV (RFC 5036 Section 3.4.4)
+    Ipv4Address pathVector[]; // Path Vector TLV (RFC 5036 Section 3.4.5): LSR-IDs the message has traversed so far
 }
 
 //
@@ -81,6 +92,11 @@ class LdpLabelMapping extends LdpPacket
 class LdpLabelRequest extends LdpPacket
 {
     FecTlv fec;
+
+    // RFC 5036 Section 2.8 loop detection -- see LdpLabelMapping's fields above for the full explanation; identical convention here.
+    bool hasLoopDetection = false;
+    uint8_t hopCount = 0; // Hop Count TLV (RFC 5036 Section 3.4.4)
+    Ipv4Address pathVector[]; // Path Vector TLV (RFC 5036 Section 3.4.5)
 }
 
 //
