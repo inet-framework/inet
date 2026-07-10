@@ -1,0 +1,109 @@
+%description:
+Regression test for D8 (workstream D, architecture decoupling): ~RsvpTe::handleStopOperation
+now sends a forced PathTear downstream for every session THIS node originated (i.e. every
+path in its own `traffic` list) BEFORE clearing its local state, instead of silently
+`clear()`-ing and leaving downstream peers to notice the dead adjacency and time their own
+state out on their own (RFC 2205 Section 3.7's (K + 0.5) * 1.5 * R state-lifetime formula,
+which with this network's default refreshInterval=30s/stateLifetimeFactor=3 is 157.5s --
+vastly longer than the propagation delay this test actually observes below).
+~RsvpTe::handleCrashOperation is intentionally left untouched (still silent `clear()`-only):
+a crash is definitionally not a graceful event, so no PathTear should be sent for one.
+
+Built on the shipped examples/mpls/testte_reroute network (RSVPTE4) and its default traffic
+configuration (LSR1_rsvp.xml): LSR1 is the ingress for two permanent sessions -- tunnel_id 1
+to host3 (route LSR1->LSR3->LSR7->LSR5) and tunnel_id 2 to host4 (route
+LSR1->LSR2->LSR4->LSR5) -- so LSR1 is exactly the kind of "session-originating" node D8
+targets. This test replaces testte_reroute's own scenario.xml (which reroutes/tears down via
+scripted <add-session>/<del-session> commands, already covered by rsvpte_setup_tear.test)
+with a single <shutdown module="LSR1"/> at t=2s, to exercise handleStopOperation's new code
+path specifically.
+
+Note on this workstream's other examples: testte_failure/testte_failure2/net37 all *do*
+shut down an RsvpTe-capable router (LSR4) in their shipped scenarios, but LSR4 is always a
+transit hop there (only LSR1/LSR2 carry `rsvp.traffic`, i.e. are session-ingresses) -- so
+their `traffic` list is empty and this new code path is a no-op for them; this is why their
+fingerprint rows are unaffected by this commit despite superficially "stopping an RSVP
+router". This test is the one that actually exercises an INGRESS shutting down.
+
+Asserted, in order:
+  1. the shutdown fires;
+  2. one of LSR1's two downstream neighbors (LSR2 or LSR3, whichever the log shows first)
+     receives and processes the resulting PathTear (RsvpTe::processPathTearMsg's "Received
+     PATH_TEAR" log line);
+  3. that neighbor removes its own path (and, if already reserved, reservation) state
+     (RsvpTe::removePSB's "removing PSB ..." log line, straight from the shared teardown
+     path processPathTearMsg/delSession already use);
+  4. the PathTear arrives well within 100ms of the t=2s shutdown -- i.e. promptly, not via
+     the ~157.5s RFC 2205 timeout that would otherwise be the only mechanism;
+  5. standard undisposed-object postrun guard (clean teardown, no crash).
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<?xml version="1.0"?>
+<scenario>
+    <at t="2s">
+        <shutdown module="LSR1"/>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.testte_reroute.RSVPTE4
+sim-time-limit = 3s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host4.rt"
+**.host5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host5.rt"
+
+**.LSR1.classifier.config = xmldoc("../../../../examples/mpls/testte_reroute/LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("../../../../examples/mpls/testte_reroute/LSR1_rsvp.xml")
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR5.rt"
+**.LSR6.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR6.rt"
+**.LSR7.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR7.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.*.hasStatus = true
+# D8: a plain node shutdown of the ingress (LSR1), no scripted add-session/del-session
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# 1-3. ordered: the shutdown fires -> a downstream neighbor receives the resulting
+%# PathTear -> it removes its own path state (and reservation state, if already made)
+%contains-regex: stdout
+processing <shutdown> command\.\.\.
+.*
+Received PATH_TEAR
+.*
+removing PSB
+%#--------------------------------------------------------------------------------------------------------------
+%# 4. the PathTear arrives well within 100ms of the t=2s shutdown (propagation delay
+%# only) -- vastly promptly compared to the ~157.5s RFC 2205 refresh/timeout interval
+%# this network would otherwise fall back on (refreshInterval=30s default,
+%# stateLifetimeFactor=3: (3 + 0.5) * 1.5 * 30s = 157.5s)
+%postrun-command: awk '/^\*\* Event #/ { if (match($0, /t=([0-9.]+)/, m)) t = m[1]+0 } /Received PATH_TEAR/ && t >= 2 && t < 2.1 { print "PROMPT_PATH_TEAR", t }' test.out > prompt_path_tear.out
+%contains: prompt_path_tear.out
+PROMPT_PATH_TEAR
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -2373,9 +2373,97 @@ void RsvpTe::handleStartOperation(LifecycleOperation *operation)
     setupHello();
 }
 
+void RsvpTe::handleMessageWhenDown(cMessage *msg)
+{
+    // D8: a graceful shutdown that sent a forced PathTear puts this module into
+    // NOT_OPERATING immediately (see handleStopOperation/startActiveOperationExtraTime),
+    // while the node's later shutdown stages are held up briefly so the PathTear can
+    // actually leave. Unlike ~Ldp/~Rip (which close their sockets on stop, so no further
+    // protocol message can physically reach handleMessageWhenUp/handleMessageWhenDown
+    // afterwards), ~RsvpTe is wired directly into the Ipv4 protocol dispatch by protocol
+    // number -- there is no socket to close -- so a peer who hasn't yet heard about the
+    // shutdown can still deliver a Hello/Path/Resv/... well after this module went down
+    // (found empirically: rsvpte_graceful_shutdown.test's downstream neighbor's still-due
+    // Hello arrives ~11ms after LSR1's shutdown). The base class's default
+    // handleMessageWhenDown() assumes that scenario cannot happen (it only tolerates a
+    // message landing in the exact same instant as the down transition, throwing
+    // otherwise) -- reasonable for socket-based protocols, wrong here. There is nothing
+    // useful this module can do with such a message (all local state already cleared),
+    // so just drop it, the same way the data plane drops traffic for a downed protocol.
+    // A self-message arriving while down would still indicate a real bug (e.g. a timer
+    // clear() failed to cancel), so that diagnostic is preserved via the base class.
+    if (msg->isSelfMessage()) {
+        RoutingProtocolBase::handleMessageWhenDown(msg);
+        return;
+    }
+    EV_INFO << "RsvpTe is down, dropping '" << msg->getName() << "'" << endl;
+    delete msg;
+}
+
 void RsvpTe::handleStopOperation(LifecycleOperation *operation)
 {
+    // D8: a graceful shutdown notifies downstream peers so they can tear down their
+    // reservation state immediately, instead of having to wait out the RFC 2205
+    // refresh/timeout interval for state this node will never refresh again. Mirrors
+    // delSession's teardown pattern: for every path in a session THIS node originated
+    // (i.e. every entry in `traffic`, the locally-configured/signaled demand), force a
+    // PathTear downstream for its currently-installed PSB, then clear all local state.
+    // Sessions merely transiting this node (no corresponding `traffic` entry) are not
+    // torn down here -- this node is not their owner.
+    //
+    // Deliberately does NOT consult `tedmod` here (unlike delSession/processPSB_TIMEOUT):
+    // this handler runs during ModuleStopOperation's STAGE_ROUTING_PROTOCOLS, the very
+    // same stage Ted's own handleStopOperation() runs in, and submodules within a stage
+    // are visited in NED declaration order -- ~Ted is declared before ~RsvpTe in
+    // ~MplsRouterBase/RsvpMplsRouter, so by the time this code runs Ted may have already
+    // cleared its link database (ted.clear()/interfaceAddrs.clear()). The PSB already
+    // caches everything needed -- OutInterface is the LIH toward ERO[0], set once at PSB
+    // creation (createIngressPSB/createPSB) and never dependent on Ted afterwards -- so
+    // this uses that cached value directly, exactly as processPSB_TIMEOUT does for the
+    // same reason (a PSB timeout can likewise coincide with Ted no longer being queryable).
+    bool sentAnyPathTear = false;
+    for (auto& session : traffic) {
+        for (auto& path : session.paths) {
+            PathStateBlock *psb = findPSB(session.sobj, path.sender);
+            if (psb && !psb->OutInterface.isUnspecified()) {
+                ASSERT(psb->ERO.size() > 0);
+
+                sendPathTearMessage(psb->ERO[0].node, psb->sessionObject, psb->Sender_Template_Object,
+                        psb->OutInterface, routerId, true);
+                sentAnyPathTear = true;
+            }
+        }
+    }
+
     clear();
+
+    if (sentAnyPathTear) {
+        // ModuleStopOperation advances stage by stage (STAGE_ROUTING_PROTOCOLS, then
+        // STAGE_TRANSPORT_LAYER, STAGE_NETWORK_LAYER, ... STAGE_LINK_LAYER), synchronously,
+        // within the same call chain as this scenario command, UNLESS this stage is held
+        // pending -- so without delaying, Ipv4/the interface below would stop in the very
+        // same event before the PathTear(s) just send()'d above even get to traverse the
+        // local dispatcher chain, and get silently dropped ("... is down, dropping").
+        //
+        // Use startActiveOperationExtraTime(), NOT delayActiveOperationFinish(): the two
+        // look similar but differ in exactly the way that matters here.
+        // delayActiveOperationFinish() keeps operationalState at STOPPING_OPERATION until
+        // the timeout elapses, and OperationalMixin::handleMessage() routes STOPPING_OPERATION
+        // through handleMessageWhenUp() same as OPERATING -- i.e. this module would keep
+        // fully processing arriving RSVP packets (Hello/Path/Resv/...) for the whole window,
+        // against the state clear() just wiped, AND via a `tedmod` that -- per the note above
+        // -- may already be stopped too; a Hello from a peer who hasn't heard about the
+        // shutdown yet arriving in that window previously crashed in Ted::primaryAddress()
+        // (found empirically: rsvpte_graceful_shutdown.test's own scenario reproduces this).
+        // startActiveOperationExtraTime(), by contrast, flips operationalState to the
+        // operation's end state (NOT_OPERATING for a stop) IMMEDIATELY, so any further
+        // inbound packet is safely dropped by the framework's own handleMessageWhenDown()
+        // ("... is down, dropping ..."), while still deferring the doneCallback (and hence
+        // the node's later shutdown stages) for the extra time -- exactly the mechanism
+        // ~Ppp uses in its own handleStopOperation() for the analogous "let queued work
+        // drain before the interface truly goes dark" case.
+        startActiveOperationExtraTime(par("stopOperationExtraTime"));
+    }
 }
 
 void RsvpTe::handleCrashOperation(LifecycleOperation *operation)
