@@ -27,6 +27,86 @@ namespace inet {
 #define PATH_ERR_PREEMPTED         2
 #define PATH_ERR_NEXTHOP_FAILED    3
 
+namespace {
+
+// RFC 2205 Section 3.1.2: the common RSVP message header is 8 bytes; every
+// object is a 4-byte object header plus a body. The per-object byte counts
+// below are the OBJECT TOTAL (header + body) for the C-Types this model
+// implements (RFC 3209 LSP_TUNNEL_IPV4 for SESSION/SENDER_TEMPLATE, RFC 2210
+// Int-Serv Controlled-Load for SENDER_TSPEC/FLOWSPEC, RFC 2205 IPv4 for
+// ERROR_SPEC). These are used to compute honest (non-guessed) message
+// lengths; they are intentionally kept object-granular so a future wire
+// serializer (Workstream E) can validate against them.
+constexpr int RSVP_COMMON_HEADER_BYTES = 8;
+constexpr int SESSION_OBJECT_BYTES = 16;
+constexpr int RSVP_HOP_OBJECT_BYTES = 12;
+constexpr int TIME_VALUES_OBJECT_BYTES = 8;
+constexpr int LABEL_REQUEST_OBJECT_BYTES = 8;
+constexpr int SENDER_TEMPLATE_OBJECT_BYTES = 12; // also used for FILTER_SPEC (same C-Type)
+constexpr int SENDER_TSPEC_OBJECT_BYTES = 40;
+constexpr int FLOWSPEC_OBJECT_BYTES = 40;
+constexpr int LABEL_OBJECT_BYTES = 8;
+constexpr int STYLE_OBJECT_BYTES = 8;
+constexpr int ERROR_SPEC_OBJECT_BYTES = 12;
+constexpr int HELLO_OBJECT_BYTES = 12;
+constexpr int ERO_RRO_OBJECT_HEADER_BYTES = 4;
+constexpr int ERO_RRO_SUBOBJECT_BYTES = 8; // IPv4 prefix subobject
+
+B computeEroLength(const EroVector& ero)
+{
+    return ero.empty() ? B(0) : B(ERO_RRO_OBJECT_HEADER_BYTES + ERO_RRO_SUBOBJECT_BYTES * ero.size());
+}
+
+B computeRroLength(const Ipv4AddressVector& rro)
+{
+    return rro.empty() ? B(0) : B(ERO_RRO_OBJECT_HEADER_BYTES + ERO_RRO_SUBOBJECT_BYTES * rro.size());
+}
+
+// One FILTER_SPEC + FLOWSPEC + LABEL (+ RRO if present) per flow, shared by
+// Resv (commit 10) and ResvTear/ResvErr (commit 12), all of which carry a
+// FlowDescriptorVector.
+B computeFlowDescriptorListLength(const FlowDescriptorVector& flows)
+{
+    B length = B(0);
+    for (auto& flow : flows)
+        length += B(SENDER_TEMPLATE_OBJECT_BYTES) + B(FLOWSPEC_OBJECT_BYTES) + B(LABEL_OBJECT_BYTES) + computeRroLength(flow.RRO);
+    return length;
+}
+
+B computeHelloMessageLength()
+{
+    return B(RSVP_COMMON_HEADER_BYTES + HELLO_OBJECT_BYTES);
+}
+
+B computePathMessageLength(const EroVector& ero)
+{
+    return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + RSVP_HOP_OBJECT_BYTES + TIME_VALUES_OBJECT_BYTES
+             + LABEL_REQUEST_OBJECT_BYTES + SENDER_TEMPLATE_OBJECT_BYTES + SENDER_TSPEC_OBJECT_BYTES)
+           + computeEroLength(ero);
+}
+
+B computePathTearMessageLength()
+{
+    // The model's PathTear carries SESSION, RSVP_HOP and SENDER_TEMPLATE only (no SENDER_TSPEC).
+    return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + RSVP_HOP_OBJECT_BYTES + SENDER_TEMPLATE_OBJECT_BYTES);
+}
+
+B computePathErrorMessageLength()
+{
+    // RFC 2205 A.4: PathErr carries SESSION, ERROR_SPEC and a sender descriptor
+    // (SENDER_TEMPLATE + SENDER_TSPEC); no RSVP_HOP.
+    return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + ERROR_SPEC_OBJECT_BYTES
+             + SENDER_TEMPLATE_OBJECT_BYTES + SENDER_TSPEC_OBJECT_BYTES);
+}
+
+B computeResvMessageLength(const FlowDescriptorVector& flows)
+{
+    return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + RSVP_HOP_OBJECT_BYTES + TIME_VALUES_OBJECT_BYTES + STYLE_OBJECT_BYTES)
+           + computeFlowDescriptorListLength(flows);
+}
+
+} // namespace
+
 Define_Module(RsvpTe);
 
 using namespace xmlutils;
@@ -485,12 +565,7 @@ void RsvpTe::processHELLO_TIMER(HelloTimerMsg *msg)
     hMsg->setRequest(h->request);
     hMsg->setAck(h->ack);
 
-    int length = 10;
-
-    // see comment elsewhere (in Ted.cc)
-    length /= 10;
-
-    hMsg->setChunkLength(B(length));
+    hMsg->setChunkLength(computeHelloMessageLength());
     pk->insertAtBack(hMsg);
 
     sendToIP(pk, peer);
@@ -607,9 +682,7 @@ void RsvpTe::refreshPath(PathStateBlock *psbEle)
 
     pm->setERO(ERO);
 
-    int length = 85 + (ERO.size() * 5);
-
-    pm->setChunkLength(B(length));
+    pm->setChunkLength(computePathMessageLength(ERO));
     pk->insertAtBack(pm);
 
     Ipv4Address nextHop = tedmod->getPeerByLocalAddress(OI);
@@ -691,16 +764,7 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
 
     msg->setFlowDescriptor(flows);
 
-    int fd_length = 0;
-    for (auto& flow : flows)
-        fd_length += 28 + (flow.RRO.size() * 4);
-
-    int length = 34 + fd_length;
-
-    // see comment elsewhere (in Ted.cc)
-    length /= 10;
-
-    msg->setChunkLength(B(length));
+    msg->setChunkLength(computeResvMessageLength(flows));
     pk->insertAtBack(msg);
 
     sendToIP(pk, PHOP);
@@ -1885,8 +1949,7 @@ void RsvpTe::sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, 
     hop.Next_Hop_Address = NHOP;
     msg->setHop(hop);
     msg->setForce(force);
-    B length = B(44);
-    msg->setChunkLength(length);
+    msg->setChunkLength(computePathTearMessageLength());
     pk->insertAtBack(msg);
 
     sendToIP(pk, peerIP);
@@ -1907,12 +1970,7 @@ void RsvpTe::sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, 
     msg->setSenderTemplate(sender);
     msg->setSenderTspec(tspec);
 
-    int length = 52;
-
-    // see comment elsewhere (in Ted.cc)
-    length /= 10;
-
-    msg->setChunkLength(B(length));
+    msg->setChunkLength(computePathErrorMessageLength());
     pk->insertAtBack(msg);
 
     sendToIP(pk, nextHop);
