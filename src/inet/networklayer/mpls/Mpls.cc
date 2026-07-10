@@ -14,14 +14,9 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/ldp/Ldp.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
-#include "inet/networklayer/rsvpte/Utils.h"
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
-
-#define ICMP_TRAFFIC    6
 
 Define_Module(Mpls);
 
@@ -64,31 +59,12 @@ void Mpls::handleMessage(cMessage *msg)
 
 void Mpls::processPacketFromL3(Packet *msg)
 {
-    using namespace tcp;
-
     const Protocol *protocol = msg->getTag<PacketProtocolTag>()->getProtocol();
     if (protocol != &Protocol::ipv4) {
         // only the Ipv4 protocol supported yet
         sendToL2(msg);
         return;
     }
-
-    const auto& ipHeader = msg->peekAtFront<Ipv4Header>();
-
-    // TODO temporary solution, until TcpSocket and Ipv4 are extended to support nam tracing
-    if (ipHeader->getProtocolId() == IP_PROT_TCP) {
-        const auto& seg = msg->peekDataAt<TcpHeader>(ipHeader->getChunkLength());
-        if (seg->getDestPort() == LDP_PORT || seg->getSrcPort() == LDP_PORT) {
-            ASSERT(!msg->hasPar("color"));
-            msg->addPar("color") = LDP_TRAFFIC;
-        }
-    }
-    else if (ipHeader->getProtocolId() == IP_PROT_ICMP) {
-//        ASSERT(!msg->hasPar("color")); TODO this did not hold sometimes...
-        if (!msg->hasPar("color"))
-            msg->addPar("color") = ICMP_TRAFFIC;
-    }
-    // TODO end of temporary area
 
     labelAndForwardIpv4Datagram(msg);
 }
@@ -99,9 +75,8 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
     (void)ipv4Header; // unused variable
     LabelOpVector outLabel;
     std::string outInterface; // FIXME set based on interfaceID
-    int color;
 
-    if (!pct->lookupLabel(packet, outLabel, outInterface, color)) {
+    if (!pct->lookupLabel(packet, outLabel, outInterface)) {
         EV_WARN << "no mapping exists for this packet" << endl;
         return false;
     }
@@ -112,8 +87,6 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
     doStackOps(packet, outLabel);
 
     EV_INFO << "forwarding packet to " << outInterface << endl;
-
-    packet->addPar("color") = color;
 
     packet->trim();
     packet->removeTagIfPresent<DispatchProtocolReq>();
@@ -230,9 +203,8 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 
     LabelOpVector outLabel;
     std::string outInterface;
-    int color;
 
-    bool found = lt->resolveLabel(incomingInterfaceName, mplsHeader->getLabel(), outLabel, outInterface, color);
+    bool found = lt->resolveLabel(incomingInterfaceName, mplsHeader->getLabel(), outLabel, outInterface);
     if (!found) {
         EV_INFO << "discarding packet, incoming label not resolved" << endl;
 
@@ -247,13 +219,6 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
     if ((packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId())) {
         // forward labeled packet
         EV_INFO << "forwarding packet to " << outInterface << endl;
-
-        if (packet->hasPar("color")) {
-            packet->par("color") = color;
-        }
-        else {
-            packet->addPar("color") = color;
-        }
 
 //        ASSERT(labelIf[outgoingPort]);
         packet->removeTagIfPresent<DispatchProtocolReq>();

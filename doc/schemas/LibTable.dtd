@@ -4,7 +4,7 @@
 <!ELEMENT libtable (libentry*)>
 
 <!-- one entry in the LIB table -->
-<!ELEMENT libentry (inLabel,inInterface,outInterface,outLabel,color?)>  <!-- in arbitrary order -->
+<!ELEMENT libentry (inLabel,inInterface,outInterface,outLabel)>  <!-- in arbitrary order -->
 
 <!-- input label -->
 <!ELEMENT inLabel (#PCDATA)> <!-- integer -->
@@ -17,9 +17,6 @@
 
 <!-- output label operations -->
 <!ELEMENT outLabel (op*)>
-
-<!-- optional color -->
-<!ELEMENT color (#PCDATA)>  <!-- integer -->
 
 <!-- one label operation: PUSH, POP or SWAP -->
 <!ELEMENT op EMPTY>

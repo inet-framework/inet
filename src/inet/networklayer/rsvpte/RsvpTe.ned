@@ -36,7 +36,6 @@ import inet.common.SimpleModule;
 //                     <node>10.1.5.1</node>
 //                 </route>
 //                 <permanent>true</permanent>
-//                 <color>100</color>
 //             </path>
 //         </paths>
 //     </session>

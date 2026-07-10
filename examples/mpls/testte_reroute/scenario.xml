@@ -17,7 +17,6 @@
 						<node>LSR5%routerId</node>
 					</route>
 
-					<color>100</color>
 				</path>
 			</paths>
 		</add-session>

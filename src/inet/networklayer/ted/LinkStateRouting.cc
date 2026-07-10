@@ -247,8 +247,6 @@ void LinkStateRouting::sendToPeer(Ipv4Address peer, const std::vector<TeLinkStat
 
 void LinkStateRouting::sendToIP(Packet *msg, Ipv4Address destAddr)
 {
-    msg->addPar("color") = TED_TRAFFIC;
-
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::linkStateRouting);
     msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::linkStateRouting);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);

@@ -7,6 +7,5 @@
 		<outLabel>
 			<op code="pop"/>
 		</outLabel>
-		<color>200</color>
 	</libentry>
 </libtable>

@@ -42,7 +42,6 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
         int owner;
         bool permanent;
-        int color;
     };
 
     struct traffic_session_t {
@@ -80,9 +79,6 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
         // PSB unique identifier
         int id;
-
-        // TODO nam colors
-        int color;
 
         // timer/timeout routines
         PsbTimerMsg *timerMsg;

@@ -17,7 +17,6 @@
 				</route>
 
 				<permanent>true</permanent>
-				<color>100</color>
 			</path>
 		</paths>
 	</session>

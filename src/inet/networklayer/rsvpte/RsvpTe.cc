@@ -221,7 +221,7 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 
     cXMLElementList list = paths->getChildrenByTagName("path");
     for (auto path : list) {
-        checkTags(path, "sender lspid bandwidth route permanent owner color");
+        checkTags(path, "sender lspid bandwidth route permanent owner");
 
         int lspid = getParameterIntValue(path, "lspid");
 
@@ -259,7 +259,6 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
         }
 
         newPath.permanent = getParameterBoolValue(path, "permanent", true);
-        newPath.color = getParameterIntValue(path, "color", 0);
 
         newPath.tspec.req_bandwidth = getParameterDoubleValue(path, "bandwidth", 0.0);
 
@@ -608,7 +607,6 @@ void RsvpTe::refreshPath(PathStateBlock *psbEle)
     pm->setHop(hop);
 
     pm->setERO(ERO);
-    pm->setColor(psbEle->color);
 
     int length = 85 + (ERO.size() * 5);
 
@@ -917,7 +915,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
         ASSERT(rsb->inLabelVector.size() == rsb->FlowDescriptor.size());
 
         int inLabel = lt->installLibEntry(rsb->inLabelVector[i], inInterface,
-                    outLabel, outInterface, psb->color);
+                    outLabel, outInterface);
 
         ASSERT(inLabel >= 0);
 
@@ -1193,7 +1191,6 @@ RsvpTe::PathStateBlock *RsvpTe::createPSB(const Ptr<RsvpPathMsg>& msg)
     psbEle.OutInterface = OI;
     psbEle.ERO = ERO;
 
-    psbEle.color = msg->getColor();
     psbEle.handler = -1;
 
     PSBList.push_back(psbEle);
@@ -1240,7 +1237,6 @@ RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const traffic_session_t& sessio
 
     psbEle.OutInterface = OI;
     psbEle.ERO = ERO;
-    psbEle.color = path.color;
 
     psbEle.handler = path.owner;
 
@@ -1892,7 +1888,6 @@ void RsvpTe::sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, 
 
 void RsvpTe::sendToIP(Packet *msg, Ipv4Address destAddr)
 {
-    msg->addPar("color") = RSVP_TRAFFIC;
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::rsvpTe);
     msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::rsvpTe);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);

@@ -7,7 +7,6 @@
 		<outLabel>
 			<op code="push" value="101"/>
 		</outLabel>
-		<color>100</color>
 	</libentry>
 	<libentry>
 		<inLabel>2</inLabel>
@@ -16,6 +15,5 @@
 		<outLabel>
 			<op code="push" value="301"/>
 		</outLabel>
-		<color>300</color>
 	</libentry>
 </libtable>

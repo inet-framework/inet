@@ -12,10 +12,6 @@ import inet.networklayer.rsvpte.IntServ;
 
 namespace inet;
 
-cplusplus {{
-#define RSVP_TRAFFIC    2
-}}
-
 enum RsvpConstants {
     PATH_MESSAGE   = 1;
     RESV_MESSAGE   = 2;

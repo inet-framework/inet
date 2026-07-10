@@ -29,16 +29,13 @@ class INET_API IIngressClassifier
 
     /**
      * The packet argument is an input parameter, the rest (outLabel,
-     * outInterface, color) are output parameters only.
+     * outInterface) are output parameters only.
      *
      * In subclasses, this function should be implemented to determine the forwarding
      * equivalence class for the Ipv4 datagram passed, and map it to an outLabel
      * and outInterface.
-     *
-     * The color parameter (which can be set to an arbitrary value) will
-     * only be used for the NAM trace if one will be recorded.
      */
-    virtual bool lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface, int& color) = 0;
+    virtual bool lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface) = 0;
 };
 
 } // namespace inet

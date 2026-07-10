@@ -37,7 +37,7 @@ void LibTable::handleMessage(cMessage *msg)
 }
 
 bool LibTable::resolveLabel(std::string inInterface, int inLabel,
-        LabelOpVector& outLabel, std::string& outInterface, int& color)
+        LabelOpVector& outLabel, std::string& outInterface)
 {
     bool any = (inInterface.length() == 0);
 
@@ -50,7 +50,6 @@ bool LibTable::resolveLabel(std::string inInterface, int inLabel,
 
         outLabel = elem.outLabel;
         outInterface = elem.outInterface;
-        color = elem.color;
 
         return true;
     }
@@ -58,7 +57,7 @@ bool LibTable::resolveLabel(std::string inInterface, int inLabel,
 }
 
 int LibTable::installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
-        std::string outInterface, int color)
+        std::string outInterface)
 {
     if (inLabel == -1) {
         LibEntry newItem;
@@ -66,7 +65,6 @@ int LibTable::installLibEntry(int inLabel, std::string inInterface, const LabelO
         newItem.inInterface = inInterface;
         newItem.outLabel = outLabel;
         newItem.outInterface = outInterface;
-        newItem.color = color;
         lib.push_back(newItem);
         return newItem.inLabel;
     }
@@ -78,7 +76,6 @@ int LibTable::installLibEntry(int inLabel, std::string inInterface, const LabelO
             elem.inInterface = inInterface;
             elem.outLabel = outLabel;
             elem.outInterface = outInterface;
-            elem.color = color;
             return inLabel;
         }
         throw cRuntimeError("Cannot update LIB entry: no entry with inLabel=%d", inLabel);
@@ -108,7 +105,7 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
     for (auto& elem : list) {
         const cXMLElement& entry = *elem;
 
-        checkTags(&entry, "inLabel inInterface outLabel outInterface color");
+        checkTags(&entry, "inLabel inInterface outLabel outInterface");
 
         LibEntry newItem;
         newItem.inLabel = getParameterIntValue(&entry, "inLabel");
@@ -116,7 +113,6 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
             throw cRuntimeError("Invalid libentry at %s: inLabel must be > 0, but is %d", entry.getSourceLocation(), newItem.inLabel);
         newItem.inInterface = getParameterStrValue(&entry, "inInterface");
         newItem.outInterface = getParameterStrValue(&entry, "outInterface");
-        newItem.color = getParameterIntValue(&entry, "color", 0);
 
         cXMLElementList ops = getUniqueChild(&entry, "outLabel")->getChildrenByTagName("op");
         for (auto& ops_oit : ops) {
@@ -227,7 +223,6 @@ std::ostream& operator<<(std::ostream& os, const LibTable::LibEntry& lib)
     os << "    inInterface:" << lib.inInterface;
     os << "    outLabel:" << lib.outLabel;
     os << "    outInterface:" << lib.outInterface;
-    os << "    color:" << lib.color;
     return os;
 }
 

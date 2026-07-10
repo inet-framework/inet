@@ -61,7 +61,7 @@ class INET_API RsvpClassifier : public SimpleModule, public IScriptable, public 
     virtual void processCommand(const cXMLElement& node) override;
 
     // IRsvpClassifier implementation
-    virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
+    virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, std::string& outInterface) override;
     virtual void bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel) override;
 
   protected:

@@ -43,9 +43,6 @@ class INET_API LibTable : public SimpleModule
 
         LabelOpVector outLabel;
         std::string outInterface;
-
-        // FIXME colors in nam, temporary solution
-        int color;
     };
 
   protected:
@@ -63,10 +60,10 @@ class INET_API LibTable : public SimpleModule
   public:
     // label management
     virtual bool resolveLabel(std::string inInterface, int inLabel,
-            LabelOpVector& outLabel, std::string& outInterface, int& color);
+            LabelOpVector& outLabel, std::string& outInterface);
 
     virtual int installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
-            std::string outInterface, int color);
+            std::string outInterface);
 
     virtual void removeLibEntry(int inLabel);
 

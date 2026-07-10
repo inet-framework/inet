@@ -357,7 +357,7 @@ void Ldp::updateFecListEntry(Ldp::fec_t oldItem)
         if (ER) {
             // we are egress, that's easy:
             LabelOpVector outLabel = LibTable::popLabel();
-            uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, LDP_USER_TRAFFIC);
+            uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
 
             EV_DETAIL << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
                       << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
@@ -366,7 +366,7 @@ void Ldp::updateFecListEntry(Ldp::fec_t oldItem)
         else if (dit != fecDown.end()) {
             // we have mapping from DS, that's easy
             LabelOpVector outLabel = LibTable::swapLabel(dit->label);
-            uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, LDP_USER_TRAFFIC);
+            uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
 
             EV_DETAIL << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
                       << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
@@ -523,7 +523,6 @@ void Ldp::sendHelloTo(Ipv4Address dest)
 //    hello->setRbit(...);
 //    hello->setTbit(...);
     pk->insertAtBack(hello);
-    pk->addPar("color") = LDP_HELLO_TRAFFIC;
 
     if (dest.isMulticast()) {
         for (size_t i = 0; i < udpSockets.size(); ++i) {
@@ -1118,7 +1117,7 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
         // we are egress, that's easy:
         LabelOpVector outLabel = LibTable::popLabel();
 
-        uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, 0);
+        uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
 
         EV_DETAIL << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
                   << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
@@ -1131,7 +1130,7 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
     else if (dit != fecDown.end()) {
         // we have mapping from DS, that's easy
         LabelOpVector outLabel = LibTable::swapLabel(dit->label);
-        uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, LDP_USER_TRAFFIC);
+        uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
 
         EV_DETAIL << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
                   << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
@@ -1282,7 +1281,7 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
         fec_bind_t newItem;
         newItem.fecid = it->fecid;
         newItem.peer = pit->peer;
-        newItem.label = lt->installLibEntry(-1, inInterface, outLabel, outInterface, LDP_USER_TRAFFIC);
+        newItem.label = lt->installLibEntry(-1, inInterface, outLabel, outInterface);
         fecUp.push_back(newItem);
 
         EV_DETAIL << "installed LIB entry inLabel=" << newItem.label << " inInterface=" << inInterface
@@ -1322,7 +1321,7 @@ TcpSocket *Ldp::getPeerSocket(Ipv4Address peerAddr)
     return sock;
 }
 
-bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface, int& color)
+bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface)
 {
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     Ipv4Address destAddr = ipv4Header->getDestAddress();
@@ -1359,7 +1358,6 @@ bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outI
         if (dit != fecDown.end()) {
             outLabel = LibTable::pushLabel(dit->label);
             outInterface = findInterfaceFromPeerAddr(elem.nextHop);
-            color = LDP_USER_TRAFFIC;
             EV_DETAIL << "mapping found, outLabel=" << outLabel << ", outInterface=" << outInterface << endl;
             return true;
         }

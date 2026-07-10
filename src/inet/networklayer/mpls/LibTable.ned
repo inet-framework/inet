@@ -22,7 +22,6 @@ import inet.common.SimpleModule;
 // - <inInterface>: input interface (interface name)
 // - <outInterface>: output interface (interface name)
 // - <outLabel>: output label operations, see below.
-// - <color>: color (integer); this element is optional.
 //
 // The <outLabel> element describes the output label operations in
 // <op> child elements. <op> has two attributes:
