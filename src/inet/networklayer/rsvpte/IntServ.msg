@@ -88,7 +88,6 @@ struct LabelRequestObj
 {
     @packetData;
     // request;
-    int prot;
 }
 
 //

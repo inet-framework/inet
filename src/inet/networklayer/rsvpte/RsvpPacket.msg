@@ -40,7 +40,6 @@ class RsvpMessage extends FieldsChunk
 class RsvpPacket extends RsvpMessage
 {
     SessionObj session;
-    bool checksumValid = true;
 }
 
 cplusplus(RsvpPacket) {{

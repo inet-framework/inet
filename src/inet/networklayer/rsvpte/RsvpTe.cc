@@ -221,7 +221,7 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 
     cXMLElementList list = paths->getChildrenByTagName("path");
     for (auto path : list) {
-        checkTags(path, "sender lspid bandwidth max_delay route permanent owner color");
+        checkTags(path, "sender lspid bandwidth route permanent owner color");
 
         int lspid = getParameterIntValue(path, "lspid");
 
@@ -262,7 +262,6 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
         newPath.color = getParameterIntValue(path, "color", 0);
 
         newPath.tspec.req_bandwidth = getParameterDoubleValue(path, "bandwidth", 0.0);
-        newPath.max_delay = getParameterDoubleValue(path, "max_delay", 0.0);
 
         const cXMLElement *route = getUniqueChildIfExists(path, "route");
         if (route)
@@ -934,12 +933,6 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
             // bind fec
             rpct->bind(psb->Session_Object, psb->Sender_Template_Object, inLabel);
         }
-
-        // schedule commit of merging backups too...
-        for (auto& elem : RSBList) {
-            if (elem.OI == Ipv4Address(lspid))
-                scheduleCommitTimer(&elem);
-        }
     }
 }
 
@@ -1487,45 +1480,6 @@ void RsvpTe::processPathTearMsg(Packet *pk)
         EV_DETAIL << "received PATH_TEAR for nonexisting lspid=" << lspid << endl;
         delete pk;
         return;
-    }
-
-    // ignore message if backup exists and force flag is not set
-
-    bool modified = false;
-
-    // Collect the ids of the merging-backup PSBs first: removePSB() erases from
-    // PSBList (a std::vector), which would invalidate an iterator/pointer held
-    // into it while iterating.
-    std::vector<int> backupIds;
-    for (auto& elem : PSBList) {
-        if (elem.OutInterface.getInt() != (uint32_t)lspid)
-            continue;
-
-        // merging backup exists
-
-        if (!msg->getForce()) {
-            EV_DETAIL << "merging backup tunnel exists and force flag is not set, ignoring teardown" << endl;
-            delete pk;
-            return;
-        }
-
-        EV_DETAIL << "merging backup must be removed too" << endl;
-
-        backupIds.push_back(elem.id);
-        modified = true;
-    }
-
-    for (int id : backupIds)
-        removePSB(findPsbById(id));
-
-    if (modified) {
-        // the pointer obtained above dangles after the erasures; re-fetch it
-        psb = findPSB(msg->getSession(), msg->getSenderTemplate());
-        if (!psb) {
-            // the teardown removed the last matching PSB; nothing left to forward
-            delete pk;
-            return;
-        }
     }
 
     // forward path teardown downstream

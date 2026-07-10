@@ -39,7 +39,6 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         SenderTspecObj tspec;
 
         EroVector ERO;
-        simtime_t max_delay;
 
         int owner;
         bool permanent;
