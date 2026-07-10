@@ -1,0 +1,238 @@
+%description:
+Regression test for D7 (workstream D, architecture decoupling): ~StaticIngressClassifier,
+a signaling-free ingress classifier that loads its push-mapping table once from static XML
+at startup instead of being programmed by ~Ldp or ~RsvpTe at runtime.
+
+Together with ~MplsRouterBase and static ~LibTable XML configuration, this makes it possible
+to build a fully static LSP network with NO signaling protocol running at all (today only
+examples/mpls/testte_tunnel approximates this, and it still runs the full RSVP-TE machinery
+underneath it). This test builds its own minimal 3-LSR chain (host1 -- LSR1 -- LSR2 -- LSR3
+-- host2), ad hoc, entirely within this .test file: a new node type "StaticMplsLsr" (plain
+~MplsRouterBase plus a ~StaticIngressClassifier submodule) and the network wiring it into a
+chain. Neither ~Ldp nor ~RsvpTe is present anywhere in this network -- ~Ted/~LinkStateRouting
+are still there (they come for free with ~MplsRouterBase) but never influence the forwarding
+decision, since ~Mpls intercepts every packet arriving from L2 before it ever reaches the
+IPv4 routing table (see Mpls.cc's processPacketFromL2 / the MplsRouterBase.ned wiring
+comment) -- the classifier and the LIB tables are the only things that decide how host1's
+traffic reaches host2.
+
+Asserted, in order:
+  1. LSR1 (ingress) pushes a label on the first hop -- doStackOps: {PUSH ...} --, resolved by
+     ~StaticIngressClassifier's longest-prefix-match lookup over its static <fectable>;
+  2. LSR2 (transit) swaps the label -- doStackOps: {SWAP ...} -- purely from its static
+     ~LibTable, with no classifier involvement at all;
+  3. LSR3 (egress) pops the label -- doStackOps: {POP} -- and decapsulates back to plain
+     IPv4, forwarding out its host-facing interface without ever consulting IPv4 routing;
+  4. host traffic is actually delivered end to end (packetReceived:count > 0);
+  5. standard undisposed-object postrun guard.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: StaticMplsLsr.ned
+
+import inet.networklayer.mpls.StaticIngressClassifier;
+import inet.node.mpls.MplsRouterBase;
+
+//
+// A signaling-free MPLS LSR: ~MplsRouterBase plus a ~StaticIngressClassifier wired
+// as its ingress classifier. No ~Ldp, no ~RsvpTe -- every forwarding decision comes
+// from static configuration (the classifier's <fectable> and libTable's <libtable>).
+//
+module StaticMplsLsr extends MplsRouterBase
+{
+    parameters:
+        mpls.classifierModule = default(absPath(".classifier"));
+    submodules:
+        classifier: StaticIngressClassifier {
+            @display("p=250,80;is=s");
+        }
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: StaticLspTest.ned
+
+import inet.node.inet.StandardHost;
+
+//
+// host1 -- LSR1 -- LSR2 -- LSR3 -- host2, all statically configured, no signaling protocol.
+//
+network StaticLspTest
+{
+    submodules:
+        host1: StandardHost {
+            @display("p=100,100");
+        }
+        LSR1: StaticMplsLsr {
+            @display("p=250,100");
+        }
+        LSR2: StaticMplsLsr {
+            @display("p=400,100");
+        }
+        LSR3: StaticMplsLsr {
+            @display("p=550,100");
+        }
+        host2: StandardHost {
+            @display("p=700,100");
+        }
+    connections:
+        host1.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> LSR1.pppg++;
+        LSR1.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> LSR2.pppg++;
+        LSR2.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> LSR3.pppg++;
+        LSR3.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> host2.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: host1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.0.2	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.2	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.0.1	10.0.0.1	255.255.255.255	H	0	ppp0
+10.0.1.2	10.0.1.2	255.255.255.255	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.2	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.2.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.1.1	10.0.1.1	255.255.255.255	H	0	ppp0
+10.0.2.2	10.0.2.2	255.255.255.255	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.2	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.3.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.2.1	10.0.2.1	255.255.255.255	H	0	ppp0
+10.0.3.2	10.0.3.2	255.255.255.255	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: host2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.3.2	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.3.1	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1_fec.xml
+<?xml version="1.0"?>
+<fectable>
+    <fecentry dest="10.0.3.2" netmask="255.255.255.255" label="100" interface="ppp1"/>
+</fectable>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2_lib.xml
+<?xml version="1.0"?>
+<libtable>
+    <libentry>
+        <inLabel>100</inLabel>
+        <inInterface>ppp0</inInterface>
+        <outInterface>ppp1</outInterface>
+        <outLabel>
+            <op code="swap" value="200"/>
+        </outLabel>
+    </libentry>
+</libtable>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3_lib.xml
+<?xml version="1.0"?>
+<libtable>
+    <libentry>
+        <inLabel>200</inLabel>
+        <inInterface>ppp0</inInterface>
+        <outInterface>ppp1</outInterface>
+        <outLabel>
+            <op code="pop"/>
+        </outLabel>
+    </libentry>
+</libtable>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = .;../../../../src
+network = StaticLspTest
+sim-time-limit = 2s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host2"
+
+**.host2.numApps = 1
+**.host2.app[0].typename = "UdpSink"
+**.host2.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "host1.rt"
+**.LSR1.ipv4.routingTable.routingFile = "LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "LSR3.rt"
+**.host2.ipv4.routingTable.routingFile = "host2.rt"
+
+# D7: LSR1 is the only ingress -- it classifies host1's plain IPv4 traffic to host2 and
+# pushes a label; LSR2/LSR3 never see plain (non-MPLS) traffic in this one-directional
+# test, so their classifiers stay at the empty default.
+**.LSR1.classifier.config = xmldoc("LSR1_fec.xml")
+
+# LSR1 never receives already-labeled traffic in this test, so its libTable stays empty.
+**.LSR2.libTable.config = xmldoc("LSR2_lib.xml")
+**.LSR3.libTable.config = xmldoc("LSR3_lib.xml")
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%# 1. ingress LSR1 pushes a label (StaticIngressClassifier's longest-prefix-match lookup)
+%contains: stdout
+doStackOps: {PUSH
+%#--------------------------------------------------------------------------------------------------------------
+%# 2. transit LSR2 swaps the label (pure LibTable::resolveLabel, no classifier involved)
+%contains: stdout
+doStackOps: {SWAP
+%#--------------------------------------------------------------------------------------------------------------
+%# 3. egress LSR3 pops the label and decapsulates back to plain IPv4
+%contains: stdout
+doStackOps: {POP
+%#--------------------------------------------------------------------------------------------------------------
+%# 4. host traffic is actually delivered end to end over the statically-switched LSP
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
