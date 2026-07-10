@@ -15,7 +15,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/ldp/LdpPacket_m.h"
-#include "inet/networklayer/mpls/IIngressClassifier.h"
+#include "inet/networklayer/mpls/LibTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
@@ -45,13 +45,12 @@ const B LDP_NOTIFICATION_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES
 
 class IInterfaceTable;
 class IIpv4RoutingTable;
-class LibTable;
 class Ted;
 
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener
+class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCallback, public UdpSocket::ICallback, public cListener
 {
   public:
 
@@ -188,6 +187,15 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
+    /**
+     * Ingress classification decision for an incoming Ipv4 datagram: longest-prefix
+     * match over fecList, followed by a fecDown lookup for the matched FEC, plus the
+     * LDP/OSPF port skip-rules. Called by the sibling ~LdpClassifier module, which
+     * implements IIngressClassifier and delegates to this method rather than
+     * maintaining its own bind-time FEC/label table -- see LdpClassifier.h for why.
+     */
+    virtual bool classifyPacket(Packet *ipdatagram, LabelOpVector& outLabel, int& outInterfaceId);
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -228,9 +236,6 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     virtual void socketClosed(UdpSocket *socket) override;
     //@}
-
-    // IIngressClassifier
-    virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, int& outInterfaceId) override;
 
     // cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
