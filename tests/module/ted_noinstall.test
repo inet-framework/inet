@@ -1,0 +1,111 @@
+%description:
+Regression test for the D1 `installRoutes` param on ~Ted (workstream D, architecture
+decoupling): with `**.ted.installRoutes = false`, Ted must stop touching the IPv4 routing
+table entirely, letting another source of routes own it -- here, Ipv4NetworkConfigurator,
+which is already wired up in examples/mpls/testte_failure2/RSVPTE4 -- while RSVP-TE
+signaling and label-switched forwarding continue to work unaffected.
+
+Built on the shipped examples/mpls/testte_failure2 network (RSVPTE4), which already uses
+Ipv4NetworkConfigurator instead of per-node .rt files, so no rerouting/stripping of static
+routes was needed -- just adding installRoutes=false and dropping its failure/recovery
+scenario (irrelevant here; this test isn't about link failure).
+
+Asserted, in order:
+  1. the RSVP-TE LSP from host1 to host3 (LSR1->LSR2->LSR4->LSR5, permanent, tunnel_id 1 /
+     lspid 100, per LSR1_rsvp.xml) is fully signaled -- RsvpTe::processPATH_NOTIFY's
+     PATH_CREATED log line fires at the ingress once the label is actually installed;
+  2. host traffic is DELIVERED end to end (packetReceived:count > 0 -- host3 runs a
+     UdpEchoApp, so both directions are exercised);
+  3. -- the actual point of this test -- Ted::rebuildRoutingTable() never runs on any LSR:
+     with installRoutes=false, Ted logs "installRoutes=false, not touching the routing
+     table" instead of ever "rebuilding routing table at", i.e. the configurator's routes
+     are left untouched.
+
+Proof that assertion 3 is a real discriminator (not a no-op check): flipping
+**.ted.installRoutes back to true (the default) in this exact network config makes every
+LSR log "rebuilding routing table at <routerId>" during startup/convergence (observed 49
+occurrences across the 7 LSRs in a manual run) -- Ted actively deletes and reinstalls its
+own /32-only route set over whatever the configurator had computed, which is exactly what
+the %not-contains below guards against, so the test fails on assertion 3 as required.
+
+Honest note on assertions 1-2: in THIS particular network (a pure point-to-point topology
+with no switches/hubs), Ted's own link-state-derived Dijkstra also happens to reach every
+host once flooding converges, so LSP establishment and end-to-end delivery still succeed
+even with installRoutes=true (verified manually: 134-144 packets delivered either way). The
+route wipe-and-reinstall is real and observable, it just doesn't happen to break
+reachability in this topology -- that would require a host hidden behind a switch/hub,
+which is Ted.ned's own documented "multi-access link" limitation (out of scope here, see
+plans/pending workstream D). So assertion 3 is the one that actually flips PASS/FAIL
+between installRoutes=false and =true; 1 and 2 are cross-checks that signaling/forwarding
+are unaffected by the param either way.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.testte_failure2.RSVPTE4
+sim-time-limit = 3s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host3"
+
+**.host3.numApps = 1
+**.host3.app[0].typename = "UdpEchoApp"
+**.host3.app[0].localPort = 100
+
+**.LSR1.classifier.config = xmldoc("../../../../examples/mpls/testte_failure2/LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("../../../../examples/mpls/testte_failure2/LSR1_rsvp.xml")
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+**.LSR1.peers = "ppp0 ppp1"
+**.LSR2.peers = "ppp0 ppp1 ppp2"
+**.LSR3.peers = "ppp0 ppp1 ppp2"
+**.LSR4.peers = "ppp0 ppp1 ppp2"
+**.LSR5.peers = "ppp0 ppp3 ppp4"
+**.LSR6.peers = "ppp0 ppp1"
+**.LSR7.peers = "ppp0 ppp1"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.*.hasStatus = true
+# no failure scenario -- this test is about installRoutes, not link failure
+**.scenarioManager.script = xml("<scenario/>")
+
+# D1: Ted must not own the routing table here; Ipv4NetworkConfigurator does.
+**.ted.installRoutes = false
+
+%#--------------------------------------------------------------------------------------------------------------
+%# 1. the RSVP-TE LSP establishes end to end (ingress PATH_CREATED confirmation)
+%contains: stdout
+Path successfully established
+%#--------------------------------------------------------------------------------------------------------------
+%# 2. host traffic is actually delivered over the established LSP
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%# 3. the actual point of the test: Ted never touched the routing table
+%contains: stdout
+installRoutes=false, not touching the routing table
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+rebuilding routing table at
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

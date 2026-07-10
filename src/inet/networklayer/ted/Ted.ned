@@ -28,11 +28,24 @@ import inet.common.SimpleModule;
 //   IPv4 address; if it does not, initialization fails with a
 //   cRuntimeError (MPLS/LDP/RSVP-TE assume unique interface addresses
 //   throughout).
-// - Ted unconditionally owns the node's IPv4 routing table: whenever the
-//   link-state database changes, it deletes every non-multicast route and
-//   reinstalls a full set of host routes derived from the TED. There is
-//   currently no option to let another routing protocol (e.g., ~Ospfv2)
-//   coexist with an active ~Ted in the same router.
+//
+// Routing-table ownership (~installRoutes~):
+// - Default (~installRoutes~ = true, today's behavior): Ted unconditionally
+//   owns the node's IPv4 routing table. Whenever the link-state database
+//   changes, it deletes every non-multicast route and reinstalls a full set
+//   of `/32` host routes derived from the TED, sourced as IRoute::OSPF. Do
+//   not combine this mode with another source of routes beyond interface
+//   addressing (e.g. the configurator's static routes, or another routing
+//   protocol such as ~Ospfv2) in the same router -- Ted will wipe them out
+//   on the next rebuild.
+// - ~installRoutes~ = false: Ted never touches the routing table; it only
+//   tracks link-state/TE information for CAC and signaling purposes (LDP
+//   FEC binding and RSVP-TE loose-hop resolution still work off whatever
+//   routes are present in the table -- installed by an IGP, static `.rt`
+//   files, or ~Ipv4NetworkConfigurator~ -- since LDP/RSVP only ever read
+//   the routing table, they don't care who populated it). Use this mode to
+//   let Ted coexist with another routing protocol or with
+//   configurator-assigned routes.
 //
 simple Ted extends SimpleModule
 {
@@ -40,5 +53,6 @@ simple Ted extends SimpleModule
         @class(Ted);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;  // The path to the RoutingTable module
+        bool installRoutes = default(true); // Whether Ted installs/maintains host routes in the routing table from its link-state database (see class documentation for the coexistence story)
         @display("i=block/table");
 }

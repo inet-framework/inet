@@ -45,6 +45,8 @@ void Ted::initialize(int stage)
 
         rt.reference(this, "routingTableModule", true);
         ift.reference(this, "interfaceTableModule", true);
+
+        installRoutes = par("installRoutes");
     }
 }
 
@@ -211,6 +213,15 @@ Ipv4AddressVector Ted::calculateShortestPath(Ipv4AddressVector dest,
 
 void Ted::rebuildRoutingTable()
 {
+    if (!installRoutes) {
+        // Some other means (IGP, static routes, Ipv4NetworkConfigurator) owns the routing
+        // table; Ted only tracks TE state, so there's nothing to compute or install here.
+        // (Nothing else consumes calculateShortestPaths()'s result, so it's safe to skip
+        // the whole method, not just the route-install tail.)
+        EV_INFO << "installRoutes=false, not touching the routing table at " << routerId << endl;
+        return;
+    }
+
     EV_INFO << "rebuilding routing table at " << routerId << endl;
 
     std::vector<Vertex> V = calculateShortestPaths(ted, 0.0, 7);
