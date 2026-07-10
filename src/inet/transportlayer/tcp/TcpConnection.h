@@ -393,6 +393,14 @@ class INET_API TcpConnection : public SimpleModule
     int getFsmState() const { return fsm.getState(); }
     const TcpStateVariables *getState() const { return state; }
     TcpStateVariables *getStateForUpdate() { return state; }
+
+    /**
+     * Returns the RFC 5681 FlightSize: the amount of data (in bytes) that has
+     * been sent but not yet cumulatively acknowledged (snd_max - snd_una).
+     * This is the value recorded by the "unacked" signal; it is the outstanding
+     * data used to compute ssthresh on loss.
+     */
+    virtual uint32_t getFlightSize() const;
     const TcpSendQueue *getSendQueue() const { return sendQueue; }
     TcpSendQueue *getSendQueueForUpdate() { return sendQueue; }
     const TcpSackRexmitQueue *getRexmitQueue() const { return rexmitQueue; }

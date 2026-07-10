@@ -1054,6 +1054,12 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     return sentBytes;
 }
 
+uint32_t TcpConnection::getFlightSize() const
+{
+    // RFC 5681 FlightSize: data sent but not yet cumulatively acknowledged.
+    return state->snd_max - state->snd_una;
+}
+
 bool TcpConnection::sendData(uint32_t congestionWindow)
 {
     // we'll start sending from snd_max, if not after RTO
