@@ -42,6 +42,12 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
         int owner;
         bool permanent;
+
+        // CSPF affinity constraints (Workstream C6/D3), parsed from this path's optional
+        // <include_any>/<exclude_any> XML attributes; 0 = no constraint. Only consulted when
+        // computeEro is on and this path's ERO is empty/all-loose (see createIngressPSB()).
+        uint32_t includeAny = 0;
+        uint32_t excludeAny = 0;
     };
 
     struct TrafficSession {
@@ -154,6 +160,13 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     int stateLifetimeFactor; // RFC 2205's K
     simtime_t retryInterval;
     bool advertiseImplicitNull = true;
+    // C6: compute a strict ERO at the ingress via Ted::calculateShortestPath() (CSPF) whenever
+    // a path's configured ERO is empty or contains only loose hops. Default off -- CSPF is a
+    // purely local ingress computation with no RFC-mandated wire behavior (RFC 3209 leaves
+    // route computation unspecified), so defaulting it off is a scope choice, not a compliance
+    // gap; it also keeps every shipped example/showcase (which all hand-write EROs) fingerprint-
+    // identical.
+    bool computeEro = false;
 
   protected:
     ModuleRefByPar<Ted> tedmod;

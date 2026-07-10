@@ -1,0 +1,276 @@
+%description:
+Isolated verification of Ted::calculateShortestPath()/calculateShortestPaths() -- the
+constrained-shortest-path (CSPF) helper that, before this test was written, had ZERO callers
+in the codebase (dead since 2005; the original author's own comment above the Bellman-Ford
+relaxation loop reads "Dijkstra? just guessing..."). This test hand-builds a small TED
+topology with a KNOWN-correct answer and exercises the function directly, without any
+RSVP-TE wiring, so the algorithm is validated in isolation before Workstream C6 wires it into
+RsvpTe's ingress signaling path.
+
+Topology (a "diamond" -- the same shape later reused, with the same bandwidth numbers, by
+tests/module/rsvpte_cspf.test):
+
+               R2 (metric 1 each way, 600 kbps)
+             /              \
+   R1 (1.1.1.1)              R4 (4.4.4.4)
+             \              /
+               R3 (metric 5 each way, 10 Mbps)
+
+Plus:
+  - R1 -- R5 (5.5.5.5), metric 1, to test that calculateShortestPath() picks the CLOSEST
+    reachable address among a *set* of acceptable destinations (dest-vector semantics).
+  - R1 -- R6 (6.6.6.6), metric 1, but with state=false (down), to confirm down links are
+    excluded from the graph regardless of how short they are.
+
+Hand-computed expected answers:
+  1. dest={R4}, bandwidth=0, priority=7 (no constraint): shortest path by metric is via R2
+     (1+1=2) vs via R3 (5+5=10) -> expect [R1, R2, R4].
+  2. dest={R4}, bandwidth=700000, priority=7: the R1-R2 link's UnResvBandwidth[7] is only
+     600000, so it must be pruned; the only remaining path is via R3 -> expect [R1, R3, R4].
+  3. dest={R4}, bandwidth=200000, priority=7, but with the R1-R2 link's UnResvBandwidth[7]
+     (only) reduced to 100000 (as if some other reservation already ate it): priority 7 must
+     avoid it (-> via R3), but the SAME query at priority=0 (whose UnResvBandwidth[0] on that
+     link is untouched, still 600000) must NOT prune it (-> via R2). This exercises that the
+     pruning is keyed by the requested priority index, not a blanket check.
+  4. dest={R4, R5} (a destination SET, e.g. multiple advertised interface addresses), no
+     bandwidth constraint: R5 is directly connected (metric 1) and much closer than R4 (metric
+     2 via R2) -> expect the nearer member of the set, [R1, R5].
+  5. dest={R6}, no constraint: R6 is only reachable via a link with state=false -> expect an
+     EMPTY result (unreachable).
+  6. dest={R9} (address not present anywhere in the topology at all) -> expect EMPTY result.
+  7. Affinity (Workstream D3's matchesAffinity(), wired into the pruning predicate by this
+     commit): give the R1-R2 link's adminGroup bit 0x1, and query with excludeAny=0x1 -> the
+     R2 branch must be excluded by affinity alone (bandwidth/metric would otherwise prefer it)
+     -> expect [R1, R3, R4].
+  8. Affinity include: give the R1-R3 link's adminGroup bit 0x2, and query with
+     includeAny=0x2 -> only the R3 branch satisfies the include constraint, even though R2 is
+     the unconstrained-cheaper branch -> expect [R1, R3, R4].
+
+No bug was found in the underlying Bellman-Ford relaxation, the dest-set/backtrace logic, or
+the bandwidth-by-priority pruning: every check above (including the priority-indexing check,
+which is the one most likely to hide an off-by-one) passed on the FIRST run of this test,
+before any changes were made to Ted.cc beyond making calculateShortestPath() public and
+threading through the includeAny/excludeAny parameters for checks 7-8. See the commit message
+for the full account of this verification.
+
+%includes:
+#include "inet/networklayer/ted/Ted.h"
+#include "inet/networklayer/ted/Ted_m.h"
+
+%global:
+
+using namespace inet;
+
+// Test-only harness: exposes Ted's protected calculateShortestPath() and lets us poke the
+// protected routerId member directly, without needing a full NED network / routing table /
+// interface table (calculateShortestPath()/calculateShortestPaths()/assignIndex() touch only
+// the `topology` parameter and the `routerId` member -- no gates, no par(), no scheduling --
+// so a bare, unregistered instance is safe to exercise them on).
+class TedTestHarness : public Ted
+{
+  public:
+    using Ted::calculateShortestPath;
+    void setRouterIdForTest(Ipv4Address addr) { routerId = addr; }
+};
+
+static TeLinkStateInfo makeLink(const char *advrouter, const char *linkid, double metric,
+        double maxBandwidth, bool up = true)
+{
+    TeLinkStateInfo link;
+    link.advrouter = Ipv4Address(advrouter);
+    link.linkid = Ipv4Address(linkid);
+    link.local = Ipv4Address(advrouter); // not used by the algorithm; just needs a value
+    link.remote = Ipv4Address(linkid);
+    link.metric = metric;
+    link.MaxBandwidth = maxBandwidth;
+    for (int i = 0; i < 8; i++)
+        link.UnResvBandwidth[i] = maxBandwidth;
+    link.state = up;
+    link.sourceId = link.advrouter.getInt();
+    link.messageId = 1;
+    link.timestamp = SIMTIME_ZERO;
+    return link;
+}
+
+static std::string pathToStr(const Ipv4AddressVector& path)
+{
+    std::string s;
+    for (auto& a : path) {
+        if (!s.empty())
+            s += " -> ";
+        s += a.str();
+    }
+    return s.empty() ? "(empty)" : s;
+}
+
+static bool pathEquals(const Ipv4AddressVector& path, std::initializer_list<const char *> expected)
+{
+    if (path.size() != expected.size())
+        return false;
+    size_t i = 0;
+    for (auto *e : expected) {
+        if (path[i] != Ipv4Address(e))
+            return false;
+        i++;
+    }
+    return true;
+}
+
+#define CHECK_PATH(label, actual, ...) \
+    do { \
+        auto expectedList = { __VA_ARGS__ }; \
+        bool ok = pathEquals(actual, expectedList); \
+        EV << (label) << ": got [" << pathToStr(actual) << "]" << (ok ? "  OK" : "  FAIL") << endl; \
+        if (!ok) \
+            throw cRuntimeError("Broken: %s did not match expected path", label); \
+    } while (false)
+
+#define CHECK_EMPTY(label, actual) \
+    do { \
+        bool ok = (actual).empty(); \
+        EV << (label) << ": got [" << pathToStr(actual) << "]" << (ok ? "  OK" : "  FAIL") << endl; \
+        if (!ok) \
+            throw cRuntimeError("Broken: %s expected an empty (unreachable) result", label); \
+    } while (false)
+
+%activity:
+
+TedTestHarness ted;
+ted.setRouterIdForTest(Ipv4Address("1.1.1.1"));
+
+TeLinkStateInfoVector topology;
+// R1 <-> R2, cheap metric, LOW bandwidth (600 kbps)
+topology.push_back(makeLink("1.1.1.1", "2.2.2.2", 1, 600000));
+topology.push_back(makeLink("2.2.2.2", "1.1.1.1", 1, 600000));
+// R2 <-> R4
+topology.push_back(makeLink("2.2.2.2", "4.4.4.4", 1, 600000));
+topology.push_back(makeLink("4.4.4.4", "2.2.2.2", 1, 600000));
+// R1 <-> R3, expensive metric, HIGH bandwidth (10 Mbps)
+topology.push_back(makeLink("1.1.1.1", "3.3.3.3", 5, 10000000));
+topology.push_back(makeLink("3.3.3.3", "1.1.1.1", 5, 10000000));
+// R3 <-> R4
+topology.push_back(makeLink("3.3.3.3", "4.4.4.4", 5, 10000000));
+topology.push_back(makeLink("4.4.4.4", "3.3.3.3", 5, 10000000));
+// R1 <-> R5, directly connected, very cheap
+topology.push_back(makeLink("1.1.1.1", "5.5.5.5", 1, 1000000));
+topology.push_back(makeLink("5.5.5.5", "1.1.1.1", 1, 1000000));
+// R1 <-> R6, cheap but DOWN
+topology.push_back(makeLink("1.1.1.1", "6.6.6.6", 1, 1000000, false));
+topology.push_back(makeLink("6.6.6.6", "1.1.1.1", 1, 1000000, false));
+
+// Check 1: plain shortest path (no bandwidth constraint) picks the low-metric/low-bandwidth
+// branch via R2.
+{
+    Ipv4AddressVector dest;
+    dest.push_back(Ipv4Address("4.4.4.4"));
+    Ipv4AddressVector path = ted.calculateShortestPath(dest, topology, 0.0, 7);
+    CHECK_PATH("check1 (unconstrained -> via R2)", path, "1.1.1.1", "2.2.2.2", "4.4.4.4");
+}
+
+// Check 2: requesting more bandwidth than the R1-R2 link has forces the R3 branch.
+{
+    Ipv4AddressVector dest;
+    dest.push_back(Ipv4Address("4.4.4.4"));
+    Ipv4AddressVector path = ted.calculateShortestPath(dest, topology, 700000.0, 7);
+    CHECK_PATH("check2 (700kbps prunes R2 -> via R3)", path, "1.1.1.1", "3.3.3.3", "4.4.4.4");
+}
+
+// Check 3: pruning is keyed by the REQUESTED priority index, not a blanket bandwidth check.
+{
+    // Reduce UnResvBandwidth[7] only on the R1->R2 direction (the direction actually used by
+    // the algorithm rooted at R1), leaving UnResvBandwidth[0] untouched.
+    for (auto& link : topology) {
+        if (link.advrouter == Ipv4Address("1.1.1.1") && link.linkid == Ipv4Address("2.2.2.2"))
+            link.UnResvBandwidth[7] = 100000;
+    }
+
+    Ipv4AddressVector dest;
+    dest.push_back(Ipv4Address("4.4.4.4"));
+
+    Ipv4AddressVector pathPrio7 = ted.calculateShortestPath(dest, topology, 200000.0, 7);
+    CHECK_PATH("check3a (priority 7 depleted -> via R3)", pathPrio7, "1.1.1.1", "3.3.3.3", "4.4.4.4");
+
+    Ipv4AddressVector pathPrio0 = ted.calculateShortestPath(dest, topology, 200000.0, 0);
+    CHECK_PATH("check3b (priority 0 untouched -> via R2)", pathPrio0, "1.1.1.1", "2.2.2.2", "4.4.4.4");
+
+    // restore for subsequent checks
+    for (auto& link : topology) {
+        if (link.advrouter == Ipv4Address("1.1.1.1") && link.linkid == Ipv4Address("2.2.2.2"))
+            link.UnResvBandwidth[7] = 600000;
+    }
+}
+
+// Check 4: dest-vector (destination SET) semantics -- picks the nearest member of the set.
+{
+    Ipv4AddressVector dest;
+    dest.push_back(Ipv4Address("4.4.4.4"));
+    dest.push_back(Ipv4Address("5.5.5.5"));
+    Ipv4AddressVector path = ted.calculateShortestPath(dest, topology, 0.0, 7);
+    CHECK_PATH("check4 (dest set -> nearer member R5)", path, "1.1.1.1", "5.5.5.5");
+}
+
+// Check 5: a link with state=false is excluded from the graph entirely, even though it is
+// the shortest metric available.
+{
+    Ipv4AddressVector dest;
+    dest.push_back(Ipv4Address("6.6.6.6"));
+    Ipv4AddressVector path = ted.calculateShortestPath(dest, topology, 0.0, 7);
+    CHECK_EMPTY("check5 (down link -> unreachable)", path);
+}
+
+// Check 6: destination address absent from the topology altogether.
+{
+    Ipv4AddressVector dest;
+    dest.push_back(Ipv4Address("9.9.9.9"));
+    Ipv4AddressVector path = ted.calculateShortestPath(dest, topology, 0.0, 7);
+    CHECK_EMPTY("check6 (nonexistent dest -> unreachable)", path);
+}
+
+// Check 7: exclude-affinity forces the R3 branch even though R2 is unconstrained-cheaper.
+{
+    for (auto& link : topology) {
+        if (link.advrouter == Ipv4Address("1.1.1.1") && link.linkid == Ipv4Address("2.2.2.2"))
+            link.adminGroup = 0x1;
+    }
+
+    Ipv4AddressVector dest;
+    dest.push_back(Ipv4Address("4.4.4.4"));
+    Ipv4AddressVector path = ted.calculateShortestPath(dest, topology, 0.0, 7, 0 /*includeAny*/, 0x1 /*excludeAny*/);
+    CHECK_PATH("check7 (excludeAny=0x1 prunes R2 -> via R3)", path, "1.1.1.1", "3.3.3.3", "4.4.4.4");
+
+    for (auto& link : topology) {
+        if (link.advrouter == Ipv4Address("1.1.1.1") && link.linkid == Ipv4Address("2.2.2.2"))
+            link.adminGroup = 0;
+    }
+}
+
+// Check 8: include-affinity forces the R3 branch (only it carries the required color on
+// BOTH its hops -- matchesAffinity() is evaluated per-edge, so every hop of the eventual path
+// must carry the required color, not just one of them; the R1-R2/R2-R4 hops are left at
+// adminGroup=0 and so fail the include constraint, making the whole R2 branch unusable).
+{
+    for (auto& link : topology) {
+        if ((link.advrouter == Ipv4Address("1.1.1.1") && link.linkid == Ipv4Address("3.3.3.3"))
+                || (link.advrouter == Ipv4Address("3.3.3.3") && link.linkid == Ipv4Address("4.4.4.4")))
+            link.adminGroup = 0x2;
+    }
+
+    Ipv4AddressVector dest;
+    dest.push_back(Ipv4Address("4.4.4.4"));
+    Ipv4AddressVector path = ted.calculateShortestPath(dest, topology, 0.0, 7, 0x2 /*includeAny*/, 0 /*excludeAny*/);
+    CHECK_PATH("check8 (includeAny=0x2 requires R3's color -> via R3)", path, "1.1.1.1", "3.3.3.3", "4.4.4.4");
+
+    for (auto& link : topology) {
+        if ((link.advrouter == Ipv4Address("1.1.1.1") && link.linkid == Ipv4Address("3.3.3.3"))
+                || (link.advrouter == Ipv4Address("3.3.3.3") && link.linkid == Ipv4Address("4.4.4.4")))
+            link.adminGroup = 0;
+    }
+}
+
+EV << "ALL CSPF UNIT CHECKS PASSED" << endl;
+
+%contains: stdout
+ALL CSPF UNIT CHECKS PASSED
+
+%not-contains: stdout
+Broken:

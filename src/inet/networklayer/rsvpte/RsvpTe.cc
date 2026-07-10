@@ -6,6 +6,8 @@
 
 #include "inet/networklayer/rsvpte/RsvpTe.h"
 
+#include <cstdlib>
+
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -192,6 +194,7 @@ void RsvpTe::initialize(int stage)
         stateLifetimeFactor = par("stateLifetimeFactor");
         retryInterval = par("retryInterval");
         advertiseImplicitNull = par("advertiseImplicitNull");
+        computeEro = par("computeEro");
         WATCH(maxPsbId);
         WATCH(maxRsbId);
         WATCH(maxSrcInstance);
@@ -341,7 +344,7 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 
     cXMLElementList list = paths->getChildrenByTagName("path");
     for (auto path : list) {
-        checkTags(path, "sender lspid bandwidth route permanent owner");
+        checkTags(path, "sender lspid bandwidth route permanent owner include_any exclude_any");
 
         int lspid = getParameterIntValue(path, "lspid");
 
@@ -385,6 +388,14 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
         const cXMLElement *route = getUniqueChildIfExists(path, "route");
         if (route)
             newPath.ERO = readTrafficRouteFromXML(route);
+
+        // C6/D3: optional CSPF affinity constraints, hex-encoded admin-group bitmasks (e.g.
+        // "0x3"); only consulted by createIngressPSB() when computeEro is on and this path's
+        // ERO ends up empty/all-loose. strtoul's base-0 auto-detects the "0x" prefix (same
+        // parsing Ted::initializeTED() already uses for the "linkAttributes" adminGroup XML
+        // attribute).
+        newPath.includeAny = strtoul(getParameterStrValue(path, "include_any", "0"), nullptr, 0);
+        newPath.excludeAny = strtoul(getParameterStrValue(path, "exclude_any", "0"), nullptr, 0);
 
         if (merge) {
             EV_INFO << "adding new path into an existing session" << endl;
@@ -1443,6 +1454,52 @@ RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const TrafficSession& session, 
     while (ERO.size() > 0 && ERO[0].node == routerId) {
         // remove ourselves from the beginning of the hop list
         ERO.erase(ERO.begin());
+    }
+
+    // C6: if the configured ERO gives no real source-routing constraint -- it's empty, or
+    // every remaining hop is loose (<lnode>, i.e. just a waypoint hint, never a strict hop) --
+    // and CSPF is enabled, compute a full strict ERO to the destination ourselves instead of
+    // falling back to plain hop-by-hop routing. A partially-strict ERO (at least one <node>)
+    // is left untouched: the operator asked for a specific route, CSPF doesn't override it.
+    bool allLoose = true;
+    for (auto& hop : ERO)
+        if (!hop.L)
+            allLoose = false;
+
+    if (computeEro && (ERO.empty() || allLoose)) {
+        Ipv4AddressVector dest;
+        dest.push_back(session.sobj.DestAddress);
+
+        Ipv4AddressVector cspfPath = tedmod->calculateShortestPath(dest, tedmod->getLinks(),
+                path.tspec.req_bandwidth, session.sobj.setupPri, path.includeAny, path.excludeAny);
+
+        if (cspfPath.empty()) {
+            EV_INFO << "CSPF found no feasible path to " << session.sobj.DestAddress
+                    << " (bandwidth=" << path.tspec.req_bandwidth
+                    << ", priority=" << session.sobj.setupPri << ")" << endl;
+
+            // No path found: reuse the existing pathProblem()/retry contract. There is no PSB
+            // yet to hand to pathProblem(), so just return nullptr -- createPath(), our only
+            // caller, already does exactly the right thing with that: a permanent path is
+            // retried after retryInterval (PATH_RETRY notify), a non-permanent one is dropped
+            // from the traffic database.
+            return nullptr;
+        }
+
+        // cspfPath[0] is this router itself (the CSPF root); the ERO -- like a hand-written
+        // one at this point -- carries only the hops AFTER us. CSPF always yields a full
+        // STRICT route (every hop L=false).
+        EroVector computedEro;
+        for (unsigned int i = 1; i < cspfPath.size(); i++) {
+            EroObj hop;
+            hop.L = false;
+            hop.node = cspfPath[i];
+            computedEro.push_back(hop);
+        }
+        ERO = computedEro;
+
+        EV_DETAIL << "CSPF computed ERO for session (dest=" << session.sobj.DestAddress
+                  << ", lspid=" << path.sender.Lsp_Id << "): " << vectorToString(ERO) << endl;
     }
 
     Ipv4Address OI;

@@ -58,17 +58,24 @@ import inet.common.SimpleModule;
 // - <bandwidth>: requested bandwidth in bits/sec for admission control;
 //   defaults to 0 (best-effort, always admitted).
 // - <route>: an explicit route (ERO), see below; if omitted, the path is
-//   forwarded hop-by-hop according to the routing table (no ERO).
+//   forwarded hop-by-hop according to the routing table (no ERO), unless
+//   "computeEro" is on (see below).
 // - <permanent>: if true (the default), the module keeps retrying to set up
 //   the path (after "retryInterval") if the initial attempt fails.
 // - <owner>: the module (dotted path) that receives this path's status
 //   notifications (created / preempted / failed / unfeasible); defaults to
 //   this ~RsvpTe module.
+// - <include_any>, <exclude_any>: optional hex-encoded admin-group bitmasks
+//   (e.g. "0x3") consulted by CSPF when "computeEro" is on (RFC 3209 Section
+//   4.7.4-style affinity, Workstream D3); ignored otherwise.
 //
 // In the route, <node> stands for a strict hop, and <lnode> stands for a loose hop
-// (both take an IPv4 address). Hand-written EROs are the only way to specify an
-// explicit route: this model does not compute one (there is no CSPF/constrained
-// path computation at the ingress).
+// (both take an IPv4 address). Hand-written EROs are the primary way to specify an
+// explicit route. Alternatively, if "computeEro" is on and a path's <route> is
+// omitted (or contains only loose hops), the ingress computes one itself via CSPF
+// (~Ted's revived Bellman-Ford, constrained by bandwidth at the session's setup
+// priority and, if given, the <include_any>/<exclude_any> affinity above) and
+// installs it as a full strict ERO before signaling.
 //
 // ~RsvpTe understands the "add-session" and "del-session" ~ScenarioManager commands. The contents of the <add-session> element can be the same as the <session> element for the traffic.xml above.
 // The <del-session> element syntax is similar, but only <tunnel_id>, <endpoint>, an optional <extended_tunnel_id> (defaults to this router's address), and (optionally) a <paths> list of <path> elements carrying just <lspid> need to be specified; if <paths> is omitted, every path of the session is torn down.
@@ -123,6 +130,7 @@ simple RsvpTe extends SimpleModule
         int stateLifetimeFactor = default(3); // RFC 2205's K: PSB/RSB state expires (if not refreshed) after (K + 0.5) * 1.5 * refreshInterval
         double retryInterval @unit(s) = default(1s); // delay before retrying a permanent path whose ingress PSB couldn't be created (model-specific, not an RFC 2205 value)
         bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a tunnel
+        bool computeEro = default(false); // C6: at the ingress, compute a full strict ERO via CSPF (Ted::calculateShortestPath()) whenever a path's configured route is empty or contains only loose hops; default off keeps every shipped example/showcase (which all hand-write EROs) fingerprint-identical -- CSPF is a purely local ingress computation with no RFC-mandated wire behavior, so defaulting it off is a scope choice, not a compliance gap. Bandwidth-feasible (Ted's UnResvBandwidth pruning at the session's setup priority) and, if configured on a path via <include_any>/<exclude_any>, affinity-constrained (RFC 3209 Section 4.7.4-style admin-group match, Workstream D3).
         double stopOperationExtraTime @unit(s) = default(2s); // extra time to hold up the node's later shutdown stages after a graceful shutdown sent a forced PathTear for an owned session (see handleStopOperation); this module itself goes NOT_OPERATING immediately (further inbound RSVP packets are dropped, not processed), but the local network/link layers are held up until this elapses so the just-enqueued PathTear can actually leave the node instead of being dropped by an already-stopped Ipv4/interface
         @display("i=block/control");
         @signal[lspEstablished](type=simtime_t); // LSP setup latency, emitted at the ingress when commitResv first installs the ingress label for a session
