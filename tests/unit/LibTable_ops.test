@@ -1,0 +1,258 @@
+%description:
+Unit test for the MPLS LIB (Label Information Base) layer: LibTable::installLibEntry,
+removeLibEntry, resolveLabel (with a specific interface id and with the ANY_INTERFACE
+wildcard), the LabelOpVector builders (pushLabel/swapLabel/popLabel) that Mpls::doStackOps
+consumes, and the reserved-label handling in readTableFromXML (RFC 3032 labels 0-15 are no
+longer uniformly rejected, per Workstream B's B3 change to LibTable.cc).
+
+%includes:
+#include "inet/networklayer/mpls/LibTable.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include <omnetpp/cxmlelement.h>
+
+using namespace inet;
+using namespace omnetpp;
+
+%file: TestNetwork.ned
+
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.loopback.LoopbackInterface;
+import inet.networklayer.mpls.LibTable;
+
+network TestNetwork
+{
+    parameters:
+        @networkNode();
+    submodules:
+        test: Test;
+        ift: InterfaceTable;
+        eth0: LoopbackInterface {
+            interfaceTableModule = "^.ift";
+        }
+        eth1: LoopbackInterface {
+            interfaceTableModule = "^.ift";
+        }
+        // "lib" exercises the public API (installLibEntry/removeLibEntry/resolveLabel);
+        // "libXml" is a TestLibTable so the test can also drive the protected
+        // readTableFromXML() directly, without touching production code.
+        lib: LibTable {
+            interfaceTableModule = "^.ift";
+        }
+        libXml: TestLibTable {
+            interfaceTableModule = "^.ift";
+        }
+    connections allowunconnected:
+}
+
+%file: TestLibTable.ned
+
+import inet.networklayer.mpls.LibTable;
+
+simple TestLibTable extends LibTable
+{
+    parameters:
+        @class(TestLibTable);
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+
+%global:
+
+// Expose the protected readTableFromXML() for direct testing of the reserved-label
+// boundary handling. This subclass lives only in the test binary -- LibTable.h/.cc are
+// untouched.
+class TestLibTable : public LibTable
+{
+  public:
+    using LibTable::readTableFromXML;
+};
+
+Define_Module(TestLibTable);
+
+// Builds a <libtable> config document matching the schema documented in LibTable.ned
+// (one <libentry> with a single <op> in its <outLabel>). Caller owns and must delete
+// the returned root element.
+static cXMLElement *makeLibTableXml(int inLabel, const char *inInterface,
+        const char *outInterface, const char *opCode, int opValue = -1)
+{
+    auto *table = new cXMLElement("libtable", nullptr);
+    auto *entry = new cXMLElement("libentry", table);
+    (new cXMLElement("inLabel", entry))->setNodeValue(std::to_string(inLabel).c_str());
+    (new cXMLElement("inInterface", entry))->setNodeValue(inInterface);
+    (new cXMLElement("outInterface", entry))->setNodeValue(outInterface);
+    auto *outLabelEl = new cXMLElement("outLabel", entry);
+    auto *opEl = new cXMLElement("op", outLabelEl);
+    opEl->setAttribute("code", opCode);
+    if (opValue >= 0)
+        opEl->setAttribute("value", std::to_string(opValue).c_str());
+    return table;
+}
+
+%activity:
+
+auto lib = check_and_cast<LibTable *>(getSimulation()->getModuleByPath("lib"));
+auto libXml = check_and_cast<TestLibTable *>(getSimulation()->getModuleByPath("libXml"));
+int eth0Id = check_and_cast<NetworkInterface *>(getSimulation()->getModuleByPath("eth0"))->getInterfaceId();
+int eth1Id = check_and_cast<NetworkInterface *>(getSimulation()->getModuleByPath("eth1"))->getInterfaceId();
+
+// === 1. installLibEntry: fresh allocation via the -1 auto-allocate sentinel ===
+{
+    EV << "=== installLibEntry: auto-allocate ===" << endl;
+    // maxLabel starts at RESERVED_LABEL_MAX (15, see LibTable::initialize), so the first
+    // auto-allocated label is 16, never colliding with the RFC 3032 reserved range.
+    int l1 = lib->installLibEntry(-1, eth0Id, LibTable::pushLabel(100), eth1Id);
+    ASSERT(l1 == RESERVED_LABEL_MAX + 1);
+    int l2 = lib->installLibEntry(-1, eth0Id, LibTable::pushLabel(101), eth1Id);
+    ASSERT(l2 == l1 + 1);
+
+    LabelOpVector out;
+    int outIf;
+    ASSERT(lib->resolveLabel(eth0Id, l1, out, outIf));
+    ASSERT(out.size() == 1 && out[0].optcode == PUSH_OPER && out[0].label == 100);
+    ASSERT(outIf == eth1Id);
+    EV << "  PASS" << endl;
+}
+
+// === 2. installLibEntry: explicit label only UPDATES an existing entry -- it never
+// inserts a fresh one (there is no "insert with explicit label" path in the current
+// code: the else-branch of installLibEntry() is pure update-or-throw) ===
+{
+    EV << "=== installLibEntry: update existing entry ===" << endl;
+    int l1 = lib->installLibEntry(-1, eth0Id, LibTable::pushLabel(200), eth1Id);
+    int updated = lib->installLibEntry(l1, eth1Id, LibTable::swapLabel(555), eth0Id);
+    ASSERT(updated == l1);
+
+    LabelOpVector out;
+    int outIf;
+    // the entry is now bound to eth1Id as its incoming interface: a query from the
+    // wrong interface must miss, the right one must hit
+    ASSERT(!lib->resolveLabel(eth0Id, l1, out, outIf));
+    ASSERT(lib->resolveLabel(eth1Id, l1, out, outIf));
+    ASSERT(out.size() == 1 && out[0].optcode == SWAP_OPER && out[0].label == 555);
+    ASSERT(outIf == eth0Id);
+    EV << "  PASS" << endl;
+}
+
+// === 3. installLibEntry: error path -- updating an unknown label throws ===
+{
+    EV << "=== installLibEntry: error on unknown label ===" << endl;
+    bool threw = false;
+    try {
+        lib->installLibEntry(123456, eth0Id, LibTable::popLabel(), eth1Id);
+    }
+    catch (const cRuntimeError&) {
+        threw = true;
+    }
+    ASSERT(threw);
+    EV << "  PASS" << endl;
+}
+
+// === 4. removeLibEntry: successful removal, and error on an unknown label ===
+{
+    EV << "=== removeLibEntry ===" << endl;
+    int l = lib->installLibEntry(-1, eth0Id, LibTable::pushLabel(300), eth1Id);
+    LabelOpVector out;
+    int outIf;
+    ASSERT(lib->resolveLabel(eth0Id, l, out, outIf));
+
+    lib->removeLibEntry(l);
+    ASSERT(!lib->resolveLabel(eth0Id, l, out, outIf));
+
+    bool threw = false;
+    try {
+        lib->removeLibEntry(l); // already removed
+    }
+    catch (const cRuntimeError&) {
+        threw = true;
+    }
+    ASSERT(threw);
+    EV << "  PASS" << endl;
+}
+
+// === 5. resolveLabel: specific interface id vs. the ANY_INTERFACE wildcard ===
+// Per LibTable::resolveLabel, the wildcard is on the QUERY side: passing
+// LibTable::ANY_INTERFACE as inInterfaceId bypasses the incoming-interface check
+// entirely and matches by label alone, regardless of which interface the entry itself
+// is bound to. This is exactly how RsvpClassifier.cc queries an ingress-pushed label
+// (RsvpTe.cc sets inInterfaceId = ANY_INTERFACE there because there is no incoming
+// labeled interface yet at the ingress LSR) -- the only two production callers of
+// resolveLabel() are Mpls.cc (always a real incoming interface, for already-labeled
+// packets) and RsvpClassifier.cc (always ANY_INTERFACE, for ingress).
+{
+    EV << "=== resolveLabel: specific interface vs. ANY_INTERFACE ===" << endl;
+    int l = lib->installLibEntry(-1, eth1Id, LibTable::swapLabel(321), eth0Id);
+    LabelOpVector out;
+    int outIf;
+    ASSERT(lib->resolveLabel(eth1Id, l, out, outIf));     // exact interface match
+    ASSERT(!lib->resolveLabel(eth0Id, l, out, outIf));    // wrong interface -> no match
+    ASSERT(lib->resolveLabel(LibTable::ANY_INTERFACE, l, out, outIf)); // wildcard matches regardless
+    EV << "  PASS" << endl;
+}
+
+// === 6. LabelOpVector builders (pushLabel/swapLabel/popLabel): these are exactly the
+// single-op vectors Mpls::doStackOps() consumes (see Mpls.cc's switch over
+// PUSH_OPER/SWAP_OPER/POP_OPER) -- this test verifies the LIB layer's contract with
+// doStackOps, not Mpls's own packet-level behavior ===
+{
+    EV << "=== LabelOpVector builders ===" << endl;
+    LabelOpVector push = LibTable::pushLabel(42);
+    ASSERT(push.size() == 1 && push[0].optcode == PUSH_OPER && push[0].label == 42);
+
+    LabelOpVector swap = LibTable::swapLabel(43);
+    ASSERT(swap.size() == 1 && swap[0].optcode == SWAP_OPER && swap[0].label == 43);
+
+    LabelOpVector pop = LibTable::popLabel();
+    ASSERT(pop.size() == 1 && pop[0].optcode == POP_OPER);
+    EV << "  PASS" << endl;
+}
+
+// === 7. readTableFromXML: reserved-label boundary handling (Workstream B, B3) ===
+// The current validation only rejects a negative inLabel; there is no special
+// rejection of the RFC 3032 reserved range (0-15) any more, so labels like the
+// implicit-null (3) and router-alert (1) values must load without throwing.
+{
+    EV << "=== readTableFromXML: label 3 (implicit null) validates fine ===" << endl;
+    cXMLElement *table = makeLibTableXml(3, "any", "eth0", "pop");
+    libXml->readTableFromXML(table);
+    delete table;
+
+    LabelOpVector out;
+    int outIf;
+    ASSERT(libXml->resolveLabel(LibTable::ANY_INTERFACE, 3, out, outIf));
+    ASSERT(out.size() == 1 && out[0].optcode == POP_OPER);
+    EV << "  PASS" << endl;
+}
+{
+    EV << "=== readTableFromXML: label 1 (router alert) validates fine ===" << endl;
+    cXMLElement *table = makeLibTableXml(1, "any", "eth1", "pop");
+    libXml->readTableFromXML(table);
+    delete table;
+
+    LabelOpVector out;
+    int outIf;
+    ASSERT(libXml->resolveLabel(LibTable::ANY_INTERFACE, 1, out, outIf));
+    EV << "  PASS" << endl;
+}
+{
+    EV << "=== readTableFromXML: a genuinely invalid entry still throws ===" << endl;
+    // a negative inLabel is rejected regardless of the reserved-range relaxation
+    cXMLElement *table = makeLibTableXml(-1, "any", "eth0", "pop");
+    bool threw = false;
+    try {
+        libXml->readTableFromXML(table);
+    }
+    catch (const cRuntimeError&) {
+        threw = true;
+    }
+    delete table;
+    ASSERT(threw);
+    EV << "  PASS" << endl;
+}
+
+EV << "All LibTable operation checks passed." << endl;
+
+%contains: stdout
+All LibTable operation checks passed.
