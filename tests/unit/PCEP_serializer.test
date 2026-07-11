@@ -1,0 +1,89 @@
+%description:
+Byte-exact round-trip serialization of PCEP messages (RFC 5440 Section 6.1/6.3/6.4/7.2/7.3):
+the Common Header plus an Open message (carrying an OPEN object with KeepAlive Timer,
+DeadTimer, and SID) and a bare Keepalive message. Verifies the on-wire lengths are exactly
+12 bytes (Open: 4-byte Common Header + 8-byte OPEN object) and 4 bytes (Keepalive: Common
+Header only), per RFC 5440's INCLUSIVE Message-Length/Object-Length convention (see
+PcepMessagesSerializer), and that encode->decode reproduces every field.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/pcep/PcepCommon.h"
+#include "inet/networklayer/pcep/PcepMessages_m.h"
+
+using namespace inet;
+
+%global:
+
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<const T>& original)
+{
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();
+
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    return pkt2.popAtFront<T>(pkt2.getDataLength());
+}
+
+%activity:
+
+// === 1. Open message ===
+{
+    EV << "=== PcepOpen ===" << endl;
+    auto open = makeShared<PcepOpen>();
+    open->setChunkLength(PCEP_OPEN_MESSAGE_BYTES);
+    open->setType(PCEP_OPEN);
+    open->setKeepaliveTime(30);
+    open->setDeadTimer(120);
+    open->setSid(7);
+
+    Packet pkt("sz");
+    pkt.insertAtFront(open);
+    B len = pkt.getDataLength();
+    EV << "  serializedLength: " << len.get() << endl;
+    ASSERT(len == B(12)); // 4-byte Common Header + 8-byte OPEN object (RFC 5440 Section 6.1/7.2/7.3)
+
+    auto p = roundTrip(staticPtrCast<const PcepMessage>(open));
+    ASSERT(p != nullptr);
+    auto open2 = dynamicPtrCast<const PcepOpen>(p);
+    ASSERT(open2 != nullptr);
+    ASSERT(open2->getType() == PCEP_OPEN);
+    ASSERT(open2->getVersion() == 1);
+    ASSERT(open2->getKeepaliveTime() == 30);
+    ASSERT(open2->getDeadTimer() == 120);
+    ASSERT(open2->getSid() == 7);
+    EV << "  keepaliveTime: " << (int)open2->getKeepaliveTime() << endl;
+    EV << "  deadTimer: " << (int)open2->getDeadTimer() << endl;
+    EV << "  sid: " << (int)open2->getSid() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 2. Keepalive message ===
+{
+    EV << "=== PcepKeepalive ===" << endl;
+    auto ka = makeShared<PcepKeepalive>();
+    ka->setChunkLength(PCEP_KEEPALIVE_MESSAGE_BYTES);
+    ka->setType(PCEP_KEEPALIVE);
+
+    Packet pkt("sz");
+    pkt.insertAtFront(ka);
+    B len = pkt.getDataLength();
+    EV << "  serializedLength: " << len.get() << endl;
+    ASSERT(len == B(4)); // Common Header alone (RFC 5440 Section 6.4)
+
+    auto p = roundTrip(staticPtrCast<const PcepMessage>(ka));
+    ASSERT(p != nullptr);
+    auto ka2 = dynamicPtrCast<const PcepKeepalive>(p);
+    ASSERT(ka2 != nullptr);
+    ASSERT(ka2->getType() == PCEP_KEEPALIVE);
+    ASSERT(ka2->getVersion() == 1);
+    EV << "  PASS" << endl;
+}
+
+EV << "All PCEP serializer round-trips passed." << endl;
+
+%contains: stdout
+All PCEP serializer round-trips passed.

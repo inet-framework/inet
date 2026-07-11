@@ -1,0 +1,150 @@
+%description:
+Regression test for the PCEP session establishment FSM (RFC 5440 Section 6.2-6.4,
+7.3; Workstream F4 Phase 1), a single ~Pce and a single ~Pcc connected over a plain
+point-to-point Ethernet link (no MPLS data plane is needed for session
+establishment -- see this workstream's Phase 1 scope note).
+
+Asserts:
+1. The PCEP TCP connection is established, the Open/Keepalive handshake happens in
+   order (Open sent by the Pcc -> Open received by the Pce -> Open+Keepalive sent
+   back by the Pce -> Keepalive received/sent by the Pcc -> both sides declare their
+   session OPERATIONAL), before the link is cut.
+2. Cutting the underlying link (ScenarioManager <disconnect> at t=3s) silently drops
+   all further PCEP traffic in both directions (no TCP-level RST/FIN is generated --
+   this specifically exercises PCEP's OWN DeadTimer-based liveness detection, not
+   TCP's much slower failure detection): both sides log "DeadTimer expired ...
+   closing the session" once the DeadTimer (6s, comfortably above the negotiated
+   3x KeepAlive interval of 2s) elapses with no PCEP message received.
+3. Standard undisposed-object postrun guard.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.ted.Ted;
+import inet.node.inet.StandardHost;
+
+//
+// A plain StandardHost plus a bare Ted submodule, for ~Pce (running as app[0]) to
+// hold a module-path reference to (Phase 1: wired, not yet consulted -- see
+// Pce.ned). Defined locally in this test rather than as a full derived MPLS router
+// node type (e.g. a future PcepRsvpMplsRouter/PcepSrMplsRouter): this test needs no
+// MPLS data plane at all, so a minimal test network is preferred over reaching
+// ahead into a later phase's NED-design decision.
+//
+module PceHost extends StandardHost
+{
+    submodules:
+        ted: Ted {
+            @display("p=100,400;is=s");
+        }
+}
+
+network PcepSessionTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        scenarioManager: ScenarioManager;
+        pce: PceHost;
+        pcc: StandardHost;
+    connections:
+        pce.ethg++ <--> { delay = 10ms; datarate = 100Mbps; } <--> pcc.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<scenario>
+    <at t="3s">
+        <disconnect src-module="pce" src-gate="ethg$o[0]"/>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+network = PcepSessionTest
+ned-path = .;../../../../src
+sim-time-limit = 16s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+%# only the PCEP apps and the scenario manager log at info level -- keeps the log
+%# small for the multi-line ordering regex below (authoring-tests skill: "Log-
+%# asserting tests" hygiene)
+**.pce.app[*].cmdenv-log-level = info
+**.pcc.app[*].cmdenv-log-level = info
+**.scenarioManager.cmdenv-log-level = info
+**.cmdenv-log-level = off
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%# deadTimer is deliberately ASYMMETRIC (pce=10s, pcc=6s): RFC 5440 Section 7.3's
+%# DeadTimer is each speaker's own promise ("I will wait this long"), not a
+%# negotiated value -- each side must apply the OTHER side's advertised DeadTimer
+%# (not its own) when monitoring that peer's liveness (see Pce::PccSession::
+%# peerDeadTimer / Pcc::peerDeadTimer doc comments). The asymmetry makes this
+%# directionality actually observable below: the Pcc must report "within 10"
+%# (the Pce's advertised value) and the Pce must report "within 6" (the Pcc's) --
+%# swapped values would mean the wrong (local, not peer) DeadTimer was used.
+**.pce.numApps = 1
+**.pce.app[0].typename = "Pce"
+**.pce.app[0].tedModule = "^.ted"
+**.pce.app[0].keepaliveTime = 2s
+**.pce.app[0].deadTimer = 10s
+
+**.pcc.numApps = 1
+**.pcc.app[0].typename = "Pcc"
+**.pcc.app[0].pceAddress = "pce"
+**.pcc.app[0].keepaliveTime = 2s
+**.pcc.app[0].deadTimer = 6s
+**.pcc.app[0].reconnectInterval = 5s
+
+%#--------------------------------------------------------------------------------------------------------------
+%# the handshake, in order: Open sent (Pcc, active side) -> Open received (Pce) ->
+%# Open+Keepalive sent back (Pce) -> Keepalive received (Pcc) -> both sides OPERATIONAL,
+%# all before the link is cut at t=3s
+%contains-regex: stdout
+Open sent to PCE .*
+.*
+Open received from .*
+Open sent to .*
+Keepalive sent to .*
+session with .* negotiated .*
+Open received from PCE .*
+Keepalive sent to PCE
+session with PCE negotiated .*
+.*
+PCEP session with .* is now OPERATIONAL
+.*
+PCEP session with PCE .* is now OPERATIONAL
+%#--------------------------------------------------------------------------------------------------------------
+%# the TCP session itself establishes (unchanged data point, corroborating the above)
+%contains: stdout
+TCP connection established with PCE
+%#--------------------------------------------------------------------------------------------------------------
+%# the link is actually cut (corroborating that the ensuing DeadTimer expiry below is
+%# caused by silent packet loss, not by a TCP-visible failure)
+%contains: stdout
+processing <disconnect> command...
+%#--------------------------------------------------------------------------------------------------------------
+%# DeadTimer-based liveness (RFC 5440 Section 7.3): both sides notice the silence and
+%# tear the session down, well before sim-time-limit. Each side's log line names the
+%# PEER's advertised DeadTimer, not its own (see the ini's deadTimer comment above) --
+%# the Pcc (monitoring the Pce) must report "within 10" (the Pce's own ~deadTimer),
+%# and the Pce (monitoring the Pcc) must report "within 6" (the Pcc's own ~deadTimer);
+%# either line showing the OTHER number would mean the wrong (local, not peer)
+%# DeadTimer was actually applied.
+%contains: stdout
+DeadTimer expired for PCEP session with PCE: no PCEP message received within 10
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+DeadTimer expired for PCEP session with .*: no PCEP message received within 6
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
