@@ -6,6 +6,7 @@
 
 package inet.examples.mpls.sr;
 
+import inet.common.scenario.ScenarioManager;
 import inet.node.inet.StandardHost;
 import inet.node.mpls.SrMplsRouter;
 import ned.DatarateChannel;
@@ -103,6 +104,9 @@ network SrMplsRing
         }
         hostAdj: StandardHost {
             @display("p=960,460");
+        }
+        scenarioManager: ScenarioManager { // idle by default (empty script); see the [TiLfa] config
+            @display("p=100,460");
         }
     connections:
         hostA.pppg++ <--> Link <--> R1.pppg[0];
