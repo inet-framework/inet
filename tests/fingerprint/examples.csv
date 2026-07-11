@@ -152,8 +152,8 @@
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableSourceHost -r 0,              10s,     ee2c-67dc/tplx;283e-764a/~tNl;98c5-772c/~tND;e43d-2303/tyf, PASS, EthernetMac Ipv4
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableDestinationInterfaces -r 0,   10s,     4fea-ce55/tplx;ba3e-99de/~tNl;21bc-bc31/~tND;37ed-6720/tyf, PASS, EthernetMac Ipv4
 
-/examples/inet/dctcp/,               -f omnetpp.ini -c DcTcpIncast -r 0,            100s,         c150-8970/tplx;383d-92fe/~tNl;a91a-169c/~tND;0ad1-d012/tyf, PASS, EthernetMac Ipv4
-/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         6128-3623/tplx;8b89-5bc4/~tNl;f31a-a71d/~tND;651a-d4cf/tyf, PASS, EthernetMac Ipv4
+/examples/inet/dctcp/,               -f omnetpp.ini -c DcTcpIncast -r 0,            100s,         c150-8970/tplx;383d-92fe/~tNl;723f-b824/~tND;0ad1-d012/tyf, PASS, EthernetMac Ipv4
+/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         6128-3623/tplx;8b89-5bc4/~tNl;757d-50be/~tND;651a-d4cf/tyf, PASS, EthernetMac Ipv4
 
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            ea11-1052/tplx;145c-4d9e/~tNl;431c-ceb4/~tND;2b32-31ec/tyf, PASS, Ipv4
 
@@ -207,7 +207,7 @@
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           569f-78e0/tplx;2824-c5c1/~tNl;138f-07d3/~tND;1bb9-1773/tyf, PASS, EthernetMac Ipv4
 
-/examples/inet/redmarker/,           -f omnetpp.ini -c TcpSender1 -r 0,             100s,         4bbe-13d2/tplx;c404-57a1/~tNl;ac31-3a65/~tND;5d29-588d/tyf, PASS, EthernetMac Ipv4
+/examples/inet/redmarker/,           -f omnetpp.ini -c TcpSender1 -r 0,             100s,         4bbe-13d2/tplx;c404-57a1/~tNl;7b8b-3709/~tND;5d29-588d/tyf, PASS, EthernetMac Ipv4
 
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            a25b-9004/tplx;de21-71ca/~tNl;bef4-cd44/~tND;7acb-f17c/tyf, PASS, Ipv4
 
