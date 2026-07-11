@@ -15,6 +15,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 
 namespace inet {
@@ -65,16 +66,16 @@ void Mpls::handleMessage(cMessage *msg)
 void Mpls::processPacketFromL3(Packet *msg)
 {
     const Protocol *protocol = msg->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol != &Protocol::ipv4) {
-        // only the Ipv4 protocol supported yet
+    if (protocol != &Protocol::ipv4 && protocol != &Protocol::ipv6) {
+        // only Ipv4/Ipv6 are supported yet (Workstream F3: IPv6 joined Ipv4 here)
         sendToL2(msg);
         return;
     }
 
-    labelAndForwardIpv4Datagram(msg);
+    labelAndForwardDatagram(msg);
 }
 
-bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
+bool Mpls::tryLabelAndForwardDatagram(Packet *packet)
 {
     LabelOpVector outLabel;
     int outInterfaceId;
@@ -99,17 +100,17 @@ bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
     return true;
 }
 
-void Mpls::labelAndForwardIpv4Datagram(Packet *ipdatagram)
+void Mpls::labelAndForwardDatagram(Packet *datagram)
 {
-    if (tryLabelAndForwardIpv4Datagram(ipdatagram))
+    if (tryLabelAndForwardDatagram(datagram))
         return;
 
-    // handling our outgoing Ipv4 traffic that didn't match any FEC/LSP
-    // do not use labelAndForwardIPv4Datagram for packets arriving to ingress!
+    // handling our outgoing Ipv4/Ipv6 traffic that didn't match any FEC/LSP
+    // do not use labelAndForwardDatagram for packets arriving to ingress!
 
     EV_INFO << "FEC not resolved, doing regular L3 routing" << endl;
 
-    sendToL2(ipdatagram);
+    sendToL2(datagram);
 }
 
 void Mpls::pushLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
@@ -137,22 +138,55 @@ void Mpls::popLabel(Packet *packet, const Protocol *payloadProtocol)
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 
         // RFC 3443 §3.2: in uniform mode the (possibly decremented) label TTL is
-        // authoritative and is written back into the IP header; in pipe mode the
-        // original IP TTL was never touched by the MPLS domain, so it is left alone.
-        // This is Ipv4Header-specific; IPv6 hop-limit handling is Workstream F3 Phase
-        // 2 -- guarded out here so a (currently nonexistent) IPv6 LIB entry doesn't
-        // crash trying to treat a non-Ipv4Header packet as Ipv4Header.
-        if (payloadProtocol == &Protocol::ipv4 && ttlModel == TTL_MODEL_UNIFORM) {
-            auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-            ipv4Header->setTimeToLive(oldMplsHeader->getTtl());
+        // authoritative and is written back into the native header (Ipv4Header's
+        // TTL or, since Workstream F3, Ipv6Header's hop limit); in pipe mode the
+        // original hop count was never touched by the MPLS domain, so it is left
+        // alone. Guarded to known payload protocols so a future, still-unhandled
+        // payload protocol doesn't get silently (mis)treated as Ipv4 by
+        // setNativeHopCount()'s dispatch.
+        if ((payloadProtocol == &Protocol::ipv4 || payloadProtocol == &Protocol::ipv6) && ttlModel == TTL_MODEL_UNIFORM) {
             // writeTcBackOnPop defaults to false: the 3-bit tc -> 6-bit DSCP mapping
             // is lossy, and RFC 5462 (short pipe) keeps the inner DSCP authoritative
-            if (writeTcBackOnPop)
-                ipv4Header->setDscp(oldMplsHeader->getTc() << 3);
-            ipv4Header->updateChecksum();
-            insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
+            setNativeHopCount(packet, oldMplsHeader->getTtl(), writeTcBackOnPop, (uint8_t)(oldMplsHeader->getTc() << 3));
         }
     }
+}
+
+uint8_t Mpls::getNativeHopCount(const Packet *packet) const
+{
+    const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    return protocol == &Protocol::ipv6
+        ? (uint8_t)packet->peekAtFront<Ipv6Header>()->getHopLimit()
+        : (uint8_t)packet->peekAtFront<Ipv4Header>()->getTimeToLive();
+}
+
+void Mpls::setNativeHopCount(Packet *packet, uint8_t hopCount, bool writeDscp, uint8_t dscp)
+{
+    const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    if (protocol == &Protocol::ipv6) {
+        auto ipv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
+        ipv6Header->setHopLimit(hopCount);
+        if (writeDscp)
+            ipv6Header->setDscp(dscp);
+        // RFC 2460: IPv6 has no header checksum to maintain, unlike Ipv4Header below
+        insertNetworkProtocolHeader(packet, Protocol::ipv6, ipv6Header);
+    }
+    else {
+        auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
+        ipv4Header->setTimeToLive(hopCount);
+        if (writeDscp)
+            ipv4Header->setDscp(dscp);
+        ipv4Header->updateChecksum();
+        insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
+    }
+}
+
+uint8_t Mpls::getNativeDscp(const Packet *packet) const
+{
+    const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    return protocol == &Protocol::ipv6
+        ? (uint8_t)packet->peekAtFront<Ipv6Header>()->getDscp()
+        : (uint8_t)packet->peekAtFront<Ipv4Header>()->getDscp();
 }
 
 uint8_t Mpls::computePushTtl(const Packet *packet) const
@@ -161,8 +195,7 @@ uint8_t Mpls::computePushTtl(const Packet *packet) const
         // pushing an additional label onto an existing stack: copy the current outer label's TTL
         return packet->peekAtFront<MplsHeader>()->getTtl();
 
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    return ttlModel == TTL_MODEL_UNIFORM ? (uint8_t)ipv4Header->getTimeToLive() : (uint8_t)defaultTtl;
+    return ttlModel == TTL_MODEL_UNIFORM ? getNativeHopCount(packet) : (uint8_t)defaultTtl;
 }
 
 uint8_t Mpls::computePushTc(const Packet *packet) const
@@ -172,11 +205,10 @@ uint8_t Mpls::computePushTc(const Packet *packet) const
         return packet->peekAtFront<MplsHeader>()->getTc();
 
     // E-LSP default mapping: the top 3 bits of the 6-bit DSCP become the MPLS Traffic Class
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    return (uint8_t)(ipv4Header->getDscp() >> 3);
+    return (uint8_t)(getNativeDscp(packet) >> 3);
 }
 
-void Mpls::handleTtlExpiry(Packet *packet, int outInterfaceId)
+void Mpls::handleTtlExpiry(Packet *packet, int outInterfaceId, const Protocol *payloadProtocol)
 {
     EV_WARN << "MPLS label TTL expired, discarding the label stack and handing the datagram up to L3 for ICMP Time Exceeded processing" << endl;
 
@@ -185,29 +217,26 @@ void Mpls::handleTtlExpiry(Packet *packet, int outInterfaceId)
         auto oldMplsHeader = packet->popAtFront<MplsHeader>();
         bottomOfStack = oldMplsHeader->getS();
     }
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 
-    // write the expired TTL back into the IP header; this happens in both TTL
-    // models (RFC 3443: expiry handling is common to uniform and pipe modes)
-    auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-    ipv4Header->setTimeToLive(0);
-    ipv4Header->updateChecksum();
-    insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
+    // write the expired hop count back into the native header; this happens in
+    // both TTL models (RFC 3443: expiry handling is common to uniform and pipe modes)
+    setNativeHopCount(packet, 0);
 
     // hand the packet to L3 as if it just arrived from the network on the interface
     // this LSR would have forwarded it on; this LSR (and its peers) typically has no
     // IP route to the packet's ultimate destination (only the MPLS LIB knows the path),
     // so the outgoing interface resolved by the label lookup is supplied explicitly to
-    // avoid a spurious "destination unreachable" -- Ipv4::fragmentAndSend's own
-    // hop-count check then generates the real ICMP Time Exceeded
+    // avoid a spurious "destination unreachable" -- Ipv4's/Ipv6's own hop-count check
+    // then generates the real ICMP Time Exceeded
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outInterfaceId);
-    deliverToL3(packet);
+    deliverToL3(packet, payloadProtocol);
 }
 
-void Mpls::deliverToL3(Packet *packet)
+void Mpls::deliverToL3(Packet *packet, const Protocol *protocol)
 {
     packet->removeTagIfPresent<DispatchProtocolReq>();
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     sendToL3(packet);
 }
 
@@ -233,7 +262,7 @@ bool Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInte
                 const auto& oldMplsHeader = packet->peekAtFront<MplsHeader>();
                 uint8_t oldTtl = oldMplsHeader->getTtl();
                 if (oldTtl <= 1) {
-                    handleTtlExpiry(packet, outInterfaceId);
+                    handleTtlExpiry(packet, outInterfaceId, payloadProtocol);
                     return false;
                 }
                 auto mplsHeader = makeShared<MplsHeader>();
@@ -261,17 +290,18 @@ void Mpls::processPacketFromL2(Packet *packet)
     if (protocolId == Protocol::mpls.getId()) {
         processMplsPacketFromL2(packet);
     }
-    else if (protocolId == Protocol::ipv4.getId()) {
-        // Ipv4 datagram arrives at Ingress router. We'll try to classify it
-        // and add an MPLS header
+    else if (protocolId == Protocol::ipv4.getId() || protocolId == Protocol::ipv6.getId()) {
+        // an Ipv4/Ipv6 (Workstream F3: IPv6 joined Ipv4 here) datagram arrives at
+        // the Ingress router -- native traffic this router originates or that a
+        // neighbor sent natively. We'll try to classify it and add an MPLS header
 
-        if (!tryLabelAndForwardIpv4Datagram(packet)) {
+        if (!tryLabelAndForwardDatagram(packet)) {
             sendToL3(packet);
         }
     }
     else {
-        // not an IPv4 or MPLS packet (e.g. IPv6): this model cannot label or
-        // forward it, so drop it with a notification instead of aborting
+        // neither Ipv4, Ipv6 nor MPLS: this model cannot label or forward it, so
+        // drop it with a notification instead of aborting
         EV_WARN << "discarding packet from L2 with unsupported protocol "
                 << packet->getTag<PacketProtocolTag>()->getProtocol()->getName() << endl;
         PacketDropDetails details;
@@ -292,10 +322,19 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
     if (label == IPV4_EXPLICIT_NULL_LABEL) {
         // RFC 3032: the explicit null label always means "pop and process the
         // datagram as ordinary IPv4", regardless of what the LIB says
-        EV_INFO << "explicit null label, popping and delivering to L3" << endl;
+        EV_INFO << "IPv4 explicit null label, popping and delivering to L3" << endl;
         popLabel(packet);
         packet->trim();
         deliverToL3(packet);
+        return;
+    }
+    if (label == IPV6_EXPLICIT_NULL_LABEL) {
+        // RFC 3032: the IPv6 explicit null label always means "pop and process the
+        // datagram as ordinary IPv6", regardless of what the LIB says
+        EV_INFO << "IPv6 explicit null label, popping and delivering to L3" << endl;
+        popLabel(packet, &Protocol::ipv6);
+        packet->trim();
+        deliverToL3(packet, &Protocol::ipv6);
         return;
     }
     if (label > IMPLICIT_NULL_LABEL && label <= RESERVED_LABEL_MAX) {
@@ -336,10 +375,12 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
         sendToL2(packet);
     }
     else {
-        // last label popped, decapsulate and send out Ipv4 datagram
+        // last label popped, decapsulate and send out the native (Ipv4 or,
+        // since Workstream F3, Ipv6) datagram
 
-        EV_INFO << "decapsulating Ipv4 datagram" << endl;
-        ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::ipv4.getId());
+        EV_INFO << "decapsulating datagram" << endl;
+        int payloadProtocolId = packet->getTag<PacketProtocolTag>()->getProtocol()->getId();
+        ASSERT(payloadProtocolId == Protocol::ipv4.getId() || payloadProtocolId == Protocol::ipv6.getId());
 
         if (outgoingInterface) {
             packet->trim();

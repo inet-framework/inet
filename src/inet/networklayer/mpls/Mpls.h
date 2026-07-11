@@ -54,8 +54,13 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     virtual void processPacketFromL2(Packet *msg);
     virtual void processMplsPacketFromL2(Packet *mplsPacket);
 
-    virtual bool tryLabelAndForwardIpv4Datagram(Packet *ipdatagram);
-    virtual void labelAndForwardIpv4Datagram(Packet *ipdatagram);
+    // Despite the "Datagram" (not "Ipv4Datagram") name, these two are genuinely
+    // protocol-agnostic: they only ever call the ingress classifier and doStackOps(),
+    // neither of which cares whether the packet underneath is Ipv4Header or
+    // Ipv6Header (Workstream F3, IPv6). Renamed from *Ipv4Datagram when IPv6 packets
+    // started being offered to them too.
+    virtual bool tryLabelAndForwardDatagram(Packet *datagram);
+    virtual void labelAndForwardDatagram(Packet *datagram);
 
     virtual void sendToL2(Packet *msg);
     virtual void sendToL3(Packet *msg);
@@ -68,6 +73,26 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     // matching every caller that pre-dates per-LIB-entry payload protocols.
     void popLabel(Packet *packet, const Protocol *payloadProtocol = &Protocol::ipv4);
 
+    // Single dispatch point (Workstream F3, IPv6) for reading the packet's current
+    // native hop count -- Ipv4Header::TimeToLive or Ipv6Header::HopLimit, whichever
+    // the packet's PacketProtocolTag currently names. Used by computePushTtl().
+    uint8_t getNativeHopCount(const Packet *packet) const;
+
+    // Write-side counterpart to getNativeHopCount(): writes hopCount into the
+    // packet's current native header (Ipv4Header::TimeToLive or
+    // Ipv6Header::HopLimit), dispatched the same way. Shared by popLabel()'s RFC
+    // 3443 uniform-mode writeback and handleTtlExpiry()'s expiry writeback, so
+    // neither grows its own "if ipv6 do X else do Y" copy. When writeDscp is true
+    // (popLabel()'s writeTcBackOnPop path only; handleTtlExpiry() never rewrites
+    // Dscp), dscp is written into the very same header instance before it is
+    // re-inserted, preserving the pre-Phase-2 code's single remove/insert shape.
+    void setNativeHopCount(Packet *packet, uint8_t hopCount, bool writeDscp = false, uint8_t dscp = 0);
+
+    // Read-side dispatch (Workstream F3, IPv6) mirroring getNativeHopCount(), but
+    // for Dscp -- both Ipv4Header and Ipv6Header expose getDscp() with the same
+    // shape. Used by computePushTc().
+    uint8_t getNativeDscp(const Packet *packet) const;
+
     // returns the TTL to stamp on a freshly pushed label: the IP TTL (uniform) or
     // defaultTtl (pipe) when pushing onto bare IP, or the current outer label's TTL
     // when pushing onto an existing label stack
@@ -79,21 +104,25 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     uint8_t computePushTc(const Packet *packet) const;
 
     // RFC 3443: the label TTL reached zero at a transit LSR; pop the entire label
-    // stack, write the expired TTL back into the IP header, and hand the datagram
-    // to L3 so that Ipv4's own hop-count check generates the ICMP Time Exceeded
-    void handleTtlExpiry(Packet *packet, int outInterfaceId);
+    // stack, write the expired hop count back into the native header, and hand the
+    // datagram to L3 so that its own hop-count check generates the ICMP Time
+    // Exceeded. payloadProtocol (Workstream F3, IPv6) is what this LIB entry's
+    // label ultimately carries; defaults to Ipv4 for source compatibility.
+    void handleTtlExpiry(Packet *packet, int outInterfaceId, const Protocol *payloadProtocol = &Protocol::ipv4);
 
-    // hands a packet that was label-switched off the packet's Ipv4 PacketProtocolTag
-    // up to L3 as if it had just arrived from the network: replaces the stale
+    // hands a packet that was label-switched off the packet's PacketProtocolTag up
+    // to L3 as if it had just arrived from the network: replaces the stale
     // DispatchProtocolReq left over from being dispatched here as an MPLS packet
-    // (otherwise the dispatcher between Mpls and Ipv4 loops it straight back here)
-    void deliverToL3(Packet *packet);
+    // (otherwise the dispatcher between Mpls and Ipv4/Ipv6 loops it straight back
+    // here). protocol (Workstream F3, IPv6) defaults to Ipv4 for source
+    // compatibility with callers that pre-date dual-stack support.
+    void deliverToL3(Packet *packet, const Protocol *protocol = &Protocol::ipv4);
 
     // returns false if the packet was already fully handled (TTL expiry or a
     // reserved label) and the caller must not touch it any further.
-    // payloadProtocol (Workstream F3, IPv6) is forwarded to popLabel() for the
-    // POP_OPER case; defaults to Ipv4 since the ingress call site
-    // (tryLabelAndForwardIpv4Datagram()) has no LIB entry to ask.
+    // payloadProtocol (Workstream F3, IPv6) is forwarded to popLabel() and
+    // handleTtlExpiry() for the POP_OPER/expiry cases; defaults to Ipv4 since the
+    // ingress call site (tryLabelAndForwardDatagram()) has no LIB entry to ask.
     virtual bool doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInterfaceId,
             const Protocol *payloadProtocol = &Protocol::ipv4);
 

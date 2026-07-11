@@ -80,7 +80,7 @@ bool SrPolicy::resolveSegmentList(const std::vector<Segment>& segments, LabelOpV
         // `interfaceId` already achieves, so as the first segment it is always dropped from the
         // pushed stack -- its LIB entry lives on THIS SAME router (SegmentRouting installed it
         // here), and ingress-classified traffic never consults the LIB at all (see
-        // Mpls::tryLabelAndForwardIpv4Datagram), so pushing it would leave a label on the wire
+        // Mpls::tryLabelAndForwardDatagram), so pushing it would leave a label on the wire
         // that no router downstream would ever pop.
         skipFirst = true;
         firstInterfaceId = segments[0].interfaceId;
@@ -103,7 +103,7 @@ bool SrPolicy::resolveSegmentList(const std::vector<Segment>& segments, LabelOpV
         // The entire policy collapsed to nothing (a single-segment policy whose one segment was
         // dropped by the canonicalization above): no label needs to be imposed at all. Report
         // "no mapping" (see .ned doc's Limitations section) rather than violating Mpls's
-        // non-empty-outLabel invariant (Mpls::tryLabelAndForwardIpv4Datagram ASSERTs
+        // non-empty-outLabel invariant (Mpls::tryLabelAndForwardDatagram ASSERTs
         // outLabel.size() > 0) with an empty PUSH stack.
         return false;
     }
