@@ -17,6 +17,11 @@ namespace tcp {
 
 Register_Class(TcpCubic);
 
+// HyStart constants (Linux tcp_cubic.c); seconds (global simtime_t is forbidden)
+static const int HYSTART_MIN_SAMPLES = 8;
+static const double HYSTART_DELAY_MIN = 0.004; // 4 ms
+static const double HYSTART_DELAY_MAX = 0.016; // 16 ms
+
 TcpCubic::TcpCubic() : TcpReno(),
     state((TcpCubicStateVariables *&)TcpAlgorithm::state)
 {
@@ -85,6 +90,51 @@ void TcpCubic::recalculateSlowStartThreshold()
     state->ssthresh = std::max((uint32_t)(cwnd * state->cubic_beta), 2 * state->snd_mss);
 
     conn->emit(ssthreshSignal, state->ssthresh);
+}
+
+void TcpCubic::hystartUpdate(simtime_t delay)
+{
+    // Linux hystart_update: called during slow start to find the exit point.
+    if (seqGreater(state->snd_una, state->hystart_end_seq))
+        hystartReset();
+
+    if (state->hystart_found)
+        return;
+
+    // ACK-train detector: if ACKs arrive in a train longer than half the min RTT,
+    // the pipe is considered full.
+    if (state->hystart_detect & 1) {
+        simtime_t now = simTime();
+        if (now - state->hystart_last_ack <= state->hystart_ack_delta) {
+            state->hystart_last_ack = now;
+            if (now - state->hystart_round_start > state->cubic_delay_min / 2) {
+                state->hystart_found = true;
+                state->ssthresh = state->snd_cwnd;
+                conn->emit(ssthreshSignal, state->ssthresh);
+                EV_INFO << "HyStart: ACK-train exit, ssthresh set to " << state->ssthresh << "\n";
+            }
+        }
+    }
+
+    // delay-increase detector: if the round's minimum RTT rises above the
+    // connection minimum by more than eta, the pipe is considered full.
+    if (!state->hystart_found && (state->hystart_detect & 2)) {
+        if (state->hystart_curr_rtt == 0 || delay < state->hystart_curr_rtt)
+            state->hystart_curr_rtt = delay;
+        if (++state->hystart_sample_cnt >= HYSTART_MIN_SAMPLES) {
+            double eta = state->cubic_delay_min.dbl() / 8.0;
+            if (eta < HYSTART_DELAY_MIN)
+                eta = HYSTART_DELAY_MIN;
+            if (eta > HYSTART_DELAY_MAX)
+                eta = HYSTART_DELAY_MAX;
+            if (state->hystart_curr_rtt > state->cubic_delay_min + eta) {
+                state->hystart_found = true;
+                state->ssthresh = state->snd_cwnd;
+                conn->emit(ssthreshSignal, state->ssthresh);
+                EV_INFO << "HyStart: delay-increase exit, ssthresh set to " << state->ssthresh << "\n";
+            }
+        }
+    }
 }
 
 void TcpCubic::cubicUpdate(uint32_t ackedBytes)
@@ -171,6 +221,14 @@ void TcpCubic::receivedDataAck(uint32_t firstSeqAcked)
         simtime_t rtt = simTime() - item->getFirstSentTime();
         if (rtt > 0 && (state->cubic_delay_min == 0 || rtt < state->cubic_delay_min))
             state->cubic_delay_min = rtt;
+
+        // HyStart acts only during slow start and once the window is large enough
+        if (state->hystart_enabled && !state->hystart_found
+            && state->snd_cwnd < state->ssthresh
+            && state->snd_cwnd / state->snd_mss >= (uint32_t)state->hystart_low_window)
+        {
+            hystartUpdate(rtt);
+        }
     }
 
     if (state->dupacks >= state->dupthresh) {

@@ -39,6 +39,9 @@ class INET_API TcpCubic : public TcpReno
     /** Resets the HyStart per-round state (Linux bictcp_hystart_reset). */
     virtual void hystartReset();
 
+    /** HyStart slow-start-exit detection (ACK-train and delay-increase). */
+    virtual void hystartUpdate(simtime_t delay);
+
     /** Updates cubic_cnt (ACKs per 1-MSS increase) from the cubic function (Linux bictcp_update). */
     virtual void cubicUpdate(uint32_t ackedBytes);
 
