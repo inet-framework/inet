@@ -27,6 +27,11 @@ module SrMplsRouter extends MplsRouterBase
         xml sidTable;                   // network-wide router-id -> node-SID index map; see ~SegmentRouting for the XML format; required, no default
         xml policies = default(xml("<policies/>")); // SR-policy table; see ~SrPolicy for the XML format
         mpls.classifierModule = default(absPath(".classifier"));
+        // SR-MPLS has no Hello-based peer-liveness protocol of its own (unlike Ldp/RsvpTe, whose
+        // Hello timeout is what normally calls Ted::setLinkState()); without this, a bare
+        // physical link failure would be invisible to Ted and ~SegmentRouting would never
+        // reroute. See ~Ted's "trackInterfaceState" parameter documentation.
+        ted.trackInterfaceState = true;
 
     submodules:
         segmentRouting: SegmentRouting {

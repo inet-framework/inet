@@ -16,6 +16,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -49,6 +50,7 @@ void Ted::initialize(int stage)
         ift.reference(this, "interfaceTableModule", true);
 
         installRoutes = par("installRoutes");
+        trackInterfaceState = par("trackInterfaceState");
     }
 }
 
@@ -577,18 +579,65 @@ Ipv4Address Ted::getPeerByLocalAddress(Ipv4Address localInf)
 void Ted::handleStartOperation(LifecycleOperation *operation)
 {
     initializeTED();
+
+    if (trackInterfaceState)
+        getContainingNode(this)->subscribe(interfaceStateChangedSignal, this);
 }
 
 void Ted::handleStopOperation(LifecycleOperation *operation)
 {
+    if (trackInterfaceState)
+        getContainingNode(this)->unsubscribe(interfaceStateChangedSignal, this);
+
     ted.clear();
     interfaceAddrs.clear();
 }
 
 void Ted::handleCrashOperation(LifecycleOperation *operation)
 {
+    if (trackInterfaceState)
+        getContainingNode(this)->unsubscribe(interfaceStateChangedSignal, this);
+
     ted.clear();
     interfaceAddrs.clear();
+}
+
+void Ted::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
+    ASSERT(signalID == interfaceStateChangedSignal);
+    ASSERT(trackInterfaceState);
+
+    const auto *change = check_and_cast<const NetworkInterfaceChangeDetails *>(obj);
+    int fieldId = change->getFieldId();
+    if (fieldId != NetworkInterface::F_STATE && fieldId != NetworkInterface::F_CARRIER)
+        return; // some other change on this interface (e.g. an address change); not our concern
+
+    const NetworkInterface *ie = change->getNetworkInterface();
+    if (ie->isLoopback())
+        return;
+    auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+    if (!ipv4Data)
+        return; // not an IPv4 (or not yet configured) interface, so it cannot be one of ted[]'s own local links
+
+    bool up = ie->isUp() && ie->hasCarrier();
+    Ipv4Address localAddr = ipv4Data->getIPAddress();
+
+    // Find THIS router's own TED entry for this exact local interface (advrouter==routerId,
+    // local==localAddr, see initializeTED()) and report its liveness the same way Ldp/RsvpTe's
+    // own Hello-timeout detection does -- setLinkState() is idempotent (no-op if the state
+    // didn't actually change) and itself takes care of rebuilding the routing table and
+    // announcing the change via tedChangedSignal (so LinkStateRouting floods it to peers).
+    for (size_t i = 0; i < ted.size(); i++) {
+        if (ted[i].advrouter == routerId && ted[i].local == localAddr) {
+            setLinkState((int)i, up);
+            return;
+        }
+    }
+    // Not necessarily a bug: an interface with no corresponding TED entry (e.g. one that isn't
+    // connected to another routing node -- initializeTED() only creates entries for interfaces
+    // whose peer has an IIpv4RoutingTable, see its own "switch, hub, bus, accesspoint" comment).
 }
 
 } // namespace inet

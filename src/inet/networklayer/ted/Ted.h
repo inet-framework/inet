@@ -24,7 +24,7 @@ class NetworkInterface;
  *
  * See NED file for more info.
  */
-class INET_API Ted : public RoutingProtocolBase
+class INET_API Ted : public RoutingProtocolBase, public cListener
 {
   public:
     // Cap on the number of SRLGs a single TeLinkStateInfo can carry (D3).
@@ -167,12 +167,18 @@ class INET_API Ted : public RoutingProtocolBase
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
+    // cListener method: reacts to interfaceStateChangedSignal when trackInterfaceState is
+    // enabled (see Ted.ned), translating a local interface's up/down (carrier) transition into
+    // a setLinkState() call for the matching TED link.
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+
   protected:
     ModuleRefByPar<IIpv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     Ipv4Address routerId;
 
     bool installRoutes = true; // whether rebuildRoutingTable() is allowed to touch the routing table
+    bool trackInterfaceState = false; // whether this module subscribes to interfaceStateChangedSignal (see Ted.ned)
 
     Ipv4AddressVector interfaceAddrs; // list of local interface addresses
 
