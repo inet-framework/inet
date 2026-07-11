@@ -48,6 +48,24 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         // computeEro is on and this path's ERO is empty/all-loose (see createIngressPSB()).
         uint32_t includeAny = 0;
         uint32_t excludeAny = 0;
+
+        // C7 (make-before-break, RFC 3209 Section 4.6.4): >= 0 while this path is a
+        // pending replacement LSP signaled to take over from an older Lsp_Id on the SAME
+        // session (set by triggerMakeBeforeBreak(), cleared by commitResv()'s cutover once
+        // the replacement's ingress label is installed and traffic has been switched over).
+        // -1 (the default) means "not a pending replacement" -- either an ordinary path, or
+        // one that has already completed its cutover and is now the session's normal path.
+        int replacesLspId = -1;
+
+        // C7: the flip side of replacesLspId, kept on the OLD (primary) path while its
+        // replacement is in flight: >= 0 means "a replacement with this Lsp_Id is already
+        // being signaled/retried for me, don't start a second one". Needed because a single
+        // path problem can legitimately generate more than one PathErr reaching this same
+        // ingress in quick succession (e.g. a multi-hop preemption re-notifies from each hop
+        // independently) -- without this guard, each one would spawn its own redundant
+        // replacement. Reset implicitly by this path's entry being erased once the
+        // replacement's cutover completes (completeMakeBeforeBreakCutover()).
+        int pendingReplacementLspId = -1;
     };
 
     struct TrafficSession {
@@ -167,6 +185,12 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     // gap; it also keeps every shipped example/showcase (which all hand-write EROs) fingerprint-
     // identical.
     bool computeEro = false;
+    // C7: RFC 4736-lite periodic reoptimization -- every reoptimizeInterval, re-run CSPF for
+    // every established ingress path and, if it finds a strictly cheaper route than the one
+    // currently in use, make-before-break reroute onto it. 0 (default) disables the feature
+    // entirely (no timer is ever scheduled), independent of computeEro's setting, which keeps
+    // it fingerprint-inert regardless of computeEro.
+    simtime_t reoptimizeInterval;
 
   protected:
     ModuleRefByPar<Ted> tedmod;
@@ -179,6 +203,16 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     int maxRsbId = 0;
 
     int maxSrcInstance = 0;
+
+    // C7: monotonic counter for allocating fresh Lsp_Id values to make-before-break
+    // replacement paths (there is no other Lsp_Id generator in this model -- every
+    // operator-configured lspid is an explicit XML value; this counter is bumped past every
+    // XML/add-session lspid seen so a generated replacement id never collides with one).
+    int maxLspId = 0;
+
+    // C7: single periodic self-message driving reoptimization; only allocated/scheduled
+    // when reoptimizeInterval > 0.
+    ReoptimizeTimerMsg *reoptimizeTimerMsg = nullptr;
 
     Ipv4Address routerId;
 
@@ -279,6 +313,22 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual void createPath(const SessionObj& session, const SenderTemplateObj& sender);
 
     virtual void pathProblem(PathStateBlock *psb);
+
+    // C7 (make-before-break, RFC 3209 Section 4.6.4): signal a fresh-Lsp_Id replacement for
+    // the (session, oldSender) path, leaving the old path/PSB completely untouched; used by
+    // both pathProblem() (reactive: the old path failed) and considerReoptimization()
+    // (proactive: a strictly better route was found). The actual cutover (classifier rebind
+    // + old PathTear) happens later, in commitResv(), once the replacement's ingress label
+    // is installed.
+    virtual void triggerMakeBeforeBreak(const SessionObj& session, const SenderTemplateObj& oldSender);
+    // Called from commitResv() the instant a make-before-break replacement's ingress label
+    // is installed: rebinds the classifier from oldLspId to newSender/newInLabel (the actual
+    // traffic cutover), then tears down and removes the old path/PSB.
+    virtual void completeMakeBeforeBreakCutover(const SessionObj& session, const SenderTemplateObj& newSender, int oldLspId, int newInLabel);
+    // C7 reoptimizeInterval: re-run CSPF for one established ingress path and, if it finds a
+    // strictly cheaper route than the one currently in use, kick off make-before-break.
+    virtual void considerReoptimization(const SessionObj& session, const SenderTemplateObj& sender);
+    virtual void processREOPTIMIZE_TIMER(ReoptimizeTimerMsg *msg);
 
     virtual void addSession(const cXMLElement& node);
     virtual void delSession(const cXMLElement& node);

@@ -61,7 +61,15 @@ import inet.common.SimpleModule;
 //   forwarded hop-by-hop according to the routing table (no ERO), unless
 //   "computeEro" is on (see below).
 // - <permanent>: if true (the default), the module keeps retrying to set up
-//   the path (after "retryInterval") if the initial attempt fails.
+//   the path (after "retryInterval") if the initial attempt fails. If an
+//   already-established permanent path later fails (a PathErr arrives, or its
+//   next hop goes down), the module make-before-break reroutes it (RFC 3209
+//   Section 4.6.4, Workstream C7): it signals a brand-new replacement LSP-id
+//   FIRST, while the old path/PSB is left completely alone; only once the
+//   replacement's ingress label is installed does it rebind the classifier's
+//   FEC entry to the new LSP-id (the actual traffic cutover) and tear down the
+//   old one. If the replacement itself fails before that point, it keeps
+//   retrying (same "retryInterval") without disturbing the old path further.
 // - <owner>: the module (dotted path) that receives this path's status
 //   notifications (created / preempted / failed / unfeasible); defaults to
 //   this ~RsvpTe module.
@@ -131,6 +139,7 @@ simple RsvpTe extends SimpleModule
         double retryInterval @unit(s) = default(1s); // delay before retrying a permanent path whose ingress PSB couldn't be created (model-specific, not an RFC 2205 value)
         bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a tunnel
         bool computeEro = default(false); // C6: at the ingress, compute a full strict ERO via CSPF (Ted::calculateShortestPath()) whenever a path's configured route is empty or contains only loose hops; default off keeps every shipped example/showcase (which all hand-write EROs) fingerprint-identical -- CSPF is a purely local ingress computation with no RFC-mandated wire behavior, so defaulting it off is a scope choice, not a compliance gap. Bandwidth-feasible (Ted's UnResvBandwidth pruning at the session's setup priority) and, if configured on a path via <include_any>/<exclude_any>, affinity-constrained (RFC 3209 Section 4.7.4-style admin-group match, Workstream D3).
+        double reoptimizeInterval @unit(s) = default(0s); // C7: RFC 4736-lite reoptimization. 0 (default) disables it entirely -- no timer is ever scheduled, regardless of "computeEro" -- keeping every shipped example/showcase fingerprint-identical. When nonzero, every reoptimizeInterval this router re-runs CSPF for each of its own established ingress paths; if a strictly cheaper route (lower total TE metric) is found than the one currently in use, it make-before-break reroutes onto it (same choreography "pathProblem" uses to react to a failed path: signal the new LSP-id first, cut the classifier over once its ingress label is installed, only then tear down the old one). Paths whose current route is not a full strict hop-by-hop ERO (empty, or containing a loose hop) are left alone -- this model only scores routes it can walk hop by hop against the TED.
         double stopOperationExtraTime @unit(s) = default(2s); // extra time to hold up the node's later shutdown stages after a graceful shutdown sent a forced PathTear for an owned session (see handleStopOperation); this module itself goes NOT_OPERATING immediately (further inbound RSVP packets are dropped, not processed), but the local network/link layers are held up until this elapses so the just-enqueued PathTear can actually leave the node instead of being dropped by an already-stopped Ipv4/interface
         @display("i=block/control");
         @signal[lspEstablished](type=simtime_t); // LSP setup latency, emitted at the ingress when commitResv first installs the ingress label for a session

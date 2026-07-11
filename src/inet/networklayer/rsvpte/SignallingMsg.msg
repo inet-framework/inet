@@ -23,6 +23,7 @@ enum SignallingConstants {
     MSG_HELLO_TIMEOUT     = 7;
 
     MSG_PATH_NOTIFY       = 8;
+    MSG_REOPTIMIZE_TIMER  = 9;
 
     PATH_CREATED          = 1;
     PATH_UNFEASIBLE       = 2;
@@ -120,4 +121,14 @@ message PathNotifyMsg extends SignallingMsg
     int status;
 
     command = MSG_PATH_NOTIFY;
+}
+
+//
+// C7 (RFC 4736-lite reoptimization): a single periodic self-message, scheduled every
+// "reoptimizeInterval" while that parameter is nonzero, that re-checks every ingress path
+// for a strictly-better CSPF route and triggers make-before-break re-routing onto it.
+//
+message ReoptimizeTimerMsg extends SignallingMsg
+{
+    command = MSG_REOPTIMIZE_TIMER;
 }

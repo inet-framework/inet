@@ -98,6 +98,22 @@ void RsvpClassifier::bind(const SessionObj& session, const SenderTemplateObj& se
     }
 }
 
+void RsvpClassifier::rebind(const SessionObj& session, const SenderTemplateObj& oldSender, const SenderTemplateObj& newSender, int inLabel)
+{
+    for (auto& elem : bindings) {
+        if (elem.session != session)
+            continue;
+
+        if (elem.sender != oldSender)
+            continue;
+
+        EV_INFO << "make-before-break cutover: rebinding fec id " << elem.id << " from lspid "
+                << oldSender.Lsp_Id << " to lspid " << newSender.Lsp_Id << ", in-label " << inLabel << endl;
+        elem.sender = newSender;
+        elem.inLabel = inLabel;
+    }
+}
+
 // IScriptable implementation (method invoked by ScenarioManager)
 
 void RsvpClassifier::processCommand(const cXMLElement& node)

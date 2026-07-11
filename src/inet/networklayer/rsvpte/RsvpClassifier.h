@@ -63,6 +63,7 @@ class INET_API RsvpClassifier : public SimpleModule, public IScriptable, public 
     // IRsvpClassifier implementation
     virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, int& outInterfaceId) override;
     virtual void bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel) override;
+    virtual void rebind(const SessionObj& session, const SenderTemplateObj& oldSender, const SenderTemplateObj& newSender, int inLabel) override;
 
   protected:
     virtual void readTableFromXML(const cXMLElement *fectable);

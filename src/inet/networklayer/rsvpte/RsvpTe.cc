@@ -175,6 +175,8 @@ RsvpTe::~RsvpTe()
         cancelAndDelete(hello.timer);
         cancelAndDelete(hello.timeout);
     }
+    if (reoptimizeTimerMsg)
+        cancelAndDelete(reoptimizeTimerMsg);
 }
 
 void RsvpTe::initialize(int stage)
@@ -190,14 +192,19 @@ void RsvpTe::initialize(int stage)
         maxPsbId = 0;
         maxRsbId = 0;
         maxSrcInstance = 0;
+        maxLspId = 0;
         refreshInterval = par("refreshInterval");
         stateLifetimeFactor = par("stateLifetimeFactor");
         retryInterval = par("retryInterval");
         advertiseImplicitNull = par("advertiseImplicitNull");
         computeEro = par("computeEro");
+        reoptimizeInterval = par("reoptimizeInterval");
+        if (reoptimizeInterval > SIMTIME_ZERO)
+            reoptimizeTimerMsg = new ReoptimizeTimerMsg("reoptimize timer");
         WATCH(maxPsbId);
         WATCH(maxRsbId);
         WATCH(maxSrcInstance);
+        WATCH(maxLspId);
         WATCH(refreshInterval);
         WATCH(stateLifetimeFactor);
         WATCH(retryInterval);
@@ -347,6 +354,12 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
         checkTags(path, "sender lspid bandwidth route permanent owner include_any exclude_any");
 
         int lspid = getParameterIntValue(path, "lspid");
+
+        // C7: keep the make-before-break Lsp_Id allocator (maxLspId) past every
+        // operator-configured id, whether it arrives via the initial traffic.xml or a later
+        // add-session, so a generated replacement id can never collide with one of these.
+        if (lspid > maxLspId)
+            maxLspId = lspid;
 
         std::vector<TrafficPath>::iterator pit;
 
@@ -1072,6 +1085,16 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
 
     // install labels into lib
 
+    // C7 (make-before-break): if this commitResv() call is the one that installs a pending
+    // MBB replacement's ingress label for the first time, remember the cutover to perform --
+    // but only ACT on it after the loop below has fully finished. Doing it mid-loop (e.g.
+    // calling removePSB() on the OLD psb right away) could erase a PSB and shift PSBList,
+    // invalidating the `psb` pointer this same loop still uses for OTHER flow indices.
+    int cutoverOldLspId = -1;
+    SessionObj cutoverSession;
+    SenderTemplateObj cutoverNewSender;
+    int cutoverNewInLabel = -1;
+
     for (unsigned int i = 0; i < rsb->FlowDescriptor.size(); i++) {
         int lspid = rsb->FlowDescriptor[i].Filter_Spec_Object.Lsp_Id;
 
@@ -1163,6 +1186,22 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
             // path established
             sendPathNotify(psb->handler, psb->sessionObject, psb->Sender_Template_Object, PATH_CREATED, 0.0);
             emit(lspEstablishedSignal, simTime() - psb->pathCreationTime);
+
+            // C7 (make-before-break, RFC 3209 Section 4.6.4): if this newly-established
+            // ingress PSB is a pending MBB replacement, this is the moment to cut traffic
+            // over -- record it now (inLabel is already known at this point), act on it
+            // once this loop finishes.
+            auto sit = findSession(rsb->sessionObject);
+            if (sit != traffic.end()) {
+                auto pit = findPath(&(*sit), psb->Sender_Template_Object);
+                if (pit != sit->paths.end() && pit->replacesLspId >= 0) {
+                    cutoverOldLspId = pit->replacesLspId;
+                    cutoverSession = rsb->sessionObject;
+                    cutoverNewSender = psb->Sender_Template_Object;
+                    cutoverNewInLabel = inLabel;
+                    pit->replacesLspId = -1; // no longer a pending replacement -- it's the session's normal path now
+                }
+            }
         }
 
         if (rsb->inLabelVector[i] != inLabel) {
@@ -1173,6 +1212,9 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
             rpct->bind(psb->sessionObject, psb->Sender_Template_Object, inLabel);
         }
     }
+
+    if (cutoverOldLspId >= 0)
+        completeMakeBeforeBreakCutover(cutoverSession, cutoverNewSender, cutoverOldLspId, cutoverNewInLabel);
 }
 
 RsvpTe::ResvStateBlock *RsvpTe::createRSB(const Ptr<const RsvpResvMsg>& msg)
@@ -2033,6 +2075,10 @@ void RsvpTe::processSignallingMessage(SignallingMsg *msg)
             processPATH_NOTIFY(check_and_cast<PathNotifyMsg *>(msg));
             break;
 
+        case MSG_REOPTIMIZE_TIMER:
+            processREOPTIMIZE_TIMER(check_and_cast<ReoptimizeTimerMsg *>(msg));
+            break;
+
         default:
             throw cRuntimeError("Invalid command %d in message '%s'", command, msg->getName());
     }
@@ -2043,32 +2089,75 @@ void RsvpTe::pathProblem(PathStateBlock *psb)
     ASSERT(psb);
     ASSERT(!psb->OutInterface.isUnspecified());
 
+    // C7 (make-before-break, RFC 3209 Section 4.6.4): copy what's needed by value up front.
+    // triggerMakeBeforeBreak() below (permanent-path case) calls createPath(), which can
+    // grow PSBList/traffic[].paths (both std::vectors) and reallocate them -- invalidating
+    // `psb` and any iterator taken before the call. Everything after this point uses only
+    // the saved copies (or freshly re-taken iterators), never `psb` past its last use below.
+    SessionObj session = psb->sessionObject;
+    SenderTemplateObj oldSender = psb->Sender_Template_Object;
+
+    auto sit = findSession(session);
+    ASSERT(sit != traffic.end());
+    TrafficSession *s = &(*sit);
+
+    auto pit = findPath(s, oldSender);
+    ASSERT(pit != s->paths.end());
+
+    bool permanent = pit->permanent;
+    bool isReplacementInProgress = (pit->replacesLspId >= 0);
+    bool hasReplacementPending = (pit->pendingReplacementLspId >= 0);
+
+    if (permanent && !isReplacementInProgress) {
+        if (hasReplacementPending) {
+            // A single path problem can legitimately generate more than one PathErr
+            // reaching this ingress in quick succession (e.g. a multi-hop preemption
+            // re-notifies independently from each hop it preempted at) -- a replacement is
+            // already being signaled/retried for this path, so there is nothing new to do.
+            EV_INFO << "make-before-break replacement lspid=" << pit->pendingReplacementLspId
+                    << " for lspid=" << oldSender.Lsp_Id << " is already pending, ignoring" << endl;
+            return;
+        }
+
+        // Start signaling a replacement Lsp_Id NOW, and leave this (old, possibly still
+        // working) PSB and its traffic-database entry completely alone -- no PathTear, no
+        // retry -- until the replacement's ingress label is actually installed (see
+        // commitResv()'s cutover, completeMakeBeforeBreakCutover()). If the replacement
+        // itself later fails before that happens, it retries on its own (the
+        // isReplacementInProgress branch below); this original path is never touched by
+        // any of that.
+        EV_INFO << "path problem on lspid=" << oldSender.Lsp_Id
+                << ", starting make-before-break re-route (RFC 3209 Section 4.6.4)" << endl;
+
+        triggerMakeBeforeBreak(session, oldSender);
+        return;
+    }
+
+    // Either a non-permanent (best-effort) path -- never retried, MBB or not -- or this IS
+    // itself a still-pending make-before-break replacement that failed before ever cutting
+    // traffic over. Both fall back to the original tear-and-maybe-retry behavior. In the
+    // replacement case, the (separate) path it was meant to replace is untouched.
+    if (isReplacementInProgress) {
+        EV_INFO << "make-before-break replacement lspid=" << oldSender.Lsp_Id
+                << " failed before cutover, retrying it (the path it was meant to replace is unaffected)" << endl;
+    }
+
     Ipv4Address nextHop = tedmod->getPeerByLocalAddress(psb->OutInterface);
 
     EV_INFO << "sending PathTear to " << nextHop << endl;
 
-    sendPathTearMessage(nextHop, psb->sessionObject, psb->Sender_Template_Object,
+    sendPathTearMessage(nextHop, session, oldSender,
             tedmod->getInterfaceAddrByPeerAddress(nextHop), routerId, true);
 
-    // schedule re-creation if path is permanent
-
-    auto sit = findSession(psb->sessionObject);
-    ASSERT(sit != traffic.end());
-    TrafficSession *s = &(*sit);
-
-    auto pit = findPath(s, psb->Sender_Template_Object);
-    ASSERT(pit != s->paths.end());
-    TrafficPath *p = &(*pit);
-
-    if (p->permanent) {
+    if (permanent) {
         EV_INFO << "this path is permanent, we will try to re-create it later" << endl;
 
-        sendPathNotify(getId(), psb->sessionObject, psb->Sender_Template_Object, PATH_RETRY, retryInterval);
+        sendPathNotify(getId(), session, oldSender, PATH_RETRY, retryInterval);
     }
     else {
         EV_INFO << "removing path from traffic database" << endl;
 
-        sit->paths.erase(pit);
+        s->paths.erase(pit);
     }
 
     // remove path
@@ -2076,6 +2165,143 @@ void RsvpTe::pathProblem(PathStateBlock *psb)
     EV_INFO << "removing PSB" << endl;
 
     removePSB(psb);
+}
+
+void RsvpTe::triggerMakeBeforeBreak(const SessionObj& session, const SenderTemplateObj& oldSender)
+{
+    auto sit = findSession(session);
+    if (sit == traffic.end())
+        return; // e.g. raced with a del-session removing the whole session in between
+
+    TrafficSession *s = &(*sit);
+
+    auto pit = findPath(s, oldSender);
+    if (pit == s->paths.end())
+        return; // e.g. raced with a del-session removing just this path
+
+    if (pit->replacesLspId >= 0 || pit->pendingReplacementLspId >= 0)
+        return; // already being replaced, or already has a replacement in flight; callers
+                 // already guard this, but stay defensive
+
+    TrafficPath newPath = *pit;
+    newPath.sender.Lsp_Id = ++maxLspId;
+    newPath.replacesLspId = oldSender.Lsp_Id;
+    newPath.pendingReplacementLspId = -1; // the new path has no replacement of its own (yet)
+    // newPath.ERO is a copy of the old path's ERO (typically empty/loose when the old path
+    // itself relied on computeEro): createIngressPSB() recomputes it fresh via CSPF exactly
+    // as it would for a brand-new path. If the operator hand-wrote a strict ERO instead,
+    // MBB deliberately does not second-guess it, same as any other retry of that path would.
+
+    pit->pendingReplacementLspId = newPath.sender.Lsp_Id; // mark the OLD path: don't spawn another
+
+    s->paths.push_back(newPath); // may reallocate `s->paths` -- `pit` is no longer used after this
+    SenderTemplateObj newSender = newPath.sender;
+
+    EV_INFO << "make-before-break: signaling replacement lspid=" << newSender.Lsp_Id
+            << " for lspid=" << oldSender.Lsp_Id << endl;
+
+    createPath(session, newSender);
+}
+
+void RsvpTe::completeMakeBeforeBreakCutover(const SessionObj& session, const SenderTemplateObj& newSender, int oldLspId, int newInLabel)
+{
+    SenderTemplateObj oldSender;
+    oldSender.SrcAddress = newSender.SrcAddress;
+    oldSender.Lsp_Id = oldLspId;
+
+    EV_INFO << "make-before-break cutover: lspid=" << newSender.Lsp_Id
+            << " is up, switching traffic away from lspid=" << oldLspId << endl;
+
+    // Traffic cutover: rebind the classifier's FEC entries from the old lspid to the new
+    // one. This IS the data-plane switchover; nothing else needs to change.
+    rpct->rebind(session, oldSender, newSender, newInLabel);
+
+    PathStateBlock *oldPsb = findPSB(session, oldSender);
+    if (oldPsb) {
+        Ipv4Address nextHop = tedmod->getPeerByLocalAddress(oldPsb->OutInterface);
+
+        EV_INFO << "sending PathTear to " << nextHop << endl;
+
+        sendPathTearMessage(nextHop, oldPsb->sessionObject, oldPsb->Sender_Template_Object,
+                tedmod->getInterfaceAddrByPeerAddress(nextHop), routerId, true);
+
+        removePSB(oldPsb);
+    }
+
+    auto sit = findSession(session);
+    if (sit != traffic.end()) {
+        auto pit = findPath(&(*sit), oldSender);
+        if (pit != sit->paths.end())
+            sit->paths.erase(pit);
+    }
+}
+
+void RsvpTe::considerReoptimization(const SessionObj& session, const SenderTemplateObj& sender)
+{
+    auto sit = findSession(session);
+    if (sit == traffic.end())
+        return;
+
+    auto pit = findPath(&(*sit), sender);
+    if (pit == sit->paths.end() || pit->replacesLspId >= 0 || pit->pendingReplacementLspId >= 0)
+        return; // gone, already mid-reroute itself, or already has a replacement in flight
+
+    PathStateBlock *psb = findPSB(session, sender);
+    if (!psb || psb->previousHopAddress != routerId || psb->OutInterface.isUnspecified())
+        return; // no established ingress PSB to compare against (egress-terminated or not up yet)
+
+    bool allStrict = !psb->ERO.empty();
+    for (auto& hop : psb->ERO)
+        if (hop.L)
+            allStrict = false;
+
+    if (!allStrict)
+        return; // can't cheaply score a loose/empty route hop by hop; scope limitation
+
+    double currentMetric = 0.0;
+    Ipv4Address from = routerId;
+    for (auto& hop : psb->ERO) {
+        currentMetric += Ted::getTeMetric(tedmod->getLink(tedmod->linkIndex(from, hop.node)));
+        from = hop.node;
+    }
+
+    Ipv4AddressVector dest;
+    dest.push_back(session.DestAddress);
+
+    Ipv4AddressVector cspfPath = tedmod->calculateShortestPath(dest, tedmod->getLinks(),
+            psb->Sender_Tspec_Object.req_bandwidth, session.setupPri, pit->includeAny, pit->excludeAny);
+
+    if (cspfPath.size() < 2)
+        return; // no feasible alternative right now
+
+    double candidateMetric = 0.0;
+    for (unsigned int i = 1; i < cspfPath.size(); i++)
+        candidateMetric += Ted::getTeMetric(tedmod->getLink(tedmod->linkIndex(cspfPath[i - 1], cspfPath[i])));
+
+    if (candidateMetric < currentMetric) {
+        EV_INFO << "reoptimization: found a strictly better path for lspid=" << sender.Lsp_Id
+                << " (current metric=" << currentMetric << ", candidate metric=" << candidateMetric
+                << "), starting make-before-break re-route" << endl;
+
+        triggerMakeBeforeBreak(session, sender);
+    }
+}
+
+void RsvpTe::processREOPTIMIZE_TIMER(ReoptimizeTimerMsg *msg)
+{
+    // Collect (session, sender) pairs first: considerReoptimization() (via
+    // triggerMakeBeforeBreak()) may push a new TrafficPath into some session's `paths`
+    // vector, which would invalidate an in-flight iterator over that same vector.
+    std::vector<std::pair<SessionObj, SenderTemplateObj>> candidates;
+    for (auto& session : traffic)
+        for (auto& path : session.paths)
+            if (path.replacesLspId < 0 && path.pendingReplacementLspId < 0)
+                candidates.push_back({session.sobj, path.sender});
+
+    for (auto& c : candidates)
+        considerReoptimization(c.first, c.second);
+
+    scheduleAfter(reoptimizeInterval, msg);
 }
 
 void RsvpTe::processPATH_NOTIFY(PathNotifyMsg *msg)
@@ -2423,11 +2649,15 @@ void RsvpTe::clear()
         removeRSB(&RSBList.front());
     while (!HelloList.empty())
         removeHello(&HelloList.front());
+    if (reoptimizeTimerMsg)
+        cancelEvent(reoptimizeTimerMsg);
 }
 
 void RsvpTe::handleStartOperation(LifecycleOperation *operation)
 {
     setupHello();
+    if (reoptimizeTimerMsg && !reoptimizeTimerMsg->isScheduled())
+        scheduleAfter(reoptimizeInterval, reoptimizeTimerMsg);
 }
 
 void RsvpTe::handleMessageWhenDown(cMessage *msg)
