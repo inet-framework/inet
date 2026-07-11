@@ -64,6 +64,9 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
     /** Ctor */
     TcpReno();
 
+    /** TcpReno (and its subclasses TcpCubic, DcTcp) implement RFC 3517 SACK recovery. */
+    virtual bool supportsSackRecovery() const override { return true; }
+
     /** Detect reordering (dynamic DupThresh) when a never-retransmitted segment is acked below the SACK fack. */
     virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) override;
 

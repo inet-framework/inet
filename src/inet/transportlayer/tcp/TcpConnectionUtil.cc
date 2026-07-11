@@ -668,6 +668,17 @@ void TcpConnection::configureStateVariables()
     state->maxReordering = tcpMain->par("maxReordering");
     state->reordering = state->dupthresh; // dynamic DupThresh starts at the static value
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
+    // SACK-based (RFC 3517) loss recovery is implemented in TcpReno and inherited by
+    // its subclasses (TcpCubic, DcTcp). Other flavours (TcpNewReno, TcpTahoe, TcpVegas,
+    // TcpWestwood, DumbTcp, ...) have no SACK recovery path. Rather than error -- which
+    // would make it impossible to turn sackSupport on by default -- we treat sackSupport
+    // as a willingness (as Linux does; SACK is orthogonal to the congestion control) and
+    // simply do not use SACK for a flavour that cannot recover with it.
+    if (state->sack_support && !tcpAlgorithm->supportsSackRecovery()) {
+        EV_WARN << "sackSupport=true but tcpAlgorithmClass=\"" << tcpAlgorithm->getClassName()
+                << "\" has no SACK-based loss recovery; disabling SACK for this connection\n";
+        state->sack_support = false;
+    }
     if (state->lossDetectionMode == 1 && !state->sack_support)
         throw cRuntimeError("lossDetectionMode=\"rack\" requires sackSupport=true");
     if (state->prrEnabled && !state->sack_support)
@@ -682,12 +693,6 @@ void TcpConnection::configureStateVariables()
     WATCH_EXPR("rcv_nxt", state->rcv_nxt);
     WATCH_EXPR("snd_una", state->snd_una);
 
-    if (state->sack_support) {
-        // RFC 3517 SACK recovery is implemented in TcpReno and inherited by TcpCubic.
-        std::string algorithmName = tcpMain->par("tcpAlgorithmClass");
-        if (algorithmName != "TcpReno" && algorithmName != "TcpCubic")
-            throw cRuntimeError("sackSupport=true is only supported with tcpAlgorithmClass=\"TcpReno\" or \"TcpCubic\", not \"%s\"", algorithmName.c_str());
-    }
 }
 
 void TcpConnection::selectInitialSeqNum()

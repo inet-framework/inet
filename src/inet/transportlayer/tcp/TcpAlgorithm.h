@@ -136,6 +136,14 @@ class INET_API TcpAlgorithm : public cObject
     virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) {}
 
     /**
+     * Whether this flavour implements SACK-based (RFC 3517) loss recovery.
+     * SACK is orthogonal to congestion control (as in Linux): a flavour that
+     * returns false will have SACK disabled even if the host is willing, so that
+     * turning sackSupport on by default does not break non-SACK flavours.
+     */
+    virtual bool supportsSackRecovery() const { return false; }
+
+    /**
      * Called after we received a duplicate ACK (that is: ackNo == snd_una,
      * no data in segment, segment doesn't carry window update, and also,
      * we have unacked data). The dupack counter got already updated

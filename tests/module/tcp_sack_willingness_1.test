@@ -1,0 +1,56 @@
+%description:
+Tests that sackSupport is treated as a willingness that is orthogonal to the
+congestion control (as in Linux). SACK-based (RFC 3517) loss recovery is only
+implemented by TcpReno and its subclasses (TcpCubic, DcTcp); a flavour without
+SACK recovery -- here TcpNewReno -- must NOT error when sackSupport=true, but
+instead silently disable SACK for the connection and fall back to its own
+recovery. (Before this change, sackSupport=true with a non-Reno flavour raised a
+runtime error, which made it impossible to turn SACK on by default.)
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0s
+*.cli_app.sendBytes=10000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpNewReno"
+*.*_tcp.sackSupport = true
+
+%# SACK is disabled for the SACK-incapable flavour instead of raising an error
+%contains: stdout
+has no SACK-based loss recovery; disabling SACK for this connection
+
+%# and the transfer still completes
+%contains: stdout
+received 10000 bytes
