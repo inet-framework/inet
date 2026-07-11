@@ -272,10 +272,10 @@ void TcpBaseAlg::processPersistTimer(TcpEventCode& event)
 
     // PERSIST timer is bounded to 5-60 seconds
     if (state->persist_timeout < MIN_PERSIST_TIMEOUT)
-        state->rexmit_timeout = MIN_PERSIST_TIMEOUT;
+        state->persist_timeout = MIN_PERSIST_TIMEOUT;
 
     if (state->persist_timeout > MAX_PERSIST_TIMEOUT)
-        state->rexmit_timeout = MAX_PERSIST_TIMEOUT;
+        state->persist_timeout = MAX_PERSIST_TIMEOUT;
 
     conn->scheduleAfter(state->persist_timeout, persistTimer);
 

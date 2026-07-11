@@ -1,0 +1,85 @@
+%description:
+Tests the zero-window persist timer. The server never reads (autoRead=false),
+so its receive buffer fills and it advertises a zero window; the client then
+probes it with the persist timer. The persist timeout must follow the bounded
+Stevens sequence (5, 5, 6, 12, 24, 48, 60 s) and must NOT clobber the
+connection's retransmission timeout (the bug fixed alongside this test).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+sim-time-limit = 115s
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script=""
+
+# client sends a burst larger than the receiver buffer
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=1s
+*.cli_app.sendBytes = 20000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+# server never reads -> receive buffer fills -> zero window
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+*.srv_app.autoRead=false
+
+# tcp settings
+*.*_tcp.advertisedWindow = 3000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.nagleEnabled = true
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+%# The persist timer engages when the zero window is seen (~t=1.011). Persist
+%# probes (1-byte segments, incrementing seq) must fire at the bounded Stevens
+%# intervals 5, 5, 6, 12, 24, 48 s. With the bug (clamp applied to rexmit_timeout
+%# instead of persist_timeout) the first probe would fire ~1.5 s later, at ~t=2.5.
+%contains: stdout
+Received zero-sized window therefore PERSIST timer is started.
+
+%contains-regex: stdout
+\[6\.013 [^\n]*A 3001:3002\(1\)
+%contains-regex: stdout
+\[11\.013 [^\n]*A 3002:3003\(1\)
+%contains-regex: stdout
+\[16\.013 [^\n]*A 3003:3004\(1\)
+%contains-regex: stdout
+\[22\.013 [^\n]*A 3004:3005\(1\)
+%contains-regex: stdout
+\[34\.013 [^\n]*A 3005:3006\(1\)
+%contains-regex: stdout
+\[58\.013 [^\n]*A 3006:3007\(1\)
+%contains-regex: stdout
+\[106\.013 [^\n]*A 3007:3008\(1\)
+
+%# RTO retransmissions of the unacked probe bytes back off normally (interval
+%# grows past 5 s), i.e. the connection's rexmit_timeout is no longer clobbered.
+%contains-regex: stdout
+\[20\.123 [^\n]*A 3001:3004\(3\)

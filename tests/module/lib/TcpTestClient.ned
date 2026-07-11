@@ -21,6 +21,7 @@ simple TcpTestClient like IApp
         string connectAddress;
         int connectPort;
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
+        bool autoRead = default(true); // when false, the app never reads received data (fills the receive buffer -> zero window)
         double tOpen @unit(s);
         double tSend @unit(s);
         int sendBytes @unit(B);
