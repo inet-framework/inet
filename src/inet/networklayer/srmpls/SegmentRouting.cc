@@ -15,6 +15,7 @@ namespace inet {
 Define_Module(SegmentRouting);
 
 simsignal_t SegmentRouting::sidEntriesInstalledSignal = registerSignal("sidEntriesInstalled");
+simsignal_t SegmentRouting::adjSidEntriesInstalledSignal = registerSignal("adjSidEntriesInstalled");
 
 void SegmentRouting::initialize(int stage)
 {
@@ -73,6 +74,11 @@ void SegmentRouting::handleStopOperation(LifecycleOperation *operation)
         lt->removeLibEntryIfExists(label);
     ownedLabels.clear();
     emit(sidEntriesInstalledSignal, (long)0);
+
+    for (auto& elem : adjSidByInterfaceId)
+        lt->removeLibEntryIfExists(elem.second);
+    adjSidByInterfaceId.clear();
+    emit(adjSidEntriesInstalledSignal, (long)0);
 }
 
 void SegmentRouting::handleCrashOperation(LifecycleOperation *operation)
@@ -88,6 +94,12 @@ void SegmentRouting::handleCrashOperation(LifecycleOperation *operation)
     for (int label : ownedLabels)
         lt->removeLibEntryIfExists(label);
     ownedLabels.clear();
+
+    // Same rationale for adjacency-SID entries (dynamically allocated, but still left behind
+    // in the LIB by a crash unless explicitly removed here).
+    for (auto& elem : adjSidByInterfaceId)
+        lt->removeLibEntryIfExists(elem.second);
+    adjSidByInterfaceId.clear();
 }
 
 void SegmentRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -151,6 +163,23 @@ int SegmentRouting::resolveOutInterfaceId(Ipv4Address peerRouterId)
     return ie->getInterfaceId();
 }
 
+bool SegmentRouting::resolveNextHop(Ipv4Address destRouter, int& outInterfaceId, bool& directlyConnected)
+{
+    const TeLinkStateInfoVector& topology = ted->getLinks();
+
+    Ipv4AddressVector dest;
+    dest.push_back(destRouter);
+    Ipv4AddressVector path = ted->calculateShortestPath(dest, topology, 0.0, 7);
+
+    if (path.size() < 2)
+        return false;
+
+    Ipv4Address nextHop = path[1];
+    outInterfaceId = resolveOutInterfaceId(nextHop);
+    directlyConnected = (nextHop == destRouter);
+    return true;
+}
+
 void SegmentRouting::recomputeAndInstall()
 {
     // Wipe our own previously-installed entries first, so recomputation is idempotent and a
@@ -161,8 +190,6 @@ void SegmentRouting::recomputeAndInstall()
         lt->removeLibEntryIfExists(label);
     ownedLabels.clear();
 
-    const TeLinkStateInfoVector& topology = ted->getLinks();
-
     for (auto& elem : sidByRouter) {
         Ipv4Address destRouter = elem.first;
         int sid = elem.second;
@@ -172,20 +199,15 @@ void SegmentRouting::recomputeAndInstall()
 
         int label = srgbBase + sid;
 
-        Ipv4AddressVector dest;
-        dest.push_back(destRouter);
-        Ipv4AddressVector path = ted->calculateShortestPath(dest, topology, 0.0, 7);
-
-        if (path.size() < 2) {
+        int outInterfaceId;
+        bool directlyConnected;
+        if (!resolveNextHop(destRouter, outInterfaceId, directlyConnected)) {
             EV_WARN << "node " << destRouter << " (sid=" << sid << ", label=" << label << ") is currently unreachable, not installing a LIB entry" << endl;
             continue;
         }
 
-        Ipv4Address nextHop = path[1];
-        int outInterfaceId = resolveOutInterfaceId(nextHop);
-
         LabelOpVector outLabel;
-        if (nextHop == destRouter) {
+        if (directlyConnected) {
             // this router is the penultimate hop toward destRouter: PHP (RFC 8660 Section 2) --
             // same "pop, forward out a specific interface" entry Ldp already installs for its own
             // penultimate-hop-popping FECs (see Ldp::duAdvertiseToPeer's advertiseImplicitNull path).
@@ -195,7 +217,7 @@ void SegmentRouting::recomputeAndInstall()
         else {
             // transit: homogeneous SRGB means the label is unchanged network-wide
             outLabel = LibTable::swapLabel(label);
-            EV_INFO << "node " << destRouter << " (sid=" << sid << ", label=" << label << "): transit via " << nextHop << ", installing SWAP via " << outInterfaceId << endl;
+            EV_INFO << "node " << destRouter << " (sid=" << sid << ", label=" << label << "): transit, installing SWAP via " << outInterfaceId << endl;
         }
 
         // installReservedLabel() (not installLibEntry()) because we need a LIB entry created
@@ -207,6 +229,71 @@ void SegmentRouting::recomputeAndInstall()
     }
 
     emit(sidEntriesInstalledSignal, (long)ownedLabels.size());
+
+    recomputeAdjacencySids();
+}
+
+void SegmentRouting::recomputeAdjacencySids()
+{
+    const TeLinkStateInfoVector& topology = ted->getLinks();
+
+    // Currently-up local links (this router's own outgoing interfaces), keyed by interface id.
+    // TeLinkStateInfo entries with advrouter==routerId are exactly this router's own advertised
+    // links, one per physical interface (see Ted::initializeTED()); `local` is that interface's
+    // own address.
+    std::map<int, Ipv4Address> upInterfaces; // interfaceId -> peer router id (informational)
+    for (auto& link : topology) {
+        if (link.advrouter != routerId || !link.state)
+            continue;
+
+        NetworkInterface *ie = rt->getInterfaceByAddress(link.local);
+        if (!ie)
+            throw cRuntimeError("SegmentRouting: no local interface found with address %s for adjacency-SID allocation", link.local.str().c_str());
+        upInterfaces[ie->getInterfaceId()] = link.linkid;
+    }
+
+    // Withdraw adjacency SIDs for interfaces that are no longer up (or no longer present in the
+    // topology at all); labels for interfaces that stay up are left untouched, see class doc.
+    for (auto it = adjSidByInterfaceId.begin(); it != adjSidByInterfaceId.end(); ) {
+        if (upInterfaces.find(it->first) == upInterfaces.end()) {
+            lt->removeLibEntryIfExists(it->second);
+            EV_INFO << "adjacency SID for interface " << ift->getInterfaceById(it->first)->getInterfaceName()
+                    << " (label " << it->second << "): link is down, withdrawing" << endl;
+            it = adjSidByInterfaceId.erase(it);
+        }
+        else
+            ++it;
+    }
+
+    // Allocate adjacency SIDs for newly-up interfaces that don't already have one.
+    for (auto& elem : upInterfaces) {
+        int interfaceId = elem.first;
+        if (adjSidByInterfaceId.count(interfaceId))
+            continue; // already has a stable label from a previous computation
+
+        // Directed "pop and forward out this specific interface" -- RFC 8660's adjacency-SID
+        // forwarding action; see Mpls::processMplsPacketFromL2, which forwards via the resolved
+        // outInterfaceId regardless of whether the pop exposed another label or plain IP,
+        // exactly like an existing PHP entry -- no Mpls.cc changes needed (verified by reading
+        // doStackOps()/processMplsPacketFromL2() before writing this, per the plan's Phase-0
+        // audit). Auto-allocated (installLibEntry(-1,...), NOT installReservedLabel()) since
+        // adjacency SIDs are locally significant labels, not drawn from the SRGB; LibTable's
+        // maxLabel counter is shared with Ldp/RsvpTe's own dynamic allocations
+        // (installLibEntry()/allocateLabel()), so collisions with their labels are structurally
+        // impossible (see LibTable::installLibEntry()).
+        int label = lt->installLibEntry(-1, LibTable::ANY_INTERFACE, LibTable::popLabel(), interfaceId);
+        adjSidByInterfaceId[interfaceId] = label;
+        EV_INFO << "adjacency SID for interface " << ift->getInterfaceById(interfaceId)->getInterfaceName()
+                << " (peer " << elem.second << "): installed POP via " << interfaceId << ", label=" << label << endl;
+    }
+
+    emit(adjSidEntriesInstalledSignal, (long)adjSidByInterfaceId.size());
+}
+
+int SegmentRouting::getAdjSidLabel(int interfaceId) const
+{
+    auto it = adjSidByInterfaceId.find(interfaceId);
+    return it != adjSidByInterfaceId.end() ? it->second : -1;
 }
 
 } // namespace inet

@@ -43,8 +43,24 @@ import inet.common.SimpleModule;
 // its previously-owned entries first so that recomputation is idempotent
 // and never touches LIB entries owned by coexisting ~Ldp/~RsvpTe signaling.
 //
-// Adjacency SIDs and the SR-policy ingress classifier (segment-list label
-// stack imposition) are out of scope for this module; see F1's later phases.
+// Adjacency SIDs (RFC 8660 Section 3.3): for every one of this router's own
+// TED links that is currently up, ~SegmentRouting also allocates ONE
+// dynamically-allocated label per link (~LibTable::installLibEntry(-1,...),
+// never drawn from the SRGB, so it can never collide with a node-SID label)
+// whose forwarding action is "pop, then forward out this specific
+// interface" -- crossing that one adjacency, then continuing
+// label-switching with whatever label (if any) was beneath it. Unlike
+// node-SID labels (fixed at srgbBase+sidIndex, so a full wipe+reinstall on
+// every ~tedChangedSignal reproduces them identically), adjacency-SID labels
+// are ordinary dynamically-allocated ones: a link that stays up keeps the
+// SAME label across unrelated topology churn elsewhere in the network (only
+// links whose up/down state actually changed are touched), and a link that
+// flaps gets a freshly allocated label when it comes back, exactly like a
+// re-established ~Ldp session would. `getAdjSidLabel(interfaceId)` exposes
+// the current mapping for the ~SrPolicy ingress module's `adj:` segments.
+//
+// The SR-policy ingress classifier (segment-list label stack imposition,
+// ~SrPolicy) is a separate module; see F1's later phases.
 //
 // The `sidTable` XML format: the root element is <sr>, containing any
 // number of <node> elements, each with:
@@ -73,4 +89,6 @@ simple SegmentRouting extends SimpleModule
         @display("i=block/table2");
         @signal[sidEntriesInstalled](type=long); // emitted after every (re)computation, with the number of node-SID LIB entries currently owned by this module
         @statistic[sidEntriesInstalled](title="number of installed node-SID LIB entries"; record=last,vector; interpolationmode=none);
+        @signal[adjSidEntriesInstalled](type=long); // emitted after every adjacency-SID (re)computation, with the number of adjacency-SID LIB entries currently owned by this module
+        @statistic[adjSidEntriesInstalled](title="number of installed adjacency-SID LIB entries"; record=last,vector; interpolationmode=none);
 }

@@ -1,0 +1,269 @@
+%description:
+Unit test for ~SegmentRouting's adjacency-SID allocation (RFC 8660 Section 3.3): given a router
+with two of its own local links (each on a distinct interface), verify that one
+dynamically-allocated LIB entry is installed per link (POP, forwarding out that specific
+interface), that the allocated labels are mutually disjoint and disjoint from any node-SID
+label reserved from the SRGB, that the getAdjSidLabel(interfaceId) accessor resolves them
+correctly, and that a link going down/up withdraws/reinstalls its entry via the same
+tedChangedSignal wiring node-SID recomputation uses -- while a link that stays up keeps ITS
+label stable across an unrelated topology change elsewhere (see SegmentRouting.h's
+recomputeAdjacencySids() documentation for why this differs from the node-SID wipe+reinstall
+strategy).
+
+Topology: router A(1.1.1.1) has two of its own links: A--B (interface lo0, address 1.1.1.1,
+mirroring SegmentRouting_nodeSid.test's convention of routerId==lo0's address) and A--E
+(interface lo1, address 9.9.9.1, set directly in C++ since there is no network configurator in
+this minimal network). sidTable: A=1, B=2 (srgbBase=16000 -> label 16002 for B, reachable and
+directly connected, so a real reserved POP entry is installed) -- this gives a genuine
+installed node-SID label to check disjointness against, alongside the dynamically-allocated
+adjacency-SID labels (which start at 16, see LibTable::initialize()'s maxLabel=RESERVED_LABEL_MAX).
+
+%includes:
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/mpls/LibTable.h"
+#include "inet/networklayer/srmpls/SegmentRouting.h"
+#include "inet/networklayer/ted/Ted.h"
+#include "inet/networklayer/ted/Ted_m.h"
+#include <omnetpp/cxmlelement.h>
+
+using namespace inet;
+using namespace omnetpp;
+
+%file: TestNetwork.ned
+
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
+import inet.networklayer.ipv4.Ipv4RoutingTable;
+import inet.linklayer.loopback.LoopbackInterface;
+import inet.networklayer.mpls.LibTable;
+import inet.networklayer.ted.Ted;
+
+network TestNetwork
+{
+    parameters:
+        @networkNode();
+    submodules:
+        test: Test;
+        ift: InterfaceTable;
+        rt: Ipv4RoutingTable {
+            interfaceTableModule = "^.ift";
+            routerId = "1.1.1.1";
+        }
+        ipv4NodeConfigurator: Ipv4NodeConfigurator {
+            interfaceTableModule = "^.ift";
+            routingTableModule = "^.rt";
+            networkConfiguratorModule = "";
+        }
+        lo0: LoopbackInterface {
+            interfaceTableModule = "^.ift";
+        }
+        // A second local interface, so this router has TWO of its own TED links (and hence
+        // two adjacency SIDs to allocate); its address is set directly in %activity (there is
+        // no network configurator to assign it one, same rationale as lo0's routerId override).
+        lo1: LoopbackInterface {
+            interfaceTableModule = "^.ift";
+        }
+        lib: LibTable {
+            interfaceTableModule = "^.ift";
+        }
+        ted: Ted {
+            interfaceTableModule = "^.ift";
+            routingTableModule = "^.rt";
+        }
+        sr: TestSegmentRouting {
+            interfaceTableModule = "^.ift";
+            routingTableModule = "^.rt";
+            libTableModule = "^.lib";
+            tedModule = "^.ted";
+            srgbBase = 16000;
+            srgbSize = 8000;
+            sidTable = xmldoc("sr.xml");
+        }
+    connections allowunconnected:
+}
+
+%file: TestSegmentRouting.ned
+
+import inet.networklayer.srmpls.SegmentRouting;
+
+simple TestSegmentRouting extends SegmentRouting
+{
+    parameters:
+        @class(TestSegmentRouting);
+}
+
+%file: sr.xml
+
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+</sr>
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+
+%global:
+
+// Test-only harness, same technique as SegmentRouting_nodeSid.test: exposes SegmentRouting's
+// protected recomputeAndInstall() so the test can drive recomputation directly.
+class TestSegmentRouting : public SegmentRouting
+{
+  public:
+    using SegmentRouting::recomputeAndInstall;
+};
+
+Define_Module(TestSegmentRouting);
+
+// Unlike SegmentRouting_nodeSid.test's makeLink() helper (which always sets `local` to the
+// advertising router's own address, fine there since that test only ever has ONE real local
+// interface), this variant takes an explicit local-interface address, so this test can give
+// A's two own links two DISTINCT `local` addresses (lo0's and lo1's).
+static TeLinkStateInfo makeLink(const char *advrouter, const char *linkid, const char *localAddr, double metric, double maxBandwidth)
+{
+    TeLinkStateInfo link;
+    link.advrouter = Ipv4Address(advrouter);
+    link.linkid = Ipv4Address(linkid);
+    link.local = Ipv4Address(localAddr);
+    link.remote = Ipv4Address(linkid);
+    link.metric = metric;
+    link.MaxBandwidth = maxBandwidth;
+    for (int i = 0; i < 8; i++)
+        link.UnResvBandwidth[i] = maxBandwidth;
+    link.state = true;
+    link.sourceId = link.advrouter.getInt();
+    link.messageId = 1;
+    link.timestamp = SIMTIME_ZERO;
+    return link;
+}
+
+%activity:
+
+auto ted = check_and_cast<Ted *>(getSimulation()->getModuleByPath("ted"));
+auto lib = check_and_cast<LibTable *>(getSimulation()->getModuleByPath("lib"));
+auto sr = check_and_cast<TestSegmentRouting *>(getSimulation()->getModuleByPath("sr"));
+auto lo0 = check_and_cast<NetworkInterface *>(getSimulation()->getModuleByPath("lo0"));
+auto lo1 = check_and_cast<NetworkInterface *>(getSimulation()->getModuleByPath("lo1"));
+int lo0Id = lo0->getInterfaceId();
+int lo1Id = lo1->getInterfaceId();
+
+// lo1 needs an address distinct from lo0's (1.1.1.1, via Ipv4RoutingTable's routerId
+// assignment) -- there is no network configurator in this minimal network to do it, so it is
+// set directly here, before any TED link referencing it is injected.
+lo1->getProtocolDataForUpdate<Ipv4InterfaceData>()->setIPAddress(Ipv4Address("9.9.9.1"));
+
+const int SRGB_BASE = 16000;
+const int LABEL_B = SRGB_BASE + 2;
+const int FIRST_DYNAMIC_LABEL = RESERVED_LABEL_MAX + 1; // 16, see LibTable::initialize()
+
+// === 1. Build A's two own links (A-B via lo0, A-E via lo1) plus the reverse of A-B (needed
+// for node-SID next-hop computation toward B; the reverse of A-E is never needed since E has
+// no sidTable entry) and install both node-SID and adjacency-SID entries ===
+EV << "=== building topology and installing SID entries ===" << endl;
+int abIndex = 0;
+ted->addLink(makeLink("1.1.1.1", "2.2.2.2", "1.1.1.1", 1, 1e6)); // index 0: A -> B, own link via lo0
+ted->addLink(makeLink("2.2.2.2", "1.1.1.1", "2.2.2.2", 1, 1e6)); // index 1: B -> A (not A's own link)
+ted->addLink(makeLink("1.1.1.1", "9.9.9.2", "9.9.9.1", 1, 1e6)); // index 2: A -> E, own link via lo1
+
+sr->recomputeAndInstall();
+
+{
+    // B's node-SID entry: a real installed reserved-label entry (label 16002), to check
+    // disjointness against.
+    LabelOpVector out;
+    int outIf;
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_B, out, outIf) || out[0].optcode != POP_OPER)
+        throw cRuntimeError("Broken: B's node-SID entry (label %d) not correctly installed", LABEL_B);
+    EV << "node-SID for B installed at label " << LABEL_B << "  OK" << endl;
+}
+
+int labelLo0 = sr->getAdjSidLabel(lo0Id);
+int labelLo1 = sr->getAdjSidLabel(lo1Id);
+
+if (labelLo0 < 0)
+    throw cRuntimeError("Broken: no adjacency SID allocated for lo0 (A-B link)");
+if (labelLo1 < 0)
+    throw cRuntimeError("Broken: no adjacency SID allocated for lo1 (A-E link)");
+if (labelLo0 == labelLo1)
+    throw cRuntimeError("Broken: lo0 and lo1 were allocated the SAME adjacency-SID label (%d)", labelLo0);
+if (labelLo0 == LABEL_B || labelLo1 == LABEL_B)
+    throw cRuntimeError("Broken: an adjacency-SID label collides with node-SID label %d", LABEL_B);
+if (labelLo0 < FIRST_DYNAMIC_LABEL || labelLo1 < FIRST_DYNAMIC_LABEL)
+    throw cRuntimeError("Broken: an adjacency-SID label is below the dynamic-allocation floor %d", FIRST_DYNAMIC_LABEL);
+if (labelLo0 >= SRGB_BASE || labelLo1 >= SRGB_BASE)
+    throw cRuntimeError("Broken: an adjacency-SID label falls inside the SRGB range (>= %d)", SRGB_BASE);
+EV << "adjacency SIDs: lo0=" << labelLo0 << ", lo1=" << labelLo1 << " (disjoint from each other and from node-SID label " << LABEL_B << ")  OK" << endl;
+
+{
+    // The installed LIB entries themselves: POP, forwarding out the OWNING interface --
+    // "cross this specific adjacency" (RFC 8660 Section 3.3).
+    LabelOpVector out;
+    int outIf;
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, labelLo0, out, outIf))
+        throw cRuntimeError("Broken: no LIB entry for lo0's adjacency SID (label %d)", labelLo0);
+    if (!(out.size() == 1 && out[0].optcode == POP_OPER))
+        throw cRuntimeError("Broken: lo0's adjacency-SID entry (label %d) is not a plain POP", labelLo0);
+    if (outIf != lo0Id)
+        throw cRuntimeError("Broken: lo0's adjacency-SID entry (label %d) forwards via interface %d, expected lo0 (%d)", labelLo0, outIf, lo0Id);
+
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, labelLo1, out, outIf))
+        throw cRuntimeError("Broken: no LIB entry for lo1's adjacency SID (label %d)", labelLo1);
+    if (!(out.size() == 1 && out[0].optcode == POP_OPER))
+        throw cRuntimeError("Broken: lo1's adjacency-SID entry (label %d) is not a plain POP", labelLo1);
+    if (outIf != lo1Id)
+        throw cRuntimeError("Broken: lo1's adjacency-SID entry (label %d) forwards via interface %d, expected lo1 (%d)", labelLo1, outIf, lo1Id);
+    EV << "both adjacency-SID LIB entries are POP, forwarding via their own owning interface  OK" << endl;
+}
+
+// === 2. An UNRELATED topology change (the A-B link, not A-E) must not disturb lo1's stable
+// adjacency-SID label -- see recomputeAdjacencySids()'s "only touch links whose state actually
+// changed" documentation. ===
+EV << "=== bringing the A-B link down (unrelated to lo1) ===" << endl;
+ted->setLinkState(abIndex, false);
+
+if (sr->getAdjSidLabel(lo0Id) != -1)
+    throw cRuntimeError("Broken: lo0's adjacency SID still present after its link went down");
+if (sr->getAdjSidLabel(lo1Id) != labelLo1)
+    throw cRuntimeError("Broken: lo1's adjacency SID changed (was %d, now %d) after an UNRELATED link (A-B) went down", labelLo1, sr->getAdjSidLabel(lo1Id));
+{
+    LabelOpVector out;
+    int outIf;
+    if (lib->resolveLabel(LibTable::ANY_INTERFACE, labelLo0, out, outIf))
+        throw cRuntimeError("Broken: lo0's adjacency-SID LIB entry (label %d) still exists after its link went down", labelLo0);
+}
+EV << "lo0's adjacency SID withdrawn; lo1's stayed stable at label " << labelLo1 << "  OK" << endl;
+
+// === 3. The A-B link comes back up: a NEW adjacency-SID label is allocated for lo0 (dynamic
+// allocation, unlike node-SIDs, never reuses a withdrawn label -- see class doc), while lo1's
+// label remains unchanged throughout. ===
+EV << "=== bringing the A-B link back up ===" << endl;
+ted->setLinkState(abIndex, true);
+
+int labelLo0AfterFlap = sr->getAdjSidLabel(lo0Id);
+if (labelLo0AfterFlap < 0)
+    throw cRuntimeError("Broken: lo0's adjacency SID not reinstalled after its link came back up");
+if (labelLo0AfterFlap == labelLo0)
+    throw cRuntimeError("Broken: lo0's adjacency SID after the flap (%d) reused the OLD label (%d); dynamic allocation should hand out a fresh one", labelLo0AfterFlap, labelLo0);
+if (sr->getAdjSidLabel(lo1Id) != labelLo1)
+    throw cRuntimeError("Broken: lo1's adjacency SID changed across lo0's flap (was %d, now %d)", labelLo1, sr->getAdjSidLabel(lo1Id));
+{
+    LabelOpVector out;
+    int outIf;
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, labelLo0AfterFlap, out, outIf) || out[0].optcode != POP_OPER || outIf != lo0Id)
+        throw cRuntimeError("Broken: lo0's post-flap adjacency-SID entry (label %d) is not a correct POP via lo0", labelLo0AfterFlap);
+}
+EV << "lo0 reallocated a fresh adjacency-SID label (" << labelLo0AfterFlap << " != " << labelLo0 << "), lo1 stayed stable  OK" << endl;
+
+// === 4. getAdjSidLabel() on an unrelated interface id returns -1 (no adjacency SID) ===
+if (sr->getAdjSidLabel(12345) != -1)
+    throw cRuntimeError("Broken: getAdjSidLabel() on an unrelated interface id did not return -1");
+EV << "getAdjSidLabel() on an unrelated interface id returns -1  OK" << endl;
+
+EV << "ALL SEGMENTROUTING ADJACENCY-SID UNIT CHECKS PASSED" << endl;
+
+%contains: stdout
+ALL SEGMENTROUTING ADJACENCY-SID UNIT CHECKS PASSED
+
+%not-contains: stdout
+Broken:
