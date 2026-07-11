@@ -1,0 +1,88 @@
+%description:
+Test TcpCubic congestion control with PER
+
+%#################################################################################################################
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+cmdenv-event-banners=false
+cmdenv-express-mode=true
+
+*.testing=true
+
+###################################################################
+
+network = inet.test.moduletest.lib.ClientServer
+total-stack = 7MiB
+#**.server.numPcapRecorders = 1
+#**.server.pcapRecorder[0].pcapFile = "${resultdir}/server.pcap"
+#**.client.numPcapRecorders = 1
+#**.client.pcapRecorder[0].pcapFile = "${resultdir}/client.pcap"
+
+
+
+description = "inet_TCP CUBIC"
+*.server*.tcpType = "Tcp"
+*.client*.tcpType = "Tcp"
+**.tcp.tcpAlgorithmClass = "TcpCubic"
+*.per = 0.01 * ${per=0, 0.1, 0.2, 0.5, 1, 2, 5}
+
+
+
+## tcp apps
+**.client.numApps = 1
+**.client.app[0].typename = "TcpSessionApp"
+**.client.app[0].active = true
+**.client.app[0].localPort = -1
+**.client.app[0].connectAddress = "server"
+**.client.app[0].connectPort = 1000
+**.client.app[0].tOpen = 0.2s
+**.client.app[0].tSend = 0.4s
+**.client.app[0].sendBytes = 1000000B
+**.client.app[0].sendScript = ""
+**.client.app[0].tClose = 25s
+
+**.server.numApps = 1
+**.server.app[0].typename="TcpSinkApp"
+**.server.app[0].localPort = 1000
+
+# NIC configuration
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.configurator.config=xml("<config><interface hosts='*' address='192.168.1.x' netmask='255.255.255.0'/></config>")
+
+
+%#################################################################################################################
+
+%contains: results/General-#0.sca
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
+
+%contains: results/General-#1.sca
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
+
+%contains: results/General-#2.sca
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
+
+%contains: results/General-#3.sca
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
+
+%contains: results/General-#4.sca
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
+
+%contains: results/General-#5.sca
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
+
+%contains: results/General-#6.sca
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

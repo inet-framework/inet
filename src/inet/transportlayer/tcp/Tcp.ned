@@ -199,7 +199,7 @@ simple Tcp extends SimpleModule like ITcp
         bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(536); // Maximum Segment Size (header option). Default 536 per RFC 1122.
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
-        string tcpAlgorithmClass @examples("TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
+        string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
         int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 3517) DO NOT change unless you really know what you are doing
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
@@ -215,6 +215,14 @@ simple Tcp extends SimpleModule like ITcp
         double initialRto @unit(s) = default(3s); // initial retransmission timeout, used until the first RTT sample (RFC 6298 recommends 1s; Linux TCP_TIMEOUT_INIT=1s)
         double minRto @unit(s) = default(1s); // lower bound on the retransmission timeout (Linux TCP_RTO_MIN=200ms)
         double maxRto @unit(s) = default(240s); // upper bound on the retransmission timeout (Linux rto_max default 120s)
+        double cubicBeta = default(0.700195); // TcpCubic multiplicative-decrease factor (717/1024)
+        double cubicC = default(0.4); // TcpCubic scaling constant C
+        bool cubicFastConvergence = default(true); // TcpCubic fast convergence
+        bool cubicTcpFriendliness = default(true); // TcpCubic Reno-emulation (TCP friendliness)
+        bool hystartEnabled = default(true); // TcpCubic HyStart hybrid slow start
+        int hystartDetect = default(3); // HyStart detectors: 1=ACK-train, 2=delay, 3=both
+        int hystartLowWindow = default(16); // minimum cwnd (in segments) for HyStart to act
+        double hystartAckDelta @unit(s) = default(2ms); // HyStart ACK-train inter-arrival threshold
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];

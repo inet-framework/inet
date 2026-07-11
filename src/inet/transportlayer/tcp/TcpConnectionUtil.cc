@@ -671,14 +671,10 @@ void TcpConnection::configureStateVariables()
     WATCH_EXPR("snd_una", state->snd_una);
 
     if (state->sack_support) {
-        std::string algorithmName1 = "TcpReno";
-        std::string algorithmName2 = tcpMain->par("tcpAlgorithmClass");
-
-        if (algorithmName1 != algorithmName2) { // TODO add additional checks for new SACK supporting algorithms here once they are implemented
-            EV_DEBUG << "If you want to use TCP SACK please set tcpAlgorithmClass to TcpReno\n";
-
-            ASSERT(false);
-        }
+        // RFC 3517 SACK recovery is implemented in TcpReno and inherited by TcpCubic.
+        std::string algorithmName = tcpMain->par("tcpAlgorithmClass");
+        if (algorithmName != "TcpReno" && algorithmName != "TcpCubic")
+            throw cRuntimeError("sackSupport=true is only supported with tcpAlgorithmClass=\"TcpReno\" or \"TcpCubic\", not \"%s\"", algorithmName.c_str());
     }
 }
 
