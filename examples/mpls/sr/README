@@ -1,0 +1,126 @@
+This example demonstrates Segment Routing over the MPLS data plane (SR-MPLS,
+RFC 8660): signaling-free label programming, where every router derives its
+own node-SID label-switching entries from a network-wide, statically
+configured SID table (the model's stand-in for the OSPF-SR/IS-IS-SR
+advertisements a real deployment would flood -- see the users guide's MPLS
+chapter for the full simplification list), and an ingress ~SrPolicy module
+imposes segment-list label stacks to steer specific flows.
+
+Topology
+--------
+
+Six ~SrMplsRouter nodes (R1..R6) form a ring (R1-R2-R3-R4-R5-R6-R1), plus one
+chord (R1-R3) that shortcuts across the ring, plus a second, higher-metric
+parallel link between R1 and R2 (used for the adjacency-SID demo below).
+hostA hangs off R1; three destination hosts (hostPlain, hostExplicit,
+hostAdj) hang off R4 -- three "customers" reachable through the same egress
+router, each reached by traffic engineered a different way.
+
+All ring edges and the chord carry metric 1; the extra R1-R2 link carries
+metric 10 (deliberately non-IGP-preferred). Router IDs are 1.1.1.1..6.6.6.6;
+node SIDs are 1..6 (R1=1, ..., R6=6); with the default srgbBase (16000), R4's
+node-SID label is 16004.
+
+Only R1 carries an ~SrPolicy policy table (policies.xml), with three entries,
+one per destination host -- each illustrating a different SR-MPLS traffic
+steering mechanism:
+
+1. hostA -> hostPlain, ``segments="node:4"`` (plain node-SID policy)
+
+   Names only the destination's node SID; the path taken is whatever
+   ~SegmentRouting's own shortest-path computation over the network picks.
+   Here, that is the R1-R3 chord: a 2-hop shortcut (cost 2) that beats
+   either way around the ring (cost 3). R1 (ingress) PUSHes label 16004 and
+   forwards directly to R3 over the chord; R3, being R4's direct neighbor,
+   POPs the label (penultimate-hop-popping, RFC 8660 Section 2) and
+   forwards the resulting plain IP datagram to R4, which delivers it to
+   hostPlain via ordinary L3 routing. No transit SWAP occurs on this path
+   (R1-R3-R4 is only 2 hops).
+
+2. hostA -> hostExplicit, ``segments="node:6 node:4"`` (explicit-path policy)
+
+   Names R6's node SID as an intermediate waypoint before the real
+   destination's node SID -- SR traffic engineering without any signaling
+   protocol: a small number of loose waypoints steers an arbitrarily long
+   detour, unlike RSVP-TE's explicit-route object, which must name every
+   hop. Since R6 is R1's own direct neighbor (the ring edge), the R6 segment
+   is dropped from the pushed stack entirely (pushing it would be pointless:
+   R6's own PHP would immediately pop it back off -- see ~SrPolicy's
+   first-segment canonicalization); only R4's label (16004) is actually
+   pushed, and R1 forwards directly to R6. From R6, R4 is not a direct
+   neighbor (R6 only reaches R4 via R5), so R6 genuinely transits: SWAP
+   16004, forwarding to R5. R5, being R4's direct neighbor, POPs. The
+   resulting 3-hop path (R1-R6-R5-R4) is deliberately longer than the
+   chord's 2-hop shortcut -- proof that the policy, not the IGP metric,
+   chose the route.
+
+3. hostA -> hostAdj, ``segments="adj:ppp4 node:4"`` (adjacency-SID pin)
+
+   Names one of R1's OWN local links by interface (R1's ppp4, the
+   higher-metric SECONDARY link to R2) before R4's node SID. Adjacency-SID
+   segments are always dropped when first (crossing the named link IS what
+   forwarding out that interface already achieves -- see ~SrPolicy's
+   Limitations section for why "adj:" segments only have well-defined
+   semantics as a policy's first/sole segment in this model), so again only
+   R4's label (16004) is pushed -- but this time R1 forwards out ppp4
+   specifically, the SECONDARY link, even though the PRIMARY link to R2 is
+   cheaper and would normally be preferred. From R2, R4 is not a direct
+   neighbor (R2 only reaches R4 via R3), so R2 genuinely transits: SWAP
+   16004, forwarding to R3, which POPs (R3 is R4's direct neighbor):
+   crossing the pinned adjacency does not disturb the subsequent node-SID
+   forwarding into R4.
+
+   Note this policy names R1's interface directly ("adj:ppp4"), NOT R2's
+   node SID as a waypoint -- unlike the explicit-path policy above, which
+   deliberately avoids naming R2 at all as a waypoint. This is not a stylistic
+   choice: R1 and R2 are joined by TWO parallel physical links (the primary,
+   metric-1 one and this secondary, metric-10 one), and this model's ~Ted/
+   ~LinkStateRouting represents a router PAIR's link state as a single entry
+   keyed by the two routers' identities, not per physical interface. Once
+   both links are flooded, only one of the two survives in the link-state
+   view every OTHER router computes shortest paths from -- harmless for a
+   pair with no competing alternate route, but here R1-R3-R2 (via the chord)
+   IS a competing alternate, so a "node:2" waypoint would resolve
+   unpredictably. The "adj:" mechanism sidesteps this entirely: it resolves
+   straight to the named LOCAL interface at config time and never consults
+   the link-state view, which is exactly why it is the correct tool for
+   pinning one specific physical link among several parallel ones.
+
+All three flows are simple periodic UDP flows (128-byte datagrams every
+10 ms), started 0.1s apart so their PUSH/SWAP/POP log lines do not interleave
+too closely; sim-time-limit is 10s, far longer than needed for delivery to
+begin, leaving plenty of margin to inspect steady-state forwarding in Qtenv
+or the Cmdenv EV log.
+
+How to observe it
+------------------
+
+Run with Cmdenv and an "info" log level (the default in this ini) and grep
+the output for ``doStackOps:`` lines, or look at which module logs
+"Received ... from L2, label=16004" to see exactly which routers each flow's
+labeled packets pass through. Compare:
+
+- the plain flow's packets: PUSH at R1, POP at R3 -- R2, R5, and R6 never
+  see this flow at all;
+- the explicit-path flow's packets: PUSH at R1, SWAP at R6, POP at R5 --
+  R2 and R3 never see this flow at all;
+- the adjacency-pin flow's packets: PUSH at R1 (forwarded out ppp4, the
+  secondary interface), SWAP at R2 (arriving over its SECONDARY-facing
+  interface, not its primary one), POP at R3.
+
+All three flows push the SAME label (16004, R4's node-SID label) and are
+delivered to three different hosts behind the same router R4, yet each
+takes a genuinely different physical path away from R1 -- that divergence,
+not the label value, is what to look for.
+
+Simplifications
+---------------
+
+As documented in the users guide's SR-MPLS section: the SID table is
+static, network-wide configuration (no OSPF-SR/IS-IS-SR flooding is
+modeled); the SRGB is homogeneous across all routers; there is no
+protection/fast-reroute (a link or node failure reroutes node-SID traffic
+via ~Ted's own shortest-path recomputation, once ~Ted itself notices the
+failure -- see ~Ted's ``trackInterfaceState`` parameter -- but adjacency-SID
+pins are NOT automatically protected, since they are tied to one specific
+physical link by design).

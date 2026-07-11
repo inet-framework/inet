@@ -1,0 +1,8 @@
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+    <node router="4.4.4.4" sid="4"/>
+    <node router="5.5.5.5" sid="5"/>
+    <node router="6.6.6.6" sid="6"/>
+</sr>
