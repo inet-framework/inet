@@ -39,6 +39,12 @@ class INET_API TcpCubic : public TcpReno
     /** Resets the HyStart per-round state (Linux bictcp_hystart_reset). */
     virtual void hystartReset();
 
+    /** Updates cubic_cnt (ACKs per 1-MSS increase) from the cubic function (Linux bictcp_update). */
+    virtual void cubicUpdate(uint32_t ackedBytes);
+
+    /** Additive increase governed by cubic_cnt (Linux tcp_cong_avoid_ai). */
+    virtual void congestionAvoidanceAi(uint32_t ackedBytes);
+
   public:
     /** Constructor */
     TcpCubic();
@@ -47,6 +53,9 @@ class INET_API TcpCubic : public TcpReno
 
     /** CUBIC multiplicative decrease (beta) with fast convergence. */
     virtual void recalculateSlowStartThreshold() override;
+
+    /** CUBIC window growth (slow start + cubic congestion avoidance). */
+    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 
     virtual void processRexmitTimer(TcpEventCode& event) override;
 };
