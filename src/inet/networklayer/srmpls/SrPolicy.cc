@@ -8,9 +8,10 @@
 
 #include <omnetpp/cstringtokenizer.h>
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/XMLUtils.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/mpls/LibTable.h"
 
 namespace inet {
@@ -46,16 +47,23 @@ void SrPolicy::handleMessage(cMessage *msg)
 
 bool SrPolicy::lookupLabel(Packet *packet, LabelOpVector& outLabel, int& outInterfaceId)
 {
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    Ipv4Address destAddress = ipv4Header->getDestAddress();
+    // Dual-stack (Workstream F3): see ~StaticIngressClassifier::lookupLabel() for the same
+    // generic-L3Address dispatch (via PacketProtocolTag + L3Tools::peekNetworkProtocolHeader()).
+    const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    L3Address destAddress = peekNetworkProtocolHeader(packet, *protocol)->getDestinationAddress();
 
-    // longest-prefix match: the entry with the most specific (longest) netmask wins
+    // longest-prefix match: the entry with the most specific (longest) prefix length wins.
+    // policyTable may hold a MIX of IPv4 and IPv6 entries; see
+    // ~StaticIngressClassifier::lookupLabel() for why cross-family entries must be skipped
+    // before calling L3Address::matches() (it would throw).
     const PolicyEntry *best = nullptr;
     for (auto& entry : policyTable) {
-        if (!Ipv4Address::maskedAddrAreEqual(destAddress, entry.dest, entry.netmask))
+        if (entry.dest.getType() != destAddress.getType())
+            continue;
+        if (!destAddress.matches(entry.dest, entry.prefixLength))
             continue;
 
-        if (!best || entry.netmask.getNetmaskLength() > best->netmask.getNetmaskLength())
+        if (!best || entry.prefixLength > best->prefixLength)
             best = &entry;
     }
 
@@ -145,20 +153,37 @@ void SrPolicy::readPoliciesFromXML(const cXMLElement *policiesXml)
         const char *destStr = entry.getAttribute("dest");
         if (!destStr)
             throw cRuntimeError("Invalid policy at %s: missing 'dest' attribute", entry.getSourceLocation());
-        if (!Ipv4Address::isWellFormed(destStr))
-            throw cRuntimeError("Invalid policy at %s: 'dest' is not a valid IPv4 address: '%s'", entry.getSourceLocation(), destStr);
+        L3Address dest;
+        if (!dest.tryParse(destStr))
+            throw cRuntimeError("Invalid policy at %s: 'dest' is not a valid IPv4/IPv6 address: '%s'", entry.getSourceLocation(), destStr);
 
+        // Dual-stack (Workstream F3): see ~StaticIngressClassifier::readTableFromXML() for the
+        // same netmask=/prefixLength= backward-compat rationale.
         const char *netmaskStr = entry.getAttribute("netmask");
-        if (!netmaskStr)
-            throw cRuntimeError("Invalid policy at %s: missing 'netmask' attribute", entry.getSourceLocation());
-        if (!Ipv4Address::isWellFormed(netmaskStr))
-            throw cRuntimeError("Invalid policy at %s: 'netmask' is not a valid IPv4 address: '%s'", entry.getSourceLocation(), netmaskStr);
+        const char *prefixLengthStr = entry.getAttribute("prefixLength");
+        if (netmaskStr && prefixLengthStr)
+            throw cRuntimeError("Invalid policy at %s: 'netmask' and 'prefixLength' are mutually exclusive, but both were given", entry.getSourceLocation());
+        if (!netmaskStr && !prefixLengthStr)
+            throw cRuntimeError("Invalid policy at %s: missing 'netmask' or 'prefixLength' attribute", entry.getSourceLocation());
+
+        int prefixLength;
+        if (netmaskStr) {
+            if (!Ipv4Address::isWellFormed(netmaskStr))
+                throw cRuntimeError("Invalid policy at %s: 'netmask' is not a valid IPv4 address: '%s'", entry.getSourceLocation(), netmaskStr);
+            Ipv4Address netmask(netmaskStr);
+            if (!netmask.isValidNetmask())
+                throw cRuntimeError("Invalid policy at %s: 'netmask' is not a valid netmask (non-contiguous bits): '%s'", entry.getSourceLocation(), netmaskStr);
+            prefixLength = netmask.getNetmaskLength();
+        }
+        else {
+            prefixLength = atoi(prefixLengthStr);
+            if (prefixLength < 0)
+                throw cRuntimeError("Invalid policy at %s: 'prefixLength' must be >= 0, but is '%s'", entry.getSourceLocation(), prefixLengthStr);
+        }
 
         PolicyEntry newEntry;
-        newEntry.dest = Ipv4Address(destStr);
-        newEntry.netmask = Ipv4Address(netmaskStr);
-        if (!newEntry.netmask.isValidNetmask())
-            throw cRuntimeError("Invalid policy at %s: 'netmask' is not a valid netmask (non-contiguous bits): '%s'", entry.getSourceLocation(), netmaskStr);
+        newEntry.dest = dest;
+        newEntry.prefixLength = prefixLength;
 
         const char *segmentsStr = entry.getAttribute("segments");
         if (!segmentsStr || !*segmentsStr)
@@ -222,7 +247,7 @@ void SrPolicy::readPoliciesFromXML(const cXMLElement *policiesXml)
 std::ostream& operator<<(std::ostream& os, const SrPolicy::PolicyEntry& policy)
 {
     os << "dest:" << policy.dest;
-    os << "    netmask:" << policy.netmask;
+    os << "    prefixLength:" << policy.prefixLength;
     os << "    segments:" << policy.segments.size();
     return os;
 }

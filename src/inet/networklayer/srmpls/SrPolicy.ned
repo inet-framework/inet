@@ -23,8 +23,14 @@ import inet.networklayer.mpls.IIngressClassifier;
 //
 // The `policies` XML format: the root element is <policies>, containing any
 // number of <policy> elements, each a leaf element with:
-// - dest: destination prefix's network address (e.g. "10.3.3.0")
-// - netmask: the prefix's netmask (e.g. "255.255.255.0")
+// - dest: destination prefix's network address, IPv4 or IPv6 (e.g. "10.3.3.0"
+//   or "2001:db8:3::"; the family is auto-detected from the string)
+// - netmask: the prefix's IPv4 dotted netmask (e.g. "255.255.255.0"); mutually
+//   exclusive with prefixLength, kept for backward compatibility
+// - prefixLength: the prefix length as a plain integer (e.g. "24"), usable
+//   for either address family; mutually exclusive with netmask, and REQUIRED
+//   for an IPv6 dest (IPv6 has no netmask-string convention). Exactly one of
+//   netmask/prefixLength must be given.
 // - segments: a whitespace-separated, ORDERED list of segment tokens, each
 //   either "node:<sidIndex>" or "adj:<interfaceName>"
 //
@@ -32,10 +38,11 @@ import inet.networklayer.mpls.IIngressClassifier;
 // <policies>
 //     <policy dest="10.3.3.0" netmask="255.255.255.0" segments="node:3 node:5"/>
 //     <policy dest="10.9.9.0" netmask="255.255.255.0" segments="node:3 adj:ppp2"/>
+//     <policy dest="2001:db8:9::" prefixLength="64" segments="node:3"/>
 // </policies>
 // </pre>
 //
-// On a lookup, the entry with the longest matching netmask wins (standard
+// On a lookup, the entry with the longest matching prefix wins (standard
 // longest-prefix match, like ~StaticIngressClassifier); if no entry matches,
 // this classifier reports "no mapping" and ~Mpls falls back to regular L3
 // routing for that packet.

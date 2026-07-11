@@ -9,8 +9,8 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/SimpleModule.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 
 namespace inet {
@@ -22,13 +22,21 @@ namespace inet {
  * LSP network be built with no signaling protocol (~Ldp/~RsvpTe) at all --
  * every LSR's forwarding decision (ingress push, transit swap/pop) comes
  * entirely from configuration loaded at startup.
+ *
+ * Dual-stack (Workstream F3): `dest` is a generic ~L3Address (IPv4 or IPv6,
+ * auto-detected from the XML `dest` string), matched against the packet's
+ * native destination address via ~L3Address::matches(), keyed off an integer
+ * `prefixLength` -- an IPv4 fecentry may still express this as a dotted
+ * `netmask=` attribute for backward compatibility (converted to a prefix
+ * length at load time); an IPv6 `dest` requires the new `prefixLength=`
+ * attribute instead, since IPv6 has no netmask-string convention.
  */
 class INET_API StaticIngressClassifier : public SimpleModule, public IIngressClassifier
 {
   public:
     struct FecEntry {
-        Ipv4Address dest;
-        Ipv4Address netmask;
+        L3Address dest;
+        int prefixLength;
         int label;
         int outInterfaceId;
     };

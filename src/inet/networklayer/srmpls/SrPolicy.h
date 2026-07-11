@@ -11,6 +11,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/SimpleModule.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
@@ -48,8 +49,10 @@ class INET_API SrPolicy : public SimpleModule, public IIngressClassifier
     };
 
     struct PolicyEntry {
-        Ipv4Address dest;
-        Ipv4Address netmask;
+        // Dual-stack (Workstream F3): see ~StaticIngressClassifier.h for the same L3Address +
+        // prefixLength shape and rationale (dest's family, IPv4 or IPv6, is auto-detected).
+        L3Address dest;
+        int prefixLength;
         std::vector<Segment> segments; // wire order: segments[0] = outermost/first-traversed
     };
 

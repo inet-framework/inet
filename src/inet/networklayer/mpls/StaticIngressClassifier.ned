@@ -22,18 +22,25 @@ import inet.common.SimpleModule;
 // The XML config file has the following format. The root element is
 // <fectable>, which may contain any number of <fecentry> elements. Each
 // <fecentry> is a leaf element with the following attributes:
-// - dest: destination prefix's network address (e.g. "10.0.0.0")
-// - netmask: the prefix's netmask (e.g. "255.0.0.0")
+// - dest: destination prefix's network address, IPv4 or IPv6 (e.g. "10.0.0.0"
+//   or "2001:db8:1::"; the family is auto-detected from the string)
+// - netmask: the prefix's IPv4 dotted netmask (e.g. "255.0.0.0"); mutually
+//   exclusive with prefixLength, kept for backward compatibility
+// - prefixLength: the prefix length as a plain integer (e.g. "8"), usable for
+//   either address family; mutually exclusive with netmask, and REQUIRED for
+//   an IPv6 dest (IPv6 has no netmask-string convention). Exactly one of
+//   netmask/prefixLength must be given.
 // - label: the label to push (integer, >= 0)
 // - interface: the outgoing interface name (e.g. "ppp0")
 //
 // <pre>
 // <fectable>
 //     <fecentry dest="10.0.0.0" netmask="255.0.0.0" label="17" interface="ppp0"/>
+//     <fecentry dest="2001:db8:2::" prefixLength="64" label="18" interface="ppp1"/>
 // </fectable>
 // </pre>
 //
-// On a lookup, the entry with the longest matching netmask wins (standard
+// On a lookup, the entry with the longest matching prefix wins (standard
 // longest-prefix match); if no entry matches, the classifier reports "no
 // mapping", and ~Mpls falls back to regular L3 routing for that packet.
 //
