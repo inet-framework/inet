@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<scenario>
+	<at t="7s">
+		<add-session module="LSR1.rsvp">
+			<endpoint>LSR6%routerId</endpoint>
+			<tunnel_id>2</tunnel_id>
+
+			<paths>
+				<path>
+					<lspid>200</lspid>
+					<bandwidth>520000</bandwidth>
+					<permanent>true</permanent>
+					<route>
+						<node>LSR2%routerId</node>
+						<node>LSR3%routerId</node>
+						<node>LSR6%routerId</node>
+					</route>
+				</path>
+			</paths>
+		</add-session>
+	</at>
+	<at t="9s">
+		<pce-reoptimize module="PceRouter.app[0]" plspid="1"/>
+	</at>
+</scenario>
