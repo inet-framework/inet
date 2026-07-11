@@ -7,7 +7,6 @@
 
 import inet.common.INETDefs;
 import inet.transportlayer.tcp.flavours.TcpBaseAlgState;
-import inet.transportlayer.tcp.flavours.TcpSegmentTransmitInfoList;
 
 namespace inet::tcp;
 
@@ -30,8 +29,6 @@ struct TcpVegasStateVariables extends TcpBaseAlgStateVariables
     simtime_t v_rtt_timeout = 1000.0; // vegas fine-grained timeout
     simtime_t v_sa; // average for vegas fine-grained timeout
     simtime_t v_sd; // deviation for vegas fine-grained timeout
-
-    TcpSegmentTransmitInfoList regions;
 
     uint32_t ssthresh = 65536; ///< slow start threshold
 

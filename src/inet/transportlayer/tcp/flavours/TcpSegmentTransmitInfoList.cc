@@ -9,6 +9,8 @@
 
 #include <algorithm> // min,max
 
+#include "inet/transportlayer/tcp_common/TcpHeader.h" // seqLE, seqLess
+
 namespace inet {
 
 namespace tcp {

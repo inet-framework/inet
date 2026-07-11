@@ -8,7 +8,9 @@
 #ifndef __INET_TCPSEGMENTTRANSMITINFOLIST_H
 #define __INET_TCPSEGMENTTRANSMITINFOLIST_H
 
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
+#include <list>
+
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 

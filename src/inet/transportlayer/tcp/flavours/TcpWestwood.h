@@ -42,11 +42,6 @@ class INET_API TcpWestwood : public TcpBaseAlg
 
     /** Redefine what should happen when dupAck was received, to add congestion window management */
     virtual void receivedDuplicateAck() override;
-
-    /** Called after we send data */
-    virtual void dataSent(uint32_t fromseq) override;
-
-    virtual void segmentRetransmitted(uint32_t fromseq, uint32_t toseq) override;
 };
 
 } // namespace tcp

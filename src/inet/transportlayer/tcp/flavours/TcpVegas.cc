@@ -85,7 +85,7 @@ void TcpVegas::receivedDataAck(uint32_t firstSeqAcked)
 {
     TcpBaseAlg::receivedDataAck(firstSeqAcked);
 
-    const TcpSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
+    const TcpSegmentTransmitInfoList::Item *found = state->sentInfo.get(firstSeqAcked);
     if (found) {
         simtime_t currentTime = simTime();
         simtime_t tSent = found->getFirstSentTime();
@@ -234,7 +234,7 @@ void TcpVegas::receivedDataAck(uint32_t firstSeqAcked)
         // check 1st and 2nd ack after a rtx
         if (state->v_worried > 0) {
             state->v_worried -= state->snd_mss;
-            const TcpSegmentTransmitInfoList::Item *unaFound = state->regions.get(state->snd_una);
+            const TcpSegmentTransmitInfoList::Item *unaFound = state->sentInfo.get(state->snd_una);
 //            bool expired = unaFound && ((currentTime - unaFound->getLastSentTime()) >= state->v_rtt_timeout);
             bool expired = unaFound && ((currentTime - unaFound->getFirstSentTime()) >= state->v_rtt_timeout);
 
@@ -250,7 +250,7 @@ void TcpVegas::receivedDataAck(uint32_t firstSeqAcked)
         }
     } // Closes if v_sendtime != nullptr
 
-    state->regions.clearTo(state->snd_una);
+    state->sentInfo.clearTo(state->snd_una);
 
     // Try to send more data
     sendData(false);
@@ -263,12 +263,12 @@ void TcpVegas::receivedDuplicateAck()
     simtime_t currentTime = simTime();
     simtime_t tSent = 0;
     int num_transmits = 0;
-    const TcpSegmentTransmitInfoList::Item *found = state->regions.get(state->snd_una);
+    const TcpSegmentTransmitInfoList::Item *found = state->sentInfo.get(state->snd_una);
     if (found) {
         tSent = found->getFirstSentTime();
         num_transmits = found->getTransmitCount();
     }
-    state->regions.clearTo(state->snd_una);
+    state->sentInfo.clearTo(state->snd_una);
 
     // check Vegas timeout
     bool expired = found && ((currentTime - tSent) >= state->v_rtt_timeout);
@@ -318,27 +318,6 @@ void TcpVegas::receivedDuplicateAck()
 
     // try to send more data
     sendData(false);
-}
-
-void TcpVegas::dataSent(uint32_t fromseq)
-{
-    TcpBaseAlg::dataSent(fromseq);
-
-    // save time when packet is sent
-    // fromseq is the seq number of the 1st sent byte
-    // we need this value, based on iss=0 (to store it the right way on the vector),
-    // but iss is not a constant value (ej: iss=0), so it needs to be detemined each time
-    // (this is why it is used: fromseq-state->iss)
-
-    state->regions.clearTo(state->snd_una);
-    state->regions.set(fromseq, state->snd_max, simTime());
-}
-
-void TcpVegas::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
-{
-    TcpBaseAlg::segmentRetransmitted(fromseq, toseq);
-
-    state->regions.set(fromseq, toseq, simTime());
 }
 
 } // namespace tcp

@@ -592,10 +592,16 @@ void TcpBaseAlg::dataSent(uint32_t fromseq)
     }
 
     state->time_last_data_sent = simTime();
+
+    // record per-segment transmit times (shared facility used by Vegas/Westwood
+    // RTT sampling, and by RACK/Eifel loss recovery)
+    state->sentInfo.clearTo(state->snd_una);
+    state->sentInfo.set(fromseq, state->snd_max, simTime());
 }
 
 void TcpBaseAlg::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
 {
+    state->sentInfo.set(fromseq, toseq, simTime());
 }
 
 void TcpBaseAlg::restartRexmitTimer()

@@ -101,8 +101,8 @@ void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
 {
     TcpBaseAlg::receivedDataAck(firstSeqAcked);
 
-    state->regions.clearTo(state->snd_una);
-    const TcpSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
+    state->sentInfo.clearTo(state->snd_una);
+    const TcpSegmentTransmitInfoList::Item *found = state->sentInfo.get(firstSeqAcked);
 
     if (found != nullptr) {
         simtime_t currentTime = simTime();
@@ -260,25 +260,6 @@ void TcpWestwood::receivedDuplicateAck()
 
         sendData(false);
     }
-}
-
-void TcpWestwood::dataSent(uint32_t fromseq)
-{
-    TcpBaseAlg::dataSent(fromseq);
-
-    // save time when packet is sent
-    // fromseq is the seq number of the 1st sent byte
-
-    simtime_t sendtime = simTime();
-    state->regions.clearTo(state->snd_una);
-    state->regions.set(fromseq, state->snd_max, sendtime);
-}
-
-void TcpWestwood::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
-{
-    TcpBaseAlg::segmentRetransmitted(fromseq, toseq);
-
-    state->regions.set(fromseq, toseq, simTime());
 }
 
 } // namespace tcp

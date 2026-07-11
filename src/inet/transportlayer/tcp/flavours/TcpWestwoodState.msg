@@ -7,7 +7,6 @@
 
 import inet.common.INETDefs;
 import inet.transportlayer.tcp.flavours.TcpBaseAlgState;
-import inet.transportlayer.tcp.flavours.TcpSegmentTransmitInfoList;
 
 namespace inet::tcp;
 
@@ -27,8 +26,6 @@ struct TcpWestwoodStateVariables extends TcpBaseAlgStateVariables
 
     double w_bwe = 0.0;
     double w_sample_bwe = 0.0;
-
-    TcpSegmentTransmitInfoList regions;
 };
 
 cplusplus(TcpWestwoodStateVariables) {{
