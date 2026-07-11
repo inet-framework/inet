@@ -405,7 +405,7 @@ std::set<Ipv4Address> SegmentRouting::distancePreservingReachable(Ipv4Address ro
         if (candidate == root)
             continue;
 
-        double fullDist, filteredDist;
+        double fullDist = -1, filteredDist = -1;
         bool reachableInFull = ted->getShortestPathCost(root, candidate, fullTopology, 0.0, 7, fullDist);
         bool reachableInFiltered = ted->getShortestPathCost(root, candidate, filteredTopology, 0.0, 7, filteredDist);
 
@@ -453,10 +453,22 @@ bool SegmentRouting::findTiLfaRepair(Ipv4Address dest, Ipv4Address protectedNeig
     TeLinkStateInfoVector reversedExcluded = reversedTopology(excludedTopology);
     std::set<Ipv4Address> qSpace = distancePreservingReachable(dest, reversedFull, reversedExcluded);
 
-    // Case 1: a PQ node exists -> single node-SID segment. (Skip routerId itself: using our own
-    // "node SID" as a repair segment is meaningless -- we're already here.)
+    // Case 1: a PQ node exists -> single node-SID segment. Skip routerId itself (using our own
+    // "node SID" as a repair segment is meaningless -- we're already here) AND protectedNeighbor
+    // (the far end of the link that just failed/is being protected against): protectedNeighbor
+    // can genuinely satisfy the distance-preserving P-space/Q-space tests (e.g. reachable from
+    // some OTHER neighbor at unchanged cost via a path that never used the protected link at
+    // all), but routing traffic for a DIFFERENT destination THROUGH the very node whose
+    // adjacency to the PLR just changed relies on that node's own view of the network already
+    // being consistent -- exactly the kind of assumption RFC 9855's P/Q-space rules exist to
+    // avoid leaning on. The one destination this exclusion trivially still protects is
+    // protectedNeighbor itself (dest == protectedNeighbor): Q-space always contains dest itself
+    // (root-included, trivially), so excluding protectedNeighbor here just means that case falls
+    // through to the next real PQ candidate instead of a degenerate self-referential push --
+    // strictly safer, and no less correct (the destination's own node-SID is still what a
+    // genuine PQ node ultimately delivers it to).
     for (auto& node : pSpace) {
-        if (node == routerId || !qSpace.count(node))
+        if (node == routerId || node == protectedNeighbor || !qSpace.count(node))
             continue;
 
         int sid = sidByRouter.at(node);
@@ -488,6 +500,8 @@ bool SegmentRouting::findTiLfaRepair(Ipv4Address dest, Ipv4Address protectedNeig
                 continue;
             if (p == routerId)
                 continue; // that would just be case 1 with q as the PQ node -- already tried
+            if (p == protectedNeighbor || q == protectedNeighbor)
+                continue; // same reasoning as Case 1's protectedNeighbor exclusion above
 
             int pSid = sidByRouter.at(p);
             int qSid = sidByRouter.at(q);

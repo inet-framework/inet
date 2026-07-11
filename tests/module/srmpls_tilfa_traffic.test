@@ -1,0 +1,295 @@
+%description:
+Module test for TI-LFA (RFC 9855) backup activation (Workstream F2, Phase 4): exercises the
+Phase-1 data-plane backup fields (LibTable::setBackup()/activateBackup(), resolveLabel()'s
+backupActive branch) against an ACTUAL live packet, not just the EV_INFO log lines
+srmpls_tilfa_repair_pq.test already asserts. Every existing TI-LFA test locks in either the
+repair COMPUTATION (srmpls_tilfa_repair_pq.test, srmpls_tilfa_repair_bridge.test) or the
+activation/revert EV_INFO lines (srmpls_tilfa_repair_pq.test's Phase-3 half) -- none of them
+had ever pushed a single real packet through the installed backup label stack. This test closes
+that gap with the narrowest observable that actually depends on the backup mechanism: the
+label stack Mpls::doStackOps() logs at A's own LIB lookup for a live, in-flight packet.
+
+Topology: hostA -- U -- A -- { B -- D (metric 1+1+1=3), C -- D (metric 1+1+1=3, tied) } -- D --
+hostD (U=9.9.9.9, A=1.1.1.1, B=2.2.2.2, C=3.3.3.3, D=4.4.4.4; srgbBase 16000). U is the SR
+INGRESS: its SrPolicy classifies traffic to hostD's subnet onto the unconstrained node-SID
+segment "node:4" (label 16004) and pushes it. A is deliberately kept OUT of that ingress role
+and carries no policies of its own -- A is a pure TRANSIT hop for this flow (and the PLR
+protecting the A-B link). This split matters: SrPolicy.cc's own resolveSegmentList() resolves
+its first hop directly via SegmentRouting::resolveNextHop() and documents that "ingress-
+classified traffic never consults the LIB at all" -- so if A itself were the ingress (as an
+earlier version of this test had it), the packets IT let A originates would never touch
+LibTable::resolveLabel() at all, and the backupActive branch this test exists to exercise would
+silently never run. Only a packet arriving at A ALREADY label-encoded (i.e. one that went
+through a genuine upstream ingress first) forces A to do a real LIB lookup for label 16004,
+which is exactly where setBackup()/activateBackup() take effect.
+
+What makes this test discriminating rather than redundant with srmpls_tilfa_repair_pq.test:
+recomputeAndInstall() (triggered synchronously by the SAME event that detects the A-B failure)
+already reprograms A's node-SID(D) entry to route via C -- in THIS model, ordinary recompute
+alone would deliver every packet with zero loss even if handleOwnLinkStateChange() were a
+no-op, since nothing here measures a convergence GAP. A "packets still arrive" or "no delivery
+gap" assertion would therefore pass whether or not the backup mechanism does anything at all,
+and is deliberately NOT the primary assertion here (see Workstream F2's plan and this
+workstream's docs for that limitation). What genuinely depends on
+handleOwnLinkStateChange()/LibTable's backupActive branch is WHICH label stack A applies to a
+live TRANSIT packet while the backup is active: with backupActive=true, resolveLabel() returns
+tiLfaRepairByRouter[D] = a single node-SID PUSH of C's label (16003) -- an EXTRA, OUTER push
+stacked on top of the packet's still-present, unmodified inner node-SID(D) label 16004 (SR
+repair semantics: the packet keeps carrying its ultimate destination's own segment underneath a
+temporary detour segment) -- so "doStackOps: {PUSH 16003}" appearing in A's own log, while (and
+only while) TI-LFA reports the backup active, is a real, packet-level exercise of the Phase-1
+backup data plane, not an artifact of ordinary recompute (which would instead re-SWAP A's
+node-SID(D) entry, never PUSH 16003 there at all).
+
+At t=1s a ~ScenarioManager severs the A-B link (as in srmpls_tilfa_repair_pq.test); at t=2s it
+is restored. Traffic runs continuously across both transitions.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.mpls.SrMplsRouter;
+import inet.common.scenario.ScenarioManager;
+import ned.DatarateChannel;
+
+network TiLfaTrafficTest
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    types:
+        channel Link extends DatarateChannel
+        {
+            datarate = 1Mbps;
+            delay = 10us;
+        }
+    submodules:
+        scenarioManager: ScenarioManager;
+        hostA: StandardHost {
+            @display("p=50,150");
+        }
+        U: SrMplsRouter {
+            parameters:
+                routerId = "9.9.9.9";
+                peers = "ppp1"; // ppp0 goes to hostA, not an IGP peer
+                sidTable = xmldoc("sidtable.xml");
+                policies = xmldoc("policiesU.xml");
+                @display("p=180,150");
+            gates:
+                pppg[2];
+        }
+        A: SrMplsRouter {
+            parameters:
+                routerId = "1.1.1.1";
+                peers = "ppp0 ppp1 ppp2";
+                sidTable = xmldoc("sidtable.xml");
+                segmentRouting.tiLfa = true;
+                @display("p=310,150");
+            gates:
+                pppg[3];
+        }
+        B: SrMplsRouter {
+            parameters:
+                routerId = "2.2.2.2";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=440,80");
+            gates:
+                pppg[2];
+        }
+        C: SrMplsRouter {
+            parameters:
+                routerId = "3.3.3.3";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=440,220");
+            gates:
+                pppg[2];
+        }
+        D: SrMplsRouter {
+            parameters:
+                routerId = "4.4.4.4";
+                peers = "ppp0 ppp1"; // ppp2 goes to hostD, not an IGP peer
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=570,150");
+            gates:
+                pppg[3];
+        }
+        hostD: StandardHost {
+            @display("p=700,150");
+        }
+    connections:
+        hostA.pppg++ <--> Link <--> U.pppg[0];
+        U.pppg[1] <--> Link <--> A.pppg[0];
+        A.pppg[1] <--> Link <--> B.pppg[0]; // primary: metric 1
+        B.pppg[1] <--> Link <--> D.pppg[0]; // metric 1
+        A.pppg[2] <--> Link <--> C.pppg[0]; // alternate: metric 1 (tied with primary)
+        C.pppg[1] <--> Link <--> D.pppg[1]; // metric 1
+        D.pppg[2] <--> Link <--> hostD.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: sidtable.xml
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+    <node router="4.4.4.4" sid="4"/>
+</sr>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: policiesU.xml
+<policies>
+    <policy dest="10.0.9.30" netmask="255.255.255.255" segments="node:4"/>
+</policies>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<scenario>
+    <at t="1s">
+        <disconnect src-module="A" src-gate="pppg$o[1]"/>
+        <disconnect src-module="B" src-gate="pppg$o[0]"/>
+    </at>
+    <at t="2s">
+        <connect src-module="A" src-gate="pppg[1]"
+                 dest-module="B" dest-gate="pppg[0]"
+                 channel-type="ned.DatarateChannel">
+            <param name="delay" value="10us"/>
+            <param name="datarate" value="1Mbps"/>
+        </connect>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostA.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.9.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.9.2	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: U.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.9.2	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.9.3	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: A.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.9.4	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.9.5	MTU: 1500	Metric: 1
+name: ppp2	inet_addr: 10.0.9.7	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: B.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.9.6	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.9.9	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: C.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.9.8	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.9.11	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: D.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.9.10	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.9.12	MTU: 1500	Metric: 1
+name: ppp2	inet_addr: 10.0.9.13	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostD.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.9.30	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.9.13	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src
+network = TiLfaTrafficTest
+sim-time-limit = 3s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.hostA.numApps = 1
+**.hostA.app[0].typename = "UdpBasicApp"
+**.hostA.app[0].localPort = 100
+**.hostA.app[0].destPort = 100
+**.hostA.app[0].messageLength = 128 bytes
+**.hostA.app[0].startTime = 0.2s
+**.hostA.app[0].sendInterval = 0.01s
+**.hostA.app[0].destAddresses = "hostD"
+
+**.hostD.numApps = 1
+**.hostD.app[0].typename = "UdpSink"
+**.hostD.app[0].localPort = 100
+
+**.hostA.ipv4.routingTable.routingFile = "hostA.rt"
+**.hostD.ipv4.routingTable.routingFile = "hostD.rt"
+**.U.ipv4.routingTable.routingFile = "U.rt"
+**.A.ipv4.routingTable.routingFile = "A.rt"
+**.B.ipv4.routingTable.routingFile = "B.rt"
+**.C.ipv4.routingTable.routingFile = "C.rt"
+**.D.ipv4.routingTable.routingFile = "D.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Before the failure: U's SrPolicy ingress push puts the unconstrained node-SID (D=16004) on
+%# every packet, exactly as sr_reroute.test's identical setup shows
+%contains: stdout
+doStackOps: {PUSH 16004}
+%#--------------------------------------------------------------------------------------------------------------
+%# The failure is actually injected
+%contains: stdout
+Disconnecting TiLfaTrafficTest.A.pppg$o[1]
+%#--------------------------------------------------------------------------------------------------------------
+%# TI-LFA activates the precomputed backup for D as soon as A's link to B (2.2.2.2) dies
+%contains: stdout
+TI-LFA: activated backup for 4.4.4.4 (protected link to 2.2.2.2 went down)
+%#--------------------------------------------------------------------------------------------------------------
+%# The discriminating assertion: a LIVE, already label-encoded packet arriving at A (a genuine
+%# TRANSIT lookup, since U -- not A -- is the SR ingress) now gets an outer PUSH of C's node-SID
+%# (16003) stacked on top of the still-present inner 16004 -- something ordinary (non-backup)
+%# node-SID forwarding at A never does (that path only ever SWAPs 16004, it never pushes 16003).
+%# This can only happen via LibTable::resolveLabel()'s backupActive branch actually being taken
+%# for a real packet.
+%contains: stdout
+doStackOps: {PUSH 16003}
+%#--------------------------------------------------------------------------------------------------------------
+%# ... and reverts once the A-B link comes back up
+%contains: stdout
+TI-LFA: reverted backup for 4.4.4.4 (protected link to 2.2.2.2 came back up)
+%#--------------------------------------------------------------------------------------------------------------
+%# Traffic keeps flowing throughout (a coarse sanity check, not a convergence-gap measurement --
+%# see this file's description for why a precise zero-gap assertion wouldn't actually be
+%# discriminating in this model): hostD receives a large, still-climbing count by the end
+%postrun-command: grep "TiLfaTrafficTest.hostD.app\[0\] packetReceived:count" results/General-#0.sca | awk '{ if ($NF+0 > 200) print "HOSTD_KEEPS_FLOWING", $0 }' > hostd.out
+%contains: hostd.out
+HOSTD_KEEPS_FLOWING
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
