@@ -88,6 +88,13 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
      */
     virtual bool sendData(bool sendCommandInvoked);
 
+    /**
+     * Returns the configured initial congestion window in bytes according to
+     * state->init_cwnd_mode (RFC 2001 / RFC 3390 / RFC 6928 IW10). Used both for
+     * the initial cwnd and for the restart window after an idle period.
+     */
+    virtual uint32_t initialWindow() const;
+
     /** Utility function */
     cMessage *cancelEvent(cMessage *msg) { return conn->cancelEvent(msg); }
 

@@ -152,7 +152,8 @@ struct TcpStateVariables
     bool nagle_enabled = false;                 // set if Nagle's algorithm (RFC 896) is enabled
     bool delayed_acks_enabled = false;          // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled = false;      // set if Limited Transmit algorithm (RFC 3042) is enabled
-    bool increased_IW_enabled = false;          // set if Increased Initial Window (RFC 3390) is enabled
+    bool increased_IW_enabled = false;          // set if Increased Initial Window (RFC 3390) is enabled (deprecated, mapped to init_cwnd_mode)
+    int init_cwnd_mode = 0;                      // initial window: 0=RFC2001 (1 SMSS), 1=RFC3390, 2=RFC6928 (IW10)
 
     uint32_t full_sized_segment_counter = 0;    // this counter is needed for delayed ACK
     bool ack_now = false;                       // send ACK immediately, needed if delayed_acks_enabled is set

@@ -1,0 +1,54 @@
+%description:
+Tests the configurable initial congestion window. With mss=1024 the number of
+segments the client may send before the first ACK arrives is the initial window:
+1 segment for RFC 2001, 4 for RFC 3390 (min(4*MSS, max(2*MSS, 4380)) = 4096 B),
+and 10 for RFC 6928 / IW10 (min(10*MSS, max(2*MSS, 14600)) = 10240 B).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=1s
+*.cli_app.sendBytes = 40000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.mss = 1024
+*.*_tcp.advertisedWindow = 65535
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.cli_tcp.initialWindow = "rfc6928"
+
+%# With IW10 the client sends exactly 10 segments (up to seq 10241) in the initial
+%# burst at t=1.001, before the first ACK arrives at t=1.003. The 10th segment is
+%# present; there is no 11th segment in the initial burst.
+%contains-regex: stdout
+\[1\.001 [^\n]*A 9217:10241\(1024\)
+%not-contains-regex: stdout
+\[1\.001 [^\n]*A 10241:11265

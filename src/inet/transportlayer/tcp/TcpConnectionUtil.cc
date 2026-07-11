@@ -643,6 +643,20 @@ void TcpConnection::configureStateVariables()
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
+    const char *initialWindow = tcpMain->par("initialWindow");
+    if (state->increased_IW_enabled) {
+        // deprecated knob: map to RFC 3390 unless initialWindow was also set
+        if (strcmp(initialWindow, "rfc2001") != 0)
+            throw cRuntimeError("Tcp: set either the deprecated increasedIWEnabled or initialWindow, not both");
+        EV_WARN << "Tcp: increasedIWEnabled is deprecated; use initialWindow=\"rfc3390\"\n";
+        state->init_cwnd_mode = 1;
+    }
+    else if (!strcmp(initialWindow, "rfc3390"))
+        state->init_cwnd_mode = 1;
+    else if (!strcmp(initialWindow, "rfc6928"))
+        state->init_cwnd_mode = 2;
+    else
+        state->init_cwnd_mode = 0;
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
