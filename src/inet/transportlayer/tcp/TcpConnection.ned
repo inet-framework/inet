@@ -36,6 +36,7 @@ simple TcpConnection extends SimpleModule {
         @signal[rcvOooSeg];    // Number of received out-of-order segments
         @signal[rcvNASeg];    // Number of received not acceptable segments
         @signal[sackedBytes];    // Current number of received sacked bytes
+        @signal[delivered];    // Cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
         @signal[tcpRcvQueueBytes];    // Current amount of used bytes in TCP receive queue
         @signal[tcpRcvQueueDrops];    // Number of drops in TCP receive queue
         @signal[tcpRcvPayloadBytes];   // Amount of payload bytes received (including duplicates, out of order, etc.) for TCP throughput
@@ -69,6 +70,7 @@ simple TcpConnection extends SimpleModule {
         @statistic[rcvOooSeg](record=vector; interpolationmode=sample-hold);    // Number of received out-of-order segments
         @statistic[rcvNASeg](record=vector; interpolationmode=sample-hold);    // Number of received not acceptable segments
         @statistic[sackedBytes](record=vector; interpolationmode=sample-hold);    // Current number of received sacked bytes
+        @statistic[delivered](record=vector; interpolationmode=sample-hold);    // Cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
         @statistic[tcpRcvQueueBytes](record=vector; interpolationmode=sample-hold);    // Current amount of used bytes in tcp receive queue
         @statistic[tcpRcvQueueDrops](record=vector; interpolationmode=sample-hold);    // Number of drops in tcp receive queue
         @statistic[tcpRcvPayloadBytes](record=vector; interpolationmode=sample-hold);    // Current amount of payload bytes received (including duplicates, out of order etc) for TCP throughput

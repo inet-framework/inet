@@ -38,6 +38,7 @@ simsignal_t TcpConnection::rcvSacksSignal = registerSignal("rcvSacks"); // numbe
 simsignal_t TcpConnection::rcvOooSegSignal = registerSignal("rcvOooSeg"); // number of received out-of-order segments
 simsignal_t TcpConnection::rcvNASegSignal = registerSignal("rcvNASeg"); // number of received not acceptable segments
 simsignal_t TcpConnection::sackedBytesSignal = registerSignal("sackedBytes"); // current number of received sacked bytes
+simsignal_t TcpConnection::deliveredSignal = registerSignal("delivered"); // cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
 simsignal_t TcpConnection::tcpRcvQueueBytesSignal = registerSignal("tcpRcvQueueBytes"); // current amount of used bytes in tcp receive queue
 simsignal_t TcpConnection::tcpRcvQueueDropsSignal = registerSignal("tcpRcvQueueDrops"); // number of drops in tcp receive queue
 simsignal_t TcpConnection::tcpRcvPayloadBytesSignal = registerSignal("tcpRcvPayloadBytes"); // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput

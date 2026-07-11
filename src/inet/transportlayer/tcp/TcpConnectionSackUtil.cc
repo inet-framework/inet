@@ -117,6 +117,14 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
 
         emit(sackedBytesSignal, state->sackedBytes);
 
+        // delivered-bytes accounting (RFC 8985/6937): count bytes newly SACKed by
+        // this segment. Cumulatively-acked bytes are counted separately where
+        // snd_una advances (process_ACK).
+        if (state->sackedBytes > state->sackedBytes_old) {
+            state->deliveredBytes += state->sackedBytes - state->sackedBytes_old;
+            emit(deliveredSignal, (unsigned long)state->deliveredBytes);
+        }
+
         // RACK time-based loss detection runs on every ACK carrying new SACK info
         if (state->lossDetectionMode == 1)
             rackDetectAndMarkLost();

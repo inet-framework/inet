@@ -1211,6 +1211,13 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
 
         emit(unackedSignal, state->snd_max - state->snd_una);
 
+        // delivered-bytes accounting (RFC 8985/6937): count the newly cumulatively
+        // acknowledged bytes (the newly-SACKed part is counted in processSACKOption).
+        if (seqGreater(state->snd_una, old_snd_una)) {
+            state->deliveredBytes += state->snd_una - old_snd_una;
+            emit(deliveredSignal, (unsigned long)state->deliveredBytes);
+        }
+
         // after retransmitting a lost segment, we may get an ack well ahead of snd_nxt
         if (seqLess(state->snd_nxt, state->snd_una))
             state->snd_nxt = state->snd_una;
