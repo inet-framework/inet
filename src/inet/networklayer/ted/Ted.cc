@@ -229,11 +229,22 @@ Ipv4AddressVector Ted::calculateShortestPath(Ipv4AddressVector dest,
         const TeLinkStateInfoVector& topology, double req_bandwidth, int priority,
         uint32_t includeAny, uint32_t excludeAny)
 {
+    // Thin wrapper over the explicit-root overload below, rooted at this Ted instance's own
+    // routerId -- behavior-identical to what this function always did (Workstream F2's
+    // explicit-root extension only ADDS a way to root elsewhere; every existing caller here
+    // keeps getting exactly the same root it always implicitly used).
+    return calculateShortestPath(routerId, dest, topology, req_bandwidth, priority, includeAny, excludeAny);
+}
+
+Ipv4AddressVector Ted::calculateShortestPath(Ipv4Address root, Ipv4AddressVector dest,
+        const TeLinkStateInfoVector& topology, double req_bandwidth, int priority,
+        uint32_t includeAny, uint32_t excludeAny)
+{
     // Run the constrained Bellman-Ford below, then pick the CLOSEST reachable vertex that is
     // a member of `dest` (a destination address SET -- e.g. several advertised interface
     // addresses of the same egress router all count), and walk parent pointers back to the
     // root to build the full hop list root..dest.
-    std::vector<Vertex> V = calculateShortestPaths(topology, req_bandwidth, priority, includeAny, excludeAny);
+    std::vector<Vertex> V = calculateShortestPaths(root, topology, req_bandwidth, priority, includeAny, excludeAny);
 
     double minDist = LS_INFINITY;
     int minIndex = -1;
@@ -279,7 +290,7 @@ void Ted::rebuildRoutingTable()
 
     EV_INFO << "rebuilding routing table at " << routerId << endl;
 
-    std::vector<Vertex> V = calculateShortestPaths(ted, 0.0, 7);
+    std::vector<Vertex> V = calculateShortestPaths(routerId, ted, 0.0, 7);
 
     // remove all routing entries, except multicast ones (we don't care about them)
     int n = rt->getNumRoutes();
@@ -381,7 +392,7 @@ bool Ted::isLocalPeer(Ipv4Address inetAddr)
     return false;
 }
 
-std::vector<Ted::Vertex> Ted::calculateShortestPaths(const TeLinkStateInfoVector& topology,
+std::vector<Ted::Vertex> Ted::calculateShortestPaths(Ipv4Address root, const TeLinkStateInfoVector& topology,
         double req_bandwidth, int priority, uint32_t includeAny, uint32_t excludeAny)
 {
     std::vector<Vertex> vertices;
@@ -412,7 +423,7 @@ std::vector<Ted::Vertex> Ted::calculateShortestPaths(const TeLinkStateInfoVector
         edges.push_back(edge);
     }
 
-    Ipv4Address srcAddr = routerId;
+    Ipv4Address srcAddr = root;
 
     int srcIndex = assignIndex(vertices, srcAddr);
     vertices[srcIndex].dist = 0.0;
