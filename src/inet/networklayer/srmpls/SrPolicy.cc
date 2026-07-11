@@ -70,7 +70,40 @@ bool SrPolicy::lookupLabel(Packet *packet, LabelOpVector& outLabel, int& outInte
     if (!best)
         return false;
 
-    return resolveSegmentList(best->segments, outLabel, outInterfaceId);
+    if (!resolveSegmentList(best->segments, outLabel, outInterfaceId))
+        return false;
+
+    // Workstream F3 (6PE-lite): a node-SID label is shared by ALL traffic destined to that
+    // node, of either family -- SegmentRouting installs exactly one, family-agnostic PHP POP
+    // LIB entry per node-SID (see SegmentRouting.cc), so unlike Phase 1's per-FEC LIB entries
+    // (LDP/RSVP-TE/static XML, where one entry = one FEC = one family), the popping router's
+    // own LIB entry cannot carry a payload protocol that is correct for BOTH families sharing
+    // the label. Baking payloadProtocol into that shared entry was therefore never viable for
+    // SR: it would silently mislabel the OTHER family the moment both rode the same node-SID.
+    //
+    // RFC 3032's IPv6 Explicit NULL label exists for exactly this kind of demultiplexing.
+    // Push it as the INNERMOST label -- beneath every node:/adj: segment resolveSegmentList()
+    // just produced -- so it rides through every transit PHP pop untouched: Mpls::popLabel()
+    // only stamps a payload protocol when the popped label is bottom-of-stack, and a non-
+    // bottom pop leaves the packet mpls-tagged and simply forwarded via the resolved
+    // outInterfaceId (Mpls::processMplsPacketFromL2's "still mpls" branch) -- no transit
+    // router needs to know or care that IPv6 is underneath. Only once this label reaches the
+    // bottom of the stack, at the true egress, does Mpls's existing IPV6_EXPLICIT_NULL_LABEL
+    // handling (Workstream F3 Phase 2, unused until now) pop it and correctly stamp
+    // Protocol::ipv6 -- regardless of what the egress's OWN (also family-agnostic) node-SID
+    // LIB entry would have defaulted to.
+    //
+    // IPv4 destinations need no such marker: LibTable's payloadProtocol already defaults to
+    // ipv4, so the family-agnostic node-SID POP entries are correct as-is; this block is
+    // therefore a no-op for every existing (IPv4-only) policy/example.
+    if (destAddress.getType() == L3Address::IPv6 && !outLabel.empty()) {
+        LabelOp explicitNull;
+        explicitNull.optcode = PUSH_OPER;
+        explicitNull.label = IPV6_EXPLICIT_NULL_LABEL;
+        outLabel.insert(outLabel.begin(), explicitNull);
+    }
+
+    return true;
 }
 
 bool SrPolicy::resolveSegmentList(const std::vector<Segment>& segments, LabelOpVector& outLabel, int& outInterfaceId)

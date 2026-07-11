@@ -83,6 +83,22 @@ import inet.networklayer.mpls.IIngressClassifier;
 // rather than imposing an empty label stack, which ~Mpls's non-empty-
 // outLabel invariant forbids.
 //
+// IPv6 destinations (Workstream F3, 6PE-lite): a node-SID label is shared by
+// ALL traffic destined to that node, of either family -- ~SegmentRouting
+// installs one family-agnostic PHP POP LIB entry per node-SID, unlike Phase
+// 1's per-FEC LIB entries (Ldp/RsvpTe/static XML), where one entry = one FEC
+// = one family. So whenever a matched policy's destination is IPv6 (and the
+// resolved stack is non-empty), ~SrPolicy pushes an extra, INNERMOST label:
+// RFC 3032's IPv6 Explicit NULL (label value 2). It rides underneath every
+// node:/adj: segment, surviving every transit PHP pop untouched (a non-
+// bottom pop never stamps a payload protocol -- see ~Mpls::popLabel()), and
+// is only actually processed once it reaches the bottom of the stack at the
+// true egress, where ~Mpls's IPV6_EXPLICIT_NULL_LABEL handling pops it and
+// correctly stamps Protocol::ipv6, regardless of what the egress's own
+// (also family-agnostic) node-SID LIB entry would have defaulted to. IPv4
+// destinations need no such marker: LibTable's payloadProtocol already
+// defaults to ipv4.
+//
 // Limitations (deliberate simplifications of this model, see F1's plan):
 // - "adj:<interfaceName>" ALWAYS resolves against the CO-LOCATED
 //   ~SegmentRouting module's OWN local adjacency-SID table -- i.e. it can
