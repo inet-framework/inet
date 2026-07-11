@@ -1,10 +1,12 @@
 %description:
 Byte-exact round-trip serialization of RSVP-TE packets (RFC 2205, RFC 3209, RFC 2210):
 the common message header (Section 3.1.2), Path (with a multi-hop ERO), PathTear,
-PathErr, Resv (with 2 flow descriptors, one carrying an RRO), ResvTear, ResvErr, and
-Hello (request and ack). Verifies serialize->bytes->deserialize reproduces the fields
-and the expected on-wire lengths, cross-checked against the B(...) length constants
-in RsvpTe.cc's compute*MessageLength() helpers.
+PathErr, Resv (with 2 flow descriptors, one carrying an RRO), ResvTear, ResvErr,
+Hello (request and ack), and (Workstream C8, RFC 2961 refresh reduction) a
+MESSAGE_ID-bearing Path, a MESSAGE_ID-bearing Resv, and Srefresh (with and without
+a piggybacked MESSAGE_ID_ACK/_NACK). Verifies serialize->bytes->deserialize
+reproduces the fields and the expected on-wire lengths, cross-checked against the
+B(...) length constants in RsvpTe.cc's compute*MessageLength() helpers.
 
 %includes:
 #include "inet/common/packet/Packet.h"
@@ -12,6 +14,7 @@ in RsvpTe.cc's compute*MessageLength() helpers.
 #include "inet/networklayer/rsvpte/RsvpHelloMsg_m.h"
 #include "inet/networklayer/rsvpte/RsvpPathMsg_m.h"
 #include "inet/networklayer/rsvpte/RsvpResvMsg_m.h"
+#include "inet/networklayer/rsvpte/RsvpSrefreshMsg_m.h"
 
 using namespace inet;
 
@@ -346,6 +349,133 @@ static const double BW = 1000000.0;
         ASSERT(h2->getAck() == !isRequest);
         ASSERT(h2->getSrcInstance() == 111);
         ASSERT(h2->getDstInstance() == 222);
+    }
+    EV << "  PASS" << endl;
+}
+
+// === 9. Path carrying a MESSAGE_ID + piggybacked MESSAGE_ID_ACK (Workstream C8) ===
+{
+    EV << "=== Path with MESSAGE_ID + MESSAGE_ID_ACK ===" << endl;
+    auto pm = makeShared<RsvpPathMsg>();
+    pm->setRsvpKind(PATH_MESSAGE);
+    pm->setSession(makeSession(Ipv4Address("10.0.0.20"), 2, 200));
+    pm->setHop(makeHop(Ipv4Address("10.0.0.3"), Ipv4Address("10.0.0.4")));
+    pm->setRefreshPeriod(15000);
+    LabelRequestObj lr; lr.l3pid = 0x0800;
+    pm->setLabel_request(lr);
+    pm->setERO(EroVector());
+    SenderDescriptor_t sd;
+    sd.Sender_Template_Object.SrcAddress = Ipv4Address("10.0.0.6");
+    sd.Sender_Template_Object.Lsp_Id = 42;
+    sd.Sender_Tspec_Object.req_bandwidth = BW;
+    pm->setSender_descriptor(sd);
+    pm->setHasMessageId(true);
+    pm->setMessageIdEpoch(123456789u);
+    pm->setMessageId(7u);
+    pm->setHasMessageIdAck(true);
+    pm->setMessageIdNack(true);
+    pm->setAckedMessageIdEpoch(987654321u);
+    pm->setAckedMessageId(3u);
+    // same base as test 2 (100) + MESSAGE_ID(12) + MESSAGE_ID_ACK(12) = 124
+    pm->setChunkLength(B(124));
+
+    Packet pkt("sz"); pkt.insertAtFront(pm);
+    ASSERT(pkt.getDataLength() == B(124));
+    auto p2 = dynamicPtrCast<const RsvpPathMsg>(roundTrip(staticPtrCast<const RsvpPathMsg>(pm)));
+    ASSERT(p2 != nullptr);
+    ASSERT(p2->getHasMessageId() == true);
+    ASSERT(p2->getMessageIdEpoch() == 123456789u);
+    ASSERT(p2->getMessageId() == 7u);
+    ASSERT(p2->getHasMessageIdAck() == true);
+    ASSERT(p2->getMessageIdNack() == true);
+    ASSERT(p2->getAckedMessageIdEpoch() == 987654321u);
+    ASSERT(p2->getAckedMessageId() == 3u);
+    EV << "  PASS" << endl;
+}
+
+// === 10. Resv (single flow, no RRO) carrying a MESSAGE_ID, no ack (Workstream C8) ===
+// Exercises deserializeFlowDescriptorList()'s peekClassNum(CLASSNUM_FLOWSPEC) stop
+// condition: without it, the trailing MESSAGE_ID object would be misread as another
+// flow descriptor.
+{
+    EV << "=== Resv with MESSAGE_ID ===" << endl;
+    auto rm = makeShared<RsvpResvMsg>();
+    rm->setRsvpKind(RESV_MESSAGE);
+    rm->setSession(makeSession(Ipv4Address("10.0.0.10"), 1, 100));
+    rm->setHop(makeHop(Ipv4Address("10.0.0.2"), Ipv4Address("10.0.0.1")));
+    rm->setRefreshPeriod(30000);
+
+    FlowDescriptorVector flows;
+    FlowDescriptor_t f1;
+    f1.Flowspec_Object.req_bandwidth = BW;
+    f1.Filter_Spec_Object.SrcAddress = Ipv4Address("10.0.0.5");
+    f1.Filter_Spec_Object.Lsp_Id = 7;
+    f1.label = 1001;
+    flows.push_back(f1);
+    rm->setFlowDescriptor(flows);
+
+    rm->setHasMessageId(true);
+    rm->setMessageIdEpoch(111222333u);
+    rm->setMessageId(5u);
+    // CommonHdr(8)+SESSION(16)+RSVP_HOP(12)+TIME_VALUES(8)+STYLE(8) = 52
+    // flow: FLOWSPEC(36)+FILTER_SPEC(12)+LABEL(8) = 56 (no RRO)
+    // + MESSAGE_ID(12) = 120
+    rm->setChunkLength(B(120));
+
+    Packet pkt("sz"); pkt.insertAtFront(rm);
+    ASSERT(pkt.getDataLength() == B(120));
+    auto r2 = dynamicPtrCast<const RsvpResvMsg>(roundTrip(staticPtrCast<const RsvpResvMsg>(rm)));
+    ASSERT(r2 != nullptr);
+    ASSERT(r2->getFlowDescriptor().size() == 1);
+    ASSERT(r2->getFlowDescriptor()[0].label == 1001);
+    ASSERT(r2->getHasMessageId() == true);
+    ASSERT(r2->getMessageIdEpoch() == 111222333u);
+    ASSERT(r2->getMessageId() == 5u);
+    ASSERT(r2->getHasMessageIdAck() == false);
+    EV << "  PASS" << endl;
+}
+
+// === 11. Srefresh, with and without a piggybacked MESSAGE_ID_ACK/_NACK (Workstream C8) ===
+{
+    EV << "=== Srefresh ===" << endl;
+    {
+        auto sm = makeShared<RsvpSrefreshMsg>();
+        sm->setRsvpKind(SREFRESH_MESSAGE);
+        sm->setMessageIdEpoch(42u);
+        sm->setMessageId(9u);
+        // CommonHdr(8) + MESSAGE_ID(12) = 20
+        sm->setChunkLength(B(20));
+
+        Packet pkt("sz"); pkt.insertAtFront(sm);
+        ASSERT(pkt.getDataLength() == B(20));
+        auto s2 = dynamicPtrCast<const RsvpSrefreshMsg>(roundTrip(staticPtrCast<const RsvpSrefreshMsg>(sm)));
+        ASSERT(s2 != nullptr);
+        ASSERT(s2->getRsvpKind() == SREFRESH_MESSAGE);
+        ASSERT(s2->getMessageIdEpoch() == 42u);
+        ASSERT(s2->getMessageId() == 9u);
+        ASSERT(s2->getHasMessageIdAck() == false);
+    }
+    {
+        auto sm = makeShared<RsvpSrefreshMsg>();
+        sm->setRsvpKind(SREFRESH_MESSAGE);
+        sm->setMessageIdEpoch(42u);
+        sm->setMessageId(10u);
+        sm->setHasMessageIdAck(true);
+        sm->setMessageIdNack(false);
+        sm->setAckedMessageIdEpoch(555u);
+        sm->setAckedMessageId(1u);
+        // CommonHdr(8) + MESSAGE_ID(12) + MESSAGE_ID_ACK(12) = 32
+        sm->setChunkLength(B(32));
+
+        Packet pkt("sz"); pkt.insertAtFront(sm);
+        ASSERT(pkt.getDataLength() == B(32));
+        auto s2 = dynamicPtrCast<const RsvpSrefreshMsg>(roundTrip(staticPtrCast<const RsvpSrefreshMsg>(sm)));
+        ASSERT(s2 != nullptr);
+        ASSERT(s2->getMessageId() == 10u);
+        ASSERT(s2->getHasMessageIdAck() == true);
+        ASSERT(s2->getMessageIdNack() == false);
+        ASSERT(s2->getAckedMessageIdEpoch() == 555u);
+        ASSERT(s2->getAckedMessageId() == 1u);
     }
     EV << "  PASS" << endl;
 }
