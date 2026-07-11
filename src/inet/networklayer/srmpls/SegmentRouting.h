@@ -44,9 +44,25 @@ class INET_API SegmentRouting : public RoutingProtocolBase, public cListener
     // Per-destination TI-LFA repair label stack, computed by computeTiLfaRepairs() whenever
     // tiLfa is true and recomputeAndInstall() runs. A destination with NO entry here (or an
     // empty LabelOpVector) is UNPROTECTED: no repair within maxRepairStackDepth was found (see
-    // computeTiLfaRepairs()'s doc). Populated but not yet consumed by anything in this phase --
-    // Phase 3 wires this into LibTable::setBackup()/activateBackup() on local link failure.
+    // computeTiLfaRepairs()'s doc).
     std::map<Ipv4Address, LabelOpVector> tiLfaRepairByRouter;
+
+    // dest -> the protected neighbor (this router's current next hop toward dest) that
+    // tiLfaRepairByRouter[dest] guards against. Populated in lock-step with
+    // tiLfaRepairByRouter by computeTiLfaRepairs(); consumed by handleOwnLinkStateChange() to
+    // decide which destinations' backups to (de)activate when a specific local link flips.
+    std::map<Ipv4Address, Ipv4Address> tiLfaProtectedNeighborByRouter;
+
+    // dest -> the local interface id this router should forward the repaired packet out of,
+    // i.e. the next hop toward the repair's first/outermost segment target (the PQ node in
+    // Case 1; P in Case 2), computed over the protected-link-excluded topology. Populated in
+    // lock-step with tiLfaRepairByRouter by computeTiLfaRepairs(); this is exactly the
+    // backupOutInterfaceId LibTable::setBackup() needs.
+    std::map<Ipv4Address, int> tiLfaBackupOutInterfaceByRouter;
+
+    // Destinations whose TI-LFA backup is currently ACTIVE (LibTable::activateBackup(label,
+    // true) has been called and not yet reverted), maintained by handleOwnLinkStateChange().
+    std::set<Ipv4Address> tiLfaActiveDestinations;
 
     // parsed from the "sidTable" XML parameter: router id -> node-SID index
     std::map<Ipv4Address, int> sidByRouter;
@@ -146,6 +162,47 @@ class INET_API SegmentRouting : public RoutingProtocolBase, public cListener
     // format "TI-LFA repair for <dest> via <protectedNeighbor>: <segment list>" (or "UNPROTECTED"
     // for the no-repair case), which is what the module tests assert against.
     virtual void computeTiLfaRepairs();
+
+    // Core of computeTiLfaRepairs(), factored out so handleOwnLinkStateChange() (Phase 3) can
+    // also ask "what would the repair be if THIS SPECIFIC link were the protected one", for a
+    // link/destination pair that computeTiLfaRepairs()'s own current-shortest-path-driven loop
+    // would no longer pick (e.g. once that link has already failed and traffic has moved off
+    // it). Returns true and fills outRepair/outBackupOutInterfaceId/outDescription if a Case-1
+    // (PQ node) or Case-2 (P/Q bridge, within maxRepairStackDepth) repair exists; returns false
+    // (outputs untouched) otherwise.
+    virtual bool findTiLfaRepair(Ipv4Address dest, Ipv4Address protectedNeighbor,
+            const TeLinkStateInfoVector& topology, LabelOpVector& outRepair,
+            int& outBackupOutInterfaceId, std::string& outDescription);
+
+    // Helper for computeTiLfaRepairs(): resolves the local outgoing interface id toward the
+    // NEXT HOP on the shortest path (over `excludedTopology`, i.e. with the protected link
+    // already excluded) from this router to `firstHopTarget` -- the repair's first/outermost
+    // segment target (the PQ node in Case 1; P in Case 2). This is exactly the interface the
+    // repaired, backup-labeled packet must actually be forwarded out of.
+    virtual int resolveBackupOutInterfaceId(Ipv4Address firstHopTarget, const TeLinkStateInfoVector& excludedTopology);
+
+    // TI-LFA activation trigger (Phase 3): reacts to a LOCAL link's up/down transition (the
+    // peer at the far end is peerRouterId) by activating/reverting the precomputed backups that
+    // specifically guard against this link. Called from receiveSignal() for tedChangedSignal,
+    // AFTER recomputeAndInstall() has already run for this same signal. No-op if tiLfa is false.
+    //
+    // Ted::setLinkState() flips ted[index].state on its very first line, before
+    // rebuildRoutingTable() fires any signal at all -- so by the time ANY handler in this
+    // cascade runs (including this one), ted[] already reflects the POST-failure topology; a
+    // snapshot taken earlier in the same cascade would already be stale too (confirmed
+    // empirically: an earlier snapshot-based design silently never found anything to activate).
+    // So for a link going DOWN (up==false), this method does not rely on any snapshot: it
+    // reconstructs a topology with exactly this link forced back to "up" (everything else left
+    // as ted[] has it now, post-failure), uses that to find which destinations used to route
+    // via peerRouterId, and passes that SAME reconstructed topology to findTiLfaRepair() as the
+    // reference "full" topology -- P-space/Q-space's distance-preserving comparisons need a
+    // genuinely-up baseline; the real post-failure ted[] would make excluding the
+    // (already-excluded) link a no-op, trivially satisfying the check for every node and
+    // silently discarding RFC 9855's actual constraint. For a link coming back UP, no
+    // reconstruction is needed:
+    // recomputeAndInstall() just restored the ORIGINAL protectedNeighbor mapping, so the current
+    // (member) tiLfaProtectedNeighborByRouter already matches what revert needs.
+    virtual void handleOwnLinkStateChange(Ipv4Address peerRouterId, bool up);
 
     // Nodes N (root included, trivially) whose shortest-path COST from `root` is UNCHANGED
     // between `fullTopology` (the real, unfiltered topology) and `filteredTopology` (typically

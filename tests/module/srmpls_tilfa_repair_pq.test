@@ -1,9 +1,7 @@
 %description:
-Module test for TI-LFA (RFC 9855) repair-stack COMPUTATION only (Workstream F2, Phase 2) --
-no link failure is triggered here (that's a later phase's job, wiring the computed repairs
-into LibTable::setBackup()/activateBackup()). This test locks in that ~SegmentRouting, with
-`tiLfa=true`, correctly finds a single-segment (PQ node) repair over a real, flooded,
-multi-router network -- not just a hand-built unit-test harness.
+Module test for TI-LFA (RFC 9855) repair-stack computation (Workstream F2, Phase 2) AND
+activation/revert on an actual local link failure (Phase 3, wiring the computed repairs into
+LibTable::setBackup()/activateBackup() via SegmentRouting::handleOwnLinkStateChange()).
 
 Topology (a "diamond"): A(1.1.1.1) -- B(2.2.2.2) -- D(4.4.4.4), and also A -- C(3.3.3.3) -- D,
 all links metric 1. A's shortest path to D is via B (cost 2); the A-C-D branch (also cost 2)
@@ -27,10 +25,22 @@ a valid, but less interesting, PQ node in this topology).
 Expected repair for destination D, protecting the A-B link: a SINGLE node-SID segment, C's
 label (16003) -- logged as "TI-LFA repair for 4.4.4.4 via 2.2.2.2: [PUSH 16003 (3.3.3.3)]".
 
+Phase 3 activation: a ~ScenarioManager severs A's link to B at t=1s (the same
+<disconnect src-module=".." src-gate=".."/> idiom as sr_reroute.test -- Ted's existing
+"trackInterfaceState" hook, already true by default on ~SrMplsRouter, is what turns this
+physical carrier-down event into a Ted::setLinkState() call, same as that other test) and
+restores it at t=2s. No traffic is sent -- Phase 2's test already proved the computation
+itself against a real, flooded network, and the log lines below are a genuine, direct
+assertion of the activation/revert wiring itself, not an indirect inference from delivery
+counts. Asserted purely via the "TI-LFA: activated backup"/"TI-LFA: reverted backup" EV_INFO
+log lines this phase's handleOwnLinkStateChange() emits: activation for D (4.4.4.4) once the
+A-B link goes down, and revert once it comes back up.
+
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
 import inet.node.mpls.SrMplsRouter;
+import inet.common.scenario.ScenarioManager;
 import ned.DatarateChannel;
 
 network TiLfaRepairPqTest
@@ -44,6 +54,7 @@ network TiLfaRepairPqTest
             delay = 10us;
         }
     submodules:
+        scenarioManager: ScenarioManager;
         A: SrMplsRouter {
             parameters:
                 routerId = "1.1.1.1";
@@ -126,12 +137,29 @@ name: ppp1	inet_addr: 10.0.1.8	MTU: 1500	Metric: 1
 ifconfigend.
 
 %#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<scenario>
+    <at t="1s">
+        <disconnect src-module="A" src-gate="pppg$o[0]"/>
+        <disconnect src-module="B" src-gate="pppg$o[0]"/>
+    </at>
+    <at t="2s">
+        <connect src-module="A" src-gate="pppg[0]"
+                 dest-module="B" dest-gate="pppg[0]"
+                 channel-type="ned.DatarateChannel">
+            <param name="delay" value="10us"/>
+            <param name="datarate" value="1Mbps"/>
+        </connect>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
 [General]
 ned-path = .;../../../../src
 network = TiLfaRepairPqTest
-sim-time-limit = 2s
+sim-time-limit = 3s
 total-stack = 64MiB
 record-vector-results = false
 cmdenv-express-mode = false
@@ -146,10 +174,25 @@ output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
 **.ppp[*].queue.typename = "DropTailQueue"
 **.ppp[*].queue.packetCapacity = 10
 
+**.scenarioManager.script = xmldoc("scenario.xml")
+
 %#--------------------------------------------------------------------------------------------------------------
-%# A single node-SID segment (C's label, 16003) repairs destination D against the A-B link.
+%# A single node-SID segment (C's label, 16003) repairs destination D against the A-B link,
+%# computed BEFORE any failure happens (Phase 2's computation, still exercised here).
 %contains: stdout
 TI-LFA repair for 4.4.4.4 via 2.2.2.2: [PUSH 16003 (3.3.3.3)]
+%#--------------------------------------------------------------------------------------------------------------
+%# The failure is actually injected
+%contains: stdout
+Disconnecting TiLfaRepairPqTest.A.pppg$o[0]
+%#--------------------------------------------------------------------------------------------------------------
+%# Phase 3: A activates the precomputed backup for D as soon as its link to B (2.2.2.2) dies
+%contains: stdout
+TI-LFA: activated backup for 4.4.4.4 (protected link to 2.2.2.2 went down)
+%#--------------------------------------------------------------------------------------------------------------
+%# ... and reverts it once the A-B link comes back up
+%contains: stdout
+TI-LFA: reverted backup for 4.4.4.4 (protected link to 2.2.2.2 came back up)
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
