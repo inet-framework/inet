@@ -27,8 +27,10 @@ namespace inet {
 class INET_API LdpPacketSerializer : public FieldsChunkSerializer
 {
   private:
-    // RFC 5036 Section 3.4.1: FEC TLV (type 0x0100) carrying a single
-    // Address Prefix FEC Element (element type 2, address family 1/IP).
+    // RFC 5036 Section 3.4.1: FEC TLV (type 0x0100) carrying a single Address
+    // Prefix FEC Element (element type 2). Dual-stack (Workstream F3 Phase 5):
+    // the Address Family field is 1 (IPv4, 4-byte prefix) or, per RFC 7552
+    // Section 3.1, 2 (IPv6, 16-byte prefix).
     static void serializeFecTlv(MemoryOutputStream& stream, const FecTlv& fec);
     static FecTlv deserializeFecTlv(MemoryInputStream& stream);
 

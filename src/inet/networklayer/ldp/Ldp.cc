@@ -12,12 +12,15 @@
 #include <iostream>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/ted/Ted.h"
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
@@ -40,6 +43,17 @@ std::ostream& operator<<(std::ostream& os, const Ldp::FecBinding& f)
 bool fecPrefixCompare(const Ldp::Fec& a, const Ldp::Fec& b)
 {
     return a.length > b.length;
+}
+
+// Dual-stack (Workstream F3 Phase 5): every LibTable::installLibEntry()/
+// installReservedLabel() call this module makes must tag the LIB entry with the
+// correct payload protocol for the FEC it serves -- LibTable defaults to
+// &Protocol::ipv4 (pre-Phase-5, LDP never installed anything else), which silently
+// mislabels an IPv6 FEC's entries and crashes Mpls::popLabel()'s caller the moment
+// that entry is used (it reinterprets the popped IPv6 bytes as an Ipv4Header).
+static const Protocol *ldpPayloadProtocolFor(const L3Address& addr)
+{
+    return addr.getType() == L3Address::IPv6 ? &Protocol::ipv6 : &Protocol::ipv4;
 }
 
 std::ostream& operator<<(std::ostream& os, const Ldp::Fec& f)
@@ -138,6 +152,10 @@ void Ldp::initialize(int stage)
 
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        // Dual-stack (Workstream F3 Phase 5): optional -- a plain IPv4-only router
+        // (hasIpv6=false, the default) has no Ipv6RoutingTable submodule at all, so
+        // this reference stays null and rebuildFecList()'s IPv6 loop never runs.
+        rt6.reference(this, "routingTableModule6", false);
         lt.reference(this, "libTableModule", true);
         tedmod.reference(this, "tedModule", true);
 
@@ -448,7 +466,7 @@ void Ldp::sendAddress(Ipv4Address dest)
     EV_INFO << endl;
 }
 
-void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length, uint8_t hopCount, const std::vector<Ipv4Address>& pathVector)
+void Ldp::sendMappingRequest(Ipv4Address dest, L3Address addr, int length, uint8_t hopCount, const std::vector<Ipv4Address>& pathVector)
 {
     if (!isPeerOperational(dest)) {
         EV_WARN << "not sending Label Request to " << dest << ": session is not OPERATIONAL\n";
@@ -457,7 +475,7 @@ void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length, uin
 
     Packet *pk = new Packet("Lb-Req");
     const auto& requestMsg = makeShared<LdpLabelRequest>();
-    B chunkLength = LDP_LABEL_REQUEST_BYTES;
+    B chunkLength = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + ldpFecTlvBytes(addr);
     requestMsg->setType(LABEL_REQUEST);
 
     FecTlv fec;
@@ -547,7 +565,7 @@ void Ldp::duAdvertiseToPeer(const Ldp::Fec& fec, Ipv4Address peer)
             }
         }
         else if (uit == fecUp.end()) {
-            label = lt->installLibEntry(-1, inInterface, outLabel, outInterface);
+            label = lt->installLibEntry(-1, inInterface, outLabel, outInterface, ldpPayloadProtocolFor(fec.addr));
             FecBinding newItem;
             newItem.fecid = fec.fecid;
             newItem.peer = peer;
@@ -563,17 +581,17 @@ void Ldp::duAdvertiseToPeer(const Ldp::Fec& fec, Ipv4Address peer)
             // reservation must be completed at that SAME label (already on the
             // wire); a former implicit-null needs a brand new real label instead
             if (uit->installed) // i.e. was implicit-null
-                label = lt->installLibEntry(-1, inInterface, outLabel, outInterface);
+                label = lt->installLibEntry(-1, inInterface, outLabel, outInterface, ldpPayloadProtocolFor(fec.addr));
             else {
                 label = uit->label;
-                lt->installReservedLabel(label, inInterface, outLabel, outInterface);
+                lt->installReservedLabel(label, inInterface, outLabel, outInterface, ldpPayloadProtocolFor(fec.addr));
             }
             uit->label = label;
             uit->installed = true;
         }
         else {
             // already installed (e.g. a prior next hop): refresh the swap target
-            label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
+            label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, ldpPayloadProtocolFor(fec.addr));
             uit->label = label;
         }
 
@@ -708,7 +726,7 @@ void Ldp::updateFecListEntry(Ldp::Fec oldItem)
             else {
                 // we are egress, that's easy:
                 LabelOpVector outLabel = LibTable::popLabel();
-                uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
+                uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, ldpPayloadProtocolFor(oldItem.addr));
 
                 EV_DETAIL << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
                           << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
@@ -721,7 +739,7 @@ void Ldp::updateFecListEntry(Ldp::Fec oldItem)
             // label, in which case we are the penultimate hop and must pop
             // rather than swap to label 3
             LabelOpVector outLabel = (dit->label == IMPLICIT_NULL_LABEL) ? LibTable::popLabel() : LibTable::swapLabel(dit->label);
-            uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
+            uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, ldpPayloadProtocolFor(oldItem.addr));
 
             EV_DETAIL << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
                       << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
@@ -792,6 +810,74 @@ void Ldp::rebuildFecList()
             fecList.push_back(*it);
             oldList.erase(it);
             continue;
+        }
+    }
+
+    // Dual-stack (Workstream F3 Phase 5, RFC 7552): IPv6 FEC advertisement over this
+    // (IPv4-transport) LDP session. rt6 is null on a plain IPv4-only router (no
+    // Ipv6RoutingTable submodule at all -- see routingTableModule6 in Ldp.ned), in
+    // which case this loop is a complete no-op and fecList (hence this router's
+    // fingerprint) is entirely unaffected by this feature's existence.
+    if (rt6) {
+        for (int i = 0; i < rt6->getNumRoutes(); i++) {
+            const Ipv6Route *re = rt6->getRoute(i);
+
+            // ignore multicast destinations, same as the IPv4 loop above; also skip
+            // link-local/loopback destinations, which are never meaningful FEC
+            // targets (never the "far side" of an LSP)
+            const Ipv6Address& destPrefix = re->getDestPrefix();
+            if (destPrefix.isMulticast() || destPrefix.isLinkLocal() || destPrefix.isLoopback())
+                continue;
+
+            NetworkInterface *outIe = re->getInterface();
+            if (!outIe)
+                continue; // no egress interface recorded for this route: cannot resolve a peer for it
+
+            // Fec::nextHop stays an Ipv4Address LDP peer identifier, never the FEC's
+            // real (IPv6) next hop -- resolve it via findIpv4NextHopForInterface(),
+            // i.e. the IPv4 routing table's own idea of "what's out this interface",
+            // exactly mirroring how the IPv4 loop above derives ITS nextHop (a stable
+            // routing-table gateway/destination address, not a live Hello-derived
+            // peer lookup -- see findIpv4NextHopForInterface()'s doc comment for why
+            // that distinction matters). If the egress interface has NO IPv4 route at
+            // all (an IPv6-only link, not present in any shipped example/test), fall
+            // back to our own router ID -- findPeerSocket() can never treat our own
+            // address as a peer, so this reliably still evaluates to "egress" wherever
+            // it's later used (duAdvertiseToPeer's ER check), and
+            // findInterfaceFromPeerAddr() already special-cases a local address to lo0.
+            Ipv4Address nextHop = findIpv4NextHopForInterface(outIe->getInterfaceId());
+            if (nextHop.isUnspecified())
+                nextHop = rt->getRouterId();
+
+            L3Address destAddr = destPrefix;
+            int length = re->getPrefixLength();
+
+            EV_INFO << "IPv6 nextHop <-- " << nextHop << " (dest=" << destAddr << "/" << length << ")" << endl;
+
+            auto it = findFecEntry(oldList, destAddr, length);
+
+            if (it == oldList.end()) {
+                // fec didn't exist, it was just created
+                Fec newItem;
+                newItem.fecid = ++maxFecid;
+                newItem.addr = destAddr;
+                newItem.length = length;
+                newItem.nextHop = nextHop;
+                updateFecListEntry(newItem);
+                fecList.push_back(newItem);
+            }
+            else if (it->nextHop != nextHop) {
+                // next hop for this FEC changed
+                it->nextHop = nextHop;
+                updateFecListEntry(*it);
+                fecList.push_back(*it);
+                oldList.erase(it);
+            }
+            else {
+                // FEC didn't change, reusing old values
+                fecList.push_back(*it);
+                oldList.erase(it);
+            }
         }
     }
 
@@ -1568,6 +1654,31 @@ int Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
     return ie->getInterfaceId();
 }
 
+Ipv4Address Ldp::findIpv4NextHopForInterface(int interfaceId)
+{
+    for (int i = 0; i < rt->getNumRoutes(); i++) {
+        const Ipv4Route *re = rt->getRoute(i);
+        // ignore multicast group-membership routes (e.g. the 224.0.0.0/8 entries this
+        // model's .rt files carry for multicast-capable interfaces) -- never a
+        // meaningful neighbor identity
+        if (re->getDestination().isMulticast())
+            continue;
+        if (!re->getInterface() || re->getInterface()->getInterfaceId() != interfaceId)
+            continue;
+        // only a DIRECTLY CONNECTED route (gateway unspecified, or gateway==destination
+        // -- this model's convention for an ARP-resolvable host route, see the IPv4
+        // loop above) identifies this interface's immediate neighbor; an INDIRECT
+        // (multi-hop) route reached via the same physical interface -- e.g. one
+        // installed once Ted/LinkStateRouting converges -- names a FURTHER router,
+        // never the adjacent one, and must not be mistaken for it
+        Ipv4Address gateway = re->getGateway();
+        if (!gateway.isUnspecified() && gateway != re->getDestination())
+            continue;
+        return gateway.isUnspecified() ? re->getDestination() : gateway;
+    }
+    return Ipv4Address(); // the IPv4 routing table has no direct-neighbor route through this interface
+}
+
 Ldp::FecBindVector::iterator Ldp::findFecEntry(FecBindVector& fecs, int fecid, Ipv4Address peer)
 {
     auto it = fecs.begin();
@@ -1578,10 +1689,17 @@ Ldp::FecBindVector::iterator Ldp::findFecEntry(FecBindVector& fecs, int fecid, I
     return it;
 }
 
-Ldp::FecVector::iterator Ldp::findFecEntry(FecVector& fecs, Ipv4Address addr, int length)
+Ldp::FecVector::iterator Ldp::findFecEntry(FecVector& fecs, L3Address addr, int length)
 {
     auto it = fecs.begin();
     for (; it != fecs.end(); it++) {
+        // Dual-stack (Workstream F3 Phase 5): fecs may hold a MIX of IPv4 and IPv6
+        // entries -- skip cross-family comparisons before matching (L3Address's own
+        // operator== already handles this safely, but skipping first avoids wasting a
+        // comparison and keeps this in line with the same idiom used elsewhere, e.g.
+        // StaticIngressClassifier::lookupLabel()).
+        if (it->addr.getType() != addr.getType())
+            continue;
         if ((it->length == length) && (it->addr == addr)) // TODO compare only relevant part (?)
             break;
     }
@@ -1596,12 +1714,12 @@ bool Ldp::isLoopDetected(uint8_t hopCount, const std::vector<Ipv4Address>& pathV
     return hopCount > pathVectorLimit;
 }
 
-void Ldp::sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length)
+void Ldp::sendNotify(int status, Ipv4Address dest, L3Address addr, int length)
 {
     // Send NOTIFY message
     Packet *packet = new Packet("Lb-Notify");
     const auto& lnMessage = makeShared<LdpNotify>();
-    lnMessage->setChunkLength(LDP_NOTIFICATION_BYTES);
+    lnMessage->setChunkLength(LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_STATUS_TLV_BYTES + ldpFecTlvBytes(addr));
     lnMessage->setType(NOTIFICATION);
     lnMessage->setStatus(status);
     lnMessage->setLsrId(rt->getRouterId());
@@ -1616,7 +1734,7 @@ void Ldp::sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length)
     sendToPeer(dest, packet);
 }
 
-void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, int length, uint8_t hopCount, const std::vector<Ipv4Address>& pathVector)
+void Ldp::sendMapping(int type, Ipv4Address dest, int label, L3Address addr, int length, uint8_t hopCount, const std::vector<Ipv4Address>& pathVector)
 {
     if (!isPeerOperational(dest)) {
         EV_WARN << "not sending LDP label message (type " << type << ") to " << dest << ": session is not OPERATIONAL\n";
@@ -1626,7 +1744,7 @@ void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, i
     // Send LABEL MAPPING downstream
     Packet *packet = new Packet("Lb-Mapping");
     const auto& lmMessage = makeShared<LdpLabelMapping>();
-    B chunkLength = LDP_LABEL_MAPPING_BYTES; // also used for LABEL_WITHDRAW/LABEL_RELEASE (see LDP_LABEL_MAPPING_BYTES)
+    B chunkLength = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + ldpFecTlvBytes(addr) + LDP_GENERIC_LABEL_TLV_BYTES; // also used for LABEL_WITHDRAW/LABEL_RELEASE
     lmMessage->setType(type);
     lmMessage->setLsrId(rt->getRouterId());
     lmMessage->setLabel(label);
@@ -1802,7 +1920,7 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
             // we are egress, that's easy:
             LabelOpVector outLabel = LibTable::popLabel();
 
-            uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
+            uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, ldpPayloadProtocolFor(fec.addr));
 
             EV_DETAIL << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
                       << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
@@ -1819,7 +1937,7 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
         // which case we are the penultimate hop and must pop rather than
         // swap to label 3
         LabelOpVector outLabel = (dit->label == IMPLICIT_NULL_LABEL) ? LibTable::popLabel() : LibTable::swapLabel(dit->label);
-        uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
+        uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, ldpPayloadProtocolFor(fec.addr));
 
         EV_DETAIL << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface
                   << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
@@ -2066,7 +2184,7 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
         FecBinding newItem;
         newItem.fecid = it->fecid;
         newItem.peer = pit->peer;
-        newItem.label = lt->installLibEntry(-1, inInterface, outLabel, outInterface);
+        newItem.label = lt->installLibEntry(-1, inInterface, outLabel, outInterface, ldpPayloadProtocolFor(it->addr));
         fecUp.push_back(newItem);
 
         EV_DETAIL << "installed LIB entry inLabel=" << newItem.label << " inInterface=" << inInterface
@@ -2111,33 +2229,57 @@ TcpSocket *Ldp::getPeerSocket(Ipv4Address peerAddr)
 
 bool Ldp::classifyPacket(Packet *packet, LabelOpVector& outLabel, int& outInterfaceId)
 {
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    Ipv4Address destAddr = ipv4Header->getDestAddress();
-    int protocol = ipv4Header->getProtocolId();
+    // Dual-stack (Workstream F3 Phase 5): the packet's native protocol (ipv4 or ipv6,
+    // both offered to classifiers by Mpls -- see Mpls::processPacketFromL3/
+    // processPacketFromL2) determines how the destination address is extracted; the
+    // IPv4 branch below is byte-for-byte the original (pre-Phase-5) logic, including
+    // its LDP/OSPF control-plane port skip-rules -- those rules are IPv4-transport-only
+    // in this model (LDP's own Hello/session traffic never runs over IPv6), so there is
+    // no IPv6 equivalent to replicate.
+    const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    L3Address destAddr;
 
-    // never match and always route via L3 if:
+    if (protocol == &Protocol::ipv4) {
+        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+        destAddr = ipv4Header->getDestAddress();
+        int ipProtocol = ipv4Header->getProtocolId();
 
-    // OSPF traffic (Ted)
-    if (protocol == IP_PROT_OSPF)
-        return false;
+        // never match and always route via L3 if:
 
-    // LDP traffic (both discovery...
-    if (protocol == IP_PROT_UDP) {
-        const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4Header->getChunkLength());
-        if (udpHeader->getDestinationPort() == LDP_PORT)
+        // OSPF traffic (Ted)
+        if (ipProtocol == IP_PROT_OSPF)
             return false;
+
+        // LDP traffic (both discovery...
+        if (ipProtocol == IP_PROT_UDP) {
+            const auto& udpHeader = packet->peekDataAt<UdpHeader>(ipv4Header->getChunkLength());
+            if (udpHeader->getDestinationPort() == LDP_PORT)
+                return false;
+        }
+        else if (ipProtocol == IP_PROT_TCP) {
+            // ...and session)
+            const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4Header->getChunkLength());
+            if (tcpHeader->getDestPort() == LDP_PORT || tcpHeader->getSrcPort() == LDP_PORT)
+                return false;
+        }
     }
-    else if (protocol == IP_PROT_TCP) {
-        // ...and session)
-        const auto& tcpHeader = packet->peekDataAt<tcp::TcpHeader>(ipv4Header->getChunkLength());
-        if (tcpHeader->getDestPort() == LDP_PORT || tcpHeader->getSrcPort() == LDP_PORT)
-            return false;
+    else if (protocol == &Protocol::ipv6) {
+        destAddr = peekNetworkProtocolHeader(packet, *protocol)->getDestinationAddress();
+    }
+    else {
+        // neither Ipv4 nor Ipv6: this classifier has no FEC table entry for anything else
+        return false;
     }
 
     // regular traffic, classify, label etc.
 
     for (auto& elem : fecList) {
-        if (!destAddr.prefixMatches(elem.addr, elem.length))
+        // fecList may hold a MIX of IPv4 and IPv6 entries; L3Address::matches() throws
+        // if called across mismatched families (see StaticIngressClassifier.cc's
+        // lookupLabel()), so cross-family entries must be skipped first.
+        if (elem.addr.getType() != destAddr.getType())
+            continue;
+        if (!destAddr.matches(elem.addr, elem.length))
             continue;
 
         EV_DETAIL << "FEC matched: " << elem << endl;

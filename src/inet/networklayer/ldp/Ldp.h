@@ -14,6 +14,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/socket/SocketMap.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/ldp/LdpPacket_m.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
@@ -30,7 +31,7 @@ const B LDP_PDU_HEADER_BYTES = B(10);
 const B LDP_MESSAGE_HEADER_BYTES = B(8);
 
 // TLV sizes (4-byte TLV header + value), RFC 5036 Section 3.4
-const B LDP_FEC_TLV_BYTES = B(4 + 8); // one IPv4-prefix FEC element (element type 1 + address family 2 + prefix length 1 + 4 prefix bytes); this model's FecTlv always carries exactly one element
+const B LDP_FEC_TLV_BYTES = B(4 + 8); // one IPv4-prefix FEC element (element type 1 + address family 2 + prefix length 1 + 4 prefix bytes); this model's FecTlv always carries exactly one element. IPv4-baseline size ONLY -- an IPv6 FEC is larger (see ldpFecTlvBytes() below), so any code that sizes a message containing a FecTlv whose family isn't known to be IPv4 must go through ldpFecTlvBytes() instead of this constant directly.
 const B LDP_GENERIC_LABEL_TLV_BYTES = B(8);
 const B LDP_COMMON_HELLO_PARAMETERS_TLV_BYTES = B(8);
 const B LDP_STATUS_TLV_BYTES = B(14);
@@ -52,6 +53,13 @@ const B LDP_ADDRESS_LIST_TLV_HEADER_BYTES = B(4 + 2);
 
 // Model simplification (see Ldp.ned): exactly one message per PDU, so each
 // packet's total length is the PDU header plus one message (message header + TLVs).
+// LDP_LABEL_REQUEST_BYTES/LDP_LABEL_MAPPING_BYTES/LDP_NOTIFICATION_BYTES below are the
+// IPv4-FEC baseline sizes; Ldp::sendMappingRequest/sendMapping/sendNotify compute the
+// actual chunk length via ldpFecTlvBytes() instead of these constants directly, since a
+// FEC's address family isn't known at compile time (RFC 7552 IPv6 FECs, Workstream F3
+// Phase 5) -- ldpFecTlvBytes() returns exactly LDP_FEC_TLV_BYTES for an IPv4 FEC, so
+// these constants remain the correct (and byte-identical) value whenever no IPv6 FEC is
+// involved.
 const B LDP_HELLO_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_COMMON_HELLO_PARAMETERS_TLV_BYTES; // 26 B
 const B LDP_LABEL_REQUEST_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_FEC_TLV_BYTES; // 30 B
 // Label Mapping, and also Label Withdraw/Release (sendMapping() reuses the same wire fields -- FEC + label -- for all three message types)
@@ -59,6 +67,17 @@ const B LDP_LABEL_MAPPING_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTE
 const B LDP_NOTIFICATION_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_STATUS_TLV_BYTES + LDP_FEC_TLV_BYTES; // 44 B; sendNotify() always includes a FEC TLV
 const B LDP_INITIALIZATION_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_COMMON_SESSION_PARAMETERS_TLV_BYTES; // 38 B
 const B LDP_KEEPALIVE_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES; // 18 B; KeepAlive carries no message parameters (RFC 5036 Section 3.5.4)
+
+// Dual-stack (Workstream F3 Phase 5, RFC 7552): the size of a FecTlv on the wire depends
+// on its address family -- LDP_FEC_TLV_BYTES (12 bytes total) for an IPv4 FEC, or 24
+// bytes (4-byte TLV header + 1(elem type) + 2(addr family) + 1(prelen) + 16(prefix)) for
+// an IPv6 one. Used both to size outgoing messages (Ldp::sendMappingRequest/sendMapping/
+// sendNotify) and by LdpPacketSerializer to write the matching on-wire TLV value length,
+// so the two can never drift apart.
+inline B ldpFecTlvBytes(const L3Address& addr)
+{
+    return addr.getType() == L3Address::IPv6 ? B(4 + 1 + 2 + 1 + 16) : LDP_FEC_TLV_BYTES;
+}
 
 // Address/Address Withdraw message length depends on the number of addresses
 // carried (see Ldp::sendAddress); also used by LdpPacketSerializer indirectly
@@ -80,6 +99,7 @@ inline B ldpLoopDetectionTlvBytes(size_t pathVectorLength)
 
 class IInterfaceTable;
 class IIpv4RoutingTable;
+class Ipv6RoutingTable;
 class Ted;
 
 /**
@@ -92,11 +112,18 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     struct Fec {
         int fecid;
 
-        // FEC value
-        Ipv4Address addr;
+        // FEC value. Dual-stack (Workstream F3 Phase 5, RFC 7552): holds either an
+        // Ipv4Address or an Ipv6Address prefix -- see rebuildFecList() for how an IPv6
+        // route becomes one of these.
+        L3Address addr;
         int length;
 
-        // FEC's next hop address
+        // FEC's next hop address. ALWAYS an LDP peer identifier (an LSR-ID), never the
+        // FEC's real next-hop address directly -- stays Ipv4Address even for an IPv6 FEC,
+        // since LDP peering/transport is IPv4-only in this model (RFC 7552 allows a
+        // session's transport address family to be independent of which FEC families it
+        // advertises); see rebuildFecList()'s IPv6 loop for how this is resolved without
+        // ever comparing an IPv6 address against a peer's IPv4 identity.
         Ipv4Address nextHop;
 
         // possibly also: (speed up)
@@ -223,6 +250,11 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     //
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IIpv4RoutingTable> rt;
+    // Dual-stack (Workstream F3 Phase 5): optional -- null on a plain IPv4-only router
+    // (no Ipv6RoutingTable submodule at all, e.g. hasIpv6=false), in which case
+    // rebuildFecList()'s IPv6 loop is a complete no-op. See routingTableModule6 in
+    // Ldp.ned.
+    ModuleRefByPar<Ipv6RoutingTable> rt6;
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<Ted> tedmod;
 
@@ -254,6 +286,30 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     // known to belong to any OPERATIONAL peer.
     int findInterfaceFromPeerAddr(Ipv4Address peerIP);
 
+    // Dual-stack (Workstream F3 Phase 5): returns the DIRECTLY CONNECTED neighbor's
+    // address (gateway unspecified, or gateway==destination -- this model's convention
+    // for an ARP-resolvable host route) reachable via the given local interface, or the
+    // unspecified address if the IPv4 routing table has no such route through it --
+    // used by rebuildFecList()'s IPv6 loop to translate "the interface an IPv6 route
+    // egresses on" into an Ipv4Address for Fec::nextHop, since that field must stay
+    // Ipv4Address even for an IPv6 FEC. Deliberately ignores INDIRECT (multi-hop) routes
+    // sharing the same interface (e.g. ones installed once Ted/LinkStateRouting
+    // converges) -- those name a further router, never the adjacent one.
+    //
+    // Deliberately NOT resolved via myPeers (a peer's Hello adjacency): rebuildFecList()
+    // runs once at INITSTAGE_ROUTING_PROTOCOLS, before ANY Hello has been sent (Hello
+    // only starts from handleStartOperation, scheduled to run after every module's
+    // initialize() completes) -- myPeers is always empty at that point, so a
+    // myPeers-based lookup would incorrectly treat EVERY IPv6 route as having no peer
+    // (never just the genuinely-egress ones), and nothing ever revisits that decision
+    // afterwards (rebuildFecList() only reruns on routeAdded/routeDeleted, and this
+    // model's IPv6 routing table never changes once configured). Using the IPv4 routing
+    // table instead gives a value that is stable regardless of session timing -- exactly
+    // like the IPv4 loop's own nextHop (a routing-table gateway address, not a
+    // Hello-derived one): whether it identifies an actual LDP peer is, correctly,
+    // decided later and afresh every time via findPeerSocket()/isPeerOperational().
+    Ipv4Address findIpv4NextHopForInterface(int interfaceId);
+
     /** Utility: return peer's index in myPeers table, or -1 if not found */
     virtual int findPeer(Ipv4Address peerAddr);
 
@@ -268,7 +324,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     /** Utility: true if we hold an OPERATIONAL LDP session with this peer (session FSM gate) */
     virtual bool isPeerOperational(Ipv4Address peerAddr);
 
-    FecVector::iterator findFecEntry(FecVector& fecs, Ipv4Address addr, int length);
+    FecVector::iterator findFecEntry(FecVector& fecs, L3Address addr, int length);
     FecBindVector::iterator findFecEntry(FecBindVector& fecs, int fecid, Ipv4Address peer);
 
     // label/binding-plane sends: RFC 5036 Section 3.5.3 -- only valid once the
@@ -282,9 +338,12 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     // are propagating a request/mapping received from another peer -- see
     // processLABEL_REQUEST/processLABEL_MAPPING) means the message is sent with
     // hopCount+1 and 'pathVector' plus our own LSR-ID appended (RFC 5036 Section 2.8).
-    virtual void sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length, uint8_t hopCount = 0, const std::vector<Ipv4Address>& pathVector = {});
-    virtual void sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, int length, uint8_t hopCount = 0, const std::vector<Ipv4Address>& pathVector = {});
-    virtual void sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length);
+    // 'dest' is the downstream LDP peer's (IPv4) session address, never the FEC value --
+    // LDP peering/transport stays IPv4-only in this model (RFC 7552). 'addr'/'length' are
+    // the FEC value itself, dual-stack since Workstream F3 Phase 5.
+    virtual void sendMappingRequest(Ipv4Address dest, L3Address addr, int length, uint8_t hopCount = 0, const std::vector<Ipv4Address>& pathVector = {});
+    virtual void sendMapping(int type, Ipv4Address dest, int label, L3Address addr, int length, uint8_t hopCount = 0, const std::vector<Ipv4Address>& pathVector = {});
+    virtual void sendNotify(int status, Ipv4Address dest, L3Address addr, int length);
 
     // RFC 5036 Section 2.8: true if 'pathVector' already contains our own LSR-ID, or
     // 'hopCount' has gone past pathVectorLimit -- either condition means a propagated
@@ -329,11 +388,13 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     /**
-     * Ingress classification decision for an incoming Ipv4 datagram: longest-prefix
-     * match over fecList, followed by a fecDown lookup for the matched FEC, plus the
-     * LDP/OSPF port skip-rules. Called by the sibling ~LdpClassifier module, which
-     * implements IIngressClassifier and delegates to this method rather than
-     * maintaining its own bind-time FEC/label table -- see LdpClassifier.h for why.
+     * Ingress classification decision for an incoming Ipv4 OR (Workstream F3 Phase 5)
+     * Ipv6 datagram: longest-prefix match over fecList, followed by a fecDown lookup
+     * for the matched FEC, plus the LDP/OSPF port skip-rules (Ipv4 only -- LDP's own
+     * control-plane traffic never runs over Ipv6 in this model). Called by the sibling
+     * ~LdpClassifier module, which implements IIngressClassifier and delegates to this
+     * method rather than maintaining its own bind-time FEC/label table -- see
+     * LdpClassifier.h for why.
      */
     virtual bool classifyPacket(Packet *ipdatagram, LabelOpVector& outLabel, int& outInterfaceId);
 

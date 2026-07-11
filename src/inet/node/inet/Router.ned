@@ -40,6 +40,12 @@ module Router extends ApplicationLayerNodeBase
         hasUdp = default(hasRip || hasDhcp);
         hasTcp = default(hasBgp);
         *.routingTableModule = default("^.ipv4.routingTable");
+        // Dual-stack (Workstream F3 Phase 5): auto-fill routingTableModule6 (currently
+        // only consulted by ~Ldp) for any submodule that declares it; the module path
+        // simply fails to resolve (harmlessly, see ModuleRefByPar's non-mandatory
+        // reference) on a plain IPv4-only router (hasIpv6=false), so this is a no-op
+        // for every module/network that doesn't declare this parameter.
+        *.routingTableModule6 = default("^.ipv6.routingTable");
 
     submodules:
         ospf: <default("Ospfv2")> like IOspf if hasOspf {

@@ -93,10 +93,20 @@ import inet.applications.contract.IApp;
 // the Hello adjacency exists (targeted or regular), session establishment (TCP,
 // Initialization/KeepAlive) is identical either way.
 //
-// Explicit non-features (RFC 5036 mechanisms not modeled by this module):
+// Dual-stack FEC advertisement (Workstream F3 Phase 5, RFC 7552 subset): if
+// ~routingTableModule6 resolves to an Ipv6RoutingTable (i.e. this router has
+// hasIpv6=true), IPv6 routes are also turned into FECs and advertised/withdrawn
+// exactly like IPv4 ones (see Ldp::rebuildFecList()). LDP peering/transport itself
+// stays IPv4-only (Hello, TCP session establishment, LSR-ID, loop-detection path
+// vectors are never IPv6) -- only the FEC VALUE being advertised may be an IPv6
+// prefix, riding over an ordinary IPv4-addressed LDP session, per RFC 7552's design
+// (a session's transport address family is independent of which FEC families it
+// carries). Full "LDP over an IPv6 transport session" remains out of scope.
+//
+// Explicit non-features (RFC 5036/7552 mechanisms not modeled by this module):
 // - No graceful restart, capabilities negotiation, or IGP synchronization.
 // - No Generalized TTL Security Mechanism (GTSM).
-// - No IPv6 support (RFC 7552); the whole module is IPv4-only.
+// - No LDP-over-IPv6 transport (Hello/TCP session establishment stays IPv4-only).
 // - No pseudowire (PW) signaling extensions.
 //
 // @author Vojta Janota
@@ -107,6 +117,7 @@ simple Ldp extends SimpleModule like IApp
         @class(Ldp);
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
+        string routingTableModule6;   // Dual-stack (Workstream F3 Phase 5): path to an Ipv6RoutingTable module; only resolved if non-empty and the path resolves to an actual module (see Ldp::rt6) -- a plain IPv4-only router (hasIpv6=false) leaves this unresolved and IPv6 FEC advertisement is simply never active. Auto-filled by ~Router (mirroring ~routingTableModule's own auto-fill) when this module is used inside one.
         string libTableModule;
         string tedModule;
         double holdTime @unit(s) = default(15s);

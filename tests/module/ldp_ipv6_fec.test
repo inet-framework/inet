@@ -1,0 +1,282 @@
+%description:
+Regression/feature test for Workstream F3 Phase 5 (RFC 7552 subset): proves that LDP
+itself -- not static XML configuration -- discovers peers, forms sessions, and
+DYNAMICALLY advertises and learns an IPv6 FEC (a Label Mapping message whose FEC TLV
+carries an IPv6 prefix, Address Family = 2 on the wire), and that real end-to-end IPv6
+packet delivery happens over the resulting LDP-signaled LSP using the dynamically
+learned labels (no static <fectable>/<libtable> XML anywhere in this test).
+
+Topology, all point-to-point ppp links (mirrors the shape of the existing
+examples/mpls/ldp/LDPTEST network and of mpls_ipv6_static_lsp.test, scaled down to one
+core transit hop):
+
+  hostA -- LSR1 (ingress) -- LSR2 (core transit) -- LSR3 (egress) -- hostB
+
+- hostA/hostB: plain ~StandardHost, hasIpv6 = true.
+- LSR1/LSR2/LSR3: ~LdpMplsRouter (~MplsRouterBase + real ~Ldp signaling, no static XML
+  FEC/LIB configuration anywhere), each with hasIpv6 = true. Unlike
+  mpls_ipv6_static_lsp.test's transit LSR (which has NO IPv6 awareness at all, since a
+  purely static classifier never needs one), LSR2 here DOES need hasIpv6 = true and an
+  IPv6 route to hostB's prefix in its own Ipv6RoutingTable: DU-mode LDP only advertises/
+  accepts bindings for FECs the local router itself recognizes (Ldp::rebuildFecList()
+  populates fecList from the LOCAL routing table; Ldp::processLABEL_MAPPING ignores a
+  mapping for a FEC it doesn't recognize) -- exactly mirroring how a real dynamic IPv4
+  LDP LSP depends on IGP-learned routes at every transit hop, not just the edges.
+- IPv4 core addressing is fully static (.rt files, mirrors LDPTEST/static_lsp.test's
+  style): this is what LDP's own Hello/TCP session establishment runs over -- LDP
+  peering/transport stays IPv4-only in this model (RFC 7552's design: a session's
+  transport address family is independent of which FEC families it advertises).
+- IPv6 addressing/routing is fully AUTOMATIC (~Ipv6NetworkConfigurator's default
+  wildcard address-assignment + Dijkstra route computation), applied across the WHOLE
+  chain hostA..hostB, INCLUDING the core router-to-router links -- not just the edges.
+  This is the deliberate difference from mpls_ipv6_static_lsp.test's single-link manual
+  config: it gives every router along the path (including transit LSR2) a real IPv6
+  route to hostB's prefix with a real next-hop gateway address, so
+  Ldp::rebuildFecList()'s IPv6 loop actually has something to turn into a FEC on every
+  hop. hostA/hostB's own addresses are pinned to fixed literals (2001:db8:a::1,
+  2001:db8:b::1) so the traffic-generator config below can target a literal (not a
+  symbolic hostname -- hostB also carries a dormant IPv4 address, for ~Ted, so a bare
+  hostname lookup could ambiguously resolve to either family).
+
+Design note on Fec::nextHop resolution for an IPv6 route (see Ldp::rebuildFecList()):
+Fec::nextHop stays an Ipv4Address LDP peer identifier even for an IPv6 FEC (LDP peering
+is IPv4-only). It is resolved via Ldp::findIpv4NextHopForInterface(): the IPv4 routing
+table's own directly-connected-neighbor route through the same local interface the IPv6
+route egresses on -- e.g. LSR1's route to hostB's prefix egresses via its LSR2-facing
+interface, and the IPv4 table's route through that same interface names LSR2's real
+address, so nextHop becomes LSR2's address (an ordinary transit FEC; whether LSR2 is
+CURRENTLY an operational LDP peer is, correctly, decided later and afresh every time via
+findPeerSocket(), exactly like the IPv4 loop's own nextHop). For LSR3's OWN route to
+hostB's prefix (the directly-connected hostB-facing interface), the IPv4 table's route
+through that SAME interface names hostB's own (dormant, Ted-only) IPv4 address --
+findPeerSocket() will (correctly, always) report that hostB is not an LDP peer, so
+duAdvertiseToPeer() takes the ER=true ("we are egress") branch. This is deliberately
+NOT resolved via myPeers (a peer's live Hello adjacency): rebuildFecList() runs once at
+INITSTAGE_ROUTING_PROTOCOLS, before ANY Hello has been sent, so myPeers is always empty
+at that point -- a myPeers-based lookup would incorrectly treat EVERY IPv6 route as
+egress (not just the genuinely-egress one), and nothing would ever revisit that
+decision afterwards (this model's IPv6 routing table never changes once configured, so
+no further routeAdded/routeDeleted signal re-triggers rebuildFecList() later once
+sessions actually come up). The IPv4-routing-table correlation is stable regardless of
+session timing, which is what makes LSR3 reliably recognize itself as egress for
+hostB's prefix -- without it, the LSP could never complete end to end.
+
+Asserted, in order:
+  1. all three LDP sessions establish over TCP;
+  2. LSR3 sends (and LSR2 receives) a Label Mapping whose FEC TLV carries hostB's IPv6
+     prefix -- proves RFC 7552 IPv6 FEC advertisement actually happened over the wire,
+     not just in memory;
+  3. the data plane is label-switched using the dynamically learned label, for hostA's
+     IPv6 traffic to hostB: LSR1 (ingress) pushes it, and LSR2 (penultimate hop) pops it
+     rather than swapping, per penultimate-hop-popping/PHP (advertiseImplicitNull, on by
+     default -- see the design note above);
+  4. hostB actually receives the IPv6 UDP traffic;
+  5. standard undisposed-object postrun guard.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LdpIpv6FecTest.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.mpls.LdpMplsRouter;
+
+//
+// hostA -- LSR1 (ingress) -- LSR2 (core transit) -- LSR3 (egress) -- hostB. Real LDP
+// signaling throughout (no static FEC/LIB XML); IPv6 addressing/routing is fully
+// automatic (~Ipv6NetworkConfigurator), including across the core, so every LDP router
+// -- not just the edges -- has its own IPv6 route to hostB's prefix.
+//
+network LdpIpv6FecTest
+{
+    submodules:
+        hostA: StandardHost {
+            hasIpv6 = true;
+            @display("p=100,100");
+        }
+        LSR1: LdpMplsRouter {
+            hasIpv6 = true;
+            @display("p=250,100");
+        }
+        LSR2: LdpMplsRouter {
+            hasIpv6 = true;
+            @display("p=400,100");
+        }
+        LSR3: LdpMplsRouter {
+            hasIpv6 = true;
+            @display("p=550,100");
+        }
+        hostB: StandardHost {
+            hasIpv6 = true;
+            @display("p=700,100");
+        }
+        configurator: Ipv6NetworkConfigurator {
+            @display("p=400,300");
+        }
+    connections:
+        hostA.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> LSR1.pppg++;
+        LSR1.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> LSR2.pppg++;
+        LSR2.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> LSR3.pppg++;
+        LSR3.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> hostB.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostA.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.0.2	*		255.255.255.255	H	0	ppp0
+default:	10.0.0.2	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.2	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 2
+ifconfigend.
+
+route:
+10.0.0.1	10.0.0.1	255.255.255.255	H	0	ppp0
+10.0.1.2	10.0.1.2	255.255.255.255	H	0	ppp1
+
+224.0.0.0	*		255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 2
+name: ppp1	inet_addr: 10.0.2.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 2
+ifconfigend.
+
+route:
+10.0.1.1	10.0.1.1	255.255.255.255	H	0	ppp0
+10.0.2.2	10.0.2.2	255.255.255.255	H	0	ppp1
+
+224.0.0.0	*		255.0.0.0	H	0	ppp0
+224.0.0.0	*		255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 2
+name: ppp1	inet_addr: 10.0.3.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.2.1	10.0.2.1	255.255.255.255	H	0	ppp0
+10.0.3.2	10.0.3.2	255.255.255.255	H	0	ppp1
+
+224.0.0.0	*		255.0.0.0	H	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostB.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.3.2	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.3.1	*		255.255.255.255	H	0	ppp0
+default:	10.0.3.1	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = .;../../../../src
+network = LdpIpv6FecTest
+sim-time-limit = 6s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.hostA.numApps = 1
+**.hostA.app[0].typename = "UdpBasicApp"
+**.hostA.app[0].localPort = 100
+**.hostA.app[0].destPort = 100
+**.hostA.app[0].messageLength = 128 bytes
+**.hostA.app[0].sendInterval = 0.1s
+# start well after LDP sessions/labels have had time to converge (see the LSR*.holdTime/
+# helloInterval settings below, which shorten the discovery/session timers for this test)
+**.hostA.app[0].startTime = 3s
+# a literal IPv6 address (not the symbolic hostname "hostB"): hostB also carries a
+# dormant (Ted-only) IPv4 address, so resolving a bare hostname could pick either family
+**.hostA.app[0].destAddresses = "2001:db8:b::1"
+
+**.hostB.numApps = 1
+**.hostB.app[0].typename = "UdpSink"
+**.hostB.app[0].localPort = 100
+
+# IPv4 core addressing/routing is entirely static (.rt files); no Ipv4NetworkConfigurator
+# is present in this network, so each node's Ipv4NodeConfigurator must be told not to
+# look for one.
+**.ipv4.configurator.networkConfiguratorModule = ""
+**.hostA.ipv4.routingTable.routingFile = "hostA.rt"
+**.LSR1.ipv4.routingTable.routingFile = "LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "LSR3.rt"
+**.hostB.ipv4.routingTable.routingFile = "hostB.rt"
+
+# IPv6 addressing/routing is fully automatic, across the WHOLE chain including the core
+# router-to-router links -- this is what gives LSR2 (transit) its own IPv6 route to
+# hostB's prefix (see this file's %description). hostA/hostB get pinned literal
+# addresses so the traffic-generator config above can target one deterministically.
+*.configurator.config = xml("<config>\
+    <interface hosts='hostA' names='ppp0' address='2001:db8:a::1' prefix='2001:db8:a::/64'/>\
+    <interface hosts='LSR1' names='ppp0' prefix='2001:db8:a::/64'/>\
+    <interface hosts='LSR3' names='ppp1' prefix='2001:db8:b::/64'/>\
+    <interface hosts='hostB' names='ppp0' address='2001:db8:b::1' prefix='2001:db8:b::/64'/>\
+    <interface hosts='**' prefix='2001:db8:x:x::/64'/>\
+    </config>")
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+# shorten LDP discovery/session timers so sessions and labels have converged well before
+# hostA.app[0]'s 3s startTime
+**.LSR*.holdTime = 2s
+**.LSR*.helloInterval = 0.5s
+
+%#--------------------------------------------------------------------------------------------------------------
+%# 1. all three LDP sessions establish over TCP
+%contains: stdout
+TCP connection established with peer
+%#--------------------------------------------------------------------------------------------------------------
+%# 2. LSR3 (egress) sends a Label Mapping whose FEC TLV is hostB's IPv6 prefix specifically
+%# (not just any Label Mapping) -- proves RFC 7552 IPv6 FEC advertisement (Address Family
+%# = 2 on the wire, see LdpPacketSerializer::serializeFecTlv) actually happened, not just
+%# something coincidental in memory
+%contains: stdout
+DU: advertising unsolicited Label Mapping (egress) label=3 for fec addr=2001:db8:b:: length=64
+%#--------------------------------------------------------------------------------------------------------------
+%# ...and a downstream peer (LSR2) received it, dynamically learning the same FEC
+%contains: stdout
+Label mapping label=3 received for fec=addr=2001:db8:b::  length=64
+%#--------------------------------------------------------------------------------------------------------------
+%# 3. the data plane is label-switched using the dynamically learned label: LSR1 (ingress)
+%# pushes it (PHP means LSR2, the penultimate hop, pops rather than swaps -- see
+%# %description -- so PUSH/POP is the complete, correct label-operation set here)
+%contains: stdout
+doStackOps: {PUSH
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+doStackOps: {POP}
+%#--------------------------------------------------------------------------------------------------------------
+%# 4. hostB actually receives the IPv6 UDP traffic sent by hostA over the LDP-signaled LSP
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

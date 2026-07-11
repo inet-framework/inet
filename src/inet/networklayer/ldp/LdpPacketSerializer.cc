@@ -41,25 +41,39 @@ enum LdpTlvType {
 
 void LdpPacketSerializer::serializeFecTlv(MemoryOutputStream& stream, const FecTlv& fec)
 {
+    // Dual-stack (Workstream F3 Phase 5, RFC 7552 Section 3.1): the FEC Element's
+    // Address Family selects IPv4 (1, a 4-byte prefix) or IPv6 (2, a 16-byte prefix);
+    // this is the ONLY on-wire change RFC 7552 needs for this TLV.
+    bool isV6 = fec.addr.getType() == L3Address::IPv6;
     stream.writeBit(false); // U-bit
     stream.writeNBitsOfUint64Be(FEC_TLV, 15);
-    stream.writeUint16Be(8); // TLV value length: 1(elem type) + 2(addr family) + 1(prelen) + 4(prefix)
+    stream.writeUint16Be(isV6 ? 20 : 8); // TLV value length: 1(elem type) + 2(addr family) + 1(prelen) + 4 or 16(prefix)
     stream.writeByte(2); // FEC Element Type = 2 (Address Prefix)
-    stream.writeUint16Be(1); // Address Family = 1 (IP)
-    stream.writeByte(fec.length);
-    stream.writeIpv4Address(fec.addr);
+    if (isV6) {
+        stream.writeUint16Be(2); // Address Family = 2 (IPv6, RFC 7552 Section 3.1)
+        stream.writeByte(fec.length);
+        stream.writeIpv6Address(fec.addr.toIpv6());
+    }
+    else {
+        stream.writeUint16Be(1); // Address Family = 1 (IP)
+        stream.writeByte(fec.length);
+        stream.writeIpv4Address(fec.addr.toIpv4());
+    }
 }
 
 FecTlv LdpPacketSerializer::deserializeFecTlv(MemoryInputStream& stream)
 {
     stream.readBit(); // U-bit
     stream.readNBitsToUint64Be(15); // TLV type, assumed FEC_TLV (dispatch already selected this branch)
-    stream.readUint16Be(); // TLV value length, assumed 8
+    stream.readUint16Be(); // TLV value length: derived from the Address Family below, not used directly
     stream.readByte(); // FEC Element Type, assumed 2 (Address Prefix)
-    stream.readUint16Be(); // Address Family, assumed 1 (IP)
+    uint16_t addressFamily = stream.readUint16Be(); // RFC 5036/7552: 1 = IPv4, 2 = IPv6
     FecTlv fec;
     fec.length = stream.readByte();
-    fec.addr = stream.readIpv4Address();
+    if (addressFamily == 2)
+        fec.addr = stream.readIpv6Address();
+    else
+        fec.addr = stream.readIpv4Address();
     return fec;
 }
 
