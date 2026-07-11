@@ -203,7 +203,7 @@ simple Tcp extends SimpleModule like ITcp
         bool timestampSupport = default(true); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(-1); // Maximum Segment Size (header option). -1 derives it from the address family (IPv4->1460, IPv6->1440), like Linux on a 1500-byte-MTU link; set explicitly (e.g. 536) for small-MTU links.
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
-        string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
+        string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpCubic");
         int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 3517) DO NOT change unless you really know what you are doing
         string lossDetectionMode @enum("dupthresh","rack") = default("dupthresh"); // SACK loss detection: classic DupThresh (RFC 3517) or RACK time-based (RFC 8985). RACK requires sackSupport.
         bool prrEnabled = default(false); // Proportional Rate Reduction (RFC 6937) during fast recovery instead of classic cwnd inflation/halving. Requires sackSupport. Currently applied by TcpReno.
