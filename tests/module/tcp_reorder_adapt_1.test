@@ -51,6 +51,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.adaptiveReorderingEnabled = true
 *.*_tcp.initialWindow = "rfc6928"
 
+include ../../lib/tcp-legacy.ini
+
 %# the reordering degree is learned (grows above the static DupThresh of 3) from
 %# the first event, so the later, equal reordering event no longer triggers a
 %# spurious fast retransmit.

@@ -689,12 +689,25 @@ void TcpConnection::configureStateVariables()
                 << "\" has no SACK-based loss recovery; disabling SACK for this connection\n";
         state->sack_support = false;
     }
-    if (state->lossDetectionMode == 1 && !state->sack_support)
-        throw cRuntimeError("lossDetectionMode=\"rack\" requires sackSupport=true");
-    if (state->prrEnabled && !state->sack_support)
-        throw cRuntimeError("prrEnabled=true (Proportional Rate Reduction, RFC 6937) requires sackSupport=true");
-    if (state->adaptiveReorderingEnabled && !state->sack_support)
-        throw cRuntimeError("adaptiveReorderingEnabled=true requires sackSupport=true");
+    // RACK, PRR and adaptive reordering all need SACK. Since these can be enabled by
+    // default (workstream D7), and SACK itself is a willingness that is switched off
+    // for flavours without SACK recovery (above), treat these the same way: fall back
+    // gracefully rather than erroring, so selecting a non-SACK congestion control does
+    // not break under the modern defaults.
+    if (!state->sack_support) {
+        if (state->lossDetectionMode == 1) {
+            EV_WARN << "lossDetectionMode=\"rack\" needs SACK; falling back to DupThresh (RFC 3517) loss detection\n";
+            state->lossDetectionMode = 0;
+        }
+        if (state->prrEnabled) {
+            EV_WARN << "prrEnabled=true (RFC 6937) needs SACK; disabling PRR for this connection\n";
+            state->prrEnabled = false;
+        }
+        if (state->adaptiveReorderingEnabled) {
+            EV_WARN << "adaptiveReorderingEnabled=true needs SACK; disabling adaptive reordering for this connection\n";
+            state->adaptiveReorderingEnabled = false;
+        }
+    }
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
