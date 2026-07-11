@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<policies>
+    <!-- Unconstrained: names only the destination's node SID (R4). The route taken is
+         whatever SegmentRouting's own shortest-path computation picks: here, the R1-R3
+         chord (2 hops) beats the R1-R2-R3-R4 chain (3 hops), so R1 pushes and forwards
+         straight to R3 over the chord; R3, being R4's direct neighbor, POPs (PHP);
+         R2 never sees this flow at all. -->
+    <policy dest="2001:db8:20::" prefixLength="64" segments="node:4"/>
+
+    <!-- Explicit path: names R2's node SID as an intermediate waypoint before the real
+         destination's node SID, forcing the LONGER 3-hop chain route (R1-R2-R3-R4) and
+         avoiding the chord entirely: SR traffic engineering without any signaling
+         protocol. R2 genuinely transits (SWAP), then R3 POPs (PHP), same as the
+         unconstrained flow above. -->
+    <policy dest="2001:db8:30::" prefixLength="64" segments="node:2 node:4"/>
+</policies>
