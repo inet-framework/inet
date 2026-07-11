@@ -203,6 +203,14 @@ struct TcpStateVariables
     uint32_t sackedBytes_old = 0;    // old number of sackedBytes - needed for RFC 3042 to check if last dupAck contained new sack information
     bool lossRecovery = false;    // indicates if algorithm is in loss recovery phase
 
+    // RACK-TLP loss detection (RFC 8985)
+    int lossDetectionMode = 0;    // 0 = classic DupThresh (RFC 3517), 1 = RACK time-based
+    simtime_t minRtt = 0;         // minimum RTT observed on the connection (0 = unset)
+    simtime_t rackXmitTime = 0;   // send time of the most recently delivered (SACKed/ACKed) segment
+    uint32_t rackEndSeq = 0;      // end sequence number of that segment
+    simtime_t rackRtt = 0;        // RTT of the ACK that last advanced the RACK point
+    bool rackReordSeen = false;   // whether reordering has been observed (widens the reordering window)
+
     // queue management
     uint32_t sendQueueLimit = 0;
     bool queueUpdate = true;

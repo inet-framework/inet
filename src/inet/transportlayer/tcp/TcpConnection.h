@@ -490,6 +490,13 @@ class INET_API TcpConnection : public SimpleModule
     virtual bool isLost(uint32_t seqNum);
 
     /**
+     * RFC 8985 RACK: advance the RACK reference to the most recently sent
+     * delivered segment and mark earlier-sent, still-unacked segments as lost
+     * once RACK.rtt + reo_wnd has elapsed. Returns the number of newly lost bytes.
+     */
+    virtual uint32_t rackDetectAndMarkLost();
+
+    /**
      * For SACK TCP. RFC 3517, page 3: "This routine traverses the sequence
      * space from HighACK to HighData and MUST set the "pipe" variable to an
      * estimate of the number of octets that are currently in transit between

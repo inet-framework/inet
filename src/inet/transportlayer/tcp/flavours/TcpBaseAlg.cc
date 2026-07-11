@@ -379,6 +379,10 @@ void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     const double g = 0.125; // 1 / 8; (1 - alpha) where alpha == 7 / 8;
     simtime_t newRTT = tAcked - tSent;
 
+    // track the minimum RTT (RACK loss detection); a running min (not windowed)
+    if (newRTT > 0 && (state->minRtt == 0 || newRTT < state->minRtt))
+        state->minRtt = newRTT;
+
     simtime_t& srtt = state->srtt;
     simtime_t& rttvar = state->rttvar;
 

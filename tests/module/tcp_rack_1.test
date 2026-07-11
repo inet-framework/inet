@@ -1,0 +1,60 @@
+%description:
+Tests RACK time-based loss detection (RFC 8985, lossDetectionMode="rack"). The
+client sends one segment at t=1 (which is dropped), then a second, later burst of
+two segments at t=1.5. When those later-sent segments are SACKed, RACK declares
+the earlier-sent segment lost by time and fast-retransmits it (~t=1.5), even
+though only two discontiguous SACKs are present -- fewer than DupThresh (3), so
+classic RFC 3517 detection would instead wait for the retransmission timeout.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="A3 delete"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 500;1.5 1000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 5000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.lossDetectionMode = "rack"
+*.*_tcp.initialWindow = "rfc6928"
+
+%# RACK marks the earlier-sent segment lost by time...
+%contains: stdout
+RACK: marked 500 bytes lost by time
+
+%# ...and fast-retransmits it at ~t=1.5, NOT at the retransmission timeout (~t=4)
+%# that classic DupThresh detection would need (only two SACKs are available).
+%contains-regex: stdout
+\[1\.505 [^\n]*A 1:501\(500\)

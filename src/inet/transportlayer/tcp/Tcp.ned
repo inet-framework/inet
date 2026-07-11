@@ -205,6 +205,7 @@ simple Tcp extends SimpleModule like ITcp
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
         int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 3517) DO NOT change unless you really know what you are doing
+        string lossDetectionMode @enum("dupthresh","rack") = default("dupthresh"); // SACK loss detection: classic DupThresh (RFC 3517) or RACK time-based (RFC 8985). RACK requires sackSupport.
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation

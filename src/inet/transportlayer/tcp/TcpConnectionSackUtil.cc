@@ -116,6 +116,10 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
         state->sackedBytes = rexmitQueue->getTotalAmountOfSackedBytes();
 
         emit(sackedBytesSignal, state->sackedBytes);
+
+        // RACK time-based loss detection runs on every ACK carrying new SACK info
+        if (state->lossDetectionMode == 1)
+            rackDetectAndMarkLost();
     }
     return true;
 }
@@ -132,10 +136,70 @@ bool TcpConnection::isLost(uint32_t seqNum)
     // false."
     ASSERT(seqGE(seqNum, state->snd_una)); // HighAck = snd_una
 
+    // RACK mode: a segment is lost iff RACK has marked its region lost (by time).
+    if (state->lossDetectionMode == 1)
+        return rexmitQueue->getRegion(seqNum).lost;
+
     bool isLost = (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= state->dupthresh
                    || rexmitQueue->getAmountOfSackedBytes(seqNum) >= (state->dupthresh * state->snd_mss));
 
     return isLost;
+}
+
+uint32_t TcpConnection::rackDetectAndMarkLost()
+{
+    if (rexmitQueue == nullptr || !state->sack_enabled)
+        return 0;
+
+    // (1) advance the RACK reference: the most recently *sent* segment among those
+    // that have been delivered (SACKed). Skip retransmitted segments whose RTT is
+    // below the connection minimum RTT (ambiguous, Karn-style).
+    for (const auto& region : rexmitQueue->rexmitQueue) {
+        if (!region.sacked)
+            continue;
+        simtime_t xmit = region.lastSentTime;
+        simtime_t rtt = simTime() - xmit;
+        if (region.transmitCount > 1 && state->minRtt > 0 && rtt < state->minRtt)
+            continue;
+        if (xmit > state->rackXmitTime
+            || (xmit == state->rackXmitTime && seqGreater(region.endSeqNum, state->rackEndSeq)))
+        {
+            state->rackXmitTime = xmit;
+            state->rackEndSeq = region.endSeqNum;
+            state->rackRtt = rtt;
+        }
+    }
+
+    if (state->rackXmitTime == 0)
+        return 0;
+
+    // (2) reordering window: 0 until reordering has been observed, then minRtt/4
+    simtime_t reoWnd = 0;
+    if (state->rackReordSeen)
+        reoWnd = state->minRtt / 4;
+
+    // (3) mark as lost any earlier-sent, still-unacked segment for which more than
+    // RACK.rtt + reo_wnd has elapsed since it was (last) sent.
+    std::vector<std::pair<uint32_t, uint32_t>> toMark;
+    for (const auto& region : rexmitQueue->rexmitQueue) {
+        if (region.sacked || region.lost)
+            continue;
+        bool earlier = (region.lastSentTime < state->rackXmitTime)
+            || (region.lastSentTime == state->rackXmitTime && seqLE(region.endSeqNum, state->rackEndSeq));
+        if (!earlier)
+            continue;
+        if (simTime() - region.lastSentTime > state->rackRtt + reoWnd)
+            toMark.push_back(std::make_pair(region.beginSeqNum, region.endSeqNum));
+    }
+
+    uint32_t lostBytes = 0;
+    for (auto& r : toMark) {
+        rexmitQueue->markLost(r.first, r.second);
+        lostBytes += r.second - r.first;
+    }
+    if (lostBytes > 0)
+        EV_INFO << "RACK: marked " << lostBytes << " bytes lost by time (RACK.rtt=" << state->rackRtt << ")\n";
+    return lostBytes;
 }
 
 void TcpConnection::setPipe()

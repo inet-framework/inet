@@ -10,6 +10,7 @@
 #include <algorithm> // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
 namespace inet {
 namespace tcp {
@@ -228,7 +229,14 @@ void TcpReno::receivedDuplicateAck()
 {
     TcpTahoeRenoFamily::receivedDuplicateAck();
 
-    if (state->dupacks == state->dupthresh) {
+    // In RACK mode a fast retransmit is triggered by time-based loss detection
+    // rather than by counting duplicate ACKs.
+    bool rackTrigger = (state->lossDetectionMode == 1 && state->sack_enabled
+                        && !state->lossRecovery
+                        && conn->getRexmitQueue()->getTotalAmountOfLostBytes() > 0
+                        && (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint)));
+
+    if (state->dupacks == state->dupthresh || rackTrigger) {
         EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
 
         if (state->sack_enabled) {
