@@ -1,0 +1,337 @@
+%description:
+Unit test for ~SegmentRouting's node-SID label programming (RFC 8660): given a statically
+configured sidTable (router-id -> node-SID index) and a Ted topology, verify that the
+resulting LibTable entries are exactly what RFC 8660 Section 3.1's "homogeneous SRGB, PHP at
+the penultimate hop" model calls for -- and that a topology change (a link going down and
+coming back) correctly reprograms (and un-programs) those entries via the tedChangedSignal
+wiring, without needing a full physical multi-node network (the Ted topology is injected
+directly via Ted::addLink()/setLinkState(), the same technique
+tests/unit/Ted_calculateShortestPath.test uses, but here driving a REAL SegmentRouting module
+instance instead of a bare C++ object, since SegmentRouting needs real IInterfaceTable/
+IIpv4RoutingTable/LibTable/Ted module references).
+
+Topology (a line, rooted at this test's own router A): A(1.1.1.1) -- B(2.2.2.2) --
+C(3.3.3.3) -- D(4.4.4.4), each hop metric 1. sidTable: A=1, B=2, C=3, D=4; srgbBase=16000,
+srgbSize=8000 -> labels A=16001 (own SID, no entry expected), B=16002, C=16003, D=16004.
+From A's perspective: B is directly connected (PHP/POP case), C and D are transit via B
+(SWAP case, same label network-wide thanks to the homogeneous SRGB).
+
+Also covers sidTable XML validation: out-of-range sid, duplicate sid within one document,
+and duplicate router (across calls, since sidByRouter persists) must all be rejected with
+cRuntimeError.
+
+%includes:
+#include "inet/networklayer/mpls/LibTable.h"
+#include "inet/networklayer/srmpls/SegmentRouting.h"
+#include "inet/networklayer/ted/Ted.h"
+#include "inet/networklayer/ted/Ted_m.h"
+#include <omnetpp/cxmlelement.h>
+
+using namespace inet;
+using namespace omnetpp;
+
+%file: TestNetwork.ned
+
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
+import inet.networklayer.ipv4.Ipv4RoutingTable;
+import inet.linklayer.loopback.LoopbackInterface;
+import inet.networklayer.mpls.LibTable;
+import inet.networklayer.ted.Ted;
+
+network TestNetwork
+{
+    parameters:
+        @networkNode();
+    submodules:
+        test: Test;
+        ift: InterfaceTable;
+        rt: Ipv4RoutingTable {
+            interfaceTableModule = "^.ift";
+            routerId = "1.1.1.1";
+        }
+        // Attaches Ipv4InterfaceData to every interface (prepareAllInterfaces(), always run
+        // regardless of networkConfiguratorModule); there is no Ipv4NetworkConfigurator in
+        // this minimal network, so addresses stay at their defaults except where
+        // Ipv4RoutingTable's routerId assignment (above) explicitly overrides lo0's address.
+        ipv4NodeConfigurator: Ipv4NodeConfigurator {
+            interfaceTableModule = "^.ift";
+            routingTableModule = "^.rt";
+            networkConfiguratorModule = "";
+        }
+        lo0: LoopbackInterface {
+            interfaceTableModule = "^.ift";
+        }
+        lib: LibTable {
+            interfaceTableModule = "^.ift";
+        }
+        // "ted" must start before "sr" (see MplsRouterBase.ned for the same ordering
+        // requirement in production): within a single lifecycle stage, submodules run their
+        // handleStartOperation() in declaration order, and SegmentRouting::handleStartOperation()
+        // reads ted->getLinks() immediately.
+        ted: Ted {
+            interfaceTableModule = "^.ift";
+            routingTableModule = "^.rt";
+        }
+        sr: TestSegmentRouting {
+            interfaceTableModule = "^.ift";
+            routingTableModule = "^.rt";
+            libTableModule = "^.lib";
+            tedModule = "^.ted";
+            srgbBase = 16000;
+            srgbSize = 8000;
+            sidTable = xmldoc("sr.xml");
+        }
+    connections allowunconnected:
+}
+
+%file: TestSegmentRouting.ned
+
+import inet.networklayer.srmpls.SegmentRouting;
+
+simple TestSegmentRouting extends SegmentRouting
+{
+    parameters:
+        @class(TestSegmentRouting);
+}
+
+%file: sr.xml
+
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+    <node router="4.4.4.4" sid="4"/>
+</sr>
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+
+%global:
+
+// Test-only harness: exposes SegmentRouting's protected recomputeAndInstall() (so the test
+// can drive recomputation directly, matching what a real tedChangedSignal firing would
+// trigger) and readSidTableFromXML() (for the XML-validation checks below). SegmentRouting.h/
+// .cc are untouched -- this subclass lives only in the test binary, same technique as
+// LibTable_ops.test's TestLibTable.
+class TestSegmentRouting : public SegmentRouting
+{
+  public:
+    using SegmentRouting::recomputeAndInstall;
+    using SegmentRouting::readSidTableFromXML;
+    using SegmentRouting::handleStartOperation;
+    using SegmentRouting::handleCrashOperation;
+};
+
+Define_Module(TestSegmentRouting);
+
+static TeLinkStateInfo makeLink(const char *advrouter, const char *linkid, double metric, double maxBandwidth)
+{
+    TeLinkStateInfo link;
+    link.advrouter = Ipv4Address(advrouter);
+    link.linkid = Ipv4Address(linkid);
+    link.local = Ipv4Address(advrouter); // only meaningful for A's own advertised links (see below)
+    link.remote = Ipv4Address(linkid);
+    link.metric = metric;
+    link.MaxBandwidth = maxBandwidth;
+    for (int i = 0; i < 8; i++)
+        link.UnResvBandwidth[i] = maxBandwidth;
+    link.state = true;
+    link.sourceId = link.advrouter.getInt();
+    link.messageId = 1;
+    link.timestamp = SIMTIME_ZERO;
+    return link;
+}
+
+// Builds a minimal <sr> document with the given <node> entries, e.g.
+// makeSidXml({{"9.9.9.1", 5}, {"9.9.9.2", 5}}) for a duplicate-sid check.
+static cXMLElement *makeSidXml(std::initializer_list<std::pair<const char *, int>> nodes)
+{
+    auto *root = new cXMLElement("sr", nullptr);
+    for (auto& n : nodes) {
+        auto *node = new cXMLElement("node", root);
+        node->setAttribute("router", n.first);
+        node->setAttribute("sid", std::to_string(n.second).c_str());
+    }
+    return root;
+}
+
+// Takes ownership of `xmlExpr` (deleted unconditionally, whether or not readSidTableFromXML()
+// throws -- readSidTableFromXML() never takes ownership of its argument on any path).
+#define ASSERT_THROWS_XML(label, xmlExpr) \
+    do { \
+        cXMLElement *xml = (xmlExpr); \
+        bool threw = false; \
+        try { sr->readSidTableFromXML(xml); } \
+        catch (const cRuntimeError&) { threw = true; } \
+        delete xml; \
+        EV << (label) << (threw ? "  OK (threw)" : "  FAIL (did not throw)") << endl; \
+        if (!threw) \
+            throw cRuntimeError("Broken: %s was expected to throw but did not", label); \
+    } while (false)
+
+%activity:
+
+auto ted = check_and_cast<Ted *>(getSimulation()->getModuleByPath("ted"));
+auto lib = check_and_cast<LibTable *>(getSimulation()->getModuleByPath("lib"));
+auto sr = check_and_cast<TestSegmentRouting *>(getSimulation()->getModuleByPath("sr"));
+int lo0Id = check_and_cast<NetworkInterface *>(getSimulation()->getModuleByPath("lo0"))->getInterfaceId();
+
+const int SRGB_BASE = 16000;
+const int LABEL_A = SRGB_BASE + 1;
+const int LABEL_B = SRGB_BASE + 2;
+const int LABEL_C = SRGB_BASE + 3;
+const int LABEL_D = SRGB_BASE + 4;
+
+// === 1. Build the line topology A-B-C-D and install node-SID entries ===
+EV << "=== building topology and installing node-SID entries ===" << endl;
+int abIndex = 0;
+ted->addLink(makeLink("1.1.1.1", "2.2.2.2", 1, 1e6)); // index 0: A -> B (A's own advertised link)
+ted->addLink(makeLink("2.2.2.2", "1.1.1.1", 1, 1e6)); // index 1: B -> A
+ted->addLink(makeLink("2.2.2.2", "3.3.3.3", 1, 1e6)); // index 2: B -> C
+ted->addLink(makeLink("3.3.3.3", "2.2.2.2", 1, 1e6)); // index 3: C -> B
+ted->addLink(makeLink("3.3.3.3", "4.4.4.4", 1, 1e6)); // index 4: C -> D
+ted->addLink(makeLink("4.4.4.4", "3.3.3.3", 1, 1e6)); // index 5: D -> C
+
+// addLink() (unlike setLinkState()) never emits tedChangedSignal -- mirroring how Ted's own
+// initializeTED() silently populates the initial local-link snapshot -- so the module's
+// SIGNAL-driven recompute never fires for this initial injection; call it directly, exactly
+// as SegmentRouting::handleStartOperation() does for its own initial computation.
+sr->recomputeAndInstall();
+
+{
+    // A's own SID (1): no LIB entry -- packets arrive already popped via B's PHP.
+    LabelOpVector out;
+    int outIf;
+    if (lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_A, out, outIf))
+        throw cRuntimeError("Broken: a LIB entry was installed for this router's OWN node SID (label %d)", LABEL_A);
+    EV << "no LIB entry for own SID (label " << LABEL_A << ")  OK" << endl;
+}
+{
+    // B (directly connected): PHP -- POP, forwarding out lo0 (A's only "interface").
+    LabelOpVector out;
+    int outIf;
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_B, out, outIf))
+        throw cRuntimeError("Broken: no LIB entry for B's node SID (label %d)", LABEL_B);
+    if (!(out.size() == 1 && out[0].optcode == POP_OPER))
+        throw cRuntimeError("Broken: B's node-SID entry (label %d) is not a plain POP", LABEL_B);
+    if (outIf != lo0Id)
+        throw cRuntimeError("Broken: B's node-SID entry (label %d) forwards via interface %d, expected %d", LABEL_B, outIf, lo0Id);
+    EV << "label " << LABEL_B << " (B, direct neighbour): POP via " << outIf << "  OK" << endl;
+}
+{
+    // C (2 hops, transit via B): SWAP to the SAME label (homogeneous SRGB).
+    LabelOpVector out;
+    int outIf;
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_C, out, outIf))
+        throw cRuntimeError("Broken: no LIB entry for C's node SID (label %d)", LABEL_C);
+    if (!(out.size() == 1 && out[0].optcode == SWAP_OPER && out[0].label == LABEL_C))
+        throw cRuntimeError("Broken: C's node-SID entry (label %d) is not SWAP-to-self", LABEL_C);
+    if (outIf != lo0Id)
+        throw cRuntimeError("Broken: C's node-SID entry (label %d) forwards via interface %d, expected %d", LABEL_C, outIf, lo0Id);
+    EV << "label " << LABEL_C << " (C, transit via B): SWAP via " << outIf << "  OK" << endl;
+}
+{
+    // D (3 hops, transit via B): SWAP to the SAME label.
+    LabelOpVector out;
+    int outIf;
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_D, out, outIf))
+        throw cRuntimeError("Broken: no LIB entry for D's node SID (label %d)", LABEL_D);
+    if (!(out.size() == 1 && out[0].optcode == SWAP_OPER && out[0].label == LABEL_D))
+        throw cRuntimeError("Broken: D's node-SID entry (label %d) is not SWAP-to-self", LABEL_D);
+    if (outIf != lo0Id)
+        throw cRuntimeError("Broken: D's node-SID entry (label %d) forwards via interface %d, expected %d", LABEL_D, outIf, lo0Id);
+    EV << "label " << LABEL_D << " (D, transit via B): SWAP via " << outIf << "  OK" << endl;
+}
+
+// === 2. Topology change: the A-B link goes down -- B/C/D become unreachable from A.
+// Ted::setLinkState() (unlike addLink()) DOES emit tedChangedSignal, so this exercises the
+// real production signal path: SegmentRouting is subscribed (from its own
+// handleStartOperation(), run automatically during network setup) and should recompute on
+// its own, with no direct call needed here. ===
+EV << "=== bringing the A-B link down (via tedChangedSignal) ===" << endl;
+ted->setLinkState(abIndex, false);
+
+for (int label : {LABEL_B, LABEL_C, LABEL_D}) {
+    LabelOpVector out;
+    int outIf;
+    if (lib->resolveLabel(LibTable::ANY_INTERFACE, label, out, outIf))
+        throw cRuntimeError("Broken: label %d still has a LIB entry after the A-B link went down", label);
+}
+EV << "all three node-SID entries removed after the link went down  OK" << endl;
+
+// === 3. The link comes back up: entries must be reinstalled identically to step 1. ===
+EV << "=== bringing the A-B link back up (via tedChangedSignal) ===" << endl;
+ted->setLinkState(abIndex, true);
+
+{
+    LabelOpVector out;
+    int outIf;
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_B, out, outIf) || out[0].optcode != POP_OPER)
+        throw cRuntimeError("Broken: label %d not correctly reinstalled (POP) after the link came back up", LABEL_B);
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_C, out, outIf) || out[0].optcode != SWAP_OPER || out[0].label != LABEL_C)
+        throw cRuntimeError("Broken: label %d not correctly reinstalled (SWAP) after the link came back up", LABEL_C);
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_D, out, outIf) || out[0].optcode != SWAP_OPER || out[0].label != LABEL_D)
+        throw cRuntimeError("Broken: label %d not correctly reinstalled (SWAP) after the link came back up", LABEL_D);
+}
+EV << "all three node-SID entries correctly reinstalled after the link recovered  OK" << endl;
+
+// === 4. Crash + restart: handleCrashOperation() must remove every owned LIB entry (LibTable
+// is a plain SimpleModule, not lifecycle-aware, so it never does this on its own), otherwise
+// the FIRST recomputeAndInstall() after a restart throws trying to installReservedLabel() at
+// labels that still exist from before the crash. ===
+EV << "=== simulating a crash, then a restart ===" << endl;
+sr->handleCrashOperation(nullptr);
+
+for (int label : {LABEL_B, LABEL_C, LABEL_D}) {
+    LabelOpVector out;
+    int outIf;
+    if (lib->resolveLabel(LibTable::ANY_INTERFACE, label, out, outIf))
+        throw cRuntimeError("Broken: label %d still has a LIB entry right after handleCrashOperation()", label);
+}
+EV << "handleCrashOperation() removed all owned LIB entries  OK" << endl;
+
+sr->handleStartOperation(nullptr); // must NOT throw (this is exactly the bug the comment above describes)
+
+{
+    LabelOpVector out;
+    int outIf;
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_B, out, outIf) || out[0].optcode != POP_OPER)
+        throw cRuntimeError("Broken: label %d not correctly reinstalled (POP) after the crash+restart", LABEL_B);
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_C, out, outIf) || out[0].optcode != SWAP_OPER || out[0].label != LABEL_C)
+        throw cRuntimeError("Broken: label %d not correctly reinstalled (SWAP) after the crash+restart", LABEL_C);
+    if (!lib->resolveLabel(LibTable::ANY_INTERFACE, LABEL_D, out, outIf) || out[0].optcode != SWAP_OPER || out[0].label != LABEL_D)
+        throw cRuntimeError("Broken: label %d not correctly reinstalled (SWAP) after the crash+restart", LABEL_D);
+}
+EV << "restart after crash correctly recomputes and reinstalls all entries, no throw  OK" << endl;
+
+// === 5. sidTable XML validation ===
+EV << "=== sidTable XML validation ===" << endl;
+
+ASSERT_THROWS_XML("out-of-range sid (>= srgbSize)", makeSidXml({{"9.9.9.1", 8000}}));
+
+ASSERT_THROWS_XML("negative sid", makeSidXml({{"9.9.9.2", -1}}));
+
+ASSERT_THROWS_XML("duplicate sid within one document", makeSidXml({{"9.9.9.3", 50}, {"9.9.9.4", 50}}));
+
+ASSERT_THROWS_XML("duplicate router (already present from the initial sidTable config)", makeSidXml({{"1.1.1.1", 51}}));
+
+ASSERT_THROWS_XML("wrong root element", new cXMLElement("notsr", nullptr));
+
+// A well-formed, non-conflicting entry must still validate fine after all the rejections above.
+{
+    cXMLElement *xml = makeSidXml({{"9.9.9.5", 60}});
+    sr->readSidTableFromXML(xml);
+    delete xml;
+    EV << "a fresh, valid <node> entry still validates fine after the rejections above  OK" << endl;
+}
+
+EV << "ALL SEGMENTROUTING NODE-SID UNIT CHECKS PASSED" << endl;
+
+%contains: stdout
+ALL SEGMENTROUTING NODE-SID UNIT CHECKS PASSED
+
+%not-contains: stdout
+Broken:
