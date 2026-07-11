@@ -67,7 +67,12 @@ class INET_API SegmentRouting : public RoutingProtocolBase, public cListener
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
-    // cListener method: reacts to tedChangedSignal, emitted at the host level by Ted
+    // cListener method: reacts to tedChangedSignal (Ted, local liveness flips) and to
+    // routeAddedSignal/routeDeletedSignal (Ipv4RoutingTable, emitted by EVERY route
+    // Ted::rebuildRoutingTable() installs/removes -- including ones triggered by
+    // LinkStateRouting learning a REMOTE topology change via flooding, which does NOT emit
+    // tedChangedSignal; see handleStartOperation()'s subscription comment for why both are
+    // needed).
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     // static configuration

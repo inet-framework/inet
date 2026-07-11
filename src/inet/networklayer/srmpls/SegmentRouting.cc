@@ -56,6 +56,27 @@ void SegmentRouting::handleStartOperation(LifecycleOperation *operation)
     cModule *host = getContainingNode(this);
     host->subscribe(tedChangedSignal, this);
 
+    // tedChangedSignal alone is NOT enough to learn about topology information this router
+    // only knows about via FLOODING: LinkStateRouting::processLINK_STATE_MESSAGE applies a
+    // remote link-state update it just learned about (a brand-new link, or an existing one's
+    // state changing) by calling Ted::addLink()/Ted::rebuildRoutingTable() DIRECTLY, never
+    // through Ted::setLinkState() -- so tedChangedSignal (reserved for THIS router's own
+    // locally-observed liveness flips, specifically so LinkStateRouting knows to re-flood them
+    // to peers, see Ted::setLinkState()'s doc) never fires for it. Left unaddressed, this
+    // module would only ever see its own directly-connected links (the snapshot available at
+    // the very first recomputeAndInstall() call below, before any flooding has happened) and
+    // would never install a transit (SWAP) entry for an indirect node, no matter how long the
+    // simulation runs. Ted::rebuildRoutingTable() is, however, the ONLY thing that ever
+    // touches this router's routing table, and it runs unconditionally on every Ted content
+    // change regardless of origin (local flip or flooded update) -- so subscribing to
+    // Ipv4RoutingTable's routeAddedSignal/routeDeletedSignal (emitted from every route it
+    // adds/removes) catches every such rebuild, local or remote-triggered alike.
+    // recomputeAndInstall() is idempotent (wipe-owned-then-reinstall), so being triggered
+    // redundantly -- once per intermediate route add/delete rather than once per logical
+    // topology change -- is wasteful but harmless.
+    host->subscribe(routeAddedSignal, this);
+    host->subscribe(routeDeletedSignal, this);
+
     // Ted's own initial local-link discovery (Ted::initializeTED(), also run from
     // handleStartOperation) does NOT emit tedChangedSignal -- only later changes (setLinkState()/
     // announceLinkChange()) do -- so an initial computation here is needed to pick up that first,
@@ -69,6 +90,8 @@ void SegmentRouting::handleStopOperation(LifecycleOperation *operation)
 {
     cModule *host = getContainingNode(this);
     host->unsubscribe(tedChangedSignal, this);
+    host->unsubscribe(routeAddedSignal, this);
+    host->unsubscribe(routeDeletedSignal, this);
 
     for (int label : ownedLabels)
         lt->removeLibEntryIfExists(label);
@@ -85,6 +108,8 @@ void SegmentRouting::handleCrashOperation(LifecycleOperation *operation)
 {
     cModule *host = getContainingNode(this);
     host->unsubscribe(tedChangedSignal, this);
+    host->unsubscribe(routeAddedSignal, this);
+    host->unsubscribe(routeDeletedSignal, this);
 
     // LibTable is a plain SimpleModule, not lifecycle-aware -- it does NOT drop this module's
     // entries on its own just because SegmentRouting crashed, so they must be removed here.
@@ -108,9 +133,9 @@ void SegmentRouting::receiveSignal(cComponent *source, simsignal_t signalID, cOb
 
     printSignalBanner(signalID, obj, details);
 
-    ASSERT(signalID == tedChangedSignal);
+    ASSERT(signalID == tedChangedSignal || signalID == routeAddedSignal || signalID == routeDeletedSignal);
 
-    EV_INFO << "TED changed, recomputing node-SID label programming" << endl;
+    EV_INFO << "topology-affecting signal " << cComponent::getSignalName(signalID) << " received, recomputing node-SID label programming" << endl;
 
     recomputeAndInstall();
 }
