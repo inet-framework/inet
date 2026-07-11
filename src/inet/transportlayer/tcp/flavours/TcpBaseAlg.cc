@@ -99,6 +99,11 @@ void TcpBaseAlg::initialize()
     persistTimer->setContextPointer(conn);
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
+
+    state->keepalive_enabled = conn->getTcpMain()->par("keepAliveEnabled");
+    state->keepalive_idle_time = conn->getTcpMain()->par("keepAliveIdleTime");
+    state->keepalive_interval = conn->getTcpMain()->par("keepAliveInterval");
+    state->keepalive_max_probes = conn->getTcpMain()->par("keepAliveProbeCount");
 }
 
 void TcpBaseAlg::established(bool active)
@@ -153,6 +158,12 @@ void TcpBaseAlg::established(bool active)
         EV_INFO << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
         if (!sendData(false)) // FIXME - This condition is never true because the buffer is empty (at this time) therefore the first ACK is never piggyback on data
             conn->sendAck();
+    }
+
+    if (state->keepalive_enabled) {
+        state->time_last_segment_received = simTime();
+        state->keepalive_probes_sent = 0;
+        conn->scheduleAfter(state->keepalive_idle_time, keepAliveTimer);
     }
 }
 
@@ -291,18 +302,41 @@ void TcpBaseAlg::processDelayedAckTimer(TcpEventCode& event)
 
 void TcpBaseAlg::processKeepAliveTimer(TcpEventCode& event)
 {
-    // TODO
-    // RFC 1122, page 102:
-    // "A "keep-alive" mechanism periodically probes the other
-    // end of a connection when the connection is otherwise
-    // idle, even when there is no data to be sent.  The TCP
-    // specification does not include a keep-alive mechanism
-    // because it could:  (1) cause perfectly good connections
-    // to break during transient Internet failures; (2)
-    // consume unnecessary bandwidth ("if no one is using the
-    // connection, who cares if it is still good?"); and (3)
-    // cost money for an Internet path that charges for
-    // packets."
+    // RFC 1122 4.2.3.6 keepalive mechanism, following the Linux tcp_keepalive_timer
+    // semantics (net/ipv4/tcp_timer.c).
+
+    // If there is unacknowledged data or data pending in the send queue, the
+    // retransmission timer already probes connection liveness; just re-arm.
+    if (state->snd_max != state->snd_una || !conn->isSendQueueEmpty()) {
+        state->keepalive_probes_sent = 0;
+        conn->scheduleAfter(state->keepalive_idle_time, keepAliveTimer);
+        return;
+    }
+
+    // If a segment was received recently, the connection is not idle yet.
+    simtime_t elapsed = simTime() - state->time_last_segment_received;
+    if (elapsed < state->keepalive_idle_time) {
+        state->keepalive_probes_sent = 0;
+        conn->scheduleAfter(state->keepalive_idle_time - elapsed, keepAliveTimer);
+        return;
+    }
+
+    // The connection is idle. If the peer failed to answer the allowed number of
+    // probes, abort the connection (Linux sends a RST; INET reuses the
+    // timeout-abort path, which notifies the app with TCP_I_TIMED_OUT).
+    if (state->keepalive_probes_sent >= state->keepalive_max_probes) {
+        EV_INFO << "Keepalive: peer did not respond to " << state->keepalive_max_probes
+                << " probes, aborting connection\n";
+        conn->signalConnectionTimeout();
+        event = TCP_E_ABORT;
+        return;
+    }
+
+    EV_INFO << "Keepalive: connection idle, sending probe #"
+            << (state->keepalive_probes_sent + 1) << "\n";
+    conn->sendKeepAliveProbe();
+    state->keepalive_probes_sent++;
+    conn->scheduleAfter(state->keepalive_interval, keepAliveTimer);
 }
 
 void TcpBaseAlg::startRexmitTimer()

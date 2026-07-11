@@ -276,6 +276,9 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: sends 1 bytes as "probe", called by the "persist" mechanism */
     virtual bool sendProbe();
 
+    /** Sends a zero-length keepalive probe (seq = snd_una - 1) to elicit an ACK from an idle peer. */
+    virtual void sendKeepAliveProbe();
+
     /** Utility: retransmit one segment from snd_una */
     virtual void retransmitOneSegment(bool called_at_rto);
 

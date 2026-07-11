@@ -32,6 +32,15 @@ struct TcpBaseAlgStateVariables extends TcpStateVariables
     simtime_t persist_timeout = 5.0; ///< current persist timeout
     //@}
 
+    /// keepalive (RFC 1122 4.2.3.6)
+    //@{
+    bool keepalive_enabled = false; ///< whether keepalive probing is active on this connection
+    simtime_t keepalive_idle_time = 7200; ///< idle time before the first probe
+    simtime_t keepalive_interval = 75; ///< interval between probes
+    int keepalive_max_probes = 9; ///< number of unanswered probes before abort
+    int keepalive_probes_sent = 0; ///< probes sent in the current idle episode
+    //@}
+
     /// congestion window
     //@{
     uint32_t snd_cwnd = 0; ///< congestion window

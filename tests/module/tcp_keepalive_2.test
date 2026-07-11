@@ -1,0 +1,72 @@
+%description:
+Tests that TCP keepalive aborts a connection whose peer has become unreachable.
+After the handshake the tester deletes all client segments, so the server never
+answers the keepalive probes. The client sends keepAliveProbeCount (3) probes at
+the 5 s interval and then aborts the connection, notifying the app with
+TCP_I_TIMED_OUT.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+sim-time-limit = 60s
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+# drop every client segment after the handshake (segments A003..A006), so the
+# server never sees the keepalive probes and cannot answer them
+*.tcptester.script="A3 delete;A4 delete;A5 delete;A6 delete"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.cli_tcp.keepAliveEnabled=true
+*.cli_tcp.keepAliveIdleTime=30s
+*.cli_tcp.keepAliveInterval=5s
+*.cli_tcp.keepAliveProbeCount=3
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+%# three probes are sent at the 5 s interval (t = 30, 35, 40 s), all deleted by
+%# the tester, then the connection is aborted and the app is notified.
+%contains-regex: stdout
+\[30\.005 [^\n]*A\.1000 > B\.2000: A ack 501 win 7000 # deleting
+%contains-regex: stdout
+\[35\.005 [^\n]*A\.1000 > B\.2000: A ack 501 win 7000 # deleting
+%contains-regex: stdout
+\[40\.005 [^\n]*A\.1000 > B\.2000: A ack 501 win 7000 # deleting
+
+%contains: stdout
+Keepalive: connection idle, sending probe #3
+
+%contains: stdout
+Keepalive: peer did not respond to 3 probes, aborting connection
+
+%contains: stdout
+Notifying app: TIMED_OUT

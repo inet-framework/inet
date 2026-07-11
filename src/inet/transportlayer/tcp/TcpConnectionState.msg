@@ -183,6 +183,7 @@ struct TcpStateVariables
     uint32_t ts_recent = 0;         // RFC 1323, page 31: "Latest received Timestamp"
     uint32_t last_ack_sent = 0;     // RFC 1323, page 31: "Last ACK field sent"
     simtime_t time_last_data_sent;  // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
+    simtime_t time_last_segment_received = 0; // time at which the last segment was received (idle base for keepalive)
 
     // SACK related variables
     bool sack_support = false;      // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 3517)

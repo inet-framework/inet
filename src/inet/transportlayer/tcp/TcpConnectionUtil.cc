@@ -1170,6 +1170,31 @@ bool TcpConnection::sendProbe()
     return true;
 }
 
+void TcpConnection::sendKeepAliveProbe()
+{
+    // Linux-style keepalive probe (net/ipv4/tcp_output.c tcp_xmit_probe_skb):
+    // a zero-length segment carrying seq = snd_una - 1. That sequence number is
+    // outside the receiver's window, so the peer answers with a plain ACK
+    // without accepting any data. Unlike sendProbe(), no real byte is sent and
+    // snd_nxt/snd_max are not advanced.
+    const auto& tcpHeader = makeShared<TcpHeader>();
+
+    tcpHeader->setAckBit(true);
+    tcpHeader->setSequenceNo(state->snd_una - 1);
+    tcpHeader->setAckNo(state->rcv_nxt);
+    tcpHeader->setWindow(updateRcvWnd());
+
+    writeHeaderOptions(tcpHeader);
+    Packet *fp = new Packet("TcpKeepAlive");
+
+    EV_INFO << "Sending keepalive probe, seq=" << (state->snd_una - 1) << "\n";
+
+    // pure control packet: must be sent with the not-ECT codepoint
+    state->sndAck = true;
+    sendToIP(fp, tcpHeader);
+    state->sndAck = false;
+}
+
 void TcpConnection::retransmitOneSegment(bool called_at_rto)
 {
     // rfc-3168, page 20:

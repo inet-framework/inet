@@ -81,6 +81,8 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
     printSegmentBrief(tcpSegment, tcpHeader);
     EV_DETAIL << "TCB: " << state->str() << "\n";
 
+    state->time_last_segment_received = simTime(); // idle base for keepalive
+
     emit(rcvSeqSignal, tcpHeader->getSequenceNo());
     emit(rcvAckSignal, tcpHeader->getAckNo());
 
