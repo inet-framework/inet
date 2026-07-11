@@ -26,6 +26,10 @@ class INET_API TcpSackRexmitQueue
         uint32_t endSeqNum;
         bool sacked; // indicates whether region has already been sacked by data receiver
         bool rexmitted; // indicates whether region has already been retransmitted by data sender
+        simtime_t firstSentTime = 0; // time this region was first transmitted (RACK/Vegas: original send time)
+        simtime_t lastSentTime = 0; // time this region was most recently (re)transmitted (RACK: xmit time)
+        uint16_t transmitCount = 0; // number of times this region has been transmitted (1 = never retransmitted)
+        bool lost = false; // RACK/RFC 3517: region considered lost (not in flight); cleared on (re)transmission
     };
 
     typedef std::list<Region> RexmitQueue;
@@ -159,6 +163,28 @@ class INET_API TcpSackRexmitQueue
      * SACK block starting at seqNum.
      */
     virtual void checkSackBlock(uint32_t seqNum, uint32_t& length, bool& sacked, bool& rexmitted) const;
+
+    /**
+     * Returns the region containing seqNum. seqNum must be within [begin, end).
+     * Used by RACK to read a segment's transmit time and count.
+     */
+    virtual const Region& getRegion(uint32_t seqNum) const;
+
+    /**
+     * Marks the byte range [fromSeqNum, toSeqNum) as lost (RACK/RFC 3517),
+     * splitting regions at the boundaries as needed.
+     */
+    virtual void markLost(uint32_t fromSeqNum, uint32_t toSeqNum);
+
+    /**
+     * Returns the total amount of bytes currently marked lost and not yet sacked.
+     */
+    virtual uint32_t getTotalAmountOfLostBytes() const;
+
+    /**
+     * Returns the amount of retransmitted-but-not-yet-sacked bytes (retrans_out analogue).
+     */
+    virtual uint32_t getRexmittedBytesInFlight() const;
 
   protected:
     /*

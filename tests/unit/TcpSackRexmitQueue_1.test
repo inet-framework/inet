@@ -1,0 +1,92 @@
+%description:
+Tests TcpSackRexmitQueue: per-region transmit-time and transmit-count tracking,
+sacked/lost marking, region splitting (which must preserve the per-region times
+and counts), and discardUpTo trimming.
+
+%includes:
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+static void dump(const char *label, TcpSackRexmitQueue& q)
+{
+    EV << label << " " << q.str() << "\n";
+    for (const auto& r : q.rexmitQueue)
+        EV << "  [" << r.beginSeqNum << ".." << r.endSeqNum << ") sacked=" << r.sacked
+           << " rexmitted=" << r.rexmitted << " count=" << r.transmitCount
+           << " first=" << r.firstSentTime << " last=" << r.lastSentTime
+           << " lost=" << r.lost << "\n";
+}
+
+%activity:
+
+TcpSackRexmitQueue q;
+q.init(1000);
+
+q.enqueueSentData(1000, 1500);
+q.enqueueSentData(1500, 2000);
+q.enqueueSentData(2000, 2500);
+dump("t0 after 3 sends:", q);
+
+wait(1);
+q.enqueueSentData(1000, 1500);   // retransmit region 1 at t=1
+dump("t1 after retransmit [1000,1500):", q);
+
+q.setSackedBit(1500, 2000);      // sack the middle region
+dump("after sack [1500,2000):", q);
+
+q.setSackedBit(2100, 2300);      // partial sack -> splits region 3 into three
+dump("after sack [2100,2300):", q);
+
+q.markLost(1000, 1500);          // mark region 1 lost
+dump("after markLost [1000,1500):", q);
+EV << "lostBytes=" << q.getTotalAmountOfLostBytes()
+   << " rexmittedInFlight=" << q.getRexmittedBytesInFlight() << "\n";
+
+EV << "getRegion(1600) count=" << q.getRegion(1600).transmitCount << "\n";
+
+q.discardUpTo(1500);             // cumulative ACK of region 1
+dump("after discardUpTo(1500):", q);
+
+EV << ".\n";
+
+%subst: /rexmitQ: [^\n]*\n//
+%subst: /FAILED to set sacked bit[^\n]*\n//
+%contains: stdout
+t0 after 3 sends: [1000..2500)
+  [1000..1500) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+  [1500..2000) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2000..2500) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+
+%contains: stdout
+t1 after retransmit [1000,1500): [1000..2500)
+  [1000..1500) sacked=0 rexmitted=1 count=2 first=0 last=1 lost=0
+  [1500..2000) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2000..2500) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+after sack [1500,2000): [1000..2500)
+  [1000..1500) sacked=0 rexmitted=1 count=2 first=0 last=1 lost=0
+  [1500..2000) sacked=1 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2000..2500) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+after sack [2100,2300): [1000..2500)
+  [1000..1500) sacked=0 rexmitted=1 count=2 first=0 last=1 lost=0
+  [1500..2000) sacked=1 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2000..2100) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2100..2300) sacked=1 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2300..2500) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+after markLost [1000,1500): [1000..2500)
+  [1000..1500) sacked=0 rexmitted=1 count=2 first=0 last=1 lost=1
+  [1500..2000) sacked=1 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2000..2100) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2100..2300) sacked=1 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2300..2500) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+lostBytes=500 rexmittedInFlight=500
+getRegion(1600) count=1
+after discardUpTo(1500): [1500..2500)
+  [1500..2000) sacked=1 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2000..2100) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2100..2300) sacked=1 rexmitted=0 count=1 first=0 last=0 lost=0
+  [2300..2500) sacked=0 rexmitted=0 count=1 first=0 last=0 lost=0
+.

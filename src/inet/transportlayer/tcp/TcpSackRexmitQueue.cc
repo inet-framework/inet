@@ -91,6 +91,9 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
         region.endSeqNum = toSeqNum;
         region.sacked = false;
         region.rexmitted = false;
+        region.firstSentTime = region.lastSentTime = simTime();
+        region.transmitCount = 1;
+        region.lost = false;
         rexmitQueue.push_back(region);
         found = true;
         fromSeqNum = toSeqNum;
@@ -114,6 +117,9 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
 
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
             i->rexmitted = true;
+            i->lastSentTime = simTime();
+            i->transmitCount++;
+            i->lost = false;
             fromSeqNum = i->endSeqNum;
             found = true;
             i++;
@@ -128,6 +134,9 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
             region.endSeqNum = toSeqNum;
             region.sacked = beforeEnd ? i->sacked : false;
             region.rexmitted = beforeEnd;
+            region.firstSentTime = region.lastSentTime = simTime();
+            region.transmitCount = 1;
+            region.lost = false;
             rexmitQueue.insert(i, region);
             found = true;
             fromSeqNum = toSeqNum;
@@ -374,6 +383,92 @@ void TcpSackRexmitQueue::checkSackBlock(uint32_t fromSeqNum, uint32_t& length, b
     length = (i->endSeqNum - fromSeqNum);
     sacked = i->sacked;
     rexmitted = i->rexmitted;
+}
+
+const TcpSackRexmitQueue::Region& TcpSackRexmitQueue::getRegion(uint32_t seqNum) const
+{
+    ASSERT(seqLE(begin, seqNum) && seqLess(seqNum, end));
+
+    RexmitQueue::const_iterator i = rexmitQueue.begin();
+
+    while (i != rexmitQueue.end() && seqLE(i->endSeqNum, seqNum)) // search for seqNum
+        i++;
+
+    ASSERT(i != rexmitQueue.end());
+    ASSERT(seqLE(i->beginSeqNum, seqNum) && seqLess(seqNum, i->endSeqNum));
+
+    return *i;
+}
+
+void TcpSackRexmitQueue::markLost(uint32_t fromSeqNum, uint32_t toSeqNum)
+{
+    if (seqLess(fromSeqNum, begin))
+        fromSeqNum = begin;
+
+    if (seqLE(toSeqNum, fromSeqNum))
+        return;
+
+    ASSERT(seqLess(fromSeqNum, end));
+    ASSERT(seqLE(toSeqNum, end));
+
+    if (!rexmitQueue.empty()) {
+        auto i = rexmitQueue.begin();
+
+        while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum))
+            i++;
+
+        ASSERT(i != rexmitQueue.end() && seqLE(i->beginSeqNum, fromSeqNum) && seqLess(fromSeqNum, i->endSeqNum));
+
+        if (i->beginSeqNum != fromSeqNum) { // split off the tail so lost applies exactly from fromSeqNum
+            Region region = *i;
+
+            region.endSeqNum = fromSeqNum;
+            rexmitQueue.insert(i, region);
+            i->beginSeqNum = fromSeqNum;
+        }
+
+        while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
+            if (seqGE(i->beginSeqNum, fromSeqNum))
+                i->lost = true;
+
+            i++;
+        }
+
+        if (i != rexmitQueue.end() && seqLess(i->beginSeqNum, toSeqNum) && seqLess(toSeqNum, i->endSeqNum)) {
+            Region region = *i;
+
+            region.endSeqNum = toSeqNum;
+            region.lost = true;
+            rexmitQueue.insert(i, region);
+            i->beginSeqNum = toSeqNum;
+        }
+    }
+
+    ASSERT(checkQueue());
+}
+
+uint32_t TcpSackRexmitQueue::getTotalAmountOfLostBytes() const
+{
+    uint32_t bytes = 0;
+
+    for (const auto& elem : rexmitQueue) {
+        if (elem.lost && !elem.sacked)
+            bytes += (elem.endSeqNum - elem.beginSeqNum);
+    }
+
+    return bytes;
+}
+
+uint32_t TcpSackRexmitQueue::getRexmittedBytesInFlight() const
+{
+    uint32_t bytes = 0;
+
+    for (const auto& elem : rexmitQueue) {
+        if (elem.rexmitted && !elem.sacked)
+            bytes += (elem.endSeqNum - elem.beginSeqNum);
+    }
+
+    return bytes;
 }
 
 } // namespace tcp
