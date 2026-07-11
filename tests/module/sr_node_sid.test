@@ -1,0 +1,216 @@
+%description:
+Module test for RFC 8660 node-SID label switching end to end: a self-contained line
+network hostA -- A -- B -- C -- D -- hostD, all of A/B/C/D being ~SrMplsRouter nodes that
+share the SAME `sidTable` (router-id -> node-SID index; A=1, B=2, C=3, D=4). No configurator
+is used -- interface addresses and host default routes are set via inline .rt files, and
+router-to-router (and router-to-host) reachability is provided automatically by ~Ted's own
+`installRoutes` route computation (default true), which acts as this model's IGP -- exactly
+the "TED plays the IGP" design of F1's plan.
+
+Only router A carries an ~SrPolicy entry: destination hostD, segments="node:4" -- since D is
+NOT directly connected to A (3 hops away, via B and C), the label is genuinely pushed (no
+first-segment PHP-canonicalization drop). This is deliberate: with NO policy configured
+anywhere, hostA->hostD traffic would already be delivered via plain IP routing (Ted installs
+shortest-path host routes on every router), so a test with no SR policy at all would not
+actually exercise the MPLS data plane -- see F1's plan Phase 4 note. This ONE policy forces
+the ingress (A) to actually impose a node-SID label stack, so the test genuinely locks in:
+  - A (ingress): PUSH of D's node-SID label (16004, srgbBase=16000 + sid=4)
+  - B (transit, 2 hops from D via C): SWAP to the SAME label (homogeneous SRGB)
+  - C (penultimate hop, directly connected to D): POP (PHP, RFC 8660 Section 2)
+  - D: receives a plain (unlabeled) Ipv4 datagram and forwards it to hostD via ordinary L3
+    routing (no further MPLS involvement) -- ~Mpls::processMplsPacketFromL2's POP branch
+    forwards directly out the interface resolved by the LIB entry, bypassing the classifier/L3
+    routing entirely, so C's POP->forward is itself already proof the label was consumed
+    correctly, not merely that routing "happened to work".
+End-to-end delivery is confirmed via the UdpSink's packetReceived scalar at hostD.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.mpls.SrMplsRouter;
+import ned.DatarateChannel;
+
+network SrNodeSidTest
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    types:
+        channel Link extends DatarateChannel
+        {
+            datarate = 1Mbps;
+            delay = 10us;
+        }
+    submodules:
+        hostA: StandardHost {
+            @display("p=100,100");
+        }
+        A: SrMplsRouter {
+            parameters:
+                routerId = "1.1.1.1";
+                peers = "ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                policies = xmldoc("policiesA.xml");
+                @display("p=250,100");
+            gates:
+                pppg[2];
+        }
+        B: SrMplsRouter {
+            parameters:
+                routerId = "2.2.2.2";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=400,100");
+            gates:
+                pppg[2];
+        }
+        C: SrMplsRouter {
+            parameters:
+                routerId = "3.3.3.3";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=550,100");
+            gates:
+                pppg[2];
+        }
+        D: SrMplsRouter {
+            parameters:
+                routerId = "4.4.4.4";
+                peers = "ppp0";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=700,100");
+            gates:
+                pppg[2];
+        }
+        hostD: StandardHost {
+            @display("p=850,100");
+        }
+    connections:
+        hostA.pppg++ <--> Link <--> A.pppg[0];
+        A.pppg[1] <--> Link <--> B.pppg[0];
+        B.pppg[1] <--> Link <--> C.pppg[0];
+        C.pppg[1] <--> Link <--> D.pppg[0];
+        D.pppg[1] <--> Link <--> hostD.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: sidtable.xml
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+    <node router="4.4.4.4" sid="4"/>
+</sr>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: policiesA.xml
+<policies>
+    <policy dest="10.0.0.20" netmask="255.255.255.255" segments="node:4"/>
+</policies>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostA.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.10	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.0.1	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: A.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.1	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.0.2	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: B.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.3	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.0.4	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: C.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.5	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.0.6	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: D.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.7	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.0.8	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostD.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.20	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.0.8	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src
+network = SrNodeSidTest
+sim-time-limit = 2s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.hostA.numApps = 1
+**.hostA.app[0].typename = "UdpBasicApp"
+**.hostA.app[0].localPort = 100
+**.hostA.app[0].destPort = 100
+**.hostA.app[0].messageLength = 128 bytes
+**.hostA.app[0].sendInterval = 0.01s
+**.hostA.app[0].destAddresses = "hostD"
+
+**.hostD.numApps = 1
+**.hostD.app[0].typename = "UdpSink"
+**.hostD.app[0].localPort = 100
+
+**.hostA.ipv4.routingTable.routingFile = "hostA.rt"
+**.hostD.ipv4.routingTable.routingFile = "hostD.rt"
+**.A.ipv4.routingTable.routingFile = "A.rt"
+**.B.ipv4.routingTable.routingFile = "B.rt"
+**.C.ipv4.routingTable.routingFile = "C.rt"
+**.D.ipv4.routingTable.routingFile = "D.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%# A (ingress): PUSH of D's node-SID label (srgbBase 16000 + sid 4 = 16004)
+%contains: stdout
+doStackOps: {PUSH 16004}
+%#--------------------------------------------------------------------------------------------------------------
+%# B (transit, 2 hops from D via C): SWAP to the SAME label (homogeneous SRGB)
+%contains: stdout
+doStackOps: {SWAP 16004}
+%#--------------------------------------------------------------------------------------------------------------
+%# C (penultimate hop toward D): POP (PHP) -- with only this one live flow, any POP in the
+%# log can only be this one
+%contains: stdout
+doStackOps: {POP}
+%#--------------------------------------------------------------------------------------------------------------
+%# host traffic is delivered end-to-end via the SR-programmed LSP
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
