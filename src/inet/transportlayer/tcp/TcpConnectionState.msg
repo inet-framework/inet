@@ -222,6 +222,11 @@ struct TcpStateVariables
     bool dsackSeen = false;        // a D-SACK was seen while processing the current segment (reset per segment)
     uint32_t dsackBytes = 0;       // bytes covered by the D-SACK seen on the current segment
 
+    // adaptive reordering / dynamic DupThresh (Linux tp->reordering)
+    bool adaptiveReorderingEnabled = false; // set from the adaptiveReorderingEnabled parameter
+    uint32_t reordering = 3;       // learned reordering degree in segments; initialized to dupthresh
+    uint32_t maxReordering = 300;  // upper bound (set from the maxReordering parameter)
+
     // RACK-TLP loss detection (RFC 8985)
     int lossDetectionMode = 0;    // 0 = classic DupThresh (RFC 3517), 1 = RACK time-based
     simtime_t minRtt = 0;         // minimum RTT observed on the connection (0 = unset)

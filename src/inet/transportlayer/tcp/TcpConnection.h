@@ -498,6 +498,14 @@ class INET_API TcpConnection : public SimpleModule
     virtual uint32_t rackDetectAndMarkLost();
 
     /**
+     * Adaptive reordering (Linux tcp_check_sack_reordering): a segment at lowSeq
+     * was delivered although higher sequence numbers were already SACKed -- i.e.
+     * data arrived out of order rather than being lost. Grow the learned
+     * reordering degree (dynamic DupThresh) accordingly, capped at maxReordering.
+     */
+    virtual void checkSackReordering(uint32_t lowSeq);
+
+    /**
      * For SACK TCP. RFC 3517, page 3: "This routine traverses the sequence
      * space from HighACK to HighData and MUST set the "pipe" variable to an
      * estimate of the number of octets that are currently in transit between

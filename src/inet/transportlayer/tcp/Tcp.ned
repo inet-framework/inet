@@ -208,6 +208,8 @@ simple Tcp extends SimpleModule like ITcp
         string lossDetectionMode @enum("dupthresh","rack") = default("dupthresh"); // SACK loss detection: classic DupThresh (RFC 3517) or RACK time-based (RFC 8985). RACK requires sackSupport.
         bool prrEnabled = default(false); // Proportional Rate Reduction (RFC 6937) during fast recovery instead of classic cwnd inflation/halving. Requires sackSupport. Currently applied by TcpReno.
         bool lossUndoEnabled = default(false); // Undo a spurious cwnd/ssthresh reduction when D-SACK (RFC 2883) or timestamps (RFC 3522 Eifel) reveal the retransmission was unnecessary. Currently applied by TcpReno.
+        bool adaptiveReorderingEnabled = default(false); // Grow the reordering degree (dynamic DupThresh) when SACK reveals reordering, so persistent reordering stops causing spurious fast retransmits. Requires sackSupport. Currently applied by TcpReno.
+        int maxReordering = default(300); // Upper bound on the learned reordering degree in segments (Linux tcp_max_reordering).
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation

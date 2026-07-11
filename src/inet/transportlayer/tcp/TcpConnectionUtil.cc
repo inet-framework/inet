@@ -664,11 +664,16 @@ void TcpConnection::configureStateVariables()
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     state->prrEnabled = tcpMain->par("prrEnabled");
     state->lossUndoEnabled = tcpMain->par("lossUndoEnabled");
+    state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
+    state->maxReordering = tcpMain->par("maxReordering");
+    state->reordering = state->dupthresh; // dynamic DupThresh starts at the static value
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
     if (state->lossDetectionMode == 1 && !state->sack_support)
         throw cRuntimeError("lossDetectionMode=\"rack\" requires sackSupport=true");
     if (state->prrEnabled && !state->sack_support)
         throw cRuntimeError("prrEnabled=true (Proportional Rate Reduction, RFC 6937) requires sackSupport=true");
+    if (state->adaptiveReorderingEnabled && !state->sack_support)
+        throw cRuntimeError("adaptiveReorderingEnabled=true requires sackSupport=true");
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet

@@ -64,6 +64,9 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
     /** Ctor */
     TcpReno();
 
+    /** Detect reordering (dynamic DupThresh) when a never-retransmitted segment is acked below the SACK fack. */
+    virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) override;
+
     /** Redefine what should happen when data got acked, to add congestion window management */
     virtual void receivedDataAck(uint32_t firstSeqAcked) override;
 

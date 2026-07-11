@@ -127,6 +127,15 @@ class INET_API TcpAlgorithm : public cObject
     virtual void receivedDataAck(uint32_t firstSeqAcked) = 0;
 
     /**
+     * Called when snd_una is about to advance, BEFORE the acked range
+     * [fromSeq, toSeq) is discarded from the send/rexmit queues. At this point
+     * the scoreboard data for [fromSeq, toSeq) (transmit counts, SACK state) is
+     * still valid, so an algorithm can inspect it (e.g. to distinguish reordering
+     * from loss). Default-empty; overridden by flavours that need it.
+     */
+    virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) {}
+
+    /**
      * Called after we received a duplicate ACK (that is: ackNo == snd_una,
      * no data in segment, segment doesn't carry window update, and also,
      * we have unacked data). The dupack counter got already updated

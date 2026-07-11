@@ -173,6 +173,23 @@ void TcpReno::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
+void TcpReno::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
+{
+    // Adaptive reordering: if this cumulatively-acked segment was never
+    // retransmitted yet sits below already-SACKed data, it was merely reordered
+    // (not lost) -- grow the learned reordering degree so it stops causing
+    // spurious fast retransmits.
+    if (state->adaptiveReorderingEnabled && state->sack_enabled) {
+        const TcpSackRexmitQueue *rq = conn->getRexmitQueue();
+        if (rq != nullptr && rq->getQueueLength() > 0
+            && seqLE(rq->getBufferStartSeq(), fromSeq) && seqLess(fromSeq, rq->getBufferEndSeq())
+            && rq->getRegion(fromSeq).transmitCount <= 1)
+        {
+            conn->checkSackReordering(fromSeq);
+        }
+    }
+}
+
 void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
 {
     TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
@@ -189,7 +206,7 @@ void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
         // happens at recovery exit (prrEndCwndReduction, below).
         prrCwndReduction((int)prrNewlyDelivered(), 0, true /*snd_una advanced*/);
     }
-    else if (state->dupacks >= state->dupthresh) {
+    else if (state->dupacks >= state->reordering) {
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
@@ -347,8 +364,8 @@ void TcpReno::receivedDuplicateAck()
                         && conn->getRexmitQueue()->getTotalAmountOfLostBytes() > 0
                         && (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint)));
 
-    if (state->dupacks == state->dupthresh || rackTrigger) {
-        EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
+    if (state->dupacks == state->reordering || rackTrigger) {
+        EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->reordering << ": perform Fast Retransmit, and enter Fast Recovery:";
 
         if (state->sack_enabled) {
             // RFC 3517, page 6: "When a TCP sender receives the duplicate ACK corresponding to
@@ -460,7 +477,7 @@ void TcpReno::receivedDuplicateAck()
         // try to transmit new segments (RFC 2581)
         sendData(false);
     }
-    else if (state->dupacks > state->dupthresh) {
+    else if (state->dupacks > state->reordering) {
         if (state->prrEnabled && state->lossRecovery) {
             // RFC 6937: each additional dup ACK carrying new SACK info sizes cwnd
             // by PRR rather than inflating it by one SMSS.

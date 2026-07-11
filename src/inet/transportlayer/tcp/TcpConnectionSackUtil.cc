@@ -77,6 +77,10 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
                 // detect a spurious retransmission.
                 state->dsackSeen = true;
                 state->dsackBytes = tmp.getEnd() - tmp.getStart();
+                // a D-SACK reveals reordering of the (spuriously retransmitted)
+                // segment: grow the reordering degree so it stops recurring.
+                if (state->adaptiveReorderingEnabled)
+                    checkSackReordering(tmp.getStart());
             }
             else if (i == 0 && n > 1 && seqGreater(tmp.getEnd(), tcpHeader->getAckNo())) {
                 // RFC 2883, page 8:
@@ -96,6 +100,8 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
                     // for the loss-undo logic.
                     state->dsackSeen = true;
                     state->dsackBytes = tmp.getEnd() - tmp.getStart();
+                    if (state->adaptiveReorderingEnabled)
+                        checkSackReordering(tmp.getStart());
                 }
             }
 
@@ -156,8 +162,10 @@ bool TcpConnection::isLost(uint32_t seqNum)
     if (state->lossDetectionMode == 1)
         return rexmitQueue->getRegion(seqNum).lost;
 
-    bool isLost = (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= state->dupthresh
-                   || rexmitQueue->getAmountOfSackedBytes(seqNum) >= (state->dupthresh * state->snd_mss));
+    // state->reordering equals state->dupthresh unless adaptive reordering has
+    // grown it (RFC-era static DupThresh otherwise), so this is inert by default.
+    bool isLost = (rexmitQueue->getNumOfDiscontiguousSacks(seqNum) >= state->reordering
+                   || rexmitQueue->getAmountOfSackedBytes(seqNum) >= (state->reordering * state->snd_mss));
 
     return isLost;
 }
@@ -216,6 +224,25 @@ uint32_t TcpConnection::rackDetectAndMarkLost()
     if (lostBytes > 0)
         EV_INFO << "RACK: marked " << lostBytes << " bytes lost by time (RACK.rtt=" << state->rackRtt << ")\n";
     return lostBytes;
+}
+
+void TcpConnection::checkSackReordering(uint32_t lowSeq)
+{
+    // Linux tcp_check_sack_reordering(): reordering is proven when data at lowSeq
+    // was delivered while a higher sequence number (fack) had already been SACKed.
+    if (rexmitQueue == nullptr || !state->sack_enabled)
+        return;
+    uint32_t fack = rexmitQueue->getHighestSackedSeqNum();
+    if (fack == 0 || seqGE(lowSeq, fack))
+        return;
+
+    uint32_t metric = fack - lowSeq;
+    if (state->snd_mss != 0 && metric > state->reordering * state->snd_mss) {
+        uint32_t newReordering = (metric + state->snd_mss - 1) / state->snd_mss;
+        state->reordering = std::min(newReordering, state->maxReordering);
+        EV_DETAIL << "reordering degree updated to " << state->reordering << "\n";
+    }
+    state->rackReordSeen = true; // activate RACK's reordering window as well
 }
 
 void TcpConnection::setPipe()
