@@ -375,8 +375,7 @@ void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     // 500ms ticks is available from old tcpmodule.cc:calcRetransTimer().
     //
 
-    // update smoothed RTT estimate (srtt) and variance (rttvar)
-    const double g = 0.125; // 1 / 8; (1 - alpha) where alpha == 7 / 8;
+    // RTT estimator per RFC 6298 (Jacobson/Karn), with Linux's variance-floor RTO.
     simtime_t newRTT = tAcked - tSent;
 
     // track the minimum RTT (RACK loss detection); a running min (not windowed)
@@ -386,18 +385,30 @@ void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     simtime_t& srtt = state->srtt;
     simtime_t& rttvar = state->rttvar;
 
-    simtime_t err = newRTT - srtt;
+    if (!state->rtt_measured) {
+        // RFC 6298 (2.2): first measurement R -> SRTT = R, RTTVAR = R/2.
+        // (Linux seeds mdev=2R -> rttvar=R here; we take the RFC's R/2. Documented divergence.)
+        srtt = newRTT;
+        rttvar = newRTT / 2;
+        state->rtt_measured = true;
+    }
+    else {
+        // RFC 6298 (2.3): RTTVAR uses the OLD SRTT, then SRTT is updated.
+        //   RTTVAR = (1 - beta) * RTTVAR + beta * |SRTT - R|,   beta = 1/4
+        //   SRTT   = (1 - alpha) * SRTT + alpha * R,            alpha = 1/8
+        rttvar = 0.75 * rttvar + 0.25 * fabs(srtt - newRTT);
+        srtt = 0.875 * srtt + 0.125 * newRTT;
+    }
 
-    srtt += g * err;
-    rttvar += g * (fabs(err) - rttvar);
-
-    // assign RTO (here: rexmit_timeout) a new value
-    simtime_t rto = srtt + 4 * rttvar;
-
+    // Linux-style variance floor (tcp_set_rto): RTO = SRTT + max(4*RTTVAR, RTO_MIN),
+    // giving RTO >= SRTT + min_rto. This matches packetdrill-style comparisons; no
+    // separate lower clamp needed.
+    simtime_t varTerm = 4 * rttvar;
+    if (varTerm < state->min_rto)
+        varTerm = state->min_rto;
+    simtime_t rto = srtt + varTerm;
     if (rto > state->max_rto)
         rto = state->max_rto;
-    else if (rto < state->min_rto)
-        rto = state->min_rto;
 
     state->rexmit_timeout = rto;
 

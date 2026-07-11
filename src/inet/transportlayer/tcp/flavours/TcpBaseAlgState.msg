@@ -57,7 +57,8 @@ struct TcpBaseAlgStateVariables extends TcpStateVariables
     /// round-trip time estimation (Jacobson's algorithm)
     //@{
     simtime_t srtt = 0; ///< smoothed round-trip time
-    simtime_t rttvar = 3.0 / 4.0; ///< variance of round-trip time
+    simtime_t rttvar = 0; ///< variance of round-trip time (RFC 6298: seeded to R/2 on the first sample)
+    bool rtt_measured = false; ///< whether a first RTT sample has been taken (RFC 6298 initialization)
     //@}
 
     /// number of RTOs

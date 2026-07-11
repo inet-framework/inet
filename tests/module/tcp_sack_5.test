@@ -110,13 +110,13 @@ srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 [0.015 B005] A.1000 < B.2000: A ack 2001 win 5000 # deleting
 [0.015 B006] A.1000 < B.2000: A ack 2501 win 5000 # deleting
 [0.015 B007] A.1000 < B.2000: A ack 2501 win 5000   Option(s): NOP NOP SACK[3001,3501)# deleting
-[2.314 A009] A.1000 > B.2000: A 1501:2001(500) ack 501 win 5000
-[2.316 B008] A.1000 < B.2000: A ack 2501 win 5000   Option(s): NOP NOP SACK[1501,2001)[3001,3501)
-[2.318 A010] A.1000 > B.2000: A 2501:3001(500) ack 501 win 5000
-[2.318 A011] A.1000 > B.2000: A 3501:4001(500) ack 501 win 5000
-[2.320 B009] A.1000 < B.2000: A ack 3501 win 5000
-[2.320 B010] A.1000 < B.2000: A ack 4001 win 5000
-[2.321] tcpdump finished, A:11 B:10 segments
+[1.017 A009] A.1000 > B.2000: A 1501:2001(500) ack 501 win 5000
+[1.019 B008] A.1000 < B.2000: A ack 2501 win 5000   Option(s): NOP NOP SACK[1501,2001)[3001,3501)
+[1.021 A010] A.1000 > B.2000: A 2501:3001(500) ack 501 win 5000
+[1.021 A011] A.1000 > B.2000: A 3501:4001(500) ack 501 win 5000
+[1.023 B009] A.1000 < B.2000: A ack 3501 win 5000
+[1.023 B010] A.1000 < B.2000: A ack 4001 win 5000
+[1.024] tcpdump finished, A:11 B:10 segments
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

@@ -82,4 +82,4 @@ Received zero-sized window therefore PERSIST timer is started.
 %# RTO retransmissions of the unacked probe bytes back off normally (interval
 %# grows past 5 s), i.e. the connection's rexmit_timeout is no longer clobbered.
 %contains-regex: stdout
-\[20\.123 [^\n]*A 3001:3004\(3\)
+\[21\.073 [^\n]*A 3001:3004\(3\)
