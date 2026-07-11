@@ -12,7 +12,9 @@ Multi-Protocol Label Switching (MPLS) is a "layer 2.5" protocol for high-perform
 
 A fundamental MPLS concept is that the meaning of the labels used to forward traffic between and through two LSRs must be agreed upon. This common understanding is achieved by using signaling protocols through which one LSR informs another of label bindings it has made. Such signaling protocols are also called label distribution protocols. The two main label distribution protocols used with MPLS are LDP and RSVP-TE.
 
-INET provides basic support for building MPLS simulations. It provides models for the MPLS, LDP, and RSVP-TE protocols and their associated data structures, and preassembled MPLS-capable router models.
+Segment Routing over the MPLS data plane (SR-MPLS, RFC 8660) takes a different approach: instead of a signaling protocol establishing per-hop label bindings, every router derives its own labels from a network-wide map of router identities to small integers ("segment identifiers", or SIDs), flooded by extensions to the IGP (OSPF-SR, IS-IS-SR). An ingress router can then steer a packet along an explicit, loosely specified path by pushing an ordered stack of these labels ("segments"), without any LSP being signaled or torn down anywhere in the network.
+
+INET provides basic support for building MPLS simulations. It provides models for the MPLS, LDP, RSVP-TE, and SR-MPLS protocols and their associated data structures, and preassembled MPLS-capable router models.
 
 .. _ug:sec:mpls:core-modules:
 
@@ -34,6 +36,10 @@ The core modules are:
 - :ned:`LinkStateRouting` is a simple link-state routing protocol
 
 - :ned:`RsvpClassifier` is a configurable ingress classifier for MPLS
+
+- :ned:`SegmentRouting` derives node-SID and adjacency-SID label programming from the TED, signaling-free, for SR-MPLS
+
+- :ned:`SrPolicy` is a configurable ingress classifier for MPLS that imposes SR-MPLS segment-list label stacks
 
 .. _ug:sec:mpls:mpls:
 
@@ -202,6 +208,48 @@ An example ``fectable.xml`` file:
        </fecentry>
    </fectable>
 
+.. _ug:sec:mpls:segmentrouting:
+
+SegmentRouting
+~~~~~~~~~~~~~~
+
+The :ned:`SegmentRouting` module implements the SR-MPLS (RFC 8660) control plane: for every other router, it derives an :ned:`LibTable` entry from the router's own view of the network, with no signaling protocol and no per-hop label negotiation.
+
+In a real deployment, every router advertises a small integer node identifier (a "node SID") via extensions to the IGP (OSPF-SR, IS-IS-SR, see RFC 8665/8667), and all routers agree on a common "Segment Routing Global Block" (SRGB) of label values from which node-SID labels are drawn. INET does not model IGP flooding of SID advertisements; instead, :ned:`SegmentRouting` takes this router-id-to-SID map as a static, network-wide-consistent XML configuration file (the ``sidTable`` parameter), and takes the network topology itself from the :ned:`Ted` module (playing the same role here that it plays for :ned:`Ldp`). All routers are expected to be configured with the same ``srgbBase`` and ``srgbSize`` (a homogeneous SRGB); this is what makes a node-SID label mean the same thing at every router.
+
+An example ``sidTable`` XML file:
+
+.. code-block:: xml
+
+   <sr>
+       <node router="10.1.1.1" sid="1"/>
+       <node router="10.1.1.2" sid="2"/>
+   </sr>
+
+For every other router N with node-SID index ``sid``, :ned:`SegmentRouting` computes N's node-SID label as ``srgbBase + sid``, computes the shortest path to N over the :ned:`Ted`, and installs one :ned:`LibTable` entry for that label: a *swap* to the same label (the homogeneous-SRGB property) if N is not a direct neighbor, or a *pop* (penultimate-hop-popping, RFC 8660 Section 2) if N is a direct neighbor. Whenever the TED changes, :ned:`SegmentRouting` recomputes and reinstalls its own entries, without disturbing any coexisting :ned:`Ldp` or :ned:`RsvpTe` entries in the same :ned:`LibTable`.
+
+:ned:`SegmentRouting` additionally allocates one dynamically-numbered *adjacency SID* (RFC 8660 Section 3.3) per currently-up local link, each an entry that pops the label and forwards out that one specific interface. Adjacency SIDs are locally significant (not drawn from the SRGB, not flooded to other routers); they let an :ned:`SrPolicy` policy pin traffic onto one specific physical link, e.g., a non-shortest-path parallel link, regardless of what the IGP would otherwise choose.
+
+.. _ug:sec:mpls:srpolicy:
+
+SrPolicy
+~~~~~~~~
+
+The :ned:`SrPolicy` module is an ingress classifier for :ned:`Mpls` that generalizes :ned:`RsvpClassifier`'s single-label FEC table to a full, ordered *segment list*: an SR policy names a sequence of node SIDs and/or adjacency SIDs, and :ned:`SrPolicy` pushes the corresponding label stack, steering the packet along that explicit (if loosely specified) path -- SR traffic engineering with no signaling protocol and no LSP to establish or tear down.
+
+An example ``policies`` XML file:
+
+.. code-block:: xml
+
+   <policies>
+       <policy dest="10.3.3.0" netmask="255.255.255.0" segments="node:3 node:5"/>
+       <policy dest="10.9.9.0" netmask="255.255.255.0" segments="node:3 adj:ppp2"/>
+   </policies>
+
+Each ``<policy>`` matches a destination prefix (longest-prefix match across all policies, like :ned:`RsvpClassifier`) and gives an ordered, whitespace-separated segment list. Each segment is either ``node:<sidIndex>`` (a node SID, resolved against the sibling :ned:`SegmentRouting` module's ``sidTable``) or ``adj:<interfaceName>`` (one of *this* router's own adjacency SIDs, resolved against that same module's dynamically allocated adjacency-SID table). Segments are listed left to right in network-processing order, i.e., the first segment is the outermost (active) label on the pushed stack -- the opposite of the order in which :ned:`LibTable`'s push operations are appended, so :ned:`SrPolicy` builds the operation list in reverse.
+
+If the first segment's label would be immediately popped again by the very next router (a node segment whose target is this router's direct neighbor, or any adjacency segment, which by construction always names one of this router's own local links), that label is not pushed at all; the packet is simply forwarded out the resolved interface with the remaining labels underneath. Because adjacency-SID advertisement between routers is not modeled, an ``adj:`` segment only has well-defined meaning as a policy's first (or sole) segment, naming one of the ingress router's own links; see :ned:`SrPolicy`'s NED documentation for the full reasoning and its consequences if used later in a segment list.
+
 .. _ug:sec:mpls:mpls-enabled-router-models:
 
 MPLS-Enabled Router Models
@@ -212,6 +260,10 @@ INET provides the following preassembled MPLS routers:
 - :ned:`LdpMplsRouter` is an MPLS router with the LDP signaling protocol
 
 - :ned:`RsvpMplsRouter` is an MPLS router with the RSVP-TE signaling protocol
+
+- :ned:`SrMplsRouter` is an MPLS router with SR-MPLS node-SID/adjacency-SID label programming (:ned:`SegmentRouting`) and an :ned:`SrPolicy` ingress classifier
+
+A complete, runnable example demonstrating node-SID forwarding, an explicit-path policy that overrides the IGP-preferred route, and an adjacency-SID pin onto a non-preferred parallel link is provided under ``examples/mpls/sr``.
 
 .. _ug:sec:mpls:conformance:
 
@@ -391,6 +443,58 @@ RSVP-TE (RFC 2205 + RFC 3209)
        and the internal PathTear "force" flag have no RFC wire
        representation and do not survive a serialize/deserialize round
        trip.
+
+SR-MPLS (RFC 8660)
+~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 32 14 54
+
+   * - Mechanism
+     - Status
+     - Notes
+   * - Node segments (node SIDs) and PHP
+     - Modeled
+     - :ned:`SegmentRouting` installs a swap or (penultimate-hop-popping)
+       pop entry per remote router, computed from :ned:`Ted`.
+   * - Adjacency segments (adjacency SIDs)
+     - Partially modeled
+     - Dynamically allocated per local link and usable via :ned:`SrPolicy`'s
+       ``adj:`` segments, but only as a policy's first/sole segment; see
+       :ned:`SrPolicy`'s NED documentation for why.
+   * - IGP flooding of SID advertisements (OSPF-SR/IS-IS-SR, RFC
+       8665/8667)
+     - Not modeled
+     - The router-id-to-SID map is static, network-wide-consistent
+       configuration (the ``sidTable`` XML), standing in for what a real
+       deployment would flood.
+   * - Segment Routing Global Block (SRGB)
+     - Partially modeled
+     - ``srgbBase``/``srgbSize`` are NED parameters; a homogeneous SRGB across
+       the network is the supported case and is not itself checked
+       network-wide.
+   * - Explicit-path / segment-list steering
+     - Modeled
+     - :ned:`SrPolicy` pushes an ordered label stack per a static XML
+       policy table; recomputation on topology change is inherited from
+       :ned:`SegmentRouting`'s own per-node-SID recomputation.
+   * - SR-DB / BGP-LS, PCEP-driven policies
+     - Not modeled
+     - n/a
+   * - TI-LFA / any local protection or fast reroute
+     - Not modeled
+     - A topology change reroutes node-SID traffic once :ned:`Ted` itself
+       notices it and recomputes shortest paths; this is IGP
+       reconvergence, not sub-50ms local protection. Adjacency-SID pins
+       are not protected at all: a pinned link's failure blackholes that
+       policy's traffic.
+   * - SRv6
+     - Not modeled
+     - Only the MPLS data plane encoding (RFC 8660) is implemented.
+   * - Entropy labels / ECMP over segment lists
+     - Not modeled
+     - n/a
 
 MPLS data plane (RFC 3031 + RFC 3032 + RFC 3443 + RFC 5462)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
