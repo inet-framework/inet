@@ -283,6 +283,10 @@ void Pce::processPcepPacketFromTcp(int i, const Ptr<const PcepMessage>& pcepMsg)
             processKEEPALIVE(i);
             break;
 
+        case PCEP_PCREQ:
+            processPCREQ(i, pcepMsg);
+            break;
+
         default:
             // an unrecognized message type from a peer must not abort the simulation
             EV_WARN << "ignoring an unrecognized PCEP message of type " << pcepMsg->getType() << endl;
@@ -358,6 +362,55 @@ void Pce::processKEEPALIVE(int i)
         EV_WARN << "unexpected Keepalive from " << sessions[i].pccAddress << " in session state "
                 << pcepSessionStateName(sessions[i].state) << ", ignoring" << endl;
     }
+}
+
+void Pce::processPCREQ(int i, const Ptr<const PcepMessage>& pcepMsg)
+{
+    const auto& req = CHK(dynamicPtrCast<const PcepPcreq>(pcepMsg));
+
+    EV_INFO << "PCReq received from " << sessions[i].pccAddress << " (requestId=" << req->getRequestId()
+            << ", src=" << req->getSrcAddress() << ", dst=" << req->getDstAddress()
+            << ", bandwidth=" << req->getBandwidth() << ", setupPriority=" << req->getSetupPriority() << ")" << endl;
+
+    // Same CSPF call RsvpTe::createIngressPSB() makes for its own local computation
+    // (Workstream C6) -- rooted at the REQUESTER (the PCReq's END-POINTS source
+    // address), not at this Pce's own node, since the Pce may be running on a
+    // different router than the one that will actually signal the LSP.
+    Ipv4AddressVector dest;
+    dest.push_back(req->getDstAddress());
+    Ipv4AddressVector cspfPath = tedmod->calculateShortestPath(req->getSrcAddress(), dest, tedmod->getLinks(),
+            req->getBandwidth(), req->getSetupPriority(), req->getIncludeAny(), req->getExcludeAny());
+
+    Packet *pk = new Packet("Pcep-PCRep");
+    const auto& rep = makeShared<PcepPcrep>();
+    rep->setType(PCEP_PCREP);
+    rep->setRequestId(req->getRequestId());
+
+    if (cspfPath.empty()) {
+        EV_INFO << "no feasible path to " << req->getDstAddress() << " for requestId " << req->getRequestId()
+                << ", replying with NO-PATH" << endl;
+        rep->setNoPath(true);
+        rep->setChunkLength(PCEP_PCREP_NOPATH_MESSAGE_BYTES);
+    }
+    else {
+        // cspfPath[0] is the requester itself (the CSPF root); the ERO -- like
+        // RsvpTe's own local CSPF result -- carries only the hops AFTER it. CSPF
+        // always yields a full STRICT route (every hop L=false).
+        EroVector ero;
+        for (unsigned int k = 1; k < cspfPath.size(); k++) {
+            EroObj hop;
+            hop.L = false;
+            hop.node = cspfPath[k];
+            ero.push_back(hop);
+        }
+        rep->setNoPath(false);
+        rep->setEro(ero);
+        rep->setChunkLength(pcepPcrepEroMessageBytes(ero.size()));
+        EV_INFO << "computed ERO for requestId " << req->getRequestId() << " (" << ero.size() << " hop(s))" << endl;
+    }
+
+    pk->insertAtBack(rep);
+    sendToSession(i, pk);
 }
 
 void Pce::processKeepAliveSendTimeout(cMessage *msg)

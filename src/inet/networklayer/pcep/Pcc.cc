@@ -38,6 +38,7 @@ void Pcc::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         pceAddressStr = par("pceAddress").stdstringValue();
         pcePort = par("pcePort");
+        localAddressStr = par("localAddress").stdstringValue();
         keepaliveTime = par("keepaliveTime");
         deadTimer = par("deadTimer");
         reconnectInterval = par("reconnectInterval");
@@ -80,6 +81,13 @@ void Pcc::clearState()
     cancelAndDelete(sessionHoldTimer);
     sessionHoldTimer = nullptr;
     state = PCEP_NONEXISTENT;
+    // Phase 2: any PCReq outstanding on the session being torn down will never see
+    // its PCRep now -- drop it rather than leaving a permanently-PENDING entry that
+    // would silently swallow every future requestPathComputation() retry for the
+    // same (source, dest, bandwidth, priority, affinity) tuple without ever
+    // resending (there is no session left to answer on anyway; a fresh request is
+    // sent once/if the session comes back up).
+    pendingRequests.clear();
 }
 
 void Pcc::handleMessageWhenUp(cMessage *msg)
@@ -129,7 +137,15 @@ void Pcc::connectToPce()
     socket = new TcpSocket();
     socket->setOutputGate(gate("socketOut"));
     socket->setCallback(this);
-    socket->bind(L3Address(), -1);
+
+    // See Pcc.ned's doc comment on "localAddress": binding to an explicit, stable
+    // local address matters whenever the PCE is more than one hop away in an IGP/
+    // TED-routed backbone -- this model's own Ted/LinkStateRouting (like a real IGP)
+    // only guarantees reachability to each router's OWN routerId, not to whichever
+    // arbitrary outgoing-interface address an unspecified bind would otherwise let
+    // the stack pick as this connection's source.
+    L3Address localAddress = localAddressStr.empty() ? L3Address() : L3AddressResolver().resolve(localAddressStr.c_str());
+    socket->bind(localAddress, -1);
 
     L3Address pceAddress = L3AddressResolver().resolve(pceAddressStr.c_str());
     EV_INFO << "Connecting to PCE " << pceAddress << ":" << pcePort << "\n";
@@ -175,6 +191,68 @@ void Pcc::sendKeepalive()
     EV_INFO << "Keepalive sent to PCE\n";
 }
 
+void Pcc::sendPcreq(const PceRequest& request)
+{
+    Packet *pk = new Packet("Pcep-PCReq");
+    const auto& req = makeShared<PcepPcreq>();
+    req->setChunkLength(PCEP_PCREQ_MESSAGE_BYTES);
+    req->setType(PCEP_PCREQ);
+    req->setRequestId(request.requestId);
+    req->setSrcAddress(request.srcAddress);
+    req->setDstAddress(request.destAddress);
+    req->setBandwidth(request.bandwidth);
+    req->setSetupPriority(request.setupPriority);
+    req->setIncludeAny(request.includeAny);
+    req->setExcludeAny(request.excludeAny);
+    pk->insertAtBack(req);
+
+    sendToPce(pk);
+    EV_INFO << "PCReq sent to PCE (requestId=" << request.requestId << ", src=" << request.srcAddress
+            << ", dst=" << request.destAddress << ", bandwidth=" << request.bandwidth
+            << ", setupPriority=" << request.setupPriority << ")\n";
+}
+
+Pcc::PceComputationResult Pcc::requestPathComputation(const Ipv4Address& srcAddress, const Ipv4Address& destAddress,
+        double bandwidth, int setupPriority, uint32_t includeAny, uint32_t excludeAny, EroVector& outEro)
+{
+    // Called cross-module (from ~RsvpTe, a sibling app in the same node, via pccModule) --
+    // required so the simulation kernel attributes any send() this call ends up doing
+    // (sendPcreq() below) to THIS module, not the caller's; mirrors RsvpTe's own
+    // addSession()/delSession() (called cross-module from ScenarioManager).
+    Enter_Method("requestPathComputation");
+
+    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
+        if (it->srcAddress == srcAddress && it->destAddress == destAddress && it->bandwidth == bandwidth
+                && it->setupPriority == setupPriority && it->includeAny == includeAny && it->excludeAny == excludeAny) {
+            if (!it->hasResult)
+                return PceComputationResult::PENDING; // PCReq already sent, PCRep not received yet
+
+            PceComputationResult result = it->success ? PceComputationResult::COMPUTED : PceComputationResult::NO_PATH;
+            if (it->success)
+                outEro = it->ero;
+            pendingRequests.erase(it); // one-shot: this phase's PCEP is stateless (see class doc)
+            return result;
+        }
+    }
+
+    if (state != PCEP_OPERATIONAL) {
+        EV_INFO << "cannot request PCE path computation to " << destAddress << ": PCEP session not OPERATIONAL\n";
+        return PceComputationResult::NO_PATH;
+    }
+
+    PceRequest request;
+    request.srcAddress = srcAddress;
+    request.destAddress = destAddress;
+    request.bandwidth = bandwidth;
+    request.setupPriority = setupPriority;
+    request.includeAny = includeAny;
+    request.excludeAny = excludeAny;
+    request.requestId = ++pceRequestIdCounter;
+    pendingRequests.push_back(request);
+    sendPcreq(request);
+    return PceComputationResult::PENDING;
+}
+
 void Pcc::socketEstablished(TcpSocket *sock)
 {
     ASSERT(sock == socket);
@@ -217,6 +295,7 @@ void Pcc::handleTcpConnectionDown(TcpSocket *sock)
     if (wasOperational)
         emit(sessionDownSignal, (long)sid);
     state = PCEP_NONEXISTENT;
+    pendingRequests.clear(); // see clearState()'s doc comment for the rationale
 
     // defer the delete: we are called from inside socket->processMessage(), which
     // still touches the socket after this callback returns
@@ -260,6 +339,10 @@ void Pcc::processPcepPacketFromTcp(const Ptr<const PcepMessage>& pcepMsg)
 
         case PCEP_KEEPALIVE:
             processKEEPALIVE();
+            break;
+
+        case PCEP_PCREP:
+            processPCREP(pcepMsg);
             break;
 
         default:
@@ -334,6 +417,37 @@ void Pcc::processKEEPALIVE()
     }
 }
 
+void Pcc::processPCREP(const Ptr<const PcepMessage>& pcepMsg)
+{
+    const auto& rep = CHK(dynamicPtrCast<const PcepPcrep>(pcepMsg));
+
+    for (auto& request : pendingRequests) {
+        if (request.requestId == rep->getRequestId()) {
+            if (request.hasResult) {
+                // a duplicate/retransmitted PCRep for an already-answered request is a
+                // peer/protocol anomaly, not a model error
+                EV_WARN << "duplicate PCRep for requestId " << request.requestId << ", ignoring" << endl;
+                return;
+            }
+            request.hasResult = true;
+            request.success = !rep->getNoPath();
+            if (request.success) {
+                request.ero = rep->getEro();
+                EV_INFO << "PCRep received from PCE: requestId=" << request.requestId
+                        << ", ERO with " << request.ero.size() << " hop(s)" << endl;
+            }
+            else
+                EV_INFO << "PCRep received from PCE: requestId=" << request.requestId << ", NO-PATH" << endl;
+            return;
+        }
+    }
+
+    // a PCRep naming a requestId we have no record of (e.g. the request was already
+    // consumed and erased, or belongs to a session that bounced in between) is a
+    // peer/protocol anomaly, not a model error
+    EV_WARN << "PCRep for unknown requestId " << rep->getRequestId() << ", ignoring" << endl;
+}
+
 void Pcc::processKeepAliveSendTimeout(cMessage *msg)
 {
     ASSERT(msg == keepAliveSendTimer);
@@ -366,6 +480,7 @@ void Pcc::processSessionHoldTimeout(cMessage *msg)
     cancelAndDelete(sessionHoldTimer); // deletes 'msg' itself
     sessionHoldTimer = nullptr;
     state = PCEP_NONEXISTENT;
+    pendingRequests.clear(); // see clearState()'s doc comment for the rationale
 
     if (socket) {
         // decisive, synchronous teardown: we cannot trust a graceful close() to ever

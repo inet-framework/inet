@@ -11,6 +11,7 @@
 
 #include "inet/networklayer/pcep/PcepCommon.h"
 #include "inet/networklayer/pcep/PcepMessages_m.h"
+#include "inet/networklayer/rsvpte/IntServ_m.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
@@ -21,14 +22,47 @@ namespace inet {
  * statically configured PCE (~Pce) on PCEP_PORT (4189) and, unlike Ldp's Hello-driven
  * peer discovery, always plays the active (connecting) role -- PCEP has no
  * discovery phase. Phase 1 of this workstream (see Pcc.ned): session establishment
- * only -- no path computation, LSP delegation, or ERO application yet.
+ * only. Phase 2 (RFC 5440 Section 6.5/6.6, stateless path computation) adds
+ * requestPathComputation(): a synchronous-looking C++ API that ~RsvpTe (its
+ * "pccModule") calls in place of its own local CSPF (Ted::calculateShortestPath())
+ * when configured for "pce" computationMode, bridging that synchronous call onto
+ * the inherently asynchronous PCReq/PCRep TCP exchange -- see requestPathComputation()'s
+ * own doc comment for exactly how.
  */
 class INET_API Pcc : public RoutingProtocolBase, public TcpSocket::BufferingCallback
 {
+  public:
+    // Outcome of requestPathComputation() below.
+    enum class PceComputationResult { PENDING, COMPUTED, NO_PATH };
+
   protected:
+    // Phase 2: one entry per path computation request this Pcc has sent to the PCE
+    // and not yet handed back to its caller (~RsvpTe) -- see requestPathComputation().
+    // Keyed by the full computation input tuple (there is no other identity a caller
+    // outside this module could use to look a request back up by); requestId is this
+    // Pcc's OWN correlator, carried in the RP object, used only to match an arriving
+    // PCRep back to its entry here (RsvpTe never sees it). Removed as soon as its
+    // result is consumed by requestPathComputation() -- this phase's PCEP is
+    // stateless (RFC 5440 Section 6.5/6.6), so nothing here outlives a single
+    // request/reply/consume cycle.
+    struct PceRequest {
+        Ipv4Address srcAddress;
+        Ipv4Address destAddress;
+        double bandwidth = 0;
+        int setupPriority = 0;
+        uint32_t includeAny = 0;
+        uint32_t excludeAny = 0;
+        uint32_t requestId = 0;
+        bool hasResult = false; // false: PCReq sent, PCRep not received yet
+        bool success = false; // valid only if hasResult; true: ero is a computed path, false: PCE reported NO-PATH
+        EroVector ero;
+    };
+    std::vector<PceRequest> pendingRequests;
+    uint32_t pceRequestIdCounter = 0;
     // configuration
     std::string pceAddressStr;
     int pcePort = -1;
+    std::string localAddressStr; // see Pcc.ned's doc comment; "" means "let the stack pick"
     simtime_t keepaliveTime; // KeepAlive Time WE propose in our Open (RFC 5440 Section 7.3)
     simtime_t deadTimer; // DeadTimer WE propose in our Open -- what we ask the PCE to use when monitoring US
     simtime_t reconnectInterval;
@@ -70,16 +104,50 @@ class INET_API Pcc : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void sendToPce(Packet *msg);
     virtual void sendOpen();
     virtual void sendKeepalive();
+    virtual void sendPcreq(const PceRequest& request);
 
     virtual void processPcepPacketFromTcp(const Ptr<const PcepMessage>& pcepMsg);
     virtual void processOPEN(const Ptr<const PcepMessage>& pcepMsg);
     virtual void processKEEPALIVE();
+    virtual void processPCREP(const Ptr<const PcepMessage>& pcepMsg);
 
     virtual void processKeepAliveSendTimeout(cMessage *msg);
     virtual void processSessionHoldTimeout(cMessage *msg);
     virtual void processReconnectTimeout(cMessage *msg);
 
     virtual void handleTcpConnectionDown(TcpSocket *socket);
+
+  public:
+    // Phase 2 (RFC 5440 Section 6.5/6.6): the bridge between ~RsvpTe's synchronous
+    // ingress path computation call and this module's asynchronous PCReq/PCRep TCP
+    // exchange. Called by ~RsvpTe::createIngressPSB() in place of its own local
+    // Ted::calculateShortestPath() CSPF call whenever its "computationMode" is "pce";
+    // arguments mirror that same call's parameters exactly (srcAddress is the
+    // requesting router's own id -- the CSPF root -- mirroring RsvpTe's routerId).
+    //
+    // Each call either:
+    // - finds an outstanding request for this EXACT (srcAddress, destAddress,
+    //   bandwidth, setupPriority, includeAny, excludeAny) tuple whose PCRep has
+    //   already arrived: consumes it (one-shot -- erased from pendingRequests right
+    //   here, matching this phase's stateless PCEP semantics) and returns COMPUTED
+    //   (with outEro filled from the PCE's ERO) or NO_PATH (the PCE's NO-PATH);
+    // - finds a matching request still in flight (no PCRep yet): returns PENDING,
+    //   without resending -- the caller (RsvpTe) is expected to retry later via its
+    //   own existing permanent-path retry timer (see RsvpTe::createPath()'s
+    //   PATH_RETRY handling, unchanged by this workstream: "no path yet" and
+    //   "awaiting a reply" are treated identically);
+    // - finds no matching request at all: if the PCEP session is OPERATIONAL, sends
+    //   a fresh PCReq and returns PENDING; otherwise returns NO_PATH immediately
+    //   (nothing to wait for -- there is no session to answer on).
+    //
+    // A tuple-keyed cache (rather than a caller-supplied opaque handle) is a
+    // deliberate simplification: RsvpTe has no PCEP-specific request identity of its
+    // own to hand back, and two concurrent requests for the identical
+    // (source/dest/bandwidth/priority/affinity) inputs would get the identical CSPF
+    // answer from a stateless PCE anyway, so sharing one cache slot for them costs
+    // nothing but a possible extra PCReq if both retry after the first is consumed.
+    virtual PceComputationResult requestPathComputation(const Ipv4Address& srcAddress, const Ipv4Address& destAddress,
+            double bandwidth, int setupPriority, uint32_t includeAny, uint32_t excludeAny, EroVector& outEro);
 
   public:
     Pcc();

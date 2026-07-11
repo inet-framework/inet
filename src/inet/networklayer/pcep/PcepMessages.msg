@@ -6,19 +6,23 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.contract.ipv4.Ipv4Address;
+import inet.networklayer.rsvpte.IntServ;
 
 namespace inet;
 
 //
 // PCEP message types (RFC 5440 Section 6.1, Message-Type field of the Common
-// Header). Only the subset needed for Phase 1 of this workstream (session
-// establishment) is defined here; PCReq/PCRep/PCRpt/PCUpd etc. are added by later
-// phases (path computation, stateful delegation).
+// Header). Phase 1 (session establishment) defined OPEN/KEEPALIVE; Phase 2 (this
+// workstream's stateless path computation) adds PCREQ/PCREP. PCRpt/PCUpd etc. (RFC
+// 8231 stateful delegation) are left for a later phase.
 //
 enum PcepMessageType
 {
     PCEP_OPEN = 1;
     PCEP_KEEPALIVE = 2;
+    PCEP_PCREQ = 3;
+    PCEP_PCREP = 4;
 }
 
 //
@@ -56,4 +60,58 @@ class PcepOpen extends PcepMessage
 //
 class PcepKeepalive extends PcepMessage
 {
+}
+
+//
+// PCEP Path Computation Request (PCReq) Message (RFC 5440 Section 6.5), sent by a
+// PCC to ask the PCE to compute a path (Workstream F4 Phase 2 -- stateless path
+// computation). Carries:
+// - an RP (Request Parameters) object (Section 7.4): model simplification --
+//   only the Request-ID-number is kept (to correlate this request with its
+//   PCRep, see ~Pcc), the RFC's flag bits (e.g. the reoptimization (R) bit) are
+//   not modeled since this phase never reoptimizes via PCEP (that is Phase 3's
+//   PCRpt/PCUpd delegation, out of scope here).
+// - an END-POINTS object (Section 7.6, IPv4 C-Type): source + destination
+//   addresses -- this model's PCEP stays IPv4-only, like the rest of the MPLS/TE
+//   stack it serves.
+// - a BANDWIDTH object (Section 7.7): the requested bandwidth, mirroring
+//   ~RsvpTe's own TrafficPath::tspec.req_bandwidth -- the same input the PCE's
+//   ~Ted::calculateShortestPath() CSPF needs to prune infeasible links exactly
+//   like ~RsvpTe's own local CSPF call does (Workstream C6).
+// - an LSPA object (Section 7.11): setup priority (mirroring
+//   ~SessionObj::setupPri) plus, opportunistically, the same object's
+//   Include-any/Exclude-any fields for optional CSPF affinity constraints
+//   (Workstream D3-style, 0 = no constraint) -- convenient to carry here since
+//   LSPA already has dedicated fields for them; holding priority/flags are not
+//   modeled (this phase's PCE never preempts).
+//
+class PcepPcreq extends PcepMessage
+{
+    uint32_t requestId; // RP object: Request-ID-number, model-assigned by the requesting Pcc to correlate this PCReq with the matching PCRep
+    Ipv4Address srcAddress; // END-POINTS object: source address (the requesting PCC's own router id -- the CSPF root)
+    Ipv4Address dstAddress; // END-POINTS object: destination address
+    double bandwidth; // BANDWIDTH object: requested bandwidth (bits/sec), mirrors TrafficPath::tspec.req_bandwidth
+    int setupPriority; // LSPA object: setup priority, mirrors SessionObj::setupPri
+    uint32_t includeAny = 0; // LSPA object: include-any affinity mask (D3-style), 0 = no constraint
+    uint32_t excludeAny = 0; // LSPA object: exclude-any affinity mask, 0 = no constraint
+}
+
+//
+// PCEP Path Computation Reply (PCRep) Message (RFC 5440 Section 6.6): the PCE's
+// answer to a PCReq. Always carries the RP object (echoing the request's
+// Request-ID-number, the correlator back to the waiting Pcc), plus EITHER:
+// - an ERO object (Section 7.9) on success -- reuses ~EroVector/~EroObj
+//   (~IntServ.msg) verbatim rather than redefining them: RFC 5440's ERO is the
+//   same object (same IPv4-prefix-subobject wire format, RFC 3209 Section
+//   4.3.3.1) that ~RsvpTe/~RsvpPathMsg already carry, just computed remotely
+//   instead of locally; or
+// - a NO-PATH object (Section 7.5) on failure -- model simplification: a single
+//   presence flag is enough (noPath=true), the RFC's optional unreachable-
+//   destination sub-TLVs are not modeled.
+//
+class PcepPcrep extends PcepMessage
+{
+    uint32_t requestId; // RP object: echoes the matching PCReq's Request-ID-number
+    bool noPath = false; // true: NO-PATH object present (ero is meaningless); false: ERO object present (see ero)
+    EroVector ero; // ERO object; meaningful iff !noPath
 }

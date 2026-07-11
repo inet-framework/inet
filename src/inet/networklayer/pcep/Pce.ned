@@ -19,13 +19,16 @@ import inet.applications.contract.IApp;
 // rather than under inet.applications -- see this workstream's Phase 1 commit
 // message.
 //
-// Phase 1 of this workstream (this module): session establishment only -- Open/
-// Keepalive exchange (RFC 5440 Sections 6.2-6.4, 7.3) bringing a session to
-// OPERATIONAL, plus DeadTimer-based liveness. No path computation (PCReq/PCRep), no
-// stateful delegation (PCRpt/PCUpd, ERO application) yet -- those are later phases
-// of this workstream. ~tedModule is wired (an "omniscient" module-path reference,
-// mirroring ~Ldp's own tedmod and ~Ted's own initializeTED()'s pre-existing
-// topology-omniscience elsewhere in this codebase) but not yet consulted.
+// Phase 1 of this workstream: session establishment only -- Open/Keepalive exchange
+// (RFC 5440 Sections 6.2-6.4, 7.3) bringing a session to OPERATIONAL, plus
+// DeadTimer-based liveness. Phase 2 (this revision) adds stateless path computation
+// (PCReq/PCRep, RFC 5440 Section 6.5/6.6): ~tedModule (wired since Phase 1 -- an
+// "omniscient" module-path reference, mirroring ~Ldp's own tedmod and ~Ted's own
+// initializeTED()'s pre-existing topology-omniscience elsewhere in this codebase) is
+// now actually consulted, running the identical CSPF (Ted::calculateShortestPath())
+// ~RsvpTe's own local computation uses (Workstream C6), rooted at the requesting
+// PCC rather than at this node. No stateful delegation (PCRpt/PCUpd, ERO
+// application) yet -- that is a later phase of this workstream.
 //
 // Session FSM (RFC 5440 Section 6.2, minimal subset -- mirrors the level of
 // fidelity of ~Ldp's own Initialization/KeepAlive FSM, not the full RFC state
@@ -51,7 +54,7 @@ simple Pce extends SimpleModule like IApp
 {
     parameters:
         @class(Pce);
-        string tedModule; // module-path reference to this router's Ted (wired, not yet consulted this phase -- see class documentation)
+        string tedModule; // module-path reference to this router's Ted, consulted to answer PCReq/PCRep path computations (see class documentation)
         double keepaliveTime @unit(s) = default(30s); // KeepAlive Time this PCE proposes in its Open (RFC 5440 Section 7.3); RFC-conventional default
         double deadTimer @unit(s) = default(120s); // DeadTimer this PCE proposes in its Open (RFC 5440 Section 7.3); RFC-conventional default is 4x keepaliveTime
         @display("i=block/control");

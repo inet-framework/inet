@@ -24,8 +24,12 @@ class Ted;
 /**
  * PCE (Path Computation Element) server (RFC 5440): listens on PCEP_PORT (4189) and
  * accepts PCEP sessions from any number of PCCs (~Pcc), each tracked independently
- * in `sessions`. Phase 1 of this workstream (see Pce.ned): session establishment
- * only -- no path computation, LSP delegation, or ERO handling yet.
+ * in `sessions`. Phase 1 of this workstream (see Pce.ned): session establishment.
+ * Phase 2 (RFC 5440 Section 6.5/6.6, stateless path computation) adds PCReq/PCRep:
+ * `tedmod` (wired since Phase 1) is now actually consulted -- a PCReq is answered by
+ * running the identical Ted::calculateShortestPath() CSPF ~RsvpTe's own local
+ * computation uses (Workstream C6), rooted at the requester rather than this node.
+ * No LSP delegation/stateful PCRpt/PCUpd yet -- that is a later phase.
  */
 class INET_API Pce : public RoutingProtocolBase, public TcpSocket::BufferingCallback
 {
@@ -64,10 +68,10 @@ class INET_API Pce : public RoutingProtocolBase, public TcpSocket::BufferingCall
     simtime_t keepaliveTime; // KeepAlive Time WE propose in our Open (RFC 5440 Section 7.3); RFC-conventional default
     simtime_t deadTimer; // DeadTimer WE propose in our Open -- what we ask the PCC to use when monitoring US
 
-    // Wired but unused this phase (Phase 1: session establishment only -- see
-    // Pce.ned): an "omniscient" module-path reference to the network's Ted, mirroring
-    // Ldp::tedmod and Ted::initializeTED's own existing topology-omniscience
-    // elsewhere in this codebase. A later (path-computation) phase will consult it.
+    // Wired since Phase 1 (session establishment); actually consulted starting Phase 2
+    // (processPCREQ()): an "omniscient" module-path reference to the network's Ted,
+    // mirroring Ldp::tedmod and Ted::initializeTED's own existing topology-omniscience
+    // elsewhere in this codebase.
     ModuleRefByPar<Ted> tedmod;
 
     TcpSocket serverSocket; // for listening on PCEP_PORT
@@ -91,6 +95,7 @@ class INET_API Pce : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void processPcepPacketFromTcp(int i, const Ptr<const PcepMessage>& pcepMsg);
     virtual void processOPEN(int i, const Ptr<const PcepMessage>& pcepMsg);
     virtual void processKEEPALIVE(int i);
+    virtual void processPCREQ(int i, const Ptr<const PcepMessage>& pcepMsg);
 
     virtual void processKeepAliveSendTimeout(cMessage *msg);
     virtual void processSessionHoldTimeout(cMessage *msg);
