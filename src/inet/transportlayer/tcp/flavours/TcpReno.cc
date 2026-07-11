@@ -104,6 +104,41 @@ void TcpReno::prrEndCwndReduction()
     EV_INFO << "PRR: leaving fast recovery, cwnd=ssthresh=" << state->snd_cwnd << "\n";
 }
 
+void TcpReno::undoInit()
+{
+    // Linux tcp_init_undo(): remember the pre-reduction cwnd/ssthresh so a later
+    // D-SACK (or Eifel timestamp) can restore them. Must be called BEFORE the
+    // ssthresh/cwnd reduction. undoRetrans starts at -1 ("no retransmit yet"),
+    // becomes >0 as retransmissions go out, and returns to 0 once every one of
+    // them is confirmed spurious by a D-SACK.
+    state->undoMarker = state->snd_una ? state->snd_una : 1; // nonzero marker
+    state->priorSsthresh = state->ssthresh;
+    state->priorCwnd = state->snd_cwnd;
+    state->undoRetrans = -1;
+    state->retransStampTS = 0;
+}
+
+bool TcpReno::mayUndo() const
+{
+    // Linux tcp_may_undo(): undo when every retransmission of the episode has been
+    // D-SACKed (undoRetrans == 0). (The Eifel/timestamp packet-delayed path is a
+    // planned refinement.)
+    return state->undoMarker != 0 && state->undoRetrans == 0;
+}
+
+void TcpReno::undoCwndReduction()
+{
+    // Linux tcp_undo_cwnd_reduction(): restore cwnd and ssthresh.
+    state->snd_cwnd = std::max(state->snd_cwnd, state->priorCwnd); // tcp_reno_undo_cwnd
+    if (state->priorSsthresh > state->ssthresh)
+        state->ssthresh = state->priorSsthresh;
+    state->undoMarker = 0;
+    conn->emit(cwndSignal, state->snd_cwnd);
+    conn->emit(ssthreshSignal, state->ssthresh);
+    EV_INFO << "Undoing spurious cwnd reduction (D-SACK): cwnd=" << state->snd_cwnd
+            << ", ssthresh=" << state->ssthresh << "\n";
+}
+
 void TcpReno::processRexmitTimer(TcpEventCode& event)
 {
     TcpTahoeRenoFamily::processRexmitTimer(event);
@@ -142,7 +177,13 @@ void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
 {
     TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
 
-    if (state->prrEnabled && state->lossRecovery) {
+    if (state->lossUndoEnabled && mayUndo()) {
+        // RFC 2883: every retransmission of this episode has been D-SACKed, so the
+        // recovery was spurious -- restore cwnd/ssthresh and reopen (no deflation).
+        undoCwndReduction();
+        state->lossRecovery = false;
+    }
+    else if (state->prrEnabled && state->lossRecovery) {
         // RFC 6937: while in fast recovery, PRR sizes cwnd from delivered bytes
         // (no slow start / congestion avoidance growth). The deflation to ssthresh
         // happens at recovery exit (prrEndCwndReduction, below).
@@ -342,6 +383,10 @@ void TcpReno::receivedDuplicateAck()
         // transmission of new data until a non-duplicate ACK arrives.
         // (...) the TCP sender can continue to transmit new
         // segments (although transmission must continue using a reduced cwnd)."
+
+        // capture the undo context BEFORE reducing ssthresh/cwnd (RFC 2883/3522)
+        if (state->lossUndoEnabled)
+            undoInit();
 
         // enter Fast Recovery
         if (state->prrEnabled) {

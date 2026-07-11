@@ -662,6 +662,16 @@ void TcpBaseAlg::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
     // RFC 6937 PRR: count retransmitted bytes while in fast recovery
     if (state->prrEnabled && state->lossRecovery && seqGreater(toseq, fromseq))
         state->prrOut += toseq - fromseq;
+
+    // RFC 2883 loss undo: count the retransmitted segments of the current episode
+    // so a later D-SACK of all of them can trigger an undo.
+    if (state->lossUndoEnabled && state->undoMarker != 0 && seqGreater(toseq, fromseq)) {
+        uint32_t segs = (toseq - fromseq + state->snd_mss - 1) / state->snd_mss;
+        if (state->undoRetrans < 0)
+            state->undoRetrans = (int32_t)segs;
+        else
+            state->undoRetrans += (int32_t)segs;
+    }
 }
 
 void TcpBaseAlg::restartRexmitTimer()

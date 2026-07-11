@@ -211,7 +211,16 @@ struct TcpStateVariables
     bool prrEnabled = false;       // use PRR during fast recovery (set from the prrEnabled parameter)
     uint32_t prrDelivered = 0;     // bytes delivered during the current recovery episode
     uint32_t prrOut = 0;           // bytes transmitted during the current recovery episode
-    uint32_t priorCwnd = 0;        // snd_cwnd snapshot at recovery entry (RFC 6937 RecoverFS proxy)
+    uint32_t priorCwnd = 0;        // snd_cwnd snapshot at recovery entry (RFC 6937 RecoverFS proxy; also the undo target)
+
+    // loss undo (RFC 2883 D-SACK, RFC 3522 Eifel)
+    bool lossUndoEnabled = false;  // set from the lossUndoEnabled parameter
+    uint32_t undoMarker = 0;       // snd_una at recovery entry; 0 = no undo pending
+    int32_t undoRetrans = 0;       // retransmitted segments still to be confirmed spurious (-1 = unknown)
+    uint32_t priorSsthresh = 0;    // ssthresh before the reduction (restored on undo)
+    uint32_t retransStampTS = 0;   // TSval echoed on the first retransmit of the episode (Eifel); 0 = none
+    bool dsackSeen = false;        // a D-SACK was seen while processing the current segment (reset per segment)
+    uint32_t dsackBytes = 0;       // bytes covered by the D-SACK seen on the current segment
 
     // RACK-TLP loss detection (RFC 8985)
     int lossDetectionMode = 0;    // 0 = classic DupThresh (RFC 3517), 1 = RACK time-based

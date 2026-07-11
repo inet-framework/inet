@@ -50,6 +50,16 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
     uint32_t prrNewlyDelivered() const;
     //@}
 
+    /** @name Loss undo (RFC 2883 D-SACK, RFC 3522 Eifel) */
+    //@{
+    /** Capture the undo context (marker, priorCwnd/ssthresh) at recovery entry. */
+    virtual void undoInit();
+    /** True if the cwnd reduction of the current episode may be undone. */
+    virtual bool mayUndo() const;
+    /** Restore cwnd/ssthresh reduced by a now-known-spurious recovery. Linux tcp_undo_cwnd_reduction(). */
+    virtual void undoCwndReduction();
+    //@}
+
   public:
     /** Ctor */
     TcpReno();

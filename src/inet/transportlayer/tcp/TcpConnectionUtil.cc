@@ -663,6 +663,7 @@ void TcpConnection::configureStateVariables()
     state->dupthresh = tcpMain->par("dupthresh");
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     state->prrEnabled = tcpMain->par("prrEnabled");
+    state->lossUndoEnabled = tcpMain->par("lossUndoEnabled");
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
     if (state->lossDetectionMode == 1 && !state->sack_support)
         throw cRuntimeError("lossDetectionMode=\"rack\" requires sackSupport=true");

@@ -72,12 +72,11 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
                 // wrong conclusion if ACK packets are reordered."
                 EV_DETAIL << "Received D-SACK below cumulative ACK=" << tcpHeader->getAckNo()
                           << " D-SACK: " << tmp.str() << endl;
-                // Note: RFC 2883 does not specify what should be done in this case.
-                // RFC 2883, page 9:
-                // "5. Detection of Duplicate Packets
-                // (...) This document does not specify what action a TCP implementation should
-                // take in these cases. The extension to the SACK option simply enables
-                // the sender to detect each of these cases.(...)"
+                // RFC 2883: the segment identified by this block was received more
+                // than once. Record it so the loss-undo logic (RFC 2883/3522) can
+                // detect a spurious retransmission.
+                state->dsackSeen = true;
+                state->dsackBytes = tmp.getEnd() - tmp.getStart();
             }
             else if (i == 0 && n > 1 && seqGreater(tmp.getEnd(), tcpHeader->getAckNo())) {
                 // RFC 2883, page 8:
@@ -93,12 +92,10 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
                     EV_DETAIL << "Received D-SACK above cumulative ACK=" << tcpHeader->getAckNo()
                               << " D-SACK: " << tmp.str()
                               << ", SACK: " << tmp2.str() << endl;
-                    // Note: RFC 2883 does not specify what should be done in this case.
-                    // RFC 2883, page 9:
-                    // "5. Detection of Duplicate Packets
-                    // (...) This document does not specify what action a TCP implementation should
-                    // take in these cases. The extension to the SACK option simply enables
-                    // the sender to detect each of these cases.(...)"
+                    // RFC 2883: duplicate data above the cumulative ACK; record it
+                    // for the loss-undo logic.
+                    state->dsackSeen = true;
+                    state->dsackBytes = tmp.getEnd() - tmp.getStart();
                 }
             }
 
@@ -123,6 +120,17 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
         if (state->sackedBytes > state->sackedBytes_old) {
             state->deliveredBytes += state->sackedBytes - state->sackedBytes_old;
             emit(deliveredSignal, (unsigned long)state->deliveredBytes);
+        }
+
+        // RFC 2883 loss undo: a D-SACK seen during an active undo episode confirms
+        // that (part of) a retransmission was spurious. Decrement the count of
+        // retransmitted segments still to be accounted for. (Simplification: any
+        // D-SACK during the episode is treated as covering episode retransmits.)
+        if (state->lossUndoEnabled && state->dsackSeen && state->undoMarker != 0 && state->undoRetrans > 0) {
+            uint32_t segs = (state->dsackBytes + state->snd_mss - 1) / state->snd_mss;
+            state->undoRetrans -= (int32_t)segs;
+            if (state->undoRetrans < 0)
+                state->undoRetrans = 0;
         }
 
         // RACK time-based loss detection runs on every ACK carrying new SACK info

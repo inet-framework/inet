@@ -87,6 +87,10 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
     // acked+sacked bytes (RFC 6937 PRR input) as deliveredBytes - prrDeliveredMark
     state->prrDeliveredMark = state->deliveredBytes;
 
+    // reset the per-segment D-SACK detection (RFC 2883 loss undo)
+    state->dsackSeen = false;
+    state->dsackBytes = 0;
+
     emit(rcvSeqSignal, tcpHeader->getSequenceNo());
     emit(rcvAckSignal, tcpHeader->getAckNo());
 
