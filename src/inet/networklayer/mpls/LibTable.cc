@@ -50,7 +50,7 @@ void LibTable::handleMessage(cMessage *msg)
 }
 
 bool LibTable::resolveLabel(int inInterfaceId, int inLabel,
-        LabelOpVector& outLabel, int& outInterfaceId)
+        LabelOpVector& outLabel, int& outInterfaceId, const Protocol *& outPayloadProtocol)
 {
     bool any = (inInterfaceId == ANY_INTERFACE);
 
@@ -79,6 +79,9 @@ bool LibTable::resolveLabel(int inInterfaceId, int inLabel,
             outLabel = elem.outLabel;
             outInterfaceId = elem.outInterfaceId;
         }
+        // a backup repairs the same destination as the primary, so the payload
+        // protocol is the same either way
+        outPayloadProtocol = elem.payloadProtocol;
 
         return true;
     }
@@ -86,7 +89,7 @@ bool LibTable::resolveLabel(int inInterfaceId, int inLabel,
 }
 
 int LibTable::installLibEntry(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
-        int outInterfaceId)
+        int outInterfaceId, const Protocol *payloadProtocol)
 {
     if (inLabel == -1) {
         LibEntry newItem;
@@ -94,6 +97,7 @@ int LibTable::installLibEntry(int inLabel, int inInterfaceId, const LabelOpVecto
         newItem.inInterfaceId = inInterfaceId;
         newItem.outLabel = outLabel;
         newItem.outInterfaceId = outInterfaceId;
+        newItem.payloadProtocol = payloadProtocol;
         lib.push_back(newItem);
         emitLibEntryCount();
         return newItem.inLabel;
@@ -106,6 +110,7 @@ int LibTable::installLibEntry(int inLabel, int inInterfaceId, const LabelOpVecto
             elem.inInterfaceId = inInterfaceId;
             elem.outLabel = outLabel;
             elem.outInterfaceId = outInterfaceId;
+            elem.payloadProtocol = payloadProtocol;
             emitLibEntryCount();
             return inLabel;
         }
@@ -119,7 +124,7 @@ int LibTable::allocateLabel()
 }
 
 int LibTable::installReservedLabel(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
-        int outInterfaceId)
+        int outInterfaceId, const Protocol *payloadProtocol)
 {
     for (auto& elem : lib) {
         if (elem.inLabel == inLabel)
@@ -130,6 +135,7 @@ int LibTable::installReservedLabel(int inLabel, int inInterfaceId, const LabelOp
     newItem.inInterfaceId = inInterfaceId;
     newItem.outLabel = outLabel;
     newItem.outInterfaceId = outInterfaceId;
+    newItem.payloadProtocol = payloadProtocol;
     lib.push_back(newItem);
     emitLibEntryCount();
     return inLabel;
@@ -258,6 +264,15 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
 
             newItem.outLabel.push_back(l);
         }
+
+        // Optional payload="ipv6" attribute (checkTags above only inspects child
+        // elements, not attributes, so this doesn't need to be added there). Absent
+        // (or any value other than "ipv6") leaves the in-class default of
+        // &Protocol::ipv4 untouched -- Workstream F3 (IPv6) plumbing, dormant until an
+        // installer actually configures an IPv6 FEC via XML.
+        const char *payload = entry.getAttribute("payload");
+        if (payload && !strcmp(payload, "ipv6"))
+            newItem.payloadProtocol = &Protocol::ipv6;
 
         lib.push_back(newItem);
 

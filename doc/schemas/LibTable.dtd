@@ -5,6 +5,9 @@
 
 <!-- one entry in the LIB table -->
 <!ELEMENT libentry (inLabel,inInterface,outInterface,outLabel)>  <!-- in arbitrary order -->
+<!ATTLIST libentry
+  payload  NMTOKEN  (ipv4|ipv6)  #IMPLIED>  <!-- payload protocol stamped when this
+  entry's label is popped; defaults to ipv4 when omitted -->
 
 <!-- input label -->
 <!ELEMENT inLabel (#PCDATA)> <!-- integer -->

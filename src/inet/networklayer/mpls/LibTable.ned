@@ -24,6 +24,11 @@ import inet.common.SimpleModule;
 // - <outInterface>: output interface (interface name)
 // - <outLabel>: output label operations, see below.
 //
+// <libentry> also accepts an optional "payload" attribute ("ipv4" or "ipv6"),
+// naming the network-layer protocol stamped on the packet when this entry's
+// label is finally popped. Defaults to "ipv4" when omitted, matching the
+// behavior before this attribute existed.
+//
 // The <outLabel> element describes the output label operations in
 // <op> child elements. <op> has two attributes:
 // - code: accepted values are "push", "pop" and "swap".

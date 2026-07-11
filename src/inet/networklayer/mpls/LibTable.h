@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -65,6 +66,14 @@ class INET_API LibTable : public SimpleModule
         LabelOpVector backupOutLabel;
         int backupOutInterfaceId = -1;
         bool backupActive = false;
+
+        // The network-layer protocol of the payload this label ultimately carries (IPv4 by
+        // default, matching every existing installer). Stamped on the packet's
+        // PacketProtocolTag when this entry's label is finally popped (see Mpls::popLabel()).
+        // Workstream F3 (IPv6): installers that set up an IPv6 FEC set this to
+        // &Protocol::ipv6; nothing does yet, so this field is dormant plumbing exactly like
+        // the backup* fields above.
+        const Protocol *payloadProtocol = &Protocol::ipv4;
     };
 
   protected:
@@ -88,10 +97,21 @@ class INET_API LibTable : public SimpleModule
   public:
     // label management
     virtual bool resolveLabel(int inInterfaceId, int inLabel,
-            LabelOpVector& outLabel, int& outInterfaceId);
+            LabelOpVector& outLabel, int& outInterfaceId, const Protocol *& outPayloadProtocol);
+
+    // Convenience overload for callers that don't need the payload protocol (every
+    // caller that pre-dates Workstream F3: RsvpClassifier.cc's ingress lookup, and
+    // LibTable_ops.test). Not virtual: it merely forwards to the 5-arg overload above,
+    // which is the one actual override point.
+    bool resolveLabel(int inInterfaceId, int inLabel,
+            LabelOpVector& outLabel, int& outInterfaceId)
+    {
+        const Protocol *ignoredPayloadProtocol;
+        return resolveLabel(inInterfaceId, inLabel, outLabel, outInterfaceId, ignoredPayloadProtocol);
+    }
 
     virtual int installLibEntry(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
-            int outInterfaceId);
+            int outInterfaceId, const Protocol *payloadProtocol = &Protocol::ipv4);
 
     // Reserve a fresh label without installing a full LIB entry. Used by LDP's
     // Downstream Unsolicited distribution mode under independent control (RFC 5036
@@ -105,7 +125,7 @@ class INET_API LibTable : public SimpleModule
     // (inLabel==-1) or UPDATES an existing entry, throwing if none exists -- this
     // creates a new entry and throws if one with this inLabel already exists.
     virtual int installReservedLabel(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
-            int outInterfaceId);
+            int outInterfaceId, const Protocol *payloadProtocol = &Protocol::ipv4);
 
     virtual void removeLibEntry(int inLabel);
 

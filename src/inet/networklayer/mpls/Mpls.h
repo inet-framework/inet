@@ -62,7 +62,11 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
 
     void pushLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
     void swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader);
-    void popLabel(Packet *packet);
+
+    // payloadProtocol is the protocol to stamp on the packet's PacketProtocolTag once
+    // the bottom-of-stack label is popped (Workstream F3, IPv6): defaults to Ipv4,
+    // matching every caller that pre-dates per-LIB-entry payload protocols.
+    void popLabel(Packet *packet, const Protocol *payloadProtocol = &Protocol::ipv4);
 
     // returns the TTL to stamp on a freshly pushed label: the IP TTL (uniform) or
     // defaultTtl (pipe) when pushing onto bare IP, or the current outer label's TTL
@@ -86,8 +90,12 @@ class INET_API Mpls : public SimpleModule, public DefaultProtocolRegistrationLis
     void deliverToL3(Packet *packet);
 
     // returns false if the packet was already fully handled (TTL expiry or a
-    // reserved label) and the caller must not touch it any further
-    virtual bool doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInterfaceId);
+    // reserved label) and the caller must not touch it any further.
+    // payloadProtocol (Workstream F3, IPv6) is forwarded to popLabel() for the
+    // POP_OPER case; defaults to Ipv4 since the ingress call site
+    // (tryLabelAndForwardIpv4Datagram()) has no LIB entry to ask.
+    virtual bool doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInterfaceId,
+            const Protocol *payloadProtocol = &Protocol::ipv4);
 
     // IInterfaceRegistrationListener:
     virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *in, cGate *out) override;

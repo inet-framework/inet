@@ -129,17 +129,20 @@ void Mpls::swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
     packet->insertAtFront(newMplsHeader);
 }
 
-void Mpls::popLabel(Packet *packet)
+void Mpls::popLabel(Packet *packet, const Protocol *payloadProtocol)
 {
     ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
     auto oldMplsHeader = packet->popAtFront<MplsHeader>();
     if (oldMplsHeader->getS()) {
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 
         // RFC 3443 §3.2: in uniform mode the (possibly decremented) label TTL is
         // authoritative and is written back into the IP header; in pipe mode the
-        // original IP TTL was never touched by the MPLS domain, so it is left alone
-        if (ttlModel == TTL_MODEL_UNIFORM) {
+        // original IP TTL was never touched by the MPLS domain, so it is left alone.
+        // This is Ipv4Header-specific; IPv6 hop-limit handling is Workstream F3 Phase
+        // 2 -- guarded out here so a (currently nonexistent) IPv6 LIB entry doesn't
+        // crash trying to treat a non-Ipv4Header packet as Ipv4Header.
+        if (payloadProtocol == &Protocol::ipv4 && ttlModel == TTL_MODEL_UNIFORM) {
             auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
             ipv4Header->setTimeToLive(oldMplsHeader->getTtl());
             // writeTcBackOnPop defaults to false: the 3-bit tc -> 6-bit DSCP mapping
@@ -208,7 +211,8 @@ void Mpls::deliverToL3(Packet *packet)
     sendToL3(packet);
 }
 
-bool Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInterfaceId)
+bool Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInterfaceId,
+        const Protocol *payloadProtocol)
 {
     unsigned int n = outLabel.size();
 
@@ -240,7 +244,7 @@ bool Mpls::doStackOps(Packet *packet, const LabelOpVector& outLabel, int outInte
                 break;
             }
             case POP_OPER:
-                popLabel(packet);
+                popLabel(packet, payloadProtocol);
                 break;
 
             default:
@@ -306,8 +310,9 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 
     LabelOpVector outLabel;
     int outInterfaceId;
+    const Protocol *payloadProtocol;
 
-    bool found = lt->resolveLabel(incomingInterfaceId, label, outLabel, outInterfaceId);
+    bool found = lt->resolveLabel(incomingInterfaceId, label, outLabel, outInterfaceId, payloadProtocol);
     if (!found) {
         EV_INFO << "discarding packet, incoming label not resolved" << endl;
 
@@ -317,7 +322,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 
     NetworkInterface *outgoingInterface = ift->getInterfaceById(outInterfaceId);
 
-    if (!doStackOps(packet, outLabel, outInterfaceId))
+    if (!doStackOps(packet, outLabel, outInterfaceId, payloadProtocol))
         return; // TTL expired: the datagram was already popped and handed to L3
 
     if ((packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId())) {
