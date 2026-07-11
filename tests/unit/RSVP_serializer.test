@@ -76,6 +76,13 @@ static const double BW = 1000000.0;
     sd.Sender_Template_Object.SrcAddress = Ipv4Address("10.0.0.5");
     sd.Sender_Template_Object.Lsp_Id = 7; // NOT the -1 default -- that would wrap to 65535 on the wire
     sd.Sender_Tspec_Object.req_bandwidth = BW;
+    // Workstream C11: burst/peakRate/minPolicedUnit/maxPacketSize are independent
+    // token-bucket parameters (RFC 2210), not mirrors/placeholders of req_bandwidth --
+    // exercise them here with values distinct from BW and from each other.
+    sd.Sender_Tspec_Object.burst = 2000000.0;
+    sd.Sender_Tspec_Object.peakRate = 1500000.0;
+    sd.Sender_Tspec_Object.minPolicedUnit = 20;
+    sd.Sender_Tspec_Object.maxPacketSize = 1500;
     pm->setSender_descriptor(sd);
     // CommonHdr(8) + SESSION(16) + RSVP_HOP(12) + TIME_VALUES(8) + LABEL_REQUEST(8)
     // + ERO(4 + 8*3=28) + SENDER_TEMPLATE(12) + SENDER_TSPEC(36) = 128
@@ -104,6 +111,10 @@ static const double BW = 1000000.0;
     ASSERT(p2->getSender_descriptor().Sender_Template_Object.SrcAddress == Ipv4Address("10.0.0.5"));
     ASSERT(p2->getLspId() == 7);
     ASSERT(p2->getSender_descriptor().Sender_Tspec_Object.req_bandwidth == BW);
+    ASSERT(p2->getSender_descriptor().Sender_Tspec_Object.burst == 2000000.0);
+    ASSERT(p2->getSender_descriptor().Sender_Tspec_Object.peakRate == 1500000.0);
+    ASSERT(p2->getSender_descriptor().Sender_Tspec_Object.minPolicedUnit == 20);
+    ASSERT(p2->getSender_descriptor().Sender_Tspec_Object.maxPacketSize == 1500);
     EV << "  PASS" << endl;
 }
 
@@ -202,6 +213,12 @@ static const double BW = 1000000.0;
     FlowDescriptorVector flows;
     FlowDescriptor_t f1;
     f1.Flowspec_Object.req_bandwidth = BW;
+    // Workstream C11: FlowSpecObj extends SenderTspecObj with no fields of its own,
+    // so the same independent token-bucket parameters apply to FLOWSPEC too.
+    f1.Flowspec_Object.burst = 3000000.0;
+    f1.Flowspec_Object.peakRate = 4000000.0;
+    f1.Flowspec_Object.minPolicedUnit = 40;
+    f1.Flowspec_Object.maxPacketSize = 9000;
     f1.Filter_Spec_Object.SrcAddress = Ipv4Address("10.0.0.5");
     f1.Filter_Spec_Object.Lsp_Id = 7;
     f1.label = 1001;
@@ -233,6 +250,10 @@ static const double BW = 1000000.0;
     const FlowDescriptorVector& rf = r2->getFlowDescriptor();
     ASSERT(rf.size() == 2);
     ASSERT(rf[0].Flowspec_Object.req_bandwidth == BW);
+    ASSERT(rf[0].Flowspec_Object.burst == 3000000.0);
+    ASSERT(rf[0].Flowspec_Object.peakRate == 4000000.0);
+    ASSERT(rf[0].Flowspec_Object.minPolicedUnit == 40);
+    ASSERT(rf[0].Flowspec_Object.maxPacketSize == 9000);
     ASSERT(rf[0].Filter_Spec_Object.SrcAddress == Ipv4Address("10.0.0.5") && rf[0].Filter_Spec_Object.Lsp_Id == 7);
     ASSERT(rf[0].label == 1001);
     ASSERT(rf[0].RRO.size() == 0);

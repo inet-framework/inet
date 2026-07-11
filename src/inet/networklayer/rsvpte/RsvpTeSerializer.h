@@ -45,9 +45,11 @@ class INET_API RsvpTeSerializer : public FieldsChunkSerializer
     static SenderTemplateObj deserializeSenderTemplate(MemoryInputStream& stream);
 
     // classNum selects SENDER_TSPEC(12) or FLOWSPEC(9) -- identical Int-Serv
-    // Controlled-Load body, only the Class-Num on the wire differs.
-    static void serializeTspec(MemoryOutputStream& stream, double reqBandwidth, uint8_t classNum);
-    static double deserializeTspec(MemoryInputStream& stream);
+    // Controlled-Load body, only the Class-Num on the wire differs. Carries the
+    // full (r, b, p, m, M) token bucket (Workstream C11); FlowSpecObj extends
+    // SenderTspecObj with no extra fields, so the same overload serves both.
+    static void serializeTspec(MemoryOutputStream& stream, const SenderTspecObj& tspec, uint8_t classNum);
+    static SenderTspecObj deserializeTspec(MemoryInputStream& stream);
 
     static void serializeLabel(MemoryOutputStream& stream, int label);
     static int deserializeLabel(MemoryInputStream& stream);

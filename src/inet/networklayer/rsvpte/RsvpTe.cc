@@ -387,7 +387,8 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 
     cXMLElementList list = paths->getChildrenByTagName("path");
     for (auto path : list) {
-        checkTags(path, "sender lspid bandwidth route permanent owner include_any exclude_any");
+        checkTags(path, "sender lspid bandwidth route permanent owner include_any exclude_any "
+                        "burst peak_rate min_policed_unit max_packet_size");
 
         int lspid = getParameterIntValue(path, "lspid");
 
@@ -433,6 +434,16 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
         newPath.permanent = getParameterBoolValue(path, "permanent", true);
 
         newPath.tspec.req_bandwidth = getParameterDoubleValue(path, "bandwidth", 0.0);
+
+        // C11 (RFC 2210 token-bucket Tspec): carried/propagated/recorded end to end
+        // (see IntServ.msg's SenderTspecObj) but NOT consulted by admission control,
+        // which stays req_bandwidth-only (RsvpTe::doCACCheck()) -- see RsvpTe.ned's
+        // doc comment for this model limitation. Default 0 when absent, like every
+        // other optional path XML attribute here.
+        newPath.tspec.burst = getParameterDoubleValue(path, "burst", 0.0);
+        newPath.tspec.peakRate = getParameterDoubleValue(path, "peak_rate", 0.0);
+        newPath.tspec.minPolicedUnit = getParameterIntValue(path, "min_policed_unit", 0);
+        newPath.tspec.maxPacketSize = getParameterIntValue(path, "max_packet_size", 0);
 
         const cXMLElement *route = getUniqueChildIfExists(path, "route");
         if (route)

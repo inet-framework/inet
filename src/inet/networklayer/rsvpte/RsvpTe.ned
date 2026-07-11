@@ -56,7 +56,19 @@ import inet.common.SimpleModule;
 // - <sender>: the sender (ingress) address for the SENDER_TEMPLATE object;
 //   defaults to this router's address.
 // - <bandwidth>: requested bandwidth in bits/sec for admission control;
-//   defaults to 0 (best-effort, always admitted).
+//   defaults to 0 (best-effort, always admitted). This is the SENDER_TSPEC/
+//   FLOWSPEC token rate [r] (RFC 2210).
+// - <burst>, <peak_rate>, <min_policed_unit>, <max_packet_size>: the remaining
+//   RFC 2210 Int-Serv token-bucket Tspec parameters -- bucket depth [b], peak
+//   rate [p], minimum policed unit [m], maximum packet size [M] -- all default
+//   to 0 when omitted (Workstream C11). LIMITATION: these are carried on the
+//   wire and propagated/recorded end to end (~IntServ's SenderTspecObj) exactly
+//   like <bandwidth>, but admission control (doCACCheck()) and preemption only
+//   ever consult <bandwidth> [r] -- there is no per-LSP policing/shaping in
+//   this model (that would require wiring ~inet::queueing::TokenBucket into the
+//   MPLS forwarding path, out of scope here), so a sender declaring e.g. a
+//   burst size larger than what any downstream link could actually absorb is
+//   never rejected or throttled for it.
 // - <route>: an explicit route (ERO), see below; if omitted, the path is
 //   forwarded hop-by-hop according to the routing table (no ERO), unless
 //   "computeEro" is on (see below).

@@ -95,12 +95,14 @@ Register_Serializer(RsvpSrefreshMsg, RsvpTeSerializer);
 //   for one). They do not survive a serialize/deserialize round trip.
 // - RsvpPathTear.force is model-internal signalling state with no RFC wire
 //   representation; not serialized (B6 does not budget space for it either).
-// - SENDER_TSPEC/FLOWSPEC only carry a single bandwidth value
-//   (SenderTspecObj::req_bandwidth); it is written into the RFC 2210 token
-//   bucket's rate [r], size [b] and peak rate [p] fields alike (a real
-//   sender would generally set these independently). The minimum policed
-//   unit [m] and maximum packet size [M] parameters are not modeled state;
-//   fixed placeholder values are written and discarded on deserialize.
+// - SENDER_TSPEC/FLOWSPEC carry the full RFC 2210 token bucket (r, b, p, m, M --
+//   Workstream C11's SenderTspecObj fields), but only [r] (req_bandwidth) is
+//   ever consulted by admission control (RsvpTe::doCACCheck()); b/p/m/M are
+//   carried/propagated/recorded only -- there is no per-LSP policing/shaping in
+//   this model (see IntServ.msg's SenderTspecObj doc comment). When a path/flow
+//   leaves b/p/m/M at their unset default (0), serializeTspec() falls back to the
+//   pre-C11 wire values (b=p=r, m=20, M=1500) rather than writing literal zeros,
+//   to keep every existing example/showcase's serialized bytes unchanged.
 // ===========================================================================
 
 namespace {
@@ -317,7 +319,19 @@ SenderTemplateObj RsvpTeSerializer::deserializeSenderTemplate(MemoryInputStream&
 // RFC 2210 Section 3.1 (SENDER_TSPEC) / 3.2.1 (FLOWSPEC, Controlled-Load):
 // message header word + per-service header word + per-parameter header word
 // + 5 token-bucket parameter words (r, b, p, m, M) = 8 words = 32 bytes body.
-void RsvpTeSerializer::serializeTspec(MemoryOutputStream& stream, double reqBandwidth, uint8_t classNum)
+// Workstream C11: r/b/p are real (independent) IEEE-754 float fields; m/M are
+// real 32-bit integers -- all five now come from the model's own SenderTspecObj
+// (IntServ.msg) rather than always being derived/placeholder values. BUT: when a
+// path/flow leaves burst/peakRate/minPolicedUnit/maxPacketSize at their message
+// defaults (0 -- i.e. the operator's XML never set them, true of every existing
+// example/showcase), this function falls back to EXACTLY the old pre-C11 wire
+// values (b=p=r, m=20, M=1500) instead of writing literal zeros: this is what
+// keeps this commit fingerprint-NEUTRAL (a literal 0 for e.g. maxPacketSize would
+// change the serialized bytes of every ~tND-checked example/showcase, none of
+// which ever exercises this new XML surface, for no behavioral reason -- CAC/
+// preemption never consult these fields either way, see IntServ.msg's doc
+// comment). A path/flow that DOES set them gets its real values on the wire.
+void RsvpTeSerializer::serializeTspec(MemoryOutputStream& stream, const SenderTspecObj& tspec, uint8_t classNum)
 {
     writeObjectHeader(stream, 36, classNum, CTYPE_INTSERV);
     // Message header: version(4 bits)=0, reserved(12 bits), overall length = 7 words
@@ -334,17 +348,18 @@ void RsvpTeSerializer::serializeTspec(MemoryOutputStream& stream, double reqBand
     stream.writeByte(127);
     stream.writeByte(0);
     stream.writeUint16Be(5);
-    float r = static_cast<float>(reqBandwidth);
-    float b = r; // not modeled independently -- see non-features list
-    float p = r;
-    stream.writeUint32Be(bitCast<uint32_t>(r));
-    stream.writeUint32Be(bitCast<uint32_t>(b));
-    stream.writeUint32Be(bitCast<uint32_t>(p));
-    stream.writeUint32Be(20); // Minimum Policed Unit [m]: not modeled, fixed placeholder
-    stream.writeUint32Be(1500); // Maximum Packet Size [M]: not modeled, fixed placeholder
+    double b = tspec.burst > 0 ? tspec.burst : tspec.req_bandwidth;
+    double p = tspec.peakRate > 0 ? tspec.peakRate : tspec.req_bandwidth;
+    int m = tspec.minPolicedUnit > 0 ? tspec.minPolicedUnit : 20;
+    int M = tspec.maxPacketSize > 0 ? tspec.maxPacketSize : 1500;
+    stream.writeUint32Be(bitCast<uint32_t>(static_cast<float>(tspec.req_bandwidth))); // [r]
+    stream.writeUint32Be(bitCast<uint32_t>(static_cast<float>(b))); // [b]
+    stream.writeUint32Be(bitCast<uint32_t>(static_cast<float>(p))); // [p]
+    stream.writeUint32Be(static_cast<uint32_t>(m)); // [m]
+    stream.writeUint32Be(static_cast<uint32_t>(M)); // [M]
 }
 
-double RsvpTeSerializer::deserializeTspec(MemoryInputStream& stream)
+SenderTspecObj RsvpTeSerializer::deserializeTspec(MemoryInputStream& stream)
 {
     readObjectHeader(stream);
     stream.readNBitsToUint64Be(4); // version
@@ -356,12 +371,13 @@ double RsvpTeSerializer::deserializeTspec(MemoryInputStream& stream)
     stream.readByte(); // parameter id
     stream.readByte(); // parameter flags
     stream.readUint16Be(); // parameter length
-    uint32_t rBits = stream.readUint32Be();
-    stream.readUint32Be(); // [b], mirrors [r], discarded
-    stream.readUint32Be(); // [p], mirrors [r], discarded
-    stream.readUint32Be(); // [m], not modeled, discarded
-    stream.readUint32Be(); // [M], not modeled, discarded
-    return static_cast<double>(bitCast<float>(rBits));
+    SenderTspecObj tspec;
+    tspec.req_bandwidth = static_cast<double>(bitCast<float>(stream.readUint32Be())); // [r]
+    tspec.burst = static_cast<double>(bitCast<float>(stream.readUint32Be())); // [b]
+    tspec.peakRate = static_cast<double>(bitCast<float>(stream.readUint32Be())); // [p]
+    tspec.minPolicedUnit = static_cast<int>(stream.readUint32Be()); // [m]
+    tspec.maxPacketSize = static_cast<int>(stream.readUint32Be()); // [M]
+    return tspec;
 }
 
 void RsvpTeSerializer::serializeLabel(MemoryOutputStream& stream, int label)
@@ -563,7 +579,7 @@ Ipv4AddressVector RsvpTeSerializer::deserializeRro(MemoryInputStream& stream)
 void RsvpTeSerializer::serializeFlowDescriptorList(MemoryOutputStream& stream, const FlowDescriptorVector& flows)
 {
     for (const auto& flow : flows) {
-        serializeTspec(stream, flow.Flowspec_Object.req_bandwidth, CLASSNUM_FLOWSPEC);
+        serializeTspec(stream, flow.Flowspec_Object, CLASSNUM_FLOWSPEC);
         serializeSenderTemplate(stream, flow.Filter_Spec_Object, CLASSNUM_FILTER_SPEC);
         serializeLabel(stream, flow.label);
         serializeRro(stream, flow.RRO);
@@ -582,7 +598,10 @@ FlowDescriptorVector RsvpTeSerializer::deserializeFlowDescriptorList(MemoryInput
     // 9), so peeking for it is an exact, unambiguous boundary.
     while (stream.getPosition() < endPos && peekClassNum(stream) == CLASSNUM_FLOWSPEC) {
         FlowDescriptor_t flow;
-        flow.Flowspec_Object.req_bandwidth = deserializeTspec(stream);
+        // FlowSpecObj adds no fields of its own over SenderTspecObj, so assigning
+        // through the (always-valid) base-class reference copies exactly the (r, b,
+        // p, m, M) fields deserializeTspec() just read.
+        static_cast<SenderTspecObj&>(flow.Flowspec_Object) = deserializeTspec(stream);
         SenderTemplateObj st = deserializeSenderTemplate(stream);
         flow.Filter_Spec_Object.SrcAddress = st.SrcAddress;
         flow.Filter_Spec_Object.Lsp_Id = st.Lsp_Id;
@@ -619,7 +638,7 @@ void RsvpTeSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chu
             serializeLabelRequest(stream, pm->getLabel_request());
             serializeEro(stream, pm->getERO());
             serializeSenderTemplate(stream, pm->getSender_descriptor().Sender_Template_Object, CLASSNUM_SENDER_TEMPLATE);
-            serializeTspec(stream, pm->getSender_descriptor().Sender_Tspec_Object.req_bandwidth, CLASSNUM_SENDER_TSPEC);
+            serializeTspec(stream, pm->getSender_descriptor().Sender_Tspec_Object, CLASSNUM_SENDER_TSPEC);
             serializeOptionalMessageIdObjects(stream, *pm);
             break;
         }
@@ -636,7 +655,7 @@ void RsvpTeSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chu
             serializeSession(stream, pe->getSession());
             serializeErrorSpec(stream, pe->getErrorNode(), pe->getErrorCode());
             serializeSenderTemplate(stream, pe->getSender_descriptor().Sender_Template_Object, CLASSNUM_SENDER_TEMPLATE);
-            serializeTspec(stream, pe->getSender_descriptor().Sender_Tspec_Object.req_bandwidth, CLASSNUM_SENDER_TSPEC);
+            serializeTspec(stream, pe->getSender_descriptor().Sender_Tspec_Object, CLASSNUM_SENDER_TSPEC);
             serializeOptionalMessageIdObjects(stream, *pe);
             break;
         }
@@ -717,7 +736,7 @@ const Ptr<Chunk> RsvpTeSerializer::deserialize(MemoryInputStream& stream) const
                 pm->setERO(EroVector());
             SenderDescriptor_t sd;
             sd.Sender_Template_Object = deserializeSenderTemplate(stream);
-            sd.Sender_Tspec_Object.req_bandwidth = deserializeTspec(stream);
+            sd.Sender_Tspec_Object = deserializeTspec(stream);
             pm->setSender_descriptor(sd);
             deserializeOptionalMessageIdObjects(stream, endPos, *pm);
             msg = pm;
@@ -743,7 +762,7 @@ const Ptr<Chunk> RsvpTeSerializer::deserialize(MemoryInputStream& stream) const
             pe->setErrorCode(errorCode);
             SenderDescriptor_t sd;
             sd.Sender_Template_Object = deserializeSenderTemplate(stream);
-            sd.Sender_Tspec_Object.req_bandwidth = deserializeTspec(stream);
+            sd.Sender_Tspec_Object = deserializeTspec(stream);
             pe->setSender_descriptor(sd);
             deserializeOptionalMessageIdObjects(stream, endPos, *pe);
             msg = pe;
