@@ -31,9 +31,8 @@ namespace tcp {
 
 #define DELAYED_ACK_TIMEOUT    0.2   // 200ms (RFC 1122: MUST be less than 0.5 seconds)
 #define MAX_REXMIT_COUNT       12   // 12 retries
-#define MIN_REXMIT_TIMEOUT     1.0   // 1s
-//#define MIN_REXMIT_TIMEOUT    0.6   // 600ms (3 ticks)
-#define MAX_REXMIT_TIMEOUT     240   // 2 * MSL (RFC 1122)
+// RTO bounds are configurable via the minRto/maxRto parameters (state->min_rto,
+// state->max_rto); the defaults reproduce the historical 1s / 2*MSL (RFC 1122) clamps.
 #define MIN_PERSIST_TIMEOUT    5   // 5s
 #define MAX_PERSIST_TIMEOUT    60   // 60s
 
@@ -104,6 +103,10 @@ void TcpBaseAlg::initialize()
     state->keepalive_idle_time = conn->getTcpMain()->par("keepAliveIdleTime");
     state->keepalive_interval = conn->getTcpMain()->par("keepAliveInterval");
     state->keepalive_max_probes = conn->getTcpMain()->par("keepAliveProbeCount");
+
+    state->rexmit_timeout = conn->getTcpMain()->par("initialRto");
+    state->min_rto = conn->getTcpMain()->par("minRto");
+    state->max_rto = conn->getTcpMain()->par("maxRto");
 }
 
 void TcpBaseAlg::established(bool active)
@@ -222,8 +225,8 @@ void TcpBaseAlg::processRexmitTimer(TcpEventCode& event)
 
     // restart the retransmission timer with twice the latest RTO value, or with the max, whichever is smaller
     state->rexmit_timeout += state->rexmit_timeout;
-    if (state->rexmit_timeout > MAX_REXMIT_TIMEOUT)
-        state->rexmit_timeout = MAX_REXMIT_TIMEOUT;
+    if (state->rexmit_timeout > state->max_rto)
+        state->rexmit_timeout = state->max_rto;
 
     conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
 
@@ -373,10 +376,10 @@ void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     // assign RTO (here: rexmit_timeout) a new value
     simtime_t rto = srtt + 4 * rttvar;
 
-    if (rto > MAX_REXMIT_TIMEOUT)
-        rto = MAX_REXMIT_TIMEOUT;
-    else if (rto < MIN_REXMIT_TIMEOUT)
-        rto = MIN_REXMIT_TIMEOUT;
+    if (rto > state->max_rto)
+        rto = state->max_rto;
+    else if (rto < state->min_rto)
+        rto = state->min_rto;
 
     state->rexmit_timeout = rto;
 

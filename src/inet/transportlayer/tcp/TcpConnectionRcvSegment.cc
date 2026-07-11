@@ -1334,7 +1334,7 @@ void TcpConnection::process_TIMEOUT_FIN_WAIT_2()
 void TcpConnection::startSynRexmitTimer()
 {
     state->syn_rexmit_count = 0;
-    state->syn_rexmit_timeout = TCP_TIMEOUT_SYN_REXMIT;
+    state->syn_rexmit_timeout = tcpMain->par("initialRto");
     rescheduleAfter(state->syn_rexmit_timeout, synRexmitTimer);
 }
 
@@ -1367,8 +1367,9 @@ void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
     // reschedule timer
     state->syn_rexmit_timeout *= 2;
 
-    if (state->syn_rexmit_timeout > TCP_TIMEOUT_SYN_REXMIT_MAX)
-        state->syn_rexmit_timeout = TCP_TIMEOUT_SYN_REXMIT_MAX;
+    simtime_t synRexmitMax = tcpMain->par("maxRto");
+    if (state->syn_rexmit_timeout > synRexmitMax)
+        state->syn_rexmit_timeout = synRexmitMax;
 
     scheduleAfter(state->syn_rexmit_timeout, synRexmitTimer);
 }

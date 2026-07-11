@@ -211,6 +211,9 @@ simple Tcp extends SimpleModule like ITcp
         double keepAliveIdleTime @unit(s) = default(7200s); // idle time before the first keepalive probe (Linux tcp_keepalive_time)
         double keepAliveInterval @unit(s) = default(75s); // interval between keepalive probes (Linux tcp_keepalive_intvl)
         int keepAliveProbeCount = default(9); // number of unanswered probes before the connection is aborted (Linux tcp_keepalive_probes)
+        double initialRto @unit(s) = default(3s); // initial retransmission timeout, used until the first RTT sample (RFC 6298 recommends 1s; Linux TCP_TIMEOUT_INIT=1s)
+        double minRto @unit(s) = default(1s); // lower bound on the retransmission timeout (Linux TCP_RTO_MIN=200ms)
+        double maxRto @unit(s) = default(240s); // upper bound on the retransmission timeout (Linux rto_max default 120s)
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];

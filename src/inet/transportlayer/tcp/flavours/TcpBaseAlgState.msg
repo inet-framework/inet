@@ -24,6 +24,8 @@ struct TcpBaseAlgStateVariables extends TcpStateVariables
     //@{
     int rexmit_count = 0; ///< number of retransmissions (=1 after first rexmit)
     simtime_t rexmit_timeout = 3.0; ///< current retransmission timeout (aka RTO)
+    simtime_t min_rto = 1.0; ///< lower bound on RTO (from the minRto parameter)
+    simtime_t max_rto = 240.0; ///< upper bound on RTO (from the maxRto parameter)
     //@}
 
     /// persist factor
