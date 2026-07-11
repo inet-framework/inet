@@ -148,6 +148,10 @@ import inet.transportlayer.contract.ITcp;
 //    three-way handshake, ECE/CWR flag handling, and CE codepoint processing.
 //  - Data Center TCP (RFC 8257): DCTCP congestion control based on ECN
 //    feedback, implemented in the `DcTcp` algorithm class.
+//  - CUBIC (RFC 9438): the `TcpCubic` algorithm class implements CUBIC window
+//    growth with fast convergence, TCP friendliness, and the HyStart hybrid
+//    slow-start exit (parameters `cubic*` and `hystart*`). It reuses `TcpReno`'s
+//    fast retransmit and RFC 3517 SACK recovery.
 //
 // The `TcpNewReno`, `TcpReno`, and `TcpTahoe` algorithms implement:
 //  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
