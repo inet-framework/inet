@@ -54,6 +54,17 @@ class INET_API LibTable : public SimpleModule
 
         LabelOpVector outLabel;
         int outInterfaceId;
+
+        // Optional precomputed backup path (e.g. a TI-LFA repair stack per RFC 9855),
+        // dormant until activateBackup(inLabel, true) flips backupActive. Nothing in
+        // this phase ever calls setBackup()/activateBackup() -- the fields exist purely
+        // as inert data-plane plumbing for a later workstream phase. In-class
+        // initializers are load-bearing here: unlike inLabel/inInterfaceId/outInterfaceId
+        // (which every factory path below assigns explicitly), no existing factory path
+        // touches these new fields, so an uninitialized bool would be indeterminate.
+        LabelOpVector backupOutLabel;
+        int backupOutInterfaceId = -1;
+        bool backupActive = false;
     };
 
   protected:
@@ -103,6 +114,20 @@ class INET_API LibTable : public SimpleModule
     // advertised but never actually installed (independent control, downstream
     // mapping never arrived).
     virtual bool removeLibEntryIfExists(int inLabel);
+
+    // Configures (or replaces) the backup outLabel/outInterfaceId of an existing entry,
+    // found by inLabel, WITHOUT activating it (backupActive is left untouched). Throws
+    // if no entry with inLabel exists -- like installLibEntry()'s update branch, this is
+    // a configuration operation on an entry that must already exist, not an upsert.
+    virtual void setBackup(int inLabel, const LabelOpVector& backupOutLabel, int backupOutInterfaceId);
+
+    // Flips backupActive on the entry with the given inLabel: when true, resolveLabel()
+    // returns the backup outLabel/outInterfaceId instead of the primary ones for that
+    // entry. Returns false (does not throw) if no entry with inLabel exists, mirroring
+    // removeLibEntryIfExists()'s no-op-on-miss convention -- callers on the activation
+    // path (a future phase's failure/revert handler) may race a removed entry and
+    // should not need to guard with a separate existence check.
+    virtual bool activateBackup(int inLabel, bool active);
 
     // utility
     static LabelOpVector pushLabel(int label);

@@ -71,8 +71,14 @@ bool LibTable::resolveLabel(int inInterfaceId, int inLabel,
         if (elem.inLabel != inLabel)
             continue;
 
-        outLabel = elem.outLabel;
-        outInterfaceId = elem.outInterfaceId;
+        if (elem.backupActive) {
+            outLabel = elem.backupOutLabel;
+            outInterfaceId = elem.backupOutInterfaceId;
+        }
+        else {
+            outLabel = elem.outLabel;
+            outInterfaceId = elem.outInterfaceId;
+        }
 
         return true;
     }
@@ -150,6 +156,31 @@ bool LibTable::removeLibEntryIfExists(int inLabel)
 
         lib.erase(lib.begin() + i);
         emitLibEntryCount();
+        return true;
+    }
+    return false;
+}
+
+void LibTable::setBackup(int inLabel, const LabelOpVector& backupOutLabel, int backupOutInterfaceId)
+{
+    for (auto& elem : lib) {
+        if (elem.inLabel != inLabel)
+            continue;
+
+        elem.backupOutLabel = backupOutLabel;
+        elem.backupOutInterfaceId = backupOutInterfaceId;
+        return;
+    }
+    throw cRuntimeError("Cannot set backup for LIB entry: no entry with inLabel=%d", inLabel);
+}
+
+bool LibTable::activateBackup(int inLabel, bool active)
+{
+    for (auto& elem : lib) {
+        if (elem.inLabel != inLabel)
+            continue;
+
+        elem.backupActive = active;
         return true;
     }
     return false;
