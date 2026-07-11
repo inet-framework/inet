@@ -45,6 +45,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.tcpAlgorithmClass = "TcpReno"
 *.cli_tcp.initialWindow = "rfc6928"
 
+include ../../lib/tcp-legacy.ini
+
 %# With IW10 the client sends exactly 10 segments (up to seq 10241) in the initial
 %# burst at t=1.001, before the first ACK arrives at t=1.003. The 10th segment is
 %# present; there is no 11th segment in the initial burst.

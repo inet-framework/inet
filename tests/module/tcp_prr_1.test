@@ -51,6 +51,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.prrEnabled = true
 *.*_tcp.initialWindow = "rfc6928"
 
+include ../../lib/tcp-legacy.ini
+
 %# PRR entered fast recovery (no ssthresh+3*SMSS inflation)
 %contains: stdout
 PRR fast recovery

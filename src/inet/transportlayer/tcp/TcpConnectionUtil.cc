@@ -657,7 +657,17 @@ void TcpConnection::configureStateVariables()
         state->init_cwnd_mode = 2;
     else
         state->init_cwnd_mode = 0;
-    state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
+    // Maximum Segment Size (RFC 793). mss=-1 is a sentinel meaning "derive from the
+    // address family" -- resolved in writeHeaderOptions() once remoteAddr is known.
+    // Read as signed first: assigning -1 straight into the uint32_t snd_mss trips
+    // OMNeT++'s cPar overflow check.
+    int mssPar = tcpMain->par("mss");
+    if (mssPar == -1)
+        state->snd_mss = (uint32_t)-1;
+    else if (mssPar >= 64 && mssPar <= 65535)
+        state->snd_mss = (uint32_t)mssPar;
+    else
+        throw cRuntimeError("mss must be -1 (address-family default) or in the range 64..65535, but is %d", mssPar);
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
     state->dupthresh = tcpMain->par("dupthresh");
@@ -1507,6 +1517,14 @@ bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHe
 
 TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 {
+    // Resolve the address-family-derived default MSS (mss = -1 sentinel) now that
+    // the remote address is known and before we advertise/use it. IPv6 has 40 bytes
+    // of base header vs IPv4's 20, so a 1500-byte MTU yields 1440 vs 1460.
+    if (state->snd_mss == (uint32_t)-1) {
+        state->snd_mss = (remoteAddr.getType() == L3Address::IPv6) ? 1440 : 1460;
+        EV_DETAIL << "Derived default MSS from address family: snd_mss=" << state->snd_mss << "\n";
+    }
+
     // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
     if (tcpHeader->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
                                 || ((fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD)

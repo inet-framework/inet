@@ -62,6 +62,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.mss = 500                                     # Maximum Segment Size (RFC 793) (header option)
 *.*_tcp.tcpAlgorithmClass = "TcpReno"                 # TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl/DumbTcp
 
+include ../../lib/tcp-legacy.ini
+
 %#--------------------------------------------------------------------------------------------------------------
 %file: postrun.pl
 open FILE, '<test.out';

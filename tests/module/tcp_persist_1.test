@@ -57,6 +57,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.mss = 500
 *.*_tcp.tcpAlgorithmClass = "TcpReno"
 
+include ../../lib/tcp-legacy.ini
+
 %# The persist timer engages when the zero window is seen (~t=1.011). Persist
 %# probes (1-byte segments, incrementing seq) must fire at the bounded Stevens
 %# intervals 5, 5, 6, 12, 24, 48 s. With the bug (clamp applied to rexmit_timeout

@@ -51,7 +51,10 @@ cmdenv-log-prefix="[%c]: "
 *.cli_tcp.keepAliveInterval=5s
 *.cli_tcp.keepAliveProbeCount=3
 *.*_tcp.mss = 500
+*.*_tcp.advertisedWindow = 7000                       # legacy 14*mss for mss=500 (pinned ahead of tcp-legacy.ini)
 *.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+include ../../lib/tcp-legacy.ini
 
 %# three probes are sent at the 5 s interval (t = 30, 35, 40 s), all deleted by
 %# the tester, then the connection is aborted and the app is notified.

@@ -50,6 +50,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.lossDetectionMode = "rack"
 *.*_tcp.initialWindow = "rfc6928"
 
+include ../../lib/tcp-legacy.ini
+
 %# RACK marks the earlier-sent segment lost by time...
 %contains: stdout
 RACK: marked 500 bytes lost by time

@@ -2,8 +2,8 @@
 
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
 
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,                  50s,            3b43-43bd/tplx, PASS, Ipv4
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,                  50s,            8402-9aa9/tplx, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,                  50s,            251b-8db8/tplx, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,                  50s,            035c-b045/tplx, PASS, Ipv4
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            f1ba-019b/tplx, PASS, Ipv4
 
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TcpLwip -r 0,                     100s,           8ae1-b60d/tplx, PASS, Ipv4
@@ -11,13 +11,13 @@
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TcpLwip -r 2,                     100s,           cd3e-3242/tplx, PASS, Ipv4
 
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0,                 100s,            dbac-e55c/tplx, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,                 100s,            841f-007f/tplx, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,                 100s,            aef8-f3cc/tplx, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0,            100s,            dbac-e55c/tplx, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,         100s,            dbac-e55c/tplx, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            4999-d547/tplx, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            050a-a829/tplx, PASS, Ipv4
 
 
 # nclients uses TelnetApp + TcpGenericServerApp, whose request/reply control rides in a GenericAppMsgReq region tag. TcpLwip now preserves region tags across the lwIP stack, so these run.
-/examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,                 200s,            cdda-993b/tplx, PASS, Ipv4
-/examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,                 200s,            a2ab-e146/tplx, PASS, Ipv4
+/examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,                 200s,            e51f-3d37/tplx, PASS, Ipv4
+/examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,                 200s,            7089-eaaa/tplx, PASS, Ipv4
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0,                 200s,            89be-7ae7/tplx, PASS, Ipv4

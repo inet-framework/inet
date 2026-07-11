@@ -52,6 +52,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.lossUndoEnabled = true
 *.*_tcp.initialWindow = "rfc6928"
 
+include ../../lib/tcp-legacy.ini
+
 %# the sender detects the D-SACK and undoes the spurious reduction, restoring
 %# cwnd to its pre-recovery value (8000) and ssthresh to the pre-loss value.
 %# Falsification: with lossUndoEnabled=false this line is absent and cwnd stays

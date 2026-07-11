@@ -191,17 +191,17 @@ simple Tcp extends SimpleModule like ITcp
     parameters:
         @class(Tcp);
         string checksumMode @enum("declared", "computed") = default("declared");
-        int advertisedWindow = default(14 * this.mss); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
-        bool delayedAcksEnabled = default(false); // Delayed ACK algorithm (RFC 1122) enabled/disabled
+        int advertisedWindow = default(65535); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+        bool delayedAcksEnabled = default(true); // Delayed ACK algorithm (RFC 1122) enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
-        bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
+        bool limitedTransmitEnabled = default(true); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
         bool increasedIWEnabled = default(false); // DEPRECATED: use initialWindow="rfc3390" instead. Increased Initial Window (RFC 3390) enabled/disabled
-        string initialWindow @enum("rfc2001","rfc3390","rfc6928") = default("rfc2001"); // initial congestion window: rfc2001=1 SMSS, rfc3390=min(4*MSS,max(2*MSS,4380)), rfc6928=IW10=min(10*MSS,max(2*MSS,14600))
-        bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
-        bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+        string initialWindow @enum("rfc2001","rfc3390","rfc6928") = default("rfc6928"); // initial congestion window: rfc2001=1 SMSS, rfc3390=min(4*MSS,max(2*MSS,4380)), rfc6928=IW10=min(10*MSS,max(2*MSS,14600))
+        bool sackSupport = default(true); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+        bool windowScalingSupport = default(true); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
         int windowScalingFactor = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits)
-        bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
-        int mss = default(536); // Maximum Segment Size (header option). Default 536 per RFC 1122.
+        bool timestampSupport = default(true); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+        int mss = default(-1); // Maximum Segment Size (header option). -1 derives it from the address family (IPv4->1460, IPv6->1440), like Linux on a 1500-byte-MTU link; set explicitly (e.g. 536) for small-MTU links.
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
         int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 3517) DO NOT change unless you really know what you are doing
@@ -221,9 +221,9 @@ simple Tcp extends SimpleModule like ITcp
         double keepAliveIdleTime @unit(s) = default(7200s); // idle time before the first keepalive probe (Linux tcp_keepalive_time)
         double keepAliveInterval @unit(s) = default(75s); // interval between keepalive probes (Linux tcp_keepalive_intvl)
         int keepAliveProbeCount = default(9); // number of unanswered probes before the connection is aborted (Linux tcp_keepalive_probes)
-        double initialRto @unit(s) = default(3s); // initial retransmission timeout, used until the first RTT sample (RFC 6298 recommends 1s; Linux TCP_TIMEOUT_INIT=1s)
-        double minRto @unit(s) = default(1s); // lower bound on the retransmission timeout (Linux TCP_RTO_MIN=200ms)
-        double maxRto @unit(s) = default(240s); // upper bound on the retransmission timeout (Linux rto_max default 120s)
+        double initialRto @unit(s) = default(1s); // initial retransmission timeout, used until the first RTT sample (RFC 6298 recommends 1s; Linux TCP_TIMEOUT_INIT=1s)
+        double minRto @unit(s) = default(0.2s); // lower bound on the retransmission timeout (Linux TCP_RTO_MIN=200ms)
+        double maxRto @unit(s) = default(120s); // upper bound on the retransmission timeout (Linux rto_max default 120s)
         double cubicBeta = default(0.700195); // TcpCubic multiplicative-decrease factor (717/1024)
         double cubicC = default(0.4); // TcpCubic scaling constant C
         bool cubicFastConvergence = default(true); // TcpCubic fast convergence
