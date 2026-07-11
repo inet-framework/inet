@@ -1,0 +1,389 @@
+%description:
+Regression test for controller-death fallback (RFC 8231 Section 5.2 state timeout,
+Workstream F4 Phase 3, RSVP-MBB mode) -- this workstream's headline behavior: a PCC whose
+PCEP session to its PCE dies, and stays dead, eventually gives up waiting and falls back to
+LOCAL (non-PCE) path computation for every LSP it had delegated, rather than leaving them
+stuck forever waiting for a controller that never comes back.
+
+Same ad hoc diamond + real end-to-end hosts as the sibling pcep_pcupd.test (host1 -- LSR1 ->
+{LSR2 (600 kbps), LSR3 (10 Mbps)} -> LSR4 -- host4, LSR1.classifier statically FEC-binding
+host4's traffic to lspid 100), PLUS a fifth router, PceRouter, hanging off LSR4 on its own
+leaf link and running the ~Pce (instead of LSR4 itself, unlike pcep_pcreq.test/pcep_pcupd.test)
+-- deliberately, so that killing the PCE (a ~ScenarioManager "shutdown" of PceRouter, the same
+technique ldp_peer_death.test/rsvpte_mbb.test already use for a node kill/restart) can NEVER be
+confused with a data-plane failure: PceRouter sits on neither the LSR2 nor the LSR3 branch, so
+tunnel 1's own forwarding path (LSR1 -> LSR2/LSR3 -> LSR4 -> host4) is completely undisturbed
+by PceRouter's death -- this test is about the CONTROLLER dying, not the network.
+"reoptimizeInterval" is left at its default (0, off): the only thing that ever reroutes tunnel
+1 in this test is the state-timeout fallback itself, not an internal reoptimization racing it.
+
+Scenario:
+  1. At t=0, tunnel 1 (lspid 100, 50 kbps, permanent, computeEro=true, computationMode="pce",
+     delegate=true) is configured from the static traffic.xml, establishes over the PCE-
+     computed route (~3-5s in, same PCEP-session-startup lag as pcep_pcreq.test/
+     pcep_pcupd.test), and is reported to the PCE (PCRpt, PLSP-ID 1).
+  2. At t=8s (well after tunnel 1 is fully up and reported), PceRouter is shut down. Its PCEP
+     TCP session with LSR1's Pcc dies; since PLSP-ID 1 is still delegated at that moment, the
+     Pcc starts its "stateTimeout" (configured to 5s for this test) rather than reacting
+     immediately -- RFC 8231 Section 5.2 gives the PCE a real grace period to come back, and
+     this test deliberately never restarts PceRouter, so that grace period is what is actually
+     exercised (not an immediate reaction that would defeat the point of having a timeout at
+     all).
+  3. At t=13s (8s + the 5s stateTimeout), with the PCEP session still down, the Pcc tells
+     ~RsvpTe to fall back to local computation for PLSP-ID 1. ~RsvpTe::revertToLocalComputation()
+     immediately make-before-break re-routes it (a fresh replacement Lsp_Id, 101 -- the XML
+     only ever configures lspid 100 in this test, so maxLspId is 100 going in) with its ERO
+     cleared and localFallback set, forcing createIngressPSB() into its LOCAL CSPF branch
+     (Ted::calculateShortestPath()) regardless of "computationMode" still being "pce" --
+     nothing is ever sent to (or expected from) the PCE for this event; there is nothing left
+     to send it to anyway.
+  4. The replacement establishes, the classifier's FEC entry is rebound to lspid 101, and
+     lspid 100 is torn down -- ordinary make-before-break cutover, just LOCAL-CSPF-driven
+     this time instead of PCE-driven.
+
+Asserted:
+1. The PCEP session comes up, tunnel 1 establishes, and it is reported to the PCE (PCRpt) --
+   all before PceRouter is shut down (ordering regex).
+2. The state timeout is armed on session loss (NOT an immediate fallback) and expires only
+   after its configured delay, at which point ~RsvpTe is told to fall back for PLSP-ID 1.
+3. The fallback re-route is computed via LOCAL CSPF (the "CSPF computed ERO for session..."
+   EV_DETAIL line, ~RsvpTe's own local branch), NOT via any further PCEP exchange -- no
+   "PCReq sent to PCE" or "PCE computed ERO" line is ever produced for lspid 101 (structural
+   %not-contains: with localFallback set, createIngressPSB() never even reaches the
+   "computationMode == pce" branch for this specific replacement).
+4. The cutover completes (classifier rebound from lspid 100 to 101) and traffic keeps
+   flowing end to end, strongly, across the whole run including the controller's death and
+   the fallback re-route (packetReceived:count postrun-scalar check, same idiom as
+   rsvpte_mbb.test/pcep_pcupd.test).
+5. Standard undisposed-object postrun guard.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: PcepFallbackDiamond.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.node.mpls.RsvpMplsRouter;
+import inet.node.inet.StandardHost;
+
+//
+// Ad hoc diamond, with real end-to-end hosts, identical to pcep_pcupd.test's own
+// PcepPcupdDiamond, PLUS a fifth router (PceRouter) hanging off LSR4 on its own leaf link,
+// running the ~Pce -- see this file's own %description for why it is deliberately NOT
+// co-located with LSR4 itself.
+//
+network PcepFallbackDiamond
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    submodules:
+        host1: StandardHost {
+            @display("p=50,200");
+            gates: pppg[1];
+        }
+        host4: StandardHost {
+            @display("p=650,200");
+            gates: pppg[1];
+        }
+        LSR1: RsvpMplsRouter {
+            @display("p=200,200");
+            gates: pppg[3];
+        }
+        LSR2: RsvpMplsRouter {
+            @display("p=400,100");
+            gates: pppg[2];
+        }
+        LSR3: RsvpMplsRouter {
+            @display("p=400,300");
+            gates: pppg[2];
+        }
+        LSR4: RsvpMplsRouter {
+            @display("p=600,200");
+            gates: pppg[4];
+        }
+        PceRouter: RsvpMplsRouter {
+            @display("p=600,350");
+            gates: pppg[1];
+        }
+        scenarioManager: ScenarioManager {
+            @display("p=100,100;is=s");
+        }
+    connections:
+        host1.pppg[0] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR1.pppg[0];
+        LSR1.pppg[1] <--> { delay = 1ms; datarate = 600kbps; } <--> LSR2.pppg[0];
+        LSR2.pppg[1] <--> { delay = 1ms; datarate = 600kbps; } <--> LSR4.pppg[0];
+        LSR1.pppg[2] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR3.pppg[0];
+        LSR3.pppg[1] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR4.pppg[1];
+        LSR4.pppg[2] <--> { delay = 1ms; datarate = 10Mbps; } <--> host4.pppg[0];
+        LSR4.pppg[3] <--> { delay = 1ms; datarate = 10Mbps; } <--> PceRouter.pppg[0];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Addressing (identical to pcep_pcupd.test's own PcepPcupdDiamond for host1/LSR1..4/host4),
+%# PLUS the new LSR4<->PceRouter leaf link, deliberately given a LOWER address
+%# (10.0.4.x) than LSR4's existing highest interface (10.0.5.1) so LSR4's own "auto" routerId
+%# pick (the highest of its interface addresses) is unaffected by this test's added node:
+%#   LSR4.ppp3=10.0.4.9 <-> PceRouter.ppp0=10.0.4.10
+%#   LSR4 = max(10.0.2.2, 10.0.4.2, 10.0.5.1, 10.0.4.9) = 10.0.5.1 (unchanged)
+%#   PceRouter = 10.0.4.10 (its only interface)
+%# Every other router's routerId is exactly as in pcep_pcupd.test's own addressing note:
+%#   LSR1 = 10.0.3.1, LSR2 = 10.0.2.1, LSR3 = 10.0.4.1.
+%# The PCEP session connects LSR1's Pcc to PceRouter's routerId (10.0.4.10, genuinely
+%# multi-hop, off the tunnel's own LSR2/LSR3 forwarding branches entirely).
+%file: LSR1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.1.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp2	inet_addr: 10.0.3.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+224.0.0.0	*	255.0.0.0	H	0	ppp2
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.2.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.3.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+name: ppp1	inet_addr: 10.0.4.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR4.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.4.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+name: ppp2	inet_addr: 10.0.5.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp3	inet_addr: 10.0.4.9	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+224.0.0.0	*	255.0.0.0	H	0	ppp2
+224.0.0.0	*	255.0.0.0	H	0	ppp3
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: PceRouter.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.4.10	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: host1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.0.2	*		255.255.255.255	H	0	ppp0
+default:	10.0.0.2	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: host4.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.5.2	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.5.1	*		255.255.255.255	H	0	ppp0
+default:	10.0.5.1	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# fecid 1 is statically bound to lspid 100 (tunnel 1's ORIGINAL Lsp_Id); the whole point of
+%# this test is that the state-timeout-driven make-before-break cutover rebinds it to the
+%# fresh, LOCALLY-computed replacement Lsp_Id (101) itself.
+%file: LSR1_fec.xml
+<?xml version="1.0"?>
+<fectable>
+	<fecentry>
+		<id>1</id>
+		<destination>10.0.5.2</destination>
+		<tunnel_id>1</tunnel_id>
+		<endpoint>LSR4%routerId</endpoint>
+		<lspid>100</lspid>
+	</fecentry>
+</fectable>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1_rsvp.xml
+<?xml version="1.0"?>
+<sessions>
+	<session>
+		<endpoint>LSR4%routerId</endpoint>
+		<tunnel_id>1</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>100</lspid>
+				<bandwidth>50000</bandwidth>
+				<permanent>true</permanent>
+			</path>
+		</paths>
+	</session>
+</sessions>
+
+%#--------------------------------------------------------------------------------------------------------------
+%# PceRouter (and only it) is killed at t=8s -- well after tunnel 1 is up and delegated -- and
+%# never restarted: this test is specifically about a controller that never comes back.
+%file: scenario.xml
+<?xml version="1.0"?>
+<scenario>
+	<at t="8s">
+		<shutdown module="PceRouter"/>
+	</at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = .;../../../../src
+network = PcepFallbackDiamond
+sim-time-limit = 18s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+%# rsvp modules at detail (to capture the CSPF/label-install/reporting EV_DETAIL lines) and
+%# the classifier + PCEP apps at info; everything else off -- same convention as
+%# pcep_pcupd.test/rsvpte_mbb.test. Per-module cmdenv-log-level overrides are matched in FILE
+%# ORDER (first matching pattern wins), so specific overrides MUST be declared before the
+%# general catch-all below.
+**.LSR1.rsvp.cmdenv-log-level = detail
+**.LSR1.classifier.cmdenv-log-level = info
+**.LSR1.app[0].cmdenv-log-level = info
+**.PceRouter.app[0].cmdenv-log-level = info
+**.scenarioManager.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.02s
+**.host1.app[0].destAddresses = "10.0.5.2"
+
+**.host4.numApps = 1
+**.host4.app[0].typename = "UdpSink"
+**.host4.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "host1.rt"
+**.host4.ipv4.routingTable.routingFile = "host4.rt"
+**.LSR1.ipv4.routingTable.routingFile = "LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "LSR4.rt"
+**.PceRouter.ipv4.routingTable.routingFile = "PceRouter.rt"
+
+**.LSR1.classifier.config = xmldoc("LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("LSR1_rsvp.xml")
+
+**.LSR1.rsvp.computeEro = true
+**.LSR1.rsvp.computationMode = "pce"
+**.LSR1.rsvp.pccModule = "^.app[0]"
+**.LSR1.rsvp.delegate = true
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+**.PceRouter.rsvp.helloInterval = 0.2s
+**.PceRouter.rsvp.helloTimeout = 0.5s
+
+%# PCEP: LSR1 (ingress) runs the Pcc, PceRouter runs the Pce, wired to PceRouter's own (fully
+%# converged) Ted -- see this file's %description for why the Pce is NOT co-located with LSR4.
+**.LSR1.hasTcp = true
+**.LSR1.numApps = 1
+**.LSR1.app[0].typename = "Pcc"
+**.LSR1.app[0].pceAddress = "10.0.4.10"
+**.LSR1.app[0].localAddress = "10.0.3.1"
+**.LSR1.app[0].rsvpteModule = "^.rsvp"
+**.LSR1.app[0].keepaliveTime = 2s
+**.LSR1.app[0].deadTimer = 10s
+**.LSR1.app[0].reconnectInterval = 1s
+**.LSR1.app[0].stateTimeout = 5s
+
+**.PceRouter.hasTcp = true
+**.PceRouter.numApps = 1
+**.PceRouter.app[0].typename = "Pce"
+**.PceRouter.app[0].tedModule = "^.ted"
+**.PceRouter.app[0].keepaliveTime = 2s
+**.PceRouter.app[0].deadTimer = 10s
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.*.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 1: PCEP session up, tunnel 1 established, and delegated (PCRpt) -- all before
+%# PceRouter is shut down (ordering regex; %contains-regex matches with re.DOTALL, so a lone
+%# ".*" filler line can absorb any number of intervening lines, same convention as
+%# pcep_pcreq.test/pcep_pcupd.test's own ordering regexes).
+%contains-regex: stdout
+PCEP session with .* is now OPERATIONAL
+.*
+reporting delegated LSP UP to PCE \(plspId=1, lspid=100, .*\)
+.*
+processing <shutdown> command\.\.\.
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 2: the state timeout is armed on session loss (not an immediate fallback) --
+%# and, separately (further down in the log, only after its own 5s delay actually elapses),
+%# it expires and tells RsvpTe to fall back for PLSP-ID 1.
+%contains: stdout
+PCEP session lost with 1 delegated LSP(s) outstanding; starting state timeout (5)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+PCEP state timeout (5) expired with the session still down; 1 delegated LSP(s) falling back to local path computation
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 3: the fallback re-route (a fresh replacement lspid, 101) is computed via LOCAL
+%# CSPF, not via any further PCEP exchange.
+%contains: stdout
+PCEP controller state timeout expired for delegated PLSP-ID 1 (lspid=100): falling back to LOCAL path computation (C6 CSPF)
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+CSPF computed ERO for session \(dest=10.0.5.1, lspid=101\): .*
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+PCE computed ERO for session (dest=10.0.5.1, lspid=101)
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 4: the cutover completes (classifier rebound from lspid 100 to 101) and traffic
+%# keeps flowing end to end, strongly, across the whole run -- same postrun-scalar idiom as
+%# pcep_pcupd.test/rsvpte_mbb.test.
+%contains-regex: stdout
+make-before-break cutover: lspid=101 is up, switching traffic away from lspid=100.*
+make-before-break cutover: rebinding fec id 1 from lspid 100 to lspid 101.*
+sending PathTear to .*
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 650 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -226,6 +226,8 @@ void RsvpTe::initialize(int stage)
         computationMode = par("computationMode").stdstringValue();
         if (computationMode == "pce")
             pccmod.reference(this, "pccModule", true);
+        delegate = par("delegate");
+        maxPlspId = 0;
         reoptimizeInterval = par("reoptimizeInterval");
         if (reoptimizeInterval > SIMTIME_ZERO)
             reoptimizeTimerMsg = new ReoptimizeTimerMsg("reoptimize timer");
@@ -1367,12 +1369,20 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
             auto sit = findSession(rsb->sessionObject);
             if (sit != traffic.end()) {
                 auto pit = findPath(&(*sit), psb->Sender_Template_Object);
-                if (pit != sit->paths.end() && pit->replacesLspId >= 0) {
-                    cutoverOldLspId = pit->replacesLspId;
-                    cutoverSession = rsb->sessionObject;
-                    cutoverNewSender = psb->Sender_Template_Object;
-                    cutoverNewInLabel = inLabel;
-                    pit->replacesLspId = -1; // no longer a pending replacement -- it's the session's normal path now
+                if (pit != sit->paths.end()) {
+                    // Phase 3 (RFC 8231 stateful delegation): report this path (whether
+                    // it's a brand-new establishment or a completed make-before-break
+                    // replacement -- both land here) to the PCE. A no-op unless
+                    // "delegate" applies to it (see reportLspUp()'s own doc comment).
+                    reportLspUp(rsb->sessionObject, *pit, psb->ERO);
+
+                    if (pit->replacesLspId >= 0) {
+                        cutoverOldLspId = pit->replacesLspId;
+                        cutoverSession = rsb->sessionObject;
+                        cutoverNewSender = psb->Sender_Template_Object;
+                        cutoverNewInLabel = inLabel;
+                        pit->replacesLspId = -1; // no longer a pending replacement -- it's the session's normal path now
+                    }
                 }
             }
         }
@@ -1706,7 +1716,10 @@ RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const TrafficSession& session, 
             allLoose = false;
 
     if (computeEro && (ERO.empty() || allLoose)) {
-        if (computationMode == "pce") {
+        // Phase 3: a path that has fallen back to local control (RFC 8231 Section 5.2
+        // state timeout, see revertToLocalComputation()) always uses LOCAL CSPF from
+        // here on, even while computationMode is still "pce" for every OTHER path.
+        if (computationMode == "pce" && !path.localFallback) {
             // Workstream F4 Phase 2: delegate to a co-located Pcc instead of running
             // Ted::calculateShortestPath() ourselves. requestPathComputation() bridges
             // its inherently asynchronous PCReq/PCRep TCP exchange onto this synchronous-
@@ -2652,6 +2665,119 @@ void RsvpTe::completeMakeBeforeBreakCutover(const SessionObj& session, const Sen
     }
 }
 
+void RsvpTe::reportLspUp(const SessionObj& session, TrafficPath& path, const EroVector& ero)
+{
+    if (!delegate || computationMode != "pce" || path.localFallback)
+        return; // Phase 3 delegation isn't on, doesn't apply here, or already fell back to local control
+
+    if (path.plspId < 0)
+        path.plspId = ++maxPlspId;
+
+    EV_INFO << "reporting delegated LSP UP to PCE (plspId=" << path.plspId << ", lspid=" << path.sender.Lsp_Id
+            << ", ERO " << vectorToString(ero) << ")" << endl;
+    pccmod->reportLsp(path.plspId, true, routerId, session.DestAddress, path.tspec.req_bandwidth,
+            session.setupPri, path.includeAny, path.excludeAny, ero);
+}
+
+void RsvpTe::reportLspDown(const SessionObj& session, TrafficPath& path)
+{
+    if (!delegate || computationMode != "pce" || path.localFallback || path.plspId < 0)
+        return; // never delegated/reported in the first place (or already fell back)
+
+    EV_INFO << "reporting delegated LSP DOWN to PCE (plspId=" << path.plspId << ", lspid=" << path.sender.Lsp_Id << ")" << endl;
+    pccmod->reportLsp(path.plspId, false, routerId, session.DestAddress, path.tspec.req_bandwidth,
+            session.setupPri, path.includeAny, path.excludeAny, EroVector());
+}
+
+void RsvpTe::applyPceUpdate(int plspId, const EroVector& newEro)
+{
+    // Called cross-module from the co-located ~Pcc -- mirrors
+    // Pcc::requestPathComputation()'s identical Enter_Method rationale.
+    Enter_Method("applyPceUpdate");
+
+    for (auto& s : traffic) {
+        auto pit = std::find_if(s.paths.begin(), s.paths.end(),
+                [plspId](const TrafficPath& p) { return p.plspId == plspId; });
+        if (pit == s.paths.end())
+            continue;
+
+        if (pit->replacesLspId >= 0 || pit->pendingReplacementLspId >= 0) {
+            EV_WARN << "PCUpd for PLSP-ID " << plspId
+                    << " arrived while a make-before-break re-route is already in flight for it, ignoring" << endl;
+            return;
+        }
+
+        EV_INFO << "PCUpd received for PLSP-ID " << plspId << ": re-routing lspid=" << pit->sender.Lsp_Id
+                << " via make-before-break with the PCE-supplied ERO (" << vectorToString(newEro) << ")" << endl;
+
+        TrafficPath newPath = *pit;
+        newPath.sender.Lsp_Id = ++maxLspId;
+        newPath.replacesLspId = pit->sender.Lsp_Id;
+        newPath.pendingReplacementLspId = -1;
+        // Use the PCE-supplied route DIRECTLY: newEro is always a full strict route
+        // (like every ERO the PCE hands back, see Pce::processPCREQ()), so
+        // createIngressPSB()'s "ERO.empty() || allLoose" guard is never true for it --
+        // no fresh CSPF/PCReq round-trip happens, see this method's own doc comment.
+        newPath.ERO = newEro;
+        pit->pendingReplacementLspId = newPath.sender.Lsp_Id;
+
+        SessionObj session = s.sobj;
+        s.paths.push_back(newPath); // may reallocate `s.paths` -- `pit` unusable after this
+        SenderTemplateObj newSender = newPath.sender;
+
+        createPath(session, newSender);
+        return;
+    }
+
+    EV_WARN << "PCUpd for unknown PLSP-ID " << plspId << ", ignoring" << endl;
+}
+
+void RsvpTe::revertToLocalComputation(int plspId)
+{
+    // Called cross-module from the co-located ~Pcc -- mirrors
+    // Pcc::requestPathComputation()'s identical Enter_Method rationale.
+    Enter_Method("revertToLocalComputation");
+
+    for (auto& s : traffic) {
+        auto pit = std::find_if(s.paths.begin(), s.paths.end(),
+                [plspId](const TrafficPath& p) { return p.plspId == plspId; });
+        if (pit == s.paths.end())
+            continue;
+
+        pit->localFallback = true; // never delegate/report this path to the PCE again
+
+        if (pit->replacesLspId >= 0 || pit->pendingReplacementLspId >= 0) {
+            EV_INFO << "PCEP state timeout: PLSP-ID " << plspId
+                    << " is already mid-reroute; marked for local fallback without forcing an extra one" << endl;
+            return;
+        }
+
+        EV_INFO << "PCEP controller state timeout expired for delegated PLSP-ID " << plspId
+                << " (lspid=" << pit->sender.Lsp_Id << "): falling back to LOCAL path computation (C6 CSPF)" << endl;
+
+        TrafficPath newPath = *pit;
+        newPath.sender.Lsp_Id = ++maxLspId;
+        newPath.replacesLspId = pit->sender.Lsp_Id;
+        newPath.pendingReplacementLspId = -1;
+        // Clear the ERO (rather than reusing the stale, PCE-supplied one this path was
+        // last using): combined with newPath.localFallback == true (copied from *pit
+        // above), this forces createIngressPSB() to compute a fresh route via LOCAL
+        // CSPF right now, rather than silently keeping the last PCE-supplied route
+        // until some unrelated future trigger happens to recompute it.
+        newPath.ERO.clear();
+        pit->pendingReplacementLspId = newPath.sender.Lsp_Id;
+
+        SessionObj session = s.sobj;
+        s.paths.push_back(newPath); // may reallocate `s.paths` -- `pit` unusable after this
+        SenderTemplateObj newSender = newPath.sender;
+
+        createPath(session, newSender);
+        return;
+    }
+
+    EV_WARN << "state timeout fallback fired for unknown/already-migrated PLSP-ID " << plspId << ", ignoring" << endl;
+}
+
 void RsvpTe::considerReoptimization(const SessionObj& session, const SenderTemplateObj& sender)
 {
     auto sit = findSession(session);
@@ -2821,6 +2947,10 @@ void RsvpTe::delSession(const cXMLElement& node)
 
                 removePSB(psb);
             }
+
+            // Phase 3: this path is going away for good -- tell the PCE, if it was
+            // ever delegated (a no-op otherwise, see reportLspDown()'s doc comment).
+            reportLspDown(session->sobj, *it);
 
             it = session->paths.erase(it);
         }

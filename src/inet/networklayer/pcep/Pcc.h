@@ -7,8 +7,10 @@
 #ifndef __INET_PCC_H
 #define __INET_PCC_H
 
+#include <map>
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/pcep/PcepCommon.h"
 #include "inet/networklayer/pcep/PcepMessages_m.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
@@ -16,6 +18,8 @@
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
+
+class RsvpTe;
 
 /**
  * PCC (Path Computation Client) (RFC 5440): opens a TCP connection to a single,
@@ -59,6 +63,45 @@ class INET_API Pcc : public RoutingProtocolBase, public TcpSocket::BufferingCall
     };
     std::vector<PceRequest> pendingRequests;
     uint32_t pceRequestIdCounter = 0;
+
+    // Phase 3 (RFC 8231 stateful delegation): bookkeeping for one delegated LSP this
+    // Pcc has reported (or is about to report) to the PCE -- see reportLsp(), called
+    // cross-module by ~RsvpTe whenever a delegated ingress LSP it manages comes up,
+    // changes route (make-before-break), or goes down. Keyed by PLSP-ID (a small
+    // integer ~RsvpTe assigns once per delegated LSP and both sides use for its
+    // whole lifetime) in `delegatedLsps` below -- deliberately NOT the tuple-keyed
+    // shape `pendingRequests` above uses: that cache exists only because stateless
+    // PCEP (Phase 2) has no other identity to key by, whereas stateful delegation
+    // has a real, RFC-defined identity (PLSP-ID) to use instead. The two mechanisms
+    // are RFC-distinct (RFC 5440 Section 6.5/6.6 vs. RFC 8231 Section 6.1/6.2) and
+    // deliberately kept code-distinct here too.
+    struct DelegatedLsp {
+        bool up = false;
+        EroVector ero;
+        // SRP-ID of the last PCUpd applied to this LSP that has not yet been
+        // acknowledged by a PCRpt -- echoed once (then reset to 0) the next time
+        // reportLsp() sends a report for this PLSP-ID (RFC 8231 Section 7.2).
+        uint32_t lastAppliedSrpId = 0;
+    };
+    std::map<int, DelegatedLsp> delegatedLsps;
+
+    // Phase 3: RFC 8231 Section 5.2 state timeout -- how long this PCC waits, after
+    // the PCEP session is lost, for the PCE to come back before reverting every
+    // delegated LSP to local control (see Pcc.ned's doc comment and
+    // processStateTimeout()).
+    simtime_t stateTimeout;
+    cMessage *stateTimeoutTimer = nullptr;
+
+    // Phase 3: an optional back-reference to the co-located ~RsvpTe this Pcc's
+    // delegated LSPs actually belong to -- needed both to apply an incoming PCUpd
+    // (applyPceUpdate()) and to tell RsvpTe to fall back to local computation once
+    // stateTimeout expires (revertToLocalComputation()). Unlike ~RsvpTe's own
+    // pccModule reference (always resolved when computationMode is "pce"), this is
+    // only resolved when the "rsvpteModule" parameter is non-empty -- a plain
+    // stateless (Phase 1/2-only) deployment never sets it and never touches any of
+    // this phase's code.
+    ModuleRefByPar<RsvpTe> rsvptemod;
+
     // configuration
     std::string pceAddressStr;
     int pcePort = -1;
@@ -105,15 +148,29 @@ class INET_API Pcc : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void sendOpen();
     virtual void sendKeepalive();
     virtual void sendPcreq(const PceRequest& request);
+    virtual void sendPcrpt(int plspId, uint32_t srpId, bool up, const Ipv4Address& srcAddress,
+            const Ipv4Address& destAddress, double bandwidth, int setupPriority,
+            uint32_t includeAny, uint32_t excludeAny, const EroVector& ero);
 
     virtual void processPcepPacketFromTcp(const Ptr<const PcepMessage>& pcepMsg);
     virtual void processOPEN(const Ptr<const PcepMessage>& pcepMsg);
     virtual void processKEEPALIVE();
     virtual void processPCREP(const Ptr<const PcepMessage>& pcepMsg);
+    virtual void processPCUPD(const Ptr<const PcepMessage>& pcepMsg);
 
     virtual void processKeepAliveSendTimeout(cMessage *msg);
     virtual void processSessionHoldTimeout(cMessage *msg);
     virtual void processReconnectTimeout(cMessage *msg);
+    // Phase 3: RFC 8231 Section 5.2 -- the PCEP session has been down for a full
+    // stateTimeout with delegated LSPs still outstanding; tell ~RsvpTe to fall back
+    // to local computation for every one of them (see revertToLocalComputation()'s
+    // doc comment on RsvpTe for what "fall back" means precisely).
+    virtual void processStateTimeout(cMessage *msg);
+    // Starts stateTimeoutTimer, but only if there is at least one delegated LSP to
+    // fall back for and the timer isn't already running (called from both
+    // handleTcpConnectionDown() and processSessionHoldTimeout() -- the two ways an
+    // OPERATIONAL session can be lost).
+    virtual void armStateTimeoutIfNeeded();
 
     virtual void handleTcpConnectionDown(TcpSocket *socket);
 
@@ -148,6 +205,23 @@ class INET_API Pcc : public RoutingProtocolBase, public TcpSocket::BufferingCall
     // nothing but a possible extra PCReq if both retry after the first is consumed.
     virtual PceComputationResult requestPathComputation(const Ipv4Address& srcAddress, const Ipv4Address& destAddress,
             double bandwidth, int setupPriority, uint32_t includeAny, uint32_t excludeAny, EroVector& outEro);
+
+    // Phase 3 (RFC 8231 Section 6.1): called by ~RsvpTe whenever a delegated ingress
+    // LSP it manages comes up (up=true, a real ERO), changes route via an internal
+    // make-before-break re-route or an applied PCUpd (up=true again, same PLSP-ID,
+    // new ERO), or is torn down (up=false, ero ignored). Builds and, if the PCEP
+    // session is currently OPERATIONAL, sends a PCRpt -- echoing (once) the SRP-ID of
+    // the last PCUpd applied to this PLSP-ID, if any (see DelegatedLsp::lastAppliedSrpId).
+    // If the session is NOT operational, the report is simply recorded locally and
+    // not sent: RFC 8231's full State Synchronization Sequence (Section 5.6) -- which
+    // would resend this and every other delegated LSP's state once the session comes
+    // back up -- is out of scope for this phase (a documented simplification).
+    // srcAddress/destAddress/bandwidth/setupPriority/includeAny/excludeAny are the
+    // same CSPF inputs ~Pce::reoptimizeDelegatedLsp() needs later; see PcepPcrpt's
+    // own doc comment for why they ride along on every report rather than being
+    // looked up separately.
+    virtual void reportLsp(int plspId, bool up, const Ipv4Address& srcAddress, const Ipv4Address& destAddress,
+            double bandwidth, int setupPriority, uint32_t includeAny, uint32_t excludeAny, const EroVector& ero);
 
   public:
     Pcc();

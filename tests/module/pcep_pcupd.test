@@ -1,0 +1,432 @@
+%description:
+Regression test for stateful PCEP delegation and PCE-initiated update (RFC 8231 Section
+6.1/6.2, Workstream F4 Phase 3, RSVP-MBB mode): a ~RsvpTe ingress delegates a running LSP to
+a remote ~Pce (PCRpt), the PCE later recomputes that LSP's path (a ~ScenarioManager
+"pce-reoptimize" command -- see ~Pce's own doc comment for why this, not a TED-change-
+triggered version, was chosen for testability) and finds a strictly necessary alternate route,
+sends a PCUpd, and the PCC applies it via make-before-break using the PCE-supplied ERO
+DIRECTLY (no fresh CSPF/PCReq round-trip) -- reusing the exact same ~RsvpTe::createPath()/
+createIngressPSB() machinery Workstream C7's own reoptimizeInterval trigger already exercises
+(see the sibling rsvpte_mbb.test), just PCE-driven instead of internally triggered.
+
+Same ad hoc diamond + real end-to-end hosts as rsvpte_mbb.test: host1 -- LSR1 -> {LSR2 (600
+kbps), LSR3 (10 Mbps)} -> LSR4 -- host4, with LSR1.classifier statically FEC-binding host4's
+traffic to lspid 100 (the tunnel's ORIGINAL Lsp_Id) -- unlike rsvpte_mbb.test's own scenario,
+LSR2 is never shut down here: both branches are available and healthy for this test's entire
+run, and "reoptimizeInterval" is left at its default (0, off), so ~RsvpTe's OWN internal
+make-before-break trigger (reactive pathProblem() or periodic reoptimization) never fires --
+the ONLY thing that ever reroutes tunnel 1 in this test is the PCE-initiated PCUpd. LSR1 also
+runs a ~Pcc (app[0]), LSR4 a ~Pce (app[0]), exactly as in the sibling pcep_pcreq.test (Phase 2)
+-- see that test's own addressing/PCEP-startup-lag notes, which apply identically here.
+
+Scenario:
+  1. At t=0, tunnel 1 (lspid 100, 50 kbps, permanent, computeEro=true, computationMode="pce",
+     delegate=true) is configured from the static traffic.xml. Exactly like pcep_pcreq.test,
+     its first createIngressPSB() attempt(s) legitimately fail until the PCEP session comes up
+     (~3-5s in, per that test's own TCP-SYN-retransmit-lag note) and the PCRep with a real ERO
+     arrives; both branches being equally free, the PCE picks the plain-cheapest LSR2 branch.
+     Once the ingress label is installed, ~RsvpTe reports this delegated LSP to the PCE (PCRpt,
+     assigning it PLSP-ID 1 -- the first and only delegated LSP in this run).
+  2. At t=7s (well after tunnel 1 is fully established and its reservation has flooded to
+     LSR4's own TED too -- see pcep_pcreq.test's identical margin/lag rationale for its own
+     second tunnel), a scenario add-session brings up tunnel 2 (lspid 200, 520 kbps,
+     permanent, an EXPLICIT hardwired route via the LSR2 branch -- deliberately NOT
+     computeEro'd/PCE-computed, so it never touches the PCE or ~RsvpTe's own CSPF at all, just
+     a plain, independently-signaled admission request). Combined with tunnel 1's own 50 kbps,
+     the LSR2 branch now carries 570 of its 600 kbps capacity -- only 30 kbps free, no longer
+     enough for a hypothetical 50 kbps request. Critically, tunnel 2's admission succeeding
+     does NOT touch tunnel 1's already-established reservation in any way (CAC only ever
+     blocks NEW requests, it does not preempt or otherwise disturb an existing one) -- so
+     tunnel 1 keeps flowing over the LSR2 branch completely undisturbed by this step, and no
+     PathErr/local reroute trigger of any kind fires for it.
+  3. At t=9s (2s margin for tunnel 2's reservation to flood to LSR4's TED, mirroring
+     pcep_pcreq.test's own convergence-lag lesson), a "pce-reoptimize" ~ScenarioManager
+     command names PLSP-ID 1 specifically (NOT "all": tunnel 2's hand-configured route is
+     ALSO delegated/reported here, since "delegate" applies at the ~RsvpTe module level to
+     every ingress path regardless of whether that particular path's own route came from
+     CSPF/the PCE or an explicit XML <route> -- reoptimizing "all" would legitimately also
+     migrate tunnel 2 off the now-crowded LSR2 branch, which is real, correct behavior, but
+     would only muddy this test's narrower assertions below; the plspid="1" form is exercised
+     instead, and is exactly as real a code path as "all"). Re-running CSPF for PLSP-ID 1 with
+     its original inputs (50 kbps) now finds the LSR2 branch
+     infeasible (only 30 kbps free) and returns the LSR3 branch instead (10 Mbps, ample) --
+     a DIFFERENT ERO than the one currently in use, so the PCE sends a PCUpd (srpId=1, the
+     first and only one this run). The PCC applies it: ~RsvpTe::applyPceUpdate() signals a
+     fresh replacement Lsp_Id (201 -- see maxLspId's own doc comment: it is bumped past every
+     XML-configured lspid seen, i.e. past 200, before this event) using the PCE-supplied ERO
+     DIRECTLY (verified below by a structural %not-contains: since the ERO handed to
+     createIngressPSB() for lspid 201 is already a full strict route, its
+     "ERO.empty() || allLoose" CSPF/PCE-delegation guard is never true for it, so neither a
+     fresh "PCReq sent to PCE" nor a "PCE computed ERO for session (..., lspid=201)" line is
+     ever produced for this specific replacement -- structurally impossible given the code,
+     not just something this particular run happens not to trigger). Once lspid 201's ingress
+     label is installed, the classifier's FEC entry (originally bound to lspid 100) is rebound
+     to it -- the actual traffic cutover -- and lspid 100 is torn down. ~RsvpTe then reports
+     PLSP-ID 1's new state to the PCE again (PCRpt, echoing srpId=1, the PCUpd it
+     acknowledges).
+
+Asserted:
+1. The PCEP session reaches OPERATIONAL, tunnel 1 establishes over the LSR2 branch, and this
+   delegated LSP is reported to the PCE (PCRpt) -- all before tunnel 2 ever arrives (ordering
+   regex).
+2. The PCE's reoptimization actually recomputes PLSP-ID 1 and finds a different (LSR3-branch)
+   route, and sends a PCUpd for it; the PCC receives it and applies it via make-before-break,
+   ending with the cutover/rebind and a new PCRpt echoing the PCUpd's srpId.
+3. No fresh CSPF/PCReq round-trip happened for the replacement lspid (201) -- the PCE-supplied
+   ERO was used directly (structural %not-contains, see point 3 in the scenario walkthrough
+   above).
+4. Traffic keeps flowing end to end, strongly (not just nonzero), across the whole run
+   including the cutover (packetReceived:count postrun-scalar check, same idiom as
+   rsvpte_mbb.test/ldp_ipv6_fec.test).
+5. Standard undisposed-object postrun guard.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: PcepPcupdDiamond.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.node.mpls.RsvpMplsRouter;
+import inet.node.inet.StandardHost;
+
+//
+// Ad hoc diamond, with real end-to-end hosts: host1 -- LSR1 -> {LSR2 (600 kbps), LSR3 (10
+// Mbps)} -> LSR4 -- host4. Identical shape/metrics/bandwidths to rsvpte_mbb.test's
+// RsvpteMbbDiamond; LSR1/LSR4 additionally run a PCEP Pcc/Pce pair as app[0] (see test.ini),
+// exactly like pcep_pcreq.test's own PcepCspfDiamond.
+//
+network PcepPcupdDiamond
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    submodules:
+        host1: StandardHost {
+            @display("p=50,200");
+            gates: pppg[1];
+        }
+        host4: StandardHost {
+            @display("p=650,200");
+            gates: pppg[1];
+        }
+        LSR1: RsvpMplsRouter {
+            @display("p=200,200");
+            gates: pppg[3];
+        }
+        LSR2: RsvpMplsRouter {
+            @display("p=400,100");
+            gates: pppg[2];
+        }
+        LSR3: RsvpMplsRouter {
+            @display("p=400,300");
+            gates: pppg[2];
+        }
+        LSR4: RsvpMplsRouter {
+            @display("p=600,200");
+            gates: pppg[3];
+        }
+        scenarioManager: ScenarioManager {
+            @display("p=100,100;is=s");
+        }
+    connections:
+        host1.pppg[0] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR1.pppg[0];
+        LSR1.pppg[1] <--> { delay = 1ms; datarate = 600kbps; } <--> LSR2.pppg[0];
+        LSR2.pppg[1] <--> { delay = 1ms; datarate = 600kbps; } <--> LSR4.pppg[0];
+        LSR1.pppg[2] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR3.pppg[0];
+        LSR3.pppg[1] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR4.pppg[1];
+        LSR4.pppg[2] <--> { delay = 1ms; datarate = 10Mbps; } <--> host4.pppg[0];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Addressing (identical to rsvpte_mbb.test): host1.ppp0=10.0.0.1 <-> LSR1.ppp0=10.0.0.2
+%#             LSR1.ppp1=10.0.1.1 <-> LSR2.ppp0=10.0.1.2 (600k branch, hop A, metric 1)
+%#             LSR2.ppp1=10.0.2.1 <-> LSR4.ppp0=10.0.2.2 (600k branch, hop B, metric 1)
+%#             LSR1.ppp2=10.0.3.1 <-> LSR3.ppp0=10.0.3.2 (10M branch, hop A, metric 5)
+%#             LSR3.ppp1=10.0.4.1 <-> LSR4.ppp1=10.0.4.2 (10M branch, hop B, metric 5)
+%#             LSR4.ppp2=10.0.5.1 <-> host4.ppp0=10.0.5.2
+%# routerId="auto" picks the HIGHEST interface address per LSR:
+%#   LSR1 = max(10.0.0.2, 10.0.1.1, 10.0.3.1) = 10.0.3.1
+%#   LSR2 = max(10.0.1.2, 10.0.2.1) = 10.0.2.1
+%#   LSR3 = max(10.0.3.2, 10.0.4.1) = 10.0.4.1
+%#   LSR4 = max(10.0.2.2, 10.0.4.2, 10.0.5.1) = 10.0.5.1
+%# The PCEP session connects LSR1's Pcc to LSR4's routerId (10.0.5.1), over the genuinely
+%# multi-hop route ~LinkStateRouting installs -- same rationale as pcep_pcreq.test.
+%file: LSR1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.1.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp2	inet_addr: 10.0.3.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+224.0.0.0	*	255.0.0.0	H	0	ppp2
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.2.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.3.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+name: ppp1	inet_addr: 10.0.4.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR4.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.4.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+name: ppp2	inet_addr: 10.0.5.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+224.0.0.0	*	255.0.0.0	H	0	ppp2
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: host1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.0.2	*		255.255.255.255	H	0	ppp0
+default:	10.0.0.2	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: host4.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.5.2	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.5.1	*		255.255.255.255	H	0	ppp0
+default:	10.0.5.1	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# fecid 1 is statically bound to lspid 100 (tunnel 1's ORIGINAL Lsp_Id); the whole point of
+%# this test is that the PCUpd-driven make-before-break cutover rebinds it to the fresh
+%# replacement Lsp_Id (201) itself -- nothing here ever references 201 directly.
+%file: LSR1_fec.xml
+<?xml version="1.0"?>
+<fectable>
+	<fecentry>
+		<id>1</id>
+		<destination>10.0.5.2</destination>
+		<tunnel_id>1</tunnel_id>
+		<endpoint>LSR4%routerId</endpoint>
+		<lspid>100</lspid>
+	</fecentry>
+</fectable>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1_rsvp.xml
+<?xml version="1.0"?>
+<sessions>
+	<session>
+		<endpoint>LSR4%routerId</endpoint>
+		<tunnel_id>1</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>100</lspid>
+				<bandwidth>50000</bandwidth>
+				<permanent>true</permanent>
+			</path>
+		</paths>
+	</session>
+</sessions>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<?xml version="1.0"?>
+<scenario>
+	<at t="7s">
+		<add-session module="LSR1.rsvp">
+			<endpoint>LSR4%routerId</endpoint>
+			<tunnel_id>2</tunnel_id>
+
+			<paths>
+				<path>
+					<lspid>200</lspid>
+					<bandwidth>520000</bandwidth>
+					<permanent>true</permanent>
+					<route>
+						<node>LSR2%routerId</node>
+						<node>LSR4%routerId</node>
+					</route>
+				</path>
+			</paths>
+		</add-session>
+	</at>
+	<at t="9s">
+		<pce-reoptimize module="LSR4.app[0]" plspid="1"/>
+	</at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = .;../../../../src
+network = PcepPcupdDiamond
+sim-time-limit = 14s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+%# rsvp modules at detail (to capture the CSPF/label-install/reporting EV_DETAIL lines) and
+%# the classifier + PCEP apps at info; everything else off, same rationale/convention as
+%# rsvpte_mbb.test/pcep_pcreq.test. Per-module cmdenv-log-level overrides are matched in FILE
+%# ORDER (first matching pattern wins), so specific overrides MUST be declared before the
+%# general catch-all below.
+**.LSR1.rsvp.cmdenv-log-level = detail
+**.LSR4.rsvp.cmdenv-log-level = detail
+**.LSR1.classifier.cmdenv-log-level = info
+**.LSR1.app[0].cmdenv-log-level = info
+**.LSR4.app[0].cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.02s
+**.host1.app[0].destAddresses = "10.0.5.2"
+
+**.host4.numApps = 1
+**.host4.app[0].typename = "UdpSink"
+**.host4.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "host1.rt"
+**.host4.ipv4.routingTable.routingFile = "host4.rt"
+**.LSR1.ipv4.routingTable.routingFile = "LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "LSR4.rt"
+
+**.LSR1.classifier.config = xmldoc("LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("LSR1_rsvp.xml")
+
+**.LSR1.rsvp.computeEro = true
+**.LSR1.rsvp.computationMode = "pce"
+**.LSR1.rsvp.pccModule = "^.app[0]"
+**.LSR1.rsvp.delegate = true
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+%# PCEP: LSR1 (ingress) runs the Pcc, LSR4 (two hops away, genuinely remote) runs the Pce,
+%# wired to LSR4's own (fully converged) Ted -- exactly as in pcep_pcreq.test.
+**.LSR1.hasTcp = true
+**.LSR1.numApps = 1
+**.LSR1.app[0].typename = "Pcc"
+**.LSR1.app[0].pceAddress = "10.0.5.1"
+**.LSR1.app[0].localAddress = "10.0.3.1"
+**.LSR1.app[0].rsvpteModule = "^.rsvp"
+**.LSR1.app[0].keepaliveTime = 2s
+**.LSR1.app[0].deadTimer = 10s
+**.LSR1.app[0].reconnectInterval = 1s
+
+**.LSR4.hasTcp = true
+**.LSR4.numApps = 1
+**.LSR4.app[0].typename = "Pce"
+**.LSR4.app[0].tedModule = "^.ted"
+**.LSR4.app[0].keepaliveTime = 2s
+**.LSR4.app[0].deadTimer = 10s
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.*.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 1: PCEP session up, tunnel 1 established over the LSR2 branch (matching
+%# rsvpte_cspf.test-style CSPF results on the identical topology's metrics), and this
+%# delegated LSP reported to the PCE -- all before tunnel 2 (added at t=7s) ever shows up in
+%# the traffic database (ordering regex; %contains-regex matches with re.DOTALL, so a lone
+%# ".*" filler line can absorb any number of intervening lines, same convention as
+%# pcep_pcreq.test's own ordering regex).
+%contains-regex: stdout
+PCEP session with .* is now OPERATIONAL
+.*
+PCE computed ERO for session \(dest=10.0.5.1, lspid=100\): 10.0.2.1, 10.0.5.1
+.*
+reporting delegated LSP UP to PCE \(plspId=1, lspid=100, ERO 10.0.2.1, 10.0.5.1\)
+PCRpt sent to PCE \(plspId=1, srpId=0, up=1, ERO with 2 hop\(s\)\)
+.*
+adding new session into database
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 2: the PCE receives and remembers the PCRpt.
+%contains-regex: stdout
+PCRpt received from .* \(plspId=1, srpId=0, delegate=1, up=1, ERO with 2 hop\(s\)\)
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 2 (continued): the pce-reoptimize command (t=9s) recomputes PLSP-ID 1, finds the
+%# LSR2 branch no longer feasible (30 kbps free < the 50 kbps tunnel 1 needs, after tunnel 2's
+%# 520 kbps admission alongside tunnel 1's own 50 kbps) and the LSR3 branch instead, and sends
+%# a PCUpd for it.
+%contains: stdout
+pce-reoptimize: found a better path for PLSP-ID 1 (10.0.4.1, 10.0.5.1), sending PCUpd
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+PCUpd sent to 10.0.3.1 (srpId=1, plspId=1, ERO with 2 hop(s))
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+PCUpd received from PCE (srpId=1, plspId=1, ERO with 2 hop(s))
+%#--------------------------------------------------------------------------------------------------------------
+%# The PCC applies it: a fresh replacement Lsp_Id (201) signaled via make-before-break, using
+%# the PCE-supplied ERO directly.
+%contains: stdout
+PCUpd received for PLSP-ID 1: re-routing lspid=100 via make-before-break with the PCE-supplied ERO (10.0.4.1, 10.0.5.1)
+%#--------------------------------------------------------------------------------------------------------------
+%# Cutover completes (lspid 201 up, classifier rebound from lspid 100, lspid 100 torn down) --
+%# ordering regex, same crux-assertion shape as rsvpte_mbb.test's own MBB cutover check.
+%contains-regex: stdout
+installing label for 201 outLabel=.*
+make-before-break cutover: lspid=201 is up, switching traffic away from lspid=100.*
+make-before-break cutover: rebinding fec id 1 from lspid 100 to lspid 201.*
+sending PathTear to .*
+%#--------------------------------------------------------------------------------------------------------------
+%# The cutover is reported back to the PCE, echoing the PCUpd's own srpId (1) -- RFC 8231
+%# Section 7.2's correlator round trip.
+%contains: stdout
+reporting delegated LSP UP to PCE (plspId=1, lspid=201, ERO 10.0.4.1, 10.0.5.1)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+PCRpt sent to PCE (plspId=1, srpId=1, up=1, ERO with 2 hop(s))
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 3: no fresh CSPF/PCReq round-trip happened for the replacement lspid (201) -- the
+%# PCE-supplied ERO was used directly (see the scenario walkthrough's point 3 above for why
+%# this is structurally guaranteed, not incidental).
+%not-contains: stdout
+PCE computed ERO for session (dest=10.0.5.1, lspid=201)
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 4: strong (not just nonzero) end-to-end delivery across the whole run, including
+%# the cutover -- same postrun-scalar idiom as rsvpte_mbb.test.
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 500 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -7,7 +7,9 @@
 #include "inet/networklayer/pcep/Pce.h"
 
 #include <algorithm>
+#include <cstdlib>
 
+#include "inet/networklayer/rsvpte/Utils.h"
 #include "inet/networklayer/ted/Ted.h"
 
 namespace inet {
@@ -148,6 +150,14 @@ int Pce::findSession(TcpSocket *socket)
     return -1;
 }
 
+int Pce::findSessionByAddress(const L3Address& pccAddress)
+{
+    for (size_t i = 0; i < sessions.size(); ++i)
+        if (sessions[i].pccAddress == pccAddress)
+            return (int)i;
+    return -1;
+}
+
 void Pce::sendToSession(int i, Packet *pk)
 {
     numSent++;
@@ -185,6 +195,22 @@ void Pce::sendKeepalive(int i)
 
     sendToSession(i, pk);
     EV_INFO << "Keepalive sent to " << sessions[i].pccAddress << "\n";
+}
+
+void Pce::sendPcupd(int i, uint32_t srpId, int plspId, const EroVector& ero)
+{
+    Packet *pk = new Packet("Pcep-PCUpd");
+    const auto& upd = makeShared<PcepPcupd>();
+    upd->setType(PCEP_PCUPD);
+    upd->setSrpId(srpId);
+    upd->setPlspId(plspId);
+    upd->setEro(ero);
+    upd->setChunkLength(pcepPcupdMessageBytes(ero.size()));
+    pk->insertAtBack(upd);
+
+    sendToSession(i, pk);
+    EV_INFO << "PCUpd sent to " << sessions[i].pccAddress << " (srpId=" << srpId << ", plspId=" << plspId
+            << ", ERO with " << ero.size() << " hop(s))\n";
 }
 
 void Pce::socketAvailable(TcpSocket *listenerSocket, TcpAvailableInfo *availableInfo)
@@ -238,6 +264,21 @@ void Pce::handleTcpConnectionDown(TcpSocket *socket)
                 emit(sessionDownSignal, (long)sessions[i].sid);
             cancelAndDelete(sessions[i].keepAliveSendTimer);
             cancelAndDelete(sessions[i].sessionHoldTimer);
+
+            // Phase 3: forget every LSP this now-dead PCC had delegated to us -- a
+            // stale entry naming an unreachable session would otherwise linger
+            // (harmlessly but confusingly) until a later pce-reoptimize command
+            // discovers, only then, that it has nowhere to send a PCUpd (see
+            // reoptimizeDelegatedLsp()'s own OPERATIONAL check). No RFC 8231
+            // Section 5.6 State Synchronization is attempted if this PCC
+            // reconnects later -- a documented simplification for this phase.
+            for (auto it = delegatedLsps.begin(); it != delegatedLsps.end(); ) {
+                if (it->second.pccAddress == sessions[i].pccAddress)
+                    it = delegatedLsps.erase(it);
+                else
+                    ++it;
+            }
+
             EV_INFO << "PCEP session with " << sessions[i].pccAddress << " went down\n";
             sessions.erase(sessions.begin() + i);
             break;
@@ -285,6 +326,10 @@ void Pce::processPcepPacketFromTcp(int i, const Ptr<const PcepMessage>& pcepMsg)
 
         case PCEP_PCREQ:
             processPCREQ(i, pcepMsg);
+            break;
+
+        case PCEP_PCRPT:
+            processPCRPT(i, pcepMsg);
             break;
 
         default:
@@ -411,6 +456,113 @@ void Pce::processPCREQ(int i, const Ptr<const PcepMessage>& pcepMsg)
 
     pk->insertAtBack(rep);
     sendToSession(i, pk);
+}
+
+void Pce::processPCRPT(int i, const Ptr<const PcepMessage>& pcepMsg)
+{
+    const auto& rpt = CHK(dynamicPtrCast<const PcepPcrpt>(pcepMsg));
+
+    EV_INFO << "PCRpt received from " << sessions[i].pccAddress << " (plspId=" << rpt->getPlspId()
+            << ", srpId=" << rpt->getSrpId() << ", delegate=" << rpt->getDelegate()
+            << ", up=" << rpt->getUp() << ", ERO with " << rpt->getEro().size() << " hop(s))" << endl;
+
+    if (!rpt->getUp()) {
+        delegatedLsps.erase(rpt->getPlspId());
+        EV_INFO << "delegated LSP PLSP-ID " << rpt->getPlspId() << " reported DOWN, forgetting it" << endl;
+        return;
+    }
+
+    DelegatedLsp& lsp = delegatedLsps[rpt->getPlspId()]; // creates the entry the first time this PLSP-ID is seen
+    lsp.plspId = rpt->getPlspId();
+    lsp.pccAddress = sessions[i].pccAddress;
+    lsp.srcAddress = rpt->getSrcAddress();
+    lsp.destAddress = rpt->getDstAddress();
+    lsp.bandwidth = rpt->getBandwidth();
+    lsp.setupPriority = rpt->getSetupPriority();
+    lsp.includeAny = rpt->getIncludeAny();
+    lsp.excludeAny = rpt->getExcludeAny();
+    lsp.currentEro = rpt->getEro();
+}
+
+void Pce::reoptimizeDelegatedLsp(int plspId)
+{
+    auto it = delegatedLsps.find(plspId);
+    if (it == delegatedLsps.end()) {
+        EV_WARN << "pce-reoptimize: no delegated LSP with PLSP-ID " << plspId << ", ignoring" << endl;
+        return;
+    }
+    DelegatedLsp& lsp = it->second;
+
+    // Same CSPF call processPCREQ() makes (Workstream F4 Phase 2), rooted at this
+    // LSP's own source, using the CSPF inputs the owning PCC's PCRpt carried along
+    // (see PcepPcrpt's doc comment for why those ride on every report).
+    Ipv4AddressVector dest;
+    dest.push_back(lsp.destAddress);
+    Ipv4AddressVector cspfPath = tedmod->calculateShortestPath(lsp.srcAddress, dest, tedmod->getLinks(),
+            lsp.bandwidth, lsp.setupPriority, lsp.includeAny, lsp.excludeAny);
+
+    if (cspfPath.empty()) {
+        EV_INFO << "pce-reoptimize: no feasible path for PLSP-ID " << plspId << ", leaving it unchanged" << endl;
+        return;
+    }
+
+    EroVector newEro;
+    for (unsigned int k = 1; k < cspfPath.size(); k++) {
+        EroObj hop;
+        hop.L = false;
+        hop.node = cspfPath[k];
+        newEro.push_back(hop);
+    }
+
+    if (newEro.size() == lsp.currentEro.size()
+            && std::equal(newEro.begin(), newEro.end(), lsp.currentEro.begin(),
+                    [](const EroObj& a, const EroObj& b) { return a.L == b.L && a.node == b.node; })) {
+        EV_INFO << "pce-reoptimize: recomputed path for PLSP-ID " << plspId << " is unchanged, no PCUpd needed" << endl;
+        return;
+    }
+
+    int i = findSessionByAddress(lsp.pccAddress);
+    if (i == -1 || sessions[i].state != PCEP_OPERATIONAL) {
+        EV_WARN << "pce-reoptimize: no OPERATIONAL PCEP session to " << lsp.pccAddress
+                << " for PLSP-ID " << plspId << ", cannot send PCUpd" << endl;
+        return;
+    }
+
+    EV_INFO << "pce-reoptimize: found a better path for PLSP-ID " << plspId << " (" << vectorToString(newEro)
+            << "), sending PCUpd" << endl;
+
+    uint32_t srpId = ++srpIdCounter;
+    // Optimistic update: a real PCE might wait for the PCC's next PCRpt to actually
+    // confirm the cutover before considering this LSP's "current" route changed;
+    // this phase's scope does not implement that extra round trip (see class doc
+    // comment's State Synchronization simplification note).
+    lsp.currentEro = newEro;
+    sendPcupd(i, srpId, plspId, newEro);
+}
+
+void Pce::processCommand(const cXMLElement& node)
+{
+    // Called cross-module from ~ScenarioManager -- mirrors ~RsvpTe::addSession()/
+    // delSession()'s identical, pre-existing Enter_Method precedent for the same
+    // caller.
+    Enter_Method("processCommand");
+
+    if (strcmp(node.getTagName(), "pce-reoptimize") != 0)
+        throw cRuntimeError("Unknown scenario command '%s'", node.getTagName());
+
+    const char *plspidAttr = node.getAttribute("plspid");
+    if (!plspidAttr)
+        throw cRuntimeError("<pce-reoptimize> requires a 'plspid' attribute (\"all\" or a PLSP-ID)");
+
+    if (!strcmp(plspidAttr, "all")) {
+        std::vector<int> plspIds;
+        for (auto& entry : delegatedLsps)
+            plspIds.push_back(entry.first);
+        for (int plspId : plspIds)
+            reoptimizeDelegatedLsp(plspId);
+    }
+    else
+        reoptimizeDelegatedLsp(atoi(plspidAttr));
 }
 
 void Pce::processKeepAliveSendTimeout(cMessage *msg)

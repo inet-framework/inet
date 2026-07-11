@@ -29,6 +29,17 @@ import inet.applications.contract.IApp;
 // session); instead, losing the session (TCP failure or DeadTimer expiry) schedules
 // an explicit reconnection attempt after ~reconnectInterval.
 //
+// Phase 3 (RFC 8231 stateful delegation, Workstream F4): when ~RsvpTe's own
+// "delegate" parameter is on, this Pcc reports every delegated ingress LSP RsvpTe
+// manages to the PCE via reportLsp() (a PCRpt), and applies an incoming PCUpd by
+// calling back into RsvpTe (via "rsvpteModule") to make-before-break re-route the
+// named LSP onto the PCE-supplied ERO. If the PCEP session is lost while LSPs are
+// still delegated, this Pcc waits ~stateTimeout (RFC 8231 Section 5.2) for the PCE
+// to come back before telling RsvpTe to fall back to local (non-PCE) path
+// computation for each of them -- see ~RsvpTe's own "delegate" parameter doc
+// comment for the full picture; a plain stateless (Phase 1/2-only) deployment never
+// sets "rsvpteModule" and never touches any of this.
+//
 simple Pcc extends SimpleModule like IApp
 {
     parameters:
@@ -39,6 +50,8 @@ simple Pcc extends SimpleModule like IApp
         double keepaliveTime @unit(s) = default(30s); // KeepAlive Time this PCC proposes in its Open (RFC 5440 Section 7.3); RFC-conventional default
         double deadTimer @unit(s) = default(120s); // DeadTimer this PCC proposes in its Open (RFC 5440 Section 7.3); RFC-conventional default is 4x keepaliveTime
         double reconnectInterval @unit(s) = default(5s); // delay before retrying the TCP connection after the session is lost (see class documentation)
+        string rsvpteModule = default(""); // Phase 3: module-path reference to the co-located ~RsvpTe this Pcc's delegated LSPs belong to (e.g. "^.rsvp"); "" (default) disables all Phase 3 behavior -- no PCUpd can be applied and stateTimeout fallback has nothing to act on
+        double stateTimeout @unit(s) = default(60s); // Phase 3 (RFC 8231 Section 5.2): how long this PCC waits, after the PCEP session is lost, for the PCE to come back before telling RsvpTe to fall back to local computation for every LSP still delegated at that point; only armed while at least one LSP is actually delegated
         @display("i=block/control");
         @signal[sessionUp](type=long); // emitted (with this session's local SID) whenever the PCEP session reaches OPERATIONAL
         @signal[sessionDown](type=long); // emitted (with this session's local SID) whenever an OPERATIONAL PCEP session goes down

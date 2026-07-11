@@ -69,6 +69,23 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         // replacement. Reset implicitly by this path's entry being erased once the
         // replacement's cutover completes (completeMakeBeforeBreakCutover()).
         int pendingReplacementLspId = -1;
+
+        // Phase 3 (RFC 8231 stateful delegation, Workstream F4): the PLSP-ID this path
+        // is known to the PCE by, assigned once (see reportLspUp()) the first time it is
+        // reported, and -1 until then (or if delegation is off/not applicable). Carried
+        // forward verbatim by every `newPath = *pit`-style copy this file already makes
+        // for a make-before-break replacement (both the internally-triggered kind and
+        // applyPceUpdate()'s PCE-driven kind) -- giving the replacement the SAME PLSP-ID
+        // as the path it replaces, for free, which is exactly the identity continuity RFC
+        // 8231 requires across a delegated LSP's re-routes.
+        int plspId = -1;
+
+        // Phase 3: set by revertToLocalComputation() once RFC 8231 Section 5.2's state
+        // timeout expires for this path's plspId -- from that point on, this path is
+        // never again delegated/reported to the PCE, and createIngressPSB() always uses
+        // LOCAL CSPF for it regardless of "computationMode" (there is no re-delegation/
+        // re-sync logic in this phase's scope; see RsvpTe.ned's "delegate" doc comment).
+        bool localFallback = false;
     };
 
     struct TrafficSession {
@@ -251,6 +268,14 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     // "local" (default, unchanged) or "pce" (delegate to a co-located ~Pcc, see
     // pccmod below). See RsvpTe.ned's doc comment for the full rationale.
     std::string computationMode = "local";
+    // Workstream F4 Phase 3 (RFC 8231 stateful delegation): only meaningful when
+    // computationMode is "pce" -- report every ingress LSP delegated that way to the
+    // PCE (PCRpt) and accept PCE-initiated updates for it (PCUpd), applied via
+    // make-before-break with the PCE-supplied ERO (see applyPceUpdate()). Default off
+    // keeps every Phase 1/2 deployment (and every shipped example/showcase) completely
+    // unaffected -- see RsvpTe.ned's doc comment for the full picture, including
+    // controller-death fallback (revertToLocalComputation()).
+    bool delegate = false;
     // C7: RFC 4736-lite periodic reoptimization -- every reoptimizeInterval, re-run CSPF for
     // every established ingress path and, if it finds a strictly cheaper route than the one
     // currently in use, make-before-break reroute onto it. 0 (default) disables the feature
@@ -284,6 +309,10 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     // operator-configured lspid is an explicit XML value; this counter is bumped past every
     // XML/add-session lspid seen so a generated replacement id never collides with one).
     int maxLspId = 0;
+
+    // Phase 3: monotonic counter for allocating fresh PLSP-IDs to delegated LSPs (see
+    // TrafficPath::plspId); scoped to this RsvpTe module, mirroring maxLspId above.
+    int maxPlspId = 0;
 
     // C7: single periodic self-message driving reoptimization; only allocated/scheduled
     // when reoptimizeInterval > 0.
@@ -437,6 +466,19 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual void considerReoptimization(const SessionObj& session, const SenderTemplateObj& sender);
     virtual void processREOPTIMIZE_TIMER(ReoptimizeTimerMsg *msg);
 
+    // Phase 3 (RFC 8231 stateful delegation): reports a delegated ingress path's
+    // current state to the co-located Pcc (pccmod->reportLsp()) -- a no-op unless
+    // "delegate" is on, computationMode is "pce", and this path hasn't already fallen
+    // back to local control (path.localFallback). Assigns path.plspId the first time
+    // it is called for a given path (see TrafficPath::plspId's doc comment for how
+    // that identity survives every later make-before-break re-route). Called from
+    // commitResv() the instant an ingress path's label is (re-)installed.
+    virtual void reportLspUp(const SessionObj& session, TrafficPath& path, const EroVector& ero);
+    // The teardown counterpart, called from delSession() for every path actually
+    // removed; a no-op under the same conditions as reportLspUp(), plus requiring
+    // path.plspId to already be assigned (nothing was ever reported otherwise).
+    virtual void reportLspDown(const SessionObj& session, TrafficPath& path);
+
     virtual void addSession(const cXMLElement& node);
     virtual void delSession(const cXMLElement& node);
 
@@ -447,6 +489,29 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual int getInLabel(const SessionObj& session, const SenderTemplateObj& sender);
 
   public:
+    // Phase 3 (RFC 8231 Section 6.2): called cross-module by the co-located ~Pcc
+    // (Enter_Method-guarded there, mirroring ~Pcc::requestPathComputation()'s own
+    // cross-module precedent) when a PCUpd arrives naming a PLSP-ID this RsvpTe has
+    // delegated. Finds the (session, path) currently using that plspId -- ignoring it
+    // (with a warning) if none is found, or if a make-before-break re-route is already
+    // in flight for it -- and make-before-break re-routes it using newEro DIRECTLY:
+    // the replacement TrafficPath's ERO is set to newEro itself (always a full strict
+    // route, like every ERO the PCE hands back), so createIngressPSB()'s
+    // "ERO.empty() || allLoose" guard is never true for it and no fresh CSPF/PCReq
+    // round-trip happens -- reusing createPath()/createIngressPSB() exactly as any
+    // other replacement path would, just with its route already decided.
+    virtual void applyPceUpdate(int plspId, const EroVector& newEro);
+
+    // Phase 3 (RFC 8231 Section 5.2): called cross-module by ~Pcc once its stateTimeout
+    // expires for a delegated LSP whose PCEP session never came back. Marks the
+    // (session, path) currently using this plspId as localFallback (so it is never
+    // delegated/reported again) and, unless a re-route is already in flight for it,
+    // immediately make-before-break re-routes it with its ERO cleared -- forcing
+    // createIngressPSB() to compute a fresh route via LOCAL CSPF (Ted::
+    // calculateShortestPath()) regardless of "computationMode", rather than waiting
+    // for some future, unrelated trigger to eventually notice the fallback flag.
+    virtual void revertToLocalComputation(int plspId);
+
     RsvpTe();
     virtual ~RsvpTe();
 

@@ -22,6 +22,8 @@ Register_Serializer(PcepOpen, PcepMessagesSerializer);
 Register_Serializer(PcepKeepalive, PcepMessagesSerializer);
 Register_Serializer(PcepPcreq, PcepMessagesSerializer);
 Register_Serializer(PcepPcrep, PcepMessagesSerializer);
+Register_Serializer(PcepPcrpt, PcepMessagesSerializer);
+Register_Serializer(PcepPcupd, PcepMessagesSerializer);
 
 // RFC 5440 Section 7.2/7.3: OPEN object identity (Object-Class=1, Object-Type=1)
 static const uint8_t PCEP_OBJ_CLASS_OPEN = 1;
@@ -40,6 +42,12 @@ static const uint8_t PCEP_OBJ_CLASS_LSPA = 9;
 static const uint8_t PCEP_OBJ_TYPE_LSPA = 1;
 static const uint8_t PCEP_OBJ_CLASS_RP = 2;
 static const uint8_t PCEP_OBJ_TYPE_RP = 1;
+
+// RFC 8231 Section 7 object identities used by PCRpt/PCUpd (Workstream F4 Phase 3)
+static const uint8_t PCEP_OBJ_CLASS_SRP = 33;
+static const uint8_t PCEP_OBJ_TYPE_SRP = 1;
+static const uint8_t PCEP_OBJ_CLASS_LSP = 32;
+static const uint8_t PCEP_OBJ_TYPE_LSP = 1;
 
 namespace {
 
@@ -208,6 +216,54 @@ void PcepMessagesSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             }
             break;
         }
+        case PCEP_PCRPT: {
+            const auto& rpt = staticPtrCast<const PcepPcrpt>(pcepMsg);
+            // SRP object (RFC 8231 Section 7.2)
+            writePcepObjectHeader(stream, PCEP_OBJ_CLASS_SRP, PCEP_OBJ_TYPE_SRP, PCEP_SRP_OBJECT_BYTES.get<B>());
+            stream.writeUint32Be(rpt->getSrpId());
+            // LSP object (RFC 8231 Section 7.3) -- model simplification, see
+            // PCEP_LSP_OBJECT_BYTES's doc comment: PLSP-ID and flags are separate,
+            // byte-aligned fields rather than the RFC's bit-packed 4-byte body.
+            writePcepObjectHeader(stream, PCEP_OBJ_CLASS_LSP, PCEP_OBJ_TYPE_LSP, PCEP_LSP_OBJECT_BYTES.get<B>());
+            stream.writeUint32Be(static_cast<uint32_t>(rpt->getPlspId()));
+            stream.writeByte((rpt->getDelegate() ? 0x1 : 0x0) | (rpt->getUp() ? 0x2 : 0x0));
+            stream.writeByte(0); // reserved
+            stream.writeByte(0); // reserved
+            stream.writeByte(0); // reserved
+            // END-POINTS/BANDWIDTH/LSPA (model simplification -- see PcepPcrpt's doc comment)
+            writePcepObjectHeader(stream, PCEP_OBJ_CLASS_ENDPOINTS, PCEP_OBJ_TYPE_ENDPOINTS_IPV4, PCEP_ENDPOINTS_OBJECT_BYTES.get<B>());
+            stream.writeIpv4Address(rpt->getSrcAddress());
+            stream.writeIpv4Address(rpt->getDstAddress());
+            writePcepObjectHeader(stream, PCEP_OBJ_CLASS_BANDWIDTH, PCEP_OBJ_TYPE_BANDWIDTH_REQUESTED, PCEP_BANDWIDTH_OBJECT_BYTES.get<B>());
+            stream.writeUint32Be(bitCast<uint32_t>(static_cast<float>(rpt->getBandwidth())));
+            writePcepObjectHeader(stream, PCEP_OBJ_CLASS_LSPA, PCEP_OBJ_TYPE_LSPA, PCEP_LSPA_OBJECT_BYTES.get<B>());
+            stream.writeUint32Be(rpt->getExcludeAny());
+            stream.writeUint32Be(rpt->getIncludeAny());
+            stream.writeByte(static_cast<uint8_t>(rpt->getSetupPriority()));
+            stream.writeByte(0); // holding priority: not modeled
+            stream.writeByte(0); // flags: not modeled
+            stream.writeByte(0); // reserved
+            // ERO object (RFC 5440 Section 7.9): only present while the LSP is up
+            if (rpt->getUp())
+                writePcepEro(stream, rpt->getEro());
+            break;
+        }
+        case PCEP_PCUPD: {
+            const auto& upd = staticPtrCast<const PcepPcupd>(pcepMsg);
+            // SRP object (RFC 8231 Section 7.2)
+            writePcepObjectHeader(stream, PCEP_OBJ_CLASS_SRP, PCEP_OBJ_TYPE_SRP, PCEP_SRP_OBJECT_BYTES.get<B>());
+            stream.writeUint32Be(upd->getSrpId());
+            // LSP object (RFC 8231 Section 7.3) -- see PCEP_LSP_OBJECT_BYTES's doc comment
+            writePcepObjectHeader(stream, PCEP_OBJ_CLASS_LSP, PCEP_OBJ_TYPE_LSP, PCEP_LSP_OBJECT_BYTES.get<B>());
+            stream.writeUint32Be(static_cast<uint32_t>(upd->getPlspId()));
+            stream.writeByte(0x1); // D always set: a PCUpd only ever targets an already-delegated LSP
+            stream.writeByte(0); // reserved
+            stream.writeByte(0); // reserved
+            stream.writeByte(0); // reserved
+            // ERO object (RFC 5440 Section 7.9): the new route to apply
+            writePcepEro(stream, upd->getEro());
+            break;
+        }
         default:
             throw cRuntimeError("PcepMessagesSerializer: cannot serialize unknown PCEP message type %d", pcepMsg->getType());
     }
@@ -282,6 +338,51 @@ const Ptr<Chunk> PcepMessagesSerializer::deserialize(MemoryInputStream& stream) 
                 rep->setEro(readPcepEro(stream));
             }
             pcepMsg = rep;
+            break;
+        }
+        case PCEP_PCRPT: {
+            auto rpt = makeShared<PcepPcrpt>();
+            readPcepObjectHeader(stream); // SRP, assumed
+            rpt->setSrpId(stream.readUint32Be());
+            readPcepObjectHeader(stream); // LSP, assumed
+            rpt->setPlspId(static_cast<int>(stream.readUint32Be()));
+            uint8_t lspFlags = stream.readByte();
+            rpt->setDelegate((lspFlags & 0x1) != 0);
+            rpt->setUp((lspFlags & 0x2) != 0);
+            stream.readByte(); // reserved
+            stream.readByte(); // reserved
+            stream.readByte(); // reserved
+            readPcepObjectHeader(stream); // END-POINTS, assumed
+            rpt->setSrcAddress(stream.readIpv4Address());
+            rpt->setDstAddress(stream.readIpv4Address());
+            readPcepObjectHeader(stream); // BANDWIDTH, assumed
+            rpt->setBandwidth(static_cast<double>(bitCast<float>(stream.readUint32Be())));
+            readPcepObjectHeader(stream); // LSPA, assumed
+            rpt->setExcludeAny(stream.readUint32Be());
+            rpt->setIncludeAny(stream.readUint32Be());
+            rpt->setSetupPriority(stream.readByte());
+            stream.readByte(); // holding priority: not modeled
+            stream.readByte(); // flags: not modeled
+            stream.readByte(); // reserved
+            if (rpt->getUp())
+                rpt->setEro(readPcepEro(stream));
+            else
+                rpt->setEro(EroVector());
+            pcepMsg = rpt;
+            break;
+        }
+        case PCEP_PCUPD: {
+            auto upd = makeShared<PcepPcupd>();
+            readPcepObjectHeader(stream); // SRP, assumed
+            upd->setSrpId(stream.readUint32Be());
+            readPcepObjectHeader(stream); // LSP, assumed
+            upd->setPlspId(static_cast<int>(stream.readUint32Be()));
+            stream.readByte(); // flags: D assumed set, not otherwise modeled
+            stream.readByte(); // reserved
+            stream.readByte(); // reserved
+            stream.readByte(); // reserved
+            upd->setEro(readPcepEro(stream));
+            pcepMsg = upd;
             break;
         }
         default: {

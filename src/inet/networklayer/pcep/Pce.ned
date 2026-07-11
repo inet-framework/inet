@@ -50,6 +50,32 @@ import inet.applications.contract.IApp;
 // failure or DeadTimer expiry), its entry is discarded outright; a reconnecting PCC
 // is handled entirely afresh via a new incoming TCP connection.
 //
+// Phase 3 (RFC 8231 stateful delegation, Workstream F4): a PCC reports every LSP it
+// delegates control of via a PCRpt (processPCRPT()); this Pce remembers each one
+// (keyed by PLSP-ID, see the C++ class's DelegatedLsp) together with the CSPF
+// inputs (source/dest/bandwidth/priority/affinity) it needs to recompute that LSP's
+// path later. Reoptimization is triggered by an operator/~ScenarioManager
+// "pce-reoptimize" command (see processCommand()) rather than automatically on
+// every TED change -- a TED-change-triggered version was considered (per this
+// workstream's plan) but rejected as harder to make deterministic in a module test
+// (it would fire on an unpredictable number of intermediate/partial TED updates as
+// LinkStateRouting floods a change through the network); an explicit, operator-timed
+// command is both simpler to implement and reliably testable. The command names a
+// PLSP-ID directly, or "all" to reoptimize every currently delegated LSP:
+//
+// <pre>
+// <pce-reoptimize module="LSR4.app[0]" plspid="all"/>
+// <pce-reoptimize module="LSR4.app[0]" plspid="100"/>
+// </pre>
+//
+// Reoptimizing an LSP re-runs the identical CSPF call processPCREQ() uses
+// (Ted::calculateShortestPath(), rooted at that LSP's own source) and, only if the
+// result differs from the route that LSP is currently known to be using, sends a
+// PCUpd carrying the new ERO to the owning PCC. No RFC 8231 Section 5.6 State
+// Synchronization Sequence is implemented: if a PCC's session bounces and
+// reconnects, this Pce does not automatically re-learn or re-verify which LSPs are
+// still delegated to it -- a documented scope simplification for this phase.
+//
 simple Pce extends SimpleModule like IApp
 {
     parameters:

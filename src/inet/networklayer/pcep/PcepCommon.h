@@ -79,6 +79,39 @@ inline B pcepPcrepEroMessageBytes(size_t eroHopCount)
     return PCEP_COMMON_HEADER_BYTES + PCEP_RP_OBJECT_BYTES + B(4 + 8 * eroHopCount);
 }
 
+// Workstream F4 Phase 3 (RFC 8231 stateful delegation): PCRpt/PCUpd object sizes.
+
+// RFC 8231 Section 7.2: SRP object. Model simplification (mirrors PCEP_RP_OBJECT_BYTES's
+// own precedent): the body carries only the SRP-ID-number, no flags.
+const B PCEP_SRP_OBJECT_BYTES = B(8); // 4-byte header + 4-byte SRP-ID-number
+
+// RFC 8231 Section 7.3: LSP object. Model simplification: unlike the RFC's compact
+// 4-byte body (a 20-bit PLSP-ID bit-packed with 12 bits of flags), this model writes
+// the PLSP-ID and flags as separate, byte-aligned fields for implementation
+// simplicity -- consistent with this model's existing boolean-collapsed O field (see
+// PcepPcrpt's doc comment); the resulting on-wire byte count simply differs from a
+// byte-exact RFC 8231 implementation as a result.
+const B PCEP_LSP_OBJECT_BYTES = B(12); // 4-byte header + 4-byte PLSP-ID + 1-byte flags + 3 reserved
+
+// RFC 8231 Section 6.1: PCRpt = Common Header + SRP + LSP + (this model's own
+// END-POINTS/BANDWIDTH/LSPA path attributes, see PcepPcrpt's doc comment) + ERO
+// (only present when the report's "up" flag is true).
+inline B pcepPcrptMessageBytes(size_t eroHopCount)
+{
+    B bytes = PCEP_COMMON_HEADER_BYTES + PCEP_SRP_OBJECT_BYTES + PCEP_LSP_OBJECT_BYTES
+        + PCEP_ENDPOINTS_OBJECT_BYTES + PCEP_BANDWIDTH_OBJECT_BYTES + PCEP_LSPA_OBJECT_BYTES;
+    if (eroHopCount > 0)
+        bytes += B(4 + 8 * eroHopCount);
+    return bytes;
+}
+
+// RFC 8231 Section 6.2: PCUpd = Common Header + SRP + LSP + ERO (no END-POINTS/
+// BANDWIDTH/LSPA -- see PcepPcupd's doc comment).
+inline B pcepPcupdMessageBytes(size_t eroHopCount)
+{
+    return PCEP_COMMON_HEADER_BYTES + PCEP_SRP_OBJECT_BYTES + PCEP_LSP_OBJECT_BYTES + B(4 + 8 * eroHopCount);
+}
+
 // PCEP session FSM (RFC 5440 Section 6.2, minimal subset -- mirrors the level of
 // fidelity of Ldp::peer_info::SessionState, not the full RFC state machine):
 // NONEXISTENT until the TCP connection is established; INITIALIZED once connected
