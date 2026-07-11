@@ -1,0 +1,258 @@
+%description:
+Module test for RFC 8660 explicit-path steering: an ~SrPolicy segment list overriding the IGP
+shortest path -- SR-TE without any signaling protocol.
+
+Topology (5 SrMplsRouter LSRs + 2 hosts, all sharing one sidTable: A=1, B=2, C=3, D=4, Y=5):
+  hostA -- A -- B -- D -- hostD   (the SHORT branch: metric 1+1 = 2, hop count 2)
+              \- C -- Y -/         (the LONG branch:  metric 1+1+1 = 3, hop count 3)
+~Ted's own shortest-path computation (this model's IGP, see ~Ted's "installRoutes" doc) prefers
+the B branch: plain IP traffic (or a node-SID policy naming ONLY D) would go hostA->A->B->D->hostD.
+
+Router A carries ONE policy: dest hostD, segments="node:3 node:4" (C's sid, then D's sid) --
+an explicit ordered waypoint list that forces the LONG branch instead. This is deliberately
+NOT a policy that lists every hop: naming C and D only relies on each named waypoint's own
+shortest-path computation to reach the NEXT one, which is the entire point of segment routing
+(a small number of loose waypoints steers an arbitrarily long path, unlike RSVP-TE's
+explicit-route object which must name every hop). Since C's own shortest path to D goes via Y
+(C has no direct link to D), naming just "C then D" is enough to route the WHOLE detour.
+
+First-segment PHP canonicalization (see SrPolicy.ned): C is A's direct neighbour, so C's node-SID
+label is dropped from the pushed stack (pushing it would be pointless -- C's own PHP would pop
+it right back off); only D's label (srgbBase+4 = 16004) is actually pushed, and A forwards
+directly toward C. At C, D is NOT directly connected (C only reaches D via Y), so C's own
+node-SID entry for D is a genuine TRANSIT one: SWAP 16004 (unlike sr_node_sid.test's B, which
+is a case of "2 hops away via a single named waypoint" -- here it is "the explicit path's
+non-adjacent middle waypoint"). At Y (the actual penultimate hop toward D), D IS directly
+connected: POP (PHP). B, on the IGP-preferred short branch, never sees a single packet of this
+flow -- proving the policy, not the IGP metric, decided the path.
+
+Asserted: (1) doStackOps: {SWAP 16004} happens, and specifically at C (module-scoped, via the
+labelflow.out postrun-command correlating each "received from L2, label=16004" line with the
+preceding "** Event ... in <module>" header); (2) that SWAP never happens at B (B never even
+receives a label-16004 packet); (3) end-to-end delivery.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.mpls.SrMplsRouter;
+import ned.DatarateChannel;
+
+network SrExplicitPathTest
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    types:
+        channel Link extends DatarateChannel
+        {
+            datarate = 1Mbps;
+            delay = 10us;
+        }
+    submodules:
+        hostA: StandardHost {
+            @display("p=100,250");
+        }
+        A: SrMplsRouter {
+            parameters:
+                routerId = "1.1.1.1";
+                peers = "ppp1 ppp2";
+                sidTable = xmldoc("sidtable.xml");
+                policies = xmldoc("policiesA.xml");
+                @display("p=250,250");
+            gates:
+                pppg[3];
+        }
+        B: SrMplsRouter {
+            parameters:
+                routerId = "2.2.2.2";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=400,150");
+            gates:
+                pppg[2];
+        }
+        C: SrMplsRouter {
+            parameters:
+                routerId = "3.3.3.3";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=400,350");
+            gates:
+                pppg[2];
+        }
+        Y: SrMplsRouter {
+            parameters:
+                routerId = "5.5.5.5";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=550,350");
+            gates:
+                pppg[2];
+        }
+        D: SrMplsRouter {
+            parameters:
+                routerId = "4.4.4.4";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=700,250");
+            gates:
+                pppg[3];
+        }
+        hostD: StandardHost {
+            @display("p=850,250");
+        }
+    connections:
+        hostA.pppg++ <--> Link <--> A.pppg[0];
+        A.pppg[1] <--> Link <--> B.pppg[0];
+        B.pppg[1] <--> Link <--> D.pppg[0];
+        A.pppg[2] <--> Link <--> C.pppg[0];
+        C.pppg[1] <--> Link <--> Y.pppg[0];
+        Y.pppg[1] <--> Link <--> D.pppg[1];
+        D.pppg[2] <--> Link <--> hostD.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: sidtable.xml
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+    <node router="4.4.4.4" sid="4"/>
+    <node router="5.5.5.5" sid="5"/>
+</sr>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: policiesA.xml
+<policies>
+    <policy dest="10.0.1.14" netmask="255.255.255.255" segments="node:3 node:4"/>
+</policies>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostA.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.10	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.1.1	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: A.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.1	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.2	MTU: 1500	Metric: 1
+name: ppp2	inet_addr: 10.0.1.6	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: B.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.3	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.4	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: C.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.7	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.8	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: Y.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.9	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.11	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: D.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.5	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.12	MTU: 1500	Metric: 1
+name: ppp2	inet_addr: 10.0.1.13	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostD.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.14	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.1.13	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src
+network = SrExplicitPathTest
+sim-time-limit = 2s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.hostA.numApps = 1
+**.hostA.app[0].typename = "UdpBasicApp"
+**.hostA.app[0].localPort = 100
+**.hostA.app[0].destPort = 100
+**.hostA.app[0].messageLength = 128 bytes
+**.hostA.app[0].startTime = 0.5s
+**.hostA.app[0].sendInterval = 0.01s
+**.hostA.app[0].destAddresses = "hostD"
+
+**.hostD.numApps = 1
+**.hostD.app[0].typename = "UdpSink"
+**.hostD.app[0].localPort = 100
+
+**.hostA.ipv4.routingTable.routingFile = "hostA.rt"
+**.hostD.ipv4.routingTable.routingFile = "hostD.rt"
+**.A.ipv4.routingTable.routingFile = "A.rt"
+**.B.ipv4.routingTable.routingFile = "B.rt"
+**.C.ipv4.routingTable.routingFile = "C.rt"
+**.Y.ipv4.routingTable.routingFile = "Y.rt"
+**.D.ipv4.routingTable.routingFile = "D.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%# The explicit-path policy actually pushes D's label (C's own label is dropped by the
+%# first-segment PHP canonicalization, since C is A's direct neighbour)
+%contains: stdout
+doStackOps: {PUSH 16004}
+%#--------------------------------------------------------------------------------------------------------------
+%# C, the explicit path's non-adjacent middle waypoint, genuinely transits (SWAP), never PHPs
+%contains: stdout
+doStackOps: {SWAP 16004}
+%#--------------------------------------------------------------------------------------------------------------
+%# Y, the real penultimate hop toward D, PHPs (POP)
+%contains: stdout
+doStackOps: {POP}
+%#--------------------------------------------------------------------------------------------------------------
+%# Module-scope which router received label 16004 from L2: must be C (and, after C's SWAP, Y),
+%# and must NEVER be B -- proving the explicit path, not the (B-preferring) IGP metric, was used.
+%postrun-command: awk '/^\*\* Event/{mod=$0} /Received .*from L2, label=16004/{print mod}' test.out > labelflow.out
+%contains: labelflow.out
+SrExplicitPathTest.C.mpls
+%#--------------------------------------------------------------------------------------------------------------
+%contains: labelflow.out
+SrExplicitPathTest.Y.mpls
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: labelflow.out
+SrExplicitPathTest.B.mpls
+%#--------------------------------------------------------------------------------------------------------------
+%# end-to-end delivery over the explicit (longer, non-IGP-preferred) path
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
