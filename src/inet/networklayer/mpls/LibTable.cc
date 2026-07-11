@@ -55,7 +55,17 @@ bool LibTable::resolveLabel(int inInterfaceId, int inLabel,
     bool any = (inInterfaceId == ANY_INTERFACE);
 
     for (auto& elem : lib) {
-        if (!any && elem.inInterfaceId != inInterfaceId)
+        // ANY_INTERFACE is a two-way sentinel (see the header doc): either the QUERY doesn't
+        // care which entry's interface it hits (any==true, e.g. a caller doing a pure
+        // label-space lookup), or the ENTRY itself was installed as interface-independent
+        // (elem.inInterfaceId==ANY_INTERFACE) -- e.g. SegmentRouting's node-SID entries, whose
+        // whole point (homogeneous SRGB) is that the label means the same thing regardless of
+        // which upstream interface it arrives on, unlike Ldp/RsvpTe's always-per-interface
+        // entries. Without this second condition, an ANY_INTERFACE entry could ONLY ever be
+        // found by an ANY_INTERFACE query, never by Mpls::processMplsPacketFromL2()'s normal
+        // query (which always passes the real incoming interface) -- i.e. it could never match
+        // any real received packet at all.
+        if (!any && elem.inInterfaceId != ANY_INTERFACE && elem.inInterfaceId != inInterfaceId)
             continue;
 
         if (elem.inLabel != inLabel)
