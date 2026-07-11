@@ -149,7 +149,12 @@ void Ppp::refreshOutGateConnection(bool connected)
             simtime_t startTransmissionTime = endTransmissionEvent->getSendingTime();
             simtime_t sentDuration = simTime() - startTransmissionTime;
             double sentPart = sentDuration / (endTransmissionEvent->getArrivalTime() - startTransmissionTime);
-            b newLength = b(floor(curTxPacket->getBitLength() * sentPart));
+            // Round the transmitted amount down to a whole byte: the partially sent
+            // packet is delivered with the bit-error flag set and then discarded, and
+            // INET's byte-granular chunks (e.g. ByteCountChunk) cannot represent a
+            // sub-byte length -- a non-byte-aligned truncation makes the packet
+            // unserializable (fails converting bits to bytes).
+            B newLength = B(floor(curTxPacket->getByteLength() * sentPart));
             curTxPacket->removeAtBack(curTxPacket->getDataLength() - newLength);
             curTxPacket->setBitError(true);
             send(curTxPacket, SendOptions().finishTx(curTxPacket->getId()), physOutGate);

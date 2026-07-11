@@ -86,8 +86,8 @@
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_and_Downlink_Traffic -r 0, 100s,    0, ERROR,    # pcap devices not supported
 # /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                100s,         0, ERROR,    # pcap devices not supported
 
-/examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            08c9-483d/tplx;72b6-b050/~tNl;26f1-239e/~tND;26ac-bc27/tyf, PASS, EthernetMac Ipv4
-/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            640c-4f03/tplx;5051-d5e4/~tNl;03ba-fab3/~tND;0d87-579d/tyf, PASS, EthernetMac EthernetCsmaMac Ipv4
+/examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            d070-bb12/tplx;6bc7-05b4/~tNl;a847-b37d/~tND;a078-ad30/tyf, PASS, EthernetMac Ipv4
+/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            58dc-cc43/tplx;6aae-0685/~tNl;1249-ee03/~tND;2d33-9412/tyf, PASS, EthernetMac EthernetCsmaMac Ipv4
 
 # /examples/ethernet/lans/,            -f .qtenv.ini -c General -r 0
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            1b3d-7b41/tplx;46eb-2c9e/~tNl;59e8-47d5/tyf, PASS, EthernetCsmaMac
