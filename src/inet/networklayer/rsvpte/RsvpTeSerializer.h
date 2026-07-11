@@ -11,6 +11,7 @@
 #include "inet/networklayer/rsvpte/RsvpHelloMsg_m.h"
 #include "inet/networklayer/rsvpte/RsvpPathMsg_m.h"
 #include "inet/networklayer/rsvpte/RsvpResvMsg_m.h"
+#include "inet/networklayer/rsvpte/RsvpSrefreshMsg_m.h"
 
 namespace inet {
 
@@ -67,6 +68,21 @@ class INET_API RsvpTeSerializer : public FieldsChunkSerializer
 
     static void serializeFlowDescriptorList(MemoryOutputStream& stream, const FlowDescriptorVector& flows);
     static FlowDescriptorVector deserializeFlowDescriptorList(MemoryInputStream& stream, B remainingLength);
+
+    // RFC 2961 Section 5.4 (refresh reduction, Workstream C8).
+    static void serializeMessageId(MemoryOutputStream& stream, uint32_t epoch, uint32_t id);
+    static void deserializeMessageId(MemoryInputStream& stream, uint32_t& epoch, uint32_t& id);
+
+    static void serializeMessageIdAck(MemoryOutputStream& stream, bool nack, uint32_t epoch, uint32_t id);
+    static void deserializeMessageIdAck(MemoryInputStream& stream, bool& nack, uint32_t& epoch, uint32_t& id);
+
+    // Appends the optional MESSAGE_ID / MESSAGE_ID_ACK objects shared by all six
+    // RsvpPacket subtypes, in that fixed order, when present -- called at the end
+    // of each message's own serialize()/deserialize() case. endPos bounds how far
+    // into the input stream this message's objects extend (same convention as the
+    // ERO/RRO optional-trailing-object checks elsewhere in this file).
+    static void serializeOptionalMessageIdObjects(MemoryOutputStream& stream, const RsvpPacket& pkt);
+    static void deserializeOptionalMessageIdObjects(MemoryInputStream& stream, B endPos, RsvpPacket& pkt);
 
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;

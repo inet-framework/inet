@@ -67,6 +67,11 @@ constexpr int ERROR_SPEC_OBJECT_BYTES = 12;
 constexpr int HELLO_OBJECT_BYTES = 12;
 constexpr int ERO_RRO_OBJECT_HEADER_BYTES = 4;
 constexpr int ERO_RRO_SUBOBJECT_BYTES = 8; // IPv4 prefix subobject
+// RFC 2961 Section 5.4 (refresh reduction, Workstream C8): MESSAGE_ID / MESSAGE_ID_ACK
+// object header(4) + Epoch(4) + Message_Identifier(4) = 12 bytes each; only ever
+// present when the sending router's "refreshReduction" parameter is on.
+constexpr int MESSAGE_ID_OBJECT_BYTES = 12;
+constexpr int MESSAGE_ID_ACK_OBJECT_BYTES = 12;
 
 B computeEroLength(const EroVector& ero)
 {
@@ -94,11 +99,30 @@ B computeHelloMessageLength()
     return B(RSVP_COMMON_HEADER_BYTES + HELLO_OBJECT_BYTES);
 }
 
-B computePathMessageLength(const EroVector& ero)
+// C8: 0 bytes when absent -- same "omitted entirely" convention as computeEroLength()/
+// computeRroLength() above.
+B computeMessageIdLength(bool hasMessageId)
+{
+    return hasMessageId ? B(MESSAGE_ID_OBJECT_BYTES) : B(0);
+}
+
+B computeMessageIdAckLength(bool hasMessageIdAck)
+{
+    return hasMessageIdAck ? B(MESSAGE_ID_ACK_OBJECT_BYTES) : B(0);
+}
+
+B computePathMessageLength(const EroVector& ero, bool hasMessageId = false, bool hasMessageIdAck = false)
 {
     return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + RSVP_HOP_OBJECT_BYTES + TIME_VALUES_OBJECT_BYTES
              + LABEL_REQUEST_OBJECT_BYTES + SENDER_TEMPLATE_OBJECT_BYTES + SENDER_TSPEC_OBJECT_BYTES)
-           + computeEroLength(ero);
+           + computeEroLength(ero) + computeMessageIdLength(hasMessageId) + computeMessageIdAckLength(hasMessageIdAck);
+}
+
+// C8: an Srefresh's own length -- CommonHdr + MESSAGE_ID, plus an optional piggybacked
+// MESSAGE_ID_ACK/_NACK.
+B computeSrefreshMessageLength(bool hasMessageIdAck)
+{
+    return B(RSVP_COMMON_HEADER_BYTES) + computeMessageIdLength(true) + computeMessageIdAckLength(hasMessageIdAck);
 }
 
 B computePathTearMessageLength()
@@ -115,10 +139,10 @@ B computePathErrorMessageLength()
              + SENDER_TEMPLATE_OBJECT_BYTES + SENDER_TSPEC_OBJECT_BYTES);
 }
 
-B computeResvMessageLength(const FlowDescriptorVector& flows)
+B computeResvMessageLength(const FlowDescriptorVector& flows, bool hasMessageId = false, bool hasMessageIdAck = false)
 {
     return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + RSVP_HOP_OBJECT_BYTES + TIME_VALUES_OBJECT_BYTES + STYLE_OBJECT_BYTES)
-           + computeFlowDescriptorListLength(flows);
+           + computeFlowDescriptorListLength(flows) + computeMessageIdLength(hasMessageId) + computeMessageIdAckLength(hasMessageIdAck);
 }
 
 B computeResvTearMessageLength(const FlowDescriptorVector& flows)
@@ -201,10 +225,22 @@ void RsvpTe::initialize(int stage)
         reoptimizeInterval = par("reoptimizeInterval");
         if (reoptimizeInterval > SIMTIME_ZERO)
             reoptimizeTimerMsg = new ReoptimizeTimerMsg("reoptimize timer");
+        refreshReduction = par("refreshReduction");
+        maxMessageId = 0;
+        messageIdEpoch = 0;
+        // C8: a fresh epoch each run (like a real router's would change across
+        // restarts). Only drawn when refreshReduction is actually on -- an
+        // unconditional RNG draw here would consume a random number on every run
+        // regardless of this feature, shifting every subsequent uniform(0.5, 1.5) *
+        // refreshInterval jitter draw in refreshPath()/refreshResv() and moving the
+        // fingerprint of every unrelated (refreshReduction=false) example/showcase.
+        if (refreshReduction)
+            messageIdEpoch = static_cast<uint32_t>(intuniform(1, 0x7fffffff));
         WATCH(maxPsbId);
         WATCH(maxRsbId);
         WATCH(maxSrcInstance);
         WATCH(maxLspId);
+        WATCH(maxMessageId);
         WATCH(refreshInterval);
         WATCH(stateLifetimeFactor);
         WATCH(retryInterval);
@@ -644,7 +680,17 @@ void RsvpTe::processPSB_TIMER(PsbTimerMsg *msg)
     PathStateBlock *psb = findPsbById(msg->getId());
     ASSERT(psb);
 
-    refreshPath(psb);
+    // C8 (RFC 2961 refresh reduction): once this PSB already has an assigned
+    // outbound MESSAGE_ID (from an earlier full send -- the very first call here
+    // after PSB creation always takes the refreshPath() branch, since outMessageId
+    // starts at 0), subsequent periodic refreshes are compressed into a Srefresh.
+    // When refreshReduction is off, outMessageId is never assigned in the first
+    // place, so this is behaviorally identical to the unconditional refreshPath()
+    // call it replaces.
+    if (refreshReduction && psb->outMessageId != 0)
+        sendPathSrefresh(psb);
+    else
+        refreshPath(psb);
     scheduleRefreshTimer(psb, uniform(0.5, 1.5) * refreshInterval);
 }
 
@@ -749,13 +795,63 @@ void RsvpTe::refreshPath(PathStateBlock *psbEle)
 
     pm->setERO(ERO);
 
-    pm->setChunkLength(computePathMessageLength(ERO));
+    // C8 (RFC 2961 refresh reduction): attach this PSB's own MESSAGE_ID (assigning
+    // one on first use) so that later periodic refreshes can be compressed into a
+    // Srefresh instead (see processPSB_TIMER()); also piggyback any ACK/NACK owed to
+    // this PSB's downstream peer.
+    if (refreshReduction) {
+        if (psbEle->outMessageId == 0)
+            psbEle->outMessageId = ++maxMessageId;
+        pm->setHasMessageId(true);
+        pm->setMessageIdEpoch(messageIdEpoch);
+        pm->setMessageId(psbEle->outMessageId);
+    }
+    if (psbEle->hasPendingAckOut) {
+        pm->setHasMessageIdAck(true);
+        pm->setMessageIdNack(psbEle->pendingAckOut.isNack);
+        pm->setAckedMessageIdEpoch(psbEle->pendingAckOut.epoch);
+        pm->setAckedMessageId(psbEle->pendingAckOut.messageId);
+        psbEle->hasPendingAckOut = false;
+    }
+
+    pm->setChunkLength(computePathMessageLength(ERO, pm->getHasMessageId(), pm->getHasMessageIdAck()));
     pk->insertAtBack(pm);
 
     Ipv4Address nextHop = tedmod->getPeerByLocalAddress(OI);
 
     ASSERT(ERO.size() == 0 || ERO[0].node.equals(nextHop) || ERO[0].L);
 
+    sendToIP(pk, nextHop);
+}
+
+// C8 (RFC 2961 Section 5.3): compressed counterpart of refreshPath(), sent once
+// this PSB already has an assigned outMessageId. Carries no session/ERO/Tspec at
+// all -- the receiver resolves it purely from (this PSB's downstream peer address,
+// epoch, id); see processSrefreshMsg().
+void RsvpTe::sendPathSrefresh(PathStateBlock *psbEle)
+{
+    ASSERT(refreshReduction && psbEle->outMessageId != 0);
+
+    EV_INFO << "sending SREFRESH (PSB " << psbEle->id << ") messageId=" << psbEle->outMessageId << endl;
+
+    Packet *pk = new Packet("Srefresh");
+    const auto& msg = makeShared<RsvpSrefreshMsg>();
+
+    msg->setMessageIdEpoch(messageIdEpoch);
+    msg->setMessageId(psbEle->outMessageId);
+
+    if (psbEle->hasPendingAckOut) {
+        msg->setHasMessageIdAck(true);
+        msg->setMessageIdNack(psbEle->pendingAckOut.isNack);
+        msg->setAckedMessageIdEpoch(psbEle->pendingAckOut.epoch);
+        msg->setAckedMessageId(psbEle->pendingAckOut.messageId);
+        psbEle->hasPendingAckOut = false;
+    }
+
+    msg->setChunkLength(computeSrefreshMessageLength(msg->getHasMessageIdAck()));
+    pk->insertAtBack(msg);
+
+    Ipv4Address nextHop = tedmod->getPeerByLocalAddress(psbEle->OutInterface);
     sendToIP(pk, nextHop);
 }
 
@@ -780,8 +876,18 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle)
                 phops.push_back(elem.previousHopAddress);
         }
 
-        for (auto& phop : phops)
-            refreshResv(rsbEle, phop);
+        // C8 (RFC 2961 refresh reduction): once a phop already has an assigned
+        // outbound MESSAGE_ID (from a previous full send), subsequent periodic
+        // refreshes to it are compressed into a Srefresh instead. When
+        // refreshReduction is off, "refreshReduction && ..." is always false, so
+        // this is behaviorally identical to the unconditional refreshResv(rsbEle,
+        // phop) call it replaces.
+        for (auto& phop : phops) {
+            if (refreshReduction && rsbEle->outMessageIdByPhop.count(phop))
+                sendResvSrefresh(rsbEle, phop);
+            else
+                refreshResv(rsbEle, phop);
+        }
     }
 }
 
@@ -828,7 +934,59 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
 
     msg->setFlowDescriptor(flows);
 
-    msg->setChunkLength(computeResvMessageLength(flows));
+    // C8: attach this (RSB, phop)'s own MESSAGE_ID (assigning one on first use) and
+    // any ACK/NACK owed to "phop" for a MESSAGE_ID it attached to a Path it sent us
+    // (see the matching PSB's hasInMessageId/processPathMsg()).
+    if (refreshReduction) {
+        auto it = rsbEle->outMessageIdByPhop.find(PHOP);
+        if (it == rsbEle->outMessageIdByPhop.end())
+            it = rsbEle->outMessageIdByPhop.emplace(PHOP, ++maxMessageId).first;
+        msg->setHasMessageId(true);
+        msg->setMessageIdEpoch(messageIdEpoch);
+        msg->setMessageId(it->second);
+    }
+    auto ackIt = rsbEle->pendingAcksByPhop.find(PHOP);
+    if (ackIt != rsbEle->pendingAcksByPhop.end()) {
+        msg->setHasMessageIdAck(true);
+        msg->setMessageIdNack(ackIt->second.isNack);
+        msg->setAckedMessageIdEpoch(ackIt->second.epoch);
+        msg->setAckedMessageId(ackIt->second.messageId);
+        rsbEle->pendingAcksByPhop.erase(ackIt);
+    }
+
+    msg->setChunkLength(computeResvMessageLength(flows, msg->getHasMessageId(), msg->getHasMessageIdAck()));
+    pk->insertAtBack(msg);
+
+    sendToIP(pk, PHOP);
+}
+
+// C8 (RFC 2961 Section 5.3): compressed counterpart of refreshResv(rsb, PHOP), sent
+// once this (RSB, phop) pair already has an assigned outbound MESSAGE_ID. Carries no
+// session/flow descriptors at all -- the receiver resolves it purely from (this
+// router's address as seen by "PHOP", epoch, id); see processSrefreshMsg().
+void RsvpTe::sendResvSrefresh(ResvStateBlock *rsbEle, Ipv4Address PHOP)
+{
+    auto it = rsbEle->outMessageIdByPhop.find(PHOP);
+    ASSERT(refreshReduction && it != rsbEle->outMessageIdByPhop.end());
+
+    EV_INFO << "sending SREFRESH (RSB " << rsbEle->id << ") PHOP " << PHOP << " messageId=" << it->second << endl;
+
+    Packet *pk = new Packet("Srefresh");
+    const auto& msg = makeShared<RsvpSrefreshMsg>();
+
+    msg->setMessageIdEpoch(messageIdEpoch);
+    msg->setMessageId(it->second);
+
+    auto ackIt = rsbEle->pendingAcksByPhop.find(PHOP);
+    if (ackIt != rsbEle->pendingAcksByPhop.end()) {
+        msg->setHasMessageIdAck(true);
+        msg->setMessageIdNack(ackIt->second.isNack);
+        msg->setAckedMessageIdEpoch(ackIt->second.epoch);
+        msg->setAckedMessageId(ackIt->second.messageId);
+        rsbEle->pendingAcksByPhop.erase(ackIt);
+    }
+
+    msg->setChunkLength(computeSrefreshMessageLength(msg->getHasMessageIdAck()));
     pk->insertAtBack(msg);
 
     sendToIP(pk, PHOP);
@@ -1250,6 +1408,19 @@ RsvpTe::ResvStateBlock *RsvpTe::createRSB(const Ptr<const RsvpResvMsg>& msg)
 
     EV_INFO << "created new RSB " << rsb->id << endl;
 
+    // C8 (RFC 2961 refresh reduction): seed an ACK owed to any upstream sender whose
+    // Path already arrived (with a MESSAGE_ID) before this RSB existed to queue it
+    // against -- the common case for a transit node, since this function only runs
+    // once the first downstream Resv arrives, which is typically after the matching
+    // upstream Path(s) already created their PSB(s). Without this, such a PSB's
+    // pending ack would have had nowhere to go at the time (processPathMsg() only
+    // gets one chance to queue it, before refreshReduction compresses further
+    // refreshes into Srefresh).
+    for (auto& psb : PSBList) {
+        if (psb.OutInterface == rsb->OI && psb.sessionObject == rsb->sessionObject && psb.hasInMessageId)
+            rsb->pendingAcksByPhop[psb.previousHopAddress] = {false, psb.inMessageIdEpoch, psb.inMessageId};
+    }
+
     return rsb;
 }
 
@@ -1274,6 +1445,14 @@ void RsvpTe::updateRSB(ResvStateBlock *rsb, const RsvpResvMsg *msg)
                     // label must be updated in lib table
 
                     scheduleCommitTimer(rsb);
+
+                    // C8 (RFC 2961 refresh reduction): this RSB's content just
+                    // changed, so any already-assigned outbound MESSAGE_IDs are
+                    // stale (RFC 2961 requires a fresh id whenever the content
+                    // changes) -- drop them all so the next Resv send to each phop
+                    // is a full one (refreshResv()'s per-phop check treats a
+                    // missing map entry as "not yet assigned") and gets a fresh id.
+                    rsb->outMessageIdByPhop.clear();
                 }
 
                 break;
@@ -1290,6 +1469,9 @@ void RsvpTe::updateRSB(ResvStateBlock *rsb, const RsvpResvMsg *msg)
 
             scheduleCommitTimer(rsb);
             scheduleRefreshTimer(rsb, 0.0);
+
+            // C8: same reasoning as the label-modified branch above.
+            rsb->outMessageIdByPhop.clear();
         }
     }
 }
@@ -1665,6 +1847,10 @@ void RsvpTe::processRSVPMessage(Packet *pk)
             processResvErrMsg(pk);
             break;
 
+        case SREFRESH_MESSAGE:
+            processSrefreshMsg(pk);
+            break;
+
         default:
             throw cRuntimeError("Invalid RSVP kind of message '%s': %d", pk->getName(), kind);
     }
@@ -1960,6 +2146,26 @@ void RsvpTe::processPathMsg(Packet *pk)
     if (rsb)
         scheduleRefreshTimer(rsb, 0.0);
 
+    // C8 (RFC 2961 refresh reduction): record the peer's MESSAGE_ID for this PSB (so
+    // a later Srefresh from them naming it resolves back here -- see
+    // processSrefreshMsg()) and process any piggybacked ACK/NACK for our own
+    // outbound Resv-id previously sent to this same previousHopAddress. Queuing the
+    // ack itself needs a matching RSB to piggyback it on: if egress, "rsb" was just
+    // created above and is available immediately; for a transit node with no RSB
+    // yet, createRSB() seeds it later instead (see there) -- this function only
+    // ever runs with a full (uncompressed) Path, so there is no later call here to
+    // retry the queuing once refreshReduction has compressed refreshes into
+    // Srefresh.
+    if (msg->getHasMessageId()) {
+        psb->hasInMessageId = true;
+        psb->inMessageIdEpoch = msg->getMessageIdEpoch();
+        psb->inMessageId = msg->getMessageId();
+        if (rsb)
+            rsb->pendingAcksByPhop[psb->previousHopAddress] = {false, psb->inMessageIdEpoch, psb->inMessageId};
+    }
+    if (msg->getHasMessageIdAck())
+        handleMessageIdAck(psb->previousHopAddress, msg->getMessageIdNack(), msg->getAckedMessageIdEpoch(), msg->getAckedMessageId());
+
     delete pk;
 }
 
@@ -2020,7 +2226,167 @@ void RsvpTe::processResvMsg(Packet *pk)
 
     scheduleTimeout(rsb);
 
+    // C8: record the peer's MESSAGE_ID for this RSB (so a later Srefresh from them
+    // naming it resolves back here) and process any piggybacked ACK/NACK for our
+    // own outbound Path-id previously sent to this same downstream peer. The
+    // matching PSB is the one sharing this RSB's (session, OI) -- the same identity
+    // refreshResv() itself uses to find it (rsb->Next_Hop_Address is NOT a reliable
+    // peer address here: refreshResv() writes the SEND TARGET into that hop field,
+    // so on receipt it reflects OUR OWN address, not the sender's -- getPeerByLocal
+    // Address(rsb->OI) is this file's established way to recover the actual
+    // downstream peer, e.g. sendResvErrorMessage()). The matching PSB is guaranteed
+    // to already exist here -- a Resv flow with no matching PSB was already dropped
+    // above.
+    if (msg->getHasMessageId()) {
+        rsb->hasInMessageId = true;
+        rsb->inMessageIdEpoch = msg->getMessageIdEpoch();
+        rsb->inMessageId = msg->getMessageId();
+        for (auto& elem : PSBList) {
+            if (elem.sessionObject == rsb->sessionObject && elem.OutInterface == rsb->OI) {
+                elem.hasPendingAckOut = true;
+                elem.pendingAckOut = {false, rsb->inMessageIdEpoch, rsb->inMessageId};
+                break;
+            }
+        }
+    }
+    if (msg->getHasMessageIdAck())
+        handleMessageIdAck(tedmod->getPeerByLocalAddress(rsb->OI), msg->getMessageIdNack(), msg->getAckedMessageIdEpoch(), msg->getAckedMessageId());
+
     delete pk;
+}
+
+// C8 (RFC 2961 Section 5.3): a compressed refresh naming (epoch, id). Resolved
+// purely from (the packet's actual sender address, epoch, id) -- Srefresh carries
+// no session/sender identity of its own (see RsvpSrefreshMsg.msg).
+void RsvpTe::processSrefreshMsg(Packet *pk)
+{
+    const auto& msg = pk->peekAtFront<RsvpSrefreshMsg>();
+    // Normalize the packet's actual (possibly per-interface) source address to the
+    // peer's canonical router id -- the same mapping processHelloMsg() applies for
+    // the same reason: previousHopAddress/routerId-based bookkeeping is keyed on
+    // the peer's primary address, not necessarily the address it happened to send
+    // this particular packet from.
+    Ipv4Address peer = tedmod->primaryAddress(pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4());
+    uint32_t epoch = msg->getMessageIdEpoch();
+    uint32_t id = msg->getMessageId();
+
+    EV_INFO << "Received SREFRESH from " << peer << " (epoch=" << epoch << ", id=" << id << ")" << endl;
+
+    if (msg->getHasMessageIdAck())
+        handleMessageIdAck(peer, msg->getMessageIdNack(), msg->getAckedMessageIdEpoch(), msg->getAckedMessageId());
+
+    bool resolved = false;
+    for (auto& psb : PSBList) {
+        if (psb.previousHopAddress == peer && psb.hasInMessageId && psb.inMessageIdEpoch == epoch && psb.inMessageId == id) {
+            EV_DETAIL << "SREFRESH recognized for PSB " << psb.id << ", refreshing soft state" << endl;
+            scheduleTimeout(&psb);
+            resolved = true;
+            break;
+        }
+    }
+    if (!resolved) {
+        for (auto& rsb : RSBList) {
+            if (tedmod->isLocalAddress(rsb.OI) && tedmod->getPeerByLocalAddress(rsb.OI) == peer
+                    && rsb.hasInMessageId && rsb.inMessageIdEpoch == epoch && rsb.inMessageId == id) {
+                EV_DETAIL << "SREFRESH recognized for RSB " << rsb.id << ", refreshing soft state" << endl;
+                scheduleTimeout(&rsb);
+                resolved = true;
+                break;
+            }
+        }
+    }
+
+    if (!resolved) {
+        EV_WARN << "SREFRESH from " << peer << " names an unrecognized messageId (epoch=" << epoch
+                << ", id=" << id << "), sending a NACK" << endl;
+        sendMessageIdNack(peer, epoch, id);
+    }
+
+    delete pk;
+}
+
+// C8: a positive ack is purely informational in this model (there is nothing this
+// model does differently once a peer confirms receipt -- no summary-refresh-interval
+// extension is modeled); a nack means "peer" does not recognize the (epoch, id) we
+// last told them about, so fall back to an immediate full resend of whichever state
+// (PSB or RSB-per-phop) we still have that id assigned to.
+void RsvpTe::handleMessageIdAck(Ipv4Address peer, bool isNack, uint32_t epoch, uint32_t id)
+{
+    if (!isNack) {
+        EV_DETAIL << "received MESSAGE_ID_ACK from " << peer << " (epoch=" << epoch << ", id=" << id << ")" << endl;
+        return;
+    }
+
+    EV_WARN << "received MESSAGE_ID_NACK from " << peer << " (epoch=" << epoch << ", id=" << id
+            << "), falling back to a full refresh" << endl;
+
+    if (epoch != messageIdEpoch)
+        return; // stale epoch (e.g. from before this router last restarted); nothing of ours to fall back on
+
+    for (auto& psb : PSBList) {
+        if (psb.outMessageId == id && tedmod->isLocalAddress(psb.OutInterface)
+                && tedmod->getPeerByLocalAddress(psb.OutInterface) == peer) {
+            refreshPath(&psb);
+            return;
+        }
+    }
+    for (auto& rsb : RSBList) {
+        auto it = rsb.outMessageIdByPhop.find(peer);
+        if (it != rsb.outMessageIdByPhop.end() && it->second == id) {
+            refreshResv(&rsb, peer);
+            return;
+        }
+    }
+
+    EV_WARN << "MESSAGE_ID_NACK from " << peer << " names an id (" << id
+            << ") this router no longer owns, ignoring" << endl;
+}
+
+// An Srefresh from "peer" named an (epoch, id) this router never assigned: queue and
+// promptly send a NACK back toward them (piggybacked on whatever this router would
+// send them next -- forced out now rather than waiting for the next periodic cycle,
+// since RFC 2961 wants a negative acknowledgment delivered promptly). "peer" is
+// resolved as either an upstream Path-sender (nacked via the Resv this router sends
+// back to them) or a downstream Resv-sender (nacked via the Path this router sends
+// to them); if this router has no state at all toward "peer" yet, there is no
+// vehicle to carry the nack and it is dropped (a documented corner case of the
+// piggyback-only scope).
+void RsvpTe::sendMessageIdNack(Ipv4Address peer, uint32_t epoch, uint32_t id)
+{
+    for (auto& psb : PSBList) {
+        if (psb.previousHopAddress != peer)
+            continue;
+        for (auto& rsb : RSBList) {
+            if (rsb.OI == psb.OutInterface && rsb.sessionObject == psb.sessionObject) {
+                rsb.pendingAcksByPhop[peer] = {true, epoch, id};
+                if (refreshReduction && rsb.outMessageIdByPhop.count(peer))
+                    sendResvSrefresh(&rsb, peer);
+                else
+                    refreshResv(&rsb, peer);
+                return;
+            }
+        }
+    }
+
+    for (auto& rsb : RSBList) {
+        if (!tedmod->isLocalAddress(rsb.OI) || tedmod->getPeerByLocalAddress(rsb.OI) != peer)
+            continue;
+        for (auto& psb : PSBList) {
+            if (psb.sessionObject == rsb.sessionObject && psb.OutInterface == rsb.OI) {
+                psb.hasPendingAckOut = true;
+                psb.pendingAckOut = {true, epoch, id};
+                if (refreshReduction && psb.outMessageId != 0)
+                    sendPathSrefresh(&psb);
+                else
+                    refreshPath(&psb);
+                return;
+            }
+        }
+    }
+
+    EV_WARN << "unrecognized SREFRESH from " << peer << " (epoch=" << epoch << ", id=" << id
+            << ") but this router has no state at all toward them yet -- dropping the NACK "
+               "(no vehicle to carry it; a documented corner case of the piggyback-only scope)" << endl;
 }
 
 void RsvpTe::recoveryEvent(Ipv4Address peer)

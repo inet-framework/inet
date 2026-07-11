@@ -11,6 +11,7 @@
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/rsvpte/RsvpPathMsg_m.h"
 #include "inet/networklayer/rsvpte/RsvpResvMsg_m.h"
+#include "inet/networklayer/rsvpte/RsvpSrefreshMsg_m.h"
 
 namespace inet {
 
@@ -26,6 +27,7 @@ Register_Serializer(RsvpResvMsg, RsvpTeSerializer);
 Register_Serializer(RsvpResvTear, RsvpTeSerializer);
 Register_Serializer(RsvpResvError, RsvpTeSerializer);
 Register_Serializer(RsvpHelloMsg, RsvpTeSerializer);
+Register_Serializer(RsvpSrefreshMsg, RsvpTeSerializer);
 
 // ===========================================================================
 // Canonical per-message RSVP object layout (Workstream E, Phase 2 commits 3
@@ -75,6 +77,16 @@ Register_Serializer(RsvpHelloMsg, RsvpTeSerializer);
 //   PERROR_MESSAGE (5)  | PathErr   (3)
 //   RERROR_MESSAGE (6)  | ResvErr   (4)
 //   HELLO_MESSAGE  (7)  | Hello     (20)
+//   SREFRESH_MESSAGE (8)| Srefresh  (15)   -- RFC 2961 Section 5.3 (Workstream C8)
+//
+// RFC 2961 Section 5.4 refresh reduction (Workstream C8): every Path/PathTear/
+// PathErr/Resv/ResvTear/ResvErr may carry a trailing, optional MESSAGE_ID object
+// (Class-Num 23) and/or a piggybacked MESSAGE_ID_ACK/_NACK object (Class-Num 24,
+// C-Type 1/2), gated on RsvpPacket's hasMessageId/hasMessageIdAck fields -- absent
+// for every message unless the sending router's "refreshReduction" parameter is on.
+// Srefresh (a distinct, much shorter message, not an RsvpPacket subtype -- it
+// carries no SESSION object at all) carries exactly one MESSAGE_ID plus an optional
+// piggybacked MESSAGE_ID_ACK/_NACK.
 //
 // Known non-features (documented, not silently dropped):
 // - SessionObj.setupPri/holdingPri are model-only fields; a real RSVP-TE
@@ -108,6 +120,8 @@ enum RsvpClassNum {
     CLASSNUM_ERO = 20,
     CLASSNUM_RRO = 21,
     CLASSNUM_HELLO = 22,
+    CLASSNUM_MESSAGE_ID = 23, // RFC 2961 Section 5.4
+    CLASSNUM_MESSAGE_ID_ACK = 24, // RFC 2961 Section 5.4 (C-Type distinguishes Ack/Nack, see below)
 };
 
 constexpr uint8_t CTYPE_IPV4 = 1;
@@ -115,8 +129,12 @@ constexpr uint8_t CTYPE_LSP_TUNNEL_IPV4 = 7;
 constexpr uint8_t CTYPE_INTSERV = 2;
 constexpr uint8_t CTYPE_HELLO_REQUEST = 1;
 constexpr uint8_t CTYPE_HELLO_ACK = 2;
+constexpr uint8_t CTYPE_MESSAGE_ID = 1;
+constexpr uint8_t CTYPE_MESSAGE_ID_ACK = 1;
+constexpr uint8_t CTYPE_MESSAGE_ID_NACK = 2;
 
-// RFC 2205 Section 3.1.1 message-type numbers (Hello per RFC 3209 Appendix).
+// RFC 2205 Section 3.1.1 message-type numbers (Hello per RFC 3209 Appendix; Srefresh
+// per RFC 2961 Section 5.3).
 enum RsvpWireMsgType {
     WIRE_PATH = 1,
     WIRE_RESV = 2,
@@ -125,6 +143,7 @@ enum RsvpWireMsgType {
     WIRE_PATH_TEAR = 5,
     WIRE_RESV_TEAR = 6,
     WIRE_HELLO = 20,
+    WIRE_SREFRESH = 15,
 };
 
 int rfcMsgTypeForRsvpKind(int rsvpKind)
@@ -137,6 +156,7 @@ int rfcMsgTypeForRsvpKind(int rsvpKind)
         case PERROR_MESSAGE: return WIRE_PATH_ERR;
         case RERROR_MESSAGE: return WIRE_RESV_ERR;
         case HELLO_MESSAGE: return WIRE_HELLO;
+        case SREFRESH_MESSAGE: return WIRE_SREFRESH;
         default: throw cRuntimeError("RsvpTeSerializer: unknown rsvpKind %d", rsvpKind);
     }
 }
@@ -155,6 +175,7 @@ int rsvpKindForRfcMsgType(int wireType)
         case WIRE_PATH_ERR: return PERROR_MESSAGE;
         case WIRE_RESV_ERR: return RERROR_MESSAGE;
         case WIRE_HELLO: return HELLO_MESSAGE;
+        case WIRE_SREFRESH: return SREFRESH_MESSAGE;
         default: return -1;
     }
 }
@@ -396,6 +417,77 @@ void RsvpTeSerializer::deserializeErrorSpec(MemoryInputStream& stream, Ipv4Addre
     stream.readUint16Be(); // error value
 }
 
+// RFC 2961 Section 5.4 MESSAGE_ID object: this model simplifies the RFC's
+// Flags(1)+Reserved(2)+Epoch(4)+Message_Identifier(4) body down to just
+// Epoch(4)+Message_Identifier(4) -- there is no ACK-Desired/other flag modeled (this
+// router always both requests and grants acknowledgment), matching this file's usual
+// practice of fixing unused sub-fields to a single implicit value rather than
+// carrying dead bytes (see e.g. serializeStyle()'s fixed Option Vector).
+void RsvpTeSerializer::serializeMessageId(MemoryOutputStream& stream, uint32_t epoch, uint32_t id)
+{
+    // 12 bytes: 4-byte object header + Epoch(4) + Message_Identifier(4); must match
+    // RsvpTe.cc's MESSAGE_ID_OBJECT_BYTES constant (see this file's canonical-layout
+    // comment block above).
+    writeObjectHeader(stream, 12, CLASSNUM_MESSAGE_ID, CTYPE_MESSAGE_ID);
+    stream.writeUint32Be(epoch);
+    stream.writeUint32Be(id);
+}
+
+void RsvpTeSerializer::deserializeMessageId(MemoryInputStream& stream, uint32_t& epoch, uint32_t& id)
+{
+    readObjectHeader(stream);
+    epoch = stream.readUint32Be();
+    id = stream.readUint32Be();
+}
+
+// RFC 2961 Section 5.4 MESSAGE_ID_ACK object (C-Type 1) / MESSAGE_ID_NACK (C-Type 2,
+// this model's shorthand for what RFC 2961 calls a MESSAGE_ID_ACK object with the
+// Bad-message flag set) -- same simplified Epoch+Message_Identifier body as
+// MESSAGE_ID above.
+void RsvpTeSerializer::serializeMessageIdAck(MemoryOutputStream& stream, bool nack, uint32_t epoch, uint32_t id)
+{
+    // 12 bytes; must match RsvpTe.cc's MESSAGE_ID_ACK_OBJECT_BYTES constant.
+    writeObjectHeader(stream, 12, CLASSNUM_MESSAGE_ID_ACK, nack ? CTYPE_MESSAGE_ID_NACK : CTYPE_MESSAGE_ID_ACK);
+    stream.writeUint32Be(epoch);
+    stream.writeUint32Be(id);
+}
+
+void RsvpTeSerializer::deserializeMessageIdAck(MemoryInputStream& stream, bool& nack, uint32_t& epoch, uint32_t& id)
+{
+    ObjectHeader oh = readObjectHeader(stream);
+    nack = (oh.cType == CTYPE_MESSAGE_ID_NACK);
+    epoch = stream.readUint32Be();
+    id = stream.readUint32Be();
+}
+
+void RsvpTeSerializer::serializeOptionalMessageIdObjects(MemoryOutputStream& stream, const RsvpPacket& pkt)
+{
+    if (pkt.getHasMessageId())
+        serializeMessageId(stream, pkt.getMessageIdEpoch(), pkt.getMessageId());
+    if (pkt.getHasMessageIdAck())
+        serializeMessageIdAck(stream, pkt.getMessageIdNack(), pkt.getAckedMessageIdEpoch(), pkt.getAckedMessageId());
+}
+
+void RsvpTeSerializer::deserializeOptionalMessageIdObjects(MemoryInputStream& stream, B endPos, RsvpPacket& pkt)
+{
+    if (stream.getPosition() < endPos && peekClassNum(stream) == CLASSNUM_MESSAGE_ID) {
+        uint32_t epoch, id;
+        deserializeMessageId(stream, epoch, id);
+        pkt.setHasMessageId(true);
+        pkt.setMessageIdEpoch(epoch);
+        pkt.setMessageId(id);
+    }
+    if (stream.getPosition() < endPos && peekClassNum(stream) == CLASSNUM_MESSAGE_ID_ACK) {
+        bool nack;
+        uint32_t epoch, id;
+        deserializeMessageIdAck(stream, nack, epoch, id);
+        pkt.setHasMessageIdAck(true);
+        pkt.setMessageIdNack(nack);
+        pkt.setAckedMessageIdEpoch(epoch);
+        pkt.setAckedMessageId(id);
+    }
+}
+
 // RFC 3209 Section 4.3.3.1: ERO IPv4 prefix subobject = L bit + Type(7 bits),
 // Length(1, =8), Address(4), Prefix Length(1), Reserved(1) = 8 bytes/hop.
 // Prefix Length is fixed at 32 (host route) -- this model's EroObj carries no
@@ -482,7 +574,13 @@ FlowDescriptorVector RsvpTeSerializer::deserializeFlowDescriptorList(MemoryInput
 {
     FlowDescriptorVector flows;
     B endPos = stream.getPosition() + remainingLength;
-    while (stream.getPosition() < endPos) {
+    // Stop at the first non-FLOWSPEC object, not just at endPos: since C8 (refresh
+    // reduction) appends optional MESSAGE_ID/MESSAGE_ID_ACK objects after the whole
+    // flow descriptor list, "remainingLength" passed in by the caller may cover
+    // those trailing objects too (it is simply "everything left in the message").
+    // Every flow descriptor unconditionally starts with a FLOWSPEC object (Class-Num
+    // 9), so peeking for it is an exact, unambiguous boundary.
+    while (stream.getPosition() < endPos && peekClassNum(stream) == CLASSNUM_FLOWSPEC) {
         FlowDescriptor_t flow;
         flow.Flowspec_Object.req_bandwidth = deserializeTspec(stream);
         SenderTemplateObj st = deserializeSenderTemplate(stream);
@@ -522,6 +620,7 @@ void RsvpTeSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chu
             serializeEro(stream, pm->getERO());
             serializeSenderTemplate(stream, pm->getSender_descriptor().Sender_Template_Object, CLASSNUM_SENDER_TEMPLATE);
             serializeTspec(stream, pm->getSender_descriptor().Sender_Tspec_Object.req_bandwidth, CLASSNUM_SENDER_TSPEC);
+            serializeOptionalMessageIdObjects(stream, *pm);
             break;
         }
         case PTEAR_MESSAGE: {
@@ -529,6 +628,7 @@ void RsvpTeSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chu
             serializeSession(stream, pt->getSession());
             serializeRsvpHop(stream, pt->getHop());
             serializeSenderTemplate(stream, pt->getSenderTemplate(), CLASSNUM_SENDER_TEMPLATE);
+            serializeOptionalMessageIdObjects(stream, *pt);
             break;
         }
         case PERROR_MESSAGE: {
@@ -537,6 +637,7 @@ void RsvpTeSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chu
             serializeErrorSpec(stream, pe->getErrorNode(), pe->getErrorCode());
             serializeSenderTemplate(stream, pe->getSender_descriptor().Sender_Template_Object, CLASSNUM_SENDER_TEMPLATE);
             serializeTspec(stream, pe->getSender_descriptor().Sender_Tspec_Object.req_bandwidth, CLASSNUM_SENDER_TSPEC);
+            serializeOptionalMessageIdObjects(stream, *pe);
             break;
         }
         case RESV_MESSAGE: {
@@ -546,6 +647,7 @@ void RsvpTeSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chu
             serializeTimeValues(stream, rm->getRefreshPeriod());
             serializeStyle(stream);
             serializeFlowDescriptorList(stream, rm->getFlowDescriptor());
+            serializeOptionalMessageIdObjects(stream, *rm);
             break;
         }
         case RTEAR_MESSAGE: {
@@ -554,6 +656,7 @@ void RsvpTeSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chu
             serializeRsvpHop(stream, rt->getHop());
             serializeStyle(stream);
             serializeFlowDescriptorList(stream, rt->getFlowDescriptor());
+            serializeOptionalMessageIdObjects(stream, *rt);
             break;
         }
         case RERROR_MESSAGE: {
@@ -563,6 +666,7 @@ void RsvpTeSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chu
             serializeErrorSpec(stream, re->getErrorNode(), re->getErrorCode());
             serializeStyle(stream);
             serializeFlowDescriptorList(stream, re->getFlowDescriptor());
+            serializeOptionalMessageIdObjects(stream, *re);
             break;
         }
         case HELLO_MESSAGE: {
@@ -571,6 +675,13 @@ void RsvpTeSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chu
             writeObjectHeader(stream, 12, CLASSNUM_HELLO, hm->getRequest() ? CTYPE_HELLO_REQUEST : CTYPE_HELLO_ACK);
             stream.writeUint32Be(static_cast<uint32_t>(hm->getSrcInstance()));
             stream.writeUint32Be(static_cast<uint32_t>(hm->getDstInstance()));
+            break;
+        }
+        case SREFRESH_MESSAGE: {
+            const auto& sm = staticPtrCast<const RsvpSrefreshMsg>(chunk);
+            serializeMessageId(stream, sm->getMessageIdEpoch(), sm->getMessageId());
+            if (sm->getHasMessageIdAck())
+                serializeMessageIdAck(stream, sm->getMessageIdNack(), sm->getAckedMessageIdEpoch(), sm->getAckedMessageId());
             break;
         }
         default:
@@ -608,6 +719,7 @@ const Ptr<Chunk> RsvpTeSerializer::deserialize(MemoryInputStream& stream) const
             sd.Sender_Template_Object = deserializeSenderTemplate(stream);
             sd.Sender_Tspec_Object.req_bandwidth = deserializeTspec(stream);
             pm->setSender_descriptor(sd);
+            deserializeOptionalMessageIdObjects(stream, endPos, *pm);
             msg = pm;
             break;
         }
@@ -617,6 +729,7 @@ const Ptr<Chunk> RsvpTeSerializer::deserialize(MemoryInputStream& stream) const
             pt->setHop(deserializeRsvpHop(stream));
             pt->setSenderTemplate(deserializeSenderTemplate(stream));
             pt->setForce(false); // model-internal state, not on the wire
+            deserializeOptionalMessageIdObjects(stream, endPos, *pt);
             msg = pt;
             break;
         }
@@ -632,6 +745,7 @@ const Ptr<Chunk> RsvpTeSerializer::deserialize(MemoryInputStream& stream) const
             sd.Sender_Template_Object = deserializeSenderTemplate(stream);
             sd.Sender_Tspec_Object.req_bandwidth = deserializeTspec(stream);
             pe->setSender_descriptor(sd);
+            deserializeOptionalMessageIdObjects(stream, endPos, *pe);
             msg = pe;
             break;
         }
@@ -642,6 +756,7 @@ const Ptr<Chunk> RsvpTeSerializer::deserialize(MemoryInputStream& stream) const
             rm->setRefreshPeriod(deserializeTimeValues(stream));
             deserializeStyle(stream);
             rm->setFlowDescriptor(deserializeFlowDescriptorList(stream, endPos - stream.getPosition()));
+            deserializeOptionalMessageIdObjects(stream, endPos, *rm);
             msg = rm;
             break;
         }
@@ -651,6 +766,7 @@ const Ptr<Chunk> RsvpTeSerializer::deserialize(MemoryInputStream& stream) const
             rt->setHop(deserializeRsvpHop(stream));
             deserializeStyle(stream);
             rt->setFlowDescriptor(deserializeFlowDescriptorList(stream, endPos - stream.getPosition()));
+            deserializeOptionalMessageIdObjects(stream, endPos, *rt);
             msg = rt;
             break;
         }
@@ -665,6 +781,7 @@ const Ptr<Chunk> RsvpTeSerializer::deserialize(MemoryInputStream& stream) const
             re->setErrorCode(errorCode);
             deserializeStyle(stream);
             re->setFlowDescriptor(deserializeFlowDescriptorList(stream, endPos - stream.getPosition()));
+            deserializeOptionalMessageIdObjects(stream, endPos, *re);
             msg = re;
             break;
         }
@@ -676,6 +793,24 @@ const Ptr<Chunk> RsvpTeSerializer::deserialize(MemoryInputStream& stream) const
             hm->setSrcInstance(static_cast<int>(stream.readUint32Be()));
             hm->setDstInstance(static_cast<int>(stream.readUint32Be()));
             msg = hm;
+            break;
+        }
+        case SREFRESH_MESSAGE: {
+            auto sm = makeShared<RsvpSrefreshMsg>();
+            uint32_t epoch, id;
+            deserializeMessageId(stream, epoch, id);
+            sm->setMessageIdEpoch(epoch);
+            sm->setMessageId(id);
+            if (stream.getPosition() < endPos && peekClassNum(stream) == CLASSNUM_MESSAGE_ID_ACK) {
+                bool nack;
+                uint32_t ackedEpoch, ackedId;
+                deserializeMessageIdAck(stream, nack, ackedEpoch, ackedId);
+                sm->setHasMessageIdAck(true);
+                sm->setMessageIdNack(nack);
+                sm->setAckedMessageIdEpoch(ackedEpoch);
+                sm->setAckedMessageId(ackedId);
+            }
+            msg = sm;
             break;
         }
         default: {

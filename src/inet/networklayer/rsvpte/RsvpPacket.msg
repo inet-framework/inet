@@ -20,6 +20,7 @@ enum RsvpConstants {
     PERROR_MESSAGE = 5;
     RERROR_MESSAGE = 6;
     HELLO_MESSAGE  = 7;
+    SREFRESH_MESSAGE = 8; // RFC 2961 Section 5.3 Srefresh (Workstream C8); wire message type 15, see RsvpTeSerializer.cc's translation table
 }
 
 //
@@ -36,6 +37,30 @@ class RsvpMessage extends FieldsChunk
 class RsvpPacket extends RsvpMessage
 {
     SessionObj session;
+
+    // RFC 2961 Section 5.4 refresh reduction (Workstream C8), gated on the sending
+    // router's "refreshReduction" parameter (default off, so these fields default to
+    // "absent" for every existing example/showcase). MESSAGE_ID identifies the
+    // content of the PSB/RSB state this particular message carries, so that a later
+    // Srefresh (~RsvpSrefreshMsg) naming the same id can stand in for a full resend of
+    // it. Presence on the wire is inferred from this message's own recorded total
+    // length (RsvpTeSerializer's existing ERO/RRO trailing-optional-object
+    // convention), not a dedicated flag byte.
+    bool hasMessageId = false;
+    uint32_t messageIdEpoch = 0;
+    uint32_t messageId = 0;
+
+    // RFC 2961 Section 5.4 MESSAGE_ID_ACK / MESSAGE_ID_NACK object. Workstream C8
+    // scope choice: acknowledgments are piggybacked only, on whatever message this
+    // router next sends back toward the id's originator (Path/Resv/Srefresh) --
+    // there is no standalone Ack message type in this model. A set "nack" means the
+    // id named below was NOT recognized by this router (see RsvpTe.cc's
+    // processSrefreshMsg()); the originator falls back to a full resend on
+    // receiving it.
+    bool hasMessageIdAck = false;
+    bool messageIdNack = false;
+    uint32_t ackedMessageIdEpoch = 0;
+    uint32_t ackedMessageId = 0;
 }
 
 cplusplus(RsvpPacket) {{
