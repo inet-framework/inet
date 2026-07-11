@@ -42,6 +42,68 @@ void TcpReno::recalculateSlowStartThreshold()
     conn->emit(ssthreshSignal, state->ssthresh);
 }
 
+uint32_t TcpReno::prrNewlyDelivered() const
+{
+    // bytes newly cumulatively-acked + selectively-acked by the ACK being processed
+    // (snapshot taken at the top of process_RCV_SEGMENT)
+    return (uint32_t)(state->deliveredBytes - state->prrDeliveredMark);
+}
+
+void TcpReno::prrInitCwndReduction()
+{
+    // RFC 6937 / Linux tcp_init_cwnd_reduction(): snapshot cwnd, reset the PRR
+    // counters, and reduce ssthresh via the flavour's decrease function.
+    state->priorCwnd = state->snd_cwnd;
+    state->prrDelivered = 0;
+    state->prrOut = 0;
+    recalculateSlowStartThreshold(); // sets state->ssthresh and emits ssthreshSignal
+}
+
+void TcpReno::prrCwndReduction(int newlyAckedSacked, int newlyLost, bool sndUnaAdvanced)
+{
+    // RFC 6937 / Linux tcp_cwnd_reduction(): proportional rate reduction. All
+    // quantities are in bytes (Linux counts packets); 1 packet == snd_mss bytes.
+    if (newlyAckedSacked <= 0 || state->priorCwnd == 0)
+        return;
+
+    conn->setPipe();
+    int pipeNow = (int)state->pipe;
+    int delta = (int)state->ssthresh - pipeNow;
+
+    state->prrDelivered += newlyAckedSacked;
+
+    int sndcnt;
+    if (delta < 0) {
+        // proportional phase: bound sending to the reduction slope
+        uint64_t dividend = (uint64_t)state->ssthresh * state->prrDelivered + state->priorCwnd - 1;
+        sndcnt = (int)(dividend / state->priorCwnd) - (int)state->prrOut;
+    }
+    else {
+        // slow-start-reduction-bound phase
+        sndcnt = std::max((int)state->prrDelivered - (int)state->prrOut, newlyAckedSacked);
+        if (sndUnaAdvanced && newlyLost == 0)
+            sndcnt += (int)state->snd_mss;
+        sndcnt = std::min(delta, sndcnt);
+    }
+    // force at least one segment out on entering fast recovery (prrOut == 0)
+    sndcnt = std::max(sndcnt, (int)(state->prrOut ? 0 : state->snd_mss));
+
+    state->snd_cwnd = (uint32_t)std::max(0, pipeNow + sndcnt);
+    conn->emit(cwndSignal, state->snd_cwnd);
+
+    EV_DETAIL << "PRR: pipe=" << pipeNow << " ssthresh=" << state->ssthresh
+              << " prrDelivered=" << state->prrDelivered << " prrOut=" << state->prrOut
+              << " sndcnt=" << sndcnt << " -> cwnd=" << state->snd_cwnd << "\n";
+}
+
+void TcpReno::prrEndCwndReduction()
+{
+    // RFC 6937 / Linux tcp_end_cwnd_reduction(): set cwnd to ssthresh on leaving recovery.
+    state->snd_cwnd = state->ssthresh;
+    conn->emit(cwndSignal, state->snd_cwnd);
+    EV_INFO << "PRR: leaving fast recovery, cwnd=ssthresh=" << state->snd_cwnd << "\n";
+}
+
 void TcpReno::processRexmitTimer(TcpEventCode& event)
 {
     TcpTahoeRenoFamily::processRexmitTimer(event);
@@ -80,7 +142,13 @@ void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
 {
     TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
 
-    if (state->dupacks >= state->dupthresh) {
+    if (state->prrEnabled && state->lossRecovery) {
+        // RFC 6937: while in fast recovery, PRR sizes cwnd from delivered bytes
+        // (no slow start / congestion avoidance growth). The deflation to ssthresh
+        // happens at recovery exit (prrEndCwndReduction, below).
+        prrCwndReduction((int)prrNewlyDelivered(), 0, true /*snd_una advanced*/);
+    }
+    else if (state->dupacks >= state->dupthresh) {
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
@@ -191,6 +259,8 @@ void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
         if (seqGE(state->snd_una, state->recoveryPoint)) {
             EV_INFO << "Loss Recovery terminated.\n";
             state->lossRecovery = false;
+            if (state->prrEnabled)
+                prrEndCwndReduction(); // RFC 6937: snd_cwnd = ssthresh on exit
         }
         // RFC 3517, page 7: "(B) Upon receipt of an ACK that does not cover RecoveryPoint the
         // following actions MUST be taken:
@@ -274,51 +344,71 @@ void TcpReno::receivedDuplicateAck()
         // segments (although transmission must continue using a reduced cwnd)."
 
         // enter Fast Recovery
-        recalculateSlowStartThreshold();
-        // "set cwnd to ssthresh plus 3 * SMSS." (RFC 2581)
-        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss; // 20051129 (1)
+        if (state->prrEnabled) {
+            // RFC 6937 Proportional Rate Reduction: no cwnd inflation. Size cwnd
+            // with prrOut==0 (forces at least one segment out for the fast
+            // retransmit), retransmit, then fill the pipe up to the PRR cwnd.
+            prrInitCwndReduction();
+            prrCwndReduction((int)prrNewlyDelivered(), 0, false /*snd_una not advanced*/);
+            EV_DETAIL << " PRR fast recovery: priorCwnd=" << state->priorCwnd
+                      << ", ssthresh=" << state->ssthresh << ", cwnd=" << state->snd_cwnd << "\n";
 
-        conn->emit(cwndSignal, state->snd_cwnd);
+            conn->retransmitOneSegment(false);
 
-        EV_DETAIL << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
-
-        // Fast Retransmission: retransmit missing segment without waiting
-        // for the REXMIT timer to expire
-        conn->retransmitOneSegment(false);
-
-        // Do not restart REXMIT timer.
-        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
-        // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
-
-        if (state->sack_enabled) {
-            // RFC 3517, page 7: "(4) Run SetPipe ()
-            //
-            // Set a "pipe" variable  to the number of outstanding octets
-            // currently "in the pipe"; this is the data which has been sent by
-            // the TCP sender but for which no cumulative or selective
-            // acknowledgment has been received and the data has not been
-            // determined to have been dropped in the network.  It is assumed
-            // that the data is still traversing the network path."
-            conn->setPipe();
-            // RFC 3517, page 7: "(5) In order to take advantage of potential additional available
-            // cwnd, proceed to step (C) below."
             if (state->lossRecovery) {
-                // RFC 3517, page 9: "Therefore we give implementers the latitude to use the standard
-                // [RFC2988] style RTO management or, optionally, a more careful variant
-                // that re-arms the RTO timer on each retransmission that is sent during
-                // recovery MAY be used.  This provides a more conservative timer than
-                // specified in [RFC2988], and so may not always be an attractive
-                // alternative.  However, in some cases it may prevent needless
-                // retransmissions, go-back-N transmission and further reduction of the
-                // congestion window."
-                // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
-                EV_INFO << "Retransmission sent during recovery, restarting REXMIT timer.\n";
                 restartRexmitTimer();
-
-                // RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
-                // segments as follows:"
-                if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
+                conn->setPipe();
+                if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss)
                     conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
+            }
+        }
+        else {
+            recalculateSlowStartThreshold();
+            // "set cwnd to ssthresh plus 3 * SMSS." (RFC 2581)
+            state->snd_cwnd = state->ssthresh + 3 * state->snd_mss; // 20051129 (1)
+
+            conn->emit(cwndSignal, state->snd_cwnd);
+
+            EV_DETAIL << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
+
+            // Fast Retransmission: retransmit missing segment without waiting
+            // for the REXMIT timer to expire
+            conn->retransmitOneSegment(false);
+
+            // Do not restart REXMIT timer.
+            // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+            // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
+
+            if (state->sack_enabled) {
+                // RFC 3517, page 7: "(4) Run SetPipe ()
+                //
+                // Set a "pipe" variable  to the number of outstanding octets
+                // currently "in the pipe"; this is the data which has been sent by
+                // the TCP sender but for which no cumulative or selective
+                // acknowledgment has been received and the data has not been
+                // determined to have been dropped in the network.  It is assumed
+                // that the data is still traversing the network path."
+                conn->setPipe();
+                // RFC 3517, page 7: "(5) In order to take advantage of potential additional available
+                // cwnd, proceed to step (C) below."
+                if (state->lossRecovery) {
+                    // RFC 3517, page 9: "Therefore we give implementers the latitude to use the standard
+                    // [RFC2988] style RTO management or, optionally, a more careful variant
+                    // that re-arms the RTO timer on each retransmission that is sent during
+                    // recovery MAY be used.  This provides a more conservative timer than
+                    // specified in [RFC2988], and so may not always be an attractive
+                    // alternative.  However, in some cases it may prevent needless
+                    // retransmissions, go-back-N transmission and further reduction of the
+                    // congestion window."
+                    // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+                    EV_INFO << "Retransmission sent during recovery, restarting REXMIT timer.\n";
+                    restartRexmitTimer();
+
+                    // RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
+                    // segments as follows:"
+                    if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
+                        conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
+                }
             }
         }
 
@@ -326,18 +416,28 @@ void TcpReno::receivedDuplicateAck()
         sendData(false);
     }
     else if (state->dupacks > state->dupthresh) {
-        //
-        // Reno: For each additional duplicate ACK received, increment cwnd by SMSS.
-        // This artificially inflates the congestion window in order to reflect the
-        // additional segment that has left the network
-        //
-        state->snd_cwnd += state->snd_mss;
-        EV_DETAIL << "Reno on dupAcks > DUPTHRESH(=" << state->dupthresh << ": Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
+        if (state->prrEnabled && state->lossRecovery) {
+            // RFC 6937: each additional dup ACK carrying new SACK info sizes cwnd
+            // by PRR rather than inflating it by one SMSS.
+            prrCwndReduction((int)prrNewlyDelivered(), 0, false /*snd_una not advanced*/);
+            conn->setPipe();
+            if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss)
+                conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
+        }
+        else {
+            //
+            // Reno: For each additional duplicate ACK received, increment cwnd by SMSS.
+            // This artificially inflates the congestion window in order to reflect the
+            // additional segment that has left the network
+            //
+            state->snd_cwnd += state->snd_mss;
+            EV_DETAIL << "Reno on dupAcks > DUPTHRESH(=" << state->dupthresh << ": Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
 
-        conn->emit(cwndSignal, state->snd_cwnd);
+            conn->emit(cwndSignal, state->snd_cwnd);
+        }
 
         // Note: Steps (A) - (C) of RFC 3517, page 7 ("Once a TCP is in the loss recovery phase the following procedure MUST be used for each arriving ACK")
-        // should not be used here!
+        // should not be used here (non-PRR)!
 
         // RFC 3517, pages 7 and 8: "5.1 Retransmission Timeouts
         // (...)

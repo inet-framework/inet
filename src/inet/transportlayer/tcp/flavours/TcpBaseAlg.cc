@@ -649,11 +649,19 @@ void TcpBaseAlg::dataSent(uint32_t fromseq)
     // RTT sampling, and by RACK/Eifel loss recovery)
     state->sentInfo.clearTo(state->snd_una);
     state->sentInfo.set(fromseq, state->snd_max, simTime());
+
+    // RFC 6937 PRR: count bytes transmitted while in fast recovery
+    if (state->prrEnabled && state->lossRecovery && seqGreater(state->snd_max, fromseq))
+        state->prrOut += state->snd_max - fromseq;
 }
 
 void TcpBaseAlg::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
 {
     state->sentInfo.set(fromseq, toseq, simTime());
+
+    // RFC 6937 PRR: count retransmitted bytes while in fast recovery
+    if (state->prrEnabled && state->lossRecovery && seqGreater(toseq, fromseq))
+        state->prrOut += toseq - fromseq;
 }
 
 void TcpBaseAlg::restartRexmitTimer()

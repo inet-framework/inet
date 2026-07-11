@@ -38,6 +38,18 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
     /** Redefine what should happen on retransmission */
     virtual void processRexmitTimer(TcpEventCode& event) override;
 
+    /** @name Proportional Rate Reduction (RFC 6937) */
+    //@{
+    /** RFC 6937 init: snapshot cwnd, reset PRR counters, set ssthresh. Linux tcp_init_cwnd_reduction(). */
+    virtual void prrInitCwndReduction();
+    /** RFC 6937 per-ACK cwnd sizing: snd_cwnd = pipe + sndcnt. Linux tcp_cwnd_reduction(). */
+    virtual void prrCwndReduction(int newlyAckedSacked, int newlyLost, bool sndUnaAdvanced);
+    /** RFC 6937 exit: snd_cwnd = ssthresh. Linux tcp_end_cwnd_reduction(). */
+    virtual void prrEndCwndReduction();
+    /** Newly acked+sacked bytes carried by the ACK currently being processed. */
+    uint32_t prrNewlyDelivered() const;
+    //@}
+
   public:
     /** Ctor */
     TcpReno();

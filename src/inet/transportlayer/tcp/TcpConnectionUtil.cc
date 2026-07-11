@@ -662,9 +662,12 @@ void TcpConnection::configureStateVariables()
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
     state->dupthresh = tcpMain->par("dupthresh");
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
+    state->prrEnabled = tcpMain->par("prrEnabled");
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
     if (state->lossDetectionMode == 1 && !state->sack_support)
         throw cRuntimeError("lossDetectionMode=\"rack\" requires sackSupport=true");
+    if (state->prrEnabled && !state->sack_support)
+        throw cRuntimeError("prrEnabled=true (Proportional Rate Reduction, RFC 6937) requires sackSupport=true");
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet

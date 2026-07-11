@@ -205,6 +205,13 @@ struct TcpStateVariables
 
     // delivered-bytes accounting (RFC 8985 delivery; RFC 6937 PRR input)
     uint64_t deliveredBytes = 0;   // cumulative newly-delivered (cumulatively acked + selectively acked) bytes
+    uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
+
+    // PRR - Proportional Rate Reduction (RFC 6937)
+    bool prrEnabled = false;       // use PRR during fast recovery (set from the prrEnabled parameter)
+    uint32_t prrDelivered = 0;     // bytes delivered during the current recovery episode
+    uint32_t prrOut = 0;           // bytes transmitted during the current recovery episode
+    uint32_t priorCwnd = 0;        // snd_cwnd snapshot at recovery entry (RFC 6937 RecoverFS proxy)
 
     // RACK-TLP loss detection (RFC 8985)
     int lossDetectionMode = 0;    // 0 = classic DupThresh (RFC 3517), 1 = RACK time-based

@@ -1,0 +1,75 @@
+%description:
+Tests Proportional Rate Reduction (RFC 6937, prrEnabled=true) during fast
+recovery. A single data segment in the middle of the transfer is dropped; once
+DupThresh duplicate ACKs (carrying SACK information) arrive, TcpReno enters fast
+recovery. With PRR the congestion window is NOT inflated to ssthresh+3*SMSS and
+then by one SMSS per further dup ACK (classic Reno); instead cwnd is set to
+pipe + sndcnt, releasing roughly one segment per delivered ACK. The pinned lines
+prove PRR ran and the transfer completed.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="A8 delete"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0s
+*.cli_app.sendBytes=15000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 10000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.prrEnabled = true
+*.*_tcp.initialWindow = "rfc6928"
+
+%# PRR entered fast recovery (no ssthresh+3*SMSS inflation)
+%contains: stdout
+PRR fast recovery
+
+%# PRR sized cwnd from pipe during recovery (proportional reduction toward ssthresh)
+%contains: stdout
+PRR: pipe=
+
+%# on leaving recovery cwnd is set to ssthresh (RFC 6937 tcp_end_cwnd_reduction)
+%contains: stdout
+PRR: leaving fast recovery, cwnd=ssthresh=4000
+
+%# the transfer completed despite the loss
+%contains: stdout
+received 15000 bytes in 15 packets
+
+%# classic Reno cwnd inflation must NOT occur under PRR
+%# Falsification: with prrEnabled=false this scenario instead prints
+%# "inflating cwnd by SMSS" (13 times) and no "PRR" lines (verified during
+%# development), so the pins above would fail.
+%not-contains: stdout
+inflating cwnd by SMSS

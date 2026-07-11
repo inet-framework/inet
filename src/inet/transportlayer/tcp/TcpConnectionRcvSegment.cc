@@ -83,6 +83,10 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
 
     state->time_last_segment_received = simTime(); // idle base for keepalive
 
+    // snapshot delivered-bytes so the algorithm can read this segment's newly
+    // acked+sacked bytes (RFC 6937 PRR input) as deliveredBytes - prrDeliveredMark
+    state->prrDeliveredMark = state->deliveredBytes;
+
     emit(rcvSeqSignal, tcpHeader->getSequenceNo());
     emit(rcvAckSignal, tcpHeader->getAckNo());
 
