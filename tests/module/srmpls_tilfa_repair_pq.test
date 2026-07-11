@@ -1,0 +1,157 @@
+%description:
+Module test for TI-LFA (RFC 9855) repair-stack COMPUTATION only (Workstream F2, Phase 2) --
+no link failure is triggered here (that's a later phase's job, wiring the computed repairs
+into LibTable::setBackup()/activateBackup()). This test locks in that ~SegmentRouting, with
+`tiLfa=true`, correctly finds a single-segment (PQ node) repair over a real, flooded,
+multi-router network -- not just a hand-built unit-test harness.
+
+Topology (a "diamond"): A(1.1.1.1) -- B(2.2.2.2) -- D(4.4.4.4), and also A -- C(3.3.3.3) -- D,
+all links metric 1. A's shortest path to D is via B (cost 2); the A-C-D branch (also cost 2)
+is a tied-cost alternate. All four nodes share one sidTable (A=1, B=2, C=3, D=4; srgbBase
+16000 -> labels A=16001, B=16002, C=16003, D=16004).
+
+With the A-B link (A's own next hop toward D) treated as "protected": excluding it, A can
+still reach C (unaffected, direct link) and, via C, D itself -- at the SAME cost as before
+(1+1=2), so both C and D remain in A's (distance-preserving) P-space. On the OTHER side,
+Q-space of D (nodes whose own path to D doesn't need the A-B link) includes B (direct B-D
+link, doesn't touch A-B at all), C, D itself, and -- since A's own alternate via C ties the
+original cost -- A too.
+
+P-space = {A, C, D}, Q-space = {A, B, C, D}. Excluding routerId (A) itself from consideration
+(pushing "your own" node-SID as a repair is meaningless), the intersection is {C, D}; since
+SegmentRouting iterates candidates in ascending IPv4 address order, C (3.3.3.3) is found
+BEFORE D (4.4.4.4) -- this deliberately proves the computation finds a genuine INTERMEDIATE
+PQ node, not just trivially falling back to the destination itself (which is also technically
+a valid, but less interesting, PQ node in this topology).
+
+Expected repair for destination D, protecting the A-B link: a SINGLE node-SID segment, C's
+label (16003) -- logged as "TI-LFA repair for 4.4.4.4 via 2.2.2.2: [PUSH 16003 (3.3.3.3)]".
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.mpls.SrMplsRouter;
+import ned.DatarateChannel;
+
+network TiLfaRepairPqTest
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    types:
+        channel Link extends DatarateChannel
+        {
+            datarate = 1Mbps;
+            delay = 10us;
+        }
+    submodules:
+        A: SrMplsRouter {
+            parameters:
+                routerId = "1.1.1.1";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                segmentRouting.tiLfa = true;
+                @display("p=250,100");
+            gates:
+                pppg[2];
+        }
+        B: SrMplsRouter {
+            parameters:
+                routerId = "2.2.2.2";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=400,50");
+            gates:
+                pppg[2];
+        }
+        C: SrMplsRouter {
+            parameters:
+                routerId = "3.3.3.3";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=400,150");
+            gates:
+                pppg[2];
+        }
+        D: SrMplsRouter {
+            parameters:
+                routerId = "4.4.4.4";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=550,100");
+            gates:
+                pppg[2];
+        }
+    connections:
+        A.pppg[0] <--> Link <--> B.pppg[0];
+        B.pppg[1] <--> Link <--> D.pppg[0];
+        A.pppg[1] <--> Link <--> C.pppg[0];
+        C.pppg[1] <--> Link <--> D.pppg[1];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: sidtable.xml
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+    <node router="4.4.4.4" sid="4"/>
+</sr>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: A.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.1	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.2	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: B.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.3	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.4	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: C.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.5	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.6	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: D.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.7	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.8	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src
+network = TiLfaRepairPqTest
+sim-time-limit = 2s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "detail"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.A.ipv4.routingTable.routingFile = "A.rt"
+**.B.ipv4.routingTable.routingFile = "B.rt"
+**.C.ipv4.routingTable.routingFile = "C.rt"
+**.D.ipv4.routingTable.routingFile = "D.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%# A single node-SID segment (C's label, 16003) repairs destination D against the A-B link.
+%contains: stdout
+TI-LFA repair for 4.4.4.4 via 2.2.2.2: [PUSH 16003 (3.3.3.3)]
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

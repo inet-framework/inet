@@ -62,6 +62,46 @@ import inet.common.SimpleModule;
 // The SR-policy ingress classifier (segment-list label stack imposition,
 // ~SrPolicy) is a separate module; see F1's later phases.
 //
+// TI-LFA (Topology-Independent Loop-Free Alternates, RFC 9855, Workstream F2): when `tiLfa`
+// is true (default false; the whole mechanism is dormant otherwise), ~SegmentRouting
+// additionally precomputes, for every destination whose current shortest path leaves via one
+// of this router's own links, a backup repair label stack to use if that specific link fails
+// -- BEFORE the failure happens, so it is ready the instant this router (acting as the Point
+// of Local Repair, PLR) notices the link go down (see ~Ted's `trackInterfaceState`), rather
+// than waiting for IGP flooding/reconvergence.
+//
+// For a protected link L and destination D:
+// - P-space: nodes reachable from this router without ever traversing L (extended P-space
+//   additionally includes nodes reachable this way from each of this router's OTHER
+//   neighbours -- RFC 9855's "extended P-space", which increases the chance of finding a
+//   usable repair).
+// - Q-space of D: nodes whose OWN shortest path to D does not traverse L (computed via a
+//   reverse shortest-path tree rooted at D, since this is about paths *toward* D, not *from*
+//   this router).
+// - If P-space and Q-space intersect, the repair is a SINGLE node-SID segment: any PQ node's
+//   label steers the packet, via this router's own (L-independent) path, to a node that is
+//   already known to route safely onward to D.
+// - Otherwise, this module looks for a P-space node P that is topologically ADJACENT (a real
+//   link, not the protected one) to a Q-space node Q, and uses TWO node-SID segments,
+//   [node-SID(P), node-SID(Q)]: cross to P (via a path that cannot use L), then continue under
+//   Q's label so P doesn't hand the packet back to ordinary (possibly not-yet-reconverged, and
+//   so possibly still looping through L) IP forwarding. NOTE this deliberately uses a SECOND
+//   NODE-SID rather than P's own adjacency-SID (the textbook RFC 9855 §5 form): this model's
+//   adjacency SIDs are never advertised/flooded between routers (the same limitation
+//   ~SrPolicy's `adj:` segments document), so the PLR could never learn a THIRD-party node's
+//   adjacency-SID label value; two globally-resolvable node-SID labels sidestep that limitation
+//   entirely, at the cost of requiring P and Q to be directly adjacent (a real link between
+//   them), which is more restrictive than the general RFC 9855 form.
+// - If neither of the above yields a repair within `maxRepairStackDepth` segments, the
+//   destination is left UNPROTECTED (logged via EV_WARN): a link failure toward it converges
+//   the ordinary, non-TI-LFA way, via the existing signaling-free node-SID recomputation on
+//   the next ~tedChangedSignal.
+//
+// This phase computes and logs (`EV_DETAIL`, one line per destination: "TI-LFA repair for
+// <dest> via <protectedNeighbor>: <segment list>", or "...: UNPROTECTED") the repair stacks;
+// it does not yet activate them (see a later phase for wiring this into
+// ~LibTable::setBackup()/activateBackup() on an actual local link failure).
+//
 // The `sidTable` XML format: the root element is <sr>, containing any
 // number of <node> elements, each with:
 // - router: the router's IPv4 router id (e.g. "10.1.1.1")
@@ -86,6 +126,8 @@ simple SegmentRouting extends SimpleModule
         int srgbBase = default(16000); // Segment Routing Global Block: first label of the block
         int srgbSize = default(8000);  // Segment Routing Global Block: number of labels in the block
         xml sidTable; // network-wide router-id -> node-SID index map, see class documentation for the XML format; required, no default
+        bool tiLfa = default(false); // Whether to precompute TI-LFA (RFC 9855) repair label stacks; see class documentation
+        int maxRepairStackDepth = default(3); // Maximum number of segments a TI-LFA repair stack may use before the destination is left unprotected
         @display("i=block/table2");
         @signal[sidEntriesInstalled](type=long); // emitted after every (re)computation, with the number of node-SID LIB entries currently owned by this module
         @statistic[sidEntriesInstalled](title="number of installed node-SID LIB entries"; record=last,vector; interpolationmode=none);

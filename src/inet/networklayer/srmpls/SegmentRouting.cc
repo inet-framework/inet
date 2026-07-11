@@ -34,9 +34,13 @@ void SegmentRouting::initialize(int stage)
 
         readSidTableFromXML(par("sidTable").xmlValue());
 
+        tiLfa = par("tiLfa");
+        maxRepairStackDepth = par("maxRepairStackDepth");
+
         WATCH(routerId);
         WATCH(srgbBase);
         WATCH(srgbSize);
+        WATCH(tiLfa);
     }
 }
 
@@ -256,6 +260,9 @@ void SegmentRouting::recomputeAndInstall()
     emit(sidEntriesInstalledSignal, (long)ownedLabels.size());
 
     recomputeAdjacencySids();
+
+    if (tiLfa)
+        computeTiLfaRepairs();
 }
 
 void SegmentRouting::recomputeAdjacencySids()
@@ -319,6 +326,189 @@ int SegmentRouting::getAdjSidLabel(int interfaceId) const
 {
     auto it = adjSidByInterfaceId.find(interfaceId);
     return it != adjSidByInterfaceId.end() ? it->second : -1;
+}
+
+Ipv4AddressVector SegmentRouting::getOwnNeighbors(const TeLinkStateInfoVector& topology)
+{
+    Ipv4AddressVector neighbors;
+    for (auto& link : topology) {
+        if (link.advrouter == routerId && link.state)
+            neighbors.push_back(link.linkid);
+    }
+    return neighbors;
+}
+
+TeLinkStateInfoVector SegmentRouting::withLinkExcluded(const TeLinkStateInfoVector& topology, Ipv4Address a, Ipv4Address b)
+{
+    TeLinkStateInfoVector result = topology;
+    for (auto& link : result) {
+        if ((link.advrouter == a && link.linkid == b) || (link.advrouter == b && link.linkid == a))
+            link.state = false;
+    }
+    return result;
+}
+
+TeLinkStateInfoVector SegmentRouting::reversedTopology(const TeLinkStateInfoVector& topology)
+{
+    TeLinkStateInfoVector result = topology;
+    for (auto& link : result) {
+        Ipv4Address tmpRouter = link.advrouter;
+        link.advrouter = link.linkid;
+        link.linkid = tmpRouter;
+
+        Ipv4Address tmpAddr = link.local;
+        link.local = link.remote;
+        link.remote = tmpAddr;
+    }
+    return result;
+}
+
+std::set<Ipv4Address> SegmentRouting::distancePreservingReachable(Ipv4Address root,
+        const TeLinkStateInfoVector& fullTopology, const TeLinkStateInfoVector& filteredTopology)
+{
+    std::set<Ipv4Address> result;
+    result.insert(root); // trivially at distance 0 from itself, in both topologies
+
+    for (auto& elem : sidByRouter) {
+        Ipv4Address candidate = elem.first;
+        if (candidate == root)
+            continue;
+
+        double fullDist, filteredDist;
+        bool reachableInFull = ted->getShortestPathCost(root, candidate, fullTopology, 0.0, 7, fullDist);
+        bool reachableInFiltered = ted->getShortestPathCost(root, candidate, filteredTopology, 0.0, 7, filteredDist);
+
+        if (!reachableInFull || !reachableInFiltered)
+            continue; // unreachable in either topology: not a (simple) P-/Q-space member
+
+        if (filteredDist <= fullDist)
+            result.insert(candidate);
+        // else: reachable, but only via a STRICTLY LONGER path once the filtered link is
+        // excluded -- deliberately NOT included (see this method's header doc: relying on such
+        // a path risks a transient micro-loop, exactly what P-space/Q-space rules out).
+        // filteredDist can never be LESS than fullDist (removing a link can only lengthen or
+        // preserve a shortest path), so "<=" and "==" are equivalent here; "<=" is used only to
+        // be robust against floating-point noise from repeated additions.
+    }
+
+    return result;
+}
+
+void SegmentRouting::computeTiLfaRepairs()
+{
+    tiLfaRepairByRouter.clear();
+
+    const TeLinkStateInfoVector& topology = ted->getLinks();
+    Ipv4AddressVector ownNeighbors = getOwnNeighbors(topology);
+
+    for (auto& elem : sidByRouter) {
+        Ipv4Address dest = elem.first;
+        if (dest == routerId)
+            continue;
+
+        // The protected link is whichever of THIS router's own links dest's CURRENT shortest
+        // path leaves via -- exactly node-SID forwarding's own next hop for dest, computed the
+        // same way recomputeAndInstall() does, but read out directly here (rather than through
+        // resolveNextHop()) because the protected link's FAR END (path[1]) is exactly what's
+        // needed, not just the resolved interface id.
+        Ipv4AddressVector destVec;
+        destVec.push_back(dest);
+        Ipv4AddressVector path = ted->calculateShortestPath(routerId, destVec, topology, 0.0, 7);
+        if (path.size() < 2) {
+            EV_DETAIL << "TI-LFA repair for " << dest << ": UNPROTECTED (destination currently unreachable)" << endl;
+            continue;
+        }
+        Ipv4Address protectedNeighbor = path[1];
+
+        TeLinkStateInfoVector excludedTopology = withLinkExcluded(topology, routerId, protectedNeighbor);
+
+        // P-space: nodes whose shortest-path cost from this router is UNCHANGED once the
+        // protected link is excluded (distancePreservingReachable()'s definition -- see its
+        // doc for why a node reachable only via a strictly LONGER alternate is excluded).
+        // Extended P-space additionally includes such nodes reachable from each of this
+        // router's OTHER neighbors, over the SAME topology pair (RFC 9855; increases the
+        // chance of a PQ hit).
+        std::set<Ipv4Address> pSpace = distancePreservingReachable(routerId, topology, excludedTopology);
+        for (auto& neighbor : ownNeighbors) {
+            if (neighbor == protectedNeighbor)
+                continue;
+            std::set<Ipv4Address> extra = distancePreservingReachable(neighbor, topology, excludedTopology);
+            pSpace.insert(extra.begin(), extra.end());
+        }
+
+        // Q-space of dest: nodes whose OWN shortest-path cost TO dest is unchanged once the
+        // protected link is excluded -- computed via a reverse-SPT rooted at dest, over the
+        // reversed topology pair (order of reverse-then-exclude vs exclude-then-reverse doesn't
+        // matter: withLinkExcluded() matches the link in both directions either way).
+        TeLinkStateInfoVector reversedFull = reversedTopology(topology);
+        TeLinkStateInfoVector reversedExcluded = reversedTopology(excludedTopology);
+        std::set<Ipv4Address> qSpace = distancePreservingReachable(dest, reversedFull, reversedExcluded);
+
+        // Case 1: a PQ node exists -> single node-SID segment. (Skip routerId itself: using
+        // our own "node SID" as a repair segment is meaningless -- we're already here.)
+        bool found = false;
+        for (auto& node : pSpace) {
+            if (node == routerId || !qSpace.count(node))
+                continue;
+
+            int sid = sidByRouter.at(node);
+            int label = srgbBase + sid;
+            LabelOp op;
+            op.optcode = PUSH_OPER;
+            op.label = label;
+            tiLfaRepairByRouter[dest] = LabelOpVector{op};
+            EV_DETAIL << "TI-LFA repair for " << dest << " via " << protectedNeighbor << ": [PUSH " << label << " (" << node << ")]" << endl;
+            found = true;
+            break;
+        }
+        if (found)
+            continue;
+
+        // Case 2: no PQ node -- look for a P-space node P directly adjacent (a real link, not
+        // the protected one) to a Q-space node Q, and bridge with TWO node-SID segments
+        // [P, Q] (see class documentation for why a second node-SID, not P's adjacency-SID).
+        if (maxRepairStackDepth >= 2) {
+            for (auto& link : topology) {
+                if (!link.state)
+                    continue;
+                if (link.advrouter == routerId && link.linkid == protectedNeighbor)
+                    continue; // the protected link itself can never be part of its own repair
+
+                Ipv4Address p = link.advrouter;
+                Ipv4Address q = link.linkid;
+                if (p == q || !pSpace.count(p) || !qSpace.count(q))
+                    continue;
+                if (p == routerId)
+                    continue; // that would just be case 1 with q as the PQ node -- already tried
+
+                int pSid = sidByRouter.at(p);
+                int qSid = sidByRouter.at(q);
+                int pLabel = srgbBase + pSid;
+                int qLabel = srgbBase + qSid;
+
+                // Wire order: LibTable::pushLabel()/Mpls::doStackOps() insert each PUSH at the
+                // FRONT of the packet's label stack, so the LAST op appended ends up on top --
+                // P must be processed FIRST (it's the immediate hop), so P's PUSH must be
+                // appended LAST.
+                LabelOp opQ;
+                opQ.optcode = PUSH_OPER;
+                opQ.label = qLabel;
+                LabelOp opP;
+                opP.optcode = PUSH_OPER;
+                opP.label = pLabel;
+
+                tiLfaRepairByRouter[dest] = LabelOpVector{opQ, opP};
+                EV_DETAIL << "TI-LFA repair for " << dest << " via " << protectedNeighbor << ": [PUSH " << pLabel << " (" << p << "), PUSH " << qLabel << " (" << q << ")]" << endl;
+                found = true;
+                break;
+            }
+        }
+        if (found)
+            continue;
+
+        EV_WARN << "TI-LFA: no repair found for " << dest << " (protected link to " << protectedNeighbor << ") within " << maxRepairStackDepth << " segments; leaving unprotected" << endl;
+        EV_DETAIL << "TI-LFA repair for " << dest << " via " << protectedNeighbor << ": UNPROTECTED" << endl;
+    }
 }
 
 } // namespace inet

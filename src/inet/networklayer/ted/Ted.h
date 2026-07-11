@@ -93,6 +93,19 @@ class INET_API Ted : public RoutingProtocolBase, public cListener
             const TeLinkStateInfoVector& topology, double req_bandwidth, int priority,
             uint32_t includeAny = 0, uint32_t excludeAny = 0);
 
+    // Reports the shortest-path COST (not just the hop list) from `root` to `dest`, via the
+    // same constrained Bellman-Ford as calculateShortestPath() above. Returns false (leaves
+    // outDistance untouched) if dest is unreachable from root under the given constraints.
+    // TI-LFA (Workstream F2) needs true path COST, not hop count, to decide whether a node's
+    // shortest path actually depends on a specific link: a node can be reachable via a strictly
+    // LONGER alternate path once a link is excluded, which is a real, meaningful difference
+    // that a hop-count-only comparison would miss (two paths can have the same hop count but
+    // very different cost, or vice versa) -- see SegmentRouting's TI-LFA P-space/Q-space
+    // membership test for how this is used.
+    virtual bool getShortestPathCost(Ipv4Address root, Ipv4Address dest,
+            const TeLinkStateInfoVector& topology, double req_bandwidth, int priority,
+            double& outDistance, uint32_t includeAny = 0, uint32_t excludeAny = 0);
+
     /** @name Public interface to the Traffic Engineering Database */
     //@{
     virtual Ipv4Address getInterfaceAddrByPeerAddress(Ipv4Address peerIP);

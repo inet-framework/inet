@@ -34,6 +34,20 @@ class INET_API SegmentRouting : public RoutingProtocolBase, public cListener
     int srgbBase = 0;
     int srgbSize = 0;
 
+    // TI-LFA (RFC 9855, Workstream F2). Off by default: computeTiLfaRepairs() is only ever
+    // called from recomputeAndInstall() when tiLfa is true, so every existing network (which
+    // never sets it) is completely unaffected -- no repair lists are ever computed, and
+    // Phase 3's activation wiring (not yet written) has nothing to activate.
+    bool tiLfa = false;
+    int maxRepairStackDepth = 3;
+
+    // Per-destination TI-LFA repair label stack, computed by computeTiLfaRepairs() whenever
+    // tiLfa is true and recomputeAndInstall() runs. A destination with NO entry here (or an
+    // empty LabelOpVector) is UNPROTECTED: no repair within maxRepairStackDepth was found (see
+    // computeTiLfaRepairs()'s doc). Populated but not yet consumed by anything in this phase --
+    // Phase 3 wires this into LibTable::setBackup()/activateBackup() on local link failure.
+    std::map<Ipv4Address, LabelOpVector> tiLfaRepairByRouter;
+
     // parsed from the "sidTable" XML parameter: router id -> node-SID index
     std::map<Ipv4Address, int> sidByRouter;
 
@@ -108,6 +122,65 @@ class INET_API SegmentRouting : public RoutingProtocolBase, public cListener
     // tedChangedSignal, which would both be wasteful and needlessly invalidate any in-flight
     // assumption about that link's label).
     virtual void recomputeAdjacencySids();
+
+    // TI-LFA (RFC 9855), pure computation -- see SegmentRouting.ned for the full design
+    // writeup. Called from recomputeAndInstall() (right after node-SID entries are
+    // (re)installed) whenever tiLfa is true. For every OTHER router D in sidByRouter whose
+    // current shortest path from this router (the PLR) leaves via one of THIS router's own
+    // links L (i.e. every destination this router is a potential point-of-local-repair for):
+    // computes P-space (nodes reachable from the PLR without traversing L; "extended" P-space
+    // additionally includes nodes reachable from each of the PLR's other neighbors without
+    // traversing L) and Q-space of D (nodes whose shortest path TO D does not traverse L,
+    // computed via a reversed-topology SPT rooted at D). If a PQ node (P-space ∩ Q-space)
+    // exists, the repair is that node's own node-SID (single segment). Otherwise, tries a
+    // P-space node P that is topologically ADJACENT to some Q-space node Q (a real physical
+    // link, not the protected one) and uses [node-SID(P), node-SID(Q)] (two segments) as the
+    // bridge -- see the .ned doc for why this model uses a SECOND NODE-SID here rather than a
+    // P-node's own adjacency-SID (the textbook RFC 9855 §5 form): adjacency SIDs in this model
+    // are locally significant and never flooded (the same limitation SrPolicy's "adj:" segments
+    // document), so the PLR can only ever resolve label values for ITS OWN local adjacencies,
+    // never a third-party P-node's -- two globally-resolvable node-SIDs sidestep that entirely.
+    // If neither a PQ node nor an adjacent P/Q pair exists within maxRepairStackDepth segments,
+    // the destination is left unprotected (no entry in tiLfaRepairByRouter) and an EV_WARN is
+    // logged. Every computed repair (or lack thereof) is also logged via EV_DETAIL in the
+    // format "TI-LFA repair for <dest> via <protectedNeighbor>: <segment list>" (or "UNPROTECTED"
+    // for the no-repair case), which is what the module tests assert against.
+    virtual void computeTiLfaRepairs();
+
+    // Nodes N (root included, trivially) whose shortest-path COST from `root` is UNCHANGED
+    // between `fullTopology` (the real, unfiltered topology) and `filteredTopology` (typically
+    // the same topology with the protected link excluded) -- i.e. N's shortest path does not
+    // actually depend on the excluded link at all. This is RFC 9855's P-space/Q-space
+    // membership test: a node that is only reachable via a STRICTLY LONGER alternate once the
+    // protected link is excluded is deliberately NOT included here, since relying on such a
+    // path risks a transient micro-loop (the very failure mode P-space/Q-space is designed to
+    // rule out) -- see Ted::getShortestPathCost(). Used to compute both P-space (root=this
+    // router or a neighbor, filteredTopology=protected-link-excluded) and Q-space (root=D,
+    // both topologies reversed) -- see computeTiLfaRepairs(). Linear in the number of known
+    // routers (two getShortestPathCost() calls per candidate); fine for the small topologies
+    // TI-LFA in this model targets, and only ever runs on tedChangedSignal/routeAdded/
+    // routeDeletedSignal, never per-packet.
+    virtual std::set<Ipv4Address> distancePreservingReachable(Ipv4Address root,
+            const TeLinkStateInfoVector& fullTopology, const TeLinkStateInfoVector& filteredTopology);
+
+    // Returns a copy of `topology` with the (bidirectional) link between `a` and `b` marked
+    // down (state=false in both directions) -- used to compute P-space/Q-space "as if the
+    // protected link didn't exist", mirroring recomputeAndInstall()'s own topology-filtering
+    // idiom (that one filters by removing this module's owned entries; this one filters the
+    // topology copy itself before handing it to calculateShortestPath()).
+    virtual TeLinkStateInfoVector withLinkExcluded(const TeLinkStateInfoVector& topology, Ipv4Address a, Ipv4Address b);
+
+    // Returns a copy of `topology` with every entry's direction reversed (advrouter<->linkid,
+    // local<->remote): a shortest-path computation rooted at D over this reversed copy gives,
+    // for every node X, the cost of the ORIGINAL topology's shortest path FROM X TO D -- which
+    // is exactly the reverse-SPT computation Q-space needs (RFC 9855's Q-space is defined in
+    // terms of paths *toward* D, not *from* the PLR).
+    virtual TeLinkStateInfoVector reversedTopology(const TeLinkStateInfoVector& topology);
+
+    // This router's own direct, currently-up neighbors (routers with a link where
+    // advrouter==routerId and state==true), used for extended P-space and for the
+    // adjacent-P/Q-pair search in computeTiLfaRepairs().
+    virtual Ipv4AddressVector getOwnNeighbors(const TeLinkStateInfoVector& topology);
 
   public:
     // Read-only access to the parsed sidTable's router -> node-SID index map, and to the

@@ -277,6 +277,22 @@ Ipv4AddressVector Ted::calculateShortestPath(Ipv4Address root, Ipv4AddressVector
     return result;
 }
 
+bool Ted::getShortestPathCost(Ipv4Address root, Ipv4Address dest, const TeLinkStateInfoVector& topology,
+        double req_bandwidth, int priority, double& outDistance, uint32_t includeAny, uint32_t excludeAny)
+{
+    std::vector<Vertex> V = calculateShortestPaths(root, topology, req_bandwidth, priority, includeAny, excludeAny);
+
+    for (auto& v : V) {
+        if (v.node != dest)
+            continue;
+        if (v.dist >= LS_INFINITY)
+            return false; // present in the vertex list (some edge referenced it) but never reached
+        outDistance = v.dist;
+        return true;
+    }
+    return false; // dest never appeared in the topology at all
+}
+
 void Ted::rebuildRoutingTable()
 {
     if (!installRoutes) {

@@ -1,0 +1,178 @@
+%description:
+Module test for TI-LFA (RFC 9855) repair-stack COMPUTATION only (Workstream F2, Phase 2) --
+no link failure is triggered here (see tests/module/srmpls_tilfa_repair_pq.test's description
+for that shared context). This test locks in the OTHER repair shape: no PQ node exists, so
+~SegmentRouting must bridge via a P-space node directly ADJACENT to a Q-space node, using TWO
+node-SID segments (see SegmentRouting.ned's TI-LFA section for why two node-SIDs, not a
+P-node's own adjacency-SID: adjacency SIDs are never flooded in this model).
+
+Topology: A(1.1.1.1) -- B(2.2.2.2) -- D(4.4.4.4) is the primary path (metric 1 each, total 2).
+A also connects to E(5.5.5.5) (metric 1), which connects on to F(6.6.6.6) via an
+EXPENSIVE link (metric 5), which finally connects to D (metric 1). All five nodes share one
+sidTable (A=1, B=2, D=4, E=5, F=6; srgbBase 16000 -> labels A=16001, B=16002, D=16004,
+E=16005, F=16006).
+
+Because the E-F hop is expensive (5), the ORIGINAL (unprotected) shortest path from E to D is
+E-A-B-D (cost 1+1+1=3, i.e. back through A and the very link this test protects), NOT E-F-D
+(cost 5+1=6) -- so once the A-B link is excluded, E's ONLY remaining route to D (E-F-D, cost
+6) is a full 3x longer than its original cost, failing the distance-preserving Q-space test:
+E is P-space (reachable from A without A-B, unaffected, still cost 1) but NOT Q-space. By the
+same asymmetric-cost logic, F is Q-space (F-D is direct and cheap, cost 1, utterly unaffected
+by A-B's exclusion) but NOT P-space (A's only route to F normally goes via B-D, cost 3; once
+A-B is excluded, the only remaining route is via E, cost 1+5=6 -- far longer).
+
+P-space = {A, E}, Q-space = {B, D, F}: DISJOINT (no PQ node at all, once A itself is excluded
+from consideration). But the E-F link is a REAL, direct adjacency between a P-space node (E)
+and a Q-space node (F) -- exactly RFC 9855's "P-node adjacent to Q-node" bridging case.
+Expected repair for destination D, protecting the A-B link: TWO node-SID segments, E (16005,
+the immediate/outermost hop) then F (16006, innermost) -- logged as "TI-LFA repair for
+4.4.4.4 via 2.2.2.2: [PUSH 16005 (5.5.5.5), PUSH 16006 (6.6.6.6)]".
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.mpls.SrMplsRouter;
+import ned.DatarateChannel;
+
+network TiLfaRepairBridgeTest
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    types:
+        channel Link extends DatarateChannel
+        {
+            datarate = 1Mbps;
+            delay = 10us;
+        }
+    submodules:
+        A: SrMplsRouter {
+            parameters:
+                routerId = "1.1.1.1";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                segmentRouting.tiLfa = true;
+                @display("p=250,150");
+            gates:
+                pppg[2];
+        }
+        B: SrMplsRouter {
+            parameters:
+                routerId = "2.2.2.2";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=400,100");
+            gates:
+                pppg[2];
+        }
+        D: SrMplsRouter {
+            parameters:
+                routerId = "4.4.4.4";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=550,150");
+            gates:
+                pppg[2];
+        }
+        E: SrMplsRouter {
+            parameters:
+                routerId = "5.5.5.5";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=250,250");
+            gates:
+                pppg[2];
+        }
+        F: SrMplsRouter {
+            parameters:
+                routerId = "6.6.6.6";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=400,250");
+            gates:
+                pppg[2];
+        }
+    connections:
+        A.pppg[0] <--> Link <--> B.pppg[0];
+        B.pppg[1] <--> Link <--> D.pppg[0];
+        A.pppg[1] <--> Link <--> E.pppg[0];
+        E.pppg[1] <--> Link <--> F.pppg[0];
+        F.pppg[1] <--> Link <--> D.pppg[1];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: sidtable.xml
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="4.4.4.4" sid="4"/>
+    <node router="5.5.5.5" sid="5"/>
+    <node router="6.6.6.6" sid="6"/>
+</sr>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: A.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.1	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.2.2	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: B.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.3	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.2.4	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: D.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.5	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.2.6	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: E.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.7	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.2.8	MTU: 1500	Metric: 5
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: F.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.9	MTU: 1500	Metric: 5
+name: ppp1	inet_addr: 10.0.2.10	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src
+network = TiLfaRepairBridgeTest
+sim-time-limit = 2s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "detail"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.A.ipv4.routingTable.routingFile = "A.rt"
+**.B.ipv4.routingTable.routingFile = "B.rt"
+**.D.ipv4.routingTable.routingFile = "D.rt"
+**.E.ipv4.routingTable.routingFile = "E.rt"
+**.F.ipv4.routingTable.routingFile = "F.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Two node-SID segments (E's label 16005, outermost; F's label 16006, innermost) bridge
+%# destination D against the A-B link, since no single PQ node exists.
+%contains: stdout
+TI-LFA repair for 4.4.4.4 via 2.2.2.2: [PUSH 16005 (5.5.5.5), PUSH 16006 (6.6.6.6)]
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
