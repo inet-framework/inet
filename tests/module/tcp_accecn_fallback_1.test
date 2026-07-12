@@ -1,0 +1,99 @@
+%description:
+TCP AccECN (Workstream G) G9.1: fallback-matrix completeness --
+tcpEcnMode="accecn-passive" as the LISTENER (passive-open) role. Server
+is accecn-passive (willing to ACCEPT AccECN if a peer requests it, but
+never initiates it itself); client is accecn (active opener, sends the
+real SEWA request). Confirms the asymmetry TCP_ECN_MODE_ACCECN_PASSIVE
+is meant to express: processSynInListen()'s AccECN-accept check
+(TcpConnectionRcvSegment.cc) already treats ACCECN and ACCECN_PASSIVE
+identically for the PASSIVE-accept role (both listed in that check's
+`||`), so this scenario negotiates real AccECN exactly like
+tcp_accecn_negotiate_accepted_1.test's both-accecn scenario does -- this
+test's job is to pin that accecn-passive on the listener specifically
+(not just accecn) reaches the same outcome, and the companion
+tcp_accecn_fallback_2.test pins the other half (accecn-passive on the
+ACTIVE opener never even offers to negotiate).
+
+Falsification: none needed as a separate run -- the assertion itself
+(AccECN successfully negotiated with the server configured
+accecn-passive, not accecn) is the falsification of "passive means
+inert/no-op", the plausible-but-wrong reading of the mode name.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script=""
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+*.cli_tcp.tcpEcnMode = "accecn"
+*.srv_tcp.tcpEcnMode = "accecn-passive"
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# Client's SYN: SEWA, requesting AccECN as usual.
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S E W N 0:0(0) win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%# Server's SYN-ACK: SW. -- accecn-passive still accepts a peer-initiated AccECN request.
+%contains: postrun-command(1).out
+[0.003 B001] A.1000 < B.2000: A S W 500:500(0) ack 1 win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+AccECN-setup SYN-ACK sent... AccECN is enabled
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+AccECN-setup SYN-ACK received... AccECN is enabled.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,116 @@
+%description:
+TCP AccECN (Workstream G) G9.1: fallback-matrix completeness --
+tcpEcnMode="accecn-passive" as the ACTIVE OPENER role. Client is
+accecn-passive; server is accecn. sendSyn()'s AccECN-initiate branch
+(TcpConnectionUtil.cc) checks `state->ecnMode == TCP_ECN_MODE_ACCECN`
+only, not ACCECN_PASSIVE, so an accecn-passive active opener sends a
+plain SYN with no ECN codepoint at all (its own code comment: "covers
+off, passive, and accecn-passive: none of these initiate on active
+OPEN"). The server, seeing no ECN-willingness signal in the SYN at all,
+negotiates no ECN either -- the two ends end up with NO ECN, not classic
+ECN and not AccECN, even though the server itself is accecn-capable and
+would have accepted a request. This is the accecn-passive design intent
+(RFC 3168's own precedent: it only ever means "will respond to a peer's
+request", never "will ask"), pinned here as the second half of
+tcp_accecn_fallback_1.test's assertion (listener role, accepts) so the
+mode's asymmetry is tested from both sides.
+
+Falsification: none needed as a separate run -- the assertion (plain,
+ECN-flag-less SYN despite both tcpEcnMode values being ECN-capable
+modes) is itself the falsification of "accecn-passive negotiates
+AccECN/ECN when possible regardless of role", the plausible-but-wrong
+reading.
+
+Building this test surfaced a real, pre-existing (not AccECN-related,
+not touched by this workstream) quirk: sendSynAck()'s classic-ECN
+branch (`else if (state->ecnWillingness)`, TcpConnectionUtil.cc) sets
+the SYN-ACK's ECE bit purely from the SERVER's own willingness, without
+checking whether the peer's SYN actually requested ECN
+(endPointIsWillingECN) -- so the server's SYN-ACK here still carries ECE
+even though the client's SYN was plain. Harmless in practice: the
+client only acts on an incoming SYN-ACK's ECE bit if it itself sent an
+ECN-setup SYN (state->ecnSynSent), which never happened here (its SYN
+was plain, per the assertion above), so the client's ect stays false
+and no ECN is actually used on this connection -- pinned below (A002,
+the connection-completing ACK, carries no ECN flags). Out of scope to
+fix as part of this AccECN-focused workstream; noted for a possible
+future classic-ECN hardening pass, not filed as its own issue here.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script=""
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+*.cli_tcp.tcpEcnMode = "accecn-passive"
+*.srv_tcp.tcpEcnMode = "accecn"
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# Client's SYN: plain, no ECN codepoint at all -- accecn-passive never initiates.
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%# Server's SYN-ACK: still carries ECE (the pre-existing quirk described above) -- but since
+%# the client's own SYN was plain, the client never acts on it (see A002 below).
+%contains: postrun-command(1).out
+[0.003 B001] A.1000 < B.2000: A S E 500:500(0) ack 1 win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%# Client's connection-completing ACK: no ECN flags -- confirms ECN was never actually enabled
+%# on this connection despite the server's inappropriate ECE offer above.
+%contains: postrun-command(1).out
+[0.005 A002] A.1000 > B.2000: A ack 501 win 7504
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
