@@ -1,0 +1,126 @@
+%description:
+TCP AccECN (Workstream G) G8.1: byte-exact CE feedback for DcTcp, superseding
+RFC 8257's boolean gotEce-gated approximation. Client runs DcTcp,
+tcpEcnMode="accecn", accEcnOptionEnabled=true, accEcnOptionBeaconAcks=1.
+The client sends 5 MSS-sized segments in one burst; the tester marks only
+the FIRST of them CE and drops the server's first 4 individual ACKs, so
+the client sees a single cumulative ACK covering all 5 newly-acked
+segments' bytes, with the AccECN option reporting the real ~1-segment CE
+byte count.
+
+A second, follow-up 100B send at t=1.0 forces one more ACK round after
+the burst: G8's byte-exact accounting has a one-ACK lag by design (the
+AccECN option/ACE for a given segment is decoded in
+processAckInEstabEtc()'s ACE block, which runs AFTER
+tcpAlgorithm->receivedDataAck() for that same segment -- see the code
+comment), so the marked=988 assertion below is observed on the ACK for
+this follow-up send, not on the burst-covering ACK itself (which, at
+the time DcTcp checks it, still shows the OLD marks: ceBytesThisRound=0
+cePktsThisRound=0 -- also asserted below, to pin the lag itself as
+expected behavior rather than a flake).
+
+The point of this scenario (deliberately "partial-segment CE marking
+... out of several delivered in one round", per the plan): RFC 8257's
+boolean approximation would mark this WHOLE round's bytes_acked (~5
+segments, ~4940 bytes) since ECE/dctcp_ce would be true for the round,
+while AccECN's byte-exact evidence correctly marks only the ~1
+CE-marked segment's real payload (988 bytes -- reduced from the 1000B
+MSS by the AccECN option's own 12-byte wire overhead on that segment).
+
+Falsification: an identical scenario with accEcnOptionBeaconAcks=1000000
+(never actually beacons within this test's short duration, starving the
+option path exactly like accEcnOptionEnabled=false would, without
+needing a second file) was run empirically during development and
+produces a genuinely different number: marked=1000 (the
+deliveredCePkts * snd_mss fallback estimate: 1 packet * the negotiated
+1000-byte MSS -- not 988, since without the option there's no real
+per-segment payload-length evidence, only the coarser packet count).
+This 988-vs-1000 divergence is the concrete, numeric proof that the
+byte-exact and packet-count-estimate code paths are actually different,
+not just differently gated copies of the same number.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script="a3 ce;b2 delete;b3 delete;b4 delete;b5 delete"
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript="0.5 5000; 1.0 100"
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.initialWindow = "rfc6928"
+
+*.cli_tcp.tcpAlgorithmClass = "DcTcp"
+*.srv_tcp.tcpAlgorithmClass = "TcpReno"
+
+*.*_tcp.tcpEcnMode = "accecn"
+*.*_tcp.accEcnOptionEnabled = true
+*.*_tcp.accEcnOptionBeaconAcks = 1
+
+# tcp-legacy.ini sets advertisedWindow=7504; OMNeT++ ini resolution takes the FIRST matching
+# entry, so this override -- needed so the full 5000B burst fits in one window and all 5
+# segments go out without waiting on an intermediate ACK -- must appear BEFORE the include.
+*.*_tcp.advertisedWindow = 20000
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# The one-ACK lag itself: at the burst-covering ACK (B006), byte-exact evidence hasn't
+%# been folded in yet (this segment's own ACE block runs AFTER this call) -- expected, not a bug.
+%contains: stdout
+DcTcp AccECN CE-byte accounting: ceBytesThisRound=0 cePktsThisRound=0 marked=0 dctcp_bytesMarked=0
+%#--------------------------------------------------------------------------------------------------------------
+%# The actual G8.1 assertion, observed one ACK later (the follow-up send's ACK): marked=988,
+%# the ONE CE-marked segment's real payload -- not ~4940 (5 segments), which RFC 8257's
+%# boolean gotEce-gated approximation would have produced for this whole round.
+%contains: stdout
+DcTcp AccECN CE-byte accounting: ceBytesThisRound=988 cePktsThisRound=1 marked=988 dctcp_bytesMarked=988
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

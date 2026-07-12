@@ -54,8 +54,51 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
             // RFC 8257 3.3.2
             state->dctcp_bytesAcked += bytes_acked;
 
-            // RFC 8257 3.3.3
-            if (state->gotEce) {
+            // RFC 8257 3.3.3. AccECN (Workstream G8): when this connection negotiated
+            // AccECN, use the AccECN option's byte-exact CE evidence (deliveredCeBytes,
+            // G6/G7) instead of RFC 8257's boolean gotEce-gated approximation -- AccECN
+            // already gives the precise number of CE-marked bytes the peer reported, so
+            // the "mark this whole round's bytes_acked if ECE was ever seen" approximation
+            // isn't needed in this mode. gotEce itself is never set true for an AccECN
+            // connection in the first place (the foundation-fix guard on eceBit consumption
+            // -- see TcpConnectionRcvSegment.cc's processAckInEstabEtc()), so the two
+            // branches below are naturally mutually exclusive per connection, exactly
+            // mirroring how the two ECN modes are already mutually exclusive at negotiation
+            // time elsewhere in this workstream.
+            //
+            // deliveredCeBytes/deliveredCePkts are cumulative (updated once per ACK in
+            // processAckInEstabEtc()'s ACE block, which runs AFTER this function for the
+            // very same segment -- see that block's own comment) -- the two "Mark" fields
+            // snapshot them the same way prrDeliveredMark already does for deliveredBytes,
+            // so this round's increment is picked up on the NEXT call, one ACK later. That
+            // one-ACK lag is immaterial here: DCTCP.Alpha is a windowed EWMA over many ACKs
+            // (RFC 8257 3.3.4-3.3.6 below), not a per-ACK-exact quantity, and no CE byte is
+            // ever lost or double-counted -- each one is picked up on the very next round.
+            //
+            // Two-tier fallback: prefer the byte-exact AccECN-option evidence
+            // (deliveredCeBytes, G6/G7) whenever it advanced this round; when it didn't
+            // (the peer never sends the option, or none happened to arrive this
+            // particular round), fall back to G5's ACE-only mod-8 packet-count estimate
+            // (deliveredCePkts * snd_mss) rather than silently reporting zero marking.
+            if (state->accEcnNegotiated) {
+                uint32_t ceBytesThisRound = state->deliveredCeBytes - state->dctcp_deliveredCeBytesMark;
+                uint32_t cePktsThisRound = state->deliveredCePkts - state->dctcp_deliveredCePktsMark;
+                state->dctcp_deliveredCeBytesMark = state->deliveredCeBytes;
+                state->dctcp_deliveredCePktsMark = state->deliveredCePkts;
+
+                uint32_t marked = (ceBytesThisRound > 0) ? ceBytesThisRound : (cePktsThisRound * state->snd_mss);
+                EV_INFO << "DcTcp AccECN CE-byte accounting: ceBytesThisRound=" << ceBytesThisRound
+                        << " cePktsThisRound=" << cePktsThisRound << " marked=" << marked
+                        << " dctcp_bytesMarked=" << (state->dctcp_bytesMarked + marked) << "\n";
+                if (marked > 0) {
+                    state->dctcp_bytesMarked += marked;
+                    conn->emit(markingProbSignal, 1);
+                }
+                else {
+                    conn->emit(markingProbSignal, 0);
+                }
+            }
+            else if (state->gotEce) {
                 state->dctcp_bytesMarked += bytes_acked;
                 conn->emit(markingProbSignal, 1);
             }
