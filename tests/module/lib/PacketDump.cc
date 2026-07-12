@@ -547,6 +547,14 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
         flags = true;
         out << "F ";
     }
+    if (tcpHeader->getEceBit()) {
+        flags = true;
+        out << "E "; // ECN-Echo (RFC 3168); also AccECN's AE bit combined with CWR/ECE per draft-ietf-tcpm-accurate-ecn
+    }
+    if (tcpHeader->getCwrBit()) {
+        flags = true;
+        out << "W "; // Congestion Window Reduced (RFC 3168)
+    }
     if (!flags) {
         out << ". ";
     }

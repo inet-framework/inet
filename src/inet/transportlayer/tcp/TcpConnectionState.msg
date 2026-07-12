@@ -262,10 +262,18 @@ struct TcpStateVariables
     bool ect = false; // set if this connection is ECN Capable (ECT stands for ECN-Capable transport - rfc-3168)
     bool endPointIsWillingECN = false; // set if the other end-point is willing to use ECN
     bool ecnSynSent = false; // set if ECN-setup SYN packet was sent
-    bool ecnWillingness = false; // set if current host is willing to use ECN
+    bool ecnWillingness = false; // set if current host is willing to use ECN. Kept in sync with ecnMode>=2 ("rfc3168") for backward compatibility -- every classic-ECN call site still keys off this field, unmodified since before AccECN (Workstream G)
     bool sndAck = false; // set if sending Ack packet, used to set relevant info in controlInfo.
     bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (rfc3168, p. 20)
     simtime_t eceReactionTime; // records the time of the last ECE reaction
+
+    // AccECN (draft-ietf-tcpm-accurate-ecn), Workstream G
+    int ecnMode = 0; // from the tcpEcnMode parameter (or the deprecated ecnWillingness, mapped): 0=off, 1=passive, 2=rfc3168, 3=accecn, 4=accecn-passive
+    bool accEcnNegotiated = false; // set once 3WHS negotiation (G3) determines this connection uses AccECN, not classic ECN or no-ECN
+    bool aeSynSent = false; // set if an AccECN-requesting SYN (the flag-bit combination, G3) was sent
+    uint32_t rcvCePkts = 0; // receiver-side count of CE-marked packets seen (mod-8 ACE counter input, G4/G5)
+    uint32_t rcvCePktsReported = 0; // rcvCePkts value as of the last ACE delta the peer has acknowledged resolving (G5)
+    uint32_t deliveredCePkts = 0; // sender-side resolved count of CE-marked packets the peer has reported via ACE/option (G5/G7)
 
     uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
 

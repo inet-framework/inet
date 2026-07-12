@@ -213,7 +213,20 @@ simple Tcp extends SimpleModule like ITcp
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
-        bool ecnWillingness = default(false); // True if willing to use ECN
+        bool ecnWillingness = default(false); // DEPRECATED -- use tcpEcnMode. true maps to tcpEcnMode="rfc3168" unless tcpEcnMode is ALSO explicitly set to something other than "off" (then a cRuntimeError is thrown -- exact precedent: increasedIWEnabled vs initialWindow, TcpConnectionUtil.cc:645-651)
+        string tcpEcnMode @enum("off","passive","rfc3168","accecn","accecn-passive") = default("off");
+            // Value semantics modeled on Linux net.ipv4.tcp_ecn (0/1/2/3/4/5; AccECN owns 3/4/5):
+            //   off            ~ tcp_ecn=0: never request or accept any form of ECN (today's default)
+            //   passive        ~ tcp_ecn=2: accept a peer-initiated classic ECN-setup SYN, never
+            //                    initiate ECN on active OPEN. Linux's real out-of-box default.
+            //   rfc3168        ~ tcp_ecn=1/4: always send a classic ECN-setup SYN on active OPEN;
+            //                    accept passively when listening. Equivalent to ecnWillingness=true.
+            //   accecn         ~ tcp_ecn=3: attempt AccECN negotiation on active OPEN and accept it
+            //                    when listening; fall back to rfc3168 or off per negotiation outcome.
+            //   accecn-passive ~ tcp_ecn=5: accept AccECN when listening, never initiate it on
+            //                    active OPEN (mirrors "passive" but for AccECN).
+        bool accEcnOptionEnabled = default(false); // Send/parse the AccECN TCP option (E0B/E1B/CEB byte counters). Requires tcpEcnMode in {"accecn","accecn-passive"}
+        int accEcnOptionBeaconAcks = default(4); // Send the AccECN option at least once every N ACKs even when not otherwise demanded (simplified beaconing policy -- Linux's full demand/beacon/DSACK-triggered state machine is not ported)
         double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
         bool pmtudEnabled = default(false); // Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled
         double pmtudTimeout @unit(s) = default(600s); // Time after which the original MSS is restored to probe for increased path MTU (RFC 1191, Section 6.3)

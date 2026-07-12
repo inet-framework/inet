@@ -669,7 +669,31 @@ void TcpConnection::configureStateVariables()
     else
         throw cRuntimeError("mss must be -1 (address-family default) or in the range 64..65535, but is %d", mssPar);
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
-    state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
+
+    // ECN mode resolution (AccECN, Workstream G): tcpEcnMode supersedes the deprecated
+    // ecnWillingness. Exact precedent: increasedIWEnabled vs initialWindow (above).
+    bool ecnWillingnessDeprecated = tcpMain->par("ecnWillingness");
+    const char *tcpEcnModeStr = tcpMain->par("tcpEcnMode");
+    if (ecnWillingnessDeprecated) {
+        if (strcmp(tcpEcnModeStr, "off") != 0)
+            throw cRuntimeError("Tcp: set either the deprecated ecnWillingness or tcpEcnMode, not both");
+        EV_WARN << "Tcp: ecnWillingness is deprecated; use tcpEcnMode=\"rfc3168\"\n";
+        state->ecnMode = 2; // rfc3168
+    }
+    else if (!strcmp(tcpEcnModeStr, "passive"))
+        state->ecnMode = 1;
+    else if (!strcmp(tcpEcnModeStr, "rfc3168"))
+        state->ecnMode = 2;
+    else if (!strcmp(tcpEcnModeStr, "accecn"))
+        state->ecnMode = 3;
+    else if (!strcmp(tcpEcnModeStr, "accecn-passive"))
+        state->ecnMode = 4;
+    else
+        state->ecnMode = 0; // off
+    // Every existing classic-ECN call site (sendSyn/sendSynAck/processSynInListen/etc.) keys
+    // off state->ecnWillingness, not state->ecnMode -- keep it in sync so this commit is pure
+    // param plumbing, zero behavior change, for every mode this commit actually implements.
+    state->ecnWillingness = state->ecnMode >= 2; // rfc3168 or higher (accecn modes fall back to rfc3168 wire behavior until G2+ land)
     state->dupthresh = tcpMain->par("dupthresh");
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     state->prrEnabled = tcpMain->par("prrEnabled");

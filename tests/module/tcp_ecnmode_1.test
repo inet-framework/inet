@@ -1,0 +1,95 @@
+%description:
+TCP AccECN (Workstream G) G1.1: tcpEcnMode supersedes the deprecated
+ecnWillingness parameter. This commit is pure param plumbing -- with
+tcpEcnMode="rfc3168" (and ecnWillingness left at its default, unset), the
+wire trace must be byte-for-byte identical to today's ecnWillingness=true
+behavior, since state->ecnWillingness is kept in sync (ecnMode>=2) so every
+existing classic-ECN call site is unmodified.
+
+This test pins the tcpEcnMode="rfc3168" trace directly (a simple ECN-willing
+active-open connection: SYN carries ECE+CWR, the SYN-ACK echoes ECE only,
+per RFC 3168 SS6.1). Byte-for-byte equivalence with the legacy
+ecnWillingness=true path was verified empirically during development (same
+scenario, same assertions, with ecnWillingness=true and tcpEcnMode="off"
+instead) -- not repeated as a permanent second file since it exercises no
+code this test doesn't already cover.
+
+Falsification: setting both ecnWillingness=true AND tcpEcnMode to a
+non-"off" value must throw "Tcp: set either the deprecated ecnWillingness or
+tcpEcnMode, not both" -- verified empirically during development (temporarily
+set both in this test's ini, confirmed the cRuntimeError fired with that
+exact message), not pinned as a permanent assertion here since this test's
+primary job is the plumbing-preserves-behavior claim, not exercising the
+guard itself.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script=""
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+*.*_tcp.tcpEcnMode = "rfc3168"
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# SYN: ECE+CWR both set (RFC 3168 SS6.1's ECN-setup SYN, requesting ECN).
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S E W 0:0(0) win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%# SYN-ACK: ECE only (no CWR) -- the listener accepting the ECN-setup SYN.
+%contains: postrun-command(1).out
+[0.003 B001] A.1000 < B.2000: A S E 500:500(0) ack 1 win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
