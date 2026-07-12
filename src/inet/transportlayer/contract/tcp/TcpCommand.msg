@@ -239,4 +239,27 @@ class TcpStatusInfo extends TcpCommand
     unsigned int irs;
 
     bool fin_ack_rcvd;
+
+    // Additional fields below bridge a Linux struct tcp_info-style status query
+    // (e.g. for packetdrill's %{ }% assertion blocks) -- not part of RFC 793,
+    // sourced from the congestion-control/loss-recovery state variables where
+    // available. Fields with no equivalent for the connection's flavour (e.g.
+    // DumbTcp has no congestion window) are set to UINT_MAX/-1 as a sentinel;
+    // callers must check for that before using the value.
+    unsigned int cwnd;
+    unsigned int ssthresh;
+    unsigned int reordering;
+    double srtt;
+    double minRtt;
+    unsigned int flightSize;
+    unsigned int sackedBytes;
+    unsigned int deliveredBytes;
+    unsigned int rexmitCount;
+    unsigned int numRtos;
+    bool tsEnabled;
+    bool sackEnabled;
+    bool wsEnabled;
+    bool ectEnabled;
+    unsigned int sndWndScale;
+    simtime_t lastDataRecvTime;
 }

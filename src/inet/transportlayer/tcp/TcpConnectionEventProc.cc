@@ -5,6 +5,7 @@
 //
 
 
+#include <climits>
 #include <string.h>
 
 #include "inet/common/socket/SocketTag_m.h"
@@ -14,6 +15,8 @@
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
+#include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
+#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamilyState_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
@@ -334,6 +337,41 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setRcv_up(state->rcv_up);
     statusInfo->setIrs(state->irs);
     statusInfo->setFin_ack_rcvd(state->fin_ack_rcvd);
+
+    statusInfo->setReordering(state->reordering);
+    statusInfo->setMinRtt(state->minRtt.dbl());
+    statusInfo->setFlightSize(getFlightSize());
+    statusInfo->setSackedBytes(state->sackedBytes);
+    statusInfo->setDeliveredBytes(state->deliveredBytes);
+    statusInfo->setTsEnabled(state->ts_enabled);
+    statusInfo->setSackEnabled(state->sack_enabled);
+    statusInfo->setWsEnabled(state->ws_enabled);
+    statusInfo->setEctEnabled(state->ect);
+    statusInfo->setSndWndScale(state->snd_wnd_scale);
+    statusInfo->setLastDataRecvTime(state->time_last_segment_received);
+
+    // Congestion-window/RTO/RTT fields live on flavour-specific state variable
+    // subclasses, one or two levels below the base TcpStateVariables* held as
+    // `state` -- not every flavour (e.g. DumbTcp) has them, so guard with a
+    // dynamic_cast and fall back to the UINT_MAX sentinel documented on
+    // TcpStatusInfo.
+    if (auto *baseAlgState = dynamic_cast<TcpBaseAlgStateVariables *>(state)) {
+        statusInfo->setCwnd(baseAlgState->snd_cwnd);
+        statusInfo->setSrtt(baseAlgState->srtt.dbl());
+        statusInfo->setRexmitCount(baseAlgState->rexmit_count);
+        statusInfo->setNumRtos(baseAlgState->numRtos);
+    }
+    else {
+        statusInfo->setCwnd(UINT_MAX);
+        statusInfo->setSrtt(-1);
+        statusInfo->setRexmitCount(UINT_MAX);
+        statusInfo->setNumRtos(UINT_MAX);
+    }
+
+    if (auto *tahoeRenoState = dynamic_cast<TcpTahoeRenoFamilyStateVariables *>(state))
+        statusInfo->setSsthresh(tahoeRenoState->ssthresh);
+    else
+        statusInfo->setSsthresh(UINT_MAX);
 
     msg->setControlInfo(statusInfo);
     msg->setKind(TCP_I_STATUS);
