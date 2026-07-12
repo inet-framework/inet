@@ -375,6 +375,14 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
 
     msg->setControlInfo(statusInfo);
     msg->setKind(TCP_I_STATUS);
+    // Every other reply-sending path in this file tags its outgoing message
+    // with SocketInd (see sendIndicationToApp() and friends in
+    // TcpConnectionUtil.cc) so TcpSocket::belongsToSocket() can match it back
+    // to the requesting app-side socket. This path reuses the incoming
+    // request message, which only ever carried a SocketReq tag -- without
+    // this, the STATUS reply is silently dropped by the app's socket
+    // dispatch instead of reaching TcpSocket::ICallback::socketStatusArrived().
+    check_and_cast<Message *>(msg)->addTag<SocketInd>()->setSocketId(socketId);
     sendToApp(msg);
 }
 
