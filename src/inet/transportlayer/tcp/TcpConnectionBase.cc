@@ -39,6 +39,7 @@ simsignal_t TcpConnection::rcvOooSegSignal = registerSignal("rcvOooSeg"); // num
 simsignal_t TcpConnection::rcvNASegSignal = registerSignal("rcvNASeg"); // number of received not acceptable segments
 simsignal_t TcpConnection::sackedBytesSignal = registerSignal("sackedBytes"); // current number of received sacked bytes
 simsignal_t TcpConnection::deliveredSignal = registerSignal("delivered"); // cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
+simsignal_t TcpConnection::deliveredCeSignal = registerSignal("deliveredCe"); // AccECN (Workstream G5): cumulative resolved count of CE-marked packets the peer has reported via the ACE field
 simsignal_t TcpConnection::tcpRcvQueueBytesSignal = registerSignal("tcpRcvQueueBytes"); // current amount of used bytes in tcp receive queue
 simsignal_t TcpConnection::tcpRcvQueueDropsSignal = registerSignal("tcpRcvQueueDrops"); // number of drops in tcp receive queue
 simsignal_t TcpConnection::tcpRcvPayloadBytesSignal = registerSignal("tcpRcvPayloadBytes"); // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput

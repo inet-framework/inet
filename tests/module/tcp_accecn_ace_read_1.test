@@ -1,0 +1,108 @@
+%description:
+TCP AccECN (Workstream G) G5.1: ACE field read side (mod-8 delta resolution,
+deliveredCePkts). Both endpoints tcpEcnMode="accecn". The client sends
+9000B (9 MSS-sized segments) in one window-sized burst; the tester marks
+all 9 data segments CE and drops the server's first 8 individual ACKs, so
+only the 9th (cumulative, ack=9001) survives -- the client sees a single
+ACK covering all 9 newly-delivered "packets" (INET has no segment-boundary
+tracking once bytes enter the byte-range-based send/rexmit-queue model, so
+deliveredPktsThisAck approximates packets as ceil(newly-delivered-bytes /
+mss), the same reduction Linux's own tcp_skb_pcount collapses to for a
+non-GSO/TSO sender -- see the code comment).
+
+The server's rcvCePkts reaches 9 (one per CE-marked segment), so its
+surviving ACK encodes ace=(9+5)&0x7=6. The client's naive delta --
+(receivedAce - 5 - deliveredCePkts_before) & 0x7 = (6-5-0)&7 = 1 -- badly
+undercounts (true value is 9, off by exactly one full mod-8 wraparound).
+Since deliveredPktsThisAck=9 > 7, the safeDelta resolution kicks in:
+9 - ((9-1)&7) = 9, matching the true count. Asserted via a new EV_INFO trace
+line (AccECN ACE decode: ...) added specifically to make deliveredCePkts
+observable in a module test, since it otherwise only reaches an emitted
+signal (not recorded here, record-vector-results=false).
+
+Falsification: a companion scenario with only 3 delivered packets (below
+the wraparound threshold) must show naiveDelta and resolvedDelta agreeing --
+verified empirically during development (see commit message); not pinned
+as a second permanent file since it exercises the same code with the
+`deliveredPktsThisAck > 7` branch simply not taken, which the trace line's
+own naiveDelta/resolvedDelta fields already make directly observable
+whenever they happen to diverge or agree in any test.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script="a3 ce;a4 ce;a5 ce;a6 ce;a7 ce;a8 ce;a9 ce;a10 ce;a11 ce;b2 delete;b3 delete;b4 delete;b5 delete;b6 delete;b7 delete;b8 delete;b9 delete"
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0.5s
+*.cli_app.sendBytes=9000B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.initialWindow = "rfc6928"
+
+*.*_tcp.tcpEcnMode = "accecn"
+
+# tcp-legacy.ini sets advertisedWindow=7504; OMNeT++ ini resolution takes the FIRST matching
+# entry, so this override -- needed so the full 9000B burst fits in one window and all 9
+# segments go out without waiting on an intermediate ACK -- must appear BEFORE the include.
+*.*_tcp.advertisedWindow = 20000
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# Server's surviving (9th) ACK: ace=6=0b110 (cwr+ae, no ece), covering all 9 CE-marked segments.
+%contains: postrun-command(1).out
+[0.503 B010] A.1000 < B.2000: A W N ack 9001 win 20000
+%#--------------------------------------------------------------------------------------------------------------
+%# The actual G5.1 assertion: safeDelta (9) resolves correctly, not the undercounting naive delta (1).
+%contains: stdout
+AccECN ACE decode: receivedAce=6 deliveredPktsThisAck=9 naiveDelta=1 resolvedDelta=9 deliveredCePkts=9
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

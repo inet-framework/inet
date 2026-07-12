@@ -1367,6 +1367,44 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         return false; // means "drop"
     }
 
+    // AccECN (Workstream G5): ACE field read side -- mod-8 delta resolution
+    // (design reference: tcp_accecn_process/__tcp_accecn_process, tcp_input.c, cited for the
+    // naive-delta + safeDelta shape only, reimplemented against INET's own byte-oriented
+    // state). Skipped on the handshake-completing ACK (fsm still SYN_RCVD here, i.e. the
+    // very first ACE value this side has ever seen from the peer) -- there's no prior
+    // baseline to diff against yet.
+    if (state->accEcnNegotiated && fsm.getState() != TCP_S_SYN_RCVD) {
+        bool ae = tcpHeader->getAeBit();
+        bool cwr = tcpHeader->getCwrBit();
+        bool ece = tcpHeader->getEceBit();
+        uint8_t receivedAce = (uint8_t)((ae ? 4 : 0) | (cwr ? 2 : 0) | (ece ? 1 : 0));
+
+        // deliveredPktsThisAck: INET has no segment-boundary tracking once bytes enter the
+        // (byte-range-based) rexmit-queue/send-queue model, so this approximates "packets"
+        // the same way Linux's own tcp_skb_pcount (GSO/TSO segment counting, which INET
+        // doesn't model either) ultimately reduces to for a non-offloaded sender: one MSS
+        // of newly-delivered bytes per packet. Reuses the existing prrDeliveredMark
+        // snapshot (process_RCV_SEGMENT, RFC 6937 PRR) rather than adding a second one.
+        uint64_t deliveredBytesThisAck = state->deliveredBytes - state->prrDeliveredMark;
+        uint32_t mss = state->snd_mss > 0 ? state->snd_mss : 1;
+        uint32_t deliveredPktsThisAck = (uint32_t)((deliveredBytesThisAck + mss - 1) / mss);
+
+        int delta = ((int)receivedAce - 5 - (int)(state->deliveredCePkts & 0x7)) & 0x7;
+        int resolvedDelta = delta;
+        if (deliveredPktsThisAck > 7) {
+            // Naive delta can't distinguish "the counter wrapped around more than once"
+            // from "it wrapped around once" when more than 8 packets were delivered in a
+            // single ACK -- resolve against the actual delivered-packet count instead.
+            resolvedDelta = (int)deliveredPktsThisAck - (((int)deliveredPktsThisAck - delta) & 0x7);
+        }
+        state->deliveredCePkts += resolvedDelta;
+        emit(deliveredCeSignal, (unsigned long)state->deliveredCePkts);
+        EV_INFO << "AccECN ACE decode: receivedAce=" << (int)receivedAce
+                << " deliveredPktsThisAck=" << deliveredPktsThisAck
+                << " naiveDelta=" << delta << " resolvedDelta=" << resolvedDelta
+                << " deliveredCePkts=" << state->deliveredCePkts << "\n";
+    }
+
     return true;
 }
 

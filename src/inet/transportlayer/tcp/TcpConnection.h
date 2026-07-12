@@ -119,6 +119,7 @@ class INET_API TcpConnection : public SimpleModule
     static simsignal_t rcvNASegSignal; // number of received not acceptable segments
     static simsignal_t sackedBytesSignal; // current number of received sacked bytes
     static simsignal_t deliveredSignal; // cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
+    static simsignal_t deliveredCeSignal; // AccECN (Workstream G5): cumulative resolved count of CE-marked packets the peer has reported via the ACE field
     static simsignal_t tcpRcvQueueBytesSignal; // current amount of used bytes in tcp receive queue
     static simsignal_t tcpRcvQueueDropsSignal; // number of drops in tcp receive queue
     static simsignal_t tcpRcvPayloadBytesSignal; // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
