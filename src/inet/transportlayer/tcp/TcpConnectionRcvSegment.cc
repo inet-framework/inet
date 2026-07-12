@@ -1341,6 +1341,17 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // acked data no longer needed in send queue
         sendQueue->discardUpTo(discardUpToSeq);
 
+        // TCP_INFO trio (busy_time): read-only bookkeeping -- if this ACK just
+        // caught snd_una up to snd_max with nothing left queued either, the
+        // connection has gone fully idle. See enqueueSendCommandData() for the
+        // matching "became busy" entry.
+        if (state->busyStartTime >= SIMTIME_ZERO && state->snd_una == state->snd_max
+            && sendQueue->getBytesAvailable(state->snd_nxt) == 0)
+        {
+            state->busyTimeAccumulated += simTime() - state->busyStartTime;
+            state->busyStartTime = -1;
+        }
+
         // acked data no longer needed in rexmit queue
         if (state->sack_enabled)
             rexmitQueue->discardUpTo(discardUpToSeq);

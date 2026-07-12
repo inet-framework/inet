@@ -247,6 +247,20 @@ struct TcpStateVariables
     uint32_t notsentLowat = (uint32_t)-1;
     bool notsentLowatUpdate = true;
 
+    // TCP_INFO trio (busy_time/rwnd_limited): cumulative time bookkeeping, read-only
+    // with respect to every send/receive decision -- consulted only by TcpStatusInfo.
+    // INET-native definitions (not a port of Linux's tcp_chrono_* state machine); see
+    // enqueueSendCommandData()/processAckInEstabEtc() (busy) and sendData() (rwnd).
+    // A *StartTime of -1 means "not currently in that state"; *Accumulated is the
+    // running total up to the last state exit. sndbuf_limited has no INET analog
+    // (the send queue never actually blocks a SEND on sendQueueLimit -- it's
+    // notification-only, see notsentLowat/sendQueueLimit above) and is deliberately
+    // not tracked here.
+    simtime_t busyStartTime;          // set to -1 in configureStateVariables() -- see pmtudLastMssReduction below for the same pattern
+    simtime_t busyTimeAccumulated = 0;
+    simtime_t rwndLimitedStartTime;   // set to -1 in configureStateVariables()
+    simtime_t rwndLimitedAccumulated = 0;
+
     // those counters would logically belong to TcpAlgorithm, but it's a lot easier to manage them here
     uint32_t dupacks = 0;    // current number of received consecutive duplicate ACKs
     uint32_t snd_sacks = 0;    // number of sent sacks

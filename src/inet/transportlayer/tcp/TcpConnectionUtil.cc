@@ -778,6 +778,11 @@ void TcpConnection::configureStateVariables()
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
 
+    // TCP_INFO trio: idle/not-limited until the first SEND/sendData() call says
+    // otherwise (enqueueSendCommandData()/sendData()).
+    state->busyStartTime = -1;
+    state->rwndLimitedStartTime = -1;
+
     state->fastopenClientEnabled = tcpMain->par("fastopenClientEnabled"); // TCP Fast Open (RFC 7413)
     state->fastopenServerEnabled = tcpMain->par("fastopenServerEnabled");
     state->fastopenLenientCookieValidation = tcpMain->par("fastopenLenientCookieValidation");
@@ -1257,6 +1262,15 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
 
 void TcpConnection::enqueueSendCommandData(Packet *packet)
 {
+    // TCP_INFO trio (busy_time): read-only bookkeeping -- if the connection was
+    // fully idle (nothing outstanding, nothing queued) before this SEND, it becomes
+    // busy now. See processAckInEstabEtc() for the matching "back to idle" exit.
+    if (state->busyStartTime < SIMTIME_ZERO && state->snd_una == state->snd_max
+        && sendQueue->getBytesAvailable(state->snd_nxt) == 0)
+    {
+        state->busyStartTime = simTime();
+    }
+
     bool eor = packet->findTag<TcpSendEorReq>() != nullptr;
     sendQueue->enqueueAppData(packet);
 
@@ -1306,6 +1320,22 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
 
     // effectiveWindow: number of bytes we're allowed to send now
     int64_t effectiveWin = (int64_t)maxWindow - (state->snd_nxt - state->snd_una);
+
+    // TCP_INFO trio (rwnd_limited): read-only bookkeeping, consulted only by
+    // TcpStatusInfo -- never influences the send decision below. "rwnd-limited"
+    // here means: there is more buffered data than can be sent right now, and the
+    // peer's advertised window (not the congestion window) is the binding
+    // constraint.
+    bool rwndBinding = (state->snd_wnd < congestionWindow)
+        && ((int64_t)buffered > std::max<int64_t>(effectiveWin, 0));
+    if (rwndBinding) {
+        if (state->rwndLimitedStartTime < SIMTIME_ZERO)
+            state->rwndLimitedStartTime = simTime();
+    }
+    else if (state->rwndLimitedStartTime >= SIMTIME_ZERO) {
+        state->rwndLimitedAccumulated += simTime() - state->rwndLimitedStartTime;
+        state->rwndLimitedStartTime = -1;
+    }
 
     if (effectiveWin <= 0) {
         EV_WARN << "Effective window is zero (advertised window " << state->snd_wnd

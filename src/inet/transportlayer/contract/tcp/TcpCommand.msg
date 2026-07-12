@@ -288,4 +288,15 @@ class TcpStatusInfo extends TcpCommand
     // an ECN-less connection.
     unsigned int deliveredCePkts;
     unsigned int deliveredCeBytes;
+
+    // Cumulative time (seconds) the connection was busy sending data, and time
+    // specifically blocked by the peer's advertised window rather than the
+    // congestion window -- see TcpConnection::enqueueSendCommandData()/
+    // processAckInEstabEtc()/sendData() (INET-native bookkeeping, not a port of
+    // Linux's tcpi_busy_time/tcpi_rwnd_limited, which are cumulative microseconds
+    // from a kernel-internal chrono state machine this reimplements independently).
+    // sndbuf_limited has no INET analog and is not surfaced (INET's send queue is
+    // never actually blocking -- see notsentLowat/sendQueueLimit above).
+    double busyTime;
+    double rwndLimited;
 }

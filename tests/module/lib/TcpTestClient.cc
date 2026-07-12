@@ -141,6 +141,8 @@ void TcpTestClient::printStatus(TcpStatusInfo *status)
             << " bytesReceived=" << status->getBytesReceived()
             << " deliveredCePkts=" << status->getDeliveredCePkts()
             << " deliveredCeBytes=" << status->getDeliveredCeBytes()
+            << " busyTime=" << status->getBusyTime()
+            << " rwndLimited=" << status->getRwndLimited()
             << "\n";
 }
 

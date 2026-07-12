@@ -438,6 +438,14 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setDeliveredCePkts(state->deliveredCePkts);
     statusInfo->setDeliveredCeBytes(state->deliveredCeBytes);
 
+    // TCP_INFO trio: report the accumulated total plus, if a period is still open
+    // right now, the elapsed time since it started -- so a live query reflects the
+    // up-to-the-moment total rather than only the last fully-closed period.
+    statusInfo->setBusyTime((state->busyTimeAccumulated
+        + (state->busyStartTime >= SIMTIME_ZERO ? simTime() - state->busyStartTime : SIMTIME_ZERO)).dbl());
+    statusInfo->setRwndLimited((state->rwndLimitedAccumulated
+        + (state->rwndLimitedStartTime >= SIMTIME_ZERO ? simTime() - state->rwndLimitedStartTime : SIMTIME_ZERO)).dbl());
+
     if (state->sack_enabled && rexmitQueue != nullptr && state->snd_mss > 0)
         statusInfo->setLost(rexmitQueue->getTotalAmountOfLostBytes() / state->snd_mss);
     else
