@@ -11,9 +11,11 @@ namespace inet::tcp;
 
 cplusplus {{
 typedef std::list<Sack> SackList;
+typedef std::vector<uint8_t> FastOpenCookie;
 }}
 
 class SackList { @existingClass; }
+class FastOpenCookie { @existingClass; }
 
 //
 // TCP FSM states
@@ -272,6 +274,17 @@ struct TcpStateVariables
     uint32_t pmtudOriginalMss = 0;          // negotiated MSS before any PMTUD reduction
     simtime_t pmtudTimeout;                 // time after which the original MSS is restored to probe for increased path MTU
     simtime_t pmtudLastMssReduction;        // timestamp of last PMTUD-triggered MSS reduction (-1 = never reduced)
+
+    // TCP Fast Open (RFC 7413)
+    bool fastopenClientEnabled = false;      // from the fastopenClientEnabled parameter
+    bool fastopenServerEnabled = false;      // from the fastopenServerEnabled parameter
+    bool fastopenLenientCookieValidation = true; // from the fastopenLenientCookieValidation parameter
+    bool fastopenExpOptionEnabled = false;   // from the fastopenExpOptionEnabled parameter
+    int fastopenCookieBytes = 8;             // from the fastopenCookieBytes parameter
+    bool fastopenCookieRequested = false;    // server: peer sent an empty-cookie TFO option this SYN
+    bool fastopenCookieValid = false;        // server: peer's cookie validated (accelerate this SYN)
+    bool fastopenSendCookieOption = false;   // server: echo a (possibly fresh) cookie in the SYN-ACK
+    FastOpenCookie fastopenCookieToSend;     // server: the cookie bytes to echo, if fastopenSendCookieOption
 };
 
 cplusplus(TcpStateVariables) {{

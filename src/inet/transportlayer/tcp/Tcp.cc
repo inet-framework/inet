@@ -18,6 +18,8 @@
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
+#include <functional>
+
 #include "inet/networklayer/common/Icmpv4ErrorTag_m.h"
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
@@ -51,6 +53,18 @@ void Tcp::initialize(int stage)
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
         msl = par("msl");
+
+        // TCP Fast Open (RFC 7413): seed the per-module cookie-generation secret from
+        // this module's own (seeded, reproducible) RNG stream -- two 32-bit draws
+        // combined into 64 bits, mirroring the intuniform()-based token generation
+        // idiom used elsewhere in INET (e.g. DhcpClient's transaction id). Only draws
+        // when Fast Open is actually enabled: an unconditional draw here would shift
+        // the RNG stream for every scenario (even ones that never touch TFO), breaking
+        // fingerprints that share this module's RNG for unrelated randomness.
+        bool fastopenClientEnabled = par("fastopenClientEnabled");
+        bool fastopenServerEnabled = par("fastopenServerEnabled");
+        if (fastopenClientEnabled || fastopenServerEnabled)
+            fastOpenSecret = ((uint64_t)(uint32_t)intuniform(0, 0x7fffffff) << 32) | (uint32_t)intuniform(0, 0x7fffffff);
 
         WATCH(checksumMode);
         WATCH(lastEphemeralPort);
@@ -397,6 +411,39 @@ void Tcp::addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Add
 
     // newConn will live on with the new socketId
     tcpAppConnMap[newConn->socketId] = newConn;
+}
+
+std::vector<uint8_t> Tcp::generateFastOpenCookie(const L3Address& remoteAddr, int cookieBytes) const
+{
+    // Clean-room, simulator-appropriate keyed mix -- intentionally NOT a port of
+    // Linux's AES/SipHash-based cookie cipher (RFC 7413's threat model of a blind
+    // off-path attacker doesn't apply to a non-adversarial simulator). Chains
+    // std::hash<std::string> over the secret, the destination address, and a block
+    // counter to produce as many bytes as requested.
+    std::vector<uint8_t> cookie(cookieBytes);
+    std::string base = std::to_string(fastOpenSecret) + "|" + remoteAddr.str();
+    std::hash<std::string> hasher;
+    for (int block = 0; block * (int)sizeof(size_t) < cookieBytes; block++) {
+        size_t h = hasher(base + "|" + std::to_string(block));
+        const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&h);
+        for (size_t i = 0; i < sizeof(size_t) && (int)(block * sizeof(size_t) + i) < cookieBytes; i++)
+            cookie[block * sizeof(size_t) + i] = bytes[i];
+    }
+    return cookie;
+}
+
+bool Tcp::getFastOpenCookie(const L3Address& remoteAddr, std::vector<uint8_t>& cookie) const
+{
+    auto it = fastOpenCookieCache.find(remoteAddr);
+    if (it == fastOpenCookieCache.end())
+        return false;
+    cookie = it->second;
+    return true;
+}
+
+void Tcp::setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8_t>& cookie)
+{
+    fastOpenCookieCache[remoteAddr] = cookie;
 }
 
 void Tcp::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)

@@ -712,6 +712,15 @@ void TcpConnection::configureStateVariables()
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
 
+    state->fastopenClientEnabled = tcpMain->par("fastopenClientEnabled"); // TCP Fast Open (RFC 7413)
+    state->fastopenServerEnabled = tcpMain->par("fastopenServerEnabled");
+    state->fastopenLenientCookieValidation = tcpMain->par("fastopenLenientCookieValidation");
+    state->fastopenExpOptionEnabled = tcpMain->par("fastopenExpOptionEnabled");
+    int fastopenCookieBytes = tcpMain->par("fastopenCookieBytes");
+    if (fastopenCookieBytes < 4 || fastopenCookieBytes > 16)
+        throw cRuntimeError("fastopenCookieBytes must be in the range 4..16 (RFC 7413 SS4), but is %d", fastopenCookieBytes);
+    state->fastopenCookieBytes = fastopenCookieBytes;
+
     WATCH_EXPR("snd_nxt", state->snd_nxt);
     WATCH_EXPR("rcv_nxt", state->rcv_nxt);
     WATCH_EXPR("snd_una", state->snd_una);
@@ -1516,7 +1525,49 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
 
 bool TcpConnection::processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option)
 {
-    // Wire format only in this commit -- cookie generation/validation lands in a later commit.
+    // RFC 7413 SS4.1: server processing an incoming SYN, or client processing a SYN-ACK.
+    bool isServerSyn = state->fastopenServerEnabled && fsm.getState() == TCP_S_LISTEN;
+    bool isClientSynAck = state->fastopenClientEnabled && fsm.getState() == TCP_S_SYN_SENT;
+    if (!isServerSyn && !isClientSynAck)
+        return true; // Fast Open not applicable in this role/state -- accepted, no-op.
+
+    unsigned int cookieLen = option.getCookieArraySize();
+
+    if (isServerSyn) {
+        if (cookieLen == 0) {
+            // Empty cookie: peer is requesting one for a future connection attempt.
+            state->fastopenCookieRequested = true;
+            state->fastopenCookieToSend = tcpMain->generateFastOpenCookie(remoteAddr, state->fastopenCookieBytes);
+            state->fastopenSendCookieOption = true;
+            EV_INFO << "Fast Open: cookie requested, generated a fresh one to echo\n";
+        }
+        else {
+            std::vector<uint8_t> want = tcpMain->generateFastOpenCookie(remoteAddr, cookieLen);
+            std::vector<uint8_t> got(cookieLen);
+            for (unsigned int i = 0; i < cookieLen; i++)
+                got[i] = option.getCookie(i);
+            if (state->fastopenLenientCookieValidation || got == want) {
+                state->fastopenCookieValid = true;
+                EV_INFO << "Fast Open: cookie accepted (" << (state->fastopenLenientCookieValidation ? "lenient" : "verified") << ")\n";
+            }
+            else {
+                // Mismatch under strict validation: refresh, matching RFC 7413's
+                // "always give the client a fresh cookie on failure" guidance.
+                state->fastopenCookieToSend = tcpMain->generateFastOpenCookie(remoteAddr, state->fastopenCookieBytes);
+                state->fastopenSendCookieOption = true;
+                EV_INFO << "Fast Open: cookie mismatch under strict validation, offering a fresh one\n";
+            }
+        }
+    }
+    else { // isClientSynAck
+        if (cookieLen > 0) {
+            std::vector<uint8_t> cookie(cookieLen);
+            for (unsigned int i = 0; i < cookieLen; i++)
+                cookie[i] = option.getCookie(i);
+            tcpMain->setFastOpenCookie(remoteAddr, cookie);
+            EV_INFO << "Fast Open: learned a " << cookieLen << "-byte cookie for " << remoteAddr.str() << "\n";
+        }
+    }
     return true;
 }
 

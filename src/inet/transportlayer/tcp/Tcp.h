@@ -161,6 +161,13 @@ class INET_API Tcp : public TransportProtocolBase
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 
+    // TCP Fast Open (RFC 7413): per-module cookie generation secret and client-role
+    // cookie cache (destination address -> last-learned cookie). Not cryptographically
+    // strong -- RFC 7413's threat model (blind off-path attackers) doesn't apply to a
+    // non-adversarial simulator; see generateFastOpenCookie().
+    uint64_t fastOpenSecret = 0;
+    std::map<L3Address, std::vector<uint8_t>> fastOpenCookieCache;
+
     ushort lastEphemeralPort = static_cast<ushort>(-1);
     std::multiset<ushort> usedEphemeralPorts;
     long numSegmentsSent = 0;
@@ -204,6 +211,19 @@ class INET_API Tcp : public TransportProtocolBase
      * during processing of OPEN_ACTIVE or OPEN_PASSIVE.
      */
     virtual void addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
+
+    /**
+     * TCP Fast Open (RFC 7413): derive a cookie for remoteAddr from this module's
+     * secret. Deterministic for a fixed secret+address (a simple keyed mix, not a
+     * cryptographic MAC -- see fastOpenSecret).
+     */
+    virtual std::vector<uint8_t> generateFastOpenCookie(const L3Address& remoteAddr, int cookieBytes) const;
+
+    /** TCP Fast Open: client-role cookie cache lookup. Returns false if nothing is cached for remoteAddr. */
+    virtual bool getFastOpenCookie(const L3Address& remoteAddr, std::vector<uint8_t>& cookie) const;
+
+    /** TCP Fast Open: client-role cookie cache update, called on learning a cookie from a peer's SYN-ACK. */
+    virtual void setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8_t>& cookie);
 
     virtual void removeConnection(TcpConnection *conn);
     virtual void sendToIp(Packet *segment);
