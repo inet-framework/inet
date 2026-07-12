@@ -1410,10 +1410,19 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // option, G5's packet-count-only safeDelta is used as-is (unchanged from before
         // this commit).
         int resolvedDelta = safeDelta;
+        long cebDeltaForTrace = -1;
         if (state->accEcnOptionCebDeltaValid) {
-            resolvedDelta = resolveAceDelta(delta, safeDelta, state->accEcnOptionCebDelta);
-            state->deliveredCeBytes += state->accEcnOptionCebDelta;
+            // Compute the delta AND advance the peerReportedCeBytes baseline together,
+            // right here at the one place that actually consumes it -- readHeaderOptions()
+            // deliberately left the baseline untouched (see its own comment and the state
+            // field's) so this function's early-return path (an ACK beyond snd_max, above)
+            // can never advance the baseline while discarding the delta it implies.
+            uint32_t cebDelta = (state->accEcnOptionRawCeBytes - state->peerReportedCeBytes) & 0xFFFFFF;
+            resolvedDelta = resolveAceDelta(delta, safeDelta, cebDelta);
+            state->deliveredCeBytes += cebDelta;
+            state->peerReportedCeBytes = state->accEcnOptionRawCeBytes;
             emit(deliveredCeBytesSignal, (unsigned long)state->deliveredCeBytes);
+            cebDeltaForTrace = (long)cebDelta;
         }
 
         state->deliveredCePkts += resolvedDelta;
@@ -1422,7 +1431,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
                 << " deliveredPktsThisAck=" << deliveredPktsThisAck
                 << " naiveDelta=" << delta << " safeDelta=" << safeDelta
                 << " cebDeltaValid=" << state->accEcnOptionCebDeltaValid
-                << " cebDelta=" << (state->accEcnOptionCebDeltaValid ? (long)state->accEcnOptionCebDelta : -1L)
+                << " cebDelta=" << cebDeltaForTrace
                 << " resolvedDelta=" << resolvedDelta
                 << " deliveredCePkts=" << state->deliveredCePkts << "\n";
     }

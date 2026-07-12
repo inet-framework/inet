@@ -1532,18 +1532,17 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 // Un-apply the wire init offsets (E0B/E1B +1, CEB +0 -- see G6.1's write side).
                 state->peerReportedEct0Bytes = aeOpt->getEct0Bytes() - 1;
                 state->peerReportedEct1Bytes = aeOpt->getEct1Bytes() - 1;
-                uint32_t decodedCeBytes = aeOpt->getCeBytes();
-                // CEB is a 24-bit cumulative counter; 0 is a legitimate starting baseline
-                // for peerReportedCeBytes (not an uninitialized sentinel), so the very
-                // first option this connection ever receives already yields a correct
-                // delta -- no separate "have we seen one before" gate needed. Mod-2^24 to
-                // mirror how the ACE field's own mod-8 counter is handled (G4/G5).
-                state->accEcnOptionCebDelta = (decodedCeBytes - state->peerReportedCeBytes) & 0xFFFFFF;
+                // CEB itself is stored raw (offset-corrected only) here, NOT diffed against
+                // peerReportedCeBytes yet -- the delta computation and the baseline advance
+                // both happen together in processAckInEstabEtc()'s ACE block, the one place
+                // that actually consumes it, so an early-return path there (e.g. an ACK
+                // beyond snd_max) can never advance the baseline without folding the delta
+                // into deliveredCeBytes. See the state field's own comment for why.
+                state->accEcnOptionRawCeBytes = aeOpt->getCeBytes();
                 state->accEcnOptionCebDeltaValid = true;
-                state->peerReportedCeBytes = decodedCeBytes;
                 EV_INFO << "Tcp Header Option AccECN(kind=" << kind << ", E0B=" << aeOpt->getEct0Bytes()
-                        << ", E1B=" << aeOpt->getEct1Bytes() << ", CEB=" << decodedCeBytes
-                        << ") received, CEB delta=" << state->accEcnOptionCebDelta << "\n";
+                        << ", E1B=" << aeOpt->getEct1Bytes() << ", CEB=" << state->accEcnOptionRawCeBytes
+                        << ") received\n";
                 break;
             }
 

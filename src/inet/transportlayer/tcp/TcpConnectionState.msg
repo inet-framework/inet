@@ -290,9 +290,17 @@ struct TcpStateVariables
     // above, which are what WE observed on bytes the peer sent us).
     uint32_t peerReportedEct0Bytes = 0;
     uint32_t peerReportedEct1Bytes = 0;
+    // peerReportedCeBytes is the CEB baseline, advanced only at the point its delta is
+    // actually consumed (processAckInEstabEtc()'s ACE block) -- NOT at decode time
+    // (readHeaderOptions() below), because that block has an early-return path (an ACK
+    // beyond snd_max) that would otherwise silently lose the delta: if the baseline had
+    // already advanced but the block never ran to fold the delta into deliveredCeBytes,
+    // those CE bytes would be gone for good, and the next real option would diff against
+    // an already-advanced baseline as if they'd been accounted for. Same read-vs-mutate
+    // separation as G6.1's write-side fix (dry-run calls there, an early return here).
     uint32_t peerReportedCeBytes = 0; // cumulative (peer's clock); 0 is a legitimate starting baseline, not a sentinel -- CEB itself starts at 0
     bool accEcnOptionCebDeltaValid = false; // true only for the segment just processed by readHeaderOptions(), if it carried a valid AccECN option
-    uint32_t accEcnOptionCebDelta = 0; // valid only when accEcnOptionCebDeltaValid; mod-2^24 delta against the previous peerReportedCeBytes
+    uint32_t accEcnOptionRawCeBytes = 0; // valid only when accEcnOptionCebDeltaValid: the raw (offset-corrected, but not yet diffed) CEB value decoded from that segment's option
     uint32_t deliveredCeBytes = 0; // sender-side resolved CE byte count from option evidence only (G7); stays 0 if the peer never sends the option
 
     uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
