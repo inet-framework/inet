@@ -298,6 +298,18 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     addresses->setSrcAddress(localAddr);
     addresses->setDestAddress(remoteAddr);
 
+    // AccECN (Workstream G4): the ACE field rides the same 3 flag bits AccECN's 3WHS
+    // negotiation used (aeBit,cwrBit,eceBit), re-purposed post-handshake as a mod-8 counter
+    // of CE-marked packets received. Every ACK-bearing segment after the handshake carries
+    // the current count; the SYN-ACK itself is excluded -- G3.2 already set its fixed SW.
+    // accept codepoint there, which this must not override.
+    if (state->accEcnNegotiated && tcpHeader->getAckBit() && !tcpHeader->getSynBit()) {
+        uint8_t ace = (uint8_t)((state->rcvCePkts + 5) & 0x7);
+        tcpHeader->setAeBit((ace >> 2) & 0x1);
+        tcpHeader->setCwrBit((ace >> 1) & 0x1);
+        tcpHeader->setEceBit(ace & 0x1);
+    }
+
     // ECN:
     // We use ECT(0) to indicate ECN-capable transport, matching Linux
     // (RFC 3168 treats ECT(0) and ECT(1) as equivalent at routers, but ECT(1)

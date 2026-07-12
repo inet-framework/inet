@@ -1,0 +1,107 @@
+%description:
+TCP AccECN (Workstream G) G4.1: ACE field write side (CE-packet counting and
+encoding). Both endpoints tcpEcnMode="accecn"; the client sends 200B of
+data after the handshake completes, and the tcptester script marks that
+data segment CE (IP_ECN_CE) on the wire. The server's independent
+rcvCePkts counter (hooked at Tcp.cc's inbound EcnInd tag read, NOT routed
+through the pre-existing, dead classic-ECN gotCeIndication flag -- see
+description below) increments to 1, and its next outbound ACK encodes
+ace = (1+5)&0x7 = 6 = 0b110 into (aeBit,cwrBit,eceBit) = (1,1,0), rendered
+"W N" (no "E").
+
+Also pins the connection-completing 3rd ACK (A002): building this test
+caught a real ordering bug -- G3.1's SYN-ACK decode (which sets
+accEcnNegotiated) originally ran AFTER tcpAlgorithm->established(true),
+but established(true) is what synchronously sends the 3rd ACK, so that ACK
+went out with accEcnNegotiated still false and no ACE encoding at all
+(verified empirically: before the fix, A002 rendered as a plain "A ack 501"
+with no ACE bits). Fixed by moving the ECN/AccECN decode block before
+established(true) in processSegmentInSynSent() -- ordering that never
+mattered for classic ECN, which doesn't touch this particular ACK's flags,
+but matters here since AccECN's ACE field must already reflect the
+just-negotiated state (matching the kernel's handling of the analogous
+3rd-ACK case, tcp_accecn_3rd_ack_ce_updates_received_ce.pkt). A002 is
+pinned below with ace=5=(0+5)&0x7 (rcvCePkts still 0 at that point) as the
+regression check for this fix.
+
+Falsification (the two code paths must be disjoint): verified empirically
+by rerunning this exact scenario with tcpEcnMode="rfc3168" instead --
+accEcnNegotiated never becomes true, so the CE mark on A003 produces no
+ACE-style bit manipulation on B002 at all; the server's ACK shows only
+classic ECN's own, unrelated ECE-echo bit ("E" alone, no "W"/"N").
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script="a3 ce"
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0.5s
+*.cli_app.sendBytes=200B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+*.*_tcp.tcpEcnMode = "accecn"
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# 3rd ACK of the handshake: ace=5=(0+5)&0x7 (rcvCePkts still 0) -- the ordering-bug regression check.
+%contains: postrun-command(1).out
+[0.005 A002] A.1000 > B.2000: A E N ack 501 win 7504
+%#--------------------------------------------------------------------------------------------------------------
+%# Client's data segment, marked CE by the tester.
+%contains: postrun-command(1).out
+[0.501 A003] A.1000 > B.2000: A E N 1:201(200) ack 501 win 7504 # marking CE
+%#--------------------------------------------------------------------------------------------------------------
+%# Server's ACK: ace=6=(1+5)&0x7, rendered W N (cwrBit+aeBit, no eceBit) -- the actual G4.1 assertion.
+%contains: postrun-command(1).out
+[0.503 B002] A.1000 < B.2000: A W N ack 201 win 7504
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

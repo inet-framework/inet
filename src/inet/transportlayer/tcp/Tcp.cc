@@ -182,6 +182,12 @@ void Tcp::handleLowerPacket(Packet *packet)
                 // any accompanying data) MUST be sent with the not-ECT codepoint.
                 state->gotCeIndication = (ecn == 3);
             }
+            // AccECN (Workstream G4): independent CE-packet counter, not routed through
+            // gotCeIndication (which nothing downstream of classic ECN actually reads --
+            // a pre-existing, separate gap, not fixed here). Counts from the moment
+            // negotiation completes, including CE marks on the handshake-completing 3rd ACK.
+            if (state && state->accEcnNegotiated && ecn == 3)
+                state->rcvCePkts++;
 
             bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
             if (!ret)

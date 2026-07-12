@@ -1072,13 +1072,11 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
                 readHeaderOptions(tcpHeader);
 
-            // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
-            state->ack_now = true;
-            tcpAlgorithm->established(true);
-            tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
-            sendEstabIndicationToApp();
-
-            // ECN
+            // ECN. Resolved BEFORE tcpAlgorithm->established(true) below: that call
+            // synchronously sends the connection-completing 3rd ACK (AccECN's G4 needs that
+            // ACK's ACE field to reflect the just-negotiated state, matching the kernel's
+            // handling of the analogous 3rd-ACK case) -- ordering matters here in a way it
+            // never did for classic ECN, which doesn't touch this particular ACK's flags.
             if (state->aeSynSent) {
                 // draft-ietf-tcpm-accurate-ecn 3WHS: decode the SYN-ACK's (ECE,CWR,AE) triple
                 // in response to our SEWA (AccECN-requesting) SYN.
@@ -1120,6 +1118,12 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit())
                     EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
             }
+
+            // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
+            state->ack_now = true;
+            tcpAlgorithm->established(true);
+            tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
+            sendEstabIndicationToApp();
 
             // This will trigger transition to ESTABLISHED. Timers and notifying
             // app will be taken care of in stateEntered().
