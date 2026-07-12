@@ -285,6 +285,9 @@ struct TcpStateVariables
     bool fastopenCookieValid = false;        // server: peer's cookie validated (accelerate this SYN)
     bool fastopenSendCookieOption = false;   // server: echo a (possibly fresh) cookie in the SYN-ACK
     FastOpenCookie fastopenCookieToSend;     // server: the cookie bytes to echo, if fastopenSendCookieOption
+    bool fastopenSynDeferred = false;        // client: connect(fastOpen=true) is waiting for the app's first SEND (or the connEstabTimer safety net) before sending the SYN
+    bool fastopenCookieRequestPending = false; // client: no cookie was cached, so the (immediate, dataless) SYN requests one
+    uint32_t fastopenSynDataLen = 0;         // client: bytes of app data attached to the SYN (0 = none); fixed once set, reused verbatim across SYN-REXMIT
 };
 
 cplusplus(TcpStateVariables) {{

@@ -125,6 +125,11 @@ void TcpSocket::accept(int socketId)
 
 void TcpSocket::connect(L3Address remoteAddress, int remotePort)
 {
+    connect(remoteAddress, remotePort, false);
+}
+
+void TcpSocket::connect(L3Address remoteAddress, int remotePort, bool fastOpen)
+{
     if (sockstate != NOT_BOUND && sockstate != BOUND)
         throw cRuntimeError("TcpSocket::connect(): connect() or listen() already called (need renewSocket()?)");
 
@@ -143,6 +148,7 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
     openCmd->setRemotePort(remotePrt);
     openCmd->setAutoRead(autoRead);
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
+    openCmd->setFastOpen(fastOpen);
 
     request->setControlInfo(openCmd);
     sendToTcp(request);

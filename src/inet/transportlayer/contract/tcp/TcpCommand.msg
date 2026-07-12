@@ -122,6 +122,7 @@ class TcpOpenCommand extends TcpCommand
     bool fork = false;     // used only for passive open
     bool autoRead = true;  // true: TCPs sends up arrived data automatically. false: should use read command
     string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
+    bool fastOpen = false; // active open only: attempt TCP Fast Open (RFC 7413) -- attach data to the SYN if a cookie is already cached for remoteAddr, else request one
 }
 
 //

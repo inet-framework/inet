@@ -805,7 +805,11 @@ void TcpConnection::sendSyn()
     updateRcvWnd();
     tcpHeader->setWindow(state->rcv_wnd);
 
-    state->snd_max = state->snd_nxt = state->iss + 1;
+    // TCP Fast Open (RFC 7413): fastopenSynDataLen is 0 unless process_SEND's
+    // deferred-SYN path (F3.1) attached data; idempotent across SYN-REXMIT calls,
+    // same as the plain snd_max/snd_nxt assignment below already was.
+    uint32_t synDataLen = state->fastopenSynDataLen;
+    state->snd_max = state->snd_nxt = state->iss + 1 + synDataLen;
 
     // ECN
     if (state->ecnWillingness) {
@@ -827,7 +831,7 @@ void TcpConnection::sendSyn()
 
     // write header options
     writeHeaderOptions(tcpHeader);
-    Packet *fp = new Packet("SYN");
+    Packet *fp = (synDataLen > 0) ? sendQueue->createSegmentWithBytes(state->iss + 1, synDataLen) : new Packet("SYN");
 
     // send it
     sendToIP(fp, tcpHeader);
@@ -1599,10 +1603,12 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         EV_DETAIL << "Derived default MSS from address family: snd_mss=" << state->snd_mss << "\n";
     }
 
-    // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
+    // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout, or
+    // sending a TCP Fast Open deferred SYN for the first time -- fastopenSynDeferred stays
+    // true through sendSyn() itself for exactly this purpose, see process_SEND)
     if (tcpHeader->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
                                 || ((fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD)
-                                    && state->syn_rexmit_count > 0)))
+                                    && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred))))
     {
         // MSS header option
         if (state->snd_mss > 0) {
@@ -1705,6 +1711,25 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             option->setLength(2 + state->fastopenCookieToSend.size());
             tcpHeader->appendHeaderOption(option);
             EV_INFO << "Tcp Header Option Fast Open cookie (" << state->fastopenCookieToSend.size() << " bytes) sent\n";
+        }
+
+        // TCP Fast Open (RFC 7413) cookie option, client side: echo the cached
+        // cookie (data-bearing SYN, process_SEND's deferred path) or an empty
+        // cookie (dataless SYN requesting one, process_OPEN_ACTIVE's immediate path).
+        if (state->fastopenClientEnabled) {
+            std::vector<uint8_t> cachedCookie;
+            bool haveCachedCookie = tcpMain->getFastOpenCookie(remoteAddr, cachedCookie);
+            if (haveCachedCookie || state->fastopenCookieRequestPending) {
+                tcpHeader->appendHeaderOption(new TcpOptionNop());
+                tcpHeader->appendHeaderOption(new TcpOptionNop());
+                TcpOptionTcpFastOpen *option = new TcpOptionTcpFastOpen();
+                option->setCookieArraySize(cachedCookie.size());
+                for (size_t i = 0; i < cachedCookie.size(); i++)
+                    option->setCookie(i, cachedCookie[i]);
+                option->setLength(2 + cachedCookie.size());
+                tcpHeader->appendHeaderOption(option);
+                EV_INFO << "Tcp Header Option Fast Open cookie (" << cachedCookie.size() << " bytes) sent\n";
+            }
         }
 
         // TODO add new TCPOptions here once they are implemented

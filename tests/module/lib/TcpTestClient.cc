@@ -29,12 +29,14 @@ class INET_API TcpTestClient : public cSimpleModule
     };
     typedef std::list<Command> Commands;
     Commands commands;
+    Commands commands2; // for the optional second connection (socket2)
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_OPEN2, TEST_SEND2 };
 
     int ctr;
 
     TcpSocket socket;
+    TcpSocket socket2; // optional second, independent connection from the same app/Tcp module -- see active2/tOpen2
 
     // statistics
     int64_t rcvdBytes;
@@ -45,6 +47,7 @@ class INET_API TcpTestClient : public cSimpleModule
     std::string makeMsgName();
     void handleSelfMessage(cMessage *msg);
     void scheduleNextSend();
+    void scheduleNextSend2();
 
   protected:
     virtual void initialize();
@@ -118,12 +121,23 @@ void TcpTestClient::initialize()
         throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
 
     socket.setOutputGate(gate("socketOut"));
+    socket2.setOutputGate(gate("socketOut"));
 
     ctr = 0;
 
     scheduleAt(tOpen, new cMessage("Open", TEST_OPEN));
     if (tClose > 0)
         scheduleAt(tClose, new cMessage("Close", TEST_CLOSE));
+
+    simtime_t tOpen2 = par("tOpen2");
+    if (tOpen2 >= SIMTIME_ZERO) {
+        Command cmd2;
+        cmd2.tSend = par("tSend2");
+        cmd2.numBytes = par("sendBytes2");
+        if (cmd2.numBytes > 0)
+            commands2.push_back(cmd2);
+        scheduleAt(tOpen2, new cMessage("Open2", TEST_OPEN2));
+    }
 }
 
 void TcpTestClient::handleMessage(cMessage *msg)
@@ -140,7 +154,10 @@ void TcpTestClient::handleMessage(cMessage *msg)
         rcvdPackets++;
         rcvdBytes += PK(msg)->getByteLength();
     }
-    socket.processMessage(msg);
+    if (socket2.belongsToSocket(msg))
+        socket2.processMessage(msg);
+    else
+        socket.processMessage(msg);
 }
 
 void TcpTestClient::handleSelfMessage(cMessage *msg)
@@ -159,7 +176,7 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket.setAutoRead(par("autoRead"));
 
             if (par("active"))
-                socket.connect(L3Address(connectAddress), connectPort);
+                socket.connect(L3Address(connectAddress), connectPort, par("fastOpen"));
             else
                 socket.listenOnce();
             scheduleNextSend();
@@ -174,6 +191,31 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket.close();
             delete msg;
             break;
+        case TEST_OPEN2:
+        {
+            // Second, independent connection from this same app/Tcp module --
+            // e.g. to prime a Fast Open cookie cache with the first connection
+            // (TEST_OPEN) and then exercise it here.
+            const char *localAddress = par("localAddress");
+            int localPort2 = par("localPort2");
+            const char *connectAddress = par("connectAddress");
+            int connectPort = par("connectPort");
+
+            socket2.bind(*localAddress ? L3Address(localAddress) : L3Address(), localPort2);
+            socket2.setAutoRead(par("autoRead"));
+
+            if (par("active2"))
+                socket2.connect(L3Address(connectAddress), connectPort, par("fastOpen"));
+            else
+                socket2.listenOnce();
+            scheduleNextSend2();
+            delete msg;
+            break;
+        }
+        case TEST_SEND2:
+            socket2.send(check_and_cast<Packet *>(msg));
+            scheduleNextSend2();
+            break;
         default:
             throw cRuntimeError("Unknown self message!");
             break;
@@ -187,6 +229,18 @@ void TcpTestClient::scheduleNextSend()
     Command cmd = commands.front();
     commands.pop_front();
     Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND);
+    const auto& bytes = makeShared<ByteCountChunk>(B(cmd.numBytes));
+    msg->insertAtBack(bytes);
+    scheduleAt(cmd.tSend, msg);
+}
+
+void TcpTestClient::scheduleNextSend2()
+{
+    if (commands2.empty())
+        return;
+    Command cmd = commands2.front();
+    commands2.pop_front();
+    Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND2);
     const auto& bytes = makeShared<ByteCountChunk>(B(cmd.numBytes));
     msg->insertAtBack(bytes);
     scheduleAt(cmd.tSend, msg);

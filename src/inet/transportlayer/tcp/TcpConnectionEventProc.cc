@@ -56,6 +56,26 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
 
             tcpMain->addSockPair(this, localAddr, remoteAddr, localPort, remotePort);
 
+            // TCP Fast Open (RFC 7413): if the app asked for it and a cookie is
+            // already cached for this destination, defer the SYN until the app's
+            // first SEND arrives (process_SEND fills in the data and calls
+            // sendSyn()) instead of sending a bare SYN now. If no cookie is
+            // cached, send an immediate (dataless) SYN that just requests one --
+            // FSM_Goto(TCP_S_SYN_SENT) below doesn't depend on sendSyn() having
+            // actually been called, so deferring here is FSM-transition-transparent.
+            if (openCmd->getFastOpen() && state->fastopenClientEnabled) {
+                std::vector<uint8_t> cachedCookie;
+                if (tcpMain->getFastOpenCookie(remoteAddr, cachedCookie)) {
+                    selectInitialSeqNum();
+                    state->fastopenSynDeferred = true;
+                    scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
+                    delete openCmd;
+                    delete msg;
+                    return;
+                }
+                state->fastopenCookieRequestPending = true;
+            }
+
             // send initial SYN
             selectInitialSeqNum();
             sendSyn();
@@ -135,7 +155,30 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
             break;
 
         case TCP_S_SYN_RCVD:
+            EV_DETAIL << "Queueing up data for sending later.\n";
+            sendQueue->enqueueAppData(packet); // queue up for later
+            EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
+            break;
+
         case TCP_S_SYN_SENT:
+            if (state->fastopenSynDeferred) {
+                // TCP Fast Open (RFC 7413): this is the SEND process_OPEN_ACTIVE
+                // deferred the SYN for. Attach as much of it as fits in one
+                // segment and send the data-bearing SYN now.
+                sendQueue->enqueueAppData(packet);
+                uint32_t availableBytes = sendQueue->getBytesAvailable(state->iss + 1);
+                uint32_t capBytes = state->snd_mss > 0 ? state->snd_mss : 536;
+                state->fastopenSynDataLen = availableBytes < capBytes ? availableBytes : capBytes;
+                // fastopenSynDeferred stays true through sendSyn() itself: it doubles
+                // as writeHeaderOptions()'s signal that this is a first-ever SYN being
+                // sent from SYN_SENT (not the usual TCP_S_INIT), so the SYN gets its
+                // full option set despite syn_rexmit_count still being 0.
+                sendSyn();
+                state->fastopenSynDeferred = false;
+                startSynRexmitTimer();
+                // connEstabTimer was already scheduled from process_OPEN_ACTIVE.
+                break;
+            }
             EV_DETAIL << "Queueing up data for sending later.\n";
             sendQueue->enqueueAppData(packet); // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";

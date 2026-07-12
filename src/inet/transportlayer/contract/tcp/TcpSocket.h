@@ -359,6 +359,14 @@ class INET_API TcpSocket : public ISocket
     void connect(L3Address remoteAddr, int remotePort);
 
     /**
+     * Active OPEN to the given remote socket, with TCP Fast Open (RFC 7413)
+     * requested: if a cookie is already cached for remoteAddr, the SYN attempts
+     * to carry the first SEND's data; otherwise the SYN just requests a cookie
+     * for a future attempt.
+     */
+    void connect(L3Address remoteAddr, int remotePort, bool fastOpen);
+
+    /**
      * This function is only in use in "explicit-read" mode, i.e. when the
      * autoRead is turned off with setAutoRead(false).
      *

@@ -853,7 +853,16 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
         B payloadLen = B(tcpSegment->getByteLength()) - tcpHeader->getHeaderLength();
         if (payloadLen > B(0) && hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) {
             updateRcvQueueVars();
-            state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
+            // insertBytesFromSegment() indexes the payload by tcpHeader's own
+            // SequenceNo, which is correct for a plain data segment but is the SYN's
+            // OWN sequence number here (RFC 793: SYN consumes one sequence number, so
+            // the data actually starts at SEG.SEQ+1) -- pass a sequence-shifted copy
+            // of the header so the receive queue doesn't mistake the first data byte
+            // for a 1-byte overlap with the already-initialized rcv_nxt (=IRS+1) and
+            // silently drop it.
+            auto synShiftedHeader = staticPtrCast<TcpHeader>(tcpHeader->dupShared());
+            synShiftedHeader->setSequenceNo(tcpHeader->getSequenceNo() + 1);
+            state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, synShiftedHeader);
             updateRcvQueueVars();
             sendAvailableDataToApp(); // deliver before the 3WHS completes -- the RFC 7413 win
             EV_INFO << "Fast Open: cookie valid, accepting " << payloadLen
