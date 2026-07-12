@@ -36,6 +36,7 @@ class TcpAlgorithm;
 //@}
 
 #define MAX_SYN_REXMIT_COUNT          12  // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
+#define TFO_BLACKHOLE_RTO_THRESHOLD   2  // TCP Fast Open active blackhole detection: syn_rexmit_count value (i.e. the 3rd SYN transmission, matching the kernel's "timeouts == 2" check) that triggers a suspected-blackhole report for a data-carrying SYN
 #define TCP_MAX_WIN                   65535lu  // 65535 bytes, largest value (16 bit) for (unscaled) window size
 #define TCP_MAX_WIN_SCALED            0x3fffffffL // 2^30-1 bytes, largest value for scaled window size
 #define MAX_SACK_BLOCKS               60  // will only be used with SACK

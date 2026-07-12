@@ -1,0 +1,146 @@
+%description:
+TCP Fast Open (RFC 7413) F5.1: client-side active blackhole detection and
+disable timer (fastopenBlackholeTimeout), three connections through the same
+client/server Tcp modules:
+ - Connection 1 (port 1000): primes the client's cookie cache (bare
+   cookie-request SYN, as in tcp_fastopen_1.test).
+ - Connection 2 (port 1001): a deferred SYN+data attempt using the cached
+   cookie. Its first two transmissions (the original send and its first
+   SYN-REXMIT) are dropped by the tcptester script; on the second REXMIT,
+   syn_rexmit_count reaches TFO_BLACKHOLE_RTO_THRESHOLD (2) with
+   fastopenSynDataLen>0, tripping recordFastOpenBlackhole() -- confirmed via
+   its EV_INFO line. This same (now undropped) retransmission still carries
+   the cookie and data: blackhole detection disables *future* connection
+   attempts, not the one that tripped it.
+ - Connection 3 (port 1002), opened well within the 60s disable window: even
+   though a cookie is still cached, isActiveFastOpenDisabled() makes this
+   connection behave exactly like "no cookie cached" -- a bare, dataless SYN
+   carrying an empty cookie-request option, not the real cached cookie.
+
+Falsification: building this test caught a real bug -- the first version of
+the isActiveFastOpenDisabled() gate was added directly to
+writeHeaderOptions()'s cookie lookup, which (correctly) suppressed
+connection 3's stale cookie, but ALSO suppressed connection 2's OWN
+already-in-flight retransmission's cookie option (since blackhole detection
+trips *during* that same retransmission's processing, before
+writeHeaderOptions() runs for it) -- producing a nonsensical wire segment
+carrying 200 bytes of SYN data with no Fast Open option at all. Fixed by
+gating on state->fastopenCookieRequestPending (set once, at connect() time,
+by process_OPEN_ACTIVE, and left false for an already-deferred connection's
+retransmissions) instead of re-deriving disablement independently inside
+writeHeaderOptions(). This test's exact wire assertions for both connection
+2's successful retransmission (cookie AND data present) and connection 3's
+suppressed attempt (neither present) would fail again if either regressed.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 30s
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script="a3 delete;a4 delete"
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+*.cli_app.fastOpen=true
+*.cli_app.active2=true
+*.cli_app.tOpen2=1s
+*.cli_app.localPort2=1001
+*.cli_app.tSend2=1s
+*.cli_app.sendBytes2=200B
+*.cli_app.fastOpen2=true
+*.cli_app.active3=true
+*.cli_app.tOpen3=20s
+*.cli_app.localPort3=1002
+*.cli_app.tSend3=20s
+*.cli_app.sendBytes3=200B
+*.cli_app.fastOpen3=true
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+*.srv_app.active2=false
+*.srv_app.tOpen2=1s
+*.srv_app.localPort2=2000
+*.srv_app.active3=false
+*.srv_app.tOpen3=20s
+*.srv_app.localPort3=2000
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+*.cli_tcp.fastopenClientEnabled = true
+*.cli_tcp.fastopenBlackholeTimeout = 60s
+*.srv_tcp.fastopenServerEnabled = true
+*.srv_tcp.fastopenLenientCookieValidation = false
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# Connection 2's first two transmissions (original + 1st REXMIT) are dropped by the tester.
+%contains: postrun-command(1).out
+[1.001 A003] A.1001 > B.2000: S 250000:250200(200) win 7504   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=8)# deleting
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[4.001 A004] A.1001 > B.2000: S 250000:250200(200) win 7504   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=8)# deleting
+%#--------------------------------------------------------------------------------------------------------------
+%# Connection 2's 2nd REXMIT (syn_rexmit_count reaches the blackhole threshold here, but this
+%# transmission itself still carries the cookie+data -- blackhole detection disables FUTURE
+%# attempts, not the in-flight one that tripped it) gets through and accelerates normally.
+%contains: postrun-command(1).out
+[10.001 A005] A.1001 > B.2000: S 250000:250200(200) win 7504   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=8)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[10.003 B002] A.1001 < B.2000: A S 2500500:2500500(0) ack 250201 win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%# The blackhole was recorded exactly once (2nd REXMIT), disabling active TFO for 60s (until t=70).
+%contains: stdout
+Fast Open: disabling active TFO after suspected blackhole (count=1, until t=70)
+%#--------------------------------------------------------------------------------------------------------------
+%# Connection 3, opened at t=20s (well within the t=70 disable window): despite a cookie still
+%# being cached, this SYN is bare/dataless with an EMPTY cookie-request option -- not the real
+%# cached cookie -- exactly matching "no cookie cached" behavior.
+%contains: postrun-command(1).out
+[20.001 A007] A.1002 > B.2000: S 5000000:5000000(0) win 7504   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=0)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

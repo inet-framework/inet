@@ -173,6 +173,15 @@ class INET_API Tcp : public TransportProtocolBase
     uint64_t fastOpenSecret = 0;
     std::map<L3Address, std::vector<uint8_t>> fastOpenCookieCache;
 
+    // TCP Fast Open active blackhole detection (RFC 7413 SS4.4-inspired; simplified
+    // two-trigger port of the kernel's tcp_fastopen_active_should_disable/_disable/
+    // _detect_blackhole design -- see recordFastOpenBlackhole()). Module-wide, not
+    // per-destination: a middlebox that blackholes TFO SYN+data for one destination
+    // is presumed likely to do so for others too, matching the kernel's own
+    // process-wide (not per-destination) disable state.
+    int fastOpenBlackholeDisableCount = 0;
+    simtime_t fastOpenBlackholeDisableUntil = SIMTIME_ZERO;
+
     ushort lastEphemeralPort = static_cast<ushort>(-1);
     std::multiset<ushort> usedEphemeralPorts;
     long numSegmentsSent = 0;
@@ -230,6 +239,23 @@ class INET_API Tcp : public TransportProtocolBase
 
     /** TCP Fast Open: client-role cookie cache update, called on learning a cookie from a peer's SYN-ACK. */
     virtual void setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8_t>& cookie);
+
+    /**
+     * TCP Fast Open active blackhole detection: true while active (data-attached)
+     * Fast Open is temporarily disabled module-wide after suspected middlebox
+     * interference. Checked from process_OPEN_ACTIVE's cache-lookup gate -- while
+     * true, a new connection attempt behaves as if no cookie were cached (an
+     * immediate bare cookie-request SYN, no deferral/data), even if one is.
+     */
+    virtual bool isActiveFastOpenDisabled() const;
+
+    /**
+     * TCP Fast Open active blackhole detection: record a suspected blackhole event
+     * (an RTO or an out-of-order RST on a connection whose SYN carried data/a
+     * cookie) and disable active Fast Open for an exponentially-growing (capped)
+     * duration. No-op if fastopenBlackholeTimeout == 0 (disabled by default).
+     */
+    virtual void recordFastOpenBlackhole();
 
     virtual void removeConnection(TcpConnection *conn);
     virtual void sendToIp(Packet *segment);

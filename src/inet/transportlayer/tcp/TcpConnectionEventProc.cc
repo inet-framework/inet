@@ -66,7 +66,11 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
             if (openCmd->getFastOpen() && state->fastopenClientEnabled) {
                 state->fastopenRequested = true;
                 std::vector<uint8_t> cachedCookie;
-                if (tcpMain->getFastOpenCookie(remoteAddr, cachedCookie)) {
+                // isActiveFastOpenDisabled(): active blackhole detection tripped --
+                // treat exactly like "no cookie cached" (still request one via a
+                // bare, dataless SYN), so the connection proceeds normally, just
+                // without the data-attached acceleration until the timeout elapses.
+                if (!tcpMain->isActiveFastOpenDisabled() && tcpMain->getFastOpenCookie(remoteAddr, cachedCookie)) {
                     selectInitialSeqNum();
                     state->fastopenSynDeferred = true;
                     scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);

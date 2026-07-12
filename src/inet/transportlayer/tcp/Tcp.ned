@@ -237,6 +237,7 @@ simple Tcp extends SimpleModule like ITcp
         bool fastopenExpOptionEnabled = default(false); // Accept the legacy kind-253/254+magic-0xF989 experimental Fast Open option on receive (never emitted); inert unless fastopenServerEnabled or fastopenClientEnabled is also true
         bool fastopenLenientCookieValidation = default(true); // Accept any syntactically valid (4-16 byte) Fast Open cookie as valid without a keyed-hash check -- simulation-appropriate (no adversarial clients on the wire); set false to require an exact match against the locally generated cookie
         int fastopenCookieBytes = default(8); // Length in bytes of the locally generated Fast Open cookie (RFC 7413 allows 4-16)
+        double fastopenBlackholeTimeout @unit(s) = default(0s); // Client-side active-TFO blackhole detection: base disable duration after a suspected middlebox interference event (RTO or out-of-order RST on a data-carrying TFO SYN), doubling (capped at 64x) on repeated events. 0s (default) disables the detector entirely, matching Linux's own shipped default -- the local corpus's defaults.sh override to a nonzero value is a *test* configuration, not upstream's
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];

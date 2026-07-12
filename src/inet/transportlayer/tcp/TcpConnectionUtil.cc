@@ -1753,7 +1753,18 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // opt-in (MSG_FASTOPEN / TCP_FASTOPEN_CONNECT) never does.
         if (state->fastopenClientEnabled && state->fastopenRequested) {
             std::vector<uint8_t> cachedCookie;
-            bool haveCachedCookie = tcpMain->getFastOpenCookie(remoteAddr, cachedCookie);
+            // fastopenCookieRequestPending is the authoritative "this connection is in
+            // cookie-REQUEST mode" signal set once, at connect() time, by
+            // process_OPEN_ACTIVE -- true both for a genuinely empty cache and for a
+            // cache hit overridden by isActiveFastOpenDisabled() (blackhole detection,
+            // F5.1): either way this SYN must look like "no cookie cached" (an empty
+            // request), not silently reveal a real cached cookie it chose not to use.
+            // Deliberately NOT re-checking isActiveFastOpenDisabled() here directly --
+            // that would also suppress an *already*-deferred connection's own SYN
+            // retransmissions if blackhole detection trips mid-flight (after this
+            // connection committed to using the cache), corrupting an in-flight
+            // data-bearing SYN into a data-bearing-but-cookie-less one.
+            bool haveCachedCookie = !state->fastopenCookieRequestPending && tcpMain->getFastOpenCookie(remoteAddr, cachedCookie);
             if (haveCachedCookie || state->fastopenCookieRequestPending) {
                 tcpHeader->appendHeaderOption(new TcpOptionNop());
                 tcpHeader->appendHeaderOption(new TcpOptionNop());

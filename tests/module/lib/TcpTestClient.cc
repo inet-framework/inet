@@ -30,13 +30,15 @@ class INET_API TcpTestClient : public cSimpleModule
     typedef std::list<Command> Commands;
     Commands commands;
     Commands commands2; // for the optional second connection (socket2)
+    Commands commands3; // for the optional third connection (socket3)
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_OPEN2, TEST_SEND2 };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_OPEN2, TEST_SEND2, TEST_OPEN3, TEST_SEND3 };
 
     int ctr;
 
     TcpSocket socket;
     TcpSocket socket2; // optional second, independent connection from the same app/Tcp module -- see active2/tOpen2
+    TcpSocket socket3; // optional third, independent connection from the same app/Tcp module -- see active3/tOpen3
 
     // statistics
     int64_t rcvdBytes;
@@ -48,6 +50,7 @@ class INET_API TcpTestClient : public cSimpleModule
     void handleSelfMessage(cMessage *msg);
     void scheduleNextSend();
     void scheduleNextSend2();
+    void scheduleNextSend3();
 
   protected:
     virtual void initialize();
@@ -122,6 +125,7 @@ void TcpTestClient::initialize()
 
     socket.setOutputGate(gate("socketOut"));
     socket2.setOutputGate(gate("socketOut"));
+    socket3.setOutputGate(gate("socketOut"));
 
     ctr = 0;
 
@@ -137,6 +141,16 @@ void TcpTestClient::initialize()
         if (cmd2.numBytes > 0)
             commands2.push_back(cmd2);
         scheduleAt(tOpen2, new cMessage("Open2", TEST_OPEN2));
+    }
+
+    simtime_t tOpen3 = par("tOpen3");
+    if (tOpen3 >= SIMTIME_ZERO) {
+        Command cmd3;
+        cmd3.tSend = par("tSend3");
+        cmd3.numBytes = par("sendBytes3");
+        if (cmd3.numBytes > 0)
+            commands3.push_back(cmd3);
+        scheduleAt(tOpen3, new cMessage("Open3", TEST_OPEN3));
     }
 }
 
@@ -156,6 +170,8 @@ void TcpTestClient::handleMessage(cMessage *msg)
     }
     if (socket2.belongsToSocket(msg))
         socket2.processMessage(msg);
+    else if (socket3.belongsToSocket(msg))
+        socket3.processMessage(msg);
     else
         socket.processMessage(msg);
 }
@@ -216,6 +232,31 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket2.send(check_and_cast<Packet *>(msg));
             scheduleNextSend2();
             break;
+        case TEST_OPEN3:
+        {
+            // Third, independent connection from this same app/Tcp module -- e.g.
+            // to verify Fast Open blackhole-detection suppression after an earlier
+            // connection (TEST_OPEN2) tripped it.
+            const char *localAddress = par("localAddress");
+            int localPort3 = par("localPort3");
+            const char *connectAddress = par("connectAddress");
+            int connectPort = par("connectPort");
+
+            socket3.bind(*localAddress ? L3Address(localAddress) : L3Address(), localPort3);
+            socket3.setAutoRead(par("autoRead"));
+
+            if (par("active3"))
+                socket3.connect(L3Address(connectAddress), connectPort, par("fastOpen3"));
+            else
+                socket3.listenOnce();
+            scheduleNextSend3();
+            delete msg;
+            break;
+        }
+        case TEST_SEND3:
+            socket3.send(check_and_cast<Packet *>(msg));
+            scheduleNextSend3();
+            break;
         default:
             throw cRuntimeError("Unknown self message!");
             break;
@@ -241,6 +282,18 @@ void TcpTestClient::scheduleNextSend2()
     Command cmd = commands2.front();
     commands2.pop_front();
     Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND2);
+    const auto& bytes = makeShared<ByteCountChunk>(B(cmd.numBytes));
+    msg->insertAtBack(bytes);
+    scheduleAt(cmd.tSend, msg);
+}
+
+void TcpTestClient::scheduleNextSend3()
+{
+    if (commands3.empty())
+        return;
+    Command cmd = commands3.front();
+    commands3.pop_front();
+    Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND3);
     const auto& bytes = makeShared<ByteCountChunk>(B(cmd.numBytes));
     msg->insertAtBack(bytes);
     scheduleAt(cmd.tSend, msg);

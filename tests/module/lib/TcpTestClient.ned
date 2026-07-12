@@ -34,6 +34,12 @@ simple TcpTestClient like IApp
         double tSend2 @unit(s) = default(-1s);
         int sendBytes2 @unit(B) = default(0B);
         bool fastOpen2 = default(false); // TCP Fast Open (RFC 7413): request it on the second connection's active open, independently of fastOpen
+        bool active3 = default(false); // open a third, independent connection from this same app (and Tcp module)
+        double tOpen3 @unit(s) = default(-1s); // -1s = no third connection
+        int localPort3 = default(-1);
+        double tSend3 @unit(s) = default(-1s);
+        int sendBytes3 @unit(B) = default(0B);
+        bool fastOpen3 = default(false); // TCP Fast Open (RFC 7413): request it on the third connection's active open, independently of fastOpen/fastOpen2
         @display("i=block/app");
     gates:
         input socketIn;

@@ -18,6 +18,7 @@
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
+#include <algorithm>
 #include <functional>
 
 #include "inet/networklayer/common/Icmpv4ErrorTag_m.h"
@@ -445,6 +446,26 @@ bool Tcp::getFastOpenCookie(const L3Address& remoteAddr, std::vector<uint8_t>& c
 void Tcp::setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8_t>& cookie)
 {
     fastOpenCookieCache[remoteAddr] = cookie;
+}
+
+bool Tcp::isActiveFastOpenDisabled() const
+{
+    return simTime() < fastOpenBlackholeDisableUntil;
+}
+
+void Tcp::recordFastOpenBlackhole()
+{
+    simtime_t timeout = par("fastopenBlackholeTimeout");
+    if (timeout == SIMTIME_ZERO)
+        return; // disabled (default)
+
+    fastOpenBlackholeDisableCount++;
+    // Exponential backoff capped at 64x, matching the kernel's tcp_fastopen_active_disable()
+    // 2^(n-1) multiplier (capped there too, at TFO_BHOLE_LOWCNT/backoff limits).
+    int multiplier = 1 << std::min(fastOpenBlackholeDisableCount - 1, 6); // 2^6 = 64
+    fastOpenBlackholeDisableUntil = simTime() + timeout * multiplier;
+    EV_INFO << "Fast Open: disabling active TFO after suspected blackhole (count="
+            << fastOpenBlackholeDisableCount << ", until t=" << fastOpenBlackholeDisableUntil << ")\n";
 }
 
 void Tcp::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)

@@ -927,8 +927,16 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
     //"
     if (tcpHeader->getAckBit()) {
         if (seqLE(tcpHeader->getAckNo(), state->iss) || seqGreater(tcpHeader->getAckNo(), state->snd_nxt)) {
-            if (tcpHeader->getRstBit())
+            if (tcpHeader->getRstBit()) {
                 EV_DETAIL << "ACK+RST bit set but wrong AckNo, ignored\n";
+                // TCP Fast Open active blackhole detection: an out-of-order RST
+                // (wrong AckNo) while a data-carrying TFO SYN is still outstanding
+                // is a classic middlebox-interference symptom -- some boxes that
+                // don't understand the TFO option strip it and desync sequence
+                // numbers, producing a stray RST like this one.
+                if (state->fastopenSynDataLen > 0)
+                    tcpMain->recordFastOpenBlackhole();
+            }
             else {
                 EV_DETAIL << "ACK bit set but wrong AckNo, sending RST\n";
                 sendRst(tcpHeader->getAckNo(), destAddr, srcAddr, tcpHeader->getDestPort(), tcpHeader->getSrcPort());
@@ -1393,6 +1401,14 @@ void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
         event = TCP_E_ABORT;
         return;
     }
+
+    // TCP Fast Open active blackhole detection: repeated SYN-REXMITs on a
+    // connection whose SYN carried data suggest a middlebox is dropping/mangling
+    // TFO SYN+data specifically (a plain-SYN retransmit would usually get through
+    // sooner) -- matches the kernel's tcp_fastopen_active_should_disable() 3rd
+    // (index-2) consecutive-timeout trigger.
+    if (state->fastopenSynDataLen > 0 && state->syn_rexmit_count == TFO_BLACKHOLE_RTO_THRESHOLD)
+        tcpMain->recordFastOpenBlackhole();
 
     EV_INFO << "Performing retransmission #" << state->syn_rexmit_count << "\n";
 
