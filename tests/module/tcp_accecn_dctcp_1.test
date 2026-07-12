@@ -111,14 +111,15 @@ while($sor = <FILE>)
 %#--------------------------------------------------------------------------------------------------------------
 %# The one-ACK lag itself: at the burst-covering ACK (B006), byte-exact evidence hasn't
 %# been folded in yet (this segment's own ACE block runs AFTER this call) -- expected, not a bug.
+%# lens=bytes already, since the option arrived on the very first post-handshake ACK (A002).
 %contains: stdout
-DcTcp AccECN CE-byte accounting: ceBytesThisRound=0 cePktsThisRound=0 marked=0 dctcp_bytesMarked=0
+DcTcp AccECN CE-byte accounting: lens=bytes marked=0 dctcp_bytesMarked=0
 %#--------------------------------------------------------------------------------------------------------------
 %# The actual G8.1 assertion, observed one ACK later (the follow-up send's ACK): marked=988,
 %# the ONE CE-marked segment's real payload -- not ~4940 (5 segments), which RFC 8257's
 %# boolean gotEce-gated approximation would have produced for this whole round.
 %contains: stdout
-DcTcp AccECN CE-byte accounting: ceBytesThisRound=988 cePktsThisRound=1 marked=988 dctcp_bytesMarked=988
+DcTcp AccECN CE-byte accounting: lens=bytes marked=988 dctcp_bytesMarked=988
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

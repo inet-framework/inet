@@ -75,21 +75,37 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
             // (RFC 8257 3.3.4-3.3.6 below), not a per-ACK-exact quantity, and no CE byte is
             // ever lost or double-counted -- each one is picked up on the very next round.
             //
-            // Two-tier fallback: prefer the byte-exact AccECN-option evidence
-            // (deliveredCeBytes, G6/G7) whenever it advanced this round; when it didn't
-            // (the peer never sends the option, or none happened to arrive this
-            // particular round), fall back to G5's ACE-only mod-8 packet-count estimate
-            // (deliveredCePkts * snd_mss) rather than silently reporting zero marking.
+            // Lens selection is per-CONNECTION, latched, not per-round: once
+            // dctcp_accEcnOptionSeen is set (the first time this connection ever sees a
+            // real AccECN option -- state->accEcnOptionCebDeltaValid, set by
+            // readHeaderOptions() earlier in this same segment's processing, so unlike
+            // deliveredCeBytes this flag is NOT lagged), every later round uses the
+            // byte-exact deliveredCeBytes delta exclusively, even in rounds where no
+            // option happened to arrive (deliveredCeBytes correctly contributes 0 for
+            // those -- CEB is cumulative, so the NEXT option's delta automatically covers
+            // any gap rounds, per its own design). A per-round choice ("prefer bytes when
+            // nonzero, else packets") was tried and rejected: a gap round would be
+            // attributed to the packet-count estimate, and then the FOLLOWING option's
+            // cumulative delta would re-include that same gap round's bytes, double-
+            // counting them. Before the option is ever seen at all, the packet-count
+            // estimate (deliveredCePkts * snd_mss, G5's ACE-only estimate) is used instead
+            // of reporting zero.
             if (state->accEcnNegotiated) {
-                uint32_t ceBytesThisRound = state->deliveredCeBytes - state->dctcp_deliveredCeBytesMark;
-                uint32_t cePktsThisRound = state->deliveredCePkts - state->dctcp_deliveredCePktsMark;
-                state->dctcp_deliveredCeBytesMark = state->deliveredCeBytes;
-                state->dctcp_deliveredCePktsMark = state->deliveredCePkts;
+                if (state->accEcnOptionCebDeltaValid)
+                    state->dctcp_accEcnOptionSeen = true;
 
-                uint32_t marked = (ceBytesThisRound > 0) ? ceBytesThisRound : (cePktsThisRound * state->snd_mss);
-                EV_INFO << "DcTcp AccECN CE-byte accounting: ceBytesThisRound=" << ceBytesThisRound
-                        << " cePktsThisRound=" << cePktsThisRound << " marked=" << marked
-                        << " dctcp_bytesMarked=" << (state->dctcp_bytesMarked + marked) << "\n";
+                uint32_t marked;
+                if (state->dctcp_accEcnOptionSeen) {
+                    marked = state->deliveredCeBytes - state->dctcp_deliveredCeBytesMark;
+                    state->dctcp_deliveredCeBytesMark = state->deliveredCeBytes;
+                }
+                else {
+                    uint32_t cePktsThisRound = state->deliveredCePkts - state->dctcp_deliveredCePktsMark;
+                    state->dctcp_deliveredCePktsMark = state->deliveredCePkts;
+                    marked = cePktsThisRound * state->snd_mss;
+                }
+                EV_INFO << "DcTcp AccECN CE-byte accounting: lens=" << (state->dctcp_accEcnOptionSeen ? "bytes" : "packets")
+                        << " marked=" << marked << " dctcp_bytesMarked=" << (state->dctcp_bytesMarked + marked) << "\n";
                 if (marked > 0) {
                     state->dctcp_bytesMarked += marked;
                     conn->emit(markingProbSignal, 1);
