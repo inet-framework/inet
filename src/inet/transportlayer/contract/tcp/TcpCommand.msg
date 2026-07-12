@@ -175,6 +175,18 @@ class TcpSetTosCommand extends TcpSetOptionCommand
 }
 
 //
+// Workstream H3 (SO_TIMESTAMPING/SCM_TIMESTAMPING): enables/disables attaching a
+// TcpRxTimestampInd tag (see TcpTimestampingTag.msg) to every TCP_I_DATA packet
+// delivered to the app on this connection.
+//
+// @see ~TcpSocket::setTimestamping
+//
+class TcpSetTimestampingCommand extends TcpSetOptionCommand
+{
+    bool enabled = true;
+}
+
+//
 // Sent with message kind TCP_I_AVAILABLE, to let the app know
 // about the local and remote IP address and port.
 //

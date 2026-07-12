@@ -14,6 +14,7 @@
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
@@ -240,6 +241,8 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
         if (Packet *dataMsg = receiveQueue->extractBytesUpTo(endSeqNo)) {
             dataMsg->setKind(TCP_I_DATA);
             dataMsg->addTag<SocketInd>()->setSocketId(socketId);
+            if (rxTimestampingEnabled)
+                dataMsg->addTag<TcpRxTimestampInd>();
             sendToApp(dataMsg);
             maxByteCountRequested = 0;
         }
@@ -262,6 +265,9 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     }
     else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand)) {
         dscp = cmd->getDscp();
+    }
+    else if (auto cmd = dynamic_cast<TcpSetTimestampingCommand *>(tcpCommand)) {
+        rxTimestampingEnabled = cmd->getEnabled();
     }
     else
         throw cRuntimeError("Unknown subclass of TcpSetOptionCommand received from app: %s", tcpCommand->getClassName());

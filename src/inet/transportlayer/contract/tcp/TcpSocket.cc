@@ -266,6 +266,15 @@ void TcpSocket::setTos(short dscp)
     sendToTcp(request);
 }
 
+void TcpSocket::setTimestamping(bool enabled)
+{
+    auto request = new Request("setTimestamping", TCP_C_SETOPTION);
+    auto *cmd = new TcpSetTimestampingCommand();
+    cmd->setEnabled(enabled);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
 // ######################
 // TCP Socket Options End
 // ######################

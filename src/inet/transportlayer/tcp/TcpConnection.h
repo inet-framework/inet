@@ -142,6 +142,13 @@ class INET_API TcpConnection : public SimpleModule
     int ttl = -1;
     short dscp = -1;
     short tos = -1;
+    // Workstream H3 (SO_TIMESTAMPING): unrelated to TcpConnectionState's
+    // ts_support/ts_enabled (the RFC 1323 TCP Timestamps wire option) -- this is the
+    // app-facing, no-wire-impact socket option gating TcpRxTimestampInd delivery. A
+    // plain TcpConnection member (like ttl/dscp/tos above), not a state field, since
+    // it must be settable via TCP_C_SETOPTION before state exists (app code may call
+    // TcpSocket::setTimestamping() before connect(), same as setTtl/setDscp/setTos).
+    bool rxTimestampingEnabled = false;
     bool autoRead = true;
     bool peerClosedSentUp = false;
     long maxByteCountRequested = 0;  // from READ requests

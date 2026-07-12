@@ -450,6 +450,16 @@ class INET_API TcpSocket : public ISocket
     void setTos(short tos);
 
     /**
+     * Enables or disables delivery-time timestamping (Workstream H3,
+     * SO_TIMESTAMPING/SCM_TIMESTAMPING): when enabled, every TCP_I_DATA packet
+     * this socket receives carries a TcpRxTimestampInd tag recording when TCP
+     * delivered it (see TcpTimestampingTag.msg for the exact semantics --
+     * an INET-native simplification, not a full port of Linux's timestamp
+     * triad).
+     */
+    void setTimestamping(bool enabled);
+
+    /**
      * Required to re-connect with a "used" TcpSocket object.
      * By default, a TcpSocket object is tied to a single TCP connection,
      * via the connectionId. When the connection gets closed or aborted,

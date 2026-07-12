@@ -30,6 +30,7 @@
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
+#include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
@@ -607,6 +608,8 @@ void TcpConnection::sendAvailableDataToApp()
             while (auto msg = receiveQueue->extractBytesUpTo(endSeqNo)) {
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                 msg->addTag<SocketInd>()->setSocketId(socketId);
+                if (rxTimestampingEnabled)
+                    msg->addTag<TcpRxTimestampInd>();
                 sendToApp(msg);
                 if (!autoRead) {
                     maxByteCountRequested = 0;

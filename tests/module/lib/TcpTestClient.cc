@@ -15,6 +15,7 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
+#include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
@@ -219,6 +220,8 @@ void TcpTestClient::handleMessage(cMessage *msg)
     {
         rcvdPackets++;
         rcvdBytes += PK(msg)->getByteLength();
+        if (auto rxTs = check_and_cast<Packet *>(msg)->findTag<TcpRxTimestampInd>())
+            EV_INFO << "RX_TIMESTAMP: " << rxTs->getTimestamp() << "\n";
     }
     else if (msg->getKind()==TCP_I_STATUS)
     {
@@ -250,6 +253,9 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket.bind(*localAddress ? L3Address(localAddress) : L3Address(), localPort);
 
             socket.setAutoRead(par("autoRead"));
+
+            if (par("enableTimestamping"))
+                socket.setTimestamping(true);
 
             if (par("active"))
                 socket.connect(L3Address(connectAddress), connectPort, par("fastOpen"));

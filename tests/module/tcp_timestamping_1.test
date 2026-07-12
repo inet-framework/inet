@@ -1,0 +1,75 @@
+%description:
+SO_TIMESTAMPING/SCM_TIMESTAMPING (Workstream H3). Server enables
+timestamping (socket.setTimestamping(true), called right after bind());
+client sends two separate 500B writes 1s apart. Confirms a
+TcpRxTimestampInd tag is attached to each TCP_I_DATA delivery, with a
+distinct timestamp per delivery matching (within the link's 1ms one-way
+delay) the send time -- not a single fixed value, and not the
+connection's overall establishment time.
+
+Falsification: none needed as a separate run -- two DIFFERENT timestamps,
+each close to its own segment's arrival rather than both being identical
+or both being ~0, is itself the falsification of "the tag is attached but
+never actually stamped" or "the same stale timestamp is reused every
+time".
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1.0 500; 2.0 500"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+*.srv_app.enableTimestamping=true
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%# First 500B write, sent at t=1.0, arrives ~2ms later (the net's two 1ms link hops, client->tester->server).
+%contains: stdout
+RX_TIMESTAMP: 1.002
+%#--------------------------------------------------------------------------------------------------------------
+%# Second, separate 500B write, sent at t=2.0 -- a distinct timestamp, not a
+%# repeat of the first (which would indicate the tag is stamped once and reused).
+%contains: stdout
+RX_TIMESTAMP: 2.002
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
