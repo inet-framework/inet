@@ -905,13 +905,17 @@ void TcpConnection::sendSynAck()
     // ECN
     if (state->accEcnNegotiated) {
         // draft-ietf-tcpm-accurate-ecn 3WHS accept codepoint: ECE=0, CWR=1, AE=0 ("SW.").
-        // state->ect is deliberately NOT set here -- AccECN's ECT-marking/CE-counting wiring
-        // is G4's job; this commit only closes the negotiation handshake itself. ect and
-        // accEcnNegotiated are mutually exclusive per connection by construction (only one
-        // branch of this if/else runs).
+        // The server marks ECT the same as the client (G3.1's active-open side already does
+        // this on accept) -- AccECN is still ECN-capable transport, and a server that never
+        // marks ECT can never actually observe a CE mark to report back via the ACE field.
+        // ect and accEcnNegotiated are NOT mutually exclusive: once negotiated, both are true
+        // together, and every classic-ECN read/write site that consumes eceBit/cwrBit for its
+        // own (ECE-echo / CWR) purposes must additionally check !accEcnNegotiated, since those
+        // same 3 bits are repurposed post-handshake as the ACE counter (see sendToIP()).
         tcpHeader->setEceBit(false);
         tcpHeader->setCwrBit(true);
         tcpHeader->setAeBit(false);
+        state->ect = true;
         EV << "AccECN-setup SYN-ACK sent... AccECN is enabled\n";
     }
     else if (state->ecnWillingness) {
@@ -926,7 +930,7 @@ void TcpConnection::sendSynAck()
             EV << "non-ECN-setup SYN-ACK packet sent\n";
     }
     if (state->accEcnNegotiated) {
-        // see comment above -- ect intentionally untouched for AccECN in this commit.
+        // ect already set to true above.
     }
     else if (state->ecnWillingness && state->endPointIsWillingECN) {
         state->ect = true;
@@ -1023,7 +1027,9 @@ void TcpConnection::sendAck()
     // subsequent non-CE data packets do not have the ECN-Echo flag set.
 
     TcpStateVariables *state = getStateForUpdate();
-    if (state && state->ect) {
+    // AccECN connections repurpose eceBit as part of the post-handshake ACE counter
+    // (encoded later in sendToIP()); classic ECE-echo must not also write it here.
+    if (state && state->ect && !state->accEcnNegotiated) {
         if (tcpAlgorithm->shouldMarkAck()) {
             tcpHeader->setEceBit(true);
             EV_INFO << "In ecnEcho state... send ACK with ECE bit set\n";
@@ -1125,8 +1131,9 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     tcpHeader->setAckBit(true);
     tcpHeader->setWindow(updateRcvWnd());
 
-    // ECN
-    if (state->ect && state->sndCwr) {
+    // ECN. AccECN connections repurpose cwrBit as part of the post-handshake ACE counter
+    // (encoded later in sendToIP()); classic CWR-on-reduction must not also write it here.
+    if (state->ect && state->sndCwr && !state->accEcnNegotiated) {
         tcpHeader->setCwrBit(true);
         EV_INFO << "set CWR bit\n";
         state->sndCwr = false;

@@ -1219,9 +1219,13 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
 
     int payloadLength = tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>();
 
-    // ECN
+    // ECN. AccECN connections repurpose eceBit as part of the post-handshake ACE counter
+    // (decoded separately below, near the end of this function) -- classic ECE-echo
+    // consumption must not also read it here, or congestion control (TcpReno/TcpCubic/DcTcp,
+    // all gated on gotEce) would spuriously react to ACE bit-pattern noise instead of a real
+    // congestion signal.
     TcpStateVariables *state = getStateForUpdate();
-    if (state && state->ect) {
+    if (state && state->ect && !state->accEcnNegotiated) {
         if (tcpHeader->getEceBit() == true)
             EV_INFO << "Received packet with ECE\n";
 
