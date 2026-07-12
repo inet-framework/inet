@@ -448,6 +448,17 @@ class INET_API TcpConnection : public SimpleModule
      * data used to compute ssthresh on loss.
      */
     virtual uint32_t getFlightSize() const;
+
+    /**
+     * Maps INET's independent loss-recovery bools onto Linux's tcp_ca_state
+     * ordinals (TCP_CA_Open=0, Disorder=1, CWR=2, Recovery=3, Loss=4), for
+     * TcpStatusInfo::ca_state. INET has no state tracking Linux's Disorder --
+     * the pre-recovery "first dupACK seen" phase -- so that ordinal is never
+     * returned; scripts asserting ca_state==Disorder will still diverge. This
+     * is a known, documented imprecision, not a bug.
+     */
+    virtual int deriveLinuxCaState() const;
+
     const TcpSendQueue *getSendQueue() const { return sendQueue; }
     TcpSendQueue *getSendQueueForUpdate() { return sendQueue; }
     const TcpSackRexmitQueue *getRexmitQueue() const { return rexmitQueue; }

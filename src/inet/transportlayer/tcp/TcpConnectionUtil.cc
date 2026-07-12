@@ -1257,6 +1257,17 @@ uint32_t TcpConnection::getFlightSize() const
     return state->snd_max - state->snd_una;
 }
 
+int TcpConnection::deriveLinuxCaState() const
+{
+    if (state->afterRto)
+        return 4; // TCP_CA_Loss
+    if (state->lossRecovery)
+        return 3; // TCP_CA_Recovery
+    if (state->sndCwr)
+        return 2; // TCP_CA_CWR
+    return 0; // TCP_CA_Open (also covers TCP_CA_Disorder -- see header comment)
+}
+
 bool TcpConnection::sendData(uint32_t congestionWindow)
 {
     // we'll start sending from snd_max, if not after RTO

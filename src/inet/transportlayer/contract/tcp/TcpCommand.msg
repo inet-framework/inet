@@ -263,4 +263,29 @@ class TcpStatusInfo extends TcpCommand
     bool ectEnabled;
     unsigned int sndWndScale;
     simtime_t lastDataRecvTime;
+
+    // Linux tcp_ca_state ordinal (Open=0/Disorder=1/CWR=2/Recovery=3/Loss=4), derived
+    // from INET's independent loss-recovery bools -- see
+    // TcpConnection::deriveLinuxCaState(). INET never tracks Disorder(1) as a distinct
+    // state; see that function's doc comment.
+    int caState;
+    // Backoff/retransmit counter: same underlying counter as rexmitCount above (INET
+    // does not track Linux's tcpi_backoff and tcpi_retransmits as separate concepts).
+    unsigned int backoff;
+    // SACK/RACK-tracked lost bytes (TcpSackRexmitQueue::getTotalAmountOfLostBytes()),
+    // converted to an approximate segment count via integer division by snd_mss -- a
+    // lossy but honest approximation of Linux's tcpi_lost, which counts segments
+    // directly. UINT_MAX if SACK is not enabled on this connection (no loss tracking).
+    unsigned int lost;
+    // Cumulative zero-window (persist) probes sent (TcpBaseAlgStateVariables::
+    // zeroWindowProbesSent). UINT_MAX for flavours without persist-probe tracking.
+    unsigned int probes;
+    // Total bytes received in-sequence so far (rcv_nxt - irs - 1).
+    unsigned int bytesReceived;
+    // AccECN (Workstream G) sender-side resolved CE-marked packet/byte counts
+    // (state->deliveredCePkts/deliveredCeBytes); 0 (not a sentinel) when AccECN was
+    // never negotiated on this connection, matching Linux's own tcp_info behavior for
+    // an ECN-less connection.
+    unsigned int deliveredCePkts;
+    unsigned int deliveredCeBytes;
 }

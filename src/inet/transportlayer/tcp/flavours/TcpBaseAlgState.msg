@@ -32,6 +32,7 @@ struct TcpBaseAlgStateVariables extends TcpStateVariables
     //@{
     unsigned int persist_factor = 0; ///< factor needed for simplified PERSIST timer calculation
     simtime_t persist_timeout = 5.0; ///< current persist timeout
+    uint32_t zeroWindowProbesSent = 0; ///< cumulative zero-window (persist) probes sent; surfaced as TcpStatusInfo::probes
     //@}
 
     /// keepalive (RFC 1122 4.2.3.6)

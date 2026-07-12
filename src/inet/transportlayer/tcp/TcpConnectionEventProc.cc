@@ -14,6 +14,7 @@
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
 #include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamilyState_m.h"
@@ -421,6 +422,28 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
         statusInfo->setSsthresh(tahoeRenoState->ssthresh);
     else
         statusInfo->setSsthresh(UINT_MAX);
+
+    statusInfo->setCaState(deriveLinuxCaState());
+    // rcv_nxt/irs are only meaningful once the 3WHS has fixed irs (peer's ISN); before
+    // that (e.g. a STATUS query in SYN_SENT) both are still 0 and the subtraction
+    // would underflow.
+    statusInfo->setBytesReceived(seqGreater(state->rcv_nxt, state->irs) ? state->rcv_nxt - state->irs - 1 : 0);
+    statusInfo->setDeliveredCePkts(state->deliveredCePkts);
+    statusInfo->setDeliveredCeBytes(state->deliveredCeBytes);
+
+    if (state->sack_enabled && rexmitQueue != nullptr && state->snd_mss > 0)
+        statusInfo->setLost(rexmitQueue->getTotalAmountOfLostBytes() / state->snd_mss);
+    else
+        statusInfo->setLost(UINT_MAX);
+
+    if (auto *baseAlgState = dynamic_cast<TcpBaseAlgStateVariables *>(state)) {
+        statusInfo->setBackoff(baseAlgState->rexmit_count);
+        statusInfo->setProbes(baseAlgState->zeroWindowProbesSent);
+    }
+    else {
+        statusInfo->setBackoff(UINT_MAX);
+        statusInfo->setProbes(UINT_MAX);
+    }
 
     msg->setControlInfo(statusInfo);
     msg->setKind(TCP_I_STATUS);

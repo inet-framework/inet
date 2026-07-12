@@ -40,6 +40,7 @@ simple TcpTestClient like IApp
         double tSend3 @unit(s) = default(-1s);
         int sendBytes3 @unit(B) = default(0B);
         bool fastOpen3 = default(false); // TCP Fast Open (RFC 7413): request it on the third connection's active open, independently of fastOpen/fastOpen2
+        string statusRequestScript = default(""); // comma-separated list of times ("1.5,3.0") at which to issue a TCP_C_STATUS query on socket (the first connection) and log the reply
         @display("i=block/app");
     gates:
         input socketIn;

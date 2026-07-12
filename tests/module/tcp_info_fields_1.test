@@ -1,0 +1,86 @@
+%description:
+Remaining TCP_INFO fields (extends TcpStatusInfo beyond what
+topic/packetdrill-tcp-info-bridge already landed): caState, backoff, lost,
+probes, bytesReceived, deliveredCePkts, deliveredCeBytes.
+
+Client sends a 5-segment (5000B, mss=1000) burst; the tester drops every one
+of the server's ACKs for it, so nothing is ever acknowledged and the REXMIT
+timer (initialRto=3s) fires at t=4s. RFC 5681 slow start after RTO retransmits
+only ONE segment (TcpReno::processRexmitTimer -> retransmitOneSegment), so
+snd_nxt (snd_una+1000) stays below snd_max (snd_una+5000) -- afterRto stays
+observably true until a later event catches snd_nxt up, unlike a single-
+segment-outstanding RTO where the retransmission's own sendSegment() call
+clears afterRto again before any external STATUS query could ever observe it
+(this was tried first, empirically, against tcp_persist_1.test's zero-window
+scenario, and always read back caState=Open -- not what's pinned below).
+
+Falsification: none needed as a separate run -- the two %contains blocks pin
+genuinely different caState/backoff values at the two query times, so a stub
+returning a fixed sentinel regardless of connection state would fail one of
+them.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+sim-time-limit = 10s
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+# Drop every server ACK from the second one on (b001 is the SYN-ACK, kept so
+# the handshake completes normally); a generous range covers however many
+# per-segment ACKs the server actually emits for the 5-segment burst.
+*.tcptester.script="b2 delete;b3 delete;b4 delete;b5 delete;b6 delete;b7 delete;b8 delete"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=5000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+# t=0.5: idle baseline (Open, no probes/backoff yet). t=4.2: shortly after the
+# t=4s RTO fires and retransmits one segment, afterRto still true (see above).
+*.cli_app.statusRequestScript="0.5,4.2"
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+# tcp settings -- initialWindow must be overridden to "rfc6928" (IW10) so all
+# 5 segments of the burst go out immediately instead of ramping up from 1 MSS;
+# per the ini first-match-wins gotcha this override must precede the include.
+*.*_tcp.initialWindow = "rfc6928"
+*.*_tcp.mss = 1000
+*.*_tcp.advertisedWindow = 20000
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+STATUS: caState=0 backoff=0 lost=4294967295 probes=0 bytesReceived=0 deliveredCePkts=0 deliveredCeBytes=0
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+STATUS: caState=4 backoff=1 lost=4294967295 probes=0 bytesReceived=0 deliveredCePkts=0 deliveredCeBytes=0
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
@@ -35,7 +36,7 @@ class INET_API TcpTestClient : public cSimpleModule
     Commands commands2; // for the optional second connection (socket2)
     Commands commands3; // for the optional third connection (socket3)
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_OPEN2, TEST_SEND2, TEST_OPEN3, TEST_SEND3 };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_OPEN2, TEST_SEND2, TEST_OPEN3, TEST_SEND3, TEST_STATUS };
 
     int ctr;
 
@@ -54,6 +55,8 @@ class INET_API TcpTestClient : public cSimpleModule
     void scheduleNextSend();
     void scheduleNextSend2();
     void scheduleNextSend3();
+    void parseStatusRequestScript(const char *script);
+    void printStatus(TcpStatusInfo *status);
 
   protected:
     virtual void initialize();
@@ -107,6 +110,40 @@ void TcpTestClient::parseScript(const char *script)
     }
 }
 
+void TcpTestClient::parseStatusRequestScript(const char *script)
+{
+    // Remaining TCP_INFO fields: "<time>,<time>,..." -- each entry schedules a
+    // TCP_C_STATUS query on socket (the first connection); the reply is logged
+    // via printStatus() when it arrives.
+    const char *s = script;
+    while (*s) {
+        while (isspace(*s)) s++;
+        if (!*s) break;
+        const char *s0 = s;
+        simtime_t t = strtod(s, &const_cast<char *&>(s));
+        if (s == s0)
+            throw cRuntimeError("syntax error in statusRequestScript: simulation time expected");
+        scheduleAt(t, new cMessage("StatusRequest", TEST_STATUS));
+        while (isspace(*s)) s++;
+        if (!*s) break;
+        if (*s != ',')
+            throw cRuntimeError("syntax error in statusRequestScript: separator ',' missing");
+        s++;
+    }
+}
+
+void TcpTestClient::printStatus(TcpStatusInfo *status)
+{
+    EV_INFO << "STATUS: caState=" << status->getCaState()
+            << " backoff=" << status->getBackoff()
+            << " lost=" << status->getLost()
+            << " probes=" << status->getProbes()
+            << " bytesReceived=" << status->getBytesReceived()
+            << " deliveredCePkts=" << status->getDeliveredCePkts()
+            << " deliveredCeBytes=" << status->getDeliveredCeBytes()
+            << "\n";
+}
+
 std::string TcpTestClient::makeMsgName()
 {
     char buf[40];
@@ -133,6 +170,8 @@ void TcpTestClient::initialize()
     parseScript(script);
     if (cmd.numBytes > 0 && commands.size() > 1)
         throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
+
+    parseStatusRequestScript(par("statusRequestScript"));
 
     socket.setOutputGate(gate("socketOut"));
     socket2.setOutputGate(gate("socketOut"));
@@ -178,6 +217,10 @@ void TcpTestClient::handleMessage(cMessage *msg)
     {
         rcvdPackets++;
         rcvdBytes += PK(msg)->getByteLength();
+    }
+    else if (msg->getKind()==TCP_I_STATUS)
+    {
+        printStatus(check_and_cast<TcpStatusInfo *>(msg->getControlInfo()));
     }
     if (socket2.belongsToSocket(msg))
         socket2.processMessage(msg);
@@ -267,6 +310,10 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
         case TEST_SEND3:
             socket3.send(check_and_cast<Packet *>(msg));
             scheduleNextSend3();
+            break;
+        case TEST_STATUS:
+            socket.requestStatus();
+            delete msg;
             break;
         default:
             throw cRuntimeError("Unknown self message!");
