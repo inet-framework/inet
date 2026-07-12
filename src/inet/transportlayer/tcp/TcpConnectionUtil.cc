@@ -310,12 +310,20 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
         tcpHeader->setEceBit(ace & 0x1);
     }
 
-    // AccECN TCP option beacon bookkeeping (Workstream G6.1): the exactly-once
-    // mutation companion to writeHeaderOptions()'s pure/idempotent beacon decision
-    // (which may run more than once per real segment as a header-size dry run --
-    // see the comment there). sendToIP() is called exactly once per genuine send
-    // across every path (sendAck/sendSyn/sendSynAck/sendSegment/sendKeepAliveProbe),
-    // same reasoning as the ACE-encode block just above.
+    // AccECN TCP option beacon bookkeeping (Workstream G6.1): the exactly-once-per-
+    // real-send mutation companion to writeHeaderOptions()'s pure/idempotent beacon
+    // decision (which may run more than once per real segment as a header-size dry
+    // run -- see the comment there). This guard is deliberately broader than
+    // writeHeaderOptions()'s own (which only appends from its non-SYN/non-INIT/
+    // non-LISTEN else-if branch, so e.g. sendFin() -- which never calls
+    // writeHeaderOptions() at all -- and ACKs sent from LAST_ACK/CLOSING/TIME_WAIT
+    // never carry the option): counting here is a superset of appending, so a FIN
+    // or teardown ACK can advance accEcnAckCount/toggle the kind without the option
+    // ever actually going out. That's harmless -- neither the cadence nor which of
+    // 172/174 is used has a wire-correctness requirement (the peer decodes either
+    // kind identically) -- so "beacon every accEcnOptionBeaconAcks-th ACK-bearing
+    // segment" is closer to "at most every Nth" in practice; it is never a
+    // duplicate append, only an occasional silent skip/phase advance.
     if (state->accEcnNegotiated && state->accEcnOptionEnabled && tcpHeader->getAckBit() && !tcpHeader->getSynBit()) {
         state->accEcnAckCount++;
         if (state->accEcnOptionBeaconAcks > 0 && state->accEcnAckCount % state->accEcnOptionBeaconAcks == 0)
