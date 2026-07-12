@@ -172,6 +172,7 @@ class INET_API Tcp : public TransportProtocolBase
     bool fastOpenSecretSeeded = false;
     uint64_t fastOpenSecret = 0;
     std::map<L3Address, std::vector<uint8_t>> fastOpenCookieCache;
+    int fastOpenCookieCacheSize = 0; // read once from the fastopenCookieCacheSize parameter at INITSTAGE_LOCAL
 
     // TCP Fast Open active blackhole detection (RFC 7413 SS4.4-inspired; simplified
     // two-trigger port of the kernel's tcp_fastopen_active_should_disable/_disable/

@@ -55,6 +55,8 @@ void Tcp::initialize(int stage)
 
         msl = par("msl");
 
+        fastOpenCookieCacheSize = par("fastopenCookieCacheSize");
+
         WATCH(checksumMode);
         WATCH(lastEphemeralPort);
         WATCH(usedEphemeralPorts);
@@ -445,6 +447,15 @@ bool Tcp::getFastOpenCookie(const L3Address& remoteAddr, std::vector<uint8_t>& c
 
 void Tcp::setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8_t>& cookie)
 {
+    if (fastOpenCookieCache.find(remoteAddr) == fastOpenCookieCache.end()
+        && (int)fastOpenCookieCache.size() >= fastOpenCookieCacheSize)
+    {
+        // Bound the cache: evict an arbitrary entry (not LRU -- this is a small
+        // per-Tcp-module in-memory map, not full RFC 7413 persistence semantics;
+        // a real LRU is unnecessary machinery for a cache whose only job in a
+        // simulation is not growing unboundedly across thousands of destinations).
+        fastOpenCookieCache.erase(fastOpenCookieCache.begin());
+    }
     fastOpenCookieCache[remoteAddr] = cookie;
 }
 

@@ -1,0 +1,95 @@
+%description:
+TCP Fast Open (RFC 7413) F6.1: bounds the client-role cookie cache
+(fastopenCookieCacheSize). A pure Tcp-module-level cache test rather than a
+full network module test -- the eviction policy is exercised entirely
+through setFastOpenCookie()/getFastOpenCookie(), with no protocol
+interaction needed, so a direct unit test (same live-module-instantiation
+pattern as tcp_fastopen_cookie_gen_1.test) is a more precise and simpler fit
+than standing up three real TCP handshakes to three distinct destinations
+through the module-test network harness.
+
+Sets fastopenCookieCacheSize=2, then inserts cookies for 3 distinct
+addresses. Eviction is documented as "arbitrary, not LRU" (see Tcp.cc):
+concretely, std::map<L3Address,...>::begin() evicts the numerically smallest
+still-cached address, not the first-inserted one. With addr1 < addr2 < addr3
+and insertion order addr1, addr2, addr3, only addr1 and addr2 are in the map
+when addr3 triggers eviction, so addr1 (the smaller of the two) is evicted.
+That happens to coincide with "oldest inserted" in this particular scenario,
+but this note is spelling out that it's a same-address-ordering coincidence
+of this test's chosen addresses, not a guarantee the implementation
+provides.
+
+Falsification: same 3-insert sequence with the default fastopenCookieCacheSize
+(1024, i.e. effectively unbounded here) -- all three must remain cached.
+
+%includes:
+#include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+static Tcp *makeTcpMain(const char *name, int cacheSize)
+{
+    cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp.Tcp");
+    Tcp *tcpMain = check_and_cast<Tcp *>(moduleType->create(name, getSimulation()->getSystemModule()));
+    tcpMain->par("fastopenCookieCacheSize").setIntValue(cacheSize);
+    tcpMain->finalizeParameters();
+    tcpMain->callInitialize();
+    return tcpMain;
+}
+
+%activity:
+
+L3Address addr1(Ipv4Address("10.0.0.1"));
+L3Address addr2(Ipv4Address("10.0.0.2"));
+L3Address addr3(Ipv4Address("10.0.0.3"));
+
+{
+    // Bounded: fastopenCookieCacheSize=2.
+    Tcp *tcpMain = makeTcpMain("tcpMainBounded", 2);
+    tcpMain->setFastOpenCookie(addr1, {0x01});
+    tcpMain->setFastOpenCookie(addr2, {0x02});
+    tcpMain->setFastOpenCookie(addr3, {0x03}); // triggers eviction (cache was at capacity 2)
+
+    std::vector<uint8_t> cookie;
+    EV << "bounded: addr1 cached=" << (tcpMain->getFastOpenCookie(addr1, cookie) ? "yes" : "no") << "\n";
+    EV << "bounded: addr2 cached=" << (tcpMain->getFastOpenCookie(addr2, cookie) ? "yes" : "no") << "\n";
+    EV << "bounded: addr3 cached=" << (tcpMain->getFastOpenCookie(addr3, cookie) ? "yes" : "no") << "\n";
+
+    tcpMain->deleteModule();
+}
+
+{
+    // Falsification: default fastopenCookieCacheSize (1024) on the same 3-insert
+    // sequence -- well under the bound, so nothing should be evicted.
+    Tcp *tcpMain = makeTcpMain("tcpMainDefault", 1024);
+    tcpMain->setFastOpenCookie(addr1, {0x01});
+    tcpMain->setFastOpenCookie(addr2, {0x02});
+    tcpMain->setFastOpenCookie(addr3, {0x03});
+
+    std::vector<uint8_t> cookie;
+    EV << "unbounded: addr1 cached=" << (tcpMain->getFastOpenCookie(addr1, cookie) ? "yes" : "no") << "\n";
+    EV << "unbounded: addr2 cached=" << (tcpMain->getFastOpenCookie(addr2, cookie) ? "yes" : "no") << "\n";
+    EV << "unbounded: addr3 cached=" << (tcpMain->getFastOpenCookie(addr3, cookie) ? "yes" : "no") << "\n";
+
+    tcpMain->deleteModule();
+}
+
+EV << ".\n";
+
+%contains: stdout
+bounded: addr1 cached=no
+bounded: addr2 cached=yes
+bounded: addr3 cached=yes
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+unbounded: addr1 cached=yes
+unbounded: addr2 cached=yes
+unbounded: addr3 cached=yes
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+.
