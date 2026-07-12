@@ -1,0 +1,93 @@
+%description:
+TCP AccECN (Workstream G) G3.1: 3WHS negotiation, client AccECN-capable
+(tcpEcnMode="accecn") but the server only understands classic ECN
+(tcpEcnMode="rfc3168"). The client's SEWA SYN (ECE=CWR=AE=1) does NOT match
+the server's classic-ECN-willing check (G3.2 requires AE=0 for that check
+to fire -- draft-ietf-tcpm-accurate-ecn's resolution of an RFC 3168
+ambiguity), so the server treats it as a plain non-ECN SYN and replies with
+an unconditional classic ECN-setup SYN-ACK (ECE=1, CWR=0, AE=0) -- the
+server's own ecnWillingness=true, unconditionally on any SYN, per its
+pre-AccECN behavior. The client's G3.1 decode logic matches (1,0,0) and
+falls back to classic ECN (ect=true, accEcnNegotiated stays false).
+
+Real two-INET-instance handshake (see tcp_accecn_negotiate_accepted_1.test
+for why this isn't hand-injected).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script=""
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+*.cli_tcp.tcpEcnMode = "accecn"
+*.srv_tcp.tcpEcnMode = "rfc3168"
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# Client's SYN: SEWA -- unchanged, the client doesn't know yet that the server is classic-only.
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S E W N 0:0(0) win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%# Server's SYN-ACK: SE. (classic ECN-setup, no AE) -- the server never recognized the SYN as AccECN.
+%contains: postrun-command(1).out
+[0.003 B001] A.1000 < B.2000: A S E 500:500(0) ack 1 win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+AccECN request received classic-ECN SYN-ACK... falling back to RFC 3168 ECN.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+AccECN-setup SYN received
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

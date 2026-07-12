@@ -836,8 +836,22 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
 
     state->ack_now = true;
 
-    // ECN
-    if (tcpHeader->getEceBit() == true && tcpHeader->getCwrBit() == true) {
+    // ECN. AccECN's request codepoint (SEWA: ECE=CWR=AE=1) is checked first -- it's a
+    // superset of the classic-ECN-willing bit pattern (ECE=CWR=1), so without this check
+    // first an AccECN SYN would also satisfy the classic branch below and get misread as a
+    // plain RFC 3168 request.
+    if (tcpHeader->getEceBit() && tcpHeader->getCwrBit() && tcpHeader->getAeBit()
+        && (state->ecnMode == TCP_ECN_MODE_ACCECN || state->ecnMode == TCP_ECN_MODE_ACCECN_PASSIVE))
+    {
+        state->endPointIsWillingECN = true;
+        state->accEcnNegotiated = true;
+        EV << "AccECN-setup SYN received\n";
+    }
+    else if (tcpHeader->getEceBit() == true && tcpHeader->getCwrBit() == true && !tcpHeader->getAeBit()) {
+        // AE=0 required: draft-ietf-tcpm-accurate-ecn resolves the RFC 3168 ambiguity this
+        // way -- an AE=1 SYN (AccECN's request, or a foreign use of the bit) is never a valid
+        // classic-ECN-willing signal, even from a peer this connection isn't using AccECN
+        // with (e.g. tcpEcnMode="passive" seeing a SEWA SYN must NOT treat it as ECN-willing).
         state->endPointIsWillingECN = true;
         EV << "ECN-setup SYN packet received\n";
     }
@@ -1065,7 +1079,32 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             sendEstabIndicationToApp();
 
             // ECN
-            if (state->ecnSynSent) {
+            if (state->aeSynSent) {
+                // draft-ietf-tcpm-accurate-ecn 3WHS: decode the SYN-ACK's (ECE,CWR,AE) triple
+                // in response to our SEWA (AccECN-requesting) SYN.
+                bool ece = tcpHeader->getEceBit();
+                bool cwr = tcpHeader->getCwrBit();
+                bool ae = tcpHeader->getAeBit();
+                if (!ece && cwr && !ae) {
+                    // "0 1 0": AccECN accepted.
+                    state->accEcnNegotiated = true;
+                    state->ect = true;
+                    EV << "AccECN-setup SYN-ACK received... AccECN is enabled.\n";
+                }
+                else if (ece && !cwr && !ae) {
+                    // "1 0 0": peer only understands classic ECN -- fall back to it.
+                    state->ecnMode = TCP_ECN_MODE_RFC3168;
+                    state->ect = true;
+                    EV << "AccECN request received classic-ECN SYN-ACK... falling back to RFC 3168 ECN.\n";
+                }
+                else {
+                    // Any other combination (all-clear, or an unexpected codepoint): no ECN.
+                    state->ect = false;
+                    EV << "AccECN request received a non-ECN-setup SYN-ACK... ECN is disabled.\n";
+                }
+                state->aeSynSent = false;
+            }
+            else if (state->ecnSynSent) {
                 if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit()) {
                     state->ect = true;
                     EV << "ECN-setup SYN-ACK packet was received... ECN is enabled.\n";

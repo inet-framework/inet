@@ -678,22 +678,24 @@ void TcpConnection::configureStateVariables()
         if (strcmp(tcpEcnModeStr, "off") != 0)
             throw cRuntimeError("Tcp: set either the deprecated ecnWillingness or tcpEcnMode, not both");
         EV_WARN << "Tcp: ecnWillingness is deprecated; use tcpEcnMode=\"rfc3168\"\n";
-        state->ecnMode = 2; // rfc3168
+        state->ecnMode = TCP_ECN_MODE_RFC3168;
     }
     else if (!strcmp(tcpEcnModeStr, "passive"))
-        state->ecnMode = 1;
+        state->ecnMode = TCP_ECN_MODE_PASSIVE;
     else if (!strcmp(tcpEcnModeStr, "rfc3168"))
-        state->ecnMode = 2;
+        state->ecnMode = TCP_ECN_MODE_RFC3168;
     else if (!strcmp(tcpEcnModeStr, "accecn"))
-        state->ecnMode = 3;
+        state->ecnMode = TCP_ECN_MODE_ACCECN;
     else if (!strcmp(tcpEcnModeStr, "accecn-passive"))
-        state->ecnMode = 4;
+        state->ecnMode = TCP_ECN_MODE_ACCECN_PASSIVE;
     else
-        state->ecnMode = 0; // off
-    // Every existing classic-ECN call site (sendSyn/sendSynAck/processSynInListen/etc.) keys
-    // off state->ecnWillingness, not state->ecnMode -- keep it in sync so this commit is pure
-    // param plumbing, zero behavior change, for every mode this commit actually implements.
-    state->ecnWillingness = state->ecnMode >= 2; // rfc3168 or higher (accecn modes fall back to rfc3168 wire behavior until G2+ land)
+        state->ecnMode = TCP_ECN_MODE_OFF;
+    // state->ecnWillingness reflects "willing to use ECN in some capacity" (accept and/or
+    // initiate) and is what the PASSIVE-open call sites (processSynInListen/sendSynAck) key
+    // off, unchanged since before AccECN -- true for rfc3168 and both AccECN modes (passive
+    // mode's own asymmetry, and accecn-passive's, is about *initiating*, which the ACTIVE-open
+    // call site (sendSyn(), G3.1) decides separately, directly from ecnMode, not from this flag).
+    state->ecnWillingness = state->ecnMode >= TCP_ECN_MODE_RFC3168;
     state->dupthresh = tcpMain->par("dupthresh");
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     state->prrEnabled = tcpMain->par("prrEnabled");
@@ -835,8 +837,21 @@ void TcpConnection::sendSyn()
     uint32_t synDataLen = state->fastopenSynDataLen;
     state->snd_max = state->snd_nxt = state->iss + 1 + synDataLen;
 
-    // ECN
-    if (state->ecnWillingness) {
+    // ECN. Active-open initiation is decided directly from ecnMode, not from the shared
+    // ecnWillingness flag (which also covers the passive-accept side, G3.2) -- accecn-passive
+    // is willing to ACCEPT AccECN when listening but must never INITIATE it (or classic ECN)
+    // on an active open, same as "passive"/"off".
+    if (state->ecnMode == TCP_ECN_MODE_ACCECN) {
+        // draft-ietf-tcpm-accurate-ecn 3WHS: the AccECN-requesting SYN sets ECE=CWR=AE=1
+        // (the "SEWA" codepoint, distinct from classic ECN's "SEW").
+        tcpHeader->setEceBit(true);
+        tcpHeader->setCwrBit(true);
+        tcpHeader->setAeBit(true);
+        state->aeSynSent = true;
+        state->ecnSynSent = false; // this is an AccECN attempt, not classic -- aeSynSent tracks it
+        EV << "AccECN-setup SYN packet sent\n";
+    }
+    else if (state->ecnMode == TCP_ECN_MODE_RFC3168) {
         tcpHeader->setEceBit(true);
         tcpHeader->setCwrBit(true);
         state->ecnSynSent = true;
@@ -847,6 +862,7 @@ void TcpConnection::sendSyn()
         // A host that is not willing to use ECN on a TCP connection SHOULD
         // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
         // SYN-ACK packets that it sends to indicate this unwillingness.
+        // Covers off, passive, and accecn-passive: none of these initiate on active OPEN.
         tcpHeader->setEceBit(false);
         tcpHeader->setCwrBit(false);
         state->ecnSynSent = false;
@@ -875,7 +891,18 @@ void TcpConnection::sendSynAck()
     state->snd_max = state->snd_nxt = state->iss + 1;
 
     // ECN
-    if (state->ecnWillingness) {
+    if (state->accEcnNegotiated) {
+        // draft-ietf-tcpm-accurate-ecn 3WHS accept codepoint: ECE=0, CWR=1, AE=0 ("SW.").
+        // state->ect is deliberately NOT set here -- AccECN's ECT-marking/CE-counting wiring
+        // is G4's job; this commit only closes the negotiation handshake itself. ect and
+        // accEcnNegotiated are mutually exclusive per connection by construction (only one
+        // branch of this if/else runs).
+        tcpHeader->setEceBit(false);
+        tcpHeader->setCwrBit(true);
+        tcpHeader->setAeBit(false);
+        EV << "AccECN-setup SYN-ACK sent... AccECN is enabled\n";
+    }
+    else if (state->ecnWillingness) {
         tcpHeader->setEceBit(true);
         tcpHeader->setCwrBit(false);
         EV << "ECN-setup SYN-ACK packet sent\n";
@@ -886,7 +913,10 @@ void TcpConnection::sendSynAck()
         if (state->endPointIsWillingECN)
             EV << "non-ECN-setup SYN-ACK packet sent\n";
     }
-    if (state->ecnWillingness && state->endPointIsWillingECN) {
+    if (state->accEcnNegotiated) {
+        // see comment above -- ect intentionally untouched for AccECN in this commit.
+    }
+    else if (state->ecnWillingness && state->endPointIsWillingECN) {
         state->ect = true;
         EV << "both end-points are willing to use ECN... ECN is enabled\n";
     }

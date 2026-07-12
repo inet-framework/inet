@@ -1,0 +1,96 @@
+%description:
+TCP AccECN (Workstream G) G3.1+G3.2: 3WHS negotiation, both endpoints
+AccECN-capable (tcpEcnMode="accecn"). The client's SYN uses the SEWA
+codepoint (ECE=CWR=AE=1, RFC 3168's classic-ECN-willing pattern plus the AE
+bit); the server recognizes it as an AccECN request (not classic -- G3.2's
+AccECN check runs before the classic ECE&&CWR check) and replies with the
+SW. accept codepoint (ECE=0, CWR=1, AE=0); the client's G3.1 decode logic
+matches (0,1,0) and marks the connection AccECN-negotiated.
+
+Tested via a real two-INET-instance handshake, not hand-injected packets:
+G3.1 (client SYN-ACK decode) and G3.2 (server SYN accept/reflect) are
+tightly coupled -- the client's decode logic can only be meaningfully
+exercised against a real AccECN-aware server's actual reply, so both
+commits' code landed together before this test was written.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script=""
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+*.*_tcp.tcpEcnMode = "accecn"
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# Client's SYN: SEWA (SYN+ECE+CWR+AE), requesting AccECN. Rendered "S E W N" -- AE renders
+%# as "N" (its RFC 3540 NS heritage), not "A", to avoid colliding with the ACK flag's "A".
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S E W N 0:0(0) win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%# Server's SYN-ACK: SW. (SYN+ACK+CWR only) -- the AccECN accept codepoint.
+%contains: postrun-command(1).out
+[0.003 B001] A.1000 < B.2000: A S W 500:500(0) ack 1 win 7504   Option(s): MaxSegSize
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+AccECN-setup SYN received
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+AccECN-setup SYN-ACK sent... AccECN is enabled
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+AccECN-setup SYN-ACK received... AccECN is enabled.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

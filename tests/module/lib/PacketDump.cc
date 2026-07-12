@@ -549,11 +549,15 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
     }
     if (tcpHeader->getEceBit()) {
         flags = true;
-        out << "E "; // ECN-Echo (RFC 3168); also AccECN's AE bit combined with CWR/ECE per draft-ietf-tcpm-accurate-ecn
+        out << "E "; // ECN-Echo (RFC 3168); also part of AccECN's SEWA/SW./SE. codepoints per draft-ietf-tcpm-accurate-ecn
     }
     if (tcpHeader->getCwrBit()) {
         flags = true;
         out << "W "; // Congestion Window Reduced (RFC 3168)
+    }
+    if (tcpHeader->getAeBit()) {
+        flags = true;
+        out << "N "; // AE (AccECN Echo): the repurposed RFC 3540 NS bit -- "N" avoids colliding with "A" (ACK, above)
     }
     if (!flags) {
         out << ". ";
