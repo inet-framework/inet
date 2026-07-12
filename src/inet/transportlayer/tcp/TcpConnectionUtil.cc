@@ -1388,6 +1388,10 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 ok = processTSOption(tcpHeader, *check_and_cast<const TcpOptionTimestamp *>(option));
                 break;
 
+            case TCPOPTION_TCP_FASTOPEN: // TFO=34
+                ok = processFastOpenOption(tcpHeader, *check_and_cast<const TcpOptionTcpFastOpen *>(option));
+                break;
+
             // TODO add new TCPOptions here once they are implemented
             // TODO delegate to TcpAlgorithm as well -- it may want to recognized additional options
 
@@ -1507,6 +1511,12 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
         }
     }
 
+    return true;
+}
+
+bool TcpConnection::processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option)
+{
+    // Wire format only in this commit -- cookie generation/validation lands in a later commit.
     return true;
 }
 

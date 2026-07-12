@@ -68,7 +68,9 @@ enum TcpOptionNumbers
 //  TCPOPTION_QUICK_START_RESPONSE = 27;                // RFC 4782, LENGTH: 8 Bytes
 //  TCPOPTION_USER_TIMEOUT_OPTION = 28;                 // RFC 5482, LENGTH: 4 Bytes
 //  TCPOPTION_AUTHENTICATION_OPTION = 29;               // RFC 5925, LENGTH: -
-//    TCPOPTION kinds 30-252 Unassigned
+//    TCPOPTION kinds 30-33 Unassigned
+    TCPOPTION_TCP_FASTOPEN = 34;                        // RFC 7413, LENGTH: 2 + cookie length (0 or 4-16 Bytes)
+//    TCPOPTION kinds 35-252 Unassigned
 //  TCPOPTION_RFC3692_STYLE_EXPERIMENT_1 = 253;         // RFC 4727, LENGTH: N
 //  TCPOPTION_RFC3692_STYLE_EXPERIMENT_2 = 254;         // RFC 4727, LENGTH: N
 };
@@ -150,6 +152,13 @@ class TcpOptionTimestamp extends TcpOption
     length = 10;
     uint32_t   senderTimestamp;
     uint32_t   echoedTimestamp;
+}
+
+class TcpOptionTcpFastOpen extends TcpOption
+{
+    kind = TCPOPTION_TCP_FASTOPEN;
+    length = 2;     // 2 + getCookieArraySize(); 0-byte cookie = "request a cookie"
+    uint8_t cookie[];
 }
 
 class TcpOptionUnknown extends TcpOption

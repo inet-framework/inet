@@ -147,6 +147,14 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
             break;
         }
 
+        case TCPOPTION_TCP_FASTOPEN: {
+            auto *opt = check_and_cast<const TcpOptionTcpFastOpen *>(option);
+            ASSERT(length == 2 + opt->getCookieArraySize());
+            for (unsigned int i = 0; i < opt->getCookieArraySize(); i++)
+                stream.writeByte(opt->getCookie(i));
+            break;
+        }
+
         default: {
             throw cRuntimeError("Unknown TCPOption kind=%d (not in a TCPOptionUnknown option)", kind);
             break;
@@ -263,6 +271,18 @@ TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
                 option->setLength(length);
                 option->setSenderTimestamp(stream.readUint32Be());
                 option->setEchoedTimestamp(stream.readUint32Be());
+                return option;
+            }
+            break;
+
+        case TCPOPTION_TCP_FASTOPEN:
+            length = stream.readByte();
+            if (length == 2 || (length >= 6 && length <= 18)) {
+                auto *option = new TcpOptionTcpFastOpen();
+                option->setLength(length);
+                option->setCookieArraySize(length - 2);
+                for (unsigned int i = 0; i < (unsigned int)(length - 2); i++)
+                    option->setCookie(i, stream.readByte());
                 return option;
             }
             break;
