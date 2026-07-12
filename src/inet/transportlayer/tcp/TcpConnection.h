@@ -120,6 +120,7 @@ class INET_API TcpConnection : public SimpleModule
     static simsignal_t sackedBytesSignal; // current number of received sacked bytes
     static simsignal_t deliveredSignal; // cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
     static simsignal_t deliveredCeSignal; // AccECN (Workstream G5): cumulative resolved count of CE-marked packets the peer has reported via the ACE field
+    static simsignal_t deliveredCeBytesSignal; // AccECN (Workstream G7): cumulative CE byte count from AccECN option evidence only (stays 0 if the peer never sends the option)
     static simsignal_t tcpRcvQueueBytesSignal; // current amount of used bytes in tcp receive queue
     static simsignal_t tcpRcvQueueDropsSignal; // number of drops in tcp receive queue
     static simsignal_t tcpRcvPayloadBytesSignal; // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
@@ -216,6 +217,17 @@ class INET_API TcpConnection : public SimpleModule
     virtual TcpEventCode processRstInSynReceived(const Ptr<const TcpHeader>& tcpHeader);
     virtual bool processAckInEstabEtc(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
     //@}
+
+    /**
+     * AccECN (Workstream G7): pick between the ACE field's packet-count-only naiveDelta
+     * and safeDelta candidates (G5) using the AccECN option's byte-exact CEB evidence
+     * (G6/G7) as corroboration -- whichever candidate's byte estimate (delta * snd_mss)
+     * is closer to the observed cebByteDelta wins. Isolated as its own method so it's
+     * independently unit-testable (design reference: tcp_accecn_process's naive/safe/
+     * option-evidence *shape* only, tcp_input.c, re-derived not transcribed -- see the
+     * plan's Verified Facts point 3).
+     */
+    virtual int resolveAceDelta(int naiveDelta, int safeDelta, uint32_t cebByteDelta) const;
 
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{

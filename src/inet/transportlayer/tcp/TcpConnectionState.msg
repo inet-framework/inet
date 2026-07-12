@@ -284,6 +284,17 @@ struct TcpStateVariables
     uint32_t rcvEct1Bytes = 0; // receiver-side byte count of segments arriving marked ECT(1) since AccECN negotiated (option's E1B field content, G6.1)
     uint32_t rcvCeBytes = 0; // receiver-side byte count of segments arriving marked CE since AccECN negotiated (option's CEB field content, G6.1)
 
+    // AccECN TCP option read side (G7): peer-reported byte counts, decoded from the last
+    // AccECN option this connection has received (offsets already un-applied). These are
+    // PEER-reported feedback on bytes WE sent (opposite direction from rcvEct*Bytes/rcvCeBytes
+    // above, which are what WE observed on bytes the peer sent us).
+    uint32_t peerReportedEct0Bytes = 0;
+    uint32_t peerReportedEct1Bytes = 0;
+    uint32_t peerReportedCeBytes = 0; // cumulative (peer's clock); 0 is a legitimate starting baseline, not a sentinel -- CEB itself starts at 0
+    bool accEcnOptionCebDeltaValid = false; // true only for the segment just processed by readHeaderOptions(), if it carried a valid AccECN option
+    uint32_t accEcnOptionCebDelta = 0; // valid only when accEcnOptionCebDeltaValid; mod-2^24 delta against the previous peerReportedCeBytes
+    uint32_t deliveredCeBytes = 0; // sender-side resolved CE byte count from option evidence only (G7); stays 0 if the peer never sends the option
+
     uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
 
     // Path MTU Discovery (RFC 1191, RFC 1981)

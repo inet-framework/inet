@@ -1459,6 +1459,11 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
 {
     EV_INFO << "Tcp Header Option(s) received:\n";
 
+    // AccECN TCP option (G7): reset per-segment before scanning this segment's options,
+    // so a segment that doesn't carry the option never lets processAckInEstabEtc() reuse
+    // a delta computed from some earlier segment.
+    state->accEcnOptionCebDeltaValid = false;
+
     for (uint i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
         const TcpOption *option = tcpHeader->getHeaderOption(i);
         short kind = option->getKind();
@@ -1513,15 +1518,34 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 break;
 
             case TCPOPTION_ACCECN0: // draft-ietf-tcpm-accurate-ecn, E0B/CEB/E1B byte counters
-            case TCPOPTION_ACCECN1: // same option, E1B/CEB/E0B field order
-                // Recognized (so it doesn't fall through to the "Unsupported" ERROR log
-                // below) but not yet consumed -- decoding its 3 counters into the
-                // peer-reported-bytes delta resolution is G7's job. Length sanity only.
+            case TCPOPTION_ACCECN1: { // same option, E1B/CEB/E0B field order
+                // G7: decode the peer's report of bytes IT received from US (opposite
+                // direction from rcvEct*Bytes/rcvCeBytes, which are what we observed on
+                // bytes the peer sent us). The serializer already resolved the
+                // kind-dependent wire order into these semantic accessors.
                 if (length != 11) {
                     EV_ERROR << "ERROR: AccECN option length incorrect\n";
                     ok = false;
+                    break;
                 }
+                auto *aeOpt = check_and_cast<const TcpOptionAccEcn *>(option);
+                // Un-apply the wire init offsets (E0B/E1B +1, CEB +0 -- see G6.1's write side).
+                state->peerReportedEct0Bytes = aeOpt->getEct0Bytes() - 1;
+                state->peerReportedEct1Bytes = aeOpt->getEct1Bytes() - 1;
+                uint32_t decodedCeBytes = aeOpt->getCeBytes();
+                // CEB is a 24-bit cumulative counter; 0 is a legitimate starting baseline
+                // for peerReportedCeBytes (not an uninitialized sentinel), so the very
+                // first option this connection ever receives already yields a correct
+                // delta -- no separate "have we seen one before" gate needed. Mod-2^24 to
+                // mirror how the ACE field's own mod-8 counter is handled (G4/G5).
+                state->accEcnOptionCebDelta = (decodedCeBytes - state->peerReportedCeBytes) & 0xFFFFFF;
+                state->accEcnOptionCebDeltaValid = true;
+                state->peerReportedCeBytes = decodedCeBytes;
+                EV_INFO << "Tcp Header Option AccECN(kind=" << kind << ", E0B=" << aeOpt->getEct0Bytes()
+                        << ", E1B=" << aeOpt->getEct1Bytes() << ", CEB=" << decodedCeBytes
+                        << ") received, CEB delta=" << state->accEcnOptionCebDelta << "\n";
                 break;
+            }
 
             // TODO add new TCPOptions here once they are implemented
             // TODO delegate to TcpAlgorithm as well -- it may want to recognized additional options

@@ -99,8 +99,10 @@ while($sor = <FILE>)
 [0.503 B010] A.1000 < B.2000: A W N ack 9001 win 20000
 %#--------------------------------------------------------------------------------------------------------------
 %# The actual G5.1 assertion: safeDelta (9) resolves correctly, not the undercounting naive delta (1).
+%# G7's option-evidence refinement is inert here (accEcnOptionEnabled unset, cebDeltaValid=0),
+%# so resolvedDelta still falls back to plain safeDelta -- unchanged from G5.1's own behavior.
 %contains: stdout
-AccECN ACE decode: receivedAce=6 deliveredPktsThisAck=9 naiveDelta=1 resolvedDelta=9 deliveredCePkts=9
+AccECN ACE decode: receivedAce=6 deliveredPktsThisAck=9 naiveDelta=1 safeDelta=9 cebDeltaValid=0 cebDelta=-1 resolvedDelta=9 deliveredCePkts=9
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

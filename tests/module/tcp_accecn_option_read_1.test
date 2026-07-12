@@ -1,0 +1,118 @@
+%description:
+TCP AccECN (Workstream G) G7.1: AccECN TCP option read side, CEB-refined
+ACE delta resolution. Deliberately constructs the scenario where G5.1's
+packet-count-only safeDelta heuristic is WRONG and the AccECN option's
+byte-exact CEB evidence corrects it -- the complementary case to
+tcp_accecn_ace_read_1.test, which only exercised the case where safeDelta
+happens to already be right.
+
+Same base topology as tcp_accecn_ace_read_1.test (client sends 9000B/9
+MSS-sized segments in one burst, server's first 8 ACKs are dropped so
+only the 9th/cumulative one survives, deliveredPktsThisAck=9 so the
+G5.1 packet-count-only resolution enters its "ambiguous, >7 delivered"
+branch) but only the FIRST data segment (a3) is CE-marked, not all 9.
+So the true CE-packet count is 1, not 9:
+  - naiveDelta = (receivedAce - 5 - deliveredCePkts_before) & 7 = 1
+    -- already exactly correct, no wraparound actually occurred.
+  - G5.1's safeDelta, which always reinterprets the mod-8 value once
+    deliveredPktsThisAck > 7 (regardless of what the true count actually
+    is), computes 9 - ((9-1)&7) = 9 -- WRONG here, since only 1 of the 9
+    delivered segments was actually CE-marked.
+Both endpoints also have accEcnOptionEnabled=true, accEcnOptionBeaconAcks=1
+(server beacons on every ACK-bearing segment), so the surviving 9th ACK
+also carries a real AccECN option whose CEB field reports ~1 segment's
+worth of CE bytes (corroborating naiveDelta, not safeDelta). resolveAceDelta()
+compares both candidates' byte estimates (naiveDelta*mss vs safeDelta*mss)
+against the observed CEB delta and correctly picks naiveDelta=1 --
+deliveredCePkts lands on 1, not G5.1's uncorrected 9.
+
+Falsification: an identical scenario with accEcnOptionEnabled=false (not
+committed as a second file -- verified empirically during development,
+see commit message) reproduces tcp_accecn_ace_read_1.test's own pattern:
+cebDeltaValid=0, resolvedDelta falls back to the uncorrected (and here,
+wrong) safeDelta=9.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script="a3 ce;b2 delete;b3 delete;b4 delete;b5 delete;b6 delete;b7 delete;b8 delete;b9 delete"
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0.5s
+*.cli_app.sendBytes=9000B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.initialWindow = "rfc6928"
+
+*.*_tcp.tcpEcnMode = "accecn"
+*.*_tcp.accEcnOptionEnabled = true
+*.*_tcp.accEcnOptionBeaconAcks = 1
+
+# tcp-legacy.ini sets advertisedWindow=7504; OMNeT++ ini resolution takes the FIRST matching
+# entry, so this override -- needed so the full 9000B burst fits in one window and all 9
+# segments go out without waiting on an intermediate ACK -- must appear BEFORE the include.
+*.*_tcp.advertisedWindow = 20000
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# Server's surviving (9th real) ACK: ace=6=0b110, covering the 9-segment burst (option overhead
+%# reduces per-segment payload below 1000B, so 9000B took 10 segments in total -- one extra small
+%# segment, A012/B011, follows this one and is unrelated to the assertion below). CEB=988 reflects
+%# exactly the one CE-marked segment's (a3's) real payload length.
+%contains: postrun-command(1).out
+[0.503 B010] A.1000 < B.2000: A W N ack 8893 win 20000   Option(s): NOP AccECN(kind=172,E0B=1,E1B=1,CEB=988)
+%#--------------------------------------------------------------------------------------------------------------
+%# The G7.1 assertion: CEB evidence (cebDelta=988, matching naiveDelta*mss exactly) correctly
+%# overrides G5.1's uncorrected, wrong-in-this-scenario safeDelta=9 back to naiveDelta=1.
+%contains: stdout
+AccECN ACE decode: receivedAce=6 deliveredPktsThisAck=9 naiveDelta=1 safeDelta=9 cebDeltaValid=1 cebDelta=988 resolvedDelta=1 deliveredCePkts=1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

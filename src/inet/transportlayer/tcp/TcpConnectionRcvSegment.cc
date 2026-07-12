@@ -1394,22 +1394,53 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         uint32_t deliveredPktsThisAck = (uint32_t)((deliveredBytesThisAck + mss - 1) / mss);
 
         int delta = ((int)receivedAce - 5 - (int)(state->deliveredCePkts & 0x7)) & 0x7;
-        int resolvedDelta = delta;
+        int safeDelta = delta;
         if (deliveredPktsThisAck > 7) {
             // Naive delta can't distinguish "the counter wrapped around more than once"
             // from "it wrapped around once" when more than 8 packets were delivered in a
             // single ACK -- resolve against the actual delivered-packet count instead.
-            resolvedDelta = (int)deliveredPktsThisAck - (((int)deliveredPktsThisAck - delta) & 0x7);
+            safeDelta = (int)deliveredPktsThisAck - (((int)deliveredPktsThisAck - delta) & 0x7);
         }
+
+        // AccECN TCP option (Workstream G7): if this ACK also carried a valid AccECN
+        // option (readHeaderOptions() already ran and set accEcnOptionCebDeltaValid,
+        // before this function, for this same segment), its byte-exact CEB evidence can
+        // corroborate naiveDelta vs. safeDelta -- resolveAceDelta() picks whichever
+        // candidate's byte estimate is closer to the observed CE byte delta. Without the
+        // option, G5's packet-count-only safeDelta is used as-is (unchanged from before
+        // this commit).
+        int resolvedDelta = safeDelta;
+        if (state->accEcnOptionCebDeltaValid) {
+            resolvedDelta = resolveAceDelta(delta, safeDelta, state->accEcnOptionCebDelta);
+            state->deliveredCeBytes += state->accEcnOptionCebDelta;
+            emit(deliveredCeBytesSignal, (unsigned long)state->deliveredCeBytes);
+        }
+
         state->deliveredCePkts += resolvedDelta;
         emit(deliveredCeSignal, (unsigned long)state->deliveredCePkts);
         EV_INFO << "AccECN ACE decode: receivedAce=" << (int)receivedAce
                 << " deliveredPktsThisAck=" << deliveredPktsThisAck
-                << " naiveDelta=" << delta << " resolvedDelta=" << resolvedDelta
+                << " naiveDelta=" << delta << " safeDelta=" << safeDelta
+                << " cebDeltaValid=" << state->accEcnOptionCebDeltaValid
+                << " cebDelta=" << (state->accEcnOptionCebDeltaValid ? (long)state->accEcnOptionCebDelta : -1L)
+                << " resolvedDelta=" << resolvedDelta
                 << " deliveredCePkts=" << state->deliveredCePkts << "\n";
     }
 
     return true;
+}
+
+int TcpConnection::resolveAceDelta(int naiveDelta, int safeDelta, uint32_t cebByteDelta) const
+{
+    if (naiveDelta == safeDelta)
+        return naiveDelta; // no ambiguity to resolve
+
+    uint32_t mss = state->snd_mss > 0 ? state->snd_mss : 1;
+    uint64_t naiveBytesEstimate = (uint64_t)naiveDelta * mss;
+    uint64_t safeBytesEstimate = (uint64_t)safeDelta * mss;
+    uint64_t naiveDiff = (cebByteDelta > naiveBytesEstimate) ? (cebByteDelta - naiveBytesEstimate) : (naiveBytesEstimate - cebByteDelta);
+    uint64_t safeDiff = (cebByteDelta > safeBytesEstimate) ? (cebByteDelta - safeBytesEstimate) : (safeBytesEstimate - cebByteDelta);
+    return (naiveDiff <= safeDiff) ? naiveDelta : safeDelta;
 }
 
 // ----
