@@ -1,0 +1,106 @@
+%description:
+TCP Fast Open (RFC 7413) F3.2: an app calls connect(fastOpen=true) with a
+cookie already cached (connection 1 primes the cache, as in
+tcp_fastopen_1.test) but never SENDs on connection 2 -- the deferred SYN
+must not hang forever. The connEstabTimer's safety net fires at the normal
+TCP_TIMEOUT_CONN_ESTAB (75s) and sends the fallback bare SYN, still
+carrying the cached cookie (RFC 7413 explicitly allows a data-less SYN
+with a valid cookie), instead of aborting the connection as a genuine
+establishment timeout would.
+
+Falsification: without this commit's fix, no SYN goes out at all past
+75s -- the connEstabTimer fires straight into process_TIMEOUT_CONN_ESTAB(),
+which treats it as a real timeout and refuses the connection (verified on
+the pre-fix tree: cli_tcp transitions SYN_SENT --> CLOSED instead of
+sending a second SYN).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 76s
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script=""
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+*.cli_app.fastOpen=true
+*.cli_app.active2=true
+*.cli_app.tOpen2=0.5s
+*.cli_app.localPort2=1001
+*.cli_app.tSend2=-1s
+*.cli_app.sendBytes2=0B
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+*.srv_app.active2=false
+*.srv_app.tOpen2=0.5s
+*.srv_app.localPort2=2000
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+*.cli_tcp.fastopenClientEnabled = true
+*.srv_tcp.fastopenServerEnabled = true
+*.srv_tcp.fastopenLenientCookieValidation = false
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# Connection 1: bare cookie-request SYN, learned by the client (same as tcp_fastopen_1.test).
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 7504   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=0)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 7504   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=8)
+%#--------------------------------------------------------------------------------------------------------------
+%# Connection 2: the deferred SYN's ISS is picked at connect() time (t=0.5s, when
+%# selectInitialSeqNum() runs), so this exact "[75.501 A003] ... S 125000:..." line can
+%# only appear if the SYN was actually held back until the connEstabTimer safety net
+%# fired at t=0.5+75=75.5s -- an earlier (regressed) transmission would show a
+%# different ISS (selectInitialSeqNum() is simTime()-derived) at a different timestamp.
+%contains: postrun-command(1).out
+[75.501 A003] A.1001 > B.2000: S 125000:125000(0) win 7504   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=8)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
