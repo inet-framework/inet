@@ -16,6 +16,7 @@
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
+#include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
@@ -31,6 +32,7 @@ class INET_API TcpTestClient : public cSimpleModule
         simtime_t tSend;
         int numBytes;
         bool eor = false; // Workstream H1 (MSG_EOR): optional "eor" keyword after numBytes in sendScript
+        bool zerocopy = false; // Workstream H2 (MSG_ZEROCOPY): optional "zerocopy" keyword after numBytes in sendScript
     };
     typedef std::list<Command> Commands;
     Commands commands;
@@ -96,6 +98,14 @@ void TcpTestClient::parseScript(const char *script)
         if (strncmp(s, "eor", 3) == 0 && !isalnum(s[3])) {
             cmd.eor = true;
             s += 3;
+        }
+
+        // Workstream H2 (MSG_ZEROCOPY): optional "zerocopy" keyword right after the
+        // byte count (and optional "eor") requests a completion notification.
+        while (isspace(*s)) s++;
+        if (strncmp(s, "zerocopy", 8) == 0 && !isalnum(s[8])) {
+            cmd.zerocopy = true;
+            s += 8;
         }
 
         // add command
@@ -231,6 +241,10 @@ void TcpTestClient::handleMessage(cMessage *msg)
     {
         EV_INFO << "SEND_MSG: userId=" << check_and_cast<TcpCommand *>(msg->getControlInfo())->getUserId() << "\n";
     }
+    else if (msg->getKind()==TCP_I_ZEROCOPY_COMPLETION)
+    {
+        EV_INFO << "ZEROCOPY_COMPLETION: id=" << check_and_cast<TcpZerocopyCompletionInfo *>(msg->getControlInfo())->getZerocopyId() << "\n";
+    }
     if (socket2.belongsToSocket(msg))
         socket2.processMessage(msg);
     else if (socket3.belongsToSocket(msg))
@@ -344,6 +358,8 @@ void TcpTestClient::scheduleNextSend()
     msg->insertAtBack(bytes);
     if (cmd.eor)
         msg->addTagIfAbsent<TcpSendEorReq>();
+    if (cmd.zerocopy)
+        msg->addTagIfAbsent<TcpSendZerocopyReq>();
     scheduleAt(cmd.tSend, msg);
 }
 

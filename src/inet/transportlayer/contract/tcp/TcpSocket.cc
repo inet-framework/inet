@@ -188,6 +188,12 @@ void TcpSocket::send(Packet *msg, bool eor)
     send(msg);
 }
 
+void TcpSocket::sendZerocopy(Packet *msg)
+{
+    msg->addTagIfAbsent<TcpSendZerocopyReq>();
+    send(msg);
+}
+
 void TcpSocket::sendCommand(Request *msg)
 {
     sendToTcp(msg);
@@ -422,6 +428,14 @@ void TcpSocket::processMessage(cMessage *msg)
             auto *tcpCommand = check_and_cast<TcpCommand *>(msg->getControlInfo());
             if (cb)
                 cb->socketSendMsgArrived(this, tcpCommand);
+            delete msg;
+            break;
+        }
+
+        case TCP_I_ZEROCOPY_COMPLETION: {
+            auto *completionInfo = check_and_cast<TcpZerocopyCompletionInfo *>(msg->getControlInfo());
+            if (cb)
+                cb->socketZerocopyCompletion(this, completionInfo->getZerocopyId());
             delete msg;
             break;
         }

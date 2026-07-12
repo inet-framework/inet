@@ -18,6 +18,7 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
+#include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 
 namespace inet {
 
@@ -175,6 +176,13 @@ class INET_API TcpSocket : public ISocket
          * data. Default implementation does nothing (backward compatible).
          */
         virtual void socketSendMsgArrived(TcpSocket *socket, TcpCommand *tcpCommand) {}
+
+        /**
+         * Notifies that a zerocopy-marked SEND's data has been transmitted
+         * (Workstream H2, MSG_ZEROCOPY -- see TcpSocket::sendZerocopy()).
+         * Default implementation does nothing (backward compatible).
+         */
+        virtual void socketZerocopyCompletion(TcpSocket *socket, unsigned int zerocopyId) {}
     };
 
     /**
@@ -399,6 +407,19 @@ class INET_API TcpSocket : public ISocket
      * with a later SEND's data into the same outgoing segment.
      */
     void send(Packet *msg, bool eor);
+
+    /**
+     * Sends data packet, requesting a zerocopy-style completion notification
+     * (Workstream H2, MSG_ZEROCOPY) once this SEND's data has been
+     * transmitted: the callback's socketZerocopyCompletion() (see ICallback)
+     * fires with the id assigned to this SEND -- ids are assigned
+     * sequentially per connection starting at 0, mirroring Linux's own
+     * SO_ZEROCOPY id assignment, so the caller can predict the id of its own
+     * Nth zerocopy SEND without needing it echoed back synchronously. INET
+     * has no real zero-copy data path; this models only the completion-
+     * notification contract (see TcpZerocopyTag.msg).
+     */
+    void sendZerocopy(Packet *msg);
 
     /**
      * Sends command.

@@ -52,6 +52,7 @@ enum TcpStatusInd
     TCP_I_SEND_MSG = 11;         // send queue abated, send more messages
     TCP_I_ICMPv4_ERROR = 12;       // ICMPv4 error received (carries ~Icmpv4ErrorInd tag)
     TCP_I_ICMPv6_ERROR = 13;     // ICMPv6 error received (carries ~Icmpv6ErrorInd tag)
+    TCP_I_ZEROCOPY_COMPLETION = 14; // a zerocopy-marked SEND's data has been transmitted (Workstream H2, MSG_ZEROCOPY; carries ~TcpZerocopyCompletionInfo)
 }
 
 //
@@ -184,6 +185,19 @@ class TcpSetTosCommand extends TcpSetOptionCommand
 class TcpSetTimestampingCommand extends TcpSetOptionCommand
 {
     bool enabled = true;
+}
+
+//
+// Sent with message kind TCP_I_ZEROCOPY_COMPLETION, in response to a
+// zerocopy-marked SEND (Workstream H2, MSG_ZEROCOPY -- see
+// ~TcpSendZerocopyReq/~TcpSocket::sendZerocopy) once that SEND's data has
+// been transmitted.
+//
+// @see ~TcpStatusInd, ~TcpCommandCode, ~ITcp
+//
+class TcpZerocopyCompletionInfo extends TcpCommand
+{
+    unsigned int zerocopyId;
 }
 
 //

@@ -31,6 +31,7 @@
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
+#include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
@@ -1209,6 +1210,24 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (eorSeqNums.count(state->snd_nxt))
         tcpHeader->setPshBit(true);
 
+    // Workstream H2 (MSG_ZEROCOPY): fire a completion notification for every
+    // pending zerocopy SEND whose data has now been transmitted (its boundary seq
+    // is at or behind the just-advanced snd_nxt) -- unlike MSG_EOR's clamp, a
+    // single segment may legitimately span (and thus complete) several small
+    // zerocopy-marked SENDs at once, so this drains all that are now covered
+    // rather than checking for one exact match.
+    while (!zerocopySeqNums.empty() && !seqGreater(zerocopySeqNums.begin()->first, state->snd_nxt)) {
+        uint32_t zerocopyId = zerocopySeqNums.begin()->second;
+        zerocopySeqNums.erase(zerocopySeqNums.begin());
+        EV_INFO << "Notifying app: ZEROCOPY_COMPLETION id=" << zerocopyId << "\n";
+        auto *completionIndication = new Indication("ZerocopyCompletion", TCP_I_ZEROCOPY_COMPLETION);
+        auto *completionInfo = new TcpZerocopyCompletionInfo();
+        completionInfo->setZerocopyId(zerocopyId);
+        completionIndication->addTag<SocketInd>()->setSocketId(socketId);
+        completionIndication->setControlInfo(completionInfo);
+        sendToApp(completionIndication);
+    }
+
     // check if afterRto bit can be reset
     if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
         state->afterRto = false;
@@ -1275,12 +1294,20 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
     }
 
     bool eor = packet->findTag<TcpSendEorReq>() != nullptr;
+    bool zerocopy = packet->findTag<TcpSendZerocopyReq>() != nullptr;
     sendQueue->enqueueAppData(packet);
 
     if (eor) {
         uint32_t boundarySeq = sendQueue->getBufferEndSeq();
         eorSeqNums.insert(boundarySeq);
         EV_DETAIL << "MSG_EOR: recorded record boundary at seq=" << boundarySeq << "\n";
+    }
+
+    if (zerocopy) {
+        uint32_t boundarySeq = sendQueue->getBufferEndSeq();
+        uint32_t zerocopyId = nextZerocopyId++;
+        zerocopySeqNums[boundarySeq] = zerocopyId;
+        EV_DETAIL << "MSG_ZEROCOPY: recorded pending completion id=" << zerocopyId << " at seq=" << boundarySeq << "\n";
     }
 }
 

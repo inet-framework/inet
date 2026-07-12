@@ -9,6 +9,7 @@
 #ifndef __INET_TCPCONNECTION_H
 #define __INET_TCPCONNECTION_H
 
+#include <map>
 #include <set>
 
 #include "inet/common/SimpleModule.h"
@@ -171,6 +172,14 @@ class INET_API TcpConnection : public SimpleModule
     // spanning one of these; keyed on sequence number (not send-queue position)
     // so it survives retransmission for free. Pruned lazily in sendSegment().
     std::set<uint32_t> eorSeqNums;
+
+    // Workstream H2 (MSG_ZEROCOPY): pending completion notifications, keyed on the
+    // sequence number marking the end of a zerocopy-marked SEND's data -> the id to
+    // report once transmission (sendSegment() advancing snd_nxt past that seq)
+    // reaches it. IDs are assigned sequentially per connection, mirroring Linux's
+    // own SO_ZEROCOPY id assignment.
+    std::map<uint32_t, uint32_t> zerocopySeqNums;
+    uint32_t nextZerocopyId = 0;
 
     // TCP behavior in data transfer state
     TcpAlgorithm *tcpAlgorithm = nullptr;
