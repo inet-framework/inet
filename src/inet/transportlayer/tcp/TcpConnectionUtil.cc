@@ -29,6 +29,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
@@ -1125,6 +1126,26 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (bytes > buffered) // last segment?
         bytes = buffered;
 
+    // Workstream H1 (MSG_EOR): boundaries at or behind snd_una are already fully
+    // acked and no longer relevant to anything sendSegment() might build from here
+    // on; drop them so the set doesn't grow across a long connection's lifetime.
+    while (!eorSeqNums.empty() && !seqGreater(*eorSeqNums.begin(), state->snd_una))
+        eorSeqNums.erase(eorSeqNums.begin());
+
+    // A record boundary must never be spanned by one segment: clamp bytes so this
+    // segment ends exactly at the nearest boundary ahead of snd_nxt, if closer than
+    // what was requested. Applies equally to fresh sends and retransmissions, since
+    // both funnel through here and the boundary is keyed on sequence number, not on
+    // send-queue position.
+    if (!eorSeqNums.empty()) {
+        auto it = eorSeqNums.upper_bound(state->snd_nxt);
+        if (it != eorSeqNums.end()) {
+            uint32_t distanceToBoundary = *it - state->snd_nxt;
+            if (bytes > distanceToBoundary)
+                bytes = distanceToBoundary;
+        }
+    }
+
     // if header options will be added, this could reduce the number of data bytes allowed for this segment,
     // because following condition must to be respected:
     //     bytes + options_len <= snd_mss
@@ -1161,11 +1182,19 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         state->sndCwr = false;
     }
 
-    // TODO when to set PSH bit?
     // TODO set URG bit if needed
     ASSERT(bytes == tcpSegment->getByteLength());
 
     state->snd_nxt += bytes;
+
+    // Workstream H1 (MSG_EOR): set PSH when this segment's last byte lands exactly
+    // on a still-pending record boundary -- signals the peer to hand the data up to
+    // its application without waiting for more, mirroring a real PSH-at-record-
+    // boundary policy. A boundary not yet reached (this segment fell short, e.g.
+    // clamped further by the MSS/options budget above) stays pending in eorSeqNums
+    // and is retried by the connection's next sendSegment() call.
+    if (eorSeqNums.count(state->snd_nxt))
+        tcpHeader->setPshBit(true);
 
     // check if afterRto bit can be reset
     if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
@@ -1208,6 +1237,18 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         state->snd_max = state->snd_nxt;
 
     return sentBytes;
+}
+
+void TcpConnection::enqueueSendCommandData(Packet *packet)
+{
+    bool eor = packet->findTag<TcpSendEorReq>() != nullptr;
+    sendQueue->enqueueAppData(packet);
+
+    if (eor) {
+        uint32_t boundarySeq = sendQueue->getBufferEndSeq();
+        eorSeqNums.insert(boundarySeq);
+        EV_DETAIL << "MSG_EOR: recorded record boundary at seq=" << boundarySeq << "\n";
+    }
 }
 
 uint32_t TcpConnection::getFlightSize() const

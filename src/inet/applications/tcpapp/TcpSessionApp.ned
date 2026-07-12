@@ -38,7 +38,10 @@ import inet.applications.contract.IApp;
 // data. One way of specifying sending is via the `tSend`, `sendBytes`
 // parameters, the other way is with `sendScript`. With the former, `sendBytes`
 // bytes will be sent at `tSend`. With `sendScript`, the format is
-// "<time> <numBytes>;<time> <numBytes>;..."
+// "<time> <numBytes>[ eor];<time> <numBytes>[ eor];...". The optional trailing
+// `eor` keyword marks that SEND's last byte as a record boundary (MSG_EOR):
+// TCP will not coalesce it together with data from a later SEND into the same
+// outgoing segment.
 //
 // <b>Closing the connection</b>
 //

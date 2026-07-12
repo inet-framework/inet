@@ -141,8 +141,9 @@ void TcpConnection::process_ACCEPT(TcpEventCode& event, TcpCommand *tcpCommand, 
 
 void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
-    // FIXME how to support PUSH? One option is to treat each SEND as a unit of data,
-    // and set PSH at SEND boundaries
+    // PSH-at-record-boundary is opt-in per SEND via the packet's TcpSendEorReq tag
+    // (Workstream H1, MSG_EOR) rather than automatic on every SEND -- see
+    // enqueueSendCommandData() and sendSegment()'s PSH-bit logic.
     Packet *packet = check_and_cast<Packet *>(msg);
     switch (fsm.getState()) {
         case TCP_S_INIT:
@@ -155,13 +156,13 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
             sendSyn();
             startSynRexmitTimer();
             scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
-            sendQueue->enqueueAppData(packet); // queue up for later
+            enqueueSendCommandData(packet); // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
         case TCP_S_SYN_RCVD:
             EV_DETAIL << "Queueing up data for sending later.\n";
-            sendQueue->enqueueAppData(packet); // queue up for later
+            enqueueSendCommandData(packet); // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
@@ -170,7 +171,7 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
                 // TCP Fast Open (RFC 7413): this is the SEND process_OPEN_ACTIVE
                 // deferred the SYN for. Attach as much of it as fits in one
                 // segment and send the data-bearing SYN now.
-                sendQueue->enqueueAppData(packet);
+                enqueueSendCommandData(packet);
                 uint32_t availableBytes = sendQueue->getBytesAvailable(state->iss + 1);
                 uint32_t capBytes = state->snd_mss > 0 ? state->snd_mss : 536;
                 state->fastopenSynDataLen = availableBytes < capBytes ? availableBytes : capBytes;
@@ -185,13 +186,13 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
                 break;
             }
             EV_DETAIL << "Queueing up data for sending later.\n";
-            sendQueue->enqueueAppData(packet); // queue up for later
+            enqueueSendCommandData(packet); // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
         case TCP_S_ESTABLISHED:
         case TCP_S_CLOSE_WAIT:
-            sendQueue->enqueueAppData(packet);
+            enqueueSendCommandData(packet);
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue, plus "
                       << (state->snd_max - state->snd_una) << " bytes unacknowledged\n";
             tcpAlgorithm->sendCommandInvoked();

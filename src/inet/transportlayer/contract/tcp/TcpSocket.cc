@@ -180,6 +180,14 @@ void TcpSocket::send(Packet *msg)
     sendToTcp(msg);
 }
 
+void TcpSocket::send(Packet *msg, bool eor)
+{
+    if (eor)
+        msg->addTagIfAbsent<TcpSendEorReq>();
+
+    send(msg);
+}
+
 void TcpSocket::sendCommand(Request *msg)
 {
     sendToTcp(msg);

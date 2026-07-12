@@ -5,6 +5,7 @@
 //
 
 
+#include <cstring>
 #include <vector>
 #include <string>
 
@@ -12,6 +13,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
@@ -26,6 +28,7 @@ class INET_API TcpTestClient : public cSimpleModule
     {
         simtime_t tSend;
         int numBytes;
+        bool eor = false; // Workstream H1 (MSG_EOR): optional "eor" keyword after numBytes in sendScript
     };
     typedef std::list<Command> Commands;
     Commands commands;
@@ -82,6 +85,14 @@ void TcpTestClient::parseScript(const char *script)
             throw cRuntimeError("syntax error in script: number of bytes expected");
         cmd.numBytes = atoi(s);
         while (isdigit(*s)) s++;
+
+        // Workstream H1 (MSG_EOR): optional "eor" keyword right after the byte
+        // count marks this command's SEND as a record boundary.
+        while (isspace(*s)) s++;
+        if (strncmp(s, "eor", 3) == 0 && !isalnum(s[3])) {
+            cmd.eor = true;
+            s += 3;
+        }
 
         // add command
         commands.push_back(cmd);
@@ -272,6 +283,8 @@ void TcpTestClient::scheduleNextSend()
     Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND);
     const auto& bytes = makeShared<ByteCountChunk>(B(cmd.numBytes));
     msg->insertAtBack(bytes);
+    if (cmd.eor)
+        msg->addTagIfAbsent<TcpSendEorReq>();
     scheduleAt(cmd.tSend, msg);
 }
 

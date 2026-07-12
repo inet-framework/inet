@@ -9,6 +9,8 @@
 #ifndef __INET_TCPCONNECTION_H
 #define __INET_TCPCONNECTION_H
 
+#include <set>
+
 #include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/IcmpType_m.h"
 #include "inet/networklayer/common/Icmpv6Type_m.h"
@@ -156,6 +158,12 @@ class INET_API TcpConnection : public SimpleModule
     TcpSendQueue *sendQueue = nullptr;
     TcpReceiveQueue *receiveQueue = nullptr;
     TcpSackRexmitQueue *rexmitQueue = nullptr;
+
+    // Workstream H1 (MSG_EOR): sequence numbers marking the end of a SEND that
+    // requested a record boundary. sendSegment() must never build a segment
+    // spanning one of these; keyed on sequence number (not send-queue position)
+    // so it survives retransmission for free. Pruned lazily in sendSegment().
+    std::set<uint32_t> eorSeqNums;
 
     // TCP behavior in data transfer state
     TcpAlgorithm *tcpAlgorithm = nullptr;
@@ -330,6 +338,13 @@ class INET_API TcpConnection : public SimpleModule
      * Returns the number of bytes sent.
      */
     virtual uint32_t sendSegment(uint32_t bytes);
+
+    /**
+     * Workstream H1 (MSG_EOR): enqueues a SEND's data into sendQueue, and if the
+     * packet carries a TcpSendEorReq tag, records the new end of that data as a
+     * boundary sendSegment() must not build a segment across.
+     */
+    virtual void enqueueSendCommandData(Packet *packet);
 
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader);

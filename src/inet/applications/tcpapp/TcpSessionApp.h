@@ -25,7 +25,8 @@ class INET_API TcpSessionApp : public TcpAppBase
     struct Command {
         simtime_t tSend;
         long numBytes = 0;
-        Command(simtime_t t, long n) { tSend = t; numBytes = n; }
+        bool eor = false; // Workstream H1 (MSG_EOR): "eor" keyword after the byte count in sendScript
+        Command(simtime_t t, long n, bool e = false) { tSend = t; numBytes = n; eor = e; }
     };
     typedef std::vector<Command> CommandVector;
     CommandVector commands;

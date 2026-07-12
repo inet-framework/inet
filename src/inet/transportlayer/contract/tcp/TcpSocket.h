@@ -17,6 +17,7 @@
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
 
 namespace inet {
 
@@ -382,6 +383,13 @@ class INET_API TcpSocket : public ISocket
      * Sends data packet.
      */
     virtual void send(Packet *msg) override;
+
+    /**
+     * Sends data packet, marking its last byte as a record boundary (like the
+     * MSG_EOR sendto() flag): TCP will not coalesce this SEND's data together
+     * with a later SEND's data into the same outgoing segment.
+     */
+    void send(Packet *msg, bool eor);
 
     /**
      * Sends command.
