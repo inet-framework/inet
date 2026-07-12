@@ -215,7 +215,12 @@ class INET_API TcpConnection : public SimpleModule
     virtual bool processSACKOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSack& option);
     virtual bool processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option);
     virtual bool processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option);
+    virtual bool processFastOpenExpOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpenExp& option);
     //@}
+
+    /** Shared cookie-processing core for both the standard (kind 34) and legacy
+     * experimental (kind 254 + 0xF989 magic) Fast Open options. */
+    virtual bool processFastOpenCookieBytes(const std::vector<uint8_t>& cookie);
 
     /** @name Processing timeouts. Invoked from processTimer(). */
     //@{

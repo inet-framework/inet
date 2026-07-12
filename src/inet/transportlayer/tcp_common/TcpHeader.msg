@@ -72,7 +72,7 @@ enum TcpOptionNumbers
     TCPOPTION_TCP_FASTOPEN = 34;                        // RFC 7413, LENGTH: 2 + cookie length (0 or 4-16 Bytes)
 //    TCPOPTION kinds 35-252 Unassigned
 //  TCPOPTION_RFC3692_STYLE_EXPERIMENT_1 = 253;         // RFC 4727, LENGTH: N
-//  TCPOPTION_RFC3692_STYLE_EXPERIMENT_2 = 254;         // RFC 4727, LENGTH: N
+    TCPOPTION_RFC3692_STYLE_EXPERIMENT_2 = 254;         // RFC 4727, LENGTH: N; also carries the pre-standardization TCP Fast Open experimental option (RFC 7413 Appendix A), identified by the 0xF989 magic sub-type
 };
 
 //
@@ -158,6 +158,19 @@ class TcpOptionTcpFastOpen extends TcpOption
 {
     kind = TCPOPTION_TCP_FASTOPEN;
     length = 2;     // 2 + getCookieArraySize(); 0-byte cookie = "request a cookie"
+    uint8_t cookie[];
+}
+
+// Pre-standardization TCP Fast Open experimental option (RFC 7413 Appendix A):
+// kind 254 (RFC 4727 experimental) followed by the 0xF989 magic sub-type, then
+// the cookie bytes. Receive-only in INET (see readHeaderOptions()) -- kind 34
+// (TcpOptionTcpFastOpen above) is the modern standard and the only form INET
+// ever emits.
+class TcpOptionTcpFastOpenExp extends TcpOption
+{
+    kind = TCPOPTION_RFC3692_STYLE_EXPERIMENT_2;
+    length = 4;                 // 4 + getCookieArraySize()
+    uint16_t expId = 0xF989;
     uint8_t cookie[];
 }
 

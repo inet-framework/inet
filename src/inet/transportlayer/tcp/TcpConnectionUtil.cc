@@ -1405,6 +1405,18 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 ok = processFastOpenOption(tcpHeader, *check_and_cast<const TcpOptionTcpFastOpen *>(option));
                 break;
 
+            case TCPOPTION_RFC3692_STYLE_EXPERIMENT_2: // kind 254: only the pre-standardization
+                // TCP Fast Open experimental sub-type (0xF989 magic) is understood, and only
+                // when fastopenExpOptionEnabled opts into accepting it. Any other kind-254 use,
+                // or this same sub-type while the gate is off, is a dynamic_cast miss / early
+                // return here -- silently ignored, same as an ordinary TcpOptionUnknown kind
+                // elsewhere in this switch gets no special handling either.
+                if (state->fastopenExpOptionEnabled) {
+                    if (auto *expOption = dynamic_cast<const TcpOptionTcpFastOpenExp *>(option))
+                        ok = processFastOpenExpOption(tcpHeader, *expOption);
+                }
+                break;
+
             // TODO add new TCPOptions here once they are implemented
             // TODO delegate to TcpAlgorithm as well -- it may want to recognized additional options
 
@@ -1527,15 +1539,18 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
     return true;
 }
 
-bool TcpConnection::processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option)
+bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cookie)
 {
     // RFC 7413 SS4.1: server processing an incoming SYN, or client processing a SYN-ACK.
+    // Shared by both the standard (kind 34, processFastOpenOption()) and legacy
+    // experimental (kind 254 + 0xF989 magic, processFastOpenExpOption()) options --
+    // once the cookie bytes are extracted, the two forms are handled identically.
     bool isServerSyn = state->fastopenServerEnabled && fsm.getState() == TCP_S_LISTEN;
     bool isClientSynAck = state->fastopenClientEnabled && fsm.getState() == TCP_S_SYN_SENT;
     if (!isServerSyn && !isClientSynAck)
         return true; // Fast Open not applicable in this role/state -- accepted, no-op.
 
-    unsigned int cookieLen = option.getCookieArraySize();
+    unsigned int cookieLen = cookie.size();
 
     if (isServerSyn) {
         if (cookieLen == 0) {
@@ -1547,10 +1562,7 @@ bool TcpConnection::processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader,
         }
         else {
             std::vector<uint8_t> want = tcpMain->generateFastOpenCookie(remoteAddr, cookieLen);
-            std::vector<uint8_t> got(cookieLen);
-            for (unsigned int i = 0; i < cookieLen; i++)
-                got[i] = option.getCookie(i);
-            if (state->fastopenLenientCookieValidation || got == want) {
+            if (state->fastopenLenientCookieValidation || cookie == want) {
                 state->fastopenCookieValid = true;
                 EV_INFO << "Fast Open: cookie accepted (" << (state->fastopenLenientCookieValidation ? "lenient" : "verified") << ")\n";
             }
@@ -1565,14 +1577,32 @@ bool TcpConnection::processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader,
     }
     else { // isClientSynAck
         if (cookieLen > 0) {
-            std::vector<uint8_t> cookie(cookieLen);
-            for (unsigned int i = 0; i < cookieLen; i++)
-                cookie[i] = option.getCookie(i);
             tcpMain->setFastOpenCookie(remoteAddr, cookie);
             EV_INFO << "Fast Open: learned a " << cookieLen << "-byte cookie for " << remoteAddr.str() << "\n";
         }
     }
     return true;
+}
+
+bool TcpConnection::processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option)
+{
+    unsigned int cookieLen = option.getCookieArraySize();
+    std::vector<uint8_t> cookie(cookieLen);
+    for (unsigned int i = 0; i < cookieLen; i++)
+        cookie[i] = option.getCookie(i);
+    return processFastOpenCookieBytes(cookie);
+}
+
+bool TcpConnection::processFastOpenExpOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpenExp& option)
+{
+    // Pre-standardization form (RFC 7413 Appendix A): same semantics as kind 34,
+    // gated separately (fastopenExpOptionEnabled) since accepting it is a distinct
+    // opt-in -- readHeaderOptions() only calls this when that gate is on.
+    unsigned int cookieLen = option.getCookieArraySize();
+    std::vector<uint8_t> cookie(cookieLen);
+    for (unsigned int i = 0; i < cookieLen; i++)
+        cookie[i] = option.getCookie(i);
+    return processFastOpenCookieBytes(cookie);
 }
 
 bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSackPermitted& option)

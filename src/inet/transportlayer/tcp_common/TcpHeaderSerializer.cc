@@ -287,6 +287,39 @@ TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
             }
             break;
 
+        case TCPOPTION_RFC3692_STYLE_EXPERIMENT_2: {
+            // Kind 254 is the generic RFC 4727 experimental slot; only the
+            // 0xF989 magic sub-type (pre-standardization TCP Fast Open,
+            // RFC 7413 Appendix A) is recognized here. Any other magic (or an
+            // invalid TFO cookie length) falls back to a raw TcpOptionUnknown,
+            // built here rather than via the shared default: path below,
+            // since the 2 magic bytes are already consumed from the stream
+            // by the time that's known.
+            length = stream.readByte();
+            if (length >= 4) {
+                uint16_t expId = stream.readUint16Be();
+                if (expId == 0xF989 && (length == 4 || (length >= 8 && length <= 20))) {
+                    auto *option = new TcpOptionTcpFastOpenExp();
+                    option->setLength(length);
+                    option->setExpId(expId);
+                    option->setCookieArraySize(length - 4);
+                    for (unsigned int i = 0; i < (unsigned int)(length - 4); i++)
+                        option->setCookie(i, stream.readByte());
+                    return option;
+                }
+                auto *option = new TcpOptionUnknown();
+                option->setKind(kind);
+                option->setLength(length);
+                option->setBytesArraySize(length - 2);
+                option->setBytes(0, (expId >> 8) & 0xff);
+                option->setBytes(1, expId & 0xff);
+                for (unsigned int i = 2; i < (unsigned int)(length - 2); i++)
+                    option->setBytes(i, stream.readByte());
+                return option;
+            }
+            break;
+        }
+
         default:
             length = stream.readByte();
             break;
