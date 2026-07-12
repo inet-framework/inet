@@ -164,7 +164,12 @@ class INET_API Tcp : public TransportProtocolBase
     // TCP Fast Open (RFC 7413): per-module cookie generation secret and client-role
     // cookie cache (destination address -> last-learned cookie). Not cryptographically
     // strong -- RFC 7413's threat model (blind off-path attackers) doesn't apply to a
-    // non-adversarial simulator; see generateFastOpenCookie().
+    // non-adversarial simulator; see generateFastOpenCookie(). Seeded lazily, on first
+    // actual use, rather than in initialize(): an unconditional RNG draw at module init
+    // time would shift this module's RNG stream for every scenario -- including ones
+    // that never touch TFO -- breaking determinism for unrelated randomness sharing
+    // the same stream.
+    bool fastOpenSecretSeeded = false;
     uint64_t fastOpenSecret = 0;
     std::map<L3Address, std::vector<uint8_t>> fastOpenCookieCache;
 
@@ -215,9 +220,10 @@ class INET_API Tcp : public TransportProtocolBase
     /**
      * TCP Fast Open (RFC 7413): derive a cookie for remoteAddr from this module's
      * secret. Deterministic for a fixed secret+address (a simple keyed mix, not a
-     * cryptographic MAC -- see fastOpenSecret).
+     * cryptographic MAC -- see fastOpenSecret). Not const: lazily seeds fastOpenSecret
+     * from the module's RNG on first call.
      */
-    virtual std::vector<uint8_t> generateFastOpenCookie(const L3Address& remoteAddr, int cookieBytes) const;
+    virtual std::vector<uint8_t> generateFastOpenCookie(const L3Address& remoteAddr, int cookieBytes);
 
     /** TCP Fast Open: client-role cookie cache lookup. Returns false if nothing is cached for remoteAddr. */
     virtual bool getFastOpenCookie(const L3Address& remoteAddr, std::vector<uint8_t>& cookie) const;

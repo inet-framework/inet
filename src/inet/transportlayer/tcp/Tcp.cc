@@ -54,18 +54,6 @@ void Tcp::initialize(int stage)
 
         msl = par("msl");
 
-        // TCP Fast Open (RFC 7413): seed the per-module cookie-generation secret from
-        // this module's own (seeded, reproducible) RNG stream -- two 32-bit draws
-        // combined into 64 bits, mirroring the intuniform()-based token generation
-        // idiom used elsewhere in INET (e.g. DhcpClient's transaction id). Only draws
-        // when Fast Open is actually enabled: an unconditional draw here would shift
-        // the RNG stream for every scenario (even ones that never touch TFO), breaking
-        // fingerprints that share this module's RNG for unrelated randomness.
-        bool fastopenClientEnabled = par("fastopenClientEnabled");
-        bool fastopenServerEnabled = par("fastopenServerEnabled");
-        if (fastopenClientEnabled || fastopenServerEnabled)
-            fastOpenSecret = ((uint64_t)(uint32_t)intuniform(0, 0x7fffffff) << 32) | (uint32_t)intuniform(0, 0x7fffffff);
-
         WATCH(checksumMode);
         WATCH(lastEphemeralPort);
         WATCH(usedEphemeralPorts);
@@ -413,8 +401,21 @@ void Tcp::addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Add
     tcpAppConnMap[newConn->socketId] = newConn;
 }
 
-std::vector<uint8_t> Tcp::generateFastOpenCookie(const L3Address& remoteAddr, int cookieBytes) const
+std::vector<uint8_t> Tcp::generateFastOpenCookie(const L3Address& remoteAddr, int cookieBytes)
 {
+    // Lazily seed on first actual use (not in initialize()): an unconditional RNG
+    // draw at module init time would shift this module's RNG stream for every
+    // scenario, even ones that never touch TFO, breaking determinism/fingerprints
+    // for unrelated randomness sharing the same stream. This method is only ever
+    // reached once a peer has actually sent a TFO option, so a scenario that never
+    // exercises Fast Open -- including one with fastopenClientEnabled/
+    // fastopenServerEnabled defaulted to true, e.g. after the F7 default-enable gate
+    // -- never draws.
+    if (!fastOpenSecretSeeded) {
+        fastOpenSecret = ((uint64_t)(uint32_t)intuniform(0, 0x7fffffff) << 32) | (uint32_t)intuniform(0, 0x7fffffff);
+        fastOpenSecretSeeded = true;
+    }
+
     // Clean-room, simulator-appropriate keyed mix -- intentionally NOT a port of
     // Linux's AES/SipHash-based cookie cipher (RFC 7413's threat model of a blind
     // off-path attacker doesn't apply to a non-adversarial simulator). Chains

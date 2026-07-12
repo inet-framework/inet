@@ -27,21 +27,30 @@ static std::string toHex(const std::vector<uint8_t>& v)
 
 %activity:
 
-Tcp tcpMain;
+// generateFastOpenCookie() lazily seeds from the module's own RNG on first use
+// (see Tcp.cc), so it needs a properly attached module -- not a bare stack
+// object -- the same way Tcp.cc itself instantiates TcpChecksumInsertionHook.
+cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp.Tcp");
+Tcp *tcpMain = check_and_cast<Tcp *>(moduleType->create("tcpMain", getSimulation()->getSystemModule()));
+tcpMain->finalizeParameters();
+tcpMain->callInitialize();
+
 L3Address addr1(Ipv4Address("10.0.0.1"));
 L3Address addr2(Ipv4Address("10.0.0.2"));
 
 // Falsification first: two DIFFERENT addresses must not collide -- catches a
 // broken (constant) implementation before the equality check below could pass trivially.
-std::vector<uint8_t> c1 = tcpMain.generateFastOpenCookie(addr1, 8);
-std::vector<uint8_t> c2 = tcpMain.generateFastOpenCookie(addr2, 8);
+std::vector<uint8_t> c1 = tcpMain->generateFastOpenCookie(addr1, 8);
+std::vector<uint8_t> c2 = tcpMain->generateFastOpenCookie(addr2, 8);
 EV << "addr1 != addr2 cookie: " << (toHex(c1) != toHex(c2) ? "distinct" : "COLLIDED") << "\n";
 
 // Deterministic for a fixed secret+address.
-std::vector<uint8_t> c1again = tcpMain.generateFastOpenCookie(addr1, 8);
+std::vector<uint8_t> c1again = tcpMain->generateFastOpenCookie(addr1, 8);
 EV << "addr1 repeat cookie: " << (toHex(c1) == toHex(c1again) ? "stable" : "CHANGED") << "\n";
 
 EV << "cookie length: " << c1.size() << "\n";
+
+tcpMain->deleteModule();
 
 EV << ".\n";
 
