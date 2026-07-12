@@ -842,6 +842,25 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
         EV << "ECN-setup SYN packet received\n";
     }
 
+    // TCP Fast Open (RFC 7413): a validated-cookie SYN carrying data is accepted and
+    // delivered to the app now, ahead of the 3WHS completing -- readHeaderOptions()
+    // above has already run processFastOpenOption() and populated
+    // state->fastopenCookie*. Advancing rcv_nxt here (before sendSynAck() below)
+    // makes the SYN-ACK's ack number naturally cover the SYN and the data in one
+    // segment, with no change needed to sendSynAck() itself.
+    bool tfoAttempted = state->fastopenCookieRequested || state->fastopenCookieValid || state->fastopenSendCookieOption;
+    if (state->fastopenServerEnabled && state->fastopenCookieValid) {
+        B payloadLen = B(tcpSegment->getByteLength()) - tcpHeader->getHeaderLength();
+        if (payloadLen > B(0) && hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) {
+            updateRcvQueueVars();
+            state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
+            updateRcvQueueVars();
+            sendAvailableDataToApp(); // deliver before the 3WHS completes -- the RFC 7413 win
+            EV_INFO << "Fast Open: cookie valid, accepting " << payloadLen
+                    << " bytes of SYN data before handshake completion\n";
+        }
+    }
+
     sendSynAck();
     startSynRexmitTimer();
 
@@ -857,7 +876,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
     // so there's only URG and PSH left to handle.
     //
-    if (B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
+    if (!tfoAttempted && B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
         updateRcvQueueVars();
 
         if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?

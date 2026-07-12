@@ -1690,6 +1690,23 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             tcpHeader->appendHeaderOption(option);
         }
 
+        // TCP Fast Open (RFC 7413) cookie option, server side: echo a (possibly
+        // fresh) cookie in the SYN-ACK. 2 trailing NOPs pad the 2- or 10-byte
+        // (with the default 8-byte cookie) option to a 4-byte-aligned option area --
+        // unlike MSS/WS/SACK_PERMITTED/TS, no other option's NOPs can double up here
+        // since TFO is server-to-client-only at this point in the plan.
+        if (state->fastopenServerEnabled && state->fastopenSendCookieOption) {
+            tcpHeader->appendHeaderOption(new TcpOptionNop());
+            tcpHeader->appendHeaderOption(new TcpOptionNop());
+            TcpOptionTcpFastOpen *option = new TcpOptionTcpFastOpen();
+            option->setCookieArraySize(state->fastopenCookieToSend.size());
+            for (size_t i = 0; i < state->fastopenCookieToSend.size(); i++)
+                option->setCookie(i, state->fastopenCookieToSend[i]);
+            option->setLength(2 + state->fastopenCookieToSend.size());
+            tcpHeader->appendHeaderOption(option);
+            EV_INFO << "Tcp Header Option Fast Open cookie (" << state->fastopenCookieToSend.size() << " bytes) sent\n";
+        }
+
         // TODO add new TCPOptions here once they are implemented
     }
     else if (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD
