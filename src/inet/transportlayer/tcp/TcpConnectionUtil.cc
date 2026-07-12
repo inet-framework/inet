@@ -1716,7 +1716,12 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // TCP Fast Open (RFC 7413) cookie option, client side: echo the cached
         // cookie (data-bearing SYN, process_SEND's deferred path) or an empty
         // cookie (dataless SYN requesting one, process_OPEN_ACTIVE's immediate path).
-        if (state->fastopenClientEnabled) {
+        // Gated on fastopenRequested (this connection's own connect() opted in), not
+        // just the module-wide fastopenClientEnabled param -- otherwise a plain
+        // connect() to a destination with a cookie cached from an earlier TFO
+        // connection would attach that cookie uninvited, which Linux's per-connection
+        // opt-in (MSG_FASTOPEN / TCP_FASTOPEN_CONNECT) never does.
+        if (state->fastopenClientEnabled && state->fastopenRequested) {
             std::vector<uint8_t> cachedCookie;
             bool haveCachedCookie = tcpMain->getFastOpenCookie(remoteAddr, cachedCookie);
             if (haveCachedCookie || state->fastopenCookieRequestPending) {

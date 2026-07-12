@@ -45,6 +45,7 @@ cmdenv-log-prefix="[%c]: "
 *.cli_app.localPort2=1001
 *.cli_app.tSend2=-1s
 *.cli_app.sendBytes2=0B
+*.cli_app.fastOpen2=true
 
 *.srv_app.localAddress="10.0.0.2"
 *.srv_app.localPort=2000

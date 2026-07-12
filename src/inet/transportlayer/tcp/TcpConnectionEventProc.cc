@@ -64,6 +64,7 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
             // FSM_Goto(TCP_S_SYN_SENT) below doesn't depend on sendSyn() having
             // actually been called, so deferring here is FSM-transition-transparent.
             if (openCmd->getFastOpen() && state->fastopenClientEnabled) {
+                state->fastopenRequested = true;
                 std::vector<uint8_t> cachedCookie;
                 if (tcpMain->getFastOpenCookie(remoteAddr, cachedCookie)) {
                     selectInitialSeqNum();

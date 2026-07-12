@@ -1,29 +1,24 @@
 %description:
-TCP Fast Open (RFC 7413), end to end, both roles, two connections through the
-same client/server Tcp modules:
- - Connection 1 (port 1000): client has no cached cookie yet, so the SYN is
-   sent immediately with an empty ("request a cookie") Fast Open option; the
-   server generates and echoes a fresh cookie in the SYN-ACK; the client
-   learns it.
- - Connection 2 (port 1001), started before connection 1 closes: the client
-   now has a cached cookie, so it defers the SYN until the app's first SEND,
-   then sends a SYN carrying both the cached cookie and the data. The server
-   validates the cookie (strict mode -- not lenient, so this proves real
-   validation, not blanket acceptance) and accelerates: the SYN-ACK's ack
-   number covers the SYN and the data in one segment, before the 3WHS
-   completes.
+TCP Fast Open (RFC 7413) client-side opt-in is per-connection, like Linux's
+MSG_FASTOPEN/TCP_FASTOPEN_CONNECT -- NOT "attach a cached cookie to every SYN
+to a destination that happens to have one cached because the module-wide
+fastopenClientEnabled parameter is on". Connection 1 (port 1000,
+fastOpen=true) primes the client's cookie cache for the server address, same
+as tcp_fastopen_1.test. Connection 2 (port 1001) then does a PLAIN
+connect() (fastOpen2=false) to the same destination. Even though a cookie is
+cached and fastopenClientEnabled is true module-wide, connection 2's SYN
+must NOT carry a Fast Open option at all, because this connection's own
+open() call never opted in.
 
-Falsification: writing this test caught two real bugs before this recorded
-trace was correct -- (1) the deferred SYN is sent from TCP_S_SYN_SENT, not
-TCP_S_INIT, which writeHeaderOptions()'s option-append guard didn't
-recognize, so connection 2's SYN silently carried no options at all; (2)
-insertBytesFromSegment() indexes payload by the segment's own SequenceNo,
-which for a SYN-bearing segment is the SYN's own sequence number, not the
-data's (off by one) -- srv_app received 199 bytes instead of 200 and the
-SYN-ACK's ack number was short by 1 until fixed. Both are now fixed in
-TcpConnectionEventProc.cc/TcpConnectionUtil.cc/TcpConnectionRcvSegment.cc;
-this test's exact byte/ack assertions below would fail again if either
-regressed.
+Falsification: before the fastopenRequested fix, writeHeaderOptions()'s
+client-side cookie-append block was gated only on state->fastopenClientEnabled
+plus "is a cookie cached for this destination" -- with no way to see that
+THIS connection's own connect() call asked for it. Under that gate,
+connection 2's SYN would carry "FastOpen(cookieLen=8)" here, a wire-level
+divergence from Linux (which never attaches TFO data to a connect() that
+didn't request it). The single assertion below (a plain "S 126000:..." line
+with no Option(s) FastOpen suffix) would fail -- the real (buggy) output
+included the FastOpen option -- if that gate regressed.
 
 %inifile: omnetpp.ini
 [General]
@@ -53,9 +48,9 @@ cmdenv-log-prefix="[%c]: "
 *.cli_app.active2=true
 *.cli_app.tOpen2=0.5s
 *.cli_app.localPort2=1001
-*.cli_app.tSend2=0.5s
-*.cli_app.sendBytes2=200B
-*.cli_app.fastOpen2=true
+*.cli_app.tSend2=-1s
+*.cli_app.sendBytes2=0B
+*.cli_app.fastOpen2=false
 
 *.srv_app.localAddress="10.0.0.2"
 *.srv_app.localPort=2000
@@ -96,24 +91,22 @@ while($sor = <FILE>)
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command:  perl ./postrun.pl
 %#--------------------------------------------------------------------------------------------------------------
-%# Connection 1 (port 1000): no cached cookie -- bare SYN requests one, server issues a fresh one, client learns it.
+%# Connection 1: bare cookie-request SYN, learned by the client (primes the cache), same as tcp_fastopen_1.test.
 %contains: postrun-command(1).out
 [0.001 A001] A.1000 > B.2000: S 0:0(0) win 7504   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=0)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: postrun-command(1).out
 [0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 7504   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=8)
 %#--------------------------------------------------------------------------------------------------------------
-%# Connection 2 (port 1001): cached cookie -- deferred SYN carries the cookie AND 200 bytes of data.
+%# Connection 2: plain connect() (fastOpen2=false) to the same destination -- despite the
+%# cached cookie and fastopenClientEnabled being on module-wide, this SYN must carry no
+%# Fast Open option at all. The line is pinned end-to-end (through the trailing newline
+%# into the next line's start) so a regression that appends " NOP NOP FastOpen(...)"
+%# after "MaxSegSize" would break this exact contiguous match, not just get missed by
+%# a loose substring check.
 %contains: postrun-command(1).out
-[0.501 A003] A.1001 > B.2000: S 125000:125200(200) win 7504   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=8)
-%#--------------------------------------------------------------------------------------------------------------
-%# Accelerated ACK: ack 125201 = IRS+1+200, covering the SYN and the data in one segment, no MSS/WS/SACK
-%# renegotiation options this time around (a plain accelerated SYN-ACK, not a cookie-issuing one).
-%contains: postrun-command(1).out
-[0.503 B002] A.1001 < B.2000: A S 125500:125500(0) ack 125201 win 7504   Option(s): MaxSegSize
-%#--------------------------------------------------------------------------------------------------------------
-%contains: stdout
-TcpTestNet1.srv_app: received 200 bytes in 1 packets
+[0.501 A003] A.1001 > B.2000: S 125000:125000(0) win 7504   Option(s): MaxSegSize
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

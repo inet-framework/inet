@@ -205,7 +205,7 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket2.setAutoRead(par("autoRead"));
 
             if (par("active2"))
-                socket2.connect(L3Address(connectAddress), connectPort, par("fastOpen"));
+                socket2.connect(L3Address(connectAddress), connectPort, par("fastOpen2"));
             else
                 socket2.listenOnce();
             scheduleNextSend2();
