@@ -222,6 +222,10 @@ void TcpTestClient::handleMessage(cMessage *msg)
     {
         printStatus(check_and_cast<TcpStatusInfo *>(msg->getControlInfo()));
     }
+    else if (msg->getKind()==TCP_I_SEND_MSG)
+    {
+        EV_INFO << "SEND_MSG: userId=" << check_and_cast<TcpCommand *>(msg->getControlInfo())->getUserId() << "\n";
+    }
     if (socket2.belongsToSocket(msg))
         socket2.processMessage(msg);
     else if (socket3.belongsToSocket(msg))

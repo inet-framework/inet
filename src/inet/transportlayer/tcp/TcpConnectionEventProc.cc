@@ -209,6 +209,13 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
 
     if ((state->sendQueueLimit > 0) && (sendQueue->getBytesAvailable(state->snd_una) > state->sendQueueLimit))
         state->queueUpdate = false;
+
+    // TCP_NOTSENT_LOWAT (Workstream H4): arm re-notification once the not-yet-
+    // transmitted portion of the queue (from snd_nxt, not snd_una -- independent of
+    // sendQueueLimit above) exceeds the low-water mark; sendSegment() disarms it and
+    // signals the app again once transmission brings it back down to/below the mark.
+    if (state->notsentLowat != (uint32_t)-1 && sendQueue->getBytesAvailable(state->snd_nxt) > state->notsentLowat)
+        state->notsentLowatUpdate = false;
 }
 
 void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)

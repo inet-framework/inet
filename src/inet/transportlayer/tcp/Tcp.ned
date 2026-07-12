@@ -202,6 +202,7 @@ simple Tcp extends SimpleModule like ITcp
         int windowScalingFactor = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits)
         bool timestampSupport = default(true); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(-1); // Maximum Segment Size (header option). -1 derives it from the address family (IPv4->1460, IPv6->1440), like Linux on a 1500-byte-MTU link; set explicitly (e.g. 536) for small-MTU links.
+        int notsentLowat @unit(B) = default(-1B); // TCP_NOTSENT_LOWAT (Linux sockopt, no RFC): write-readiness low-water mark on queued-but-not-yet-transmitted bytes (sendQueue bytes ahead of snd_nxt). Once exceeded, no further TCP_I_SEND_MSG indication is sent until it drops back at or below this value. -1B = disabled (no notsentLowat-driven signaling; independent of the runtime-settable sendQueueLimit/TCP_C_QUEUE_BYTES_LIMIT mechanism, which tracks total outstanding+unsent bytes instead).
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpCubic");
         int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 3517) DO NOT change unless you really know what you are doing

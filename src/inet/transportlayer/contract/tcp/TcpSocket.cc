@@ -409,6 +409,14 @@ void TcpSocket::processMessage(cMessage *msg)
             delete msg;
             break;
 
+        case TCP_I_SEND_MSG: {
+            auto *tcpCommand = check_and_cast<TcpCommand *>(msg->getControlInfo());
+            if (cb)
+                cb->socketSendMsgArrived(this, tcpCommand);
+            delete msg;
+            break;
+        }
+
         default:
             throw cRuntimeError("TcpSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected", msg->getKind());
     }

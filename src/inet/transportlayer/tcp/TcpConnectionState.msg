@@ -241,6 +241,12 @@ struct TcpStateVariables
     uint32_t sendQueueLimit = 0;
     bool queueUpdate = true;
 
+    // TCP_NOTSENT_LOWAT (Workstream H4): independent of sendQueueLimit/queueUpdate
+    // above (which track total outstanding+unsent bytes from snd_una); this tracks
+    // only the not-yet-transmitted portion from snd_nxt. (uint32_t)-1 = disabled.
+    uint32_t notsentLowat = (uint32_t)-1;
+    bool notsentLowatUpdate = true;
+
     // those counters would logically belong to TcpAlgorithm, but it's a lot easier to manage them here
     uint32_t dupacks = 0;    // current number of received consecutive duplicate ACKs
     uint32_t snd_sacks = 0;    // number of sent sacks

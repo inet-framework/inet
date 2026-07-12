@@ -1,0 +1,79 @@
+%description:
+TCP_NOTSENT_LOWAT (Workstream H4). Client writes 5000B in one SEND while
+its advertised window is only 1000B (mss=500), so only 2 segments can go
+out immediately -- the other 4000B sit queued but not-yet-transmitted
+(TcpSendQueue bytes ahead of snd_nxt) while the window slides forward as
+ACKs arrive. With notsentLowat=2000B, TCP is armed (no TCP_I_SEND_MSG)
+while the not-yet-transmitted portion stays above 2000B, and must fire
+exactly once (not once per segment) after enough segments have gone out
+to bring it back at or below 2000B.
+
+Falsification: this exercises a path genuinely independent of the existing
+sendQueueLimit/queueUpdate mechanism (never set here -- sendQueueLimit
+stays 0, so that mechanism's own guard `state->sendQueueLimit > 0` is
+false throughout and could never itself produce this SEND_MSG). A stub
+that reused sendQueueLimit/queueUpdate instead of a separate notsentLowat/
+notsentLowatUpdate pair would never fire here at all.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+sim-time-limit = 10s
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=5000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.notsentLowat = 2000B
+*.*_tcp.advertisedWindow = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.nagleEnabled = false
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Fires exactly once, right as the 8th segment (2501:3001) brings the not-yet-
+%# transmitted portion down to exactly the 2000B low-water mark (5000B total -
+%# 3000B now sent = 2000B remaining).
+%contains: stdout
+SEND_MSG: userId=2000
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

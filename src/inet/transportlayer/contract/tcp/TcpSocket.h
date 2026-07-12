@@ -166,6 +166,15 @@ class INET_API TcpSocket : public ISocket
          * Default implementation does nothing (backward compatible).
          */
         virtual void socketIcmpv6Error(TcpSocket *socket, Indication *errorInd) {}
+
+        /**
+         * Notifies that TCP's send queue has abated below the configured
+         * low-water mark (sendQueueLimit via TCP_C_QUEUE_BYTES_LIMIT, or
+         * notsentLowat via the module parameter of the same name -- see
+         * requestStatus()'s sibling mechanisms) and is ready to accept more
+         * data. Default implementation does nothing (backward compatible).
+         */
+        virtual void socketSendMsgArrived(TcpSocket *socket, TcpCommand *tcpCommand) {}
     };
 
     /**
