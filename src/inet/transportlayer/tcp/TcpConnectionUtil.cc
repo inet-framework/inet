@@ -310,6 +310,18 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
         tcpHeader->setEceBit(ace & 0x1);
     }
 
+    // AccECN TCP option beacon bookkeeping (Workstream G6.1): the exactly-once
+    // mutation companion to writeHeaderOptions()'s pure/idempotent beacon decision
+    // (which may run more than once per real segment as a header-size dry run --
+    // see the comment there). sendToIP() is called exactly once per genuine send
+    // across every path (sendAck/sendSyn/sendSynAck/sendSegment/sendKeepAliveProbe),
+    // same reasoning as the ACE-encode block just above.
+    if (state->accEcnNegotiated && state->accEcnOptionEnabled && tcpHeader->getAckBit() && !tcpHeader->getSynBit()) {
+        state->accEcnAckCount++;
+        if (state->accEcnOptionBeaconAcks > 0 && state->accEcnAckCount % state->accEcnOptionBeaconAcks == 0)
+            state->accEcnOptionNextKindIsAccEcn1 = !state->accEcnOptionNextKindIsAccEcn1;
+    }
+
     // ECN:
     // We use ECT(0) to indicate ECN-capable transport, matching Linux
     // (RFC 3168 treats ECT(0) and ECT(1) as equivalent at routers, but ECT(1)
@@ -708,6 +720,8 @@ void TcpConnection::configureStateVariables()
     // mode's own asymmetry, and accecn-passive's, is about *initiating*, which the ACTIVE-open
     // call site (sendSyn(), G3.1) decides separately, directly from ecnMode, not from this flag).
     state->ecnWillingness = state->ecnMode >= TCP_ECN_MODE_RFC3168;
+    state->accEcnOptionEnabled = tcpMain->par("accEcnOptionEnabled");
+    state->accEcnOptionBeaconAcks = tcpMain->par("accEcnOptionBeaconAcks");
     state->dupthresh = tcpMain->par("dupthresh");
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     state->prrEnabled = tcpMain->par("prrEnabled");
@@ -1490,6 +1504,17 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 }
                 break;
 
+            case TCPOPTION_ACCECN0: // draft-ietf-tcpm-accurate-ecn, E0B/CEB/E1B byte counters
+            case TCPOPTION_ACCECN1: // same option, E1B/CEB/E0B field order
+                // Recognized (so it doesn't fall through to the "Unsupported" ERROR log
+                // below) but not yet consumed -- decoding its 3 counters into the
+                // peer-reported-bytes delta resolution is G7's job. Length sanity only.
+                if (length != 11) {
+                    EV_ERROR << "ERROR: AccECN option length incorrect\n";
+                    ok = false;
+                }
+                break;
+
             // TODO add new TCPOptions here once they are implemented
             // TODO delegate to TcpAlgorithm as well -- it may want to recognized additional options
 
@@ -1898,6 +1923,49 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // SACK option."
         if (state->sack_enabled && (state->snd_sack || state->snd_dsack)) {
             addSacks(tcpHeader);
+        }
+
+        // AccECN TCP option (draft-ietf-tcpm-accurate-ecn), Workstream G6: byte-exact
+        // corroboration of the ACE mod-8 counter (G4/G5). Sent on every ACK-bearing
+        // segment once negotiated would be needlessly heavy for a 11-byte option whose
+        // information changes slowly; INET's own simplified beaconing policy instead
+        // sends it on every accEcnOptionBeaconAcks-th ACK-bearing segment, alternating
+        // kind 172/174 each time it's actually sent (neither kind is more "correct" than
+        // the other -- the receiver decodes either the same way once it knows which kind
+        // arrived -- alternating is purely so a single dropped option instance doesn't
+        // silently starve one field ordering's coverage).
+        //
+        // This block must be pure (read state->accEcnAckCount/accEcnOptionNextKindIsAccEcn1,
+        // never mutate them): writeHeaderOptions() also runs as a header-size "dry run"
+        // against a throwaway tmpTcpHeader (sendSegment()/sendData()'s
+        // "bytes + options_len <= snd_mss" budget calc), sometimes more than once for
+        // the very same real segment -- mutating a beacon counter here would make the
+        // cadence depend on how many dry runs happened to precede the real send, not
+        // on how many segments were actually sent. The actual, exactly-once mutation
+        // is sendToIP()'s job (G6.1), mirroring where G4's ACE-encode block already
+        // lives for the identical "must fire exactly once, only on the genuine final
+        // send" reason.
+        if (state->accEcnNegotiated && state->accEcnOptionEnabled && tcpHeader->getAckBit()) {
+            uint32_t wouldBeAckCount = state->accEcnAckCount + 1;
+            if (state->accEcnOptionBeaconAcks > 0 && wouldBeAckCount % state->accEcnOptionBeaconAcks == 0) {
+                // Pad with NOPs so the options area stays 4-byte aligned once this
+                // 11-byte option is appended -- same convention SACK/TS/WS already
+                // follow elsewhere in this function (TcpConnectionSackUtil.cc's
+                // addSacks() is the clearest example of the same pattern).
+                while (tcpHeader->getHeaderOptionArrayLength().get<B>() % 4 != 1)
+                    tcpHeader->appendHeaderOption(new TcpOptionNop());
+
+                TcpOptionAccEcn *option = new TcpOptionAccEcn();
+                option->setKind(state->accEcnOptionNextKindIsAccEcn1 ? TCPOPTION_ACCECN1 : TCPOPTION_ACCECN0);
+                // Wire init offsets (Verified Facts, G6.1): E0B/E1B start at 1, CEB at 0.
+                option->setEct0Bytes(state->rcvEct0Bytes + 1);
+                option->setEct1Bytes(state->rcvEct1Bytes + 1);
+                option->setCeBytes(state->rcvCeBytes);
+                tcpHeader->appendHeaderOption(option);
+                EV_INFO << "Tcp Header Option AccECN(kind=" << option->getKind()
+                        << ", E0B=" << option->getEct0Bytes() << ", E1B=" << option->getEct1Bytes()
+                        << ", CEB=" << option->getCeBytes() << ") sent\n";
+            }
         }
 
         // TODO add new TCPOptions here once they are implemented

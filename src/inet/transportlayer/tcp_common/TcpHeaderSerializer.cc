@@ -155,6 +155,24 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
             break;
         }
 
+        case TCPOPTION_ACCECN0: { // draft-ietf-tcpm-accurate-ecn: field order E0B,CEB,E1B
+            auto *opt = check_and_cast<const TcpOptionAccEcn *>(option);
+            ASSERT(length == 11);
+            stream.writeUint24Be(opt->getEct0Bytes());
+            stream.writeUint24Be(opt->getCeBytes());
+            stream.writeUint24Be(opt->getEct1Bytes());
+            break;
+        }
+
+        case TCPOPTION_ACCECN1: { // draft-ietf-tcpm-accurate-ecn: field order E1B,CEB,E0B
+            auto *opt = check_and_cast<const TcpOptionAccEcn *>(option);
+            ASSERT(length == 11);
+            stream.writeUint24Be(opt->getEct1Bytes());
+            stream.writeUint24Be(opt->getCeBytes());
+            stream.writeUint24Be(opt->getEct0Bytes());
+            break;
+        }
+
         default: {
             throw cRuntimeError("Unknown TCPOption kind=%d (not in a TCPOptionUnknown option)", kind);
             break;
@@ -284,6 +302,32 @@ TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
                 option->setCookieArraySize(length - 2);
                 for (unsigned int i = 0; i < (unsigned int)(length - 2); i++)
                     option->setCookie(i, stream.readByte());
+                return option;
+            }
+            break;
+
+        case TCPOPTION_ACCECN0: // draft-ietf-tcpm-accurate-ecn: field order E0B,CEB,E1B
+            length = stream.readByte();
+            if (length == 11) {
+                auto *option = new TcpOptionAccEcn();
+                option->setKind(TCPOPTION_ACCECN0);
+                option->setLength(length);
+                option->setEct0Bytes(stream.readUint24Be());
+                option->setCeBytes(stream.readUint24Be());
+                option->setEct1Bytes(stream.readUint24Be());
+                return option;
+            }
+            break;
+
+        case TCPOPTION_ACCECN1: // draft-ietf-tcpm-accurate-ecn: field order E1B,CEB,E0B
+            length = stream.readByte();
+            if (length == 11) {
+                auto *option = new TcpOptionAccEcn();
+                option->setKind(TCPOPTION_ACCECN1);
+                option->setLength(length);
+                option->setEct1Bytes(stream.readUint24Be());
+                option->setCeBytes(stream.readUint24Be());
+                option->setEct0Bytes(stream.readUint24Be());
                 return option;
             }
             break;

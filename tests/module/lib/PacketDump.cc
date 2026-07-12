@@ -622,6 +622,13 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
                         out << " FastOpen(cookieLen=" << foOpt->getCookieArraySize() << ")";
                         break;
                     }
+                    case TCPOPTION_ACCECN0:
+                    case TCPOPTION_ACCECN1: {
+                        auto aeOpt = check_and_cast<const TcpOptionAccEcn *>(option);
+                        out << " AccECN(kind=" << option->getKind() << ",E0B=" << aeOpt->getEct0Bytes()
+                            << ",E1B=" << aeOpt->getEct1Bytes() << ",CEB=" << aeOpt->getCeBytes() << ")";
+                        break;
+                    }
                     default:
                         out << " (kind=" << option->getKind() << " length=" << option->getLength() << ")"; break;
                 }

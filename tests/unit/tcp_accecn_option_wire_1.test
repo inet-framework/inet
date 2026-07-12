@@ -1,0 +1,114 @@
+%description:
+TCP AccECN (Workstream G) G6.1: AccECN TCP option (kind 172/174, E0B/E1B/CEB
+24-bit byte counters) wire format. Pure serializer round-trip test
+(TcpHeaderSerializer::serializeOption()/deserializeOption()) with no TCP
+connection logic involved.
+
+Builds a TcpOptionAccEcn with distinct E0B/E1B/CEB values (1001, 2002, 3)
+so the 3 fields can't be confused with each other by position, appends it
+to an otherwise-empty header once with kind=172 (TCPOPTION_ACCECN0) and
+once with kind=174 (TCPOPTION_ACCECN1), serializes both, and asserts the
+raw option bytes match the kind-dependent field order from the plan's
+Verified Facts (172: E0B,CEB,E1B; 174: E1B,CEB,E0B) -- each field written
+24-bit big-endian via MemoryOutputStream::writeUint24Be(). Then a full
+serialize -> deserialize round trip must recover the same kind and the
+same 3 field values (deserializeOption() decodes back into the semantic
+ect0Bytes/ect1Bytes/ceBytes fields, not raw wire position, so a swapped
+decode order would misassign the values while a swapped encode order
+alone would not show up here -- see falsification below for that case).
+
+Falsification: temporarily swapping the two writeUint24Be() calls for
+E1B/E0B in the kind-172 encode branch (making both kinds emit the same
+order) was verified during development to make the kind-172 raw-byte
+assertion below fail while the round-trip assertions kept passing
+unchanged -- confirming the raw-byte checks are the ones actually pinning
+field order, not just field-value presence.
+
+%includes:
+#include <iomanip>
+#include "inet/transportlayer/tcp_common/TcpHeaderSerializer.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+class TestTcpHeaderSerializer : public TcpHeaderSerializer
+{
+  public:
+    using TcpHeaderSerializer::serialize;
+    using TcpHeaderSerializer::deserialize;
+};
+
+static Ptr<TcpHeader> makeHeader(TcpOptionNumbers kind)
+{
+    auto h = makeShared<TcpHeader>();
+    h->setSrcPort(1000);
+    h->setDestPort(2000);
+    h->setSequenceNo(0);
+    h->setAckNo(0);
+    h->setAckBit(true);
+    h->setWindow(1000);
+    h->setChecksumMode(CHECKSUM_COMPUTED);
+    h->setChecksum(0);
+
+    auto *option = new TcpOptionAccEcn();
+    option->setKind(kind);
+    option->setEct0Bytes(1001);
+    option->setEct1Bytes(2002);
+    option->setCeBytes(3);
+    h->appendHeaderOption(option);
+    // 11-byte option -> 1 NOP to reach a 4-byte-aligned 12-byte options area,
+    // same convention TcpConnection::writeHeaderOptions() follows.
+    h->appendHeaderOption(new TcpOptionNop());
+    h->setHeaderLength(TCP_MIN_HEADER_LENGTH + h->getHeaderOptionArrayLength());
+    h->setChunkLength(h->getHeaderLength());
+    return h;
+}
+
+static void printHex(const std::vector<uint8_t>& bytes, size_t from, size_t to)
+{
+    for (size_t i = from; i < to && i < bytes.size(); i++)
+        EV << (i == from ? "" : " ") << std::hex << std::setw(2) << std::setfill('0') << (int)bytes[i] << std::dec;
+    EV << "\n";
+}
+
+%activity:
+
+TestTcpHeaderSerializer ser;
+
+MemoryOutputStream out172;
+ser.serialize(out172, makeHeader(TCPOPTION_ACCECN0));
+std::vector<uint8_t> bytes172 = out172.getData();
+
+MemoryOutputStream out174;
+ser.serialize(out174, makeHeader(TCPOPTION_ACCECN1));
+std::vector<uint8_t> bytes174 = out174.getData();
+
+// Option bytes start right after the 20-byte fixed header: kind(1) length(1) then 3*3 data bytes.
+EV << "kind172 option bytes: ";
+printHex(bytes172, 20, 31);
+EV << "kind174 option bytes: ";
+printHex(bytes174, 20, 31);
+
+MemoryInputStream in172(bytes172);
+auto hdr172 = staticPtrCast<TcpHeader>(ser.deserialize(in172));
+auto *opt172 = check_and_cast<const TcpOptionAccEcn *>(hdr172->getHeaderOption(0));
+EV << "round-trip kind172: kind=" << opt172->getKind() << " E0B=" << opt172->getEct0Bytes()
+   << " E1B=" << opt172->getEct1Bytes() << " CEB=" << opt172->getCeBytes() << "\n";
+
+MemoryInputStream in174(bytes174);
+auto hdr174 = staticPtrCast<TcpHeader>(ser.deserialize(in174));
+auto *opt174 = check_and_cast<const TcpOptionAccEcn *>(hdr174->getHeaderOption(0));
+EV << "round-trip kind174: kind=" << opt174->getKind() << " E0B=" << opt174->getEct0Bytes()
+   << " E1B=" << opt174->getEct1Bytes() << " CEB=" << opt174->getCeBytes() << "\n";
+
+EV << ".\n";
+
+%contains: stdout
+kind172 option bytes: ac 0b 00 03 e9 00 00 03 00 07 d2
+kind174 option bytes: ae 0b 00 07 d2 00 00 03 00 03 e9
+round-trip kind172: kind=172 E0B=1001 E1B=2002 CEB=3
+round-trip kind174: kind=174 E0B=1001 E1B=2002 CEB=3
+.

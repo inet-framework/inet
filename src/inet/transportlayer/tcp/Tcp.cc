@@ -189,6 +189,21 @@ void Tcp::handleLowerPacket(Packet *packet)
             if (state && state->accEcnNegotiated && ecn == 3)
                 state->rcvCePkts++;
 
+            // AccECN TCP option (Workstream G6): per-codepoint received-byte counters
+            // (E0B/E1B/CEB), incremented alongside rcvCePkts above but in bytes rather
+            // than packets. Same "from the moment negotiation completes" scope.
+            if (state && state->accEcnNegotiated) {
+                int payloadLength = packet->getByteLength() - tcpHeader->getHeaderLength().get<B>();
+                if (payloadLength > 0) {
+                    switch (ecn) {
+                        case 1: state->rcvEct1Bytes += payloadLength; break; // IP_ECN_ECT_1
+                        case 2: state->rcvEct0Bytes += payloadLength; break; // IP_ECN_ECT_0
+                        case 3: state->rcvCeBytes += payloadLength; break; // IP_ECN_CE
+                        default: break; // IP_ECN_NOT_ECT: not counted by any AccECN field
+                    }
+                }
+            }
+
             bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
             if (!ret)
                 removeConnection(conn);
