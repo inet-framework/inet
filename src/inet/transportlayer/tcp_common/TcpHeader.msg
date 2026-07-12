@@ -220,6 +220,7 @@ class TcpHeader extends TransportHeaderBase
 
     bool cwrBit; // CWR: congestion window reduced bit (RFC 3168)
     bool eceBit; // ECE: ECN-echo bit (RFC 3168)
+    bool aeBit; // AE: AccECN Echo (repurposed NS/RFC3540 bit); handshake codepoint bit during 3WHS, ACE-counter MSB afterward (draft-ietf-tcpm-accurate-ecn)
     bool urgBit; // URG: urgent pointer field significant if set
     bool ackBit; // ACK: ackNo significant if set
     bool pshBit; // PSH: push function

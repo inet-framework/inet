@@ -34,7 +34,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     tcp.th_dport = htons(tcpHeader->getDestPort());
     tcp.th_seq = htonl(tcpHeader->getSequenceNo());
     tcp.th_ack = htonl(tcpHeader->getAckNo());
-    tcp.th_x2 = 0; // unused
+    tcp.th_x2 = tcpHeader->getAeBit() ? 0x1 : 0x0; // AE (AccECN Echo): repurposed NS bit (RFC 3540), the low bit of this reserved nibble
 
     // set flags
     uint8_t flags = 0;
@@ -188,6 +188,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     tcpHeader->setUrgBit((flags & TH_URG) == TH_URG);
     tcpHeader->setEceBit((flags & TH_ECE) == TH_ECE);
     tcpHeader->setCwrBit((flags & TH_CWR) == TH_CWR);
+    tcpHeader->setAeBit((tcp.th_x2 & 0x1) == 0x1);
 
     tcpHeader->setWindow(ntohs(tcp.th_win));
 

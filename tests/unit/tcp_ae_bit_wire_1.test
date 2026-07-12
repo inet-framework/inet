@@ -1,0 +1,99 @@
+%description:
+TCP AccECN (Workstream G) G2.1: the AE (AccECN Echo) header bit -- the
+repurposed NS/RFC 3540 bit, written into the reserved nibble alongside the
+data-offset field (tcp.th_x2), not into the flags byte where CWR/ECE live.
+Pure wire-format round-trip test (TcpHeaderSerializer::serialize()/
+deserialize()) with no TCP connection logic involved.
+
+Compares the serialized bytes of two otherwise-identical headers (one with
+aeBit=true, one with aeBit=false) to find exactly which byte and bit AE
+occupies on the wire -- rather than assuming a specific bit-field packing
+order for tcp.th_x2 (compiler/endianness dependent), then asserts a full
+serialize -> deserialize round-trip recovers aeBit correctly in both
+directions.
+
+Falsification: with the aeBit write side temporarily reverted to the old
+`tcp.th_x2 = 0` (unconditional), the two serialized byte streams would be
+identical (no wire difference at all) and the round-trip would silently
+lose the bit -- verified empirically during development.
+
+%includes:
+#include "inet/transportlayer/tcp_common/TcpHeaderSerializer.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+class TestTcpHeaderSerializer : public TcpHeaderSerializer
+{
+  public:
+    using TcpHeaderSerializer::serialize;
+    using TcpHeaderSerializer::deserialize;
+};
+
+static Ptr<TcpHeader> makeHeader(bool aeBit)
+{
+    auto h = makeShared<TcpHeader>();
+    h->setSrcPort(1000);
+    h->setDestPort(2000);
+    h->setSequenceNo(0);
+    h->setAckNo(0);
+    h->setSynBit(true);
+    h->setAeBit(aeBit);
+    h->setWindow(1000);
+    h->setChecksumMode(CHECKSUM_COMPUTED);
+    h->setChecksum(0);
+    return h;
+}
+
+%activity:
+
+TestTcpHeaderSerializer ser;
+
+MemoryOutputStream outFalse;
+ser.serialize(outFalse, makeHeader(false));
+std::vector<uint8_t> bytesFalse = outFalse.getData();
+
+MemoryOutputStream outTrue;
+ser.serialize(outTrue, makeHeader(true));
+std::vector<uint8_t> bytesTrue = outTrue.getData();
+
+EV << "byte length equal: " << (bytesFalse.size() == bytesTrue.size() ? "yes" : "no") << "\n";
+
+int diffCount = 0;
+int diffIndex = -1;
+uint8_t diffXor = 0;
+for (size_t i = 0; i < bytesFalse.size() && i < bytesTrue.size(); i++) {
+    if (bytesFalse[i] != bytesTrue[i]) {
+        diffCount++;
+        diffIndex = (int)i;
+        diffXor = bytesFalse[i] ^ bytesTrue[i];
+    }
+}
+EV << "differing byte count: " << diffCount << "\n";
+EV << "differing byte index: " << diffIndex << "\n";
+EV << "xor at differing byte: 0x" << std::hex << (int)diffXor << std::dec << "\n";
+
+// Full round-trip: aeBit must survive serialize -> deserialize, both ways.
+MemoryInputStream inFalse(bytesFalse);
+Ptr<Chunk> resultFalse = ser.deserialize(inFalse);
+auto hdrFalse = staticPtrCast<TcpHeader>(resultFalse);
+EV << "round-trip aeBit=false -> " << (hdrFalse->getAeBit() ? "true" : "false") << "\n";
+
+MemoryInputStream inTrue(bytesTrue);
+Ptr<Chunk> resultTrue = ser.deserialize(inTrue);
+auto hdrTrue = staticPtrCast<TcpHeader>(resultTrue);
+EV << "round-trip aeBit=true -> " << (hdrTrue->getAeBit() ? "true" : "false") << "\n";
+
+EV << ".\n";
+
+%contains: stdout
+byte length equal: yes
+differing byte count: 1
+differing byte index: 12
+xor at differing byte: 0x1
+round-trip aeBit=false -> false
+round-trip aeBit=true -> true
+.
