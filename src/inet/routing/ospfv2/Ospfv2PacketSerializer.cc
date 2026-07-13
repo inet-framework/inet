@@ -122,7 +122,7 @@ const Ptr<Chunk> Ospfv2PacketSerializer::deserialize(MemoryInputStream& stream) 
             ddOptions.M_More = stream.readBit();
             ddOptions.MS_MasterSlave = stream.readBit();
             ddPacket->setDdSequenceNumber(stream.readUint32Be());
-            int numLsaHeaders = ((B(packetLength) - OSPFv2_HEADER_LENGTH - OSPFv2_DD_HEADER_LENGTH) / OSPFv2_LSA_HEADER_LENGTH).get<unit>();
+            int numLsaHeaders = (B(packetLength) - OSPFv2_HEADER_LENGTH - OSPFv2_DD_HEADER_LENGTH).get<B>() / OSPFv2_LSA_HEADER_LENGTH.get<B>();
             if (numLsaHeaders < 0)
                 ddPacket->markIncorrect();
             ddPacket->setLsaHeadersArraySize(numLsaHeaders);
