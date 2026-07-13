@@ -59,10 +59,12 @@ cmdenv-log-prefix = "At %ts %N: "
 At 3s gate: Opening gate.
 At 3s producer: Producing packet, .*?producer-0.*?
 At 3s streamer: Starting streaming packet, .*?producer-0.*?
+At 3s gate: Starting packet streaming, .*?producer-0.*?
 At 3s gate: Passing through packet, .*?producer-0.*?
 At 3s destreamer: Starting destreaming packet, .*?producer-0.*?
 At 7s gate: Closing gate.
 At 7s streamer: Ending streaming packet, .*?producer-0.*?
+At 7s gate: Ending packet streaming, .*?producer-0.*?
 At 7s destreamer: Ending destreaming packet, .*?producer-0.*?
 At 7s consumer: Consuming packet, .*?producer-0.*?
 
