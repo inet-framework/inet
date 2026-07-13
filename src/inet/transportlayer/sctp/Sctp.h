@@ -247,6 +247,9 @@ class INET_API Sctp : public SimpleModule, public IPassivePacketSink, public ISc
     virtual void receive(int socketId, int sid, int numMsgs) override;
     virtual void streamReset(int socketId, L3Address remoteAddress, int type, int stream) override;
     virtual void getSocketOptions(int socketId) override;
+    virtual void setStreamPriority(int socketId, uint32_t stream, uint32_t priority) override;
+    virtual void setRtoInfo(int socketId, double initial, double max, double min) override;
+    virtual void destroy(int socketId) override;
     virtual void setQueueLimits(int socketId, int packetCapacity, B dataCapacity) override;
 
     virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("appIn") || gate->isName("ipIn"); }

@@ -48,6 +48,9 @@ class INET_API ISctp
     virtual void receive(int socketId, int sid, int numMsgs) = 0;
     virtual void streamReset(int socketId, L3Address remoteAddress, int type, int stream) = 0;
     virtual void getSocketOptions(int socketId) = 0;
+    virtual void setStreamPriority(int socketId, uint32_t stream, uint32_t priority) = 0;
+    virtual void setRtoInfo(int socketId, double initial, double max, double min) = 0;
+    virtual void destroy(int socketId) = 0;
     virtual void setQueueLimits(int socketId, int packetCapacity, B dataCapacity) = 0;
 };
 

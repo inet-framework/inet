@@ -1097,6 +1097,44 @@ void Sctp::getSocketOptions(int socketId)
     handleMessage(cmsg);
 }
 
+void Sctp::setStreamPriority(int socketId, uint32_t stream, uint32_t priority)
+{
+    Enter_Method("setStreamPriority");
+    Request *cmsg = new Request("SET_STREAM_PRIO", SCTP_C_SET_STREAM_PRIO);
+    auto cmd = cmsg->addTag<SctpSendReq>();
+    cmd->setSocketId(socketId);
+    cmd->setSid(stream);
+    cmd->setPpid(priority);
+    cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    cmsg->setArrival(getId(), gate("appIn")->getId());
+    handleMessage(cmsg);
+}
+
+void Sctp::setRtoInfo(int socketId, double initial, double max, double min)
+{
+    Enter_Method("setRtoInfo");
+    Request *cmsg = new Request("RtoInfo", SCTP_C_SET_RTO_INFO);
+    auto cmd = cmsg->addTag<SctpRtoReq>();
+    cmd->setSocketId(socketId);
+    cmd->setRtoInitial(initial);
+    cmd->setRtoMin(min);
+    cmd->setRtoMax(max);
+    cmsg->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    cmsg->setArrival(getId(), gate("appIn")->getId());
+    handleMessage(cmsg);
+}
+
+void Sctp::destroy(int socketId)
+{
+    Enter_Method("destroy");
+    // do not resurrect an already removed association just to destroy it
+    if (getAssoc(socketId) == nullptr) {
+        EV_DETAIL << "Destroy: association does not exist (already removed?)" << EV_FIELD(socketId) << EV_ENDL;
+        return;
+    }
+    removeAssociation(getAssoc(socketId));
+}
+
 void Sctp::setQueueLimits(int socketId, int packetCapacity, B dataCapacity)
 {
     if (packetCapacity != -1) {

@@ -396,11 +396,7 @@ void SctpSocket::shutdown(int id)
 void SctpSocket::destroy()
 {
     EV << "SctpSocket::destroy()\n";
-
-    Request *msg = new Request("DESTROY", SCTP_C_DESTROY);
-    auto cmd = msg->addTag<SctpCommandReq>();
-    cmd->setSocketId(assocId);
-    sendToSctp(msg);
+    sctp->destroy(assocId);
 }
 
 void SctpSocket::abort()
@@ -596,12 +592,7 @@ void SctpSocket::processMessage(cMessage *msg)
 
 void SctpSocket::setStreamPriority(uint32_t stream, uint32_t priority)
 {
-    Request *msg = new Request("SET_STREAM_PRIO", SCTP_C_SET_STREAM_PRIO);
-    auto cmd = msg->addTag<SctpSendReq>();
-    cmd->setSocketId(assocId);
-    cmd->setSid(stream);
-    cmd->setPpid(priority);
-    sendToSctp(msg);
+    sctp->setStreamPriority(assocId, stream, priority);
 }
 
 void SctpSocket::setRtoInfo(double initial, double max, double min)
@@ -609,15 +600,8 @@ void SctpSocket::setRtoInfo(double initial, double max, double min)
     sOptions->rtoInitial = initial;
     sOptions->rtoMax = max;
     sOptions->rtoMin = min;
-    if (sockstate == CONNECTED) {
-        Request *msg = new Request("RtoInfo", SCTP_C_SET_RTO_INFO);
-        auto cmd = msg->addTag<SctpRtoReq>();
-        cmd->setSocketId(assocId);
-        cmd->setRtoInitial(initial);
-        cmd->setRtoMin(min);
-        cmd->setRtoMax(max);
-        sendToSctp(msg);
-    }
+    if (sockstate == CONNECTED)
+        sctp->setRtoInfo(assocId, initial, max, min);
 }
 
 bool SctpSocket::isOpen() const
