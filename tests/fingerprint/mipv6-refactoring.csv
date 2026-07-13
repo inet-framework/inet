@@ -20,7 +20,7 @@
 /examples/ipv6/mld/,            -f omnetpp.ini -c MldV2Ssm -r 0,            30s,             a22a-81c9/~tNl, PASS, EthernetMac MLD
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           50c9-9bb3/~tNlb, PASS, EthernetMac
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           0e0c-b800/~tNlb, PASS,
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            06b9-ff17/~tNlb, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            3a7c-924c/~tNlb, PASS,
 
 # IPv6 networking examples
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          f206-a0e2/~tNlb, PASS, EthernetMac

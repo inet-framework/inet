@@ -166,6 +166,7 @@ class SctpCookieEchoChunk extends SctpChunk
 class SctpCookie extends cNamedObject
 {
     simtime_t creationTime;
+    uint32_t creationTimeRaw = 0; // wire creationTime (whole seconds) of a deserialized cookie; 0 for a locally built one. Lets an absolute-time (Unix-epoch) capture round-trip without overflowing the picosecond simulation clock via creationTime.
     uint32_t localTag;
     uint32_t peerTag;
     uint8_t localTieTag[];
