@@ -1,0 +1,7 @@
+all: Added optional yieldBeforePush() calls at converted synchronous packet push call sites.
+
+When the yieldBeforePushPacket flag is enabled, a zero simulation time yield
+is inserted before each pushPacket() call that replaced a send() during the
+intra-node communication refactoring. This recreates the pre-refactoring
+event trajectories for verification purposes. The flag is disabled by
+default.

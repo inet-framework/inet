@@ -1,0 +1,153 @@
+pick b761958f5f489a291611f336a2fb5752a057a419 common: Added global scheduleAt() and scheduleAfter() functions that execute a lambda function at a specific simulation time.
+pick d96490914b0b1d5d6c5e155e4c054084c6162dc9 common: Added support for temporarily stopping and later resuming the execution of the current event.
+pick 71c67a9bfd163d4dde1835ffae548c53bd57c665 all: Removed IInterfaceRegistrationListener interface and all of its implementation and usage.
+pick 0a6cf561636e43a64e6352995fbda730be1859aa all: Fixed compilation errors caused by missing #include statements.
+pick 9f89e952049641496b3cda8e18d92f483f614a38 all: Removed IProtocolRegistrationListener interface and all of its implementation and usage.
+pick eb0483425025710ee2096df80067411af5e87df0 all: Fixed compilation errors caused by missing #include statements.
+pick 42b4e24f6b75597c3a71ae80a9641c7155caf130 ProtocolGroup: Added findProtocolGroup static method.
+pick 1ff780e519aec9477d7ab6ec8788006fa430a3c3 SocketMap: Added findSocketById() method.
+pick bd7b5fed070b58bfe86b2586bd899ee4fc3debe5 common: Added PacketServcieTag tag.
+pick 2780ce054683f4d4f74f959bced226e3eba8e320 common: Added a new mechanism to lookup a module along a gate chain that implement the requested C++ interface.
+fixup cf12b1725da1cdd1108e1b5a1940d5cc777cf87a IModuleInterfaceLookup: Documented the payload protocol lookup rationale.
+pick 81d49fb92e6e41f2575cc31f30b028355132e805 ModuleRefByGate: Adapted to the new module interface lookup mechanism.
+pick df2453f52119e08565ecb85a3f3962b44af9b8b6 all: Followed recent ModuleRefByGate changes.
+pick 08fd7785a48adb94e4ed21314e918f1d400e03bb all: Added PassivePacketSinkRef fields for output gates and replaced send() calls with pushPacket() calls.
+fixup c0309abdde9c7c20835d0b286e6662a434c1fed1 PIECE todo3-a (fixup into 08fd7785a4)
+fixup bc0846df5fd57ede5e514ca906fb71245a971637 todo4
+fixup 190df01bbe169272a7561bf31026bed90c93b726 PIECE 8360-a (fixup into 08fd7785a4)
+pick d355db266bab95d570213d59fdf741bac42cb994 all: Added new module interfaces for several protocol modules.
+pick 8a29254ba9dc15b7e12b8bc5cbee959061735ad9 IpvxTrafSink: Added field to store the protocol.
+pick 97a1372a4bffa9b32266a015286b66b5febf4557 BGPv4: Added hasSocket() method.
+pick 8d539f3eac31f23dcf3d39056d8073e3ca6a600e all: Implemented new ILookupModuleInterface C++ interface for several modules.
+fixup 277838fff695aee7a339370e34b4adfa839b8ef8 PIECE todo1-D (fixup into 8d539f3eac)
+fixup 0c8352a97acdd8fc1babe477791dd51c7242aefa Mpls: Implemented IModuleInterfaceLookup to make the layer visible to lookups.
+pick 5d5c8e68c9f13c1127056f6fe8336efac0816ef6 queueing: Extracted animate* methods from PacketProcessorBase into global functions.
+pick 52503e2581bdca011dc58f7915964de935ba6884 MessageDispatcher: Removed obsolete module parameters which were used by the obsolete dispatching mechanism.
+pick 2b16b6e8261d4ecd2b39294a8264b8aa7f18156b MessageDispatcher: Removed the obsolete message dispatching mechanisms.
+pick e0c99ee8b09d1a90097a5b6ecb08b50a8c6c6b02 MessageDispatcher: Implemented the new message dispatching mechanism using the IModuleInterfaceLookup interface.
+fixup 05f6d71b977779d58f54d06bc52c66abf5da37d9 MessageDispatcher: Made the direct-claim precedence rule explicit in lookups.
+pick 72b2d288bcf11f6e9dba7df63f3b0fa6fa1720bb all: Added @interface properties to input gates on many modules to describe what C++ interfaces are implemented by the module with respect to the gate.
+fixup ac384e1a3753a1aac6c192e51783142698849353 todo5
+fixup 73f718b9cb46424b5cac1556a700110fa717cc40 PIECE 8360-b (fixup into 72b2d288bc)
+fixup 8bb6cec609fa06ce8e9ac9e0ee59f28d75fb3729 Ipv6: Added missing IPassivePacketSink gate interface declarations.
+pick 2c8e8ceb1867871bda15b99de1456999e3052403 all: Implemented IPassivePacketSink interface to support using the modules via direct pushPacket() methods.
+pick 5fa09bb428731095ec192e0a8d8a1c9712976733 InterfaceTable: Moved resetInterface method from the InterfaceTable to the NetworkInterface.
+pick b37eb10bc705abb3c895670acb6cddf037e2bf37 LinkLayerNodeBase: Replaced @allowUnconnected with @loose.
+pick 75f560badccb54a73425c4c57f6114ee8181286c Ethernet: Added separate EthernetFcsRemover module.
+fixup b3fa6ba649cc8746c3a6ec710fd78af69dede777 fixed checksumType parameter doesn't exist issue
+pick a2ddd1785631e51168d094d483a15020cff9d6cb protocolelement: Added a new DelayChannel module that delays packets in two directions.
+pick 3336a1cc6873ac2b6df8e2f76bb6c9e96c9f7bd1 CsmaCaMac: Fixed deleting lower frame that is sent up.
+pick 3c17247fb8e866654408273fafd4bd3a20a39f01 XMac: Moved call to sendUp() after state change to have a consistent internal state.
+pick 3ed9b7aa70cb86d4f1538b5608730d2104ef5d4c InterfaceTable: Fixed checking for the index of vector gates.
+pick 9060f8fe2a1987233d9c5b3cbeea2916f9f56786 LifecycleController: Added log statement for stage completion.
+pick 6e3a1ec824b890028ab23842807100daaadc8ef5 PacketTransmitter: Moved emitting transmissionEndedSignal after the transmitting state is cleared.
+pick 2c5728806ff4041d83036f8063addbe854a2a2ff transceiver: Moved handlePushPacketProcessed eariler than emitting transmissionEndedSignal.
+pick 3786849ec269d925902263480f1b8f2307347667 all: Added automatic learning for the set of upper layer protocols.
+pick 3e5bf3c8e2d01a762535da658409ca2c73033fe2 all: Added packet sink and protocol module interface fields to all socket classes.
+fixup a54802563b0706a38a41c7732050f677ca0013ad EthernetSocket, Ieee8021qSocket: Made the missing socket support error actionable.
+pick ff9b1467f1f046226846cd8d8430725caf19b829 PacketMultiplexer: Removed obsolete forward*Registration parameters.
+pick 87923eb166304b200a174e0bb3669127ed3dfceb PassivePacketSinkRef: Changed to automatically do the packet animation for pushPacket().
+pick e9d05ce44ffde7fa4fb4509e0b4981ee7180f59a ActivePacketSource: Changed initialProductionOffset to be zero by default.
+pick 9e3fa6d6d0a4d2214cfebad91107e7e2429a8974 CompoundPacketQueueBase: Removed animatePushPacket() call because it's done automatically in PassivePacketSinkRef.
+pick 1fbca7833e4364165363ae5e011f88c37e6657aa all: Implemented protocol module callback interfaces with socket classes.
+pick 5a5ac65eea4cbdc75e867982ef1bd615feb9cb49 all: Replaced sending commands in socket classes with direct method calls to protocol modules.
+pick 3881df4100a6559870a316ffa27ce86a2adaa7fd all: Replaced packet sends in socket classes with pushPacket() calls using the passive packet sink.
+fixup 7f1a77ea02705b505d29f0724ab2aecb9cee7577 PIECE todo1-B (fixup into 3881df4100)
+fixup 435fc61cfea72d5466f80773f30dda57ce7a588b PIECE todo8-a (fixup into 3881df4100)
+pick d1677f78fc76d695bfbf65f9a81af0740e33e62d all: Added missing Enter_Method() calls to several application socket callback interface methods.
+pick 074cf107c3dcfe49aa4e23c6b539a88e9ec3feab all: Added indication argument to socketEstablished() callback methods.
+pick e38225269aab997a2c66f27de6fd0c2ea1d6e1d9 all: Moved setOutputGate() and setCallback() socket calls to initialize.
+pick 4daa804e71f4568110b85fc0552b8ee52fdb114d all: Modified EV statements to be more consistent in their wording and logging parameters.
+pick 0bfaf1df296fe0a0ec24f8e0950e4c0658e7fc50 all: Added socketId-based methods and callback fields to protocol modules for direct socket calls.
+pick 3e8cf323081d421a0348987bf05f39eacc5e87ee applications: Moved emitting packetSentSignal before the synchronous send method is called.
+pick 58c8e89ab8d7a263f1f56c6900ff8322594e8b45 Ipv4RoutingTable: Update netmask route for a specific interface only for interface changed signals.
+pick fdb47bbddf37b1ab992f93cb1e9ee829f46a9524 ip: Changed Ipv4Socket/Ipv6Socket constructors to use the setOutputGate() method.
+pick 6eb8fde97d0f2c0c90aeeb77461ab7f80907d4b9 applications/ethernet: Fixed module test EtherHost_lifecycle.test.
+pick 7c1dc583f2ee7e6b6b4008f930ec07e3a51f81ee SctpSocket: Added receive(), streamReset(), and setQueueLimits() methods.
+pick a1e51acfdd4f6396463ecb886af01f20f1e8485b sctpapp: Replaced sending requests from applications to SCTP with direct method calls.
+pick cf8642f10cdb3bb5840975bc42ef7762f7ec4b9b all: Added some socket functions that delegate to the protocol module.
+pick d6059d9a32713cbed588610fbf708cf8c04416cd NetworkInterface: Changed module interface lookup to use a protocol indication argument for the upper layer out.
+fixup 51b7f57fd93e9396d7823da3202393f88e642c14 PIECE todo1-G (fixup into 9fea7b31ba)
+pick 79941feb34e374fbc57fd4af57211f64420edd8c DirectionReverserLayer: Replaced MessageDispatcher fork submodule with LocalDelivery.
+pick dbc32a876f59da81bb4d8d18f9839790c91a06c3 NetPerfMeter, SctpServer: Converted socket communication to use callback interfaces and direct method calls.
+pick e5fad9ee6f8c6f87e49afe06b7b0594380cc795d Ieee80211Mac, Ieee80211MgmtSta: Converted radio configuration commands to direct method calls.
+pick 9865bbab12608ea37d7911f295f73da3c6df923b Ieee8022Llc, Sctp, Tcp: Converted the remaining protocol-side indication delivery to socket callback interfaces.
+fixup ac4f3f5fbe9547f643f7104b10f56f0a1c1aafe1 Sctp: Fixed available indication delivery to use the listening socket callback.
+fixup 05c0e439721781ee579d5315dd70ac8770bd2d01 Sctp: Fixed callback delivery for accepted server side associations.
+pick be7f1241ae91a673fff8b90ade671451585e941b Bgpv4: Fixed established and available indication delivery to use the accepted socket's id.
+pick 1d34b91094fd7680579a4aa53dc953e4b2514ad3 Ipv4: Guarded against missing Ipv4InterfaceData during interface configuration.
+pick 066d1a41dcb267ced1329ac6d4ae909610abd540 EthernetMacPhy: Skipped decapsulation for frames received with a bit error.
+fixup 66a33ae43160f5ab4711cfa3dd717dc87c6722dc PIECE todo8-b (fixup into todo1-J)
+pick cf07b8147ad3c5bb1db8f5b9f45c81b5281acbe8 ConfigureRadioCommand: Removed obsolete message class replaced with direct C++ method calls.
+pick 5cca1fc2f9324605338d741cc77d9f21474c0d93 Ieee80211ConfigureRadioCommand: Removed obsolete message class replaced with direct C++ method calls.
+pick cd41b32753034a8ef26cdcf9e2a61fe1415c2720 Showcases: Added initialProductionOffset = 0s parameter assignment to keep ~tND fingerprints.
+pick 3051f58f45ad75cc36abefb08ce6dfbe2b046ecc Showcases: Disabled unused MAC layer queue in all Ethernet interfaces.
+pick baee1671162cae8e82fc97f441a92192a9015d9e Showcases: Enabled socket support in multicast failure protection.
+pick 98215c06e1ace883abe29d566a4905ffdb9075b0 Examples: Delayed the production of the first packet from initialize to the first event.
+pick 3500a395b6f740c12b6ed546805dc2324fca625b Examples: Removed several messages from expected output which are replaced with direct method calls.
+pick 3042ce2b910231e229920b2a35d32726fdf8b667 Tests: Removed unnecessary delayer submodule from PushSendPush_1.test.
+pick f5b33a9893abe526af19bf085aab97360a4a6170 Tests: Fixed UDP module tests by increasing stack size.
+pick 10bc23d8c1fceaa2fc08af4c5e1c2a8d6515ee08 Tests: Followed recent changes wrt. synchronous communication between modules.
+pick 165d83bbf3a60aea9601c1313d0b1ef207602c14 Tests: Changed test output validation to be more flexible.
+pick 708003637d12e4763da1c1760863b69328371950 Tests: Followed changes in EV statements.
+fixup ddca883fdf11971d6b646891f8796c3ee17d6b2b Tests: Followed EV statement wording changes in UDPSocket_1 test.
+pick cff82747caf4343b5b8a00583bd39a30b901c0b2 Tests: Removed no longer printed EV output.
+pick eff923ac9e6eba611c6e7288f9b8adb1474f6967 Tests: Followed EV output changes in queue modules.
+pick 075761c379042b29cf21043ba2e374261203881c Tests: Added initialProductionOffset assignment to make sure the test behaves the same as before the synchronous communication changes.
+pick e5f2edf75403df3709d57a47c3471c4edceacfba Tests: Reduced SCTP streamRequestTime parameter to make the test behave as before the synchronous communication changes.
+pick 7696a16e2a5a4593783c4ca6df253896f58ecd81 Tests: Added several new IModuleInterfaceLookup tests.
+fixup 3804f7a12b77b151a148957ea45dba681a391637 Tests: Made protocol IDs in ModuleInterfaceLookup test outputs robust against renumbering.
+pick a480828067951b6f1b54d15ebc833bd899b15e81 all: Removed obsolete IProtocolRegistrationListener includes and registerProtocol/registerService calls.
+pick 95a05b65a906524136a8dc966718ec8e201bc147 EchoProtocol: Fixed missing initialize() declaration.
+pick 89d4b78a9d49d7f3a1fcb567fca941e04fa7b34e Sctp: Removed obsolete streamThroughputVectors code replaced by signal-based recording.
+pick b4b93080878f45f16455435bd54d490513f3631a ThruputMeter: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick fb75e3326e2e6697be5e1d7e83338662038821c1 RandomQosClassifier: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick 320b8574b2ae6ddfe837d39fb6b8293de585460a EthernetPauseCommandProcessor: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick a2be0f6c0313b3e4762bfa85f475fc7aefcbe896 EchoProtocol: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick 88562fd9e2e8f032362f5130e7f9095422fcc69f Mpls: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick f85a9b391fa16c4532df8fda08dbf782792eadb8 LinkStateRouting: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick 4dc70871be8573238238c306efc494fc9c08cd65 RsvpTe: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick 75307670d0222dab44bc70fac42fcf796012bf24 Dymo: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick b7712add54553a571b572c580419b75f95953d36 Gpsr: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick 2fbd131e2452131822b7b6462e5ec1376456cca1 Mrp: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick c987cc0eff0f8bdaa8fd668c46ef572b8c35ed56 EthernetEncapsulation: Replaced remaining send() with lowerLayerSink.pushPacket() in handleSendPause.
+pick 1239b6183195332353662b6f9530c6aa6f1d4e89 EthernetCsmaMacPhy: Replaced send() with upperLayerSink.pushPacket() in processReceivedDataFrame.
+pick 816df5ecf26438abdf32c111abf7c793bbd12a95 EigrpSplitter: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick 918d85d24d134845c591ba23e2873ccdf3cdc3da Ospfv3Splitter: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick 557ac52e2d46f638797617f8e0db954137bd0407 TcpSpoof: Replaced send() with pushPacket() calls using PassivePacketSinkRef.
+pick 08813227d054d7d8b252c9c99180ab53998fd5b4 EthernetPhy: Replaced send() with upperLayerSink.pushPacket() for intra-node packet passing.
+pick 3ed9efcffc614201de50d820654ab9d3ecbb5344 ShortcutRadio: Replaced send() with upperLayerSink.pushPacket() in receiveFromPeer.
+pick 3bbb788bbd4896a866294eaa4e310afa79fc966c Ipv6Tunneling: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick 4771cbf28fb8de629061384ddc3a73e7f4ffe6e2 Ipv4Encap: Replaced send() calls with pushPacket() calls using PassivePacketSinkRef.
+pick 1762a71957ca7fecd9a2a619823b6fba50bac1cb ReceiveWithAcknowledge, SendWithAcknowledge: Replaced send() with pushPacket() calls.
+pick 31cc734e3fd048b34d75e537f0cec076fac18780 Ieee80211Mac, Ieee80211MgmtBase: Replaced send() with pushPacket() calls using PassivePacketSinkRef.
+pick 6466e1be7af80713b5e1172a72e27a945faf4c42 Ieee8022LlcSocketIo, IpSocketIo: Replaced send() with pushPacket() calls using PassivePacketSinkRef.
+pick 3e28b940b9b3998003ad550e5305eed825414988 Ieee8022LlcSocketPacketProcessor: Replaced send() with pushPacket() calls using PassivePacketSinkRef.
+pick 98f3167e41bd0a069e11caad96f83aabadf38cb8 Ospfv3Process: Replaced send() with splitterOutSink.pushPacket() in sendPacket.
+pick 9b6ea6f0c43b0b0a9b1a1bde7dd34f77a4cd5b82 TcpLwip: Replaced send() with ipOutSink.pushPacket() using PassivePacketSinkRef.
+pick 654a459f63f4cb90c4b78d639112cc33ae77277a Ipv6NeighbourDiscovery: Replaced send() with ipv6OutSink.pushPacket() using PassivePacketSinkRef.
+pick 796891ca668b5e0eea5b85646105b2f39135820a xMIPv6: Replaced send() with toIpv6Sink.pushPacket() using PassivePacketSinkRef.
+pick 4ab57da0bc1b4ef1659a7b1f9c607d285017497c EigrpIpv4Pdm, EigrpIpv6Pdm: Replaced send(pk, SPLITTER_OUTGW) with splitterOutSink.pushPacket() using PassivePacketSinkRef.
+pick 87d30fb7409fd87fa223933cbf66fa781c5a36ad all: Added optional yieldBeforePush() calls at converted synchronous packet push call sites.
+pick e70a0eb1b85daf5a5891925414061c39aea617cb common: Added coroutine based event execution for the simulation continuation machinery.
+fixup edfcaec00a38a26cc2d44fa9cdc7cb4fb9424fb7 todo6
+pick ac41438412b394614f384c4bbb9a6237ce754ff3 Ieee80211Mac: Fixed the module interface lookup for management frames.
+pick d13fa0b8c6b56cd57600d2adfb589a8603a16409 Icmp, Icmpv6, Ipv4, Ipv6, Udp, Tcp: Replaced ICMP error indication messages between network and transport layers with direct method calls.
+fixup 64aea9c7f428572e6777005728d1ea140cec4c79 todo7
+fixup 731a2953f7077f900d2e280dd1065e8eba85e85d Udp: Fixed ICMP module lookup to use the concrete module interface.
+fixup ea55e96304cbf450859b3e7045eb80ee61d56520 Ipv4, Ipv6: Fixed ICMP error indication delivery to transport protocols.
+pick f95ddf592f14086699f4834c5eb42ba287742a1f InterpacketGapInserter: Documented timing edge cases around zero-duration packets and signal ordering.
+pick 7a9a579a8399cebe6d547a81feac51d788320698 Tests: Followed method call logging changes in queueing gate tests.
+pick 48fc9fbafeec4428fd9bcdf7da841a4cdfe5cc73 Tests: Updated TCP algorithm test goldens to current scalar formatting.
+pick be725f34d0a54b196eef9c8393b5b651159a9cec Udp: Completed the socket command conversion to direct method calls.
+pick 7c43f67fda518c0c80d7d3c1cf45ba7ae98764cb Tcp: Converted the socket destroy command to a direct method call.
+fixup -C 082bed9d4d5552786f020f373c30eac68a5ae4a2 Tcp: Converted remaining socket commands to direct method calls.
+pick 3c1feee9d657cdefae1dbeba8a03e22d70492fdf Sctp: Converted remaining socket commands to direct method calls.
+pick 85b57de4ea7449e4e1c82d7fe1cfdad518395f4a Tun: Converted socket close and destroy commands to direct method calls.
+pick 52e588c7ef1d3798cbf3a8fdc237096cdf38556b Quic: Converted the socket communication to the new intra-node architecture.
+pick 7c61d4083b41385be14c93779b06b5d6d3f14b02 BridgingLayer: Forward unclaimed module interface lookups to the layer below.
+pick 2963c688074d894aa82e048872ab2a30cc60a1a3 Tests: Added switch relaying test for ethertypes unknown to INET.
+pick 017fac438c397bb2a92e6f61732d6bab74c8675c Tests: Added protocol-path insertion tests.
+pick 80b2db9eda7c1a6c4956c18dc02af5dc8b0a4744 Added the branch completion plan, decision log and test artifacts.
+fixup 79418bf8c8952ceae8612972f658772144d57912 Updated the completion plan: Phase 1 complete.
+fixup 2586b3e0a67e721f2c2301fde55153d179601b6e Updated the completion plan: Phase 2 rewrite maps and tooling.

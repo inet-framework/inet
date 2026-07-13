@@ -1,0 +1,29 @@
+{
+ "expect_subject": "Fixed 802.11 module interface lookup.",
+ "pieces": [
+  {
+   "message": "common: Added coroutine based event execution for the simulation continuation machinery.\n\nThe machinery is disabled by default: installCoroutineEventExecution() is\nnot called and the setEventExecutor() calls are commented out. It can be\nused to recreate pre-refactoring event trajectories for verification\npurposes.",
+   "files": {
+    "src/inet/common/CoroutineEventExecution.cc": "all",
+    "src/inet/common/CoroutineEventExecution.h": "all",
+    "src/inet/common/FunctionalEvent.cc": "all",
+    "src/inet/common/SimulationContinuation.cc": "all",
+    "src/inet/common/SimulationContinuation.h": "all"
+   }
+  },
+  {
+   "message": "Ieee80211Mac: Fixed the module interface lookup for management frames.",
+   "files": {
+    "src/inet/linklayer/ieee80211/mac/Ieee80211Mac.cc": "all",
+    "src/inet/linklayer/ieee80211/mac/Ieee80211Mac.h": "all",
+    "src/inet/linklayer/ieee80211/mac/Ieee80211Mac.ned": "all",
+    "src/inet/linklayer/ieee80211/mgmt/IIeee80211Mgmt.ned": "all",
+    "src/inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAdhoc.ned": "all",
+    "src/inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.ned": "all",
+    "src/inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApSimplified.ned": "all",
+    "src/inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.ned": "all",
+    "src/inet/linklayer/ieee80211/mgmt/Ieee80211MgmtStaSimplified.ned": "all"
+   }
+  }
+ ]
+}

@@ -1,0 +1,438 @@
+# Complete `topic/infrastructure` and make it merge-ready onto `master`
+
+**Repo / worktree:** `/home/levy/workspace/inet-infrastructure` (branch `topic/infrastructure`)
+**Goal:** settle remaining open questions, clean up history, rebase onto `master`, pass full
+regression, ready to merge.
+
+> This plan file is intentionally **untracked** — it must not land on the branch (the branch is
+> destined for master; `__TODO` is being removed for the same reason). It survives rebases.
+
+## Current state (facts, 2026-07-02)
+
+- Branch `topic/infrastructure` @ `7c0ff8e19f` (todo9, 2026-04-30).
+- **115 commits ahead / 374 behind** `master` @ `1bd6b4b1fa` (2026-07-01).
+  Merge-base: `47adf296fb` (OMNeT++ 6.4-era master).
+- Diff vs master: **636 files, +8937 / −4443**, concentrated in `src/inet` (551 files),
+  `tests/module` (40), `tests/queueing` (14), `tests/protocol` (11).
+- Conflict surface vs master (git merge-tree dry run): **76 files**, including core files
+  (`Ipv4.cc`, `Ipv6.cc`, `MessageDispatcher.cc`, `Ieee8022Llc.cc`, BGP, NetPerfMeter, …).
+- Branch themes:
+  1. `IModuleInterfaceLookup` gate-chain lookup; `MessageDispatcher` reimplemented on it;
+     obsolete dispatch mechanisms/parameters removed.
+  2. `IProtocolRegistrationListener` / `IInterfaceRegistrationListener` **removed entirely**;
+     automatic upper-layer protocol learning added.
+  3. `send()` → `pushPacket()` via `PassivePacketSinkRef` across ~40 protocol modules.
+  4. Sockets call protocol modules directly (commands = C++ calls, callback interfaces);
+     no more command messages.
+  5. New suspend/resume machinery: `SimulationContinuation`, `CoroutineEventExecution`,
+     `FunctionalEvent`, global `scheduleAt()`/`scheduleAfter()` lambda helpers.
+  6. Fingerprint-preserving fixture updates (`initialProductionOffset = 0s`, EV-output
+     expectations) across tests/examples/showcases.
+- Loose ends: 9 `todoN` fixup commits at the tip (todo7 partially reverts todo3's Tcp change);
+  `__TODO` file committed as todo9 holding the open-questions notes.
+- **Companion OMNeT++ branch**: `/home/levy/workspace/omnetpp` is on `topic/inet-infrastructure`
+  @ `dd8d2f278e` — **13 ahead / 16 behind** `omnetpp-6.x`. Mixed content: a hard INET coupling
+  commit (`dc427ca596`, new `csimulation.h`/`cenvir.h` APIs), real fixes (cCoroutine mmap stack
+  guard, `cEndSimulationEvent::dup`), fingerprint-machinery changes (same-simtime event sorting),
+  debugging aids ("log when generating random numbers", "1/1000 random time perturbation",
+  "don't share parameter impls"), and a "Temporary:" tip commit (zero-delay send detector).
+  This branch needs its own disposition (D6) — INET merge is blocked on it.
+
+## Decision log (settle in Phase 1, record outcomes here)
+
+| # | Question (from `__TODO` tail) | Decision | Follow-up |
+|---|---|---|---|
+| D1 | MessageDispatcher can't forward packets from link/upper-layer protocols to the **bridging layer by default** — acceptable? What config/doc is required? | **DECIDED 2026-07-14 (user interview).** (1) R1 confirmed: the from-above contract is interface-addressed packets (`InterfaceReq`) + MAC-sublayer service requests + `IEthernet` lookups; anything else failing is a modelling error, BUT the accept set is incomplete — must also accept **IEEE 802.1 tag-family service requests (802.1Q, 802.1R, …)** whose handler modules live inside the bridging layer. (2) R2 confirmed: **sibling-wins** fallback capture from below is the intended precedence. (3) Dispatcher ambiguity: **pure fail-loud** — remove the non-dispatcher-preference KLUDGE, fix dependent networks at source. (4) `hasSocketSupport` **opt-in is correct**; improve the failure mode to an actionable error. The stale `__TODO` dispatch claims retire once (1) lands. | Work items → 1.7 |
+
+### 1.7 — D1 follow-up implementation
+- [x] 1.7.1 DONE `fe75bef16a` — BridgingLayer upperLayerIn: default case becomes "forward the
+      lookup down the lowerLayerOut chain with original arguments" instead of returning
+      nullptr (D1+D4 decision: forwarding = true bypass; the 802.1 handlers sit between
+      bl and li and answer for themselves, as do unknown user protocols). Explicit claims
+      (ethernetMac request, InterfaceReq, IEthernet) stay. R2 indication capture from
+      below stays untouched. Proving tests: 802.1Q socket app above bridging + an
+      unknown-protocol pair straddling the bridging layer.
+- [x] 1.7.2 DONE `1dd0250e64` — **decision amended by user during sweep:** removing the tie-break outright broke 17 tests structurally (the li↔bl diamond makes dispatcher proxy-answers duplicate direct claims). Reinstated as a DOCUMENTED precedence rule: a module's direct claim shadows a dispatcher's transitive claim; direct-vs-direct and dispatcher-vs-dispatcher stay hard errors; scanning strengthened (continue, not break). Was: remove the KLUDGE
+      tie-break → full suites + mpls/quic/tsn example sweep → fix revealed ambiguities at
+      their source (each is a modelling error by decision (3)).
+- [x] 1.7.3 DONE `992b426b67` (also fixed the identical failure shape in Ieee8021qSocket) — Raw-socket use without `hasSocketSupport`: fail with an error
+      naming the parameter instead of a bare lookup failure.
+- [x] 1.7.4 DONE `06df44b377` — Replace the `TODO???` in IModuleInterfaceLookup.cc:21 with the real
+      matching rationale (Tcp's ipIn declares `protocol=tcp; service=indication` — the
+      searcher resolves the payload protocol before the lookup).
+- [x] 1.7.5 DONE `970383a539` (relays Protocol::unknown/0x86F0 frames via broadcast; not delivered locally) — D2 proving test: a frame with an ethertype unknown to INET is
+      relayed through a default EthernetSwitch (MAC-table + broadcast fallback), and NOT
+      delivered locally.
+- [x] 1.7.6 DONE `38e737a313` — all three shapes pass with NO missing hooks (host: @reconnect subclass per FlowMeasurementShowcase pattern; switch: BridgingLayer's processingDelayLayer slot via TsnSwitch; PcapRecorder: built-in signal-based params + computed FCS mode). Suite: 272/272. — D3/D5(a) proving tests, all three shapes:
+      (i) in-path measurement layer spliced between protocol modules, (ii) signal-based
+      PcapRecorder, each verified in (iii) both a StandardHost (transport↔network
+      boundary) and a switch (around the bridging layer). Assertion: simulation outcome
+      identical to the uninstrumented run (same app-level output, sockets keep working).
+| D2 | **Ethernet switch doesn't forward all protocols encapsulated in Ethernet frames by default** — problem or documented behavior change? | **DECIDED 2026-07-14: closed as satisfied-by-design** — switches never decapsulate by default (encap typename empty), the relay forwards by MAC table regardless of ethertype; local delivery = own MAC + reserved group MACs + sibling-claimed protocols (R2). Registration-era artifact. | Proving test → 1.7.5 (unknown-ethertype frame relayed through a default switch). |
+| D3 | How do socket bind/open/close/configure commands pass **through/around queueing-like modules**? | **DECIDED 2026-07-14: mechanism verified** — commands are direct C++ calls that never touch the packet path; queueing modules forward lookups declaratively (`@interface(forward=out)`). | Proving tests → 1.7.6: ALL THREE shapes (user): in-path measurement layer spliced between protocol modules; signal-based PcapRecorder; each in BOTH a StandardHost (transport↔network) and a switch (around bridging). |
+| D4 | Bridging layer **bypass connection** — required to be present? Where? | **DECIDED 2026-07-14 (user interview): no physical bypass connection, ever.** The architectural model: lookup and use are separate — a component that FORWARDS a lookup steps out of the data path entirely (the returned pointer bypasses it; it is not notified on use). Each component autonomously claims/forwards/rejects lookups; the bridging layer is not special. Bypass = lookup forwarding semantics. Failed lookup = hard error. The `__TODO` "bypass connection must be present" requirement is retired as satisfied-by-design. | 1.7.1 generalized accordingly; document the model prominently in Phase 5. |
+| D5 | `__TODO` "Requirements" block: which are met, which need tests. | **DECIDED 2026-07-14 (collapsed):** (a) → D3 tests (1.7.6); (b) retired — no bypass connection by design (D4); (c) satisfied-by-design (D2) + test 1.7.5; (d) settled — `hasSocketSupport` is a feature toggle, not dispatch config (D1.4), with an improved error (1.7.3). | — |
+| D6 | **Companion omnetpp branch disposition**. Coupling analysis (0.1, verified): hard requirements are `4f52bcee` (adds fields to `cSingleFingerprintCalculator` — INET subclasses it → header/lib ABI must match; also changes same-simtime fingerprint sorting semantics) and `dc427ca5` (`cSimulation::setEventExecutor` — only needed to activate the dormant verification mode, see D9). | **DECIDED 2026-07-13 (user):** `4f52bcee` fingerprint sorting is a **temporary verification measure** — it exists so baseline fingerprints stay comparable across the refactor; it gets **dropped when the INET changes land**. All companion commits stay on the separate branch; **nothing is pushed to omnetpp-6.x now**; revisit at landing time. | Phase 4 consequences: (a) fingerprint parity verification runs against `topic/inet-infrastructure-clean`; (b) NEW final step — after parity is verified, regenerate final INET fingerprint baselines against **stock omnetpp-6.x** (rebuild INET against it; the sorting commit is gone at landing); (c) Phase 5 adds a "builds+runs against stock omnetpp-6.x" gate. |
+| D9 | **Dormant trajectory-verification machinery disposition**: `SimulationContinuation` + `CoroutineEventExecution` + `yieldBeforePush()` at ~90 call sites (global flag `yieldBeforePushPacket`, default false; recreates pre-refactor event trajectories). Currently non-functional: `installCoroutineEventExecution()` has no callers and its body is commented out; needs omnetpp `dc427ca5`. (`FunctionalEvent` 0-delay lambda events are LIVE production code and stay regardless.) | **DECIDED 2026-07-02: defer to Phase 5** — keep dormant through Phase 4 (may help fingerprint triage), decide strip-vs-keep in Phase 5 cleanup. | Phase 2: introduce machinery already-disabled (todo2 standalone, todo6 folded so no enable→disable churn); accept a possible second history pass in Phase 5 if the decision is "strip". |
+| D7 | **82 modules** stub the packet-streaming API as `pushPacketStart/Progress/End { throw cRuntimeError("TODO"); }`. Acceptable for merge (explicit error, streaming unused on those paths), or replace with a proper "packet streaming not supported" error / base-class default? | _open_ | |
+| D8 | **MPLS has no `lookupModuleInterface` impl and no `@interface` NED properties** — `__TODO` listed MPLS-layer transparency as a problem; looks unaddressed. Verify LDP/RSVP-TE scenarios work (tests/module mpls, examples), or implement lookup in `Mpls`. | **RESOLVED 2026-07-13: implemented.** Confirmed broken (LDP crashed at init; zero MPLS coverage in tests/module). Fixed in 4 commits: `2f6c9f10cc` Mpls lookup (sink-style: accepts what the other side accepts, plus mpls-labeled from below); `f4f8c8f3b2` Udp socket-option direct-call completion (8 remnant command messages) + close() null guard; `e409faa29f` Tcp destroy() direct call with no-resurrect semantics; (uses `075993e404`-pattern concrete lookups). All 7 examples/mpls simulations (ldp, net37, 5× testte RSVP-TE) run 30s clean. | Add an MPLS module test in Phase 4 (suite has zero coverage); remnant sweep of other socket classes (Tcp 4 more, Sctp 7, Quic 6, L3 4, Tun 2 `new Request(` sites) delegated below. |
+
+### 0.5 findings — `__TODO` Problems/Solutions vs implementation (verified 2026-07-02)
+
+Resolved at mechanism level (evidence checked in code):
+- *Non-transparent bridging breaks registration/dispatching* → registration removed entirely;
+  `BridgingLayer::lookupModuleInterface` claims only `ethernetMac`/`InterfaceReq` requests and
+  transparently forwards everything else (BridgingLayer.cc:20-48).
+- *In-path module insertion breaks dispatching* → queueing bases declare declarative
+  transparency: `@interface[IPassivePacketSink](forward=out)` on `PacketDelayerBase`,
+  `PacketSchedulerBase`, etc.; `FlowMeasurementRecorder` implements lookup in C++. Needs the
+  D5(a) proving test, but the mechanism is there.
+- *Socket commands can't pass queueing modules* → moot: commands are direct C++ calls now
+  (e.g. `TcpSocket::close()` → `tcp->close(connId)`); only packets traverse gates.
+- *Queueing modules don't handle messages* → moot: no command messages remain.
+- *Sync-vs-async reordering (send-then-close, configure-radio-then-send)* → everything
+  synchronous: `pushPacket` + direct calls; `ConfigureRadioCommand` message classes deleted.
+- Old-mechanism remnants: none (remaining `registerProtocol*` hits are the unrelated
+  dissector/printer registries).
+
+Still open / new review items:
+- D1 note: `MessageDispatcher::lookupModuleInterface` accepts any `IPassivePacketSink` lookup
+  it can satisfy downstream (fan-out over all other gates) and **errors on ambiguity**, with a
+  self-labelled `KLUDGE` preferring non-dispatcher candidates (MessageDispatcher.cc:179-192).
+  Whether the `__TODO` claim "dispatcher can't forward to bridging layer by default" is still
+  true needs a runtime check → fold into D1.
+- Unexplained-acceptance TODO in the design comment: "Ipv4 -> Tcp: Tcp accepts because TODO???"
+  (IModuleInterfaceLookup.cc:21) → answer during D1 discussion, fix comment.
+- Individual new TODOs to triage in Phase 4.3: "tx end emit signal earlier than
+  handlePushPacketProcessed" ordering note, a "TODO leak", NetPerfMeter-copied
+  `queueInfo->setUserId` "seems wrong!".
+
+## Phase 0 — Inventory & baseline  _(mostly delegated)_
+
+- [x] 0.1 **[sonnet]** OMNeT++ requirement determined: companion branch
+      `topic/inet-infrastructure` required; coupling table in `phase0/omnetpp-coupling.md`;
+      verdict folded into D6/D9. Verified: fresh build, coupling claims spot-checked.
+- [x] 0.2 **[sonnet]** Branch builds green, release + debug (`out/clang-{release,debug}` built
+      2026-07-02; only pre-existing `-Wdeprecated-this-capture` warnings, 15/16). Logs in
+      `phase0/inet-build-{release,debug}.log`.
+- [!] 0.3 **Baseline INVALID — blocked on environment decision.** 2nd attempt completed
+      (results in `plan/artifacts/phase0/smoke-*.log`, `smoke-summary.md`) but is unusable
+      as a reference, for two independently verified reasons:
+      1. **Wrong runner**: the agent hand-rolled per-test `opp_test -p <name>/<name>_dbg`
+         invocations; queueing 0/57 and protocol 0/13 all failed on NED resolution — an
+         invocation artifact. Canonical runner is **opp_repl** (`run_opp_tests`,
+         opp_repl/test/opp.py) — the per-suite `runtest` scripts were removed in Oct 2024
+         (`b40acc079f`). Historic form for reference: shared `work` project +
+         `opp_test run -p work_dbg -a "--check-signals=false -lINET -n ../../../../src:."`.
+      2. **omnetpp time-parameter jitter**: companion-branch commit `3b8a3ea1` (+`d68f116c`,
+         `948f0e89`) multiplies EVERY unit-`s` double parameter by uniform(0.999, 1.001),
+         unconditionally (verified in cdoubleparimpl.cc on the branch). All 17 unit-test
+         failures (Clock/Oscillator exact-output) are consistent with this; the 195/268
+         module failures are likely dominated by it too. NO exact-output baseline is
+         meaningful on this omnetpp build.
+      Usable data points from the run: build OK, tests/packet PASSES, unit 59/76 with all
+      failures in jitter-sensitive Clock/Oscillator.
+      **Re-run prerequisites:** (a) cleaned omnetpp without the debug-aid commits (D6-lite),
+      rebuilt; (b) opp_repl as the runner (same as Phase 4 CI → comparable results).
+
+### Environment fix (DONE 2026-07-02) — cleaned omnetpp branch
+
+**`omnetpp/topic/inet-infrastructure-clean`** created (user-approved) in
+`/home/levy/workspace/omnetpp`, now checked out there. 8 commits over the 6.x merge-base
+(`cadfe143d1`), rebased-dropping 5 debug aids from the companion branch:
+- DROPPED: `3b8a3ea1` (±0.1% time-param jitter), `d68f116c` (jitter exemptions),
+  `948f0e89` (no param-impl sharing), `1314ecc2` (RNG logging), `dd8d2f27`
+  ("Temporary:" zero-delay send detector).
+- KEPT (new SHAs after rebase): `8271a475cf` (EventExecutor API — was `dc427ca5`; one
+  conflict resolved: dead commented-out RNG-log line in mersennetwister.h removed),
+  unitconversion test tweak, cCoroutine mmap guard, qtenv packet-log display,
+  `cEndSimulationEvent::dup`, qtenv executed-events GOI, eventlog non-cMessage fix,
+  `4f52bcee39` (same-simtime fingerprint sorting — fingerprint-relevant, D6).
+- Verified: jitter and detector code absent from sources; original branch untouched.
+- Consequence: header/ABI changes → omnetpp AND INET full rebuild required (running).
+
+- [x] 0.3 **BASELINE ESTABLISHED (3rd attempt, 2026-07-02)** — cleaned omnetpp + canonical
+      opp_repl runners (`opp_run_<suite>_tests --load @opp --no-build`, cwd = INET root).
+      Artifacts: `plan/artifacts/phase0/smoke2-*`. Results:
+      | suite | pass/total | note |
+      |---|---|---|
+      | unit | **76/76** | 17 Clock/Oscillator failures gone → jitter hypothesis CONFIRMED |
+      | packet | 1/1 | |
+      | queueing | **53/57** | NED-resolution 0/57 gone → invocation hypothesis CONFIRMED; 4 content failures: Gate_1..3, PeriodicGate_1 |
+      | protocol | **13/13** | |
+      | module | **89/268** | 179 real failures — see 0.6 |
+- [~] 0.6 **[sonnet, running]** Cluster the 179 module + 4 queueing failures by normalized
+      error signature → `plan/artifacts/phase0/failure-clusters.md`. Root cause already
+      identified for (at least) one major cluster, by inspection:
+      **Dispatcher-as-sink vs blind cast** — `MessageDispatcher::lookupModuleInterface`
+      correctly returns its own gate for `IPassivePacketSink` lookups it can satisfy
+      downstream (it forwards at push time), but `Udp::initialize` (Udp.cc:92-104, todo3-era)
+      looks up Icmp/Icmpv6 that way and `check_and_cast`s the returned owner to `Icmp*` →
+      init crash in any host with a transport-network dispatcher. Same anti-pattern may
+      exist in other modules (Tcp? Sctp?). Direct-call module discovery must look up the
+      concrete module C++ interface (dispatcher forwards those), not IPassivePacketSink.
+      Also: the branch's own `ModuleInterfaceLookup_*` tests fail → lookup semantics
+      drifted after they were written (todo-era dispatch-tag changes).
+
+> **Artifact location change (2026-07-02):** the session scratchpad `phase0/` dir was wiped
+> (all Phase 0 artifacts lost). Key content reconstructed from agent reports into
+> **`plan/artifacts/phase0/`** (untracked, inside the worktree): `squash-map-summary.md`
+> (table only — per-hunk blame evidence for todo1's 6-way split must be re-derived in
+> Phase 2), `omnetpp-coupling.md`. All future agents write artifacts here, never delete.
+- [x] 0.4 **[sonnet]** Squash map delivered: `phase0/squash-map.md` (358 lines). Highlights:
+      todo4→`08fd7785a4`, todo5→`72b2d288bc`, todo6→`62d30b2a6f` (all high conf);
+      todo7 into todo3 (NOT a full cancel: net effect makes `processIcmpv4/v6Error` public —
+      Icmp calls Tcp directly now); todo9 dropped. **Review flags for Phase 2 (opus):**
+      (a) todo1 needs a manual 6-way `git add -p` split across ~6 parents (low conf);
+      (b) todo2 (85-file `yieldBeforePush()` sweep) and todo6 (disables `setEventExecutor`)
+      are D9-coupled — their squash treatment depends on the dormant-machinery decision;
+      blame shows `62d30b2a6f` is itself a mixed commit (802.11 fix + coroutine toggle),
+      so if D9 = keep-dormant, introduce the machinery already-dormant instead of
+      enable-then-disable churn; (c) todo8 EthernetMacPhy comment-only hunk placement.
+- [x] 0.5 **[opus]** Verify `__TODO` "Problems/Solutions" sections are actually resolved by the
+      implementation → see "0.5 findings" under the Decision log. Added D6–D8.
+- **Checkpoint:** builds green on both compilers/modes chosen, baseline test table saved,
+  squash map approved.
+
+## Phase 1 — Settle open design questions  _(user + opus, no delegation)_
+
+- [ ] 1.1 Walk D1–D5 one at a time (grill-style), record decisions in the Decision log.
+- [ ] 1.2 For each decision requiring code: small focused commits on the branch tip
+      (**[opus]** design, **[sonnet]** mechanical edits where separable).
+- [ ] 1.3 For each `__TODO` Requirement: add/identify a test that proves it (esp. D3: insert
+      PcapRecorder/measurement module into a working sim, assert unchanged behavior).
+- **Checkpoint:** Decision log has no `_open_` rows; new tests pass locally.
+
+> **PHASE 1 COMPLETE (2026-07-14):** decision log fully settled (D1–D9), all follow-up
+> work items implemented and committed, proving tests in place, module suite **272/272**
+> (268 baseline + 4 new). Next: Phase 2 history rewrite.
+
+## Phase 1.5 — Fix baseline failures (NEW, before history cleanup)
+
+The branch tip is genuinely broken (179/268 module tests fail at minimum via the
+dispatcher-cast bug). "Complete the branch" means these must be fixed on the tip, BEFORE
+the Phase 2 history rewrite (fix commits get squashed into their logical parents there).
+
+- [x] 1.5.1 **[opus]** Triage done. Clusters (of 179+4): ①+⑤ 135× Udp→Icmp cast; ② 30×
+      LLC/ethernetmac over 802.11; ③ 7× stale protocol-ID goldens; ④ 6× Ipv6 bare gates;
+      ⑥ 1× tun-echo silent; queueing 4× method-call log lines.
+- [x] 1.5.2 **[opus]** Cluster ①+⑤ FIXED — `075993e404` "Udp: Fixed ICMP module lookup to use
+      the concrete module interface." (typeid(Icmp)/typeid(Icmpv6) lookups +
+      @interface[inet::Icmp(v6)] gate properties + null guards). Verified: DHCP_1,
+      udpapp_lifecycle_1 pass; ModuleInterfaceLookup_Udp now fails only on stale IDs (→③).
+      **Sweep audit CLEAN**: no other IPassivePacketSink-lookup+concrete-cast site exists;
+      `ModuleRefByGate<T>` is correct by construction (looks up typeid(T), dynamic_casts).
+- [x] 1.5.3a Cluster ② FIXED — `8360ab4d9a` "Ieee8022Llc: Fixed lower layer sink lookup to
+      work over non-Ethernet MACs." (reference by PacketProtocolTag(ieee8022llc) — the
+      uniform "modules below LLC accept LLC PDUs" contract; added missing pdu=ieee8022llc
+      to EthernetLayer.upperLayerIn). Verified: Ieee80211_1, lifecycle_WirelessHost_1,
+      AODVSimpleTest pass; Ethernet guards (EtherHost_lifecycle, Ieee8021d-Rstp) stay green.
+- [x] 1.5.3b Cluster ④ FIXED — `8d111516b7` "Ipv6: Added missing IPassivePacketSink gate
+      interface declarations." (ndIn, upperTunnelingIn, lowerTunnelingIn, xMIPv6In were
+      bare). Verified: ICMPv6_delivery, IPv6_fragmentation, lo0_IPv6 pass.
+- [x] 1.5.3c Queueing 4× FIXED — `2737d114b6` "Tests: Followed method call logging changes
+      in queueing gate tests." (%subst for method-call lines, per existing convention).
+- [x] 1.5.4 Cluster ③ FIXED — `e6fba31362` (%subst normalizes protocol IDs to `(N)` in all
+      9 stale `ModuleInterfaceLookup_*` goldens — 2 more than triage counted; durable
+      against renumbering incl. the rebase). Cluster ⑥ tun-echo: NOT a failure — the
+      earlier "silent" run was a runner-environment abort (missing setenv); passes cleanly.
+      Census after clusters ①②④ fixed: **249/268** (was 89/268).
+- [x] 1.5.4b Second-wave fixes from the census (things the init crashes had masked):
+      - SCTP forked-association crash (11 tests) FIXED — `fd329a752c` "Sctp: Fixed available
+        indication delivery to use the listening socket callback." (forked assoc has no
+        callback until accepted; SCTP_I_AVAILABLE now delivered via the listening
+        association's callback, with a clear error if unregistered). Verified on 4 incl.
+        sctp_congestion.
+      - tcp_algorithm goldens (6 tests) FIXED — `bde8051d8b`, adopted master's copies
+        verbatim (branch never touched them; master already has the 1e+06 scalar
+        formatting) → also pre-resolves 6 rebase conflicts.
+      - ICMPv6_delivery + UDPSocket_1: pass 3/3 and 1/1 in isolation — suspected
+        **concurrency flakes** of the census run, not branch bugs; re-check in 1.5.5.
+- [x] 1.5.5a smoke4 run (sonnet) — release build exit 0; unit 76/76, packet 1/1,
+      queueing **57/57**, protocol 13/13, module 255/268. Its 13 module failures:
+      11 SCTP estab-crash (next masked bug), UDPSocket_1, ICMPv6_delivery.
+- [x] 1.5.5b **CRITICAL PROCESS FINDING — env poisoning.** `source setenv` piped through
+      grep (or run without the mid-command `cd`) leaves `INET_ROOT` pointing at
+      `/home/levy/workspace/inet` (branch topic/gptp!); opp_repl also caches a project
+      registry ("overwriting previous environment" warning). Several earlier agent runs
+      AND several of my isolation re-runs tested the WRONG TREE — this manufactured the
+      phantom "flakes" (a test passes against the old wording/behavior of the gptp tree).
+      **Mitigation: all test runs now go through `plan/artifacts/runtests.sh`, which
+      sources both setenvs from the right cwds, echoes INET_ROOT and hard-fails unless it
+      is inet-infrastructure.** Optional BUILD=1 rebuilds debug first.
+- [x] 1.5.5c Second-wave fixes, all verified under gated env:
+      - SCTP accept-path callback (11 tests) FIXED — `a8ce3fe580`: estab indication falls
+        back to the listening association's callback; `SctpSocket::setCallback` now
+        registers the socket as the association's protocol-side callback (accepted
+        sockets never listen()/connect()); `Sctp::setCallback` tolerates missing assoc;
+        `SctpSocket::handleEstablished` forwards fork indications without adopting
+        connection params into the listening socket. **All 11 SCTP tests pass.**
+      - UDPSocket_1 golden FIXED — `57458b84b2` (EV wording: value/addr/localAddr).
+      - ICMPv6_delivery FIXED — `c03c0609db` "Ipv4, Ipv6: Fixed ICMP error indication
+        delivery to transport protocols." (same dispatcher-as-sink anti-pattern one layer
+        up, with SILENT drop via dynamic_cast; concrete-type lookups + @interface[
+        inet::Udp]/[inet::tcp::Tcp] on ipIn gates). IPv4 twin fixed preemptively.
+- [x] 1.5.5d Authoritative full module suite via runtests.sh: **268/268 PASS** (45s,
+      `plan/artifacts/phase0/smoke5-module.log`). With unit 76/76, packet 1/1,
+      queueing 57/57, protocol 13/13 (smoke4, same binary): **ALL FIVE SUITES GREEN.**
+- **Checkpoint MET (2026-07-13):** all suites green, 11 fix commits on the tip
+  (`075993e404..c03c0609db`), ready for Phase 2 placement after Phase 1 decisions.
+  Recurring root cause worth documenting in Phase 5: *"look up the concrete module type
+  for direct method calls; packet-sink lookups are answered by dispatchers"* — three
+  independent bug clusters (Udp→Icmp, LLC→MAC, Ipv4/Ipv6→transport) came from this.
+- [x] 1.5.6 **DONE (2026-07-13).** Socket command-message remnant conversion (survey:
+      `plan/artifacts/phase0/socket-remnants.md`; D8 work resolved the Udp set + Tcp
+      destroy; regression stayed 268/268 — smoke6). Remaining, per survey:
+      - **QUIC: entirely unconverted** (no C++ interface, raw cGate*, all 6 socket ops
+        crash) — **blocks Phase 4**: the opp_ci validation kind includes the 4 QUIC
+        validation inis. **[opus]** designs IQuic + module ref following ITcp; convert.
+        **Design (2026-07-13):** new C++ `inet::quic::IQuic` (contract/quic/IQuic.h):
+        bind/listen/connect/accept/recv/close, socketId-first signatures. `Quic`
+        implements them as thin adapters building the SAME legacy Requests + SocketReq
+        tag, Enter_Method, then `handleMessageFromApp(request); delete request;`
+        (mirrors handleMessageWhenUp's ownership). Packet-based ops (send,
+        connectAndSend) stay as-is — dispatchers handle packets. QuicSocket gets
+        `ModuleRefByGate<quic::IQuic> quic` resolved in setOutputGate (SctpSocket
+        pattern); the 6 Request methods become delegations; local socketState
+        transitions stay in the socket. `Quic.ned` appIn gains
+        `@interface[inet::quic::IQuic]` + `@interface[IPassivePacketSink](protocol=quic;
+        service=request)`, and `Quic` gets the trivial IPassivePacketSink implementation
+        (pushPacket → take + handleMessageWhenUp, Mpls-style) so the sink declaration is
+        honest. destroy() already throws not-implemented → leave. Verify with a QUIC
+        validation ini.
+        **Outcome:** implemented with three design refinements discovered while driving
+        the examples: (a) declarative gate properties replaced by a C++
+        `lookupModuleInterface` (dynamic internal UDP socket ids can't be expressed in
+        NED; C++ lookup supersedes properties anyway); (b) a protocol-side
+        `IQuic::ICallback::handleMessage` funnel delivers indications AND app-bound data
+        packets via 0s functional events (apps can't answer SocketInd lookups), with a
+        context switch into the app module; (c) the outgoing packet path converted from
+        raw send() to `PassivePacketSinkRef` push — **message dispatchers are push-in /
+        send-out; raw send() into one always crashes** (important architectural fact,
+        document in Phase 5). Commits: `cd8dfaa2ee` (Tcp), `e441f2ef9d` (Sctp),
+        `24d2d98e9d` (Tun), `5ae305f7ab` (Quic). All examples/quic configs run to
+        completion; module suite 268/268. Deferred (documented in socket-remnants.md):
+        L3Socket 4 sites (multi-receiver interface design), SCTP dead fd-variants +
+        requestStatus (no handler exists), QuicSocket::destroy (pre-existing
+        not-implemented).
+      - TcpSocket::read (crashes every autoRead=false app), setDscp/setTos (crash when
+        params nonzero) — **[sonnet]** mechanical.
+      - L3Socket bind/connect/close/destroy (PingApp on non-IPv4/v6) — **[sonnet]**.
+      - SctpSocket setStreamPriority/setRtoInfo mechanical; destroy/requestStatus are
+        double-faults (command kinds lack handlers entirely) — convert destroy with
+        Tcp-style no-resurrect, document/park requestStatus; listen2/connect2/accept2
+        dead variants — **[opus review]** on the judgment ones.
+      - TunSocket close/destroy — latent, **[sonnet]** mechanical.
+
+## Phase 2 — History cleanup (before rebase, on current base)
+
+- [x] 2.1 Safety: `topic/infrastructure-backup-20260714` created at pre-rewrite tip
+      `4861313719` (= origin/topic/infrastructure at rewrite start; verified equal).
+- [x] 2.2 **DONE (2026-07-14).** Executed as two passes (final sequence, evidence and
+      review deltas: `plan/artifacts/phase2/rewrite-sequence.md`, `split-map.md`,
+      `fix-placement-map.md`). Pass A: 10 in-place edit stops (4 splits via
+      `split_commit.py` + spec JSONs, tree-identity enforced per split; 6 rewords incl.
+      honest message for the mislabeled server-side sweep `4c5522a4b0`). Pass B: scripted
+      reorder+fixup rebase (`pass_b_todo.txt`: 126 picks, 27 fixups, todo9 dropped);
+      6 conflicts resolved (MrpRelay include ripple ×2, Mpls.h lookup-vs-sink ×2, SCTP
+      estab-indication vs streamThroughputVectors ×2), rerere recorded. Series: 140+1 →
+      154 (post-split) → **126** commits; no todoN/PIECE/nonconforming subjects remain.
+      Notable: todo1 split 10 ways (not ~6); todo3 alone never compiled (todo7 squash
+      was mandatory); 62d30b2a6f split so the D9 dormant coroutine machinery is one
+      droppable commit born-disabled.
+- [x] 2.3 **DONE (2026-07-14).** `git diff topic/infrastructure-backup-20260714` ==
+      `__TODO` removal only (excluding plan/, which gained the phase2 artifacts);
+      BUILD=1 runtests.sh: debug build clean, module suite **272/272 PASS**
+      (`phase2 smoke-postrewrite.log` in scratchpad). Note: the rebase checkout
+      dropped runtests.sh/runsim.sh exec bits — now committed as 100755.
+- **Checkpoint MET:** clean linear history (126 commits), no fixup/todoN commits, tree
+  identical modulo `__TODO`; force-pushed over `4861313719` (backup branch retained).
+
+## Phase 3 — Rebase onto master
+
+- [x] 3.1 **DONE (2026-07-14).** rerere on; inventory refreshed at rebase start: master
+      moved to 437 ahead, aggregate conflict surface 77 files
+      (`scratchpad phase2/merge-tree-files.txt`).
+- [x] 3.2 **DONE (2026-07-14).** Full `git rebase --empty=drop origin/master` of the
+      126-commit series; ~25 conflict stops, all resolved by opus (era-correct semantic
+      merges). Two commits legitimately vanished: the tcp_algorithm goldens
+      pre-resolution (became empty vs master, as designed) and the Ipv6Tunneling push
+      conversion (master's mipv6 rework Stage 5d DELETED the Ipv6Tunneling module).
+      **Key master-side reworks handled:** Icmpv6/Ipv6/TcpLwip/Ipv6NeighbourDiscovery/
+      Mipv6 moved SimpleModule→OperationalBase (lifecycle); xMIPv6 renamed to Mipv6 and
+      moved to netfilter hooks + extension-header handlers (several branch push-sites
+      moot); Ipv6 is tunneling-agnostic (no tunneling gates/refs); BGP rewrote socket
+      handling (_bgpSessions rename, setSocketListen deleted, message-driven socket
+      rebuild); Tcp split sendFromConn into sendToIp/sendToApp (branch's scheduleAfter
+      KLUDGE + yieldBeforePush applied to both); master's Udp SSM multicast fix,
+      Ipv6 extension-header ICMP-error guard, WATCH/WATCH_EXPR display refactors and
+      refreshDisplay removals all preserved. **Master features removed by the branch**
+      (→ WHATSNEW in 5.2): MessageDispatcher interfaceMapping/serviceMapping/
+      protocolMapping manual-configuration parameters (subsumed by lookup dispatch).
+      **Post-rebase repair pass** (2 edit stops): the IProtocolRegistrationListener
+      sweep extended to master-new/renamed modules (Mldv1, Mldv2, Pmipv6, Mipv6 —
+      rename detection had leaked a registerProtocol into Mipv6.cc); EtherHost_lifecycle
+      golden re-resolved (a scripted resolution had mis-asserted and staged markers —
+      caught, repaired in place; `git diff --check` now gates every staging).
+      **Deferred, recorded here:** (a) Mldv1/Mldv2/Pmipv6/Mipv6 lost their
+      registerProtocol dispatch wiring and are NOT yet adapted to lookup-based dispatch
+      — Phase 4 triage must wire @interface/lookups if MLD/MIPv6 tests demand delivery;
+      (b) MessageDispatcher.ned + Ipv4.ned doc blocks still describe the old
+      registration/mapping mechanism → Phase 5 doc rewrite; (c) xMIPv6's own
+      sendDelayed/send("toIPv6") sites remain unconverted (pre-existing branch
+      incompleteness, faithful to tip).
+- [ ] 3.3 **[sonnet]** Post-rebase build (release+debug) + smoke table; compare against 2.3
+      (272/272). Debug build + module suite RUNNING.
+- [ ] 3.4 **[opus]** Spot-review the rebased diff vs `topic/infrastructure-backup-20260714`
+      diff (both against their merge-bases) for accidental semantic drift in bucket (c) files.
+- **Checkpoint:** branch based on current master tip, builds green, smoke equal-or-better.
+
+## Phase 4 — Full regression
+
+- [ ] 4.1 **[sonnet]** Local suites: unit, module, packet, queueing, protocol, misc/leak.
+      Full logs to scratchpad; failure table per suite.
+- [ ] 4.2 **[sonnet]** Fingerprint tests (`tests/fingerprint`), all categories. Expect churn
+      from sync-communication event-order changes; produce a diff report:
+      *unchanged / changed-explainable / changed-unexplained / crashed*.
+- [ ] 4.3 **[opus]** Triage: every *changed-unexplained* and *crashed* fingerprint, every
+      failed test. Classify legit (update CSV/expectation with justification in the commit
+      message) vs bug (fix). Statistical tests as a second net for what `~tND` masks hide.
+- [ ] 4.4 **[sonnet]** opp_ci validation run, pinned to the exact commit SHA:
+      `submit_run(project='inet', kind='validation', git_ref=<SHA>, pins=['omnetpp=git@omnetpp-6.x'], isolation='none', toolchain='none')`
+      (coordinator `https://ci.omnetpp.dev/api`; worker "levy" is this machine — restart
+      `opp_ci-worker@levy.service` first if opp_repl changed).
+- [ ] 4.5 Fix → rerun loop until green. Fixes are amended into the logical commit while the
+      branch is still unpublished; separate commits only for genuinely new findings.
+- **Checkpoint:** all suites pass (or diffs justified + committed); opp_ci validation green.
+
+## Phase 5 — Final cleanup & merge prep
+
+- [ ] 5.1 **[sonnet]** Confirm `__TODO` gone from history; unresolved leftovers → GitHub
+      issues (draft texts for review, do not file without approval).
+- [ ] 5.2 **[opus+sonnet]** WHATSNEW + ChangeLog entries for the architectural change
+      (sonnet drafts from commit log, opus edits).
+- [ ] 5.3 **[sonnet→opus]** Commit-message review pass over the full series.
+- [ ] 5.4 **[opus]** Final full-diff review vs master (`/code-review` on the branch).
+- [ ] 5.5 **[user]** Merge decision (ff vs merge commit), push. Delete backup branch after.
+
+## Delegation & verification protocol
+
+- **Sonnet subagents:** builds, test runs, log parsing, fingerprint reruns/reports,
+  blame-mapping, fixture-conflict pre-resolution, draft texts. Each gets a narrow prompt,
+  writes artifacts (logs/tables) to the scratchpad, and reports paths + exit codes.
+- **Opus (main):** design decisions, squash map approval, bucket (c) conflict resolution,
+  failure triage, final review.
+- **Verification rule:** never trust a subagent summary — check exit codes, artifact files
+  exist, test counts match suite sizes before marking a step done.
+- Update checkboxes and the Decision log in this file as work proceeds; commits per completed
+  step (branch work), plan stays untracked.
+
+## Risks & mitigations
+
+| Risk | Mitigation |
+|---|---|
+| 374-commit rebase, 76-file conflict surface, revisited per commit | rerere; fixture regeneration instead of hand-merge; chunked rebase fallback; backup branch |
+| Fingerprint churn masks real regressions (`~tND`) | statistical tests + explicit *changed-unexplained* triage class |
+| OMNeT++ API coupling (coroutines/continuations) | Phase 0.1 pins the required omnetpp before anything else |
+| Sync-communication event reordering causes rare-path bugs (Enter_Method/take) | todoN commits show the pattern; grep-audit all `pushPacket` impls for `Enter_Method`+`take` as part of 4.3 |
+| Master keeps moving during the work | re-check `master..` delta before Phase 3 and again before merge; Phase 3–5 should be one focused push |

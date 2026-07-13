@@ -1,0 +1,17 @@
+{
+ "expect_subject": "Ieee8022Llc: Fixed lower layer sink lookup to work over non-Ethernet MACs.",
+ "pieces": [
+  {
+   "message": "PIECE 8360-a (fixup into 08fd7785a4)",
+   "files": {
+    "src/inet/linklayer/ieee8022/Ieee8022Llc.cc": "all"
+   }
+  },
+  {
+   "message": "PIECE 8360-b (fixup into 72b2d288bc)",
+   "files": {
+    "src/inet/linklayer/ethernet/modular/EthernetLayer.ned": "all"
+   }
+  }
+ ]
+}

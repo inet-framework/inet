@@ -1,0 +1,23 @@
+{
+ "expect_subject": "todo8",
+ "pieces": [
+  {
+   "message": "InterpacketGapInserter: Documented timing edge cases around zero-duration packets and signal ordering.",
+   "files": {
+    "src/inet/protocolelement/common/InterpacketGapInserter.cc": "all"
+   }
+  },
+  {
+   "message": "PIECE todo8-a (fixup into 3881df4100)",
+   "files": {
+    "src/inet/applications/tunapp/TunLoopbackApp.cc": "all"
+   }
+  },
+  {
+   "message": "PIECE todo8-b (fixup into todo1-J)",
+   "files": {
+    "src/inet/linklayer/ethernet/basic/EthernetMacPhy.cc": "all"
+   }
+  }
+ ]
+}
