@@ -32,36 +32,38 @@ void PcapReader::openPcap(const char *filename, const char *packetNameFormat)
     file = fopen(filename, "rb");
     if (file == nullptr)
         throw cRuntimeError("Cannot open pcap file [%s] for reading: %s", filename, strerror(errno));
-    struct pcap_hdr fh;
-    auto err = fread(&fh, sizeof(fh), 1, file);
+    auto err = fread(&fileHeader, sizeof(fileHeader), 1, file);
     if (err != 1)
         throw cRuntimeError("Cannot read fileheader from file '%s', errno is %u.", filename, (unsigned int)err);
-    if (fh.magic == 0xa1b2c3d4)
+    if (fileHeader.magic == 0xa1b2c3d4)
         swapByteOrder = false;
-    else if (fh.magic == 0xd4c3b2a1)
+    else if (fileHeader.magic == 0xd4c3b2a1)
         swapByteOrder = true;
     else
         throw cRuntimeError("Unknown fileheader read from file '%s'", filename);
     if (swapByteOrder) {
-        fh.version_major = swapByteOrder16(fh.version_major);
-        fh.version_minor = swapByteOrder16(fh.version_minor);
-        fh.thiszone = swapByteOrder32(fh.thiszone);
-        fh.sigfigs = swapByteOrder32(fh.sigfigs);
-        fh.snaplen = swapByteOrder32(fh.snaplen);
-        fh.network = swapByteOrder32(fh.network);
+        fileHeader.version_major = swapByteOrder16(fileHeader.version_major);
+        fileHeader.version_minor = swapByteOrder16(fileHeader.version_minor);
+        fileHeader.thiszone = swapByteOrder32(fileHeader.thiszone);
+        fileHeader.sigfigs = swapByteOrder32(fileHeader.sigfigs);
+        fileHeader.snaplen = swapByteOrder32(fileHeader.snaplen);
+        fileHeader.network = swapByteOrder32(fileHeader.network);
     }
 }
 
-std::pair<simtime_t, Packet *> PcapReader::readPacket()
+std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
 {
     if (file == nullptr)
         throw cRuntimeError("Cannot read packet: pcap input file is not open");
     if (feof(file))
-        return { -1, nullptr };
+        return { PcapRecordTime(), nullptr };
     struct pcaprec_hdr packetHeader;
     auto err = fread(&packetHeader, sizeof(packetHeader), 1, file);
-    if (err != 1)
+    if (err != 1) {
+        if (feof(file)) // clean end of file: no more records
+            return { PcapRecordTime(), nullptr };
         throw cRuntimeError("Cannot read packetheader, errno is %u.", (unsigned int)err);
+    }
     uint8_t buffer[1 << 16];
     memset(buffer, 0, sizeof(buffer));
     err = fread(buffer, packetHeader.incl_len, 1, file);
@@ -73,7 +75,7 @@ std::pair<simtime_t, Packet *> PcapReader::readPacket()
         packetHeader.orig_len = swapByteOrder32(packetHeader.orig_len);
         packetHeader.incl_len = swapByteOrder32(packetHeader.incl_len);
     }
-    simtime_t time = SimTime(packetHeader.ts_sec, SIMTIME_S) + SimTime(packetHeader.ts_usec, SIMTIME_US);
+    PcapRecordTime time { packetHeader.ts_sec, packetHeader.ts_usec };
     std::vector<uint8_t> bytes;
     const Protocol *protocol = nullptr;
     int offset = 0;
@@ -89,6 +91,15 @@ std::pair<simtime_t, Packet *> PcapReader::readPacket()
         }
         case 1: protocol = &Protocol::ethernetMac; break;
         case 105: protocol = &Protocol::ieee80211Mac; break;
+        case 127: {
+            // DLT_IEEE802_11_RADIO: a variable-length radiotap header precedes the
+            // 802.11 MAC frame. Its total length is in bytes 2-3 (it_len), stored
+            // little-endian regardless of the pcap byte order -- strip it to reach
+            // the MAC frame.
+            offset = buffer[2] | (buffer[3] << 8);
+            protocol = &Protocol::ieee80211Mac;
+            break;
+        }
         case 204: protocol = &Protocol::ppp; break;
     }
     bytes.resize(packetHeader.orig_len - offset);
@@ -100,7 +111,9 @@ std::pair<simtime_t, Packet *> PcapReader::readPacket()
     auto packet = new Packet(nullptr, data);
     if (protocol != nullptr)
         packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
-    packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
+    // naming a packet requires dissecting it; only do so when a format was requested
+    if (packetNameFormat != nullptr)
+        packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
     return { time, packet };
 }
 
