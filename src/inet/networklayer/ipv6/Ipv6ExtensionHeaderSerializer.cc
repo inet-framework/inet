@@ -64,7 +64,11 @@ static void serializeIpv6TlvOptions(MemoryOutputStream& stream, const TlvOptions
 static void deserializeIpv6TlvOptions(MemoryInputStream& stream, TlvOptions& tlvOptions, B optionsLen)
 {
     b startPos = stream.getPosition();
-    while (stream.getPosition() - startPos < b(optionsLen)) {
+    // Stop on a read past the end of the stream: a malformed/truncated header whose
+    // declared options length exceeds the available bytes would otherwise spin forever
+    // here, because readByte() clamps the position at the end and returns 0 (== Pad1),
+    // so "position - startPos < optionsLen" would never become false.
+    while (stream.getPosition() - startPos < b(optionsLen) && !stream.isReadBeyondEnd()) {
         uint8_t type = stream.readByte();
         if (type == IPv6TLVOPTION_NOP1) {
             auto *opt = new TlvOptionBase();
