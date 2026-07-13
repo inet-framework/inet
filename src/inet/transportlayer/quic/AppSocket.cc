@@ -6,6 +6,7 @@
 //
 
 #include "AppSocket.h"
+#include "inet/common/FunctionalEvent.h"
 #include "QueueAppSocket.h"
 #include "inet/transportlayer/contract/quic/QuicCommand_m.h"
 #include "inet/common/socket/SocketTag_m.h"
@@ -98,7 +99,13 @@ void AppSocket::sendToken(std::string clientToken)
 void AppSocket::sendIndication(Indication *indication)
 {
     indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
-    this->quicSimpleMod->send(indication, "appOut");
+    if (callback != nullptr) {
+        // NOTE: the 0s delay preserves the event ordering of the replaced message send
+        auto callback = this->callback;
+        inet::scheduleAfter("handleIndication", 0, [=]() { callback->handleMessage(indication); });
+    }
+    else
+        this->quicSimpleMod->send(indication, "appOut");
 }
 
 void AppSocket::sendIndications(std::list<Indication *> indications)
@@ -111,7 +118,13 @@ void AppSocket::sendIndications(std::list<Indication *> indications)
 void AppSocket::sendPacket(Packet *pkt)
 {
     pkt->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
-    this->quicSimpleMod->send(pkt, "appOut");
+    if (callback != nullptr) {
+        // NOTE: the 0s delay preserves the event ordering of the replaced message send
+        auto callback = this->callback;
+        inet::scheduleAfter("handlePacket", 0, [=]() { callback->handleMessage(pkt); });
+    }
+    else
+        this->quicSimpleMod->send(pkt, "appOut");
 }
 
 void AppSocket::processAppCommand(cMessage *msg)

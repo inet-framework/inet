@@ -9,6 +9,7 @@
 #define INET_APPLICATIONS_QUIC_APPSOCKET_H_
 
 #include "Connection.h"
+#include "inet/transportlayer/contract/quic/IQuic.h"
 #include "UdpSocket.h"
 #include "Quic.h"
 
@@ -27,6 +28,7 @@ public:
     virtual ~AppSocket();
 
     virtual void processAppCommand(cMessage *msg);
+    virtual void setCallback(IQuic::ICallback *callback) { this->callback = callback; }
     virtual void sendEstablished();
     virtual void sendData(Ptr<const Chunk> data);
     virtual void sendIndication(Indication *indication);
@@ -60,6 +62,7 @@ public:
 private:
     int socketId;
     Quic *quicSimpleMod;
+    IQuic::ICallback *callback = nullptr;
     Connection *connection = nullptr;
     UdpSocket *udpSocket = nullptr;
 };

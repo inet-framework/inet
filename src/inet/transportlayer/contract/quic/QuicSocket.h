@@ -9,9 +9,13 @@
 #define __INET_QUICSOCKET_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ModuleRefByGate.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/quic/IQuic.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "QuicCommand_m.h"
 
 namespace inet {
@@ -27,7 +31,7 @@ namespace inet {
  * command packets such as QUIC_C_BIND to QUIC, and can also help you deal with
  * packets and notification messages arriving from QUIC.
  */
-class INET_API QuicSocket : public ISocket
+class INET_API QuicSocket : public ISocket, public quic::IQuic::ICallback
 {
 public:
     /**
@@ -125,6 +129,8 @@ public:
 private:
     int socketId;
     cGate *gateToQuic;
+    ModuleRefByGate<quic::IQuic> quic;
+    queueing::PassivePacketSinkRef sink;
 
     ICallback *cb = nullptr;
     State socketState;
@@ -166,9 +172,26 @@ public:
      *
      * @param The gate to QUIC.
      */
+    /**
+     * Protocol side callback: QUIC delivers indications and data packets for
+     * this socket through direct method calls instead of messages.
+     */
+    virtual void handleMessage(cMessage *msg) override {
+        // run the application code in its own module context: the call arrives
+        // from a functional event executing in the global context
+        cContextSwitcher switcher(check_and_cast<cModule *>(gateToQuic->getOwnerModule()));
+        processMessage(msg);
+    }
+
     void setOutputGate(cGate *toQuic)
     {
         gateToQuic = toQuic;
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::quic);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        quic.reference(toQuic, true, &dispatchProtocolReq);
+        sink.reference(toQuic, true, &dispatchProtocolReq);
+        quic->setCallback(socketId, this);
     }
 
     /**

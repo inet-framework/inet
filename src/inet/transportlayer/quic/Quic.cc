@@ -9,6 +9,8 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/packet/Message.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/transportlayer/contract/quic/QuicCommand_m.h"
 #include "UdpSocket.h"
 #include "AppSocket.h"
@@ -90,6 +92,118 @@ void Quic::handleTimeout(cMessage *msg)
 
         destroySockets(appSocket);
     }
+}
+
+void Quic::setCallback(int socketId, IQuic::ICallback *callback)
+{
+    Enter_Method("setCallback");
+    findOrCreateAppSocket(socketId)->setCallback(callback);
+}
+
+void Quic::bind(int socketId, const L3Address& localAddr, uint16_t localPort)
+{
+    Enter_Method("bind");
+    QuicBindCommand *ctrl = new QuicBindCommand();
+    ctrl->setLocalAddr(localAddr);
+    ctrl->setLocalPort(localPort);
+    Request *request = new Request("BIND", QUIC_C_CREATE_PCB);
+    request->setControlInfo(ctrl);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    handleMessageFromApp(request);
+    delete request;
+}
+
+void Quic::listen(int socketId)
+{
+    Enter_Method("listen");
+    Request *request = new Request("LISTEN", QUIC_C_OPEN_PASSIVE);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    handleMessageFromApp(request);
+    delete request;
+}
+
+void Quic::connect(int socketId, const L3Address& remoteAddr, uint16_t remotePort)
+{
+    Enter_Method("connect");
+    QuicOpenCommand *cmd = new QuicOpenCommand();
+    cmd->setRemoteAddr(remoteAddr);
+    cmd->setRemotePort(remotePort);
+    Request *request = new Request("CONNECT", QUIC_C_OPEN_ACTIVE);
+    request->setControlInfo(cmd);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    handleMessageFromApp(request);
+    delete request;
+}
+
+void Quic::accept(int socketId, int newSocketId)
+{
+    Enter_Method("accept");
+    QuicAcceptCommand *cmd = new QuicAcceptCommand();
+    cmd->setNewSocketId(newSocketId);
+    Request *request = new Request("ACCEPT", QUIC_C_ACCEPT);
+    request->setControlInfo(cmd);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    handleMessageFromApp(request);
+    delete request;
+}
+
+void Quic::recv(int socketId, uint64_t streamId, int64_t expectedDataSize)
+{
+    Enter_Method("recv");
+    QuicRecvCommand *cmd = new QuicRecvCommand();
+    cmd->setStreamID(streamId);
+    cmd->setExpectedDataSize(expectedDataSize);
+    Request *request = new Request("RECV", QUIC_C_RECEIVE);
+    request->setControlInfo(cmd);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    handleMessageFromApp(request);
+    delete request;
+}
+
+void Quic::close(int socketId)
+{
+    Enter_Method("close");
+    Request *request = new Request("CLOSE", QUIC_C_CLOSE);
+    request->addTag<SocketReq>()->setSocketId(socketId);
+    handleMessageFromApp(request);
+    delete request;
+}
+
+void Quic::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    if (gate->isName("appIn"))
+        handleMessageFromApp(packet);
+    else if (gate->isName("udpIn"))
+        handleMessageFromUdp(packet);
+    else
+        throw cRuntimeError("Unknown gate: %s", gate->getFullName());
+    delete packet;
+}
+
+cGate *Quic::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("appIn")) {
+        if (type == typeid(IQuic))
+            return gate;
+        if (type == typeid(queueing::IPassivePacketSink)) {
+            if (auto dispatchProtocolReq = dynamic_cast<const DispatchProtocolReq *>(arguments))
+                if (dispatchProtocolReq->getProtocol() == &Protocol::quic && dispatchProtocolReq->getServicePrimitive() == SP_REQUEST)
+                    return gate;
+        }
+    }
+    else if (gate->isName("udpIn")) {
+        if (type == typeid(queueing::IPassivePacketSink)) {
+            // packets coming up from UDP are addressed to this module's internal UDP sockets
+            if (auto socketInd = dynamic_cast<const SocketInd *>(arguments))
+                if (udpSocketIdUdpSocketMap.find(socketInd->getSocketId()) != udpSocketIdUdpSocketMap.end())
+                    return gate;
+        }
+    }
+    return nullptr;
 }
 
 void Quic::handleMessageFromApp(cMessage *msg)

@@ -45,7 +45,7 @@ void QuicSocket::sendToQuic(cMessage *msg)
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::quic);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
 
-    check_and_cast<cSimpleModule *>(gateToQuic->getOwnerModule())->send(msg, gateToQuic);
+    sink.pushPacket(check_and_cast<Packet *>(msg));
 }
 
 void QuicSocket::bind(L3Address localAddr, uint16_t localPort)
@@ -53,19 +53,13 @@ void QuicSocket::bind(L3Address localAddr, uint16_t localPort)
     this->localAddr = localAddr;
     this->localPort = localPort;
 
-    QuicBindCommand *ctrl = new QuicBindCommand();
-    ctrl->setLocalAddr(localAddr);
-    ctrl->setLocalPort(localPort);
-    Request *request = new Request("BIND", QUIC_C_CREATE_PCB);
-    request->setControlInfo(ctrl);
-    sendToQuic(request);
+    quic->bind(socketId, localAddr, localPort);
     socketState = BOUND;
 }
 
 void QuicSocket::listen()
 {
-    Request *request = new Request("LISTEN", QUIC_C_OPEN_PASSIVE);
-    sendToQuic(request);
+    quic->listen(socketId);
     socketState = LISTENING;
 }
 
@@ -74,12 +68,7 @@ void QuicSocket::connect(L3Address addr, uint16_t port)
     if (addr.isUnspecified())
         throw cRuntimeError("QuicSocket::connect(): unspecified remote address");
 
-    QuicOpenCommand *cmd = new QuicOpenCommand();
-    cmd->setRemoteAddr(addr);
-    cmd->setRemotePort(port);
-    Request *request = new Request("CONNECT", QUIC_C_OPEN_ACTIVE);
-    request->setControlInfo(cmd);
-    sendToQuic(request);
+    quic->connect(socketId, addr, port);
 
     socketState = CONNECTING;
 }
@@ -133,18 +122,12 @@ void QuicSocket::recv(int64_t length, uint64_t streamId)
     if (length < 0) {
         throw cRuntimeError("QuicSocket::recv(): negative length not allowed");
     }
-    QuicRecvCommand *cmd = new QuicRecvCommand();
-    cmd->setStreamID(streamId);
-    cmd->setExpectedDataSize(length);
-    Request *request = new Request("RECV", QUIC_C_RECEIVE);
-    request->setControlInfo(cmd);
-    sendToQuic(request);
+    quic->recv(socketId, streamId, length);
 }
 
 void QuicSocket::close()
 {
-    Request *msg = new Request("CLOSE", QUIC_C_CLOSE);
-    sendToQuic(msg);
+    quic->close(socketId);
     socketState = CLOSED;
 }
 
@@ -188,11 +171,7 @@ QuicSocket *QuicSocket::accept()
     newSocket->setOutputGate(gateToQuic);
     newSocket->bind(localAddr, localPort);
     EV_DEBUG << "QuicSocket::accept(): new socket created with socket ID " << newSocket->getSocketId() << endl;
-    Request *request = new Request("ACCEPT", QUIC_C_ACCEPT);
-    QuicAcceptCommand *cmd = new QuicAcceptCommand();
-    cmd->setNewSocketId(newSocket->getSocketId());
-    request->setControlInfo(cmd);
-    sendToQuic(request);
+    quic->accept(socketId, newSocket->getSocketId());
     return newSocket;
 }
 

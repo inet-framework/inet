@@ -11,6 +11,9 @@
 #include <omnetpp.h>
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/transportlayer/contract/quic/IQuic.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "Connection.h"
 #include "UdpSocket.h"
 #include "AppSocket.h"
@@ -25,9 +28,26 @@ namespace quic {
 class Connection;
 class UdpSocket;
 
-class Quic : public OperationalBase
+class Quic : public OperationalBase, public IQuic, public queueing::IPassivePacketSink, public IModuleInterfaceLookup
 {
   public:
+    virtual void setCallback(int socketId, IQuic::ICallback *callback) override;
+    virtual void bind(int socketId, const L3Address& localAddr, uint16_t localPort) override;
+    virtual void listen(int socketId) override;
+    virtual void connect(int socketId, const L3Address& remoteAddr, uint16_t remotePort) override;
+    virtual void accept(int socketId, int newSocketId) override;
+    virtual void recv(int socketId, uint64_t streamId, int64_t expectedDataSize) override;
+    virtual void close(int socketId) override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
+
     virtual ~Quic();
     virtual Connection *createConnection(UdpSocket *udpSocket, AppSocket *appSocket, L3Address remoteAddr, uint16_t remotePort);
     virtual UdpSocket *createUdpSocket();
