@@ -13,6 +13,7 @@
 #include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
 #include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -67,8 +68,27 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
     }
     else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ActionFrame>(header))
         ASSERT(packet->getDataLength() == b(0));
-    else if (dynamicPtrCast<const inet::ieee80211::Ieee80211MgmtHeader>(header))
-        callback.dissectPacket(packet, &Protocol::ieee80211Mgmt);
+    else if (auto mgmtHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211MgmtHeader>(header)) {
+        // deserialize the management-frame body as the concrete subtype named by the
+        // header, so its serializer is exercised instead of leaving the body as raw
+        // bytes; unknown subtypes fall back to the generic mgmt dissector
+        using namespace inet::ieee80211;
+        if (packet->getDataLength() > b(0)) {
+            switch (mgmtHeader->getType()) {
+                case ST_BEACON: callback.visitChunk(packet->popAtFront<Ieee80211BeaconFrame>(), &Protocol::ieee80211Mgmt); break;
+                case ST_PROBEREQUEST: callback.visitChunk(packet->popAtFront<Ieee80211ProbeRequestFrame>(), &Protocol::ieee80211Mgmt); break;
+                case ST_PROBERESPONSE: callback.visitChunk(packet->popAtFront<Ieee80211ProbeResponseFrame>(), &Protocol::ieee80211Mgmt); break;
+                case ST_ASSOCIATIONREQUEST: callback.visitChunk(packet->popAtFront<Ieee80211AssociationRequestFrame>(), &Protocol::ieee80211Mgmt); break;
+                case ST_ASSOCIATIONRESPONSE: callback.visitChunk(packet->popAtFront<Ieee80211AssociationResponseFrame>(), &Protocol::ieee80211Mgmt); break;
+                case ST_REASSOCIATIONREQUEST: callback.visitChunk(packet->popAtFront<Ieee80211ReassociationRequestFrame>(), &Protocol::ieee80211Mgmt); break;
+                case ST_REASSOCIATIONRESPONSE: callback.visitChunk(packet->popAtFront<Ieee80211ReassociationResponseFrame>(), &Protocol::ieee80211Mgmt); break;
+                case ST_AUTHENTICATION: callback.visitChunk(packet->popAtFront<Ieee80211AuthenticationFrame>(), &Protocol::ieee80211Mgmt); break;
+                case ST_DEAUTHENTICATION: callback.visitChunk(packet->popAtFront<Ieee80211DeauthenticationFrame>(), &Protocol::ieee80211Mgmt); break;
+                case ST_DISASSOCIATION: callback.visitChunk(packet->popAtFront<Ieee80211DisassociationFrame>(), &Protocol::ieee80211Mgmt); break;
+                default: callback.dissectPacket(packet, &Protocol::ieee80211Mgmt); break;
+            }
+        }
+    }
     // TODO else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ControlFrame>(header))
     else
         ASSERT(packet->getDataLength() == b(0));
