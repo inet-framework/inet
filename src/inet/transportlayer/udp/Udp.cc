@@ -479,6 +479,11 @@ void Udp::setBroadcast(SockDesc *sd, bool broadcast)
     sd->isBroadcast = broadcast;
 }
 
+void Udp::setMulticastOutputInterface(int socketId, int interfaceId)
+{
+    setMulticastOutputInterface(getOrCreateSocket(socketId), interfaceId);
+}
+
 void Udp::setMulticastOutputInterface(SockDesc *sd, int interfaceId)
 {
     sd->multicastOutputInterfaceId = interfaceId;
@@ -492,6 +497,11 @@ void Udp::setMulticastLoop(int socketId, bool loop)
 void Udp::setMulticastLoop(SockDesc *sd, bool loop)
 {
     sd->multicastLoop = loop;
+}
+
+void Udp::setReuseAddress(int socketId, bool reuseAddress)
+{
+    setReuseAddress(getOrCreateSocket(socketId), reuseAddress);
 }
 
 void Udp::setReuseAddress(SockDesc *sd, bool reuseAddr)
@@ -611,6 +621,11 @@ void Udp::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multi
     }
 }
 
+void Udp::blockMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
+{
+    blockMulticastSources(getOrCreateSocket(socketId), ift->getInterfaceById(interfaceId), multicastAddr, sourceList);
+}
+
 void Udp::blockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
 {
     ASSERT(ie && ie->isMulticast());
@@ -639,6 +654,11 @@ void Udp::blockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address mu
     if (changed) {
         ie->changeMulticastGroupMembership(multicastAddress, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, excludedSources);
     }
+}
+
+void Udp::unblockMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
+{
+    unblockMulticastSources(getOrCreateSocket(socketId), ift->getInterfaceById(interfaceId), multicastAddr, sourceList);
 }
 
 void Udp::unblockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
@@ -670,6 +690,11 @@ void Udp::unblockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address 
     if (changed) {
         ie->changeMulticastGroupMembership(multicastAddress, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, excludedSources);
     }
+}
+
+void Udp::leaveMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
+{
+    leaveMulticastSources(getOrCreateSocket(socketId), ift->getInterfaceById(interfaceId), multicastAddr, sourceList);
 }
 
 void Udp::leaveMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
@@ -706,6 +731,11 @@ void Udp::leaveMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address mu
         sd->deleteMulticastMembership(membership);
 }
 
+void Udp::joinMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
+{
+    joinMulticastSources(getOrCreateSocket(socketId), ift->getInterfaceById(interfaceId), multicastAddr, sourceList);
+}
+
 void Udp::joinMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList)
 {
     ASSERT(ie && ie->isMulticast());
@@ -738,6 +768,11 @@ void Udp::joinMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address mul
     if (changed) {
         ie->changeMulticastGroupMembership(multicastAddress, MCAST_INCLUDE_SOURCES, oldSources, MCAST_INCLUDE_SOURCES, includedSources);
     }
+}
+
+void Udp::setMulticastSourceFilter(int socketId, int interfaceId, const L3Address& multicastAddr, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList)
+{
+    setMulticastSourceFilter(getOrCreateSocket(socketId), ift->getInterfaceById(interfaceId), multicastAddr, filterMode, sourceList);
 }
 
 void Udp::setMulticastSourceFilter(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList)
@@ -950,8 +985,9 @@ void Udp::close(int sockId)
 
     EV_INFO << "Closing socket: " << *(it->second) << "\n";
     auto callback = it->second->callback;
-    // KLUDGE: this schedule call is here to keep the fingerprints
-    inet::scheduleAfter("handleClose", 0, [=]() { callback->handleClose(); });
+    if (callback != nullptr)
+        // KLUDGE: this schedule call is here to keep the fingerprints
+        inet::scheduleAfter("handleClose", 0, [=]() { callback->handleClose(); });
 
     destroySocket(it);
 }

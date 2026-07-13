@@ -229,6 +229,13 @@ class INET_API Udp : public TransportProtocolBase, public IUdp, public IPassiveP
     virtual void setTos(int socketId, short tos) override;
     virtual void joinMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds) override;
     virtual void leaveMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses) override;
+    virtual void setMulticastOutputInterface(int socketId, int interfaceId) override;
+    virtual void setReuseAddress(int socketId, bool reuseAddress) override;
+    virtual void blockMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList) override;
+    virtual void unblockMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList) override;
+    virtual void joinMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList) override;
+    virtual void leaveMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList) override;
+    virtual void setMulticastSourceFilter(int socketId, int interfaceId, const L3Address& multicastAddr, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList) override;
     virtual void close(int socketId) override;
     virtual void destroy(int socketId) override;
 

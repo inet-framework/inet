@@ -9,6 +9,7 @@
 #define __INET_IUDP_H
 
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 
 namespace inet {
 
@@ -32,6 +33,13 @@ class INET_API IUdp
     virtual void setTos(int socketId, short dscp) = 0;
     virtual void joinMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds) = 0;
     virtual void leaveMulticastGroups(int socketId, const std::vector<L3Address>& multicastAddresses) = 0;
+    virtual void setMulticastOutputInterface(int socketId, int interfaceId) = 0;
+    virtual void setReuseAddress(int socketId, bool reuseAddress) = 0;
+    virtual void blockMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList) = 0;
+    virtual void unblockMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList) = 0;
+    virtual void joinMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList) = 0;
+    virtual void leaveMulticastSources(int socketId, int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList) = 0;
+    virtual void setMulticastSourceFilter(int socketId, int interfaceId, const L3Address& multicastAddr, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList) = 0;
     virtual void close(int socketId) = 0;
     virtual void destroy(int socketId) = 0;
 };
