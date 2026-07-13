@@ -728,6 +728,50 @@ void Tcp::abort(int socketId)
     handleUpperCommand(request);
 }
 
+void Tcp::destroy(int socketId)
+{
+    // do not resurrect an already removed connection just to destroy it
+    if (findConnForApp(socketId) == nullptr) {
+        EV_DETAIL << "Destroy: connection does not exist (already removed?)" << EV_FIELD(socketId) << EV_ENDL;
+        return;
+    }
+    auto request = new Request("DESTROY", TCP_C_DESTROY);
+    TcpCommand *cmd = new TcpCommand();
+    request->setControlInfo(cmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::read(int socketId, int32_t numBytes)
+{
+    auto request = new Request("Read", TCP_C_READ);
+    TcpReadCommand *cmd = new TcpReadCommand();
+    cmd->setMaxByteCount(numBytes);
+    request->setControlInfo(cmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::setDscp(int socketId, short dscp)
+{
+    auto request = new Request("setDscp", TCP_C_SETOPTION);
+    TcpSetDscpCommand *cmd = new TcpSetDscpCommand();
+    cmd->setDscp(dscp);
+    request->setControlInfo(cmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
+void Tcp::setTos(int socketId, short tos)
+{
+    auto request = new Request("setTOS", TCP_C_SETOPTION);
+    TcpSetTosCommand *cmd = new TcpSetTosCommand();
+    cmd->setTos(tos);
+    request->setControlInfo(cmd);
+    request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    handleUpperCommand(request);
+}
+
 void Tcp::setTimeToLive(int socketId, int ttl)
 {
     auto request = new Request("setTTL", TCP_C_SETOPTION);

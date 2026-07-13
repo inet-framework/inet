@@ -270,6 +270,10 @@ class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassiveP
     virtual void accept(int socketId) override;
     virtual void close(int socketId) override;
     virtual void abort(int socketId) override;
+    virtual void destroy(int socketId) override;
+    virtual void read(int socketId, int32_t numBytes) override;
+    virtual void setDscp(int socketId, short dscp) override;
+    virtual void setTos(int socketId, short tos) override;
     virtual void setTimeToLive(int socketId, int ttl) override;
     virtual void setQueueLimits(int socketId, int packetCapacity, B dataCapacity) override;
 };

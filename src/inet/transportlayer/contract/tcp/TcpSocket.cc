@@ -135,13 +135,7 @@ void TcpSocket::read(int32_t numBytes)
     if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED && sockstate != LOCALLY_CLOSED)
         throw cRuntimeError("TcpSocket::read(): socket not connected or connecting, state is %s", stateName(sockstate));
 
-    auto request = new Request("Read", TCP_C_READ);
-
-    TcpReadCommand *readCmd = new TcpReadCommand();
-    readCmd->setMaxByteCount(numBytes);
-
-    request->setControlInfo(readCmd);
-    sendToTcp(request);
+    tcp->read(connId, numBytes);
 }
 
 void TcpSocket::send(Packet *msg)
@@ -182,10 +176,7 @@ void TcpSocket::abort()
 
 void TcpSocket::destroy()
 {
-    auto request = new Request("DESTROY", TCP_C_DESTROY);
-    TcpCommand *cmd = new TcpCommand();
-    request->setControlInfo(cmd);
-    sendToTcp(request);
+    tcp->destroy(connId);
     sockstate = CLOSED;
 }
 
@@ -208,20 +199,12 @@ void TcpSocket::setTimeToLive(int ttl)
 
 void TcpSocket::setDscp(short dscp)
 {
-    auto request = new Request("setDscp", TCP_C_SETOPTION);
-    auto *cmd = new TcpSetDscpCommand();
-    cmd->setDscp(dscp);
-    request->setControlInfo(cmd);
-    sendToTcp(request);
+    tcp->setDscp(connId, dscp);
 }
 
-void TcpSocket::setTos(short dscp)
+void TcpSocket::setTos(short tos)
 {
-    auto request = new Request("setTOS", TCP_C_SETOPTION);
-    auto *cmd = new TcpSetTosCommand();
-    cmd->setTos(dscp);
-    request->setControlInfo(cmd);
-    sendToTcp(request);
+    tcp->setTos(connId, tos);
 }
 
 // ######################

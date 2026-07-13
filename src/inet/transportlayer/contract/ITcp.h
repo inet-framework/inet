@@ -35,6 +35,10 @@ class INET_API ITcp
     virtual void accept(int socketId) = 0;
     virtual void close(int socketId) = 0;
     virtual void abort(int socketId) = 0;
+    virtual void destroy(int socketId) = 0;
+    virtual void read(int socketId, int32_t numBytes) = 0;
+    virtual void setDscp(int socketId, short dscp) = 0;
+    virtual void setTos(int socketId, short tos) = 0;
     virtual void setTimeToLive(int socketId, int ttl) = 0;
     virtual void setQueueLimits(int socketId, int packetCapacity, B dataCapacity) = 0;
 };
