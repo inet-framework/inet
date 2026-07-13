@@ -188,6 +188,19 @@ class TcpSetTimestampingCommand extends TcpSetOptionCommand
 }
 
 //
+// Workstream H4 follow-up (TCP_NOTSENT_LOWAT as a runtime socket option): sets
+// the connection's not-yet-transmitted-bytes low-water mark at runtime, same
+// semantics as the notsentLowat module parameter (which supplies the initial
+// value at connection setup). -1 disables.
+//
+// @see ~TcpSocket::setNotsentLowat
+//
+class TcpSetNotsentLowatCommand extends TcpSetOptionCommand
+{
+    int value = -1;
+}
+
+//
 // Sent with message kind TCP_I_ZEROCOPY_COMPLETION, in response to a
 // zerocopy-marked SEND (Workstream H2, MSG_ZEROCOPY -- see
 // ~TcpSendZerocopyReq/~TcpSocket::sendZerocopy) once that SEND's data has

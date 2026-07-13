@@ -9,6 +9,7 @@
 #ifndef __INET_TCPCONNECTION_H
 #define __INET_TCPCONNECTION_H
 
+#include <climits>
 #include <map>
 #include <set>
 
@@ -150,6 +151,12 @@ class INET_API TcpConnection : public SimpleModule
     // it must be settable via TCP_C_SETOPTION before state exists (app code may call
     // TcpSocket::setTimestamping() before connect(), same as setTtl/setDscp/setTos).
     bool rxTimestampingEnabled = false;
+    // Runtime TCP_NOTSENT_LOWAT (TcpSetNotsentLowatCommand): like
+    // rxTimestampingEnabled above, must survive arriving before state exists
+    // (a sockopt sent between bind() and connect()/listen()). INT_MIN = never
+    // set; otherwise applied over the notsentLowat module param in
+    // configureStateVariables(), and directly to state when set later.
+    int notsentLowatSockopt = INT_MIN;
     bool autoRead = true;
     bool peerClosedSentUp = false;
     long maxByteCountRequested = 0;  // from READ requests

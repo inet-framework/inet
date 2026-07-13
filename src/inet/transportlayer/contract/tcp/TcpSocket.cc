@@ -281,6 +281,15 @@ void TcpSocket::setTimestamping(bool enabled)
     sendToTcp(request);
 }
 
+void TcpSocket::setNotsentLowat(int value)
+{
+    auto request = new Request("setNotsentLowat", TCP_C_SETOPTION);
+    auto *cmd = new TcpSetNotsentLowatCommand();
+    cmd->setValue(value);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
 // ######################
 // TCP Socket Options End
 // ######################

@@ -42,6 +42,7 @@ simple TcpTestClient like IApp
         bool fastOpen3 = default(false); // TCP Fast Open (RFC 7413): request it on the third connection's active open, independently of fastOpen/fastOpen2
         string statusRequestScript = default(""); // comma-separated list of times ("1.5,3.0") at which to issue a TCP_C_STATUS query on socket (the first connection) and log the reply
         bool enableTimestamping = default(false); // Workstream H3 (SO_TIMESTAMPING): if true, calls socket.setTimestamping(true) right after bind(), logging TcpRxTimestampInd's timestamp on every arriving TCP_I_DATA packet
+        int setNotsentLowat = default(-1); // TCP_NOTSENT_LOWAT runtime sockopt: if >= 0, calls socket.setNotsentLowat(value) right after bind() -- the runtime counterpart of the Tcp module's notsentLowat parameter
         @display("i=block/app");
     gates:
         input socketIn;

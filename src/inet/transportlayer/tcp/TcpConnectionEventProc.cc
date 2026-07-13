@@ -269,6 +269,16 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     else if (auto cmd = dynamic_cast<TcpSetTimestampingCommand *>(tcpCommand)) {
         rxTimestampingEnabled = cmd->getEnabled();
     }
+    else if (auto cmd = dynamic_cast<TcpSetNotsentLowatCommand *>(tcpCommand)) {
+        // Runtime TCP_NOTSENT_LOWAT: same field the notsentLowat module param
+        // seeds at connection setup (configureStateVariables); -1 disables.
+        // May legally arrive before OPEN creates state (like setTimestamping
+        // above) -- keep the value on the connection and apply it now only if
+        // state already exists; configureStateVariables() applies it otherwise.
+        notsentLowatSockopt = cmd->getValue();
+        if (state != nullptr)
+            state->notsentLowat = (notsentLowatSockopt < 0) ? (uint32_t)-1 : (uint32_t)notsentLowatSockopt;
+    }
     else
         throw cRuntimeError("Unknown subclass of TcpSetOptionCommand received from app: %s", tcpCommand->getClassName());
     delete tcpCommand;

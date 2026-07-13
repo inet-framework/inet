@@ -271,6 +271,9 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             if (par("enableTimestamping"))
                 socket.setTimestamping(true);
 
+            if ((int)par("setNotsentLowat") >= 0)
+                socket.setNotsentLowat(par("setNotsentLowat"));
+
             if (par("active"))
                 socket.connect(L3Address(connectAddress), connectPort, par("fastOpen"));
             else

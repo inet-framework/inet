@@ -709,7 +709,9 @@ void TcpConnection::configureStateVariables()
 
     // TCP_NOTSENT_LOWAT (Workstream H4). -1 (default) disables it; same signed-read-
     // first pattern as mss above, since -1 doesn't fit directly into the uint32_t field.
-    int notsentLowatPar = tcpMain->par("notsentLowat");
+    // A runtime TcpSetNotsentLowatCommand received before OPEN (notsentLowatSockopt,
+    // INT_MIN = never set) overrides the module parameter.
+    int notsentLowatPar = (notsentLowatSockopt != INT_MIN) ? notsentLowatSockopt : (int)tcpMain->par("notsentLowat");
     state->notsentLowat = (notsentLowatPar < 0) ? (uint32_t)-1 : (uint32_t)notsentLowatPar;
 
     // ECN mode resolution (AccECN, Workstream G): tcpEcnMode supersedes the deprecated

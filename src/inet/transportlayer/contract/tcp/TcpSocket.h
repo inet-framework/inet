@@ -481,6 +481,13 @@ class INET_API TcpSocket : public ISocket
     void setTimestamping(bool enabled);
 
     /**
+     * Sets the TCP_NOTSENT_LOWAT write-readiness low-water mark (in bytes) at
+     * runtime — same semantics as the Tcp module's notsentLowat parameter,
+     * which supplies the initial value. -1 disables.
+     */
+    void setNotsentLowat(int value);
+
+    /**
      * Required to re-connect with a "used" TcpSocket object.
      * By default, a TcpSocket object is tied to a single TCP connection,
      * via the connectionId. When the connection gets closed or aborted,
