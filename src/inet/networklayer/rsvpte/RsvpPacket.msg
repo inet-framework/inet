@@ -27,7 +27,23 @@ enum RsvpConstants {
 }
 
 //
-// RSVP message common part
+// RSVP message common part.
+//
+// NOTE: these RSVP/RSVP-TE message classes are a simulation model, not the
+// on-the-wire RSVP format, and there is deliberately no RSVP serializer.
+// They carry only what INET's RSVP-TE signaling needs -- e.g. RsvpPathMsg holds
+// a hop, a sender descriptor, a label_request, an ERO and an INET-internal color
+// and rsvpKind. A real RSVP message (RFC 2205 / RFC 3209 RSVP-TE) is instead a
+// common header followed by a sequence of type-length objects (SESSION, RSVP_HOP,
+// TIME_VALUES, SENDER_TEMPLATE, SENDER_TSPEC, ADSPEC, LABEL_REQUEST,
+// EXPLICIT_ROUTE, RECORD_ROUTE, ...), which do not correspond one-to-one to these
+// fields: the model lacks objects that appear on the wire (ADSPEC, TIME_VALUES,
+// the real SESSION/HOP/TSPEC encodings) and adds fields that never do (color,
+// rsvpKind, and the RSVP-TE label_request/ERO for plain RSVP). Serializing a
+// captured RSVP message into this model would therefore be both lossy and large,
+// and INET never serializes RSVP in normal simulations. A pcap capture that
+// contains RSVP (e.g. mpls-basic.cap) consequently cannot round-trip and its run
+// is disabled in serializer_pcap.test.
 //
 class RsvpMessage extends FieldsChunk
 {
