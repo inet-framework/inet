@@ -1,3 +1,4 @@
+
 //
 // Copyright (C) 2024 Daniel Zeitler
 //
@@ -55,7 +56,7 @@ const Ptr<Chunk> CfmContinuityCheckMessageSerializer::deserialize(MemoryInputStr
     int nameLength = stream.readUint8();
     ASSERT(nameLength <= 45);
     uint8_t buffer[46];
-    stream.readBytes(buffer, B(nameLength));
+    stream.readBytes(buffer, B(45));
     buffer[nameLength] = '\0';
     ccm->setMessageName(reinterpret_cast<const char*>(buffer));
 
