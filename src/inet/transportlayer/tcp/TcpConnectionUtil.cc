@@ -347,7 +347,12 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     // rfc-3168, page 20:
     // ECN-capable TCP implementations MUST NOT set either ECT codepoint
     // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
-    tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification((state->ect && !state->sndAck && !state->rexmit) ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
+    // RFC 3168 section 6.1.1: a host MUST NOT set an ECT codepoint on a SYN or
+    // SYN-ACK -- those are control segments and are always sent Not-ECT (this also
+    // matches Linux, whose AccECN/ECN SYN-ACK carries Not-ECT in the IP header
+    // even though state->ect is already true by then). Pure ACKs (sndAck) and
+    // retransmissions are likewise excluded per section 6.1.
+    tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification((state->ect && !state->sndAck && !state->rexmit && !tcpHeader->getSynBit()) ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
 
     tcpHeader->setChecksum(0);
     tcpHeader->setChecksumMode(tcpMain->checksumMode);
@@ -2052,6 +2057,37 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                 tcpHeader->appendHeaderOption(option);
                 EV_INFO << "Tcp Header Option Fast Open cookie (" << cachedCookie.size() << " bytes) sent\n";
             }
+        }
+
+        // AccECN option on the SYN-ACK (draft-ietf-tcpm-accurate-ecn section 3.2.3):
+        // once the incoming SYN negotiated AccECN, the SYN-ACK carries the AccECN
+        // option seeding the byte counters at their wire-init offsets. Gated on
+        // getAckBit() so it rides the SYN-ACK (and any SYN-ACK retransmit) but never
+        // the client's own initial bare SYN -- that SYN advertises AccECN with the
+        // flag-bit combination alone, no option (confirmed against the corpus's
+        // "> SEWA ... <mss,sackOK,...>" client SYN, which carries no ECN option).
+        // Unlike the post-handshake beacon (see the non-SYN branch below), the
+        // SYN-ACK always carries it -- there is no cadence to apply on the one
+        // handshake segment. The kind is fixed to ACCECN1 (the corpus's observed
+        // first-emission ordering E1B,CEB,E0B); the post-handshake alternation
+        // start is a separate concern. This block is pure (it may run as a
+        // header-size dry run) -- it mutates no beacon state.
+        if (state->accEcnNegotiated && state->accEcnOptionEnabled && tcpHeader->getAckBit()) {
+            // Pad with NOPs so the options area stays 4-byte aligned once this
+            // 11-byte option is appended -- same convention as the other options.
+            while (tcpHeader->getHeaderOptionArrayLength().get<B>() % 4 != 1)
+                tcpHeader->appendHeaderOption(new TcpOptionNop());
+
+            TcpOptionAccEcn *option = new TcpOptionAccEcn();
+            option->setKind(TCPOPTION_ACCECN1);
+            // Wire init offsets (G6.1): E0B/E1B start at 1, CEB at 0.
+            option->setEct0Bytes(state->rcvEct0Bytes + 1);
+            option->setEct1Bytes(state->rcvEct1Bytes + 1);
+            option->setCeBytes(state->rcvCeBytes);
+            tcpHeader->appendHeaderOption(option);
+            EV_INFO << "Tcp Header Option AccECN on SYN-ACK(kind=" << option->getKind()
+                    << ", E0B=" << option->getEct0Bytes() << ", E1B=" << option->getEct1Bytes()
+                    << ", CEB=" << option->getCeBytes() << ") sent\n";
         }
 
         // TODO add new TCPOptions here once they are implemented

@@ -37,6 +37,8 @@ simple TcpConnection extends SimpleModule {
         @signal[rcvNASeg];    // Number of received not acceptable segments
         @signal[sackedBytes];    // Current number of received sacked bytes
         @signal[delivered];    // Cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
+        @signal[deliveredCe];    // AccECN: cumulative resolved count of CE-marked packets the peer reported (draft-ietf-tcpm-accurate-ecn)
+        @signal[deliveredCeBytes];    // AccECN: cumulative CE byte count from AccECN option evidence
         @signal[tcpRcvQueueBytes];    // Current amount of used bytes in TCP receive queue
         @signal[tcpRcvQueueDrops];    // Number of drops in TCP receive queue
         @signal[tcpRcvPayloadBytes];   // Amount of payload bytes received (including duplicates, out of order, etc.) for TCP throughput
@@ -71,6 +73,8 @@ simple TcpConnection extends SimpleModule {
         @statistic[rcvNASeg](record=vector; interpolationmode=sample-hold);    // Number of received not acceptable segments
         @statistic[sackedBytes](record=vector; interpolationmode=sample-hold);    // Current number of received sacked bytes
         @statistic[delivered](record=vector; interpolationmode=sample-hold);    // Cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
+        @statistic[deliveredCe](record=vector; interpolationmode=sample-hold);    // AccECN: cumulative resolved count of CE-marked packets the peer reported
+        @statistic[deliveredCeBytes](record=vector; interpolationmode=sample-hold);    // AccECN: cumulative CE byte count from AccECN option evidence
         @statistic[tcpRcvQueueBytes](record=vector; interpolationmode=sample-hold);    // Current amount of used bytes in tcp receive queue
         @statistic[tcpRcvQueueDrops](record=vector; interpolationmode=sample-hold);    // Number of drops in tcp receive queue
         @statistic[tcpRcvPayloadBytes](record=vector; interpolationmode=sample-hold);    // Current amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
