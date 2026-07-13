@@ -34,6 +34,18 @@ struct pcaprec_hdr
     uint32_t orig_len; /* actual length of packet */
 };
 
+/**
+ * Wall-clock capture timestamp of a pcap record, kept in the file's native
+ * fields so no precision is lost and no simtime_t range limit applies. Mapping
+ * this absolute timestamp onto a simulation time (e.g. relative to the first
+ * record, or to a configured origin) is the caller's responsibility.
+ */
+struct PcapRecordTime
+{
+    int32_t sec = 0; /* seconds since the Unix epoch (pcap ts_sec) */
+    uint32_t usec = 0; /* microseconds within the second (pcap ts_usec) */
+};
+
 class INET_API PcapReader
 {
   protected:
@@ -47,7 +59,7 @@ class INET_API PcapReader
     virtual void openPcap(const char *filename, const char *packetNameFormat);
     virtual void closePcap();
     virtual bool isOpen() { return file != nullptr; }
-    virtual std::pair<simtime_t, Packet *> readPacket();
+    virtual std::pair<PcapRecordTime, Packet *> readPacket();
 };
 
 } // namespace inet

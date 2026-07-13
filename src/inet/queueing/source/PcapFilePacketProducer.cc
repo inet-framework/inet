@@ -53,7 +53,12 @@ void PcapFilePacketProducer::schedulePacket()
     emit(packetCreatedSignal, packet);
     if (packet != nullptr) {
         EV << "Scheduling packet from PCAP file" << EV_FIELD(packet) << EV_ENDL;
-        scheduleAt(pair.first, packet);
+        // map the pcap record's absolute wall-clock timestamp onto a simulation time;
+        // NOTE: this uses the absolute epoch timestamp as-is, so it only works for
+        // captures whose timestamps fit into simtime_t -- richer policies (relative to
+        // the first record, or to a configured origin) belong here
+        auto& time = pair.first;
+        scheduleAt(SimTime(time.sec, SIMTIME_S) + SimTime(time.usec, SIMTIME_US), packet);
     }
     else
         EV << "End of PCAP file reached" << EV_ENDL;
