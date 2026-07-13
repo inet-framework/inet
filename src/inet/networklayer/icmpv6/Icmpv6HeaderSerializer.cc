@@ -223,6 +223,22 @@ void Icmpv6HeaderSerializer::serializeFields(MemoryOutputStream& stream, const P
             stream.writeUint32Be(0); // unused
             break;
         }
+        case ICMPv6_PACKET_TOO_BIG: {
+            auto frame = check_and_cast<const Icmpv6PacketTooBigMsg *>(pkt.get());
+            stream.writeByte(pkt->getType());
+            stream.writeByte(frame->getCode());
+            stream.writeUint16Be(frame->getChksum());
+            stream.writeUint32Be(frame->getMTU());
+            break;
+        }
+        case ICMPv6_PARAMETER_PROBLEM: {
+            auto frame = check_and_cast<const Icmpv6ParamProblemMsg *>(pkt.get());
+            stream.writeByte(pkt->getType());
+            stream.writeByte(frame->getCode());
+            stream.writeUint16Be(frame->getChksum());
+            stream.writeUint32Be(frame->getPointer());
+            break;
+        }
 
         case ICMPv6_TIME_EXCEEDED: {
             auto frame = check_and_cast<const Icmpv6TimeExceededMsg *>(pkt.get());
@@ -336,6 +352,22 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserializeFields(MemoryInputStream& st
             destUnreach->setType(type);
             destUnreach->setCode(static_cast<Icmpv6DestUnav>(subcode));
             stream.readUint32Be(); // unused
+            break;
+        }
+        case ICMPv6_PACKET_TOO_BIG: {
+            auto packetTooBig = makeShared<Icmpv6PacketTooBigMsg>();
+            icmpv6Header = packetTooBig;
+            packetTooBig->setType(type);
+            packetTooBig->setCode(subcode);
+            packetTooBig->setMTU(stream.readUint32Be());
+            break;
+        }
+        case ICMPv6_PARAMETER_PROBLEM: {
+            auto paramProblem = makeShared<Icmpv6ParamProblemMsg>();
+            icmpv6Header = paramProblem;
+            paramProblem->setType(type);
+            paramProblem->setCode(static_cast<Icmpv6ParameterProblem>(subcode));
+            paramProblem->setPointer(stream.readUint32Be());
             break;
         }
 
