@@ -257,9 +257,19 @@ void TcpCubic::receivedDataAck(uint32_t firstSeqAcked)
         if (performGrowth) {
             uint32_t bytesAcked = state->snd_una - firstSeqAcked;
             if (state->snd_cwnd < state->ssthresh) {
-                // slow start
-                state->snd_cwnd += state->snd_mss;
-                conn->emit(cwndSignal, state->snd_cwnd);
+                // Slow start, Linux parity (tcp_slow_start + tcp_is_cwnd_limited):
+                // grow cwnd by the number of segments this ACK newly acknowledged,
+                // but only while the sender is cwnd-limited -- i.e. it actually
+                // filled the window (cwnd < 2 * max_packets_out, both in segments).
+                // An application-limited flow that never fills cwnd does not
+                // inflate it. This replaces the old flat "+1 SMSS per ACK", which
+                // both under-counted multi-segment ACKs and grew unconditionally.
+                uint32_t segmentsAcked = bytesAcked / state->snd_mss;
+                uint32_t cwndSegments = state->snd_cwnd / state->snd_mss;
+                if (segmentsAcked > 0 && cwndSegments < 2 * state->maxPacketsOut) {
+                    state->snd_cwnd += segmentsAcked * state->snd_mss;
+                    conn->emit(cwndSignal, state->snd_cwnd);
+                }
             }
             else {
                 // cubic congestion avoidance

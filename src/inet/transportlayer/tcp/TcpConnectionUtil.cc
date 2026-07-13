@@ -1430,6 +1430,17 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
 
     emit(unackedSignal, state->snd_max - state->snd_una);
 
+    // Track peak segments in flight (Linux max_packets_out) for the RFC 5681
+    // cwnd-limited slow-start gate: an application-limited flow that never fills
+    // the congestion window must not be allowed to inflate it. Round up so a
+    // partial trailing segment counts as a whole packet (Linux accounts in
+    // packets, not bytes).
+    if (state->snd_mss > 0) {
+        uint32_t packetsOut = (state->snd_max - state->snd_una + state->snd_mss - 1) / state->snd_mss;
+        if (packetsOut > state->maxPacketsOut)
+            state->maxPacketsOut = packetsOut;
+    }
+
     // notify (once is enough)
     tcpAlgorithm->ackSent();
 

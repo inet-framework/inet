@@ -127,6 +127,7 @@ struct TcpStateVariables
     uint32_t snd_una = 0;           // send unacknowledged
     uint32_t snd_nxt = 0;           // send next (drops back on retransmission)
     uint32_t snd_max = 0;           // max seq number sent (needed because snd_nxt is re-set on retransmission)
+    uint32_t maxPacketsOut = 0;     // peak segments in flight observed at send time (Linux max_packets_out); drives the RFC 5681 cwnd-limited slow-start gate
     uint32_t snd_wnd = 0;           // send window
     uint32_t snd_up = 0;            // send urgent pointer
     uint32_t snd_wl1 = 0;           // segment sequence number used for last window update
