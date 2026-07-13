@@ -24,6 +24,7 @@ Register_Serializer(Igmpv2Report, IgmpHeaderSerializer);
 Register_Serializer(Igmpv2Leave, IgmpHeaderSerializer);
 Register_Serializer(Igmpv3Query, IgmpHeaderSerializer);
 Register_Serializer(Igmpv3Report, IgmpHeaderSerializer);
+Register_Serializer(RgmpHello, IgmpHeaderSerializer);
 
 void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -92,6 +93,13 @@ void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     stream.writeUint32Be(groupRecord.getAuxData(i));
                 }
             }
+            break;
+        }
+        case RGMP_HELLO: {
+            auto rgmpHello = dynamicPtrCast<const RgmpHello>(igmpMessage);
+            stream.writeByte(rgmpHello->getReserved());
+            stream.writeUint16Be(rgmpHello->getChecksum());
+            stream.writeIpv4Address(rgmpHello->getGroupAddress());
             break;
         }
         default:
@@ -193,6 +201,14 @@ const Ptr<Chunk> IgmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
             while (stream.getRemainingLength() > B(0))
                 stream.readByte();
             return igmpv3Report;
+        }
+        case RGMP_HELLO: {
+            auto rgmpHello = makeShared<RgmpHello>();
+            rgmpHello->setReserved(code);
+            rgmpHello->setChecksum(chksum);
+            rgmpHello->setChecksumMode(CHECKSUM_COMPUTED);
+            rgmpHello->setGroupAddress(stream.readIpv4Address());
+            return rgmpHello;
         }
         default: {
             EV_ERROR << "IGMPSerializer: can not create IGMP packet: type " << type << " not supported\n";
