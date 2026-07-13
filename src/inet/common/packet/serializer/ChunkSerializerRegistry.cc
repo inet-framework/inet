@@ -19,15 +19,29 @@ void ChunkSerializerRegistry::registerSerializer(const std::type_info& typeInfo,
 {
     CHUNK_CHECK_USAGE(serializer != nullptr, "invalid serializer");
     serializers[typeInfo] = serializer;
+    registeredTypeNames.insert(opp_typename(typeInfo));
 }
 
 const ChunkSerializer *ChunkSerializerRegistry::getSerializer(const std::type_info& typeInfo) const
 {
     auto it = serializers.find(typeInfo);
-    if (it != serializers.end())
+    if (it != serializers.end()) {
+        if (usedRecorder != nullptr)
+            usedRecorder->insert(opp_typename(typeInfo));
+        if (usedSerializerClassRecorder != nullptr)
+            usedSerializerClassRecorder->insert(opp_typename(typeid(*it->second)));
         return it->second;
+    }
     else
         throw cRuntimeError("Cannot find serializer for %s", opp_typename(typeInfo));
+}
+
+std::set<std::string> ChunkSerializerRegistry::getRegisteredSerializerClassNames() const
+{
+    std::set<std::string> names;
+    for (const auto& it : serializers)
+        names.insert(opp_typename(typeid(*it.second)));
+    return names;
 }
 
 ChunkSerializerRegistry& ChunkSerializerRegistry::getInstance()
