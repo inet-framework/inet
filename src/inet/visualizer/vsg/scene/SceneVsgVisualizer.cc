@@ -39,7 +39,7 @@ void SceneVsgVisualizer::initializeScene()
 {
     SceneVsgVisualizerBase::initializeScene();
     auto sceneNode = visualizationTargetModule->getOsgCanvas()->getScene();
-    auto topLevelScene = sceneNode != nullptr ? dynamic_cast<inet::vsg::TopLevelScene *>(sceneNode->getRoot().get()) : nullptr;
+    auto topLevelScene = dynamic_cast<inet::vsg::TopLevelScene *>(omnetpp::getVsgRoot(sceneNode).get());
     if (topLevelScene == nullptr)
         throw cRuntimeError("Cannot find the VSG top level scene");
     topLevelScene->addChild(inet::vsg::SimulationScene::create());

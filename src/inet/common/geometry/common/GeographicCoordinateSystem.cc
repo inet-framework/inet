@@ -10,6 +10,7 @@
 #if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZATIONOSG)
 #include <osg/PositionAttitudeTransform>
 #include <osgEarth/GeoTransform>
+#include "qtenv/osg/osgscenehandle.h"   // omnetpp::getOsgRoot()
 #endif
 
 namespace inet {
@@ -49,7 +50,7 @@ Define_Module(OsgGeographicCoordinateSystem);
 void OsgGeographicCoordinateSystem::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        auto mapScene = getParentModule()->getOsgCanvas()->getScene();
+        auto mapScene = omnetpp::getOsgRoot(getParentModule()->getOsgCanvas()->getScene());
         mapNode = osgEarth::MapNode::findMapNode(mapScene);
         if (mapNode == nullptr)
             throw cRuntimeError("Count not find map node in the scene");

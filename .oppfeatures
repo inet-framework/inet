@@ -1759,10 +1759,12 @@
         name = "Visualization VSG (3D)"
         description = "Provides network-level 3D visualization features for physical layer,
                        data link layer and network layer communications, and more.
-                       This is the VulkanSceneGraph-based replacement for the OpenSceneGraph
+                       This is the VulkanSceneGraph-based counterpart to the OpenSceneGraph
                        (VisualizationOsg) 3D visualizer; it requires OMNeT++ built with VSG
-                       support (WITH_VSG=yes). VisualizationOsg and VisualizationVsg are
-                       mutually exclusive (OMNeT++ is built with either OSG or VSG, not both)."
+                       support (WITH_VSG=yes). Since OMNeT++'s cScene3DNode became
+                       backend-neutral, VisualizationOsg and VisualizationVsg may be enabled
+                       together (in an OMNeT++ built with both WITH_OSG and WITH_VSG); each
+                       scene renders on the backend its visualizer creates."
         initiallyEnabled = "false"
         requires = "PhysicalEnvironment VisualizationCommon"
         recommended = ""

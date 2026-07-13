@@ -19,6 +19,7 @@
 #include <osgDB/ReadFile>
 #include <osgEarth/Capabilities>
 #include <osgEarth/Viewpoint>
+#include "qtenv/osg/osgscenehandle.h"   // omnetpp::getOsgRoot()
 #endif // ifdef WITH_OSGEARTH
 
 namespace inet {
@@ -62,7 +63,7 @@ void SceneOsgEarthVisualizer::initializeScene()
         throw cRuntimeError("Could not read earth map file '%s'", mapFileString.c_str());
     auto osgCanvas = visualizationTargetModule->getOsgCanvas();
     osgCanvas->setViewerStyle(cOsgCanvas::STYLE_EARTH);
-    auto topLevelScene = check_and_cast<inet::osg::TopLevelScene *>(osgCanvas->getScene());
+    auto topLevelScene = check_and_cast<inet::osg::TopLevelScene *>(omnetpp::getOsgRoot(osgCanvas->getScene()));
     topLevelScene->addChild(mapScene);
     mapNode = MapNode::findMapNode(mapScene);
     if (mapNode == nullptr)
