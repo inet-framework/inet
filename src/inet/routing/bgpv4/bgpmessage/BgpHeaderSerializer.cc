@@ -278,7 +278,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
             bgpOpenMessage->setBgpIdentifier(stream.readIpv4Address());
             unsigned short optionalParametersLength = stream.readByte();
             bgpOpenMessage->setOptionalParametersLength(optionalParametersLength);
-            for (size_t i = 0; optionalParametersLength > 0; ++i) {
+            for (size_t i = 0; optionalParametersLength > 0 && !stream.isReadBeyondEnd(); ++i) {
                 bgpOpenMessage->setOptionalParameterArraySize(i + 1);
                 uint8_t parameterType = stream.readByte();
                 uint8_t parameterValueLength = stream.readByte();
@@ -288,7 +288,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                     BgpOptionalParameterCapabilities *caps = new BgpOptionalParameterCapabilities();
                     caps->setParameterValueLength(parameterValueLength);
                     uint8_t remaining = parameterValueLength;
-                    for (size_t c = 0; remaining > 0; ++c) {
+                    for (size_t c = 0; remaining > 0 && !stream.isReadBeyondEnd(); ++c) {
                         uint8_t capabilityCode = stream.readByte();
                         uint8_t capabilityLength = stream.readByte();
                         remaining -= (2 + capabilityLength);
@@ -340,7 +340,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
             bgpUpdateMessage->setType(type);
             uint32_t withdrawnRoutesLength = stream.readUint16Be();
             uint32_t tmp_withdrawnRoutesLength = withdrawnRoutesLength;
-            for (size_t i = 0; withdrawnRoutesLength > 0; ++i) {
+            for (size_t i = 0; withdrawnRoutesLength > 0 && !stream.isReadBeyondEnd(); ++i) {
                 bgpUpdateMessage->setWithdrawnRoutesArraySize(i + 1);
                 BgpUpdateWithdrawnRoutes *withdrawnRoutes = new BgpUpdateWithdrawnRoutes();
                 uint8_t length = stream.readByte();
@@ -358,7 +358,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
             uint32_t totalPathAttributeLength = stream.readUint16Be();
             uint32_t tmp_totalPathAttributeLength = totalPathAttributeLength;
             bgpUpdateMessage->setTotalPathAttributeLength(totalPathAttributeLength);
-            for (size_t i = 0; totalPathAttributeLength > 0; ++i) {
+            for (size_t i = 0; totalPathAttributeLength > 0 && !stream.isReadBeyondEnd(); ++i) {
                 bgpUpdateMessage->setPathAttributesArraySize(i + 1);
                 bool optionalBit = stream.readBit();
                 bool transitiveBit = stream.readBit();
@@ -407,7 +407,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         asPath->setReserved(0);
                         asPath->setLength(pathAttributeLength);
                         asPath->setTypeCode(typeCode);
-                        for (size_t e = 0; pathAttributeLength > 0; ++e) {
+                        for (size_t e = 0; pathAttributeLength > 0 && !stream.isReadBeyondEnd(); ++e) {
                             asPath->setValueArraySize(e + 1);
                             BgpAsPathSegment *value = new BgpAsPathSegment();
                             value->setType(static_cast<BgpPathSegmentType>(stream.readByte()));
