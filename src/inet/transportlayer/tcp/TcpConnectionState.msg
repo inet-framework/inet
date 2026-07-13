@@ -157,6 +157,7 @@ struct TcpStateVariables
     uint32_t rcv_fin_seq = 0;       // if fin_rcvd: sequence number of received FIN
 
     bool nagle_enabled = false;                 // set if Nagle's algorithm (RFC 896) is enabled
+    bool pushOnWriteBoundary = false;           // Linux parity: set PSH on the segment carrying the last buffered byte of a send (from the pushSegmentsOnWriteBoundary parameter)
     bool delayed_acks_enabled = false;          // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled = false;      // set if Limited Transmit algorithm (RFC 3042) is enabled
     bool increased_IW_enabled = false;          // set if Increased Initial Window (RFC 3390) is enabled (deprecated, mapped to init_cwnd_mode)

@@ -1,0 +1,54 @@
+%description:
+Linux-parity PSH-on-write-boundary (pushSegmentsOnWriteBoundary). Linux
+sets the PSH flag on the segment carrying the last byte of a write once the
+send buffer drains past it; INET does not by default. This test reuses
+tcp_nagle_3.test's exact scenario (same sendScript) with the option ON, and
+pins that PSH now appears on the segments that carry the final byte of each
+write burst.
+
+Two write bursts land as single segments here: the 100B tail write (2.0005)
+becomes segment 8073:8101, and it -- carrying the last buffered byte, with an
+empty queue behind it -- gains PSH. The larger writes coalesce/segment into
+multiple MSS-sized segments; only the one carrying the write's final byte
+(with nothing more queued at that instant) gets PSH.
+
+Falsification: tcp_nagle_3.test is the exact same scenario with the option
+OFF (its default) -- its pinned trace shows NO PSH on any of these segments.
+This test's %contains lines below would all fail against that default trace,
+so the pair is a direct on/off falsification of the feature.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.*_app.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.cli_app.sendScript="1.00 3000; 1.0005 2000; 2.00 3000; 2.0005 100"
+
+*.*_tcp.pushSegmentsOnWriteBoundary = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%# The 100B tail write becomes one segment carrying the connection's final buffered
+%# byte with an empty queue behind it -> PSH set (shown as "P" in the tcpdump line).
+%contains: stdout
+[2.205 A011] A.1000 > B.2000: A P 8073:8101(28) ack 501 win 16384
+%#--------------------------------------------------------------------------------------------------------------
+%# The first write's tail segment (4097:5001, the byte-3000 boundary of write #1
+%# once write #2's bytes have not yet been Nagle-released) carries PSH too.
+%contains: stdout
+[1.413 A007] A.1000 > B.2000: A P 4097:5001(904) ack 501 win 16384
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

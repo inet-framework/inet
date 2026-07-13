@@ -678,6 +678,7 @@ void TcpConnection::configureStateVariables()
     state->maxRcvBuffer = advertisedWindow;
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
+    state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary"); // Linux-parity PSH-on-drain
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     const char *initialWindow = tcpMain->par("initialWindow");
@@ -1211,6 +1212,15 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     // clamped further by the MSS/options budget above) stays pending in eorSeqNums
     // and is retried by the connection's next sendSegment() call.
     if (eorSeqNums.count(state->snd_nxt))
+        tcpHeader->setPshBit(true);
+
+    // Linux parity (pushSegmentsOnWriteBoundary): Linux sets PSH on the segment
+    // carrying the last byte of a write once the send buffer has drained past
+    // it. snd_nxt has just advanced past this segment's payload, so an empty
+    // send queue from here means this segment carried the final buffered byte.
+    // PSH is inert on INET's own receiver (it only logs "ignoring"), so this is
+    // pure wire-realism; default-off pending a maintainer-gated flip.
+    if (state->pushOnWriteBoundary && bytes > 0 && sendQueue->getBytesAvailable(state->snd_nxt) == 0)
         tcpHeader->setPshBit(true);
 
     // Workstream H2 (MSG_ZEROCOPY): fire a completion notification for every
