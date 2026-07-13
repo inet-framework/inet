@@ -16,6 +16,8 @@ class INET_API ITun
 {
   public:
     virtual void open(int socketId) = 0;
+    virtual void close(int socketId) = 0;
+    virtual void destroy(int socketId) = 0;
 };
 
 } // namespace inet

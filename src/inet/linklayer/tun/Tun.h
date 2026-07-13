@@ -30,6 +30,8 @@ class INET_API Tun : public MacProtocolBase, public ITun, public IModuleInterfac
     virtual void handleUpperCommand(cMessage *message) override;
 
     virtual void open(int socketId) override;
+    virtual void close(int socketId) override;
+    virtual void destroy(int socketId) override;
 
     virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 };

@@ -122,6 +122,27 @@ void Tun::open(int socketId)
     socketIds.push_back(socketId);
 }
 
+void Tun::close(int socketId)
+{
+    Enter_Method("close");
+    auto it = find(socketIds, socketId);
+    if (it != socketIds.end())
+        socketIds.erase(it);
+    auto indication = new Indication("closed", TUN_I_CLOSED);
+    auto ctrl = new TunSocketClosedIndication();
+    indication->setControlInfo(ctrl);
+    indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+    send(indication, "upperLayerOut");
+}
+
+void Tun::destroy(int socketId)
+{
+    Enter_Method("destroy");
+    auto it = find(socketIds, socketId);
+    if (it != socketIds.end())
+        socketIds.erase(it);
+}
+
 cGate *Tun::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
 {
     Enter_Method("lookupModuleInterface");

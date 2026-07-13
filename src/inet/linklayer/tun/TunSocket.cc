@@ -78,19 +78,13 @@ void TunSocket::send(Packet *packet)
 
 void TunSocket::close()
 {
-    auto request = new Request("CLOSE", TUN_C_CLOSE);
-    TunCloseCommand *command = new TunCloseCommand();
-    request->setControlInfo(command);
-    sendToTun(request);
+    tun->close(socketId);
     this->interfaceId = -1;
 }
 
 void TunSocket::destroy()
 {
-    auto request = new Request("DESTROY", TUN_C_DESTROY);
-    auto command = new TunDestroyCommand();
-    request->setControlInfo(command);
-    sendToTun(request);
+    tun->destroy(socketId);
     this->interfaceId = -1;
 }
 
