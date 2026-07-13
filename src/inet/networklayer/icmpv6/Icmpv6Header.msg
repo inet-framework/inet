@@ -65,6 +65,7 @@ class Icmpv6ParamProblemMsg extends Icmpv6Header
 {
     type = ICMPv6_PARAMETER_PROBLEM;
     Icmpv6ParameterProblem code;
+    uint32_t pointer = 0; // offset of the problematic octet in the invoking packet
 }
 
 //
