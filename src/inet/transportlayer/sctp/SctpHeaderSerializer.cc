@@ -386,7 +386,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     struct init_cookie_parameter *cookie = (struct init_cookie_parameter *)(((unsigned char *)iac) + sizeof(struct init_chunk) + parPtr);
                     cookie->type = htons(INIT_PARAM_COOKIE);
                     cookie->length = htons(SCTP_COOKIE_LENGTH + 4);
-                    cookie->creationTime = htonl((uint32_t)stateCookie->getCreationTime().dbl());
+                    cookie->creationTime = htonl(stateCookie->getCreationTimeRaw() != 0 ? stateCookie->getCreationTimeRaw() : (uint32_t)stateCookie->getCreationTime().dbl());
                     cookie->localTag = htonl(stateCookie->getLocalTag());
                     cookie->peerTag = htonl(stateCookie->getPeerTag());
                     for (int i = 0; i < 32; i++) {
@@ -622,7 +622,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 else {
                     SctpCookie *stateCookie = (SctpCookie *)(cookieChunk->getStateCookie());
                     struct cookie_parameter *cookie = (struct cookie_parameter *)(buffer + writtenbytes + 4);
-                    cookie->creationTime = htonl((uint32_t)stateCookie->getCreationTime().dbl());
+                    cookie->creationTime = htonl(stateCookie->getCreationTimeRaw() != 0 ? stateCookie->getCreationTimeRaw() : (uint32_t)stateCookie->getCreationTime().dbl());
                     cookie->localTag = htonl(stateCookie->getLocalTag());
                     cookie->peerTag = htonl(stateCookie->getPeerTag());
                     for (int i = 0; i < 32; i++) {
@@ -1752,7 +1752,12 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                     EV_DETAIL << "cookieSize=" << cookieSize << "\n";
                     const struct cookie_parameter *cookie = (struct cookie_parameter *)(chunks + chunkPtr + 4);
                     SctpCookie *stateCookie = new SctpCookie();
-                    stateCookie->setCreationTime(ntohl(cookie->creationTime));
+                    uint32_t creationTimeRaw = ntohl(cookie->creationTime);
+                    stateCookie->setCreationTimeRaw(creationTimeRaw);
+                    // mirror it into the simtime creationTime only when it fits the
+                    // simulation clock; an absolute-time capture round-trips via the raw field
+                    if (creationTimeRaw < SimTime::getMaxTime().dbl())
+                        stateCookie->setCreationTime(SimTime(creationTimeRaw, SIMTIME_S));
                     stateCookie->setLocalTag(ntohl(cookie->localTag));
                     stateCookie->setPeerTag(ntohl(cookie->peerTag));
                     stateCookie->setLocalTieTagArraySize(32);
