@@ -20,7 +20,11 @@ class Ipv6Address
 {
     @existingClass;
     @opaque;
+    @editable;
     @toString(.str());
+    @fromString(Ipv6Address($));
+    @toValue(.str());
+    @fromValue(Ipv6Address($.stringValue()));
 }
 
 class Ipv6AddressVector

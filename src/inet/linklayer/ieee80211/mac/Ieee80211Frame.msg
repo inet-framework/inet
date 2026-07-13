@@ -31,6 +31,7 @@ class SequenceNumberCyclic
 {
     @existingClass;
     @opaque;
+    @toString(std::to_string($.get()));
 }
 
 cplusplus {{
@@ -189,7 +190,7 @@ class Ieee80211DataOrMgmtHeader extends Ieee80211TwoAddressHeader
 {
     chunkLength = LENGTH_MGMT - B(4);
     MacAddress address3;
-    short fragmentNumber;
+    short fragmentNumber @bit(4);
     SequenceNumberCyclic sequenceNumber;
 }
 
@@ -209,7 +210,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
     type = ST_DATA;         // or ST_DATA_WITH_QOS
     MacAddress address4;    // optional field, exists when toDS and fromDS are true
     AckPolicy ackPolicy = NORMAL_ACK;
-    uint8_t tid;              // optional field, exists when type == ST_DATA_WITH_QOS
+    uint8_t tid @bit(4);              // optional field, exists when type == ST_DATA_WITH_QOS
     bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
 }
 
@@ -267,8 +268,8 @@ class Ieee80211AddbaRequest extends Ieee80211ActionFrame
     // Block Ack Parameter Set field (2 bytes)
     bool aMsduSupported; // The A-MSDU Supported subfield determines whether an A-MSDU may be carried in a QoS data MPDU sent under this Block Ack agreement. (1 bit)
     bool blockAckPolicy; // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack. (1 bit)
-    uint8_t tid; // The TID subfield contains the value of the TC or TS for which the BlockAck is being requested. (4 bits)
-    uint16_t bufferSize; // The Buffer Size subfield indicates the number of buffers available for this particular TID. (10 bits)
+    uint8_t tid @bit(4); // The TID subfield contains the value of the TC or TS for which the BlockAck is being requested.
+    uint16_t bufferSize @bit(10); // The Buffer Size subfield indicates the number of buffers available for this particular TID.
 
     // Block Ack Timeout Value field (2 bytes)
     // The Block Ack Timeout Value field contains the duration, in TUs, after which the Block Ack setup is
@@ -279,7 +280,7 @@ class Ieee80211AddbaRequest extends Ieee80211ActionFrame
     // Block Ack Starting Sequence Control (2 bytes)
     // The Starting Sequence Number subfield of the Block Ack Starting Sequence Control subfield contains the sequence number of the first MSDU for which this Basic
     // BlockAckReq frame is sent. The Fragment Number subfield is set to 0.
-    uint8_t _fragmentNumber = 0; // FIXME DataOrMgmtFreme has a fragmentNumber (4 bits)
+    uint8_t _fragmentNumber @bit(4) = 0; // FIXME DataOrMgmtFreme has a fragmentNumber
     SequenceNumberCyclic startingSequenceNumber; // the sequence number of the first MSDU (12 bits)
 }
 
@@ -297,8 +298,8 @@ class Ieee80211AddbaResponse extends Ieee80211ActionFrame
     // Block Ack Parameter Set field (2 bytes)
     bool aMsduSupported; // The A-MSDU Supported subfield determines whether an A-MSDU may be carried in a QoS data MPDU sent under this Block Ack agreement. (1 bit)
     bool blockAckPolicy; // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack. (1 bit)
-    uint8_t tid; // The TID subfield contains the value of the TC or TS for which the BlockAck is being requested. (4 bits)
-    uint16_t bufferSize; // The Buffer Size subfield indicates the number of buffers available for this particular TID. (10 bits)
+    uint8_t tid @bit(4); // The TID subfield contains the value of the TC or TS for which the BlockAck is being requested.
+    uint16_t bufferSize @bit(10); // The Buffer Size subfield indicates the number of buffers available for this particular TID.
 
     // Block Ack Timeout Value field (2 bytes)
     // The Block Ack Timeout Value field contains the duration, in TUs, after which the Block Ack setup is
@@ -317,10 +318,10 @@ class Ieee80211Delba extends Ieee80211ActionFrame
     blockAckAction = 2; // Block Ack Action field is set to 2 (representing DELBA). (1 byte)
 
     // DELBA Parameter Set (2 bytes)
-    uint16_t reserved = 0; // Reserved. (11 bits)
+    uint16_t reserved @bit(11) = 0; // Reserved.
     bool initiator; // It is set to 1 to indicate the originator and is set to 0 to indicate the recipient.
                     // The Initiator subfield indicates if the originator or the recipient of the data is sending this frame. (1 bit)
-    uint8_t tid; // The TID subfield indicates the TSID or the UP for which the Block Ack has been originally set up. (4 bits)
+    uint8_t tid @bit(4); // The TID subfield indicates the TSID or the UP for which the Block Ack has been originally set up.
 
     // This Reason Code field is used to indicate the reason that an unsolicited notification management frame of
     // type Disassociation, Deauthentication, DELTS, DELBA, DLS Teardown, or Mesh Peering Close was
@@ -347,7 +348,7 @@ class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 {
     chunkLength = B(38);
 
-    int tidInfo; //  The TID_INFO subfield of the BAR Control field of the Basic BlockAckReq frame contains the TID for which a Basic BlockAck frame is requested.
+    int tidInfo @bit(4); //  The TID_INFO subfield of the BAR Control field of the Basic BlockAckReq frame contains the TID for which a Basic BlockAck frame is requested.
 
     // The BAR Information field of the Basic BlockAckReq frame contains the Block Ack Starting Sequence
     // Control subfield, as shown in Figure 8-21. The Starting Sequence Number subfield of the Block Ack
@@ -364,7 +365,7 @@ class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
 {
     chunkLength = B(38);
 
-    int tidInfo; // The TID_INFO subfield of the BAR Control field of the Compressed BlockAckReq frame contains the TID for which a BlockAck frame is requested.
+    int tidInfo @bit(4); // The TID_INFO subfield of the BAR Control field of the Compressed BlockAckReq frame contains the TID for which a BlockAck frame is requested.
     // The BAR Information field of the Compressed BlockAckReq frame contains the Block Ack Starting
     // Sequence Control subfield, as shown in Figure 8-21. The Starting Sequence Number subfield of the Block
     // Ack Starting Sequence Control subfield contains the sequence number of the first MSDU or A-MSDU for
@@ -436,7 +437,7 @@ class Ieee80211BasicBlockAck extends Ieee80211BlockAck
 
     // The TID_INFO subfield of the BA Control field of the Basic BlockAck frame contains the TID for which
     // this BlockAck frame is sent.
-    int tidInfo;
+    int tidInfo @bit(4);
 }
 
 //
@@ -457,7 +458,7 @@ class Ieee80211CompressedBlockAck extends Ieee80211BlockAck
 
     // The TID_INFO subfield of the BA Control field of the Compressed BlockAck frame contains the TID for
     // which this BlockAck frame is sent.
-    int tidInfo;
+    int tidInfo @bit(4);
 }
 
 //

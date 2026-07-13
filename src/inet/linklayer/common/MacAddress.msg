@@ -15,7 +15,9 @@ namespace inet;
 class MacAddress
 {
     @existingClass;
-    @opaque;
+    @primitive;
     @toString(.str());
     @fromString(MacAddress($));
+    @toValue(.str());
+    @fromValue(MacAddress($.stringValue()));
 }

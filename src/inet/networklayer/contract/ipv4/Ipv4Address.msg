@@ -19,9 +19,11 @@ typedef std::vector<Ipv4Address> Ipv4AddressVector;
 class Ipv4Address
 {
     @existingClass;
-    @opaque;
+    @primitive;
     @toString(.str());
     @fromString(Ipv4Address($));
+    @toValue(.str());
+    @fromValue(Ipv4Address($.stringValue()));
 }
 
 class Ipv4AddressVector

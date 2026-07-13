@@ -32,8 +32,8 @@ class Ieee80211FhssPhyPreamble extends Ieee80211PhyPreamble
 class Ieee80211FhssPhyHeader extends Ieee80211PhyHeader
 {
     chunkLength = b(32);
-    uint16_t plw;
-    uint8_t psf;
+    uint16_t plw @bit(12);
+    uint8_t psf @bit(4);
     uint16_t fcs;
     ChecksumMode fcsMode = FCS_MODE_UNDEFINED;  // should be FcsMode, but OMMeT++ bug #1351 prevents that (fixed in OMNeT++ 6.2)
 }
@@ -109,11 +109,11 @@ class Ieee80211OfdmPhyHeader extends Ieee80211PhyHeader
     // The PLCP header is composed of RATE (4), Reserved (1), LENGTH (12), Parity (1),
     // Tail (6) and SERVICE (16) fields.
     chunkLength = B(5);
-    uint8_t rate;
+    uint8_t rate @bit(4);
     bool reserved = false;
     // TODO B lengthField;
     bool parity = false;
-    uint8_t tail = 0;
+    uint8_t tail @bit(6) = 0;
     uint16_t service;
 }
 

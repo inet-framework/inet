@@ -16,5 +16,9 @@ class L3Address
 {
     @existingClass;
     @opaque;
+    @editable;
     @toString(.str());
+    @fromString(L3Address($));
+    @toValue(.str());
+    @fromValue(L3Address($.stringValue()));
 }

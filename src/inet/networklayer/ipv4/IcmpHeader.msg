@@ -23,7 +23,7 @@ namespace inet;
 class IcmpHeader extends FieldsChunk
 {
     chunkLength = B(8);
-    IcmpType type;   // 1 byte
+    IcmpType type @editable(false);   // 1 byte; subtype discriminator, pinned per subclass
     int code = -1;                   // 1 byte
     int chksum = 0;                 // 2 bytes, RFC 1071
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;

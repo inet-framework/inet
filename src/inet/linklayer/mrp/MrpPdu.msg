@@ -55,7 +55,7 @@ class MrpVersion extends FieldsChunk
 //
 class MrpTlvHeader extends FieldsChunk
 {
-    TlvHeaderType headerType;
+    TlvHeaderType headerType @editable(false);   // subtype discriminator, pinned per subclass
     uint8_t valueLength;
 }
 

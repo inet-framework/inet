@@ -31,7 +31,7 @@ enum IgmpType
 
 class IgmpMessage extends FieldsChunk
 {
-    IgmpType type;         // 1 byte
+    IgmpType type @editable(false);         // 1 byte; subtype discriminator, pinned per subclass
     uint16_t checksum = 0;    // 2 bytes, The checksum is the 16-bit one's complement of the one's complement sum of the whole IGMP message (the entire IP payload).
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;  // 0 bytes, inet only
 }
