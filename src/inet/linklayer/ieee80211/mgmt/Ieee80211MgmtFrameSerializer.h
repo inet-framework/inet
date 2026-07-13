@@ -22,7 +22,15 @@ class INET_API Ieee80211MgmtFrameSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    // the concrete management-frame subtype cannot be told apart from the body bytes
+    // alone (the subtype lives in the already-consumed MAC header), so dispatch on the
+    // requested type_info; the plain deserialize(stream) overload is therefore unused
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
+
+    // set by deserialize(stream, typeInfo) just before it delegates to the base class,
+    // and read back by deserialize(stream) to pick the subtype (single-threaded use)
+    mutable const std::type_info *requestedTypeInfo = nullptr;
 
   public:
     Ieee80211MgmtFrameSerializer() : FieldsChunkSerializer() {}

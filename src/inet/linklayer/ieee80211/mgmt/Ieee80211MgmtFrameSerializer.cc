@@ -255,9 +255,31 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         throw cRuntimeError("Cannot serialize frame");
 }
 
+const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+{
+    // the concrete subtype is only known from typeInfo -- stash it and let the base
+    // class drive length/serialized-data bookkeeping through deserialize(stream) below
+    requestedTypeInfo = &typeInfo;
+    return FieldsChunkSerializer::deserialize(stream, typeInfo);
+}
+
 const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& stream) const
 {
-    switch (0) { // TODO receive and dispatch on type_info parameter
+    // map the requested chunk type to the 802.11 subtype the case bodies below expect
+    // (the value is the subtype in bits 4-7 of the frame control field)
+    int subtype = -1;
+    const std::type_info& t = requestedTypeInfo != nullptr ? *requestedTypeInfo : typeid(void);
+    if (t == typeid(Ieee80211AuthenticationFrame)) subtype = 0xB0;
+    else if (t == typeid(Ieee80211DeauthenticationFrame)) subtype = 0xC0;
+    else if (t == typeid(Ieee80211DisassociationFrame)) subtype = 0xA0;
+    else if (t == typeid(Ieee80211ProbeRequestFrame)) subtype = 0x40;
+    else if (t == typeid(Ieee80211ReassociationRequestFrame)) subtype = 0x02;
+    else if (t == typeid(Ieee80211AssociationRequestFrame)) subtype = 0x00;
+    else if (t == typeid(Ieee80211ReassociationResponseFrame)) subtype = 0x03;
+    else if (t == typeid(Ieee80211AssociationResponseFrame)) subtype = 0x01;
+    else if (t == typeid(Ieee80211BeaconFrame)) subtype = 0x80;
+    else if (t == typeid(Ieee80211ProbeResponseFrame)) subtype = 0x50;
+    switch (subtype) {
         case 0xB0: // ST_AUTHENTICATION
         {
             auto frame = makeShared<Ieee80211AuthenticationFrame>();
@@ -294,9 +316,13 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            int numRates = stream.readByte();
+            supRat.numRates = numRates <= 8 ? numRates : 8; // clamp to the fixed-size rate[] array
+            for (int i = 0; i < numRates; i++) {
+                double r = (double)(stream.readByte() & 0x7F) * 0.5;
+                if (i < 8)
+                    supRat.rate[i] = r;
+            }
             frame->setSupportedRates(supRat);
             return frame;
         }
@@ -314,9 +340,13 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            int numRates = stream.readByte();
+            supRat.numRates = numRates <= 8 ? numRates : 8; // clamp to the fixed-size rate[] array
+            for (int i = 0; i < numRates; i++) {
+                double r = (double)(stream.readByte() & 0x7F) * 0.5;
+                if (i < 8)
+                    supRat.rate[i] = r;
+            }
             frame->setSupportedRates(supRat);
             return frame;
         }
@@ -338,9 +368,13 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            int numRates = stream.readByte();
+            supRat.numRates = numRates <= 8 ? numRates : 8; // clamp to the fixed-size rate[] array
+            for (int i = 0; i < numRates; i++) {
+                double r = (double)(stream.readByte() & 0x7F) * 0.5;
+                if (i < 8)
+                    supRat.rate[i] = r;
+            }
             frame->setSupportedRates(supRat);
             return frame;
         }
@@ -354,9 +388,13 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            int numRates = stream.readByte();
+            supRat.numRates = numRates <= 8 ? numRates : 8; // clamp to the fixed-size rate[] array
+            for (int i = 0; i < numRates; i++) {
+                double r = (double)(stream.readByte() & 0x7F) * 0.5;
+                if (i < 8)
+                    supRat.rate[i] = r;
+            }
             frame->setSupportedRates(supRat);
             return frame;
         }
@@ -370,9 +408,13 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            int numRates = stream.readByte();
+            supRat.numRates = numRates <= 8 ? numRates : 8; // clamp to the fixed-size rate[] array
+            for (int i = 0; i < numRates; i++) {
+                double r = (double)(stream.readByte() & 0x7F) * 0.5;
+                if (i < 8)
+                    supRat.rate[i] = r;
+            }
             frame->setSupportedRates(supRat);
             return frame;
         }
@@ -396,9 +438,13 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            int numRates = stream.readByte();
+            supRat.numRates = numRates <= 8 ? numRates : 8; // clamp to the fixed-size rate[] array
+            for (int i = 0; i < numRates; i++) {
+                double r = (double)(stream.readByte() & 0x7F) * 0.5;
+                if (i < 8)
+                    supRat.rate[i] = r;
+            }
             frame->setSupportedRates(supRat);
             return frame;
         }
@@ -422,9 +468,13 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
 
             Ieee80211SupportedRatesElement supRat;
             stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+            int numRates = stream.readByte();
+            supRat.numRates = numRates <= 8 ? numRates : 8; // clamp to the fixed-size rate[] array
+            for (int i = 0; i < numRates; i++) {
+                double r = (double)(stream.readByte() & 0x7F) * 0.5;
+                if (i < 8)
+                    supRat.rate[i] = r;
+            }
             frame->setSupportedRates(supRat);
             return frame;
         }
