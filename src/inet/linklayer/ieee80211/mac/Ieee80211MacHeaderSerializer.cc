@@ -137,8 +137,12 @@ const Ptr<Chunk> Ieee80211MpduSubframeHeaderSerializer::deserialize(MemoryInputS
 {
     auto mpduSubframe = makeShared<Ieee80211MpduSubframeHeader>();
     stream.readUint4();
-    mpduSubframe->setLength(stream.readUint4() >> 8);
-    mpduSubframe->setLength(stream.readUint8());
+    // length is a 12-bit field: high nibble then low byte. (The previous code read the
+    // high nibble, shifted it right by 8 -- always 0 -- and then overwrote length with
+    // only the low byte, losing bits 8..11 for any length >= 256.)
+    uint16_t lengthHigh = stream.readUint4();
+    uint16_t lengthLow = stream.readUint8();
+    mpduSubframe->setLength((lengthHigh << 8) | lengthLow);
     stream.readByte();
     stream.readByte();
     return mpduSubframe;
