@@ -705,6 +705,7 @@ void TcpConnection::configureStateVariables()
         state->snd_mss = (uint32_t)mssPar;
     else
         throw cRuntimeError("mss must be -1 (address-family default) or in the range 64..65535, but is %d", mssPar);
+    state->advertisedMss = state->snd_mss; // our own receive limit; stays unclamped when snd_mss later shrinks to the peer's MSS
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
 
     // TCP_NOTSENT_LOWAT (Workstream H4). -1 (default) disables it; same signed-read-
@@ -1891,6 +1892,8 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         state->snd_mss = (remoteAddr.getType() == L3Address::IPv6) ? 1440 : 1460;
         EV_DETAIL << "Derived default MSS from address family: snd_mss=" << state->snd_mss << "\n";
     }
+    if (state->advertisedMss == (uint32_t)-1)
+        state->advertisedMss = (remoteAddr.getType() == L3Address::IPv6) ? 1440 : 1460;
 
     // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout, or
     // sending a TCP Fast Open deferred SYN for the first time -- fastopenSynDeferred stays
@@ -1899,12 +1902,16 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                                 || ((fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD)
                                     && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred))))
     {
-        // MSS header option
-        if (state->snd_mss > 0) {
+        // MSS header option: announces OUR receive limit (advertisedMss), not
+        // snd_mss -- by SYN-ACK time snd_mss is already clamped to the peer's
+        // announced MSS, and echoing that back is wrong (RFC 793/9293: each
+        // side announces its own limit; Linux advertises its own 1460 in the
+        // SYN-ACK regardless of the client's smaller MSS).
+        if (state->advertisedMss > 0) {
             TcpOptionMaxSegmentSize *option = new TcpOptionMaxSegmentSize();
-            option->setMaxSegmentSize(state->snd_mss);
+            option->setMaxSegmentSize(state->advertisedMss);
             tcpHeader->appendHeaderOption(option);
-            EV_INFO << "Tcp Header Option MSS(=" << state->snd_mss << ") sent\n";
+            EV_INFO << "Tcp Header Option MSS(=" << state->advertisedMss << ") sent\n";
         }
 
         // WS header option

@@ -115,6 +115,11 @@ struct TcpStateVariables
     bool fork = false;              // if passive and in LISTEN: whether to fork on an incoming connection
 
     uint32_t snd_mss = 0;           // sender maximum segment size (without headers, i.e. only segment text); see RFC 2581, page 1.
+    uint32_t advertisedMss = 0;     // our OWN maximum receivable segment size, as announced in this side's SYN/SYN-ACK MSS option
+                                    // (RFC 793/9293: the option describes the announcing side's receive limit). Unlike snd_mss it is
+                                    // NEVER clamped by the peer's announced MSS -- a server used to advertise the already-clamped
+                                    // snd_mss, wrongly echoing a small client MSS back (caught by the packetdrill oracle: Linux
+                                    // advertises 1460 in the SYN-ACK regardless of the client's mss 1000).
                                     // This will be set to the minimum of the local smss parameter and the value specified in the
                                     // MSS option received during connection setup.
 
