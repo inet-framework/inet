@@ -196,6 +196,9 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
         case Graft:
         case JoinPrune: {
             const auto& pimJoinPrune = staticPtrCast<const PimJoinPrune>(chunk);
+            // a body-less Graft (just the 4-byte header) is carried by some senders;
+            // emit its body only when there is one
+            if (pimPacket->getChunkLength() > B(4)) {
             serializeEncodedUnicastAddress(stream, pimJoinPrune->getUpstreamNeighborAddress());
             stream.writeByte(pimJoinPrune->getReserved2());
             stream.writeByte(pimJoinPrune->getJoinPruneGroupsArraySize());
@@ -214,6 +217,7 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                 for (size_t k = 0; k < joinPruneGroups.getPrunedSourceAddressArraySize(); ++k) {
                     serializeEncodedSourceAddress(stream, joinPruneGroups.getPrunedSourceAddress(k));
                 }
+            }
             }
             break;
         }
@@ -362,6 +366,8 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimJoinPrune->setReserved(pimPacket->getReserved());
             pimJoinPrune->setChecksum(pimPacket->getChecksum());
             pimJoinPrune->setChecksumMode(pimPacket->getChecksumMode());
+            // a body-less Graft carries just the 4-byte header
+            if (stream.getRemainingLength() > B(0)) {
             length += deserializeEncodedUnicastAddress(stream, pimJoinPrune, pimJoinPrune->getUpstreamNeighborAddressForUpdate());
             pimJoinPrune->setReserved2(stream.readByte()); // Reserved
             pimJoinPrune->setJoinPruneGroupsArraySize(stream.readByte());
@@ -379,6 +385,7 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
                     length += deserializeEncodedSourceAddress(stream, pimJoinPrune, joinPruneGroup.getJoinedSourceAddressForUpdate(k));
                 for (size_t k = 0; k < pimJoinPrune->getJoinPruneGroups(i).getPrunedSourceAddressArraySize(); ++k)
                     length += deserializeEncodedSourceAddress(stream, pimJoinPrune, joinPruneGroup.getPrunedSourceAddressForUpdate(k));
+            }
             }
             pimJoinPrune->setChunkLength(length);
             return pimJoinPrune;
