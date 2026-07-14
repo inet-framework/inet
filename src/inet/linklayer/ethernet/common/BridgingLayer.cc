@@ -30,8 +30,10 @@ cGate *BridgingLayer::lookupModuleInterface(cGate *gate, const std::type_info &t
             if (interfaceReq != nullptr)
                 return findModuleInterface(gate, type, arguments, 1);
         }
-        else if (type == typeid(IEthernet))
-            return findModuleInterface(this->gate("lowerLayerOut"), type, arguments);
+        // forward all other lookups to the layer below: protocols unknown to the
+        // bridging layer (e.g. 802.1 sublayers, user developed protocols) are served
+        // by the modules there, and the returned interface bypasses this layer
+        return findModuleInterface(this->gate("lowerLayerOut"), type, arguments);
     }
     else if (gate->isName("upperLayerOut"))
         return findModuleInterface(gate, type, arguments); // forward all other interfaces
