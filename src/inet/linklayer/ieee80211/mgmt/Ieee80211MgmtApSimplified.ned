@@ -25,7 +25,7 @@ simple Ieee80211MgmtApSimplified extends SimpleModule like IIeee80211Mgmt
         string ssid = default("SSID");
         @display("i=block/cogwheel");
     gates:
-        input macIn @labels(Ieee80211MacHeader); // From ~Ieee80211Mac
+        input macIn @labels(Ieee80211MacHeader) @interface[inet::queueing::IPassivePacketSink]; // From ~Ieee80211Mac
         output macOut @labels(Ieee80211MacHeader); // To ~Ieee80211Mac
         input agentIn @loose;   // Unused dummy to satisfy the IIeee80211Mgmt interface
         output agentOut @loose; // Unused dummy to satisfy the IIeee80211Mgmt interface

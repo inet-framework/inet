@@ -26,7 +26,7 @@ simple Ieee80211MgmtStaSimplified extends SimpleModule like IIeee80211Mgmt
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
     gates:
-        input macIn @labels(Ieee80211MacHeader);
+        input macIn @labels(Ieee80211MacHeader) @interface[inet::queueing::IPassivePacketSink];
         output macOut @labels(Ieee80211MacHeader);
         input agentIn @loose;   // Unused dummy to satisfy the IIeee80211Mgmt interface
         output agentOut @loose; // Unused dummy to satisfy the IIeee80211Mgmt interface

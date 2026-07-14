@@ -107,7 +107,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @statistic[packetDropOther](title="packet drops: other"; source=packetDropReasonIsOther(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         upperLayerIn @interface[inet::queueing::IPassivePacketSink](pdu=ieee8022llc);
-        input mgmtIn;
+        input mgmtIn @interface[inet::queueing::IPassivePacketSink];
         output mgmtOut;
     submodules:
         dcf: <default("Dcf")> like IDcf {

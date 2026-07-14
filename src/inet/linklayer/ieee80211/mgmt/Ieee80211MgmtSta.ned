@@ -36,7 +36,7 @@ simple Ieee80211MgmtSta extends SimpleModule like IIeee80211Mgmt
         @signal[l2Associated](type=inet::NetworkInterface);
         @signal[l2BeaconLost](type=inet::NetworkInterface);
     gates:
-        input macIn @labels(Ieee80211MacHeader);
+        input macIn @labels(Ieee80211MacHeader) @interface[inet::queueing::IPassivePacketSink];
         output macOut @labels(Ieee80211MacHeader);
         input agentIn;   // Used for attaching an agent algorithm
         output agentOut; // Used for attaching an agent algorithm
