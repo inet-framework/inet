@@ -313,7 +313,8 @@ class Ieee80211AddbaResponse extends Ieee80211ActionFrame
 //
 class Ieee80211Delba extends Ieee80211ActionFrame
 {
-    chunkLength = LENGTH_DELBA;
+    chunkLength = LENGTH_DELBA - B(4); // header without the 4-byte FCS, as for the other action frames
+
     category = 3; // Category field is set to 3 (representing DELBA). (1 byte)
     blockAckAction = 2; // Block Ack Action field is set to 2 (representing DELBA). (1 byte)
 
