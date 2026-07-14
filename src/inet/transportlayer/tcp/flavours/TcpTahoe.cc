@@ -61,23 +61,18 @@ void TcpTahoe::receivedDataAck(uint32_t firstSeqAcked)
     // Perform slow start and congestion avoidance.
     //
     if (state->snd_cwnd < state->ssthresh) {
-        EV_DETAIL << "cwnd <= ssthresh: Slow Start: increasing cwnd by SMSS bytes to ";
-
-        // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
-        // by at most SMSS bytes for each ACK received that acknowledges new data."
-        state->snd_cwnd += state->snd_mss;
-
-        // Note: we could increase cwnd based on the number of bytes being
-        // acknowledged by each arriving ACK, rather than by the number of ACKs
-        // that arrive. This is called "Appropriate Byte Counting" (ABC) and is
-        // described in RFC 3465 (experimental).
-        //
-//        int bytesAcked = state->snd_una - firstSeqAcked;
-//        state->snd_cwnd += bytesAcked;
-
-        conn->emit(cwndSignal, state->snd_cwnd);
-
-        EV_DETAIL << "cwnd=" << state->snd_cwnd << "\n";
+        // RFC 5681 slow start (Eq 2): cwnd += min(N, SMSS) per ACK -- at most one
+        // SMSS, keeping textbook Tahoe growth. The only change is the cwnd-limited
+        // gate (RFC 5681 principle, Linux tcp_is_cwnd_limited): grow only while the
+        // sender actually fills the window (cwnd < 2 * max_packets_out, in
+        // segments); an application-limited flow that never fills cwnd must not
+        // inflate it. (ABC/byte-counting growth, RFC 3465, is deliberately NOT
+        // adopted here -- only TcpCubic uses it, to model Linux.)
+        if ((state->snd_cwnd / state->snd_mss) < 2 * state->maxPacketsOut) {
+            state->snd_cwnd += state->snd_mss;
+            conn->emit(cwndSignal, state->snd_cwnd);
+        }
+        EV_DETAIL << "cwnd <= ssthresh: Slow Start: cwnd=" << state->snd_cwnd << "\n";
     }
     else {
         // perform Congestion Avoidance (RFC 2581)

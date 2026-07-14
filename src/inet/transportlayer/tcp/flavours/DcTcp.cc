@@ -171,16 +171,19 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
             // less than RTT, then perform slow start and congestion avoidance.
 
             if (state->snd_cwnd < state->ssthresh) {
-                EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
-
-                // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
-                // by at most SMSS bytes for each ACK received that acknowledges new data."
-                state->snd_cwnd += state->snd_mss;
-
-                conn->emit(cwndSignal, state->snd_cwnd);
-                conn->emit(ssthreshSignal, state->ssthresh);
-
-                EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
+                // RFC 5681 slow start (Eq 2): cwnd += min(N, SMSS) per ACK -- at
+                // most one SMSS. The only change is the cwnd-limited gate (RFC 5681
+                // principle, Linux tcp_is_cwnd_limited): grow only while the sender
+                // actually fills the window (cwnd < 2 * max_packets_out, in
+                // segments); an application-limited flow that never fills cwnd must
+                // not inflate it. (ABC/byte-counting growth, RFC 3465, is
+                // deliberately NOT adopted here -- only TcpCubic uses it.)
+                if ((state->snd_cwnd / state->snd_mss) < 2 * state->maxPacketsOut) {
+                    state->snd_cwnd += state->snd_mss;
+                    conn->emit(cwndSignal, state->snd_cwnd);
+                    conn->emit(ssthreshSignal, state->ssthresh);
+                }
+                EV_INFO << "cwnd <= ssthresh: Slow Start: cwnd=" << state->snd_cwnd << "\n";
             }
             else {
                 // perform Congestion Avoidance (RFC 2581)

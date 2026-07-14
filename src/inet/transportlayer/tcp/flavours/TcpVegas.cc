@@ -163,9 +163,17 @@ void TcpVegas::receivedDataAck(uint32_t firstSeqAcked)
 
                             conn->emit(cwndSignal, state->snd_cwnd);
                         }
-                        else {
+                        else if ((state->snd_cwnd / state->snd_mss) < 2 * state->maxPacketsOut) {
+                            // Only grow while cwnd-limited (RFC 5681 principle,
+                            // Linux tcp_is_cwnd_limited): an application-limited
+                            // flow that never fills the window must not inflate
+                            // cwnd. This is the same cwnd-limited gate the other
+                            // flavours now apply to their own growth step.
                             state->v_incr = state->snd_mss; // incr 1 segment
                             state->v_incr_ss = true;
+                        }
+                        else {
+                            state->v_incr = 0;
                         }
                     }
                 } // end slow start
