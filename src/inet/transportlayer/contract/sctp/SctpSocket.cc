@@ -426,6 +426,10 @@ bool SctpSocket::belongsToSocket(cMessage *msg) const
 void SctpSocket::setCallback(ICallback *callback)
 {
     cb = callback;
+    // register this socket as the association's protocol side callback; needed for
+    // accepted sockets which never go through listen() or connect()
+    if (sctp.getReferencedGate() != nullptr)
+        sctp->setCallback(assocId, this);
 }
 
 void SctpSocket::processMessage(cMessage *msg)
@@ -635,6 +639,16 @@ bool SctpSocket::isOpen() const
 void SctpSocket::handleEstablished(Indication *indication)
 {
     EV_INFO << "SCTP_I_ESTABLISHED\n";
+    int socketId = indication->getTag<SocketInd>()->getSocketId();
+    if (oneToOne && socketId != assocId) {
+        // establishment of a forked association delivered through the listening
+        // socket: don't adopt the connection parameters, just notify the application
+        if (cb != nullptr)
+            cb->socketEstablished(this, indication);
+        else
+            EV_WARN << "No callback for socketEstablished" << EV_ENDL;
+        return;
+    }
     if (oneToOne)
         sockstate = CONNECTED;
     auto connectInfo = indication->getTag<SctpConnectReq>();

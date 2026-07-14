@@ -279,7 +279,7 @@ void Sctp::handleMessage(cMessage *msg)
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void *)socketOptions);
             cmsg->addTag<SocketInd>()->setSocketId(assocId);
-            send(cmsg, "appOut");
+// TODO           send(cmsg, "appOut");
             delete msg;
         }
         else {
@@ -961,7 +961,10 @@ void Sctp::sendToApp(cMessage *msg)
 
 void Sctp::setCallback(int socketId, ICallback *callback)
 {
-    getAssoc(socketId)->callback = callback;
+    // tolerate a not yet existing association: listening sockets register their
+    // callback before listen() creates the association, and listen() registers again
+    if (auto assoc = getAssoc(socketId))
+        assoc->callback = callback;
 }
 
 void Sctp::listen(int socketId, const std::vector<L3Address>& localAddresses, int localPort, bool fork, int inboundStreams, int outboundStreams, bool streamReset, uint32_t requests, uint32_t messagesToPush)
