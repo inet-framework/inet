@@ -350,9 +350,20 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     // RFC 3168 section 6.1.1: a host MUST NOT set an ECT codepoint on a SYN or
     // SYN-ACK -- those are control segments and are always sent Not-ECT (this also
     // matches Linux, whose AccECN/ECN SYN-ACK carries Not-ECT in the IP header
-    // even though state->ect is already true by then). Pure ACKs (sndAck) and
-    // retransmissions are likewise excluded per section 6.1.
-    tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification((state->ect && !state->sndAck && !state->rexmit && !tcpHeader->getSynBit()) ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
+    // even though state->ect is already true by then).
+    //
+    // AccECN (draft-ietf-tcpm-accurate-ecn section 3.1.5) reverses two of RFC
+    // 3168's restrictions: once AccECN is negotiated, the Data Sender sets ECT on
+    // EVERY packet except the SYN/SYN-ACK -- including pure ACKs, retransmissions
+    // and window probes -- so that congestion can be measured on the whole flow,
+    // not just new-data packets (Linux marks ECT(0) identically). Classic RFC 3168
+    // keeps the pure-ACK and retransmission exclusions.
+    bool markEct;
+    if (state->accEcnNegotiated)
+        markEct = state->ect && !tcpHeader->getSynBit();
+    else
+        markEct = state->ect && !state->sndAck && !state->rexmit && !tcpHeader->getSynBit();
+    tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification(markEct ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
 
     tcpHeader->setChecksum(0);
     tcpHeader->setChecksumMode(tcpMain->checksumMode);
