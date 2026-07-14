@@ -188,7 +188,8 @@ void Icmpv6::processICMPv6Message(Packet *packet)
                 EV_INFO << "ICMPv6: forwarding MLD message (type=" << type << ") to MLD module.\n";
                 packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::mld);
                 packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mld);
-                send(packet, "ipv6Out");
+                yieldBeforePush();
+                ipv6Sink.pushPacket(packet);
                 break;
             }
             default:

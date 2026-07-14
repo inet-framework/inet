@@ -23,7 +23,7 @@ namespace inet {
 class IInterfaceTable;
 class Ipv6RoutingTable;
 
-class INET_API Mldv1 : public OperationalBase, public cListener
+class INET_API Mldv1 : public OperationalBase, public cListener, public queueing::IPassivePacketSink
 {
   protected:
     // --- Host listener state machine (RFC 2710 §5) ---
@@ -112,6 +112,7 @@ class INET_API Mldv1 : public OperationalBase, public cListener
   protected:
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<Ipv6RoutingTable> rt;
+    queueing::PassivePacketSinkRef ipSink;
 
     bool enabled = true;
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
@@ -223,6 +224,14 @@ class INET_API Mldv1 : public OperationalBase, public cListener
 
     // Router Done handler
     virtual void processDone(NetworkInterface *ie, Packet *packet);
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet

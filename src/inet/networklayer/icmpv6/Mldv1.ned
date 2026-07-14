@@ -76,6 +76,6 @@ simple Mldv1 extends SimpleModule like IMld
         @display("i=block/cogwheel");
 
     gates:
-        input ipIn @labels(Ipv6ControlInfo/up);
+        input ipIn @labels(Ipv6ControlInfo/up) @interface[inet::queueing::IPassivePacketSink](protocol=mld; service=indication; sdu=ipv6);
         output ipOut @labels(Ipv6ControlInfo/down);
 }

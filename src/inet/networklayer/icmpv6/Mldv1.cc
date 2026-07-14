@@ -17,6 +17,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/common/SimulationContinuation.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/MldMessage_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
@@ -134,6 +135,7 @@ void Mldv1::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        ipSink.reference(gate("ipOut"), true);
 
         // Read NED parameter
         unsolicitedReportInterval = par("unsolicitedReportInterval");
@@ -489,7 +491,8 @@ void Mldv1::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& des
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);   // RFC 2710 §3: hop limit = 1
-    send(msg, "ipOut");
+    yieldBeforePush();
+    ipSink.pushPacket(msg);
 }
 
 // --- Lifecycle ---
@@ -730,6 +733,13 @@ void Mldv1::processDone(NetworkInterface *ie, Packet *packet)
     }
 
     delete packet;
+}
+
+void Mldv1::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet
