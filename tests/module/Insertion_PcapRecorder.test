@@ -1,0 +1,102 @@
+%description:
+
+D3/D5(a) proving test, shape (ii): a signal-based PcapRecorder is added to
+a host in a working UDP client/server simulation. PcapRecorder
+(inet/common/packet/recorder/PcapRecorder.ned) is purely a signal listener
+(subscribes to "transmissionEnded"/"receptionEnded" on the host's eth[*]
+submodules by default) -- it never sits in the packet path, so adding it
+must not change any application-visible behavior. StandardHost already
+offers this as a plain parameter (recordPcap / numPcapRecorders, inherited
+from LinkLayerNodeBase) -- no new NED is needed at all.
+
+This file's ini has two configs:
+- [Config Baseline]: *.server.recordPcap = false (default)
+- [Config WithPcap]: *.server.recordPcap = true
+
+Both configs were run manually and produce IDENTICAL app-level output
+(client sends 6 UDP packets -- the 6th right at the sim-time-limit, never
+delivered, in both configs alike -- server receives 5); this test commits
+the WithPcap variant and additionally asserts the pcap file gets produced.
+
+%#--------------------------------------------------------------------------------------------------------------
+%extraargs: -c WithPcap
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 5ms
+cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+*.client.hasTcp = false
+*.client.hasSctp = false
+*.client.hasQuic = false
+*.server.hasTcp = false
+*.server.hasSctp = false
+*.server.hasQuic = false
+
+*.client.numApps = 1
+*.client.app[0].typename = "UdpSourceApp"
+*.client.app[0].source.packetLength = 100B
+*.client.app[0].source.productionInterval = 1ms
+*.client.app[0].io.destAddress = "server"
+*.client.app[0].io.destPort = 1000
+
+*.server.numApps = 1
+*.server.app[0].typename = "UdpSinkApp"
+*.server.app[0].io.localPort = 1000
+
+# PcapRecorder needs a real (not just "declared correct") FCS to serialize frames
+**.fcsMode = "computed"
+**.checksumMode = "computed"
+
+[Config Baseline]
+*.server.recordPcap = false
+
+[Config WithPcap]
+*.server.recordPcap = true
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network Test
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=300,100");
+        }
+        client: StandardHost {
+            @display("p=150,250");
+        }
+        server: StandardHost {
+            @display("p=450,250");
+        }
+    connections:
+        client.ethg++ <--> { datarate = 100Mbps; delay = 10us; } <--> server.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/WithPcap-0.sca
+scalar Test.client.app[0].io "packets sent" 6
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/WithPcap-0.sca
+scalar Test.server.app[0].io "packets received" 5
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: ls results/*Test.server*.pcap* 2>/dev/null | wc -l > pcapcount.out
+%contains: pcapcount.out
+1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

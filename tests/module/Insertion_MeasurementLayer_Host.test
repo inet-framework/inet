@@ -1,0 +1,114 @@
+%description:
+
+D3/D5(a) proving test, shape (i)+(iii-host): an in-path measurement layer
+(inet.protocolelement.measurement.MeasurementLayer) is spliced into a
+StandardHost at the transport/network boundary (the udp<->tn dispatcher
+link), using the same NED extension + @reconnect technique as the
+FlowMeasurementShowcase (MyStandardHost there, "MeasuredHost" here) -- there
+is no built-in StandardHost parameter for this, so the insertion point is a
+small NED subclass that reconnects two existing gates around a new
+"like IMeasurementLayer" submodule.
+
+This file's ini has two configs:
+- [Config Baseline]: measurementLayer.typename = "" (IMeasurementLayer's
+  @omittedTypename substitutes OmittedMeasurementLayer, a pure pass-through)
+- [Config WithMeasurement]: measurementLayer.typename = "MeasurementLayer"
+  (a real FlowMeasurementStarter/FlowMeasurementRecorder pair spliced in)
+
+Both configs were run manually and produce IDENTICAL app-level output
+(6 packets sent by the client -- the 6th is emitted right at the
+sim-time-limit and never delivered, in both configs alike -- and 5 packets
+received by the server -- see the scalar assertions below); this test
+commits the WithMeasurement variant to prove insertion doesn't change
+application-visible behavior.
+
+%#--------------------------------------------------------------------------------------------------------------
+%extraargs: -c WithMeasurement
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 5ms
+cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+*.client.hasTcp = false
+*.client.hasSctp = false
+*.client.hasQuic = false
+*.server.hasTcp = false
+*.server.hasSctp = false
+*.server.hasQuic = false
+
+*.client.numApps = 1
+*.client.app[0].typename = "UdpSourceApp"
+*.client.app[0].source.packetLength = 100B
+*.client.app[0].source.productionInterval = 1ms
+*.client.app[0].io.destAddress = "server"
+*.client.app[0].io.destPort = 1000
+
+*.server.numApps = 1
+*.server.app[0].typename = "UdpSinkApp"
+*.server.app[0].io.localPort = 1000
+
+[Config Baseline]
+*.client.measurementLayer.typename = ""
+*.server.measurementLayer.typename = ""
+
+[Config WithMeasurement]
+*.client.measurementLayer.typename = "MeasurementLayer"
+*.server.measurementLayer.typename = "MeasurementLayer"
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocolelement.measurement.IMeasurementLayer;
+
+module MeasuredHost extends StandardHost
+{
+    submodules:
+        measurementLayer: <default("")> like IMeasurementLayer {
+            @display("p=450,250");
+        }
+    connections:
+        udp.ipOut --> { @reconnect; } --> measurementLayer.upperLayerIn if hasUdp;
+        measurementLayer.lowerLayerOut --> { @reconnect; } --> tn.in[0] if hasUdp;
+        udp.ipIn <-- { @reconnect; } <-- measurementLayer.upperLayerOut if hasUdp;
+        measurementLayer.lowerLayerIn <-- { @reconnect; } <-- tn.out[0] if hasUdp;
+}
+
+network Test
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=300,100");
+        }
+        client: MeasuredHost {
+            @display("p=150,250");
+        }
+        server: MeasuredHost {
+            @display("p=450,250");
+        }
+    connections:
+        client.ethg++ <--> { datarate = 100Mbps; delay = 10us; } <--> server.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/WithMeasurement-0.sca
+scalar Test.client.app[0].io "packets sent" 6
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/WithMeasurement-0.sca
+scalar Test.server.app[0].io "packets received" 5
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

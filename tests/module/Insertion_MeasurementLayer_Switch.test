@@ -1,0 +1,109 @@
+%description:
+
+D3/D5(a) proving test, shape (i)+(iii-switch): a processing-delay layer is
+enabled inside a switch's bridging layer. Unlike the plain EthernetSwitch
+(whose default "bridging" submodule is MacRelayUnit/Ieee8021dRelay, which
+has no such slot), TsnSwitch already switches "bridging" to the modular
+"BridgingLayer" (inet/linklayer/ethernet/common/BridgingLayer.ned), which
+has an optional "processingDelayLayer: <default(\"\")> like
+IProcessingDelayLayer" submodule slot spliced directly into its pipeline
+(upperLayerIn -> processingDelayLayer -> directionReverser -> ... and back).
+This test uses a zero-delay/pass-through "ProcessingDelayLayer" instance
+(ingress/egress PacketDelayer, delay = 0s) there -- no new NED is invented.
+
+This file's ini has two configs:
+- [Config Baseline]: bridging.processingDelayLayer.typename = "" (the
+  @omittedTypename mechanism substitutes OmittedProcessingDelayLayer, a
+  pure pass-through)
+- [Config WithProcessingDelay]: bridging.processingDelayLayer.typename =
+  "ProcessingDelayLayer" with delay = 0s on both the ingress and egress
+  packet delayers
+
+Both configs were run manually and produce IDENTICAL app-level output
+(client sends 6 UDP packets -- the 6th right at the sim-time-limit, never
+delivered, in both configs alike -- server receives 5); this test commits
+the WithProcessingDelay variant to prove insertion doesn't change
+application-visible behavior.
+
+%#--------------------------------------------------------------------------------------------------------------
+%extraargs: -c WithProcessingDelay
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 5ms
+cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+*.client.hasTcp = false
+*.client.hasSctp = false
+*.client.hasQuic = false
+*.server.hasTcp = false
+*.server.hasSctp = false
+*.server.hasQuic = false
+*.switch.eth[*].bitrate = 100Mbps
+
+*.client.numApps = 1
+*.client.app[0].typename = "UdpSourceApp"
+*.client.app[0].source.packetLength = 100B
+*.client.app[0].source.productionInterval = 1ms
+*.client.app[0].io.destAddress = "server"
+*.client.app[0].io.destPort = 1000
+
+*.server.numApps = 1
+*.server.app[0].typename = "UdpSinkApp"
+*.server.app[0].io.localPort = 1000
+
+[Config Baseline]
+*.switch.bridging.processingDelayLayer.typename = ""
+
+[Config WithProcessingDelay]
+*.switch.bridging.processingDelayLayer.typename = "ProcessingDelayLayer"
+*.switch.bridging.processingDelayLayer.ingress.delay = 0s
+*.switch.bridging.processingDelayLayer.egress.delay = 0s
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.tsn.TsnSwitch;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network Test
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=300,100");
+        }
+        client: StandardHost {
+            @display("p=100,250");
+        }
+        switch: TsnSwitch {
+            @display("p=300,250");
+        }
+        server: StandardHost {
+            @display("p=500,250");
+        }
+    connections:
+        client.ethg++ <--> { datarate = 100Mbps; delay = 10us; } <--> switch.ethg++;
+        switch.ethg++ <--> { datarate = 100Mbps; delay = 10us; } <--> server.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/WithProcessingDelay-0.sca
+scalar Test.client.app[0].io "packets sent" 6
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/WithProcessingDelay-0.sca
+scalar Test.server.app[0].io "packets received" 5
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
