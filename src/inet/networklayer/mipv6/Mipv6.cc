@@ -13,8 +13,10 @@
 
 #include <algorithm>
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
@@ -643,9 +645,11 @@ void Mipv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& dest
     // TODO solve the HA DAD problem in a different way
     // (delay currently specified via the sendTime parameter)
     if (sendTime > 0)
-        sendDelayed(msg, sendTime, "toIPv6");
-    else
-        send(msg, "toIPv6");
+        inet::scheduleAfter("sendMobilityMessageToIPv6Module", sendTime, [this, msg] () { toIpv6Sink.pushPacket(msg); });
+    else {
+        yieldBeforePush();
+        toIpv6Sink.pushPacket(msg);
+    }
 }
 
 void Mipv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu)

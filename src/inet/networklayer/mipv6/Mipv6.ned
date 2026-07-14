@@ -37,7 +37,7 @@ simple Mipv6 extends SimpleModule
         @signal[mipv6RoCompleted](type=cMessage?);
         @signal[packetDropped](type=cPacket);
     gates:
-        input fromIPv6;
+        input fromIPv6 @interface[inet::queueing::IPassivePacketSink](protocol=mobileipv6; service=indication; sdu=ipv6);
         output toIPv6;
 }
 
