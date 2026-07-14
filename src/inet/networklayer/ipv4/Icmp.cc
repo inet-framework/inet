@@ -24,7 +24,9 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/SimulationContinuation.h"
 
 namespace inet {
@@ -63,6 +65,10 @@ void Icmp::initialize(int stage)
         WATCH(numEchoReplied);
         WATCH(numErrorsSent);
         WATCH(numErrorsReceived);
+
+        auto ipv4Gate = findModuleInterface(gate("ipOut"), typeid(IIpv4));
+        if (ipv4Gate)
+            ipv4Module = check_and_cast<Ipv4 *>(ipv4Gate->getOwnerModule());
     }
 }
 
@@ -294,10 +300,8 @@ void Icmp::processIcmpMessage(Packet *packet)
                     delete indication;
                 }
                 else {
-                    // Send the Indication to IPv4 via ipOut; IPv4 will pop the quoted
-                    // IPv4 header and forward the indication to the transport protocol.
-                    indication->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-                    send(indication, "ipOut");
+                    // Call Ipv4 directly to forward the ICMP error to the transport protocol.
+                    ipv4Module->handleIcmpErrorIndication(indication);
                 }
             }
             break;

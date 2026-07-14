@@ -215,7 +215,7 @@ simple Tcp extends SimpleModule like ITcp
         @signal[packetDropped](type=inet::Packet);
     gates:
         input appIn @interface[inet::tcp::ITcp] @interface[inet::queueing::IPassivePacketSink](protocol=tcp; service=request; sdu=tcp) @labels(TcpCommand/down) @messageKinds(inet::TcpCommandCode);
-        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=tcp; service=indication; sdu=ipv4, ipv6; pdu=tcp) @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
+        input ipIn @interface[inet::tcp::Tcp] @interface[inet::queueing::IPassivePacketSink](protocol=tcp; service=indication; sdu=ipv4, ipv6; pdu=tcp) @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output appOut @labels(TcpCommand/up) @messageKinds(inet::TcpStatusInd);
         output ipOut @labels(TcpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }

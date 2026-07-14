@@ -30,7 +30,7 @@ simple Icmpv6 extends SimpleModule
         string mldModule = default("");  // Path to the MLD module, or "" if MLD is not enabled; MLD messages are dropped when empty
         @display("i=block/control");
     gates:
-        input transportIn @interface[inet::queueing::IPassivePacketSink](protocol=icmpv6; service=indication);
+        input transportIn @interface[inet::queueing::IPassivePacketSink](protocol=icmpv6; service=indication) @interface[inet::Icmpv6];
         output transportOut;
         input ipv6In;
         output ipv6Out;

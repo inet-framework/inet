@@ -83,7 +83,7 @@ simple Udp extends SimpleModule like IUdp
 
     gates:
         input appIn @interface[inet::IUdp] @interface[inet::queueing::IPassivePacketSink](protocol=udp; service=request; sdu=udp) @labels(UdpCommand/down) @messageKinds(inet::UdpCommandCode);
-        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=udp; service=indication; sdu=ipv4, ipv6; pdu=udp) @labels(UdpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
+        input ipIn @interface[inet::Udp] @interface[inet::queueing::IPassivePacketSink](protocol=udp; service=indication; sdu=ipv4, ipv6; pdu=udp) @labels(UdpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output appOut @labels(UdpCommand/up) @messageKinds(inet::UdpStatusInd);
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }

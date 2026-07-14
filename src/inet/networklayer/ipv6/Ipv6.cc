@@ -34,7 +34,14 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6MulticastRoute.h"
 #include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/common/SimulationContinuation.h"
+#ifdef INET_WITH_UDP
+#include "inet/transportlayer/udp/Udp.h"
+#endif
+#ifdef INET_WITH_TCP
+#include "inet/transportlayer/tcp/Tcp.h"
+#endif
 
 
 namespace inet {
@@ -292,6 +299,9 @@ void Ipv6::handleIndication(Indication *indication)
 
 void Ipv6::handleIcmpErrorIndication(Indication *indication)
 {
+    Enter_Method("handleIcmpErrorIndication");
+    take(indication);
+
     auto& errorInd = indication->getTagForUpdate<Icmpv6ErrorInd>();
     Packet *originalPacket = errorInd->getOriginalPacketForUpdate();
 
@@ -303,8 +313,6 @@ void Ipv6::handleIcmpErrorIndication(Indication *indication)
     l3Ind->setDestAddress(ipv6Header->getDestAddress());
     originalPacket->addTagIfAbsent<HopLimitInd>()->setHopLimit(ipv6Header->getHopLimit());
 
-    // Dispatch the same Indication to the appropriate transport protocol.
-    // SP_INDICATION routes via protocolToGateIndex to the transport module's ipIn gate.
     // The offending packet may begin with an IPv6 extension header (e.g. a Type-2
     // Routing Header inserted by route optimization), which is not a registered
     // transport protocol; in that case the error cannot be delivered to a transport,
@@ -317,12 +325,29 @@ void Ipv6::handleIcmpErrorIndication(Indication *indication)
         delete indication;
         return;
     }
-    auto& dispatchReq = indication->addTagIfAbsent<DispatchProtocolReq>();
-    dispatchReq->setProtocol(protocol);
-    dispatchReq->setServicePrimitive(SP_INDICATION);
-
     EV_INFO << "Forwarding ICMPv6 error indication to transport protocol " << protocol->getName() << "\n";
-    send(indication, "transportOut");
+
+    // Find the target transport module through gate connections and call it directly;
+    // the lookup must use the concrete module type, because packet sink lookups are
+    // answered by the message dispatchers between the layers
+#ifdef INET_WITH_UDP
+    if (protocol == &Protocol::udp) {
+        if (auto targetGate = findModuleInterface(gate("transportOut"), typeid(Udp), nullptr)) {
+            check_and_cast<Udp *>(targetGate->getOwnerModule())->processIcmpv6Error(indication);
+            return;
+        }
+    }
+#endif
+#ifdef INET_WITH_TCP
+    if (protocol == &Protocol::tcp) {
+        if (auto targetGate = findModuleInterface(gate("transportOut"), typeid(tcp::Tcp), nullptr)) {
+            check_and_cast<tcp::Tcp *>(targetGate->getOwnerModule())->processIcmpv6Error(indication);
+            return;
+        }
+    }
+#endif
+    EV_WARN << "No transport module found for protocol " << protocol->getName() << ", discarding ICMPv6 error\n";
+    delete indication;
 }
 
 NetworkInterface *Ipv6::getSourceInterfaceFrom(Packet *packet)
