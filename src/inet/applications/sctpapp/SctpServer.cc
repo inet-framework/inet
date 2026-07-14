@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
@@ -81,6 +82,7 @@ void SctpServer::initialize(int stage)
 
         socket = new SctpSocket();
         socket->setOutputGate(gate("socketOut"));
+        socket->setCallback(this);
         socket->setInboundStreams(inboundStreams);
         socket->setOutboundStreams(outboundStreams);
 
@@ -103,34 +105,6 @@ void SctpServer::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
-}
-
-void SctpServer::sendOrSchedule(cMessage *msg)
-{
-    if (delay == 0)
-        send(msg, "socketOut");
-    else
-        scheduleAfter(delay, msg);
-}
-
-void SctpServer::sendOrSchedule(Message *msg)
-{
-    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
-    msg->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
-    if (delay == 0)
-        send(msg, "socketOut");
-    else
-        scheduleAfter(delay, msg);
-}
-
-void SctpServer::sendOrSchedule(Packet *pkt)
-{
-    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
-    pkt->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
-    if (delay == 0)
-        send(pkt, "socketOut");
-    else
-        scheduleAfter(delay, pkt);
 }
 
 void SctpServer::generateAndSend()
@@ -160,42 +134,38 @@ void SctpServer::generateAndSend()
     applicationPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
     bytesSent += numBytes;
     packetsSent++;
-    sendOrSchedule(applicationPacket);
+    if (delay == 0)
+        socket->send(applicationPacket);
+    else {
+        inet::scheduleAfter("send", delay, [=] () {
+            socket->send(applicationPacket);
+        });
+    }
 }
 
-Message *SctpServer::makeReceiveRequest(cMessage *msg)
-{
-    Message *message = check_and_cast<Message *>(msg);
-    auto& intags = message->getTags();
-    const auto& ind = intags.findTag<SctpCommandReq>();
-    Request *cmsg = new Request("ReceiveRequest", SCTP_C_RECEIVE);
-    auto cmd = cmsg->addTag<SctpSendReq>();
-    cmd->setSocketId(ind->getSocketId());
-    cmd->setSid(ind->getSid());
-    cmd->setNumMsgs(ind->getNumMsgs());
-    return cmsg;
-}
+//Message *SctpServer::makeReceiveRequest(cMessage *msg)
+//{
+//    Message *message = check_and_cast<Message *>(msg);
+//    auto& intags = message->getTags();
+//    const auto& ind = intags.findTag<SctpCommandReq>();
+//    Request *cmsg = new Request("ReceiveRequest", SCTP_C_RECEIVE);
+//    auto cmd = cmsg->addTag<SctpSendReq>();
+//    cmd->setSocketId(ind->getSocketId());
+//    cmd->setSid(ind->getSid());
+//    cmd->setNumMsgs(ind->getNumMsgs());
+//    return cmsg;
+//}
 
-Message *SctpServer::makeDefaultReceive()
-{
-    Request *cmsg = new Request("DefaultReceive", SCTP_C_RECEIVE);
-    auto& cmd = cmsg->addTag<SctpCommandReq>();
-    cmd->setSocketId(assocId);
-    cmd->setSid(0);
-    cmd->setNumMsgs(1);
-    return cmsg;
-}
-
-Message *SctpServer::makeAbortNotification(const SctpCommandReq *msg)
-{
-    Request *cmsg = new Request("SCTP_C_ABORT", SCTP_C_ABORT);
-    auto& cmd = cmsg->addTag<SctpSendReq>();
-    assocId = msg->getSocketId();
-    cmd->setSocketId(assocId);
-    cmd->setSid(msg->getSid());
-    cmd->setNumMsgs(msg->getNumMsgs());
-    return cmsg;
-}
+//Message *SctpServer::makeAbortNotification(const SctpCommandReq *msg)
+//{
+//    Request *cmsg = new Request("SCTP_C_ABORT", SCTP_C_ABORT);
+//    auto& cmd = cmsg->addTag<SctpSendReq>();
+//    assocId = msg->getSocketId();
+//    cmd->setSocketId(assocId);
+//    cmd->setSid(msg->getSid());
+//    cmd->setNumMsgs(msg->getNumMsgs());
+//    return cmsg;
+//}
 
 void SctpServer::handleMessage(cMessage *msg)
 {
@@ -214,7 +184,7 @@ void SctpServer::handleMessage(cMessage *msg)
                 serverAssocStatMap[assocId].peerClosed = true;
                 if (par("numPacketsToReceivePerClient").intValue() == 0) {
                     if (serverAssocStatMap[assocId].abortSent == false) {
-                        sendOrSchedule(makeAbortNotification(command->dup()));
+                        // TODO sendOrSchedule(makeAbortNotification(command->dup()));
                         serverAssocStatMap[assocId].abortSent = true;
                     }
                 }
@@ -222,7 +192,7 @@ void SctpServer::handleMessage(cMessage *msg)
                     if (serverAssocStatMap[assocId].rcvdPackets == (long)par("numPacketsToReceivePerClient")
                         && serverAssocStatMap[assocId].abortSent == false)
                     {
-                        sendOrSchedule(makeAbortNotification(command->dup()));
+                        // TODO sendOrSchedule(makeAbortNotification(command->dup()));
                         serverAssocStatMap[assocId].abortSent = true;
                     }
                 }
@@ -255,6 +225,10 @@ void SctpServer::handleMessage(cMessage *msg)
                 assocId = connectInfo->getSocketId();
                 inboundStreams = connectInfo->getInboundStreams();
                 outboundStreams = connectInfo->getOutboundStreams();
+                auto newSocket = new SctpSocket(message);
+                newSocket->setOutputGate(gate("socketOut"));
+                newSocket->setCallback(this);
+                serverAssocStatMap[assocId].socket = newSocket;
                 serverAssocStatMap[assocId].rcvdPackets = par("numPacketsToReceivePerClient");
                 serverAssocStatMap[assocId].sentPackets = par("numPacketsToSendPerClient");
                 serverAssocStatMap[assocId].rcvdBytes = 0;
@@ -294,12 +268,13 @@ void SctpServer::handleMessage(cMessage *msg)
                                 numRequestsToSend--;
                                 i->second.sentPackets = numRequestsToSend;
                             }
-
-                            Request *cmsg = new Request("SCTP_C_QUEUE_MSGS_LIMIT", SCTP_C_QUEUE_MSGS_LIMIT);
-                            auto& qinfo = cmsg->addTag<SctpInfoReq>();
-                            qinfo->setText(queueSize);
-                            qinfo->setSocketId(id);
-                            sendOrSchedule(cmsg);
+                            if (delay == 0)
+                                socket->setQueueLimits(queueSize, B(-1));
+                            else {
+                                inet::scheduleAfter("setQueueLimits", delay, [=] () {
+                                    socket->setQueueLimits(queueSize, B(-1));
+                                });
+                            }
                         }
                         auto j = serverAssocStatMap.find(assocId);
                         if (j->second.rcvdPackets == 0 && par("waitToClose").doubleValue() > 0) {
@@ -310,10 +285,13 @@ void SctpServer::handleMessage(cMessage *msg)
                         }
                         else {
                             EV_INFO << "no more packets to send, call shutdown for assoc " << assocId << "\n";
-                            Request *cmsg = new Request("ShutdownRequest", SCTP_C_SHUTDOWN);
-                            auto& cmd = cmsg->addTag<SctpCommandReq>();
-                            cmd->setSocketId(assocId);
-                            sendOrSchedule(cmsg);
+                            if (delay == 0)
+                                socket->shutdown();
+                            else {
+                                inet::scheduleAfter("shutdown", delay, [=] () {
+                                    socket->shutdown();
+                                });
+                            }
                         }
                     }
                 }
@@ -322,28 +300,46 @@ void SctpServer::handleMessage(cMessage *msg)
 
             case SCTP_I_DATA_NOTIFICATION: {
                 notificationsReceived++;
-                Message *cmsg;
+                const auto& ind = check_and_cast<Message *>(msg)->getTag<SctpCommandReq>();
+                auto socket = serverAssocStatMap[ind->getSocketId()].socket;
                 if (schedule == false) {
                     if (delayFirstRead > 0 && !delayFirstReadTimer->isScheduled()) {
-                        cmsg = makeReceiveRequest(msg);
-                        scheduleAfter(delayFirstRead, cmsg);
+                        inet::scheduleAfter("receive", delayFirstRead, [=] () {
+                            socket->receive(ind->getSid(), ind->getNumMsgs());
+                        });
                         scheduleAfter(delayFirstRead, delayFirstReadTimer);
                     }
                     else if (readInt && firstData) {
                         firstData = false;
-                        cmsg = makeReceiveRequest(msg);
                         scheduleAfter(par("readingInterval"), delayTimer);
-                        sendOrSchedule(cmsg);
+                        if (delay == 0)
+                            socket->receive(ind->getSid(), ind->getNumMsgs());
+                        else {
+                            inet::scheduleAfter("receive", delay, [=] () {
+                                socket->receive(ind->getSid(), ind->getNumMsgs());
+                            });
+                        }
                     }
                     else if (delayFirstRead == 0 && readInt == false) {
-                        cmsg = makeReceiveRequest(msg);
-                        sendOrSchedule(cmsg);
+                        if (delay == 0)
+                            socket->receive(ind->getSid(), ind->getNumMsgs());
+                        else {
+                            inet::scheduleAfter("receive", delay, [=] () {
+                                socket->receive(ind->getSid(), ind->getNumMsgs());
+                            });
+                        }
                     }
                 }
                 else {
                     EV_INFO << simTime() << " makeReceiveRequest\n";
-                    cmsg = makeReceiveRequest(msg);
-                    sendOrSchedule(cmsg);
+                    const auto& ind = check_and_cast<Message *>(msg)->getTag<SctpCommandReq>();
+                    if (delay == 0)
+                        socket->receive(ind->getSid(), ind->getNumMsgs());
+                    else {
+                        inet::scheduleAfter("receive", delay, [=] () {
+                            socket->receive(ind->getSid(), ind->getNumMsgs());
+                        });
+                    }
                 }
                 delete msg;
                 break;
@@ -377,7 +373,7 @@ void SctpServer::handleMessage(cMessage *msg)
 
                         if (j->second.rcvdPackets == 0) {
                             if (serverAssocStatMap[assocId].peerClosed == true && serverAssocStatMap[assocId].abortSent == false) {
-                                sendOrSchedule(makeAbortNotification(ind.get()));
+                                // TODO sendOrSchedule(makeAbortNotification(ind.get()));
                                 serverAssocStatMap[assocId].abortSent = true;
                                 j->second.stop = simTime();
                                 j->second.lifeTime = j->second.stop - j->second.start;
@@ -387,7 +383,7 @@ void SctpServer::handleMessage(cMessage *msg)
                                 Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
                                 auto& qinfo = cmsg->addTag<SctpCommandReq>();
                                 qinfo->setSocketId(id);
-                                sendOrSchedule(cmsg);
+                                // TODO sendOrSchedule(cmsg);
                                 j->second.stop = simTime();
                                 j->second.lifeTime = j->second.stop - j->second.start;
                             }
@@ -412,7 +408,13 @@ void SctpServer::handleMessage(cMessage *msg)
                     cmsg->setKind(cmd->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
                     bytesSent += smsg->getChunkLength().get<B>();
                     packetsSent++;
-                    sendOrSchedule(cmsg);
+                    if (delay == 0)
+                        socket->send(cmsg);
+                    else {
+                        inet::scheduleAfter("send", delay, [=] () {
+                            socket->send(cmsg);
+                        });
+                    }
                 }
                 delete msg;
                 break;
@@ -427,7 +429,7 @@ void SctpServer::handleMessage(cMessage *msg)
                     Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING", SCTP_C_NO_OUTSTANDING);
                     auto& qinfo = cmsg->addTag<SctpCommandReq>();
                     qinfo->setSocketId(id);
-                    sendOrSchedule(cmsg);
+                    // TODO sendOrSchedule(cmsg);
                     i->second.stop = simTime();
                     i->second.lifeTime = i->second.stop - i->second.start;
                 }
@@ -469,7 +471,14 @@ void SctpServer::handleTimer(cMessage *msg)
 {
     if (msg == delayTimer) {
         if (delayFirstRead == 0) {
-            sendOrSchedule(makeDefaultReceive());
+            auto socket = serverAssocStatMap[assocId].socket;
+            if (delay == 0)
+                socket->receive(0, 1);
+            else {
+                inet::scheduleAfter("receive", delay, [=] () {
+                    socket->receive(0, 1);
+                });
+            }
             scheduleAfter(par("readingInterval"), delayTimer);
         }
         return;
@@ -479,7 +488,10 @@ void SctpServer::handleTimer(cMessage *msg)
         if (readInt && !delayTimer->isScheduled()) {
             simtime_t tempInterval = par("readingInterval");
             scheduleAfter(tempInterval, delayTimer);
-            scheduleAfter(tempInterval, makeDefaultReceive());
+            inet::scheduleAfter("receive", tempInterval, [=] () {
+                auto socket = serverAssocStatMap[assocId].socket;
+                socket->receive(0, 1);
+            });
         }
         return;
     }
@@ -495,22 +507,32 @@ void SctpServer::handleTimer(cMessage *msg)
             break;
 
         case SCTP_I_ABORT: {
-            Request *cmsg = new Request("SCTP_C_CLOSE", SCTP_C_CLOSE);
-            auto& cmd = cmsg->addTag<SctpCommandReq>();
-            int id = atoi(msg->getName());
-            cmd->setSocketId(id);
-            sendOrSchedule(cmsg);
+            if (delay == 0)
+                socket->close();
+            else {
+                inet::scheduleAfter("close", delay, [=] () {
+                    socket->close();
+                });
+            }
         }
         break;
 
-        case SCTP_C_RECEIVE:
+        case SCTP_C_RECEIVE: {
             EV_INFO << simTime() << " SctpServer:SCTP_C_RECEIVE\n";
             if (readInt || delayFirstRead > 0)
                 schedule = false;
             else
                 schedule = true;
-            sendOrSchedule(msg);
+            auto cmd = check_and_cast<Message *>(msg)->getTag<SctpSendReq>();
+            auto socket = serverAssocStatMap[assocId].socket;
+            if (delay == 0)
+                socket->receive(cmd->getSid(), cmd->getNumMsgs());
+            else
+                inet::scheduleAfter("receive", delay, [=] () {
+                    socket->receive(cmd->getSid(), cmd->getNumMsgs());
+                });
             break;
+        }
 
         default:
             EV_INFO << "MsgKind =" << msg->getKind() << " unknown\n";
@@ -582,6 +604,36 @@ SctpServer::SctpServer()
     abortSent = false;
     count = 0;
     numRequestsToSend = 0;
+}
+
+void SctpServer::socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent)
+{
+    Enter_Method("socketDataArrived");
+    take(packet);
+    packet->setArrival(getId(), gate("socketIn")->getId());
+    handleMessage(packet);
+}
+
+void SctpServer::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
+{
+    Enter_Method("socketDataNotificationArrived");
+    take(msg);
+    msg->setArrival(getId(), gate("socketIn")->getId());
+    handleMessage(msg);
+}
+
+void SctpServer::socketAvailable(SctpSocket *socket, Indication *indication)
+{
+    auto availableIndication = indication->getTag<SctpAvailableReq>();
+    socket->accept(availableIndication->getNewSocketId());
+}
+
+void SctpServer::socketEstablished(SctpSocket *socket, Indication *indication)
+{
+    Enter_Method("socketEstablished");
+    take(indication);
+    indication->setArrival(getId(), gate("socketIn")->getId());
+    handleMessage(indication);
 }
 
 void SctpServer::pushPacket(Packet *packet, const cGate *gate)
