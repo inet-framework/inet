@@ -330,7 +330,8 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     if (state->accEcnNegotiated && state->accEcnOptionEnabled && tcpHeader->getAckBit() && !tcpHeader->getSynBit()) {
         state->accEcnAckCount++;
         if (state->accEcnOptionBeaconAcks > 0 && state->accEcnAckCount % state->accEcnOptionBeaconAcks == 0)
-            state->accEcnOptionNextKindIsAccEcn1 = !state->accEcnOptionNextKindIsAccEcn1;
+            if (state->accEcnOptionKindAlternates)
+                state->accEcnOptionNextKindIsAccEcn1 = !state->accEcnOptionNextKindIsAccEcn1;
     }
 
     // ECN:
@@ -760,6 +761,7 @@ void TcpConnection::configureStateVariables()
     state->ecnWillingness = state->ecnMode >= TCP_ECN_MODE_RFC3168;
     state->accEcnOptionEnabled = tcpMain->par("accEcnOptionEnabled");
     state->accEcnOptionBeaconAcks = tcpMain->par("accEcnOptionBeaconAcks");
+    state->accEcnOptionKindAlternates = tcpMain->par("accEcnOptionKindAlternates");
     state->dupthresh = tcpMain->par("dupthresh");
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     state->prrEnabled = tcpMain->par("prrEnabled");
@@ -2192,7 +2194,10 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                     tcpHeader->appendHeaderOption(new TcpOptionNop());
 
                 TcpOptionAccEcn *option = new TcpOptionAccEcn();
-                option->setKind(state->accEcnOptionNextKindIsAccEcn1 ? TCPOPTION_ACCECN1 : TCPOPTION_ACCECN0);
+                // When alternation is disabled (Linux behavior) always emit kind
+                // 174 (ACCECN1); otherwise alternate 172/174 per the beacon toggle.
+                option->setKind((!state->accEcnOptionKindAlternates || state->accEcnOptionNextKindIsAccEcn1)
+                        ? TCPOPTION_ACCECN1 : TCPOPTION_ACCECN0);
                 // Wire init offsets (Verified Facts, G6.1): E0B/E1B start at 1, CEB at 0.
                 option->setEct0Bytes(state->rcvEct0Bytes + 1);
                 option->setEct1Bytes(state->rcvEct1Bytes + 1);

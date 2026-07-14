@@ -307,6 +307,7 @@ struct TcpStateVariables
     uint32_t accEcnOptionBeaconAcks = 4; // cached from the accEcnOptionBeaconAcks param: emit the option on every Nth ACK-bearing segment
     uint32_t accEcnAckCount = 0; // counts ACK-bearing segments sent since AccECN negotiated, for the beacon cadence above
     bool accEcnOptionNextKindIsAccEcn1 = false; // alternates which of kind 172/174 is emitted each time the option is actually sent (G6.1)
+    bool accEcnOptionKindAlternates = true; // cached from the accEcnOptionKindAlternates param: if false, always emit kind 174 (Linux behavior) instead of alternating
     uint32_t rcvEct0Bytes = 0; // receiver-side byte count of segments arriving marked ECT(0) since AccECN negotiated (option's E0B field content, G6.1)
     uint32_t rcvEct1Bytes = 0; // receiver-side byte count of segments arriving marked ECT(1) since AccECN negotiated (option's E1B field content, G6.1)
     uint32_t rcvCeBytes = 0; // receiver-side byte count of segments arriving marked CE since AccECN negotiated (option's CEB field content, G6.1)
