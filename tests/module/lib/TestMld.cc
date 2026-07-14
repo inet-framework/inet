@@ -34,12 +34,15 @@
 #include "inet/networklayer/icmpv6/Mldv2.h"
 #include "inet/networklayer/icmpv6/Mldv2Message_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 using namespace std;
 
 namespace inet {
 
-class INET_API TestMld : public cSimpleModule, public IScriptable
+using namespace inet::queueing;
+
+class INET_API TestMld : public cSimpleModule, public IScriptable, public IPassivePacketSink
 {
   private:
     typedef Ipv6InterfaceData::Ipv6AddressVector Ipv6AddressVector;
@@ -66,6 +69,14 @@ class INET_API TestMld : public cSimpleModule, public IScriptable
     void processDumpCommand(string what, NetworkInterface *ie);
     void parseIpv6AddressVector(const char *str, Ipv6AddressVector &result);
     void sendMld(Packet *msg, NetworkInterface *ie, Ipv6Address dest);
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("upperLayerIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("upperLayerIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 Define_Module(TestMld);
@@ -420,6 +431,14 @@ void TestMld::parseIpv6AddressVector(const char *str, Ipv6AddressVector &result)
             result.push_back(Ipv6Address(tokens.nextToken()));
     }
     sort(result.begin(), result.end());
+}
+
+void TestMld::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
 }
 
 } // namespace inet

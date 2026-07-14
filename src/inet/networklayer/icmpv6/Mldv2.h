@@ -40,7 +40,7 @@ enum Mldv2TimerKind {
     MLDV2_H_OLDER_VERSION_TIMER, // Older Version Querier Present timer (RFC 3810 8.2.1), per HostInterfaceData
 };
 
-class INET_API Mldv2 : public OperationalBase, protected cListener
+class INET_API Mldv2 : public OperationalBase, protected cListener, public queueing::IPassivePacketSink
 {
   protected:
     enum RouterState {
@@ -209,6 +209,7 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
   protected:
     ModuleRefByPar<Ipv6RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
+    queueing::PassivePacketSinkRef ipSink;
 
     bool enabled = true;
     int robustnessVariable; // RFC 3810: a State-Change Report is (re)transmitted this many times
@@ -335,6 +336,13 @@ class INET_API Mldv2 : public OperationalBase, protected cListener
      */
     static uint16_t decodeMaxRespCode(uint16_t code);
     static uint16_t codeMaxRespCode(uint16_t value);
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Ipv6AddressVector addresses)

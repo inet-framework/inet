@@ -84,6 +84,6 @@ simple Mldv2 extends SimpleModule like IMld
         @selfMessageKinds(inet::Mldv2TimerKind);
 
     gates:
-        input ipIn @labels(Ipv6ControlInfo/up);   // delivered MLD (ICMPv6) packets
+        input ipIn @labels(Ipv6ControlInfo/up) @interface[inet::queueing::IPassivePacketSink](protocol=mld; service=indication; sdu=ipv6);   // delivered MLD (ICMPv6) packets
         output ipOut @labels(Ipv6ControlInfo/down); // to ~Ipv6
 }

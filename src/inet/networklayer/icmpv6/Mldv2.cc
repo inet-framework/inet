@@ -18,6 +18,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/common/SimulationContinuation.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/MldMessage_m.h" // MLDv1 MldQuery/MldReport/MldDone for older-version interop
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
@@ -82,6 +83,19 @@ void Mldv2::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
+        // Passing a concrete DispatchProtocolReq(ipv6, SP_REQUEST) here (rather than a
+        // bare/nullptr lookup) mirrors exactly what sendToIPv6() tags outgoing packets
+        // with below, and what Ipv6's transportIn gate declares
+        // (protocol=ipv6;service=request). A bare/nullptr lookup works when ipOut faces
+        // a real MessageDispatcher (it accepts any lookup unconditionally), but fails
+        // when ipOut is wired directly to a NetworkInterface-typed neighbor (e.g. the
+        // TestMld tester NIC used by the MLDv2 SSM/interop module tests): its
+        // lookupModuleInterface() only forwards PacketProtocolTag/DispatchProtocolReq/
+        // InterfaceReq-based lookups, never bare/nullptr ones.
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::ipv6);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        ipSink.reference(gate("ipOut"), true, &dispatchProtocolReq);
 
         cModule *host = getContainingNode(this);
 
@@ -1423,7 +1437,8 @@ void Mldv2::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& des
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
-    send(msg, "ipOut");
+    yieldBeforePush();
+    ipSink.pushPacket(msg);
 }
 
 // --- Utility Methods for SourceRecord ---
@@ -1834,6 +1849,13 @@ const std::string Mldv2::getFilterModeString(Mldv2::FilterMode fm)
         return "EXCLUDE";
 
     return "UNKNOWN";
+}
+
+void Mldv2::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet
