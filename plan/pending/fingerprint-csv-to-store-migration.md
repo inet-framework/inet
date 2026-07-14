@@ -164,6 +164,22 @@ finishes in < 10 min.
 
 ## Open items to resolve during execution
 - Exact clean-regenerate invocation (verify `clear()` semantics).
-- Version parity: is opp_ci's omnetpp/inet == what the CSVs were recorded with?
-  (Determines whether the faithful run is all-green.)
+- ~~Version parity: is opp_ci's omnetpp/inet == what the CSVs were recorded with?~~
+  RESOLVED: run 53 = 1717 PASS, 0 fingerprint mismatches. The faithful store
+  matches opp_ci's omnetpp-6.x.
 - One-time slow Phase-1 validation: shard vs cpu-time cap.
+
+## Outcome (2026-07-14) — Phase 1 green
+Faithful CSV→store run is green on opp_ci: 1717 PASS, 7 expected-ERROR, 0
+unexpected (~142s), across itervar and multi-ingredient groups, tyf excluded.
+Two opp_repl framework fixes were needed: (a) aggregate `expected` = "no
+unexpected children" (was `expected_result==result`, which mislabeled
+all-expected-ERROR groups); (b) simulation-config collection now drops configs
+whose feature is disabled in the build (their network NED isn't compiled, so
+they can only ERROR) — resolved NED-folder-aware from `.oppfeaturestate`.
+
+OSG showcases: opp_env now conditionally keeps `WITH_OSG=yes` when the host has
+OpenSceneGraph (was always forced off). On OSG-capable workers the
+`showcases/visualizer/osg` configs build and run; on OSG-less builds they are
+skipped by (b). This commit exists to force a fresh workspace so the worker
+rebuilds omnetpp with the conditional recipe.
