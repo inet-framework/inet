@@ -1,0 +1,103 @@
+%description:
+
+D2 proving test: an Ethernet frame whose payload protocol is UNKNOWN to INET
+(the io app doesn't set a protocol, so EthernetSocketIo tags it with
+Protocol::unknown, ethertype 0x86F0 -- "INET specific non-standard protocol")
+is sent from host "client" to host "server" through one default EthernetSwitch.
+
+Asserts:
+- the frame is relayed by the switch's MAC table / broadcast (host "server"
+  receives it: "packets received" scalar on its io module)
+- the frame is NOT delivered locally in the switch: the switch's own
+  "ethernet" module (which would decapsulate/drop unclaimed protocols) never
+  touches it -- only the "bridging" (MacRelayUnit) module does, which relays
+  frames purely by MAC address regardless of ethertype/protocol.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 5ms
+cmdenv-express-mode = false
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+*.client.hasIpv4 = false
+*.client.hasTcp = false
+*.client.hasUdp = false
+*.client.numLoInterfaces = 0
+*.server.hasIpv4 = false
+*.server.hasTcp = false
+*.server.hasUdp = false
+*.server.numLoInterfaces = 0
+
+*.client.eth[0].address = "AA-00-00-00-00-01"
+*.server.eth[0].address = "AA-00-00-00-00-02"
+
+*.client.numApps = 1
+*.client.app[0].typename = "EthernetSourceApp"
+*.client.app[0].source.packetLength = 100B
+*.client.app[0].source.productionInterval = 1ms
+*.client.app[0].io.interface = "eth0"
+*.client.app[0].io.remoteAddress = "AA-00-00-00-00-02"
+
+*.server.numApps = 1
+*.server.app[0].typename = "EthernetSinkApp"
+*.server.app[0].io.interface = "eth0"
+*.server.app[0].io.localAddress = "AA-00-00-00-00-02"
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.EthernetSwitch;
+
+network Test
+{
+    submodules:
+        client: StandardHost {
+            @display("p=100,200");
+        }
+        switch: EthernetSwitch {
+            @display("p=300,200");
+        }
+        server: StandardHost {
+            @display("p=500,200");
+        }
+    connections:
+        client.ethg++ <--> { datarate = 100Mbps; delay = 10us; } <--> switch.ethg++;
+        switch.ethg++ <--> { datarate = 100Mbps; delay = 10us; } <--> server.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%# host B receives all 5 frames sent by host A, even though their protocol
+%# (Protocol::unknown) is not modeled/claimed by anything in the network
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-0.sca
+scalar Test.server.app[0].io "packets received" 5
+%#--------------------------------------------------------------------------------------------------------------
+%# the switch relays by MAC table / broadcast: it never learns host B's
+%# address (host B never sends), so every frame is flooded to all ports
+%# except the one it arrived on
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Broadcasting packet to all interfaces except incoming interface
+%#--------------------------------------------------------------------------------------------------------------
+%# the switch's own ethernet layer decodes the frame only to find its
+%# destination port (via bridging/MacRelayUnit); it forwards the unclaimed
+%# protocol onward instead of dropping it -- i.e. it is NOT delivered
+%# locally in the switch (no local socket/app ever sees it, unlike host B)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Method call switch.ethernet --> switch.bl: pushPacket
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
