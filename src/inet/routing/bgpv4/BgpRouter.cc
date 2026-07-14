@@ -12,6 +12,7 @@
 #ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
@@ -347,6 +348,12 @@ void BgpRouter::setRedistributeOspf(std::string str)
 
 void BgpRouter::processMessageFromTcp(cMessage *msg)
 {
+    TcpSocket *socket = ensureSocket(msg);
+    socket->processMessage(msg);
+}
+
+TcpSocket *BgpRouter::ensureSocket(cMessage *msg)
+{
     TcpSocket *socket = check_and_cast_nullable<TcpSocket *>(_socketMap.findSocketFor(msg));
     if (!socket) {
         if (dynamic_cast<Packet *>(msg) != nullptr ||
@@ -356,7 +363,7 @@ void BgpRouter::processMessageFromTcp(cMessage *msg)
             // socket id that has already been replaced locally. Ignore those stale messages
             // instead of rebuilding a new TcpSocket for the defunct connection.
             delete msg;
-            return;
+            return nullptr;
         }
         socket = new TcpSocket(msg);
         socket->setOutputGate(bgpModule->gate("socketOut"));
@@ -368,7 +375,7 @@ void BgpRouter::processMessageFromTcp(cMessage *msg)
             delete socket;
             socket = nullptr;
             delete msg;
-            return;
+            return nullptr;
         }
 
         // RFC 4271 §6.8 connection collision detection: if we already have a live connection to
@@ -395,7 +402,7 @@ void BgpRouter::processMessageFromTcp(cMessage *msg)
                 socket->abort();
                 delete socket;
                 delete msg;
-                return;
+                return nullptr;
             }
             // else peer wins: fall through and adopt the incoming connection (dropping ours)
             EV_INFO << "Connection collision (RFC 4271 6.8): peer id " << peerAddr
@@ -412,8 +419,7 @@ void BgpRouter::processMessageFromTcp(cMessage *msg)
         _socketMap.removeSocket(_bgpSessions[i]->getSocket());
         _bgpSessions[i]->setSocket(socket);
     }
-
-    socket->processMessage(msg);
+    return socket;
 }
 
 void BgpRouter::listenConnectionFromPeer(SessionId sessionId)
@@ -490,9 +496,20 @@ void BgpRouter::openTcpConnectionToPeer(SessionId sessionId)
     socket->connect(_bgpSessions[sessionId]->getPeerAddr(), TCP_PORT);
 }
 
+void BgpRouter::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
+{
+    auto indication = new Indication("TCP_I_AVAILABLE", TCP_I_AVAILABLE);
+    indication->addTag<SocketInd>()->setSocketId(availableInfo->getNewSocketId());
+    indication->setControlInfo(availableInfo);
+    ensureSocket(indication);
+    socket->accept(availableInfo->getNewSocketId());
+    delete indication;
+}
+
 void BgpRouter::socketEstablished(TcpSocket *socket, Indication *indication)
 {
-    int connId = socket->getSocketId();
+    ensureSocket(indication);
+    int connId = indication->getTag<SocketInd>()->getSocketId();
     _currSessionId = findIdFromSocketConnId(_bgpSessions, connId);
     if (_currSessionId == static_cast<SessionId>(-1)) {
         throw cRuntimeError("socket id=%d is not established", connId);
