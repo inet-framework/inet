@@ -12,6 +12,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/SimulationContinuation.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -41,6 +42,7 @@ void Pmipv6::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        toIpv6Sink.reference(gate("toIPv6"), true);
         isLma = par("isLocalMobilityAnchor");
         isMag = par("isMobileAccessGateway");
         if (isLma == isMag)
@@ -131,7 +133,8 @@ void Pmipv6::sendMobilityMessage(Packet *packet, const Ipv6Address& destAddress,
     packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(srcAddress);
     packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddress);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(64);
-    send(packet, "toIPv6");
+    yieldBeforePush();
+    toIpv6Sink.pushPacket(packet);
 }
 
 Ipv6Address Pmipv6::getEgressAddressFor(const Ipv6Address& destination)
@@ -472,6 +475,13 @@ void Pmipv6::handleStopOperation(LifecycleOperation *operation)
 
 void Pmipv6::handleCrashOperation(LifecycleOperation *operation)
 {
+}
+
+void Pmipv6::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
 }
 
 } // namespace inet

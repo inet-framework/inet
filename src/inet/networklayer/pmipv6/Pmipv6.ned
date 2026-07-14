@@ -52,6 +52,6 @@ simple Pmipv6 extends SimpleModule
         @display("i=block/network2");
         @signal[packetDropped](type=cPacket);
     gates:
-        input fromIPv6;
+        input fromIPv6 @interface[inet::queueing::IPassivePacketSink](protocol=mobileipv6; service=indication; sdu=ipv6);
         output toIPv6;
 }
