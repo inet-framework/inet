@@ -292,7 +292,8 @@ void EthernetMacPhy::processMsgFromNetwork(Signal *signal)
     bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
     delete signal;
-    decapsulate(packet);
+    if (!hasBitError) // needed to run examples/ospfv2/simpletest/ -f omnetpp.ini -c CrashAndReboot -r 0 EthernetMac Ipv4 ... : PASS
+        decapsulate(packet);
     emit(packetReceivedFromLowerSignal, packet);
 
     if (hasBitError || !verifyFcsAndLength(packet)) {
