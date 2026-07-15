@@ -152,6 +152,7 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
 
 void TelnetApp::socketEstablished(TcpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketEstablished");
     TcpAppBase::socketEstablished(socket, indication);
 
     // schedule first sending
@@ -164,6 +165,7 @@ void TelnetApp::socketEstablished(TcpSocket *socket, Indication *indication)
 
 void TelnetApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
+    Enter_Method("socketDataArrived");
     int len = msg->getByteLength();
     TcpAppBase::socketDataArrived(socket, msg, urgent);
 
@@ -198,6 +200,7 @@ void TelnetApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 
 void TelnetApp::socketClosed(TcpSocket *socket)
 {
+    Enter_Method("socketClosed");
     TcpAppBase::socketClosed(socket);
     cancelEvent(timeoutMsg);
     cancelEvent(readDelayTimer);
@@ -214,6 +217,7 @@ void TelnetApp::socketClosed(TcpSocket *socket)
 
 void TelnetApp::socketFailure(TcpSocket *socket, int code)
 {
+    Enter_Method("socketFailure");
     TcpAppBase::socketFailure(socket, code);
 
     // reconnect after a delay
