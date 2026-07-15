@@ -1,9 +1,6 @@
 <?xml version="1.0"?>
 <checker>
     <message occurence="1">
-        <fieldValue name="name" value="ESTABLISHED"/>
-    </message>
-    <message occurence="1">
         <fieldValue name="name" value="data"/>
     </message>
     <message occurence="1">

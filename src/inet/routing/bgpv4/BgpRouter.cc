@@ -349,7 +349,8 @@ void BgpRouter::setRedistributeOspf(std::string str)
 void BgpRouter::processMessageFromTcp(cMessage *msg)
 {
     TcpSocket *socket = ensureSocket(msg);
-    socket->processMessage(msg);
+    if (socket != nullptr) // ensureSocket() consumed the message if it returned nullptr
+        socket->processMessage(msg);
 }
 
 TcpSocket *BgpRouter::ensureSocket(cMessage *msg)
@@ -440,6 +441,7 @@ void BgpRouter::listenConnectionFromPeer(SessionId sessionId)
 
     if (listeningSocket->getState() != TcpSocket::LISTENING) {
         listeningSocket->setOutputGate(bgpModule->gate("socketOut"));
+        listeningSocket->setCallback(this); // socketAvailable() adopts incoming connections
         listeningSocket->bind(TCP_PORT); // wildcard (address-family-unspecified) bind accepts IPv4 and IPv6
         listeningSocket->listen();
         _socketMap.addSocket(listeningSocket);
@@ -498,6 +500,7 @@ void BgpRouter::openTcpConnectionToPeer(SessionId sessionId)
 
 void BgpRouter::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
 {
+    cContextSwitcher switcher(bgpModule); // callbacks arrive in TcpConnection context
     auto indication = new Indication("TCP_I_AVAILABLE", TCP_I_AVAILABLE);
     indication->addTag<SocketInd>()->setSocketId(availableInfo->getNewSocketId());
     indication->setControlInfo(availableInfo);
@@ -508,6 +511,7 @@ void BgpRouter::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableIn
 
 void BgpRouter::socketEstablished(TcpSocket *socket, Indication *indication)
 {
+    cContextSwitcher switcher(bgpModule); // callbacks arrive in TcpConnection context
     ensureSocket(indication);
     int connId = indication->getTag<SocketInd>()->getSocketId();
     _currSessionId = findIdFromSocketConnId(_bgpSessions, connId);
@@ -530,6 +534,7 @@ void BgpRouter::socketEstablished(TcpSocket *socket, Indication *indication)
 
 void BgpRouter::socketFailure(TcpSocket *socket, int code)
 {
+    cContextSwitcher switcher(bgpModule); // callbacks arrive in TcpConnection context
     int connId = socket->getSocketId();
     _currSessionId = findIdFromSocketConnId(_bgpSessions, connId);
     if (_currSessionId != static_cast<SessionId>(-1)) {
@@ -539,6 +544,7 @@ void BgpRouter::socketFailure(TcpSocket *socket, int code)
 
 void BgpRouter::socketPeerClosed(TcpSocket *socket)
 {
+    cContextSwitcher switcher(bgpModule); // callbacks arrive in TcpConnection context
     socket->close();
     int connId = socket->getSocketId();
     _currSessionId = findIdFromSocketConnId(_bgpSessions, connId);
@@ -548,6 +554,7 @@ void BgpRouter::socketPeerClosed(TcpSocket *socket)
 
 void BgpRouter::socketDataArrived(TcpSocket *socket)
 {
+    cContextSwitcher switcher(bgpModule); // callbacks arrive in TcpConnection context
     auto queue = socket->getReadBuffer();
     while (queue->has<BgpHeader>()) {
         auto header = queue->pop<BgpHeader>();
