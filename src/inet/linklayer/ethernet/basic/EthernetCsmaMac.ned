@@ -46,5 +46,7 @@ simple EthernetCsmaMac extends MacProtocolBase
         @statistic[collision](title="collision"; type=int; source=collisionChanged; record=count,vector; interpolationmode=sample-hold);
         // the time evolution of the state of the state machine
         @statistic[state](title="state"; type=enum; enum=IDLE, WAIT_IFG, TRANSMITTING, JAMMING, BACKOFF, RECEIVING; source=stateChanged; record=count,vector; interpolationmode=sample-hold);
+    gates:
+        upperLayerIn @interface[inet::queueing::IActivePacketSink](pdu=ethernetmac);
 }
 

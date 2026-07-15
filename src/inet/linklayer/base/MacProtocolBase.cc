@@ -46,7 +46,9 @@ void MacProtocolBase::initialize(int stage)
         lowerLayerOutGateId = findGate("lowerLayerOut");
         upperLayerSink.reference(gate("upperLayerOut"), false);
         if (hasGate("lowerLayerOut"))
-            lowerLayerSink.reference(gate("lowerLayerOut"), true);
+            // non-mandatory: some subclasses (e.g. EthernetCsmaMac) talk to the lower
+            // module through a C++ interface and never push packets on this gate
+            lowerLayerSink.reference(gate("lowerLayerOut"), false);
         currentTxFrame = nullptr;
         hostModule = findContainingNode(this);
     }
