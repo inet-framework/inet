@@ -13,14 +13,16 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
 L3Socket::L3Socket(const Protocol *l3Protocol, cGate *outputGate) :
     l3Protocol(l3Protocol),
-    socketId(getActiveSimulationOrEnvir()->getUniqueNumber()),
-    outputGate(outputGate)
+    socketId(getActiveSimulationOrEnvir()->getUniqueNumber())
 {
+    if (outputGate != nullptr)
+        setOutputGate(outputGate);
 }
 
 void L3Socket::setCallback(INetworkSocket::ICallback *callback)
@@ -62,28 +64,25 @@ void L3Socket::bind(const Protocol *protocol, L3Address localAddress)
 {
     ASSERT(!bound);
     ASSERT(l3Protocol != nullptr);
-    L3SocketBindCommand *command = new L3SocketBindCommand();
-    command->setProtocol(protocol);
-    auto request = new Request("bind", L3_C_BIND);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    l3ProtocolModule->bind(socketId, protocol, localAddress);
+    l3ProtocolModule->setCallback(socketId, this);
     bound = true;
     isOpen_ = true;
 }
 
 void L3Socket::connect(L3Address remoteAddress)
 {
+    l3ProtocolModule->connect(socketId, remoteAddress);
+    l3ProtocolModule->setCallback(socketId, this);
     isOpen_ = true;
-    auto *command = new L3SocketConnectCommand();
-    command->setRemoteAddress(remoteAddress);
-    auto request = new Request("connect", L3_C_CONNECT);
-    request->setControlInfo(command);
-    sendToOutput(request);
 }
 
 void L3Socket::send(Packet *packet)
 {
-    sendToOutput(packet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
+    packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    yieldBeforePush();
+    sink.pushPacket(packet);
 }
 
 void L3Socket::sendTo(Packet *packet, L3Address destAddress)
@@ -97,19 +96,13 @@ void L3Socket::close()
 {
     ASSERT(bound);
     ASSERT(l3Protocol != nullptr);
-    L3SocketCloseCommand *command = new L3SocketCloseCommand();
-    auto request = new Request("close", L3_C_CLOSE);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    l3ProtocolModule->close(socketId);
 }
 
 void L3Socket::destroy()
 {
     ASSERT(l3Protocol != nullptr);
-    auto *command = new L3SocketDestroyCommand();
-    auto request = new Request("destroy", L3_C_DESTROY);
-    request->setControlInfo(command);
-    sendToOutput(request);
+    l3ProtocolModule->destroy(socketId);
 }
 
 void L3Socket::sendToOutput(cMessage *message)

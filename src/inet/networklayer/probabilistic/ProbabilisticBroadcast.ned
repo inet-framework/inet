@@ -55,4 +55,7 @@ simple ProbabilisticBroadcast extends NetworkProtocolBase like INetworkProtocol
         // copies that isn't dead because of TTL de-synchronization due to
         // MAC backoff, propagation delay, and clock drift.
         double timeInQueueAfterDeath @unit(s) = default(60 s);
+    gates:
+        transportIn @interface[inet::IL3Protocol] @interface[inet::queueing::IPassivePacketSink](protocol=probabilistic; service=request; protocolGroup=ip; sdu=probabilistic);
+        queueIn @interface[inet::queueing::IPassivePacketSink](protocol=probabilistic; service=indication);
 }

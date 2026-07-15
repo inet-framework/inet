@@ -51,4 +51,7 @@ simple Flooding extends NetworkProtocolBase like INetworkProtocol
         double bcDelTime @unit(s) = default(100 s);
         int defaultTtl = default(10); // Default time-to-live (ttl) used for this module expressed in number of hops.
         @class(Flooding);
+    gates:
+        transportIn @interface[inet::IL3Protocol] @interface[inet::queueing::IPassivePacketSink](protocol=flooding; service=request; protocolGroup=ip; sdu=flooding);
+        queueIn @interface[inet::queueing::IPassivePacketSink](protocol=flooding; service=indication);
 }

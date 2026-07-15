@@ -16,10 +16,14 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/IL3Protocol.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
-class INET_API NetworkProtocolBase : public LayeredProtocolBase
+using namespace inet::queueing;
+
+class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IL3Protocol, public IPassivePacketSink
 {
   protected:
     struct SocketDescriptor {
@@ -27,12 +31,15 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase
         int protocolId = -1;
         L3Address localAddress;
         L3Address remoteAddress;
+        IL3Protocol::ICallback *callback = nullptr;
 
         SocketDescriptor(int socketId, int protocolId, L3Address localAddress)
             : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
     ModuleRefByPar<IInterfaceTable> interfaceTable;
+    PassivePacketSinkRef transportSink;
+    PassivePacketSinkRef queueSink;
     // working vars
     std::set<const Protocol *> upperProtocols;
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
@@ -56,6 +63,20 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase
     virtual void handleUpperCommand(cMessage *msg) override;
 
     virtual const Protocol& getProtocol() const = 0;
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual void setCallback(int socketId, ICallback *callback) override;
+    virtual void bind(int socketId, const Protocol *protocol, const L3Address& localAddress) override;
+    virtual void connect(int socketId, const L3Address& remoteAddress) override;
+    virtual void close(int socketId) override;
+    virtual void destroy(int socketId) override;
 };
 
 } // namespace inet

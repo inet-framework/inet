@@ -12,13 +12,17 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetworkSocket.h"
+#include "inet/networklayer/contract/IL3Protocol.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
+
+using namespace inet::queueing;
 
 /**
  * This class implements a raw L3 socket.
  */
-class INET_API L3Socket : public INetworkSocket
+class INET_API L3Socket : public INetworkSocket, public IL3Protocol::ICallback
 {
   public:
     class INET_API ICallback : public INetworkSocket::ICallback {
@@ -41,6 +45,8 @@ class INET_API L3Socket : public INetworkSocket
     INetworkSocket::ICallback *callback = nullptr;
     void *userData = nullptr;
     cGate *outputGate = nullptr;
+    PassivePacketSinkRef sink;
+    ModuleRefByGate<IL3Protocol> l3ProtocolModule;
 
   protected:
     void sendToOutput(cMessage *message);
@@ -53,7 +59,14 @@ class INET_API L3Socket : public INetworkSocket
      * Sets the gate on which to send raw packets. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("ipOut"));</tt>
      */
-    void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
+    void setOutputGate(cGate *outputGate) {
+        this->outputGate = outputGate;
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(l3Protocol);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        sink.reference(outputGate, true, &dispatchProtocolReq);
+        l3ProtocolModule.reference(outputGate, true);
+    }
     virtual void setCallback(INetworkSocket::ICallback *callback) override;
 
     void *getUserData() const { return userData; }
@@ -72,6 +85,11 @@ class INET_API L3Socket : public INetworkSocket
     virtual void close() override;
     virtual void destroy() override;
     virtual bool isOpen() const override { return isOpen_; }
+
+    virtual void handleClosed() override {
+        if (callback != nullptr)
+            callback->socketClosed(this);
+    }
 };
 
 } // namespace inet

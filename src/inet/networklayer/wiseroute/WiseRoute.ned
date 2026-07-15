@@ -66,5 +66,8 @@ simple WiseRoute extends NetworkProtocolBase like INetworkProtocol
 
         @display("i=block/fork");
         @class(WiseRoute);
+    gates:
+        transportIn @interface[inet::IL3Protocol] @interface[inet::queueing::IPassivePacketSink](protocol=wiseroute; service=request; protocolGroup=ip; sdu=wiseroute);
+        queueIn @interface[inet::queueing::IPassivePacketSink](protocol=wiseroute; service=indication);
 }
 

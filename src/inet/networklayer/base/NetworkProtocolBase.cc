@@ -7,6 +7,7 @@
 
 #include "inet/networklayer/base/NetworkProtocolBase.h"
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
@@ -18,6 +19,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
+#include "inet/common/SimulationContinuation.h"
 
 namespace inet {
 
@@ -28,48 +30,50 @@ NetworkProtocolBase::NetworkProtocolBase()
 void NetworkProtocolBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         interfaceTable.reference(this, "interfaceTableModule", true);
+        queueSink.reference(gate("queueOut"), true);
+        transportSink.reference(gate("transportOut"), true);
+    }
 }
 
 void NetworkProtocolBase::sendUp(cMessage *message)
 {
-    if (Packet *packet = dynamic_cast<Packet *>(message)) {
-        const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-        const auto& addr = packet->getTag<L3AddressInd>();
-        auto remoteAddress(addr->getSrcAddress());
-        auto localAddress(addr->getDestAddress());
-        bool hasSocket = false;
-        for (const auto& elem : socketIdToSocketDescriptor) {
-            if (elem.second->protocolId == protocol->getId() &&
-                (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress) &&
-                (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))
-            {
-                auto *packetCopy = packet->dup();
-                packetCopy->setKind(L3_I_DATA);
-                packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
-                EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
-                emit(packetSentToUpperSignal, packetCopy);
-                send(packetCopy, "transportOut");
-                hasSocket = true;
-            }
-        }
-        if (contains(upperProtocols, protocol)) {
-            EV_INFO << "Passing up to protocol " << protocol->getName() << "\n";
-            emit(packetSentToUpperSignal, packet);
-            send(packet, "transportOut");
-        }
-        else {
-            if (!hasSocket) {
-                EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
-                // TODO send an ICMP error: protocol unreachable
-//                sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
-            }
-            delete packet;
+    Packet *packet = check_and_cast<Packet *>(message);
+    const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    const auto& addr = packet->getTag<L3AddressInd>();
+    auto remoteAddress(addr->getSrcAddress());
+    auto localAddress(addr->getDestAddress());
+    bool hasSocket = false;
+    for (const auto& elem : socketIdToSocketDescriptor) {
+        if (elem.second->protocolId == protocol->getId() &&
+            (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress) &&
+            (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))
+        {
+            auto *packetCopy = packet->dup();
+            packetCopy->setKind(L3_I_DATA);
+            packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
+            EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
+            emit(packetSentToUpperSignal, packetCopy);
+            yieldBeforePush();
+            transportSink.pushPacket(packetCopy);
+            hasSocket = true;
         }
     }
-    else
-        send(message, "transportOut");
+    if (contains(upperProtocols, protocol)) {
+        EV_INFO << "Passing up to protocol " << protocol->getName() << "\n";
+        emit(packetSentToUpperSignal, packet);
+        yieldBeforePush();
+        transportSink.pushPacket(packet);
+    }
+    else {
+        if (!hasSocket) {
+            EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
+            // TODO send an ICMP error: protocol unreachable
+//                sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+        }
+        delete packet;
+    }
 }
 
 void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
@@ -85,7 +89,8 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
         else
             tags.removeTagIfPresent<DispatchProtocolReq>();
-        send(message, "queueOut");
+        yieldBeforePush();
+        queueSink.pushPacket(check_and_cast<Packet *>(message));
     }
     else {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
@@ -99,7 +104,8 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
                     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
                 else
                     tags.removeTagIfPresent<DispatchProtocolReq>();
-                send(duplicate, "queueOut");
+                yieldBeforePush();
+                queueSink.pushPacket(check_and_cast<Packet *>(duplicate));
             }
         }
         delete message;
@@ -121,33 +127,78 @@ void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
     auto request = dynamic_cast<Request *>(msg);
     if (auto *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
-        socketIdToSocketDescriptor[socketId] = descriptor;
+        bind(socketId, command->getProtocol(), command->getLocalAddress());
         delete msg;
     }
     else if (auto *command = dynamic_cast<L3SocketConnectCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         if (!containsKey(socketIdToSocketDescriptor, socketId))
-            throw cRuntimeError("Ipv4Socket: should use bind() before connect()");
-        socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
+            throw cRuntimeError("L3Socket: should use bind() before connect()");
+        connect(socketId, command->getRemoteAddress());
         delete msg;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        auto it = socketIdToSocketDescriptor.find(socketId);
-        if (it != socketIdToSocketDescriptor.end()) {
-            delete it->second;
-            socketIdToSocketDescriptor.erase(it);
-            auto indication = new Indication("closed", L3_I_SOCKET_CLOSED);
-            auto ctrl = new L3SocketClosedIndication();
-            indication->setControlInfo(ctrl);
-            indication->addTag<SocketInd>()->setSocketId(socketId);
-            send(indication, "transportOut");
-        }
+        close(socketId);
+        delete msg;
+    }
+    else if (dynamic_cast<L3SocketDestroyCommand *>(msg->getControlInfo()) != nullptr) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        destroy(socketId);
         delete msg;
     }
     else
         LayeredProtocolBase::handleUpperCommand(msg);
+}
+
+void NetworkProtocolBase::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
+}
+
+void NetworkProtocolBase::setCallback(int socketId, ICallback *callback)
+{
+    Enter_Method("setCallback");
+    socketIdToSocketDescriptor[socketId]->callback = callback;
+}
+
+void NetworkProtocolBase::bind(int socketId, const Protocol *protocol, const L3Address& localAddress)
+{
+    Enter_Method("bind");
+    SocketDescriptor *descriptor = new SocketDescriptor(socketId, protocol ? protocol->getId() : -1, localAddress);
+    socketIdToSocketDescriptor[socketId] = descriptor;
+}
+
+void NetworkProtocolBase::connect(int socketId, const L3Address& remoteAddress)
+{
+    Enter_Method("connect");
+    socketIdToSocketDescriptor[socketId]->remoteAddress = remoteAddress;
+}
+
+void NetworkProtocolBase::close(int socketId)
+{
+    Enter_Method("close");
+    auto it = socketIdToSocketDescriptor.find(socketId);
+    if (it != socketIdToSocketDescriptor.end()) {
+        auto callback = it->second->callback;
+        delete it->second;
+        socketIdToSocketDescriptor.erase(it);
+        if (callback)
+            inet::scheduleAfter("handleClose", 0, [=]() { callback->handleClosed(); });
+    }
+}
+
+void NetworkProtocolBase::destroy(int socketId)
+{
+    Enter_Method("destroy");
+    auto it = socketIdToSocketDescriptor.find(socketId);
+    if (it != socketIdToSocketDescriptor.end()) {
+        delete it->second;
+        socketIdToSocketDescriptor.erase(it);
+    }
 }
 
 } // namespace inet

@@ -23,6 +23,7 @@
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoute.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/SimulationContinuation.h"
 
 namespace inet {
@@ -104,42 +105,70 @@ void NextHopForwarding::handleCommand(Request *request)
 {
     if (auto *command = dynamic_cast<L3SocketBindCommand *>(request->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
-        socketIdToSocketDescriptor[socketId] = descriptor;
+        bind(socketId, command->getProtocol(), command->getLocalAddress());
         delete request;
     }
     else if (auto *command = dynamic_cast<L3SocketConnectCommand *>(request->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         if (!containsKey(socketIdToSocketDescriptor, socketId))
             throw cRuntimeError("L3Socket: should use bind() before connect()");
-        socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
+        connect(socketId, command->getRemoteAddress());
         delete request;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(request->getControlInfo()) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        auto it = socketIdToSocketDescriptor.find(socketId);
-        if (it != socketIdToSocketDescriptor.end()) {
-            delete it->second;
-            socketIdToSocketDescriptor.erase(it);
-            auto indication = new Indication("closed", L3_I_SOCKET_CLOSED);
-            auto ctrl = new L3SocketClosedIndication();
-            indication->setControlInfo(ctrl);
-            indication->addTag<SocketInd>()->setSocketId(socketId);
-            send(indication, "transportOut");
-        }
+        close(socketId);
         delete request;
     }
     else if (dynamic_cast<L3SocketDestroyCommand *>(request->getControlInfo()) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        auto it = socketIdToSocketDescriptor.find(socketId);
-        if (it != socketIdToSocketDescriptor.end()) {
-            delete it->second;
-            socketIdToSocketDescriptor.erase(it);
-        }
+        destroy(socketId);
         delete request;
     }
     else
         throw cRuntimeError("Invalid command: (%s)%s", request->getClassName(), request->getName());
+}
+
+void NextHopForwarding::setCallback(int socketId, ICallback *callback)
+{
+    Enter_Method("setCallback");
+    socketIdToSocketDescriptor[socketId]->callback = callback;
+}
+
+void NextHopForwarding::bind(int socketId, const Protocol *protocol, const L3Address& localAddress)
+{
+    Enter_Method("bind");
+    SocketDescriptor *descriptor = new SocketDescriptor(socketId, protocol ? protocol->getId() : -1, localAddress);
+    socketIdToSocketDescriptor[socketId] = descriptor;
+}
+
+void NextHopForwarding::connect(int socketId, const L3Address& remoteAddress)
+{
+    Enter_Method("connect");
+    socketIdToSocketDescriptor[socketId]->remoteAddress = remoteAddress;
+}
+
+void NextHopForwarding::close(int socketId)
+{
+    Enter_Method("close");
+    auto it = socketIdToSocketDescriptor.find(socketId);
+    if (it != socketIdToSocketDescriptor.end()) {
+        auto callback = it->second->callback;
+        delete it->second;
+        socketIdToSocketDescriptor.erase(it);
+        if (callback)
+            inet::scheduleAfter("handleClose", 0, [=]() { callback->handleClosed(); });
+    }
+}
+
+void NextHopForwarding::destroy(int socketId)
+{
+    Enter_Method("destroy");
+    auto it = socketIdToSocketDescriptor.find(socketId);
+    if (it != socketIdToSocketDescriptor.end()) {
+        delete it->second;
+        socketIdToSocketDescriptor.erase(it);
+    }
 }
 
 const NetworkInterface *NextHopForwarding::getSourceInterfaceFrom(Packet *packet)
@@ -595,7 +624,8 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const NetworkInte
             datagram->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
         else
             datagram->removeTagIfPresent<DispatchProtocolReq>();
-        send(datagram, "queueOut");
+        yieldBeforePush();
+        queueSink.pushPacket(datagram);
         return;
     }
 
@@ -623,7 +653,8 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const NetworkInte
             datagram->removeTagIfPresent<DispatchProtocolReq>();
 
         // send out
-        send(datagram, "queueOut");
+        yieldBeforePush();
+        queueSink.pushPacket(datagram);
     }
 }
 

@@ -21,6 +21,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/contract/IL3Protocol.h"
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
@@ -35,7 +36,7 @@ using namespace inet::queueing;
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol, public IPassivePacketSink
+class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol, public IL3Protocol, public IPassivePacketSink
 {
   protected:
     /**
@@ -60,6 +61,7 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
         int protocolId = -1;
         L3Address localAddress;
         L3Address remoteAddress;
+        IL3Protocol::ICallback *callback = nullptr;
 
         SocketDescriptor(int socketId, int protocolId, L3Address localAddress)
             : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
@@ -166,6 +168,12 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual void setCallback(int socketId, ICallback *callback) override;
+    virtual void bind(int socketId, const Protocol *protocol, const L3Address& localAddress) override;
+    virtual void connect(int socketId, const L3Address& remoteAddress) override;
+    virtual void close(int socketId) override;
+    virtual void destroy(int socketId) override;
 
   protected:
     /**
