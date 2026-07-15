@@ -381,11 +381,29 @@ the Phase 2 history rewrite (fix commits get squashed into their logical parents
       registration/mapping mechanism → Phase 5 doc rewrite; (c) xMIPv6's own
       sendDelayed/send("toIPv6") sites remain unconverted (pre-existing branch
       incompleteness, faithful to tip).
-- [ ] 3.3 **[sonnet]** Post-rebase build (release+debug) + smoke table; compare against 2.3
-      (272/272). Debug build + module suite RUNNING.
-- [ ] 3.4 **[opus]** Spot-review the rebased diff vs `topic/infrastructure-backup-20260714`
-      diff (both against their merge-bases) for accidental semantic drift in bucket (c) files.
-- **Checkpoint:** branch based on current master tip, builds green, smoke equal-or-better.
+- [x] 3.3 **DONE (2026-07-14).** Debug + release builds green. Module suite (now 337
+      tests: old 272-equivalents + master-new) **337/337** after adapting master-new
+      features to lookup-based dispatch — six new tip commits, one per module family:
+      Mldv1, Mldv2, Mipv6, Pmipv6 (IGMP template: @interface + sink push + sink impl),
+      Ipv6Tunnel (sink claim narrowed to `arguments=null` so the tunnel answers
+      InterfaceReq probes without shadowing protocol dispatch), Ospfv3 (three latent
+      gaps: dynamically created processes never run INITSTAGE_LOCAL so the splitter
+      sink is referenced at INITSTAGE_ROUTING_PROTOCOLS; splitter ipIn/processIn +
+      process splitterIn packet-sink claims; splitter pushPacket sets packet arrival
+      for its gate-name dispatch). Rebase-fallout compile fixes and drift fixes were
+      distributed into their true parent commits via a scripted 7-stop repair rebase;
+      final tree verified hash-identical to the pre-distribution state (5936c677).
+- [x] 3.4 **DONE (2026-07-14).** Systematic "diff of diffs" review of the whole
+      hand-resolved conflict surface (report: scratchpad phase2/drift-review.md +
+      batch reports). TWO real findings, both fixed and distributed: (1) master's new
+      bytesSent counters missing from TcpClient/ServerSocketIo::pushPacket (the live
+      path on this branch); (2) EtherHost_lifecycle golden kept stray `.*` expectation
+      lines (all four removed — the last one empirically, the rebased runtime no
+      longer interleaves a line there). Also noted (pre-existing, Phase 5): Ieee8022Llc
+      processCommandFromHigherLayer dereferences the socket iterator before its
+      end-check.
+- **Checkpoint MET:** branch on current master tip (130 commits), builds green,
+  module suite 337/337 (> pre-rebase 272/272 baseline).
 
 ## Phase 4 — Full regression
 
