@@ -1,8 +1,10 @@
 <environment>
-    <!-- A wall between the access point and sta[0]. DielectricObstacleLoss attenuates (does not
-         block) the AP<->sta[0] link through it, so rate control settles that link near 6 Mbps;
-         the other stations are not behind the wall and stay at 54 Mbps. Thickness tunes the
-         attenuation; z is centered on the nodes' z=0 plane so the ray passes cleanly through. -->
-    <object position="min 12 16.05 -1.5" orientation="0 0 0" shape="cuboid 10 1.9 3"
-            material="concrete" fill-color="160 160 160" opacity="0.9"/>
+    <!-- A thin wall in front of sta[0]. DielectricObstacleLoss attenuates (does not block) the
+         AP<->sta[0] link crossing it, so rate control settles that link near 6 Mbps; the other
+         stations are not behind it and stay at 54 Mbps. A lossy custom material lets the wall stay
+         thin; resistivity tunes the attenuation, and z is centered on the nodes' z=0 plane so the
+         ray passes cleanly through. -->
+    <material id="1" name="lossywall" resistivity="22" relativePermittivity="4.5" relativePermeability="1"/>
+    <object position="min 10 6.5 -1.5" orientation="0 0 0" shape="cuboid 0.4 2.7 3"
+            material="lossywall" fill-color="160 160 160" opacity="0.9"/>
 </environment>
