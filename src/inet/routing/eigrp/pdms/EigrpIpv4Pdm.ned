@@ -22,7 +22,7 @@ simple EigrpIpv4Pdm extends SimpleModule
         string interfaceTableModule;
         string routingTableModule;
     gates:
-        input splitterIn;
+        input splitterIn @interface[inet::queueing::IPassivePacketSink];
         input rtpIn;
 
         output splitterOut;

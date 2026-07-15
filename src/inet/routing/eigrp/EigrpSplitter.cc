@@ -36,8 +36,11 @@ void EigrpSplitter::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         ipOutSink.reference(gate("ipOut"), true);
-        splitterOutSink.reference(gate("splitterOut"), true);
-        splitter6OutSink.reference(gate("splitter6Out"), true);
+        // the pdm-side gates are connected conditionally (enableIPv4/enableIPv6)
+        if (gate("splitterOut")->isConnected())
+            splitterOutSink.reference(gate("splitterOut"), true);
+        if (gate("splitter6Out")->isConnected())
+            splitter6OutSink.reference(gate("splitter6Out"), true);
         WATCH(numSent);
         WATCH(numReceived);
     }
@@ -85,6 +88,7 @@ void EigrpSplitter::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
+    packet->setArrival(getId(), gate->getId());
     handleMessage(packet);
 }
 

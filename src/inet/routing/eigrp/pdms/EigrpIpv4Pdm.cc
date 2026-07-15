@@ -128,7 +128,8 @@ void EigrpIpv4Pdm::initialize(int stage)
 
 void EigrpIpv4Pdm::preDelete(cComponent *root)
 {
-    cancelHelloTimers();
+    if (eigrpIft != nullptr && eigrpIftDisabled != nullptr) // initialize() may not have run
+        cancelHelloTimers();
 }
 
 void EigrpIpv4Pdm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -1972,6 +1973,7 @@ void EigrpIpv4Pdm::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
+    packet->setArrival(getId(), gate->getId());
     handleMessage(packet);
 }
 

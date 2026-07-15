@@ -18,11 +18,11 @@ simple EigrpSplitter extends SimpleModule
     parameters:
         @class(EigrpSplitter);
     gates:
-        input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=eigrp; service=indication; sdu=ipv4,ipv6) @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 
-        input splitterIn @labels(Ipv4ControlInfo/up);
-        input splitter6In  @labels(Ipv6ControlInfo/up);
+        input splitterIn @interface[inet::queueing::IPassivePacketSink] @labels(Ipv4ControlInfo/up);
+        input splitter6In @interface[inet::queueing::IPassivePacketSink] @labels(Ipv6ControlInfo/up);
         output splitterOut @labels(Ipv4ControlInfo/down);
         output splitter6Out @labels(Ipv6ControlInfo/down);
 }

@@ -82,8 +82,8 @@ class INET_API EigrpIpv4Pdm : public SimpleModule, public IEigrpModule<Ipv4Addre
 
     EigrpDual<Ipv4Address> *eigrpDual;
     EigrpMetricHelper *eigrpMetric;
-    EigrpInterfaceTable *eigrpIft;                   /**< Table with enabled EIGRP interfaces */
-    EigrpDisabledInterfaces *eigrpIftDisabled;       /**< Disabled EIGRP interfaces */
+    EigrpInterfaceTable *eigrpIft = nullptr;                   /**< Table with enabled EIGRP interfaces */
+    EigrpDisabledInterfaces *eigrpIftDisabled = nullptr;       /**< Disabled EIGRP interfaces */
     EigrpIpv4NeighborTable *eigrpNt;                /**< Table with EIGRP neighbors */
     EigrpIpv4TopologyTable *eigrpTt;                /**< Topology table */
     EigrpNetworkTable<Ipv4Address> *routingForNetworks;          /**< Networks included in EIGRP */

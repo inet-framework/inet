@@ -23,7 +23,7 @@ simple EigrpIpv6Pdm extends SimpleModule
         string routingTableModule;
 
     gates:
-        input splitterIn;
+        input splitterIn @interface[inet::queueing::IPassivePacketSink];
         input rtpIn;
 
         output splitterOut;

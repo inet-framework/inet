@@ -122,7 +122,8 @@ void EigrpIpv6Pdm::initialize(int stage)
 
 void EigrpIpv6Pdm::preDelete(cComponent *root)
 {
-    cancelHelloTimers();
+    if (eigrpIft != nullptr && eigrpIftDisabled != nullptr) // initialize() may not have run
+        cancelHelloTimers();
 }
 
 //void EigrpIpv6Pdm::receiveChangeNotification(int category, const cObject *details)
@@ -1986,6 +1987,7 @@ void EigrpIpv6Pdm::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
+    packet->setArrival(getId(), gate->getId());
     handleMessage(packet);
 }
 
