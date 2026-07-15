@@ -36,7 +36,7 @@ simple MacRelayUnitBase extends SimpleModule
     gates:
         input lowerLayerIn @interface[inet::queueing::IPassivePacketSink];
         output lowerLayerOut;
-        input upperLayerIn @interface[inet::queueing::IPassivePacketSink];
+        input upperLayerIn @interface[inet::queueing::IPassivePacketSink](arguments=null; protocol=ethernetmac; service=request; pdu=ieee8022llc);
         output upperLayerOut;
 }
 

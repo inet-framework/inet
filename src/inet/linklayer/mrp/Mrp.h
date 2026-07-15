@@ -18,6 +18,7 @@
 #include "inet/linklayer/mrp/MrpRelay.h"
 #include "inet/linklayer/mrp/MrpPdu_m.h"
 #include "inet/linklayer/mrp/CfmContinuityCheckMessage_m.h"
+#include "inet/common/IModuleInterfaceLookup.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
@@ -27,7 +28,7 @@ using namespace inet::queueing;
 /**
  * Implements the base part of the MRP protocol, i.e. roles MRC, MRM and MRA.
  */
-class INET_API Mrp: public OperationalBase, public cListener, public IPassivePacketSink
+class INET_API Mrp: public OperationalBase, public cListener, public IPassivePacketSink, public IModuleInterfaceLookup
 {
 public:
     enum FrameType : uint64_t {
@@ -250,6 +251,8 @@ public:
 
     virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
+
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }

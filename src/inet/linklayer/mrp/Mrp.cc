@@ -1927,6 +1927,21 @@ void Mrp::sendCCM(int portId, Packet *ccm)
     relayOutSink.pushPacket(ccm);
 }
 
+cGate *Mrp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    // the equivalent of the old registerProtocol(Protocol::mrp, ...) and
+    // registerProtocol(Protocol::ieee8021qCFM, ...) calls: a NED gate claim
+    // can only declare a single protocol
+    if (gate->isName("relayIn") && type == typeid(IPassivePacketSink)) {
+        if (auto dispatchProtocolReq = dynamic_cast<const DispatchProtocolReq *>(arguments))
+            if ((dispatchProtocolReq->getProtocol() == &Protocol::mrp || dispatchProtocolReq->getProtocol() == &Protocol::ieee8021qCFM)
+                    && dispatchProtocolReq->getServicePrimitive() == SP_INDICATION)
+                return gate;
+    }
+    return nullptr;
+}
+
 void Mrp::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
