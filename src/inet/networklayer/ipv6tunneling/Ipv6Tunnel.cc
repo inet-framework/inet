@@ -22,6 +22,7 @@ void Ipv6Tunnel::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         upperLayerInGateId = findGate("upperLayerIn");
         upperLayerOutGateId = findGate("upperLayerOut");
+        upperLayerOutSink.reference(gate("upperLayerOut"), true);
         source = Ipv6Address(par("source").stringValue());
         destination = Ipv6Address(par("destination").stringValue());
     }
@@ -53,7 +54,15 @@ void Ipv6Tunnel::handleUpperPacket(Packet *packet)
     auto req = packet->addTag<DispatchProtocolReq>();
     req->setProtocol(&Protocol::ipv6);
     req->setServicePrimitive(SP_REQUEST);
-    send(packet, upperLayerOutGateId);
+    upperLayerOutSink.pushPacket(packet);
+}
+
+void Ipv6Tunnel::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    handleMessage(packet);
 }
 
 } // namespace inet

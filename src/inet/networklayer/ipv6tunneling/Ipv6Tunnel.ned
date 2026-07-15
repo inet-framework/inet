@@ -28,6 +28,6 @@ simple Ipv6Tunnel extends SimpleModule
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetSentToLower](type=cPacket);
     gates:
-        input upperLayerIn;
+        input upperLayerIn @interface[inet::queueing::IPassivePacketSink](arguments=null);
         output upperLayerOut;
 }

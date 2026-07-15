@@ -11,6 +11,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 
 namespace inet {
 
@@ -26,7 +27,7 @@ namespace inet {
  * "encapsulate an upper-layer payload" path, where the payload happens to be an
  * IPv6 datagram. This mirrors the IPv4-style virtual tunnel interfaces.
  */
-class INET_API Ipv6Tunnel : public LayeredProtocolBase
+class INET_API Ipv6Tunnel : public LayeredProtocolBase, public queueing::IPassivePacketSink
 {
   protected:
     opp_component_ptr<NetworkInterface> networkInterface;
@@ -36,6 +37,8 @@ class INET_API Ipv6Tunnel : public LayeredProtocolBase
 
     int upperLayerInGateId = -1;
     int upperLayerOutGateId = -1;
+
+    queueing::PassivePacketSinkRef upperLayerOutSink;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -54,6 +57,14 @@ class INET_API Ipv6Tunnel : public LayeredProtocolBase
     virtual void handleStartOperation(LifecycleOperation *operation) override {}
     virtual void handleStopOperation(LifecycleOperation *operation) override {}
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return true; }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 };
 
 } // namespace inet
