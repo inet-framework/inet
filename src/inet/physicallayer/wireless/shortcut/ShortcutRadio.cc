@@ -53,6 +53,13 @@ void ShortcutRadio::handleMessageWhenUp(cMessage *message)
         PhysicalLayerBase::handleMessageWhenUp(message);
 }
 
+void ShortcutRadio::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleUpperPacket(packet);
+}
+
 void ShortcutRadio::handleUpperPacket(Packet *packet)
 {
     auto destination = packet->getTag<MacAddressReq>()->getDestAddress();

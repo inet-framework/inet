@@ -34,6 +34,7 @@ simple ShortcutMac extends MacProtocolBase like ILinkLayer, IMacProtocol
         @class(ShortcutMac);
         @display("i=block/rxtx");
     gates:
+        upperLayerIn @interface[inet::queueing::IPassivePacketSink](arguments=null);
         input peerIn;
 }
 

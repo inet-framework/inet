@@ -200,8 +200,15 @@ void MacProtocolBase::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    emit(packetReceivedFromUpperSignal, packet);
-    handleUpperPacket(packet);
+    if (gate->isName("lowerLayerIn")) {
+        packet->setArrival(getId(), gate->getId());
+        emit(packetReceivedFromLowerSignal, packet);
+        handleLowerPacket(packet);
+    }
+    else {
+        emit(packetReceivedFromUpperSignal, packet);
+        handleUpperPacket(packet);
+    }
 }
 
 } // namespace inet

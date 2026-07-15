@@ -12,6 +12,7 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/PhysicalLayerBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/queueing/common/PassivePacketSinkRef.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
 
@@ -20,7 +21,7 @@ using namespace inet::queueing;
 namespace physicallayer {
 
 // TODO emit signals required by IRadio interface
-class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
+class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio, public queueing::IPassivePacketSink
 {
   protected:
     std::map<MacAddress, ShortcutRadio *>& shortcutRadios = SIMULATION_SHARED_VARIABLE(shortcutRadios);
@@ -45,6 +46,13 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
   public:
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleUpperPacket(Packet *packet) override;
+
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("upperLayerIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("upperLayerIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
     virtual const cGate *getRadioGate() const override { return gate("radioIn"); }
     virtual RadioMode getRadioMode() const override { return radioMode; }
