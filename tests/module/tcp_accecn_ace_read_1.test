@@ -12,21 +12,30 @@ non-GSO/TSO sender -- see the code comment).
 
 The server's rcvCePkts reaches 9 (one per CE-marked segment), so its
 surviving ACK encodes ace=(9+5)&0x7=6. The client's naive delta --
-(receivedAce - 5 - deliveredCePkts_before) & 0x7 = (6-5-0)&7 = 1 -- badly
-undercounts (true value is 9, off by exactly one full mod-8 wraparound).
-Since deliveredPktsThisAck=9 > 7, the safeDelta resolution kicks in:
-9 - ((9-1)&7) = 9, matching the true count. Asserted via a new EV_INFO trace
-line (AccECN ACE decode: ...) added specifically to make deliveredCePkts
-observable in a module test, since it otherwise only reaches an emitted
-signal (not recorded here, record-vector-results=false).
+(receivedAce - 5 - deliveredCePkts_before) & 0x7 = (6-5-0)&7 = 1 -- and its
+safeDelta candidate -- 9 - ((9-1)&7) = 9 -- disagree, because 9 packets were
+delivered in one ACK (> 7) so the mod-8 counter is genuinely ambiguous: the
+client cannot tell "1 CE mark" from "1 + one full wraparound = 9".
 
-Falsification: a companion scenario with only 3 delivered packets (below
-the wraparound threshold) must show naiveDelta and resolvedDelta agreeing --
-verified empirically during development (see commit message); not pinned
-as a second permanent file since it exercises the same code with the
-`deliveredPktsThisAck > 7` branch simply not taken, which the trace line's
-own naiveDelta/resolvedDelta fields already make directly observable
-whenever they happen to diverge or agree in any test.
+Linux (and now INET) resolve this ambiguity with the packets-acked EWMA
+(pkts_acked_ewma / ACK_COMP_THRESH in __tcp_accecn_process). This is the
+client's FIRST ACK, so the EWMA is seeded directly to deliveredPktsThisAck
+(9 << 6 = 576), which exceeds the ACK_COMP_THRESH<<PREC = 4<<6 = 256 gate.
+A high EWMA means large ACKs are the NORM for this flow (receiver-side ACK
+compression / GRO), so a big single-ACK packet count is EXPECTED and does NOT
+imply a counter wrap -- the naive delta (1), not safeDelta (9), is chosen.
+resolvedDelta=1, deliveredCePkts=1. This deliberately trades exact CE
+accounting for robustness against ACK compression, matching the real kernel
+(verified: the corpus's tcp_accecn_delivered_largeack/largeack2/maxack/
+2ndlargeack goldens require exactly this behavior).
+
+safeDelta now wins only in the opposite regime -- a flow whose ACKs are
+routinely SMALL (EWMA <= 256) that then takes a genuine wrap on one larger
+ACK. This test exercises the high-EWMA (naive) branch; the trace line's
+naiveDelta/safeDelta/resolvedDelta fields make which branch fired directly
+observable. Asserted via an EV_INFO trace line (AccECN ACE decode: ...) added
+to make deliveredCePkts observable in a module test, since it otherwise only
+reaches an emitted signal (not recorded here, record-vector-results=false).
 
 %inifile: omnetpp.ini
 [General]
@@ -98,11 +107,12 @@ while($sor = <FILE>)
 %contains: postrun-command(1).out
 [0.503 B010] A.1000 < B.2000: A W N ack 9001 win 20000
 %#--------------------------------------------------------------------------------------------------------------
-%# The actual G5.1 assertion: safeDelta (9) resolves correctly, not the undercounting naive delta (1).
-%# G7's option-evidence refinement is inert here (accEcnOptionEnabled unset, cebDeltaValid=0),
-%# so resolvedDelta still falls back to plain safeDelta -- unchanged from G5.1's own behavior.
+%# The ACE resolution: a first big ACK (EWMA seeded to 9<<6=576 > 256) is read as
+%# ACK compression, so the naive delta (1) is chosen over safeDelta (9), matching
+%# Linux's pkts_acked_ewma heuristic. G7's option-evidence refinement is inert here
+%# (accEcnOptionEnabled unset, cebDeltaValid=0).
 %contains: stdout
-AccECN ACE decode: receivedAce=6 deliveredPktsThisAck=9 naiveDelta=1 safeDelta=9 cebDeltaValid=0 cebDelta=-1 resolvedDelta=9 deliveredCePkts=9
+AccECN ACE decode: receivedAce=6 deliveredPktsThisAck=9 naiveDelta=1 safeDelta=9 cebDeltaValid=0 cebDelta=-1 resolvedDelta=1 deliveredCePkts=1
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

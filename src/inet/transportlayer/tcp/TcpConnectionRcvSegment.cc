@@ -1414,6 +1414,22 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
             safeDelta = (int)deliveredPktsThisAck - (((int)deliveredPktsThisAck - delta) & 0x7);
         }
 
+        // Packets-acked EWMA (design reference: __tcp_accecn_process's pkts_acked_ewma,
+        // tcp_input.c; PKTS_ACKED_WEIGHT=PKTS_ACKED_PREC=6 reimplemented here). Tracks
+        // whether large ACKs are the NORM for this flow (receiver-side ACK
+        // compression / GRO). When they are, a big single-ACK delivered-packet count
+        // is expected and does NOT imply the mod-8 ACE counter wrapped, so the naive
+        // delta -- not safeDelta -- is the correct CE count. Updated on every ACK.
+        if (deliveredPktsThisAck > 0) {
+            if (state->pktsAckedEwma == 0)
+                state->pktsAckedEwma = deliveredPktsThisAck << 6; // PKTS_ACKED_PREC
+            else {
+                uint32_t e = state->pktsAckedEwma;
+                e = (((e << 6) - e) + (deliveredPktsThisAck << 6)) >> 6; // weight 6
+                state->pktsAckedEwma = std::min<uint32_t>(e, 0xFFFF);
+            }
+        }
+
         // AccECN TCP option (Workstream G7): if this ACK also carried a valid AccECN
         // option (readHeaderOptions() already ran and set accEcnOptionCebDeltaValid,
         // before this function, for this same segment), its byte-exact CEB evidence can
@@ -1435,6 +1451,13 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
             state->peerReportedCeBytes = state->accEcnOptionRawCeBytes;
             emit(deliveredCeBytesSignal, (unsigned long)state->deliveredCeBytes);
             cebDeltaForTrace = (long)cebDelta;
+        }
+        else if (deliveredPktsThisAck > 7 && state->pktsAckedEwma > (4u << 6)) {
+            // No AccECN option to disambiguate, but this flow's ACKs routinely
+            // cover many packets (EWMA above ACK_COMP_THRESH=4): the large
+            // delivered-packet count is ACK compression, not an ACE counter wrap,
+            // so the naive mod-8 delta is the correct CE count rather than safeDelta.
+            resolvedDelta = delta;
         }
 
         state->deliveredCePkts += resolvedDelta;

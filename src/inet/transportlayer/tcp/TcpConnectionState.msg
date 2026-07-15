@@ -354,6 +354,7 @@ struct TcpStateVariables
     uint32_t fastopenSynDataLen = 0;         // client: bytes of app data attached to the SYN (0 = none); fixed once set, reused verbatim across SYN-REXMIT
     bool fastopenRequested = false;          // client: this connection's own connect() call opted into Fast Open (per-connection, like Linux's MSG_FASTOPEN/TCP_FASTOPEN_CONNECT) -- gates the cookie append independently of the module-wide fastopenClientEnabled parameter, so a plain connect() to a destination with a cached cookie does NOT send it uninvited
     bool fastopenSynDataAccepted = false;    // server: a validated-cookie SYN carried data that was accepted and delivered ahead of the 3WHS (mirrors Linux's TCPI_OPT_SYN_DATA tcp_info flag)
+    uint32_t pktsAckedEwma = 0;              // AccECN: EWMA of packets acked per ACK (<<6 fixed point), for the ACE-wrap-vs-ACK-compression heuristic on large ACKs
 };
 
 cplusplus(TcpStateVariables) {{
