@@ -667,3 +667,6 @@
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,         3b2b-5123/tplx;0009-ca8c/~tNl;4d9d-62df/~tND;5fb8-99af/tyf, PASS, wireless
 
 /examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,      54d5-9cfc/tplx;56e1-d7a0/~tNl;b96e-4c2d/~tND;b1ff-070d/tyf, PASS, wireless EthernetMac Ipv4
+
+/examples/wireless/airtimefairness/, -f omnetpp.ini -c Anomaly -r 0,         3s,          7868-fe04/tplx;daf7-9a23/~tNl;09e9-a59f/~tND, PASS, wireless ieee80211 airtimefairness
+/examples/wireless/airtimefairness/, -f omnetpp.ini -c AirtimeFair -r 0,     3s,          3528-14aa/tplx;bdd5-f417/~tNl;6d65-81dd/~tND, PASS, wireless ieee80211 airtimefairness

@@ -1,0 +1,158 @@
+%description:
+
+Statistical test for AirtimeFairnessQueue (802.11 downlink airtime fairness).
+
+An access point saturates three wireless clients with downlink UDP traffic over
+equally good links, transmitting to sta[0] at 6 Mbps and to sta[1]/sta[2] at 54 Mbps
+(per-receiver data-frame rate). The AP's transmit queue is an AirtimeFairnessQueue.
+
+The test runs the same scenario twice and checks the steady-state per-station downlink
+throughput (averaged over the [warmup, limit] window) against tolerant bands:
+
+  - AirtimeFair regime (fairnessEnabled = true, the [General] run):
+      * allServed      - every client receives traffic;
+      * fastRecovered  - each 54 Mbps client recovers to near its offered load,
+                         far above the slow client (throughput follows airtime share);
+      * slowBounded    - the 6 Mbps client is held to its airtime share, not more;
+      * fairTotalInBand - aggregate goodput sits in the expected band.
+
+  - Anomaly regime (fairnessEnabled = false, frame-fair round-robin):
+      * anomalyCollapsed - all three clients collapse to (nearly) the same throughput,
+                           i.e. the fast clients are dragged down to the slow one -- the
+                           classic 802.11 rate anomaly.
+
+  - Cross-regime:
+      * fixImproves - airtime fairness lifts the aggregate goodput well above the anomaly.
+
+Reference values on the current implementation (8 s window):
+  AirtimeFair: sta0=1.74, sta1=8.00, sta2=7.99, total=17.73 Mbps
+  Anomaly:     sta0=sta1=sta2=3.54,            total=10.63 Mbps
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+network AirtimeFairnessTest
+{
+    parameters:
+        int numStations = default(3);
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        server: StandardHost;
+        accessPoint: AccessPoint;
+        sta[numStations]: WirelessHost;
+    connections:
+        accessPoint.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = AirtimeFairnessTest
+ned-path = .;../../../../src
+sim-time-limit = 10s
+warmup-period = 2s
+**.vector-recording = false
+
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.*.ipv4.arp.typename = "GlobalArp"
+
+# equally good links, all stations ~8-9 m from the AP
+*.sta[*].mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+*.sta[*].mobility.initialX = 9m
+*.sta[*].mobility.initialY = 8m + parentIndex() * 2m
+*.sta[*].mobility.initialZ = 0m
+*.accessPoint.mobility.initialX = 17m
+*.accessPoint.mobility.initialY = 12m
+*.accessPoint.mobility.initialZ = 0m
+
+# 802.11g; AP transmits to sta[0] at 6 Mbps and to the others at 54 Mbps
+*.sta[*].wlan[*].opMode = "g(erp)"
+*.accessPoint.wlan[*].opMode = "g(erp)"
+*.sta[*].wlan[*].bitrate = 54Mbps
+*.accessPoint.wlan[*].bitrate = 54Mbps
+*.sta[*].wlan[*].radio.transmitter.power = 100mW
+*.accessPoint.wlan[*].radio.transmitter.power = 100mW
+*.accessPoint.wlan[*].mac.dcf.rateSelection.dataFrameBitratePerReceiver = {"sta[0].wlan[0]": 6Mbps}
+
+# simplified management: every station connected from the start
+*.accessPoint.wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified"
+*.sta[*].wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.sta[*].wlan[*].agent.typename = ""
+*.accessPoint.wlan[*].address = "10:00:00:00:00:00"
+*.sta[*].wlan[*].mgmt.accessPointAddress = "10:00:00:00:00:00"
+
+# saturating downlink: server sources one flow per station (~8 Mbps), stations sink
+*.server.numApps = 3
+*.server.app[*].typename = "UdpBasicApp"
+*.server.app[*].destAddresses = "sta[" + string(index) + "]"
+*.server.app[*].destPort = 5000 + index
+*.server.app[*].messageLength = 1000B
+*.server.app[*].sendInterval = 1ms
+*.sta[*].numApps = 1
+*.sta[*].app[0].typename = "UdpSink"
+*.sta[*].app[0].localPort = 5000 + parentIndex()
+
+# transmit queue under test; [General] is the airtime-fair regime (fairnessEnabled defaults true)
+*.accessPoint.wlan[*].mac.dcf.channelAccess.pendingQueue.typename = "AirtimeFairnessQueue"
+*.accessPoint.wlan[*].mac.dcf.channelAccess.pendingQueue.packetCapacity = 50
+
+[Config Anomaly]
+# frame-fair round-robin: reproduces the downlink rate anomaly
+*.accessPoint.wlan[*].mac.dcf.channelAccess.pendingQueue.fairnessEnabled = false
+
+%#--------------------------------------------------------------------------------------------------------------
+# The [General] run above is the airtime-fair regime. Run the anomaly regime as well.
+%postrun-command: $INET_ROOT/bin/inet -u Cmdenv omnetpp.ini -c Anomaly --result-dir=results > anom.out 2>&1
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: gawk -f verdict.awk results/General-#0.sca results/Anomaly-#0.sca > verdict.out
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: verdict.awk
+
+# Per-station received bytes -> Mbps over the measurement window (sim-time-limit - warmup).
+BEGIN { T = 8.0 }
+/sta\[[0-9]+\]\.app\[0\] packetReceived:sum\(packetBytes\)/ {
+    cfg = (FILENAME ~ /Anomaly/) ? "a" : "f"
+    match($2, /sta\[([0-9]+)\]/, m)
+    v[cfg SUBSEP m[1]] = $4 * 8 / T / 1e6
+}
+END {
+    f0=v["f" SUBSEP 0]; f1=v["f" SUBSEP 1]; f2=v["f" SUBSEP 2]
+    a0=v["a" SUBSEP 0]; a1=v["a" SUBSEP 1]; a2=v["a" SUBSEP 2]
+    ftot=f0+f1+f2; atot=a0+a1+a2
+    amax = (a0>a1 ? (a0>a2?a0:a2) : (a1>a2?a1:a2))
+    amin = (a0<a1 ? (a0<a2?a0:a2) : (a1<a2?a1:a2))
+    printf "fair sta0=%.3f sta1=%.3f sta2=%.3f total=%.3f\n", f0, f1, f2, ftot
+    printf "anom sta0=%.3f sta1=%.3f sta2=%.3f total=%.3f\n", a0, a1, a2, atot
+    printf "allServed=%s\n",       (f0>0 && f1>0 && f2>0)          ? "YES" : "NO"
+    printf "fastRecovered=%s\n",   (f1>=6.5 && f2>=6.5)            ? "YES" : "NO"
+    printf "slowBounded=%s\n",     (f0>0 && f0<=2.5)               ? "YES" : "NO"
+    printf "fairTotalInBand=%s\n", (ftot>=15.0 && ftot<=20.0)      ? "YES" : "NO"
+    printf "anomalyCollapsed=%s\n",(amin>0 && amax/amin<=1.15)     ? "YES" : "NO"
+    printf "fixImproves=%s\n",     (ftot >= atot*1.25)             ? "YES" : "NO"
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: verdict.out
+allServed=YES
+fastRecovered=YES
+slowBounded=YES
+fairTotalInBand=YES
+anomalyCollapsed=YES
+fixImproves=YES
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object:
