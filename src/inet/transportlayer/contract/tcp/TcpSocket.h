@@ -312,11 +312,15 @@ class INET_API TcpSocket : public ISocket, public ITcp::ICallback
      */
     void setOutputGate(cGate *toTcp) {
         gateToTcp = toTcp;
-        DispatchProtocolReq dispatchProtocolReq;
-        dispatchProtocolReq.setProtocol(&Protocol::tcp);
-        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
-        sink.reference(toTcp, true, &dispatchProtocolReq);
-        tcp.reference(toTcp, true);
+        if (sink.getReferencingGate() == nullptr) {
+            DispatchProtocolReq dispatchProtocolReq;
+            dispatchProtocolReq.setProtocol(&Protocol::tcp);
+            dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+            sink.reference(toTcp, true, &dispatchProtocolReq);
+            tcp.reference(toTcp, true);
+        }
+        else if (sink.getReferencingGate() != toTcp)
+            throw cRuntimeError("TcpSocket: setOutputGate() already called with a different gate");
         if (sockstate == CONNECTED)
             tcp->setCallback(connId, this);
     }
