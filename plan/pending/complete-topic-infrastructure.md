@@ -469,6 +469,26 @@ the Phase 2 history rewrite (fix commits get squashed into their logical parents
       - Audit: socket-callback overrides that schedule/cancel need their own
         Enter_Method (TcpAppBase-style base-call protection does not cover the
         derived continuation) — TelnetApp fixed; sweep other apps in Phase 5.
+      **4.3 churn triage conclusion (2026-07-15):** the 111 ~tNl-changed subjects
+      concentrate exactly where RNG-order reallocation predicts: mrp parameter studies
+      (60 — synchronized periodic test frames), manetrouting (20 — wireless), nclients/
+      telnet (11 — exponential app timings), mpls/ldp (5 — session timing), rest
+      singletons. Spot check (mrp SmallNetworkWithTraffic -r 4, branch vs master
+      scalars): per-MAC packet counts identical to within ±2 in ~4000 — timing jitter,
+      not behavior. Classified **changed-explainable** pending the CI validation net.
+      **Local statistical suite is not usable as the second net**: it exact-matches
+      .sca files against the `inet-framework/statistics` baseline clone (missing
+      locally; and exact-match has the same comparability problem as store.json under
+      legitimate trajectory divergence). The distribution-level net is the opp_ci
+      `validation` kind (4.4).
+- [ ] 4.4 **BLOCKED on OPP_CI_API_TOKEN** (not present in the agent environment by
+      design). Branch pushed as `84f3c9aa81`; submit with:
+      `OPP_CI_COORDINATOR_URL=https://ci.omnetpp.dev opp_ci --remote run` or Python:
+      `OppCiClient(url='https://ci.omnetpp.dev/api', token=...).submit_run(project='inet',
+      kind='validation', git_ref='84f3c9aa81ef0a97786d2e1f9fa23811865033a6',
+      pins=['omnetpp=git@omnetpp-6.x'], isolation='none', toolchain='none')`
+      (worker "levy" is this machine; restart `opp_ci-worker@levy.service` first if
+      opp_repl changed).
 - [ ] 4.4 **[sonnet]** opp_ci validation run, pinned to the exact commit SHA:
       `submit_run(project='inet', kind='validation', git_ref=<SHA>, pins=['omnetpp=git@omnetpp-6.x'], isolation='none', toolchain='none')`
       (coordinator `https://ci.omnetpp.dev/api`; worker "levy" is this machine — restart
