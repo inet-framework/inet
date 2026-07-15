@@ -28,6 +28,9 @@ cGate *EthernetLayer::lookupModuleInterface(cGate *gate, const std::type_info &t
             auto packetServiceTag = dynamic_cast<const PacketServiceTag *>(arguments);
             if (packetServiceTag != nullptr && packetServiceTag->getProtocol() == &Protocol::ethernetMac)
                 return findModuleInterface(gate, type, nullptr, 1);
+            auto packetProtocolTag = dynamic_cast<const PacketProtocolTag *>(arguments);
+            if (packetProtocolTag != nullptr && packetProtocolTag->getProtocol() == &Protocol::ieee8022llc)
+                return findModuleInterface(gate, type, nullptr, 1); // LLC PDUs to encapsulate, same as EthernetEncapsulation
         }
         else if (type == typeid(IEthernet))
             return findModuleInterface(gate, type, arguments, 1);
