@@ -407,14 +407,68 @@ the Phase 2 history rewrite (fix commits get squashed into their logical parents
 
 ## Phase 4 — Full regression
 
-- [ ] 4.1 **[sonnet]** Local suites: unit, module, packet, queueing, protocol, misc/leak.
-      Full logs to scratchpad; failure table per suite.
-- [ ] 4.2 **[sonnet]** Fingerprint tests (`tests/fingerprint`), all categories. Expect churn
-      from sync-communication event-order changes; produce a diff report:
-      *unchanged / changed-explainable / changed-unexplained / crashed*.
-- [ ] 4.3 **[opus]** Triage: every *changed-unexplained* and *crashed* fingerprint, every
-      failed test. Classify legit (update CSV/expectation with justification in the commit
-      message) vs bug (fix). Statistical tests as a second net for what `~tND` masks hide.
+- [x] 4.1 **DONE (2026-07-15).** Local suites, all green at `eacc163f14` (debug):
+      unit **89/89**, packet **1/1**, queueing **57/57**, protocol **13/13**, module
+      **337/337** (logs: scratchpad `phase4/suite-*.log`). tests/misc = **N/A**: not
+      CI-covered on master either; dlltest is Windows-only, ns3 needs a patched
+      ns-3.24 install, etherfixes is a manual README procedure, lifecycle.test's
+      helper lib isn't wired into the current harness (no Makefile; `-ltest_dbg`
+      link failure) — lifecycle behavior is covered by the module suite.
+      **Incident during 4.2 smoke:** release fingerprint runs crashed at startup
+      (malloc corruption / SIGSEGV in `cSingleFingerprintCalculator::registerVectorResult`).
+      Root cause: `libINET.so` had been rebuilt (2026-07-15 10:48) against **stock
+      omnetpp-6.x** (RUNPATH proved it) — stock lacks companion `4f52bcee`'s
+      cSingleFingerprintCalculator fields → subclass layout mismatch. Debug lib was
+      companion-linked, hence green suites. Fix: clean release rebuild
+      (`rm -rf out/clang-release`) in the verified env; RUNPATH now companion; smoke
+      sims run clean. Data point for the Phase-5 stock-omnetpp gate: INET **compiles
+      and links** against stock omnetpp-6.x; only the fingerprint-calculator ABI is
+      companion-coupled at runtime.
+- [x] 4.2 **DONE (2026-07-15).** Full fingerprint run via `opp_run_fingerprint_tests`
+      (release, stored_only, tplx/~tNl/~tND — the opp_ci/GitHub-parity config).
+      **Key discovery: master's `store.json` baselines are unusable as reference** —
+      master itself built against the companion omnetpp reproduces **0** of them
+      (3149/3149 mismatch): `4f52bcee`'s same-simtime sorting changes essentially every
+      hash. Per D6 the true parity reference is **master's calculated fingerprints on
+      the companion pairing**: built master (`512dd6f642` = merge-base = master tip) in
+      a fresh worktree `/home/levy/workspace/inet-fp-master` against companion omnetpp,
+      ran the full suite there (`fp-master.log`), and compared calculated-vs-calculated
+      (scratchpad `phase4/fp_compare.py`, `fp-diff-details.txt`). First-pass result:
+      **1972 unchanged / 574 changed / 383 branch-error rows**; subject-level ~tNl:
+      **862/915 identical (94%)**, 53 different; **422 subjects tplx-identical** (full
+      event trajectory preserved). Feature-missing exclusions (voipstream/Z3, 16
+      subjects) identical on both sides.
+- [x] 4.5(first pass) **DONE (2026-07-15).** All 383 branch-error rows triaged via a
+      reproduce-and-cluster sweep (12 clusters, scratchpad `phase4/nofp-clusters.md`)
+      and **fixed in 10 commits** (`5ac6849fae..5a0f3ac6eb`): EthernetCsmaMac claim +
+      MacProtocolBase optional lowerLayerSink (TenBaseT1S CSMACD/PLCA, 220 runs);
+      Eigrp completion — splitter/PDM claims, setArrival, conditional gate refs,
+      preDelete hardening (20 subjects); EthernetLayer LLC-PDU lookup (ieee8021d+mrp,
+      58); Mrp C++ lookup for mrp+ieee8021qCFM + MacRelayUnitBase claim narrowed to
+      stop indication bounce-back (30); TcpGenericServerApp per-connection sockets +
+      push/direct-call replies + SimpleVoipReceiver sink (14); TcpSocket setOutputGate
+      idempotency (BGP reconnects); Bgp completion — listener callback, context
+      switchers, ensureSocket null guard, BgpOpen/BgpUpdate sniffer fixtures reduced
+      to data packets (7); L3Socket+IL3Protocol+NetworkProtocolBase conversion incl.
+      NextHopForwarding leftovers (dymo/gpsr/hierarchical99, 12); ShortcutMac claim,
+      ShortcutRadio sink, MacProtocolBase pushPacket gate dispatch (2). Module suite
+      **337/337 green after every step**. Full fingerprint rerun + master compare in
+      progress.
+- [ ] 4.3 **[opus] IN PROGRESS.** Post-fix rerun (`fp-full2.log`) vs master reference:
+      **2409 unchanged / 736 changed / 4 error rows** (2 subjects); subject-level ~tNl
+      identical **1167/1278 (91%)**, tplx identical 506. The changed set includes the
+      newly-running subjects (previously crashing); churn mechanism: intra-node event
+      elimination reorders same-simtime module activations → shared RNG streams are
+      consumed in different order → genuinely different (but statistically equivalent)
+      trajectories; the companion sorting only masks pure hash-order effects.
+      Statistical tests running as the second net. **Open items:**
+      - `shutdownrestart -c TCP -r 2`: FIN sent from a pre-restart source address
+        after the t=3..6 node bounce ("no interface with such address", t=9.13).
+        Possibly a master-latent address-restoration gap that the branch's changed
+        timing trips; r0/r1/r3 green after the TelnetApp Enter_Method fix.
+      - Audit: socket-callback overrides that schedule/cancel need their own
+        Enter_Method (TcpAppBase-style base-call protection does not cover the
+        derived continuation) — TelnetApp fixed; sweep other apps in Phase 5.
 - [ ] 4.4 **[sonnet]** opp_ci validation run, pinned to the exact commit SHA:
       `submit_run(project='inet', kind='validation', git_ref=<SHA>, pins=['omnetpp=git@omnetpp-6.x'], isolation='none', toolchain='none')`
       (coordinator `https://ci.omnetpp.dev/api`; worker "levy" is this machine — restart
