@@ -2086,17 +2086,20 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // AccECN option on the SYN-ACK (draft-ietf-tcpm-accurate-ecn section 3.2.3):
         // once the incoming SYN negotiated AccECN, the SYN-ACK carries the AccECN
         // option seeding the byte counters at their wire-init offsets. Gated on
-        // getAckBit() so it rides the SYN-ACK (and any SYN-ACK retransmit) but never
-        // the client's own initial bare SYN -- that SYN advertises AccECN with the
-        // flag-bit combination alone, no option (confirmed against the corpus's
-        // "> SEWA ... <mss,sackOK,...>" client SYN, which carries no ECN option).
-        // Unlike the post-handshake beacon (see the non-SYN branch below), the
-        // SYN-ACK always carries it -- there is no cadence to apply on the one
-        // handshake segment. The kind is fixed to ACCECN1 (the corpus's observed
-        // first-emission ordering E1B,CEB,E0B); the post-handshake alternation
-        // start is a separate concern. This block is pure (it may run as a
-        // header-size dry run) -- it mutates no beacon state.
-        if (state->accEcnNegotiated && state->accEcnOptionEnabled && tcpHeader->getAckBit()) {
+        // getAckBit() so it rides the SYN-ACK but never the client's own initial
+        // bare SYN -- that SYN advertises AccECN with the flag-bit combination
+        // alone, no option (confirmed against the corpus's "> SEWA ... <mss,sackOK,
+        // ...>" client SYN, which carries no ECN option). Only the FIRST SYN-ACK
+        // carries the option: on a SYN-ACK retransmit (syn_rexmit_count > 0) Linux
+        // conservatively omits the AccECN option -- since a middlebox that dropped
+        // the option-bearing SYN-ACK is a plausible reason for the retransmit -- so
+        // the retransmit falls back to a plain SYN-ACK (mss/WS/SACK only), matching
+        // the corpus's accecn *_drop / *_rxmt scripts. The kind is fixed to ACCECN1
+        // (the corpus's observed first-emission ordering E1B,CEB,E0B); the
+        // post-handshake alternation start is a separate concern. This block is pure
+        // (it may run as a header-size dry run) -- it mutates no beacon state.
+        if (state->accEcnNegotiated && state->accEcnOptionEnabled && tcpHeader->getAckBit()
+                && state->syn_rexmit_count == 0) {
             // Pad with NOPs so the options area stays 4-byte aligned once this
             // 11-byte option is appended -- same convention as the other options.
             while (tcpHeader->getHeaderOptionArrayLength().get<B>() % 4 != 1)
