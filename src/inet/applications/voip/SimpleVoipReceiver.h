@@ -16,6 +16,8 @@
 #include "inet/common/SimpleModule.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/IModuleInterfaceLookup.h"
+#include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
@@ -25,7 +27,7 @@ class SimpleVoipPacket;
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class INET_API SimpleVoipReceiver : public SimpleModule, public LifecycleUnsupported, public UdpSocket::ICallback
+class INET_API SimpleVoipReceiver : public SimpleModule, public LifecycleUnsupported, public UdpSocket::ICallback, public queueing::IPassivePacketSink, public IModuleInterfaceLookup
 {
   private:
     class VoipPacketInfo {
@@ -96,6 +98,16 @@ class INET_API SimpleVoipReceiver : public SimpleModule, public LifecycleUnsuppo
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     virtual void socketClosed(UdpSocket *socket) override {}
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override { return gate->isName("socketIn"); }
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
+    virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
+    virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
+
+    virtual cGate *lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction) override;
 
   public:
     SimpleVoipReceiver();

@@ -7,6 +7,8 @@
 
 #include "inet/applications/voip/SimpleVoipReceiver.h"
 
+#include "inet/common/socket/SocketTag_m.h"
+
 #include "inet/applications/voip/SimpleVoipPacket_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -114,6 +116,27 @@ void SimpleVoipReceiver::handleMessage(cMessage *msg)
     }
     else
         throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
+}
+
+void SimpleVoipReceiver::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    socket.processMessage(packet);
+}
+
+cGate *SimpleVoipReceiver::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(queueing::IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && socketInd->getSocketId() == socket.getSocketId())
+                return gate;
+        }
+    }
+    return nullptr;
 }
 
 void SimpleVoipReceiver::socketDataArrived(UdpSocket *socket, Packet *packet)

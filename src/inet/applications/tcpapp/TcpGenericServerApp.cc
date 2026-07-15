@@ -14,6 +14,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/SimulationContinuation.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
@@ -44,6 +45,12 @@ void TcpGenericServerApp::initialize(int stage)
         int localPort = par("localPort");
         autoRead = par("autoRead");
         socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this); // to learn the socket ids of forked connections
+        DispatchProtocolReq dispatchProtocolReq;
+        dispatchProtocolReq.setProtocol(&Protocol::tcp);
+        dispatchProtocolReq.setServicePrimitive(SP_REQUEST);
+        socketOutSink.reference(gate("socketOut"), true, &dispatchProtocolReq);
+        tcp.reference(gate("socketOut"), true);
         socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
         socket.setAutoRead(autoRead);
         socket.listen();
@@ -66,22 +73,34 @@ void TcpGenericServerApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 
 void TcpGenericServerApp::sendBack(cMessage *msg)
 {
-    Packet *packet = dynamic_cast<Packet *>(msg);
-
-    if (packet) {
+    if (auto packet = dynamic_cast<Packet *>(msg)) {
         msgsSent++;
         bytesSent += packet->getByteLength();
         emit(packetSentSignal, packet);
-
         EV_INFO << "sending \"" << packet->getName() << "\" to TCP, " << packet->getByteLength() << " bytes\n";
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
+        yieldBeforePush();
+        socketOutSink.pushPacket(packet);
     }
     else {
+        // socket commands are direct method calls into TCP
+        auto request = check_and_cast<Request *>(msg);
+        int connId = request->getTags().getTag<SocketReq>()->getSocketId();
         EV_INFO << "sending \"" << msg->getName() << "\" to TCP\n";
+        switch (request->getKind()) {
+            case TCP_C_CLOSE:
+                tcp->close(connId);
+                break;
+            case TCP_C_READ: {
+                auto readCommand = check_and_cast<TcpReadCommand *>(request->getControlInfo());
+                tcp->read(connId, readCommand->getMaxByteCount());
+                break;
+            }
+            default:
+                throw cRuntimeError("Unknown command to TCP: kind=%d", request->getKind());
+        }
+        delete msg;
     }
-
-    auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
-    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-    send(msg, "socketOut");
 }
 
 void TcpGenericServerApp::handleMessage(cMessage *msg)
@@ -181,6 +200,81 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
 }
 
 
+void TcpGenericServerApp::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
+{
+    // new connection: create a socket object for it so TCP indications arrive
+    // through the callbacks below, and accept it
+    TcpSocket *newSocket = new TcpSocket(availableInfo);
+    newSocket->setOutputGate(gate("socketOut"));
+    newSocket->setCallback(this);
+    socketMap.addSocket(newSocket);
+    socket->accept(availableInfo->getNewSocketId());
+}
+
+void TcpGenericServerApp::socketEstablished(TcpSocket *socket, Indication *indication)
+{
+    // note: the indication is owned and deleted by TcpSocket::processMessage
+    if (!autoRead)
+        sendOrScheduleReadCommandIfNeeded(socket->getSocketId());
+}
+
+void TcpGenericServerApp::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
+{
+    // feed the legacy message-style processing
+    packet->setKind(TCP_I_DATA);
+    handleMessage(packet);
+}
+
+void TcpGenericServerApp::socketPeerClosed(TcpSocket *socket)
+{
+    // we'll close too, but only after there's surely no message
+    // pending to be sent back in this connection
+    auto request = new Request("close", TCP_C_CLOSE);
+    request->addTag<SocketReq>()->setSocketId(socket->getSocketId());
+    sendOrSchedule(request, delay + maxMsgDelay);
+}
+
+void TcpGenericServerApp::socketDeleted(TcpSocket *socket)
+{
+    socketMap.removeSocket(socket);
+    socketQueue.erase(socket->getSocketId());
+    delete socket;
+}
+
+void TcpGenericServerApp::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    packet->setArrival(getId(), gate->getId());
+    auto socketInd = packet->getTag<SocketInd>();
+    if (auto connectionSocket = socketMap.findSocketById(socketInd->getSocketId()))
+        connectionSocket->processMessage(packet);
+    else
+        socket.processMessage(packet);
+}
+
+cGate *TcpGenericServerApp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)
+{
+    Enter_Method("lookupModuleInterface");
+    EV_TRACE << "Looking up module interface" << EV_FIELD(gate) << EV_FIELD(type, opp_typename(type)) << EV_FIELD(arguments) << EV_FIELD(direction) << EV_ENDL;
+    if (gate->isName("socketIn")) {
+        if (type == typeid(queueing::IPassivePacketSink)) {
+            auto socketInd = dynamic_cast<const SocketInd *>(arguments);
+            if (socketInd != nullptr && (socketInd->getSocketId() == socket.getSocketId() || socketMap.findSocketById(socketInd->getSocketId()) != nullptr))
+                return gate;
+            auto packetServiceTag = dynamic_cast<const PacketServiceTag *>(arguments);
+            if (packetServiceTag != nullptr && packetServiceTag->getProtocol() == &Protocol::tcp)
+                return gate;
+        }
+    }
+    return nullptr;
+}
+
+TcpGenericServerApp::~TcpGenericServerApp()
+{
+    socketMap.deleteSockets();
+}
+
 void TcpGenericServerApp::finish()
 {
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
@@ -201,12 +295,8 @@ void TcpGenericServerApp::sendOrScheduleReadCommandIfNeeded(int connId)
         if (delay >= SIMTIME_ZERO) {
             scheduleAfter(delay, request);
         }
-        else {
-            // send read message to TCP
-            request->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-            EV_INFO << "sending \"" << request->getName() << "\" to TCP\n";
-            send(request, "socketOut");
-        }
+        else
+            sendBack(request);
     }
 }
 
