@@ -377,10 +377,10 @@ A rate-adapted client behind a wall
 
 ``[Config DownlinkBase]`` reverses the traffic — the server sources one saturating UDP flow per
 station and the access point relays them over the air — and changes *how* the slow station is
-slow. The uplink configs pin the slow rate by hand. Here ``sta[0]`` sits close to the others but
-behind a **wall** — a concrete obstacle in the physical environment, between it and the access
-point, that only its link has to cross. :ned:`DielectricObstacleLoss` *attenuates* the signal
-through the wall rather than blocking it, and rate control does the rest:
+slow. The uplink configs pin the slow rate by hand. Here ``sta[0]`` stays in the cluster with the
+others, but a thin **wall** stands in front of it — an obstacle in the physical environment,
+between it and the access point, that only its link has to cross. :ned:`DielectricObstacleLoss`
+*attenuates* the signal through the wall rather than blocking it, and rate control does the rest:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: # Realistic indoor radio
@@ -398,7 +398,7 @@ falling back to. With INET's default −85 dBm sensitivity sitting well above th
 link is either strong enough for 54 Mbps or below sensitivity and dead — nothing in between.
 Bringing the sensitivity (−92 dBm) and an explicit noise floor (−95 dBm) close together opens that
 middle band, so an attenuated link can settle on any of the lower 802.11g rates instead of
-dropping out; the steeper indoor path loss (α = 4) just keeps the wall a realistic thickness.
+dropping out; the steeper indoor path loss (α = 4) means a thin, lossy wall is enough to do it.
 
 A weak-link client can also fail to *associate* in the first place — which would confound a
 scheduling experiment with association failures. To keep the demo about scheduling, the stations
