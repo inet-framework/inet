@@ -879,6 +879,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
             state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, synShiftedHeader);
             updateRcvQueueVars();
             sendAvailableDataToApp(); // deliver before the 3WHS completes -- the RFC 7413 win
+            state->fastopenSynDataAccepted = true; // surfaced as TCPI_OPT_SYN_DATA in tcp_info
             EV_INFO << "Fast Open: cookie valid, accepting " << payloadLen
                     << " bytes of SYN data before handshake completion\n";
         }

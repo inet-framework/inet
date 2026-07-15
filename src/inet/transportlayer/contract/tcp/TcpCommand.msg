@@ -300,6 +300,7 @@ class TcpStatusInfo extends TcpCommand
     bool sackEnabled;
     bool wsEnabled;
     bool ectEnabled;
+    bool synDataAccepted;   // server accepted TFO SYN data ahead of the 3WHS (-> TCPI_OPT_SYN_DATA)
     unsigned int sndWndScale;
     simtime_t lastDataRecvTime;
 

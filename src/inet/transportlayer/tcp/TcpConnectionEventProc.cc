@@ -420,6 +420,7 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setSackEnabled(state->sack_enabled);
     statusInfo->setWsEnabled(state->ws_enabled);
     statusInfo->setEctEnabled(state->ect);
+    statusInfo->setSynDataAccepted(state->fastopenSynDataAccepted);
     statusInfo->setSndWndScale(state->snd_wnd_scale);
     statusInfo->setLastDataRecvTime(state->time_last_segment_received);
 

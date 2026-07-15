@@ -353,6 +353,7 @@ struct TcpStateVariables
     bool fastopenCookieRequestPending = false; // client: no cookie was cached, so the (immediate, dataless) SYN requests one
     uint32_t fastopenSynDataLen = 0;         // client: bytes of app data attached to the SYN (0 = none); fixed once set, reused verbatim across SYN-REXMIT
     bool fastopenRequested = false;          // client: this connection's own connect() call opted into Fast Open (per-connection, like Linux's MSG_FASTOPEN/TCP_FASTOPEN_CONNECT) -- gates the cookie append independently of the module-wide fastopenClientEnabled parameter, so a plain connect() to a destination with a cached cookie does NOT send it uninvited
+    bool fastopenSynDataAccepted = false;    // server: a validated-cookie SYN carried data that was accepted and delivered ahead of the 3WHS (mirrors Linux's TCPI_OPT_SYN_DATA tcp_info flag)
 };
 
 cplusplus(TcpStateVariables) {{
