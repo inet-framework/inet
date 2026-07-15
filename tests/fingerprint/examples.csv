@@ -114,9 +114,9 @@
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            d3d9-7959/tplx;981f-f62a/~tNl;9659-511c/~tND;5e9a-19d8/tyf, PASS, wireless Ipv4
 
-/examples/ieee8021as/,               -f omnetpp.ini -c Network -r 0,                     200s,       5245-6afa/tplx;c81e-ef6d/~tNl;5d59-3f56/~tND;380c-a43f/tyf, PASS, gptp
-/examples/ieee8021as/,               -f omnetpp.ini -c Network_with_cross_traffic -r 0,  200s,       3973-05bb/tplx;4eba-b4ee/~tNl;658c-a0eb/~tND;50a1-84a3/tyf, PASS, gptp Ipv4
-/examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       fcbe-a4f3/tplx;ec9b-9c9e/~tNl;f778-1ff3/~tND;9f7e-e462/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network -r 0,                     200s,       4945-9817/tplx;c81e-ef6d/~tNl;5d59-3f56/~tND;380c-a43f/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network_with_cross_traffic -r 0,  200s,       7e9d-1577/tplx;4eba-b4ee/~tNl;658c-a0eb/~tND;50a1-84a3/tyf, PASS, gptp Ipv4
+/examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       ed7a-6929/tplx;ec9b-9c9e/~tNl;f778-1ff3/~tND;9f7e-e462/tyf, PASS, gptp
 
 # /examples/ieee8021d/,                -f omnetpp.ini -c LargeNet -r 0,               100s,            0, ERROR,   # abstract-config
 # /examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                   100s,            0, ERROR,   # abstract-config
