@@ -37,10 +37,19 @@ Ospfv3Process::~Ospfv3Process()
 
 void Ospfv3Process::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL) {
-        splitterOutSink.reference(gate("splitterOut"), true);
-    }
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+        // NOTE: this reference used to be resolved at INITSTAGE_LOCAL, matching where
+        // Igmpv2/Mldv1/Mldv2/Mipv6/Pmipv6 resolve their equivalent sinks. But unlike
+        // those modules, Ospfv3Process instances are created dynamically at runtime by
+        // Ospfv3Splitter::addNewProcess() (called from Ospfv3Splitter's own
+        // INITSTAGE_ROUTING_PROTOCOLS), i.e. after the whole simulation has already
+        // moved past the global INITSTAGE_LOCAL stage. OMNeT++ does not replay
+        // already-passed global init stages for a module created mid-flight, so
+        // initialize(INITSTAGE_LOCAL) never runs here and splitterOutSink would stay
+        // permanently unreferenced. Resolving it here instead, in the first stage that
+        // actually executes for a dynamically created process, fixes that.
+        splitterOutSink.reference(gate("splitterOut"), true);
+
         this->containingModule = findContainingNode(this);
         containingModule->subscribe(interfaceStateChangedSignal, this);
         ift.reference(this, "interfaceTableModule", true);

@@ -15,11 +15,11 @@ simple Ospfv3Splitter extends SimpleModule
         string routingTableModule6;
         string checksumMode @enum("declared", "computed") = default("declared"); // passed on to each Ospfv3Process
     gates:
-        input ipIn @labels(Ipv6ControlInfo/up);
+        input ipIn @interface[inet::queueing::IPassivePacketSink](protocol=ospf; service=indication; sdu=ipv6) @labels(Ipv6ControlInfo/up);
         output ipOut @labels(Ipv6ControlInfo/down);
         //        input ipIn @labels(Ospfv3Packet/up);
         //        output ipOut @labels(Ospfv3Packet/down);
-        input processIn[];
+        input processIn[] @interface[inet::queueing::IPassivePacketSink];
         output processOut[];
 }
 
