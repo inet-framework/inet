@@ -66,6 +66,14 @@ enum DhcpTimerType
 // protocol models. Options absent from a packet are represented by empty/unfilled
 // DhcpOptions fields.
 //
+// TODO This fixed-struct representation does not faithfully model DHCP options,
+// which on the wire form an ordered sequence of arbitrary (code, length, value)
+// items. Consequences: option order is not preserved across a (de)serialize round
+// trip; an option whose code is not one of the fields below cannot be represented
+// at all (the deserializer marks the message incorrect); and a value that does not
+// fit its field -- e.g. a Client Identifier that is not a type-1 MAC address --
+// cannot be stored. A faithful model would keep the raw ordered option list.
+//
 // @see DhcpMessage, DhcpClient, DhcpServer
 //
 class DhcpOptions extends cObject
@@ -89,6 +97,18 @@ class DhcpOptions extends cObject
 //
 // Represents a DHCP message. DHCP (Dynamic Host Configuration Protocol, RFC 2131)
 // provides a framework for passing configuration information to hosts on a TCP/IP network.
+//
+// TODO The (de)serializer (DhcpMessageSerializer) does not fully conform to RFC
+// 2131/2132; it deviates from the standard in the following ways:
+//   - Only the fixed subset of options represented in DhcpOptions is understood.
+//     An option with any other code (for example Vendor Class Identifier, option
+//     60) is not preserved: the deserializer marks the message incorrect rather
+//     than keeping the raw option, so such a packet does not round-trip.
+//   - The Client Identifier option (61) is modeled as a MacAddress, so only the
+//     type-1 (Ethernet, 7-byte) form is supported; the deserializer asserts on any
+//     other client-id type or length.
+//   - siaddr (the "next server" IP address in the fixed BOOTP header) is not
+//     represented; the serializer writes it as zero.
 //
 // @see DhcpClient, DhcpServer
 //
