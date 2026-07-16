@@ -28,7 +28,7 @@ void DipoleAntenna::initialize(int stage)
 std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "DipoleAntenna";
-    if (level <= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL && gain != nullptr)
         stream << EV_FIELD(length, gain->getLength());
     return AntennaBase::printToStream(stream, level);
 }

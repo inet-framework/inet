@@ -394,6 +394,11 @@ void Ieee80211Mac::pushPacket(Packet *packet, const cGate *gate)
     if (gate->isName("mgmtIn")) {
         handleMgmtPacket(packet);
     }
+    else if (gate->isName("lowerLayerIn")) {
+        packet->setArrival(getId(), gate->getId());
+        emit(packetReceivedFromLowerSignal, packet);
+        handleLowerPacket(packet);
+    }
     else {
         emit(packetReceivedFromUpperSignal, packet);
         handleUpperPacket(packet);

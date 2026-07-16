@@ -14,6 +14,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/signal/WirelessSignal.h"
+#include "inet/queueing/common/PassivePacketSinkRef.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
 namespace inet {
@@ -104,6 +105,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio, public I
     cGate *upperLayerOut = nullptr;
     cGate *upperLayerIn = nullptr;
     cGate *radioIn = nullptr;
+    queueing::PassivePacketSinkRef upperLayerSink;
     //@}
 
     /** State */

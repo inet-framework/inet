@@ -10,6 +10,7 @@
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/SimulationContinuation.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/stlutils.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
@@ -69,6 +70,9 @@ void Radio::initialize(int stage)
         WATCH(allReceptionTimers);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+        // not in INITSTAGE_LOCAL: resolving the reference EV_TRACE-prints this radio,
+        // whose submodules (antenna etc.) are only initialized after our stage 0
+        upperLayerSink.reference(upperLayerOut, true);
         medium->addRadio(this);
         if (medium->getCommunicationCache()->getNumTransmissions() == 0 && isListeningPossible())
             throw cRuntimeError("Receiver is busy without any ongoing transmission, probably energy detection level is too low or background noise level is too high");
@@ -463,16 +467,16 @@ void Radio::endReception(cMessage *timer)
     auto signal = static_cast<WirelessSignal *>(timer->getControlInfo());
     auto arrival = signal->getArrival();
     auto reception = signal->getReception();
+    Packet *macFrame = nullptr;
     if (timer == receptionTimer && isReceiverMode(radioMode) && arrival->getEndTime() == simTime()) {
         auto transmission = signal->getTransmission();
         // TODO this would draw twice from the random number generator in isReceptionSuccessful: auto isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, part);
         auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
-        auto macFrame = medium->receivePacket(this, signal);
+        macFrame = medium->receivePacket(this, signal);
         take(macFrame);
         // FIXME see handling packets with incorrect PHY headers in the TODO file
         decapsulate(macFrame);
-        sendUp(macFrame);
         emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
     }
     else
@@ -485,6 +489,10 @@ void Radio::endReception(cMessage *timer)
     delete timer;
     // TODO move to radio medium
     check_and_cast<RadioMedium *>(medium.get())->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
+    // push last: the MAC may react immediately (e.g. switch the radio to transmit),
+    // so the radio state must be fully updated, like when the frame was gate-sent
+    if (macFrame != nullptr)
+        sendUp(macFrame);
 }
 
 void Radio::abortReception(cMessage *timer)
@@ -509,7 +517,8 @@ void Radio::sendUp(Packet *macFrame)
 {
     EV_INFO << "Sending up " << macFrame << endl;
     emit(packetSentToUpperSignal, macFrame);
-    send(macFrame, upperLayerOut);
+    yieldBeforePush();
+    upperLayerSink.pushPacket(macFrame);
 }
 
 cMessage *Radio::createReceptionTimer(WirelessSignal *signal) const

@@ -29,7 +29,7 @@ void InterpolatingAntenna::initialize(int stage)
 std::ostream& InterpolatingAntenna::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "InterpolatingAntenna";
-    if (level <= PRINT_LEVEL_DETAIL)
+    if (level <= PRINT_LEVEL_DETAIL && gain != nullptr)
         stream << EV_FIELD(maxGain, gain->getMaxGain());
     return AntennaBase::printToStream(stream, level);
 }
