@@ -9,6 +9,8 @@
 #ifndef __INET_TCPCONNECTION_H
 #define __INET_TCPCONNECTION_H
 
+#include <deque>
+
 #include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/IcmpType_m.h"
 #include "inet/networklayer/common/Icmpv6Type_m.h"
@@ -132,6 +134,21 @@ class INET_API TcpConnection : public SimpleModule
     bool autoRead = true;
     bool peerClosedSentUp = false;
     long maxByteCountRequested = 0;  // from READ requests
+
+    // Pending work as explicit per-connection state, processed by Tcp::reconcile()
+    // when the current entry point unwinds; replaces the earlier zero-delay
+    // self-events. TODO(BSD-style): the honest endpoint is deriving segments and
+    // app data from send/receive state at reconcile time (like tcp_output() and
+    // sowakeup() in BSD), instead of buffering pre-built packets here.
+    std::deque<Packet *> ipQueue; // segments awaiting push to the network layer
+    std::deque<cMessage *> appQueue; // data packets and indications awaiting delivery to the app
+    bool establishedIndicationPending = false;
+    int establishedIndicationSocketId = -1;
+    bool availableIndicationPending = false;
+    bool peerClosedIndicationPending = false;
+    bool closedIndicationPending = false;
+    bool removalPending = false;
+    bool touched = false; // member of Tcp::touchedConnections
 
     Tcp *tcpMain = nullptr; // Tcp module
     ITcp::ICallback *callback = nullptr;
@@ -328,6 +345,18 @@ class INET_API TcpConnection : public SimpleModule
 
     /** Utility: sends data or data notification to application */
     virtual void sendAvailableDataToApp();
+
+    /** Utility: buffers a built segment for Tcp::reconcile() to push to the network layer */
+    virtual void enqueueSegmentToIp(Packet *tcpSegment);
+
+    /** Utility: requests removal of this connection by Tcp::reconcile() */
+    virtual void requestRemoval();
+
+    /** Utility: invoked by Tcp::reconcile() to deliver the pending indication */
+    virtual void reportEstablished();
+    virtual void reportAvailable();
+    virtual void reportPeerClosed();
+    virtual void reportClosed();
 
   public:
     /** Utility: prints local/remote addr/port and app gate index/socketId */

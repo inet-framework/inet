@@ -157,6 +157,11 @@ void TcpConnection::initConnection(Tcp *_mod, int _socketId)
 
 TcpConnection::~TcpConnection()
 {
+    for (auto segment : ipQueue)
+        delete segment;
+    for (auto msg : appQueue)
+        delete msg;
+
     delete sendQueue;
     delete rexmitQueue;
     delete receiveQueue;
@@ -176,8 +181,10 @@ TcpConnection::~TcpConnection()
 void TcpConnection::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
+        Tcp *tcp = tcpMain; // reconcile() may delete this connection module
         if (!processTimer(msg))
-            tcpMain->removeConnection(this);
+            requestRemoval();
+        tcp->reconcile();
     }
     else
         throw cRuntimeError("model error: TcpConnection allows only self messages");

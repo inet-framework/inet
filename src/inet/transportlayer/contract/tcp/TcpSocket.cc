@@ -102,9 +102,10 @@ void TcpSocket::listen(bool fork)
         throw cRuntimeError(sockstate == NOT_BOUND ? "TcpSocket: must call bind() before listen()"
                 : "TcpSocket::listen(): connect() or listen() already called");
 
-    tcp->listen(connId, localAddr, localPrt, fork, autoRead, tcpAlgorithmClass);
-    tcp->setCallback(connId, this);
+    // local state first: the module call may synchronously deliver callbacks,
+    // and the application may even delete this socket from them
     sockstate = LISTENING;
+    tcp->listen(connId, localAddr, localPrt, fork, autoRead, tcpAlgorithmClass, this);
 }
 
 void TcpSocket::accept(int socketId)
@@ -123,9 +124,10 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
     remoteAddr = remoteAddress;
     remotePrt = remotePort;
 
-    tcp->connect(connId, localAddr, localPrt, remoteAddr, remotePort, autoRead, tcpAlgorithmClass);
-    tcp->setCallback(connId, this);
+    // local state first: the module call may synchronously deliver callbacks
+    // (e.g. ESTABLISHED on a loopback handshake), which update sockstate further
     sockstate = CONNECTING;
+    tcp->connect(connId, localAddr, localPrt, remoteAddr, remotePort, autoRead, tcpAlgorithmClass, this);
 }
 
 void TcpSocket::read(int32_t numBytes)
@@ -162,22 +164,27 @@ void TcpSocket::close()
 //        throw cRuntimeError("TcpSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
     }
     else {
-        tcp->close(connId);
+        // local state first: the module call may synchronously deliver callbacks,
+        // and the application may even delete this socket from them
         sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
+        tcp->close(connId);
     }
 }
 
 void TcpSocket::abort()
 {
-    if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR)
-        tcp->abort(connId);
+    bool wasOpen = (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR);
+    // local state first: the module call may synchronously deliver callbacks
     sockstate = CLOSED;
+    if (wasOpen)
+        tcp->abort(connId);
 }
 
 void TcpSocket::destroy()
 {
-    tcp->destroy(connId);
+    // local state first: the module call may synchronously deliver callbacks
     sockstate = CLOSED;
+    tcp->destroy(connId);
 }
 
 void TcpSocket::requestStatus()

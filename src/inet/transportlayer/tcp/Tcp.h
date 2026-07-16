@@ -11,6 +11,8 @@
 #include <map>
 #include <set>
 
+#include <deque>
+
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -173,6 +175,16 @@ class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassiveP
     long numSegmentsSent = 0;
     long numSegmentsRcvd = 0;
 
+    // connections with pending work (buffered segments, app notifications,
+    // removal), processed by reconcile() when the current entry point unwinds
+    std::deque<TcpConnection *> touchedConnections;
+    bool reconciling = false;
+    int64_t touchedEventNumber = -1;
+
+  public:
+    virtual void touchConnection(TcpConnection *conn);
+    virtual void reconcile();
+
   protected:
     /** Factory method; may be overriden for customizing Tcp */
     virtual TcpConnection *createConnection(int socketId);
@@ -198,6 +210,7 @@ class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassiveP
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void finish() override;
 
+    virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message) override;
     virtual void handleUpperCommand(cMessage *message) override;
     virtual void handleUpperPacket(Packet *packet) override;
@@ -264,9 +277,10 @@ class INET_API Tcp : public TransportProtocolBase, public ITcp, public IPassiveP
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("TODO"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("TODO"); }
 
+    virtual void installCallback(int socketId, ITcp::ICallback *callback);
     virtual void setCallback(int socketId, ITcp::ICallback *callback) override;
-    virtual void listen(int socketId, const L3Address &localAddr, int localPrt, bool fork, bool autoRead, std::string tcpAlgorithmClass) override;
-    virtual void connect(int socketId, const L3Address &localAddr, int localPort, const L3Address &remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass) override;
+    virtual void listen(int socketId, const L3Address &localAddr, int localPrt, bool fork, bool autoRead, std::string tcpAlgorithmClass, ITcp::ICallback *callback) override;
+    virtual void connect(int socketId, const L3Address &localAddr, int localPort, const L3Address &remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass, ITcp::ICallback *callback) override;
     virtual void accept(int socketId) override;
     virtual void close(int socketId) override;
     virtual void abort(int socketId) override;

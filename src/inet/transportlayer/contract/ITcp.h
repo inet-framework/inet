@@ -30,8 +30,10 @@ class INET_API ITcp
 
   public:
     virtual void setCallback(int socketId, ICallback *callback) = 0;
-    virtual void listen(int socketId, const L3Address& localAddr, int localPrt, bool fork, bool autoRead, std::string tcpAlgorithmClass) = 0;
-    virtual void connect(int socketId, const L3Address& localAddr, int localPort, const L3Address& remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass) = 0;
+    // listen()/connect() take the callback so that it is installed before any
+    // processing: indications may be generated before the call returns
+    virtual void listen(int socketId, const L3Address& localAddr, int localPrt, bool fork, bool autoRead, std::string tcpAlgorithmClass, ICallback *callback) = 0;
+    virtual void connect(int socketId, const L3Address& localAddr, int localPort, const L3Address& remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass, ICallback *callback) = 0;
     virtual void accept(int socketId) = 0;
     virtual void close(int socketId) = 0;
     virtual void abort(int socketId) = 0;

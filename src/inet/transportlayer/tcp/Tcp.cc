@@ -5,7 +5,6 @@
 //
 
 
-#include "inet/common/FunctionalEvent.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/Checksum.h"
@@ -28,6 +27,7 @@
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/common/SimulationContinuation.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 namespace tcp {
@@ -94,6 +94,12 @@ void Tcp::finish()
     EV_INFO << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
 }
 
+void Tcp::handleMessageWhenUp(cMessage *msg)
+{
+    TransportProtocolBase::handleMessageWhenUp(msg);
+    reconcile();
+}
+
 void Tcp::handleSelfMessage(cMessage *msg)
 {
     throw cRuntimeError("model error: should schedule timers on connection");
@@ -117,7 +123,9 @@ void Tcp::handleUpperCommand(cMessage *msg)
     // TODO replace bool return convention with void + conn->getFsmState() == TCP_S_CLOSED check
     // (applies to processAppCommand, processTCPSegment, processIcmpv4Error, processIcmpv6Error)
     if (!conn->processAppCommand(msg))
-        removeConnection(conn);
+        conn->requestRemoval();
+    // covers all socket-facing commands (listen/connect/accept/close/abort/destroy/read/...)
+    reconcile();
 }
 
 void Tcp::sendToIp(Packet *segment)
@@ -125,22 +133,16 @@ void Tcp::sendToIp(Packet *segment)
     Enter_Method("sendToIp");
     take(segment);
     numSegmentsSent++;
-    // KLUDGE: this schedule call is here to keep the fingerprints
-    inet::scheduleAfter("SendToIp", 0, [=] () {
-        yieldBeforePush();
-        ipSink.pushPacket(segment);
-    });
+    yieldBeforePush();
+    ipSink.pushPacket(segment);
 }
 
 void Tcp::sendToApp(cMessage *msg)
 {
     Enter_Method("sendToApp");
     take(msg);
-    // KLUDGE: this schedule call is here to keep the fingerprints
-    inet::scheduleAfter("SendToApp", 0, [=] () {
-        yieldBeforePush();
-        appSink.pushPacket(check_and_cast<Packet *>(msg));
-    });
+    yieldBeforePush();
+    appSink.pushPacket(check_and_cast<Packet *>(msg));
 }
 
 void Tcp::handleUpperPacket(Packet *packet)
@@ -193,7 +195,7 @@ void Tcp::handleLowerPacket(Packet *packet)
 
             bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);
             if (!ret)
-                removeConnection(conn);
+                conn->requestRemoval();
         }
         else {
             segmentArrivalWhileClosed(packet, tcpHeader, srcAddr, destAddr);
@@ -249,6 +251,88 @@ void Tcp::removeConnection(TcpConnection *conn)
 
     emit(tcpConnectionRemovedSignal, conn);
     conn->deleteModule();
+}
+
+void Tcp::touchConnection(TcpConnection *conn)
+{
+    if (!conn->touched) {
+        // pending work must be reconciled within the same event; a failing
+        // assert means an entry point is missing a reconcile() call
+        ASSERT(touchedConnections.empty() || touchedEventNumber == getSimulation()->getEventNumber());
+        touchedEventNumber = getSimulation()->getEventNumber();
+        conn->touched = true;
+        touchedConnections.push_back(conn);
+    }
+}
+
+void Tcp::reconcile()
+{
+    // Processes the pending work recorded as explicit connection state (buffered
+    // segments, app notifications, removal requests) when an entry point of this
+    // module unwinds. Everything runs in the same event, so no intra-node event
+    // is created, and the connection FSM cannot be re-entered mid-processing.
+    // Nested entries (e.g. a segment arriving over the loopback interface while
+    // a buffered segment is being pushed, or a socket command issued from an
+    // application callback) only mark connection state; this loop picks it up.
+    if (reconciling)
+        return;
+    reconciling = true;
+    std::deque<TcpConnection *> removals;
+    try {
+        while (!touchedConnections.empty()) {
+            TcpConnection *conn = touchedConnections.front();
+            touchedConnections.pop_front();
+            conn->touched = false;
+            // segments to the network first: the wire makes progress before the
+            // application reacts to what happened
+            while (!conn->ipQueue.empty()) {
+                Packet *segment = conn->ipQueue.front();
+                conn->ipQueue.pop_front();
+                sendToIp(segment);
+            }
+            if (conn->establishedIndicationPending) {
+                conn->establishedIndicationPending = false;
+                conn->reportEstablished();
+            }
+            if (conn->availableIndicationPending) {
+                conn->availableIndicationPending = false;
+                conn->reportAvailable();
+            }
+            while (!conn->appQueue.empty()) {
+                cMessage *msg = conn->appQueue.front();
+                conn->appQueue.pop_front();
+                sendToApp(msg);
+            }
+            if (conn->peerClosedIndicationPending) {
+                conn->peerClosedIndicationPending = false;
+                conn->reportPeerClosed();
+            }
+            if (conn->closedIndicationPending) {
+                conn->closedIndicationPending = false;
+                conn->reportClosed();
+            }
+            if (conn->removalPending && std::find(removals.begin(), removals.end(), conn) == removals.end())
+                removals.push_back(conn);
+        }
+        // removals last: deleting the connection module whose event is currently
+        // executing unwinds with cDeleteModuleException, so nothing may follow it
+        TcpConnection *executing = nullptr;
+        for (auto conn : removals) {
+            if (conn == getSimulation()->getContextModule())
+                executing = conn;
+            else if (conn->socketId == -1)
+                conn->deleteModule(); // temporary connection of segmentArrivalWhileClosed()
+            else
+                removeConnection(conn);
+        }
+        reconciling = false;
+        if (executing != nullptr)
+            removeConnection(executing); // does not return
+    }
+    catch (...) {
+        reconciling = false;
+        throw;
+    }
 }
 
 TcpConnection *Tcp::findConnForSegment(const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr)
@@ -328,12 +412,13 @@ void Tcp::processIcmpv4Error(Indication *indication)
     TcpConnection *conn = findConnForSockPair(key);
     if (conn) {
         if (!conn->processIcmpv4Error(indication))
-            removeConnection(conn);
+            conn->requestRemoval();
     }
     else {
         EV_WARN << "No matching connection, ignoring ICMPv4 error\n";
         delete indication;
     }
+    reconcile();
 }
 
 void Tcp::processIcmpv6Error(Indication *indication)
@@ -363,12 +448,13 @@ void Tcp::processIcmpv6Error(Indication *indication)
     TcpConnection *conn = findConnForSockPair(key);
     if (conn) {
         if (!conn->processIcmpv6Error(indication))
-            removeConnection(conn);
+            conn->requestRemoval();
     }
     else {
         EV_WARN << "No matching connection, ignoring ICMPv6 error\n";
         delete indication;
     }
+    reconcile();
 }
 
 void Tcp::segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address srcAddr, L3Address destAddr)
@@ -378,7 +464,9 @@ void Tcp::segmentArrivalWhileClosed(Packet *tcpSegment, const Ptr<const TcpHeade
     auto module = check_and_cast<TcpConnection *>(moduleType->createScheduleInit(submoduleName, this));
     module->initConnection(this, -1);
     module->segmentArrivalWhileClosed(tcpSegment, tcpHeader, srcAddr, destAddr);
-    module->deleteModule();
+    // the temporary connection is removed by reconcile(), after the RST it may
+    // have buffered has been pushed to the network layer
+    module->requestRemoval();
     delete tcpSegment;
 }
 
@@ -487,15 +575,18 @@ void Tcp::handleStopOperation(LifecycleOperation *operation)
     reset();
     delayActiveOperationFinish(par("stopOperationTimeout"));
     startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    reconcile();
 }
 
 void Tcp::handleCrashOperation(LifecycleOperation *operation)
 {
     reset();
+    reconcile();
 }
 
 void Tcp::reset()
 {
+    touchedConnections.clear(); // the connection modules are deleted below
     for (auto& elem : tcpAppConnMap)
         elem.second->deleteModule();
     tcpAppConnMap.clear();
@@ -664,6 +755,7 @@ void Tcp::pushPacket(Packet *packet, const cGate *gate)
         handleLowerPacket(packet);
     else
         throw cRuntimeError("Unknown gate: %s", gate->getFullName());
+    reconcile();
 }
 
 void Tcp::setCallback(int socketId, ITcp::ICallback *callback)
@@ -672,8 +764,9 @@ void Tcp::setCallback(int socketId, ITcp::ICallback *callback)
     connection->setCallback(callback);
 }
 
-void Tcp::listen(int socketId, const L3Address &localAddr, int localPrt, bool fork, bool autoRead, std::string tcpAlgorithmClass)
+void Tcp::listen(int socketId, const L3Address &localAddr, int localPrt, bool fork, bool autoRead, std::string tcpAlgorithmClass, ITcp::ICallback *callback)
 {
+    installCallback(socketId, callback);
     TcpOpenCommand *openCmd = new TcpOpenCommand();
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPrt);
@@ -686,8 +779,9 @@ void Tcp::listen(int socketId, const L3Address &localAddr, int localPrt, bool fo
     handleUpperCommand(request);
 }
 
-void Tcp::connect(int socketId, const L3Address &localAddr, int localPort, const L3Address &remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass)
+void Tcp::connect(int socketId, const L3Address &localAddr, int localPort, const L3Address &remoteAddr, int remotePort, bool autoRead, std::string tcpAlgorithmClass, ITcp::ICallback *callback)
 {
+    installCallback(socketId, callback);
     TcpOpenCommand *openCmd = new TcpOpenCommand();
     openCmd->setLocalAddr(localAddr);
     openCmd->setLocalPort(localPort);
@@ -699,6 +793,19 @@ void Tcp::connect(int socketId, const L3Address &localAddr, int localPort, const
     request->addTag<SocketReq>()->setSocketId(socketId);
     request->setControlInfo(openCmd);
     handleUpperCommand(request);
+}
+
+void Tcp::installCallback(int socketId, ITcp::ICallback *callback)
+{
+    // create the connection up front so the callback is in place before the
+    // OPEN command is processed (indications may fire before it completes)
+    TcpConnection *conn = findConnForApp(socketId);
+    if (conn == nullptr) {
+        conn = createConnection(socketId);
+        tcpAppConnMap[socketId] = conn;
+        EV_INFO << "Tcp connection created for socketId " << socketId << "\n";
+    }
+    conn->setCallback(callback);
 }
 
 void Tcp::accept(int socketId)

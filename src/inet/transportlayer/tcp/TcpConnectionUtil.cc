@@ -323,7 +323,7 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
 
     insertTransportProtocolHeader(tcpSegment, Protocol::tcp, tcpHeader);
 
-    tcpMain->sendToIp(tcpSegment);
+    enqueueSegmentToIp(tcpSegment);
 }
 
 void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader, L3Address src, L3Address dest)
@@ -351,7 +351,7 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
 
     insertTransportProtocolHeader(tcpSegment, Protocol::tcp, tcpHeader);
 
-    tcpMain->sendToIp(tcpSegment);
+    enqueueSegmentToIp(tcpSegment);
 }
 
 void TcpConnection::signalConnectionTimeout()
@@ -363,18 +363,19 @@ void TcpConnection::sendIndicationToApp(int code, const int id)
 {
     EV_INFO << "Notifying app: " << indicationName(code) << "\n";
     if (code == TCP_I_CONNECTION_RESET)
+        // TODO deliver via a terminationCause field in Tcp::reconcile(), like the
+        // other indications; today the application is called back mid-processing
         callback->handleFailure(id);
     else if (code == TCP_I_CLOSED) {
-        // KLUDGE: this schedule call is here to keep the fingerprints
-        inet::scheduleAfter("closed", 0, [=] () {
-            callback->handleClosed();
-        });
+        // recorded as explicit state and reported by Tcp::reconcile() when the
+        // current entry point unwinds, so the application cannot re-enter the
+        // connection FSM mid-processing
+        closedIndicationPending = true;
+        tcpMain->touchConnection(this);
     }
     else if (code == TCP_I_PEER_CLOSED) {
-        // KLUDGE: this schedule call is here to keep the fingerprints
-        inet::scheduleAfter("handlePeerClosed", 0, [=] () {
-            callback->handlePeerClosed();
-        });
+        peerClosedIndicationPending = true;
+        tcpMain->touchConnection(this);
     }
     else if (code == TCP_I_TIMED_OUT)
         callback->handleFailure(0);
@@ -543,6 +544,15 @@ bool TcpConnection::isPacketTooBig(Icmpv6Type type, int code)
 void TcpConnection::sendAvailableIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_AVAILABLE) << "\n";
+    // recorded as explicit state and reported by Tcp::reconcile() when the current
+    // entry point unwinds, so the application is not called back before TCP
+    // completes processing the received segment
+    availableIndicationPending = true;
+    tcpMain->touchConnection(this);
+}
+
+void TcpConnection::reportAvailable()
+{
     TcpAvailableInfo *ind = new TcpAvailableInfo();
     ind->setNewSocketId(socketId);
     ind->setLocalAddr(localAddr);
@@ -550,16 +560,27 @@ void TcpConnection::sendAvailableIndicationToApp()
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
     ind->setAutoRead(autoRead);
-
-    auto callback = tcpMain->findConnForApp(listeningSocketId)->callback;
+    auto listeningConnection = tcpMain->findConnForApp(listeningSocketId);
+    auto callback = listeningConnection != nullptr ? listeningConnection->callback : nullptr;
     if (callback != nullptr)
-        // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
-        inet::scheduleAfter("available", 0, [=] () { callback->handleAvailable(ind); });
+        callback->handleAvailable(ind);
+    else
+        delete ind;
 }
 
 void TcpConnection::sendEstabIndicationToApp()
 {
     EV_INFO << "Notifying app: " << indicationName(TCP_I_ESTABLISHED) << "\n";
+    // recorded as explicit state and reported by Tcp::reconcile() when the current
+    // entry point unwinds, so the application is not called back before TCP
+    // completes processing the received segment
+    establishedIndicationPending = true;
+    establishedIndicationSocketId = listeningSocketId != -1 ? listeningSocketId : socketId;
+    tcpMain->touchConnection(this);
+}
+
+void TcpConnection::reportEstablished()
+{
     auto indication = new Indication(indicationName(TCP_I_ESTABLISHED), TCP_I_ESTABLISHED);
     TcpConnectInfo *ind = new TcpConnectInfo();
     ind->setLocalAddr(localAddr);
@@ -567,20 +588,49 @@ void TcpConnection::sendEstabIndicationToApp()
     ind->setLocalPort(localPort);
     ind->setRemotePort(remotePort);
     ind->setAutoRead(autoRead);
-    indication->addTag<SocketInd>()->setSocketId(listeningSocketId != -1 ? listeningSocketId : socketId);
+    indication->addTag<SocketInd>()->setSocketId(establishedIndicationSocketId);
     indication->setControlInfo(ind);
     if (callback != nullptr) {
-        // NOTE: this 0s delay is required to avoid calling the application before TCP completes the processing for the received message
-        inet::scheduleAfter("established", 0, [=] () {
-            cContextSwitcher switcher(this);
-            callback->handleEstablished(indication);
-        });
+        cContextSwitcher switcher(this);
+        callback->handleEstablished(indication);
     }
+    else
+        delete indication;
+}
+
+void TcpConnection::reportPeerClosed()
+{
+    if (callback != nullptr)
+        callback->handlePeerClosed();
+}
+
+void TcpConnection::reportClosed()
+{
+    if (callback != nullptr)
+        callback->handleClosed();
+}
+
+void TcpConnection::requestRemoval()
+{
+    removalPending = true;
+    tcpMain->touchConnection(this);
+}
+
+void TcpConnection::enqueueSegmentToIp(Packet *tcpSegment)
+{
+    // buffered in explicit per-connection state and flushed by Tcp::reconcile()
+    // when the current entry point unwinds, so the push cannot re-enter protocol
+    // processing mid-event (e.g. over the loopback interface)
+    ipQueue.push_back(tcpSegment);
+    tcpMain->touchConnection(this);
 }
 
 void TcpConnection::sendToApp(cMessage *msg)
 {
-    tcpMain->sendToApp(msg);
+    // buffered and delivered by Tcp::reconcile() so the application cannot
+    // re-enter the connection FSM mid-processing
+    appQueue.push_back(msg);
+    tcpMain->touchConnection(this);
 }
 
 void TcpConnection::sendAvailableDataToApp()
