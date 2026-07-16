@@ -33,6 +33,23 @@ void AirtimeFairnessScheduler::resolveGates()
         gates[i] = check_and_cast<AirtimeFairnessGate *>(inputGates[i]->getPreviousGate()->getOwnerModule());
 }
 
+void AirtimeFairnessScheduler::addInput(cGate *inputGate)
+{
+    Enter_Method("addInput");
+    inputGates.push_back(inputGate);
+    queueing::PassivePacketSourceRef provider;
+    provider.reference(inputGate, false);
+    providers.push_back(provider);
+    queueing::ActivePacketSourceRef producer;
+    producer.reference(inputGate, false);
+    producers.push_back(producer);
+    gates.push_back(check_and_cast<AirtimeFairnessGate *>(inputGate->getPreviousGate()->getOwnerModule()));
+    checkPacketOperationSupport(inputGate);
+    // a new (possibly soon-backlogged) station appeared -> let the downstream re-evaluate
+    if (collector != nullptr)
+        collector.handleCanPullPacketChanged();
+}
+
 int AirtimeFairnessScheduler::schedulePacket()
 {
     int n = (int)inputGates.size();

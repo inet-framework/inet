@@ -64,6 +64,13 @@ class INET_API AirtimeFairnessScheduler : public queueing::PacketSchedulerBase, 
     virtual AirtimeFairnessGate *getGate(int index) const { return gates[index]; }
 
   public:
+    /**
+     * Registers an input gate added at runtime (a per-station branch created on demand by
+     * ~AirtimeFairnessClassifier): appends the provider/producer references and the matched
+     * gate, and notifies the downstream collector that a new station may be pullable.
+     */
+    virtual void addInput(cGate *inputGate);
+
     /** @name Pull interface */
     //@{
     virtual bool canPullSomePacket(const cGate *gate) const override;

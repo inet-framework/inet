@@ -22,6 +22,7 @@ import inet.queueing.contract.IPacketClassifier;
 simple AirtimeFairnessClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
+        string subqueueModuleType = default("inet.queueing.queue.PacketQueue"); // NED type of each per-station sub-queue created on demand (used only when branches are not pre-wired)
         @class(AirtimeFairnessClassifier);
         @display("i=block/classifier");
 }

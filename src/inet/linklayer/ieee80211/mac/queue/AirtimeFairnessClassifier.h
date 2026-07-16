@@ -34,12 +34,21 @@ namespace ieee80211 {
 class INET_API AirtimeFairnessClassifier : public queueing::PacketClassifierBase
 {
   protected:
+    std::string subqueueModuleType; // NED type of each per-station sub-queue to create on demand
     std::map<MacAddress, int> addressToIndex; // receiver MAC address -> output branch index, assigned in first-seen order
 
   protected:
     virtual void initialize(int stage) override;
     virtual MacAddress getReceiverAddress(Packet *packet) const;
     virtual int classifyPacket(Packet *packet) override;
+
+    /**
+     * Instantiates a new per-station branch: a sub-queue (of type subqueueModuleType) and an
+     * ~AirtimeFairnessGate, wired classifier.out[index] -> queue.in, queue.out -> gate.in,
+     * gate.out -> scheduler.in[index], and registered with the ~AirtimeFairnessScheduler.
+     * Returns the branch index.
+     */
+    virtual int createBranch(int index);
 
   public:
     virtual int getNumStations() const { return (int)addressToIndex.size(); }
