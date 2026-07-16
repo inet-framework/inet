@@ -14,16 +14,32 @@ namespace ieee80211 {
 
 Define_Module(AirtimeFairnessCompoundQueue);
 
-void AirtimeFairnessCompoundQueue::removePacket(Packet *packet)
+void AirtimeFairnessCompoundQueue::pushPacket(Packet *packet, const cGate *gate)
 {
-    Enter_Method("removePacket");
-    collection->removePacket(packet);
-    // The frame was removed from its per-station sub-queue, but is still owned by that
-    // sub-queue; take ownership so the base class's subsequent dropPacket() delete does not
-    // trip the "deleting an object it doesn't own" warning.
-    if (packet->getOwner() != this)
-        take(packet);
-    emit(packetRemovedSignal, packet);
+    Enter_Method("pushPacket");
+    take(packet);
+    cNamedObject packetPushStartedDetails("atomicOperationStarted");
+    emit(packetPushStartedSignal, packet, &packetPushStartedDetails);
+    animatePushPacket(packet, inputGate, consumer.getReferencedGate());
+    EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
+    consumer.pushPacket(packet);
+    // Shared-capacity overflow: drop from the longest per-station backlog. Unlike the base
+    // class, remove the victim directly from its sub-queue collection instead of via
+    // removePacket(): removePacket() would emit packetRemoved, making the drop count as both
+    // a removal and a drop (subtracted twice from the queue-length statistic). Take ownership
+    // of the victim (it is still owned by its sub-queue) before dropPacket() deletes it, so
+    // the delete does not warn about deleting an object owned by another module.
+    while (packetDropperFunction != nullptr && isOverloaded()) {
+        auto droppedPacket = packetDropperFunction->selectPacket(this);
+        EV_INFO << "Dropping packet from the longest sub-queue" << EV_FIELD(droppedPacket) << EV_ENDL;
+        collection->removePacket(droppedPacket);
+        if (droppedPacket->getOwner() != this)
+            take(droppedPacket);
+        dropPacket(droppedPacket, QUEUE_OVERFLOW);
+    }
+    ASSERT(!isOverloaded());
+    cNamedObject packetPushEndedDetails("atomicOperationEnded");
+    emit(packetPushEndedSignal, nullptr, &packetPushEndedDetails);
 }
 
 } // namespace ieee80211

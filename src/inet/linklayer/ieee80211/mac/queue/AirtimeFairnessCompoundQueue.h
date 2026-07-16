@@ -15,10 +15,15 @@ namespace ieee80211 {
 
 /**
  * The compound-module class behind the airtime-fairness compound queue. It only refines
- * ~CompoundPacketQueueBase's shared-capacity overflow handling: when the drop-from-longest
- * dropper removes a frame from a per-station sub-queue, the frame is still owned by that
- * sub-queue, so this class takes ownership before the base class deletes it -- otherwise
- * OMNeT++ warns about deleting an object owned by another module.
+ * ~CompoundPacketQueueBase's shared-capacity overflow handling. The base class, on overflow,
+ * removes the victim frame from its per-station sub-queue by calling removePacket() (which
+ * emits packetRemoved) and then dropPacket() (which emits packetDropped); that has two
+ * problems for a sub-queue-based compound: the frame stays owned by the sub-queue so the
+ * subsequent delete warns about deleting an object it does not own, and the frame is counted
+ * as both removed and dropped, so it is subtracted twice from the queue-length statistic
+ * (which then drifts). This class overrides pushPacket() to remove the victim directly from
+ * the sub-queue collection (no spurious packetRemoved), take ownership before the delete, and
+ * drop it exactly once.
  *
  * See the corresponding NED file for the submodule structure.
  *
@@ -28,7 +33,7 @@ namespace ieee80211 {
 class INET_API AirtimeFairnessCompoundQueue : public queueing::CompoundPacketQueueBase
 {
   public:
-    virtual void removePacket(Packet *packet) override;
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace ieee80211

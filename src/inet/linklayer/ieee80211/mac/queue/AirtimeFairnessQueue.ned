@@ -7,47 +7,68 @@
 
 package inet.linklayer.ieee80211.mac.queue;
 
-import inet.queueing.base.PacketQueueBase;
 import inet.queueing.contract.IPacketQueue;
+import inet.queueing.queue.CompoundPacketQueueBase;
 
 //
-// A per-station airtime deficit round-robin (DRR) transmit queue for IEEE 802.11,
-// modelled on the Linux `mac80211` airtime-fairness feature. Keeps one FIFO sub-queue
-// per receiver (destination MAC address) and hands frames to the MAC so that, over time,
-// each backlogged station gets an equal share of *on-air time* (rather than an equal
-// share of frames). This fixes the downlink form of the 802.11 rate anomaly: it stops a
-// slow client's long frames from dragging fast clients down to its throughput.
+// A per-station airtime deficit round-robin (DRR) transmit queue for IEEE 802.11, modelled
+// on the Linux `mac80211` airtime-fairness feature. It is built as a compound queue: a
+// classifier routes each frame to a per-receiver sub-queue, each sub-queue is followed by a
+// per-station airtime gate, and a deficit-round-robin scheduler serves the gates so that,
+// over time, every backlogged station gets an equal share of on-air *time* (scaled by an
+// optional per-station weight) rather than an equal share of frames.
 //
-// The airtime deficit of each station is charged a-posteriori from the actual on-air
-// duration of its transmitted frames (retries included), reported by the coordination
-// function via the `frameTransmittedAirtime` signal. A station may transmit while its
-// deficit is non-negative; an ineligible backlogged station is topped up by
-// `quantum * weight` when the round-robin cursor reaches it.
+// The per-station branches (sub-queue + gate) are created on demand as new receivers
+// appear, so the queue adapts to the dynamic set of stations an access point serves. The
+// sub-queue type is configurable via `subqueueTypename`.
+//
+// This fixes the downlink form of the 802.11 rate anomaly: when an access point saturates a
+// mix of fast and slow clients, a plain FIFO (or frame-fair round robin) lets the slow
+// client's long frames drag the fast clients down to its throughput; airtime fairness holds
+// the slow client to its fair *time* share and lets the fast clients recover.
+//
+// Each station's airtime deficit is charged a-posteriori from the actual on-air duration of
+// its transmitted frames (retries included), reported by the coordination function via the
+// `frameTransmittedAirtime` signal. A shared `packetCapacity` is enforced across all
+// stations with a drop-from-longest overflow policy (see ~Ieee80211LongestFlowDropper), so a
+// slow station's backlog cannot lock the others out. With `fairnessEnabled = false` the
+// queue degrades to a plain per-station round robin (the frame-fair anomaly baseline).
 //
 // Drops into the `pendingQueue` slot of an ~Edcaf or ~Dcaf via a typename override, e.g.:
 //   *.host.wlan[*].mac.dcf.channelAccess.pendingQueue.typename = "AirtimeFairnessQueue"
 //
-// @see ~PendingQueue, ~CompoundPendingQueue
+// @see ~AirtimeFairnessClassifier, ~AirtimeFairnessGate, ~AirtimeFairnessScheduler,
+//      ~Ieee80211LongestFlowDropper, ~PendingQueue
 //
-simple AirtimeFairnessQueue extends PacketQueueBase like IPacketQueue
+module AirtimeFairnessQueue extends CompoundPacketQueueBase
 {
     parameters:
-        int packetCapacity = default(-1); // maximum total number of packets across all stations, no limit by default
+        @class(AirtimeFairnessCompoundQueue);
         double quantum @unit(s) = default(1500us); // base DRR quantum in airtime units; ~one max-length frame's airtime
         double weight = default(1); // per-station airtime weight; equal weight means equal airtime share
-        bool fairnessEnabled = default(true); // when false, degrades to a plain FIFO passthrough (for OFF/ON contrast)
-        displayStringTextFormat = default("{numStations} stations, %p pk (%l)\npulled %o dropped %d"); // See ~PacketQueueBase for the legacy '%' directives
-        @class(AirtimeFairnessQueue);
-        @signal[packetPushStarted](type=inet::Packet);
-        @signal[packetPushEnded](type=inet::Packet?);
-        @signal[packetPulled](type=inet::Packet);
-        @signal[packetRemoved](type=inet::Packet);
-        @signal[packetDropped](type=inet::Packet);
-        // the statistical value is the number of packets in the queue
-        @statistic[queueLength](title="queue length"; source=warmup(atomic(constant0(packetPushEnded) + count(packetPushStarted) - count(packetPulled) - count(packetRemoved) - count(packetDropped))); record=last,max,timeavg,vector; unit=pk; interpolationmode=sample-hold; autoWarmupFilter=false);
-        // the statistical value is the queueing time of packets
-        @statistic[queueingTime](title="queueing times"; source=queueingTime(packetPulled); record=histogram,vector; unit=s; interpolationmode=none);
-        // the statistical value is the packet that is dropped due to queue overflow
-        @statistic[droppedPacketsQueueOverflow](title="dropped packets: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count; unit=pk; interpolationmode=none);
-        @defaultStatistic(queueLength:vector);
+        bool fairnessEnabled = default(true); // when false, degrades to a plain per-station round robin (for OFF/ON contrast)
+        string subqueueTypename = default("inet.queueing.queue.PacketQueue"); // NED type of each per-station sub-queue
+        dropperClass = default("inet::ieee80211::Ieee80211LongestFlowDropper"); // on overflow, drop the tail frame of the longest per-station backlog
+        displayStringTextFormat = default("{classifier.numStations} stations\ncontains %p pk (%l) dropped %d");
+        classifier.subqueueModuleType = default(this.subqueueTypename);
+        gate[*].quantum = default(this.quantum);
+        gate[*].weight = default(this.weight);
+        gate[*].fairnessEnabled = default(this.fairnessEnabled);
+        scheduler.fairnessEnabled = default(this.fairnessEnabled);
+    submodules:
+        classifier: AirtimeFairnessClassifier {
+            @display("p=100,150");
+        }
+        queue[0]: <default("PacketQueue")> like IPacketQueue { // grown on demand, one FIFO sub-queue per receiver
+            @display("p=300,150,column,80");
+        }
+        gate[0]: AirtimeFairnessGate { // grown on demand, one airtime gate per receiver
+            @display("p=500,150,column,80");
+        }
+        scheduler: AirtimeFairnessScheduler {
+            @display("p=700,150");
+        }
+    connections allowunconnected:
+        in --> { @display("m=w"); } --> classifier.in;
+        scheduler.out --> { @display("m=e"); } --> out;
 }
