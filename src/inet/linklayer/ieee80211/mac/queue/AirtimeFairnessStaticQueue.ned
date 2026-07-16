@@ -25,6 +25,7 @@ module AirtimeFairnessStaticQueue extends CompoundPacketQueueBase
         double quantum @unit(s) = default(1500us);
         double weight = default(1);
         bool fairnessEnabled = default(true);
+        dropperClass = default("inet::ieee80211::Ieee80211LongestFlowDropper"); // on overflow, drop the tail frame of the longest per-station backlog
         gate[*].quantum = default(this.quantum);
         gate[*].weight = default(this.weight);
         gate[*].fairnessEnabled = default(this.fairnessEnabled);
