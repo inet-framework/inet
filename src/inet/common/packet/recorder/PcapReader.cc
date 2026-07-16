@@ -91,6 +91,7 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
         }
         case 1: protocol = &Protocol::ethernetMac; break;
         case 105: protocol = &Protocol::ieee80211Mac; break;
+        case 195: protocol = &Protocol::ieee802154; break; // DLT_IEEE802_15_4_WITHFCS
         case 127: {
             // DLT_IEEE802_11_RADIO: a variable-length radiotap header precedes the
             // 802.11 MAC frame. Its total length is in bytes 2-3 (it_len), stored
