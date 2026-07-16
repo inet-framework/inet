@@ -236,9 +236,9 @@ void TcpGenericServerApp::socketPeerClosed(TcpSocket *socket)
 
 void TcpGenericServerApp::socketDeleted(TcpSocket *socket)
 {
+    // called from the TcpSocket destructor: drop references, but don't delete
     socketMap.removeSocket(socket);
     socketQueue.erase(socket->getSocketId());
-    delete socket;
 }
 
 void TcpGenericServerApp::pushPacket(Packet *packet, const cGate *gate)
@@ -272,7 +272,14 @@ cGate *TcpGenericServerApp::lookupModuleInterface(cGate *gate, const std::type_i
 
 TcpGenericServerApp::~TcpGenericServerApp()
 {
-    socketMap.deleteSockets();
+    // socketMap and socketQueue are destroyed before the socket member,
+    // whose destructor would otherwise call back into socketDeleted()
+    socket.setCallback(nullptr);
+    // each delete calls back socketDeleted(), which erases the map entry,
+    // so don't iterate the map while deleting (cf. SocketMap::deleteSockets)
+    auto& sockets = socketMap.getMap();
+    while (!sockets.empty())
+        delete sockets.begin()->second;
 }
 
 void TcpGenericServerApp::finish()
