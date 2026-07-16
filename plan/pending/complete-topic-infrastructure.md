@@ -497,6 +497,138 @@ the Phase 2 history rewrite (fix commits get squashed into their logical parents
       branch is still unpublished; separate commits only for genuinely new findings.
 - **Checkpoint:** all suites pass (or diffs justified + committed); opp_ci validation green.
 
+### 4.6 Zero-delay intra-node event audit (2026-07-15, user-requested)
+
+Goal check for the branch's core property: **no 0-simtime cross-module events within a
+network node** (self-timers exempt). Fingerprints never verified this (the `~tNl`
+ingredient masks intra-node events by design), so it got its own audit.
+
+**Method.** (a) Static sweep of event-creating constructs (`inet::scheduleAfter` lambdas /
+FunctionalEvent, `scheduleAt(simTime())`, SimulationContinuation, raw `send()`).
+(b) Dynamic eventlog audit: 9 representative sims recorded with `--record-eventlog` and
+analyzed by `scratchpad phase4/zerodelay/zd_audit.py` — every delivered event matched to
+its `BS` entry; flagged when sendTime==arrivalTime && senderModule!=arrivalModule && NCA
+below network root. Companion-omnetpp elog format notes: real sends reconstructed via
+delivery `E` lines (BS `st/at` inline only for scheduled self-messages); `CMB/CME` record
+method calls (pushPacket chains — not events); FunctionalEvents appear as `E ... m -1`
+(the final `m -1` event of a run is the sim-time-limit marker, not a FunctionalEvent).
+
+**Findings (message-send layer).**
+- Wired/routing sims CLEAN: eth-mixedlan, tcp-shutdownrestart, nclients, bgp-update,
+  ospf-backbone, voip-good, mrp-small → 0 intra-node zero-delay deliveries.
+- `Radio::sendUp` was still a raw gate `send()` → 733 zero-delay radio→mac events in a
+  20 s AODV run (16 % of all events); the only unconverted message path found.
+  **FIXED:** Radio pushes via `upperLayerSink` (mandatory ref; MacProtocolBase.ned already
+  carries the bare `lowerLayerIn @interface[IPassivePacketSink]` claim); plus
+  `Ieee80211Mac::pushPacket` override needed the `lowerLayerIn` branch (its override only
+  knew mgmtIn vs upper → "Unknown protocol ieee80211mac" in all 802.11 sims; the AODV
+  example masked this by using AckingWirelessInterface). Re-audit: aodv + 802.11 Ping1 →
+  0 violations; event counts drop by exactly the eliminated hops, other categories
+  count-identical.
+- Remaining self-zero timers (allowed): queueing PacketServer/InstantServer `ServeTimer`
+  (36 k in mrp-small!), Dcf contention `startTx`/`channelGranted`, ClockBase, EndBackoff,
+  lifecycle extra timers. MrpRelay/Dsdv/Mipv6/MessageChecker/SctpServer `scheduleAfter`
+  lambdas carry nonzero modeling delays (MrpRelay: truncnormal(8.61us,5.42us)) — legit.
+
+**Findings (0-delay FunctionalEvent deferrals — OPEN DESIGN QUESTION).** Deliberate
+`inet::scheduleAfter(..., 0, lambda)` calls remain at transport boundaries; 10–16 % of
+all events in TCP-heavy sims (nclients 1877/12142, eth-mixedlan 1603, shutdownrestart
+1151, bgp 70; zero in non-TCP sims):
+- `Tcp::sendToIp` (every segment), `Tcp::sendToApp` (every app delivery),
+  `sendIndicationToApp` CLOSED/PEER_CLOSED — commented "KLUDGE ... keep the fingerprints".
+- `sendAvailableIndicationToApp`/`sendEstabIndicationToApp` — commented as required so the
+  app is not called back before TCP finishes processing the current segment (REENTRANCY
+  guard, not just fingerprint compat).
+- QUIC `AppSocket` (all indications + packets), SCTP (SCTP_I_SEND_MSG,
+  sendDataArrivedNotification), and socket `handleClose(d)` deferrals in Udp/Ipv4×2/
+  NetworkProtocolBase/NextHopForwarding.
+These are module-less events (FunctionalEvent has no module context — the class of
+context bugs found in Phase 4.5). True removal requires making the boundaries
+reentrancy-safe (e.g. deferred-callback queue drained at end of the triggering event);
+asked user 2026-07-15.
+
+### 4.7 Transport-boundary 0-delay elimination (2026-07-16, user decision)
+
+User rejected both the FES 0-delay events (the KLUDGEs) and a deferred-callback
+queue ("reinvents the FES"); chosen design: **BSD-style state-derivation hybrid** —
+pending work is explicit protocol state, and a reconciliation pass at the end of
+each module entry point derives the outputs/notifications from it (cf. tcp_output()/
+sowakeup()). Do what's easy now; TODO-comment what's hard.
+
+**Tcp (implemented):** per-connection `ipQueue` (built segments; TODO full tcp_output
+derivation), `appQueue` (data/status/icmp-error messages), pending-indication flags
+(established/available/peerClosed/closed + establishedIndicationSocketId), and
+`removalPending` (replaces every mid-operation `removeConnection`). `Tcp::reconcile()`
+at the tail of every entry point (pushPacket, handleMessageWhenUp, handleUpperCommand
+— covers all ITcp socket-facing methods —, processIcmpvX, lifecycle,
+TcpConnection::handleMessage) drains a touched-connections deque to fixpoint:
+flush segments → report established/available → deliver appQueue → report
+peerClosed/closed → removals LAST (deleting the module whose event is executing
+unwinds via cDeleteModuleException, so the self-removal is the very last action;
+temp conn of segmentArrivalWhileClosed has socketId==-1 and is deleteModule'd
+without map cleanup). Loopback conversations linearize with O(1) stack: nested
+entries only mark state; the outer fixpoint loop flushes. Missed-reconcile
+tripwire: ASSERT in touchConnection comparing event numbers.
+`ITcp::listen/connect` now take the ICallback so it is installed before OPEN
+processing (a synchronously completing loopback handshake must not drop
+ESTABLISHED); TcpSocket wrappers write local state first and make the module call
+the tail statement (the app may delete the socket from a callback).
+
+**UDP/L3 closes (implemented):** Udp/Ipv4(×2: direct call + legacy message path)/
+NetworkProtocolBase/NextHopForwarding `close()` now remove the descriptor first and
+invoke `callback->handleClose(d)()` directly as the LAST statement — close completes
+within the call ("state settled, notify last"); UdpSocket::close sets sockState
+before the module call. MessageChecker forwards directly when delayToWait==0.
+
+**App-side consequence:** `handleStopOperation` bodies that called socket close()
+BEFORE `delayActiveOperationFinish()` now trip
+ASSERT(activeOperation.operation != nullptr) — the closed callback can complete the
+operation synchronously inside close() (found via tcpapp_lifecycle_4). Fix: register
+the delayed finish FIRST, then close — swept mechanically across all apps
+(OperationalMixin::handleOperationStage is tolerant: it skips finishActiveOperation
+when the operation already completed inside the stage).
+
+**Kept as documented residue (TODO comments pointing at the Tcp::reconcile pattern):**
+QUIC AppSocket sendIndication/sendPacket (experimental module, needs its own
+touched-socket bookkeeping; legacy no-callback path even raw-send()s), SCTP
+SCTP_I_SEND_MSG + sendDataArrivedNotification. TCP RESET/TIMED_OUT handleFailure
+stays synchronous (was never deferred) with a TODO to route it through reconcile
+via a terminationCause field.
+
+**Expected fallout:** TCP trajectories shift (event elimination) → the 4
+tcp_stresstest expected-output blocks + tcpapp_lifecycle_4 need regeneration
+(byte totals identical, segment counts/finish times differ); fingerprint "changed"
+set grows accordingly (re-measured vs master under D6 at landing). Verified on
+smoke battery: shutdownrestart/nclients FunctionalEvents 1151/1877 → 1 (the
+sim-time-limit marker), all other delivery categories count-identical; BgpUpdate
+fixture runs to clean completion.
+
+**RESULT (2026-07-16): DONE, module suite 337/337.** Committed as `6111e48c8e`
+(Tcp reconcile), `304268aa62` (Udp/L3/MessageChecker closes), `fb1b562e55`
+(OperationalMixin), `e883570b66` (app sweeps: delay-first ×21 files,
+Enter_Method ×135 in 47 files, snapshot close loops, Ldp/Aodv guards),
+`b3b7cc3925` (QUIC/SCTP TODOs), `1aebbae7e9` (test expectations: 4 stresstests
+byte-identical + MIPv6_tcp_handover trace rename dataArrived→socketDataArrived).
+Final 8-sim elog battery: 0 intra-node zero-delay deliveries everywhere;
+module-less events = exactly the sim-time-limit marker in 7/8 sims
+(shutdownrestart/nclients/bgp/aodv/dot11/voip/ospf); eth-mixedlan's 1603
+module-less events are omnetpp cDatarateChannel transmission events on the
+shared EthernetBus (wire modeling, count identical pre/post rework — verified
+no inet::scheduleAt/After 0-delay sites remain outside the 4 QUIC/SCTP TODOs).
+Also fixed en route: tcpapp_lifecycle_4 assert, pingapp segfault
+(_Rb_tree_increment), AODVLifecycleTest unknown-parameter error, udp-app
+undisposed ActiveOperationTimeout (context/ownership), Ldp shutdown landmine
+(ASSERT(false) on synchronously closed listener).
+
+**Incidental find + fix:** `TcpGenericServerApp::socketDeleted` deleted the socket while
+`~TcpSocket` was invoking the callback → infinite recursion → stack overflow at network
+teardown in EVERY TcpGenericServerApp sim. Invisible to the fingerprint suite: the
+verdict parses the fingerprint printed before teardown. Contract clarified: socketDeleted
+only drops references; destructor defuses the member-socket callback (member destruction
+order) and deletes map sockets via while-not-empty (callback erases entries during
+deleteSockets iteration → UB). Lesson recorded: teardown is untested by fingerprints;
+consider an exit-code check in the runner.
+
 ## Phase 5 — Final cleanup & merge prep
 
 - [ ] 5.1 **[sonnet]** Confirm `__TODO` gone from history; unresolved leftovers → GitHub
