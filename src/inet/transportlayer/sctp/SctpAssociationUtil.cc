@@ -473,6 +473,9 @@ void SctpAssociation::sendIndicationToApp(int32_t code, int32_t value)
     else if (code == SCTP_I_RCV_STREAMS_RESETTED)
         callback->handleReceiveStreamReset();
     else if (code == SCTP_I_SEND_MSG) {
+        // TODO eliminate this zero-delay event: derive the notification from
+        // association state (send queue occupancy / receive buffer) when the Sctp
+        // module's entry point unwinds, following the Tcp::reconcile() pattern
         inet::scheduleAfter("handleSendMessage", 0, [=] () {
             callback->handleSendMessage();
         });
@@ -1900,6 +1903,9 @@ void SctpAssociation::sendDataArrivedNotification(uint16_t sid)
     cmd->setNumMsgs(1);
 //    cmsg->setControlInfo(cmd);
 
+    // TODO eliminate this zero-delay event: derive the notification from the
+    // association receive buffer when the Sctp module's entry point unwinds,
+    // following the Tcp::reconcile() pattern
     inet::scheduleAfter("sendDataArrivedNotification", 0, [=] () {
         callback->handleDataArrivedNotification(cmsg);
     });

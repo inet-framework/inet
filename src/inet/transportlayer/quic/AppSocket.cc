@@ -100,7 +100,10 @@ void AppSocket::sendIndication(Indication *indication)
 {
     indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
     if (callback != nullptr) {
-        // NOTE: the 0s delay preserves the event ordering of the replaced message send
+        // TODO eliminate this zero-delay event: record the pending notification as
+        // explicit state and deliver it when the QUIC module's entry point unwinds,
+        // following the Tcp::reconcile() pattern (see Tcp.cc); QUIC's entry surface
+        // needs its own touched-socket bookkeeping first
         auto callback = this->callback;
         inet::scheduleAfter("handleIndication", 0, [=]() { callback->handleMessage(indication); });
     }
@@ -119,7 +122,10 @@ void AppSocket::sendPacket(Packet *pkt)
 {
     pkt->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
     if (callback != nullptr) {
-        // NOTE: the 0s delay preserves the event ordering of the replaced message send
+        // TODO eliminate this zero-delay event: record the pending notification as
+        // explicit state and deliver it when the QUIC module's entry point unwinds,
+        // following the Tcp::reconcile() pattern (see Tcp.cc); QUIC's entry surface
+        // needs its own touched-socket bookkeeping first
         auto callback = this->callback;
         inet::scheduleAfter("handlePacket", 0, [=]() { callback->handleMessage(pkt); });
     }
