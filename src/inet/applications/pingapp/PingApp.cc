@@ -177,9 +177,13 @@ void PingApp::handleSelfMessage(cMessage *msg)
         }
         const Protocol *icmp = l3Echo.at(networkProtocol);
 
-        for (auto socket : socketMap.getMap()) {
-            socket.second->close();
-        }
+        // snapshot: the socketClosed callback removes the socket from socketMap
+        // synchronously, so don't iterate the live map while closing
+        std::vector<ISocket *> sockets;
+        for (auto& s : socketMap.getMap())
+            sockets.push_back(s.second);
+        for (auto socket : sockets)
+            socket->close();
         currentSocket = nullptr;
         if (networkProtocol == &Protocol::ipv4)
             currentSocket = new Ipv4Socket(gate("socketOut"));
