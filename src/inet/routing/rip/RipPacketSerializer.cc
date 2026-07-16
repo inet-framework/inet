@@ -24,10 +24,10 @@ void RipPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     const auto& ripPacket = staticPtrCast<const RipPacket>(chunk);
 
     stream.writeUint8(ripPacket->getCommand());
-    stream.writeUint8(2); // RIP version
+    stream.writeUint8(ripPacket->getVersion()); // RIP version
 
+    stream.writeUint16Be(ripPacket->getUnused1()); // "must be zero" field (RFC 2453); the entry count is implied by the payload length
     int numEntries = ripPacket->getEntryArraySize();
-    stream.writeUint16Be(numEntries);
 
     // iterate over each entry and write to stream
     for (int i = 0; i < numEntries; ++i) {
@@ -46,17 +46,14 @@ const Ptr<Chunk> RipPacketSerializer::deserialize(MemoryInputStream& stream) con
     auto ripPacket = makeShared<RipPacket>();
 
     ripPacket->setCommand((inet::RipCommand)stream.readUint8());
-    int ripVer = stream.readUint8();
-    if (ripVer != 2) {
-        // TODO add RIP v1 support
-        ripPacket->markIncorrect();
-    }
+    ripPacket->setVersion(stream.readUint8());
 
-    int numEntries = stream.readUint16Be();
+    ripPacket->setUnused1(stream.readUint16Be()); // "must be zero" field (RFC 2453);
+    // each Route Table Entry is RIP_RTE_SIZE (20 B): AFI(2) + routeTag(2) + address(4) + netmask(4) + nextHop(4) + metric(4)
+    int numEntries = stream.getRemainingLength().get<B>() / RIP_RTE_SIZE.get<B>();
     ripPacket->setEntryArraySize(numEntries);
 
     for (int i = 0; i < numEntries; ++i) {
-
         RipEntry entry = {};
 
         entry.addressFamilyId = (inet::RipAf)stream.readUint16Be();

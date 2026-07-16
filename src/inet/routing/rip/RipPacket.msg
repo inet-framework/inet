@@ -56,7 +56,8 @@ struct RipEntry
 //
 class RipPacket extends FieldsChunk
 {
-    RipCommand command;
-    // version is fixed: 2
+    RipCommand command @bit(8);
+    short version @bit(8) = 2;
+    uint16_t unused1 = 0;
     RipEntry entry[];
 }
