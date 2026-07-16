@@ -1389,7 +1389,20 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
     // state). Skipped on the handshake-completing ACK (fsm still SYN_RCVD here, i.e. the
     // very first ACE value this side has ever seen from the peer) -- there's no prior
     // baseline to diff against yet.
-    if (state->accEcnNegotiated && fsm.getState() != TCP_S_SYN_RCVD) {
+    //
+    // Forward-progress guard: __tcp_accecn_process returns 0 up front unless the
+    // ACK makes forward progress (FLAG_FORWARD_PROGRESS | FLAG_TS_PROGRESS). An
+    // ACK that acks no new data (snd_una did not advance, so deliveredBytes is
+    // unchanged since this segment's prrDeliveredMark snapshot) is a pure /
+    // duplicate ACK and must not move the CE counters -- neither the ACE-field
+    // delta nor the AccECN option's CEB delta. readHeaderOptions() left the
+    // option baseline (peerReportedCeBytes) unadvanced, so any accumulated delta
+    // is instead consumed by the next forward-progress ACK, exactly as Linux
+    // defers it. (TS-only progress is not modeled: the AccECN corpus negotiates
+    // timestamps off -- both peers' SYNs carry no TS option -- so a no-new-data
+    // ACK here is genuinely a pure ACK, never a fresh timestamp-bearing one.)
+    if (state->accEcnNegotiated && fsm.getState() != TCP_S_SYN_RCVD
+            && state->deliveredBytes != state->prrDeliveredMark) {
         bool ae = tcpHeader->getAeBit();
         bool cwr = tcpHeader->getCwrBit();
         bool ece = tcpHeader->getEceBit();
