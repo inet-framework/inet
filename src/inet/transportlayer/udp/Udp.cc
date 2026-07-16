@@ -985,11 +985,11 @@ void Udp::close(int sockId)
 
     EV_INFO << "Closing socket: " << *(it->second) << "\n";
     auto callback = it->second->callback;
-    if (callback != nullptr)
-        // KLUDGE: this schedule call is here to keep the fingerprints
-        inet::scheduleAfter("handleClose", 0, [=]() { callback->handleClose(); });
-
     destroySocket(it);
+    // notify last, with the module state settled: close completes within this
+    // call, and the callback may re-enter this module or delete the socket
+    if (callback != nullptr)
+        callback->handleClose();
 }
 
 void Udp::destroySocket(SocketsByIdMap::iterator it)

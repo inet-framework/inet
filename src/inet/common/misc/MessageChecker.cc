@@ -210,10 +210,16 @@ void MessageChecker::forwardMessage(cMessage *msg)
     simtime_t delayToWait = 0;
     if (endTransmissionTime > now)
         delayToWait = endTransmissionTime - now;
-    inet::scheduleAfter("forward", delayToWait, [=] () {
+    if (delayToWait > SIMTIME_ZERO)
+        inet::scheduleAfter("forward", delayToWait, [=] () {
+            yieldBeforePush();
+            outSink.pushPacket(check_and_cast<Packet *>(msg));
+        });
+    else {
+        // forward directly instead of through a zero-delay event
         yieldBeforePush();
         outSink.pushPacket(check_and_cast<Packet *>(msg));
-    });
+    }
 }
 
 void MessageChecker::finish()

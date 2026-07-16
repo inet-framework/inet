@@ -88,8 +88,10 @@ void UdpSocket::close()
 {
     if (sockState == CLOSED)
         return;
-    udp->close(socketId);
+    // local state first: the module call completes the close synchronously,
+    // and the application may even delete this socket from the callback
     sockState = CLOSED;
+    udp->close(socketId);
 }
 
 void UdpSocket::destroy()

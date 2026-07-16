@@ -173,8 +173,10 @@ void Ipv4::handleRequest(Request *request)
             auto callback = it->second->callback;
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
+            // notify last, with the module state settled: the callback may
+            // re-enter this module or delete the socket
             if (callback)
-                inet::scheduleAfter("handleClose", 0, [=]() { callback->handleClosed(); });
+                callback->handleClosed();
         }
         delete request;
     }
@@ -1570,9 +1572,12 @@ void Ipv4::close(int socketId)
     auto it = socketIdToSocketDescriptor.find(socketId);
     if (it != socketIdToSocketDescriptor.end()) {
         auto callback = it->second->callback;
-        inet::scheduleAfter("handleClose", 0, [=]() { callback->handleClosed(); });
         delete it->second;
         socketIdToSocketDescriptor.erase(it);
+        // notify last, with the module state settled: close completes within
+        // this call, and the callback may re-enter this module or delete the socket
+        if (callback)
+            callback->handleClosed();
     }
 }
 
