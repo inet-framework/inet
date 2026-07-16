@@ -94,9 +94,10 @@ void EtherAppClient::handleStopOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
     if (llcSocket.isOpen()) {
-        llcSocket.close();
+        // register the delayed finish before close(): the closed callback may complete the operation synchronously
         if (activeOperation.operation != nullptr)
             delayActiveOperationFinish(par("stopOperationTimeout"));
+        llcSocket.close();
     }
 }
 
@@ -185,6 +186,7 @@ void EtherAppClient::sendPacket()
 
 void EtherAppClient::socketDataArrived(Ieee8022LlcSocket *, Packet *msg)
 {
+    Enter_Method("socketDataArrived");
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
 
     packetsReceived++;

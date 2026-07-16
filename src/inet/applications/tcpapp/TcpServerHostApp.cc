@@ -41,10 +41,13 @@ void TcpServerHostApp::handleStartOperation(LifecycleOperation *operation)
 
 void TcpServerHostApp::handleStopOperation(LifecycleOperation *operation)
 {
-    for (auto thread : threadSet)
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+    // snapshot: a synchronously completing close removes the thread from threadSet
+    auto threads = threadSet;
+    for (auto thread : threads)
         thread->close();
     serverSocket.close();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
@@ -92,6 +95,7 @@ void TcpServerHostApp::finish()
 
 void TcpServerHostApp::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
 {
+    Enter_Method("socketAvailable");
     // new TCP connection -- create new socket object and server process
     TcpSocket *newSocket = new TcpSocket(availableInfo);
     newSocket->setOutputGate(gate("socketOut"));
@@ -114,6 +118,7 @@ void TcpServerHostApp::socketAvailable(TcpSocket *socket, TcpAvailableInfo *avai
 
 void TcpServerHostApp::socketClosed(TcpSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION && threadSet.empty() && !serverSocket.isOpen())
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -189,36 +194,43 @@ void TcpServerThreadBase::initialize(int stage)
 
 void TcpServerThreadBase::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
+    Enter_Method("socketDataArrived");
     dataArrived(msg, urgent);
 }
 
 void TcpServerThreadBase::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
 {
+    Enter_Method("socketAvailable");
     socket->accept(availableInfo->getNewSocketId());
 }
 
 void TcpServerThreadBase::socketEstablished(TcpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketEstablished");
     established();
 }
 
 void TcpServerThreadBase::socketPeerClosed(TcpSocket *socket)
 {
+    Enter_Method("socketPeerClosed");
     peerClosed();
 }
 
 void TcpServerThreadBase::socketClosed(TcpSocket *socket)
 {
+    Enter_Method("socketClosed");
     hostmod->threadClosed(this);
 }
 
 void TcpServerThreadBase::socketFailure(TcpSocket *socket, int code)
 {
+    Enter_Method("socketFailure");
     hostmod->removeThread(this);
 }
 
 void TcpServerThreadBase::socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status)
 {
+    Enter_Method("socketStatusArrived");
     statusArrived(status);
 }
 

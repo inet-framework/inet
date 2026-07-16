@@ -51,9 +51,10 @@ void EtherAppServer::handleStopOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Stop the application\n";
     if (llcSocket.isOpen()) {
-        llcSocket.close();
+        // register the delayed finish before close(): the closed callback may complete the operation synchronously
         if (activeOperation.operation != nullptr)
             delayActiveOperationFinish(par("stopOperationTimeout"));
+        llcSocket.close();
     }
 }
 
@@ -78,6 +79,7 @@ void EtherAppServer::handleMessageWhenUp(cMessage *msg)
 
 void EtherAppServer::socketDataArrived(Ieee8022LlcSocket *, Packet *msg)
 {
+    Enter_Method("socketDataArrived");
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
     const auto& req = msg->peekAtFront<EtherAppReq>();
     if (req == nullptr)

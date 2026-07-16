@@ -40,10 +40,13 @@ void TcpServerListener::handleStartOperation(LifecycleOperation *operation)
 
 void TcpServerListener::handleStopOperation(LifecycleOperation *operation)
 {
-    for (auto connection : connectionSet)
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
+    delayActiveOperationFinish(par("stopOperationTimeout"));
+    // snapshot: a synchronously completing close removes the connection from connectionSet
+    auto connections = connectionSet;
+    for (auto connection : connections)
         connection->close();
     serverSocket.close();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void TcpServerListener::handleCrashOperation(LifecycleOperation *operation)
@@ -75,6 +78,7 @@ void TcpServerListener::finish()
 
 void TcpServerListener::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
 {
+    Enter_Method("socketAvailable");
     const char *serverConnectionModuleType = par("serverConnectionModuleType");
     cModuleType *moduleType = cModuleType::get(serverConnectionModuleType);
     cModule *parentModule = getParentModule();
@@ -96,6 +100,7 @@ void TcpServerListener::socketAvailable(TcpSocket *socket, TcpAvailableInfo *ava
 
 void TcpServerListener::socketClosed(TcpSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION && connectionSet.empty() && !serverSocket.isOpen())
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }

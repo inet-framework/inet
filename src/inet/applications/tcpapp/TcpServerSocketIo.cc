@@ -56,6 +56,7 @@ void TcpServerSocketIo::handleMessage(cMessage *message)
 
 void TcpServerSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
+    Enter_Method("socketDataArrived");
     ASSERT(socket == this->socket);
     bytesRcvd += packet->getByteLength();
     packet->removeTag<SocketInd>();
@@ -66,6 +67,7 @@ void TcpServerSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, boo
 
 void TcpServerSocketIo::socketEstablished(TcpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketEstablished");
     ASSERT(socket == this->socket);
     sendOrScheduleReadCommandIfNeeded();
 }

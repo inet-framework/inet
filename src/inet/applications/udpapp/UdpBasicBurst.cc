@@ -205,12 +205,14 @@ void UdpBasicBurst::handleMessageWhenUp(cMessage *msg)
 
 void UdpBasicBurst::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     // process incoming packet
     processPacket(packet);
 }
 
 void UdpBasicBurst::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
 }
@@ -344,8 +346,9 @@ void UdpBasicBurst::handleStopOperation(LifecycleOperation *operation)
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)

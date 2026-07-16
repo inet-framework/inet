@@ -74,6 +74,7 @@ void QuicDiscardServer::handleMessageWhenUp(cMessage *msg)
 
 void QuicDiscardServer::socketDataArrived(QuicSocket* socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     auto data = packet->popAtFront();
     static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
     emit(bytesReceivedSignal, (long)B(data->getChunkLength()).get());
@@ -101,11 +102,13 @@ void QuicDiscardServer::socketDataAvailable(QuicSocket* socket, QuicDataInfo *da
 
 void QuicDiscardServer::socketEstablished(QuicSocket *socket)
 {
+    Enter_Method("socketEstablished");
     EV_DEBUG << "connection to " << socket->getRemoteAddr() << ":" << socket->getRemotePort() << " established" << endl;
 }
 
 void QuicDiscardServer::socketClosed(QuicSocket *socket)
 {
+    Enter_Method("socketClosed");
     EV_DEBUG << "connection closed over socket " << socket->getSocketId() << endl;
 }
 

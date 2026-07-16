@@ -65,6 +65,7 @@ void QuicZeroRttClient::handleMessageWhenUp(cMessage *msg)
 
 void QuicZeroRttClient::socketEstablished(QuicSocket *socket)
 {
+    Enter_Method("socketEstablished");
     EV_DEBUG << "Connection established" << endl;
 
     Packet *packet = new Packet("ApplicationData");
@@ -95,6 +96,7 @@ void QuicZeroRttClient::socketEstablished(QuicSocket *socket)
 
 void QuicZeroRttClient::socketDataArrived(QuicSocket* socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     EV_DEBUG << "Data arrived" << endl;
     numReceived++;
     delete packet;
@@ -102,6 +104,7 @@ void QuicZeroRttClient::socketDataArrived(QuicSocket* socket, Packet *packet)
 
 void QuicZeroRttClient::socketClosed(QuicSocket *socket)
 {
+    Enter_Method("socketClosed");
     EV_DEBUG << "Socket closed" << endl;
 }
 

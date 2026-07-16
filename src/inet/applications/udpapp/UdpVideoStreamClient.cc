@@ -48,12 +48,14 @@ void UdpVideoStreamClient::handleMessageWhenUp(cMessage *msg)
 
 void UdpVideoStreamClient::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     // process incoming packet
     receiveStream(packet);
 }
 
 void UdpVideoStreamClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
 }
@@ -106,8 +108,9 @@ void UdpVideoStreamClient::handleStartOperation(LifecycleOperation *operation)
 void UdpVideoStreamClient::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void UdpVideoStreamClient::handleCrashOperation(LifecycleOperation *operation)

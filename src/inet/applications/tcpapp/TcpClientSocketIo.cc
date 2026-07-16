@@ -70,6 +70,7 @@ void TcpClientSocketIo::handleMessage(cMessage *message)
 
 void TcpClientSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
+    Enter_Method("socketDataArrived");
     bytesRcvd += packet->getByteLength();
     packet->removeTag<SocketInd>();
     yieldBeforePush();
@@ -83,23 +84,27 @@ void TcpClientSocketIo::socketAvailable(TcpSocket *socket, TcpAvailableInfo *ava
 
 void TcpClientSocketIo::socketEstablished(TcpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketEstablished");
     sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpClientSocketIo::socketPeerClosed(TcpSocket *socket)
 {
+    Enter_Method("socketPeerClosed");
     if (readDelayTimer)
         cancelEvent(readDelayTimer);
 }
 
 void TcpClientSocketIo::socketClosed(TcpSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (readDelayTimer)
         cancelEvent(readDelayTimer);
 }
 
 void TcpClientSocketIo::socketFailure(TcpSocket *socket, int code)
 {
+    Enter_Method("socketFailure");
     if (readDelayTimer)
         cancelEvent(readDelayTimer);
 }
@@ -110,6 +115,7 @@ void TcpClientSocketIo::socketStatusArrived(TcpSocket *socket, TcpStatusInfo *st
 
 void TcpClientSocketIo::socketDeleted(TcpSocket *socket)
 {
+    Enter_Method("socketDeleted");
     if (readDelayTimer)
         cancelEvent(readDelayTimer);
 }

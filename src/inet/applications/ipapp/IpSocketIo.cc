@@ -61,6 +61,7 @@ void IpSocketIo::setSocketOptions()
 
 void IpSocketIo::socketDataArrived(Ipv4Socket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     emit(packetReceivedSignal, packet);
     numReceived++;
     packet->removeTag<SocketInd>();
@@ -70,6 +71,7 @@ void IpSocketIo::socketDataArrived(Ipv4Socket *socket, Packet *packet)
 
 void IpSocketIo::socketClosed(Ipv4Socket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -87,8 +89,9 @@ void IpSocketIo::handleStartOperation(LifecycleOperation *operation)
 
 void IpSocketIo::handleStopOperation(LifecycleOperation *operation)
 {
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void IpSocketIo::handleCrashOperation(LifecycleOperation *operation)

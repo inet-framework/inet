@@ -94,6 +94,7 @@ void UdpSocketIo::setSocketOptions()
 
 void UdpSocketIo::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     emit(packetReceivedSignal, packet);
     numReceived++;
     packet->removeTag<SocketInd>();
@@ -103,12 +104,14 @@ void UdpSocketIo::socketDataArrived(UdpSocket *socket, Packet *packet)
 
 void UdpSocketIo::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
 }
 
 void UdpSocketIo::socketClosed(UdpSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -126,8 +129,9 @@ void UdpSocketIo::handleStartOperation(LifecycleOperation *operation)
 
 void UdpSocketIo::handleStopOperation(LifecycleOperation *operation)
 {
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void UdpSocketIo::handleCrashOperation(LifecycleOperation *operation)

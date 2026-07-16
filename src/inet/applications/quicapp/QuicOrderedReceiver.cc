@@ -68,6 +68,7 @@ void QuicOrderedReceiver::handleMessageWhenUp(cMessage *msg)
 
 void QuicOrderedReceiver::socketDataArrived(QuicSocket* socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     auto data = packet->popAtFront();
     static simsignal_t bytesReceivedSignal = registerSignal("bytesReceived");
     long chunkBytes = (long)B(data->getChunkLength()).get();
@@ -97,11 +98,13 @@ void QuicOrderedReceiver::socketDataAvailable(QuicSocket* socket, QuicDataInfo *
 
 void QuicOrderedReceiver::socketEstablished(QuicSocket *socket)
 {
+    Enter_Method("socketEstablished");
     EV_DEBUG << "connection to " << socket->getRemoteAddr() << ":" << socket->getRemotePort() << " established" << endl;
 }
 
 void QuicOrderedReceiver::socketClosed(QuicSocket *socket)
 {
+    Enter_Method("socketClosed");
     EV_DEBUG << "connection closed over socket " << socket->getSocketId() << endl;
 }
 

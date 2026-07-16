@@ -81,6 +81,7 @@ void VoipStreamReceiver::handleMessage(cMessage *msg)
 
 void VoipStreamReceiver::socketDataArrived(UdpSocket *socket, Packet *pk)
 {
+    Enter_Method("socketDataArrived");
     // process incoming packet
 
     const auto& vp = pk->peekAtFront<VoipStreamPacket>();
@@ -107,6 +108,7 @@ void VoipStreamReceiver::socketDataArrived(UdpSocket *socket, Packet *pk)
 
 void VoipStreamReceiver::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Unknown message '" << indication->getName() << "', kind = " << indication->getKind() << ", discarding it." << endl;
     delete indication;
 }

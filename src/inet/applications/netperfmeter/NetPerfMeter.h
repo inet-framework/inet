@@ -71,20 +71,20 @@ class INET_API NetPerfMeter : public SimpleModule, public IPassivePacketSink, pu
     unsigned long getTotalSentBytes() const;
     unsigned long getTotalReceivedBytes() const;
 
-    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override { receiveMessage(packet); }
-    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override { teardownConnection(); }
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override { Enter_Method("socketDataArrived"); receiveMessage(packet); }
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override { Enter_Method("socketErrorArrived"); teardownConnection(); }
     virtual void socketClosed(UdpSocket *socket) override { }
 
-    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { receiveMessage(packet); }
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { Enter_Method("socketDataArrived"); receiveMessage(packet); }
     virtual void socketAvailable(TcpSocket* socket, TcpAvailableInfo* availableInfo) override;
     virtual void socketEstablished(TcpSocket *socket, Indication *indication) override { Enter_Method("socketEstablished"); successfullyEstablishedConnection(indication, 0); }
-    virtual void socketPeerClosed(TcpSocket *socket) override { teardownConnection(); }
-    virtual void socketClosed(TcpSocket *socket) override { teardownConnection(); }
-    virtual void socketFailure(TcpSocket *socket, int code) override { teardownConnection(); }
+    virtual void socketPeerClosed(TcpSocket *socket) override { Enter_Method("socketPeerClosed"); teardownConnection(); }
+    virtual void socketClosed(TcpSocket *socket) override { Enter_Method("socketClosed"); teardownConnection(); }
+    virtual void socketFailure(TcpSocket *socket, int code) override { Enter_Method("socketFailure"); teardownConnection(); }
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
     virtual void socketDeleted(TcpSocket *socket) override { }
 
-    virtual void socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent) override { receiveMessage(packet); }
+    virtual void socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent) override { Enter_Method("socketDataArrived"); receiveMessage(packet); }
     virtual void socketDataNotificationArrived(SctpSocket *socket, Message *msg) override;
     virtual void socketAvailable(SctpSocket *socket, Indication *indication) override;
     virtual void socketEstablished(SctpSocket *socket, Indication *indication) override;

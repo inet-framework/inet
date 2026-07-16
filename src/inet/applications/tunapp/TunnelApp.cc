@@ -100,6 +100,7 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
 
 void TunnelApp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     auto packetProtocol = packet->getTag<TransportProtocolInd>()->getProtocol();
     if (protocol == packetProtocol) {
         numReceived++;
@@ -113,6 +114,7 @@ void TunnelApp::socketDataArrived(UdpSocket *socket, Packet *packet)
 
 void TunnelApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     delete indication;
 }
 
@@ -124,6 +126,7 @@ void TunnelApp::socketClosed(UdpSocket *socket)
 // Ipv4Socket::ICallback
 void TunnelApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     EV_INFO << "Received packet from IPv4 socket" << EV_FIELD(packet) << EV_ENDL;
     auto packetProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
     if (protocol == packetProtocol) {
@@ -145,6 +148,7 @@ void TunnelApp::socketClosed(Ipv4Socket *socket)
 // TunSocket::ICallback
 void TunnelApp::socketDataArrived(TunSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     EV_INFO << "Received packet from TUN socket" << EV_FIELD(packet) << EV_ENDL;
     // InterfaceInd says packet is from tunnel interface and socket id is present and equals to tunSocket
     numReceived++;
@@ -168,12 +172,18 @@ void TunnelApp::socketDataArrived(TunSocket *socket, Packet *packet)
 
 void TunnelApp::handleStopOperation(LifecycleOperation *operation)
 {
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
+    delayActiveOperationFinish(par("stopOperationTimeout"));
     ipv4Socket.close();
     serverSocket.close();
     clientSocket.close();
-    for (auto s : socketMap.getMap())
-        s.second->close();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
+    // snapshot: the socketClosed callback may remove the socket from socketMap
+    // synchronously, so don't iterate the live map while closing
+    std::vector<ISocket *> sockets;
+    for (auto& s : socketMap.getMap())
+        sockets.push_back(s.second);
+    for (auto socket : sockets)
+        socket->close();
 }
 
 void TunnelApp::handleCrashOperation(LifecycleOperation *operation)

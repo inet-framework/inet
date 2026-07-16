@@ -828,20 +828,24 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
 
 void Aodv::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     numReceived++;
     processPacket(packet);
 }
 
 void Aodv::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
 }
 
 void Aodv::socketClosed(UdpSocket *socket)
 {
-    if (operationalState == State::STOPPING_OPERATION)
-        startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+    Enter_Method("socketClosed");
+    // handleStopOperation() does not delay the operation finish, so the mixin
+    // completes the operation when the stage returns; nothing to do here
+    // (the module also has no stopOperationExtraTime parameter)
 }
 
 void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive)

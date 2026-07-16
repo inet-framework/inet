@@ -200,12 +200,14 @@ void UdpBasicApp::handleMessageWhenUp(cMessage *msg)
 
 void UdpBasicApp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     // process incoming packet
     processPacket(packet);
 }
 
 void UdpBasicApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
 }
@@ -237,8 +239,9 @@ void UdpBasicApp::handleStartOperation(LifecycleOperation *operation)
 void UdpBasicApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void UdpBasicApp::handleCrashOperation(LifecycleOperation *operation)

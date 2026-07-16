@@ -130,18 +130,21 @@ void DhcpServer::handleMessageWhenUp(cMessage *msg)
 
 void DhcpServer::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     // process incoming packet
     processDhcpMessage(packet);
 }
 
 void DhcpServer::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Unknown message '" << indication->getName() << "', kind = " << indication->getKind() << ", discarding it." << endl;
     delete indication;
 }
 
 void DhcpServer::socketClosed(UdpSocket *socket_)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION && !socket.isOpen())
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -573,8 +576,9 @@ void DhcpServer::handleStopOperation(LifecycleOperation *operation)
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void DhcpServer::handleCrashOperation(LifecycleOperation *operation)

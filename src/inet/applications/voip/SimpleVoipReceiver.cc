@@ -141,6 +141,7 @@ cGate *SimpleVoipReceiver::lookupModuleInterface(cGate *gate, const std::type_in
 
 void SimpleVoipReceiver::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     // process incoming packet
     const auto& voice = packet->peekAtFront<SimpleVoipPacket>();
 
@@ -179,6 +180,7 @@ void SimpleVoipReceiver::socketDataArrived(UdpSocket *socket, Packet *packet)
 
 void SimpleVoipReceiver::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Unknown message '" << indication->getName() << "', kind = " << indication->getKind() << ", discarding it." << endl;
     delete indication;
 }

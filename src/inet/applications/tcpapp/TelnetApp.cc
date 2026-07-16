@@ -68,8 +68,9 @@ void TelnetApp::handleStopOperation(LifecycleOperation *operation)
     cancelEvent(timeoutMsg);
     cancelEvent(readDelayTimer);
     if (socket.isOpen()) {
-        close();
+        // register the delayed finish before close(): the closed callback may complete the operation synchronously
         delayActiveOperationFinish(par("stopOperationTimeout"));
+        close();
     }
 }
 

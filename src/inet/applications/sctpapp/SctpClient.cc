@@ -193,6 +193,7 @@ void SctpClient::close()
 
 void SctpClient::socketEstablished(SctpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketEstablished");
     unsigned long int buffer = indication->getTag<SctpConnectReq>()->getNumMsgs();
     int count = 0;
     EV_INFO << "SctpClient: connected\n";
@@ -306,6 +307,7 @@ void SctpClient::sendRequestArrived(SctpSocket *socket)
 
 void SctpClient::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
 {
+    Enter_Method("socketDataArrived");
     packetsRcvd++;
 
     EV_INFO << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
@@ -476,6 +478,7 @@ void SctpClient::shutdownReceivedArrived(SctpSocket *socket)
 
 void SctpClient::socketPeerClosed(SctpSocket *socket)
 {
+    Enter_Method("socketPeerClosed");
     // close the connection (if not already closed)
     if (socket->getState() == SctpSocket::PEER_CLOSED) {
         EV_INFO << "remote SCTP closed, closing here as well\n";
@@ -485,6 +488,7 @@ void SctpClient::socketPeerClosed(SctpSocket *socket)
 
 void SctpClient::socketClosed(SctpSocket *socket)
 {
+    Enter_Method("socketClosed");
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
 
@@ -497,6 +501,7 @@ void SctpClient::socketClosed(SctpSocket *socket)
 
 void SctpClient::socketFailure(SctpSocket *socket, int code)
 {
+    Enter_Method("socketFailure");
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";
     numBroken++;
@@ -507,6 +512,7 @@ void SctpClient::socketFailure(SctpSocket *socket, int code)
 
 void SctpClient::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 {
+    Enter_Method("socketStatusArrived");
     struct PathStatus ps;
     auto i = sctpPathStatus.find(status->getPathId());
 

@@ -158,6 +158,7 @@ void QuicTrafficgen::handleGeneratorInfo(TrafficgenInfo* msg)
 
 void QuicTrafficgen::socketEstablished(QuicSocket *socket)
 {
+    Enter_Method("socketEstablished");
     EV_INFO << "socketEstablished" << endl;
     sendGeneratorControl(TRAFFICGEN_START_SENDING);
     sendingAllowed = true;
@@ -166,11 +167,13 @@ void QuicTrafficgen::socketEstablished(QuicSocket *socket)
 
 void QuicTrafficgen::socketDataArrived(QuicSocket* socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     EV_DEBUG << "Data arrived" << endl;
 }
 
 void QuicTrafficgen::socketClosed(QuicSocket *socket)
 {
+    Enter_Method("socketClosed");
     EV_INFO << "socketClosed" << endl;
     setStatusString("closed");
 }

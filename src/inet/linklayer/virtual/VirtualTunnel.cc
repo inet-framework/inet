@@ -102,6 +102,7 @@ void VirtualTunnel::pushPacket(Packet *packet, const cGate *gate)
 #ifdef INET_WITH_ETHERNET
 void VirtualTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     yieldBeforePush();
@@ -112,6 +113,7 @@ void VirtualTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 #ifdef INET_WITH_IEEE8021Q
 void VirtualTunnel::socketDataArrived(Ieee8021qSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     yieldBeforePush();

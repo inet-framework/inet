@@ -36,6 +36,7 @@ void UdpEchoApp::handleMessageWhenUp(cMessage *msg)
 
 void UdpEchoApp::socketDataArrived(UdpSocket *socket, Packet *pk)
 {
+    Enter_Method("socketDataArrived");
     // determine its source address/port
     L3Address remoteAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
     int srcPort = pk->getTag<L4PortInd>()->getSrcPort();
@@ -51,6 +52,7 @@ void UdpEchoApp::socketDataArrived(UdpSocket *socket, Packet *pk)
 
 void UdpEchoApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
 }
@@ -79,8 +81,9 @@ void UdpEchoApp::handleStartOperation(LifecycleOperation *operation)
 
 void UdpEchoApp::handleStopOperation(LifecycleOperation *operation)
 {
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void UdpEchoApp::handleCrashOperation(LifecycleOperation *operation)

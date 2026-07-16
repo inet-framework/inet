@@ -95,6 +95,7 @@ void Ieee8022LlcSocketIo::setSocketOptions()
 
 void Ieee8022LlcSocketIo::socketDataArrived(Ieee8022LlcSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     emit(packetReceivedSignal, packet);
     EV_INFO << "Received packet: " << packet << endl;
     numReceived++;
@@ -105,6 +106,7 @@ void Ieee8022LlcSocketIo::socketDataArrived(Ieee8022LlcSocket *socket, Packet *p
 
 void Ieee8022LlcSocketIo::socketClosed(Ieee8022LlcSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -118,8 +120,9 @@ void Ieee8022LlcSocketIo::handleStartOperation(LifecycleOperation *operation)
 
 void Ieee8022LlcSocketIo::handleStopOperation(LifecycleOperation *operation)
 {
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void Ieee8022LlcSocketIo::handleCrashOperation(LifecycleOperation *operation)

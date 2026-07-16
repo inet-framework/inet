@@ -53,13 +53,13 @@ class INET_API VirtualTunnel : public queueing::PassivePacketSinkBase
 
 #ifdef INET_WITH_ETHERNET
     virtual void socketDataArrived(EthernetSocket *socket, Packet *packet) override;
-    virtual void socketErrorArrived(EthernetSocket *socket, Indication *indication) override { throw cRuntimeError("Invalid operation"); }
+    virtual void socketErrorArrived(EthernetSocket *socket, Indication *indication) override { Enter_Method("socketErrorArrived"); throw cRuntimeError("Invalid operation"); }
     virtual void socketClosed(EthernetSocket *socket) override {}
 #endif
 
 #ifdef INET_WITH_IEEE8021Q
     virtual void socketDataArrived(Ieee8021qSocket *socket, Packet *packet) override;
-    virtual void socketErrorArrived(Ieee8021qSocket *socket, Indication *indication) override { throw cRuntimeError("Invalid operation"); }
+    virtual void socketErrorArrived(Ieee8021qSocket *socket, Indication *indication) override { Enter_Method("socketErrorArrived"); throw cRuntimeError("Invalid operation"); }
     virtual void socketClosed(Ieee8021qSocket *socket) override {}
 #endif
 

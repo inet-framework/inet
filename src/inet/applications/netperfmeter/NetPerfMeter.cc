@@ -1213,6 +1213,7 @@ void NetPerfMeter::socketDataNotificationArrived(SctpSocket *socket, Message *ms
 
 void NetPerfMeter::socketAvailable(SctpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketAvailable");
     auto availableIndication = indication->getTag<SctpAvailableReq>();
     socket->accept(availableIndication->getNewSocketId());
 }

@@ -39,10 +39,10 @@ class INET_API TcpServerSocketIo : public SimpleModule, public TcpSocket::ICallb
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override {}
     virtual void socketEstablished(TcpSocket *socket, Indication *indication) override;
     virtual void socketPeerClosed(TcpSocket *socket) override {}
-    virtual void socketClosed(TcpSocket *socket) override { if (readDelayTimer) cancelEvent(readDelayTimer); }
-    virtual void socketFailure(TcpSocket *socket, int code) override { if (readDelayTimer) cancelEvent(readDelayTimer); }
+    virtual void socketClosed(TcpSocket *socket) override { Enter_Method("socketClosed"); if (readDelayTimer) cancelEvent(readDelayTimer); }
+    virtual void socketFailure(TcpSocket *socket, int code) override { Enter_Method("socketFailure"); if (readDelayTimer) cancelEvent(readDelayTimer); }
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
-    virtual void socketDeleted(TcpSocket *socket) override { ASSERT(socket == this->socket); if (readDelayTimer) cancelEvent(readDelayTimer); socket = nullptr; }
+    virtual void socketDeleted(TcpSocket *socket) override { Enter_Method("socketDeleted"); ASSERT(socket == this->socket); if (readDelayTimer) cancelEvent(readDelayTimer); socket = nullptr; }
 
     virtual void sendOrScheduleReadCommandIfNeeded();
 

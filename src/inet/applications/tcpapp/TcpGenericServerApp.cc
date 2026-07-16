@@ -202,6 +202,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
 
 void TcpGenericServerApp::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
 {
+    Enter_Method("socketAvailable");
     // new connection: create a socket object for it so TCP indications arrive
     // through the callbacks below, and accept it
     TcpSocket *newSocket = new TcpSocket(availableInfo);
@@ -213,6 +214,7 @@ void TcpGenericServerApp::socketAvailable(TcpSocket *socket, TcpAvailableInfo *a
 
 void TcpGenericServerApp::socketEstablished(TcpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketEstablished");
     // note: the indication is owned and deleted by TcpSocket::processMessage
     if (!autoRead)
         sendOrScheduleReadCommandIfNeeded(socket->getSocketId());
@@ -220,6 +222,7 @@ void TcpGenericServerApp::socketEstablished(TcpSocket *socket, Indication *indic
 
 void TcpGenericServerApp::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
+    Enter_Method("socketDataArrived");
     // feed the legacy message-style processing
     packet->setKind(TCP_I_DATA);
     handleMessage(packet);
@@ -227,6 +230,7 @@ void TcpGenericServerApp::socketDataArrived(TcpSocket *socket, Packet *packet, b
 
 void TcpGenericServerApp::socketPeerClosed(TcpSocket *socket)
 {
+    Enter_Method("socketPeerClosed");
     // we'll close too, but only after there's surely no message
     // pending to be sent back in this connection
     auto request = new Request("close", TCP_C_CLOSE);
@@ -236,6 +240,7 @@ void TcpGenericServerApp::socketPeerClosed(TcpSocket *socket)
 
 void TcpGenericServerApp::socketDeleted(TcpSocket *socket)
 {
+    Enter_Method("socketDeleted");
     // called from the TcpSocket destructor: drop references, but don't delete
     socketMap.removeSocket(socket);
     socketQueue.erase(socket->getSocketId());

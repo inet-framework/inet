@@ -80,7 +80,7 @@ class INET_API SctpClient : public SimpleModule, public SctpSocket::ICallback, p
     void handleTimer(cMessage *msg);
 
     /* SctpSocket::ICallback callback methods */
-    virtual void socketAvailable(SctpSocket *socket, Indication *indication) override { throw cRuntimeError("Model error, this module doesn't use any listener SCTP sockets"); }
+    virtual void socketAvailable(SctpSocket *socket, Indication *indication) override { Enter_Method("socketAvailable"); throw cRuntimeError("Model error, this module doesn't use any listener SCTP sockets"); }
     void socketEstablished(SctpSocket *socket, Indication *indication) override; // TODO needs a better name
     void socketDataArrived(SctpSocket *socket, Packet *msg, bool urgent) override; // TODO needs a better name
     void socketDataNotificationArrived(SctpSocket *socket, Message *msg) override;

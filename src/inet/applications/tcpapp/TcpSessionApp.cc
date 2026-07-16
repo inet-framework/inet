@@ -69,9 +69,10 @@ void TcpSessionApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
     cancelEvent(readDelayTimer);
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
+    delayActiveOperationFinish(par("stopOperationTimeout"));
     if (socket.isOpen())
         close();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
 }
 
 void TcpSessionApp::handleCrashOperation(LifecycleOperation *operation)
@@ -174,6 +175,7 @@ Packet *TcpSessionApp::createDataPacket(long sendBytes)
 
 void TcpSessionApp::socketEstablished(TcpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketEstablished");
     TcpAppBase::socketEstablished(socket, indication);
 
     ASSERT(commandIndex == 0);
@@ -185,12 +187,14 @@ void TcpSessionApp::socketEstablished(TcpSocket *socket, Indication *indication)
 
 void TcpSessionApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
+    Enter_Method("socketDataArrived");
     TcpAppBase::socketDataArrived(socket, msg, urgent);
     sendOrScheduleReadCommandIfNeeded();
 }
 
 void TcpSessionApp::socketClosed(TcpSocket *socket)
 {
+    Enter_Method("socketClosed");
     TcpAppBase::socketClosed(socket);
     cancelEvent(timeoutMsg);
     cancelEvent(readDelayTimer);
@@ -200,6 +204,7 @@ void TcpSessionApp::socketClosed(TcpSocket *socket)
 
 void TcpSessionApp::socketFailure(TcpSocket *socket, int code)
 {
+    Enter_Method("socketFailure");
     TcpAppBase::socketFailure(socket, code);
     cancelEvent(timeoutMsg);
     cancelEvent(readDelayTimer);

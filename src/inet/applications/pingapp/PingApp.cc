@@ -230,6 +230,7 @@ void PingApp::handleMessageWhenUp(cMessage *msg)
 
 void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
 #ifdef INET_WITH_IPv4
     if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
         const auto& icmpHeader = packet->popAtFront<IcmpHeader>();
@@ -316,11 +317,15 @@ void PingApp::handleStopOperation(LifecycleOperation *operation)
     currentSocket = nullptr;
     // TODO close sockets
     // TODO remove getMap()
-    if (socketMap.size() > 0) {
-        for (auto socket : socketMap.getMap())
-            socket.second->close();
-    }
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    // snapshot: the socketClosed callback may remove the socket from socketMap
+    // synchronously, so don't iterate the live map while closing
+    std::vector<ISocket *> sockets;
+    for (auto& s : socketMap.getMap())
+        sockets.push_back(s.second);
+    for (auto socket : sockets)
+        socket->close();
 }
 
 void PingApp::handleCrashOperation(LifecycleOperation *operation)

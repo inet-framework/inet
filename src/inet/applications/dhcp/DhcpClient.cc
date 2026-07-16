@@ -188,6 +188,7 @@ void DhcpClient::handleMessageWhenUp(cMessage *msg)
 
 void DhcpClient::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     // process incoming packet
     handleDhcpMessage(packet);
     delete packet;
@@ -195,6 +196,7 @@ void DhcpClient::socketDataArrived(UdpSocket *socket, Packet *packet)
 
 void DhcpClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
 }
@@ -726,8 +728,9 @@ void DhcpClient::handleStopOperation(LifecycleOperation *operation)
     // TODO Client should send DHCPRELEASE to the server. However, the correct operation
     // of DHCP does not depend on the transmission of DHCPRELEASE messages.
 
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void DhcpClient::handleCrashOperation(LifecycleOperation *operation)

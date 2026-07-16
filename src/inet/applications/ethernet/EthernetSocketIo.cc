@@ -101,6 +101,7 @@ void EthernetSocketIo::setSocketOptions()
 
 void EthernetSocketIo::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     emit(packetReceivedSignal, packet);
     numReceived++;
     packet->removeTag<SocketInd>();
@@ -110,12 +111,14 @@ void EthernetSocketIo::socketDataArrived(EthernetSocket *socket, Packet *packet)
 
 void EthernetSocketIo::socketErrorArrived(EthernetSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Ignoring Ethernet error report " << indication->getName() << endl;
     delete indication;
 }
 
 void EthernetSocketIo::socketClosed(EthernetSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -149,8 +152,9 @@ void EthernetSocketIo::handleStartOperation(LifecycleOperation *operation)
 
 void EthernetSocketIo::handleStopOperation(LifecycleOperation *operation)
 {
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void EthernetSocketIo::handleCrashOperation(LifecycleOperation *operation)

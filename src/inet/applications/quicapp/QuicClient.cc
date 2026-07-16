@@ -60,6 +60,7 @@ void QuicClient::handleMessageWhenUp(cMessage *msg)
 
 void QuicClient::socketEstablished(QuicSocket *socket)
 {
+    Enter_Method("socketEstablished");
     EV_DEBUG << "Connection established" << endl;
 
     Packet *packet = new Packet("ApplicationData");
@@ -88,6 +89,7 @@ void QuicClient::socketEstablished(QuicSocket *socket)
 
 void QuicClient::socketDataArrived(QuicSocket* socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     EV_DEBUG << "Data arrived" << endl;
     numReceived++;
     delete packet;
@@ -95,6 +97,7 @@ void QuicClient::socketDataArrived(QuicSocket* socket, Packet *packet)
 
 void QuicClient::socketClosed(QuicSocket *socket)
 {
+    Enter_Method("socketClosed");
     EV_DEBUG << "Socket closed" << endl;
 }
 

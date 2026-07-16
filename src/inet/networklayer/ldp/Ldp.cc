@@ -215,6 +215,7 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
 
 void Ldp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     numReceived++;
     // process incoming udp packet
     // FIXME add implementation
@@ -223,6 +224,7 @@ void Ldp::socketDataArrived(UdpSocket *socket, Packet *packet)
 
 void Ldp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
 }
@@ -242,13 +244,19 @@ void Ldp::handleStopOperation(LifecycleOperation *operation)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
+    delayActiveOperationFinish(par("stopOperationTimeout"));
     udpSocket.close();
     for (auto& s : udpSockets)
         s.close();
     serverSocket.close();
-    for (auto s : socketMap.getMap())
-        s.second->close();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
+    // snapshot: the socketClosed callback may remove the socket from socketMap
+    // synchronously, so don't iterate the live map while closing
+    std::vector<ISocket *> sockets;
+    for (auto& s : socketMap.getMap())
+        sockets.push_back(s.second);
+    for (auto socket : sockets)
+        socket->close();
 }
 
 void Ldp::handleCrashOperation(LifecycleOperation *operation)
@@ -634,6 +642,7 @@ void Ldp::openTCPConnectionToPeer(int peerIndex)
 
 void Ldp::socketEstablished(TcpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketEstablished");
     peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "TCP connection established with peer " << peer.peerIP << "\n";
 
@@ -645,6 +654,7 @@ void Ldp::socketEstablished(TcpSocket *socket, Indication *indication)
 
 void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInfo)
 {
+    Enter_Method("socketAvailable");
     // TODO
     // not yet in socketMap, must be new incoming connection.
     // find which peer it is and register connection
@@ -672,6 +682,7 @@ void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInf
 
 void Ldp::socketDataArrived(TcpSocket *socket)
 {
+    Enter_Method("socketDataArrived");
     peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "Message arrived over TCP from peer " << peer.peerIP << "\n";
 
@@ -685,6 +696,7 @@ void Ldp::socketDataArrived(TcpSocket *socket)
 
 void Ldp::socketPeerClosed(TcpSocket *socket)
 {
+    Enter_Method("socketPeerClosed");
     peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "Peer " << peer.peerIP << " closed TCP connection\n";
 
@@ -702,6 +714,9 @@ void Ldp::socketPeerClosed(TcpSocket *socket)
 
 void Ldp::socketClosed(TcpSocket *socket)
 {
+    Enter_Method("socketClosed");
+    if (operationalState != State::OPERATING)
+        return; // close initiated by handleStopOperation; myPeers is already cleared
     peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "TCP connection to peer " << peer.peerIP << " closed\n";
 
@@ -712,6 +727,7 @@ void Ldp::socketClosed(TcpSocket *socket)
 
 void Ldp::socketFailure(TcpSocket *socket, int code)
 {
+    Enter_Method("socketFailure");
     peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "TCP connection to peer " << peer.peerIP << " broken\n";
 

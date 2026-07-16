@@ -65,18 +65,21 @@ void UdpSink::handleMessageWhenUp(cMessage *msg)
 
 void UdpSink::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
+    Enter_Method("socketDataArrived");
     // process incoming packet
     processPacket(packet);
 }
 
 void UdpSink::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketErrorArrived");
     EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
     delete indication;
 }
 
 void UdpSink::socketClosed(UdpSocket *socket)
 {
+    Enter_Method("socketClosed");
     if (operationalState == State::STOPPING_OPERATION)
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
@@ -167,8 +170,9 @@ void UdpSink::handleStopOperation(LifecycleOperation *operation)
     cancelEvent(selfMsg);
     if (!multicastGroup.isUnspecified())
         socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
-    socket.close();
+    // register the delayed finish before close(): the closed callback may complete the operation synchronously
     delayActiveOperationFinish(par("stopOperationTimeout"));
+    socket.close();
 }
 
 void UdpSink::handleCrashOperation(LifecycleOperation *operation)

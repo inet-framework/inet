@@ -624,6 +624,7 @@ void SctpServer::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 
 void SctpServer::socketAvailable(SctpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketAvailable");
     auto availableIndication = indication->getTag<SctpAvailableReq>();
     socket->accept(availableIndication->getNewSocketId());
 }

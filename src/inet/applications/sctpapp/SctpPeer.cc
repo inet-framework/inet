@@ -498,6 +498,7 @@ void SctpPeer::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 
 void SctpPeer::socketPeerClosed(SctpSocket *socket)
 {
+    Enter_Method("socketPeerClosed");
     // close the connection (if not already closed)
     if (clientSocket.getState() == SctpSocket::PEER_CLOSED) {
         EV_INFO << "remote SCTP closed, closing here as well\n";
@@ -508,6 +509,7 @@ void SctpPeer::socketPeerClosed(SctpSocket *socket)
 
 void SctpPeer::socketClosed(SctpSocket *socket)
 {
+    Enter_Method("socketClosed");
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
     setStatusString("closed");
@@ -515,6 +517,7 @@ void SctpPeer::socketClosed(SctpSocket *socket)
 
 void SctpPeer::socketFailure(SctpSocket *socket, int code)
 {
+    Enter_Method("socketFailure");
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";
     setStatusString("broken");
@@ -525,6 +528,7 @@ void SctpPeer::socketFailure(SctpSocket *socket, int code)
 
 void SctpPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 {
+    Enter_Method("socketStatusArrived");
     struct PathStatus ps;
     auto i = sctpPathStatus.find(status->getPathId());
 
@@ -573,6 +577,7 @@ void SctpPeer::sendRequest(bool last)
 
 void SctpPeer::socketEstablished(SctpSocket *socket, Indication *indication)
 {
+    Enter_Method("socketEstablished");
     ASSERT(socket == &clientSocket);
     int count = 0;
     // *redefine* to perform or schedule first sending
@@ -650,6 +655,7 @@ void SctpPeer::sendRequestArrived(SctpSocket *socket)
 
 void SctpPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
 {
+    Enter_Method("socketDataArrived");
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
 

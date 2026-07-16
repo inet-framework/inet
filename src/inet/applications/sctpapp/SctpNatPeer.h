@@ -109,6 +109,7 @@ class INET_API SctpNatPeer : public SimpleModule, public SctpSocket::ICallback, 
     void connectx(AddressVector connectAddressList, int connectPort);
 
     virtual void socketAvailable(SctpSocket *socket, Indication *indication) override {
+        Enter_Method("socketAvailable");
         throw cRuntimeError("Model error, this module doesn't use any listener SCTP sockets");
     }
 

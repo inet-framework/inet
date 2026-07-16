@@ -33,7 +33,7 @@ class INET_API TcpServerListener : public ApplicationBase, public IPassivePacket
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
-    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { throw cRuntimeError("Unexpected data"); }
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { Enter_Method("socketDataArrived"); throw cRuntimeError("Unexpected data"); }
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
     virtual void socketEstablished(TcpSocket *socket, Indication *indication) override {}
     virtual void socketPeerClosed(TcpSocket *socket) override {}

@@ -37,14 +37,14 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
-    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { throw cRuntimeError("Unexpected data"); }
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override { Enter_Method("socketDataArrived"); throw cRuntimeError("Unexpected data"); }
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
     virtual void socketEstablished(TcpSocket *socket, Indication *indication) override {}
     virtual void socketPeerClosed(TcpSocket *socket) override {}
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override {}
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
-    virtual void socketDeleted(TcpSocket *socket) override { socketMap.removeSocket(socket); }
+    virtual void socketDeleted(TcpSocket *socket) override { Enter_Method("socketDeleted"); socketMap.removeSocket(socket); }
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
