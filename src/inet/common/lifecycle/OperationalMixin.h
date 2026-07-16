@@ -35,6 +35,7 @@ class INET_API OperationalMixin : public T, public ILifecycle
     };
     Operation activeOperation;
     cMessage *activeOperationTimeout = nullptr;
+    bool insideOperationStage = false; // a socket close() etc. may complete the operation synchronously
     cMessage *activeOperationExtraTimer = nullptr;
 
   protected:

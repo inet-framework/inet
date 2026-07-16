@@ -88,7 +88,9 @@ bool OperationalMixin<T>::handleOperationStage(LifecycleOperation *operation, ID
         if (isModuleStartStage(stage)) {
             operationalState = STARTING_OPERATION;
             setupActiveOperation(operation, doneCallback, OPERATING);
+            insideOperationStage = true;
             handleStartOperation(operation);
+            insideOperationStage = false;
             if (activeOperation.operation != nullptr && !activeOperation.isDelayedFinish)
                 finishActiveOperation();
             return activeOperation.operation == nullptr;
@@ -98,7 +100,9 @@ bool OperationalMixin<T>::handleOperationStage(LifecycleOperation *operation, ID
         if (isModuleStopStage(stage)) {
             operationalState = STOPPING_OPERATION;
             setupActiveOperation(operation, doneCallback, NOT_OPERATING);
+            insideOperationStage = true;
             handleStopOperation(operation);
+            insideOperationStage = false;
             if (activeOperation.operation != nullptr && !activeOperation.isDelayedFinish)
                 finishActiveOperation();
             return activeOperation.operation == nullptr;
@@ -191,7 +195,12 @@ void OperationalMixin<T>::finishActiveOperation()
     if (activeOperation.isDelayedFinish) {
         T::cancelEvent(activeOperationExtraTimer);
         T::cancelEvent(activeOperationTimeout);
-        activeOperation.doneCallback->invoke();
+        // within handleOperationStage the done callback must not be invoked;
+        // completion is reported by returning true from the stage instead.
+        // The operation can complete here when a socket close() finishes
+        // synchronously within the handleStopOperation call.
+        if (!insideOperationStage)
+            activeOperation.doneCallback->invoke();
     }
     activeOperation.clear();
 }
