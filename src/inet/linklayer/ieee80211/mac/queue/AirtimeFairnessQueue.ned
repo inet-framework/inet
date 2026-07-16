@@ -49,7 +49,7 @@ module AirtimeFairnessQueue extends CompoundPacketQueueBase
         bool fairnessEnabled = default(true); // when false, degrades to a plain per-station round robin (for OFF/ON contrast)
         string subqueueTypename = default("inet.queueing.queue.PacketQueue"); // NED type of each per-station sub-queue
         dropperClass = default("inet::ieee80211::Ieee80211LongestFlowDropper"); // on overflow, drop the tail frame of the longest per-station backlog
-        displayStringTextFormat = default("{classifier.numStations} stations\ncontains %p pk (%l) dropped %d");
+        displayStringTextFormat = default("{numStations} stations\ncontains %p pk (%l) dropped %d");
         classifier.subqueueModuleType = default(this.subqueueTypename);
         gate[*].quantum = default(this.quantum);
         gate[*].weight = default(this.weight);

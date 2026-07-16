@@ -32,6 +32,9 @@ namespace ieee80211 {
  */
 class INET_API AirtimeFairnessCompoundQueue : public queueing::CompoundPacketQueueBase
 {
+  protected:
+    virtual void initialize(int stage) override;
+
   public:
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
