@@ -136,8 +136,8 @@ Mipv6Network.MN[0].ipv6.mipv6: Binding was accepted.
 %#--------------------------------------------------------------------------------------------------------------
 %# the correspondent node receives TCP data delivered over the connection (which carried
 %# it through the handover; the post-handover chunks are tunneled to the care-of address)
-%contains: stdout
-dataArrived
+%contains-regex: stdout
+CN\[0\]\.app\[0\]\.thread_\d+: socketDataArrived
 %#--------------------------------------------------------------------------------------------------------------
 %# the connection was never reset (it closes cleanly at tClose, it is not aborted)
 %not-contains: stdout
