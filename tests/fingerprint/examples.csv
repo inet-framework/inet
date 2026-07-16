@@ -520,16 +520,16 @@
 /examples/quic/zerortt/,                -f omnetpp.ini -c invalidClientTokenString -r 0, 0.2s,            7c10-a66c/tplx;c396-2a57/~tNl, PASS, quic Ipv4
 /examples/quic/zerortt/,                -f omnetpp.ini -c sendInvalidToken -r 0,         0.2s,            e0b9-bfb4/tplx;5610-3986/~tNl, PASS, quic Ipv4
 
-/examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            98ee-282c/tplx;52f0-1d63/~tNl;b879-96e0/~tND;faf1-de52/tyf, PASS, EthernetMac Ipv4
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            4826-dcad/tplx;75e3-d75f/~tNl;10bd-b953/~tND;c5ed-b9aa/tyf, PASS, EthernetMac Ipv4
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            512c-57f0/tplx;aa3f-de9b/~tNl;1034-dbc2/~tND;5abf-7954/tyf, PASS, EthernetMac Ipv4
-/examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            4d96-c07d/tplx;3b9f-c5fe/~tNl;de1a-468b/~tND;fcd9-0439/tyf, PASS, EthernetMac Ipv4
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            9e01-9ba6/tplx;0ae5-2d64/~tNl;7b33-3fdc/~tND;73f0-641b/tyf, PASS, EthernetMac Ipv4
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            cff2-9525/tplx;ba53-ebda/~tNl;24fe-02a7/~tND;65b9-9e8c/tyf, PASS, EthernetMac Ipv4
-/examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            3f15-0c9c/tplx;0916-8bd0/~tNl;bdd5-b370/~tND;3d73-91e0/tyf, PASS, EthernetMac Ipv4
-/examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            e4b8-5591/tplx;eede-9ed7/~tNl;9364-b90a/~tND;bac1-99b5/tyf, PASS, EthernetMac Ipv4
+/examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            98ee-282c/tplx;52f0-1d63/~tNl;480e-bf21/~tND;faf1-de52/tyf, PASS, EthernetMac Ipv4
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            4826-dcad/tplx;75e3-d75f/~tNl;18d2-a442/~tND;c5ed-b9aa/tyf, PASS, EthernetMac Ipv4
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            512c-57f0/tplx;aa3f-de9b/~tNl;e1b2-c359/~tND;5abf-7954/tyf, PASS, EthernetMac Ipv4
+/examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            4d96-c07d/tplx;3b9f-c5fe/~tNl;139f-f984/~tND;fcd9-0439/tyf, PASS, EthernetMac Ipv4
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            9e01-9ba6/tplx;0ae5-2d64/~tNl;6a01-4a86/~tND;73f0-641b/tyf, PASS, EthernetMac Ipv4
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            cff2-9525/tplx;ba53-ebda/~tNl;fa7d-05a5/~tND;65b9-9e8c/tyf, PASS, EthernetMac Ipv4
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            3f15-0c9c/tplx;0916-8bd0/~tNl;d7b7-042f/~tND;3d73-91e0/tyf, PASS, EthernetMac Ipv4
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            e4b8-5591/tplx;eede-9ed7/~tNl;a16a-0e30/~tND;bac1-99b5/tyf, PASS, EthernetMac Ipv4
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            86c3-66f0/tplx;ce03-6f52/~tNl;883f-6d71/tyf, PASS, EthernetMac
-/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            640c-b305/tplx;2dde-f981/~tNl;595e-ecc4/~tND;3d31-178a/tyf, PASS, EthernetMac Ipv4
+/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            640c-b305/tplx;2dde-f981/~tNl;d7cc-b710/~tND;3d31-178a/tyf, PASS, EthernetMac Ipv4
 
 /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,           3b10-2c5c/tplx;b015-6f81/~tNl;5260-d4c2/~tND;d294-df5c/tyf, PASS, igmp Ipv4
 /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           0055-d76b/tplx;7c48-14c9/~tNl;f185-90f2/~tND;c576-873e/tyf, PASS, Ipv4
