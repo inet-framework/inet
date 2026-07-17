@@ -7,10 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mac/ratecontrol/RateControlBase.h"
 
-#include <algorithm>
-
 #include "inet/common/Simsignals.h"
-#include "inet/linklayer/ieee80211/mac/ratecontrol/RateStatistic.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -22,8 +19,6 @@ simsignal_t RateControlBase::datarateChangedSignal = cComponent::registerSignal(
 void RateControlBase::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-        recordPerStationRate = par("recordPerStationRate");
 }
 
 const IIeee80211Mode *RateControlBase::increaseRateIfPossible(const IIeee80211Mode *currentMode)
@@ -50,37 +45,23 @@ const IIeee80211Mode *RateControlBase::getInitialMode()
     return initialRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initialRate));
 }
 
+std::string RateControlBase::stationLabel(const MacAddress& receiver) const
+{
+    return receiver.str();
+}
+
 void RateControlBase::emitDatarateChangedSignal(const MacAddress& receiver, const IIeee80211Mode *mode)
 {
     bps rate = mode->getDataMode()->getNetBitrate();
-    // aggregate statistic on this module (backward compatible: all stations interleaved)
-    emit(datarateChangedSignal, rate.get());
-    // per-station statistic on a dedicated submodule, so each station's rate is separately plottable
-    if (recordPerStationRate && !receiver.isBroadcast() && !receiver.isMulticast())
-        getOrCreateStationModule(receiver)->setRate(rate.get());
-}
-
-RateStatistic *RateControlBase::getOrCreateStationModule(const MacAddress& receiver)
-{
-    auto it = stationModules.find(receiver);
-    if (it != stationModules.end())
-        return it->second;
-    auto moduleType = cModuleType::get("inet.linklayer.ieee80211.mac.ratecontrol.RateStatistic");
-    // build a valid, MAC-derived submodule name, e.g. "sta-0AAA00000002"
-    std::string macString = receiver.str();
-    macString.erase(std::remove(macString.begin(), macString.end(), '-'), macString.end());
-    std::string name = "sta-" + macString;
-    auto module = check_and_cast<RateStatistic *>(moduleType->createScheduleInit(name.c_str(), this));
-    module->setPeerAddress(receiver);
-    stationModules[receiver] = module;
-    return module;
-}
-
-void RateControlBase::clearStationModules()
-{
-    for (auto& it : stationModules)
-        it.second->deleteModule();
-    stationModules.clear();
+    // Emit once, tagging the value with the receiver as a named details object. The aggregate
+    // datarateChanged statistic ignores the details (so it is unchanged), while a demux(datarateChanged)
+    // statistic uses the details name to record a separate data-rate vector per station.
+    if (receiver.isBroadcast() || receiver.isMulticast())
+        emit(datarateChangedSignal, rate.get());
+    else {
+        cNamedObject details(stationLabel(receiver).c_str());
+        emit(datarateChangedSignal, rate.get(), &details);
+    }
 }
 
 void RateControlBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -90,7 +71,6 @@ void RateControlBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
         resetRateControl();
-        clearStationModules();
     }
 }
 

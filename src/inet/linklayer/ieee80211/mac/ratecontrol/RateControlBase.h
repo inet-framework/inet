@@ -8,7 +8,7 @@
 #ifndef __INET_RATECONTROLBASE_H
 #define __INET_RATECONTROLBASE_H
 
-#include <map>
+#include <string>
 
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
@@ -17,18 +17,10 @@
 namespace inet {
 namespace ieee80211 {
 
-class RateStatistic;
-
 class INET_API RateControlBase : public ModeSetListener, public IRateControl
 {
   public:
     static simsignal_t datarateChangedSignal;
-
-  protected:
-    // When true, a per-station RateStatistic submodule is created for each receiver so that
-    // the data rate to each station is recorded as a separate, plottable statistic.
-    bool recordPerStationRate = false;
-    std::map<MacAddress, RateStatistic *> stationModules;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -39,13 +31,13 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
     virtual MacAddress getReceiverAddress(Packet *frame) const;
     // The mode a newly seen station starts from: the initialRate parameter, or the fastest mandatory mode.
     virtual const physicallayer::IIeee80211Mode *getInitialMode();
-    // Emits the aggregate datarateChanged signal on this module (backward compatible), and, when
-    // recordPerStationRate is enabled, also feeds the per-receiver RateStatistic submodule.
+    // The demux label identifying a receiver in the per-station datarate statistic (the receiver MAC).
+    virtual std::string stationLabel(const MacAddress& receiver) const;
+    // Emits datarateChanged with the receiver as a named details object, so a demux(datarateChanged)
+    // result filter can record a separate data-rate vector per station. The aggregate datarateChanged
+    // statistic ignores the details and is therefore unchanged. Group-addressed receivers are emitted
+    // without details (aggregate only).
     virtual void emitDatarateChangedSignal(const MacAddress& receiver, const physicallayer::IIeee80211Mode *mode);
-    // Finds or lazily creates the per-station RateStatistic submodule for the given receiver.
-    virtual RateStatistic *getOrCreateStationModule(const MacAddress& receiver);
-    // Deletes all per-station RateStatistic submodules (e.g. on a mode set change).
-    virtual void clearStationModules();
     // Drops all per-station state; called by subclasses' override when the mode set changes.
     virtual void resetRateControl() {}
 
