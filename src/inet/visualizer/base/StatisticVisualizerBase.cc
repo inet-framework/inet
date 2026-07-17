@@ -7,7 +7,10 @@
 
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 
+#include <cmath>
+
 #include "inet/common/ModuleAccess.h"
+#include "inet/visualizer/util/ColorSet.h"
 #include "omnetpp/cstatisticbuilder.h"
 
 namespace inet {
@@ -23,11 +26,18 @@ StatisticVisualizerBase::StatisticVisualization::StatisticVisualization(int modu
 {
 }
 
+StatisticVisualizerBase::BarSetVisualization::BarSetVisualization(int networkNodeId, int moduleId) :
+    networkNodeId(networkNodeId),
+    moduleId(moduleId)
+{
+}
+
 void StatisticVisualizerBase::preDelete(cComponent *root)
 {
     if (displayStatistics) {
         unsubscribe();
         removeAllStatisticVisualizations();
+        removeAllBarSetVisualizations();
     }
 }
 
@@ -75,6 +85,27 @@ void StatisticVisualizerBase::initialize(int stage)
         opacity = par("opacity");
         placementHint = parsePlacement(par("placementHint"));
         placementPriority = par("placementPriority");
+        barChartMode = !strcmp(par("displayMode"), "bars");
+        if (barChartMode) {
+            maxValue = par("maxValue");
+            minValue = par("minValue");
+            barWidth = par("barWidth");
+            barSpacing = par("barSpacing");
+            maxBarHeight = par("maxBarHeight");
+            ColorSet barColorSet;
+            barColorSet.parseColors(par("barColor"));
+            for (size_t i = 0; i < barColorSet.getSize(); i++)
+                barColors.push_back(barColorSet.getColor(i));
+            valueFormat = par("valueFormat").stringValue();
+            valueLabelFont = cFigure::parseFont(par("valueLabelFont"));
+            valueLabelColor = cFigure::Color(par("valueLabelColor"));
+            seriesLabelFont = cFigure::parseFont(par("seriesLabelFont"));
+            seriesLabelColor = cFigure::Color(par("seriesLabelColor"));
+            nameRotation = par("nameRotation").doubleValueInUnit("rad");
+            displayTitle = par("displayTitle");
+            titleFont = cFigure::parseFont(par("titleFont"));
+            titleColor = cFigure::Color(par("titleColor"));
+        }
         if (displayStatistics) {
             if (opp_isempty(signalName))
                 throw cRuntimeError("The signalName parameter must be not empty");
@@ -91,6 +122,7 @@ void StatisticVisualizerBase::handleParameterChange(const char *name)
     else if (!strcmp(name, "format"))
         format.parseFormat(par("format"));
     removeAllStatisticVisualizations();
+    removeAllBarSetVisualizations();
 }
 
 void StatisticVisualizerBase::subscribe()
@@ -240,6 +272,84 @@ void StatisticVisualizerBase::refreshStatisticVisualization(const StatisticVisua
                 break;
         }
     }
+}
+
+StatisticVisualizerBase::BarSetVisualization *StatisticVisualizerBase::getBarSetVisualization(int moduleId)
+{
+    auto it = barSetVisualizations.find(moduleId);
+    return it == barSetVisualizations.end() ? nullptr : it->second;
+}
+
+void StatisticVisualizerBase::addBarSetVisualization(BarSetVisualization *barSetVisualization)
+{
+    barSetVisualizations[barSetVisualization->moduleId] = barSetVisualization;
+}
+
+void StatisticVisualizerBase::removeBarSetVisualization(BarSetVisualization *barSetVisualization)
+{
+    barSetVisualizations.erase(barSetVisualization->moduleId);
+}
+
+void StatisticVisualizerBase::removeAllBarSetVisualizations()
+{
+    std::vector<BarSetVisualization *> removedBarSetVisualizations;
+    for (auto it : barSetVisualizations)
+        removedBarSetVisualizations.push_back(it.second);
+    for (auto barSetVisualization : removedBarSetVisualizations) {
+        removeBarSetVisualization(barSetVisualization);
+        delete barSetVisualization;
+    }
+}
+
+void StatisticVisualizerBase::processBarValue(cComponent *source, double value, cObject *details)
+{
+    // Each bar is keyed on a demux label (the details full name); a value emitted without a label
+    // (e.g. a group-addressed frame's rate) has no bar of its own and is ignored in bar chart mode.
+    std::string label = details != nullptr ? details->getFullName() : "";
+    if (label.empty())
+        return;
+    auto module = check_and_cast<cModule *>(source);
+    auto barSetVisualization = getBarSetVisualization(module->getId());
+    if (barSetVisualization == nullptr) {
+        if (!sourceFilter.matches(module))
+            return;
+        barSetVisualization = createBarSetVisualization(source);
+        if (barSetVisualization == nullptr)
+            return; // bar charts not supported by this concrete visualizer (e.g. osg)
+        addBarSetVisualization(barSetVisualization);
+    }
+    double displayValue = value;
+    if (!units.empty() && statisticUnit != nullptr && *statisticUnit != '\0')
+        displayValue = cNEDValue::convertUnit(value, statisticUnit, units[0].c_str());
+    barSetVisualization->values[label] = displayValue;
+}
+
+std::string StatisticVisualizerBase::formatBarValue(double value) const
+{
+    char buf[64];
+    snprintf(buf, sizeof(buf), valueFormat.c_str(), value);
+    return buf;
+}
+
+cFigure::Color StatisticVisualizerBase::getBarColor(double value) const
+{
+    if (barColors.empty())
+        return cFigure::Color("grey");
+    if (barColors.size() == 1)
+        return barColors[0];
+    double range = maxValue - minValue;
+    double fraction = range > 0 ? (value - minValue) / range : 0;
+    if (fraction < 0) fraction = 0;
+    if (fraction > 1) fraction = 1;
+    double pos = fraction * (barColors.size() - 1);
+    int index = (int)std::floor(pos);
+    if (index >= (int)barColors.size() - 1)
+        return barColors.back();
+    double t = pos - index;
+    const auto& c0 = barColors[index];
+    const auto& c1 = barColors[index + 1];
+    auto lerp = [](uint8_t a, uint8_t b, double t) { return (uint8_t)std::round(a + (b - a) * t); };
+    return cFigure::Color(lerp(c0.red, c1.red, t), lerp(c0.green, c1.green, t), lerp(c0.blue, c1.blue, t));
 }
 
 } // namespace visualizer

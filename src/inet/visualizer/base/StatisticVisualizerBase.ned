@@ -48,6 +48,26 @@ simple StatisticVisualizerBase extends VisualizerBase
         string placementHint = default("top"); // Annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // Determines the order of annotation positioning
 
+        // Bar chart mode: instead of a value label per source, display a small bar chart per source, with
+        // one bar per distinct demux label (the full name of the details object emitted with the value).
+        // This is the live counterpart of the demux() result filter used for recording.
+        string displayMode @enum("text","bars") = default("text"); // "text": a value label per source (default); "bars": a bar chart per source
+        double maxValue = default(0); // Value mapped to a full-height bar and to the top of the color gradient (in the display unit)
+        double minValue = default(0); // Value mapped to a zero-height bar and to the bottom of the color gradient (in the display unit)
+        double barWidth = default(12); // Width of each bar in pixels
+        double barSpacing = default(8); // Horizontal spacing between adjacent bars in pixels
+        double maxBarHeight = default(60); // Height of a full bar in pixels
+        string barColor = default("blue"); // A single bar color, or a value-to-color gradient (list of colors from minValue to maxValue), or a color group name
+        string valueFormat = default("%g"); // printf format for the value label on top of each bar (value in the display unit)
+        string valueLabelFont = default("<default>,8"); // Value label font
+        string valueLabelColor = default("black"); // Value label color
+        string seriesLabelFont = default("<default>,8"); // Per-bar series (demux label) font
+        string seriesLabelColor = default("black"); // Per-bar series label color
+        double nameRotation @unit(deg) = default(45deg); // Rotation angle of the per-bar series labels
+        bool displayTitle = default(true); // Display a title above each bar chart
+        string titleFont = default("<default>,9"); // Chart title font
+        string titleColor = default("black"); // Chart title color
+
         @class(StatisticVisualizerBase);
 }
 

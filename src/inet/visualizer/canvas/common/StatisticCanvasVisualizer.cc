@@ -7,9 +7,13 @@
 
 #include "inet/visualizer/canvas/common/StatisticCanvasVisualizer.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/figures/BoxedLabelFigure.h"
 #include "inet/common/figures/IIndicatorFigure.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -28,6 +32,18 @@ StatisticCanvasVisualizer::StatisticCanvasVisualization::~StatisticCanvasVisuali
 {
     delete figure;
     figure = nullptr;
+}
+
+StatisticCanvasVisualizer::BarSetCanvasVisualization::BarSetCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cGroupFigure *figure, int networkNodeId, int moduleId) :
+    BarSetVisualization(networkNodeId, moduleId),
+    networkNodeVisualization(networkNodeVisualization),
+    figure(figure)
+{
+}
+
+StatisticCanvasVisualizer::BarSetCanvasVisualization::~BarSetCanvasVisualization()
+{
+    delete figure;
 }
 
 void StatisticCanvasVisualizer::initialize(int stage)
@@ -118,6 +134,135 @@ void StatisticCanvasVisualizer::refreshStatisticVisualization(const StatisticVis
         boxedLabelFigure->setText(getText(statisticVisualization).c_str());
         statisticCanvasVisualization->networkNodeVisualization->setAnnotationSize(figure, boxedLabelFigure->getBounds().getSize());
     }
+}
+
+StatisticVisualizerBase::BarSetVisualization *StatisticCanvasVisualizer::createBarSetVisualization(cComponent *source)
+{
+    auto module = check_and_cast<cModule *>(source);
+    auto figure = new cGroupFigure("statisticBars");
+    figure->setTags((std::string("statistic_bars ") + tags).c_str());
+    figure->setZIndex(zIndex);
+    auto networkNode = getContainingNode(module);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
+    auto barSetVisualization = new BarSetCanvasVisualization(networkNodeVisualization, figure, networkNode->getId(), module->getId());
+    // title: the containing network interface name if any, else the source module name
+    auto networkInterface = getContainingNicModule(module);
+    barSetVisualization->title = networkInterface != nullptr ? networkInterface->getInterfaceName() : module->getFullName();
+    return barSetVisualization;
+}
+
+void StatisticCanvasVisualizer::addBarSetVisualization(BarSetVisualization *barSetVisualization)
+{
+    StatisticVisualizerBase::addBarSetVisualization(barSetVisualization);
+    auto barSetCanvasVisualization = static_cast<BarSetCanvasVisualization *>(barSetVisualization);
+    if (barSetCanvasVisualization->networkNodeVisualization != nullptr)
+        barSetCanvasVisualization->networkNodeVisualization->addAnnotation(barSetCanvasVisualization->figure, cFigure::Rectangle(0, 0, 0, 0), placementHint, placementPriority);
+}
+
+void StatisticCanvasVisualizer::removeBarSetVisualization(BarSetVisualization *barSetVisualization)
+{
+    StatisticVisualizerBase::removeBarSetVisualization(barSetVisualization);
+    auto barSetCanvasVisualization = static_cast<BarSetCanvasVisualization *>(barSetVisualization);
+    if (networkNodeVisualizer != nullptr && barSetCanvasVisualization->networkNodeVisualization != nullptr)
+        barSetCanvasVisualization->networkNodeVisualization->removeAnnotation(barSetCanvasVisualization->figure);
+}
+
+void StatisticCanvasVisualizer::refreshDisplay() const
+{
+    VisualizerBase::refreshDisplay();
+    if (!barChartMode)
+        return;
+    for (auto& it : barSetVisualizations) {
+        auto barSetCanvasVisualization = static_cast<BarSetCanvasVisualization *>(it.second);
+        refreshChart(barSetCanvasVisualization);
+        if (barSetCanvasVisualization->networkNodeVisualization != nullptr)
+            barSetCanvasVisualization->networkNodeVisualization->setAnnotationSize(barSetCanvasVisualization->figure, barSetCanvasVisualization->bounds.getSize());
+    }
+}
+
+void StatisticCanvasVisualizer::refreshChart(BarSetCanvasVisualization *barSetVisualization) const
+{
+    auto figure = barSetVisualization->figure;
+    // clear previous content
+    while (figure->getNumFigures() > 0)
+        delete figure->removeFigure(0);
+
+    // order series by label for a stable layout
+    std::vector<std::pair<std::string, double>> entries(barSetVisualization->values.begin(), barSetVisualization->values.end());
+    std::sort(entries.begin(), entries.end(), [](const std::pair<std::string, double>& a, const std::pair<std::string, double>& b) {
+        return a.first < b.first;
+    });
+
+    // reserve vertical space for the title and the value labels, scaled by their font size
+    double titleHeight = displayTitle ? (titleFont.pointSize > 0 ? titleFont.pointSize : 8) + 5 : 0;
+    double valueLabelHeight = (valueLabelFont.pointSize > 0 ? valueLabelFont.pointSize : 8) + 4;
+    double baselineY = titleHeight + valueLabelHeight + maxBarHeight;
+    double chartWidth = entries.empty() ? 0 : (entries.size() * barWidth + (entries.size() - 1) * barSpacing);
+
+    if (displayTitle) {
+        auto titleFigure = new cLabelFigure("title");
+        titleFigure->setText(barSetVisualization->title.c_str());
+        titleFigure->setFont(titleFont);
+        titleFigure->setColor(titleColor);
+        titleFigure->setAnchor(cFigure::ANCHOR_N);
+        titleFigure->setPosition(cFigure::Point(chartWidth / 2, 0));
+        figure->addFigure(titleFigure);
+    }
+
+    if (!entries.empty()) {
+        auto baseline = new cLineFigure("baseline");
+        baseline->setStart(cFigure::Point(-1, baselineY));
+        baseline->setEnd(cFigure::Point(chartWidth + 1, baselineY));
+        baseline->setLineColor(cFigure::Color("grey50"));
+        figure->addFigure(baseline);
+    }
+
+    double range = maxValue - minValue;
+    for (size_t i = 0; i < entries.size(); i++) {
+        double value = entries[i].second;
+        double x = i * (barWidth + barSpacing);
+        double fraction = range > 0 ? (value - minValue) / range : 0;
+        if (fraction < 0) fraction = 0;
+        if (fraction > 1) fraction = 1;
+        double h = maxBarHeight * fraction;
+
+        auto bar = new cRectangleFigure("bar");
+        bar->setBounds(cFigure::Rectangle(x, baselineY - h, barWidth, h));
+        bar->setFilled(true);
+        bar->setFillColor(getBarColor(value));
+        bar->setLineColor(cFigure::Color("grey30"));
+        bar->setTooltip((entries[i].first + ": " + formatBarValue(value)).c_str());
+        figure->addFigure(bar);
+
+        // value label centered above the bar
+        auto valueLabel = new cLabelFigure("value");
+        valueLabel->setText(formatBarValue(value).c_str());
+        valueLabel->setFont(valueLabelFont);
+        valueLabel->setColor(valueLabelColor);
+        valueLabel->setAnchor(cFigure::ANCHOR_S);
+        valueLabel->setPosition(cFigure::Point(x + barWidth / 2, baselineY - h - 1));
+        figure->addFigure(valueLabel);
+
+        // series label below the baseline, rotated
+        auto seriesLabel = new cLabelFigure("series");
+        seriesLabel->setText(entries[i].first.c_str());
+        seriesLabel->setFont(seriesLabelFont);
+        seriesLabel->setColor(seriesLabelColor);
+        seriesLabel->setAnchor(cFigure::ANCHOR_NE);
+        seriesLabel->setAngle(nameRotation);
+        seriesLabel->setPosition(cFigure::Point(x + barWidth / 2, baselineY + 2));
+        figure->addFigure(seriesLabel);
+    }
+
+    // Estimate the bounding box (in the group's local coordinates). The rotated series labels hang
+    // below and to the left of the baseline; reserve space for them.
+    double longestName = 0;
+    for (auto& entry : entries)
+        longestName = std::max(longestName, (double)entry.first.length());
+    double nameExtent = longestName * 4 + 4; // rough per-character estimate for the small font
+    double bottom = baselineY + 4 + std::max(6.0, nameExtent * std::abs(std::sin(nameRotation)));
+    double left = -std::max(2.0, nameExtent * std::abs(std::cos(nameRotation)));
+    barSetVisualization->bounds = cFigure::Rectangle(left, 0, (chartWidth - left) + 2, bottom);
 }
 
 } // namespace visualizer

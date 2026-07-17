@@ -9,6 +9,9 @@
 #define __INET_STATISTICVISUALIZERBASE_H
 
 #include <functional>
+#include <map>
+#include <string>
+#include <vector>
 
 #include "inet/common/StringFormat.h"
 #include "inet/visualizer/base/VisualizerBase.h"
@@ -48,6 +51,21 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
         virtual ~StatisticVisualization() {}
     };
 
+    // A bar-chart visualization for one signal source: the last value of the signal for each distinct
+    // demux label (the full name of the details object emitted with the value) becomes one bar. This is
+    // the live counterpart of the demux() result filter used for recording.
+    class INET_API BarSetVisualization {
+      public:
+        const int networkNodeId = -1;
+        const int moduleId = -1;
+        std::string title;
+        std::map<std::string, double> values; // series label (details full name) -> last value
+
+      public:
+        BarSetVisualization(int networkNodeId, int moduleId);
+        virtual ~BarSetVisualization() {}
+    };
+
     class INET_API DirectiveResolver : public StringFormat::IResolver {
       protected:
         const StatisticVisualizerBase *visualizer = nullptr;
@@ -78,7 +96,28 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     double placementPriority;
     //@}
 
+    /** @name Bar chart mode parameters (displayMode == "bars") */
+    //@{
+    bool barChartMode = false;
+    double maxValue = NaN;
+    double minValue = NaN;
+    double barWidth = NaN;
+    double barSpacing = NaN;
+    double maxBarHeight = NaN;
+    std::vector<cFigure::Color> barColors;
+    std::string valueFormat;
+    cFigure::Font valueLabelFont;
+    cFigure::Color valueLabelColor;
+    cFigure::Font seriesLabelFont;
+    cFigure::Color seriesLabelColor;
+    double nameRotation = NaN; // radians
+    bool displayTitle = true;
+    cFigure::Font titleFont;
+    cFigure::Color titleColor;
+    //@}
+
     std::map<std::pair<int, simsignal_t>, const StatisticVisualization *> statisticVisualizations;
+    std::map<int, BarSetVisualization *> barSetVisualizations; // keyed by source module id
 
   protected:
     virtual void initialize(int stage) override;
@@ -104,15 +143,33 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization);
     virtual void processSignal(cComponent *source, simsignal_t signal, std::function<void(cIListener *)> receiveSignal);
 
+    /** @name Bar chart mode */
+    //@{
+    // Creates the bar-chart visualization for one source (the concrete subclass builds the figure);
+    // returns nullptr if bar charts are not supported (e.g. the osg visualizer).
+    virtual BarSetVisualization *createBarSetVisualization(cComponent *source) { return nullptr; }
+    virtual BarSetVisualization *getBarSetVisualization(int moduleId);
+    virtual void addBarSetVisualization(BarSetVisualization *barSetVisualization);
+    virtual void removeBarSetVisualization(BarSetVisualization *barSetVisualization);
+    virtual void removeAllBarSetVisualizations();
+    // Records the last value of a signal for a (source, demux label) pair into its bar set.
+    virtual void processBarValue(cComponent *source, double value, cObject *details);
+    // Formats a bar value into its label using valueFormat.
+    virtual std::string formatBarValue(double value) const;
+    // Interpolates the bar color for a value on the barColors gradient (minValue..maxValue).
+    virtual cFigure::Color getBarColor(double value) const;
+    //@}
+
   public:
 #define PROCESS_SIGNAL(value) { processSignal(source, signal, [=] (cIListener *listener) { listener->receiveSignal(source, signal, value, details); }); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details) override { PROCESS_SIGNAL(b); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details) override { PROCESS_SIGNAL(l); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, uintval_t l, cObject *details) override { PROCESS_SIGNAL(l); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override { PROCESS_SIGNAL(d); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, const SimTime& t, cObject *details) override { PROCESS_SIGNAL(t); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details) override { PROCESS_SIGNAL(s); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override { PROCESS_SIGNAL(obj); }
+#define PROCESS_NUMERIC(value) { if (barChartMode) processBarValue(source, (double)(value), details); else PROCESS_SIGNAL(value); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details) override { PROCESS_NUMERIC(b); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details) override { PROCESS_NUMERIC(l); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, uintval_t l, cObject *details) override { PROCESS_NUMERIC(l); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override { PROCESS_NUMERIC(d); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, const SimTime& t, cObject *details) override { if (barChartMode) processBarValue(source, t.dbl(), details); else PROCESS_SIGNAL(t); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details) override { if (!barChartMode) PROCESS_SIGNAL(s); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override { if (!barChartMode) PROCESS_SIGNAL(obj); }
 };
 
 } // namespace visualizer
