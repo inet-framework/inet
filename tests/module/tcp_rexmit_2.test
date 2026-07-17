@@ -23,6 +23,15 @@ cmdenv-log-prefix="[%c]: "
 
 include ../../lib/defaults.ini
 
+# Pin the 2026-07 Linux-parity default flips (TLP, F-RTO, handshake-RTT seed)
+# to their historical values: this test's baselines predate them.
+*.*_tcp.tlpEnabled = false
+*.*_tcp.frtoEnabled = false
+*.*_tcp.seedRttFromHandshake = false
+**.tcp.tlpEnabled = false
+**.tcp.frtoEnabled = false
+**.tcp.seedRttFromHandshake = false
+
 %#--------------------------------------------------------------------------------------------------------------
 %file: postrun.pl
 open FILE, '<test.out';

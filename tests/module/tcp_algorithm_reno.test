@@ -58,6 +58,15 @@ description = "inet_TCP <---> inet_TCP with algorithms"
 *.configurator.config=xml("<config><interface hosts='*' address='192.168.1.x' netmask='255.255.255.0'/></config>")
 
 
+# Pin the 2026-07 Linux-parity default flips (TLP, F-RTO, handshake-RTT seed)
+# to their historical values: this test's baselines predate them.
+*.*_tcp.tlpEnabled = false
+*.*_tcp.frtoEnabled = false
+*.*_tcp.seedRttFromHandshake = false
+**.tcp.tlpEnabled = false
+**.tcp.frtoEnabled = false
+**.tcp.seedRttFromHandshake = false
+
 %#################################################################################################################
 
 %contains: results/General-#0.sca
