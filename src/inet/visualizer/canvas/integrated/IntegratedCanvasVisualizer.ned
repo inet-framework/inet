@@ -12,7 +12,6 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
 import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 import inet.visualizer.contract.IGateScheduleVisualizer;
-import inet.visualizer.contract.IIeee80211RateVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -131,7 +130,7 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,800");
         }
-        rateVisualizer: <default("Ieee80211RateCanvasVisualizer")> like IIeee80211RateVisualizer if typename != "" {
+        rateVisualizer: <default("Ieee80211RateVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:
                 @display("p=450,850");
         }
