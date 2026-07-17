@@ -67,8 +67,7 @@ void MacProtocolBase::sendUp(cMessage *message)
 {
     if (message->isPacket()) {
         emit(packetSentToUpperSignal, message);
-        yieldBeforePush();
-        upperLayerSink.pushPacket(check_and_cast<Packet *>(message));
+        deferrablePushPacket(upperLayerSink, check_and_cast<Packet *>(message));
     }
     else
         send(message, upperLayerOutGateId);
@@ -78,8 +77,7 @@ void MacProtocolBase::sendDown(cMessage *message)
 {
     if (message->isPacket()) {
         emit(packetSentToLowerSignal, message);
-        yieldBeforePush();
-        lowerLayerSink.pushPacket(check_and_cast<Packet *>(message));
+        deferrablePushPacket(lowerLayerSink, check_and_cast<Packet *>(message));
     }
     else
         send(message, lowerLayerOutGateId);

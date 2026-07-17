@@ -101,12 +101,37 @@ static void coroutineEventExecutor(cSimulation *sim, cEvent *event)
 
 void installCoroutineEventExecution()
 {
-    // cSimulation::getActiveSimulation()->setEventExecutor(coroutineEventExecutor);
+    cSimulation::getActiveSimulation()->setEventExecutor(coroutineEventExecutor);
 }
 
 void uninstallCoroutineEventExecution()
 {
-    // cSimulation::getActiveSimulation()->setEventExecutor(nullptr);
+    cSimulation::getActiveSimulation()->setEventExecutor(nullptr);
 }
+
+Register_GlobalConfigOption(CFGID_TRAJECTORY_VERIFICATION, "trajectory-verification", CFG_BOOL, "false", "Delivers each pushPacket() call that replaced a send() during the intra-node communication refactoring in a separate zero-delay event, recreating the pre-refactoring event trajectories for verification. The INET_TRAJECTORY_VERIFICATION environment variable also enables it.");
+
+class INET_API TrajectoryVerificationActivator : public cISimulationLifecycleListener
+{
+  public:
+    virtual void lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details) override
+    {
+        switch (eventType) {
+            case LF_PRE_NETWORK_SETUP:
+                if (cSimulation::getActiveEnvir()->getConfig()->getAsBool(CFGID_TRAJECTORY_VERIFICATION) || getenv("INET_TRAJECTORY_VERIFICATION") != nullptr)
+                    deferPushPacketForVerification = true;
+                break;
+            case LF_ON_RUN_END:
+                deferPushPacketForVerification = false;
+                break;
+            default:
+                break;
+        }
+    }
+};
+
+EXECUTE_ON_STARTUP(
+    cSimulation::getActiveEnvir()->addLifecycleListener(new TrajectoryVerificationActivator());
+);
 
 } // namespace inet

@@ -57,8 +57,7 @@ void Ospfv3Splitter::handleMessage(cMessage *msg)
     }
     else {
         if (strcmp(msg->getArrivalGate()->getBaseName(), "processIn") == 0) {
-            yieldBeforePush();
-            ipOutSink.pushPacket(check_and_cast<Packet *>(msg)); // A message from one of the processes
+            deferrablePushPacket(ipOutSink, check_and_cast<Packet *>(msg)); // A message from one of the processes
         }
         else if (strcmp(msg->getArrivalGate()->getBaseName(), "ipIn") == 0) {
             Packet *packet = check_and_cast<Packet *>(msg);
@@ -82,11 +81,9 @@ void Ospfv3Splitter::handleMessage(cMessage *msg)
                 if (it != this->interfaceToProcess.end()) {
                     if (it->second.second != -1) {
                         Packet *copy = packet->dup();
-                        yieldBeforePush();
-                        processOutSinks[it->second.second].pushPacket(copy);
+                        deferrablePushPacket(processOutSinks[it->second.second], copy);
                     }
-                    yieldBeforePush();
-                    processOutSinks[it->second.first].pushPacket(packet); // first is always there
+                    deferrablePushPacket(processOutSinks[it->second.first], packet); // first is always there
                 }
             }
             else {

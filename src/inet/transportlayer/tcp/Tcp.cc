@@ -133,16 +133,14 @@ void Tcp::sendToIp(Packet *segment)
     Enter_Method("sendToIp");
     take(segment);
     numSegmentsSent++;
-    yieldBeforePush();
-    ipSink.pushPacket(segment);
+    deferrablePushPacket(ipSink, segment);
 }
 
 void Tcp::sendToApp(cMessage *msg)
 {
     Enter_Method("sendToApp");
     take(msg);
-    yieldBeforePush();
-    appSink.pushPacket(check_and_cast<Packet *>(msg));
+    deferrablePushPacket(appSink, check_and_cast<Packet *>(msg));
 }
 
 void Tcp::handleUpperPacket(Packet *packet)

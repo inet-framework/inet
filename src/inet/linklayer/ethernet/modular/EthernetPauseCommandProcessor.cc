@@ -33,8 +33,7 @@ void EthernetPauseCommandProcessor::handleMessage(cMessage *msg)
             return;
         }
     }
-    yieldBeforePush();
-    outSink.pushPacket(check_and_cast<Packet *>(msg));
+    deferrablePushPacket(outSink, check_and_cast<Packet *>(msg));
 }
 
 void EthernetPauseCommandProcessor::handleSendPause(Request *msg, Ieee802PauseCommand *etherctrl)
@@ -58,8 +57,7 @@ void EthernetPauseCommandProcessor::handleSendPause(Request *msg, Ieee802PauseCo
 
     EV_INFO << "Sending Pause command " << frame << " to lower layer.\n";
     emit(pauseSentSignal, pauseUnits);
-    yieldBeforePush();
-    outSink.pushPacket(packet);
+    deferrablePushPacket(outSink, packet);
 }
 
 void EthernetPauseCommandProcessor::pushPacket(Packet *packet, const cGate *gate)

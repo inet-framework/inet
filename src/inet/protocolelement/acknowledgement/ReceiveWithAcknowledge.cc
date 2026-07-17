@@ -30,14 +30,12 @@ void ReceiveWithAcknowledge::pushPacket(Packet *dataPacket, const cGate *gate)
     Enter_Method("pushPacket");
     take(dataPacket);
     auto dataHeader = dataPacket->popAtFront<SequenceNumberHeader>();
-    yieldBeforePush();
-    consumer.pushPacket(dataPacket);
+    deferrablePushPacket(consumer, dataPacket);
     auto ackHeader = makeShared<AcknowledgeHeader>();
     ackHeader->setSequenceNumber(dataHeader->getSequenceNumber());
     auto ackPacket = new Packet("Ack", ackHeader);
     ackPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::acknowledge);
-    yieldBeforePush();
-    ackOutSink.pushPacket(ackPacket);
+    deferrablePushPacket(ackOutSink, ackPacket);
 }
 
 } // namespace inet

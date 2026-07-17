@@ -67,8 +67,7 @@ void Ieee8022Llc::handleMessageWhenUp(cMessage *msg)
 void Ieee8022Llc::processPacketFromHigherLayer(Packet *packet)
 {
     encapsulate(packet);
-    yieldBeforePush();
-    lowerLayerSink.pushPacket(packet);
+    deferrablePushPacket(lowerLayerSink, packet);
 }
 
 void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
@@ -121,8 +120,7 @@ bool Ieee8022Llc::deliverCopyToSockets(Packet *packet)
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
                 packetCopy->setKind(SOCKET_I_DATA);
-                yieldBeforePush();
-                upperLayerSink.pushPacket(packetCopy);
+                deferrablePushPacket(upperLayerSink, packetCopy);
                 isSent = true;
             }
         }
@@ -161,8 +159,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
     bool isSent = deliverCopyToSockets(packet);
 
     if (isDeliverableToUpperLayer(packet)) {
-        yieldBeforePush();
-        upperLayerSink.pushPacket(packet);
+        deferrablePushPacket(upperLayerSink, packet);
     }
     else {
         if (!isSent) {

@@ -295,14 +295,12 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             break;
         case Ipv6NeighbourCache::STALE:
             EV_INFO << "Reachability State is STALE.\n";
-            yieldBeforePush();
-            ipv6OutSink.pushPacket(packet);
+            deferrablePushPacket(ipv6OutSink, packet);
             initiateNeighbourUnreachabilityDetection(nce);
             break;
         case Ipv6NeighbourCache::REACHABLE:
             EV_INFO << "Next hop is REACHABLE, sending packet to next-hop address.";
-            yieldBeforePush();
-            ipv6OutSink.pushPacket(packet);
+            deferrablePushPacket(ipv6OutSink, packet);
             break;
         case Ipv6NeighbourCache::DELAY:
             if (nce->macAddress.isUnspecified()) {
@@ -312,8 +310,7 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             }
             else {
                 EV_INFO << "Next hop is in DELAY state, sending packet to next-hop address.";
-                yieldBeforePush();
-                ipv6OutSink.pushPacket(packet);
+                deferrablePushPacket(ipv6OutSink, packet);
             }
             break;
         case Ipv6NeighbourCache::PROBE:
@@ -324,8 +321,7 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
             }
             else {
                 EV_INFO << "Next hop is in PROBE state, sending packet to next-hop address.";
-                yieldBeforePush();
-                ipv6OutSink.pushPacket(packet);
+                deferrablePushPacket(ipv6OutSink, packet);
             }
             break;
         default:

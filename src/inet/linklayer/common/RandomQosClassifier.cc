@@ -24,8 +24,7 @@ void RandomQosClassifier::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(intrand(8));
-    yieldBeforePush();
-    outSink.pushPacket(packet);
+    deferrablePushPacket(outSink, packet);
 }
 
 void RandomQosClassifier::pushPacket(Packet *packet, const cGate *gate)

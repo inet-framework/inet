@@ -149,8 +149,7 @@ void TcpSocket::send(Packet *msg)
     auto packet = check_and_cast<Packet *>(msg);
     packet->addTagIfAbsent<SocketReq>()->setSocketId(connId);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-    yieldBeforePush();
-    sink.pushPacket(packet);
+    deferrablePushPacket(sink, packet);
 }
 
 void TcpSocket::sendCommand(Request *msg)

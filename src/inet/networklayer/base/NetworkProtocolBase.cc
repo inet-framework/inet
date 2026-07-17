@@ -55,16 +55,14 @@ void NetworkProtocolBase::sendUp(cMessage *message)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
-            yieldBeforePush();
-            transportSink.pushPacket(packetCopy);
+            deferrablePushPacket(transportSink, packetCopy);
             hasSocket = true;
         }
     }
     if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << protocol->getName() << "\n";
         emit(packetSentToUpperSignal, packet);
-        yieldBeforePush();
-        transportSink.pushPacket(packet);
+        deferrablePushPacket(transportSink, packet);
     }
     else {
         if (!hasSocket) {
@@ -89,8 +87,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
         else
             tags.removeTagIfPresent<DispatchProtocolReq>();
-        yieldBeforePush();
-        queueSink.pushPacket(check_and_cast<Packet *>(message));
+        deferrablePushPacket(queueSink, check_and_cast<Packet *>(message));
     }
     else {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
@@ -104,8 +101,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
                     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
                 else
                     tags.removeTagIfPresent<DispatchProtocolReq>();
-                yieldBeforePush();
-                queueSink.pushPacket(check_and_cast<Packet *>(duplicate));
+                deferrablePushPacket(queueSink, check_and_cast<Packet *>(duplicate));
             }
         }
         delete message;

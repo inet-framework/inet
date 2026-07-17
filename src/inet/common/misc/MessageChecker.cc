@@ -212,13 +212,11 @@ void MessageChecker::forwardMessage(cMessage *msg)
         delayToWait = endTransmissionTime - now;
     if (delayToWait > SIMTIME_ZERO)
         inet::scheduleAfter("forward", delayToWait, [=] () {
-            yieldBeforePush();
-            outSink.pushPacket(check_and_cast<Packet *>(msg));
+            deferrablePushPacket(outSink, check_and_cast<Packet *>(msg));
         });
     else {
         // forward directly instead of through a zero-delay event
-        yieldBeforePush();
-        outSink.pushPacket(check_and_cast<Packet *>(msg));
+        deferrablePushPacket(outSink, check_and_cast<Packet *>(msg));
     }
 }
 

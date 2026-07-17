@@ -55,8 +55,7 @@ void QosClassifier::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(getUserPriority(msg));
-    yieldBeforePush();
-    outSink.pushPacket(packet);
+    deferrablePushPacket(outSink, packet);
 }
 
 int QosClassifier::parseUserPriority(const char *text)

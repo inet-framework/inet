@@ -437,8 +437,7 @@ void EthernetMacPhy::processReceivedDataFrame(Packet *packet, const Ptr<const Et
     emit(packetSentToUpperSignal, packet);
     // pass up to upper layer
     EV_INFO << "Sending packet to upper layer" << EV_FIELD(packet) << EV_ENDL;
-    yieldBeforePush();
-    upperLayerSink.pushPacket(packet);
+    deferrablePushPacket(upperLayerSink, packet);
 }
 
 void EthernetMacPhy::processPauseCommand(int pauseUnits)

@@ -31,8 +31,7 @@ void Ieee8021qSocket::sendOut(Packet *packet)
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
     if (packet->findTag<DispatchProtocolReq>() == nullptr)
         packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
-    yieldBeforePush();
-    sink.pushPacket(packet);
+    deferrablePushPacket(sink, packet);
 }
 
 void Ieee8021qSocket::bind(const Protocol *protocol, int vlanId, bool steal)

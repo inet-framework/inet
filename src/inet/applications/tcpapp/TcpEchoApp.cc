@@ -53,8 +53,7 @@ void TcpEchoApp::sendDown(Packet *msg)
     bytesSent += msg->getByteLength();
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
     msg->getTag<SocketReq>();
-    yieldBeforePush();
-    socketSink.pushPacket(msg);
+    deferrablePushPacket(socketSink, msg);
 }
 
 void TcpEchoApp::finish()

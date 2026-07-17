@@ -37,13 +37,11 @@ void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, const cGate *g
         packetCopy->setKind(SOCKET_I_DATA);
         packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(socket->socketId);
         EV_INFO << "Passing up packet to socket" << EV_FIELD(socket) << EV_FIELD(packet) << EV_ENDL;
-        yieldBeforePush();
-        upperLayerSink.pushPacket(packetCopy);
+        deferrablePushPacket(upperLayerSink, packetCopy);
     }
 
     // TODO mark packet when sent to any socket
-    yieldBeforePush();
-    consumer.pushPacket(packet);
+    deferrablePushPacket(consumer, packet);
 }
 
 } // namespace inet

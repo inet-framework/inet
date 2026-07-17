@@ -79,8 +79,7 @@ void TcpGenericServerApp::sendBack(cMessage *msg)
         emit(packetSentSignal, packet);
         EV_INFO << "sending \"" << packet->getName() << "\" to TCP, " << packet->getByteLength() << " bytes\n";
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-        yieldBeforePush();
-        socketOutSink.pushPacket(packet);
+        deferrablePushPacket(socketOutSink, packet);
     }
     else {
         // socket commands are direct method calls into TCP

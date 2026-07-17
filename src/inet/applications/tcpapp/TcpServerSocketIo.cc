@@ -60,8 +60,7 @@ void TcpServerSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, boo
     ASSERT(socket == this->socket);
     bytesRcvd += packet->getByteLength();
     packet->removeTag<SocketInd>();
-    yieldBeforePush();
-    trafficSink.pushPacket(packet);
+    deferrablePushPacket(trafficSink, packet);
     sendOrScheduleReadCommandIfNeeded();
 }
 

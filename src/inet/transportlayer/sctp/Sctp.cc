@@ -458,8 +458,7 @@ void Sctp::sendShutdownCompleteFromMain(SctpHeader *sctpmsg, L3Address fromAddr,
 void Sctp::send_to_ip(Packet *msg)
 {
     EV_INFO << "send packet " << msg << " to IP\n";
-    yieldBeforePush();
-    ipSink.pushPacket(msg);
+    deferrablePushPacket(ipSink, msg);
 }
 
 std::string Sctp::getSctpStatusString() const

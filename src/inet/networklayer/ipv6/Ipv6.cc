@@ -865,8 +865,7 @@ void Ipv6::localDeliverFinish(Packet *packet)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
-            yieldBeforePush();
-            transportSink.pushPacket(packetCopy);
+            deferrablePushPacket(transportSink, packetCopy);
             hasSocket = true;
         }
     }
@@ -890,8 +889,7 @@ void Ipv6::localDeliverFinish(Packet *packet)
     else if (hasUpperProtocol(protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
-        yieldBeforePush();
-        transportSink.pushPacket(packet);
+        deferrablePushPacket(transportSink, packet);
     }
     else if (!hasSocket) {
         // send ICMP Destination Unreacheable error: protocol unavailable
@@ -918,8 +916,7 @@ void Ipv6::handleReceivedIcmp(Packet *msg)
     }
     else {
         EV_INFO << "ICMPv6 packet: passing it to ICMPv6 module\n";
-        yieldBeforePush();
-        transportSink.pushPacket(msg);
+        deferrablePushPacket(transportSink, msg);
     }
 }
 
@@ -1170,8 +1167,7 @@ void Ipv6::sendDatagramToOutput(Packet *packet, const NetworkInterface *destIE, 
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
-    yieldBeforePush();
-    queueSink.pushPacket(packet);
+    deferrablePushPacket(queueSink, packet);
 }
 
 bool Ipv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address& nextHop,

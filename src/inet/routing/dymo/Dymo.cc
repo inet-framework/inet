@@ -385,8 +385,7 @@ void Dymo::processRreqHolddownTimer(RreqHolddownTimer *message)
 void Dymo::sendUdpPacket(cPacket *packet)
 {
     numSent++;
-    yieldBeforePush();
-    ipOutSink.pushPacket(check_and_cast<Packet *>(packet));
+    deferrablePushPacket(ipOutSink, check_and_cast<Packet *>(packet));
 }
 
 void Dymo::scheduleJitterTimerPacket(cPacket *packet, double delay)

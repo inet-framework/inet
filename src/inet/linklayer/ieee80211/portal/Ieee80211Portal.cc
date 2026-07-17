@@ -45,15 +45,13 @@ void Ieee80211Portal::handleMessage(cMessage *message)
     if (message->arrivedOn("upperLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         encapsulate(packet);
-        yieldBeforePush();
-        lowerLayerSink.pushPacket(packet);
+        deferrablePushPacket(lowerLayerSink, packet);
     }
     else if (message->arrivedOn("lowerLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         decapsulate(packet);
         if (upperLayerOutConnected) {
-            yieldBeforePush();
-            upperLayerSink.pushPacket(packet);
+            deferrablePushPacket(upperLayerSink, packet);
         }
         else
             delete packet;
@@ -131,14 +129,12 @@ void Ieee80211Portal::pushPacket(Packet *packet, const cGate *gate)
     take(packet);
     if (gate->isName("upperLayerIn")) {
         encapsulate(packet);
-        yieldBeforePush();
-        lowerLayerSink.pushPacket(packet);
+        deferrablePushPacket(lowerLayerSink, packet);
     }
     else if (gate->isName("lowerLayerIn")) {
         decapsulate(packet);
         if (upperLayerOutConnected) {
-            yieldBeforePush();
-            upperLayerSink.pushPacket(packet);
+            deferrablePushPacket(upperLayerSink, packet);
         }
         else
             delete packet;

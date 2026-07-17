@@ -289,8 +289,7 @@ void Ppp::handleLowerPacket(Packet *packet)
         numRcvdOK++;
         emit(packetSentToUpperSignal, packet);
         EV_INFO << "Sending packet to upper layer" << EV_FIELD(packet) << EV_ENDL;
-        yieldBeforePush();
-        upperLayerSink.pushPacket(packet);
+        deferrablePushPacket(upperLayerSink, packet);
     }
 }
 

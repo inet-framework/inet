@@ -31,15 +31,13 @@ void Ieee80211LlcEpd::handleMessage(cMessage *message)
     if (message->arrivedOn("upperLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         encapsulate(packet);
-        yieldBeforePush();
-        lowerLayerSink.pushPacket(packet);
+        deferrablePushPacket(lowerLayerSink, packet);
     }
     else if (message->arrivedOn("lowerLayerIn")) {
         auto packet = check_and_cast<Packet *>(message);
         decapsulate(packet);
         if (packet->getTag<PacketProtocolTag>()->getProtocol() != nullptr) {
-            yieldBeforePush();
-            upperLayerSink.pushPacket(packet);
+            deferrablePushPacket(upperLayerSink, packet);
         }
         else {
             EV_WARN << "Unknown protocol, dropping packet\n";

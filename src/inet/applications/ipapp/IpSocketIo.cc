@@ -65,8 +65,7 @@ void IpSocketIo::socketDataArrived(Ipv4Socket *socket, Packet *packet)
     emit(packetReceivedSignal, packet);
     numReceived++;
     packet->removeTag<SocketInd>();
-    yieldBeforePush();
-    trafficOutSink.pushPacket(packet);
+    deferrablePushPacket(trafficOutSink, packet);
 }
 
 void IpSocketIo::socketClosed(Ipv4Socket *socket)

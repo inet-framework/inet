@@ -213,8 +213,7 @@ void Ieee8021dRelay::updatePeerAddress(NetworkInterface *incomingInterface, MacA
 void Ieee8021dRelay::sendUp(Packet *packet)
 {
     EV_INFO << "Sending frame to the upper layer" << EV_FIELD(packet) << EV_ENDL;
-    yieldBeforePush();
-    upperLayerSink.pushPacket(packet);
+    deferrablePushPacket(upperLayerSink, packet);
 }
 
 void Ieee8021dRelay::handleStartOperation(LifecycleOperation *operation)

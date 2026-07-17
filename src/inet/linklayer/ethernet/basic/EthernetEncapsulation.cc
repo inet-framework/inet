@@ -184,8 +184,7 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
     protocolTag->setProtocol(&Protocol::ethernetMac);
     packet->removeTagIfPresent<DispatchProtocolReq>();
     EV_INFO << "Sending packet to lower layer" << EV_FIELD(packet) << EV_ENDL;
-    yieldBeforePush();
-    lowerLayerSink.pushPacket(packet);
+    deferrablePushPacket(lowerLayerSink, packet);
 }
 
 void EthernetEncapsulation::processPacketFromMac(Packet *packet)
@@ -233,8 +232,7 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
             packetCopy->setKind(SOCKET_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
             EV_INFO << "Sending packet to socket" << EV_FIELD(socketId, it.first) << EV_FIELD(packet, packetCopy) << EV_ENDL;
-            yieldBeforePush();
-            upperLayerSink.pushPacket(packetCopy);
+            deferrablePushPacket(upperLayerSink, packetCopy);
             steal |= socket->steal;
         }
     }
@@ -246,8 +244,7 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
 
         // pass up to higher layers.
         EV_INFO << "Sending packet to upper layer" << EV_FIELD(packet) << EV_ENDL;
-        yieldBeforePush();
-        upperLayerSink.pushPacket(packet);
+        deferrablePushPacket(upperLayerSink, packet);
     }
     else {
         EV_WARN << "Unknown protocol, dropping packet\n";
@@ -288,8 +285,7 @@ void EthernetEncapsulation::handleSendPause(cMessage *msg)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
-    yieldBeforePush();
-    lowerLayerSink.pushPacket(packet);
+    deferrablePushPacket(lowerLayerSink, packet);
 
     emit(pauseSentSignal, pauseUnits);
     totalPauseSent++;

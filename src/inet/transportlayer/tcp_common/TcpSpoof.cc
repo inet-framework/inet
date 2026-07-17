@@ -74,8 +74,7 @@ void TcpSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
     addresses->setDestAddress(dest);
 
     emit(packetSentSignal, pk);
-    yieldBeforePush();
-    ipOutSink.pushPacket(pk);
+    deferrablePushPacket(ipOutSink, pk);
 }
 
 unsigned long TcpSpoof::chooseInitialSeqNum()

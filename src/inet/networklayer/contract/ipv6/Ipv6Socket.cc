@@ -77,8 +77,7 @@ void Ipv6Socket::send(Packet *packet)
 {
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    yieldBeforePush();
-    sink.pushPacket(packet);
+    deferrablePushPacket(sink, packet);
 }
 
 void Ipv6Socket::sendTo(Packet *packet, Ipv6Address destAddress)

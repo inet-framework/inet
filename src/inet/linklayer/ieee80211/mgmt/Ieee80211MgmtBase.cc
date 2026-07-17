@@ -86,8 +86,7 @@ void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
     ASSERT(isUp());
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mgmt);
-    yieldBeforePush();
-    macOutSink.pushPacket(frame);
+    deferrablePushPacket(macOutSink, frame);
 }
 
 void Ieee80211MgmtBase::dropManagementFrame(Packet *frame)

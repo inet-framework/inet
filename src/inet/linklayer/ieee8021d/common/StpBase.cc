@@ -71,8 +71,7 @@ void StpBase::sendOut(Packet *packet, int interfaceId, const MacAddress& destAdd
     auto macAddressReq = packet->addTag<MacAddressReq>();
     macAddressReq->setSrcAddress(bridgeAddress);
     macAddressReq->setDestAddress(destAddress);
-    yieldBeforePush();
-    relaySink.pushPacket(packet);
+    deferrablePushPacket(relaySink, packet);
 }
 
 std::string StpBase::getStpStatusString() const

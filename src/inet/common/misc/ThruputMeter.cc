@@ -41,8 +41,7 @@ void ThruputMeter::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     updateStats(simTime(), packet->getBitLength());
-    yieldBeforePush();
-    outSink.pushPacket(packet);
+    deferrablePushPacket(outSink, packet);
 }
 
 void ThruputMeter::pushPacket(Packet *packet, const cGate *gate)

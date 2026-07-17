@@ -496,8 +496,7 @@ void Gptp::sendPacketToNic(Packet *packet, int portId)
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
-    yieldBeforePush();
-    socketSink.pushPacket(packet);
+    deferrablePushPacket(socketSink, packet);
 }
 
 const GptpBase *Gptp::extractGptpMessage(Packet *packet)

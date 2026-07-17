@@ -49,8 +49,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
         EV << "Encapsulating\n";
         encapsulate(packet);
         EV << "SEnding\n";
-        yieldBeforePush();
-        lowerLayerSink.pushPacket(packet);
+        deferrablePushPacket(lowerLayerSink, packet);
     }
     else {
         auto packet = check_and_cast<Packet *>(msg);
@@ -71,16 +70,14 @@ void Ipv4Encap::handleMessage(cMessage *msg)
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
 //                emit(packetSentToUpperSignal, packetCopy);
-                yieldBeforePush();
-                upperLayerSink.pushPacket(packetCopy);
+                deferrablePushPacket(upperLayerSink, packetCopy);
                 hasSocket = true;
             }
         }
         if (contains(upperProtocols, protocol)) {
             EV_INFO << "Passing up to protocol " << protocol << "\n";
 //            emit(packetSentToUpperSignal, packet);
-            yieldBeforePush();
-            upperLayerSink.pushPacket(packet);
+            deferrablePushPacket(upperLayerSink, packet);
         }
         else if (hasSocket) {
             delete packet;
@@ -91,8 +88,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
 //            const NetworkInterface* fromIE = getSourceInterface(packet);
 //            sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         }
-        yieldBeforePush();
-        upperLayerSink.pushPacket(packet);
+        deferrablePushPacket(upperLayerSink, packet);
     }
 }
 

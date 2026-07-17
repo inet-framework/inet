@@ -254,8 +254,7 @@ void LinkStateRouting::sendToIP(Packet *msg, Ipv4Address destAddr)
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(routerId);
-    yieldBeforePush();
-    ipOutSink.pushPacket(msg);
+    deferrablePushPacket(ipOutSink, msg);
 }
 
 void LinkStateRouting::pushPacket(Packet *packet, const cGate *gate)

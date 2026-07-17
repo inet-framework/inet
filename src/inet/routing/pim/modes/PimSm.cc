@@ -1695,8 +1695,7 @@ void PimSm::sendToIP(Packet *packet, L3Address srcAddr, L3Address destAddr, int 
     packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(ttl);
     numSent++;
-    yieldBeforePush();
-    ipSink.pushPacket(packet);
+    deferrablePushPacket(ipSink, packet);
 }
 
 /**
@@ -1738,8 +1737,7 @@ void PimSm::forwardMulticastData(Packet *data, int outInterfaceId)
     addrTag->setDestAddress(destAddr);
     data->addTagIfAbsent<HopLimitReq>()->setHopLimit(MAX_TTL - 2); // one minus for source DR router and one for RP router // TODO specification???
     data->trim();
-    yieldBeforePush();
-    ipSink.pushPacket(data);
+    deferrablePushPacket(ipSink, data);
 }
 
 //============================================================================

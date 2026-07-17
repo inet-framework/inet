@@ -81,8 +81,7 @@ void L3Socket::send(Packet *packet)
 {
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
     packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    yieldBeforePush();
-    sink.pushPacket(packet);
+    deferrablePushPacket(sink, packet);
 }
 
 void L3Socket::sendTo(Packet *packet, L3Address destAddress)

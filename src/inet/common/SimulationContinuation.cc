@@ -10,7 +10,7 @@
 
 namespace inet {
 
-bool yieldBeforePushPacket = false;
+bool deferPushPacketForVerification = false;
 
 // ---- sleepSimulationTime ----
 

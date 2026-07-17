@@ -73,8 +73,7 @@ void TcpClientSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, boo
     Enter_Method("socketDataArrived");
     bytesRcvd += packet->getByteLength();
     packet->removeTag<SocketInd>();
-    yieldBeforePush();
-    trafficSink.pushPacket(packet);
+    deferrablePushPacket(trafficSink, packet);
     sendOrScheduleReadCommandIfNeeded();
 }
 

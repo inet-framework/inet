@@ -65,8 +65,7 @@ void Loopback::handleUpperPacket(Packet *packet)
     packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
     emit(packetSentToUpperSignal, packet);
-    yieldBeforePush();
-    upperLayerSink.pushPacket(packet);
+    deferrablePushPacket(upperLayerSink, packet);
 }
 
 cGate *Loopback::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)

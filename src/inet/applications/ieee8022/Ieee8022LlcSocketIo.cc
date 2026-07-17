@@ -100,8 +100,7 @@ void Ieee8022LlcSocketIo::socketDataArrived(Ieee8022LlcSocket *socket, Packet *p
     EV_INFO << "Received packet: " << packet << endl;
     numReceived++;
     packet->removeTag<SocketInd>();
-    yieldBeforePush();
-    trafficOutSink.pushPacket(packet);
+    deferrablePushPacket(trafficOutSink, packet);
 }
 
 void Ieee8022LlcSocketIo::socketClosed(Ieee8022LlcSocket *socket)

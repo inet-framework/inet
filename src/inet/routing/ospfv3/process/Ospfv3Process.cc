@@ -824,8 +824,7 @@ void Ospfv3Process::sendPacket(Packet *packet, Ipv6Address destination, const ch
             break;
     }
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
-    yieldBeforePush();
-    splitterOutSink.pushPacket(packet);
+    deferrablePushPacket(splitterOutSink, packet);
 } // sendPacket
 
 Ospfv3Lsa *Ospfv3Process::findLSA(LSAKeyType lsaKey, Ipv4Address areaID, int instanceID)

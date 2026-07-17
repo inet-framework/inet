@@ -39,8 +39,7 @@ void EthernetSocket::sendOut(Packet *packet)
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
     packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
-    yieldBeforePush();
-    sink.pushPacket(packet);
+    deferrablePushPacket(sink, packet);
 }
 
 void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal)

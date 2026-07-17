@@ -120,8 +120,7 @@ void ShortcutRadio::receiveFromPeer(Packet *packet)
         packetProtocolTag->setProtocol(header->getPayloadProtocol());
     }
     emit(packetSentToUpperSignal, packet);
-    yieldBeforePush();
-    upperLayerSink.pushPacket(packet);
+    deferrablePushPacket(upperLayerSink, packet);
 }
 
 } // namespace physicallayer

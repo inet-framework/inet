@@ -167,8 +167,7 @@ void EtherTrafGen::sendBurstPackets()
 
         EV_INFO << "Send packet `" << msgname << "' dest=" << destMacAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
         emit(packetSentSignal, datapacket);
-        yieldBeforePush();
-        outSink.pushPacket(datapacket);
+        deferrablePushPacket(outSink, datapacket);
         packetsSent++;
     }
 }

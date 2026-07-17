@@ -368,8 +368,7 @@ void MessageHandler::sendPacket(Packet *packet, Ipv4Address destination, Ospfv2I
 
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     check_and_cast<Ospfv2 *>(ospfModule)->countSentPacket();
-    yieldBeforePush();
-    ipSink.pushPacket(packet);
+    deferrablePushPacket(ipSink, packet);
 }
 
 void MessageHandler::clearTimer(cMessage *timer)

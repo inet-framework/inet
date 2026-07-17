@@ -173,8 +173,7 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
 
     emit(sentHelloPkSignal, pk);
 
-    yieldBeforePush();
-    ipSink.pushPacket(pk);
+    deferrablePushPacket(ipSink, pk);
 }
 
 void PimBase::processHelloPacket(Packet *packet)

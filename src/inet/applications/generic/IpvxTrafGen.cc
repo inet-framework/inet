@@ -161,8 +161,7 @@ void IpvxTrafGen::sendPacket()
     EV_INFO << "Sending packet: ";
     printPacket(packet);
     emit(packetSentSignal, packet);
-    yieldBeforePush();
-    ipSink.pushPacket(packet);
+    deferrablePushPacket(ipSink, packet);
     numSent++;
 }
 

@@ -105,8 +105,7 @@ void VirtualTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
     Enter_Method("socketDataArrived");
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
-    yieldBeforePush();
-    upperLayerSink.pushPacket(packet);
+    deferrablePushPacket(upperLayerSink, packet);
 }
 #endif
 
@@ -116,8 +115,7 @@ void VirtualTunnel::socketDataArrived(Ieee8021qSocket *socket, Packet *packet)
     Enter_Method("socketDataArrived");
     packet->removeTag<SocketInd>();
     packet->getTagForUpdate<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
-    yieldBeforePush();
-    upperLayerSink.pushPacket(packet);
+    deferrablePushPacket(upperLayerSink, packet);
 }
 #endif
 

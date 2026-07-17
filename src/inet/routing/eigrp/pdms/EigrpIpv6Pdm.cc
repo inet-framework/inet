@@ -431,8 +431,7 @@ void EigrpIpv6Pdm::processMsgFromRtp(cMessage *msg)
     pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     pk->addTagIfAbsent<L3AddressReq>()->setSrcAddress(ift->getInterfaceById(destIface)->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress());
     pk->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
-    yieldBeforePush();
-    splitterOutSink.pushPacket(pk);
+    deferrablePushPacket(splitterOutSink, pk);
 }
 
 bool EigrpIpv6Pdm::getDestIpAddress(int destNeigh, Ipv6Address *resultAddress)

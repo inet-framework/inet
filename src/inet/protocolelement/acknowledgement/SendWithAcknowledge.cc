@@ -55,8 +55,7 @@ void SendWithAcknowledge::processPacket(Packet *packet)
         header->setSequenceNumber(sequenceNumber);
         packet->insertAtFront(header);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::withAcknowledge);
-        yieldBeforePush();
-        consumer.pushPacket(packet);
+        deferrablePushPacket(consumer, packet);
         auto timer = new cMessage("AcknowledgeTimer");
         timer->setKind(sequenceNumber);
         timer->setContextPointer(packet);

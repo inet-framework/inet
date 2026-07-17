@@ -905,16 +905,14 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Sending packet to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
-            yieldBeforePush();
-            transportSink.pushPacket(packetCopy);
+            deferrablePushPacket(transportSink, packetCopy);
             hasSocket = true;
         }
     }
     EV_INFO << "Sending packet to protocol" << EV_FIELD(protocol, *protocol) << EV_FIELD(packet) << EV_ENDL;
     if (hasUpperProtocol(protocol)) {
         emit(packetSentToUpperSignal, packet);
-        yieldBeforePush();
-        transportSink.pushPacket(packet);
+        deferrablePushPacket(transportSink, packet);
         numLocalDeliver++;
     }
     else if (hasSocket) {
@@ -1270,8 +1268,7 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>())
         EV_INFO << EV_FIELD(protocol, *dispatchProtocolReq->getProtocol());
     EV_INFO << EV_FIELD(interface, networkInterface->getInterfaceName()) << EV_FIELD(packet) << EV_ENDL;
-    yieldBeforePush();
-    queueSink.pushPacket(packet);
+    deferrablePushPacket(queueSink, packet);
 }
 
 // NetFilter:

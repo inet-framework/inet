@@ -105,8 +105,7 @@ void EthernetSocketIo::socketDataArrived(EthernetSocket *socket, Packet *packet)
     emit(packetReceivedSignal, packet);
     numReceived++;
     packet->removeTag<SocketInd>();
-    yieldBeforePush();
-    trafficSink.pushPacket(packet);
+    deferrablePushPacket(trafficSink, packet);
 }
 
 void EthernetSocketIo::socketErrorArrived(EthernetSocket *socket, Indication *indication)

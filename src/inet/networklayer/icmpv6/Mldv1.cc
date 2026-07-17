@@ -491,8 +491,7 @@ void Mldv1::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& des
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);   // RFC 2710 §3: hop limit = 1
-    yieldBeforePush();
-    ipSink.pushPacket(msg);
+    deferrablePushPacket(ipSink, msg);
 }
 
 // --- Lifecycle ---

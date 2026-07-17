@@ -170,8 +170,7 @@ void Arp::sendArpRequest(const NetworkInterface *ie, Ipv4Address ipAddress)
     // send out
     EV_INFO << "Sending " << packet << " to network protocol.\n";
     emit(arpRequestSentSignal, packet);
-    yieldBeforePush();
-    ifOutSink.pushPacket(packet);
+    deferrablePushPacket(ifOutSink, packet);
     numRequestsSent++;
 }
 
@@ -337,8 +336,7 @@ void Arp::processArpPacket(Packet *packet)
                 // send out
                 EV_INFO << "Sending " << outPk << " to network protocol.\n";
                 emit(arpReplySentSignal, outPk);
-                yieldBeforePush();
-                ifOutSink.pushPacket(outPk);
+                deferrablePushPacket(ifOutSink, outPk);
                 numRepliesSent++;
                 break;
             }
@@ -479,8 +477,7 @@ void Arp::sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4
     // updateARPCache(entry, srcAddr); //FIXME
 
     // send out
-    yieldBeforePush();
-    ifOutSink.pushPacket(packet);
+    deferrablePushPacket(ifOutSink, packet);
 }
 
 // A client should send out 'ARP Probe' to probe the newly received IPv4 address.
@@ -513,8 +510,7 @@ void Arp::sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Addre
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
 
     // send out
-    yieldBeforePush();
-    ifOutSink.pushPacket(packet);
+    deferrablePushPacket(ifOutSink, packet);
 }
 
 void Arp::pushPacket(Packet *packet, const cGate *gate)

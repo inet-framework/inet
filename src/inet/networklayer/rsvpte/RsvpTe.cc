@@ -1911,8 +1911,7 @@ void RsvpTe::sendToIP(Packet *msg, Ipv4Address destAddr)
     msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::rsvpTe);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
-    yieldBeforePush();
-    ipOutSink.pushPacket(msg);
+    deferrablePushPacket(ipOutSink, msg);
 }
 
 void RsvpTe::pushPacket(Packet *packet, const cGate *gate)

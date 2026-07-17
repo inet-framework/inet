@@ -69,8 +69,7 @@ void MacRelayUnitBase::sendPacket(Packet *packet, const MacAddress& destinationA
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
     emit(packetSentToLowerSignal, packet);
-    yieldBeforePush();
-    lowerLayerSink.pushPacket(packet);
+    deferrablePushPacket(lowerLayerSink, packet);
 }
 
 void MacRelayUnitBase::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId)

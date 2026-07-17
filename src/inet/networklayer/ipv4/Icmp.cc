@@ -371,8 +371,7 @@ void Icmp::sendToIP(Packet *msg)
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
-    yieldBeforePush();
-    ipSink.pushPacket(msg);
+    deferrablePushPacket(ipSink, msg);
 }
 
 void Icmp::insertChecksum(ChecksumMode checksumMode, const Ptr<IcmpHeader>& icmpHeader, Packet *packet)

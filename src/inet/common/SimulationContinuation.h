@@ -8,6 +8,7 @@
 #ifndef __INET_SIMULATIONCONTINUATION_H
 #define __INET_SIMULATIONCONTINUATION_H
 
+#include "inet/common/FunctionalEvent.h"
 #include "inet/common/INETDefs.h"
 
 namespace inet {
@@ -50,15 +51,29 @@ class INET_API SimulationContextSwitchingEvent : public cEvent
 };
 
 /**
- * When enabled, inserts a yield (sleepSimulationTime(0)) before each new pushPacket()
- * call that replaced a send() during the intra-node communication refactoring.
- * This recreates the old event-by-event processing for trajectory verification.
+ * When enabled, each pushPacket() call that replaced a send() during the
+ * intra-node communication refactoring delivers its packet in a separate
+ * zero-delay FunctionalEvent while the caller continues immediately. This
+ * recreates the pre-refactoring send() semantics event by event, for
+ * trajectory verification (see the trajectory-verification config option).
  */
-INET_API extern bool yieldBeforePushPacket;
+INET_API extern bool deferPushPacketForVerification;
 
-inline void yieldBeforePush() {
-    if (yieldBeforePushPacket)
-        sleepSimulationTime(0);
+template<typename TSink, typename TPacket>
+inline void deferrablePushPacket(TSink& sink, TPacket *packet)
+{
+    if (!deferPushPacketForVerification)
+        sink.pushPacket(packet);
+    else {
+        // Deliver in a separate event, like the pre-refactoring send() did. The
+        // caller's module context is restored around the deferred push so the
+        // sink's Enter_Method sees the same caller as a direct call would.
+        auto context = cSimulation::getActiveSimulation()->getContext();
+        scheduleAt(packet->getName(), simTime(), [&sink, packet, context]() {
+            cContextSwitcher switcher(context);
+            sink.pushPacket(packet);
+        });
+    }
 }
 
 } // namespace inet

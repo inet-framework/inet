@@ -343,8 +343,7 @@ void SctpSocket::send(Packet *packet)
     packet->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
     if (interfaceIdToTun != -1)
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceIdToTun);
-    yieldBeforePush();
-    sink.pushPacket(packet);
+    deferrablePushPacket(sink, packet);
 }
 
 void SctpSocket::receive(int sid, int numMsgs)

@@ -427,8 +427,7 @@ void EigrpIpv4Pdm::processMsgFromRtp(cMessage *msg)
     pk->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddress);
     pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     pk->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
-    yieldBeforePush();
-    splitterOutSink.pushPacket(pk);
+    deferrablePushPacket(splitterOutSink, pk);
 }
 
 bool EigrpIpv4Pdm::getDestIpAddress(int destNeigh, Ipv4Address *resultAddress)

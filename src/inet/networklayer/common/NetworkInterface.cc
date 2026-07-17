@@ -234,8 +234,7 @@ void NetworkInterface::pushPacket(Packet *packet, const cGate *gate)
     else if (gate == upperLayerOut) {
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
         if (upperLayerOutConsumer != nullptr) {
-            yieldBeforePush();
-            upperLayerOutConsumer.pushPacket(packet);
+            deferrablePushPacket(upperLayerOutConsumer, packet);
         }
         else {
             EV_WARN << "Network interface has no upper layer connection, dropping packet" << EV_FIELD(packet) << EV_ENDL;

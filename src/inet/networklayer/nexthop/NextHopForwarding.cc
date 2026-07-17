@@ -577,8 +577,7 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
-            yieldBeforePush();
-            transportSink.pushPacket(packetCopy);
+            deferrablePushPacket(transportSink, packetCopy);
             hasSocket = true;
         }
     }
@@ -586,8 +585,7 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
     if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
-        yieldBeforePush();
-        transportSink.pushPacket(packet);
+        deferrablePushPacket(transportSink, packet);
         numLocalDeliver++;
     }
     else {
@@ -626,8 +624,7 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const NetworkInte
             datagram->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
         else
             datagram->removeTagIfPresent<DispatchProtocolReq>();
-        yieldBeforePush();
-        queueSink.pushPacket(datagram);
+        deferrablePushPacket(queueSink, datagram);
         return;
     }
 
@@ -655,8 +652,7 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const NetworkInte
             datagram->removeTagIfPresent<DispatchProtocolReq>();
 
         // send out
-        yieldBeforePush();
-        queueSink.pushPacket(datagram);
+        deferrablePushPacket(queueSink, datagram);
     }
 }
 

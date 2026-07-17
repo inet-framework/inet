@@ -749,6 +749,58 @@ LOST the whole update (store never written). (3) is FIXED as an uncommitted one-
 `getattr` guard in `~/workspace/opp_repl` `test/fingerprint/task.py` — needs the
 user's review/commit; (1)+(2) remain open in opp_repl.
 
+### 4.10 Divergence deep-dive: trajectory-verification mode (2026-07-17, user-directed)
+
+Goal (user): for each divergent subject find a minimal, easy-to-reason-about change on
+either side that reproduces the exact fingerprint; fall back to statistical comparison
+where impossible. Buckets created (§4.9 list); decision: try the dormant D9 machinery
+first as the one-mechanism-explains-many candidate.
+
+**Coroutine-yield mode (rejected):** activated via new `trajectory-verification` config
+option / `INET_TRAJECTORY_VERIFICATION` env (lifecycle listener, was in
+CoroutineEventExecution.cc). Full run: 433 PASS / 51 FAIL / 364 ERROR. Aligned 19/80
+divergent subjects (proving pure-interleaving causes) but: (a) ~306 subjects crash
+"Cannot schedule message X, currently contained/owned by globalOwningContext" +
+24 "must be called with a simple module in context" — the executor does not
+save/restore owner/module context across suspend/resume; (b) 9 subjects crash on
+init-time yields (no coroutine exists during callInitialize); (c) 8 EthernetPlca FSM
+reentrancy crashes; (d) 11 previously-PASSing subjects diverge — suspension displaces
+the handler tail, which the old send() semantics never did (send deferred the PACKET,
+not the control flow). Verdict: semantically unfaithful by construction.
+
+**Deferred-push mode (adopted, user decision):** survey showed ALL 146
+`yieldBeforePush(); <sink>.pushPacket(<pkt>);` sites are uniform and NOTHING else uses
+sleepSimulationTime/coroutines. Replaced every site (mechanical script, 91 files) with
+`deferrablePushPacket(sink, pkt)` (SimulationContinuation.h): flag off → plain push
+(behavior-neutral, verified by a no-mode rerun matching §4.9 exactly); flag on → the
+push runs in its own zero-delay FunctionalEvent (named after the packet, caller's
+module context restored inside) while the caller continues — exact pre-refactoring
+send() semantics. `yieldBeforePush()` deleted; flag renamed
+`deferPushPacketForVerification`; coroutine machinery now has ZERO users (D9 strip
+input). Full run with mode ON: **796 PASS / 41 FAIL / 11 ERROR**.
+
+Cross-tab vs the no-mode wire run: **44/80 divergent subjects convert to exact
+wire-identity** — the whole wired-TCP bucket B1 minus arptest+pmtud (bulktransfer ×3,
+dctcp ×2, tcpthroughput, tcpwindowscale, nclients), all dsdv, half of gpsr, all
+802.11 B3 (hiddennode ×4, hosttohost, lan80211-ftp, blockack, analogmodel, nic,
+datalinkactivity, tutorials/wireless), ospfv2 fulltest, RTP ×2, MRP base ×4,
+TenBaseT1S ×2, ieee8021d leftovers. 6 mode-only regressions (PASS without mode →
+non-PASS with): sctp multihomed/nclients + netperfmeter interplay (SCTP TODO sites
+were never converted → mixed semantics), rip dynamic2, networkpathactivity,
+framereplication, and ospfv2 CrashAndReboot ERRORs under the mode (deferred push
+meets node crash — stale sink; known mode limitation, harmless: parity is judged
+no-mode). Of the 18 attribution artifacts, 9 now PASS, 9 remain.
+
+**Residual after the mode (37 parity-relevant):**
+| bucket | subjects | next step |
+|---|---|---|
+| R1 attribution artifacts (tplx-PASS) | 9: mrp *WithTraffic ×4, seaport, quic linksharing, hierarchical99 Flooding/Generic/WiseRoute | B8 FingerprintCalculator fix |
+| R2 MPLS family | 6: ldp, net37, testte ×4 | per-case: LDP/RSVP session timing |
+| R3 manet dymo/gpsr/multiradio subset | 13 | per-case: which RNG/timer draws still reorder |
+| R4 probabilistic broadcast | hierarchical99 Adaptive/ProbabilisticBroadcast | per-packet probability draws; likely statistical |
+| R5 TCP oddballs | arptest ×2, tcp_pmtud ×2 | per-case diagnosis |
+| R6 misc | netperfmeter SCTP-OLIA, manet-showcase Gpsr | per-case |
+
 ## Phase 5 — Final cleanup & merge prep
 
 - [ ] 5.1 **[sonnet]** Confirm `__TODO` gone from history; unresolved leftovers → GitHub

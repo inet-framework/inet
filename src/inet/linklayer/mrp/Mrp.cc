@@ -1910,8 +1910,7 @@ void Mrp::sendFrameReq(int portId, const MacAddress &destinationAddress, const M
     macAddressReq->setSrcAddress(sourceAddress);
     macAddressReq->setDestAddress(destinationAddress);
     EV_INFO << "Sending packet down" << EV_FIELD(mrpPDU) << EV_FIELD(destinationAddress) << EV_ENDL;
-    yieldBeforePush();
-    relayOutSink.pushPacket(mrpPDU);
+    deferrablePushPacket(relayOutSink, mrpPDU);
 }
 
 void Mrp::sendCCM(int portId, Packet *ccm)
@@ -1923,8 +1922,7 @@ void Mrp::sendCCM(int portId, Packet *ccm)
     macAddressReq->setSrcAddress(getPortNetworkInterface(portId)->getMacAddress());
     macAddressReq->setDestAddress(MacAddress::CFM_CCM_MULTICAST_ADDRESS);
     EV_INFO << "Sending packet down" << EV_FIELD(ccm) << EV_ENDL;
-    yieldBeforePush();
-    relayOutSink.pushPacket(ccm);
+    deferrablePushPacket(relayOutSink, ccm);
 }
 
 cGate *Mrp::lookupModuleInterface(cGate *gate, const std::type_info& type, const cObject *arguments, int direction)

@@ -188,8 +188,7 @@ void Icmpv6::processICMPv6Message(Packet *packet)
                 EV_INFO << "ICMPv6: forwarding MLD message (type=" << type << ") to MLD module.\n";
                 packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::mld);
                 packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mld);
-                yieldBeforePush();
-                ipv6Sink.pushPacket(packet);
+                deferrablePushPacket(ipv6Sink, packet);
                 break;
             }
             default:
@@ -328,8 +327,7 @@ void Icmpv6::sendToIP(Packet *msg)
 {
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
-    yieldBeforePush();
-    ipv6Sink.pushPacket(msg);
+    deferrablePushPacket(ipv6Sink, msg);
 }
 
 Packet *Icmpv6::createDestUnreachableMsg(Icmpv6DestUnav code)

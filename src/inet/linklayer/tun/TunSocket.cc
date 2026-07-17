@@ -72,8 +72,7 @@ void TunSocket::send(Packet *packet)
     packet->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
     EV_INFO << "Sending packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
-    yieldBeforePush();
-    sink.pushPacket(packet);
+    deferrablePushPacket(sink, packet);
 }
 
 void TunSocket::close()

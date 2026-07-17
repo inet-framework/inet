@@ -184,8 +184,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
 
         // broadcast to other nodes the hello message
         numSent++;
-        yieldBeforePush();
-        ipSink.pushPacket(packet);
+        deferrablePushPacket(ipSink, packet);
         packet = nullptr;
         hello = nullptr;
 
@@ -202,8 +201,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
             if ((*it)->event == msg) {
                 EV << "Vou mandar forward do " << (*it)->hello->peekData<DsdvHello>()->getSrcAddress() << endl; // todo
                 numSent++;
-                yieldBeforePush();
-                ipSink.pushPacket((*it)->hello);
+                deferrablePushPacket(ipSink, (*it)->hello);
                 (*it)->hello = nullptr;
                 delete *it;
                 forwardList->erase(it);
@@ -317,7 +315,7 @@ void Dsdv::handleMessageWhenUp(cMessage *msg)
 //                    waitTime= SIMTIME_DBL (simTime())+waitTime;
                     EV_DETAIL << "waitime for forward is " << waitTime << " And host is " << source << "\n"; // FIXME unchanged waitTime showed twice!!!
                     packet->insertAtBack(recHello);
-                    inet::scheduleAfter("delay", waitTime, [=] () { yieldBeforePush(); ipSink.pushPacket(packet); });
+                    inet::scheduleAfter("delay", waitTime, [=] () { deferrablePushPacket(ipSink, packet); });
                     packet = nullptr;
                 }
                 else {

@@ -49,8 +49,7 @@ void EthernetPhy::handleMessage(cMessage *message)
         delete signal;
         auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
-        yieldBeforePush();
-        upperLayerSink.pushPacket(packet);
+        deferrablePushPacket(upperLayerSink, packet);
     }
     else
         throw cRuntimeError("Received unknown message");

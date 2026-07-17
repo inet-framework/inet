@@ -321,8 +321,7 @@ void Ieee80211Mac::sendUpFrame(Packet *frame)
     const auto& header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
     decapsulate(frame);
     if (!(header->getType() & 0x30)) {
-        yieldBeforePush();
-        mgmtOutSink.pushPacket(frame);
+        deferrablePushPacket(mgmtOutSink, frame);
     }
     else
         ds->processDataFrame(frame, dynamicPtrCast<const Ieee80211DataHeader>(header));

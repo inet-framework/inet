@@ -80,8 +80,7 @@ void Ieee8022LlcSocket::send(Packet *packet)
             interfaceReq->setInterfaceId(interfaceId);
     }
     EV_INFO << "Sending packet on socket" << EV_FIELD(socketId) << EV_FIELD(packet) << EV_ENDL;
-    yieldBeforePush();
-    sink.pushPacket(packet);
+    deferrablePushPacket(sink, packet);
     isOpen_ = true;
 }
 

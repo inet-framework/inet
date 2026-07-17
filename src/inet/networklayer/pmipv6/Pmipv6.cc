@@ -133,8 +133,7 @@ void Pmipv6::sendMobilityMessage(Packet *packet, const Ipv6Address& destAddress,
     packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(srcAddress);
     packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddress);
     packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(64);
-    yieldBeforePush();
-    toIpv6Sink.pushPacket(packet);
+    deferrablePushPacket(toIpv6Sink, packet);
 }
 
 Ipv6Address Pmipv6::getEgressAddressFor(const Ipv6Address& destination)

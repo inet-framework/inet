@@ -360,8 +360,7 @@ void Igmpv2::handleMessage(cMessage *msg)
         }
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "routerIn")) {
-        yieldBeforePush();
-        ipSink.pushPacket(check_and_cast<Packet *>(msg));
+        deferrablePushPacket(ipSink, check_and_cast<Packet *>(msg));
     }
     else {
         auto packet = check_and_cast<Packet *>(msg);
@@ -473,8 +472,7 @@ void Igmpv2::processIgmpMessage(Packet *packet)
 
         default:
             if (externalRouter) {
-                yieldBeforePush();
-                routerSink.pushPacket(packet);
+                deferrablePushPacket(routerSink, packet);
             }
             else {
 //                delete msg;
@@ -516,8 +514,7 @@ void Igmpv2::processQuery(NetworkInterface *ie, Packet *packet)
 
     if (rt->isMulticastForwardingEnabled()) {
         if (externalRouter) {
-            yieldBeforePush();
-            routerSink.pushPacket(packet);
+            deferrablePushPacket(routerSink, packet);
             return;
         }
 
@@ -583,8 +580,7 @@ void Igmpv2::processV2Report(NetworkInterface *ie, Packet *packet)
 
     if (rt->isMulticastForwardingEnabled()) {
         if (externalRouter) {
-            yieldBeforePush();
-            routerSink.pushPacket(packet);
+            deferrablePushPacket(routerSink, packet);
             return;
         }
 
@@ -632,8 +628,7 @@ void Igmpv2::processLeave(NetworkInterface *ie, Packet *packet)
 
     if (rt->isMulticastForwardingEnabled()) {
         if (externalRouter) {
-            yieldBeforePush();
-            routerSink.pushPacket(packet);
+            deferrablePushPacket(routerSink, packet);
             return;
         }
 
@@ -733,8 +728,7 @@ void Igmpv2::sendToIP(Packet *msg, NetworkInterface *ie, const Ipv4Address& dest
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
 
-    yieldBeforePush();
-    ipSink.pushPacket(msg);
+    deferrablePushPacket(ipSink, msg);
 }
 
 // --- Utility Methods for Group Data ---
@@ -1010,8 +1004,7 @@ void Igmpv2::pushPacket(Packet *packet, const cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     if (gate->isName("routerIn")) {
-        yieldBeforePush();
-        ipSink.pushPacket(packet);
+        deferrablePushPacket(ipSink, packet);
     }
     else
         processIgmpMessage(packet);

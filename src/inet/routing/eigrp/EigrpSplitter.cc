@@ -55,8 +55,7 @@ void EigrpSplitter::handleMessage(cMessage *msg)
     else {
         if (strcmp(msg->getArrivalGate()->getBaseName(), "splitterIn") == 0 || strcmp(msg->getArrivalGate()->getBaseName(), "splitter6In") == 0) {
             numSent++;
-            yieldBeforePush();
-            ipOutSink.pushPacket(check_and_cast<Packet *>(msg)); // A message from ipv6pdm or ipv4pdm to outside
+            deferrablePushPacket(ipOutSink, check_and_cast<Packet *>(msg)); // A message from ipv6pdm or ipv4pdm to outside
         }
         else if (strcmp(msg->getArrivalGate()->getBaseName(), "ipIn") == 0) {
             numReceived++;
@@ -70,12 +69,10 @@ void EigrpSplitter::handleMessage(cMessage *msg)
 
             auto ipversion = packet->getTag<L3AddressInd>()->getSrcAddress().getType();
             if (ipversion == inet::L3Address::IPv4) {
-                yieldBeforePush();
-                splitterOutSink.pushPacket(packet);
+                deferrablePushPacket(splitterOutSink, packet);
             }
             else if (ipversion == inet::L3Address::IPv6) {
-                yieldBeforePush();
-                splitter6OutSink.pushPacket(packet);
+                deferrablePushPacket(splitter6OutSink, packet);
             }
             else {
                 delete msg;

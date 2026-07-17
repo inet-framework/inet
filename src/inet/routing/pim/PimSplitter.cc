@@ -71,8 +71,7 @@ void PimSplitter::handleMessage(cMessage *msg)
         EV_INFO << "Received packet from PIM module, sending it to the network." << endl;
         auto packet = check_and_cast<Packet *>(msg);
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(networkProtocol);
-        yieldBeforePush();
-        ipSink.pushPacket(packet);
+        deferrablePushPacket(ipSink, packet);
     }
     else
         throw cRuntimeError("PimSplitter: received packet on the unknown gate: %s.", arrivalGate ? arrivalGate->getBaseName() : "nullptr");
@@ -97,14 +96,12 @@ void PimSplitter::processPIMPacket(Packet *pkt)
     switch (pimInt->getMode()) {
         case PimInterface::DenseMode:
             EV_INFO << "Sending packet to PimDm.\n";
-            yieldBeforePush();
-            pimDMSink.pushPacket(pkt);
+            deferrablePushPacket(pimDMSink, pkt);
             break;
 
         case PimInterface::SparseMode:
             EV_INFO << "Sending packet to PimSm.\n";
-            yieldBeforePush();
-            pimSMSink.pushPacket(pkt);
+            deferrablePushPacket(pimSMSink, pkt);
             break;
 
         default:

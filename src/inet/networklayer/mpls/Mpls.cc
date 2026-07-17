@@ -289,8 +289,7 @@ void Mpls::sendToL2(Packet *msg)
     ASSERT(msg->findTag<InterfaceReq>());
     ASSERT(msg->findTag<PacketProtocolTag>());
     numSent++;
-    yieldBeforePush();
-    lowerLayerOutSink.pushPacket(msg);
+    deferrablePushPacket(lowerLayerOutSink, msg);
 }
 
 void Mpls::sendToL3(Packet *msg)
@@ -298,8 +297,7 @@ void Mpls::sendToL3(Packet *msg)
     ASSERT(msg->findTag<InterfaceInd>());
     ASSERT(msg->findTag<DispatchProtocolReq>());
     numSent++;
-    yieldBeforePush();
-    upperLayerOutSink.pushPacket(msg);
+    deferrablePushPacket(upperLayerOutSink, msg);
 }
 
 void Mpls::pushPacket(Packet *packet, const cGate *gate)

@@ -647,8 +647,7 @@ void Mipv6::sendMobilityMessageToIPv6Module(Packet *msg, const Ipv6Address& dest
     if (sendTime > 0)
         inet::scheduleAfter("sendMobilityMessageToIPv6Module", sendTime, [this, msg] () { toIpv6Sink.pushPacket(msg); });
     else {
-        yieldBeforePush();
-        toIpv6Sink.pushPacket(msg);
+        deferrablePushPacket(toIpv6Sink, msg);
     }
 }
 

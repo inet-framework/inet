@@ -68,8 +68,7 @@ void UdpSocket::sendTo(Packet *pk, L3Address destAddr, int destPort)
         pk->addTagIfAbsent<L4PortReq>()->setDestPort(destPort);
     pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
     pk->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    yieldBeforePush();
-    sink.pushPacket(pk);
+    deferrablePushPacket(sink, pk);
     sockState = CONNECTED;
 }
 
@@ -79,8 +78,7 @@ void UdpSocket::send(Packet *pk)
     pk->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
     EV_INFO << "Sending packet on socket" << EV_FIELD(socketId) << EV_FIELD(pk) << EV_ENDL;
-    yieldBeforePush();
-    sink.pushPacket(pk);
+    deferrablePushPacket(sink, pk);
     sockState = CONNECTED;
 }
 

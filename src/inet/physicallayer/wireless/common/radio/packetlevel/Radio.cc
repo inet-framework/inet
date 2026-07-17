@@ -517,8 +517,7 @@ void Radio::sendUp(Packet *macFrame)
 {
     EV_INFO << "Sending up " << macFrame << endl;
     emit(packetSentToUpperSignal, macFrame);
-    yieldBeforePush();
-    upperLayerSink.pushPacket(macFrame);
+    deferrablePushPacket(upperLayerSink, macFrame);
 }
 
 cMessage *Radio::createReceptionTimer(WirelessSignal *signal) const

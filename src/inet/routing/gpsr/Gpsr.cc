@@ -203,8 +203,7 @@ void Gpsr::processPurgeNeighborsTimer()
 void Gpsr::sendUdpPacket(Packet *packet)
 {
     numSent++;
-    yieldBeforePush();
-    ipOutSink.pushPacket(packet);
+    deferrablePushPacket(ipOutSink, packet);
 }
 
 void Gpsr::processUdpPacket(Packet *packet)

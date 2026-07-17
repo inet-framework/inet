@@ -73,8 +73,7 @@ void EchoProtocol::processEchoRequest(Packet *request)
     reply->addTag<DispatchProtocolReq>()->setProtocol(request->getTag<NetworkProtocolInd>()->getProtocol());
     reply->addTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
     delete request;
-    yieldBeforePush();
-    ipOutSink.pushPacket(reply);
+    deferrablePushPacket(ipOutSink, reply);
 }
 
 void EchoProtocol::processEchoReply(Packet *reply)
