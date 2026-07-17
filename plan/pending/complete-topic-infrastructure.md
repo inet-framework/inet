@@ -711,6 +711,34 @@ all in configs the old 1422-subject suite never covered. OPEN, must fix before m
 | netperfmeter trace replay | examples/inet/netperfmeter -c TraceFile-Tcp, -c TraceFile-Sctp | SIGSEGV ~1.2s in |
 | MessageDispatcher registration | showcases/tsn/combiningfeatures/invehicle -c AutomaticTsn, -c ManualTsn | "Cannot forward packet because no dispatch information was found" — missing dispatch registration in the reworked core |
 
+**Wire-level parity (the definitive D6(a) measure, user-directed):** `tplx` hashes
+every event incl. the intra-node ones the branch removes on purpose — it measures the
+rework's footprint, not parity. The right metric is `~tNl`/`~tND` (network-node-
+crossing packet deliveries only: node paths + timing + length / payload bytes). The
+updater hardcodes tplx, so `plan/artifacts/fp_update_ingredients.py` drives the Python
+API (`update_fingerprint_test_results(ingredients=...)`) for two more baseline passes
+on fp-master (run-0): `~tNl` 848 ok / 64 ERROR, `~tND` 759 ok / 153 ERROR (the extra
+~90: `D` hashes packet BYTES, so master sims carrying serializer-less packets can't
+compute it). Branch store = the 1607 ok entries
+(`phase4/store-baseline-512dd6f642-r0-wire.json`), branch run with `-r 0`:
+
+**848 subjects: 758 PASS / 80 FAIL / 10 ERROR** (same 10 crashes;
+`phase4/fp-branch-r0-vs-baseline-wire.{log,json}`). Cross-referencing the tplx run
+splits the 80: **18 attribution artifacts** (tplx PASS ⇒ executed event sequence
+provably identical; only the `~` filter's `getSenderModule()` attribution moved —
+aodv FastMobility, mrp *WithTraffic ×5, hierarchical99 Flooding/Generic/WiseRoute,
+ipsec UDPTraffic, seaport, testnewmac, quic linksharing, manet Aodv/Dsdv,
+transportconnection, tutorials/wireless 12/13) and **62 genuine wire divergences**,
+all in expected categories: TCP-timing (bulktransfer ×3, dctcp ×2, tcp_pmtud ×2,
+tcpthroughput, tcpwindowscale, nclients, netperfmeter OLIA, arptest ×2 TCP apps),
+wireless/manet RNG (~30), MPLS/LDP+RSVP (6, incl. net37), OSPF fulltest, RTP ×2,
+MRP base ×4, probabilistic broadcast ×2, TenBaseT1S best/worst-case ×2.
+
+**Bottom line: 776/838 runnable run-0 subjects (92.6%) provably wire-identical or
+event-identical vs master; the 62 shifted ones are all RNG-order or TCP-timing
+categories; the 10 crashes are the only real regressions and block the merge.**
+Both worktrees' store.json restored to HEAD afterwards.
+
 Tooling (opp_repl, checkout was clean at `32319ae`): THREE bugs hit. (1) `--dry-run`
 errors every disabled-feature config with `ValueError('list.index(x): x not in list')`
 then dies; (2) launch-failed sims raise `AttributeError: 'NoneType' object has no
