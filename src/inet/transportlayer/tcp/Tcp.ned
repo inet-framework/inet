@@ -193,6 +193,7 @@ simple Tcp extends SimpleModule like ITcp
         string checksumMode @enum("declared", "computed") = default("declared");
         int advertisedWindow = default(65535); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
         bool delayedAcksEnabled = default(true); // Delayed ACK algorithm (RFC 1122) enabled/disabled
+        bool adaptiveDelayedAcks = default(false); // Linux-shaped receiver ACK dynamics on top of delayedAcksEnabled: a quickack budget (immediate ACKs at connection start, after out-of-order data, and after long idle), an ADAPTIVE delayed-ACK timeout (ATO: 40ms floor, tracks the inter-segment arrival gap, bounded by srtt and 200ms) instead of the fixed 200ms timer, and an interactive "pingpong" mode. Off = the classic fixed-timeout RFC 1122 behavior
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
         bool pushSegmentsOnWriteBoundary = default(false); // Linux parity: set the PSH flag on the last segment carrying the final buffered byte of the current send (Linux always does this; PSH has no effect on INET's own receiver, so this is a pure wire-realism option). Default off pending a maintainer-gated default flip, like the other Linux-default parity switches.
         bool limitedTransmitEnabled = default(true); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)

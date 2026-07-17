@@ -161,6 +161,11 @@ struct TcpStateVariables
     bool nagle_enabled = false;                 // set if Nagle's algorithm (RFC 896) is enabled
     bool pushOnWriteBoundary = false;           // Linux parity: set PSH on the segment carrying the last buffered byte of a send (from the pushSegmentsOnWriteBoundary parameter)
     bool delayed_acks_enabled = false;          // set if delayed ACK algorithm (RFC 1122) is enabled
+    bool adaptiveDelayedAcks = false;           // from the adaptiveDelayedAcks parameter: Linux-shaped quickack/ATO/pingpong receiver ACK dynamics
+    uint32_t quickAckCounter = 0;               // remaining immediate-ACK budget (Linux icsk_ack.quick); consumed one per ACK sent
+    uint32_t pingpongCount = 0;                 // interactive-session evidence counter (Linux icsk_ack.pingpong); >= 3 = pingpong (delack-favoring) mode
+    simtime_t ackAto = 0;                       // adaptive delayed-ACK timeout (Linux icsk_ack.ato); 0 = engine not yet initialized (no data received)
+    simtime_t lastDataRecvTime = 0;             // arrival time of the last in-order data segment (Linux icsk_ack.lrcvtime)
     bool limited_transmit_enabled = false;      // set if Limited Transmit algorithm (RFC 3042) is enabled
     bool seedRttFromHandshake = false;          // from the seedRttFromHandshake parameter
     bool frtoEnabled = false;                   // from the frtoEnabled parameter (RFC 5682 F-RTO); requires SACK

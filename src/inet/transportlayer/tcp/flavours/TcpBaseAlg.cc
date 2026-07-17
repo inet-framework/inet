@@ -30,6 +30,14 @@ namespace tcp {
 // segment."
 
 #define DELAYED_ACK_TIMEOUT    0.2   // 200ms (RFC 1122: MUST be less than 0.5 seconds)
+// Linux-shaped adaptive receiver ACK dynamics (adaptiveDelayedAcks parameter);
+// values are Linux's long-stable ABI constants (TCP_ATO_MIN/TCP_DELACK_MIN =
+// HZ/25, TCP_DELACK_MAX = HZ/5, TCP_MAX_QUICKACKS, TCP_PINGPONG_THRESH).
+#define TCP_ATO_MIN_S          0.04  // 40ms: ATO floor and quickack-mode ATO
+#define TCP_DELACK_MIN_S       0.04  // 40ms
+#define TCP_DELACK_MAX_S       0.2   // 200ms
+#define TCP_MAX_QUICKACKS      16
+#define TCP_PINGPONG_THRESH    3
 #define MAX_REXMIT_COUNT       12   // 12 retries
 // RTO bounds are configurable via the minRto/maxRto parameters (state->min_rto,
 // state->max_rto); the defaults reproduce the historical 1s / 2*MSL (RFC 1122) clamps.
@@ -280,6 +288,16 @@ void TcpBaseAlg::processRexmitTimer(TcpEventCode& event)
         }
     }
 
+    // a data reply within one ATO of the last received data is interactive
+    // ("pingpong") evidence -- enough of it makes the receiver favor delayed
+    // ACKs (Linux tcp_event_data_sent)
+    if (state->adaptiveDelayedAcks && state->lastDataRecvTime > SIMTIME_ZERO
+        && simTime() - state->lastDataRecvTime < state->ackAto
+        && state->pingpongCount < TCP_PINGPONG_THRESH)
+    {
+        state->pingpongCount++;
+    }
+
     state->time_last_data_sent = simTime();
 
     //
@@ -322,6 +340,20 @@ void TcpBaseAlg::processPersistTimer(TcpEventCode& event)
 
 void TcpBaseAlg::processDelayedAckTimer(TcpEventCode& event)
 {
+    if (state->adaptiveDelayedAcks) {
+        // a delayed ACK actually expired (Linux tcp_delack_timer_handler):
+        // in bulk mode the ATO was too optimistic -- inflate it (bounded by
+        // RTO); in interactive (pingpong) mode drop back out and deflate
+        if (state->pingpongCount < TCP_PINGPONG_THRESH) {
+            state->ackAto = state->ackAto * 2;
+            if (state->ackAto > state->rexmit_timeout)
+                state->ackAto = state->rexmit_timeout;
+        }
+        else {
+            state->pingpongCount = 0;
+            state->ackAto = TCP_ATO_MIN_S;
+        }
+    }
     state->ack_now = true;
     conn->sendAck();
 }
@@ -551,11 +583,106 @@ void TcpBaseAlg::sendCommandInvoked()
     sendData(true);
 }
 
+void TcpBaseAlg::incrQuickack(uint32_t maxQuickacks)
+{
+    // Budget of back-to-back immediate ACKs: enough to cover half the receive
+    // window in one-per-segment ACKs, at most maxQuickacks (Linux
+    // tcp_incr_quickack; rcv_mss approximated by our own MSS -- the corpus
+    // and virtually all sim setups are MSS-symmetric).
+    uint32_t mss = state->snd_mss > 0 ? state->snd_mss : 536;
+    uint32_t quickacks = state->rcv_wnd / (2 * mss);
+    if (quickacks == 0)
+        quickacks = 2;
+    if (quickacks > maxQuickacks)
+        quickacks = maxQuickacks;
+    if (quickacks > state->quickAckCounter)
+        state->quickAckCounter = quickacks;
+}
+
+void TcpBaseAlg::enterQuickackMode(uint32_t maxQuickacks)
+{
+    incrQuickack(maxQuickacks);
+    state->pingpongCount = 0; // leave interactive mode
+    state->ackAto = TCP_ATO_MIN_S;
+}
+
+bool TcpBaseAlg::inQuickackMode() const
+{
+    return state->quickAckCounter > 0 && state->pingpongCount < TCP_PINGPONG_THRESH;
+}
+
 void TcpBaseAlg::receivedOutOfOrderSegment()
 {
+    // out-of-order data starts (or refreshes) a quickack burst: the sender is
+    // likely in loss recovery and needs feedback per segment
+    if (state->adaptiveDelayedAcks)
+        enterQuickackMode(TCP_MAX_QUICKACKS);
     state->ack_now = true;
     EV_INFO << "Out-of-order segment, sending immediate ACK\n";
     conn->sendAck();
+}
+
+void TcpBaseAlg::dataArrivedAtoUpdate()
+{
+    // Adapt the delayed-ACK engine to the observed inter-segment arrival gap
+    // (Linux tcp_event_data_recv): the first data segment initializes a full
+    // quickack budget; closely spaced arrivals shrink the ATO toward its
+    // 40ms floor; a gap above the retransmission timeout means the sender
+    // stalled waiting for ACKs -- resume quick ACKing.
+    simtime_t now = simTime();
+    if (state->ackAto == SIMTIME_ZERO) {
+        incrQuickack(TCP_MAX_QUICKACKS);
+        state->ackAto = TCP_ATO_MIN_S;
+    }
+    else {
+        simtime_t m = now - state->lastDataRecvTime;
+        if (m <= TCP_ATO_MIN_S / 2)
+            state->ackAto = state->ackAto / 2 + TCP_ATO_MIN_S / 2;
+        else if (m < state->ackAto) {
+            state->ackAto = state->ackAto / 2 + m;
+            if (state->ackAto > state->rexmit_timeout)
+                state->ackAto = state->rexmit_timeout;
+        }
+        else if (m > state->rexmit_timeout)
+            incrQuickack(TCP_MAX_QUICKACKS);
+    }
+    state->lastDataRecvTime = now;
+}
+
+void TcpBaseAlg::scheduleDelayedAck()
+{
+    // Linux tcp_send_delayed_ack: the armed timeout is the ATO bounded by the
+    // measured RTT (a delayed ACK should not stall the sender's clock for
+    // longer than a round trip) and by the 200ms ceiling.
+    simtime_t ato = state->ackAto;
+    if (ato > TCP_DELACK_MIN_S) {
+        simtime_t maxAto = TCP_DELACK_MAX_S;
+        if (state->srtt > SIMTIME_ZERO) {
+            simtime_t rtt = state->srtt < TCP_DELACK_MIN_S ? TCP_DELACK_MIN_S : state->srtt;
+            if (rtt < maxAto)
+                maxAto = rtt;
+        }
+        if (ato > maxAto)
+            ato = maxAto;
+    }
+    if (ato > TCP_DELACK_MAX_S)
+        ato = TCP_DELACK_MAX_S;
+
+    simtime_t timeout = simTime() + ato;
+    if (delayedAckTimer->isScheduled()) {
+        // an earlier deadline stands; and if it is about to fire anyway,
+        // just send the ACK now
+        if (delayedAckTimer->getArrivalTime() <= simTime() + ato / 4) {
+            cancelEvent(delayedAckTimer);
+            state->ack_now = true;
+            conn->sendAck();
+            return;
+        }
+        if (delayedAckTimer->getArrivalTime() < timeout)
+            return; // keep the earlier one
+        cancelEvent(delayedAckTimer);
+    }
+    conn->scheduleAt(timeout, delayedAckTimer);
 }
 
 void TcpBaseAlg::receiveSeqChanged()
@@ -577,6 +704,26 @@ void TcpBaseAlg::receiveSeqChanged()
         if (!state->delayed_acks_enabled) { // delayed ACK disabled
             EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", (delayed ACK disabled) sending ACK now\n";
             conn->sendAck();
+        }
+        else if (state->adaptiveDelayedAcks) {
+            // Linux-shaped decision (__tcp_ack_snd_check): immediate ACK when
+            // more than one full frame is pending, in quickack mode, or when
+            // protocol state demands one; otherwise arm the ADAPTIVE delayed
+            // ACK. The ATO bookkeeping runs first (tcp_event_data_recv).
+            dataArrivedAtoUpdate();
+            uint32_t mss = state->snd_mss > 0 ? state->snd_mss : 536;
+            bool moreThanOneFrame = (state->rcv_nxt - state->last_ack_sent) > mss;
+            if (state->ack_now || moreThanOneFrame || inQuickackMode()) {
+                EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", sending immediate ACK ("
+                        << (state->ack_now ? "ack_now" : moreThanOneFrame ? "second full frame" : "quickack mode")
+                        << ", quickack budget " << state->quickAckCounter << ")\n";
+                conn->sendAck();
+            }
+            else {
+                EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", arming adaptive delayed ACK (ato="
+                        << state->ackAto << ")\n";
+                scheduleDelayedAck();
+            }
         }
         else { // delayed ACK enabled
             if (state->ack_now) {
@@ -726,6 +873,10 @@ void TcpBaseAlg::receivedAckForDataNotYetSent(uint32_t seq)
 
 void TcpBaseAlg::ackSent()
 {
+    // every ACK actually sent consumes one unit of the quickack budget
+    // (Linux tcp_event_ack_sent -> tcp_dec_quickack_mode)
+    if (state->adaptiveDelayedAcks && state->quickAckCounter > 0)
+        state->quickAckCounter--;
     state->full_sized_segment_counter = 0; // reset counter
     state->ack_now = false; // reset flag
     state->last_ack_sent = state->rcv_nxt; // update last_ack_sent, needed for TS option
