@@ -369,7 +369,16 @@ void TcpReno::receivedDuplicateAck()
                         && conn->getRexmitQueue()->getTotalAmountOfLostBytes() > 0
                         && (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint)));
 
-    if (state->dupacks == state->reordering || rackTrigger) {
+    // Once SACK loss recovery is underway (e.g. entered early via rackTrigger on
+    // an earlier dupack), the dupack count reaching DupThresh must NOT re-enter
+    // fast retransmit -- Linux only enters recovery from ca_state < Recovery.
+    // Re-entering would re-run the PRR initialization and retransmit the head
+    // segment a second time. Such an ACK falls through to the additional-dupack
+    // branch below instead.
+    bool alreadyInSackRecovery = state->sack_enabled && state->lossRecovery
+        && seqLess(state->snd_una, state->recoveryPoint);
+
+    if ((state->dupacks == state->reordering && !alreadyInSackRecovery) || rackTrigger) {
         EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->reordering << ": perform Fast Retransmit, and enter Fast Recovery:";
 
         if (state->sack_enabled) {
@@ -482,7 +491,7 @@ void TcpReno::receivedDuplicateAck()
         // try to transmit new segments (RFC 2581)
         sendData(false);
     }
-    else if (state->dupacks > state->reordering) {
+    else if (state->dupacks >= state->reordering) { // >= : a dupack reaching DupThresh while alreadyInSackRecovery lands here
         if (state->prrEnabled && state->lossRecovery) {
             // RFC 6937: each additional dup ACK carrying new SACK info sizes cwnd
             // by PRR rather than inflating it by one SMSS.

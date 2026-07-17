@@ -15,6 +15,7 @@
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
@@ -197,13 +198,40 @@ uint32_t TcpConnection::rackDetectAndMarkLost()
     if (state->rackXmitTime == 0)
         return 0;
 
-    // (2) reordering window: 0 until reordering has been observed, then minRtt/4
-    simtime_t reoWnd = 0;
-    if (state->rackReordSeen)
-        reoWnd = state->minRtt / 4;
+    // (2) reordering window (Linux tcp_rack_reo_wnd): the default is a
+    // min_rtt/4 settling delay (capped at srtt/8) to tolerate mild reordering.
+    // Only when reordering has NEVER been observed on the connection may RACK
+    // be aggressive (reo_wnd = 0) -- and then only during recovery, or once
+    // DupThresh-worth of segments are already SACKed (the classic dupthresh
+    // entry point). The previous inversion of this rule (0 by default,
+    // min_rtt/4 after reordering) let a single SACK mark same-burst segments
+    // lost and enter recovery on the FIRST duplicate ACK.
+    simtime_t reoWnd;
+    uint32_t sackedSegs = state->snd_mss > 0 ? state->sackedBytes / state->snd_mss : 0;
+    if (!state->rackReordSeen && (state->lossRecovery || sackedSegs >= state->reordering))
+        reoWnd = 0;
+    else {
+        // minRtt is only populated once a data RTT has been measured; on the very
+        // first flight (dupacks arriving before any cumulative ACK) it is still 0.
+        // Linux's min_rtt is seeded from the handshake, so it is never 0 by the
+        // time SACKs arrive -- approximate that with this ACK's own RACK RTT.
+        simtime_t minRtt = state->minRtt > 0 ? state->minRtt : state->rackRtt;
+        reoWnd = minRtt / 4;
+        if (auto *baseAlgState = dynamic_cast<TcpBaseAlgStateVariables *>(state)) {
+            if (baseAlgState->srtt > 0 && baseAlgState->srtt / 8 < reoWnd)
+                reoWnd = baseAlgState->srtt / 8;
+        }
+    }
 
-    // (3) mark as lost any earlier-sent, still-unacked segment for which more than
-    // RACK.rtt + reo_wnd has elapsed since it was (last) sent.
+    // (3) mark as lost any earlier-sent, still-unacked segment for which at least
+    // RACK.rtt + reo_wnd has elapsed since it was (last) sent. The comparison is
+    // INCLUSIVE (Linux tcp_rack_detect_loss marks on remaining <= 0, i.e.
+    // elapsed >= rtt + reo_wnd): with a whole flight transmitted in one burst --
+    // the norm in a discrete-event simulation, where every segment of a window
+    // carries the IDENTICAL send timestamp -- a lost head segment's elapsed time
+    // always exactly EQUALS the RACK RTT derived from its SACKed burst-mates
+    // (both measure simTime() - burstTime), so a strict > could never mark it,
+    // no matter how much time passed, and recovery stalled into an RTO.
     std::vector<std::pair<uint32_t, uint32_t>> toMark;
     for (const auto& region : rexmitQueue->rexmitQueue) {
         if (region.sacked || region.lost)
@@ -212,7 +240,7 @@ uint32_t TcpConnection::rackDetectAndMarkLost()
             || (region.lastSentTime == state->rackXmitTime && seqLE(region.endSeqNum, state->rackEndSeq));
         if (!earlier)
             continue;
-        if (simTime() - region.lastSentTime > state->rackRtt + reoWnd)
+        if (simTime() - region.lastSentTime >= state->rackRtt + reoWnd)
             toMark.push_back(std::make_pair(region.beginSeqNum, region.endSeqNum));
     }
 
