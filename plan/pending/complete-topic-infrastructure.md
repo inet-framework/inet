@@ -666,42 +666,60 @@ order) and deletes map sockets via while-not-empty (callback erases entries duri
 deleteSockets iteration → UB). Lesson recorded: teardown is untested by fingerprints;
 consider an exit-code check in the runner.
 
-### 4.9 D6(a) fingerprint parity re-measure vs master reference (2026-07-17) — DONE
+### 4.9 D6(a) fingerprint parity vs regenerated baseline (2026-07-17) — 10 NEW CRASHES FOUND
 
-Re-measured after the /tmp purge ate the original reference log; everything durable now
-lives in `plan/artifacts/` (`runfingerprints.sh` env-gated runner, `fp_compare.py`,
-`phase4/fp-*.{log,json}`, `phase4/fp-compare-master-vs-branch.txt`).
+**Correct methodology (user):** the checked-in store.json is stale (2023 timestamps) —
+comparing either side against it is noise (both "fail" ~universally under the companion
+omnetpp sorting change; equal FAIL counts tell us nothing). Instead: regenerate the
+store ON THE BASELINE with `opp_update_fingerprint_test_results`, limited to
+**run number 0** (the full config×run universe is 18602 tasks — way too many;
+run-0 is 914), then run the branch suite against that baseline store.
 
-Setup: reference = `inet-fp-master` worktree at the exact merge-base `512dd6f642`,
-subject = branch `cb0cf2432e`, BOTH built release against companion omnetpp
-`8271a475cf`, identical feature states (TSNTests enabled on both sides). Suite:
-1422 subjects, ~70–80 s wall per side.
+Setup: baseline = `inet-fp-master` at the exact merge-base `512dd6f642`, branch =
+`cb0cf2432e`, both release against companion omnetpp `8271a475cf`, identical feature
+states. Baseline update: 912 tasks → 14 KEEP / 357 INSERT / 477 UPDATE / 64 ERROR
+(the ERRORs are unrunnable-here configs: quic examples, tutorials/protocol,
+examples/empty, one interactive wireless ini, ...). Notes: the updater runs configs at
+their **ini-default sim-time-limits** (not the store's old ones) and only does `tplx`
+(ignores the kind's ingredients_list), so the branch-side store = exactly the 848
+successful update tasks' run-0/tplx entries (2 ancient expected-ERROR duplicates for
+manetrouting dymo/gpsr DynamicIPv6 dropped in favor of the fresh PASS entries).
+Baseline store artifact: `phase4/store-baseline-512dd6f642-r0.json`; branch worktree
+store.json restored to HEAD after the run.
 
-Totals: master 16 PASS / 1384 FAIL / 22 ERROR; branch 16 PASS / 1383 FAIL / 23 ERROR —
-the single delta is `shutdownrestart -c TCP -r 2` (FAIL→ERROR, the §4.8 master-latent
-Ipv4 throw). **ERROR sets otherwise identical** (the known lwip/voipstream/z3/net37
-local exclusions); **no subject flipped PASS↔FAIL** (the only asymmetric fingerprint
-keys are r2's). PASS/FAIL is measured vs the dead store, so the real parity signal is
-comparing CALCULATED fingerprints run-to-run: 3147 shared checks, 2383 identical,
-764 differing, spread over 592 subjects classified via the ingredient variants
-(`tplx` = every event: simtime+module path+bit length; `~tNl`/`~tND` = INET
-NETWORK_COMMUNICATION_FILTER: only node-crossing packet deliveries, hashing
-node paths + length/payload bytes — see `src/inet/common/FingerprintCalculator.cc`):
+**Branch result (848 subjects): 485 PASS / 353 FAIL / 10 ERROR** in 4:42
+(`phase4/fp-branch-r0-vs-baseline.{log,json}`).
 
-| class | subjects | meaning |
+PASS = event-for-event identical trajectory vs master. The 353 FAIL concentrate in
+TCP-heavy (examples/inet 60), routing-protocol (ospf/bgp/rip/stp tutorials, ~60), and
+wireless (~100) categories — consistent with the earlier 3-ingredient run-to-run
+analysis on the old universe (3147 checks: 2383 identical; differing ones classified
+as internal-composition-only 469 subjects with `~tNl`/`~tND` wire fingerprints
+matching, RNG/TCP-timing shifts 83, `getSenderModule()` attribution artifacts 40 with
+tplx provably identical — details in `phase4/fp-compare-master-vs-branch.txt`).
+tplx-only makes this run maximally sensitive; it cannot distinguish wire-identical
+from behavior-changed — the wire-level classification comes from the run-to-run
+analysis above.
+
+**The actionable finding — 10 branch-only crashes (master computes fingerprints fine),
+all in configs the old 1422-subject suite never covered. OPEN, must fix before merge:**
+
+| cluster | subjects | symptom |
 |---|---|---|
-| `tplx` differs, `~tNl`(+`~tND`) match | 469 | wire traffic byte-identical at identical times; only internal event composition changed — the intended effect of eliminating intra-node events |
-| all variants differ | 83 | genuine trajectory shift (RNG-draw order / TCP segmentation+ACK timing): mrp 32, manetrouting ~20, TCP bulk (bulktransfer/dctcp/nclients/netperfmeter), mpls/ldp, rtp, wireless misc — all in RNG- or TCP-timing-sensitive categories, none unexplained |
-| `tplx` matches, `~tN*` differ | 40 | executed event sequence PROVABLY identical (tplx covers every event); the `~` filter keys off `getSenderModule()` attribution, which direct pushPacket calls change — metadata artifact, not behavior (mrp *WithTraffic ×31, scattered wireless/manet) |
+| BGP session failover/restart | examples/bgpv4 BgpDiamondFailover, BgpDiamondFailover6, BgpWithdrawal -c Restart, BgpWithdrawal6 -c Restart | SIGSEGV ~0.65s in (BGP over TcpSocket; suspect synchronous-close fallout: live-map close loop / callback-deleted object) |
+| EthernetMacPhy map::at | tutorials/bgp -c Step7, -c Step8 | `std::out_of_range: map::at` in (inet::EthernetMacPhy) RB1/RC1.eth[0].mac |
+| netperfmeter trace replay | examples/inet/netperfmeter -c TraceFile-Tcp, -c TraceFile-Sctp | SIGSEGV ~1.2s in |
+| MessageDispatcher registration | showcases/tsn/combiningfeatures/invehicle -c AutomaticTsn, -c ManualTsn | "Cannot forward packet because no dispatch information was found" — missing dispatch registration in the reworked core |
 
-Conclusion: parity CONFIRMED — zero unexplained divergence; every changed fingerprint
-falls into an expected class. Store regeneration against stock omnetpp-6.x remains a
-landing-time task (D6 consequence (b)).
-
-Tooling note (opp_repl, clean checkout `32319ae`): `opp_run_fingerprint_tests
---dry-run` is broken — every disabled-feature config errors with
-`ValueError('list.index(x): x not in list')` and the run dies with
-`'NoneType' object has no attribute 'stdout'`; the real run is unaffected.
+Tooling (opp_repl, checkout was clean at `32319ae`): THREE bugs hit. (1) `--dry-run`
+errors every disabled-feature config with `ValueError('list.index(x): x not in list')`
+then dies; (2) launch-failed sims raise `AttributeError: 'NoneType' object has no
+attribute 'stdout'` (simulation/task.py accesses subprocess_result.stdout uncritically);
+(3) `MultipleFingerprintUpdateTasks.run` crashed on those exception-wrapped results
+(`'SimulationUpdateTaskResult' object has no attribute 'calculated_fingerprint'`) and
+LOST the whole update (store never written). (3) is FIXED as an uncommitted one-line
+`getattr` guard in `~/workspace/opp_repl` `test/fingerprint/task.py` — needs the
+user's review/commit; (1)+(2) remain open in opp_repl.
 
 ## Phase 5 — Final cleanup & merge prep
 
