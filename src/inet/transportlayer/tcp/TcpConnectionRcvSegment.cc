@@ -1365,8 +1365,15 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         }
 
         // acked data no longer needed in rexmit queue
-        if (state->sack_enabled)
+        if (state->sack_enabled) {
             rexmitQueue->discardUpTo(discardUpToSeq);
+            // The cumulative ACK just consumed (part of) the SACK scoreboard;
+            // refresh the cached count so tcp_info's tcpi_sacked drops back to 0
+            // once everything is acked (Linux decrements sacked_out as skbs are
+            // cum-acked). sackedBytes_old is untouched: RFC 3042's new-SACK-info
+            // check compares per-dupack, and this is not a duplicate ACK.
+            state->sackedBytes = rexmitQueue->getTotalAmountOfSackedBytes();
+        }
 
         updateWndInfo(tcpHeader);
 

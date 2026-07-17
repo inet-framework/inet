@@ -106,8 +106,22 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
                 }
             }
 
-            if (seqGreater(tmp.getEnd(), tcpHeader->getAckNo()) && seqGreater(tmp.getEnd(), state->snd_una))
-                rexmitQueue->setSackedBit(tmp.getStart(), tmp.getEnd());
+            if (seqGreater(tmp.getEnd(), tcpHeader->getAckNo()) && seqGreater(tmp.getEnd(), state->snd_una)) {
+                // FACK before this block is applied: needed to recognize that the
+                // block NEWLY sacks data below the highest already-SACKed sequence.
+                uint32_t fackBefore = rexmitQueue->getHighestSackedSeqNum();
+                uint32_t newlySackedLow = rexmitQueue->setSackedBit(tmp.getStart(), tmp.getEnd());
+                // Reordering detection (Linux tcp_sacktag_one/tcp_check_sack_reordering):
+                // a never-retransmitted range newly SACKed BELOW the prior FACK proves
+                // the network delivered it out of order -- data above it arrived first.
+                // Grow the reordering degree by the observed distance so RACK/dupthresh
+                // stop misreading this path's reordering as loss. A re-reported or
+                // merely grown block returns newlySackedLow at/above fackBefore and is
+                // ignored, as are SACKs of retransmissions (ambiguous, Karn-style).
+                if (state->adaptiveReorderingEnabled && newlySackedLow != 0
+                        && fackBefore != 0 && seqLess(newlySackedLow, fackBefore))
+                    checkSackReordering(newlySackedLow);
+            }
             else
                 EV_DETAIL << "Received SACK below total cumulative ACK snd_una=" << state->snd_una << "\n";
         }

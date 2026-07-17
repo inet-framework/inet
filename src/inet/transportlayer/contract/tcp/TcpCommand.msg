@@ -317,6 +317,7 @@ class TcpStatusInfo extends TcpCommand
     // lossy but honest approximation of Linux's tcpi_lost, which counts segments
     // directly. UINT_MAX if SACK is not enabled on this connection (no loss tracking).
     unsigned int lost;
+    unsigned int retrans;        // retransmitted-and-still-outstanding segments (Linux tcpi_retrans / retrans_out), same segment approximation and UINT_MAX sentinel as `lost`
     // Cumulative zero-window (persist) probes sent (TcpBaseAlgStateVariables::
     // zeroWindowProbesSent). UINT_MAX for flavours without persist-probe tracking.
     unsigned int probes;

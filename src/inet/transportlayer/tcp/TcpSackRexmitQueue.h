@@ -102,7 +102,9 @@ class INET_API TcpSackRexmitQueue
      * so they can be skipped if retransmitting segments as long as
      * REXMIT timer did not expired.
      */
-    virtual void setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum);
+    /** Marks [fromSeqNum,toSeqNum) sacked; returns the lowest sequence number
+     *  newly marked (skipping ever-retransmitted regions), 0 if nothing new. */
+    virtual uint32_t setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum);
 
     /**
      * Returns SackedBit value of seqNum.
@@ -180,6 +182,9 @@ class INET_API TcpSackRexmitQueue
      * Returns the total amount of bytes currently marked lost and not yet sacked.
      */
     virtual uint32_t getTotalAmountOfLostBytes() const;
+
+    /** Bytes retransmitted and still outstanding (not SACKed) -- Linux retrans_out. */
+    virtual uint32_t getTotalAmountOfRexmittedUnsackedBytes() const;
 
     /**
      * Returns the amount of retransmitted-but-not-yet-sacked bytes (retrans_out analogue).

@@ -463,10 +463,14 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setRwndLimited((state->rwndLimitedAccumulated
         + (state->rwndLimitedStartTime >= SIMTIME_ZERO ? simTime() - state->rwndLimitedStartTime : SIMTIME_ZERO)).dbl());
 
-    if (state->sack_enabled && rexmitQueue != nullptr && state->snd_mss > 0)
+    if (state->sack_enabled && rexmitQueue != nullptr && state->snd_mss > 0) {
         statusInfo->setLost(rexmitQueue->getTotalAmountOfLostBytes() / state->snd_mss);
-    else
+        statusInfo->setRetrans(rexmitQueue->getTotalAmountOfRexmittedUnsackedBytes() / state->snd_mss);
+    }
+    else {
         statusInfo->setLost(UINT_MAX);
+        statusInfo->setRetrans(UINT_MAX);
+    }
 
     if (auto *baseAlgState = dynamic_cast<TcpBaseAlgStateVariables *>(state)) {
         statusInfo->setBackoff(baseAlgState->rexmit_count);
