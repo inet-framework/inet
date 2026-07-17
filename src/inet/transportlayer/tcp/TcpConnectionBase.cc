@@ -124,11 +124,13 @@ void TcpConnection::initConnection(Tcp *_mod, int _socketId)
     connEstabTimer = new cMessage("CONN-ESTAB");
     finWait2Timer = new cMessage("FIN-WAIT-2");
     synRexmitTimer = new cMessage("SYN-REXMIT");
+    rackReoTimer = new cMessage("RACK-REO");
 
     the2MSLTimer->setContextPointer(this);
     connEstabTimer->setContextPointer(this);
     finWait2Timer->setContextPointer(this);
     synRexmitTimer->setContextPointer(this);
+    rackReoTimer->setContextPointer(this);
 
     WATCH(socketId);
     WATCH(listeningSocketId);
@@ -152,6 +154,7 @@ void TcpConnection::initConnection(Tcp *_mod, int _socketId)
     WATCH(connEstabTimer);
     WATCH(finWait2Timer);
     WATCH(synRexmitTimer);
+    WATCH(rackReoTimer);
     WATCH(rcvdSegments);
     WATCH(sentSegments);
     WATCH(lastRcvdSeqNo);
@@ -174,6 +177,8 @@ TcpConnection::~TcpConnection()
         delete cancelEvent(finWait2Timer);
     if (synRexmitTimer)
         delete cancelEvent(synRexmitTimer);
+    if (rackReoTimer)
+        delete cancelEvent(rackReoTimer);
 }
 
 void TcpConnection::handleMessage(cMessage *msg)
@@ -226,6 +231,10 @@ bool TcpConnection::processTimer(cMessage *msg)
     else if (msg == synRexmitTimer) {
         event = TCP_E_IGNORE;
         process_TIMEOUT_SYN_REXMIT(event);
+    }
+    else if (msg == rackReoTimer) {
+        event = TCP_E_IGNORE;
+        processRackReoTimeout();
     }
     else {
         event = TCP_E_IGNORE;

@@ -233,6 +233,7 @@ uint32_t TcpConnection::rackDetectAndMarkLost()
     // (both measure simTime() - burstTime), so a strict > could never mark it,
     // no matter how much time passed, and recovery stalled into an RTO.
     std::vector<std::pair<uint32_t, uint32_t>> toMark;
+    simtime_t minRemaining = SIMTIME_MAX; // earliest not-yet-matured deadline
     for (const auto& region : rexmitQueue->rexmitQueue) {
         if (region.sacked || region.lost)
             continue;
@@ -240,9 +241,21 @@ uint32_t TcpConnection::rackDetectAndMarkLost()
             || (region.lastSentTime == state->rackXmitTime && seqLE(region.endSeqNum, state->rackEndSeq));
         if (!earlier)
             continue;
-        if (simTime() - region.lastSentTime >= state->rackRtt + reoWnd)
+        simtime_t remaining = state->rackRtt + reoWnd - (simTime() - region.lastSentTime);
+        if (remaining <= 0)
             toMark.push_back(std::make_pair(region.beginSeqNum, region.endSeqNum));
+        else if (remaining < minRemaining)
+            minRemaining = remaining;
     }
+
+    // Arm the RACK reordering timer for the earliest deadline that has not
+    // matured yet (Linux ICSK_TIME_REO_TIMEOUT): dupacks stop arriving once the
+    // receiver has ACKed everything it got, so without this timer a deadline
+    // maturing between ACKs would only ever be noticed by the (much later) RTO.
+    if (rackReoTimer->isScheduled())
+        cancelEvent(rackReoTimer);
+    if (minRemaining != SIMTIME_MAX)
+        scheduleAfter(minRemaining, rackReoTimer);
 
     uint32_t lostBytes = 0;
     for (auto& r : toMark) {
@@ -252,6 +265,21 @@ uint32_t TcpConnection::rackDetectAndMarkLost()
     if (lostBytes > 0)
         EV_INFO << "RACK: marked " << lostBytes << " bytes lost by time (RACK.rtt=" << state->rackRtt << ")\n";
     return lostBytes;
+}
+
+void TcpConnection::processRackReoTimeout()
+{
+    // The reordering-window deadline of some still-unacked segment matured with
+    // no ACK arriving to re-run detection -- re-run it now and let the flavour
+    // act on any newly lost marks (enter recovery / retransmit). Guarded: the
+    // timer can be stale if the connection moved on (recovery completed and the
+    // queue drained, algorithm torn down mid-close).
+    if (!state || !state->sack_enabled || state->lossDetectionMode != 1
+            || rexmitQueue == nullptr || tcpAlgorithm == nullptr)
+        return;
+    rackDetectAndMarkLost();
+    if (rexmitQueue->getTotalAmountOfLostBytes() > 0)
+        tcpAlgorithm->rackReoTimeout();
 }
 
 void TcpConnection::checkSackReordering(uint32_t lowSeq)

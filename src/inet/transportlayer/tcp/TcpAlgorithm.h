@@ -152,6 +152,15 @@ class INET_API TcpAlgorithm : public cObject
     virtual void receivedDuplicateAck() = 0;
 
     /**
+     * Called when the RACK reordering timer expired and RACK loss detection
+     * (re-run just before this call) left lost-marked bytes in the scoreboard.
+     * Flavours with SACK-based loss recovery react by entering fast recovery
+     * (or, if already recovering, by retransmitting the newly lost data);
+     * the default is a no-op for flavours without RACK support.
+     */
+    virtual void rackReoTimeout() {}
+
+    /**
      * Called after we received an ACK for data not yet sent.
      * According to RFC 793 this function should send an ACK.
      */

@@ -196,6 +196,7 @@ class INET_API TcpConnection : public SimpleModule
     cMessage *connEstabTimer = nullptr;
     cMessage *finWait2Timer = nullptr;
     cMessage *synRexmitTimer = nullptr; // for retransmitting SYN and SYN+ACK
+    cMessage *rackReoTimer = nullptr; // RACK reordering timer (Linux ICSK_TIME_REO_TIMEOUT): fires when a not-yet-lost segment's RACK.rtt+reo_wnd deadline matures between ACKs
 
     // statistics
     long rcvdSegments = 0;
@@ -571,8 +572,20 @@ class INET_API TcpConnection : public SimpleModule
      * RFC 8985 RACK: advance the RACK reference to the most recently sent
      * delivered segment and mark earlier-sent, still-unacked segments as lost
      * once RACK.rtt + reo_wnd has elapsed. Returns the number of newly lost bytes.
+     * Segments whose deadline has not matured yet arm rackReoTimer for the
+     * earliest remaining deadline (Linux ICSK_TIME_REO_TIMEOUT), so a loss whose
+     * reordering window expires BETWEEN ACKs -- e.g. a tail flight where no
+     * further ACKs arrive -- is still detected without waiting for the RTO.
      */
     virtual uint32_t rackDetectAndMarkLost();
+
+    /**
+     * rackReoTimer expired: re-run RACK loss detection (time has advanced, so
+     * pending deadlines may have matured) and let the congestion-control
+     * flavour react (enter fast recovery / retransmit) via
+     * TcpAlgorithm::rackReoTimeout().
+     */
+    virtual void processRackReoTimeout();
 
     /**
      * Adaptive reordering (Linux tcp_check_sack_reordering): a segment at lowSeq

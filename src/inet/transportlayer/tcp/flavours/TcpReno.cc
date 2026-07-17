@@ -358,6 +358,142 @@ void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
     sendData(false);
 }
 
+void TcpReno::enterFastRecovery()
+{
+    EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->reordering << ": perform Fast Retransmit, and enter Fast Recovery:";
+
+    if (state->sack_enabled) {
+        // RFC 3517, page 6: "When a TCP sender receives the duplicate ACK corresponding to
+        // DupThresh ACKs, the scoreboard MUST be updated with the new SACK
+        // information (via Update ()).  If no previous loss event has occurred
+        // on the connection or the cumulative acknowledgment point is beyond
+        // the last value of RecoveryPoint, a loss recovery phase SHOULD be
+        // initiated, per the fast retransmit algorithm outlined in [RFC2581].
+        // The following steps MUST be taken:
+        //
+        // (1) RecoveryPoint = HighData
+        //
+        // When the TCP sender receives a cumulative ACK for this data octet
+        // the loss recovery phase is terminated."
+
+        // RFC 3517, page 8: "If an RTO occurs during loss recovery as specified in this document,
+        // RecoveryPoint MUST be set to HighData.  Further, the new value of
+        // RecoveryPoint MUST be preserved and the loss recovery algorithm
+        // outlined in this document MUST be terminated.  In addition, a new
+        // recovery phase (as described in section 5) MUST NOT be initiated
+        // until HighACK is greater than or equal to the new value of
+        // RecoveryPoint."
+        if (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint)) { // HighACK = snd_una
+            state->recoveryPoint = state->snd_max; // HighData = snd_max
+            state->lossRecovery = true;
+            EV_DETAIL << " recoveryPoint=" << state->recoveryPoint;
+        }
+    }
+    // RFC 2581, page 5:
+    // "After the fast retransmit algorithm sends what appears to be the
+    // missing segment, the "fast recovery" algorithm governs the
+    // transmission of new data until a non-duplicate ACK arrives.
+    // (...) the TCP sender can continue to transmit new
+    // segments (although transmission must continue using a reduced cwnd)."
+
+    // capture the undo context BEFORE reducing ssthresh/cwnd (RFC 2883/3522)
+    if (state->lossUndoEnabled)
+        undoInit();
+
+    // enter Fast Recovery
+    if (state->prrEnabled) {
+        // RFC 6937 Proportional Rate Reduction: no cwnd inflation. Size cwnd
+        // with prrOut==0 (forces at least one segment out for the fast
+        // retransmit), retransmit, then fill the pipe up to the PRR cwnd.
+        prrInitCwndReduction();
+        prrCwndReduction((int)prrNewlyDelivered(), 0, false /*snd_una not advanced*/);
+        EV_DETAIL << " PRR fast recovery: priorCwnd=" << state->priorCwnd
+                  << ", ssthresh=" << state->ssthresh << ", cwnd=" << state->snd_cwnd << "\n";
+
+        conn->retransmitOneSegment(false);
+
+        if (state->lossRecovery) {
+            restartRexmitTimer();
+            conn->setPipe();
+            if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss)
+                conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
+        }
+    }
+    else {
+        recalculateSlowStartThreshold();
+        // "set cwnd to ssthresh plus 3 * SMSS." (RFC 2581)
+        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss; // 20051129 (1)
+
+        conn->emit(cwndSignal, state->snd_cwnd);
+
+        EV_DETAIL << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
+
+        // Fast Retransmission: retransmit missing segment without waiting
+        // for the REXMIT timer to expire
+        conn->retransmitOneSegment(false);
+
+        // Do not restart REXMIT timer.
+        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+        // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
+
+        if (state->sack_enabled) {
+            // RFC 3517, page 7: "(4) Run SetPipe ()
+            //
+            // Set a "pipe" variable  to the number of outstanding octets
+            // currently "in the pipe"; this is the data which has been sent by
+            // the TCP sender but for which no cumulative or selective
+            // acknowledgment has been received and the data has not been
+            // determined to have been dropped in the network.  It is assumed
+            // that the data is still traversing the network path."
+            conn->setPipe();
+            // RFC 3517, page 7: "(5) In order to take advantage of potential additional available
+            // cwnd, proceed to step (C) below."
+            if (state->lossRecovery) {
+                // RFC 3517, page 9: "Therefore we give implementers the latitude to use the standard
+                // [RFC2988] style RTO management or, optionally, a more careful variant
+                // that re-arms the RTO timer on each retransmission that is sent during
+                // recovery MAY be used.  This provides a more conservative timer than
+                // specified in [RFC2988], and so may not always be an attractive
+                // alternative.  However, in some cases it may prevent needless
+                // retransmissions, go-back-N transmission and further reduction of the
+                // congestion window."
+                // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+                EV_INFO << "Retransmission sent during recovery, restarting REXMIT timer.\n";
+                restartRexmitTimer();
+
+                // RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
+                // segments as follows:"
+                if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
+                    conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
+            }
+        }
+    }
+
+    // try to transmit new segments (RFC 2581)
+    sendData(false);
+}
+
+void TcpReno::rackReoTimeout()
+{
+    // The RACK reordering timer matured with lost-marked bytes on the
+    // scoreboard (see TcpConnection::processRackReoTimeout). Mirror the
+    // dupack-path reaction: enter fast recovery if none is underway --
+    // Linux's "loss is proven" entry, without waiting for DupThresh dupacks
+    // that may never arrive -- or, mid-recovery, retransmit the newly lost
+    // data through the ordinary RFC 3517 pipe machinery.
+    if (!state->sack_enabled || state->lossDetectionMode != 1)
+        return;
+    if (!state->lossRecovery
+        && (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint))) {
+        enterFastRecovery();
+    }
+    else if (state->lossRecovery) {
+        conn->setPipe();
+        if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss)
+            conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
+    }
+}
+
 void TcpReno::receivedDuplicateAck()
 {
     TcpTahoeRenoFamily::receivedDuplicateAck();
@@ -379,119 +515,17 @@ void TcpReno::receivedDuplicateAck()
         && seqLess(state->snd_una, state->recoveryPoint);
 
     if ((state->dupacks == state->reordering && !alreadyInSackRecovery) || rackTrigger) {
-        EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->reordering << ": perform Fast Retransmit, and enter Fast Recovery:";
-
-        if (state->sack_enabled) {
-            // RFC 3517, page 6: "When a TCP sender receives the duplicate ACK corresponding to
-            // DupThresh ACKs, the scoreboard MUST be updated with the new SACK
-            // information (via Update ()).  If no previous loss event has occurred
-            // on the connection or the cumulative acknowledgment point is beyond
-            // the last value of RecoveryPoint, a loss recovery phase SHOULD be
-            // initiated, per the fast retransmit algorithm outlined in [RFC2581].
-            // The following steps MUST be taken:
-            //
-            // (1) RecoveryPoint = HighData
-            //
-            // When the TCP sender receives a cumulative ACK for this data octet
-            // the loss recovery phase is terminated."
-
-            // RFC 3517, page 8: "If an RTO occurs during loss recovery as specified in this document,
-            // RecoveryPoint MUST be set to HighData.  Further, the new value of
-            // RecoveryPoint MUST be preserved and the loss recovery algorithm
-            // outlined in this document MUST be terminated.  In addition, a new
-            // recovery phase (as described in section 5) MUST NOT be initiated
-            // until HighACK is greater than or equal to the new value of
-            // RecoveryPoint."
-            if (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint)) { // HighACK = snd_una
-                state->recoveryPoint = state->snd_max; // HighData = snd_max
-                state->lossRecovery = true;
-                EV_DETAIL << " recoveryPoint=" << state->recoveryPoint;
-            }
-        }
-        // RFC 2581, page 5:
-        // "After the fast retransmit algorithm sends what appears to be the
-        // missing segment, the "fast recovery" algorithm governs the
-        // transmission of new data until a non-duplicate ACK arrives.
-        // (...) the TCP sender can continue to transmit new
-        // segments (although transmission must continue using a reduced cwnd)."
-
-        // capture the undo context BEFORE reducing ssthresh/cwnd (RFC 2883/3522)
-        if (state->lossUndoEnabled)
-            undoInit();
-
-        // enter Fast Recovery
-        if (state->prrEnabled) {
-            // RFC 6937 Proportional Rate Reduction: no cwnd inflation. Size cwnd
-            // with prrOut==0 (forces at least one segment out for the fast
-            // retransmit), retransmit, then fill the pipe up to the PRR cwnd.
-            prrInitCwndReduction();
-            prrCwndReduction((int)prrNewlyDelivered(), 0, false /*snd_una not advanced*/);
-            EV_DETAIL << " PRR fast recovery: priorCwnd=" << state->priorCwnd
-                      << ", ssthresh=" << state->ssthresh << ", cwnd=" << state->snd_cwnd << "\n";
-
-            conn->retransmitOneSegment(false);
-
-            if (state->lossRecovery) {
-                restartRexmitTimer();
-                conn->setPipe();
-                if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss)
-                    conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
-            }
-        }
-        else {
-            recalculateSlowStartThreshold();
-            // "set cwnd to ssthresh plus 3 * SMSS." (RFC 2581)
-            state->snd_cwnd = state->ssthresh + 3 * state->snd_mss; // 20051129 (1)
-
-            conn->emit(cwndSignal, state->snd_cwnd);
-
-            EV_DETAIL << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
-
-            // Fast Retransmission: retransmit missing segment without waiting
-            // for the REXMIT timer to expire
-            conn->retransmitOneSegment(false);
-
-            // Do not restart REXMIT timer.
-            // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
-            // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
-
-            if (state->sack_enabled) {
-                // RFC 3517, page 7: "(4) Run SetPipe ()
-                //
-                // Set a "pipe" variable  to the number of outstanding octets
-                // currently "in the pipe"; this is the data which has been sent by
-                // the TCP sender but for which no cumulative or selective
-                // acknowledgment has been received and the data has not been
-                // determined to have been dropped in the network.  It is assumed
-                // that the data is still traversing the network path."
-                conn->setPipe();
-                // RFC 3517, page 7: "(5) In order to take advantage of potential additional available
-                // cwnd, proceed to step (C) below."
-                if (state->lossRecovery) {
-                    // RFC 3517, page 9: "Therefore we give implementers the latitude to use the standard
-                    // [RFC2988] style RTO management or, optionally, a more careful variant
-                    // that re-arms the RTO timer on each retransmission that is sent during
-                    // recovery MAY be used.  This provides a more conservative timer than
-                    // specified in [RFC2988], and so may not always be an attractive
-                    // alternative.  However, in some cases it may prevent needless
-                    // retransmissions, go-back-N transmission and further reduction of the
-                    // congestion window."
-                    // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
-                    EV_INFO << "Retransmission sent during recovery, restarting REXMIT timer.\n";
-                    restartRexmitTimer();
-
-                    // RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
-                    // segments as follows:"
-                    if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
-                        conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
-                }
-            }
-        }
-
-        // try to transmit new segments (RFC 2581)
-        sendData(false);
+        enterFastRecovery();
     }
-    else if (state->dupacks >= state->reordering) { // >= : a dupack reaching DupThresh while alreadyInSackRecovery lands here
+    // >= : a dupack reaching DupThresh while alreadyInSackRecovery lands here.
+    // The second disjunct: when recovery was entered EARLY (RACK reordering
+    // timer, before DupThresh dupacks accumulated), every subsequent dupack
+    // must still run the PRR sizing + retransmission machinery -- Linux runs
+    // tcp_fastretrans_alert on every ACK while in recovery, dupack count
+    // notwithstanding. It implies prrEnabled && lossRecovery, so the classic
+    // (non-PRR) inflation below stays reachable only at dupacks >= DupThresh.
+    else if (state->dupacks >= state->reordering
+             || (state->prrEnabled && state->sack_enabled && state->lossRecovery)) {
         if (state->prrEnabled && state->lossRecovery) {
             // RFC 6937: each additional dup ACK carrying new SACK info sizes cwnd
             // by PRR rather than inflating it by one SMSS.

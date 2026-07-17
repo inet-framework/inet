@@ -38,6 +38,13 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
     /** Redefine what should happen on retransmission */
     virtual void processRexmitTimer(TcpEventCode& event) override;
 
+    /**
+     * Fast retransmit + fast recovery entry (the former dupacks==DupThresh
+     * branch of receivedDuplicateAck()), shared by the dupack path and the
+     * RACK reordering-timer path (rackReoTimeout()).
+     */
+    virtual void enterFastRecovery();
+
     /** @name Proportional Rate Reduction (RFC 6937) */
     //@{
     /** RFC 6937 init: snapshot cwnd, reset PRR counters, set ssthresh. Linux tcp_init_cwnd_reduction(). */
@@ -75,6 +82,9 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
 
     /** Redefine what should happen when dupAck was received, to add congestion window management */
     virtual void receivedDuplicateAck() override;
+
+    /** RACK reordering timer matured with lost-marked data: enter/continue recovery. */
+    virtual void rackReoTimeout() override;
 };
 
 } // namespace tcp
