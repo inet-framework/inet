@@ -8,7 +8,11 @@
 
 #include "inet/common/NetworkNamespaceContext.h"
 
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
 #include <fcntl.h>
+#include <unistd.h>
 
 namespace inet {
 
@@ -115,7 +119,17 @@ void ExternalProcess::startProcess()
         }
         args.push_back(nullptr);
         execvp(args[0], &args[0]);
-        throw cRuntimeError("Failed to execute command");
+        // execvp only returns on failure, and this is the fork child -- a copy of the
+        // simulation process. It must NOT throw: a cRuntimeError here unwinds into a
+        // full simulation teardown *inside the child*, which runs ~ExternalProcess()
+        // with pid==0, whose stopProcess() then executes `/bin/kill -SIGTERM 0` and
+        // SIGTERMs the entire process group (the whole concurrent test run, not just
+        // this command). Report the failure on the (redirected) stderr and _exit()
+        // immediately, so the parent simply observes the process exit and applies its
+        // `onExit` policy. Use _exit (not exit) to skip the parent's atexit/static
+        // destructors, which must never run in the fork child.
+        std::fprintf(stderr, "ExternalProcess: cannot execute '%s': %s\n", command, std::strerror(errno));
+        _exit(127);
     }
     else { // parent process
         close(stdout_pipe[1]);
@@ -135,7 +149,10 @@ void ExternalProcess::startProcess()
 void ExternalProcess::stopProcess()
 {
     EV_DEBUG << "Stopping process: " << command << std::endl;
-    if (pid != -1) {
+    // Only ever kill a real child PID. pid==-1 means "never started"; pid==0 must never
+    // reach here (that is the fork child -- startProcess now _exit()s instead of throwing),
+    // and `kill 0` / `kill -1` would signal the whole process group, not just this command.
+    if (pid > 0) {
         rtScheduler->removeCallback(processStdout, this);
         rtScheduler->removeCallback(processStderr, this);
         std::string prefix = !strncmp("sudo", command, 4) ? "sudo " : "";
