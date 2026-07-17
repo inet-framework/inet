@@ -581,6 +581,12 @@ void TcpConnection::sendEstabIndicationToApp()
 
 void TcpConnection::reportEstablished()
 {
+    if (callback == nullptr)
+        return;
+    // switch context before creating the indication: it is deleted inside the
+    // callback (TcpSocket::processMessage), and the creation and deletion
+    // contexts must agree for cOwnedObject ownership
+    cContextSwitcher switcher(this);
     auto indication = new Indication(indicationName(TCP_I_ESTABLISHED), TCP_I_ESTABLISHED);
     TcpConnectInfo *ind = new TcpConnectInfo();
     ind->setLocalAddr(localAddr);
@@ -590,12 +596,7 @@ void TcpConnection::reportEstablished()
     ind->setAutoRead(autoRead);
     indication->addTag<SocketInd>()->setSocketId(establishedIndicationSocketId);
     indication->setControlInfo(ind);
-    if (callback != nullptr) {
-        cContextSwitcher switcher(this);
-        callback->handleEstablished(indication);
-    }
-    else
-        delete indication;
+    callback->handleEstablished(indication);
 }
 
 void TcpConnection::reportPeerClosed()
