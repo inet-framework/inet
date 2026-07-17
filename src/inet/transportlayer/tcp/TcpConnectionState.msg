@@ -342,6 +342,7 @@ struct TcpStateVariables
     // TCP Fast Open (RFC 7413)
     bool fastopenClientEnabled = false;      // from the fastopenClientEnabled parameter
     bool fastopenServerEnabled = false;      // from the fastopenServerEnabled parameter
+    bool fastopenAcceptWithoutCookie = false; // server: accept SYN data carrying no cookie option at all (tcp_fastopen 0x200 / TFO_SERVER_COOKIE_NOT_REQD)
     bool fastopenLenientCookieValidation = true; // from the fastopenLenientCookieValidation parameter
     bool fastopenExpOptionEnabled = false;   // from the fastopenExpOptionEnabled parameter
     int fastopenCookieBytes = 8;             // from the fastopenCookieBytes parameter

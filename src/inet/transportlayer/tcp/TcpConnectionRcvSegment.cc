@@ -863,7 +863,10 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     // makes the SYN-ACK's ack number naturally cover the SYN and the data in one
     // segment, with no change needed to sendSynAck() itself.
     bool tfoAttempted = state->fastopenCookieRequested || state->fastopenCookieValid || state->fastopenSendCookieOption;
-    if (state->fastopenServerEnabled && state->fastopenCookieValid) {
+    // Cookie-less mode (RFC 7413 section 4.1.3, sysctl TFO_SERVER_COOKIE_NOT_REQD):
+    // the listener accepts the SYN data even when the SYN carries no cookie option
+    // at all, so fastopenCookieValid (and tfoAttempted) stay false here.
+    if (state->fastopenServerEnabled && (state->fastopenCookieValid || state->fastopenAcceptWithoutCookie)) {
         B payloadLen = B(tcpSegment->getByteLength()) - tcpHeader->getHeaderLength();
         if (payloadLen > B(0) && hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) {
             updateRcvQueueVars();
@@ -880,7 +883,8 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
             updateRcvQueueVars();
             sendAvailableDataToApp(); // deliver before the 3WHS completes -- the RFC 7413 win
             state->fastopenSynDataAccepted = true; // surfaced as TCPI_OPT_SYN_DATA in tcp_info
-            EV_INFO << "Fast Open: cookie valid, accepting " << payloadLen
+            EV_INFO << "Fast Open: " << (state->fastopenCookieValid ? "cookie valid" : "no cookie required")
+                    << ", accepting " << payloadLen
                     << " bytes of SYN data before handshake completion\n";
         }
     }
@@ -900,7 +904,14 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
     // so there's only URG and PSH left to handle.
     //
-    if (!tfoAttempted && B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
+    // Also skipped when the Fast Open block above already consumed the payload
+    // (fastopenSynDataAccepted): in the cookie-less mode tfoAttempted is false
+    // (no cookie option was present), and re-inserting here with the UNSHIFTED
+    // sequence number -- after rcv_nxt has already advanced past the whole
+    // payload -- would compute a negative remainder and crash in peekDataAt()
+    // ("offset is out of range").
+    if (!tfoAttempted && !state->fastopenSynDataAccepted
+            && B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
         updateRcvQueueVars();
 
         if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?

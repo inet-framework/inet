@@ -811,6 +811,7 @@ void TcpConnection::configureStateVariables()
 
     state->fastopenClientEnabled = tcpMain->par("fastopenClientEnabled"); // TCP Fast Open (RFC 7413)
     state->fastopenServerEnabled = tcpMain->par("fastopenServerEnabled");
+    state->fastopenAcceptWithoutCookie = tcpMain->par("fastopenAcceptWithoutCookie");
     state->fastopenLenientCookieValidation = tcpMain->par("fastopenLenientCookieValidation");
     state->fastopenExpOptionEnabled = tcpMain->par("fastopenExpOptionEnabled");
     int fastopenCookieBytes = tcpMain->par("fastopenCookieBytes");

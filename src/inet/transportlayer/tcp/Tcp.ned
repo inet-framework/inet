@@ -250,6 +250,7 @@ simple Tcp extends SimpleModule like ITcp
         double hystartAckDelta @unit(s) = default(2ms); // HyStart ACK-train inter-arrival threshold
         bool fastopenClientEnabled = default(false); // TCP Fast Open (RFC 7413) client role: attempt SYN-with-data when a cookie is cached. ~ sysctl tcp_fastopen bit 0 (TFO_CLIENT_ENABLE)
         bool fastopenServerEnabled = default(false); // TCP Fast Open (RFC 7413) server role: accept and accelerate a validated-cookie SYN-with-data. ~ sysctl tcp_fastopen bit 1 (TFO_SERVER_ENABLE)
+        bool fastopenAcceptWithoutCookie = default(false); // Server role: accept SYN-with-data even when the SYN carries no Fast Open cookie option at all (RFC 7413 section 4.1.3's cookie-less mode). ~ sysctl tcp_fastopen bit 9 (0x200, TFO_SERVER_COOKIE_NOT_REQD). Only meaningful with fastopenServerEnabled.
         bool fastopenExpOptionEnabled = default(false); // Accept the legacy kind-253/254+magic-0xF989 experimental Fast Open option on receive (never emitted); inert unless fastopenServerEnabled or fastopenClientEnabled is also true
         bool fastopenLenientCookieValidation = default(true); // Accept any syntactically valid (4-16 byte) Fast Open cookie as valid without a keyed-hash check -- simulation-appropriate (no adversarial clients on the wire); set false to require an exact match against the locally generated cookie
         int fastopenCookieBytes = default(8); // Length in bytes of the locally generated Fast Open cookie (RFC 7413 allows 4-16)
