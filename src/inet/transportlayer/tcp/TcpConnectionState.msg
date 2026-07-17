@@ -162,6 +162,10 @@ struct TcpStateVariables
     bool pushOnWriteBoundary = false;           // Linux parity: set PSH on the segment carrying the last buffered byte of a send (from the pushSegmentsOnWriteBoundary parameter)
     bool delayed_acks_enabled = false;          // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled = false;      // set if Limited Transmit algorithm (RFC 3042) is enabled
+    bool seedRttFromHandshake = false;          // from the seedRttFromHandshake parameter
+    bool tlpEnabled = false;                    // Tail Loss Probe (RFC 8985 section 7.2, from the tlpEnabled parameter); requires SACK
+    uint32_t tlpHighSeq = 0;                    // TLP: snd_max when the probe was sent; nonzero = a probe is outstanding (Linux tlp_high_seq)
+    bool tlpRetrans = false;                    // TLP: the outstanding probe was a retransmission of the last segment (vs. new data)
     bool increased_IW_enabled = false;          // set if Increased Initial Window (RFC 3390) is enabled (deprecated, mapped to init_cwnd_mode)
     int init_cwnd_mode = 0;                      // initial window: 0=RFC2001 (1 SMSS), 1=RFC3390, 2=RFC6928 (IW10)
 

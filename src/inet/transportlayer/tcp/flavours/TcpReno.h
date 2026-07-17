@@ -85,6 +85,9 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
 
     /** RACK reordering timer matured with lost-marked data: enter/continue recovery. */
     virtual void rackReoTimeout() override;
+
+    /** TLP probe repaired a real tail loss: CWR-style cwnd reduction. */
+    virtual void tlpLossEpisode() override;
 };
 
 } // namespace tcp

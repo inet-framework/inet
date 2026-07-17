@@ -44,6 +44,7 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     TcpBaseAlgStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
     cMessage *rexmitTimer;
+    cMessage *tlpTimer = nullptr; // Tail Loss Probe PTO (RFC 8985 sec 7.2 / Linux ICSK_TIME_LOSS_PROBE); mutually exclusive with rexmitTimer (single-slot discipline)
     cMessage *persistTimer;
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
@@ -69,6 +70,16 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
      * Start REXMIT timer and initialize retransmission variables
      */
     virtual void startRexmitTimer();
+
+    /** @name Tail Loss Probe (RFC 8985 section 7.2, Linux tcp_schedule_loss_probe/tcp_send_loss_probe) */
+    //@{
+    /** Replace the armed RTO with a PTO (2*srtt, capped by the remaining RTO) when eligible. */
+    virtual void schedulePto();
+    /** PTO expired: send one probe (new data if possible, else the last segment) and re-arm the RTO. */
+    virtual void processPtoTimer(TcpEventCode& event);
+    /** A probe-covering ACK arrived with no D-SACK: the original tail was lost; flavours reduce cwnd CWR-style. */
+    virtual void tlpLossEpisode() {}
+    //@}
 
     /**
      * Update state vars with new measured RTT value. Passing two simtime_t's

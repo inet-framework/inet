@@ -192,9 +192,32 @@ uint32_t TcpConnection::rackDetectAndMarkLost()
 
     // (1) advance the RACK reference: the most recently *sent* segment among those
     // that have been delivered (SACKed). Skip retransmitted segments whose RTT is
-    // below the connection minimum RTT (ambiguous, Karn-style).
-    for (const auto& region : rexmitQueue->rexmitQueue) {
+    // below the connection minimum RTT (ambiguous, Karn-style). Also skip a
+    // sacked region that is only a FRAGMENT of its original transmission (an
+    // adjacent region from the same send is still unsacked): Linux tags SACKs at
+    // skb granularity with MSS-aligned fragmentation (tcp_match_skb_to_sack), so
+    // a sub-segment SACK -- e.g. the corpus's 1-byte "sack 4000:4001" tail probe
+    // in fr-4pkt-fack-last-byte -- never advances RACK there, and advancing on it
+    // here would let the reordering timer preempt the tail loss probe.
+    auto isPartialFragment = [&](auto it) {
+        if (it->endSeqNum - it->beginSeqNum >= state->snd_mss)
+            return false;
+        if (it != rexmitQueue->rexmitQueue.begin()) {
+            auto prev = std::prev(it);
+            if (!prev->sacked && prev->lastSentTime == it->lastSentTime && prev->transmitCount == it->transmitCount)
+                return true;
+        }
+        auto next = std::next(it);
+        if (next != rexmitQueue->rexmitQueue.end()
+                && !next->sacked && next->lastSentTime == it->lastSentTime && next->transmitCount == it->transmitCount)
+            return true;
+        return false;
+    };
+    for (auto it = rexmitQueue->rexmitQueue.begin(); it != rexmitQueue->rexmitQueue.end(); ++it) {
+        const auto& region = *it;
         if (!region.sacked)
+            continue;
+        if (isPartialFragment(it))
             continue;
         simtime_t xmit = region.lastSentTime;
         simtime_t rtt = simTime() - xmit;
@@ -231,9 +254,11 @@ uint32_t TcpConnection::rackDetectAndMarkLost()
         // time SACKs arrive -- approximate that with this ACK's own RACK RTT.
         simtime_t minRtt = state->minRtt > 0 ? state->minRtt : state->rackRtt;
         reoWnd = minRtt / 4;
+        // capped at the smoothed RTT (Linux: tp->srtt_us >> 3 -- the srtt_us
+        // FIELD stores 8*srtt, so the cap is the full srtt, not srtt/8)
         if (auto *baseAlgState = dynamic_cast<TcpBaseAlgStateVariables *>(state)) {
-            if (baseAlgState->srtt > 0 && baseAlgState->srtt / 8 < reoWnd)
-                reoWnd = baseAlgState->srtt / 8;
+            if (baseAlgState->srtt > 0 && baseAlgState->srtt < reoWnd)
+                reoWnd = baseAlgState->srtt;
         }
     }
 

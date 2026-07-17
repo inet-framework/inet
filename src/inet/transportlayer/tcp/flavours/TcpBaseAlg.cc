@@ -67,7 +67,7 @@ simsignal_t TcpBaseAlg::numRtosSignal = cComponent::registerSignal("numRtos"); /
 TcpBaseAlg::TcpBaseAlg() : TcpAlgorithm(),
     state((TcpBaseAlgStateVariables *&)TcpAlgorithm::state)
 {
-    rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = nullptr;
+    rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = tlpTimer = nullptr;
 }
 
 TcpBaseAlg::~TcpBaseAlg()
@@ -83,6 +83,8 @@ TcpBaseAlg::~TcpBaseAlg()
         delete cancelEvent(delayedAckTimer);
     if (keepAliveTimer)
         delete cancelEvent(keepAliveTimer);
+    if (tlpTimer)
+        delete cancelEvent(tlpTimer);
 }
 
 void TcpBaseAlg::initialize()
@@ -93,11 +95,13 @@ void TcpBaseAlg::initialize()
     persistTimer = new cMessage("PERSIST");
     delayedAckTimer = new cMessage("DELAYEDACK");
     keepAliveTimer = new cMessage("KEEPALIVE");
+    tlpTimer = new cMessage("TLP-PTO");
 
     rexmitTimer->setContextPointer(conn);
     persistTimer->setContextPointer(conn);
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
+    tlpTimer->setContextPointer(conn);
 
     state->keepalive_enabled = conn->getTcpMain()->par("keepAliveEnabled");
     state->keepalive_idle_time = conn->getTcpMain()->par("keepAliveIdleTime");
@@ -202,6 +206,8 @@ void TcpBaseAlg::processTimer(cMessage *timer, TcpEventCode& event)
         processDelayedAckTimer(event);
     else if (timer == keepAliveTimer)
         processKeepAliveTimer(event);
+    else if (timer == tlpTimer)
+        processPtoTimer(event);
     else
         throw cRuntimeError(timer, "unrecognized timer");
 }
@@ -359,12 +365,73 @@ void TcpBaseAlg::processKeepAliveTimer(TcpEventCode& event)
 
 void TcpBaseAlg::startRexmitTimer()
 {
+    // single-slot discipline with the loss-probe timer (Linux shares one
+    // icsk timer slot between RETRANS and LOSS_PROBE): arming the RTO always
+    // disarms a pending probe.
+    if (tlpTimer != nullptr && tlpTimer->isScheduled())
+        conn->cancelEvent(tlpTimer);
+
     // start counting retransmissions for this seq number.
     // Note: state->rexmit_timeout is set from rttMeasurementComplete().
     state->rexmit_count = 0;
 
     // schedule timer
     conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
+}
+
+void TcpBaseAlg::schedulePto()
+{
+    // Linux tcp_schedule_loss_probe: eligible while SACK-capable, not in loss
+    // recovery, with no SACKed data outstanding (ca_state Open/CWR) and no
+    // probe already in flight. The PTO replaces the RTO in the timer slot.
+    if (!state->tlpEnabled || !state->sack_enabled || state->lossRecovery
+            || state->sackedBytes != 0 || state->tlpHighSeq != 0
+            || state->snd_una == state->snd_max)
+        return;
+
+    // PTO = 2*SRTT; with a single packet in flight add the peer's potential
+    // delayed-ACK wait (Linux adds tcp_rto_min there). No RTT sample yet ->
+    // the initial RTO (Linux TCP_TIMEOUT_INIT).
+    simtime_t pto;
+    if (state->srtt > 0) {
+        pto = state->srtt * 2;
+        if (state->snd_max - state->snd_una <= state->snd_mss)
+            pto += state->min_rto; // single packet in flight: allow for the peer's delayed ACK
+        else
+            pto += SimTime(2, SIMTIME_MS); // Linux TCP_TIMEOUT_MIN_US: floors the PTO so a
+                                           // near-zero srtt (e.g. a same-instant packetdrill
+                                           // handshake) cannot fire the probe between
+                                           // back-to-back ACKs of the same flight
+    }
+    else
+        pto = state->rexmit_timeout;
+
+    // never fire later than the RTO would have
+    if (rexmitTimer->isScheduled()) {
+        simtime_t rtoRemaining = rexmitTimer->getArrivalTime() - simTime();
+        if (rtoRemaining < pto)
+            pto = rtoRemaining;
+        conn->cancelEvent(rexmitTimer);
+    }
+    else if (pto > state->rexmit_timeout)
+        pto = state->rexmit_timeout;
+
+    conn->rescheduleAfter(pto, tlpTimer);
+    EV_DETAIL << "TLP: probe timeout armed in " << pto << "s (replaces RTO)\n";
+}
+
+void TcpBaseAlg::processPtoTimer(TcpEventCode& event)
+{
+    // Linux tcp_send_loss_probe. At most one probe per flight; if recovery
+    // began (or everything got acked) since the PTO was armed, just fall back
+    // to the ordinary RTO discipline.
+    if (state->tlpHighSeq == 0 && !state->lossRecovery && state->snd_una != state->snd_max) {
+        if (conn->sendTlpProbe()) {
+            state->tlpHighSeq = state->snd_max;
+            EV_INFO << "TLP: probe sent, tlpHighSeq=" << state->tlpHighSeq << "\n";
+        }
+    }
+    startRexmitTimer(); // full RTO from now (Linux tcp_rearm_rto after the probe)
 }
 
 void TcpBaseAlg::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
@@ -519,6 +586,20 @@ void TcpBaseAlg::receiveSeqChanged()
 
 void TcpBaseAlg::receivedDataAck(uint32_t firstSeqAcked)
 {
+    // Tail Loss Probe outcome (Linux tcp_process_tlp_ack): the ACK reached the
+    // probe's snd_max. A new-data probe acked, or a D-SACK on this ACK (both
+    // the original and the probe arrived), ends the episode benignly. A
+    // retransmitted probe acked WITHOUT a D-SACK means the original tail was
+    // really lost and the probe silently repaired it -- apply the CWR-style
+    // congestion response (Linux: tcp_init_cwnd_reduction + end, cwnd=ssthresh).
+    if (state->tlpHighSeq != 0 && seqGE(state->snd_una, state->tlpHighSeq)) {
+        if (state->tlpRetrans && !state->dsackSeen) {
+            EV_INFO << "TLP: probe repaired a real tail loss, applying congestion response\n";
+            tlpLossEpisode();
+        }
+        state->tlpHighSeq = 0;
+    }
+
     if (!state->ts_enabled) {
         // if round-trip time measurement is running, check if rtseq has been acked
         if (state->rtseq_sendtime != 0 && seqLess(state->rtseq, state->snd_una)) {
@@ -545,6 +626,8 @@ void TcpBaseAlg::receivedDataAck(uint32_t firstSeqAcked)
         }
         else
             EV_INFO << "There were no outstanding segments, nothing new in this ACK.\n";
+        if (tlpTimer != nullptr && tlpTimer->isScheduled())
+            cancelEvent(tlpTimer); // nothing left to probe
     }
     else {
         EV_INFO << "ACK acks some but not all outstanding segments ("
@@ -552,6 +635,7 @@ void TcpBaseAlg::receivedDataAck(uint32_t firstSeqAcked)
                 << "restarting REXMIT timer\n";
         cancelEvent(rexmitTimer);
         startRexmitTimer();
+        schedulePto(); // data still in flight: re-arm the loss probe when eligible
     }
 
     //
@@ -640,10 +724,13 @@ void TcpBaseAlg::ackSent()
 void TcpBaseAlg::dataSent(uint32_t fromseq)
 {
     // if retransmission timer not running, schedule it
-    if (!rexmitTimer->isScheduled()) {
+    if (!rexmitTimer->isScheduled() && !(tlpTimer != nullptr && tlpTimer->isScheduled())) {
         EV_INFO << "Starting REXMIT timer\n";
         startRexmitTimer();
     }
+
+    // possibly convert the armed RTO into a tail-loss-probe timeout
+    schedulePto();
 
     if (!state->ts_enabled) {
         // start round-trip time measurement (if not already running)

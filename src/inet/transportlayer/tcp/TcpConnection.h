@@ -588,6 +588,14 @@ class INET_API TcpConnection : public SimpleModule
     virtual void processRackReoTimeout();
 
     /**
+     * Send one Tail Loss Probe segment (Linux tcp_send_loss_probe): a segment
+     * of new data when available and permitted by the send window, otherwise a
+     * retransmission of the last (highest-sequence) outstanding segment.
+     * Returns true if a probe went out.
+     */
+    virtual bool sendTlpProbe();
+
+    /**
      * Adaptive reordering (Linux tcp_check_sack_reordering): a segment at lowSeq
      * was delivered although higher sequence numbers were already SACKed -- i.e.
      * data arrived out of order rather than being lost. Grow the learned

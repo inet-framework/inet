@@ -473,6 +473,18 @@ void TcpReno::enterFastRecovery()
     sendData(false);
 }
 
+void TcpReno::tlpLossEpisode()
+{
+    // Linux tcp_process_tlp_ack loss branch: one-shot CWR-style reduction --
+    // tcp_init_cwnd_reduction() + tcp_end_cwnd_reduction() collapse to
+    // "ssthresh = flavour reduction of cwnd; cwnd = ssthresh" with no
+    // recovery episode entered.
+    recalculateSlowStartThreshold();
+    state->snd_cwnd = state->ssthresh;
+    conn->emit(cwndSignal, state->snd_cwnd);
+    EV_INFO << "TLP loss episode: cwnd reduced to ssthresh=" << state->ssthresh << "\n";
+}
+
 void TcpReno::rackReoTimeout()
 {
     // The RACK reordering timer matured with lost-marked bytes on the

@@ -696,7 +696,9 @@ void TcpConnection::configureStateVariables()
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary"); // Linux-parity PSH-on-drain
-    state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
+    state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled");
+    state->tlpEnabled = tcpMain->par("tlpEnabled");
+    state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     const char *initialWindow = tcpMain->par("initialWindow");
     if (state->increased_IW_enabled) {
@@ -1581,6 +1583,57 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
 
     if (state && state->ect)
         state->rexmit = false;
+}
+
+bool TcpConnection::sendTlpProbe()
+{
+    // Prefer probing with NEW data (Linux tcp_send_loss_probe tries the send
+    // head first): it advances the receiver's state and can be acked normally.
+    uint32_t available = sendQueue->getBytesAvailable(state->snd_max);
+    if (available > 0 && seqLess(state->snd_max, state->snd_una + state->snd_wnd)) {
+        uint32_t win = state->snd_una + state->snd_wnd - state->snd_max;
+        uint32_t bytes = std::min(std::min(state->snd_mss, available), win);
+        if (bytes > 0) {
+            uint32_t old_snd_nxt = state->snd_nxt;
+            state->snd_nxt = state->snd_max;
+            uint32_t sent = sendSegment(bytes);
+            if (seqGreater(old_snd_nxt, state->snd_nxt))
+                state->snd_nxt = old_snd_nxt;
+            if (sent > 0) {
+                state->tlpRetrans = false;
+                EV_INFO << "TLP: probing with " << sent << " bytes of new data\n";
+                return true;
+            }
+        }
+    }
+
+    // No new data: retransmit the last (highest-sequence) outstanding segment
+    // (Linux retransmits the tail skb, fragmenting off its last MSS).
+    if (state->snd_una == state->snd_max)
+        return false;
+    uint32_t outstanding = state->snd_max - state->snd_una;
+    uint32_t len = std::min(state->snd_mss, outstanding);
+    uint32_t start = state->snd_max - len;
+
+    // RFC 3168: no ECT on retransmissions (classic-ECN rule; see retransmitOneSegment)
+    if (state->ect)
+        state->rexmit = true;
+
+    uint32_t old_snd_nxt = state->snd_nxt;
+    state->snd_nxt = start;
+    uint32_t sent = sendSegment(len);
+    tcpAlgorithm->segmentRetransmitted(start, start + sent);
+    if (seqGreater(old_snd_nxt, state->snd_nxt))
+        state->snd_nxt = old_snd_nxt;
+
+    if (state->ect)
+        state->rexmit = false;
+
+    if (sent == 0)
+        return false;
+    state->tlpRetrans = true;
+    EV_INFO << "TLP: retransmitting the last segment [" << start << ".." << (start + sent) << ")\n";
+    return true;
 }
 
 void TcpConnection::retransmitData()
