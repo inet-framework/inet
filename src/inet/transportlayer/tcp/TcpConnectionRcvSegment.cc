@@ -318,6 +318,14 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
             return TCP_E_IGNORE;
         }
 
+        // Seed the RTT estimator from the handshake RTT (Linux measures the
+        // SYN<->SYN-ACK exchange via tcp_ack_update_rtt/tcp_synack_rtt_meas and
+        // enters ESTABLISHED with srtt/rttvar -- and hence the first RTO and any
+        // TLP probe timeout -- already RTT-scaled instead of the 1 s initial
+        // default). Karn: skipped if our handshake segment was retransmitted.
+        if (state->syn_rexmit_count == 0 && state->handshakeSentTime >= SIMTIME_ZERO)
+            tcpAlgorithm->rttMeasurementComplete(state->handshakeSentTime, simTime());
+
         // notify tcpAlgorithm and app layer
         tcpAlgorithm->established(false);
 
@@ -1130,6 +1138,14 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit())
                     EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
             }
+
+            // Seed the RTT estimator from the handshake RTT (Linux measures the
+            // SYN<->SYN-ACK exchange via tcp_ack_update_rtt/tcp_synack_rtt_meas and
+            // enters ESTABLISHED with srtt/rttvar -- and hence the first RTO and any
+            // TLP probe timeout -- already RTT-scaled instead of the 1 s initial
+            // default). Karn: skipped if our handshake segment was retransmitted.
+            if (state->syn_rexmit_count == 0 && state->handshakeSentTime >= SIMTIME_ZERO)
+                tcpAlgorithm->rttMeasurementComplete(state->handshakeSentTime, simTime());
 
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;

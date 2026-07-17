@@ -198,6 +198,14 @@ class INET_API TcpAlgorithm : public cObject
     virtual void rttMeasurementCompleteUsingTS(uint32_t echoedTS) = 0;
 
     /**
+     * Report a completed RTT measurement (segment sent at tSent, acked at
+     * tAcked) to the algorithm's estimator. Used by the connection for the
+     * handshake (SYN<->SYN-ACK) RTT seed; data-segment measurements are
+     * handled internally by the algorithm.
+     */
+    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked) = 0;
+
+    /**
      * Called before sending ACK. Determines whether to set ECE bit.
      */
     virtual bool shouldMarkAck() = 0;

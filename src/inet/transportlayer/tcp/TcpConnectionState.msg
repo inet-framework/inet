@@ -145,6 +145,7 @@ struct TcpStateVariables
     // because normal rexmit belongs to TcpAlgorithm)
     int syn_rexmit_count = 0;       // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
     simtime_t syn_rexmit_timeout;   // current SYN/SYN+ACK retransmission timeout
+    simtime_t handshakeSentTime = -1; // when our SYN (active) / SYN-ACK (passive) was last sent; seeds the RTT estimator from the handshake RTT on reaching ESTABLISHED (skipped per Karn if the handshake segment was retransmitted)
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code

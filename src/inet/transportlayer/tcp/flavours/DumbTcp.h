@@ -71,6 +71,8 @@ class INET_API DumbTcp : public TcpAlgorithm
 
     virtual void rttMeasurementCompleteUsingTS(uint32_t echoedTS) override;
 
+    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked) override {} // no RTT estimator in DumbTcp
+
     virtual bool shouldMarkAck() override;
 
     virtual void processEcnInEstablished() override;

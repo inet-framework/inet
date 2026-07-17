@@ -945,6 +945,8 @@ void TcpConnection::sendSyn()
     writeHeaderOptions(tcpHeader);
     Packet *fp = (synDataLen > 0) ? sendQueue->createSegmentWithBytes(state->iss + 1, synDataLen) : new Packet("SYN");
 
+    state->handshakeSentTime = simTime(); // for the handshake RTT seed on ESTABLISHED
+
     // send it
     sendToIP(fp, tcpHeader);
 }
@@ -1010,6 +1012,8 @@ void TcpConnection::sendSynAck()
     writeHeaderOptions(tcpHeader);
 
     Packet *fp = new Packet("SYN+ACK");
+
+    state->handshakeSentTime = simTime(); // for the handshake RTT seed on ESTABLISHED
 
     // send it
     sendToIP(fp, tcpHeader);

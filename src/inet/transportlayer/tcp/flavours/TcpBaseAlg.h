@@ -75,7 +75,7 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
      * will allow rttMeasurementComplete() to do calculations in double or
      * in 200ms/500ms ticks, as needed)
      */
-    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked);
+    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked) override;
 
     /**
      * Converting uint32_t echoedTS to simtime_t and calling rttMeasurementComplete()
