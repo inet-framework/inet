@@ -666,6 +666,43 @@ order) and deletes map sockets via while-not-empty (callback erases entries duri
 deleteSockets iteration → UB). Lesson recorded: teardown is untested by fingerprints;
 consider an exit-code check in the runner.
 
+### 4.9 D6(a) fingerprint parity re-measure vs master reference (2026-07-17) — DONE
+
+Re-measured after the /tmp purge ate the original reference log; everything durable now
+lives in `plan/artifacts/` (`runfingerprints.sh` env-gated runner, `fp_compare.py`,
+`phase4/fp-*.{log,json}`, `phase4/fp-compare-master-vs-branch.txt`).
+
+Setup: reference = `inet-fp-master` worktree at the exact merge-base `512dd6f642`,
+subject = branch `cb0cf2432e`, BOTH built release against companion omnetpp
+`8271a475cf`, identical feature states (TSNTests enabled on both sides). Suite:
+1422 subjects, ~70–80 s wall per side.
+
+Totals: master 16 PASS / 1384 FAIL / 22 ERROR; branch 16 PASS / 1383 FAIL / 23 ERROR —
+the single delta is `shutdownrestart -c TCP -r 2` (FAIL→ERROR, the §4.8 master-latent
+Ipv4 throw). **ERROR sets otherwise identical** (the known lwip/voipstream/z3/net37
+local exclusions); **no subject flipped PASS↔FAIL** (the only asymmetric fingerprint
+keys are r2's). PASS/FAIL is measured vs the dead store, so the real parity signal is
+comparing CALCULATED fingerprints run-to-run: 3147 shared checks, 2383 identical,
+764 differing, spread over 592 subjects classified via the ingredient variants
+(`tplx` = every event: simtime+module path+bit length; `~tNl`/`~tND` = INET
+NETWORK_COMMUNICATION_FILTER: only node-crossing packet deliveries, hashing
+node paths + length/payload bytes — see `src/inet/common/FingerprintCalculator.cc`):
+
+| class | subjects | meaning |
+|---|---|---|
+| `tplx` differs, `~tNl`(+`~tND`) match | 469 | wire traffic byte-identical at identical times; only internal event composition changed — the intended effect of eliminating intra-node events |
+| all variants differ | 83 | genuine trajectory shift (RNG-draw order / TCP segmentation+ACK timing): mrp 32, manetrouting ~20, TCP bulk (bulktransfer/dctcp/nclients/netperfmeter), mpls/ldp, rtp, wireless misc — all in RNG- or TCP-timing-sensitive categories, none unexplained |
+| `tplx` matches, `~tN*` differ | 40 | executed event sequence PROVABLY identical (tplx covers every event); the `~` filter keys off `getSenderModule()` attribution, which direct pushPacket calls change — metadata artifact, not behavior (mrp *WithTraffic ×31, scattered wireless/manet) |
+
+Conclusion: parity CONFIRMED — zero unexplained divergence; every changed fingerprint
+falls into an expected class. Store regeneration against stock omnetpp-6.x remains a
+landing-time task (D6 consequence (b)).
+
+Tooling note (opp_repl, clean checkout `32319ae`): `opp_run_fingerprint_tests
+--dry-run` is broken — every disabled-feature config errors with
+`ValueError('list.index(x): x not in list')` and the run dies with
+`'NoneType' object has no attribute 'stdout'`; the real run is unaffected.
+
 ## Phase 5 — Final cleanup & merge prep
 
 - [ ] 5.1 **[sonnet]** Confirm `__TODO` gone from history; unresolved leftovers → GitHub
