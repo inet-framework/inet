@@ -7,7 +7,10 @@
 
 #include "inet/linklayer/ieee80211/mac/ratecontrol/RateControlBase.h"
 
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -45,9 +48,34 @@ const IIeee80211Mode *RateControlBase::getInitialMode()
     return initialRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initialRate));
 }
 
-std::string RateControlBase::stationLabel(const MacAddress& receiver) const
+std::string RateControlBase::stationLabel(const MacAddress& receiver)
 {
-    return receiver.str();
+    auto cached = stationLabels.find(receiver);
+    if (cached != stationLabels.end())
+        return cached->second;
+    // resolve the receiver MAC to its network node name (interface-table sweep); fall back to the MAC
+    std::string label = receiver.str();
+    L3AddressResolver resolver;
+    for (cModule::SubmoduleIterator it(getSimulation()->getSystemModule()); !it.end(); ++it) {
+        cModule *node = *it;
+        if (!isNetworkNode(node))
+            continue;
+        auto interfaceTable = resolver.findInterfaceTableOf(node);
+        if (interfaceTable == nullptr)
+            continue;
+        bool found = false;
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+            if (interfaceTable->getInterface(i)->getMacAddress() == receiver) {
+                label = node->getFullName();
+                found = true;
+                break;
+            }
+        }
+        if (found)
+            break;
+    }
+    stationLabels[receiver] = label;
+    return label;
 }
 
 void RateControlBase::emitDatarateChangedSignal(const MacAddress& receiver, const IIeee80211Mode *mode)

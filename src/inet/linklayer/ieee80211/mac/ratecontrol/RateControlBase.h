@@ -8,6 +8,7 @@
 #ifndef __INET_RATECONTROLBASE_H
 #define __INET_RATECONTROLBASE_H
 
+#include <map>
 #include <string>
 
 #include "inet/linklayer/common/MacAddress.h"
@@ -23,6 +24,9 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
     static simsignal_t datarateChangedSignal;
 
   protected:
+    std::map<MacAddress, std::string> stationLabels; // cache of receiver MAC -> demux label (peer node name)
+
+  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
@@ -31,8 +35,9 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
     virtual MacAddress getReceiverAddress(Packet *frame) const;
     // The mode a newly seen station starts from: the initialRate parameter, or the fastest mandatory mode.
     virtual const physicallayer::IIeee80211Mode *getInitialMode();
-    // The demux label identifying a receiver in the per-station datarate statistic (the receiver MAC).
-    virtual std::string stationLabel(const MacAddress& receiver) const;
+    // The demux label identifying a receiver in the per-station datarate statistic: the receiver's
+    // network node name if it can be resolved, otherwise the MAC address string. Cached per receiver.
+    virtual std::string stationLabel(const MacAddress& receiver);
     // Emits datarateChanged with the receiver as a named details object, so a demux(datarateChanged)
     // result filter can record a separate data-rate vector per station. The aggregate datarateChanged
     // statistic ignores the details and is therefore unchanged. Group-addressed receivers are emitted
