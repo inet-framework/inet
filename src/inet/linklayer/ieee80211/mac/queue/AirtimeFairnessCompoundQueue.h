@@ -27,7 +27,7 @@ namespace ieee80211 {
  *
  * See the corresponding NED file for the submodule structure.
  *
- * @see AirtimeFairnessClassifier, AirtimeFairnessGate, AirtimeFairnessScheduler,
+ * @see DynamicClassifier, AirtimeFairnessGate, AirtimeFairnessScheduler,
  *      Ieee80211LongestFlowDropper
  */
 class INET_API AirtimeFairnessCompoundQueue : public queueing::CompoundPacketQueueBase

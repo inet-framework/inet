@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.queue;
 
+import inet.queueing.classifier.DynamicClassifier;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.queue.CompoundPacketQueueBase;
 
@@ -37,7 +38,7 @@ import inet.queueing.queue.CompoundPacketQueueBase;
 // Drops into the `pendingQueue` slot of an ~Edcaf or ~Dcaf via a typename override, e.g.:
 //   *.host.wlan[*].mac.dcf.channelAccess.pendingQueue.typename = "AirtimeFairnessQueue"
 //
-// @see ~AirtimeFairnessClassifier, ~AirtimeFairnessGate, ~AirtimeFairnessScheduler,
+// @see ~DynamicClassifier, ~AirtimeFairnessGate, ~AirtimeFairnessScheduler,
 //      ~Ieee80211LongestFlowDropper, ~PendingQueue
 //
 module AirtimeFairnessQueue extends CompoundPacketQueueBase
@@ -50,13 +51,17 @@ module AirtimeFairnessQueue extends CompoundPacketQueueBase
         string subqueueTypename = default("inet.queueing.queue.PacketQueue"); // NED type of each per-station sub-queue
         dropperClass = default("inet::ieee80211::Ieee80211LongestFlowDropper"); // on overflow, drop the tail frame of the longest per-station backlog
         displayStringTextFormat = default("{numStations} stations\ncontains %p pk (%l) dropped %d");
-        classifier.subqueueModuleType = default(this.subqueueTypename);
-        gate[*].quantum = default(this.quantum);
-        gate[*].weight = default(this.weight);
-        gate[*].fairnessEnabled = default(this.fairnessEnabled);
         scheduler.fairnessEnabled = default(this.fairnessEnabled);
     submodules:
-        classifier: AirtimeFairnessClassifier {
+        // Generic dynamic classifier: routes by receiver MAC (Ieee80211ReceiverAddressClassifier)
+        // and, per new station, splices a PerStationAirtimeQueue (queue -> gate) directly into the
+        // queue as queue[k]/gate[k], wiring gate[k] into the scheduler. quantum/weight/
+        // fairnessEnabled/subqueueTypename are forwarded to the branch by matching parameter name.
+        classifier: DynamicClassifier {
+            classifierClass = default("inet::ieee80211::Ieee80211ReceiverAddressClassifier");
+            moduleType = default("inet.linklayer.ieee80211.mac.queue.PerStationAirtimeQueue");
+            aggregatorSubmoduleName = default("scheduler");
+            spliceBranchSubmodules = default(true);
             @display("p=100,150");
         }
         queue[0]: <default("PacketQueue")> like IPacketQueue { // grown on demand, one FIFO sub-queue per receiver

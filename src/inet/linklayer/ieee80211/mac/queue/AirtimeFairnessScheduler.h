@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "inet/queueing/base/PacketSchedulerBase.h"
+#include "inet/queueing/contract/IDynamicInputScheduler.h"
 #include "inet/queueing/contract/IPacketCollection.h"
 
 namespace inet {
@@ -46,7 +47,7 @@ class AirtimeFairnessGate;
  *
  * @see AirtimeFairnessQueue, AirtimeFairnessGate
  */
-class INET_API AirtimeFairnessScheduler : public queueing::PacketSchedulerBase, public virtual queueing::IPacketCollection
+class INET_API AirtimeFairnessScheduler : public queueing::PacketSchedulerBase, public virtual queueing::IPacketCollection, public virtual queueing::IDynamicInputScheduler
 {
   protected:
     // parameters
@@ -66,7 +67,7 @@ class INET_API AirtimeFairnessScheduler : public queueing::PacketSchedulerBase, 
   public:
     /**
      * Registers an input gate added at runtime (a per-station branch created on demand by
-     * ~AirtimeFairnessClassifier): appends the provider/producer references and the matched
+     * ~DynamicClassifier): appends the provider/producer references and the matched
      * gate, and notifies the downstream collector that a new station may be pullable.
      */
     virtual void addInput(cGate *inputGate);

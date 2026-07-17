@@ -25,7 +25,7 @@ import inet.queueing.contract.IPacketScheduler;
 // With `fairnessEnabled = false` the gates stay open and this degrades to a plain
 // per-station round robin (the frame-fair anomaly baseline).
 //
-// @see ~AirtimeFairnessQueue, ~AirtimeFairnessGate, ~AirtimeFairnessClassifier
+// @see ~AirtimeFairnessQueue, ~AirtimeFairnessGate, ~DynamicClassifier
 //
 simple AirtimeFairnessScheduler extends PacketSchedulerBase like IPacketScheduler
 {
