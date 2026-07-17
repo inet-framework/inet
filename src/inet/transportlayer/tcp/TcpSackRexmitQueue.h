@@ -145,6 +145,9 @@ class INET_API TcpSackRexmitQueue
      */
     virtual void resetRexmittedBit();
 
+    /** Clears the lost mark of every region (spurious-RTO undo: nothing was actually lost). */
+    virtual void resetLost();
+
     /**
      * Returns total amount of sacked bytes. Corresponds to update() function from RFC 3517.
      */

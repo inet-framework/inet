@@ -1,0 +1,84 @@
+%description:
+TCP F-RTO (Workstream D5, RFC 5682 SACK-enhanced): spurious-RTO detection and
+undo. The client sends a 3000-byte flight (3 MSS segments); the tester deletes
+every ACK the server sends for it (b2-b4), so the client's retransmission timer
+fires even though ALL the data arrived at the receiver -- the canonical
+spurious RTO (only the reverse path lost the ACKs).
+
+On the RTO the client arms an F-RTO episode (undo context captured before the
+ssthresh/cwnd reduction, frtoHighSeq = snd_max) and retransmits the head
+segment. The server, which already holds all 3000 bytes, answers with a full
+cumulative ACK of 3001. The segmentsAcked() scoreboard scan finds the range
+[1001..3001) with transmitCount == 1 -- never retransmitted, so the original
+transmissions must have been delivered -- proving the timeout spurious: the
+pre-RTO cwnd/ssthresh are restored (undoCwndReduction) and the loss marks are
+dropped.
+
+Falsification: with frtoEnabled=false (verified during development), the same
+scenario leaves the post-RTO cwnd at the slow-start value and the "F-RTO:
+spurious" line never appears; the %not-contains on a second RTO also fails if
+the undo accidentally rearms a bogus retransmission.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script="b2 delete;b3 delete;b4 delete"
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0.5s
+*.cli_app.sendBytes=3000B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.sackSupport = true
+*.*_tcp.frtoEnabled = true
+*.*_tcp.initialWindow = "rfc6928"
+*.*_tcp.advertisedWindow = 20000
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+F-RTO: spurious retransmission timeout detected, undoing the RTO response
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Undoing spurious cwnd reduction
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep -c "Performing retransmission" test.out > test_rexmit_count.out || true
+%contains: test_rexmit_count.out
+1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

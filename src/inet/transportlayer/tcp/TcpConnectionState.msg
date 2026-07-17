@@ -163,6 +163,10 @@ struct TcpStateVariables
     bool delayed_acks_enabled = false;          // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled = false;      // set if Limited Transmit algorithm (RFC 3042) is enabled
     bool seedRttFromHandshake = false;          // from the seedRttFromHandshake parameter
+    bool frtoEnabled = false;                   // from the frtoEnabled parameter (RFC 5682 F-RTO); requires SACK
+    bool frtoActive = false;                    // an RTO fired and its spuriousness is still undecided
+    uint32_t frtoHighSeq = 0;                   // snd_max at the RTO (RFC 5682 recover / Linux high_seq)
+    bool frtoOrigAcked = false;                 // never-retransmitted data was (s)acked since the RTO -> the timeout was spurious
     bool tlpEnabled = false;                    // Tail Loss Probe (RFC 8985 section 7.2, from the tlpEnabled parameter); requires SACK
     uint32_t tlpHighSeq = 0;                    // TLP: snd_max when the probe was sent; nonzero = a probe is outstanding (Linux tlp_high_seq)
     bool tlpRetrans = false;                    // TLP: the outstanding probe was a retransmission of the last segment (vs. new data)

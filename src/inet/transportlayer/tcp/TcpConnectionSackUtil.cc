@@ -121,6 +121,13 @@ bool TcpConnection::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, con
                 if (state->adaptiveReorderingEnabled && newlySackedLow != 0
                         && fackBefore != 0 && seqLess(newlySackedLow, fackBefore))
                     checkSackReordering(newlySackedLow);
+                // F-RTO (RFC 5682 sec 3.1 step 3.b): newlySackedLow skips
+                // ever-retransmitted regions, so a nonzero value during an
+                // undecided RTO episode is exactly "never-retransmitted data
+                // has been SACKed" -- the original flight arrived, the timeout
+                // was spurious. The flavour undoes on the next ACK hook.
+                if (state->frtoActive && newlySackedLow != 0)
+                    state->frtoOrigAcked = true;
             }
             else
                 EV_DETAIL << "Received SACK below total cumulative ACK snd_una=" << state->snd_una << "\n";

@@ -698,6 +698,7 @@ void TcpConnection::configureStateVariables()
     state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary"); // Linux-parity PSH-on-drain
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled");
     state->tlpEnabled = tcpMain->par("tlpEnabled");
+    state->frtoEnabled = tcpMain->par("frtoEnabled");
     state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     const char *initialWindow = tcpMain->par("initialWindow");

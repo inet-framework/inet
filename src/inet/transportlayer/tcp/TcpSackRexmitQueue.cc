@@ -327,6 +327,12 @@ void TcpSackRexmitQueue::resetRexmittedBit()
         elem.rexmitted = false; // reset rexmitted bit
 }
 
+void TcpSackRexmitQueue::resetLost()
+{
+    for (auto& elem : rexmitQueue)
+        elem.lost = false;
+}
+
 uint32_t TcpSackRexmitQueue::getTotalAmountOfSackedBytes() const
 {
     uint32_t bytes = 0;

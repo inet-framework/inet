@@ -159,6 +159,19 @@ void TcpReno::processRexmitTimer(TcpEventCode& event)
     // from 1 full-sized segment to the new value of ssthresh, at which
     // point congestion avoidance again takes over."
 
+    // F-RTO (RFC 5682, SACK-enhanced): open a spurious-RTO detection episode.
+    // Capture the undo context BEFORE the ssthresh/cwnd reduction (sec 3.2:
+    // recurring timeouts on the same SND.UNA keep the ORIGINAL context, hence
+    // the undoMarker guard), and remember snd_max ("recover") so the episode
+    // can be closed once everything outstanding at the RTO is accounted for.
+    if (state->frtoEnabled && state->sack_enabled) {
+        if (state->undoMarker == 0)
+            undoInit();
+        state->frtoActive = true;
+        state->frtoHighSeq = state->snd_max;
+        state->frtoOrigAcked = false;
+    }
+
     // begin Slow Start (RFC 2581)
     recalculateSlowStartThreshold();
     state->snd_cwnd = state->snd_mss;
@@ -175,6 +188,27 @@ void TcpReno::processRexmitTimer(TcpEventCode& event)
 
 void TcpReno::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
 {
+    // F-RTO (RFC 5682 sec 3.1 step 3.b, cumulative side): the scoreboard for
+    // [fromSeq, toSeq) is still intact here. If any part of the newly
+    // cumulatively-acked range was transmitted exactly once -- i.e. NOT part of
+    // the post-RTO retransmissions -- the original flight (or part of it)
+    // arrived at the receiver, so the timeout was spurious.
+    if (state->frtoActive && state->sack_enabled) {
+        const TcpSackRexmitQueue *frq = conn->getRexmitQueue();
+        if (frq != nullptr && frq->getQueueLength() > 0) {
+            for (uint32_t seq = std::max(fromSeq, frq->getBufferStartSeq());
+                 seqLess(seq, std::min(toSeq, frq->getBufferEndSeq())); )
+            {
+                const auto& region = frq->getRegion(seq);
+                if (region.transmitCount <= 1) {
+                    state->frtoOrigAcked = true;
+                    break;
+                }
+                seq = region.endSeqNum;
+            }
+        }
+    }
+
     // Adaptive reordering: if this cumulatively-acked segment was never
     // retransmitted yet sits below already-SACKed data, it was merely reordered
     // (not lost) -- grow the learned reordering degree so it stops causing
@@ -190,9 +224,37 @@ void TcpReno::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
     }
 }
 
+void TcpReno::processFrtoEpisode()
+{
+    if (!state->frtoActive)
+        return;
+    if (state->frtoOrigAcked) {
+        // RFC 5682 step 3.b: never-retransmitted data was (s)acked -- the
+        // original flight arrived, the RTO was spurious. Restore the pre-RTO
+        // cwnd/ssthresh (Linux tcp_try_undo_loss(frto_undo=true) ->
+        // tcp_undo_cwnd_reduction with loss unmarking) and forget the loss
+        // marks: nothing was actually lost.
+        EV_INFO << "F-RTO: spurious retransmission timeout detected, undoing the RTO response\n";
+        undoCwndReduction();
+        conn->getRexmitQueueForUpdate()->resetLost();
+        state->afterRto = false;
+        state->rexmit_count = 0; // Linux clears icsk_retransmits on the undo
+        state->frtoActive = false;
+        state->frtoOrigAcked = false;
+    }
+    else if (seqGE(state->snd_una, state->frtoHighSeq)) {
+        // everything outstanding at the RTO has been accounted for through the
+        // conventional recovery: the loss was real, close the episode.
+        state->frtoActive = false;
+        state->undoMarker = 0;
+    }
+}
+
 void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
 {
     TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
+
+    processFrtoEpisode();
 
     if (state->lossUndoEnabled && mayUndo()) {
         // RFC 2883: every retransmission of this episode has been D-SACKed, so the
@@ -509,6 +571,9 @@ void TcpReno::rackReoTimeout()
 void TcpReno::receivedDuplicateAck()
 {
     TcpTahoeRenoFamily::receivedDuplicateAck();
+
+    // a dupack can carry the SACK of never-retransmitted data (F-RTO step 3.b)
+    processFrtoEpisode();
 
     // In RACK mode a fast retransmit is triggered by time-based loss detection
     // rather than by counting duplicate ACKs.

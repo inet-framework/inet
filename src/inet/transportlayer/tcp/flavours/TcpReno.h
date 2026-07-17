@@ -88,6 +88,9 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
 
     /** TLP probe repaired a real tail loss: CWR-style cwnd reduction. */
     virtual void tlpLossEpisode() override;
+
+    /** F-RTO (RFC 5682): resolve an undecided RTO episode -- undo if proven spurious. */
+    virtual void processFrtoEpisode();
 };
 
 } // namespace tcp
