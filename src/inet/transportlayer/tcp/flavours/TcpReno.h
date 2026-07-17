@@ -61,6 +61,8 @@ class INET_API TcpReno : public TcpTahoeRenoFamily
     //@{
     /** Capture the undo context (marker, priorCwnd/ssthresh) at recovery entry. */
     virtual void undoInit();
+    /** Eifel (RFC 3522): the last ACK's TSecr predates the first retransmission. */
+    virtual bool packetDelayed() const;
     /** True if the cwnd reduction of the current episode may be undone. */
     virtual bool mayUndo() const;
     /** Restore cwnd/ssthresh reduced by a now-known-spurious recovery. Linux tcp_undo_cwnd_reduction(). */

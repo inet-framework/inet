@@ -1170,6 +1170,14 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (bytes > buffered) // last segment?
         bytes = buffered;
 
+    // The post-RTO snd_nxt forwarding above can land exactly at the end of the
+    // send queue (everything from the old snd_nxt was SACKed/retransmitted);
+    // building a zero-byte segment would abort in createSegmentWithBytes()
+    // ("empty chunk"). Report "nothing sent" instead -- callers stop their
+    // send loops on a zero return.
+    if (bytes == 0)
+        return 0;
+
     // Workstream H1 (MSG_EOR): boundaries at or behind snd_una are already fully
     // acked and no longer relevant to anything sendSegment() might build from here
     // on; drop them so the set doesn't grow across a long connection's lifetime.
@@ -1430,6 +1438,8 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     // send whole segments
     while (bytesToSend >= effectiveMss) {
         uint32_t sentBytes = sendSegment(effectiveMss);
+        if (sentBytes == 0) // nothing left at snd_nxt (post-RTO forwarding hit the queue end)
+            break;
         ASSERT(bytesToSend >= sentBytes);
         bytesToSend -= sentBytes;
     }
@@ -1871,6 +1881,11 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
     }
     else
         EV_INFO << "Tcp Header Option TS(TSval=" << option.getSenderTimestamp() << ", TSecr=" << option.getEchoedTimestamp() << ") received\n";
+
+    // Eifel input (RFC 3522 / Linux rx_opt.rcv_tsecr): remember the echo so the
+    // undo logic can compare it against the first retransmission's timestamp.
+    if (tcpHeader->getAckBit() && option.getEchoedTimestamp() != 0)
+        state->lastRcvdTSecr = option.getEchoedTimestamp();
 
     // RFC 1323, page 35:
     // "Check whether the segment contains a Timestamps option and bit

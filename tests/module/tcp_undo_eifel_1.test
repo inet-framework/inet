@@ -1,0 +1,83 @@
+%description:
+TCP Eifel timestamp undo (Workstream D2 refinement, RFC 3522 / Linux
+tcp_packet_delayed): a spurious RTO proven by TIMESTAMPS alone (SACK off, so
+neither D-SACK undo nor F-RTO can trigger).
+
+The client sends one 1000-byte segment with Timestamps negotiated. The tester
+DELAYS the server's ACK of it (b2) by 1.2 s -- past the client's 1 s RTO -- and
+deletes the duplicate ACK (b3) elicited by the resulting retransmission (that
+duplicate echoes the RETRANSMISSION's TSval and would mask the proof). The RTO
+fires, the undo context is captured before the ssthresh/cwnd reduction, and the
+retransmission stamps retransStampTS with the current TS clock. When the
+delayed original ACK finally arrives, its TSecr echoes the ORIGINAL
+transmission's TSval, which is OLDER than retransStampTS: packetDelayed() holds,
+mayUndo() passes without a single D-SACK, and the pre-RTO cwnd/ssthresh are
+restored (undoCwndReduction).
+
+Falsification: with timestampSupport=false (verified during development) the
+same scenario keeps the post-RTO slow-start cwnd and the "Undoing spurious cwnd
+reduction" line never appears -- there is no evidence usable for the undo.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script="b2 delay 1.2;b3 delete"
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0.5s
+*.cli_app.sendBytes=1000B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript=""
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.sackSupport = false
+*.*_tcp.timestampSupport = true
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.lossUndoEnabled = true
+*.*_tcp.frtoEnabled = false
+*.*_tcp.tlpEnabled = false
+*.*_tcp.initialRto = 1s
+*.*_tcp.initialWindow = "rfc6928"
+*.*_tcp.advertisedWindow = 20000
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Undoing spurious cwnd reduction
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep -c "Performing retransmission" test.out > test_rexmit_count.out || true
+%contains: test_rexmit_count.out
+1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

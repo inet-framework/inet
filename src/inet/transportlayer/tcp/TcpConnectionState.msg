@@ -236,7 +236,8 @@ struct TcpStateVariables
     uint32_t undoMarker = 0;       // snd_una at recovery entry; 0 = no undo pending
     int32_t undoRetrans = 0;       // retransmitted segments still to be confirmed spurious (-1 = unknown)
     uint32_t priorSsthresh = 0;    // ssthresh before the reduction (restored on undo)
-    uint32_t retransStampTS = 0;   // TSval echoed on the first retransmit of the episode (Eifel); 0 = none
+    uint32_t retransStampTS = 0;   // our TS-clock value at the FIRST retransmission of the episode (Eifel / Linux retrans_stamp); 0 = none
+    uint32_t lastRcvdTSecr = 0;    // TSecr carried by the most recently received TS-bearing ACK (Eifel spuriousness test input)
     bool dsackSeen = false;        // a D-SACK was seen while processing the current segment (reset per segment)
     uint32_t dsackBytes = 0;       // bytes covered by the D-SACK seen on the current segment
 

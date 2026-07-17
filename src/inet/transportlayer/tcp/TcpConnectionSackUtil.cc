@@ -559,6 +559,8 @@ void TcpConnection::sendDataDuringLossRecoveryPhase(uint32_t congestionWindow)
             break;
 
         uint32_t sentBytes = sendSegmentDuringLossRecoveryPhase(seqNum);
+        if (sentBytes == 0) // sendSegment() had nothing to build at seqNum; avoid spinning on the same NextSeg() answer
+            break;
         // RFC 3517 page 8: "(C.4) The estimate of the amount of data outstanding in the
         // network must be updated by incrementing pipe by the number of
         // octets transmitted in (C.1)."
