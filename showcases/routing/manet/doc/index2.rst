@@ -1,0 +1,600 @@
+Exploring MANET Routing Protocols (Redesigned)
+==============================================
+
+Goals
+-----
+
+Routing in Mobile Ad Hoc Networks (MANETs) is a challenging problem due to the
+dynamically changing network topology, which gave rise to the development of
+many different routing protocols. MANET routing protocols can be classified
+into reactive, proactive, and location-based, among others. INET features
+various routing protocols for MANETs from different categories.
+
+In this showcase, we'll look at three representative MANET routing protocols: a
+reactive protocol (AODV), a proactive protocol (DSDV), and a location-based
+protocol (GPSR). We'll explore each of them through three example simulations.
+
+| Verified with INET version: ``4.6``
+| Source files location: `inet/showcases/routing/manet <https://github.com/inet-framework/inet/tree/master/showcases/routing/manet>`__
+
+.. admonition:: In one minute
+
+   - The scenario: ``source`` pings ``destination`` once per second, but the two
+     are out of communication range of each other — intermediate nodes moving at
+     25 meters per second must forward every packet, and routes break as the
+     nodes move.
+   - Reactive **AODV** discovers routes on demand (RREQ/RREP messages) and
+     repairs them after route-error (RERR) broadcasts. We lower
+     :par:`activeRouteTimeout` from the default 3s to 1s and :par:`deletePeriod`
+     from 15s to 0.5s so it reacts faster to the rapidly changing topology.
+   - Proactive **DSDV** keeps all routes up to date with periodic hello messages
+     (:par:`helloInterval` lowered from 5s to 1s, :par:`routeLifetime` from 5s to
+     2s), so data is sent with less delay — at the cost of continuous
+     maintenance traffic.
+   - Location-based **GPSR** maintains no routes at all: packets are forwarded
+     greedily toward the destination's geographic coordinates, and around voids
+     in perimeter mode.
+   - The page first gives protocol background (the About sections), then one
+     simulation per protocol, each with videos of the routing in action.
+
+.. video:: media/Aodv5_s.mp4
+   :width: 60%
+   :align: center
+
+**AODV discovers a multi-hop route on demand, and when a moving node breaks the
+route, a route-error broadcast triggers rediscovery — the ping traffic between
+two nodes that are never in direct range continues on a new route.**
+
+About MANETs
+------------
+
+MANETs are ad hoc networks comprised of mobile wireless nodes. Given the
+mobile nature of the nodes, the network topology can change over time. The
+nodes create their own network infrastructure: each node also acts as a
+router, forwarding traffic in the network. MANET routing protocols need to
+adapt to changes in the network topology and maintain routing information so
+that packets can be forwarded to their destinations.
+
+Although MANET routing protocols are mainly for mobile networks, they can
+also be useful for networks of stationary nodes that lack network
+infrastructure.
+
+.. todo::
+
+   <!-- TODO: keywords: autonomous, wireless, self-configuring, continuously maintain information to properly route. each node is a router, forwarding traffic not mean for him. transport layer ? -->
+
+There are two main types of MANET routing protocols, reactive and proactive
+(although there are others which don't fit into either category):
+
+- **Reactive (on-demand) protocols** update routing information when there is
+  an immediate demand for it, i.e. one of the nodes wants to send a packet and
+  there is no working route to the destination. Then, they exchange route
+  discovery messages and forward the packet. The routes stay the same until
+  there is an error in a packet's forwarding, i.e. the packet cannot be
+  forwarded anymore due to a change in the network topology. Examples include
+  AODV, DSR, ABR, etc.
+- **Proactive (table-driven) protocols** continuously maintain routing
+  information so the routes in the network are always up to date. This update
+  typically involves periodic routing maintenance messages exchanged
+  throughout the network. These protocols use more maintenance transmissions
+  than reactive ones to make sure the routing information is always up to date
+  (they update it even when there is no change in the network topology).
+  Examples include DSDV, OLSR, Babel, etc.
+
+Reactive protocols require less overhead than proactive protocols (there are
+no messages concerning routing when the routes don't change) but also might
+react more slowly to changes in the network topology. In the case of
+proactive protocols, due to the up-to-date nature of routing information,
+latency is lower than in the case of reactive protocols.
+
+There are other types of MANET routing protocols, such as Hybrid (both
+reactive and proactive), Hierarchical, and Geographical routing. INET
+features several routing protocols, for MANETs and other uses (including
+wired and wireless cases). See the
+`/inet/src/inet/routing <https://github.com/inet-framework/inet/tree/master/src/inet/routing>`__
+directory for the available routing protocols.
+
+The example simulations in this showcase feature the reactive protocol
+Ad hoc On-Demand Distance Vector routing (AODV), the proactive protocol
+Destination-Sequenced Distance Vector routing (DSDV), and the geo routing
+protocol Greedy Perimeter Stateless Routing (GPSR). The following sections
+detail these three protocols briefly.
+
+About AODV
+~~~~~~~~~~
+
+AODV is a reactive (or on-demand) MANET routing protocol, and as such, it
+maintains routes for which there is a demand in the network (i.e. packets are
+frequently sent on the route). AODV maintains a routing table with the next
+hop for reaching destinations. Routes time out after a while if not used
+(i.e. no packets are sent on them). AODV features the following routing
+message types:
+
+-  RREQ: Route request
+-  RREP: Route reply
+-  RERR: Route error
+
+Route discovery works as follows:
+
+- When a node wants to send a packet and it doesn't know the route to the
+  destination, it initiates route discovery by sending an RREQ multicast
+  message.
+- The neighboring nodes record where the message came from and forward it to
+  their neighbors until the message gets to the destination node.
+- The destination node replies with an RREP, which gets back to the source on
+  the reverse path along which the RREQ came. Forward routes are set up in the
+  intermediate nodes as the RREP travels back to the source.
+- An intermediate node can also send an RREP in reply to a received RREQ if it
+  knows the route to the destination — thus nodes can join an existing route.
+- When the RREP arrives at the source, and the route is created, communication
+  can begin between the source and the destination.
+
+If a route no longer works due to a link break, i.e. messages cannot be
+forwarded on it, a RERR message is broadcast by the node which detects the
+link break, and other nodes re-broadcast it. The RERR message indicates the
+destination which is unreachable. Nodes receiving the message make the route
+inactive (and eventually, the route is deleted). The next packet to be sent
+triggers route discovery.
+
+As a reactive protocol, generally, AODV has less overhead (less route
+maintenance messages) than proactive ones, but setting up new routes takes
+time while packets are waiting to be delivered. (Note that the routing
+protocol overhead depends on the mobility level in the network.)
+
+.. admonition:: Details — optional hello messages
+
+   Even though AODV is a reactive protocol, nodes can send periodic hello
+   messages to discover links to neighbors and update the status of these
+   links. This mechanism is local (hello messages are only sent to neighbors,
+   and not forwarded), and it can make the network more responsive to local
+   topology changes. By default, hello messages are turned off in INET's AODV
+   implementation.
+
+About DSDV
+~~~~~~~~~~
+
+DSDV is a proactive (or table-driven) MANET routing protocol, so it makes
+sure routing information in the network is always up-to-date. Each node
+maintains a routing table with the best route to each destination. The
+routing table contains routing entries for all possible destinations known
+either directly because it's a neighbor, or indirectly through neighbors.
+
+A routing entry contains the destination's IP address, last known sequence
+number, hop count required to reach the destination, and the next hop.
+Routing information is frequently updated so all nodes have the best routes
+in the network. Routing information is updated in two ways:
+
+-  Nodes broadcast their entire routing table periodically (infrequently)
+-  Nodes broadcast small updates when a change in their routing table occurs
+
+A node updates a routing table entry if it receives a better route. A better
+route is one that has a higher sequence number, or a lower hop count if the
+sequence number is the same.
+
+In general, DSDV has more overhead than reactive routing protocols because
+route maintenance messages are sent all the time. Since the routes are always
+up to date, DSDV has less delay in sending data.
+
+About GPSR
+~~~~~~~~~~
+
+GPSR is a stateless (regarding routes), geographic location-based routing
+protocol. Each node maintains the addresses and geographical coordinates of
+its neighbors, i.e. other nodes in its communication range. Nodes advertise
+their locations periodically by sending beacons.
+
+The neighbor table is kept fresh with little overhead:
+
+- When no beacons are received from a neighboring node for some time, the node
+  is assumed to be out of range, and its table entry is deleted. A table entry
+  for a node is also deleted after link failure.
+- Nodes attach their location data to all sent and forwarded packets as well.
+  Each packet transmission resets the beacon timer, reducing the required
+  protocol overhead in parts of the network with frequent packet traffic.
+
+The protocol is stateless in the context of routes. Nodes only have local
+information about their neighborhood, i.e. the positions of other nodes in
+their communication range, but they don't have information about node
+positions or routes in the network as a whole.
+
+Destination is designated by an IP address, but the destination's location is
+also appended to packets. Packets are routed towards the destination's
+location specified with coordinates. IP addresses are only used to determine
+whether a receiving node is the destination of a packet. The protocol
+operates in one of two modes:
+
+- **Greedy mode:** a node forwards a packet to its neighbor which is
+  geographically closest to the destination node. Thus the packet gets
+  gradually closer to its destination with every hop. If a forwarding node is
+  closer to the destination than any of its neighbors, the node switches the
+  packet to perimeter mode. In this case, the packet must take a route that
+  takes it farther from its destination temporarily — it routes around a
+  *void*, a region without any nodes.
+- **Perimeter routing mode:** the packet can circumnavigate a void. When the
+  packet is in this mode, nodes create a planar graph of their neighboring
+  nodes based on their location, where vertices represent nodes and edges
+  represent possible links between nodes. Nodes use the right-hand rule for
+  forwarding packets, i.e. they forward the packet on the first edge to the
+  right, compared to the edge the packet arrived from. Each node does this
+  until the packet arrives at its destination, or at an intermediate node
+  which is closer to the destination than the one where the packet was
+  switched to perimeter mode. In the latter case, the packet is switched to
+  greedy mode. If the packet is in perimeter mode and would be forwarded again
+  on the first edge of the perimeter, it is discarded (there is no route to
+  the destination).
+
+.. admonition:: Details — tunable parameters and planarization algorithms
+
+   Several parameters of the protocol can be set according to the mobility
+   rate and transmission ranges in the network, such as the interval of
+   beacons and timeout of neighbor location data. Also, there are multiple
+   planarization algorithms available, which can yield different planar graphs
+   and thus result in different behavior of the protocol in certain
+   situations.
+
+Configuration and Results
+-------------------------
+
+This section contains the configuration and results for the three
+simulations, which demonstrate the MANET routing protocols ``AODV``, ``DSDV``
+and ``GPSR``. The AODV and DSDV simulations use the ``ManetprotocolsShowcaseB``
+network, which features moving hosts. The GPSR simulation uses the
+``ManetprotocolsShowcaseA`` network, featuring stationary hosts. The networks
+are defined in
+:download:`ManetProtocolsShowcase.ned <../ManetProtocolsShowcase.ned>`.
+
+Both networks contain hosts of the type :ned:`ManetRouter`, an extension of
+:ned:`WirelessHost` whose routing module type is configurable:
+
+- Just as :ned:`WirelessHost`, it uses :ned:`Ieee80211Radio` with the scalar
+  analog model by default. The nodes' default PHY model (IEEE 802.11) will
+  suffice because we're focusing on the routing protocols.
+- It has IP forwarding enabled, and its management module is set to
+  :ned:`Ieee80211MgmtAdhoc`.
+
+In the network, there is a source host named ``source``, a destination host
+named ``destination``, and a number of other hosts, which are named ``node1``
+up to ``node10`` (their numbers vary in the different networks). In addition
+to mobile nodes, both networks contain an :ned:`Ieee80211RadioMedium`, an
+:ned:`Ipv4NetworkConfigurator`, and an :ned:`IntegratedMultiCanvasVisualizer`
+module.
+
+In all three simulations, the source node pings the destination node. The two
+nodes are out of communication range of each other, and the other nodes are
+responsible for forwarding packets between the two.
+
+Since routes are managed dynamically by the MANET routing algorithms, the
+:ned:`Ipv4NetworkConfigurator` module is instructed not to add any routes (it
+will only assign IP addresses). The netmask routes added by network
+interfaces are disabled as well. The following keys in the ``General``
+configuration in :download:`omnetpp.ini <../omnetpp.ini>` achieve this:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: configurator
+   :end-at: netmaskRoutes
+
+AODV
+~~~~
+
+The example simulation featuring AODV is defined in the :ned:`Aodv`
+configuration in :download:`omnetpp.ini <../omnetpp.ini>`. This configuration
+uses the ``ManetprotocolsShowcaseB`` network. The network looks like the
+following:
+
+.. figure:: media/networkA.png
+   :width: 50%
+   :align: center
+
+**The stationary source and destination cannot reach each other directly; the
+nodes scattered between them will move in random directions and forward the
+ping traffic.**
+
+The communication ranges are set up so that ``source`` cannot reach
+``destination`` directly, but only through the intermediate nodes. The source
+and destination nodes are stationary, and the other nodes are configured to
+move in random directions. The routing protocols will adapt the routes to the
+changing network topology.
+
+The mobility settings are defined in the ``MobileNodesBase`` configuration in
+:download:`omnetpp.ini <../omnetpp.ini>`; the simulations for AODV and DSDV,
+which feature moving nodes, are based on this configuration. The nodes will be
+moving on linear paths in random directions with a speed of 25 meters per
+second, bouncing back from the edge of the scene:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: LinearMobility
+   :end-at: MinY
+
+The ping app in ``source`` will send one ping request every second to
+``destination``. In INET, AODV is implemented by the :ned:`Aodv` module. This
+module is configured in :download:`omnetpp.ini <../omnetpp.ini>` as the
+routing protocol type in :ned:`ManetRouter`:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: "Aodv"
+   :end-at: "Aodv"
+
+The :ned:`Aodv` module has many parameters for controlling the operation of
+the protocol. All of the parameters have default values, and :ned:`Aodv`
+should work out of the box, without setting any of the parameters. We will
+fine-tune the protocol's behavior to our scenario by setting two of the
+parameters:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: activeRouteTimeout
+   :end-at: deletePeriod
+
+The :par:`activeRouteTimeout` parameter sets the timeout for the active
+routes: if the routes are not used for this period, they become inactive. The
+:par:`deletePeriod` parameter sets the period after which the inactive routes
+are deleted. We lower :par:`activeRouteTimeout` from the default 3s to 1s, and
+:par:`deletePeriod` from the default 15s to 0.5s, to make the protocol react
+faster to the rapidly changing network topology.
+
+.. admonition:: Details — how to choose the timeout values
+
+   In general, the parameters should be set according to the number of nodes
+   in a network, the nodes' mobility levels, traffic, and radio transmission
+   power levels/communication ranges. Higher mobility results in routes
+   becoming invalid faster. Thus the routing protocol can work better — react
+   to topology changes faster — with lower timeout values. However, setting
+   the timeout values too low results in increased routing protocol overhead.
+
+.. video:: media/Aodv5_s.mp4
+   :width: 60%
+   :align: center
+
+   <!--internal video recording, release mode (does it matter?), normal run, animation speed none, zoom 2 (or 1.54 if smaller), fadeOutMode = animationTime in datalink and networkroute visualizers-->
+   <!--playback speed 0.38, normal run until event 1950-->
+
+**An RREQ flood and a returning RREP set up the route
+source → node1 → node6 → destination; when node6 moves out of range, a RERR
+broadcast triggers rediscovery, and the pings continue on the new route
+source → node1 → destination.**
+
+In the video, successful data link layer transmissions are visualized by
+colored arrows; note that only the routing protocol and ping packets are
+visualized, not the ACKs. Routes are visualized with black arrows, and the
+:ned:`RoutingTableVisualizer` is configured to visualize only the routes
+leading to ``destination``. Here is what happens in the video:
+
+- At the beginning of the simulation, ``source`` queues a ping request packet
+  for transmission. There are no routes for ``destination``, so it broadcasts
+  an ``AodvRreq`` message. The RREQ is re-broadcast by the adjacent nodes
+  until it gets to ``destination``.
+- The destination node sends a unicast ``AodvRrep``. It is forwarded on the
+  reverse path the RREQ message arrived on
+  (``destination`` → ``node6`` → ``node1`` → ``source``). As the intermediate
+  nodes receive the RREP message, the routes to ``destination`` are created.
+- When the route is established in ``source``, it sends the ping request
+  packet, which gets to the destination. The ping reply packet gets back to
+  ``source`` on the reverse path.
+- When ``source`` sends the next ping request packet, ``node6`` has already
+  moved out of range of ``destination``. The ping packet gets to ``node6``,
+  but can't get to ``destination`` (``node6`` tries to transmit the packet a
+  few times, but it doesn't get an ACK).
+- So ``node6`` broadcasts an ``AodvRerr`` message, indicating that the link no
+  longer works. When the RERR gets back to ``node1``, it initiates route
+  discovery by broadcasting an RREQ message. When a new route is discovered
+  (``source`` → ``node1`` → ``destination``), the ping traffic can continue.
+
+The following log excerpt shows ``node6`` handling the first RREQ and RREP
+messages:
+
+.. figure:: media/aodvlog3.png
+   :width: 100%
+
+**node6's log confirms the mechanism: the arriving RREQ updates routes back
+toward the originator, and the arriving RREP creates the route to the
+destination before being forwarded on the reverse path.**
+
+DSDV
+~~~~
+
+The example simulation featuring DSDV is defined in the :ned:`Dsdv`
+configuration in :download:`omnetpp.ini <../omnetpp.ini>`. Just like the AODV
+configuration, this one uses the ``ManetprotocolsShowcaseB`` network, and the
+mobility settings are also the same as in the AODV simulation. The ping app in
+``source`` will send a ping request every second.
+
+The DSDV protocol is implemented in the :ned:`Dsdv` module. The routing
+protocol type in all hosts is set to :ned:`Dsdv`:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: "Dsdv"
+   :end-at: "Dsdv"
+
+.. admonition:: Fine print — DSDV implementation scope
+
+   Currently, complete routing table broadcasts are not implemented, only the
+   broadcasting of changes in the routing table using periodic hello messages.
+
+Like :ned:`Aodv` (and most routing protocol modules), :ned:`Dsdv` has many
+parameters with default values that yield a working simulation without any
+configuration. In this simulation, similarly to the previous one, we set two
+parameters of the protocol:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: helloInterval
+   :end-at: routeLifetime
+
+The :par:`helloInterval` parameter controls the frequency of the periodic
+updates, or hello messages. Setting this parameter to a higher value decreases
+the protocol overhead, but the network will react more slowly to changes in
+topology. We lower it from the default 5s to 1s to make the network more
+adaptive to rapid changes.
+
+The :par:`routeLifetime` parameter sets after how long the routes are deleted
+after not being used or updated anymore. We lower this from the default 5s to
+2s.
+
+The following video shows the nodes sending hello messages and routes being
+created at the beginning of the simulation. Note that the black arrows
+represent routes, and routes from all nodes to all destinations are
+visualized here.
+
+.. video:: media/Dsdv1.mp4
+   :width: 60%
+   :align: center
+
+   <!--internal video recording, animation speed none, data link visualizers fadeOutMode set to animation time, zoom 1.54-->
+
+**Hello messages alone are enough to build routes: black-arrow routes from
+every node to every destination appear right at the beginning of the
+simulation.**
+
+The following video shows ``source`` pinging ``destination``:
+
+.. video:: media/DsdvPing1.mp4
+   :width: 60%
+   :align: center
+
+   <!--internal video recording, animation speed none, playback speed 0.38 (seems to have an effect), zoom 1.54, fadeOutMode animation time, run until event 3000, run until next sendPing-->
+
+**The ping packets travel over routes that DSDV already maintains — unlike
+with AODV, no route discovery has to precede the data traffic.**
+
+GPSR
+~~~~
+
+The example simulation featuring GPSR is defined in the ``Gpsr``
+configuration in :download:`omnetpp.ini <../omnetpp.ini>`. It uses the
+``ManetprotocolsShowcaseA`` network. The network looks like the following:
+
+.. figure:: media/networkB.png
+   :width: 90%
+
+**The nodes form a chain around a forest — a void that GPSR can route
+around — with source and destination on opposite sides of it.**
+
+Just as with the previous two configurations, the nodes are
+:ned:`ManetRouter`\ s, laid out along a chain. The transmitter power of the
+radios is configured so that nodes can only reach their neighbors in the
+chain (except for ``node9``, which can reach nodes 11, 5, and 8).
+
+In this example simulation, the nodes will be static (though GPSR is suitable
+for scenarios with moving nodes). The source node will ping the destination
+node, which is on the other side of the void; the ping app in ``source`` will
+send one ping request every second. The hosts' routing protocol type is set
+to :ned:`Gpsr`:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: "Gpsr"
+   :end-at: "Gpsr"
+
+The following video shows running the simulation from the beginning:
+
+.. video:: media/Gpsr1.mp4
+   :width: 90%
+   :align: center
+
+
+   <!--simple screen recorder, 10 fps, normal run-->
+
+**The ping request travels greedily along the chain until node5, is switched
+to perimeter mode to get around the void, and reaches destination — even
+though every node's IP routing table is empty.**
+
+Here is what happens in the video:
+
+- The nodes start sending out GPSR beacons (and learning about the positions
+  of their neighbors).
+- ``source`` sends a ping request packet. It gets forwarded along the chain to
+  ``node9``, which sends it to ``node5``, as it is the closest to the
+  destination among ``node9``'s neighbors.
+- However, ``node5`` doesn't have any neighbors closer to the destination (and
+  it is out of range of ``destination``), thus it switches the packet to
+  perimeter mode. It forwards the ping packet according to the right-hand
+  rule.
+- The packet gets to ``node1`` and then back up along the chain through
+  ``node9`` again. Then ``node10`` switches it back to greedy routing mode,
+  because ``node10`` is closer to the destination than ``node5``, where the
+  packet was switched to perimeter mode. Then the packet arrives at
+  ``destination``.
+
+The reply packet starts off in perimeter mode, as the destination is closer
+to ``source`` than ``destination``'s only neighbor, ``node4``. The packet is
+switched back to greedy mode at ``node10`` because it's closer to ``source``
+than ``destination``. From there, it gets to ``source`` through ``node9`` and
+``node11``.
+
+.. admonition:: Fine print — asymmetric paths and incomplete neighbor knowledge
+
+   Note that the reply packet didn't get back on the same route as the request
+   packet. Also, a packet might not be routed to a closer neighbor because the
+   sender doesn't yet know about it (and its position).
+
+Note that there are no IP routes; the ``ipv4`` module routing tables are
+empty. Instead, :ned:`Gpsr` maintains the positions of the nodes in
+communication range (those that a beacon was received from) and uses that for
+routing decisions. Here is ``node12``'s neighbor position table:
+
+.. figure:: media/positions.png
+   :width: 80%
+
+**All the routing state GPSR needs: the table links node positions with IP
+addresses (it also contains the beacon arrival time) — no IP routing table
+entries at all.**
+
+Further information
+-------------------
+
+The following papers describe the three MANET routing protocols featured
+in this showcase:
+
+-  `Ad hoc On-Demand Distance Vector (AODV)
+   Routing <https://www.rfc-editor.org/info/rfc3561>`__
+-  `Destination-Sequenced Distance Vector (DSDV)
+   Protocol <http://www.netlab.tkk.fi/opetus/s38030/k02/Papers/03-Guoyou.pdf>`__
+-  `GPSR: Greedy Perimeter Stateless Routing for Wireless
+   Networks <http://www.icir.org/bkarp/jobs/gpsr-mobicom2000.pdf>`__
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ManetProtocolsShowcase.ned <../ManetProtocolsShowcase.ned>`
+
+
+Try It Yourself
+---------------
+
+If you already have INET and OMNeT++ installed, start the IDE by typing
+``omnetpp``, import the INET project into the IDE, then navigate to the
+``inet/showcases/routing/manet`` folder in the `Project Explorer`. There, you can view
+and edit the showcase files, run simulations, and analyze results.
+
+Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
+<https://omnetpp.org/opp_env>`__, and run the simulation interactively.
+Ensure that ``opp_env`` is installed on your system, then execute:
+
+.. code-block:: bash
+
+    $ opp_env run inet-4.6 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.6.*/showcases/routing/manet && inet'
+
+This command creates an ``inet-workspace`` directory, installs the appropriate
+versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
+showcase directory for interactive simulation.
+
+Alternatively, for a more hands-on experience, you can first set up the
+workspace and then open an interactive shell:
+
+.. code-block:: bash
+
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.6
+    $ cd inet-workspace
+    $ opp_env shell
+
+Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
+then start exploring.
+
+Discussion
+----------
+
+Use `this
+page <https://github.com/inet-framework/inet-showcases/issues/21>`__ in
+the GitHub issue tracker for commenting on this showcase.

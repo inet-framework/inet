@@ -21,6 +21,7 @@ Communication:
    datalinkactivity/doc/index
    physicallinkactivity/doc/index
    radiomediumactivity/doc/index
+   radiomediumactivity/doc/index2
    routingtable/doc/index
    interfacetable/doc/index
    ieee80211/doc/index

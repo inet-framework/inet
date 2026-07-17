@@ -12,6 +12,7 @@ General Wireless:
    pathloss/doc/index
    directionalantennas/doc/index
    sensornetwork/doc/index
+   sensornetwork/doc/index2
    ieee802154/doc/index
    power/doc/index
    coexistence/doc/index
@@ -26,6 +27,7 @@ IEEE 802.11:
 
    throughput/doc/index
    rateanomaly/doc/index
+   rateanomaly/doc/index2
    handover/doc/index
    ratecontrol/doc/index
    fragmentation/doc/index
