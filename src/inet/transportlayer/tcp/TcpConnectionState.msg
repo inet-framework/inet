@@ -359,6 +359,7 @@ struct TcpStateVariables
     bool fastopenCookieRequested = false;    // server: peer sent an empty-cookie TFO option this SYN
     bool fastopenCookieValid = false;        // server: peer's cookie validated (accelerate this SYN)
     bool fastopenSendCookieOption = false;   // server: echo a (possibly fresh) cookie in the SYN-ACK
+    bool fastopenPeerUsedExpOption = false;  // server: the SYN's cookie/request came in the RFC 7413 Appendix A experimental form (kind 254 + 0xF989); echo in the SAME form, as Linux does
     FastOpenCookie fastopenCookieToSend;     // server: the cookie bytes to echo, if fastopenSendCookieOption
     bool fastopenSynDeferred = false;        // client: connect(fastOpen=true) is waiting for the app's first SEND (or the connEstabTimer safety net) before sending the SYN
     bool fastopenCookieRequestPending = false; // client: no cookie was cached, so the (immediate, dataless) SYN requests one

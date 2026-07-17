@@ -171,7 +171,8 @@ class INET_API Tcp : public TransportProtocolBase
     // the same stream.
     bool fastOpenSecretSeeded = false;
     uint64_t fastOpenSecret = 0;
-    std::map<L3Address, std::vector<uint8_t>> fastOpenCookieCache;
+    struct FastOpenCacheEntry { std::vector<uint8_t> cookie; uint32_t peerMss = 0; };
+    std::map<L3Address, FastOpenCacheEntry> fastOpenCookieCache; // per-destination cookie + learned peer MSS (~ Linux tcp_metrics)
     int fastOpenCookieCacheSize = 0; // read once from the fastopenCookieCacheSize parameter at INITSTAGE_LOCAL
 
     // TCP Fast Open active blackhole detection (RFC 7413 SS4.4-inspired; simplified
@@ -233,13 +234,16 @@ class INET_API Tcp : public TransportProtocolBase
      * cryptographic MAC -- see fastOpenSecret). Not const: lazily seeds fastOpenSecret
      * from the module's RNG on first call.
      */
-    virtual std::vector<uint8_t> generateFastOpenCookie(const L3Address& remoteAddr, int cookieBytes);
+    virtual std::vector<uint8_t> generateFastOpenCookie(const L3Address& localAddr, const L3Address& remoteAddr, int cookieBytes);
 
     /** TCP Fast Open: client-role cookie cache lookup. Returns false if nothing is cached for remoteAddr. */
     virtual bool getFastOpenCookie(const L3Address& remoteAddr, std::vector<uint8_t>& cookie) const;
 
     /** TCP Fast Open: client-role cookie cache update, called on learning a cookie from a peer's SYN-ACK. */
-    virtual void setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8_t>& cookie);
+    virtual void setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8_t>& cookie, uint32_t peerMss);
+
+    /** Peer MSS learned alongside the cached cookie; 0 if no cache entry. */
+    virtual uint32_t getFastOpenCachedMss(const L3Address& remoteAddr) const;
 
     /**
      * TCP Fast Open active blackhole detection: true while active (data-attached)

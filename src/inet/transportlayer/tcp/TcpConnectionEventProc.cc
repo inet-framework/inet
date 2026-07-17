@@ -187,7 +187,18 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
                 // segment and send the data-bearing SYN now.
                 enqueueSendCommandData(packet);
                 uint32_t availableBytes = sendQueue->getBytesAvailable(state->iss + 1);
+                // SYN-payload cap: the peer's MSS cached with the cookie minus
+                // the maximum TCP option space (40) -- Linux sizes the SYN data
+                // from the tcp_metrics-cached MSS, since nothing has been
+                // negotiated yet on this connection (the corpus's over-mss test
+                // pins 1420 = 1460-40, and its third-connection test pins
+                // 900 = a cached 940 - 40).
                 uint32_t capBytes = state->snd_mss > 0 ? state->snd_mss : 536;
+                uint32_t cachedMss = tcpMain->getFastOpenCachedMss(remoteAddr);
+                if (cachedMss > 40)
+                    capBytes = cachedMss - 40;
+                else if (capBytes > 40)
+                    capBytes -= 40;
                 state->fastopenSynDataLen = availableBytes < capBytes ? availableBytes : capBytes;
                 // fastopenSynDeferred stays true through sendSyn() itself: it doubles
                 // as writeHeaderOptions()'s signal that this is a first-ever SYN being

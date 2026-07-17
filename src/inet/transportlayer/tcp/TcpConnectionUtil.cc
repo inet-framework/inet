@@ -911,6 +911,13 @@ void TcpConnection::sendSyn()
     // same as the plain snd_max/snd_nxt assignment below already was.
     uint32_t synDataLen = state->fastopenSynDataLen;
     state->snd_max = state->snd_nxt = state->iss + 1 + synDataLen;
+    if (synDataLen > 0 && rexmitQueue->getBufferEndSeq() == state->iss + 1) {
+        // register the SYN's payload in the SACK scoreboard: SACK is not yet
+        // negotiated when the data-bearing SYN goes out, but if the SYN-ACK
+        // enables it, the handshake ACK's discardUpTo must find the acked
+        // range in the queue (only once -- guarded against SYN retransmits)
+        rexmitQueue->enqueueSentData(state->iss + 1, state->iss + 1 + synDataLen);
+    }
 
     // ECN. Active-open initiation is decided directly from ecnMode, not from the shared
     // ecnWillingness flag (which also covers the passive-accept side, G3.2) -- accecn-passive
@@ -1998,12 +2005,12 @@ bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cooki
         if (cookieLen == 0) {
             // Empty cookie: peer is requesting one for a future connection attempt.
             state->fastopenCookieRequested = true;
-            state->fastopenCookieToSend = tcpMain->generateFastOpenCookie(remoteAddr, state->fastopenCookieBytes);
+            state->fastopenCookieToSend = tcpMain->generateFastOpenCookie(localAddr, remoteAddr, state->fastopenCookieBytes);
             state->fastopenSendCookieOption = true;
             EV_INFO << "Fast Open: cookie requested, generated a fresh one to echo\n";
         }
         else {
-            std::vector<uint8_t> want = tcpMain->generateFastOpenCookie(remoteAddr, cookieLen);
+            std::vector<uint8_t> want = tcpMain->generateFastOpenCookie(localAddr, remoteAddr, cookieLen);
             if (state->fastopenLenientCookieValidation || cookie == want) {
                 state->fastopenCookieValid = true;
                 EV_INFO << "Fast Open: cookie accepted (" << (state->fastopenLenientCookieValidation ? "lenient" : "verified") << ")\n";
@@ -2011,7 +2018,7 @@ bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cooki
             else {
                 // Mismatch under strict validation: refresh, matching RFC 7413's
                 // "always give the client a fresh cookie on failure" guidance.
-                state->fastopenCookieToSend = tcpMain->generateFastOpenCookie(remoteAddr, state->fastopenCookieBytes);
+                state->fastopenCookieToSend = tcpMain->generateFastOpenCookie(localAddr, remoteAddr, state->fastopenCookieBytes);
                 state->fastopenSendCookieOption = true;
                 EV_INFO << "Fast Open: cookie mismatch under strict validation, offering a fresh one\n";
             }
@@ -2019,7 +2026,10 @@ bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cooki
     }
     else { // isClientSynAck
         if (cookieLen > 0) {
-            tcpMain->setFastOpenCookie(remoteAddr, cookie);
+            // remember the peer's announced MSS with the cookie (Linux caches
+            // both in tcp_metrics): the NEXT connect's SYN-payload cap is
+            // cachedMss - 40, before any live MSS negotiation has happened
+            tcpMain->setFastOpenCookie(remoteAddr, cookie, state->snd_mss);
             EV_INFO << "Fast Open: learned a " << cookieLen << "-byte cookie for " << remoteAddr.str() << "\n";
         }
     }
@@ -2044,6 +2054,10 @@ bool TcpConnection::processFastOpenExpOption(const Ptr<const TcpHeader>& tcpHead
     std::vector<uint8_t> cookie(cookieLen);
     for (unsigned int i = 0; i < cookieLen; i++)
         cookie[i] = option.getCookie(i);
+    // Linux echoes the cookie in the same option form the client used
+    // (foc->exp propagates request->response); remember it for the SYN-ACK.
+    if (fsm.getState() == TCP_S_LISTEN)
+        state->fastopenPeerUsedExpOption = true;
     return processFastOpenCookieBytes(cookie);
 }
 
@@ -2098,7 +2112,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 
         // WS header option
         if (state->ws_support && (state->rcv_ws || (fsm.getState() == TCP_S_INIT
-                                                    || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
+                                                    || (fsm.getState() == TCP_S_SYN_SENT && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred)))))
         {
             // 1 padding byte
             tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
@@ -2127,7 +2141,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 
         // SACK_PERMITTED header option
         if (state->sack_support && (state->rcv_sack_perm || (fsm.getState() == TCP_S_INIT
-                                                             || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
+                                                             || (fsm.getState() == TCP_S_SYN_SENT && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred)))))
         {
             if (!state->ts_support) { // if TS is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
@@ -2145,7 +2159,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 
         // TS header option
         if (state->ts_support && (state->rcv_initial_ts || (fsm.getState() == TCP_S_INIT
-                                                            || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
+                                                            || (fsm.getState() == TCP_S_SYN_SENT && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred)))))
         {
             if (!state->sack_support) { // if SACK is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
@@ -2182,12 +2196,25 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         if (state->fastopenServerEnabled && state->fastopenSendCookieOption) {
             tcpHeader->appendHeaderOption(new TcpOptionNop());
             tcpHeader->appendHeaderOption(new TcpOptionNop());
-            TcpOptionTcpFastOpen *option = new TcpOptionTcpFastOpen();
-            option->setCookieArraySize(state->fastopenCookieToSend.size());
-            for (size_t i = 0; i < state->fastopenCookieToSend.size(); i++)
-                option->setCookie(i, state->fastopenCookieToSend[i]);
-            option->setLength(2 + state->fastopenCookieToSend.size());
-            tcpHeader->appendHeaderOption(option);
+            if (state->fastopenPeerUsedExpOption) {
+                // echo in the experimental form the client used (RFC 7413
+                // Appendix A: kind 254 + 0xF989 magic), as Linux does
+                TcpOptionTcpFastOpenExp *option = new TcpOptionTcpFastOpenExp();
+                option->setExpId(0xF989);
+                option->setCookieArraySize(state->fastopenCookieToSend.size());
+                for (size_t i = 0; i < state->fastopenCookieToSend.size(); i++)
+                    option->setCookie(i, state->fastopenCookieToSend[i]);
+                option->setLength(4 + state->fastopenCookieToSend.size());
+                tcpHeader->appendHeaderOption(option);
+            }
+            else {
+                TcpOptionTcpFastOpen *option = new TcpOptionTcpFastOpen();
+                option->setCookieArraySize(state->fastopenCookieToSend.size());
+                for (size_t i = 0; i < state->fastopenCookieToSend.size(); i++)
+                    option->setCookie(i, state->fastopenCookieToSend[i]);
+                option->setLength(2 + state->fastopenCookieToSend.size());
+                tcpHeader->appendHeaderOption(option);
+            }
             EV_INFO << "Tcp Header Option Fast Open cookie (" << state->fastopenCookieToSend.size() << " bytes) sent\n";
         }
 
