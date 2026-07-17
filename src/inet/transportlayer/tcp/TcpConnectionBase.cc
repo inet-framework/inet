@@ -671,6 +671,14 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             ASSERT(connEstabTimer && synRexmitTimer);
             cancelEvent(connEstabTimer);
             cancelEvent(synRexmitTimer);
+            // A TCP Fast Open server may have sent response data from
+            // SYN_RCVD, arming the data-transfer timers (REXMIT/TLP/RACK);
+            // the embryonic connection's send state is abandoned wholesale,
+            // so those timers must not survive the fall back to LISTEN (a
+            // late REXMIT firing in LISTEN walked freshly-reset queues).
+            tcpAlgorithm->connectionClosed();
+            if (rackReoTimer)
+                cancelEvent(rackReoTimer);
             break;
 
         case TCP_S_SYN_RCVD:

@@ -93,7 +93,7 @@ while($sor = <FILE>)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: postrun-command(1).out
 srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
-[1.001 A003] A.1000 > B.2000: A 1:501(500) ack 501 win 5000   Option(s): NOP NOP TS(1000,0)
+[1.001 A003] A.1000 > B.2000: A 1:501(500) ack 501 win 5000   Option(s): NOP NOP TS(1000,2)
 [1.203 B002] A.1000 < B.2000: A ack 501 win 5000   Option(s): NOP NOP TS(1202,1000)
 [1.205 A004] A.1000 > B.2000: A 501:1001(500) ack 501 win 5000   Option(s): NOP NOP TS(1204,1202)
 [1.205 A005] A.1000 > B.2000: A 1001:1501(500) ack 501 win 5000   Option(s): NOP NOP TS(1204,1202)

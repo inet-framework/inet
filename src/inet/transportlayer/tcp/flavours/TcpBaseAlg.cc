@@ -194,6 +194,8 @@ void TcpBaseAlg::connectionClosed()
     cancelEvent(persistTimer);
     cancelEvent(delayedAckTimer);
     cancelEvent(keepAliveTimer);
+    if (tlpTimer != nullptr)
+        cancelEvent(tlpTimer);
 }
 
 void TcpBaseAlg::processTimer(cMessage *timer, TcpEventCode& event)
@@ -504,6 +506,17 @@ void TcpBaseAlg::rttMeasurementCompleteUsingTS(uint32_t echoedTS)
 
 bool TcpBaseAlg::sendData(bool sendCommandInvoked)
 {
+    // TCP Fast Open server (RFC 7413 section 4.2): response data may be sent
+    // from SYN_RCVD, before established() has initialized the congestion
+    // window -- initialize it here, the same initial window a regular
+    // connection would get (Linux initializes the TFO child socket's cwnd at
+    // creation). Only a fastopenSynDataAccepted connection can reach
+    // sendData() with the pre-established cwnd of 0.
+    if (state->snd_cwnd == 0 && state->fastopenSynDataAccepted) {
+        state->snd_cwnd = initialWindow();
+        EV_DETAIL << "Fast Open: initializing CWND to " << state->snd_cwnd << " for SYN_RCVD response data\n";
+    }
+
     // RFC 2581, pages 7 and 8: "When TCP has not received a segment for
     // more than one retransmission timeout, cwnd is reduced to the value
     // of the restart window (RW) before transmission begins.

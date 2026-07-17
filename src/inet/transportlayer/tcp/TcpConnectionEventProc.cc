@@ -163,9 +163,21 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
             break;
 
         case TCP_S_SYN_RCVD:
-            EV_DETAIL << "Queueing up data for sending later.\n";
-            enqueueSendCommandData(packet); // queue up for later
-            EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
+            enqueueSendCommandData(packet);
+            if (state->fastopenSynDataAccepted) {
+                // TCP Fast Open server (RFC 7413 section 4.2): the connection was
+                // created from a SYN whose data was accepted, so the app already
+                // read that data and may respond BEFORE the handshake-completing
+                // ACK arrives -- the response transmits from SYN_RCVD (this is
+                // TFO's data-exchange-during-handshake acceleration; a regular
+                // SYN_RCVD connection keeps queueing until ESTABLISHED).
+                EV_DETAIL << "Fast Open: sending response data during SYN_RCVD\n";
+                tcpAlgorithm->sendCommandInvoked();
+            }
+            else {
+                EV_DETAIL << "Queueing up data for sending later.\n";
+                EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
+            }
             break;
 
         case TCP_S_SYN_SENT:

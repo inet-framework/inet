@@ -965,7 +965,14 @@ void TcpConnection::sendSynAck()
     updateRcvWnd();
     tcpHeader->setWindow(state->rcv_wnd);
 
-    state->snd_max = state->snd_nxt = state->iss + 1;
+    // A SYN-ACK RETRANSMISSION must not roll these back below response data a
+    // TCP Fast Open server already sent from SYN_RCVD (its own REXMIT timer
+    // tracks that data; regressing snd_max here made the next data RTO
+    // compute a zero-length retransmission).
+    if (seqLess(state->snd_nxt, state->iss + 1))
+        state->snd_nxt = state->iss + 1;
+    if (seqLess(state->snd_max, state->snd_nxt))
+        state->snd_max = state->snd_nxt;
 
     // ECN
     if (state->accEcnNegotiated) {
@@ -1131,6 +1138,12 @@ void TcpConnection::sendFin()
     tcpHeader->setSequenceNo(state->snd_nxt);
     tcpHeader->setWindow(updateRcvWnd());
     Packet *fp = new Packet("FIN");
+
+    // RFC 7323: once Timestamps are negotiated, EVERY segment carries the TS
+    // option, a bare FIN included (sendAck()/sendSegment() already do this;
+    // without it the peer's PAWS/RTT bookkeeping never sees the FIN and a
+    // Linux peer's last ACK's TSecr goes backwards).
+    writeHeaderOptions(tcpHeader);
 
     // send it
     sendToIP(fp, tcpHeader);
@@ -1449,6 +1462,15 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // yet been acknowledged, small segments cannot be sent until the outstanding
         // data is acknowledged.
         bool unacknowledgedData = (state->snd_una != state->snd_max);
+        // The unacknowledged SYN's sequence-number slot is not data: a TCP
+        // Fast Open server sending its response from SYN_RCVD still has
+        // snd_una at the SYN (iss) with snd_max = iss+1 -- Nagle must not
+        // hold the sub-MSS response hostage to a handshake segment (Linux's
+        // nagle test walks the data write queue, where the SYN-ACK never
+        // appears, so it sends immediately too).
+        if (unacknowledgedData && fsm.getState() == TCP_S_SYN_RCVD
+                && state->snd_una == state->iss && state->snd_max == state->iss + 1)
+            unacknowledgedData = false;
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
         if (state->nagle_enabled && unacknowledgedData && !containsFin)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
@@ -1554,6 +1576,14 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
     // retransmit one segment at snd_una, and set snd_nxt accordingly (if not called at RTO)
     state->snd_nxt = state->snd_una;
 
+    // The SYN-ACK's sequence slot is not data: a TCP Fast Open server can be
+    // retransmitting response data from SYN_RCVD while the SYN-ACK itself is
+    // still unacknowledged (snd_una == iss; the SYN-REXMIT timer owns that
+    // slot). Data retransmission starts at the first data byte, or the send
+    // and rexmit queues (which begin at iss+1) would be walked out of range.
+    if (fsm.getState() == TCP_S_SYN_RCVD && seqLess(state->snd_nxt, state->iss + 1))
+        state->snd_nxt = state->iss + 1;
+
     // When FIN sent the snd_max - snd_nxt larger than bytes available in queue
     uint32_t bytes = std::min(std::min(state->snd_mss, state->snd_max - state->snd_nxt),
                 sendQueue->getBytesAvailable(state->snd_nxt));
@@ -1572,8 +1602,9 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
     else {
         ASSERT(bytes != 0);
 
+        uint32_t rexmitStart = state->snd_nxt; // == snd_una except for the SYN_RCVD clamp above
         sendSegment(bytes);
-        tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
+        tcpAlgorithm->segmentRetransmitted(rexmitStart, state->snd_nxt);
 
         if (!called_at_rto) {
             if (seqGreater(old_snd_nxt, state->snd_nxt))
@@ -1626,6 +1657,16 @@ bool TcpConnection::sendTlpProbe()
     uint32_t len = std::min(state->snd_mss, outstanding);
     uint32_t start = state->snd_max - len;
 
+    // The unacked SYN-ACK's sequence slot is not in the send queue: a TCP
+    // Fast Open server probing response data from SYN_RCVD still has snd_una
+    // at iss (see retransmitOneSegment's matching clamp).
+    if (fsm.getState() == TCP_S_SYN_RCVD && seqLess(start, state->iss + 1)) {
+        start = state->iss + 1;
+        if (start == state->snd_max)
+            return false;
+        len = state->snd_max - start;
+    }
+
     // RFC 3168: no ECT on retransmissions (classic-ECN rule; see retransmitOneSegment)
     if (state->ect)
         state->rexmit = true;
@@ -1657,6 +1698,12 @@ void TcpConnection::retransmitData()
 
     // retransmit everything from snd_una
     state->snd_nxt = state->snd_una;
+
+    // ... except the unacked SYN-ACK's sequence slot, which is not in the
+    // send queue (TCP Fast Open server data in SYN_RCVD; see
+    // retransmitOneSegment's matching clamp)
+    if (fsm.getState() == TCP_S_SYN_RCVD && seqLess(state->snd_nxt, state->iss + 1))
+        state->snd_nxt = state->iss + 1;
 
     uint32_t bytesToSend = state->snd_max - state->snd_nxt;
 
@@ -1896,7 +1943,19 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
     //   unacceptable segment.
     //   If SEG.SEQ is equal to Last.ACK.sent, then save SEG.[TSval] in
     //   variable TS.Recent."
-    if (state->ts_enabled) {
+    if (tcpHeader->getSynBit() && state->ts_support) {
+        // Handshake segment (SYN or SYN-ACK): its TSval initializes TS.Recent
+        // unconditionally (RFC 7323 section 4.3's last-ACK-sent bookkeeping
+        // cannot accept it -- no ACK has ever been sent yet; and on the
+        // passive side ts_enabled itself only becomes true once the SYN-ACK
+        // goes out). This is what makes the passive side echo the SYN's TSval
+        // in its SYN-ACK, and the active side echo the SYN-ACK's TSval in the
+        // handshake-completing ACK, as Linux does (tcp_store_ts_recent in
+        // both handshake paths).
+        state->ts_recent = option.getSenderTimestamp();
+        EV_DETAIL << "Initializing ts_recent from handshake segment: ts_recent=" << state->ts_recent << "\n";
+    }
+    else if (state->ts_enabled) {
         if (seqLess(option.getSenderTimestamp(), state->ts_recent)) {
             if ((simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) { // PAWS_IDLE_TIME_THRESH = 24 days
                 EV_DETAIL << "PAWS: Segment is not acceptable, TSval=" << option.getSenderTimestamp() << " in " << stateName(fsm.getState()) << " state received: dropping segment\n";
@@ -1904,8 +1963,18 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
             }
         }
         else if (seqLE(tcpHeader->getSequenceNo(), state->last_ack_sent)) { // Note: test is modified according to the latest proposal of the tcplw@cray.com list (Braden 1993/04/26)
-            state->ts_recent = option.getSenderTimestamp();
-            EV_DETAIL << "Updating ts_recent from segment: new ts_recent=" << state->ts_recent << "\n";
+            // ... but never from a segment whose ACK is invalid (acks data we
+            // never sent): options are processed before ACK validation here,
+            // and accepting such a segment's (possibly wild) TSval would arm
+            // PAWS against every subsequent legitimate segment. Linux only
+            // stores ts_recent after the incoming segment passes validation
+            // (the ts_recent/invalid_ack kernel packetdrill test pins this).
+            if (tcpHeader->getAckBit() && seqGreater(tcpHeader->getAckNo(), state->snd_max))
+                EV_DETAIL << "Not updating ts_recent: segment acks unsent data\n";
+            else {
+                state->ts_recent = option.getSenderTimestamp();
+                EV_DETAIL << "Updating ts_recent from segment: new ts_recent=" << state->ts_recent << "\n";
+            }
         }
     }
 

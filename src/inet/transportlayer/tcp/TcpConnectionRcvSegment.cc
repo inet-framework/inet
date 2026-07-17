@@ -1395,7 +1395,16 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
 
         // if segment contains data, wait until data has been forwarded to app before sending ACK,
         // otherwise we would use an old ACKNo
-        if (payloadLength == 0 && fsm.getState() != TCP_S_SYN_RCVD) {
+        //
+        // The handshake-completing ACK (fsm still SYN_RCVD here) is normally
+        // excluded: it only acks the SYN, and the algorithm was just
+        // initialized by established() above. But a TCP Fast Open server may
+        // have sent response DATA from SYN_RCVD -- when the handshake ACK
+        // also acks beyond the SYN-ACK's sequence slot (iss+1), it is a data
+        // ack and must run the algorithm's ack processing, or the data's
+        // REXMIT/probe timers stay armed after everything is acked.
+        bool acksFastOpenData = state->fastopenSynDataAccepted && seqGreater(tcpHeader->getAckNo(), state->iss + 1);
+        if (payloadLength == 0 && (fsm.getState() != TCP_S_SYN_RCVD || acksFastOpenData)) {
             // notify
             tcpAlgorithm->receivedDataAck(old_snd_una);
 
