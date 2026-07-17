@@ -632,7 +632,30 @@ no inet::scheduleAt/After 0-delay sites remain outside the 4 QUIC/SCTP TODOs).
 Also fixed en route: tcpapp_lifecycle_4 assert, pingapp segfault
 (_Rb_tree_increment), AODVLifecycleTest unknown-parameter error, udp-app
 undisposed ActiveOperationTimeout (context/ownership), Ldp shutdown landmine
-(ASSERT(false) on synchronously closed listener).
+(ASSERT(false) on synchronously closed listener), ESTABLISHED-indication
+ownership warning (created in reconcile caller's context, deleted in the
+connection's — now built inside the context switcher, `dcb02312b8`).
+
+### 4.8 shutdownrestart TCP -r 2 — TRIAGED: master-latent (2026-07-17)
+
+r2 = scenario_iface.xml (cli[0] node bounce 3–6s, **eth[0] ifdown 9s / ifup
+12s**, node bounce 15–18s). At t=9.1357 the client app closes and TCP emits a
+FIN while eth[0] is down → `Ipv4::encapsulate` throws "Wrong source address
+10.0.0.10 ... no interface with such address"
+(`rt->getInterfaceByAddress(src) == nullptr` for the down interface). The
+identical check+throw exists verbatim on master (Ipv4.cc:1065); only the
+branch's shifted TCP timing lands a FIN inside the down-window at this seed —
+NOT a branch bug. **Draft upstream issue (do not file without approval):**
+"Ipv4 aborts the simulation when a transport protocol sends while its
+interface is down. In examples/inet/shutdownrestart (TCP, scenario_iface.xml)
+a FIN emitted during the interface-down window makes Ipv4::encapsulate throw
+'Wrong source address ...: no interface with such address'. A down interface
+should arguably drop the datagram (with a packetDropped signal), as a real
+stack would, instead of terminating the simulation with cRuntimeError.
+Reproducible on master with timing that places any TCP segment inside an
+ifdown window." Options if the example should be green meanwhile: pin the
+app's close time outside 9–12s in the ini, or mark the run expected-ERROR in
+the fingerprint store.
 
 **Incidental find + fix:** `TcpGenericServerApp::socketDeleted` deleted the socket while
 `~TcpSocket` was invoking the callback → infinite recursion → stack overflow at network
