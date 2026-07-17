@@ -119,7 +119,14 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
             i->rexmitted = true;
             i->lastSentTime = simTime();
             i->transmitCount++;
-            i->lost = false;
+            // Deliberately KEEP i->lost: a lost mark persists across the
+            // retransmission until the data is cumulatively or selectively
+            // acked (Linux keeps TCPCB_LOST alongside TCPCB_SACKED_RETRANS --
+            // lost_out and retrans_out coexist in tcp_packets_in_flight()).
+            // Clearing it here made setPipe() count a retransmitted lost head
+            // under BOTH its rules ((a) not-lost and (b) retransmitted), one
+            // segment high, which starved PRR's ssthresh-pipe cap right after
+            // the fast retransmit and stalled recovery into the RTO.
             fromSeqNum = i->endSeqNum;
             found = true;
             i++;
