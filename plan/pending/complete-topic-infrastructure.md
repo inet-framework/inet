@@ -489,10 +489,24 @@ the Phase 2 history rewrite (fix commits get squashed into their logical parents
       pins=['omnetpp=git@omnetpp-6.x'], isolation='none', toolchain='none')`
       (worker "levy" is this machine; restart `opp_ci-worker@levy.service` first if
       opp_repl changed).
-- [ ] 4.4 **[sonnet]** opp_ci validation run, pinned to the exact commit SHA:
-      `submit_run(project='inet', kind='validation', git_ref=<SHA>, pins=['omnetpp=git@omnetpp-6.x'], isolation='none', toolchain='none')`
-      (coordinator `https://ci.omnetpp.dev/api`; worker "levy" is this machine — restart
-      `opp_ci-worker@levy.service` first if opp_repl changed).
+- [x] 4.4 **DONE 2026-07-16, run locally via the opp_repl MCP server** (the opp_ci
+      submission needed OPP_CI_API_TOKEN; instead the validation kind was executed
+      directly at `3d921f9f3f`). Method: programmatically defined the project combo
+      in the live REPL (`define_omnetpp_project("omnetpp", root=companion)` +
+      `define_simulation_project("inet", version="topic-infrastructure",
+      root=worktree, ...)` mirroring inet.opp), enabled the **TSNTests** feature
+      (NED-only, owns tests/validation/tsn; was initiallyEnabled=false so the
+      disabled-feature exclusion hid the validation configs), then ran the four
+      TSN validation tasks from `inet.test.validation` with mode=release,
+      build=False. **All 4 PASS**: framereplication (simulated success rate
+      0.657841 vs analytical 0.656671/0.655942, tol 0.01), creditbasedshaper
+      (per-class e2e delay min/max/mean/stddev inside the reference envelope,
+      means within 0.05%, maxQueueLength 2 < 4), asynchronousshaper core4inet +
+      icct (PASS). NOTE: the 4 QUIC validation task builders in
+      python/inet/test/validation.py reference tests/validation/quic which exists
+      neither on this branch nor on master — upstream python/tests inconsistency;
+      `get_validation_test_tasks()` IndexErrors on them, so the TSN task functions
+      were invoked directly.
 - [ ] 4.5 Fix → rerun loop until green. Fixes are amended into the logical commit while the
       branch is still unpublished; separate commits only for genuinely new findings.
 - **Checkpoint:** all suites pass (or diffs justified + committed); opp_ci validation green.
