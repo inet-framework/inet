@@ -1,0 +1,70 @@
+%description:
+Atomic protocolelement test: source port (learning the sender's port).
+
+SendFromPort stamps a SourcePortHeader carrying the sender's port (1234). ReceiveFromPort pops that
+header and records the port into an L4PortInd tag, without dropping the packet. Together with the
+source L3 address element this lets a receiver reconstruct who to reply to.
+
+%file: PeSourcePort.cc
+
+#include "ProtocolTest.h"
+#include "inet/protocolelement/selectivity/SourcePortHeader_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_source_port)
+{
+    return ProtocolTest("pe_source_port")
+        // the sender stamps its port into the source port header
+        .once(on("sender").signal("packetPushedOut")
+                  .match([](const MatchContext& c) {
+                      auto h = c.event.packet->peekAtFront<SourcePortHeader>();
+                      return h != nullptr && h->getSourcePort() == 1234;
+                  })
+                  .describe("the packet carrying source port 1234").within(1.5))
+        // the receiver records the sender's port as an L4PortInd on the delivered packet
+        .once(on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      const auto& ind = c.event.packet->findTag<L4PortInd>();
+                      return ind != nullptr && ind->getSrcPort() == 1234;
+                  })
+                  .describe("the delivered packet tagged with source port 1234").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeSourcePortNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_source_port"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.sender.port = 1234
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.selectivity.SendFromPort;
+import inet.protocolelement.selectivity.ReceiveFromPort;
+import inet.protocoltest.ProtocolTester;
+
+network PeSourcePortNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        sender: SendFromPort { @display("p=100,200"); }
+        receiver: ReceiveFromPort { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> sender.in;
+        sender.out --> receiver.in;
+        receiver.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_source_port: PASS

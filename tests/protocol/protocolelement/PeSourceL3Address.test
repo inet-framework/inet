@@ -1,0 +1,73 @@
+%description:
+Atomic protocolelement test: source L3 address (learning the sender).
+
+SendFromL3Address stamps a SourceL3AddressHeader carrying the sender's address (10.0.0.5).
+ReceiveFromL3Address pops that header and records the sender into an L3AddressInd tag, without
+dropping the packet. The test checks the header carries the right source address on egress and that
+the receiver surfaces it as an indication tag on delivery.
+
+%file: PeSourceL3Address.cc
+
+#include "ProtocolTest.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/protocolelement/selectivity/SourceL3AddressHeader_m.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_source_l3address)
+{
+    return ProtocolTest("pe_source_l3address")
+        // the sender stamps its own address into the source address header
+        .once(on("sender").signal("packetPushedOut")
+                  .match([](const MatchContext& c) {
+                      auto h = c.event.packet->peekAtFront<SourceL3AddressHeader>();
+                      return h != nullptr && h->getSourceAddress() == L3Address(Ipv4Address("10.0.0.5"));
+                  })
+                  .describe("the packet carrying source address 10.0.0.5").within(1.5))
+        // the receiver records the sender as an L3AddressInd on the delivered packet
+        .once(on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      const auto& ind = c.event.packet->findTag<L3AddressInd>();
+                      return ind != nullptr && ind->getSrcAddress() == L3Address(Ipv4Address("10.0.0.5"));
+                  })
+                  .describe("the delivered packet tagged with source 10.0.0.5").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeSourceL3AddressNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_source_l3address"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.sender.address = "10.0.0.5"
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.selectivity.SendFromL3Address;
+import inet.protocolelement.selectivity.ReceiveFromL3Address;
+import inet.protocoltest.ProtocolTester;
+
+network PeSourceL3AddressNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        sender: SendFromL3Address { @display("p=100,200"); }
+        receiver: ReceiveFromL3Address { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> sender.in;
+        sender.out --> receiver.in;
+        receiver.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_source_l3address: PASS
