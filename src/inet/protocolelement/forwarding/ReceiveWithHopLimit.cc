@@ -28,7 +28,6 @@ void ReceiveWithHopLimit::initialize(int stage)
 void ReceiveWithHopLimit::processPacket(Packet *packet)
 {
     auto header = packet->popAtFront<HopLimitHeader>();
-    packet->popAtFront<HopLimitHeader>();
     packet->addTag<HopLimitInd>()->setHopLimit(header->getHopLimit());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&AccessoryProtocol::forwarding);
 }

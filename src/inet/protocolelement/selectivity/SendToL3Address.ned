@@ -7,15 +7,12 @@
 
 package inet.protocolelement.selectivity;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketFlowBase;
 
-simple SendToL3Address extends SimpleModule
+simple SendToL3Address extends PacketFlowBase
 {
     parameters:
         @class(SendToL3Address);
         string address;
         @display("i=block/tx");
-    gates:
-        input in;
-        output out;
 }

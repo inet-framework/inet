@@ -7,16 +7,14 @@
 
 package inet.protocolelement.acknowledgement;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketFlowBase;
 
-simple SendWithAcknowledge extends SimpleModule
+simple SendWithAcknowledge extends PacketFlowBase
 {
     parameters:
         @class(SendWithAcknowledge);
         double acknowledgeTimeout @unit(s);
         @display("i=block/rxtx");
     gates:
-        input in;
         input ackIn;
-        output out;
 }

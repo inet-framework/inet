@@ -7,14 +7,11 @@
 
 package inet.protocolelement.forwarding;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketFilterBase;
 
-simple ReceiveWithHopLimit extends SimpleModule
+simple ReceiveWithHopLimit extends PacketFilterBase
 {
     parameters:
         @class(ReceiveWithHopLimit);
         @display("i=block/rx");
-    gates:
-        input in;
-        output out;
 }

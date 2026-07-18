@@ -7,14 +7,11 @@
 
 package inet.protocolelement.dispatching;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketPusherBase;
 
-simple ReceiveWithProtocol extends SimpleModule
+simple ReceiveWithProtocol extends PacketPusherBase
 {
     parameters:
         @class(ReceiveWithProtocol);
         @display("i=block/rx");
-    gates:
-        input in;
-        output out;
 }

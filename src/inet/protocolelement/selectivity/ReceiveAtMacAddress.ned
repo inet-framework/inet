@@ -7,15 +7,12 @@
 
 package inet.protocolelement.selectivity;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketFilterBase;
 
-simple ReceiveAtMacAddress extends SimpleModule
+simple ReceiveAtMacAddress extends PacketFilterBase
 {
     parameters:
         @class(ReceiveAtMacAddress);
         string address;
         @display("i=block/rx");
-    gates:
-        input in;
-        output out;
 }

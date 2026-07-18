@@ -7,15 +7,12 @@
 
 package inet.protocolelement.forwarding;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketFlowBase;
 
-simple SendWithHopLimit extends SimpleModule
+simple SendWithHopLimit extends PacketFlowBase
 {
     parameters:
         @class(SendWithHopLimit);
         int hopLimit;
         @display("i=block/tx");
-    gates:
-        input in;
-        output out;
 }

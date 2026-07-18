@@ -7,20 +7,17 @@
 
 package inet.protocolelement.selectivity;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketFlowBase;
 
 //
 // Adds a destination port header to packets. The header contains the configured
 // destination port and is used by the corresponding ReceiveAtPort module to
 // filter packets.
 //
-simple SendToPort extends SimpleModule
+simple SendToPort extends PacketFlowBase
 {
     parameters:
         @class(SendToPort);
         int port;
         @display("i=block/tx");
-    gates:
-        input in;
-        output out;
 }

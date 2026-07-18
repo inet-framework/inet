@@ -7,15 +7,12 @@
 
 package inet.protocolelement.selectivity;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketFlowBase;
 
-simple SendToMacAddress extends SimpleModule
+simple SendToMacAddress extends PacketFlowBase
 {
     parameters:
         @class(SendToMacAddress);
         string address = default("");
         @display("i=block/tx");
-    gates:
-        input in;
-        output out;
 }

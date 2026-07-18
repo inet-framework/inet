@@ -7,15 +7,12 @@
 
 package inet.protocolelement.forwarding;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketPusherBase;
 
-simple Forwarding extends SimpleModule
+simple Forwarding extends PacketPusherBase
 {
     parameters:
         @class(Forwarding);
         string address = default("");
         @display("i=block/tx");
-    gates:
-        input in;
-        output out;
 }
