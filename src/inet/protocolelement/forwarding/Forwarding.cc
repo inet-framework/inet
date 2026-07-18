@@ -82,8 +82,11 @@ void Forwarding::pushPacket(Packet *packet, const cGate *gate)
     auto destinationAddress = header->getDestinationAddress();
     if (!address.isUnspecified() && destinationAddress == address) {
         // addressed to us: hand it up for local delivery. The DestinationL3AddressHeader is
-        // left in place -- ReceiveAtL3Address is what checks and pops it.
+        // left in place -- ReceiveAtL3Address is what checks and pops it. Set both the dispatch
+        // request and the packet protocol to destinationL3Address so a MessageDispatcher treats
+        // this as an indication (going up) rather than a request (going down).
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&AccessoryProtocol::destinationL3Address);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::destinationL3Address);
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else {

@@ -8,7 +8,7 @@
 #include "inet/protocolelement/selectivity/SendToMacAddress.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/selectivity/DestinationMacAddressHeader_m.h"
@@ -29,31 +29,16 @@ void SendToMacAddress::initialize(int stage)
     }
 }
 
-void SendToMacAddress::pushPacket(Packet *packet, const cGate *inGate)
-{
-    Enter_Method("pushPacket");
-    take(packet);
-    handleMessage(packet);
-}
-
-void SendToMacAddress::handleCanPushPacketChanged(const cGate *outGate)
-{
-    producer.handleCanPushPacketChanged();
-}
-
 void SendToMacAddress::processPacket(Packet *packet)
 {
+    // use the requested destination MAC if present (set by NextHopMacResolver for forwarded data),
+    // otherwise the configured address (broadcast, used by acks)
     const auto& macAddressReq = packet->findTag<MacAddressReq>();
     auto destinationAddress = macAddressReq != nullptr ? macAddressReq->getDestAddress() : address;
     auto header = makeShared<DestinationMacAddressHeader>();
     header->setDestinationAddress(destinationAddress);
     packet->insertAtFront(header);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::destinationMacAddress);
-}
-
-void SendToMacAddress::handlePushPacketProcessed(Packet *packet, const cGate *gate, bool successful)
-{
-    producer.handlePushPacketProcessed(packet, successful);
 }
 
 } // namespace inet
