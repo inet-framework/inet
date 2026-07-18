@@ -307,7 +307,8 @@ the companion file **[ELEMENTS.md](ELEMENTS.md)**. The table below is the index.
 | `backoff` | CSMA-style contention backoff | `ExponentialBackoff` (window doubles per attempt via `TransmissionAttemptReq`) |
 | `dispatching` | numeric protocol-id header | `SendWithProtocol`, `ReceiveWithProtocol` |
 | `forwarding` | hop-by-hop forwarding + hop limit | `Forwarding`, `SendWithHopLimit`, `ReceiveWithHopLimit` |
-| `selectivity` | destination + source address/port addressing | `SendTo{L3Address,MacAddress,Port}`/`ReceiveAt{…}` (destination), `SendFrom{L3Address,Port}`/`ReceiveFrom{…}` (source) |
+| `selectivity` | destination + source address/port addressing | `SendTo{L3Address,MacAddress,Port}`/`ReceiveAt{…}` (destination), `SendFrom{L3Address,MacAddress,Port}`/`ReceiveFrom{…}` (source), `NextHopMacResolver` (static L3→MAC) |
+| `medium` | simplified shared wireless medium | `SimplifiedRadioMedium` (broadcast + range + loss; not a real RadioMedium) |
 | `aggregation` | sub-packet aggregation (policy-driven) | `SubpacketLengthHeaderBasedAggregator`/`Deaggregator` |
 | `fragmentation` | fragment/defragment (policy-driven) + preemption | `FragmentNumberHeaderBasedFragmenter`, `PreemptableStreamer` |
 | `checksum` | FCS / Internet checksum insert+check | `ChecksumHeaderInserter`/`Checker`, `EthernetFcs…` |

@@ -290,6 +290,30 @@ what lets a receiver learn who to reply to.
 - **Gates:** `input in`, `output out`.
 - **Header/tag:** inserts `SourcePortHeader` (`sourcePort`, `B(2)`, `insertAtFront`); no tags read or written. Registers service+protocol for `AccessoryProtocol::sourcePort` on `in`/`out`.
 
+### `SendFromMacAddress` / `ReceiveFromMacAddress` (simple modules)
+- **Role/base:** source-MAC inserter / reader — C++ base `PacketFlowBase`. Registration-free (mid-stack transforms).
+- **Does:** `SendFromMacAddress.processPacket` prepends a `SourceMacAddressHeader` with the configured `address` (this interface's MAC). `ReceiveFromMacAddress.processPacket` pops it and records `MacAddressInd.srcAddress`. On a shared medium this is what lets `ReceiveWithAcknowledge` unicast the ack back to the frame's sender.
+- **Parameters:** `SendFromMacAddress.address: string` (this interface's MAC); `ReceiveFromMacAddress` has none.
+- **Header/tag:** `SourceMacAddressHeader` (`sourceAddress`, `B(6)`); reader writes `MacAddressInd` (`srcAddress`).
+
+### `NextHopMacResolver` (simple module)
+- **Role/base:** static L3→L2 resolver ("ARP") — C++ base `PacketFlowBase`.
+- **Does:** `processPacket` reads `NextHopAddressReq` (next-hop L3, set by `Forwarding`), looks it up in the configured `neighbors` table, and sets `MacAddressReq.destAddress` so `SendToMacAddress` can unicast the forwarded frame to the next hop.
+- **Parameters:** `neighbors: string = default("")` — `"l3address macaddress; ..."`.
+- **Header/tag:** reads `NextHopAddressReq`; writes `MacAddressReq`. No header.
+
+---
+
+## medium
+
+Not a protocol element — a minimal PHY/medium used by the reliable-wireless example.
+
+### `SimplifiedRadioMedium` (simple module, C++ based on `WireJunction`)
+- **Role/base:** shared broadcast medium — `SimpleModule`, `cListener`.
+- **Does:** a frame transmitted on one `radio[]` gate is relayed (as a `Signal`, over MULTI-mode `DatarateChannel`s) to every OTHER **in-range** radio after the channel's propagation delay. `ranges` limits which radios hear each other (empty = fully connected); `packetLossProbability` drops in-range deliveries (drives retransmission+backoff). No SNR/capture or collision modelling — deliberately simplified; NOT INET's real `RadioMedium`.
+- **Parameters:** `ranges: string = default("")` (adjacency `"i j; ..."`); `packetLossProbability: double = default(0)`.
+- **Gates:** `inout radio[]`.
+
 ---
 
 
