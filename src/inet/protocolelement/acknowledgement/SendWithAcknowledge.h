@@ -18,6 +18,7 @@ class INET_API SendWithAcknowledge : public PacketFlowBase
 {
   protected:
     simtime_t acknowledgeTimeout = -1;
+    cGate *ackInGate = nullptr;
 
     int sequenceNumber = -1;
     std::map<int, cMessage *> timers;
@@ -25,7 +26,11 @@ class INET_API SendWithAcknowledge : public PacketFlowBase
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
-    virtual void processPacket(Packet *packet) override;
+    // Unused: pushPacket() is overridden, so the base never calls processPacket().
+    virtual void processPacket(Packet *packet) override {}
+
+  public:
+    virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };
 
 } // namespace inet
