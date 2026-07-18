@@ -306,7 +306,7 @@ the companion file **[ELEMENTS.md](ELEMENTS.md)**. The table below is the index.
 | `acknowledgement` | stop-and-wait ARQ | `SendWithAcknowledge`, `ReceiveWithAcknowledge`, `Resending` |
 | `dispatching` | numeric protocol-id header | `SendWithProtocol`, `ReceiveWithProtocol` |
 | `forwarding` | hop-by-hop forwarding + hop limit | `Forwarding`, `SendWithHopLimit`, `ReceiveWithHopLimit` |
-| `selectivity` | address/port addressing | `SendTo{L3Address,MacAddress,Port}`, `ReceiveAt{…}` |
+| `selectivity` | destination + source address/port addressing | `SendTo{L3Address,MacAddress,Port}`/`ReceiveAt{…}` (destination), `SendFrom{L3Address,Port}`/`ReceiveFrom{…}` (source) |
 | `aggregation` | sub-packet aggregation (policy-driven) | `SubpacketLengthHeaderBasedAggregator`/`Deaggregator` |
 | `fragmentation` | fragment/defragment (policy-driven) + preemption | `FragmentNumberHeaderBasedFragmenter`, `PreemptableStreamer` |
 | `checksum` | FCS / Internet checksum insert+check | `ChecksumHeaderInserter`/`Checker`, `EthernetFcs…` |
@@ -316,7 +316,7 @@ the companion file **[ELEMENTS.md](ELEMENTS.md)**. The table below is the index.
 | `cutthrough` | cut-through switching | `CutthroughSource`, `CutthroughSink` |
 | `transceiver` | packet⇄stream transmission boundary | `PacketTransmitter`/`Receiver`, `Streaming…`, `StreamThrough…` |
 | `common` | utility flows + protocol glue | `PacketEmitter`, `Packet(De)Serializer/Streamer`, `AccessoryProtocol` |
-| `lifetime` | packet lifetime expiry | `CarrierBasedLifeTimer` |
+| `lifetime` | packet lifetime expiry | `SendWithLifetime`/`ReceiveWithLifetime` (time-based TTL), `CarrierBasedLifeTimer` |
 | `measurement` / `processing` / `socket` / `trafficconditioner` | compound layers | `MeasurementLayer`, `ProcessingDelayLayer`, … + `Omitted…` |
 | `service` | assembled reliable-data layers | `DataService`, `MacService`, … |
 | `contract` | the shared `moduleinterface`s | `IProtocolLayer`, `IProtocolHeader{Inserter,Checker}`, `IPacketLifeTimer` |

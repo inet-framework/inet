@@ -178,7 +178,10 @@ A family of matched inserter/filter pairs — for L3 address, MAC address, and t
 a demultiplexing pipeline route/filter packets based on a small header field (destination L3 address,
 destination MAC address, or destination port number) instead of needing full protocol-specific parsing;
 each "SendTo..." module tags/labels a packet for a destination, and the matching "ReceiveAt..." module
-filters for packets addressed to itself and strips the header again.
+filters for packets addressed to itself and strips the header again. The package also carries the
+*source*-side counterparts ("SendFrom.../ReceiveFrom...") for L3 address and port: these stamp the
+sender's identity on egress and surface it as an indication tag on ingress (they never drop), which is
+what lets a receiver learn who to reply to.
 
 ### `DestinationL3AddressHeader` (msg chunk, not a module)
 - **Fields:** `destinationAddress: L3Address`; `chunkLength = B(4)`.
@@ -190,6 +193,14 @@ filters for packets addressed to itself and strips the header again.
 
 ### `DestinationPortHeader` (msg chunk, not a module)
 - **Fields:** `destinationPort: int`; `chunkLength = B(2)`.
+- Extends `FieldsChunk`.
+
+### `SourceL3AddressHeader` (msg chunk, not a module)
+- **Fields:** `sourceAddress: L3Address`; `chunkLength = B(4)`.
+- Extends `FieldsChunk`.
+
+### `SourcePortHeader` (msg chunk, not a module)
+- **Fields:** `sourcePort: int`; `chunkLength = B(2)`.
 - Extends `FieldsChunk`.
 
 ### `ReceiveAtL3Address` (simple module)
@@ -213,6 +224,20 @@ filters for packets addressed to itself and strips the header again.
 - **Gates:** `input in`, `output out`.
 - **Header/tag:** pops `DestinationPortHeader` (`destinationPort`, `B(2)`) on match; no tags written. Registers service+protocol for `AccessoryProtocol::destinationPort` on `in`/`out`.
 
+### `ReceiveFromL3Address` (simple module)
+- **Role/base:** header reader — C++ base `PacketFlowBase` (a plain flow, **not** a filter: it never drops).
+- **Does:** `processPacket` pops the `SourceL3AddressHeader` and copies its `sourceAddress` into an `L3AddressInd` tag (`srcAddress`) so higher elements know who sent the packet. The source-address counterpart of `ReceiveAtL3Address`.
+- **Parameters:** none.
+- **Gates:** `input in`, `output out`.
+- **Header/tag:** pops `SourceL3AddressHeader` (`sourceAddress`, `B(4)`); writes `L3AddressInd` (`srcAddress`). Registers service+protocol for `AccessoryProtocol::sourceL3Address` on `in`/`out`.
+
+### `ReceiveFromPort` (simple module)
+- **Role/base:** header reader — C++ base `PacketFlowBase` (never drops).
+- **Does:** `processPacket` pops the `SourcePortHeader` and copies its `sourcePort` into an `L4PortInd` tag (`srcPort`). The source-port counterpart of `ReceiveAtPort`.
+- **Parameters:** none.
+- **Gates:** `input in`, `output out`.
+- **Header/tag:** pops `SourcePortHeader` (`sourcePort`, `B(2)`); writes `L4PortInd` (`srcPort`). Registers service+protocol for `AccessoryProtocol::sourcePort` on `in`/`out`.
+
 ### `SendToL3Address` (simple module)
 - **Role/base:** header inserter — C++ base `PacketFlowBase`.
 - **Does:** `processPacket` builds a `DestinationL3AddressHeader` with the configured `address` and prepends it, then marks the packet for re-dispatch as `AccessoryProtocol::forwarding` and tags it `PacketProtocolTag = AccessoryProtocol::destinationL3Address`.
@@ -233,6 +258,20 @@ filters for packets addressed to itself and strips the header again.
 - **Parameters:** `port: int` (no default) — the destination port number stamped on every outgoing packet.
 - **Gates:** `input in`, `output out`.
 - **Header/tag:** inserts `DestinationPortHeader` (`destinationPort`, `B(2)`, `insertAtFront`); no tags read or written. Registers service+protocol for `AccessoryProtocol::destinationPort` on `in`/`out`.
+
+### `SendFromL3Address` (simple module)
+- **Role/base:** header inserter — C++ base `PacketFlowBase`.
+- **Does:** `processPacket` builds a `SourceL3AddressHeader` with the configured `address` (this node's own L3 address, resolved as an `Ipv4Address`), prepends it, and tags `PacketProtocolTag = AccessoryProtocol::sourceL3Address`. The source-address counterpart of `SendToL3Address`.
+- **Parameters:** `address: string` (no default) — this sender's L3 address, stamped into the source address header.
+- **Gates:** `input in`, `output out`.
+- **Header/tag:** inserts `SourceL3AddressHeader` (`sourceAddress`, `B(4)`, `insertAtFront`); writes `PacketProtocolTag = AccessoryProtocol::sourceL3Address`. Registers service+protocol for `AccessoryProtocol::sourceL3Address` on `in`/`out`.
+
+### `SendFromPort` (simple module)
+- **Role/base:** header inserter — C++ base `PacketFlowBase`.
+- **Does:** `processPacket` builds a `SourcePortHeader` with the configured `port` and prepends it. The source-port counterpart of `SendToPort`.
+- **Parameters:** `port: int` (no default) — the sender's port, stamped into the source port header.
+- **Gates:** `input in`, `output out`.
+- **Header/tag:** inserts `SourcePortHeader` (`sourcePort`, `B(2)`, `insertAtFront`); no tags read or written. Registers service+protocol for `AccessoryProtocol::sourcePort` on `in`/`out`.
 
 ---
 
@@ -896,7 +935,28 @@ Utility/atomic flow elements reused across protocol stacks: serialization, strea
 
 ## lifetime
 
-Packet-expiry/lifetime watchdogs — not queueing-pipeline flow elements, but signal-driven collection watchers implementing `IPacketLifeTimer`.
+Packet-expiry elements. Two flavours: a signal-driven collection watchdog implementing
+`IPacketLifeTimer` (`CarrierBasedLifeTimer`), and an on-wire time-to-live inserter/checker pair
+(`SendWithLifetime`/`ReceiveWithLifetime`) that stamps a creation time and drops over-age packets — the
+time-based analogue of the hop-limit (space-based) pair in `forwarding`.
+
+### `LifetimeHeader` (msg chunk, not a module)
+- **Fields:** `creationTime: simtime_t`; `chunkLength = B(4)`.
+- Extends `FieldsChunk`.
+
+### `SendWithLifetime` (simple module)
+- **Role/base:** header inserter — C++ base `PacketFlowBase`.
+- **Does:** `processPacket` builds a `LifetimeHeader` with `creationTime = simTime()`, prepends it, and tags `PacketProtocolTag = AccessoryProtocol::lifetime`. The time analogue of `SendWithHopLimit`.
+- **Parameters:** none.
+- **Gates:** `input in`, `output out`.
+- **Header/tag:** inserts `LifetimeHeader` (`creationTime`, `B(4)`, `insertAtFront`); writes `PacketProtocolTag = AccessoryProtocol::lifetime`. Registers service+protocol for `AccessoryProtocol::lifetime` on `in`/`out`.
+
+### `ReceiveWithLifetime` (simple module)
+- **Role/base:** header checker / drop filter — C++ base `PacketFilterBase`.
+- **Does:** `matchesPacket` peeks the `LifetimeHeader` and returns true only if `simTime() - creationTime <= maxLifetime`; over-age packets are dropped by the framework. `processPacket` (matches only) pops the header. The time analogue of `ReceiveWithHopLimit`.
+- **Parameters:** `maxLifetime: double @unit(s)` (no default) — packets older than this when they arrive are dropped.
+- **Gates:** `input in`, `output out`.
+- **Header/tag:** peeks/pops `LifetimeHeader` (`creationTime`, `B(4)`); no tags written. Registers service+protocol for `AccessoryProtocol::lifetime` on `in`/`out`.
 
 ### `CarrierBasedLifeTimer` (simple) — `lifetime/CarrierBasedLifeTimer.ned/.h/.cc`
 - **Role/base:** NED `extends SimpleModule like IPacketLifeTimer` (`@class(CarrierBasedLifeTimer)` declared twice in the `.ned`). C++ base matches: `SimpleModule`, `cListener`.
