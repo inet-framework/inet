@@ -1,0 +1,68 @@
+%description:
+Atomic protocolelement test: stop-and-wait acknowledgement (happy path).
+
+The full ARQ loop: Resending holds each packet and (re)sends copies; SendWithAcknowledge numbers
+each packet, transmits it, and starts an acknowledgement timeout; ReceiveWithAcknowledge forwards
+the data and returns an acknowledgement on its ack gate; the acknowledgement cancels the timeout
+and reports success back up so Resending releases the packet. With a lossless link every packet is
+acknowledged on the first try, so the sink receives each source packet exactly once (no
+retransmissions). Four source packets -> exactly four deliveries.
+
+%file: PeAcknowledge.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_acknowledge)
+{
+    return ProtocolTest("pe_acknowledge")
+        // exactly four delivered (one per source packet: acknowledged, never retransmitted)
+        .betweenTimes(4, 4, on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getDataLength() == B(100);
+                  })
+                  .describe("an acknowledged data packet at the sink").within(1.9));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeAcknowledgeNet
+sim-time-limit = 2s
+cmdenv-express-mode = true
+*.tester.testName = "pe_acknowledge"
+*.source.packetLength = 100B
+*.source.productionInterval = 0.5s
+*.sender.acknowledgeTimeout = 0.1s
+*.resending.numRetries = 3
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.acknowledgement.Resending;
+import inet.protocolelement.acknowledgement.SendWithAcknowledge;
+import inet.protocolelement.acknowledgement.ReceiveWithAcknowledge;
+import inet.protocoltest.ProtocolTester;
+
+network PeAcknowledgeNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,75"); }
+        resending: Resending { @display("p=100,150"); }
+        sender: SendWithAcknowledge { @display("p=100,225"); }
+        receiver: ReceiveWithAcknowledge { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,375"); }
+    connections:
+        source.out --> resending.in;
+        resending.out --> sender.in;
+        sender.out --> receiver.in;
+        receiver.out --> sink.in;
+        receiver.ackOut --> sender.ackIn;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_acknowledge: PASS

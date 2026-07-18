@@ -1,0 +1,74 @@
+%description:
+Atomic protocolelement test: acknowledgement retransmission on loss.
+
+An OrdinalBasedDropper on the data link drops the very first transmitted packet, so no
+acknowledgement comes back for it. SendWithAcknowledge's timeout must therefore fire and report
+failure, prompting Resending to retransmit; the retransmission is not dropped and gets through.
+The sink thus receives nothing until after the acknowledgement timeout (0.1s) and only then the
+retransmitted packet -- proving the timeout + retransmit path works.
+
+%file: PeAcknowledgeRetransmit.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_acknowledge_retransmit)
+{
+    return ProtocolTest("pe_acknowledge_retransmit")
+        // the first packet is dropped, so nothing is delivered before the ack timeout (0.1s)
+        .never(on("sink").signal("packetPushed")
+                  .describe("any delivery before the acknowledgement timeout").within(0.09))
+        // after the timeout, Resending retransmits and the packet finally reaches the sink
+        .once(on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getDataLength() == B(100);
+                  })
+                  .describe("the retransmitted packet delivered after the timeout").within(0.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeAcknowledgeRetransmitNet
+sim-time-limit = 2s
+cmdenv-express-mode = true
+*.tester.testName = "pe_acknowledge_retransmit"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.sender.acknowledgeTimeout = 0.1s
+*.resending.numRetries = 3
+*.dataDropper.dropsVector = "0;"
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.filter.OrdinalBasedDropper;
+import inet.protocolelement.acknowledgement.Resending;
+import inet.protocolelement.acknowledgement.SendWithAcknowledge;
+import inet.protocolelement.acknowledgement.ReceiveWithAcknowledge;
+import inet.protocoltest.ProtocolTester;
+
+network PeAcknowledgeRetransmitNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,50"); }
+        resending: Resending { @display("p=100,120"); }
+        sender: SendWithAcknowledge { @display("p=100,190"); }
+        dataDropper: OrdinalBasedDropper { @display("p=100,260"); }
+        receiver: ReceiveWithAcknowledge { @display("p=100,330"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> resending.in;
+        resending.out --> sender.in;
+        sender.out --> dataDropper.in;
+        dataDropper.out --> receiver.in;
+        receiver.out --> sink.in;
+        receiver.ackOut --> sender.ackIn;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_acknowledge_retransmit: PASS
