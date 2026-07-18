@@ -37,6 +37,12 @@ const char *getEventKindName(EventKind kind)
         case EventKind::SentToPeer: return "sentToPeer";
         case EventKind::ReceivedFromPeer: return "receivedFromPeer";
         case EventKind::Dropped: return "dropped";
+        case EventKind::Pushed: return "pushed";
+        case EventKind::PushedIn: return "pushedIn";
+        case EventKind::PushedOut: return "pushedOut";
+        case EventKind::Pulled: return "pulled";
+        case EventKind::PulledIn: return "pulledIn";
+        case EventKind::PulledOut: return "pulledOut";
         default: return "other";
     }
 }
@@ -65,6 +71,14 @@ void ProtocolTester::initialize()
     signalKinds[packetSentToPeerSignal] = EventKind::SentToPeer;
     signalKinds[packetReceivedFromPeerSignal] = EventKind::ReceivedFromPeer;
     signalKinds[packetDroppedSignal] = EventKind::Dropped;
+    // queueing-layer signals -- let the tester observe packet flow through
+    // inet.queueing / inet.protocolelement processing modules, not just protocol nodes.
+    signalKinds[packetPushedSignal] = EventKind::Pushed;
+    signalKinds[packetPushedInSignal] = EventKind::PushedIn;
+    signalKinds[packetPushedOutSignal] = EventKind::PushedOut;
+    signalKinds[packetPulledSignal] = EventKind::Pulled;
+    signalKinds[packetPulledInSignal] = EventKind::PulledIn;
+    signalKinds[packetPulledOutSignal] = EventKind::PulledOut;
 
     // Subscribe network-wide (PcapRecorder style): signals propagate to ancestor
     // listeners, so attaching at the network module catches every node.
@@ -109,7 +123,9 @@ void ProtocolTester::subscribeStateSignals()
     // are subscribed here and delivered to the intval_t receiveSignal overload.
     static const std::set<std::string> packetSignals = {
         "packetSentToLower", "packetReceivedFromLower", "packetSentToUpper",
-        "packetReceivedFromUpper", "packetSentToPeer", "packetReceivedFromPeer", "packetDropped"
+        "packetReceivedFromUpper", "packetSentToPeer", "packetReceivedFromPeer", "packetDropped",
+        "packetPushed", "packetPushedIn", "packetPushedOut",
+        "packetPulled", "packetPulledIn", "packetPulledOut"
     };
     auto collect = [&](const EventPattern& p) {
         if (!p.selSignal.empty() && packetSignals.find(p.selSignal) == packetSignals.end())
