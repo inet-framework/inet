@@ -22,6 +22,7 @@ void ReceiveWithProtocol::pushPacket(Packet *packet, const cGate *gate)
     auto protocol = Protocol::findProtocol(header->getProtocolId());
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    pushOrSendPacket(packet, outputGate, consumer);
 }
 
 } // namespace inet
