@@ -1,0 +1,61 @@
+%description:
+Atomic protocolelement test: forwarding drops a packet with no matching route.
+
+SendToL3Address addresses a packet to 10.0.0.99. Forwarding sits on node 10.0.0.1 whose routing
+table only has a route to 10.0.0.10. The destination is neither this node nor a known route, so
+Forwarding drops the packet (NO_ROUTE_FOUND) and it never reaches the sink. This exercises the
+explicit no-route path, distinct from local delivery.
+
+%file: PeForwardingNoRoute.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_forwarding_noroute)
+{
+    return ProtocolTest("pe_forwarding_noroute")
+        .once(on("forwarding").signal("packetDropped")
+                  .describe("the forwarder dropping the unroutable packet").within(1.5))
+        .never(on("sink").signal("packetPushed")
+                  .describe("any delivery to the sink").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeForwardingNoRouteNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_forwarding_noroute"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.sender.address = "10.0.0.99"
+*.forwarding.address = "10.0.0.1"
+*.forwarding.routes = "10.0.0.10 10.0.0.2 0"
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.selectivity.SendToL3Address;
+import inet.protocolelement.forwarding.Forwarding;
+import inet.protocoltest.ProtocolTester;
+
+network PeForwardingNoRouteNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        sender: SendToL3Address { @display("p=100,200"); }
+        forwarding: Forwarding { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> sender.in;
+        sender.out --> forwarding.in;
+        forwarding.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_forwarding_noroute: PASS
