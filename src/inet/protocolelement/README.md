@@ -304,6 +304,7 @@ the companion file **[ELEMENTS.md](ELEMENTS.md)**. The table below is the index.
 | Subsystem | Concern | Key elements |
 |-----------|---------|--------------|
 | `acknowledgement` | stop-and-wait ARQ | `SendWithAcknowledge`, `ReceiveWithAcknowledge`, `Resending` |
+| `backoff` | CSMA-style contention backoff | `ExponentialBackoff` (window doubles per attempt via `TransmissionAttemptReq`) |
 | `dispatching` | numeric protocol-id header | `SendWithProtocol`, `ReceiveWithProtocol` |
 | `forwarding` | hop-by-hop forwarding + hop limit | `Forwarding`, `SendWithHopLimit`, `ReceiveWithHopLimit` |
 | `selectivity` | destination + source address/port addressing | `SendTo{L3Address,MacAddress,Port}`/`ReceiveAt{…}` (destination), `SendFrom{L3Address,Port}`/`ReceiveFrom{…}` (source) |

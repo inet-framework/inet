@@ -111,7 +111,7 @@ element consumes the sequence-numbered data and emits an acknowledgement packet 
 - **Does:** Holds at most one in-flight packet (`canPushSomePacket`/`canPushPacket` return false while one is outstanding). On push, duplicates and forwards the packet downstream; `handlePushPacketProcessed` is the completion callback — if the push succeeded or the retry budget (`numRetries`) is exhausted, it reports completion to the producer and clears state; otherwise it re-duplicates and re-sends the same packet, incrementing `retry`.
 - **Parameters:** `numRetries: int` (no default in NED; must be set in config) — maximum number of resend attempts before giving up.
 - **Gates:** inherited from `PacketPusherBase`: `input in`, `output out`.
-- **Header/tag:** none — operates purely on push/duplicate semantics, no chunk inserted/removed and no tags read/written.
+- **Header/tag:** no chunk inserted/removed; stamps a `TransmissionAttemptReq` tag (`attempt` = its `retry` counter, 0-based) on each pushed duplicate so downstream elements (e.g. `ExponentialBackoff`) can size their behaviour to the attempt number.
 
 ### `SendWithAcknowledge` (simple module)
 - **Role/base:** header inserter + ack-timeout tracker — C++ base `PacketFlowBase`.
@@ -119,6 +119,23 @@ element consumes the sequence-numbered data and emits an acknowledgement packet 
 - **Parameters:** `acknowledgeTimeout: double @unit(s)` (no default) — how long to wait for an ack before treating the send as failed.
 - **Gates:** `input in`, `input ackIn`, `output out`.
 - **Header/tag:** inserts `SequenceNumberHeader` (ordering module, `insertAtFront`) on egress data packets; pops `AcknowledgeHeader` on packets arriving with protocol `AccessoryProtocol::acknowledge`; sets `PacketProtocolTag` to `AccessoryProtocol::withAcknowledge` on outgoing data and reads `PacketProtocolTag` to distinguish ack vs. data packets. Registers service for `AccessoryProtocol::withAcknowledge` on `in`/`out` and `AccessoryProtocol::acknowledge` on `ackIn`.
+
+## backoff
+A contention-backoff delayer for shared-medium/CSMA-style access. Unlike a plain `PacketDelayer` with a
+random `delay` (which is memoryless), the backoff window here **doubles with each successive transmission
+attempt**, which a fixed distribution cannot express. The attempt number is carried on the packet, so the
+element stays stateless and orthogonal.
+
+### `TransmissionAttemptReq` (tag, not a module)
+- **Fields:** `attempt: int = 0` — which (re)transmission attempt the packet represents, counting from 0.
+- Extends `TagBase`. Set by a retransmission element (`Resending`) and read by `ExponentialBackoff`. Lives in `common/`.
+
+### `ExponentialBackoff` (simple module)
+- **Role/base:** attempt-scaled random delayer — C++ base `PacketDelayerBase` (overrides `computeDelay`), NED `extends PacketDelayerBase like IPacketDelayer`.
+- **Does:** reads the packet's `TransmissionAttemptReq` tag (attempt `a`, default 0 if absent), computes the exponent `E = min(minBackoffExponent + a, maxBackoffExponent)` and contention window `CW = 2^E - 1`, then delays the packet by `intuniform(0, CW) * slotTime` (using RNG 0). The delay is applied by the `PacketDelayerBase` machinery (schedules, then pushes). Truncated binary exponential backoff — the window doubles per attempt up to the cap.
+- **Parameters:** `slotTime: double @unit(s) = default(20us)` — one backoff slot; `minBackoffExponent: int = default(1)` — exponent for the first attempt (`CW_min = 2^this - 1`); `maxBackoffExponent: int = default(10)` — exponent cap (`CW_max = 2^this - 1`).
+- **Gates:** `input in`, `output out` (from `PacketDelayerBase`).
+- **Header/tag:** reads `TransmissionAttemptReq` (`attempt`); no chunk inserted/removed. Forwards protocol registration transparently (`TransparentProtocolRegistrationListener`), so a registering module directly upstream must initialize first (declare it before the upstream sender in NED) to avoid the `getRegistrationForwardingGate` init-order error.
 
 ## dispatching
 Adds/removes a lightweight numeric protocol-id header so a generic downstream module can be told which
