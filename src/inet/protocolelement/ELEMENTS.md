@@ -46,11 +46,14 @@ source on `master`, worth knowing before building on or copying these elements.
 - `service/DataService` instantiates `FragmentNumberHeaderBasedDefragmenter` for
   **both** its outbound `fragmenter` *and* inbound `defragmenter` submodules —
   the egress path has no real fragmenter. Looks like a copy-paste bug.
-- `forwarding/ReceiveWithHopLimit::processPacket` pops `HopLimitHeader` **twice**
-  in a row (second result discarded).
-- `forwarding/Forwarding::findNextHop` is a hard-coded `// KLUDGE` table
-  (recognizes only `10.0.0.10` from sources `10.0.0.1/.2/.7`) — a tutorial-grade
-  router, not a general one.
+- `forwarding/ReceiveWithHopLimit::processPacket` popped `HopLimitHeader` **twice**
+  in a row (second result discarded). *(Fixed on this branch.)*
+- `forwarding/Forwarding::findNextHop` was a hard-coded `// KLUDGE` table
+  (recognized only `10.0.0.10` from sources `10.0.0.1/.2/.7`), it walked the module
+  hierarchy for the outgoing interface, and it fabricated the destination MAC from
+  the next-hop IP. *(Replaced on this branch with a NED-parameter `routes` table,
+  `NextHopAddressReq`/`InterfaceReq` tags, and standard interface-table resolution;
+  see the `Forwarding` entry below.)*
 - `selectivity/ReceiveAtMacAddress` re-dispatches unconditionally to
   `AccessoryProtocol::sequenceNumber` (hard-coded `// KLUDGE`) and sets the
   containing NIC's MAC address as an `initialize()` side effect.
@@ -141,16 +144,16 @@ tag), and dynamically forwards protocol (de)registration requests to the correct
 - **Header/tag:** inserts `ProtocolHeader` (`protocolId`, `B(2)`, `insertAtFront`) built from the packet's `PacketProtocolTag`; does not itself set the tag. No fixed protocol registration (registrations are proxied dynamically per the protocol requested by peers).
 
 ## forwarding
-Implements a minimal, test-oriented hop-by-hop L3 forwarding element (next-hop/interface lookup with a
-hard-coded topology) together with a paired hop-limit header inserter/checker (TTL-like mechanism) that
-decrements/validates the number of remaining hops a packet may travel.
+Implements a minimal hop-by-hop L3 forwarding element (next-hop/interface lookup driven by a
+configurable route table) together with a paired hop-limit header inserter/checker (TTL-like mechanism)
+that decrements/validates the number of remaining hops a packet may travel.
 
 ### `Forwarding` (simple module)
 - **Role/base:** next-hop lookup / router — C++ base `PacketPusherBase`.
-- **Does:** On `pushPacket`, clears any existing `DispatchProtocolReq`, peeks the packet's `DestinationL3AddressHeader` to get the destination, and calls `findNextHop()` — a **hard-coded/KLUDGE lookup table** (only recognizes destination `10.0.0.10` from source addresses `10.0.0.1`/`10.0.0.2`/`10.0.0.7`, returning a fixed next hop and outgoing interface index; otherwise returns unspecified/-1). If no next hop is found (destination reached / unknown), it pops the `DestinationL3AddressHeader` and re-dispatches the packet as protocol `AccessoryProtocol::destinationL3Address`. If a next hop is found, it looks up the corresponding sibling `interface` submodule by index, sets `InterfaceReq` to that interface's id, constructs a synthetic destination MAC address by encoding the low byte of the next-hop IPv4 address, sets `MacAddressReq`, tags the packet `PacketProtocolTag = AccessoryProtocol::forwarding` and `DispatchProtocolReq = AccessoryProtocol::hopLimit`, trims the front (removes already-consumed regions), and pushes/sends it onward.
-- **Parameters:** `address: string = default("")` — this node's own L3 address (resolved via `L3AddressResolver`), used to determine this hop's position in the hard-coded next-hop table.
+- **Does:** On `pushPacket`, clears any existing `DispatchProtocolReq` and peeks the packet's `DestinationL3AddressHeader` to get the destination. Then it takes exactly one of three explicit branches: **(1) local delivery** — if the destination equals this node's `address`, it dispatches the packet as `AccessoryProtocol::destinationL3Address` (up to `ReceiveAtL3Address`) and **leaves the header in place** for the receiver to check and pop; **(2) forward** — otherwise it calls `findNextHop()`, a lookup over the parsed `routes` table, and if a route matches it tags the packet with `NextHopAddressReq` (the next-hop L3 address), `InterfaceReq` (the resolved outgoing interface id), `PacketProtocolTag = AccessoryProtocol::forwarding` and `DispatchProtocolReq = AccessoryProtocol::hopLimit`, then pushes it onward; **(3) no route** — if no route matches, it `dropPacket(..., NO_ROUTE_FOUND)`. `findNextHop()` is kept `virtual` as the extension seam for a smarter routing policy.
+- **Parameters:** `address: string = default("")` — this node's own L3 address (resolved via `L3AddressResolver`); a packet destined to it is delivered locally. `routes: string = default("")` — the static routing table, `"destination nextHop [interface]"` entries separated by `;`. `interfaceTableModule: string = default("")` — when set, each route's interface field is an **index** resolved to an interface id via that table (`IInterfaceTable::getInterface(index)`); when empty, the field is used as a literal interface id (which makes the element unit-testable with no node hierarchy).
 - **Gates:** `input in`, `output out`.
-- **Header/tag:** reads/pops `DestinationL3AddressHeader` (selectivity module, `destinationAddress`, `B(4)`) when at the final hop; reads/writes tags `DispatchProtocolReq`, `InterfaceReq`, `MacAddressReq`, `PacketProtocolTag`. Registers service+protocol for `AccessoryProtocol::forwarding` on `in`/`out` (both directions).
+- **Header/tag:** peeks `DestinationL3AddressHeader` (selectivity module, `destinationAddress`, `B(4)`) but never pops it; reads/writes tags `DispatchProtocolReq`, `NextHopAddressReq`, `InterfaceReq`, `PacketProtocolTag`. Registers service+protocol for `AccessoryProtocol::forwarding` on `in`/`out` (both directions). *(Previously carried three testing-only kludges — a hard-coded next-hop table, a module-hierarchy walk for the interface, and a fabricated MAC — now removed; see the quirks list.)*
 
 ### `HopLimitHeader` (msg chunk, not a module)
 - **Fields:** `hopLimit: int`; `chunkLength = B(2)`.
