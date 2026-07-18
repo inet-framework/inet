@@ -1,0 +1,75 @@
+%description:
+Atomic protocolelement test: exponential backoff, small attempt -> small window.
+
+ExponentialBackoff delays a packet by intuniform(0, 2^E - 1) * slotTime, where the exponent E grows
+with the transmission attempt carried in the packet's TransmissionAttemptReq tag. Here a packet is
+injected with attempt 1, minBackoffExponent 0 and slotTime 1s, so E = 1, the contention window is
+CW = 1, and the delay is at most 1 slot = 1s. The packet must therefore always reach the sink within
+1s -- proving the window is small for a low attempt (an over-large or fixed window would routinely
+exceed this). The complementary "window grows with attempt" case is PeBackoffGrows.
+
+%file: PeBackoff.cc
+
+#include "ProtocolTest.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/protocolelement/common/TransmissionAttemptTag_m.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static Packet *makeAttemptPacket(const char *name, int attempt)
+{
+    auto packet = new Packet(name);
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+    packet->addTagIfAbsent<TransmissionAttemptReq>()->setAttempt(attempt);
+    return packet;
+}
+
+Define_ProtocolTest(pe_backoff)
+{
+    return ProtocolTest("pe_backoff")
+        .inject(inject("backoff").into("", "in").at(0.1)
+                  .describe("a packet on transmission attempt 1")
+                  .packet([](const CaptureStore&) { return makeAttemptPacket("p", 1); }))
+        // window CW = 1 slot = 1s, so the packet is delayed by at most 1s and always arrives here
+        .once(on("sink").signal("packetPushed")
+                  .describe("the packet delivered within the small backoff window").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeBackoffNet
+sim-time-limit = 10s
+cmdenv-express-mode = true
+*.tester.testName = "pe_backoff"
+*.blackhole.packetLength = 100B
+*.blackhole.productionInterval = 1000s
+*.blackhole.initialProductionOffset = 1000s
+*.backoff.slotTime = 1s
+*.backoff.minBackoffExponent = 0
+*.backoff.maxBackoffExponent = 10
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.backoff.ExponentialBackoff;
+import inet.protocoltest.ProtocolTester;
+
+network PeBackoffNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        // never produces; only there so backoff.in is connected. Packets enter via injection.
+        blackhole: ActivePacketSource { @display("p=250,100"); }
+        backoff: ExponentialBackoff { @display("p=100,100"); }
+        sink: PassivePacketSink { @display("p=100,200"); }
+    connections:
+        blackhole.out --> backoff.in;
+        backoff.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_backoff: PASS
