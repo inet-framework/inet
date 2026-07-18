@@ -27,7 +27,10 @@ void SendWithAcknowledge::initialize(int stage)
         WATCH(sequenceNumber);
         registerService(AccessoryProtocol::withAcknowledge, inputGate, nullptr);
         registerProtocol(AccessoryProtocol::withAcknowledge, outputGate, nullptr);
+        // received acknowledgements arrive on ackIn; register the acknowledge protocol indication
+        // there so a MessageDispatcher below routes incoming acks to this module
         registerService(AccessoryProtocol::acknowledge, ackInGate, ackInGate);
+        registerProtocol(AccessoryProtocol::acknowledge, nullptr, ackInGate);
     }
 }
 

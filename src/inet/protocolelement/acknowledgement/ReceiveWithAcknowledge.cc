@@ -20,8 +20,10 @@ void ReceiveWithAcknowledge::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        // register the withAcknowledge protocol indication on the input gate (facing a
+        // MessageDispatcher below), so received data frames are routed up to this module
         registerService(AccessoryProtocol::withAcknowledge, nullptr, inputGate);
-        registerProtocol(AccessoryProtocol::withAcknowledge, nullptr, outputGate);
+        registerProtocol(AccessoryProtocol::withAcknowledge, nullptr, inputGate);
     }
 }
 
