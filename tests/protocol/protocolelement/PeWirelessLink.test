@@ -1,0 +1,253 @@
+%description:
+Integration example: a single reliable wireless link built only from protocol elements, over a
+shared SimplifiedRadioMedium.
+
+Two @networkNode nodes (source 10.0.0.1, dest 10.0.0.2) each with one radio interface, connected
+through a SimplifiedRadioMedium. The source app addresses a packet to the destination; Forwarding
+routes it out the interface; NextHopMacResolver + SendToMacAddress unicast it to the destination's
+MAC; the link is made reliable with stop-and-wait acknowledgement + retransmission + exponential
+backoff; the destination filters by MAC, delivers locally, and returns a (broadcast) ack matched by
+sequence number. No real protocols -- only protocolelement + queueing modules.
+
+This variant is lossless, so the packet is acknowledged on the first attempt and delivered.
+
+%file: PeWirelessLink.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_wireless_link)
+{
+    return ProtocolTest("pe_wireless_link")
+        .once(on("dest.app.sink").signal("packetPushed")
+                  .describe("the packet delivered end-to-end to the destination app").within(1.0));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeWirelessLinkNet
+sim-time-limit = 5s
+cmdenv-express-mode = true
+*.tester.testName = "pe_wireless_link"
+
+*.radioMedium.packetLossProbability = 0
+
+# every MessageDispatcher needs the node's interface table
+**.forwardingLayer.outputDispatcher.interfaceTableModule = "^.^.interfaceTable"
+**.interface.d1.interfaceTableModule = "^.^.interfaceTable"
+
+# one packet from the source app, addressed to the destination
+*.source.app.typename = "SourceApp"
+*.source.app.source.packetLength = 100B
+*.source.app.source.productionInterval = 100s   # effectively a single packet
+*.source.app.sendToL3.address = "10.0.0.2"
+*.source.forwardingLayer.forwarding.address = "10.0.0.1"
+*.source.forwardingLayer.forwarding.routes = "10.0.0.2 10.0.0.2 0"
+*.source.interface.receiveAtMac.address = "0A-00-00-00-00-01"
+*.source.interface.macResolver.neighbors = "10.0.0.2 0A-00-00-00-00-02"
+
+*.dest.app.typename = "SinkApp"
+*.dest.app.receiveAtL3.address = "10.0.0.2"
+*.dest.forwardingLayer.forwarding.address = "10.0.0.2"
+*.dest.interface.receiveAtMac.address = "0A-00-00-00-00-02"
+
+# reliable-link + transmission parameters (every interface)
+*.*.interface.sendToMac.address = "ff-ff-ff-ff-ff-ff"   # broadcast fallback used by acks
+*.*.interface.transmitter.datarate = 1Mbps
+*.*.interface.receiver.datarate = 1Mbps
+*.*.interface.sendWithAck.acknowledgeTimeout = 0.1s
+*.*.interface.resending.numRetries = 3
+*.*.interface.backoff.slotTime = 1ms
+*.*.interface.backoff.minBackoffExponent = 0
+*.*.interface.backoff.maxBackoffExponent = 5
+*.*.forwardingLayer.sendWithHopLimit.hopLimit = 8
+
+%file: test.ned
+
+import ned.DatarateChannel;
+import inet.common.MessageDispatcher;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.common.NetworkInterface;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.common.PacketMultiplexer;
+import inet.protocolelement.acknowledgement.Resending;
+import inet.protocolelement.acknowledgement.SendWithAcknowledge;
+import inet.protocolelement.acknowledgement.ReceiveWithAcknowledge;
+import inet.protocolelement.backoff.ExponentialBackoff;
+import inet.protocolelement.dispatching.SendWithProtocol;
+import inet.protocolelement.dispatching.ReceiveWithProtocol;
+import inet.protocolelement.forwarding.Forwarding;
+import inet.protocolelement.forwarding.SendWithHopLimit;
+import inet.protocolelement.forwarding.ReceiveWithHopLimit;
+import inet.protocolelement.medium.SimplifiedRadioMedium;
+import inet.protocolelement.selectivity.SendToL3Address;
+import inet.protocolelement.selectivity.ReceiveAtL3Address;
+import inet.protocolelement.selectivity.SendToMacAddress;
+import inet.protocolelement.selectivity.ReceiveAtMacAddress;
+import inet.protocolelement.selectivity.NextHopMacResolver;
+import inet.protocolelement.transceiver.PacketTransmitter;
+import inet.protocolelement.transceiver.PacketReceiver;
+import inet.protocoltest.ProtocolTester;
+
+moduleinterface IApp
+{
+    parameters:
+        @display("i=block/app");
+    gates:
+        input in;
+        output out;
+}
+
+module SourceApp like IApp
+{
+    parameters:
+        @display("i=block/app");
+    gates:
+        input in;
+        output out;
+    submodules:
+        source: ActivePacketSource { @display("p=100,100"); }
+        sendToL3: SendToL3Address { @display("p=100,200"); }
+    connections allowunconnected:
+        source.out --> sendToL3.in;
+        sendToL3.out --> out;
+}
+
+module SinkApp like IApp
+{
+    parameters:
+        @display("i=block/app");
+    gates:
+        input in;
+        output out;
+    submodules:
+        receiveAtL3: ReceiveAtL3Address { @display("p=100,100"); }
+        sink: PassivePacketSink { @display("p=100,200"); }
+    connections allowunconnected:
+        in --> receiveAtL3.in;
+        receiveAtL3.out --> sink.in;
+}
+
+// A wireless network interface that makes its link reliable: stop-and-wait acknowledgement +
+// retransmission + exponential backoff, with MAC filtering for the shared medium.
+module WirelessInterface extends NetworkInterface
+{
+    parameters:
+        string interfaceTableModule;
+        @display("i=block/ifcard");
+    gates:
+        input upperLayerIn @loose;
+        output upperLayerOut @loose;
+        inout radio;
+    submodules:
+        // NOTE: submodules are declared downstream-first (reverse of data flow) so that a module
+        // has cached its gates (in INITSTAGE_LOCAL) before an upstream module's protocol/service
+        // registration is forwarded into it -- otherwise the registration walk dereferences a
+        // not-yet-initialized gate. Data flow is given by the connections, not this order.
+        // egress: reliable send, MAC-address, encode, transmit (declared transmit-first)
+        transmitter: PacketTransmitter { @display("p=150,625"); }
+        sendProtocol: SendWithProtocol { @display("p=150,550"); }
+        sendToMac: SendToMacAddress { @display("p=150,475"); }
+        mux: PacketMultiplexer { @display("p=150,400"); }
+        sendWithAck: SendWithAcknowledge { @display("p=150,325"); }
+        macResolver: NextHopMacResolver { @display("p=150,250"); }
+        backoff: ExponentialBackoff { @display("p=150,175"); }
+        resending: Resending { @display("p=150,100"); }
+        // ingress: receive, decode, MAC-filter, split data vs. ack
+        receiver: PacketReceiver { @display("p=450,625"); }
+        receiveProtocol: ReceiveWithProtocol { @display("p=450,475"); }
+        receiveAtMac: ReceiveAtMacAddress { @display("p=450,400"); }
+        d1: MessageDispatcher { @display("p=450,300"); }
+        receiveWithAck: ReceiveWithAcknowledge { @display("p=450,175"); }
+    connections:
+        upperLayerIn --> resending.in;
+        resending.out --> backoff.in;
+        backoff.out --> macResolver.in;
+        macResolver.out --> sendWithAck.in;
+        sendWithAck.out --> mux.in++;
+        receiveWithAck.ackOut --> mux.in++;
+        mux.out --> sendToMac.in;
+        sendToMac.out --> sendProtocol.in;
+        sendProtocol.out --> transmitter.in;
+        transmitter.out --> radio$o;
+        radio$i --> receiver.in;
+        receiver.out --> receiveProtocol.in;
+        receiveProtocol.out --> receiveAtMac.in;
+        receiveAtMac.out --> d1.in++;
+        d1.out++ --> receiveWithAck.in;
+        receiveWithAck.out --> upperLayerOut;
+        d1.out++ --> sendWithAck.ackIn;
+}
+
+// Hop-by-hop forwarding: decide next hop / local delivery, plus a hop-limit stamp/check.
+// Inputs (from the app and from the lower layer) are merged by a multiplexer; the forwarding
+// decision is routed by a dispatcher to either local delivery (up) or the hop-limit sender (down).
+// Note: this deliberately avoids Network91's single forwarding<->dispatcher loop, which makes
+// canPushSomePacket recurse forever over the cycle.
+module ForwardingLayer
+{
+    parameters:
+        @display("i=block/routing");
+    gates:
+        input upperLayerIn @loose;
+        output upperLayerOut @loose;
+        input lowerLayerIn;
+        output lowerLayerOut;
+    submodules:
+        outputDispatcher: MessageDispatcher { @display("p=300,120"); }
+        sendWithHopLimit: SendWithHopLimit { @display("p=150,220"); }
+        forwarding: Forwarding { interfaceTableModule = "^.^.interfaceTable"; @display("p=300,320"); }
+        inputMux: PacketMultiplexer { @display("p=300,420"); }
+        receiveWithHopLimit: ReceiveWithHopLimit { @display("p=450,220"); }
+    connections:
+        upperLayerIn --> inputMux.in++;
+        receiveWithHopLimit.out --> inputMux.in++;
+        inputMux.out --> forwarding.in;
+        forwarding.out --> outputDispatcher.in++;
+        outputDispatcher.out++ --> sendWithHopLimit.in;   // forward: DispatchProtocolReq = hopLimit
+        outputDispatcher.out++ --> upperLayerOut;          // local:   DispatchProtocolReq = destinationL3Address
+        sendWithHopLimit.out --> lowerLayerOut;
+        lowerLayerIn --> receiveWithHopLimit.in;
+}
+
+module WirelessNode
+{
+    parameters:
+        @networkNode;
+        @display("i=device/pc");
+    gates:
+        inout radio;
+    submodules:
+        interfaceTable: InterfaceTable { @display("p=100,100"); }
+        app: <default("")> like IApp if typename != "" { @display("p=300,100"); }
+        forwardingLayer: ForwardingLayer { @display("p=300,200"); }
+        interface: WirelessInterface {
+            interfaceTableModule = "^.interfaceTable";
+            @display("p=300,350");
+        }
+    connections:
+        app.out --> forwardingLayer.upperLayerIn if exists(app);
+        forwardingLayer.upperLayerOut --> app.in if exists(app);
+        forwardingLayer.lowerLayerOut --> interface.upperLayerIn;
+        interface.upperLayerOut --> forwardingLayer.lowerLayerIn;
+        radio <--> interface.radio;
+}
+
+network PeWirelessLinkNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        radioMedium: SimplifiedRadioMedium { @display("p=250,60;i=misc/sun"); }
+        source: WirelessNode { @display("p=150,200"); }
+        dest: WirelessNode { @display("p=400,200"); }
+    connections:
+        source.radio <--> DatarateChannel { delay = 1us; } <--> radioMedium.radio++;
+        dest.radio <--> DatarateChannel { delay = 1us; } <--> radioMedium.radio++;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_wireless_link: PASS
