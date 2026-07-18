@@ -1,0 +1,72 @@
+%description:
+Atomic protocolelement test: local delivery by the forwarding element.
+
+SendToL3Address addresses a packet to 10.0.0.10, and Forwarding sits on node 10.0.0.10 -- i.e. the
+packet is addressed to this very node. Forwarding must therefore hand it up for local delivery: it
+sets a dispatch request for the destinationL3Address protocol (which routes the packet to the
+ReceiveAtL3Address checker) and leaves the DestinationL3AddressHeader in place, because it is the
+receiver that checks and pops that header, not the forwarder. This guards against the earlier
+double-pop bug where Forwarding stripped the header prematurely.
+
+%file: PeForwardingLocal.cc
+
+#include "ProtocolTest.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/selectivity/DestinationL3AddressHeader_m.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_forwarding_local)
+{
+    return ProtocolTest("pe_forwarding_local")
+        // delivered up as a local packet: dispatched to destinationL3Address, header still intact
+        .once(on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      const auto& dispatchReq = c.event.packet->findTag<DispatchProtocolReq>();
+                      auto header = c.event.packet->peekAtFront<DestinationL3AddressHeader>();
+                      return dispatchReq != nullptr && dispatchReq->getProtocol() == &AccessoryProtocol::destinationL3Address
+                             && header != nullptr && header->getDestinationAddress() == L3Address(Ipv4Address("10.0.0.10"));
+                  })
+                  .describe("the packet delivered locally with its address header intact").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeForwardingLocalNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_forwarding_local"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.sender.address = "10.0.0.10"
+*.forwarding.address = "10.0.0.10"
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.selectivity.SendToL3Address;
+import inet.protocolelement.forwarding.Forwarding;
+import inet.protocoltest.ProtocolTester;
+
+network PeForwardingLocalNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        sender: SendToL3Address { @display("p=100,200"); }
+        forwarding: Forwarding { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> sender.in;
+        sender.out --> forwarding.in;
+        forwarding.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_forwarding_local: PASS

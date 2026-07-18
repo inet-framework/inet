@@ -1,0 +1,76 @@
+%description:
+Atomic protocolelement test: hop-by-hop forwarding towards a next hop.
+
+SendToL3Address addresses a packet to 10.0.0.10. Forwarding sits on node 10.0.0.1 and has a
+static route "10.0.0.10 10.0.0.2 0" (destination, next hop, outgoing interface). Because the
+destination is not this node, Forwarding looks up the route and forwards the packet: it tags the
+packet with the next-hop address (10.0.0.2), the outgoing interface (0), and a dispatch request
+for the hop-limit protocol (the next element on the egress path). The routing table is a NED
+parameter, not a hard-coded C++ table.
+
+%file: PeForwarding.cc
+
+#include "ProtocolTest.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/common/NextHopAddressTag_m.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_forwarding)
+{
+    return ProtocolTest("pe_forwarding")
+        // the forwarded packet reaches the downstream sink carrying the routing decision as tags
+        .once(on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      const auto& nextHopReq = c.event.packet->findTag<NextHopAddressReq>();
+                      const auto& interfaceReq = c.event.packet->findTag<InterfaceReq>();
+                      const auto& dispatchReq = c.event.packet->findTag<DispatchProtocolReq>();
+                      return nextHopReq != nullptr && nextHopReq->getNextHopAddress() == L3Address(Ipv4Address("10.0.0.2"))
+                             && interfaceReq != nullptr && interfaceReq->getInterfaceId() == 0
+                             && dispatchReq != nullptr && dispatchReq->getProtocol() == &AccessoryProtocol::hopLimit;
+                  })
+                  .describe("the packet forwarded towards next hop 10.0.0.2 on interface 0").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeForwardingNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_forwarding"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.sender.address = "10.0.0.10"
+*.forwarding.address = "10.0.0.1"
+*.forwarding.routes = "10.0.0.10 10.0.0.2 0"
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.selectivity.SendToL3Address;
+import inet.protocolelement.forwarding.Forwarding;
+import inet.protocoltest.ProtocolTester;
+
+network PeForwardingNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        sender: SendToL3Address { @display("p=100,200"); }
+        forwarding: Forwarding { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> sender.in;
+        sender.out --> forwarding.in;
+        forwarding.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_forwarding: PASS
