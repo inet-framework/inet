@@ -7,15 +7,13 @@
 
 package inet.protocolelement.acknowledgement;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketPusherBase;
 
-simple ReceiveWithAcknowledge extends SimpleModule
+simple ReceiveWithAcknowledge extends PacketPusherBase
 {
     parameters:
         @class(ReceiveWithAcknowledge);
         @display("i=block/rxtx");
     gates:
-        input in;
-        output out;
         output ackOut;
 }

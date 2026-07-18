@@ -7,15 +7,12 @@
 
 package inet.protocolelement.selectivity;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketFilterBase;
 
-simple ReceiveAtL3Address extends SimpleModule
+simple ReceiveAtL3Address extends PacketFilterBase
 {
     parameters:
         @class(ReceiveAtL3Address);
         string address;
         @display("i=block/rx");
-    gates:
-        input in;
-        output out;
 }

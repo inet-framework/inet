@@ -7,14 +7,11 @@
 
 package inet.protocolelement.dispatching;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketFlowBase;
 
-simple SendWithProtocol extends SimpleModule
+simple SendWithProtocol extends PacketFlowBase
 {
     parameters:
         @class(SendWithProtocol);
         @display("i=block/tx");
-    gates:
-        input in;
-        output out;
 }

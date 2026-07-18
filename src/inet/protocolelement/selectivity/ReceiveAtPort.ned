@@ -7,15 +7,12 @@
 
 package inet.protocolelement.selectivity;
 
-import inet.common.SimpleModule;
+import inet.queueing.base.PacketFilterBase;
 
-simple ReceiveAtPort extends SimpleModule
+simple ReceiveAtPort extends PacketFilterBase
 {
     parameters:
         @class(ReceiveAtPort);
         int port;
         @display("i=block/rx");
-    gates:
-        input in;
-        output out;
 }
