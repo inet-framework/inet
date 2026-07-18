@@ -26,7 +26,10 @@ class INET_API AccessoryProtocol
     static const Protocol forwarding;
     static const Protocol fragmentation;
     static const Protocol hopLimit;
+    static const Protocol lifetime;
     static const Protocol sequenceNumber;
+    static const Protocol sourceL3Address;
+    static const Protocol sourcePort;
     static const Protocol withAcknowledge;
 };
 

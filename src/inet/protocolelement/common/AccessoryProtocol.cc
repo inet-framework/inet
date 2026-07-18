@@ -18,7 +18,10 @@ const Protocol AccessoryProtocol::destinationPort("destinationPort", "Destinatio
 const Protocol AccessoryProtocol::forwarding("forwarding", "Forwarding");
 const Protocol AccessoryProtocol::fragmentation("fragmentation", "Fragmentation");
 const Protocol AccessoryProtocol::hopLimit("hopLimit", "Hop limit");
+const Protocol AccessoryProtocol::lifetime("lifetime", "Lifetime");
 const Protocol AccessoryProtocol::sequenceNumber("sequenceNumber", "Sequence number");
+const Protocol AccessoryProtocol::sourceL3Address("sourceL3Address", "Source L3 address");
+const Protocol AccessoryProtocol::sourcePort("sourcePort", "Source port");
 const Protocol AccessoryProtocol::withAcknowledge("withAcknowledge", "With acknowledge");
 
 } // namespace inet
