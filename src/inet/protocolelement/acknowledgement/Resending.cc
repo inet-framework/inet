@@ -8,10 +8,21 @@
 #include "inet/protocolelement/acknowledgement/Resending.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/protocolelement/common/TransmissionAttemptTag_m.h"
 
 namespace inet {
 
 Define_Module(Resending);
+
+// Duplicates the held packet and announces which attempt this transmission is (0 for the first,
+// incremented for each retry) via a TransmissionAttemptReq tag, so downstream elements such as
+// ExponentialBackoff can size their behaviour to the attempt number.
+static Packet *dupWithAttempt(Packet *packet, int attempt)
+{
+    auto dup = packet->dup();
+    dup->addTagIfAbsent<TransmissionAttemptReq>()->setAttempt(attempt);
+    return dup;
+}
 
 void Resending::initialize(int stage)
 {
@@ -33,7 +44,7 @@ void Resending::handleMessage(cMessage *message)
 {
     ASSERT(retry == 0);
     packet = check_and_cast<Packet *>(message);
-    pushOrSendPacket(packet->dup(), outputGate, consumer);
+    pushOrSendPacket(dupWithAttempt(packet, retry), outputGate, consumer);
     retry++;
 }
 
@@ -50,7 +61,7 @@ void Resending::handlePushPacketProcessed(Packet *p, const cGate *gate, bool suc
             producer.handleCanPushPacketChanged();
     }
     else {
-        pushOrSendPacket(packet->dup(), outputGate, consumer);
+        pushOrSendPacket(dupWithAttempt(packet, retry), outputGate, consumer);
         retry++;
     }
 }
