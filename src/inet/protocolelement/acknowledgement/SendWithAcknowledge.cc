@@ -43,6 +43,15 @@ void SendWithAcknowledge::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
+    if (gate == ackInGate) {
+        // an acknowledgement pushed in (e.g. by a MessageDispatcher): handle it, do NOT re-send it
+        processAcknowledgement(packet);
+        return;
+    }
+    // a data packet: number it, transmit it, and start the acknowledgement timeout; completion is
+    // reported later (from processAcknowledgement() on ack, or handleMessage() on timeout). send()
+    // is used -- rather than PacketFlowBase's push -- so the packet is not double-sent, and so the
+    // ack returns on a later event rather than reentrantly.
     auto header = makeShared<SequenceNumberHeader>();
     header->setSequenceNumber(sequenceNumber);
     packet->insertAtFront(header);
@@ -56,6 +65,22 @@ void SendWithAcknowledge::pushPacket(Packet *packet, const cGate *gate)
     send(packet, "out");
 }
 
+void SendWithAcknowledge::processAcknowledgement(Packet *ackPacket)
+{
+    auto header = ackPacket->popAtFront<AcknowledgeHeader>();
+    int seq = header->getSequenceNumber();
+    delete ackPacket;
+    auto it = timers.find(seq);
+    if (it != timers.end()) {
+        auto timer = it->second;
+        timers.erase(it);
+        auto dataPacket = static_cast<Packet *>(timer->getContextPointer());
+        cancelAndDelete(timer);
+        if (producer != nullptr)
+            producer.handlePushPacketProcessed(dataPacket, true);
+    }
+}
+
 void SendWithAcknowledge::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage()) {
@@ -67,22 +92,9 @@ void SendWithAcknowledge::handleMessage(cMessage *message)
             producer.handlePushPacketProcessed(dataPacket, false);
         delete message;
     }
-    else if (message->getArrivalGate() == ackInGate) {
-        // an acknowledgement arrived: cancel its timer and report success upstream
-        auto ackPacket = check_and_cast<Packet *>(message);
-        auto header = ackPacket->popAtFront<AcknowledgeHeader>();
-        int seq = header->getSequenceNumber();
-        delete ackPacket;
-        auto it = timers.find(seq);
-        if (it != timers.end()) {
-            auto timer = it->second;
-            timers.erase(it);
-            auto dataPacket = static_cast<Packet *>(timer->getContextPointer());
-            cancelAndDelete(timer);
-            if (producer != nullptr)
-                producer.handlePushPacketProcessed(dataPacket, true);
-        }
-    }
+    else if (message->getArrivalGate() == ackInGate)
+        // an acknowledgement delivered as a raw message (rather than a push)
+        processAcknowledgement(check_and_cast<Packet *>(message));
     else
         PacketFlowBase::handleMessage(message);
 }

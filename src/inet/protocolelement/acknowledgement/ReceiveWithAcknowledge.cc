@@ -8,6 +8,7 @@
 #include "inet/protocolelement/acknowledgement/ReceiveWithAcknowledge.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/protocolelement/acknowledgement/AcknowledgeHeader_m.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
@@ -32,11 +33,16 @@ void ReceiveWithAcknowledge::pushPacket(Packet *dataPacket, const cGate *gate)
     Enter_Method("pushPacket");
     take(dataPacket);
     auto dataHeader = dataPacket->popAtFront<SequenceNumberHeader>();
+    // remember who sent this frame (if known) so the ack can be unicast back to that sender --
+    // essential on a shared medium, where a broadcast ack would be heard and mis-handled by peers
+    const auto& macAddressInd = dataPacket->findTag<MacAddressInd>();
     send(dataPacket, "out");
     auto ackHeader = makeShared<AcknowledgeHeader>();
     ackHeader->setSequenceNumber(dataHeader->getSequenceNumber());
     auto ackPacket = new Packet("Ack", ackHeader);
     ackPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::acknowledge);
+    if (macAddressInd != nullptr)
+        ackPacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddressInd->getSrcAddress());
     send(ackPacket, "ackOut");
 }
 

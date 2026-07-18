@@ -28,6 +28,8 @@ class INET_API SendWithAcknowledge : public PacketFlowBase
     virtual void handleMessage(cMessage *message) override;
     // Unused: pushPacket() is overridden, so the base never calls processPacket().
     virtual void processPacket(Packet *packet) override {}
+    // Handle an acknowledgement arriving on ackIn: cancel its timer and report success upstream.
+    virtual void processAcknowledgement(Packet *ackPacket);
 
   public:
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
