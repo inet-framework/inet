@@ -1,0 +1,59 @@
+%description:
+Atomic protocolelement test: fragment-number based fragmentation.
+
+FragmentNumberHeaderBasedFragmenter splits a 100-byte packet into fragments of at most 20 bytes
+of payload each (via a LengthBasedFragmenterPolicy). Observed directly at the sink, this must
+produce several small fragments rather than one whole packet. (The fragmenter is a 1-to-N pusher,
+so its multiple outputs are observed where they are consumed -- at the sink.)
+
+%file: PeFragmentation.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_fragmentation)
+{
+    return ProtocolTest("pe_fragmentation")
+        // at least two small (<= 30 B) fragments arrive -- i.e. the packet really was fragmented
+        .atLeastTimes(2, on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getDataLength() <= B(30);
+                  })
+                  .describe("a small fragment at the sink").within(0.9));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeFragmentationNet
+sim-time-limit = 1s
+cmdenv-express-mode = true
+*.tester.testName = "pe_fragmentation"
+*.source.packetLength = 100B
+*.source.productionInterval = 10s
+*.fragmenter.fragmenterPolicy.typename = "LengthBasedFragmenterPolicy"
+*.fragmenter.fragmenterPolicy.maxFragmentLength = 20B
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.fragmentation.FragmentNumberHeaderBasedFragmenter;
+import inet.protocoltest.ProtocolTester;
+
+network PeFragmentationNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        fragmenter: FragmentNumberHeaderBasedFragmenter { @display("p=100,200"); }
+        sink: PassivePacketSink { @display("p=100,300"); }
+    connections:
+        source.out --> fragmenter.in;
+        fragmenter.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_fragmentation: PASS

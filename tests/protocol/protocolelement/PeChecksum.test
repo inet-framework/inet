@@ -1,0 +1,65 @@
+%description:
+Atomic protocolelement test: Internet checksum inserter + checker.
+
+Verifies that InternetChecksumHeaderInserter prepends a 2-byte ChecksumHeader (tagging the
+packet with the internal "checksum" protocol) and that InternetChecksumHeaderChecker validates
+it and forwards the packet on, so it reaches the sink. Self-contained: the network, the
+ProtocolTest program, the config and the expected verdict are all in this file.
+
+%file: PeChecksum.cc
+
+#include "ProtocolTest.h"
+#include "inet/protocolelement/checksum/header/ChecksumHeader_m.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_checksum)
+{
+    return ProtocolTest("pe_checksum")
+        // the inserter emits a packet carrying a 2-byte checksum header, tagged "checksum"
+        .once(on("inserter").signal("packetPushedOut").protocol("checksum")
+                  .match([](const MatchContext& c) {
+                      auto h = c.event.packet->peekAtFront<ChecksumHeader>();
+                      return h != nullptr && h->getChunkLength() == B(2);
+                  })
+                  .describe("the inserter output with a 2-byte checksum header").within(1.5))
+        // the checker validates and forwards it; the sink consumes it
+        .once(on("sink").signal("packetPushed")
+                  .describe("the validated packet delivered to the sink").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeChecksumNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_checksum"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.checksum.InternetChecksumHeaderInserter;
+import inet.protocolelement.checksum.InternetChecksumHeaderChecker;
+import inet.protocoltest.ProtocolTester;
+
+network PeChecksumNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        inserter: InternetChecksumHeaderInserter { @display("p=100,200"); }
+        checker: InternetChecksumHeaderChecker { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> inserter.in;
+        inserter.out --> checker.in;
+        checker.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_checksum: PASS

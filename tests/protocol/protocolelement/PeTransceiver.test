@@ -1,0 +1,61 @@
+%description:
+Atomic protocolelement test: whole-packet transmitter + receiver.
+
+PacketTransmitter serialises a packet into a signal sent over a DatarateChannel; PacketReceiver
+turns the received signal back into a packet. The test checks a packet crosses the channel and
+reaches the sink (the transmission consumes time proportional to the packet length and datarate).
+
+%file: PeTransceiver.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_transceiver)
+{
+    return ProtocolTest("pe_transceiver")
+        .once(on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getDataLength() == B(100);
+                  })
+                  .describe("the received 100-byte packet at the sink").within(0.01));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeTransceiverNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_transceiver"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.transmitter.datarate = 1Mbps
+*.receiver.datarate = 1Mbps
+
+%file: test.ned
+
+import ned.DatarateChannel;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.transceiver.PacketTransmitter;
+import inet.protocolelement.transceiver.PacketReceiver;
+import inet.protocoltest.ProtocolTester;
+
+network PeTransceiverNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        transmitter: PacketTransmitter { @display("p=100,200"); }
+        receiver: PacketReceiver { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> transmitter.in;
+        transmitter.out --> DatarateChannel { delay = 1us; } --> receiver.in;
+        receiver.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_transceiver: PASS

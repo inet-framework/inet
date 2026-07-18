@@ -1,0 +1,57 @@
+%description:
+Atomic protocolelement test: padding inserter.
+
+PaddingInserter pads a short packet up to a configured minimum length. A 20-byte packet padded
+to a minimum of 64 bytes must leave the inserter at least 64 bytes long.
+
+%file: PePadding.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_padding)
+{
+    return ProtocolTest("pe_padding")
+        .once(on("padding").signal("packetPushedOut")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getDataLength() >= B(64);
+                  })
+                  .describe("the padded packet, at least 64 bytes").within(1.5))
+        .once(on("sink").signal("packetPushed")
+                  .describe("the padded packet delivered to the sink").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PePaddingNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_padding"
+*.source.packetLength = 20B
+*.source.productionInterval = 1s
+*.padding.minLength = 64B
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.common.PaddingInserter;
+import inet.protocoltest.ProtocolTester;
+
+network PePaddingNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        padding: PaddingInserter { @display("p=100,200"); }
+        sink: PassivePacketSink { @display("p=100,300"); }
+    connections:
+        source.out --> padding.in;
+        padding.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_padding: PASS

@@ -1,0 +1,59 @@
+%description:
+Atomic protocolelement test: subpacket-length-header based aggregation.
+
+SubpacketLengthHeaderBasedAggregator collects several subpackets and concatenates them into one
+larger packet (here up to 3 subpackets of 100 bytes each, via a LengthBasedAggregatorPolicy).
+Observed at the sink, the aggregated packet must be at least 300 bytes -- i.e. it really carries
+the three subpackets, not just one. (The aggregator is an N-to-1 pusher, observed at the sink.)
+
+%file: PeAggregation.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_aggregation)
+{
+    return ProtocolTest("pe_aggregation")
+        .once(on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getDataLength() >= B(300);
+                  })
+                  .describe("an aggregated packet of at least 300 bytes at the sink").within(3.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeAggregationNet
+sim-time-limit = 5s
+cmdenv-express-mode = true
+*.tester.testName = "pe_aggregation"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.aggregator.aggregatorPolicy.typename = "LengthBasedAggregatorPolicy"
+*.aggregator.aggregatorPolicy.maxNumSubpackets = 3
+*.aggregator.aggregatorPolicy.maxAggregatedLength = 1000B
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.aggregation.SubpacketLengthHeaderBasedAggregator;
+import inet.protocoltest.ProtocolTester;
+
+network PeAggregationNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        aggregator: SubpacketLengthHeaderBasedAggregator { @display("p=100,200"); }
+        sink: PassivePacketSink { @display("p=100,300"); }
+    connections:
+        source.out --> aggregator.in;
+        aggregator.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_aggregation: PASS

@@ -1,0 +1,58 @@
+%description:
+Atomic protocolelement test: destination-port addressing (non-matching port is dropped).
+
+SendToPort addresses the packet to port 1000, but ReceiveAtPort listens on port 2000. The port
+does not match, so ReceiveAtPort's filter drops the packet and it never reaches the sink.
+
+%file: PeReceiveAtPortDrop.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_receiveatport_drop)
+{
+    return ProtocolTest("pe_receiveatport_drop")
+        .once(on("receiver").signal("packetDropped")
+                  .describe("the receiver dropping the wrongly-addressed packet").within(1.5))
+        .never(on("sink").signal("packetPushed")
+                  .describe("any delivery to the sink").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeReceiveAtPortDropNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_receiveatport_drop"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.sender.port = 1000
+*.receiver.port = 2000
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.selectivity.SendToPort;
+import inet.protocolelement.selectivity.ReceiveAtPort;
+import inet.protocoltest.ProtocolTester;
+
+network PeReceiveAtPortDropNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        sender: SendToPort { @display("p=100,200"); }
+        receiver: ReceiveAtPort { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> sender.in;
+        sender.out --> receiver.in;
+        receiver.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_receiveatport_drop: PASS

@@ -1,0 +1,60 @@
+%description:
+Atomic protocolelement test: serialize / deserialize round-trip.
+
+PacketSerializer flattens a packet's chunk tree into raw bytes (simulating on-wire
+serialization); PacketDeserializer rebuilds a chunk tree from the bytes. A 100-byte packet must
+survive the round-trip unchanged in length and reach the sink.
+
+%file: PeSerialization.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_serialization)
+{
+    return ProtocolTest("pe_serialization")
+        .once(on("serializer").signal("packetPushedOut")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getDataLength() == B(100);
+                  })
+                  .describe("the serialized 100-byte packet").within(1.5))
+        .once(on("sink").signal("packetPushed")
+                  .describe("the deserialized packet delivered to the sink").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeSerializationNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_serialization"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.common.PacketSerializer;
+import inet.protocolelement.common.PacketDeserializer;
+import inet.protocoltest.ProtocolTester;
+
+network PeSerializationNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        serializer: PacketSerializer { @display("p=100,200"); }
+        deserializer: PacketDeserializer { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> serializer.in;
+        serializer.out --> deserializer.in;
+        deserializer.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_serialization: PASS
