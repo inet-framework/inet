@@ -1,0 +1,69 @@
+%description:
+Atomic protocolelement test: numeric protocol-id header (dispatching).
+
+SequenceNumbering tags the packet with the internal "sequenceNumber" protocol. SendWithProtocol
+encodes that protocol's numeric id into a ProtocolHeader; ReceiveWithProtocol decodes it and
+restores the protocol on the packet. The test checks the encoded id matches the sequenceNumber
+protocol and that the packet is delivered.
+
+%file: PeDispatching.cc
+
+#include "ProtocolTest.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/dispatching/ProtocolHeader_m.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_dispatching)
+{
+    return ProtocolTest("pe_dispatching")
+        // the sender encodes the sequenceNumber protocol id into a ProtocolHeader
+        .once(on("sender").signal("packetPushedOut")
+                  .match([](const MatchContext& c) {
+                      auto h = c.event.packet->peekAtFront<ProtocolHeader>();
+                      return h != nullptr && h->getProtocolId() == AccessoryProtocol::sequenceNumber.getId();
+                  })
+                  .describe("the packet carrying the encoded protocol id").within(1.5))
+        // the receiver decodes it and the packet is delivered
+        .once(on("sink").signal("packetPushed")
+                  .describe("the decoded packet delivered to the sink").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeDispatchingNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_dispatching"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.ordering.SequenceNumbering;
+import inet.protocolelement.dispatching.SendWithProtocol;
+import inet.protocolelement.dispatching.ReceiveWithProtocol;
+import inet.protocoltest.ProtocolTester;
+
+network PeDispatchingNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        numbering: SequenceNumbering { @display("p=100,175"); }
+        sender: SendWithProtocol { @display("p=100,250"); }
+        receiver: ReceiveWithProtocol { @display("p=100,325"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> numbering.in;
+        numbering.out --> sender.in;
+        sender.out --> receiver.in;
+        receiver.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_dispatching: PASS

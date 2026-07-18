@@ -1,0 +1,82 @@
+%description:
+Atomic protocolelement test: reordering holds out-of-order packets.
+
+Reordering releases packets strictly in sequence-number order, buffering any that arrive early.
+Two packets are injected out of order (sequence numbers 2 then 1) while sequence number 0 never
+arrives; Reordering must therefore hold both and deliver nothing to the sink -- proving it does
+not pass out-of-order packets straight through. (The complementary in-order *release* happens
+synchronously with the gap-filling packet and so is not separately observable through this
+framework; this test pins the buffering/hold behaviour.)
+
+%file: PeReordering.cc
+
+#include "ProtocolTest.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/protocolelement/common/AccessoryProtocol.h"
+#include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static Packet *makeSeqPacket(const char *name, int seq)
+{
+    auto packet = new Packet(name);
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+    auto header = makeShared<SequenceNumberHeader>();
+    header->setSequenceNumber(seq);
+    packet->insertAtFront(header);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&AccessoryProtocol::sequenceNumber);
+    return packet;
+}
+
+Define_ProtocolTest(pe_reordering)
+{
+    return ProtocolTest("pe_reordering")
+        // inject sequence numbers 2 then 1 (sequence number 0 never arrives -> a gap remains)
+        .inject(inject("reordering").into("", "in").at(0.1)
+                  .describe("a packet with sequence number 2")
+                  .packet([](const CaptureStore&) { return makeSeqPacket("p2", 2); }))
+        .inject(inject("reordering").into("", "in").at(0.2)
+                  .describe("a packet with sequence number 1")
+                  .packet([](const CaptureStore&) { return makeSeqPacket("p1", 1); }))
+        // with the sequence-0 gap unfilled, nothing may be delivered to the sink
+        .never(on("sink").signal("packetPushed")
+                  .describe("any premature delivery while the sequence gap is open").within(1.0));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeReorderingNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_reordering"
+*.blackhole.packetLength = 100B
+*.blackhole.productionInterval = 1000s
+*.blackhole.initialProductionOffset = 1000s
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.ordering.Reordering;
+import inet.protocoltest.ProtocolTester;
+
+network PeReorderingNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        // never produces (first production far past sim end); only there so reordering.in is
+        // connected. Packets enter reordering.in via injection instead.
+        blackhole: ActivePacketSource { @display("p=250,100"); }
+        reordering: Reordering { @display("p=100,100"); }
+        sink: PassivePacketSink { @display("p=100,200"); }
+    connections:
+        blackhole.out --> reordering.in;
+        reordering.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_reordering: PASS

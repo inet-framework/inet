@@ -1,0 +1,61 @@
+%description:
+Atomic protocolelement test: duplicate removal.
+
+SequenceNumbering stamps each packet with a sequence number; a PacketDuplicator then emits each
+packet twice (original + one duplicate, same sequence number); DuplicateRemoval must forward the
+first copy and drop the duplicate. Over 3 source packets, the sink must therefore receive exactly
+3 packets, not 6.
+
+%file: PeDuplicateRemoval.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_duplicateremoval)
+{
+    return ProtocolTest("pe_duplicateremoval")
+        // exactly 3 deliveries for 3 sources -> the duplicate of each was removed
+        .betweenTimes(3, 3, on("sink").signal("packetPushed")
+                  .describe("a de-duplicated packet at the sink").within(2.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeDuplicateRemovalNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_duplicateremoval"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.duplicator.numDuplicates = 1
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.common.PacketDuplicator;
+import inet.protocolelement.ordering.SequenceNumbering;
+import inet.protocolelement.ordering.DuplicateRemoval;
+import inet.protocoltest.ProtocolTester;
+
+network PeDuplicateRemovalNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        numbering: SequenceNumbering { @display("p=100,175"); }
+        duplicator: PacketDuplicator { @display("p=100,250"); }
+        deduplicator: DuplicateRemoval { @display("p=100,325"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> numbering.in;
+        numbering.out --> duplicator.in;
+        duplicator.out --> deduplicator.in;
+        deduplicator.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_duplicateremoval: PASS
