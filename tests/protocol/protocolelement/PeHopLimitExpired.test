@@ -1,0 +1,60 @@
+%description:
+Atomic protocolelement test: hop-limit checker drops an expired packet.
+
+When SendWithHopLimit stamps a hop limit of 0, ReceiveWithHopLimit's filter predicate
+(hopLimit > 0) fails, so the checker drops the packet and it never reaches the sink. This
+exercises the drop path of the checker (a PacketFilterBase).
+
+%file: PeHopLimitExpired.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_hoplimit_expired)
+{
+    return ProtocolTest("pe_hoplimit_expired")
+        // the checker drops the expired (hop limit 0) packet
+        .once(on("checker").signal("packetDropped")
+                  .describe("the checker dropping the expired packet").within(1.5))
+        // and nothing is ever delivered to the sink
+        .never(on("sink").signal("packetPushed")
+                  .describe("any delivery to the sink").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeHopLimitExpiredNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_hoplimit_expired"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.inserter.hopLimit = 0
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.forwarding.SendWithHopLimit;
+import inet.protocolelement.forwarding.ReceiveWithHopLimit;
+import inet.protocoltest.ProtocolTester;
+
+network PeHopLimitExpiredNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        inserter: SendWithHopLimit { @display("p=100,200"); }
+        checker: ReceiveWithHopLimit { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> inserter.in;
+        inserter.out --> checker.in;
+        checker.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_hoplimit_expired: PASS

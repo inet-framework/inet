@@ -1,0 +1,65 @@
+%description:
+Atomic protocolelement test: hop-limit inserter + checker (the pass case).
+
+SendWithHopLimit prepends a HopLimitHeader carrying the configured hop limit; ReceiveWithHopLimit
+accepts the packet while the hop limit is positive, strips the header and forwards it. Here the
+hop limit is 5 (> 0), so the packet is delivered to the sink.
+
+%file: PeHopLimit.cc
+
+#include "ProtocolTest.h"
+#include "inet/protocolelement/forwarding/HopLimitHeader_m.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_hoplimit)
+{
+    return ProtocolTest("pe_hoplimit")
+        // the inserter output carries a hop-limit header with value 5
+        .once(on("inserter").signal("packetPushedOut").protocol("hopLimit")
+                  .match([](const MatchContext& c) {
+                      auto h = c.event.packet->peekAtFront<HopLimitHeader>();
+                      return h != nullptr && h->getHopLimit() == 5;
+                  })
+                  .describe("the inserter output with hop limit 5").within(1.5))
+        // the checker accepts it (5 > 0) and it reaches the sink
+        .once(on("sink").signal("packetPushed")
+                  .describe("the accepted packet delivered to the sink").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeHopLimitNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_hoplimit"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.inserter.hopLimit = 5
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.forwarding.SendWithHopLimit;
+import inet.protocolelement.forwarding.ReceiveWithHopLimit;
+import inet.protocoltest.ProtocolTester;
+
+network PeHopLimitNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        inserter: SendWithHopLimit { @display("p=100,200"); }
+        checker: ReceiveWithHopLimit { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> inserter.in;
+        inserter.out --> checker.in;
+        checker.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_hoplimit: PASS

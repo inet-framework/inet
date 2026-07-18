@@ -1,0 +1,65 @@
+%description:
+Atomic protocolelement test: destination-port addressing (matching port).
+
+SendToPort prepends a DestinationPortHeader with the configured port; ReceiveAtPort accepts a
+packet only if its port matches. Here both use port 1000, so the packet is accepted and delivered.
+
+%file: PeSendToPort.cc
+
+#include "ProtocolTest.h"
+#include "inet/protocolelement/selectivity/DestinationPortHeader_m.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_sendtoport)
+{
+    return ProtocolTest("pe_sendtoport")
+        // (SendToPort inserts the header but does not set a PacketProtocolTag, so match on the
+        // header contents directly rather than on .protocol(...))
+        .once(on("sender").signal("packetPushedOut")
+                  .match([](const MatchContext& c) {
+                      auto h = c.event.packet->peekAtFront<DestinationPortHeader>();
+                      return h != nullptr && h->getDestinationPort() == 1000;
+                  })
+                  .describe("the packet addressed to port 1000").within(1.5))
+        .once(on("sink").signal("packetPushed")
+                  .describe("the packet accepted at the matching port and delivered").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeSendToPortNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_sendtoport"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.sender.port = 1000
+*.receiver.port = 1000
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.selectivity.SendToPort;
+import inet.protocolelement.selectivity.ReceiveAtPort;
+import inet.protocoltest.ProtocolTester;
+
+network PeSendToPortNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        sender: SendToPort { @display("p=100,200"); }
+        receiver: ReceiveAtPort { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> sender.in;
+        sender.out --> receiver.in;
+        receiver.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_sendtoport: PASS

@@ -1,0 +1,59 @@
+%description:
+Atomic protocolelement test: packet streamer + destreamer.
+
+PacketStreamer takes a whole packet and streams it out over time (start/progress/end) at a
+configured datarate; PacketDestreamer collects a stream back into a whole packet. A 100-byte
+packet must survive the stream / destream round-trip and reach the sink.
+
+%file: PeStreaming.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_streaming)
+{
+    return ProtocolTest("pe_streaming")
+        .once(on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getDataLength() == B(100);
+                  })
+                  .describe("the destreamed 100-byte packet at the sink").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeStreamingNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_streaming"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.*.datarate = 100Mbps
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.common.PacketStreamer;
+import inet.protocolelement.common.PacketDestreamer;
+import inet.protocoltest.ProtocolTester;
+
+network PeStreamingNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        streamer: PacketStreamer { @display("p=100,200"); }
+        destreamer: PacketDestreamer { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> streamer.in;
+        streamer.out --> destreamer.in;
+        destreamer.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_streaming: PASS

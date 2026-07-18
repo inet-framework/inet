@@ -1,0 +1,61 @@
+%description:
+Atomic protocolelement test: streaming transmitter + destreaming receiver.
+
+StreamingTransmitter sends a packet onto the channel as a signal that starts and ends over time
+(rather than all at once); DestreamingReceiver collects the whole packet back once the signal
+ends. The 100-byte packet must cross the channel and reach the sink.
+
+%file: PeTransceiverStreaming.cc
+
+#include "ProtocolTest.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_transceiver_streaming)
+{
+    return ProtocolTest("pe_transceiver_streaming")
+        .once(on("sink").signal("packetPushed")
+                  .match([](const MatchContext& c) {
+                      return c.event.packet->getDataLength() == B(100);
+                  })
+                  .describe("the streamed 100-byte packet at the sink").within(0.01));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeTransceiverStreamingNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_transceiver_streaming"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.transmitter.datarate = 1Mbps
+*.receiver.datarate = 1Mbps
+
+%file: test.ned
+
+import ned.DatarateChannel;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.transceiver.StreamingTransmitter;
+import inet.protocolelement.transceiver.DestreamingReceiver;
+import inet.protocoltest.ProtocolTester;
+
+network PeTransceiverStreamingNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        transmitter: StreamingTransmitter { @display("p=100,200"); }
+        receiver: DestreamingReceiver { @display("p=100,300"); }
+        sink: PassivePacketSink { @display("p=100,400"); }
+    connections:
+        source.out --> transmitter.in;
+        transmitter.out --> DatarateChannel { delay = 1us; } --> receiver.in;
+        receiver.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_transceiver_streaming: PASS

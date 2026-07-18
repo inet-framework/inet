@@ -1,0 +1,62 @@
+%description:
+Atomic protocolelement test: sequence numbering.
+
+SequenceNumbering prepends a SequenceNumberHeader whose counter increments per packet. The test
+checks that the first emitted packet carries sequence number 0 and the second carries 1.
+
+%file: PeSequenceNumbering.cc
+
+#include "ProtocolTest.h"
+#include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTest(pe_sequencenumbering)
+{
+    return ProtocolTest("pe_sequencenumbering")
+        .once(on("numbering").signal("packetPushedOut").protocol("sequenceNumber")
+                  .match([](const MatchContext& c) {
+                      auto h = c.event.packet->peekAtFront<SequenceNumberHeader>();
+                      return h != nullptr && h->getSequenceNumber() == 0;
+                  })
+                  .describe("the first packet with sequence number 0").within(1.5))
+        .once(on("numbering").signal("packetPushedOut")
+                  .match([](const MatchContext& c) {
+                      auto h = c.event.packet->peekAtFront<SequenceNumberHeader>();
+                      return h != nullptr && h->getSequenceNumber() == 1;
+                  })
+                  .describe("the second packet with sequence number 1").within(1.5));
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PeSequenceNumberingNet
+sim-time-limit = 3s
+cmdenv-express-mode = true
+*.tester.testName = "pe_sequencenumbering"
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+
+%file: test.ned
+
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.ordering.SequenceNumbering;
+import inet.protocoltest.ProtocolTester;
+
+network PeSequenceNumberingNet
+{
+    submodules:
+        tester: ProtocolTester { @display("p=50,50"); }
+        source: ActivePacketSource { @display("p=100,100"); }
+        numbering: SequenceNumbering { @display("p=100,200"); }
+        sink: PassivePacketSink { @display("p=100,300"); }
+    connections:
+        source.out --> numbering.in;
+        numbering.out --> sink.in;
+}
+
+%contains: stdout
+PROTOCOLTEST pe_sequencenumbering: PASS
