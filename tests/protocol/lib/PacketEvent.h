@@ -24,6 +24,14 @@ enum class EventKind {
     SentToPeer,
     ReceivedFromPeer,
     Dropped,
+    // queueing-layer signals: packet flow through inet.queueing / inet.protocolelement
+    // processing modules (inserters, checkers, flows, filters, sources, sinks, ...).
+    Pushed,      // packetPushed   (active source out, passive sink in, classifier, server)
+    PushedIn,    // packetPushedIn  (a flow/filter/pusher received a pushed packet)
+    PushedOut,   // packetPushedOut (a flow/filter/pusher emitted a pushed packet)
+    Pulled,      // packetPulled    (active sink, passive source, scheduler)
+    PulledIn,    // packetPulledIn
+    PulledOut,   // packetPulledOut
     Other
 };
 
