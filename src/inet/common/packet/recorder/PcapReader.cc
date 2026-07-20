@@ -9,6 +9,7 @@
 
 #include <cerrno>
 
+#include "inet/common/FcsInd_m.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 
@@ -22,6 +23,45 @@ static uint16_t swapByteOrder16(uint16_t v)
 static uint32_t swapByteOrder32(uint32_t v)
 {
     return ((v & 0xFFL) << 24) | ((v & 0xFF00L) << 8) | ((v & 0xFF0000L) >> 8) | ((v & 0xFF000000L) >> 24);
+}
+
+// Read a little-endian 32-bit word from a radiotap header (radiotap is always
+// little-endian, regardless of the pcap byte order).
+static uint32_t radiotapReadLe32(const uint8_t *buf, size_t pos)
+{
+    return buf[pos] | (buf[pos + 1] << 8) | (buf[pos + 2] << 16) | ((uint32_t)buf[pos + 3] << 24);
+}
+
+// Whether a radiotap-encapsulated 802.11 frame still carries its FCS, i.e. the
+// "FCS at end" flag (0x10) of the radiotap Flags field is set. The Flags field
+// (it_present bit 1) is located after the it_present bitmap words and the TSFT
+// field (bit 0), honouring radiotap's field alignment. Returns false if the
+// Flags field is absent or the header is truncated.
+static bool radiotapHasFcs(const uint8_t *buf, uint32_t caplen)
+{
+    if (caplen < 8)
+        return false;
+    uint16_t itLen = buf[2] | (buf[3] << 8);
+    uint32_t present0 = radiotapReadLe32(buf, 4);
+    // skip any extended it_present words (each with bit 31 set chains the next)
+    size_t pos = 4;
+    for (uint32_t w = present0; (w & 0x80000000u) != 0; ) {
+        pos += 4;
+        if (pos + 4 > itLen || pos + 4 > caplen)
+            return false;
+        w = radiotapReadLe32(buf, pos);
+    }
+    pos += 4; // data fields begin after the last it_present word
+    if (present0 & (1u << 0)) { // TSFT: 8-byte aligned, 8 bytes
+        pos = (pos + 7) & ~((size_t)7);
+        pos += 8;
+    }
+    if (present0 & (1u << 1)) { // Flags: 1-byte aligned, 1 byte
+        if (pos >= itLen || pos >= caplen)
+            return false;
+        return (buf[pos] & 0x10) != 0;
+    }
+    return false;
 }
 
 void PcapReader::openPcap(const char *filename, const char *packetNameFormat)
@@ -79,6 +119,7 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
     std::vector<uint8_t> bytes;
     const Protocol *protocol = nullptr;
     int offset = 0;
+    bool hasFcs = false;
     switch (fileHeader.network) {
         case 0: {
             offset = 4;
@@ -99,6 +140,7 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
             // the MAC frame.
             offset = buffer[2] | (buffer[3] << 8);
             protocol = &Protocol::ieee80211Mac;
+            hasFcs = radiotapHasFcs(buffer, packetHeader.incl_len);
             break;
         }
         case 204: protocol = &Protocol::ppp; break;
@@ -112,6 +154,8 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
     auto packet = new Packet(nullptr, data);
     if (protocol != nullptr)
         packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
+    if (hasFcs)
+        packet->addTag<FcsInd>();
     // naming a packet requires dissecting it; only do so when a format was requested
     if (packetNameFormat != nullptr)
         packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
