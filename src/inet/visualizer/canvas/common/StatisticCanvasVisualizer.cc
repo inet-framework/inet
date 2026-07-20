@@ -180,6 +180,8 @@ void StatisticCanvasVisualizer::refreshDisplay() const
         return;
     if (barSeriesBySources)
         const_cast<StatisticCanvasVisualizer *>(this)->refreshGroupedBarValues();
+    else if (barSeriesByFlow)
+        const_cast<StatisticCanvasVisualizer *>(this)->refreshFlowBarValues();
     for (auto& it : barSetVisualizations) {
         auto barSetCanvasVisualization = static_cast<BarSetCanvasVisualization *>(it.second);
         refreshChart(barSetCanvasVisualization);

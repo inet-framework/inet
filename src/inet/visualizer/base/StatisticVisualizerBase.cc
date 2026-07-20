@@ -87,7 +87,9 @@ void StatisticVisualizerBase::initialize(int stage)
         placementPriority = par("placementPriority");
         barChartMode = !strcmp(par("displayMode"), "bars");
         if (barChartMode) {
-            barSeriesBySources = !strcmp(par("barSeries"), "sources");
+            const char *barSeries = par("barSeries");
+            barSeriesBySources = !strcmp(barSeries, "sources");
+            barSeriesByFlow = !strcmp(barSeries, "flow");
             maxValue = par("maxValue");
             minValue = par("minValue");
             barWidth = par("barWidth");
@@ -387,6 +389,63 @@ void StatisticVisualizerBase::refreshGroupedBarValues()
             if (!std::isnan(value) && !units.empty() && statisticUnit != nullptr && *statisticUnit != '\0')
                 value = cNEDValue::convertUnit(value, statisticUnit, units[0].c_str());
             barSetVisualization->values[r.first] = value;
+        }
+    }
+}
+
+void StatisticVisualizerBase::processFlowBarSource(cComponent *source, simsignal_t signal)
+{
+    auto module = check_and_cast<cModule *>(source);
+    if (groupedBarSourceIds.find(module->getId()) != groupedBarSourceIds.end())
+        return; // already registered
+    if (!sourceFilter.matches(module))
+        return;
+    // attach the recorder chain; its statisticExpression contains demuxFlow, so a separate recorder is
+    // created per flow (lazily, as flows appear) and discovered in refreshFlowBarValues()
+    addResultRecorder(source, signal);
+    auto barSetVisualization = getBarSetVisualization(module->getId());
+    if (barSetVisualization == nullptr) {
+        barSetVisualization = createBarSetVisualization(source);
+        if (barSetVisualization == nullptr)
+            return; // bar charts not supported by this concrete visualizer (e.g. osg)
+        addBarSetVisualization(barSetVisualization);
+    }
+    groupedBarSourceIds.insert(module->getId());
+}
+
+void StatisticVisualizerBase::collectResultRecorders(cResultListener *resultListener, std::vector<LastValueRecorder *>& recorders)
+{
+    if (auto resultRecorder = dynamic_cast<LastValueRecorder *>(resultListener)) {
+        if (getRecordingMode() == resultRecorder->getRecordingMode() && !strcmp(statisticName, resultRecorder->getStatisticName()))
+            recorders.push_back(resultRecorder);
+    }
+    else if (auto resultFilter = dynamic_cast<cResultFilter *>(resultListener)) {
+        for (auto delegate : resultFilter->getDelegates())
+            collectResultRecorders(delegate, recorders);
+    }
+}
+
+void StatisticVisualizerBase::refreshFlowBarValues()
+{
+    auto signal = registerSignal(signalName);
+    for (auto& kv : barSetVisualizations) {
+        auto barSetVisualization = kv.second;
+        auto source = getSimulation()->getModule(barSetVisualization->moduleId);
+        if (source == nullptr)
+            continue;
+        std::vector<LastValueRecorder *> recorders;
+        for (auto listener : source->getLocalSignalListeners(signal))
+            if (auto resultListener = dynamic_cast<cResultListener *>(listener))
+                collectResultRecorders(resultListener, recorders);
+        barSetVisualization->values.clear();
+        for (auto recorder : recorders) {
+            const char *label = recorder->getDemuxLabel();
+            if (label == nullptr || *label == '\0')
+                continue; // skip the undemuxed base recorder
+            double value = recorder->getLastValue();
+            if (!std::isnan(value) && !units.empty() && statisticUnit != nullptr && *statisticUnit != '\0')
+                value = cNEDValue::convertUnit(value, statisticUnit, units[0].c_str());
+            barSetVisualization->values[label] = value;
         }
     }
 }
