@@ -1,0 +1,46 @@
+# Starter clang-tidy config that enforces the C++ side of naming-conventions.md
+# (which concretizes AR-QUAL-NAMING). This is a STARTER staged under doc/tmp/ — to
+# activate it, move it to the repository root so it applies to all of src/inet.
+#
+# Scope: this only sees C++ identifiers. The NED-, .msg-, .ini-, and .oppfeatures-side
+# rules in naming-conventions.md need a separate small linter.
+#
+# Expect first runs to report the known deviations catalogued in naming-exceptions.md
+# (rtp leading-underscore members NV-08, PascalCase static constants NV-10, etc.).
+# Feed anything new into that ledger; don't weaken the rules here to match the code.
+
+Checks: '-*,readability-identifier-naming'
+WarningsAsErrors: ''
+HeaderFilterRegex: 'inet/.*'
+
+CheckOptions:
+  # Types are PascalCase (clang-tidy's "CamelCase" == UpperCamel)
+  - { key: readability-identifier-naming.ClassCase,            value: CamelCase }
+  - { key: readability-identifier-naming.StructCase,           value: CamelCase }
+  - { key: readability-identifier-naming.UnionCase,            value: CamelCase }
+  - { key: readability-identifier-naming.EnumCase,             value: CamelCase }
+  - { key: readability-identifier-naming.TypeAliasCase,        value: CamelCase }
+  - { key: readability-identifier-naming.TypedefCase,          value: CamelCase }
+  - { key: readability-identifier-naming.TypeTemplateParameterCase, value: CamelCase }
+
+  # Functions / methods / variables / members / parameters are camelCase ("camelBack")
+  - { key: readability-identifier-naming.FunctionCase,         value: camelBack }
+  - { key: readability-identifier-naming.MethodCase,           value: camelBack }
+  - { key: readability-identifier-naming.MemberCase,           value: camelBack }
+  - { key: readability-identifier-naming.PublicMemberCase,     value: camelBack }
+  - { key: readability-identifier-naming.ProtectedMemberCase,  value: camelBack }
+  - { key: readability-identifier-naming.PrivateMemberCase,    value: camelBack }
+  - { key: readability-identifier-naming.ParameterCase,        value: camelBack }
+  - { key: readability-identifier-naming.VariableCase,         value: camelBack }
+  - { key: readability-identifier-naming.LocalVariableCase,    value: camelBack }
+
+  # Enum values, macros, and named constants are ALL_CAPS_WITH_UNDERSCORE.
+  # (Note: the "named-instance constant" exception — e.g. Protocol::ipv4 — is camelCase
+  #  and clang-tidy cannot express that carve-out; such hits go to naming-exceptions.md.)
+  - { key: readability-identifier-naming.EnumConstantCase,     value: UPPER_CASE }
+  - { key: readability-identifier-naming.MacroDefinitionCase,  value: UPPER_CASE }
+  - { key: readability-identifier-naming.GlobalConstantCase,   value: UPPER_CASE }
+  - { key: readability-identifier-naming.ConstexprVariableCase, value: UPPER_CASE }
+
+  # Namespaces are lowercase
+  - { key: readability-identifier-naming.NamespaceCase,        value: lower_case }

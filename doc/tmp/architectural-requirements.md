@@ -563,3 +563,108 @@ Test-baseline artifacts (fingerprint and statistical stores) should be structure
 parallel development branches do not inherently conflict over them, and every baseline update should be
 attributable to the specific change that caused it. Traceability turns the test suite from an opaque
 pass/fail gate into a tool that tells developers what to run and explains why a baseline moved.
+
+### AR-QUAL-ENFORCED — Quality rules are machine-checked, not just documented
+Every architectural requirement that *can* be mechanically verified is backed by an automated check —
+a compiler constraint, a test, or a lint/architecture rule that runs in CI — and the project's
+standing goal is to push each requirement up the enforcement ladder (from review-only, toward
+automated, toward can't-even-build) rather than leaving it as prose.
+
+A rule that lives only in a document is advisory: a contributor — human or, increasingly, an AI agent —
+optimizes for whatever gate actually blocks the merge, not for the paragraph. The architecture is
+therefore responsible for making the right thing the path of least resistance and the wrong thing
+*fail loudly*: an illegal dependency should not compile, a behavioral regression should break a
+fingerprint, an off-convention name should trip the linter. And "review" is itself a ladder: rules
+that no static check can express but that remain *judgeable* — visualization logic leaking into a
+protocol, a zero-time message standing in for a procedure call, prose that duplicates a NED
+declaration — are enforceable by an **agent reviewer** run as a CI gate, leaving only genuine design
+judgment (is a fidelity level worth adding?) to a human. The enforcement status of each requirement
+is tracked in the map below.
+
+## Quality attributes and enforcement
+
+The requirements above are grouped by *architectural concern* — the axis a contributor uses to find
+the rules that apply to the code in front of them. This section adds two orthogonal views: which
+*quality attributes* (in the ISO/IEC 25010 and structural-characteristics vocabulary) each group
+serves, and *how* each requirement is actually enforced.
+
+### Quality-attribute coverage
+
+| AR group | Quality attributes served |
+|---|---|
+| AR-ORG | Modularity, Analysability, Modifiability |
+| AR-MOD | Modularity, Reusability, Modifiability; Fidelity = performance⇄accuracy trade-off |
+| AR-PKT | Compatibility / Interoperability, Correctness, Performance efficiency |
+| AR-COM | Modularity, Extensibility, Interoperability |
+| AR-LIFE | Reliability (recoverability), Testability |
+| AR-QUEUE | Modularity, Reusability, Extensibility |
+| AR-OBS | Analysability, Testability |
+| AR-CFG | Configurability, Maintainability (DRY) |
+| AR-EXT | Extensibility, Modularity, Modifiability |
+| AR-BUILD | Deployability, Portability, Reproducibility |
+| AR-QUAL | Testability, Reliability, Analysability, plus the enforcement/governance dimension |
+
+### Enforcement tiers
+
+Each requirement is enforced at the strongest tier available to it; the goal of AR-QUAL-ENFORCED is to
+move every requirement as far up this ladder as it can go.
+
+- **T1 — won't build.** The compiler or NED toolchain rejects non-compliance.
+- **T2 — fails a CI test.** A fingerprint, unit, module, statistical, or validation test breaks.
+- **T3 — flagged by a deterministic check.** A linter, `featuretool`, build matrix, or a custom
+  architecture script reports it in CI.
+- **T4 — flagged by an agent reviewer.** An LLM reviewer, run as a CI gate, judges the diff against
+  the requirement — catching *semantic* violations no static rule can express (visualization logic in
+  a protocol, a zero-time message used as a procedure call, prose duplicating NED). This rung is what
+  makes the "judgment" requirements enforceable rather than merely hoped-for, and it scales in a way
+  human review does not.
+- **T5 — human review.** Reserved for genuine design judgment and final sign-off (is a fidelity level
+  worth adding? does this read as one system?).
+
+*Proposed* checks below are achievable today with off-the-shelf tooling; starter artifacts live under
+`doc/tmp/enforcement/`.
+
+### Enforcement map
+
+| Requirement | Tier | Enforced by (→ how to raise) |
+|---|---|---|
+| AR-ORG-DOMAINS | T1→T3 | NED package=directory (compiler) → include-graph layering script |
+| AR-ORG-CONTRACTS | T1 | NED `like`/`moduleinterface` + C++ virtuals; contract-package purity → lint (T3) |
+| AR-ORG-VIS-SPLIT | T3+T4 | `#include visualizer/` check (T3) + agent review for vis logic in protocol code |
+| AR-ORG-KERNEL | T4 | agent review: "does this reimplement or patch a kernel facility?" |
+| AR-MOD-COMPOSITION | T1+T4 | NED composition (compiler); agent review for composition-over-inheritance |
+| AR-MOD-PLUGGABLE | T1 | NED `like` / default type / `if typename` (compiler) |
+| AR-MOD-FIDELITY | T4→T5 | agent flags hardcoded fidelity; whether a level is worth adding is human judgment |
+| AR-MOD-NODEBASE | T1/T2 | NED extension + `absPath`/`^` resolution (compiler/runtime) |
+| AR-PKT-CHUNKS | T1/T2 | Chunk types (compiler) + runtime immutability asserts (debug) |
+| AR-PKT-DUAL | T2 | serializer registry + fingerprint `D` ingredient → serializer-completeness test |
+| AR-PKT-TAGS | T1/T2 | tag API (compiler); PHY strips tags (tested) |
+| AR-PKT-ERRORS | T1 | chunk/error API (compiler) |
+| AR-PKT-SIGNAL | T1/T2 | Signal API (compiler) + runtime asserts |
+| AR-COM-REGISTRY | T1/T2 | registration macros (compiler) + runtime "register once" check |
+| AR-COM-DISPATCH | T2 | MessageDispatcher + tags at runtime (tested) |
+| AR-COM-SOCKETS | T1+T4 | socket API provided (compiler); agent review that apps use sockets, not raw messages |
+| AR-COM-DIRECT | T3+T4 | lint for `scheduleAt(simTime())`/zero-delay send + agent review; runtime zero-delay hook (T2) |
+| AR-LIFE-STAGES | T1/T2 | `INITSTAGE_*` / `Define_InitStage_Dependency` (compiler) + runtime ordering |
+| AR-LIFE-OPERATIONS | T2 | `@lifecycleSupport` + module/lifecycle tests |
+| AR-QUEUE-ROLES | T1 | queueing `I*` contracts (compiler) |
+| AR-QUEUE-STREAMING | T1/T2 | streaming API (compiler) + tests |
+| AR-OBS-SIGNALS | T1/T2 | NED `@signal`/`@statistic` (compiler) + fingerprint neutrality |
+| AR-OBS-NED-TRUTH | T1+T4 | NED authoritative, reference generated from it; agent review for prose duplicating NED |
+| AR-OBS-INTROSPECTION | T3+T4 | dissector/printer-completeness test + agent review |
+| AR-OBS-FLOWS | T1/T2 | region-tag API (compiler) + flow tests |
+| AR-CFG-INFER | T1+T4 | NED gate/size inference (compiler); agent review for DRY |
+| AR-CFG-PARAMS | T1+T4 | **units library + `@unit` (compile-time dimensional analysis)**; agent review for single-meaning fields |
+| AR-EXT-NOCORE | T3+T4 | feature-off build (core→optional deps) + agent review "no core edits for a new protocol" |
+| AR-EXT-ATTACH | T1/T3 | attachment API (compiler) + feature-off build |
+| AR-EXT-FEATURES | T3 | `inet_featuretool` dependency validation + feature-matrix build |
+| AR-BUILD-OUTOFTREE | T2/T3 | CI clean/isolated build (opp_ci from a pinned commit) |
+| AR-BUILD-DECLARATIVE | T1+T4 | build descriptors (`.oppfeatures`, opp descriptors); agent review for single-source-of-truth |
+| AR-QUAL-FINGERPRINT | T2 ✔ | fingerprint tests on CI |
+| AR-QUAL-TESTS | T2+T4 | test suites on CI; coverage/mutation gate + agent review that a change ships matching tests |
+| AR-QUAL-DETERMINISM | T2 ✔ | fingerprint stability (same seed → same fingerprint; parallel-safe) |
+| AR-QUAL-NAMING | T3+T4 | `clang-tidy` (C++) + agent review for NED/`.msg`/semantic names |
+| AR-QUAL-DISPLAY | T3+T4 | "every module has an icon" coverage check + agent review |
+| AR-QUAL-LOGGING | T3+T4 | `-Werror`/`clang-tidy` + agent review that programming errors throw, not log |
+| AR-QUAL-TRACEABILITY | T3 | fingerprint tags + source→config mapping (partial) |
+| AR-QUAL-ENFORCED | — | the CI gate set itself; measured by how many rows above reach T1–T4 (automated) |
