@@ -10,11 +10,15 @@ import inet.common.TagBase;
 namespace inet;
 
 //
-// Attached to a packet read from a capture file whose link-layer frame still
-// carries its Frame Check Sequence in the packet bytes (for example a radiotap
-// 802.11 capture with the "FCS at end" flag set). Consumers that need a frame
-// with an FCS trailer can use this to tell whether one must still be appended.
+// Attached to a packet read from a capture file whose link-layer FCS presence is
+// known from the file itself, so consumers do not have to assume it. It is set
+// only for capture formats that encode this -- a radiotap 802.11 header (the
+// per-frame "FCS at end" flag) or an FCS-explicit link type such as
+// DLT_IEEE802_15_4_WITHFCS / _NOFCS. For formats that do not encode it (plain
+// Ethernet, raw 802.11) the tag is absent and the presence of an FCS must be
+// supplied out of band. hasFcs tells whether the frame bytes still carry the FCS.
 //
 class FcsInd extends TagBase
 {
+    bool hasFcs;
 }
