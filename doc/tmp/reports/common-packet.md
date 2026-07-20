@@ -4,7 +4,7 @@
 - **Date:** 2026-07-20
 - **Command:** `doc/tmp/enforcement/check-architecture.sh src/inet/common/packet`
 - **Result:** FAIL — 8 `AR-ORG-DOMAINS` couplings across 5 files; 0 `AR-ORG-VIS-SPLIT`.
-- **Rules:** [architectural-requirements.md](../../architectural-requirements.md) AR-ORG-DOMAINS,
+- **Rules:** [architectural-requirements.md](../architectural-requirements.md) AR-ORG-DOMAINS,
   AR-ORG-VIS-SPLIT. Foundational value types (addresses, protocol ids) are allowlisted (AS-01).
 
 ## Findings

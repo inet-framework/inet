@@ -1,11 +1,11 @@
 # Architecture Exceptions and Violations
 
 Known places where the INET code base departs from the dependency-direction requirements in
-[architectural-requirements.md](../architectural-requirements.md) — chiefly **AR-ORG-DOMAINS**
+[architectural-requirements.md](architectural-requirements.md) — chiefly **AR-ORG-DOMAINS**
 (dependencies point protocols → infrastructure, never the reverse) and **AR-ORG-VIS-SPLIT** (model
 code must not depend on the visualizer). It is the architecture counterpart of
-[naming-exceptions.md](../naming-exceptions.md), and it is seeded automatically from
-[`check-architecture.sh`](check-architecture.sh) — re-running that script *is* the audit.
+[naming-exceptions.md](naming-exceptions.md), and it is seeded automatically from
+[`check-architecture.sh`](enforcement/check-architecture.sh) — re-running that script *is* the audit.
 
 Each entry has a **disposition**:
 
@@ -58,7 +58,7 @@ Grouped by cluster (the check reports the individual `file:line` hits). Counts a
 
 ## Auditing
 
-Re-running [`check-architecture.sh`](check-architecture.sh) from the INET repo root reproduces the
+Re-running [`check-architecture.sh`](enforcement/check-architecture.sh) from the INET repo root reproduces the
 violation list. When it reports something new:
 
 1. If the coupling is a deliberate, accepted framework-wide dependency, add an `AS-*` row **and** add

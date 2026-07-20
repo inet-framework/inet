@@ -22,7 +22,7 @@ Ground rules:
 2. **Judge only what static checks miss.** The compiler, `clang-tidy`, and `check-architecture.sh`
    already cover the mechanical rules; you cover *semantics* (intent, logic, duplication).
 3. **Respect the ledgers.** Couplings already recorded in
-   [architecture-exceptions.md](architecture-exceptions.md) or names in
+   [architecture-exceptions.md](../architecture-exceptions.md) or names in
    [naming-exceptions.md](../naming-exceptions.md) are known — don't re-flag them; flag only *new*
    deviations, and propose them as new ledger rows.
 4. **Scope to the diff.** Review what the change adds or moves, not the whole pre-existing tree.
