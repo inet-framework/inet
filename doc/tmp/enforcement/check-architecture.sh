@@ -9,20 +9,33 @@
 #   AR-ORG-VIS-SPLIT — model/protocol code must not depend on the visualizer package
 #
 # Usage (from the INET repository root):
-#   doc/tmp/enforcement/check-architecture.sh [SRC_DIR]     # default SRC_DIR=src/inet
+#   doc/tmp/enforcement/check-architecture.sh            # full check
+#   doc/tmp/enforcement/check-architecture.sh <SUBTREE>  # scope both checks to a subset,
+#                                                        # e.g. src/inet/common/packet
+#
+# With no argument, AR-ORG-DOMAINS covers src/inet/common and AR-ORG-VIS-SPLIT covers all of
+# src/inet. A SUBTREE argument restricts both checks to that directory — useful for a
+# focused, per-package audit report.
 #
 # Exit status 0 = clean, 1 = violations found. Wire it into CI to make the rule a gate.
 # This is intentionally a grep-level starter; a robust version would parse the full
 # include graph (e.g. dependency-cruiser / a small Python tool) and check for cycles.
 
 set -uo pipefail
-SRC="${1:-src/inet}"
+SCOPE="${1:-}"
+if [ -n "$SCOPE" ]; then
+  DOMAIN_SCOPE="$SCOPE"; VIS_SCOPE="$SCOPE"
+else
+  DOMAIN_SCOPE="src/inet/common"; VIS_SCOPE="src/inet"
+fi
 status=0
 
-if [ ! -d "$SRC" ]; then
-  echo "error: source dir '$SRC' not found (run from the INET repo root)" >&2
-  exit 2
-fi
+for d in "$DOMAIN_SCOPE" "$VIS_SCOPE"; do
+  if [ ! -d "$d" ]; then
+    echo "error: '$d' not found (run from the INET repo root)" >&2
+    exit 2
+  fi
+done
 
 LAYERS='physicallayer|linklayer|networklayer|transportlayer|routing|applications'
 
@@ -36,8 +49,8 @@ ALLOW+='|linklayer/common/MacAddress\.h'
 ALLOW+='|linklayer/common/EtherType_m\.h'
 ALLOW+='|networklayer/common/IpProtocolId_m\.h'
 
-echo "== AR-ORG-DOMAINS: common/ must not #include a protocol layer (foundational value types allowlisted) =="
-hits=$(grep -rEn "#include \"inet/(${LAYERS})/" "$SRC/common/" 2>/dev/null | grep -vE "$ALLOW")
+echo "== AR-ORG-DOMAINS: $DOMAIN_SCOPE must not #include a protocol layer (foundational value types allowlisted) =="
+hits=$(grep -rEn "#include \"inet/(${LAYERS})/" "$DOMAIN_SCOPE" 2>/dev/null | grep -vE "$ALLOW")
 if [ -n "$hits" ]; then
   echo "$hits" | sed 's/^/  VIOLATION: /'
   echo "  ^ common/ reaches up into a protocol layer — invert the dependency (AR-EXT-ATTACH),"
@@ -49,7 +62,7 @@ fi
 
 echo
 echo "== AR-ORG-VIS-SPLIT: non-visualizer code must not #include visualizer/ =="
-if hits=$(grep -rEln "#include \"inet/visualizer/" "$SRC" 2>/dev/null | grep -v "/visualizer/"); then
+if hits=$(grep -rEln "#include \"inet/visualizer/" "$VIS_SCOPE" 2>/dev/null | grep -v "/visualizer/"); then
   echo "$hits" | sed 's/^/  VIOLATION: /'
   echo "  ^ model/protocol code depends on the visualizer — visualizers must subscribe from outside."
   status=1
