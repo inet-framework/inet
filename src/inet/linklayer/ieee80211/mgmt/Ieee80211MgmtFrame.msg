@@ -123,6 +123,11 @@ struct Ieee80211SupportedRatesElement
 //
 class Ieee80211MgmtFrame extends FieldsChunk
 {
+    // Trailing information elements this model does not represent (DS Parameter Set,
+    // TIM, Country, RSN, HT Capabilities, vendor-specific, ...). They are preserved
+    // verbatim so real captures round-trip byte-for-byte; empty for frames the
+    // simulation builds itself (those carry only the modelled elements).
+    uint8_t trailingBytes[];
 }
 
 //
@@ -177,6 +182,7 @@ class Ieee80211AssociationRequestFrame extends Ieee80211MgmtFrame
 {
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
+    uint16_t capabilityInformation = 0; // Capability Information field (2 octets); preserved from the wire
 }
 
 //
@@ -195,6 +201,7 @@ class Ieee80211AssociationResponseFrame extends Ieee80211MgmtFrame
     Ieee80211StatusCode statusCode;
     short aid;
     Ieee80211SupportedRatesElement supportedRates;
+    uint16_t capabilityInformation = 0; // Capability Information field (2 octets); preserved from the wire
 }
 
 //
@@ -214,6 +221,8 @@ class Ieee80211BeaconFrame extends Ieee80211MgmtFrame
     simtime_t beaconInterval;
     int channelNumber;
     Ieee80211HandoverParameters handoverParameters;     //TODO is it a vendor-specific parameter in serializer?
+    uint64_t timestamp = 0;             // TSF timer value (8 octets); preserved from the wire, 0 for simulation-built frames
+    uint16_t capabilityInformation = 0; // Capability Information field (2 octets); preserved from the wire
 }
 
 //
