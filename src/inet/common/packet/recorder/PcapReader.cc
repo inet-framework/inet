@@ -119,6 +119,9 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
     std::vector<uint8_t> bytes;
     const Protocol *protocol = nullptr;
     int offset = 0;
+    // Some link types tell us whether the frame carries its FCS; for those, set
+    // fcsKnown and record hasFcs so an FcsInd tag can be attached (see below).
+    bool fcsKnown = false;
     bool hasFcs = false;
     switch (fileHeader.network) {
         case 0: {
@@ -132,14 +135,17 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
         }
         case 1: protocol = &Protocol::ethernetMac; break;
         case 105: protocol = &Protocol::ieee80211Mac; break;
-        case 195: protocol = &Protocol::ieee802154; break; // DLT_IEEE802_15_4_WITHFCS
+        case 195: protocol = &Protocol::ieee802154; fcsKnown = true; hasFcs = true; break; // DLT_IEEE802_15_4_WITHFCS
+        case 230: protocol = &Protocol::ieee802154; fcsKnown = true; hasFcs = false; break; // DLT_IEEE802_15_4_NOFCS
         case 127: {
             // DLT_IEEE802_11_RADIO: a variable-length radiotap header precedes the
             // 802.11 MAC frame. Its total length is in bytes 2-3 (it_len), stored
             // little-endian regardless of the pcap byte order -- strip it to reach
-            // the MAC frame.
+            // the MAC frame. The radiotap Flags field tells per frame whether the FCS
+            // is present.
             offset = buffer[2] | (buffer[3] << 8);
             protocol = &Protocol::ieee80211Mac;
+            fcsKnown = true;
             hasFcs = radiotapHasFcs(buffer, packetHeader.incl_len);
             break;
         }
@@ -154,8 +160,8 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
     auto packet = new Packet(nullptr, data);
     if (protocol != nullptr)
         packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
-    if (hasFcs)
-        packet->addTag<FcsInd>();
+    if (fcsKnown)
+        packet->addTag<FcsInd>()->setHasFcs(hasFcs);
     // naming a packet requires dissecting it; only do so when a format was requested
     if (packetNameFormat != nullptr)
         packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
