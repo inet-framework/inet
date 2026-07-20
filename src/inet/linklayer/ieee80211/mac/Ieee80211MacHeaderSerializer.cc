@@ -164,6 +164,29 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     stream.writeBit(macHeader->getFromDS());
     stream.writeBit(macHeader->getToDS());
     Ieee80211FrameType type = macHeader->getType();
+    // Any data-type frame (frameType == 2) shares the data-header layout; the QoS
+    // control field is present iff the QoS bit (0x08) of the subtype is set. Handle
+    // all data subtypes here -- Null (0x24), QoS-Null (0x2c) and the CF-Poll/CF-Ack
+    // variants -- not just plain Data (ST_DATA) and QoS-Data (ST_DATA_WITH_QOS).
+    if (macHeader->getFrameType() == 2) {
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(chunk);
+        stream.writeUint16Le(dataHeader->getDurationField().inUnit(SIMTIME_US));
+        stream.writeMacAddress(dataHeader->getReceiverAddress());
+        stream.writeMacAddress(dataHeader->getTransmitterAddress());
+        stream.writeMacAddress(dataHeader->getAddress3());
+        writeSequenceControl(stream, dataHeader->getFragmentNumber(), dataHeader->getSequenceNumber().get());
+        if (dataHeader->getFromDS() && dataHeader->getToDS())
+            stream.writeMacAddress(dataHeader->getAddress4());
+        if (macHeader->getSubType() & 0x08) {
+            stream.writeUint4(dataHeader->getTid());
+            stream.writeBit(true);
+            stream.writeUint2(dataHeader->getAckPolicy());
+            stream.writeBit(dataHeader->getAMsduPresent());
+            stream.writeByte(0);
+        }
+        ASSERT(stream.getLength() - startPos == dataHeader->getChunkLength());
+        return;
+    }
     switch (type) {
         case ST_ASSOCIATIONREQUEST:
         case ST_ASSOCIATIONRESPONSE:
@@ -342,26 +365,6 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             break;
 
         }
-        case ST_DATA_WITH_QOS:
-        case ST_DATA: {
-            auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(chunk);
-            stream.writeUint16Le(dataHeader->getDurationField().inUnit(SIMTIME_US));
-            stream.writeMacAddress(dataHeader->getReceiverAddress());
-            stream.writeMacAddress(dataHeader->getTransmitterAddress());
-            stream.writeMacAddress(dataHeader->getAddress3());
-            writeSequenceControl(stream, dataHeader->getFragmentNumber(), dataHeader->getSequenceNumber().get());
-            if (dataHeader->getFromDS() && dataHeader->getToDS())
-                stream.writeMacAddress(dataHeader->getAddress4());
-            if (type == ST_DATA_WITH_QOS) {
-                stream.writeUint4(dataHeader->getTid());
-                stream.writeBit(true);
-                stream.writeUint2(dataHeader->getAckPolicy());
-                stream.writeBit(dataHeader->getAMsduPresent());
-                stream.writeByte(0);
-            }
-            ASSERT(stream.getLength() - startPos == dataHeader->getChunkLength());
-            break;
-        }
         case ST_PSPOLL:
         case ST_LBMS_REQUEST:
         case ST_LBMS_REPORT: {
@@ -389,6 +392,34 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
     macHeader->setFromDS(stream.readBit());
     macHeader->setToDS(stream.readBit());
     Ieee80211FrameType type = macHeader->getType();
+    // Any data-type frame (frameType == 2) shares the data-header layout; the QoS
+    // control field is present iff the QoS bit (0x08) of the subtype is set. Handle
+    // all data subtypes here -- Null (0x24), QoS-Null (0x2c) and the CF-Poll/CF-Ack
+    // variants -- not just plain Data (ST_DATA) and QoS-Data (ST_DATA_WITH_QOS),
+    // which previously fell through to the default case and were marked incorrect.
+    if (macHeader->getFrameType() == 2) {
+        auto dataHeader = makeShared<Ieee80211DataHeader>();
+        copyBasicFields(dataHeader, macHeader);
+        dataHeader->setDurationField(SimTime(stream.readUint16Le(), SIMTIME_US));
+        dataHeader->setReceiverAddress(stream.readMacAddress());
+        dataHeader->setTransmitterAddress(stream.readMacAddress());
+        dataHeader->setAddress3(stream.readMacAddress());
+        int fragmentNumber;
+        SequenceNumberCyclic sequenceNumber;
+        readSequenceControl(stream, fragmentNumber, sequenceNumber);
+        dataHeader->setFragmentNumber(fragmentNumber);
+        dataHeader->setSequenceNumber(sequenceNumber);
+        if (dataHeader->getFromDS() && dataHeader->getToDS())
+            dataHeader->setAddress4(stream.readMacAddress());
+        if (macHeader->getSubType() & 0x08) {
+            dataHeader->setTid(stream.readUint4());
+            stream.readBit();
+            dataHeader->setAckPolicy(static_cast<AckPolicy>(stream.readUint2()));
+            dataHeader->setAMsduPresent(stream.readBit());
+            stream.readByte();
+        }
+        return dataHeader;
+    }
     switch (type) {
         case ST_ASSOCIATIONREQUEST:
         case ST_ASSOCIATIONRESPONSE:
@@ -601,30 +632,6 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             }
             return blockAck;
 
-        }
-        case ST_DATA_WITH_QOS:
-        case ST_DATA: {
-            auto dataHeader = makeShared<Ieee80211DataHeader>();
-            copyBasicFields(dataHeader, macHeader);
-            dataHeader->setDurationField(SimTime(stream.readUint16Le(), SIMTIME_US));
-            dataHeader->setReceiverAddress(stream.readMacAddress());
-            dataHeader->setTransmitterAddress(stream.readMacAddress());
-            dataHeader->setAddress3(stream.readMacAddress());
-            int fragmentNumber;
-            SequenceNumberCyclic sequenceNumber;
-            readSequenceControl(stream, fragmentNumber, sequenceNumber);
-            dataHeader->setFragmentNumber(fragmentNumber);
-            dataHeader->setSequenceNumber(sequenceNumber);
-            if (dataHeader->getFromDS() && dataHeader->getToDS())
-                dataHeader->setAddress4(stream.readMacAddress());
-            if (type == ST_DATA_WITH_QOS) {
-                dataHeader->setTid(stream.readUint4());
-                stream.readBit();
-                dataHeader->setAckPolicy(static_cast<AckPolicy>(stream.readUint2()));
-                dataHeader->setAMsduPresent(stream.readBit());
-                stream.readByte();
-            }
-            return dataHeader;
         }
         case ST_PSPOLL:
         case ST_LBMS_REQUEST:

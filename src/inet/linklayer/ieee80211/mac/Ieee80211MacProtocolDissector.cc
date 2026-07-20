@@ -47,7 +47,11 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
     callback.visitChunk(header, &Protocol::ieee80211Mac);
     // TODO fragmentation & aggregation
     if (auto dataHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211DataHeader>(header)) {
-        if (dataHeader->getMoreFragments() || dataHeader->getFragmentNumber() != 0)
+        if (packet->getDataLength() == b(0)) {
+            // the frame body is empty: a Null or QoS-Null data frame (and the
+            // CF-Poll/CF-Ack data subtypes) carry no payload, so there is nothing to dissect
+        }
+        else if (dataHeader->getMoreFragments() || dataHeader->getFragmentNumber() != 0)
             callback.dissectPacket(packet, nullptr);
         else if (dataHeader->getAMsduPresent()) {
             auto originalTrailerPopOffset = packet->getBackOffset();
