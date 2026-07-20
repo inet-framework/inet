@@ -134,6 +134,12 @@ std::pair<PcapRecordTime, Packet *> PcapReader::readPacket()
             break;
         }
         case 1: protocol = &Protocol::ethernetMac; break;
+        case 101: // DLT_RAW: a bare IP packet with no link-layer header; the IP
+            // version nibble tells IPv4 from IPv6
+            protocol = ((buffer[0] >> 4) == 6) ? &Protocol::ipv6 : &Protocol::ipv4;
+            break;
+        case 228: protocol = &Protocol::ipv4; break; // DLT_IPV4
+        case 229: protocol = &Protocol::ipv6; break; // DLT_IPV6
         case 105: protocol = &Protocol::ieee80211Mac; break;
         case 195: protocol = &Protocol::ieee802154; fcsKnown = true; hasFcs = true; break; // DLT_IEEE802_15_4_WITHFCS
         case 230: protocol = &Protocol::ieee802154; fcsKnown = true; hasFcs = false; break; // DLT_IEEE802_15_4_NOFCS
