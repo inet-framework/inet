@@ -16,9 +16,12 @@ requirement [AR-QUAL-NAMING](architectural-requirements.md); both humans and too
 component's category and how to compose it from its name.
 
 This document aims to cover **every** kind of name in an INET project — NED, message,
-C++, configuration, build, and asset names. Where the current codebase deviates from a
-rule, the rule is stated prescriptively and the deviation flagged as *avoid* or
-*exception*: the rule is the target, not merely a description of what exists.
+C++, configuration, build, and asset names. The rules here are the **target**: they are
+stated prescriptively, describing the ideal rather than the current state. Known places
+where the existing code does not (yet) follow them — both permanent, sanctioned exceptions
+and violations awaiting a rename — are recorded separately in
+[naming-exceptions.md](naming-exceptions.md), which serves as the rename backlog (see
+*Auditing* at the end).
 
 ## Casing at a glance
 
@@ -55,15 +58,13 @@ namespaces** are `lowercase`; **enum values, constants, and macros** are `ALL_CA
   `Ipv4Address`, not `IPv4Address`; `TcpConnection`, not `TCPConnection`; `Ieee80211Mac`,
   not `IEEE80211MAC`; likewise `UdpHeader`, `ArpPacket`, `SctpAssociation`,
   `Ospfv2HelloPacket`. This keeps word boundaries in a compound name unambiguous
-  (`Ieee80211` + `Mac`). A few names keep their canonical real-world spelling as an
-  established exception (`IPsec`).
+  (`Ieee80211` + `Mac`). Established canonical real-world spellings are the only exception.
 - **No ad-hoc abbreviations.** Spell domain words out in type, parameter, signal, field,
   and member names (`address` not `addr`, `interface` not `iface`, `destination` not
   `dst`). The only sanctioned short forms are established domain terms that read
   unambiguously as their one expansion: `Mac`, `Phy`, `Nic`, `Fcs`, `Snir`, `Rng`, `Mtu`,
   and the protocol acronyms themselves (`Tcp`, `Udp`, `Ip`, `Ipv4`, `Ipv6`, `Arp`, `Ppp`,
-  `Bgp`, `Ospf`, …). *Avoid* the surviving legacy abbreviations (`src`/`dest` fields,
-  `ltostr`/`atod` utility functions); several carry `// TODO rename` comments already.
+  `Bgp`, `Ospf`, …).
 - **American spelling** (`initialize`, `color`, `neighbor`).
 
 ---
@@ -77,10 +78,8 @@ namespaces** are `lowercase`; **enum values, constants, and macros** are `ALL_CA
   folder). The recurring functional subpackages carry fixed meanings: **`base`** holds
   shared base modules, **`contract`** holds the module interfaces, **`common`** holds
   cross-cutting infrastructure, **`configurator`** holds configurators. The protocol layers
-  are `physicallayer`, `linklayer`, `networklayer`, `transportlayer`.
-  *Exceptions:* two long-standing top-level packages are plural (`applications`,
-  `networks`); a few deep packages use plurals (`…/tables`, `…/modes`) or underscores
-  (`ospf_common`, `tcp_common`). Do not introduce new plural or underscored package names.
+  are `physicallayer`, `linklayer`, `networklayer`, `transportlayer`. Do not introduce new
+  plural or underscored package names.
 - **A file is named after the primary type it defines**, in that type's `PascalCase`:
   `Udp.ned` + `Udp.cc` + `Udp.h` define module `Udp`; `Ipv4Header.msg` defines
   `Ipv4Header`. Code generated from a `.msg` file carries the `_m` marker
@@ -167,8 +166,7 @@ last, variant `6` at the very end: `Ieee80211` + `Mgmt` + `Ap` → `Ieee80211Mgm
   `queueIn`/`queueOut`, `mgmtIn`/`mgmtOut`, and the receive-only `radioIn`. A plain
   single-purpose port may be a bare `in`/`out`.
 - **A gate vector adds `[]`, and its stem still carries the direction:** `upperLayerOut[]`,
-  `generatorIn[]`. *Exception:* the historical link-frame vector `ethg[]` predates this rule;
-  prefer `<stem>In[]`/`<stem>Out[]` for new gate vectors.
+  `generatorIn[]`. Prefer `<stem>In[]`/`<stem>Out[]` for new gate vectors.
 
 ## Parameters
 
@@ -230,7 +228,8 @@ them.
 - **A self-contained protocol message is `<Protocol>Packet`; a link-layer frame is
   `<Protocol>Frame`.** The two are role-distinct, not synonyms: `Frame` is an L2 PDU
   (`Ieee80211BeaconFrame`, `EthernetPauseFrame`), `Packet` an L3-and-above or generic PDU
-  (`ArpPacket`, `Ospfv2HelloPacket`). *Avoid* the meaningless suffixes `Msg` / `Message`.
+  (`ArpPacket`, `Ospfv2HelloPacket`). Use these role-bearing suffixes, never a bare
+  `Msg` / `Message`.
 - **A packet-independent protocol request is `<Concept>Command`** (`Ipv4SocketCloseCommand`,
   `ConfigureRadioCommand`).
 - **Metadata attached to a packet is a tag, suffixed by direction:**
@@ -248,8 +247,8 @@ them.
   `sequenceNo`, `srcPort`, `destPort`, `headerLength`, `moreFragments`. Boolean fields usually
   read as a domain-specific state or flag rather than `is*`/`has*` (`moreFragments`,
   `dontFragment`, `synBit`, `ackBit`). Fields freely mix C++ primitives (`uint16_t`, `bool`)
-  with INET value types (`Ipv4Address`, `MacAddress`, `B` for a byte quantity). *Avoid* the
-  legacy abbreviated field names (`src`/`dest`) — prefer `srcAddress`/`destAddress`.
+  with INET value types (`Ipv4Address`, `MacAddress`, `B` for a byte quantity). Spell field
+  names out (`srcAddress`/`destAddress`, not `src`/`dest`).
 - **Each `.msg` opens with a `namespace` statement** (`namespace inet;`, or a protocol
   sub-namespace `namespace inet::tcp;`), never an `@namespace(...)` property (that property form
   is reserved for `package.ned`).
@@ -309,15 +308,14 @@ them.
   `handleMessageWhenUp`, `handleSelfMessage`, `handleStartOperation`, `receiveSignal`,
   `refreshDisplay`, `finish` — and dispatched handlers follow `handle<Event>`
   (`handleUpperPacket`, `handleAckFrame`). Free functions live at namespace scope, marked
-  `INET_API`; *avoid* the surviving C-style abbreviated helpers (`ltostr`, `atod`).
+  `INET_API`.
 - **Method arguments and local variables are `camelCase`, full words** (`servicePrimitive`,
   `localPort`, `relativeHeaderLength`). Short pointer nouns are acceptable for the obvious
   subject (`packet`, `msg`). Loop counters are `i`, iterators `it`/`iter`, and the range-`for`
   element binding is `elem`; prefer `auto` for iterators and casts.
 - **Member variables are plain `camelCase`, with no `m_`, leading, or trailing underscore**
   (`socketId`, `localAddr`, `numRetries`, `sendQueue`); a boolean member may take an `is`
-  prefix (`isNodeUp`). *Exception:* the `rtp` subsystem uses a legacy leading-underscore style;
-  do not copy it.
+  prefix (`isNodeUp`).
 - **Named constants are `ALL_CAPS_WITH_UNDERSCORE`** regardless of type
   (`INITSTAGE_LINK_LAYER`, `UDP_MAX_MESSAGE_SIZE`, `CFM_CCM_MULTICAST_ADDRESS`). The one
   sanctioned exception is a **named-instance constant** — a `static const` object that behaves
@@ -349,8 +347,6 @@ them.
 A self-message or timer is held in a `camelCase` member named for its purpose, ending in
 `*Timer` (`txTimer`, `endTxTimer`, `retransmitTimer`) or `*Msg`. **Give the `cMessage` a
 descriptive `camelCase` name string, ideally identical to the member** (`new cMessage("sendTimer")`).
-*The codebase is inconsistent here* — timer name strings appear in camelCase, PascalCase,
-snake_case, and ALL_CAPS; the camelCase-matching-the-member form is the target.
 
 ---
 
@@ -364,7 +360,7 @@ snake_case, and ALL_CAPS; the camelCase-matching-the-member form is the target.
   carries a `description = "…"`**.
 - **Parameter-study iteration variables `${name=…}` are `camelCase`** — a single lowercase word
   for simple sweeps (`${distance=10..550 step 2}m`, `${bitrate=6,9,…}Mbps`), camelCase for
-  multi-word ones (`${advertisedWindowKiB=…}`). *Avoid* bare-capital names (`${N1=…}`).
+  multi-word ones (`${advertisedWindowKiB=…}`).
 - INET does not use `experiment-label` / `measurement-label` / `replication-label`; scenario
   identity comes from the config name and iteration variables.
 
@@ -374,9 +370,8 @@ snake_case, and ALL_CAPS; the camelCase-matching-the-member form is the target.
   paired with a free-text, spaced human-readable `name` (`"AODV"`, `"BGPv4 routing"`). Its
   `nedPackages` are lowercase dotted paths and its `compileFlags` define `-DINET_WITH_<UPPER_ID>`.
   Auxiliary features derived from a base feature append a role suffix:
-  `<Feature>Examples`, `<Feature>Showcases`, `<Feature>Tests`, `<Feature>Tutorial`.
-- *Exceptions:* a handful of ids break acronym-as-word (`TSN`, `OpenMP`, `TcpLwip`, `BMac`);
-  new features should follow the `Aodv`/`Bgpv4` form.
+  `<Feature>Examples`, `<Feature>Showcases`, `<Feature>Tests`, `<Feature>Tutorial`. New
+  feature ids follow the `Aodv`/`Bgpv4` form.
 
 ## Directories
 
@@ -384,8 +379,7 @@ snake_case, and ALL_CAPS; the camelCase-matching-the-member form is the target.
   usually the protocol or feature they exercise (`examples/aodv`, `examples/ethernet`,
   `showcases/tsn/framepreemption`, `tutorials/queueing`). The `tests/` subtree is partitioned by
   test *kind*: `fingerprint`, `module`, `unit`, `statistical`, `validation`, `packet`, `speed`.
-  *Exception:* some `examples/` leaf scenario folders are `CamelCase` (`BgpCompleteTest`,
-  `VoIPStreamTest`); prefer lowercase for new ones.
+  Prefer lowercase, run-together names for new scenario folders.
 
 ## Tests
 
@@ -393,7 +387,7 @@ snake_case, and ALL_CAPS; the camelCase-matching-the-member form is the target.
   separate name: `<dir>, -f <inifile> -c <ConfigName> -r <run#>, <timelimit>, <fingerprint>,
   <result>, <tags>`, one per line in a per-area CSV (`ethernet.csv`, `examples.csv`). The
   trailing **tags** are lowercase, space-separated model-area words used for filtering
-  (`wireless adhoc Ipv4`, `routing`); *avoid* mixing in `PascalCase` type-name tags.
+  (`wireless adhoc Ipv4`, `routing`).
 - **`tests/module/*.test` and `tests/unit/*.test` files are `<Subject>[_<n>].test`**
   (`AntennaOrientation_1.test`, `Clock_SettableLinear_1.test`) — `PascalCase` subject, optional
   numeric variant.
@@ -408,6 +402,16 @@ snake_case, and ALL_CAPS; the camelCase-matching-the-member form is the target.
   set and are referenced, not shipped, by INET.
 
 ---
+
+## Auditing and exceptions
+
+The rules above describe the target, not the current state of every file. Real deviations —
+both permanent, sanctioned exceptions (`IPsec`, the `applications`/`networks` packages, the SI
+unit typedefs) and violations still awaiting a rename (`Msg`/`Message` types, underscored
+packages, `rtp` leading-underscore members, and so on) — are tracked in
+[naming-exceptions.md](naming-exceptions.md), which is the rename backlog. When you audit a file
+or area against this document, record what you find there (with a suggested fix and a status)
+rather than fixing it silently or weakening a rule here to match the code.
 
 ## Deriving a protocol's whole vocabulary
 
