@@ -205,9 +205,9 @@ competing error models and none should be architecturally privileged.
 
 ## Protocol Interaction (AR-COM)
 
-### AR-COM-REGISTRY — Protocols and the services modules offer are declared in a global registry
-Protocols, and the services that modules provide and use for them, are declared in a registry at
-initialization, and message dispatch is driven by these registrations.
+### AR-COM-REGISTRY — Modules declare the protocols and services they provide in a global registry
+At initialization, each module registers the protocols it handles and the services it provides for
+them into a global registry, and message dispatch is driven by these registrations.
 
 Rather than hardwiring "TCP output goes to gate 3," a module calls `registerProtocol` in its
 `initialize` method to declare that it serves (or consumes) a given protocol, informing the
