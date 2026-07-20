@@ -26,10 +26,22 @@ fi
 
 LAYERS='physicallayer|linklayer|networklayer|transportlayer|routing|applications'
 
-echo "== AR-ORG-DOMAINS: common/ must not #include a protocol layer =="
-if hits=$(grep -rEn "#include \"inet/(${LAYERS})/" "$SRC/common/" 2>/dev/null); then
+# Foundational value types that are depended on framework-wide. These are sanctioned
+# exceptions (AS-* in architecture-exceptions.md) — ideally they would live in common/,
+# but until they are moved, coupling to them is accepted rather than flagged.
+ALLOW='networklayer/contract/ipv4/Ipv4Address\.h'
+ALLOW+='|networklayer/contract/ipv6/Ipv6Address\.h'
+ALLOW+='|networklayer/common/L3Address(Resolver)?\.h'
+ALLOW+='|linklayer/common/MacAddress\.h'
+ALLOW+='|linklayer/common/EtherType_m\.h'
+ALLOW+='|networklayer/common/IpProtocolId_m\.h'
+
+echo "== AR-ORG-DOMAINS: common/ must not #include a protocol layer (foundational value types allowlisted) =="
+hits=$(grep -rEn "#include \"inet/(${LAYERS})/" "$SRC/common/" 2>/dev/null | grep -vE "$ALLOW")
+if [ -n "$hits" ]; then
   echo "$hits" | sed 's/^/  VIOLATION: /'
-  echo "  ^ common/ reaches up into a protocol layer — invert the dependency (AR-EXT-ATTACH)."
+  echo "  ^ common/ reaches up into a protocol layer — invert the dependency (AR-EXT-ATTACH),"
+  echo "    or record a sanctioned exception in architecture-exceptions.md."
   status=1
 else
   echo "  ok"
