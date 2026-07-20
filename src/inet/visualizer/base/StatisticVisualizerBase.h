@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -59,7 +60,8 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
         const int networkNodeId = -1;
         const int moduleId = -1;
         std::string title;
-        std::map<std::string, double> values; // series label (details full name) -> last value
+        std::map<std::string, double> values; // series label -> last value
+        std::map<std::string, LastValueRecorder *> recorders; // series label -> recorder (barSeries=="sources" only)
 
       public:
         BarSetVisualization(int networkNodeId, int moduleId);
@@ -99,6 +101,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     /** @name Bar chart mode parameters (displayMode == "bars") */
     //@{
     bool barChartMode = false;
+    bool barSeriesBySources = false; // barSeries=="sources": one bar per matching source module (grouped by node), value from a recorder; else demux one source's details
     double maxValue = NaN;
     double minValue = NaN;
     double barWidth = NaN;
@@ -117,7 +120,8 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     //@}
 
     std::map<std::pair<int, simsignal_t>, const StatisticVisualization *> statisticVisualizations;
-    std::map<int, BarSetVisualization *> barSetVisualizations; // keyed by source module id
+    std::map<int, BarSetVisualization *> barSetVisualizations; // keyed by source module id (details mode) or network node id (sources mode)
+    std::set<int> groupedBarSourceIds; // source modules already registered in sources mode
 
   protected:
     virtual void initialize(int stage) override;
@@ -154,6 +158,11 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual void removeAllBarSetVisualizations();
     // Records the last value of a signal for a (source, demux label) pair into its bar set.
     virtual void processBarValue(cComponent *source, double value, cObject *details);
+    // Registers a source module as one bar in its network node's bar set (barSeries=="sources"): attaches a
+    // result recorder (using statisticExpression, e.g. count or throughput) whose value the bar shows.
+    virtual void processGroupedBarSource(cComponent *source, simsignal_t signal);
+    // Refreshes each sources-mode bar set's values from its per-source recorders (called before rendering).
+    virtual void refreshGroupedBarValues();
     // Formats a bar value into its label using valueFormat.
     virtual std::string formatBarValue(double value) const;
     // Interpolates the bar color for a value on the barColors gradient (minValue..maxValue).
@@ -162,14 +171,14 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
 
   public:
 #define PROCESS_SIGNAL(value) { processSignal(source, signal, [=] (cIListener *listener) { listener->receiveSignal(source, signal, value, details); }); }
-#define PROCESS_NUMERIC(value) { if (barChartMode) processBarValue(source, (double)(value), details); else PROCESS_SIGNAL(value); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details) override { PROCESS_NUMERIC(b); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details) override { PROCESS_NUMERIC(l); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, uintval_t l, cObject *details) override { PROCESS_NUMERIC(l); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override { PROCESS_NUMERIC(d); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, const SimTime& t, cObject *details) override { if (barChartMode) processBarValue(source, t.dbl(), details); else PROCESS_SIGNAL(t); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details) override { if (!barChartMode) PROCESS_SIGNAL(s); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override { if (!barChartMode) PROCESS_SIGNAL(obj); }
+#define DISPATCH_NUMERIC(value) { if (barSeriesBySources) processGroupedBarSource(source, signal); else if (barChartMode) processBarValue(source, (double)(value), details); else PROCESS_SIGNAL(value); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details) override { DISPATCH_NUMERIC(b); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details) override { DISPATCH_NUMERIC(l); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, uintval_t l, cObject *details) override { DISPATCH_NUMERIC(l); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override { DISPATCH_NUMERIC(d); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, const SimTime& t, cObject *details) override { if (barSeriesBySources) processGroupedBarSource(source, signal); else if (barChartMode) processBarValue(source, t.dbl(), details); else PROCESS_SIGNAL(t); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details) override { if (barSeriesBySources) processGroupedBarSource(source, signal); else if (!barChartMode) PROCESS_SIGNAL(s); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override { if (barSeriesBySources) processGroupedBarSource(source, signal); else if (!barChartMode) PROCESS_SIGNAL(obj); }
 };
 
 } // namespace visualizer

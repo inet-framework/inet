@@ -145,9 +145,15 @@ StatisticVisualizerBase::BarSetVisualization *StatisticCanvasVisualizer::createB
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     auto barSetVisualization = new BarSetCanvasVisualization(networkNodeVisualization, figure, networkNode->getId(), module->getId());
-    // title: the containing network interface name if any, else the source module name
-    auto networkInterface = getContainingNicModule(module);
-    barSetVisualization->title = networkInterface != nullptr ? networkInterface->getInterfaceName() : module->getFullName();
+    // title: the containing network interface name if the source is under one (e.g. a rate control),
+    // else the source module's own name (e.g. a network node in sources mode)
+    barSetVisualization->title = module->getFullName();
+    for (cModule *m = module; m != nullptr && !isNetworkNode(m); m = m->getParentModule()) {
+        if (auto networkInterface = dynamic_cast<NetworkInterface *>(m)) {
+            barSetVisualization->title = networkInterface->getInterfaceName();
+            break;
+        }
+    }
     return barSetVisualization;
 }
 
@@ -172,6 +178,8 @@ void StatisticCanvasVisualizer::refreshDisplay() const
     VisualizerBase::refreshDisplay();
     if (!barChartMode)
         return;
+    if (barSeriesBySources)
+        const_cast<StatisticCanvasVisualizer *>(this)->refreshGroupedBarValues();
     for (auto& it : barSetVisualizations) {
         auto barSetCanvasVisualization = static_cast<BarSetCanvasVisualization *>(it.second);
         refreshChart(barSetCanvasVisualization);

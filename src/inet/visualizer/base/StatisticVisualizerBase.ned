@@ -52,6 +52,7 @@ simple StatisticVisualizerBase extends VisualizerBase
         // one bar per distinct demux label (the full name of the details object emitted with the value).
         // This is the live counterpart of the demux() result filter used for recording.
         string displayMode @enum("text","bars") = default("text"); // "text": a value label per source (default); "bars": a bar chart per source
+        string barSeries @enum("details","sources") = default("details"); // Bar keying in bars mode: "details" = one bar per demux label of a single source's signal; "sources" = one bar per matching source module, grouped by network node (bar value from statisticExpression, e.g. count or throughput)
         double maxValue = default(0); // Value mapped to a full-height bar and to the top of the color gradient (in the display unit)
         double minValue = default(0); // Value mapped to a zero-height bar and to the bottom of the color gradient (in the display unit)
         double barWidth = default(12); // Width of each bar in pixels

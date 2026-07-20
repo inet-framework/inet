@@ -87,6 +87,7 @@ void StatisticVisualizerBase::initialize(int stage)
         placementPriority = par("placementPriority");
         barChartMode = !strcmp(par("displayMode"), "bars");
         if (barChartMode) {
+            barSeriesBySources = !strcmp(par("barSeries"), "sources");
             maxValue = par("maxValue");
             minValue = par("minValue");
             barWidth = par("barWidth");
@@ -299,6 +300,7 @@ void StatisticVisualizerBase::removeAllBarSetVisualizations()
         removeBarSetVisualization(barSetVisualization);
         delete barSetVisualization;
     }
+    groupedBarSourceIds.clear();
 }
 
 void StatisticVisualizerBase::processBarValue(cComponent *source, double value, cObject *details)
@@ -350,6 +352,43 @@ cFigure::Color StatisticVisualizerBase::getBarColor(double value) const
     const auto& c1 = barColors[index + 1];
     auto lerp = [](uint8_t a, uint8_t b, double t) { return (uint8_t)std::round(a + (b - a) * t); };
     return cFigure::Color(lerp(c0.red, c1.red, t), lerp(c0.green, c1.green, t), lerp(c0.blue, c1.blue, t));
+}
+
+void StatisticVisualizerBase::processGroupedBarSource(cComponent *source, simsignal_t signal)
+{
+    auto module = check_and_cast<cModule *>(source);
+    if (groupedBarSourceIds.find(module->getId()) != groupedBarSourceIds.end())
+        return; // already a bar
+    if (!sourceFilter.matches(module))
+        return;
+    // attach a result recorder (statisticExpression, e.g. count or throughput) whose value the bar will show
+    addResultRecorder(source, signal);
+    auto recorder = getResultRecorder(source, signal);
+    auto networkNode = getContainingNode(module);
+    auto barSetVisualization = getBarSetVisualization(networkNode->getId());
+    if (barSetVisualization == nullptr) {
+        barSetVisualization = createBarSetVisualization(networkNode);
+        if (barSetVisualization == nullptr)
+            return; // bar charts not supported by this concrete visualizer (e.g. osg)
+        addBarSetVisualization(barSetVisualization);
+    }
+    std::string label = module->getFullName();
+    barSetVisualization->recorders[label] = recorder;
+    barSetVisualization->values[label] = NaN;
+    groupedBarSourceIds.insert(module->getId());
+}
+
+void StatisticVisualizerBase::refreshGroupedBarValues()
+{
+    for (auto& kv : barSetVisualizations) {
+        auto barSetVisualization = kv.second;
+        for (auto& r : barSetVisualization->recorders) {
+            double value = r.second->getLastValue();
+            if (!std::isnan(value) && !units.empty() && statisticUnit != nullptr && *statisticUnit != '\0')
+                value = cNEDValue::convertUnit(value, statisticUnit, units[0].c_str());
+            barSetVisualization->values[r.first] = value;
+        }
+    }
 }
 
 } // namespace visualizer
