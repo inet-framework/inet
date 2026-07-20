@@ -335,15 +335,15 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeUint16Le(blockAck->getDurationField().inUnit(SIMTIME_US));
             stream.writeMacAddress(blockAck->getReceiverAddress());
             stream.writeMacAddress(blockAck->getTransmitterAddress());
-            stream.writeBit(blockAck->getBlockAckPolicy());
             bool multiTid = blockAck->getMultiTid();
             bool compressedBitmap = blockAck->getCompressedBitmap();
-            stream.writeBit(multiTid);
-            stream.writeBit(compressedBitmap);
-            stream.writeNBitsOfUint64Be(blockAck->getReserved(), 9);
+            // BA Control is a 16-bit little-endian field: bit 0 Ack Policy, bit 1 Multi-TID,
+            // bit 2 Compressed Bitmap, bits 3-11 reserved, bits 12-15 TID_INFO
+            uint16_t baControl = (blockAck->getBlockAckPolicy() ? 1 : 0) | ((multiTid ? 1 : 0) << 1)
+                    | ((compressedBitmap ? 1 : 0) << 2) | ((blockAck->getReserved() & 0x1FF) << 3);
             if (!multiTid && !compressedBitmap) {
                 auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(chunk);
-                stream.writeUint4(basicBlockAck->getTidInfo());
+                stream.writeUint16Le(baControl | ((basicBlockAck->getTidInfo() & 0xF) << 12));
                 // Block Ack Starting Sequence Control = 4-bit Fragment Number + 12-bit sequence number
                 stream.writeUint4(basicBlockAck->getFragmentNumber());
                 stream.writeNBitsOfUint64Be(basicBlockAck->getStartingSequenceNumber().get(), 12);
@@ -355,7 +355,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             }
             else if (!multiTid && compressedBitmap) {
                 auto compressedBlockAck = dynamicPtrCast<const Ieee80211CompressedBlockAck>(chunk);
-                stream.writeUint4(compressedBlockAck->getTidInfo());
+                stream.writeUint16Le(baControl | ((compressedBlockAck->getTidInfo() & 0xF) << 12));
                 // Block Ack Starting Sequence Control: the Fragment Number subfield is reserved (0) here
                 stream.writeUint4(0);
                 stream.writeNBitsOfUint64Be(compressedBlockAck->getStartingSequenceNumber().get(), 12);
@@ -600,17 +600,21 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             blockAck->setDurationField(SimTime(stream.readUint16Le(), SIMTIME_US));
             blockAck->setReceiverAddress(stream.readMacAddress());
             blockAck->setTransmitterAddress(stream.readMacAddress());
-            blockAck->setBlockAckPolicy(stream.readBit());
-            bool multiTid = stream.readBit();
-            bool compressedBitmap = stream.readBit();
+            // BA Control is a 16-bit little-endian field: bit 0 Ack Policy, bit 1 Multi-TID,
+            // bit 2 Compressed Bitmap, bits 3-11 reserved, bits 12-15 TID_INFO
+            uint16_t baControl = stream.readUint16Le();
+            bool multiTid = (baControl >> 1) & 1;
+            bool compressedBitmap = (baControl >> 2) & 1;
+            uint8_t tidInfo = (baControl >> 12) & 0xF;
+            blockAck->setBlockAckPolicy(baControl & 1);
             blockAck->setMultiTid(multiTid);
             blockAck->setCompressedBitmap(compressedBitmap);
-            blockAck->setReserved(stream.readNBitsToUint64Be(9));
+            blockAck->setReserved((baControl >> 3) & 0x1FF);
             if (!multiTid && !compressedBitmap) {
                 auto basicBlockAck = makeShared<Ieee80211BasicBlockAck>();
                 copyBasicFields(basicBlockAck, macHeader);
                 copyBlockAckFrameFields(basicBlockAck, blockAck);
-                basicBlockAck->setTidInfo(stream.readUint4());
+                basicBlockAck->setTidInfo(tidInfo);
                 // Block Ack Starting Sequence Control = 4-bit Fragment Number + 12-bit sequence number;
                 // reading the sequence number as 12 bits keeps it within SequenceNumberCyclic's range
                 basicBlockAck->setFragmentNumber(stream.readUint4());
@@ -629,7 +633,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
                 copyBasicFields(compressedBlockAck, macHeader);
                 copyBlockAckFrameFields(compressedBlockAck, blockAck);
 
-                compressedBlockAck->setTidInfo(stream.readUint4());
+                compressedBlockAck->setTidInfo(tidInfo);
                 // Block Ack Starting Sequence Control: skip the reserved 4-bit Fragment Number, then
                 // read the 12-bit sequence number (kept within SequenceNumberCyclic's range)
                 stream.readUint4();
