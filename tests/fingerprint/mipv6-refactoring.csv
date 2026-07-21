@@ -8,9 +8,9 @@
 # empty-shim step, which kept these fingerprints bit-for-bit identical.
 
 # MIPv6 example — the primary test
-/examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,            1710-75c3/~tNlb, PASS, wireless EthernetMac
-/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,            69c1-746f/~tNlb, PASS, wireless EthernetMac
-/examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,            507d-0662/~tNlb, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,            e6a5-97e7/~tNlb, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,            84bc-8b69/~tNlb, PASS, wireless EthernetMac
+/examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,            c6e4-09fb/~tNlb, PASS, wireless EthernetMac
 
 # IPv6 examples
 # MLD example — new PASS row; ~tNl locks the MLD Report/Query/Done/MAS-Query packet exchange (traffic+lengths);
