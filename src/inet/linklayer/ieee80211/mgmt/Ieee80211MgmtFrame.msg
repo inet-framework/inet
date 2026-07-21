@@ -184,6 +184,7 @@ class Ieee80211AssociationRequestFrame extends Ieee80211MgmtFrame
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
     uint16_t capabilityInformation = 0; // Capability Information field (2 octets); preserved from the wire
+    uint16_t listenInterval = 0; // Listen Interval field (2 octets)
 }
 
 //
