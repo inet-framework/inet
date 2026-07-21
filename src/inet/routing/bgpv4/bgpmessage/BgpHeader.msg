@@ -226,6 +226,14 @@ class BgpUpdatePathAttributesAggregator extends BgpUpdatePathAttributes
     Ipv4Address bgpSpeaker;
 }
 
+// Fallback for path attributes whose type code the serializer does not model
+// specifically (e.g. COMMUNITIES, RFC 1997). The raw value octets are preserved
+// verbatim so the message round-trips regardless of the attribute type.
+class BgpUpdatePathAttributesUnknown extends BgpUpdatePathAttributes
+{
+    uint8_t value[];    // raw attribute value ('length' octets)
+}
+
 struct BgpUpdateWithdrawnRoutes
 {
     @packetData;
