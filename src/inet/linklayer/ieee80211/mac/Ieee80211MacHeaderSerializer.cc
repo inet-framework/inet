@@ -180,7 +180,7 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeMacAddress(dataHeader->getAddress4());
         if (macHeader->getSubType() & 0x08) {
             stream.writeUint4(dataHeader->getTid());
-            stream.writeBit(true);
+            stream.writeBit(dataHeader->getEosp());
             stream.writeUint2(dataHeader->getAckPolicy());
             stream.writeBit(dataHeader->getAMsduPresent());
             stream.writeByte(0);
@@ -421,7 +421,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             dataHeader->setAddress4(stream.readMacAddress());
         if (macHeader->getSubType() & 0x08) {
             dataHeader->setTid(stream.readUint4());
-            stream.readBit();
+            dataHeader->setEosp(stream.readBit());
             dataHeader->setAckPolicy(static_cast<AckPolicy>(stream.readUint2()));
             dataHeader->setAMsduPresent(stream.readBit());
             stream.readByte();
