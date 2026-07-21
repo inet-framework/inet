@@ -1292,6 +1292,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 int size = chunk->getSctpChunkTypesArraySize();
                                 chunk->setSctpChunkTypesArraySize(size + 1);
                                 chunk->setSctpChunkTypes(size, FORWARD_TSN_SUPPORTED_PARAMETER);
+                                chunk->setForwardTsn(true); // else serialize (which checks getForwardTsn) drops the parameter
                                 chunklen += ntohs(parameter->length);
                                 break;
                             }
@@ -1563,6 +1564,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 int size = chunk->getSctpChunkTypesArraySize();
                                 chunk->setSctpChunkTypesArraySize(size + 1);
                                 chunk->setSctpChunkTypes(size, FORWARD_TSN_SUPPORTED_PARAMETER);
+                                chunk->setForwardTsn(true); // else serialize (which checks getForwardTsn) drops the parameter
                                 chunklen++;
                                 break;
                             }
