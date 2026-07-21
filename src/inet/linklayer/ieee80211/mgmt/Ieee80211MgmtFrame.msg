@@ -116,6 +116,7 @@ struct Ieee80211SupportedRatesElement
 {
     short numRates; // number of rates (max 8)
     double rate[8]; // in Mbit/s; should be multiple of 500 kbit/s
+    bool basicRate[8]; // whether the rate is in the BSSBasicRateSet (the high 0x80 bit on the wire); defaults false, matching INET's mgmt code, which marks no rate basic
 }
 
 //
