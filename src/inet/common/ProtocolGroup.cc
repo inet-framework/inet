@@ -168,6 +168,7 @@ static const ProtocolGroup::Protocols tcpProtocols {
     { 22, &Protocol::ssh },
     { 23, &Protocol::telnet },
     { 80, &Protocol::http },
+    { 179, &Protocol::bgp },
     { 554, &Protocol::rtsp },
     { 11111, &Protocol::unknown }, // INET specific non-standard protocol
 };
