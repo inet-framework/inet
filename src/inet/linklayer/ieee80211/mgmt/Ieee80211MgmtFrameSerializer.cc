@@ -76,7 +76,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 1    Capability
         stream.writeUint16Be(reassociationRequestFrame->getCapabilityInformation());
         // 2    Listen interval
-        stream.writeUint16Be(0); // FIXME not modelled
+        stream.writeUint16Be(reassociationRequestFrame->getListenInterval());
         // 3    Current AP address
         stream.writeMacAddress(reassociationRequestFrame->getCurrentAP());
         // 4    SSID
@@ -108,7 +108,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 1    Capability
         stream.writeUint16Be(associationRequestFrame->getCapabilityInformation());
         // 2    Listen interval
-        stream.writeUint16Be(0); // FIXME not modelled
+        stream.writeUint16Be(associationRequestFrame->getListenInterval());
         // 3    SSID
         const char *SSID = associationRequestFrame->getSSID();
         unsigned int length = strlen(SSID);
@@ -356,7 +356,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
         {
             auto frame = makeShared<Ieee80211AssociationRequestFrame>();
             frame->setCapabilityInformation(stream.readUint16Be());
-            stream.readUint16Be(); // listen interval (not modelled)
+            frame->setListenInterval(stream.readUint16Be()); // listen interval
 
             char SSID[256];
             stream.readByte();
@@ -385,7 +385,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
         {
             auto frame = makeShared<Ieee80211ReassociationRequestFrame>();
             frame->setCapabilityInformation(stream.readUint16Be());
-            stream.readUint16Be(); // listen interval (not modelled)
+            frame->setListenInterval(stream.readUint16Be()); // listen interval
 
             frame->setCurrentAP(stream.readMacAddress());
 
