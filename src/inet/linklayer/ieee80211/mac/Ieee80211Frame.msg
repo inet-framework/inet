@@ -241,6 +241,15 @@ class Ieee80211ActionFrame extends Ieee80211MgmtHeader
     //WirelessNetworkManagementAction action; // action TODO remove it
 }
 
+// An action frame whose Category/Action this model does not parse (everything but
+// the Block Ack category). The fixed MAC header is represented as usual and the
+// entire action body -- Category, Action and the category-specific parameters --
+// is preserved verbatim in actionBody, so real captures round-trip byte-for-byte.
+class Ieee80211ActionFrameOther extends Ieee80211ActionFrame
+{
+    uint8_t actionBody[];
+}
+
 class Ieee80211MsduSubframeHeader extends FieldsChunk
 {
     chunkLength = LENGTH_A_MSDU_SUBFRAME_HEADER;
