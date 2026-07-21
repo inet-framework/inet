@@ -76,9 +76,14 @@ void deserializeSdesChunk(MemoryInputStream& stream, const Ptr<RtcpPacket> rtcpP
     uint64_t numBytes = 1;
     while (type != 0) {
         uint8_t count = stream.readByte();
-        char *content = new char[count];
+        // NUL-terminate: SdesItem stores the content in a std::string (strlen), so an
+        // unterminated buffer would over-read and give the item a wrong length, breaking
+        // the re-serialization. The ctor copies the bytes, so the buffer is freed after.
+        char *content = new char[count + 1];
         stream.readBytes((uint8_t *)content, B(count));
+        content[count] = '\0';
         SdesItem *sdesItem = new SdesItem(static_cast<SdesItem::SdesItemType>(type), content);
+        delete[] content;
         sdesChunk.addSDESItem(sdesItem);
         type = stream.readByte();
         numBytes += 2 + count;
