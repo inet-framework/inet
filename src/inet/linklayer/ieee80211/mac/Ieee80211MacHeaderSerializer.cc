@@ -111,6 +111,7 @@ Register_Serializer(Ieee80211CompressedBlockAck, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MultiTidBlockAck, Ieee80211MacHeaderSerializer);
 
 Register_Serializer(Ieee80211ActionFrame, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211ActionFrameOther, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211AddbaRequest, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211AddbaResponse, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211Delba, Ieee80211MacHeaderSerializer);
@@ -226,6 +227,13 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
             if (mgmtHeader->getOrder())
                 stream.writeUint32Be(0);
             if (type == ST_ACTION) {
+                // an action category/action this serializer does not model: the whole
+                // action body was preserved verbatim on deserialize -- emit it as is
+                if (auto other = dynamicPtrCast<const Ieee80211ActionFrameOther>(chunk)) {
+                    for (size_t i = 0; i < other->getActionBodyArraySize(); ++i)
+                        stream.writeByte(other->getActionBody(i));
+                    break;
+                }
                 auto actionFrame = dynamicPtrCast<const Ieee80211ActionFrame>(chunk);
                 switch (actionFrame->getCategory()) {
                     case 3: {
@@ -474,66 +482,73 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
             actionFrame->setSequenceNumber(sequenceNumber);
             if (order)
                 stream.readUint32Be();
+            // Only the Block Ack category is modelled. For any other category or action,
+            // preserve the entire action body (Category + Action + parameters) verbatim in
+            // an Ieee80211ActionFrameOther so the frame round-trips without parsing it. The
+            // MAC dissector pops the FCS trailer before the header, so getRemainingLength
+            // here is exactly the action body.
+            auto actionBodyPosition = stream.getPosition();
             actionFrame->setCategory(stream.readByte());
-            switch (actionFrame->getCategory()) {
-                case 3: {
-                    uint8_t blockAckAction = stream.readByte();
-                    switch (blockAckAction) {
-                        case 0: {
-                            auto addbaRequest = makeShared<Ieee80211AddbaRequest>();
-                            copyBasicFields(addbaRequest, macHeader);
-                            copyActionFrameFields(addbaRequest, actionFrame);
-                            addbaRequest->setBlockAckAction(blockAckAction);
-                            addbaRequest->setDialogToken(stream.readByte());
-                            auto parameters = stream.readUint16Le();
-                            addbaRequest->setAMsduSupported(parameters & 1);
-                            addbaRequest->setBlockAckPolicy(parameters & 2);
-                            addbaRequest->setTid((parameters >> 2) & 0xF);
-                            addbaRequest->setBufferSize(parameters >> 6);
-                            addbaRequest->setBlockAckTimeoutValue(SimTime(stream.readUint16Le() * 1024, SIMTIME_US));
-                            readSequenceControl(stream, fragmentNumber, sequenceNumber);
-                            addbaRequest->set_fragmentNumber(fragmentNumber);
-                            addbaRequest->setStartingSequenceNumber(sequenceNumber);
-                            return addbaRequest;
-                        }
-                        case 1: {
-                            auto addbaResponse = makeShared<Ieee80211AddbaResponse>();
-                            copyBasicFields(addbaResponse, macHeader);
-                            copyActionFrameFields(addbaResponse, actionFrame);
-                            addbaResponse->setBlockAckAction(blockAckAction);
-                            addbaResponse->setDialogToken(stream.readByte());
-                            addbaResponse->setStatusCode(stream.readUint16Le());
-                            auto parameters = stream.readUint16Le();
-                            addbaResponse->setAMsduSupported(parameters & 1);
-                            addbaResponse->setBlockAckPolicy(parameters & 2);
-                            addbaResponse->setTid((parameters >> 2) & 0xF);
-                            addbaResponse->setBufferSize(parameters >> 6);
-                            addbaResponse->setBlockAckTimeoutValue(SimTime(stream.readUint16Le() * 1024, SIMTIME_US));
-                            return addbaResponse;
-                        }
-                        case 2: {
-                            auto delba = makeShared<Ieee80211Delba>();
-                            copyBasicFields(delba, macHeader);
-                            copyActionFrameFields(delba, actionFrame);
-                            delba->setBlockAckAction(blockAckAction);
-                            auto parameters = stream.readUint16Le();
-                            delba->setReserved(parameters & 0x7FF);
-                            delba->setInitiator(parameters & 0x800);
-                            delba->setTid(parameters >> 12);
-                            delba->setReasonCode(stream.readUint16Le());
-                            return delba;
-                        }
-                        default:
-                            actionFrame->markIncorrect();
-                            return actionFrame;
+            if (actionFrame->getCategory() == 3) {
+                uint8_t blockAckAction = stream.readByte();
+                switch (blockAckAction) {
+                    case 0: {
+                        auto addbaRequest = makeShared<Ieee80211AddbaRequest>();
+                        copyBasicFields(addbaRequest, macHeader);
+                        copyActionFrameFields(addbaRequest, actionFrame);
+                        addbaRequest->setBlockAckAction(blockAckAction);
+                        addbaRequest->setDialogToken(stream.readByte());
+                        auto parameters = stream.readUint16Le();
+                        addbaRequest->setAMsduSupported(parameters & 1);
+                        addbaRequest->setBlockAckPolicy(parameters & 2);
+                        addbaRequest->setTid((parameters >> 2) & 0xF);
+                        addbaRequest->setBufferSize(parameters >> 6);
+                        addbaRequest->setBlockAckTimeoutValue(SimTime(stream.readUint16Le() * 1024, SIMTIME_US));
+                        readSequenceControl(stream, fragmentNumber, sequenceNumber);
+                        addbaRequest->set_fragmentNumber(fragmentNumber);
+                        addbaRequest->setStartingSequenceNumber(sequenceNumber);
+                        return addbaRequest;
                     }
-                    break;
-                }
-                default: {
-                    actionFrame->markIncorrect();
-                    return actionFrame;
+                    case 1: {
+                        auto addbaResponse = makeShared<Ieee80211AddbaResponse>();
+                        copyBasicFields(addbaResponse, macHeader);
+                        copyActionFrameFields(addbaResponse, actionFrame);
+                        addbaResponse->setBlockAckAction(blockAckAction);
+                        addbaResponse->setDialogToken(stream.readByte());
+                        addbaResponse->setStatusCode(stream.readUint16Le());
+                        auto parameters = stream.readUint16Le();
+                        addbaResponse->setAMsduSupported(parameters & 1);
+                        addbaResponse->setBlockAckPolicy(parameters & 2);
+                        addbaResponse->setTid((parameters >> 2) & 0xF);
+                        addbaResponse->setBufferSize(parameters >> 6);
+                        addbaResponse->setBlockAckTimeoutValue(SimTime(stream.readUint16Le() * 1024, SIMTIME_US));
+                        return addbaResponse;
+                    }
+                    case 2: {
+                        auto delba = makeShared<Ieee80211Delba>();
+                        copyBasicFields(delba, macHeader);
+                        copyActionFrameFields(delba, actionFrame);
+                        delba->setBlockAckAction(blockAckAction);
+                        auto parameters = stream.readUint16Le();
+                        delba->setReserved(parameters & 0x7FF);
+                        delba->setInitiator(parameters & 0x800);
+                        delba->setTid(parameters >> 12);
+                        delba->setReasonCode(stream.readUint16Le());
+                        return delba;
+                    }
+                    default:
+                        break; // unmodelled Block Ack action -- preserved below
                 }
             }
+            stream.seek(actionBodyPosition);
+            auto other = makeShared<Ieee80211ActionFrameOther>();
+            copyBasicFields(other, macHeader);
+            copyActionFrameFields(other, actionFrame);
+            size_t actionBodyLength = stream.getRemainingLength().get<B>();
+            other->setActionBodyArraySize(actionBodyLength);
+            for (size_t i = 0; i < actionBodyLength; i++)
+                other->setActionBody(i, stream.readByte());
+            return other;
         }
         case ST_RTS: {
             auto rtsFrame = makeShared<Ieee80211RtsFrame>();

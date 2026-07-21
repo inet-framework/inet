@@ -41,8 +41,11 @@ const Protocol *Ieee80211MacProtocolDissector::computeLlcProtocol(Packet *packet
 
 void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    const auto& header = packet->popAtFront<inet::ieee80211::Ieee80211MacHeader>();
+    // Pop the FCS trailer before the header so that a header whose length is only
+    // bounded by the end of the frame -- an Ieee80211ActionFrameOther, which stores the
+    // unmodelled action body up to the FCS -- does not read into the FCS.
     const auto& trailer = packet->popAtBack<inet::ieee80211::Ieee80211MacTrailer>(B(4));
+    const auto& header = packet->popAtFront<inet::ieee80211::Ieee80211MacHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee80211Mac);
     callback.visitChunk(header, &Protocol::ieee80211Mac);
     // TODO fragmentation & aggregation
@@ -70,8 +73,13 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
         else
             callback.dissectPacket(packet, computeLlcProtocol(packet));
     }
-    else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ActionFrame>(header))
-        ASSERT(packet->getDataLength() == b(0));
+    else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ActionFrame>(header)) {
+        // A fully modelled action (ADDBA/DELBA) and the Ieee80211ActionFrameOther that
+        // carries an unmodelled action body both consume the whole frame, so nothing
+        // should remain; keep the raw fallback only as a safety net.
+        if (packet->getDataLength() > b(0))
+            callback.dissectPacket(packet, nullptr);
+    }
     else if (auto mgmtHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211MgmtHeader>(header)) {
         // deserialize the management-frame body as the concrete subtype named by the
         // header, so its serializer is exercised instead of leaving the body as raw
