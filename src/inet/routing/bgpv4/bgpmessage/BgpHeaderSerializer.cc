@@ -344,6 +344,7 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
             bgpUpdateMessage->setChunkLength(B(totalLength));
             bgpUpdateMessage->setType(type);
             uint32_t withdrawnRoutesLength = stream.readUint16Be();
+            bgpUpdateMessage->setWithDrawnRoutesLength(withdrawnRoutesLength);
             uint32_t tmp_withdrawnRoutesLength = withdrawnRoutesLength;
             for (size_t i = 0; withdrawnRoutesLength > 0 && !stream.isReadBeyondEnd(); ++i) {
                 bgpUpdateMessage->setWithdrawnRoutesArraySize(i + 1);
