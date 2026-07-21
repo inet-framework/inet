@@ -155,6 +155,8 @@ static const ProtocolGroup::Protocols ieee8022Protocols {
 };
 
 static const ProtocolGroup::Protocols udpProtocols {
+    { 67, &Protocol::dhcp },
+    { 68, &Protocol::dhcp },
     { 554, &Protocol::rtsp },
     { 6696, &Protocol::babel },
     { 11111, &Protocol::unknown }, // INET specific non-standard protocol

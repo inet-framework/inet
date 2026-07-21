@@ -174,6 +174,13 @@ const Protocol Protocol::genericPhy("genericphy", "Generic PHY");
 const Protocol Protocol::unknown("unknown", "Unknown");
 const Protocol Protocol::wiseRoute("wiseroute", "WiseRoute"); // WiseRoute Network Protocol
 
+// The protocols below are intentionally kept out of the alphanumeric ordering above.
+// The id is auto-assigned in construction order, so inserting a Protocol in the middle
+// shifts the id of every protocol defined after it, which changes the fingerprints of
+// the sims that serialize a protocol id into a packet. Appending new protocols here
+// keeps the existing ids -- and thus those fingerprints -- stable, so dhcp is added
+// here rather than in alphabetic order.
 const Protocol Protocol::gptp("gptp", "gPTP");
-const Protocol Protocol::ieee8021rTag("ieee8021rtag", "IEEE 802.1R TAG"); // TODO: move to its place in the alphanumeric ordering, causes fingerprints to change because some hypothetical protocols serialize the protocol ID into the packet
+const Protocol Protocol::ieee8021rTag("ieee8021rtag", "IEEE 802.1R TAG");
+const Protocol Protocol::dhcp("dhcp", "DHCP");
 } // namespace inet
