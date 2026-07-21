@@ -218,8 +218,13 @@ void BgpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                         }
                         break;
                     }
-                    default:
-                        throw cRuntimeError("Cannot serialize BGP UPDATE Message: incorrect typeCode: %d.", typeCode);
+                    default: {
+                        // Unknown/unsupported attribute type: emit the preserved raw value octets.
+                        const BgpUpdatePathAttributesUnknown *unknown = check_and_cast<const BgpUpdatePathAttributesUnknown *>(pathAttributes);
+                        for (size_t k = 0; k < unknown->getValueArraySize(); ++k)
+                            stream.writeByte(unknown->getValue(k));
+                        break;
+                    }
                 }
             }
             for (size_t i = 0; i < bgpUpdateMessage->getNlriArraySize(); ++i) {
@@ -562,16 +567,21 @@ const Ptr<Chunk> BgpHeaderSerializer::deserialize(MemoryInputStream& stream) con
                         break;
                     }
                     default: {
-                        BgpUpdatePathAttributes *pathAttributes = new BgpUpdatePathAttributes();
-                        pathAttributes->setOptionalBit(optionalBit);
-                        pathAttributes->setTransitiveBit(transitiveBit);
-                        pathAttributes->setPartialBit(partialBit);
-                        pathAttributes->setExtendedLengthBit(extendedLengthBit);
-                        pathAttributes->setReserved(0);
-                        pathAttributes->setLength(pathAttributeLength);
-                        pathAttributes->setTypeCode(typeCode);
-                        bgpUpdateMessage->markIncorrect();
-                        bgpUpdateMessage->setPathAttributes(i, pathAttributes);
+                        // Unknown/unsupported attribute type: preserve the raw value octets
+                        // verbatim so the message still round-trips (e.g. COMMUNITIES, RFC 1997).
+                        BgpUpdatePathAttributesUnknown *unknown = new BgpUpdatePathAttributesUnknown();
+                        unknown->setOptionalBit(optionalBit);
+                        unknown->setTransitiveBit(transitiveBit);
+                        unknown->setPartialBit(partialBit);
+                        unknown->setExtendedLengthBit(extendedLengthBit);
+                        unknown->setReserved(0);
+                        unknown->setLength(pathAttributeLength);
+                        unknown->setTypeCode(typeCode);
+                        unknown->setValueArraySize(pathAttributeLength);
+                        for (uint16_t k = 0; k < pathAttributeLength && !stream.isReadBeyondEnd(); ++k)
+                            unknown->setValue(k, stream.readByte());
+                        bgpUpdateMessage->setPathAttributes(i, unknown);
+                        break;
                     }
                 }
             }
