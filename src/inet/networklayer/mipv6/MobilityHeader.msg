@@ -139,29 +139,29 @@ class BindingError extends MobilityHeader
 //=============Message definition of Home Test Init Message ==========
 class HomeTestInit extends MobilityHeader
 {
-    unsigned int homeInitCookie;
+    uint64_t homeInitCookie; // 8 octets on the wire (RFC 6275)
 }
 
 //=============Message definition of Home Test Message ==========
 class HomeTest extends MobilityHeader
 {
-    unsigned int homeInitCookie;
-    unsigned int homeKeyGenToken;
-    // home nonce index not modelled
+    uint64_t homeInitCookie; // 8 octets on the wire (RFC 6275)
+    uint64_t homeKeyGenToken; // 8 octets on the wire (RFC 6275)
+    uint16_t homeNonceIndex;
 }
 
 //=============Message definition of Care-of Test Init Message ==========
 class CareOfTestInit extends MobilityHeader
 {
-    unsigned int careOfInitCookie;
+    uint64_t careOfInitCookie; // 8 octets on the wire (RFC 6275)
 }
 
 //=============Message definition of Care-of Test Message ==========
 class CareOfTest extends MobilityHeader
 {
-    unsigned int careOfInitCookie;
-    unsigned int careOfKeyGenToken;
-    // care-of nonce index not modelled
+    uint64_t careOfInitCookie; // 8 octets on the wire (RFC 6275)
+    uint64_t careOfKeyGenToken; // 8 octets on the wire (RFC 6275)
+    uint16_t careOfNonceIndex;
 }
 
 ///////////////////////////////////////////

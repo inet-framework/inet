@@ -135,7 +135,7 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
         case HOME_TEST: {
             // RFC 6275 Section 6.1.5: home nonce index (2 bytes) + home init cookie (8 bytes) + home keygen token (8 bytes)
             auto hot = staticPtrCast<const HomeTest>(chunk);
-            stream.writeUint16Be(0); // home nonce index (not modelled)
+            stream.writeUint16Be(hot->getHomeNonceIndex());
             stream.writeUint64Be(hot->getHomeInitCookie());
             stream.writeUint64Be(hot->getHomeKeyGenToken());
             break;
@@ -144,7 +144,7 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
         case CARE_OF_TEST: {
             // RFC 6275 Section 6.1.6: care-of nonce index (2 bytes) + care-of init cookie (8 bytes) + care-of keygen token (8 bytes)
             auto cot = staticPtrCast<const CareOfTest>(chunk);
-            stream.writeUint16Be(0); // care-of nonce index (not modelled)
+            stream.writeUint16Be(cot->getCareOfNonceIndex());
             stream.writeUint64Be(cot->getCareOfInitCookie());
             stream.writeUint64Be(cot->getCareOfKeyGenToken());
             break;
@@ -261,7 +261,7 @@ const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream
         case HOME_TEST: {
             auto hot = makeShared<HomeTest>();
             hot->setMobilityHeaderType(HOME_TEST);
-            stream.readUint16Be(); // home nonce index (not modelled)
+            hot->setHomeNonceIndex(stream.readUint16Be());
             hot->setHomeInitCookie(stream.readUint64Be());
             hot->setHomeKeyGenToken(stream.readUint64Be());
             mh = hot;
@@ -271,7 +271,7 @@ const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream
         case CARE_OF_TEST: {
             auto cot = makeShared<CareOfTest>();
             cot->setMobilityHeaderType(CARE_OF_TEST);
-            stream.readUint16Be(); // care-of nonce index (not modelled)
+            cot->setCareOfNonceIndex(stream.readUint16Be());
             cot->setCareOfInitCookie(stream.readUint64Be());
             cot->setCareOfKeyGenToken(stream.readUint64Be());
             mh = cot;
