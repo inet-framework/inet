@@ -512,6 +512,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
                     case 2: {
                         auto delba = makeShared<Ieee80211Delba>();
                         copyBasicFields(delba, macHeader);
+                        copyActionFrameFields(delba, actionFrame);
                         delba->setBlockAckAction(blockAckAction);
                         delba->setReserved(stream.readNBitsToUint64Be(11));
                         delba->setInitiator(stream.readBit());
