@@ -41,6 +41,9 @@ class INET_API GptpPacketSerializer : public FieldsChunkSerializer
     void readGptpSyncPart(MemoryInputStream& stream, GptpSync& gptpPacket) const;
     void writeGptpSyncPart(MemoryOutputStream& stream, const GptpSync& gptpPacket) const;
 
+    void readGptpAnnouncePart(MemoryInputStream& stream, GptpAnnounce& gptpPacket) const;
+    void writeGptpAnnouncePart(MemoryOutputStream& stream, const GptpAnnounce& gptpPacket) const;
+
     void readGptpFollowUpInformationTlv(MemoryInputStream& stream, GptpFollowUpInformationTlv& gptpPacket) const;
     void writeGptpFollowUpInformationTlv(MemoryOutputStream& stream, const GptpFollowUpInformationTlv& gptpPacket) const;
 
