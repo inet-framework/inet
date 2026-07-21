@@ -17,6 +17,7 @@ Register_Serializer(GptpPdelayReq, GptpPacketSerializer);
 Register_Serializer(GptpPdelayResp, GptpPacketSerializer);
 Register_Serializer(GptpPdelayRespFollowUp, GptpPacketSerializer);
 Register_Serializer(GptpSync, GptpPacketSerializer);
+Register_Serializer(GptpAnnounce, GptpPacketSerializer);
 
 clocktime_t GptpPacketSerializer::readClock8(MemoryInputStream& stream) const
 {
@@ -185,18 +186,44 @@ void GptpPacketSerializer::writeGptpPdelayRespFollowUpPart(MemoryOutputStream& s
 
 void GptpPacketSerializer::readGptpSyncPart(MemoryInputStream& stream, GptpSync& gptpPacket) const
 {
-    if (gptpPacket.getFlags() & twoStepFlag)
-        stream.readByteRepeatedly(0, 10); // read "reserved"
-    else
-        throw cRuntimeError("The GptpSync without twoStepFlag is unimplemented yet");
+    // 10-byte originTimestamp: reserved (all-zero) for a two-step Port, the egress
+    // time for a one-step Port. Reading it either way round-trips both.
+    gptpPacket.setOriginTimestampSeconds(stream.readUint48Be());
+    gptpPacket.setOriginTimestampNanoseconds(stream.readUint32Be());
 }
 
 void GptpPacketSerializer::writeGptpSyncPart(MemoryOutputStream& stream, const GptpSync& gptpPacket) const
 {
-    if (gptpPacket.getFlags() & twoStepFlag)
-        stream.writeByteRepeatedly(0, 10); // write "reserved"
-    else
-        throw cRuntimeError("The GptpSync without twoStepFlag is unimplemented yet");
+    stream.writeUint48Be(gptpPacket.getOriginTimestampSeconds());
+    stream.writeUint32Be(gptpPacket.getOriginTimestampNanoseconds());
+}
+
+void GptpPacketSerializer::readGptpAnnouncePart(MemoryInputStream& stream, GptpAnnounce& gptpPacket) const
+{
+    gptpPacket.setOriginTimestampSeconds(stream.readUint48Be());
+    gptpPacket.setOriginTimestampNanoseconds(stream.readUint32Be());
+    gptpPacket.setCurrentUtcOffset(stream.readUint16Be());
+    gptpPacket.setReserved(stream.readUint8());
+    gptpPacket.setGrandmasterPriority1(stream.readUint8());
+    gptpPacket.setGrandmasterClockQuality(stream.readUint32Be());
+    gptpPacket.setGrandmasterPriority2(stream.readUint8());
+    gptpPacket.setGrandmasterIdentity(stream.readUint64Be());
+    gptpPacket.setStepsRemoved(stream.readUint16Be());
+    gptpPacket.setTimeSource(stream.readUint8());
+}
+
+void GptpPacketSerializer::writeGptpAnnouncePart(MemoryOutputStream& stream, const GptpAnnounce& gptpPacket) const
+{
+    stream.writeUint48Be(gptpPacket.getOriginTimestampSeconds());
+    stream.writeUint32Be(gptpPacket.getOriginTimestampNanoseconds());
+    stream.writeUint16Be(gptpPacket.getCurrentUtcOffset());
+    stream.writeUint8(gptpPacket.getReserved());
+    stream.writeUint8(gptpPacket.getGrandmasterPriority1());
+    stream.writeUint32Be(gptpPacket.getGrandmasterClockQuality());
+    stream.writeUint8(gptpPacket.getGrandmasterPriority2());
+    stream.writeUint64Be(gptpPacket.getGrandmasterIdentity());
+    stream.writeUint16Be(gptpPacket.getStepsRemoved());
+    stream.writeUint8(gptpPacket.getTimeSource());
 }
 
 void GptpPacketSerializer::readGptpFollowUpInformationTlv(MemoryInputStream& stream, GptpFollowUpInformationTlv& tlv) const
@@ -255,6 +282,11 @@ void GptpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             writeGptpSyncPart(stream, *gptp.get());
             break;
         }
+        case GPTPTYPE_ANNOUNCE: {
+            const auto& gptp = CHK(dynamicPtrCast<const GptpAnnounce>(gptpPacket));
+            writeGptpAnnouncePart(stream, *gptp.get());
+            break;
+        }
         default:
             throw cRuntimeError("unknown GptpMessageType");
     }
@@ -296,6 +328,12 @@ const Ptr<Chunk> GptpPacketSerializer::deserialize(MemoryInputStream& stream) co
             auto gptpPacket = makeShared<GptpSync>();
             readGptpBase(stream, *gptpPacket.get());
             readGptpSyncPart(stream, *gptpPacket.get());
+            return gptpPacket;
+        }
+        case GPTPTYPE_ANNOUNCE: {
+            auto gptpPacket = makeShared<GptpAnnounce>();
+            readGptpBase(stream, *gptpPacket.get());
+            readGptpAnnouncePart(stream, *gptpPacket.get());
             return gptpPacket;
         }
         default:
