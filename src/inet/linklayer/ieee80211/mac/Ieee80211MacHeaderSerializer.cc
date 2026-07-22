@@ -368,8 +368,8 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
             else if (!multiTid && compressedBitmap) {
                 auto compressedBlockAck = CHK(dynamicPtrCast<const Ieee80211CompressedBlockAck>(chunk));
                 stream.writeUint16Le(baControl | ((compressedBlockAck->getTidInfo() & 0xF) << 12));
-                // Block Ack Starting Sequence Control: the Fragment Number subfield is reserved (0) here
-                stream.writeUint4(0);
+                // Block Ack Starting Sequence Control = 4-bit Fragment Number (reserved) + 12-bit sequence number
+                stream.writeUint4(compressedBlockAck->getFragmentNumber());
                 stream.writeNBitsOfUint64Be(compressedBlockAck->getStartingSequenceNumber().get(), 12);
                 for (size_t i = 0; i < 8; ++i) {
                     stream.writeByte(compressedBlockAck->getBlockAckBitmap().getBytes()[i]);
@@ -651,9 +651,9 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
                 copyBlockAckFrameFields(compressedBlockAck, blockAck);
 
                 compressedBlockAck->setTidInfo(tidInfo);
-                // Block Ack Starting Sequence Control: skip the reserved 4-bit Fragment Number, then
-                // read the 12-bit sequence number (kept within SequenceNumberCyclic's range)
-                stream.readUint4();
+                // Block Ack Starting Sequence Control = 4-bit Fragment Number (reserved) + 12-bit
+                // sequence number (kept within SequenceNumberCyclic's range)
+                compressedBlockAck->setFragmentNumber(stream.readUint4());
                 compressedBlockAck->setStartingSequenceNumber(SequenceNumberCyclic(stream.readNBitsToUint64Be(12)));
                 std::vector<uint8_t> bytes;
                 for (size_t i = 0; i < 8; ++i) {
