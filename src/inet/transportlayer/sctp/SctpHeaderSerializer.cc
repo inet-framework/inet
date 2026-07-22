@@ -230,6 +230,13 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     free(vector);
                 }
 
+                // re-emit the preserved unrecognized parameters verbatim (INIT-ACK and
+                // COOKIE already do this) so a deserialized INIT round-trips
+                uint32_t unrecognizedLen = initChunk->getUnrecognizedParametersArraySize();
+                for (uint32_t i = 0; i < unrecognizedLen; i++)
+                    ((unsigned char *)ic)[sizeof(struct init_chunk) + parPtr + i] = initChunk->getUnrecognizedParameters(i);
+                parPtr += unrecognizedLen;
+
                 ic->length = htons(SCTP_INIT_CHUNK_LENGTH + parPtr);
                 writtenbytes += SCTP_INIT_CHUNK_LENGTH + parPtr + padding_last;
                 break;
@@ -1360,23 +1367,16 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 uint16_t skip = (paramType & 0x8000) >> 15;
                                 if (skip == 0)
                                     stopProcessing = true;
-                                uint16_t report = (paramType & 0x4000) >> 14;
-
-                                const struct tlv *unknown;
-                                unknown = (struct tlv *)(((unsigned char *)init_chunk) + sizeof(struct init_chunk) + parptr);
-
-                                if (report != 0) {
-                                    size_t unknownLen = chunk->getUnrecognizedParametersArraySize();
-                                    chunk->setUnrecognizedParametersArraySize(unknownLen + ADD_PADDING(ntohs(unknown->length)));
-                                    struct data_vector *dv = (struct data_vector *)(((unsigned char *)init_chunk) + sizeof(struct init_chunk) + parptr);
-
-                                    for (size_t i = unknownLen; i < unknownLen + ADD_PADDING(ntohs(unknown->length)); i++)
-                                        chunk->setUnrecognizedParameters(i, dv->data[i - unknownLen]);
-                                }
-                                else {
-                                    chunklen += ADD_PADDING(ntohs(unknown->length));
-                                }
-                                EV_INFO << "stopProcessing=" << stopProcessing << " report=" << report << "\n";
+                                // Keep every unrecognized parameter verbatim so the chunk round-trips.
+                                // Ignoring one (per the skip/report type bits) is a decision for the
+                                // SCTP module that processes the chunk, not for the serializer.
+                                const struct tlv *unknown = (struct tlv *)(((unsigned char *)init_chunk) + sizeof(struct init_chunk) + parptr);
+                                size_t unknownLen = chunk->getUnrecognizedParametersArraySize();
+                                chunk->setUnrecognizedParametersArraySize(unknownLen + ADD_PADDING(ntohs(unknown->length)));
+                                struct data_vector *dv = (struct data_vector *)(((unsigned char *)init_chunk) + sizeof(struct init_chunk) + parptr);
+                                for (size_t i = unknownLen; i < unknownLen + ADD_PADDING(ntohs(unknown->length)); i++)
+                                    chunk->setUnrecognizedParameters(i, dv->data[i - unknownLen]);
+                                chunklen += ADD_PADDING(ntohs(unknown->length));
                                 break;
                             }
                         }
