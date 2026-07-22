@@ -24,6 +24,8 @@ void DynamicClassifier::initialize(int stage)
         moduleType = cModuleType::get(par("moduleType"));
         aggregatorSubmoduleName = par("aggregatorSubmoduleName");
         spliceBranchSubmodules = par("spliceBranchSubmodules");
+        if (!spliceBranchSubmodules && (submoduleName == nullptr || submoduleName[0] == '\0'))
+            throw cRuntimeError("The submoduleName parameter must be set when spliceBranchSubmodules is false (it names the submodule vector that holds each branch)");
         if (!spliceBranchSubmodules && !getParentModule()->hasSubmoduleVector(submoduleName))
             throw cRuntimeError("The submodule vector '%s' is missing from %s", submoduleName, getParentModule()->getFullPath().c_str());
         if (getParentModule()->getSubmodule(aggregatorSubmoduleName) == nullptr)

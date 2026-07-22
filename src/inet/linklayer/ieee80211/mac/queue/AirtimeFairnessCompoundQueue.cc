@@ -18,12 +18,20 @@ Define_Module(AirtimeFairnessCompoundQueue);
 void AirtimeFairnessCompoundQueue::initialize(int stage)
 {
     CompoundPacketQueueBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        // The scheduler addresses each per-station gate directly (matched pair), so the branch
+        // must be flattened into this module; a non-spliced branch would leave the gate behind a
+        // compound boundary and the scheduler's check_and_cast to AirtimeFairnessGate would fail.
+        cModule *classifier = getSubmodule("classifier");
+        if (classifier != nullptr && classifier->hasPar("spliceBranchSubmodules") && !classifier->par("spliceBranchSubmodules").boolValue())
+            throw cRuntimeError("AirtimeFairnessQueue requires classifier.spliceBranchSubmodules=true "
+                                "(its scheduler addresses each per-station gate directly)");
         // Number of per-station branches created so far (= stations served). Watched on this
         // module so the display string can use {numStations}; a cross-submodule reference like
         // {classifier.numStations} would make ModuleMixin call getModuleByPath(), which throws
         // in OMNeT++ 6 and breaks every Qtenv refreshDisplay (Cmdenv never evaluates it).
         WATCH_EXPR("numStations", (int)getSubmoduleVectorSize("queue"));
+    }
 }
 
 void AirtimeFairnessCompoundQueue::pushPacket(Packet *packet, const cGate *gate)
