@@ -463,7 +463,7 @@ class Ieee80211CompressedBlockAck extends Ieee80211BlockAck
     // The BA Information field of the Compressed BlockAck frame comprises the Block Ack Starting Sequence
     // Control subfield and the Block Ack Bitmap subfield, as shown in Figure 8-27.
 
-    int fragmentNumber = 0;
+    int fragmentNumber @bit(4) = 0; // Fragment Number subfield of the Block Ack Starting Sequence Control (reserved)
     SequenceNumberCyclic startingSequenceNumber;
     BitVector blockAckBitmap; // 64 bits
 
