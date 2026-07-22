@@ -29,8 +29,8 @@ there, carrier sensing hears too little; here, it hears too much.
      sensing range, so carrier sensing forces them to take turns — even though
      neither receiver could hear the other link's transmitter at all.
    - **The proof:** in the entire 5-second run, not a single transmitted
-     frame is lost or retransmitted — every deferral guarded against a
-     collision that could not have happened. A control run with a
+     frame is lost or retransmitted — no collision is possible at either
+     data receiver. A control run with a
      radio-opaque wall between hostA and hostC
      lets both flows run at full rate in parallel: the aggregate rises from
      4.7 to 8.6 Mbps.
@@ -73,9 +73,9 @@ transmission would actually interfere at the intended receiver.
 
 The exposed node problem is the situation where that inference is wrong.
 Consider two transmitter–receiver pairs pointing away from each other: hostA
-sends to hostB on its left, hostC sends to hostD on its right, and only the
-two *transmitters* are within range of each other. Each transmitter's signal
-cannot reach the *other pair's receiver* at all.
+sends to hostB on its left, hostC sends to hostD on its right. Each
+transmitter is in range of the *other transmitter* — but its signal cannot
+reach the *other pair's receiver* at all.
 
 The two links are therefore physically independent — both could transmit at
 the same time and both receivers would decode their frames cleanly. But
@@ -162,13 +162,17 @@ Line by line:
 - Data, ACK, and control frames all use a fixed 6 Mbps.
 - The radio is unit-disk with a 300 m communication range (interference and
   detection range default to the same value).
-- A 14-frame MAC queue keeps each sender backlogged.
+- A 14-frame MAC queue keeps each sender backlogged; the exact depth does
+  not matter, it just needs to never run empty.
 - :par:`sameTransmissionStartTimeCheck` permits transmissions that start at
   exactly the same moment. By default the radio medium treats coincident
   starts as a likely configuration error and stops; here they are legitimate
-  — both saturated senders begin at t = 1 ms.
+  — both senders begin at t = 1 ms, because the traffic source's
+  :par:`startTime` defaults to one send interval.
 - :ned:`IdealObstacleLoss` makes obstacles block signals completely; it only
   has an effect in the wall configuration.
+- Address resolution uses :ned:`GlobalArp` (set at the top of the ini), so
+  no ARP exchanges appear on the air.
 
 All runs use plain DCF (distributed coordination function — 802.11's
 standard CSMA/CA channel access): RTS/CTS stays disabled, its default state.
@@ -190,11 +194,13 @@ time. Throughput is measured as the packets received by the sinks.
 OneFlow Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
-Only hostA transmits; hostC stays silent. This measures what one link is
+Only hostA transmits; hostC stays silent. The config itself adds nothing —
+hostA's traffic already lives in the ``General`` section, and hostC's is
+only added by the two-flow configurations. This measures what one link is
 worth on its own — the baseline that the two-flow runs are compared against.
 (The baseline comes out near 4.3 Mbps rather than 6: besides the data bits,
-every 1000-byte frame also pays for a physical-layer preamble, interframe
-gaps, the random backoff, and the ACK.)
+every 1000-byte packet also pays for 64 bytes of UDP/IP/MAC headers, a
+physical-layer preamble, interframe gaps, the random backoff, and the ACK.)
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: [Config OneFlow]
@@ -216,8 +222,9 @@ exposed node situation:
 TwoFlowsDecoupled Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The control experiment: the same two flows, plus a wall between hostA and
-hostC that completely blocks radio signals (ideal obstacle loss). The wall
+The control experiment: the same two flows, plus a wall that completely
+blocks radio signals (ideal obstacle loss) — a 200 m segment crossing the
+chain midway between hostA and hostC. The wall
 removes the one thing the exposed configuration suffers from — the
 transmitters sensing each other — while leaving both links' own paths
 untouched:
@@ -307,21 +314,24 @@ TwoFlowsDecoupled  4.28             4.28             8.56
 =================  ===============  ===============  =========
 
 (Application-level throughput in Mbps: packets received by the sink × 8000
-bits / 5 s.)
+bits / 5 s. Aggregates are computed from the unrounded packet counts.)
 
 Two measurements pin down *why* this is pure carrier-sensing overcaution and
 not physics:
 
 - **The links never actually collide.** In the exposed run, not one data
   frame is retransmitted — the MAC's retry counters stay at zero on both
-  senders. Every frame that was sent got through and was acknowledged. The
-  collisions carrier sensing guarded against cannot occur in this topology.
+  senders. Every frame that was sent got through and was acknowledged. A
+  collision at either data receiver — the thing carrier sensing primarily
+  guards against — cannot occur in this topology. (What *could* still be
+  lost is an ACK; see the fine print below.)
 - **The serialization is near-total.** Computed from the recorded radio
   transmission-state vectors, hostA and hostC are on the air simultaneously
-  for just 1.4 ms of their combined 4.23 s of transmission airtime (0.03%) —
-  and that sole overlap, the two flows' very first packets started in the
-  same instant at t = 1 ms, was delivered successfully by *both* links. In
-  the decoupled run the same overlap measure is 3.0 s.
+  for just 1.45 ms of their combined 4.23 s of transmission airtime
+  (0.034%) — and that sole overlap, the two flows' very first packets
+  started in the same instant at t = 1 ms, was delivered successfully by
+  *both* links. In the decoupled run the two stations overlap for 3.0 s —
+  78% of each flow's ~3.9 s of airtime.
 
 .. admonition:: Details — why the exposed aggregate is slightly *above* the baseline
 
@@ -333,10 +343,13 @@ not physics:
      idle backoff slots before transmitting again.
    - With one saturated sender, the channel idles for that station's full
      backoff draw between frames — on average ~15.5 slots, half the minimum
-     contention window of 31.
+     contention window (31 in the default 802.11g mixed mode).
    - With two saturated senders, whoever's counter expires first seizes the
      channel, so the idle gap is the *smaller* of two counters — measured
-     ~8.3 slots per frame here. Less idle time, slightly more frames.
+     ~7.7 slots per frame here. It is even below the ~10-slot average of
+     two fresh draws, because the station that loses a round keeps its
+     remaining count for the next one. Less idle time, slightly more
+     frames.
 
 .. admonition:: Fine print — why 802.11 cannot simply ignore the busy channel
 
@@ -349,7 +362,9 @@ not physics:
      was on the air. Having started later, hostC would still be transmitting
      when hostB's ACK to hostA arrives — and hostC is well within hostA's
      range, so the ACK would be destroyed at hostA. Whichever station starts
-     second clobbers the other link's ACK.
+     noticeably later clobbers the other link's ACK; only a near-simultaneous
+     start escapes, both frames then ending before either ACK begins — which
+     is exactly why the two first frames at t = 1 ms both survived.
    - The parallelism is therefore not recoverable just by relaxing carrier
      sensing — physical or virtual: the *reverse* channel of each link is not
      independent, only the forward channel is. Carrier sensing and the NAV
@@ -357,8 +372,10 @@ not physics:
      cannot simply be switched off. (The wall in the control run removes this
      coupling too, which is why it recovers the full rate.)
    - This is why the exposed node problem, unlike the hidden node problem,
-     has no in-protocol fix in 802.11; proposals in the literature (MACA,
-     MACAW, and successors) change the protocol itself.
+     has no in-protocol fix in classic 802.11; proposals in the literature
+     (MACA, MACAW, and successors) change the protocol itself. Much later,
+     802.11ax's spatial-reuse rules did relax this over-deferral — but even
+     they cannot decouple the ACKs in a topology like this one.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`ExposedNodeShowcase.ned <../ExposedNodeShowcase.ned>`,
