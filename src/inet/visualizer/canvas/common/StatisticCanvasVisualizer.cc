@@ -227,7 +227,15 @@ void StatisticCanvasVisualizer::refreshChart(BarSetCanvasVisualization *barSetVi
         figure->addFigure(baseline);
     }
 
-    double range = maxValue - minValue;
+    // Fixed scale when maxValue is set (> minValue); otherwise autoscale each chart to its largest value.
+    double effectiveMax = maxValue;
+    if (!(effectiveMax > minValue)) {
+        effectiveMax = minValue;
+        for (auto& entry : entries)
+            if (!std::isnan(entry.second) && entry.second > effectiveMax)
+                effectiveMax = entry.second;
+    }
+    double range = effectiveMax - minValue;
     for (size_t i = 0; i < entries.size(); i++) {
         double value = entries[i].second;
         double x = i * (barWidth + barSpacing);
@@ -239,7 +247,7 @@ void StatisticCanvasVisualizer::refreshChart(BarSetCanvasVisualization *barSetVi
         auto bar = new cRectangleFigure("bar");
         bar->setBounds(cFigure::Rectangle(x, baselineY - h, barWidth, h));
         bar->setFilled(true);
-        bar->setFillColor(getBarColor(value));
+        bar->setFillColor(getBarColor(value, effectiveMax));
         bar->setLineColor(cFigure::Color("grey30"));
         bar->setTooltip((entries[i].first + ": " + formatBarValue(value)).c_str());
         figure->addFigure(bar);

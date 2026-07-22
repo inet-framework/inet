@@ -53,7 +53,7 @@ simple StatisticVisualizerBase extends VisualizerBase
         // This is the live counterpart of the demux() result filter used for recording.
         string displayMode @enum("text","bars") = default("text"); // "text": a value label per source (default); "bars": a bar chart per source
         string barSeries @enum("details","sources","flow") = default("details"); // Bar keying in bars mode: "details" = one bar per demux label of a single source's signal; "sources" = one bar per matching source module, grouped by network node; "flow" = one bar per flow, demultiplexing a single source's signal by the packet's flow tag (the statisticExpression must contain demuxFlow). "sources"/"flow" take the bar value from statisticExpression, e.g. count or throughput
-        double maxValue = default(0); // Value mapped to a full-height bar and to the top of the color gradient (in the display unit)
+        double maxValue = default(0); // Value mapped to a full-height bar and to the top of the color gradient (in the display unit); 0 (default, i.e. not greater than minValue) autoscales each chart to its own current maximum
         double minValue = default(0); // Value mapped to a zero-height bar and to the bottom of the color gradient (in the display unit)
         double barWidth = default(12); // Width of each bar in pixels
         double barSpacing = default(8); // Horizontal spacing between adjacent bars in pixels

@@ -335,13 +335,13 @@ std::string StatisticVisualizerBase::formatBarValue(double value) const
     return buf;
 }
 
-cFigure::Color StatisticVisualizerBase::getBarColor(double value) const
+cFigure::Color StatisticVisualizerBase::getBarColor(double value, double maxForScale) const
 {
     if (barColors.empty())
         return cFigure::Color("grey");
     if (barColors.size() == 1)
         return barColors[0];
-    double range = maxValue - minValue;
+    double range = maxForScale - minValue;
     double fraction = range > 0 ? (value - minValue) / range : 0;
     if (fraction < 0) fraction = 0;
     if (fraction > 1) fraction = 1;

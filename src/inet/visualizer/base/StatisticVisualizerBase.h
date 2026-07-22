@@ -174,8 +174,9 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual void collectResultRecorders(cResultListener *resultListener, std::vector<LastValueRecorder *>& recorders);
     // Formats a bar value into its label using valueFormat.
     virtual std::string formatBarValue(double value) const;
-    // Interpolates the bar color for a value on the barColors gradient (minValue..maxValue).
-    virtual cFigure::Color getBarColor(double value) const;
+    // Interpolates the bar color for a value on the barColors gradient (minValue..maxForScale); the caller
+    // passes the effective maximum so the gradient follows the autoscale when maxValue is not set.
+    virtual cFigure::Color getBarColor(double value, double maxForScale) const;
     //@}
 
   public:
