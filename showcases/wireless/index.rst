@@ -37,6 +37,7 @@ IEEE 802.11:
    txop/doc/index
    errorrate/doc/index
    hiddennode/doc/index
+   exposednode/doc/index
    multiradio/doc/index
    crosstalk/doc/index
 .. infrastructure/doc/index
