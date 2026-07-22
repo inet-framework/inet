@@ -163,7 +163,9 @@ void Ipv6RoutingHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     stream.writeByte((totalLen.get() - 8) / 8);
     stream.writeByte(hdr->getRoutingType());
     stream.writeByte(hdr->getSegmentsLeft());
-    stream.writeByteRepeatedly(0, 4); // reserved
+    stream.writeByte(hdr->getLastEntry());
+    stream.writeByte(hdr->getFlags());
+    stream.writeUint16Be(hdr->getTag());
     for (size_t j = 0; j < hdr->getAddressArraySize(); j++)
         stream.writeIpv6Address(hdr->getAddress(j));
 }
@@ -177,7 +179,9 @@ const Ptr<Chunk> Ipv6RoutingHeaderSerializer::deserialize(MemoryInputStream& str
     hdr->setChunkLength(totalLen);
     hdr->setRoutingType(stream.readByte());
     hdr->setSegmentsLeft(stream.readByte());
-    stream.readByteRepeatedly(0, 4); // reserved
+    hdr->setLastEntry(stream.readByte());
+    hdr->setFlags(stream.readByte());
+    hdr->setTag(stream.readUint16Be());
     // Remaining bytes are addresses (16 bytes each)
     int numAddresses = (totalLen.get() - 8) / 16;
     hdr->setAddressArraySize(numAddresses);

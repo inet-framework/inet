@@ -70,6 +70,9 @@ class Ipv6RoutingHeader extends Ipv6ExtensionHeader
     //chunkLength = 8+16*getAddressArraySize() when routingType == 0
     uint8_t routingType;
     uint8_t segmentsLeft;
+    uint8_t lastEntry = 0; // SRv6 (RFC 8754): index of the last segment in the list; reserved for other routing types
+    uint8_t flags = 0;     // SRv6 flags octet
+    uint16_t tag = 0;      // SRv6 tag
     Ipv6Address address[];
 }
 
