@@ -726,6 +726,7 @@ utils.export_data_if_needed(df, props)
             <property name="title" value="Per-flow and aggregate throughput"/>
             <property name="xaxis_title" value="configuration"/>
             <property name="yaxis_title" value="Throughput [Mbps]"/>
+            <property name="yaxis_unit" value=""/>
             <property name="yaxis_min" value=""/>
             <property name="yaxis_max" value=""/>
             <property name="yaxis_log" value="false"/>
