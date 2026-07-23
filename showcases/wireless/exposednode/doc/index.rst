@@ -236,8 +236,13 @@ untouched:
 Results
 -------
 
-The following video shows the exposed configuration in steady state. The
-expanding disks are radio transmissions; the counters show packets received:
+The videos below use three overlays together. An expanding **disk** is a radio
+transmission propagating outward — it shows how far a signal reaches. A **green
+arrow** marks a data frame accepted by its addressed receiver's MAC — the real
+delivery. A **blue arrow** marks any radio *decoding* a frame at the physical
+layer, which includes both the acknowledgments and frames a node merely
+*overhears* without being the addressee. The overhearing arrow is the one to
+watch: it is exactly what makes carrier sensing defer.
 
 .. video:: media/exposed.mp4
    :width: 100%
@@ -247,25 +252,35 @@ expanding disks are radio transmissions; the counters show packets received:
    config:   TwoFlowsExposed
    seed:     default
    shows:    hostA and hostC transmitting strictly one at a time (a single
-             signal disk on the air at any moment), each data frame answered
-             by the receiver's ACK; both packet counters advancing at about
-             half pace (~297 at t=1.02 s vs ~543 in the decoupled run)
+             signal disk on the air at any moment). Each data frame draws a
+             green delivery arrow to its receiver (A->B or C->D) AND a blue
+             physical arrow to the OTHER transmitter (A->C or C->A) -- the
+             overhearing that forces deferral -- plus a blue WlanAck arrow
+             back. Counters advance at half pace (~297 hostB / 300 hostD at
+             t=1.02 s vs ~543/545 decoupled).
    anchors:  saturated steady state from a few ms in; any window works. Last
-             observed: counters 297 (hostB) / 300 (hostD) at t=1.02 s.
-   window:   express-run to 1.02 s -> step 1 event -> record to 1.037 s;
-             no fade wait (fadeOutMode=animationTime)
+             observed: counters 297 (hostB) / 300 (hostD) at t=1.02 s. The
+             A<->C overhearing arrows are present (contrast: absent when the
+             wall is in place). Built-in message animation is OFF.
+   window:   express-run to 1.02 s -> step 1 event -> record to 1.037 s
+   visualizers: medium displaySignals; physicalLinkVisualizer (blue, all
+             receptions incl. overhearing + ACKs); dataLinkVisualizer (green,
+             lineWidth 6, packetFilter UDPData*, no label). Link arrows use
+             fadeOutMode=simulationTime, fadeOutTime=1.5ms so each stays
+             legible for its exchange. Qtenv animation_enabled=false.
    anim:     playback_speed=2        # set_animation_parameters, normal profile
-   capture:  fps=2, crop_area=with_padding   # crop_rect was 1024:644:777:87
-   encode:   ffmpeg -r 10 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
+   capture:  fps=2, crop_area=with_padding   # crop_rect was 1024:644:750:87
+   encode:   ffmpeg -r 14 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
    post:     none
    stamp:    recorded 2026-07, INET 4.6
 
-**Only one signal disk is on the air at any moment: hostA and hostC take
-turns, so the two independent links share one link's worth of airtime.**
+**One transmission at a time: hostA's frame draws a green delivery arrow to
+hostB and, at the same instant, a blue overhearing arrow to hostC — so hostC
+must stay silent, and the two independent links share one link's worth of
+airtime.**
 
 The decoupled control run looks strikingly different — the wall (the reddish
-bar in the middle) hides the transmitters from each other, and their
-transmissions overlap freely:
+bar in the middle) blocks the transmitters from hearing each other:
 
 .. video:: media/decoupled.mp4
    :width: 100%
@@ -275,21 +290,27 @@ transmissions overlap freely:
    config:   TwoFlowsDecoupled
    seed:     default
    shows:    both hostA and hostC transmitting at the same time (two signal
-             disks on the air together, overlapping mid-canvas), the wall
-             visible between them; packet counters at roughly double the
-             exposed run's values (~543 at t=1.02 s vs ~297)
+             disks overlapping mid-canvas). hostA->hostB (green + blue + ACK)
+             stays entirely LEFT of the wall and hostC->hostD entirely RIGHT;
+             NO blue arrow crosses the wall (no A<->C overhearing). Counters
+             at roughly double the exposed run (~543/545 at t=1.02 s).
    anchors:  saturated steady state from a few ms in; any window works. Last
-             observed: counters 543 (hostB) / 545 (hostD) at t=1.02 s.
-   window:   express-run to 1.02 s -> step 1 event -> record to 1.037 s;
-             no fade wait (fadeOutMode=animationTime)
+             observed: counters 544 (hostB) / 546 (hostD) at t=1.02 s. The
+             defining feature is the ABSENCE of any wall-crossing arrow.
+             Built-in message animation is OFF.
+   window:   express-run to 1.02 s -> step 1 event -> record to 1.037 s
+   visualizers: same as the exposed recipe (medium + physical blue + data-link
+             green, link fadeOutTime 1.5ms simulationTime, animation off).
    anim:     playback_speed=2        # set_animation_parameters, normal profile
-   capture:  fps=2, crop_area=with_padding   # crop_rect was 1024:644:777:87
-   encode:   ffmpeg -r 14 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
+   capture:  fps=2, crop_area=with_padding   # crop_rect was 1024:644:750:87
+             (d_0000 was dropped; encode with -start_number 1)
+   encode:   ffmpeg -r 20 -start_number 1 -vcodec libx264 -pix_fmt yuv420p
    post:     none
    stamp:    recorded 2026-07, INET 4.6
 
-**With the wall blocking the transmitters from sensing each other, both
-signal disks are on the air simultaneously — and both receivers still decode
+**With the wall blocking the transmitters from sensing each other, both links
+run at once — each data frame's green delivery and blue ACK stay on its own
+side of the wall, and no overhearing arrow crosses. Both receivers decode
 every frame, because neither transmitter's signal reaches the other link's
 receiver.**
 
