@@ -265,7 +265,7 @@ watch: it is exactly what makes carrier sensing defer.
    window:   express-run to 1.02 s -> step 1 event -> record to 1.037 s
    visualizers: medium displaySignals; physicalLinkVisualizer (blue, all
              receptions incl. overhearing + ACKs); dataLinkVisualizer (green,
-             lineWidth 6, packetFilter UDPData*, no label). Link arrows use
+             lineWidth 3, packetFilter UDPData*, no label). Link arrows use
              fadeOutMode=simulationTime, fadeOutTime=1.5ms so each stays
              legible for its exchange. Qtenv animation_enabled=false.
    anim:     playback_speed=2        # set_animation_parameters, normal profile
