@@ -28,7 +28,7 @@ PROJECTRELATIVE_PATH = tests/unit/lib
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
-OBJS = $O/ClockTestApp.o $O/IntervalTreeTest.o $O/TCPQueueTesterFunctions.o
+OBJS = $O/ChunkRoundTripTest.o $O/ClockTestApp.o $O/IntervalTreeTest.o $O/TCPQueueTesterFunctions.o
 
 # Message files
 MSGFILES =
