@@ -947,85 +947,43 @@ Packet *Ospfv3Interface::prepareUpdatePacket(std::vector<Ospfv3Lsa *> lsas)
     // length ended up reflecting only the last LSA, corrupting multi-LSA updates on the wire.)
     B packetLength = OSPFV3_HEADER_LENGTH + B(sizeof(uint32_t));
 
-    for (size_t j = 0; j < lsas.size(); j++) {
-        Ospfv3Lsa *lsa = lsas[j];
+    // Populate the single LSA list grouped by type (Router, Network, Inter-Area-Prefix,
+    // Link, Intra-Area-Prefix). The order of LSAs inside a Link State Update carries no
+    // meaning -- RFC 5340 lets a router pack them in any order and the receiver processes
+    // each independently -- so this type grouping is functionally UNNECESSARY. We emit them
+    // in this fixed order only to reproduce the exact on-the-wire byte layout the previous
+    // per-type LSA arrays produced, which keeps the ~tND ("packet contents") fingerprint of
+    // every OSPFv3 simulation byte-identical and spares us re-recording them. (The model is
+    // a single ordered list now; a captured update still round-trips in its original wire
+    // order because the serializer preserves whatever order the list holds -- that is the
+    // whole point of the list. Here, for locally originated updates, we just choose to fill
+    // the list type-grouped.)
+    static const int lsaTypeOrder[] = { ROUTER_LSA, NETWORK_LSA, INTER_AREA_PREFIX_LSA, LINK_LSA, INTRA_AREA_PREFIX_LSA };
+    for (int wantType : lsaTypeOrder) {
+        for (size_t j = 0; j < lsas.size(); j++) {
+            Ospfv3Lsa *lsa = lsas[j];
+            uint16_t code = lsa->getHeader().getLsaType();
+            if (code != wantType)
+                continue;
 
-        int count = updatePacket->getLsaCount();
-
-//        Ospfv3LsaHeader header = lsa->getHeader();
-        uint16_t code = lsa->getHeader().getLsaType();
-
-        switch (code) {
-            case ROUTER_LSA: {
-                int pos = updatePacket->getRouterLSAsArraySize();
-                Ospfv3RouterLsa *routerLSA = dynamic_cast<Ospfv3RouterLsa *>(lsa);
-                updatePacket->setRouterLSAsArraySize(pos + 1);
-                updatePacket->setRouterLSAs(pos, *routerLSA);
-                updatePacket->setLsaCount(count + 1);
-                packetLength += calculateLSASize(routerLSA);
-                updatePacket->setPacketLengthField(packetLength.get());
-                updatePacket->setChunkLength(packetLength);
-                break;
+            int count = updatePacket->getLsaCount();
+            // calculateLSASize is overloaded per concrete LSA type, so dispatch for the size.
+            B lsaSize;
+            switch (code) {
+                case ROUTER_LSA:            lsaSize = calculateLSASize(check_and_cast<Ospfv3RouterLsa *>(lsa)); break;
+                case NETWORK_LSA:           lsaSize = calculateLSASize(check_and_cast<Ospfv3NetworkLsa *>(lsa)); break;
+                case INTER_AREA_PREFIX_LSA: lsaSize = calculateLSASize(check_and_cast<Ospfv3InterAreaPrefixLsa *>(lsa)); break;
+                case LINK_LSA:              lsaSize = calculateLSASize(check_and_cast<Ospfv3LinkLsa *>(lsa)); break;
+                case INTRA_AREA_PREFIX_LSA: lsaSize = calculateLSASize(check_and_cast<Ospfv3IntraAreaPrefixLsa *>(lsa)); break;
+                default:                    continue;
             }
-            case NETWORK_LSA: {
-                int pos = updatePacket->getNetworkLSAsArraySize();
-                Ospfv3NetworkLsa *networkLSA = dynamic_cast<Ospfv3NetworkLsa *>(lsa);
-                updatePacket->setNetworkLSAsArraySize(pos + 1);
-                updatePacket->setNetworkLSAs(pos, *networkLSA);
-                updatePacket->setLsaCount(count + 1);
-                packetLength += calculateLSASize(networkLSA);
-                updatePacket->setPacketLengthField(packetLength.get());
-                updatePacket->setChunkLength(B(packetLength));
-                break;
-            }
-
-            case INTER_AREA_PREFIX_LSA: {
-                int pos = updatePacket->getInterAreaPrefixLSAsArraySize();
-                Ospfv3InterAreaPrefixLsa *prefixLSA = dynamic_cast<Ospfv3InterAreaPrefixLsa *>(lsa);
-                updatePacket->setInterAreaPrefixLSAsArraySize(pos + 1);
-                updatePacket->setInterAreaPrefixLSAs(pos, *prefixLSA);
-                updatePacket->setLsaCount(count + 1);
-                packetLength += calculateLSASize(prefixLSA);
-                updatePacket->setPacketLengthField(packetLength.get());
-                updatePacket->setChunkLength(packetLength);
-                break;
-            }
-
-            case INTER_AREA_ROUTER_LSA:
-                break;
-
-            case AS_EXTERNAL_LSA:
-                break;
-
-            case DEPRECATED:
-                break;
-
-            case NSSA_LSA:
-                break;
-
-            case LINK_LSA: {
-                int pos = updatePacket->getLinkLSAsArraySize();
-                Ospfv3LinkLsa *linkLSA = dynamic_cast<Ospfv3LinkLsa *>(lsa);
-                updatePacket->setLinkLSAsArraySize(pos + 1);
-                updatePacket->setLinkLSAs(pos, *linkLSA);
-                updatePacket->setLsaCount(count + 1);
-                packetLength += calculateLSASize(linkLSA);
-                updatePacket->setPacketLengthField(packetLength.get());
-                updatePacket->setChunkLength(packetLength);
-                break;
-            }
-
-            case INTRA_AREA_PREFIX_LSA: {
-                int pos = updatePacket->getIntraAreaPrefixLSAsArraySize();
-                Ospfv3IntraAreaPrefixLsa *prefixLSA = dynamic_cast<Ospfv3IntraAreaPrefixLsa *>(lsa);
-                updatePacket->setIntraAreaPrefixLSAsArraySize(pos + 1);
-                updatePacket->setIntraAreaPrefixLSAs(pos, *prefixLSA);
-                updatePacket->setLsaCount(count + 1);
-                packetLength += calculateLSASize(prefixLSA);
-                updatePacket->setPacketLengthField(packetLength.get());
-                updatePacket->setChunkLength(packetLength);
-                break;
-            }
+            int pos = updatePacket->getLsasArraySize();
+            updatePacket->setLsasArraySize(pos + 1);
+            updatePacket->setLsas(pos, check_and_cast<Ospfv3Lsa *>(lsa->dup())); // @owned copy
+            updatePacket->setLsaCount(count + 1);
+            packetLength += lsaSize;
+            updatePacket->setPacketLengthField(packetLength.get());
+            updatePacket->setChunkLength(packetLength);
         }
     }
     Packet *pk = new Packet();
@@ -1041,93 +999,18 @@ void Ospfv3Interface::processLSU(Packet *packet, Ospfv3Neighbor *neighbor)
 
     if (neighbor->getState() >= Ospfv3Neighbor::EXCHANGE_STATE) {
         EV_DEBUG << "Processing LSU from " << lsUpdatePacket->getRouterID() << "\n";
-        int currentType = ROUTER_LSA;
         Ipv4Address areaID = lsUpdatePacket->getAreaID();
 
-        // First I get count from one array
-        while (currentType >= ROUTER_LSA && currentType <= INTRA_AREA_PREFIX_LSA) {
-            unsigned int lsaCount = 0;
-            switch (currentType) {
-                case ROUTER_LSA:
-                    lsaCount = lsUpdatePacket->getRouterLSAsArraySize();
-                    EV_DEBUG << "Parsing ROUTER_LSAs, lsaCount = " << lsaCount << "\n";
-                    break;
-
-                case NETWORK_LSA:
-                    lsaCount = lsUpdatePacket->getNetworkLSAsArraySize();
-                    EV_DEBUG << "Parsing NETWORK_LSAs, lsaCount = " << lsaCount << "\n";
-                    break;
-
-                case INTER_AREA_PREFIX_LSA:
-                    lsaCount = lsUpdatePacket->getInterAreaPrefixLSAsArraySize();
-                    EV_DEBUG << "Parsing InterAreaPrefixLSAs, lsaCount = " << lsaCount << endl;
-                    break;
-                case INTER_AREA_ROUTER_LSA: // support of LSA type 4 and 5 is not implemented yet
-                    currentType++;
+        // Process the LSAs grouped by type (Router, Network, Inter-Area-Prefix, Link,
+        // Intra-Area-Prefix), reading from the single ordered list. The storage changed to a
+        // single list, but the per-type processing order is kept identical to before so the
+        // routing behaviour (install/flood/aging order across areas) is unchanged.
+        static const int lsaTypeOrder[] = { ROUTER_LSA, NETWORK_LSA, INTER_AREA_PREFIX_LSA, LINK_LSA, INTRA_AREA_PREFIX_LSA };
+        for (int currentType : lsaTypeOrder) {
+            for (unsigned int i = 0; i < lsUpdatePacket->getLsasArraySize(); i++) {
+                const Ospfv3Lsa *currentLSA = lsUpdatePacket->getLsas(i);
+                if ((currentLSA->getHeader().getLsaType() & 0x1f) != currentType)
                     continue;
-                    break;
-
-                case AS_EXTERNAL_LSA:
-                    currentType += 2;
-                    continue;
-                    break;
-
-                case NSSA_LSA:
-                    currentType++;
-                    continue;
-                    break;
-
-                case LINK_LSA:
-                    lsaCount = lsUpdatePacket->getLinkLSAsArraySize();
-                    EV_DEBUG << "Parsing LINK_LSAs, lsaCount = " << lsaCount << "\n";
-                    break;
-
-                case INTRA_AREA_PREFIX_LSA:
-                    lsaCount = lsUpdatePacket->getIntraAreaPrefixLSAsArraySize();
-                    EV_DEBUG << "Parsing INTRA_AREA_PREFIX_LSAs, lsaCount = " << lsaCount << "\n";
-                    break;
-                default:
-                    throw cRuntimeError("Invalid currentType:%d", currentType);
-            }
-
-            for (unsigned int i = 0; i < lsaCount; i++) {
-                const Ospfv3Lsa *currentLSA = nullptr;
-
-                switch (currentType) {
-                    case ROUTER_LSA:
-                        currentLSA = (&(lsUpdatePacket->getRouterLSAs(i)));
-                        break;
-
-                    case NETWORK_LSA:
-                        EV_DEBUG << "Caught NETWORK_LSA in LSU\n";
-                        currentLSA = (&(lsUpdatePacket->getNetworkLSAs(i)));
-                        break;
-
-                    case INTER_AREA_PREFIX_LSA:
-                        EV_DEBUG << "Caught INTER_AREA_PREFIX_LSA in Update\n";
-                        currentLSA = (&(lsUpdatePacket->getInterAreaPrefixLSAs(i)));
-                        break;
-
-                    case INTER_AREA_ROUTER_LSA: // TODO this LSAs are not implemented yet, so they are not processed (with acutal code, this case should never happen)
-                    case AS_EXTERNAL_LSA:
-                        throw cRuntimeError("ProcessLSU - managing LSA of type 4 or 5 - not implemented yet! ");
-                        break;
-
-                    case NSSA_LSA:
-                        break;
-
-                    case LINK_LSA:
-                        currentLSA = (&(lsUpdatePacket->getLinkLSAs(i)));
-                        break;
-
-                    case INTRA_AREA_PREFIX_LSA:
-                        EV_DEBUG << "Caught INTRA_AREA_PREFIX_LSA in LSU\n";
-                        currentLSA = (&(lsUpdatePacket->getIntraAreaPrefixLSAs(i)));
-                        break;
-
-                    default:
-                        throw cRuntimeError("Invalid currentType:%d", currentType);
-                }
 
                 LSAKeyType lsaKey;
                 lsaKey.linkStateID = currentLSA->getHeader().getLinkStateID();
@@ -1317,10 +1200,8 @@ void Ospfv3Interface::processLSU(Packet *packet, Ospfv3Neighbor *neighbor)
                 {
                     continue;
                 }
-            } // for (unsigned int i = 0; i < lsaCount; i++)
-
-            currentType++;
-        } // while (currentType >= ROUTER_LSA && currentType <= LINK_LSA) {
+            } // for (LSAs of currentType)
+        } // for (currentType : lsaTypeOrder)
     } // if (neighbor->getState()>=Ospfv3Neighbor::EXCHANGE_STATE)STATE)
     else {
         EV_DEBUG << "Neighbor in lesser than EXCHANGE_STATE -> Drop the packet\n";
