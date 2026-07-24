@@ -449,16 +449,8 @@ void Ospfv3PacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
         case LINKSTATE_UPDATE_PACKET: {
             const auto& upd = staticPtrCast<const Ospfv3LinkStateUpdatePacket>(ospfPacket);
             stream.writeUint32Be(upd->getLsaCount());
-            for (size_t i = 0; i < upd->getRouterLSAsArraySize(); ++i)
-                serializeLsa(stream, upd->getRouterLSAs(i));
-            for (size_t i = 0; i < upd->getNetworkLSAsArraySize(); ++i)
-                serializeLsa(stream, upd->getNetworkLSAs(i));
-            for (size_t i = 0; i < upd->getInterAreaPrefixLSAsArraySize(); ++i)
-                serializeLsa(stream, upd->getInterAreaPrefixLSAs(i));
-            for (size_t i = 0; i < upd->getLinkLSAsArraySize(); ++i)
-                serializeLsa(stream, upd->getLinkLSAs(i));
-            for (size_t i = 0; i < upd->getIntraAreaPrefixLSAsArraySize(); ++i)
-                serializeLsa(stream, upd->getIntraAreaPrefixLSAs(i));
+            for (size_t i = 0; i < upd->getLsasArraySize(); ++i)
+                serializeLsa(stream, *upd->getLsas(i));
             break;
         }
         case LINKSTATE_ACKNOWLEDGEMENT_PACKET: {
@@ -579,64 +571,52 @@ const Ptr<Chunk> Ospfv3PacketSerializer::deserialize(MemoryInputStream& stream) 
             upd->setReserved(ospfPacket->getReserved());
             uint32_t lsaCount = stream.readUint32Be();
             upd->setLsaCount(lsaCount);
+            upd->setLsasArraySize(lsaCount);
             for (uint32_t i = 0; i < lsaCount; ++i) {
                 Ospfv3LsaHeader header;
                 deserializeLsaHeader(stream, header);
+                Ospfv3Lsa *lsa = nullptr;
                 switch (header.getLsaType() & 0x1f) {
                     case ROUTER_LSA: {
-                        auto *lsa = new Ospfv3RouterLsa();
-                        lsa->setHeader(header);
-                        deserializeRouterLsa(stream, *lsa);
-                        size_t n = upd->getRouterLSAsArraySize();
-                        upd->setRouterLSAsArraySize(n + 1);
-                        upd->setRouterLSAs(n, *lsa);
-                        delete lsa;
+                        auto *l = new Ospfv3RouterLsa();
+                        l->setHeader(header);
+                        deserializeRouterLsa(stream, *l);
+                        lsa = l;
                         break;
                     }
                     case NETWORK_LSA: {
-                        auto *lsa = new Ospfv3NetworkLsa();
-                        lsa->setHeader(header);
-                        deserializeNetworkLsa(stream, *lsa);
-                        size_t n = upd->getNetworkLSAsArraySize();
-                        upd->setNetworkLSAsArraySize(n + 1);
-                        upd->setNetworkLSAs(n, *lsa);
-                        delete lsa;
+                        auto *l = new Ospfv3NetworkLsa();
+                        l->setHeader(header);
+                        deserializeNetworkLsa(stream, *l);
+                        lsa = l;
                         break;
                     }
                     case INTER_AREA_PREFIX_LSA: {
-                        auto *lsa = new Ospfv3InterAreaPrefixLsa();
-                        lsa->setHeader(header);
-                        deserializeInterAreaPrefixLsa(stream, *lsa);
-                        size_t n = upd->getInterAreaPrefixLSAsArraySize();
-                        upd->setInterAreaPrefixLSAsArraySize(n + 1);
-                        upd->setInterAreaPrefixLSAs(n, *lsa);
-                        delete lsa;
+                        auto *l = new Ospfv3InterAreaPrefixLsa();
+                        l->setHeader(header);
+                        deserializeInterAreaPrefixLsa(stream, *l);
+                        lsa = l;
                         break;
                     }
                     case LINK_LSA: {
-                        auto *lsa = new Ospfv3LinkLsa();
-                        lsa->setHeader(header);
-                        deserializeLinkLsa(stream, *lsa);
-                        size_t n = upd->getLinkLSAsArraySize();
-                        upd->setLinkLSAsArraySize(n + 1);
-                        upd->setLinkLSAs(n, *lsa);
-                        delete lsa;
+                        auto *l = new Ospfv3LinkLsa();
+                        l->setHeader(header);
+                        deserializeLinkLsa(stream, *l);
+                        lsa = l;
                         break;
                     }
                     case INTRA_AREA_PREFIX_LSA: {
-                        auto *lsa = new Ospfv3IntraAreaPrefixLsa();
-                        lsa->setHeader(header);
-                        deserializeIntraAreaPrefixLsa(stream, *lsa);
-                        size_t n = upd->getIntraAreaPrefixLSAsArraySize();
-                        upd->setIntraAreaPrefixLSAsArraySize(n + 1);
-                        upd->setIntraAreaPrefixLSAs(n, *lsa);
-                        delete lsa;
+                        auto *l = new Ospfv3IntraAreaPrefixLsa();
+                        l->setHeader(header);
+                        deserializeIntraAreaPrefixLsa(stream, *l);
+                        lsa = l;
                         break;
                     }
                     default:
                         upd->markIncorrect();
                         return upd;
                 }
+                upd->setLsas(i, lsa);    // @owned: the packet takes ownership
             }
             return upd;
         }
