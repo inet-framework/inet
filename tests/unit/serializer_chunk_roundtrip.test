@@ -1,0 +1,1048 @@
+%description:
+Constructed per-chunk round-trip test (WP8).
+
+Enumerates every registered chunk-serializer type, instantiates it, fills its
+flat scalar fields with distinct, byte-asymmetric values, and checks the byte
+round-trip (serialize -> deserialize -> serialize) and the length invariant. A
+coverage report (OK / FAILED / CRASHED / SKIPPED) is printed.
+
+The engine (tests/unit/lib/ChunkRoundTripTest.{h,cc}) is chunk-agnostic. Every
+chunk-type-specific decision lives here in this .test file and is passed in via
+ChunkRoundTripConfig:
+  - skipTypes: only chunks that genuinely cannot round-trip to themselves --
+    dispatch base headers (they deserialize into a concrete subclass), structural
+    framework chunks with no standalone wire form (EmptyChunk / SliceChunk /
+    SequenceChunk / StreamBufferChunk), serialize-only chunks whose deserializer
+    throws, and chunks whose serializer is a stub / has no branch for them. Chunks
+    that should round-trip but need construction the generic fill does not do (raw
+    BytesChunk content, discriminators, lengths, ...) get a recipe instead.
+  - preFill:  sets non-editable meta fields the descriptor cannot reach -- the
+    checksum/FCS mode. It defaults to UNDEFINED (making the chunk "not
+    serializable"); CHECKSUM_COMPUTED / FCS_COMPUTED tells the serializer to emit
+    the stored value as-is (it does not verify it). Casting to the base class
+    covers all subtypes (e.g. all OSPF packets).
+
+This first cut only auto-fills flat scalars; complex chunks (sub-structs,
+vectors, owned polymorphic pointers, computed lengths, domain-constrained
+fields) need richer per-type fillers and are a later step.
+
+%includes:
+#include "ChunkRoundTripTest.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+// headers for commonSetup (checksum/FCS mode) -- most recipes are data (type names
+// as strings) and need no chunk header; the exception is a chunk with a custom fill
+// lambda that uses typed setters (AODV Rerr below).
+#include "inet/common/Protocol.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/linklayer/bmac/BMacHeader_m.h"
+#include "inet/linklayer/csmaca/CsmaCaMacHeader_m.h"
+#include "inet/linklayer/ieee8021as/GptpPacket_m.h"
+#include "inet/networklayer/mipv6/MobilityHeader_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/linklayer/shortcut/ShortcutMacHeader_m.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/generic/GenericPhyHeader_m.h"
+#include "inet/physicallayer/wireless/shortcut/ShortcutPhyHeader_m.h"
+#include "inet/routing/aodv/AodvControlPackets_m.h"
+#ifdef INET_WITH_VOIPSTREAM
+#include "inet/applications/voipstream/VoipStreamPacket_m.h"
+#endif
+#include "inet/linklayer/xmac/XMacHeader_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/icmpv6/Mldv2Message_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv4/IgmpMessage_m.h"
+#include "inet/applications/dhcp/DhcpMessage_m.h"
+#include "inet/routing/pim/PimPacket_m.h"
+#include "inet/routing/rip/RipPacket_m.h"
+#include "inet/transportlayer/sctp/SctpHeader_m.h"
+#include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/protocolelement/checksum/header/ChecksumHeader_m.h"
+#include "inet/routing/ospf_common/OspfPacketBase_m.h"
+#include "inet/routing/ospfv2/Ospfv2Packet_m.h"
+#include "inet/routing/ospfv3/Ospfv3Packet_m.h"
+#include "inet/transportlayer/rtp/RtcpPacket_m.h"
+#include "inet/transportlayer/rtp/Reports_m.h"
+#include "inet/transportlayer/rtp/Sdes.h"
+#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+
+%global:
+
+using namespace inet;
+
+static const std::set<std::string> chunkSkipTypes = {
+    // -- Packet-framework structural chunks that have no standalone wire form (unlike
+    // the raw-data BytesChunk/ByteCountChunk/BitCountChunk/BitsChunk, which do round-
+    // trip -- see fillRawData): a SliceChunk is a view onto another chunk and a
+    // SequenceChunk a composite of sub-chunks, so their bytes do not deserialize back
+    // into the same structural type; an EmptyChunk is the zero-length placeholder
+    // (serialize is an "Invalid operation"); a StreamBufferChunk is a mutable stream
+    // scratch buffer, not a finalized chunk (serialize dereferences its null backing).
+    "inet::EmptyChunk",
+    "inet::SliceChunk",
+    "inet::SequenceChunk",
+    "inet::StreamBufferChunk",
+
+    // -- Abstract-by-convention base headers: deserialization starts on the base
+    // serializer, which branches on a type discriminator and builds the concrete
+    // subclass. Instantiated standalone the base leaves that discriminator at its
+    // -1/undefined sentinel, so its serializer throws "type N not supported". The
+    // concrete subclasses (which pin the type) are the real round-trip targets.
+    // (Not auto-detectable: RtcpReceiverReportPacket is itself a base of
+    // RtcpSenderReportPacket yet is a concrete, round-trippable chunk -- there the
+    // discriminator is pinned, not left unset.)
+    "inet::IcmpHeader",                           // ICMP type -> EchoRequest / Reply / DestUnreachable / ...
+    "inet::Icmpv6Header",                         // ICMPv6 type -> Echo / NeighbourSol / RouterAd / ...
+    "inet::ieee80211::Ieee80211MacHeader",        // 802.11 type -> data / mgmt / control frames
+    "inet::ieee80211::Ieee80211MgmtHeader",       // 802.11 mgmt subtype -> Assoc / Probe / Beacon / ...
+    "inet::ieee80211::Ieee80211DataOrMgmtHeader", // 802.11 data-or-mgmt intermediate base
+    "inet::ieee80211::Ieee80211ActionFrame",      // action-frame base; serializer casts to a concrete Addba/Delba subtype
+    "inet::bgp::BgpHeader",                       // BGP type -> Open / Update / Notification / Keepalive
+    "inet::IgmpQuery",                            // IGMP query base -> v1 / v2 / v3 query (the base has no max-response code field, so it cannot round-trip standalone)
+    "inet::MldMessage",                           // MLD message base -> MldQuery / MldReport / MldDone / Mldv2* (a bare message carries no valid ICMPv6 type)
+    "inet::ospf::OspfPacketBase",                 // OSPF common base (version/type only); "use specific OSPF chunks"
+    "inet::ospfv2::Ospfv2Packet",                 // OSPFv2 type -> Hello / DatabaseDescription / LSR / LSU / LSAck
+    "inet::ospfv3::Ospfv3Packet",                 // OSPFv3 type -> Hello / DatabaseDescription / LSR / LSU / LSAck
+    "inet::rtp::RtcpPacket",                      // RTCP packetType -> ReceiverReport / SenderReport / Sdes / Bye
+    "inet::aodv::AodvControlPacket",              // AODV packetType -> Rreq / Rrep / Rerr / RrepAck
+    "inet::BpduBase",                             // STP bpduType -> Cfg / Tcn
+    "inet::BMacHeaderBase",                       // B-MAC type -> ControlFrame (preamble/ack) / DataFrameHeader
+    "inet::XMacHeaderBase",                       // X-MAC type -> ControlFrame (preamble/ack) / DataFrameHeader
+    "inet::CsmaCaMacHeader",                      // CSMA/CA type -> Data / Ack
+    "inet::EthernetControlFrameBase",             // Ethernet control opCode -> PauseFrame / ...
+    "inet::physicallayer::EthernetPhyHeaderBase", // Ethernet PHY base -> EthernetPhyHeader / EthernetFragmentPhyHeader
+    "inet::GptpBase",                             // gPTP messageType -> Sync / FollowUp / PdelayReq / ...
+    "inet::IgmpMessage",                          // IGMP type -> Query / Report (v1/v2/v3) / Leave
+    "inet::MobilityHeader",                       // MIPv6 MH type -> BindingUpdate / -Acknowledgement / HomeTest / ...
+    "inet::MrpTlvHeader",                         // MRP tlvType -> Test / TopologyChange / LinkChange / ...
+    "inet::PimPacket",                            // PIM type -> Hello / JoinPrune / Assert / Register / ...
+
+    // Not round-trippable: serialized only, their deserializer throws. TransportPseudoHeader
+    // is a checksum pseudo-header ("not a valid deserializable data"); EthernetPadding is
+    // trailing zero padding ("Invalid operation").
+    "inet::TransportPseudoHeader",
+    "inet::EthernetPadding",
+
+    // (The 802.11 management frames -- Beacon, Probe/Association/Reassociation
+    // Request/Response -- used to be skipped here because the serializer's deserialize()
+    // was a stub. It now dispatches on the frame type and the serialize/deserialize
+    // directions agree, so they are exercised via per-type recipes below instead.)
+
+    // Multi-TID BlockAck / BlockAckReq: not modelled (empty .msg body) and not
+    // constructed anywhere in INET, so the serializer intentionally throws
+    // "unimplemented" instead of round-tripping. (It throws cleanly now -- a CHK guard
+    // replaced the former null-deref crash -- but there is simply no format to test.)
+    "inet::ieee80211::Ieee80211MultiTidBlockAck",
+    "inet::ieee80211::Ieee80211MultiTidBlockAckReq",
+};
+
+// commonSetup: set the checksum/FCS mode to CHECKSUM_COMPUTED / FCS_COMPUTED for
+// chunk types that carry one. It is a non-editable meta field the descriptor cannot
+// set, and it defaults to UNDEFINED, which makes the chunk "not serializable".
+// CHECKSUM_COMPUTED tells the serializer to emit the stored value as-is (it does
+// not verify it). Cast to the base classes so one line covers all subtypes (e.g.
+// every OSPF packet). Run by the engine on every chunk, before any recipe.
+static void chunkCommonSetup(Chunk *c)
+{
+    if (auto p = dynamic_cast<UdpHeader *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<tcp::TcpHeader *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<ospf::OspfPacketBase *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<EthernetFcs *>(c)) p->setFcsMode(FCS_COMPUTED);
+    else if (auto p = dynamic_cast<ApskPhyHeader *>(c)) p->setFcsMode(FCS_COMPUTED);
+    else if (auto p = dynamic_cast<CsmaCaMacTrailer *>(c)) p->setFcsMode(FCS_COMPUTED);
+    else if (auto p = dynamic_cast<ieee80211::Ieee80211MacTrailer *>(c)) p->setFcsMode(FCS_COMPUTED);
+    // more checksum-carrying families, each on the base that declares checksumMode:
+    // IcmpHeader (ICMPv4), Icmpv6Header (ICMPv6, and Ipv6 ND + MLD which extend it),
+    // IgmpMessage (IGMP), PimPacket (PIM), SctpHeader.
+    else if (auto p = dynamic_cast<IcmpHeader *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<Icmpv6Header *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<IgmpMessage *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<PimPacket *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<sctp::SctpHeader *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    // the 802.11 PHY headers declare fcsMode per subclass (no common base with it):
+    // DsssPhyHeader covers HrDsssPhyHeader; Fhss and Ir are separate.
+    else if (auto p = dynamic_cast<physicallayer::Ieee80211DsssPhyHeader *>(c)) p->setFcsMode(FCS_COMPUTED);
+    else if (auto p = dynamic_cast<physicallayer::Ieee80211FhssPhyHeader *>(c)) p->setFcsMode(FCS_COMPUTED);
+    else if (auto p = dynamic_cast<physicallayer::Ieee80211IrPhyHeader *>(c)) p->setFcsMode(FCS_COMPUTED);
+}
+
+// Custom fill for AODV Rerr: its serializer requires at least one unreachable node
+// (DestCount >= 1), an array the generic fill leaves empty. A special chunk like
+// this uses a typed fill lambda instead of SimpleFiller. length is B(4 + 1*8) for
+// IPv4 and B(4 + 1*20) for IPv6.
+static void fillRerr(Chunk *c, aodv::AodvControlPacketType type, B length)
+{
+    auto rerr = check_and_cast<aodv::Rerr *>(c);
+    rerr->setPacketType(type);
+    rerr->setUnreachableNodesArraySize(1);
+    rerr->setChunkLength(length);
+}
+
+// AODV carries the discriminator in the base-class 'packetType' enum field, whose
+// default is an out-of-range static_cast<>(-1) sentinel. The msg compiler marks such
+// a field non-editable, so SimpleFiller's setFieldValueAsString cannot set it (it is
+// silently left at -1 and the serializer rejects "type -1"). Set it with the typed
+// C++ setter instead (as fillRerr does for Rerr).
+static void setAodvType(Chunk *c, aodv::AodvControlPacketType type, B length)
+{
+    auto pkt = check_and_cast<aodv::AodvControlPacket *>(c);
+    pkt->setPacketType(type);
+    pkt->setChunkLength(length);
+}
+
+// MIPv6 mobility headers carry the discriminator in the base 'mobilityHeaderType' enum,
+// which (with no explicit default) the msg compiler initialises to an out-of-range
+// static_cast<>(-1) and marks non-editable -- so setFieldValueAsString cannot set it.
+// Set it with the typed C++ setter, as setAodvType does for AODV.
+static void setMhType(Chunk *c, MobilityHeaderType type, B length)
+{
+    auto mh = check_and_cast<MobilityHeader *>(c);
+    mh->setMobilityHeaderType(type);
+    mh->setChunkLength(length);
+}
+
+// Custom fill for the 802.11 data / action / block-ack frames: they carry a
+// SequenceNumberCyclic (base sequenceNumber and/or startingSequenceNumber) whose
+// default value -1 is a "must be set" sentinel -- every accessor asserts value != -1,
+// and the generic fill skips it (a compound field with no string setter). Set the
+// sequence number(s) to a valid value; their chunkLength has a .msg default.
+static void fill80211Seq(Chunk *c)
+{
+    using namespace inet::ieee80211;
+    if (auto p = dynamic_cast<Ieee80211DataOrMgmtHeader *>(c)) p->setSequenceNumber(SequenceNumberCyclic(0));
+    // the frame-control 'order' bit makes the mgmt serializer emit an extra 4-byte HT
+    // Control field (see Ieee80211MacHeaderSerializer), breaking these frames' fixed .msg
+    // chunkLength; it is unused here, so the generic bool fill must not leave it set.
+    if (auto p = dynamic_cast<Ieee80211MgmtHeader *>(c)) p->setOrder(false);
+    // the action frames' category (3 = Block Ack) and blockAckAction are the
+    // serializer's discriminators, but editable, so the generic fill clobbers them;
+    // restore them (0 = ADDBA req, 1 = ADDBA resp, 2 = DELBA).
+    if (auto p = dynamic_cast<Ieee80211AddbaRequest *>(c)) {
+        p->setCategory(3); p->setBlockAckAction(0); p->setStartingSequenceNumber(SequenceNumberCyclic(0));
+    }
+    else if (auto p = dynamic_cast<Ieee80211AddbaResponse *>(c)) { p->setCategory(3); p->setBlockAckAction(1); }
+    else if (auto p = dynamic_cast<Ieee80211Delba *>(c)) { p->setCategory(3); p->setBlockAckAction(2); }
+    // multiTid/compressedBitmap are pinned per subclass in the .msg but stay editable, so
+    // the generic bool fill flips them into a reserved/invalid combination (SIGSEGV or
+    // "reserved" throw); restore the subclass's fixed pair.
+    if (auto p = dynamic_cast<Ieee80211BasicBlockAckReq *>(c)) {
+        p->setMultiTid(false); p->setCompressedBitmap(false); p->setStartingSequenceNumber(SequenceNumberCyclic(0));
+    }
+    if (auto p = dynamic_cast<Ieee80211CompressedBlockAckReq *>(c)) {
+        p->setMultiTid(false); p->setCompressedBitmap(true); p->setStartingSequenceNumber(SequenceNumberCyclic(0));
+    }
+}
+
+// 802.11 BlockAck (response) frames. Besides the SequenceNumberCyclic starting
+// sequence, the serializer walks the blockAckBitmap: the Basic variant reads 2
+// bytes from each of 64 BitVector elements, the Compressed variant 8 bytes from a
+// single one -- all default-empty, so getBytes()[k] would read out of bounds. Fill
+// the bitmaps to the wire width and zero the 9-bit reserved field so it does not
+// overflow. Basic's chunkLength is its LENGTH_BASIC_BLOCKACK-B(4) .msg default;
+// Compressed has none (".msg chunkLength TODO"), so give it the wire size:
+// header 16 + BA control/tid 2 + starting sequence 2 + bitmap 8 = 28 B.
+static void fillBlockAck(Chunk *c)
+{
+    using namespace inet::ieee80211;
+    if (auto p = dynamic_cast<Ieee80211BasicBlockAck *>(c)) {
+        p->setMultiTid(false); p->setCompressedBitmap(false); // .msg-pinned pair the bool fill clobbered
+        p->setReserved(0);
+        p->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        for (int i = 0; i < 64; ++i)
+            p->setBlockAckBitmap(i, BitVector(std::vector<uint8_t>(2, 0)));
+    }
+    else if (auto p = dynamic_cast<Ieee80211CompressedBlockAck *>(c)) {
+        p->setMultiTid(false); p->setCompressedBitmap(true); // .msg-pinned pair the bool fill clobbered
+        p->setReserved(0);
+        p->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        p->setBlockAckBitmap(BitVector(std::vector<uint8_t>(8, 0)));
+        setChunkLength(c, B(28));
+    }
+}
+
+// OSPFv2/OSPFv3 filler. The serializer dispatches on the OspfPacketType `type` and,
+// on the wire, writes the stored packetLengthField and derives the array element
+// count from it on deserialize -- so a correct round trip needs packetLengthField ==
+// the actual serialized length. `type` has no descriptor string setter (it is not in
+// the generated setFieldValueAsString), so set it through the typed setter. The
+// generic fill leaves packetLengthField at a garbage value (the serialize loops over
+// the empty arrays, so the natural body length is just the fixed header for the
+// chosen type). Zero the length field first so measure's oversized probe serialize
+// does not overflow the uint16 header length, measure the natural body length, then
+// write that byte count back into packetLengthField so deserialize computes zero
+// entries.
+static void fillOspf(Chunk *c, ospf::OspfPacketType type)
+{
+    auto pkt = check_and_cast<ospf::OspfPacketBase *>(c);
+    pkt->setType(type);
+    // OSPFv2 carries a fixed 8-byte authentication field in the header; fill its content.
+    if (auto v2 = dynamic_cast<ospfv2::Ospfv2Packet *>(c))
+        for (int i = 0; i < 8; i++)
+            v2->setAuthentication(i, (char)(0x41 + i));
+    // options / ddOptions are fixed bit-flag structs embedded in the header (no length
+    // change). The serializer writes and reads back every bit, so setting one meaningful
+    // bit round-trips and fills the compound.
+    if (auto h = dynamic_cast<ospfv2::Ospfv2HelloPacket *>(c))
+        h->getOptionsForUpdate().E_ExternalRoutingCapability = true;
+    if (auto dd = dynamic_cast<ospfv2::Ospfv2DatabaseDescriptionPacket *>(c)) {
+        dd->getOptionsForUpdate().E_ExternalRoutingCapability = true;
+        dd->getDdOptionsForUpdate().I_Init = true;
+    }
+    if (auto h = dynamic_cast<ospfv3::Ospfv3HelloPacket *>(c))
+        h->getOptionsForUpdate().dcBit = true;
+    if (auto dd = dynamic_cast<ospfv3::Ospfv3DatabaseDescriptionPacket *>(c)) {
+        dd->getOptionsForUpdate().dcBit = true;
+        dd->getDdOptionsForUpdate().iBit = true;
+    }
+    // Hello packets list neighbors (a variable-length array); add one before measuring.
+    if (auto h = dynamic_cast<ospfv2::Ospfv2HelloPacket *>(c)) {
+        h->setNeighborArraySize(1);
+        h->setNeighbor(0, Ipv4Address("10.0.0.1"));
+    }
+    // DD and LinkStateAck packets list LSA headers; LinkStateRequest lists requests. Give
+    // each one entry (a valid lsType and COMPUTED checksum) before measuring the length.
+    auto makeV2Header = []() {
+        ospfv2::Ospfv2LsaHeader h;
+        h.setLsAge(1);
+        h.setLsType(ospfv2::ROUTERLSA_TYPE);
+        h.setLinkStateID(Ipv4Address("1.1.1.1"));
+        h.setAdvertisingRouter(Ipv4Address("2.2.2.2"));
+        h.setLsSequenceNumber(0x80000001);
+        h.setLsChecksumMode(CHECKSUM_COMPUTED);
+        h.setLsaLength(20);
+        return h;
+    };
+    if (auto dd = dynamic_cast<ospfv2::Ospfv2DatabaseDescriptionPacket *>(c)) {
+        dd->setLsaHeadersArraySize(1); dd->setLsaHeaders(0, makeV2Header());
+    }
+    if (auto ack = dynamic_cast<ospfv2::Ospfv2LinkStateAcknowledgementPacket *>(c)) {
+        ack->setLsaHeadersArraySize(1); ack->setLsaHeaders(0, makeV2Header());
+    }
+    if (auto lsr = dynamic_cast<ospfv2::Ospfv2LinkStateRequestPacket *>(c)) {
+        ospfv2::Ospfv2LsaRequest r;
+        r.lsType = ospfv2::ROUTERLSA_TYPE;
+        r.linkStateID = Ipv4Address("1.1.1.1");
+        r.advertisingRouter = Ipv4Address("2.2.2.2");
+        lsr->setRequestsArraySize(1); lsr->setRequests(0, r);
+    }
+    // OSPFv3 equivalents.
+    auto makeV3Header = []() {
+        ospfv3::Ospfv3LsaHeader h;
+        h.setLsaAge(1);
+        h.setLsaType(1);
+        h.setLinkStateID(Ipv4Address("1.1.1.1"));
+        h.setAdvertisingRouter(Ipv4Address("2.2.2.2"));
+        h.setLsaSequenceNumber(0x80000001);
+        h.setLsChecksumMode(CHECKSUM_COMPUTED);
+        h.setLsaLength(20);
+        return h;
+    };
+    if (auto dd = dynamic_cast<ospfv3::Ospfv3DatabaseDescriptionPacket *>(c)) {
+        dd->setLsaHeadersArraySize(1); dd->setLsaHeaders(0, makeV3Header());
+    }
+    if (auto ack = dynamic_cast<ospfv3::Ospfv3LinkStateAcknowledgementPacket *>(c)) {
+        ack->setLsaHeadersArraySize(1); ack->setLsaHeaders(0, makeV3Header());
+    }
+    if (auto lsr = dynamic_cast<ospfv3::Ospfv3LinkStateRequestPacket *>(c)) {
+        ospfv3::Ospfv3LsRequest r;
+        r.lsaType = 1;
+        r.lsaID = Ipv4Address("1.1.1.1");
+        r.advertisingRouter = Ipv4Address("2.2.2.2");
+        lsr->setRequestsArraySize(1); lsr->setRequests(0, r);
+    }
+    // OSPFv3 LinkStateUpdate carries a single ordered list of polymorphic LSAs (owned
+    // pointers); add one empty-body LSA of each type (lsaType = function code, COMPUTED
+    // checksum, lsaLength = 20-byte header + body) and set lsaCount to the total. Body sizes:
+    // Router/Network 4, InterAreaPrefix 8 (with a zero-length prefix), Link 24 (16-byte
+    // link-local addr), IntraAreaPrefix 12.
+    if (auto lsu = dynamic_cast<ospfv3::Ospfv3LinkStateUpdatePacket *>(c)) {
+        auto mkHdr = [](int fnCode, int len) {
+            ospfv3::Ospfv3LsaHeader h;
+            h.setLsaAge(1); h.setLsaType(fnCode);
+            h.setLinkStateID(Ipv4Address("1.1.1.1")); h.setAdvertisingRouter(Ipv4Address("2.2.2.2"));
+            h.setLsaSequenceNumber(0x80000001); h.setLsChecksumMode(CHECKSUM_COMPUTED); h.setLsaLength(len);
+            return h;
+        };
+        auto *rl = new ospfv3::Ospfv3RouterLsa();           rl->getHeaderForUpdate() = mkHdr(ospfv3::ROUTER_LSA, 24);
+        auto *nl = new ospfv3::Ospfv3NetworkLsa();          nl->getHeaderForUpdate() = mkHdr(ospfv3::NETWORK_LSA, 24);
+        auto *il = new ospfv3::Ospfv3InterAreaPrefixLsa();  il->getHeaderForUpdate() = mkHdr(ospfv3::INTER_AREA_PREFIX_LSA, 28);
+        auto *kl = new ospfv3::Ospfv3LinkLsa();             kl->getHeaderForUpdate() = mkHdr(ospfv3::LINK_LSA, 44); kl->setNumPrefixes(0);
+        auto *pl = new ospfv3::Ospfv3IntraAreaPrefixLsa();  pl->getHeaderForUpdate() = mkHdr(ospfv3::INTRA_AREA_PREFIX_LSA, 32); pl->setNumPrefixes(0);
+        lsu->setLsasArraySize(5);
+        lsu->setLsas(0, rl); lsu->setLsas(1, nl); lsu->setLsas(2, il); lsu->setLsas(3, kl); lsu->setLsas(4, pl);
+        lsu->setLsaCount(5);
+    }
+    // OSPFv2 LinkStateUpdate carries polymorphic LSAs (owned pointers); add one Router LSA
+    // with no links (24-byte LSA = 20 header + 4 body). The serializer dispatches on lsType.
+    if (auto lsu = dynamic_cast<ospfv2::Ospfv2LinkStateUpdatePacket *>(c)) {
+        auto *lsa = new ospfv2::Ospfv2RouterLsa();
+        auto& h = lsa->getHeaderForUpdate();
+        h.setLsType(ospfv2::ROUTERLSA_TYPE);
+        h.setLinkStateID(Ipv4Address("1.1.1.1"));
+        h.setAdvertisingRouter(Ipv4Address("2.2.2.2"));
+        h.setLsSequenceNumber(0x80000001);
+        h.setLsChecksumMode(CHECKSUM_COMPUTED);
+        h.setLsaLength(24);
+        lsa->setNumberOfLinks(0);
+        lsu->setOspfLSAsArraySize(1);
+        lsu->setOspfLSAs(0, lsa);
+    }
+    if (auto h = dynamic_cast<ospfv3::Ospfv3HelloPacket *>(c)) {
+        h->setNeighborIDArraySize(1);
+        h->setNeighborID(0, Ipv4Address("10.0.0.2"));
+    }
+    pkt->setPacketLengthField(0);
+    measureAndSetChunkLength(c);
+    pkt->setPacketLengthField(c->getChunkLength().get<B>());
+}
+
+// B-MAC / X-MAC filler. The serializer dispatches on the enum `type` (a control
+// type -> BMacControlFrame/XMacControlFrame, the data type -> the data frame), and
+// the base is never produced by deserialize, so only the concrete subclasses are
+// round-trip targets. `type` has no descriptor string setter, so set it through the
+// typed setter; the header pads to chunkLength, so any generous byte length works.
+static void fillBMac(Chunk *c, BMacType type, b length)
+{
+    check_and_cast<BMacHeaderBase *>(c)->setType(type);
+    setChunkLength(c, length);
+}
+static void fillXMac(Chunk *c, XMacTypes type, b length)
+{
+    check_and_cast<XMacHeaderBase *>(c)->setType(type);
+    setChunkLength(c, length);
+}
+
+// PHY/shortcut headers that carry a payloadProtocol pointer. The generic fill
+// never sets pointer fields, so payloadProtocol stays null and the serializer's
+// getProtocolNumber(nullptr) dereferences it in its own error path (SIGSEGV for
+// ApskPhyHeader) or, when the length is also unset, throws "offset is out of
+// range". Point it at a protocol registered in the group the serializer looks up
+// (inetPhy for the PHY headers, ethertype for the shortcut MAC header), and give
+// the self-padding headers (which write the length field then pad to chunkLength,
+// so measuring overflows the uint16) an explicit length. ApskPhyHeader's fixed
+// 8-byte header is exactly its B(8) .msg default.
+static void fillPhyPayloadProtocol(Chunk *c)
+{
+    if (auto p = dynamic_cast<ApskPhyHeader *>(c)) { p->setPayloadProtocol(&Protocol::ethernetMac); setChunkLength(c, B(8)); }
+    else if (auto p = dynamic_cast<GenericPhyHeader *>(c)) { p->setPayloadProtocol(&Protocol::ethernetMac); setChunkLength(c, B(4)); }
+    else if (auto p = dynamic_cast<ShortcutPhyHeader *>(c)) { p->setPayloadProtocol(&Protocol::ethernetMac); setChunkLength(c, B(4)); }
+    else if (auto p = dynamic_cast<ShortcutMacHeader *>(c)) { p->setPayloadProtocol(&Protocol::ipv4); setChunkLength(c, B(4)); }
+}
+
+// Ipv4Header: headerLength and totalLengthField are B (unit) fields the generic
+// scalar fill skips, so totalLengthField stays 0 and the serializer asserts
+// headerLength <= totalLengthField. Set the total length to the header length (a
+// header-only chunk) and 8-align the fragment offset. chunkLength keeps its
+// IPv4_MIN_HEADER_LENGTH .msg default.
+static void fillIpv4(Chunk *c)
+{
+    auto h = check_and_cast<Ipv4Header *>(c);
+    h->setTotalLengthField(B(20));
+    h->setFragmentOffset(0);
+    h->setChecksumMode(CHECKSUM_COMPUTED);
+    // the payload protocol pointer serializes as the 1-byte protocolId; the serializer
+    // maps it through getIpProtocolGroup(), so pick a protocol registered in that group.
+    h->setProtocol(&Protocol::udp);
+}
+
+// Ipv4Header with one header option: append it and set headerLength (a whole number of
+// 32-bit words, >= 20 + option bytes; the serializer pads the remainder up to headerLength
+// with End options) and the matching totalLengthField (headerLength <= totalLengthField).
+// PimJoinPrune / PimGraft (a subclass): fill the upstream-neighbor encoded address and add
+// one join/prune group (an IPv4 group, no sources) -- the array the deep fill cannot reach.
+static void fillPimJoinPrune(Chunk *c)
+{
+    auto p = check_and_cast<PimJoinPrune *>(c);
+    p->setVersion(2);
+    p->getUpstreamNeighborAddressForUpdate().unicastAddress = L3Address(Ipv4Address("10.0.0.1"));
+    JoinPruneGroup g;
+    g.getGroupAddressForUpdate().groupAddress = L3Address(Ipv4Address("224.0.0.1"));
+    g.getGroupAddressForUpdate().maskLength = 32;
+    p->setJoinPruneGroupsArraySize(1);
+    p->setJoinPruneGroups(0, g);
+    measureAndSetChunkLength(c);
+}
+
+static void fillIpv4Option(Chunk *c, TlvOptionBase *opt)
+{
+    auto h = check_and_cast<Ipv4Header *>(c);
+    h->setFragmentOffset(0);
+    h->setChecksumMode(CHECKSUM_COMPUTED);
+    h->setProtocol(&Protocol::udp);
+    h->addOption(opt);
+    B len = IPv4_MIN_HEADER_LENGTH + B(opt->getLength());
+    if (len.get<B>() % 4 != 0)
+        len += B(4 - len.get<B>() % 4);
+    h->setHeaderLength(len);
+    h->setTotalLengthField(len); // header-only packet
+    setChunkLength(c, len);
+}
+
+// IPv6 extension-header TLV options: append an option and set chunkLength to the header's
+// rounded size (a 2-byte next-header+len prefix + the options, padded up to a multiple of
+// 8 -- the serializer fills any leftover bytes with Pad1s, which round-trip). tlvOptions is
+// declared on each ext-header subclass, so the concrete type is a template parameter.
+template<typename T>
+static void addIpv6ExtOption(Chunk *c, TlvOptionBase *opt, B optBytes)
+{
+    check_and_cast<T *>(c)->getTlvOptionsForUpdate().appendTlvOption(opt);
+    B len = B(2) + optBytes;
+    if (len.get<B>() % 8 != 0)
+        len += B(8 - len.get<B>() % 8);
+    setChunkLength(c, len);
+}
+static TlvOptionBase *tlvPadN(int n) { auto o = new TlvOptionBase(); o->setType(IPv6TLVOPTION_NOPN); o->setLength(n); return o; }
+static TlvOptionRaw *tlvRaw(int type, int n) { auto o = new TlvOptionRaw(); o->setType(type); o->setBytesArraySize(n); for (int i = 0; i < n; i++) o->setBytes(i, (uint8_t)(0x41 + i)); return o; }
+
+// IPv6 ND options: append one option and grow chunkLength by its fixed on-the-wire size.
+// optionLength is pinned per option subclass (in units of 8 bytes), so the delta is a
+// constant -- grow the length rather than re-measuring. `options` is declared per ND
+// subclass (not on the base), so the concrete type is a template parameter.
+template<typename T>
+static void addNdOption(Chunk *c, Ipv6NdOption *opt, B optBytes)
+{
+    check_and_cast<T *>(c)->getOptionsForUpdate().insertUniqueOption(opt);
+    setChunkLength(c, c->getChunkLength() + optBytes);
+}
+static Ipv6NdSourceLinkLayerAddress *ndSrcLL() { auto o = new Ipv6NdSourceLinkLayerAddress(); o->setLinkLayerAddress(MacAddress("0A:AA:BB:CC:DD:EE")); return o; }
+static Ipv6NdTargetLinkLayerAddress *ndTgtLL() { auto o = new Ipv6NdTargetLinkLayerAddress(); o->setLinkLayerAddress(MacAddress("0A:11:22:33:44:55")); return o; }
+static Ipv6NdMtu *ndMtu() { auto o = new Ipv6NdMtu(); o->setMtu(1500); return o; }
+static Ipv6NdPrefixInformation *ndPrefix() {
+    auto o = new Ipv6NdPrefixInformation();
+    o->setPrefixLength(64); o->setPrefix(Ipv6Address("2001:db8::"));
+    o->setOnlinkFlag(true); o->setAutoAddressConfFlag(true);
+    o->setValidLifetime(3600); o->setPreferredLifetime(1800);
+    return o;
+}
+
+// ChecksumHeader: chunkLength is "set programmatically" (no .msg default, so the
+// unset length throws "offset is out of range"), and the mode must be COMPUTED or
+// DISABLED. Use a 64-bit slot so the full uint64 checksum round-trips without
+// truncation (narrower slots would clip the generic fill's checksum value).
+static void fillChecksum(Chunk *c)
+{
+    check_and_cast<ChecksumHeader *>(c)->setChecksumMode(CHECKSUM_COMPUTED);
+    setChunkLength(c, B(8));
+}
+
+// TcpHeader with one header option: append it and set the header/chunk length to the
+// total, aligned up to a 32-bit word (the serializer pads the option bytes to a 4-byte
+// boundary; the padding zeros deserialize as End options that re-serialize to the same
+// bytes, so the round trip holds). commonSetup already set the checksum mode; ownership
+// of the option passes to the header (headerOption is @owned).
+static void fillTcpOption(Chunk *c, tcp::TcpOption *opt)
+{
+    auto h = check_and_cast<tcp::TcpHeader *>(c);
+    h->appendHeaderOption(opt);
+    // The serializer asserts headerLength == 20 + sum(option lengths) and requires that to
+    // be a whole number of 32-bit words, so the options must total a multiple of 4. Pad with
+    // explicit 1-byte NOP options (not the serializer's zero padding, which the assert rejects).
+    int optLen = opt->getLength();
+    while (optLen % 4 != 0) {
+        h->appendHeaderOption(new tcp::TcpOptionNop());
+        optLen += 1;
+    }
+    B len = tcp::TCP_MIN_HEADER_LENGTH + B(optLen);
+    h->setHeaderLength(len);
+    setChunkLength(c, len);
+}
+
+// Raw/opaque data chunks (the packet framework's own representations): the generic
+// scalar fill leaves them empty (no bytes / no length -- their payload is an array,
+// which the generic fill never touches), so serialize() has nothing to emit. Give
+// them content so they round-trip like any other chunk.
+static void fillRawData(Chunk *c)
+{
+    if (auto p = dynamic_cast<BytesChunk *>(c)) p->setBytes({0x11, 0x22, 0x33, 0x44});
+    // 8 bits (byte-aligned): a non-byte-multiple BitsChunk cannot survive the
+    // serialize->bytes->deserialize round-trip (the byte stream pads to 8 bits, so
+    // deserialize reads back 8, not 4).
+    else if (auto p = dynamic_cast<BitsChunk *>(c)) p->setBits({false, true, true, false, true, false, false, true});
+    else if (auto p = dynamic_cast<ByteCountChunk *>(c)) p->setLength(B(4));
+    // data is left at its default false: BitCountChunk's serialized form is `length`
+    // copies of `data`, but the deserializer only *verifies* them against the default
+    // getData() and never recovers a set value, so a non-default data would not round-trip.
+    // That is why inet::BitCountChunk::data stays a permanent entry in knownUnfilled.
+    else if (auto p = dynamic_cast<BitCountChunk *>(c)) p->setLength(b(16));
+}
+
+// Per-type recipes. Each recipe's fill is usually built with SimpleFiller(fields,
+// length) -- a data-driven filler that sets the fields via the descriptor and the
+// chunkLength via the helper (length b(-1) => measure, else explicit). A special
+// chunk can use any fill lambda (see Rerr). A type
+// may appear several times (variants). A truly special chunk could use any lambda
+// instead of SimpleFiller.
+static const std::vector<ChunkRecipe> chunkRecipes = {
+    // -- raw/opaque data chunks (packet-framework representations): give them content
+    // so they round-trip (see fillRawData). Their payload is an array (bytes/bits),
+    // so the generic scalar fill leaves them empty -- each needs a recipe.
+    {"inet::BytesChunk",            "", [](Chunk *c){ fillRawData(c); }},
+    {"inet::BitsChunk",             "", [](Chunk *c){ fillRawData(c); }},
+    {"inet::ByteCountChunk",        "", [](Chunk *c){ fillRawData(c); }},
+    {"inet::BitCountChunk",         "", [](Chunk *c){ fillRawData(c); }},
+
+    // -- self-sizing / padding headers: they store their own length and pad up to
+    // it, so any length above their fixed part round-trips (the serializer reports
+    // no natural length). Give an explicit one.
+    {"inet::AckingMacHeader",       "", SimpleFiller({}, B(64))},
+    {"inet::ApplicationPacket",     "", SimpleFiller({}, B(64))},
+    {"inet::BMacControlFrame",      "", [](Chunk *c){ fillBMac(c, BMAC_ACK, B(64)); }},
+    {"inet::BMacDataFrameHeader",   "", [](Chunk *c){ fillBMac(c, BMAC_DATA, B(64)); }},
+    {"inet::EtherAppReq",           "", SimpleFiller({}, B(64))},
+    {"inet::EtherAppResp",          "", SimpleFiller({}, B(64))},
+    {"inet::GenericAppMsg",         "", SimpleFiller({}, B(64))},
+#ifdef INET_WITH_VOIPSTREAM
+    // VoipStream: the serialized length is the headerLength field (the serializer writes
+    // the fixed fields, then pads with '?' up to headerLength). Pin a type and a
+    // headerLength >= the fixed part, with a matching chunkLength. (Guarded by the
+    // feature macro; the %file makefrag below sets -DHAVE_FFMPEG so the header compiles.)
+    {"inet::VoipStreamPacket",      "", [](Chunk *c){
+            auto p = check_and_cast<VoipStreamPacket *>(c);
+            p->setType(SILENCE);          // non-VOICE keeps the fixed part at 26 B
+            p->setHeaderLength(30);       // 26 B fixed + 4 B of '?' padding
+            p->setChunkLength(B(30)); }},
+#endif
+    {"inet::XMacControlFrame",      "", [](Chunk *c){ fillXMac(c, XMAC_ACK, B(64)); }},
+    {"inet::XMacDataFrameHeader",   "", [](Chunk *c){ fillXMac(c, XMAC_DATA, B(64)); }},
+
+    // -- PHY / shortcut headers carrying a payloadProtocol pointer (see fillPhyPayloadProtocol).
+    {"inet::ApskPhyHeader",         "", [](Chunk *c){ fillPhyPayloadProtocol(c); }},
+    {"inet::GenericPhyHeader",      "", [](Chunk *c){ fillPhyPayloadProtocol(c); }},
+    {"inet::ShortcutMacHeader",     "", [](Chunk *c){ fillPhyPayloadProtocol(c); }},
+    {"inet::ShortcutPhyHeader",     "", [](Chunk *c){ fillPhyPayloadProtocol(c); }},
+    {"inet::Ipv4Header",            "", [](Chunk *c){ fillIpv4(c); }},
+    // Ipv4Header header-option variants: one case per option type so each option's
+    // serializer path is exercised (RFC 791). Length handling is in fillIpv4Option.
+    {"inet::Ipv4Header", "streamid",    [](Chunk *c){ auto o = new Ipv4OptionStreamId(); o->setStreamId(0x1234); fillIpv4Option(c, o); }},
+    {"inet::Ipv4Header", "routeralert", [](Chunk *c){ auto o = new Ipv4OptionRouterAlert(); o->setRouterAlert(0); fillIpv4Option(c, o); }},
+    {"inet::Ipv4Header", "timestamp",   [](Chunk *c){ auto o = new Ipv4OptionTimestamp(); o->setFlag(IP_TIMESTAMP_TIMESTAMP_ONLY); o->setOverflow(0); o->setNextIdx(0); o->setLength(4); fillIpv4Option(c, o); }},
+    {"inet::Ipv4Header", "recordroute", [](Chunk *c){ auto o = new Ipv4OptionRecordRoute(); o->setType(IPOPTION_RECORD_ROUTE); o->setNextAddressIdx(0); o->setRecordAddressArraySize(1); o->setRecordAddress(0, Ipv4Address("10.0.0.1")); o->setLength(3 + 4 * 1); fillIpv4Option(c, o); }},
+    {"inet::Ipv4Header", "raw",         [](Chunk *c){ auto o = new TlvOptionRaw(); o->setType(30); o->setBytesArraySize(2); o->setBytes(0, 0xAB); o->setBytes(1, 0xCD); o->setLength(2 + 2); fillIpv4Option(c, o); }},
+    // Ipv6Header's protocol pointer serializes as the 1-byte protocolId (nextHeader),
+    // mapped through getIpProtocolGroup() -- same as IPv4; pick a protocol from that group.
+    {"inet::Ipv6Header",            "", [](Chunk *c){ check_and_cast<Ipv6Header *>(c)->setProtocol(&Protocol::udp); }},
+    {"inet::ChecksumHeader",        "", [](Chunk *c){ fillChecksum(c); }},
+    // UdpHeader: commonSetup sets the checksum mode and the .msg default fixes the 8-byte
+    // length; set totalLengthField (header + payload) to the header-only length so it holds
+    // a real value rather than the -1 "unset" sentinel.
+    {"inet::UdpHeader", "", [](Chunk *c){ check_and_cast<UdpHeader *>(c)->setTotalLengthField(B(8)); }},
+    // MLDv2 report: add one multicast-address record (commonSetup set the checksum mode).
+    {"inet::Mldv2Report", "", [](Chunk *c){ auto p = check_and_cast<Mldv2Report *>(c); Mldv2MulticastAddressRecord r; r.setRecordType(MLD_MODE_IS_INCLUDE); r.setGroupAddress(Ipv6Address("ff02::1")); p->setMulticastAddressRecordArraySize(1); p->setMulticastAddressRecord(0, r); measureAndSetChunkLength(c); }},
+    // MLDv2 query sourceList: numberOfSources is derived from the vector size, so only the
+    // length grows (16 bytes per IPv6 source). Like Igmpv3Query::sourceList, the std::vector
+    // is opaque to the coverage detector, so it stays in knownUnfilled despite being carried.
+    {"inet::Mldv2Query", "", [](Chunk *c){
+        auto p = check_and_cast<Mldv2Query *>(c);
+        p->getSourceListForUpdate().push_back(Ipv6Address("ff02::1"));
+        p->getSourceListForUpdate().push_back(Ipv6Address("ff02::2"));
+        setChunkLength(c, B(28) + B(2 * 16));
+    }},
+    // IPv6 routing header (type 0): one address; chunkLength = 8 + 16 * addressCount.
+    {"inet::Ipv6RoutingHeader", "", [](Chunk *c){ auto p = check_and_cast<Ipv6RoutingHeader *>(c); p->setRoutingType(0); p->setSegmentsLeft(1); p->setAddressArraySize(1); p->setAddress(0, Ipv6Address("2001:db8::1")); setChunkLength(c, B(8 + 16)); }},
+    // TcpHeader header-option variants: one case per option type so each option's
+    // serializer path (RFC 793 / 1323 / 2018) is exercised; "" keeps the plain,
+    // no-option 20-byte header. Length handling is in fillTcpOption.
+    {"inet::tcp::TcpHeader", "",               [](Chunk *){ /* plain header, no options */ }},
+    {"inet::tcp::TcpHeader", "mss",            [](Chunk *c){ auto o = new tcp::TcpOptionMaxSegmentSize(); o->setMaxSegmentSize(1460); fillTcpOption(c, o); }},
+    {"inet::tcp::TcpHeader", "wscale",         [](Chunk *c){ auto o = new tcp::TcpOptionWindowScale(); o->setWindowScale(7); fillTcpOption(c, o); }},
+    {"inet::tcp::TcpHeader", "sack-permitted", [](Chunk *c){ fillTcpOption(c, new tcp::TcpOptionSackPermitted()); }},
+    {"inet::tcp::TcpHeader", "timestamp",      [](Chunk *c){ auto o = new tcp::TcpOptionTimestamp(); o->setSenderTimestamp(0x11223344); o->setEchoedTimestamp(0x55667788); fillTcpOption(c, o); }},
+    {"inet::tcp::TcpHeader", "sack",           [](Chunk *c){ auto o = new tcp::TcpOptionSack(); o->setSackItemArraySize(1); tcp::SackItem si; si.setStart(1000); si.setEnd(2000); o->setSackItem(0, si); o->setLength(2 + 1 * 8); fillTcpOption(c, o); }},
+    {"inet::tcp::TcpHeader", "unknown",        [](Chunk *c){ auto o = new tcp::TcpOptionUnknown(); o->setKind(static_cast<tcp::TcpOptionNumbers>(28)); o->setBytesArraySize(2); o->setBytes(0, 0xAB); o->setBytes(1, 0xCD); o->setLength(2 + 2); fillTcpOption(c, o); }},
+    // SCTP with no chunks is just the 12-byte common header; its serializer asserts
+    // writtenbytes == chunkLength (and recomputes the crc32c both times).
+    // SCTP header with one chunk: a COOKIE_ACK (type 11), the simplest 4-byte chunk. The
+    // serializer computes the crc32c; total = 12-byte common header + 4.
+    {"inet::sctp::SctpHeader", "", [](Chunk *c){ auto p = check_and_cast<sctp::SctpHeader *>(c); auto *ch = new sctp::SctpCookieAckChunk(); ch->setSctpChunkType(11); ch->setLength(4); ch->setByteLength(4); p->appendSctpChunks(ch); setChunkLength(c, B(12 + 4)); }},
+    // DHCP with default options: 236-byte fixed part + 4-byte magic cookie + 1-byte
+    // End option; the serializer asserts chunkLength == that computed length.
+    // op is a non-editable discriminator (BOOTREQUEST/BOOTREPLY); 0 is invalid, so set it typed.
+    // DHCP options: the base message (241 bytes) carries only the magic cookie and END; set
+    // three IPv4-address options (each serialized as tag+len+4 bytes = 6 bytes, none written
+    // by default since they start unspecified) so the options compound is covered. Grow the
+    // length by the fixed per-option delta.
+    {"inet::DhcpMessage",           "", [](Chunk *c){
+        auto p = check_and_cast<DhcpMessage *>(c);
+        p->setOp(BOOTREQUEST);
+        auto& o = p->getOptionsForUpdate();
+        o.setRequestedIp(Ipv4Address("192.168.1.100"));
+        o.setSubnetMask(Ipv4Address("255.255.255.0"));
+        o.setServerIdentifier(Ipv4Address("192.168.1.1"));
+        setChunkLength(c, B(241 + 3 * 6));
+    }},
+
+    // -- headers whose natural length the serializer reports: measure it (SimpleFiller() default).
+    {"inet::DsdvHello",                                    "", SimpleFiller()},
+    // headerLengthField must equal the real header length (the serializer pads to chunkLength
+    // but deserialize reads the trailer count from this field); pin it to the fixed 14 B.
+    {"inet::CsmaCaMacAckHeader",                           "", SimpleFiller({{"headerLengthField", "14"}}, B(14))},
+    {"inet::Ieee802154MacHeader",                          "", SimpleFiller()},
+    {"inet::Igmpv3Report", "", [](Chunk *c){ auto p = check_and_cast<Igmpv3Report *>(c); GroupRecord r; r.setRecordType(MODE_IS_INCLUDE); r.setGroupAddress(Ipv4Address("224.0.0.1")); p->setGroupRecordArraySize(1); p->setGroupRecord(0, r); measureAndSetChunkLength(c); }},
+    {"inet::RipPacket", "", [](Chunk *c){ auto p = check_and_cast<RipPacket *>(c); p->setCommand(RIP_REQUEST); RipEntry e; e.addressFamilyId = RIP_AF_INET; e.address = L3Address(Ipv4Address("10.1.0.0")); e.nextHop = L3Address(Ipv4Address("10.1.0.1")); e.metric = 1; p->setEntryArraySize(1); p->setEntry(0, e); measureAndSetChunkLength(c); }},
+    {"inet::ArpPacket",                                    "", SimpleFiller({{"opcode", "ARP_REQUEST"}})}, // 0 opcode is invalid
+    {"inet::Ieee8022LlcHeader",                            "", SimpleFiller()},
+    // the SNAP header is recognized on the wire only by dsap=ssap=0xAA & control=0x03
+    // (else it deserializes as a plain LLC header); pin those, measure the rest.
+    {"inet::Ieee8022LlcSnapHeader",                        "", SimpleFiller({{"dsap", "170"}, {"ssap", "170"}, {"control", "3"}})},
+    {"inet::physicallayer::Ieee80211DsssPhyHeader",        "", SimpleFiller()},
+    {"inet::physicallayer::Ieee80211HrDsssPhyHeader",      "", SimpleFiller()},
+
+    // -- headers with a domain-constrained field the generic fill violates: the
+    // serializer asserts/validates it, so pin a valid value and measure the rest.
+    // BGP OPEN with one raw optional parameter (type 1, not the capabilities type 2):
+    // paramType(1) + paramLen(1) + value(2) = 4; totalLength = 19 header + 10 open + 4.
+    {"inet::bgp::BgpOpenMessage", "", [](Chunk *c){ auto p = check_and_cast<bgp::BgpOpenMessage *>(c); p->setVersion(4); auto *op = new bgp::BgpOptionalParameterRaw(); op->setParameterType(1); op->setValueArraySize(2); op->setValue(0, 0xAB); op->setValue(1, 0xCD); op->setParameterValueLength(2); p->setOptionalParameterArraySize(1); p->setOptionalParameter(0, op); p->setOptionalParametersLength(4); p->setTotalLength(19 + 10 + 4); setChunkLength(c, B(19 + 10 + 4)); }},
+    // BGP UPDATE with one withdrawn route, one ORIGIN path attribute and one NLRI (each a
+    // /24 = 1 length byte + 3 prefix bytes; the path attribute is 4 bytes). Length fields:
+    // withdrawn 4, path-attributes 4; totalLength = 19 + 2 + 4 + 2 + 4 + 4 = 35.
+    {"inet::bgp::BgpUpdateMessage", "", [](Chunk *c){ auto p = check_and_cast<bgp::BgpUpdateMessage *>(c);
+        bgp::BgpUpdateWithdrawnRoutes wr; wr.length = 24; wr.prefix = Ipv4Address("10.1.1.0"); p->setWithdrawnRoutesArraySize(1); p->setWithdrawnRoutes(0, wr); p->setWithDrawnRoutesLength(4);
+        auto *pa = new bgp::BgpUpdatePathAttributesOrigin(); pa->setValue(bgp::IGP); pa->setLength(1); p->appendPathAttributes(pa); p->setTotalPathAttributeLength(4);
+        bgp::BgpUpdateNlri nlri; nlri.length = 24; nlri.prefix = Ipv4Address("10.2.2.0"); p->setNlriArraySize(1); p->setNlri(0, nlri);
+        p->setTotalLength(35); setChunkLength(c, B(35)); }},
+    // IGMP is not a FieldsChunkSerializer, so it reports no natural length to measure
+    // -> give the empty-source-list query its fixed 12-byte length. QRV is 3-bit (<= 7).
+    // add two sources so the source-list serialization path is exercised; numberOfSources is
+    // derived from the vector size by the serializer, so only the length grows (4 bytes per
+    // IPv4 source). NOTE: Ipv4AddressVector is a std::vector with no cClassDescriptor, so the
+    // descriptor-based coverage detector cannot observe its contents -- sourceList therefore
+    // stays in knownUnfilled even though the round-trip really does carry the sources.
+    {"inet::Igmpv3Query",         "", [](Chunk *c){
+        auto p = check_and_cast<Igmpv3Query *>(c);
+        p->setRobustnessVariable(2); p->setResv(0);
+        p->getSourceListForUpdate().push_back(Ipv4Address("10.0.0.1"));
+        p->getSourceListForUpdate().push_back(Ipv4Address("10.0.0.2"));
+        setChunkLength(c, B(12) + B(2 * 4));
+    }},
+    // IPv6 fragment extension header is a fixed 8 bytes; offset must be a multiple of
+    // 8, and the 2-bit reserved field must not overflow.
+    {"inet::Ipv6FragmentHeader",  "", SimpleFiller({{"fragmentOffset", "16"}, {"reserved", "0"}}, B(8))},
+    {"inet::EthernetPauseFrame",  "", SimpleFiller({{"opCode", "1"}})},             // ETHERNET_CONTROL_PAUSE opcode
+    // supportedRates is a fixed rate[8] array of which only numRates are serialized; set a
+    // couple of rates (multiples of 0.5 Mbit/s so they round-trip through the 1-byte
+    // encoding). This frame's length is measured (its serialize writes a different field set).
+    {"inet::ieee80211::Ieee80211ProbeRequestFrame",        "", [](Chunk *c){
+        auto& sr = check_and_cast<ieee80211::Ieee80211ProbeRequestFrame *>(c)->getSupportedRatesForUpdate();
+        sr.numRates = 2; sr.rate[0] = 6.0; sr.rate[1] = 54.0;
+        measureAndSetChunkLength(c);
+    }},
+    // An action frame of an unmodelled category: the whole action body is stored verbatim
+    // in actionBody (a variable byte array the generic fill leaves empty), and the sequence
+    // number is a SequenceNumberCyclic whose default the header serializer cannot emit; set
+    // both, and measure the length (fixed header + actionBody). The first body byte is the
+    // Category -- keep it != 3 so it is not decoded as a Block Ack action.
+    {"inet::ieee80211::Ieee80211ActionFrameOther",         "", [](Chunk *c){
+        auto p = check_and_cast<ieee80211::Ieee80211ActionFrameOther *>(c);
+        p->setSequenceNumber(ieee80211::SequenceNumberCyclic(0));
+        p->setActionBodyArraySize(3);
+        p->setActionBody(0, 0x7f); p->setActionBody(1, 0x01); p->setActionBody(2, 0x02);
+        measureAndSetChunkLength(c);
+    }},
+    // The remaining management frames round-trip the same way: pin supportedRates to
+    // round-trippable rates (as above) and measure the length. Beacon/ProbeResponse also
+    // need a beaconInterval that survives the lossy 1/1024 s wire encoding (a multiple of
+    // 1024 us). The other fixed fields (capability, timestamp, statusCode, aid, currentAP,
+    // SSID) come from the generic fill; the trailing-IE array stays empty (knownUnfilled).
+    {"inet::ieee80211::Ieee80211BeaconFrame",              "", [](Chunk *c){
+        auto p = check_and_cast<ieee80211::Ieee80211BeaconFrame *>(c);
+        p->setBeaconInterval(SimTime(102400, SIMTIME_US)); // 100 * 1024 us
+        auto& sr = p->getSupportedRatesForUpdate();
+        sr.numRates = 2; sr.rate[0] = 6.0; sr.rate[1] = 54.0;
+        measureAndSetChunkLength(c);
+    }},
+    {"inet::ieee80211::Ieee80211ProbeResponseFrame",       "", [](Chunk *c){
+        auto p = check_and_cast<ieee80211::Ieee80211ProbeResponseFrame *>(c);
+        p->setBeaconInterval(SimTime(102400, SIMTIME_US)); // 100 * 1024 us
+        auto& sr = p->getSupportedRatesForUpdate();
+        sr.numRates = 2; sr.rate[0] = 6.0; sr.rate[1] = 54.0;
+        measureAndSetChunkLength(c);
+    }},
+    {"inet::ieee80211::Ieee80211AssociationRequestFrame",  "", [](Chunk *c){
+        auto& sr = check_and_cast<ieee80211::Ieee80211AssociationRequestFrame *>(c)->getSupportedRatesForUpdate();
+        sr.numRates = 2; sr.rate[0] = 6.0; sr.rate[1] = 54.0;
+        measureAndSetChunkLength(c);
+    }},
+    {"inet::ieee80211::Ieee80211AssociationResponseFrame", "", [](Chunk *c){
+        auto& sr = check_and_cast<ieee80211::Ieee80211AssociationResponseFrame *>(c)->getSupportedRatesForUpdate();
+        sr.numRates = 2; sr.rate[0] = 6.0; sr.rate[1] = 54.0;
+        measureAndSetChunkLength(c);
+    }},
+    {"inet::ieee80211::Ieee80211ReassociationRequestFrame", "", [](Chunk *c){
+        auto& sr = check_and_cast<ieee80211::Ieee80211ReassociationRequestFrame *>(c)->getSupportedRatesForUpdate();
+        sr.numRates = 2; sr.rate[0] = 6.0; sr.rate[1] = 54.0;
+        measureAndSetChunkLength(c);
+    }},
+    {"inet::ieee80211::Ieee80211ReassociationResponseFrame", "", [](Chunk *c){
+        auto& sr = check_and_cast<ieee80211::Ieee80211ReassociationResponseFrame *>(c)->getSupportedRatesForUpdate();
+        sr.numRates = 2; sr.rate[0] = 6.0; sr.rate[1] = 54.0;
+        measureAndSetChunkLength(c);
+    }},
+    {"inet::physicallayer::Ieee80211HtPhyHeader",          "", SimpleFiller()},
+    {"inet::physicallayer::Ieee80211IrPhyHeader",          "", SimpleFiller()},
+    {"inet::physicallayer::Ieee80211VhtPhyHeader",         "", SimpleFiller()},
+
+    // -- MIPv6 mobility headers: the serializer dispatches on mobilityHeaderType
+    // (set in code, not the .msg), then pads to chunkLength (a multiple of 8 bytes).
+    // Set the type and an explicit length.
+    // fixed-length subtypes: the serializer asserts an exact chunkLength (no padding)
+    {"inet::BindingRefreshRequest",  "", [](Chunk *c){ setMhType(c, BINDING_REFRESH_REQUEST, B(8)); }},
+    {"inet::HomeTestInit",           "", [](Chunk *c){ setMhType(c, HOME_TEST_INIT, B(16)); }},
+    {"inet::CareOfTestInit",         "", [](Chunk *c){ setMhType(c, CARE_OF_TEST_INIT, B(16)); }},
+    {"inet::HomeTest",               "", [](Chunk *c){ setMhType(c, HOME_TEST, B(24)); }},
+    {"inet::CareOfTest",             "", [](Chunk *c){ setMhType(c, CARE_OF_TEST, B(24)); }},
+    {"inet::BindingError",           "", [](Chunk *c){ setMhType(c, BINDING_ERROR, B(24)); }},
+    // padded subtypes: any multiple-of-8 length above the fixed part round-trips
+    {"inet::BindingUpdate",          "", [](Chunk *c){ setMhType(c, BINDING_UPDATE, B(64)); }},
+    {"inet::BindingAcknowledgement", "", [](Chunk *c){ setMhType(c, BINDING_ACKNOWLEDGEMENT, B(64)); }},
+
+    // -- PIM: the type is pinned in the .msg and the serializer writes size-prefixed
+    // arrays (empty by default), so the natural length is reported: measure it. The
+    // 4-bit version field is not @bit-annotated, so the generic fill overflows it
+    // (writeUint4 asserts); pin it to the real PIM version (2).
+    {"inet::PimHello",        "", [](Chunk *c){ auto p = check_and_cast<PimHello *>(c); p->setVersion(2); auto *o = new HoldtimeOption(); o->setHoldTime(120); p->setOptionsArraySize(1); p->setOptions(0, o); measureAndSetChunkLength(c); }},
+    // recurse into the EncodedUnicastAddress / EncodedGroupAddress sub-structs these
+    // carry (the flat fill leaves them zero); the version stays pinned, length measured.
+    {"inet::PimJoinPrune",    "", [](Chunk *c){ fillPimJoinPrune(c); }},
+    {"inet::PimAssert",       "", RecursiveFiller({{"version", "2"}})},
+    {"inet::PimGraft",        "", [](Chunk *c){ fillPimJoinPrune(c); }},
+    {"inet::PimRegister",     "", SimpleFiller({{"version", "2"}})},
+    {"inet::PimRegisterStop", "", RecursiveFiller({{"version", "2"}})},
+    {"inet::PimStateRefresh", "", RecursiveFiller({{"version", "2"}})},
+
+    // -- OSPFv2 / OSPFv3: the serializer dispatches on the OspfPacketType `type`
+    // field (an @enum, so the generic fill leaves it at the .msg default). Only the
+    // Hello subclass pins `type` in its .msg; the others inherit the base -1 sentinel
+    // ("Unknown OSPF message type"), and even Hello declares only the B(24) base
+    // header length, not its body. Set the matching type and measure the body. The
+    // OSPFv2 and OSPFv3 packets share the ospf::OspfPacketType enum symbols.
+    {"inet::ospfv2::Ospfv2HelloPacket",                    "", [](Chunk *c){ fillOspf(c, ospf::HELLO_PACKET); }},
+    {"inet::ospfv2::Ospfv2DatabaseDescriptionPacket",      "", [](Chunk *c){ fillOspf(c, ospf::DATABASE_DESCRIPTION_PACKET); }},
+    {"inet::ospfv2::Ospfv2LinkStateRequestPacket",         "", [](Chunk *c){ fillOspf(c, ospf::LINKSTATE_REQUEST_PACKET); }},
+    {"inet::ospfv2::Ospfv2LinkStateUpdatePacket",          "", [](Chunk *c){ fillOspf(c, ospf::LINKSTATE_UPDATE_PACKET); }},
+    {"inet::ospfv2::Ospfv2LinkStateAcknowledgementPacket", "", [](Chunk *c){ fillOspf(c, ospf::LINKSTATE_ACKNOWLEDGEMENT_PACKET); }},
+    {"inet::ospfv3::Ospfv3HelloPacket",                    "", [](Chunk *c){ fillOspf(c, ospf::HELLO_PACKET); }},
+    {"inet::ospfv3::Ospfv3DatabaseDescriptionPacket",      "", [](Chunk *c){ fillOspf(c, ospf::DATABASE_DESCRIPTION_PACKET); }},
+    {"inet::ospfv3::Ospfv3LinkStateRequestPacket",         "", [](Chunk *c){ fillOspf(c, ospf::LINKSTATE_REQUEST_PACKET); }},
+    {"inet::ospfv3::Ospfv3LinkStateUpdatePacket",          "", [](Chunk *c){ fillOspf(c, ospf::LINKSTATE_UPDATE_PACKET); }},
+    {"inet::ospfv3::Ospfv3LinkStateAcknowledgementPacket", "", [](Chunk *c){ fillOspf(c, ospf::LINKSTATE_ACKNOWLEDGEMENT_PACKET); }},
+
+    // -- multi-value: one class serialized differently per discriminator value.
+    // AODV Rreq/Rrep/Rerr/RrepAck carry an IPv4 and an IPv6 packetType (the .msg
+    // cannot pin it -- see AodvControlPackets.msg), and the serializer asserts a
+    // different chunkLength for each (IPv4 vs IPv6 addresses). Set packetType and
+    // the matching explicit length -- the whole point of a per-variant recipe: one
+    // class, two lengths. The generic fill defaults the destAddr/originatorAddr
+    // L3Address fields to IPv4, which suits the IPv4 variants; the IPv6 variants
+    // override them here with (distinct) IPv6 literals so the serialized family
+    // matches the packetType. Rerr also needs >= 1 unreachable node (an array element).
+    {"inet::aodv::Rreq",    "RREQ",         [](Chunk *c){ setAodvType(c, aodv::RREQ, B(24)); }},
+    {"inet::aodv::Rreq",    "RREQ_IPv6",    [](Chunk *c){
+            auto p = check_and_cast<aodv::Rreq *>(c);
+            p->setDestAddr(L3Address("2001:db8:1:2:3:4:5:6"));
+            p->setOriginatorAddr(L3Address("2001:db8:a:b:c:d:e:f"));
+            setAodvType(c, aodv::RREQ_IPv6, B(48)); }},
+    {"inet::aodv::Rrep",    "RREP",         [](Chunk *c){ setAodvType(c, aodv::RREP, B(20)); }},
+    {"inet::aodv::Rrep",    "RREP_IPv6",    [](Chunk *c){
+            auto p = check_and_cast<aodv::Rrep *>(c);
+            p->setDestAddr(L3Address("2001:db8:1:2:3:4:5:6"));
+            p->setOriginatorAddr(L3Address("2001:db8:a:b:c:d:e:f"));
+            setAodvType(c, aodv::RREP_IPv6, B(44)); }},
+    {"inet::aodv::Rerr",    "RERR",         [](Chunk *c){ fillRerr(c, aodv::RERR, B(12)); }},
+    {"inet::aodv::Rerr",    "RERR_IPv6",    [](Chunk *c){ fillRerr(c, aodv::RERR_IPv6, B(24)); }},
+    {"inet::aodv::RrepAck", "RREPACK",      [](Chunk *c){ setAodvType(c, aodv::RREPACK, B(2)); }},
+    {"inet::aodv::RrepAck", "RREPACK_IPv6", [](Chunk *c){ setAodvType(c, aodv::RREPACK_IPv6, B(2)); }},
+
+    // -- gPTP: descend into the PortIdentity sub-struct(s) (clockIdentity + portNumber),
+    // which the flat fill leaves zero. Fixed-size headers, so the deep fill does not change
+    // the size; measure it back (b(-1) default).
+    {"inet::GptpSync",               "", RecursiveFiller()},
+    {"inet::GptpFollowUp",           "", RecursiveFiller()},
+    // GptpPdelayReq also carries a 20-octet reserved area (a byte array the deep fill leaves
+    // empty); set it to distinct bytes so the round-trip exercises its verbatim preservation.
+    {"inet::GptpPdelayReq",          "", [](Chunk *c){
+        RecursiveFiller()(c);
+        auto p = check_and_cast<GptpPdelayReq *>(c);
+        for (size_t i = 0; i < p->getReservedArraySize(); i++) p->setReserved(i, (uint8_t)(0x41 + i));
+    }},
+    {"inet::GptpPdelayResp",         "", RecursiveFiller()},
+    {"inet::GptpPdelayRespFollowUp", "", RecursiveFiller()},
+
+    // -- 802.11 data / action / block-ack frames: set the SequenceNumberCyclic
+    // field(s) (compound, no string setter -> a typed lambda); chunkLength comes
+    // from the .msg default.
+    {"inet::ieee80211::Ieee80211DataHeader",          "", [](Chunk *c){ fill80211Seq(c); }},
+    // A-MSDU/A-MPDU aggregation subframe headers: length describes the following subframe,
+    // not this header, so it is plain wire data and the generic fill skips it (name looks
+    // like a size). Set it via a recipe. MPDU length is a 12-bit field; use a value that
+    // exercises the high nibble.
+    {"inet::ieee80211::Ieee80211MsduSubframeHeader",  "", [](Chunk *c){ check_and_cast<ieee80211::Ieee80211MsduSubframeHeader *>(c)->setLength(1500); }},
+    {"inet::ieee80211::Ieee80211MpduSubframeHeader",  "", [](Chunk *c){ check_and_cast<ieee80211::Ieee80211MpduSubframeHeader *>(c)->setLength(0x123); }},
+    {"inet::ieee80211::Ieee80211AddbaRequest",        "", [](Chunk *c){ fill80211Seq(c); }},
+    // order=true is a real alternative branch (not a bad fill): it makes the mgmt serializer
+    // emit the optional 4-byte HT Control field, which the deserializer reads back. The
+    // default recipe (above) pins order off; this variant covers the other branch, its fixed
+    // length grown by those 4 bytes back to LENGTH_ADDBAREQ. One mgmt frame suffices -- the
+    // order logic is shared across all mgmt frames.
+    {"inet::ieee80211::Ieee80211AddbaRequest", "order", [](Chunk *c){
+        fill80211Seq(c);
+        check_and_cast<ieee80211::Ieee80211AddbaRequest *>(c)->setOrder(true);
+        setChunkLength(c, ieee80211::LENGTH_ADDBAREQ);
+    }},
+    {"inet::ieee80211::Ieee80211AddbaResponse",       "", [](Chunk *c){ fill80211Seq(c); }},
+    // Delba's msg default chunkLength (LENGTH_DELBA) omits the -B(4) FCS deduction
+    // the sibling action frames apply, so it is 4 bytes larger than the serializer
+    // writes; pin the length the serializer actually produces.
+    {"inet::ieee80211::Ieee80211Delba", "", [](Chunk *c){ fill80211Seq(c); setChunkLength(c, ieee80211::LENGTH_DELBA - B(4)); }},
+    {"inet::ieee80211::Ieee80211BasicBlockAckReq",    "", [](Chunk *c){ fill80211Seq(c); }},
+    {"inet::ieee80211::Ieee80211CompressedBlockAckReq","", [](Chunk *c){ fill80211Seq(c); }},
+    {"inet::ieee80211::Ieee80211BasicBlockAck",       "", [](Chunk *c){ fillBlockAck(c); }},
+    {"inet::ieee80211::Ieee80211CompressedBlockAck",  "", [](Chunk *c){ fillBlockAck(c); }},
+    // IPv6 extension-header TLV options: a variant per option type. padn stays within the
+    // base 8-byte header; the larger raw option grows it to 16. Both headers share the TLV
+    // serialization, so exercising both types on each is cheap and symmetric.
+    {"inet::Ipv6HopByHopOptionsHeader",    "padn", [](Chunk *c){ addIpv6ExtOption<Ipv6HopByHopOptionsHeader>(c, tlvPadN(4), B(6)); }},
+    {"inet::Ipv6HopByHopOptionsHeader",    "raw",  [](Chunk *c){ addIpv6ExtOption<Ipv6HopByHopOptionsHeader>(c, tlvRaw(IPv6TLVOPTION_TLV_GPSR, 8), B(10)); }},
+    {"inet::Ipv6DestinationOptionsHeader", "padn", [](Chunk *c){ addIpv6ExtOption<Ipv6DestinationOptionsHeader>(c, tlvPadN(4), B(6)); }},
+    {"inet::Ipv6DestinationOptionsHeader", "raw",  [](Chunk *c){ addIpv6ExtOption<Ipv6DestinationOptionsHeader>(c, tlvRaw(IPv6TLVOPTION_TLV_GPSR, 8), B(10)); }},
+    // IPv6 ND options: one variant per option type (see fillTcpOption's style). The router
+    // advertisement -- which in practice carries the most option kinds -- gets the plain
+    // no-option case plus every option type; the other messages get a single option so their
+    // `options` compound is covered. Each option grows chunkLength by its fixed size.
+    {"inet::Ipv6RouterAdvertisement",    "",       [](Chunk *){}},
+    {"inet::Ipv6RouterAdvertisement",    "srcll",  [](Chunk *c){ addNdOption<Ipv6RouterAdvertisement>(c, ndSrcLL(), B(8)); }},
+    {"inet::Ipv6RouterAdvertisement",    "mtu",    [](Chunk *c){ addNdOption<Ipv6RouterAdvertisement>(c, ndMtu(), B(8)); }},
+    {"inet::Ipv6RouterAdvertisement",    "prefix", [](Chunk *c){ addNdOption<Ipv6RouterAdvertisement>(c, ndPrefix(), B(32)); }},
+    {"inet::Ipv6RouterSolicitation",     "srcll",  [](Chunk *c){ addNdOption<Ipv6RouterSolicitation>(c, ndSrcLL(), B(8)); }},
+    {"inet::Ipv6NeighbourSolicitation",  "srcll",  [](Chunk *c){ addNdOption<Ipv6NeighbourSolicitation>(c, ndSrcLL(), B(8)); }},
+    {"inet::Ipv6NeighbourAdvertisement", "tgtll",  [](Chunk *c){ addNdOption<Ipv6NeighbourAdvertisement>(c, ndTgtLL(), B(8)); }},
+    {"inet::Ipv6Redirect",               "tgtll",  [](Chunk *c){ addNdOption<Ipv6Redirect>(c, ndTgtLL(), B(8)); }},
+    // RTCP sender report: senderReport is a fixed 20-byte sub-struct (no length change);
+    // fill its fields so the compound is covered. (count/reportBlocks stay empty -- those
+    // are the length-dependent group left for later.)
+    // RTCP report arrays: addReceptionReport/addSDESChunk bump the count field and grow
+    // chunkLength themselves (24 bytes per reception report), so no manual count/length
+    // bookkeeping is needed. Both count (a scalar) and the cArray (which the descriptor can
+    // recurse into) get credited, so their allow-list entries are gone.
+    {"inet::rtp::RtcpSenderReportPacket", "", [](Chunk *c){
+        auto p = check_and_cast<rtp::RtcpSenderReportPacket *>(c);
+        auto& sr = p->getSenderReportForUpdate();
+        sr.setNTPTimeStamp(0x1122334455667788ULL);
+        sr.setRTPTimeStamp(0x99AABBCC);
+        sr.setPacketCount(1234);
+        sr.setByteCount(567890);
+        for (int i = 0; i < 2; i++) {
+            auto *rr = new rtp::ReceptionReport();
+            rr->setSsrc(0x1000 + i); rr->setFractionLost(1); rr->setPacketsLostCumulative(2);
+            rr->setSequenceNumber(100 + i); rr->setJitter(3); rr->setLastSR(4); rr->setDelaySinceLastSR(5);
+            p->addReceptionReport(rr);
+        }
+    }},
+    {"inet::rtp::RtcpReceiverReportPacket", "", [](Chunk *c){
+        auto p = check_and_cast<rtp::RtcpReceiverReportPacket *>(c);
+        for (int i = 0; i < 2; i++) {
+            auto *rr = new rtp::ReceptionReport();
+            rr->setSsrc(0x2000 + i); rr->setFractionLost(1); rr->setPacketsLostCumulative(2);
+            rr->setSequenceNumber(200 + i); rr->setJitter(3); rr->setLastSR(4); rr->setDelaySinceLastSR(5);
+            p->addReceptionReport(rr);
+        }
+    }},
+    // SDES: addSDESChunk grows chunkLength by getLength() (ssrc + items), but the serializer
+    // also writes a trailing END byte and pads the chunk to a 32-bit boundary, so set the
+    // length explicitly: header(4) + roundUp(getLength() + 1, 4).
+    {"inet::rtp::RtcpSdesPacket", "", [](Chunk *c){
+        auto p = check_and_cast<rtp::RtcpSdesPacket *>(c);
+        auto *sc = new rtp::SdesChunk("sdes", 0x3000);
+        sc->addSDESItem(new rtp::SdesItem(rtp::SdesItem::SDES_CNAME, "inet"));
+        p->addSDESChunk(sc);
+        int bytes = sc->getLength() + 1;
+        if (bytes % 4 != 0) bytes += 4 - bytes % 4;
+        setChunkLength(c, B(4) + B(bytes));
+    }},
+};
+
+%activity:
+
+cLog::logLevel = LOGLEVEL_WARN;
+
+ChunkRoundTripConfig config;
+config.skipTypes = chunkSkipTypes;
+// Serializer classes that need not be exercised by a round-trip: the structural chunks
+// (they carry no fields of their own) and the abstract-base serializers whose concrete
+// subclasses register a different class. A serializer class no round-tripped type invokes
+// and that is not listed here is an untested serializer -> fails the gate below.
+config.skipSerializerClasses = {
+    "inet::EmptyChunkSerializer",
+    "inet::SliceChunkSerializer",
+    "inet::SequenceChunkSerializer",
+    "inet::StreamBufferChunkSerializer",
+    "inet::EthernetPaddingSerializer",              // padding is emitted with the frame, not round-tripped alone
+    "inet::TransportPseudoHeaderSerializer",        // used for checksum computation, never a standalone chunk
+    "inet::ospf::OspfPacketSerializer",             // OspfPacketBase abstract base; concrete OSPF packets use their own
+    "inet::physicallayer::EthernetPhyHeaderBaseSerializer", // abstract PHY base
+};
+config.commonSetup = chunkCommonSetup;
+config.recipes = chunkRecipes;
+// Coverage gate: the wire fields we knowingly leave unfilled (discriminators,
+// length/count fields, arrays and compounds not yet opted into RecursiveFiller,
+// non-editable meta). A gap not on this list fails the test (see knownUnfilled).
+config.knownUnfilled = R"KEYS(
+inet::BitCountChunk::data
+inet::GptpAnnounce::sourcePortIdentity
+inet::Icmpv6DestUnreachableMsg::code
+inet::Icmpv6ParamProblemMsg::code
+inet::Icmpv6TimeExceededMsg::code
+inet::Igmpv3Query::sourceList
+inet::MrpEnd::valueLength
+inet::MrpManufacturerFkt::subHeaderLength
+inet::MrpSubTlvHeader::subHeaderLength
+inet::ieee80211::Ieee80211AuthenticationFrame::trailingBytes
+inet::ieee80211::Ieee80211DeauthenticationFrame::trailingBytes
+inet::ieee80211::Ieee80211DisassociationFrame::trailingBytes
+inet::ieee80211::Ieee80211ProbeRequestFrame::trailingBytes
+inet::ieee80211::Ieee80211ProbeResponseFrame::trailingBytes
+inet::ieee80211::Ieee80211BeaconFrame::trailingBytes
+inet::ieee80211::Ieee80211AssociationRequestFrame::trailingBytes
+inet::ieee80211::Ieee80211AssociationResponseFrame::trailingBytes
+inet::ieee80211::Ieee80211ReassociationRequestFrame::trailingBytes
+inet::ieee80211::Ieee80211ReassociationResponseFrame::trailingBytes
+inet::VoipStreamPacket::dataLength
+inet::ieee80211::Ieee80211BeaconFrame::handoverParameters
+inet::ieee80211::Ieee80211ProbeResponseFrame::handoverParameters
+inet::rtp::RtpHeader::csrc
+inet::Mldv2Query::sourceList
+inet::BindingAcknowledgement::status
+inet::BindingError::status
+)KEYS";
+testChunkRoundTrips(config);
+
+%file: makefrag
+# VoipStreamPacket_m.h (included above, guarded by INET_WITH_VOIPSTREAM) has a hard
+# #error unless HAVE_FFMPEG is defined. src/makefrag sets it for the INET library build;
+# do the same here so the header compiles when the VoipStream feature is enabled. The
+# test needs no libav symbols itself -- the VoipStreamPacket serializer lives in libINET.
+HAVE_FFMPEG := $(shell pkg-config --exists libavcodec libavformat libavutil && echo yes)
+ifeq ($(HAVE_FFMPEG), yes)
+  CFLAGS += -DHAVE_FFMPEG
+endif
+
+%contains: stdout
+=== Chunk round-trip coverage ===
+
+%contains: stdout
+FAILED: 0  CRASHED: 0
+
+%contains: stdout
+Coverage gate: 0 unexpected
+
+%contains: stdout
+Serializer-class gate: 0 unexpected
