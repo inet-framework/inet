@@ -352,13 +352,9 @@ class Ospfv3LinkStateUpdatePacket extends Ospfv3Packet
 {
     uint32_t lsaCount;  //specifies the number of LSAs sent in a single packet
 
-    Ospfv3RouterLsa RouterLSAs[];
-    Ospfv3NetworkLsa NetworkLSAs[];
-    Ospfv3InterAreaPrefixLsa InterAreaPrefixLSAs[];
-    Ospfv3LinkLsa LinkLSAs[];
-    Ospfv3IntraAreaPrefixLsa IntraAreaPrefixLSAs[];
-    // Ospfv3Lsa *LSAs[] @owned @allowReplace;
-    //TODO - see Ospfv2LinkStateUpdatePacket
+    // A single ordered list of LSAs (not per-type arrays), so the on-the-wire LSA order is
+    // preserved on a serialize/deserialize round trip. Mirrors Ospfv2LinkStateUpdatePacket.
+    Ospfv3Lsa *lsas[] @owned @allowReplace;
 }
 
 //

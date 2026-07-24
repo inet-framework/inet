@@ -337,6 +337,7 @@ void Ospfv3Neighbor::retransmitUpdatePacket()
     // overcounted chunkLength by 16 octets, so the serializer padded the packet with
     // uninitialized (non-deterministic) bytes.
     B packetLength = OSPFV3_HEADER_LENGTH + B(sizeof(uint32_t));
+    std::vector<Ospfv3Lsa *> toSend; // collected in list order, appended type-grouped below
     auto it = linkStateRetransmissionList.begin();
 
     while (!packetFull && (it != linkStateRetransmissionList.end())) {
@@ -400,111 +401,44 @@ void Ospfv3Neighbor::retransmitUpdatePacket()
 
         if (includeLSA) {
             packetLength += lsaSize;
+            const Ospfv3Lsa *src = nullptr;
             switch (lsaType) {
-                case ROUTER_LSA:
-                    if (routerLSA != nullptr) {
-                        unsigned int routerLSACount = updatePacket->getRouterLSAsArraySize();
-
-                        updatePacket->setRouterLSAsArraySize(routerLSACount + 1);
-                        updatePacket->setRouterLSAs(routerLSACount, *routerLSA);
-
-                        unsigned short lsAge = updatePacket->getRouterLSAs(routerLSACount).getHeader().getLsaAge();
-                        if (lsAge < MAX_AGE - this->getInterface()->getTransDelayInterval()) {
-                            updatePacket->getRouterLSAsForUpdate(routerLSACount).getHeaderForUpdate().setLsaAge(lsAge + this->getInterface()->getTransDelayInterval());
-                        }
-                        else {
-                            updatePacket->getRouterLSAsForUpdate(routerLSACount).getHeaderForUpdate().setLsaAge(MAX_AGE);
-                        }
-                    }
-                    break;
-
-                case NETWORK_LSA:
-                    if (networkLSA != nullptr) {
-                        unsigned int networkLSACount = updatePacket->getNetworkLSAsArraySize();
-
-                        updatePacket->setNetworkLSAsArraySize(networkLSACount + 1);
-                        updatePacket->setNetworkLSAs(networkLSACount, *networkLSA);
-
-                        unsigned short lsAge = updatePacket->getNetworkLSAs(networkLSACount).getHeader().getLsaAge();
-                        if (lsAge < MAX_AGE - this->getInterface()->getTransDelayInterval()) {
-                            updatePacket->getNetworkLSAsForUpdate(networkLSACount).getHeaderForUpdate().setLsaAge(lsAge + this->getInterface()->getTransDelayInterval());
-                        }
-                        else {
-                            updatePacket->getNetworkLSAsForUpdate(networkLSACount).getHeaderForUpdate().setLsaAge(MAX_AGE);
-                        }
-                    }
-                    break;
-                case INTER_AREA_PREFIX_LSA:
-                    if (interAreaPrefixLSA != nullptr) {
-                        unsigned int interAreaPrefixLSACount = updatePacket->getInterAreaPrefixLSAsArraySize();
-
-                        updatePacket->setInterAreaPrefixLSAsArraySize(interAreaPrefixLSACount + 1);
-                        updatePacket->setInterAreaPrefixLSAs(interAreaPrefixLSACount, *interAreaPrefixLSA);
-
-                        unsigned short lsAge = updatePacket->getInterAreaPrefixLSAs(interAreaPrefixLSACount).getHeader().getLsaAge();
-                        if (lsAge < MAX_AGE - this->getInterface()->getTransDelayInterval()) {
-                            updatePacket->getInterAreaPrefixLSAsForUpdate(interAreaPrefixLSACount).getHeaderForUpdate().setLsaAge(lsAge + this->getInterface()->getTransDelayInterval());
-                        }
-                        else {
-                            updatePacket->getInterAreaPrefixLSAsForUpdate(interAreaPrefixLSACount).getHeaderForUpdate().setLsaAge(MAX_AGE);
-                        }
-                    }
-                    break;
-//                case AS_EXTERNAL_LSA_TYPE:
-//                    if (asExternalLSA != nullptr) {
-//                        unsigned int asExternalLSACount = updatePacket->getAsExternalLSAsArraySize();
-//
-//                        updatePacket->setAsExternalLSAsArraySize(asExternalLSACount + 1);
-//                        updatePacket->setAsExternalLSAs(asExternalLSACount, *asExternalLSA);
-//
-//                        unsigned short lsAge = updatePacket->getAsExternalLSAs(asExternalLSACount).getHeader().getLsAge();
-//                        if (lsAge < MAX_AGE - parentInterface->getTransmissionDelay()) {
-//                            updatePacket->getAsExternalLSAs(asExternalLSACount).getHeader().setLsAge(lsAge + parentInterface->getTransmissionDelay());
-//                        }
-//                        else {
-//                            updatePacket->getAsExternalLSAs(asExternalLSACount).getHeader().setLsAge(MAX_AGE);
-//                        }
-//                    }
-//                    break;
-                case LINK_LSA:
-                    if (linkLSA != nullptr) {
-                        unsigned int linkLSACount = updatePacket->getLinkLSAsArraySize();
-
-                        updatePacket->setLinkLSAsArraySize(linkLSACount + 1);
-                        updatePacket->setLinkLSAs(linkLSACount, *linkLSA);
-
-                        unsigned short lsAge = updatePacket->getLinkLSAs(linkLSACount).getHeader().getLsaAge();
-                        if (lsAge < MAX_AGE - this->getInterface()->getTransDelayInterval()) {
-                            updatePacket->getLinkLSAsForUpdate(linkLSACount).getHeaderForUpdate().setLsaAge(lsAge + this->getInterface()->getTransDelayInterval());
-                        }
-                        else {
-                            updatePacket->getLinkLSAsForUpdate(linkLSACount).getHeaderForUpdate().setLsaAge(MAX_AGE);
-                        }
-                    }
-                    break;
-                case INTRA_AREA_PREFIX_LSA:
-                    if (intraAreaPrefixLSA != nullptr) {
-                        unsigned int intraAreaPrefixLSACount = updatePacket->getIntraAreaPrefixLSAsArraySize();
-
-                        updatePacket->setIntraAreaPrefixLSAsArraySize(intraAreaPrefixLSACount + 1);
-                        updatePacket->setIntraAreaPrefixLSAs(intraAreaPrefixLSACount, *intraAreaPrefixLSA);
-
-                        unsigned short lsAge = updatePacket->getIntraAreaPrefixLSAs(intraAreaPrefixLSACount).getHeader().getLsaAge();
-                        if (lsAge < MAX_AGE - this->getInterface()->getTransDelayInterval()) {
-                            updatePacket->getIntraAreaPrefixLSAsForUpdate(intraAreaPrefixLSACount).getHeaderForUpdate().setLsaAge(lsAge + this->getInterface()->getTransDelayInterval());
-                        }
-                        else {
-                            updatePacket->getIntraAreaPrefixLSAsForUpdate(intraAreaPrefixLSACount).getHeaderForUpdate().setLsaAge(MAX_AGE);
-                        }
-                    }
-                    break;
-                default:
-                    break;
+                case ROUTER_LSA:            src = routerLSA; break;
+                case NETWORK_LSA:           src = networkLSA; break;
+                case INTER_AREA_PREFIX_LSA: src = interAreaPrefixLSA; break;
+                case LINK_LSA:              src = linkLSA; break;
+                case INTRA_AREA_PREFIX_LSA: src = intraAreaPrefixLSA; break;
+                default:                    break;
+            }
+            if (src != nullptr) {
+                // Age the copy as before; collect it now and append type-grouped after the loop.
+                Ospfv3Lsa *copy = src->dup();
+                unsigned short lsAge = copy->getHeader().getLsaAge();
+                if (lsAge < MAX_AGE - this->getInterface()->getTransDelayInterval())
+                    copy->getHeaderForUpdate().setLsaAge(lsAge + this->getInterface()->getTransDelayInterval());
+                else
+                    copy->getHeaderForUpdate().setLsaAge(MAX_AGE);
+                toSend.push_back(copy);
             }
         }
 
         it++;
     }
+
+    // Append the collected LSAs grouped by type (Router, Network, Inter-Area-Prefix, Link,
+    // Intra-Area-Prefix). LSA order within a Link State Update is not significant (RFC 5340
+    // -- the receiver handles each LSA independently), so this grouping is not needed for
+    // correctness. We keep it only to reproduce the exact byte order the old per-type LSA
+    // arrays emitted, so the ~tND fingerprint of the OSPFv3 simulations stays unchanged and
+    // no re-recording is needed.
+    static const int lsaTypeOrder[] = { ROUTER_LSA, NETWORK_LSA, INTER_AREA_PREFIX_LSA, LINK_LSA, INTRA_AREA_PREFIX_LSA };
+    for (int wantType : lsaTypeOrder)
+        for (auto *l : toSend)
+            if (l->getHeader().getLsaType() == wantType) {
+                int pos = updatePacket->getLsasArraySize();
+                updatePacket->setLsasArraySize(pos + 1);
+                updatePacket->setLsas(pos, l);
+            }
 
     EV_DEBUG << "Retransmit - packet length: " << packetLength << "\n";
     updatePacket->setPacketLengthField(packetLength.get());
