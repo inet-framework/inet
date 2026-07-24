@@ -1,0 +1,6 @@
+# The vetted third-party captures in this directory are committed to the repo and
+# used by serializer_pcap.test. Any other file dropped here stays untracked by
+# default; force-add a new vetted capture with:
+#   git add -f tests/unit/pcap/wireshark/<file>
+*
+!.gitignore
