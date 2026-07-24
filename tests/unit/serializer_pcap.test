@@ -1,0 +1,220 @@
+%description:
+Round-trip serialization test for the packet serializers.
+
+Reads each record of a pcap file, deserializes it into its most specific typed
+chunks using the generic PacketDissector, re-serializes the result, and compares
+it byte-by-byte with the original frame. The generic dissector automatically
+covers every registered protocol; unknown payloads fall back to raw bytes and
+round-trip trivially. This replaces the former hand-written, per-protocol
+deserialization chain.
+
+The engine lives in tests/unit/lib/SerializerTestLib.{h,cc}.
+
+It also reports serializer coverage: the exercised (USED ...) and never-invoked
+(UNTESTED ...) registered serializers, plus a raw-bytes summary. The full lists
+are printed for humans to drive corpus expansion; only a small baseline of core
+serializers is gated below (so a silent coverage loss is caught), together with
+the requirement that no whole packet fall back to raw bytes (TOPLEVEL-RAWBYTES).
+
+NOTE: this test FAILS on purpose, and it tests the whole corpus from the start.
+Alongside the always-green baseline pcaps it runs real captures (many from the
+Wireshark wiki, committed under pcap/wireshark/) whose expected result is a clean
+round-trip. Some frames do not round-trip yet -- protocol subtypes the serializers
+do not model, and INET-internal formats that differ from the on-the-wire layout --
+so "differ"/"EXCEPTION" appear in the output and the test fails.
+Fixing a serializer removes its failures WITHOUT touching this test; the coverage
+report (frames same/differ/error) simply improves. The gates below only pin a
+small, state-independent baseline: the core serializers stay exercised and no
+whole packet falls back to raw bytes (TOPLEVEL-RAWBYTES).
+
+%includes:
+#include "SerializerTestLib.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/common/Protocol.h"
+
+%global:
+
+using namespace inet;
+
+// Serializers a pcap round-trip can never exercise: reporting them as SKIPPED
+// (rather than UNTESTED) keeps the UNTESTED list to real protocol serializers for
+// which a capture could still be added. Four groups:
+//
+//   1. Generic chunk representations -- the packet "plumbing" (raw byte/bit
+//      buffers, composite/slice wrappers), never a distinct protocol on the wire.
+//   2. Abstract / dispatch base classes -- the deserializer always yields a
+//      concrete subtype (e.g. Ieee80211MacHeader -> data/mgmt/control, BgpHeader ->
+//      Open/Update/...), so the base is never the leaf chunk. These are the same
+//      dispatch bases serializer_chunk_roundtrip skips.
+//   3. INET-internal formats -- research/simplified MAC models, synthetic
+//      traffic-generator payloads, and framework helper headers with no real-world
+//      capture; the constructed serializer_chunk_roundtrip test covers them instead.
+//   4. Physical-layer headers -- a link-layer pcap begins above the PHY, so the PHY
+//      preamble/header is never present in a capture.
+static const std::set<std::string> coverageSkipTypes = {
+    // 1. generic chunk representations
+    "inet::BitCountChunk", "inet::BitsChunk", "inet::ByteCountChunk", "inet::BytesChunk",
+    "inet::EmptyChunk", "inet::SequenceChunk", "inet::SliceChunk", "inet::StreamBufferChunk",
+
+    // 2. abstract / dispatch base classes (deserializer returns a concrete subtype)
+    "inet::ieee80211::Ieee80211DataOrMgmtHeader", "inet::ieee80211::Ieee80211ActionFrame",
+    "inet::bgp::BgpHeader", "inet::ospfv2::Ospfv2Packet", "inet::ospfv3::Ospfv3Packet",
+    "inet::rtp::RtcpPacket", "inet::aodv::AodvControlPacket", "inet::MobilityHeader",
+    "inet::MldMessage", "inet::IgmpQuery", "inet::MrpTlvHeader", "inet::BMacHeaderBase",
+    "inet::XMacHeaderBase", "inet::CsmaCaMacHeader", "inet::EthernetControlFrameBase",
+    // VLAN/tag "TPID" headers: the packet dissector produces the *TagEpdHeader variant
+    // (Ieee8021qTagEpdProtocolDissector etc.); the *TagTpidHeader is the sending/checker
+    // simulation-module representation, never popped by a ProtocolDissector.
+    "inet::Ieee8021qTagTpidHeader", "inet::Ieee8021aeTagTpidHeader", "inet::Ieee8021rTagTpidHeader",
+
+    // 3. INET-internal formats with no real-world capture (covered by
+    //    serializer_chunk_roundtrip): research MACs, synthetic app payloads, helpers
+    "inet::CsmaCaMacAckHeader", "inet::CsmaCaMacDataHeader", "inet::CsmaCaMacTrailer",
+    "inet::BMacControlFrame", "inet::BMacDataFrameHeader",
+    "inet::XMacControlFrame", "inet::XMacDataFrameHeader",
+    "inet::AckingMacHeader", "inet::ShortcutMacHeader",
+    "inet::EtherAppReq", "inet::EtherAppResp", "inet::ApplicationPacket",
+    "inet::VoipStreamPacket", "inet::EchoPacket", "inet::DsdvHello",
+    "inet::ChecksumHeader", "inet::FragmentNumberHeader", "inet::SequenceNumberHeader",
+    "inet::TransportPseudoHeader",
+
+    // 4. physical-layer headers (a link-layer pcap starts above the PHY)
+    "inet::ApskPhyHeader", "inet::GenericPhyHeader", "inet::ShortcutPhyHeader",
+    "inet::physicallayer::EthernetPhyHeader", "inet::physicallayer::EthernetFragmentPhyHeader",
+    "inet::physicallayer::EthernetPhyHeaderBase",
+    "inet::physicallayer::Ieee80211DsssPhyHeader", "inet::physicallayer::Ieee80211ErpOfdmPhyHeader",
+    "inet::physicallayer::Ieee80211FhssPhyHeader", "inet::physicallayer::Ieee80211HrDsssPhyHeader",
+    "inet::physicallayer::Ieee80211HtPhyHeader", "inet::physicallayer::Ieee80211IrPhyHeader",
+    "inet::physicallayer::Ieee80211OfdmPhyHeader", "inet::physicallayer::Ieee80211VhtPhyHeader",
+};
+
+%activity:
+
+// keep the output quiet: per-frame progress is logged at EV_TRACE (drop the log
+// level to see it when debugging a hard crash); results are logged at EV_WARN
+cLog::logLevel = LOGLEVEL_WARN;
+
+beginSerializerCoverage();
+
+testPcapSerialization("../../pcap/rarp_request.pcap", false);
+testPcapSerialization("../../pcap/rarp_req_reply.pcap", false);
+testPcapSerialization("../../pcap/Ethernet_Pause_Frame.pcap", false);
+testPcapSerialization("../../pcap/eth_fcs_good.pcap", true);
+testPcapSerialization("../../pcap/v6.pcap", false);
+
+// captures downloaded from the Wireshark wiki (see fetch_wireshark_captures.sh)
+testPcapSerialization("../../pcap/wireshark/ospf.cap", false);
+testPcapSerialization("../../pcap/wireshark/IGMP-dataset.pcap", false);
+testPcapSerialization("../../pcap/wireshark/pim-reg.cap", false);
+testPcapSerialization("../../pcap/wireshark/sctp-www.cap", false);
+testPcapSerialization("../../pcap/wireshark/v6-http.cap", false);
+testPcapSerialization("../../pcap/wireshark/vlan.cap", false);
+// mpls-basic.cap carries an RSVP PATH message. INET has no RSVP serializer, and its
+// RSVP-TE classes are a simulation model rather than the on-the-wire format (see the
+// note in RsvpPacket.msg), so this capture cannot round-trip. It is kept in the
+// corpus but disabled here rather than forcing a low-value serializer for a protocol
+// INET does not serialize.
+//testPcapSerialization("../../pcap/wireshark/mpls-basic.cap", false);
+testPcapSerialization("../../pcap/wireshark/PPP-config.cap", false);
+testPcapSerialization("../../pcap/wireshark/ptpv2.pcap", false);
+
+// Raw IEEE 802.11 (linktype 105) carries no FCS and no way to signal it, so the
+// hasFcs argument says so. For radiotap (linktype 127) the PcapReader detects the
+// FCS per frame from the radiotap header (FcsInd), so the hasFcs argument is unused.
+testPcapSerialization("../../pcap/wireshark/Network_Join_Nokia_Mobile.pcap", false);
+// wpa-Induction is a large real WPA/EAPOL over-the-air capture. Ten frames that
+// Wireshark cannot parse either -- nine with a corrupted 802.11 Frame Control
+// (protocol version 2/3, the standard requires 0) and one truncated Probe Request --
+// were removed with editcap so the remaining 1083 frames round-trip cleanly.
+testPcapSerialization("../../pcap/wireshark/wpa-Induction.pcap", false);
+
+// IPv6 routing header (segment routing) -> Ipv6RoutingHeader serializer
+testPcapSerialization("../../pcap/wireshark/sr-header.pcap", false);
+
+// captures collected from public corpora (Zeek, tcpdump, aircrack-ng, ...) that
+// exercise serializers with no Wireshark-wiki sample -- see pcap/ (not pcap/wireshark/)
+testPcapSerialization("../../pcap/igmpv1-query.pcap", false);
+testPcapSerialization("../../pcap/igmpv2-leave.pcap", false);
+testPcapSerialization("../../pcap/igmpv3-query.pcap", false);
+testPcapSerialization("../../pcap/igmpv3-report.pcap", false);
+testPcapSerialization("../../pcap/pim-assert-graft-regstop.pcap", false);
+testPcapSerialization("../../pcap/ipv6-frag.pcap", false);
+testPcapSerialization("../../pcap/icmpv6-toobig.pcap", false);
+testPcapSerialization("../../pcap/icmpv6-paramprob.pcap", false);
+testPcapSerialization("../../pcap/icmpv6-redirect.pcap", false);
+testPcapSerialization("../../pcap/icmpv4-destunreach.pcap", false);
+testPcapSerialization("../../pcap/mipv6.pcap", false);
+testPcapSerialization("../../pcap/qinq.pcap", false);
+// wlan-aggregation carries an FCS and wlan-addba-delba does not; the PcapReader
+// detects this per frame from the radiotap header, so hasFcs stays false here.
+testPcapSerialization("../../pcap/wlan-aggregation.pcap", false);
+testPcapSerialization("../../pcap/wlan-blockack-reassoc.pcap", false);
+testPcapSerialization("../../pcap/wlan-addba-delba.pcap", false);
+// basic (non-compressed, 128-byte bitmap) BlockAckReq + BlockAck; derived from the
+// compressed dotpcap/packetnet frames (plain 802.11, so the FCS is present)
+testPcapSerialization("../../pcap/wlan-blockack-basic.pcap", true);
+
+// More dissectable protocols, to widen serializer coverage. OSPFv3 (IP protocol
+// 89), MPLS-over-plain-IP (EtherType 0x8847), an ICMPv4 fragmentation-needed
+// (type 3 code 4) message, and STP configuration + Topology Change Notification
+// BPDUs. ospfv3.pcap was already in the corpus; the other three come from the
+// packetlife.net public capture library (epiecs/packetlife-backup mirror). All
+// four round-trip cleanly today.
+testPcapSerialization("../../pcap/ospfv3.pcap", false);     // Ospfv3 Hello/DD/LSR/LSU/LSAck
+testPcapSerialization("../../pcap/mpls-ip.pcap", false);    // MplsHeader
+testPcapSerialization("../../pcap/icmpv4-ptb.pcap", false); // IcmpPtb
+testPcapSerialization("../../pcap/stp-tcn.pcap", false);    // BpduCfg / BpduTcn
+
+// RIP travels over UDP port 520 but is not in the default ProtocolGroup port map,
+// so the UDP dissector would leave its payload as raw bytes. Register the port here
+// (test-local, no effect on simulations) to route the payload to RipProtocolDissector.
+ProtocolGroup::getUdpProtocolGroup()->addProtocol(520, &Protocol::rip);
+testPcapSerialization("../../pcap/rip.pcap", false);        // RipPacket
+testPcapSerialization("../../pcap/dhcp.pcap", false);       // DhcpMessage (UDP 67/68)
+testPcapSerialization("../../pcap/aodv.pcap", false); // AODV RREQ/RREP (ns-3, de-encapsulated from 802.11)
+testPcapSerialization("../../pcap/aodv-rerr.pcap", false); // AODV RERR + RREP-ACK (ns-3 wifi, de-encapsulated from 802.11)
+testPcapSerialization("../../pcap/gptp-full.pcap", false); // gPTP: adds Follow_Up + Pdelay_Req/Resp/Resp_Follow_Up
+testPcapSerialization("../../pcap/bgp.pcap", false);          // BGP (TCP 179)
+testPcapSerialization("../../pcap/sip_rtp_rtcp.pcap", false); // SIP / RTP / RTCP
+testPcapSerialization("../../pcap/mld.pcap", false);          // MLD (ICMPv6 types 130-132/143)
+testPcapSerialization("../../pcap/esp.pcap", false);          // IPsec ESP
+testPcapSerialization("../../pcap/ripng.pcap", false);        // RIPng (UDP 521)
+testPcapSerialization("../../pcap/cfm.pcap", false);          // CFM CCM (IEEE 802.1ag, EtherType 0x8902)
+
+reportSerializerCoverage(coverageSkipTypes);
+
+%not-contains: stdout
+differ
+
+%not-contains: stdout
+EXCEPTION
+
+%contains: stdout
+USED inet::EthernetMacHeader
+
+%contains: stdout
+USED inet::EthernetFcs
+
+%contains: stdout
+USED inet::ArpPacket
+
+%contains: stdout
+USED inet::Ipv4Header
+
+%contains: stdout
+USED inet::Ipv6Header
+
+%contains: stdout
+USED inet::IcmpHeader
+
+%contains: stdout
+USED inet::Icmpv6Header
+
+%contains: stdout
+USED inet::tcp::TcpHeader
+
+%contains: stdout
+USED inet::UdpHeader
+
+%not-contains: stdout
+TOPLEVEL-RAWBYTES
