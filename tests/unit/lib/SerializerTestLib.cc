@@ -19,6 +19,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
@@ -92,7 +93,20 @@ class CoverageBuilder : public PacketDissector::ICallback
         if (isRaw)
             rawChunkCount++;
         bytesParsed += chunk->getChunkLength();
-        builder.visitChunk(chunk, protocol);
+        // A FieldsChunk built by deserialization caches the original wire bytes, and the
+        // serializer replays that cache instead of re-encoding from the parsed fields (see
+        // FieldsChunkSerializer). Left as-is, the round-trip below would replay the input
+        // and never exercise serialize() -- masking any deserialize/serialize asymmetry.
+        // Store a mutable copy with the cache dropped so the re-serialization genuinely
+        // re-encodes from the fields.
+        Ptr<const Chunk> stored = chunk;
+        if (dynamic_cast<const FieldsChunk *>(chunk.get()) != nullptr) {
+            auto mutableChunk = makeExclusivelyOwnedMutableChunk(staticPtrCast<const FieldsChunk>(chunk));
+            mutableChunk->handleChange();  // clears serializedData (requires a mutable chunk)
+            mutableChunk->markImmutable(); // the reassembly below requires immutable chunks
+            stored = mutableChunk;
+        }
+        builder.visitChunk(stored, protocol);
     }
 };
 

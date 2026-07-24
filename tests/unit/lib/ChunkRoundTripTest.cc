@@ -730,6 +730,15 @@ void runCase(const std::string& name, cObjectFactory *factory, const ChunkRecipe
         const auto& chunk2 = Chunk::deserialize(in, typeid(*chunk.get()));
 
         g_phase = "re-serialize";
+        // Drop the deserialization byte cache so serialize() re-encodes from the parsed
+        // fields instead of replaying the bytes it just read (see FieldsChunkSerializer).
+        // Without this, chunk2 replays b1 verbatim, b2 == b1 always, the diff below never
+        // runs, and a serialize()-only asymmetry passes silently. chunk2 is the sole owner
+        // of a freshly deserialized (mutable) chunk.
+        if (auto fc = dynamic_cast<FieldsChunk *>(chunk2.get())) {
+            fc->markMutableIfExclusivelyOwned();
+            fc->handleChange(); // clears serializedData
+        }
         MemoryOutputStream out2;
         Chunk::serialize(out2, chunk2);
         std::vector<uint8_t> b2 = out2.getData();
