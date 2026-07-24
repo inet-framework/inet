@@ -150,14 +150,14 @@ void GptpPacketSerializer::writeGptpFollowUpPart(MemoryOutputStream& stream, con
 
 void GptpPacketSerializer::readGptpPdelayReqPart(MemoryInputStream& stream, GptpPdelayReq& gptpPacket) const
 {
-    stream.readByteRepeatedly(0, 10);
-    stream.readByteRepeatedly(0, 10);
+    for (size_t i = 0; i < gptpPacket.getReservedArraySize(); i++)
+        gptpPacket.setReserved(i, stream.readByte());
 }
 
 void GptpPacketSerializer::writeGptpPdelayReqPart(MemoryOutputStream& stream, const GptpPdelayReq& gptpPacket) const
 {
-    stream.writeByteRepeatedly(0, 10);
-    stream.writeByteRepeatedly(0, 10);
+    for (size_t i = 0; i < gptpPacket.getReservedArraySize(); i++)
+        stream.writeByte(gptpPacket.getReserved(i));
 }
 
 void GptpPacketSerializer::readGptpPdelayRespPart(MemoryInputStream& stream, GptpPdelayResp& gptpPacket) const

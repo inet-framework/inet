@@ -213,8 +213,10 @@ class GptpPdelayReq extends GptpBase
     messageType = GPTPTYPE_PDELAY_REQ;
     chunkLength = GPTP_PDELAY_REQ_PACKET_SIZE;
     messageLengthField = GPTP_PDELAY_REQ_PACKET_SIZE.get<B>();
-    clocktime_t reserved1;
-    clocktime_t reserved2;
+    // The 20 octets after the common header (a 10-octet reserved originTimestamp plus
+    // 10 reserved octets) are 0 in a conformant 802.1AS Pdelay_Req; kept verbatim so a
+    // capture that carries data there round-trips instead of being zeroed.
+    uint8_t reserved[20];
 }
 
 class GptpPdelayResp extends GptpBase
