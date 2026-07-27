@@ -646,6 +646,16 @@ void TcpBaseAlg::processEcnInEstablished()
 {
 }
 
+uint32_t TcpBaseAlg::calculateSsthresh(uint32_t bytesInFlight)
+{
+    return std::max(bytesInFlight / 2, 2 * state->snd_effmss);
+}
+
+uint32_t TcpBaseAlg::getBytesInFlight() const
+{
+    return state->snd_nxt - state->snd_una;
+}
+
 } // namespace tcp
 } // namespace inet
 
