@@ -89,6 +89,7 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
     if (rexmitQueue.empty() || (end == fromSeqNum)) {
         region.beginSeqNum = fromSeqNum;
         region.endSeqNum = toSeqNum;
+        region.lost = false;
         region.sacked = false;
         region.rexmitted = false;
         rexmitQueue.push_back(region);
@@ -126,6 +127,7 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
 
             region.beginSeqNum = fromSeqNum;
             region.endSeqNum = toSeqNum;
+            region.lost = false;
             region.sacked = beforeEnd ? i->sacked : false;
             region.rexmitted = beforeEnd;
             rexmitQueue.insert(i, region);
@@ -285,6 +287,12 @@ uint32_t TcpSackRexmitQueue::checkRexmitQueueForSackedOrRexmittedSegments(uint32
     }
 
     return bytes;
+}
+
+void TcpSackRexmitQueue::markHeadLost()
+{
+    ASSERT(!rexmitQueue.empty());
+    rexmitQueue.begin()->lost = true;
 }
 
 void TcpSackRexmitQueue::resetSackedBit()
