@@ -305,8 +305,19 @@ void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, c
                 EV_DETAIL << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
                 state->snd_nxt = state->snd_max;
                 sendFin();
-                tcpAlgorithm->restartRexmitTimer();
                 state->snd_max = ++state->snd_nxt;
+                emit(sndMaxSignal, state->snd_max);
+                // The FIN is new data on the wire: arm the retransmit timer if
+                // it is not already running for outstanding data, and (re)arm
+                // the loss probe for the new tail of the flight -- Linux
+                // tcp_event_new_data_sent + tcp_schedule_loss_probe; a plain
+                // rexmit-timer restart would disarm a pending probe (shared
+                // timer slot) and the lost FIN would wait out the full RTO.
+                // Must run AFTER snd_max advances over the FIN: schedulePto()
+                // refuses to arm while snd_una == snd_max, which silently
+                // skipped the probe for a FIN-only close (nothing else in
+                // flight -- user_timeout pins TLP-then-backoff FIN rexmits).
+                tcpAlgorithm->dataSent(state->snd_max - 1);
 
                 emit(unackedSignal, state->snd_max - state->snd_una);
 

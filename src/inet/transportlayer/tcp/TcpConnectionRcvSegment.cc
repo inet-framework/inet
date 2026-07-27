@@ -1155,8 +1155,16 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
     //"
     if (tcpHeader->getAckBit()) {
         if (seqLE(tcpHeader->getAckNo(), state->iss) || seqGreater(tcpHeader->getAckNo(), state->snd_nxt)) {
-            if (tcpHeader->getRstBit())
+            if (tcpHeader->getRstBit()) {
                 EV_DETAIL << "ACK+RST bit set but wrong AckNo, ignored\n";
+                // TCP Fast Open active blackhole detection: an out-of-order RST
+                // (wrong AckNo) while a data-carrying TFO SYN is still outstanding
+                // is a classic middlebox-interference symptom -- some boxes that
+                // don't understand the TFO option strip it and desync sequence
+                // numbers, producing a stray RST like this one.
+                if (state->fastopenSynDataLen > 0)
+                    tcpMain->recordFastOpenBlackhole();
+            }
             else {
                 EV_DETAIL << "ACK bit set but wrong AckNo, sending RST\n";
                 sendRst(tcpHeader->getAckNo(), destAddr, srcAddr, tcpHeader->getDestPort(), tcpHeader->getSrcPort());
@@ -1361,6 +1369,78 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 state->ect = false;
                 if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit())
                     EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
+            }
+
+            // Seed the RTT estimator from the handshake RTT (Linux measures the
+            // SYN<->SYN-ACK exchange via tcp_ack_update_rtt/tcp_synack_rtt_meas and
+            // enters ESTABLISHED with srtt/rttvar -- and hence the first RTO and any
+            // TLP probe timeout -- already RTT-scaled instead of the 1 s initial
+            // default). Karn: skipped if our handshake segment was retransmitted.
+            if (state->syn_rexmit_count == 0 && state->handshakeSentTime >= SIMTIME_ZERO)
+                tcpAlgorithm->rttMeasurementComplete(state->handshakeSentTime, simTime());
+
+            // RFC 7413 section 4.1: SYN data the SYN-ACK did NOT acknowledge
+            // (server acked only the SYN, or a partial range) is retransmitted
+            // immediately on connection establishment -- Linux does this from
+            // tcp_rcv_synsent_state_process, and the corpus pins the retransmit
+            // as the FIRST post-handshake segment with the handshake ACK
+            // piggybacked on it ("> P. 1:1001(1000) ack 1", no separate bare
+            // ACK). Pull snd_nxt back to the unacked point so established()'s
+            // send-data-with-first-ACK path emits exactly that.
+            bool fastopenSynDataRexmit = state->fastopenSynDataLen > 0 && seqLess(state->snd_una, state->snd_max);
+            if (fastopenSynDataRexmit) {
+                EV_INFO << "Fast Open: SYN data [" << state->snd_una << ", " << state->snd_max
+                        << ") not acknowledged by the SYN-ACK, retransmitting with the handshake ACK\n";
+                state->snd_nxt = state->snd_una;
+                // afterRto is the sanctioned "snd_nxt deliberately pulled back"
+                // signal: without it sendData() immediately resets snd_nxt to
+                // snd_max and nothing is retransmitted. It auto-clears once
+                // snd_nxt catches back up to snd_max.
+                state->afterRto = true;
+                // The unacked SYN data no longer counts as in flight (Linux's
+                // fallback requeues the skb as plain pending data, packets_out
+                // drops to 0): without the lost mark the pipe still carries it
+                // and, with the post-SYN-rexmit IW of one segment, allowedToSend
+                // collapses to zero and only a bare handshake ACK leaves
+                // (cookie-less-sendto's non-blocking test).
+                if (state->sack_enabled && rexmitQueue->getQueueLength() > 0)
+                    rexmitQueue->markLost(state->snd_una, state->snd_max);
+                // No Nagle/PSH special-casing needed anymore: Minshall's check
+                // never holds this partial (no unacked SMALL segment is in
+                // flight), and the PSH comes from the push boundary sendSyn()
+                // recorded at the SYN-data end (Linux marks the syn_data skb
+                // with TCPHDR_PSH at creation).
+            }
+
+            // RFC 793 permits FIN on the SYN-ACK; Linux processes it and lands
+            // in CLOSE_WAIT (tcp_fin) -- fastopen/client/synack-data's TEST2
+            // expects the single handshake ACK to cover data AND FIN (ack 1402).
+            // Advance rcv_nxt over the FIN BEFORE established(true) sends that
+            // ACK; the state hop goes SYN_SENT -> ESTABLISHED here, then the
+            // returned RCV_FIN takes ESTABLISHED -> CLOSE_WAIT in the caller
+            // (stateEntered defers TCP_I_PEER_CLOSED until the data is read,
+            // like a normal FIN behind undelivered data).
+            if (synAckFin) {
+                EV_INFO << "FIN on the SYN-ACK: advancing rcv_nxt over the FIN, will enter CLOSE_WAIT\n";
+                state->fin_rcvd = true;
+                state->rcv_fin_seq = state->rcv_nxt;
+                state->rcv_nxt = state->rcv_fin_seq + 1;
+            }
+
+            // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
+            state->ack_now = true;
+            tcpAlgorithm->established(true);
+            tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
+            sendEstabIndicationToApp();
+            // deliver any data that rode the SYN-ACK (inserted above) -- the
+            // normal per-segment delivery only runs in the data-transfer
+            // states, so without this the app would never see these bytes
+            // (and a poll() right after the handshake would miss POLLIN)
+            sendAvailableDataToApp();
+
+            if (synAckFin) {
+                performStateTransition(TCP_E_RCV_SYN_ACK); // SYN_SENT -> ESTABLISHED now...
+                return TCP_E_RCV_FIN;                      // ...so the caller's transition lands in CLOSE_WAIT
             }
 
             // This will trigger transition to ESTABLISHED. Timers and notifying
