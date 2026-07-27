@@ -646,9 +646,33 @@ void TcpConnection::configureStateVariables()
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
-    state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
+    // Maximum Segment Size (RFC 9293). mss=-1 is a sentinel meaning "derive from the
+    // address family" -- resolved in writeHeaderOptions() once remoteAddr is known.
+    // Read as signed first: assigning -1 straight into the uint32_t snd_mss trips
+    // OMNeT++'s cPar overflow check.
+    int mssPar = tcpMain->par("mss");
+    if (mssPar == -1)
+        state->snd_mss = (uint32_t)-1;
+    else if (mssPar >= 64 && mssPar <= 65535)
+        state->snd_mss = (uint32_t)mssPar;
+    else
+        throw cRuntimeError("mss must be -1 (address-family default) or in the range 64..65535, but is %d", mssPar);
+    state->snd_effmss = calculateEffectiveMss();
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
+    state->advertisedMss = state->snd_mss; // our own receive limit; stays unclamped when snd_mss later shrinks to the peer's MSS
+    // TCP_MAXSEG (setsockopt SOL_TCP, via TcpSetMaxSegCommand before OPEN): the app
+    // caps the MSS -- both what we advertise in our SYN/SYN-ACK and the effective
+    // send MSS (Linux rx_opt.user_mss). A later peer MSS option still clamps snd_mss
+    // further down (writeHeaderOptions/readHeaderOptions min), so a smaller peer MSS
+    // wins, but the peer can never raise us above userMss.
+    if (userMss > 0) {
+        state->advertisedMss = userMss;
+        if (state->snd_mss == (uint32_t)-1 || (uint32_t)userMss < state->snd_mss) {
+            state->snd_mss = userMss;
+            state->snd_effmss = calculateEffectiveMss();
+        }
+    }
     state->dupthresh = tcpMain->par("dupthresh");
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
@@ -1181,7 +1205,7 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
     state->snd_nxt = state->snd_una;
 
     // When FIN sent the snd_max - snd_nxt larger than bytes available in queue
-    uint32_t bytes = std::min(std::min(state->snd_mss, state->snd_max - state->snd_nxt),
+    uint32_t bytes = std::min(std::min(state->snd_effmss, state->snd_max - state->snd_nxt),
                 sendQueue->getBytesAvailable(state->snd_nxt));
 
     // FIN (without user data) needs to be resent
@@ -1251,7 +1275,7 @@ void TcpConnection::retransmitData()
 
     // TODO - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
     while (bytesToSend > 0) {
-        uint32_t bytes = std::min(bytesToSend, state->snd_mss);
+        uint32_t bytes = std::min(bytesToSend, state->snd_effmss);
         bytes = std::min(bytes, sendQueue->getBytesAvailable(state->snd_nxt));
         uint32_t sentBytes = sendSegment(bytes);
 
@@ -1347,13 +1371,21 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpHeader, cons
     //
     // The value of snd_mss (SMSS) is set to the minimum of snd_mss (local parameter) and
     // the value specified in the MSS option received during connection startup.
+    state->peerAdvertisedMss = option.getMaxSegmentSize(); // raw, pre-clamp (TFO metrics cache)
     state->snd_mss = std::min(state->snd_mss, (uint32_t)option.getMaxSegmentSize());
 
     if (state->snd_mss == 0)
-        state->snd_mss = 536;
+        // RFC 9293, section 3.7.1
+        //"
+        // If an MSS Option is not received at connection setup,
+        // TCP implementations MUST assume a default send MSS of
+        // 536 (576 - 40) for IPv4 or 1220 (1280 - 60) for IPv6 (MUST-15).
+        //"
+        state->snd_mss = remoteAddr.getType() == L3Address::IPv4 ? 536 : 1220;
 
     // Store negotiated MSS for PMTUD: this is the value we restore after the probe timeout
     state->pmtudOriginalMss = state->snd_mss;
+    state->snd_effmss = calculateEffectiveMss();
 
     EV_INFO << "Tcp Header Option MSS(=" << option.getMaxSegmentSize() << ") received, SMSS is set to " << state->snd_mss << "\n";
     return true;
@@ -1450,26 +1482,54 @@ bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHe
     return true;
 }
 
+uint32_t TcpConnection::calculateEffectiveMss()
+{
+    // calculate mss minus TCP options length for cwnd calculations
+    // TCP options used during the handshake is ignored
+    // only TCP options used in established connections are considered
+    // we only support two such options: timestamp and sack options
+    // we only calculate with the timestamp option
+    // the sack option is ignored because it is variable width and
+    // the number of sack blocks is not yet known when this value is needed
+    // also it is not important during recovery and during bidirectional traffic
+    return state->snd_mss - (state->ts_enabled ? 10 + 1 + 1 : 0); // timestamp option + end of options + padding
+}
+
 TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 {
     // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
+    if (state->advertisedMss == (uint32_t)-1)
+        state->advertisedMss = (remoteAddr.getType() == L3Address::IPv6) ? 1440 : 1460;
+    // Resolve the address-family-derived default MSS (mss = -1 sentinel) now that
+    // the remote address is known and before we advertise/use it. IPv6 has 40 bytes
+    // of base header vs IPv4's 20, so a 1500-byte MTU yields 1440 vs 1460.
+    if (state->snd_mss == (uint32_t)-1) {
+        state->snd_mss = (remoteAddr.getType() == L3Address::IPv6) ? 1440 : 1460;
+        state->snd_effmss = calculateEffectiveMss();
+        EV_DETAIL << "Derived default MSS from address family: snd_mss=" << state->snd_mss << "\n";
+    }
+
     if (tcpHeader->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
                                 || ((fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD)
                                     && state->syn_rexmit_count > 0)))
     {
-        // MSS header option
-        if (state->snd_mss > 0) {
+        // MSS header option: announces OUR receive limit (advertisedMss), not
+        // snd_mss -- by SYN-ACK time snd_mss is already clamped to the peer's
+        // announced MSS, and echoing that back is wrong (RFC 793/9293: each
+        // side announces its own limit; Linux advertises its own 1460 in the
+        // SYN-ACK regardless of the client's smaller MSS).
+        if (tcpMain->sendMssOption && state->advertisedMss > 0) {
             TcpOptionMaxSegmentSize *option = new TcpOptionMaxSegmentSize();
-            option->setMaxSegmentSize(state->snd_mss);
+            option->setMaxSegmentSize(state->advertisedMss);
             tcpHeader->appendHeaderOption(option);
-            EV_INFO << "Tcp Header Option MSS(=" << state->snd_mss << ") sent\n";
+            EV_INFO << "Tcp Header Option MSS(=" << state->advertisedMss << ") sent\n";
         }
 
         // WS header option
         if (state->ws_support && (state->rcv_ws || (fsm.getState() == TCP_S_INIT
                                                     || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
-            // 1 padding byte
+            if (tcpMain->alignOptions) // align
             tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
 
             // Update WS variables
@@ -1516,7 +1576,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         if (state->ts_support && (state->rcv_initial_ts || (fsm.getState() == TCP_S_INIT
                                                             || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
         {
-            if (!state->sack_support) { // if SACK is supported by host, do not add NOPs to this segment
+            if (tcpMain->alignOptions && !state->sack_support) { // if SACK is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP

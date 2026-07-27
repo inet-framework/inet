@@ -227,6 +227,8 @@ simple Tcp extends SimpleModule like ITcp
         int hystartDetect = default(3); // HyStart detectors, as a bitmask: 1 = ACK train, 2 = delay increase, 3 = both
         bool hystartEnabled = default(true); // HyStart: leave slow start when the path appears full, instead of overshooting into loss
         int hystartLowWindow = default(16); // smallest cwnd (in segments) at which HyStart starts looking for the exit point
+        // parameters of: tcp: size segments against the space options actually leave
+        bool syncookiesAlways = default(false); // model Linux sysctl tcp_syncookies=2 (cookies on every passive open): the server's connection is rebuilt from the cookie, whose 2-bit MSS field quantizes the peer's advertised MSS DOWN to the IPv4 msstab {536, 1300, 1440, 1460} (net/ipv4/syncookies.c); other option state (wscale/SACK/TS) survives via the timestamp encoding and stays exact
     gates:
         input appIn @labels(TcpCommand/down) @messageKinds(inet::TcpCommandCode);
         input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);

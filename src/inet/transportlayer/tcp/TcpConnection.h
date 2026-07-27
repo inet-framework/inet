@@ -108,6 +108,11 @@ class INET_API TcpConnection : public SimpleModule
     int ttl = -1;
     short dscp = -1;
     short tos = -1;
+    // Runtime TCP_MAXSEG (TcpSetMaxSegCommand): like notsentLowatSockopt, must
+    // survive arriving before state exists (a sockopt sent before connect()/
+    // listen()). -1 = never set; otherwise clamps advertisedMss/snd_mss in
+    // configureStateVariables(), and applied directly to state when set later.
+    int userMss = -1;
     bool autoRead = true;
     bool peerClosedSentUp = false;
     long maxByteCountRequested = 0;  // from READ requests
@@ -333,6 +338,8 @@ class INET_API TcpConnection : public SimpleModule
 
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
+
+    virtual uint32_t calculateEffectiveMss();
 
   public:
     TcpConnection() {}

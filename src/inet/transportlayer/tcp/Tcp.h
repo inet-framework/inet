@@ -182,6 +182,8 @@ class INET_API Tcp : public TransportProtocolBase
   public:
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     int msl;
+    bool alignOptions = true;
+    bool sendMssOption = true;
 
   public:
     Tcp() {}
