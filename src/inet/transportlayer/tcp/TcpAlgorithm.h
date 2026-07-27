@@ -11,6 +11,8 @@
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp/ITcpCongestionControl.h"
+#include "inet/transportlayer/tcp/ITcpRecovery.h"
 
 namespace inet {
 namespace tcp {
@@ -182,6 +184,14 @@ class INET_API TcpAlgorithm : public cObject
      * This function process ECN marks.
      */
     virtual void processEcnInEstablished() = 0;
+
+    /**
+     * The connection's loss-recovery strategy, or nullptr for flavours that do
+     * not use the ITcpRecovery split (DumbTcp, TcpNoCongestionControl, Vegas,
+     * Westwood). Lets the connection reach RACK/PRR/etc. without knowing the
+     * concrete algorithm class.
+     */
+    virtual ITcpRecovery *getRecovery() { return nullptr; }
 };
 
 } // namespace tcp
