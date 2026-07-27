@@ -24,8 +24,9 @@ simple TcpConnection extends SimpleModule {
         @signal[sndWnd];    // Snd_wnd
         @signal[rcvWnd];    // Rcv_wnd
         @signal[rcvAdv];    // Current advertised window (=rcv_adv)
-        @signal[sndNxt];    // Sent seqNo
+        @signal[sndSeq];    // Sent seqNo
         @signal[sndAck];    // Sent ackNo
+        @signal[sndMax];    // Snd_max
         @signal[rcvSeq];    // Received seqNo
         @signal[rcvAck];    // Received ackNo (=snd_una)
         @signal[unacked];    // Number of bytes unacknowledged
@@ -36,9 +37,13 @@ simple TcpConnection extends SimpleModule {
         @signal[rcvOooSeg];    // Number of received out-of-order segments
         @signal[rcvNASeg];    // Number of received not acceptable segments
         @signal[sackedBytes];    // Current number of received sacked bytes
+        @signal[delivered];    // Cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
+        @signal[deliveredCe];    // AccECN: cumulative resolved count of CE-marked packets the peer reported (draft-ietf-tcpm-accurate-ecn)
+        @signal[deliveredCeBytes];    // AccECN: cumulative CE byte count from AccECN option evidence
         @signal[tcpRcvQueueBytes];    // Current amount of used bytes in TCP receive queue
         @signal[tcpRcvQueueDrops];    // Number of drops in TCP receive queue
         @signal[tcpRcvPayloadBytes];   // Amount of payload bytes received (including duplicates, out of order, etc.) for TCP throughput
+        @signal[bytesInFlight];
 
         //TcpAlgorithm signals:
         @signal[cwnd];    // Will record changes to snd_cwnd
@@ -57,8 +62,9 @@ simple TcpConnection extends SimpleModule {
         @statistic[sndWnd](record=vector; interpolationmode=sample-hold);    // Snd_wnd
         @statistic[rcvWnd](record=vector; interpolationmode=sample-hold);    // Rcv_wnd
         @statistic[rcvAdv](record=vector; interpolationmode=sample-hold);    // Current advertised window (=rcv_adv)
-        @statistic[sndNxt](record=vector; interpolationmode=sample-hold);    // Sent seqNo
+        @statistic[sndSeq](record=vector; interpolationmode=sample-hold);    // Sent seqNo
         @statistic[sndAck](record=vector; interpolationmode=sample-hold);    // Sent ackNo
+        @statistic[sndMax](record=vector; interpolationmode=sample-hold);    // Snd_max
         @statistic[rcvSeq](record=vector; interpolationmode=sample-hold);    // Received seqNo
         @statistic[rcvAck](record=vector; interpolationmode=sample-hold);    // Received ackNo (=snd_una)
         @statistic[unacked](record=vector; interpolationmode=sample-hold);    // Number of bytes unacknowledged
@@ -69,9 +75,13 @@ simple TcpConnection extends SimpleModule {
         @statistic[rcvOooSeg](record=vector; interpolationmode=sample-hold);    // Number of received out-of-order segments
         @statistic[rcvNASeg](record=vector; interpolationmode=sample-hold);    // Number of received not acceptable segments
         @statistic[sackedBytes](record=vector; interpolationmode=sample-hold);    // Current number of received sacked bytes
+        @statistic[delivered](record=vector; interpolationmode=sample-hold);    // Cumulative newly-delivered (acked + sacked) bytes (RFC 8985/6937)
+        @statistic[deliveredCe](record=vector; interpolationmode=sample-hold);    // AccECN: cumulative resolved count of CE-marked packets the peer reported
+        @statistic[deliveredCeBytes](record=vector; interpolationmode=sample-hold);    // AccECN: cumulative CE byte count from AccECN option evidence
         @statistic[tcpRcvQueueBytes](record=vector; interpolationmode=sample-hold);    // Current amount of used bytes in tcp receive queue
         @statistic[tcpRcvQueueDrops](record=vector; interpolationmode=sample-hold);    // Number of drops in tcp receive queue
         @statistic[tcpRcvPayloadBytes](record=vector; interpolationmode=sample-hold);    // Current amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
+        @statistic[bytesInFlight](record=vector; interpolationmode=sample-hold);
 
         @statistic[cwnd](record=vector; interpolationmode=sample-hold);    // Will record changes to snd_cwnd
         @statistic[ssthresh](record=vector; interpolationmode=sample-hold);    // Will record changes to ssthresh
