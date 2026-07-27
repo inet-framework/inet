@@ -311,6 +311,14 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
         state->snd_effmss = calculateEffectiveMss();
 
+        // Seed the RTT estimator from the handshake RTT (Linux measures the
+        // SYN<->SYN-ACK exchange via tcp_ack_update_rtt/tcp_synack_rtt_meas and
+        // enters ESTABLISHED with srtt/rttvar -- and hence the first RTO -- already
+        // RTT-scaled instead of the initial default). Karn: skipped if our handshake
+        // segment was retransmitted.
+        if (state->seedRttFromHandshake && state->syn_rexmit_count == 0 && state->handshakeSentTime >= SIMTIME_ZERO)
+            tcpAlgorithm->rttMeasurementComplete(state->handshakeSentTime, simTime());
+
         // notify tcpAlgorithm and app layer
         tcpAlgorithm->established(false);
 
@@ -820,7 +828,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     receiveQueue->init(state->rcv_nxt); // FIXME may init twice...
     selectInitialSeqNum();
 
-    // although not mentioned in RFC 793, seems like we have to pick up
+    // although not mentioned in RFC 9293, seems like we have to pick up
     // initial snd_wnd from the segment here.
     updateWndInfo(tcpHeader, true);
 
@@ -1035,12 +1043,26 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
                 readHeaderOptions(tcpHeader);
 
+            // RFC 7323 / Linux tcp_rcv_synsent_state_process (PAWSACTIVEREJECTED):
+            // a SYN-ACK whose TSecr does not echo anything this connection could
+            // have sent (it must lie between the SYN's send time and now on our
+            // timestamp clock) is repelled with <SEQ=SEG.ACK><CTL=RST> and the
+            // segment is dropped -- the connection stays in SYN_SENT awaiting a
+            // valid SYN-ACK (synack-data TEST5's deliberate bad-ecr probe).
+            if (state->rcv_initial_ts && state->lastRcvdTSecr != 0 && state->handshakeSentTime >= SIMTIME_ZERO) {
+                uint32_t tsLow = convertSimtimeToTS(state->handshakeSentTime);
+                uint32_t tsHigh = convertSimtimeToTS(simTime());
+                if (seqLess(state->lastRcvdTSecr, tsLow) || seqGreater(state->lastRcvdTSecr, tsHigh)) {
+                    EV_WARN << "SYN-ACK TSecr " << state->lastRcvdTSecr << " outside [" << tsLow << ", "
+                            << tsHigh << "] -- repelling with RST (PAWSACTIVEREJECTED)\n";
+                    sendRst(tcpHeader->getAckNo());
+                    return TCP_E_IGNORE;
+                }
+            }
+
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
             state->snd_effmss = calculateEffectiveMss();
-            tcpAlgorithm->established(true);
-            tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
-            sendEstabIndicationToApp();
 
             // ECN
             if (state->ecnSynSent) {
