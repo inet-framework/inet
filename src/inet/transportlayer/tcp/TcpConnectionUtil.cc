@@ -1461,6 +1461,38 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (bytes > buffered) // last segment?
         bytes = buffered;
 
+    // The post-RTO snd_nxt forwarding above can land exactly at the end of the
+    // send queue (everything from the old snd_nxt was SACKed/retransmitted);
+    // building a zero-byte segment would abort in createSegmentWithBytes()
+    // ("empty chunk"). Report "nothing sent" instead -- callers stop their
+    // send loops on a zero return.
+    if (bytes == 0)
+        return 0;
+
+    // MSG_EOR: boundaries at or behind snd_una are already fully
+    // acked and no longer relevant to anything sendSegment() might build from here
+    // on; drop them so the set doesn't grow across a long connection's lifetime.
+    while (!eorSeqNums.empty() && !seqGreater(*eorSeqNums.begin(), state->snd_una))
+        eorSeqNums.erase(eorSeqNums.begin());
+    while (!pushSeqNums.empty() && !seqGreater(*pushSeqNums.begin(), state->snd_una))
+        pushSeqNums.erase(pushSeqNums.begin());
+    while (!forcedPushSeqNums.empty() && !seqGreater(*forcedPushSeqNums.begin(), state->snd_una))
+        forcedPushSeqNums.erase(forcedPushSeqNums.begin());
+
+    // A record boundary must never be spanned by one segment: clamp bytes so this
+    // segment ends exactly at the nearest boundary ahead of snd_nxt, if closer than
+    // what was requested. Applies equally to fresh sends and retransmissions, since
+    // both funnel through here and the boundary is keyed on sequence number, not on
+    // send-queue position.
+    if (!eorSeqNums.empty()) {
+        auto it = eorSeqNums.upper_bound(state->snd_nxt);
+        if (it != eorSeqNums.end()) {
+            uint32_t distanceToBoundary = *it - state->snd_nxt;
+            if (bytes > distanceToBoundary)
+                bytes = distanceToBoundary;
+        }
+    }
+
     // if header options will be added, this could reduce the number of data bytes allowed for this segment,
     // because following condition must to be respected:
     //     bytes + options_len <= snd_mss
@@ -3154,13 +3186,19 @@ uint16_t TcpConnection::updateRcvWnd()
 void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways)
 {
     uint32_t true_window = tcpHeader->getWindow();
-    // RFC 1323, page 10:
+    // RFC 7323, page 10
     // "The window field (SEG.WND) in the header of every incoming
-    // segment, with the exception of SYN segments, is left-shifted
-    // by Snd.Wind.Scale bits before updating SND.WND:
+    // segment, with the exception of <SYN> segments, MUST be left-
+    // shifted by Snd.Wind.Shift bits before updating SND.WND:
     //    SND.WND = SEG.WND << Snd.Wind.Scale"
     if (state->ws_enabled && !tcpHeader->getSynBit())
         true_window = tcpHeader->getWindow() << state->snd_wnd_scale;
+
+    // Largest window the peer has ever advertised (Linux tcp_ack_update_window's
+    // tp->max_window); the forced_push heuristic in sendSegment() pushes once more
+    // than max_window/2 of unpushed data has gone out.
+    if (true_window > state->max_window)
+        state->max_window = true_window;
 
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 982]:
     if (doAlways || (tcpHeader->getAckBit()
