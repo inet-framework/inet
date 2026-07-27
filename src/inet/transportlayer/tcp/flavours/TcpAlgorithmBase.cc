@@ -20,11 +20,6 @@ namespace tcp {
 // less than 0.5 seconds, and in a stream of full-sized
 // segments there SHOULD be an ACK for at least every second
 // segment."
-#define MAX_REXMIT_COUNT       12   // 12 retries
-#define MIN_REXMIT_TIMEOUT     1.0   // 1s
-#define MAX_REXMIT_TIMEOUT     240   // 2 * MSL (RFC 1122)
-#define MIN_PERSIST_TIMEOUT    5   // 5s
-#define MAX_PERSIST_TIMEOUT    60   // 60s
 
 std::string TcpAlgorithmBaseStateVariables::str() const
 // Linux-shaped adaptive receiver ACK dynamics (adaptiveDelayedAcks parameter);
@@ -100,6 +95,7 @@ void TcpAlgorithmBase::initialize()
     tlpTimer->setContextPointer(conn);
 
 
+    state->rexmit_timeout = initialRto;
 }
 
 uint32_t TcpAlgorithmBase::initialWindow() const
@@ -192,8 +188,14 @@ void TcpAlgorithmBase::established(bool active)
     if (active) {
         // finish connection setup with ACK (possibly piggybacked on data)
         EV_INFO << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
-        if (!sendData(false))
+        if (sendDataWithFirstAck) {
+            if (!sendData(false))
+                conn->sendAck();
+        }
+        else {
             conn->sendAck();
+            sendData(false);
+        }
     }
 
 }
@@ -238,7 +240,7 @@ void TcpAlgorithmBase::schedulePto()
     if (state->srtt > 0) {
         pto = state->srtt * 2;
         if (state->snd_max - state->snd_una <= state->snd_mss)
-            pto += MIN_REXMIT_TIMEOUT; // single packet in flight: allow for the peer's delayed ACK
+            pto += minRexmitTimeout; // single packet in flight: allow for the peer's delayed ACK
         else
             pto += SimTime(2, SIMTIME_MS); // floor so a near-zero srtt cannot fire the
                                            // probe between back-to-back ACKs of one flight
@@ -303,8 +305,8 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     // However, retransmission is actually more complicated than that
     // in RFC 9293 above, we'll leave it to subclasses (e.g. TcpTahoe, TcpReno).
     //
-    if (++state->rexmit_count > MAX_REXMIT_COUNT) {
-        EV_DETAIL << "Retransmission count exceeds " << MAX_REXMIT_COUNT << ", aborting connection\n";
+    if (++state->rexmit_count > maxRexmitCount) {
+        EV_DETAIL << "Retransmission count exceeds " << maxRexmitCount << ", aborting connection\n";
         conn->signalConnectionTimeout();
         event = TCP_E_ABORT; // TODO maybe rather introduce a TCP_E_TIMEDOUT event
         return;
@@ -321,8 +323,8 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
 
     // restart the retransmission timer with twice the latest RTO value, or with the max, whichever is smaller
     state->rexmit_timeout += state->rexmit_timeout;
-    if (state->rexmit_timeout > MAX_REXMIT_TIMEOUT)
-        state->rexmit_timeout = MAX_REXMIT_TIMEOUT;
+    if (state->rexmit_timeout > maxRexmitTimeout)
+        state->rexmit_timeout = maxRexmitTimeout;
 
     conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
 
@@ -376,25 +378,15 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
 
 void TcpAlgorithmBase::processPersistTimer(TcpEventCode& event)
 {
-    // setup and restart the PERSIST timer
-    // FIXME Calculation of PERSIST timer is not as simple as done here!
-    // It depends on RTT calculations and is bounded to 5-60 seconds.
-    // This simplified PERSIST timer calculation generates values
-    // as presented in [Stevens, W.R.: TCP/IP Illustrated, Volume 1, chapter 22.2]
-    // (5, 5, 6, 12, 24, 48, 60, 60, 60...)
-    if (state->persist_factor == 0)
-        state->persist_factor++;
-    else if (state->persist_factor < 64)
-        state->persist_factor = state->persist_factor * 2;
-
-    state->persist_timeout = state->persist_factor * 1.5; // 1.5 is a factor for typical LAN connection [Stevens, W.R.: TCP/IP Ill. Vol. 1, chapter 22.2]
-
-    // PERSIST timer is bounded to 5-60 seconds
-    if (state->persist_timeout < MIN_PERSIST_TIMEOUT)
-        state->rexmit_timeout = MIN_PERSIST_TIMEOUT;
-
-    if (state->persist_timeout > MAX_PERSIST_TIMEOUT)
-        state->rexmit_timeout = MAX_PERSIST_TIMEOUT;
+    // Linux tcp_probe_timer / probe0 cadence (resolves the old FIXME): the
+    // zero-window probe interval starts at the current RTO (set at first arm,
+    // see receivedAckForUnackedData's zero-window branch) and DOUBLES per
+    // probe (icsk_backoff), capped at maxPersistTimeout -- it is not the
+    // fixed Stevens 5/5/6/12/24/48/60 table: with a ~100ms RTT the first
+    // probe goes out at ~300ms (slow-start-after-win-update pins this).
+    state->persist_timeout = state->persist_timeout * 2;
+    if (state->persist_timeout > maxPersistTimeout)
+        state->persist_timeout = maxPersistTimeout;
 
     conn->scheduleAfter(state->persist_timeout, persistTimer);
 
@@ -507,11 +499,13 @@ void TcpAlgorithmBase::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     // Linux-style variance floor (tcp_set_rto): RTO = SRTT + max(4*RTTVAR, RTO_MIN),
     // i.e. RTO >= SRTT + minRexmitTimeout, rather than clamping the final RTO from
     // below.
-    simtime_t rto = state->srtt + 4 * state->rttvar;
-    if (rto > MAX_REXMIT_TIMEOUT)
-        rto = MAX_REXMIT_TIMEOUT;
-    else if (rto < MIN_REXMIT_TIMEOUT)
-        rto = MIN_REXMIT_TIMEOUT;
+    simtime_t varTerm = 4 * state->rttvar;
+    if (varTerm < minRexmitTimeout)
+        varTerm = minRexmitTimeout;
+    simtime_t rto = state->srtt + varTerm;
+
+    if (rto > maxRexmitTimeout)
+        rto = maxRexmitTimeout;
 
     state->rexmit_timeout = rto;
 

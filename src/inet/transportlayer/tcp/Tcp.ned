@@ -257,7 +257,9 @@ simple Tcp extends SimpleModule like ITcp
         bool windowAutoTuning = default(false); // receiver window auto-tuning (Linux tcp_grow_window): the offered window starts at advertisedWindow and grows with received data toward a clamp derived from receiveBufferSize. Requires receiveBufferSize to be set.
         bool windowShrinkAllowed = default(false); // model Linux sysctl tcp_shrink_window=1: the advertised window follows the receive buffer's genuine free space (__tcp_select_window's shrink branch) and may move the right edge DOWN as unread data accumulates -- occupancy is accounted at Linux's skb-truesize granularity and scaled by the measured payload/truesize ratio (tcp_scaling_ratio), so unread bytes cost what they cost a real socket buffer. Needs receiveBufferSize and an application that leaves data unread (e.g. a packetdrill explicit-read run) to differ from the default no-shrink policy
         // parameters of: tcp: judge loss by transmission time (RFC 8985)
+        double initialRto @unit(s) = default(1s); // initial retransmission timeout, used until the first RTT measurement completes (RFC 6298 section 2.1 specifies 1s; 3s is the historical RFC 1122 value)
         double rackReoTimerGranularity @unit(s) = default(0s); // model the kernel's jiffy-quantized REO timeout arming (Linux usecs_to_jiffies(timeout)+1: delay rounded UP to this granularity plus one extra tick, e.g. 4ms for an HZ=250 kernel); a sub-tick RACK deadline then fires whole ticks later, letting a dupthresh-timed SACK enter recovery first, as real kernels do. 0 = exact (default INET behavior)
+        int synRetries @mutable = default(-1); // Linux net.ipv4.tcp_syn_retries / per-socket TCP_SYNCNT: maximum number of SYN (and SYN-ACK) retransmissions before the connection attempt is aborted; -1 = INET's historical MAX_SYN_REXMIT_COUNT (12). @mutable so a test harness can inject the per-socket sockopt at runtime.
         // parameters of: tcp: TCP Fast Open (RFC 7413)
         bool alignOptions = default(true);  // enable/disable per-option predefined alignment
         double fastopenBlackholeTimeout @unit(s) = default(0s); // Client-side active-TFO blackhole detection: base disable duration after a suspected middlebox interference event (RTO or out-of-order RST on a data-carrying TFO SYN), doubling (capped at 64x) on repeated events. 0s (default) disables the detector entirely, matching Linux's own shipped default -- the local corpus's defaults.sh override to a nonzero value is a *test* configuration, not upstream's
@@ -266,6 +268,14 @@ simple Tcp extends SimpleModule like ITcp
         bool sendMssOption = default(true);  // enable/disable MSS option sending
         // parameters of: tcp: adapt the acknowledgement delay to the connection
         double delayedAckTimeout @unit(s) = default(200ms); // maximum time to wait before sending a delayed ACK
+        double maxPersistTimeout @unit(s) = default(60s); // maximum persist timeout
+        int maxRexmitCount = default(12); // maximum retransmission count
+        double maxRexmitTimeout @unit(s) = default(120s); // maximum retransmission timeout
+        double minPersistTimeout @unit(s) = default(5s); // minimum persist timeout
+        double minRexmitTimeout @unit(s) = default(0.2s); // minimum retransmission timeout
+        bool sendDataWithFirstAck = default(true); // send data in 3rd packet in SYN - SYN+ACK - ACK sequence
+        // parameters of: tcp: retransmission, persist and handshake timing
+        int synLinearTimeouts = default(4); // Linux net.ipv4.tcp_syn_linear_timeouts: number of initial CLIENT SYN retransmits fired at the (non-backed-off) initial RTO before exponential backoff begins; 0 = double from the first retransmit
     gates:
         input appIn @labels(TcpCommand/down) @messageKinds(inet::TcpCommandCode);
         input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);

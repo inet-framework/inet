@@ -1991,14 +1991,21 @@ void TcpConnection::process_TIMEOUT_FIN_WAIT_2()
 void TcpConnection::startSynRexmitTimer()
 {
     state->syn_rexmit_count = 0;
-    state->syn_rexmit_timeout = TCP_TIMEOUT_SYN_REXMIT;
+    // Linux retransmits the SYN/SYN-ACK on the same initial RTO as data (1s;
+    // TCP_TIMEOUT_INIT), doubling per attempt. The initialRto parameter sets it.
+    state->syn_rexmit_timeout = tcpMain->par("initialRto");
     rescheduleAfter(state->syn_rexmit_timeout, synRexmitTimer);
 }
 
 void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
 {
-    if (++state->syn_rexmit_count > MAX_SYN_REXMIT_COUNT) {
-        EV_INFO << "Retransmission count during connection setup exceeds " << MAX_SYN_REXMIT_COUNT << ", giving up\n";
+    // Linux net.ipv4.tcp_syn_retries / TCP_SYNCNT: cap on SYN retransmissions
+    // (read live so a runtime-injected sockopt takes effect); -1 keeps INET's
+    // historical MAX_SYN_REXMIT_COUNT.
+    int synRetries = tcpMain->par("synRetries");
+    int maxSynRexmitCount = synRetries >= 0 ? synRetries : MAX_SYN_REXMIT_COUNT;
+    if (++state->syn_rexmit_count > maxSynRexmitCount) {
+        EV_INFO << "Retransmission count during connection setup exceeds " << maxSynRexmitCount << ", giving up\n";
         // Note ABORT will take the connection to closed, and cancel CONN-ESTAB timer as well
         event = TCP_E_ABORT;
         return;
@@ -2029,11 +2036,23 @@ void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
                 stateName(fsm.getState()));
     }
 
-    // reschedule timer
-    state->syn_rexmit_timeout *= 2;
+    // reschedule timer: Linux (tcp_syn_linear_timeouts, default 4) fires the first
+    // few CLIENT SYN retransmits at the initial RTO (linear spacing) before
+    // exponential backoff begins, so a briefly-lost handshake recovers quickly.
+    // The server's SYN-ACK retransmit (SYN_RCVD) doubles from the first attempt.
+    int synLinearTimeouts = tcpMain->par("synLinearTimeouts");
+    bool linearTimeout = (fsm.getState() == TCP_S_SYN_SENT) && ((int)state->syn_rexmit_count <= synLinearTimeouts);
+    if (!linearTimeout)
+        state->syn_rexmit_timeout *= 2;
 
-    if (state->syn_rexmit_timeout > TCP_TIMEOUT_SYN_REXMIT_MAX)
-        state->syn_rexmit_timeout = TCP_TIMEOUT_SYN_REXMIT_MAX;
+    // the configured RTO ceiling caps handshake retransmits too (Linux
+    // net.ipv4.tcp_rto_max_ms bounds the SYN-ACK backoff; tcp_rto_synack_rto_max
+    // pins 1s-spaced SYN-ACK retransmits under a 1s cap)
+    simtime_t maxSynRexmitTimeout = tcpMain->par("maxRexmitTimeout");
+    if (maxSynRexmitTimeout > TCP_TIMEOUT_SYN_REXMIT_MAX)
+        maxSynRexmitTimeout = TCP_TIMEOUT_SYN_REXMIT_MAX;
+    if (state->syn_rexmit_timeout > maxSynRexmitTimeout)
+        state->syn_rexmit_timeout = maxSynRexmitTimeout;
 
     scheduleAfter(state->syn_rexmit_timeout, synRexmitTimer);
 }
