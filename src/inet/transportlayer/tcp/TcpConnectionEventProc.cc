@@ -203,6 +203,72 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand)) {
         dscp = cmd->getDscp();
     }
+    else if (auto cmd = dynamic_cast<TcpSetTimestampingCommand *>(tcpCommand)) {
+        rxTimestampingEnabled = cmd->getEnabled();
+    }
+    else if (auto cmd = dynamic_cast<TcpSetNotsentLowatCommand *>(tcpCommand)) {
+        // Runtime TCP_NOTSENT_LOWAT: same field the notsentLowat module param
+        // seeds at connection setup (configureStateVariables); -1 disables.
+        // May legally arrive before OPEN creates state (like setTimestamping
+        // above) -- keep the value on the connection and apply it now only if
+        // state already exists; configureStateVariables() applies it otherwise.
+        notsentLowatSockopt = cmd->getValue();
+        if (state != nullptr)
+            state->notsentLowat = (notsentLowatSockopt < 0) ? (uint32_t)-1 : (uint32_t)notsentLowatSockopt;
+    }
+    else if (auto cmd = dynamic_cast<TcpSetMaxSegCommand *>(tcpCommand)) {
+        // Runtime TCP_MAXSEG: clamp the advertised and effective send MSS. Like
+        // TCP_NOTSENT_LOWAT above it may arrive before OPEN creates state; keep it
+        // on the connection and let configureStateVariables() apply it, or apply
+        // now if state already exists (a mid-connection clamp).
+        userMss = cmd->getValue();
+        if (state != nullptr && userMss > 0) {
+            state->advertisedMss = userMss;
+            if (state->snd_mss == (uint32_t)-1 || (uint32_t)userMss < state->snd_mss)
+                state->snd_mss = userMss;
+            state->snd_effmss = calculateEffectiveMss();
+        }
+    }
+    else if (auto cmd = dynamic_cast<TcpSetWriterBlockedCommand *>(tcpCommand)) {
+        // The application's blocking write is (no longer) stalled on
+        // send-buffer space -- drives the SNDBUF_LIMITED chrono
+        // (tcp-info-sndbuf-limited).
+        writerBlocked = cmd->getBlocked();
+        EV_DETAIL << "Application writer is " << (writerBlocked ? "blocked on send-buffer space" : "no longer blocked") << "\n";
+        updateSndbufLimitedChrono();
+    }
+    else if (auto cmd = dynamic_cast<TcpSetOwnedCommand *>(tcpCommand)) {
+        // Application-ownership marker (Linux sk->sk_socket): gates the
+        // kernel behaviors that skip embryonic (not-yet-accepted) sockets,
+        // e.g. OOO-pressure rcvbuf growth (ooo-before-and-after-accept).
+        appOwned = cmd->getOwned();
+        EV_DETAIL << "Connection ownership set to " << (appOwned ? "owned" : "embryonic") << "\n";
+    }
+    else if (auto cmd = dynamic_cast<TcpSetNoDelayCommand *>(tcpCommand)) {
+        // Runtime TCP_NODELAY: nagle_enabled is the runtime Nagle switch (nodelay
+        // disables Nagle). Enabling nodelay force-flushes any withheld partial
+        // (Linux __tcp_push_pending_frames on the nagle-off transition) but does NOT
+        // clear tcp_cork -- CORK outranks NODELAY for future small writes. May arrive
+        // before OPEN creates state; stash and let configureStateVariables() apply it.
+        nodelaySockopt = cmd->getNodelay() ? 1 : 0;
+        if (state != nullptr) {
+            state->nagle_enabled = !cmd->getNodelay();
+            if (cmd->getNodelay())
+                flushCorkedData(false);
+        }
+    }
+    else if (auto cmd = dynamic_cast<TcpSetCorkCommand *>(tcpCommand)) {
+        // Runtime TCP_CORK: persistently hold the trailing sub-MSS partial. A
+        // true->false transition (uncork) force-flushes the withheld partial
+        // (Linux tcp_uncork tail). May arrive before OPEN creates state.
+        corkSockopt = cmd->getCork() ? 1 : 0;
+        if (state != nullptr) {
+            bool wasCorked = state->tcp_cork;
+            state->tcp_cork = cmd->getCork();
+            if (wasCorked && !cmd->getCork())
+                flushCorkedData(false);
+        }
+    }
     else
         throw cRuntimeError("Unknown subclass of TcpSetOptionCommand received from app: %s", tcpCommand->getClassName());
     delete tcpCommand;
@@ -321,6 +387,8 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setAutoRead(autoRead);
 
     statusInfo->setSnd_mss(state->snd_mss);
+    statusInfo->setSndEffMss(state->snd_effmss);
+    statusInfo->setAdvmss(state->advertisedMss);
     statusInfo->setSnd_una(state->snd_una);
     statusInfo->setSnd_nxt(state->snd_nxt);
     statusInfo->setSnd_max(state->snd_max);

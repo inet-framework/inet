@@ -636,44 +636,194 @@ void TcpConnection::configureStateVariables()
     state->rcv_adv = advertisedWindow;
 
     if (state->ws_support && advertisedWindow > TCP_MAX_WIN) {
-        state->rcv_wnd = TCP_MAX_WIN; // we cannot to guarantee that the other end is also supporting the Window Scale (header option) (RFC 1322)
+        state->rcv_wnd = TCP_MAX_WIN; // we cannot to guarantee that the other end is also supporting the Window Scale (header option) (RFC 1122)
         state->rcv_adv = TCP_MAX_WIN; // therefore TCP_MAX_WIN is used as initial value for rcv_wnd and rcv_adv
     }
 
     state->maxRcvBuffer = advertisedWindow;
+    // receive-buffer capacity decoupled from the advertised window (Linux
+    // sk_rcvbuf vs the offered window): out-of-order data may be buffered up
+    // to this limit; -1 keeps the historical conflation
+    {
+        int64_t rcvBufBytes = (int64_t)tcpMain->par("receiveBufferSize").doubleValue();
+        state->rcvBufferSize = rcvBufBytes >= 0 ? (uint32_t)rcvBufBytes : 0;
+    }
+    // receiver window auto-tuning (Linux tcp_grow_window): offer starts at
+    // advertisedWindow, grows with received data toward the clamp (Linux
+    // tcp_win_from_space halves the buffer at the default scaling ratio)
+    if (tcpMain->par("windowAutoTuning") && state->rcvBufferSize > 0) {
+        state->rcv_ssthresh = advertisedWindow;
+        state->window_clamp = std::max(advertisedWindow, state->rcvBufferSize / 2);
+    }
+    // windowShrinkAllowed: the whole window model follows the REAL buffer
+    // (Linux sk_rcvbuf = receiveBufferSize), not the advertisedWindow param --
+    // the initial offer is tcp_select_initial_window's win_from_space at the
+    // DEFAULT 50% scaling ratio, so the maximum promise the peer can hold us
+    // to (rcv_adv / Linux rcv_mwnd_seq) starts buffer-derived too
+    // (rcv_wnd_shrink_allowed's max promise comes solely from the first
+    // data-time offer).
+    if (tcpMain->par("windowShrinkAllowed").boolValue() && state->rcvBufferSize > 0) {
+        state->maxRcvBuffer = state->rcvBufferSize;
+        uint32_t initWin = std::min<uint32_t>(state->rcvBufferSize / 2, TCP_MAX_WIN);
+        state->rcv_wnd = initWin;
+        state->rcv_adv = initWin;
+        if (tcpMain->par("windowAutoTuning") && state->rcvBufferSize > 0) {
+            state->rcv_ssthresh = std::max<uint32_t>(state->rcv_ssthresh, state->rcvBufferSize);
+            state->window_clamp = std::max<uint32_t>(state->window_clamp, state->rcvBufferSize);
+        }
+    }
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
-    state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
+    state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
+    state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 1122) enabled/disabled
+    // A runtime TCP_NODELAY / TCP_CORK received before OPEN (nodelaySockopt/corkSockopt,
+    // INT_MIN = never set) overrides the compiled-in defaults (mirrors userMss/notsentLowat).
+    if (nodelaySockopt != INT_MIN)
+        state->nagle_enabled = (nodelaySockopt == 0);
+    if (corkSockopt != INT_MIN)
+        state->tcp_cork = (corkSockopt != 0);
+    state->adaptiveDelayedAcks = tcpMain->par("adaptiveDelayedAcks"); // Linux-shaped quickack/ATO/pingpong dynamics
+    state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary"); // Linux-parity PSH-on-drain
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
-    state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
-    state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
+    const char *initialWindow = tcpMain->par("initialWindow");
+    if (state->increased_IW_enabled) {
+        // deprecated knob: map to RFC 3390 unless initialWindow was also set
+        if (strcmp(initialWindow, "rfc2001") != 0)
+            throw cRuntimeError("Tcp: set either the deprecated increasedIWEnabled or initialWindow, not both");
+        EV_WARN << "Tcp: increasedIWEnabled is deprecated; use initialWindow=\"rfc3390\"\n";
+        state->init_cwnd_mode = 1;
+    }
+    else if (!strcmp(initialWindow, "rfc3390"))
+        state->init_cwnd_mode = 1;
+    else if (!strcmp(initialWindow, "rfc6928"))
+        state->init_cwnd_mode = 2;
+    else
+        state->init_cwnd_mode = 0;
+    // Maximum Segment Size (RFC 9293). mss=-1 is a sentinel meaning "derive from the
+    // address family" -- resolved in writeHeaderOptions() once remoteAddr is known.
+    // Read as signed first: assigning -1 straight into the uint32_t snd_mss trips
+    // OMNeT++'s cPar overflow check.
+    int mssPar = tcpMain->par("mss");
+    if (mssPar == -1)
+        state->snd_mss = (uint32_t)-1;
+    else if (mssPar >= 64 && mssPar <= 65535)
+        state->snd_mss = (uint32_t)mssPar;
+    else
+        throw cRuntimeError("mss must be -1 (address-family default) or in the range 64..65535, but is %d", mssPar);
+    state->snd_effmss = calculateEffectiveMss();
+    state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 7323)
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
+    state->advertisedMss = state->snd_mss; // our own receive limit; stays unclamped when snd_mss later shrinks to the peer's MSS
+    // TCP_MAXSEG (setsockopt SOL_TCP, via TcpSetMaxSegCommand before OPEN): the app
+    // caps the MSS -- both what we advertise in our SYN/SYN-ACK and the effective
+    // send MSS (Linux rx_opt.user_mss). A later peer MSS option still clamps snd_mss
+    // further down (writeHeaderOptions/readHeaderOptions min), so a smaller peer MSS
+    // wins, but the peer can never raise us above userMss.
+    if (userMss > 0) {
+        state->advertisedMss = userMss;
+        if (state->snd_mss == (uint32_t)-1 || (uint32_t)userMss < state->snd_mss) {
+            state->snd_mss = userMss;
+            state->snd_effmss = calculateEffectiveMss();
+        }
+    }
+    // TCP_NOTSENT_LOWAT. -1 (default) disables it; same signed-read-
+    // first pattern as mss above, since -1 doesn't fit directly into the uint32_t field.
+    // A runtime TcpSetNotsentLowatCommand received before OPEN (notsentLowatSockopt,
+    // INT_MIN = never set) overrides the module parameter.
+    int notsentLowatPar = (notsentLowatSockopt != INT_MIN) ? notsentLowatSockopt : (int)tcpMain->par("notsentLowat");
+    state->notsentLowat = (notsentLowatPar < 0) ? (uint32_t)-1 : (uint32_t)notsentLowatPar;
+    // ECN mode resolution (AccECN): tcpEcnMode supersedes the deprecated
+    // ecnWillingness. Exact precedent: increasedIWEnabled vs initialWindow (above).
+    bool ecnWillingnessDeprecated = tcpMain->par("ecnWillingness");
+    const char *tcpEcnModeStr = tcpMain->par("tcpEcnMode");
+    if (ecnWillingnessDeprecated) {
+        if (strcmp(tcpEcnModeStr, "off") != 0)
+            throw cRuntimeError("Tcp: set either the deprecated ecnWillingness or tcpEcnMode, not both");
+        EV_WARN << "Tcp: ecnWillingness is deprecated; use tcpEcnMode=\"rfc3168\"\n";
+        state->ecnMode = TCP_ECN_MODE_RFC3168;
+    }
+    else if (!strcmp(tcpEcnModeStr, "passive"))
+        state->ecnMode = TCP_ECN_MODE_PASSIVE;
+    else if (!strcmp(tcpEcnModeStr, "rfc3168"))
+        state->ecnMode = TCP_ECN_MODE_RFC3168;
+    else if (!strcmp(tcpEcnModeStr, "accecn"))
+        state->ecnMode = TCP_ECN_MODE_ACCECN;
+    else if (!strcmp(tcpEcnModeStr, "accecn-passive"))
+        state->ecnMode = TCP_ECN_MODE_ACCECN_PASSIVE;
+    else
+        state->ecnMode = TCP_ECN_MODE_OFF;
+    // state->ecnWillingness reflects "willing to use ECN in some capacity" (accept and/or
+    // initiate) and is what the PASSIVE-open call sites (processSynInListen/sendSynAck) key
+    // off, unchanged since before AccECN -- true for rfc3168 and both AccECN modes (passive
+    // mode's own asymmetry, and accecn-passive's, is about *initiating*, which the ACTIVE-open
+    // call site (sendSyn()) decides separately, directly from ecnMode, not from this flag).
+    state->ecnWillingness = state->ecnMode >= TCP_ECN_MODE_RFC3168;
+    state->accEcnOptionEnabled = tcpMain->par("accEcnOptionEnabled");
+    state->accEcnOptionBeaconAcks = tcpMain->par("accEcnOptionBeaconAcks");
+    state->accEcnOptionKindAlternates = tcpMain->par("accEcnOptionKindAlternates");
     state->dupthresh = tcpMain->par("dupthresh");
-    state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
+    state->frtoEnabled = tcpMain->par("frtoEnabled");
+    state->tlpEnabled = tcpMain->par("tlpEnabled");
+    state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
+    state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
+    state->maxReordering = tcpMain->par("maxReordering");
+    state->reordering = state->dupthresh; // dynamic DupThresh starts at the static value
+    state->lossUndoEnabled = tcpMain->par("lossUndoEnabled");
+    state->prrEnabled = tcpMain->par("prrEnabled");
+    state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
+    state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 6675)
+    // SACK-based (RFC 6675) loss recovery is provided by flavours whose createRecovery()
+    // can return an Rfc6675Recovery (TcpReno, TcpNewReno). Other flavours (TcpTahoe,
+    // TcpVegas, TcpWestwood, DumbTcp, ...) have no SACK recovery path. Rather than error
+    // -- which would make it impossible to turn sackSupport on by default -- treat
+    // sackSupport as a willingness (as Linux does; SACK is orthogonal to the congestion
+    // control) and simply do not use SACK for a flavour that cannot recover with it.
+    if (state->sack_support && !tcpAlgorithm->supportsSackRecovery()) {
+        EV_WARN << "sackSupport=true but tcpAlgorithmClass=\"" << tcpAlgorithm->getClassName()
+                << "\" has no SACK-based loss recovery; disabling SACK for this connection\n";
+        state->sack_support = false;
+    }
+    if (state->lossDetectionMode == 1 && !state->sack_support) {
+        // RACK needs the SACK scoreboard. Rather than make the connection
+        // unusable, fall back to classic DupThresh -- the same "willingness"
+        // treatment sackSupport itself gets just above, so that turning RACK on
+        // by default cannot break a flavour or peer that ends up without SACK.
+        EV_WARN << "lossDetectionMode=\"rack\" requires SACK, which is not enabled for this "
+                   "connection; falling back to DupThresh loss detection\n";
+        state->lossDetectionMode = 0;
+    }
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
+    state->dsack_enabled = tcpMain->par("dsackEnabled"); // if set, this means that current host supports SACK (RFC 2018, 2883, 6675)
+
+    // TCP_INFO trio: idle/not-limited until the first SEND/sendData() call says
+    // otherwise (enqueueSendCommandData()/sendData()).
+    state->busyStartTime = -1;
+    state->rwndLimitedStartTime = -1;
+    state->sndbufLimitedStartTime = -1;
+
+    state->fastopenClientEnabled = tcpMain->par("fastopenClientEnabled"); // TCP Fast Open (RFC 7413)
+    state->fastopenServerEnabled = tcpMain->par("fastopenServerEnabled");
+    state->fastopenAcceptWithoutCookie = tcpMain->par("fastopenAcceptWithoutCookie");
+    state->fastopenLenientCookieValidation = tcpMain->par("fastopenLenientCookieValidation");
+    state->fastopenExpOptionEnabled = tcpMain->par("fastopenExpOptionEnabled");
+    int fastopenCookieBytes = tcpMain->par("fastopenCookieBytes");
+    if (fastopenCookieBytes < 4 || fastopenCookieBytes > 16)
+        throw cRuntimeError("fastopenCookieBytes must be in the range 4..16 (RFC 7413 SS4), but is %d", fastopenCookieBytes);
+    state->fastopenCookieBytes = fastopenCookieBytes;
 
     WATCH_EXPR("snd_nxt", state->snd_nxt);
     WATCH_EXPR("rcv_nxt", state->rcv_nxt);
     WATCH_EXPR("snd_una", state->snd_una);
 
-    if (state->sack_support) {
-        std::string algorithmName1 = "TcpReno";
-        std::string algorithmName2 = tcpMain->par("tcpAlgorithmClass");
-
-        if (algorithmName1 != algorithmName2) { // TODO add additional checks for new SACK supporting algorithms here once they are implemented
-            EV_DEBUG << "If you want to use TCP SACK please set tcpAlgorithmClass to TcpReno\n";
-
-            ASSERT(false);
-        }
-    }
 }
 
 void TcpConnection::selectInitialSeqNum()
 {
     // set the initial send sequence number
-    state->iss = (unsigned long)fmod(SIMTIME_DBL(simTime()) * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL) & 0xffffffffUL;
+    int64_t iss = tcpMain->par("initialSendSequenceNumber");
+    state->iss = iss != -1 ? iss : (unsigned long)fmod(SIMTIME_DBL(simTime()) * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL) & 0xffffffffUL;
 
     state->snd_una = state->snd_nxt = state->snd_max = state->iss;
 
@@ -1045,17 +1195,150 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         state->queueUpdate = true;
     }
 
+    // TCP_NOTSENT_LOWAT: independent low-water-mark check on the
+    // not-yet-transmitted portion of the queue (snd_nxt has just advanced past this
+    // segment, above). Disarmed/re-armed separately from sendQueueLimit/queueUpdate.
+    if (state->notsentLowat != (uint32_t)-1 && !state->notsentLowatUpdate) {
+        uint32_t notsentBytes = sendQueue->getBytesAvailable(state->snd_nxt);
+        if (notsentBytes <= state->notsentLowat) {
+            sendIndicationToApp(TCP_I_SEND_MSG, notsentBytes);
+            state->notsentLowatUpdate = true;
+        }
+    }
+
+    // Minshall bookkeeping (Linux tcp_minshall_update, called only for NEW
+    // data in tcp_write_xmit): a freshly sent sub-MSS segment records its end
+    // seq so Nagle can hold the NEXT partial until this one is acked.
+    // Retransmissions (snd_nxt at or below the old snd_max) don't count.
+    // "Small" is judged against what THIS segment could have carried
+    // (Linux compares skb->len to pcount * mss_now, the options-adjusted
+    // MSS) -- not against snd_effmss, which still includes option headroom.
+    if (bytes > 0 && bytes + options_len < state->snd_mss && seqGreater(state->snd_nxt, state->snd_max))
+        state->snd_sml = state->snd_nxt;
+
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
-    if (seqGreater(state->snd_nxt, state->snd_max))
+    if (seqGreater(state->snd_nxt, state->snd_max)) {
         state->snd_max = state->snd_nxt;
+        emit(sndMaxSignal, state->snd_max);
+    }
+
+    // Track peak segments in flight (Linux max_packets_out) for the RFC 5681
+    // cwnd-limited slow-start gate: an application-limited flow that never fills
+    // the congestion window must not be allowed to inflate it. Round up so a
+    // partial trailing segment counts as a whole packet (Linux accounts in
+    // packets, not bytes).
+    if (state->snd_mss > 0) {
+        uint32_t packetsOut = (state->snd_max - state->snd_una + state->snd_mss - 1) / state->snd_mss;
+        if (packetsOut > state->maxPacketsOut)
+            state->maxPacketsOut = packetsOut;
+    }
+
+    updateSndbufLimitedChrono(); // this send may have drained the queue
 
     return sentBytes;
 }
 
+void TcpConnection::enqueueSendCommandData(Packet *packet)
+{
+    // TCP_INFO trio (busy_time): read-only bookkeeping -- if the connection was
+    // fully idle (nothing outstanding, nothing queued) before this SEND, it becomes
+    // busy now. See processAckInEstabEtc() for the matching "back to idle" exit.
+    if (state->busyStartTime < SIMTIME_ZERO && state->snd_una == state->snd_max
+        && sendQueue->getBytesAvailable(state->snd_nxt) == 0)
+    {
+        state->busyStartTime = simTime();
+    }
+
+    bool eor = packet->findTag<TcpSendEorReq>() != nullptr;
+    bool zerocopy = packet->findTag<TcpSendZerocopyReq>() != nullptr;
+    // TCP_CORK / MSG_MORE: MSG_MORE corks this one send's trailing partial. A write
+    // WITHOUT MSG_MORE while corking is active marks the held tail for PSH on flush
+    // (Linux tcp_mark_push). msgMoreThisSend is consumed at the top of sendData().
+    bool msgMore = packet->findTag<TcpSendMoreReq>() != nullptr;
+    state->msgMoreThisSend = msgMore;
+    if (!msgMore && (state->tcp_cork || state->corkedDataPending))
+        state->pushHeldPartial = true;
+    uint32_t writeStartSeq = sendQueue->getBufferEndSeq(); // Linux tp->write_seq before this write
+    sendQueue->enqueueAppData(packet);
+    if (eor) {
+        uint32_t boundarySeq = sendQueue->getBufferEndSeq();
+        eorSeqNums.insert(boundarySeq);
+        EV_DETAIL << "MSG_EOR: recorded record boundary at seq=" << boundarySeq << "\n";
+    }
+    // Linux tcp_mark_push tags the tail skb of every write (without MSG_MORE)
+    // AT WRITE TIME -- the PSH survives later writes queuing behind it and is
+    // retained on retransmission. Recording the boundary here (instead of a
+    // buffer-drained check at transmit time) is what keeps the last segment of
+    // a write PSH-marked even when the next write is already buffered
+    // Linux forced_push (tcp_sendmsg copy loop): while a large write is being
+    // copied into the send queue, every time an skb fills with more than
+    // max_window/2 of data beyond the last PSH mark, that skb is PSH-marked
+    // (tcp_mark_push) so the receiver keeps delivering without waiting for the
+    // whole write to drain. skb fill geometry: size_goal quantizes
+    // tcp_bound_to_half_wnd(max_window/2, aligned by Linux's ALIGN() with the
+    // PMTU-derived mss_cache 1460) down to whole MSS units. The mark's PSH
+    // surfaces on the marked skb's SECOND mss slice, i.e. the wire segment
+    // ending at skbStart + 2*mss.
+    if (state->pushOnWriteBoundary && !msgMore && state->max_window > 0) {
+        if (seqLess(state->pushed_seq, state->snd_una))
+            state->pushed_seq = state->snd_una; // lazy seed: first write of a connection
+        uint32_t halfWnd = state->max_window >> 1;
+        const uint32_t mssCache = 1460; // Linux tp->mss_cache (IPv4 PMTU 1500 - 40)
+        uint32_t alignQ = (halfWnd + mssCache - 1) & ~(mssCache - 1); // Linux ALIGN() verbatim (the macro assumes a power of 2; Linux applies it to mss_cache anyway, so replicate bit-for-bit)
+        uint32_t sizeGoal = std::max((alignQ / state->snd_mss) * state->snd_mss, state->snd_mss);
+        uint32_t writeEndSeq = sendQueue->getBufferEndSeq();
+        for (uint32_t f = writeStartSeq + sizeGoal; seqLE(f, writeEndSeq); f += sizeGoal) {
+            if (seqGreater(f, state->pushed_seq + halfWnd)) {
+                uint32_t pshSeq = f - sizeGoal + 2 * state->snd_mss;
+                forcedPushSeqNums.insert(pshSeq);
+                state->pushed_seq = f;
+                EV_DETAIL << "forced_push: recorded mid-write PSH boundary at seq=" << pshSeq << "\n";
+            }
+        }
+    }
+    if (state->pushOnWriteBoundary && !msgMore) {
+        pushSeqNums.insert(sendQueue->getBufferEndSeq());
+        state->pushed_seq = sendQueue->getBufferEndSeq(); // Linux tcp_push -> tcp_mark_push on the write's tail skb
+    }
+
+    if (zerocopy) {
+        uint32_t boundarySeq = sendQueue->getBufferEndSeq();
+        uint32_t zerocopyId = nextZerocopyId++;
+        zerocopySeqNums[boundarySeq] = zerocopyId;
+        EV_DETAIL << "MSG_ZEROCOPY: recorded pending completion id=" << zerocopyId << " at seq=" << boundarySeq << "\n";
+    }
+
+    updateSndbufLimitedChrono(); // fresh unsent data: the starved interval (if any) ends
+}
+
+int TcpConnection::deriveLinuxCaState() const
+{
+    if (state->afterRto)
+        return 4; // TCP_CA_Loss
+    if (state->lossRecovery)
+        return 3; // TCP_CA_Recovery
+    if (state->sndCwr)
+        return 2; // TCP_CA_CWR
+    // TCP_CA_Disorder: SACK/dup information has arrived (segments sit above
+    // snd_una) but not enough to enter recovery yet -- Linux tcp_fastretrans_alert
+    // holds ca_state at Disorder while sacked_out > 0 without a confirmed loss.
+    // sackedBytes is kept current on both the SACK and the cumulative-ACK path, so
+    // this reverts to Open as soon as snd_una catches up to the SACKed data.
+    if (state->sack_enabled && state->sackedBytes > 0)
+        return 1; // TCP_CA_Disorder
+    return 0; // TCP_CA_Open
+}
+
 bool TcpConnection::sendData(uint32_t congestionWindow)
 {
+    // MSG_MORE corks the trailing partial only for THIS send-driven sendData().
+    // Read-and-clear it up front so it never leaks to the ACK-driven or cork-timer
+    // send paths (there, only the persistent TCP_CORK holds).
+    bool msgMoreHold = state->msgMoreThisSend;
+    state->msgMoreThisSend = false;
+
     // we'll start sending from snd_max, if not after RTO
     if (!state->afterRto)
         state->snd_nxt = state->snd_max;
@@ -1071,19 +1354,44 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     if (buffered == 0)
         return false;
 
-    // maxWindow is minimum of snd_wnd and congestionWindow (snd_cwnd)
-    uint32_t maxWindow = std::min(state->snd_wnd, congestionWindow);
+    // The receiver may shrink its advertised window (or close it entirely) while
+    // data is still in flight, so snd_wnd can legitimately be smaller than the
+    // unacknowledged range -- e.g. during zero-window probing. Saturate at zero
+    // instead of underflowing the unsigned subtraction.
+    uint32_t unackedInWindow = state->snd_nxt - state->snd_una;
+    uint32_t spaceLeftInSendWindow = state->snd_wnd > unackedInWindow ? state->snd_wnd - unackedInWindow : 0;
+    uint32_t bytesInFlight = tcpAlgorithm->getBytesInFlight();
+    uint32_t spaceLeftInCongestionWindow = bytesInFlight >= congestionWindow ? 0 : congestionWindow - bytesInFlight;
 
-    // effectiveWindow: number of bytes we're allowed to send now
-    int64_t effectiveWin = (int64_t)maxWindow - (state->snd_nxt - state->snd_una);
+    uint32_t allowedToSend = std::min(spaceLeftInSendWindow, spaceLeftInCongestionWindow);
+    // TCP_INFO trio (rwnd_limited): read-only bookkeeping, consulted only by
+    // TcpStatusInfo -- never influences the send decision below. "rwnd-limited"
+    // here means: there is more buffered data than can be sent right now, and the
+    // peer's advertised window (not the congestion window) is the binding
+    // constraint.
+    bool rwndBinding = (state->snd_wnd < congestionWindow)
+        && ((int64_t)buffered > std::max<int64_t>(allowedToSend, 0));
+    if (rwndBinding) {
+        if (state->rwndLimitedStartTime < SIMTIME_ZERO)
+            state->rwndLimitedStartTime = simTime();
+    }
+    else if (state->rwndLimitedStartTime >= SIMTIME_ZERO) {
+        state->rwndLimitedAccumulated += simTime() - state->rwndLimitedStartTime;
+        state->rwndLimitedStartTime = -1;
+    }
 
-    if (effectiveWin <= 0) {
-        EV_WARN << "Effective window is zero (advertised window " << state->snd_wnd
+    if (allowedToSend <= 0) {
+        EV_WARN << "AllowedToSend is zero (advertised window " << state->snd_wnd
                 << ", congestion window " << congestionWindow << "), cannot send.\n";
         return false;
     }
 
-    uint32_t bytesToSend = std::min(buffered, (uint32_t)effectiveWin);
+    if (allowedToSend < state->snd_effmss && buffered > allowedToSend) {
+        EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
+        return false;
+    }
+
+    uint32_t bytesToSend = std::min(buffered, (uint32_t)allowedToSend);
 
     // make a temporary tcp header for detecting tcp options length (copied from 'TcpConnection::sendSegment(uint32_t bytes)' )
     const auto& tmpTcpHeader = makeShared<TcpHeader>();
@@ -1110,12 +1418,62 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // yet been acknowledged, small segments cannot be sent until the outstanding
         // data is acknowledged.
         bool unacknowledgedData = (state->snd_una != state->snd_max);
+        // The unacknowledged SYN's sequence-number slot is not data: a TCP
+        // Fast Open server sending its response from SYN_RCVD still has
+        // snd_una at the SYN (iss) with snd_max = iss+1 -- Nagle must not
+        // hold the sub-MSS response hostage to a handshake segment (Linux's
+        // nagle test walks the data write queue, where the SYN-ACK never
+        // appears, so it sends immediately too).
+        if (unacknowledgedData && fsm.getState() == TCP_S_SYN_RCVD
+                && state->snd_una == state->iss && state->snd_max == state->iss + 1)
+            unacknowledgedData = false;
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
-        if (state->nagle_enabled && unacknowledgedData && !containsFin)
-            EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
-        else
+        // TCP_CORK / MSG_MORE hold the trailing sub-MSS partial (full segments were
+        // already sent by the loop above). Unlike Nagle, corking holds even with an
+        // empty pipe. A flush in progress (corkFlush: uncork/nodelay/timer) bypasses
+        // both holds.
+        bool corkHold = (state->tcp_cork || msgMoreHold) && !state->corkFlush
+                        && !containsFin && buffered < state->snd_effmss;
+        // Minshall's variant of the Nagle check (Linux tcp_nagle_check +
+        // tcp_minshall_check): a trailing partial is held only while an
+        // earlier SMALL segment is still unacknowledged; a pipe full of
+        // nothing but full-MSS segments never delays it
+        // (client_accecn_options_lost pins the 976-byte tail of a 3000-byte
+        // write leaving back-to-back with its two full siblings).
+        bool unackedSmallSegment = seqGreater(state->snd_sml, state->snd_una)
+                                   && seqLE(state->snd_sml, state->snd_nxt);
+        bool nagleHold = state->nagle_enabled && unacknowledgedData && unackedSmallSegment
+                         && !containsFin && buffered < state->snd_effmss && !state->corkFlush;
+        if (allowedToSend < state->snd_effmss && buffered > allowedToSend)
+            EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
+        else if (corkHold || nagleHold) {
+            if (corkHold)
+                state->corkedDataPending = true;
+            EV_WARN << "Holding partial segment ("
+                    << (corkHold ? "TCP_CORK/MSG_MORE" : "Nagle") << ")\n";
+        }
+        else {
+            // If this partial is a flush of previously-corked data, it may carry PSH:
+            // when the producing write(s) lacked MSG_MORE (pushHeldPartial) or the
+            // flush is the cork timer (forcePushHeld). sendSegment reads pushThisSegment.
+            bool flushingCorked = state->corkedDataPending || state->corkFlush;
+            state->pushThisSegment = flushingCorked && (state->pushHeldPartial || state->forcePushHeld);
             sendSegment(bytesToSend);
+            state->pushThisSegment = false;
+            state->corkedDataPending = false;
+            state->pushHeldPartial = false;
+        }
     }
+
+    // Cork (RTO/probe) timer: arm it only while a corked partial is withheld AND
+    // nothing is in flight (Linux ICSK_TIME_PROBE0 needs packets_out == 0); an
+    // incoming ACK re-runs sendData and flushes otherwise. Disarm as soon as the
+    // partial goes out or data becomes outstanding. A Nagle hold always has
+    // snd_una != snd_max, so it never arms this timer.
+    if (state->corkedDataPending && state->snd_una == state->snd_max)
+        tcpAlgorithm->scheduleCorkTimer();
+    else
+        tcpAlgorithm->cancelCorkTimer();
 
     if (old_snd_nxt == state->snd_nxt)
         return false; // no data sent
@@ -1179,8 +1537,16 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
     // retransmit one segment at snd_una, and set snd_nxt accordingly (if not called at RTO)
     state->snd_nxt = state->snd_una;
 
+    // The SYN-ACK's sequence slot is not data: a TCP Fast Open server can be
+    // retransmitting response data from SYN_RCVD while the SYN-ACK itself is
+    // still unacknowledged (snd_una == iss; the SYN-REXMIT timer owns that
+    // slot). Data retransmission starts at the first data byte, or the send
+    // and rexmit queues (which begin at iss+1) would be walked out of range.
+    if (fsm.getState() == TCP_S_SYN_RCVD && seqLess(state->snd_nxt, state->iss + 1))
+        state->snd_nxt = state->iss + 1;
+
     // When FIN sent the snd_max - snd_nxt larger than bytes available in queue
-    uint32_t bytes = std::min(std::min(state->snd_mss, state->snd_max - state->snd_nxt),
+    uint32_t bytes = std::min(std::min(state->snd_effmss, state->snd_max - state->snd_nxt),
                 sendQueue->getBytesAvailable(state->snd_nxt));
 
     // FIN (without user data) needs to be resent
@@ -1250,7 +1616,7 @@ void TcpConnection::retransmitData()
 
     // TODO - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
     while (bytesToSend > 0) {
-        uint32_t bytes = std::min(bytesToSend, state->snd_mss);
+        uint32_t bytes = std::min(bytesToSend, state->snd_effmss);
         bytes = std::min(bytes, sendQueue->getBytesAvailable(state->snd_nxt));
         uint32_t sentBytes = sendSegment(bytes);
 
@@ -1332,27 +1698,35 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpHeader, cons
         return false;
     }
 
-    // RFC 2581, page 1:
+    // RFC 5681, page 3:
     // "The SMSS is the size of the largest segment that the sender can transmit.
     // This value can be based on the maximum transmission unit of the network,
-    // the path MTU discovery [MD90] algorithm, RMSS (see next item), or other
+    // the path MTU discovery [RFC1191, RFC4821] algorithm, RMSS (see next item), or other
     // factors.  The size does not include the TCP/IP headers and options."
     //
     // "The RMSS is the size of the largest segment the receiver is willing to accept.
     // This is the value specified in the MSS option sent by the receiver during
-    // connection startup.  Or, if the MSS option is not used, 536 bytes [Bra89].
+    // connection startup.  Or, if the MSS option is not used, it is 536 bytes [RFC1122].
     // The size does not include the TCP/IP headers and options."
     //
     //
     // The value of snd_mss (SMSS) is set to the minimum of snd_mss (local parameter) and
     // the value specified in the MSS option received during connection startup.
+    state->peerAdvertisedMss = option.getMaxSegmentSize(); // raw, pre-clamp (TFO metrics cache)
     state->snd_mss = std::min(state->snd_mss, (uint32_t)option.getMaxSegmentSize());
 
     if (state->snd_mss == 0)
-        state->snd_mss = 536;
+        // RFC 9293, section 3.7.1
+        //"
+        // If an MSS Option is not received at connection setup,
+        // TCP implementations MUST assume a default send MSS of
+        // 536 (576 - 40) for IPv4 or 1220 (1280 - 60) for IPv6 (MUST-15).
+        //"
+        state->snd_mss = remoteAddr.getType() == L3Address::IPv4 ? 536 : 1220;
 
     // Store negotiated MSS for PMTUD: this is the value we restore after the probe timeout
     state->pmtudOriginalMss = state->snd_mss;
+    state->snd_effmss = calculateEffectiveMss();
 
     EV_INFO << "Tcp Header Option MSS(=" << option.getMaxSegmentSize() << ") received, SMSS is set to " << state->snd_mss << "\n";
     return true;
@@ -1449,37 +1823,188 @@ bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHe
     return true;
 }
 
+uint32_t TcpConnection::calculateEffectiveMss()
+{
+    // calculate mss minus TCP options length for cwnd calculations
+    // TCP options used during the handshake is ignored
+    // only TCP options used in established connections are considered
+    // we only support two such options: timestamp and sack options
+    // we only calculate with the timestamp option
+    // the sack option is ignored because it is variable width and
+    // the number of sack blocks is not yet known when this value is needed
+    // also it is not important during recovery and during bidirectional traffic
+    return state->snd_mss - (state->ts_enabled ? 10 + 1 + 1 : 0); // timestamp option + end of options + padding
+}
+
 TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 {
-    // SYN flag set and connetion in INIT or LISTEN state (or after synRexmit timeout)
+    // SYN flag set and the connection state is INIT or LISTEN state (or after synRexmit
+    // timeout, or sending a TCP Fast Open deferred SYN for the first time --
+    // fastopenSynDeferred stays true through sendSyn() itself for exactly this purpose,
+    // see process_SEND)
+    if (state->advertisedMss == (uint32_t)-1)
+        state->advertisedMss = (remoteAddr.getType() == L3Address::IPv6) ? 1440 : 1460;
+    // Resolve the address-family-derived default MSS (mss = -1 sentinel) now that
+    // the remote address is known and before we advertise/use it. IPv6 has 40 bytes
+    // of base header vs IPv4's 20, so a 1500-byte MTU yields 1440 vs 1460.
+    if (state->snd_mss == (uint32_t)-1) {
+        state->snd_mss = (remoteAddr.getType() == L3Address::IPv6) ? 1440 : 1460;
+        state->snd_effmss = calculateEffectiveMss();
+        EV_DETAIL << "Derived default MSS from address family: snd_mss=" << state->snd_mss << "\n";
+    }
+
     if (tcpHeader->getSynBit() && (fsm.getState() == TCP_S_INIT || fsm.getState() == TCP_S_LISTEN
                                 || ((fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD)
-                                    && state->syn_rexmit_count > 0)))
+                                    && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred
+                                        // simultaneous open: the crossing-SYN reply (a first
+                                        // SYN-ACK sent while still in SYN_SENT) carries the
+                                        // full handshake option set, same as any other
+                                        // handshake segment -- without this it fell into the
+                                        // established-states branch and went out bare
+                                        || tcpHeader->getAckBit()))))
     {
-        // MSS header option
-        if (state->snd_mss > 0) {
+        // MSS header option: announces OUR receive limit (advertisedMss), not
+        // snd_mss -- by SYN-ACK time snd_mss is already clamped to the peer's
+        // announced MSS, and echoing that back is wrong (RFC 793/9293: each
+        // side announces its own limit; Linux advertises its own 1460 in the
+        // SYN-ACK regardless of the client's smaller MSS).
+        if (tcpMain->sendMssOption && state->advertisedMss > 0) {
             TcpOptionMaxSegmentSize *option = new TcpOptionMaxSegmentSize();
-            option->setMaxSegmentSize(state->snd_mss);
+            option->setMaxSegmentSize(state->advertisedMss);
             tcpHeader->appendHeaderOption(option);
-            EV_INFO << "Tcp Header Option MSS(=" << state->snd_mss << ") sent\n";
+            EV_INFO << "Tcp Header Option MSS(=" << state->advertisedMss << ") sent\n";
+        }
+
+        // TS header option
+        if (state->ts_support && (state->rcv_initial_ts || (fsm.getState() == TCP_S_INIT
+                                                            || (fsm.getState() == TCP_S_SYN_SENT && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred)))))
+        {
+            if (tcpMain->alignOptions && !state->sack_support) { // if SACK is supported by host, do not add NOPs to this segment
+                // 2 padding bytes
+                tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
+                tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
+            }
+
+            TcpOptionTimestamp *option = new TcpOptionTimestamp();
+
+            // Update TS variables
+            // RFC 7323, page 12: "The TSval field contains the current value of the timestamp clock of the Tcp sending the option."
+            option->setSenderTimestamp(convertSimtimeToTS(simTime()));
+
+            // RFC 7323, page 17: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
+            // RFC 7323, page 12:
+            // "The TSecr field is valid if the ACK bit is set in the TCP header.  If
+            // the ACK bit is not set in the outgoing TCP header, the sender of that
+            // segment SHOULD set the TSecr field to zero.  When the ACK bit is set
+            // in an outgoing segment, the sender MUST echo a recently received
+            // TSval sent by the remote TCP in the TSval field of a Timestamps
+            // option."
+            option->setEchoedTimestamp(tcpHeader->getAckBit() ? state->ts_recent : 0);
+
+            state->snd_initial_ts = true;
+            state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
+            EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
+            tcpHeader->appendHeaderOption(option);
+        }
+
+        // TCP Fast Open (RFC 7413) cookie option, server side: echo a (possibly
+        // fresh) cookie in the SYN-ACK. 2 trailing NOPs pad the 2- or 10-byte
+        // (with the default 8-byte cookie) option to a 4-byte-aligned option area --
+        // unlike MSS/WS/SACK_PERMITTED/TS, no other option's NOPs can double up here
+        // since TFO is server-to-client-only at this point in the plan.
+        if (state->fastopenServerEnabled && state->fastopenSendCookieOption) {
+            if (state->fastopenPeerUsedExpOption) {
+                // Echo in the experimental form the client used (RFC 7413
+                // Appendix A: kind 254 + 0xF989 magic), as Linux does
+                // (foc->exp propagates request->response). The 12-byte option
+                // (4 base + 8 cookie) is 4-byte-aligned on its own, so no NOP
+                // padding -- matches the corpus's "<mss 1460,nop,nop,sackOK,
+                // FOEXP ...>" SYN-ACK layout.
+                TcpOptionTcpFastOpenExp *option = new TcpOptionTcpFastOpenExp();
+                option->setExpId(0xF989);
+                option->setCookieArraySize(state->fastopenCookieToSend.size());
+                for (size_t i = 0; i < state->fastopenCookieToSend.size(); i++)
+                    option->setCookie(i, state->fastopenCookieToSend[i]);
+                option->setLength(4 + state->fastopenCookieToSend.size());
+                tcpHeader->appendHeaderOption(option);
+            }
+            else {
+                tcpHeader->appendHeaderOption(new TcpOptionNop());
+                tcpHeader->appendHeaderOption(new TcpOptionNop());
+                TcpOptionTcpFastOpen *fastOpenOption = new TcpOptionTcpFastOpen();
+                fastOpenOption->setCookieArraySize(state->fastopenCookieToSend.size());
+                for (size_t i = 0; i < state->fastopenCookieToSend.size(); i++)
+                    fastOpenOption->setCookie(i, state->fastopenCookieToSend[i]);
+                fastOpenOption->setLength(2 + state->fastopenCookieToSend.size());
+                tcpHeader->appendHeaderOption(fastOpenOption);
+            }
+            EV_INFO << "Tcp Header Option Fast Open cookie (" << state->fastopenCookieToSend.size()
+                    << " bytes, kind " << (state->fastopenPeerUsedExpOption ? 254 : 34) << ") sent\n";
+        }
+
+        // TCP Fast Open (RFC 7413) cookie option, client side: echo the cached
+        // cookie (data-bearing SYN, process_SEND's deferred path) or an empty
+        // cookie (dataless SYN requesting one, process_OPEN_ACTIVE's immediate path).
+        // Gated on fastopenRequested (this connection's own connect() opted in), not
+        // just the module-wide fastopenClientEnabled param -- otherwise a plain
+        // connect() to a destination with a cookie cached from an earlier TFO
+        // connection would attach that cookie uninvited, which Linux's per-connection
+        // opt-in (MSG_FASTOPEN / TCP_FASTOPEN_CONNECT) never does.
+        // Linux drops the Fast Open option on SYN retransmits (RFC 7413
+        // section 4.1.3 / tcp_retransmit_skb clearing the fastopen request:
+        // a lost option-bearing SYN plausibly means a middlebox ate it) --
+        // the corpus pins this ("SYN retransmit should not include Fast Open
+        // Cookie Request", cookie-req-timeout; and the data-SYN rexmits in
+        // syn-data-timeout / *-sendto-errnos are bare too).
+        // ... never on an ACK-bearing SYN (a simultaneous-open SYN-ACK carries
+        // no client cookie in Linux), and never in cookie-less client mode
+        // (tcp_fastopen bit 0x4: the SYN+data goes out with NO FO option even
+        // when a cookie happens to be cached -- tcp_fastopen_no_cookie()).
+        if (state->fastopenClientEnabled && state->fastopenRequested && state->syn_rexmit_count == 0
+            && !tcpHeader->getAckBit() && !tcpMain->par("fastopenClientNoCookieRequired").boolValue()) {
+            std::vector<uint8_t> cachedCookie;
+            // fastopenCookieRequestPending is the authoritative "this connection is in
+            // cookie-REQUEST mode" signal set once, at connect() time, by
+            // process_OPEN_ACTIVE -- true both for a genuinely empty cache and for a
+            // cache hit overridden by isActiveFastOpenDisabled() (blackhole detection,
+            // F5.1): either way this SYN must look like "no cookie cached" (an empty
+            // request), not silently reveal a real cached cookie it chose not to use.
+            // Deliberately NOT re-checking isActiveFastOpenDisabled() here directly --
+            // that would also suppress an *already*-deferred connection's own SYN
+            // retransmissions if blackhole detection trips mid-flight (after this
+            // connection committed to using the cache), corrupting an in-flight
+            // data-bearing SYN into a data-bearing-but-cookie-less one.
+            bool haveCachedCookie = !state->fastopenCookieRequestPending && tcpMain->getFastOpenCookie(remoteAddr, cachedCookie);
+            if (haveCachedCookie || state->fastopenCookieRequestPending) {
+                tcpHeader->appendHeaderOption(new TcpOptionNop());
+                tcpHeader->appendHeaderOption(new TcpOptionNop());
+                TcpOptionTcpFastOpen *clientOption = new TcpOptionTcpFastOpen();
+                clientOption->setCookieArraySize(cachedCookie.size());
+                for (size_t i = 0; i < cachedCookie.size(); i++)
+                    clientOption->setCookie(i, cachedCookie[i]);
+                clientOption->setLength(2 + cachedCookie.size());
+                tcpHeader->appendHeaderOption(clientOption);
+                state->fastopenSynCarriedOption = true; // Linux tp->syn_fastopen
+                EV_INFO << "Tcp Header Option Fast Open cookie (" << cachedCookie.size() << " bytes) sent\n";
+            }
         }
 
         // WS header option
         if (state->ws_support && (state->rcv_ws || (fsm.getState() == TCP_S_INIT
-                                                    || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
+                                                    || (fsm.getState() == TCP_S_SYN_SENT && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred)))))
         {
-            // 1 padding byte
-            tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
+            if (tcpMain->alignOptions) // align
+                tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
 
             // Update WS variables
             if (state->ws_manual_scale > -1) {
                 state->rcv_wnd_scale = state->ws_manual_scale;
             }
             else {
-                ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + state->maxRcvBuffer - state->rcv_nxt;
+                ulong scaled_rcv_wnd = state->maxRcvBuffer - receiveQueue->getAcknowledgedDataLength();
                 state->rcv_wnd_scale = 0;
 
-                while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 1323, page 11: "the shift count must be limited to 14"
+                while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 7323, page 10: "the shift count must be limited to 14"
                     scaled_rcv_wnd = scaled_rcv_wnd >> 1;
                     state->rcv_wnd_scale++;
                 }

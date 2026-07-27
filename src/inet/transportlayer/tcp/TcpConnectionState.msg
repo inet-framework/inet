@@ -111,16 +111,24 @@ struct TcpStateVariables
 
     bool active = false;            // set if the connection was initiated by an active open
     bool fork = false;              // if passive and in LISTEN: whether to fork on an incoming connection
+    bool forked = false;            // this connection WAS forked off a listener (durable, unlike listeningSocketId which is cleared on ACCEPT): on RST/hard-ICMP in SYN_RCVD it must close like a Linux child socket, never fall back to LISTEN (the original listener still exists -- falling back would duplicate it)
 
-    uint32_t snd_mss = 0;           // sender maximum segment size (without headers, i.e. only segment text); see RFC 2581, page 1.
+    uint32_t snd_mss = 0;           // sender maximum segment size (without headers, i.e. only segment text); see RFC 5681.
+    uint32_t advertisedMss = 0;     // our OWN maximum receivable segment size, as announced in this side's SYN/SYN-ACK MSS option
+                                    // (RFC 793/9293: the option describes the announcing side's receive limit). Unlike snd_mss it is
+                                    // NEVER clamped by the peer's announced MSS: a SYN-ACK announces this side's own receive
+                                    // limit, never the client's.
                                     // This will be set to the minimum of the local smss parameter and the value specified in the
                                     // MSS option received during connection setup.
+    uint32_t snd_effmss = 0;        // effective sender maximum segment size without TCP/IP header options
 
-    // send sequence number variables (see RFC 793, "3.2. Terminology")
+    // send sequence number variables (see RFC 9293, "3.3. TCP Terminology Overview")
     uint32_t snd_una = 0;           // send unacknowledged
     uint32_t snd_nxt = 0;           // send next (drops back on retransmission)
     uint32_t snd_max = 0;           // max seq number sent (needed because snd_nxt is re-set on retransmission)
     uint32_t snd_wnd = 0;           // send window
+    uint32_t max_window = 0;        // largest peer window ever advertised (Linux tp->max_window); drives forced_push
+    uint32_t pushed_seq = 0;        // highest seq already PSHed (Linux tp->pushed_seq); forced_push compares snd_nxt against it
     uint32_t snd_up = 0;            // send urgent pointer
     uint32_t snd_wl1 = 0;           // segment sequence number used for last window update
     uint32_t snd_wl2 = 0;           // segment ack. number used for last window update

@@ -308,6 +308,16 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
             return TCP_E_IGNORE;
         }
 
+        state->snd_effmss = calculateEffectiveMss();
+
+        // Seed the RTT estimator from the handshake RTT (Linux measures the
+        // SYN<->SYN-ACK exchange via tcp_ack_update_rtt/tcp_synack_rtt_meas and
+        // enters ESTABLISHED with srtt/rttvar -- and hence the first RTO -- already
+        // RTT-scaled instead of the initial default). Karn: skipped if our handshake
+        // segment was retransmitted.
+        if (state->seedRttFromHandshake && state->syn_rexmit_count == 0 && state->handshakeSentTime >= SIMTIME_ZERO)
+            tcpAlgorithm->rttMeasurementComplete(state->handshakeSentTime, simTime());
+
         // notify tcpAlgorithm and app layer
         tcpAlgorithm->established(false);
 
@@ -817,19 +827,95 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     receiveQueue->init(state->rcv_nxt); // FIXME may init twice...
     selectInitialSeqNum();
 
-    // although not mentioned in RFC 793, seems like we have to pick up
+    // although not mentioned in RFC 9293, seems like we have to pick up
     // initial snd_wnd from the segment here.
     updateWndInfo(tcpHeader, true);
 
     if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
         readHeaderOptions(tcpHeader);
 
+    // Linux tcp_syncookies=2 (always-on cookies): the connection is rebuilt
+    // from the cookie at the handshake ACK, and its 2-bit MSS field quantizes
+    // the peer's advertised MSS DOWN to the IPv4 msstab (net/ipv4/syncookies.c
+    // msstab[] = {536, 1300, 1440, 1460}: largest entry not above the
+    // advertised value). wscale/SACK/TS ride the timestamp encoding and stay
+    // exact (syncookies_ip4_9k pins snd_mss 1448 = 1460 - 12 against an
+    // advertised 8960).
+    if (tcpMain->par("syncookiesAlways").boolValue() && state->snd_mss > 536) {
+        static const uint32_t msstab[] = { 536, 1300, 1440, 1460 };
+        uint32_t clamped = msstab[0];
+        for (uint32_t entry : msstab)
+            if (entry <= state->snd_mss)
+                clamped = entry;
+        if (clamped < state->snd_mss) {
+            EV_DETAIL << "syncookies=2: peer MSS " << state->snd_mss << " quantized to msstab " << clamped << "\n";
+            state->snd_mss = clamped;
+            state->snd_effmss = calculateEffectiveMss();
+        }
+    }
+
     state->ack_now = true;
 
-    // ECN
-    if (tcpHeader->getEceBit() == true && tcpHeader->getCwrBit() == true) {
+    // ECN. AccECN's request codepoint (SEWA: ECE=CWR=AE=1) is checked first -- it's a
+    // superset of the classic-ECN-willing bit pattern (ECE=CWR=1), so without this check
+    // first an AccECN SYN would also satisfy the classic branch below and get misread as a
+    // plain RFC 3168 request.
+    if (tcpHeader->getEceBit() && tcpHeader->getCwrBit() && tcpHeader->getAeBit()
+        && (state->ecnMode == TCP_ECN_MODE_ACCECN || state->ecnMode == TCP_ECN_MODE_ACCECN_PASSIVE))
+    {
+        state->endPointIsWillingECN = true;
+        state->accEcnNegotiated = true;
+        EV << "AccECN-setup SYN received\n";
+    }
+    else if (tcpHeader->getEceBit() == true && tcpHeader->getCwrBit() == true
+             && (!tcpHeader->getAeBit() || state->ecnMode == TCP_ECN_MODE_RFC3168)) {
+        // Classic branch. An RFC3168-mode host ACCEPTS an AE-carrying SYN as
+        // ECN-willing -- Linux tcp_ecn_create_request's condition
+        // (!ect || th->res1 || th->ae) && ecn_ok treats the AE bit as evidence
+        // FOR a compliant peer (RFC 8311 section 4.3 allows future extensions
+        // on that bit), so an AccECN SYN falls back to plain RFC 3168 here
+        // (accecn_to_rfc3168 pins the SE. SYN-ACK and ect0-marked data). A
+        // PASSIVE-mode host still requires AE=0: it never volunteered for ECN
+        // and must not read a foreign bit pattern as a classic request.
         state->endPointIsWillingECN = true;
         EV << "ECN-setup SYN packet received\n";
+    }
+
+    // TCP Fast Open (RFC 7413): a validated-cookie SYN carrying data is accepted and
+    // delivered to the app now, ahead of the 3WHS completing -- readHeaderOptions()
+    // above has already run processFastOpenOption() and populated
+    // state->fastopenCookie*. Advancing rcv_nxt here (before sendSynAck() below)
+    // makes the SYN-ACK's ack number naturally cover the SYN and the data in one
+    // segment, with no change needed to sendSynAck() itself.
+    bool tfoAttempted = state->fastopenCookieRequested || state->fastopenCookieValid || state->fastopenSendCookieOption;
+    // Cookie-less mode (RFC 7413 section 4.1.3, sysctl TFO_SERVER_COOKIE_NOT_REQD):
+    // the listener accepts the SYN data even when the SYN carries no cookie option
+    // at all, so fastopenCookieValid (and tfoAttempted) stay false here.
+    if (state->fastopenServerEnabled && (state->fastopenCookieValid || state->fastopenAcceptWithoutCookie)) {
+        // The TFO acceptance itself is payload-independent: a zero-payload SYN
+        // with a valid cookie still creates a fully-accelerated connection
+        // whose app may respond from SYN_RCVD (basic-zero-payload scripts).
+        state->fastopenAccelerated = true;
+        B payloadLen = B(tcpSegment->getByteLength()) - tcpHeader->getHeaderLength();
+        if (payloadLen > B(0) && hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) {
+            updateRcvQueueVars();
+            // insertBytesFromSegment() indexes the payload by tcpHeader's own
+            // SequenceNo, which is correct for a plain data segment but is the SYN's
+            // OWN sequence number here (RFC 793: SYN consumes one sequence number, so
+            // the data actually starts at SEG.SEQ+1) -- pass a sequence-shifted copy
+            // of the header so the receive queue doesn't mistake the first data byte
+            // for a 1-byte overlap with the already-initialized rcv_nxt (=IRS+1) and
+            // silently drop it.
+            auto synShiftedHeader = staticPtrCast<TcpHeader>(tcpHeader->dupShared());
+            synShiftedHeader->setSequenceNo(tcpHeader->getSequenceNo() + 1);
+            state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, synShiftedHeader);
+            updateRcvQueueVars();
+            sendAvailableDataToApp(); // deliver before the 3WHS completes -- the RFC 7413 win
+            state->fastopenSynDataAccepted = true; // surfaced as TCPI_OPT_SYN_DATA in tcp_info
+            EV_INFO << "Fast Open: " << (state->fastopenCookieValid ? "cookie valid" : "no cookie required")
+                    << ", accepting " << payloadLen
+                    << " bytes of SYN data before handshake completion\n";
+        }
     }
 
     sendSynAck();
@@ -1012,14 +1098,75 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
                 readHeaderOptions(tcpHeader);
 
+            // Linux tcp_rcv_fastopen_synack(): a TFO connection's SYN-ACK
+            // refreshes the cached peer MSS EVERY time (the cookie only when
+            // one is present) -- a later cookie-less SYN-ACK advertising a
+            // larger MSS restores the cache after an earlier small-MSS server
+            // shrank it (syn-data-only-syn-acked's 1040 -> 1460 -> 1420-cap
+            // sequence pins this). Cache the RAW advertised value, not
+            // snd_mss: a local TCP_MAXSEG clamp on THIS connection must not
+            // shrink the metrics cache (the kernel reparses the SYN-ACK to
+            // bypass the user clamp; syn-data-mss pins the next SYN's
+            // 1300-byte payload from an advertised 1340 despite this
+            // connection's TCP_MAXSEG 1040).
+            if (state->fastopenRequested)
+                tcpMain->updateFastOpenCachedMss(remoteAddr,
+                        state->peerAdvertisedMss > 0 ? state->peerAdvertisedMss : state->snd_mss);
+
+            // RFC 7323 / Linux tcp_rcv_synsent_state_process (PAWSACTIVEREJECTED):
+            // a SYN-ACK whose TSecr does not echo anything this connection could
+            // have sent (it must lie between the SYN's send time and now on our
+            // timestamp clock) is repelled with <SEQ=SEG.ACK><CTL=RST> and the
+            // segment is dropped -- the connection stays in SYN_SENT awaiting a
+            // valid SYN-ACK (synack-data TEST5's deliberate bad-ecr probe).
+            if (state->rcv_initial_ts && state->lastRcvdTSecr != 0 && state->handshakeSentTime >= SIMTIME_ZERO) {
+                uint32_t tsLow = convertSimtimeToTS(state->handshakeSentTime);
+                uint32_t tsHigh = convertSimtimeToTS(simTime());
+                if (seqLess(state->lastRcvdTSecr, tsLow) || seqGreater(state->lastRcvdTSecr, tsHigh)) {
+                    EV_WARN << "SYN-ACK TSecr " << state->lastRcvdTSecr << " outside [" << tsLow << ", "
+                            << tsHigh << "] -- repelling with RST (PAWSACTIVEREJECTED)\n";
+                    sendRst(tcpHeader->getAckNo());
+                    return TCP_E_IGNORE;
+                }
+            }
+
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
-            tcpAlgorithm->established(true);
-            tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
-            sendEstabIndicationToApp();
+            state->snd_effmss = calculateEffectiveMss();
 
-            // ECN
-            if (state->ecnSynSent) {
+            // ECN. Resolved BEFORE tcpAlgorithm->established(true) below: that call
+            // synchronously sends the connection-completing 3rd ACK, and AccECN needs that
+            // ACK's ACE field to reflect the just-negotiated state (matching the kernel's
+            // handling of the analogous 3rd-ACK case) -- ordering matters here in a way it
+            // never did for classic ECN, which doesn't touch this particular ACK's flags.
+            if (state->aeSynSent) {
+                // draft-ietf-tcpm-accurate-ecn 3WHS: decode the SYN-ACK's (ECE,CWR,AE) triple
+                // in response to our SEWA (AccECN-requesting) SYN.
+                // Table 2 of RFC 9768 / Linux tcp_ecn_rcv_synack: the ACE value
+                // (AE<<2 | CWR<<1 | ECE) of the SYN-ACK decides the mode.
+                // 0b000 and 0b111 = no ECN; 0b001 = peer speaks only classic
+                // ECN, fall back; EVERY other value (0b010..0b110) = AccECN
+                // accepted, the value additionally encoding how our SYN
+                // arrived (serverside_accecn_disabled1 pins 0b101 as accept).
+                uint8_t synAckAce = (uint8_t)((tcpHeader->getAeBit() ? 4 : 0)
+                        | (tcpHeader->getCwrBit() ? 2 : 0) | (tcpHeader->getEceBit() ? 1 : 0));
+                if (synAckAce == 0 || synAckAce == 7) {
+                    state->ect = false;
+                    EV << "AccECN request received a non-ECN-setup SYN-ACK... ECN is disabled.\n";
+                }
+                else if (synAckAce == 1) {
+                    state->ecnMode = TCP_ECN_MODE_RFC3168;
+                    state->ect = true;
+                    EV << "AccECN request received classic-ECN SYN-ACK... falling back to RFC 3168 ECN.\n";
+                }
+                else {
+                    state->accEcnNegotiated = true;
+                    state->ect = true;
+                    EV << "AccECN-setup SYN-ACK received (ACE=" << (int)synAckAce << ")... AccECN is enabled.\n";
+                }
+                state->aeSynSent = false;
+            }
+            else if (state->ecnSynSent) {
                 if (tcpHeader->getEceBit() && !tcpHeader->getCwrBit()) {
                     state->ect = true;
                     EV << "ECN-setup SYN-ACK packet was received... ECN is enabled.\n";
