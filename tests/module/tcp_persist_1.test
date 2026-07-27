@@ -1,0 +1,89 @@
+%description:
+Tests the zero-window persist timer. The server never reads (autoRead=false),
+so its receive buffer fills and it advertises a zero window; the client then
+probes it with the persist timer. The persist timeout must follow the bounded
+Stevens sequence (5, 5, 6, 12, 24, 48, 60 s) and must NOT clobber the
+connection's retransmission timeout (the bug fixed alongside this test).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+sim-time-limit = 115s
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script=""
+
+# client sends a burst larger than the receiver buffer
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=1s
+*.cli_app.sendBytes = 20000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+# server never reads -> receive buffer fills -> zero window
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+*.srv_app.autoRead=false
+
+# tcp settings
+*.*_tcp.advertisedWindow = 3000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.nagleEnabled = true
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+
+include ../../lib/tcp-legacy.ini
+
+%# The persist timer engages when the zero window is seen (~t=1.013). Persist
+%# probes (1-byte segments, incrementing seq) follow Linux's probe0 cadence
+%# (tcp_probe_timer): the first probe one RTO (~1.004 s) after the window
+%# closed, then doubling per probe (2.008, 4.016, 8.03, 16.06, 32.1 s), capped
+%# at maxPersistTimeout -- NOT the old fixed Stevens 5/5/6/12/24/48/60 table
+%# (the resolved FIXME): with a real RTT the first probe must go out at ~RTO,
+%# which the packetdrill slow-start-after-win-update oracle script pins at
+%# ~300 ms for a 100 ms RTT.
+%contains: stdout
+Received zero-sized window therefore PERSIST timer is started.
+
+%# The probes themselves are DATALESS (Linux tcp_xmit_probe_skb: seq =
+%# SND.UNA-1, no payload -- it provokes a window-carrying ACK without
+%# consuming sequence space), so the tcpdump line shows a bare ACK and there
+%# are NO probe-byte RTO retransmissions any more.
+%contains-regex: stdout
+\[2\.017 [^\n]*A ack 501
+%contains-regex: stdout
+\[4\.025 [^\n]*A ack 501
+%contains-regex: stdout
+\[8\.041 [^\n]*A ack 501
+%contains-regex: stdout
+\[16\.073 [^\n]*A ack 501
+%contains-regex: stdout
+\[32\.137 [^\n]*A ack 501
+%contains-regex: stdout
+\[64\.265 [^\n]*A ack 501

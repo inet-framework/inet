@@ -1,0 +1,84 @@
+%description:
+TcpHeaderSerializer::deserializeOption() for the legacy TCP Fast Open
+experimental option (RFC 7413 Appendix A: kind 254 + 0xF989 magic, receive-only
+in INET -- there is no serializeOption() case, so this test hand-crafts the
+raw wire bytes directly instead of round-tripping through serializeOption()
+like tcp_fastopen_wireformat_1.test does for kind 34).
+
+Cases: empty cookie (4-byte option, just kind+length+magic), an 8-byte cookie
+(12-byte option), and -- falsification that the magic is actually checked,
+not just the kind -- a kind-254 option with a DIFFERENT 2-byte value where
+0xF989 would be, which must fall back to a generic TcpOptionUnknown (not a
+TcpOptionTcpFastOpenExp), preserving the "other RFC 4727 experimental use"
+kind-254 traffic this option shares its kind number with.
+
+%includes:
+#include "inet/transportlayer/tcp_common/TcpHeaderSerializer.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+class TestTcpHeaderSerializer : public TcpHeaderSerializer
+{
+  public:
+    using TcpHeaderSerializer::deserializeOption;
+};
+
+static void checkExp(const char *label, const std::vector<uint8_t>& cookie)
+{
+    std::vector<uint8_t> bytes;
+    bytes.push_back(254);                      // kind
+    bytes.push_back(4 + cookie.size());         // length
+    bytes.push_back(0xF9);                      // magic hi
+    bytes.push_back(0x89);                      // magic lo
+    for (uint8_t b : cookie)
+        bytes.push_back(b);
+
+    TestTcpHeaderSerializer ser;
+    MemoryInputStream in(bytes);
+    TcpOption *result = ser.deserializeOption(in);
+    auto *fo = dynamic_cast<TcpOptionTcpFastOpenExp *>(result);
+
+    bool match = fo != nullptr && fo->getExpId() == 0xF989 && fo->getCookieArraySize() == cookie.size();
+    for (size_t i = 0; match && i < cookie.size(); i++)
+        if (fo->getCookie(i) != cookie[i])
+            match = false;
+
+    EV << label << ": isFastOpenExp=" << (fo != nullptr ? "yes" : "no")
+       << " match=" << (match ? "yes" : "no") << "\n";
+    delete result;
+}
+
+%activity:
+
+checkExp("empty cookie (request)", {});
+checkExp("8-byte cookie", {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08});
+
+{
+    // Falsification: kind 254 with a non-0xF989 magic must NOT be treated as
+    // Fast Open -- it's the generic RFC 4727 experimental slot shared by
+    // other uses, so it must fall back to TcpOptionUnknown.
+    std::vector<uint8_t> bytes = {254, 6, 0x12, 0x34, 0xAA, 0xBB};
+    TestTcpHeaderSerializer ser;
+    MemoryInputStream in(bytes);
+    TcpOption *result = ser.deserializeOption(in);
+    bool isFastOpenExp = dynamic_cast<TcpOptionTcpFastOpenExp *>(result) != nullptr;
+    auto *unknown = dynamic_cast<TcpOptionUnknown *>(result);
+    bool bytesPreserved = unknown != nullptr && unknown->getBytesArraySize() == 4
+        && unknown->getBytes(0) == 0x12 && unknown->getBytes(1) == 0x34
+        && unknown->getBytes(2) == 0xAA && unknown->getBytes(3) == 0xBB;
+    EV << "non-magic kind 254: isFastOpenExp=" << (isFastOpenExp ? "yes" : "no")
+       << " fellBackToUnknownWithBytesIntact=" << (bytesPreserved ? "yes" : "no") << "\n";
+    delete result;
+}
+
+EV << ".\n";
+
+%contains: stdout
+empty cookie (request): isFastOpenExp=yes match=yes
+8-byte cookie: isFastOpenExp=yes match=yes
+non-magic kind 254: isFastOpenExp=no fellBackToUnknownWithBytesIntact=yes
+.
