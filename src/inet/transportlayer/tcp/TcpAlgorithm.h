@@ -9,6 +9,7 @@
 #define __INET_TCPALGORITHM_H
 
 #include "inet/transportlayer/tcp/TcpConnection.h"
+#include "inet/transportlayer/tcp/TcpSimsignals.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
