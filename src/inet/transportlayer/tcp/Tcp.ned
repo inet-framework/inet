@@ -230,6 +230,7 @@ simple Tcp extends SimpleModule like ITcp
         // parameters of: tcp: size segments against the space options actually leave
         bool adaptiveReorderingEnabled = default(true); // Grow the reordering degree (dynamic DupThresh) when SACK reveals reordering, so persistent reordering stops causing spurious fast retransmits. Requires sackSupport.
         bool dsackEnabled = default(this.sackSupport); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+        bool frtoEnabled = default(true); // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced variant): after a retransmission timeout, an ACK/SACK covering data that was never retransmitted proves the original flight arrived and the timeout was spurious -- the pre-RTO cwnd/ssthresh are restored. ~ sysctl tcp_frto=2 (the Linux default)
         volatile int initialSendSequenceNumber = default(-1); // -1 means the value is calculated from the current simulation time
         string initialWindow @enum("rfc2001","rfc3390","rfc6928") = default("rfc6928"); // initial congestion window: rfc2001=1 SMSS, rfc3390=min(4*MSS,max(2*MSS,4380)), rfc6928=IW10=min(10*MSS,max(2*MSS,14600))
         string lossDetectionMode @enum("dupthresh","rack") = default("rack"); // SACK loss detection: classic DupThresh (RFC 6675) or RACK time-based (RFC 8985). RACK requires sackSupport.

@@ -231,6 +231,10 @@ struct TcpStateVariables
     bool seedRttFromHandshake = false; // seed srtt/rttvar/RTO from the SYN<->SYN-ACK exchange, as Linux does
 
     // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced; Linux tcp_frto=2)
+    bool frtoEnabled = false;      // from the frtoEnabled parameter; requires SACK
+    bool frtoActive = false;       // an RTO fired and its spuriousness is still undecided
+    uint32_t frtoHighSeq = 0;      // snd_max at the RTO (RFC 5682 recover / Linux high_seq)
+    bool frtoOrigAcked = false;    // never-retransmitted data was (s)acked since the RTO
 
     uint32_t maxPacketsOut = 0;    // peak segments in flight observed at send time (Linux max_packets_out); drives the RFC 5681 cwnd-limited slow-start gate
     // adaptive reordering / dynamic DupThresh (Linux tp->reordering)

@@ -327,6 +327,12 @@ void TcpSackRexmitQueue::markHeadLost()
     rexmitQueue.begin()->lost = true;
 }
 
+void TcpSackRexmitQueue::resetLostBit()
+{
+    for (auto& elem : rexmitQueue)
+        elem.lost = false;
+}
+
 void TcpSackRexmitQueue::resetSackedBit()
 {
     for (auto& elem : rexmitQueue)
