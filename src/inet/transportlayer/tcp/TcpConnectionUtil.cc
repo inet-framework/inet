@@ -758,6 +758,11 @@ void TcpConnection::sendAvailableDataToApp()
     if (receiveQueue->getAmountOfBufferedBytes()) {
         if (autoRead || maxByteCountRequested > 0) {
             uint32_t endSeqNo = state->rcv_nxt;
+            // rcv_nxt may already be advanced past a received FIN (which
+            // occupies a sequence number but has no bytes in the queue) --
+            // clamp extraction at the FIN or the queue's range assert trips
+            if (state->fin_rcvd && seqLess(state->rcv_fin_seq, endSeqNo))
+                endSeqNo = state->rcv_fin_seq;
             if (!autoRead) {
                 uint32_t requestedEndPos = receiveQueue->getFirstSeqNo() + maxByteCountRequested;
                 if (seqLess(requestedEndPos, endSeqNo))
