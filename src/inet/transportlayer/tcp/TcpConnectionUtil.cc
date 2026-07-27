@@ -888,7 +888,9 @@ void TcpConnection::configureStateVariables()
         }
     }
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
+    state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 1122) enabled/disabled
+    state->adaptiveDelayedAcks = tcpMain->par("adaptiveDelayedAcks"); // Linux-shaped quickack/ATO/pingpong dynamics
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     const char *initialWindow = tcpMain->par("initialWindow");

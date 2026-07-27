@@ -28,6 +28,7 @@ class INET_API TcpAlgorithm : public cObject
   protected:
     TcpConnection *conn; // we belong to this connection
     TcpStateVariables *state; // our state variables
+    simtime_t delayedAckTimeout;
 
     /**
      * Create state block (TCB) used by this TCP variant. It is expected
@@ -70,7 +71,9 @@ class INET_API TcpAlgorithm : public cObject
      * This method is necessary because the TcpConnection ptr is not
      * available in the constructor yet.
      */
-    virtual void initialize() {}
+    virtual void initialize() {
+        delayedAckTimeout = conn->getTcpMain()->par("delayedAckTimeout");
+    }
 
     /**
      * Called when the connection is going to ESTABLISHED from SYN_SENT or

@@ -136,6 +136,14 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 
     virtual void receivedOutOfOrderSegment() override;
 
+    // Linux-shaped adaptive receiver ACK dynamics (adaptiveDelayedAcks param):
+    // quickack budget, adaptive delayed-ACK timeout (ATO), pingpong mode
+    virtual void incrQuickack(uint32_t maxQuickacks);
+    virtual void enterQuickackMode(uint32_t maxQuickacks);
+    virtual bool inQuickackMode() const;
+    virtual void dataArrivedAtoUpdate();
+    virtual void scheduleDelayedAck();
+
     virtual void receiveSeqChanged() override;
 
     virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;

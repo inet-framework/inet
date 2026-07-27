@@ -231,7 +231,9 @@ simple Tcp extends SimpleModule like ITcp
         int accEcnOptionBeaconAcks = default(4); // Send the AccECN option at least once every N ACKs even when not otherwise demanded (simplified beaconing policy -- Linux's full demand/beacon/DSACK-triggered state machine is not ported)
         bool accEcnOptionEnabled @mutable = default(false); // Send/parse the AccECN TCP option (E0B/E1B/CEB byte counters). Requires tcpEcnMode in {"accecn","accecn-passive"}
         bool accEcnOptionKindAlternates = default(true); // If true, alternate the AccECN option between kind 172 (E0B,CEB,E1B) and 174 (E1B,CEB,E0B) on successive sends (draft middlebox-robustness). If false, always emit kind 174 -- Linux's observed behavior.
+        bool adaptiveDelayedAcks = default(false); // Linux-shaped receiver ACK dynamics on top of delayedAcksEnabled: a quickack budget (immediate ACKs at connection start, after out-of-order data, and after long idle), an ADAPTIVE delayed-ACK timeout (ATO: 40ms floor, tracks the inter-segment arrival gap, bounded by srtt and 200ms) instead of the fixed 200ms timer, and an interactive "pingpong" mode. Off = the classic fixed-timeout RFC 1122 behavior
         bool adaptiveReorderingEnabled = default(true); // Grow the reordering degree (dynamic DupThresh) when SACK reveals reordering, so persistent reordering stops causing spurious fast retransmits. Requires sackSupport.
+        int delayedAckFrameCount = default(2); // number of frames after delayed acks are sent
         bool dsackEnabled = default(this.sackSupport); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
         bool fastopenAcceptWithoutCookie @mutable = default(false); // Server role: accept SYN-with-data even when the SYN carries no Fast Open cookie option at all (RFC 7413 section 4.1.3's cookie-less mode). ~ sysctl tcp_fastopen bit 9 (0x200, TFO_SERVER_COOKIE_NOT_REQD). Only meaningful with fastopenServerEnabled.
         bool fastopenClientEnabled @mutable = default(false); // TCP Fast Open (RFC 7413) client role: attempt SYN-with-data when a cookie is cached. ~ sysctl tcp_fastopen bit 0 (TFO_CLIENT_ENABLE)
@@ -262,6 +264,8 @@ simple Tcp extends SimpleModule like ITcp
         int fastopenCookieCacheSize = default(1024); // Upper bound on the number of distinct destinations the client-role Fast Open cookie cache retains; evicts an arbitrary (not LRU) entry once full
         string fastopenKey @mutable = default(""); // Server-role Fast Open cookie key in Linux net.ipv4.tcp_fastopen_key format ("xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx", primary key only). When set, the 8-byte cookie is derived exactly as Linux does (SipHash-2-4 of source||destination IPv4 address under this key), so cookies are deterministic and interoperable with captures; when empty (default), a simulation-local keyed hash is used instead
         bool sendMssOption = default(true);  // enable/disable MSS option sending
+        // parameters of: tcp: adapt the acknowledgement delay to the connection
+        double delayedAckTimeout @unit(s) = default(200ms); // maximum time to wait before sending a delayed ACK
     gates:
         input appIn @labels(TcpCommand/down) @messageKinds(inet::TcpCommandCode);
         input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
