@@ -1262,35 +1262,51 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
             discardUpToSeq--; // the FIN sequence number is not real data
         }
 
+        // Notify the algorithm while the scoreboard for the acked range is still
+        // valid (i.e. before it is discarded below): transmit counts and SACK state
+        // for [old_snd_una, discardUpToSeq) are what lets a recovery algorithm tell
+        // reordering apart from loss.
+        tcpAlgorithm->segmentsAcked(old_snd_una, discardUpToSeq);
+
         // acked data no longer needed in send queue
         sendQueue->discardUpTo(discardUpToSeq);
 
+        // TCP_INFO trio (busy_time): read-only bookkeeping -- if this ACK just
+        // caught snd_una up to snd_max with nothing left queued either, the
+        // connection has gone fully idle. See enqueueSendCommandData() for the
+        // matching "became busy" entry.
+        if (state->busyStartTime >= SIMTIME_ZERO && state->snd_una == state->snd_max
+            && sendQueue->getBytesAvailable(state->snd_nxt) == 0)
+        {
+            state->busyTimeAccumulated += simTime() - state->busyStartTime;
+            state->busyStartTime = -1;
+        }
+
         // acked data no longer needed in rexmit queue
+        rexmitQueue->discardUpTo(discardUpToSeq);
+
+        // A plain cumulative ACK carries no SACK option, so processSACKOption()
+        // does not run to recompute the SACK scoreboard byte count. Refresh it
+        // after the discard so tcpi_sacked reflects only what is still SACKed
+        // above snd_una (Linux tp->sacked_out drops as snd_una catches up); a full
+        // ACK that ends recovery must report 0, not the stale pre-ACK count. The
+        // next SACK's delivered-delta baseline (sackedBytes_old) is re-taken from
+        // this value in processSACKOption(), so the PRR accounting stays consistent.
         if (state->sack_enabled)
-            rexmitQueue->discardUpTo(discardUpToSeq);
+            state->sackedBytes = rexmitQueue->getTotalAmountOfSackedBytes();
 
         updateWndInfo(tcpHeader);
 
         // if segment contains data, wait until data has been forwarded to app before sending ACK,
         // otherwise we would use an old ACKNo
-        if (payloadLength == 0 && fsm.getState() != TCP_S_SYN_RCVD) {
-            // notify
+        if (payloadLength == 0 && fsm.getState() != TCP_S_SYN_RCVD)
             tcpAlgorithm->receivedAckForUnackedData(old_snd_una);
-
-            // in the receivedAckForUnackedData we need the old value
-            state->dupacks = 0;
-
-            emit(dupAcksSignal, state->dupacks);
-        }
     }
     else {
         ASSERT(seqGreater(tcpHeader->getAckNo(), state->snd_max)); // from if-ladder
 
         // send an ACK, drop the segment, and return.
         tcpAlgorithm->receivedAckForUnsentData(tcpHeader->getAckNo());
-        state->dupacks = 0;
-
-        emit(dupAcksSignal, state->dupacks);
 
         return false; // means "drop"
     }
