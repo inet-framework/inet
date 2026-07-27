@@ -138,6 +138,7 @@ class INET_API TcpConnection : public SimpleModule
     cMessage *connEstabTimer = nullptr;
     cMessage *finWait2Timer = nullptr;
     cMessage *synRexmitTimer = nullptr; // for retransmitting SYN and SYN+ACK
+    cMessage *rackReoTimer = nullptr; // RACK reordering timer (Linux ICSK_TIME_REO_TIMEOUT): fires when a not-yet-lost segment's RACK.rtt+reo_wnd deadline matures between ACKs
 
     // statistics
     long rcvdSegments = 0;
@@ -158,6 +159,22 @@ class INET_API TcpConnection : public SimpleModule
 
     /** @name Processing app commands. Invoked from processAppCommand(). */
     //@{
+    /**
+     * rackReoTimer expired: re-run RACK loss detection (time has advanced, so
+     * pending deadlines may have matured) and let the recovery strategy react
+     * (enter fast recovery / retransmit) via ITcpRecovery::reoTimeout().
+     */
+    virtual void processRackReoTimeout();
+
+  public:
+    /**
+     * (Re)arms the RACK reordering timer for the given delay, or cancels it when
+     * delay is negative. Called by the recovery strategy from RACK loss detection.
+     */
+    virtual void rescheduleRackReoTimer(simtime_t delay);
+
+  protected:
+
     virtual void process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_OPEN_PASSIVE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_ACCEPT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);

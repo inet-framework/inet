@@ -689,6 +689,7 @@ void TcpConnection::configureStateVariables()
     }
     state->dupthresh = tcpMain->par("dupthresh");
     state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
+    state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 6675)
     // SACK-based (RFC 6675) loss recovery is provided by flavours whose createRecovery()
     // can return an Rfc6675Recovery (TcpReno, TcpNewReno). Other flavours (TcpTahoe,
@@ -700,6 +701,15 @@ void TcpConnection::configureStateVariables()
         EV_WARN << "sackSupport=true but tcpAlgorithmClass=\"" << tcpAlgorithm->getClassName()
                 << "\" has no SACK-based loss recovery; disabling SACK for this connection\n";
         state->sack_support = false;
+    }
+    if (state->lossDetectionMode == 1 && !state->sack_support) {
+        // RACK needs the SACK scoreboard. Rather than make the connection
+        // unusable, fall back to classic DupThresh -- the same "willingness"
+        // treatment sackSupport itself gets just above, so that turning RACK on
+        // by default cannot break a flavour or peer that ends up without SACK.
+        EV_WARN << "lossDetectionMode=\"rack\" requires SACK, which is not enabled for this "
+                   "connection; falling back to DupThresh loss detection\n";
+        state->lossDetectionMode = 0;
     }
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
@@ -1030,6 +1040,31 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
 
     if (bytes + options_len > state->snd_mss)
         bytes = state->snd_mss - options_len;
+
+    // A retransmission never extends past the previously sent high-water mark
+    // in the same segment: Linux retransmits skbs from the rtx queue (possibly
+    // collapsed together, but only from already-SENT data); unsent data goes
+    // out in its own segments behind it (syn-data-only-syn-acked pins the
+    // 1420-byte TFO fallback retransmit NOT swallowing 40 fresh bytes, which
+    // also mis-aligned every following segment off the golden's boundaries).
+    if (seqLess(state->snd_nxt, state->snd_max) && bytes > state->snd_max - state->snd_nxt)
+        bytes = state->snd_max - state->snd_nxt;
+
+    // ... and it honors the ORIGINAL segment boundaries: Linux's rtx queue
+    // holds whole skbs, and tcp_retrans_try_collapse merges only ENTIRE
+    // adjacent sent skbs that fit cur_mss together -- it never splits the
+    // next skb to top a retransmit up to the MSS. Cap at the largest recorded
+    // transmission boundary inside the budget (syn-data-only-syn-acked pins
+    // the RACK retransmit of the 1420-byte TFO payload staying 1420 bytes).
+    if (seqLess(state->snd_nxt, state->snd_max) && bytes > 0 && rexmitQueue != nullptr) {
+        const auto& starts = rexmitQueue->xmitSegmentStarts;
+        auto it = starts.upper_bound(state->snd_nxt + bytes);
+        if (it != starts.begin()) {
+            uint32_t b = *std::prev(it);
+            if (seqGreater(b, state->snd_nxt) && seqLess(b, state->snd_nxt + bytes))
+                bytes = b - state->snd_nxt;
+        }
+    }
 
     uint32_t sentBytes = bytes;
 

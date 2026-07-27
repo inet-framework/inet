@@ -251,8 +251,13 @@ struct TcpStateVariables
     bool accEcnOptionEnabled = false; // cached from the accEcnOptionEnabled param at configureStateVariables() time
     uint64_t deliveredBytes = 0;   // cumulative newly-delivered (cumulatively acked + selectively acked) bytes
     uint32_t lastRcvdTSecr = 0;    // most recent TSecr echoed back by the peer (Eifel input)
+    int lossDetectionMode = 0;    // 0 = classic DupThresh (RFC 3517), 1 = RACK time-based
     simtime_t minRtt = 0;         // minimum RTT observed on the connection (0 = unset)
     uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
+    uint32_t rackEndSeq = 0;      // end sequence number of that segment
+    bool rackReordSeen = false;   // whether reordering has been observed (widens the reordering window)
+    simtime_t rackRtt = 0;        // RTT of the ACK that last advanced the RACK point
+    simtime_t rackXmitTime = 0;   // send time of the most recently delivered (SACKed/ACKed) segment
     bool sawAccEcnOpt = false;
     bool fastopenAccelerated = false;        // server: this connection was created from a TFO-accepted SYN (valid cookie or cookie-less mode), REGARDLESS of whether it carried data -- a zero-payload TFO SYN still entitles the app to respond from SYN_RCVD (Linux: the TFO child socket exists either way). Gates the SYN_RCVD send path; fastopenSynDataAccepted above stays data-only (it drives TCPI_OPT_SYN_DATA)
     bool accEcnOptionCebDeltaValid = false; // true only for the segment just processed by readHeaderOptions(), if it carried a valid AccECN option
