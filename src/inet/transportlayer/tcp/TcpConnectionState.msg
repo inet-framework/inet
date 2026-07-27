@@ -223,6 +223,9 @@ struct TcpStateVariables
 
     uint32_t maxPacketsOut = 0;    // peak segments in flight observed at send time (Linux max_packets_out); drives the RFC 5681 cwnd-limited slow-start gate
     // adaptive reordering / dynamic DupThresh (Linux tp->reordering)
+    bool adaptiveReorderingEnabled = false; // set from the adaptiveReorderingEnabled parameter
+    uint32_t reordering = 3;       // learned reordering degree in segments; initialized to dupthresh
+    uint32_t maxReordering = 300;  // upper bound (set from the maxReordering parameter)
 
 
     // RACK-TLP loss detection (RFC 8985)

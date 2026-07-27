@@ -354,6 +354,11 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setIrs(state->irs);
     statusInfo->setFin_ack_rcvd(state->fin_ack_rcvd);
 
+    // Adaptive reordering (RFC 4653-style dynamic DupThresh): state->reordering
+    // grows past the static dupthresh as checkSackReordering() observes SACKs
+    // arriving below the FACK (Linux tp->reordering). Report the live degree, not
+    // the static dupthresh -- tcpi_reordering must track the adaptive value.
+    statusInfo->setReordering(state->reordering);
     statusInfo->setMinRtt(state->minRtt.dbl());
     statusInfo->setFlightSize(tcpAlgorithm->getBytesInFlight());
     statusInfo->setSackedBytes(state->sackedBytes);

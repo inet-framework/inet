@@ -197,8 +197,14 @@ bool TcpSackRexmitQueue::checkQueue() const
     return f;
 }
 
-void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
+uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
 {
+    // lowest sequence number this call NEWLY marked sacked, skipping regions that
+    // were ever retransmitted (a SACK for a retransmission is ambiguous, Linux's
+    // !TCPCB_RETRANS rule); 0 = nothing new. Regions are kept in sequence order, so
+    // the first hit is the lowest. Consumed by the caller's reordering detection
+    // (a new SACK below the prior FACK proves reordering).
+    uint32_t newlySackedLow = 0;
     if (seqLess(fromSeqNum, begin))
         fromSeqNum = begin;
 
@@ -227,6 +233,8 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
             if (seqGE(i->beginSeqNum, fromSeqNum)) { // Search region in queue!
                 found = true;
+                if (!i->sacked && !i->rexmitted && newlySackedLow == 0)
+                    newlySackedLow = i->beginSeqNum;
                 i->lost = false;
                 i->sacked = true; // set sacked bit
             }
@@ -249,6 +257,7 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
         EV_DETAIL << "FAILED to set sacked bit for region: [" << fromSeqNum << ".." << toSeqNum << "). Not found in retransmission queue.\n";
 
     ASSERT(checkQueue());
+    return newlySackedLow;
 }
 
 bool TcpSackRexmitQueue::getSackedBit(uint32_t seqNum) const
