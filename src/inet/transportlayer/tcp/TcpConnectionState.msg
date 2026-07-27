@@ -275,6 +275,8 @@ struct TcpStateVariables
     // TCP_NOTSENT_LOWAT: independent of sendQueueLimit/queueUpdate
     // above (which track total outstanding+unsent bytes from snd_una); this tracks
     // only the not-yet-transmitted portion from snd_nxt. (uint32_t)-1 = disabled.
+    uint32_t notsentLowat = (uint32_t)-1;
+    bool notsentLowatUpdate = true;
 
     // TCP_INFO trio (busy_time/rwnd_limited): cumulative time bookkeeping, read-only
     // with respect to every send/receive decision -- consulted only by TcpStatusInfo.

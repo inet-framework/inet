@@ -5,6 +5,7 @@
 //
 
 
+#include <climits>
 #include <string.h>
 
 #include "inet/common/socket/SocketTag_m.h"
@@ -246,6 +247,13 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
 
     if ((state->sendQueueLimit > 0) && (sendQueue->getBytesAvailable(state->snd_una) > state->sendQueueLimit))
         state->queueUpdate = false;
+
+    // TCP_NOTSENT_LOWAT: arm re-notification once the not-yet-
+    // transmitted portion of the queue (from snd_nxt, not snd_una -- independent of
+    // sendQueueLimit above) exceeds the low-water mark; sendSegment() disarms it and
+    // signals the app again once transmission brings it back down to/below the mark.
+    if (state->notsentLowat != (uint32_t)-1 && sendQueue->getBytesAvailable(state->snd_nxt) > state->notsentLowat)
+        state->notsentLowatUpdate = false;
 }
 
 void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
@@ -297,6 +305,16 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     }
     else if (auto cmd = dynamic_cast<TcpSetTimestampingCommand *>(tcpCommand)) {
         rxTimestampingEnabled = cmd->getEnabled();
+    }
+    else if (auto cmd = dynamic_cast<TcpSetNotsentLowatCommand *>(tcpCommand)) {
+        // Runtime TCP_NOTSENT_LOWAT: same field the notsentLowat module param
+        // seeds at connection setup (configureStateVariables); -1 disables.
+        // May legally arrive before OPEN creates state (like setTimestamping
+        // above) -- keep the value on the connection and apply it now only if
+        // state already exists; configureStateVariables() applies it otherwise.
+        notsentLowatSockopt = cmd->getValue();
+        if (state != nullptr)
+            state->notsentLowat = (notsentLowatSockopt < 0) ? (uint32_t)-1 : (uint32_t)notsentLowatSockopt;
     }
     else if (auto cmd = dynamic_cast<TcpSetMaxSegCommand *>(tcpCommand)) {
         // Runtime TCP_MAXSEG: clamp the advertised and effective send MSS. Like

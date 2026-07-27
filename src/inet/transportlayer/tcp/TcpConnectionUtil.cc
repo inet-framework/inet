@@ -934,6 +934,12 @@ void TcpConnection::configureStateVariables()
             state->snd_effmss = calculateEffectiveMss();
         }
     }
+    // TCP_NOTSENT_LOWAT. -1 (default) disables it; same signed-read-
+    // first pattern as mss above, since -1 doesn't fit directly into the uint32_t field.
+    // A runtime TcpSetNotsentLowatCommand received before OPEN (notsentLowatSockopt,
+    // INT_MIN = never set) overrides the module parameter.
+    int notsentLowatPar = (notsentLowatSockopt != INT_MIN) ? notsentLowatSockopt : (int)tcpMain->par("notsentLowat");
+    state->notsentLowat = (notsentLowatPar < 0) ? (uint32_t)-1 : (uint32_t)notsentLowatPar;
     // ECN mode resolution (AccECN): tcpEcnMode supersedes the deprecated
     // ecnWillingness. Exact precedent: increasedIWEnabled vs initialWindow (above).
     bool ecnWillingnessDeprecated = tcpMain->par("ecnWillingness");
@@ -1565,6 +1571,13 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     // TCP_NOTSENT_LOWAT: independent low-water-mark check on the
     // not-yet-transmitted portion of the queue (snd_nxt has just advanced past this
     // segment, above). Disarmed/re-armed separately from sendQueueLimit/queueUpdate.
+    if (state->notsentLowat != (uint32_t)-1 && !state->notsentLowatUpdate) {
+        uint32_t notsentBytes = sendQueue->getBytesAvailable(state->snd_nxt);
+        if (notsentBytes <= state->notsentLowat) {
+            sendIndicationToApp(TCP_I_SEND_MSG, notsentBytes);
+            state->notsentLowatUpdate = true;
+        }
+    }
 
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
