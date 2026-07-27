@@ -17,6 +17,7 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
@@ -25,6 +26,8 @@ Define_Module(TcpConnection);
 
 simsignal_t TcpConnection::sndNxtSignal = registerSignal("sndNxt"); // sent seqNo
 
+simsignal_t TcpConnection::deliveredCeSignal = registerSignal("deliveredCe"); // AccECN: cumulative resolved count of CE-marked packets the peer has reported via the ACE field
+simsignal_t TcpConnection::deliveredCeBytesSignal = registerSignal("deliveredCeBytes"); // AccECN: cumulative CE byte count from AccECN option evidence only
 TcpStateVariables::~TcpStateVariables()
 {
 }
