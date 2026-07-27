@@ -14,6 +14,7 @@
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp/flavours/TcpAlgorithmBaseState_m.h"
@@ -269,6 +270,8 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
         if (Packet *dataMsg = receiveQueue->extractBytesUpTo(endSeqNo)) {
             dataMsg->setKind(TCP_I_DATA);
             dataMsg->addTag<SocketInd>()->setSocketId(socketId);
+            if (rxTimestampingEnabled)
+                dataMsg->addTag<TcpRxTimestampInd>();
             sendToApp(dataMsg);
             maxByteCountRequested = 0;
         }
@@ -292,6 +295,9 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand)) {
         dscp = cmd->getDscp();
     }
+    else if (auto cmd = dynamic_cast<TcpSetTimestampingCommand *>(tcpCommand)) {
+        rxTimestampingEnabled = cmd->getEnabled();
+    }
     else if (auto cmd = dynamic_cast<TcpSetMaxSegCommand *>(tcpCommand)) {
         // Runtime TCP_MAXSEG: clamp the advertised and effective send MSS. Like
         // TCP_NOTSENT_LOWAT above it may arrive before OPEN creates state; keep it
@@ -304,6 +310,14 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
                 state->snd_mss = userMss;
             state->snd_effmss = calculateEffectiveMss();
         }
+    }
+    else if (auto cmd = dynamic_cast<TcpSetWriterBlockedCommand *>(tcpCommand)) {
+        // The application's blocking write is (no longer) stalled on
+        // send-buffer space -- drives the SNDBUF_LIMITED chrono
+        // (tcp-info-sndbuf-limited).
+        writerBlocked = cmd->getBlocked();
+        EV_DETAIL << "Application writer is " << (writerBlocked ? "blocked on send-buffer space" : "no longer blocked") << "\n";
+        updateSndbufLimitedChrono();
     }
     else if (auto cmd = dynamic_cast<TcpSetOwnedCommand *>(tcpCommand)) {
         // Application-ownership marker (Linux sk->sk_socket): gates the

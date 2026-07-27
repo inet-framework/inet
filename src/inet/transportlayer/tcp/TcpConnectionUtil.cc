@@ -31,6 +31,8 @@
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
+#include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
+#include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
@@ -730,6 +732,27 @@ void TcpConnection::sendToApp(cMessage *msg)
     tcpMain->sendToApp(msg);
 }
 
+void TcpConnection::updateSndbufLimitedChrono()
+{
+    // Linux TCP_CHRONO_SNDBUF_LIMITED (tcp_write_xmit's tail): the chrono runs
+    // while the transmission is STARVED by the send buffer -- the write queue
+    // has no unsent data (everything the buffer could hold is in flight) and
+    // the application writer is still blocked waiting for space (SOCK_NOSPACE,
+    // conveyed by TcpSetWriterBlockedCommand). Sampled at every event that can
+    // change the condition; tcp-info-sndbuf-limited pins the resulting ~20ms.
+    if (state == nullptr || sendQueue == nullptr)
+        return;
+    bool limited = writerBlocked
+        && sendQueue->getBytesAvailable(state->snd_nxt) == 0
+        && state->snd_una != state->snd_max;
+    if (limited && state->sndbufLimitedStartTime < SIMTIME_ZERO)
+        state->sndbufLimitedStartTime = simTime();
+    else if (!limited && state->sndbufLimitedStartTime >= SIMTIME_ZERO) {
+        state->sndbufLimitedAccumulated += simTime() - state->sndbufLimitedStartTime;
+        state->sndbufLimitedStartTime = -1;
+    }
+}
+
 void TcpConnection::sendAvailableDataToApp()
 {
     if (receiveQueue->getAmountOfBufferedBytes()) {
@@ -761,6 +784,8 @@ void TcpConnection::sendAvailableDataToApp()
                 }
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                 msg->addTag<SocketInd>()->setSocketId(socketId);
+                if (rxTimestampingEnabled)
+                    msg->addTag<TcpRxTimestampInd>();
                 sendToApp(msg);
                 if (!autoRead) {
                     maxByteCountRequested = 0;
@@ -1478,6 +1503,24 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
 
     state->snd_nxt += bytes;
 
+    // MSG_ZEROCOPY: fire a completion notification for every
+    // pending zerocopy SEND whose data has now been transmitted (its boundary seq
+    // is at or behind the just-advanced snd_nxt) -- unlike MSG_EOR's clamp, a
+    // single segment may legitimately span (and thus complete) several small
+    // zerocopy-marked SENDs at once, so this drains all that are now covered
+    // rather than checking for one exact match.
+    while (!zerocopySeqNums.empty() && !seqGreater(zerocopySeqNums.begin()->first, state->snd_nxt)) {
+        uint32_t zerocopyId = zerocopySeqNums.begin()->second;
+        zerocopySeqNums.erase(zerocopySeqNums.begin());
+        EV_INFO << "Notifying app: ZEROCOPY_COMPLETION id=" << zerocopyId << "\n";
+        auto *completionIndication = new Indication("ZerocopyCompletion", TCP_I_ZEROCOPY_COMPLETION);
+        auto *completionInfo = new TcpZerocopyCompletionInfo();
+        completionInfo->setZerocopyId(zerocopyId);
+        completionIndication->addTag<SocketInd>()->setSocketId(socketId);
+        completionIndication->setControlInfo(completionInfo);
+        sendToApp(completionIndication);
+    }
+
     // check if afterRto bit can be reset
     if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
         state->afterRto = false;
@@ -1535,6 +1578,8 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
             state->maxPacketsOut = packetsOut;
     }
 
+    updateSndbufLimitedChrono(); // this send may have drained the queue
+
     return sentBytes;
 }
 
@@ -1549,8 +1594,17 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
         state->busyStartTime = simTime();
     }
 
+    bool zerocopy = packet->findTag<TcpSendZerocopyReq>() != nullptr;
     sendQueue->enqueueAppData(packet);
 
+    if (zerocopy) {
+        uint32_t boundarySeq = sendQueue->getBufferEndSeq();
+        uint32_t zerocopyId = nextZerocopyId++;
+        zerocopySeqNums[boundarySeq] = zerocopyId;
+        EV_DETAIL << "MSG_ZEROCOPY: recorded pending completion id=" << zerocopyId << " at seq=" << boundarySeq << "\n";
+    }
+
+    updateSndbufLimitedChrono(); // fresh unsent data: the starved interval (if any) ends
 }
 
 int TcpConnection::deriveLinuxCaState() const
