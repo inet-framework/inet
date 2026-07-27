@@ -305,6 +305,13 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
             state->snd_effmss = calculateEffectiveMss();
         }
     }
+    else if (auto cmd = dynamic_cast<TcpSetOwnedCommand *>(tcpCommand)) {
+        // Application-ownership marker (Linux sk->sk_socket): gates the
+        // kernel behaviors that skip embryonic (not-yet-accepted) sockets,
+        // e.g. OOO-pressure rcvbuf growth (ooo-before-and-after-accept).
+        appOwned = cmd->getOwned();
+        EV_DETAIL << "Connection ownership set to " << (appOwned ? "owned" : "embryonic") << "\n";
+    }
     else
         throw cRuntimeError("Unknown subclass of TcpSetOptionCommand received from app: %s", tcpCommand->getClassName());
     delete tcpCommand;
@@ -523,6 +530,12 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
         statusInfo->setRetrans((rexmitQueue->getRetrans() + state->snd_mss - 1) / state->snd_mss);
     else
         statusInfo->setRetrans(UINT_MAX);
+
+    // Linux SK_MEMINFO_RCVBUF: the live sk_rcvbuf -- receiveBufferSize as
+    // configured, possibly grown by tcp_clamp_window under OOO pressure
+    // (ooo-before-and-after-accept asserts both the untouched embryonic value
+    // and the post-accept growth). 0 when no buffer size is configured.
+    statusInfo->setSkRcvbuf(state->rcvBufferSize);
 
     if (auto *baseAlgState = dynamic_cast<TcpAlgorithmBaseStateVariables *>(state)) {
         statusInfo->setBackoff(baseAlgState->rexmit_count);

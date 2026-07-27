@@ -125,6 +125,11 @@ class INET_API TcpConnection : public SimpleModule
     // configureStateVariables(), and applied directly to state when set later.
     int userMss = -1;
     bool autoRead = true;
+    // Linux sk->sk_socket presence: false = embryonic (listening-side, not yet
+    // accept()ed by the application). Gates OOO-pressure rcvbuf growth
+    // (tcp_data_queue_ofo's not-yet-accepted skip). Set via TcpSetOwnedCommand;
+    // defaults to owned so ordinary applications are unaffected.
+    bool appOwned = true;
     bool peerClosedSentUp = false;
     long maxByteCountRequested = 0;  // from READ requests
 
@@ -140,6 +145,59 @@ class INET_API TcpConnection : public SimpleModule
     TcpSendQueue *sendQueue = nullptr;
     TcpReceiveQueue *receiveQueue = nullptr;
     TcpSackRexmitQueue *rexmitQueue = nullptr;
+
+    // windowShrinkAllowed (Linux tcp_shrink_window=1) receive-buffer accounting:
+    // Linux charges the buffer at skb-TRUESIZE granularity and scales free space
+    // by the measured payload/truesize ratio (tp->scaling_ratio, a u8 fraction
+    // of 256 updated in tcp_measure_rcv_mss). Each accepted in-order data
+    // segment appends (payloadBytes, truesize) here; explicit application reads
+    // release entries front-to-back (an skb is freed only once fully copied).
+    std::deque<std::pair<uint32_t, uint32_t>> rcvSkbChain;
+    uint64_t rcvBufOccupancy = 0; // sum of truesizes in rcvSkbChain (Linux sk_rmem_alloc)
+    uint8_t rcvScalingRatio = 128; // Linux TCP_DEFAULT_SCALING_RATIO (50% of 256)
+    uint32_t rcvMssEstimate = 536; // Linux icsk_ack.rcv_mss seed; gates ratio updates
+
+  public:
+    // Set when a data segment reaching BEYOND the advertised-window promise
+    // (rcv_adv) was nevertheless accepted via the empty-receive-queue
+    // exception (tcp_sequence's over-accept): the kernel does NOT send an
+    // immediate ACK for such an arrival -- its own selftest documents this
+    // ("A too big packet is accepted if the receive queue is empty. It does
+    // not trigger an immediate ACK", tcp_rcv_neg_window; the 7.1.3 golden
+    // provably sends none, even though a static reading of the quickack path
+    // predicts one). Consumed and cleared by
+    // TcpAlgorithmBase::receiveSeqChanged's adaptive branch, which then takes
+    // the DELAYED path.
+    bool overWindowAcceptPending = false;
+
+  protected:
+
+    // Linux's skb truesize for a tun-received TCP segment: the payload plus
+    // IP+TCP headers and skb_shared_info (320B), allocated page-granular for
+    // large packets (tun_alloc_skb's paged path) or from a power-of-two page
+    // frag for small ones (tun_build_skb), plus struct sk_buff (~232B).
+    // Pins rcv_wnd_shrink_allowed's golden offers exactly (10000B payload ->
+    // 12520, 1023B -> 2280).
+    static uint32_t linuxSkbTruesize(uint32_t tcpPayloadBytes)
+    {
+        uint32_t base = tcpPayloadBytes + 40 + 320;
+        uint32_t alloc;
+        if (base > 16384)
+            // very large packets take order-3 (32KB) page compounds
+            // (alloc_skb_with_frags / PAGE_ALLOC_COSTLY_ORDER) -- two 39000/
+            // 60000-byte OOO injections then genuinely overflow a 131072
+            // rcvbuf (ooo-before-and-after-accept pins the resulting
+            // tcp_clamp_window growth)
+            alloc = ((base + 32767) / 32768) * 32768;
+        else if (base > 4096)
+            alloc = ((base + 4095) / 4096) * 4096;
+        else {
+            alloc = 1024;
+            while (alloc < base)
+                alloc <<= 1;
+        }
+        return alloc + 232;
+    }
 
     // TCP behavior in data transfer state
     TcpAlgorithm *tcpAlgorithm = nullptr;

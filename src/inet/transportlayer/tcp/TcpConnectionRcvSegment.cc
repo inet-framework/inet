@@ -130,7 +130,21 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, c
         payloadSeq += delta;
         payloadLength -= delta;
     }
-    return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + state->maxRcvBuffer);
+    // Linux exception (tcp_data_queue): an in-order segment arriving to an
+    // EMPTY receive queue is accepted even beyond the buffer limit -- the
+    // advertised window then collapses toward 0 until the application drains
+    // it. A hard drop would force the peer to retransmit forever against a
+    // receiver that has room the moment its app reads (rcv_zero_wnd_fin pins
+    // 'ack 60001 win 0' for a single 60000B segment against SO_RCVBUF 20000).
+    if (payloadLength > 0 && payloadSeq == state->rcv_nxt
+            && receiveQueue->getAcknowledgedDataLength() == 0
+            && receiveQueue->getAmountOfBufferedBytes() == 0)
+        return true;
+    // buffer CAPACITY, not the advertised window: rcvBufferSize (Linux
+    // sk_rcvbuf, e.g. tcp_rmem[1]) when configured, else the historical
+    // maxRcvBuffer conflation
+    uint32_t bufferCap = state->rcvBufferSize > 0 ? std::max(state->rcvBufferSize, state->maxRcvBuffer) : state->maxRcvBuffer;
+    return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + bufferCap);
 }
 
 TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader)
@@ -645,6 +659,63 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                     dupRangeFound = receiveQueue->findFirstDuplicateRange(tcpHeader->getSequenceNo(),
                             tcpHeader->getSequenceNo() + payloadLength, dupStart, dupEnd);
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
+
+                // Receive-buffer occupancy at Linux's skb-truesize granularity,
+                // plus the measured payload/truesize scaling ratio
+                // (tcp_measure_rcv_mss: updated when a segment at least as
+                // large as the current rcv_mss estimate arrives with a
+                // DIFFERENT length; the estimate itself follows
+                // min(len, advmss)). Consumed by the windowShrinkAllowed offer
+                // arithmetic and by the tcp_clamp_window growth below.
+                if (payloadLength > 0) {
+                    // Over-accept detection: this segment's end lies BEYOND the
+                    // highest window edge ever promised (rcv_adv, still the
+                    // pre-arrival value here) yet it was accepted -- the
+                    // empty-queue exception. The kernel does not immediate-ACK
+                    // such an arrival (rcv_neg_window); receiveSeqChanged
+                    // consumes the flag and takes the delayed path.
+                    if (seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_adv))
+                        overWindowAcceptPending = true;
+                    uint32_t truesize = linuxSkbTruesize(payloadLength);
+                    rcvSkbChain.push_back(std::make_pair(payloadLength, truesize));
+                    rcvBufOccupancy += truesize;
+                    if (payloadLength >= rcvMssEstimate) {
+                        if (payloadLength != rcvMssEstimate) {
+                            uint64_t ratio = ((uint64_t)payloadLength << 8) / truesize;
+                            rcvScalingRatio = (uint8_t)std::min<uint64_t>(ratio ? ratio : 1, 255);
+                        }
+                        rcvMssEstimate = std::min<uint32_t>((uint32_t)payloadLength,
+                                state->advertisedMss > 0 ? (uint32_t)state->advertisedMss : (uint32_t)payloadLength);
+                    }
+                    // Linux tcp_clamp_window: when the queued skbs' truesize
+                    // outgrows sk_rcvbuf on a socket the application OWNS
+                    // (accepted or actively opened), the buffer itself is
+                    // grown toward tcp_rmem[2] rather than dropping -- an
+                    // EMBRYONIC (not-yet-accepted) connection keeps its
+                    // initial tcp_rmem[1] buffer untouched
+                    // (ooo-before-and-after-accept pins both halves).
+                    if (appOwned && !isToBeAccepted() && state->rcvBufferSize > 0
+                            && rcvBufOccupancy > state->rcvBufferSize)
+                    {
+                        EV_DETAIL << "Receive-buffer pressure (occupancy " << rcvBufOccupancy
+                                  << " > rcvbuf " << state->rcvBufferSize
+                                  << "): growing sk_rcvbuf (tcp_clamp_window)\n";
+                        state->rcvBufferSize = (uint32_t)std::min<uint64_t>(rcvBufOccupancy, UINT32_MAX);
+                        if (state->maxRcvBuffer < state->rcvBufferSize)
+                            state->maxRcvBuffer = state->rcvBufferSize;
+                    }
+                }
+
+                // receiver window auto-tuning (Linux tcp_grow_window, called
+                // for both in-order and out-of-order arrivals): grow the offer
+                // by max(2*advmss, 2*len) toward the clamp -- a single large
+                // segment can open most of the remaining room at once
+                // (incr = max_t(int, incr, 2 * skb->len) in the reference).
+                if (state->rcv_ssthresh > 0 && state->rcv_ssthresh < state->window_clamp && payloadLength > 0) {
+                    uint32_t incr = std::max((uint32_t)(2 * state->snd_mss), (uint32_t)(2 * payloadLength));
+                    uint32_t room = state->window_clamp - state->rcv_ssthresh;
+                    state->rcv_ssthresh += std::min(room, incr);
+                }
 
                 if (seqGreater(state->snd_una, old_snd_una))
                     tcpAlgorithm->receivedAckForUnackedData(old_snd_una);

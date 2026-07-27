@@ -381,6 +381,15 @@ struct TcpStateVariables
     // connection (RFC 1122 4.2.2.13 / Linux RCV_SHUTDOWN + TCPABORTONDATA).
     // A shutdown(SHUT_WR)-style half close leaves it false.
     bool rcvShutdown = false;
+    // receive-BUFFER capacity (Linux sk_rcvbuf), decoupled from maxRcvBuffer /
+    // the advertised window when the receiveBufferSize parameter is set;
+    // 0 = use maxRcvBuffer (historical INET behavior)
+    uint32_t rcvBufferSize = 0;
+    // receiver window auto-tuning (Linux tcp_grow_window / tp->rcv_ssthresh):
+    // the OFFERED window starts at advertisedWindow and grows with received
+    // data toward window_clamp (derived from rcvBufferSize). 0 = disabled.
+    uint32_t rcv_ssthresh = 0;
+    uint32_t window_clamp = 0;
     bool sawAccEcnOpt = false;
     // Linux tp->accecn_minlen: minimum number of AccECN option fields the next
     // option must carry to cover the counter(s) that changed since the last

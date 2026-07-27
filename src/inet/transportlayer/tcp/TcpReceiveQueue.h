@@ -96,6 +96,13 @@ class INET_API TcpReceiveQueue : public cObject
     virtual uint32_t getAmountOfBufferedBytes();
 
     /**
+     * Returns the amount of contiguous data available for reading.
+     */
+    virtual uint32_t getAcknowledgedDataLength() const {
+        return B(reorderBuffer.getAvailableDataLength()).get();
+    }
+
+    /**
      * Returns the number of bytes currently free (=available) in queue. freeRcvBuffer = maxRcvBuffer - usedRcvBuffer
      */
     virtual uint32_t getAmountOfFreeBytes(uint32_t maxRcvBuffer);
