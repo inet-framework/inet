@@ -100,6 +100,12 @@ class INET_API TcpSackRexmitQueue
     virtual void enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum);
 
     /**
+     * Emulate sacks for sackless connections. Called on a new dupack, it marks
+     * one more segment as sacked.
+     */
+    virtual void addInferredSack();
+
+    /**
      * Called when data sender received selective acknowledgments.
      * Tells the queue which bytes have been transmitted and SACKed,
      * so they can be skipped if retransmitting segments as long as
@@ -159,7 +165,7 @@ class INET_API TcpSackRexmitQueue
     virtual void resetRexmittedBit();
 
     /**
-     * Returns total amount of sacked bytes. Corresponds to update() function from RFC 3517.
+     * Returns total amount of sacked bytes. Corresponds to update() function from RFC 6675.
      */
     virtual uint32_t getTotalAmountOfSackedBytes() const;
 

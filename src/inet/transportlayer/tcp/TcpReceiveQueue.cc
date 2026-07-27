@@ -100,7 +100,7 @@ Packet *TcpReceiveQueue::extractBytesUpTo(uint32_t seq)
     return nullptr;
 }
 
-uint32_t TcpReceiveQueue::getAmountOfBufferedBytes()
+uint32_t TcpReceiveQueue::getAmountOfBufferedBytes() const
 {
     uint32_t bytes = 0;
 

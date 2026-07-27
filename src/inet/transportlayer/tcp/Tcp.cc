@@ -18,6 +18,9 @@
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
+#include <algorithm>
+#include <functional>
+
 #include "inet/networklayer/common/Icmpv4ErrorTag_m.h"
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
