@@ -33,6 +33,14 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     uint32_t zeroWindowProbesSent = 0; ///< cumulative zero-window (persist) probes sent; surfaced as TcpStatusInfo::probes
     //@}
 
+    /// keepalive (RFC 1122 4.2.3.6)
+    //@{
+    bool keepalive_enabled = false; ///< whether keepalive probing is active on this connection
+    simtime_t keepalive_idle_time = 7200; ///< idle time before the first probe
+    simtime_t keepalive_interval = 75; ///< interval between probes
+    int keepalive_max_probes = 9; ///< number of unanswered probes before abort
+    int keepalive_probes_sent = 0; ///< probes sent in the current idle episode
+    //@}
 
     /// congestion window
     //@{

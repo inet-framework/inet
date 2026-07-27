@@ -227,6 +227,11 @@ simple Tcp extends SimpleModule like ITcp
         int hystartDetect = default(3); // HyStart detectors, as a bitmask: 1 = ACK train, 2 = delay increase, 3 = both
         bool hystartEnabled = default(true); // HyStart: leave slow start when the path appears full, instead of overshooting into loss
         int hystartLowWindow = default(16); // smallest cwnd (in segments) at which HyStart starts looking for the exit point
+        // parameters of: tcp: keepalive probing (RFC 1122 4.2.3.6)
+        bool keepAliveEnabled = default(false); // TCP keepalive (RFC 1122 4.2.3.6). Off by default, like SO_KEEPALIVE on Linux
+        double keepAliveIdleTime @unit(s) = default(7200s); // idle time before the first keepalive probe (Linux tcp_keepalive_time)
+        double keepAliveInterval @unit(s) = default(75s); // interval between keepalive probes (Linux tcp_keepalive_intvl)
+        int keepAliveProbeCount = default(9); // number of unanswered probes before the connection is aborted (Linux tcp_keepalive_probes)
         // parameters of: tcp: size segments against the space options actually leave
         int accEcnOptionBeaconAcks = default(4); // Send the AccECN option at least once every N ACKs even when not otherwise demanded (simplified beaconing policy -- Linux's full demand/beacon/DSACK-triggered state machine is not ported)
         bool accEcnOptionEnabled @mutable = default(false); // Send/parse the AccECN TCP option (E0B/E1B/CEB byte counters). Requires tcpEcnMode in {"accecn","accecn-passive"}
