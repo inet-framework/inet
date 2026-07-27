@@ -1936,41 +1936,90 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     return true;
 }
 
+void TcpConnection::flushCorkedData(bool forcePush)
+{
+    // Force out a partial segment currently withheld by TCP_CORK / MSG_MORE
+    // (uncork, TCP_NODELAY, or the cork timer). corkFlush makes sendData's trailing
+    // partial bypass both the cork and Nagle holds; forcePush (timer path only)
+    // makes the flushed partial carry PSH. msgMoreThisSend is false here (no new
+    // SEND), so nothing re-corks. Reuse sendCommandInvoked()'s idle-restart cwnd
+    // path into conn->sendData().
+    state->corkFlush = true;
+    state->forcePushHeld = forcePush;
+    tcpAlgorithm->sendCommandInvoked();
+    state->corkFlush = false;
+    state->forcePushHeld = false;
+}
+
 bool TcpConnection::sendProbe()
 {
-    // we'll start sending from snd_max
-    state->snd_nxt = state->snd_max;
+    // Linux tcp_xmit_probe_skb: a zero-window probe is a DATALESS segment
+    // with seq = SND.UNA - 1. It provokes a pure ACK carrying the peer's
+    // current window without consuming sequence space -- the old 1-byte BSD
+    // persist style consumed a real byte and dragged the RTO machinery into
+    // the probing (slow-start-after-win-update pins "26000:26000(0)", i.e.
+    // snd_una-1 dataless, and tcp_persist_1's trace was updated in step).
+    EV_INFO << "Sending zero-window probe, seq=" << (state->snd_una - 1) << "\n";
 
-    // check we have 1 byte to send
-    if (sendQueue->getBytesAvailable(state->snd_nxt) == 0) {
-        EV_WARN << "Cannot send probe because send buffer is empty\n";
-        return false;
-    }
-
-    uint32_t old_snd_nxt = state->snd_nxt;
-
-    EV_INFO << "Sending 1 byte as probe, with seq=" << state->snd_nxt << "\n";
-    sendSegment(1);
-
-    // remember highest seq sent (snd_nxt may be set back on retransmission,
-    // but we'll need snd_max to check validity of ACKs -- they must ack
-    // something we really sent)
-    state->snd_max = state->snd_nxt;
-
-    emit(unackedSignal, state->snd_max - state->snd_una);
-
-    // notify
-    tcpAlgorithm->ackSent();
-    tcpAlgorithm->dataSent(old_snd_nxt);
-
+    const auto& tcpHeader = makeShared<TcpHeader>();
+    tcpHeader->setSequenceNo(state->snd_una - 1);
+    tcpHeader->setAckBit(true);
+    tcpHeader->setAckNo(state->rcv_nxt);
+    updateRcvWnd();
+    tcpHeader->setWindow(state->rcv_wnd >> state->rcv_wnd_scale);
+    writeHeaderOptions(tcpHeader);
+    Packet *fp = new Packet("ZeroWindowProbe");
+    sendToIP(fp, tcpHeader);
     return true;
+}
+
+void TcpConnection::sendKeepAliveProbe()
+{
+    // Linux-style keepalive probe (net/ipv4/tcp_output.c tcp_xmit_probe_skb):
+    // a zero-length segment carrying seq = snd_una - 1. That sequence number is
+    // outside the receiver's window, so the peer answers with a plain ACK
+    // without accepting any data. Unlike sendProbe(), no real byte is sent and
+    // snd_nxt/snd_max are not advanced.
+    const auto& tcpHeader = makeShared<TcpHeader>();
+
+    tcpHeader->setAckBit(true);
+    tcpHeader->setSequenceNo(state->snd_una - 1);
+    tcpHeader->setAckNo(state->rcv_nxt);
+    tcpHeader->setWindow(updateRcvWnd());
+
+    writeHeaderOptions(tcpHeader);
+    Packet *fp = new Packet("TcpKeepAlive");
+
+    EV_INFO << "Sending keepalive probe, seq=" << (state->snd_una - 1) << "\n";
+
+    // pure control packet: must be sent with the not-ECT codepoint
+    state->sndAck = true;
+    sendToIP(fp, tcpHeader);
+    state->sndAck = false;
+}
+
+void TcpConnection::markOutstandingLostOnRto()
+{
+    if (!state->sack_enabled || rexmitQueue == nullptr || rexmitQueue->getQueueLength() == 0)
+        return;
+    // Clamp to the scoreboard's range: snd_una may sit below the queue start (already
+    // discarded) and snd_max may sit above the queue end (e.g. an outstanding FIN,
+    // which carries no data byte in the rexmit queue).
+    uint32_t from = state->snd_una;
+    uint32_t to = state->snd_max;
+    if (seqLess(from, rexmitQueue->getBufferStartSeq()))
+        from = rexmitQueue->getBufferStartSeq();
+    if (seqGreater(to, rexmitQueue->getBufferEndSeq()))
+        to = rexmitQueue->getBufferEndSeq();
+    if (seqLess(from, to))
+        rexmitQueue->markLost(from, to);
 }
 
 void TcpConnection::retransmitOneSegment(bool called_at_rto)
 {
-    // rfc-3168, page 20:
-    // ECN-capable TCP implementations MUST NOT set either ECT codepoint
-    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
+    // RFC 3168, page 20
+    // "ECN-capable TCP implementations MUST NOT set either ECT codepoint
+    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets"
     if (state && state->ect)
         state->rexmit = true;
 
