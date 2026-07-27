@@ -8,6 +8,7 @@
 #include "TCPTester.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
 namespace inet {
@@ -96,6 +97,8 @@ void TCPScriptableTester::parseScript(const char *script)
             cmd.command = CMD_COPY; s+=5;
         } else if (!strncmp(s,"copy",4)) {
             cmd.command = CMD_COPY; s+=4;
+        } else if (!strncmp(s,"ce",2)) {
+            cmd.command = CMD_CE; s+=2;
         } else
             throw cRuntimeError("syntax error in script: wrong command");
 
@@ -213,6 +216,13 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
             }
         }
         delete pk;
+    }
+    else if (cmd->command==CMD_CE)
+    {
+        bubble("marking CE");
+        pk->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(IP_ECN_CE);
+        dump(seg, pk->getByteLength(), fromA, "marking CE");
+        send(pk, fromA ? "out2" : "out1");
     }
     else
     {

@@ -1,0 +1,77 @@
+%description:
+TCP_NOTSENT_LOWAT as a runtime socket option (TcpSetNotsentLowatCommand /
+TcpSocket::setNotsentLowat) -- the runtime counterpart of the notsentLowat
+module parameter tcp_notsent_lowat_1.test pins. Identical scenario (5000B
+write under a 1000B advertised window, mss=500), but the 2000B low-water
+mark is set via the sockopt from the client app right after bind() --
+i.e. BEFORE the connection's state exists, exercising the deferred-apply
+path (notsentLowatSockopt member -> configureStateVariables) rather than
+the module-param path. The module param is left at its -1 default, so the
+single SEND_MSG below can only come from the sockopt having been applied.
+
+Falsification: tcp_notsent_lowat_1.test with the module param unset (i.e.
+this exact ini minus the setNotsentLowat line) produces no SEND_MSG line at
+all -- the mechanism is disabled by default.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+sim-time-limit = 10s
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=5000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+*.cli_app.setNotsentLowat=2000
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+# notsentLowat module param deliberately left at default (-1/disabled)
+*.*_tcp.advertisedWindow = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.nagleEnabled = false
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Same single firing point as tcp_notsent_lowat_1.test: the 8th segment brings the
+%# not-yet-transmitted portion down to exactly 2000B.
+%contains: stdout
+SEND_MSG: userId=2000
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

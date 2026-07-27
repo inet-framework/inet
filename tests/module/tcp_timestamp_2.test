@@ -1,18 +1,18 @@
 %description:
 TCP TimeStamp test
-  Examples from [RFC1323]:
+  Examples from [RFC 7323]:
   "The following examples illustrate these rules.  Here A, B, C...
   represent data segments occupying successive blocks of sequence
   numbers, and ACK(A),...  represent the corresponding
   acknowledgment segments.  Note that ACK(A) has the same sequence
   number as B.  We show only one direction of timestamp echoing, for
-  clarity." [RFC1323]
+  clarity." [RFC 7323]
 
-      "Packets arrive out of order, and every packet is
+      "Segments arrive out of order, and every segment is
       acknowledged.
 
       By Case (B), the timestamp from the last segment that
-      advanced the left window edge is echoed, until the missing
+      advanced the left window edge is echoed until the missing
       segment arrives; it is echoed according to Case (C).  The
       same sequence would occur if segments B and D were lost and
       retransmitted..
@@ -36,7 +36,7 @@ TCP TimeStamp test
           <D, TSval=4> ------------------->
                                                 4
                    <---- <ACK(E), TSecr=4>
-          (etc)" [RFC1323]
+          (etc)" [RFC 7323]
 
 %inifile: omnetpp.ini
 [General]
@@ -82,14 +82,16 @@ cmdenv-log-prefix="[%c]: "
 # tcp settings
 *.*_tcp.advertisedWindow = 5000                       # in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
 *.*_tcp.delayedAcksEnabled = false                    # delayed ACK algorithm (RFC 1122) enabled/disabled
-*.*_tcp.nagleEnabled = false                          # Nagle's algorithm (RFC 896) enabled/disabled
+*.*_tcp.nagleEnabled = false                          # Nagle's algorithm (RFC 1122) enabled/disabled
 *.*_tcp.limitedTransmitEnabled = false                # Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
 *.*_tcp.increasedIWEnabled = false                    # Increased Initial Window (RFC 3390) enabled/disabled
-*.*_tcp.sackSupport = false                           # Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
-*.*_tcp.windowScalingSupport = false                  # Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
-*.*_tcp.timestampSupport = true                       # Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
-*.*_tcp.mss = 512                                     # Maximum Segment Size (RFC 793) (header option)
+*.*_tcp.sackSupport = false                           # Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+*.*_tcp.windowScalingSupport = false                  # Window Scale (RFC 7323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+*.*_tcp.timestampSupport = true                       # Timestamps (RFC 7323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+*.*_tcp.mss = 512                                     # Maximum Segment Size (RFC 9293) (header option)
 *.*_tcp.tcpAlgorithmClass = "TcpReno"                 # TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl/DumbTcp
+
+include ../../lib/tcp-legacy.ini
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: postrun.pl
@@ -111,27 +113,22 @@ srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
 srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
 [0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 5000   Option(s): MaxSegSize NOP NOP TS(2,0)
 cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
-[0.005 A002] A.1000 > B.2000: A ack 501 win 5000   Option(s): NOP NOP TS(4,0)
+[0.005 A002] A.1000 > B.2000: A ack 501 win 5000   Option(s): NOP NOP TS(4,2)
 srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
-[1.001 A003] A.1000 > B.2000: A 1:501(500) ack 501 win 5000   Option(s): NOP NOP TS(1000,0)
-[1.001 A004] A.1000 > B.2000: A 501:513(12) ack 501 win 5000   Option(s): NOP NOP TS(1000,0)# removing original
+[1.001 A003] A.1000 > B.2000: A 1:501(500) ack 501 win 5000   Option(s): NOP NOP TS(1000,2)
 [1.003 B002] A.1000 < B.2000: A ack 501 win 5000   Option(s): NOP NOP TS(1002,1000)
-[1.004 A004] A.1000 > B.2000: A 501:513(12) ack 501 win 5000   Option(s): NOP NOP TS(1000,0)# introducing copy
-[1.005 A005] A.1000 > B.2000: A 513:1013(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)
-[1.005 A006] A.1000 > B.2000: A 1013:1513(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# removing original
-[1.005 A007] A.1000 > B.2000: A 1513:1525(12) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)
-[1.006 B003] A.1000 < B.2000: A ack 513 win 5000   Option(s): NOP NOP TS(1005,1000)
-[1.007 B004] A.1000 < B.2000: A ack 1013 win 5000   Option(s): NOP NOP TS(1006,1004)
-[1.007 B005] A.1000 < B.2000: A ack 1013 win 5000   Option(s): NOP NOP TS(1006,1004)
-[1.008 A007] A.1000 > B.2000: A 1013:1513(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# introducing copy
-[1.008 A008] A.1000 > B.2000: A 1525:2025(500) ack 501 win 5000   Option(s): NOP NOP TS(1007,1005)
-[1.008 A009] A.1000 > B.2000: A 2025:2049(24) ack 501 win 5000   Option(s): NOP NOP TS(1007,1005)
-[1.009 A010] A.1000 > B.2000: A 2049:2501(452) ack 501 win 5000   Option(s): NOP NOP TS(1008,1006)
-[1.010 B006] A.1000 < B.2000: A ack 1525 win 5000   Option(s): NOP NOP TS(1009,1004)
-[1.010 B007] A.1000 < B.2000: A ack 2025 win 5000   Option(s): NOP NOP TS(1009,1007)
-[1.010 B008] A.1000 < B.2000: A ack 2049 win 5000   Option(s): NOP NOP TS(1009,1007)
-[1.011 B009] A.1000 < B.2000: A ack 2501 win 5000   Option(s): NOP NOP TS(1010,1008)
-[1.012] tcpdump finished, A:10 B:9 segments
+[1.005 A004] A.1000 > B.2000: A 501:1001(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# removing original
+[1.005 A005] A.1000 > B.2000: A 1001:1501(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)
+[1.007 B003] A.1000 < B.2000: A ack 501 win 5000   Option(s): NOP NOP TS(1006,1000)
+[1.008 A005] A.1000 > B.2000: A 501:1001(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# introducing copy
+[1.009 A006] A.1000 > B.2000: A 1501:2001(500) ack 501 win 5000   Option(s): NOP NOP TS(1008,1006)# removing original
+[1.010 B004] A.1000 < B.2000: A ack 1501 win 5000   Option(s): NOP NOP TS(1009,1004)
+[1.012 A006] A.1000 > B.2000: A 1501:2001(500) ack 501 win 5000   Option(s): NOP NOP TS(1008,1006)# introducing copy
+[1.012 A007] A.1000 > B.2000: A 2001:2501(500) ack 501 win 5000   Option(s): NOP NOP TS(1011,1009)
+[1.014 B005] A.1000 < B.2000: A ack 2001 win 5000   Option(s): NOP NOP TS(1013,1008)
+[1.014 B006] A.1000 < B.2000: A ack 2501 win 5000   Option(s): NOP NOP TS(1013,1011)
+[1.015] tcpdump finished, A:7 B:6 segments
+
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

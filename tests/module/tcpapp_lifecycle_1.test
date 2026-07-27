@@ -18,6 +18,11 @@ ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 sim-time-limit = 3s
 
+# Legacy SYN-retransmit timing: this lifecycle scenario was recorded with the
+# historical 3s initial RTO (the connection attempt during the server-down window
+# must not complete within the 3s sim); keep it on legacy timing.
+**.tcp.initialRto = 3s
+
 **.hasStatus = true
 **.initialStatus = "down"
 **.scenarioManager.script = xmldoc("scenario.xml")

@@ -1,0 +1,93 @@
+%description:
+Round-trips a TcpOptionTcpFastOpen (kind 34, RFC 7413) through
+TcpHeaderSerializer::serializeOption()/deserializeOption() for an empty
+("cookie request") and an 8-byte cookie, and confirms a single corrupted
+cookie byte breaks the round-trip (falsification: proves the test actually
+reads the cookie bytes, not just the length).
+
+%includes:
+#include "inet/transportlayer/tcp_common/TcpHeaderSerializer.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::tcp;
+
+// serializeOption()/deserializeOption() are protected on TcpHeaderSerializer;
+// expose them for this test only.
+class TestTcpHeaderSerializer : public TcpHeaderSerializer
+{
+  public:
+    using TcpHeaderSerializer::serializeOption;
+    using TcpHeaderSerializer::deserializeOption;
+};
+
+static TcpOptionTcpFastOpen *makeOption(const std::vector<uint8_t>& cookie)
+{
+    auto *opt = new TcpOptionTcpFastOpen();
+    opt->setCookieArraySize(cookie.size());
+    for (size_t i = 0; i < cookie.size(); i++)
+        opt->setCookie(i, cookie[i]);
+    opt->setLength(2 + cookie.size());
+    return opt;
+}
+
+static void roundtrip(const char *label, const std::vector<uint8_t>& cookie)
+{
+    TestTcpHeaderSerializer ser;
+    TcpOptionTcpFastOpen *opt = makeOption(cookie);
+
+    MemoryOutputStream out;
+    ser.serializeOption(out, opt);
+
+    MemoryInputStream in(out.getData());
+    TcpOption *result = ser.deserializeOption(in);
+    auto *fo = check_and_cast<TcpOptionTcpFastOpen *>(result);
+
+    bool match = fo->getCookieArraySize() == cookie.size();
+    for (size_t i = 0; match && i < cookie.size(); i++)
+        if (fo->getCookie(i) != cookie[i])
+            match = false;
+
+    EV << label << ": length=" << fo->getLength() << " cookieSize=" << fo->getCookieArraySize()
+       << " match=" << (match ? "yes" : "no") << "\n";
+    delete opt;
+    delete result;
+}
+
+%activity:
+
+roundtrip("empty cookie (request)", {});
+roundtrip("8-byte cookie", {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08});
+
+{
+    // Falsification: flip a bit in the serialized cookie before deserializing.
+    std::vector<uint8_t> cookie = {0xAA, 0xBB, 0xCC, 0xDD};
+    TestTcpHeaderSerializer ser;
+    TcpOptionTcpFastOpen *opt = makeOption(cookie);
+
+    MemoryOutputStream out;
+    ser.serializeOption(out, opt);
+    std::vector<uint8_t> bytes = out.getData();
+    bytes[2] ^= 0xFF; // byte 0=kind, 1=length, 2=first cookie byte
+
+    MemoryInputStream in(bytes);
+    TcpOption *result = ser.deserializeOption(in);
+    auto *fo = check_and_cast<TcpOptionTcpFastOpen *>(result);
+    bool match = true;
+    for (size_t i = 0; i < cookie.size(); i++)
+        if (fo->getCookie(i) != cookie[i])
+            match = false;
+    EV << "corrupted cookie: match=" << (match ? "yes" : "no") << "\n";
+    delete opt;
+    delete result;
+}
+
+EV << ".\n";
+
+%contains: stdout
+empty cookie (request): length=2 cookieSize=0 match=yes
+8-byte cookie: length=10 cookieSize=8 match=yes
+corrupted cookie: match=no
+.
