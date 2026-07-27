@@ -344,6 +344,31 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
         appOwned = cmd->getOwned();
         EV_DETAIL << "Connection ownership set to " << (appOwned ? "owned" : "embryonic") << "\n";
     }
+    else if (auto cmd = dynamic_cast<TcpSetNoDelayCommand *>(tcpCommand)) {
+        // Runtime TCP_NODELAY: nagle_enabled is the runtime Nagle switch (nodelay
+        // disables Nagle). Enabling nodelay force-flushes any withheld partial
+        // (Linux __tcp_push_pending_frames on the nagle-off transition) but does NOT
+        // clear tcp_cork -- CORK outranks NODELAY for future small writes. May arrive
+        // before OPEN creates state; stash and let configureStateVariables() apply it.
+        nodelaySockopt = cmd->getNodelay() ? 1 : 0;
+        if (state != nullptr) {
+            state->nagle_enabled = !cmd->getNodelay();
+            if (cmd->getNodelay())
+                flushCorkedData(false);
+        }
+    }
+    else if (auto cmd = dynamic_cast<TcpSetCorkCommand *>(tcpCommand)) {
+        // Runtime TCP_CORK: persistently hold the trailing sub-MSS partial. A
+        // true->false transition (uncork) force-flushes the withheld partial
+        // (Linux tcp_uncork tail). May arrive before OPEN creates state.
+        corkSockopt = cmd->getCork() ? 1 : 0;
+        if (state != nullptr) {
+            bool wasCorked = state->tcp_cork;
+            state->tcp_cork = cmd->getCork();
+            if (wasCorked && !cmd->getCork())
+                flushCorkedData(false);
+        }
+    }
     else
         throw cRuntimeError("Unknown subclass of TcpSetOptionCommand received from app: %s", tcpCommand->getClassName());
     delete tcpCommand;

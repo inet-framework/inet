@@ -52,7 +52,7 @@ std::string TcpAlgorithmBaseStateVariables::detailedInfo() const
 TcpAlgorithmBase::TcpAlgorithmBase() : TcpAlgorithm(),
     state((TcpAlgorithmBaseStateVariables *&)TcpAlgorithm::state)
 {
-    rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = tlpTimer = nullptr;
+    rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = tlpTimer = corkTimer = nullptr;
 }
 
 TcpAlgorithmBase::~TcpAlgorithmBase()
@@ -69,6 +69,8 @@ TcpAlgorithmBase::~TcpAlgorithmBase()
         delete cancelEvent(keepAliveTimer);
     if (tlpTimer)
         delete cancelEvent(tlpTimer);
+    if (corkTimer)
+        delete cancelEvent(corkTimer);
 }
 
 void TcpAlgorithmBase::initialize()
@@ -87,12 +89,14 @@ void TcpAlgorithmBase::initialize()
     // period (rearm in processPtoTimer), while a failed/skipped probe leaves
     // the same-instant RTO to fire right after, so no deadlock is possible.
     tlpTimer->setSchedulingPriority(-1);
+    corkTimer = new cMessage("CORK");
 
     rexmitTimer->setContextPointer(conn);
     persistTimer->setContextPointer(conn);
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
     tlpTimer->setContextPointer(conn);
+    corkTimer->setContextPointer(conn);
 
     state->keepalive_enabled = conn->getTcpMain()->par("keepAliveEnabled");
     state->keepalive_idle_time = conn->getTcpMain()->par("keepAliveIdleTime");
@@ -216,6 +220,7 @@ void TcpAlgorithmBase::connectionClosed()
     cancelEvent(delayedAckTimer);
     cancelEvent(keepAliveTimer);
     cancelEvent(tlpTimer);
+    cancelEvent(corkTimer);
 }
 
 void TcpAlgorithmBase::processTimer(cMessage *timer, TcpEventCode& event)
@@ -230,8 +235,32 @@ void TcpAlgorithmBase::processTimer(cMessage *timer, TcpEventCode& event)
         processKeepAliveTimer(event);
     else if (timer == tlpTimer)
         processPtoTimer(event);
+    else if (timer == corkTimer)
+        processCorkTimer(event);
     else
         throw cRuntimeError(timer, "unrecognized timer");
+}
+
+void TcpAlgorithmBase::processCorkTimer(TcpEventCode& event)
+{
+    // Linux ICSK_TIME_PROBE0 fired for a corked partial: force it out with PSH
+    // (tcp_write_wakeup forces PSH). corkedDataPending is cleared by the flush.
+    conn->flushCorkedData(/*forcePush=*/true);
+}
+
+void TcpAlgorithmBase::scheduleCorkTimer()
+{
+    // Force-flush a withheld TCP_CORK/MSG_MORE partial at the RTO if nothing else
+    // (a later send, an incoming ACK, or an uncork) flushes it first.
+    if (corkTimer->isScheduled())
+        conn->cancelEvent(corkTimer);
+    conn->scheduleAfter(state->rexmit_timeout, corkTimer);
+}
+
+void TcpAlgorithmBase::cancelCorkTimer()
+{
+    if (corkTimer != nullptr && corkTimer->isScheduled())
+        conn->cancelEvent(corkTimer);
 }
 
 void TcpAlgorithmBase::schedulePto()
