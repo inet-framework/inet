@@ -113,6 +113,14 @@ class INET_API TcpReceiveQueue : public cObject
     /**
      * Returns left edge of enqueued region.
      */
+    /**
+     * Returns true and sets [dupStart, dupEnd) to the lowest-sequence part of
+     * [fromSeqNum, toSeqNum) that duplicates already-buffered data (RFC 2883:
+     * the first duplicate contiguous sequence, reported as a D-SACK block).
+     * Must be queried BEFORE the segment is inserted into the queue.
+     */
+    virtual bool findFirstDuplicateRange(uint32_t fromSeqNum, uint32_t toSeqNum, uint32_t& dupStart, uint32_t& dupEnd) const;
+
     virtual uint32_t getLE(uint32_t fromSeqNum) const;
 
     /**

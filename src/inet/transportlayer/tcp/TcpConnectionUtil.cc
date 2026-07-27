@@ -692,6 +692,7 @@ void TcpConnection::configureStateVariables()
     state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
     state->maxReordering = tcpMain->par("maxReordering");
     state->reordering = state->dupthresh; // dynamic DupThresh starts at the static value
+    state->lossUndoEnabled = tcpMain->par("lossUndoEnabled");
     state->prrEnabled = tcpMain->par("prrEnabled");
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 6675)
@@ -718,6 +719,7 @@ void TcpConnection::configureStateVariables()
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
+    state->dsack_enabled = tcpMain->par("dsackEnabled"); // if set, this means that current host supports SACK (RFC 2018, 2883, 6675)
 
     // TCP_INFO trio: idle/not-limited until the first SEND/sendData() call says
     // otherwise (enqueueSendCommandData()/sendData()).
@@ -1576,6 +1578,11 @@ bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpHeader, const
 
 bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option)
 {
+    // Eifel input (RFC 3522 / Linux rx_opt.rcv_tsecr): remember the echo so the
+    // undo logic can compare it against the first retransmission's timestamp.
+    if (tcpHeader->getAckBit() && option.getEchoedTimestamp() != 0)
+        state->lastRcvdTSecr = option.getEchoedTimestamp();
+
     if (option.getLength() != 10) {
         EV_ERROR << "ERROR: length incorrect\n";
         return false;
