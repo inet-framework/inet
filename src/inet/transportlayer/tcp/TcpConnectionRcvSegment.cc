@@ -82,6 +82,11 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
     printSegmentBrief(tcpSegment, tcpHeader);
     EV_DETAIL << "TCB: " << state->str() << "\n";
 
+    // snapshot delivered-bytes so consumers can read this segment's newly
+    // acked+sacked bytes as deliveredBytes - prrDeliveredMark (RFC 6937 PRR input,
+    // also used by AccECN to approximate this ACK's delivered packet count)
+    state->prrDeliveredMark = state->deliveredBytes;
+
     emit(rcvSeqSignal, tcpHeader->getSequenceNo());
     emit(rcvAckSignal, tcpHeader->getAckNo());
 

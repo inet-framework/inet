@@ -57,6 +57,8 @@ void Rfc6675Recovery::stepA()
     //"
     if (seqGE(state->snd_una, state->recoveryPoint)) {
         state->lossRecovery = false;
+        if (state->prrEnabled)
+            prrEndCwndReduction(); // RFC 6937: deflate to ssthresh on leaving recovery
         conn->getRexmitQueueForUpdate()->discardUpTo(state->snd_una);
     }
 }
@@ -130,6 +132,13 @@ void Rfc6675Recovery::stepC()
             state->snd_nxt = seqNum;
             uint32_t sentBytes = conn->sendSegment(state->snd_mss);
 
+            // RFC 6937 accounting: sendSegment() is called here DIRECTLY (not via
+            // sendData()/retransmitOneSegment()), so the dataSent()/segmentRetransmitted()
+            // callbacks that feed prrOut never fire for these sends. Count them here, or
+            // prrOut stays 0 and PRR's sndcnt = prrDelivered - prrOut over-sends.
+            if (state->prrEnabled && state->lossRecovery)
+                state->prrOut += sentBytes;
+
             //"
             // (C.4) The estimate of the amount of data outstanding in the
             //       network must be updated by incrementing pipe by the number
@@ -153,6 +162,12 @@ void Rfc6675Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
     // Once a TCP is in the loss recovery phase, the following procedure
     // MUST be used for each arriving ACK:
     //"
+    // RFC 6937: while in fast recovery PRR sizes cwnd from the bytes this ACK
+    // delivered, instead of the classic inflate-per-dupack / deflate-on-exit.
+    // Runs before stepA so a recovery-ending ACK still deflates to ssthresh there.
+    if (state->prrEnabled && state->lossRecovery)
+        prrCwndReduction((int)prrNewlyDelivered(), 0, true /* snd_una advanced */);
+
     stepA();
     stepB();
     stepC();
@@ -193,10 +208,35 @@ void Rfc6675Recovery::step4()
     // icsk_ca_ops->ssthresh): the default is RFC 5681/6675's max(FlightSize/2, 2*SMSS)
     // (TcpAlgorithmBase::calculateSsthreshForFastRecovery), but CUBIC applies its own
     // beta (cwnd*0.7) -- hardcoding FlightSize/2 here gave CUBIC connections the wrong
-    // post-recovery ssthresh (the fast_recovery/PRR scripts are all CUBIC).
+    // post-recovery ssthresh (the fast_recovery/PRR scripts are all CUBIC). Capture the
+    // pre-reduction cwnd first for PRR's priorCwnd (Linux tp->prior_cwnd = tp->snd_cwnd),
+    // not the old snd_cwnd*2 which assumed a /2 factor.
+    uint32_t priorCwnd = state->snd_cwnd;
     state->ssthresh = state->snd_cwnd = conn->getTcpAlgorithmForUpdate()->calculateSsthreshForFastRecovery();
     conn->emit(cwndSignal, state->snd_cwnd);
     conn->emit(ssthreshSignal, state->ssthresh);
+
+    // RFC 6937: from here on the sending rate is paced by PRR rather than by the
+    // reduced cwnd above; snapshot the pre-reduction cwnd and reset the counters.
+    if (state->prrEnabled) {
+        state->priorCwnd = priorCwnd;
+        state->prrDelivered = 0;
+        state->prrOut = 0;
+        EV_INFO << "PRR fast recovery: entering, priorCwnd=" << state->priorCwnd
+                << " ssthresh=" << state->ssthresh << "\n";
+        // Run PRR on the entry ACK itself, exactly as Linux tcp_fastretrans_alert
+        // calls tcp_cwnd_reduction() BEFORE tcp_xmit_retransmit_queue(). This
+        // clamps snd_cwnd to pipe+sndcnt (~1 segment on entry) so the
+        // retransmitOneSegment() + stepC() below send only sndcnt worth. Without
+        // it snd_cwnd stays at the full reduced ssthresh and stepC's cwnd-pipe
+        // loop floods every RACK-marked-lost segment at once -- a premature
+        // multi-segment retransmit burst (Linux sends just the first hole and
+        // paces the rest over later ACKs). step4() is only reached from the
+        // duplicate-ACK path, so snd_una has not advanced (sndUnaAdvanced=false);
+        // on the reo-timer entry there is no new delivery, prrNewlyDelivered()==0,
+        // and prrCwndReduction() is an early-return no-op (behavior unchanged).
+        prrCwndReduction((int)prrNewlyDelivered(), 0, false);
+    }
 
     //"
     // (4.3) Retransmit the first data segment presumed dropped -- the
@@ -307,6 +347,14 @@ void Rfc6675Recovery::receivedDuplicateAck()
         }
     }
     else {
+        // Already in loss recovery and this ACK is a (SACK-carrying) duplicate --
+        // snd_una did not advance. RFC 6937 PRR must still run here so cwnd tracks the
+        // bytes this ACK newly SACKed (Linux tcp_cwnd_reduction runs on EVERY ACK in
+        // recovery); without it a pure-SACK recovery leaves cwnd frozen below pipe after
+        // the entry retransmit and stalls into an RTO. sndUnaAdvanced=false.
+        if (state->prrEnabled)
+            prrCwndReduction((int)prrNewlyDelivered(), 0, false /* snd_una not advanced */);
+
         stepA();
         stepB();
         stepC();
@@ -644,6 +692,68 @@ uint32_t Rfc6675Recovery::rackDetectAndMarkLost(bool fromReoTimer)
     return lostBytes;
 }
 
+uint32_t Rfc6675Recovery::prrNewlyDelivered() const
+{
+    // bytes newly cumulatively-acked + selectively-acked by the ACK being processed
+    // (snapshot taken at the top of process_RCV_SEGMENT)
+    return (uint32_t)(state->deliveredBytes - state->prrDeliveredMark);
+}
+
+void Rfc6675Recovery::prrInitCwndReduction()
+{
+    // RFC 6937 / Linux tcp_init_cwnd_reduction(): snapshot cwnd and reset the PRR
+    // counters. ssthresh itself is set by the caller (step4), which owns the
+    // flavour's multiplicative decrease.
+    state->priorCwnd = state->snd_cwnd;
+    state->prrDelivered = 0;
+    state->prrOut = 0;
+}
+
+void Rfc6675Recovery::prrCwndReduction(int newlyAckedSacked, int newlyLost, bool sndUnaAdvanced)
+{
+    // RFC 6937 / Linux tcp_cwnd_reduction(): proportional rate reduction. All
+    // quantities are in bytes (Linux counts packets); 1 packet == snd_mss bytes.
+    if (newlyAckedSacked <= 0 || state->priorCwnd == 0)
+        return;
+
+    setPipe();
+    int pipeNow = (int)state->pipe;
+    int delta = (int)state->ssthresh - pipeNow;
+
+    state->prrDelivered += newlyAckedSacked;
+
+    int sndcnt;
+    if (delta < 0) {
+        // proportional phase: bound sending to the reduction slope
+        uint64_t dividend = (uint64_t)state->ssthresh * state->prrDelivered + state->priorCwnd - 1;
+        sndcnt = (int)(dividend / state->priorCwnd) - (int)state->prrOut;
+    }
+    else {
+        // slow-start-reduction-bound phase
+        sndcnt = std::max((int)state->prrDelivered - (int)state->prrOut, newlyAckedSacked);
+        if (sndUnaAdvanced && newlyLost == 0)
+            sndcnt += (int)state->snd_mss;
+        sndcnt = std::min(delta, sndcnt);
+    }
+    // force at least one segment out on entering fast recovery (prrOut == 0)
+    sndcnt = std::max(sndcnt, (int)(state->prrOut ? 0 : state->snd_mss));
+
+    state->snd_cwnd = (uint32_t)std::max(0, pipeNow + sndcnt);
+    conn->emit(cwndSignal, state->snd_cwnd);
+
+    EV_DETAIL << "PRR: pipe=" << pipeNow << " ssthresh=" << state->ssthresh
+              << " prrDelivered=" << state->prrDelivered << " prrOut=" << state->prrOut
+              << " sndcnt=" << sndcnt << " -> cwnd=" << state->snd_cwnd << "\n";
+}
+
+void Rfc6675Recovery::prrEndCwndReduction()
+{
+    // RFC 6937 / Linux tcp_end_cwnd_reduction(): set cwnd to ssthresh on leaving recovery.
+    state->snd_cwnd = state->ssthresh;
+    conn->emit(cwndSignal, state->snd_cwnd);
+    EV_INFO << "PRR: leaving fast recovery, cwnd=ssthresh=" << state->snd_cwnd << "\n";
+}
+
 void Rfc6675Recovery::checkSackReordering(uint32_t lowSeq)
 {
     // Linux tcp_check_sack_reordering(): reordering is proven when data at lowSeq
@@ -696,10 +806,15 @@ void Rfc6675Recovery::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
 
 void Rfc6675Recovery::dataSent(uint32_t fromSeq)
 {
+    // RFC 6937 accounting: bytes transmitted during the current recovery episode.
+    if (state->prrEnabled && state->lossRecovery && seqGreater(state->snd_nxt, fromSeq))
+        state->prrOut += state->snd_nxt - fromSeq;
 }
 
 void Rfc6675Recovery::segmentRetransmitted(uint32_t fromSeq, uint32_t toSeq)
 {
+    if (state->prrEnabled && state->lossRecovery && seqGreater(toSeq, fromSeq))
+        state->prrOut += toSeq - fromSeq;
 }
 
 void Rfc6675Recovery::setPipe()

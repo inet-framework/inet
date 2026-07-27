@@ -212,6 +212,10 @@ struct TcpStateVariables
     uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
 
     // PRR - Proportional Rate Reduction (RFC 6937)
+    bool prrEnabled = false;       // use PRR during fast recovery (set from the prrEnabled parameter)
+    uint32_t prrDelivered = 0;     // bytes delivered during the current recovery episode
+    uint32_t prrOut = 0;           // bytes transmitted during the current recovery episode
+    uint32_t priorCwnd = 0;        // snd_cwnd snapshot at recovery entry (RFC 6937 RecoverFS proxy; also the undo target)
 
     // loss undo (RFC 2883 D-SACK, RFC 3522 Eifel)
     uint32_t lastRcvdTSecr = 0;    // most recent TSecr echoed back by the peer (Eifel input)
