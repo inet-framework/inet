@@ -193,6 +193,26 @@ void TcpClassicAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tc
 
 void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
+    // Tail Loss Probe outcome (Linux tcp_process_tlp_ack): this ACK reached the
+    // probe's snd_max. A new-data probe acked, or a D-SACK on this ACK (meaning
+    // both the original and the probe arrived), ends the episode benignly. A
+    // RETRANSMITTED probe acked WITHOUT a D-SACK means the original tail really
+    // was lost and the probe silently repaired it, so the congestion response a
+    // fast recovery would have applied is owed -- Linux collapses
+    // tcp_init_cwnd_reduction() + tcp_end_cwnd_reduction() into a one-shot
+    // "ssthresh = cwnd/2; cwnd = ssthresh", entering no recovery episode.
+    if (state->tlpHighSeq != 0 && seqGE(state->snd_una, state->tlpHighSeq)) {
+        if (state->tlpRetrans && !state->dsackSeen) {
+            state->ssthresh = std::max(getBytesInFlight() / 2, 2 * state->snd_mss);
+            state->snd_cwnd = state->ssthresh;
+            conn->emit(ssthreshSignal, state->ssthresh);
+            conn->emit(cwndSignal, state->snd_cwnd);
+            EV_INFO << "TLP: probe repaired a real tail loss, cwnd reduced to ssthresh="
+                    << state->ssthresh << "\n";
+        }
+        state->tlpHighSeq = 0;
+    }
+
     TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
     if (state->lossRecovery)
