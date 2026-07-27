@@ -36,10 +36,19 @@ class TcpAlgorithm;
 //@}
 
 #define MAX_SYN_REXMIT_COUNT          12  // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
+#define TFO_BLACKHOLE_RTO_THRESHOLD   2  // TCP Fast Open active blackhole detection: syn_rexmit_count value (i.e. the 3rd SYN transmission, matching the kernel's "timeouts == 2" check) that triggers a suspected-blackhole report for a data-carrying SYN
+
+// AccECN (draft-ietf-tcpm-accurate-ecn): state->ecnMode values, mirroring the
+// tcpEcnMode NED enum by index (Tcp.ned / TcpConnectionState.msg's ecnMode field).
+#define TCP_ECN_MODE_OFF              0
+#define TCP_ECN_MODE_PASSIVE          1
+#define TCP_ECN_MODE_RFC3168          2
+#define TCP_ECN_MODE_ACCECN           3
+#define TCP_ECN_MODE_ACCECN_PASSIVE   4
 #define TCP_MAX_WIN                   65535lu  // 65535 bytes, largest value (16 bit) for (unscaled) window size
 #define TCP_MAX_WIN_SCALED            0x3fffffffL // 2^30-1 bytes, largest value for scaled window size
 #define MAX_SACK_BLOCKS               60  // will only be used with SACK
-#define PAWS_IDLE_TIME_THRESH         (24 * 24 * 3600)  // 24 days in seconds (RFC 1323)
+#define PAWS_IDLE_TIME_THRESH         (24 * 24 * 3600)  // 24 days in seconds (RFC 7323)
 
 /**
  * Manages a TCP connection. This class itself implements the TCP state
@@ -230,14 +239,30 @@ class INET_API TcpConnection : public SimpleModule
     virtual bool processAckInEstabEtc(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
     //@}
 
+    /**
+     * AccECN: pick between the ACE field's packet-count-only naiveDelta
+     * and safeDelta candidates using the AccECN option's byte-exact CEB evidence
+     * as corroboration -- whichever candidate's byte estimate (delta * snd_mss)
+     * is closer to the observed cebByteDelta wins. Isolated as its own method so it's
+     * independently unit-testable (design reference: tcp_accecn_process's naive/safe/
+     * option-evidence *shape* only, tcp_input.c, re-derived not transcribed -- see the
+     * plan's Verified Facts point 3).
+     */
+    virtual int resolveAceDelta(int naiveDelta, int safeDelta, uint32_t cebByteDelta) const;
+
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
     virtual bool processMSSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionMaxSegmentSize& option);
     virtual bool processWSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionWindowScale& option);
     virtual bool processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSackPermitted& option);
-    virtual bool processSACKOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSack& option);
     virtual bool processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option);
+    virtual bool processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option);
+    virtual bool processFastOpenExpOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpenExp& option);
     //@}
+
+    /** Shared cookie-processing core for both the standard (kind 34) and legacy
+     * experimental (kind 254 + 0xF989 magic) Fast Open options. */
+    virtual bool processFastOpenCookieBytes(const std::vector<uint8_t>& cookie);
 
     /** @name Processing timeouts. Invoked from processTimer(). */
     //@{

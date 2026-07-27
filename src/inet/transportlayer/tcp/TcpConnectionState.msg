@@ -11,25 +11,27 @@ namespace inet::tcp;
 
 cplusplus {{
 typedef std::list<Sack> SackList;
+typedef std::vector<uint8_t> FastOpenCookie;
 }}
 
 class SackList { @existingClass; }
+class FastOpenCookie { @existingClass; }
 
 //
 // TCP FSM states
 //
-// Brief descriptions (cf RFC 793, page 20):
+// Brief descriptions (cf RFC 9293, page 20):
 //
-// LISTEN - waiting for a connection request
-// SYN-SENT - part of 3-way handshake (waiting for peer's SYN+ACK or SYN)
-// SYN-RECEIVED - part of 3-way handshake (we sent SYN too, waiting for it to be acked)
-// ESTABLISHED - normal data transfer
-// FIN-WAIT-1 - FIN sent, waiting for its ACK (or peer's FIN)
-// FIN-WAIT-2 - our side of the connection closed (our FIN acked), waiting for peer's FIN
-// CLOSE-WAIT - FIN received and acked, waiting for local user to close
-// LAST-ACK - remote side closed, FIN sent, waiting for its ACK
-// CLOSING - simultaneous close: sent FIN, then got peer's FIN
-// TIME-WAIT - both FIN's acked, waiting for some time to be sure remote TCP received our ACK
+// LISTEN - represents waiting for a connection request from any remote TCP peer and port.
+// SYN-SENT - represents waiting for a matching connection request after having sent a connection request.
+// SYN-RECEIVED - represents waiting for a confirming connection request acknowledgment after having both received and sent a connection request.
+// ESTABLISHED - represents an open connection, data received can be delivered to the user. The normal state for the data transfer phase of the connection.
+// FIN-WAIT-1 - represents waiting for a connection termination request from the remote TCP peer, or an acknowledgment of the connection termination request previously sent.
+// FIN-WAIT-2 - represents waiting for a connection termination request from the remote TCP peer.
+// CLOSE-WAIT - represents waiting for a connection termination request from the local user.
+// CLOSING - represents waiting for a connection termination request acknowledgment from the remote TCP peer.
+// LAST-ACK - represents waiting for an acknowledgment of the connection termination request previously sent to the remote TCP peer (this termination request sent to the remote TCP peer already included an acknowledgment of the termination request sent from the remote TCP peer).
+// TIME-WAIT - represents waiting for enough time to pass to be sure the remote TCP peer received the acknowledgment of its connection termination request and to avoid new connections being impacted by delayed segments from previous connections.
 // CLOSED - represents no connection state at all.
 //
 // Note: FIN-WAIT-1, FIN-WAIT-2, CLOSING, TIME-WAIT represents active close (that is,

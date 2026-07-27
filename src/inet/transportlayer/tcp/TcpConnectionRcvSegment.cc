@@ -1113,7 +1113,14 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
     // so there's only URG and PSH left to handle.
     //
-    if (B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
+    // Also skipped when the Fast Open block above already consumed the payload
+    // (fastopenSynDataAccepted): in the cookie-less mode tfoAttempted is false
+    // (no cookie option was present), and re-inserting here with the UNSHIFTED
+    // sequence number -- after rcv_nxt has already advanced past the whole
+    // payload -- would compute a negative remainder and crash in peekDataAt()
+    // ("offset is out of range").
+    if (!tfoAttempted && !state->fastopenSynDataAccepted
+            && B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
         updateRcvQueueVars();
 
         if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?
@@ -1255,20 +1262,38 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         if (seqGreater(state->snd_una, state->iss)) {
             EV_INFO << "SYN+ACK bits set, connection established.\n";
 
+            // TCP Fast Open client (RFC 7413): the SYN carried data and the
+            // SYN-ACK acked ALL of it -- surface as TCPI_OPT_SYN_DATA, the
+            // same tcp_info bit the server side sets. Linux tp->syn_data_acked
+            // is true only when nothing of the SYN data remains unacked
+            // (tcp_rcv_fastopen_synack: syn_data && !data); a partial ack
+            // leaves it clear (syn-data-partial-or-over-ack: 9 of 18 bytes).
+            if (state->fastopenSynDataLen > 0
+                && seqGE(state->snd_una, state->iss + 1 + state->fastopenSynDataLen))
+                state->fastopenSynDataAccepted = true;
+
+
             // RFC says "continue processing at the sixth step below where
             // the URG bit is checked". Those steps deal with: URG, segment text
             // (and PSH), and FIN.
             // Now: URG and PSH we don't support yet; in SYN+FIN we ignore FIN;
             // with segment text we just take it easy and put it in the receiveQueue
             // -- we'll forward it to the user when more data arrives.
-            if (tcpHeader->getFinBit())
-                EV_DETAIL << "SYN+ACK+FIN received: ignoring FIN\n";
+            bool synAckFin = tcpHeader->getFinBit();
 
             if (B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
                 updateRcvQueueVars();
 
                 if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?
-                    receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader); // TODO forward to app, etc.
+                    // advance rcv_nxt over the SYN-ACK's data (RFC 793 permits data on
+                    // SYN-ACK; a TFO server may respond in the same segment), so that
+                    // the handshake ACK acknowledges it. The SYN consumes one
+                    // sequence number, so index the payload from SEG.SEQ+1 via a
+                    // sequence-shifted header copy (same pattern as the TFO server's
+                    // SYN-data acceptance in processSynInListen()).
+                    auto synShiftedHeader = staticPtrCast<TcpHeader>(tcpHeader->dupShared());
+                    synShiftedHeader->setSequenceNo(tcpHeader->getSequenceNo() + 1);
+                    state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, synShiftedHeader);
                 }
                 else { // not enough freeRcvBuffer in rcvQueue for new segment
                     state->tcpRcvQueueDrops++; // update current number of tcp receive queue drops
@@ -1458,9 +1483,24 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         //   has been reached, return.
         //"
         EV_INFO << "SYN bit set: sending SYN+ACK\n";
+        // Simultaneous open: consume the crossing SYN's options BEFORE building
+        // our SYN-ACK (mirrors processSegmentInListen()) -- otherwise
+        // rcv_sack_perm/ws/ts stay unset and the reply advertises nothing.
+        if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH)
+            readHeaderOptions(tcpHeader);
         state->snd_max = state->snd_nxt = state->iss;
+        emit(sndMaxSignal, state->snd_max);
         sendSynAck();
         startSynRexmitTimer();
+        // TFO simultaneous open: our SYN's data stays queued and OUTSTANDING.
+        // Linux keeps snd_nxt spanning it (the SYN-ACK reuses the SYN skb's
+        // sequence, nothing is rewound), so the peer's eventual SYN-ACK acking
+        // the data (ack 1001) is acceptable and the dup-segment ACK goes out
+        // with SEQ = 1001, not a SYN-ACK retransmit (simultaneous-fast-open).
+        if (state->fastopenSynDataLen > 0) {
+            state->snd_max = state->snd_nxt = state->iss + 1 + state->fastopenSynDataLen;
+            emit(sndMaxSignal, state->snd_max);
+        }
 
         // Note: code below is similar to processing SYN in LISTEN.
 
@@ -1468,24 +1508,13 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         if (tcpHeader->getFinBit())
             EV_DETAIL << "SYN+FIN received: ignoring FIN\n";
 
-        // We don't send text in SYN or SYN+ACK, but accept it. Otherwise
-        // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
-        // so there's only URG and PSH left to handle.
-        if (B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
-            updateRcvQueueVars();
-
-            if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?
-                receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader); // TODO forward to app, etc.
-            }
-            else { // not enough freeRcvBuffer in rcvQueue for new segment
-                state->tcpRcvQueueDrops++; // update current number of tcp receive queue drops
-
-                emit(tcpRcvQueueDropsSignal, state->tcpRcvQueueDrops);
-
-                EV_WARN << "RcvQueueBuffer has run out, dropping segment\n";
-                return TCP_E_IGNORE;
-            }
-        }
+        // Data on the crossing SYN is DISCARDED: Linux tcp_rcv_synsent_state_
+        // process moves to SYN_RECV and drops the segment -- a client socket
+        // has no TFO server context to accept SYN data into, and the golden
+        // pins the peer retransmitting it after the handshake
+        // (simultaneous-fast-open: "The other end retries").
+        if (B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength())
+            EV_DETAIL << "Discarding data on the crossing SYN (simultaneous open)\n";
 
         if (tcpHeader->getUrgBit() || tcpHeader->getPshBit())
             EV_DETAIL << "Ignoring URG and PSH bits in SYN\n"; // TODO
@@ -1518,16 +1547,17 @@ TcpEventCode TcpConnection::processRstInSynReceived(const Ptr<const TcpHeader>& 
 
     sendQueue->discardUpTo(sendQueue->getBufferEndSeq()); // flush send queue
 
-    if (state->sack_enabled)
-        rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq()); // flush rexmit queue
+    rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq()); // flush rexmit queue
 
     if (state->active) {
         // signal "connection refused"
         sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
     }
 
-    // on RCV_RST, FSM will go either to LISTEN or to CLOSED, depending on state->active
-    // FIXME if this was a forked connection, it should rather close than go back to listening (otherwise we'd now have two listening connections with the original one!)
+    // on RCV_RST the FSM goes to CLOSED for an active open, a FORKED connection
+    // (a Linux child socket must die -- re-listening would duplicate the still-
+    // existing listener) or a TFO-accelerated connection (app-visible state
+    // exists); only a plain non-forked passive open returns to LISTEN (RFC 793).
     return TCP_E_RCV_RST;
 }
 

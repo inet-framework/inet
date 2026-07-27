@@ -379,20 +379,74 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
             << " > " << remoteAddr << ":" << remotePort
             << " type=" << errorInd->getType() << " code=" << errorInd->getCode() << "\n";
 
-    // Hard errors abort the connection during setup (RFC 5461).
+    // RFC 5927 / Linux tcp_v4_err(): validate the QUOTED sequence number
+    // against the send window before acting -- an ICMP error quoting a
+    // sequence outside [SND.UNA, SND.MAX] is stale or forged and must be
+    // ignored entirely (the icmp-before-accept scripts inject exactly such an
+    // out-of-window error first and expect it to have no effect).
+    if (const Packet *originalPacket = errorInd->getOriginalPacket()) {
+        const auto& quotedTcp = originalPacket->peekAtFront<TcpHeader>(b(-1), Chunk::PF_ALLOW_INCOMPLETE);
+        uint32_t quotedSeq = quotedTcp->getSequenceNo();
+        if (!seqLE(state->snd_una, quotedSeq) || !seqLE(quotedSeq, state->snd_max)) {
+            EV_DETAIL << "Ignoring ICMPv4 error quoting out-of-window sequence " << quotedSeq
+                      << " (SND.UNA=" << state->snd_una << ", SND.MAX=" << state->snd_max << ")\n";
+            delete indication;
+            return true;
+        }
+    }
+
+    // Hard errors abort the connection during setup (RFC 5461) -- in SYN_SENT
+    // and in SYN_RCVD alike: Linux tcp_v4_err()/tcp_done_with_error() kills the
+    // pending request/child socket regardless of which side of the handshake it
+    // is on (a plain non-forked passive open falls back to LISTEN via the RCV_RST
+    // transition's gate, "request dropped, listener remains"; a forked or
+    // TFO-accelerated connection dies, see TcpConnectionBase's RCV_RST rule).
     // Once ESTABLISHED, even hard errors are treated as soft to prevent
     // blind reset attacks.
-    if (isHardIcmpv4Error(errorInd->getType(), errorInd->getCode()) && fsm.getState() == TCP_S_SYN_SENT) {
+    if (isHardIcmpv4Error(errorInd->getType(), errorInd->getCode())
+        && (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD))
+    {
         EV_DETAIL << "Hard ICMPv4 error during connection setup -- connection refused\n";
 
         sendQueue->discardUpTo(sendQueue->getBufferEndSeq());
         if (state->sack_enabled)
             rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq());
 
-        sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
+        // Only signal an app that actually owns this socket (an active opener,
+        // or a forked/TFO child); a plain passive listener just drops the
+        // half-open request and keeps listening, the user need not be informed.
+        if (state->active || state->forked || state->fastopenAccelerated)
+            sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
         delete indication;
 
         return performStateTransition(TCP_E_RCV_RST);
+    }
+
+    // Linux reacts to an ICMP frag-needed in SYN_SENT immediately and
+    // unconditionally (tcp_v4_err -> tcp_simple_retransmit; kernel commit
+    // c31b70c9968f) -- this is NOT gated behind PMTUD proper, which governs
+    // the established-connection MSS-reduction path below: the SYN is
+    // retransmitted at once at the reduced MSS, with any Fast Open payload
+    // and option dropped from it (the bare-rexmit rule), and the SYN's own
+    // MSS option re-advertises the reduced value.
+    if (fsm.getState() == TCP_S_SYN_SENT && isFragNeeded(errorInd->getType(), errorInd->getCode())) {
+        int mtu = errorInd->getMtu();
+        uint32_t newMss = mtu > 40 ? mtu - 40 : 0; // 20B IPv4 header + 20B minimum TCP header
+        if (newMss > 0 && newMss < state->snd_mss) {
+            EV_DETAIL << "ICMP frag-needed in SYN_SENT: reducing MSS from " << state->snd_mss
+                      << " to " << newMss << " and retransmitting a bare SYN immediately\n";
+            state->snd_mss = newMss;
+            if (newMss < state->advertisedMss)
+                state->advertisedMss = newMss;
+            // count as a retransmission so sendSyn()/writeHeaderOptions()'s
+            // bare-SYN rule (no FO option, no SYN data) applies, same as
+            // Linux's retransmit path
+            state->syn_rexmit_count++;
+            sendSyn();
+            rescheduleAfter(state->syn_rexmit_timeout, synRexmitTimer);
+        }
+        delete indication;
+        return true;
     }
 
     // PMTUD (RFC 1191): if Fragmentation Needed and DF Set, reduce snd_mss
@@ -446,14 +500,30 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
     // Hard errors abort the connection during setup (RFC 5461).
     // Once ESTABLISHED, even hard errors are treated as soft to prevent
     // blind reset attacks.
-    if (isHardIcmpv6Error(errorInd->getType(), errorInd->getCode()) && fsm.getState() == TCP_S_SYN_SENT) {
+    // same quoted-sequence validation as the IPv4 sibling
+    if (const Packet *originalPacket = errorInd->getOriginalPacket()) {
+        const auto& quotedTcp = originalPacket->peekAtFront<TcpHeader>(b(-1), Chunk::PF_ALLOW_INCOMPLETE);
+        uint32_t quotedSeq = quotedTcp->getSequenceNo();
+        if (!seqLE(state->snd_una, quotedSeq) || !seqLE(quotedSeq, state->snd_max)) {
+            EV_DETAIL << "Ignoring ICMPv6 error quoting out-of-window sequence " << quotedSeq << "\n";
+            delete indication;
+            return true;
+        }
+    }
+
+    if (isHardIcmpv6Error(errorInd->getType(), errorInd->getCode())
+        && (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD))
+    {
+        // same SYN_RCVD extension as the IPv4 sibling: the pending request /
+        // TFO child dies (or a plain passive open falls back to LISTEN)
         EV_DETAIL << "Hard ICMPv6 error during connection setup -- connection refused\n";
 
         sendQueue->discardUpTo(sendQueue->getBufferEndSeq());
         if (state->sack_enabled)
             rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq());
 
-        sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
+        if (state->active || state->forked || state->fastopenAccelerated)
+            sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
         delete indication;
 
         return performStateTransition(TCP_E_RCV_RST);
@@ -1810,12 +1880,88 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 break;
 
             case TCPOPTION_SACK: // SACK=5
-                ok = processSACKOption(tcpHeader, *check_and_cast<const TcpOptionSack *>(option));
+                ok = check_and_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery())->processSACKOption(tcpHeader, *check_and_cast<const TcpOptionSack *>(option));
                 break;
 
             case TCPOPTION_TIMESTAMP: // TS=8
                 ok = processTSOption(tcpHeader, *check_and_cast<const TcpOptionTimestamp *>(option));
                 break;
+
+            case TCPOPTION_TCP_FASTOPEN: // TFO=34
+                ok = processFastOpenOption(tcpHeader, *check_and_cast<const TcpOptionTcpFastOpen *>(option));
+                break;
+
+            case TCPOPTION_RFC3692_STYLE_EXPERIMENT_2: // kind 254: only the pre-standardization
+                // TCP Fast Open experimental sub-type (0xF989 magic) is understood, and only
+                // when fastopenExpOptionEnabled opts into accepting it. Any other kind-254 use,
+                // or this same sub-type while the gate is off, is a dynamic_cast miss / early
+                // return here -- silently ignored, same as an ordinary TcpOptionUnknown kind
+                // elsewhere in this switch gets no special handling either.
+                if (state->fastopenExpOptionEnabled) {
+                    if (auto *expOption = dynamic_cast<const TcpOptionTcpFastOpenExp *>(option))
+                        ok = processFastOpenExpOption(tcpHeader, *expOption);
+                }
+                break;
+
+            case TCPOPTION_ACCECN0: // draft-ietf-tcpm-accurate-ecn, E0B/CEB/E1B byte counters
+            case TCPOPTION_ACCECN1: { // same option, E1B/CEB/E0B field order
+                // G7: decode the peer's report of bytes IT received from US (opposite
+                // direction from rcvEct*Bytes/rcvCeBytes, which are what we observed on
+                // bytes the peer sent us). The serializer already resolved the
+                // kind-dependent wire order into these semantic accessors.
+                if (length != 2 && length != 5 && length != 8 && length != 11) {
+                    EV_ERROR << "ERROR: AccECN option length incorrect\n";
+                    ok = false;
+                    break;
+                }
+                auto *aeOpt = check_and_cast<const TcpOptionAccEcn *>(option);
+                state->sawAccEcnOpt = true; // Linux tp->saw_accecn_opt
+                // A variable-length AccECN option (2/5/8/11) may omit trailing
+                // counters; absent fields are 0. CEB is the 2nd field in both wire
+                // orders, so a usable CE-byte delta is present iff length >= 8.
+                // Decode the ECT0/ECT1 byte counters into raw (offset-corrected) values
+                // and flag them valid, exactly as the CEB below. The first present counter
+                // (E0B for ACCECN0, E1B for ACCECN1) appears at length >= 5; the third
+                // counter at length >= 11. The delta against the baseline and the baseline
+                // advance both happen later in processAckInEstabEtc()'s ACE block, so an
+                // early-return ACK never advances a baseline while dropping its delta.
+                if (length >= 5) {
+                    if (kind == TCPOPTION_ACCECN0) {
+                        state->accEcnOptionRawE0Bytes = aeOpt->getEct0Bytes() - 1;
+                        state->accEcnOptionE0DeltaValid = true;
+                    }
+                    else {
+                        state->accEcnOptionRawE1Bytes = aeOpt->getEct1Bytes() - 1;
+                        state->accEcnOptionE1DeltaValid = true;
+                    }
+                }
+                if (length >= 11) {
+                    if (kind == TCPOPTION_ACCECN0) {
+                        state->accEcnOptionRawE1Bytes = aeOpt->getEct1Bytes() - 1;
+                        state->accEcnOptionE1DeltaValid = true;
+                    }
+                    else {
+                        state->accEcnOptionRawE0Bytes = aeOpt->getEct0Bytes() - 1;
+                        state->accEcnOptionE0DeltaValid = true;
+                    }
+                }
+                if (length < 8) {
+                    EV_INFO << "Tcp Header Option AccECN(kind=" << kind << ", len=" << length << ", no CEB) received\n";
+                    break;
+                }
+                // CEB itself is stored raw (offset-corrected only) here, NOT diffed against
+                // peerReportedCeBytes yet -- the delta computation and the baseline advance
+                // both happen together in processAckInEstabEtc()'s ACE block, the one place
+                // that actually consumes it, so an early-return path there (e.g. an ACK
+                // beyond snd_max) can never advance the baseline without folding the delta
+                // into deliveredCeBytes. See the state field's own comment for why.
+                state->accEcnOptionRawCeBytes = aeOpt->getCeBytes();
+                state->accEcnOptionCebDeltaValid = true;
+                EV_INFO << "Tcp Header Option AccECN(kind=" << kind << ", E0B=" << aeOpt->getEct0Bytes()
+                        << ", E1B=" << aeOpt->getEct1Bytes() << ", CEB=" << state->accEcnOptionRawCeBytes
+                        << ") received\n";
+                break;
+            }
 
             // TODO add new TCPOptions here once they are implemented
             // TODO delegate to TcpAlgorithm as well -- it may want to recognized additional options
@@ -1944,12 +2090,118 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
             }
         }
         else if (seqLE(tcpHeader->getSequenceNo(), state->last_ack_sent)) { // Note: test is modified according to the latest proposal of the tcplw@cray.com list (Braden 1993/04/26)
-            state->ts_recent = option.getSenderTimestamp();
-            EV_DETAIL << "Updating ts_recent from segment: new ts_recent=" << state->ts_recent << "\n";
+            // ... but never from a segment whose ACK is invalid (acks data we
+            // never sent): options are processed before ACK validation here,
+            // and accepting such a segment's (possibly wild) TSval would arm
+            // PAWS against every subsequent legitimate segment. Linux only
+            // stores ts_recent after the incoming segment passes validation.
+            if (tcpHeader->getAckBit() && seqGreater(tcpHeader->getAckNo(), state->snd_max))
+                EV_DETAIL << "Not updating ts_recent: segment acks unsent data\n";
+            else {
+                // positive delta = Linux FLAG_TS_PROGRESS (consumed by the AccECN
+                // ACE decode's forward-progress test this segment)
+                if (seqGreater(option.getSenderTimestamp(), state->ts_recent))
+                    state->accEcnTsProgress = true;
+                state->ts_recent = option.getSenderTimestamp();
+                EV_DETAIL << "Updating ts_recent from segment: new ts_recent=" << state->ts_recent << "\n";
+            }
         }
     }
 
     return true;
+}
+
+bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cookie)
+{
+    // RFC 7413 SS4.1: server processing an incoming SYN, or client processing a SYN-ACK.
+    // Shared by both the standard (kind 34, processFastOpenOption()) and legacy
+    // experimental (kind 254 + 0xF989 magic, processFastOpenExpOption()) options --
+    // once the cookie bytes are extracted, the two forms are handled identically.
+    bool isServerSyn = state->fastopenServerEnabled && fsm.getState() == TCP_S_LISTEN;
+    bool isClientSynAck = state->fastopenClientEnabled && fsm.getState() == TCP_S_SYN_SENT;
+    if (!isServerSyn && !isClientSynAck)
+        return true; // Fast Open not applicable in this role/state -- accepted, no-op.
+
+    unsigned int cookieLen = cookie.size();
+
+    if (isServerSyn) {
+        if (cookieLen == 0) {
+            // Empty cookie: peer is requesting one for a future connection attempt.
+            state->fastopenCookieRequested = true;
+            state->fastopenCookieToSend = tcpMain->generateFastOpenCookie(localAddr, remoteAddr, state->fastopenCookieBytes);
+            state->fastopenSendCookieOption = true;
+            EV_INFO << "Fast Open: cookie requested, generated a fresh one to echo\n";
+        }
+        else {
+            std::vector<uint8_t> want = tcpMain->generateFastOpenCookie(localAddr, remoteAddr, cookieLen);
+            if (state->fastopenLenientCookieValidation || cookie == want) {
+                state->fastopenCookieValid = true;
+                EV_INFO << "Fast Open: cookie accepted (" << (state->fastopenLenientCookieValidation ? "lenient" : "verified") << ")\n";
+            }
+            else {
+                // Mismatch under strict validation: refresh, matching RFC 7413's
+                // "always give the client a fresh cookie on failure" guidance.
+                state->fastopenCookieToSend = tcpMain->generateFastOpenCookie(localAddr, remoteAddr, state->fastopenCookieBytes);
+                state->fastopenSendCookieOption = true;
+                EV_INFO << "Fast Open: cookie mismatch under strict validation, offering a fresh one\n";
+            }
+        }
+    }
+    else { // isClientSynAck
+        if (!state->fastopenSynCarriedOption) {
+            // Linux tcp_rcv_fastopen_synack: "Ignore an unsolicited cookie" --
+            // our SYN carried no TFO option (cookie-less mode, or no TFO at
+            // all), so a cookie the server volunteered is NOT cached
+            // (cookie-less-sendto pins the later cookie-mode connect still
+            // sending an empty cookie REQUEST).
+            EV_INFO << "Fast Open: ignoring unsolicited " << cookieLen << "-byte cookie (our SYN carried no TFO option)\n";
+        }
+        else if (cookieLen >= 4 && cookieLen <= 16) {
+            // remember the peer's ANNOUNCED MSS with the cookie (Linux caches
+            // both in tcp_metrics): the NEXT connect's SYN-payload cap is
+            // cachedMss - 40, before any live MSS negotiation has happened.
+            // The raw option value, NOT snd_mss -- a local TCP_MAXSEG clamp on
+            // THIS connection must not shrink the cache (Linux reparses the
+            // SYN-ACK to bypass the user clamp; syn-data-mss pins a 1300-byte
+            // next-SYN payload from a cached 1340 despite this connection's
+            // TCP_MAXSEG 1040).
+            uint32_t cacheMss = state->peerAdvertisedMss > 0 ? state->peerAdvertisedMss : state->snd_mss;
+            tcpMain->setFastOpenCookie(remoteAddr, cookie, cacheMss);
+            EV_INFO << "Fast Open: learned a " << cookieLen << "-byte cookie for " << remoteAddr.str() << "\n";
+        }
+        else if (cookieLen > 0) {
+            // RFC 7413 SS4.1.2: valid cookies are 4-16 bytes (Linux
+            // TCP_FASTOPEN_COOKIE_MIN/MAX in tcp_parse_fastopen_option()).
+            // An out-of-range cookie must NOT be cached.
+            EV_WARN << "Fast Open: ignoring out-of-range " << cookieLen << "-byte cookie from " << remoteAddr.str() << "\n";
+        }
+    }
+    return true;
+}
+
+bool TcpConnection::processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option)
+{
+    unsigned int cookieLen = option.getCookieArraySize();
+    std::vector<uint8_t> cookie(cookieLen);
+    for (unsigned int i = 0; i < cookieLen; i++)
+        cookie[i] = option.getCookie(i);
+    return processFastOpenCookieBytes(cookie);
+}
+
+bool TcpConnection::processFastOpenExpOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpenExp& option)
+{
+    // Pre-standardization form (RFC 7413 Appendix A): same semantics as kind 34,
+    // gated separately (fastopenExpOptionEnabled) since accepting it is a distinct
+    // opt-in -- readHeaderOptions() only calls this when that gate is on.
+    unsigned int cookieLen = option.getCookieArraySize();
+    std::vector<uint8_t> cookie(cookieLen);
+    for (unsigned int i = 0; i < cookieLen; i++)
+        cookie[i] = option.getCookie(i);
+    // Linux echoes the cookie in the same option form the client used
+    // (foc->exp propagates request->response); remember it for the SYN-ACK.
+    if (fsm.getState() == TCP_S_LISTEN)
+        state->fastopenPeerUsedExpOption = true;
+    return processFastOpenCookieBytes(cookie);
 }
 
 bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSackPermitted& option)
@@ -2167,9 +2419,9 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 
         // SACK_PERMITTED header option
         if (state->sack_support && (state->rcv_sack_perm || (fsm.getState() == TCP_S_INIT
-                                                             || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
+                                                             || (fsm.getState() == TCP_S_SYN_SENT && (state->syn_rexmit_count > 0 || state->fastopenSynDeferred)))))
         {
-            if (!state->ts_support) { // if TS is supported by host, do not add NOPs to this segment
+            if (tcpMain->alignOptions && !state->ts_support) { // if TS is supported by host, do not add NOPs to this segment
                 // 2 padding bytes
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
