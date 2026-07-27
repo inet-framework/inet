@@ -309,6 +309,8 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
             return TCP_E_IGNORE;
         }
 
+        state->snd_effmss = calculateEffectiveMss();
+
         // notify tcpAlgorithm and app layer
         tcpAlgorithm->established(false);
 
@@ -825,6 +827,26 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
         readHeaderOptions(tcpHeader);
 
+    // Linux tcp_syncookies=2 (always-on cookies): the connection is rebuilt
+    // from the cookie at the handshake ACK, and its 2-bit MSS field quantizes
+    // the peer's advertised MSS DOWN to the IPv4 msstab (net/ipv4/syncookies.c
+    // msstab[] = {536, 1300, 1440, 1460}: largest entry not above the
+    // advertised value). wscale/SACK/TS ride the timestamp encoding and stay
+    // exact (syncookies_ip4_9k pins snd_mss 1448 = 1460 - 12 against an
+    // advertised 8960).
+    if (tcpMain->par("syncookiesAlways").boolValue() && state->snd_mss > 536) {
+        static const uint32_t msstab[] = { 536, 1300, 1440, 1460 };
+        uint32_t clamped = msstab[0];
+        for (uint32_t entry : msstab)
+            if (entry <= state->snd_mss)
+                clamped = entry;
+        if (clamped < state->snd_mss) {
+            EV_DETAIL << "syncookies=2: peer MSS " << state->snd_mss << " quantized to msstab " << clamped << "\n";
+            state->snd_mss = clamped;
+            state->snd_effmss = calculateEffectiveMss();
+        }
+    }
+
     state->ack_now = true;
 
     // ECN
@@ -1015,6 +1037,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
 
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;
+            state->snd_effmss = calculateEffectiveMss();
             tcpAlgorithm->established(true);
             tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
             sendEstabIndicationToApp();
