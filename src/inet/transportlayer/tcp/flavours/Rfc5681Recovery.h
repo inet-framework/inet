@@ -38,6 +38,7 @@ class INET_API Rfc5681Recovery : public ITcpRecovery
     virtual void dataSent(uint32_t fromSeq) override {}
     virtual void segmentRetransmitted(uint32_t fromSeq, uint32_t toSeq) override {}
     virtual void onRexmitTimeout() override {}
+    virtual void reoTimeout() override {}
 };
 
 } // namespace tcp

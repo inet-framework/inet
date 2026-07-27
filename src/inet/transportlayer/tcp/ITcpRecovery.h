@@ -47,6 +47,13 @@ class INET_API ITcpRecovery : public cObject
      * spurious-RTO detection episode (RFC 5682 F-RTO).
      */
     virtual void onRexmitTimeout() = 0;
+
+    /**
+     * Called when the RACK reordering timer expired (RFC 8985 / Linux
+     * ICSK_TIME_REO_TIMEOUT) and loss detection has just marked further bytes
+     * lost, so the newly lost data can be retransmitted.
+     */
+    virtual void reoTimeout() = 0;
 };
 
 } // namespace tcp

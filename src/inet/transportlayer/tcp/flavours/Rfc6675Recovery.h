@@ -49,7 +49,15 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
      */
     virtual bool isLost(uint32_t seqNum);
 
+    /**
+     * RFC 8985 RACK: advance the RACK reference to the most recently sent
+     * delivered segment and mark earlier-sent, still-unacked segments as lost
+     * once RACK.rtt + reo_wnd has elapsed. Returns the number of newly lost bytes.
+     */
+    virtual uint32_t rackDetectAndMarkLost(bool fromReoTimer = false);
+
     virtual void onRexmitTimeout() override;
+    virtual void reoTimeout() override;
     virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) override;
     virtual void dataSent(uint32_t fromSeq) override;
     virtual void segmentRetransmitted(uint32_t fromSeq, uint32_t toSeq) override;
