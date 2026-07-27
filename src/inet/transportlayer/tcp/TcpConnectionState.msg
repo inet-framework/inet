@@ -316,14 +316,61 @@ struct TcpStateVariables
     simtime_t eceReactionTime; // records the time of the last ECE reaction
 
     // AccECN (draft-ietf-tcpm-accurate-ecn)
+    int ecnMode = 0; // from the tcpEcnMode parameter (or the deprecated ecnWillingness, mapped): 0=off, 1=passive, 2=rfc3168, 3=accecn, 4=accecn-passive
     bool accEcnNegotiated = false; // set once 3WHS negotiation determines this connection uses AccECN, not classic ECN or no-ECN
+    bool aeSynSent = false; // set if an AccECN-requesting SYN (the flag-bit combination) was sent
+    uint32_t rcvCePkts = 0; // receiver-side count of CE-marked packets seen (mod-8 ACE counter input)
+    uint32_t rcvCePktsReported = 0; // rcvCePkts value as of the last ACE delta the peer has acknowledged resolving
     uint32_t deliveredCePkts = 0; // sender-side resolved count of CE-marked packets the peer has reported via ACE/option
+
+    // AccECN ECN-field reflector (RFC 9768 section 3.2.3.2, table "Encoding of the ACE field on the SYN-ACK / third ACK"):
+    // the handshake feeds the IP-ECN codepoint of the SYN back on the SYN-ACK, and that of the SYN-ACK back on the
+    // handshake-completing ACK, so each end learns whether the network mangled the ECN field of the packet it sent.
+    // accEcnReflectCodepoint holds the IP-ECN codepoint (IP_ECN_*) of the received SYN (server) or SYN-ACK (client),
+    // captured where the EcnInd tag is still readable; accEcnReflectAce arms the ONE ACK that must carry the reflected
+    // value instead of the ordinary mod-8 CE counter (the reflection is a handshake one-off; everything after it is a counter).
+    int accEcnReflectCodepoint = -1;
+    bool accEcnReflectAce = false;
 
     // AccECN TCP option (kind 172/174 E0B/E1B/CEB byte counters)
     bool accEcnOptionEnabled = false; // cached from the accEcnOptionEnabled param at configureStateVariables() time
+    uint32_t accEcnOptionBeaconAcks = 4; // cached from the accEcnOptionBeaconAcks param: emit the option on every Nth ACK-bearing segment
+    uint32_t accEcnAckCount = 0; // counts ACK-bearing segments sent since AccECN negotiated, for the beacon cadence above
+    bool accEcnOptionNextKindIsAccEcn1 = false; // alternates which of kind 172/174 is emitted each time the option is actually sent
+    bool accEcnOptionKindAlternates = true; // cached from the accEcnOptionKindAlternates param: if false, always emit kind 174 (Linux behavior) instead of alternating
+    uint32_t rcvEct0Bytes = 0; // receiver-side byte count of segments arriving marked ECT(0) since AccECN negotiated (option's E0B field content)
+    uint32_t rcvEct1Bytes = 0; // receiver-side byte count of segments arriving marked ECT(1) since AccECN negotiated (option's E1B field content)
+    uint32_t rcvCeBytes = 0; // receiver-side byte count of segments arriving marked CE since AccECN negotiated (option's CEB field content)
 
+    // AccECN TCP option read side: peer-reported byte counts, decoded from the last
+    // AccECN option this connection has received (offsets already un-applied). These are
+    // PEER-reported feedback on bytes WE sent (opposite direction from rcvEct*Bytes/rcvCeBytes
+    // above, which are what WE observed on bytes the peer sent us).
+    uint32_t peerReportedEct0Bytes = 0;
+    uint32_t peerReportedEct1Bytes = 0;
+    // peerReportedCeBytes is the CEB baseline, advanced only at the point its delta is
+    // actually consumed (processAckInEstabEtc()'s ACE block) -- NOT at decode time
+    // (readHeaderOptions() below), because that block has an early-return path (an ACK
+    // beyond snd_max) that would otherwise silently lose the delta: if the baseline had
+    // already advanced but the block never ran to fold the delta into deliveredCeBytes,
+    // those CE bytes would be gone for good, and the next real option would diff against
+    // an already-advanced baseline as if they'd been accounted for. The write side keeps
+    // the same read-vs-mutate separation (dry-run calls there, an early return here).
+    uint32_t peerReportedCeBytes = 0; // cumulative (peer's clock); 0 is a legitimate starting baseline, not a sentinel -- CEB itself starts at 0
     bool accEcnOptionCebDeltaValid = false; // true only for the segment just processed by readHeaderOptions(), if it carried a valid AccECN option
+    uint32_t accEcnOptionRawCeBytes = 0; // valid only when accEcnOptionCebDeltaValid: the raw (offset-corrected, but not yet diffed) CEB value decoded from that segment's option
     uint32_t deliveredCeBytes = 0; // sender-side resolved CE byte count from option evidence only; stays 0 if the peer never sends the option
+    // ECT0/ECT1 delivered-byte accounting, exactly mirroring the CEB machinery above.
+    // peerReportedEct0Bytes/Ect1Bytes are the (offset-corrected) baselines, advanced only
+    // when each delta is consumed in the ACE block. The raw/valid pair is decoded per
+    // segment by readHeaderOptions(). deliveredE0Bytes/E1Bytes are the cumulative totals
+    // reported as tcpi_delivered_e0_bytes / tcpi_delivered_e1_bytes.
+    bool accEcnOptionE0DeltaValid = false;
+    bool accEcnOptionE1DeltaValid = false;
+    uint32_t accEcnOptionRawE0Bytes = 0;
+    uint32_t accEcnOptionRawE1Bytes = 0;
+    uint32_t deliveredE0Bytes = 0;
+    uint32_t deliveredE1Bytes = 0;
     // Linux tp->saw_accecn_opt: the peer has sent an AccECN TCP option at least once.
     // Gates OUR option emission on established segments (tcp_established_options
     // sends the option only to peers that demonstrated they use it; a peer that
@@ -343,10 +390,24 @@ struct TcpStateVariables
     // REQUIRED option gets its space (tcp_options_fit_accecn's
     // num_sack_blocks-- arm, down to 2 blocks at most).
     uint8_t accEcnOptMinFields = 0;
+    // Linux tp->accecn_opt_sent_w_dsack + TCP_ACCECN_OPT_FAIL_SEND
+    // (tcp_rcv_spurious_retrans): when the previous ACK carried both the
+    // AccECN option and a D-SACK, and the peer nevertheless retransmits the
+    // very same duplicate again, our option-bearing ACKs are evidently being
+    // dropped by a middlebox -- stop sending the AccECN option for good
+    // (default sysctl_tcp_ecn_option = FULL, which yields to the fail mode).
     // Linux tp->snd_sml (Minshall's Nagle variant): right edge of the most
     // recently sent sub-MSS data segment. Nagle holds a trailing partial only
     // while such a small segment is still unacknowledged -- full-MSS segments
     // in flight alone never delay it (tcp_minshall_check).
+    bool accEcnOptSentWithDsack = false;
+    uint32_t accEcnSentDsackStart = 0;
+    bool accEcnOptFailSend = false;
+    // Linux FLAG_TS_PROGRESS, per-segment (reset in readHeaderOptions like the
+    // option-delta valid flags): this segment's TS option advanced ts_recent by a
+    // positive delta. An ACK that acks no new data but carries a fresh timestamp
+    // still lets the ACE decode run (__tcp_accecn_process's forward-progress test).
+    bool accEcnTsProgress = false;
 
     uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 6675)
 
@@ -376,6 +437,7 @@ struct TcpStateVariables
     bool fastopenSynCarriedOption = false;  // client: our SYN carried a TFO option (cookie or empty request) -- Linux tp->syn_fastopen; a SYN-ACK cookie is cached ONLY then (tcp_rcv_fastopen_synack ignores unsolicited cookies, cookie-less-sendto pins the next connect still REQUESTING)
     bool fastopenSynDataAccepted = false;   // server: a validated-cookie SYN carried data that was accepted and delivered ahead of the 3WHS; client: the SYN's data was acked by the SYN-ACK (both mirror Linux's TCPI_OPT_SYN_DATA tcp_info flag / tp->syn_data_acked)
     bool fastopenAccelerated = false;        // server: this connection was created from a TFO-accepted SYN (valid cookie or cookie-less mode), REGARDLESS of whether it carried data -- a zero-payload TFO SYN still entitles the app to respond from SYN_RCVD (Linux: the TFO child socket exists either way). Gates the SYN_RCVD send path; fastopenSynDataAccepted above stays data-only (it drives TCPI_OPT_SYN_DATA)
+    uint32_t pktsAckedEwma = 0;              // AccECN: EWMA of packets acked per ACK (<<6 fixed point), for the ACE-wrap-vs-ACK-compression heuristic on large ACKs
     // declared here for the code above that already uses it:
     int init_cwnd_mode = 0;                      // initial window: 0=RFC2001 (1 SMSS), 1=RFC3390, 2=RFC6928 (IW10)
     simtime_t handshakeSentTime = -1; // when our SYN (active) / SYN-ACK (passive) was last sent; seeds the RTT estimator from the handshake RTT on reaching ESTABLISHED (skipped per Karn if the handshake segment was retransmitted)

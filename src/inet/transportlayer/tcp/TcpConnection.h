@@ -38,6 +38,13 @@ class TcpAlgorithm;
 #define MAX_SYN_REXMIT_COUNT          12  // will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner
 #define TFO_BLACKHOLE_RTO_THRESHOLD   2  // TCP Fast Open active blackhole detection: syn_rexmit_count value (i.e. the 3rd SYN transmission, matching the kernel's "timeouts == 2" check) that triggers a suspected-blackhole report for a data-carrying SYN
 
+// AccECN (draft-ietf-tcpm-accurate-ecn): state->ecnMode values, mirroring the
+// tcpEcnMode NED enum by index (Tcp.ned / TcpConnectionState.msg's ecnMode field).
+#define TCP_ECN_MODE_OFF              0
+#define TCP_ECN_MODE_PASSIVE          1
+#define TCP_ECN_MODE_RFC3168          2
+#define TCP_ECN_MODE_ACCECN           3
+#define TCP_ECN_MODE_ACCECN_PASSIVE   4
 #define TCP_MAX_WIN                   65535lu  // 65535 bytes, largest value (16 bit) for (unscaled) window size
 #define TCP_MAX_WIN_SCALED            0x3fffffffL // 2^30-1 bytes, largest value for scaled window size
 #define MAX_SACK_BLOCKS               60  // will only be used with SACK
@@ -95,6 +102,8 @@ class INET_API TcpConnection : public SimpleModule
 {
   protected:
     static simsignal_t sndNxtSignal; // sent seqNo
+    static simsignal_t deliveredCeSignal; // AccECN: cumulative resolved count of CE-marked packets the peer has reported via the ACE field
+    static simsignal_t deliveredCeBytesSignal; // AccECN: cumulative CE byte count from AccECN option evidence only (stays 0 if the peer never sends the option)
     // connection identification by apps: socketId
     int socketId = -1; // identifies connection within the app
 
@@ -217,6 +226,17 @@ class INET_API TcpConnection : public SimpleModule
     virtual bool processAckInEstabEtc(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
     //@}
 
+    /**
+     * AccECN: pick between the ACE field's packet-count-only naiveDelta
+     * and safeDelta candidates using the AccECN option's byte-exact CEB evidence
+     * as corroboration -- whichever candidate's byte estimate (delta * snd_mss)
+     * is closer to the observed cebByteDelta wins. Isolated as its own method so it's
+     * independently unit-testable (design reference: tcp_accecn_process's naive/safe/
+     * option-evidence *shape* only, tcp_input.c, re-derived not transcribed -- see the
+     * plan's Verified Facts point 3).
+     */
+    virtual int resolveAceDelta(int naiveDelta, int safeDelta, uint32_t cebByteDelta) const;
+
     /** @name Processing of TCP options. Invoked from readHeaderOptions(). Return value indicates whether the option was valid. */
     //@{
     virtual bool processMSSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionMaxSegmentSize& option);
@@ -319,6 +339,19 @@ class INET_API TcpConnection : public SimpleModule
 
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader);
+
+    /**
+     * Utility: the AccECN ECN-field reflector encoding (RFC 9768 section 3.2.3.2).
+     * Maps the IP-ECN codepoint of the received SYN (reflected on the SYN-ACK) or
+     * SYN-ACK (reflected on the handshake-completing ACK) to the ACE value that
+     * carries it back: Not-ECT->0b010, ECT(1)->0b011, ECT(0)->0b100, CE->0b110.
+     * The gaps in the encoding are deliberate: 0b000/0b001/0b111 are reserved by
+     * table 2 for "no ECN" and "classic ECN only" during negotiation.
+     */
+    static uint8_t accEcnReflectedAce(int ipEcnCodepoint);
+
+    /** Utility: the IP-ECN codepoint a received segment arrived with, or IP_ECN_NOT_ECT if untagged */
+    static int receivedEcnCodepoint(Packet *tcpSegment);
 
     /** Utility: start SYN-REXMIT timer */
     virtual void startSynRexmitTimer();

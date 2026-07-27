@@ -176,10 +176,40 @@ void Tcp::handleLowerPacket(Packet *packet)
         if (conn) {
             TcpStateVariables *state = conn->getStateForUpdate();
             if (state && state->ect) {
-                // This may be true only in receiver side. According to RFC 3168, page 20:
-                // pure acknowledgement packets (e.g., packets that do not contain
-                // any accompanying data) MUST be sent with the not-ECT codepoint.
+                // This may be true only in receiver side.
+                // RFC 3168, page 20
+                // "pure acknowledgement packets (e.g., packets that do not contain
+                // any accompanying data) MUST be sent with the not-ECT codepoint."
                 state->gotCeIndication = (ecn == 3);
+            }
+            // AccECN: independent CE-packet counter, not routed through
+            // gotCeIndication (which nothing downstream of classic ECN actually reads --
+            // a pre-existing, separate gap, not fixed here). Counts from the moment
+            // negotiation completes, including CE marks on the handshake-completing 3rd ACK.
+            if (state && state->accEcnNegotiated && ecn == 3)
+                state->rcvCePkts++;
+
+            // AccECN TCP option: per-codepoint received-byte counters
+            // (E0B/E1B/CEB), incremented alongside rcvCePkts above but in bytes rather
+            // than packets. Same "from the moment negotiation completes" scope.
+            if (state && state->accEcnNegotiated) {
+                int payloadLength = packet->getByteLength() - tcpHeader->getHeaderLength().get<B>();
+                if (payloadLength > 0) {
+                    switch (ecn) {
+                        case 1: state->rcvEct1Bytes += payloadLength; break; // IP_ECN_ECT_1
+                        case 2: state->rcvEct0Bytes += payloadLength; break; // IP_ECN_ECT_0
+                        case 3: state->rcvCeBytes += payloadLength; break; // IP_ECN_CE
+                        default: break; // IP_ECN_NOT_ECT: not counted by any AccECN field
+                    }
+                    // Linux tp->accecn_minlen: the AccECN option sent next must
+                    // include at least the field whose counter just changed
+                    // (order-1 field numbers: ECT1=1, CE=2, ECT0=3 -- see
+                    // tcp_ecnfield_to_accecn_optfield). Drives both the option
+                    // fitting and the SACK-block reduction in its favor.
+                    uint8_t neededField = ecn == 1 ? 1 : ecn == 3 ? 2 : ecn == 2 ? 3 : 0;
+                    if (neededField > state->accEcnOptMinFields)
+                        state->accEcnOptMinFields = neededField;
+                }
             }
 
             bool ret = conn->processTCPSegment(packet, tcpHeader, srcAddr, destAddr);

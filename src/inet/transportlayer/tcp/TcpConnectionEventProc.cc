@@ -495,6 +495,10 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     // that (e.g. a STATUS query in SYN_SENT) both are still 0 and the subtraction
     // would underflow.
     statusInfo->setBytesReceived(seqGreater(state->rcv_nxt, state->irs) ? state->rcv_nxt - state->irs - 1 : 0);
+    statusInfo->setDeliveredCePkts(state->deliveredCePkts);
+    statusInfo->setDeliveredCeBytes(state->deliveredCeBytes);
+    statusInfo->setDeliveredE0Bytes(state->deliveredE0Bytes);
+    statusInfo->setDeliveredE1Bytes(state->deliveredE1Bytes);
 
     // TCP_INFO trio: report the accumulated total plus, if a period is still open
     // right now, the elapsed time since it started -- so a live query reflects the
