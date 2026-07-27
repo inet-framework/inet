@@ -17,6 +17,8 @@
 #include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
+#include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 
 namespace inet {
 
@@ -165,6 +167,22 @@ class INET_API TcpSocket : public ISocket
          * Default implementation does nothing (backward compatible).
          */
         virtual void socketIcmpv6Error(TcpSocket *socket, Indication *errorInd) {}
+
+        /**
+         * Notifies that TCP's send queue has abated below the configured
+         * low-water mark (sendQueueLimit via TCP_C_QUEUE_BYTES_LIMIT, or
+         * notsentLowat via the module parameter of the same name -- see
+         * requestStatus()'s sibling mechanisms) and is ready to accept more
+         * data. Default implementation does nothing (backward compatible).
+         */
+        virtual void socketSendMsgArrived(TcpSocket *socket, TcpCommand *tcpCommand) {}
+
+        /**
+         * Notifies that a zerocopy-marked SEND's data has been transmitted
+         * (MSG_ZEROCOPY -- see TcpSocket::sendZerocopy()).
+         * Default implementation does nothing (backward compatible).
+         */
+        virtual void socketZerocopyCompletion(TcpSocket *socket, unsigned int zerocopyId) {}
     };
 
     /**
@@ -359,6 +377,14 @@ class INET_API TcpSocket : public ISocket
     void connect(L3Address remoteAddr, int remotePort);
 
     /**
+     * Active OPEN to the given remote socket, with TCP Fast Open (RFC 7413)
+     * requested: if a cookie is already cached for remoteAddr, the SYN attempts
+     * to carry the first SEND's data; otherwise the SYN just requests a cookie
+     * for a future attempt.
+     */
+    void connect(L3Address remoteAddr, int remotePort, bool fastOpen);
+
+    /**
      * This function is only in use in "explicit-read" mode, i.e. when the
      * autoRead is turned off with setAutoRead(false).
      *
@@ -374,6 +400,26 @@ class INET_API TcpSocket : public ISocket
      * Sends data packet.
      */
     virtual void send(Packet *msg) override;
+
+    /**
+     * Sends data packet, marking its last byte as a record boundary (like the
+     * MSG_EOR sendto() flag): TCP will not coalesce this SEND's data together
+     * with a later SEND's data into the same outgoing segment.
+     */
+    void send(Packet *msg, bool eor);
+
+    /**
+     * Sends data packet, requesting a zerocopy-style completion notification
+     * (MSG_ZEROCOPY) once this SEND's data has been
+     * transmitted: the callback's socketZerocopyCompletion() (see ICallback)
+     * fires with the id assigned to this SEND -- ids are assigned
+     * sequentially per connection starting at 0, mirroring Linux's own
+     * SO_ZEROCOPY id assignment, so the caller can predict the id of its own
+     * Nth zerocopy SEND without needing it echoed back synchronously. INET
+     * has no real zero-copy data path; this models only the completion-
+     * notification contract (see TcpZerocopyTag.msg).
+     */
+    void sendZerocopy(Packet *msg);
 
     /**
      * Sends command.
@@ -423,6 +469,54 @@ class INET_API TcpSocket : public ISocket
      * sent from the TCP socket.
      */
     void setTos(short tos);
+
+    /**
+     * Enables or disables delivery-time timestamping
+     * (SO_TIMESTAMPING/SCM_TIMESTAMPING): when enabled, every TCP_I_DATA packet
+     * this socket receives carries a TcpRxTimestampInd tag recording when TCP
+     * delivered it (see TcpTimestampingTag.msg for the exact semantics --
+     * an INET-native simplification, not a full port of Linux's timestamp
+     * triad).
+     */
+    void setTimestamping(bool enabled);
+
+    /**
+     * Sets the TCP_NOTSENT_LOWAT write-readiness low-water mark (in bytes) at
+     * runtime — same semantics as the Tcp module's notsentLowat parameter,
+     * which supplies the initial value. -1 disables.
+     */
+    void setNotsentLowat(int value);
+
+    /**
+     * TCP_MAXSEG (setsockopt SOL_TCP): clamp the connection's MSS -- both the MSS
+     * advertised in this host's SYN/SYN-ACK and the effective sending MSS.
+     */
+    void setMaxSeg(int value);
+
+    /**
+     * TCP_NODELAY (setsockopt SOL_TCP): enable/disable Nagle at runtime. Enabling
+     * nodelay also force-pushes any held partial segment (but does not clear TCP_CORK).
+     */
+    void setNoDelay(bool nodelay);
+
+    /**
+     * Application-ownership marker (Linux sk->sk_socket): a harness driving
+     * accept() timing explicitly clears it at listen and sets it at accept;
+     * kernel behaviors like OOO-pressure rcvbuf growth are gated on it.
+     */
+    void setOwned(bool owned);
+
+    /**
+     * Application-writer blocked-on-send-buffer marker (Linux SOCK_NOSPACE
+     * during a blocking write): drives the tcpi_sndbuf_limited chrono.
+     */
+    void setWriterBlocked(bool blocked);
+
+    /**
+     * TCP_CORK (setsockopt SOL_TCP): hold sub-MSS partial segments until cleared
+     * (full segments still flow). Clearing the cork flushes any held partial.
+     */
+    void setCork(bool cork);
 
     /**
      * Required to re-connect with a "used" TcpSocket object.
