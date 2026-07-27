@@ -214,6 +214,19 @@ simple Tcp extends SimpleModule like ITcp
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetSentToLower](type=cPacket);
         @signal[packetDropped](type=inet::Packet);
+        // parameters of: tcp: add TcpCubic (RFC 9438) with HyStart
+        double cubicBeta = default(0.7); // multiplicative-decrease factor applied to cwnd on loss. Note that the TCP-friendliness estimator keeps the kernel's fixed scale (derived from beta=717/1024), so changing this only alters the decrease itself
+        double cubicC = default(0.4); // scaling constant C of the cubic window-growth curve
+        int cubicCntClamp = default(20); // cap on the per-increment ACK count while no W_max is known yet (before the first loss)
+        double cubicDelta @unit(s) = default(10ms); // settling time after a window reduction, during which RTT samples are ignored
+        bool cubicFastConvergence = default(true); // on a loss below the previous W_max, release extra window so a newly arrived competing flow can grow (RFC 9438 section 4.7)
+        bool cubicTcpFriendliness = default(true); // never grow slower than an AIMD(1, beta) Reno flow would (RFC 9438 section 4.3)
+        double hystartAckDelta @unit(s) = default(2ms); // largest ACK spacing still counted as part of an ACK train
+        double hystartDelayMax @unit(s) = default(1s); // upper clamp on the HyStart delay-increase threshold
+        double hystartDelayMin @unit(s) = default(4ms); // lower clamp on the HyStart delay-increase threshold
+        int hystartDetect = default(3); // HyStart detectors, as a bitmask: 1 = ACK train, 2 = delay increase, 3 = both
+        bool hystartEnabled = default(true); // HyStart: leave slow start when the path appears full, instead of overshooting into loss
+        int hystartLowWindow = default(16); // smallest cwnd (in segments) at which HyStart starts looking for the exit point
     gates:
         input appIn @labels(TcpCommand/down) @messageKinds(inet::TcpCommandCode);
         input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);
