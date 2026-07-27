@@ -47,6 +47,7 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     cMessage *persistTimer;
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
+    cMessage *tlpTimer; // Tail Loss Probe PTO (RFC 8985 7.2); shares the RTO's single-slot discipline
 
   protected:
     /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */
@@ -55,6 +56,10 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void processPersistTimer(TcpEventCode& event);
     virtual void processDelayedAckTimer(TcpEventCode& event);
     virtual void processKeepAliveTimer(TcpEventCode& event);
+    /** Tail Loss Probe timeout: send a probe and remember snd_max in tlpHighSeq. */
+    virtual void processPtoTimer(TcpEventCode& event);
+    /** Linux tcp_schedule_loss_probe(): arm the PTO if the connection is TLP-eligible. */
+    virtual void schedulePto();
     //@}
 
     /**

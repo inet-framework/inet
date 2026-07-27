@@ -229,6 +229,9 @@ struct TcpStateVariables
 
     // Tail Loss Probe (RFC 8985 section 7.2, Linux tcp_send_loss_probe)
     bool seedRttFromHandshake = false; // seed srtt/rttvar/RTO from the SYN<->SYN-ACK exchange, as Linux does
+    bool tlpEnabled = false;           // Tail Loss Probe enabled (requires SACK)
+    uint32_t tlpHighSeq = 0;           // snd_max when the probe was sent; nonzero = a probe is outstanding (Linux tlp_high_seq)
+    bool tlpRetrans = false;           // the outstanding probe retransmitted the last segment (vs. sent new data)
 
     // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced; Linux tcp_frto=2)
     bool frtoEnabled = false;      // from the frtoEnabled parameter; requires SACK

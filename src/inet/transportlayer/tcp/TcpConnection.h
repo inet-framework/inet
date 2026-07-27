@@ -173,6 +173,13 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual void rescheduleRackReoTimer(simtime_t delay);
 
+    /**
+     * RFC 8985 section 7.2 loss probe: send one segment of new data if any is
+     * available, else retransmit the last outstanding segment. Returns whether
+     * anything was actually sent.
+     */
+    virtual bool sendTlpProbe();
+
   protected:
 
     virtual void process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);

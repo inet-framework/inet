@@ -690,6 +690,7 @@ void TcpConnection::configureStateVariables()
     }
     state->dupthresh = tcpMain->par("dupthresh");
     state->frtoEnabled = tcpMain->par("frtoEnabled");
+    state->tlpEnabled = tcpMain->par("tlpEnabled");
     state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
     state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
     state->maxReordering = tcpMain->par("maxReordering");
@@ -1406,6 +1407,74 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
 
     if (state && state->ect)
         state->rexmit = false;
+}
+
+bool TcpConnection::sendTlpProbe()
+{
+    // Prefer probing with NEW data (Linux tcp_send_loss_probe tries the send head
+    // first): it advances the receiver's state and can be acked normally.
+    uint32_t available = sendQueue->getBytesAvailable(state->snd_max);
+    if (available > 0 && seqLess(state->snd_max, state->snd_una + state->snd_wnd)) {
+        uint32_t win = state->snd_una + state->snd_wnd - state->snd_max;
+        uint32_t bytes = std::min(std::min(state->snd_mss, available), win);
+        if (bytes > 0) {
+            uint32_t old_snd_nxt = state->snd_nxt;
+            state->snd_nxt = state->snd_max;
+            uint32_t sent = sendSegment(bytes);
+            if (seqGreater(old_snd_nxt, state->snd_nxt))
+                state->snd_nxt = old_snd_nxt;
+            if (sent > 0) {
+                state->tlpRetrans = false;
+                EV_INFO << "TLP: probing with " << sent << " bytes of new data\n";
+                return true;
+            }
+        }
+    }
+
+    // A FIN that has already been sent occupies the highest-sequence "segment":
+    // probe by resending the FIN (Linux retransmits the tail skb, and the tail
+    // skb is the FIN-only skb then), not the last MSS of data below it.
+    if (state->send_fin && state->snd_fin_seq == sendQueue->getBufferEndSeq()
+            && state->snd_max == state->snd_fin_seq + 1) {
+        state->snd_nxt = state->snd_fin_seq;
+        sendFin();
+        tcpAlgorithm->segmentRetransmitted(state->snd_fin_seq, state->snd_fin_seq + 1);
+        state->snd_nxt = state->snd_fin_seq + 1;
+        state->tlpRetrans = true;
+        EV_INFO << "TLP: probing by resending the FIN\n";
+        return true;
+    }
+
+    // No new data: retransmit the last (highest-sequence) outstanding segment
+    // (Linux retransmits the tail skb, fragmenting off its last MSS). Bound the
+    // region by the send queue's buffered-data start, NOT snd_una: when the SYN
+    // is still unacked (e.g. a TFO server whose SYN-ACK+data was never acked)
+    // snd_una points at the SYN, which is not in the data-only send queue, so
+    // start = snd_max - (snd_max - snd_una) would fall below the buffer and abort
+    // createSegmentWithBytes(). The SYN is the RTO/SYN-retransmit path's job.
+    uint32_t bufStart = sendQueue->getBufferStartSeq();
+    if (seqGE(bufStart, state->snd_max))
+        return false; // nothing buffered to retransmit
+    uint32_t outstanding = state->snd_max - bufStart;
+    uint32_t len = std::min(state->snd_mss, outstanding);
+    uint32_t start = state->snd_max - len;
+
+    // RFC 3168: no ECT on retransmissions (classic-ECN rule; see retransmitOneSegment)
+    if (state->ect)
+        state->rexmit = true;
+    uint32_t old_snd_nxt = state->snd_nxt;
+    state->snd_nxt = start;
+    uint32_t sent = sendSegment(len);
+    tcpAlgorithm->segmentRetransmitted(start, start + sent);
+    if (seqGreater(old_snd_nxt, state->snd_nxt))
+        state->snd_nxt = old_snd_nxt;
+    if (state->ect)
+        state->rexmit = false;
+    if (sent == 0)
+        return false;
+    state->tlpRetrans = true;
+    EV_INFO << "TLP: probing by retransmitting the last " << sent << " bytes\n";
+    return true;
 }
 
 void TcpConnection::retransmitData()
