@@ -105,7 +105,7 @@ class INET_API TcpAlgorithm : public cObject
     /**
      * Called after receiving data which are in the window, but not at its
      * left edge (seq != rcv_nxt). This indicates that either segments got
-     * re-ordered in the way, or one segment was lost. RFC 1122 and RFC 2001
+     * re-ordered in the way, or one segment was lost. RFC 1122 and RFC 5681
      * recommend sending an immediate ACK here (Fast Retransmit relies on
      * that).
      */
@@ -113,7 +113,7 @@ class INET_API TcpAlgorithm : public cObject
 
     /**
      * Called after rcv_nxt got advanced, either because we received in-sequence
-     * data ("text" in RFC 793 lingo) or a FIN. At this point, rcv_nxt has
+     * data ("text" in RFC 9293 lingo) or a FIN. At this point, rcv_nxt has
      * already been updated. This method should take care to send or schedule
      * an ACK some time.
      */
@@ -153,7 +153,7 @@ class INET_API TcpAlgorithm : public cObject
 
     /**
      * Called after we received an ACK for data not yet sent.
-     * According to RFC 793 this function should send an ACK.
+     * According to RFC 9293 this function should send an ACK.
      */
     virtual void receivedAckForUnsentData(uint32_t seq) = 0;
 
