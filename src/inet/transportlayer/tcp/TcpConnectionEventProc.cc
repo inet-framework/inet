@@ -5,16 +5,22 @@
 //
 
 
+#include <climits>
 #include <string.h>
 
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
+#include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBaseState_m.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
+#include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
 namespace tcp {
@@ -241,6 +247,13 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
 
     if ((state->sendQueueLimit > 0) && (sendQueue->getBytesAvailable(state->snd_una) > state->sendQueueLimit))
         state->queueUpdate = false;
+
+    // TCP_NOTSENT_LOWAT: arm re-notification once the not-yet-
+    // transmitted portion of the queue (from snd_nxt, not snd_una -- independent of
+    // sendQueueLimit above) exceeds the low-water mark; sendSegment() disarms it and
+    // signals the app again once transmission brings it back down to/below the mark.
+    if (state->notsentLowat != (uint32_t)-1 && sendQueue->getBytesAvailable(state->snd_nxt) > state->notsentLowat)
+        state->notsentLowatUpdate = false;
 }
 
 void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
@@ -265,6 +278,8 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
         if (Packet *dataMsg = receiveQueue->extractBytesUpTo(endSeqNo)) {
             dataMsg->setKind(TCP_I_DATA);
             dataMsg->addTag<SocketInd>()->setSocketId(socketId);
+            if (rxTimestampingEnabled)
+                dataMsg->addTag<TcpRxTimestampInd>();
             sendToApp(dataMsg);
             maxByteCountRequested = 0;
         }

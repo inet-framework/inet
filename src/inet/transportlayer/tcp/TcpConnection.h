@@ -118,7 +118,41 @@ class INET_API TcpConnection : public SimpleModule
     int ttl = -1;
     short dscp = -1;
     short tos = -1;
+    // SO_TIMESTAMPING: unrelated to TcpConnectionState's
+    // ts_support/ts_enabled (the RFC 1323 TCP Timestamps wire option) -- this is the
+    // app-facing, no-wire-impact socket option gating TcpRxTimestampInd delivery. A
+    // plain TcpConnection member (like ttl/dscp/tos above), not a state field, since
+    // it must be settable via TCP_C_SETOPTION before state exists (app code may call
+    // TcpSocket::setTimestamping() before connect(), same as setTtl/setDscp/setTos).
+    bool rxTimestampingEnabled = false;
+    // Runtime TCP_NOTSENT_LOWAT (TcpSetNotsentLowatCommand): like
+    // rxTimestampingEnabled above, must survive arriving before state exists
+    // (a sockopt sent between bind() and connect()/listen()). INT_MIN = never
+    // set; otherwise applied over the notsentLowat module param in
+    // configureStateVariables(), and directly to state when set later.
+    int notsentLowatSockopt = INT_MIN;
+    // Runtime TCP_MAXSEG (TcpSetMaxSegCommand): like notsentLowatSockopt, must
+    // survive arriving before state exists (a sockopt sent before connect()/
+    // listen()). -1 = never set; otherwise clamps advertisedMss/snd_mss in
+    // configureStateVariables(), and applied directly to state when set later.
+    int userMss = -1;
+    // Runtime TCP_NODELAY / TCP_CORK (TcpSetNoDelayCommand / TcpSetCorkCommand)
+    // that may arrive before OPEN creates state; INT_MIN = never set, otherwise
+    // applied in configureStateVariables() (mirrors notsentLowatSockopt/userMss).
+    int nodelaySockopt = INT_MIN;
+    int corkSockopt = INT_MIN;
     bool autoRead = true;
+    // Linux sk->sk_socket presence: false = embryonic (listening-side, not yet
+    // accept()ed by the application). Gates OOO-pressure rcvbuf growth
+    // (tcp_data_queue_ofo's not-yet-accepted skip). Set via TcpSetOwnedCommand;
+    // defaults to owned so ordinary applications are unaffected.
+    bool appOwned = true;
+    // Linux SOCK_NOSPACE-while-waiting: the application's blocking write is
+    // stalled on send-buffer space (TcpSetWriterBlockedCommand). While set AND
+    // the send queue has run dry (everything queued is in flight), the
+    // SNDBUF_LIMITED chrono accumulates -- tcp_write_xmit's queue-empty +
+    // SOCK_NOSPACE start condition (tcp-info-sndbuf-limited).
+    bool writerBlocked = false;
     bool peerClosedSentUp = false;
     long maxByteCountRequested = 0;  // from READ requests
 
@@ -475,6 +509,12 @@ class INET_API TcpConnection : public SimpleModule
     static const char *optionName(int option);
     /** Utility: update receiver queue related variables and statistics - called before setting rcv_wnd */
     virtual void updateRcvQueueVars();
+
+    /** SNDBUF_LIMITED chrono sampling: (re)evaluate the "transmission starved
+     * by the send buffer" condition (writerBlocked && no unsent data && data
+     * outstanding) and open/close the accumulation interval accordingly.
+     * Called after sends, enqueues, the writer-blocked toggles and ACKs. */
+    virtual void updateSndbufLimitedChrono();
 
     /** Utility: returns true when receive queue has enough space for store the tcpHeader */
     virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);

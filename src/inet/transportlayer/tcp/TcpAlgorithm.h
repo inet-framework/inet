@@ -117,9 +117,18 @@ class INET_API TcpAlgorithm : public cObject
     virtual void sendCommandInvoked() = 0;
 
     /**
+     * Arm / cancel the "cork" flush timer, which force-flushes a TCP_CORK/MSG_MORE
+     * partial segment that could not be sent (Linux ICSK_TIME_PROBE0, fired at the
+     * RTO). Delegated to the algorithm because the RTO lives in its derived state.
+     * Non-pure with no-op defaults so flavours without a cork timer need no change.
+     */
+    virtual void scheduleCorkTimer() {}
+    virtual void cancelCorkTimer() {}
+
+    /**
      * Called after receiving data which are in the window, but not at its
      * left edge (seq != rcv_nxt). This indicates that either segments got
-     * re-ordered in the way, or one segment was lost. RFC 1122 and RFC 2001
+     * re-ordered in the way, or one segment was lost. RFC 1122 and RFC 5681
      * recommend sending an immediate ACK here (Fast Retransmit relies on
      * that).
      */
