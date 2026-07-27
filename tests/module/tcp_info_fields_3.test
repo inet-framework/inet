@@ -1,0 +1,93 @@
+%description:
+TCP_INFO trio, continued: busyTime/rwndLimited (TcpStatusInfo). INET-native
+cumulative-time bookkeeping (not a port of Linux's tcpi_busy_time/
+tcpi_rwnd_limited chrono state machine) -- see
+TcpConnection::enqueueSendCommandData()/processAckInEstabEtc() (busy) and
+sendData() (rwnd). sndbuf_limited has no INET analog and is not surfaced
+(documented on TcpStatusInfo itself, not asserted here).
+
+Client writes 5000B under a 1000B advertised window (mss=500): cwnd grows
+past 1000B in slow start almost immediately, so the peer's window (not
+cwnd) becomes the binding constraint for most of the transfer -- a real,
+not contrived, rwnd-limited condition.
+
+This is a self-consistency check only, not a ground-truth parity check:
+there is no independent oracle in this repository for INET's own busy/
+rwnd-limited definitions (unlike the wire-format-anchored tests elsewhere
+in this series). It confirms the bookkeeping behaves sanely (both start
+at 0, both grow, rwndLimited never exceeds busyTime since rwnd-limited
+periods are by definition a subset of busy time) and stays internally
+consistent across a real run -- not that the specific numbers match any
+independent reference.
+
+Falsification: none needed as a separate run -- the ordering assertions
+below (busyTime and rwndLimited both 0 before any data is sent; both
+strictly positive, and rwndLimited < busyTime, once the transfer is well
+underway) are themselves the falsification of "the counters don't move"
+or "rwndLimited counts something unrelated to busyTime".
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+sim-time-limit = 10s
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=5000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+*.cli_app.statusRequestScript="0.5,1.5"
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.nagleEnabled = false
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%# t=0.5: idle baseline, before tSend -- both counters still exactly 0.
+%contains: stdout
+STATUS: caState=0 backoff=0 lost=4294967295 probes=0 bytesReceived=0 deliveredCePkts=0 deliveredCeBytes=0 busyTime=0 rwndLimited=0
+%#--------------------------------------------------------------------------------------------------------------
+%# t=1.5: 0.5s into the transfer, both counters have grown, and rwndLimited stays
+%# below busyTime (window-limited time is a subset of overall busy time).
+%contains: stdout
+busyTime=0.024 rwndLimited=0.012
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

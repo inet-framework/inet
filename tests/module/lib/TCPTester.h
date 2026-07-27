@@ -50,7 +50,7 @@ class INET_API TCPTesterBase : public cSimpleModule
 class INET_API TCPScriptableTester : public TCPTesterBase
 {
   protected:
-    enum {CMD_DELETE,CMD_COPY}; // "delay" is same as "copy"
+    enum {CMD_DELETE,CMD_COPY,CMD_CE}; // "delay" is same as "copy"; CMD_CE marks the segment CE (IP_ECN_CE) instead of forwarding it unmarked -- for AccECN/ECN module tests that need a CE-marked inbound segment
     typedef std::vector<simtime_t> DelayVector;
     struct Command
     {

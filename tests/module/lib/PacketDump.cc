@@ -547,6 +547,18 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
         flags = true;
         out << "F ";
     }
+    if (tcpHeader->getEceBit()) {
+        flags = true;
+        out << "E "; // ECN-Echo (RFC 3168); also part of AccECN's SEWA/SW./SE. codepoints per draft-ietf-tcpm-accurate-ecn
+    }
+    if (tcpHeader->getCwrBit()) {
+        flags = true;
+        out << "W "; // Congestion Window Reduced (RFC 3168)
+    }
+    if (tcpHeader->getAeBit()) {
+        flags = true;
+        out << "N "; // AE (AccECN Echo): the repurposed RFC 3540 NS bit -- "N" avoids colliding with "A" (ACK, above)
+    }
     if (!flags) {
         out << ". ";
     }
@@ -603,6 +615,18 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
                     case TCPOPTION_TIMESTAMP: {
                         auto tsOpt = check_and_cast<const TcpOptionTimestamp *>(option);
                         out << " TS(" << tsOpt->getSenderTimestamp() << "," << tsOpt->getEchoedTimestamp() << ")";
+                        break;
+                    }
+                    case TCPOPTION_TCP_FASTOPEN: {
+                        auto foOpt = check_and_cast<const TcpOptionTcpFastOpen *>(option);
+                        out << " FastOpen(cookieLen=" << foOpt->getCookieArraySize() << ")";
+                        break;
+                    }
+                    case TCPOPTION_ACCECN0:
+                    case TCPOPTION_ACCECN1: {
+                        auto aeOpt = check_and_cast<const TcpOptionAccEcn *>(option);
+                        out << " AccECN(kind=" << option->getKind() << ",E0B=" << aeOpt->getEct0Bytes()
+                            << ",E1B=" << aeOpt->getEct1Bytes() << ",CEB=" << aeOpt->getCeBytes() << ")";
                         break;
                     }
                     default:

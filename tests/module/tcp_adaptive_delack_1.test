@@ -1,0 +1,85 @@
+%description:
+TCP adaptive delayed-ACK dynamics (Linux quickack/ATO model, the
+adaptiveDelayedAcks parameter): with classic delayed ACKs a sub-MSS segment
+is only acknowledged when the fixed 200ms timer fires; with the adaptive
+dynamics the receiver holds a "quickack" budget -- initialized on the first
+data segment and refreshed whenever the arrival gap exceeds the
+retransmission timeout -- and acknowledges such segments IMMEDIATELY.
+
+The client sends two spaced 100-byte segments (t=1.0 and t=1.6). With
+adaptiveDelayedAcks=true the server's ACKs leave immediately (~1.001 and
+~1.601: the first data segment initializes the quickack budget; the 0.6s
+gap exceeds the RTO and refreshes it). Falsification: with
+adaptiveDelayedAcks=false (verified during development) the same scenario
+acknowledges at ~1.201 and ~1.801 -- the fixed 200ms delayed-ACK timer.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script=""
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript="1.0 100; 1.6 100"
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.sackSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.delayedAcksEnabled = true
+*.*_tcp.adaptiveDelayedAcks = true
+*.*_tcp.advertisedWindow = 5000
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A 1:101(100) ack 501 win 5000
+[1.003 B002] A.1000 < B.2000: A ack 101 win 5000
+[1.601 A004] A.1000 > B.2000: A 101:201(100) ack 501 win 5000
+[1.603 B003] A.1000 < B.2000: A ack 201 win 5000
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
