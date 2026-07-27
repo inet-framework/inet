@@ -41,6 +41,7 @@ void Ppp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         sendRawBytes = par("sendRawBytes");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
+        endTransmissionEvent->setSchedulingPriority(par("endTxSchedulingPriority"));
         lowerLayerInGateId = findGate("phys$i");
         physOutGate = gate("phys$o");
         lowerLayerOutGateId = physOutGate->getId();
@@ -278,10 +279,6 @@ void Ppp::handleLowerPacket(Packet *packet)
     else {
         // pass up payload
         const auto& pppHeader = packet->peekAtFront<PppHeader>();
-        const auto& pppTrailer = packet->peekAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
-        if (pppHeader == nullptr || pppTrailer == nullptr)
-            throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
-        emit(receptionEndedSignal, packet);
         emit(rxPkOkSignal, packet);
         decapsulate(packet);
         numRcvdOK++;
@@ -342,18 +339,12 @@ void Ppp::encapsulate(Packet *packet)
     auto pppHeader = makeShared<PppHeader>();
     pppHeader->setProtocol(ProtocolGroup::getPppProtocolGroup()->getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     packet->insertAtFront(pppHeader);
-    auto pppTrailer = makeShared<PppTrailer>();
-    packet->insertAtBack(pppTrailer);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
 }
 
 void Ppp::decapsulate(Packet *packet)
 {
     const auto& pppHeader = packet->popAtFront<PppHeader>();
-    const auto& pppTrailer = packet->popAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
-    if (pppHeader == nullptr || pppTrailer == nullptr)
-        throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
-    // TODO check FCS
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
 
     auto payloadProtocol = ProtocolGroup::getPppProtocolGroup()->getProtocol(pppHeader->getProtocol());

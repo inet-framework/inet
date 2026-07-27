@@ -259,20 +259,12 @@ void addFillers_ethernet(std::vector<ChunkFiller>& fillers)
         p->setTtl(v.u8());
     }});
 
-    // --- PPP (RFC 1662). flag/address/control are the protocol's fixed framing bytes,
-    // pinned by the .msg default; only protocol is per-frame content.
+    // --- PPP (RFC 1661). The header is the protocol field alone: the HDLC framing of
+    // RFC 1662 -- flag, address, control and FCS -- is not modelled, and there is no trailer.
     fillers.push_back({"inet::PppHeader", "", [](Chunk *c) {
         auto p = check_and_cast<PppHeader *>(c);
         FillValues v;
         p->setProtocol(v.u16());
-    }});
-    fillers.push_back({"inet::PppTrailer", "", [](Chunk *c) {
-        auto p = check_and_cast<PppTrailer *>(c);
-        FillValues v;
-        p->setFcs(v.u16());
-        // flag is left at its default: PppTrailerSerializer never reads or writes it
-        // (commented out, with the .msg's own FIXME that the trailer is kept at 2 bytes
-        // instead of the RFC's 3 -- see the round-trip report).
     }});
 }
 

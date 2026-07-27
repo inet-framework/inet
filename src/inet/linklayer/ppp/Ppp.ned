@@ -12,7 +12,7 @@ import inet.common.SimpleModule;
 //
 // PPP implementation.
 //
-// Packets are encapsulated in ~PppHeader and ~PppTrailer.
+// Packets are encapsulated in ~PppHeader.
 //
 // PPP is a complex protocol with strong support for link configuration
 // and maintenance. This model ignores those details, and only performs
@@ -44,6 +44,7 @@ simple Ppp extends SimpleModule
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
+        int endTxSchedulingPriority = default(0);
         @class(Ppp);
         @display("i=block/rxtx");
 
