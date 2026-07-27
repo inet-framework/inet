@@ -397,6 +397,16 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: retransmit one segment from snd_una */
     virtual void retransmitOneSegment(bool called_at_rto);
 
+    /**
+     * RFC 5681 / Linux tcp_enter_loss: on an RTO, mark the un-SACKed outstanding
+     * data lost in the SACK scoreboard, so getBytesInFlight() stops counting it as
+     * in the network and the whole window can be clocked out on the recovering ACKs
+     * (rather than one segment per backed-off RTO on a tail drop with no SACK). No-op
+     * without SACK. Called by each flavour's RTO handler after it computes ssthresh
+     * from the pre-loss FlightSize.
+     */
+    virtual void markOutstandingLostOnRto();
+
     /** Utility: retransmit all from snd_una to snd_max */
     virtual void retransmitData();
 

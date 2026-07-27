@@ -165,6 +165,7 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
             << ", ssthresh=" << state->ssthresh << "\n";
     state->afterRto = true;
+    conn->markOutstandingLostOnRto();
     conn->retransmitOneSegment(true);
 }
 

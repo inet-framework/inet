@@ -137,6 +137,7 @@ void TcpCubic::processRexmitTimer(TcpEventCode& event)
             << ", ssthresh=" << state->ssthresh << "\n";
 
     state->afterRto = true;
+    conn->markOutstandingLostOnRto();
     conn->retransmitOneSegment(true);
 
     // Linux cubictcp_state(TCP_CA_Loss): a timeout invalidates the curve and the
