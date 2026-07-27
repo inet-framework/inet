@@ -77,9 +77,9 @@ void TcpReno::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
+void TcpReno::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
-    TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
+    TcpTahoeRenoFamily::receivedAckForUnackedData(firstSeqAcked);
 
     if (state->dupacks >= state->dupthresh) {
         //

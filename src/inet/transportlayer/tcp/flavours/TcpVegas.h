@@ -35,7 +35,7 @@ class INET_API TcpVegas : public TcpBaseAlg
     TcpVegas();
 
     /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
     /** Redefine what should happen when dupAck was received, to add congestion window management */
     virtual void receivedDuplicateAck() override;
