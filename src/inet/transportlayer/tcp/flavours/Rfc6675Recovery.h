@@ -87,6 +87,9 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
      */
     virtual void checkSackReordering(uint32_t lowSeq);
 
+    /** RFC 5682 F-RTO: decide/close a spurious-RTO episode. */
+    virtual void processFrtoEpisode();
+
     virtual void onRexmitTimeout() override;
     virtual void reoTimeout() override;
     virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) override;

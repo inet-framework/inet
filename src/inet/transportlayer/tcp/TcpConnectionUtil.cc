@@ -689,6 +689,7 @@ void TcpConnection::configureStateVariables()
         }
     }
     state->dupthresh = tcpMain->par("dupthresh");
+    state->frtoEnabled = tcpMain->par("frtoEnabled");
     state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
     state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
     state->maxReordering = tcpMain->par("maxReordering");
