@@ -159,12 +159,30 @@ struct TcpStateVariables
     bool fin_rcvd = false;          // whether FIN received or not
     uint32_t rcv_fin_seq = 0;       // if fin_rcvd: sequence number of received FIN
 
-    bool nagle_enabled = false;                 // set if Nagle's algorithm (RFC 896) is enabled
+    bool nagle_enabled = false;                 // set if Nagle's algorithm (RFC 1122) is enabled; also the runtime TCP_NODELAY switch (nodelay == !nagle_enabled)
+    // TCP_CORK / MSG_MORE ("corking"): hold the trailing sub-MSS partial segment;
+    // full-MSS segments always flow. TCP_CORK is persistent (until cleared); MSG_MORE
+    // is per-send (transient). See TcpConnection::flushCorkedData and the cork timer.
+    bool tcp_cork = false;                       // TCP_CORK: persistent partial-segment hold
+    bool msgMoreThisSend = false;                // MSG_MORE on the current SEND: transient hold, read-and-cleared at the top of sendData()
+    bool corkedDataPending = false;              // a cork/MSG_MORE partial is currently withheld (drives cork-timer arming and PSH gating)
+    bool pushHeldPartial = false;                // the withheld partial must carry PSH when flushed (Linux tcp_mark_push on a non-MSG_MORE tail write)
+    bool corkFlush = false;                      // an explicit push (uncork / nodelay / timer) is in progress: bypass BOTH cork and Nagle holds for the trailing partial
+    bool forcePushHeld = false;                  // timer-path flush: force PSH on the flushed partial (Linux tcp_write_wakeup)
+    bool pushThisSegment = false;                // transient handoff to sendSegment(): OR in PSH for the segment currently being flushed
+    bool pushOnWriteBoundary = false;           // Linux parity: set PSH on the segment carrying the last buffered byte of a send (from the pushSegmentsOnWriteBoundary parameter)
     bool delayed_acks_enabled = false;          // set if delayed ACK algorithm (RFC 1122) is enabled
+    bool adaptiveDelayedAcks = false;           // from the adaptiveDelayedAcks parameter: Linux-shaped quickack/ATO/pingpong receiver ACK dynamics
+    uint32_t quickAckCounter = 0;               // remaining immediate-ACK budget (Linux icsk_ack.quick); consumed one per ACK sent
+    uint32_t pingpongCount = 0;                 // interactive-session evidence counter (Linux icsk_ack.pingpong); >= 3 = pingpong (delack-favoring) mode
+    simtime_t ackAto = 0;                       // adaptive delayed-ACK timeout (Linux icsk_ack.ato); 0 = engine not yet initialized (no data received)
+    simtime_t lastDataRecvTime = 0;             // arrival time of the last in-order data segment (Linux icsk_ack.lrcvtime)
     bool limited_transmit_enabled = false;      // set if Limited Transmit algorithm (RFC 3042) is enabled
-    bool increased_IW_enabled = false;          // set if Increased Initial Window (RFC 3390) is enabled
+    bool increased_IW_enabled = false;          // set if Increased Initial Window (RFC 3390) is enabled (deprecated, mapped to init_cwnd_mode)
+    int init_cwnd_mode = 0;                      // initial window: 0=RFC2001 (1 SMSS), 1=RFC3390, 2=RFC6928 (IW10)
 
     uint32_t full_sized_segment_counter = 0;    // this counter is needed for delayed ACK
+    uint32_t delayedAckFrameCount = 0;          // number of frames after delayed acks are sent
     bool ack_now = false;                       // send ACK immediately, needed if delayed_acks_enabled is set
                                                 // Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].
                                                 // ack_now should be set when:
