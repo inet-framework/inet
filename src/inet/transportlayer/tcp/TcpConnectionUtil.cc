@@ -807,8 +807,9 @@ void TcpConnection::sendSyn()
     tcpHeader->setWindow(state->rcv_wnd);
 
     state->snd_max = state->snd_nxt = state->iss + 1;
+    emit(sndMaxSignal, state->snd_max);
+    state->full_sized_segment_counter = 0;
 
-    // ECN
     if (state->ecnWillingness) {
         tcpHeader->setEceBit(true);
         tcpHeader->setCwrBit(true);
@@ -816,10 +817,11 @@ void TcpConnection::sendSyn()
         EV << "ECN-setup SYN packet sent\n";
     }
     else {
-        // rfc 3168 page 16:
-        // A host that is not willing to use ECN on a TCP connection SHOULD
+        // RFC 3168, page 16
+        // "A host that is not willing to use ECN on a TCP connection SHOULD
         // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
-        // SYN-ACK packets that it sends to indicate this unwillingness.
+        // SYN-ACK packets that it sends to indicate this unwillingness."
+        // Covers off, passive, and accecn-passive: none of these initiate on active OPEN.
         tcpHeader->setEceBit(false);
         tcpHeader->setCwrBit(false);
         state->ecnSynSent = false;
@@ -1167,6 +1169,24 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
 
     sendQueue->enqueueAppData(packet);
 
+}
+
+int TcpConnection::deriveLinuxCaState() const
+{
+    if (state->afterRto)
+        return 4; // TCP_CA_Loss
+    if (state->lossRecovery)
+        return 3; // TCP_CA_Recovery
+    if (state->sndCwr)
+        return 2; // TCP_CA_CWR
+    // TCP_CA_Disorder: SACK/dup information has arrived (segments sit above
+    // snd_una) but not enough to enter recovery yet -- Linux tcp_fastretrans_alert
+    // holds ca_state at Disorder while sacked_out > 0 without a confirmed loss.
+    // sackedBytes is kept current on both the SACK and the cumulative-ACK path, so
+    // this reverts to Open as soon as snd_una catches up to the SACKed data.
+    if (state->sack_enabled && state->sackedBytes > 0)
+        return 1; // TCP_CA_Disorder
+    return 0; // TCP_CA_Open
 }
 
 bool TcpConnection::sendData(uint32_t congestionWindow)
