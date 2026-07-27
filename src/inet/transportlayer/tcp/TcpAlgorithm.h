@@ -8,8 +8,11 @@
 #ifndef __INET_TCPALGORITHM_H
 #define __INET_TCPALGORITHM_H
 
-#include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp/ITcpCongestionControl.h"
+#include "inet/transportlayer/tcp/ITcpRecovery.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
+#include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
 namespace tcp {
@@ -136,11 +139,16 @@ class INET_API TcpAlgorithm : public cObject
 
     /**
      * Called after rcv_nxt got advanced, either because we received in-sequence
-     * data ("text" in RFC 793 lingo) or a FIN. At this point, rcv_nxt has
+     * data ("text" in RFC 9293 lingo) or a FIN. At this point, rcv_nxt has
      * already been updated. This method should take care to send or schedule
      * an ACK some time.
      */
     virtual void receiveSeqChanged() = 0;
+
+    /**
+     * Called after we received an ACK for which ackNo <= snd_una.
+     */
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) = 0;
 
     /**
      * Called after we received an ACK which acked some data (that is,
@@ -205,6 +213,14 @@ class INET_API TcpAlgorithm : public cObject
      * to update state vars with new measured RTT value.
      */
     virtual void rttMeasurementCompleteUsingTS(uint32_t echoedTS) = 0;
+
+    /**
+     * Report a completed RTT measurement (segment sent at tSent, acked at
+     * tAcked) to the algorithm's estimator. Used by the connection for the
+     * handshake (SYN<->SYN-ACK) RTT seed; data-segment measurements are
+     * handled internally by the algorithm.
+     */
+    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked) = 0;
 
     /**
      * Called before sending ACK. Determines whether to set ECE bit.

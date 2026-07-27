@@ -145,6 +145,13 @@ class INET_API TcpSackRexmitQueue
      */
     virtual uint32_t checkRexmitQueueForSackedOrRexmittedSegments(uint32_t fromSeq) const;
 
+    virtual void markHeadLost();
+
+    /**
+     * Resets lost bit of all segments in rexmit queue.
+     */
+    virtual void resetLostBit();
+
     /**
      * Called when REXMIT timer expired.
      * Resets sacked bit of all segments in rexmit queue.
@@ -158,7 +165,7 @@ class INET_API TcpSackRexmitQueue
     virtual void resetRexmittedBit();
 
     /**
-     * Returns total amount of sacked bytes. Corresponds to update() function from RFC 3517.
+     * Returns total amount of sacked bytes. Corresponds to update() function from RFC 6675.
      */
     virtual uint32_t getTotalAmountOfSackedBytes() const;
 

@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+#include <iomanip>
 #include <assert.h>
 #include <string.h>
 
@@ -83,6 +84,25 @@ std::string TcpStateVariables::detailedInfo() const
 void TcpConnection::initialize()
 {
     WATCH_EXPR("fsmState", stateName(fsm.getState()));
+}
+
+std::string TcpConnection::validationInfo() const
+{
+    auto baseState = static_cast<const TcpAlgorithmBaseStateVariables *>(state);
+    std::stringstream out;
+    out << "lostOut: " << rexmitQueue->getLost() << ", "
+        << "sackedOut: " << rexmitQueue->getSacked() << ", "
+        << "retrans: " << rexmitQueue->getRetrans() << ", "
+        << "bytesInFligh: " << tcpAlgorithm->getBytesInFlight() << ", "
+        << "ssthresh: " << static_cast<const TcpClassicAlgorithmBaseStateVariables *>(state)->ssthresh << ", "
+        << "cwnd: " << baseState->snd_cwnd << ", "
+        << "snd_una: " << state->snd_una << ", "
+        << "snd_max: " << state->snd_max << ", "
+        << "snd_wnd: " << state->snd_wnd << ", "
+        << "dup_ack: " << state->dupacks << ", "
+        << "recover: " << (baseState->recover != 0 ? baseState->recover + 1 : state->recoveryPoint) << ", "
+        << "recovery: " << (state->lossRecovery ? "true" : "false");
+    return out.str();
 }
 
 //
@@ -229,6 +249,7 @@ bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHea
 {
     Enter_Method("processTCPSegment");
 
+
     take(tcpSegment);
     printConnBrief();
     rcvdSegments++;
@@ -250,7 +271,10 @@ bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHea
     TcpEventCode event = process_RCV_SEGMENT(tcpSegment, tcpHeader, segSrcAddr, segDestAddr);
 
     // then state transitions
-    return performStateTransition(event);
+    auto r = performStateTransition(event);
+
+
+    return r;
 }
 
 bool TcpConnection::processAppCommand(cMessage *msg)
@@ -699,6 +723,12 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             ASSERT(connEstabTimer && synRexmitTimer);
             cancelEvent(connEstabTimer);
             cancelEvent(synRexmitTimer);
+            // A TCP Fast Open server may have sent response data from
+            // SYN_RCVD, arming the data-transfer timers (REXMIT etc.);
+            // the embryonic connection's send state is abandoned wholesale,
+            // so those timers must not survive the fall back to LISTEN (a
+            // late REXMIT firing in LISTEN walked freshly-reset queues).
+            tcpAlgorithm->connectionClosed();
             break;
 
         case TCP_S_SYN_RCVD:

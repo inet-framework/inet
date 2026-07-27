@@ -7,6 +7,8 @@
 
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
+
 namespace inet {
 
 namespace tcp {
@@ -61,11 +63,33 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
         auto i = rexmitQueue.begin();
 
         while ((i != rexmitQueue.end()) && seqLE(i->endSeqNum, seqNum)) // discard/delete regions from rexmit queue, which have been acked
+        {
             i = rexmitQueue.erase(i);
+        }
+
+        // prune recorded transmission boundaries the same way
+        for (auto s = xmitSegmentStarts.begin(); s != xmitSegmentStarts.end(); )
+            s = seqLess(*s, seqNum) ? xmitSegmentStarts.erase(s) : std::next(s);
 
         if (i != rexmitQueue.end()) {
             ASSERT(seqLE(i->beginSeqNum, seqNum) && seqLess(seqNum, i->endSeqNum));
             i->beginSeqNum = seqNum;
+        }
+    }
+
+    // conn is null only when the queue is exercised standalone (unit tests); the
+    // Reno-dupack inferred-SACK emulation below is a connection-level concern.
+    if (conn != nullptr && !conn->getState()->sack_enabled && !rexmitQueue.empty())
+    {
+        auto& head = rexmitQueue.front();
+        if (head.sacked)
+        {
+            // It is not possible to have the UNA sacked; otherwise, it would
+            // have been ACKed. This is, most likely, our wrong guessing
+            // when adding Reno dupacks in the count.
+            head.lost = true;
+            head.sacked = false;
+            addInferredSack();
         }
     }
 
@@ -87,10 +111,15 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
     ASSERT(seqLess(fromSeqNum, toSeqNum));
 
     if (rexmitQueue.empty() || (end == fromSeqNum)) {
+        xmitSegmentStarts.insert(fromSeqNum); // original transmission boundary (skb start)
         region.beginSeqNum = fromSeqNum;
         region.endSeqNum = toSeqNum;
+        region.lost = false;
         region.sacked = false;
         region.rexmitted = false;
+        region.firstSentTime = region.lastSentTime = simTime();
+        region.transmitCount = 1;
+        region.lost = false;
         rexmitQueue.push_back(region);
         found = true;
         fromSeqNum = toSeqNum;
@@ -136,8 +165,12 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
 
             region.beginSeqNum = fromSeqNum;
             region.endSeqNum = toSeqNum;
+            region.lost = beforeEnd ? i->lost : false;
             region.sacked = beforeEnd ? i->sacked : false;
             region.rexmitted = beforeEnd;
+            region.firstSentTime = region.lastSentTime = simTime();
+            region.transmitCount = 1;
+            region.lost = false;
             rexmitQueue.insert(i, region);
             found = true;
             fromSeqNum = toSeqNum;
@@ -232,7 +265,10 @@ uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
             if (seqGE(i->beginSeqNum, fromSeqNum)) { // Search region in queue!
                 found = true;
-                i->sacked = true; // set sacked bit
+                if (!i->sacked && !i->rexmitted && newlySackedLow == 0)
+                    newlySackedLow = i->beginSeqNum;
+                i->lost = false;
+                i->sacked = true;
             }
 
             i++;
@@ -242,6 +278,7 @@ uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum
             Region region = *i;
 
             region.endSeqNum = toSeqNum;
+            region.lost = false;
             region.sacked = true;
             rexmitQueue.insert(i, region);
             i->beginSeqNum = toSeqNum;
@@ -252,6 +289,7 @@ uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum
         EV_DETAIL << "FAILED to set sacked bit for region: [" << fromSeqNum << ".." << toSeqNum << "). Not found in retransmission queue.\n";
 
     ASSERT(checkQueue());
+    return newlySackedLow;
 }
 
 bool TcpSackRexmitQueue::getSackedBit(uint32_t seqNum) const
@@ -313,6 +351,18 @@ uint32_t TcpSackRexmitQueue::checkRexmitQueueForSackedOrRexmittedSegments(uint32
     }
 
     return bytes;
+}
+
+void TcpSackRexmitQueue::markHeadLost()
+{
+    ASSERT(!rexmitQueue.empty());
+    rexmitQueue.begin()->lost = true;
+}
+
+void TcpSackRexmitQueue::resetLostBit()
+{
+    for (auto& elem : rexmitQueue)
+        elem.lost = false;
 }
 
 void TcpSackRexmitQueue::resetSackedBit()

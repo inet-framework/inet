@@ -85,7 +85,7 @@ enum TcpEventCode {
     TCP_E_RCV_UNEXP_SYN = 19; // unexpected SYN
 
     // timers
-    TCP_E_TIMEOUT_2MSL = 20; // RFC 793, a.k.a. TIME-WAIT timer
+    TCP_E_TIMEOUT_2MSL = 20; // RFC 9293, a.k.a. TIME-WAIT timer
     TCP_E_TIMEOUT_CONN_ESTAB = 21;
     TCP_E_TIMEOUT_FIN_WAIT_2 = 22;
 
@@ -102,7 +102,7 @@ enum TcpEventCode {
 // it in Tkenv.)
 //
 // TcpStateVariables only contains variables needed to implement
-// the "base" (RFC 793) TCP. More advanced TCP variants are encapsulated
+// the "base" (RFC 9293) TCP. More advanced TCP variants are encapsulated
 // into TcpAlgorithm subclasses which can have their own state blocks,
 // subclassed from TcpStateVariables. See TcpAlgorithm::createStateVariables().
 //
@@ -147,6 +147,7 @@ struct TcpStateVariables
     // because normal rexmit belongs to TcpAlgorithm)
     int syn_rexmit_count = 0;       // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
     simtime_t syn_rexmit_timeout;   // current SYN/SYN+ACK retransmission timeout
+    simtime_t handshakeSentTime = -1; // when our SYN (active) / SYN-ACK (passive) was last sent; seeds the RTT estimator from the handshake RTT on reaching ESTABLISHED (skipped per Karn if the handshake segment was retransmitted)
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code

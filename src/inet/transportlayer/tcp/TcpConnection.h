@@ -9,6 +9,11 @@
 #ifndef __INET_TCPCONNECTION_H
 #define __INET_TCPCONNECTION_H
 
+#include <climits>
+#include <map>
+#include <set>
+#include <deque>
+
 #include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/IcmpType_m.h"
 #include "inet/networklayer/common/Icmpv6Type_m.h"
@@ -57,7 +62,7 @@ class TcpAlgorithm;
  * associated with TCP state changes.
  *
  * The implementation largely follows the functional specification at the end
- * of RFC 793. Code comments extensively quote RFC 793 to make it easier
+ * of RFC 9293. Code comments extensively quote RFC 9293 to make it easier
  * to understand.
  *
  * TcpConnection objects are not used alone -- they are instantiated and managed
@@ -389,9 +394,6 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: writeHeaderOptions (Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented) */
     virtual TcpHeader writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader);
 
-    /** Utility: adds SACKs to segments header options field */
-    virtual TcpHeader addSacks(const Ptr<TcpHeader>& tcpHeader);
-
     /** Utility: get TSval from segments TS header option */
     virtual uint32_t getTSval(const Ptr<const TcpHeader>& tcpHeader) const;
 
@@ -452,6 +454,13 @@ class INET_API TcpConnection : public SimpleModule
      * Returns the number of bytes sent.
      */
     virtual uint32_t sendSegment(uint32_t bytes);
+
+    /**
+     * MSG_EOR: enqueues a SEND's data into sendQueue, and if the
+     * packet carries a TcpSendEorReq tag, records the new end of that data as a
+     * boundary sendSegment() must not build a segment across.
+     */
+    virtual void enqueueSendCommandData(Packet *packet);
 
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader);
@@ -526,6 +535,10 @@ class INET_API TcpConnection : public SimpleModule
 
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     virtual void updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways = false);
+
+    std::string validationInfo() const;
+
+    virtual uint32_t calculateEffectiveMss();
 
   public:
     TcpConnection() {}
@@ -651,46 +664,6 @@ class INET_API TcpConnection : public SimpleModule
      */
     static bool isPacketTooBig(Icmpv6Type type, int code);
 
-    /**
-     * For SACK TCP. RFC 3517, page 3: "This routine returns whether the given
-     * sequence number is considered to be lost.  The routine returns true when
-     * either DupThresh discontiguous SACKed sequences have arrived above
-     * 'SeqNum' or (DupThresh * SMSS) bytes with sequence numbers greater
-     * than 'SeqNum' have been SACKed.  Otherwise, the routine returns
-     * false."
-     */
-    virtual bool isLost(uint32_t seqNum);
-
-    /**
-     * For SACK TCP. RFC 3517, page 3: "This routine traverses the sequence
-     * space from HighACK to HighData and MUST set the "pipe" variable to an
-     * estimate of the number of octets that are currently in transit between
-     * the TCP sender and the TCP receiver."
-     */
-    virtual void setPipe();
-
-    /**
-     * For SACK TCP. RFC 3517, page 3: "This routine uses the scoreboard data
-     * structure maintained by the Update() function to determine what to transmit
-     * based on the SACK information that has arrived from the data receiver
-     * (and hence been marked in the scoreboard).  NextSeg () MUST return the
-     * sequence number range of the next segment that is to be
-     * transmitted..."
-     * Returns true if a valid sequence number (for the next segment) is found and
-     * returns false if no segment should be send.
-     */
-    virtual bool nextSeg(uint32_t& seqNum);
-
-    /**
-     * Utility: send data during Loss Recovery phase (if SACK is enabled).
-     */
-    virtual void sendDataDuringLossRecoveryPhase(uint32_t congestionWindow);
-
-    /**
-     * Utility: send segment during Loss Recovery phase (if SACK is enabled).
-     * Returns the number of bytes sent.
-     */
-    virtual uint32_t sendSegmentDuringLossRecoveryPhase(uint32_t seqNum);
 
     /**
      * Utility: send one new segment from snd_max if allowed (RFC 3042).
