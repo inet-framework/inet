@@ -1461,6 +1461,14 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (bytes > buffered) // last segment?
         bytes = buffered;
 
+    // The post-RTO snd_nxt forwarding above can land exactly at the end of the
+    // send queue (everything from the old snd_nxt was SACKed/retransmitted);
+    // building a zero-byte segment would abort in createSegmentWithBytes()
+    // ("empty chunk"). Report "nothing sent" instead -- callers stop their
+    // send loops on a zero return.
+    if (bytes == 0)
+        return 0;
+
     // MSG_EOR: boundaries at or behind snd_una are already fully
     // acked and no longer relevant to anything sendSegment() might build from here
     // on; drop them so the set doesn't grow across a long connection's lifetime.
@@ -3178,10 +3186,10 @@ uint16_t TcpConnection::updateRcvWnd()
 void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways)
 {
     uint32_t true_window = tcpHeader->getWindow();
-    // RFC 1323, page 10:
+    // RFC 7323, page 10
     // "The window field (SEG.WND) in the header of every incoming
-    // segment, with the exception of SYN segments, is left-shifted
-    // by Snd.Wind.Scale bits before updating SND.WND:
+    // segment, with the exception of <SYN> segments, MUST be left-
+    // shifted by Snd.Wind.Shift bits before updating SND.WND:
     //    SND.WND = SEG.WND << Snd.Wind.Scale"
     if (state->ws_enabled && !tcpHeader->getSynBit())
         true_window = tcpHeader->getWindow() << state->snd_wnd_scale;
