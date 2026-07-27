@@ -81,13 +81,24 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
     printSegmentBrief(tcpSegment, tcpHeader);
     EV_DETAIL << "TCB: " << state->str() << "\n";
 
+    state->time_last_segment_received = simTime(); // idle base for keepalive
+
+    // snapshot delivered-bytes so consumers can read this segment's newly
+    // acked+sacked bytes as deliveredBytes - prrDeliveredMark (RFC 6937 PRR input,
+    // also used by AccECN to approximate this ACK's delivered packet count)
+    state->prrDeliveredMark = state->deliveredBytes;
+
+    // reset the per-segment D-SACK detection (RFC 2883 loss undo)
+    state->dsackSeen = false;
+    state->dsackBytes = 0;
+
     emit(rcvSeqSignal, tcpHeader->getSequenceNo());
     emit(rcvAckSignal, tcpHeader->getAckNo());
 
     emit(tcpRcvPayloadBytesSignal, int(tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>()));
     //
-    // Note: this code is organized exactly as RFC 793, section "3.9 Event
-    // Processing", subsection "SEGMENT ARRIVES".
+    // Note: this code is organized exactly as
+    // RFC 9293, section "3.10 Event Processing", subsection "3.10.7. SEGMENT ARRIVES".
     //
     TcpEventCode event;
 
