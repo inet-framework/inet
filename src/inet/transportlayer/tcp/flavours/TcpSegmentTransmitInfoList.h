@@ -8,7 +8,9 @@
 #ifndef __INET_TCPSEGMENTTRANSMITINFOLIST_H
 #define __INET_TCPSEGMENTTRANSMITINFOLIST_H
 
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
+#include <list>
+
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 
@@ -39,6 +41,12 @@ class INET_API TcpSegmentTransmitInfoList
     TcpSegmentTransmitInfoItems regions; // region[i].end == region[i+1].beg
 
   public:
+    /**
+     * Whether beg lies within the contiguous range this list currently covers
+     * (or the list is empty), i.e. whether set() may be called with it.
+     */
+    bool isInRange(uint32_t beg) const;
+
     void set(uint32_t beg, uint32_t end, simtime_t sentTime); // [beg,end)
 
     /// returns pointer to Item, or nullptr if not found

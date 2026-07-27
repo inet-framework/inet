@@ -8,6 +8,7 @@
 
 #include <algorithm> // min,max
 
+#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 
 namespace inet {
@@ -28,13 +29,16 @@ void DcTcp::initialize()
 {
     TcpReno::initialize();
     state->dctcp_gamma = conn->getTcpMain()->par("dctcpGamma");
+    state->ecnMarkAll = true;
 }
 
-void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
+void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
-    TcpTahoeRenoFamily::receivedDataAck(firstSeqAcked);
+    uint32_t old_dupacks = state->dupacks;
 
-    if (state->dupacks >= state->dupthresh) {
+    TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
+
+    if (old_dupacks >= state->dupthresh) {
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
@@ -54,8 +58,66 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
             // RFC 8257 3.3.2
             state->dctcp_bytesAcked += bytes_acked;
 
-            // RFC 8257 3.3.3
-            if (state->gotEce) {
+            // RFC 8257 3.3.3. AccECN: when this connection negotiated
+            // AccECN, use the AccECN option's byte-exact CE evidence (deliveredCeBytes,
+            // G6/G7) instead of RFC 8257's boolean gotEce-gated approximation -- AccECN
+            // already gives the precise number of CE-marked bytes the peer reported, so
+            // the "mark this whole round's bytes_acked if ECE was ever seen" approximation
+            // isn't needed in this mode. gotEce itself is never set true for an AccECN
+            // connection in the first place (the foundation-fix guard on eceBit consumption
+            // -- see TcpConnectionRcvSegment.cc's processAckInEstabEtc()), so the two
+            // branches below are naturally mutually exclusive per connection, exactly
+            // mirroring how the two ECN modes are already mutually exclusive at negotiation
+            // time elsewhere in this workstream.
+            //
+            // deliveredCeBytes/deliveredCePkts are cumulative (updated once per ACK in
+            // processAckInEstabEtc()'s ACE block, which runs AFTER this function for the
+            // very same segment -- see that block's own comment) -- the two "Mark" fields
+            // snapshot them the same way prrDeliveredMark already does for deliveredBytes,
+            // so this round's increment is picked up on the NEXT call, one ACK later. That
+            // one-ACK lag is immaterial here: DCTCP.Alpha is a windowed EWMA over many ACKs
+            // (RFC 8257 3.3.4-3.3.6 below), not a per-ACK-exact quantity, and no CE byte is
+            // ever lost or double-counted -- each one is picked up on the very next round.
+            //
+            // Lens selection is per-CONNECTION, latched, not per-round: once
+            // dctcp_accEcnOptionSeen is set (the first time this connection ever sees a
+            // real AccECN option -- state->accEcnOptionCebDeltaValid, set by
+            // readHeaderOptions() earlier in this same segment's processing, so unlike
+            // deliveredCeBytes this flag is NOT lagged), every later round uses the
+            // byte-exact deliveredCeBytes delta exclusively, even in rounds where no
+            // option happened to arrive (deliveredCeBytes correctly contributes 0 for
+            // those -- CEB is cumulative, so the NEXT option's delta automatically covers
+            // any gap rounds, per its own design). A per-round choice ("prefer bytes when
+            // nonzero, else packets") must NOT be used: a gap round would be attributed
+            // to the packet-count estimate, and then the FOLLOWING option's cumulative
+            // delta would re-include that same gap round's bytes, double-counting them. Before the option is ever seen at all, the packet-count
+            // estimate (deliveredCePkts * snd_mss, the ACE-only estimate) is used instead
+            // of reporting zero.
+            if (state->accEcnNegotiated) {
+                if (state->accEcnOptionCebDeltaValid)
+                    state->dctcp_accEcnOptionSeen = true;
+
+                uint32_t marked;
+                if (state->dctcp_accEcnOptionSeen) {
+                    marked = state->deliveredCeBytes - state->dctcp_deliveredCeBytesMark;
+                    state->dctcp_deliveredCeBytesMark = state->deliveredCeBytes;
+                }
+                else {
+                    uint32_t cePktsThisRound = state->deliveredCePkts - state->dctcp_deliveredCePktsMark;
+                    state->dctcp_deliveredCePktsMark = state->deliveredCePkts;
+                    marked = cePktsThisRound * state->snd_mss;
+                }
+                EV_INFO << "DcTcp AccECN CE-byte accounting: lens=" << (state->dctcp_accEcnOptionSeen ? "bytes" : "packets")
+                        << " marked=" << marked << " dctcp_bytesMarked=" << (state->dctcp_bytesMarked + marked) << "\n";
+                if (marked > 0) {
+                    state->dctcp_bytesMarked += marked;
+                    conn->emit(markingProbSignal, 1);
+                }
+                else {
+                    conn->emit(markingProbSignal, 0);
+                }
+            }
+            else if (state->gotEce) {
                 state->dctcp_bytesMarked += bytes_acked;
                 conn->emit(markingProbSignal, 1);
             }
@@ -114,7 +176,7 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
             if (state->snd_cwnd < state->ssthresh) {
                 EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
 
-                // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
+                // perform Slow Start. RFC 5681: "During slow start, a TCP increments cwnd
                 // by at most SMSS bytes for each ACK received that acknowledges new data."
                 state->snd_cwnd += state->snd_mss;
 
@@ -124,7 +186,7 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
                 EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
             }
             else {
-                // perform Congestion Avoidance (RFC 2581)
+                // perform Congestion Avoidance (RFC 5681)
                 uint32_t incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
                 if (incr == 0)
@@ -136,10 +198,7 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
                 conn->emit(ssthreshSignal, state->ssthresh);
 
                 //
-                // Note: some implementations use extra additive constant mss / 8 here
-                // which is known to be incorrect (RFC 2581 p5)
-                //
-                // Note 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
+                // Note: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
                 // would require maintaining a bytes_acked variable here which we don't do
                 //
 
@@ -149,11 +208,11 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
     }
 
     if (state->sack_enabled && state->lossRecovery) {
-        // RFC 3517, page 7: "Once a TCP is in the loss recovery phase the following procedure MUST
+        // RFC 6675, page 9: "Once a TCP is in the loss recovery phase, the following procedure MUST
         // be used for each arriving ACK:
         //
         // (A) An incoming cumulative ACK for a sequence number greater than
-        // RecoveryPoint signals the end of loss recovery and the loss
+        // RecoveryPoint signals the end of loss recovery, and the loss
         // recovery phase MUST be terminated.  Any information contained in
         // the scoreboard for sequence numbers greater than the new value of
         // HighACK SHOULD NOT be cleared when leaving the loss recovery
@@ -162,7 +221,7 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
             EV_INFO << "Loss Recovery terminated.\n";
             state->lossRecovery = false;
         }
-        // RFC 3517, page 7: "(B) Upon receipt of an ACK that does not cover RecoveryPoint the
+        // RFC 6675, page 9: "(B) Upon receipt of an ACK that does not cover RecoveryPoint the
         // following actions MUST be taken:
         //
         // (B.1) Use Update () to record the new SACK information conveyed
@@ -172,22 +231,22 @@ void DcTcp::receivedDataAck(uint32_t firstSeqAcked)
         // in the network."
         else {
             // update of scoreboard (B.1) has already be done in readHeaderOptions()
-            conn->setPipe();
+            check_and_cast<Rfc6675Recovery *>(recovery)->setPipe();
 
-            // RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
+            // RFC 6675, page 9: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
             // segments as follows:"
             if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
-                conn->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
+                check_and_cast<Rfc6675Recovery *>(recovery)->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
         }
     }
 
-    // RFC 3517, pages 7 and 8: "5.1 Retransmission Timeouts
+    // RFC 6675, page 10: "5.1 Retransmission Timeouts
     // (...)
     // If there are segments missing from the receiver's buffer following
     // processing of the retransmitted segment, the corresponding ACK will
     // contain SACK information.  In this case, a TCP sender SHOULD use this
     // SACK information when determining what data should be sent in each
-    // segment of the slow start.  The exact algorithm for this selection is
+    // segment following an RTO.  The exact algorithm for this selection is
     // not specified in this document (specifically NextSeg () is
     // inappropriate during slow start after an RTO).  A relatively
     // straightforward approach to "filling in" the sequence space reported

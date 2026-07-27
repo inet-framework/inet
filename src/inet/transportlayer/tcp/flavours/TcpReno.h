@@ -1,52 +1,29 @@
 //
-// Copyright (C) 2004 OpenSim Ltd.
+// Copyright (C) 2020 OpenSim Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #ifndef __INET_TCPRENO_H
 #define __INET_TCPRENO_H
 
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 
 namespace inet {
 namespace tcp {
 
 /**
- * State variables for TcpReno.
+ * Implements RFC 6582: The NewReno Modification to TCP's Fast Recovery Algorithm.
  */
-typedef TcpTahoeRenoFamilyStateVariables TcpRenoStateVariables;
-
-/**
- * Implements TCP Reno.
- */
-class INET_API TcpReno : public TcpTahoeRenoFamily
+class INET_API TcpReno : public TcpClassicAlgorithmBase
 {
   protected:
-    TcpRenoStateVariables *& state; // alias to TCLAlgorithm's 'state'
-
-    /** Create and return a TcpRenoStateVariables object. */
-    virtual TcpStateVariables *createStateVariables() override
-    {
-        return new TcpRenoStateVariables();
-    }
-
-    /** Utility function to recalculate ssthresh */
-    virtual void recalculateSlowStartThreshold();
-
-    /** Redefine what should happen on retransmission */
-    virtual void processRexmitTimer(TcpEventCode& event) override;
+    virtual ITcpRecovery *createRecovery() override;
+    virtual ITcpCongestionControl *createCongestionControl() override;
 
   public:
-    /** Ctor */
-    TcpReno();
-
-    /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
-
-    /** Redefine what should happen when dupAck was received, to add congestion window management */
-    virtual void receivedDuplicateAck() override;
+    /** TcpReno selects RFC 6675 SACK recovery when the connection negotiated SACK. */
+    virtual bool supportsSackRecovery() const override { return true; }
 };
 
 } // namespace tcp

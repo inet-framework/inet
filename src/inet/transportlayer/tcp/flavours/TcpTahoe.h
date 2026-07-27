@@ -8,46 +8,37 @@
 #ifndef __INET_TCPTAHOE_H
 #define __INET_TCPTAHOE_H
 
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
 
 /**
- * State variables for TcpTahoe.
+ * This class serves educational purposes to demonstrate a simple congestion
+ * control algorithm. It implements slow start, congestion avoidance, and fast
+ * retransmit algorithms.
  */
-typedef TcpTahoeRenoFamilyStateVariables TcpTahoeStateVariables;
-
-/**
- * Implements Tahoe.
- */
-class INET_API TcpTahoe : public TcpTahoeRenoFamily
+class INET_API TcpTahoe : public TcpAlgorithmBase
 {
   protected:
-    TcpTahoeStateVariables *& state; // alias to TCLAlgorithm's 'state'
+    TcpClassicAlgorithmBaseStateVariables *& state;
 
   protected:
-    /** Create and return a TcpTahoeStateVariables object. */
-    virtual TcpStateVariables *createStateVariables() override
-    {
-        return new TcpTahoeStateVariables();
-    }
+    virtual TcpStateVariables *createStateVariables() override { return new TcpClassicAlgorithmBaseStateVariables(); }
 
-    /** Utility function to recalculate ssthresh */
-    virtual void recalculateSlowStartThreshold();
+    virtual void initialize() override;
 
-    /** Redefine what should happen on retransmission */
     virtual void processRexmitTimer(TcpEventCode& event) override;
 
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
+
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
+
+    virtual void resetToSlowStart();
+
   public:
-    /** Ctor */
     TcpTahoe();
-
-    /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
-
-    /** Redefine what should happen when dupAck was received, to add congestion window management */
-    virtual void receivedDuplicateAck() override;
 };
 
 } // namespace tcp

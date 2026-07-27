@@ -8,7 +8,7 @@
 #define __INET_DCTCPFAMILY_H
 
 #include "inet/transportlayer/tcp/flavours/DcTcpFamilyState_m.h"
-#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamily.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 
 namespace inet {
 namespace tcp {
@@ -16,7 +16,7 @@ namespace tcp {
 /**
  * Provides utility functions to implement DcTcp.
  */
-class INET_API DcTcpFamily : public TcpTahoeRenoFamily
+class INET_API DcTcpFamily : public TcpClassicAlgorithmBase
 {
   protected:
     DcTcpFamilyStateVariables *& state; // alias to TcpAlgorithm's 'state'

@@ -18,7 +18,7 @@ Register_Class(TcpWestwood);
 std::string TcpWestwoodStateVariables::str() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::str();
+    out << TcpAlgorithmBaseStateVariables::str();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }
@@ -26,14 +26,14 @@ std::string TcpWestwoodStateVariables::str() const
 std::string TcpWestwoodStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::detailedInfo();
+    out << TcpAlgorithmBaseStateVariables::detailedInfo();
     out << "ssthresh = " << ssthresh << "\n";
     out << "w_RTTmin = " << w_RTTmin << "\n";
     return out.str();
 }
 
 TcpWestwood::TcpWestwood()
-    : TcpBaseAlg(), state((TcpWestwoodStateVariables *&)TcpAlgorithm::state)
+    : TcpAlgorithmBase(), state((TcpWestwoodStateVariables *&)TcpAlgorithm::state)
 {
 }
 
@@ -65,7 +65,7 @@ void TcpWestwood::recalculateBWE(uint32_t cumul_ack)
 
 void TcpWestwood::processRexmitTimer(TcpEventCode& event)
 {
-    TcpBaseAlg::processRexmitTimer(event);
+    TcpAlgorithmBase::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
@@ -97,12 +97,14 @@ void TcpWestwood::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
-void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
+void TcpWestwood::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
-    TcpBaseAlg::receivedDataAck(firstSeqAcked);
+    uint32_t old_dupacks = state->dupacks;
 
-    state->regions.clearTo(state->snd_una);
-    const TcpSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
+    TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
+
+    state->sentInfo.clearTo(state->snd_una);
+    const TcpSegmentTransmitInfoList::Item *found = state->sentInfo.get(firstSeqAcked);
 
     if (found != nullptr) {
         simtime_t currentTime = simTime();
@@ -115,10 +117,10 @@ void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
         // cumul_ack: cumulative ack's that acks 2 or more pkts count 1,
         // because DUPACKs count them
         uint32_t cumul_ack = state->snd_una - firstSeqAcked; // acked bytes
-        if ((state->dupacks * state->snd_mss) >= cumul_ack)
+        if ((old_dupacks * state->snd_mss) >= cumul_ack)
             cumul_ack = state->snd_mss; // cumul_ack = 1:
         else
-            cumul_ack -= (state->dupacks * state->snd_mss);
+            cumul_ack -= (old_dupacks * state->snd_mss);
 
         // security check: if previous steps are right cumul_ack shoudl be > 2:
         if (cumul_ack > (2 * state->snd_mss))
@@ -129,7 +131,7 @@ void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
 
     // Same behavior of Reno during fast recovery, slow start and cong. avoidance
 
-    if (state->dupacks >= state->dupthresh) {
+    if (old_dupacks >= state->dupthresh) {
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
@@ -145,7 +147,7 @@ void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
         if (state->snd_cwnd < state->ssthresh) {
             EV_DETAIL << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
 
-            // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
+            // perform Slow Start. RFC 5681: "During slow start, a TCP increments cwnd
             // by at most SMSS bytes for each ACK received that acknowledges new data."
             state->snd_cwnd += state->snd_mss;
 
@@ -165,7 +167,7 @@ void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
             EV_DETAIL << "cwnd=" << state->snd_cwnd << "\n";
         }
         else {
-            // perform Congestion Avoidance (RFC 2581)
+            // perform Congestion Avoidance (RFC 5681)
             uint32_t incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
             if (incr == 0)
@@ -176,10 +178,7 @@ void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
             conn->emit(cwndSignal, state->snd_cwnd);
 
             //
-            // Note: some implementations use extra additive constant mss / 8 here
-            // which is known to be incorrect (RFC 2581 p5)
-            //
-            // Note 2: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
+            // Note: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
             // would require maintaining a bytes_acked variable here which we don't do
             //
 
@@ -192,7 +191,7 @@ void TcpWestwood::receivedDataAck(uint32_t firstSeqAcked)
 
 void TcpWestwood::receivedDuplicateAck()
 {
-    TcpBaseAlg::receivedDuplicateAck();
+    TcpAlgorithmBase::receivedDuplicateAck();
 
     {
         // BWE calculation: dupack counts 1
@@ -260,25 +259,6 @@ void TcpWestwood::receivedDuplicateAck()
 
         sendData(false);
     }
-}
-
-void TcpWestwood::dataSent(uint32_t fromseq)
-{
-    TcpBaseAlg::dataSent(fromseq);
-
-    // save time when packet is sent
-    // fromseq is the seq number of the 1st sent byte
-
-    simtime_t sendtime = simTime();
-    state->regions.clearTo(state->snd_una);
-    state->regions.set(fromseq, state->snd_max, sendtime);
-}
-
-void TcpWestwood::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
-{
-    TcpBaseAlg::segmentRetransmitted(fromseq, toseq);
-
-    state->regions.set(fromseq, toseq, simTime());
 }
 
 } // namespace tcp

@@ -19,7 +19,7 @@ Register_Class(TcpVegas);
 std::string TcpVegasStateVariables::str() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::str();
+    out << TcpAlgorithmBaseStateVariables::str();
     out << " ssthresh=" << ssthresh;
     return out.str();
 }
@@ -27,29 +27,30 @@ std::string TcpVegasStateVariables::str() const
 std::string TcpVegasStateVariables::detailedInfo() const
 {
     std::stringstream out;
-    out << TcpBaseAlgStateVariables::detailedInfo();
+    out << TcpAlgorithmBaseStateVariables::detailedInfo();
     out << "ssthresh = " << ssthresh << "\n";
     out << "baseRTT = " << v_baseRTT << "\n";
     return out.str();
 }
 
 TcpVegas::TcpVegas()
-    : TcpBaseAlg(), state((TcpVegasStateVariables *&)TcpAlgorithm::state)
+    : TcpAlgorithmBase(), state((TcpVegasStateVariables *&)TcpAlgorithm::state)
 {
 }
 
 // Same as TcpReno
 void TcpVegas::recalculateSlowStartThreshold()
 {
-    // RFC 2581, page 4:
+    // RFC 5681, page 7:
     // "When a TCP sender detects segment loss using the retransmission
-    // timer, the value of ssthresh MUST be set to no more than the value
-    // given in equation 3:
+    // timer and the given segment has not yet been resent by way of the
+    // retransmission timer, the value of ssthresh MUST be set to no more
+    // than the value given in equation 4:
     //
-    //   ssthresh = max (FlightSize / 2, 2*SMSS)            (3)
+    //   ssthresh = max (FlightSize / 2, 2*SMSS)            (4)
     //
-    // As discussed above, FlightSize is the amount of outstanding data in
-    // the network."
+    // where, as discussed above, FlightSize is the amount of outstanding
+    // data in the network."
 
     // set ssthresh to flight size/2, but at least 2 SMSS
     // (the formula below practically amounts to ssthresh=cwnd/2 most of the time)
@@ -62,7 +63,7 @@ void TcpVegas::recalculateSlowStartThreshold()
 // Process rexmit timer
 void TcpVegas::processRexmitTimer(TcpEventCode& event)
 {
-    TcpBaseAlg::processRexmitTimer(event);
+    TcpAlgorithmBase::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
@@ -82,11 +83,11 @@ void TcpVegas::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true); // retransmit one segment from snd_una
 }
 
-void TcpVegas::receivedDataAck(uint32_t firstSeqAcked)
+void TcpVegas::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
-    TcpBaseAlg::receivedDataAck(firstSeqAcked);
+    TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
 
-    const TcpSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
+    const TcpSegmentTransmitInfoList::Item *found = state->sentInfo.get(firstSeqAcked);
     if (found) {
         simtime_t currentTime = simTime();
         simtime_t tSent = found->getFirstSentTime();
@@ -235,7 +236,7 @@ void TcpVegas::receivedDataAck(uint32_t firstSeqAcked)
         // check 1st and 2nd ack after a rtx
         if (state->v_worried > 0) {
             state->v_worried -= state->snd_mss;
-            const TcpSegmentTransmitInfoList::Item *unaFound = state->regions.get(state->snd_una);
+            const TcpSegmentTransmitInfoList::Item *unaFound = state->sentInfo.get(state->snd_una);
 //            bool expired = unaFound && ((currentTime - unaFound->getLastSentTime()) >= state->v_rtt_timeout);
             bool expired = unaFound && ((currentTime - unaFound->getFirstSentTime()) >= state->v_rtt_timeout);
 
@@ -251,7 +252,7 @@ void TcpVegas::receivedDataAck(uint32_t firstSeqAcked)
         }
     } // Closes if v_sendtime != nullptr
 
-    state->regions.clearTo(state->snd_una);
+    state->sentInfo.clearTo(state->snd_una);
 
     // Try to send more data
     sendData(false);
@@ -259,17 +260,17 @@ void TcpVegas::receivedDataAck(uint32_t firstSeqAcked)
 
 void TcpVegas::receivedDuplicateAck()
 {
-    TcpBaseAlg::receivedDuplicateAck();
+    TcpAlgorithmBase::receivedDuplicateAck();
 
     simtime_t currentTime = simTime();
     simtime_t tSent = 0;
     int num_transmits = 0;
-    const TcpSegmentTransmitInfoList::Item *found = state->regions.get(state->snd_una);
+    const TcpSegmentTransmitInfoList::Item *found = state->sentInfo.get(state->snd_una);
     if (found) {
         tSent = found->getFirstSentTime();
         num_transmits = found->getTransmitCount();
     }
-    state->regions.clearTo(state->snd_una);
+    state->sentInfo.clearTo(state->snd_una);
 
     // check Vegas timeout
     bool expired = found && ((currentTime - tSent) >= state->v_rtt_timeout);
@@ -319,27 +320,6 @@ void TcpVegas::receivedDuplicateAck()
 
     // try to send more data
     sendData(false);
-}
-
-void TcpVegas::dataSent(uint32_t fromseq)
-{
-    TcpBaseAlg::dataSent(fromseq);
-
-    // save time when packet is sent
-    // fromseq is the seq number of the 1st sent byte
-    // we need this value, based on iss=0 (to store it the right way on the vector),
-    // but iss is not a constant value (ej: iss=0), so it needs to be detemined each time
-    // (this is why it is used: fromseq-state->iss)
-
-    state->regions.clearTo(state->snd_una);
-    state->regions.set(fromseq, state->snd_max, simTime());
-}
-
-void TcpVegas::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
-{
-    TcpBaseAlg::segmentRetransmitted(fromseq, toseq);
-
-    state->regions.set(fromseq, toseq, simTime());
 }
 
 } // namespace tcp

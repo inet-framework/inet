@@ -14,14 +14,14 @@ namespace tcp {
 
 Register_Class(TcpNoCongestionControl);
 
-TcpNoCongestionControl::TcpNoCongestionControl() : TcpBaseAlg(),
+TcpNoCongestionControl::TcpNoCongestionControl() : TcpAlgorithmBase(),
     state((TcpNoCongestionControlStateVariables *&)TcpAlgorithm::state)
 {
 }
 
 void TcpNoCongestionControl::initialize()
 {
-    TcpBaseAlg::initialize();
+    TcpAlgorithmBase::initialize();
 
     // set congestion window to a practically infinite value
     state->snd_cwnd = 0x7fffffff;
@@ -63,7 +63,7 @@ bool TcpNoCongestionControl::sendData(bool sendCommandInvoked)
 
 void TcpNoCongestionControl::processRexmitTimer(TcpEventCode& event)
 {
-    TcpBaseAlg::processRexmitTimer(event);
+    TcpAlgorithmBase::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
@@ -74,9 +74,9 @@ void TcpNoCongestionControl::processRexmitTimer(TcpEventCode& event)
     ASSERT(state->snd_cwnd == 0x7fffffff);
 }
 
-void TcpNoCongestionControl::receivedDataAck(uint32_t firstSeqAcked)
+void TcpNoCongestionControl::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
-    TcpBaseAlg::receivedDataAck(firstSeqAcked);
+    TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
 
     // ack may have freed up some room in the window, try sending
     sendData(false);

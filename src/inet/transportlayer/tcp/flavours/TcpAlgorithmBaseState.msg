@@ -5,6 +5,7 @@
 //
 
 import inet.transportlayer.tcp.TcpConnectionState;
+import inet.transportlayer.tcp.flavours.TcpSegmentTransmitInfoList;
 
 cplusplus {{
     #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -13,9 +14,9 @@ cplusplus {{
 namespace inet::tcp;
 
 ///
-/// State variables for TcpBaseAlg.
+/// State variables for TcpAlgorithmBase.
 ///
-struct TcpBaseAlgStateVariables extends TcpStateVariables
+struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
 {
     @descriptor(readonly);
 
@@ -29,6 +30,16 @@ struct TcpBaseAlgStateVariables extends TcpStateVariables
     //@{
     unsigned int persist_factor = 0; ///< factor needed for simplified PERSIST timer calculation
     simtime_t persist_timeout = 5.0; ///< current persist timeout
+    uint32_t zeroWindowProbesSent = 0; ///< cumulative zero-window (persist) probes sent; surfaced as TcpStatusInfo::probes
+    //@}
+
+    /// keepalive (RFC 1122 4.2.3.6)
+    //@{
+    bool keepalive_enabled = false; ///< whether keepalive probing is active on this connection
+    simtime_t keepalive_idle_time = 7200; ///< idle time before the first probe
+    simtime_t keepalive_interval = 75; ///< interval between probes
+    int keepalive_max_probes = 9; ///< number of unanswered probes before abort
+    int keepalive_probes_sent = 0; ///< probes sent in the current idle episode
     //@}
 
     /// congestion window
@@ -45,7 +56,8 @@ struct TcpBaseAlgStateVariables extends TcpStateVariables
     /// round-trip time estimation (Jacobson's algorithm)
     //@{
     simtime_t srtt = 0; ///< smoothed round-trip time
-    simtime_t rttvar = 3.0 / 4.0; ///< variance of round-trip time
+    simtime_t rttvar = 0; ///< variance of round-trip time (RFC 6298: seeded to R/2 on the first sample)
+    bool rtt_measured = false; ///< whether a first RTT sample has been taken (RFC 6298 initialization)
     //@}
 
     /// number of RTOs
@@ -53,14 +65,19 @@ struct TcpBaseAlgStateVariables extends TcpStateVariables
     uint32_t numRtos = 0; ///< total number of RTOs
     //@}
 
-    /// RFC 3782 variables
+    /// RFC 6582 variables
     //@{
-    uint32_t recover = iss; ///< recover (RFC 3782)
-    bool firstPartialACK = false; ///< first partial acknowledgement (RFC 3782)
+    uint32_t recover = iss; ///< recover (RFC 6582)
+    bool firstPartialACK = false; ///< first partial acknowledgement (RFC 6582)
+    //@}
+
+    /// per-segment transmit times, shared by all flavours (RTT sampling, RACK/Eifel input)
+    //@{
+    TcpSegmentTransmitInfoList sentInfo;
     //@}
 };
 
-cplusplus(TcpBaseAlgStateVariables) {{
+cplusplus(TcpAlgorithmBaseStateVariables) {{
   public:
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
