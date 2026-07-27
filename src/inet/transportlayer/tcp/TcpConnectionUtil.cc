@@ -1754,31 +1754,23 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
 
 bool TcpConnection::sendProbe()
 {
-    // we'll start sending from snd_max
-    state->snd_nxt = state->snd_max;
+    // Linux tcp_xmit_probe_skb: a zero-window probe is a DATALESS segment
+    // with seq = SND.UNA - 1. It provokes a pure ACK carrying the peer's
+    // current window without consuming sequence space -- the old 1-byte BSD
+    // persist style consumed a real byte and dragged the RTO machinery into
+    // the probing (slow-start-after-win-update pins "26000:26000(0)", i.e.
+    // snd_una-1 dataless, and tcp_persist_1's trace was updated in step).
+    EV_INFO << "Sending zero-window probe, seq=" << (state->snd_una - 1) << "\n";
 
-    // check we have 1 byte to send
-    if (sendQueue->getBytesAvailable(state->snd_nxt) == 0) {
-        EV_WARN << "Cannot send probe because send buffer is empty\n";
-        return false;
-    }
-
-    uint32_t old_snd_nxt = state->snd_nxt;
-
-    EV_INFO << "Sending 1 byte as probe, with seq=" << state->snd_nxt << "\n";
-    sendSegment(1);
-
-    // remember highest seq sent (snd_nxt may be set back on retransmission,
-    // but we'll need snd_max to check validity of ACKs -- they must ack
-    // something we really sent)
-    state->snd_max = state->snd_nxt;
-
-    emit(unackedSignal, state->snd_max - state->snd_una);
-
-    // notify
-    tcpAlgorithm->ackSent();
-    tcpAlgorithm->dataSent(old_snd_nxt);
-
+    const auto& tcpHeader = makeShared<TcpHeader>();
+    tcpHeader->setSequenceNo(state->snd_una - 1);
+    tcpHeader->setAckBit(true);
+    tcpHeader->setAckNo(state->rcv_nxt);
+    updateRcvWnd();
+    tcpHeader->setWindow(state->rcv_wnd >> state->rcv_wnd_scale);
+    writeHeaderOptions(tcpHeader);
+    Packet *fp = new Packet("ZeroWindowProbe");
+    sendToIP(fp, tcpHeader);
     return true;
 }
 
@@ -1807,11 +1799,28 @@ void TcpConnection::sendKeepAliveProbe()
     state->sndAck = false;
 }
 
+void TcpConnection::markOutstandingLostOnRto()
+{
+    if (!state->sack_enabled || rexmitQueue == nullptr || rexmitQueue->getQueueLength() == 0)
+        return;
+    // Clamp to the scoreboard's range: snd_una may sit below the queue start (already
+    // discarded) and snd_max may sit above the queue end (e.g. an outstanding FIN,
+    // which carries no data byte in the rexmit queue).
+    uint32_t from = state->snd_una;
+    uint32_t to = state->snd_max;
+    if (seqLess(from, rexmitQueue->getBufferStartSeq()))
+        from = rexmitQueue->getBufferStartSeq();
+    if (seqGreater(to, rexmitQueue->getBufferEndSeq()))
+        to = rexmitQueue->getBufferEndSeq();
+    if (seqLess(from, to))
+        rexmitQueue->markLost(from, to);
+}
+
 void TcpConnection::retransmitOneSegment(bool called_at_rto)
 {
-    // rfc-3168, page 20:
-    // ECN-capable TCP implementations MUST NOT set either ECT codepoint
-    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
+    // RFC 3168, page 20
+    // "ECN-capable TCP implementations MUST NOT set either ECT codepoint
+    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets"
     if (state && state->ect)
         state->rexmit = true;
 
