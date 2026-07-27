@@ -38,7 +38,10 @@ import inet.applications.contract.IApp;
 // data. One way of specifying sending is via the `tSend`, `sendBytes`
 // parameters, the other way is with `sendScript`. With the former, `sendBytes`
 // bytes will be sent at `tSend`. With `sendScript`, the format is
-// "<time> <numBytes>;<time> <numBytes>;..."
+// "<time> <numBytes>[ eor];<time> <numBytes>[ eor];...". The optional trailing
+// `eor` keyword marks that SEND's last byte as a record boundary (MSG_EOR):
+// TCP will not coalesce it together with data from a later SEND into the same
+// outgoing segment.
 //
 // <b>Closing the connection</b>
 //
@@ -86,6 +89,7 @@ simple TcpSessionApp extends SimpleModule like IApp
         string connectAddress;
         int connectPort = default(1000);
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
+        int packetData = default(-1); // the packet is filled with this byte if not -1
         bool autoRead = default(true); // Whether to use "autoread" or "explicit-read" mode for TCP connection
         volatile int readSize @unit(B) = default(-1B);    // Used only with autoRead==false
         volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay
