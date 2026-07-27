@@ -9,6 +9,7 @@
 #include <algorithm> // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
+#include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
 

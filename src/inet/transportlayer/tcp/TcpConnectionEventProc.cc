@@ -15,6 +15,7 @@
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp/TcpSimsignals.h"
 
 namespace inet {
 namespace tcp {
