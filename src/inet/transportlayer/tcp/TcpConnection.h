@@ -126,6 +126,12 @@ class INET_API TcpConnection : public SimpleModule
     // it must be settable via TCP_C_SETOPTION before state exists (app code may call
     // TcpSocket::setTimestamping() before connect(), same as setTtl/setDscp/setTos).
     bool rxTimestampingEnabled = false;
+    // Runtime TCP_NOTSENT_LOWAT (TcpSetNotsentLowatCommand): like
+    // rxTimestampingEnabled above, must survive arriving before state exists
+    // (a sockopt sent between bind() and connect()/listen()). INT_MIN = never
+    // set; otherwise applied over the notsentLowat module param in
+    // configureStateVariables(), and directly to state when set later.
+    int notsentLowatSockopt = INT_MIN;
     // Runtime TCP_MAXSEG (TcpSetMaxSegCommand): like notsentLowatSockopt, must
     // survive arriving before state exists (a sockopt sent before connect()/
     // listen()). -1 = never set; otherwise clamps advertisedMss/snd_mss in
