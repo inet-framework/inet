@@ -483,8 +483,35 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
 {
     delete tcpCommand; // but reuse msg for reply
 
-    if (fsm.getState() == TCP_S_INIT)
-        throw cRuntimeError("Error processing command STATUS: connection not open");
+    if (fsm.getState() == TCP_S_INIT) {
+        // Linux parity: getsockopt(TCP_INFO) works on ANY socket fd, including
+        // one whose connection attempt was refused/reset/timed out and whose
+        // PCB is already gone -- the fd simply reports TCP_CLOSE. An app
+        // STATUS landing here means Tcp created this fresh connection for the
+        // command because the original was torn down: report a closed socket
+        // (default/zeroed fields are the honest values) instead of crashing.
+        TcpStatusInfo *closedInfo = new TcpStatusInfo();
+        closedInfo->setState(TCP_S_CLOSED);
+        closedInfo->setStateName(stateName(TCP_S_CLOSED));
+        closedInfo->setLocalAddr(localAddr);
+        closedInfo->setRemoteAddr(remoteAddr);
+        closedInfo->setLocalPort(localPort);
+        closedInfo->setRemotePort(remotePort);
+        closedInfo->setCwnd(UINT_MAX);
+        closedInfo->setSrtt(-1);
+        closedInfo->setRexmitCount(UINT_MAX);
+        closedInfo->setNumRtos(UINT_MAX);
+        closedInfo->setSsthresh(UINT_MAX);
+        closedInfo->setLost(UINT_MAX);
+        closedInfo->setRetrans(UINT_MAX);
+        closedInfo->setBackoff(UINT_MAX);
+        closedInfo->setProbes(UINT_MAX);
+        msg->setControlInfo(closedInfo);
+        msg->setKind(TCP_I_STATUS);
+        check_and_cast<Message *>(msg)->addTag<SocketInd>()->setSocketId(socketId);
+        sendToApp(msg);
+        return;
+    }
 
     TcpStatusInfo *statusInfo = new TcpStatusInfo();
 
