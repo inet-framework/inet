@@ -180,10 +180,69 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         else {
             if (tcpHeader->getSynBit()) {
                 EV_DETAIL << "SYN with unacceptable seqNum in " << stateName(fsm.getState()) << " state received (SYN duplicat?)\n";
+                // Only a PURE SYN retransmit earns the SYN-ACK resend (Linux
+                // tcp_check_req's request-socket path). A SYN+ACK here is the
+                // peer completing a SIMULTANEOUS open -- it takes the normal
+                // dup-segment route below: a D-SACK-bearing plain ACK, never a
+                // SYN-ACK retransmit (simultaneous-fast-open pins
+                // ". 1001:1001(0) ack 1 <sack 0:1>").
+                if (fsm.getState() == TCP_S_SYN_RCVD && !tcpHeader->getAckBit()) {
+                    // A retransmitted SYN while we sit in SYN_RCVD means our
+                    // SYN-ACK was lost: Linux re-sends the SYN-ACK (from the
+                    // ORIGINAL negotiation -- tcp_check_req/TCP_SYN_RECV
+                    // resend path), not a plain ACK. The AccECN
+                    // accecn_then_notecn_syn / notecn_then_accecn_syn pair
+                    // pins both directions: renegotiating from the new SYN's
+                    // (possibly different) ECN codepoint would be wrong, so
+                    // the stored negotiation state is reused as-is.
+                    EV_DETAIL << "Re-sending SYN-ACK for the retransmitted SYN\n";
+                    // count it as a SYN-ACK retransmission: the rexmit-gated
+                    // option rules apply (e.g. Linux omits the AccECN option
+                    // on SYN-ACK retransmits -- the *_drop/_rxmt scripts and
+                    // accecn_then_notecn_syn pin this)
+                    state->syn_rexmit_count++;
+                    sendSynAck();
+                    // AccECN downgrade (accecn_then_notecn_syn): a peer whose
+                    // RETRANSMITTED SYN carries no ACE bits abandoned its ECN
+                    // request (likely blackholed) -- stop setting ECT on our
+                    // packets from here on (Linux ACE_FAIL handling), while
+                    // the ACE-field/option feedback machinery keeps running.
+                    // AFTER sendSynAck(): it re-derives ect from the stored
+                    // negotiation and would undo the downgrade.
+                    if (state->accEcnNegotiated && !tcpHeader->getAeBit()
+                        && !tcpHeader->getEceBit() && !tcpHeader->getCwrBit() && state->ect)
+                    {
+                        EV_DETAIL << "Retransmitted SYN lost its ACE bits: disabling ECT marking\n";
+                        state->ect = false;
+                    }
+                    state->rcv_naseg++;
+                    emit(rcvNASegSignal, state->rcv_naseg);
+                    return TCP_E_IGNORE;
+                }
             }
-            else if (payloadLength > 0 && state->sack_enabled && seqLess((tcpHeader->getSequenceNo() + payloadLength), state->rcv_nxt)) {
+            else if (payloadLength + tcpHeader->getSynFinLen() > 0 && state->sack_enabled
+                     && seqLess(tcpHeader->getSequenceNo(), state->rcv_nxt)) {
+                // Linux tcp_send_dupack: ANY old data (seq before rcv_nxt) earns a
+                // D-SACK, including a duplicate ending exactly at rcv_nxt -- the
+                // range's right edge is capped at rcv_nxt by addSacks. SEG.LEN
+                // counts SYN and FIN (Linux end_seq): a duplicate SYN-ACK's
+                // one-sequence-number SYN gets D-SACKed as [irs, irs+1)
+                // (simultaneous-fast-open's "sack 0:1").
+                //
+                // Linux tcp_rcv_spurious_retrans, AccECN arm: our previous ACK for
+                // this very duplicate carried both the AccECN option and its D-SACK,
+                // yet the same segment arrives yet again -- a middlebox is evidently
+                // dropping our option-bearing ACKs, so stop sending the option for
+                // the rest of the connection (kernel:tcp_accecn_client_accecn_options_drop).
+                if (state->accEcnNegotiated && state->accEcnOptSentWithDsack
+                        && tcpHeader->getSequenceNo() == state->accEcnSentDsackStart
+                        && !state->accEcnOptFailSend)
+                {
+                    EV_DETAIL << "AccECN option + D-SACK ACK was evidently lost twice: disabling AccECN option emission\n";
+                    state->accEcnOptFailSend = true;
+                }
                 state->start_seqno = tcpHeader->getSequenceNo();
-                state->end_seqno = tcpHeader->getSequenceNo() + payloadLength;
+                state->end_seqno = tcpHeader->getSequenceNo() + payloadLength + tcpHeader->getSynFinLen();
                 state->snd_dsack = true;
                 EV_DETAIL << "SND_D-SACK SET (dupseg rcvd)\n";
             }
@@ -337,6 +396,20 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         else
             sendEstabIndicationToApp();
 
+        // Simultaneous open completed by a duplicate SYN-ACK: its SYN occupies
+        // an already-received sequence number, and Linux's tcp_data_queue
+        // D-SACKs that one-sequence-number range with an immediate ACK right
+        // after establishing (simultaneous-fast-open pins
+        // ". 1001:1001(0) ack 1 <sack 0:1>").
+        if (tcpHeader->getSynBit() && state->sack_enabled && state->dsack_enabled
+                && seqLess(tcpHeader->getSequenceNo(), state->rcv_nxt)) {
+            state->start_seqno = tcpHeader->getSequenceNo();
+            state->end_seqno = tcpHeader->getSequenceNo() + 1;
+            state->snd_dsack = true;
+            state->ack_now = true;
+            sendAck();
+        }
+
         // This will trigger transition to ESTABLISHED. Timers and notifying
         // app will be taken care of in stateEntered().
         event = TCP_E_RCV_ACK;
@@ -464,30 +537,57 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     }
 
     //
-    // RFC 793: seventh, process the segment text,
+    // RFC 9293: Seventh, process the segment text
     //
     uint32_t old_rcv_nxt = state->rcv_nxt; // if rcv_nxt changes, we need to send/schedule an ACK
+    // D-SACK bookkeeping (RFC 2883): first already-buffered range duplicated by
+    // this segment, captured just before the insert merges the regions.
+    bool dupRangeFound = false;
+    uint32_t dupStart = 0, dupEnd = 0;
+
+    // RFC 1122 4.2.2.13 (Linux TCPABORTONDATA, tcp_rcv_state_process): the
+    // application has fully CLOSEd -- it will never read again -- so NEW data
+    // arriving in FIN_WAIT_1/2 would be silently discarded while the peer
+    // believes it was delivered. RFC 793 said queue it; RFC 1122 (and BSD,
+    // and Linux) say reset the connection instead. Only after a FULL close
+    // (rcvShutdown): a shutdown(SHUT_WR) half close keeps receiving legal.
+    // The FIN bit itself is not data for this test, and the RST is the
+    // reset-REPLY form (Linux returns 1 from tcp_rcv_state_process and
+    // tcp_v4_send_reset stamps the RST from the offending segment's ack
+    // field, not from snd_nxt -- user_timeout pins 'R <ackNo>').
+    if ((fsm.getState() == TCP_S_FIN_WAIT_1 || fsm.getState() == TCP_S_FIN_WAIT_2)
+        && state->rcvShutdown && payloadLength > 0
+        && seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_nxt))
+    {
+        EV_INFO << "New data after full CLOSE (application gone) -- resetting the connection (RFC 1122 4.2.2.13)\n";
+        sendRst(tcpHeader->getAckNo());
+        return TCP_E_ABORT;
+    }
 
     if (fsm.getState() == TCP_S_SYN_RCVD || fsm.getState() == TCP_S_ESTABLISHED ||
         fsm.getState() == TCP_S_FIN_WAIT_1 || fsm.getState() == TCP_S_FIN_WAIT_2)
     {
         //"
         // Once in the ESTABLISHED state, it is possible to deliver segment
-        // text to user RECEIVE buffers.  Text from segments can be moved
+        // data to user RECEIVE buffers.  Data from segments can be moved
         // into buffers until either the buffer is full or the segment is
-        // empty.  If the segment empties and carries an PUSH flag, then
+        // empty.  If the segment empties and carries a PUSH flag, then
         // the user is informed, when the buffer is returned, that a PUSH
         // has been received.
         //
         // When the TCP takes responsibility for delivering the data to the
-        // user it must also acknowledge the receipt of the data.
+        // user, it must also acknowledge the receipt of the data.
         //
-        // Once the TCP takes responsibility for the data it advances
+        // Once the TCP takes responsibility for the data, it advances
         // RCV.NXT over the data accepted, and adjusts RCV.WND as
         // appropriate to the current buffer availability.  The total of
         // RCV.NXT and RCV.WND should not be reduced.
         //
-        // Please note the window management suggestions in section 3.7.
+        // A TCP implementation MAY send an ACK segment acknowledging
+        // RCV.NXT when a valid segment arrives that is in the window but
+        // not at the left window edge (MAY-13).
+
+        // Please note the window management suggestions in section 3.8.
         //
         // Send an acknowledgment of the form:
         //
@@ -518,17 +618,74 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 // section 2.5).
 
                 uint32_t old_usedRcvBuffer = state->usedRcvBuffer;
+                // D-SACK (RFC 2883): find the first already-buffered range this
+                // segment duplicates BEFORE the insert merges the regions (Linux
+                // reports it via tcp_dsack_set/tcp_dsack_extend as tcp_ofo_queue
+                // drains the out-of-order queue over a gap-filling segment).
+                if (state->sack_enabled && state->dsack_enabled && payloadLength > 0)
+                    dupRangeFound = receiveQueue->findFirstDuplicateRange(tcpHeader->getSequenceNo(),
+                            tcpHeader->getSequenceNo() + payloadLength, dupStart, dupEnd);
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
 
-                if (seqGreater(state->snd_una, old_snd_una)) {
-                    // notify
-                    tcpAlgorithm->receivedDataAck(old_snd_una);
-
-                    // in the receivedDataAck we need the old value
-                    state->dupacks = 0;
-
-                    emit(dupAcksSignal, state->dupacks);
+                // Receive-buffer occupancy at Linux's skb-truesize granularity,
+                // plus the measured payload/truesize scaling ratio
+                // (tcp_measure_rcv_mss: updated when a segment at least as
+                // large as the current rcv_mss estimate arrives with a
+                // DIFFERENT length; the estimate itself follows
+                // min(len, advmss)). Consumed by the windowShrinkAllowed offer
+                // arithmetic and by the tcp_clamp_window growth below.
+                if (payloadLength > 0) {
+                    // Over-accept detection: this segment's end lies BEYOND the
+                    // highest window edge ever promised (rcv_adv, still the
+                    // pre-arrival value here) yet it was accepted -- the
+                    // empty-queue exception. The kernel does not immediate-ACK
+                    // such an arrival (rcv_neg_window); receiveSeqChanged
+                    // consumes the flag and takes the delayed path.
+                    if (seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_adv))
+                        overWindowAcceptPending = true;
+                    uint32_t truesize = linuxSkbTruesize(payloadLength);
+                    rcvSkbChain.push_back(std::make_pair(payloadLength, truesize));
+                    rcvBufOccupancy += truesize;
+                    if (payloadLength >= rcvMssEstimate) {
+                        if (payloadLength != rcvMssEstimate) {
+                            uint64_t ratio = ((uint64_t)payloadLength << 8) / truesize;
+                            rcvScalingRatio = (uint8_t)std::min<uint64_t>(ratio ? ratio : 1, 255);
+                        }
+                        rcvMssEstimate = std::min<uint32_t>((uint32_t)payloadLength,
+                                state->advertisedMss > 0 ? (uint32_t)state->advertisedMss : (uint32_t)payloadLength);
+                    }
+                    // Linux tcp_clamp_window: when the queued skbs' truesize
+                    // outgrows sk_rcvbuf on a socket the application OWNS
+                    // (accepted or actively opened), the buffer itself is
+                    // grown toward tcp_rmem[2] rather than dropping -- an
+                    // EMBRYONIC (not-yet-accepted) connection keeps its
+                    // initial tcp_rmem[1] buffer untouched
+                    // (ooo-before-and-after-accept pins both halves).
+                    if (appOwned && !isToBeAccepted() && state->rcvBufferSize > 0
+                            && rcvBufOccupancy > state->rcvBufferSize)
+                    {
+                        EV_DETAIL << "Receive-buffer pressure (occupancy " << rcvBufOccupancy
+                                  << " > rcvbuf " << state->rcvBufferSize
+                                  << "): growing sk_rcvbuf (tcp_clamp_window)\n";
+                        state->rcvBufferSize = (uint32_t)std::min<uint64_t>(rcvBufOccupancy, UINT32_MAX);
+                        if (state->maxRcvBuffer < state->rcvBufferSize)
+                            state->maxRcvBuffer = state->rcvBufferSize;
+                    }
                 }
+
+                // receiver window auto-tuning (Linux tcp_grow_window, called
+                // for both in-order and out-of-order arrivals): grow the offer
+                // by max(2*advmss, 2*len) toward the clamp -- a single large
+                // segment can open most of the remaining room at once
+                // (incr = max_t(int, incr, 2 * skb->len) in the reference).
+                if (state->rcv_ssthresh > 0 && state->rcv_ssthresh < state->window_clamp && payloadLength > 0) {
+                    uint32_t incr = std::max((uint32_t)(2 * state->snd_mss), (uint32_t)(2 * payloadLength));
+                    uint32_t room = state->window_clamp - state->rcv_ssthresh;
+                    state->rcv_ssthresh += std::min(room, incr);
+                }
+
+                if (seqGreater(state->snd_una, old_snd_una))
+                    tcpAlgorithm->receivedAckForUnackedData(old_snd_una);
 
                 // out-of-order segment?
                 if (old_rcv_nxt == state->rcv_nxt) {
@@ -699,7 +856,19 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // received a FIN that needs to be acked (or both), we need to send or
         // schedule an ACK.
         if (state->sack_enabled) {
-            if (receiveQueue->getQueueLength() != 0) {
+            if (dupRangeFound) {
+                // RFC 2883: a gap-filling (or partially duplicate) segment covered
+                // data that was already buffered -- report the first duplicated
+                // range as a D-SACK block; addSacks() appends the still-missing
+                // out-of-order blocks (if any) after it (Linux tcp_ofo_queue ->
+                // tcp_dsack_extend).
+                state->start_seqno = dupStart;
+                state->end_seqno = dupEnd;
+                state->snd_dsack = true;
+                EV_DETAIL << "SND_D-SACK SET (segment duplicates buffered range [" << dupStart << ".." << dupEnd << "))\n";
+                state->ack_now = true;
+            }
+            else if (receiveQueue->getQueueLength() != 0) {
                 // RFC 2018, page 4:
                 // "If sent at all, SACK options SHOULD be included in all ACKs which do
                 // not ACK the highest sequence number in the data receiver's queue."

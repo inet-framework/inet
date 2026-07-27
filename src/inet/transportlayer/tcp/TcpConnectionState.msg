@@ -175,25 +175,27 @@ struct TcpStateVariables
     bool afterRto = false;                      // set at RTO, reset when snd_nxt == snd_max or snd_una == snd_max
 
     // WINDOW_SCALE related variables
-    bool ws_support = false;                    // set if the host supports Window Scale (header option) (RFC 1323)
+    bool ws_support = false;                    // set if the host supports Window Scale (header option) (RFC 7323)
     bool ws_enabled = false;                    // set if the connection uses Window Scale (header option)
     int  ws_manual_scale = -1;                  // the value of scale parameter if it was set manually (-1 otherwise)
     bool snd_ws = false;                        // set if initial WINDOW_SCALE has been sent
     bool rcv_ws = false;                        // set if initial WINDOW_SCALE has been received
-    unsigned int rcv_wnd_scale = 0;             // RFC 1323, page 31: "Receive window scale power"
-    unsigned int snd_wnd_scale = 0;             // RFC 1323, page 31: "Send window scale power"
+    unsigned int rcv_wnd_scale = 0;             // RFC 7323, page 37: "Receive window scale exponent"
+    unsigned int snd_wnd_scale = 0;             // RFC 7323, page 37: "Send window scale exponent"
 
     // TIMESTAMP related variables
-    bool ts_support = false;        // set if the host supports Timestamps (header option) (RFC 1322)
+    bool ts_support = false;        // set if the host supports Timestamps (header option) (RFC 1122)
     bool ts_enabled = false;        // set if the connection uses Window Scale (header option)
     bool snd_initial_ts = false;    // set if initial TIMESTAMP has been sent
     bool rcv_initial_ts = false;    // set if initial TIMESTAMP has been received
-    uint32_t ts_recent = 0;         // RFC 1323, page 31: "Latest received Timestamp"
-    uint32_t last_ack_sent = 0;     // RFC 1323, page 31: "Last ACK field sent"
+    uint32_t ts_recent = 0;         // RFC 7323, page 37: "Latest received Timestamp"
+    uint32_t last_ack_sent = 0;     // RFC 7323, page 37: "Last ACK field sent"
     simtime_t time_last_data_sent;  // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
+    simtime_t time_last_segment_received = 0; // time at which the last segment was received (idle base for keepalive)
 
     // SACK related variables
-    bool sack_support = false;      // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 3517)
+    bool sack_support = false;      // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 6675)
+    bool dsack_enabled = false;      // set if the host supports dsack in sack option (header option) (RFC 2883)
     bool sack_enabled = false;      // set if the connection uses selective acknowledgment (header option)
     bool snd_sack_perm = false;     // set if SACK_PERMITTED has been sent
     bool rcv_sack_perm = false;     // set if SACK_PERMITTED has been received
@@ -306,21 +308,139 @@ struct TcpStateVariables
     bool sndCwr = false; // set if ECE was handled
     bool gotEce = false; // set if packet with ECE arrived
     bool gotCeIndication = false; // set if CE was set in controlInfo from IP
-    bool ect = false; // set if this connection is ECN Capable (ECT stands for ECN-Capable transport - rfc-3168)
+    bool ect = false; // set if this connection is ECN Capable (ECT stands for ECN-Capable transport, RFC 3168)
+    bool ecnMarkAll = false; // marks all packets, including pure ACKs, retransmissions, etc. with ECN
     bool endPointIsWillingECN = false; // set if the other end-point is willing to use ECN
     bool ecnSynSent = false; // set if ECN-setup SYN packet was sent
-    bool ecnWillingness = false; // set if current host is willing to use ECN
+    bool ecnWillingness = false; // set if current host is willing to use ECN. Kept in sync with ecnMode>=2 ("rfc3168") for backward compatibility -- every classic-ECN call site still keys off this field
     bool sndAck = false; // set if sending Ack packet, used to set relevant info in controlInfo.
-    bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (rfc3168, p. 20)
+    bool rexmit = false; // set if retransmitting data, used to send not-ECT codepoint (RFC 3168, page 20)
     simtime_t eceReactionTime; // records the time of the last ECE reaction
 
-    uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
+    // AccECN (draft-ietf-tcpm-accurate-ecn)
+    int ecnMode = 0; // from the tcpEcnMode parameter (or the deprecated ecnWillingness, mapped): 0=off, 1=passive, 2=rfc3168, 3=accecn, 4=accecn-passive
+    bool accEcnNegotiated = false; // set once 3WHS negotiation determines this connection uses AccECN, not classic ECN or no-ECN
+    bool aeSynSent = false; // set if an AccECN-requesting SYN (the flag-bit combination) was sent
+    uint32_t rcvCePkts = 0; // receiver-side count of CE-marked packets seen (mod-8 ACE counter input)
+    uint32_t rcvCePktsReported = 0; // rcvCePkts value as of the last ACE delta the peer has acknowledged resolving
+    uint32_t deliveredCePkts = 0; // sender-side resolved count of CE-marked packets the peer has reported via ACE/option
+
+    // AccECN TCP option (kind 172/174 E0B/E1B/CEB byte counters)
+    bool accEcnOptionEnabled = false; // cached from the accEcnOptionEnabled param at configureStateVariables() time
+    uint32_t accEcnOptionBeaconAcks = 4; // cached from the accEcnOptionBeaconAcks param: emit the option on every Nth ACK-bearing segment
+    uint32_t accEcnAckCount = 0; // counts ACK-bearing segments sent since AccECN negotiated, for the beacon cadence above
+    bool accEcnOptionNextKindIsAccEcn1 = false; // alternates which of kind 172/174 is emitted each time the option is actually sent
+    bool accEcnOptionKindAlternates = true; // cached from the accEcnOptionKindAlternates param: if false, always emit kind 174 (Linux behavior) instead of alternating
+    uint32_t rcvEct0Bytes = 0; // receiver-side byte count of segments arriving marked ECT(0) since AccECN negotiated (option's E0B field content)
+    uint32_t rcvEct1Bytes = 0; // receiver-side byte count of segments arriving marked ECT(1) since AccECN negotiated (option's E1B field content)
+    uint32_t rcvCeBytes = 0; // receiver-side byte count of segments arriving marked CE since AccECN negotiated (option's CEB field content)
+
+    // AccECN TCP option read side: peer-reported byte counts, decoded from the last
+    // AccECN option this connection has received (offsets already un-applied). These are
+    // PEER-reported feedback on bytes WE sent (opposite direction from rcvEct*Bytes/rcvCeBytes
+    // above, which are what WE observed on bytes the peer sent us).
+    uint32_t peerReportedEct0Bytes = 0;
+    uint32_t peerReportedEct1Bytes = 0;
+    // peerReportedCeBytes is the CEB baseline, advanced only at the point its delta is
+    // actually consumed (processAckInEstabEtc()'s ACE block) -- NOT at decode time
+    // (readHeaderOptions() below), because that block has an early-return path (an ACK
+    // beyond snd_max) that would otherwise silently lose the delta: if the baseline had
+    // already advanced but the block never ran to fold the delta into deliveredCeBytes,
+    // those CE bytes would be gone for good, and the next real option would diff against
+    // an already-advanced baseline as if they'd been accounted for. The write side keeps
+    // the same read-vs-mutate separation (dry-run calls there, an early return here).
+    uint32_t peerReportedCeBytes = 0; // cumulative (peer's clock); 0 is a legitimate starting baseline, not a sentinel -- CEB itself starts at 0
+    bool accEcnOptionCebDeltaValid = false; // true only for the segment just processed by readHeaderOptions(), if it carried a valid AccECN option
+    uint32_t accEcnOptionRawCeBytes = 0; // valid only when accEcnOptionCebDeltaValid: the raw (offset-corrected, but not yet diffed) CEB value decoded from that segment's option
+    uint32_t deliveredCeBytes = 0; // sender-side resolved CE byte count from option evidence only; stays 0 if the peer never sends the option
+    // ECT0/ECT1 delivered-byte accounting, exactly mirroring the CEB machinery above.
+    // peerReportedEct0Bytes/Ect1Bytes are the (offset-corrected) baselines, advanced only
+    // when each delta is consumed in the ACE block. The raw/valid pair is decoded per
+    // segment by readHeaderOptions(). deliveredE0Bytes/E1Bytes are the cumulative totals
+    // reported as tcpi_delivered_e0_bytes / tcpi_delivered_e1_bytes.
+    bool accEcnOptionE0DeltaValid = false;
+    bool accEcnOptionE1DeltaValid = false;
+    uint32_t accEcnOptionRawE0Bytes = 0;
+    uint32_t accEcnOptionRawE1Bytes = 0;
+    uint32_t deliveredE0Bytes = 0;
+    uint32_t deliveredE1Bytes = 0;
+    // Linux tp->saw_accecn_opt: the peer has sent an AccECN TCP option at least once.
+    // Gates OUR option emission on established segments (tcp_established_options
+    // sends the option only to peers that demonstrated they use it; a peer that
+    // never sends one gets pure ACE-field feedback -- accecn tsprogress/tsnoprogress
+    // pin data segments WITHOUT the option after an option-less handshake).
+    // set by a FULL close (TCP_C_CLOSE without halfClose): the application will
+    // never read again, so new data arriving in FIN_WAIT_1/2 resets the
+    // connection (RFC 1122 4.2.2.13 / Linux RCV_SHUTDOWN + TCPABORTONDATA).
+    // A shutdown(SHUT_WR)-style half close leaves it false.
+    bool rcvShutdown = false;
+    // receive-BUFFER capacity (Linux sk_rcvbuf), decoupled from maxRcvBuffer /
+    // the advertised window when the receiveBufferSize parameter is set;
+    // 0 = use maxRcvBuffer (historical INET behavior)
+    uint32_t rcvBufferSize = 0;
+    // receiver window auto-tuning (Linux tcp_grow_window / tp->rcv_ssthresh):
+    // the OFFERED window starts at advertisedWindow and grows with received
+    // data toward window_clamp (derived from rcvBufferSize). 0 = disabled.
+    uint32_t rcv_ssthresh = 0;
+    uint32_t window_clamp = 0;
+    bool sawAccEcnOpt = false;
+    // Linux tp->accecn_minlen: minimum number of AccECN option fields the next
+    // option must carry to cover the counter(s) that changed since the last
+    // one was sent (order-1 field indices: ECT1=1, CE=2, ECT0=3; 0 = nothing
+    // pending). Consumed and reset by the option emission in
+    // writeHeaderOptions; also caps the SACK block count in addSacks so a
+    // REQUIRED option gets its space (tcp_options_fit_accecn's
+    // num_sack_blocks-- arm, down to 2 blocks at most).
+    uint8_t accEcnOptMinFields = 0;
+    // Linux tp->accecn_opt_sent_w_dsack + TCP_ACCECN_OPT_FAIL_SEND
+    // (tcp_rcv_spurious_retrans): when the previous ACK carried both the
+    // AccECN option and a D-SACK, and the peer nevertheless retransmits the
+    // very same duplicate again, our option-bearing ACKs are evidently being
+    // dropped by a middlebox -- stop sending the AccECN option for good
+    // (default sysctl_tcp_ecn_option = FULL, which yields to the fail mode).
+    // Linux tp->snd_sml (Minshall's Nagle variant): right edge of the most
+    // recently sent sub-MSS data segment. Nagle holds a trailing partial only
+    // while such a small segment is still unacknowledged -- full-MSS segments
+    // in flight alone never delay it (tcp_minshall_check).
+    uint32_t snd_sml = 0;
+    bool accEcnOptSentWithDsack = false;
+    uint32_t accEcnSentDsackStart = 0;
+    bool accEcnOptFailSend = false;
+    // Linux FLAG_TS_PROGRESS, per-segment (reset in readHeaderOptions like the
+    // option-delta valid flags): this segment's TS option advanced ts_recent by a
+    // positive delta. An ACK that acks no new data but carries a fresh timestamp
+    // still lets the ACE decode run (__tcp_accecn_process's forward-progress test).
+    bool accEcnTsProgress = false;
+
+    uint32_t dupthresh = 0; // used for TcpTahoe, TcpReno and SACK (RFC 6675)
 
     // Path MTU Discovery (RFC 1191, RFC 1981)
     bool pmtudEnabled = false;              // set if Path MTU Discovery is enabled
     uint32_t pmtudOriginalMss = 0;          // negotiated MSS before any PMTUD reduction
     simtime_t pmtudTimeout;                 // time after which the original MSS is restored to probe for increased path MTU
     simtime_t pmtudLastMssReduction;        // timestamp of last PMTUD-triggered MSS reduction (-1 = never reduced)
+
+    // TCP Fast Open (RFC 7413)
+    bool fastopenClientEnabled = false;      // from the fastopenClientEnabled parameter
+    bool fastopenServerEnabled = false;      // from the fastopenServerEnabled parameter
+    bool fastopenAcceptWithoutCookie = false; // server: accept SYN data carrying no cookie option at all (tcp_fastopen 0x200 / TFO_SERVER_COOKIE_NOT_REQD)
+    bool fastopenLenientCookieValidation = true; // from the fastopenLenientCookieValidation parameter
+    bool fastopenExpOptionEnabled = false;   // from the fastopenExpOptionEnabled parameter
+    int fastopenCookieBytes = 8;             // from the fastopenCookieBytes parameter
+    bool fastopenCookieRequested = false;    // server: peer sent an empty-cookie TFO option this SYN
+    bool fastopenCookieValid = false;        // server: peer's cookie validated (accelerate this SYN)
+    bool fastopenSendCookieOption = false;   // server: echo a (possibly fresh) cookie in the SYN-ACK
+    bool fastopenPeerUsedExpOption = false;  // server: the SYN's cookie/request came in the RFC 7413 Appendix A experimental form (kind 254 + 0xF989); echo in the SAME form, as Linux does
+    FastOpenCookie fastopenCookieToSend;     // server: the cookie bytes to echo, if fastopenSendCookieOption
+    bool fastopenSynDeferred = false;        // client: connect(fastOpen=true) is waiting for the app's first SEND (or the connEstabTimer safety net) before sending the SYN
+    bool fastopenCookieRequestPending = false; // client: no cookie was cached, so the (immediate, dataless) SYN requests one
+    uint32_t fastopenSynDataLen = 0;         // client: bytes of app data attached to the SYN (0 = none); fixed once set, reused verbatim across SYN-REXMIT
+    bool fastopenRequested = false;          // client: this connection's own connect() call opted into Fast Open (per-connection, like Linux's MSG_FASTOPEN/TCP_FASTOPEN_CONNECT) -- gates the cookie append independently of the module-wide fastopenClientEnabled parameter, so a plain connect() to a destination with a cached cookie does NOT send it uninvited
+    uint32_t peerAdvertisedMss = 0;          // the RAW MSS value from the peer's SYN/SYN-ACK option, before any local (user-MSS/TCP_MAXSEG) clamping -- Linux caches THIS in tcp_metrics for the next TFO SYN's payload budget (tcp_rcv_fastopen_synack even reparses the SYN-ACK to bypass the user clamp; syn-data-mss pins the 1300-byte SYN payload from a cached 1340)
+    bool fastopenSynCarriedOption = false;  // client: our SYN carried a TFO option (cookie or empty request) -- Linux tp->syn_fastopen; a SYN-ACK cookie is cached ONLY then (tcp_rcv_fastopen_synack ignores unsolicited cookies, cookie-less-sendto pins the next connect still REQUESTING)
+    bool fastopenSynDataAccepted = false;   // server: a validated-cookie SYN carried data that was accepted and delivered ahead of the 3WHS; client: the SYN's data was acked by the SYN-ACK (both mirror Linux's TCPI_OPT_SYN_DATA tcp_info flag / tp->syn_data_acked)
+    bool fastopenAccelerated = false;        // server: this connection was created from a TFO-accepted SYN (valid cookie or cookie-less mode), REGARDLESS of whether it carried data -- a zero-payload TFO SYN still entitles the app to respond from SYN_RCVD (Linux: the TFO child socket exists either way). Gates the SYN_RCVD send path; fastopenSynDataAccepted above stays data-only (it drives TCPI_OPT_SYN_DATA)
+    uint32_t pktsAckedEwma = 0;              // AccECN: EWMA of packets acked per ACK (<<6 fixed point), for the ACE-wrap-vs-ACK-compression heuristic on large ACKs
 };
 
 cplusplus(TcpStateVariables) {{

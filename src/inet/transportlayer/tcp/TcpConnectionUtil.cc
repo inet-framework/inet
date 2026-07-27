@@ -1827,6 +1827,11 @@ bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpHeader, const
 
 bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option)
 {
+    // Eifel input (RFC 3522 / Linux rx_opt.rcv_tsecr): remember the echo so the
+    // undo logic can compare it against the first retransmission's timestamp.
+    if (tcpHeader->getAckBit() && option.getEchoedTimestamp() != 0)
+        state->lastRcvdTSecr = option.getEchoedTimestamp();
+
     if (option.getLength() != 10) {
         EV_ERROR << "ERROR: length incorrect\n";
         return false;
@@ -2143,7 +2148,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
     {
         // TS header option
         if (state->ts_enabled) { // Is TS enabled?
-            if (!(state->sack_enabled && (state->snd_sack || state->snd_dsack))) { // if SACK is enabled and SACKs need to be added, do not add NOPs to this segment
+            if (tcpMain->alignOptions && !(state->sack_enabled && (state->snd_sack || state->snd_dsack))) { // if SACK is enabled and SACKs need to be added, do not add NOPs to this segment
                 // 2 padding bytes
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
@@ -2181,14 +2186,126 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // containing new data, and each of these "duplicate" ACKs SHOULD bear a
         // SACK option."
         if (state->sack_enabled && (state->snd_sack || state->snd_dsack)) {
-            addSacks(tcpHeader);
+            check_and_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery())->addSacks(tcpHeader);
         }
+        // AccECN TCP option (draft-ietf-tcpm-accurate-ecn): byte-exact
+        // corroboration of the ACE mod-8 counter. Sent on every ACK-bearing
+        // segment once negotiated would be needlessly heavy for a 11-byte option whose
+        // information changes slowly; INET's own simplified beaconing policy instead
+        // sends it on every accEcnOptionBeaconAcks-th ACK-bearing segment, alternating
+        // kind 172/174 each time it's actually sent (neither kind is more "correct" than
+        // the other -- the receiver decodes either the same way once it knows which kind
+        // arrived -- alternating is purely so a single dropped option instance doesn't
+        // silently starve one field ordering's coverage).
+        //
+        // This block must be pure (read state->accEcnAckCount/accEcnOptionNextKindIsAccEcn1,
+        // never mutate them): writeHeaderOptions() also runs as a header-size "dry run"
+        // against a throwaway tmpTcpHeader (sendSegment()/sendData()'s
+        // "bytes + options_len <= snd_mss" budget calc), sometimes more than once for
+        // the very same real segment -- mutating a beacon counter here would make the
+        // cadence depend on how many dry runs happened to precede the real send, not
+        // on how many segments were actually sent. The actual, exactly-once mutation
+        // is sendToIP()'s job, mirroring where the ACE-encode block already
+        // lives for the identical "must fire exactly once, only on the genuine final
+        // send" reason.
+        // Only to a peer that has itself sent an AccECN option (Linux
+        // tp->saw_accecn_opt gates tcp_established_options' option emission):
+        // a peer that never sends one gets pure ACE-field feedback.
+        if (state->accEcnNegotiated && state->accEcnOptionEnabled && state->sawAccEcnOpt
+                && !state->accEcnOptFailSend && tcpHeader->getAckBit()) {
+            // Linux tcp_options_write: a packet leaving WITHOUT the option clears
+            // the sent-with-D-SACK marker; re-set below when the option goes out.
+            state->accEcnOptSentWithDsack = false;
+            uint32_t wouldBeAckCount = state->accEcnAckCount + 1;
+            if (state->accEcnOptionBeaconAcks > 0 && wouldBeAckCount % state->accEcnOptionBeaconAcks == 0) {
+                // Space fitting (Linux tcp_options_fit_accecn): the option's
+                // trailing counter fields are dropped one by one until the
+                // dword-aligned size fits the remaining 40-byte option budget
+                // alongside whatever TS/SACK already claimed
+                // (accecn sack_space_grab_with_ts pins an 8-byte, two-field
+                // option squeezed next to TS + two SACK blocks).
+                // Budget against Linux's CANONICAL padded layout, not INET's
+                // actual (tighter) packing: the kernel emits nop,nop,TS (12B)
+                // and nop,nop,SACK (4+8n B), and its fit decision falls out of
+                // that spacing -- the golden's field counts are only
+                // reproducible against the same arithmetic. INET's real
+                // packing is never larger, so the result always also fits.
+                uint32_t used0 = 0;
+                for (unsigned int i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
+                    const TcpOption *opt = tcpHeader->getHeaderOption(i);
+                    switch (opt->getKind()) {
+                        case TCPOPTION_TIMESTAMP: used0 += 12; break;
+                        case TCPOPTION_SACK: used0 += 4 + (opt->getLength() - 2); break;
+                        case TCPOPTION_NO_OPERATION: break; // counted with its owner
+                        default: used0 += ((uint32_t)opt->getLength() + 3) & ~3u; break;
+                    }
+                }
+                // Linux tp->accecn_minlen: fields whose counters changed since
+                // the last emitted option are REQUIRED -- if not even they fit,
+                // the whole option is omitted (and the demand stays pending),
+                // rather than sending a shorter option that misses the news
+                // (sack_space_grab's final ECT0 reply: 3 SACKs + no option).
+                int requiredFields = state->accEcnOptMinFields > 0 ? state->accEcnOptMinFields : 1;
+                int numFields = 3;
+                uint32_t alignSize = 0;
+                while (numFields >= requiredFields) {
+                    uint32_t optLen = 2 + 3 * numFields;
+                    alignSize = (optLen + 3) & ~3u;
+                    if (used0 + alignSize <= TCP_OPTIONS_MAX_SIZE.get<B>())
+                        break;
+                    numFields--;
+                }
+                if (numFields < requiredFields)
+                    goto accEcnOptionDone; // required fields don't fit: omit the option
+                state->accEcnOptMinFields = 0; // demand satisfied
+                // Pad with NOPs so the options area stays 4-byte aligned once
+                // the (possibly shortened) option is appended.
+                {
+                    uint32_t optLen = 2 + 3 * numFields;
+                    for (uint32_t i = 0; i < alignSize - optLen; i++)
+                        tcpHeader->appendHeaderOption(new TcpOptionNop());
+                }
+                TcpOptionAccEcn *option = new TcpOptionAccEcn();
+                option->setLength(2 + 3 * numFields);
+                // When alternation is disabled (Linux behavior) always emit kind
+                // 174 (ACCECN1); otherwise alternate 172/174 per the beacon toggle.
+                option->setKind((!state->accEcnOptionKindAlternates || state->accEcnOptionNextKindIsAccEcn1)
+                        ? TCPOPTION_ACCECN1 : TCPOPTION_ACCECN0);
+                // Wire init offsets (Verified Facts): E0B/E1B start at 1, CEB at 0.
+                option->setEct0Bytes(state->rcvEct0Bytes + 1);
+                option->setEct1Bytes(state->rcvEct1Bytes + 1);
+                option->setCeBytes(state->rcvCeBytes);
+                tcpHeader->appendHeaderOption(option);
+                EV_INFO << "Tcp Header Option AccECN(kind=" << option->getKind()
+                        << ", E0B=" << option->getEct0Bytes() << ", E1B=" << option->getEct1Bytes()
+                        << ", CEB=" << option->getCeBytes() << ") sent\n";
+                // Linux tcp_options_write: remember that this option went out on an
+                // ACK that also carries a D-SACK (first SACK block below rcv_nxt) --
+                // a further retransmit of that very range then proves our
+                // option-bearing ACKs are being dropped (tcp_rcv_spurious_retrans).
+                for (unsigned int i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
+                    const TcpOptionSack *sackOpt = dynamic_cast<const TcpOptionSack *>(tcpHeader->getHeaderOption(i));
+                    if (sackOpt && sackOpt->getSackItemArraySize() > 0
+                            && seqLess(sackOpt->getSackItem(0).getStart(), state->rcv_nxt))
+                    {
+                        state->accEcnOptSentWithDsack = true;
+                        state->accEcnSentDsackStart = sackOpt->getSackItem(0).getStart();
+                        break;
+                    }
+                }
+            }
+        }
+        accEcnOptionDone:;
 
         // TODO add new TCPOptions here once they are implemented
         // TODO delegate to TcpAlgorithm as well -- it may want to append additional options
     }
 
     if (tcpHeader->getHeaderOptionArraySize() != 0) {
+        // alignment to a 4-byte boundary
+        while (tcpHeader->getHeaderOptionArrayLength().get() % 4 != 0)
+            tcpHeader->appendHeaderOption(new TcpOptionEnd());
+
         B options_len = tcpHeader->getHeaderOptionArrayLength();
 
         if (options_len <= TCP_OPTIONS_MAX_SIZE) { // Options length allowed? - maximum: 40 Bytes
