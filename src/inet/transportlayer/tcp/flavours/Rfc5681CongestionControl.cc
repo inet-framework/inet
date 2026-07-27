@@ -1,0 +1,106 @@
+//
+// Copyright (C) 2020 OpenSim Ltd.
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
+
+#include "inet/transportlayer/tcp/flavours/Rfc5681CongestionControl.h"
+
+namespace inet {
+namespace tcp {
+
+void Rfc5681CongestionControl::receivedAckForUnackedData(uint32_t numBytesAcked)
+{
+    ASSERT(!state->lossRecovery);
+    //"
+    // 3.1. Slow Start and Congestion Avoidance
+    // ...
+    // The slow start algorithm is used when cwnd < ssthresh, while the
+    // congestion avoidance algorithm is used when cwnd > ssthresh.  When
+    // cwnd and ssthresh are equal, the sender may use either slow start or
+    // congestion avoidance.
+    //"
+    if (state->snd_cwnd < state->ssthresh)
+        slowStart(numBytesAcked);
+    else
+        congestionAvoidance(numBytesAcked);
+}
+
+void Rfc5681CongestionControl::slowStart(uint32_t numBytesAcked)
+{
+    //"
+    // During slow start, a TCP increments cwnd by at most SMSS bytes for
+    // each ACK received that cumulatively acknowledges new data.  Slow
+    // start ends when cwnd exceeds ssthresh (or, optionally, when it
+    // reaches it, as noted above) or when congestion is observed.  While
+    // traditionally TCP implementations have increased cwnd by precisely
+    // SMSS bytes upon receipt of an ACK covering new data, we RECOMMEND
+    // that TCP implementations increase cwnd, per:
+    //
+    //   cwnd += min (N, SMSS)                      (2)
+    //
+    // where N is the number of previously unacknowledged bytes acknowledged
+    // in the incoming ACK.  This adjustment is part of Appropriate Byte
+    // Counting [RFC3465] and provides robustness against misbehaving
+    // receivers that may attempt to induce a sender to artificially inflate
+    // cwnd using a mechanism known as "ACK Division" [SCWA99].  ACK
+    // Division consists of a receiver sending multiple ACKs for a single
+    // TCP data segment, each acknowledging only a portion of its data.  A
+    // TCP that increments cwnd by SMSS for each such ACK will
+    // inappropriately inflate the amount of data injected into the network.
+    //"
+    // Cwnd-limited gate (RFC 5681 principle, Linux tcp_is_cwnd_limited): grow only
+    // while the sender actually fills the window (cwnd < 2 * max_packets_out, in
+    // segments). An application-limited flow that never fills cwnd must not be
+    // allowed to inflate it -- otherwise a trickle of ACKs grows cwnd without any
+    // evidence the path can carry it.
+    if (state->snd_effmss > 0 && (state->snd_cwnd / state->snd_effmss) >= 2 * state->maxPacketsOut) {
+        EV_DETAIL << "Not growing cwnd in slow start: not cwnd-limited\n";
+        return;
+    }
+    state->snd_cwnd += std::min(numBytesAcked, state->snd_effmss);
+    conn->emit(cwndSignal, state->snd_cwnd);
+}
+
+void Rfc5681CongestionControl::congestionAvoidance(uint32_t numBytesAcked)
+{
+    //"
+    // The RECOMMENDED way to increase cwnd during congestion avoidance is
+    // to count the number of bytes that have been acknowledged by ACKs for
+    // new data.  (A drawback of this implementation is that it requires
+    // maintaining an additional state variable.)  When the number of bytes
+    // acknowledged reaches cwnd, then cwnd can be incremented by up to SMSS
+    // bytes.  Note that during congestion avoidance, cwnd MUST NOT be
+    // increased by more than SMSS bytes per RTT.  This method both allows
+    // TCPs to increase cwnd by one segment per RTT in the face of delayed
+    // ACKs and provides robustness against ACK Division attacks.
+    //
+    // Another common formula that a TCP MAY use to update cwnd during
+    // congestion avoidance is given in equation (3):
+    //
+    //   cwnd += SMSS*SMSS/cwnd                     (3)
+    //
+    // This adjustment is executed on every incoming ACK that acknowledges
+    // new data.  Equation (3) provides an acceptable approximation to the
+    // underlying principle of increasing cwnd by 1 full-sized segment per
+    // RTT.  (Note that for a connection in which the receiver is
+    // acknowledging every-other packet, (3) is less aggressive than allowed
+    // -- roughly increasing cwnd every second RTT.)
+    //
+    // Implementation Note: Since integer arithmetic is usually used in TCP
+    // implementations, the formula given in equation (3) can fail to
+    // increase cwnd when the congestion window is larger than SMSS*SMSS.
+    // If the above formula yields 0, the result SHOULD be rounded up to 1
+    // byte.
+    //"
+    // cwnd is floored at 2*SMSS everywhere it is reduced, but guard the division
+    // anyway: a zero cwnd here would be a hard crash rather than a misprediction.
+    uint32_t i = state->snd_cwnd > 0 ? state->snd_effmss * state->snd_effmss / state->snd_cwnd : state->snd_effmss;
+    if (i == 0) i = 1;
+    state->snd_cwnd += i;
+    conn->emit(cwndSignal, state->snd_cwnd);
+}
+
+} // namespace tcp
+} // namespace inet
+
