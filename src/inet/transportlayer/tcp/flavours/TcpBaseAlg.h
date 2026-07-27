@@ -115,11 +115,11 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
 
     virtual void receiveSeqChanged() override;
 
-    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
     virtual void receivedDuplicateAck() override;
 
-    virtual void receivedAckForDataNotYetSent(uint32_t seq) override;
+    virtual void receivedAckForUnsentData(uint32_t seq) override;
 
     virtual void ackSent() override;
 
