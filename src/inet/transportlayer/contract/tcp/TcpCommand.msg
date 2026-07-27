@@ -52,6 +52,7 @@ enum TcpStatusInd
     TCP_I_SEND_MSG = 11;         // send queue abated, send more messages
     TCP_I_ICMPv4_ERROR = 12;       // ICMPv4 error received (carries ~Icmpv4ErrorInd tag)
     TCP_I_ICMPv6_ERROR = 13;     // ICMPv6 error received (carries ~Icmpv6ErrorInd tag)
+    TCP_I_ZEROCOPY_COMPLETION = 14; // a zerocopy-marked SEND's data has been transmitted (MSG_ZEROCOPY; carries ~TcpZerocopyCompletionInfo)
 }
 
 //
@@ -78,6 +79,10 @@ enum TcpErrorCode
 class TcpCommand extends cObject
 {
     int userId = -1;   // id than can be freely used by the app
+    bool halfClose = false; // only meaningful on TCP_C_CLOSE: true = shutdown(SHUT_WR) semantics
+                            // (send FIN but the application keeps reading); false = full close()
+                            // (Linux sk_shutdown gets RCV_SHUTDOWN too: new data arriving after a
+                            // full close resets the connection, RFC 1122 4.2.2.13)
 }
 
 //
@@ -122,6 +127,7 @@ class TcpOpenCommand extends TcpCommand
     bool fork = false;     // used only for passive open
     bool autoRead = true;  // true: TCPs sends up arrived data automatically. false: should use read command
     string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
+    bool fastOpen = false; // active open only: attempt TCP Fast Open (RFC 7413) -- attach data to the SYN if a cookie is already cached for remoteAddr, else request one
 }
 
 //
@@ -174,6 +180,97 @@ class TcpSetTosCommand extends TcpSetOptionCommand
 }
 
 //
+// SO_TIMESTAMPING/SCM_TIMESTAMPING: enables/disables attaching a
+// TcpRxTimestampInd tag (see TcpTimestampingTag.msg) to every TCP_I_DATA packet
+// delivered to the app on this connection.
+//
+// @see ~TcpSocket::setTimestamping
+//
+class TcpSetTimestampingCommand extends TcpSetOptionCommand
+{
+    bool enabled = true;
+}
+
+//
+// TCP_NOTSENT_LOWAT as a runtime socket option: sets
+// the connection's not-yet-transmitted-bytes low-water mark at runtime, same
+// semantics as the notsentLowat module parameter (which supplies the initial
+// value at connection setup). -1 disables.
+//
+// @see ~TcpSocket::setNotsentLowat
+//
+class TcpSetNotsentLowatCommand extends TcpSetOptionCommand
+{
+    int value = -1;
+}
+
+//
+// TCP_MAXSEG (setsockopt SOL_TCP): the application clamps the Maximum Segment
+// Size for this connection. Like Linux's rx_opt.user_mss, it caps both the MSS
+// this host advertises in its SYN/SYN-ACK and the effective sending MSS. -1
+// (default) means "not set". May be sent before connect()/listen().
+//
+class TcpSetMaxSegCommand extends TcpSetOptionCommand
+{
+    int value = -1;
+}
+
+//
+// TCP_NODELAY (setsockopt SOL_TCP): enable/disable Nagle's algorithm at runtime.
+// nodelay==true disables Nagle and force-pushes any held partial segment (but does
+// NOT clear TCP_CORK, which outranks TCP_NODELAY in Linux).
+//
+// Marks whether the connection is OWNED by an application socket (Linux
+// sk->sk_socket): a listening-side connection is embryonic until the
+// application accept()s it, and several kernel behaviors are gated on
+// ownership -- e.g. tcp_data_queue_ofo's "do not grow rcvbuf for
+// not-yet-accepted or orphaned sockets". Default is owned (active opens,
+// forked-and-accepted connections); a harness driving accept() timing
+// explicitly clears it at listen and sets it at the script's accept().
+class TcpSetOwnedCommand extends TcpSetOptionCommand
+{
+    bool owned = true;
+}
+
+// The application writer's blocked-on-send-buffer state (Linux SOCK_NOSPACE
+// while a blocking write waits in sk_stream_wait_memory): while set AND the
+// send queue has run dry, the connection accumulates SNDBUF_LIMITED chrono
+// time (tcpi_sndbuf_limited). Driven by the application layer, which is where
+// Linux's signal originates too.
+class TcpSetWriterBlockedCommand extends TcpSetOptionCommand
+{
+    bool blocked = false;
+}
+
+class TcpSetNoDelayCommand extends TcpSetOptionCommand
+{
+    bool nodelay = true;
+}
+
+//
+// TCP_CORK (setsockopt SOL_TCP): hold sub-MSS partial segments (full segments still
+// flow) until the cork is cleared, an incoming ACK opens the window, or the cork
+// (RTO) timer fires. Clearing the cork (cork==false) flushes any held partial.
+//
+class TcpSetCorkCommand extends TcpSetOptionCommand
+{
+    bool cork = true;
+}
+
+//
+// Sent with message kind TCP_I_ZEROCOPY_COMPLETION, in response to a
+// zerocopy-marked SEND (MSG_ZEROCOPY -- see
+// ~TcpSendZerocopyReq/~TcpSocket::sendZerocopy) once that SEND's data has
+// been transmitted.
+//
+// @see ~TcpStatusInd, ~TcpCommandCode, ~ITcp
+//
+class TcpZerocopyCompletionInfo extends TcpCommand
+{
+    unsigned int zerocopyId;
+}
+
+//
 // Sent with message kind TCP_I_AVAILABLE, to let the app know
 // about the local and remote IP address and port.
 //
@@ -206,7 +303,7 @@ class TcpConnectInfo extends TcpCommand
 
 //
 // Sent with message kind TCP_I_STATUS, in response to command TCP_C_STATUS.
-// For explanation of variables, see RFC 793 or TcpStateVariables in
+// For explanation of variables, see RFC 9293 or TcpStateVariables in
 // TcpConnection.h.
 //
 // @see ~TcpStatusInd, ~TcpCommandCode, ~ITcp
@@ -223,6 +320,8 @@ class TcpStatusInfo extends TcpCommand
     bool autoRead;   // true: TCP send up arrived data automatically. false: should use read command.
 
     unsigned int snd_mss;
+    unsigned int sndEffMss;  // effective send MSS after header options (Linux tcp_current_mss: e.g. 1448 with timestamps on a 1460 path) -- tcpi_snd_mss reports THIS
+    unsigned int advmss;   // the MSS this host advertised in its SYN/SYN-ACK (state->advertisedMss); Linux tcp_info tcpi_advmss
 
     unsigned int snd_una;
     unsigned int snd_nxt;
@@ -239,4 +338,78 @@ class TcpStatusInfo extends TcpCommand
     unsigned int irs;
 
     bool fin_ack_rcvd;
+
+    // Additional fields below bridge a Linux struct tcp_info-style status query
+    // (e.g. for packetdrill's %{ }% assertion blocks) -- not part of RFC 793,
+    // sourced from the congestion-control/loss-recovery state variables where
+    // available. Fields with no equivalent for the connection's flavour (e.g.
+    // DumbTcp has no congestion window) are set to UINT_MAX/-1 as a sentinel;
+    // callers must check for that before using the value.
+    unsigned int cwnd;
+    unsigned int ssthresh;
+    unsigned int reordering;
+    double srtt;
+    double minRtt;
+    unsigned int flightSize;
+    unsigned int sackedBytes;
+    unsigned int deliveredBytes;
+    unsigned int rexmitCount;
+    unsigned int numRtos;
+    bool tsEnabled;
+    bool sackEnabled;
+    bool wsEnabled;
+    bool ectEnabled;
+    bool synDataAccepted;   // server accepted TFO SYN data ahead of the 3WHS (-> TCPI_OPT_SYN_DATA)
+    unsigned int sndWndScale;
+    simtime_t lastDataRecvTime;
+
+    // Linux tcp_ca_state ordinal (Open=0/Disorder=1/CWR=2/Recovery=3/Loss=4), derived
+    // from INET's independent loss-recovery bools -- see
+    // TcpConnection::deriveLinuxCaState(). INET never tracks Disorder(1) as a distinct
+    // state; see that function's doc comment.
+    int caState;
+    // Backoff/retransmit counter: same underlying counter as rexmitCount above (INET
+    // does not track Linux's tcpi_backoff and tcpi_retransmits as separate concepts).
+    unsigned int backoff;
+    // SACK/RACK-tracked lost bytes (TcpSackRexmitQueue::getTotalAmountOfLostBytes()),
+    // converted to an approximate segment count via integer division by snd_mss -- a
+    // lossy but honest approximation of Linux's tcpi_lost, which counts segments
+    // directly. UINT_MAX if SACK is not enabled on this connection (no loss tracking).
+    unsigned int lost;
+    // Retransmitted-and-still-outstanding segments (TcpSackRexmitQueue::getRetrans()),
+    // same segment approximation and UINT_MAX sentinel as `lost` (Linux tcpi_retrans /
+    // retrans_out).
+    unsigned int retrans;
+    // Linux SK_MEMINFO_RCVBUF (sk->sk_rcvbuf): the live receive-buffer
+    // capacity -- receiveBufferSize as configured, possibly GROWN by
+    // tcp_clamp_window under out-of-order buffer pressure on an
+    // application-owned socket. 0 when no buffer size is configured.
+    unsigned int skRcvbuf;
+    // Cumulative zero-window (persist) probes sent (TcpBaseAlgStateVariables::
+    // zeroWindowProbesSent). UINT_MAX for flavours without persist-probe tracking.
+    unsigned int probes;
+    // Total bytes received in-sequence so far (rcv_nxt - irs - 1).
+    unsigned int bytesReceived;
+    // AccECN sender-side resolved CE-marked packet/byte counts
+    // (state->deliveredCePkts/deliveredCeBytes); 0 (not a sentinel) when AccECN was
+    // never negotiated on this connection, matching Linux's own tcp_info behavior for
+    // an ECN-less connection.
+    unsigned int deliveredCePkts;
+    unsigned int deliveredCeBytes;
+    // AccECN peer-reported ECT0/ECT1 delivered-byte counts (state->deliveredE0Bytes/E1Bytes),
+    // reported as tcpi_delivered_e0_bytes / tcpi_delivered_e1_bytes.
+    unsigned int deliveredE0Bytes;
+    unsigned int deliveredE1Bytes;
+
+    // Cumulative time (seconds) the connection was busy sending data, and time
+    // specifically blocked by the peer's advertised window rather than the
+    // congestion window -- see TcpConnection::enqueueSendCommandData()/
+    // processAckInEstabEtc()/sendData() (INET-native bookkeeping, not a port of
+    // Linux's tcpi_busy_time/tcpi_rwnd_limited, which are cumulative microseconds
+    // from a kernel-internal chrono state machine this reimplements independently).
+    // sndbuf_limited has no INET analog and is not surfaced (INET's send queue is
+    // never actually blocking -- see notsentLowat/sendQueueLimit above).
+    double busyTime;
+    double rwndLimited;
+    double sndbufLimited; // Linux tcpi_sndbuf_limited (TCP_CHRONO_SNDBUF_LIMITED), seconds -- see sndbufLimitedAccumulated
 }
