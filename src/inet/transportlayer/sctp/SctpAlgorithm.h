@@ -61,7 +61,7 @@ class INET_API SctpAlgorithm : public cObject
 
     virtual void receivedDuplicateAck() = 0;
 
-    virtual void receivedAckForDataNotYetSent(uint32_t seq) = 0;
+    virtual void receivedAckForUnsentData(uint32_t seq) = 0;
 
     virtual void sackSent() = 0;
 

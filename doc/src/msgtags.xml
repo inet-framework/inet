@@ -57,6 +57,8 @@
     <filename>types/msg-inet--aodv--Rreq.html</filename>
   </compound>
   <compound kind="class">
+    <name>TcpAlgorithmBaseStateVariables</name>
+    <filename>inet-tcp-TcpAlgorithmBaseStateVariables.html</filename>
     <name>UnreachableNode</name>
     <filename>types/msg-inet--aodv--UnreachableNode.html</filename>
   </compound>
