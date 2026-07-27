@@ -34,7 +34,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     tcp.th_dport = htons(tcpHeader->getDestPort());
     tcp.th_seq = htonl(tcpHeader->getSequenceNo());
     tcp.th_ack = htonl(tcpHeader->getAckNo());
-    tcp.th_x2 = 0; // unused
+    tcp.th_x2 = tcpHeader->getAeBit() ? 0x1 : 0x0; // AE (AccECN Echo): repurposed NS bit (RFC 3540), the low bit of this reserved nibble
 
     // set flags
     uint8_t flags = 0;
@@ -147,6 +147,34 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
             break;
         }
 
+        case TCPOPTION_TCP_FASTOPEN: {
+            auto *opt = check_and_cast<const TcpOptionTcpFastOpen *>(option);
+            ASSERT(length == 2 + opt->getCookieArraySize());
+            for (unsigned int i = 0; i < opt->getCookieArraySize(); i++)
+                stream.writeByte(opt->getCookie(i));
+            break;
+        }
+
+        case TCPOPTION_ACCECN0: { // draft-ietf-tcpm-accurate-ecn: field order E0B,CEB,E1B
+            auto *opt = check_and_cast<const TcpOptionAccEcn *>(option);
+            // Variable length (2/5/8/11): trailing counter fields may be dropped
+            // to fit the remaining option space; write only those length covers.
+            ASSERT(length == 2 || length == 5 || length == 8 || length == 11);
+            if (length >= 5) stream.writeUint24Be(opt->getEct0Bytes());
+            if (length >= 8) stream.writeUint24Be(opt->getCeBytes());
+            if (length >= 11) stream.writeUint24Be(opt->getEct1Bytes());
+            break;
+        }
+
+        case TCPOPTION_ACCECN1: { // draft-ietf-tcpm-accurate-ecn: field order E1B,CEB,E0B
+            auto *opt = check_and_cast<const TcpOptionAccEcn *>(option);
+            ASSERT(length == 2 || length == 5 || length == 8 || length == 11);
+            if (length >= 5) stream.writeUint24Be(opt->getEct1Bytes());
+            if (length >= 8) stream.writeUint24Be(opt->getCeBytes());
+            if (length >= 11) stream.writeUint24Be(opt->getEct0Bytes());
+            break;
+        }
+
         default: {
             throw cRuntimeError("Unknown TCPOption kind=%d (not in a TCPOptionUnknown option)", kind);
             break;
@@ -180,6 +208,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
     tcpHeader->setUrgBit((flags & TH_URG) == TH_URG);
     tcpHeader->setEceBit((flags & TH_ECE) == TH_ECE);
     tcpHeader->setCwrBit((flags & TH_CWR) == TH_CWR);
+    tcpHeader->setAeBit((tcp.th_x2 & 0x1) == 0x1);
 
     tcpHeader->setWindow(ntohs(tcp.th_win));
 
@@ -266,6 +295,77 @@ TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) con
                 return option;
             }
             break;
+
+        case TCPOPTION_TCP_FASTOPEN:
+            length = stream.readByte();
+            if (length == 2 || (length >= 6 && length <= 18)) {
+                auto *option = new TcpOptionTcpFastOpen();
+                option->setLength(length);
+                option->setCookieArraySize(length - 2);
+                for (unsigned int i = 0; i < (unsigned int)(length - 2); i++)
+                    option->setCookie(i, stream.readByte());
+                return option;
+            }
+            break;
+
+        case TCPOPTION_ACCECN0: // draft-ietf-tcpm-accurate-ecn: field order E0B,CEB,E1B
+            length = stream.readByte();
+            if (length == 2 || length == 5 || length == 8 || length == 11) {
+                auto *option = new TcpOptionAccEcn();
+                option->setKind(TCPOPTION_ACCECN0);
+                option->setLength(length);
+                if (length >= 5) option->setEct0Bytes(stream.readUint24Be());
+                if (length >= 8) option->setCeBytes(stream.readUint24Be());
+                if (length >= 11) option->setEct1Bytes(stream.readUint24Be());
+                return option;
+            }
+            break;
+
+        case TCPOPTION_ACCECN1: // draft-ietf-tcpm-accurate-ecn: field order E1B,CEB,E0B
+            length = stream.readByte();
+            if (length == 2 || length == 5 || length == 8 || length == 11) {
+                auto *option = new TcpOptionAccEcn();
+                option->setKind(TCPOPTION_ACCECN1);
+                option->setLength(length);
+                if (length >= 5) option->setEct1Bytes(stream.readUint24Be());
+                if (length >= 8) option->setCeBytes(stream.readUint24Be());
+                if (length >= 11) option->setEct0Bytes(stream.readUint24Be());
+                return option;
+            }
+            break;
+
+        case TCPOPTION_RFC3692_STYLE_EXPERIMENT_2: {
+            // Kind 254 is the generic RFC 4727 experimental slot; only the
+            // 0xF989 magic sub-type (pre-standardization TCP Fast Open,
+            // RFC 7413 Appendix A) is recognized here. Any other magic (or an
+            // invalid TFO cookie length) falls back to a raw TcpOptionUnknown,
+            // built here rather than via the shared default: path below,
+            // since the 2 magic bytes are already consumed from the stream
+            // by the time that's known.
+            length = stream.readByte();
+            if (length >= 4) {
+                uint16_t expId = stream.readUint16Be();
+                if (expId == 0xF989 && (length == 4 || (length >= 8 && length <= 20))) {
+                    auto *option = new TcpOptionTcpFastOpenExp();
+                    option->setLength(length);
+                    option->setExpId(expId);
+                    option->setCookieArraySize(length - 4);
+                    for (unsigned int i = 0; i < (unsigned int)(length - 4); i++)
+                        option->setCookie(i, stream.readByte());
+                    return option;
+                }
+                auto *option = new TcpOptionUnknown();
+                option->setKind(kind);
+                option->setLength(length);
+                option->setBytesArraySize(length - 2);
+                option->setBytes(0, (expId >> 8) & 0xff);
+                option->setBytes(1, expId & 0xff);
+                for (unsigned int i = 2; i < (unsigned int)(length - 2); i++)
+                    option->setBytes(i, stream.readByte());
+                return option;
+            }
+            break;
+        }
 
         default:
             length = stream.readByte();
