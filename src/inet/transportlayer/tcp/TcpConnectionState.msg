@@ -218,6 +218,11 @@ struct TcpStateVariables
     uint32_t priorCwnd = 0;        // snd_cwnd snapshot at recovery entry (RFC 6937 RecoverFS proxy; also the undo target)
 
     // loss undo (RFC 2883 D-SACK, RFC 3522 Eifel)
+    bool lossUndoEnabled = false;  // set from the lossUndoEnabled parameter
+    uint32_t undoMarker = 0;       // snd_una at recovery entry; 0 = no undo pending
+    int32_t undoRetrans = 0;       // retransmitted segments still to be confirmed spurious (-1 = unknown)
+    uint32_t priorSsthresh = 0;    // ssthresh before the reduction (restored on undo)
+    uint32_t retransStampTS = 0;   // TSval echoed on the first retransmit of the episode (Eifel); 0 = none
     uint32_t lastRcvdTSecr = 0;    // most recent TSecr echoed back by the peer (Eifel input)
 
     // Tail Loss Probe (RFC 8985 section 7.2, Linux tcp_send_loss_probe)
@@ -231,6 +236,8 @@ struct TcpStateVariables
     uint32_t reordering = 3;       // learned reordering degree in segments; initialized to dupthresh
     uint32_t maxReordering = 300;  // upper bound (set from the maxReordering parameter)
 
+    bool dsackSeen = false;        // a D-SACK was seen while processing the current segment (reset per segment)
+    uint32_t dsackBytes = 0;       // bytes covered by the D-SACK seen on the current segment
 
     // RACK-TLP loss detection (RFC 8985)
     int lossDetectionMode = 0;    // 0 = classic DupThresh (RFC 3517), 1 = RACK time-based
@@ -307,6 +314,7 @@ struct TcpStateVariables
     bool accEcnNegotiated = false; // set once 3WHS negotiation determines this connection uses AccECN, not classic ECN or no-ECN
     uint8_t accEcnOptMinFields = 0;
     bool accEcnOptionEnabled = false; // cached from the accEcnOptionEnabled param at configureStateVariables() time
+    bool dsack_enabled = false;      // set if the host supports dsack in sack option (header option) (RFC 2883)
     bool sawAccEcnOpt = false;
     bool fastopenAccelerated = false;        // server: this connection was created from a TFO-accepted SYN (valid cookie or cookie-less mode), REGARDLESS of whether it carried data -- a zero-payload TFO SYN still entitles the app to respond from SYN_RCVD (Linux: the TFO child socket exists either way). Gates the SYN_RCVD send path; fastopenSynDataAccepted above stays data-only (it drives TCPI_OPT_SYN_DATA)
     bool accEcnOptionCebDeltaValid = false; // true only for the segment just processed by readHeaderOptions(), if it carried a valid AccECN option

@@ -229,9 +229,11 @@ simple Tcp extends SimpleModule like ITcp
         int hystartLowWindow = default(16); // smallest cwnd (in segments) at which HyStart starts looking for the exit point
         // parameters of: tcp: size segments against the space options actually leave
         bool adaptiveReorderingEnabled = default(true); // Grow the reordering degree (dynamic DupThresh) when SACK reveals reordering, so persistent reordering stops causing spurious fast retransmits. Requires sackSupport.
+        bool dsackEnabled = default(this.sackSupport); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
         volatile int initialSendSequenceNumber = default(-1); // -1 means the value is calculated from the current simulation time
         string initialWindow @enum("rfc2001","rfc3390","rfc6928") = default("rfc6928"); // initial congestion window: rfc2001=1 SMSS, rfc3390=min(4*MSS,max(2*MSS,4380)), rfc6928=IW10=min(10*MSS,max(2*MSS,14600))
         string lossDetectionMode @enum("dupthresh","rack") = default("rack"); // SACK loss detection: classic DupThresh (RFC 6675) or RACK time-based (RFC 8985). RACK requires sackSupport.
+        bool lossUndoEnabled = default(true); // Undo a spurious cwnd/ssthresh reduction when D-SACK (RFC 2883) or timestamps (RFC 3522 Eifel) reveal the retransmission was unnecessary.
         int maxReordering = default(300); // Upper bound on the learned reordering degree in segments (Linux tcp_max_reordering).
         bool prrEnabled = default(true); // Proportional Rate Reduction (RFC 6937) during fast recovery instead of classic cwnd inflation/halving. Requires sackSupport.
         bool seedRttFromHandshake = default(true); // Seed the RTT estimator (srtt/rttvar/RTO) from the SYN<->SYN-ACK exchange, as Linux does. The first-flight RTO and TLP probe timeout become RTT-scaled instead of initialRto.

@@ -68,6 +68,18 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
     virtual void prrEndCwndReduction();
     //@}
 
+    /** @name Loss undo (RFC 2883 D-SACK, RFC 3522 Eifel), Linux tcp_undo_cwnd_reduction() */
+    //@{
+    /** Capture the undo context (marker, priorCwnd/priorSsthresh) at recovery entry. */
+    virtual void undoInit();
+    /** True if the cwnd reduction of the current episode may be undone. */
+    /** Eifel (RFC 3522): the last ACK's TSecr predates our first retransmission. */
+    virtual bool packetDelayed() const;
+    virtual bool mayUndo() const;
+    /** Restore cwnd/ssthresh reduced by a now-known-spurious recovery. */
+    virtual void undoCwndReduction();
+    //@}
+
     /**
      * Linux tcp_check_sack_reordering(): reordering is proven when data at lowSeq
      * was delivered while a higher sequence number (the SACK fack) had already been
