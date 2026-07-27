@@ -7,6 +7,8 @@
 
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
+
 namespace inet {
 
 namespace tcp {
@@ -61,7 +63,9 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
         auto i = rexmitQueue.begin();
 
         while ((i != rexmitQueue.end()) && seqLE(i->endSeqNum, seqNum)) // discard/delete regions from rexmit queue, which have been acked
+        {
             i = rexmitQueue.erase(i);
+        }
 
         // prune recorded transmission boundaries the same way
         for (auto s = xmitSegmentStarts.begin(); s != xmitSegmentStarts.end(); )
@@ -70,6 +74,22 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
         if (i != rexmitQueue.end()) {
             ASSERT(seqLE(i->beginSeqNum, seqNum) && seqLess(seqNum, i->endSeqNum));
             i->beginSeqNum = seqNum;
+        }
+    }
+
+    // conn is null only when the queue is exercised standalone (unit tests); the
+    // Reno-dupack inferred-SACK emulation below is a connection-level concern.
+    if (conn != nullptr && !conn->getState()->sack_enabled && !rexmitQueue.empty())
+    {
+        auto& head = rexmitQueue.front();
+        if (head.sacked)
+        {
+            // It is not possible to have the UNA sacked; otherwise, it would
+            // have been ACKed. This is, most likely, our wrong guessing
+            // when adding Reno dupacks in the count.
+            head.lost = true;
+            head.sacked = false;
+            addInferredSack();
         }
     }
 
@@ -197,6 +217,18 @@ bool TcpSackRexmitQueue::checkQueue() const
     return f;
 }
 
+void TcpSackRexmitQueue::addInferredSack()
+{
+    // skip the head which is assumed to be lost
+    auto i = ++rexmitQueue.begin();
+    while (i != rexmitQueue.end() && i->sacked)
+        i++;
+    if (i != rexmitQueue.end()) {
+        i->lost = false;
+        i->sacked = true;
+    }
+}
+
 uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
 {
     // lowest sequence number this call NEWLY marked sacked, skipping regions that
@@ -236,7 +268,7 @@ uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum
                 if (!i->sacked && !i->rexmitted && newlySackedLow == 0)
                     newlySackedLow = i->beginSeqNum;
                 i->lost = false;
-                i->sacked = true; // set sacked bit
+                i->sacked = true;
             }
 
             i++;

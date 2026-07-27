@@ -12,8 +12,8 @@
 #include <algorithm> // min,max
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/IcmpType_m.h"
@@ -242,6 +242,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     // put it into LISTEN, with our localAddr/localPort
     state->active = false;
     state->fork = true;
+    state->forked = true; // durable: this conn must CLOSE on RST/hard-ICMP in SYN_RCVD, never re-listen (see the field's comment)
     localAddr = listenerConn->localAddr;
     localPort = listenerConn->localPort;
     autoRead = listenerConn->autoRead;
@@ -284,7 +285,7 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
 
     // record seq (only if we do send data) and ackno
     if (tcpSegment->getByteLength() > tcpHeader->getChunkLength().get<B>())
-        emit(sndNxtSignal, tcpHeader->getSequenceNo());
+        emit(sndSeqSignal, tcpHeader->getSequenceNo());
 
     emit(sndAckSignal, tcpHeader->getAckNo());
 
@@ -669,9 +670,15 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
 
 bool TcpConnection::isHardIcmpv4Error(int type, int code)
 {
-    // ICMPv4 Destination Unreachable with protocol/port unreachable or admin prohibited
+    // Only consulted during connection setup (SYN_SENT/SYN_RCVD), where Linux
+    // tcp_v4_err() aborts on ANY Destination Unreachable code (for the SYN
+    // states the icmp_err_convert fatal flag is bypassed) -- so net/host
+    // unreachable are hard here too, EXCEPT frag-needed (code 4), which
+    // triggers the immediate reduced-MSS SYN retransmit instead.
     return type == ICMP_DESTINATION_UNREACHABLE
-           && (code == ICMP_DU_PROTOCOL_UNREACHABLE
+           && (code == ICMP_DU_NETWORK_UNREACHABLE
+               || code == ICMP_DU_HOST_UNREACHABLE
+               || code == ICMP_DU_PROTOCOL_UNREACHABLE
                || code == ICMP_DU_PORT_UNREACHABLE
                || code == ICMP_DU_COMMUNICATION_PROHIBITED);
 }
@@ -1054,7 +1061,7 @@ void TcpConnection::selectInitialSeqNum()
 bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader) const
 {
     // check that segment entirely falls in receive window
-    // RFC 793, page 69:
+    // RFC 9293, 3.10.7.4. Other States:
     // "There are four cases for the acceptability test for an incoming segment:
     //    Segment Receive  Test
     //    Length  Window
@@ -1080,12 +1087,42 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
     else { // len > 0
         if (state->rcv_wnd == 0)
             ret = false;
-        else // rcv_wnd > 0
+        else { // rcv_wnd > 0
+            // RFC 9293 SEG.LEN "counts SYN and FIN" (Linux end_seq): a segment that
+            // re-delivers already-received data but carries a FIN at RCV.NXT (a peer
+            // retransmitting its last data together with the FIN -- tcp_close_no_rst)
+            // has all its *data* below the window, yet its FIN sits at the window's
+            // left edge and the segment must be accepted so the FIN is processed.
+            // Include the SYN/FIN slot in the end-sequence test only (the branch
+            // selection above stays data-length based, so a pure FIN at a zero window
+            // still takes the len==0 path).
+            uint32_t endSeq = seqNo + len + tcpHeader->getSynFinLen();
             ret = (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, rcvWndEnd))
-                || (seqLess(state->rcv_nxt, seqNo + len) && seqLE(seqNo + len, rcvWndEnd)); // Accept an ACK on end of window
+                || (seqLess(state->rcv_nxt, endSeq) && seqLE(endSeq, rcvWndEnd)); // Accept an ACK on end of window
+            // Linux BEYOND-WINDOW rule (SKB_DROP_REASON_TCP_INVALID_END_SEQUENCE
+            // / LINUX_MIB_TCPBEYONDWINDOW): a data segment whose end reaches
+            // beyond the HIGHEST window edge ever promised (rcv_adv, monotone)
+            // is discarded whole -- classic trim-to-window would let a sender
+            // blast arbitrarily far past what was offered. Exception, same as
+            // the buffer-side over-accept: an in-order segment arriving to an
+            // EMPTY receive queue is taken (rcv_big_endseq pins the drop
+            // three times, then the accept-once-read case; rcv_zero_wnd_fin
+            // and rcv_neg_window pin the empty-queue acceptance).
+            // tcp_sequence() in the reference kernel: with end_seq past the
+            // promise, a segment whose START is also past it is always
+            // dropped; otherwise it is accepted ONLY when sk_receive_queue --
+            // the IN-ORDER unread queue, getAcknowledgedDataLength() here --
+            // is empty (out-of-order buffer content is irrelevant, and the
+            // arriving segment itself may be out of order).
+            if (ret && seqGreater(seqNo + len, state->rcv_adv)) {
+                if (seqGreater(seqNo, state->rcv_adv)
+                    || receiveQueue->getAcknowledgedDataLength() != 0)
+                    ret = false;
+            }
+        }
     }
 
-    // RFC 793, page 25:
+    // RFC 9293, 3.4. Sequence Numbers:
     // "A new acknowledgment (called an "acceptable ack"), is one for which
     // the inequality below holds:
     //    SND.UNA < SEG.ACK =< SND.NXT"
@@ -1202,10 +1239,36 @@ void TcpConnection::sendSyn()
 
     // write header options
     writeHeaderOptions(tcpHeader);
-    Packet *fp = new Packet("SYN");
+    // A retransmitted SYN goes out BARE: Linux drops both the Fast Open
+    // option and the SYN data on rexmit (tcp_retransmit_skb; RFC 7413
+    // section 4.1.3) -- the data stays registered (snd_max above is
+    // unchanged), so once the handshake completes with the data unacked it is
+    // retransmitted through the normal established path.
+    bool attachSynData = synDataLen > 0 && state->syn_rexmit_count == 0;
+    Packet *fp = attachSynData ? sendQueue->createSegmentWithBytes(state->iss + 1, synDataLen) : new Packet("SYN");
+
+    state->handshakeSentTime = simTime(); // for the handshake RTT seed on ESTABLISHED
 
     // send it
     sendToIP(fp, tcpHeader);
+
+    // TCP Fast Open SYN-data (MSG_ZEROCOPY): the payload rode out on the SYN via
+    // createSegmentWithBytes() above, NOT through sendSegment(), so its zerocopy
+    // completion would otherwise never fire. snd_nxt has already advanced past the
+    // SYN data (iss+1+synDataLen), so drain any pending completion now -- same rule
+    // as sendSegment()'s drain (see there).
+    while (synDataLen > 0 && !zerocopySeqNums.empty()
+            && !seqGreater(zerocopySeqNums.begin()->first, state->snd_nxt)) {
+        uint32_t zerocopyId = zerocopySeqNums.begin()->second;
+        zerocopySeqNums.erase(zerocopySeqNums.begin());
+        EV_INFO << "Notifying app: ZEROCOPY_COMPLETION id=" << zerocopyId << " (SYN-data)\n";
+        auto *completionIndication = new Indication("ZerocopyCompletion", TCP_I_ZEROCOPY_COMPLETION);
+        auto *completionInfo = new TcpZerocopyCompletionInfo();
+        completionInfo->setZerocopyId(zerocopyId);
+        completionIndication->addTag<SocketInd>()->setSocketId(socketId);
+        completionIndication->setControlInfo(completionInfo);
+        sendToApp(completionIndication);
+    }
 }
 
 void TcpConnection::sendSynAck()
@@ -1309,11 +1372,14 @@ void TcpConnection::sendSynAck()
 
     Packet *fp = new Packet("SYN+ACK");
 
+    state->handshakeSentTime = simTime(); // for the handshake RTT seed on ESTABLISHED
+
     // send it
     sendToIP(fp, tcpHeader);
 
     // notify
     tcpAlgorithm->ackSent();
+    state->full_sized_segment_counter = 0;
 }
 
 void TcpConnection::sendRst(uint32_t seqNo)
@@ -1353,6 +1419,21 @@ void TcpConnection::sendRstAck(uint32_t seq, uint32_t ack, L3Address src, L3Addr
     tcpHeader->setChecksumMode(tcpMain->checksumMode);
     tcpHeader->setChecksum(0);
 
+    // A reset on a timestamp-negotiated connection carries the TS option like
+    // any other segment (Linux active resets go through the regular option
+    // builder; ts_recent/reset_tsval pins 'R. <...> TS val <now> ecr <recent>').
+    // state is null for a stateless reset reply -- no negotiated options there.
+    if (state != nullptr && state->ts_enabled) {
+        tcpHeader->appendHeaderOption(new TcpOptionNop());
+        tcpHeader->appendHeaderOption(new TcpOptionNop());
+        TcpOptionTimestamp *option = new TcpOptionTimestamp();
+        option->setSenderTimestamp(convertSimtimeToTS(simTime()));
+        option->setEchoedTimestamp(state->ts_recent);
+        tcpHeader->appendHeaderOption(option);
+        tcpHeader->setHeaderLength(TCP_MIN_HEADER_LENGTH + tcpHeader->getHeaderOptionArrayLength());
+        tcpHeader->setChunkLength(tcpHeader->getHeaderLength());
+    }
+
     Packet *fp = new Packet("RST+ACK");
 
     // send it
@@ -1372,8 +1453,8 @@ void TcpConnection::sendAck()
     tcpHeader->setAckNo(state->rcv_nxt);
     tcpHeader->setWindow(updateRcvWnd());
 
-    // rfc-3168, pages 19-20:
-    // When TCP receives a CE data packet at the destination end-system, the
+    // RFC 3168, pages 19-20
+    // "When TCP receives a CE data packet at the destination end-system, the
     // TCP data receiver sets the ECN-Echo flag in the TCP header of the
     // subsequent ACK packet.
     // ...
@@ -1398,7 +1479,9 @@ void TcpConnection::sendAck()
     writeHeaderOptions(tcpHeader);
     Packet *fp = new Packet("TcpAck");
 
-    // rfc-3168 page 20: pure ack packets must be sent with not-ECT codepoint
+    // RFC 3168, page 20
+    // "pure acknowledgement packets (e.g., packets that do not contain any
+    // accompanying data) MUST be sent with the not-ECT codepoint."
     state->sndAck = true;
 
     // send it
@@ -1422,6 +1505,12 @@ void TcpConnection::sendFin()
     tcpHeader->setSequenceNo(state->snd_nxt);
     tcpHeader->setWindow(updateRcvWnd());
     Packet *fp = new Packet("FIN");
+
+    // RFC 7323: once Timestamps are negotiated, EVERY segment carries the TS
+    // option, a bare FIN included (sendAck()/sendSegment() already do this;
+    // without it the peer's PAWS/RTT bookkeeping never sees the FIN and a
+    // Linux peer's last ACK's TSecr goes backwards).
+    writeHeaderOptions(tcpHeader);
 
     // send it
     sendToIP(fp, tcpHeader);
@@ -1628,8 +1717,7 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     }
 
     // if sack_enabled copy region of tcpHeader to rexmitQueue
-    if (state->sack_enabled)
-        rexmitQueue->enqueueSentData(old_snd_nxt, state->snd_nxt);
+    rexmitQueue->enqueueSentData(old_snd_nxt, state->snd_nxt);
 
     // add header options and update header length (from tcpseg_temp)
     for (uint i = 0; i < tmpTcpHeader->getHeaderOptionArraySize(); i++)
@@ -1964,7 +2052,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     tcpAlgorithm->ackSent();
 
     if (state->sack_enabled && state->lossRecovery && old_highRxt != state->highRxt) {
-        // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
+        // Note: Restart of REXMIT timer on retransmission is not part of RFC 5681, however optional in RFC 6675 if sent during recovery.
         EV_DETAIL << "Retransmission sent during recovery, restarting REXMIT timer.\n";
         tcpAlgorithm->restartRexmitTimer();
     }
@@ -2086,14 +2174,16 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
         sendFin();
         tcpAlgorithm->segmentRetransmitted(state->snd_nxt, state->snd_nxt + 1);
         state->snd_max = ++state->snd_nxt;
+        emit(sndMaxSignal, state->snd_max);
 
         emit(unackedSignal, state->snd_max - state->snd_una);
     }
     else {
         ASSERT(bytes != 0);
 
+        uint32_t rexmitStart = state->snd_nxt; // == snd_una except for the SYN_RCVD clamp above
         sendSegment(bytes);
-        tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
+        tcpAlgorithm->segmentRetransmitted(rexmitStart, state->snd_nxt);
 
         if (!called_at_rto) {
             if (seqGreater(old_snd_nxt, state->snd_nxt))
@@ -2104,10 +2194,11 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
         tcpAlgorithm->ackSent();
 
         if (state->sack_enabled) {
-            // RFC 3517, page 7: "(3) Retransmit the first data segment presumed dropped -- the segment
+            // RFC 6675, page 8: "(4.3) Retransmit the first data segment presumed dropped -- the segment
             // starting with sequence number HighACK + 1.  To prevent repeated
-            // retransmission of the same data, set HighRxt to the highest
-            // sequence number in the retransmitted segment."
+            // retransmission of the same data or a premature rescue retransmission,
+            // set both HighRxt and RescueRxt to the highest sequence number in
+            // the retransmitted segment."
             state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
         }
     }
@@ -2210,6 +2301,7 @@ void TcpConnection::retransmitData()
         state->snd_nxt = state->snd_max;
         sendFin();
         state->snd_max = ++state->snd_nxt;
+        emit(sndMaxSignal, state->snd_max);
 
         emit(unackedSignal, state->snd_max - state->snd_una);
         return;
@@ -2436,7 +2528,7 @@ bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpHeader, const
     state->snd_wnd_scale = option.getWindowScale();
     EV_INFO << "Tcp Header Option WS(=" << state->snd_wnd_scale << ") received, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
 
-    if (state->snd_wnd_scale > 14) { // RFC 1323, page 11: "the shift count must be limited to 14"
+    if (state->snd_wnd_scale > 14) { // RFC 7323, page 10: "the shift count must be limited to 14"
         EV_ERROR << "ERROR: Tcp Header Option WS received but shift count value is exceeding 14\n";
         state->snd_wnd_scale = 14;
     }
@@ -2472,16 +2564,32 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
     else
         EV_INFO << "Tcp Header Option TS(TSval=" << option.getSenderTimestamp() << ", TSecr=" << option.getEchoedTimestamp() << ") received\n";
 
-    // RFC 1323, page 35:
-    // "Check whether the segment contains a Timestamps option and bit
-    // Snd.TS.OK is on.  If so:
-    //   If SEG.TSval < TS.Recent, then test whether connection has
-    //   been idle less than 24 days; if both are true, then the
-    //   segment is not acceptable; follow steps below for an
-    //   unacceptable segment.
-    //   If SEG.SEQ is equal to Last.ACK.sent, then save SEG.[TSval] in
-    //   variable TS.Recent."
-    if (state->ts_enabled) {
+    // RFC 7323, page 42:
+    // "Check whether the segment contains a Timestamps option and
+    //  if bit Snd.TS.OK is on.  If so:
+    //
+    //     If SEG.TSval < TS.Recent and the RST bit is off:
+    //
+    //        If the connection has been idle more than 24 days,
+    //        save SEG.TSval in variable TS.Recent, else the segment
+    //        is not acceptable; follow the steps below for an
+    //        unacceptable segment.
+    //
+    //     If SEG.TSval >= TS.Recent and SEG.SEQ <= Last.ACK.sent,
+    //     then save SEG.TSval in variable TS.Recent."
+    if (tcpHeader->getSynBit() && state->ts_support) {
+        // Handshake segment (SYN or SYN-ACK): its TSval initializes TS.Recent
+        // unconditionally (RFC 7323 section 4.3's last-ACK-sent bookkeeping
+        // cannot accept it -- no ACK has ever been sent yet; and on the
+        // passive side ts_enabled itself only becomes true once the SYN-ACK
+        // goes out). This is what makes the passive side echo the SYN's TSval
+        // in its SYN-ACK, and the active side echo the SYN-ACK's TSval in the
+        // handshake-completing ACK, as Linux does (tcp_store_ts_recent in
+        // both handshake paths).
+        state->ts_recent = option.getSenderTimestamp();
+        EV_DETAIL << "Initializing ts_recent from handshake segment: ts_recent=" << state->ts_recent << "\n";
+    }
+    else if (state->ts_enabled) {
         if (seqLess(option.getSenderTimestamp(), state->ts_recent)) {
             if ((simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) { // PAWS_IDLE_TIME_THRESH = 24 days
                 EV_DETAIL << "PAWS: Segment is not acceptable, TSval=" << option.getSenderTimestamp() << " in " << stateName(fsm.getState()) << " state received: dropping segment\n";
@@ -2883,16 +2991,17 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             TcpOptionTimestamp *option = new TcpOptionTimestamp();
 
             // Update TS variables
-            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
+            // RFC 7323, page 12: "The TSval field contains the current value of the timestamp clock of the Tcp sending the option."
             option->setSenderTimestamp(convertSimtimeToTS(simTime()));
 
-            // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
-            // RFC 1323, page 13:
-            // "The Timestamp Echo Reply field (TSecr) is only valid if the ACK
-            // bit is set in the Tcp header; if it is valid, it echos a times-
-            // tamp value that was sent by the remote Tcp in the TSval field
-            // of a Timestamps option.  When TSecr is not valid, its value
-            // must be zero."
+            // RFC 7323, page 17: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
+            // RFC 7323, page 12:
+            // "The TSecr field is valid if the ACK bit is set in the TCP header.  If
+            // the ACK bit is not set in the outgoing TCP header, the sender of that
+            // segment SHOULD set the TSecr field to zero.  When the ACK bit is set
+            // in an outgoing segment, the sender MUST echo a recently received
+            // TSval sent by the remote TCP in the TSval field of a Timestamps
+            // option."
             option->setEchoedTimestamp(tcpHeader->getAckBit() ? state->ts_recent : 0);
 
             EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent\n";
@@ -3156,7 +3265,7 @@ uint16_t TcpConnection::updateRcvWnd()
     // Observe upper limit for advertised window on this connection
     const uint32_t maxWin = (state->ws_enabled && state->rcv_wnd_scale) ? (TCP_MAX_WIN << state->rcv_wnd_scale) : TCP_MAX_WIN; // TCP_MAX_WIN = 65535 (16 bit)
     if (win > maxWin)
-        win = maxWin; // Note: The window size is limited to a 16 bit value in the TCP header if WINDOW SCALE option (RFC 1323) is not used
+        win = maxWin; // Note: The window size is limited to a 16 bit value in the TCP header if WINDOW SCALE option (RFC 7323) is not used
 
     // Note: The order of the "Do not shrink window" and "Observe upper limit" parts has been changed to the order used in FreeBSD Release 7.1
 
@@ -3174,7 +3283,7 @@ uint16_t TcpConnection::updateRcvWnd()
     // scale rcv_wnd:
     uint32_t scaled_rcv_wnd = state->rcv_wnd;
     if (state->ws_enabled && state->rcv_wnd_scale) {
-        ASSERT(state->rcv_wnd_scale <= 14); // RFC 1323, page 11: "the shift count must be limited to 14"
+        ASSERT(state->rcv_wnd_scale <= 14); // RFC 7323, page 10: "the shift count must be limited to 14"
         scaled_rcv_wnd = scaled_rcv_wnd >> state->rcv_wnd_scale;
     }
 
@@ -3239,7 +3348,7 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32_t congestion
     // segments are transmitted.  Assuming that these new segments and the
     // corresponding ACKs are not dropped, this procedure allows the sender
     // to infer loss using the standard Fast Retransmit threshold of three
-    // duplicate ACKs [RFC2581].  This is more robust to reordered packets
+    // duplicate ACKs [RFC 2581].  This is more robust to reordered packets
     // than if an old packet were retransmitted on the first or second
     // duplicate ACK.
     //
@@ -3260,6 +3369,7 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32_t congestion
             if (outstandingData + state->snd_mss <= state->snd_wnd &&
                 outstandingData + state->snd_mss <= congestionWindow + 2 * state->snd_mss)
             {
+                // TODO review effectiveWin calculation based on how allowedToSend is calculated in sendData
                 // RFC 3042, page 3: "(...)the sender can only send two segments beyond the congestion window (cwnd)."
                 uint32_t effectiveWin = std::min(state->snd_wnd, congestionWindow) - outstandingData + 2 * state->snd_mss;
 
@@ -3274,8 +3384,10 @@ void TcpConnection::sendOneNewSegment(bool fullSegmentsOnly, uint32_t congestion
                     EV_DETAIL << "Limited Transmit algorithm enabled. Sending one new segment.\n";
                     uint32_t sentBytes = sendSegment(bytes);
 
-                    if (seqGreater(state->snd_nxt, state->snd_max))
+                    if (seqGreater(state->snd_nxt, state->snd_max)) {
                         state->snd_max = state->snd_nxt;
+                        emit(sndMaxSignal, state->snd_max);
+                    }
 
                     emit(unackedSignal, state->snd_max - state->snd_una);
 

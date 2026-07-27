@@ -151,8 +151,9 @@ void TcpConnection::process_ACCEPT(TcpEventCode& event, TcpCommand *tcpCommand, 
 
 void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
-    // FIXME how to support PUSH? One option is to treat each SEND as a unit of data,
-    // and set PSH at SEND boundaries
+    // PSH-at-record-boundary is opt-in per SEND via the packet's TcpSendEorReq tag
+    // (MSG_EOR) rather than automatic on every SEND -- see
+    // enqueueSendCommandData() and sendSegment()'s PSH-bit logic.
     Packet *packet = check_and_cast<Packet *>(msg);
     switch (fsm.getState()) {
         case TCP_S_INIT:
@@ -377,6 +378,12 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
 
 void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
+    // full close vs shutdown(SHUT_WR): a full close also shuts the receive side
+    // down (see rcvShutdown's comment); a half close keeps reading possible.
+    // state is still null for a CLOSE that reaches a freshly created (INIT)
+    // connection -- e.g. an app closing an fd whose connect attempt failed.
+    if (state != nullptr && (tcpCommand == nullptr || !tcpCommand->getHalfClose()))
+        state->rcvShutdown = true;
     delete tcpCommand;
     delete msg;
 
@@ -437,7 +444,7 @@ void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, c
         case TCP_S_CLOSING:
         case TCP_S_LAST_ACK:
         case TCP_S_TIME_WAIT:
-            // RFC 793 is not entirely clear on how to handle a duplicate close request.
+            // RFC 9293 is not entirely clear on how to handle a duplicate close request.
             // Here we treat it as an error.
             throw cRuntimeError(tcpMain, "Duplicate CLOSE command: connection already closing");
     }
@@ -463,11 +470,10 @@ void TcpConnection::process_ABORT(TcpEventCode& event, TcpCommand *tcpCommand, c
         case TCP_S_FIN_WAIT_2:
         case TCP_S_CLOSE_WAIT:
             //"
-            // Send a reset segment:
-            //
-            //   <SEQ=SND.NXT><CTL=RST>
-            //"
-            sendRst(state->snd_nxt);
+            // Send a reset segment. RFC 793 shows a bare <SEQ=SND.NXT><CTL=RST>,
+            // but Linux's active reset (tcp_send_active_reset, also the
+            // tcp_disconnect/AF_UNSPEC path) always sends RST|ACK with ack=rcv_nxt.
+            sendRstAck(state->snd_nxt, state->rcv_nxt, localAddr, remoteAddr, localPort, remotePort);
             break;
     }
 }
