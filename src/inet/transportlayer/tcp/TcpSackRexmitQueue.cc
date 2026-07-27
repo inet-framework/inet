@@ -174,8 +174,26 @@ bool TcpSackRexmitQueue::checkQueue() const
     return f;
 }
 
-void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
+void TcpSackRexmitQueue::addInferredSack()
 {
+    // skip the head which is assumed to be lost
+    auto i = ++rexmitQueue.begin();
+    while (i != rexmitQueue.end() && i->sacked)
+        i++;
+    if (i != rexmitQueue.end()) {
+        i->lost = false;
+        i->sacked = true;
+    }
+}
+
+uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
+{
+    // lowest sequence number this call NEWLY marked sacked, skipping regions that
+    // were ever retransmitted (a SACK for a retransmission is ambiguous, Linux's
+    // !TCPCB_RETRANS rule); 0 = nothing new. Regions are kept in sequence order, so
+    // the first hit is the lowest. Consumed by the caller's reordering detection
+    // (a new SACK below the prior FACK proves reordering).
+    uint32_t newlySackedLow = 0;
     if (seqLess(fromSeqNum, begin))
         fromSeqNum = begin;
 

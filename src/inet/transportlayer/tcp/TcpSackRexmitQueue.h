@@ -100,12 +100,23 @@ class INET_API TcpSackRexmitQueue
     virtual void enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum);
 
     /**
+     * Emulate sacks for sackless connections. Called on a new dupack, it marks
+     * one more segment as sacked.
+     */
+    virtual void addInferredSack();
+
+    /**
      * Called when data sender received selective acknowledgments.
      * Tells the queue which bytes have been transmitted and SACKed,
      * so they can be skipped if retransmitting segments as long as
      * REXMIT timer did not expired.
      */
-    virtual void setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum);
+    /**
+     * Marks [fromSeqNum, toSeqNum) as SACKed. Returns the lowest sequence number
+     * this call NEWLY marked (skipping ever-retransmitted regions, whose SACKs are
+     * ambiguous), or 0 if nothing was newly marked -- used for reordering detection.
+     */
+    virtual uint32_t setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum);
 
     /**
      * Returns SackedBit value of seqNum.

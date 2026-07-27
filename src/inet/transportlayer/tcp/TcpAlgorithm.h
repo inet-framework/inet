@@ -124,21 +124,30 @@ class INET_API TcpAlgorithm : public cObject
      * (snd_una - firstSeqAcked). The dupack counter still reflects the old value
      * (needed for Reno and NewReno); it'll be reset to 0 after this call returns.
      */
-    virtual void receivedDataAck(uint32_t firstSeqAcked) = 0;
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) = 0;
 
     /**
-     * Called after we received a duplicate ACK (that is: ackNo == snd_una,
-     * no data in segment, segment doesn't carry window update, and also,
-     * we have unacked data). The dupack counter got already updated
-     * when calling this method (i.e. dupacks == 1 on first duplicate ACK.)
+     * Called when snd_una is about to advance, BEFORE the acked range
+     * [fromSeq, toSeq) is discarded from the send/rexmit queues. At this point
+     * the scoreboard data for [fromSeq, toSeq) (transmit counts, SACK state) is
+     * still valid, so an algorithm can inspect it (e.g. to distinguish reordering
+     * from loss). Default-empty; overridden by flavours that need it.
      */
-    virtual void receivedDuplicateAck() = 0;
+    virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) {}
+
+    /**
+     * Whether this flavour implements SACK-based (RFC 6675) loss recovery.
+     * SACK is orthogonal to congestion control (as in Linux): a flavour that
+     * returns false will have SACK disabled even if the host is willing, so that
+     * turning sackSupport on by default does not break non-SACK flavours.
+     */
+    virtual bool supportsSackRecovery() const { return false; }
 
     /**
      * Called after we received an ACK for data not yet sent.
-     * According to RFC 793 this function should send an ACK.
+     * According to RFC 9293 this function should send an ACK.
      */
-    virtual void receivedAckForDataNotYetSent(uint32_t seq) = 0;
+    virtual void receivedAckForUnsentData(uint32_t seq) = 0;
 
     /**
      * Called after we sent an ACK. This hook can be used to cancel
