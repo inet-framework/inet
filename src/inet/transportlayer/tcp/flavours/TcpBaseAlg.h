@@ -132,6 +132,8 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     virtual bool shouldMarkAck() override;
 
     virtual void processEcnInEstablished() override;
+    virtual uint32_t getBytesInFlight() const override;
+    virtual uint32_t calculateSsthresh(uint32_t bytesInFlight) override;
 };
 
 } // namespace tcp

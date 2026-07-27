@@ -238,6 +238,9 @@ struct TcpStateVariables
     uint32_t pmtudOriginalMss = 0;          // negotiated MSS before any PMTUD reduction
     simtime_t pmtudTimeout;                 // time after which the original MSS is restored to probe for increased path MTU
     simtime_t pmtudLastMssReduction;        // timestamp of last PMTUD-triggered MSS reduction (-1 = never reduced)
+    // declared here for the code above that already uses it:
+    uint32_t maxPacketsOut = 0;    // peak segments in flight observed at send time (Linux max_packets_out); drives the RFC 5681 cwnd-limited slow-start gate
+    uint32_t snd_effmss = 0;        // effective sender maximum segment size without TCP/IP header options
 };
 
 cplusplus(TcpStateVariables) {{
