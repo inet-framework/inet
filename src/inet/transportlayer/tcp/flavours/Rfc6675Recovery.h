@@ -56,6 +56,18 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
      */
     virtual uint32_t rackDetectAndMarkLost(bool fromReoTimer = false);
 
+    /** @name Proportional Rate Reduction (RFC 6937), Linux tcp_cwnd_reduction() */
+    //@{
+    /** Newly acked+sacked bytes carried by the ACK currently being processed. */
+    virtual uint32_t prrNewlyDelivered() const;
+    /** Recovery entry: snapshot cwnd and reset the PRR counters. */
+    virtual void prrInitCwndReduction();
+    /** Per-ACK cwnd sizing: snd_cwnd = pipe + sndcnt. */
+    virtual void prrCwndReduction(int newlyAckedSacked, int newlyLost, bool sndUnaAdvanced);
+    /** Recovery exit: snd_cwnd = ssthresh. */
+    virtual void prrEndCwndReduction();
+    //@}
+
     /**
      * Linux tcp_check_sack_reordering(): reordering is proven when data at lowSeq
      * was delivered while a higher sequence number (the SACK fack) had already been
