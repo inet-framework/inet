@@ -138,6 +138,14 @@ class INET_API TcpAlgorithm : public cObject
     virtual void receivedDuplicateAck() = 0;
 
     /**
+     * Whether this flavour implements SACK-based (RFC 6675) loss recovery.
+     * SACK is orthogonal to congestion control (as in Linux): a flavour that
+     * returns false will have SACK disabled even if the host is willing, so that
+     * turning sackSupport on by default does not break non-SACK flavours.
+     */
+    virtual bool supportsSackRecovery() const { return false; }
+
+    /**
      * Called after we received an ACK for data not yet sent.
      * According to RFC 793 this function should send an ACK.
      */
