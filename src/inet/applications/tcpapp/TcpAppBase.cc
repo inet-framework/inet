@@ -97,11 +97,11 @@ void TcpAppBase::close()
     emit(connectSignal, -1L);
 }
 
-void TcpAppBase::sendPacket(Packet *msg)
+void TcpAppBase::sendPacket(Packet *msg, bool eor)
 {
     int numBytes = msg->getByteLength();
     emit(packetSentSignal, msg);
-    socket.send(msg);
+    socket.send(msg, eor);
 
     packetsSent++;
     bytesSent += numBytes;
