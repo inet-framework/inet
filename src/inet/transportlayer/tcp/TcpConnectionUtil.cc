@@ -898,20 +898,63 @@ void TcpConnection::sendSyn()
     updateRcvWnd();
     tcpHeader->setWindow(state->rcv_wnd);
 
-    state->snd_max = state->snd_nxt = state->iss + 1;
+    // TCP Fast Open (RFC 7413): fastopenSynDataLen is 0 unless process_SEND's
+    // deferred-SYN path attached data; idempotent across SYN-REXMIT calls,
+    // same as the plain snd_max/snd_nxt assignment already was.
+    uint32_t synDataLen = state->fastopenSynDataLen;
+    state->snd_max = state->snd_nxt = state->iss + 1 + synDataLen;
+    emit(sndMaxSignal, state->snd_max);
+    state->full_sized_segment_counter = 0;
 
-    // ECN
-    if (state->ecnWillingness) {
+    // Fast Open data rides on the SYN, bypassing the normal sendSegment() path that
+    // would otherwise register it in the rexmit queue. Register it here, or the queue's
+    // end stays at iss+1 while snd_una advances past it once the SYN-ACK arrives, and
+    // discardUpTo() -- which the connection now calls unconditionally, not only when
+    // SACK is enabled -- trips its range assertion.
+    if (synDataLen > 0 && rexmitQueue->getBufferEndSeq() == state->iss + 1) {
+        // register the SYN's payload in the SACK scoreboard: SACK is not yet
+        // negotiated when the data-bearing SYN goes out, but if the SYN-ACK
+        // enables it, the handshake ACK's discardUpTo must find the acked
+        // range in the queue. ONLY ONCE -- a SYN retransmit goes out WITHOUT
+        // the data (RFC 7413 fallback), so re-registering the range here
+        // would tag it retransmitted and keep it counted in flight, choking
+        // the post-SYN-rexmit one-segment window right when the fallback
+        // needs to send the data with the handshake ACK (cookie-less-sendto).
+        rexmitQueue->enqueueSentData(state->iss + 1, state->iss + 1 + synDataLen);
+        // Linux tcp_send_syn_data creates the SYN-payload skb with TCPHDR_PSH
+        // already set, so a post-fallback retransmit of that data carries PSH
+        // even mid-write (syn-data-only-syn-acked pins "P. 1:1421" on the
+        // full-MSS retransmit of a 6000-byte sendto's SYN portion).
+        if (state->pushOnWriteBoundary)
+            pushSeqNums.insert(state->iss + 1 + synDataLen);
+    }
+
+    // ECN. Active-open initiation is decided directly from ecnMode, not from the shared
+    // ecnWillingness flag (which also covers the passive-accept side) -- accecn-passive
+    // is willing to ACCEPT AccECN when listening but must never INITIATE it (or classic ECN)
+    // on an active open, same as "passive"/"off".
+    if (state->ecnMode == TCP_ECN_MODE_ACCECN) {
+        // draft-ietf-tcpm-accurate-ecn 3WHS: the AccECN-requesting SYN sets ECE=CWR=AE=1
+        // (the "SEWA" codepoint, distinct from classic ECN's "SEW").
+        tcpHeader->setEceBit(true);
+        tcpHeader->setCwrBit(true);
+        tcpHeader->setAeBit(true);
+        state->aeSynSent = true;
+        state->ecnSynSent = false; // this is an AccECN attempt, not classic -- aeSynSent tracks it
+        EV << "AccECN-setup SYN packet sent\n";
+    }
+    else if (state->ecnMode == TCP_ECN_MODE_RFC3168) {
         tcpHeader->setEceBit(true);
         tcpHeader->setCwrBit(true);
         state->ecnSynSent = true;
         EV << "ECN-setup SYN packet sent\n";
     }
     else {
-        // rfc 3168 page 16:
-        // A host that is not willing to use ECN on a TCP connection SHOULD
+        // RFC 3168, page 16
+        // "A host that is not willing to use ECN on a TCP connection SHOULD
         // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
-        // SYN-ACK packets that it sends to indicate this unwillingness.
+        // SYN-ACK packets that it sends to indicate this unwillingness."
+        // Covers off, passive, and accecn-passive: none of these initiate on active OPEN.
         tcpHeader->setEceBit(false);
         tcpHeader->setCwrBit(false);
         state->ecnSynSent = false;
@@ -1132,6 +1175,31 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
 
     if (bytes + options_len > state->snd_mss)
         bytes = state->snd_mss - options_len;
+
+    // A retransmission never extends past the previously sent high-water mark
+    // in the same segment: Linux retransmits skbs from the rtx queue (possibly
+    // collapsed together, but only from already-SENT data); unsent data goes
+    // out in its own segments behind it (syn-data-only-syn-acked pins the
+    // 1420-byte TFO fallback retransmit NOT swallowing 40 fresh bytes, which
+    // also mis-aligned every following segment off the golden's boundaries).
+    if (seqLess(state->snd_nxt, state->snd_max) && bytes > state->snd_max - state->snd_nxt)
+        bytes = state->snd_max - state->snd_nxt;
+
+    // ... and it honors the ORIGINAL segment boundaries: Linux's rtx queue
+    // holds whole skbs, and tcp_retrans_try_collapse merges only ENTIRE
+    // adjacent sent skbs that fit cur_mss together -- it never splits the
+    // next skb to top a retransmit up to the MSS. Cap at the largest recorded
+    // transmission boundary inside the budget (syn-data-only-syn-acked pins
+    // the RACK retransmit of the 1420-byte TFO payload staying 1420 bytes).
+    if (seqLess(state->snd_nxt, state->snd_max) && bytes > 0 && rexmitQueue != nullptr) {
+        const auto& starts = rexmitQueue->xmitSegmentStarts;
+        auto it = starts.upper_bound(state->snd_nxt + bytes);
+        if (it != starts.begin()) {
+            uint32_t b = *std::prev(it);
+            if (seqGreater(b, state->snd_nxt) && seqLess(b, state->snd_nxt + bytes))
+                bytes = b - state->snd_nxt;
+        }
+    }
 
     uint32_t sentBytes = bytes;
 

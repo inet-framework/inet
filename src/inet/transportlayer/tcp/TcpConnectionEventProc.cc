@@ -403,8 +403,105 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setIrs(state->irs);
     statusInfo->setFin_ack_rcvd(state->fin_ack_rcvd);
 
+    // Adaptive reordering (RFC 4653-style dynamic DupThresh): state->reordering
+    // grows past the static dupthresh as checkSackReordering() observes SACKs
+    // arriving below the FACK (Linux tp->reordering). Report the live degree, not
+    // the static dupthresh -- tcpi_reordering must track the adaptive value.
+    statusInfo->setReordering(state->reordering);
+    statusInfo->setMinRtt(state->minRtt.dbl());
+    statusInfo->setFlightSize(tcpAlgorithm->getBytesInFlight());
+    statusInfo->setSackedBytes(state->sackedBytes);
+    statusInfo->setDeliveredBytes(state->deliveredBytes);
+    statusInfo->setTsEnabled(state->ts_enabled);
+    statusInfo->setSackEnabled(state->sack_enabled);
+    statusInfo->setWsEnabled(state->ws_enabled);
+    statusInfo->setEctEnabled(state->ect);
+    statusInfo->setSynDataAccepted(state->fastopenSynDataAccepted);
+    statusInfo->setSndWndScale(state->snd_wnd_scale);
+    statusInfo->setLastDataRecvTime(state->time_last_segment_received);
+
+    // Congestion-window/RTO/RTT fields live on flavour-specific state variable
+    // subclasses, one or two levels below the base TcpStateVariables* held as
+    // `state` -- not every flavour (e.g. DumbTcp) has them, so guard with a
+    // dynamic_cast and fall back to the UINT_MAX sentinel documented on
+    // TcpStatusInfo.
+    if (auto *baseAlgState = dynamic_cast<TcpAlgorithmBaseStateVariables *>(state)) {
+        statusInfo->setCwnd(baseAlgState->snd_cwnd);
+        statusInfo->setSrtt(baseAlgState->srtt.dbl());
+        statusInfo->setRexmitCount(baseAlgState->rexmit_count);
+        statusInfo->setNumRtos(baseAlgState->numRtos);
+    }
+    else {
+        statusInfo->setCwnd(UINT_MAX);
+        statusInfo->setSrtt(-1);
+        statusInfo->setRexmitCount(UINT_MAX);
+        statusInfo->setNumRtos(UINT_MAX);
+    }
+
+    if (auto *tahoeRenoState = dynamic_cast<TcpClassicAlgorithmBaseStateVariables *>(state))
+        statusInfo->setSsthresh(tahoeRenoState->ssthresh);
+    else
+        statusInfo->setSsthresh(UINT_MAX);
+
+    statusInfo->setCaState(deriveLinuxCaState());
+    // rcv_nxt/irs are only meaningful once the 3WHS has fixed irs (peer's ISN); before
+    // that (e.g. a STATUS query in SYN_SENT) both are still 0 and the subtraction
+    // would underflow.
+    statusInfo->setBytesReceived(seqGreater(state->rcv_nxt, state->irs) ? state->rcv_nxt - state->irs - 1 : 0);
+    statusInfo->setDeliveredCePkts(state->deliveredCePkts);
+    statusInfo->setDeliveredCeBytes(state->deliveredCeBytes);
+    statusInfo->setDeliveredE0Bytes(state->deliveredE0Bytes);
+    statusInfo->setDeliveredE1Bytes(state->deliveredE1Bytes);
+
+    // TCP_INFO trio: report the accumulated total plus, if a period is still open
+    // right now, the elapsed time since it started -- so a live query reflects the
+    // up-to-the-moment total rather than only the last fully-closed period.
+    statusInfo->setBusyTime((state->busyTimeAccumulated
+        + (state->busyStartTime >= SIMTIME_ZERO ? simTime() - state->busyStartTime : SIMTIME_ZERO)).dbl());
+    statusInfo->setRwndLimited((state->rwndLimitedAccumulated
+        + (state->rwndLimitedStartTime >= SIMTIME_ZERO ? simTime() - state->rwndLimitedStartTime : SIMTIME_ZERO)).dbl());
+    statusInfo->setSndbufLimited((state->sndbufLimitedAccumulated
+        + (state->sndbufLimitedStartTime >= SIMTIME_ZERO ? simTime() - state->sndbufLimitedStartTime : SIMTIME_ZERO)).dbl());
+
+    // Segment counts are approximated from byte totals by rounding UP: Linux
+    // counts skbs, and a single retransmitted/lost sub-MSS segment (e.g. the
+    // 1420-byte TFO fallback rexmit against a 1460 MSS) must report 1, not 0
+    // (syn-data-only-syn-acked asserts tcpi_retrans == 1).
+    if (state->sack_enabled && rexmitQueue != nullptr && state->snd_mss > 0)
+        statusInfo->setLost((rexmitQueue->getLost() + state->snd_mss - 1) / state->snd_mss);
+    else
+        statusInfo->setLost(UINT_MAX);
+
+    if (state->sack_enabled && rexmitQueue != nullptr && state->snd_mss > 0)
+        statusInfo->setRetrans((rexmitQueue->getRetrans() + state->snd_mss - 1) / state->snd_mss);
+    else
+        statusInfo->setRetrans(UINT_MAX);
+
+    // Linux SK_MEMINFO_RCVBUF: the live sk_rcvbuf -- receiveBufferSize as
+    // configured, possibly grown by tcp_clamp_window under OOO pressure
+    // (ooo-before-and-after-accept asserts both the untouched embryonic value
+    // and the post-accept growth). 0 when no buffer size is configured.
+    statusInfo->setSkRcvbuf(state->rcvBufferSize);
+
+    if (auto *baseAlgState = dynamic_cast<TcpAlgorithmBaseStateVariables *>(state)) {
+        statusInfo->setBackoff(baseAlgState->rexmit_count);
+        statusInfo->setProbes(baseAlgState->zeroWindowProbesSent);
+    }
+    else {
+        statusInfo->setBackoff(UINT_MAX);
+        statusInfo->setProbes(UINT_MAX);
+    }
+
     msg->setControlInfo(statusInfo);
     msg->setKind(TCP_I_STATUS);
+    // Every other reply-sending path in this file tags its outgoing message
+    // with SocketInd (see sendIndicationToApp() and friends in
+    // TcpConnectionUtil.cc) so TcpSocket::belongsToSocket() can match it back
+    // to the requesting app-side socket. This path reuses the incoming
+    // request message, which only ever carried a SocketReq tag -- without
+    // this, the STATUS reply is silently dropped by the app's socket
+    // dispatch instead of reaching TcpSocket::ICallback::socketStatusArrived().
+    check_and_cast<Message *>(msg)->addTag<SocketInd>()->setSocketId(socketId);
     sendToApp(msg);
 }
 

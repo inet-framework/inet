@@ -202,16 +202,91 @@ struct TcpStateVariables
     bool snd_sack = false;          // set if received vaild out-of-order segment or rcv_nxt changed, but receivedQueue is not empty
     bool snd_dsack = false;         // set if received duplicated segment (sequenceNo+PLength < rcv_nxt) or (segment is not acceptable)
     SackList sacks_array;    // MAX_SACK_BLOCKS is set to 60
-    uint32_t highRxt = 0;    // RFC 3517, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
-    uint32_t pipe = 0;    // RFC 3517, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
-    uint32_t recoveryPoint = 0;    // RFC 3517
+    uint32_t highRxt = 0;    // RFC 6675, page 3: ""HighRxt" is the highest sequence number which has been retransmitted during the current loss recovery phase."
+    uint32_t pipe = 0;    // RFC 6675, page 3: ""Pipe" is a sender's estimate of the number of bytes outstanding in the network."
+    uint32_t recoveryPoint = 0;    // RFC 6675; snd_max when loss recovery started
     uint32_t sackedBytes = 0;    // number of sackedBytes
     uint32_t sackedBytes_old = 0;    // old number of sackedBytes - needed for RFC 3042 to check if last dupAck contained new sack information
     bool lossRecovery = false;    // indicates if algorithm is in loss recovery phase
 
+    // delivered-bytes accounting (RFC 8985 delivery; RFC 6937 PRR input)
+    uint64_t deliveredBytes = 0;   // cumulative newly-delivered (cumulatively acked + selectively acked) bytes
+    uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
+
+    // PRR - Proportional Rate Reduction (RFC 6937)
+    bool prrEnabled = false;       // use PRR during fast recovery (set from the prrEnabled parameter)
+    uint32_t prrDelivered = 0;     // bytes delivered during the current recovery episode
+    uint32_t prrOut = 0;           // bytes transmitted during the current recovery episode
+    uint32_t priorCwnd = 0;        // snd_cwnd snapshot at recovery entry (RFC 6937 RecoverFS proxy; also the undo target)
+
+    // loss undo (RFC 2883 D-SACK, RFC 3522 Eifel)
+    bool lossUndoEnabled = false;  // set from the lossUndoEnabled parameter
+    uint32_t undoMarker = 0;       // snd_una at recovery entry; 0 = no undo pending
+    int32_t undoRetrans = 0;       // retransmitted segments still to be confirmed spurious (-1 = unknown)
+    uint32_t priorSsthresh = 0;    // ssthresh before the reduction (restored on undo)
+    uint32_t retransStampTS = 0;   // TSval echoed on the first retransmit of the episode (Eifel); 0 = none
+    uint32_t lastRcvdTSecr = 0;    // most recent TSecr echoed back by the peer (Eifel input)
+
+    // Tail Loss Probe (RFC 8985 section 7.2, Linux tcp_send_loss_probe)
+    bool seedRttFromHandshake = false; // seed srtt/rttvar/RTO from the SYN<->SYN-ACK exchange, as Linux does
+    bool tlpEnabled = false;           // Tail Loss Probe enabled (requires SACK)
+    uint32_t tlpHighSeq = 0;           // snd_max when the probe was sent; nonzero = a probe is outstanding (Linux tlp_high_seq)
+    bool tlpRetrans = false;           // the outstanding probe retransmitted the last segment (vs. sent new data)
+
+    // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced; Linux tcp_frto=2)
+    bool frtoEnabled = false;      // from the frtoEnabled parameter; requires SACK
+    bool frtoActive = false;       // an RTO fired and its spuriousness is still undecided
+    uint32_t frtoHighSeq = 0;      // snd_max at the RTO (RFC 5682 recover / Linux high_seq)
+    bool frtoOrigAcked = false;    // never-retransmitted data was (s)acked since the RTO
+
+    uint32_t maxPacketsOut = 0;    // peak segments in flight observed at send time (Linux max_packets_out); drives the RFC 5681 cwnd-limited slow-start gate
+    // adaptive reordering / dynamic DupThresh (Linux tp->reordering)
+    bool adaptiveReorderingEnabled = false; // set from the adaptiveReorderingEnabled parameter
+    uint32_t reordering = 3;       // learned reordering degree in segments; initialized to dupthresh
+    uint32_t maxReordering = 300;  // upper bound (set from the maxReordering parameter)
+
+    bool dsackSeen = false;        // a D-SACK was seen while processing the current segment (reset per segment)
+    uint32_t dsackBytes = 0;       // bytes covered by the D-SACK seen on the current segment
+
+    // RACK-TLP loss detection (RFC 8985)
+    int lossDetectionMode = 0;    // 0 = classic DupThresh (RFC 3517), 1 = RACK time-based
+    simtime_t minRtt = 0;         // minimum RTT observed on the connection (0 = unset)
+    simtime_t rackXmitTime = 0;   // send time of the most recently delivered (SACKed/ACKed) segment
+    uint32_t rackEndSeq = 0;      // end sequence number of that segment
+    simtime_t rackRtt = 0;        // RTT of the ACK that last advanced the RACK point
+    bool rackReordSeen = false;   // whether reordering has been observed (widens the reordering window)
+
     // queue management
     uint32_t sendQueueLimit = 0;
     bool queueUpdate = true;
+
+    // TCP_NOTSENT_LOWAT: independent of sendQueueLimit/queueUpdate
+    // above (which track total outstanding+unsent bytes from snd_una); this tracks
+    // only the not-yet-transmitted portion from snd_nxt. (uint32_t)-1 = disabled.
+    uint32_t notsentLowat = (uint32_t)-1;
+    bool notsentLowatUpdate = true;
+
+    // TCP_INFO trio (busy_time/rwnd_limited): cumulative time bookkeeping, read-only
+    // with respect to every send/receive decision -- consulted only by TcpStatusInfo.
+    // INET-native definitions (not a port of Linux's tcp_chrono_* state machine); see
+    // enqueueSendCommandData()/processAckInEstabEtc() (busy) and sendData() (rwnd).
+    // A *StartTime of -1 means "not currently in that state"; *Accumulated is the
+    // running total up to the last state exit. sndbuf_limited has no INET analog
+    // (the send queue never actually blocks a SEND on sendQueueLimit -- it's
+    // notification-only, see notsentLowat/sendQueueLimit above) and is deliberately
+    // not tracked here.
+    simtime_t busyStartTime;          // set to -1 in configureStateVariables() -- see pmtudLastMssReduction below for the same pattern
+    simtime_t busyTimeAccumulated = 0;
+    simtime_t rwndLimitedStartTime;   // set to -1 in configureStateVariables()
+    simtime_t rwndLimitedAccumulated = 0;
+    // Linux TCP_CHRONO_SNDBUF_LIMITED: time the TRANSMISSION was starved by
+    // the send buffer -- the send queue ran dry (everything queued is in
+    // flight) while the application writer was still blocked on buffer space
+    // (tcp_write_xmit's queue-empty + SOCK_NOSPACE start condition). The
+    // writer-blocked signal comes from the application layer via
+    // TcpSetWriterBlockedCommand (tcp-info-sndbuf-limited pins ~20ms).
+    simtime_t sndbufLimitedStartTime; // set to -1 in configureStateVariables()
+    simtime_t sndbufLimitedAccumulated = 0;
 
     // those counters would logically belong to TcpAlgorithm, but it's a lot easier to manage them here
     uint32_t dupacks = 0;    // current number of received consecutive duplicate ACKs

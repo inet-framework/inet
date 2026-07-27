@@ -153,6 +153,7 @@ class INET_API TcpConnection : public SimpleModule
     cMessage *connEstabTimer = nullptr;
     cMessage *finWait2Timer = nullptr;
     cMessage *synRexmitTimer = nullptr; // for retransmitting SYN and SYN+ACK
+    cMessage *rackReoTimer = nullptr; // RACK reordering timer (Linux ICSK_TIME_REO_TIMEOUT): fires when a not-yet-lost segment's RACK.rtt+reo_wnd deadline matures between ACKs
 
     // statistics
     long rcvdSegments = 0;
@@ -173,6 +174,29 @@ class INET_API TcpConnection : public SimpleModule
 
     /** @name Processing app commands. Invoked from processAppCommand(). */
     //@{
+    /**
+     * rackReoTimer expired: re-run RACK loss detection (time has advanced, so
+     * pending deadlines may have matured) and let the recovery strategy react
+     * (enter fast recovery / retransmit) via ITcpRecovery::reoTimeout().
+     */
+    virtual void processRackReoTimeout();
+
+  public:
+    /**
+     * (Re)arms the RACK reordering timer for the given delay, or cancels it when
+     * delay is negative. Called by the recovery strategy from RACK loss detection.
+     */
+    virtual void rescheduleRackReoTimer(simtime_t delay);
+
+    /**
+     * RFC 8985 section 7.2 loss probe: send one segment of new data if any is
+     * available, else retransmit the last outstanding segment. Returns whether
+     * anything was actually sent.
+     */
+    virtual bool sendTlpProbe();
+
+  protected:
+
     virtual void process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_OPEN_PASSIVE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_ACCEPT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
@@ -393,6 +417,16 @@ class INET_API TcpConnection : public SimpleModule
     int getFsmState() const { return fsm.getState(); }
     const TcpStateVariables *getState() const { return state; }
     TcpStateVariables *getStateForUpdate() { return state; }
+
+    /**
+     * Maps INET's independent loss-recovery bools onto Linux's tcp_ca_state
+     * ordinals (TCP_CA_Open=0, Disorder=1, CWR=2, Recovery=3, Loss=4), for
+     * TcpStatusInfo::ca_state. INET has no state tracking Linux's Disorder --
+     * the pre-recovery "first dupACK seen" phase -- so that ordinal is never
+     * returned; scripts asserting ca_state==Disorder will still diverge. This
+     * is a known, documented imprecision, not a bug.
+     */
+    virtual int deriveLinuxCaState() const;
     const TcpSendQueue *getSendQueue() const { return sendQueue; }
     TcpSendQueue *getSendQueueForUpdate() { return sendQueue; }
     const TcpSackRexmitQueue *getRexmitQueue() const { return rexmitQueue; }

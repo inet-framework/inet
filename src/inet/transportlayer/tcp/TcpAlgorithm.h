@@ -181,6 +181,28 @@ class INET_API TcpAlgorithm : public cObject
      * This function process ECN marks.
      */
     virtual void processEcnInEstablished() = 0;
+
+    /**
+     * Returns the sender's estimation of total bytes in flight in the network.
+     */
+    virtual uint32_t getBytesInFlight() const = 0;
+
+    /**
+     * The new ssthresh when entering fast recovery, per this congestion-control
+     * flavour (Linux icsk_ca_ops->ssthresh). Rfc6675Recovery::step4() calls this
+     * instead of hardcoding FlightSize/2 so a flavour such as CUBIC can apply its own
+     * reduction factor (beta). Non-pure with a 0 default so flavours without a
+     * recovery engine (DumbTcp) need no change.
+     */
+    virtual uint32_t calculateSsthreshForFastRecovery() { return 0; }
+
+    /**
+     * The connection's loss-recovery strategy, or nullptr for flavours that do
+     * not use the ITcpRecovery split (DumbTcp, TcpNoCongestionControl, Vegas,
+     * Westwood). Lets the connection reach RACK/PRR/etc. without knowing the
+     * concrete algorithm class.
+     */
+    virtual ITcpRecovery *getRecovery() { return nullptr; }
 };
 
 } // namespace tcp

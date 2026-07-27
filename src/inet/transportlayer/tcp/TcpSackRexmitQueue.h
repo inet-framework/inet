@@ -24,12 +24,19 @@ class INET_API TcpSackRexmitQueue
     struct Region {
         uint32_t beginSeqNum;
         uint32_t endSeqNum;
+        bool lost; // indicates whether region has been lost
         bool sacked; // indicates whether region has already been sacked by data receiver
         bool rexmitted; // indicates whether region has already been retransmitted by data sender
+        simtime_t firstSentTime = 0; // time this region was first transmitted (RACK/Vegas: original send time)
+        simtime_t lastSentTime = 0; // time this region was most recently (re)transmitted (RACK: xmit time)
+        uint16_t transmitCount = 0; // number of times this region has been transmitted (1 = never retransmitted)
     };
 
     typedef std::list<Region> RexmitQueue;
     RexmitQueue rexmitQueue; // rexmitQueue is ordered by seqnum, and doesn't have overlapped Regions
+    std::set<uint32_t> xmitSegmentStarts; // begin seqnums of ORIGINAL transmissions (skb boundaries): lets RACK tell a whole small segment (advances the reference, Linux tags the skb) from a sub-MSS fragment split off a bigger segment by a byte-range SACK (never tagged, tcp_match_skb_to_sack fragments only at MSS boundaries)
+
+    bool isTransmissionStart(uint32_t seqNum) const { return xmitSegmentStarts.find(seqNum) != xmitSegmentStarts.end(); }
 
     uint32_t begin; // 1st sequence number stored
     uint32_t end; // last sequence number stored + 1
@@ -159,6 +166,38 @@ class INET_API TcpSackRexmitQueue
      * SACK block starting at seqNum.
      */
     virtual void checkSackBlock(uint32_t seqNum, uint32_t& length, bool& sacked, bool& rexmitted) const;
+
+    virtual void updateLost();
+
+    /**
+     * Returns the total number of lost bytes in the queue.
+     */
+    virtual uint32_t getLost() const;
+
+    /**
+     * Returns the total number of sacked bytes in the queue.
+     */
+    virtual uint32_t getSacked() const;
+
+    /**
+     * Returns the total number of retransmitted bytes in the queue.
+     */
+    virtual uint32_t getRetrans() const;
+
+    /**
+     * Returns the region containing seqNum. seqNum must be within [begin, end).
+     * Used by RACK to read a segment's transmit time and count.
+     */
+    virtual const Region& getRegion(uint32_t seqNum) const;
+
+    /**
+     * Marks the byte range [fromSeqNum, toSeqNum) as lost (RACK/RFC 3517),
+     * splitting regions at the boundaries as needed.
+     */
+    virtual void markLost(uint32_t fromSeqNum, uint32_t toSeqNum);
+
+    /** RACK re-marked a lost RETRANSMISSION: clear the rexmitted flag on unsacked regions in the range (Linux tcp_mark_skb_lost clearing TCPCB_SACKED_RETRANS) so the recovery picker sends them again; the lost mark stays. */
+    virtual void clearRexmitted(uint32_t fromSeqNum, uint32_t toSeqNum);
 
   protected:
     /*
