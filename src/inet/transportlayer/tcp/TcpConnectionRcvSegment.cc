@@ -7,6 +7,7 @@
 
 #include <string.h>
 
+#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -180,6 +181,18 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         else {
             if (tcpHeader->getSynBit()) {
                 EV_DETAIL << "SYN with unacceptable seqNum in " << stateName(fsm.getState()) << " state received (SYN duplicat?)\n";
+                // AccECN reflector, duplicate-SYN-ACK arm: the ACK we are about to send
+                // in response reflects THIS SYN-ACK's IP-ECN codepoint, exactly like the
+                // handshake-completing ACK did for the original (RFC 9768 section
+                // 3.2.3.2 -- the reflection answers a SYN-ACK, so every answer to one
+                // carries it, not just the first). accecn 3rd_ack_after_synack_rxmt,
+                // synack_rexmit and no_ecn_after_accecn pin the three shapes: a
+                // differently-marked duplicate, an identical one, and one that dropped
+                // its ACE bits altogether.
+                if (state->accEcnNegotiated && tcpHeader->getAckBit()) {
+                    state->accEcnReflectCodepoint = receivedEcnCodepoint(tcpSegment);
+                    state->accEcnReflectAce = true;
+                }
                 // Only a PURE SYN retransmit earns the SYN-ACK resend (Linux
                 // tcp_check_req's request-socket path). A SYN+ACK here is the
                 // peer completing a SIMULTANEOUS open -- it takes the normal
@@ -201,6 +214,13 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                     // on SYN-ACK retransmits -- the *_drop/_rxmt scripts and
                     // accecn_then_notecn_syn pin this)
                     state->syn_rexmit_count++;
+                    // The negotiation is reused as-is, but the ECN-field REFLECTION is
+                    // per-packet: the resent SYN-ACK reflects the codepoint of the SYN
+                    // that triggered it, which need not be the one the first SYN carried
+                    // (accecn_then_notecn_syn: an [ect0] SYN then a [noecn] retransmit,
+                    // answered SA. and then SW.).
+                    if (state->accEcnNegotiated)
+                        state->accEcnReflectCodepoint = receivedEcnCodepoint(tcpSegment);
                     sendSynAck();
                     // AccECN downgrade (accecn_then_notecn_syn): a peer whose
                     // RETRANSMITTED SYN carries no ACE bits abandoned its ECN
@@ -1045,7 +1065,11 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     {
         state->endPointIsWillingECN = true;
         state->accEcnNegotiated = true;
-        EV << "AccECN-setup SYN received\n";
+        // The SYN-ACK about to go out reflects this SYN's IP-ECN codepoint in its ACE
+        // field (RFC 9768 section 3.2.3.2) -- capture it here, the last point at which
+        // the IP layer's EcnInd tag is still attached to the segment.
+        state->accEcnReflectCodepoint = receivedEcnCodepoint(tcpSegment);
+        EV << "AccECN-setup SYN received (IP-ECN " << state->accEcnReflectCodepoint << ")\n";
     }
     else if (tcpHeader->getEceBit() == true && tcpHeader->getCwrBit() == true
              && (!tcpHeader->getAeBit() || state->ecnMode == TCP_ECN_MODE_RFC3168)) {
@@ -1375,7 +1399,23 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 else {
                     state->accEcnNegotiated = true;
                     state->ect = true;
-                    EV << "AccECN-setup SYN-ACK received (ACE=" << (int)synAckAce << ")... AccECN is enabled.\n";
+                    // The handshake-completing ACK -- sent synchronously from the
+                    // established() call a few lines below -- reflects this SYN-ACK's
+                    // IP-ECN codepoint back to the server (RFC 9768 section 3.2.3.2),
+                    // telling it whether the network preserved its ECN field. Capture
+                    // it while the EcnInd tag is still attached and arm that one ACK;
+                    // sendToIP() consumes the flag and returns to the CE counter after.
+                    state->accEcnReflectCodepoint = receivedEcnCodepoint(tcpSegment);
+                    state->accEcnReflectAce = true;
+                    // A CE-marked SYN-ACK is itself a CE-marked packet received, so it
+                    // seeds the CE counter at 1 (RFC 9768: the client's r.cep starts at
+                    // 6 rather than 5 in that case) and every later ACK carries ACE=6.
+                    // Tcp.cc's ingest-time counter cannot do this: accEcnNegotiated only
+                    // becomes true here, while processing that very segment.
+                    if (state->accEcnReflectCodepoint == IP_ECN_CE)
+                        state->rcvCePkts++;
+                    EV << "AccECN-setup SYN-ACK received (ACE=" << (int)synAckAce
+                       << ")... AccECN is enabled. (IP-ECN " << state->accEcnReflectCodepoint << ")\n";
                 }
                 state->aeSynSent = false;
             }

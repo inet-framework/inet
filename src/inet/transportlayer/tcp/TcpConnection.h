@@ -101,27 +101,8 @@ class TcpAlgorithm;
 class INET_API TcpConnection : public SimpleModule
 {
   protected:
-    static simsignal_t tcpConnectionAddedSignal;
-    static simsignal_t stateSignal; // FSM state
-    static simsignal_t sndWndSignal; // snd_wnd
-    static simsignal_t rcvWndSignal; // rcv_wnd
-    static simsignal_t rcvAdvSignal; // current advertised window (=rcv_adv)
-    static simsignal_t sndNxtSignal; // sent seqNo
-    static simsignal_t sndAckSignal; // sent ackNo
-    static simsignal_t rcvSeqSignal; // received seqNo
-    static simsignal_t rcvAckSignal; // received ackNo (=snd_una)
-    static simsignal_t unackedSignal; // number of bytes unacknowledged
-    static simsignal_t dupAcksSignal; // current number of received dupAcks
-    static simsignal_t pipeSignal; // current sender's estimate of bytes outstanding in the network
-    static simsignal_t sndSacksSignal; // number of sent Sacks
-    static simsignal_t rcvSacksSignal; // number of received Sacks
-    static simsignal_t rcvOooSegSignal; // number of received out-of-order segments
-    static simsignal_t rcvNASegSignal; // number of received not acceptable segments
-    static simsignal_t sackedBytesSignal; // current number of received sacked bytes
-    static simsignal_t tcpRcvQueueBytesSignal; // current amount of used bytes in tcp receive queue
-    static simsignal_t tcpRcvQueueDropsSignal; // number of drops in tcp receive queue
-    static simsignal_t tcpRcvPayloadBytesSignal; // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
-
+    static simsignal_t deliveredCeSignal; // AccECN: cumulative resolved count of CE-marked packets the peer has reported via the ACE field
+    static simsignal_t deliveredCeBytesSignal; // AccECN: cumulative CE byte count from AccECN option evidence only (stays 0 if the peer never sends the option)
     // connection identification by apps: socketId
     int socketId = -1; // identifies connection within the app
 
@@ -350,6 +331,19 @@ class INET_API TcpConnection : public SimpleModule
 
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader);
+
+    /**
+     * Utility: the AccECN ECN-field reflector encoding (RFC 9768 section 3.2.3.2).
+     * Maps the IP-ECN codepoint of the received SYN (reflected on the SYN-ACK) or
+     * SYN-ACK (reflected on the handshake-completing ACK) to the ACE value that
+     * carries it back: Not-ECT->0b010, ECT(1)->0b011, ECT(0)->0b100, CE->0b110.
+     * The gaps in the encoding are deliberate: 0b000/0b001/0b111 are reserved by
+     * table 2 for "no ECN" and "classic ECN only" during negotiation.
+     */
+    static uint8_t accEcnReflectedAce(int ipEcnCodepoint);
+
+    /** Utility: the IP-ECN codepoint a received segment arrived with, or IP_ECN_NOT_ECT if untagged */
+    static int receivedEcnCodepoint(Packet *tcpSegment);
 
     /** Utility: start SYN-REXMIT timer */
     virtual void startSynRexmitTimer();

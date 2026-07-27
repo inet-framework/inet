@@ -327,6 +327,15 @@ struct TcpStateVariables
     uint32_t rcvCePktsReported = 0; // rcvCePkts value as of the last ACE delta the peer has acknowledged resolving
     uint32_t deliveredCePkts = 0; // sender-side resolved count of CE-marked packets the peer has reported via ACE/option
 
+    // AccECN ECN-field reflector (RFC 9768 section 3.2.3.2, table "Encoding of the ACE field on the SYN-ACK / third ACK"):
+    // the handshake feeds the IP-ECN codepoint of the SYN back on the SYN-ACK, and that of the SYN-ACK back on the
+    // handshake-completing ACK, so each end learns whether the network mangled the ECN field of the packet it sent.
+    // accEcnReflectCodepoint holds the IP-ECN codepoint (IP_ECN_*) of the received SYN (server) or SYN-ACK (client),
+    // captured where the EcnInd tag is still readable; accEcnReflectAce arms the ONE ACK that must carry the reflected
+    // value instead of the ordinary mod-8 CE counter (the reflection is a handshake one-off; everything after it is a counter).
+    int accEcnReflectCodepoint = -1;
+    bool accEcnReflectAce = false;
+
     // AccECN TCP option (kind 172/174 E0B/E1B/CEB byte counters)
     bool accEcnOptionEnabled = false; // cached from the accEcnOptionEnabled param at configureStateVariables() time
     uint32_t accEcnOptionBeaconAcks = 4; // cached from the accEcnOptionBeaconAcks param: emit the option on every Nth ACK-bearing segment

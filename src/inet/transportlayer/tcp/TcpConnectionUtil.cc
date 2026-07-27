@@ -255,6 +255,22 @@ TcpConnection *TcpConnection::cloneListeningConnection()
     return conn;
 }
 
+int TcpConnection::receivedEcnCodepoint(Packet *tcpSegment)
+{
+    auto ecnTag = tcpSegment->findTag<EcnInd>();
+    return ecnTag ? ecnTag->getExplicitCongestionNotification() : IP_ECN_NOT_ECT;
+}
+
+uint8_t TcpConnection::accEcnReflectedAce(int ipEcnCodepoint)
+{
+    switch (ipEcnCodepoint) {
+        case IP_ECN_ECT_1: return 3; // 0b011
+        case IP_ECN_ECT_0: return 4; // 0b100
+        case IP_ECN_CE:    return 6; // 0b110
+        default:           return 2; // 0b010, Not-ECT (and anything unrecognized)
+    }
+}
+
 void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader)
 {
     sentSegments++;
@@ -298,23 +314,102 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     addresses->setSrcAddress(localAddr);
     addresses->setDestAddress(remoteAddr);
 
+    // AccECN: the ACE field rides the same 3 flag bits AccECN's 3WHS
+    // negotiation used (aeBit,cwrBit,eceBit), re-purposed post-handshake as a mod-8 counter
+    // of CE-marked packets received. Every ACK-bearing segment after the handshake carries
+    // the current count; the SYN-ACK itself is excluded -- its accept codepoint is set
+    // during the handshake and must not be overridden here.
+    // The other exclusion is the ACK that closes the connection: once both FINs are
+    // done with (ours acknowledged, the peer's just received), Linux has handed the
+    // socket over to a tcp_timewait_sock, and the ACKs it emits -- starting with this
+    // very one -- are built by tcp_v4_send_ack, which knows nothing about AccECN and
+    // leaves all three bits clear (accecn close_local_close_then_remote_fin pins the
+    // bare "> . 1002:1002(0) ack 2" ending an otherwise ACE=5 connection).
+    // The 2MSL timer is armed by the FIN processing that decides we are going to
+    // TIME_WAIT, and stays armed for as long as we are there -- so "2MSL running"
+    // is exactly "this ACK belongs to the time-wait socket", including the very
+    // first one, which is still emitted while the FSM sits in FIN_WAIT_1/2.
+    bool timeWaitAck = the2MSLTimer != nullptr && the2MSLTimer->isScheduled();
+    if (state->accEcnNegotiated && tcpHeader->getAckBit() && !tcpHeader->getSynBit()
+        && !timeWaitAck)
+    {
+        // ...except for the ONE handshake-completing ACK, which instead reflects the
+        // IP-ECN codepoint the SYN-ACK arrived with (RFC 9768 section 3.2.3.2). It is
+        // what tells the server whether the network cleared or CE-marked the ECN field
+        // of the SYN-ACK it sent, and it cannot be a counter value: the count is
+        // necessarily still zero at that point, so the two uses of the field would be
+        // indistinguishable. Consumed here so the next ACK is a counter again.
+        uint8_t ace = state->accEcnReflectAce
+                ? accEcnReflectedAce(state->accEcnReflectCodepoint)
+                : (uint8_t)((state->rcvCePkts + 5) & 0x7);
+        state->accEcnReflectAce = false;
+        tcpHeader->setAeBit((ace >> 2) & 0x1);
+        tcpHeader->setCwrBit((ace >> 1) & 0x1);
+        tcpHeader->setEceBit(ace & 0x1);
+    }
+
+    // AccECN TCP option beacon bookkeeping: the exactly-once-per-
+    // real-send mutation companion to writeHeaderOptions()'s pure/idempotent beacon
+    // decision (which may run more than once per real segment as a header-size dry
+    // run -- see the comment there). This guard is deliberately broader than
+    // writeHeaderOptions()'s own (which only appends from its non-SYN/non-INIT/
+    // non-LISTEN else-if branch, so e.g. sendFin() -- which never calls
+    // writeHeaderOptions() at all -- and ACKs sent from LAST_ACK/CLOSING/TIME_WAIT
+    // never carry the option): counting here is a superset of appending, so a FIN
+    // or teardown ACK can advance accEcnAckCount/toggle the kind without the option
+    // ever actually going out. That's harmless -- neither the cadence nor which of
+    // 172/174 is used has a wire-correctness requirement (the peer decodes either
+    // kind identically) -- so "beacon every accEcnOptionBeaconAcks-th ACK-bearing
+    // segment" is closer to "at most every Nth" in practice; it is never a
+    // duplicate append, only an occasional silent skip/phase advance.
+    if (state->accEcnNegotiated && state->accEcnOptionEnabled && tcpHeader->getAckBit() && !tcpHeader->getSynBit()) {
+        state->accEcnAckCount++;
+        if (state->accEcnOptionBeaconAcks > 0 && state->accEcnAckCount % state->accEcnOptionBeaconAcks == 0)
+            if (state->accEcnOptionKindAlternates)
+                state->accEcnOptionNextKindIsAccEcn1 = !state->accEcnOptionNextKindIsAccEcn1;
+    }
+
     // ECN:
-    // We decided to use ECT(1) to indicate ECN capable transport.
+    // We decided to use ECT(0) to indicate ECN capable transport.
     //
-    // rfc-3168, page 6:
-    // Routers treat the ECT(0) and ECT(1) codepoints
+    // RFC 3168, page 6
+    // "Routers treat the ECT(0) and ECT(1) codepoints
     // as equivalent.  Senders are free to use either the ECT(0) or the
-    // ECT(1) codepoint to indicate ECT.
+    // ECT(1) codepoint to indicate ECT."
     //
-    // rfc-3168, page 20:
-    // For the current generation of TCP congestion control algorithms, pure
+    // RFC 3168, page 20
+    // "For the current generation of TCP congestion control algorithms, pure
     // acknowledgement packets (e.g., packets that do not contain any
-    // accompanying data) MUST be sent with the not-ECT codepoint.
+    // accompanying data) MUST be sent with the not-ECT codepoint."
     //
-    // rfc-3168, page 20:
-    // ECN-capable TCP implementations MUST NOT set either ECT codepoint
-    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets
-    tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification((state->ect && !state->sndAck && !state->rexmit) ? IP_ECN_ECT_1 : IP_ECN_NOT_ECT);
+    // RFC 3168, page 20
+    // "ECN-capable TCP implementations MUST NOT set either ECT codepoint
+    // (ECT(0) or ECT(1)) in the IP header for retransmitted data packets"
+    // The one ECT decision for this segment is made below, and it is the only
+    // one: ecnMarkAll's mark-everything semantics are folded into it.
+    // RFC 3168 section 6.1.1: a host MUST NOT set an ECT codepoint on a SYN or
+    // SYN-ACK -- those are control segments and are always sent Not-ECT (this also
+    // matches Linux, whose AccECN/ECN SYN-ACK carries Not-ECT in the IP header
+    // even though state->ect is already true by then).
+    //
+    // AccECN (draft-ietf-tcpm-accurate-ecn section 3.1.5) reverses two of RFC
+    // 3168's restrictions: once AccECN is negotiated, the Data Sender sets ECT on
+    // EVERY packet except the SYN/SYN-ACK -- including pure ACKs, retransmissions
+    // and window probes -- so that congestion can be measured on the whole flow,
+    // not just new-data packets (Linux marks ECT(0) identically). Classic RFC 3168
+    // keeps the pure-ACK and retransmission exclusions.
+    bool markEct;
+    if (state->accEcnNegotiated)
+        markEct = state->ect && !tcpHeader->getSynBit();
+    else if (state->ecnMarkAll)
+        markEct = state->ect; // legacy testing knob: every packet, SYNs included
+    else
+        // classic RFC 3168 / Linux tcp_ecn_send(): ECT only on DATA-bearing,
+        // non-retransmitted, non-SYN segments -- a data-less FIN or pure ACK
+        // goes Not-ECT (the sndAck flag missed data-less FINs).
+        markEct = state->ect && tcpSegment->getByteLength() > 0
+                  && !state->rexmit && !tcpHeader->getSynBit();
+    tcpSegment->addTagIfAbsent<EcnReq>()->setExplicitCongestionNotification(markEct ? IP_ECN_ECT_0 : IP_ECN_NOT_ECT);
 
     tcpHeader->setChecksum(0);
     tcpHeader->setChecksumMode(tcpMain->checksumMode);
@@ -824,10 +919,13 @@ void TcpConnection::configureStateVariables()
         state->ecnMode = TCP_ECN_MODE_OFF;
     // state->ecnWillingness reflects "willing to use ECN in some capacity" (accept and/or
     // initiate) and is what the PASSIVE-open call sites (processSynInListen/sendSynAck) key
-    // off, unchanged since before AccECN -- true for rfc3168 and both AccECN modes (passive
-    // mode's own asymmetry, and accecn-passive's, is about *initiating*, which the ACTIVE-open
-    // call site (sendSyn()) decides separately, directly from ecnMode, not from this flag).
-    state->ecnWillingness = state->ecnMode >= TCP_ECN_MODE_RFC3168;
+    // off, unchanged since before AccECN -- true for every mode but "off". The asymmetry of
+    // "passive" and "accecn-passive" is about *initiating*, which the ACTIVE-open call site
+    // (sendSyn()) decides separately, directly from ecnMode, not from this flag. (This used
+    // to read `>= TCP_ECN_MODE_RFC3168`, which happens to exclude TCP_ECN_MODE_PASSIVE=1 --
+    // leaving Linux's own out-of-box default unable to accept the ECN-setup SYN it exists to
+    // accept. gtests fastopen/server/pure-syn-data pins the "> SE." reply under tcp_ecn=2.)
+    state->ecnWillingness = state->ecnMode != TCP_ECN_MODE_OFF;
     state->accEcnOptionEnabled = tcpMain->par("accEcnOptionEnabled");
     state->accEcnOptionBeaconAcks = tcpMain->par("accEcnOptionBeaconAcks");
     state->accEcnOptionKindAlternates = tcpMain->par("accEcnOptionKindAlternates");
@@ -1031,6 +1129,25 @@ void TcpConnection::sendSyn()
 //        EV << "non-ECN-setup SYN packet sent\n";
     }
 
+    // ECN blackhole fallback (Linux net.ipv4.tcp_ecn_fallback, on by default):
+    // a SYN that has already been retransmitted twice with its ECN bits set is
+    // most likely being dropped BECAUSE of them (middleboxes that choke on
+    // ECE/CWR/AE are the reason this fallback exists), so the third and later
+    // transmissions go out bare. Only the wire bits are cleared -- aeSynSent /
+    // ecnSynSent stay set, so a peer that does answer with an ECN or AccECN
+    // SYN-ACK is still understood and the negotiation completes normally
+    // (accecn syn_ace_flags_acked_after_retransmit pins exactly that: a bare
+    // 3rd SYN, an AccECN SYN-ACK, and a reflecting AccECN 3rd ACK).
+    if (state->syn_rexmit_count >= 2
+        && (tcpHeader->getEceBit() || tcpHeader->getCwrBit() || tcpHeader->getAeBit()))
+    {
+        EV << "SYN retransmitted " << state->syn_rexmit_count
+           << " times: falling back to a non-ECN-setup SYN\n";
+        tcpHeader->setEceBit(false);
+        tcpHeader->setCwrBit(false);
+        tcpHeader->setAeBit(false);
+    }
+
     // write header options
     writeHeaderOptions(tcpHeader);
     Packet *fp = new Packet("SYN");
@@ -1050,10 +1167,47 @@ void TcpConnection::sendSynAck()
     updateRcvWnd();
     tcpHeader->setWindow(state->rcv_wnd);
 
-    state->snd_max = state->snd_nxt = state->iss + 1;
+    // Floor snd_nxt/snd_max at iss+1 (the SYN-ACK consumes iss) but NEVER roll
+    // them back: a SYN-ACK RETRANSMISSION for a TCP Fast Open server that already
+    // sent response data from SYN_RCVD must keep that data counted in snd_max, or
+    // the next data RTO retransmits zero bytes and asserts. The previous guard
+    // was dead code -- it overwrote snd_max with iss+1 first, so its own
+    // seqLess() checks compared against the just-written value and never fired.
+    if (seqLess(state->snd_nxt, state->iss + 1))
+        state->snd_nxt = state->iss + 1;
+    if (seqLess(state->snd_max, state->iss + 1))
+        state->snd_max = state->iss + 1;
+    emit(sndMaxSignal, state->snd_max);
 
     // ECN
-    if (state->ecnWillingness) {
+    if (state->accEcnNegotiated) {
+        // draft-ietf-tcpm-accurate-ecn 3WHS accept codepoint. The ACE field of the SYN-ACK
+        // is not a fixed value: it REFLECTS the IP-ECN codepoint the SYN arrived with
+        // (RFC 9768 section 3.2.3.2), which is how the client learns whether the network
+        // preserved, cleared or CE-marked the ECN field of its SYN. Not-ECT -- by far the
+        // common case, and what an unmarked SYN yields -- reflects as 0b010, i.e. exactly
+        // the "SW." accept codepoint this used to hardcode.
+        // The server marks ECT the same as the client (the active-open side already does
+        // this on accept) -- AccECN is still ECN-capable transport, and a server that never
+        // marks ECT can never actually observe a CE mark to report back via the ACE field.
+        // ect and accEcnNegotiated are NOT mutually exclusive: once negotiated, both are true
+        // together, and every classic-ECN read/write site that consumes eceBit/cwrBit for its
+        // own (ECE-echo / CWR) purposes must additionally check !accEcnNegotiated, since those
+        // same 3 bits are repurposed post-handshake as the ACE counter (see sendToIP()).
+        uint8_t ace = accEcnReflectedAce(state->accEcnReflectCodepoint);
+        tcpHeader->setAeBit((ace >> 2) & 0x1);
+        tcpHeader->setCwrBit((ace >> 1) & 0x1);
+        tcpHeader->setEceBit(ace & 0x1);
+        state->ect = true;
+        EV << "AccECN-setup SYN-ACK sent... AccECN is enabled (ACE=" << (int)ace << ", reflecting the SYN's IP-ECN)\n";
+    }
+    else if (state->ecnWillingness && state->endPointIsWillingECN) {
+        // Both halves of the condition matter: RFC 3168 section 6.1.1 makes the
+        // ECN-setup SYN-ACK an ANSWER to an ECN-setup SYN, so being willing is not
+        // on its own a licence to send one (Linux tcp_ecn_make_synack keys off the
+        // request sock's ecn_ok, which is only set when the SYN asked). Answering a
+        // plain SYN with ECE=1 claims a negotiation the client never opened --
+        // accecn notecn_then_accecn_syn pins the bare "> S." reply.
         tcpHeader->setEceBit(true);
         tcpHeader->setCwrBit(false);
         EV << "ECN-setup SYN-ACK packet sent\n";
@@ -1064,18 +1218,38 @@ void TcpConnection::sendSynAck()
         if (state->endPointIsWillingECN)
             EV << "non-ECN-setup SYN-ACK packet sent\n";
     }
-    if (state->ecnWillingness && state->endPointIsWillingECN) {
+    if (state->accEcnNegotiated) {
+        // ect already set to true above.
+    }
+    else if (state->ecnWillingness && state->endPointIsWillingECN) {
         state->ect = true;
         EV << "both end-points are willing to use ECN... ECN is enabled\n";
     }
     else { // TODO not sure if we have to.
-           // rfc-3168, page 16:
-           // A host that is not willing to use ECN on a TCP connection SHOULD
+           // RFC 3168, page 16
+           // "A host that is not willing to use ECN on a TCP connection SHOULD
            // clear both the ECE and CWR flags in all non-ECN-setup SYN and/or
-           // SYN-ACK packets that it sends to indicate this unwillingness.
+           // SYN-ACK packets that it sends to indicate this unwillingness."
         state->ect = false;
         if (state->endPointIsWillingECN)
             EV << "ECN is disabled\n";
+    }
+
+    // ECN blackhole fallback, SYN-ACK side (the mirror of the sendSyn() case):
+    // twice retransmitted with the ECN bits set is taken as evidence that they
+    // are why it is not getting through, so the third and later SYN-ACKs go out
+    // bare. The negotiation state is deliberately left alone -- accecn
+    // multiple_syn_ack_drop pins a handshake that still completes on the bare
+    // SYN-ACK, and listen_opt_drop pins the retransmit ladder itself (option
+    // dropped on the 1st retransmit, ECN bits on the 2nd).
+    if (state->syn_rexmit_count >= 2
+        && (tcpHeader->getEceBit() || tcpHeader->getCwrBit() || tcpHeader->getAeBit()))
+    {
+        EV << "SYN-ACK retransmitted " << state->syn_rexmit_count
+           << " times: falling back to a non-ECN-setup SYN-ACK\n";
+        tcpHeader->setEceBit(false);
+        tcpHeader->setCwrBit(false);
+        tcpHeader->setAeBit(false);
     }
 
     // write header options
@@ -1156,10 +1330,12 @@ void TcpConnection::sendAck()
     // packets it sends (whether they acknowledge CE data packets or non-CE
     // data packets) until it receives a CWR packet (a packet with the CWR
     // flag set).  After the receipt of the CWR packet, acknowledgments for
-    // subsequent non-CE data packets do not have the ECN-Echo flag set.
+    // subsequent non-CE data packets do not have the ECN-Echo flag set."
 
     TcpStateVariables *state = getStateForUpdate();
-    if (state && state->ect) {
+    // AccECN connections repurpose eceBit as part of the post-handshake ACE counter
+    // (encoded later in sendToIP()); classic ECE-echo must not also write it here.
+    if (state && state->ect && !state->accEcnNegotiated) {
         if (tcpAlgorithm->shouldMarkAck()) {
             tcpHeader->setEceBit(true);
             EV_INFO << "In ecnEcho state... send ACK with ECE bit set\n";
@@ -1286,18 +1462,76 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     tcpHeader->setAckBit(true);
     tcpHeader->setWindow(updateRcvWnd());
 
-    // ECN
-    if (state->ect && state->sndCwr) {
+    // ECN. AccECN connections repurpose cwrBit as part of the post-handshake ACE counter
+    // (encoded later in sendToIP()); classic CWR-on-reduction must not also write it here.
+    if (state->ect && state->sndCwr && !state->accEcnNegotiated) {
         tcpHeader->setCwrBit(true);
         EV_INFO << "set CWR bit\n";
         state->sndCwr = false;
     }
 
-    // TODO when to set PSH bit?
     // TODO set URG bit if needed
     ASSERT(bytes == tcpSegment->getByteLength());
 
     state->snd_nxt += bytes;
+
+    // MSG_EOR: set PSH when this segment's last byte lands exactly
+    // on a still-pending record boundary -- signals the peer to hand the data up to
+    // its application without waiting for more, mirroring a real PSH-at-record-
+    // boundary policy. A boundary not yet reached (this segment fell short, e.g.
+    // clamped further by the MSS/options budget above) stays pending in eorSeqNums
+    // and is retried by the connection's next sendSegment() call.
+    if (eorSeqNums.count(state->snd_nxt))
+        tcpHeader->setPshBit(true);
+
+    // TCP_CORK / MSG_MORE: a corked partial being flushed carries PSH when its
+    // producing write lacked MSG_MORE, or when the cork timer forced the flush
+    // (Linux tcp_mark_push / tcp_write_wakeup). sendData sets pushThisSegment.
+    if (state->pushThisSegment)
+        tcpHeader->setPshBit(true);
+
+    // Linux parity (pushSegmentsOnWriteBoundary): Linux tags the tail skb of
+    // every write with PSH at sendmsg time (tcp_mark_push), so the segment
+    // carrying a write's last byte is PSHed even when the NEXT write is
+    // already buffered behind it, and a retransmission of that segment keeps
+    // the flag. The boundaries were recorded per-write in
+    // enqueueSendCommandData (pushSeqNums); snd_nxt has just advanced past
+    // this segment's payload, so a hit means this segment ends a write.
+    // PSH is inert on INET's own receiver (it only logs "ignoring"), so this is
+    // pure wire-realism; default-off pending a maintainer-gated flip.
+    //
+    // Skip a corked partial being flushed (corkFlush = explicit uncork/nodelay/timer,
+    // corkedDataPending = a previously-held partial going out now): its PSH is fully
+    // governed by the cork rule above (pushThisSegment). MSG_MORE writes never
+    // record a boundary, matching Linux's mark_push skip for MSG_MORE.
+    if (state->pushOnWriteBoundary && bytes > 0 && pushSeqNums.count(state->snd_nxt)
+            && !state->corkFlush && !state->corkedDataPending)
+        tcpHeader->setPshBit(true);
+
+    // Linux forced_push (tcp_sendmsg): mid-write PSH boundaries were computed at
+    // enqueue time (see enqueueSendCommandData); a hit means this segment's last
+    // byte is such a boundary. Corked partials keep their own PSH rule (above).
+    if (state->pushOnWriteBoundary && bytes > 0 && !state->corkFlush && !state->corkedDataPending
+            && forcedPushSeqNums.count(state->snd_nxt))
+        tcpHeader->setPshBit(true);
+
+    // MSG_ZEROCOPY: fire a completion notification for every
+    // pending zerocopy SEND whose data has now been transmitted (its boundary seq
+    // is at or behind the just-advanced snd_nxt) -- unlike MSG_EOR's clamp, a
+    // single segment may legitimately span (and thus complete) several small
+    // zerocopy-marked SENDs at once, so this drains all that are now covered
+    // rather than checking for one exact match.
+    while (!zerocopySeqNums.empty() && !seqGreater(zerocopySeqNums.begin()->first, state->snd_nxt)) {
+        uint32_t zerocopyId = zerocopySeqNums.begin()->second;
+        zerocopySeqNums.erase(zerocopySeqNums.begin());
+        EV_INFO << "Notifying app: ZEROCOPY_COMPLETION id=" << zerocopyId << "\n";
+        auto *completionIndication = new Indication("ZerocopyCompletion", TCP_I_ZEROCOPY_COMPLETION);
+        auto *completionInfo = new TcpZerocopyCompletionInfo();
+        completionInfo->setZerocopyId(zerocopyId);
+        completionIndication->addTag<SocketInd>()->setSocketId(socketId);
+        completionIndication->setControlInfo(completionInfo);
+        sendToApp(completionIndication);
+    }
 
     // check if afterRto bit can be reset
     if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
@@ -1542,13 +1776,37 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     uint32_t old_snd_nxt = state->snd_nxt;
 
     // start sending 'bytesToSend' bytes
-    EV_INFO << "May send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin << ", in buffer " << buffered << " bytes)\n";
+    EV_INFO << "May send " << bytesToSend << " bytes (allowedToSend " << allowedToSend << ", in buffer " << buffered << " bytes)\n";
 
     // send whole segments
+    uint32_t fullSegIdx = 0;
+    uint32_t oldSndMax = state->snd_max;
     while (bytesToSend >= effectiveMss) {
+        // Retransmitted segments (below the pre-send high-water mark) are
+        // their own skbs in Linux and never join a new-data GSO chunk: the
+        // two-segment pairing below counts NEW data only, so a leading
+        // retransmit doesn't shift the PSH parity (syn-data-only-syn-acked:
+        // P. 1:1421 rexmit, then chunks (1421:2881,2881:4341^P)...).
+        bool newData = seqGE(state->snd_nxt, oldSndMax);
+        // Linux forces PSH on every multi-segment GSO burst (tcp_transmit_skb:
+        // tcp_skb_pcount(skb) > 1), and pacing clamps bursts to two segments
+        // at fresh-connection rates (tcp_tso_autosize's min_tso_segs floor:
+        // pacing_rate>>10 stays below the MSS until srtt drops well under
+        // 10ms). After GSO split the flag sits on the burst's LAST wire slice,
+        // so a write spanning several MSS carries PSH on every second full
+        // segment -- on top of the write-tail PSH from pushSeqNums.
+        // Same wire-realism gate as the other Linux PSH rules; retransmits
+        // and other send paths are untouched (a rexmitted slice loses the
+        // forced PSH in Linux too, as the split skb's pcount drops to 1).
+        state->pushThisSegment = state->pushOnWriteBoundary && newData && (fullSegIdx % 2 == 1);
         uint32_t sentBytes = sendSegment(effectiveMss);
+        state->pushThisSegment = false;
+        if (newData)
+            fullSegIdx++;
         ASSERT(bytesToSend >= sentBytes);
         bytesToSend -= sentBytes;
+        allowedToSend -= sentBytes;
+        buffered -= sentBytes;
     }
 
     if (bytesToSend > 0) {
@@ -1849,6 +2107,14 @@ void TcpConnection::retransmitData()
 void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
 {
     EV_INFO << "Tcp Header Option(s) received:\n";
+
+    // AccECN TCP option: reset per-segment before scanning this segment's options,
+    // so a segment that doesn't carry the option never lets processAckInEstabEtc() reuse
+    // a delta computed from some earlier segment.
+    state->accEcnOptionCebDeltaValid = false;
+    state->accEcnOptionE0DeltaValid = false;
+    state->accEcnOptionE1DeltaValid = false;
+    state->accEcnTsProgress = false;
 
     for (uint i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
         const TcpOption *option = tcpHeader->getHeaderOption(i);
@@ -2434,36 +2700,37 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             state->sack_enabled = state->sack_support && state->snd_sack_perm && state->rcv_sack_perm;
             EV_INFO << "Tcp Header Option SACK_PERMITTED sent, SACK (sack_enabled) is set to " << state->sack_enabled << "\n";
         }
-
-        // TS header option
-        if (state->ts_support && (state->rcv_initial_ts || (fsm.getState() == TCP_S_INIT
-                                                            || (fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count > 0))))
-        {
-            if (!state->sack_support) { // if SACK is supported by host, do not add NOPs to this segment
-                // 2 padding bytes
-                tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
-                tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
-            }
-
-            TcpOptionTimestamp *option = new TcpOptionTimestamp();
-
-            // Update TS variables
-            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
-            option->setSenderTimestamp(convertSimtimeToTS(simTime()));
-
-            // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
-            // RFC 1323, page 13:
-            // "The Timestamp Echo Reply field (TSecr) is only valid if the ACK
-            // bit is set in the Tcp header; if it is valid, it echos a times-
-            // tamp value that was sent by the remote Tcp in the TSval field
-            // of a Timestamps option.  When TSecr is not valid, its value
-            // must be zero."
-            option->setEchoedTimestamp(tcpHeader->getAckBit() ? state->ts_recent : 0);
-
-            state->snd_initial_ts = true;
-            state->ts_enabled = state->ts_support && state->snd_initial_ts && state->rcv_initial_ts;
-            EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent, TS (ts_enabled) is set to " << state->ts_enabled << "\n";
+        // AccECN option on the SYN-ACK (draft-ietf-tcpm-accurate-ecn section 3.2.3):
+        // once the incoming SYN negotiated AccECN, the SYN-ACK carries the AccECN
+        // option seeding the byte counters at their wire-init offsets. Gated on
+        // getAckBit() so it rides the SYN-ACK but never the client's own initial
+        // bare SYN -- that SYN advertises AccECN with the flag-bit combination
+        // alone, no option (confirmed against the corpus's "> SEWA ... <mss,sackOK,
+        // ...>" client SYN, which carries no ECN option). Only the FIRST SYN-ACK
+        // carries the option: on a SYN-ACK retransmit (syn_rexmit_count > 0) Linux
+        // conservatively omits the AccECN option -- since a middlebox that dropped
+        // the option-bearing SYN-ACK is a plausible reason for the retransmit -- so
+        // the retransmit falls back to a plain SYN-ACK (mss/WS/SACK only), matching
+        // the corpus's accecn *_drop / *_rxmt scripts. The kind is fixed to ACCECN1
+        // (the corpus's observed first-emission ordering E1B,CEB,E0B); the
+        // post-handshake alternation start is a separate concern. This block is pure
+        // (it may run as a header-size dry run) -- it mutates no beacon state.
+        if (state->accEcnNegotiated && state->accEcnOptionEnabled && tcpHeader->getAckBit()
+                && state->syn_rexmit_count == 0) {
+            // Pad with NOPs so the options area stays 4-byte aligned once this
+            // 11-byte option is appended -- same convention as the other options.
+            while (tcpHeader->getHeaderOptionArrayLength().get<B>() % 4 != 1)
+                tcpHeader->appendHeaderOption(new TcpOptionNop());
+            TcpOptionAccEcn *option = new TcpOptionAccEcn();
+            option->setKind(TCPOPTION_ACCECN1);
+            // Wire init offsets: E0B/E1B start at 1, CEB at 0.
+            option->setEct0Bytes(state->rcvEct0Bytes + 1);
+            option->setEct1Bytes(state->rcvEct1Bytes + 1);
+            option->setCeBytes(state->rcvCeBytes);
             tcpHeader->appendHeaderOption(option);
+            EV_INFO << "Tcp Header Option AccECN on SYN-ACK(kind=" << option->getKind()
+                    << ", E0B=" << option->getEct0Bytes() << ", E1B=" << option->getEct1Bytes()
+                    << ", CEB=" << option->getCeBytes() << ") sent\n";
         }
 
         // TODO add new TCPOptions here once they are implemented

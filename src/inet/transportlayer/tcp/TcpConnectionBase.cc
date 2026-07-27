@@ -13,35 +13,19 @@
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
 
 Define_Module(TcpConnection);
 
-simsignal_t TcpConnection::stateSignal = registerSignal("state"); // FSM state
-simsignal_t TcpConnection::sndWndSignal = registerSignal("sndWnd"); // snd_wnd
-simsignal_t TcpConnection::rcvWndSignal = registerSignal("rcvWnd"); // rcv_wnd
-simsignal_t TcpConnection::rcvAdvSignal = registerSignal("rcvAdv"); // current advertised window (=rcv_adv)
-simsignal_t TcpConnection::sndNxtSignal = registerSignal("sndNxt"); // sent seqNo
-simsignal_t TcpConnection::sndAckSignal = registerSignal("sndAck"); // sent ackNo
-simsignal_t TcpConnection::rcvSeqSignal = registerSignal("rcvSeq"); // received seqNo
-simsignal_t TcpConnection::rcvAckSignal = registerSignal("rcvAck"); // received ackNo (=snd_una)
-simsignal_t TcpConnection::unackedSignal = registerSignal("unacked"); // number of bytes unacknowledged
-simsignal_t TcpConnection::dupAcksSignal = registerSignal("dupAcks"); // current number of received dupAcks
-simsignal_t TcpConnection::pipeSignal = registerSignal("pipe"); // current sender's estimate of bytes outstanding in the network
-simsignal_t TcpConnection::sndSacksSignal = registerSignal("sndSacks"); // number of sent Sacks
-simsignal_t TcpConnection::rcvSacksSignal = registerSignal("rcvSacks"); // number of received Sacks
-simsignal_t TcpConnection::rcvOooSegSignal = registerSignal("rcvOooSeg"); // number of received out-of-order segments
-simsignal_t TcpConnection::rcvNASegSignal = registerSignal("rcvNASeg"); // number of received not acceptable segments
-simsignal_t TcpConnection::sackedBytesSignal = registerSignal("sackedBytes"); // current number of received sacked bytes
-simsignal_t TcpConnection::tcpRcvQueueBytesSignal = registerSignal("tcpRcvQueueBytes"); // current amount of used bytes in tcp receive queue
-simsignal_t TcpConnection::tcpRcvQueueDropsSignal = registerSignal("tcpRcvQueueDrops"); // number of drops in tcp receive queue
-simsignal_t TcpConnection::tcpRcvPayloadBytesSignal = registerSignal("tcpRcvPayloadBytes"); // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
-
+simsignal_t TcpConnection::deliveredCeSignal = registerSignal("deliveredCe"); // AccECN: cumulative resolved count of CE-marked packets the peer has reported via the ACE field
+simsignal_t TcpConnection::deliveredCeBytesSignal = registerSignal("deliveredCeBytes"); // AccECN: cumulative CE byte count from AccECN option evidence only
 TcpStateVariables::~TcpStateVariables()
 {
 }
