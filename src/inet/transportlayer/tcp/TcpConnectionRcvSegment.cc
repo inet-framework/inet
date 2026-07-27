@@ -131,7 +131,21 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, c
         payloadSeq += delta;
         payloadLength -= delta;
     }
-    return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + state->maxRcvBuffer);
+    // Linux exception (tcp_data_queue): an in-order segment arriving to an
+    // EMPTY receive queue is accepted even beyond the buffer limit -- the
+    // advertised window then collapses toward 0 until the application drains
+    // it. A hard drop would force the peer to retransmit forever against a
+    // receiver that has room the moment its app reads (rcv_zero_wnd_fin pins
+    // 'ack 60001 win 0' for a single 60000B segment against SO_RCVBUF 20000).
+    if (payloadLength > 0 && payloadSeq == state->rcv_nxt
+            && receiveQueue->getAcknowledgedDataLength() == 0
+            && receiveQueue->getAmountOfBufferedBytes() == 0)
+        return true;
+    // buffer CAPACITY, not the advertised window: rcvBufferSize (Linux
+    // sk_rcvbuf, e.g. tcp_rmem[1]) when configured, else the historical
+    // maxRcvBuffer conflation
+    uint32_t bufferCap = state->rcvBufferSize > 0 ? std::max(state->rcvBufferSize, state->maxRcvBuffer) : state->maxRcvBuffer;
+    return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + bufferCap);
 }
 
 TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader)

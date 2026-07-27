@@ -135,6 +135,79 @@ class INET_API TcpConnection : public SimpleModule
     TcpReceiveQueue *receiveQueue = nullptr;
     TcpSackRexmitQueue *rexmitQueue = nullptr;
 
+    // MSG_EOR: sequence numbers marking the end of a SEND that
+    // requested a record boundary. sendSegment() must never build a segment
+    // spanning one of these; keyed on sequence number (not send-queue position)
+    // so it survives retransmission for free. Pruned lazily in sendSegment().
+    std::set<uint32_t> eorSeqNums;
+    // per-write PSH boundaries (Linux tcp_mark_push at sendmsg time), consumed
+    // by sendSegment(); only populated under pushSegmentsOnWriteBoundary
+    std::set<uint32_t> pushSeqNums;
+    // Linux forced_push boundaries (tcp_sendmsg copy loop): wire segments ending
+    // exactly here carry PSH; recorded at enqueue time, purged as they are acked
+    std::set<uint32_t> forcedPushSeqNums;
+
+    // windowShrinkAllowed (Linux tcp_shrink_window=1) receive-buffer accounting:
+    // Linux charges the buffer at skb-TRUESIZE granularity and scales free space
+    // by the measured payload/truesize ratio (tp->scaling_ratio, a u8 fraction
+    // of 256 updated in tcp_measure_rcv_mss). Each accepted in-order data
+    // segment appends (payloadBytes, truesize) here; explicit application reads
+    // release entries front-to-back (an skb is freed only once fully copied).
+    std::deque<std::pair<uint32_t, uint32_t>> rcvSkbChain;
+    uint64_t rcvBufOccupancy = 0; // sum of truesizes in rcvSkbChain (Linux sk_rmem_alloc)
+    uint8_t rcvScalingRatio = 128; // Linux TCP_DEFAULT_SCALING_RATIO (50% of 256)
+    uint32_t rcvMssEstimate = 536; // Linux icsk_ack.rcv_mss seed; gates ratio updates
+
+  public:
+    // Set when a data segment reaching BEYOND the advertised-window promise
+    // (rcv_adv) was nevertheless accepted via the empty-receive-queue
+    // exception (tcp_sequence's over-accept): the kernel does NOT send an
+    // immediate ACK for such an arrival -- its own selftest documents this
+    // ("A too big packet is accepted if the receive queue is empty. It does
+    // not trigger an immediate ACK", tcp_rcv_neg_window; the 7.1.3 golden
+    // provably sends none, even though a static reading of the quickack path
+    // predicts one). Consumed and cleared by
+    // TcpAlgorithmBase::receiveSeqChanged's adaptive branch, which then takes
+    // the DELAYED path.
+    bool overWindowAcceptPending = false;
+
+  protected:
+
+    // Linux's skb truesize for a tun-received TCP segment: the payload plus
+    // IP+TCP headers and skb_shared_info (320B), allocated page-granular for
+    // large packets (tun_alloc_skb's paged path) or from a power-of-two page
+    // frag for small ones (tun_build_skb), plus struct sk_buff (~232B).
+    // Pins rcv_wnd_shrink_allowed's golden offers exactly (10000B payload ->
+    // 12520, 1023B -> 2280).
+    static uint32_t linuxSkbTruesize(uint32_t tcpPayloadBytes)
+    {
+        uint32_t base = tcpPayloadBytes + 40 + 320;
+        uint32_t alloc;
+        if (base > 16384)
+            // very large packets take order-3 (32KB) page compounds
+            // (alloc_skb_with_frags / PAGE_ALLOC_COSTLY_ORDER) -- two 39000/
+            // 60000-byte OOO injections then genuinely overflow a 131072
+            // rcvbuf (ooo-before-and-after-accept pins the resulting
+            // tcp_clamp_window growth)
+            alloc = ((base + 32767) / 32768) * 32768;
+        else if (base > 4096)
+            alloc = ((base + 4095) / 4096) * 4096;
+        else {
+            alloc = 1024;
+            while (alloc < base)
+                alloc <<= 1;
+        }
+        return alloc + 232;
+    }
+
+    // MSG_ZEROCOPY: pending completion notifications, keyed on the
+    // sequence number marking the end of a zerocopy-marked SEND's data -> the id to
+    // report once transmission (sendSegment() advancing snd_nxt past that seq)
+    // reaches it. IDs are assigned sequentially per connection, mirroring Linux's
+    // own SO_ZEROCOPY id assignment.
+    std::map<uint32_t, uint32_t> zerocopySeqNums;
+    uint32_t nextZerocopyId = 0;
+
     // TCP behavior in data transfer state
     TcpAlgorithm *tcpAlgorithm = nullptr;
 
