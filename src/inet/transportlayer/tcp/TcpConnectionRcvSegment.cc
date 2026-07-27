@@ -502,9 +502,9 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
                 if (seqGreater(state->snd_una, old_snd_una)) {
                     // notify
-                    tcpAlgorithm->receivedDataAck(old_snd_una);
+                    tcpAlgorithm->receivedAckForUnackedData(old_snd_una);
 
-                    // in the receivedDataAck we need the old value
+                    // in the receivedAckForUnackedData we need the old value
                     state->dupacks = 0;
 
                     emit(dupAcksSignal, state->dupacks);
@@ -1223,7 +1223,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // which are thereby entirely acknowledged."
         if (state->ts_enabled)
             tcpAlgorithm->rttMeasurementCompleteUsingTS(getTSecr(tcpHeader));
-        // Note: If TS is disabled the RTT measurement is completed in TcpBaseAlg::receivedDataAck()
+        // Note: If TS is disabled the RTT measurement is completed in TcpBaseAlg::receivedAckForUnackedData()
 
         uint32_t discardUpToSeq = state->snd_una;
 
@@ -1248,9 +1248,9 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // otherwise we would use an old ACKNo
         if (payloadLength == 0 && fsm.getState() != TCP_S_SYN_RCVD) {
             // notify
-            tcpAlgorithm->receivedDataAck(old_snd_una);
+            tcpAlgorithm->receivedAckForUnackedData(old_snd_una);
 
-            // in the receivedDataAck we need the old value
+            // in the receivedAckForUnackedData we need the old value
             state->dupacks = 0;
 
             emit(dupAcksSignal, state->dupacks);
@@ -1260,7 +1260,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         ASSERT(seqGreater(tcpHeader->getAckNo(), state->snd_max)); // from if-ladder
 
         // send an ACK, drop the segment, and return.
-        tcpAlgorithm->receivedAckForDataNotYetSent(tcpHeader->getAckNo());
+        tcpAlgorithm->receivedAckForUnsentData(tcpHeader->getAckNo());
         state->dupacks = 0;
 
         emit(dupAcksSignal, state->dupacks);

@@ -459,7 +459,7 @@ void TcpBaseAlg::receiveSeqChanged()
     }
 }
 
-void TcpBaseAlg::receivedDataAck(uint32_t firstSeqAcked)
+void TcpBaseAlg::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     if (!state->ts_enabled) {
         // if round-trip time measurement is running, check if rtseq has been acked
@@ -558,7 +558,7 @@ void TcpBaseAlg::receivedDuplicateAck()
     //
 }
 
-void TcpBaseAlg::receivedAckForDataNotYetSent(uint32_t seq)
+void TcpBaseAlg::receivedAckForUnsentData(uint32_t seq)
 {
     // Note: In this case no immediate ACK will be send because not mentioned
     // in [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].
