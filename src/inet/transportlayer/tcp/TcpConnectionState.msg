@@ -241,6 +241,14 @@ struct TcpStateVariables
     // declared here for the code above that already uses it:
     uint32_t maxPacketsOut = 0;    // peak segments in flight observed at send time (Linux max_packets_out); drives the RFC 5681 cwnd-limited slow-start gate
     uint32_t snd_effmss = 0;        // effective sender maximum segment size without TCP/IP header options
+    bool accEcnNegotiated = false; // set once 3WHS negotiation determines this connection uses AccECN, not classic ECN or no-ECN
+    uint8_t accEcnOptMinFields = 0;
+    bool accEcnOptionEnabled = false; // cached from the accEcnOptionEnabled param at configureStateVariables() time
+    uint64_t deliveredBytes = 0;   // cumulative newly-delivered (cumulatively acked + selectively acked) bytes
+    uint32_t lastRcvdTSecr = 0;    // most recent TSecr echoed back by the peer (Eifel input)
+    simtime_t minRtt = 0;         // minimum RTT observed on the connection (0 = unset)
+    uint64_t prrDeliveredMark = 0; // snapshot of deliveredBytes at the start of the current segment (per-ACK delta = newly acked+sacked)
+    bool sawAccEcnOpt = false;
 };
 
 cplusplus(TcpStateVariables) {{
