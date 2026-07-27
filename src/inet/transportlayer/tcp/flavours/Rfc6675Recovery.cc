@@ -362,6 +362,10 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
                 //"
                 EV_DETAIL << "Received D-SACK below cumulative ACK=" << tcpHeader->getAckNo()
                           << " D-SACK: " << tmp.str() << endl;
+                // a D-SACK also reveals reordering of the (spuriously retransmitted)
+                // segment: grow the reordering degree so it stops recurring.
+                if (state->adaptiveReorderingEnabled)
+                    checkSackReordering(tmp.getStart());
                 // Note: RFC 2883 does not specify what should be done in this case.
                 // RFC 2883, page 9:
                 //"
@@ -387,6 +391,10 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
                     EV_DETAIL << "Received D-SACK above cumulative ACK=" << tcpHeader->getAckNo()
                               << " D-SACK: " << tmp.str()
                               << ", SACK: " << tmp2.str() << endl;
+                    // a D-SACK also reveals reordering of the (spuriously retransmitted)
+                    // segment: grow the reordering degree so it stops recurring.
+                    if (state->adaptiveReorderingEnabled)
+                        checkSackReordering(tmp.getStart());
                     // Note: RFC 2883 does not specify what should be done in this case.
                     // RFC 2883, page 9:
                     //"
@@ -399,7 +407,18 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
             }
 
             if (seqGreater(tmp.getEnd(), tcpHeader->getAckNo()) && seqGreater(tmp.getEnd(), state->snd_una)) {
-                conn->getRexmitQueueForUpdate()->setSackedBit(tmp.getStart(), tmp.getEnd());
+                // FACK before this block is applied: needed to recognize that the
+                // block NEWLY sacks data below the highest already-SACKed sequence.
+                uint32_t fackBefore = conn->getRexmitQueue()->getHighestSackedSeqNum();
+                uint32_t newlySackedLow = conn->getRexmitQueueForUpdate()->setSackedBit(tmp.getStart(), tmp.getEnd());
+                // Reordering detection (Linux tcp_sacktag_one/tcp_check_sack_reordering):
+                // a never-retransmitted range newly SACKed BELOW the prior FACK proves
+                // the network delivered it out of order -- data above it arrived first.
+                // A re-reported or merely grown block returns newlySackedLow at/above
+                // fackBefore and is ignored, as are SACKs of retransmissions.
+                if (state->adaptiveReorderingEnabled && newlySackedLow != 0
+                        && fackBefore != 0 && seqLess(newlySackedLow, fackBefore))
+                    checkSackReordering(newlySackedLow);
             }
             else
                 EV_DETAIL << "Received SACK below total cumulative ACK snd_una=" << state->snd_una << "\n";
@@ -471,8 +490,10 @@ bool Rfc6675Recovery::isLost(uint32_t seqNum)
         return rexmitQueue->getRegion(seqNum).lost;
     }
 
-    bool isLost = (conn->getRexmitQueue()->getNumOfDiscontiguousSacks(seqNum) >= state->dupthresh
-                   || conn->getRexmitQueue()->getAmountOfSackedBytes(seqNum) > (state->dupthresh - 1) * state->snd_mss);
+    // state->reordering equals state->dupthresh unless adaptive reordering has grown
+    // it (static DupThresh otherwise), so this is inert by default.
+    bool isLost = (conn->getRexmitQueue()->getNumOfDiscontiguousSacks(seqNum) >= state->reordering
+                   || conn->getRexmitQueue()->getAmountOfSackedBytes(seqNum) > (state->reordering - 1) * state->snd_mss);
 
     return isLost;
 }
@@ -538,7 +559,7 @@ uint32_t Rfc6675Recovery::rackDetectAndMarkLost(bool fromReoTimer)
     // 2000-byte recovery-entry retransmit burst at +0).
     uint32_t segSize = state->snd_effmss > 0 ? state->snd_effmss : state->snd_mss;
     uint32_t sackedSegs = segSize > 0 ? state->sackedBytes / segSize : 0;
-    if (!state->rackReordSeen && (state->lossRecovery || sackedSegs >= state->dupthresh))
+    if (!state->rackReordSeen && (state->lossRecovery || sackedSegs >= state->reordering))
         reoWnd = 0;
     else {
         // minRtt is only populated once a data RTT has been measured; on the very
@@ -623,6 +644,25 @@ uint32_t Rfc6675Recovery::rackDetectAndMarkLost(bool fromReoTimer)
     return lostBytes;
 }
 
+void Rfc6675Recovery::checkSackReordering(uint32_t lowSeq)
+{
+    // Linux tcp_check_sack_reordering(): reordering is proven when data at lowSeq
+    // was delivered while a higher sequence number (fack) had already been SACKed.
+    auto rexmitQueue = conn->getRexmitQueue();
+    if (rexmitQueue == nullptr || !state->sack_enabled)
+        return;
+    uint32_t fack = rexmitQueue->getHighestSackedSeqNum();
+    if (fack == 0 || seqGE(lowSeq, fack))
+        return;
+    uint32_t metric = fack - lowSeq;
+    if (state->snd_mss != 0 && metric > state->reordering * state->snd_mss) {
+        uint32_t newReordering = (metric + state->snd_mss - 1) / state->snd_mss;
+        state->reordering = std::min(newReordering, state->maxReordering);
+        EV_DETAIL << "reordering degree updated to " << state->reordering << "\n";
+    }
+    state->rackReordSeen = true; // activate RACK's reordering window as well
+}
+
 void Rfc6675Recovery::onRexmitTimeout()
 {
 }
@@ -640,6 +680,18 @@ void Rfc6675Recovery::reoTimeout()
 
 void Rfc6675Recovery::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
 {
+    // Adaptive reordering: if this cumulatively-acked segment was never retransmitted
+    // yet sits below already-SACKed data, it was merely reordered (not lost) -- grow the
+    // learned reordering degree so it stops causing spurious fast retransmits.
+    if (state->adaptiveReorderingEnabled && state->sack_enabled) {
+        auto rq = conn->getRexmitQueue();
+        if (rq != nullptr && rq->getQueueLength() > 0
+            && seqLE(rq->getBufferStartSeq(), fromSeq) && seqLess(fromSeq, rq->getBufferEndSeq())
+            && rq->getRegion(fromSeq).transmitCount <= 1)
+        {
+            checkSackReordering(fromSeq);
+        }
+    }
 }
 
 void Rfc6675Recovery::dataSent(uint32_t fromSeq)

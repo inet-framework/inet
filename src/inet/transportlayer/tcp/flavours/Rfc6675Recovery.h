@@ -56,6 +56,13 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
      */
     virtual uint32_t rackDetectAndMarkLost(bool fromReoTimer = false);
 
+    /**
+     * Linux tcp_check_sack_reordering(): reordering is proven when data at lowSeq
+     * was delivered while a higher sequence number (the SACK fack) had already been
+     * SACKed. Grows the learned reordering degree, bounded by maxReordering.
+     */
+    virtual void checkSackReordering(uint32_t lowSeq);
+
     virtual void onRexmitTimeout() override;
     virtual void reoTimeout() override;
     virtual void segmentsAcked(uint32_t fromSeq, uint32_t toSeq) override;

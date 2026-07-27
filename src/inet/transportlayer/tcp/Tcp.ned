@@ -228,9 +228,11 @@ simple Tcp extends SimpleModule like ITcp
         bool hystartEnabled = default(true); // HyStart: leave slow start when the path appears full, instead of overshooting into loss
         int hystartLowWindow = default(16); // smallest cwnd (in segments) at which HyStart starts looking for the exit point
         // parameters of: tcp: size segments against the space options actually leave
+        bool adaptiveReorderingEnabled = default(true); // Grow the reordering degree (dynamic DupThresh) when SACK reveals reordering, so persistent reordering stops causing spurious fast retransmits. Requires sackSupport.
         volatile int initialSendSequenceNumber = default(-1); // -1 means the value is calculated from the current simulation time
         string initialWindow @enum("rfc2001","rfc3390","rfc6928") = default("rfc6928"); // initial congestion window: rfc2001=1 SMSS, rfc3390=min(4*MSS,max(2*MSS,4380)), rfc6928=IW10=min(10*MSS,max(2*MSS,14600))
         string lossDetectionMode @enum("dupthresh","rack") = default("rack"); // SACK loss detection: classic DupThresh (RFC 6675) or RACK time-based (RFC 8985). RACK requires sackSupport.
+        int maxReordering = default(300); // Upper bound on the learned reordering degree in segments (Linux tcp_max_reordering).
         bool seedRttFromHandshake = default(true); // Seed the RTT estimator (srtt/rttvar/RTO) from the SYN<->SYN-ACK exchange, as Linux does. The first-flight RTO and TLP probe timeout become RTT-scaled instead of initialRto.
         bool syncookiesAlways = default(false); // model Linux sysctl tcp_syncookies=2 (cookies on every passive open): the server's connection is rebuilt from the cookie, whose 2-bit MSS field quantizes the peer's advertised MSS DOWN to the IPv4 msstab {536, 1300, 1440, 1460} (net/ipv4/syncookies.c); other option state (wscale/SACK/TS) survives via the timestamp encoding and stays exact
         // parameters of: tcp: judge loss by transmission time (RFC 8985)

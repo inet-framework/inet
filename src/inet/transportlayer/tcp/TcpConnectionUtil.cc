@@ -689,6 +689,9 @@ void TcpConnection::configureStateVariables()
     }
     state->dupthresh = tcpMain->par("dupthresh");
     state->seedRttFromHandshake = tcpMain->par("seedRttFromHandshake");
+    state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
+    state->maxReordering = tcpMain->par("maxReordering");
+    state->reordering = state->dupthresh; // dynamic DupThresh starts at the static value
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 6675)
     // SACK-based (RFC 6675) loss recovery is provided by flavours whose createRecovery()
