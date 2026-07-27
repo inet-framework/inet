@@ -741,6 +741,24 @@ void TcpConnection::sendAvailableDataToApp()
                     endSeqNo = requestedEndPos;
             }
             while (auto msg = receiveQueue->extractBytesUpTo(endSeqNo)) {
+                // windowShrinkAllowed accounting: reading releases receive-
+                // buffer occupancy skb by skb -- Linux frees an skb (and its
+                // whole truesize) only once it is fully copied to the user.
+                if (!rcvSkbChain.empty()) {
+                    uint64_t readBytes = msg->getByteLength();
+                    while (readBytes > 0 && !rcvSkbChain.empty()) {
+                        auto& head = rcvSkbChain.front();
+                        if (readBytes >= head.first) {
+                            readBytes -= head.first;
+                            rcvBufOccupancy -= std::min<uint64_t>(head.second, rcvBufOccupancy);
+                            rcvSkbChain.pop_front();
+                        }
+                        else {
+                            head.first -= (uint32_t)readBytes; // partially read skb stays charged
+                            readBytes = 0;
+                        }
+                    }
+                }
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                 msg->addTag<SocketInd>()->setSocketId(socketId);
                 sendToApp(msg);
@@ -808,6 +826,37 @@ void TcpConnection::configureStateVariables()
     }
 
     state->maxRcvBuffer = advertisedWindow;
+    // receive-buffer capacity decoupled from the advertised window (Linux
+    // sk_rcvbuf vs the offered window): out-of-order data may be buffered up
+    // to this limit; -1 keeps the historical conflation
+    {
+        int64_t rcvBufBytes = (int64_t)tcpMain->par("receiveBufferSize").doubleValue();
+        state->rcvBufferSize = rcvBufBytes >= 0 ? (uint32_t)rcvBufBytes : 0;
+    }
+    // receiver window auto-tuning (Linux tcp_grow_window): offer starts at
+    // advertisedWindow, grows with received data toward the clamp (Linux
+    // tcp_win_from_space halves the buffer at the default scaling ratio)
+    if (tcpMain->par("windowAutoTuning") && state->rcvBufferSize > 0) {
+        state->rcv_ssthresh = advertisedWindow;
+        state->window_clamp = std::max(advertisedWindow, state->rcvBufferSize / 2);
+    }
+    // windowShrinkAllowed: the whole window model follows the REAL buffer
+    // (Linux sk_rcvbuf = receiveBufferSize), not the advertisedWindow param --
+    // the initial offer is tcp_select_initial_window's win_from_space at the
+    // DEFAULT 50% scaling ratio, so the maximum promise the peer can hold us
+    // to (rcv_adv / Linux rcv_mwnd_seq) starts buffer-derived too
+    // (rcv_wnd_shrink_allowed's max promise comes solely from the first
+    // data-time offer).
+    if (tcpMain->par("windowShrinkAllowed").boolValue() && state->rcvBufferSize > 0) {
+        state->maxRcvBuffer = state->rcvBufferSize;
+        uint32_t initWin = std::min<uint32_t>(state->rcvBufferSize / 2, TCP_MAX_WIN);
+        state->rcv_wnd = initWin;
+        state->rcv_adv = initWin;
+        if (tcpMain->par("windowAutoTuning") && state->rcvBufferSize > 0) {
+            state->rcv_ssthresh = std::max<uint32_t>(state->rcv_ssthresh, state->rcvBufferSize);
+            state->window_clamp = std::max<uint32_t>(state->window_clamp, state->rcvBufferSize);
+        }
+    }
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 1122) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
@@ -2418,7 +2467,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                 state->rcv_wnd_scale = state->ws_manual_scale;
             }
             else {
-                ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + state->maxRcvBuffer - state->rcv_nxt;
+                ulong scaled_rcv_wnd = state->maxRcvBuffer - receiveQueue->getAcknowledgedDataLength();
                 state->rcv_wnd_scale = 0;
 
                 while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 7323, page 10: "the shift count must be limited to 14"
@@ -2708,7 +2757,59 @@ uint16_t TcpConnection::updateRcvWnd()
 
     // update receive queue related state variables and statistics
     updateRcvQueueVars();
-    win = state->freeRcvBuffer;
+
+    // Linux tcp_shrink_window=1 (__tcp_select_window's shrink branch): the
+    // offer follows GENUINE buffer free space -- occupancy at skb-truesize
+    // granularity scaled by the measured payload/truesize ratio -- rounded
+    // DOWN to the window scale, zeroed when free space falls under 1/16th of
+    // the full buffer (or below one MSS / one scale unit) while less than
+    // half the buffer is free, and capped by rcv_ssthresh with an ALIGN-up.
+    // The right edge may move DOWN; rcv_adv (updated below) still records the
+    // MAXIMUM ever promised, which is what acceptance checks against (Linux
+    // rcv_mwnd_seq). rcv_wnd_shrink_allowed pins the whole sequence: offers
+    // 15360 then 13312, drop at maxpromise+1, accept at maxpromise, win 0.
+    // (also active BEFORE window scaling is negotiated -- the SYN/SYN-ACK's
+    // unscaled window is the buffer-derived initial offer, and the maximum
+    // promise starts from it)
+    if (tcpMain->par("windowShrinkAllowed").boolValue()) {
+        uint32_t rcvbuf = state->rcvBufferSize > 0 ? state->rcvBufferSize : state->maxRcvBuffer;
+        uint64_t freeSpace = rcvBufOccupancy < rcvbuf
+            ? (((uint64_t)rcvbuf - rcvBufOccupancy) * rcvScalingRatio) >> 8 : 0;
+        uint64_t fullSpace = ((uint64_t)rcvbuf * rcvScalingRatio) >> 8;
+        uint32_t scaleUnit = 1u << state->rcv_wnd_scale;
+        freeSpace = (freeSpace / scaleUnit) * scaleUnit; // round_down
+        if (freeSpace < (fullSpace >> 1)) {
+            if (freeSpace < (fullSpace >> 4) || freeSpace < state->snd_mss || freeSpace < scaleUnit)
+                freeSpace = 0;
+        }
+        if (state->rcv_ssthresh > 0 && freeSpace > state->rcv_ssthresh)
+            freeSpace = ((uint64_t)(state->rcv_ssthresh + scaleUnit - 1) / scaleUnit) * scaleUnit; // ALIGN up
+        win = (uint32_t)std::min<uint64_t>(freeSpace, TCP_MAX_WIN_SCALED);
+
+        const uint32_t maxWinShrink = (state->ws_enabled && state->rcv_wnd_scale)
+            ? (TCP_MAX_WIN << state->rcv_wnd_scale) : TCP_MAX_WIN;
+        if (win > maxWinShrink)
+            win = maxWinShrink;
+        if (win > 0 && seqGE(state->rcv_nxt + win, state->rcv_adv)) {
+            state->rcv_adv = state->rcv_nxt + win;
+            emit(rcvAdvSignal, state->rcv_adv);
+        }
+        state->rcv_wnd = win;
+        emit(rcvWndSignal, state->rcv_wnd);
+        uint32_t scaledWin = state->rcv_wnd >> state->rcv_wnd_scale;
+        if (scaledWin > TCP_MAX_WIN)
+            scaledWin = TCP_MAX_WIN;
+        return (uint16_t)scaledWin;
+    }
+
+    win = state->maxRcvBuffer - receiveQueue->getAcknowledgedDataLength();
+    // window auto-tuning: the offer follows the grown rcv_ssthresh (bounded by
+    // the clamp) instead of the static advertisedWindow
+    if (state->rcv_ssthresh > 0) {
+        uint32_t tuned = std::min(state->rcv_ssthresh, state->window_clamp);
+        uint32_t ackedLen = receiveQueue->getAcknowledgedDataLength();
+        win = tuned > ackedLen ? tuned - ackedLen : 0;
+    }
 
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, chapter 26.7, pages 878-879]:
     // Don't advertise less than one full-sized segment to avoid SWS
