@@ -11,25 +11,27 @@ namespace inet::tcp;
 
 cplusplus {{
 typedef std::list<Sack> SackList;
+typedef std::vector<uint8_t> FastOpenCookie;
 }}
 
 class SackList { @existingClass; }
+class FastOpenCookie { @existingClass; }
 
 //
 // TCP FSM states
 //
-// Brief descriptions (cf RFC 793, page 20):
+// Brief descriptions (cf RFC 9293, page 20):
 //
-// LISTEN - waiting for a connection request
-// SYN-SENT - part of 3-way handshake (waiting for peer's SYN+ACK or SYN)
-// SYN-RECEIVED - part of 3-way handshake (we sent SYN too, waiting for it to be acked)
-// ESTABLISHED - normal data transfer
-// FIN-WAIT-1 - FIN sent, waiting for its ACK (or peer's FIN)
-// FIN-WAIT-2 - our side of the connection closed (our FIN acked), waiting for peer's FIN
-// CLOSE-WAIT - FIN received and acked, waiting for local user to close
-// LAST-ACK - remote side closed, FIN sent, waiting for its ACK
-// CLOSING - simultaneous close: sent FIN, then got peer's FIN
-// TIME-WAIT - both FIN's acked, waiting for some time to be sure remote TCP received our ACK
+// LISTEN - represents waiting for a connection request from any remote TCP peer and port.
+// SYN-SENT - represents waiting for a matching connection request after having sent a connection request.
+// SYN-RECEIVED - represents waiting for a confirming connection request acknowledgment after having both received and sent a connection request.
+// ESTABLISHED - represents an open connection, data received can be delivered to the user. The normal state for the data transfer phase of the connection.
+// FIN-WAIT-1 - represents waiting for a connection termination request from the remote TCP peer, or an acknowledgment of the connection termination request previously sent.
+// FIN-WAIT-2 - represents waiting for a connection termination request from the remote TCP peer.
+// CLOSE-WAIT - represents waiting for a connection termination request from the local user.
+// CLOSING - represents waiting for a connection termination request acknowledgment from the remote TCP peer.
+// LAST-ACK - represents waiting for an acknowledgment of the connection termination request previously sent to the remote TCP peer (this termination request sent to the remote TCP peer already included an acknowledgment of the termination request sent from the remote TCP peer).
+// TIME-WAIT - represents waiting for enough time to pass to be sure the remote TCP peer received the acknowledgment of its connection termination request and to avoid new connections being impacted by delayed segments from previous connections.
 // CLOSED - represents no connection state at all.
 //
 // Note: FIN-WAIT-1, FIN-WAIT-2, CLOSING, TIME-WAIT represents active close (that is,
@@ -333,7 +335,6 @@ struct TcpStateVariables
     // A shutdown(SHUT_WR)-style half close leaves it false.
     bool rcvShutdown = false;
     bool sawAccEcnOpt = false;
-    bool fastopenAccelerated = false;        // server: this connection was created from a TFO-accepted SYN (valid cookie or cookie-less mode), REGARDLESS of whether it carried data -- a zero-payload TFO SYN still entitles the app to respond from SYN_RCVD (Linux: the TFO child socket exists either way). Gates the SYN_RCVD send path; fastopenSynDataAccepted above stays data-only (it drives TCPI_OPT_SYN_DATA)
     // Linux tp->accecn_minlen: minimum number of AccECN option fields the next
     // option must carry to cover the counter(s) that changed since the last
     // one was sent (order-1 field indices: ECT1=1, CE=2, ECT0=3; 0 = nothing
@@ -356,7 +357,25 @@ struct TcpStateVariables
     simtime_t pmtudLastMssReduction;        // timestamp of last PMTUD-triggered MSS reduction (-1 = never reduced)
 
     // TCP Fast Open (RFC 7413)
+    bool fastopenClientEnabled = false;      // from the fastopenClientEnabled parameter
+    bool fastopenServerEnabled = false;      // from the fastopenServerEnabled parameter
+    bool fastopenAcceptWithoutCookie = false; // server: accept SYN data carrying no cookie option at all (tcp_fastopen 0x200 / TFO_SERVER_COOKIE_NOT_REQD)
+    bool fastopenLenientCookieValidation = true; // from the fastopenLenientCookieValidation parameter
+    bool fastopenExpOptionEnabled = false;   // from the fastopenExpOptionEnabled parameter
+    int fastopenCookieBytes = 8;             // from the fastopenCookieBytes parameter
+    bool fastopenCookieRequested = false;    // server: peer sent an empty-cookie TFO option this SYN
+    bool fastopenCookieValid = false;        // server: peer's cookie validated (accelerate this SYN)
+    bool fastopenSendCookieOption = false;   // server: echo a (possibly fresh) cookie in the SYN-ACK
+    bool fastopenPeerUsedExpOption = false;  // server: the SYN's cookie/request came in the RFC 7413 Appendix A experimental form (kind 254 + 0xF989); echo in the SAME form, as Linux does
+    FastOpenCookie fastopenCookieToSend;     // server: the cookie bytes to echo, if fastopenSendCookieOption
+    bool fastopenSynDeferred = false;        // client: connect(fastOpen=true) is waiting for the app's first SEND (or the connEstabTimer safety net) before sending the SYN
+    bool fastopenCookieRequestPending = false; // client: no cookie was cached, so the (immediate, dataless) SYN requests one
+    uint32_t fastopenSynDataLen = 0;         // client: bytes of app data attached to the SYN (0 = none); fixed once set, reused verbatim across SYN-REXMIT
+    bool fastopenRequested = false;          // client: this connection's own connect() call opted into Fast Open (per-connection, like Linux's MSG_FASTOPEN/TCP_FASTOPEN_CONNECT) -- gates the cookie append independently of the module-wide fastopenClientEnabled parameter, so a plain connect() to a destination with a cached cookie does NOT send it uninvited
     uint32_t peerAdvertisedMss = 0;          // the RAW MSS value from the peer's SYN/SYN-ACK option, before any local (user-MSS/TCP_MAXSEG) clamping -- Linux caches THIS in tcp_metrics for the next TFO SYN's payload budget (tcp_rcv_fastopen_synack even reparses the SYN-ACK to bypass the user clamp; syn-data-mss pins the 1300-byte SYN payload from a cached 1340)
+    bool fastopenSynCarriedOption = false;  // client: our SYN carried a TFO option (cookie or empty request) -- Linux tp->syn_fastopen; a SYN-ACK cookie is cached ONLY then (tcp_rcv_fastopen_synack ignores unsolicited cookies, cookie-less-sendto pins the next connect still REQUESTING)
+    bool fastopenSynDataAccepted = false;   // server: a validated-cookie SYN carried data that was accepted and delivered ahead of the 3WHS; client: the SYN's data was acked by the SYN-ACK (both mirror Linux's TCPI_OPT_SYN_DATA tcp_info flag / tp->syn_data_acked)
+    bool fastopenAccelerated = false;        // server: this connection was created from a TFO-accepted SYN (valid cookie or cookie-less mode), REGARDLESS of whether it carried data -- a zero-payload TFO SYN still entitles the app to respond from SYN_RCVD (Linux: the TFO child socket exists either way). Gates the SYN_RCVD send path; fastopenSynDataAccepted above stays data-only (it drives TCPI_OPT_SYN_DATA)
     // declared here for the code above that already uses it:
     int init_cwnd_mode = 0;                      // initial window: 0=RFC2001 (1 SMSS), 1=RFC3390, 2=RFC6928 (IW10)
     simtime_t handshakeSentTime = -1; // when our SYN (active) / SYN-ACK (passive) was last sent; seeds the RTT estimator from the handshake RTT on reaching ESTABLISHED (skipped per Karn if the handshake segment was retransmitted)

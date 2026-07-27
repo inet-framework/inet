@@ -230,6 +230,13 @@ simple Tcp extends SimpleModule like ITcp
         // parameters of: tcp: size segments against the space options actually leave
         bool adaptiveReorderingEnabled = default(true); // Grow the reordering degree (dynamic DupThresh) when SACK reveals reordering, so persistent reordering stops causing spurious fast retransmits. Requires sackSupport.
         bool dsackEnabled = default(this.sackSupport); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+        bool fastopenAcceptWithoutCookie @mutable = default(false); // Server role: accept SYN-with-data even when the SYN carries no Fast Open cookie option at all (RFC 7413 section 4.1.3's cookie-less mode). ~ sysctl tcp_fastopen bit 9 (0x200, TFO_SERVER_COOKIE_NOT_REQD). Only meaningful with fastopenServerEnabled.
+        bool fastopenClientEnabled @mutable = default(false); // TCP Fast Open (RFC 7413) client role: attempt SYN-with-data when a cookie is cached. ~ sysctl tcp_fastopen bit 0 (TFO_CLIENT_ENABLE)
+        bool fastopenClientNoCookieRequired @mutable = default(false); // Linux net.ipv4.tcp_fastopen bit 0x4 (TFO_CLIENT_NO_COOKIE): the client sends SYN+data immediately with NO cookie (and no cookie-request) at all -- for networks where the server is known to accept cookie-less TFO
+        int fastopenCookieBytes = default(8); // Length in bytes of the locally generated Fast Open cookie (RFC 7413 allows 4-16)
+        bool fastopenExpOptionEnabled @mutable = default(false); // Accept the legacy kind-253/254+magic-0xF989 experimental Fast Open option on receive (never emitted); inert unless fastopenServerEnabled or fastopenClientEnabled is also true
+        bool fastopenLenientCookieValidation = default(true); // Accept any syntactically valid (4-16 byte) Fast Open cookie as valid without a keyed-hash check -- simulation-appropriate (no adversarial clients on the wire); set false to require an exact match against the locally generated cookie
+        bool fastopenServerEnabled @mutable = default(false); // TCP Fast Open (RFC 7413) server role: accept and accelerate a validated-cookie SYN-with-data. ~ sysctl tcp_fastopen bit 1 (TFO_SERVER_ENABLE)
         bool frtoEnabled = default(true); // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced variant): after a retransmission timeout, an ACK/SACK covering data that was never retransmitted proves the original flight arrived and the timeout was spurious -- the pre-RTO cwnd/ssthresh are restored. ~ sysctl tcp_frto=2 (the Linux default)
         volatile int initialSendSequenceNumber = default(-1); // -1 means the value is calculated from the current simulation time
         string initialWindow @enum("rfc2001","rfc3390","rfc6928") = default("rfc6928"); // initial congestion window: rfc2001=1 SMSS, rfc3390=min(4*MSS,max(2*MSS,4380)), rfc6928=IW10=min(10*MSS,max(2*MSS,14600))
@@ -242,6 +249,12 @@ simple Tcp extends SimpleModule like ITcp
         bool tlpEnabled = default(true); // Tail Loss Probe (RFC 8985 section 7.2): probe ~2*SRTT after the last transmission so a lost tail is repaired without waiting for the RTO; requires SACK. ~ Linux sysctl tcp_early_retrans=3 (its default)
         // parameters of: tcp: judge loss by transmission time (RFC 8985)
         double rackReoTimerGranularity @unit(s) = default(0s); // model the kernel's jiffy-quantized REO timeout arming (Linux usecs_to_jiffies(timeout)+1: delay rounded UP to this granularity plus one extra tick, e.g. 4ms for an HZ=250 kernel); a sub-tick RACK deadline then fires whole ticks later, letting a dupthresh-timed SACK enter recovery first, as real kernels do. 0 = exact (default INET behavior)
+        // parameters of: tcp: TCP Fast Open (RFC 7413)
+        bool alignOptions = default(true);  // enable/disable per-option predefined alignment
+        double fastopenBlackholeTimeout @unit(s) = default(0s); // Client-side active-TFO blackhole detection: base disable duration after a suspected middlebox interference event (RTO or out-of-order RST on a data-carrying TFO SYN), doubling (capped at 64x) on repeated events. 0s (default) disables the detector entirely, matching Linux's own shipped default -- the local corpus's defaults.sh override to a nonzero value is a *test* configuration, not upstream's
+        int fastopenCookieCacheSize = default(1024); // Upper bound on the number of distinct destinations the client-role Fast Open cookie cache retains; evicts an arbitrary (not LRU) entry once full
+        string fastopenKey @mutable = default(""); // Server-role Fast Open cookie key in Linux net.ipv4.tcp_fastopen_key format ("xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx", primary key only). When set, the 8-byte cookie is derived exactly as Linux does (SipHash-2-4 of source||destination IPv4 address under this key), so cookies are deterministic and interoperable with captures; when empty (default), a simulation-local keyed hash is used instead
+        bool sendMssOption = default(true);  // enable/disable MSS option sending
     gates:
         input appIn @labels(TcpCommand/down) @messageKinds(inet::TcpCommandCode);
         input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);

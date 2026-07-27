@@ -51,6 +51,9 @@ void Tcp::initialize(int stage)
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
         msl = par("msl");
+        alignOptions = par("alignOptions");
+        sendMssOption = par("sendMssOption");
+        fastOpenCookieCacheSize = par("fastopenCookieCacheSize");
 
         WATCH(checksumMode);
         WATCH(lastEphemeralPort);
@@ -398,6 +401,177 @@ void Tcp::addForkedConnection(TcpConnection *conn, TcpConnection *newConn, L3Add
 
     // newConn will live on with the new socketId
     tcpAppConnMap[newConn->socketId] = newConn;
+}
+
+// SipHash-2-4, implemented clean-room from the public SipHash specification
+// (Aumasson & Bernstein, "SipHash: a fast short-input PRF"): 2 compression
+// rounds per 8-byte word, 4 finalization rounds, little-endian word loads,
+// final block carrying the input length in its top byte.
+static uint64_t sipHash24(const uint8_t key[16], const uint8_t *data, size_t len)
+{
+    auto le64 = [](const uint8_t *p) {
+        uint64_t v = 0;
+        for (int i = 7; i >= 0; i--)
+            v = (v << 8) | p[i];
+        return v;
+    };
+    auto rotl = [](uint64_t x, int b) { return (x << b) | (x >> (64 - b)); };
+    uint64_t k0 = le64(key), k1 = le64(key + 8);
+    uint64_t v0 = 0x736f6d6570736575ULL ^ k0;
+    uint64_t v1 = 0x646f72616e646f6dULL ^ k1;
+    uint64_t v2 = 0x6c7967656e657261ULL ^ k0;
+    uint64_t v3 = 0x7465646279746573ULL ^ k1;
+    auto round = [&]() {
+        v0 += v1; v1 = rotl(v1, 13); v1 ^= v0; v0 = rotl(v0, 32);
+        v2 += v3; v3 = rotl(v3, 16); v3 ^= v2;
+        v0 += v3; v3 = rotl(v3, 21); v3 ^= v0;
+        v2 += v1; v1 = rotl(v1, 17); v1 ^= v2; v2 = rotl(v2, 32);
+    };
+    size_t fullWords = len / 8;
+    for (size_t w = 0; w < fullWords; w++) {
+        uint64_t m = le64(data + w * 8);
+        v3 ^= m; round(); round(); v0 ^= m;
+    }
+    uint8_t last[8] = {};
+    for (size_t i = fullWords * 8; i < len; i++)
+        last[i % 8] = data[i];
+    last[7] = (uint8_t)(len & 0xff);
+    uint64_t m = le64(last);
+    v3 ^= m; round(); round(); v0 ^= m;
+    v2 ^= 0xff;
+    round(); round(); round(); round();
+    return v0 ^ v1 ^ v2 ^ v3;
+}
+
+std::vector<uint8_t> Tcp::generateFastOpenCookie(const L3Address& localAddr, const L3Address& remoteAddr, int cookieBytes)
+{
+    // Linux-compatible derivation when a key is configured (fastopenKey param,
+    // the sysctl net.ipv4.tcp_fastopen_key format "xxxxxxxx-xxxxxxxx-xxxxxxxx-
+    // xxxxxxxx"): cookie = SipHash-2-4 over the incoming SYN's source address
+    // followed by its destination address (network byte order), keyed by the
+    // four hex words each laid out little-endian, with the 64-bit result
+    // written out little-endian.
+    // The "source" is the PEER here (the cookie is computed on the server for
+    // the client's SYN, and reproduced identically for validation).
+    const char *keyStr = par("fastopenKey");
+    uint32_t w[4];
+    if (cookieBytes == 8 && remoteAddr.getType() == L3Address::IPv4 && localAddr.getType() == L3Address::IPv4
+        && sscanf(keyStr, "%8x-%8x-%8x-%8x", &w[0], &w[1], &w[2], &w[3]) == 4)
+    {
+        uint8_t key[16];
+        for (int i = 0; i < 4; i++)
+            for (int b = 0; b < 4; b++)
+                key[i * 4 + b] = (uint8_t)(w[i] >> (8 * b)); // each word little-endian
+        uint8_t addrs[8];
+        uint32_t src = remoteAddr.toIpv4().getInt(); // peer = the SYN's source
+        uint32_t dst = localAddr.toIpv4().getInt();
+        for (int b = 0; b < 4; b++) {
+            addrs[b] = (uint8_t)(src >> (8 * (3 - b))); // network byte order
+            addrs[4 + b] = (uint8_t)(dst >> (8 * (3 - b)));
+        }
+        uint64_t h = sipHash24(key, addrs, sizeof(addrs));
+        std::vector<uint8_t> cookie(8);
+        for (int b = 0; b < 8; b++)
+            cookie[b] = (uint8_t)(h >> (8 * b)); // little-endian result
+        return cookie;
+    }
+
+    // Lazily seed on first actual use (not in initialize()): an unconditional RNG
+    // draw at module init time would shift this module's RNG stream for every
+    // scenario, even ones that never touch TFO, breaking determinism/fingerprints
+    // for unrelated randomness sharing the same stream. This method is only ever
+    // reached once a peer has actually sent a TFO option, so a scenario that never
+    // exercises Fast Open -- including one with fastopenClientEnabled/
+    // fastopenServerEnabled defaulted to true, e.g. after the F7 default-enable gate
+    // -- never draws.
+    if (!fastOpenSecretSeeded) {
+        fastOpenSecret = ((uint64_t)(uint32_t)intuniform(0, 0x7fffffff) << 32) | (uint32_t)intuniform(0, 0x7fffffff);
+        fastOpenSecretSeeded = true;
+    }
+
+    // Clean-room, simulator-appropriate keyed mix -- intentionally NOT a port of
+    // Linux's AES/SipHash-based cookie cipher (RFC 7413's threat model of a blind
+    // off-path attacker doesn't apply to a non-adversarial simulator). Chains
+    // std::hash<std::string> over the secret, the destination address, and a block
+    // counter to produce as many bytes as requested.
+    std::vector<uint8_t> cookie(cookieBytes);
+    std::string base = std::to_string(fastOpenSecret) + "|" + remoteAddr.str();
+    std::hash<std::string> hasher;
+    for (int block = 0; block * (int)sizeof(size_t) < cookieBytes; block++) {
+        size_t h = hasher(base + "|" + std::to_string(block));
+        const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&h);
+        for (size_t i = 0; i < sizeof(size_t) && (int)(block * sizeof(size_t) + i) < cookieBytes; i++)
+            cookie[block * sizeof(size_t) + i] = bytes[i];
+    }
+    return cookie;
+}
+
+bool Tcp::getFastOpenCookie(const L3Address& remoteAddr, std::vector<uint8_t>& cookie) const
+{
+    auto it = fastOpenCookieCache.find(remoteAddr);
+    // an entry may hold ONLY a cached MSS (tcp_metrics semantics, see
+    // updateFastOpenCachedMss below) -- an empty cookie is "no cookie cached"
+    if (it == fastOpenCookieCache.end() || it->second.cookie.empty())
+        return false;
+    cookie = it->second.cookie;
+    return true;
+}
+
+void Tcp::updateFastOpenCachedMss(const L3Address& remoteAddr, uint32_t peerMss)
+{
+    if (peerMss == 0)
+        return;
+    auto it = fastOpenCookieCache.find(remoteAddr);
+    if (it != fastOpenCookieCache.end()) {
+        it->second.peerMss = peerMss;
+        return;
+    }
+    // No entry yet: create a cookie-less one. Linux keeps the peer MSS in
+    // tcp_metrics for EVERY connection, independent of a TFO cookie -- a
+    // cookie-less-mode connect still caps its next SYN payload by the last
+    // advertised MSS (cookie-less-sendto pins 900 = 940 - 40 from the
+    // previous, cookie-free connection).
+    setFastOpenCookie(remoteAddr, std::vector<uint8_t>(), peerMss);
+}
+
+uint32_t Tcp::getFastOpenCachedMss(const L3Address& remoteAddr) const
+{
+    auto it = fastOpenCookieCache.find(remoteAddr);
+    return it == fastOpenCookieCache.end() ? 0 : it->second.peerMss;
+}
+
+void Tcp::setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8_t>& cookie, uint32_t peerMss)
+{
+    if (fastOpenCookieCache.find(remoteAddr) == fastOpenCookieCache.end()
+        && (int)fastOpenCookieCache.size() >= fastOpenCookieCacheSize)
+    {
+        // Bound the cache: evict an arbitrary entry (not LRU -- this is a small
+        // per-Tcp-module in-memory map, not full RFC 7413 persistence semantics;
+        // a real LRU is unnecessary machinery for a cache whose only job in a
+        // simulation is not growing unboundedly across thousands of destinations).
+        fastOpenCookieCache.erase(fastOpenCookieCache.begin());
+    }
+    fastOpenCookieCache[remoteAddr] = FastOpenCacheEntry{cookie, peerMss};
+}
+
+bool Tcp::isActiveFastOpenDisabled() const
+{
+    return simTime() < fastOpenBlackholeDisableUntil;
+}
+
+void Tcp::recordFastOpenBlackhole()
+{
+    simtime_t timeout = par("fastopenBlackholeTimeout");
+    if (timeout == SIMTIME_ZERO)
+        return; // disabled (default)
+
+    fastOpenBlackholeDisableCount++;
+    // Exponential backoff capped at 64x, matching the kernel's tcp_fastopen_active_disable()
+    // 2^(n-1) multiplier (capped there too, at TFO_BHOLE_LOWCNT/backoff limits).
+    int multiplier = 1 << std::min(fastOpenBlackholeDisableCount - 1, 6); // 2^6 = 64
+    fastOpenBlackholeDisableUntil = simTime() + timeout * multiplier;
+    EV_INFO << "Fast Open: disabling active TFO after suspected blackhole (count="
+            << fastOpenBlackholeDisableCount << ", until t=" << fastOpenBlackholeDisableUntil << ")\n";
 }
 
 void Tcp::addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)

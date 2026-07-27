@@ -183,8 +183,25 @@ bool TcpConnection::processTimer(cMessage *msg)
         process_TIMEOUT_2MSL();
     }
     else if (msg == connEstabTimer) {
-        event = TCP_E_TIMEOUT_CONN_ESTAB;
-        process_TIMEOUT_CONN_ESTAB();
+        if (state->fastopenSynDeferred) {
+            // TCP Fast Open (RFC 7413): the app called connect(fastOpen=true) with a
+            // cached cookie but never SEND-triggered the deferred SYN (misuse of the
+            // paired API, or a legitimately data-less Fast Open attempt) -- this is
+            // not a real connection-establishment timeout. Send the fallback bare SYN
+            // now (fastopenSynDataLen stays 0, so sendSyn() degrades to its ordinary
+            // bare-SYN behavior; the cookie is still attached, matching RFC 7413's
+            // explicitly-allowed data-less-SYN-with-valid-cookie case) and give the
+            // connection a fresh, full establishment window, instead of aborting it.
+            sendSyn();
+            state->fastopenSynDeferred = false;
+            startSynRexmitTimer();
+            scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
+            event = TCP_E_IGNORE;
+        }
+        else {
+            event = TCP_E_TIMEOUT_CONN_ESTAB;
+            process_TIMEOUT_CONN_ESTAB();
+        }
     }
     else if (msg == finWait2Timer) {
         event = TCP_E_TIMEOUT_FIN_WAIT_2;
@@ -425,7 +442,16 @@ bool TcpConnection::performStateTransition(const TcpEventCode& event)
                     break;
 
                 case TCP_E_RCV_RST:
-                    FSM_Goto(fsm, state->active ? TCP_S_CLOSED : TCP_S_LISTEN);
+                    // Return-to-LISTEN is RFC 793's rule for a plain (single-
+                    // connection) passive open only. A FORKED connection is a
+                    // Linux child socket: it must die, or we would end up with
+                    // TWO listeners (the resolved long-standing FIXME from
+                    // processRstInSynReceived()). A TFO-ACCELERATED connection
+                    // has app-visible state (accepted/possibly-delivered SYN
+                    // data) -- Linux drives such a child to TCP_CLOSE
+                    // (tcp_reset/tcp_done), it never silently re-listens.
+                    FSM_Goto(fsm, (state->active || state->forked || state->fastopenAccelerated)
+                             ? TCP_S_CLOSED : TCP_S_LISTEN);
                     break;
 
                 case TCP_E_RCV_ACK:

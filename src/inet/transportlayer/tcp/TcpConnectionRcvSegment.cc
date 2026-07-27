@@ -971,6 +971,43 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
         EV << "ECN-setup SYN packet received\n";
     }
 
+    // TCP Fast Open (RFC 7413): a validated-cookie SYN carrying data is accepted and
+    // delivered to the app now, ahead of the 3WHS completing -- readHeaderOptions()
+    // above has already run processFastOpenOption() and populated
+    // state->fastopenCookie*. Advancing rcv_nxt here (before sendSynAck() below)
+    // makes the SYN-ACK's ack number naturally cover the SYN and the data in one
+    // segment, with no change needed to sendSynAck() itself.
+    bool tfoAttempted = state->fastopenCookieRequested || state->fastopenCookieValid || state->fastopenSendCookieOption;
+    // Cookie-less mode (RFC 7413 section 4.1.3, sysctl TFO_SERVER_COOKIE_NOT_REQD):
+    // the listener accepts the SYN data even when the SYN carries no cookie option
+    // at all, so fastopenCookieValid (and tfoAttempted) stay false here.
+    if (state->fastopenServerEnabled && (state->fastopenCookieValid || state->fastopenAcceptWithoutCookie)) {
+        // The TFO acceptance itself is payload-independent: a zero-payload SYN
+        // with a valid cookie still creates a fully-accelerated connection
+        // whose app may respond from SYN_RCVD (basic-zero-payload scripts).
+        state->fastopenAccelerated = true;
+        B payloadLen = B(tcpSegment->getByteLength()) - tcpHeader->getHeaderLength();
+        if (payloadLen > B(0) && hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) {
+            updateRcvQueueVars();
+            // insertBytesFromSegment() indexes the payload by tcpHeader's own
+            // SequenceNo, which is correct for a plain data segment but is the SYN's
+            // OWN sequence number here (RFC 793: SYN consumes one sequence number, so
+            // the data actually starts at SEG.SEQ+1) -- pass a sequence-shifted copy
+            // of the header so the receive queue doesn't mistake the first data byte
+            // for a 1-byte overlap with the already-initialized rcv_nxt (=IRS+1) and
+            // silently drop it.
+            auto synShiftedHeader = staticPtrCast<TcpHeader>(tcpHeader->dupShared());
+            synShiftedHeader->setSequenceNo(tcpHeader->getSequenceNo() + 1);
+            state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, synShiftedHeader);
+            updateRcvQueueVars();
+            sendAvailableDataToApp(); // deliver before the 3WHS completes -- the RFC 7413 win
+            state->fastopenSynDataAccepted = true; // surfaced as TCPI_OPT_SYN_DATA in tcp_info
+            EV_INFO << "Fast Open: " << (state->fastopenCookieValid ? "cookie valid" : "no cookie required")
+                    << ", accepting " << payloadLen
+                    << " bytes of SYN data before handshake completion\n";
+        }
+    }
+
     sendSynAck();
     startSynRexmitTimer();
 
@@ -986,7 +1023,14 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
     // so there's only URG and PSH left to handle.
     //
-    if (B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
+    // Also skipped when the Fast Open block above already consumed the payload
+    // (fastopenSynDataAccepted): in the cookie-less mode tfoAttempted is false
+    // (no cookie option was present), and re-inserting here with the UNSHIFTED
+    // sequence number -- after rcv_nxt has already advanced past the whole
+    // payload -- would compute a negative remainder and crash in peekDataAt()
+    // ("offset is out of range").
+    if (!tfoAttempted && !state->fastopenSynDataAccepted
+            && B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
         updateRcvQueueVars();
 
         if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?
@@ -1028,8 +1072,16 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
     //"
     if (tcpHeader->getAckBit()) {
         if (seqLE(tcpHeader->getAckNo(), state->iss) || seqGreater(tcpHeader->getAckNo(), state->snd_nxt)) {
-            if (tcpHeader->getRstBit())
+            if (tcpHeader->getRstBit()) {
                 EV_DETAIL << "ACK+RST bit set but wrong AckNo, ignored\n";
+                // TCP Fast Open active blackhole detection: an out-of-order RST
+                // (wrong AckNo) while a data-carrying TFO SYN is still outstanding
+                // is a classic middlebox-interference symptom -- some boxes that
+                // don't understand the TFO option strip it and desync sequence
+                // numbers, producing a stray RST like this one.
+                if (state->fastopenSynDataLen > 0)
+                    tcpMain->recordFastOpenBlackhole();
+            }
             else {
                 EV_DETAIL << "ACK bit set but wrong AckNo, sending RST\n";
                 sendRst(tcpHeader->getAckNo(), destAddr, srcAddr, tcpHeader->getDestPort(), tcpHeader->getSrcPort());
@@ -1120,20 +1172,38 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         if (seqGreater(state->snd_una, state->iss)) {
             EV_INFO << "SYN+ACK bits set, connection established.\n";
 
+            // TCP Fast Open client (RFC 7413): the SYN carried data and the
+            // SYN-ACK acked ALL of it -- surface as TCPI_OPT_SYN_DATA, the
+            // same tcp_info bit the server side sets. Linux tp->syn_data_acked
+            // is true only when nothing of the SYN data remains unacked
+            // (tcp_rcv_fastopen_synack: syn_data && !data); a partial ack
+            // leaves it clear (syn-data-partial-or-over-ack: 9 of 18 bytes).
+            if (state->fastopenSynDataLen > 0
+                && seqGE(state->snd_una, state->iss + 1 + state->fastopenSynDataLen))
+                state->fastopenSynDataAccepted = true;
+
+
             // RFC says "continue processing at the sixth step below where
             // the URG bit is checked". Those steps deal with: URG, segment text
             // (and PSH), and FIN.
             // Now: URG and PSH we don't support yet; in SYN+FIN we ignore FIN;
             // with segment text we just take it easy and put it in the receiveQueue
             // -- we'll forward it to the user when more data arrives.
-            if (tcpHeader->getFinBit())
-                EV_DETAIL << "SYN+ACK+FIN received: ignoring FIN\n";
+            bool synAckFin = tcpHeader->getFinBit();
 
             if (B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
                 updateRcvQueueVars();
 
                 if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?
-                    receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader); // TODO forward to app, etc.
+                    // advance rcv_nxt over the SYN-ACK's data (RFC 793 permits data on
+                    // SYN-ACK; a TFO server may respond in the same segment), so that
+                    // the handshake ACK acknowledges it. The SYN consumes one
+                    // sequence number, so index the payload from SEG.SEQ+1 via a
+                    // sequence-shifted header copy (same pattern as the TFO server's
+                    // SYN-data acceptance in processSynInListen()).
+                    auto synShiftedHeader = staticPtrCast<TcpHeader>(tcpHeader->dupShared());
+                    synShiftedHeader->setSequenceNo(tcpHeader->getSequenceNo() + 1);
+                    state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, synShiftedHeader);
                 }
                 else { // not enough freeRcvBuffer in rcvQueue for new segment
                     state->tcpRcvQueueDrops++; // update current number of tcp receive queue drops
@@ -1150,6 +1220,21 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
 
             if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
                 readHeaderOptions(tcpHeader);
+
+            // Linux tcp_rcv_fastopen_synack(): a TFO connection's SYN-ACK
+            // refreshes the cached peer MSS EVERY time (the cookie only when
+            // one is present) -- a later cookie-less SYN-ACK advertising a
+            // larger MSS restores the cache after an earlier small-MSS server
+            // shrank it (syn-data-only-syn-acked's 1040 -> 1460 -> 1420-cap
+            // sequence pins this). Cache the RAW advertised value, not
+            // snd_mss: a local TCP_MAXSEG clamp on THIS connection must not
+            // shrink the metrics cache (the kernel reparses the SYN-ACK to
+            // bypass the user clamp; syn-data-mss pins the next SYN's
+            // 1300-byte payload from an advertised 1340 despite this
+            // connection's TCP_MAXSEG 1040).
+            if (state->fastopenRequested)
+                tcpMain->updateFastOpenCachedMss(remoteAddr,
+                        state->peerAdvertisedMss > 0 ? state->peerAdvertisedMss : state->snd_mss);
 
             // RFC 7323 / Linux tcp_rcv_synsent_state_process (PAWSACTIVEREJECTED):
             // a SYN-ACK whose TSecr does not echo anything this connection could
@@ -1190,6 +1275,78 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                     EV << "ECN-setup SYN-ACK packet was received... ECN is disabled.\n";
             }
 
+            // Seed the RTT estimator from the handshake RTT (Linux measures the
+            // SYN<->SYN-ACK exchange via tcp_ack_update_rtt/tcp_synack_rtt_meas and
+            // enters ESTABLISHED with srtt/rttvar -- and hence the first RTO and any
+            // TLP probe timeout -- already RTT-scaled instead of the 1 s initial
+            // default). Karn: skipped if our handshake segment was retransmitted.
+            if (state->syn_rexmit_count == 0 && state->handshakeSentTime >= SIMTIME_ZERO)
+                tcpAlgorithm->rttMeasurementComplete(state->handshakeSentTime, simTime());
+
+            // RFC 7413 section 4.1: SYN data the SYN-ACK did NOT acknowledge
+            // (server acked only the SYN, or a partial range) is retransmitted
+            // immediately on connection establishment -- Linux does this from
+            // tcp_rcv_synsent_state_process, and the corpus pins the retransmit
+            // as the FIRST post-handshake segment with the handshake ACK
+            // piggybacked on it ("> P. 1:1001(1000) ack 1", no separate bare
+            // ACK). Pull snd_nxt back to the unacked point so established()'s
+            // send-data-with-first-ACK path emits exactly that.
+            bool fastopenSynDataRexmit = state->fastopenSynDataLen > 0 && seqLess(state->snd_una, state->snd_max);
+            if (fastopenSynDataRexmit) {
+                EV_INFO << "Fast Open: SYN data [" << state->snd_una << ", " << state->snd_max
+                        << ") not acknowledged by the SYN-ACK, retransmitting with the handshake ACK\n";
+                state->snd_nxt = state->snd_una;
+                // afterRto is the sanctioned "snd_nxt deliberately pulled back"
+                // signal: without it sendData() immediately resets snd_nxt to
+                // snd_max and nothing is retransmitted. It auto-clears once
+                // snd_nxt catches back up to snd_max.
+                state->afterRto = true;
+                // The unacked SYN data no longer counts as in flight (Linux's
+                // fallback requeues the skb as plain pending data, packets_out
+                // drops to 0): without the lost mark the pipe still carries it
+                // and, with the post-SYN-rexmit IW of one segment, allowedToSend
+                // collapses to zero and only a bare handshake ACK leaves
+                // (cookie-less-sendto's non-blocking test).
+                if (state->sack_enabled && rexmitQueue->getQueueLength() > 0)
+                    rexmitQueue->markLost(state->snd_una, state->snd_max);
+                // No Nagle/PSH special-casing needed anymore: Minshall's check
+                // never holds this partial (no unacked SMALL segment is in
+                // flight), and the PSH comes from the push boundary sendSyn()
+                // recorded at the SYN-data end (Linux marks the syn_data skb
+                // with TCPHDR_PSH at creation).
+            }
+
+            // RFC 793 permits FIN on the SYN-ACK; Linux processes it and lands
+            // in CLOSE_WAIT (tcp_fin) -- fastopen/client/synack-data's TEST2
+            // expects the single handshake ACK to cover data AND FIN (ack 1402).
+            // Advance rcv_nxt over the FIN BEFORE established(true) sends that
+            // ACK; the state hop goes SYN_SENT -> ESTABLISHED here, then the
+            // returned RCV_FIN takes ESTABLISHED -> CLOSE_WAIT in the caller
+            // (stateEntered defers TCP_I_PEER_CLOSED until the data is read,
+            // like a normal FIN behind undelivered data).
+            if (synAckFin) {
+                EV_INFO << "FIN on the SYN-ACK: advancing rcv_nxt over the FIN, will enter CLOSE_WAIT\n";
+                state->fin_rcvd = true;
+                state->rcv_fin_seq = state->rcv_nxt;
+                state->rcv_nxt = state->rcv_fin_seq + 1;
+            }
+
+            // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
+            state->ack_now = true;
+            tcpAlgorithm->established(true);
+            tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
+            sendEstabIndicationToApp();
+            // deliver any data that rode the SYN-ACK (inserted above) -- the
+            // normal per-segment delivery only runs in the data-transfer
+            // states, so without this the app would never see these bytes
+            // (and a poll() right after the handshake would miss POLLIN)
+            sendAvailableDataToApp();
+
+            if (synAckFin) {
+                performStateTransition(TCP_E_RCV_SYN_ACK); // SYN_SENT -> ESTABLISHED now...
+                return TCP_E_RCV_FIN;                      // ...so the caller's transition lands in CLOSE_WAIT
+            }
+
             // This will trigger transition to ESTABLISHED. Timers and notifying
             // app will be taken care of in stateEntered().
             return TCP_E_RCV_SYN_ACK;
@@ -1205,9 +1362,24 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         //   has been reached, return.
         //"
         EV_INFO << "SYN bit set: sending SYN+ACK\n";
+        // Simultaneous open: consume the crossing SYN's options BEFORE building
+        // our SYN-ACK (mirrors processSegmentInListen()) -- otherwise
+        // rcv_sack_perm/ws/ts stay unset and the reply advertises nothing.
+        if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH)
+            readHeaderOptions(tcpHeader);
         state->snd_max = state->snd_nxt = state->iss;
+        emit(sndMaxSignal, state->snd_max);
         sendSynAck();
         startSynRexmitTimer();
+        // TFO simultaneous open: our SYN's data stays queued and OUTSTANDING.
+        // Linux keeps snd_nxt spanning it (the SYN-ACK reuses the SYN skb's
+        // sequence, nothing is rewound), so the peer's eventual SYN-ACK acking
+        // the data (ack 1001) is acceptable and the dup-segment ACK goes out
+        // with SEQ = 1001, not a SYN-ACK retransmit (simultaneous-fast-open).
+        if (state->fastopenSynDataLen > 0) {
+            state->snd_max = state->snd_nxt = state->iss + 1 + state->fastopenSynDataLen;
+            emit(sndMaxSignal, state->snd_max);
+        }
 
         // Note: code below is similar to processing SYN in LISTEN.
 
@@ -1215,24 +1387,13 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         if (tcpHeader->getFinBit())
             EV_DETAIL << "SYN+FIN received: ignoring FIN\n";
 
-        // We don't send text in SYN or SYN+ACK, but accept it. Otherwise
-        // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
-        // so there's only URG and PSH left to handle.
-        if (B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength()) {
-            updateRcvQueueVars();
-
-            if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?
-                receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader); // TODO forward to app, etc.
-            }
-            else { // not enough freeRcvBuffer in rcvQueue for new segment
-                state->tcpRcvQueueDrops++; // update current number of tcp receive queue drops
-
-                emit(tcpRcvQueueDropsSignal, state->tcpRcvQueueDrops);
-
-                EV_WARN << "RcvQueueBuffer has run out, dropping segment\n";
-                return TCP_E_IGNORE;
-            }
-        }
+        // Data on the crossing SYN is DISCARDED: Linux tcp_rcv_synsent_state_
+        // process moves to SYN_RECV and drops the segment -- a client socket
+        // has no TFO server context to accept SYN data into, and the golden
+        // pins the peer retransmitting it after the handshake
+        // (simultaneous-fast-open: "The other end retries").
+        if (B(tcpSegment->getByteLength()) > tcpHeader->getHeaderLength())
+            EV_DETAIL << "Discarding data on the crossing SYN (simultaneous open)\n";
 
         if (tcpHeader->getUrgBit() || tcpHeader->getPshBit())
             EV_DETAIL << "Ignoring URG and PSH bits in SYN\n"; // TODO
@@ -1265,16 +1426,17 @@ TcpEventCode TcpConnection::processRstInSynReceived(const Ptr<const TcpHeader>& 
 
     sendQueue->discardUpTo(sendQueue->getBufferEndSeq()); // flush send queue
 
-    if (state->sack_enabled)
-        rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq()); // flush rexmit queue
+    rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq()); // flush rexmit queue
 
     if (state->active) {
         // signal "connection refused"
         sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
     }
 
-    // on RCV_RST, FSM will go either to LISTEN or to CLOSED, depending on state->active
-    // FIXME if this was a forked connection, it should rather close than go back to listening (otherwise we'd now have two listening connections with the original one!)
+    // on RCV_RST the FSM goes to CLOSED for an active open, a FORKED connection
+    // (a Linux child socket must die -- re-listening would duplicate the still-
+    // existing listener) or a TFO-accelerated connection (app-visible state
+    // exists); only a plain non-forked passive open returns to LISTEN (RFC 793).
     return TCP_E_RCV_RST;
 }
 
@@ -1407,7 +1569,16 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
 
         // if segment contains data, wait until data has been forwarded to app before sending ACK,
         // otherwise we would use an old ACKNo
-        if (payloadLength == 0 && fsm.getState() != TCP_S_SYN_RCVD)
+        //
+        // The handshake-completing ACK (fsm still SYN_RCVD here) is normally
+        // excluded: it only acks the SYN, and the algorithm was just
+        // initialized by established() above. But a TCP Fast Open server may
+        // have sent response DATA from SYN_RCVD -- when the handshake ACK
+        // also acks beyond the SYN-ACK's sequence slot (iss+1), it is a data
+        // ack and must run the algorithm's ack processing, or the data's
+        // REXMIT/probe timers stay armed after everything is acked.
+        bool acksFastOpenData = state->fastopenSynDataAccepted && seqGreater(tcpHeader->getAckNo(), state->iss + 1);
+        if (payloadLength == 0 && (fsm.getState() != TCP_S_SYN_RCVD || acksFastOpenData))
             tcpAlgorithm->receivedAckForUnackedData(old_snd_una);
     }
     else {
@@ -1496,6 +1667,14 @@ void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
         event = TCP_E_ABORT;
         return;
     }
+
+    // TCP Fast Open active blackhole detection: repeated SYN-REXMITs on a
+    // connection whose SYN carried data suggest a middlebox is dropping/mangling
+    // TFO SYN+data specifically (a plain-SYN retransmit would usually get through
+    // sooner) -- matches the kernel's tcp_fastopen_active_should_disable() 3rd
+    // (index-2) consecutive-timeout trigger.
+    if (state->fastopenSynDataLen > 0 && state->syn_rexmit_count == TFO_BLACKHOLE_RTO_THRESHOLD)
+        tcpMain->recordFastOpenBlackhole();
 
     EV_INFO << "Performing retransmission #" << state->syn_rexmit_count << "\n";
 
