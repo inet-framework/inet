@@ -31,6 +31,8 @@
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
+#include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
+#include "inet/transportlayer/contract/tcp/TcpSendMoreTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
@@ -890,7 +892,14 @@ void TcpConnection::configureStateVariables()
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 1122) enabled/disabled
+    // A runtime TCP_NODELAY / TCP_CORK received before OPEN (nodelaySockopt/corkSockopt,
+    // INT_MIN = never set) overrides the compiled-in defaults (mirrors userMss/notsentLowat).
+    if (nodelaySockopt != INT_MIN)
+        state->nagle_enabled = (nodelaySockopt == 0);
+    if (corkSockopt != INT_MIN)
+        state->tcp_cork = (corkSockopt != 0);
     state->adaptiveDelayedAcks = tcpMain->par("adaptiveDelayedAcks"); // Linux-shaped quickack/ATO/pingpong dynamics
+    state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary"); // Linux-parity PSH-on-drain
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     const char *initialWindow = tcpMain->par("initialWindow");
@@ -1136,6 +1145,8 @@ void TcpConnection::sendSyn()
         // already set, so a post-fallback retransmit of that data carries PSH
         // even mid-write (syn-data-only-syn-acked pins "P. 1:1421" on the
         // full-MSS retransmit of a 6000-byte sendto's SYN portion).
+        if (state->pushOnWriteBoundary)
+            pushSeqNums.insert(state->iss + 1 + synDataLen);
     }
 
     // ECN. Active-open initiation is decided directly from ecnMode, not from the shared
@@ -1450,6 +1461,30 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (bytes > buffered) // last segment?
         bytes = buffered;
 
+    // MSG_EOR: boundaries at or behind snd_una are already fully
+    // acked and no longer relevant to anything sendSegment() might build from here
+    // on; drop them so the set doesn't grow across a long connection's lifetime.
+    while (!eorSeqNums.empty() && !seqGreater(*eorSeqNums.begin(), state->snd_una))
+        eorSeqNums.erase(eorSeqNums.begin());
+    while (!pushSeqNums.empty() && !seqGreater(*pushSeqNums.begin(), state->snd_una))
+        pushSeqNums.erase(pushSeqNums.begin());
+    while (!forcedPushSeqNums.empty() && !seqGreater(*forcedPushSeqNums.begin(), state->snd_una))
+        forcedPushSeqNums.erase(forcedPushSeqNums.begin());
+
+    // A record boundary must never be spanned by one segment: clamp bytes so this
+    // segment ends exactly at the nearest boundary ahead of snd_nxt, if closer than
+    // what was requested. Applies equally to fresh sends and retransmissions, since
+    // both funnel through here and the boundary is keyed on sequence number, not on
+    // send-queue position.
+    if (!eorSeqNums.empty()) {
+        auto it = eorSeqNums.upper_bound(state->snd_nxt);
+        if (it != eorSeqNums.end()) {
+            uint32_t distanceToBoundary = *it - state->snd_nxt;
+            if (bytes > distanceToBoundary)
+                bytes = distanceToBoundary;
+        }
+    }
+
     // if header options will be added, this could reduce the number of data bytes allowed for this segment,
     // because following condition must to be respected:
     //     bytes + options_len <= snd_mss
@@ -1516,6 +1551,46 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
 
     state->snd_nxt += bytes;
 
+    // MSG_EOR: set PSH when this segment's last byte lands exactly
+    // on a still-pending record boundary -- signals the peer to hand the data up to
+    // its application without waiting for more, mirroring a real PSH-at-record-
+    // boundary policy. A boundary not yet reached (this segment fell short, e.g.
+    // clamped further by the MSS/options budget above) stays pending in eorSeqNums
+    // and is retried by the connection's next sendSegment() call.
+    if (eorSeqNums.count(state->snd_nxt))
+        tcpHeader->setPshBit(true);
+
+    // TCP_CORK / MSG_MORE: a corked partial being flushed carries PSH when its
+    // producing write lacked MSG_MORE, or when the cork timer forced the flush
+    // (Linux tcp_mark_push / tcp_write_wakeup). sendData sets pushThisSegment.
+    if (state->pushThisSegment)
+        tcpHeader->setPshBit(true);
+
+    // Linux parity (pushSegmentsOnWriteBoundary): Linux tags the tail skb of
+    // every write with PSH at sendmsg time (tcp_mark_push), so the segment
+    // carrying a write's last byte is PSHed even when the NEXT write is
+    // already buffered behind it, and a retransmission of that segment keeps
+    // the flag. The boundaries were recorded per-write in
+    // enqueueSendCommandData (pushSeqNums); snd_nxt has just advanced past
+    // this segment's payload, so a hit means this segment ends a write.
+    // PSH is inert on INET's own receiver (it only logs "ignoring"), so this is
+    // pure wire-realism; default-off pending a maintainer-gated flip.
+    //
+    // Skip a corked partial being flushed (corkFlush = explicit uncork/nodelay/timer,
+    // corkedDataPending = a previously-held partial going out now): its PSH is fully
+    // governed by the cork rule above (pushThisSegment). MSG_MORE writes never
+    // record a boundary, matching Linux's mark_push skip for MSG_MORE.
+    if (state->pushOnWriteBoundary && bytes > 0 && pushSeqNums.count(state->snd_nxt)
+            && !state->corkFlush && !state->corkedDataPending)
+        tcpHeader->setPshBit(true);
+
+    // Linux forced_push (tcp_sendmsg): mid-write PSH boundaries were computed at
+    // enqueue time (see enqueueSendCommandData); a hit means this segment's last
+    // byte is such a boundary. Corked partials keep their own PSH rule (above).
+    if (state->pushOnWriteBoundary && bytes > 0 && !state->corkFlush && !state->corkedDataPending
+            && forcedPushSeqNums.count(state->snd_nxt))
+        tcpHeader->setPshBit(true);
+
     // MSG_ZEROCOPY: fire a completion notification for every
     // pending zerocopy SEND whose data has now been transmitted (its boundary seq
     // is at or behind the just-advanced snd_nxt) -- unlike MSG_EOR's clamp, a
@@ -1579,6 +1654,16 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         }
     }
 
+    // Minshall bookkeeping (Linux tcp_minshall_update, called only for NEW
+    // data in tcp_write_xmit): a freshly sent sub-MSS segment records its end
+    // seq so Nagle can hold the NEXT partial until this one is acked.
+    // Retransmissions (snd_nxt at or below the old snd_max) don't count.
+    // "Small" is judged against what THIS segment could have carried
+    // (Linux compares skb->len to pcount * mss_now, the options-adjusted
+    // MSS) -- not against snd_effmss, which still includes option headroom.
+    if (bytes > 0 && bytes + options_len < state->snd_mss && seqGreater(state->snd_nxt, state->snd_max))
+        state->snd_sml = state->snd_nxt;
+
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
@@ -1614,8 +1699,57 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
         state->busyStartTime = simTime();
     }
 
+    bool eor = packet->findTag<TcpSendEorReq>() != nullptr;
     bool zerocopy = packet->findTag<TcpSendZerocopyReq>() != nullptr;
+    // TCP_CORK / MSG_MORE: MSG_MORE corks this one send's trailing partial. A write
+    // WITHOUT MSG_MORE while corking is active marks the held tail for PSH on flush
+    // (Linux tcp_mark_push). msgMoreThisSend is consumed at the top of sendData().
+    bool msgMore = packet->findTag<TcpSendMoreReq>() != nullptr;
+    state->msgMoreThisSend = msgMore;
+    if (!msgMore && (state->tcp_cork || state->corkedDataPending))
+        state->pushHeldPartial = true;
+    uint32_t writeStartSeq = sendQueue->getBufferEndSeq(); // Linux tp->write_seq before this write
     sendQueue->enqueueAppData(packet);
+    if (eor) {
+        uint32_t boundarySeq = sendQueue->getBufferEndSeq();
+        eorSeqNums.insert(boundarySeq);
+        EV_DETAIL << "MSG_EOR: recorded record boundary at seq=" << boundarySeq << "\n";
+    }
+    // Linux tcp_mark_push tags the tail skb of every write (without MSG_MORE)
+    // AT WRITE TIME -- the PSH survives later writes queuing behind it and is
+    // retained on retransmission. Recording the boundary here (instead of a
+    // buffer-drained check at transmit time) is what keeps the last segment of
+    // a write PSH-marked even when the next write is already buffered
+    // Linux forced_push (tcp_sendmsg copy loop): while a large write is being
+    // copied into the send queue, every time an skb fills with more than
+    // max_window/2 of data beyond the last PSH mark, that skb is PSH-marked
+    // (tcp_mark_push) so the receiver keeps delivering without waiting for the
+    // whole write to drain. skb fill geometry: size_goal quantizes
+    // tcp_bound_to_half_wnd(max_window/2, aligned by Linux's ALIGN() with the
+    // PMTU-derived mss_cache 1460) down to whole MSS units. The mark's PSH
+    // surfaces on the marked skb's SECOND mss slice, i.e. the wire segment
+    // ending at skbStart + 2*mss.
+    if (state->pushOnWriteBoundary && !msgMore && state->max_window > 0) {
+        if (seqLess(state->pushed_seq, state->snd_una))
+            state->pushed_seq = state->snd_una; // lazy seed: first write of a connection
+        uint32_t halfWnd = state->max_window >> 1;
+        const uint32_t mssCache = 1460; // Linux tp->mss_cache (IPv4 PMTU 1500 - 40)
+        uint32_t alignQ = (halfWnd + mssCache - 1) & ~(mssCache - 1); // Linux ALIGN() verbatim (the macro assumes a power of 2; Linux applies it to mss_cache anyway, so replicate bit-for-bit)
+        uint32_t sizeGoal = std::max((alignQ / state->snd_mss) * state->snd_mss, state->snd_mss);
+        uint32_t writeEndSeq = sendQueue->getBufferEndSeq();
+        for (uint32_t f = writeStartSeq + sizeGoal; seqLE(f, writeEndSeq); f += sizeGoal) {
+            if (seqGreater(f, state->pushed_seq + halfWnd)) {
+                uint32_t pshSeq = f - sizeGoal + 2 * state->snd_mss;
+                forcedPushSeqNums.insert(pshSeq);
+                state->pushed_seq = f;
+                EV_DETAIL << "forced_push: recorded mid-write PSH boundary at seq=" << pshSeq << "\n";
+            }
+        }
+    }
+    if (state->pushOnWriteBoundary && !msgMore) {
+        pushSeqNums.insert(sendQueue->getBufferEndSeq());
+        state->pushed_seq = sendQueue->getBufferEndSeq(); // Linux tcp_push -> tcp_mark_push on the write's tail skb
+    }
 
     if (zerocopy) {
         uint32_t boundarySeq = sendQueue->getBufferEndSeq();
@@ -1647,6 +1781,12 @@ int TcpConnection::deriveLinuxCaState() const
 
 bool TcpConnection::sendData(uint32_t congestionWindow)
 {
+    // MSG_MORE corks the trailing partial only for THIS send-driven sendData().
+    // Read-and-clear it up front so it never leaks to the ACK-driven or cork-timer
+    // send paths (there, only the persistent TCP_CORK holds).
+    bool msgMoreHold = state->msgMoreThisSend;
+    state->msgMoreThisSend = false;
+
     // we'll start sending from snd_max, if not after RTO
     if (!state->afterRto)
         state->snd_nxt = state->snd_max;
@@ -1715,8 +1855,30 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     EV_INFO << "May send " << bytesToSend << " bytes (allowedToSend " << allowedToSend << ", in buffer " << buffered << " bytes)\n";
 
     // send whole segments
+    uint32_t fullSegIdx = 0;
+    uint32_t oldSndMax = state->snd_max;
     while (bytesToSend >= effectiveMss) {
+        // Retransmitted segments (below the pre-send high-water mark) are
+        // their own skbs in Linux and never join a new-data GSO chunk: the
+        // two-segment pairing below counts NEW data only, so a leading
+        // retransmit doesn't shift the PSH parity (syn-data-only-syn-acked:
+        // P. 1:1421 rexmit, then chunks (1421:2881,2881:4341^P)...).
+        bool newData = seqGE(state->snd_nxt, oldSndMax);
+        // Linux forces PSH on every multi-segment GSO burst (tcp_transmit_skb:
+        // tcp_skb_pcount(skb) > 1), and pacing clamps bursts to two segments
+        // at fresh-connection rates (tcp_tso_autosize's min_tso_segs floor:
+        // pacing_rate>>10 stays below the MSS until srtt drops well under
+        // 10ms). After GSO split the flag sits on the burst's LAST wire slice,
+        // so a write spanning several MSS carries PSH on every second full
+        // segment -- on top of the write-tail PSH from pushSeqNums.
+        // Same wire-realism gate as the other Linux PSH rules; retransmits
+        // and other send paths are untouched (a rexmitted slice loses the
+        // forced PSH in Linux too, as the split skb's pcount drops to 1).
+        state->pushThisSegment = state->pushOnWriteBoundary && newData && (fullSegIdx % 2 == 1);
         uint32_t sentBytes = sendSegment(effectiveMss);
+        state->pushThisSegment = false;
+        if (newData)
+            fullSegIdx++;
         ASSERT(bytesToSend >= sentBytes);
         bytesToSend -= sentBytes;
         allowedToSend -= sentBytes;
@@ -1738,13 +1900,52 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
                 && state->snd_una == state->iss && state->snd_max == state->iss + 1)
             unacknowledgedData = false;
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
+        // TCP_CORK / MSG_MORE hold the trailing sub-MSS partial (full segments were
+        // already sent by the loop above). Unlike Nagle, corking holds even with an
+        // empty pipe. A flush in progress (corkFlush: uncork/nodelay/timer) bypasses
+        // both holds.
+        bool corkHold = (state->tcp_cork || msgMoreHold) && !state->corkFlush
+                        && !containsFin && buffered < state->snd_effmss;
+        // Minshall's variant of the Nagle check (Linux tcp_nagle_check +
+        // tcp_minshall_check): a trailing partial is held only while an
+        // earlier SMALL segment is still unacknowledged; a pipe full of
+        // nothing but full-MSS segments never delays it
+        // (client_accecn_options_lost pins the 976-byte tail of a 3000-byte
+        // write leaving back-to-back with its two full siblings).
+        bool unackedSmallSegment = seqGreater(state->snd_sml, state->snd_una)
+                                   && seqLE(state->snd_sml, state->snd_nxt);
+        bool nagleHold = state->nagle_enabled && unacknowledgedData && unackedSmallSegment
+                         && !containsFin && buffered < state->snd_effmss && !state->corkFlush;
         if (allowedToSend < state->snd_effmss && buffered > allowedToSend)
             EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
-        else if (state->nagle_enabled && unacknowledgedData && !containsFin)
-            EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
-        else
+        else if (corkHold || nagleHold) {
+            if (corkHold)
+                state->corkedDataPending = true;
+            EV_WARN << "Holding partial segment ("
+                    << (corkHold ? "TCP_CORK/MSG_MORE" : "Nagle") << ")\n";
+        }
+        else {
+            // If this partial is a flush of previously-corked data, it may carry PSH:
+            // when the producing write(s) lacked MSG_MORE (pushHeldPartial) or the
+            // flush is the cork timer (forcePushHeld). sendSegment reads pushThisSegment.
+            bool flushingCorked = state->corkedDataPending || state->corkFlush;
+            state->pushThisSegment = flushingCorked && (state->pushHeldPartial || state->forcePushHeld);
             sendSegment(bytesToSend);
+            state->pushThisSegment = false;
+            state->corkedDataPending = false;
+            state->pushHeldPartial = false;
+        }
     }
+
+    // Cork (RTO/probe) timer: arm it only while a corked partial is withheld AND
+    // nothing is in flight (Linux ICSK_TIME_PROBE0 needs packets_out == 0); an
+    // incoming ACK re-runs sendData and flushes otherwise. Disarm as soon as the
+    // partial goes out or data becomes outstanding. A Nagle hold always has
+    // snd_una != snd_max, so it never arms this timer.
+    if (state->corkedDataPending && state->snd_una == state->snd_max)
+        tcpAlgorithm->scheduleCorkTimer();
+    else
+        tcpAlgorithm->cancelCorkTimer();
 
     if (old_snd_nxt == state->snd_nxt)
         return false; // no data sent
@@ -1763,6 +1964,21 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         tcpAlgorithm->dataSent(old_snd_nxt);
 
     return true;
+}
+
+void TcpConnection::flushCorkedData(bool forcePush)
+{
+    // Force out a partial segment currently withheld by TCP_CORK / MSG_MORE
+    // (uncork, TCP_NODELAY, or the cork timer). corkFlush makes sendData's trailing
+    // partial bypass both the cork and Nagle holds; forcePush (timer path only)
+    // makes the flushed partial carry PSH. msgMoreThisSend is false here (no new
+    // SEND), so nothing re-corks. Reuse sendCommandInvoked()'s idle-restart cwnd
+    // path into conn->sendData().
+    state->corkFlush = true;
+    state->forcePushHeld = forcePush;
+    tcpAlgorithm->sendCommandInvoked();
+    state->corkFlush = false;
+    state->forcePushHeld = false;
 }
 
 bool TcpConnection::sendProbe()
@@ -2969,6 +3185,12 @@ void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool do
     //    SND.WND = SEG.WND << Snd.Wind.Scale"
     if (state->ws_enabled && !tcpHeader->getSynBit())
         true_window = tcpHeader->getWindow() << state->snd_wnd_scale;
+
+    // Largest window the peer has ever advertised (Linux tcp_ack_update_window's
+    // tp->max_window); the forced_push heuristic in sendSegment() pushes once more
+    // than max_window/2 of unpushed data has gone out.
+    if (true_window > state->max_window)
+        state->max_window = true_window;
 
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 982]:
     if (doAlways || (tcpHeader->getAckBit()

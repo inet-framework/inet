@@ -48,6 +48,7 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
     cMessage *tlpTimer; // Tail Loss Probe PTO (RFC 8985 7.2); shares the RTO's single-slot discipline
+    cMessage *corkTimer; // TCP_CORK/MSG_MORE flush timer (Linux ICSK_TIME_PROBE0); fires at the RTO
 
   protected:
     /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */
@@ -58,6 +59,8 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void processKeepAliveTimer(TcpEventCode& event);
     /** Tail Loss Probe timeout: send a probe and remember snd_max in tlpHighSeq. */
     virtual void processPtoTimer(TcpEventCode& event);
+    /** Cork flush timeout: force out the withheld TCP_CORK/MSG_MORE partial with PSH. */
+    virtual void processCorkTimer(TcpEventCode& event);
     /** Linux tcp_schedule_loss_probe(): arm the PTO if the connection is TLP-eligible. */
     virtual void schedulePto();
     //@}
@@ -133,6 +136,9 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void processTimer(cMessage *timer, TcpEventCode& event) override;
 
     virtual void sendCommandInvoked() override;
+
+    virtual void scheduleCorkTimer() override;
+    virtual void cancelCorkTimer() override;
 
     virtual void receivedOutOfOrderSegment() override;
 

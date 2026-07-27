@@ -129,6 +129,8 @@ struct TcpStateVariables
     uint32_t snd_nxt = 0;           // send next (drops back on retransmission)
     uint32_t snd_max = 0;           // max seq number sent (needed because snd_nxt is re-set on retransmission)
     uint32_t snd_wnd = 0;           // send window
+    uint32_t max_window = 0;        // largest peer window ever advertised (Linux tp->max_window); drives forced_push
+    uint32_t pushed_seq = 0;        // highest seq already PSHed (Linux tp->pushed_seq); forced_push compares snd_nxt against it
     uint32_t snd_up = 0;            // send urgent pointer
     uint32_t snd_wl1 = 0;           // segment sequence number used for last window update
     uint32_t snd_wl2 = 0;           // segment ack. number used for last window update
@@ -161,6 +163,14 @@ struct TcpStateVariables
     // TCP_CORK / MSG_MORE ("corking"): hold the trailing sub-MSS partial segment;
     // full-MSS segments always flow. TCP_CORK is persistent (until cleared); MSG_MORE
     // is per-send (transient). See TcpConnection::flushCorkedData and the cork timer.
+    bool tcp_cork = false;                       // TCP_CORK: persistent partial-segment hold
+    bool msgMoreThisSend = false;                // MSG_MORE on the current SEND: transient hold, read-and-cleared at the top of sendData()
+    bool corkedDataPending = false;              // a cork/MSG_MORE partial is currently withheld (drives cork-timer arming and PSH gating)
+    bool pushHeldPartial = false;                // the withheld partial must carry PSH when flushed (Linux tcp_mark_push on a non-MSG_MORE tail write)
+    bool corkFlush = false;                      // an explicit push (uncork / nodelay / timer) is in progress: bypass BOTH cork and Nagle holds for the trailing partial
+    bool forcePushHeld = false;                  // timer-path flush: force PSH on the flushed partial (Linux tcp_write_wakeup)
+    bool pushThisSegment = false;                // transient handoff to sendSegment(): OR in PSH for the segment currently being flushed
+    bool pushOnWriteBoundary = false;           // Linux parity: set PSH on the segment carrying the last buffered byte of a send (from the pushSegmentsOnWriteBoundary parameter)
     bool delayed_acks_enabled = false;          // set if delayed ACK algorithm (RFC 1122) is enabled
     bool adaptiveDelayedAcks = false;           // from the adaptiveDelayedAcks parameter: Linux-shaped quickack/ATO/pingpong receiver ACK dynamics
     uint32_t quickAckCounter = 0;               // remaining immediate-ACK budget (Linux icsk_ack.quick); consumed one per ACK sent
@@ -421,6 +431,7 @@ struct TcpStateVariables
     // recently sent sub-MSS data segment. Nagle holds a trailing partial only
     // while such a small segment is still unacknowledged -- full-MSS segments
     // in flight alone never delay it (tcp_minshall_check).
+    uint32_t snd_sml = 0;
     bool accEcnOptSentWithDsack = false;
     uint32_t accEcnSentDsackStart = 0;
     bool accEcnOptFailSend = false;

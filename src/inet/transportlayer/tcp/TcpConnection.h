@@ -137,6 +137,11 @@ class INET_API TcpConnection : public SimpleModule
     // listen()). -1 = never set; otherwise clamps advertisedMss/snd_mss in
     // configureStateVariables(), and applied directly to state when set later.
     int userMss = -1;
+    // Runtime TCP_NODELAY / TCP_CORK (TcpSetNoDelayCommand / TcpSetCorkCommand)
+    // that may arrive before OPEN creates state; INT_MIN = never set, otherwise
+    // applied in configureStateVariables() (mirrors notsentLowatSockopt/userMss).
+    int nodelaySockopt = INT_MIN;
+    int corkSockopt = INT_MIN;
     bool autoRead = true;
     // Linux sk->sk_socket presence: false = embryonic (listening-side, not yet
     // accept()ed by the application). Gates OOO-pressure rcvbuf growth
@@ -164,6 +169,18 @@ class INET_API TcpConnection : public SimpleModule
     TcpSendQueue *sendQueue = nullptr;
     TcpReceiveQueue *receiveQueue = nullptr;
     TcpSackRexmitQueue *rexmitQueue = nullptr;
+
+    // MSG_EOR: sequence numbers marking the end of a SEND that
+    // requested a record boundary. sendSegment() must never build a segment
+    // spanning one of these; keyed on sequence number (not send-queue position)
+    // so it survives retransmission for free. Pruned lazily in sendSegment().
+    std::set<uint32_t> eorSeqNums;
+    // per-write PSH boundaries (Linux tcp_mark_push at sendmsg time), consumed
+    // by sendSegment(); only populated under pushSegmentsOnWriteBoundary
+    std::set<uint32_t> pushSeqNums;
+    // Linux forced_push boundaries (tcp_sendmsg copy loop): wire segments ending
+    // exactly here carry PSH; recorded at enqueue time, purged as they are acked
+    std::set<uint32_t> forcedPushSeqNums;
 
     // windowShrinkAllowed (Linux tcp_shrink_window=1) receive-buffer accounting:
     // Linux charges the buffer at skb-TRUESIZE granularity and scales free space
@@ -394,6 +411,10 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual bool sendData(uint32_t congestionWindow);
 
+    /** Utility: force out a partial segment currently withheld by TCP_CORK / MSG_MORE
+     *  (uncork, TCP_NODELAY, or the cork timer). forcePush sets PSH on the flushed partial. */
+    virtual void flushCorkedData(bool forcePush);
+
     /** Utility: sends 1 bytes as "probe", called by the "persist" mechanism */
     virtual bool sendProbe();
 
@@ -433,6 +454,11 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual uint32_t sendSegment(uint32_t bytes);
 
+    /**
+     * MSG_EOR: enqueues a SEND's data into sendQueue, and if the
+     * packet carries a TcpSendEorReq tag, records the new end of that data as a
+     * boundary sendSegment() must not build a segment across.
+     */
     virtual void enqueueSendCommandData(Packet *packet);
 
     /** Utility: adds control info to segment and sends it to IP */
