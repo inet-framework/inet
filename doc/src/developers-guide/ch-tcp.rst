@@ -111,10 +111,9 @@ The :ned:`Tcp` module has the following parameters:
   receiver buffer capacity (Note: normally, NIC queues should be at
   least this size, default is 14*mss)
 
-- :par:`delayedAcksEnabled` delayed ACK algorithm (RFC 1122)
-  enabled/disabled
+- :par:`delayedAcksEnabled` delayed ACK algorithm (RFC 1122) enabled/disabled
 
-- :par:`nagleEnabled` Nagle’s algorithm (RFC 896) enabled/disabled
+- :par:`nagleEnabled` Nagle's algorithm (RFC 1122) enabled/disabled
 
 - :par:`limitedTransmitEnabled` Limited Transmit algorithm (RFC 3042)
   enabled/disabled (can be used for
@@ -123,18 +122,18 @@ The :ned:`Tcp` module has the following parameters:
 - :par:`increasedIWEnabled` Increased Initial Window (RFC 3390)
   enabled/disabled
 
-- :par:`sackSupport` Selective Acknowledgment (RFC 2018, 2883, 3517)
+- :par:`sackSupport` Selective Acknowledgment (RFC 2018, 2883, 6675)
   support (header option) (SACK will be enabled for a connection if
   both endpoints support it)
 
-- :par:`windowScalingSupport` Window Scale (RFC 1323) support (header
+- :par:`windowScalingSupport` Window Scale (RFC 7323) support (header
   option) (WS will be enabled for a connection if both endpoints
   support it)
 
-- :par:`timestampSupport` Timestamps (RFC 1323) support (header option)
+- :par:`timestampSupport` Timestamps (RFC 7323) support (header option)
   (TS will be enabled for a connection if both endpoints support it)
 
-- :par:`mss` Maximum Segment Size (RFC 793) (header option, default is
+- :par:`mss` Maximum Segment Size (RFC 9293) (header option, default is
   536)
 
 - :par:`tcpAlgorithmClass` the name of the TCP flavour
@@ -244,7 +243,7 @@ receives a TCP_I_CONNECTION_REFUSED message.
    If you do an active OPEN, then send data and close before the connection
    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
    without actually sending the buffered data. This is consistent with
-   RFC 793 but may not be what you would expect.
+   RFC 9293 but may not be what you would expect.
 
 
 
@@ -403,10 +402,10 @@ etc. Because this algorithm does not send duplicate ACKs when it receives
 out-of-order segments, it does not work well together with other
 algorithms.
 
-TcpBaseAlg
+TcpAlgorithmBase
 ~~~~~~~~~~
 
-The :cpp:`TcpBaseAlg` is the base class of the INET implementation of
+The :cpp:`TcpAlgorithmBase` is the base class of the INET implementation of
 Tahoe, Reno, and NewReno. It implements basic TCP algorithms for
 adaptive retransmissions, persistence timers, delayed ACKs, Nagle’s
 algorithm, Increased Initial Window – EXCLUDING congestion control.
@@ -416,7 +415,7 @@ Delayed ACK
 ^^^^^^^^^^^
 
 When the :par:`delayedAcksEnabled` parameter is set to true, the
-:cpp:`TcpBaseAlg` applies a 200ms delay before sending ACKs.
+:cpp:`TcpAlgorithmBase` applies a 200ms delay before sending ACKs.
 
 Nagle’s algorithm
 ^^^^^^^^^^^^^^^^^
@@ -443,7 +442,7 @@ If the :par:`increasedIWEnabled` parameter is true, then the initial
 window is increased to 4380 bytes, but at least 2 SMSS and at most 4
 SMSS. The congestion window is not updated afterwards; subclasses can
 add congestion control by redefining virtual methods of the
-:cpp:`TcpBaseAlg` class in their own class implementation.
+:cpp:`TcpAlgorithmBase` class in their own class implementation.
 
 Duplicate ACKs
 ^^^^^^^^^^^^^^
@@ -469,7 +468,7 @@ Can be used to demonstrate the effect of lack of congestion control.
 TcpTahoe
 ~~~~~~~~
 
-The :cpp:`TcpTahoe` algorithm class extends :cpp:`TcpBaseAlg` with *Slow
+The :cpp:`TcpTahoe` algorithm class extends :cpp:`TcpAlgorithmBase` with *Slow
 Start*, *Congestion Avoidance*, and *Fast Retransmit* congestion control
 algorithms. This algorithm initiates a *Slow Start* when a packet loss
 is detected.
