@@ -187,15 +187,15 @@ simple Tcp extends SimpleModule like ITcp
     parameters:
         @class(Tcp);
         string checksumMode @enum("declared", "computed") = default("declared");
-        int advertisedWindow = default(14 * this.mss); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+        int advertisedWindow @mutable = default(14 * this.mss); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size). @mutable so a harness/app can model setsockopt(SO_RCVBUF) by updating it before a connection is configured.
         bool delayedAcksEnabled = default(false); // Delayed ACK algorithm (RFC 1122) enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
         bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
         bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
-        int windowScalingFactor = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits)
-        bool timestampSupport = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+        int windowScalingFactor @mutable = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits). @mutable so a harness/app modeling setsockopt(SO_RCVBUF) can switch to auto (-1) at runtime.
+        bool timestampSupport @mutable = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
         int mss = default(536); // Maximum Segment Size (header option). Default 536 per RFC 1122.
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @examples("TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
