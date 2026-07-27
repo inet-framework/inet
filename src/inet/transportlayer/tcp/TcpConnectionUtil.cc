@@ -29,6 +29,8 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
@@ -36,7 +38,6 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
 namespace tcp {
@@ -1817,7 +1818,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
     {
         // TS header option
         if (state->ts_enabled) { // Is TS enabled?
-            if (!(state->sack_enabled && (state->snd_sack || state->snd_dsack))) { // if SACK is enabled and SACKs need to be added, do not add NOPs to this segment
+            if (tcpMain->alignOptions && !(state->sack_enabled && (state->snd_sack || state->snd_dsack))) { // if SACK is enabled and SACKs need to be added, do not add NOPs to this segment
                 // 2 padding bytes
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
                 tcpHeader->appendHeaderOption(new TcpOptionNop()); // NOP
@@ -1855,7 +1856,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // containing new data, and each of these "duplicate" ACKs SHOULD bear a
         // SACK option."
         if (state->sack_enabled && (state->snd_sack || state->snd_dsack)) {
-            addSacks(tcpHeader);
+            check_and_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery())->addSacks(tcpHeader);
         }
 
         // TODO add new TCPOptions here once they are implemented
@@ -1863,6 +1864,10 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
     }
 
     if (tcpHeader->getHeaderOptionArraySize() != 0) {
+        // alignment to a 4-byte boundary
+        while (tcpHeader->getHeaderOptionArrayLength().get() % 4 != 0)
+            tcpHeader->appendHeaderOption(new TcpOptionEnd());
+
         B options_len = tcpHeader->getHeaderOptionArrayLength();
 
         if (options_len <= TCP_OPTIONS_MAX_SIZE) { // Options length allowed? - maximum: 40 Bytes
