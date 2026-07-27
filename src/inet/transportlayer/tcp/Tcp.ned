@@ -47,7 +47,7 @@ import inet.transportlayer.contract.ITcp;
 //      Limited Transmit algorithm (RFC 3042).
 //
 //   -# The `increasedIWEnabled` parameter can be used to change the initial window
-//      from one segment (RFC 2001) (based on MSS) to maximal four segments
+//      from two segments (RFC 5681) (based on MSS) to a maximum of four segments
 //      (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390).
 //
 //   -# The `advertisedWindow` parameter defines the amount of data TCP can
@@ -84,56 +84,58 @@ import inet.transportlayer.contract.ITcp;
 //  - if you do active OPEN, then send data and close before the connection
 //    has reached ESTABLISHED, the connection will go from SYN_SENT to CLOSED
 //    without actually sending the buffered data. This is consistent with
-//    RFC 793 but may not be what you'd expect.
+//    RFC 9293 but may not be what you'd expect.
 //  - handling segments with SYN+FIN bits set (esp. with data too) is
 //    inconsistent across TCPs, so check this one if it's of importance
 //
 // <b>Standards</b>
 //
 // Implementation is based on the following RFCs:
-//   - RFC  793 - Transmission Control Protocol
-//   - RFC  896 - Congestion Control in IP/TCP Internetworks
+//   - RFC 9293 - Transmission Control Protocol (TCP)
 //   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
-//   - RFC 1323 - TCP Extensions for High Performance
 //   - RFC 2018 - TCP Selective Acknowledgment Options
-//   - RFC 2581 - TCP Congestion Control
 //   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
 //   - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
+//   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
 //   - RFC 3390 - Increasing TCP's Initial Window
-//   - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss Recovery
-//                Algorithm for TCP
-//   - RFC 3782 - The `NewReno` Modification to TCP's Fast Recovery Algorithm
+//   - RFC 5681 - TCP Congestion Control
+//   - RFC 6582 - The `NewReno` Modification to TCP's Fast Recovery Algorithm
+//   - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP
+//   - RFC 7323 - TCP Extensions for High Performance
 //   - RFC 1191 - Path MTU Discovery
 //   - RFC 1981 - Path MTU Discovery for IP version 6
 //   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
-//   - RFC 8257 - Data Center TCP (DCTCP): ECN Marking at the Data Sender
+//   - RFC 8257 - Data Center TCP (DCTCP): TCP Congestion Control for Data Centers
+//   - RFC 8312 - CUBIC for Fast Long-Distance Networks
+//
+// See also:
+//   - RFC 7805 - Moving Outdated TCP Extensions and TCP-Related Documents to Historic or Informational Status
 //
 // Implemented features include the following:
-//  - all RFC 793 TCP states and state transitions
-//  - connection setup and teardown as in RFC 793
-//  - generally, RFC 793-compliant segment processing
+//  - all RFC 9293 TCP states and state transitions
+//  - connection setup and teardown as in RFC 9293
+//  - generally, RFC 9293-compliant segment processing
 //  - all socket commands and indications
 //  - receive buffer to cache above-sequence data and data not yet forwarded
 //    to the user
 //  - CONN-ESTAB timer, SYN-REXMIT timer, 2MSL timer, FIN-WAIT-2 timer
 //  - selective acknowledgements aka. SACK (RFC 2018 and RFC 2883)
-//  - RFC 3517 - SACK-based Loss Recovery algorithm which is a conservative
-//    replacement of the fast recovery algorithm (RFC2581) integrated into
+//  - RFC 6675 - SACK-based Loss Recovery algorithm which is a conservative
+//    replacement of the fast recovery algorithm (RFC 5681) integrated into
 //    `TcpReno` but not into `TcpNewReno`, `TcpTahoe`, `TcpNoCongestionControl`, and `DumbTcp`.
-//  - changes from RFC 2001 to RFC 2581:
-//      - ACK generation (ack_now = true) RFC 2581, page 6: "(...) a Tcp receiver SHOULD send an immediate ACK
-//        when the incoming segment fills in all or part of a gap in the sequence space."
+//  - ACK generation (ack_now = true) RFC 5681, page 7: "(...) a Tcp receiver SHOULD send an immediate ACK
+//    when the incoming segment fills in all or part of a gap in the sequence space."
 //  - TCP header options:
 //      - EOL: End of option list.
 //      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
 //      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
 //        (local parameter) and the value specified in the MSS option
-//        received during connection startup. Based on [RFC 2581, page 1].
-//      - WS: Window Scale option, based on RFC 1323.
+//        received during connection startup. Based on [RFC 5681].
+//      - WS: Window Scale option, based on RFC 7323.
 //      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
 //        PERMITTED during connection startup.
-//      - SACK: SACK option, based on RFC 2018, RFC 2883, and RFC 3517.
-//      - TS: Timestamps option, based on RFC 1323.
+//      - SACK: SACK option, based on RFC 2018, RFC 2883, and RFC 6675.
+//      - TS: Timestamps option, based on RFC 7323.
 //  - flow control: finite receive buffer size (initiated by the parameter
 //    `advertisedWindow`). If the receive buffer is exhausted (by out-of-order
 //    segments) and the payload length of a newly received segment
@@ -151,15 +153,15 @@ import inet.transportlayer.contract.ITcp;
 //
 // The `TcpNewReno`, `TcpReno`, and `TcpTahoe` algorithms implement:
 //  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
-//  - RFC 896 - Nagle's algorithm (optional)
+//  - RFC 1122 - Nagle's algorithm (optional)
 //  - Jacobson's and Karn's algorithms for round-trip time measurement and
 //    adaptive retransmission
 //  - `TcpTahoe` (Fast Retransmit), `TcpReno` (Fast Retransmit and Fast Recovery),
 //    `TcpNewReno` (Fast Retransmit and Fast Recovery)
-//  - RFC 3390 - Increased Initial Window (optional) integrated into `TcpBaseAlg`
+//  - RFC 3390 - Increased Initial Window (optional) integrated into `TcpAlgorithmBase`
 //    (can be used for `TcpNewReno`, `TcpReno`, `TcpTahoe`, and `TcpNoCongestionControl` but not
 //    for `DumbTcp`).
-//  - RFC 3042 - Limited Transmit algorithm (optional) integrated into `TcpBaseAlg`
+//  - RFC 3042 - Limited Transmit algorithm (optional) integrated into `TcpAlgorithmBase`
 //    (can be used for `TcpNewReno`, `TcpReno`, `TcpTahoe`, and `TcpNoCongestionControl` but not
 //    for `DumbTcp`).
 //
@@ -178,7 +180,7 @@ import inet.transportlayer.contract.ITcp;
 //
 // `TcpNewReno`, `TcpReno`, and `TcpTahoe` issues and missing features:
 //  - KEEP-ALIVE not implemented (idle connections never time out)
-//  - Nagle's algorithm (RFC 896) possibly not precisely implemented
+//  - Nagle's algorithm (RFC 1122) possibly not precisely implemented
 //
 // The above problems should be relatively easy to fix.
 //
@@ -187,23 +189,34 @@ simple Tcp extends SimpleModule like ITcp
     parameters:
         @class(Tcp);
         string checksumMode @enum("declared", "computed") = default("declared");
-        int advertisedWindow @mutable = default(14 * this.mss); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size). @mutable so a harness/app can model setsockopt(SO_RCVBUF) by updating it before a connection is configured.
-        bool delayedAcksEnabled = default(false); // Delayed ACK algorithm (RFC 1122) enabled/disabled
-        bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
-        bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
-        bool increasedIWEnabled = default(false); // Increased Initial Window (RFC 3390) enabled/disabled
-        bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
-        bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+        int advertisedWindow @mutable = default(65535); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size). @mutable so a harness/app can model setsockopt(SO_RCVBUF) by updating it before a connection is configured.
+        bool delayedAcksEnabled = default(true); // Delayed ACK algorithm (RFC 1122) enabled/disabled
+        bool nagleEnabled = default(true); // Nagle's algorithm (RFC 1122) enabled/disabled
+        bool limitedTransmitEnabled = default(true); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
+        bool increasedIWEnabled = default(false); // DEPRECATED: use initialWindow="rfc3390" instead. Increased Initial Window (RFC 3390) enabled/disabled
+        bool sackSupport = default(true); // Selective Acknowledgment (RFC 2018, 2883, 6675) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+        bool windowScalingSupport = default(true); // Window Scale (RFC 7323) support (header option) (WS will be enabled for a connection if both endpoints support it)
         int windowScalingFactor @mutable = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits). @mutable so a harness/app modeling setsockopt(SO_RCVBUF) can switch to auto (-1) at runtime.
-        bool timestampSupport @mutable = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
-        int mss = default(536); // Maximum Segment Size (header option). Default 536 per RFC 1122.
+        bool timestampSupport @mutable = default(true); // Timestamps (RFC 7323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+        int mss = default(-1); // Maximum Segment Size (RFC 9293) (header option). Default 536 per RFC 1122.
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
-        string tcpAlgorithmClass @examples("TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
-        int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 3517) DO NOT change unless you really know what you are doing
+        string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpCubic");
+        int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 6675) DO NOT change unless you really know what you are doing
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
+        // TcpCubic (RFC 9438) tuning; effective only with tcpAlgorithmClass=TcpCubic
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
-        bool ecnWillingness = default(false); // True if willing to use ECN
+        bool ecnWillingness = default(false); // DEPRECATED -- use tcpEcnMode. true maps to tcpEcnMode="rfc3168" unless tcpEcnMode is ALSO explicitly set to something other than "off" (then a cRuntimeError is thrown -- exact precedent: increasedIWEnabled vs initialWindow, TcpConnectionUtil.cc:645-651)
+            // Value semantics modeled on Linux net.ipv4.tcp_ecn (0/1/2/3/4/5; AccECN owns 3/4/5):
+            //   off            ~ tcp_ecn=0: never request or accept any form of ECN (today's default)
+            //   passive        ~ tcp_ecn=2: accept a peer-initiated classic ECN-setup SYN, never
+            //                    initiate ECN on active OPEN. Linux's real out-of-box default.
+            //   rfc3168        ~ tcp_ecn=1/4: always send a classic ECN-setup SYN on active OPEN;
+            //                    accept passively when listening. Equivalent to ecnWillingness=true.
+            //   accecn         ~ tcp_ecn=3: attempt AccECN negotiation on active OPEN and accept it
+            //                    when listening; fall back to rfc3168 or off per negotiation outcome.
+            //   accecn-passive ~ tcp_ecn=5: accept AccECN when listening, never initiate it on
+            //                    active OPEN (mirrors "passive" but for AccECN).
         double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
         bool pmtudEnabled = default(false); // Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled
         double pmtudTimeout @unit(s) = default(600s); // Time after which the original MSS is restored to probe for increased path MTU (RFC 1191, Section 6.3)
