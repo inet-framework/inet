@@ -284,6 +284,8 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual uint32_t sendSegment(uint32_t bytes);
 
+    virtual void enqueueSendCommandData(Packet *packet);
+
     /** Utility: adds control info to segment and sends it to IP */
     virtual void sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader);
 

@@ -111,17 +111,18 @@ struct TcpStateVariables
 
     bool active = false;            // set if the connection was initiated by an active open
     bool fork = false;              // if passive and in LISTEN: whether to fork on an incoming connection
+    bool forked = false;            // this connection WAS forked off a listener (durable, unlike listeningSocketId which is cleared on ACCEPT): on RST/hard-ICMP in SYN_RCVD it must close like a Linux child socket, never fall back to LISTEN (the original listener still exists -- falling back would duplicate it)
 
-    uint32_t snd_mss = 0;           // sender maximum segment size (without headers, i.e. only segment text); see RFC 2581, page 1.
+    uint32_t snd_mss = 0;           // sender maximum segment size (without headers, i.e. only segment text); see RFC 5681.
     uint32_t advertisedMss = 0;     // our OWN maximum receivable segment size, as announced in this side's SYN/SYN-ACK MSS option
                                     // (RFC 793/9293: the option describes the announcing side's receive limit). Unlike snd_mss it is
                                     // NEVER clamped by the peer's announced MSS: a SYN-ACK announces this side's own receive
                                     // limit, never the client's.
                                     // This will be set to the minimum of the local smss parameter and the value specified in the
                                     // MSS option received during connection setup.
-    uint32_t peerAdvertisedMss = 0;          // the RAW MSS value from the peer's SYN/SYN-ACK option, before any local (user-MSS/TCP_MAXSEG) clamping -- Linux caches THIS in tcp_metrics for the next TFO SYN's payload budget (tcp_rcv_fastopen_synack even reparses the SYN-ACK to bypass the user clamp; syn-data-mss pins the 1300-byte SYN payload from a cached 1340)
+    uint32_t snd_effmss = 0;        // effective sender maximum segment size without TCP/IP header options
 
-    // send sequence number variables (see RFC 793, "3.2. Terminology")
+    // send sequence number variables (see RFC 9293, "3.3. TCP Terminology Overview")
     uint32_t snd_una = 0;           // send unacknowledged
     uint32_t snd_nxt = 0;           // send next (drops back on retransmission)
     uint32_t snd_max = 0;           // max seq number sent (needed because snd_nxt is re-set on retransmission)
@@ -245,7 +246,6 @@ struct TcpStateVariables
     simtime_t pmtudLastMssReduction;        // timestamp of last PMTUD-triggered MSS reduction (-1 = never reduced)
     // declared here for the code above that already uses it:
     uint32_t maxPacketsOut = 0;    // peak segments in flight observed at send time (Linux max_packets_out); drives the RFC 5681 cwnd-limited slow-start gate
-    uint32_t snd_effmss = 0;        // effective sender maximum segment size without TCP/IP header options
     bool accEcnNegotiated = false; // set once 3WHS negotiation determines this connection uses AccECN, not classic ECN or no-ECN
     uint8_t accEcnOptMinFields = 0;
     bool accEcnOptionEnabled = false; // cached from the accEcnOptionEnabled param at configureStateVariables() time
@@ -261,6 +261,13 @@ struct TcpStateVariables
     bool ecnMarkAll = false; // marks all packets, including pure ACKs, retransmissions, etc. with ECN
     int init_cwnd_mode = 0;                      // initial window: 0=RFC2001 (1 SMSS), 1=RFC3390, 2=RFC6928 (IW10)
     simtime_t time_last_segment_received = 0; // time at which the last segment was received (idle base for keepalive)
+    simtime_t busyStartTime;          // set to -1 in configureStateVariables() -- see pmtudLastMssReduction below for the same pattern
+    simtime_t handshakeSentTime = -1; // when our SYN (active) / SYN-ACK (passive) was last sent; seeds the RTT estimator from the handshake RTT on reaching ESTABLISHED (skipped per Karn if the handshake segment was retransmitted)
+    uint32_t peerAdvertisedMss = 0;          // the RAW MSS value from the peer's SYN/SYN-ACK option, before any local (user-MSS/TCP_MAXSEG) clamping -- Linux caches THIS in tcp_metrics for the next TFO SYN's payload budget (tcp_rcv_fastopen_synack even reparses the SYN-ACK to bypass the user clamp; syn-data-mss pins the 1300-byte SYN payload from a cached 1340)
+    simtime_t rwndLimitedAccumulated = 0;
+    simtime_t rwndLimitedStartTime;   // set to -1 in configureStateVariables()
+    bool seedRttFromHandshake = false; // seed srtt/rttvar/RTO from the SYN<->SYN-ACK exchange, as Linux does
+    simtime_t sndbufLimitedStartTime; // set to -1 in configureStateVariables()
 };
 
 cplusplus(TcpStateVariables) {{
