@@ -1368,6 +1368,38 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
                 readHeaderOptions(tcpHeader);
 
+            // Fast Open option-form fallback (RFC 7413 appendix A). A cookie REQUEST
+            // that comes back with no Fast Open option at all usually means a
+            // middlebox or an older server that only understands the experimental
+            // kind-254 encoding, so remember to retry this destination that way --
+            // Linux does the same via tcp_metrics. Checked on the wire rather than
+            // through a state flag because readHeaderOptions() has no reason to
+            // record the absence of an option (gtests fastopen/client/fallback-exp-opt
+            // pins the kind-34 request, the silent SYN-ACK, then the kind-254 retry).
+            // Only when this SYN-ACK answers a SYN that actually carried the option:
+            // Linux drops the Fast Open option from SYN RETRANSMITS, so once we have
+            // retransmitted, a cookie-less SYN-ACK says nothing about the server's
+            // option dialect -- it answered a deliberately bare SYN. The two corpus
+            // scripts differ in exactly this: cookie-req-timeout retransmits and must
+            // keep requesting with kind 34, fallback-exp-opt is answered first time
+            // and must retry with kind 254.
+            if (state->fastopenCookieRequestPending && state->fastopenSynCarriedOption
+                && state->syn_rexmit_count == 0) {
+                bool sawFastOpenOption = false;
+                for (unsigned int i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
+                    short kind = tcpHeader->getHeaderOption(i)->getKind();
+                    if (kind == TCPOPTION_TCP_FASTOPEN || kind == TCPOPTION_RFC3692_STYLE_EXPERIMENT_2) {
+                        sawFastOpenOption = true;
+                        break;
+                    }
+                }
+                if (!sawFastOpenOption && !state->fastopenPeerUsedExpOption) {
+                    EV_INFO << "Fast Open: cookie request went unanswered; retrying "
+                            << remoteAddr.str() << " with the experimental option next time\n";
+                    tcpMain->setFastOpenUseExpOption(remoteAddr, true);
+                }
+            }
+
             // Linux tcp_rcv_fastopen_synack(): a TFO connection's SYN-ACK
             // refreshes the cached peer MSS EVERY time (the cookie only when
             // one is present) -- a later cookie-less SYN-ACK advertising a

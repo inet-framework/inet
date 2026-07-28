@@ -1786,6 +1786,21 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
 
 void TcpConnection::enqueueSendCommandData(Packet *packet)
 {
+    // A zero-length SEND carries no data to queue and must not reach
+    // TcpSendQueue::enqueueAppData(), whose peekDataAt(B(0), 0) throws "Returning
+    // an empty chunk is not allowed". It is not a malformed command: send(fd, x, 0)
+    // is a legal no-op, and sendto(fd, x, 0, MSG_FASTOPEN) is how an application
+    // asks for nothing but a Fast Open cookie. Only the SYN_SENT fast-open branch
+    // used to screen for it, so the same syscall crashed whenever the SYN had not
+    // been deferred -- i.e. exactly when no cookie was cached, which is when a
+    // bare cookie request is what the application wanted (gtests
+    // fastopen/client/nonblocking-sendto, after it flushes the cookie cache).
+    if (packet->getByteLength() == 0) {
+        EV_DETAIL << "Zero-length SEND: nothing to queue\n";
+        delete packet;
+        return;
+    }
+
     // TCP_INFO trio (busy_time): read-only bookkeeping -- if the connection was
     // fully idle (nothing outstanding, nothing queued) before this SEND, it becomes
     // busy now. See processAckInEstabEtc() for the matching "back to idle" exit.
@@ -2674,7 +2689,12 @@ bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cooki
             // TCP_MAXSEG 1040).
             uint32_t cacheMss = state->peerAdvertisedMss > 0 ? state->peerAdvertisedMss : state->snd_mss;
             tcpMain->setFastOpenCookie(remoteAddr, cookie, cacheMss);
-            EV_INFO << "Fast Open: learned a " << cookieLen << "-byte cookie for " << remoteAddr.str() << "\n";
+            // Remember WHICH option form carried it, so the next connection echoes the
+            // cookie the same way (Linux keeps foc->exp beside the cookie in
+            // tcp_metrics). setFastOpenCookie() rewrites the entry, so this must follow it.
+            tcpMain->setFastOpenUseExpOption(remoteAddr, state->fastopenPeerUsedExpOption);
+            EV_INFO << "Fast Open: learned a " << cookieLen << "-byte cookie for " << remoteAddr.str()
+                    << " (kind " << (state->fastopenPeerUsedExpOption ? 254 : 34) << ")\n";
         }
         else if (cookieLen > 0) {
             // RFC 7413 SS4.1.2: valid cookies are 4-16 bytes (Linux
@@ -2706,8 +2726,10 @@ bool TcpConnection::processFastOpenExpOption(const Ptr<const TcpHeader>& tcpHead
         cookie[i] = option.getCookie(i);
     // Linux echoes the cookie in the same option form the client used
     // (foc->exp propagates request->response); remember it for the SYN-ACK.
-    if (fsm.getState() == TCP_S_LISTEN)
-        state->fastopenPeerUsedExpOption = true;
+    // On the CLIENT this is equally the record of how the server answered, which
+    // decides both how the learned cookie is cached and how it is echoed later --
+    // so set it in either role, not just LISTEN.
+    state->fastopenPeerUsedExpOption = true;
     return processFastOpenCookieBytes(cookie);
 }
 
@@ -2884,14 +2906,29 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             if (haveCachedCookie || state->fastopenCookieRequestPending) {
                 tcpHeader->appendHeaderOption(new TcpOptionNop());
                 tcpHeader->appendHeaderOption(new TcpOptionNop());
-                TcpOptionTcpFastOpen *clientOption = new TcpOptionTcpFastOpen();
-                clientOption->setCookieArraySize(cachedCookie.size());
-                for (size_t i = 0; i < cachedCookie.size(); i++)
-                    clientOption->setCookie(i, cachedCookie[i]);
-                clientOption->setLength(2 + cachedCookie.size());
-                tcpHeader->appendHeaderOption(clientOption);
+                if (tcpMain->getFastOpenUseExpOption(remoteAddr)) {
+                    // RFC 7413 appendix A: kind 254 + 0xF989 magic. Used either because
+                    // this destination answered in that form before, or because a kind-34
+                    // request went unanswered and this is the retry.
+                    TcpOptionTcpFastOpenExp *expOption = new TcpOptionTcpFastOpenExp();
+                    expOption->setExpId(0xF989);
+                    expOption->setCookieArraySize(cachedCookie.size());
+                    for (size_t i = 0; i < cachedCookie.size(); i++)
+                        expOption->setCookie(i, cachedCookie[i]);
+                    expOption->setLength(4 + cachedCookie.size());
+                    tcpHeader->appendHeaderOption(expOption);
+                }
+                else {
+                    TcpOptionTcpFastOpen *clientOption = new TcpOptionTcpFastOpen();
+                    clientOption->setCookieArraySize(cachedCookie.size());
+                    for (size_t i = 0; i < cachedCookie.size(); i++)
+                        clientOption->setCookie(i, cachedCookie[i]);
+                    clientOption->setLength(2 + cachedCookie.size());
+                    tcpHeader->appendHeaderOption(clientOption);
+                }
                 state->fastopenSynCarriedOption = true; // Linux tp->syn_fastopen
-                EV_INFO << "Tcp Header Option Fast Open cookie (" << cachedCookie.size() << " bytes) sent\n";
+                EV_INFO << "Tcp Header Option Fast Open cookie (" << cachedCookie.size() << " bytes, kind "
+                        << (tcpMain->getFastOpenUseExpOption(remoteAddr) ? 254 : 34) << ") sent\n";
             }
         }
 
