@@ -240,7 +240,7 @@ whose width is the time it holds the medium:
    axes:     sta[0] (6 Mbps), sta[1] (54 Mbps), accessPoint   (this top-to-bottom order)
    display:  NETWORK_COMMUNICATION; timeline SIMULATION_TIME (linear -- required so block
              width equals airtime; NONLINEAR flattens the contrast)
-   anchor:   window 2.004000s..2.006650s -- the collision-free 6 Mbps frame occupies
+   anchor:   window 2.004000s..2.006700s -- the collision-free 6 Mbps frame occupies
              [2.005044s, 2.006494s]. Any clean (non-colliding) slow frame works; if the
              wide/narrow width ratio stops being ~8x, the bitrates changed.
    capture:  Sequence Chart screenshot, top band (ruler + position/range readout) cropped
