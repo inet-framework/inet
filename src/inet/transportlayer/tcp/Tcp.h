@@ -171,7 +171,7 @@ class INET_API Tcp : public TransportProtocolBase
     // the same stream.
     bool fastOpenSecretSeeded = false;
     uint64_t fastOpenSecret = 0;
-    struct FastOpenCacheEntry { std::vector<uint8_t> cookie; uint32_t peerMss = 0; };
+    struct FastOpenCacheEntry { std::vector<uint8_t> cookie; uint32_t peerMss = 0; bool exp = false; };
     std::map<L3Address, FastOpenCacheEntry> fastOpenCookieCache; // per-destination cookie + learned peer MSS (~ Linux tcp_metrics)
     int fastOpenCookieCacheSize = 0; // read once from the fastopenCookieCacheSize parameter at INITSTAGE_LOCAL
 
@@ -252,6 +252,28 @@ class INET_API Tcp : public TransportProtocolBase
 
     /** Peer MSS learned alongside the cached cookie; 0 if no cache entry. */
     virtual uint32_t getFastOpenCachedMss(const L3Address& remoteAddr) const;
+
+    /**
+     * TCP Fast Open: drop every cached cookie, so the next active open falls back
+     * to a bare cookie REQUEST. This is what `ip tcp_metrics flush` does on Linux,
+     * and test harnesses need it to re-arm the cookie-request path mid-run
+     * (gtests fastopen/client/nonblocking-sendto flushes and then pins "> S ... FO"
+     * with no cookie).
+     */
+    virtual void clearFastOpenCookieCache();
+
+    /**
+     * TCP Fast Open option form for remoteAddr: true = the experimental kind-254 +
+     * 0xF989-magic encoding (RFC 7413 appendix A), false = the assigned kind 34.
+     * Linux keeps this beside the cookie in tcp_metrics and echoes back whatever
+     * form worked; a cookie REQUEST that went unanswered in kind-34 form also sets
+     * it, so the next request retries as experimental
+     * (gtests fastopen/client/fallback-exp-opt pins that retry).
+     */
+    virtual bool getFastOpenUseExpOption(const L3Address& remoteAddr) const;
+
+    /** Record the option form to use for remoteAddr, leaving any cached cookie alone. */
+    virtual void setFastOpenUseExpOption(const L3Address& remoteAddr, bool exp);
 
     /**
      * TCP Fast Open active blackhole detection: true while active (data-attached)

@@ -587,6 +587,26 @@ void Tcp::setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8
     fastOpenCookieCache[remoteAddr] = FastOpenCacheEntry{cookie, peerMss};
 }
 
+bool Tcp::getFastOpenUseExpOption(const L3Address& remoteAddr) const
+{
+    auto it = fastOpenCookieCache.find(remoteAddr);
+    return it != fastOpenCookieCache.end() && it->second.exp;
+}
+
+void Tcp::setFastOpenUseExpOption(const L3Address& remoteAddr, bool exp)
+{
+    // Deliberately creates an entry when none exists: "answer my next request in
+    // the experimental form" is worth remembering even though no cookie was
+    // learned, which is precisely the unanswered-request case.
+    fastOpenCookieCache[remoteAddr].exp = exp;
+}
+
+void Tcp::clearFastOpenCookieCache()
+{
+    EV_INFO << "Fast Open: flushing " << fastOpenCookieCache.size() << " cached cookie(s)\n";
+    fastOpenCookieCache.clear();
+}
+
 bool Tcp::isActiveFastOpenDisabled() const
 {
     return simTime() < fastOpenBlackholeDisableUntil;
