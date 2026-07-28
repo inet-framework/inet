@@ -13,7 +13,9 @@ itself, it drags the throughput of *every* other station down to its own level, 
 the whole network loses a large fraction of its capacity.
 
 We reproduce the effect with a small 802.11g network and measure just how much one
-slow station costs everyone else.
+slow station costs everyone else. The page then shows the two standard cures for the two
+forms of the anomaly: the 802.11e TXOP on the contention-based uplink, and an
+airtime-fair transmit queue at the access point on the downlink.
 
 | Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/wireless/rateanomaly <https://github.com/inet-framework/inet/tree/master/showcases/wireless/rateanomaly>`__
@@ -114,6 +116,11 @@ throughput can be measured separately for each station:
    :end-at: *.sta[*].app[0].sendInterval
    :language: ini
 
+The traffic settings shown here make up an abstract ``[Config UplinkBase]``, which —
+together with the radio and node placement in ``[General]`` — the two runnable uplink
+configurations extend; the downlink section later builds a parallel
+``[Config DownlinkBase]``.
+
 The Network
 ~~~~~~~~~~~
 
@@ -140,7 +147,7 @@ UDP flow to the server at the same time, so they continuously contend for the ch
 Homogeneous and RateAnomaly Configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Two configurations are defined. In **Homogeneous**, all five stations transmit at
+Two runnable uplink configurations are defined. In **Homogeneous**, all five stations transmit at
 54 Mbps — the baseline, in which the channel is shared fairly and the network runs at
 full 802.11g capacity. In **RateAnomaly**, one station is slowed while the other four
 stay at 54 Mbps; its bitrate is swept from 36 Mbps down to 6 Mbps to show how the
@@ -301,7 +308,8 @@ slow station only a few.
 The ``[Config Txop]`` configuration switches the interface to the QoS (EDCA) MAC and grants
 best-effort traffic a time-based TXOP. AC_BE's *default* TXOP limit is zero — one frame per
 win, i.e. plain DCF behaviour — so the fix is simply to set a nonzero limit; here we borrow
-the standard's Video-category value (3.008 ms). The MAC queue is deepened too, so a fast
+the standard's Video-category value (3.008 ms). (Best-effort traffic maps to AC_BE, which
+INET indexes as ``edcaf[1]``.) The MAC queue is deepened too, so a fast
 station has enough frames buffered to fill a burst; those are the only changes:
 
 .. literalinclude:: ../omnetpp.ini
@@ -339,9 +347,17 @@ At the widest gap — the slow station at 6 Mbps — the fast-station average re
 Mbps, most of the way to the ~24 Mbps all-fast baseline (the dashed line). The slow station
 itself falls from ~2.3 to ~0.9 Mbps — and that *is* airtime fairness, not a side-effect: given
 only its fair share of time, a 6 Mbps station can clock out proportionally fewer bits, so it
-stops monopolising the medium and the others get their time back. (TXOP also sits a little
-*above* the DCF baseline even at small gaps — bursting amortises the fixed per-frame overhead,
-a modest efficiency bonus on top of the fairness fix.)
+stops monopolising the medium and the others get their time back.
+
+The TXOP curves also sit clearly *above* the plain-DCF all-fast baseline across the whole
+sweep. Bursting amortises the fixed per-exchange overhead — backoff, SIFS/DIFS, the PHY
+preamble and PLCP header — over several frames, so even a healthy all-fast cell gets more
+throughput under TXOP than under plain DCF. That is why modern 802.11 (n/ac/ax) does much the
+same all the time — frame aggregation (A-MPDU), typically carried inside a TXOP, amortises the
+same overhead; the showcase keeps a plain-DCF baseline only to isolate the rate-anomaly
+mechanism from this efficiency bonus. The TXOP limit is still a tradeoff, not "bigger is always
+better": longer bursts raise the other stations' latency and, under permanent saturation,
+can starve a station outright — the EDCA lockout noted below.
 
 TXOP and the access-point airtime scheduler noted earlier are two fixes for two faces of the
 same anomaly, not the same fix twice. TXOP is *distributed* — it bounds each *contending*
@@ -400,17 +416,20 @@ Frame fairness versus airtime fairness at the AP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The access point's transmit queue chooses which client's frame to send next; the two configs
-flip a single switch on it:
+flip a single switch on it, ``fairnessEnabled``:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: pendingQueue.typename = "AirtimeFairnessQueue"
-   :end-at: pendingQueue.quantum = 1500us
+   :end-at: pendingQueue.fairnessEnabled = true
    :language: ini
 
 ``[Config DownlinkAnomaly]`` runs the queue **frame-fair** (``fairnessEnabled = false``): it serves
 each client an equal number of *frames*, round-robin — the downlink analog of DCF's equal channel
-access. ``[Config DownlinkAirtimeFair]`` runs it **airtime-fair** with a *deficit round-robin*:
-each client carries a time budget that a fixed *quantum* (here 1500 µs) tops up every round, and
+access. A stock access point with a plain FIFO transmit queue collapses the same way; the
+per-client round-robin is used here only so each client's throughput is separately measurable.
+``[Config DownlinkAirtimeFair]`` runs it **airtime-fair** with a *deficit round-robin*:
+each client carries a time budget that a fixed *quantum* — 1500 µs by default, about one
+max-length frame's airtime — tops up every round, and
 each frame it sends is charged its own on-air duration — computed from the frame's rate and length,
 so a slow client's long frames drain its budget fast. A client whose budget runs out waits for the
 next round's top-up, so over time every client gets the same share of transmit time whatever its
@@ -472,6 +491,10 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
     $ opp_env run inet-4.6 --init -w inet-workspace --install --build-modes=release --chdir \
        -c 'cd inet-4.6.*/showcases/wireless/rateanomaly && inet'
+
+.. TODO:: opp_env installs inet-4.6, which does not yet contain this showcase or the
+   AirtimeFairnessQueue (still on a topic branch). Bump to the first release that ships
+   them (likely 4.7) once available — the try-it path is not reproducible against 4.6.
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
