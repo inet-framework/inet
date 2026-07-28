@@ -380,7 +380,7 @@ station and the access point relays them over the air — and makes ``sta[0]`` t
 pinning the rate the access point uses toward it:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: # The AP transmits to sta[0]
+   :start-at: *.accessPoint.wlan[*].mac.dcf.rateSelection.dataFrameBitratePerReceiver
    :end-at: dataFrameBitratePerReceiver
    :language: ini
 
@@ -403,7 +403,7 @@ The access point's transmit queue chooses which client's frame to send next; the
 flip a single switch on it:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: # Per-client transmit queue
+   :start-at: pendingQueue.typename = "AirtimeFairnessQueue"
    :end-at: pendingQueue.quantum = 1500us
    :language: ini
 
