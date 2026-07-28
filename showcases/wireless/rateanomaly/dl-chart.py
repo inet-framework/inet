@@ -42,6 +42,6 @@ ax.grid(True, axis="y", linestyle="--", alpha=0.6)
 ax.set_axisbelow(True)
 ax.set_ylim(0, 6.5)
 ax.legend(loc="upper left", framealpha=0.9, fontsize=9)
-plt.savefig("doc/media/downlink-throughput.png", dpi=150, bbox_inches="tight")
+plt.savefig("doc/media/downlink-throughput.png", dpi=150, bbox_inches="tight", transparent=True)
 print("saved doc/media/downlink-throughput.png  anomaly=%s  fair=%s" % (
     [round(v, 2) for v in anomaly], [round(v, 2) for v in fair]))
