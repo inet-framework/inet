@@ -243,7 +243,8 @@ whose width is the time it holds the medium:
    anchor:   window 2.004000s..2.006650s -- the collision-free 6 Mbps frame occupies
              [2.005044s, 2.006494s]. Any clean (non-colliding) slow frame works; if the
              wide/narrow width ratio stops being ~8x, the bitrates changed.
-   capture:  Sequence Chart screenshot, cropped to the window; was 1630x560
+   capture:  Sequence Chart screenshot, top band (ruler + position/range readout) cropped
+             off so the bottom ruler carries the time axis; was 977x328
    stamp:    captured 2026-07, INET 4.6
 
 Each narrow block is a 54 Mbps frame; the wide block is a single 6 Mbps frame carrying
