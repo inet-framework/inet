@@ -32,242 +32,124 @@ void DcTcp::initialize()
     state->ecnMarkAll = true;
 }
 
-// This is a fork of the pre-split classic ACK path, not a specialization of it: it
-// reimplements fast-recovery deflation, slow start, congestion avoidance and the RFC
-// 6675 A/B/C loss-recovery steps rather than calling TcpClassicAlgorithmBase's and the
-// recovery strategy's. Only the DCTCP.Alpha estimator and the proportional cwnd
-// reduction below are genuinely DCTCP's. Folding the rest back in is NOT behaviour-
-// preserving and so cannot be done as a cleanup -- it would turn on, for DCTCP
-// connections, machinery this path silently skips:
-//   - processTlpAck(): tlpHighSeq is never cleared here, so a Tail Loss Probe fires at
-//     most once per connection and its congestion response never applies (the same
-//     defect TcpCubic had before it moved onto TcpClassicAlgorithmBase);
-//   - PRR (RFC 6937), which prrEnabled turns on by default for every other flavour;
-//   - stepA's discardUpTo() when loss recovery ends;
-//   - stepC's effective-MSS gate and its advertised-window guard -- the loop below
-//     reaches Rfc6675Recovery::sendDataDuringLossRecoveryPhase(), the last caller of
-//     that older twin, which can send past the receiver's window.
-// Each of those is a behaviour change owing its own commit and fingerprint review.
-void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
+bool DcTcp::processEce(uint32_t numBytesAcked)
 {
-    uint32_t old_dupacks = state->dupacks;
+    // DCTCP replaces RFC 3168's once-per-RTT halving with a reduction proportional
+    // to the fraction of marked bytes (RFC 8257 section 3.3), so this is where its
+    // congestion response belongs: returning true tells the shared ACK path that the
+    // window has been adjusted and must not also grow for this ACK -- the role the
+    // old fork's "performSsCa" flag played.
+    if (!state || !state->ect)
+        return false;
 
-    TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
+    // RFC 8257 3.3.2
+    state->dctcp_bytesAcked += numBytesAcked;
 
-    if (old_dupacks >= state->dupthresh) {
-        //
-        // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
-        //
-        EV_INFO << "Fast Recovery: setting cwnd to ssthresh=" << state->ssthresh << "\n";
-        state->snd_cwnd = state->ssthresh;
+    // RFC 8257 3.3.3. AccECN: when this connection negotiated
+    // AccECN, use the AccECN option's byte-exact CE evidence (deliveredCeBytes,
+    // G6/G7) instead of RFC 8257's boolean gotEce-gated approximation -- AccECN
+    // already gives the precise number of CE-marked bytes the peer reported, so
+    // the "mark this whole round's bytes_acked if ECE was ever seen" approximation
+    // isn't needed in this mode. gotEce itself is never set true for an AccECN
+    // connection in the first place (the foundation-fix guard on eceBit consumption
+    // -- see TcpConnectionRcvSegment.cc's processAckInEstabEtc()), so the two
+    // branches below are naturally mutually exclusive per connection, exactly
+    // mirroring how the two ECN modes are already mutually exclusive at negotiation
+    // time elsewhere in this workstream.
+    //
+    // deliveredCeBytes/deliveredCePkts are cumulative (updated once per ACK in
+    // processAckInEstabEtc()'s ACE block, which runs AFTER this function for the
+    // very same segment -- see that block's own comment) -- the two "Mark" fields
+    // snapshot them the same way prrDeliveredMark already does for deliveredBytes,
+    // so this round's increment is picked up on the NEXT call, one ACK later. That
+    // one-ACK lag is immaterial here: DCTCP.Alpha is a windowed EWMA over many ACKs
+    // (RFC 8257 3.3.4-3.3.6 below), not a per-ACK-exact quantity, and no CE byte is
+    // ever lost or double-counted -- each one is picked up on the very next round.
+    //
+    // Lens selection is per-CONNECTION, latched, not per-round: once
+    // dctcp_accEcnOptionSeen is set (the first time this connection ever sees a
+    // real AccECN option -- state->accEcnOptionCebDeltaValid, set by
+    // readHeaderOptions() earlier in this same segment's processing, so unlike
+    // deliveredCeBytes this flag is NOT lagged), every later round uses the
+    // byte-exact deliveredCeBytes delta exclusively, even in rounds where no
+    // option happened to arrive (deliveredCeBytes correctly contributes 0 for
+    // those -- CEB is cumulative, so the NEXT option's delta automatically covers
+    // any gap rounds, per its own design). A per-round choice ("prefer bytes when
+    // nonzero, else packets") must NOT be used: a gap round would be attributed
+    // to the packet-count estimate, and then the FOLLOWING option's cumulative
+    // delta would re-include that same gap round's bytes, double-counting them. Before the option is ever seen at all, the packet-count
+    // estimate (deliveredCePkts * snd_mss, the ACE-only estimate) is used instead
+    // of reporting zero.
+    if (state->accEcnNegotiated) {
+        if (state->accEcnOptionCebDeltaValid)
+            state->dctcp_accEcnOptionSeen = true;
 
-        conn->emit(cwndSignal, state->snd_cwnd);
+        uint32_t marked;
+        if (state->dctcp_accEcnOptionSeen) {
+            marked = state->deliveredCeBytes - state->dctcp_deliveredCeBytesMark;
+            state->dctcp_deliveredCeBytesMark = state->deliveredCeBytes;
+        }
+        else {
+            uint32_t cePktsThisRound = state->deliveredCePkts - state->dctcp_deliveredCePktsMark;
+            state->dctcp_deliveredCePktsMark = state->deliveredCePkts;
+            marked = cePktsThisRound * state->snd_mss;
+        }
+        EV_INFO << "DcTcp AccECN CE-byte accounting: lens=" << (state->dctcp_accEcnOptionSeen ? "bytes" : "packets")
+                << " marked=" << marked << " dctcp_bytesMarked=" << (state->dctcp_bytesMarked + marked) << "\n";
+        if (marked > 0) {
+            state->dctcp_bytesMarked += marked;
+            conn->emit(markingProbSignal, 1);
+        }
+        else {
+            conn->emit(markingProbSignal, 0);
+        }
+    }
+    else if (state->gotEce) {
+        state->dctcp_bytesMarked += numBytesAcked;
+        conn->emit(markingProbSignal, 1);
     }
     else {
-        bool performSsCa = true; // Stands for: "perform slow start and congestion avoidance"
-        if (state && state->ect) {
-            // RFC 8257 3.3.1
-            uint32_t bytes_acked = state->snd_una - firstSeqAcked;
-
-            // bool cut = false; TODO unused?
-
-            // RFC 8257 3.3.2
-            state->dctcp_bytesAcked += bytes_acked;
-
-            // RFC 8257 3.3.3. AccECN: when this connection negotiated
-            // AccECN, use the AccECN option's byte-exact CE evidence (deliveredCeBytes,
-            // G6/G7) instead of RFC 8257's boolean gotEce-gated approximation -- AccECN
-            // already gives the precise number of CE-marked bytes the peer reported, so
-            // the "mark this whole round's bytes_acked if ECE was ever seen" approximation
-            // isn't needed in this mode. gotEce itself is never set true for an AccECN
-            // connection in the first place (the foundation-fix guard on eceBit consumption
-            // -- see TcpConnectionRcvSegment.cc's processAckInEstabEtc()), so the two
-            // branches below are naturally mutually exclusive per connection, exactly
-            // mirroring how the two ECN modes are already mutually exclusive at negotiation
-            // time elsewhere in this workstream.
-            //
-            // deliveredCeBytes/deliveredCePkts are cumulative (updated once per ACK in
-            // processAckInEstabEtc()'s ACE block, which runs AFTER this function for the
-            // very same segment -- see that block's own comment) -- the two "Mark" fields
-            // snapshot them the same way prrDeliveredMark already does for deliveredBytes,
-            // so this round's increment is picked up on the NEXT call, one ACK later. That
-            // one-ACK lag is immaterial here: DCTCP.Alpha is a windowed EWMA over many ACKs
-            // (RFC 8257 3.3.4-3.3.6 below), not a per-ACK-exact quantity, and no CE byte is
-            // ever lost or double-counted -- each one is picked up on the very next round.
-            //
-            // Lens selection is per-CONNECTION, latched, not per-round: once
-            // dctcp_accEcnOptionSeen is set (the first time this connection ever sees a
-            // real AccECN option -- state->accEcnOptionCebDeltaValid, set by
-            // readHeaderOptions() earlier in this same segment's processing, so unlike
-            // deliveredCeBytes this flag is NOT lagged), every later round uses the
-            // byte-exact deliveredCeBytes delta exclusively, even in rounds where no
-            // option happened to arrive (deliveredCeBytes correctly contributes 0 for
-            // those -- CEB is cumulative, so the NEXT option's delta automatically covers
-            // any gap rounds, per its own design). A per-round choice ("prefer bytes when
-            // nonzero, else packets") must NOT be used: a gap round would be attributed
-            // to the packet-count estimate, and then the FOLLOWING option's cumulative
-            // delta would re-include that same gap round's bytes, double-counting them. Before the option is ever seen at all, the packet-count
-            // estimate (deliveredCePkts * snd_mss, the ACE-only estimate) is used instead
-            // of reporting zero.
-            if (state->accEcnNegotiated) {
-                if (state->accEcnOptionCebDeltaValid)
-                    state->dctcp_accEcnOptionSeen = true;
-
-                uint32_t marked;
-                if (state->dctcp_accEcnOptionSeen) {
-                    marked = state->deliveredCeBytes - state->dctcp_deliveredCeBytesMark;
-                    state->dctcp_deliveredCeBytesMark = state->deliveredCeBytes;
-                }
-                else {
-                    uint32_t cePktsThisRound = state->deliveredCePkts - state->dctcp_deliveredCePktsMark;
-                    state->dctcp_deliveredCePktsMark = state->deliveredCePkts;
-                    marked = cePktsThisRound * state->snd_mss;
-                }
-                EV_INFO << "DcTcp AccECN CE-byte accounting: lens=" << (state->dctcp_accEcnOptionSeen ? "bytes" : "packets")
-                        << " marked=" << marked << " dctcp_bytesMarked=" << (state->dctcp_bytesMarked + marked) << "\n";
-                if (marked > 0) {
-                    state->dctcp_bytesMarked += marked;
-                    conn->emit(markingProbSignal, 1);
-                }
-                else {
-                    conn->emit(markingProbSignal, 0);
-                }
-            }
-            else if (state->gotEce) {
-                state->dctcp_bytesMarked += bytes_acked;
-                conn->emit(markingProbSignal, 1);
-            }
-            else {
-                conn->emit(markingProbSignal, 0);
-            }
-
-            // RFC 8257 3.3.4
-            if (state->snd_una > state->dctcp_windEnd) {
-
-                if (state->dctcp_bytesMarked) {
-                    // cut = true;  TODO unused?
-                }
-
-                // RFC 8257 3.3.5
-                double ratio;
-
-                ratio = ((double)state->dctcp_bytesMarked / state->dctcp_bytesAcked);
-                conn->emit(loadSignal, ratio);
-
-                // RFC 8257 3.3.6
-                // DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M
-                state->dctcp_alpha = state->dctcp_alpha * (1 - state->dctcp_gamma) + state->dctcp_gamma * ratio;
-                conn->emit(calcLoadSignal, state->dctcp_alpha);
-
-                // RFC 8257 3.3.7
-                state->dctcp_windEnd = state->snd_nxt;
-
-                // RFC 8257 3.3.8
-                state->dctcp_bytesAcked = state->dctcp_bytesMarked = 0;
-                state->sndCwr = false;
-            }
-
-            // Applying DcTcp style cwnd update only if there was congestion and the window has not yet been reduced during current interval
-            if ((state->dctcp_bytesMarked && !state->sndCwr)) {
-
-                performSsCa = false;
-                state->sndCwr = true;
-
-                // RFC 8257 3.3.9
-                state->snd_cwnd = state->snd_cwnd * (1 - state->dctcp_alpha / 2);
-
-                conn->emit(cwndSignal, state->snd_cwnd);
-
-                uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME - Does this formula computes the amount of outstanding data?
-                state->ssthresh = std::max(3 * flight_size / 4, 2 * state->snd_mss);
-
-                conn->emit(ssthreshSignal, state->ssthresh);
-            }
-        }
-
-        if (performSsCa) {
-            // If ECN is not enabled or if ECN is enabled and received multiple ECE-Acks in
-            // less than RTT, then perform slow start and congestion avoidance.
-
-            if (state->snd_cwnd < state->ssthresh) {
-                EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
-
-                // perform Slow Start. RFC 5681: "During slow start, a TCP increments cwnd
-                // by at most SMSS bytes for each ACK received that acknowledges new data."
-                state->snd_cwnd += state->snd_mss;
-
-                conn->emit(cwndSignal, state->snd_cwnd);
-                conn->emit(ssthreshSignal, state->ssthresh);
-
-                EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
-            }
-            else {
-                // perform Congestion Avoidance (RFC 5681)
-                uint32_t incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
-
-                if (incr == 0)
-                    incr = 1;
-
-                state->snd_cwnd += incr;
-
-                conn->emit(cwndSignal, state->snd_cwnd);
-                conn->emit(ssthreshSignal, state->ssthresh);
-
-                //
-                // Note: RFC 3465 (experimental) "Appropriate Byte Counting" (ABC)
-                // would require maintaining a bytes_acked variable here which we don't do
-                //
-
-                EV_INFO << "cwnd > ssthresh: Congestion Avoidance: increasing cwnd linearly, to " << state->snd_cwnd << "\n";
-            }
-        }
+        conn->emit(markingProbSignal, 0);
     }
 
-    if (state->sack_enabled && state->lossRecovery) {
-        // RFC 6675, page 9: "Once a TCP is in the loss recovery phase, the following procedure MUST
-        // be used for each arriving ACK:
-        //
-        // (A) An incoming cumulative ACK for a sequence number greater than
-        // RecoveryPoint signals the end of loss recovery, and the loss
-        // recovery phase MUST be terminated.  Any information contained in
-        // the scoreboard for sequence numbers greater than the new value of
-        // HighACK SHOULD NOT be cleared when leaving the loss recovery
-        // phase."
-        if (seqGE(state->snd_una, state->recoveryPoint)) {
-            EV_INFO << "Loss Recovery terminated.\n";
-            state->lossRecovery = false;
-        }
-        // RFC 6675, page 9: "(B) Upon receipt of an ACK that does not cover RecoveryPoint the
-        // following actions MUST be taken:
-        //
-        // (B.1) Use Update () to record the new SACK information conveyed
-        // by the incoming ACK.
-        //
-        // (B.2) Use SetPipe () to re-calculate the number of octets still
-        // in the network."
-        else {
-            // update of scoreboard (B.1) has already be done in readHeaderOptions()
-            check_and_cast<Rfc6675Recovery *>(recovery)->setPipe();
+    // RFC 8257 3.3.4
+    if (state->snd_una > state->dctcp_windEnd) {
+        // RFC 8257 3.3.5
+        double ratio;
 
-            // RFC 6675, page 9: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
-            // segments as follows:"
-            if (((int)state->snd_cwnd - (int)state->pipe) >= (int)state->snd_mss) // Note: Typecast needed to avoid prohibited transmissions
-                check_and_cast<Rfc6675Recovery *>(recovery)->sendDataDuringLossRecoveryPhase(state->snd_cwnd);
-        }
+        ratio = ((double)state->dctcp_bytesMarked / state->dctcp_bytesAcked);
+        conn->emit(loadSignal, ratio);
+
+        // RFC 8257 3.3.6
+        // DCTCP.Alpha = DCTCP.Alpha * (1 - g) + g * M
+        state->dctcp_alpha = state->dctcp_alpha * (1 - state->dctcp_gamma) + state->dctcp_gamma * ratio;
+        conn->emit(calcLoadSignal, state->dctcp_alpha);
+
+        // RFC 8257 3.3.7
+        state->dctcp_windEnd = state->snd_nxt;
+
+        // RFC 8257 3.3.8
+        state->dctcp_bytesAcked = state->dctcp_bytesMarked = 0;
+        state->sndCwr = false;
     }
 
-    // RFC 6675, page 10: "5.1 Retransmission Timeouts
-    // (...)
-    // If there are segments missing from the receiver's buffer following
-    // processing of the retransmitted segment, the corresponding ACK will
-    // contain SACK information.  In this case, a TCP sender SHOULD use this
-    // SACK information when determining what data should be sent in each
-    // segment following an RTO.  The exact algorithm for this selection is
-    // not specified in this document (specifically NextSeg () is
-    // inappropriate during slow start after an RTO).  A relatively
-    // straightforward approach to "filling in" the sequence space reported
-    // as missing should be a reasonable approach."
-    sendData(false);
+    // Applying DcTcp style cwnd update only if there was congestion and the window has not yet been reduced during current interval
+    if (state->dctcp_bytesMarked && !state->sndCwr) {
+        state->sndCwr = true;
+
+        // RFC 8257 3.3.9
+        state->snd_cwnd = state->snd_cwnd * (1 - state->dctcp_alpha / 2);
+
+        conn->emit(cwndSignal, state->snd_cwnd);
+
+        uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME - Does this formula computes the amount of outstanding data?
+        state->ssthresh = std::max(3 * flight_size / 4, 2 * state->snd_mss);
+
+        conn->emit(ssthreshSignal, state->ssthresh);
+        return true;
+    }
+
+    return false;
 }
 
 bool DcTcp::shouldMarkAck()

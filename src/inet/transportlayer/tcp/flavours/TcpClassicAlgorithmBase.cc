@@ -213,7 +213,7 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     // an ECN-Echo that actually triggered a congestion response takes the place of
     // this ACK's window growth (RFC 3168: "SHOULD NOT increase the congestion window
     // in response to the receipt of an ECN-Echo ACK packet")
-    if (!state->lossRecovery && !processEce())
+    if (!state->lossRecovery && !processEce(numBytesAcked))
         congestionControl->receivedAckForUnackedData(numBytesAcked);
     sendData(false);
     ensureRexmitTimerArmed();
@@ -224,7 +224,7 @@ void TcpClassicAlgorithmBase::receivedDuplicateAck()
     recovery->receivedDuplicateAck();
 }
 
-bool TcpClassicAlgorithmBase::processEce()
+bool TcpClassicAlgorithmBase::processEce(uint32_t numBytesAcked)
 {
     if (state->ect && state->gotEce) {
         // RFC 3168, page 18

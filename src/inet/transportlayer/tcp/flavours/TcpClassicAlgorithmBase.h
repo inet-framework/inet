@@ -54,8 +54,13 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     /** Closes out a Tail Loss Probe episode this ACK completed (Linux tcp_process_tlp_ack). */
     virtual void processTlpAck();
 
-    /** RFC 3168 reaction to an ECN-Echo; true if it reduced cwnd on this ACK. */
-    virtual bool processEce();
+    /**
+     * The flavour's ECN congestion response for this ACK. Returns true if it
+     * reduced the window, in which case the ACK's ordinary growth is skipped.
+     * The default is RFC 3168's once-per-RTT halving; DcTcp overrides it with
+     * RFC 8257's proportional reduction.
+     */
+    virtual bool processEce(uint32_t numBytesAcked);
 
   public:
     /** Ctor */
