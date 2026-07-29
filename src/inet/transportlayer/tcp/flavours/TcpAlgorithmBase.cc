@@ -1051,7 +1051,7 @@ void TcpAlgorithmBase::processEcnInEstablished()
 
 uint32_t TcpAlgorithmBase::getBytesInFlight() const
 {
-    return state->snd_nxt - state->snd_una;
+    return state->snd_nxt - conn->getDataSndUna();
 }
 
 uint32_t TcpAlgorithmBase::calculateSsthreshForFastRecovery()
