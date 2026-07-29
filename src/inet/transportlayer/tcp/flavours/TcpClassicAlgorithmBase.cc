@@ -156,10 +156,10 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     //
     // where, as discussed above, FlightSize is the amount of outstanding
     // data in the network."
-    state->ssthresh = std::max(conn->getTcpAlgorithm()->getBytesInFlight() / 2, 2 * state->snd_mss);
+    state->ssthresh = calculateSsthreshForRto();
     conn->emit(ssthreshSignal, state->ssthresh);
 
-    state->snd_cwnd = state->snd_mss;
+    state->snd_cwnd = calculateCwndForRto();
     conn->emit(cwndSignal, state->snd_cwnd);
 
     EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
@@ -179,7 +179,7 @@ void TcpClassicAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tc
     countDuplicateAck(tcpHeader, payloadLength);
 }
 
-void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
+void TcpClassicAlgorithmBase::processTlpAck()
 {
     // Tail Loss Probe outcome (Linux tcp_process_tlp_ack): this ACK reached the
     // probe's snd_max. A new-data probe acked, or a D-SACK on this ACK (meaning
@@ -200,6 +200,11 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
         }
         state->tlpHighSeq = 0;
     }
+}
+
+void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
+{
+    processTlpAck();
 
     TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;

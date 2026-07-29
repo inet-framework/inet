@@ -34,21 +34,14 @@ static const double CNT_RECOMPUTE_INTERVAL = 1.0 / 32;
 // out the same way here.
 static const uint32_t BETA_SCALE = 8 * (1024 + 717) / 3 / (1024 - 717);
 
-TcpCubic::TcpCubic() : TcpAlgorithmBase(),
+TcpCubic::TcpCubic() : TcpClassicAlgorithmBase(),
     state((TcpCubicStateVariables *&)TcpAlgorithm::state)
 {
 }
 
-TcpCubic::~TcpCubic()
-{
-    delete recovery;
-}
-
 void TcpCubic::initialize()
 {
-    TcpAlgorithmBase::initialize();
-
-    state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
+    TcpClassicAlgorithmBase::initialize();
 
     state->cubic_beta = conn->getTcpMain()->par("cubicBeta");
     state->cubic_c = conn->getTcpMain()->par("cubicC");
@@ -77,27 +70,6 @@ ITcpRecovery *TcpCubic::createRecovery()
         return new Rfc6582Recovery(state, conn);
 }
 
-void TcpCubic::established(bool active)
-{
-    TcpAlgorithmBase::established(active);
-
-    // getRecovery() may already have created the strategy for a TCP Fast Open
-    // server exchanging data in SYN_RCVD -- keep that instance, because its SACK
-    // scoreboard context must survive the transition to ESTABLISHED.
-    if (recovery == nullptr)
-        recovery = createRecovery();
-}
-
-ITcpRecovery *TcpCubic::getRecovery()
-{
-    // TCP Fast Open server in SYN_RCVD: data flows before established() runs, so
-    // the strategy has to be created on demand. SACK negotiation is final by
-    // then, so this makes the same choice established() would.
-    if (recovery == nullptr && state->fastopenAccelerated)
-        recovery = createRecovery();
-    return recovery;
-}
-
 void TcpCubic::cubicReset()
 {
     state->cubic_last_max_cwnd = 0;
@@ -122,23 +94,10 @@ void TcpCubic::hystartReset()
 
 void TcpCubic::processRexmitTimer(TcpEventCode& event)
 {
-    TcpAlgorithmBase::processRexmitTimer(event);
+    TcpClassicAlgorithmBase::processRexmitTimer(event);
 
     if (event == TCP_E_ABORT)
         return;
-
-    state->ssthresh = calculateSsthresh(getBytesInFlight());
-    conn->emit(ssthreshSignal, state->ssthresh);
-
-    state->snd_cwnd = state->snd_effmss;
-    conn->emit(cwndSignal, state->snd_cwnd);
-
-    EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
-            << ", ssthresh=" << state->ssthresh << "\n";
-
-    state->afterRto = true;
-    conn->markOutstandingLostOnRto();
-    conn->retransmitOneSegment(true);
 
     // Linux cubictcp_state(TCP_CA_Loss): a timeout invalidates the curve and the
     // W_max memory, and slow start begins again, so HyStart starts a new round.
@@ -146,13 +105,10 @@ void TcpCubic::processRexmitTimer(TcpEventCode& event)
     hystartReset();
 }
 
-bool TcpCubic::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
-{
-    return recovery->isDuplicateAck(tcpHeader, payloadLength);
-}
-
 void TcpCubic::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
+    processTlpAck();
+
     TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
 
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
@@ -162,6 +118,8 @@ void TcpCubic::receivedAckForUnackedData(uint32_t firstSeqAcked)
 
     if (state->lossRecovery)
         recovery->receivedAckForUnackedData(numBytesAcked);
+    else if (processEce())
+        ; // an ECN-Echo reaction replaces this ACK's window growth (RFC 3168)
     else if (state->snd_cwnd < state->ssthresh)
         slowStart(numSegmentsAcked);
     else if (numSegmentsAcked > 0)
@@ -169,22 +127,6 @@ void TcpCubic::receivedAckForUnackedData(uint32_t firstSeqAcked)
 
     sendData(false);
     ensureRexmitTimerArmed();
-}
-
-void TcpCubic::receivedDuplicateAck()
-{
-    recovery->receivedDuplicateAck();
-}
-
-uint32_t TcpCubic::getBytesInFlight() const
-{
-    auto rexmitQueue = conn->getRexmitQueue();
-    int64_t sentSize = state->snd_max - conn->getDataSndUna();
-    int64_t in_flight = sentSize - rexmitQueue->getSacked() - rexmitQueue->getLost() + rexmitQueue->getRetrans();
-    if (in_flight < 0)
-        in_flight = 0;
-    conn->emit(bytesInFlightSignal, in_flight);
-    return in_flight;
 }
 
 void TcpCubic::slowStart(uint32_t segmentsAcked)
