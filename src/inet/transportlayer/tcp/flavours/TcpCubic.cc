@@ -146,21 +146,9 @@ void TcpCubic::processRexmitTimer(TcpEventCode& event)
     hystartReset();
 }
 
-void TcpCubic::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
+bool TcpCubic::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
-    TcpAlgorithmBase::receivedAckForAlreadyAckedData(tcpHeader, payloadLength);
-
-    if (recovery->isDuplicateAck(tcpHeader, payloadLength)) {
-        if (!state->lossRecovery) {
-            state->dupacks++;
-            conn->emit(dupAcksSignal, state->dupacks);
-        }
-        receivedDuplicateAck();
-    }
-    else {
-        state->dupacks = 0;
-        conn->emit(dupAcksSignal, state->dupacks);
-    }
+    return recovery->isDuplicateAck(tcpHeader, payloadLength);
 }
 
 void TcpCubic::receivedAckForUnackedData(uint32_t firstSeqAcked)
