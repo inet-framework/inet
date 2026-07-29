@@ -118,7 +118,7 @@ void TcpCubic::receivedAckForUnackedData(uint32_t firstSeqAcked)
 
     if (state->lossRecovery)
         recovery->receivedAckForUnackedData(numBytesAcked);
-    else if (processEce())
+    else if (processEce(numBytesAcked))
         ; // an ECN-Echo reaction replaces this ACK's window growth (RFC 3168)
     else if (state->snd_cwnd < state->ssthresh)
         slowStart(numSegmentsAcked);
