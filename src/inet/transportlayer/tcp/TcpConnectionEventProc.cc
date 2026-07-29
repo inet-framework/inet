@@ -330,6 +330,19 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
             state->snd_effmss = calculateEffectiveMss();
         }
     }
+    else if (auto cmd = dynamic_cast<TcpSetPathMtuCommand *>(tcpCommand)) {
+        // A route change under an open connection. Linux notices it in
+        // tcp_current_mss (dst_mtu != icsk_pmtu_cookie) -- but with MTU probing
+        // armed the MSS still cannot exceed what the search has proven, so the new
+        // ceiling only takes effect through a successful probe.
+        pathMtuSockopt = cmd->getValue();
+        if (state != nullptr && pathMtuSockopt > 0) {
+            state->pathMtu = (uint32_t)pathMtuSockopt;
+            if (state->mtupEnabled && state->mtupSearchHigh < state->pathMtu)
+                state->mtupSearchHigh = state->pathMtu;
+            EV_DETAIL << "Path MTU is now " << state->pathMtu << "\n";
+        }
+    }
     else if (auto cmd = dynamic_cast<TcpSetWriterBlockedCommand *>(tcpCommand)) {
         // The application's blocking write is (no longer) stalled on
         // send-buffer space -- drives the SNDBUF_LIMITED chrono

@@ -299,6 +299,15 @@ void TcpSocket::setMaxSeg(int value)
     sendToTcp(request);
 }
 
+void TcpSocket::setPathMtu(int value)
+{
+    auto request = new Request("setPathMtu", TCP_C_SETOPTION);
+    auto *cmd = new TcpSetPathMtuCommand();
+    cmd->setValue(value);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
 void TcpSocket::setNoDelay(bool nodelay)
 {
     auto request = new Request("setNoDelay", TCP_C_SETOPTION);

@@ -108,6 +108,11 @@ void TcpAlgorithmBase::initialize()
 
 uint32_t TcpAlgorithmBase::initialWindow() const
 {
+    // A route's initcwnd outranks the RFC default, as it does in Linux
+    // (dst_metric(RTAX_INITCWND) wins over TCP_INIT_CWND in tcp_init_cwnd).
+    if (state->initialCwndSegments > 0)
+        return state->initialCwndSegments * state->snd_effmss;
+
     switch (state->init_cwnd_mode) {
         case 1: // RFC 3390
             return std::min(4 * state->snd_effmss, std::max(2 * state->snd_effmss, (uint32_t)4380));
