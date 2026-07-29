@@ -175,6 +175,15 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
             break;
         }
 
+        case TCPOPTION_RFC3692_STYLE_EXPERIMENT_2: { // pre-standardization TCP Fast Open, RFC 7413 Appendix A
+            auto *opt = check_and_cast<const TcpOptionTcpFastOpenExp *>(option);
+            ASSERT(length == 4 + opt->getCookieArraySize());
+            stream.writeUint16Be(opt->getExpId());
+            for (unsigned int i = 0; i < opt->getCookieArraySize(); i++)
+                stream.writeByte(opt->getCookie(i));
+            break;
+        }
+
         default: {
             throw cRuntimeError("Unknown TCPOption kind=%d (not in a TCPOptionUnknown option)", kind);
             break;

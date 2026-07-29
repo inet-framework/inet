@@ -1,16 +1,15 @@
 %description:
-TcpHeaderSerializer::deserializeOption() for the legacy TCP Fast Open
-experimental option (RFC 7413 Appendix A: kind 254 + 0xF989 magic, receive-only
-in INET -- there is no serializeOption() case, so this test hand-crafts the
-raw wire bytes directly instead of round-tripping through serializeOption()
-like tcp_fastopen_wireformat_1.test does for kind 34).
+TcpHeaderSerializer serialize/deserialize for the legacy TCP Fast Open
+experimental option (RFC 7413 Appendix A: kind 254 + 0xF989 magic).
 
-Cases: empty cookie (4-byte option, just kind+length+magic), an 8-byte cookie
-(12-byte option), and -- falsification that the magic is actually checked,
-not just the kind -- a kind-254 option with a DIFFERENT 2-byte value where
-0xF989 would be, which must fall back to a generic TcpOptionUnknown (not a
-TcpOptionTcpFastOpenExp), preserving the "other RFC 4727 experimental use"
-kind-254 traffic this option shares its kind number with.
+Cases: a serializeOption()/deserializeOption() round-trip for an empty cookie
+(4-byte option, just kind+length+magic) and an 8-byte cookie (12-byte option);
+the same two shapes hand-crafted as raw wire bytes, pinning the on-the-wire
+encoding independently of our own serializer; and -- falsification that the
+magic is actually checked, not just the kind -- a kind-254 option with a
+DIFFERENT 2-byte value where 0xF989 would be, which must fall back to a generic
+TcpOptionUnknown (not a TcpOptionTcpFastOpenExp), preserving the "other RFC 4727
+experimental use" kind-254 traffic this option shares its kind number with.
 
 %includes:
 #include "inet/transportlayer/tcp_common/TcpHeaderSerializer.h"
@@ -24,8 +23,57 @@ using namespace inet::tcp;
 class TestTcpHeaderSerializer : public TcpHeaderSerializer
 {
   public:
+    using TcpHeaderSerializer::serializeOption;
     using TcpHeaderSerializer::deserializeOption;
 };
+
+static TcpOptionTcpFastOpenExp *makeOption(const std::vector<uint8_t>& cookie)
+{
+    auto *opt = new TcpOptionTcpFastOpenExp();
+    opt->setCookieArraySize(cookie.size());
+    for (size_t i = 0; i < cookie.size(); i++)
+        opt->setCookie(i, cookie[i]);
+    opt->setLength(4 + cookie.size());
+    return opt;
+}
+
+static bool cookieMatches(const TcpOptionTcpFastOpenExp *fo, const std::vector<uint8_t>& cookie)
+{
+    if (fo == nullptr || fo->getExpId() != 0xF989 || fo->getCookieArraySize() != cookie.size())
+        return false;
+    for (size_t i = 0; i < cookie.size(); i++)
+        if (fo->getCookie(i) != cookie[i])
+            return false;
+    return true;
+}
+
+static void roundtrip(const char *label, const std::vector<uint8_t>& cookie)
+{
+    TestTcpHeaderSerializer ser;
+    TcpOptionTcpFastOpenExp *opt = makeOption(cookie);
+
+    MemoryOutputStream out;
+    ser.serializeOption(out, opt);
+    std::vector<uint8_t> bytes = out.getData();
+
+    // the wire encoding itself, not just our ability to read back what we wrote
+    bool wireOk = bytes.size() == 4 + cookie.size()
+        && bytes[0] == 254 && bytes[1] == 4 + cookie.size()
+        && bytes[2] == 0xF9 && bytes[3] == 0x89;
+    for (size_t i = 0; wireOk && i < cookie.size(); i++)
+        if (bytes[4 + i] != cookie[i])
+            wireOk = false;
+
+    MemoryInputStream in(bytes);
+    TcpOption *result = ser.deserializeOption(in);
+    auto *fo = dynamic_cast<TcpOptionTcpFastOpenExp *>(result);
+
+    EV << label << ": wireBytesOk=" << (wireOk ? "yes" : "no")
+       << " isFastOpenExp=" << (fo != nullptr ? "yes" : "no")
+       << " match=" << (cookieMatches(fo, cookie) ? "yes" : "no") << "\n";
+    delete opt;
+    delete result;
+}
 
 static void checkExp(const char *label, const std::vector<uint8_t>& cookie)
 {
@@ -42,17 +90,15 @@ static void checkExp(const char *label, const std::vector<uint8_t>& cookie)
     TcpOption *result = ser.deserializeOption(in);
     auto *fo = dynamic_cast<TcpOptionTcpFastOpenExp *>(result);
 
-    bool match = fo != nullptr && fo->getExpId() == 0xF989 && fo->getCookieArraySize() == cookie.size();
-    for (size_t i = 0; match && i < cookie.size(); i++)
-        if (fo->getCookie(i) != cookie[i])
-            match = false;
-
     EV << label << ": isFastOpenExp=" << (fo != nullptr ? "yes" : "no")
-       << " match=" << (match ? "yes" : "no") << "\n";
+       << " match=" << (cookieMatches(fo, cookie) ? "yes" : "no") << "\n";
     delete result;
 }
 
 %activity:
+
+roundtrip("roundtrip empty cookie (request)", {});
+roundtrip("roundtrip 8-byte cookie", {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08});
 
 checkExp("empty cookie (request)", {});
 checkExp("8-byte cookie", {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08});
@@ -78,6 +124,8 @@ checkExp("8-byte cookie", {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08});
 EV << ".\n";
 
 %contains: stdout
+roundtrip empty cookie (request): wireBytesOk=yes isFastOpenExp=yes match=yes
+roundtrip 8-byte cookie: wireBytesOk=yes isFastOpenExp=yes match=yes
 empty cookie (request): isFastOpenExp=yes match=yes
 8-byte cookie: isFastOpenExp=yes match=yes
 non-magic kind 254: isFastOpenExp=no fellBackToUnknownWithBytesIntact=yes
