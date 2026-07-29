@@ -308,6 +308,15 @@ void TcpSocket::setPathMtu(int value)
     sendToTcp(request);
 }
 
+void TcpSocket::setReceiveBufferSize(int value)
+{
+    auto request = new Request("setReceiveBufferSize", TCP_C_SETOPTION);
+    auto *cmd = new TcpSetRcvBufCommand();
+    cmd->setValue(value);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
 void TcpSocket::setNoDelay(bool nodelay)
 {
     auto request = new Request("setNoDelay", TCP_C_SETOPTION);

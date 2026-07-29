@@ -206,6 +206,7 @@ simple Tcp extends SimpleModule like ITcp
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpCubic");
         int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 6675) DO NOT change unless you really know what you are doing
+        bool receiveBufferLocked @mutable = default(false); // the application pinned receiveBufferSize with SO_RCVBUF (Linux SOCK_RCVBUF_LOCK): the buffer no longer grows under receive pressure, so its free space -- not the unread byte count -- is what bounds the advertised window, and an arrival that no longer fits is dropped. @mutable so a harness/app modeling setsockopt(SO_RCVBUF) can set it before a connection is configured
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
         // TcpCubic (RFC 9438) tuning; effective only with tcpAlgorithmClass=TcpCubic
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished

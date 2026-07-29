@@ -277,12 +277,24 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
         if (seqLess(requestedEndPos, endSeqNo))
             endSeqNo = requestedEndPos;
         if (Packet *dataMsg = receiveQueue->extractBytesUpTo(endSeqNo)) {
+            releaseRcvBufOccupancy(dataMsg->getByteLength());
             dataMsg->setKind(TCP_I_DATA);
             dataMsg->addTag<SocketInd>()->setSocketId(socketId);
             if (rxTimestampingEnabled)
                 dataMsg->addTag<TcpRxTimestampInd>();
             sendToApp(dataMsg);
             maxByteCountRequested = 0;
+            // Linux tcp_cleanup_rbuf: a read that frees a lot of buffer is worth an
+            // immediate window update. Without it a peer that ran into a window
+            // closed by unread data has no way to learn the application caught up,
+            // short of a zero-window probe. "A lot" is the reference's test: the
+            // window the freed space now allows is at least twice what is still open.
+            if (state->rcvBufferSize > 0 && rcvBufOccupancy < state->rcvBufferSize) {
+                uint64_t freeSpace = ((uint64_t)(state->rcvBufferSize - rcvBufOccupancy) * rcvScalingRatio) >> 8;
+                if (freeSpace > 0 && freeSpace >= 2ULL * state->rcv_wnd
+                        && 2ULL * state->rcv_wnd <= state->window_clamp)
+                    sendAck();
+            }
         }
     }
     if (!peerClosedSentUp && fsm.getState() == TCP_S_CLOSE_WAIT && this->receiveQueue->getQueueLength() == 0) {
@@ -328,6 +340,17 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
             if (state->snd_mss == (uint32_t)-1 || (uint32_t)userMss < state->snd_mss)
                 state->snd_mss = userMss;
             state->snd_effmss = calculateEffectiveMss();
+        }
+    }
+    else if (auto cmd = dynamic_cast<TcpSetRcvBufCommand *>(tcpCommand)) {
+        // SO_RCVBUF. Nothing already queued is discarded -- Linux only stops
+        // ACCEPTING once the buffer is over budget -- but the buffer is now pinned,
+        // so the growth that normally absorbs pressure is off the table.
+        rcvBufSockopt = cmd->getValue();
+        if (state != nullptr && rcvBufSockopt >= 0) {
+            state->rcvBufferSize = (uint32_t)rcvBufSockopt;
+            state->rcvbufLocked = true;
+            EV_DETAIL << "Receive buffer pinned at " << state->rcvBufferSize << " bytes\n";
         }
     }
     else if (auto cmd = dynamic_cast<TcpSetPathMtuCommand *>(tcpCommand)) {

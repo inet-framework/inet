@@ -145,6 +145,10 @@ class INET_API TcpConnection : public SimpleModule
     // arrives-before-state discipline as userMss. 0 = never set; otherwise it
     // overrides the pathMtu module param as the RFC 4821 search's ceiling.
     int pathMtuSockopt = 0;
+    // A receive-buffer size handed down at runtime (TcpSetRcvBufCommand), same
+    // arrives-before-state discipline as userMss. -1 = never set; otherwise it
+    // overrides the receiveBufferSize module param AND pins the buffer.
+    int rcvBufSockopt = -1;
     // Runtime TCP_NODELAY / TCP_CORK (TcpSetNoDelayCommand / TcpSetCorkCommand)
     // that may arrive before OPEN creates state; INT_MIN = never set, otherwise
     // applied in configureStateVariables() (mirrors notsentLowatSockopt/userMss).
@@ -611,6 +615,9 @@ class INET_API TcpConnection : public SimpleModule
      * plus TCP header plus the options carried on every established segment --
      * so the two are exact inverses and the search's bounds stay comparable.
      */
+    /** Gives back the receive-buffer charge of the skbs an application read drained. */
+    virtual void releaseRcvBufOccupancy(uint64_t readBytes);
+
     /**
      * How many segments go out as one GSO super-segment. Only the wire-realism PSH
      * rule depends on it: Linux forces PSH on a multi-segment skb, and after the
