@@ -46,9 +46,10 @@ import inet.transportlayer.contract.ITcp;
 //   -# The `limitedTransmitEnabled` parameter can be used to enable/disable the
 //      Limited Transmit algorithm (RFC 3042).
 //
-//   -# The `increasedIWEnabled` parameter can be used to change the initial window
-//      from two segments (RFC 5681) (based on MSS) to a maximum of four segments
-//      (min(4*MSS, max (2*MSS, 4380 bytes))) (RFC 3390).
+//   -# The `initialWindow` parameter selects the initial congestion window:
+//      one segment (RFC 2001), min(4*MSS, max(2*MSS, 4380 bytes)) (RFC 3390), or
+//      IW10 (RFC 6928), which is the default. The older `increasedIWEnabled`
+//      boolean does the same as "rfc3390" and is deprecated.
 //
 //   -# The `advertisedWindow` parameter defines the amount of data TCP can
 //      receive without the socket being read by the local user. Note that
@@ -67,13 +68,15 @@ import inet.transportlayer.contract.ITcp;
 //      used on a connection if both endpoints have it enabled.
 //
 //   -# The `timestampSupport` parameter enables the Timestamps option
-//      (RFC 1323). Like SACK, it is only used if both endpoints support it.
+//      (RFC 7323). Like SACK, it is only used if both endpoints support it.
 //
-//   -# The `ecnWillingness` parameter enables Explicit Congestion Notification
-//      (RFC 3168). ECN is negotiated during the three-way handshake and is
-//      only active if both endpoints are willing.  When using the `DcTcp`
-//      algorithm, the `dctcpGamma` parameter controls the EWMA gain for
-//      estimating the congestion level (RFC 8257).
+//   -# The `tcpEcnMode` parameter selects Explicit Congestion Notification:
+//      classic ECN (RFC 3168) or AccECN (RFC 9768), requested or accept-only.
+//      Either way it is negotiated during the three-way handshake and is only
+//      active if both endpoints agree. The older `ecnWillingness` boolean is
+//      deprecated in favor of it. When using the `DcTcp` algorithm, the
+//      `dctcpGamma` parameter controls the EWMA gain for estimating the
+//      congestion level (RFC 8257).
 //
 //   -# The `pmtudEnabled` parameter enables Path MTU Discovery (RFC 1191,
 //      RFC 1981). When enabled, IPv4 segments are sent with the DF bit set.
@@ -90,99 +93,317 @@ import inet.transportlayer.contract.ITcp;
 //
 // <b>Standards</b>
 //
-// Implementation is based on the following RFCs:
-//   - RFC 9293 - Transmission Control Protocol (TCP)
-//   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
-//   - RFC 2018 - TCP Selective Acknowledgment Options
-//   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP
-//   - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
-//   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
-//   - RFC 3390 - Increasing TCP's Initial Window
-//   - RFC 5681 - TCP Congestion Control
-//   - RFC 6582 - The `NewReno` Modification to TCP's Fast Recovery Algorithm
-//   - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective Acknowledgment (SACK) for TCP
-//   - RFC 7323 - TCP Extensions for High Performance
-//   - RFC 1191 - Path MTU Discovery
-//   - RFC 1981 - Path MTU Discovery for IP version 6
-//   - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
-//   - RFC 8257 - Data Center TCP (DCTCP): TCP Congestion Control for Data Centers
-//   - RFC 8312 - CUBIC for Fast Long-Distance Networks
+// The documents below are grouped by area and ordered, within each area, by how
+// central they are to a working connection. Unless an entry lists deviations, the
+// feature is meant to follow its RFC; where deviations are listed they are
+// deliberate, not known bugs.
 //
-// See also:
-//   - RFC 7805 - Moving Outdated TCP Extensions and TCP-Related Documents to Historic or Informational Status
+// Two recurring reasons for a deviation are worth stating once. First, the module
+// is continuously validated against real Linux behavior (the differential
+// packetdrill oracle in the `inet-gpl` package's `tests/oracle`), so where Linux
+// and an RFC disagree on something observable on the wire, the tie is broken in
+// favor of Linux; such entries are marked "Linux parity". Second, several
+// Linux-parity behaviors are gated behind default-off parameters so that existing
+// simulation results do not shift under users unannounced; those name the
+// parameter that turns them on.
 //
-// Implemented features include the following:
-//  - all RFC 9293 TCP states and state transitions
-//  - connection setup and teardown as in RFC 9293
-//  - generally, RFC 9293-compliant segment processing
-//  - all socket commands and indications
-//  - receive buffer to cache above-sequence data and data not yet forwarded
-//    to the user
-//  - CONN-ESTAB timer, SYN-REXMIT timer, 2MSL timer, FIN-WAIT-2 timer
-//  - selective acknowledgements aka. SACK (RFC 2018 and RFC 2883)
-//  - RFC 6675 - SACK-based Loss Recovery algorithm which is a conservative
-//    replacement of the fast recovery algorithm (RFC 5681) integrated into
-//    `TcpReno` but not into `TcpNewReno`, `TcpTahoe`, `TcpNoCongestionControl`, and `DumbTcp`.
-//  - ACK generation (ack_now = true) RFC 5681, page 7: "(...) a Tcp receiver SHOULD send an immediate ACK
-//    when the incoming segment fills in all or part of a gap in the sequence space."
-//  - TCP header options:
-//      - EOL: End of option list.
-//      - NOP: Padding bytes, currently needed for SACK_PERMITTED and SACK.
-//      - MSS: The value of snd_mss (SMSS) is set to the minimum of snd_mss
-//        (local parameter) and the value specified in the MSS option
-//        received during connection startup. Based on [RFC 5681].
-//      - WS: Window Scale option, based on RFC 7323.
-//      - SACK_PERMITTED: SACK can only be used if both nodes sent SACK_-
-//        PERMITTED during connection startup.
-//      - SACK: SACK option, based on RFC 2018, RFC 2883, and RFC 6675.
-//      - TS: Timestamps option, based on RFC 7323.
-//  - flow control: finite receive buffer size (initiated by the parameter
-//    `advertisedWindow`). If the receive buffer is exhausted (by out-of-order
-//    segments) and the payload length of a newly received segment
-//    is higher than free receiver buffer, the new segment will be dropped.
-//    Such drops are recorded in `tcpRcvQueueDropsVector`.
-//  - Path MTU Discovery (RFC 1191, RFC 1981): when enabled, the DF bit is set
-//    on IPv4 segments. Upon receiving an ICMPv4 Fragmentation Needed or ICMPv6
-//    Packet Too Big error, the MSS is reduced accordingly and the offending
-//    segment is retransmitted. After a configurable timeout (`pmtudTimeout`),
-//    the original MSS is restored to probe for an increased path MTU.
-//  - Explicit Congestion Notification (RFC 3168): ECN-setup during the
-//    three-way handshake, ECE/CWR flag handling, and CE codepoint processing.
-//  - Data Center TCP (RFC 8257): DCTCP congestion control based on ECN
-//    feedback, implemented in the `DcTcp` algorithm class.
+// <b>1. Core protocol</b>
 //
-// The `TcpNewReno`, `TcpReno`, and `TcpTahoe` algorithms implement:
-//  - RFC 1122 - delayed ACK algorithm (optional) with 200ms timeout
-//  - RFC 1122 - Nagle's algorithm (optional)
-//  - Jacobson's and Karn's algorithms for round-trip time measurement and
-//    adaptive retransmission
-//  - `TcpTahoe` (Fast Retransmit), `TcpReno` (Fast Retransmit and Fast Recovery),
-//    `TcpNewReno` (Fast Retransmit and Fast Recovery)
-//  - RFC 3390 - Increased Initial Window (optional) integrated into `TcpAlgorithmBase`
-//    (can be used for `TcpNewReno`, `TcpReno`, `TcpTahoe`, and `TcpNoCongestionControl` but not
-//    for `DumbTcp`).
-//  - RFC 3042 - Limited Transmit algorithm (optional) integrated into `TcpAlgorithmBase`
-//    (can be used for `TcpNewReno`, `TcpReno`, `TcpTahoe`, and `TcpNoCongestionControl` but not
-//    for `DumbTcp`).
+//  - RFC 9293 - Transmission Control Protocol (TCP)
+//    The base specification: every state and transition, connection setup and
+//    teardown, segment acceptability, sequence-number arithmetic, the CONN-ESTAB,
+//    SYN-REXMIT, 2MSL and FIN-WAIT-2 timers, and the socket command set.
+//    Deviations:
+//     - The urgent pointer is carried and tracked, but urgent data is never
+//       delivered out of band: `TCP_I_URGENT_DATA` is never produced, and a
+//       receiver treats URG-marked bytes as ordinary data.
+//     - PSH is set on outgoing segments but ignored on arrival: the receiver
+//       always delivers as early as it can, as if PSH were set on everything.
+//       (What drives PSH on the sending side is Linux's rule, not the RFC's --
+//       see `pushSegmentsOnWriteBoundary`.)
+//     - Checksums are declared correct rather than computed, unless
+//       `checksumMode` is set to "computed".
+//     - Timers are exact. The 200 ms / 500 ms "fast and slow tick" quantization
+//       that BSD-derived stacks impose on every timeout is not simulated.
+//     - Initial sequence numbers come from the simulation clock, or from
+//       `initialSendSequenceNumber`. RFC 6528, "Defending against Sequence
+//       Number Attacks", specifies a hashed generator; it is not implemented.
+//     - The MSS this host announces defaults to an MTU-derived 1460 (IPv4) or
+//       1440 (IPv6) rather than RFC 1122's conservative 536/1220. Those RFC
+//       values are still what a *missing* MSS option from the peer implies.
 //
-// Additional congestion control algorithms: `TcpVegas`, `TcpWestwood`, `DcTcp`.
+//  - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
+//    Delayed ACKs, Nagle's algorithm, silly-window-syndrome avoidance on both
+//    sides, and keepalive (`keepAliveEnabled`, off by default as on Linux).
+//    Deviations:
+//     - The delayed-ACK timer is a fixed 200 ms and also fires after
+//       `delayedAckFrameCount` segments; RFC 1122 permits up to 500 ms.
+//       `adaptiveDelayedAcks` replaces the fixed timer with Linux's adaptive ATO
+//       plus its quickack budget and interactive "pingpong" detection.
+//       (Linux parity, opt-in.)
+//     - Nagle follows Minshall's variant -- a trailing partial segment is held
+//       only while an earlier SMALL segment is still unacknowledged -- rather
+//       than the plain "any unacknowledged data holds it" rule. (Linux parity.)
+//     - Receiver-side SWS avoidance follows the Stevens/FreeBSD formulation and
+//       ordering rather than the pseudo-code in RFC 9293.
 //
-// Missing bits:
-//  - URG and PSH bits not handled. Receiver always acts as if PSH was set
-//    on all segments: always forwards data to the app as soon as possible.
-//  - no RECEIVE command. Received data is always forwarded to the app as
-//    soon as possible, as if the app issued a very large RECEIVE request
-//    at the beginning. This means there's currently no flow control
-//    between Tcp and the app.
-//  - all timeouts are precisely calculated: timer granularity (which is caused
-//    by "slow" and "fast" i.e. 500ms and 200ms timers found in many *nix Tcp
-//    implementations) is not simulated
+//  - RFC 6298 - Computing TCP's Retransmission Timer
+//    Jacobson's and Karn's algorithms, exponential backoff, `initialRto` = 1 s.
+//    Deviations:
+//     - `minRexmitTimeout` defaults to 200 ms, Linux's floor, where section 2.4
+//       recommends 1 s (while explicitly allowing a lower value). (Linux parity.)
+//     - With `seedRttFromHandshake` the estimator starts from the SYN/SYN-ACK
+//       round trip rather than from the first data ACK. RFC 6298 does not
+//       describe this; Linux does it. (Linux parity, on by default.)
 //
-// `TcpNewReno`, `TcpReno`, and `TcpTahoe` issues and missing features:
-//  - KEEP-ALIVE not implemented (idle connections never time out)
-//  - Nagle's algorithm (RFC 1122) possibly not precisely implemented
+//  - RFC 5961 - Improving TCP's Robustness to Blind In-Window Attacks
+//    Section 5.2 only: an ACK below SND.UNA - MAX.SND.WND is discarded and
+//    answered with a challenge ACK.
+//    Deviations: the blind RST (section 3) and blind SYN (section 4)
+//    mitigations, and the global challenge-ACK rate limit, are not implemented.
 //
-// The above problems should be relatively easy to fix.
+//  - RFC 5461 - TCP's Reaction to Soft Errors
+//    A soft ICMP error never aborts an established connection; hard errors abort
+//    a connection that is still being set up.
+//
+//  - RFC 5927 - ICMP Attacks against TCP
+//    The sequence number quoted inside an ICMP error is validated against the
+//    connection before the error is acted on.
+//
+//  - RFC 2525 - Known TCP Implementation Problems
+//    Section 2.5, "failure to retain above-sequence data": out-of-order segments
+//    are buffered rather than discarded.
+//
+//  - RFC 793 - Transmission Control Protocol (historic, obsoleted by RFC 9293)
+//    Cited in the code only where the two texts differ in wording. RFC 9293
+//    governs.
+//
+// <b>2. Header options and high-performance extensions</b>
+//
+//  - RFC 7323 - TCP Extensions for High Performance
+//    Window Scale and Timestamps, both negotiated on the SYN exchange, plus PAWS
+//    (with the specified 24-day idle threshold). Timestamps are also what drives
+//    RTT measurement and the Eifel and RACK machinery below.
+//    Deviations: the timestamp clock is the simulation clock; `windowScalingFactor`
+//    may pin the shift count instead of deriving it from `advertisedWindow`.
+//    Obsoletes RFC 1323, "TCP Extensions for High Performance", which older
+//    comments and parameter descriptions still refer to.
+//
+//  - RFC 2018 - TCP Selective Acknowledgment Options
+//    SACK-Permitted and SACK, used only when both endpoints offer them.
+//
+//  - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for
+//    TCP (D-SACK)
+//    Reported on duplicate arrivals and consumed by the spurious-retransmission
+//    undo below (`dsackEnabled`).
+//
+//    Options recognized on the wire: EOL, NOP, MSS, Window Scale,
+//    SACK-Permitted, SACK, Timestamps, the AccECN options of section 5 (kinds
+//    172 and 174), and the Fast Open option in both its assigned (kind 34) and
+//    experimental (kind 254) forms.
+//
+// <b>3. Congestion control</b>
+//
+//  - RFC 5681 - TCP Congestion Control
+//    Slow start, congestion avoidance, fast retransmit and fast recovery; the
+//    common substrate under every algorithm class. `TcpTahoe` implements fast
+//    retransmit only, `TcpReno` and `TcpNewReno` add fast recovery.
+//    Deviations:
+//     - The congestion window is maintained in bytes rather than segments. This
+//       is a representation choice, but it does surface: where the reference
+//       counts packets (for example when deciding how large a burst may be), the
+//       byte-valued window has to be divided by the effective MSS first.
+//     - The default initial window is RFC 6928's IW10, not RFC 5681's 2-4
+//       segments (see `initialWindow`).
+//    Predecessors cited in the code: RFC 2001, "TCP Slow Start, Congestion
+//    Avoidance, Fast Retransmit, and Fast Recovery Algorithms" (also the name of
+//    `initialWindow = "rfc2001"`, one segment), and RFC 2581, "TCP Congestion
+//    Control"; both are obsoleted by RFC 5681.
+//
+//  - RFC 6928 - Increasing TCP's Initial Window
+//    IW10, the default (`initialWindow = "rfc6928"`). A route-supplied initial
+//    window may override it (`initialCwnd`), as `initcwnd` does on Linux.
+//
+//  - RFC 3390 - Increasing TCP's Initial Window
+//    Selectable as `initialWindow = "rfc3390"`. The older `increasedIWEnabled`
+//    boolean is deprecated in favor of it.
+//
+//  - RFC 9438 - CUBIC for Fast and Long-Distance Networks (obsoletes RFC 8312,
+//    "CUBIC for Fast Long-Distance Networks")
+//    The default algorithm (`tcpAlgorithmClass = "TcpCubic"`), including the
+//    HyStart slow-start exit, which RFC 9438 describes as optional.
+//    Deviations: the TCP-friendliness estimator keeps the reference
+//    implementation's fixed scale, derived from beta = 717/1024, so changing
+//    `cubicBeta` alters the multiplicative decrease without rescaling the
+//    friendliness term.
+//
+//  - RFC 8257 - Data Center TCP (DCTCP): TCP Congestion Control for Data Centers
+//    ECN-feedback-driven congestion control, in the `DcTcp` algorithm class.
+//
+//  - RFC 3042 - Enhancing TCP's Loss Recovery Using Limited Transmit
+//    On by default (`limitedTransmitEnabled`); available to every algorithm
+//    class except `DumbTcp`.
+//
+//  - RFC 3465 - TCP Congestion Control with Appropriate Byte Counting
+//    (experimental)
+//    Applied in `TcpCubic`'s slow start, so that a delayed-ACK receiver does not
+//    halve the growth rate. Deliberately NOT applied in the classic
+//    `TcpTahoe`/`TcpReno`/`TcpNewReno`/`TcpWestwood` flavours, which grow by one
+//    SMSS per ACK as RFC 5681 specifies.
+//
+//    Also available, and not RFC-specified: `TcpVegas` and `TcpWestwood` (both
+//    from the research literature), `TcpNoCongestionControl`, and `DumbTcp` --
+//    the last two intentionally simplified, for teaching and for isolating other
+//    behavior in tests.
+//
+// <b>4. Loss detection and recovery</b>
+//
+//  - RFC 8985 - The RACK-TLP Loss Detection Algorithm for TCP
+//    The default (`lossDetectionMode = "rack"`, `tlpEnabled`): time-based loss
+//    detection plus tail loss probes. Requires SACK.
+//
+//  - RFC 6675 - A Conservative Loss Recovery Algorithm Based on Selective
+//    Acknowledgment (SACK) for TCP
+//    The SACK recovery engine, selected when SACK was negotiated by an algorithm
+//    class that has a recovery engine at all -- `TcpCubic`, `TcpReno` and
+//    `TcpNewReno`. (`TcpTahoe`, `TcpVegas`, `TcpWestwood`, `TcpNoCongestionControl`
+//    and `DumbTcp` have none.) Also reachable as the loss detector, via
+//    `lossDetectionMode = "dupthresh"`.
+//    Deviations: DupThresh is dynamic by default rather than fixed at three --
+//    see RFC 4653 below.
+//
+//  - RFC 6582 - The NewReno Modification to TCP's Fast Recovery Algorithm
+//    The recovery engine `TcpNewReno` and `TcpCubic` fall back to when SACK was
+//    not negotiated. `TcpReno` falls back to plain RFC 5681 recovery instead.
+//
+//  - RFC 6937 - Proportional Rate Reduction for TCP
+//    The default pacing of the window down during recovery (`prrEnabled`),
+//    replacing RFC 5681's cwnd inflation and halving. Requires SACK.
+//
+//  - RFC 5682 - Forward RTO-Recovery (F-RTO): An Algorithm for Detecting
+//    Spurious Retransmission Timeouts with TCP
+//    SACK-enhanced spurious-timeout detection (`frtoEnabled`, on by default,
+//    matching Linux's `tcp_frto = 2`).
+//
+//  - RFC 3522 - The Eifel Detection Algorithm for TCP
+//    Timestamp-based detection of a spurious retransmission; together with
+//    D-SACK it drives the cwnd/ssthresh undo (`lossUndoEnabled`).
+//
+//  - RFC 4653 - Improving the Robustness of TCP to Non-Congestion Events
+//    The adaptive-reordering idea, not the full NCR algorithm: the reordering
+//    degree grows when SACK reveals reordering, so persistent reordering stops
+//    causing spurious fast retransmits (`adaptiveReorderingEnabled`,
+//    `maxReordering`).
+//
+//  - RFC 3517 - A Conservative Selective Acknowledgment (SACK)-based Loss
+//    Recovery Algorithm for TCP (historic, obsoleted by RFC 6675)
+//    Referenced in the code for the classic DupThresh formulation.
+//
+// <b>5. Explicit Congestion Notification</b>
+//
+//  - RFC 3168 - The Addition of Explicit Congestion Notification (ECN) to IP
+//    ECN negotiation on the handshake, ECE/CWR handling, and CE processing
+//    (`tcpEcnMode = "rfc3168"`, or "passive" to accept but not request).
+//
+//  - RFC 9768 - More Accurate ECN Feedback in TCP (AccECN)
+//    The AccECN handshake, the three-bit ACE counter, and the AccECN option
+//    (`tcpEcnMode = "accecn"` / "accecn-passive", `accEcnOptionEnabled`).
+//
+//  - RFC 8311 - Relaxing Restrictions on Explicit Congestion Notification (ECN)
+//    Experimentation
+//    What permits the reserved-bit reuse AccECN depends on.
+//
+//  - RFC 3540 - Robust Explicit Congestion Notification (ECN) Signaling with
+//    Nonces (historic, obsoleted by RFC 8311)
+//    NOT implemented: the nonce-sum bit it defines is instead the AE bit of
+//    AccECN's counter.
+//
+// <b>6. Path MTU discovery</b>
+//
+//  - RFC 1191 - Path MTU Discovery
+//  - RFC 1981 - Path MTU Discovery for IP version 6
+//    `pmtudEnabled` sets DF on IPv4 segments; an ICMPv4 Fragmentation Needed or
+//    ICMPv6 Packet Too Big reduces the MSS and retransmits the offending
+//    segment. After `pmtudTimeout` the original MSS is restored, to probe for a
+//    path that has grown.
+//
+//  - RFC 4821 - Packetization Layer Path MTU Discovery
+//    `mtuProbing` arms an upward binary search between `baseMss` and the peer's
+//    MSS: one oversized probe segment is built from data already queued, and the
+//    lower bound moves up when that segment is acknowledged.
+//    Deviations:
+//     - Upward search only. There is no black-hole detector, so the "enable
+//       after a failure is detected" setting (`mtuProbing = 1`) behaves as off;
+//       only `mtuProbing = 2` arms the search.
+//     - A lost probe is recognized from the retransmission that covers it, and
+//       lowers the upper bound. Linux reaches the same verdict from its loss
+//       estimator instead (`tcp_fastretrans_alert`), so the two can disagree about
+//       exactly WHEN a probe is written off, though not about the outcome.
+//     - There is no reprobe timer: once the search has narrowed, it stays
+//       narrowed for the life of the connection.
+//     - Sending a probe does not decrement the congestion window. The reference
+//       decrements it because its window counts packets and the probe replaces
+//       several of them with one; a byte-valued window already charges the probe
+//       exactly what it carries.
+//
+// <b>7. Connection setup acceleration</b>
+//
+//  - RFC 7413 - TCP Fast Open
+//    Client and server, cookie request and validation, data on the SYN, the
+//    fallback paths, and the Appendix A experimental option (kind 254 with the
+//    0xF989 magic) alongside the assigned kind 34.
+//    Note, not a deviation: RFC 7413 leaves cookie construction to the server.
+//    Set `fastopenKey` and the cookie is derived exactly as Linux derives it
+//    (SipHash-2-4 over the address pair), so a simulated server and a real client
+//    agree; leave it empty, the default, and an internal hash is used instead.
+//
+// <b>8. Recognized on the wire but not implemented</b>
+//
+// The option kinds these documents define are listed -- commented out -- in the
+// header definitions (`TcpHeader.msg`), as a record of which kind numbers are
+// taken. Nothing generates them, and an arriving option of one of these kinds is
+// decoded as an unknown option rather than being recognized.
+//
+//  - RFC 2385 - Protection of BGP Sessions via the TCP MD5 Signature Option
+//    (obsoleted by RFC 5925)
+//  - RFC 5925 - The TCP Authentication Option
+//  - RFC 5482 - TCP User Timeout Option
+//  - RFC 4782 - Quick-Start for TCP and IP
+//  - RFC 4727 - Experimental Values in IPv4, IPv6, ICMPv4, ICMPv6, UDP, and TCP
+//    Headers, and RFC 3692 - Assigning Experimental and Testing Numbers
+//    Considered Useful. These reserve option kinds 253 and 254 for experiments.
+//    Kind 253 is unused here; kind 254 is NOT -- it carries the experimental Fast
+//    Open option of section 7, and is the one live enum member in this list.
+//  - RFC 1072 - TCP Extensions for Long-Delay Paths (Echo / Echo Reply)
+//  - RFC 1146 - TCP Alternate Checksum Options
+//  - RFC 1644 - T/TCP -- TCP Extensions for Transactions Functional Specification
+//    (the CC, CC.NEW and CC.ECHO options)
+//  - RFC 1693 - An Extension to TCP: Partial Order Service
+//  - RFC 6247 - Moving the Undeployed TCP Extensions RFC 1072, RFC 1106, RFC 1110,
+//    RFC 1145, RFC 1146, RFC 1379, RFC 1644, and RFC 1693 to Historic Status
+//    (the document that retired four of the entries above: RFC 1072, 1146,
+//    1644 and 1693)
+//
+//  - RFC 7805 - Moving Outdated TCP Extensions and TCP-Related Documents to
+//    Historic or Informational Status (the companion to RFC 6247 above; between
+//    them they explain why most of this list is historic rather than merely
+//    unimplemented)
+//
+// <b>Remaining gaps</b>
+//
+//  - Urgent data, as described under RFC 9293 above.
+//  - Flow control between TCP and the application exists but is opt-in: a
+//    connection opened in "autoread" mode drains the receive queue to the
+//    application immediately, so its advertised window never closes. Open it in
+//    explicit-read mode (`autoRead = false` on the OPEN command, then READ
+//    commands) for a receive buffer that fills up and applies back pressure.
+//    A segment dropped because the buffer was exhausted is counted by the
+//    `tcpRcvQueueDrops` statistic.
+//  - Receive-buffer occupancy is always tracked at skb-truesize granularity, but
+//    it bounds the advertised window only under `windowShrinkAllowed`, or when the
+//    buffer is pinned (`receiveBufferLocked`, i.e. an application that issued
+//    SO_RCVBUF). Otherwise the window follows unread bytes, because an unpinned
+//    buffer grows on demand and its free space is not the binding constraint.
 //
 simple Tcp extends SimpleModule like ITcp
 {
@@ -203,7 +424,7 @@ simple Tcp extends SimpleModule like ITcp
         bool windowScalingSupport = default(true); // Window Scale (RFC 7323) support (header option) (WS will be enabled for a connection if both endpoints support it)
         int windowScalingFactor @mutable = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits). @mutable so a harness/app modeling setsockopt(SO_RCVBUF) can switch to auto (-1) at runtime.
         bool timestampSupport @mutable = default(true); // Timestamps (RFC 7323) support (header option) (TS will be enabled for a connection if both endpoints support it)
-        int mss = default(-1); // Maximum Segment Size (RFC 9293) (header option). Default 536 per RFC 1122.
+        int mss = default(-1); // Maximum Segment Size (RFC 9293) (header option), i.e. the largest segment text this host is willing to receive. -1 derives it from the address family once the peer is known: 1460 for IPv4, 1440 for IPv6. RFC 1122's conservative 536/1220 is what a MISSING MSS option from the peer implies, not this default
         int mtuProbing = default(0); // Packetized Path MTU Discovery (RFC 4821), ~ Linux sysctl tcp_mtu_probing: 0 = off, 2 = search for a larger usable MTU from the start of every connection. 1 (Linux "only after a black hole is detected") behaves as 0 here, since INET has no black-hole detector
         int baseMss = default(1024); // lower end of the RFC 4821 search, ~ Linux sysctl tcp_base_mss: the MSS assumed to work without probing. Effective only with mtuProbing
         int pathMtu = default(0); // the route's MTU, the ceiling the RFC 4821 search may reach (Linux dst_mtu / icsk_pmtu_cookie). 0 = derive from the negotiated MSS. Effective only with mtuProbing
@@ -242,7 +463,7 @@ simple Tcp extends SimpleModule like ITcp
         double hystartDelayMax @unit(s) = default(16ms); // upper clamp on the same threshold (Linux HYSTART_DELAY_MAX)
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
-        bool ecnWillingness = default(false); // DEPRECATED -- use tcpEcnMode. true maps to tcpEcnMode="rfc3168" unless tcpEcnMode is ALSO explicitly set to something other than "off" (then a cRuntimeError is thrown -- exact precedent: increasedIWEnabled vs initialWindow, TcpConnectionUtil.cc:645-651)
+        bool ecnWillingness = default(false); // DEPRECATED -- use tcpEcnMode. true maps to tcpEcnMode="rfc3168" unless tcpEcnMode is ALSO explicitly set to something other than "off" (then a cRuntimeError is thrown -- same precedence rule as increasedIWEnabled vs initialWindow)
         string tcpEcnMode @mutable @enum("off","passive","rfc3168","accecn","accecn-passive") = default("off"); // @mutable so a harness can model a mid-run "sysctl net.ipv4.tcp_ecn=N": the value is read per connection at open time, exactly as Linux samples it
             // Value semantics modeled on Linux net.ipv4.tcp_ecn (0/1/2/3/4/5; AccECN owns 3/4/5):
             //   off            ~ tcp_ecn=0: never request or accept any form of ECN (today's default)
@@ -280,7 +501,7 @@ simple Tcp extends SimpleModule like ITcp
         bool fastopenClientEnabled @mutable = default(false); // TCP Fast Open (RFC 7413) client role: attempt SYN-with-data when a cookie is cached. ~ sysctl tcp_fastopen bit 0 (TFO_CLIENT_ENABLE)
         bool fastopenServerEnabled @mutable = default(false); // TCP Fast Open (RFC 7413) server role: accept and accelerate a validated-cookie SYN-with-data. ~ sysctl tcp_fastopen bit 1 (TFO_SERVER_ENABLE)
         bool fastopenAcceptWithoutCookie @mutable = default(false); // Server role: accept SYN-with-data even when the SYN carries no Fast Open cookie option at all (RFC 7413 section 4.1.3's cookie-less mode). ~ sysctl tcp_fastopen bit 9 (0x200, TFO_SERVER_COOKIE_NOT_REQD). Only meaningful with fastopenServerEnabled.
-        bool fastopenExpOptionEnabled @mutable = default(false); // Accept the legacy kind-253/254+magic-0xF989 experimental Fast Open option on receive (never emitted); inert unless fastopenServerEnabled or fastopenClientEnabled is also true
+        bool fastopenExpOptionEnabled @mutable = default(false); // Understand the pre-standardization kind-254 + magic-0xF989 Fast Open option (RFC 7413 Appendix A). Emitted only in reply to a peer that used it -- a server echoes the client's form in its SYN-ACK, and a client that got no answer to a kind-34 request retries once with this one, as Linux does. Inert unless fastopenServerEnabled or fastopenClientEnabled is also true
         bool fastopenLenientCookieValidation = default(true); // Accept any syntactically valid (4-16 byte) Fast Open cookie as valid without a keyed-hash check -- simulation-appropriate (no adversarial clients on the wire); set false to require an exact match against the locally generated cookie
         int fastopenCookieBytes = default(8); // Length in bytes of the locally generated Fast Open cookie (RFC 7413 allows 4-16)
         double fastopenBlackholeTimeout @unit(s) = default(0s); // Client-side active-TFO blackhole detection: base disable duration after a suspected middlebox interference event (RTO or out-of-order RST on a data-carrying TFO SYN), doubling (capped at 64x) on repeated events. 0s (default) disables the detector entirely, matching Linux's own shipped default -- the local corpus's defaults.sh override to a nonzero value is a *test* configuration, not upstream's
