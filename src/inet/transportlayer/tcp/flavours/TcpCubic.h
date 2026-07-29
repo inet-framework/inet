@@ -106,7 +106,7 @@ class INET_API TcpCubic : public TcpClassicAlgorithmBase
      * bytesInFlight is reported only; the reduction is taken from cwnd, as in
      * Linux cubictcp_recalc_ssthresh.
      */
-    virtual uint32_t calculateSsthresh(uint32_t bytesInFlight);
+    virtual uint32_t calculateSsthresh(uint32_t bytesInFlight) override;
 
     /** CUBIC reduces to cwnd*beta on fast-recovery entry, not to FlightSize/2. */
     virtual uint32_t calculateSsthreshForFastRecovery() override { return calculateSsthresh(state->snd_cwnd); }

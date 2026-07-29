@@ -1097,6 +1097,11 @@ uint32_t TcpAlgorithmBase::calculateSsthreshForFastRecovery()
     return std::max(getBytesInFlight() / 2, 2 * state->snd_mss);
 }
 
+uint32_t TcpAlgorithmBase::calculateSsthresh(uint32_t bytesInFlight)
+{
+    return std::max(bytesInFlight / 2, 2 * state->snd_effmss);
+}
+
 } // namespace tcp
 } // namespace inet
 

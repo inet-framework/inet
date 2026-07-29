@@ -8,7 +8,6 @@
 
 #include <algorithm> // min,max
 
-#include "inet/transportlayer/tcp/flavours/TcpCubic.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
@@ -115,11 +114,7 @@ void Rfc5681Recovery::receivedDuplicateAck()
         // data in the network.
         //"
         uint32_t flightSize = conn->getTcpAlgorithm()->getBytesInFlight() + state->snd_effmss; // the +1 MSS accounts for the retransmitOneSegment call below
-        // TODO move this to a derived class or use function pointer for ssthresh calculation?
-        if (TcpCubic *tcpCubic = dynamic_cast<TcpCubic *>(conn->getTcpAlgorithmForUpdate()))
-            state->ssthresh = tcpCubic->calculateSsthresh(flightSize);
-        else
-            state->ssthresh = std::max(flightSize / 2, 2 * state->snd_effmss);
+        state->ssthresh = conn->getTcpAlgorithmForUpdate()->calculateSsthresh(flightSize);
         conn->emit(ssthreshSignal, state->ssthresh);
 
         //"

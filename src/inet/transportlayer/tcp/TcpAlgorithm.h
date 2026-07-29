@@ -255,6 +255,14 @@ class INET_API TcpAlgorithm : public cObject
     virtual uint32_t calculateSsthreshForFastRecovery() { return 0; }
 
     /**
+     * The ssthresh this flavour's multiplicative decrease yields for a given flight
+     * size (Linux icsk_ca_ops->ssthresh with an explicit argument). Same role as
+     * calculateSsthreshForFastRecovery(), for the callers that have already computed
+     * the flight size they want the reduction taken from.
+     */
+    virtual uint32_t calculateSsthresh(uint32_t bytesInFlight) { return 0; }
+
+    /**
      * The connection's loss-recovery strategy, or nullptr for flavours that do
      * not use the ITcpRecovery split (DumbTcp, TcpNoCongestionControl, Vegas,
      * Westwood). Lets the connection reach RACK/PRR/etc. without knowing the

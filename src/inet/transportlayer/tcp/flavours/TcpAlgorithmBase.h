@@ -181,6 +181,8 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual simtime_t getSrtt() const override { return state->srtt; }
 
     virtual uint32_t calculateSsthreshForFastRecovery() override;
+
+    virtual uint32_t calculateSsthresh(uint32_t bytesInFlight) override;
 };
 
 } // namespace tcp
