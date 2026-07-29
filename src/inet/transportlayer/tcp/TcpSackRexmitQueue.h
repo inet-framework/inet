@@ -41,6 +41,23 @@ class INET_API TcpSackRexmitQueue
     uint32_t begin; // 1st sequence number stored
     uint32_t end; // last sequence number stored + 1
 
+  protected:
+    // getLost()/getSacked()/getRetrans() are read several times per ACK (setPipe alone
+    // runs 2-3 times, getBytesInFlight sums all three), so the totals are walked once
+    // and cached until something touches the queue. Linux keeps the equivalent
+    // lost_out/sacked_out/retrans_out permanently up to date at every mutation point;
+    // invalidating is the same idea with one place to get right instead of twenty.
+    mutable bool countersValid = false;
+    mutable uint32_t lostBytes = 0;
+    mutable uint32_t sackedBytes = 0;
+    mutable uint32_t retransBytes = 0;
+
+    /** Walks the queue once to refresh the cached flag totals. */
+    virtual void updateCounters() const;
+
+    /** Every insertion, removal or flag change in the queue must call this. */
+    void invalidateCounters() { countersValid = false; }
+
   public:
     /**
      * Ctor
