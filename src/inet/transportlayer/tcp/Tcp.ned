@@ -233,8 +233,8 @@ simple Tcp extends SimpleModule like ITcp
         int hystartDetect = default(3); // HyStart detectors, as a bitmask: 1 = ACK train, 2 = delay increase, 3 = both
         int hystartLowWindow = default(16); // smallest cwnd (in segments) at which HyStart starts looking for the exit point
         double hystartAckDelta @unit(s) = default(2ms); // largest ACK spacing still counted as part of an ACK train
-        double hystartDelayMin @unit(s) = default(4ms); // lower clamp on the HyStart delay-increase threshold
-        double hystartDelayMax @unit(s) = default(1s); // upper clamp on the HyStart delay-increase threshold
+        double hystartDelayMin @unit(s) = default(4ms); // lower clamp on the HyStart delay-increase threshold (an eighth of the minimum RTT)
+        double hystartDelayMax @unit(s) = default(16ms); // upper clamp on the same threshold (Linux HYSTART_DELAY_MAX)
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
         bool ecnWillingness = default(false); // DEPRECATED -- use tcpEcnMode. true maps to tcpEcnMode="rfc3168" unless tcpEcnMode is ALSO explicitly set to something other than "off" (then a cRuntimeError is thrown -- exact precedent: increasedIWEnabled vs initialWindow, TcpConnectionUtil.cc:645-651)
