@@ -32,6 +32,22 @@ void DcTcp::initialize()
     state->ecnMarkAll = true;
 }
 
+// This is a fork of the pre-split classic ACK path, not a specialization of it: it
+// reimplements fast-recovery deflation, slow start, congestion avoidance and the RFC
+// 6675 A/B/C loss-recovery steps rather than calling TcpClassicAlgorithmBase's and the
+// recovery strategy's. Only the DCTCP.Alpha estimator and the proportional cwnd
+// reduction below are genuinely DCTCP's. Folding the rest back in is NOT behaviour-
+// preserving and so cannot be done as a cleanup -- it would turn on, for DCTCP
+// connections, machinery this path silently skips:
+//   - processTlpAck(): tlpHighSeq is never cleared here, so a Tail Loss Probe fires at
+//     most once per connection and its congestion response never applies (the same
+//     defect TcpCubic had before it moved onto TcpClassicAlgorithmBase);
+//   - PRR (RFC 6937), which prrEnabled turns on by default for every other flavour;
+//   - stepA's discardUpTo() when loss recovery ends;
+//   - stepC's effective-MSS gate and its advertised-window guard -- the loop below
+//     reaches Rfc6675Recovery::sendDataDuringLossRecoveryPhase(), the last caller of
+//     that older twin, which can send past the receiver's window.
+// Each of those is a behaviour change owing its own commit and fingerprint review.
 void DcTcp::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     uint32_t old_dupacks = state->dupacks;
