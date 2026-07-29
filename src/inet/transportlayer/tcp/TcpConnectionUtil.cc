@@ -2602,9 +2602,19 @@ void TcpConnection::readHeaderOptions(const Ptr<const TcpHeader>& tcpHeader)
                 ok = processSACKPermittedOption(tcpHeader, *check_and_cast<const TcpOptionSackPermitted *>(option));
                 break;
 
-            case TCPOPTION_SACK: // SACK=5
-                ok = check_and_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery())->processSACKOption(tcpHeader, *check_and_cast<const TcpOptionSack *>(option));
+            case TCPOPTION_SACK: { // SACK=5
+                // A SACK block from a peer we never negotiated SACK with, or one that
+                // arrives before the algorithm has a SACK-capable recovery object, is
+                // malformed input -- drop the option, never abort the simulation.
+                auto *recovery = state->sack_enabled ? dynamic_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery()) : nullptr;
+                if (recovery == nullptr) {
+                    EV_ERROR << "ERROR: " << (state->sack_enabled ? "no SACK-capable recovery in use" : "SACK received but sack_enabled is false") << ", dropping SACK option\n";
+                    ok = false;
+                }
+                else
+                    ok = recovery->processSACKOption(tcpHeader, *check_and_cast<const TcpOptionSack *>(option));
                 break;
+            }
 
             case TCPOPTION_TIMESTAMP: // TS=8
                 ok = processTSOption(tcpHeader, *check_and_cast<const TcpOptionTimestamp *>(option));
@@ -3275,7 +3285,10 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // containing new data, and each of these "duplicate" ACKs SHOULD bear a
         // SACK option."
         if (state->sack_enabled && (state->snd_sack || state->snd_dsack)) {
-            check_and_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery())->addSacks(tcpHeader);
+            // recovery is only created once the algorithm is established, so a SACK
+            // scheduled while still in SYN_RCVD has nothing to render it
+            if (auto *recovery = dynamic_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery()))
+                recovery->addSacks(tcpHeader);
         }
         // AccECN TCP option (draft-ietf-tcpm-accurate-ecn): byte-exact
         // corroboration of the ACE mod-8 counter. Sent on every ACK-bearing
