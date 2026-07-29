@@ -42,8 +42,8 @@ class INET_API DcTcp : public TcpReno
     /** Constructor */
     DcTcp();
 
-    /** Redefine what should happen when data got acked, to add congestion window management */
-    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
+    /** RFC 8257's proportional reduction, in place of RFC 3168's halving. */
+    virtual bool processEce(uint32_t numBytesAcked) override;
 
     virtual bool shouldMarkAck() override;
 
