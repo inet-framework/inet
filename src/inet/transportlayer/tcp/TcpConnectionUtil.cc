@@ -781,21 +781,7 @@ void TcpConnection::sendAvailableDataToApp()
                 // windowShrinkAllowed accounting: reading releases receive-
                 // buffer occupancy skb by skb -- Linux frees an skb (and its
                 // whole truesize) only once it is fully copied to the user.
-                if (!rcvSkbChain.empty()) {
-                    uint64_t readBytes = msg->getByteLength();
-                    while (readBytes > 0 && !rcvSkbChain.empty()) {
-                        auto& head = rcvSkbChain.front();
-                        if (readBytes >= head.first) {
-                            readBytes -= head.first;
-                            rcvBufOccupancy -= std::min<uint64_t>(head.second, rcvBufOccupancy);
-                            rcvSkbChain.pop_front();
-                        }
-                        else {
-                            head.first -= (uint32_t)readBytes; // partially read skb stays charged
-                            readBytes = 0;
-                        }
-                    }
-                }
+                releaseRcvBufOccupancy(msg->getByteLength());
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                 msg->addTag<SocketInd>()->setSocketId(socketId);
                 if (rxTimestampingEnabled)
@@ -871,6 +857,13 @@ void TcpConnection::configureStateVariables()
     {
         int64_t rcvBufBytes = (int64_t)tcpMain->par("receiveBufferSize").doubleValue();
         state->rcvBufferSize = rcvBufBytes >= 0 ? (uint32_t)rcvBufBytes : 0;
+        state->rcvbufLocked = tcpMain->par("receiveBufferLocked");
+    }
+    // An SO_RCVBUF that arrived before the connection was configured (the usual
+    // case: the rcv corpus sets it between socket() and listen()).
+    if (rcvBufSockopt >= 0) {
+        state->rcvBufferSize = (uint32_t)rcvBufSockopt;
+        state->rcvbufLocked = true;
     }
     // receiver window auto-tuning (Linux tcp_grow_window): offer starts at
     // advertisedWindow, grows with received data toward the clamp (Linux
@@ -896,6 +889,7 @@ void TcpConnection::configureStateVariables()
             state->window_clamp = std::max<uint32_t>(state->window_clamp, state->rcvBufferSize);
         }
     }
+    state->rcv_mwnd_seq = state->rcv_adv;
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 1122) enabled/disabled
@@ -1088,11 +1082,16 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
     bool ret;
 
     if (len == 0) {
-        if (state->rcv_wnd == 0)
-            ret = (seqNo == state->rcv_nxt);
-        else // rcv_wnd > 0
-//            ret = seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, rcvWndEnd);
-            ret = seqLE(state->rcv_nxt, seqNo) && seqLE(seqNo, rcvWndEnd); // Accept an ACK on end of window
+        // Linux tcp_sequence() judges a segment carrying no data against the HIGHEST
+        // window edge ever promised (rcv_mwnd_seq, rcv_adv here), not against the
+        // current offer, and has no special case for a closed window. A peer that was
+        // once allowed to send that far may legitimately still be acknowledging from
+        // there -- which is exactly what it does after the window has been pulled back
+        // under it (rcv_wnd_shrink_nomem's pure ACK at the old right edge). The
+        // maximum only ever grows, so where no larger window was ever offered this
+        // stays the RFC 9293 test.
+        uint32_t promiseEnd = seqGreater(state->rcv_mwnd_seq, rcvWndEnd) ? state->rcv_mwnd_seq : rcvWndEnd;
+        ret = seqLE(state->rcv_nxt, seqNo) && seqLE(seqNo, promiseEnd); // Accept an ACK on end of window
     }
     else { // len > 0
         if (state->rcv_wnd == 0)
@@ -1111,7 +1110,7 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
                 || (seqLess(state->rcv_nxt, endSeq) && seqLE(endSeq, rcvWndEnd)); // Accept an ACK on end of window
             // Linux BEYOND-WINDOW rule (SKB_DROP_REASON_TCP_INVALID_END_SEQUENCE
             // / LINUX_MIB_TCPBEYONDWINDOW): a data segment whose end reaches
-            // beyond the HIGHEST window edge ever promised (rcv_adv, monotone)
+            // beyond the HIGHEST window edge ever promised (rcv_mwnd_seq)
             // is discarded whole -- classic trim-to-window would let a sender
             // blast arbitrarily far past what was offered. Exception, same as
             // the buffer-side over-accept: an in-order segment arriving to an
@@ -1124,8 +1123,8 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
             // the IN-ORDER unread queue, getAcknowledgedDataLength() here --
             // is empty (out-of-order buffer content is irrelevant, and the
             // arriving segment itself may be out of order).
-            if (ret && seqGreater(seqNo + len, state->rcv_adv)) {
-                if (seqGreater(seqNo, state->rcv_adv)
+            if (ret && seqGreater(seqNo + len, state->rcv_mwnd_seq)) {
+                if (seqGreater(seqNo, state->rcv_mwnd_seq)
                     || receiveQueue->getAcknowledgedDataLength() != 0)
                     ret = false;
             }
@@ -1901,6 +1900,25 @@ uint32_t TcpConnection::getDataSndUna() const
     if (fsm.getState() == TCP_S_SYN_RCVD && state->snd_una == state->iss)
         return state->iss + 1;
     return state->snd_una;
+}
+
+void TcpConnection::releaseRcvBufOccupancy(uint64_t readBytes)
+{
+    // Linux frees an skb -- and with it the WHOLE truesize it was charged -- only
+    // once the application has copied all of it, so a partially read skb keeps
+    // costing the buffer everything it did before.
+    while (readBytes > 0 && !rcvSkbChain.empty()) {
+        auto& head = rcvSkbChain.front();
+        if (readBytes >= head.first) {
+            readBytes -= head.first;
+            rcvBufOccupancy -= std::min<uint64_t>(head.second, rcvBufOccupancy);
+            rcvSkbChain.pop_front();
+        }
+        else {
+            head.first -= (uint32_t)readBytes;
+            readBytes = 0;
+        }
+    }
 }
 
 uint32_t TcpConnection::gsoBurstSegments(uint32_t congestionWindow, uint32_t bytesInFlight, uint32_t effectiveMss) const
@@ -3435,6 +3453,23 @@ uint16_t TcpConnection::updateRcvWnd()
     // update receive queue related state variables and statistics
     updateRcvQueueVars();
 
+    // Linux tcp_select_window's ICSK_ACK_NOMEM branch: the previous arrival was
+    // dropped for want of buffer space, so this ACK closes the window outright
+    // rather than repeating an offer the socket cannot honour. One-shot, cleared
+    // where the reference clears icsk_ack.pending (tcp_event_ack_sent).
+    if (state->ackNomem) {
+        state->ackNomem = false;
+        state->rcv_wnd = 0;
+        // Linux moves rcv_wup up to rcv_nxt here, which collapses the offer in force
+        // to nothing -- without that the never-shrink rule below would resurrect the
+        // old right edge on the very next segment. The maximum ever offered
+        // (rcv_mwnd_seq) is untouched: it is a memory, not an offer.
+        state->rcv_adv = state->rcv_nxt;
+        emit(rcvAdvSignal, state->rcv_adv);
+        emit(rcvWndSignal, state->rcv_wnd);
+        return 0;
+    }
+
     // Linux tcp_shrink_window=1 (__tcp_select_window's shrink branch): the
     // offer follows GENUINE buffer free space -- occupancy at skb-truesize
     // granularity scaled by the measured payload/truesize ratio -- rounded
@@ -3467,10 +3502,10 @@ uint16_t TcpConnection::updateRcvWnd()
             ? (TCP_MAX_WIN << state->rcv_wnd_scale) : TCP_MAX_WIN;
         if (win > maxWinShrink)
             win = maxWinShrink;
-        if (win > 0 && seqGE(state->rcv_nxt + win, state->rcv_adv)) {
-            state->rcv_adv = state->rcv_nxt + win;
-            emit(rcvAdvSignal, state->rcv_adv);
-        }
+        state->rcv_adv = state->rcv_nxt + win;
+        emit(rcvAdvSignal, state->rcv_adv);
+        if (seqGreater(state->rcv_adv, state->rcv_mwnd_seq))
+            state->rcv_mwnd_seq = state->rcv_adv;
         state->rcv_wnd = win;
         emit(rcvWndSignal, state->rcv_wnd);
         uint32_t scaledWin = state->rcv_wnd >> state->rcv_wnd_scale;
@@ -3479,13 +3514,35 @@ uint16_t TcpConnection::updateRcvWnd()
         return (uint16_t)scaledWin;
     }
 
-    win = state->maxRcvBuffer - receiveQueue->getAcknowledgedDataLength();
-    // window auto-tuning: the offer follows the grown rcv_ssthresh (bounded by
-    // the clamp) instead of the static advertisedWindow
-    if (state->rcv_ssthresh > 0) {
-        uint32_t tuned = std::min(state->rcv_ssthresh, state->window_clamp);
-        uint32_t ackedLen = receiveQueue->getAcknowledgedDataLength();
-        win = tuned > ackedLen ? tuned - ackedLen : 0;
+    // Linux tcp_space(): what the offer may promise is the room left in the receive
+    // BUFFER, charged the way the kernel charges it -- skb truesize, scaled by the
+    // measured payload/truesize ratio. That agrees with "bytes the application has
+    // not read yet" only while the reader keeps up; once unread data piles up the
+    // buffer is what runs out, and the buffer is what the peer must be told about.
+    //
+    // Only a buffer the application PINNED is accounted this way. An unpinned one
+    // grows on demand (the tcp_clamp_window path in the receive handler), so its
+    // free space is not what actually bounds the offer -- and INET's skb-truesize
+    // estimate is coarse enough that treating it as a bound would understate the
+    // window on a socket that was never short of memory in the first place.
+    if (state->rcvBufferSize > 0 && state->rcvbufLocked) {
+        win = rcvBufOccupancy < state->rcvBufferSize
+            ? (uint32_t)(((uint64_t)(state->rcvBufferSize - rcvBufOccupancy) * rcvScalingRatio) >> 8)
+            : 0;
+        // window auto-tuning: the offer also may not exceed the grown rcv_ssthresh
+        // (bounded by the clamp), which is what paces the window up from its start
+        if (state->rcv_ssthresh > 0)
+            win = std::min(win, std::min(state->rcv_ssthresh, state->window_clamp));
+    }
+    else {
+        win = state->maxRcvBuffer - receiveQueue->getAcknowledgedDataLength();
+        // window auto-tuning: the offer follows the grown rcv_ssthresh (bounded by
+        // the clamp) instead of the static advertisedWindow
+        if (state->rcv_ssthresh > 0) {
+            uint32_t tuned = std::min(state->rcv_ssthresh, state->window_clamp);
+            uint32_t ackedLen = receiveQueue->getAcknowledgedDataLength();
+            win = tuned > ackedLen ? tuned - ackedLen : 0;
+        }
     }
 
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, chapter 26.7, pages 878-879]:
@@ -3495,8 +3552,9 @@ uint16_t TcpConnection::updateRcvWnd()
 
     // Do not shrink window
     // (rcv_adv minus rcv_nxt) is the amount of space still available to the sender that was previously advertised
-    if (win < state->rcv_adv - state->rcv_nxt)
-        win = state->rcv_adv - state->rcv_nxt;
+    uint32_t stillOffered = seqGreater(state->rcv_adv, state->rcv_nxt) ? state->rcv_adv - state->rcv_nxt : 0;
+    if (win < stillOffered)
+        win = stillOffered;
 
     // Observe upper limit for advertised window on this connection
     const uint32_t maxWin = (state->ws_enabled && state->rcv_wnd_scale) ? (TCP_MAX_WIN << state->rcv_wnd_scale) : TCP_MAX_WIN; // TCP_MAX_WIN = 65535 (16 bit)
@@ -3505,11 +3563,16 @@ uint16_t TcpConnection::updateRcvWnd()
 
     // Note: The order of the "Do not shrink window" and "Observe upper limit" parts has been changed to the order used in FreeBSD Release 7.1
 
-    if (win > 0 && seqGE(state->rcv_nxt + win, state->rcv_adv)) {
-        state->rcv_adv = state->rcv_nxt + win;
+    // Re-anchor the offer in force at rcv_nxt, as Linux does on every advertisement
+    // (rcv_wup = rcv_nxt; rcv_wnd = new_win). That is what makes the never-shrink
+    // rule above compare against the PREVIOUS offer rather than against a
+    // high-water mark that a long-past large window would pin forever. The
+    // high-water mark is rcv_mwnd_seq, tracked separately below.
+    state->rcv_adv = state->rcv_nxt + win;
 
-        emit(rcvAdvSignal, state->rcv_adv);
-    }
+    emit(rcvAdvSignal, state->rcv_adv);
+    if (seqGreater(state->rcv_adv, state->rcv_mwnd_seq))
+        state->rcv_mwnd_seq = state->rcv_adv;
 
     state->rcv_wnd = win;
 

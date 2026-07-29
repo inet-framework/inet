@@ -229,6 +229,22 @@ class TcpSetPathMtuCommand extends TcpSetOptionCommand
 }
 
 //
+// SO_RCVBUF as a runtime socket option: sets this connection's receive-BUFFER
+// capacity (Linux sk_rcvbuf) and pins it, so the kernel's automatic growth under
+// receive pressure no longer applies (SOCK_RCVBUF_LOCK). `value` is the final
+// buffer size -- the socket layer has already applied Linux's doubling of the
+// setsockopt argument. Shrinking it below what is already queued is legal and is
+// how an application forces a memory squeeze: nothing is discarded, but the next
+// arrival has nowhere to go.
+//
+// @see ~TcpSocket::setReceiveBufferSize
+//
+class TcpSetRcvBufCommand extends TcpSetOptionCommand
+{
+    int value = -1;
+}
+
+//
 // TCP_NODELAY (setsockopt SOL_TCP): enable/disable Nagle's algorithm at runtime.
 // nodelay==true disables Nagle and force-pushes any held partial segment (but does
 // NOT clear TCP_CORK, which outranks TCP_NODELAY in Linux).

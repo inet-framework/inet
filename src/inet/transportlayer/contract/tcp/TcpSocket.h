@@ -501,6 +501,14 @@ class INET_API TcpSocket : public ISocket
     void setPathMtu(int value);
 
     /**
+     * SO_RCVBUF: pins the connection's receive-buffer capacity (Linux sk_rcvbuf,
+     * already doubled by the caller). A pinned buffer no longer grows under receive
+     * pressure, so shrinking it below the queued data makes the next arrival be
+     * dropped and a zero window advertised.
+     */
+    void setReceiveBufferSize(int value);
+
+    /**
      * TCP_NODELAY (setsockopt SOL_TCP): enable/disable Nagle at runtime. Enabling
      * nodelay also force-pushes any held partial segment (but does not clear TCP_CORK).
      */
