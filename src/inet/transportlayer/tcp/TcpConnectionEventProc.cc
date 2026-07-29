@@ -205,9 +205,7 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
                 // SYN-payload cap: the peer's MSS cached with the cookie minus
                 // the maximum TCP option space (40) -- Linux sizes the SYN data
                 // from the tcp_metrics-cached MSS, since nothing has been
-                // negotiated yet on this connection (the corpus's over-mss test
-                // pins 1420 = 1460-40, and its third-connection test pins
-                // 900 = a cached 940 - 40).
+                // negotiated yet on this connection.
                 uint32_t capBytes = state->snd_mss > 0 ? state->snd_mss : 536;
                 uint32_t cachedMss = tcpMain->getFastOpenCachedMss(remoteAddr);
                 if (cachedMss > 40)

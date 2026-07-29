@@ -642,8 +642,8 @@ void TcpAlgorithmBase::incrQuickack(uint32_t maxQuickacks)
 {
     // Budget of back-to-back immediate ACKs: enough to cover half the receive
     // window in one-per-segment ACKs, at most maxQuickacks (Linux
-    // tcp_incr_quickack; rcv_mss approximated by our own MSS -- the corpus
-    // and virtually all sim setups are MSS-symmetric).
+    // tcp_incr_quickack; rcv_mss approximated by our own MSS, since virtually
+    // all simulation setups are MSS-symmetric).
     uint32_t mss = state->snd_mss > 0 ? state->snd_mss : 536;
     uint32_t quickacks = state->rcv_wnd / (2 * mss);
     if (quickacks == 0)
