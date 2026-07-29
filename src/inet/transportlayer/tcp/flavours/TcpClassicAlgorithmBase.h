@@ -39,6 +39,7 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 
     virtual void processRexmitTimer(TcpEventCode& event) override;
 
+    /** RFC 3168 reaction to an ECN-Echo; true if it reduced cwnd on this ACK. */
     virtual bool processEce();
 
   public:
