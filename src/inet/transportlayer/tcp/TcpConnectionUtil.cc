@@ -923,6 +923,16 @@ void TcpConnection::configureStateVariables()
         state->init_cwnd_mode = 2;
     else
         state->init_cwnd_mode = 0;
+    {
+        int initialCwnd = tcpMain->par("initialCwnd");
+        if (initialCwnd < 0)
+            throw cRuntimeError("initialCwnd must be non-negative (0 = derive from initialWindow), but is %d", initialCwnd);
+        state->initialCwndSegments = (uint32_t)initialCwnd;
+    }
+    // Packetized PMTU discovery (RFC 4821). Only Linux's tcp_mtu_probing=2 has a
+    // counterpart here: 1 arms the search on black-hole detection, which needs a
+    // detector INET does not have.
+    state->mtupEnabled = (int)tcpMain->par("mtuProbing") > 1;
     // Maximum Segment Size (RFC 9293). mss=-1 is a sentinel meaning "derive from the
     // address family" -- resolved in writeHeaderOptions() once remoteAddr is known.
     // Read as signed first: assigning -1 straight into the uint32_t snd_mss trips
@@ -1545,6 +1555,15 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         }
     }
 
+    // RFC 4821: retransmitting into the range an outstanding probe covers is how
+    // this side learns the probe did not get through. Linux reaches the same
+    // conclusion in tcp_fastretrans_alert, from the loss estimator rather than from
+    // the retransmission itself; the trigger differs, the verdict does not.
+    if (state->mtupProbeSize != 0 && seqLess(state->snd_nxt, state->snd_max)
+            && seqGE(state->snd_nxt, state->mtupProbeSeqStart)
+            && seqLess(state->snd_nxt, state->mtupProbeSeqEnd))
+        mtupProbeFailed();
+
     uint32_t buffered = sendQueue->getBytesAvailable(state->snd_nxt);
 
     if (bytes > buffered) // last segment?
@@ -1592,7 +1611,9 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
 
     ASSERT(options_len < state->snd_mss);
 
-    if (bytes + options_len > state->snd_mss)
+    // An RFC 4821 probe is deliberately larger than snd_mss -- being larger is the
+    // whole experiment -- so it is the one segment the MSS clamp must leave alone.
+    if (state->mtupProbeBytes == 0 && bytes + options_len > state->snd_mss)
         bytes = state->snd_mss - options_len;
 
     // A retransmission never extends past the previously sent high-water mark
@@ -1882,6 +1903,150 @@ uint32_t TcpConnection::getDataSndUna() const
     return state->snd_una;
 }
 
+uint32_t TcpConnection::gsoBurstSegments(uint32_t congestionWindow, uint32_t bytesInFlight, uint32_t effectiveMss) const
+{
+    if (effectiveMss == 0)
+        return 1;
+    // How many segments Linux hands to the NIC as one GSO super-segment, which is
+    // what decides where the forced PSH lands (tcp_write_xmit's
+    // min(cwnd_quota, tcp_tso_segs) fed to tcp_mss_split_point).
+    //
+    // tcp_cwnd_test: never more than half the congestion window, so a second burst
+    // can be scheduled while the first is in flight.
+    uint32_t cwndSegs = congestionWindow / effectiveMss;
+    uint32_t inFlightSegs = bytesInFlight / effectiveMss;
+    if (cwndSegs == 0 || inFlightSegs >= cwndSegs)
+        return 1;
+    uint32_t cwndQuota = std::min(std::max(cwndSegs / 2, 1u), cwndSegs - inFlightSegs);
+
+    // tcp_tso_autosize: a burst is what the pacing rate lets the connection emit in
+    // one millisecond-ish tick (rate >> sk_pacing_shift), floored at two segments.
+    // At ordinary RTTs that floor is what binds; only a sub-millisecond path makes
+    // the rate large enough for the cwnd quota above to become the limit.
+    simtime_t srtt = tcpAlgorithm != nullptr ? tcpAlgorithm->getSrtt() : SIMTIME_ZERO;
+    if (srtt <= SIMTIME_ZERO)
+        // No RTT sample yet. Linux leaves the rate undivided in that case
+        // (tcp_update_pacing_rate's `if (likely(tp->srtt_us))`), which puts it far
+        // above anything a burst could reach -- so the cwnd quota decides alone.
+        return std::max(1u, cwndQuota);
+    // Linux's slow-start pacing ratio (sysctl tcp_pacing_ss_ratio = 200%). The
+    // congestion-avoidance ratio (120%) differs too little to move the segment count
+    // across the two-segment floor, so the distinction is not worth carrying here.
+    double bytesPerBurst = (2.0 * congestionWindow / srtt.dbl()) / 1024.0; // Linux sk_pacing_shift
+    uint32_t tsoSegs = std::max<uint32_t>(2, (uint32_t)(bytesPerBurst / effectiveMss));
+    return std::max(1u, std::min(cwndQuota, tsoSegs));
+}
+
+uint32_t TcpConnection::mtuHeaderOverhead() const
+{
+    const uint32_t netHeaderLen = (remoteAddr.getType() == L3Address::IPv6) ? 40 : 20;
+    // Linux's tcp_header_len: the bare header plus the options every established
+    // segment carries. Only timestamps qualify -- SACK blocks come and go, which is
+    // exactly why tcp_mtu_probe refuses to run while any are in play.
+    const uint32_t tcpHeaderLen = (TCP_MIN_HEADER_LENGTH + (state->ts_enabled ? TCP_OPTION_TS_SIZE : B(0))).get<B>();
+    return netHeaderLen + tcpHeaderLen;
+}
+
+uint32_t TcpConnection::mtuToMss(uint32_t mtu) const
+{
+    uint32_t overhead = mtuHeaderOverhead();
+    return mtu > overhead ? mtu - overhead : 0;
+}
+
+uint32_t TcpConnection::mssToMtu(uint32_t mss) const
+{
+    return mss + mtuHeaderOverhead();
+}
+
+void TcpConnection::mtupInit()
+{
+    if (!state->mtupEnabled)
+        return;
+    // Linux runs this from tcp_init_transfer, i.e. AFTER the child's MSS has been
+    // synced from the route -- which is why arming the search never disturbs the
+    // MSS the connection is already using. The upper bound is the largest segment
+    // the peer said it would accept; the lower bound is the one we assume works.
+    uint32_t peerMss = state->peerAdvertisedMss > 0 ? state->peerAdvertisedMss : state->snd_mss;
+    state->mtupSearchHigh = peerMss + mtuHeaderOverhead();
+    state->mtupSearchLow = mssToMtu((uint32_t)tcpMain->par("baseMss"));
+    state->mtupProbeSize = 0;
+    int pathMtuPar = pathMtuSockopt > 0 ? pathMtuSockopt : (int)tcpMain->par("pathMtu");
+    state->pathMtu = pathMtuPar > 0 ? (uint32_t)pathMtuPar : mssToMtu(state->snd_mss);
+    EV_DETAIL << "RFC 4821: MTU search armed, low=" << state->mtupSearchLow
+              << " high=" << state->mtupSearchHigh << " pathMtu=" << state->pathMtu << "\n";
+}
+
+uint32_t TcpConnection::mtuProbeBytes(uint32_t buffered, uint32_t congestionWindow) const
+{
+    // Linux tcp_mtu_probe's entry guards: one probe at a time, no probing while
+    // recovering, and none while SACK blocks are in play (their variable header
+    // length would make the probe's size mean nothing).
+    if (!state->mtupEnabled || state->mtupProbeSize != 0 || state->lossRecovery || state->afterRto)
+        return 0;
+    if (state->snd_sacks > 0 || state->rcv_sacks > 0)
+        return 0;
+    // "Have enough cwnd": Linux counts packets, so the byte-valued cwnd here has to
+    // clear the same 11 segments.
+    if (congestionWindow < 11 * state->snd_effmss)
+        return 0;
+
+    uint32_t probeMtu = (state->mtupSearchHigh + state->mtupSearchLow) / 2;
+    uint32_t probeMss = mtuToMss(probeMtu);
+    if (probeMss <= state->snd_effmss || probeMss > mtuToMss(state->mtupSearchHigh))
+        return 0;
+    // Once the bracket is this narrow the remaining gain no longer pays for a probe
+    // (Linux sysctl tcp_probe_threshold, default 8).
+    if (state->mtupSearchHigh - state->mtupSearchLow < 8)
+        return 0;
+
+    // The probe must be recoverable without an RTO: enough further data has to
+    // follow it that a loss is signalled by duplicate ACKs instead.
+    uint32_t sizeNeeded = probeMss + (state->reordering + 1) * state->snd_effmss;
+    if (buffered < sizeNeeded || state->snd_wnd < sizeNeeded)
+        return 0;
+    if (seqGreater(state->snd_nxt + sizeNeeded, getDataSndUna() + state->snd_wnd))
+        return 0;
+    // Sending the probe costs one extra packet's worth of window; wait for the pipe
+    // to drain unless it is empty, where waiting would stall the connection outright.
+    uint32_t inFlight = tcpAlgorithm->getBytesInFlight();
+    if (inFlight > 0 && inFlight + 2 * state->snd_effmss > congestionWindow)
+        return 0;
+
+    return probeMss;
+}
+
+void TcpConnection::mtupProbeFailed()
+{
+    // Linux tcp_mtup_probe_failed: loss while a probe is outstanding says the path
+    // will not carry that size, so it becomes the new ceiling. Without this the
+    // retransmitted data is eventually acknowledged like any other and the probe
+    // would be recorded as a SUCCESS -- raising the floor to a size that just
+    // demonstrably failed.
+    if (state->mtupProbeSize == 0)
+        return;
+    EV_INFO << "RFC 4821: probe of MTU " << state->mtupProbeSize
+            << " was lost; search high now " << (state->mtupProbeSize - 1) << "\n";
+    state->mtupSearchHigh = state->mtupProbeSize - 1;
+    state->mtupProbeSize = 0;
+}
+
+void TcpConnection::mtupProbeSucceeded()
+{
+    uint32_t probeMtu = state->mtupProbeSize;
+    state->mtupSearchLow = probeMtu;
+    state->mtupProbeSize = 0;
+    // Linux re-syncs the MSS from the route here: the path MTU is still the ceiling,
+    // but the search's lower bound is now what the connection may actually use.
+    uint32_t synced = std::min(mtuToMss(state->pathMtu), mtuToMss(state->mtupSearchLow));
+    if (synced > state->snd_mss) {
+        state->snd_mss = synced;
+        state->snd_effmss = calculateEffectiveMss();
+    }
+    EV_INFO << "RFC 4821: probe of MTU " << probeMtu << " acknowledged, snd_mss now "
+            << state->snd_mss << " (search low=" << state->mtupSearchLow
+            << " high=" << state->mtupSearchHigh << ")\n";
+}
+
 int TcpConnection::deriveLinuxCaState() const
 {
     if (state->afterRto)
@@ -1975,8 +2140,31 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     // start sending 'bytesToSend' bytes
     EV_INFO << "May send " << bytesToSend << " bytes (allowedToSend " << allowedToSend << ", in buffer " << buffered << " bytes)\n";
 
+    // RFC 4821: spend the head of this send on one oversized probe segment. It
+    // carries data that was going out anyway, so a probe that gets through costs
+    // nothing; one that does not is repaired by the ordinary loss machinery.
+    uint32_t probeBytes = mtuProbeBytes(buffered, congestionWindow);
+    if (probeBytes > 0 && probeBytes <= bytesToSend) {
+        state->mtupProbeSeqStart = state->snd_nxt;
+        state->mtupProbeBytes = probeBytes;
+        uint32_t sentProbe = sendSegment(probeBytes);
+        state->mtupProbeBytes = 0;
+        state->mtupProbeSeqEnd = state->mtupProbeSeqStart + sentProbe;
+        state->mtupProbeSize = mssToMtu(sentProbe);
+        // No cwnd adjustment: Linux decrements it by one because its window counts
+        // PACKETS and the probe replaces several of them with one oversized packet.
+        // Here the window counts bytes, and the probe already costs exactly the
+        // bytes it carries.
+        EV_INFO << "RFC 4821: sent MTU probe of " << sentProbe << " bytes (MTU "
+                << state->mtupProbeSize << ")\n";
+        bytesToSend -= sentProbe;
+        allowedToSend -= sentProbe;
+        buffered -= sentProbe;
+    }
+
     // send whole segments
     uint32_t fullSegIdx = 0;
+    uint32_t burstSegs = gsoBurstSegments(congestionWindow, bytesInFlight, effectiveMss);
     uint32_t oldSndMax = state->snd_max;
     while (bytesToSend >= effectiveMss) {
         // Retransmitted segments (below the pre-send high-water mark) are
@@ -1986,16 +2174,17 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // P. 1:1421 rexmit, then chunks (1421:2881,2881:4341^P)...).
         bool newData = seqGE(state->snd_nxt, oldSndMax);
         // Linux forces PSH on every multi-segment GSO burst (tcp_transmit_skb:
-        // tcp_skb_pcount(skb) > 1), and pacing clamps bursts to two segments
-        // at fresh-connection rates (tcp_tso_autosize's min_tso_segs floor:
-        // pacing_rate>>10 stays below the MSS until srtt drops well under
-        // 10ms). After GSO split the flag sits on the burst's LAST wire slice,
-        // so a write spanning several MSS carries PSH on every second full
-        // segment -- on top of the write-tail PSH from pushSeqNums.
+        // tcp_skb_pcount(skb) > 1). After the GSO split the flag sits on the
+        // burst's LAST wire slice, so a write spanning several MSS carries PSH
+        // once per burst -- on top of the write-tail PSH from pushSeqNums.
         // Same wire-realism gate as the other Linux PSH rules; retransmits
         // and other send paths are untouched (a rexmitted slice loses the
         // forced PSH in Linux too, as the split skb's pcount drops to 1).
-        state->pushThisSegment = state->pushOnWriteBoundary && newData && (fullSegIdx % 2 == 1);
+        // A single-segment burst carries no forced PSH: the flag is Linux's marker
+        // that a GSO super-segment ended, and an skb holding one segment has
+        // tcp_skb_pcount() == 1.
+        state->pushThisSegment = state->pushOnWriteBoundary && newData && burstSegs > 1
+                                 && (fullSegIdx % burstSegs == burstSegs - 1);
         uint32_t sentBytes = sendSegment(effectiveMss);
         state->pushThisSegment = false;
         if (newData)
@@ -3316,7 +3505,6 @@ uint16_t TcpConnection::updateRcvWnd()
 
     // Note: The order of the "Do not shrink window" and "Observe upper limit" parts has been changed to the order used in FreeBSD Release 7.1
 
-    // update rcv_adv if needed
     if (win > 0 && seqGE(state->rcv_nxt + win, state->rcv_adv)) {
         state->rcv_adv = state->rcv_nxt + win;
 

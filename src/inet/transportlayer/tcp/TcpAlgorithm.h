@@ -239,6 +239,13 @@ class INET_API TcpAlgorithm : public cObject
     virtual uint32_t getBytesInFlight() const = 0;
 
     /**
+     * The smoothed round-trip time, or zero while no sample has been taken.
+     * Flavours without an RTT estimator (DumbTcp) keep the zero default, which
+     * every caller must read as "unknown".
+     */
+    virtual simtime_t getSrtt() const { return SIMTIME_ZERO; }
+
+    /**
      * The new ssthresh when entering fast recovery, per this congestion-control
      * flavour (Linux icsk_ca_ops->ssthresh). Rfc6675Recovery::step4() calls this
      * instead of hardcoding FlightSize/2 so a flavour such as CUBIC can apply its own

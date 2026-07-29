@@ -1766,6 +1766,11 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         if (seqLess(state->snd_nxt, state->snd_una))
             state->snd_nxt = state->snd_una;
 
+        // RFC 4821: an outstanding MTU probe that is now cumulatively acknowledged
+        // proves the path carries a segment that size.
+        if (state->mtupProbeSize != 0 && seqGE(state->snd_una, state->mtupProbeSeqEnd))
+            mtupProbeSucceeded();
+
         // RFC 7323, page 43
         // "If SND.UNA < SEG.ACK <= SND.NXT then, set SND.UNA <- SEG.ACK.
         // Also compute a new estimate of round-trip time.  If Snd.TS.OK

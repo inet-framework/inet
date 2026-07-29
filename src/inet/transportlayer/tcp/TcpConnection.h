@@ -141,6 +141,10 @@ class INET_API TcpConnection : public SimpleModule
     // listen()). -1 = never set; otherwise clamps advertisedMss/snd_mss in
     // configureStateVariables(), and applied directly to state when set later.
     int userMss = -1;
+    // A route MTU handed down at runtime (TcpSetPathMtuCommand), same
+    // arrives-before-state discipline as userMss. 0 = never set; otherwise it
+    // overrides the pathMtu module param as the RFC 4821 search's ceiling.
+    int pathMtuSockopt = 0;
     // Runtime TCP_NODELAY / TCP_CORK (TcpSetNoDelayCommand / TcpSetCorkCommand)
     // that may arrive before OPEN creates state; INT_MIN = never set, otherwise
     // applied in configureStateVariables() (mirrors notsentLowatSockopt/userMss).
@@ -600,6 +604,40 @@ class INET_API TcpConnection : public SimpleModule
      * window, costing the response its last full segment.
      */
     virtual uint32_t getDataSndUna() const;
+
+    /**
+     * MTU <-> MSS conversions for the RFC 4821 search (Linux tcp_mtu_to_mss /
+     * tcp_mss_to_mtu). The header allowance is the FIXED part -- network header
+     * plus TCP header plus the options carried on every established segment --
+     * so the two are exact inverses and the search's bounds stay comparable.
+     */
+    /**
+     * How many segments go out as one GSO super-segment. Only the wire-realism PSH
+     * rule depends on it: Linux forces PSH on a multi-segment skb, and after the
+     * split the flag lands on the burst's last slice.
+     */
+    virtual uint32_t gsoBurstSegments(uint32_t congestionWindow, uint32_t bytesInFlight, uint32_t effectiveMss) const;
+
+    virtual uint32_t mtuHeaderOverhead() const;
+    virtual uint32_t mtuToMss(uint32_t mtu) const;
+    virtual uint32_t mssToMtu(uint32_t mss) const;
+
+    /** Arms the RFC 4821 search bounds once the connection's MSS is settled (Linux tcp_mtup_init). */
+    virtual void mtupInit();
+
+    /**
+     * The payload of the RFC 4821 probe segment to send right now, or 0 when the
+     * conditions for probing are not met (Linux tcp_mtu_probe). The probe is
+     * deliberately larger than snd_mss: it is the experiment that decides whether
+     * the path carries a bigger segment.
+     */
+    virtual uint32_t mtuProbeBytes(uint32_t buffered, uint32_t congestionWindow) const;
+
+    /** The probe was acknowledged, so the path carries it: raise the lower bound and the MSS (Linux tcp_mtup_probe_success). */
+    virtual void mtupProbeSucceeded();
+
+    /** The probe was lost, so the path does not carry it: lower the upper bound (Linux tcp_mtup_probe_failed). */
+    virtual void mtupProbeFailed();
     virtual int deriveLinuxCaState() const;
     const TcpSendQueue *getSendQueue() const { return sendQueue; }
     TcpSendQueue *getSendQueueForUpdate() { return sendQueue; }
