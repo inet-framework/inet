@@ -119,7 +119,6 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
         region.rexmitted = false;
         region.firstSentTime = region.lastSentTime = simTime();
         region.transmitCount = 1;
-        region.lost = false;
         rexmitQueue.push_back(region);
         found = true;
         fromSeqNum = toSeqNum;
@@ -168,9 +167,12 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
             region.lost = beforeEnd ? i->lost : false;
             region.sacked = beforeEnd ? i->sacked : false;
             region.rexmitted = beforeEnd;
-            region.firstSentTime = region.lastSentTime = simTime();
-            region.transmitCount = 1;
-            region.lost = false;
+            // a fragment split off *i is a retransmission of *i, so it inherits its
+            // transmit history; firstSentTime must stay the ORIGINAL send time for
+            // RACK's Karn check and Vegas' RTT sampling
+            region.firstSentTime = beforeEnd ? i->firstSentTime : simTime();
+            region.lastSentTime = simTime();
+            region.transmitCount = beforeEnd ? i->transmitCount + 1 : 1;
             rexmitQueue.insert(i, region);
             found = true;
             fromSeqNum = toSeqNum;
