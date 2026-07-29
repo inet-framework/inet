@@ -263,9 +263,7 @@ class INET_API Tcp : public TransportProtocolBase
     /**
      * TCP Fast Open: drop every cached cookie, so the next active open falls back
      * to a bare cookie REQUEST. This is what `ip tcp_metrics flush` does on Linux,
-     * and test harnesses need it to re-arm the cookie-request path mid-run
-     * (gtests fastopen/client/nonblocking-sendto flushes and then pins "> S ... FO"
-     * with no cookie).
+     * and test harnesses need it to re-arm the cookie-request path mid-run.
      */
     virtual void clearFastOpenCookieCache();
 

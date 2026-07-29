@@ -94,8 +94,7 @@ void Rfc6675Recovery::stepC()
     // options-adjusted effective MSS): Linux's equivalent gate is in PACKETS
     // (tcp_packets_in_flight < snd_cwnd), so a PRR budget of exactly one
     // 1000-byte segment must not be swallowed by the 12-byte timestamp
-    // overhead (client-ack-dropped-then-recovery pins the second lost
-    // segment going out in the same recovery-entry burst).
+    // overhead, or the second lost segment misses the recovery-entry burst.
     while ((int32_t)state->snd_cwnd - (int32_t)state->pipe
            >= (int32_t)(state->snd_effmss > 0 ? state->snd_effmss : state->snd_mss)) {
         //"
@@ -576,17 +575,14 @@ uint32_t Rfc6675Recovery::rackDetectAndMarkLost(bool fromReoTimer)
             continue;
         // Skip a sub-MSS SACKed TAIL fragment: Linux's tcp_match_skb_to_sack
         // fragments a partially-covered skb only at MSS boundaries, so a lone
-        // byte-range SACK of a bigger skb's tail (fr-4pkt-fack-last-byte's
-        // "sack 4000:4001") never gets tagged and never advances the kernel's
-        // RACK reference -- TLP fires there instead of a RACK retransmit.
-        // A WHOLE small skb (e.g. a fully-SACKed 400B MSG_EOR chunk) IS
-        // tagged and DOES advance RACK (eor/no-coalesce-retrans pins that),
-        // so only the buffer-tail fragment case is skipped. (Narrowed
-        // reinstatement of a guard lost in the WS-3 recovery rewrite.)
+        // byte-range SACK of a bigger skb's tail never gets tagged and never
+        // advances the kernel's RACK reference -- TLP fires there instead of a
+        // RACK retransmit. A WHOLE small skb (e.g. a fully-SACKed 400B MSG_EOR
+        // chunk) IS tagged and DOES advance RACK, so only the buffer-tail
+        // fragment case is skipped.
         // A region that STARTS at a genuine transmission boundary is a whole
         // (small) segment, not a split-off fragment -- Linux tags it, so it
-        // must advance the reference (client_accecn_options_lost pins the
-        // SACKed 976-byte write tail arming RACK for its two full siblings).
+        // must advance the reference.
         if (state->snd_mss > 0 && region.endSeqNum - region.beginSeqNum < state->snd_mss
             && region.endSeqNum == state->snd_max
             && !conn->getRexmitQueue()->isTransmissionStart(region.beginSeqNum))
@@ -620,8 +616,7 @@ uint32_t Rfc6675Recovery::rackDetectAndMarkLost(bool fromReoTimer)
     // actually cut to -- dividing by snd_mss undercounts (3 sacked 1000-byte
     // segments / mss 1012 = 2 < DupThresh) and misses the aggressive reo_wnd=0
     // clause, deferring recovery entry to the quantized reo timer where Linux
-    // enters on the ACK itself (client-ack-dropped-then-recovery pins the
-    // 2000-byte recovery-entry retransmit burst at +0).
+    // enters on the ACK itself.
     uint32_t segSize = state->snd_effmss > 0 ? state->snd_effmss : state->snd_mss;
     uint32_t sackedSegs = segSize > 0 ? state->sackedBytes / segSize : 0;
     if (!state->rackReordSeen && (state->lossRecovery || sackedSegs >= state->reordering))
@@ -657,8 +652,7 @@ uint32_t Rfc6675Recovery::rackDetectAndMarkLost(bool fromReoTimer)
         // matures against the reordering window (a SACK arrived for data sent
         // AFTER the retransmission), the retransmission itself was lost --
         // Linux tcp_mark_skb_lost then clears TCPCB_SACKED_RETRANS so the
-        // range is sent once more (prr-ss-30pkt: the re-retransmit of
-        // 1001:2001 when sack 2001:12001 proves the first rexmit died).
+        // range is sent once more.
         // A lost region already awaiting (re)transmission needs nothing.
         if (region.lost && !region.rexmitted)
             continue;
@@ -1122,7 +1116,7 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
     // sequence with no HighRxt floor -- it skips SACKED_RETRANS entries and
     // (re)transmits anything marked LOST. That reaches a lost region BELOW the
     // highest retransmission whose rexmitted flag RACK just cleared (its first
-    // retransmit died; prr-ss-30pkt pins the second '. 1001:2001' retransmit).
+    // retransmit died).
     // Rule (1.a)'s "S2 greater than HighRxt" would hide it forever.
     if (state->lossDetectionMode == 1) {
         for (const auto& region : conn->getRexmitQueue()->rexmitQueue) {

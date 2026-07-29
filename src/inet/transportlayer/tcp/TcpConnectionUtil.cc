@@ -860,7 +860,7 @@ void TcpConnection::configureStateVariables()
         state->rcvbufLocked = tcpMain->par("receiveBufferLocked");
     }
     // An SO_RCVBUF that arrived before the connection was configured (the usual
-    // case: the rcv corpus sets it between socket() and listen()).
+    // case: set between socket() and listen()).
     if (rcvBufSockopt >= 0) {
         state->rcvBufferSize = (uint32_t)rcvBufSockopt;
         state->rcvbufLocked = true;
@@ -988,7 +988,7 @@ void TcpConnection::configureStateVariables()
     // (sendSyn()) decides separately, directly from ecnMode, not from this flag. (This used
     // to read `>= TCP_ECN_MODE_RFC3168`, which happens to exclude TCP_ECN_MODE_PASSIVE=1 --
     // leaving Linux's own out-of-box default unable to accept the ECN-setup SYN it exists to
-    // accept. gtests fastopen/server/pure-syn-data pins the "> SE." reply under tcp_ecn=2.)
+    // accept.)
     state->ecnWillingness = state->ecnMode != TCP_ECN_MODE_OFF;
     state->accEcnOptionEnabled = tcpMain->par("accEcnOptionEnabled");
     state->accEcnOptionBeaconAcks = tcpMain->par("accEcnOptionBeaconAcks");
@@ -1814,8 +1814,7 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
     // asks for nothing but a Fast Open cookie. Only the SYN_SENT fast-open branch
     // used to screen for it, so the same syscall crashed whenever the SYN had not
     // been deferred -- i.e. exactly when no cookie was cached, which is when a
-    // bare cookie request is what the application wanted (gtests
-    // fastopen/client/nonblocking-sendto, after it flushes the cookie cache).
+    // bare cookie request is what the application wanted.
     if (packet->getByteLength() == 0) {
         EV_DETAIL << "Zero-length SEND: nothing to queue\n";
         delete packet;
@@ -3074,8 +3073,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                 // Appendix A: kind 254 + 0xF989 magic), as Linux does
                 // (foc->exp propagates request->response). The 12-byte option
                 // (4 base + 8 cookie) is 4-byte-aligned on its own, so no NOP
-                // padding -- matches the corpus's "<mss 1460,nop,nop,sackOK,
-                // FOEXP ...>" SYN-ACK layout.
+                // padding.
                 TcpOptionTcpFastOpenExp *option = new TcpOptionTcpFastOpenExp();
                 option->setExpId(0xF989);
                 option->setCookieArraySize(state->fastopenCookieToSend.size());
@@ -3108,10 +3106,8 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // opt-in (MSG_FASTOPEN / TCP_FASTOPEN_CONNECT) never does.
         // Linux drops the Fast Open option on SYN retransmits (RFC 7413
         // section 4.1.3 / tcp_retransmit_skb clearing the fastopen request:
-        // a lost option-bearing SYN plausibly means a middlebox ate it) --
-        // the corpus pins this ("SYN retransmit should not include Fast Open
-        // Cookie Request", cookie-req-timeout; and the data-SYN rexmits in
-        // syn-data-timeout / *-sendto-errnos are bare too).
+        // a lost option-bearing SYN plausibly means a middlebox ate it), for
+        // both cookie requests and data-carrying SYNs.
         // ... never on an ACK-bearing SYN (a simultaneous-open SYN-ACK carries
         // no client cookie in Linux), and never in cookie-less client mode
         // (tcp_fastopen bit 0x4: the SYN+data goes out with NO FO option even
@@ -3211,14 +3207,12 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
         // option seeding the byte counters at their wire-init offsets. Gated on
         // getAckBit() so it rides the SYN-ACK but never the client's own initial
         // bare SYN -- that SYN advertises AccECN with the flag-bit combination
-        // alone, no option (confirmed against the corpus's "> SEWA ... <mss,sackOK,
-        // ...>" client SYN, which carries no ECN option). Only the FIRST SYN-ACK
+        // alone, no option. Only the FIRST SYN-ACK
         // carries the option: on a SYN-ACK retransmit (syn_rexmit_count > 0) Linux
         // conservatively omits the AccECN option -- since a middlebox that dropped
         // the option-bearing SYN-ACK is a plausible reason for the retransmit -- so
-        // the retransmit falls back to a plain SYN-ACK (mss/WS/SACK only), matching
-        // the corpus's accecn *_drop / *_rxmt scripts. The kind is fixed to ACCECN1
-        // (the corpus's observed first-emission ordering E1B,CEB,E0B); the
+        // the retransmit falls back to a plain SYN-ACK (mss/WS/SACK only). The kind
+        // is fixed to ACCECN1 (Linux's first-emission ordering E1B,CEB,E0B); the
         // post-handshake alternation start is a separate concern. This block is pure
         // (it may run as a header-size dry run) -- it mutates no beacon state.
         if (state->accEcnNegotiated && state->accEcnOptionEnabled && tcpHeader->getAckBit()
