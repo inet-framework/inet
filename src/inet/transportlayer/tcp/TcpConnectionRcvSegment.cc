@@ -1393,10 +1393,18 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                         break;
                     }
                 }
-                if (!sawFastOpenOption && !state->fastopenPeerUsedExpOption) {
-                    EV_INFO << "Fast Open: cookie request went unanswered; retrying "
-                            << remoteAddr.str() << " with the experimental option next time\n";
-                    tcpMain->setFastOpenUseExpOption(remoteAddr, true);
+                if (!sawFastOpenOption) {
+                    // Which form THIS request went out in -- nothing has touched the
+                    // cache entry since (no cookie was learned), so it still answers
+                    // that. The escalation is one-way and capped, so the experimental
+                    // retry happens exactly once before the standard kind takes over
+                    // again for good.
+                    bool usedExpOption = tcpMain->getFastOpenUseExpOption(remoteAddr);
+                    tcpMain->noteFastOpenCookieRequestUnanswered(remoteAddr, usedExpOption);
+                    EV_INFO << "Fast Open: kind-" << (usedExpOption ? 254 : 34)
+                            << " cookie request went unanswered; requesting from " << remoteAddr.str()
+                            << " with kind " << (tcpMain->getFastOpenUseExpOption(remoteAddr) ? 254 : 34)
+                            << " next time\n";
                 }
             }
 

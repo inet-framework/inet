@@ -193,7 +193,7 @@ void TcpCubic::receivedDuplicateAck()
 uint32_t TcpCubic::getBytesInFlight() const
 {
     auto rexmitQueue = conn->getRexmitQueue();
-    int64_t sentSize = state->snd_max - state->snd_una;
+    int64_t sentSize = state->snd_max - conn->getDataSndUna();
     int64_t in_flight = sentSize - rexmitQueue->getSacked() - rexmitQueue->getLost() + rexmitQueue->getRetrans();
     if (in_flight < 0)
         in_flight = 0;

@@ -102,7 +102,7 @@ void TcpClassicAlgorithmBase::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
 uint32_t TcpClassicAlgorithmBase::getBytesInFlight() const
 {
     auto rexmitQueue = conn->getRexmitQueue();
-    int64_t sentSize = state->snd_max - state->snd_una;
+    int64_t sentSize = state->snd_max - conn->getDataSndUna();
     int64_t in_flight = sentSize - rexmitQueue->getSacked() - rexmitQueue->getLost() + rexmitQueue->getRetrans();
     if (in_flight < 0)
         in_flight = 0;

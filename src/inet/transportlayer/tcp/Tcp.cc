@@ -584,21 +584,48 @@ void Tcp::setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8
         // simulation is not growing unboundedly across thousands of destinations).
         fastOpenCookieCache.erase(fastOpenCookieCache.begin());
     }
-    fastOpenCookieCache[remoteAddr] = FastOpenCacheEntry{cookie, peerMss};
+    // Update in place: the escalation counter survives storing a cookie
+    // (Linux tcp_fastopen_cache_set() writes tfom->cookie without touching
+    // tfom->try_exp), and so does the option form, which the caller sets
+    // separately right after.
+    auto& entry = fastOpenCookieCache[remoteAddr];
+    entry.cookie = cookie;
+    entry.peerMss = peerMss;
 }
 
 bool Tcp::getFastOpenUseExpOption(const L3Address& remoteAddr) const
 {
     auto it = fastOpenCookieCache.find(remoteAddr);
-    return it != fastOpenCookieCache.end() && it->second.exp;
+    if (it == fastOpenCookieCache.end())
+        return false;
+    // Linux tcp_fastopen_cache_get(): a cached cookie is echoed in its own form;
+    // with no cookie to echo, only the MIDDLE escalation value asks for the
+    // experimental encoding -- at 2 the experimental request has failed too and
+    // the standard kind is used from then on.
+    return it->second.cookie.empty() ? it->second.tryExp == 1 : it->second.exp;
 }
 
-void Tcp::setFastOpenUseExpOption(const L3Address& remoteAddr, bool exp)
+void Tcp::setFastOpenCookieExpForm(const L3Address& remoteAddr, bool exp)
 {
-    // Deliberately creates an entry when none exists: "answer my next request in
-    // the experimental form" is worth remembering even though no cookie was
-    // learned, which is precisely the unanswered-request case.
-    fastOpenCookieCache[remoteAddr].exp = exp;
+    auto it = fastOpenCookieCache.find(remoteAddr);
+    if (it != fastOpenCookieCache.end())
+        it->second.exp = exp;
+}
+
+void Tcp::noteFastOpenCookieRequestUnanswered(const L3Address& remoteAddr, bool usedExpOption)
+{
+    // Deliberately creates an entry when none exists: "request differently next
+    // time" is worth remembering even though no cookie was learned, which is
+    // precisely the unanswered-request case.
+    auto& entry = fastOpenCookieCache[remoteAddr];
+    // Linux tcp_fastopen_cache_set()'s guard: a cached cookie wins over any
+    // escalation, and the counter never goes backwards, so a later kind-34
+    // request that also goes unanswered cannot re-arm the experimental retry.
+    if (!entry.cookie.empty())
+        return;
+    uint8_t tryExp = usedExpOption ? 2 : 1;
+    if (tryExp > entry.tryExp)
+        entry.tryExp = tryExp;
 }
 
 void Tcp::clearFastOpenCookieCache()
