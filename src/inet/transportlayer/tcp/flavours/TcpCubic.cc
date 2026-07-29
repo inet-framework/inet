@@ -161,8 +161,6 @@ void TcpCubic::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32
         state->dupacks = 0;
         conn->emit(dupAcksSignal, state->dupacks);
     }
-
-    processRttSample(state->srtt);
 }
 
 void TcpCubic::receivedAckForUnackedData(uint32_t firstSeqAcked)
@@ -172,7 +170,7 @@ void TcpCubic::receivedAckForUnackedData(uint32_t firstSeqAcked)
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
     uint32_t numSegmentsAcked = numBytesAcked / state->snd_effmss;
 
-    processRttSample(state->srtt);
+    processAckRttSample(firstSeqAcked);
 
     if (state->lossRecovery)
         recovery->receivedAckForUnackedData(numBytesAcked);
@@ -203,9 +201,6 @@ uint32_t TcpCubic::getBytesInFlight() const
 
 void TcpCubic::slowStart(uint32_t segmentsAcked)
 {
-    if (state->hystart_enabled && seqGreater(state->snd_una, state->hystart_end_seq))
-        hystartReset();
-
     // Grow by the number of segments this ACK acknowledged (RFC 3465 byte
     // counting) rather than by one SMSS per ACK, so that a delayed-ACK receiver
     // does not halve the slow-start rate. The cwnd-limited gate (Linux
@@ -326,6 +321,29 @@ uint32_t TcpCubic::cubicUpdate(uint32_t segmentsAcked)
     return state->cubic_cnt;
 }
 
+void TcpCubic::processAckRttSample(uint32_t firstSeqAcked)
+{
+    // Linux drives cubictcp_acked() from pkts_acked(), which gets the RTT of the
+    // ACK being processed: tcp_clean_rtx_queue times the first newly acknowledged
+    // segment against now (ack_sample::rtt_us), so EVERY ACK that advances snd_una
+    // yields a sample. That per-ACK raw value is what HyStart needs -- both its
+    // detectors count and compare individual samples, and the smoothed estimate
+    // (which moves only an eighth of the way per ACK) can neither be counted
+    // per-ACK nor rise fast enough to cross a threshold set 12.5% above the
+    // connection minimum. Deliberately kept separate from the srtt/RTO estimator,
+    // which stays on its own once-per-RTT schedule.
+    const TcpSegmentTransmitInfoList::Item *sent = state->sentInfo.get(firstSeqAcked);
+    if (sent == nullptr)
+        return;
+    // Karn's algorithm: a retransmitted segment cannot be timed, because there is
+    // no telling which copy this ACK answers. Linux discards the sample for the
+    // same reason (tcp_clean_rtx_queue only times !sacked_retrans segments when
+    // the timestamp option is not available to disambiguate).
+    if (sent->getTransmitCount() != 1)
+        return;
+    processRttSample(simTime() - sent->getFirstSentTime());
+}
+
 void TcpCubic::processRttSample(const simtime_t& rtt)
 {
     // Right after a window reduction the samples still describe the old, larger
@@ -348,6 +366,15 @@ void TcpCubic::hystartUpdate(const simtime_t& delay)
     if (state->hystart_found)
         return;
 
+    // A round ends when everything that was in flight when it began has been
+    // acknowledged. Linux opens the new round here, at the TOP of hystart_update,
+    // and the placement is load-bearing: the very ACK that closes a round also
+    // provides the new round's first RTT sample, so resetting afterwards (from the
+    // slow-start path, which runs later in the ACK's processing) would throw that
+    // sample away and delay every delay check by one ACK.
+    if (seqGreater(state->snd_una, state->hystart_end_seq))
+        hystartReset();
+
     simtime_t now = simTime();
 
     // ACK-train detector: while ACKs keep arriving back to back, the train's
@@ -362,13 +389,18 @@ void TcpCubic::hystartUpdate(const simtime_t& delay)
 
     // Delay-increase detector: once enough samples are in, a round whose
     // minimum RTT sits clearly above the connection minimum means a queue is
-    // building up ahead.
-    if (state->hystart_sample_cnt < HYSTART_MIN_SAMPLES) {
-        if (state->hystart_curr_rtt == -1 || state->hystart_curr_rtt > delay)
-            state->hystart_curr_rtt = delay;
+    // building up ahead. The round minimum tracks EVERY sample, including the
+    // ones after the count is full -- Linux commit b344579ca847 ("tcp_cubic: fix
+    // spurious HYSTART_DELAY exit upon drop in min RTT") moved this out of the
+    // counting branch precisely so that a late sample which lowers the minimum is
+    // still taken into account, instead of comparing a stale round minimum
+    // against a delay_min the same ACK just pushed down.
+    if (state->hystart_curr_rtt == -1 || state->hystart_curr_rtt > delay)
+        state->hystart_curr_rtt = delay;
+
+    if (state->hystart_sample_cnt < HYSTART_MIN_SAMPLES)
         ++state->hystart_sample_cnt;
-    }
-    else if (state->hystart_curr_rtt > state->cubic_delay_min + hystartDelayThresh(state->cubic_delay_min)
+    else if (state->hystart_curr_rtt > state->cubic_delay_min + hystartDelayThresh(state->cubic_delay_min / 8)
              && (state->hystart_detect & HYSTART_DELAY))
         state->hystart_found = true;
 

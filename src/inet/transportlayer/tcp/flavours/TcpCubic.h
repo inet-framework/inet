@@ -68,6 +68,14 @@ class INET_API TcpCubic : public TcpAlgorithmBase
      */
     virtual uint32_t cubicUpdate(uint32_t segmentsAcked);
 
+    /**
+     * Times the first newly acknowledged byte against now and feeds that raw
+     * per-ACK sample to the min-RTT tracker and to HyStart, the way Linux fills
+     * ack_sample::rtt_us for the flavour's pkts_acked hook. Silent when the sample
+     * would be ambiguous (a retransmitted segment).
+     */
+    virtual void processAckRttSample(uint32_t firstSeqAcked);
+
     /** Feeds an RTT sample to the min-RTT tracker and to HyStart. */
     virtual void processRttSample(const simtime_t& rtt);
 
