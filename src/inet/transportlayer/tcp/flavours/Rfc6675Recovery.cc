@@ -1005,9 +1005,7 @@ void Rfc6675Recovery::setPipe()
 
     state->highRxt = conn->getRexmitQueue()->getHighestRexmittedSeqNum();
     state->pipe = 0;
-    uint32_t length = 0; // required for rexmitQueue->checkSackBlock()
-    bool sacked; // required for rexmitQueue->checkSackBlock()
-    bool rexmitted; // required for rexmitQueue->checkSackBlock()
+    uint32_t length = 0;
 
     // RFC 6675, page 5:
     //"
@@ -1023,11 +1021,24 @@ void Rfc6675Recovery::setPipe()
     // stored in the (data-only) rexmit queue. Scan only the sequence space the
     // scoreboard actually covers, or checkSackBlock() walks off its end and
     // aborts (seen on a TFO fallback that closes with data still in flight).
-    uint32_t scanEnd = conn->getRexmitQueue()->getBufferEndSeq();
+    //
+    // Walked with the scoreboard iterator rather than by re-searching the queue for
+    // every octet run: checkSackBlock() and (in RACK mode) isLost() each scan from the
+    // front, which made this O(n^2) in the number of regions, on the hottest path there
+    // is. Each iteration still covers exactly one region-suffix, so the arithmetic and
+    // the order of the two increments below are unchanged.
+    //
+    auto *rexmitQueue = conn->getRexmitQueue();
+    uint32_t scanEnd = rexmitQueue->getBufferEndSeq();
     if (seqLess(state->snd_max, scanEnd))
         scanEnd = state->snd_max;
+    auto region = rexmitQueue->rexmitQueue.begin();
     for (uint32_t s1 = state->snd_una; seqLess(s1, scanEnd); s1 += length) {
-        conn->getRexmitQueue()->checkSackBlock(s1, length, sacked, rexmitted);
+        while (region != rexmitQueue->rexmitQueue.end() && seqLE(region->endSeqNum, s1))
+            region++;
+        ASSERT(region != rexmitQueue->rexmitQueue.end());
+        length = region->endSeqNum - s1;
+        bool sacked = region->sacked;
 
         if (!sacked) {
             // RFC 6675, page 5:
@@ -1041,7 +1052,10 @@ void Rfc6675Recovery::setPipe()
             //     to have been lost (i.e., those segments that are still assumed
             //     to be in the network).
             //"
-            if (isLost(s1) == false)
+            // in RACK mode isLost() is exactly this region's lost flag (its
+            // out-of-range guards cannot fire here: snd_una <= s1 < scanEnd)
+            bool lost = state->lossDetectionMode == 1 ? region->lost : isLost(s1);
+            if (lost == false)
                 state->pipe += length;
 
             // RFC 6675, pages 5:
