@@ -169,27 +169,14 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     conn->retransmitOneSegment(true);
 }
 
+bool TcpClassicAlgorithmBase::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
+{
+    return recovery->isDuplicateAck(tcpHeader, payloadLength);
+}
+
 void TcpClassicAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
-    if (recovery->isDuplicateAck(tcpHeader, payloadLength)) {
-        if (!state->lossRecovery) {
-            state->dupacks++;
-            conn->emit(dupAcksSignal, state->dupacks);
-        }
-        receivedDuplicateAck();
-    }
-    else {
-        // if doesn't qualify as duplicate ACK, just ignore it.
-        if (payloadLength == 0) {
-            if (state->snd_una != tcpHeader->getAckNo())
-                EV_DETAIL << "Old ACK: ackNo < snd_una\n";
-            else if (state->snd_una == state->snd_max)
-                EV_DETAIL << "ACK looks duplicate but we have currently no unacked data (snd_una == snd_max)\n";
-        }
-        // reset counter
-        state->dupacks = 0;
-        conn->emit(dupAcksSignal, state->dupacks);
-    }
+    countDuplicateAck(tcpHeader, payloadLength);
 }
 
 void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)

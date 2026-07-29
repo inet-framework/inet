@@ -94,7 +94,7 @@ class INET_API TcpCubic : public TcpAlgorithmBase
     virtual ITcpRecovery *getRecovery() override;
 
     virtual void processRexmitTimer(TcpEventCode& event) override;
-    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
+    virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
     virtual void receivedDuplicateAck() override;
     virtual uint32_t getBytesInFlight() const override;

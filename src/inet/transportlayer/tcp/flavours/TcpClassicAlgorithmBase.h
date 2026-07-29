@@ -52,6 +52,8 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     virtual ITcpCongestionControl *getCongestionControl() { return congestionControl; }
     virtual ITcpRecovery *getRecovery() override;
 
+    virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
+
     virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
