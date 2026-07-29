@@ -905,8 +905,9 @@ void TcpConnection::configureStateVariables()
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     const char *initialWindow = tcpMain->par("initialWindow");
     if (state->increased_IW_enabled) {
-        // deprecated knob: map to RFC 3390 unless initialWindow was also set
-        if (strcmp(initialWindow, "rfc2001") != 0)
+        // deprecated knob: map to RFC 3390 unless initialWindow was also set away
+        // from its NED default
+        if (strcmp(initialWindow, "rfc6928") != 0)
             throw cRuntimeError("Tcp: set either the deprecated increasedIWEnabled or initialWindow, not both");
         EV_WARN << "Tcp: increasedIWEnabled is deprecated; use initialWindow=\"rfc3390\"\n";
         state->init_cwnd_mode = 1;
