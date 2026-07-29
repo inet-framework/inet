@@ -818,6 +818,8 @@ void TcpAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader
         sendData(false);
     }
 
+    countDuplicateAck(tcpHeader, payloadLength);
+
     //
     // Leave congestion window management and possible sending data to
     // subclasses (e.g. TcpTahoe, TcpReno).
@@ -825,6 +827,35 @@ void TcpAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader
     // That is, subclasses will redefine this method, call us, then perform
     // window adjustments and send data (if there's room in the window).
     //
+}
+
+bool TcpAlgorithmBase::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
+{
+    return state->snd_una == tcpHeader->getAckNo() && payloadLength == 0 && state->snd_una != state->snd_max;
+}
+
+void TcpAlgorithmBase::countDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
+{
+    if (isDuplicateAck(tcpHeader, payloadLength)) {
+        // during loss recovery the recovery strategy owns the counter
+        if (!state->lossRecovery) {
+            state->dupacks++;
+            conn->emit(dupAcksSignal, state->dupacks);
+        }
+        receivedDuplicateAck();
+    }
+    else {
+        // if doesn't qualify as duplicate ACK, just ignore it.
+        if (payloadLength == 0) {
+            if (state->snd_una != tcpHeader->getAckNo())
+                EV_DETAIL << "Old ACK: ackNo < snd_una\n";
+            else if (state->snd_una == state->snd_max)
+                EV_DETAIL << "ACK looks duplicate but we have currently no unacked data (snd_una == snd_max)\n";
+        }
+        // reset counter
+        state->dupacks = 0;
+        conn->emit(dupAcksSignal, state->dupacks);
+    }
 }
 
 void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)

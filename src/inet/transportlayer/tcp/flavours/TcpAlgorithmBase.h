@@ -154,6 +154,12 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 
     virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
+    /** RFC 5681 duplicate-ACK test; flavours owning a recovery object defer to it. */
+    virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength);
+
+    /** Maintains state->dupacks and dispatches receivedDuplicateAck(). */
+    virtual void countDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength);
+
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
     virtual void receivedAckForUnsentData(uint32_t seq) override;
