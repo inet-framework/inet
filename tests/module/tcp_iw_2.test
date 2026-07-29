@@ -1,0 +1,77 @@
+%description:
+Tests the deprecated increasedIWEnabled knob on its own: with initialWindow left
+at its NED default ("rfc6928"), setting increasedIWEnabled=true must not be
+rejected as a conflict -- it maps the connection to RFC 3390, i.e. 4 segments of
+the mss=1024 initial burst instead of IW10's 10.
+
+This test spells out the legacy TCP defaults inline instead of including
+../../lib/tcp-legacy.ini, because that file pins initialWindow="rfc2001" for
+every module test -- which is exactly the "user set both knobs" combination the
+shim still rejects.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=1s
+*.cli_app.sendBytes = 40000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.cli_tcp.increasedIWEnabled = true
+
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.limitedTransmitEnabled = false
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.initialRto = 3s
+*.*_tcp.minRexmitTimeout = 1s
+*.*_tcp.maxRexmitTimeout = 240s
+*.*_tcp.mss = 1024
+*.*_tcp.advertisedWindow = 65535
+*.*_tcp.lossDetectionMode = "dupthresh"
+*.*_tcp.prrEnabled = false
+*.*_tcp.lossUndoEnabled = false
+*.*_tcp.adaptiveReorderingEnabled = false
+*.*_tcp.tlpEnabled = false
+*.*_tcp.frtoEnabled = false
+*.*_tcp.seedRttFromHandshake = false
+
+%# The deprecation warning fired instead of a cRuntimeError...
+%contains: stdout
+Tcp: increasedIWEnabled is deprecated; use initialWindow="rfc3390"
+%# ... and RFC 3390 with mss=1024 gives min(4*MSS, max(2*MSS, 4380)) = 4096 B = 4
+%# segments in the initial burst at t=1.001; the 4th is present, there is no 5th.
+%contains-regex: stdout
+\[1\.001 [^\n]*A 3073:4097\(1024\)
+%not-contains-regex: stdout
+\[1\.001 [^\n]*A 4097:5121
