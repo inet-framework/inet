@@ -1161,8 +1161,10 @@ bool Rfc6675Recovery::nextSeg(uint32_t& seqNum)
         // check how many unsent bytes we have
         uint32_t buffered = conn->getSendQueue()->getBytesAvailable(state->snd_max);
         uint32_t maxWindow = state->snd_wnd;
-        // effectiveWindow: number of bytes we're allowed to send now
-        uint32_t effectiveWin = maxWindow - state->pipe;
+        // effectiveWindow: number of bytes we're allowed to send now. pipe may exceed
+        // the advertised window (RFC 6675 setPipe counts retransmitted-not-lost octets
+        // twice, and snd_wnd can shrink), so the difference must not wrap.
+        uint32_t effectiveWin = maxWindow > state->pipe ? maxWindow - state->pipe : 0;
 
         if (buffered > 0 && effectiveWin >= state->snd_mss) {
             seqNum = state->snd_max; // HighData = snd_max
