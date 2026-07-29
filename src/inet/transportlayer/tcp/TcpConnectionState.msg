@@ -450,6 +450,22 @@ struct TcpStateVariables
     simtime_t pmtudTimeout;                 // time after which the original MSS is restored to probe for increased path MTU
     simtime_t pmtudLastMssReduction;        // timestamp of last PMTUD-triggered MSS reduction (-1 = never reduced)
 
+    // Packetized Path MTU Discovery (RFC 4821, Linux icsk_mtup): the search runs in
+    // MTU units, so every bound below is an MTU, not an MSS. It probes UPWARD by
+    // sending one oversized segment built from data that is about to go out anyway
+    // -- if that segment is acknowledged the path carries it, and the lower bound
+    // moves up. Orthogonal to the RFC 1191 pmtud* fields above, which only ever
+    // shrink the MSS in response to an ICMP report.
+    bool mtupEnabled = false;               // from the mtuProbing parameter (Linux tcp_mtu_probing > 1)
+    uint32_t mtupSearchHigh = 0;            // largest MTU still worth trying (starts at the peer's MSS plus headers)
+    uint32_t mtupSearchLow = 0;             // largest MTU known to work (starts at baseMss plus headers)
+    uint32_t mtupProbeSize = 0;             // MTU of the probe currently in flight; 0 = not probing
+    uint32_t mtupProbeSeqStart = 0;         // sequence range covered by that probe, so its ACK can be recognized
+    uint32_t mtupProbeSeqEnd = 0;
+    uint32_t mtupProbeBytes = 0;            // payload the next sendSegment() call must build, bypassing the snd_mss clamp
+    uint32_t pathMtu = 0;                   // Linux icsk_pmtu_cookie: the route's MTU, the ceiling the search works up to
+    uint32_t initialCwndSegments = 0;       // route initcwnd: initial congestion window in segments; 0 = derive from init_cwnd_mode
+
     // TCP Fast Open (RFC 7413)
     bool fastopenClientEnabled = false;      // from the fastopenClientEnabled parameter
     bool fastopenServerEnabled = false;      // from the fastopenServerEnabled parameter

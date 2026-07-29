@@ -740,6 +740,9 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             delete cancelEvent(connEstabTimer);
             delete cancelEvent(synRexmitTimer);
             connEstabTimer = synRexmitTimer = nullptr;
+            // The MSS is settled only now (both SYNs seen), which is where Linux
+            // arms the RFC 4821 search too (tcp_init_transfer -> tcp_mtup_init).
+            mtupInit();
             // TCP_I_ESTAB notification moved inside event processing
             break;
 

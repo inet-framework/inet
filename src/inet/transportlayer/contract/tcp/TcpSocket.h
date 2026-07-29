@@ -494,6 +494,13 @@ class INET_API TcpSocket : public ISocket
     void setMaxSeg(int value);
 
     /**
+     * The route's MTU under this connection changed: raises the ceiling RFC 4821
+     * MTU probing may search up to. The MSS in use is unaffected until a probe of
+     * the larger size is acknowledged.
+     */
+    void setPathMtu(int value);
+
+    /**
      * TCP_NODELAY (setsockopt SOL_TCP): enable/disable Nagle at runtime. Enabling
      * nodelay also force-pushes any held partial segment (but does not clear TCP_CORK).
      */
