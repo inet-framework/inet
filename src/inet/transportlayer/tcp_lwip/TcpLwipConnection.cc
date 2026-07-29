@@ -25,7 +25,7 @@ namespace tcp {
 Define_Module(TcpLwipConnection);
 
 simsignal_t TcpLwipConnection::sndWndSignal = registerSignal("sndWnd"); // snd_wnd
-simsignal_t TcpLwipConnection::sndNxtSignal = registerSignal("sndNxt"); // sent seqNo
+simsignal_t TcpLwipConnection::sndSeqSignal = registerSignal("sndSeq"); // sent seqNo
 simsignal_t TcpLwipConnection::sndAckSignal = registerSignal("sndAck"); // sent ackNo
 simsignal_t TcpLwipConnection::rcvWndSignal = registerSignal("rcvWnd"); // rcv_wnd
 simsignal_t TcpLwipConnection::rcvSeqSignal = registerSignal("rcvSeq"); // received seqNo
@@ -34,7 +34,7 @@ simsignal_t TcpLwipConnection::rcvAckSignal = registerSignal("rcvAck"); // recei
 void TcpLwipConnection::recordSend(const TcpHeader& tcpsegP)
 {
     emit(sndWndSignal, tcpsegP.getWindow());
-    emit(sndNxtSignal, tcpsegP.getSequenceNo());
+    emit(sndSeqSignal, tcpsegP.getSequenceNo());
 
     if (tcpsegP.getAckBit())
         emit(sndAckSignal, tcpsegP.getAckNo());
