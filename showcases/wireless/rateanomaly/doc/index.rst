@@ -437,6 +437,31 @@ next round's top-up, so over time every client gets the same share of transmit t
 frame size. (The charge is the frame's own air time — preamble, header and payload — not the
 acknowledgment and interframe gaps around it.)
 
+Both are visible in the cell itself — the access point's rate visualizer draws each client's PHY
+rate as a bar above it (a short red bar at 6 Mbps for ``sta[0]``, tall green bars at 54 Mbps for
+the other four, identical in both runs), while each client shows its running received-packet count:
+
+.. figure:: media/downlink-cell.png
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     canvas (Qtenv window capture, two configs composited)
+   config:   DownlinkAnomaly + DownlinkAirtimeFair, run 0
+   seed:     default
+   shows:    the downlink cell -- rate-visualizer bars (sta[0]=6 red, sta[1..4]=54 green,
+             identical in both) and per-station received-packet counts (anomaly all ~460-490;
+             fix sta[0]=132, the others ~870-960)
+   anchor:   at t=2s (1s past warmup); counts scale with time, the anomaly/fix contrast is
+             structural. If the bars stop showing 6 vs 54, the dcf datarateSelected wiring changed.
+   capture:  get_canvas_image renders visualizer annotations at the canvas origin, so this is a
+             Qtenv (xcb) window import per config -- run to 2s express, set_canvas_view fit, crop
+             to the module rectangle + 5px green margin, paint out the inspector toolbar, composite
+             the two side by side.
+   record:   inet -u Qtenv -c <Config> --mcp-server-address localhost:8765
+             "--*.sta[*].mobility.initialY=4m + parentIndex() * 4m"   (spread for label clarity)
+   stamp:    captured 2026-07, INET 4.6
+
+The per-station throughput makes the same point quantitatively:
+
 .. figure:: media/downlink-throughput.png
 ..
    FIGURE RECIPE (redo via ../dl-chart.py)
