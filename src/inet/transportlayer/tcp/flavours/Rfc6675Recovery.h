@@ -60,8 +60,6 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
     //@{
     /** Newly acked+sacked bytes carried by the ACK currently being processed. */
     virtual uint32_t prrNewlyDelivered() const;
-    /** Recovery entry: snapshot cwnd and reset the PRR counters. */
-    virtual void prrInitCwndReduction();
     /** Per-ACK cwnd sizing: snd_cwnd = pipe + sndcnt. */
     virtual void prrCwndReduction(int newlyAckedSacked, int newlyLost, bool sndUnaAdvanced);
     /** Recovery exit: snd_cwnd = ssthresh. */
