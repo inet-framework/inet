@@ -1393,15 +1393,12 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             // kind-254 encoding, so remember to retry this destination that way --
             // Linux does the same via tcp_metrics. Checked on the wire rather than
             // through a state flag because readHeaderOptions() has no reason to
-            // record the absence of an option (gtests fastopen/client/fallback-exp-opt
-            // pins the kind-34 request, the silent SYN-ACK, then the kind-254 retry).
+            // record the absence of an option.
             // Only when this SYN-ACK answers a SYN that actually carried the option:
             // Linux drops the Fast Open option from SYN RETRANSMITS, so once we have
             // retransmitted, a cookie-less SYN-ACK says nothing about the server's
-            // option dialect -- it answered a deliberately bare SYN. The two corpus
-            // scripts differ in exactly this: cookie-req-timeout retransmits and must
-            // keep requesting with kind 34, fallback-exp-opt is answered first time
-            // and must retry with kind 254.
+            // option dialect -- it answered a deliberately bare SYN, and we must keep
+            // requesting with kind 34 rather than falling back to kind 254.
             if (state->fastopenCookieRequestPending && state->fastopenSynCarriedOption
                 && state->syn_rexmit_count == 0) {
                 bool sawFastOpenOption = false;
@@ -1539,11 +1536,10 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
             // RFC 7413 section 4.1: SYN data the SYN-ACK did NOT acknowledge
             // (server acked only the SYN, or a partial range) is retransmitted
             // immediately on connection establishment -- Linux does this from
-            // tcp_rcv_synsent_state_process, and the corpus pins the retransmit
-            // as the FIRST post-handshake segment with the handshake ACK
-            // piggybacked on it ("> P. 1:1001(1000) ack 1", no separate bare
-            // ACK). Pull snd_nxt back to the unacked point so established()'s
-            // send-data-with-first-ACK path emits exactly that.
+            // tcp_rcv_synsent_state_process, emitting the retransmit as the FIRST
+            // post-handshake segment with the handshake ACK piggybacked on it, not
+            // a separate bare ACK. Pull snd_nxt back to the unacked point so
+            // established()'s send-data-with-first-ACK path emits exactly that.
             bool fastopenSynDataRexmit = state->fastopenSynDataLen > 0 && seqLess(state->snd_una, state->snd_max);
             if (fastopenSynDataRexmit) {
                 EV_INFO << "Fast Open: SYN data [" << state->snd_una << ", " << state->snd_max
