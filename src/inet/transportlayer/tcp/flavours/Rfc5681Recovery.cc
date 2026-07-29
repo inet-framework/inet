@@ -50,7 +50,24 @@ bool Rfc5681Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
 
 void Rfc5681Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
 {
-    throw cRuntimeError("Not implemented");
+    ASSERT(state->lossRecovery);
+    //"
+    // 6. When the next ACK arrives that acknowledges previously
+    //    unacknowledged data, a TCP MUST set cwnd to ssthresh (the value
+    //    set in step 2).  This is termed "deflating" the window.
+    //
+    //    This ACK should be the acknowledgment elicited by the
+    //    retransmission from step 3, one RTT after the retransmission
+    //    (though it may arrive sooner in the presence of significant out-
+    //    of-order delivery of data segments at the receiver).
+    //    Additionally, this ACK should acknowledge all the intermediate
+    //    segments sent between the lost segment and the receipt of the
+    //    third duplicate ACK, if none of these were lost.
+    //"
+    state->snd_cwnd = state->ssthresh;
+    conn->emit(cwndSignal, state->snd_cwnd);
+    state->lossRecovery = false;
+    EV_INFO << "Loss recovery terminated" << EV_ENDL;
 }
 
 void Rfc5681Recovery::receivedDuplicateAck()
@@ -82,7 +99,10 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    is in use, additional data sent in limited transmit MUST NOT be
     //    included in this calculation.
     //"
-    else if (state->dupacks == state->dupthresh) {
+    // dupacks is frozen for the duration of the recovery phase, so every further
+    // duplicate ACK arrives with dupacks == dupthresh; only the first one may enter
+    // fast retransmit, the rest fall through to step 5's send below
+    else if (state->dupacks == state->dupthresh && !state->lossRecovery) {
         //"
         // When a TCP sender detects segment loss using the retransmission timer
         // and the given segment has not yet been resent by way of the
@@ -111,6 +131,10 @@ void Rfc5681Recovery::receivedDuplicateAck()
         conn->retransmitOneSegment(false);
         state->snd_cwnd = state->ssthresh; // no +3*SMSS inflation: getBytesInFlight already accounts for the 3 segments in sackedOut
         conn->emit(cwndSignal, state->snd_cwnd);
+
+        // entering fast retransmit means starting the loss recovery phase; the ACK
+        // that ends it runs step 6 in receivedAckForUnackedData()
+        state->lossRecovery = true;
     }
     //"
     // 4. For each additional duplicate ACK received (after the third),
@@ -118,7 +142,10 @@ void Rfc5681Recovery::receivedDuplicateAck()
     //    congestion window in order to reflect the additional segment that
     //    has left the network.
     //"
-    else if (state->dupacks > state->dupthresh) {
+    // "additional" is counted by arrival, not by state->dupacks: the counter is frozen
+    // at dupthresh for the whole recovery phase, so every further duplicate ACK inside
+    // it is an additional one
+    else if (state->dupacks > state->dupthresh || state->lossRecovery) {
         state->snd_cwnd += state->snd_effmss;
         conn->emit(cwndSignal, state->snd_cwnd);
     }
