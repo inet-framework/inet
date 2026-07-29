@@ -588,6 +588,18 @@ class INET_API TcpConnection : public SimpleModule
      * returned; scripts asserting ca_state==Disorder will still diverge. This
      * is a known, documented imprecision, not a bug.
      */
+    /**
+     * The sequence number that DATA accounting -- the peer's advertised window and
+     * the bytes-in-flight estimate -- is measured from. Normally snd_una, but a TCP
+     * Fast Open server transmitting its response from SYN_RCVD still has snd_una at
+     * the ISS: INET keeps the unacknowledged SYN-ACK there (the SYN-REXMIT timer owns
+     * that slot), while Linux's child socket starts at snd_una = ISN+1
+     * (tcp_create_openreq_child) and never counts the handshake segment as data --
+     * its packets_out only ever sees the write queue. Left uncorrected, the SYN-ACK's
+     * sequence slot eats one byte of both the peer's window and the congestion
+     * window, costing the response its last full segment.
+     */
+    virtual uint32_t getDataSndUna() const;
     virtual int deriveLinuxCaState() const;
     const TcpSendQueue *getSendQueue() const { return sendQueue; }
     TcpSendQueue *getSendQueueForUpdate() { return sendQueue; }

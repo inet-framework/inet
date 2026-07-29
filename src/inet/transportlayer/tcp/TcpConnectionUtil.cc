@@ -1872,6 +1872,16 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
     updateSndbufLimitedChrono(); // fresh unsent data: the starved interval (if any) ends
 }
 
+uint32_t TcpConnection::getDataSndUna() const
+{
+    // Only the Fast Open server's pre-handshake-ACK window applies here: no other
+    // state can have unacknowledged data while snd_una still sits on the SYN's own
+    // sequence number. See the declaration for why the ISS slot must be skipped.
+    if (fsm.getState() == TCP_S_SYN_RCVD && state->snd_una == state->iss)
+        return state->iss + 1;
+    return state->snd_una;
+}
+
 int TcpConnection::deriveLinuxCaState() const
 {
     if (state->afterRto)
@@ -1917,7 +1927,7 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     // data is still in flight, so snd_wnd can legitimately be smaller than the
     // unacknowledged range -- e.g. during zero-window probing. Saturate at zero
     // instead of underflowing the unsigned subtraction.
-    uint32_t unackedInWindow = state->snd_nxt - state->snd_una;
+    uint32_t unackedInWindow = state->snd_nxt - getDataSndUna();
     uint32_t spaceLeftInSendWindow = state->snd_wnd > unackedInWindow ? state->snd_wnd - unackedInWindow : 0;
     uint32_t bytesInFlight = tcpAlgorithm->getBytesInFlight();
     uint32_t spaceLeftInCongestionWindow = bytesInFlight >= congestionWindow ? 0 : congestionWindow - bytesInFlight;
@@ -2691,8 +2701,8 @@ bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cooki
             tcpMain->setFastOpenCookie(remoteAddr, cookie, cacheMss);
             // Remember WHICH option form carried it, so the next connection echoes the
             // cookie the same way (Linux keeps foc->exp beside the cookie in
-            // tcp_metrics). setFastOpenCookie() rewrites the entry, so this must follow it.
-            tcpMain->setFastOpenUseExpOption(remoteAddr, state->fastopenPeerUsedExpOption);
+            // tcp_metrics). The entry must exist, so this must follow setFastOpenCookie().
+            tcpMain->setFastOpenCookieExpForm(remoteAddr, state->fastopenPeerUsedExpOption);
             EV_INFO << "Fast Open: learned a " << cookieLen << "-byte cookie for " << remoteAddr.str()
                     << " (kind " << (state->fastopenPeerUsedExpOption ? 254 : 34) << ")\n";
         }

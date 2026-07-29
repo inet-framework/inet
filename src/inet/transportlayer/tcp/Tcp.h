@@ -171,7 +171,14 @@ class INET_API Tcp : public TransportProtocolBase
     // the same stream.
     bool fastOpenSecretSeeded = false;
     uint64_t fastOpenSecret = 0;
-    struct FastOpenCacheEntry { std::vector<uint8_t> cookie; uint32_t peerMss = 0; bool exp = false; };
+    // Mirrors Linux's tcpm_fastopen: the cookie carries its OWN option form
+    // (cookie.exp), while tryExp is the separate escalation counter used while no
+    // cookie is cached -- 0 = request with kind 34, 1 = the kind-34 request went
+    // unanswered, retry as experimental, 2 = the experimental request went
+    // unanswered too, so stay with kind 34 for good. It only ever grows, which is
+    // what makes the retry a single retry (fallback-exp-opt: "first FO, then FOEXP
+    // once, then back to FO forever").
+    struct FastOpenCacheEntry { std::vector<uint8_t> cookie; uint32_t peerMss = 0; bool exp = false; uint8_t tryExp = 0; };
     std::map<L3Address, FastOpenCacheEntry> fastOpenCookieCache; // per-destination cookie + learned peer MSS (~ Linux tcp_metrics)
     int fastOpenCookieCacheSize = 0; // read once from the fastopenCookieCacheSize parameter at INITSTAGE_LOCAL
 
@@ -265,15 +272,21 @@ class INET_API Tcp : public TransportProtocolBase
     /**
      * TCP Fast Open option form for remoteAddr: true = the experimental kind-254 +
      * 0xF989-magic encoding (RFC 7413 appendix A), false = the assigned kind 34.
-     * Linux keeps this beside the cookie in tcp_metrics and echoes back whatever
-     * form worked; a cookie REQUEST that went unanswered in kind-34 form also sets
-     * it, so the next request retries as experimental
-     * (gtests fastopen/client/fallback-exp-opt pins that retry).
+     * With a cookie cached, the form that cookie arrived in decides; without one,
+     * the unanswered-request escalation does (Linux tcp_fastopen_cache_get:
+     * "cookie->len <= 0 && tfom->try_exp == 1").
      */
     virtual bool getFastOpenUseExpOption(const L3Address& remoteAddr) const;
 
-    /** Record the option form to use for remoteAddr, leaving any cached cookie alone. */
-    virtual void setFastOpenUseExpOption(const L3Address& remoteAddr, bool exp);
+    /** Record which option form the cached cookie for remoteAddr arrived in. */
+    virtual void setFastOpenCookieExpForm(const L3Address& remoteAddr, bool exp);
+
+    /**
+     * A cookie REQUEST to remoteAddr came back with no Fast Open option at all;
+     * usedExpOption tells which form it was sent in. Advances the escalation
+     * counter so the next request tries the other encoding exactly once.
+     */
+    virtual void noteFastOpenCookieRequestUnanswered(const L3Address& remoteAddr, bool usedExpOption);
 
     /**
      * TCP Fast Open active blackhole detection: true while active (data-attached)
