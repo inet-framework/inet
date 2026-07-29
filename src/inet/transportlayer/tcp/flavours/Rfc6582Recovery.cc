@@ -163,7 +163,10 @@ void Rfc6582Recovery::receivedDuplicateAck()
             }
         }
         else
-            conn->sendData(state->snd_cwnd); // TODO why?
+            // no per-dupack cwnd inflation (RFC 6582 step 3.4): the flight-size side
+            // is deflated instead, by inferring a SACK for this duplicate ACK, so
+            // cwnd stays an honest window rather than an inflated one
+            conn->sendData(state->snd_cwnd);
     }
     else {
         Rfc5681Recovery rfc5681Recovery(state, conn);
