@@ -95,7 +95,7 @@ class INET_API TcpLwipConnection : public SimpleModule
 
     // statistics
     static simsignal_t sndWndSignal; // snd_wnd
-    static simsignal_t sndNxtSignal; // sent seqNo
+    static simsignal_t sndSeqSignal; // sent seqNo
     static simsignal_t sndAckSignal; // sent ackNo
 
     static simsignal_t rcvWndSignal; // rcv_wnd
