@@ -15,8 +15,14 @@ namespace inet {
 namespace tcp {
 
 /**
- * Provides utility functions to implement TcpTahoe, TcpReno and TcpNewReno.
- * (TcpVegas should inherit from TcpAlgorithmBase instead of this one.)
+ * Common machinery for the flavours that drive a separate loss-recovery strategy:
+ * TcpReno, TcpNewReno, DcTcp and TcpCubic. Besides holding the recovery and
+ * congestion-control objects it owns the parts of the ACK path that belong to
+ * neither -- duplicate-ACK counting, the Tail Loss Probe outcome, the RFC 3168
+ * ECN response -- and forwards send/retransmit/ack events to the recovery.
+ *
+ * TcpTahoe, TcpVegas, TcpWestwood and TcpNoCongestionControl deliberately stay on
+ * TcpAlgorithmBase: they have no recovery strategy to drive.
  */
 class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 {
@@ -38,6 +44,15 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     virtual void established(bool active) override;
 
     virtual void processRexmitTimer(TcpEventCode& event) override;
+
+    /** The ssthresh an expired retransmission timer collapses to (RFC 5681 eq. 4). */
+    virtual uint32_t calculateSsthreshForRto() { return std::max(getBytesInFlight() / 2, 2 * state->snd_mss); }
+
+    /** The loss window an expired retransmission timer restarts slow start from. */
+    virtual uint32_t calculateCwndForRto() { return state->snd_mss; }
+
+    /** Closes out a Tail Loss Probe episode this ACK completed (Linux tcp_process_tlp_ack). */
+    virtual void processTlpAck();
 
     /** RFC 3168 reaction to an ECN-Echo; true if it reduced cwnd on this ACK. */
     virtual bool processEce();

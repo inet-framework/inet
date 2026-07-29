@@ -7,7 +7,7 @@
 #ifndef __INET_TCPCUBIC_H
 #define __INET_TCPCUBIC_H
 
-#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBase.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBase.h"
 #include "inet/transportlayer/tcp/flavours/TcpCubicState_m.h"
 
 namespace inet {
@@ -28,7 +28,7 @@ namespace tcp {
  * an RFC 6675 (SACK) or RFC 6582 (NewReno) recovery strategy, and contributes
  * only the multiplicative decrease (cwnd * beta, with fast convergence).
  */
-class INET_API TcpCubic : public TcpAlgorithmBase
+class INET_API TcpCubic : public TcpClassicAlgorithmBase
 {
   public:
     /** HyStart exit detectors; the hystartDetect parameter is a bitmask of these. */
@@ -39,7 +39,6 @@ class INET_API TcpCubic : public TcpAlgorithmBase
 
   protected:
     TcpCubicStateVariables *& state; // alias to TcpAlgorithm's 'state'
-    ITcpRecovery *recovery = nullptr;
 
   protected:
     virtual TcpStateVariables *createStateVariables() override
@@ -48,7 +47,12 @@ class INET_API TcpCubic : public TcpAlgorithmBase
     }
 
     /** Picks the loss-recovery strategy matching the negotiated SACK support. */
-    virtual ITcpRecovery *createRecovery();
+    virtual ITcpRecovery *createRecovery() override;
+
+    /** CUBIC collapses to beta*cwnd on a timeout, not to FlightSize/2. */
+    virtual uint32_t calculateSsthreshForRto() override { return calculateSsthresh(getBytesInFlight()); }
+
+    virtual uint32_t calculateCwndForRto() override { return state->snd_effmss; }
 
     /** Forgets the epoch and the W_max memory (Linux bictcp_reset). */
     virtual void cubicReset();
@@ -87,17 +91,11 @@ class INET_API TcpCubic : public TcpAlgorithmBase
 
   public:
     TcpCubic();
-    virtual ~TcpCubic();
 
     virtual void initialize() override;
-    virtual void established(bool active) override;
-    virtual ITcpRecovery *getRecovery() override;
 
     virtual void processRexmitTimer(TcpEventCode& event) override;
-    virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
-    virtual void receivedDuplicateAck() override;
-    virtual uint32_t getBytesInFlight() const override;
 
     /** TcpCubic selects RFC 6675 SACK recovery when the connection negotiated SACK. */
     virtual bool supportsSackRecovery() const override { return true; }
