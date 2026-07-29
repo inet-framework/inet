@@ -1,0 +1,73 @@
+%description:
+Classic RFC 3168 ECN congestion response on a TcpReno sender: the tester
+CE-marks one client data segment, the server echoes ECE on the resulting ACK,
+and the client must halve cwnd/ssthresh once (not grow the window on that ACK)
+and announce the reduction with CWR on its next outgoing segment.
+
+Falsification of "the reaction is what sets CWR": a run whose data segments are
+never CE-marked emits no "received ECN-Echo ACK" line and no CWR-carrying
+segment -- covered by tcp_ecnmode_1.test, whose rfc3168 trace has neither.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+*.tcptester.script="a3 ce"
+
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.tClose=-1s
+*.cli_app.sendScript="0.5 5000; 1.0 1000"
+
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.active=false
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.tClose=-1s
+*.srv_app.sendScript=""
+
+*.*_tcp.sackSupport = false
+*.*_tcp.windowScalingSupport = false
+*.*_tcp.timestampSupport = false
+*.*_tcp.mss = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.tcpEcnMode = "rfc3168"
+*.*_tcp.advertisedWindow = 20000
+
+include ../../lib/tcp-legacy.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%# The sender reacted to the ECN-Echo: cwnd halved and ssthresh pulled down with it.
+%contains-regex: stdout
+cwnd = cwnd / 2: received ECN-Echo ACK
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+ssthresh = cwnd: received ECN-Echo ACK
+%#--------------------------------------------------------------------------------------------------------------
+%# ... and told the receiver about it, so the receiver stops echoing ECE.
+%contains-regex: stdout
+set CWR bit
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
