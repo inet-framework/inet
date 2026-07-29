@@ -127,6 +127,16 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, c
     long int payloadLength = tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>();
     uint32_t payloadSeq = tcpHeader->getSequenceNo();
     uint32_t firstSeq = receiveQueue->getFirstSeqNo();
+    // Linux tcp_try_rmem_schedule on a buffer the application pinned with SO_RCVBUF.
+    // tcp_can_ingest asks only whether the socket is ALREADY over budget, so the
+    // segment that first crosses the line still gets in and the next one does not.
+    // Normally tcp_prune_queue would recover by growing the buffer (tcp_clamp_window),
+    // but a locked buffer forbids that and there is nothing else left to reclaim, so
+    // the answer is a hard drop until the application reads. Deliberately narrower
+    // than the reference: an unlocked buffer keeps INET's grow-on-pressure path below.
+    if (payloadLength > 0 && state->rcvbufLocked && state->rcvBufferSize > 0
+            && rcvBufOccupancy > state->rcvBufferSize)
+        return false;
     if (seqLess(payloadSeq, firstSeq)) {
         long delta = firstSeq - payloadSeq;
         payloadSeq += delta;
@@ -681,12 +691,12 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 // arithmetic and by the tcp_clamp_window growth below.
                 if (payloadLength > 0) {
                     // Over-accept detection: this segment's end lies BEYOND the
-                    // highest window edge ever promised (rcv_adv, still the
+                    // highest window edge ever promised (rcv_mwnd_seq, still the
                     // pre-arrival value here) yet it was accepted -- the
                     // empty-queue exception. The kernel does not immediate-ACK
                     // such an arrival (rcv_neg_window); receiveSeqChanged
                     // consumes the flag and takes the delayed path.
-                    if (seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_adv))
+                    if (seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_mwnd_seq))
                         overWindowAcceptPending = true;
                     uint32_t truesize = linuxSkbTruesize(payloadLength);
                     rcvSkbChain.push_back(std::make_pair(payloadLength, truesize));
@@ -822,6 +832,13 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
                 // if the ACK bit is off drop the segment and return
                 EV_WARN << "RcvQueueBuffer has run out, dropping segment\n";
+                // Linux answers a dropped-for-memory arrival immediately and with a
+                // zero window (ICSK_ACK_NOMEM | ICSK_ACK_NOW), so the peer learns at
+                // once that retransmitting is pointless until the application reads.
+                if (state->rcvbufLocked) {
+                    state->ackNomem = true;
+                    sendAck();
+                }
                 return TCP_E_IGNORE;
             }
         }
@@ -1054,6 +1071,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     //"
     state->rcv_nxt = tcpHeader->getSequenceNo() + 1;
     state->rcv_adv = state->rcv_nxt + state->rcv_wnd;
+    state->rcv_mwnd_seq = state->rcv_adv;
 
     emit(rcvAdvSignal, state->rcv_adv);
 
@@ -1284,6 +1302,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         //
         state->rcv_nxt = tcpHeader->getSequenceNo() + 1;
         state->rcv_adv = state->rcv_nxt + state->rcv_wnd;
+        state->rcv_mwnd_seq = state->rcv_adv;
 
         emit(rcvAdvSignal, state->rcv_adv);
 

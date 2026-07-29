@@ -141,7 +141,13 @@ struct TcpStateVariables
     uint32_t rcv_wnd = 0;           // receive window
     uint32_t rcv_up = 0;            // receive urgent pointer;
     uint32_t irs = 0;               // initial receive sequence number
-    uint32_t rcv_adv = 0;           // advertised window
+    uint32_t rcv_adv = 0;           // right edge of the window CURRENTLY offered (Linux rcv_wup + rcv_wnd)
+    // The highest right edge EVER offered (Linux rcv_mwnd_seq). Distinct from
+    // rcv_adv, which tracks the offer in force and may be pulled back down -- e.g.
+    // when a buffer squeeze forces a zero window. Acceptance is judged against this
+    // maximum instead, because a peer that was once allowed to send that far may
+    // still have segments in flight from there (Linux tcp_max_receive_window).
+    uint32_t rcv_mwnd_seq = 0;
 
     // SYN, SYN+ACK retransmission variables (handled separately
     // because normal rexmit belongs to TcpAlgorithm)
@@ -408,6 +414,16 @@ struct TcpStateVariables
     // the advertised window when the receiveBufferSize parameter is set;
     // 0 = use maxRcvBuffer (historical INET behavior)
     uint32_t rcvBufferSize = 0;
+    // Linux SOCK_RCVBUF_LOCK: the application pinned the receive buffer with
+    // SO_RCVBUF, so the kernel may no longer grow it under pressure
+    // (tcp_clamp_window skips a locked buffer). Without a way to grow, a socket
+    // already over its budget has no choice but to drop what arrives next.
+    bool rcvbufLocked = false;
+    // Linux ICSK_ACK_NOMEM: the last arrival was dropped for want of buffer space,
+    // so the next ACK must advertise a zero window whatever the ordinary window
+    // computation says. One-shot -- sending that ACK clears it, as clearing the
+    // delayed-ACK timer does in the reference (tcp_event_ack_sent).
+    bool ackNomem = false;
     // receiver window auto-tuning (Linux tcp_grow_window / tp->rcv_ssthresh):
     // the OFFERED window starts at advertisedWindow and grows with received
     // data toward window_clamp (derived from rcvBufferSize). 0 = disabled.
