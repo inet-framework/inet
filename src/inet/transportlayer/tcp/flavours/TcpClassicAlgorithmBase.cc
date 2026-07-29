@@ -218,7 +218,10 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     uint32_t numBytesAcked = state->snd_una - firstSeqAcked;
     if (state->lossRecovery)
         recovery->receivedAckForUnackedData(numBytesAcked);
-    if (!state->lossRecovery)
+    // an ECN-Echo that actually triggered a congestion response takes the place of
+    // this ACK's window growth (RFC 3168: "SHOULD NOT increase the congestion window
+    // in response to the receipt of an ECN-Echo ACK packet")
+    if (!state->lossRecovery && !processEce())
         congestionControl->receivedAckForUnackedData(numBytesAcked);
     sendData(false);
     ensureRexmitTimerArmed();
@@ -271,14 +274,14 @@ bool TcpClassicAlgorithmBase::processEce()
                 EV_INFO << "cwnd = 1 MSS... reset retransmit timer.\n";
             }
             state->eceReactionTime = simTime();
+            state->gotEce = false;
+            return true;
         }
         else
             EV_INFO << "multiple ECN-Echo ACKs in less than rtt... no ECN reaction\n";
         state->gotEce = false;
-        return true;
     }
-    else
-        return false;
+    return false;
 }
 
 } // namespace tcp
