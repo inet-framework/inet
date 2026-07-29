@@ -762,16 +762,6 @@ uint32_t Rfc6675Recovery::prrNewlyDelivered() const
     return (uint32_t)(state->deliveredBytes - state->prrDeliveredMark);
 }
 
-void Rfc6675Recovery::prrInitCwndReduction()
-{
-    // RFC 6937 / Linux tcp_init_cwnd_reduction(): snapshot cwnd and reset the PRR
-    // counters. ssthresh itself is set by the caller (step4), which owns the
-    // flavour's multiplicative decrease.
-    state->priorCwnd = state->snd_cwnd;
-    state->prrDelivered = 0;
-    state->prrOut = 0;
-}
-
 void Rfc6675Recovery::prrCwndReduction(int newlyAckedSacked, int newlyLost, bool sndUnaAdvanced)
 {
     // RFC 6937 / Linux tcp_cwnd_reduction(): proportional rate reduction. All
