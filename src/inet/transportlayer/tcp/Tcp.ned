@@ -235,8 +235,8 @@ simple Tcp extends SimpleModule like ITcp
         bool cubicFastConvergence = default(true); // on a loss below the previous W_max, release extra window so a newly arrived competing flow can grow (RFC 9438 section 4.7)
         bool cubicTcpFriendliness = default(true); // never grow slower than an AIMD(1, beta) Reno flow would (RFC 9438 section 4.3)
         double hystartAckDelta @unit(s) = default(2ms); // largest ACK spacing still counted as part of an ACK train
-        double hystartDelayMax @unit(s) = default(1s); // upper clamp on the HyStart delay-increase threshold
-        double hystartDelayMin @unit(s) = default(4ms); // lower clamp on the HyStart delay-increase threshold
+        double hystartDelayMax @unit(s) = default(16ms); // upper clamp on the same threshold (Linux HYSTART_DELAY_MAX)
+        double hystartDelayMin @unit(s) = default(4ms); // lower clamp on the HyStart delay-increase threshold (an eighth of the minimum RTT)
         int hystartDetect = default(3); // HyStart detectors, as a bitmask: 1 = ACK train, 2 = delay increase, 3 = both
         bool hystartEnabled = default(true); // HyStart: leave slow start when the path appears full, instead of overshooting into loss
         int hystartLowWindow = default(16); // smallest cwnd (in segments) at which HyStart starts looking for the exit point
