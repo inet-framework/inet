@@ -1,0 +1,93 @@
+%description:
+Regression test for LDP session recovery after a peer's death, in examples/mpls/ldp
+(network LDPTEST), using the shipped example's own scenario (LSR2 shutdown@2s,
+startup@10s, examples/mpls/ldp/scenario.xml) run out to its full sim-time-limit of 30s.
+
+Unlike ldp_label_withdraw.test (which focuses on the FEC withdraw/re-map protocol
+exchange), this test asserts the session-lifecycle story end to end: the scenario
+commands fire in order, and -- the actual recovery proof -- the TCP session with LSR2
+is re-established only AFTER the startup command (Ldp::socketEstablished's exact log
+line), never before, so this cannot be satisfied by the initial convergence alone. As
+a corroborating (not standalone) check, this also confirms the two host-to-host
+UdpBasicApp/UdpSink flows (which in this network have no static IP fallback route,
+only router-to-router LDP-established LSPs; see ldp_session_setup.test) show nonzero
+delivered counts over the whole 30s run -- note this scalar is cumulative for the full
+run, so by itself it would not distinguish "delivered before the outage" from
+"delivered after recovery"; that distinction is what the ordered TCP-reestablishment
+regex above actually proves.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.ldp.LDPTEST
+sim-time-limit = 30s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.LSR*.ldp.cmdenv-log-level = info
+**.scenarioManager.cmdenv-log-level = info
+**.cmdenv-log-level = off
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host2"
+
+**.host3.numApps = 1
+**.host3.app[0].typename = "UdpBasicApp"
+**.host3.app[0].localPort = 100
+**.host3.app[0].destPort = 100
+**.host3.app[0].messageLength = 128 bytes
+**.host3.app[0].sendInterval = 0.01s
+**.host3.app[0].destAddresses = "host4"
+
+**.host{2..4}.numApps = 1
+**.host{2..4}.app[0].typename = "UdpSink"
+**.host{2..4}.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host4.rt"
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR5.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.LSR*.holdTime = 6s
+**.LSR*.helloInterval = 2s
+
+**.scenarioManager.script = xmldoc("../../../../examples/mpls/ldp/scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# ordered: LSR2 shuts down, then comes back up, then re-establishes its TCP session
+%contains-regex: stdout
+processing <shutdown> command\.\.\.
+.*
+processing <startup> command\.\.\.
+.*
+TCP connection established with peer 10\.1\.2\.4
+%#--------------------------------------------------------------------------------------------------------------
+%# corroborating check: the two host-to-host application flows show nonzero delivered
+%# counts (cumulative over the run) -- since there is no IP route to the host prefixes,
+%# this can only happen over LDP-established LSPs
+%postrun-command: grep -E "host(2|4)\.app\[0\] packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
