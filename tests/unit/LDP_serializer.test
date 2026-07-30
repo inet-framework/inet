@@ -6,6 +6,14 @@ Address (also used for Address Withdraw). Verifies serialize->bytes->deserialize
 reproduces the fields and the expected on-wire lengths (matching the B(...)/
 ldpAddressMessageBytes(...) constants in Ldp.h).
 
+Also covers the optional RFC 5036 Section 2.8 loop-detection TLVs (Hop Count/Path
+Vector) that Label Request and Label Mapping messages may carry when Ldp.loopDetection
+is enabled: a Label Request and a Label Mapping WITH the TLVs populated (multi-entry
+path vector included, to cover the variable-length case), plus confirming that a
+Label Request/Mapping WITHOUT them (hasLoopDetection left at its default false)
+serializes at exactly the pre-existing base length -- the neutrality guarantee for
+loopDetection=false (the model's default).
+
 %includes:
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -76,6 +84,8 @@ static void fillHeader(LdpPacket *p, int type, Ipv4Address lsrId)
     ASSERT(r2 != nullptr);
     ASSERT(r2->getLsrId() == Ipv4Address("10.0.0.2"));
     ASSERT(r2->getFec().addr == Ipv4Address("192.168.1.0") && r2->getFec().length == 24);
+    // loopDetection=false neutrality: no loop-detection TLVs written/read
+    ASSERT(r2->getHasLoopDetection() == false);
     EV << "  PASS" << endl;
 }
 
@@ -97,6 +107,8 @@ static void fillHeader(LdpPacket *p, int type, Ipv4Address lsrId)
     ASSERT(m2 != nullptr);
     ASSERT(m2->getFec().addr == Ipv4Address("172.16.0.0") && m2->getFec().length == 16);
     ASSERT(m2->getLabel() == 1234);
+    // loopDetection=false neutrality: no loop-detection TLVs written/read
+    ASSERT(m2->getHasLoopDetection() == false);
     EV << "  PASS" << endl;
 }
 
@@ -210,6 +222,65 @@ static void fillHeader(LdpPacket *p, int type, Ipv4Address lsrId)
         ASSERT(a2->getAddresses(0) == Ipv4Address("10.0.0.9"));
         ASSERT(a2->getAddresses(1) == Ipv4Address("10.0.0.10"));
     }
+    EV << "  PASS" << endl;
+}
+
+// === 9. Label Request with loop detection (RFC 5036 Section 2.8: Hop Count + Path Vector TLVs) ===
+{
+    EV << "=== LabelRequest with loop detection ===" << endl;
+    auto req = makeShared<LdpLabelRequest>();
+    fillHeader(req.get(), LABEL_REQUEST, Ipv4Address("10.0.0.12"));
+    FecTlv fec;
+    fec.addr = Ipv4Address("192.168.2.0");
+    fec.length = 24;
+    req->setFec(fec);
+    req->setHasLoopDetection(true);
+    req->setHopCount(3);
+    req->setPathVectorArraySize(2); // multi-entry, to cover the variable-length TLV case
+    req->setPathVector(0, Ipv4Address("10.0.0.1"));
+    req->setPathVector(1, Ipv4Address("10.0.0.2"));
+    // base Label Request (30) + Hop Count TLV (4 hdr + 1 value = 5) + Path Vector TLV (4 hdr + 2 * 4 bytes = 12)
+    req->setChunkLength(B(30 + 5 + 12));
+
+    Packet pkt("sz"); pkt.insertAtFront(req);
+    ASSERT(pkt.getDataLength() == B(47));
+    auto r2 = dynamicPtrCast<const LdpLabelRequest>(roundTrip(staticPtrCast<const LdpPacket>(req)));
+    ASSERT(r2 != nullptr);
+    ASSERT(r2->getFec().addr == Ipv4Address("192.168.2.0") && r2->getFec().length == 24);
+    ASSERT(r2->getHasLoopDetection() == true);
+    ASSERT(r2->getHopCount() == 3);
+    ASSERT(r2->getPathVectorArraySize() == 2);
+    ASSERT(r2->getPathVector(0) == Ipv4Address("10.0.0.1"));
+    ASSERT(r2->getPathVector(1) == Ipv4Address("10.0.0.2"));
+    EV << "  PASS" << endl;
+}
+
+// === 10. Label Mapping with loop detection ===
+{
+    EV << "=== LabelMapping with loop detection ===" << endl;
+    auto map = makeShared<LdpLabelMapping>();
+    fillHeader(map.get(), LABEL_MAPPING, Ipv4Address("10.0.0.13"));
+    FecTlv fec;
+    fec.addr = Ipv4Address("172.16.1.0");
+    fec.length = 24;
+    map->setFec(fec);
+    map->setLabel(555);
+    map->setHasLoopDetection(true);
+    map->setHopCount(2);
+    map->setPathVectorArraySize(1);
+    map->setPathVector(0, Ipv4Address("10.0.0.3"));
+    // base Label Mapping (38) + Hop Count TLV (5) + Path Vector TLV (4 hdr + 1 * 4 bytes = 8)
+    map->setChunkLength(B(38 + 5 + 8));
+
+    Packet pkt("sz"); pkt.insertAtFront(map);
+    ASSERT(pkt.getDataLength() == B(51));
+    auto m2 = dynamicPtrCast<const LdpLabelMapping>(roundTrip(staticPtrCast<const LdpPacket>(map)));
+    ASSERT(m2 != nullptr);
+    ASSERT(m2->getLabel() == 555);
+    ASSERT(m2->getHasLoopDetection() == true);
+    ASSERT(m2->getHopCount() == 2);
+    ASSERT(m2->getPathVectorArraySize() == 1);
+    ASSERT(m2->getPathVector(0) == Ipv4Address("10.0.0.3"));
     EV << "  PASS" << endl;
 }
 

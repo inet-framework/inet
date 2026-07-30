@@ -127,6 +127,14 @@ void Ldp::initialize(int stage)
         distributionMode = par("distributionMode").stdstringValue();
         controlMode = par("controlMode").stdstringValue();
         retentionMode = par("retentionMode").stdstringValue();
+        loopDetection = par("loopDetection");
+        pathVectorLimit = par("pathVectorLimit");
+        targetedPeers = par("targetedPeers").stdstringValue();
+        acceptTargetedHellos = par("acceptTargetedHellos");
+        targetedPeerAddrs.clear();
+        cStringTokenizer tokenizer(targetedPeers.c_str());
+        while (tokenizer.hasMoreTokens())
+            targetedPeerAddrs.push_back(Ipv4Address(tokenizer.nextToken()));
 
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -206,6 +214,13 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
         // "all routers in the sub-network" multicast address
         EV_INFO << "Multicasting LDP Hello to neighboring routers\n";
         sendHelloTo(Ipv4Address::ALL_ROUTERS_MCAST);
+
+        // RFC 5036 Section 2.4.2: extended discovery -- periodic unicast Hello (T=1/R=1)
+        // to every configured targeted peer, same cadence as the regular multicast Hello
+        for (auto& addr : targetedPeerAddrs) {
+            EV_INFO << "Sending targeted LDP Hello to " << addr << "\n";
+            sendHelloTo(addr, /*targeted*/ true);
+        }
 
         // schedule next hello
         scheduleAfter(helloInterval, sendHelloMsg);
@@ -433,7 +448,7 @@ void Ldp::sendAddress(Ipv4Address dest)
     EV_INFO << endl;
 }
 
-void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
+void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length, uint8_t hopCount, const std::vector<Ipv4Address>& pathVector)
 {
     if (!isPeerOperational(dest)) {
         EV_WARN << "not sending Label Request to " << dest << ": session is not OPERATIONAL\n";
@@ -442,13 +457,39 @@ void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
 
     Packet *pk = new Packet("Lb-Req");
     const auto& requestMsg = makeShared<LdpLabelRequest>();
-    requestMsg->setChunkLength(LDP_LABEL_REQUEST_BYTES);
+    B chunkLength = LDP_LABEL_REQUEST_BYTES;
     requestMsg->setType(LABEL_REQUEST);
 
     FecTlv fec;
     fec.addr = addr;
     fec.length = length;
     requestMsg->setFec(fec);
+
+    if (loopDetection) {
+        // RFC 5036 Section 2.8: either originate a fresh vector (pathVector empty --
+        // we recognized this FEC ourselves, see updateFecListEntry/processNOTIFICATION),
+        // or propagate one hop further downstream (pathVector non-empty -- we received
+        // a Label Request from an upstream peer and have no downstream mapping of our
+        // own yet, see processLABEL_REQUEST)
+        uint8_t outHopCount;
+        std::vector<Ipv4Address> outPathVector;
+        if (pathVector.empty()) {
+            outHopCount = 1;
+            outPathVector.push_back(rt->getRouterId());
+        }
+        else {
+            outHopCount = hopCount + 1;
+            outPathVector = pathVector;
+            outPathVector.push_back(rt->getRouterId());
+        }
+        requestMsg->setHasLoopDetection(true);
+        requestMsg->setHopCount(outHopCount);
+        requestMsg->setPathVectorArraySize(outPathVector.size());
+        for (size_t i = 0; i < outPathVector.size(); ++i)
+            requestMsg->setPathVector(i, outPathVector[i]);
+        chunkLength += ldpLoopDetectionTlvBytes(outPathVector.size());
+    }
+    requestMsg->setChunkLength(chunkLength);
 
     requestMsg->setLsrId(rt->getRouterId());
     pk->insertAtBack(requestMsg);
@@ -543,7 +584,12 @@ void Ldp::duAdvertiseToPeer(const Ldp::Fec& fec, Ipv4Address peer)
             EV_INFO << "DU: advertising unsolicited Label Mapping label=" << label << " for fec addr=" << fec.addr
                     << " length=" << fec.length << " to " << peer << " using an already-held downstream mapping from "
                     << fec.nextHop << " (liberal retention switchover if the next hop just changed)" << endl;
-        sendMapping(LABEL_MAPPING, peer, label, fec.addr, fec.length);
+        // ER (egress): we are the origin of this mapping, start a fresh loop-detection
+        // vector; otherwise forward the downstream mapping's own accumulated vector, if any
+        if (ER)
+            sendMapping(LABEL_MAPPING, peer, label, fec.addr, fec.length);
+        else
+            sendMapping(LABEL_MAPPING, peer, label, fec.addr, fec.length, dit->hopCount, dit->pathVector);
         return;
     }
 
@@ -834,17 +880,22 @@ void Ldp::emitFecBindingCount()
     emit(fecBindingCountSignal, (long)(fecUp.size() + fecDown.size()));
 }
 
-void Ldp::sendHelloTo(Ipv4Address dest)
+void Ldp::sendHelloTo(Ipv4Address dest, bool targeted)
 {
     Packet *pk = new Packet("LDP-Hello");
     const auto& hello = makeShared<LdpHello>();
     hello->setChunkLength(LDP_HELLO_BYTES);
     hello->setType(HELLO);
     hello->setLsrId(rt->getRouterId());
-    // targeted hellos (which would need a destination LSR-Id) and the R-bit/T-bit
-    // (LDP hello state machine extensions) are not modeled; left at their default
-    // (unset/false) values
     hello->setHoldTime((uint16_t)holdTime.inUnit(SIMTIME_S));
+    if (targeted) {
+        // RFC 5036 Section 2.4.2 extended discovery: Targeted bit + Request bit (ask
+        // the recipient to reply in kind, completing the adjacency promptly)
+        hello->setTbit(true);
+        hello->setRbit(true);
+    }
+    // else: left at their default (unset/false) values -- the regular multicast Hello
+    // and the ordinary unicast reply to a locally-adjacent peer's Hello, unchanged
     pk->insertAtBack(hello);
 
     if (dest.isMulticast()) {
@@ -887,10 +938,13 @@ void Ldp::processHelloTimeout(cMessage *msg)
 
     removePeerBindings(peerIP);
 
-    // update TED and routing table
-
-    unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
-    tedmod->setLinkState(index, false);
+    // update TED and routing table -- only meaningful for a locally-adjacent peer; a
+    // targeted (RFC 5036 Section 2.4.2) peer has no TED link to report on (see the
+    // matching guard in processLDPHello)
+    if (tedmod->isLocalPeer(peerIP)) {
+        unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
+        tedmod->setLinkState(index, false);
+    }
 }
 
 void Ldp::processKeepAliveSendTimeout(cMessage *msg)
@@ -1030,6 +1084,7 @@ void Ldp::processLDPHello(Packet *msg)
     const auto& ldpHello = msg->peekAtFront<LdpHello>();
     Ipv4Address peerAddr = ldpHello->getLsrId();
     uint16_t receivedHoldTime = ldpHello->getHoldTime();
+    bool receivedRbit = ldpHello->getRbit();
     int interfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
     delete msg;
 
@@ -1044,10 +1099,27 @@ void Ldp::processLDPHello(Packet *msg)
         return;
     }
 
-    // report the link as working again; Ted decides whether that's actually
-    // a change (and rebuilds/announces accordingly)
-    unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerAddr);
-    tedmod->setLinkState(index, true);
+    // RFC 5036 Section 2.4.2 extended discovery: a peer we have no local TED link to
+    // (not locally adjacent) can only be a targeted-session candidate -- there is no
+    // physical link for Ted to track, so skip its link-state handling entirely (doing
+    // otherwise would mishandle a peer Ted has never heard of -- see Ted::linkIndex);
+    // accept the adjacency only if we ourselves target this peer, or accept any
+    // requesting targeted peer.
+    bool locallyAdjacent = tedmod->isLocalPeer(peerAddr);
+    if (locallyAdjacent) {
+        // report the link as working again; Ted decides whether that's actually
+        // a change (and rebuilds/announces accordingly)
+        unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerAddr);
+        tedmod->setLinkState(index, true);
+    }
+    else {
+        bool weTarget = std::find(targetedPeerAddrs.begin(), targetedPeerAddrs.end(), peerAddr) != targetedPeerAddrs.end();
+        if (!weTarget && !acceptTargetedHellos) {
+            EV_INFO << "not locally adjacent and not a configured/accepted targeted peer, ignoring\n";
+            return;
+        }
+        EV_INFO << "not locally adjacent, accepting as a targeted-session peer\n";
+    }
 
     // peer already in table?
     int i = findPeer(peerAddr);
@@ -1080,7 +1152,13 @@ void Ldp::processLDPHello(Packet *msg)
     EV_INFO << "We'll be " << (info.activeRole ? "ACTIVE" : "PASSIVE") << " in this session\n";
 
     // introduce ourselves with a Hello, then connect if we're in ACTIVE role
-    sendHelloTo(peerAddr);
+    if (locallyAdjacent)
+        sendHelloTo(peerAddr);
+    else if (receivedRbit) {
+        // RFC 5036 Section 2.4.2: reply in kind (targeted, T=1/R=1) since we were asked to
+        EV_INFO << "replying with a targeted Hello (R-bit was set)\n";
+        sendHelloTo(peerAddr, /*targeted*/ true);
+    }
     if (info.activeRole) {
         EV_INFO << "Establishing session with it\n";
         openTCPConnectionToPeer(peerIndex);
@@ -1510,6 +1588,14 @@ Ldp::FecVector::iterator Ldp::findFecEntry(FecVector& fecs, Ipv4Address addr, in
     return it;
 }
 
+bool Ldp::isLoopDetected(uint8_t hopCount, const std::vector<Ipv4Address>& pathVector)
+{
+    Ipv4Address self = rt->getRouterId();
+    if (std::find(pathVector.begin(), pathVector.end(), self) != pathVector.end())
+        return true;
+    return hopCount > pathVectorLimit;
+}
+
 void Ldp::sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length)
 {
     // Send NOTIFY message
@@ -1530,7 +1616,7 @@ void Ldp::sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length)
     sendToPeer(dest, packet);
 }
 
-void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, int length)
+void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, int length, uint8_t hopCount, const std::vector<Ipv4Address>& pathVector)
 {
     if (!isPeerOperational(dest)) {
         EV_WARN << "not sending LDP label message (type " << type << ") to " << dest << ": session is not OPERATIONAL\n";
@@ -1540,7 +1626,7 @@ void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, i
     // Send LABEL MAPPING downstream
     Packet *packet = new Packet("Lb-Mapping");
     const auto& lmMessage = makeShared<LdpLabelMapping>();
-    lmMessage->setChunkLength(LDP_LABEL_MAPPING_BYTES); // also used for LABEL_WITHDRAW/LABEL_RELEASE (see LDP_LABEL_MAPPING_BYTES)
+    B chunkLength = LDP_LABEL_MAPPING_BYTES; // also used for LABEL_WITHDRAW/LABEL_RELEASE (see LDP_LABEL_MAPPING_BYTES)
     lmMessage->setType(type);
     lmMessage->setLsrId(rt->getRouterId());
     lmMessage->setLabel(label);
@@ -1550,6 +1636,30 @@ void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, i
     fec.length = length;
 
     lmMessage->setFec(fec);
+
+    // RFC 5036 Section 2.8 loop detection: only ever meaningful for LABEL_MAPPING --
+    // LABEL_WITHDRAW/LABEL_RELEASE (which reuse this same wire representation) never
+    // carry these TLVs. Same origin-vs-propagate convention as sendMappingRequest.
+    if (loopDetection && type == LABEL_MAPPING) {
+        uint8_t outHopCount;
+        std::vector<Ipv4Address> outPathVector;
+        if (pathVector.empty()) {
+            outHopCount = 1;
+            outPathVector.push_back(rt->getRouterId());
+        }
+        else {
+            outHopCount = hopCount + 1;
+            outPathVector = pathVector;
+            outPathVector.push_back(rt->getRouterId());
+        }
+        lmMessage->setHasLoopDetection(true);
+        lmMessage->setHopCount(outHopCount);
+        lmMessage->setPathVectorArraySize(outPathVector.size());
+        for (size_t i = 0; i < outPathVector.size(); ++i)
+            lmMessage->setPathVector(i, outPathVector[i]);
+        chunkLength += ldpLoopDetectionTlvBytes(outPathVector.size());
+    }
+    lmMessage->setChunkLength(chunkLength);
     packet->insertAtBack(lmMessage);
 
     sendToPeer(dest, packet);
@@ -1617,6 +1727,20 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
     Ipv4Address srcAddr = packet->getLsrId();
 
     EV_INFO << "Label Request from LSR " << srcAddr << " for FEC " << fec << endl;
+
+    if (loopDetection && packet->getHasLoopDetection()) {
+        uint8_t hc = packet->getHopCount();
+        std::vector<Ipv4Address> pv;
+        for (size_t k = 0; k < packet->getPathVectorArraySize(); ++k)
+            pv.push_back(packet->getPathVector(k));
+        if (isLoopDetected(hc, pv)) {
+            EV_WARN << "Loop Detected in Label Request for fec=" << fec << " from " << srcAddr
+                    << " (hopCount=" << (int)hc << ", pathVectorLimit=" << pathVectorLimit
+                    << "): dropping and notifying" << endl;
+            sendNotify(LOOP_DETECTED, srcAddr, fec.addr, fec.length);
+            return;
+        }
+    }
 
     auto it = findFecEntry(fecList, fec.addr, fec.length);
     if (it == fecList.end()) {
@@ -1701,9 +1825,10 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
                   << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
 
         // We already have a mapping for this FEC, let our upstream peer know
-        // about it by sending back a Label Mapping message
+        // about it by sending back a Label Mapping message (forwarding the
+        // downstream mapping's own loop-detection vector, if any -- see dit)
 
-        sendMapping(LABEL_MAPPING, srcAddr, uit->label, fec.addr, fec.length);
+        sendMapping(LABEL_MAPPING, srcAddr, uit->label, fec.addr, fec.length, dit->hopCount, dit->pathVector);
     }
     else {
         // no mapping from DS, mark as pending
@@ -1714,6 +1839,21 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
         newItem.fecid = it->fecid;
         newItem.peer = srcAddr;
         pending.push_back(newItem);
+
+        if (loopDetection) {
+            // RFC 5036 Section 2.8: ordered-control propagation -- forward the
+            // Label Request one hop further downstream, carrying the accumulated
+            // hop count/path vector (sendMappingRequest treats an empty vector as
+            // "originate a fresh one", which is what happens if the received
+            // request itself carried none)
+            uint8_t hc = packet->getHasLoopDetection() ? packet->getHopCount() : 0;
+            std::vector<Ipv4Address> pv;
+            if (packet->getHasLoopDetection())
+                for (size_t k = 0; k < packet->getPathVectorArraySize(); ++k)
+                    pv.push_back(packet->getPathVector(k));
+            EV_DETAIL << "loop detection enabled: propagating the Label Request downstream to " << it->nextHop << endl;
+            sendMappingRequest(it->nextHop, fec.addr, fec.length, hc, pv);
+        }
     }
 
     emitFecBindingCount();
@@ -1819,6 +1959,20 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
 
     EV_INFO << "Label mapping label=" << label << " received for fec=" << fec << " from " << fromIP << endl;
 
+    if (loopDetection && packet->getHasLoopDetection()) {
+        uint8_t hc = packet->getHopCount();
+        std::vector<Ipv4Address> pv;
+        for (size_t k = 0; k < packet->getPathVectorArraySize(); ++k)
+            pv.push_back(packet->getPathVector(k));
+        if (isLoopDetected(hc, pv)) {
+            EV_WARN << "Loop Detected in Label Mapping for fec=" << fec << " from " << fromIP
+                    << " (hopCount=" << (int)hc << ", pathVectorLimit=" << pathVectorLimit
+                    << "): dropping and notifying" << endl;
+            sendNotify(LOOP_DETECTED, fromIP, fec.addr, fec.length);
+            return;
+        }
+    }
+
     ASSERT(label > 0);
 
     auto it = findFecEntry(fecList, fec.addr, fec.length);
@@ -1867,6 +2021,16 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
     newItem.fecid = it->fecid;
     newItem.peer = fromIP;
     newItem.label = label;
+    if (loopDetection && packet->getHasLoopDetection()) {
+        // remember the accumulated vector so re-advertising this binding elsewhere
+        // (duAdvertiseToPeer, or the pending-request reply below) propagates it
+        // further (RFC 5036 Section 2.8), instead of starting a fresh one
+        newItem.hopCount = packet->getHopCount();
+        for (size_t k = 0; k < packet->getPathVectorArraySize(); ++k)
+            newItem.pathVector.push_back(packet->getPathVector(k));
+    }
+    uint8_t dsHopCount = newItem.hopCount;
+    std::vector<Ipv4Address> dsPathVector = newItem.pathVector;
     fecDown.push_back(newItem);
 
     if (isNextHop && distributionMode == "du") {
@@ -1908,7 +2072,8 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
         EV_DETAIL << "installed LIB entry inLabel=" << newItem.label << " inInterface=" << inInterface
                   << " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
 
-        sendMapping(LABEL_MAPPING, pit->peer, newItem.label, it->addr, it->length);
+        // forward the just-received mapping's own loop-detection vector, if any (dsHopCount/dsPathVector)
+        sendMapping(LABEL_MAPPING, pit->peer, newItem.label, it->addr, it->length, dsHopCount, dsPathVector);
 
         // remove request from the list
         pit = pending.erase(pit);
