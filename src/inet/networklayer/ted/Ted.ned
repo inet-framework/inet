@@ -47,6 +47,20 @@ import inet.common.SimpleModule;
 //   let Ted coexist with another routing protocol or with
 //   configurator-assigned routes.
 //
+// Local link-liveness detection (~trackInterfaceState~):
+// - Default (false, today's behavior): Ted's own local links are only ever marked down/up by
+//   an explicit call to setLinkState() -- today that means ~Ldp~ or ~RsvpTe~'s own Hello-based
+//   peer liveness detection; a bare physical link failure (with no signaling protocol running)
+//   is invisible to Ted.
+// - true: Ted additionally subscribes to interfaceStateChangedSignal and, whenever one of THIS
+//   router's own (non-loopback) interfaces changes F_STATE/F_CARRIER, calls setLinkState() for
+//   the matching local link -- i.e. plain physical link up/down (interface carrier loss, e.g.
+//   via a ScenarioManager <disconnect>) reroutes signaling-free consumers of the TED (like
+//   ~SegmentRouting~, which has no Hello protocol of its own) without needing Ldp/RsvpTe
+//   present. Off by default so existing Ldp/RsvpTe networks (whose own Hello timeout is the
+//   authoritative liveness signal, and which may deliberately keep an interface administratively
+//   up through a brief physical blip) are completely unaffected.
+//
 simple Ted extends SimpleModule
 {
     parameters:
@@ -54,6 +68,7 @@ simple Ted extends SimpleModule
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;  // The path to the RoutingTable module
         bool installRoutes = default(true); // Whether Ted installs/maintains host routes in the routing table from its link-state database (see class documentation for the coexistence story)
+        bool trackInterfaceState = default(false); // Whether Ted reacts to local interface up/down (carrier) transitions by calling setLinkState() itself; see class documentation
         xml linkAttributes = default(xml("<links/>")); // optional per-interface TE-attribute overrides, e.g. <links><link interface="eth0" teMetric="10" adminGroup="0x3" srlgs="7 12"/></links>; unlisted interfaces get teMetric=0 (falls back to `metric`) and adminGroup=0/no SRLGs
         @display("i=block/table");
         @signal[tedChanged](type=inet::TedChangeInfo); // emitted by setLinkState()/announceLinkChange() whenever a link's liveness or bandwidth changes; ~LinkStateRouting subscribes at the host level to flood the change

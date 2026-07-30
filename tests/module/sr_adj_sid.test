@@ -1,0 +1,230 @@
+%description:
+Module test for RFC 8660 Section 3.3 adjacency SIDs: pinning traffic onto a SPECIFIC parallel
+link even though it is NOT the one the IGP (~Ted's own shortest-path computation) would pick.
+
+Topology: hostA -- A ={ two parallel point-to-point links to B }= B -- C -- hostC, all of
+A/B/C being ~SrMplsRouter nodes sharing one sidTable (A=1, B=2, C=3). The two A<->B links have
+very different metrics: A.ppp1<->B.ppp0 ("link1") is metric 1 (the IGP-preferred one); A.ppp2<->
+B.ppp1 ("link2") is metric 10 (the non-preferred one -- plain IP routing, or a node-SID-only
+policy naming just B or C, would always take link1).
+
+A's only policy (dest hostC, segments="adj:ppp2 node:3") deliberately names the adjacency SID
+of A's OWN local interface "ppp2" (link2) FIRST, followed by C's node SID -- exactly the
+documented, supported use of "adj:" segments (~SrPolicy.ned's Limitations section: an "adj:"
+segment only has well-defined semantics as a policy's FIRST/sole segment, since no adjacency-SID
+advertisement is modeled). Per the first-segment canonicalization, an "adj:" segment is ALWAYS
+dropped from the pushed label stack when first (crossing it IS what forwarding out that
+interface already achieves) -- so only C's node-SID label (16003) is actually pushed on the
+wire, but the packet is forwarded out ppp2 specifically, NOT ppp1, even though ppp1 is what
+~Ted's shortest-path computation (and hence plain node-SID routing) would have chosen. Once
+across the pinned link, ordinary node-SID forwarding continues unmodified: B is directly
+connected to C, so B's own node-SID entry for C is PHP (POP), and C delivers the plain IP
+datagram to hostC via normal L3 routing.
+
+Asserted: (1) ~SegmentRouting genuinely allocates a real adjacency-SID LIB entry for A's ppp2
+(the underlying mechanism, independent of whether this specific policy ends up needing the
+label value itself); (2) A forwards this flow's labeled packet out ppp2, specifically (module-
+scoped, via the forwardvia.out postrun-command correlating each "forwarding packet to ppp2"
+line with the preceding "** Event ... in <module>" header) -- and NEVER out ppp1; (3) B
+receives the packet via ITS OWN ppp1 (the interface facing A's link2), never via ppp0 (facing
+the IGP-preferred link1); (4) end-to-end delivery, i.e. crossing the pinned adjacency does not
+break the subsequent node-SID (PHP) hop into C.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.mpls.SrMplsRouter;
+import ned.DatarateChannel;
+
+network SrAdjSidTest
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    types:
+        channel Link extends DatarateChannel
+        {
+            datarate = 1Mbps;
+            delay = 10us;
+        }
+    submodules:
+        hostA: StandardHost {
+            @display("p=100,250");
+        }
+        A: SrMplsRouter {
+            parameters:
+                routerId = "1.1.1.1";
+                peers = "ppp1 ppp2";
+                sidTable = xmldoc("sidtable.xml");
+                policies = xmldoc("policiesA.xml");
+                @display("p=250,250");
+            gates:
+                pppg[3];
+        }
+        B: SrMplsRouter {
+            parameters:
+                routerId = "2.2.2.2";
+                peers = "ppp0 ppp1 ppp2";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=450,250");
+            gates:
+                pppg[3];
+        }
+        C: SrMplsRouter {
+            parameters:
+                routerId = "3.3.3.3";
+                peers = "ppp0";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=650,250");
+            gates:
+                pppg[2];
+        }
+        hostC: StandardHost {
+            @display("p=850,250");
+        }
+    connections:
+        hostA.pppg++ <--> Link <--> A.pppg[0];
+        A.pppg[1] <--> Link <--> B.pppg[0]; // link1: metric 1, IGP-preferred
+        A.pppg[2] <--> Link <--> B.pppg[1]; // link2: metric 10, pinned via adj:ppp2
+        B.pppg[2] <--> Link <--> C.pppg[0];
+        C.pppg[1] <--> Link <--> hostC.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: sidtable.xml
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+</sr>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: policiesA.xml
+<policies>
+    <policy dest="10.0.2.20" netmask="255.255.255.255" segments="adj:ppp2 node:3"/>
+</policies>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostA.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.10	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.2.1	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: A.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.1	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.2.2	MTU: 1500	Metric: 1
+name: ppp2	inet_addr: 10.0.2.4	MTU: 1500	Metric: 10
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: B.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.3	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.2.5	MTU: 1500	Metric: 10
+name: ppp2	inet_addr: 10.0.2.6	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: C.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.7	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.2.8	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostC.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.20	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.2.8	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src
+network = SrAdjSidTest
+sim-time-limit = 2s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.hostA.numApps = 1
+**.hostA.app[0].typename = "UdpBasicApp"
+**.hostA.app[0].localPort = 100
+**.hostA.app[0].destPort = 100
+**.hostA.app[0].messageLength = 128 bytes
+**.hostA.app[0].startTime = 0.5s
+**.hostA.app[0].sendInterval = 0.01s
+**.hostA.app[0].destAddresses = "hostC"
+
+**.hostC.numApps = 1
+**.hostC.app[0].typename = "UdpSink"
+**.hostC.app[0].localPort = 100
+
+**.hostA.ipv4.routingTable.routingFile = "hostA.rt"
+**.hostC.ipv4.routingTable.routingFile = "hostC.rt"
+**.A.ipv4.routingTable.routingFile = "A.rt"
+**.B.ipv4.routingTable.routingFile = "B.rt"
+**.C.ipv4.routingTable.routingFile = "C.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%# The mechanism: A genuinely allocates a real, dynamically-allocated adjacency-SID LIB entry
+%# for its own ppp2 (link2) -- independent of whether THIS policy ends up pushing that label
+%contains: stdout
+adjacency SID for interface ppp2
+%#--------------------------------------------------------------------------------------------------------------
+%# Only C's node-SID label is actually pushed (the leading adj: segment is dropped, per the
+%# first-segment canonicalization -- crossing it IS what forwarding out ppp2 already achieves)
+%contains: stdout
+doStackOps: {PUSH 16003}
+%#--------------------------------------------------------------------------------------------------------------
+%# B, directly connected to C, PHPs -- the pinned-adjacency hop does not disturb the ordinary
+%# node-SID forwarding that continues from there
+%contains: stdout
+doStackOps: {POP}
+%#--------------------------------------------------------------------------------------------------------------
+%# A forwards this flow out ppp2 (the pinned, non-IGP-preferred link) -- never out ppp1
+%postrun-command: awk '/^\*\* Event/{mod=$0} /forwarding packet to ppp2/{print mod}' test.out > forward_ppp2.out
+%contains: forward_ppp2.out
+SrAdjSidTest.A.mpls
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: awk '/^\*\* Event/{mod=$0} /forwarding packet to ppp1/{print mod}' test.out > forward_ppp1.out
+%not-contains: forward_ppp1.out
+SrAdjSidTest.A.mpls
+%#--------------------------------------------------------------------------------------------------------------
+%# B receives this flow's labeled packet via ITS OWN ppp1 (facing A's link2), never via ppp0
+%# (facing the IGP-preferred link1)
+%postrun-command: awk '/^\*\* Event/{mod=$0} /Received .*from L2, label=16003/{print mod" "$0}' test.out > labelflow.out
+%contains: labelflow.out
+SrAdjSidTest.B.mpls (Mpls, id=
+%#--------------------------------------------------------------------------------------------------------------
+%contains: labelflow.out
+inInterface=ppp1
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: labelflow.out
+inInterface=ppp0
+%#--------------------------------------------------------------------------------------------------------------
+%# end-to-end delivery: crossing the pinned adjacency did not break the subsequent PHP hop
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

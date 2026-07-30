@@ -1,0 +1,293 @@
+%description:
+Module test for SR-MPLS's core signaling-free-reroute property (RFC 8402/8660): after a link
+failure changes the topology, node-SID traffic reroutes automatically -- no LDP/RSVP-TE-style
+explicit signaling is needed, unlike this same scenario in an LDP/RSVP network. Also documents
+the flip side: an ~SrPolicy segment list pinned to a specific adjacency SID gets NO such
+automatic protection, since "adj:" segments are tied to one physical interface, not a
+recomputed shortest path (unlike "node:" segments, which DO reroute for free as long as the
+named node stays reachable via ANY path -- which is exactly why this test's blackholed flow
+uses an "adj:" pin rather than a "node:" one: a "node:"-only pinned policy would have rerouted
+here too, via the same backup path, and would NOT have demonstrated a real difference).
+
+Topology: hostA -- A -- { B -- D (PRIMARY: metric 1+1=2), C -- D (BACKUP: metric 2+2=4) } -- D,
+with D fanning out to two separate destinations, hostD and hostF; all of A/B/C/D are
+~SrMplsRouter sharing one sidTable (A=1, B=2, C=3, D=4). A carries two policies:
+  - dest hostD: segments="node:4" -- UNCONSTRAINED (just the final node SID).
+  - dest hostF: segments="adj:ppp1 node:4" -- pins the FIRST hop onto A's own adjacency SID for
+    ppp1 (A's interface toward B, the PRIMARY link), then continues via D's node SID.
+At t=1s a ~ScenarioManager <disconnect> severs the A<->B link (this is what the network's
+~Ted "trackInterfaceState" hook -- see Ted.ned -- is for: SR-MPLS has no Hello protocol of its
+own to notice a physical link death, so without it this whole test would hang forever with a
+permanently stale, pre-failure Ted view).
+
+Expected outcome after the failure re-converges:
+  - hostD (unconstrained): A recomputes its shortest path to D -- now via C (the only surviving
+    path) -- and keeps delivering. RFC 8660's whole point: no explicit signaling, no dead LSP to
+    tear down, just a Ted recompute (the same recomputeAndInstall() sr_node_sid.test locks in).
+  - hostF (adj-pinned): A's policy is STILL "resolved" (an "adj:" segment's interface is never
+    reachability-checked -- see SrPolicy.cc's resolveSegmentList(), which reads
+    segments[0].interfaceId unconditionally for the ADJ case), so it keeps trying to forward out
+    ppp1 specifically -- which is now down. The packet is dropped at the link/queue layer (NOT a
+    "no mapping" classifier miss -- that is the documented, honest distinction: pinning to a
+    dead adjacency is a hard failure with no fallback, unlike a "node:" segment or an unmatched
+    destination, both of which fail open onto ordinary L3 routing).
+
+Asserted: (1) before the failure, both flows are delivered via the primary path (B); (2) after
+the failure, ~SegmentRouting recomputes (EV_INFO) and hostD keeps being delivered in bulk (the
+"reroute", not just "a few packets"); (3) hostF's delivery essentially STOPS once the failure
+hits (a small, bounded count -- the packets in flight/queued right at the failure instant --
+while hostD's count keeps climbing for the rest of the run).
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.mpls.SrMplsRouter;
+import inet.common.scenario.ScenarioManager;
+import ned.DatarateChannel;
+
+network SrRerouteTest
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    types:
+        channel Link extends DatarateChannel
+        {
+            datarate = 1Mbps;
+            delay = 10us;
+        }
+    submodules:
+        scenarioManager: ScenarioManager;
+        hostA: StandardHost {
+            @display("p=100,250");
+        }
+        A: SrMplsRouter {
+            parameters:
+                routerId = "1.1.1.1";
+                peers = "ppp1 ppp2";
+                sidTable = xmldoc("sidtable.xml");
+                policies = xmldoc("policiesA.xml");
+                @display("p=250,250");
+            gates:
+                pppg[3];
+        }
+        B: SrMplsRouter {
+            parameters:
+                routerId = "2.2.2.2";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=400,150");
+            gates:
+                pppg[2];
+        }
+        C: SrMplsRouter {
+            parameters:
+                routerId = "3.3.3.3";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=400,350");
+            gates:
+                pppg[2];
+        }
+        D: SrMplsRouter {
+            parameters:
+                routerId = "4.4.4.4";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=600,250");
+            gates:
+                pppg[4];
+        }
+        hostD: StandardHost {
+            @display("p=750,180");
+        }
+        hostF: StandardHost {
+            @display("p=750,320");
+        }
+    connections:
+        hostA.pppg++ <--> Link <--> A.pppg[0];
+        A.pppg[1] <--> Link <--> B.pppg[0]; // primary: metric 1
+        B.pppg[1] <--> Link <--> D.pppg[0]; // primary: metric 1
+        A.pppg[2] <--> Link <--> C.pppg[0]; // backup: metric 2
+        C.pppg[1] <--> Link <--> D.pppg[1]; // backup: metric 2
+        D.pppg[2] <--> Link <--> hostD.pppg++;
+        D.pppg[3] <--> Link <--> hostF.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: sidtable.xml
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+    <node router="4.4.4.4" sid="4"/>
+</sr>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: policiesA.xml
+<policies>
+    <policy dest="10.0.6.30" netmask="255.255.255.255" segments="node:4"/>
+    <policy dest="10.0.6.40" netmask="255.255.255.255" segments="adj:ppp1 node:4"/>
+</policies>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<scenario>
+    <at t="1s">
+        <disconnect src-module="A" src-gate="pppg$o[1]"/>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostA.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.6.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.6.2	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: A.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.6.2	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.6.3	MTU: 1500	Metric: 1
+name: ppp2	inet_addr: 10.0.6.5	MTU: 1500	Metric: 2
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: B.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.6.4	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.6.7	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: C.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.6.6	MTU: 1500	Metric: 2
+name: ppp1	inet_addr: 10.0.6.9	MTU: 1500	Metric: 2
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: D.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.6.8	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.6.10	MTU: 1500	Metric: 2
+name: ppp2	inet_addr: 10.0.6.11	MTU: 1500	Metric: 1
+name: ppp3	inet_addr: 10.0.6.12	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostD.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.6.30	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.6.11	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostF.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.6.40	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.6.12	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src
+network = SrRerouteTest
+sim-time-limit = 3s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.hostA.numApps = 2
+**.hostA.app[0].typename = "UdpBasicApp"
+**.hostA.app[0].localPort = 100
+**.hostA.app[0].destPort = 100
+**.hostA.app[0].messageLength = 128 bytes
+**.hostA.app[0].startTime = 0.2s
+**.hostA.app[0].sendInterval = 0.01s
+**.hostA.app[0].destAddresses = "hostD"
+**.hostA.app[1].typename = "UdpBasicApp"
+**.hostA.app[1].localPort = 101
+**.hostA.app[1].destPort = 100
+**.hostA.app[1].messageLength = 128 bytes
+**.hostA.app[1].startTime = 0.2s
+**.hostA.app[1].sendInterval = 0.01s
+**.hostA.app[1].destAddresses = "hostF"
+
+**.hostD.numApps = 1
+**.hostD.app[0].typename = "UdpSink"
+**.hostD.app[0].localPort = 100
+
+**.hostF.numApps = 1
+**.hostF.app[0].typename = "UdpSink"
+**.hostF.app[0].localPort = 100
+
+**.hostA.ipv4.routingTable.routingFile = "hostA.rt"
+**.hostD.ipv4.routingTable.routingFile = "hostD.rt"
+**.hostF.ipv4.routingTable.routingFile = "hostF.rt"
+**.A.ipv4.routingTable.routingFile = "A.rt"
+**.B.ipv4.routingTable.routingFile = "B.rt"
+**.C.ipv4.routingTable.routingFile = "C.rt"
+**.D.ipv4.routingTable.routingFile = "D.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Before the failure: both flows are label-switched over the primary path (via B)
+%contains: stdout
+doStackOps: {PUSH 16004}
+%#--------------------------------------------------------------------------------------------------------------
+%# The failure is actually injected
+%contains: stdout
+Disconnecting SrRerouteTest.A.pppg$o[1]
+%#--------------------------------------------------------------------------------------------------------------
+%# SegmentRouting reacts and recomputes (this is the signaling-free reroute itself -- no LDP/
+%# RSVP-TE teardown/resignal round-trip, just a Ted-driven recompute)
+%contains: stdout
+topology-affecting signal
+%#--------------------------------------------------------------------------------------------------------------
+%# After reconverging, C (the backup path's penultimate hop toward D) starts handling this
+%# traffic -- proof the unconstrained node-SID flow actually moved onto the surviving path
+%contains: stdout
+node 4.4.4.4 (sid=4, label=16004): directly connected, installing POP (PHP) via
+%#--------------------------------------------------------------------------------------------------------------
+%# hostD (unconstrained node-SID) keeps being delivered in bulk after the failure -- the
+%# reroute, not just whatever was already in flight when the link died
+%postrun-command: grep "SrRerouteTest.hostD.app\[0\] packetReceived:count" results/General-#0.sca | awk '{ if ($NF+0 > 150) print "HOSTD_KEEPS_FLOWING", $0 }' > hostd.out
+%contains: hostd.out
+HOSTD_KEEPS_FLOWING
+%#--------------------------------------------------------------------------------------------------------------
+%# the exact drop mechanism for the pinned flow: a clean, graceful link-layer drop (NOT a
+%# classifier "no mapping" miss, and NOT a crash) -- confirms this is genuinely "adj: has no
+%# fallback", not some other malfunction
+%contains: stdout
+Interface is not connected, dropping packet
+%#--------------------------------------------------------------------------------------------------------------
+%# hostF (adj:ppp1-pinned) essentially stops receiving once the pinned link dies -- far fewer
+%# packets than hostD over the identical send schedule, despite an equally-available (via C)
+%# node-SID path to the SAME final router D existing in the network the whole time
+%postrun-command: grep "SrRerouteTest.hostF.app\[0\] packetReceived:count" results/General-#0.sca | awk '{ if ($NF+0 < 150) print "HOSTF_BLACKHOLED", $0 }' > hostf.out
+%contains: hostf.out
+HOSTF_BLACKHOLED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

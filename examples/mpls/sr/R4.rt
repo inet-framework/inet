@@ -1,0 +1,7 @@
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.14	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.0.15	MTU: 1500	Metric: 1
+name: ppp2	inet_addr: 10.0.0.19	MTU: 1500	Metric: 1
+name: ppp3	inet_addr: 10.0.0.21	MTU: 1500	Metric: 1
+name: ppp4	inet_addr: 10.0.0.23	MTU: 1500	Metric: 1
+ifconfigend.

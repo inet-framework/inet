@@ -1,0 +1,17 @@
+<policies>
+    <!-- plain node-SID policy: names only the destination (R4's node SID); the
+         actual route taken is whatever SegmentRouting's own shortest-path
+         computation picks: here, the R1-R3 chord (a 2-hop shortcut). -->
+    <policy dest="10.0.0.20" netmask="255.255.255.255" segments="node:4"/>
+
+    <!-- explicit-path policy: names R6's node SID as an intermediate waypoint
+         first, forcing the LONGER 3-hop route via R6 and R5, avoiding the
+         R1-R3 chord entirely: SR traffic engineering without signaling. -->
+    <policy dest="10.0.0.22" netmask="255.255.255.255" segments="node:6 node:4"/>
+
+    <!-- adjacency-SID pin: names R1's OWN secondary (higher-metric, non-IGP
+         preferred) link to R2 by its local interface, forcing that specific
+         physical link; from R2 onward, ordinary node-SID forwarding to R4
+         continues unmodified. -->
+    <policy dest="10.0.0.24" netmask="255.255.255.255" segments="adj:ppp4 node:4"/>
+</policies>
