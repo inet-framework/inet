@@ -7,7 +7,9 @@
 #include "inet/networklayer/pcep/Pce.h"
 
 #include <algorithm>
+#include <cstdlib>
 
+#include "inet/networklayer/rsvpte/Utils.h"
 #include "inet/networklayer/ted/Ted.h"
 
 namespace inet {
@@ -39,6 +41,8 @@ void Pce::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         keepaliveTime = par("keepaliveTime");
         deadTimer = par("deadTimer");
+        keepaliveTimeSec = pcepTimerSeconds(keepaliveTime, "keepaliveTime", false);
+        deadTimerSec = pcepTimerSeconds(deadTimer, "deadTimer", true);
 
         tedmod.reference(this, "tedModule", true);
 
@@ -93,6 +97,12 @@ void Pce::handleCrashOperation(LifecycleOperation *operation)
 void Pce::clearState()
 {
     for (auto& s : sessions) {
+        // A stop/crash takes an OPERATIONAL session down as surely as a lost TCP
+        // connection does; the socketClosed() that follows can no longer report it
+        // (the session is gone by then), so the sessionUp/sessionDown pair would
+        // otherwise diverge.
+        if (s.state == PCEP_OPERATIONAL)
+            emit(sessionDownSignal, (long)s.sid);
         cancelAndDelete(s.keepAliveSendTimer);
         cancelAndDelete(s.sessionHoldTimer);
     }
@@ -148,6 +158,14 @@ int Pce::findSession(TcpSocket *socket)
     return -1;
 }
 
+int Pce::findSessionByAddress(const L3Address& pccAddress)
+{
+    for (size_t i = 0; i < sessions.size(); ++i)
+        if (sessions[i].pccAddress == pccAddress)
+            return (int)i;
+    return -1;
+}
+
 void Pce::sendToSession(int i, Packet *pk)
 {
     numSent++;
@@ -165,8 +183,8 @@ void Pce::sendOpen(int i)
     const auto& open = makeShared<PcepOpen>();
     open->setChunkLength(PCEP_OPEN_MESSAGE_BYTES);
     open->setType(PCEP_OPEN);
-    open->setKeepaliveTime((uint8_t)keepaliveTime.inUnit(SIMTIME_S));
-    open->setDeadTimer((uint8_t)deadTimer.inUnit(SIMTIME_S));
+    open->setKeepaliveTime(keepaliveTimeSec);
+    open->setDeadTimer(deadTimerSec);
     open->setSid(sessions[i].sid);
     pk->insertAtBack(open);
 
@@ -185,6 +203,22 @@ void Pce::sendKeepalive(int i)
 
     sendToSession(i, pk);
     EV_INFO << "Keepalive sent to " << sessions[i].pccAddress << "\n";
+}
+
+void Pce::sendPcupd(int i, uint32_t srpId, int plspId, const EroVector& ero)
+{
+    Packet *pk = new Packet("Pcep-PCUpd");
+    const auto& upd = makeShared<PcepPcupd>();
+    upd->setType(PCEP_PCUPD);
+    upd->setSrpId(srpId);
+    upd->setPlspId(plspId);
+    upd->setEro(ero);
+    upd->setChunkLength(pcepPcupdMessageBytes(ero.size()));
+    pk->insertAtBack(upd);
+
+    sendToSession(i, pk);
+    EV_INFO << "PCUpd sent to " << sessions[i].pccAddress << " (srpId=" << srpId << ", plspId=" << plspId
+            << ", ERO with " << ero.size() << " hop(s))\n";
 }
 
 void Pce::socketAvailable(TcpSocket *listenerSocket, TcpAvailableInfo *availableInfo)
@@ -238,6 +272,21 @@ void Pce::handleTcpConnectionDown(TcpSocket *socket)
                 emit(sessionDownSignal, (long)sessions[i].sid);
             cancelAndDelete(sessions[i].keepAliveSendTimer);
             cancelAndDelete(sessions[i].sessionHoldTimer);
+
+            // Forget every LSP this now-dead PCC had delegated to us -- a stale
+            // entry naming an unreachable session would otherwise linger
+            // (harmlessly but confusingly) until a later pce-reoptimize command
+            // discovers, only then, that it has nowhere to send a PCUpd (see
+            // reoptimizeDelegatedLsp()'s own OPERATIONAL check). No RFC 8231
+            // Section 5.6 State Synchronization is attempted if this PCC
+            // reconnects later -- a documented simplification.
+            for (auto it = delegatedLsps.begin(); it != delegatedLsps.end(); ) {
+                if (it->second.pccAddress == sessions[i].pccAddress)
+                    it = delegatedLsps.erase(it);
+                else
+                    ++it;
+            }
+
             EV_INFO << "PCEP session with " << sessions[i].pccAddress << " went down\n";
             sessions.erase(sessions.begin() + i);
             break;
@@ -285,6 +334,10 @@ void Pce::processPcepPacketFromTcp(int i, const Ptr<const PcepMessage>& pcepMsg)
 
         case PCEP_PCREQ:
             processPCREQ(i, pcepMsg);
+            break;
+
+        case PCEP_PCRPT:
+            processPCRPT(i, pcepMsg);
             break;
 
         default:
@@ -350,8 +403,14 @@ void Pce::processKEEPALIVE(int i)
         ASSERT(sessions[i].keepAliveSendTimer == nullptr && sessions[i].sessionHoldTimer == nullptr);
         sessions[i].keepAliveSendTimer = new cMessage("PcepKeepAliveSendTimer");
         scheduleAfter(sessions[i].negotiatedKeepaliveTime, sessions[i].keepAliveSendTimer);
-        sessions[i].sessionHoldTimer = new cMessage("PcepSessionHoldTimer");
-        scheduleAfter(sessions[i].peerDeadTimer, sessions[i].sessionHoldTimer);
+        // RFC 5440 Section 7.3: a DeadTimer of 0 in the peer's Open asks us NOT to run
+        // one at all, so the session is simply never declared dead on silence.
+        if (sessions[i].peerDeadTimer > 0) {
+            sessions[i].sessionHoldTimer = new cMessage("PcepSessionHoldTimer");
+            scheduleAfter(sessions[i].peerDeadTimer, sessions[i].sessionHoldTimer);
+        }
+        else
+            EV_INFO << "PCC " << sessions[i].pccAddress << " advertised a DeadTimer of 0; not monitoring this session for silence" << endl;
     }
     else if (sessions[i].state == PCEP_OPERATIONAL) {
         // steady-state KeepAlive refresh; the session hold timer reset already
@@ -372,10 +431,10 @@ void Pce::processPCREQ(int i, const Ptr<const PcepMessage>& pcepMsg)
             << ", src=" << req->getSrcAddress() << ", dst=" << req->getDstAddress()
             << ", bandwidth=" << req->getBandwidth() << ", setupPriority=" << req->getSetupPriority() << ")" << endl;
 
-    // Same CSPF call RsvpTe::createIngressPSB() makes for its own local computation
-    // (Workstream C6) -- rooted at the REQUESTER (the PCReq's END-POINTS source
-    // address), not at this Pce's own node, since the Pce may be running on a
-    // different router than the one that will actually signal the LSP.
+    // Same CSPF call RsvpTe::createIngressPSB() makes for its own local computation --
+    // rooted at the REQUESTER (the PCReq's END-POINTS source address), not at this
+    // Pce's own node, since the Pce may be running on a different router than the one
+    // that will actually signal the LSP.
     Ipv4AddressVector dest;
     dest.push_back(req->getDstAddress());
     Ipv4AddressVector cspfPath = tedmod->calculateShortestPath(req->getSrcAddress(), dest, tedmod->getLinks(),
@@ -411,6 +470,113 @@ void Pce::processPCREQ(int i, const Ptr<const PcepMessage>& pcepMsg)
 
     pk->insertAtBack(rep);
     sendToSession(i, pk);
+}
+
+void Pce::processPCRPT(int i, const Ptr<const PcepMessage>& pcepMsg)
+{
+    const auto& rpt = CHK(dynamicPtrCast<const PcepPcrpt>(pcepMsg));
+
+    EV_INFO << "PCRpt received from " << sessions[i].pccAddress << " (plspId=" << rpt->getPlspId()
+            << ", srpId=" << rpt->getSrpId() << ", delegate=" << rpt->getDelegate()
+            << ", up=" << rpt->getUp() << ", ERO with " << rpt->getEro().size() << " hop(s))" << endl;
+
+    if (!rpt->getUp()) {
+        delegatedLsps.erase(rpt->getPlspId());
+        EV_INFO << "delegated LSP PLSP-ID " << rpt->getPlspId() << " reported DOWN, forgetting it" << endl;
+        return;
+    }
+
+    DelegatedLsp& lsp = delegatedLsps[rpt->getPlspId()]; // creates the entry the first time this PLSP-ID is seen
+    lsp.plspId = rpt->getPlspId();
+    lsp.pccAddress = sessions[i].pccAddress;
+    lsp.srcAddress = rpt->getSrcAddress();
+    lsp.destAddress = rpt->getDstAddress();
+    lsp.bandwidth = rpt->getBandwidth();
+    lsp.setupPriority = rpt->getSetupPriority();
+    lsp.includeAny = rpt->getIncludeAny();
+    lsp.excludeAny = rpt->getExcludeAny();
+    lsp.currentEro = rpt->getEro();
+}
+
+void Pce::reoptimizeDelegatedLsp(int plspId)
+{
+    auto it = delegatedLsps.find(plspId);
+    if (it == delegatedLsps.end()) {
+        EV_WARN << "pce-reoptimize: no delegated LSP with PLSP-ID " << plspId << ", ignoring" << endl;
+        return;
+    }
+    DelegatedLsp& lsp = it->second;
+
+    // Same CSPF call processPCREQ() makes, rooted at this LSP's own source, using the
+    // CSPF inputs the owning PCC's PCRpt carried along (see PcepPcrpt's doc comment
+    // for why those ride on every report).
+    Ipv4AddressVector dest;
+    dest.push_back(lsp.destAddress);
+    Ipv4AddressVector cspfPath = tedmod->calculateShortestPath(lsp.srcAddress, dest, tedmod->getLinks(),
+            lsp.bandwidth, lsp.setupPriority, lsp.includeAny, lsp.excludeAny);
+
+    if (cspfPath.empty()) {
+        EV_INFO << "pce-reoptimize: no feasible path for PLSP-ID " << plspId << ", leaving it unchanged" << endl;
+        return;
+    }
+
+    EroVector newEro;
+    for (unsigned int k = 1; k < cspfPath.size(); k++) {
+        EroObj hop;
+        hop.L = false;
+        hop.node = cspfPath[k];
+        newEro.push_back(hop);
+    }
+
+    if (newEro.size() == lsp.currentEro.size()
+            && std::equal(newEro.begin(), newEro.end(), lsp.currentEro.begin(),
+                    [](const EroObj& a, const EroObj& b) { return a.L == b.L && a.node == b.node; })) {
+        EV_INFO << "pce-reoptimize: recomputed path for PLSP-ID " << plspId << " is unchanged, no PCUpd needed" << endl;
+        return;
+    }
+
+    int i = findSessionByAddress(lsp.pccAddress);
+    if (i == -1 || sessions[i].state != PCEP_OPERATIONAL) {
+        EV_WARN << "pce-reoptimize: no OPERATIONAL PCEP session to " << lsp.pccAddress
+                << " for PLSP-ID " << plspId << ", cannot send PCUpd" << endl;
+        return;
+    }
+
+    EV_INFO << "pce-reoptimize: found a better path for PLSP-ID " << plspId << " (" << vectorToString(newEro)
+            << "), sending PCUpd" << endl;
+
+    uint32_t srpId = ++srpIdCounter;
+    // Optimistic update: a real PCE might wait for the PCC's next PCRpt to actually
+    // confirm the cutover before considering this LSP's "current" route changed;
+    // that extra round trip is not modeled (see the class doc comment's State
+    // Synchronization simplification note).
+    lsp.currentEro = newEro;
+    sendPcupd(i, srpId, plspId, newEro);
+}
+
+void Pce::processCommand(const cXMLElement& node)
+{
+    // Called cross-module from ~ScenarioManager -- mirrors ~RsvpTe::addSession()/
+    // delSession()'s identical, pre-existing Enter_Method precedent for the same
+    // caller.
+    Enter_Method("processCommand");
+
+    if (strcmp(node.getTagName(), "pce-reoptimize") != 0)
+        throw cRuntimeError("Unknown scenario command '%s'", node.getTagName());
+
+    const char *plspidAttr = node.getAttribute("plspid");
+    if (!plspidAttr)
+        throw cRuntimeError("<pce-reoptimize> requires a 'plspid' attribute (\"all\" or a PLSP-ID)");
+
+    if (!strcmp(plspidAttr, "all")) {
+        std::vector<int> plspIds;
+        for (auto& entry : delegatedLsps)
+            plspIds.push_back(entry.first);
+        for (int plspId : plspIds)
+            reoptimizeDelegatedLsp(plspId);
+    }
+    else
+        reoptimizeDelegatedLsp(atoi(plspidAttr));
 }
 
 void Pce::processKeepAliveSendTimeout(cMessage *msg)

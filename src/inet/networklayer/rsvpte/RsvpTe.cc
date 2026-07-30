@@ -45,8 +45,8 @@ namespace {
 // implements (RFC 3209 LSP_TUNNEL_IPV4 for SESSION/SENDER_TEMPLATE, RFC 2210
 // Int-Serv Controlled-Load for SENDER_TSPEC/FLOWSPEC, RFC 2205 IPv4 for
 // ERROR_SPEC). These are used to compute honest (non-guessed) message
-// lengths; they are intentionally kept object-granular so a future wire
-// serializer (Workstream E) can validate against them.
+// lengths; they are intentionally kept object-granular so the wire serializer
+// (RsvpTeSerializer) can validate against them.
 constexpr int RSVP_COMMON_HEADER_BYTES = 8;
 constexpr int SESSION_OBJECT_BYTES = 16;
 constexpr int RSVP_HOP_OBJECT_BYTES = 12;
@@ -56,10 +56,7 @@ constexpr int SENDER_TEMPLATE_OBJECT_BYTES = 12; // also used for FILTER_SPEC (s
 // RFC 2210 Section 3.1 (SENDER_TSPEC) / 3.2.1 (FLOWSPEC, Controlled-Load): the
 // Int-Serv content is exactly 8 32-bit words (message header + per-service
 // header + per-parameter header + the 5 token-bucket parameters r/b/p/m/M) =
-// 32 bytes, plus the 4-byte outer RSVP object header = 36. Corrected from an
-// earlier 40 (Workstream E, Phase 2 commit 3): the wire serializer's object
-// layout table exposed a 1-word (4-byte) overcount against the RFC diagram --
-// verified directly against RFC 2210 text, not re-derived from guesswork.
+// 32 bytes, plus the 4-byte outer RSVP object header = 36.
 constexpr int SENDER_TSPEC_OBJECT_BYTES = 36;
 constexpr int FLOWSPEC_OBJECT_BYTES = 36;
 constexpr int LABEL_OBJECT_BYTES = 8;
@@ -68,7 +65,7 @@ constexpr int ERROR_SPEC_OBJECT_BYTES = 12;
 constexpr int HELLO_OBJECT_BYTES = 12;
 constexpr int ERO_RRO_OBJECT_HEADER_BYTES = 4;
 constexpr int ERO_RRO_SUBOBJECT_BYTES = 8; // IPv4 prefix subobject
-// RFC 2961 Section 5.4 (refresh reduction, Workstream C8): MESSAGE_ID / MESSAGE_ID_ACK
+// RFC 2961 Section 5.4 (refresh reduction): MESSAGE_ID / MESSAGE_ID_ACK
 // object header(4) + Epoch(4) + Message_Identifier(4) = 12 bytes each; only ever
 // present when the sending router's "refreshReduction" parameter is on.
 constexpr int MESSAGE_ID_OBJECT_BYTES = 12;
@@ -85,8 +82,7 @@ B computeRroLength(const Ipv4AddressVector& rro)
 }
 
 // One FILTER_SPEC + FLOWSPEC + LABEL (+ RRO if present) per flow, shared by
-// Resv (commit 10) and ResvTear/ResvErr (commit 12), all of which carry a
-// FlowDescriptorVector.
+// Resv and ResvTear/ResvErr, all of which carry a FlowDescriptorVector.
 B computeFlowDescriptorListLength(const FlowDescriptorVector& flows)
 {
     B length = B(0);
@@ -100,7 +96,7 @@ B computeHelloMessageLength()
     return B(RSVP_COMMON_HEADER_BYTES + HELLO_OBJECT_BYTES);
 }
 
-// C8: 0 bytes when absent -- same "omitted entirely" convention as computeEroLength()/
+// 0 bytes when absent -- same "omitted entirely" convention as computeEroLength()/
 // computeRroLength() above.
 B computeMessageIdLength(bool hasMessageId)
 {
@@ -119,7 +115,7 @@ B computePathMessageLength(const EroVector& ero, bool hasMessageId = false, bool
            + computeEroLength(ero) + computeMessageIdLength(hasMessageId) + computeMessageIdAckLength(hasMessageIdAck);
 }
 
-// C8: an Srefresh's own length -- CommonHdr + MESSAGE_ID, plus an optional piggybacked
+// An Srefresh's own length -- CommonHdr + MESSAGE_ID, plus an optional piggybacked
 // MESSAGE_ID_ACK/_NACK.
 B computeSrefreshMessageLength(bool hasMessageIdAck)
 {
@@ -226,13 +222,15 @@ void RsvpTe::initialize(int stage)
         computationMode = par("computationMode").stdstringValue();
         if (computationMode == "pce")
             pccmod.reference(this, "pccModule", true);
+        delegate = par("delegate");
+        maxPlspId = 0;
         reoptimizeInterval = par("reoptimizeInterval");
         if (reoptimizeInterval > SIMTIME_ZERO)
             reoptimizeTimerMsg = new ReoptimizeTimerMsg("reoptimize timer");
         refreshReduction = par("refreshReduction");
         maxMessageId = 0;
         messageIdEpoch = 0;
-        // C8: a fresh epoch each run (like a real router's would change across
+        // A fresh epoch each run (like a real router's would change across
         // restarts). Only drawn when refreshReduction is actually on -- an
         // unconditional RNG draw here would consume a random number on every run
         // regardless of this feature, shifting every subsequent uniform(0.5, 1.5) *
@@ -396,7 +394,7 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 
         int lspid = getParameterIntValue(path, "lspid");
 
-        // C7: keep the make-before-break Lsp_Id allocator (maxLspId) past every
+        // Keep the make-before-break Lsp_Id allocator (maxLspId) past every
         // operator-configured id, whether it arrives via the initial traffic.xml or a later
         // add-session, so a generated replacement id can never collide with one of these.
         if (lspid > maxLspId)
@@ -439,7 +437,7 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 
         newPath.tspec.req_bandwidth = getParameterDoubleValue(path, "bandwidth", 0.0);
 
-        // C11 (RFC 2210 token-bucket Tspec): carried/propagated/recorded end to end
+        // RFC 2210 token-bucket Tspec: carried/propagated/recorded end to end
         // (see IntServ.msg's SenderTspecObj) but NOT consulted by admission control,
         // which stays req_bandwidth-only (RsvpTe::doCACCheck()) -- see RsvpTe.ned's
         // doc comment for this model limitation. Default 0 when absent, like every
@@ -453,10 +451,10 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
         if (route)
             newPath.ERO = readTrafficRouteFromXML(route);
 
-        // C6/D3: optional CSPF affinity constraints, hex-encoded admin-group bitmasks (e.g.
+        // Optional CSPF affinity constraints, hex-encoded admin-group bitmasks (e.g.
         // "0x3"); only consulted by createIngressPSB() when computeEro is on and this path's
         // ERO ends up empty/all-loose. strtoul's base-0 auto-detects the "0x" prefix (same
-        // parsing Ted::initializeTED() already uses for the "linkAttributes" adminGroup XML
+        // parsing Ted::initializeTED() uses for the "linkAttributes" adminGroup XML
         // attribute).
         newPath.includeAny = strtoul(getParameterStrValue(path, "include_any", "0"), nullptr, 0);
         newPath.excludeAny = strtoul(getParameterStrValue(path, "exclude_any", "0"), nullptr, 0);
@@ -695,7 +693,7 @@ void RsvpTe::processPSB_TIMER(PsbTimerMsg *msg)
     PathStateBlock *psb = findPsbById(msg->getId());
     ASSERT(psb);
 
-    // C8 (RFC 2961 refresh reduction): once this PSB already has an assigned
+    // RFC 2961 refresh reduction: once this PSB already has an assigned
     // outbound MESSAGE_ID (from an earlier full send -- the very first call here
     // after PSB creation always takes the refreshPath() branch, since outMessageId
     // starts at 0), subsequent periodic refreshes are compressed into a Srefresh.
@@ -810,7 +808,7 @@ void RsvpTe::refreshPath(PathStateBlock *psbEle)
 
     pm->setERO(ERO);
 
-    // C8 (RFC 2961 refresh reduction): attach this PSB's own MESSAGE_ID (assigning
+    // RFC 2961 refresh reduction: attach this PSB's own MESSAGE_ID (assigning
     // one on first use) so that later periodic refreshes can be compressed into a
     // Srefresh instead (see processPSB_TIMER()); also piggyback any ACK/NACK owed to
     // this PSB's downstream peer.
@@ -839,7 +837,7 @@ void RsvpTe::refreshPath(PathStateBlock *psbEle)
     sendToIP(pk, nextHop);
 }
 
-// C8 (RFC 2961 Section 5.3): compressed counterpart of refreshPath(), sent once
+// RFC 2961 Section 5.3: compressed counterpart of refreshPath(), sent once
 // this PSB already has an assigned outMessageId. Carries no session/ERO/Tspec at
 // all -- the receiver resolves it purely from (this PSB's downstream peer address,
 // epoch, id); see processSrefreshMsg().
@@ -891,7 +889,7 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle)
                 phops.push_back(elem.previousHopAddress);
         }
 
-        // C8 (RFC 2961 refresh reduction): once a phop already has an assigned
+        // RFC 2961 refresh reduction: once a phop already has an assigned
         // outbound MESSAGE_ID (from a previous full send), subsequent periodic
         // refreshes to it are compressed into a Srefresh instead. When
         // refreshReduction is off, "refreshReduction && ..." is always false, so
@@ -949,7 +947,7 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
 
     msg->setFlowDescriptor(flows);
 
-    // C8: attach this (RSB, phop)'s own MESSAGE_ID (assigning one on first use) and
+    // Attach this (RSB, phop)'s own MESSAGE_ID (assigning one on first use) and
     // any ACK/NACK owed to "phop" for a MESSAGE_ID it attached to a Path it sent us
     // (see the matching PSB's hasInMessageId/processPathMsg()).
     if (refreshReduction) {
@@ -975,7 +973,7 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
     sendToIP(pk, PHOP);
 }
 
-// C8 (RFC 2961 Section 5.3): compressed counterpart of refreshResv(rsb, PHOP), sent
+// RFC 2961 Section 5.3: compressed counterpart of refreshResv(rsb, PHOP), sent
 // once this (RSB, phop) pair already has an assigned outbound MESSAGE_ID. Carries no
 // session/flow descriptors at all -- the receiver resolves it purely from (this
 // router's address as seen by "PHOP", epoch, id); see processSrefreshMsg().
@@ -1258,7 +1256,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
 
     // install labels into lib
 
-    // C7 (make-before-break): if this commitResv() call is the one that installs a pending
+    // Make-before-break: if this commitResv() call is the one that installs a pending
     // MBB replacement's ingress label for the first time, remember the cutover to perform --
     // but only ACT on it after the loop below has fully finished. Doing it mid-loop (e.g.
     // calling removePSB() on the OLD psb right away) could erase a PSB and shift PSBList,
@@ -1360,19 +1358,27 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
             sendPathNotify(psb->handler, psb->sessionObject, psb->Sender_Template_Object, PATH_CREATED, 0.0);
             emit(lspEstablishedSignal, simTime() - psb->pathCreationTime);
 
-            // C7 (make-before-break, RFC 3209 Section 4.6.4): if this newly-established
+            // Make-before-break (RFC 3209 Section 4.6.4): if this newly-established
             // ingress PSB is a pending MBB replacement, this is the moment to cut traffic
             // over -- record it now (inLabel is already known at this point), act on it
             // once this loop finishes.
             auto sit = findSession(rsb->sessionObject);
             if (sit != traffic.end()) {
                 auto pit = findPath(&(*sit), psb->Sender_Template_Object);
-                if (pit != sit->paths.end() && pit->replacesLspId >= 0) {
-                    cutoverOldLspId = pit->replacesLspId;
-                    cutoverSession = rsb->sessionObject;
-                    cutoverNewSender = psb->Sender_Template_Object;
-                    cutoverNewInLabel = inLabel;
-                    pit->replacesLspId = -1; // no longer a pending replacement -- it's the session's normal path now
+                if (pit != sit->paths.end()) {
+                    // RFC 8231 stateful delegation: report this path (whether
+                    // it's a brand-new establishment or a completed make-before-break
+                    // replacement -- both land here) to the PCE. A no-op unless
+                    // "delegate" applies to it (see reportLspUp()'s own doc comment).
+                    reportLspUp(rsb->sessionObject, *pit, psb->ERO);
+
+                    if (pit->replacesLspId >= 0) {
+                        cutoverOldLspId = pit->replacesLspId;
+                        cutoverSession = rsb->sessionObject;
+                        cutoverNewSender = psb->Sender_Template_Object;
+                        cutoverNewInLabel = inLabel;
+                        pit->replacesLspId = -1; // no longer a pending replacement -- it's the session's normal path now
+                    }
                 }
             }
         }
@@ -1423,7 +1429,7 @@ RsvpTe::ResvStateBlock *RsvpTe::createRSB(const Ptr<const RsvpResvMsg>& msg)
 
     EV_INFO << "created new RSB " << rsb->id << endl;
 
-    // C8 (RFC 2961 refresh reduction): seed an ACK owed to any upstream sender whose
+    // RFC 2961 refresh reduction: seed an ACK owed to any upstream sender whose
     // Path already arrived (with a MESSAGE_ID) before this RSB existed to queue it
     // against -- the common case for a transit node, since this function only runs
     // once the first downstream Resv arrives, which is typically after the matching
@@ -1461,7 +1467,7 @@ void RsvpTe::updateRSB(ResvStateBlock *rsb, const RsvpResvMsg *msg)
 
                     scheduleCommitTimer(rsb);
 
-                    // C8 (RFC 2961 refresh reduction): this RSB's content just
+                    // RFC 2961 refresh reduction: this RSB's content just
                     // changed, so any already-assigned outbound MESSAGE_IDs are
                     // stale (RFC 2961 requires a fresh id whenever the content
                     // changes) -- drop them all so the next Resv send to each phop
@@ -1485,7 +1491,7 @@ void RsvpTe::updateRSB(ResvStateBlock *rsb, const RsvpResvMsg *msg)
             scheduleCommitTimer(rsb);
             scheduleRefreshTimer(rsb, 0.0);
 
-            // C8: same reasoning as the label-modified branch above.
+            // Same reasoning as the label-modified branch above.
             rsb->outMessageIdByPhop.clear();
         }
     }
@@ -1695,7 +1701,7 @@ RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const TrafficSession& session, 
         ERO.erase(ERO.begin());
     }
 
-    // C6: if the configured ERO gives no real source-routing constraint -- it's empty, or
+    // If the configured ERO gives no real source-routing constraint -- it's empty, or
     // every remaining hop is loose (<lnode>, i.e. just a waypoint hint, never a strict hop) --
     // and CSPF is enabled, compute a full strict ERO to the destination ourselves instead of
     // falling back to plain hop-by-hop routing. A partially-strict ERO (at least one <node>)
@@ -1706,15 +1712,17 @@ RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const TrafficSession& session, 
             allLoose = false;
 
     if (computeEro && (ERO.empty() || allLoose)) {
-        if (computationMode == "pce") {
-            // Workstream F4 Phase 2: delegate to a co-located Pcc instead of running
+        // A path that has fallen back to local control (RFC 8231 Section 5.2
+        // state timeout, see revertToLocalComputation()) always uses LOCAL CSPF from
+        // here on, even while computationMode is still "pce" for every OTHER path.
+        if (computationMode == "pce" && !path.localFallback) {
+            // Delegate to a co-located Pcc instead of running
             // Ted::calculateShortestPath() ourselves. requestPathComputation() bridges
             // its inherently asynchronous PCReq/PCRep TCP exchange onto this synchronous-
             // looking call (see Pcc.h's doc comment): PENDING/NO_PATH both mean "no ERO
             // available on THIS attempt", handled below by falling through to the exact
             // same nullptr-return, retry-via-createPath() contract the local-CSPF branch
-            // above already relies on for "no path found yet" -- there is no separate
-            // code path to build here.
+            // relies on for "no path found yet".
             EroVector computedEro;
             Pcc::PceComputationResult result = pccmod->requestPathComputation(routerId, session.sobj.DestAddress,
                     path.tspec.req_bandwidth, session.sobj.setupPri, path.includeAny, path.excludeAny, computedEro);
@@ -2196,7 +2204,7 @@ void RsvpTe::processPathMsg(Packet *pk)
     if (rsb)
         scheduleRefreshTimer(rsb, 0.0);
 
-    // C8 (RFC 2961 refresh reduction): record the peer's MESSAGE_ID for this PSB (so
+    // RFC 2961 refresh reduction: record the peer's MESSAGE_ID for this PSB (so
     // a later Srefresh from them naming it resolves back here -- see
     // processSrefreshMsg()) and process any piggybacked ACK/NACK for our own
     // outbound Resv-id previously sent to this same previousHopAddress. Queuing the
@@ -2276,7 +2284,7 @@ void RsvpTe::processResvMsg(Packet *pk)
 
     scheduleTimeout(rsb);
 
-    // C8: record the peer's MESSAGE_ID for this RSB (so a later Srefresh from them
+    // Record the peer's MESSAGE_ID for this RSB (so a later Srefresh from them
     // naming it resolves back here) and process any piggybacked ACK/NACK for our
     // own outbound Path-id previously sent to this same downstream peer. The
     // matching PSB is the one sharing this RSB's (session, OI) -- the same identity
@@ -2305,7 +2313,7 @@ void RsvpTe::processResvMsg(Packet *pk)
     delete pk;
 }
 
-// C8 (RFC 2961 Section 5.3): a compressed refresh naming (epoch, id). Resolved
+// RFC 2961 Section 5.3: a compressed refresh naming (epoch, id). Resolved
 // purely from (the packet's actual sender address, epoch, id) -- Srefresh carries
 // no session/sender identity of its own (see RsvpSrefreshMsg.msg).
 void RsvpTe::processSrefreshMsg(Packet *pk)
@@ -2355,7 +2363,7 @@ void RsvpTe::processSrefreshMsg(Packet *pk)
     delete pk;
 }
 
-// C8: a positive ack is purely informational in this model (there is nothing this
+// A positive ack is purely informational in this model (there is nothing this
 // model does differently once a peer confirms receipt -- no summary-refresh-interval
 // extension is modeled); a nack means "peer" does not recognize the (epoch, id) we
 // last told them about, so fall back to an immediate full resend of whichever state
@@ -2505,7 +2513,7 @@ void RsvpTe::pathProblem(PathStateBlock *psb)
     ASSERT(psb);
     ASSERT(!psb->OutInterface.isUnspecified());
 
-    // C7 (make-before-break, RFC 3209 Section 4.6.4): copy what's needed by value up front.
+    // Make-before-break (RFC 3209 Section 4.6.4): copy what's needed by value up front.
     // triggerMakeBeforeBreak() below (permanent-path case) calls createPath(), which can
     // grow PSBList/traffic[].paths (both std::vectors) and reallocate them -- invalidating
     // `psb` and any iterator taken before the call. Everything after this point uses only
@@ -2650,6 +2658,119 @@ void RsvpTe::completeMakeBeforeBreakCutover(const SessionObj& session, const Sen
         if (pit != sit->paths.end())
             sit->paths.erase(pit);
     }
+}
+
+void RsvpTe::reportLspUp(const SessionObj& session, TrafficPath& path, const EroVector& ero)
+{
+    if (!delegate || computationMode != "pce" || path.localFallback)
+        return; // delegation isn't on, doesn't apply here, or already fell back to local control
+
+    if (path.plspId < 0)
+        path.plspId = ++maxPlspId;
+
+    EV_INFO << "reporting delegated LSP UP to PCE (plspId=" << path.plspId << ", lspid=" << path.sender.Lsp_Id
+            << ", ERO " << vectorToString(ero) << ")" << endl;
+    pccmod->reportLsp(path.plspId, true, routerId, session.DestAddress, path.tspec.req_bandwidth,
+            session.setupPri, path.includeAny, path.excludeAny, ero);
+}
+
+void RsvpTe::reportLspDown(const SessionObj& session, TrafficPath& path)
+{
+    if (!delegate || computationMode != "pce" || path.localFallback || path.plspId < 0)
+        return; // never delegated/reported in the first place (or already fell back)
+
+    EV_INFO << "reporting delegated LSP DOWN to PCE (plspId=" << path.plspId << ", lspid=" << path.sender.Lsp_Id << ")" << endl;
+    pccmod->reportLsp(path.plspId, false, routerId, session.DestAddress, path.tspec.req_bandwidth,
+            session.setupPri, path.includeAny, path.excludeAny, EroVector());
+}
+
+void RsvpTe::applyPceUpdate(int plspId, const EroVector& newEro)
+{
+    // Called cross-module from the co-located ~Pcc -- mirrors
+    // Pcc::requestPathComputation()'s identical Enter_Method rationale.
+    Enter_Method("applyPceUpdate");
+
+    for (auto& s : traffic) {
+        auto pit = std::find_if(s.paths.begin(), s.paths.end(),
+                [plspId](const TrafficPath& p) { return p.plspId == plspId; });
+        if (pit == s.paths.end())
+            continue;
+
+        if (pit->replacesLspId >= 0 || pit->pendingReplacementLspId >= 0) {
+            EV_WARN << "PCUpd for PLSP-ID " << plspId
+                    << " arrived while a make-before-break re-route is already in flight for it, ignoring" << endl;
+            return;
+        }
+
+        EV_INFO << "PCUpd received for PLSP-ID " << plspId << ": re-routing lspid=" << pit->sender.Lsp_Id
+                << " via make-before-break with the PCE-supplied ERO (" << vectorToString(newEro) << ")" << endl;
+
+        TrafficPath newPath = *pit;
+        newPath.sender.Lsp_Id = ++maxLspId;
+        newPath.replacesLspId = pit->sender.Lsp_Id;
+        newPath.pendingReplacementLspId = -1;
+        // Use the PCE-supplied route DIRECTLY: newEro is always a full strict route
+        // (like every ERO the PCE hands back, see Pce::processPCREQ()), so
+        // createIngressPSB()'s "ERO.empty() || allLoose" guard is never true for it --
+        // no fresh CSPF/PCReq round-trip happens, see this method's own doc comment.
+        newPath.ERO = newEro;
+        pit->pendingReplacementLspId = newPath.sender.Lsp_Id;
+
+        SessionObj session = s.sobj;
+        s.paths.push_back(newPath); // may reallocate `s.paths` -- `pit` unusable after this
+        SenderTemplateObj newSender = newPath.sender;
+
+        createPath(session, newSender);
+        return;
+    }
+
+    EV_WARN << "PCUpd for unknown PLSP-ID " << plspId << ", ignoring" << endl;
+}
+
+void RsvpTe::revertToLocalComputation(int plspId)
+{
+    // Called cross-module from the co-located ~Pcc -- mirrors
+    // Pcc::requestPathComputation()'s identical Enter_Method rationale.
+    Enter_Method("revertToLocalComputation");
+
+    for (auto& s : traffic) {
+        auto pit = std::find_if(s.paths.begin(), s.paths.end(),
+                [plspId](const TrafficPath& p) { return p.plspId == plspId; });
+        if (pit == s.paths.end())
+            continue;
+
+        pit->localFallback = true; // never delegate/report this path to the PCE again
+
+        if (pit->replacesLspId >= 0 || pit->pendingReplacementLspId >= 0) {
+            EV_INFO << "PCEP state timeout: PLSP-ID " << plspId
+                    << " is already mid-reroute; marked for local fallback without forcing an extra one" << endl;
+            return;
+        }
+
+        EV_INFO << "PCEP controller state timeout expired for delegated PLSP-ID " << plspId
+                << " (lspid=" << pit->sender.Lsp_Id << "): falling back to LOCAL path computation (CSPF)" << endl;
+
+        TrafficPath newPath = *pit;
+        newPath.sender.Lsp_Id = ++maxLspId;
+        newPath.replacesLspId = pit->sender.Lsp_Id;
+        newPath.pendingReplacementLspId = -1;
+        // Clear the ERO (rather than reusing the stale, PCE-supplied one this path was
+        // last using): combined with newPath.localFallback == true (copied from *pit
+        // above), this forces createIngressPSB() to compute a fresh route via LOCAL
+        // CSPF right now, rather than silently keeping the last PCE-supplied route
+        // until some unrelated future trigger happens to recompute it.
+        newPath.ERO.clear();
+        pit->pendingReplacementLspId = newPath.sender.Lsp_Id;
+
+        SessionObj session = s.sobj;
+        s.paths.push_back(newPath); // may reallocate `s.paths` -- `pit` unusable after this
+        SenderTemplateObj newSender = newPath.sender;
+
+        createPath(session, newSender);
+        return;
+    }
+
+    EV_WARN << "state timeout fallback fired for unknown/already-migrated PLSP-ID " << plspId << ", ignoring" << endl;
 }
 
 void RsvpTe::considerReoptimization(const SessionObj& session, const SenderTemplateObj& sender)
@@ -2821,6 +2942,10 @@ void RsvpTe::delSession(const cXMLElement& node)
 
                 removePSB(psb);
             }
+
+            // This path is going away for good -- tell the PCE, if it was
+            // ever delegated (a no-op otherwise, see reportLspDown()'s doc comment).
+            reportLspDown(session->sobj, *it);
 
             it = session->paths.erase(it);
         }
@@ -3078,7 +3203,7 @@ void RsvpTe::handleStartOperation(LifecycleOperation *operation)
 
 void RsvpTe::handleMessageWhenDown(cMessage *msg)
 {
-    // D8: a graceful shutdown that sent a forced PathTear puts this module into
+    // A graceful shutdown that sent a forced PathTear puts this module into
     // NOT_OPERATING immediately (see handleStopOperation/startActiveOperationExtraTime),
     // while the node's later shutdown stages are held up briefly so the PathTear can
     // actually leave. Unlike ~Ldp/~Rip (which close their sockets on stop, so no further
@@ -3105,7 +3230,7 @@ void RsvpTe::handleMessageWhenDown(cMessage *msg)
 
 void RsvpTe::handleStopOperation(LifecycleOperation *operation)
 {
-    // D8: a graceful shutdown notifies downstream peers so they can tear down their
+    // A graceful shutdown notifies downstream peers so they can tear down their
     // reservation state immediately, instead of having to wait out the RFC 2205
     // refresh/timeout interval for state this node will never refresh again. Mirrors
     // delSession's teardown pattern: for every path in a session THIS node originated

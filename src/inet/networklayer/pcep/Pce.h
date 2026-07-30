@@ -7,9 +7,11 @@
 #ifndef __INET_PCE_H
 #define __INET_PCE_H
 
+#include <map>
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/scenario/IScriptable.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/pcep/PcepCommon.h"
@@ -24,14 +26,12 @@ class Ted;
 /**
  * PCE (Path Computation Element) server (RFC 5440): listens on PCEP_PORT (4189) and
  * accepts PCEP sessions from any number of PCCs (~Pcc), each tracked independently
- * in `sessions`. Phase 1 of this workstream (see Pce.ned): session establishment.
- * Phase 2 (RFC 5440 Section 6.5/6.6, stateless path computation) adds PCReq/PCRep:
- * `tedmod` (wired since Phase 1) is now actually consulted -- a PCReq is answered by
- * running the identical Ted::calculateShortestPath() CSPF ~RsvpTe's own local
- * computation uses (Workstream C6), rooted at the requester rather than this node.
- * No LSP delegation/stateful PCRpt/PCUpd yet -- that is a later phase.
+ * in `sessions`. Stateless path computation (PCReq/PCRep, RFC 5440 Section 6.5/6.6)
+ * is answered from `tedmod` by running the identical Ted::calculateShortestPath()
+ * CSPF ~RsvpTe's own local computation uses, rooted at the requester rather than at
+ * this node. Stateful LSP delegation (PCRpt/PCUpd, RFC 8231) is described in Pce.ned.
  */
-class INET_API Pce : public RoutingProtocolBase, public TcpSocket::BufferingCallback
+class INET_API Pce : public RoutingProtocolBase, public TcpSocket::BufferingCallback, public IScriptable
 {
   public:
     struct PccSession {
@@ -67,11 +67,12 @@ class INET_API Pce : public RoutingProtocolBase, public TcpSocket::BufferingCall
     // configuration
     simtime_t keepaliveTime; // KeepAlive Time WE propose in our Open (RFC 5440 Section 7.3); RFC-conventional default
     simtime_t deadTimer; // DeadTimer WE propose in our Open -- what we ask the PCC to use when monitoring US
+    uint8_t keepaliveTimeSec = 0; // the two above as they go on the wire, range-checked at initialize (see pcepTimerSeconds)
+    uint8_t deadTimerSec = 0;
 
-    // Wired since Phase 1 (session establishment); actually consulted starting Phase 2
-    // (processPCREQ()): an "omniscient" module-path reference to the network's Ted,
-    // mirroring Ldp::tedmod and Ted::initializeTED's own existing topology-omniscience
-    // elsewhere in this codebase.
+    // An "omniscient" module-path reference to the network's Ted, consulted to answer
+    // PCReq path computations (processPCREQ()); mirrors Ldp::tedmod and
+    // Ted::initializeTED's own existing topology-omniscience elsewhere in this codebase.
     ModuleRefByPar<Ted> tedmod;
 
     TcpSocket serverSocket; // for listening on PCEP_PORT
@@ -79,7 +80,27 @@ class INET_API Pce : public RoutingProtocolBase, public TcpSocket::BufferingCall
     SessionVector sessions;
     std::vector<TcpSocket *> deadSockets; // sockets torn down in a callback, deleted later
 
+    // RFC 8231 stateful delegation: one entry per delegated LSP a PCC has reported to
+    // us via a PCRpt, keyed by PLSP-ID -- see processPCRPT(). Model
+    // simplification: PLSP-ID is assumed globally unique across every PCC this Pce
+    // serves (a real PCE would key by the pair (PCC identity, PLSP-ID), since PLSP-ID
+    // is only meaningful within a single PCC's own session); acceptable here since the
+    // modeled topologies/tests only ever have a single PCC delegating to a given Pce.
+    struct DelegatedLsp {
+        int plspId;
+        L3Address pccAddress; // which PCC's session this LSP belongs to -- see findSessionByAddress()
+        Ipv4Address srcAddress;
+        Ipv4Address destAddress;
+        double bandwidth;
+        int setupPriority;
+        uint32_t includeAny;
+        uint32_t excludeAny;
+        EroVector currentEro; // the route this LSP is currently known to be using
+    };
+    std::map<int, DelegatedLsp> delegatedLsps;
+
     int sidCounter = 0;
+    uint32_t srpIdCounter = 0; // this Pce's own correlator counter for PCUpd (mirrors ~Pcc::pceRequestIdCounter)
     long numSent = 0;
     long numReceived = 0;
 
@@ -88,17 +109,30 @@ class INET_API Pce : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
   protected:
     virtual int findSession(TcpSocket *socket);
+    // Looks a session up by the PCC's address rather than its (possibly reconnected/
+    // replaced) TcpSocket -- used to find where to send a PCUpd for a
+    // delegated LSP recorded earlier (DelegatedLsp::pccAddress).
+    virtual int findSessionByAddress(const L3Address& pccAddress);
     virtual void sendToSession(int i, Packet *msg);
     virtual void sendOpen(int i);
     virtual void sendKeepalive(int i);
+    virtual void sendPcupd(int i, uint32_t srpId, int plspId, const EroVector& ero);
 
     virtual void processPcepPacketFromTcp(int i, const Ptr<const PcepMessage>& pcepMsg);
     virtual void processOPEN(int i, const Ptr<const PcepMessage>& pcepMsg);
     virtual void processKEEPALIVE(int i);
     virtual void processPCREQ(int i, const Ptr<const PcepMessage>& pcepMsg);
+    virtual void processPCRPT(int i, const Ptr<const PcepMessage>& pcepMsg);
 
     virtual void processKeepAliveSendTimeout(cMessage *msg);
     virtual void processSessionHoldTimeout(cMessage *msg);
+
+    // PCE-initiated reoptimization (see Pce.ned's doc comment for why this,
+    // rather than a TED-change-triggered version, was chosen): re-runs CSPF for one
+    // delegated LSP (or, via processCommand()'s "all", every one currently known) and
+    // sends a PCUpd if the result differs from the ERO it is currently known to be
+    // using.
+    virtual void reoptimizeDelegatedLsp(int plspId);
 
     virtual void handleTcpConnectionDown(TcpSocket *socket);
 
@@ -118,6 +152,11 @@ class INET_API Pce : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
     virtual void setupSocket();
     virtual void clearState();
+
+    // IScriptable implementation: understands a single "pce-reoptimize"
+    // ~ScenarioManager command, e.g. <pce-reoptimize module="LSR4.app[0]" plspid="all"/>
+    // or plspid="<N>" for one specific delegated LSP -- see Pce.ned's doc comment.
+    virtual void processCommand(const cXMLElement& node) override;
 
     /** @name TcpSocket::ICallback/BufferingCallback methods */
     //@{

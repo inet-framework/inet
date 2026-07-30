@@ -16,19 +16,15 @@ import inet.applications.contract.IApp;
 //
 // Placement note: lives under inet.networklayer.pcep, alongside the other
 // TCP-based signaling protocols for the same MPLS/TE data plane (~Ldp, ~RsvpTe),
-// rather than under inet.applications -- see this workstream's Phase 1 commit
-// message.
+// rather than under inet.applications.
 //
-// Phase 1 of this workstream: session establishment only -- Open/Keepalive exchange
-// (RFC 5440 Sections 6.2-6.4, 7.3) bringing a session to OPERATIONAL, plus
-// DeadTimer-based liveness. Phase 2 (this revision) adds stateless path computation
-// (PCReq/PCRep, RFC 5440 Section 6.5/6.6): ~tedModule (wired since Phase 1 -- an
-// "omniscient" module-path reference, mirroring ~Ldp's own tedmod and ~Ted's own
-// initializeTED()'s pre-existing topology-omniscience elsewhere in this codebase) is
-// now actually consulted, running the identical CSPF (Ted::calculateShortestPath())
-// ~RsvpTe's own local computation uses (Workstream C6), rooted at the requesting
-// PCC rather than at this node. No stateful delegation (PCRpt/PCUpd, ERO
-// application) yet -- that is a later phase of this workstream.
+// Session establishment: Open/Keepalive exchange (RFC 5440 Sections 6.2-6.4, 7.3)
+// bringing a session to OPERATIONAL, plus DeadTimer-based liveness. Stateless path
+// computation (PCReq/PCRep, RFC 5440 Section 6.5/6.6) is answered from ~tedModule --
+// an "omniscient" module-path reference, mirroring ~Ldp's own tedmod and ~Ted's own
+// initializeTED()'s pre-existing topology-omniscience elsewhere in this codebase --
+// by running the identical CSPF (Ted::calculateShortestPath()) ~RsvpTe's own local
+// computation uses, rooted at the requesting PCC rather than at this node.
 //
 // Session FSM (RFC 5440 Section 6.2, minimal subset -- mirrors the level of
 // fidelity of ~Ldp's own Initialization/KeepAlive FSM, not the full RFC state
@@ -50,13 +46,39 @@ import inet.applications.contract.IApp;
 // failure or DeadTimer expiry), its entry is discarded outright; a reconnecting PCC
 // is handled entirely afresh via a new incoming TCP connection.
 //
+// RFC 8231 stateful delegation: a PCC reports every LSP it delegates control of via
+// a PCRpt (processPCRPT()); this Pce remembers each one (keyed by PLSP-ID, see the
+// C++ class's DelegatedLsp) together with the CSPF inputs
+// (source/dest/bandwidth/priority/affinity) it needs to recompute that LSP's path
+// later. Reoptimization is triggered by an operator/~ScenarioManager
+// "pce-reoptimize" command (see processCommand()) rather than automatically on
+// every TED change -- a TED-change-triggered version was considered but rejected as
+// harder to make deterministic in a module test (it would fire on an unpredictable
+// number of intermediate/partial TED updates as LinkStateRouting floods a change
+// through the network); an explicit, operator-timed
+// command is both simpler to implement and reliably testable. The command names a
+// PLSP-ID directly, or "all" to reoptimize every currently delegated LSP:
+//
+// <pre>
+// <pce-reoptimize module="LSR4.app[0]" plspid="all"/>
+// <pce-reoptimize module="LSR4.app[0]" plspid="100"/>
+// </pre>
+//
+// Reoptimizing an LSP re-runs the identical CSPF call processPCREQ() uses
+// (Ted::calculateShortestPath(), rooted at that LSP's own source) and, only if the
+// result differs from the route that LSP is currently known to be using, sends a
+// PCUpd carrying the new ERO to the owning PCC. No RFC 8231 Section 5.6 State
+// Synchronization Sequence is implemented: if a PCC's session bounces and
+// reconnects, this Pce does not automatically re-learn or re-verify which LSPs are
+// still delegated to it -- a documented simplification.
+//
 simple Pce extends SimpleModule like IApp
 {
     parameters:
         @class(Pce);
         string tedModule; // module-path reference to this router's Ted, consulted to answer PCReq/PCRep path computations (see class documentation)
-        double keepaliveTime @unit(s) = default(30s); // KeepAlive Time this PCE proposes in its Open (RFC 5440 Section 7.3); RFC-conventional default
-        double deadTimer @unit(s) = default(120s); // DeadTimer this PCE proposes in its Open (RFC 5440 Section 7.3); RFC-conventional default is 4x keepaliveTime
+        double keepaliveTime @unit(s) = default(30s); // KeepAlive Time this PCE proposes in its Open (RFC 5440 Section 7.3); RFC-conventional default. The Open object encodes it as an 8-bit second count, so it must be a whole number of seconds in 1..255
+        double deadTimer @unit(s) = default(120s); // DeadTimer this PCE proposes in its Open (RFC 5440 Section 7.3); RFC-conventional default is 4x keepaliveTime. The Open object encodes it as an 8-bit second count, so it must be a whole number of seconds in 0..255; 0 asks the PCC not to run a DeadTimer for this session at all
         @display("i=block/control");
         @signal[sessionUp](type=long); // emitted (with the session's local SID) whenever a PCEP session reaches OPERATIONAL
         @signal[sessionDown](type=long); // emitted (with the session's local SID) whenever an OPERATIONAL PCEP session goes down

@@ -30,9 +30,8 @@ const B PCEP_OPEN_MESSAGE_BYTES = PCEP_COMMON_HEADER_BYTES + PCEP_OPEN_OBJECT_BY
 // RFC 5440 Section 6.4: the Keepalive message is the Common Header alone, no object.
 const B PCEP_KEEPALIVE_MESSAGE_BYTES = PCEP_COMMON_HEADER_BYTES; // 4 B
 
-// Phase 2 (Workstream F4): PCReq/PCRep object sizes (RFC 5440 Section 7), all
-// INCLUSIVE of their own 4-byte common object header (Section 7.2), same
-// convention as PCEP_OPEN_OBJECT_BYTES above.
+// PCReq/PCRep object sizes (RFC 5440 Section 7), all INCLUSIVE of their own 4-byte
+// common object header (Section 7.2), same convention as PCEP_OPEN_OBJECT_BYTES above.
 
 // RFC 5440 Section 7.4: RP (Request Parameters) object. Model simplification
 // (mirrors the OPEN object's own precedent of dropping unused flag bits): the
@@ -49,7 +48,7 @@ const B PCEP_ENDPOINTS_OBJECT_BYTES = B(12); // 4-byte header + 4+4-byte address
 const B PCEP_BANDWIDTH_OBJECT_BYTES = B(8); // 4-byte header + 4-byte float
 
 // RFC 5440 Section 7.11: LSPA (LSP Attributes) object. Model simplification: only
-// Exclude-any/Include-any (D3-style CSPF affinity) and Setup Priority are
+// Exclude-any/Include-any (CSPF affinity) and Setup Priority are
 // meaningful; Holding Priority/Flags/Reserved are written as 0 and ignored on
 // read (this model's PCE never preempts).
 const B PCEP_LSPA_OBJECT_BYTES = B(16); // 4-byte header + 4+4 (exclude/include-any) + 1+1+1+1 (setup pri/holding pri/flags/reserved)
@@ -77,6 +76,57 @@ const B PCEP_PCREP_NOPATH_MESSAGE_BYTES = PCEP_COMMON_HEADER_BYTES + PCEP_RP_OBJ
 inline B pcepPcrepEroMessageBytes(size_t eroHopCount)
 {
     return PCEP_COMMON_HEADER_BYTES + PCEP_RP_OBJECT_BYTES + B(4 + 8 * eroHopCount);
+}
+
+// RFC 8231 stateful delegation: PCRpt/PCUpd object sizes.
+
+// RFC 8231 Section 7.2: SRP object. Model simplification (mirrors PCEP_RP_OBJECT_BYTES's
+// own precedent): the body carries only the SRP-ID-number, no flags.
+const B PCEP_SRP_OBJECT_BYTES = B(8); // 4-byte header + 4-byte SRP-ID-number
+
+// RFC 8231 Section 7.3: LSP object. Model simplification: unlike the RFC's compact
+// 4-byte body (a 20-bit PLSP-ID bit-packed with 12 bits of flags), this model writes
+// the PLSP-ID and flags as separate, byte-aligned fields for implementation
+// simplicity -- consistent with this model's existing boolean-collapsed O field (see
+// PcepPcrpt's doc comment); the resulting on-wire byte count simply differs from a
+// byte-exact RFC 8231 implementation as a result.
+const B PCEP_LSP_OBJECT_BYTES = B(12); // 4-byte header + 4-byte PLSP-ID + 1-byte flags + 3 reserved
+
+// RFC 8231 Section 6.1: PCRpt = Common Header + SRP + LSP + (this model's own
+// END-POINTS/BANDWIDTH/LSPA path attributes, see PcepPcrpt's doc comment) + ERO
+// (only present when the report's "up" flag is true).
+inline B pcepPcrptMessageBytes(size_t eroHopCount)
+{
+    B bytes = PCEP_COMMON_HEADER_BYTES + PCEP_SRP_OBJECT_BYTES + PCEP_LSP_OBJECT_BYTES
+        + PCEP_ENDPOINTS_OBJECT_BYTES + PCEP_BANDWIDTH_OBJECT_BYTES + PCEP_LSPA_OBJECT_BYTES;
+    if (eroHopCount > 0)
+        bytes += B(4 + 8 * eroHopCount);
+    return bytes;
+}
+
+// RFC 8231 Section 6.2: PCUpd = Common Header + SRP + LSP + ERO (no END-POINTS/
+// BANDWIDTH/LSPA -- see PcepPcupd's doc comment).
+inline B pcepPcupdMessageBytes(size_t eroHopCount)
+{
+    return PCEP_COMMON_HEADER_BYTES + PCEP_SRP_OBJECT_BYTES + PCEP_LSP_OBJECT_BYTES + B(4 + 8 * eroHopCount);
+}
+
+// RFC 5440 Section 7.3: the OPEN object encodes the Keepalive Time and the DeadTimer
+// as 8-bit whole-second counts, so anything outside that range cannot be signalled at
+// all -- silently truncating it would put a value on the wire that has nothing to do
+// with the configured one. A DeadTimer of 0 is legal and means "do not run a DeadTimer
+// for me"; a Keepalive Time of 0 (RFC: "the sender will send no Keepalives") is
+// rejected as unacceptable by this model's peers, so it is refused at the source
+// rather than yielding a session that can never come up (pass zeroAllowed=false).
+inline uint8_t pcepTimerSeconds(simtime_t value, const char *parName, bool zeroAllowed)
+{
+    int64_t seconds = value.inUnit(SIMTIME_S);
+    int64_t minimum = zeroAllowed ? 0 : 1;
+    if (SimTime(seconds, SIMTIME_S) != value || seconds < minimum || seconds > 255)
+        throw cRuntimeError("Invalid %s=%s: RFC 5440 encodes it as an 8-bit second count, so it must be "
+                            "a whole number of seconds between %d and 255",
+                parName, value.str().c_str(), (int)minimum);
+    return (uint8_t)seconds;
 }
 
 // PCEP session FSM (RFC 5440 Section 6.2, minimal subset -- mirrors the level of

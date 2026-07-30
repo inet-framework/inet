@@ -14,8 +14,7 @@ namespace inet {
 
 /**
  * Converts between PcepMessage subtypes and binary (network byte order) PCEP
- * messages, per RFC 5440. Phase 1 of this workstream: Common Header (Section 6.1)
- * plus the Open (Section 6.3/7.3) and Keepalive (Section 6.4) messages only.
+ * messages, per RFC 5440 and RFC 8231.
  *
  * Unlike ~LdpPacketSerializer's PDU/message-length convention (which excludes the
  * length field's own bytes), RFC 5440's Message-Length (Common Header) and

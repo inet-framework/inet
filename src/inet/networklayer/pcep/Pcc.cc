@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/rsvpte/RsvpTe.h"
 
 namespace inet {
 
@@ -26,6 +27,7 @@ Pcc::~Pcc()
     cancelAndDelete(reconnectTimer);
     cancelAndDelete(keepAliveSendTimer);
     cancelAndDelete(sessionHoldTimer);
+    cancelAndDelete(stateTimeoutTimer);
     for (auto *s : deadSockets)
         delete s;
     delete socket;
@@ -41,12 +43,20 @@ void Pcc::initialize(int stage)
         localAddressStr = par("localAddress").stdstringValue();
         keepaliveTime = par("keepaliveTime");
         deadTimer = par("deadTimer");
+        keepaliveTimeSec = pcepTimerSeconds(keepaliveTime, "keepaliveTime", false);
+        deadTimerSec = pcepTimerSeconds(deadTimer, "deadTimer", true);
         reconnectInterval = par("reconnectInterval");
+        stateTimeout = par("stateTimeout");
+
+        std::string rsvpteModuleStr = par("rsvpteModule").stdstringValue();
+        if (!rsvpteModuleStr.empty())
+            rsvptemod.reference(this, "rsvpteModule", true);
 
         reconnectTimer = new cMessage("PcepReconnectTimer");
 
         WATCH(numSent);
         WATCH(numReceived);
+        WATCH_EXPR("numDelegatedLsps", delegatedLsps.size());
     }
 }
 
@@ -80,14 +90,27 @@ void Pcc::clearState()
     keepAliveSendTimer = nullptr;
     cancelAndDelete(sessionHoldTimer);
     sessionHoldTimer = nullptr;
+    cancelAndDelete(stateTimeoutTimer);
+    stateTimeoutTimer = nullptr;
+    // A stop/crash takes an OPERATIONAL session down as surely as a lost TCP connection
+    // does; the socketClosed() that follows can no longer report it (state is reset
+    // just below), so the sessionUp/sessionDown pair would otherwise diverge.
+    if (state == PCEP_OPERATIONAL)
+        emit(sessionDownSignal, (long)sid);
     state = PCEP_NONEXISTENT;
-    // Phase 2: any PCReq outstanding on the session being torn down will never see
-    // its PCRep now -- drop it rather than leaving a permanently-PENDING entry that
+    // Any PCReq outstanding on the session being torn down will never see its PCRep
+    // now -- drop it rather than leaving a permanently-PENDING entry that
     // would silently swallow every future requestPathComputation() retry for the
     // same (source, dest, bandwidth, priority, affinity) tuple without ever
     // resending (there is no session left to answer on anyway; a fresh request is
     // sent once/if the session comes back up).
     pendingRequests.clear();
+    // A module-level stop/crash, unlike an ordinary lost-then-recovered PCEP session,
+    // is not something stateTimeout's "give the PCE a chance to come
+    // back" grace period applies to -- just forget every delegated LSP outright
+    // (RsvpTe's own paths are untouched either way; only this Pcc's bookkeeping is
+    // cleared).
+    delegatedLsps.clear();
 }
 
 void Pcc::handleMessageWhenUp(cMessage *msg)
@@ -101,6 +124,8 @@ void Pcc::handleMessageWhenUp(cMessage *msg)
     if (msg->isSelfMessage()) {
         if (msg == reconnectTimer)
             processReconnectTimeout(msg);
+        else if (msg == stateTimeoutTimer)
+            processStateTimeout(msg);
         else if (!strcmp(msg->getName(), "PcepKeepAliveSendTimer"))
             processKeepAliveSendTimeout(msg);
         else if (!strcmp(msg->getName(), "PcepSessionHoldTimer"))
@@ -169,8 +194,8 @@ void Pcc::sendOpen()
     const auto& open = makeShared<PcepOpen>();
     open->setChunkLength(PCEP_OPEN_MESSAGE_BYTES);
     open->setType(PCEP_OPEN);
-    open->setKeepaliveTime((uint8_t)keepaliveTime.inUnit(SIMTIME_S));
-    open->setDeadTimer((uint8_t)deadTimer.inUnit(SIMTIME_S));
+    open->setKeepaliveTime(keepaliveTimeSec);
+    open->setDeadTimer(deadTimerSec);
     open->setSid(sid);
     pk->insertAtBack(open);
 
@@ -212,6 +237,32 @@ void Pcc::sendPcreq(const PceRequest& request)
             << ", setupPriority=" << request.setupPriority << ")\n";
 }
 
+void Pcc::sendPcrpt(int plspId, uint32_t srpId, bool up, const Ipv4Address& srcAddress,
+        const Ipv4Address& destAddress, double bandwidth, int setupPriority,
+        uint32_t includeAny, uint32_t excludeAny, const EroVector& ero)
+{
+    Packet *pk = new Packet("Pcep-PCRpt");
+    const auto& rpt = makeShared<PcepPcrpt>();
+    rpt->setType(PCEP_PCRPT);
+    rpt->setSrpId(srpId);
+    rpt->setPlspId(plspId);
+    rpt->setDelegate(true);
+    rpt->setUp(up);
+    rpt->setSrcAddress(srcAddress);
+    rpt->setDstAddress(destAddress);
+    rpt->setBandwidth(bandwidth);
+    rpt->setSetupPriority(setupPriority);
+    rpt->setIncludeAny(includeAny);
+    rpt->setExcludeAny(excludeAny);
+    rpt->setEro(up ? ero : EroVector());
+    rpt->setChunkLength(pcepPcrptMessageBytes(up ? ero.size() : 0));
+    pk->insertAtBack(rpt);
+
+    sendToPce(pk);
+    EV_INFO << "PCRpt sent to PCE (plspId=" << plspId << ", srpId=" << srpId << ", up=" << up
+            << (up ? ", ERO with " + std::to_string(ero.size()) + " hop(s)" : "") << ")\n";
+}
+
 Pcc::PceComputationResult Pcc::requestPathComputation(const Ipv4Address& srcAddress, const Ipv4Address& destAddress,
         double bandwidth, int setupPriority, uint32_t includeAny, uint32_t excludeAny, EroVector& outEro)
 {
@@ -230,7 +281,7 @@ Pcc::PceComputationResult Pcc::requestPathComputation(const Ipv4Address& srcAddr
             PceComputationResult result = it->success ? PceComputationResult::COMPUTED : PceComputationResult::NO_PATH;
             if (it->success)
                 outEro = it->ero;
-            pendingRequests.erase(it); // one-shot: this phase's PCEP is stateless (see class doc)
+            pendingRequests.erase(it); // one-shot: stateless PCEP (see class doc)
             return result;
         }
     }
@@ -251,6 +302,45 @@ Pcc::PceComputationResult Pcc::requestPathComputation(const Ipv4Address& srcAddr
     pendingRequests.push_back(request);
     sendPcreq(request);
     return PceComputationResult::PENDING;
+}
+
+void Pcc::reportLsp(int plspId, bool up, const Ipv4Address& srcAddress, const Ipv4Address& destAddress,
+        double bandwidth, int setupPriority, uint32_t includeAny, uint32_t excludeAny, const EroVector& ero)
+{
+    // Called cross-module from ~RsvpTe -- see requestPathComputation()'s identical
+    // rationale for why Enter_Method is required here.
+    Enter_Method("reportLsp");
+
+    if (!up) {
+        // LSP torn down: there is nothing left to delegate control of, and nothing
+        // left for a later state-timeout fallback to usefully act on either -- drop
+        // it outright rather than leaving a stale "up=false" entry around.
+        auto it = delegatedLsps.find(plspId);
+        uint32_t srpId = (it != delegatedLsps.end()) ? it->second.lastAppliedSrpId : 0;
+        delegatedLsps.erase(plspId);
+
+        if (state == PCEP_OPERATIONAL)
+            sendPcrpt(plspId, srpId, false, srcAddress, destAddress, bandwidth, setupPriority, includeAny, excludeAny, EroVector());
+        else
+            EV_INFO << "PCEP session not OPERATIONAL, dropping PCRpt (LSP DOWN) for PLSP-ID " << plspId << endl;
+        return;
+    }
+
+    DelegatedLsp& lsp = delegatedLsps[plspId]; // creates the entry the first time this PLSP-ID is reported
+    lsp.up = true;
+    lsp.ero = ero;
+
+    // Echo (once) the SRP-ID of the last PCUpd applied to this PLSP-ID, if any (RFC
+    // 8231 Section 7.2) -- this report is what acknowledges it, so it must not be
+    // echoed again on a later, unrelated report for the same LSP.
+    uint32_t srpId = lsp.lastAppliedSrpId;
+    lsp.lastAppliedSrpId = 0;
+
+    if (state == PCEP_OPERATIONAL)
+        sendPcrpt(plspId, srpId, true, srcAddress, destAddress, bandwidth, setupPriority, includeAny, excludeAny, ero);
+    else
+        EV_INFO << "PCEP session not OPERATIONAL, deferring PCRpt for PLSP-ID " << plspId
+                << " (state recorded locally; RFC 8231 State Synchronization Sequence (Section 5.6) is not modeled)" << endl;
 }
 
 void Pcc::socketEstablished(TcpSocket *sock)
@@ -296,11 +386,21 @@ void Pcc::handleTcpConnectionDown(TcpSocket *sock)
         emit(sessionDownSignal, (long)sid);
     state = PCEP_NONEXISTENT;
     pendingRequests.clear(); // see clearState()'s doc comment for the rationale
+    armStateTimeoutIfNeeded();
 
     // defer the delete: we are called from inside socket->processMessage(), which
     // still touches the socket after this callback returns
     deadSockets.push_back(socket);
     socket = nullptr;
+
+    // Only keep the reconnect cycle going while the module is actually running: this
+    // callback also fires for the close() that handleStopOperation() itself initiated,
+    // and a timer left pending past the stop would fire once the module is down, where
+    // handleMessageWhenDown() rejects self-messages.
+    if (operationalState != State::OPERATING) {
+        EV_INFO << "PCEP session with PCE lost while the module is shutting down; not reconnecting\n";
+        return;
+    }
 
     EV_INFO << "PCEP session with PCE lost; reconnecting in " << reconnectInterval << "\n";
     rescheduleAfter(reconnectInterval, reconnectTimer);
@@ -343,6 +443,10 @@ void Pcc::processPcepPacketFromTcp(const Ptr<const PcepMessage>& pcepMsg)
 
         case PCEP_PCREP:
             processPCREP(pcepMsg);
+            break;
+
+        case PCEP_PCUPD:
+            processPCUPD(pcepMsg);
             break;
 
         default:
@@ -404,8 +508,23 @@ void Pcc::processKEEPALIVE()
         ASSERT(keepAliveSendTimer == nullptr && sessionHoldTimer == nullptr);
         keepAliveSendTimer = new cMessage("PcepKeepAliveSendTimer");
         scheduleAfter(negotiatedKeepaliveTime, keepAliveSendTimer);
-        sessionHoldTimer = new cMessage("PcepSessionHoldTimer");
-        scheduleAfter(peerDeadTimer, sessionHoldTimer);
+        // RFC 5440 Section 7.3: a DeadTimer of 0 in the peer's Open asks us NOT to run
+        // one at all, so the session is simply never declared dead on silence.
+        if (peerDeadTimer > 0) {
+            sessionHoldTimer = new cMessage("PcepSessionHoldTimer");
+            scheduleAfter(peerDeadTimer, sessionHoldTimer);
+        }
+        else
+            EV_INFO << "PCE advertised a DeadTimer of 0; not monitoring this session for silence" << endl;
+
+        // The session is back up before stateTimeout fired -- delegation simply
+        // continues as if nothing happened (no RFC 8231 Section 5.6 State
+        // Synchronization Sequence is performed; a documented simplification).
+        if (stateTimeoutTimer) {
+            cancelAndDelete(stateTimeoutTimer);
+            stateTimeoutTimer = nullptr;
+            EV_INFO << "PCEP session recovered before the state timeout expired; delegation continues unchanged" << endl;
+        }
     }
     else if (state == PCEP_OPERATIONAL) {
         // steady-state KeepAlive refresh; the session hold timer reset already
@@ -448,6 +567,31 @@ void Pcc::processPCREP(const Ptr<const PcepMessage>& pcepMsg)
     EV_WARN << "PCRep for unknown requestId " << rep->getRequestId() << ", ignoring" << endl;
 }
 
+void Pcc::processPCUPD(const Ptr<const PcepMessage>& pcepMsg)
+{
+    const auto& upd = CHK(dynamicPtrCast<const PcepPcupd>(pcepMsg));
+
+    EV_INFO << "PCUpd received from PCE (srpId=" << upd->getSrpId() << ", plspId=" << upd->getPlspId()
+            << ", ERO with " << upd->getEro().size() << " hop(s))" << endl;
+
+    auto it = delegatedLsps.find(upd->getPlspId());
+    if (it == delegatedLsps.end()) {
+        // a PCUpd naming a PLSP-ID this Pcc never reported delegating (or already
+        // reported down) is a peer/protocol anomaly, not a model error
+        EV_WARN << "PCUpd for PLSP-ID " << upd->getPlspId() << " that is not currently delegated here, ignoring" << endl;
+        return;
+    }
+
+    // Remember this update's SRP-ID so the PCRpt reportLsp() sends once RsvpTe
+    // confirms the re-route completed echoes it (RFC 8231 Section 7.2).
+    it->second.lastAppliedSrpId = upd->getSrpId();
+
+    if (rsvptemod)
+        rsvptemod->applyPceUpdate(upd->getPlspId(), upd->getEro());
+    else
+        EV_WARN << "no rsvpteModule configured, cannot apply PCUpd for PLSP-ID " << upd->getPlspId() << endl;
+}
+
 void Pcc::processKeepAliveSendTimeout(cMessage *msg)
 {
     ASSERT(msg == keepAliveSendTimer);
@@ -481,6 +625,7 @@ void Pcc::processSessionHoldTimeout(cMessage *msg)
     sessionHoldTimer = nullptr;
     state = PCEP_NONEXISTENT;
     pendingRequests.clear(); // see clearState()'s doc comment for the rationale
+    armStateTimeoutIfNeeded();
 
     if (socket) {
         // decisive, synchronous teardown: we cannot trust a graceful close() to ever
@@ -499,6 +644,45 @@ void Pcc::processReconnectTimeout(cMessage *msg)
 {
     ASSERT(msg == reconnectTimer);
     connectToPce();
+}
+
+void Pcc::armStateTimeoutIfNeeded()
+{
+    if (!delegatedLsps.empty() && stateTimeoutTimer == nullptr) {
+        stateTimeoutTimer = new cMessage("PcepStateTimeoutTimer");
+        scheduleAfter(stateTimeout, stateTimeoutTimer);
+        EV_INFO << "PCEP session lost with " << delegatedLsps.size()
+                << " delegated LSP(s) outstanding; starting state timeout (" << stateTimeout << ")" << endl;
+    }
+}
+
+void Pcc::processStateTimeout(cMessage *msg)
+{
+    ASSERT(msg == stateTimeoutTimer);
+
+    // RFC 8231 Section 5.2: the PCEP session has been down for a full stateTimeout
+    // without coming back -- every delegated LSP falls back to local (non-PCE)
+    // computation. Collect the PLSP-IDs and forget them here first: RsvpTe's own
+    // revertToLocalComputation() may, via createIngressPSB(), end up calling back
+    // into this Pcc (e.g. a later requestPathComputation() for an unrelated path);
+    // there is nothing left here for it to find for THESE PLSP-IDs any more.
+    std::vector<int> plspIds;
+    for (auto& entry : delegatedLsps)
+        plspIds.push_back(entry.first);
+
+    EV_WARN << "PCEP state timeout (" << stateTimeout << ") expired with the session still down; "
+            << plspIds.size() << " delegated LSP(s) falling back to local path computation" << endl;
+
+    delegatedLsps.clear();
+    cancelAndDelete(stateTimeoutTimer); // deletes 'msg' itself
+    stateTimeoutTimer = nullptr;
+
+    if (rsvptemod) {
+        for (int plspId : plspIds)
+            rsvptemod->revertToLocalComputation(plspId);
+    }
+    else
+        EV_WARN << "no rsvpteModule configured, cannot fall back to local computation" << endl;
 }
 
 } // namespace inet

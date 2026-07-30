@@ -46,13 +46,13 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         int owner;
         bool permanent;
 
-        // CSPF affinity constraints (Workstream C6/D3), parsed from this path's optional
+        // CSPF affinity constraints, parsed from this path's optional
         // <include_any>/<exclude_any> XML attributes; 0 = no constraint. Only consulted when
         // computeEro is on and this path's ERO is empty/all-loose (see createIngressPSB()).
         uint32_t includeAny = 0;
         uint32_t excludeAny = 0;
 
-        // C7 (make-before-break, RFC 3209 Section 4.6.4): >= 0 while this path is a
+        // Make-before-break (RFC 3209 Section 4.6.4): >= 0 while this path is a
         // pending replacement LSP signaled to take over from an older Lsp_Id on the SAME
         // session (set by triggerMakeBeforeBreak(), cleared by commitResv()'s cutover once
         // the replacement's ingress label is installed and traffic has been switched over).
@@ -60,7 +60,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         // one that has already completed its cutover and is now the session's normal path.
         int replacesLspId = -1;
 
-        // C7: the flip side of replacesLspId, kept on the OLD (primary) path while its
+        // The flip side of replacesLspId, kept on the OLD (primary) path while its
         // replacement is in flight: >= 0 means "a replacement with this Lsp_Id is already
         // being signaled/retried for me, don't start a second one". Needed because a single
         // path problem can legitimately generate more than one PathErr reaching this same
@@ -69,6 +69,23 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         // replacement. Reset implicitly by this path's entry being erased once the
         // replacement's cutover completes (completeMakeBeforeBreakCutover()).
         int pendingReplacementLspId = -1;
+
+        // RFC 8231 stateful delegation: the PLSP-ID this path is known to the PCE by,
+        // assigned once (see reportLspUp()) the first time it is reported, and -1 until
+        // then (or if delegation is off/not applicable). Carried forward verbatim by
+        // every `newPath = *pit`-style copy this file makes for a make-before-break
+        // replacement (both the internally-triggered kind and applyPceUpdate()'s
+        // PCE-driven kind) -- giving the replacement the SAME PLSP-ID as the path it
+        // replaces, for free, which is exactly the identity continuity RFC 8231
+        // requires across a delegated LSP's re-routes.
+        int plspId = -1;
+
+        // Set by revertToLocalComputation() once RFC 8231 Section 5.2's state timeout
+        // expires for this path's plspId -- from that point on, this path is never
+        // again delegated/reported to the PCE, and createIngressPSB() always uses
+        // LOCAL CSPF for it regardless of "computationMode" (there is no re-delegation/
+        // re-sync logic; see RsvpTe.ned's "delegate" doc comment).
+        bool localFallback = false;
     };
 
     struct TrafficSession {
@@ -79,7 +96,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
     std::vector<TrafficSession> traffic;
 
-    // C8 (RFC 2961 refresh reduction): a MESSAGE_ID_ACK/_NACK a router owes to some
+    // RFC 2961 refresh reduction: a MESSAGE_ID_ACK/_NACK a router owes to some
     // peer, queued until it can be piggybacked on the next message this router
     // sends that peer (see PathStateBlock::pendingAckToPeer / ResvStateBlock::
     // pendingAcksByPhop below). Plain data, no owned pointers -- cleaned up for free
@@ -126,16 +143,16 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         // ingress to compute LSP setup latency for the lspEstablished signal
         simtime_t pathCreationTime;
 
-        // C8 (RFC 2961 refresh reduction): this PSB's own outbound MESSAGE_ID,
+        // RFC 2961 refresh reduction: this PSB's own outbound MESSAGE_ID,
         // identifying the content of the Path WE send downstream (toward this PSB's
         // OutInterface peer) for it. 0 = not yet assigned; assigned once, the first
         // time refreshPath() sends a full Path while refreshReduction is on, and
         // never bumped afterwards -- this model never mutates an existing PSB's
         // content in place (a changed path becomes a brand-new PSB via
-        // make-before-break, C7), so the id never needs to change post-assignment.
+        // make-before-break), so the id never needs to change post-assignment.
         uint32_t outMessageId = 0;
 
-        // C8: the MESSAGE_ID our previous-hop peer attached to the most recently
+        // The MESSAGE_ID our previous-hop peer attached to the most recently
         // received Path/Srefresh for this PSB, remembered so a later Srefresh from
         // that same peer naming this id can be resolved back to this PSB (RFC 2961
         // Section 5.3; see RsvpTe::processSrefreshMsg()).
@@ -143,7 +160,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         uint32_t inMessageIdEpoch = 0;
         uint32_t inMessageId = 0;
 
-        // C8: an ACK/NACK owed to this PSB's downstream peer for a MESSAGE_ID THEY
+        // An ACK/NACK owed to this PSB's downstream peer for a MESSAGE_ID THEY
         // attached to a Resv they sent us (see ResvStateBlock::hasInMessageId on the
         // matching RSB) -- piggybacked on the next Path/Srefresh sent for this PSB,
         // then cleared (RsvpTe::refreshPath()/sendPathSrefresh()).
@@ -185,9 +202,9 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         RsbCommitTimerMsg *commitTimerMsg;
         RsbTimeoutMsg *timeoutMsg;
 
-        // C8 (RFC 2961 refresh reduction): this RSB's own outbound MESSAGE_IDs, one
+        // RFC 2961 refresh reduction: this RSB's own outbound MESSAGE_IDs, one
         // per previous hop we send a (possibly SE-merged) Resv to -- refreshResv()
-        // already fans out to potentially multiple phops when several upstream
+        // fans out to potentially multiple phops when several upstream
         // senders share this reservation on the same outgoing interface, so unlike
         // a PSB's single outMessageId, this genuinely needs to be per-peer. A phop's
         // absence from the map means "not yet assigned" for that phop (ids start at
@@ -195,14 +212,14 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         // resend + fresh id) whenever this RSB's content changes -- see updateRSB().
         std::map<Ipv4Address, uint32_t> outMessageIdByPhop;
 
-        // C8: the MESSAGE_ID our downstream peer (Next_Hop_Address) attached to the
+        // The MESSAGE_ID our downstream peer (Next_Hop_Address) attached to the
         // most recently received Resv/Srefresh for this RSB, remembered so a later
         // Srefresh from that peer naming this id resolves back to this RSB.
         bool hasInMessageId = false;
         uint32_t inMessageIdEpoch = 0;
         uint32_t inMessageId = 0;
 
-        // C8: ACKs/NACKs owed to specific previous hops for MESSAGE_IDs THEY
+        // ACKs/NACKs owed to specific previous hops for MESSAGE_IDs THEY
         // attached to a Path they sent us (each phop is a distinct upstream sender
         // feeding this shared reservation -- see the matching PSB's
         // hasInMessageId) -- piggybacked on the next Resv/Srefresh sent to that
@@ -240,24 +257,32 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     int stateLifetimeFactor; // RFC 2205's K
     simtime_t retryInterval;
     bool advertiseImplicitNull = true;
-    // C6: compute a strict ERO at the ingress via Ted::calculateShortestPath() (CSPF) whenever
+    // Compute a strict ERO at the ingress via Ted::calculateShortestPath() (CSPF) whenever
     // a path's configured ERO is empty or contains only loose hops. Default off -- CSPF is a
     // purely local ingress computation with no RFC-mandated wire behavior (RFC 3209 leaves
     // route computation unspecified), so defaulting it off is a scope choice, not a compliance
     // gap; it also keeps every shipped example/showcase (which all hand-write EROs) fingerprint-
     // identical.
     bool computeEro = false;
-    // Workstream F4 Phase 2: WHERE computeEro's automatic ERO computation runs --
-    // "local" (default, unchanged) or "pce" (delegate to a co-located ~Pcc, see
-    // pccmod below). See RsvpTe.ned's doc comment for the full rationale.
+    // WHERE computeEro's automatic ERO computation runs -- "local" (default) or
+    // "pce" (delegate to a co-located ~Pcc, see pccmod below). See RsvpTe.ned's
+    // doc comment for the full rationale.
     std::string computationMode = "local";
-    // C7: RFC 4736-lite periodic reoptimization -- every reoptimizeInterval, re-run CSPF for
+    // RFC 8231 stateful delegation: only meaningful when computationMode is "pce" --
+    // report every ingress LSP delegated that way to the PCE (PCRpt) and accept
+    // PCE-initiated updates for it (PCUpd), applied via make-before-break with the
+    // PCE-supplied ERO (see applyPceUpdate()). Default off keeps every non-delegating
+    // deployment (and every shipped example/showcase) completely unaffected -- see
+    // RsvpTe.ned's doc comment for the full picture, including controller-death
+    // fallback (revertToLocalComputation()).
+    bool delegate = false;
+    // RFC 4736-lite periodic reoptimization -- every reoptimizeInterval, re-run CSPF for
     // every established ingress path and, if it finds a strictly cheaper route than the one
     // currently in use, make-before-break reroute onto it. 0 (default) disables the feature
     // entirely (no timer is ever scheduled), independent of computeEro's setting, which keeps
     // it fingerprint-inert regardless of computeEro.
     simtime_t reoptimizeInterval;
-    // C8 (RFC 2961 Section 5.4): refresh reduction -- attach MESSAGE_ID objects to
+    // RFC 2961 Section 5.4 refresh reduction -- attach MESSAGE_ID objects to
     // Path/Resv, compress subsequent periodic refreshes into Srefresh messages, and
     // piggyback ACK/NACK objects on messages already travelling toward a peer.
     // Default off keeps every shipped example/showcase fingerprint-identical.
@@ -269,9 +294,9 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<IRsvpClassifier> rpct;
-    // Workstream F4 Phase 2: only referenced (see initialize()) when computationMode
-    // is "pce" -- a plain-"local" network (the default, every pre-existing example/
-    // showcase) never touches this and needs no "pccModule" parameter at all.
+    // Only referenced (see initialize()) when computationMode is "pce" -- a
+    // plain-"local" network (the default, every shipped example/showcase) never
+    // touches this and needs no "pccModule" parameter at all.
     ModuleRefByPar<Pcc> pccmod;
 
     int maxPsbId = 0;
@@ -279,17 +304,21 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
     int maxSrcInstance = 0;
 
-    // C7: monotonic counter for allocating fresh Lsp_Id values to make-before-break
+    // Monotonic counter for allocating fresh Lsp_Id values to make-before-break
     // replacement paths (there is no other Lsp_Id generator in this model -- every
     // operator-configured lspid is an explicit XML value; this counter is bumped past every
     // XML/add-session lspid seen so a generated replacement id never collides with one).
     int maxLspId = 0;
 
-    // C7: single periodic self-message driving reoptimization; only allocated/scheduled
+    // Monotonic counter for allocating fresh PLSP-IDs to delegated LSPs (see
+    // TrafficPath::plspId); scoped to this RsvpTe module, mirroring maxLspId above.
+    int maxPlspId = 0;
+
+    // Single periodic self-message driving reoptimization; only allocated/scheduled
     // when reoptimizeInterval > 0.
     ReoptimizeTimerMsg *reoptimizeTimerMsg = nullptr;
 
-    // C8 (RFC 2961 refresh reduction): this router's own MESSAGE_ID epoch, chosen
+    // RFC 2961 refresh reduction: this router's own MESSAGE_ID epoch, chosen
     // once at initialize() time (a fresh draw each run, like a real router's would
     // change across restarts) and used for every MESSAGE_ID this router originates.
     // maxMessageId is the single monotonic counter allocating fresh ids across every
@@ -346,7 +375,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual void refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP);
     virtual void commitResv(ResvStateBlock *rsb);
 
-    // C8 (RFC 2961 refresh reduction): compressed-refresh counterparts of
+    // RFC 2961 refresh reduction: compressed-refresh counterparts of
     // refreshPath()/refreshResv(rsb, PHOP), sent instead of them by
     // processPSB_TIMER()/processRSB_REFRESH_TIMER() once a PSB/(RSB, phop) already
     // has an assigned outbound MESSAGE_ID.
@@ -421,7 +450,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
     virtual void pathProblem(PathStateBlock *psb);
 
-    // C7 (make-before-break, RFC 3209 Section 4.6.4): signal a fresh-Lsp_Id replacement for
+    // Make-before-break (RFC 3209 Section 4.6.4): signal a fresh-Lsp_Id replacement for
     // the (session, oldSender) path, leaving the old path/PSB completely untouched; used by
     // both pathProblem() (reactive: the old path failed) and considerReoptimization()
     // (proactive: a strictly better route was found). The actual cutover (classifier rebind
@@ -432,10 +461,23 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     // is installed: rebinds the classifier from oldLspId to newSender/newInLabel (the actual
     // traffic cutover), then tears down and removes the old path/PSB.
     virtual void completeMakeBeforeBreakCutover(const SessionObj& session, const SenderTemplateObj& newSender, int oldLspId, int newInLabel);
-    // C7 reoptimizeInterval: re-run CSPF for one established ingress path and, if it finds a
+    // reoptimizeInterval: re-run CSPF for one established ingress path and, if it finds a
     // strictly cheaper route than the one currently in use, kick off make-before-break.
     virtual void considerReoptimization(const SessionObj& session, const SenderTemplateObj& sender);
     virtual void processREOPTIMIZE_TIMER(ReoptimizeTimerMsg *msg);
+
+    // RFC 8231 stateful delegation: reports a delegated ingress path's
+    // current state to the co-located Pcc (pccmod->reportLsp()) -- a no-op unless
+    // "delegate" is on, computationMode is "pce", and this path hasn't already fallen
+    // back to local control (path.localFallback). Assigns path.plspId the first time
+    // it is called for a given path (see TrafficPath::plspId's doc comment for how
+    // that identity survives every later make-before-break re-route). Called from
+    // commitResv() the instant an ingress path's label is (re-)installed.
+    virtual void reportLspUp(const SessionObj& session, TrafficPath& path, const EroVector& ero);
+    // The teardown counterpart, called from delSession() for every path actually
+    // removed; a no-op under the same conditions as reportLspUp(), plus requiring
+    // path.plspId to already be assigned (nothing was ever reported otherwise).
+    virtual void reportLspDown(const SessionObj& session, TrafficPath& path);
 
     virtual void addSession(const cXMLElement& node);
     virtual void delSession(const cXMLElement& node);
@@ -447,6 +489,29 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual int getInLabel(const SessionObj& session, const SenderTemplateObj& sender);
 
   public:
+    // RFC 8231 Section 6.2: called cross-module by the co-located ~Pcc
+    // (Enter_Method-guarded there, mirroring ~Pcc::requestPathComputation()'s own
+    // cross-module precedent) when a PCUpd arrives naming a PLSP-ID this RsvpTe has
+    // delegated. Finds the (session, path) currently using that plspId -- ignoring it
+    // (with a warning) if none is found, or if a make-before-break re-route is already
+    // in flight for it -- and make-before-break re-routes it using newEro DIRECTLY:
+    // the replacement TrafficPath's ERO is set to newEro itself (always a full strict
+    // route, like every ERO the PCE hands back), so createIngressPSB()'s
+    // "ERO.empty() || allLoose" guard is never true for it and no fresh CSPF/PCReq
+    // round-trip happens -- reusing createPath()/createIngressPSB() exactly as any
+    // other replacement path would, just with its route already decided.
+    virtual void applyPceUpdate(int plspId, const EroVector& newEro);
+
+    // RFC 8231 Section 5.2: called cross-module by ~Pcc once its stateTimeout
+    // expires for a delegated LSP whose PCEP session never came back. Marks the
+    // (session, path) currently using this plspId as localFallback (so it is never
+    // delegated/reported again) and, unless a re-route is already in flight for it,
+    // immediately make-before-break re-routes it with its ERO cleared -- forcing
+    // createIngressPSB() to compute a fresh route via LOCAL CSPF (Ted::
+    // calculateShortestPath()) regardless of "computationMode", rather than waiting
+    // for some future, unrelated trigger to eventually notice the fallback flag.
+    virtual void revertToLocalComputation(int plspId);
+
     RsvpTe();
     virtual ~RsvpTe();
 
