@@ -27,7 +27,7 @@ class NetworkInterface;
 class INET_API Ted : public RoutingProtocolBase, public cListener
 {
   public:
-    // Cap on the number of SRLGs a single TeLinkStateInfo can carry (D3).
+    // Cap on the number of SRLGs a single TeLinkStateInfo can carry.
     // TeLinkStateInfo.srlgs[] is a fixed-size array (see Ted.msg -- `struct`
     // msg types don't support true dynamic arrays); this constant is the
     // single source of truth, kept in sync with the array's literal size in
@@ -66,12 +66,16 @@ class INET_API Ted : public RoutingProtocolBase, public cListener
 
     virtual void initializeTED();
 
+    // The route-installing half of rebuildRoutingTable(): wipes every non-multicast
+    // route and reinstalls a full set of /32 host routes derived from the link-state
+    // database. Only called when installRoutes is true.
+    virtual void installRoutesFromTed();
+
   public:
-    // CSPF (Constrained Shortest Path First), revived for Workstream C6 (RsvpTe's ingress
-    // path computation) -- previously DEAD code (zero callers since 2005; see calculateShortestPaths()
-    // below for the verification history). Runs Bellman-Ford (calculateShortestPaths()) on the
-    // subset of `topology` that (a) is up, (b) has at least req_bandwidth unreserved at
-    // `priority`, and (c) -- if includeAny/excludeAny are nonzero -- satisfies matchesAffinity();
+    // CSPF (Constrained Shortest Path First), used by RsvpTe's ingress path computation. Runs
+    // Bellman-Ford (calculateShortestPaths()) on the subset of `topology` that (a) is up,
+    // (b) has at least req_bandwidth unreserved at `priority`, and (c) -- if
+    // includeAny/excludeAny are nonzero -- satisfies matchesAffinity();
     // then walks parent pointers back from the closest reachable member of `dest` to build a
     // full hop list. Returns an empty vector if no member of `dest` is reachable under the
     // constraints. `dest` is a SET of acceptable destination addresses (e.g. a router's several
@@ -82,16 +86,27 @@ class INET_API Ted : public RoutingProtocolBase, public cListener
             uint32_t includeAny = 0, uint32_t excludeAny = 0);
 
     // Same computation as above, but rooted at an explicit `root` router instead of this Ted
-    // instance's own routerId (TI-LFA/Workstream F2: computing extended P-space needs SPTs
-    // rooted at THIS router's neighbors, and Q-space needs an SPT rooted at the protected
-    // destination over a reversed topology -- see SegmentRouting's TI-LFA code for how this is
-    // used). The no-root overload above is now a thin wrapper: `calculateShortestPath(dest,
-    // topology, ...)` == `calculateShortestPath(routerId, dest, topology, ...)`, so every
-    // existing caller (RsvpTe's CSPF, SegmentRouting's own node-SID programming) is completely
-    // unaffected.
+    // instance's own routerId (TI-LFA computes extended P-space from SPTs rooted at THIS
+    // router's neighbors, and Q-space from an SPT rooted at the protected destination over a
+    // reversed topology -- see SegmentRouting's TI-LFA code for how this is used). The no-root
+    // overload above is a thin wrapper: `calculateShortestPath(dest, topology, ...)` ==
+    // `calculateShortestPath(routerId, dest, topology, ...)`.
     virtual Ipv4AddressVector calculateShortestPath(Ipv4Address root, Ipv4AddressVector dest,
             const TeLinkStateInfoVector& topology, double req_bandwidth, int priority,
             uint32_t includeAny = 0, uint32_t excludeAny = 0);
+
+    // Reports the shortest-path COST (not just the hop list) from `root` to `dest`, via the
+    // same constrained Bellman-Ford as calculateShortestPath() above. Returns false (leaves
+    // outDistance untouched) if dest is unreachable from root under the given constraints.
+    // TI-LFA needs true path COST, not hop count, to decide whether a node's
+    // shortest path actually depends on a specific link: a node can be reachable via a strictly
+    // LONGER alternate path once a link is excluded, which is a real, meaningful difference
+    // that a hop-count-only comparison would miss (two paths can have the same hop count but
+    // very different cost, or vice versa) -- see SegmentRouting's TI-LFA P-space/Q-space
+    // membership test for how this is used.
+    virtual bool getShortestPathCost(Ipv4Address root, Ipv4Address dest,
+            const TeLinkStateInfoVector& topology, double req_bandwidth, int priority,
+            double& outDistance, uint32_t includeAny = 0, uint32_t excludeAny = 0);
 
     /** @name Public interface to the Traffic Engineering Database */
     //@{
@@ -138,6 +153,9 @@ class INET_API Ted : public RoutingProtocolBase, public cListener
     // report the observed liveness change and Ted owns what happens next.
     virtual void setLinkState(int index, bool up);
 
+    // Runs on every link-state database change and announces it via
+    // tedDatabaseChangedSignal; installs the derived host routes too unless
+    // installRoutes is false (see the NED doc's coexistence story).
     virtual void rebuildRoutingTable();
 
     // Emits tedChangedSignal for link `index` without touching its state --
@@ -155,10 +173,9 @@ class INET_API Ted : public RoutingProtocolBase, public cListener
     virtual void updateTimestamp(int index);
     //@}
 
-    /** @name TE attribute query helpers (D3)
-     * Consumed by calculateShortestPath()/calculateShortestPaths() below (Workstream C6,
-     * CSPF-with-affinities); TI-LFA (Workstream F2) is expected to be a future caller too.
-     * Static because they only look at the fields already carried by a
+    /** @name TE attribute query helpers
+     * Consumed by calculateShortestPath()/calculateShortestPaths() below (CSPF with
+     * affinities). Static because they only look at the fields already carried by a
      * TeLinkStateInfo record (populated by initializeTED() from the
      * "linkAttributes" NED param, or defaulted to 0/empty).
      */
@@ -205,8 +222,6 @@ class INET_API Ted : public RoutingProtocolBase, public cListener
   protected:
     virtual int assignIndex(std::vector<Vertex>& vertices, Ipv4Address nodeAddr);
 
-    // `root` used to be implicitly this Ted's own routerId (see Workstream F2's explicit-root
-    // extension); every call site now passes it explicitly.
     std::vector<Vertex> calculateShortestPaths(Ipv4Address root, const TeLinkStateInfoVector& topology,
             double req_bandwidth, int priority, uint32_t includeAny = 0, uint32_t excludeAny = 0);
 };

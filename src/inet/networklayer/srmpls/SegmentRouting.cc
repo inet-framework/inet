@@ -6,6 +6,8 @@
 
 #include "inet/networklayer/srmpls/SegmentRouting.h"
 
+#include <sstream>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -34,9 +36,13 @@ void SegmentRouting::initialize(int stage)
 
         readSidTableFromXML(par("sidTable").xmlValue());
 
+        tiLfa = par("tiLfa");
+        maxRepairStackDepth = par("maxRepairStackDepth");
+
         WATCH(routerId);
         WATCH(srgbBase);
         WATCH(srgbSize);
+        WATCH(tiLfa);
     }
 }
 
@@ -66,16 +72,13 @@ void SegmentRouting::handleStartOperation(LifecycleOperation *operation)
     // module would only ever see its own directly-connected links (the snapshot available at
     // the very first recomputeAndInstall() call below, before any flooding has happened) and
     // would never install a transit (SWAP) entry for an indirect node, no matter how long the
-    // simulation runs. Ted::rebuildRoutingTable() is, however, the ONLY thing that ever
-    // touches this router's routing table, and it runs unconditionally on every Ted content
-    // change regardless of origin (local flip or flooded update) -- so subscribing to
-    // Ipv4RoutingTable's routeAddedSignal/routeDeletedSignal (emitted from every route it
-    // adds/removes) catches every such rebuild, local or remote-triggered alike.
-    // recomputeAndInstall() is idempotent (wipe-owned-then-reinstall), so being triggered
-    // redundantly -- once per intermediate route add/delete rather than once per logical
-    // topology change -- is wasteful but harmless.
-    host->subscribe(routeAddedSignal, this);
-    host->subscribe(routeDeletedSignal, this);
+    // simulation runs. Ted::rebuildRoutingTable() runs on every link-state database change
+    // regardless of origin and announces each one via tedDatabaseChangedSignal, which is
+    // therefore what this module tracks. Note it must NOT be the routing table's own
+    // routeAdded/routeDeleted signals instead: those never fire at all under Ted's documented
+    // installRoutes=false coexistence mode, which would freeze label programming at the
+    // startup snapshot even though the topology keeps changing.
+    host->subscribe(tedDatabaseChangedSignal, this);
 
     // Ted's own initial local-link discovery (Ted::initializeTED(), also run from
     // handleStartOperation) does NOT emit tedChangedSignal -- only later changes (setLinkState()/
@@ -90,26 +93,30 @@ void SegmentRouting::handleStopOperation(LifecycleOperation *operation)
 {
     cModule *host = getContainingNode(this);
     host->unsubscribe(tedChangedSignal, this);
-    host->unsubscribe(routeAddedSignal, this);
-    host->unsubscribe(routeDeletedSignal, this);
+    host->unsubscribe(tedDatabaseChangedSignal, this);
 
     for (int label : ownedLabels)
         lt->removeLibEntryIfExists(label);
     ownedLabels.clear();
+    nextHopByRouter.clear();
     emit(sidEntriesInstalledSignal, (long)0);
 
     for (auto& elem : adjSidByInterfaceId)
         lt->removeLibEntryIfExists(elem.second);
     adjSidByInterfaceId.clear();
     emit(adjSidEntriesInstalledSignal, (long)0);
+
+    // The LIB entries themselves are already gone (removed just above), so there is nothing
+    // left to explicitly revert via activateBackup(); just drop our own bookkeeping so a
+    // restarted module doesn't think a backup is active when its LIB entry doesn't even exist.
+    tiLfaActiveRepairs.clear();
 }
 
 void SegmentRouting::handleCrashOperation(LifecycleOperation *operation)
 {
     cModule *host = getContainingNode(this);
     host->unsubscribe(tedChangedSignal, this);
-    host->unsubscribe(routeAddedSignal, this);
-    host->unsubscribe(routeDeletedSignal, this);
+    host->unsubscribe(tedDatabaseChangedSignal, this);
 
     // LibTable is a plain SimpleModule, not lifecycle-aware -- it does NOT drop this module's
     // entries on its own just because SegmentRouting crashed, so they must be removed here.
@@ -119,12 +126,17 @@ void SegmentRouting::handleCrashOperation(LifecycleOperation *operation)
     for (int label : ownedLabels)
         lt->removeLibEntryIfExists(label);
     ownedLabels.clear();
+    nextHopByRouter.clear();
 
     // Same rationale for adjacency-SID entries (dynamically allocated, but still left behind
     // in the LIB by a crash unless explicitly removed here).
     for (auto& elem : adjSidByInterfaceId)
         lt->removeLibEntryIfExists(elem.second);
     adjSidByInterfaceId.clear();
+
+    // See handleStopOperation()'s comment: the LIB entries are gone, only our own bookkeeping
+    // needs clearing.
+    tiLfaActiveRepairs.clear();
 }
 
 void SegmentRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -133,11 +145,31 @@ void SegmentRouting::receiveSignal(cComponent *source, simsignal_t signalID, cOb
 
     printSignalBanner(signalID, obj, details);
 
-    ASSERT(signalID == tedChangedSignal || signalID == routeAddedSignal || signalID == routeDeletedSignal);
+    ASSERT(signalID == tedChangedSignal || signalID == tedDatabaseChangedSignal);
 
     EV_INFO << "topology-affecting signal " << cComponent::getSignalName(signalID) << " received, recomputing node-SID label programming" << endl;
 
     recomputeAndInstall();
+
+    // TI-LFA activation: tedChangedSignal is the only one of the two signals that
+    // carries a TedChangeInfo -- tedDatabaseChangedSignal reports that the database changed
+    // without naming a link, so own-link-change detection only makes sense
+    // here. recomputeAndInstall() above has ALREADY wiped and reinstalled every owned LIB entry
+    // (using the by-now-already-updated ted[] state, see Ted::setLinkState()'s ordering: it flips
+    // ted[index].state on its very first line, before rebuildRoutingTable() fires any signal at
+    // all -- so by the time ANY handler in this cascade runs, including this one, ted[] already
+    // reflects the NEW topology). handleOwnLinkStateChange() itself reconstructs whatever
+    // pre-failure information it needs by recomputing against a synthetic "link forced back up"
+    // topology, rather than relying on a snapshot taken here -- see its own doc for why.
+    if (signalID == tedChangedSignal) {
+        const TedChangeInfo *info = check_and_cast<const TedChangeInfo *>(obj);
+        for (size_t i = 0; i < info->getTedLinkIndicesArraySize(); i++) {
+            int index = info->getTedLinkIndices(i);
+            const TeLinkStateInfo& link = ted->getLink(index);
+            if (link.advrouter == routerId)
+                handleOwnLinkStateChange(link.linkid, link.state);
+        }
+    }
 }
 
 void SegmentRouting::readSidTableFromXML(const cXMLElement *sidTableXml)
@@ -188,7 +220,7 @@ int SegmentRouting::resolveOutInterfaceId(Ipv4Address peerRouterId)
     return ie->getInterfaceId();
 }
 
-bool SegmentRouting::resolveNextHop(Ipv4Address destRouter, int& outInterfaceId, bool& directlyConnected)
+bool SegmentRouting::computeNextHop(Ipv4Address destRouter, int& outInterfaceId, bool& directlyConnected)
 {
     const TeLinkStateInfoVector& topology = ted->getLinks();
 
@@ -205,6 +237,17 @@ bool SegmentRouting::resolveNextHop(Ipv4Address destRouter, int& outInterfaceId,
     return true;
 }
 
+bool SegmentRouting::resolveNextHop(Ipv4Address destRouter, int& outInterfaceId, bool& directlyConnected)
+{
+    auto it = nextHopByRouter.find(destRouter);
+    if (it == nextHopByRouter.end())
+        return false; // currently unreachable (or not a router we program a node-SID for)
+
+    outInterfaceId = it->second.outInterfaceId;
+    directlyConnected = it->second.directlyConnected;
+    return true;
+}
+
 void SegmentRouting::recomputeAndInstall()
 {
     // Wipe our own previously-installed entries first, so recomputation is idempotent and a
@@ -214,6 +257,7 @@ void SegmentRouting::recomputeAndInstall()
     for (int label : ownedLabels)
         lt->removeLibEntryIfExists(label);
     ownedLabels.clear();
+    nextHopByRouter.clear();
 
     for (auto& elem : sidByRouter) {
         Ipv4Address destRouter = elem.first;
@@ -226,10 +270,11 @@ void SegmentRouting::recomputeAndInstall()
 
         int outInterfaceId;
         bool directlyConnected;
-        if (!resolveNextHop(destRouter, outInterfaceId, directlyConnected)) {
+        if (!computeNextHop(destRouter, outInterfaceId, directlyConnected)) {
             EV_WARN << "node " << destRouter << " (sid=" << sid << ", label=" << label << ") is currently unreachable, not installing a LIB entry" << endl;
             continue;
         }
+        nextHopByRouter[destRouter] = NextHopInfo{outInterfaceId, directlyConnected};
 
         LabelOpVector outLabel;
         if (directlyConnected) {
@@ -256,6 +301,34 @@ void SegmentRouting::recomputeAndInstall()
     emit(sidEntriesInstalledSignal, (long)ownedLabels.size());
 
     recomputeAdjacencySids();
+
+    if (tiLfa) {
+        computeTiLfaRepairs();
+        // the entries installed above are brand new, so whatever backup an earlier link
+        // failure activated on them is gone -- put it back
+        reinstateActiveTiLfaRepairs();
+    }
+}
+
+void SegmentRouting::reinstateActiveTiLfaRepairs()
+{
+    for (auto it = tiLfaActiveRepairs.begin(); it != tiLfaActiveRepairs.end(); ) {
+        Ipv4Address dest = it->first;
+        int label = srgbBase + sidByRouter.at(dest);
+
+        if (!ownedLabels.count(label)) {
+            EV_DETAIL << "TI-LFA: dropping the active backup for " << dest
+                      << ": it has no node-SID entry any more (currently unreachable)" << endl;
+            it = tiLfaActiveRepairs.erase(it);
+            continue;
+        }
+
+        lt->setBackup(label, it->second.repair, it->second.backupOutInterfaceId);
+        lt->activateBackup(label, true);
+        EV_DETAIL << "TI-LFA: reinstated the active backup for " << dest << " (protected link to "
+                  << it->second.protectedNeighbor << ") on its rebuilt LIB entry" << endl;
+        ++it;
+    }
 }
 
 void SegmentRouting::recomputeAdjacencySids()
@@ -299,9 +372,8 @@ void SegmentRouting::recomputeAdjacencySids()
         // Directed "pop and forward out this specific interface" -- RFC 8660's adjacency-SID
         // forwarding action; see Mpls::processMplsPacketFromL2, which forwards via the resolved
         // outInterfaceId regardless of whether the pop exposed another label or plain IP,
-        // exactly like an existing PHP entry -- no Mpls.cc changes needed (verified by reading
-        // doStackOps()/processMplsPacketFromL2() before writing this, per the plan's Phase-0
-        // audit). Auto-allocated (installLibEntry(-1,...), NOT installReservedLabel()) since
+        // exactly like an existing PHP entry -- so no Mpls-side special casing is needed.
+        // Auto-allocated (installLibEntry(-1,...), NOT installReservedLabel()) since
         // adjacency SIDs are locally significant labels, not drawn from the SRGB; LibTable's
         // maxLabel counter is shared with Ldp/RsvpTe's own dynamic allocations
         // (installLibEntry()/allocateLabel()), so collisions with their labels are structurally
@@ -319,6 +391,335 @@ int SegmentRouting::getAdjSidLabel(int interfaceId) const
 {
     auto it = adjSidByInterfaceId.find(interfaceId);
     return it != adjSidByInterfaceId.end() ? it->second : -1;
+}
+
+Ipv4AddressVector SegmentRouting::getOwnNeighbors(const TeLinkStateInfoVector& topology)
+{
+    Ipv4AddressVector neighbors;
+    for (auto& link : topology) {
+        if (link.advrouter == routerId && link.state)
+            neighbors.push_back(link.linkid);
+    }
+    return neighbors;
+}
+
+TeLinkStateInfoVector SegmentRouting::withLinkExcluded(const TeLinkStateInfoVector& topology, Ipv4Address a, Ipv4Address b)
+{
+    TeLinkStateInfoVector result = topology;
+    for (auto& link : result) {
+        if ((link.advrouter == a && link.linkid == b) || (link.advrouter == b && link.linkid == a))
+            link.state = false;
+    }
+    return result;
+}
+
+TeLinkStateInfoVector SegmentRouting::reversedTopology(const TeLinkStateInfoVector& topology)
+{
+    TeLinkStateInfoVector result = topology;
+    for (auto& link : result) {
+        Ipv4Address tmpRouter = link.advrouter;
+        link.advrouter = link.linkid;
+        link.linkid = tmpRouter;
+
+        Ipv4Address tmpAddr = link.local;
+        link.local = link.remote;
+        link.remote = tmpAddr;
+    }
+    return result;
+}
+
+std::set<Ipv4Address> SegmentRouting::distancePreservingReachable(Ipv4Address root,
+        const TeLinkStateInfoVector& fullTopology, const TeLinkStateInfoVector& filteredTopology)
+{
+    std::set<Ipv4Address> result;
+    result.insert(root); // trivially at distance 0 from itself, in both topologies
+
+    for (auto& elem : sidByRouter) {
+        Ipv4Address candidate = elem.first;
+        if (candidate == root)
+            continue;
+
+        double fullDist = -1, filteredDist = -1;
+        bool reachableInFull = ted->getShortestPathCost(root, candidate, fullTopology, 0.0, 7, fullDist);
+        bool reachableInFiltered = ted->getShortestPathCost(root, candidate, filteredTopology, 0.0, 7, filteredDist);
+
+        if (!reachableInFull || !reachableInFiltered)
+            continue; // unreachable in either topology: not a (simple) P-/Q-space member
+
+        if (filteredDist <= fullDist)
+            result.insert(candidate);
+        // else: reachable, but only via a STRICTLY LONGER path once the filtered link is
+        // excluded -- deliberately NOT included (see this method's header doc: relying on such
+        // a path risks a transient micro-loop, exactly what P-space/Q-space rules out).
+        // filteredDist can never be LESS than fullDist (removing a link can only lengthen or
+        // preserve a shortest path), so "<=" and "==" are equivalent here; "<=" is used only to
+        // be robust against floating-point noise from repeated additions.
+    }
+
+    return result;
+}
+
+bool SegmentRouting::findTiLfaRepair(Ipv4Address dest, Ipv4Address protectedNeighbor,
+        const TeLinkStateInfoVector& topology, LabelOpVector& outRepair, int& outBackupOutInterfaceId,
+        std::string& outDescription)
+{
+    Ipv4AddressVector ownNeighbors = getOwnNeighbors(topology);
+    TeLinkStateInfoVector excludedTopology = withLinkExcluded(topology, routerId, protectedNeighbor);
+
+    // P-space: nodes whose shortest-path cost from this router is UNCHANGED once the protected
+    // link is excluded (distancePreservingReachable()'s definition -- see its doc for why a node
+    // reachable only via a strictly LONGER alternate is excluded). Extended P-space additionally
+    // includes such nodes reachable from each of this router's OTHER neighbors, over the SAME
+    // topology pair (RFC 9855; increases the chance of a PQ hit).
+    std::set<Ipv4Address> pSpace = distancePreservingReachable(routerId, topology, excludedTopology);
+    for (auto& neighbor : ownNeighbors) {
+        if (neighbor == protectedNeighbor)
+            continue;
+        std::set<Ipv4Address> extra = distancePreservingReachable(neighbor, topology, excludedTopology);
+        pSpace.insert(extra.begin(), extra.end());
+    }
+
+    // Q-space of dest: nodes whose OWN shortest-path cost TO dest is unchanged once the
+    // protected link is excluded -- computed via a reverse-SPT rooted at dest, over the reversed
+    // topology pair (order of reverse-then-exclude vs exclude-then-reverse doesn't matter:
+    // withLinkExcluded() matches the link in both directions either way).
+    TeLinkStateInfoVector reversedFull = reversedTopology(topology);
+    TeLinkStateInfoVector reversedExcluded = reversedTopology(excludedTopology);
+    std::set<Ipv4Address> qSpace = distancePreservingReachable(dest, reversedFull, reversedExcluded);
+
+    // Case 1: a PQ node exists -> single node-SID segment. Skip routerId itself (using our own
+    // "node SID" as a repair segment is meaningless -- we're already here) AND protectedNeighbor
+    // (the far end of the link that just failed/is being protected against): protectedNeighbor
+    // can genuinely satisfy the distance-preserving P-space/Q-space tests (e.g. reachable from
+    // some OTHER neighbor at unchanged cost via a path that never used the protected link at
+    // all), but routing traffic for a DIFFERENT destination THROUGH the very node whose
+    // adjacency to the PLR just changed relies on that node's own view of the network already
+    // being consistent -- exactly the kind of assumption RFC 9855's P/Q-space rules exist to
+    // avoid leaning on. The one destination this exclusion trivially still protects is
+    // protectedNeighbor itself (dest == protectedNeighbor): Q-space always contains dest itself
+    // (root-included, trivially), so excluding protectedNeighbor here just means that case falls
+    // through to the next real PQ candidate instead of a degenerate self-referential push --
+    // strictly safer, and no less correct (the destination's own node-SID is still what a
+    // genuine PQ node ultimately delivers it to).
+    for (auto& node : pSpace) {
+        if (node == routerId || node == protectedNeighbor || !qSpace.count(node))
+            continue;
+
+        Ipv4AddressVector segments;
+        segments.push_back(node);
+        encodeRepair(dest, segments, excludedTopology, outRepair, outBackupOutInterfaceId, outDescription);
+        return true;
+    }
+
+    // Case 2: no PQ node -- look for a P-space node P directly adjacent (a real link, not the
+    // protected one) to a Q-space node Q, and bridge with TWO node-SID segments [P, Q] (see class
+    // documentation for why a second node-SID, not P's adjacency-SID).
+    if (maxRepairStackDepth >= 2) {
+        for (auto& link : topology) {
+            if (!link.state)
+                continue;
+            if (link.advrouter == routerId && link.linkid == protectedNeighbor)
+                continue; // the protected link itself can never be part of its own repair
+
+            Ipv4Address p = link.advrouter;
+            Ipv4Address q = link.linkid;
+            if (p == q || !pSpace.count(p) || !qSpace.count(q))
+                continue;
+            if (p == routerId)
+                continue; // that would just be case 1 with q as the PQ node -- already tried
+            if (p == protectedNeighbor || q == protectedNeighbor)
+                continue; // same reasoning as Case 1's protectedNeighbor exclusion above
+
+            Ipv4AddressVector segments;
+            segments.push_back(p);
+            segments.push_back(q);
+            encodeRepair(dest, segments, excludedTopology, outRepair, outBackupOutInterfaceId, outDescription);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void SegmentRouting::computeTiLfaRepairs()
+{
+    const TeLinkStateInfoVector& topology = ted->getLinks();
+
+    for (auto& elem : sidByRouter) {
+        Ipv4Address dest = elem.first;
+        if (dest == routerId)
+            continue;
+
+        // The protected link is whichever of THIS router's own links dest's CURRENT shortest
+        // path leaves via -- exactly node-SID forwarding's own next hop for dest, computed the
+        // same way recomputeAndInstall() does, but read out directly here (rather than through
+        // resolveNextHop()) because the protected link's FAR END (path[1]) is exactly what's
+        // needed, not just the resolved interface id.
+        Ipv4AddressVector destVec;
+        destVec.push_back(dest);
+        Ipv4AddressVector path = ted->calculateShortestPath(routerId, destVec, topology, 0.0, 7);
+        if (path.size() < 2) {
+            EV_DETAIL << "TI-LFA repair for " << dest << ": UNPROTECTED (destination currently unreachable)" << endl;
+            continue;
+        }
+        Ipv4Address protectedNeighbor = path[1];
+
+        LabelOpVector repair;
+        int backupOutInterfaceId;
+        std::string description;
+        if (findTiLfaRepair(dest, protectedNeighbor, topology, repair, backupOutInterfaceId, description))
+            EV_DETAIL << "TI-LFA repair for " << dest << " via " << protectedNeighbor << ": " << description << endl;
+        else {
+            EV_WARN << "TI-LFA: no repair found for " << dest << " (protected link to " << protectedNeighbor << ") within " << maxRepairStackDepth << " segments; leaving unprotected" << endl;
+            EV_DETAIL << "TI-LFA repair for " << dest << " via " << protectedNeighbor << ": UNPROTECTED" << endl;
+        }
+    }
+}
+
+void SegmentRouting::encodeRepair(Ipv4Address dest, const Ipv4AddressVector& segments,
+        const TeLinkStateInfoVector& excludedTopology, LabelOpVector& outRepair,
+        int& outBackupOutInterfaceId, std::string& outDescription)
+{
+    ASSERT(!segments.empty());
+
+    Ipv4AddressVector firstHopDest;
+    firstHopDest.push_back(segments[0]);
+    Ipv4AddressVector path = ted->calculateShortestPath(routerId, firstHopDest, excludedTopology, 0.0, 7);
+    ASSERT(path.size() >= 2); // segments[0] is a P-space member, so it is reachable over excludedTopology
+    Ipv4Address backupNextHop = path[1];
+    outBackupOutInterfaceId = resolveOutInterfaceId(backupNextHop);
+
+    // Which of the segments actually have to go on the wire. Two of them never do, and
+    // pushing either is not merely wasteful but breaks the repair outright, because a router
+    // installs no LIB entry for its OWN node-SID (see recomputeAndInstall()) and drops a
+    // packet that arrives carrying one:
+    //
+    //  - the OUTERMOST segment when its target is the very next hop. This router is then that
+    //    node's penultimate hop, and PHP means the node never expects to receive its own
+    //    node-SID; crossing the link is itself what satisfies the segment. This is the same
+    //    first-segment canonicalization SrPolicy::resolveSegmentList() applies to a
+    //    configured policy.
+    //  - the INNERMOST segment when it is the destination itself. The packet already carries
+    //    the destination's node-SID underneath (that is the label being repaired), so a second
+    //    copy just survives the egress's penultimate hop and is dropped by the egress.
+    size_t first = (backupNextHop == segments[0]) ? 1 : 0;
+    size_t last = segments.size(); // exclusive
+    if (last > first && segments[last - 1] == dest)
+        last--;
+
+    outRepair.clear();
+    std::ostringstream desc;
+    desc << "[";
+
+    if (first == last) {
+        // Nothing left to push: the packet leaves by the backup interface still carrying its
+        // own destination's node-SID, which the repair next hop knows how to forward (that is
+        // exactly what made it a Q-space member). So the repair is the ordinary forwarding
+        // action for that label, which is also what keeps the TTL decrementing.
+        int destLabel = srgbBase + sidByRouter.at(dest);
+        if (backupNextHop == dest) {
+            outRepair = LibTable::popLabel();
+            desc << "POP (" << backupNextHop << ")";
+        }
+        else {
+            outRepair = LibTable::swapLabel(destLabel);
+            desc << "SWAP " << destLabel << " (via " << backupNextHop << ")";
+        }
+    }
+    else {
+        // Wire order: LibTable::pushLabel()/Mpls::doStackOps() insert each PUSH at the FRONT of
+        // the packet's label stack, so the LAST op appended ends up on top -- the segment that
+        // must ride outermost has to be appended last.
+        for (size_t i = last; i-- > first; ) {
+            LabelOp op;
+            op.optcode = PUSH_OPER;
+            op.label = srgbBase + sidByRouter.at(segments[i]);
+            outRepair.push_back(op);
+        }
+        for (size_t i = first; i < last; i++) {
+            if (i > first)
+                desc << ", ";
+            desc << "PUSH " << (srgbBase + sidByRouter.at(segments[i])) << " (" << segments[i] << ")";
+        }
+    }
+
+    desc << "]";
+    outDescription = desc.str();
+}
+
+void SegmentRouting::handleOwnLinkStateChange(Ipv4Address peerRouterId, bool up)
+{
+    if (!tiLfa)
+        return;
+
+    if (!up) {
+        // Link to peerRouterId just went down. By this point recomputeAndInstall() (called just
+        // before this, from receiveSignal()) has already reprogrammed every destination's
+        // protectedNeighbor using the POST-failure ted[] -- Ted::setLinkState() flips
+        // ted[index].state on its very first line, before any signal in this cascade fires, so
+        // there is no point at which a signal handler still observes the pre-failure topology.
+        // A snapshot taken earlier in this same cascade would therefore already be stale too.
+        //
+        // Instead of snapshotting, reconstruct "which destinations used to route via
+        // peerRouterId" directly: run the shortest-path computation again over a topology where
+        // this link is forced back to "up" (everything else left exactly as ted[] has it now,
+        // post-failure) -- this reconstructed topology is also what gets passed to
+        // findTiLfaRepair() as the reference "full" topology, since P-space/Q-space's
+        // distance-preserving comparisons are only meaningful against a genuinely-up baseline:
+        // passing the already-down real topology as the "full" reference would make excluding
+        // the (already excluded) link a no-op, trivially satisfying the distance-preserving
+        // check for every node and silently discarding RFC 9855's actual P/Q-space constraint.
+        TeLinkStateInfoVector topologyWithLinkUp = ted->getLinks();
+        for (auto& link : topologyWithLinkUp) {
+            if ((link.advrouter == routerId && link.linkid == peerRouterId)
+                    || (link.advrouter == peerRouterId && link.linkid == routerId))
+                link.state = true;
+        }
+
+        for (auto& elem : sidByRouter) {
+            Ipv4Address dest = elem.first;
+            if (dest == routerId)
+                continue;
+
+            Ipv4AddressVector destVec;
+            destVec.push_back(dest);
+            Ipv4AddressVector preFailurePath = ted->calculateShortestPath(routerId, destVec, topologyWithLinkUp, 0.0, 7);
+            if (preFailurePath.size() < 2 || preFailurePath[1] != peerRouterId)
+                continue; // dest wasn't routed via this link before it failed
+
+            LabelOpVector repair;
+            int backupOutInterfaceId;
+            std::string description;
+            if (!findTiLfaRepair(dest, peerRouterId, topologyWithLinkUp, repair, backupOutInterfaceId, description))
+                continue; // no repair available for this destination against this link
+
+            int sid = sidByRouter.at(dest);
+            int label = srgbBase + sid;
+            lt->setBackup(label, repair, backupOutInterfaceId);
+            lt->activateBackup(label, true);
+            // recorded rather than re-derived later: once the link is down the topology no
+            // longer shows it, so this repair could not be computed again (see the member's doc)
+            tiLfaActiveRepairs[dest] = ActiveTiLfaRepair{peerRouterId, repair, backupOutInterfaceId};
+            EV_INFO << "TI-LFA: activated backup for " << dest << " (protected link to " << peerRouterId << " went down)" << endl;
+        }
+    }
+    else {
+        // Link to peerRouterId came back up: revert every destination whose backup was
+        // activated because of exactly this link.
+        for (auto it = tiLfaActiveRepairs.begin(); it != tiLfaActiveRepairs.end(); ) {
+            if (it->second.protectedNeighbor != peerRouterId) {
+                ++it;
+                continue;
+            }
+
+            Ipv4Address dest = it->first;
+            int sid = sidByRouter.at(dest);
+            int label = srgbBase + sid;
+            lt->activateBackup(label, false);
+            EV_INFO << "TI-LFA: reverted backup for " << dest << " (protected link to " << peerRouterId << " came back up)" << endl;
+            it = tiLfaActiveRepairs.erase(it);
+        }
+    }
 }
 
 } // namespace inet

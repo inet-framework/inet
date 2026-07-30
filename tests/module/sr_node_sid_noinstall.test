@@ -1,0 +1,252 @@
+%description:
+Regression test for node-SID label programming under ~Ted's `installRoutes = false` coexistence
+mode (the mode Ted.ned documents for letting an IGP, a configurator or static routes own the
+routing table while Ted only tracks TE state).
+
+Same line network as sr_node_sid.test -- hostA -- A -- B -- C -- D -- hostD, all four routers
+sharing one sidTable (A=1, B=2, C=3, D=4), and one ~SrPolicy on A sending hostD's traffic onto
+segments="node:4" -- but with `**.ted.installRoutes = false`. Ted therefore never touches any
+routing table, so the routes that would otherwise come from it are supplied inline in the .rt
+files instead: a route to each adjacent peer's ROUTER-ID on every router (that is the address
+~LinkStateRouting addresses its flooded updates to, so without these the control plane itself
+cannot run), plus the two the IP data path needs -- A's route toward hostD's address, which is
+what makes A's Ipv4 hand the packet down to Mpls for ingress classification in the first place,
+and D's directly-connected route to hostD, used after the label is popped. Everything between A
+and D is pure label switching and needs no routing table at all.
+
+What this pins down: ~SegmentRouting must keep reprogramming its labels as the link-state
+database changes, and it must do so from ~Ted's own database-changed notification rather than
+from routing-table activity. B's transit entry for D's node-SID is the discriminating one: B is
+two hops from D, so it can only learn that D exists at all once C's link-state advertisement has
+been FLOODED to it and merged into its TED -- strictly after startup. If SegmentRouting were
+driven by the routing table's routeAdded/routeDeleted signals, those would never fire here (with
+installRoutes=false Ted::rebuildRoutingTable() installs nothing), recomputeAndInstall() would
+never re-run after the initial local-links-only snapshot, and B would never install a SWAP for
+16004 at all -- labeled traffic would die at B with "incoming label not resolved" while every
+router still looked perfectly healthy. sr_node_sid.test cannot catch that: with the default
+installRoutes=true, the route churn happens to fire those signals often enough to hide it.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.mpls.SrMplsRouter;
+import ned.DatarateChannel;
+
+network SrNodeSidNoInstallTest
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    types:
+        channel Link extends DatarateChannel
+        {
+            datarate = 1Mbps;
+            delay = 10us;
+        }
+    submodules:
+        hostA: StandardHost {
+            @display("p=100,100");
+        }
+        A: SrMplsRouter {
+            parameters:
+                routerId = "1.1.1.1";
+                peers = "ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                policies = xmldoc("policiesA.xml");
+                @display("p=250,100");
+            gates:
+                pppg[2];
+        }
+        B: SrMplsRouter {
+            parameters:
+                routerId = "2.2.2.2";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=400,100");
+            gates:
+                pppg[2];
+        }
+        C: SrMplsRouter {
+            parameters:
+                routerId = "3.3.3.3";
+                peers = "ppp0 ppp1";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=550,100");
+            gates:
+                pppg[2];
+        }
+        D: SrMplsRouter {
+            parameters:
+                routerId = "4.4.4.4";
+                peers = "ppp0";
+                sidTable = xmldoc("sidtable.xml");
+                @display("p=700,100");
+            gates:
+                pppg[2];
+        }
+        hostD: StandardHost {
+            @display("p=850,100");
+        }
+    connections:
+        hostA.pppg++ <--> Link <--> A.pppg[0];
+        A.pppg[1] <--> Link <--> B.pppg[0];
+        B.pppg[1] <--> Link <--> C.pppg[0];
+        C.pppg[1] <--> Link <--> D.pppg[0];
+        D.pppg[1] <--> Link <--> hostD.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: sidtable.xml
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+    <node router="4.4.4.4" sid="4"/>
+</sr>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: policiesA.xml
+<policies>
+    <policy dest="10.0.0.20" netmask="255.255.255.255" segments="node:4"/>
+</policies>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostA.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.10	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.0.1	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: A.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.1	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.0.2	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+2.2.2.2		10.0.0.3	255.255.255.255	G	0	ppp1
+10.0.0.20	10.0.0.3	255.255.255.255	G	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: B.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.3	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.0.4	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+1.1.1.1		10.0.0.2	255.255.255.255	G	0	ppp0
+3.3.3.3		10.0.0.5	255.255.255.255	G	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: C.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.5	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.0.6	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+2.2.2.2		10.0.0.4	255.255.255.255	G	0	ppp0
+4.4.4.4		10.0.0.7	255.255.255.255	G	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: D.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.7	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.0.8	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+3.3.3.3		10.0.0.6	255.255.255.255	G	0	ppp0
+10.0.0.20	*	255.255.255.255	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostD.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.20	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+default:	10.0.0.8	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src
+network = SrNodeSidNoInstallTest
+sim-time-limit = 2s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.ted.installRoutes = false
+
+**.hostA.numApps = 1
+**.hostA.app[0].typename = "UdpBasicApp"
+**.hostA.app[0].localPort = 100
+**.hostA.app[0].destPort = 100
+**.hostA.app[0].messageLength = 128 bytes
+**.hostA.app[0].sendInterval = 0.01s
+**.hostA.app[0].destAddresses = "hostD"
+
+**.hostD.numApps = 1
+**.hostD.app[0].typename = "UdpSink"
+**.hostD.app[0].localPort = 100
+
+**.hostA.ipv4.routingTable.routingFile = "hostA.rt"
+**.hostD.ipv4.routingTable.routingFile = "hostD.rt"
+**.A.ipv4.routingTable.routingFile = "A.rt"
+**.B.ipv4.routingTable.routingFile = "B.rt"
+**.C.ipv4.routingTable.routingFile = "C.rt"
+**.D.ipv4.routingTable.routingFile = "D.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Ted really is in the hands-off mode this test is about
+%contains: stdout
+installRoutes=false, not touching the routing table
+%#--------------------------------------------------------------------------------------------------------------
+%# The discriminating assertion: B installs a TRANSIT entry for D's node-SID. B is two hops from
+%# D, so this can only follow a flooded link-state update merged into B's TED after startup.
+%contains: stdout
+node 4.4.4.4 (sid=4, label=16004): transit, installing SWAP
+%#--------------------------------------------------------------------------------------------------------------
+%# ... and the resulting label stack really is switched end to end: A pushes, B swaps, C pops
+%contains: stdout
+doStackOps: {PUSH 16004}
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+doStackOps: {SWAP 16004}
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+doStackOps: {POP}
+%#--------------------------------------------------------------------------------------------------------------
+%# No labeled packet is dropped for want of a LIB entry (the symptom of label programming that
+%# froze at the startup snapshot)
+%postrun-command: grep -c "incoming label not resolved" test.out > unresolved.out || true
+%contains: unresolved.out
+0
+%#--------------------------------------------------------------------------------------------------------------
+%# host traffic is delivered end-to-end via the SR-programmed LSP
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

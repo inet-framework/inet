@@ -1,0 +1,14 @@
+<scenario>
+    <at t="1s">
+        <disconnect src-module="R1" src-gate="pppg$o[3]"/>
+        <disconnect src-module="R3" src-gate="pppg$o[2]"/>
+    </at>
+    <at t="3s">
+        <connect src-module="R1" src-gate="pppg[3]"
+                 dest-module="R3" dest-gate="pppg[2]"
+                 channel-type="ned.DatarateChannel">
+            <param name="delay" value="100us"/>
+            <param name="datarate" value="10Mbps"/>
+        </connect>
+    </at>
+</scenario>

@@ -36,6 +36,7 @@ simsignal_t interfaceIpv4ConfigChangedSignal = cComponent::registerSignal("inter
 simsignal_t interfaceIpv6ConfigChangedSignal = cComponent::registerSignal("interfaceIpv6ConfigChanged");
 simsignal_t interfaceClnsConfigChangedSignal = cComponent::registerSignal("interfaceClnsConfigChanged");
 simsignal_t tedChangedSignal = cComponent::registerSignal("tedChanged");
+simsignal_t tedDatabaseChangedSignal = cComponent::registerSignal("tedDatabaseChanged");
 
 // layer 3 - Routing Table
 simsignal_t routeAddedSignal = cComponent::registerSignal("routeAdded");

@@ -72,4 +72,5 @@ simple Ted extends SimpleModule
         xml linkAttributes = default(xml("<links/>")); // optional per-interface TE-attribute overrides, e.g. <links><link interface="eth0" teMetric="10" adminGroup="0x3" srlgs="7 12"/></links>; unlisted interfaces get teMetric=0 (falls back to `metric`) and adminGroup=0/no SRLGs
         @display("i=block/table");
         @signal[tedChanged](type=inet::TedChangeInfo); // emitted by setLinkState()/announceLinkChange() whenever a link's liveness or bandwidth changes; ~LinkStateRouting subscribes at the host level to flood the change
+        @signal[tedDatabaseChanged](type=inet::Ted); // emitted by rebuildRoutingTable() on EVERY link-state database change, whatever its origin (a local liveness flip, a remote update merged in by flooding, or the initial discovery) and regardless of installRoutes; ~SegmentRouting subscribes at the host level to reprogram its label forwarding
 }

@@ -250,6 +250,19 @@ Each ``<policy>`` matches a destination prefix (longest-prefix match across all 
 
 If the first segment's label would be immediately popped again by the very next router (a node segment whose target is this router's direct neighbor, or any adjacency segment, which by construction always names one of this router's own local links), that label is not pushed at all; the packet is simply forwarded out the resolved interface with the remaining labels underneath. Because adjacency-SID advertisement between routers is not modeled, an ``adj:`` segment only has well-defined meaning as a policy's first (or sole) segment, naming one of the ingress router's own links; see :ned:`SrPolicy`'s NED documentation for the full reasoning and its consequences if used later in a segment list.
 
+.. _ug:sec:mpls:tilfa:
+
+TI-LFA (Topology-Independent Loop-Free Alternate)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Setting :ned:`SegmentRouting`'s ``tiLfa`` parameter to true (the default is false, so existing networks are unaffected) enables RFC 9855 local link protection: for every other router D whose current shortest path from this router (the Point of Local Repair, or PLR) leaves via one of this router's own links, :ned:`SegmentRouting` precomputes a backup label stack that steers D's traffic around that one link, and installs it (inactive) into :ned:`LibTable` alongside the primary node-SID entry.
+
+The computation follows RFC 9855's P-space/Q-space construction: P-space is the set of nodes still reachable from the PLR (and, in "extended" P-space, from each of the PLR's other neighbors) at *unchanged* cost once the protected link is excluded; Q-space of D is the set of nodes whose own shortest path to D does not depend on that link either. If a node lies in both (a "PQ node"), a single extra node-SID segment naming it is enough: pushed on top of the packet's own, already-present node-SID(D) label, it detours the packet to the PQ node, which forwards it on toward D exactly as it would anyone else's node-SID traffic. If no single PQ node exists, :ned:`SegmentRouting` looks for a P-space node directly adjacent to a Q-space node and bridges the two with two node-SID segments instead of one (bounded by the ``maxRepairStackDepth`` parameter, default 3; beyond that the destination is left unprotected and an ``EV_WARN`` is logged). Either way, the protected link's own far end is never itself chosen as a repair segment, even where the P/Q-space math would technically allow it: routing a *different* destination's traffic through the node whose adjacency to the PLR just changed would depend on that node's own view of the network already being consistent, which is exactly the assumption RFC 9855's P/Q-space rules exist to avoid leaning on.
+
+This deliberately diverges from RFC 9855 Section 5's textbook two-segment form, which bridges via the P-node's own *adjacency* SID rather than a second node SID: since adjacency-SID advertisement between routers is not modeled here (see :ref:`ug:sec:mpls:srpolicy`), a PLR could never resolve a label value for a third-party P-node's adjacency in the first place. Two globally-resolvable node SIDs sidestep that gap entirely, at the cost of one extra label on the wire versus the RFC's own encoding.
+
+The backup activates the instant the protected interface goes down (:ned:`Ted`'s ``trackInterfaceState`` hook, the same physical-carrier-loss signal :ned:`Ldp`/:ned:`RsvpTe` rely on for their own failure detection) and reverts the instant it comes back up; no IGP reconvergence has to complete first. In this model, however, the ordinary node-SID recompute this same local failure triggers (see `SegmentRouting`_ above) *also* runs synchronously in the very same simulation event, and for the PLR's own traffic already reroutes to the very same post-convergence path the backup would have used. The backup mechanism's own, distinct value here is therefore in the data plane it exercises -- a genuine, RFC-shaped repair label stack pushed for any packet a downstream router still forwards to the PLR as a transit hop during the failure window -- not a measurable reduction in the convergence gap, which this discrete-event model doesn't otherwise incur. Node protection (surviving the failure of a whole neighboring router, not just one link), SRLG-aware protection, and formal micro-loop-freedom analysis (RFC 8333) are not modeled; protection is single-link only.
+
 .. _ug:sec:mpls:mpls-enabled-router-models:
 
 MPLS-Enabled Router Models
@@ -482,13 +495,15 @@ SR-MPLS (RFC 8660)
    * - SR-DB / BGP-LS, PCEP-driven policies
      - Not modeled
      - n/a
-   * - TI-LFA / any local protection or fast reroute
-     - Not modeled
-     - A topology change reroutes node-SID traffic once :ned:`Ted` itself
-       notices it and recomputes shortest paths; this is IGP
-       reconvergence, not sub-50ms local protection. Adjacency-SID pins
-       are not protected at all: a pinned link's failure blackholes that
-       policy's traffic.
+   * - TI-LFA (RFC 9855) local link protection
+     - Partially modeled
+     - :ned:`SegmentRouting` precomputes a per-destination P/Q-space
+       backup label stack for each of its own links and activates it via
+       :ned:`LibTable`'s backup fields the instant that link's own
+       interface goes down (see below); node protection, SRLG awareness,
+       and formal micro-loop-freedom analysis are not modeled.
+       Adjacency-SID pins are not protected at all: a pinned link's
+       failure blackholes that policy's traffic.
    * - SRv6
      - Not modeled
      - Only the MPLS data plane encoding (RFC 8660) is implemented.

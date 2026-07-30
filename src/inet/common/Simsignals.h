@@ -45,6 +45,7 @@ extern INET_API simsignal_t // admin
     interfaceIpv6ConfigChangedSignal,
     interfaceClnsConfigChangedSignal,
     tedChangedSignal,
+    tedDatabaseChangedSignal,
 
 // layer 3 - Routing Table
     routeAddedSignal,

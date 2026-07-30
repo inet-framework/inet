@@ -60,9 +60,9 @@ void Ted::initializeTED()
     ASSERT(!routerId.isUnspecified());
 
     //
-    // Parse optional per-interface TE-attribute overrides (D3: teMetric,
-    // adminGroup, srlgs -- see Ted.ned's "linkAttributes" param doc for the
-    // XML schema). Interfaces not mentioned keep the defaults (teMetric=0,
+    // Parse optional per-interface TE-attribute overrides (teMetric, adminGroup,
+    // srlgs -- see Ted.ned's "linkAttributes" param doc for the XML schema).
+    // Interfaces not mentioned keep the defaults (teMetric=0,
     // i.e. fall back to `metric`; adminGroup=0; no SRLGs). Unknown interface
     // names are a configuration error and abort with a cRuntimeError that
     // includes the offending element's source location.
@@ -230,9 +230,7 @@ Ipv4AddressVector Ted::calculateShortestPath(Ipv4AddressVector dest,
         uint32_t includeAny, uint32_t excludeAny)
 {
     // Thin wrapper over the explicit-root overload below, rooted at this Ted instance's own
-    // routerId -- behavior-identical to what this function always did (Workstream F2's
-    // explicit-root extension only ADDS a way to root elsewhere; every existing caller here
-    // keeps getting exactly the same root it always implicitly used).
+    // routerId.
     return calculateShortestPath(routerId, dest, topology, req_bandwidth, priority, includeAny, excludeAny);
 }
 
@@ -277,17 +275,47 @@ Ipv4AddressVector Ted::calculateShortestPath(Ipv4Address root, Ipv4AddressVector
     return result;
 }
 
+bool Ted::getShortestPathCost(Ipv4Address root, Ipv4Address dest, const TeLinkStateInfoVector& topology,
+        double req_bandwidth, int priority, double& outDistance, uint32_t includeAny, uint32_t excludeAny)
+{
+    std::vector<Vertex> V = calculateShortestPaths(root, topology, req_bandwidth, priority, includeAny, excludeAny);
+
+    for (auto& v : V) {
+        if (v.node != dest)
+            continue;
+        if (v.dist >= LS_INFINITY)
+            return false; // present in the vertex list (some edge referenced it) but never reached
+        outDistance = v.dist;
+        return true;
+    }
+    return false; // dest never appeared in the topology at all
+}
+
 void Ted::rebuildRoutingTable()
 {
-    if (!installRoutes) {
+    if (installRoutes)
+        installRoutesFromTed();
+    else {
         // Some other means (IGP, static routes, Ipv4NetworkConfigurator) owns the routing
         // table; Ted only tracks TE state, so there's nothing to compute or install here.
         // (Nothing else consumes calculateShortestPaths()'s result, so it's safe to skip
-        // the whole method, not just the route-install tail.)
+        // the whole computation, not just the route-install tail.)
         EV_INFO << "installRoutes=false, not touching the routing table at " << routerId << endl;
-        return;
     }
 
+    // Every change to the link-state database funnels through this method, whatever its
+    // origin: a local liveness flip (setLinkState()), a remote update merged in by
+    // LinkStateRouting's flooding, or the initial local discovery (initializeTED()).
+    // tedChangedSignal deliberately covers only the first of those -- it exists so
+    // LinkStateRouting knows which of THIS router's own links to re-flood -- so modules
+    // that program forwarding state from the database itself need this one instead.
+    // Emitted regardless of installRoutes: whether Ted owns the routing table has nothing
+    // to do with whether the topology changed.
+    emit(tedDatabaseChangedSignal, this);
+}
+
+void Ted::installRoutesFromTed()
+{
     EV_INFO << "rebuilding routing table at " << routerId << endl;
 
     std::vector<Vertex> V = calculateShortestPaths(routerId, ted, 0.0, 7);
@@ -399,13 +427,12 @@ std::vector<Ted::Vertex> Ted::calculateShortestPaths(Ipv4Address root, const TeL
     std::vector<Edge> edges;
 
     // Select edges that (a) are up, (b) have enough bandwidth left at the requested priority,
-    // and (c) satisfy the affinity constraint (Workstream C6/D3; includeAny==0 && excludeAny==0
-    // is a no-op match, so existing callers -- rebuildRoutingTable()'s plain routing-table
-    // computation -- are unaffected). Meanwhile, collect vertices in vertices[].
-    // Edge weight uses getTeMetric() (TE metric with IGP-metric fallback, Workstream D3): this
-    // is a no-op change for every shipped example/showcase today since none of them configure a
-    // nonzero teMetric via Ted's "linkAttributes" param, so getTeMetric() always returns
-    // elem.metric there -- see this commit's fingerprint verification.
+    // and (c) satisfy the affinity constraint (includeAny==0 && excludeAny==0 is a no-op match,
+    // so callers that impose no affinity constraint -- e.g. rebuildRoutingTable()'s plain
+    // routing-table computation -- see every otherwise eligible link). Meanwhile, collect
+    // vertices in vertices[]. Edge weight uses getTeMetric() (TE metric with IGP-metric
+    // fallback); no shipped example/showcase configures a nonzero teMetric via Ted's
+    // "linkAttributes" param, so getTeMetric() returns elem.metric for all of them.
     for (auto& elem : topology) {
         if (!elem.state)
             continue;
@@ -428,16 +455,12 @@ std::vector<Ted::Vertex> Ted::calculateShortestPaths(Ipv4Address root, const TeL
     int srcIndex = assignIndex(vertices, srcAddr);
     vertices[srcIndex].dist = 0.0;
 
-    // This is Bellman-Ford (not Dijkstra -- the "Dijkstra? just guessing..." comment that used
-    // to sit here was the original 2005 author's own doubt about which algorithm he'd written,
-    // on code that had ZERO callers until Workstream C6 revived it for RsvpTe's ingress CSPF).
-    // Verified correct by direct review plus tests/unit/Ted_calculateShortestPath.test (a
-    // hand-built topology with a known-correct answer, exercised BEFORE this function got its
-    // first real caller): the outer loop's bound (vertices.size()-1 passes, the textbook
-    // Bellman-Ford bound for a graph with no negative-weight cycles -- all link metrics/costs
-    // here are non-negative) is correct and sufficient regardless of edge insertion order; the
-    // early "no modification this pass -> stop" exit is a valid, safe optimization on top of
-    // that bound, not a substitute for it.
+    // This is Bellman-Ford, not Dijkstra. Covered by tests/unit/Ted_calculateShortestPath.test
+    // (a hand-built topology with a known-correct answer): the outer loop's bound
+    // (vertices.size()-1 passes, the textbook Bellman-Ford bound for a graph with no
+    // negative-weight cycles -- all link metrics/costs here are non-negative) is correct and
+    // sufficient regardless of edge insertion order; the early "no modification this pass ->
+    // stop" exit is a valid, safe optimization on top of that bound, not a substitute for it.
     for (unsigned int i = 1; i < vertices.size(); i++) {
         bool mod = false;
 
