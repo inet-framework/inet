@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+    <node router="4.4.4.4" sid="4"/>
+</sr>

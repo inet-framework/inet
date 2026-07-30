@@ -1,0 +1,119 @@
+This example demonstrates a "6PE-lite" deployment: two IPv6-addressed edge
+islands connected across a small, purely IPv4-addressed, IPv4-signaled
+SR-MPLS (RFC 8660) core, using the same signaling-free node-SID label
+programming and ~SrPolicy ingress steering as examples/mpls/sr/ -- see that
+example's README first for the SR-MPLS basics this one builds on.
+
+Topology
+--------
+
+Four ~SrMplsRouter nodes form a small chain plus one chord: R1-R2-R3-R4 (all
+metric 1), plus a direct R1-R3 link that shortcuts across the middle hop.
+hostA hangs off R1; hostB and hostC hang off R4 -- two IPv6 "customers"
+reachable through the same egress router, each steered there a different
+way (mirroring examples/mpls/sr/'s first two flows, at a smaller scale and
+carrying IPv6 instead of IPv4).
+
+R1 and R4 are the only routers with an extra IPv6-addressed interface (one
+each, toward their local island); their OTHER (core-facing) interfaces, and
+BOTH of R2's and R3's interfaces, are plain IPv4 -- exactly the P/PE split a
+real 6PE deployment has (only the edge routers need any IPv6 awareness at
+all). Router IDs are 1.1.1.1..4.4.4.4; node SIDs are 1..4 (R1=1, ..., R4=4);
+with the default srgbBase (16000), R4's node-SID label is 16004.
+
+Only R1 carries an ~SrPolicy policy table (policies.xml), with two entries,
+one per destination host:
+
+1. hostA -> hostB, ``segments="node:4"`` (unconstrained node-SID policy)
+
+   Names only the destination's node SID; the path taken is whatever
+   ~SegmentRouting's own shortest-path computation over the network picks.
+   Here, that is the R1-R3 chord: a 2-hop shortcut (cost 2) that beats the
+   R1-R2-R3-R4 chain (cost 3). R1 (ingress) PUSHes and forwards directly to
+   R3 over the chord; R3, being R4's direct neighbor, POPs (penultimate-hop-
+   popping, RFC 8660 Section 2) and forwards on to R4, which delivers to
+   hostB via ordinary L3 routing. R2 never sees this flow at all.
+
+2. hostA -> hostC, ``segments="node:2 node:4"`` (explicit-path policy)
+
+   Names R2's node SID as an intermediate waypoint before the real
+   destination's node SID, forcing the longer 3-hop chain route
+   (R1-R2-R3-R4) and avoiding the chord entirely -- SR traffic engineering
+   without any signaling protocol. R2 genuinely transits (SWAP), then R3
+   POPs (PHP is still what happens at the LAST hop before R4, regardless of
+   which path got the packet there). Both flows therefore end with the same
+   PHP-at-R3 step; what differs is whether R2 is on the path at all.
+
+Both flows are simple periodic UDP flows (128-byte datagrams every 10 ms),
+started 0.1s apart; sim-time-limit is 10s.
+
+Making PHP carry IPv6 correctly: the inner explicit-null label
+----------------------------------------------------------------
+
+A node-SID label is shared by ALL traffic destined to that node, of either
+address family -- unlike a FEC-keyed LIB entry (static XML, LDP, RSVP-TE),
+where one entry corresponds to exactly one FEC of exactly one family, a
+node-SID's PHP POP entry is installed ONCE per node, family-agnostic, by
+~SegmentRouting. R2 and R3 above are given no IPv6 configuration whatsoever,
+yet R3 still correctly decapsulates hostA's IPv6 traffic without
+misinterpreting it as IPv4 -- this works because ~SrPolicy pushes an EXTRA,
+innermost label under the node-SID label whenever a matched policy's
+destination is IPv6: RFC 3032's IPv6 Explicit NULL label (value 2). It rides
+underneath the node-SID label(s) through every transit PHP pop untouched (a
+non-bottom-of-stack pop never stamps a payload protocol -- see
+~Mpls::popLabel()), and is only actually processed once it reaches the
+bottom of the stack, at the true egress (R4), where ~Mpls's existing
+explicit-null handling (built for Workstream F3 Phase 2, exercised here for
+the first time) pops it and stamps the packet IPv6 -- regardless of what
+R3's own (also family-agnostic) node-SID LIB entry would have defaulted to.
+Look for ``doStackOps: {PUSH 2; PUSH 16004}`` at R1, a plain ``{POP}`` at R3
+(popping only the node-SID label, label 2 still underneath), and "IPv6
+explicit null label, popping and delivering to L3" at R4.
+
+How to observe it
+------------------
+
+Run with Cmdenv and an "info" log level (the default in this ini) and grep
+the output for ``doStackOps:`` lines. Per-router counts over the whole run
+(confirmed by actually running this example): R1 pushes for BOTH flows; R2
+only ever appears for the explicit-path flow (hostA->hostC) -- the
+unconstrained flow (hostA->hostB) never touches it; R3 POPs the node-SID
+label for both flows (it is the PHP router for R4 on both the chord and the
+chain paths). ``hostB``'s and ``hostC``'s ``packetReceived:count`` scalars
+confirm actual end-to-end IPv6 delivery through the SR-MPLS core.
+
+What this models vs. real 6PE
+------------------------------
+
+This is deliberately "6PE-lite", not a real 6PE (RFC 4798) control plane:
+
+- **No BGP labeled-unicast.** Real 6PE distributes IPv6 reachability AND a
+  per-prefix label via MP-BGP (IPv6 AFI/SAFI, "BGP-LU"); a full BGP-LU/6VPE
+  control plane is its own, much larger modeling effort (out of scope for
+  this workstream -- see the plan's "explicitly out of scope" section).
+  Here, R1's edge-to-edge IPv6-prefix-to-label mapping is static/SR-policy
+  configuration (policies.xml) -- the same simplification this codebase
+  already makes for IGP/SID advertisement (see examples/mpls/sr/README and
+  the users guide's SR-MPLS section: no OSPF-SR/IS-IS-SR flooding is
+  modeled either, the sidTable is static, network-wide configuration).
+- **No per-(prefix,family) label.** Real 6PE's BGP label is allocated per
+  advertised IPv6 prefix, so PE routers never need a demultiplexing trick --
+  the label itself already says "this is the IPv6 route to 2001:db8:20::/64".
+  This model's SR node-SID is allocated per ROUTER, shared by both address
+  families, so it needs the inner explicit-null label described above to
+  tell the egress which family is underneath. That is a data-plane
+  workaround for the underlying scheme's coarser granularity, not something
+  a real 6PE deployment needs to do.
+- **No IPv6 route redistribution.** hostB's and hostC's prefixes are
+  reachable from R1 purely because policies.xml says so; nothing floods or
+  redistributes IPv6 reachability between routers the way BGP would in a
+  real deployment.
+
+Simplifications inherited from examples/mpls/sr/
+--------------------------------------------------
+
+As documented there: the SID table is static, network-wide configuration
+(no OSPF-SR/IS-IS-SR flooding); the SRGB is homogeneous across all routers;
+there is no protection/fast-reroute (a link or node failure reroutes
+node-SID traffic via ~Ted's own shortest-path recomputation, once ~Ted
+itself notices the failure).

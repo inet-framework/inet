@@ -1,0 +1,3 @@
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.14	MTU: 1500	Metric: 1
+ifconfigend.
