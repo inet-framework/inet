@@ -21,10 +21,10 @@ if df.empty:
 df["station"] = "sta[" + df["module"].str.extract(r"app\[(\d+)\]")[0] + "]"
 df["value"] = df["value"] * 0.002
 df["unit"] = ""
-df = df[(df["configname"] == "Homogeneous") |
-        ((df["configname"] == "RateAnomaly") & (df["slowBitrate"].astype(str) == "6"))].copy()
-df["scenario"] = df["configname"].map({"Homogeneous": "Homogeneous (all 54 Mbps)",
-                                        "RateAnomaly": "Rate anomaly (sta[0] at 6 Mbps)"})
+df = df[(df["configname"] == "UplinkHomogeneous") |
+        ((df["configname"] == "UplinkAnomaly") & (df["slowBitrate"].astype(str) == "6"))].copy()
+df["scenario"] = df["configname"].map({"UplinkHomogeneous": "Homogeneous (all 54 Mbps)",
+                                        "UplinkAnomaly": "Rate anomaly (sta[0] at 6 Mbps)"})
 
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, ["station"], ["scenario"])
 metadf["legend"] = list(valuedf.index)   # clean legend labels (no "scenario=" prefix)
@@ -748,7 +748,7 @@ if df.empty:
 
 df["station"] = df["module"].str.extract(r"app\[(\d+)\]").astype(int)
 df["mbps"] = df["value"] * 0.002
-df["slowrate"] = np.where(df["configname"] == "Homogeneous", 54.0, pd.to_numeric(df["slowBitrate"], errors="coerce"))
+df["slowrate"] = np.where(df["configname"] == "UplinkHomogeneous", 54.0, pd.to_numeric(df["slowBitrate"], errors="coerce"))
 
 agg = df.groupby("slowrate")["mbps"].sum().sort_index()
 fast = df[df["station"] != 0].groupby("slowrate")["mbps"].mean().sort_index()
@@ -1504,7 +1504,7 @@ if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
 df["station"] = "sta[" + df["module"].str.extract(r"app\[(\d+)\]")[0] + "]"
-df = df[(df["configname"] == "RateAnomaly") & (df["slowBitrate"].astype(str) == "6")].copy()
+df = df[(df["configname"] == "UplinkAnomaly") & (df["slowBitrate"].astype(str) == "6")].copy()
 df["unit"] = ""
 df["series"] = "frames transmitted"
 

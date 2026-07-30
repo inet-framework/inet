@@ -5,9 +5,9 @@
 # so it is averaged the same way as TXOP.
 #
 # Reproduce (from this showcase directory):
-#   inet -u Cmdenv -c RateAnomaly  -r 0..17 --repeat=3 --result-dir=results/solve
-#   inet -u Cmdenv -c Txop         -r 0..17 --repeat=3 --result-dir=results/solve
-#   inet -u Cmdenv -c Homogeneous  -r 0               --result-dir=results
+#   inet -u Cmdenv -c UplinkAnomaly     -r 0..17 --repeat=3 --result-dir=results/solve
+#   inet -u Cmdenv -c UplinkTxop        -r 0..17 --repeat=3 --result-dir=results/solve
+#   inet -u Cmdenv -c UplinkHomogeneous -r 0               --result-dir=results
 #   python3 txop-chart.py
 #
 # The sweep results live in results/solve/ (not results/) so they do not contaminate the
@@ -31,11 +31,11 @@ def series(config, rate, which):
     return sum(vals) / len(vals)   # mean over the repetitions
 
 rates = [6, 9, 12, 18, 24, 36]
-dcf_agg  = [series("RateAnomaly", r, "agg")  for r in rates]
-dcf_fast = [series("RateAnomaly", r, "fast") for r in rates]
-tx_agg   = [series("Txop", r, "agg")  for r in rates]
-tx_fast  = [series("Txop", r, "fast") for r in rates]
-baseline = sum(per_station(sorted(glob.glob("results/Homogeneous-*.sca"))[0]))  # all-fast aggregate
+dcf_agg  = [series("UplinkAnomaly", r, "agg")  for r in rates]
+dcf_fast = [series("UplinkAnomaly", r, "fast") for r in rates]
+tx_agg   = [series("UplinkTxop", r, "agg")  for r in rates]
+tx_fast  = [series("UplinkTxop", r, "fast") for r in rates]
+baseline = sum(per_station(sorted(glob.glob("results/UplinkHomogeneous-*.sca"))[0]))  # all-fast aggregate
 
 plt.figure(figsize=(8, 6))
 plt.axhline(baseline, color="gray", ls=":", lw=1.4, label=f"All-fast baseline (~{baseline:.0f} Mbps)")
