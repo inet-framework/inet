@@ -85,6 +85,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     // configuration
     simtime_t holdTime;
     simtime_t helloInterval;
+    bool advertiseImplicitNull = true;
 
     // currently recognized FECs
     FecVector fecList;

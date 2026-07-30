@@ -38,6 +38,7 @@ simple Ldp extends SimpleModule like IApp
         string tedModule;
         double holdTime @unit(s) = default(15s);
         double helloInterval @unit(s) = default(5s);
+        bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a FEC
         @display("i=block/control");
         @signal[tedChanged](type=inet::TedChangeInfo);
         @lifecycleSupport;

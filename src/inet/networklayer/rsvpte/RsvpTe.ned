@@ -93,6 +93,7 @@ simple RsvpTe extends SimpleModule
         string peers = default("auto"); // "auto" (default) derives the RSVP peers from the TED (every directly-connected RSVP-speaking neighbour); otherwise a space-separated list of the interface names towards the RSVP peers
         double helloInterval @unit(s);
         double helloTimeout @unit(s);
+        bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a tunnel
         @display("i=block/control");
         @signal[tedChanged](type=inet::TedChangeInfo);
     gates:

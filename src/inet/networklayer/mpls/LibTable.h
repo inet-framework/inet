@@ -19,6 +19,12 @@
 
 namespace inet {
 
+// RFC 3032 reserved label values (bottom of the 20-bit label space)
+constexpr int IPV4_EXPLICIT_NULL_LABEL = 0;
+constexpr int ROUTER_ALERT_LABEL = 1;
+constexpr int IMPLICIT_NULL_LABEL = 3;
+constexpr int RESERVED_LABEL_MAX = 15; // labels 4-15 are unassigned
+
 enum LabelOpCode {
     PUSH_OPER,
     SWAP_OPER,

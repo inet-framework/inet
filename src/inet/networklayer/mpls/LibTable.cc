@@ -21,7 +21,10 @@ void LibTable::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        maxLabel = 0;
+        // dynamically allocated labels must never collide with the RFC 3032
+        // reserved range (0-15), which the data plane (Mpls.cc) now interprets
+        // specially (explicit null, unassigned)
+        maxLabel = RESERVED_LABEL_MAX;
         ift.reference(this, "interfaceTableModule", true);
         WATCH(maxLabel);
         WATCH(lib);
@@ -111,8 +114,8 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
 
         LibEntry newItem;
         newItem.inLabel = getParameterIntValue(&entry, "inLabel");
-        if (newItem.inLabel <= 0)
-            throw cRuntimeError("Invalid libentry at %s: inLabel must be > 0, but is %d", entry.getSourceLocation(), newItem.inLabel);
+        if (newItem.inLabel < 0)
+            throw cRuntimeError("Invalid libentry at %s: inLabel must be >= 0, but is %d", entry.getSourceLocation(), newItem.inLabel);
 
         const char *inInterfaceName = getParameterStrValue(&entry, "inInterface");
         if (!strcmp(inInterfaceName, "any")) {
@@ -147,8 +150,8 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
                 if (!val)
                     throw cRuntimeError("Invalid push op at %s: missing 'value' attribute", op.getSourceLocation());
                 l.label = atoi(val);
-                if (l.label <= 0)
-                    throw cRuntimeError("Invalid push op at %s: label must be > 0, but is '%s'", op.getSourceLocation(), val);
+                if (l.label < 0)
+                    throw cRuntimeError("Invalid push op at %s: label must be >= 0, but is '%s'", op.getSourceLocation(), val);
             }
             else if (!strcmp(code, "pop")) {
                 l.optcode = POP_OPER;
@@ -160,8 +163,8 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
                 if (!val)
                     throw cRuntimeError("Invalid swap op at %s: missing 'value' attribute", op.getSourceLocation());
                 l.label = atoi(val);
-                if (l.label <= 0)
-                    throw cRuntimeError("Invalid swap op at %s: label must be > 0, but is '%s'", op.getSourceLocation(), val);
+                if (l.label < 0)
+                    throw cRuntimeError("Invalid swap op at %s: label must be >= 0, but is '%s'", op.getSourceLocation(), val);
             }
             else
                 throw cRuntimeError("Invalid label op at %s: unknown code '%s'", op.getSourceLocation(), code);
