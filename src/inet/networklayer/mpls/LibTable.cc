@@ -31,9 +31,9 @@ void LibTable::initialize(int stage)
     }
 }
 
-void LibTable::handleMessage(cMessage *)
+void LibTable::handleMessage(cMessage *msg)
 {
-    ASSERT(false);
+    throw cRuntimeError("LibTable does not process messages, but received '%s'", msg->getName());
 }
 
 bool LibTable::resolveLabel(std::string inInterface, int inLabel,
@@ -81,8 +81,7 @@ int LibTable::installLibEntry(int inLabel, std::string inInterface, const LabelO
             elem.color = color;
             return inLabel;
         }
-        ASSERT(false);
-        return 0; // prevent warning
+        throw cRuntimeError("Cannot update LIB entry: no entry with inLabel=%d", inLabel);
     }
 }
 
@@ -95,7 +94,7 @@ void LibTable::removeLibEntry(int inLabel)
         lib.erase(lib.begin() + i);
         return;
     }
-    ASSERT(false);
+    throw cRuntimeError("Cannot remove LIB entry: no entry with inLabel=%d", inLabel);
 }
 
 void LibTable::readTableFromXML(const cXMLElement *libtable)
@@ -113,6 +112,8 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
 
         LibEntry newItem;
         newItem.inLabel = getParameterIntValue(&entry, "inLabel");
+        if (newItem.inLabel <= 0)
+            throw cRuntimeError("Invalid libentry at %s: inLabel must be > 0, but is %d", entry.getSourceLocation(), newItem.inLabel);
         newItem.inInterface = getParameterStrValue(&entry, "inInterface");
         newItem.outInterface = getParameterStrValue(&entry, "outInterface");
         newItem.color = getParameterIntValue(&entry, "color", 0);
@@ -122,34 +123,38 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
             const cXMLElement& op = *ops_oit;
             const char *val = op.getAttribute("value");
             const char *code = op.getAttribute("code");
-            ASSERT(code);
+            if (!code)
+                throw cRuntimeError("Invalid label op at %s: missing 'code' attribute", op.getSourceLocation());
             LabelOp l;
 
             if (!strcmp(code, "push")) {
                 l.optcode = PUSH_OPER;
-                ASSERT(val);
+                if (!val)
+                    throw cRuntimeError("Invalid push op at %s: missing 'value' attribute", op.getSourceLocation());
                 l.label = atoi(val);
-                ASSERT(l.label > 0);
+                if (l.label <= 0)
+                    throw cRuntimeError("Invalid push op at %s: label must be > 0, but is '%s'", op.getSourceLocation(), val);
             }
             else if (!strcmp(code, "pop")) {
                 l.optcode = POP_OPER;
-                ASSERT(!val);
+                if (val)
+                    throw cRuntimeError("Invalid pop op at %s: must not have a 'value' attribute", op.getSourceLocation());
             }
             else if (!strcmp(code, "swap")) {
                 l.optcode = SWAP_OPER;
-                ASSERT(val);
+                if (!val)
+                    throw cRuntimeError("Invalid swap op at %s: missing 'value' attribute", op.getSourceLocation());
                 l.label = atoi(val);
-                ASSERT(l.label > 0);
+                if (l.label <= 0)
+                    throw cRuntimeError("Invalid swap op at %s: label must be > 0, but is '%s'", op.getSourceLocation(), val);
             }
             else
-                ASSERT(false);
+                throw cRuntimeError("Invalid label op at %s: unknown code '%s'", op.getSourceLocation(), code);
 
             newItem.outLabel.push_back(l);
         }
 
         lib.push_back(newItem);
-
-        ASSERT(newItem.inLabel > 0);
 
         if (newItem.inLabel > maxLabel)
             maxLabel = newItem.inLabel;

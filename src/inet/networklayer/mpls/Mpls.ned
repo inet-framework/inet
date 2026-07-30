@@ -51,6 +51,7 @@ simple Mpls extends SimpleModule like IProtocolLayer
         string libTableModule;
         string classifierModule; // The path to the module which implements the IIngressClassifier C++ interface
         @display("i=block/switch");
+        @signal[packetDropped](type=cPacket);
     gates:
         input upperLayerIn;
         output upperLayerOut;
