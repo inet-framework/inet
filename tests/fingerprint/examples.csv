@@ -419,7 +419,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          45b6-ed3c/tplx;0000-0000/~tNl;0000-0000/~tND;9d00-b77c/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c VehicleMobility,             10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;ddaf-0493/tyf, PASS,
 
-/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             1fda-4c2d/tplx;9be4-4c79/~tNl;57a5-614f/tyf, PASS, Ipv4
+/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             38e9-66d3/tplx;7b37-6089/~tNl;c8ac-d23e/tyf, PASS, Ipv4
 /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            931d-c856/tplx;79ad-6cde/~tNl;650f-86df/tyf, PASS, Ipv4
 /examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             000f-06fa/tplx;f12b-a8cb/~tNl;ebc6-99b0/tyf, PASS, Ipv4
 /examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            ac30-3bb0/tplx;43c5-3934/~tNl;a7ac-1aed/tyf, PASS, Ipv4
