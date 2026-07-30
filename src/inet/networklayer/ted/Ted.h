@@ -27,6 +27,14 @@ class NetworkInterface;
 class INET_API Ted : public RoutingProtocolBase
 {
   public:
+    // Cap on the number of SRLGs a single TeLinkStateInfo can carry (D3).
+    // TeLinkStateInfo.srlgs[] is a fixed-size array (see Ted.msg -- `struct`
+    // msg types don't support true dynamic arrays); this constant is the
+    // single source of truth, kept in sync with the array's literal size in
+    // Ted.msg and with LinkStateRoutingSerializer's wire layout.
+    static constexpr int MAX_SRLGS = 8;
+
+  public:
     /**
      * Only used internally, during shortest path calculation:
      * vertex in the graph we build from links in TeLinkStateInfoVector.
@@ -95,17 +103,24 @@ class INET_API Ted : public RoutingProtocolBase
     // reference into the link database.
     virtual void adjustUnresvBandwidth(int index, int priority, double delta);
 
-    // Flips the up/down state of link `index` and, unless the caller opts
-    // out via `rebuild=false` (used where the caller needs to interleave
-    // its own announce-signal emission between the flip and the rebuild,
-    // to preserve today's per-call-site event ordering), rebuilds the
-    // routing table. This is a mechanical extraction of what today's call
-    // sites in Ldp/RsvpTe do inline -- no behavior change yet; a later
-    // commit moves the announce-signal emission in here too and makes this
-    // the single owner of link-liveness changes.
-    virtual void setLinkState(int index, bool up, bool rebuild = true);
+    // Single owner of link-liveness changes: no-ops if the link is already
+    // in the requested state (so redundant reports from Ldp/RsvpTe -- e.g. a
+    // Hello session re-establishing without the link ever having gone down
+    // in the TED's eyes -- don't cause spurious rebuilds/floods); otherwise
+    // flips the state and, in this canonical order, (1) rebuilds the routing
+    // table (respecting installRoutes) and (2) announces the change via
+    // tedChangedSignal so LinkStateRouting can flood it. Ldp/RsvpTe used to
+    // each perform this flip+rebuild+announce choreography inline (with
+    // per-call-site ordering that differed from each other); now they just
+    // report the observed liveness change and Ted owns what happens next.
+    virtual void setLinkState(int index, bool up);
 
     virtual void rebuildRoutingTable();
+
+    // Emits tedChangedSignal for link `index` without touching its state --
+    // used directly by RsvpTe for bandwidth-only changes (CAC accounting),
+    // which aren't a liveness flip and so don't go through setLinkState().
+    virtual void announceLinkChange(int index);
 
     // Escape hatch for LinkStateRouting's flood-merge/topology-discovery
     // logic: checkLinkValidity() hands back a pointer into the internal
@@ -115,6 +130,26 @@ class INET_API Ted : public RoutingProtocolBase
     // about topology discovery, not liveness ownership.
     virtual bool checkLinkValidity(TeLinkStateInfo link, TeLinkStateInfo *& match);
     virtual void updateTimestamp(int index);
+    //@}
+
+    /** @name TE attribute query helpers (D3)
+     * Not consumed anywhere yet in this workstream -- CSPF-with-affinities
+     * (Workstream C6) and TI-LFA (Workstream F2) are the intended callers.
+     * Static because they only look at the fields already carried by a
+     * TeLinkStateInfo record (populated by initializeTED() from the
+     * "linkAttributes" NED param, or defaulted to 0/empty).
+     */
+    //@{
+    // teMetric==0 means "not configured"; fall back to the IGP metric.
+    static double getTeMetric(const TeLinkStateInfo& link) { return link.teMetric != 0 ? link.teMetric : link.metric; }
+
+    // RFC 3209 Section 4.7.4-style affinity match: the link's adminGroup bits
+    // must intersect includeAny (or includeAny==0, meaning "no include
+    // constraint"), and must not intersect excludeAny.
+    static bool matchesAffinity(const TeLinkStateInfo& link, uint32_t includeAny, uint32_t excludeAny)
+    {
+        return (includeAny == 0 || (link.adminGroup & includeAny) != 0) && (link.adminGroup & excludeAny) == 0;
+    }
     //@}
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;

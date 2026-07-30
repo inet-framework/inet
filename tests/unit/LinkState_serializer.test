@@ -1,13 +1,16 @@
 %description:
 Byte-exact round-trip serialization of LinkStateMsg (the TED/RSVP-TE link-state
 flooding protocol, LinkStatePacket.msg). This is a model-internal format with no RFC
-counterpart ("LinkStateSerializer format v1", see LinkStateRoutingSerializer.h/.cc):
-message header (command, flags, count) + fixed-width TeLinkStateInfo records. Verifies
+counterpart ("LinkStateSerializer format v2", see LinkStateRoutingSerializer.h/.cc):
+message header (command, flags, count) + fixed-width TeLinkStateInfo records (now
+including the D3 TE-attribute fields: teMetric, adminGroup, srlgs). Verifies
 serialize->bytes->deserialize reproduces the fields (except timestamp, which is
 intentionally not preserved -- see the format note) and the expected on-wire length
-(4 + 116 bytes per record, matching LinkStateRouting.cc's chunk-length formula).
+(4 + 164 bytes per record, matching LinkStateRouting.cc's chunk-length formula).
 
 %includes:
+#include <vector>
+
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/networklayer/ted/LinkStatePacket_m.h"
@@ -28,7 +31,8 @@ Ptr<const T> roundTrip(const Ptr<const T>& original)
 }
 
 static TeLinkStateInfo makeLinkInfo(Ipv4Address advrouter, Ipv4Address linkid, Ipv4Address local,
-        Ipv4Address remote, double metric, double maxBw, bool state, unsigned int sourceId, unsigned int messageId)
+        Ipv4Address remote, double metric, double maxBw, bool state, unsigned int sourceId, unsigned int messageId,
+        double teMetric = 0, uint32_t adminGroup = 0, const std::vector<uint32_t>& srlgs = {})
 {
     TeLinkStateInfo info;
     info.advrouter = advrouter;
@@ -43,6 +47,12 @@ static TeLinkStateInfo makeLinkInfo(Ipv4Address advrouter, Ipv4Address linkid, I
     info.sourceId = sourceId;
     info.messageId = messageId;
     info.state = state;
+    info.teMetric = teMetric;
+    info.adminGroup = adminGroup;
+    ASSERT(srlgs.size() <= 8); // Ted::MAX_SRLGS
+    info.srlgsCount = srlgs.size();
+    for (size_t i = 0; i < srlgs.size(); i++)
+        info.srlgs[i] = srlgs[i];
     return info;
 }
 
@@ -55,19 +65,24 @@ static TeLinkStateInfo makeLinkInfo(Ipv4Address advrouter, Ipv4Address linkid, I
     msg->setCommand(1);
     msg->setRequest(true);
 
+    // record 'a': nonzero teMetric, a nonzero adminGroup, and a full (8-entry, the
+    // Ted::MAX_SRLGS cap) SRLG list -- exercises the D3 TE-attribute fields end to end.
     TeLinkStateInfo a = makeLinkInfo(Ipv4Address("10.0.0.1"), Ipv4Address("10.0.0.2"),
-            Ipv4Address("10.0.1.1"), Ipv4Address("10.0.1.2"), 1.0, 1e8, true, 111, 222);
+            Ipv4Address("10.0.1.1"), Ipv4Address("10.0.1.2"), 1.0, 1e8, true, 111, 222,
+            5.0, 0x3, {7, 12, 13, 14, 15, 16, 17, 18});
+    // record 'b': all D3 fields left at their defaults (teMetric=0 -> falls back to
+    // metric, adminGroup=0, no SRLGs) -- exercises the "nothing configured" path.
     TeLinkStateInfo b = makeLinkInfo(Ipv4Address("10.0.0.3"), Ipv4Address("10.0.0.4"),
             Ipv4Address("10.0.2.1"), Ipv4Address("10.0.2.2"), 10.0, 2e8, false, 333, 444);
 
     msg->setLinkInfoArraySize(2);
     msg->setLinkInfo(0, a);
     msg->setLinkInfo(1, b);
-    // header(4) + 2 * 116 = 236
-    msg->setChunkLength(B(236));
+    // header(4) + 2 * 164 = 332
+    msg->setChunkLength(B(332));
 
     Packet pkt("sz"); pkt.insertAtFront(msg);
-    ASSERT(pkt.getDataLength() == B(236));
+    ASSERT(pkt.getDataLength() == B(332));
     auto m2 = dynamicPtrCast<const LinkStateMsg>(roundTrip(staticPtrCast<const LinkStateMsg>(msg)));
     ASSERT(m2 != nullptr);
     ASSERT(m2->getCommand() == 1);
@@ -84,6 +99,12 @@ static TeLinkStateInfo makeLinkInfo(Ipv4Address advrouter, Ipv4Address linkid, I
     ASSERT(a2.sourceId == 111 && a2.messageId == 222);
     ASSERT(a2.state == true);
     ASSERT(a2.timestamp == SIMTIME_ZERO); // NOT preserved -- see format note
+    ASSERT(a2.teMetric == 5.0);
+    ASSERT(a2.adminGroup == 0x3u);
+    ASSERT(a2.srlgsCount == 8);
+    static const uint32_t expectedSrlgs[8] = {7, 12, 13, 14, 15, 16, 17, 18};
+    for (int i = 0; i < 8; i++)
+        ASSERT(a2.srlgs[i] == expectedSrlgs[i]);
 
     const TeLinkStateInfo& b2 = m2->getLinkInfo(1);
     ASSERT(b2.advrouter == Ipv4Address("10.0.0.3") && b2.linkid == Ipv4Address("10.0.0.4"));
@@ -94,6 +115,11 @@ static TeLinkStateInfo makeLinkInfo(Ipv4Address advrouter, Ipv4Address linkid, I
         ASSERT(b2.UnResvBandwidth[i] == 2e8 - i * 1000.0);
     ASSERT(b2.sourceId == 333 && b2.messageId == 444);
     ASSERT(b2.state == false);
+    ASSERT(b2.teMetric == 0); // not configured -- Ted::getTeMetric() would fall back to metric
+    ASSERT(b2.adminGroup == 0);
+    ASSERT(b2.srlgsCount == 0);
+    for (int i = 0; i < 8; i++)
+        ASSERT(b2.srlgs[i] == 0);
     EV << "  PASS" << endl;
 }
 

@@ -594,9 +594,7 @@ void Ldp::processHelloTimeout(cMessage *msg)
     // update TED and routing table
 
     unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerIP);
-    tedmod->setLinkState(index, false, false);
-    announceLinkChange(index);
-    tedmod->rebuildRoutingTable();
+    tedmod->setLinkState(index, false);
 }
 
 void Ldp::removePeerBindings(Ipv4Address peerIP)
@@ -664,12 +662,10 @@ void Ldp::processLDPHello(Packet *msg)
         return;
     }
 
-    // mark link as working if it was failed, and rebuild table
+    // report the link as working again; Ted decides whether that's actually
+    // a change (and rebuilds/announces accordingly)
     unsigned int index = tedmod->linkIndex(rt->getRouterId(), peerAddr);
-    if (!tedmod->getLink(index).state) {
-        tedmod->setLinkState(index, true, true);
-        announceLinkChange(index);
-    }
+    tedmod->setLinkState(index, true);
 
     // peer already in table?
     int i = findPeer(peerAddr);
@@ -1407,14 +1403,6 @@ void Ldp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     EV_INFO << "routing table changed, rebuild list of known FEC" << endl;
 
     rebuildFecList();
-}
-
-void Ldp::announceLinkChange(int tedlinkindex)
-{
-    TedChangeInfo d;
-    d.setTedLinkIndicesArraySize(1);
-    d.setTedLinkIndices(0, tedlinkindex);
-    emit(tedChangedSignal, &d);
 }
 
 } // namespace inet

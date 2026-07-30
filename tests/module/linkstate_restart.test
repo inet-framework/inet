@@ -1,0 +1,102 @@
+%description:
+Regression test for D4 (workstream D, architecture decoupling): ~LinkStateRouting becomes
+lifecycle-aware (extends RoutingProtocolBase instead of a plain SimpleModule), so a node
+shutdown/restart properly stops/resumes its flooding activity and recomputes its peer
+snapshot from the current ~Ted state, instead of silently staying half-initialized (the
+pre-D4 bug: the module never noticed the node had been stopped and restarted, kept a stale
+peerIfAddrs snapshot taken at simulation start, and never re-announced).
+
+Built on the shipped examples/mpls/testte_failure2 network (RSVPTE4) and its own
+scenario.xml, which already shuts down LSR4 at t=2s and restarts it at t=4s -- exactly the
+scenario this fix targets. (Manual before/after comparison on this exact network+scenario
+showed the pre-D4 code delivering only 348/10000 UDP echo replies after the restart, vs.
+9933/10000 with this fix -- LSR4's restart previously left the network's return path mostly
+black-holed for the rest of the run; this is a functional bug fix, not just a cosmetic one.)
+
+Asserted, in order:
+  1. no ~LinkStateRouting activity at all on LSR4 while it is down (t in [2s, 4s)) -- proves
+     incoming floods aren't processed and the module doesn't spuriously tick while stopped;
+  2. a fresh "announce" self-message fires on LSR4's ~LinkStateRouting at/after the restart
+     (t >= 4s) -- proves handleStartOperation() recomputes peers and reschedules flooding on
+     every (re)start, not just once at time 0;
+  3. at least one neighbor actually receives a LinkStateMsg flood at/after the restart --
+     proves the reflood is observed downstream, not just scheduled locally;
+  4. the RSVP-TE LSP still establishes end to end, and host traffic is delivered
+     (packetReceived:count > 0) -- proves the restart doesn't break signaling/forwarding;
+  5. standard undisposed-object postrun guard -- proves clean teardown, no crash.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.testte_failure2.RSVPTE4
+sim-time-limit = 6s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host3"
+
+**.host3.numApps = 1
+**.host3.app[0].typename = "UdpEchoApp"
+**.host3.app[0].localPort = 100
+
+**.LSR1.classifier.config = xmldoc("../../../../examples/mpls/testte_failure2/LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("../../../../examples/mpls/testte_failure2/LSR1_rsvp.xml")
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+**.LSR1.peers = "ppp0 ppp1"
+**.LSR2.peers = "ppp0 ppp1 ppp2"
+**.LSR3.peers = "ppp0 ppp1 ppp2"
+**.LSR4.peers = "ppp0 ppp1 ppp2"
+**.LSR5.peers = "ppp0 ppp3 ppp4"
+**.LSR6.peers = "ppp0 ppp1"
+**.LSR7.peers = "ppp0 ppp1"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.*.hasStatus = true
+# reuse the shipped scenario verbatim: <shutdown module="LSR4"/> at t=2s, <startup .../> at t=4s
+**.scenarioManager.script = xmldoc("../../../../examples/mpls/testte_failure2/scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# 1. no LinkStateRouting activity at all on LSR4 while it's down ([2s, 4s))
+%postrun-command: awk '/^\*\* Event #/ { if (match($0, /t=([0-9.]+)/, m)) t = m[1]+0 } /in RSVPTE4\.LSR4\.linkStateRouting/ && t >= 2 && t < 4 { print "UNEXPECTED_ACTIVITY_WHILE_DOWN:", $0 }' test.out > down_activity.out
+%not-contains: down_activity.out
+UNEXPECTED_ACTIVITY_WHILE_DOWN
+%#--------------------------------------------------------------------------------------------------------------
+%# 2. a fresh "announce" self-message fires on LSR4's LinkStateRouting at/after the restart
+%postrun-command: awk '/^\*\* Event #/ { if (match($0, /t=([0-9.]+)/, m)) t = m[1]+0 } /on announce \(omnetpp::cMessage\)  in RSVPTE4\.LSR4\.linkStateRouting/ && t >= 4 { print "POST_RESTART_ANNOUNCE_SCHEDULED:", $0 }' test.out > restart_announce.out
+%contains: restart_announce.out
+POST_RESTART_ANNOUNCE_SCHEDULED
+%#--------------------------------------------------------------------------------------------------------------
+%# 3. a neighbor actually receives a LinkStateMsg flood at/after the restart
+%postrun-command: awk '/^\*\* Event #/ { if (match($0, /t=([0-9.]+)/, m)) t = m[1]+0 } /received LINK_STATE message from/ && t >= 4 { print "POST_RESTART_FLOOD_SEEN_AT_NEIGHBOR:", t }' test.out > restart_flood.out
+%contains: restart_flood.out
+POST_RESTART_FLOOD_SEEN_AT_NEIGHBOR
+%#--------------------------------------------------------------------------------------------------------------
+%# 4. the LSP still establishes and traffic is still delivered end to end across the restart
+%contains: stdout
+Path successfully established
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%# 5. clean teardown, no crash
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

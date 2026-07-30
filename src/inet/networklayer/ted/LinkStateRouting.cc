@@ -49,46 +49,22 @@ static bool moduleContainsLinkStateRouting(cModule *module)
 
 void LinkStateRouting::initialize(int stage)
 {
-    SimpleModule::initialize(stage);
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    RoutingProtocolBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        // Bind the Ted module reference early (LOCAL stage), even though the
+        // rest of this module's own registration-time setup below happens at
+        // INITSTAGE_ROUTING_PROTOCOLS: RoutingProtocolBase::initialize(stage)
+        // (the call just above) can itself invoke handleStartOperation() from
+        // INSIDE that call, at the very same ROUTING_PROTOCOLS stage -- i.e.
+        // BEFORE the rest of this function's stage==ROUTING_PROTOCOLS branch
+        // below has run. handleStartOperation() reads tedmod->getLinks() to
+        // compute the peer snapshot, so tedmod must already be bound by then.
         tedmod.reference(this, "tedModule", true);
-
-        IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        routerId = rt->getRouterId();
-
+    }
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         // listen for TED modifications
         cModule *host = getContainingNode(this);
         host->subscribe(tedChangedSignal, this);
-
-        // Determine the local interfaces facing our RSVP-TE peers, and store their
-        // addresses in peerIfAddrs[]. With peers="auto" (the default) they are
-        // derived from the TED -- every directly-connected neighbour that also runs
-        // link-state routing (skipping hosts and non-TE routers); otherwise "peers"
-        // is a space-separated list of the peer-facing interface names.
-        const char *peers = par("peers");
-        if (!strcmp(peers, "auto")) {
-            for (auto& link : tedmod->getLinks()) {
-                if (link.advrouter != routerId) // not one of our local links
-                    continue;
-                if (link.linkid.isUnspecified()) // neighbour has no router id (e.g. a host)
-                    continue;
-                cModule *peerNode = L3AddressResolver().findHostWithAddress(L3Address(link.remote));
-                if (peerNode != nullptr && moduleContainsLinkStateRouting(peerNode))
-                    peerIfAddrs.push_back(link.local);
-            }
-        }
-        else {
-            cStringTokenizer tokenizer(peers);
-            IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-            const char *token;
-            while ((token = tokenizer.nextToken()) != nullptr) {
-                peerIfAddrs.push_back(CHK(ift->findInterfaceByName(token))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
-            }
-        }
-
-        // schedule start of flooding link state info
-        announceMsg = new cMessage("announce");
-        scheduleAt(simTime() + exponential(0.01), announceMsg);
 
         WATCH(routerId);
         WATCH(peerIfAddrs);
@@ -97,7 +73,71 @@ void LinkStateRouting::initialize(int stage)
     }
 }
 
-void LinkStateRouting::handleMessage(cMessage *msg)
+void LinkStateRouting::handleStartOperation(LifecycleOperation *operation)
+{
+    // routerId is re-read from the routing table on every (re)start, same as
+    // tedmod->getLinks() below and as Ted::initializeTED() does for its own
+    // routerId -- by the time this runs (ROUTING_PROTOCOLS stage, or a real
+    // restart), the routing table module's own earlier-stage initialization
+    // has already completed, so this is safe despite not being cached at an
+    // earlier stage of THIS module.
+    IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+    routerId = rt->getRouterId();
+
+    // Determine the local interfaces facing our RSVP-TE peers, and store their
+    // addresses in peerIfAddrs[]. With peers="auto" (the default) they are
+    // derived from the TED -- every directly-connected neighbour that also runs
+    // link-state routing (skipping hosts and non-TE routers); otherwise "peers"
+    // is a space-separated list of the peer-facing interface names.
+    //
+    // Recomputing this snapshot on every start (not just once, at time 0) is
+    // the restart-safety fix: previously this ran only from initialize(), so a
+    // restarted node kept flooding with a stale peerIfAddrs snapshot and,
+    // because this module wasn't lifecycle-aware at all, never noticed it had
+    // been stopped and restarted in between.
+    peerIfAddrs.clear();
+    const char *peers = par("peers");
+    if (!strcmp(peers, "auto")) {
+        for (auto& link : tedmod->getLinks()) {
+            if (link.advrouter != routerId) // not one of our local links
+                continue;
+            if (link.linkid.isUnspecified()) // neighbour has no router id (e.g. a host)
+                continue;
+            cModule *peerNode = L3AddressResolver().findHostWithAddress(L3Address(link.remote));
+            if (peerNode != nullptr && moduleContainsLinkStateRouting(peerNode))
+                peerIfAddrs.push_back(link.local);
+        }
+    }
+    else {
+        cStringTokenizer tokenizer(peers);
+        IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        const char *token;
+        while ((token = tokenizer.nextToken()) != nullptr) {
+            peerIfAddrs.push_back(CHK(ift->findInterfaceByName(token))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+        }
+    }
+
+    // schedule (re-)start of flooding link state info
+    ASSERT(announceMsg == nullptr);
+    announceMsg = new cMessage("announce");
+    scheduleAt(simTime() + exponential(0.01), announceMsg);
+}
+
+void LinkStateRouting::handleStopOperation(LifecycleOperation *operation)
+{
+    cancelAndDelete(announceMsg);
+    announceMsg = nullptr;
+    peerIfAddrs.clear();
+}
+
+void LinkStateRouting::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelAndDelete(announceMsg);
+    announceMsg = nullptr;
+    peerIfAddrs.clear();
+}
+
+void LinkStateRouting::handleMessageWhenUp(cMessage *msg)
 {
     if (msg == announceMsg) {
         delete announceMsg;
@@ -182,6 +222,15 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, Ipv4Address sender)
                     match->UnResvBandwidth[i] = link.UnResvBandwidth[i];
                 match->MaxBandwidth = link.MaxBandwidth;
                 match->metric = link.metric;
+                // D3: TE attributes ride along with the rest of the link-state
+                // record, same as metric/bandwidth above (all current examples
+                // leave these at their all-zero defaults, so this is a no-op
+                // in practice today; it matters once linkAttributes is used).
+                match->teMetric = link.teMetric;
+                match->adminGroup = link.adminGroup;
+                match->srlgsCount = link.srlgsCount;
+                for (unsigned int i = 0; i < link.srlgsCount; i++)
+                    match->srlgs[i] = link.srlgs[i];
             }
 
             forward.push_back(link);
@@ -237,14 +286,14 @@ void LinkStateRouting::sendToPeer(Ipv4Address peer, const std::vector<TeLinkStat
         out->setLinkInfo(j, list[j]);
 
     out->setRequest(req);
-    // Message header (4: command + flags + count) + one 116-byte TeLinkStateInfo
-    // record per link (see LinkStateRoutingSerializer.cc's format v1 layout,
+    // Message header (4: command + flags + count) + one 164-byte TeLinkStateInfo
+    // record per link (see LinkStateRoutingSerializer.cc's format v2 layout,
     // which this formula must stay in sync with -- the serializer is the
-    // source of truth). Was a bare B(72) * count with no header and a
-    // per-record width that didn't correspond to any real field encoding
-    // (TeLinkStateInfo needs 113 bytes field-for-field); corrected here now
-    // that a serializer exists to derive the true byte count from.
-    B length = B(4) + B(116) * out->getLinkInfoArraySize();
+    // source of truth). Was 116 bytes/record (format v1) before D3 added the
+    // teMetric/adminGroup/srlgs fields; before any serializer existed it was a
+    // bare B(72) * count with no header and a per-record width that didn't
+    // correspond to any real field encoding.
+    B length = B(4) + B(164) * out->getLinkInfoArraySize();
     out->setChunkLength(length);
     pk->insertAtBack(out);
 

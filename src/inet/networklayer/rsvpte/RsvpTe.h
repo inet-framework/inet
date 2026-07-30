@@ -240,7 +240,6 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual bool allocateResource(Ipv4Address OI, const SessionObj& session, double bandwidth);
     virtual void preempt(Ipv4Address OI, int priority, double bandwidth);
     virtual bool doCACCheck(const SessionObj& session, const SenderTspecObj& tspec, Ipv4Address OI);
-    virtual void announceLinkChange(int tedlinkindex);
 
     virtual void sendToIP(Packet *msg, Ipv4Address destAddr);
 
