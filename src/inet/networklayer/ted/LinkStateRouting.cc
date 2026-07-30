@@ -67,7 +67,7 @@ void LinkStateRouting::initialize(int stage)
         // is a space-separated list of the peer-facing interface names.
         const char *peers = par("peers");
         if (!strcmp(peers, "auto")) {
-            for (auto& link : tedmod->ted) {
+            for (auto& link : tedmod->getLinks()) {
                 if (link.advrouter != routerId) // not one of our local links
                     continue;
                 if (link.linkid.isUnspecified()) // neighbour has no router id (e.g. a host)
@@ -102,7 +102,7 @@ void LinkStateRouting::handleMessage(cMessage *msg)
     if (msg == announceMsg) {
         delete announceMsg;
         announceMsg = nullptr;
-        sendToPeers(tedmod->ted, true, Ipv4Address());
+        sendToPeers(tedmod->getLinks(), true, Ipv4Address());
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "ipIn")) {
         EV_INFO << "Processing message from Ipv4: " << msg << endl;
@@ -134,8 +134,8 @@ void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t signalID, c
     for (unsigned int i = 0; i < k; i++) {
         unsigned int index = d->getTedLinkIndices(i);
 
-        tedmod->updateTimestamp(&tedmod->ted[index]);
-        links.push_back(tedmod->ted[index]);
+        tedmod->updateTimestamp(index);
+        links.push_back(tedmod->getLink(index));
     }
 
     sendToPeers(links, false, Ipv4Address());
@@ -166,7 +166,7 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, Ipv4Address sender)
 
             if (!match) {
                 // and we have no info on this link so far, store it as it is
-                tedmod->ted.push_back(link);
+                tedmod->addLink(link);
                 change = true;
             }
             else {
@@ -192,7 +192,7 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, Ipv4Address sender)
         tedmod->rebuildRoutingTable();
 
     if (msg->getRequest()) {
-        sendToPeer(sender, tedmod->ted, false);
+        sendToPeer(sender, tedmod->getLinks(), false);
     }
 
     if (forward.size() > 0) {
@@ -207,7 +207,7 @@ void LinkStateRouting::sendToPeers(const std::vector<TeLinkStateInfo>& list, boo
     EV_INFO << "sending LINK_STATE message to peers" << endl;
 
     // send one LinkStateMsg per own link (advrouter==routerId), to every peer except exceptPeer
-    for (auto& elem : tedmod->ted) {
+    for (auto& elem : tedmod->getLinks()) {
         if (elem.advrouter != routerId)
             continue;
 

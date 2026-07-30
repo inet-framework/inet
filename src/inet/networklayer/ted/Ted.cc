@@ -441,12 +441,31 @@ bool Ted::isLocalAddress(Ipv4Address addr)
     return false;
 }
 
-void Ted::updateTimestamp(TeLinkStateInfo *link)
+void Ted::updateTimestamp(int index)
 {
+    TeLinkStateInfo *link = &ted[index];
     ASSERT(link->advrouter == routerId);
 
     link->timestamp = simTime();
     link->messageId = ++maxMessageId;
+}
+
+const TeLinkStateInfo& Ted::getLink(int index) const
+{
+    ASSERT(index >= 0 && index < (int)ted.size());
+    return ted[index];
+}
+
+void Ted::adjustUnresvBandwidth(int index, int priority, double delta)
+{
+    ted[index].UnResvBandwidth[priority] += delta;
+}
+
+void Ted::setLinkState(int index, bool up, bool rebuild)
+{
+    ted[index].state = up;
+    if (rebuild)
+        rebuildRoutingTable();
 }
 
 Ipv4AddressVector Ted::getLocalAddress()

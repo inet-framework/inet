@@ -47,11 +47,6 @@ class INET_API Ted : public RoutingProtocolBase
         double metric; // link cost
     };
 
-    /**
-     * The link state database. (TeLinkStateInfoVector is defined in Ted.msg)
-     */
-    TeLinkStateInfoVector ted;
-
   public:
     Ted();
     virtual ~Ted();
@@ -79,7 +74,47 @@ class INET_API Ted : public RoutingProtocolBase
     virtual unsigned int linkIndex(Ipv4Address advrouter, Ipv4Address linkid);
     virtual Ipv4AddressVector getLocalAddress();
 
+    // Read-only access to the link state database, for callers outside ted/
+    // (LinkStateRouting's flooding code, RsvpTe's CAC/bandwidth checks) that
+    // used to reach into the `ted` vector directly.
+    virtual int getNumLinks() const { return ted.size(); }
+    virtual const TeLinkStateInfo& getLink(int index) const;
+    // Whole-database read access, kept alongside the per-index accessors
+    // above for callers that iterate the full topology (e.g. deriving the
+    // peer list from the TED, or building a flood snapshot); returning a
+    // const reference avoids copying on every use.
+    virtual const TeLinkStateInfoVector& getLinks() const { return ted; }
+
+    // Appends a link discovered via flooding (LinkStateRouting's topology
+    // merge); distinct from setLinkState() below, which only ever toggles
+    // the up/down state of an EXISTING link.
+    virtual void addLink(const TeLinkStateInfo& link) { ted.push_back(link); }
+
+    // Narrow write accessor for RSVP-TE's CAC bandwidth bookkeeping
+    // (allocateResource()/preempt()), so callers don't need a non-const
+    // reference into the link database.
+    virtual void adjustUnresvBandwidth(int index, int priority, double delta);
+
+    // Flips the up/down state of link `index` and, unless the caller opts
+    // out via `rebuild=false` (used where the caller needs to interleave
+    // its own announce-signal emission between the flip and the rebuild,
+    // to preserve today's per-call-site event ordering), rebuilds the
+    // routing table. This is a mechanical extraction of what today's call
+    // sites in Ldp/RsvpTe do inline -- no behavior change yet; a later
+    // commit moves the announce-signal emission in here too and makes this
+    // the single owner of link-liveness changes.
+    virtual void setLinkState(int index, bool up, bool rebuild = true);
+
     virtual void rebuildRoutingTable();
+
+    // Escape hatch for LinkStateRouting's flood-merge/topology-discovery
+    // logic: checkLinkValidity() hands back a pointer into the internal
+    // link database (non-const) for the caller to update in place when a
+    // newer link-state record supersedes a stale one. This predates (and
+    // is out of scope for) the link-liveness encapsulation above -- it's
+    // about topology discovery, not liveness ownership.
+    virtual bool checkLinkValidity(TeLinkStateInfo link, TeLinkStateInfo *& match);
+    virtual void updateTimestamp(int index);
     //@}
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;
@@ -97,15 +132,17 @@ class INET_API Ted : public RoutingProtocolBase
 
     int maxMessageId = 0;
 
+    /**
+     * The link state database. (TeLinkStateInfoVector is defined in Ted.msg)
+     * Access from outside Ted goes through the accessor methods above.
+     */
+    TeLinkStateInfoVector ted;
+
   protected:
     virtual int assignIndex(std::vector<Vertex>& vertices, Ipv4Address nodeAddr);
 
     std::vector<Vertex> calculateShortestPaths(const TeLinkStateInfoVector& topology,
             double req_bandwidth, int priority);
-
-  public: // FIXME
-    virtual bool checkLinkValidity(TeLinkStateInfo link, TeLinkStateInfo *& match);
-    virtual void updateTimestamp(TeLinkStateInfo *link);
 };
 
 std::ostream& operator<<(std::ostream& os, const TeLinkStateInfo& info);
