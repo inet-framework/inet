@@ -457,7 +457,7 @@ the other four, identical in both runs), while each client shows its running rec
              to the module rectangle + 5px green margin, paint out the inspector toolbar, composite
              the two side by side.
    record:   inet -u Qtenv -c <Config> --mcp-server-address localhost:8765
-             "--*.sta[*].mobility.initialY=4m + parentIndex() * 4m"   (spread for label clarity)
+             (DownlinkBase spreads the clients 4 m apart so the per-station readouts don't overlap)
    stamp:    captured 2026-07, INET 4.6
 
 The per-station throughput makes the same point quantitatively:
