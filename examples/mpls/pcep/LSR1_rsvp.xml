@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<sessions>
+	<session>
+		<endpoint>LSR6%routerId</endpoint>
+		<tunnel_id>1</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>100</lspid>
+				<bandwidth>50000</bandwidth>
+				<permanent>true</permanent>
+			</path>
+		</paths>
+	</session>
+</sessions>

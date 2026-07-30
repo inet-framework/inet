@@ -1,0 +1,13 @@
+ifconfig:
+name: ppp0	inet_addr: 10.0.3.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.6.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+name: ppp2	inet_addr: 10.0.7.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp3	inet_addr: 10.0.8.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+224.0.0.0	*	255.0.0.0	H	0	ppp2
+224.0.0.0	*	255.0.0.0	H	0	ppp3
+routeend.

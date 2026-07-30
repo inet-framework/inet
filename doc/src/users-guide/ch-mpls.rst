@@ -43,6 +43,10 @@ The core modules are:
 
 - :ned:`SrPolicy` is a configurable ingress classifier for MPLS that imposes SR-MPLS segment-list label stacks
 
+- :ned:`Pce` is a stateful Path Computation Element (PCEP server) that computes and updates RSVP-TE ingress paths on behalf of a :ned:`Pcc`
+
+- :ned:`Pcc` is a Path Computation Client, co-located with an ingress :ned:`RsvpTe`, that delegates path computation and (optionally) ongoing path control to a :ned:`Pce`
+
 .. _ug:sec:mpls:mpls:
 
 Mpls
@@ -279,6 +283,31 @@ Ingress classification is dual-stack wherever a FEC table can name a destination
 A "6PE-lite" example under ``examples/mpls/ipv6pe/`` demonstrates IPv6-addressed edge islands reachable across a small, purely IPv4-addressed, IPv4-signaled SR-MPLS core -- the transit routers carry no IPv6 configuration at all. Because an SR-MPLS node SID is allocated per router and shared by both address families (unlike an LDP- or static-XML-configured FEC, which is inherently family-specific), :ned:`SrPolicy` pushes an extra, innermost IPv6 explicit-null label under the node-SID label stack whenever a matched policy's destination is IPv6, so that the true egress -- not any of the family-agnostic transit routers doing penultimate-hop-popping along the way -- is the one that decides the payload is IPv6. See that example's README for the full walkthrough and for how this differs from a real 6PE (RFC 4798) deployment.
 
 Explicitly out of scope: BGP labeled-unicast / a real 6PE-6VPE control plane (this model's edge-to-edge IPv6-prefix-to-label mapping is static/SR-policy configuration, not a routing protocol); RSVP-TE sessions for IPv6 FECs (RFC 3209's IPv6 objects are not modeled; :ned:`RsvpTe`/:ned:`Ted`/:ned:`RsvpClassifier` remain IPv4-only throughout); LDP-over-IPv6 transport (RFC 7552 Section 6's dual-stack transport-connection and preference rules -- TCP over an IPv6 session -- are not modeled: only the FEC TLV itself is dual-stack); an IPv6-native :ned:`Ted`/:ned:`LinkStateRouting` (both stay IPv4-keyed regardless of which payload families ride over the LSPs they help establish); and SRv6 (a different data plane encoding entirely from the MPLS-based SR-MPLS this chapter describes).
+
+.. _ug:sec:mpls:pcep:
+
+PCEP / Stateful PCE
+-------------------
+
+:ned:`Pce` and :ned:`Pcc` implement a Path Computation Element (PCE) controller and its client, computing and (optionally) actively controlling RSVP-TE ingress paths from a central point rather than leaving every ingress router to compute its own routes locally. A :ned:`Pcc`, co-located with an ingress :ned:`RsvpTe`, connects to a statically configured :ned:`Pce` over TCP port 4189 (RFC 5440's assigned PCEP port); the session comes up via an Open/Keepalive exchange (KeepAlive Time negotiated as the smaller of both sides' proposals; DeadTimer-based liveness, each side monitoring the *other's own* advertised value). PCEP has no discovery phase (unlike :ned:`Ldp`'s Hello): the PCE's address is configured directly on the PCC, which always plays the active (connecting) role.
+
+Architecture: the omniscient TED
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A real PCE typically learns network topology via BGP-LS or IGP peering. This model's :ned:`Pce` instead holds a direct module-path reference to the SAME :ned:`Ted` module every router already maintains via :ned:`LinkStateRouting` -- an "omniscient" simplification in the same category as :ned:`Ted`'s own pre-existing topology omniscience elsewhere in this codebase (e.g. :ned:`RsvpTe`'s own local CSPF, :ned:`SegmentRouting`'s node-SID computation). There is no BGP-LS feed, no partial/incremental topology view, and no separate PCE-side TED synchronization protocol to model.
+
+Two modes: stateless computation and stateful delegation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- **Stateless (RFC 5440 Sections 6.5-6.6, PCReq/PCRep).** Setting :ned:`RsvpTe`'s ``computationMode`` to ``"pce"`` (default ``"local"``, fully backward compatible) redirects its existing CSPF hook (``computeEro``, see the RSVP-TE conformance table below) from a local :ned:`Ted` call to a PCReq/PCRep round trip with the configured :ned:`Pcc` (``pccModule``): the PCE runs the IDENTICAL bandwidth-pruning CSPF (``Ted::calculateShortestPath()``) that :ned:`RsvpTe`'s own local computation already uses, just rooted at the requesting PCC and computed centrally instead of in-process. A PCReq that finds no PCE session yet OPERATIONAL, or gets a NO-PATH reply, falls through to :ned:`RsvpTe`'s existing path-retry machinery unchanged -- there is no separate failure path to learn.
+- **Stateful (RFC 8231, PCRpt/PCUpd).** Setting :ned:`RsvpTe`'s ``delegate`` parameter to true (meaningful only alongside ``computationMode="pce"``) additionally reports every ingress LSP's establishment, make-before-break replacement, and teardown to the PCE (a PCRpt, keyed by a stable PLSP-ID that survives every later path replacement for that LSP). The PCE may then push an unsolicited PCUpd carrying a new ERO for a delegated LSP -- via a ScenarioManager ``<pce-reoptimize plspId="N"/>`` command in this model (a TED-change-triggered version was considered and rejected as harder to make deterministic for testing) -- which the PCC applies via the SAME make-before-break machinery an internally-triggered reroute already uses, using the PCE-supplied ERO directly (no fresh CSPF/PCReq round-trip, since the PCE's ERO is already a full strict route).
+
+Controller-death fallback
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If a stateful PCEP session is lost while LSPs remain delegated, the :ned:`Pcc` waits ``stateTimeout`` (RFC 8231 Section 5.2, default 60 s) for the PCE to come back. If the session is still down once the timer expires, every affected LSP falls back to LOCAL path computation (:ned:`Ted`'s CSPF, the SAME code path ``computationMode="local"`` already uses) -- a one-time forced reroute, not merely a passive "next time it happens to need one" -- and is never delegated/reported again. If the session recovers before the timeout, delegation simply continues; no RFC 8231 Section 5.6 State Synchronization Sequence is performed (a documented scope simplification -- the PCE does not re-learn which LSPs were delegated to it before a session bounce).
+
+Explicitly out of scope: BGP-LS topology feed; multi-PCE/H-PCE (RFC 6805); PCEP-over-TLS (RFC 8253); P2MP paths (RFC 8306); association groups (RFC 8697/8745); PCEP objective-function TLV negotiation (RFC 5541 -- the fixed objective is always minimum TE metric subject to a bandwidth constraint); PCE-initiated LSPs (RFC 8281 -- every LSP here is PCC-initiated and merely delegated after the fact); and SR-mode PCUpd application (RFC 8664-style segment-list updates via :ned:`SrPolicy` -- only RSVP-TE-mode delegation, a full strict hop-by-hop ERO, is modeled). A runnable example combining stateless computation, stateful delegation, and a genuine PCE-initiated reroute is provided under ``examples/mpls/pcep``.
 
 .. _ug:sec:mpls:mpls-enabled-router-models:
 
@@ -578,3 +607,69 @@ MPLS data plane (RFC 3031 + RFC 3032 + RFC 3443 + RFC 5462)
      - Not modeled
      - Labels are allocated from a monotonically increasing counter;
        freed labels are never reclaimed.
+
+PCEP / Stateful PCE (RFC 5440 + RFC 8231)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 32 14 54
+
+   * - Mechanism
+     - Status
+     - Notes
+   * - Session establishment (Open/Keepalive, KeepAlive Time negotiation, DeadTimer liveness)
+     - Partially modeled
+     - Minimal FSM (mirrors :ned:`Ldp`'s own level of fidelity); no Open error
+       negotiation/retry (RFC 5440 Section 6.3).
+   * - Stateless path computation (PCReq/PCRep)
+     - Modeled
+     - The PCE runs the identical bandwidth-pruning CSPF :ned:`RsvpTe`'s own
+       local computation uses (Workstream C6), rooted at the requesting PCC.
+       Fixed objective function only (minimum TE metric, bandwidth-feasible);
+       no objective-function TLV negotiation (RFC 5541).
+   * - Stateful delegation (PCRpt/PCUpd)
+     - Modeled
+     - A delegated LSP is identified by a stable PLSP-ID across every later
+       make-before-break replacement. PCE-initiated reoptimization is
+       triggered by an explicit ScenarioManager command in this model, not
+       autonomously on every TED change.
+   * - RFC 8231 Section 5.6 State Synchronization Sequence
+     - Not modeled
+     - A PCEP session that bounces and reconnects does not re-establish which
+       LSPs were previously delegated.
+   * - Controller-death fallback (state timeout)
+     - Modeled
+     - A PCC whose session stays down past ``stateTimeout`` (RFC 8231 Section
+       5.2) forces every delegated LSP back to local (non-PCE) computation.
+   * - SR-mode path updates (RFC 8664-style segment-list PCUpd via :ned:`SrPolicy`)
+     - Not modeled
+     - Only RSVP-TE-mode delegation (a full strict hop-by-hop ERO) is
+       modeled; applying a PCUpd through :ned:`SrPolicy` would first need a
+       runtime policy-update API :ned:`SrPolicy` does not currently have.
+   * - BGP-LS topology feed
+     - Not modeled
+     - The PCE's :ned:`Ted` view is a direct, omniscient module-path
+       reference, not a learned topology feed.
+   * - Multi-PCE / Hierarchical PCE (RFC 6805)
+     - Not modeled
+     - Exactly one PCE, one PCC-to-PCE session per PCC.
+   * - PCEP-over-TLS (RFC 8253)
+     - Not modeled
+     - Sessions run over plain TCP.
+   * - P2MP paths (RFC 8306)
+     - Not modeled
+     - Every LSP modeled is point-to-point.
+   * - Association groups (RFC 8697/8745)
+     - Not modeled
+     - n/a
+   * - PCE-initiated LSPs (RFC 8281)
+     - Not modeled
+     - Every LSP is PCC-initiated and merely delegated to the PCE after the
+       fact.
+   * - Wire format (Common Header, Open/Keepalive/PCReq/PCRep/PCRpt/PCUpd)
+     - Modeled
+     - Every message type round-trips through a registered serializer; the
+       LSP/SRP/RP objects are written as separate byte-aligned fields rather
+       than RFC 5440/8231's compact bit-packed layout (a documented
+       simplification).

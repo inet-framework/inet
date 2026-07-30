@@ -1,0 +1,178 @@
+This example demonstrates a stateful PCE (Path Computation Element, RFC 5440/
+8231) controlling an RSVP-TE MPLS core: an ingress LSR delegates a running
+LSP to a remote PCE, and later a bandwidth change in the network makes the
+PCE recompute and push a genuinely different path onto that LSP via a PCUpd
+-- the whole PCEP/stateful-PCE feature set (Workstream F4) working together
+in one runnable network, rather than in the isolated pieces
+tests/module/pcep_*.test each exercise individually. See those tests first
+for the underlying protocol machinery this example's scenario reuses almost
+verbatim.
+
+Topology
+--------
+
+A 6-LSR RSVP-TE core, plus a seventh node that runs the PCE:
+
+```
+                     LSR2 --- LSR3
+                    /   600kbps  \
+host1 -- LSR1 --                  -- LSR6 -- host2
+                    \  10 Mbps   /   \
+                     LSR4 --- LSR5     PceRouter
+```
+
+LSR1 (ingress) reaches LSR6 (egress) over two parallel two-hop branches: the
+LSR2-LSR3 branch (600 kbps per link, metric 1 per hop -- cheaper by TE
+metric) and the LSR4-LSR5 branch (10 Mbps per link, metric 5 per hop --
+plenty of spare capacity, but the more expensive route). PceRouter hangs off
+LSR6 on its own leaf link and runs the ~Pce; it is deliberately NOT
+co-located with LSR6 itself (mirroring tests/module/pcep_fallback.test's own
+placement rationale), so the PCE's own reachability is never entangled with
+either data-plane branch. host1 and host2 are the traffic endpoints.
+
+Router IDs are picked automatically ("auto": the highest interface address
+per router) -- LSR1=10.0.4.1, LSR2=10.0.2.1, LSR3=10.0.3.1, LSR4=10.0.5.1,
+LSR5=10.0.6.1, LSR6=10.0.8.1, PceRouter=10.0.7.2. LSR1's ~Pcc connects to
+PceRouter's routerId (10.0.7.2) over the genuinely multi-hop route
+~LinkStateRouting installs; LSR1's own ~Pcc.localAddress is pinned to its own
+routerId (10.0.4.1), not left to an arbitrary outgoing interface, for the
+same reason documented in ~Pcc's own "localAddress" parameter and exercised
+by every pcep_*.test: ~Ted/~LinkStateRouting (like a real IGP) only
+guarantees network-wide reachability to each router's own routerId, not to
+its individual per-link addresses.
+
+Scenario
+--------
+
+1. At t=0, tunnel 1 (lspid 100, 50 kbps, permanent) is configured at LSR1
+   with computeEro=true, computationMode="pce", delegate=true. Its first few
+   createIngressPSB() attempts legitimately fail until the PCEP session (over
+   real, multi-hop TCP, including one SYN retransmit) reaches OPERATIONAL,
+   around t~5.3s in this run; the PCE then computes the plain-cheapest route
+   -- the LSR2-LSR3 branch -- and LSR1 reports the established LSP to the PCE
+   as a delegated one (PCRpt).
+2. At t=7s, a scenario add-session brings up tunnel 2 (lspid 200, 520 kbps,
+   permanent, an EXPLICIT hand-configured route via the SAME LSR2-LSR3
+   branch) -- an ordinary, independently signaled admission request that
+   never touches the PCE's CSPF at all. Combined with tunnel 1's own 50 kbps,
+   the LSR2-LSR3 branch now carries 570 of its 600 kbps capacity: only 30
+   kbps free, no longer enough for a hypothetical fresh 50 kbps request.
+   Tunnel 1 itself is completely undisturbed by this -- CAC only ever blocks
+   NEW requests, it never preempts or re-checks an already-established
+   reservation.
+3. At t=9s, a ScenarioManager "pce-reoptimize" command (naming tunnel 1's
+   PLSP-ID, 1, explicitly rather than "all" -- tunnel 2 is also delegated,
+   since "delegate" applies to every ingress path regardless of how its own
+   route was obtained, and reoptimizing "all" would also (correctly) migrate
+   it, muddying this example's point) tells the PCE to recompute tunnel 1's
+   path. Re-running CSPF with tunnel 1's original inputs (50 kbps) now finds
+   the LSR2-LSR3 branch infeasible (only 30 kbps free) and returns the
+   LSR4-LSR5 branch instead -- a genuinely different route -- so the PCE
+   sends a PCUpd. LSR1 applies it via make-before-break: a fresh replacement
+   lspid (201) is signaled using the PCE-supplied ERO directly (no fresh
+   CSPF/PCReq round-trip -- the ERO is already a full strict route), the
+   classifier's FEC entry is rebound to it once its ingress label is
+   installed, the old lspid (100) is torn down, and the cutover is reported
+   back to the PCE (PCRpt, echoing the PCUpd's srpId).
+
+Traffic is a single periodic UDP flow, host1 -> host2 (128-byte datagrams
+every 20 ms, well under both branches' capacity), running for the whole
+14-second simulation, including across the cutover.
+
+How to observe it
+------------------
+
+Run with Cmdenv (the default in this ini) and grep the output for the PCEP
+exchange. Actually confirmed by running this example:
+
+```
+[INFO]  PCEP session with 10.0.4.1 is now OPERATIONAL
+[DETAIL] PCE computed ERO for session (dest=10.0.8.1, lspid=100): 10.0.2.1, 10.0.3.1, 10.0.8.1
+[INFO]  reporting delegated LSP UP to PCE (plspId=1, lspid=100, ERO 10.0.2.1, 10.0.3.1, 10.0.8.1)
+...
+[INFO]  adding new session into database                          # tunnel 2, t=7s
+...
+[INFO]  processing <pce-reoptimize> command...                    # t=9s
+[INFO]  pce-reoptimize: found a better path for PLSP-ID 1 (10.0.5.1, 10.0.6.1, 10.0.8.1), sending PCUpd
+[INFO]  PCUpd sent to 10.0.4.1 (srpId=1, plspId=1, ERO with 3 hop(s))
+[INFO]  PCUpd received from PCE (srpId=1, plspId=1, ERO with 3 hop(s))
+[INFO]  PCUpd received for PLSP-ID 1: re-routing lspid=100 via make-before-break with the PCE-supplied ERO (10.0.5.1, 10.0.6.1, 10.0.8.1)
+[INFO]  make-before-break cutover: lspid=201 is up, switching traffic away from lspid=100
+[INFO]  make-before-break cutover: rebinding fec id 1 from lspid 100 to lspid 201, in-label 18
+[INFO]  sending PathTear to 10.0.2.1
+```
+
+10.0.2.1/10.0.3.1 are LSR2/LSR3's routerIds (the original, cheap branch);
+10.0.5.1/10.0.6.1 are LSR4/LSR5's routerIds (the replacement, expensive
+branch); 10.0.8.1 is LSR6's (the shared egress, unchanged). host2's
+"packetReceived:count" scalar (699, out of 700 sent over the 14s run) at the
+end of the run confirms traffic kept flowing end to end across the entire
+scenario, including the mid-flight reroute.
+
+What this models vs. real PCEP / stateful PCE
+-----------------------------------------------
+
+Session establishment, stateless path computation, and stateful delegation
+are modeled at the level of detail described in ~Pce's and ~Pcc's own class
+documentation (also summarized in the sibling tests/module/pcep_*.test
+files' own descriptions):
+
+- **Session FSM** (RFC 5440 Section 6.2, minimal subset): Open/Keepalive
+  exchange to OPERATIONAL, KeepAlive Time negotiated as the smaller of both
+  sides' proposals, DeadTimer-based liveness using each side's OWN
+  advertised value. No Open error negotiation/retry (RFC 5440 Section 6.3).
+- **Stateless path computation** (PCReq/PCRep, RFC 5440 Section 6.5/6.6):
+  the PCE runs the identical bandwidth-pruning CSPF (Ted::calculateShortestPath())
+  ~RsvpTe's own local computation already uses, just rooted at the
+  requesting PCC and reached over PCEP instead of called in-process. Fixed
+  objective function only (minimize total TE metric subject to a bandwidth
+  constraint) -- no PCEP objective-function TLV negotiation.
+- **Stateful delegation and PCE-initiated reoptimization** (RFC 8231
+  Sections 5-6): a delegated LSP's state is reported via PCRpt whenever it
+  changes; the PCE recomputes a delegated LSP's path and pushes a PCUpd
+  ONLY on an explicit operator/ScenarioManager "pce-reoptimize" command
+  (see ~Pce's own class documentation for why a TED-change-triggered
+  version was considered and rejected as harder to make deterministic) --
+  this example demonstrates exactly that trigger. No RFC 8231 Section 5.6
+  State Synchronization: if a PCC's session bounces and reconnects, the PCE
+  does not re-learn which LSPs are still delegated to it.
+- **Controller-death fallback** (RFC 8231 Section 5.2 state timeout) exists
+  in this model -- a PCC whose PCEP session dies and stays dead falls back
+  to local (non-PCE) computation for every LSP it had delegated, after a
+  configurable grace period -- but is NOT demonstrated by this example
+  (this example is about the PCE doing its job, not failing); see
+  tests/module/pcep_fallback.test for that scenario in full.
+
+Explicitly NOT modeled (out of scope for this workstream):
+
+- **No BGP-LS feed.** The PCE's TED is a direct, omniscient module-path
+  reference (~tedModule) into the SAME ~Ted every router already maintains
+  via ~LinkStateRouting -- not learned via BGP-LS or any other northbound
+  topology feed. This is the same category of simplification as ~Ted's own
+  initializeTED() omniscience used elsewhere in this codebase (e.g. by
+  ~RsvpTe's own local CSPF).
+- **No multi-PCE / H-PCE** (RFC 6805 hierarchical PCE). Exactly one PCE, one
+  PCC-to-PCE session per PCC; no PCE-to-PCE communication, no parent/child
+  PCE delegation, no PCE discovery (RFC 5088/5089).
+- **No PCEP-over-TLS** (RFC 8253). Sessions run over plain TCP.
+- **No P2MP paths** (RFC 8306). Every LSP modeled is point-to-point.
+- **No association groups** (RFC 8697/8745). No cross-LSP association TLVs
+  of any kind (protection groups, policy groups, etc).
+- **No SRv6/segment-routed PCUpd** (RFC 8664 full SR-PCE support). SR-mode
+  PCUpd application was descoped during this workstream's Phase 3 -- only
+  RSVP-TE mode (a full strict hop-by-hop ERO of routerId hops) is modeled;
+  every LSP in this example is a plain RSVP-TE LSP.
+- **No PCE-initiated LSPs** (RFC 8281). Every LSP here is PCC-initiated
+  (configured via the static traffic.xml/scenario add-session, same as any
+  non-PCEP ~RsvpTe deployment) and merely delegated to the PCE after the
+  fact; the PCE never creates or deletes an LSP on its own initiative.
+- **No objective-function TLV negotiation** (RFC 5541). The PCE always
+  optimizes the same fixed objective (minimum TE metric, bandwidth-feasible)
+  -- there is no way for a PCC to request, e.g., minimum load or maximum
+  bandwidth instead.
+
+Simplifications inherited from ~RsvpTe/~Ted generally (not specific to this
+workstream): the SID/TED information is static, network-wide configuration
+with no partial/incremental views; there is no fast-reroute/protection
+beyond what ~Ted's own shortest-path recomputation provides once a failure
+is noticed.
