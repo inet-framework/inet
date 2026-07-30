@@ -1,0 +1,321 @@
+%description:
+Unit test for ~SrPolicy's segment-list resolution logic (RFC 8660): given a policy table and a
+co-located ~SegmentRouting module (node-SID table + a real, dynamically-allocated adjacency
+SID), verify that lookupLabel() builds the PUSH label stack in the CORRECT WIRE ORDER (the
+plan's own "off-by-one/reversal bug spot" warning -- PUSH ops are appended to the outLabel
+vector in REVERSE segment-list order, since LibTable::pushLabel()/Mpls::doStackOps() insert
+each PUSH at the front of the packet, so the LAST op processed ends up topmost/outermost), for
+both node-SID-only and mixed node+adjacency-SID policies, plus the first-segment PHP/adjacency
+canonicalization (dropping a first segment that would be immediately popped anyway) and its
+"whole policy collapses to nothing" edge case (reported as "no mapping", per Mpls's non-empty-
+outLabel invariant).
+
+Topology (same line as SegmentRouting_nodeSid.test): A(1.1.1.1) -- B(2.2.2.2) -- C(3.3.3.3) --
+D(4.4.4.4), each hop metric 1. sidTable: A=1, B=2, C=3, D=4; srgbBase=16000 -> labels B=16002,
+C=16003, D=16004. From A: B is directly connected (PHP case), C and D are transit via B. A's
+own link toward B (interface lo0) also gets a real, dynamically-allocated adjacency-SID label.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/mpls/IIngressClassifier.h"
+#include "inet/networklayer/mpls/LibTable.h"
+#include "inet/networklayer/srmpls/SegmentRouting.h"
+#include "inet/networklayer/srmpls/SrPolicy.h"
+#include "inet/networklayer/ted/Ted.h"
+#include "inet/networklayer/ted/Ted_m.h"
+#include <omnetpp/cxmlelement.h>
+
+using namespace inet;
+using namespace omnetpp;
+
+%file: TestNetwork.ned
+
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
+import inet.networklayer.ipv4.Ipv4RoutingTable;
+import inet.linklayer.loopback.LoopbackInterface;
+import inet.networklayer.mpls.LibTable;
+import inet.networklayer.srmpls.SrPolicy;
+import inet.networklayer.ted.Ted;
+
+network TestNetwork
+{
+    parameters:
+        @networkNode();
+    submodules:
+        test: Test;
+        ift: InterfaceTable;
+        rt: Ipv4RoutingTable {
+            interfaceTableModule = "^.ift";
+            routerId = "1.1.1.1";
+        }
+        ipv4NodeConfigurator: Ipv4NodeConfigurator {
+            interfaceTableModule = "^.ift";
+            routingTableModule = "^.rt";
+            networkConfiguratorModule = "";
+        }
+        lo0: LoopbackInterface {
+            interfaceTableModule = "^.ift";
+        }
+        lib: LibTable {
+            interfaceTableModule = "^.ift";
+        }
+        ted: Ted {
+            interfaceTableModule = "^.ift";
+            routingTableModule = "^.rt";
+        }
+        sr: TestSegmentRouting {
+            interfaceTableModule = "^.ift";
+            routingTableModule = "^.rt";
+            libTableModule = "^.lib";
+            tedModule = "^.ted";
+            srgbBase = 16000;
+            srgbSize = 8000;
+            sidTable = xmldoc("sr.xml");
+        }
+        srPolicy: SrPolicy {
+            interfaceTableModule = "^.ift";
+            segmentRoutingModule = "^.sr";
+            policies = xmldoc("policies.xml");
+        }
+    connections allowunconnected:
+}
+
+%file: TestSegmentRouting.ned
+
+import inet.networklayer.srmpls.SegmentRouting;
+
+simple TestSegmentRouting extends SegmentRouting
+{
+    parameters:
+        @class(TestSegmentRouting);
+}
+
+%file: sr.xml
+
+<sr>
+    <node router="1.1.1.1" sid="1"/>
+    <node router="2.2.2.2" sid="2"/>
+    <node router="3.3.3.3" sid="3"/>
+    <node router="4.4.4.4" sid="4"/>
+</sr>
+
+%file: policies.xml
+
+<policies>
+    <!-- B alone: directly connected from A, so the whole policy collapses (PHP canonicalization
+         drops the only segment); must report "no mapping". -->
+    <policy dest="10.1.0.0" netmask="255.255.0.0" segments="node:2"/>
+    <!-- B (PHP'd, dropped) then C: exercises the "cross the PHP'd hop, continue via the next
+         segment's label" case; single remaining label. -->
+    <policy dest="10.2.0.0" netmask="255.255.0.0" segments="node:2 node:3"/>
+    <!-- C then D, both transit via B (2 and 3 hops away, neither directly connected): both
+         labels pushed; THIS is the ordering assertion (segments[0]=C must end up outermost). -->
+    <policy dest="10.3.0.0" netmask="255.255.0.0" segments="node:3 node:4"/>
+    <!-- adjacency to B (dropped, first-position adj: is always local-forwarding-only) then C:
+         mixed node+adjacency case, single remaining (node) label. -->
+    <policy dest="10.4.0.0" netmask="255.255.0.0" segments="adj:lo0 node:3"/>
+    <!-- adjacency alone: also collapses to "no mapping", same as the node:2-alone case. -->
+    <policy dest="10.5.0.0" netmask="255.255.0.0" segments="adj:lo0"/>
+    <!-- longest-prefix-match check: a broader /16 and a more specific /24 over the same base. -->
+    <policy dest="10.6.0.0" netmask="255.255.0.0" segments="node:3"/>
+    <policy dest="10.6.6.0" netmask="255.255.255.0" segments="node:4"/>
+</policies>
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+
+%global:
+
+// Test-only harness, same technique as SegmentRouting_nodeSid.test: exposes SegmentRouting's
+// protected recomputeAndInstall() so the test can drive recomputation directly.
+class TestSegmentRouting : public SegmentRouting
+{
+  public:
+    using SegmentRouting::recomputeAndInstall;
+};
+
+Define_Module(TestSegmentRouting);
+
+static TeLinkStateInfo makeLink(const char *advrouter, const char *linkid, double metric, double maxBandwidth)
+{
+    TeLinkStateInfo link;
+    link.advrouter = Ipv4Address(advrouter);
+    link.linkid = Ipv4Address(linkid);
+    link.local = Ipv4Address(advrouter); // only meaningful for A's own advertised links
+    link.remote = Ipv4Address(linkid);
+    link.metric = metric;
+    link.MaxBandwidth = maxBandwidth;
+    for (int i = 0; i < 8; i++)
+        link.UnResvBandwidth[i] = maxBandwidth;
+    link.state = true;
+    link.sourceId = link.advrouter.getInt();
+    link.messageId = 1;
+    link.timestamp = SIMTIME_ZERO;
+    return link;
+}
+
+// Builds a minimal Ipv4-only Packet with the given destination address, the way lookupLabel()
+// expects to peek one at the front (mirrors StaticIngressClassifier's own contract).
+static Packet *makeIpv4Packet(const char *destAddr)
+{
+    Packet *packet = new Packet("test");
+    auto ipv4Header = makeShared<Ipv4Header>();
+    ipv4Header->setDestAddress(Ipv4Address(destAddr));
+    packet->insertAtBack(ipv4Header);
+    return packet;
+}
+
+%activity:
+
+auto ted = check_and_cast<Ted *>(getSimulation()->getModuleByPath("ted"));
+auto sr = check_and_cast<TestSegmentRouting *>(getSimulation()->getModuleByPath("sr"));
+auto srPolicyModule = check_and_cast<SrPolicy *>(getSimulation()->getModuleByPath("srPolicy"));
+auto classifier = static_cast<IIngressClassifier *>(srPolicyModule); // same access path Mpls.cc itself uses
+int lo0Id = check_and_cast<NetworkInterface *>(getSimulation()->getModuleByPath("lo0"))->getInterfaceId();
+
+const int SRGB_BASE = 16000;
+const int LABEL_C = SRGB_BASE + 3;
+const int LABEL_D = SRGB_BASE + 4;
+
+// === 1. Build the line topology A-B-C-D and install node-SID + adjacency-SID entries ===
+EV << "=== building topology and installing SID entries ===" << endl;
+ted->addLink(makeLink("1.1.1.1", "2.2.2.2", 1, 1e6)); // index 0: A -> B (A's own advertised link, via lo0)
+ted->addLink(makeLink("2.2.2.2", "1.1.1.1", 1, 1e6)); // index 1: B -> A
+ted->addLink(makeLink("2.2.2.2", "3.3.3.3", 1, 1e6)); // index 2: B -> C
+ted->addLink(makeLink("3.3.3.3", "2.2.2.2", 1, 1e6)); // index 3: C -> B
+ted->addLink(makeLink("3.3.3.3", "4.4.4.4", 1, 1e6)); // index 4: C -> D
+ted->addLink(makeLink("4.4.4.4", "3.3.3.3", 1, 1e6)); // index 5: D -> C
+
+sr->recomputeAndInstall();
+
+int adjLabelLo0 = sr->getAdjSidLabel(lo0Id);
+if (adjLabelLo0 < 0)
+    throw cRuntimeError("Broken: no adjacency SID allocated for lo0 (A-B link) -- test setup is broken");
+EV << "lo0's adjacency SID: " << adjLabelLo0 << endl;
+
+// === 2. "node:2" (B) alone: B is directly connected -> the whole policy collapses to nothing
+// (PHP canonicalization drops the only segment) -> "no mapping". ===
+{
+    EV << "=== policy: node:2 alone (collapses) ===" << endl;
+    Packet *packet = makeIpv4Packet("10.1.0.1");
+    LabelOpVector outLabel;
+    int outIf;
+    bool matched = classifier->lookupLabel(packet, outLabel, outIf);
+    delete packet;
+    if (matched)
+        throw cRuntimeError("Broken: a single directly-connected node-SID segment should collapse to 'no mapping', but lookupLabel() returned true");
+    EV << "collapsed to 'no mapping' as expected  OK" << endl;
+}
+
+// === 3. "node:2 node:3" (B then C): B is PHP'd/dropped, single remaining label (C, 16003),
+// forwarding out lo0 (B's interface). ===
+{
+    EV << "=== policy: node:2 node:3 (B dropped, C pushed) ===" << endl;
+    Packet *packet = makeIpv4Packet("10.2.0.1");
+    LabelOpVector outLabel;
+    int outIf;
+    if (!classifier->lookupLabel(packet, outLabel, outIf))
+        throw cRuntimeError("Broken: policy 'node:2 node:3' unexpectedly reported no mapping");
+    delete packet;
+    if (!(outLabel.size() == 1 && outLabel[0].optcode == PUSH_OPER && outLabel[0].label == LABEL_C))
+        throw cRuntimeError("Broken: policy 'node:2 node:3' should push exactly [PUSH %d], got size=%zu", LABEL_C, outLabel.size());
+    if (outIf != lo0Id)
+        throw cRuntimeError("Broken: policy 'node:2 node:3' should forward via lo0 (%d), got %d", lo0Id, outIf);
+    EV << "pushed [PUSH " << LABEL_C << "] via lo0, as expected  OK" << endl;
+}
+
+// === 4. "node:3 node:4" (C then D): neither is directly connected from A (2 and 3 hops away,
+// both transit via B) -- BOTH labels are pushed. THE ORDERING ASSERTION: segments[0]=C must end
+// up OUTERMOST on the wire, which -- since Mpls::doStackOps()/LibTable::pushLabel() insert each
+// PUSH at the FRONT of the packet, so the LAST op processed ends up on top -- means C's PUSH op
+// must be the LAST element of outLabel, i.e. outLabel == [PUSH(D), PUSH(C)], NOT [PUSH(C),
+// PUSH(D)]. ===
+{
+    EV << "=== policy: node:3 node:4 (both pushed, C must end up OUTERMOST) ===" << endl;
+    Packet *packet = makeIpv4Packet("10.3.0.1");
+    LabelOpVector outLabel;
+    int outIf;
+    if (!classifier->lookupLabel(packet, outLabel, outIf))
+        throw cRuntimeError("Broken: policy 'node:3 node:4' unexpectedly reported no mapping");
+    delete packet;
+    if (outLabel.size() != 2)
+        throw cRuntimeError("Broken: policy 'node:3 node:4' should push exactly 2 labels, got %zu", outLabel.size());
+    if (!(outLabel[0].optcode == PUSH_OPER && outLabel[0].label == LABEL_D))
+        throw cRuntimeError("Broken: outLabel[0] should be PUSH %d (D, processed FIRST -> ends up innermost), got optcode=%d label=%d", LABEL_D, (int)outLabel[0].optcode, outLabel[0].label);
+    if (!(outLabel[1].optcode == PUSH_OPER && outLabel[1].label == LABEL_C))
+        throw cRuntimeError("Broken: outLabel[1] should be PUSH %d (C, processed LAST -> ends up OUTERMOST/on top), got optcode=%d label=%d", LABEL_C, (int)outLabel[1].optcode, outLabel[1].label);
+    if (outIf != lo0Id)
+        throw cRuntimeError("Broken: policy 'node:3 node:4' should forward via lo0 (%d, toward B), got %d", lo0Id, outIf);
+    EV << "outLabel == [PUSH " << LABEL_D << ", PUSH " << LABEL_C << "] (C outermost, as required)  OK" << endl;
+}
+
+// === 5. "adj:lo0 node:3" (adjacency to B, then C): the adjacency segment is always dropped
+// when first (see SrPolicy.ned), leaving a single remaining label (C, 16003), forwarding out
+// lo0 -- "cross this adjacency, then continue label-switching with whatever's beneath". ===
+{
+    EV << "=== policy: adj:lo0 node:3 (adjacency dropped, C pushed) ===" << endl;
+    Packet *packet = makeIpv4Packet("10.4.0.1");
+    LabelOpVector outLabel;
+    int outIf;
+    if (!classifier->lookupLabel(packet, outLabel, outIf))
+        throw cRuntimeError("Broken: policy 'adj:lo0 node:3' unexpectedly reported no mapping");
+    delete packet;
+    if (!(outLabel.size() == 1 && outLabel[0].optcode == PUSH_OPER && outLabel[0].label == LABEL_C))
+        throw cRuntimeError("Broken: policy 'adj:lo0 node:3' should push exactly [PUSH %d] (the adjacency segment must be DROPPED, not pushed), got size=%zu", LABEL_C, outLabel.size());
+    if (outIf != lo0Id)
+        throw cRuntimeError("Broken: policy 'adj:lo0 node:3' should forward via lo0 (%d), got %d", lo0Id, outIf);
+    EV << "pushed [PUSH " << LABEL_C << "] via lo0 (adjacency segment correctly dropped)  OK" << endl;
+}
+
+// === 6. "adj:lo0" alone: also collapses to "no mapping" (same reasoning as node:2 alone). ===
+{
+    EV << "=== policy: adj:lo0 alone (collapses) ===" << endl;
+    Packet *packet = makeIpv4Packet("10.5.0.1");
+    LabelOpVector outLabel;
+    int outIf;
+    bool matched = classifier->lookupLabel(packet, outLabel, outIf);
+    delete packet;
+    if (matched)
+        throw cRuntimeError("Broken: a single adjacency segment should collapse to 'no mapping', but lookupLabel() returned true");
+    EV << "collapsed to 'no mapping' as expected  OK" << endl;
+}
+
+// === 7. Longest-prefix match: 10.6.6.5 matches both the /16 (node:3) and the /24 (node:4)
+// policies -- the more specific /24 must win. ===
+{
+    EV << "=== longest-prefix match: /24 policy must win over the overlapping /16 ===" << endl;
+    Packet *packet = makeIpv4Packet("10.6.6.5");
+    LabelOpVector outLabel;
+    int outIf;
+    if (!classifier->lookupLabel(packet, outLabel, outIf))
+        throw cRuntimeError("Broken: overlapping-prefix policy lookup unexpectedly reported no mapping");
+    delete packet;
+    if (!(outLabel.size() == 1 && outLabel[0].label == LABEL_D))
+        throw cRuntimeError("Broken: the more specific /24 policy (node:4, label %d) should have won, got label %d", LABEL_D, outLabel.empty() ? -1 : outLabel[0].label);
+    EV << "the /24 policy (node:4) correctly won over the /16 (node:3)  OK" << endl;
+}
+
+// === 8. No policy matches at all -> "no mapping". ===
+{
+    EV << "=== no policy matches ===" << endl;
+    Packet *packet = makeIpv4Packet("192.168.1.1");
+    LabelOpVector outLabel;
+    int outIf;
+    bool matched = classifier->lookupLabel(packet, outLabel, outIf);
+    delete packet;
+    if (matched)
+        throw cRuntimeError("Broken: an address matching no policy should report 'no mapping'");
+    EV << "no mapping, as expected  OK" << endl;
+}
+
+EV << "ALL SRPOLICY SEGMENT-LIST UNIT CHECKS PASSED" << endl;
+
+%contains: stdout
+ALL SRPOLICY SEGMENT-LIST UNIT CHECKS PASSED
+
+%not-contains: stdout
+Broken:
