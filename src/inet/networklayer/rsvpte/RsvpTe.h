@@ -28,6 +28,7 @@ class IIpv4RoutingTable;
 class IInterfaceTable;
 class Ted;
 class LibTable;
+class Pcc;
 
 /**
  * TODO documentation
@@ -246,6 +247,10 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     // gap; it also keeps every shipped example/showcase (which all hand-write EROs) fingerprint-
     // identical.
     bool computeEro = false;
+    // Workstream F4 Phase 2: WHERE computeEro's automatic ERO computation runs --
+    // "local" (default, unchanged) or "pce" (delegate to a co-located ~Pcc, see
+    // pccmod below). See RsvpTe.ned's doc comment for the full rationale.
+    std::string computationMode = "local";
     // C7: RFC 4736-lite periodic reoptimization -- every reoptimizeInterval, re-run CSPF for
     // every established ingress path and, if it finds a strictly cheaper route than the one
     // currently in use, make-before-break reroute onto it. 0 (default) disables the feature
@@ -264,6 +269,10 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<LibTable> lt;
     ModuleRefByPar<IRsvpClassifier> rpct;
+    // Workstream F4 Phase 2: only referenced (see initialize()) when computationMode
+    // is "pce" -- a plain-"local" network (the default, every pre-existing example/
+    // showcase) never touches this and needs no "pccModule" parameter at all.
+    ModuleRefByPar<Pcc> pccmod;
 
     int maxPsbId = 0;
     int maxRsbId = 0;

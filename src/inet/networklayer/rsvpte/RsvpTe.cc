@@ -20,6 +20,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/pcep/Pcc.h"
 #include "inet/networklayer/rsvpte/Utils.h"
 #include "inet/networklayer/ted/Ted.h"
 
@@ -222,6 +223,9 @@ void RsvpTe::initialize(int stage)
         retryInterval = par("retryInterval");
         advertiseImplicitNull = par("advertiseImplicitNull");
         computeEro = par("computeEro");
+        computationMode = par("computationMode").stdstringValue();
+        if (computationMode == "pce")
+            pccmod.reference(this, "pccModule", true);
         reoptimizeInterval = par("reoptimizeInterval");
         if (reoptimizeInterval > SIMTIME_ZERO)
             reoptimizeTimerMsg = new ReoptimizeTimerMsg("reoptimize timer");
@@ -1702,39 +1706,74 @@ RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const TrafficSession& session, 
             allLoose = false;
 
     if (computeEro && (ERO.empty() || allLoose)) {
-        Ipv4AddressVector dest;
-        dest.push_back(session.sobj.DestAddress);
+        if (computationMode == "pce") {
+            // Workstream F4 Phase 2: delegate to a co-located Pcc instead of running
+            // Ted::calculateShortestPath() ourselves. requestPathComputation() bridges
+            // its inherently asynchronous PCReq/PCRep TCP exchange onto this synchronous-
+            // looking call (see Pcc.h's doc comment): PENDING/NO_PATH both mean "no ERO
+            // available on THIS attempt", handled below by falling through to the exact
+            // same nullptr-return, retry-via-createPath() contract the local-CSPF branch
+            // above already relies on for "no path found yet" -- there is no separate
+            // code path to build here.
+            EroVector computedEro;
+            Pcc::PceComputationResult result = pccmod->requestPathComputation(routerId, session.sobj.DestAddress,
+                    path.tspec.req_bandwidth, session.sobj.setupPri, path.includeAny, path.excludeAny, computedEro);
 
-        Ipv4AddressVector cspfPath = tedmod->calculateShortestPath(dest, tedmod->getLinks(),
-                path.tspec.req_bandwidth, session.sobj.setupPri, path.includeAny, path.excludeAny);
+            switch (result) {
+                case Pcc::PceComputationResult::COMPUTED:
+                    ERO = computedEro;
+                    EV_DETAIL << "PCE computed ERO for session (dest=" << session.sobj.DestAddress
+                              << ", lspid=" << path.sender.Lsp_Id << "): " << vectorToString(ERO) << endl;
+                    break;
 
-        if (cspfPath.empty()) {
-            EV_INFO << "CSPF found no feasible path to " << session.sobj.DestAddress
-                    << " (bandwidth=" << path.tspec.req_bandwidth
-                    << ", priority=" << session.sobj.setupPri << ")" << endl;
+                case Pcc::PceComputationResult::PENDING:
+                    EV_INFO << "PCReq outstanding for session (dest=" << session.sobj.DestAddress
+                            << ", lspid=" << path.sender.Lsp_Id << "), awaiting the PCE's PCRep" << endl;
+                    return nullptr;
 
-            // No path found: reuse the existing pathProblem()/retry contract. There is no PSB
-            // yet to hand to pathProblem(), so just return nullptr -- createPath(), our only
-            // caller, already does exactly the right thing with that: a permanent path is
-            // retried after retryInterval (PATH_RETRY notify), a non-permanent one is dropped
-            // from the traffic database.
-            return nullptr;
+                case Pcc::PceComputationResult::NO_PATH:
+                default:
+                    EV_INFO << "PCE reported no feasible path to " << session.sobj.DestAddress
+                            << " (or the PCEP session is not yet OPERATIONAL) for session (lspid="
+                            << path.sender.Lsp_Id << ")" << endl;
+                    return nullptr;
+            }
         }
+        else {
+            Ipv4AddressVector dest;
+            dest.push_back(session.sobj.DestAddress);
 
-        // cspfPath[0] is this router itself (the CSPF root); the ERO -- like a hand-written
-        // one at this point -- carries only the hops AFTER us. CSPF always yields a full
-        // STRICT route (every hop L=false).
-        EroVector computedEro;
-        for (unsigned int i = 1; i < cspfPath.size(); i++) {
-            EroObj hop;
-            hop.L = false;
-            hop.node = cspfPath[i];
-            computedEro.push_back(hop);
+            Ipv4AddressVector cspfPath = tedmod->calculateShortestPath(dest, tedmod->getLinks(),
+                    path.tspec.req_bandwidth, session.sobj.setupPri, path.includeAny, path.excludeAny);
+
+            if (cspfPath.empty()) {
+                EV_INFO << "CSPF found no feasible path to " << session.sobj.DestAddress
+                        << " (bandwidth=" << path.tspec.req_bandwidth
+                        << ", priority=" << session.sobj.setupPri << ")" << endl;
+
+                // No path found: reuse the existing pathProblem()/retry contract. There is no PSB
+                // yet to hand to pathProblem(), so just return nullptr -- createPath(), our only
+                // caller, already does exactly the right thing with that: a permanent path is
+                // retried after retryInterval (PATH_RETRY notify), a non-permanent one is dropped
+                // from the traffic database.
+                return nullptr;
+            }
+
+            // cspfPath[0] is this router itself (the CSPF root); the ERO -- like a hand-written
+            // one at this point -- carries only the hops AFTER us. CSPF always yields a full
+            // STRICT route (every hop L=false).
+            EroVector computedEro;
+            for (unsigned int i = 1; i < cspfPath.size(); i++) {
+                EroObj hop;
+                hop.L = false;
+                hop.node = cspfPath[i];
+                computedEro.push_back(hop);
+            }
+            ERO = computedEro;
+
+            EV_DETAIL << "CSPF computed ERO for session (dest=" << session.sobj.DestAddress
+                      << ", lspid=" << path.sender.Lsp_Id << "): " << vectorToString(ERO) << endl;
         }
-        ERO = computedEro;
-
-        EV_DETAIL << "CSPF computed ERO for session (dest=" << session.sobj.DestAddress
-                  << ", lspid=" << path.sender.Lsp_Id << "): " << vectorToString(ERO) << endl;
     }
 
     Ipv4Address OI;

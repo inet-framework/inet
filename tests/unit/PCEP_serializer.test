@@ -1,0 +1,200 @@
+%description:
+Byte-exact round-trip serialization of PCEP messages (RFC 5440 Section 6.1/6.3/6.4/7.2/7.3):
+the Common Header plus an Open message (carrying an OPEN object with KeepAlive Timer,
+DeadTimer, and SID) and a bare Keepalive message. Verifies the on-wire lengths are exactly
+12 bytes (Open: 4-byte Common Header + 8-byte OPEN object) and 4 bytes (Keepalive: Common
+Header only), per RFC 5440's INCLUSIVE Message-Length/Object-Length convention (see
+PcepMessagesSerializer), and that encode->decode reproduces every field.
+
+Also covers Phase 2 (Workstream F4, stateless path computation, RFC 5440 Section 6.5/6.6):
+a PCReq (RP + END-POINTS + BANDWIDTH + LSPA objects, fixed 48-byte size) and both PCRep
+shapes -- success (RP + ERO, variable length: 16 + 8*hopCount bytes) and failure (RP +
+NO-PATH, fixed 20-byte size).
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/networklayer/pcep/PcepCommon.h"
+#include "inet/networklayer/pcep/PcepMessages_m.h"
+
+using namespace inet;
+
+%global:
+
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<const T>& original)
+{
+    Packet pkt("test");
+    pkt.insertAtFront(original);
+    auto bytes = pkt.peekAllAsBytes();
+
+    Packet pkt2("test2");
+    pkt2.insertAtFront(bytes);
+    return pkt2.popAtFront<T>(pkt2.getDataLength());
+}
+
+%activity:
+
+// === 1. Open message ===
+{
+    EV << "=== PcepOpen ===" << endl;
+    auto open = makeShared<PcepOpen>();
+    open->setChunkLength(PCEP_OPEN_MESSAGE_BYTES);
+    open->setType(PCEP_OPEN);
+    open->setKeepaliveTime(30);
+    open->setDeadTimer(120);
+    open->setSid(7);
+
+    Packet pkt("sz");
+    pkt.insertAtFront(open);
+    B len = pkt.getDataLength();
+    EV << "  serializedLength: " << len.get() << endl;
+    ASSERT(len == B(12)); // 4-byte Common Header + 8-byte OPEN object (RFC 5440 Section 6.1/7.2/7.3)
+
+    auto p = roundTrip(staticPtrCast<const PcepMessage>(open));
+    ASSERT(p != nullptr);
+    auto open2 = dynamicPtrCast<const PcepOpen>(p);
+    ASSERT(open2 != nullptr);
+    ASSERT(open2->getType() == PCEP_OPEN);
+    ASSERT(open2->getVersion() == 1);
+    ASSERT(open2->getKeepaliveTime() == 30);
+    ASSERT(open2->getDeadTimer() == 120);
+    ASSERT(open2->getSid() == 7);
+    EV << "  keepaliveTime: " << (int)open2->getKeepaliveTime() << endl;
+    EV << "  deadTimer: " << (int)open2->getDeadTimer() << endl;
+    EV << "  sid: " << (int)open2->getSid() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 2. Keepalive message ===
+{
+    EV << "=== PcepKeepalive ===" << endl;
+    auto ka = makeShared<PcepKeepalive>();
+    ka->setChunkLength(PCEP_KEEPALIVE_MESSAGE_BYTES);
+    ka->setType(PCEP_KEEPALIVE);
+
+    Packet pkt("sz");
+    pkt.insertAtFront(ka);
+    B len = pkt.getDataLength();
+    EV << "  serializedLength: " << len.get() << endl;
+    ASSERT(len == B(4)); // Common Header alone (RFC 5440 Section 6.4)
+
+    auto p = roundTrip(staticPtrCast<const PcepMessage>(ka));
+    ASSERT(p != nullptr);
+    auto ka2 = dynamicPtrCast<const PcepKeepalive>(p);
+    ASSERT(ka2 != nullptr);
+    ASSERT(ka2->getType() == PCEP_KEEPALIVE);
+    ASSERT(ka2->getVersion() == 1);
+    EV << "  PASS" << endl;
+}
+
+// === 3. PCReq message ===
+{
+    EV << "=== PcepPcreq ===" << endl;
+    auto req = makeShared<PcepPcreq>();
+    req->setChunkLength(PCEP_PCREQ_MESSAGE_BYTES);
+    req->setType(PCEP_PCREQ);
+    req->setRequestId(42);
+    req->setSrcAddress(Ipv4Address("10.0.0.1"));
+    req->setDstAddress(Ipv4Address("10.0.0.4"));
+    req->setBandwidth(500000.0);
+    req->setSetupPriority(7);
+    req->setIncludeAny(0x3);
+    req->setExcludeAny(0xc);
+
+    Packet pkt("sz");
+    pkt.insertAtFront(req);
+    B len = pkt.getDataLength();
+    EV << "  serializedLength: " << len.get() << endl;
+    ASSERT(len == B(48)); // 4 (Common Header) + 8 (RP) + 12 (END-POINTS) + 8 (BANDWIDTH) + 16 (LSPA)
+
+    auto p = roundTrip(staticPtrCast<const PcepMessage>(req));
+    ASSERT(p != nullptr);
+    auto req2 = dynamicPtrCast<const PcepPcreq>(p);
+    ASSERT(req2 != nullptr);
+    ASSERT(req2->getType() == PCEP_PCREQ);
+    ASSERT(req2->getVersion() == 1);
+    ASSERT(req2->getRequestId() == 42);
+    ASSERT(req2->getSrcAddress() == Ipv4Address("10.0.0.1"));
+    ASSERT(req2->getDstAddress() == Ipv4Address("10.0.0.4"));
+    ASSERT(req2->getBandwidth() == 500000.0);
+    ASSERT(req2->getSetupPriority() == 7);
+    ASSERT(req2->getIncludeAny() == 0x3u);
+    ASSERT(req2->getExcludeAny() == 0xcu);
+    EV << "  requestId: " << req2->getRequestId() << endl;
+    EV << "  src: " << req2->getSrcAddress() << ", dst: " << req2->getDstAddress() << endl;
+    EV << "  bandwidth: " << req2->getBandwidth() << ", setupPriority: " << req2->getSetupPriority() << endl;
+    EV << "  includeAny: " << req2->getIncludeAny() << ", excludeAny: " << req2->getExcludeAny() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 4. PCRep message (success: ERO) ===
+{
+    EV << "=== PcepPcrep (ERO) ===" << endl;
+    auto rep = makeShared<PcepPcrep>();
+    EroVector ero;
+    EroObj hop1; hop1.L = false; hop1.node = Ipv4Address("10.0.0.2"); ero.push_back(hop1);
+    EroObj hop2; hop2.L = false; hop2.node = Ipv4Address("10.0.0.4"); ero.push_back(hop2);
+    rep->setEro(ero);
+    rep->setChunkLength(pcepPcrepEroMessageBytes(ero.size()));
+    rep->setType(PCEP_PCREP);
+    rep->setRequestId(42);
+    rep->setNoPath(false);
+
+    Packet pkt("sz");
+    pkt.insertAtFront(rep);
+    B len = pkt.getDataLength();
+    EV << "  serializedLength: " << len.get() << endl;
+    ASSERT(len == B(32)); // 4 (Common Header) + 8 (RP) + 4 (ERO header) + 2*8 (hops)
+
+    auto p = roundTrip(staticPtrCast<const PcepMessage>(rep));
+    ASSERT(p != nullptr);
+    auto rep2 = dynamicPtrCast<const PcepPcrep>(p);
+    ASSERT(rep2 != nullptr);
+    ASSERT(rep2->getType() == PCEP_PCREP);
+    ASSERT(rep2->getVersion() == 1);
+    ASSERT(rep2->getRequestId() == 42);
+    ASSERT(rep2->getNoPath() == false);
+    const EroVector& ero2 = rep2->getEro();
+    ASSERT(ero2.size() == 2);
+    ASSERT(ero2[0].L == false);
+    ASSERT(ero2[0].node == Ipv4Address("10.0.0.2"));
+    ASSERT(ero2[1].L == false);
+    ASSERT(ero2[1].node == Ipv4Address("10.0.0.4"));
+    EV << "  requestId: " << rep2->getRequestId() << ", noPath: " << rep2->getNoPath() << endl;
+    EV << "  ERO hop count: " << ero2.size() << endl;
+    EV << "  PASS" << endl;
+}
+
+// === 5. PCRep message (failure: NO-PATH) ===
+{
+    EV << "=== PcepPcrep (NO-PATH) ===" << endl;
+    auto rep = makeShared<PcepPcrep>();
+    rep->setChunkLength(PCEP_PCREP_NOPATH_MESSAGE_BYTES);
+    rep->setType(PCEP_PCREP);
+    rep->setRequestId(43);
+    rep->setNoPath(true);
+
+    Packet pkt("sz");
+    pkt.insertAtFront(rep);
+    B len = pkt.getDataLength();
+    EV << "  serializedLength: " << len.get() << endl;
+    ASSERT(len == B(20)); // 4 (Common Header) + 8 (RP) + 8 (NO-PATH)
+
+    auto p = roundTrip(staticPtrCast<const PcepMessage>(rep));
+    ASSERT(p != nullptr);
+    auto rep2 = dynamicPtrCast<const PcepPcrep>(p);
+    ASSERT(rep2 != nullptr);
+    ASSERT(rep2->getType() == PCEP_PCREP);
+    ASSERT(rep2->getVersion() == 1);
+    ASSERT(rep2->getRequestId() == 43);
+    ASSERT(rep2->getNoPath() == true);
+    ASSERT(rep2->getEro().size() == 0);
+    EV << "  requestId: " << rep2->getRequestId() << ", noPath: " << rep2->getNoPath() << endl;
+    EV << "  PASS" << endl;
+}
+
+EV << "All PCEP serializer round-trips passed." << endl;
+
+%contains: stdout
+All PCEP serializer round-trips passed.

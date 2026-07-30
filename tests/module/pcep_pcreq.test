@@ -1,0 +1,341 @@
+%description:
+Regression test for stateless PCEP path computation (RFC 5440 Section 6.5/6.6, Workstream
+F4 Phase 2): ~RsvpTe's ingress, configured with computationMode="pce", delegates its
+CSPF ERO computation to a co-located ~Pcc, which sends a PCReq to a remote ~Pce and installs
+the ERO carried back on the matching PCRep -- instead of calling Ted::calculateShortestPath()
+locally (Workstream C6, exercised by the sibling rsvpte_cspf.test with computationMode
+left at its "local" default on the exact same topology).
+
+Same ad hoc DIAMOND as rsvpte_cspf.test: LSR1 -> {LSR2, LSR3} -> LSR4, no hosts. The
+LSR1-LSR2-LSR4 branch is 600 kbps end to end and the cheaper route by metric (total 2);
+the LSR1-LSR3-LSR4 branch is 10 Mbps end to end and the more expensive route by metric
+(total 10). The ~Pce runs as LSR4's app[0] (LSR4 is two hops away from the ingress LSR1,
+reached over an actual, genuinely multi-hop PCEP TCP session -- not loopback -- exercising
+this workstream's whole "the PCE may be remote" premise for real); the ~Pcc runs as LSR1's
+app[0]. The PCEP TCP session itself rides on the real IP unicast routes ~LinkStateRouting
+already installs into every router's Ipv4 routing table toward every other router's routerId
+(see this file's addressing note below) -- the same mechanism any other TCP-based traffic
+between LSRs would use; no additional static routing or network configurator is needed on
+top of what rsvpte_cspf.test's own topology already provides. Both LSR1's Pcc and LSR4's Pce
+consult the SAME (fully converged, "omniscient") Ted every LSR already maintains via
+LinkStateRouting, so the PCE's computation is provably identical to what ~RsvpTe's own local
+CSPF would have produced on this topology (see rsvpte_cspf.test).
+
+Scenario (same shape as rsvpte_cspf.test, timing pushed out well beyond rsvpte_cspf.test's own
+margins to leave headroom for TED convergence, PCEP session establishment, AND -- since the
+very first PCEP TCP connection attempt (fired ~10ms into the run, before ~LinkStateRouting has
+flooded anything) always finds the PCE's route not-yet-converged and dies with a soft ICMPv4
+"destination unreachable" -- one full TCP SYN retransmission (RFC 6298's initial RTO, 3s in
+this model, see TCP_TIMEOUT_SYN_REXMIT) before the PCEP session can even start negotiating):
+  1. At t=0, tunnel 1 (lspid 100, 500 kbps, permanent) is set up from the static traffic.xml.
+     The very first createIngressPSB() attempt(s) legitimately fail (PCEP session not yet
+     OPERATIONAL, per the paragraph above) and are retried (via the SAME permanent-path retry
+     machinery Workstream C6 already built for "CSPF found no path yet" --
+     Pcc::requestPathComputation()'s PENDING/NO_PATH results are deliberately indistinguishable
+     from that case, see RsvpTe::createIngressPSB()) until the PCEP session is up and the PCRep
+     carries a real ERO. With both branches fully free, the PCE picks the plain-shortest (by
+     metric) LSR2 branch, exactly like local CSPF would.
+  2. At t=7s (well after tunnel 1 has fully established, including the CAC reservation on
+     BOTH of its hops, and after that reservation has flooded to LSR4's Ted too -- LSR4's own
+     view of the LSR1-LSR2/LSR2-LSR4 links' free bandwidth must reflect tunnel 1's
+     reservation, not some stale/partial view, for the PCE to prune correctly), a scenario
+     add-session brings up tunnel 2 (lspid 200, another 500 kbps, permanent). The
+     LSR1-LSR2/LSR2-LSR4 links now have only 100 kbps free at priority 7 -- not enough for
+     another 500k -- so the PCE's own bandwidth pruning must exclude the entire LSR2 branch
+     and compute tunnel 2's ERO via LSR3 instead, proving the PCE (not any local fallback)
+     made this decision. (Scheduling tunnel 2 comfortably after tunnel 1's establishment
+     matters more here than in rsvpte_cspf.test's local-CSPF version: a remote PCE's
+     computation reflects whatever its OWN Ted currently knows, which briefly lags an
+     in-flight reservation elsewhere in the network -- unlike local CSPF, which always reads
+     the ingress's own, self-consistent Ted. Verified while developing this test: moving
+     tunnel 2 to t=5s -- the same instant tunnel 1's OWN first successful attempt lands --
+     races tunnel 2's PCReq against tunnel 1's reservation actually being committed anywhere
+     yet, so the PCE (correctly, given what it knew at that instant) answers tunnel 2 with the
+     stale LSR2-branch ERO; local admission control at the ingress then catches the
+     shortfall and retries, and the retry's fresh PCReq gets the correct, pruned answer. That
+     is arguably a realistic and even INTERESTING property of a remote PCE (a later phase of
+     this workstream could be judged on how gracefully it handles exactly this), but it is not
+     what THIS test is about, so t=7s avoids it entirely.)
+
+Asserted:
+1. The PCEP session (LSR1's Pcc <-> LSR4's Pce) reaches OPERATIONAL before either tunnel's
+   ERO is computed (regex ordering).
+2. A PCReq is sent (Pcc-side EV_INFO) and answered by a PCRep carrying a real ERO
+   (Pce-side "computed ERO for requestId" EV_INFO, Pcc-side "PCRep received ... ERO with N
+   hop(s)" EV_INFO) for both tunnels.
+3. The PCE-computed EROs match rsvpte_cspf.test's local-CSPF result hop for hop: tunnel 1 via
+   LSR2 (10.1.2.1, 10.1.4.2), tunnel 2 via LSR3 (10.1.4.1, 10.1.4.2) -- the bandwidth pruning
+   in point 2's scenario step is what forces tunnel 2 off the LSR2 branch, proving it
+   happened, on the PCE's side, from the same global TED view a local CSPF call would use
+   (manually verified while developing this test: with computationMode left at "local" on
+   this exact topology/traffic, rsvpte_cspf.test already proves the identical branch choice
+   for both tunnels).
+4. Both tunnels actually establish end to end (ingress "Path successfully established").
+5. Standard undisposed-object postrun guard.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: PcepCspfDiamond.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.node.mpls.RsvpMplsRouter;
+
+//
+// Ad hoc diamond: LSR1 -> {LSR2 (600 kbps branch), LSR3 (10 Mbps branch)} -> LSR4.
+// No hosts -- both tunnels terminate at LSR4 itself. Identical topology/metrics/bandwidths
+// to rsvpte_cspf.test's CspfDiamond; LSR1/LSR4 additionally run a PCEP Pcc/Pce pair as
+// app[0] (see test.ini), configured entirely from the ini file (no NED changes needed:
+// ~RsvpMplsRouter already inherits numApps/app[]/hasTcp from ~ApplicationLayerNodeBase/
+// ~Router, and Ted from ~MplsRouterBase).
+//
+network PcepCspfDiamond
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    submodules:
+        LSR1: RsvpMplsRouter {
+            @display("p=200,200");
+            gates: pppg[2];
+        }
+        LSR2: RsvpMplsRouter {
+            @display("p=400,100");
+            gates: pppg[2];
+        }
+        LSR3: RsvpMplsRouter {
+            @display("p=400,300");
+            gates: pppg[2];
+        }
+        LSR4: RsvpMplsRouter {
+            @display("p=600,200");
+            gates: pppg[2];
+        }
+        scenarioManager: ScenarioManager {
+            @display("p=100,100;is=s");
+        }
+    connections:
+        LSR1.pppg[0] <--> { delay = 1ms; datarate = 600kbps; } <--> LSR2.pppg[0];
+        LSR2.pppg[1] <--> { delay = 1ms; datarate = 600kbps; } <--> LSR4.pppg[0];
+        LSR1.pppg[1] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR3.pppg[0];
+        LSR3.pppg[1] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR4.pppg[1];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Addressing (identical to rsvpte_cspf.test): LSR1.ppp0=10.1.1.1 <-> LSR2.ppp0=10.1.1.2
+%# (600k branch, hop A); LSR2.ppp1=10.1.2.1 <-> LSR4.ppp0=10.1.2.2 (600k branch, hop B);
+%# LSR1.ppp1=10.1.3.1 <-> LSR3.ppp0=10.1.3.2 (10M branch, hop A); LSR3.ppp1=10.1.4.1 <->
+%# LSR4.ppp1=10.1.4.2 (10M branch, hop B). routerId="auto" picks the HIGHEST interface
+%# address per LSR: LSR1=10.1.3.1, LSR2=10.1.2.1, LSR3=10.1.4.1, LSR4=10.1.4.2. The PCEP
+%# session connects to LSR4's routerId (10.1.4.2, its ppp1 address) -- NOT a raw per-hop
+%# interface address -- and works over the genuinely multi-hop route ~LinkStateRouting
+%# installs (as real Ipv4 routes with real next-hop gateways, e.g. "10.1.4.2/32 via
+%# 10.1.4.1") into every router's Ipv4 routing table toward every OTHER router's routerId;
+%# there is no separate/manual static routing for the PCEP traffic (unlike a router's
+%# individual non-routerId interface addresses, e.g. LSR2's 10.1.1.2, which are NOT
+%# individually reachable this way -- only each router's own routerId is).
+%# RSVP signaling itself doesn't rely on this at all (a full strict ERO resolves its next
+%# hop via the TED directly, never via the Ipv4 routing table), so rsvpte_cspf.test never
+%# needed or exercised it; this test is the first to actually route real IP traffic across
+%# the diamond.
+%file: LSR1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.1.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.1.3.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.1.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.1.2.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.3.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+name: ppp1	inet_addr: 10.1.4.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR4.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.2.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.1.4.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1_rsvp.xml
+<?xml version="1.0"?>
+<sessions>
+	<session>
+		<endpoint>LSR4%routerId</endpoint>
+		<tunnel_id>1</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>100</lspid>
+				<bandwidth>500000</bandwidth>
+				<permanent>true</permanent>
+			</path>
+		</paths>
+	</session>
+</sessions>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<?xml version="1.0"?>
+<scenario>
+	<at t="7s">
+		<add-session module="LSR1.rsvp">
+			<endpoint>LSR4%routerId</endpoint>
+			<tunnel_id>2</tunnel_id>
+
+			<paths>
+				<path>
+					<lspid>200</lspid>
+					<bandwidth>500000</bandwidth>
+					<permanent>true</permanent>
+				</path>
+			</paths>
+		</add-session>
+	</at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = .;../../../../src
+network = PcepCspfDiamond
+sim-time-limit = 12s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+%# only the rsvp modules (detail, so the PCE/CSPF-computed-ERO EV_DETAIL line is captured)
+%# and the PCEP apps (info) log -- keeps the log scoped, same rationale as
+%# rsvpte_cspf.test/pcep_session.test. NOTE: per-module cmdenv-log-level overrides are
+%# matched in FILE ORDER (first matching pattern wins), so specific overrides MUST be
+%# declared before the general catch-all below.
+**.LSR*.rsvp.cmdenv-log-level = detail
+**.LSR1.app[0].cmdenv-log-level = info
+**.LSR4.app[0].cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+**.LSR1.ipv4.routingTable.routingFile = "LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "LSR4.rt"
+
+**.LSR1.rsvp.traffic = xmldoc("LSR1_rsvp.xml")
+**.LSR1.rsvp.computeEro = true
+**.LSR1.rsvp.computationMode = "pce"
+**.LSR1.rsvp.pccModule = "^.app[0]"
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+%# PCEP: LSR1 (ingress) runs the Pcc, LSR4 (two hops away, genuinely remote -- not the
+%# ingress and not on tunnel 1's own signaling path) runs the Pce, wired to LSR4's own
+%# (fully converged) Ted.
+**.LSR1.hasTcp = true
+**.LSR1.numApps = 1
+**.LSR1.app[0].typename = "Pcc"
+**.LSR1.app[0].pceAddress = "10.1.4.2"
+%# localAddress = LSR1's own routerId (10.1.3.1): ~Ted/~LinkStateRouting (like a real IGP)
+%# only guarantees network-wide reachability to each router's OWN routerId, not to its
+%# individual per-link interface addresses (e.g. 10.1.1.1, the address an unspecified bind
+%# would otherwise let the outgoing route toward the PCE pick) -- see ~Pcc's "localAddress"
+%# doc comment.
+**.LSR1.app[0].localAddress = "10.1.3.1"
+**.LSR1.app[0].keepaliveTime = 2s
+**.LSR1.app[0].deadTimer = 10s
+**.LSR1.app[0].reconnectInterval = 1s
+
+**.LSR4.hasTcp = true
+**.LSR4.numApps = 1
+**.LSR4.app[0].typename = "Pce"
+**.LSR4.app[0].tedModule = "^.ted"
+**.LSR4.app[0].keepaliveTime = 2s
+**.LSR4.app[0].deadTimer = 10s
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.*.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Sanity: the add-session at t=7s actually reached the ingress.
+%contains: stdout
+adding new session into database
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 1: the PCEP session comes up before the first successfully PCE-computed ERO
+%# (ordering regex -- Pcc is the active side, so its Open is sent first; %contains-regex
+%# matches with re.DOTALL, so a lone ".*" filler line can absorb any number of
+%# intervening lines, same convention as pcep_session.test's own ordering regex).
+%contains-regex: stdout
+Open sent to PCE .*
+.*
+PCEP session with .* is now OPERATIONAL
+.*
+PCE computed ERO for session .*
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 2: a PCReq is actually sent and answered with a real ERO, both sides.
+%contains-regex: stdout
+PCReq sent to PCE \(requestId=.*
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+PCReq received from .* \(requestId=.*
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+computed ERO for requestId .*
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+PCRep received from PCE: requestId=.*, ERO with .* hop\(s\)
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 3: tunnel 1 (lspid 100) via the LSR2 branch (both branches free, cheaper
+%# metric) -- LSR2's routerId 10.1.2.1, then LSR4's routerId 10.1.4.2 -- exactly matching
+%# rsvpte_cspf.test's local-CSPF result on the identical topology.
+%contains: stdout
+PCE computed ERO for session (dest=10.1.4.2, lspid=100): 10.1.2.1, 10.1.4.2
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 3 (continued): tunnel 2 (lspid 200) forced onto the LSR3 branch by the PCE's
+%# own bandwidth pruning (LSR2 branch has only 100 kbps free at priority 7 after tunnel 1's
+%# 500k reservation on BOTH its hops) -- LSR3's routerId 10.1.4.1, then LSR4's 10.1.4.2.
+%contains: stdout
+PCE computed ERO for session (dest=10.1.4.2, lspid=200): 10.1.4.1, 10.1.4.2
+%#--------------------------------------------------------------------------------------------------------------
+%# Negative check tied to the pruning above: tunnel 2 must NOT end up on the LSR2 branch
+%# (which is exactly what happens if the PCE's bandwidth-pruning silently degenerates into
+%# the plain unpruned shortest path -- see rsvpte_cspf.test's own falsification history for
+%# this same CSPF call).
+%not-contains: stdout
+PCE computed ERO for session (dest=10.1.4.2, lspid=200): 10.1.2.1, 10.1.4.2
+%#--------------------------------------------------------------------------------------------------------------
+%# Assertion 4: both tunnels actually establish end to end using the PCE-provided path.
+%contains: stdout
+Path successfully established
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
