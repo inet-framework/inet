@@ -20,7 +20,6 @@
 				</route>
 
 				<permanent>true</permanent>
-				<color>100</color>
 			</path>
 		</paths>
 	</session>
@@ -41,7 +40,6 @@
 				</route>
 
 				<permanent>true</permanent>
-				<color>200</color>
 			</path>
 		</paths>
 	</session>

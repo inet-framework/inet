@@ -17,7 +17,6 @@
 				</route>
 
 				<permanent>true</permanent>
-				<color>100</color>
 			</path>
 		</paths>
 	</session>
@@ -37,7 +36,6 @@
 				</route>
 
 				<permanent>true</permanent>
-				<color>200</color>
 			</path>
 		</paths>
 	</session>
@@ -52,7 +50,6 @@
 				<bandwidth>100000</bandwidth>
 
 				<permanent>true</permanent>
-				<color>300</color>
 			</path>
 		</paths>
 	</session>

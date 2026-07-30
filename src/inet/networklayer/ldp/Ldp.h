@@ -24,10 +24,6 @@ namespace inet {
 
 #define LDP_PORT             646
 
-#define LDP_TRAFFIC          4       // session (TCP) traffic
-#define LDP_HELLO_TRAFFIC    5       // discovery (UDP) traffic
-#define LDP_USER_TRAFFIC     100     // label switched user traffic
-
 // base header: version, length, LSR ID, Label space
 const B LDP_BASEHEADER_BYTES = B(10);
 
@@ -218,7 +214,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     //@}
 
     // IIngressClassifier
-    virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
+    virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, std::string& outInterface) override;
 
     // cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

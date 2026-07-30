@@ -7,6 +7,5 @@
 		<outLabel>
 			<op code="swap" value="203"/>
 		</outLabel>
-		<color>200</color>
 	</libentry>
 </libtable>

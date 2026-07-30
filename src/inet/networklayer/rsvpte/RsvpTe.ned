@@ -16,7 +16,7 @@ import inet.common.SimpleModule;
 // An example traffic.xml file:
 //
 //# FIXME: Verify against the code, and document formally (DTD)!
-//# <setup_pri>, <holding_pri>, <sender>, <owner>, <max_delay> elements
+//# <setup_pri>, <holding_pri>, <sender>, <owner> elements
 //# are implemented but missing from this doc!
 //
 // <pre>
@@ -36,7 +36,6 @@ import inet.common.SimpleModule;
 //                     <node>10.1.5.1</node>
 //                 </route>
 //                 <permanent>true</permanent>
-//                 <color>100</color>
 //             </path>
 //         </paths>
 //     </session>
@@ -99,7 +98,5 @@ simple RsvpTe extends SimpleModule
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down);
-        input mplsSwitchIn;
-        input appIn;
 }
 

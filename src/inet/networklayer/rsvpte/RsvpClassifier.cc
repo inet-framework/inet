@@ -49,7 +49,7 @@ void RsvpClassifier::handleMessage(cMessage *)
 
 // IIngressClassifier implementation (method invoked by MPLS)
 
-bool RsvpClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface, int& color)
+bool RsvpClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface)
 {
     // never label OSPF(TED) and RSVP traffic
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
@@ -77,7 +77,7 @@ bool RsvpClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::s
         if (elem.inLabel < 0)
             return false;
 
-        return lt->resolveLabel("", elem.inLabel, outLabel, outInterface, color);
+        return lt->resolveLabel("", elem.inLabel, outLabel, outInterface);
     }
 
     return false;

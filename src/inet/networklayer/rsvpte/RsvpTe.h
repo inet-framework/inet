@@ -39,11 +39,9 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         SenderTspecObj tspec;
 
         EroVector ERO;
-        simtime_t max_delay;
 
         int owner;
         bool permanent;
-        int color;
     };
 
     struct traffic_session_t {
@@ -81,9 +79,6 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 
         // PSB unique identifier
         int id;
-
-        // TODO nam colors
-        int color;
 
         // timer/timeout routines
         PsbTimerMsg *timerMsg;

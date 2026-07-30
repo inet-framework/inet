@@ -97,7 +97,6 @@ cmdenv-express-mode = false
 				</route>
 
 				<permanent>true</permanent>
-				<color>100</color>
 			</path>
 		</paths>
 	</session>
@@ -118,7 +117,6 @@ cmdenv-express-mode = false
 				</route>
 
 				<permanent>true</permanent>
-				<color>200</color>
 			</path>
 		</paths>
 	</session>
@@ -145,7 +143,6 @@ cmdenv-express-mode = false
 						<node>LSR5%routerId</node>
 					</route>
 
-					<color>100</color>
 				</path>
 			</paths>
 		</add-session>

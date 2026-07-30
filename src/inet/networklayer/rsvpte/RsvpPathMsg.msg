@@ -21,7 +21,6 @@ class RsvpPathMsg extends RsvpPacket
     LabelRequestObj label_request;
     SenderDescriptor_t sender_descriptor;
     EroVector ERO;
-    int color;
 
     rsvpKind = PATH_MESSAGE;
 }
