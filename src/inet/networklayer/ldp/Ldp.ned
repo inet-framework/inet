@@ -31,6 +31,26 @@ import inet.applications.contract.IApp;
 // computed for each outgoing packet is simply the 10-byte PDU header plus the
 // length of that single message (its 8-byte message header plus its TLVs).
 //
+// Explicit non-features (RFC 5036 mechanisms not modeled by this module):
+// - No session establishment FSM: a successful TCP connection stands in for
+//   the Initialization/KeepAlive exchange; there is no session parameter
+//   negotiation. (~LdpIni exists only as a wire-format representation.)
+// - No extended/targeted discovery, so only directly-connected peers
+//   (reachable via the basic UDP Hello discovery) can become LDP peers.
+// - Downstream-on-Demand with ordered control only; Downstream Unsolicited,
+//   independent control, and liberal retention are not implemented, and
+//   there is no parameter to select a mode.
+// - No Address / Address Withdraw message support: such messages received
+//   from a peer are logged and ignored rather than causing an error, and
+//   the mapping from a peer to its next-hop interface is instead derived
+//   from the local routing table. (~LdpAddress exists only as a wire-format
+//   representation.)
+// - No loop detection (hop count / path vector TLVs).
+// - No graceful restart, capabilities negotiation, or IGP synchronization.
+// - No Generalized TTL Security Mechanism (GTSM).
+// - No IPv6 support (RFC 7552); the whole module is IPv4-only.
+// - No pseudowire (PW) signaling extensions.
+//
 // @author Vojta Janota
 //
 simple Ldp extends SimpleModule like IApp

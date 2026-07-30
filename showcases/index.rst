@@ -18,6 +18,7 @@ the simulations (NED, ini, and other files) and the web pages are in the
 
 Latest updates:
 
+- Added: :doc:`mpls/te/doc/index` (2026-07-10)
 - Added: :doc:`quic/linksharing/doc/index` (2026-02-26)
 - Added: :doc:`emulation/webserver/doc/index` (2026-02-26)
 - Added: :doc:`emulation/mininet/doc/index` (2026-02-26)
@@ -49,6 +50,7 @@ All showcases:
    general/index
    measurement/index
    mobility/index
+   mpls/index
    quic/index
    routing/index
    visualizer/canvas/index

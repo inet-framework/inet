@@ -17,6 +17,14 @@ import inet.common.SimpleModule;
 //
 // The link state database is kept in the ~Ted module.
 //
+// This is a topology mirror, not a general-purpose routing protocol: it
+// floods the local ~Ted contents to a fixed set of peers configured via the
+// "peers" parameter (no periodic re-origination, no LSA aging, no wraparound
+// handling for message ids) and has no lifecycle support of its own (unlike
+// ~Ted, ~Ldp, and ~RsvpTe, it does not extend the lifecycle-aware routing
+// protocol base class); a node shutdown/restart does not stop or reset its
+// flooding activity.
+//
 simple LinkStateRouting extends SimpleModule
 {
     parameters:

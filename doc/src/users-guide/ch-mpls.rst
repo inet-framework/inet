@@ -81,11 +81,10 @@ The :ned:`LibTable` module accepts an XML config file whose structure follows th
                <op code="swap" value="200"/>
                <op code="push" value="300"/>
            </outLabel>
-           <color>200</color>
        </libentry>
    </libtable>
 
-There can be multiple ``<libentry>`` elements, each describing a row in the table. Columns are given as child elements: ``<inLabel>``, ``<inInterface>``, etc. The ``<color>`` element is optional, and it only exists to be able to color LSPs on the GUI. It is not used by the protocols.
+There can be multiple ``<libentry>`` elements, each describing a row in the table. Columns are given as child elements: ``<inLabel>``, ``<inInterface>``, ``<outInterface>``, and ``<outLabel>``. The ``<inInterface>`` element may also be the literal string ``any``, meaning the entry matches regardless of the incoming interface.
 
 .. _ug:sec:mpls:ldp:
 
@@ -142,7 +141,6 @@ The :ned:`RsvpTe` module allows LSPs to be specified statically in an XML config
                        <node>10.1.5.1</node>
                    </route>
                    <permanent>true</permanent>
-                   <color>100</color>
                </path>
            </paths>
        </session>
@@ -215,3 +213,224 @@ INET provides the following preassembled MPLS routers:
 
 - :ned:`RsvpMplsRouter` is an MPLS router with the RSVP-TE signaling protocol
 
+.. _ug:sec:mpls:conformance:
+
+Conformance Status
+------------------
+
+The MPLS/LDP/RSVP-TE models implement a substantial part of their reference
+RFCs, but are not complete protocol implementations. This section lists,
+mechanism by mechanism, what is modeled, what is only partially modeled, and
+what is deliberately left out, so that simulation results can be interpreted
+against the actual feature set rather than against the RFCs themselves. Every
+row marked "Not modeled" is an intentional simplification, not an oversight;
+none of it silently changes behavior in a way that would surprise a user who
+reads this table first.
+
+LDP (RFC 5036)
+~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 32 14 54
+
+   * - Mechanism
+     - Status
+     - Notes
+   * - Basic discovery (UDP 646 multicast Hello, hold timer)
+     - Modeled
+     - Received ``holdTime`` is honored via the RFC's min(local, peer) rule.
+   * - Extended/targeted discovery (remote sessions)
+     - Not modeled
+     - Only directly-connected peers discovered via basic discovery are
+       supported.
+   * - Session initialization (Initialization message, parameter
+       negotiation)
+     - Not modeled
+     - A successful TCP connection stands in for session establishment;
+       there is no Initialization/parameter-negotiation exchange.
+   * - KeepAlive
+     - Not modeled
+     - Session liveness relies solely on the Hello adjacency's hold timer.
+   * - Label distribution mode (DU / DoD)
+     - Partially modeled
+     - Downstream-on-Demand with ordered control only; Downstream
+       Unsolicited and independent control are not implemented, and there
+       is no parameter to select a mode.
+   * - Label retention mode (liberal / conservative)
+     - Partially modeled
+     - Behavior is conservative-like by construction, but not a
+       configurable, spec-named retention mode.
+   * - Label Mapping / Label Request / Label Withdraw / Label Release
+     - Modeled
+     - Includes the full label lifecycle (mapping, request, withdraw,
+       release) with a wire-faithful PDU/TLV encoding.
+   * - Notification
+     - Partially modeled
+     - Only the ``NO_ROUTE`` status is generated; other or unrecognized
+       status codes on a received Notification are logged and ignored
+       rather than causing an error.
+   * - Address / Address Withdraw messages
+     - Not modeled
+     - Received Address/Address Withdraw messages are logged and ignored
+       (an unsupported message is not a protocol error); the peer's
+       next-hop mapping is instead derived from the local routing table.
+   * - Loop detection (hop count / path vector TLV)
+     - Not modeled
+     - n/a
+   * - Wire format (PDU header, LSR-ID, label space, TLV encoding)
+     - Modeled
+     - One message per PDU (a documented model simplification); every
+       message type round-trips through a registered serializer with the
+       exact RFC-computed length.
+   * - Active/passive role selection
+     - Partially modeled
+     - Exactly one side of each adjacency ends up active, so LSP setup
+       works, but the comparison used is the opposite of RFC 5036 Section
+       2.5.2's rule (the LSR with the smaller, not greater, transport
+       address is chosen active).
+   * - Session-failure recovery
+     - Modeled
+     - A TCP close/failure cleans up bindings and reconnects; this is
+       hello/socket-event-driven recovery, not a spec-defined session FSM.
+   * - Graceful restart
+     - Not modeled
+     - n/a
+   * - Generalized TTL Security Mechanism (GTSM)
+     - Not modeled
+     - n/a
+   * - IPv6 (RFC 7552)
+     - Not modeled
+     - The whole subsystem is IPv4-only.
+   * - Pseudowire signaling
+     - Not modeled
+     - n/a
+   * - Penultimate-hop popping / implicit null label
+     - Modeled
+     - Controlled by the ``advertiseImplicitNull`` parameter.
+
+RSVP-TE (RFC 2205 + RFC 3209)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 32 14 54
+
+   * - Mechanism
+     - Status
+     - Notes
+   * - Path / Resv with LABEL_REQUEST and LABEL objects
+     - Modeled
+     - n/a
+   * - SESSION / RSVP_HOP / TIME_VALUES / SENDER_TEMPLATE / SENDER_TSPEC
+       objects
+     - Modeled
+     - Serialized with their RFC Class-Num/C-Type on the wire.
+   * - Explicit Route Object (ERO): strict and loose hops
+     - Partially modeled
+     - Strict and loose hop forwarding both work, but loose hops are
+       resolved with a plain routing-table lookup; there is no
+       constraint-based computation, so EROs that need bandwidth or
+       affinity awareness must be hand-written by the user.
+   * - Constrained Shortest Path First (CSPF) at the ingress
+     - Not modeled
+     - A bandwidth-pruned shortest-path helper exists in :ned:`Ted` but has
+       no caller; nothing computes an ERO automatically.
+   * - Record Route Object (RRO)
+     - Partially modeled
+     - Carried in the Resv direction only; not consulted for loop
+       detection or fast-reroute merge points.
+   * - Soft-state refresh and timeout
+     - Modeled
+     - Refresh period, state-lifetime factor, and per-refresh
+       uniform(0.5, 1.5) jitter follow RFC 2205 Section 3.7, all
+       configurable via NED parameters.
+   * - Refresh reduction (RFC 2961)
+     - Not modeled
+     - Every refresh is a full-state message; no MESSAGE_ID/Ack/Srefresh.
+   * - PathTear / PathErr
+     - Modeled
+     - n/a
+   * - ResvTear / ResvErr
+     - Modeled
+     - ResvTear is sent on soft-state teardown; ResvErr is sent (with a
+       model-local error code) when a reservation is preempted.
+   * - Hello (instances, request/ack)
+     - Modeled
+     - A Hello timeout directly flips the corresponding TED link's state
+       and triggers a routing-table rebuild rather than going through an
+       independent IGP/interface-state layer; see the TED table below.
+   * - Setup/holding priority and preemption
+     - Modeled
+     - Bandwidth sharing for admission control is computed per outgoing
+       link.
+   * - Make-before-break re-route / re-optimization
+     - Not modeled
+     - Path teardown happens before the replacement LSP is signaled
+       (break-before-make).
+   * - Fast reroute (RFC 4090)
+     - Not modeled
+     - n/a
+   * - Session attribute affinities / admin groups
+     - Not modeled
+     - The TED carries no affinity/admin-group bits to match against.
+   * - Traversal of non-RSVP clouds (Router Alert)
+     - Not modeled (by design)
+     - Path/Resv messages are addressed hop-by-hop directly to the
+       next-hop router's address.
+   * - Token-bucket Tspec (RFC 2210)
+     - Partially modeled
+     - The model tracks a single bandwidth value; the serializer writes
+       it into the rate, bucket size, and peak rate fields alike, and the
+       minimum policed unit/maximum packet size fields are fixed
+       placeholders that are not modeled state.
+   * - Wire-format serialization
+     - Modeled
+     - The model's internal message-type numbering is translated to the
+       RFC wire numbers on serialization; ``setup_pri``/``holding_pri``
+       and the internal PathTear "force" flag have no RFC wire
+       representation and do not survive a serialize/deserialize round
+       trip.
+
+MPLS data plane (RFC 3031 + RFC 3032 + RFC 3443 + RFC 5462)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 32 14 54
+
+   * - Mechanism
+     - Status
+     - Notes
+   * - Label stack push/swap/pop
+     - Modeled
+     - n/a
+   * - Shim header serialization
+     - Modeled
+     - n/a
+   * - TTL processing (RFC 3443)
+     - Modeled
+     - Uniform and pipe models, selected with the ``ttlModel`` parameter;
+       TTL expiry hands the datagram up to L3 for ICMP Time Exceeded
+       processing.
+   * - Traffic Class / EXP handling (RFC 5462)
+     - Modeled
+     - DSCP-to-TC mapping on push/pop; writing the (lossy) TC value back
+       into the IP DSCP on pop is opt-in via ``writeTcBackOnPop`` (off by
+       default).
+   * - Reserved labels 0-15 / penultimate-hop popping
+     - Modeled
+     - The implicit null label (3) can be advertised by both LDP and
+       RSVP-TE via their respective ``advertiseImplicitNull`` parameters.
+   * - Payload protocol at egress
+     - Partially modeled
+     - Popping the last label always re-tags the payload as IPv4; there
+       is no per-LIB-entry payload-protocol field, so non-IPv4 payloads
+       (e.g., for pseudowires) cannot be carried.
+   * - ECMP / entropy label over FECs
+     - Not modeled
+     - n/a
+   * - Label allocation reuse
+     - Not modeled
+     - Labels are allocated from a monotonically increasing counter;
+       freed labels are never reclaimed.

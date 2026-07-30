@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<sessions>
+    <session>
+        <endpoint>host3</endpoint>
+        <tunnel_id>1</tunnel_id>
+
+        <!-- High priority: 0 is the best, 7 (the RSVP-TE default) is the worst. -->
+        <setup_pri>1</setup_pri>
+        <holding_pri>1</holding_pri>
+
+        <paths>
+            <path>
+                <lspid>100</lspid>
+
+                <bandwidth>400000</bandwidth>
+                <route>
+                    <node>LSR1%routerId</node>
+                    <node>LSR2%routerId</node>
+                    <node>LSR4%routerId</node>
+                    <node>LSR5%routerId</node>
+                    <node>LSR8%routerId</node>
+                </route>
+
+                <permanent>true</permanent>
+            </path>
+        </paths>
+    </session>
+    <session>
+        <endpoint>host4</endpoint>
+        <tunnel_id>2</tunnel_id>
+
+        <!-- Default (lowest) priority: 7/7. -->
+
+        <paths>
+            <path>
+                <lspid>200</lspid>
+
+                <bandwidth>400000</bandwidth>
+                <route>
+                    <node>LSR1%routerId</node>
+                    <node>LSR3%routerId</node>
+                    <node>LSR7%routerId</node>
+                    <node>LSR5%routerId</node>
+                    <node>LSR8%routerId</node>
+                </route>
+
+                <permanent>true</permanent>
+            </path>
+        </paths>
+    </session>
+</sessions>

@@ -19,6 +19,21 @@ import inet.common.SimpleModule;
 // and allows ~RsvpTe and individual applications to calculate feasible LSPs
 // meeting the chosen bandwidth criteria.
 //
+// Known constraints of the current implementation:
+// - Topology discovery (at initialization) walks the gate chain to each
+//   directly connected node; anything behind a switch, hub, access point, or
+//   other non-routing device is invisible to this module (no TED entry is
+//   created for that link).
+// - Every interface participating in the TED must have a network-unique
+//   IPv4 address; if it does not, initialization fails with a
+//   cRuntimeError (MPLS/LDP/RSVP-TE assume unique interface addresses
+//   throughout).
+// - Ted unconditionally owns the node's IPv4 routing table: whenever the
+//   link-state database changes, it deletes every non-multicast route and
+//   reinstalls a full set of host routes derived from the TED. There is
+//   currently no option to let another routing protocol (e.g., ~Ospfv2)
+//   coexist with an active ~Ted in the same router.
+//
 simple Ted extends SimpleModule
 {
     parameters:

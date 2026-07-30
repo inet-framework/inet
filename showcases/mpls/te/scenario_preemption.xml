@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<scenario>
+    <!--
+         Add a second, high-priority path to the already-established tunnel 1
+         (inheriting its setup_pri=1/holding_pri=1), routed over the same links
+         tunnel 2's low-priority (7/7) reservation already uses. The combined
+         bandwidth (400 kbit/s + 400 kbit/s = 800 kbit/s) exceeds the shared
+         links' 600 kbit/s capacity, so admitting the new, better-priority path
+         preempts tunnel 2's reservation instead of being rejected.
+    -->
+    <at t="2s">
+        <add-session module="LSR1.rsvp">
+            <endpoint>host3</endpoint>
+            <tunnel_id>1</tunnel_id>
+
+            <paths>
+                <path>
+                    <lspid>101</lspid>
+
+                    <bandwidth>400000</bandwidth>
+                    <route>
+                        <node>LSR1%routerId</node>
+                        <node>LSR3%routerId</node>
+                        <node>LSR7%routerId</node>
+                        <node>LSR5%routerId</node>
+                        <node>LSR8%routerId</node>
+                    </route>
+                </path>
+            </paths>
+        </add-session>
+    </at>
+</scenario>
