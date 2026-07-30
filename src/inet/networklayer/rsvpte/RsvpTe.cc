@@ -23,15 +23,110 @@
 
 namespace inet {
 
-#define PSB_REFRESH_INTERVAL       5.0
-#define RSB_REFRESH_INTERVAL       6.0
-
-#define PSB_TIMEOUT_INTERVAL       16.0
-#define RSB_TIMEOUT_INTERVAL       19.0
-
 #define PATH_ERR_UNFEASIBLE        1
 #define PATH_ERR_PREEMPTED         2
 #define PATH_ERR_NEXTHOP_FAILED    3
+
+// ResvErr error codes (model-local, like the PATH_ERR_* codes above -- not RFC 2205
+// Appendix D wire values, just this switch's own dispatch key). Reservation-time
+// failures only (RFC 2205 Section 3.5): admission failure at Path/PSB creation time
+// is reported via PathErr/PATH_ERR_UNFEASIBLE instead, since that happens before any
+// reservation exists to report a ResvErr about.
+#define RESV_ERR_PREEMPTED         1
+
+namespace {
+
+// RFC 2205 Section 3.1.2: the common RSVP message header is 8 bytes; every
+// object is a 4-byte object header plus a body. The per-object byte counts
+// below are the OBJECT TOTAL (header + body) for the C-Types this model
+// implements (RFC 3209 LSP_TUNNEL_IPV4 for SESSION/SENDER_TEMPLATE, RFC 2210
+// Int-Serv Controlled-Load for SENDER_TSPEC/FLOWSPEC, RFC 2205 IPv4 for
+// ERROR_SPEC). These are used to compute honest (non-guessed) message
+// lengths; they are intentionally kept object-granular so a future wire
+// serializer (Workstream E) can validate against them.
+constexpr int RSVP_COMMON_HEADER_BYTES = 8;
+constexpr int SESSION_OBJECT_BYTES = 16;
+constexpr int RSVP_HOP_OBJECT_BYTES = 12;
+constexpr int TIME_VALUES_OBJECT_BYTES = 8;
+constexpr int LABEL_REQUEST_OBJECT_BYTES = 8;
+constexpr int SENDER_TEMPLATE_OBJECT_BYTES = 12; // also used for FILTER_SPEC (same C-Type)
+constexpr int SENDER_TSPEC_OBJECT_BYTES = 40;
+constexpr int FLOWSPEC_OBJECT_BYTES = 40;
+constexpr int LABEL_OBJECT_BYTES = 8;
+constexpr int STYLE_OBJECT_BYTES = 8;
+constexpr int ERROR_SPEC_OBJECT_BYTES = 12;
+constexpr int HELLO_OBJECT_BYTES = 12;
+constexpr int ERO_RRO_OBJECT_HEADER_BYTES = 4;
+constexpr int ERO_RRO_SUBOBJECT_BYTES = 8; // IPv4 prefix subobject
+
+B computeEroLength(const EroVector& ero)
+{
+    return ero.empty() ? B(0) : B(ERO_RRO_OBJECT_HEADER_BYTES + ERO_RRO_SUBOBJECT_BYTES * ero.size());
+}
+
+B computeRroLength(const Ipv4AddressVector& rro)
+{
+    return rro.empty() ? B(0) : B(ERO_RRO_OBJECT_HEADER_BYTES + ERO_RRO_SUBOBJECT_BYTES * rro.size());
+}
+
+// One FILTER_SPEC + FLOWSPEC + LABEL (+ RRO if present) per flow, shared by
+// Resv (commit 10) and ResvTear/ResvErr (commit 12), all of which carry a
+// FlowDescriptorVector.
+B computeFlowDescriptorListLength(const FlowDescriptorVector& flows)
+{
+    B length = B(0);
+    for (auto& flow : flows)
+        length += B(SENDER_TEMPLATE_OBJECT_BYTES) + B(FLOWSPEC_OBJECT_BYTES) + B(LABEL_OBJECT_BYTES) + computeRroLength(flow.RRO);
+    return length;
+}
+
+B computeHelloMessageLength()
+{
+    return B(RSVP_COMMON_HEADER_BYTES + HELLO_OBJECT_BYTES);
+}
+
+B computePathMessageLength(const EroVector& ero)
+{
+    return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + RSVP_HOP_OBJECT_BYTES + TIME_VALUES_OBJECT_BYTES
+             + LABEL_REQUEST_OBJECT_BYTES + SENDER_TEMPLATE_OBJECT_BYTES + SENDER_TSPEC_OBJECT_BYTES)
+           + computeEroLength(ero);
+}
+
+B computePathTearMessageLength()
+{
+    // The model's PathTear carries SESSION, RSVP_HOP and SENDER_TEMPLATE only (no SENDER_TSPEC).
+    return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + RSVP_HOP_OBJECT_BYTES + SENDER_TEMPLATE_OBJECT_BYTES);
+}
+
+B computePathErrorMessageLength()
+{
+    // RFC 2205 A.4: PathErr carries SESSION, ERROR_SPEC and a sender descriptor
+    // (SENDER_TEMPLATE + SENDER_TSPEC); no RSVP_HOP.
+    return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + ERROR_SPEC_OBJECT_BYTES
+             + SENDER_TEMPLATE_OBJECT_BYTES + SENDER_TSPEC_OBJECT_BYTES);
+}
+
+B computeResvMessageLength(const FlowDescriptorVector& flows)
+{
+    return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + RSVP_HOP_OBJECT_BYTES + TIME_VALUES_OBJECT_BYTES + STYLE_OBJECT_BYTES)
+           + computeFlowDescriptorListLength(flows);
+}
+
+B computeResvTearMessageLength(const FlowDescriptorVector& flows)
+{
+    // RFC 2205 A.5: no TIME_VALUES in ResvTear (unlike Resv).
+    return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + RSVP_HOP_OBJECT_BYTES + STYLE_OBJECT_BYTES)
+           + computeFlowDescriptorListLength(flows);
+}
+
+B computeResvErrorMessageLength(const FlowDescriptorVector& flows)
+{
+    // RFC 2205 A.7: SESSION, RSVP_HOP, ERROR_SPEC, STYLE, flow descriptor list; no TIME_VALUES.
+    return B(RSVP_COMMON_HEADER_BYTES + SESSION_OBJECT_BYTES + RSVP_HOP_OBJECT_BYTES + ERROR_SPEC_OBJECT_BYTES + STYLE_OBJECT_BYTES)
+           + computeFlowDescriptorListLength(flows);
+}
+
+} // namespace
 
 Define_Module(RsvpTe);
 
@@ -73,11 +168,15 @@ void RsvpTe::initialize(int stage)
         maxPsbId = 0;
         maxRsbId = 0;
         maxSrcInstance = 0;
-        retryInterval = 1.0;
+        refreshInterval = par("refreshInterval");
+        stateLifetimeFactor = par("stateLifetimeFactor");
+        retryInterval = par("retryInterval");
         advertiseImplicitNull = par("advertiseImplicitNull");
         WATCH(maxPsbId);
         WATCH(maxRsbId);
         WATCH(maxSrcInstance);
+        WATCH(refreshInterval);
+        WATCH(stateLifetimeFactor);
         WATCH(retryInterval);
         WATCH(routerId);
     }
@@ -487,12 +586,7 @@ void RsvpTe::processHELLO_TIMER(HelloTimerMsg *msg)
     hMsg->setRequest(h->request);
     hMsg->setAck(h->ack);
 
-    int length = 10;
-
-    // see comment elsewhere (in Ted.cc)
-    length /= 10;
-
-    hMsg->setChunkLength(B(length));
+    hMsg->setChunkLength(computeHelloMessageLength());
     pk->insertAtBack(hMsg);
 
     sendToIP(pk, peer);
@@ -508,7 +602,7 @@ void RsvpTe::processPSB_TIMER(PsbTimerMsg *msg)
     ASSERT(psb);
 
     refreshPath(psb);
-    scheduleRefreshTimer(psb, PSB_REFRESH_INTERVAL);
+    scheduleRefreshTimer(psb, uniform(0.5, 1.5) * refreshInterval);
 }
 
 void RsvpTe::processPSB_TIMEOUT(PsbTimeoutMsg *msg)
@@ -536,7 +630,7 @@ void RsvpTe::processRSB_REFRESH_TIMER(RsbRefreshTimerMsg *msg)
     else {
         refreshResv(rsb);
 
-        scheduleRefreshTimer(rsb, RSB_REFRESH_INTERVAL);
+        scheduleRefreshTimer(rsb, uniform(0.5, 1.5) * refreshInterval);
     }
 }
 
@@ -554,6 +648,9 @@ void RsvpTe::processRSB_TIMEOUT(RsbTimeoutMsg *msg)
 
     ASSERT(rsb);
     ASSERT(tedmod->isLocalAddress(rsb->OI));
+
+    // RFC 2205 Section 3.5: notify upstream neighbors before removing the state they refreshed
+    sendResvTearMessage(rsb);
 
     for (unsigned int i = 0; i < rsb->FlowDescriptor.size(); i++) {
         removeRsbFilter(rsb, 0);
@@ -609,9 +706,7 @@ void RsvpTe::refreshPath(PathStateBlock *psbEle)
 
     pm->setERO(ERO);
 
-    int length = 85 + (ERO.size() * 5);
-
-    pm->setChunkLength(B(length));
+    pm->setChunkLength(computePathMessageLength(ERO));
     pk->insertAtBack(pm);
 
     Ipv4Address nextHop = tedmod->getPeerByLocalAddress(OI);
@@ -693,19 +788,106 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
 
     msg->setFlowDescriptor(flows);
 
-    int fd_length = 0;
-    for (auto& flow : flows)
-        fd_length += 28 + (flow.RRO.size() * 4);
-
-    int length = 34 + fd_length;
-
-    // see comment elsewhere (in Ted.cc)
-    length /= 10;
-
-    msg->setChunkLength(B(length));
+    msg->setChunkLength(computeResvMessageLength(flows));
     pk->insertAtBack(msg);
 
     sendToIP(pk, PHOP);
+}
+
+// RFC 2205 Section 3.5: when soft state expires (or is torn down), send ResvTear
+// upstream to every previous hop for this RSB's flows, mirroring refreshResv()'s
+// PHOP discovery exactly (matching PSB entries whose OutInterface is this RSB's OI).
+void RsvpTe::sendResvTearMessage(ResvStateBlock *rsbEle)
+{
+    Ipv4AddressVector phops;
+
+    for (auto& elem : PSBList) {
+        if (elem.OutInterface != rsbEle->OI)
+            continue;
+
+        for (auto& _i : rsbEle->FlowDescriptor) {
+            if ((FilterSpecObj&)elem.Sender_Template_Object != _i.Filter_Spec_Object)
+                continue;
+
+            if (tedmod->isLocalAddress(elem.Previous_Hop_Address))
+                continue; // IR: nothing further upstream to tear
+
+            if (!contains(phops, elem.Previous_Hop_Address))
+                phops.push_back(elem.Previous_Hop_Address);
+        }
+
+        for (auto& phop : phops)
+            sendResvTearMessage(rsbEle, phop);
+    }
+}
+
+void RsvpTe::sendResvTearMessage(ResvStateBlock *rsbEle, Ipv4Address PHOP)
+{
+    EV_INFO << "sending ResvTear (RSB " << rsbEle->id << ") PHOP " << PHOP << endl;
+
+    Packet *pk = new Packet("ResvTear");
+    const auto& msg = makeShared<RsvpResvTear>();
+
+    FlowDescriptorVector flows;
+
+    msg->setSession(rsbEle->Session_Object);
+
+    RsvpHopObj hop;
+    hop.Logical_Interface_Handle = tedmod->peerRemoteInterface(PHOP);
+    hop.Next_Hop_Address = PHOP;
+    msg->setHop(hop);
+
+    for (auto& elem : PSBList) {
+        if (elem.Previous_Hop_Address != PHOP)
+            continue;
+
+        if (elem.Session_Object != rsbEle->Session_Object)
+            continue;
+
+        for (auto& flow : rsbEle->FlowDescriptor) {
+            if ((FilterSpecObj&)elem.Sender_Template_Object != flow.Filter_Spec_Object)
+                continue;
+
+            flows.push_back(flow);
+            break;
+        }
+    }
+
+    msg->setFlowDescriptor(flows);
+    msg->setChunkLength(computeResvTearMessageLength(flows));
+    pk->insertAtBack(msg);
+
+    sendToIP(pk, PHOP);
+}
+
+// RFC 2205 Section 3.5: notify the receiver (downstream, via this RSB's OI -- the
+// same direction Path/Resv-refresh travel) that its reservation failed at this hop.
+void RsvpTe::sendResvErrorMessage(ResvStateBlock *rsbEle, int errCode)
+{
+    ASSERT(!rsbEle->OI.isUnspecified());
+
+    Ipv4Address nextHop = tedmod->getPeerByLocalAddress(rsbEle->OI);
+
+    EV_INFO << "sending ResvErr (RSB " << rsbEle->id << ") to " << nextHop << endl;
+
+    Packet *pk = new Packet("ResvErr");
+    const auto& msg = makeShared<RsvpResvError>();
+
+    msg->setSession(rsbEle->Session_Object);
+
+    RsvpHopObj hop;
+    hop.Logical_Interface_Handle = rsbEle->OI;
+    hop.Next_Hop_Address = routerId;
+    msg->setHop(hop);
+
+    msg->setErrorNode(routerId);
+    msg->setErrorCode(errCode);
+
+    msg->setFlowDescriptor(rsbEle->FlowDescriptor);
+    msg->setChunkLength(computeResvErrorMessageLength(rsbEle->FlowDescriptor));
+    pk->insertAtBack(msg);
+
+    sendToIP(pk, nextHop);
 }
 
 void RsvpTe::preempt(Ipv4Address OI, int priority, double bandwidth)
@@ -726,11 +908,17 @@ void RsvpTe::preempt(Ipv4Address OI, int priority, double bandwidth)
 
         // preempt RSB
 
+        EV_INFO << "preempting RSB " << elem.id << " (holding priority " << priority
+                << ", releasing " << elem.Flowspec_Object.req_bandwidth << ")" << endl;
+
         for (int i = priority; i < 8; i++)
             tedmod->ted[index].UnResvBandwidth[i] += elem.Flowspec_Object.req_bandwidth;
 
         bandwidth -= elem.Flowspec_Object.req_bandwidth;
         elem.Flowspec_Object.req_bandwidth = 0.0;
+
+        // RFC 2205 Section 3.5: tell the receiver its reservation just died
+        sendResvErrorMessage(&(elem), RESV_ERR_PREEMPTED);
 
         scheduleCommitTimer(&(elem));
 
@@ -1354,6 +1542,14 @@ void RsvpTe::processRSVPMessage(Packet *pk)
             processPathErrMsg(pk);
             break;
 
+        case RTEAR_MESSAGE:
+            processResvTearMsg(pk);
+            break;
+
+        case RERROR_MESSAGE:
+            processResvErrMsg(pk);
+            break;
+
         default:
             throw cRuntimeError("Invalid RSVP kind of message '%s': %d", pk->getName(), kind);
     }
@@ -1524,6 +1720,74 @@ void RsvpTe::processPathTearMsg(Packet *pk)
     // remove path state block
 
     removePSB(psb);
+
+    delete pk;
+}
+
+void RsvpTe::processResvTearMsg(Packet *pk)
+{
+    EV_INFO << "Received RESV_TEAR" << endl;
+
+    const auto& msg = pk->peekAtFront<RsvpResvTear>();
+
+    // Simplification: each flow entry is processed (and, if it matches, propagated
+    // upstream) independently. All flows named in one ResvTear currently resolve to
+    // the same local RSB in every example/test this model exercises (one sender per
+    // RSB); a true SE-style multi-sender RSB would need to dedupe the upstream send.
+    for (auto& flow : msg->getFlowDescriptor()) {
+        unsigned int index;
+        ResvStateBlock *rsb = findRSB(msg->getSession(), flow.Filter_Spec_Object, index);
+        if (!rsb) {
+            EV_DETAIL << "received RESV_TEAR for lspid=" << flow.Filter_Spec_Object.Lsp_Id << " with no matching RSB, ignoring" << endl;
+            continue;
+        }
+
+        EV_INFO << "tearing down reservation (RSB " << rsb->id << ")" << endl;
+
+        // propagate the teardown further upstream before removing our own state
+        // (mirrors the RSB-timeout sender path, minus the timer cancellation)
+        sendResvTearMessage(rsb);
+
+        removeRsbFilter(rsb, index);
+
+        if (rsb->FlowDescriptor.empty())
+            removeRSB(rsb);
+    }
+
+    delete pk;
+}
+
+void RsvpTe::processResvErrMsg(Packet *pk)
+{
+    EV_INFO << "Received RESV_ERROR" << endl;
+
+    const auto& msg = pk->peekAtFront<RsvpResvError>();
+
+    for (auto& flow : msg->getFlowDescriptor()) {
+        unsigned int index;
+        ResvStateBlock *rsb = findRSB(msg->getSession(), flow.Filter_Spec_Object, index);
+        if (!rsb) {
+            EV_DETAIL << "received RESV_ERROR for lspid=" << flow.Filter_Spec_Object.Lsp_Id << " with no matching RSB, ignoring" << endl;
+            continue;
+        }
+
+        if (rsb->OI.isUnspecified()) {
+            // egress: the reservation this receiver asked for just failed upstream
+            EV_WARN << "reservation failed (errorCode=" << msg->getErrorCode() << ", errorNode=" << msg->getErrorNode()
+                    << ") for lspid=" << flow.Filter_Spec_Object.Lsp_Id << ", removing local reservation state" << endl;
+
+            removeRsbFilter(rsb, index);
+
+            if (rsb->FlowDescriptor.empty())
+                removeRSB(rsb);
+        }
+        else {
+            // transit: forward the same error further downstream toward the egress
+            EV_INFO << "forwarding ResvErr toward egress via RSB " << rsb->id << endl;
+
+            sendResvErrorMessage(rsb, msg->getErrorCode());
+        }
+    }
 
     delete pk;
 }
@@ -1887,8 +2151,7 @@ void RsvpTe::sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, 
     hop.Next_Hop_Address = NHOP;
     msg->setHop(hop);
     msg->setForce(force);
-    B length = B(44);
-    msg->setChunkLength(length);
+    msg->setChunkLength(computePathTearMessageLength());
     pk->insertAtBack(msg);
 
     sendToIP(pk, peerIP);
@@ -1909,12 +2172,7 @@ void RsvpTe::sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, 
     msg->setSenderTemplate(sender);
     msg->setSenderTspec(tspec);
 
-    int length = 52;
-
-    // see comment elsewhere (in Ted.cc)
-    length /= 10;
-
-    msg->setChunkLength(B(length));
+    msg->setChunkLength(computePathErrorMessageLength());
     pk->insertAtBack(msg);
 
     sendToIP(pk, nextHop);
@@ -1932,7 +2190,8 @@ void RsvpTe::sendToIP(Packet *msg, Ipv4Address destAddr)
 void RsvpTe::scheduleTimeout(PathStateBlock *psbEle)
 {
     ASSERT(psbEle);
-    rescheduleAfter(PSB_TIMEOUT_INTERVAL, psbEle->timeoutMsg);
+    // RFC 2205 Section 3.7: state expires after (K + 0.5) * 1.5 * R if not refreshed
+    rescheduleAfter((stateLifetimeFactor + 0.5) * 1.5 * refreshInterval, psbEle->timeoutMsg);
 }
 
 void RsvpTe::scheduleRefreshTimer(PathStateBlock *psbEle, simtime_t delay)
@@ -1953,7 +2212,8 @@ void RsvpTe::scheduleRefreshTimer(PathStateBlock *psbEle, simtime_t delay)
 void RsvpTe::scheduleTimeout(ResvStateBlock *rsbEle)
 {
     ASSERT(rsbEle);
-    rescheduleAfter(RSB_TIMEOUT_INTERVAL, rsbEle->timeoutMsg);
+    // RFC 2205 Section 3.7: state expires after (K + 0.5) * 1.5 * R if not refreshed
+    rescheduleAfter((stateLifetimeFactor + 0.5) * 1.5 * refreshInterval, rsbEle->timeoutMsg);
 }
 
 void RsvpTe::scheduleRefreshTimer(ResvStateBlock *rsbEle, simtime_t delay)

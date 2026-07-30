@@ -24,12 +24,24 @@ namespace inet {
 
 #define LDP_PORT             646
 
-// base header: version, length, LSR ID, Label space
-const B LDP_BASEHEADER_BYTES = B(10);
+// RFC 5036 Section 3.5.3: PDU common header (version 2 + PDU length 2 + LSR-ID 4 + label space 2)
+const B LDP_PDU_HEADER_BYTES = B(10);
+// RFC 5036 Section 3.6: message header (U-bit + message type 2 + message length 2 + message id 4)
+const B LDP_MESSAGE_HEADER_BYTES = B(8);
 
-// FIXME the length below is just a guess. TODO find lengths for individual TLVs
-// making up different LDP packet types, and determine length for each packet type
-const B LDP_HEADER_BYTES = LDP_BASEHEADER_BYTES + B(20);
+// TLV sizes (4-byte TLV header + value), RFC 5036 Section 3.4
+const B LDP_FEC_TLV_BYTES = B(4 + 8); // one IPv4-prefix FEC element (element type 1 + address family 2 + prefix length 1 + 4 prefix bytes); this model's FecTlv always carries exactly one element
+const B LDP_GENERIC_LABEL_TLV_BYTES = B(8);
+const B LDP_COMMON_HELLO_PARAMETERS_TLV_BYTES = B(8);
+const B LDP_STATUS_TLV_BYTES = B(14);
+
+// Model simplification (see Ldp.ned): exactly one message per PDU, so each
+// packet's total length is the PDU header plus one message (message header + TLVs).
+const B LDP_HELLO_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_COMMON_HELLO_PARAMETERS_TLV_BYTES; // 26 B
+const B LDP_LABEL_REQUEST_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_FEC_TLV_BYTES; // 30 B
+// Label Mapping, and also Label Withdraw/Release (sendMapping() reuses the same wire fields -- FEC + label -- for all three message types)
+const B LDP_LABEL_MAPPING_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_FEC_TLV_BYTES + LDP_GENERIC_LABEL_TLV_BYTES; // 38 B
+const B LDP_NOTIFICATION_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_STATUS_TLV_BYTES + LDP_FEC_TLV_BYTES; // 44 B; sendNotify() always includes a FEC TLV
 
 class IInterfaceTable;
 class IIpv4RoutingTable;
