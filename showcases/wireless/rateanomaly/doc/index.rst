@@ -451,9 +451,12 @@ the other four, identical in both runs), while each client shows its running rec
              sta[1..4]=54 green) and per-station received-packet counts (all clients ~460-490)
    anchor:   at t=2s (1s past warmup); counts scale with time, the anomaly/fix contrast is
              structural. If the bars stop showing 6 vs 54, the dcf datarateSelected wiring changed.
-   capture:  get_canvas_image renders visualizer annotations at the canvas origin, so this is a
-             Qtenv (xcb) window import -- run to 2s express, set_canvas_view fit, crop to the module
-             rectangle + 5px green margin, paint out the inspector toolbar, add the bold title.
+   capture:  get_canvas_image is unusable here (it renders the visualizer annotations at the canvas
+             origin). Grab the network's graphical inspector widget instead -- run to 2s express,
+             get_inspector_screenshot(RateAnomalyShowcase, type=graphical, 900x720); it auto-fits and
+             renders the bars/labels faithfully on the gray (209) canvas. Crop off the inspector
+             toolbar, scrollbars, module-name banner and zoom overlay; keep a 16px gray margin; add
+             the bold title centered on the gray band.
    record:   inet -u Qtenv -c DownlinkAnomaly --mcp-server-address localhost:8765
              (DownlinkBase spreads the clients 4 m apart so the per-station readouts don't overlap)
    stamp:    captured 2026-07, INET 4.6
@@ -469,7 +472,7 @@ the other four, identical in both runs), while each client shows its running rec
              the four fast clients ~870-960
    anchor:   at t=2s (1s past warmup); counts scale with time, the anomaly/fix contrast is
              structural. If the bars stop showing 6 vs 54, the dcf datarateSelected wiring changed.
-   capture:  same Qtenv (xcb) window flow as the anomaly figure above, for this config.
+   capture:  same graphical-inspector widget grab as the anomaly figure above, for this config.
    record:   inet -u Qtenv -c DownlinkAirtimeFair --mcp-server-address localhost:8765
              (DownlinkBase spreads the clients 4 m apart so the per-station readouts don't overlap)
    stamp:    captured 2026-07, INET 4.6
