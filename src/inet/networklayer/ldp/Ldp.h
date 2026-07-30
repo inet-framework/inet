@@ -38,6 +38,12 @@ const B LDP_STATUS_TLV_BYTES = B(14);
 // RFC 5036 Section 3.5.3: Common Session Parameters TLV (used by the Initialization message)
 const B LDP_COMMON_SESSION_PARAMETERS_TLV_BYTES = B(20);
 
+// RFC 5036 Section 3.4.2: Address List TLV header (4-byte TLV header + 2-byte
+// address family); the variable part (4 bytes per address) is added separately
+// since the Address/Address Withdraw message length depends on the number of
+// addresses advertised (see Ldp::sendAddress).
+const B LDP_ADDRESS_LIST_TLV_HEADER_BYTES = B(4 + 2);
+
 // Model simplification (see Ldp.ned): exactly one message per PDU, so each
 // packet's total length is the PDU header plus one message (message header + TLVs).
 const B LDP_HELLO_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_COMMON_HELLO_PARAMETERS_TLV_BYTES; // 26 B
@@ -47,6 +53,14 @@ const B LDP_LABEL_MAPPING_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTE
 const B LDP_NOTIFICATION_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_STATUS_TLV_BYTES + LDP_FEC_TLV_BYTES; // 44 B; sendNotify() always includes a FEC TLV
 const B LDP_INITIALIZATION_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_COMMON_SESSION_PARAMETERS_TLV_BYTES; // 38 B
 const B LDP_KEEPALIVE_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES; // 18 B; KeepAlive carries no message parameters (RFC 5036 Section 3.5.4)
+
+// Address/Address Withdraw message length depends on the number of addresses
+// carried (see Ldp::sendAddress); also used by LdpPacketSerializer indirectly
+// (the wire length is derived from chunk length, not recomputed there).
+inline B ldpAddressMessageBytes(size_t numAddresses)
+{
+    return LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_ADDRESS_LIST_TLV_HEADER_BYTES + B(4 * numAddresses);
+}
 
 class IInterfaceTable;
 class IIpv4RoutingTable;
@@ -79,6 +93,15 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
         Ipv4Address peer;
         int label;
+
+        // Only meaningful for fecUp entries under DU/independent control: false
+        // while 'label' has been advertised upstream but is only a reservation
+        // (LibTable::allocateLabel()), with no LIB entry yet -- the downstream
+        // mapping needed to complete the swap (LibTable::installReservedLabel())
+        // hasn't arrived (see Ldp::duAdvertiseToPeer/processLABEL_MAPPING).
+        // Always true for fecDown entries and for the DoD path, which never
+        // defers installation.
+        bool installed = true;
     };
     typedef std::vector<FecBinding> FecBindVector;
 
@@ -99,8 +122,17 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
         Ipv4Address peerIP; // Ipv4 address of LDP peer
         bool activeRole; // we're in active or passive role in this session
         TcpSocket *socket; // TCP socket
-        std::string linkInterface;
+        std::string linkInterface; // name of the local interface the Hello adjacency was formed on; also the authoritative answer to "which local interface reaches this peer" (see Ldp::findInterfaceFromPeerAddr)
         cMessage *timeout;
+
+        // RFC 5036 Section 3.5.5/2.7: interface addresses this peer advertised via
+        // Address messages (Address Withdraw removes entries); populated once the
+        // session is OPERATIONAL (see Ldp::processADDRESS/processADDRESS_WITHDRAW).
+        // Together with peerIP (the peer's LSR-ID) this is the authoritative
+        // "which address belongs to this peer session" map -- see
+        // Ldp::findInterfaceFromPeerAddr, which consults it instead of guessing
+        // through a generic routing-table lookup.
+        std::vector<Ipv4Address> peerAddresses;
 
         SessionState state = NONEXISTENT;
         simtime_t negotiatedKeepaliveTime = 0; // min(ours, peer's KeepAlive Time) once negotiated; 0 until then
@@ -129,6 +161,13 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     simtime_t helloInterval;
     simtime_t keepaliveTime; // Session KeepAlive Time we propose in Initialization messages (RFC 5036 Section 3.5.3)
     bool advertiseImplicitNull = true;
+
+    // RFC 5036 Section 2.6 label distribution mode parameters -- see Ldp.ned for
+    // the full semantics; distributionMode also drives the Initialization
+    // message's A-bit (see sendInit/processINITIALIZATION).
+    std::string distributionMode; // "du" (default) or "dod"
+    std::string controlMode; // "independent" (default) or "ordered"; only consulted when distributionMode=="du"
+    std::string retentionMode; // "liberal" (default) or "conservative"
 
     // currently recognized FECs
     FecVector fecList;
@@ -169,20 +208,13 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     static simsignal_t fecBindingCountSignal;
 
   protected:
-    /**
-     * This method finds next peer in upstream direction
-     */
-    virtual Ipv4Address locateNextHop(Ipv4Address dest);
-
-    /**
-     * This method maps the peerIP with the interface id in routing table.
-     * It is expected that for MPLS host, entries linked to MPLS peers are available.
-     * In case no corresponding peerIP found, a peerIP (not deterministic)
-     * will be returned.
-     */
-    virtual Ipv4Address findPeerAddrFromInterface(int interfaceId);
-
-    // This method is the reserve of above method
+    // Maps a peer-side address (a peer's LSR-ID, or one of its interface
+    // addresses learned via an Address message -- see peer_info::peerAddresses)
+    // to the local interface used to reach it. Consults the peer table (built
+    // from real Hello adjacencies and Address messages) first, since that is
+    // the authoritative source of "which peer session owns this address";
+    // falls back to a routing-table lookup for addresses that are not (yet)
+    // known to belong to any OPERATIONAL peer.
     int findInterfaceFromPeerAddr(Ipv4Address peerIP);
 
     /** Utility: return peer's index in myPeers table, or -1 if not found */
@@ -213,9 +245,23 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     virtual void sendInit(Ipv4Address dest);
     virtual void sendKeepAlive(Ipv4Address dest);
 
+    // RFC 5036 Section 3.5.5/2.7: advertise all of this router's LDP-capable
+    // interface addresses to a newly-OPERATIONAL peer (see processKEEPALIVE)
+    virtual void sendAddress(Ipv4Address dest);
+
     virtual void rebuildFecList();
     virtual void updateFecList(Ipv4Address nextHop);
     virtual void updateFecListEntry(Fec oldItem);
+
+    // RFC 5036 Section 2.6: Downstream Unsolicited -- (re)advertise our label
+    // mapping for 'fec' to a single OPERATIONAL 'peer', deciding egress/
+    // independent-control/ordered-control/liberal-retention-switchover behavior
+    // from the current state (see Ldp.cc for the full decision tree). Called (a)
+    // once per FEC when a session first reaches OPERATIONAL (processKEEPALIVE) and
+    // (b) once per OPERATIONAL peer whenever updateFecListEntry (called only on
+    // FEC creation or a next-hop change, never for an unchanged FEC) detects
+    // distributionMode=="du".
+    virtual void duAdvertiseToPeer(const Fec& fec, Ipv4Address peer);
 
     // emits the current total binding count (fecUp.size() + fecDown.size()) on the fecBindingCount signal
     virtual void emitFecBindingCount();
@@ -260,6 +306,8 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
     virtual void processINITIALIZATION(Ptr<const LdpPacket>& ldpPacket);
     virtual void processKEEPALIVE(Ptr<const LdpPacket>& ldpPacket);
+    virtual void processADDRESS(Ptr<const LdpPacket>& ldpPacket);
+    virtual void processADDRESS_WITHDRAW(Ptr<const LdpPacket>& ldpPacket);
     virtual void processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket);
     virtual void processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket);
     virtual void processLABEL_RELEASE(Ptr<const LdpPacket>& ldpPacket);

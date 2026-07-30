@@ -1,0 +1,121 @@
+%description:
+Companion to ldp_du_mode.test: exercises that file's `[Config dod]` section (the legacy
+Downstream-on-Demand/ordered-control/conservative-retention combination, selectable via
+Ldp.ned's distributionMode/controlMode/retentionMode params) against the SAME network
+and scenario (examples/mpls/ldp, LDPTEST, LSR2 shutdown@2s/startup@10s).
+
+opp_test runs exactly one simulation per .test file (a `[Config X]` section not selected
+via `-c` never actually executes -- confirmed empirically: omitting `-c` always runs
+"General" only), so this is a separate file with `%extraargs: -c dod` rather than a
+second run within ldp_du_mode.test itself.
+
+Asserts the OLD Request/Mapping request-response flow still works end-to-end under this
+config: a Label Request is actually sent and received (proving the request/response
+path -- not DU's proactive flooding -- drives label distribution), sessions still
+establish, the data plane is still label-switched, and delivery still succeeds.
+
+Falsification note: this test does NOT falsify against the parent commit, and that is
+expected, not a bug -- the parent commit's only (hardcoded) behavior already IS this
+Request/Mapping flow (this commit's whole point is making DU/independent/liberal the new
+DEFAULT while leaving the old flow fully selectable and behaviorally UNCHANGED); ini
+entries for NED parameters a module type doesn't (yet) declare are silently ignored by
+OMNeT++ (no unused-parameter check is enabled here), so `-c dod` on the parent commit
+just runs that same old flow under a different config name -- verified empirically by
+running this exact file against the parent commit's library (PASS, not FAIL). The
+genuine falsification for this commit lives in ldp_du_mode.test (the new DU/independent/
+liberal default), which DOES fail against the parent commit.
+
+%#--------------------------------------------------------------------------------------------------------------
+%extraargs: -c dod
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.ldp.LDPTEST
+sim-time-limit = 11s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.LSR*.ldp.cmdenv-log-level = info
+**.LSR*.mpls.cmdenv-log-level = info
+**.scenarioManager.cmdenv-log-level = info
+**.cmdenv-log-level = off
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host2"
+
+**.host3.numApps = 1
+**.host3.app[0].typename = "UdpBasicApp"
+**.host3.app[0].localPort = 100
+**.host3.app[0].destPort = 100
+**.host3.app[0].messageLength = 128 bytes
+**.host3.app[0].sendInterval = 0.01s
+**.host3.app[0].destAddresses = "host4"
+
+**.host{2..4}.numApps = 1
+**.host{2..4}.app[0].typename = "UdpSink"
+**.host{2..4}.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/host4.rt"
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/ldp/LSR5.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.LSR*.holdTime = 6s
+**.LSR*.helloInterval = 2s
+
+**.scenarioManager.script = xmldoc("../../../../examples/mpls/ldp/scenario.xml")
+
+[Config dod]
+description = "legacy Downstream-on-Demand/ordered/conservative combination"
+**.LSR*.ldp.distributionMode = "dod"
+**.LSR*.ldp.controlMode = "ordered"
+**.LSR*.ldp.retentionMode = "conservative"
+
+%#--------------------------------------------------------------------------------------------------------------
+%# the legacy request/response flow: a Label Request is actually sent downstream and
+%# received by the peer (Ldp::processLABEL_REQUEST) -- the opposite of DU's proactive,
+%# unsolicited advertisement
+%contains: stdout
+sending request message downstream
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Label Request from LSR
+%#--------------------------------------------------------------------------------------------------------------
+%# no DU-style proactive advertisement ever happens under this config
+%not-contains: stdout
+DU: advertising unsolicited Label Mapping
+%#--------------------------------------------------------------------------------------------------------------
+%# an LDP session still establishes over TCP and the data plane is still label-switched
+%contains: stdout
+TCP connection established with peer
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+doStackOps: {PUSH
+%#--------------------------------------------------------------------------------------------------------------
+%# host traffic is still delivered end-to-end under the legacy config
+%postrun-command: grep -E "host(2|4)\.app\[0\] packetReceived:count" results/dod-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

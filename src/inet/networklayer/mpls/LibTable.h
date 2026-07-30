@@ -82,7 +82,27 @@ class INET_API LibTable : public SimpleModule
     virtual int installLibEntry(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
             int outInterfaceId);
 
+    // Reserve a fresh label without installing a full LIB entry. Used by LDP's
+    // Downstream Unsolicited distribution mode under independent control (RFC 5036
+    // Section 2.6): the label must be advertised to an upstream peer before the
+    // downstream mapping needed to complete the swap is known. installReservedLabel()
+    // later creates the actual entry for this same label once that mapping arrives.
+    virtual int allocateLabel();
+
+    // Creates a LIB entry for a label previously reserved via allocateLabel().
+    // Unlike installLibEntry() -- which either allocates a fresh label
+    // (inLabel==-1) or UPDATES an existing entry, throwing if none exists -- this
+    // creates a new entry and throws if one with this inLabel already exists.
+    virtual int installReservedLabel(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
+            int outInterfaceId);
+
     virtual void removeLibEntry(int inLabel);
+
+    // Like removeLibEntry(), but returns false instead of throwing when no entry
+    // with inLabel exists -- e.g. a label reserved via allocateLabel() that was
+    // advertised but never actually installed (independent control, downstream
+    // mapping never arrived).
+    virtual bool removeLibEntryIfExists(int inLabel);
 
     // utility
     static LabelOpVector pushLabel(int label);

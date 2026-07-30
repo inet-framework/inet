@@ -134,9 +134,10 @@ class LdpKeepAlive extends LdpPacket
 //
 // LDP Address Message
 //
-//# FIXME currently unused
 // Fields mirror the Address List TLV (RFC 5036 Section 3.4.2): an address
-// family (1 = IPv4) followed by a list of addresses of that family.
+// family (1 = IPv4) followed by a list of addresses of that family. Also
+// used for the Address Withdraw message (isWithdraw=true), which shares the
+// same wire fields (see Ldp::processADDRESS/processADDRESS_WITHDRAW).
 class LdpAddress extends LdpPacket
 {
     bool isWithdraw;

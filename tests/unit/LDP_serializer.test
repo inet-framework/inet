@@ -1,9 +1,10 @@
 %description:
 Byte-exact round-trip serialization of LDP packets (RFC 5036): the PDU/message header
 (Section 3.5.3, 3.6), Hello, Label Request, Label Mapping (also used for Label
-Withdraw/Release), Notification (with its FEC TLV), Initialization, KeepAlive, and the
-still-unwired Address message. Verifies serialize->bytes->deserialize reproduces the
-fields and the expected on-wire lengths (matching the B(...) constants in Ldp.h).
+Withdraw/Release), Notification (with its FEC TLV), Initialization, KeepAlive, and
+Address (also used for Address Withdraw). Verifies serialize->bytes->deserialize
+reproduces the fields and the expected on-wire lengths (matching the B(...)/
+ldpAddressMessageBytes(...) constants in Ldp.h).
 
 %includes:
 #include "inet/common/packet/Packet.h"
@@ -185,8 +186,7 @@ static void fillHeader(LdpPacket *p, int type, Ipv4Address lsrId)
     EV << "  PASS" << endl;
 }
 
-// === 8. Address / Address Withdraw (same class, different type; unwired, but must
-// still be serializable) ===
+// === 8. Address / Address Withdraw (same class, different type) ===
 {
     EV << "=== Address/AddressWithdraw ===" << endl;
     for (int msgType : { ADDRESS, ADDRESS_WITHDRAW }) {

@@ -124,6 +124,9 @@ void Ldp::initialize(int stage)
         helloInterval = par("helloInterval");
         keepaliveTime = par("keepaliveTime");
         advertiseImplicitNull = par("advertiseImplicitNull");
+        distributionMode = par("distributionMode").stdstringValue();
+        controlMode = par("controlMode").stdstringValue();
+        retentionMode = par("retentionMode").stdstringValue();
 
         ift.reference(this, "interfaceTableModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -369,10 +372,9 @@ void Ldp::sendInit(Ipv4Address dest)
     ini->setType(INITIALIZATION);
     ini->setLsrId(rt->getRouterId());
     ini->setKeepAliveTime((uint16_t)keepaliveTime.inUnit(SIMTIME_S));
-    // A-bit (advertisement discipline: DU=0/DoD=1 per this model's convention) is
-    // hardcoded to 0 (DU) here; it gets wired to the real distributionMode param
-    // once that param exists (see Ldp.ned; a later commit in this workstream)
-    ini->setAbit(false);
+    // RFC 5036 Section 3.5.3 A-bit (Label Advertisement Discipline): 0 signals
+    // Downstream Unsolicited, 1 signals Downstream on Demand.
+    ini->setAbit(distributionMode == "dod");
     ini->setDbit(false);
     ini->setReceiverLsrId(dest);
     pk->insertAtBack(ini);
@@ -392,6 +394,43 @@ void Ldp::sendKeepAlive(Ipv4Address dest)
 
     sendToPeer(dest, pk);
     EV_INFO << "KeepAlive sent to " << dest << "\n";
+}
+
+void Ldp::sendAddress(Ipv4Address dest)
+{
+    // RFC 5036 Section 3.5.5/2.7: advertise all of this router's LDP-capable
+    // interface addresses. "LDP-capable" is taken to mean the same set of
+    // interfaces LDP itself sends/joins Hellos on (setupSockets' multicast-
+    // capable interfaces), rather than re-deriving a separate notion of
+    // "own addresses" (rebuildFecList's "our own addresses" block serves a
+    // different purpose -- FEC bookkeeping -- and is not reused here).
+    std::vector<Ipv4Address> addrs;
+    for (int i = 0; i < ift->getNumInterfaces(); ++i) {
+        NetworkInterface *ie = ift->getInterface(i);
+        if (!ie->isMulticast())
+            continue;
+        auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+        if (ipv4Data)
+            addrs.push_back(ipv4Data->getIPAddress());
+    }
+
+    Packet *pk = new Packet("Ldp-Address");
+    const auto& addrMsg = makeShared<LdpAddress>();
+    addrMsg->setChunkLength(ldpAddressMessageBytes(addrs.size()));
+    addrMsg->setType(ADDRESS);
+    addrMsg->setLsrId(rt->getRouterId());
+    addrMsg->setAddressFamily(1); // IPv4
+    addrMsg->setAddressesArraySize(addrs.size());
+    for (size_t i = 0; i < addrs.size(); ++i)
+        addrMsg->setAddresses(i, addrs[i]);
+    pk->insertAtBack(addrMsg);
+
+    sendToPeer(dest, pk);
+
+    EV_INFO << "Address message sent to " << dest << " listing " << addrs.size() << " interface address(es):";
+    for (auto& a : addrs)
+        EV_INFO << " " << a;
+    EV_INFO << endl;
 }
 
 void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
@@ -417,8 +456,182 @@ void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
     sendToPeer(dest, pk);
 }
 
+void Ldp::duAdvertiseToPeer(const Ldp::Fec& fec, Ipv4Address peer)
+{
+    if (!isPeerOperational(peer))
+        return;
+
+    auto uit = findFecEntry(fecUp, fec.fecid, peer);
+    // is the FEC's next hop our LDP peer, or are WE egress for it?
+    bool ER = findPeerSocket(fec.nextHop) == nullptr;
+    // do we hold a mapping from the FEC's CURRENT next hop? (liberal retention may
+    // already hold one even though it only just became the next hop)
+    auto dit = findFecEntry(fecDown, fec.fecid, fec.nextHop);
+
+    int inInterface = findInterfaceFromPeerAddr(peer);
+
+    bool haveMapping = ER || dit != fecDown.end();
+    if (haveMapping) {
+        // we can offer a real mapping now: either we are egress for this FEC
+        // (ALWAYS advertised, regardless of control mode), or we hold a downstream
+        // mapping for its current next hop -- freshly received, or already held
+        // thanks to liberal retention (e.g. this peer just became the next hop
+        // after a reroute). PHP behavior (advertiseImplicitNull) is unchanged from
+        // the DoD path.
+        bool implicitNull = ER && advertiseImplicitNull;
+        LabelOpVector outLabel;
+        int outInterface = -1;
+        if (!implicitNull) {
+            outInterface = findInterfaceFromPeerAddr(fec.nextHop);
+            if (ER)
+                outLabel = LibTable::popLabel();
+            else
+                outLabel = (dit->label == IMPLICIT_NULL_LABEL) ? LibTable::popLabel() : LibTable::swapLabel(dit->label);
+        }
+
+        int label;
+        if (implicitNull) {
+            // an implicit-null advertisement never allocates/installs a real LIB entry
+            label = IMPLICIT_NULL_LABEL;
+            if (uit == fecUp.end()) {
+                FecBinding newItem;
+                newItem.fecid = fec.fecid;
+                newItem.peer = peer;
+                newItem.label = label;
+                fecUp.push_back(newItem);
+            }
+            else {
+                uit->label = label;
+                uit->installed = true;
+            }
+        }
+        else if (uit == fecUp.end()) {
+            label = lt->installLibEntry(-1, inInterface, outLabel, outInterface);
+            FecBinding newItem;
+            newItem.fecid = fec.fecid;
+            newItem.peer = peer;
+            newItem.label = label;
+            fecUp.push_back(newItem);
+        }
+        else if (!uit->installed || uit->label == IMPLICIT_NULL_LABEL) {
+            // either completing a label reserved earlier by independent control
+            // (no LIB entry exists yet for it), or this peer's previously
+            // advertised label was the implicit-null sentinel (never a real LIB
+            // entry, and not reusable as one) -- either way there is no existing
+            // LIB entry to update, but the label to (re-)use differs: a genuine
+            // reservation must be completed at that SAME label (already on the
+            // wire); a former implicit-null needs a brand new real label instead
+            if (uit->installed) // i.e. was implicit-null
+                label = lt->installLibEntry(-1, inInterface, outLabel, outInterface);
+            else {
+                label = uit->label;
+                lt->installReservedLabel(label, inInterface, outLabel, outInterface);
+            }
+            uit->label = label;
+            uit->installed = true;
+        }
+        else {
+            // already installed (e.g. a prior next hop): refresh the swap target
+            label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface);
+            uit->label = label;
+        }
+
+        if (ER)
+            EV_INFO << "DU: advertising unsolicited Label Mapping (egress) label=" << label << " for fec addr="
+                    << fec.addr << " length=" << fec.length << " to " << peer << endl;
+        else
+            EV_INFO << "DU: advertising unsolicited Label Mapping label=" << label << " for fec addr=" << fec.addr
+                    << " length=" << fec.length << " to " << peer << " using an already-held downstream mapping from "
+                    << fec.nextHop << " (liberal retention switchover if the next hop just changed)" << endl;
+        sendMapping(LABEL_MAPPING, peer, label, fec.addr, fec.length);
+        return;
+    }
+
+    // no downstream mapping for the FEC's current next hop, and we are not egress
+    if (controlMode == "independent") {
+        if (uit == fecUp.end()) {
+            // independent control: advertise now, without waiting for a downstream
+            // mapping; reserve (but do not install) an inLabel -- the LIB swap
+            // follows once the downstream mapping arrives (see
+            // processLABEL_MAPPING). Until then, an incoming packet for this label
+            // has nowhere to swap to and is dropped by
+            // Mpls::processMplsPacketFromL2's resolveLabel() miss -- this is the
+            // FAITHFUL independent-control transient, not a bug.
+            int label = lt->allocateLabel();
+            FecBinding newItem;
+            newItem.fecid = fec.fecid;
+            newItem.peer = peer;
+            newItem.label = label;
+            newItem.installed = false;
+            fecUp.push_back(newItem);
+
+            EV_INFO << "DU: advertising unsolicited Label Mapping (independent control, no downstream mapping yet) label="
+                    << label << " for fec addr=" << fec.addr << " length=" << fec.length << " to " << peer << endl;
+            sendMapping(LABEL_MAPPING, peer, label, fec.addr, fec.length);
+        }
+        else if (uit->label == IMPLICIT_NULL_LABEL) {
+            // (uit->installed is necessarily true here, see the invariant note on
+            // FecBinding::installed) an implicit-null advertisement never had a
+            // real LIB entry to fall back to "pending" the way a genuine reserved
+            // label can -- 3 must never be reused as a real inLabel either -- so
+            // withdraw it outright instead. If a real mapping becomes available
+            // again later, this function creates a brand new fecUp entry from
+            // scratch (uit == fecUp.end() at that point).
+            EV_INFO << "DU: withdrawing previously-advertised implicit-null mapping for fec addr=" << fec.addr
+                    << " length=" << fec.length << " from " << peer
+                    << ": we are no longer egress and no downstream mapping is held for it" << endl;
+            sendMapping(LABEL_WITHDRAW, peer, uit->label, fec.addr, fec.length);
+            fecUp.erase(uit);
+        }
+        else if (uit->installed) {
+            // we previously advertised this FEC to this peer with a real, installed
+            // LIB entry (e.g. for a former next hop); the next hop has since
+            // changed and we no longer hold a downstream mapping for the new one.
+            // The label we already gave upstream stays valid on the wire (no need
+            // to re-advertise), but the installed entry now points at a stale (no
+            // longer applicable) target -- remove it so traffic drops instead of
+            // being misrouted
+            EV_DETAIL << "DU: next hop changed and no downstream mapping is held for the new one; removing the "
+                      << "(now stale) LIB entry for label=" << uit->label << ", fec addr=" << fec.addr << " length="
+                      << fec.length << endl;
+            lt->removeLibEntryIfExists(uit->label);
+            uit->installed = false;
+        }
+        // else: already reserved-but-not-installed from before; nothing new to do
+    }
+    else {
+        // ordered control: nothing to advertise without a downstream mapping
+        if (uit != fecUp.end()) {
+            // we previously advertised this FEC (we had a downstream mapping back
+            // then) and have since lost it on a next-hop change -- withdraw
+            EV_INFO << "DU: withdrawing previously-advertised mapping label=" << uit->label << " for fec addr="
+                    << fec.addr << " length=" << fec.length << " from " << peer
+                    << ": next hop changed and no downstream mapping is held for it" << endl;
+            sendMapping(LABEL_WITHDRAW, peer, uit->label, fec.addr, fec.length);
+            if (uit->installed && uit->label != IMPLICIT_NULL_LABEL)
+                lt->removeLibEntryIfExists(uit->label);
+            fecUp.erase(uit);
+        }
+    }
+}
+
 void Ldp::updateFecListEntry(Ldp::Fec oldItem)
 {
+    if (distributionMode == "du") {
+        // RFC 5036 Section 2.6: Downstream Unsolicited -- (re)advertise this FEC to
+        // every currently OPERATIONAL peer. Called only when this FEC was just
+        // created or its next hop actually changed (see rebuildFecList), never for
+        // an unchanged FEC.
+        for (auto& p : myPeers) {
+            if (p.state == peer_info::OPERATIONAL)
+                duAdvertiseToPeer(oldItem, p.peerIP);
+        }
+        emitFecBindingCount();
+        return;
+    }
+
+    // DoD path (distributionMode == "dod"): current Request/Mapping flow, unchanged
+
     // do we have mapping from downstream?
     auto dit = findFecEntry(fecDown, oldItem.fecid, oldItem.nextHop);
 
@@ -587,11 +800,15 @@ void Ldp::rebuildFecList()
 
                 sendMapping(LABEL_WITHDRAW, _uit.peer, _uit.label, elem.addr, elem.length);
 
-                // an implicit-null advertisement never allocated a LIB entry
+                // an implicit-null advertisement never allocated a LIB entry, and
+                // under DU independent control a label may have been advertised
+                // (reserved via allocateLabel()) but never actually installed if
+                // no downstream mapping ever arrived before the FEC itself
+                // disappeared -- removeLibEntryIfExists() tolerates both
                 if (_uit.label != IMPLICIT_NULL_LABEL) {
-                    EV_DETAIL << "removing entry inLabel=" << _uit.label << " from LIB" << endl;
+                    EV_DETAIL << "removing entry inLabel=" << _uit.label << " from LIB (if it was ever installed)" << endl;
 
-                    lt->removeLibEntry(_uit.label);
+                    lt->removeLibEntryIfExists(_uit.label);
                 }
             }
         }
@@ -759,6 +976,9 @@ void Ldp::removePeerBindings(Ipv4Address peerIP)
         myPeers[pi].sessionHoldTimer = nullptr;
         myPeers[pi].state = peer_info::NONEXISTENT;
         myPeers[pi].negotiatedKeepaliveTime = 0;
+        // stale until re-advertised by a fresh Address message once the
+        // replacement session reaches OPERATIONAL (see processKEEPALIVE)
+        myPeers[pi].peerAddresses.clear();
     }
 
     EV_INFO << "removing (stale) bindings from fecDown for peer=" << peerIP << endl;
@@ -1013,15 +1233,6 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
             EV_WARN << "ignoring an LDP HELLO received over TCP (Hellos arrive over UDP)" << endl;
             break;
 
-        case ADDRESS:
-            // Address messages are not modeled; RFC 5036 says ignore unsupported messages
-            EV_WARN << "ignoring an LDP ADDRESS message (not supported in this model)" << endl;
-            break;
-
-        case ADDRESS_WITHDRAW:
-            EV_WARN << "ignoring an LDP ADDRESS_WITHDRAW message (not supported in this model)" << endl;
-            break;
-
         case INITIALIZATION:
             processINITIALIZATION(ldpPacket);
             break;
@@ -1033,9 +1244,12 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
         case LABEL_MAPPING:
         case LABEL_REQUEST:
         case LABEL_WITHDRAW:
-        case LABEL_RELEASE: {
-            // RFC 5036 Section 3.5.3: label/binding-plane messages are only valid
-            // once the session has completed Initialization/KeepAlive negotiation
+        case LABEL_RELEASE:
+        case ADDRESS:
+        case ADDRESS_WITHDRAW: {
+            // RFC 5036 Section 3.5.3: label- and address-plane messages are only
+            // valid once the session has completed Initialization/KeepAlive
+            // negotiation
             Ipv4Address srcAddr = ldpPacket->getLsrId();
             if (!isPeerOperational(srcAddr)) {
                 EV_WARN << "rejecting LDP message type " << ldpPacket->getType() << " from " << srcAddr
@@ -1048,7 +1262,10 @@ void Ldp::processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket)
                 case LABEL_MAPPING: processLABEL_MAPPING(ldpPacket); break;
                 case LABEL_REQUEST: processLABEL_REQUEST(ldpPacket); break;
                 case LABEL_WITHDRAW: processLABEL_WITHDRAW(ldpPacket); break;
-                default: processLABEL_RELEASE(ldpPacket); break;
+                case LABEL_RELEASE: processLABEL_RELEASE(ldpPacket); break;
+                case ADDRESS: processADDRESS(ldpPacket); break;
+                case ADDRESS_WITHDRAW: processADDRESS_WITHDRAW(ldpPacket); break;
+                default: break; // unreachable given the outer case list
             }
             break;
         }
@@ -1097,6 +1314,18 @@ void Ldp::processINITIALIZATION(Ptr<const LdpPacket>& ldpPacket)
 
     myPeers[i].negotiatedKeepaliveTime = std::min(keepaliveTime, SimTime(peerKeepAliveTime, SIMTIME_S));
 
+    // RFC 5036 Section 3.5.3: the A-bit signals the peer's own label advertisement
+    // discipline (0=DU, 1=DoD). RFC 5036 allows DU/DoD to be negotiated per link
+    // (falling back to DoD on a mismatch); this model does not implement that
+    // negotiation -- on a mismatch, warn and simply proceed using OUR OWN mode.
+    bool peerWantsDod = ini->getAbit();
+    bool weAreDod = (distributionMode == "dod");
+    if (peerWantsDod != weAreDod) {
+        EV_WARN << "peer " << srcAddr << " advertised distribution mode " << (peerWantsDod ? "DoD" : "DU")
+                << ", which differs from ours (" << (weAreDod ? "DoD" : "DU") << "); RFC 5036 allows per-link "
+                << "DU/DoD negotiation, which this model does not implement -- proceeding using our own mode" << endl;
+    }
+
     if (myPeers[i].state == peer_info::INITIALIZED) {
         // passive side: this is the peer's opening move -- reply with our own
         // Init, then immediately KeepAlive (RFC 5036 Section 2.5.3)
@@ -1141,8 +1370,34 @@ void Ldp::processKEEPALIVE(Ptr<const LdpPacket>& ldpPacket)
         scheduleAfter(myPeers[i].negotiatedKeepaliveTime, myPeers[i].sessionHoldTimer);
 
         // now (and only now) that the session is usable, drive the FEC/label
-        // machinery for this peer (RFC 5036 Section 3.5.3)
-        updateFecList(srcAddr);
+        // machinery for this peer (RFC 5036 Section 3.5.3), and let the peer
+        // know which of our interface addresses it can use as a next hop
+        // (RFC 5036 Section 3.5.5/2.7)
+        if (distributionMode == "du") {
+            // RFC 5036 Section 2.6: Downstream Unsolicited -- advertise EVERY FEC
+            // we recognize to this newly-OPERATIONAL peer, not just the ones whose
+            // next hop happens to be this peer (updateFecList's filter, which the
+            // DoD path below still uses).
+            for (auto& fec : fecList)
+                duAdvertiseToPeer(fec, srcAddr);
+            // This peer's session just became usable as a downstream link too:
+            // any FEC whose next hop IS this peer may already have been
+            // (mis)advertised to OTHER peers as if we were egress for it, because
+            // duAdvertiseToPeer's ER check (findPeerSocket(fec.nextHop)==nullptr)
+            // could not yet distinguish "genuinely egress" from "next hop not
+            // OPERATIONAL yet" at the time of that earlier advertisement.
+            // updateFecListEntry's DU branch re-advertises to every OPERATIONAL
+            // peer (this one included, harmlessly) using the now-correct ER
+            // value, which corrects any such stale implicit-null advertisement.
+            for (auto& fec : fecList) {
+                if (fec.nextHop == srcAddr)
+                    updateFecListEntry(fec);
+            }
+            emitFecBindingCount();
+        }
+        else
+            updateFecList(srcAddr);
+        sendAddress(srcAddr);
     }
     else if (myPeers[i].state == peer_info::OPERATIONAL) {
         // steady-state KeepAlive refresh; the session hold timer reset already
@@ -1155,56 +1410,49 @@ void Ldp::processKEEPALIVE(Ptr<const LdpPacket>& ldpPacket)
     }
 }
 
-Ipv4Address Ldp::locateNextHop(Ipv4Address dest)
+void Ldp::processADDRESS(Ptr<const LdpPacket>& ldpPacket)
 {
-    // Mapping L3 IP-host of next hop to L2 peer address.
+    const auto& addr = CHK(dynamicPtrCast<const LdpAddress>(ldpPacket));
+    Ipv4Address srcAddr = addr->getLsrId();
 
-    // RFC 3036 says the receiving LSR should use its routing table to determine its
-    // response, and answer with a No Route Notification unless the table has an entry
-    // that exactly matches the requested Prefix or Host Address. We can't reasonably
-    // expect the destination host to be explicitly in an LSR's routing table, though,
-    // so we use simple IP routing (destination-address lookup) instead. --Andras
-    NetworkInterface *ie = rt->getInterfaceForDestAddr(dest);
-    if (!ie)
-        return Ipv4Address(); // no route
+    int i = findPeer(srcAddr);
+    if (i == -1) {
+        EV_WARN << "Address message from unknown peer " << srcAddr << ", ignoring" << endl;
+        return;
+    }
 
-    return findPeerAddrFromInterface(ie->getInterfaceId());
+    size_t n = addr->getAddressesArraySize();
+    EV_INFO << "Address message received from " << srcAddr << " listing " << n << " interface address(es):";
+    for (size_t k = 0; k < n; ++k) {
+        Ipv4Address a = addr->getAddresses(k);
+        EV_INFO << " " << a;
+        if (std::find(myPeers[i].peerAddresses.begin(), myPeers[i].peerAddresses.end(), a) == myPeers[i].peerAddresses.end())
+            myPeers[i].peerAddresses.push_back(a);
+    }
+    EV_INFO << endl;
 }
 
-// FIXME To allow this to work, make sure there are entries of hosts for all peers
-
-Ipv4Address Ldp::findPeerAddrFromInterface(int interfaceId)
+void Ldp::processADDRESS_WITHDRAW(Ptr<const LdpPacket>& ldpPacket)
 {
-    size_t i = 0;
-    size_t k = 0;
-    NetworkInterface *ie = ift->findInterfaceById(interfaceId);
-    if (ie == nullptr)
-        return Ipv4Address();
+    const auto& addr = CHK(dynamicPtrCast<const LdpAddress>(ldpPacket));
+    Ipv4Address srcAddr = addr->getLsrId();
 
-    const Ipv4Route *anEntry;
-
-    for (i = 0; i < (size_t)rt->getNumRoutes(); i++) {
-        for (k = 0; k < myPeers.size(); k++) {
-            anEntry = rt->getRoute(i);
-            if (anEntry->getDestination() == myPeers[k].peerIP && anEntry->getInterface() == ie) {
-                return myPeers[k].peerIP;
-            }
-        }
+    int i = findPeer(srcAddr);
+    if (i == -1) {
+        EV_WARN << "Address Withdraw from unknown peer " << srcAddr << ", ignoring" << endl;
+        return;
     }
 
-    // Return any IP which has default route - not in routing table entries
-    for (i = 0; i < myPeers.size(); i++) {
-        for (k = 0; k < (size_t)rt->getNumRoutes(); k++) {
-            anEntry = rt->getRoute(k);
-            if (anEntry->getDestination() == myPeers[i].peerIP)
-                break;
-        }
-        if (k == (size_t)rt->getNumRoutes())
-            break;
+    size_t n = addr->getAddressesArraySize();
+    EV_INFO << "Address Withdraw received from " << srcAddr << " for " << n << " interface address(es):";
+    for (size_t k = 0; k < n; ++k) {
+        Ipv4Address a = addr->getAddresses(k);
+        EV_INFO << " " << a;
+        auto it = std::find(myPeers[i].peerAddresses.begin(), myPeers[i].peerAddresses.end(), a);
+        if (it != myPeers[i].peerAddresses.end())
+            myPeers[i].peerAddresses.erase(it);
     }
-
-    // return the peer's address if found, unspecified address otherwise
-    return i == myPeers.size() ? Ipv4Address() : myPeers[i].peerIP;
+    EV_INFO << endl;
 }
 
 // Pre-condition: myPeers vector is finalized
@@ -1214,6 +1462,28 @@ int Ldp::findInterfaceFromPeerAddr(Ipv4Address peerIP)
     if (rt->isLocalAddress(peerIP))
         return CHK(ift->findInterfaceByName("lo0"))->getInterfaceId();
 
+    // RFC 5036 Section 3.5.5: 'peerIP' here may be a peer's LSR-ID (the key
+    // myPeers is indexed by) or one of that peer's interface addresses learned
+    // via an Address message (peerAddresses) -- a FEC's next-hop address comes
+    // from the routing table's gateway field and need not equal the LSR-ID.
+    // The peer table -- populated from real Hello adjacencies and Address
+    // messages -- is the authoritative source of "which peer session owns
+    // this address"; consult it first instead of guessing through a generic
+    // routing-table lookup.
+    for (auto& p : myPeers) {
+        if (p.state != peer_info::OPERATIONAL)
+            continue;
+        bool isPeerAddr = p.peerIP == peerIP ||
+            std::find(p.peerAddresses.begin(), p.peerAddresses.end(), peerIP) != p.peerAddresses.end();
+        if (isPeerAddr) {
+            EV_DETAIL << "resolved " << peerIP << " to peer session " << p.peerIP
+                      << " via the LDP peer address table (interface " << p.linkInterface << ")" << endl;
+            return CHK(ift->findInterfaceByName(p.linkInterface.c_str()))->getInterfaceId();
+        }
+    }
+
+    // no OPERATIONAL peer owns this address (e.g. a FEC whose next hop is not
+    // yet a known LDP peer address): fall back to a generic routing-table lookup
     NetworkInterface *ie = rt->getInterfaceForDestAddr(peerIP);
     if (!ie)
         throw cRuntimeError("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
@@ -1477,10 +1747,13 @@ void Ldp::processLABEL_RELEASE(Ptr<const LdpPacket>& ldpPacket)
         return;
     }
 
-    // an implicit-null advertisement never allocated a LIB entry
+    // an implicit-null advertisement never allocated a LIB entry, and under DU
+    // independent control the released label may have been advertised (reserved
+    // via allocateLabel()) but never actually installed if no downstream mapping
+    // ever arrived -- removeLibEntryIfExists() tolerates both
     if (uit->label != IMPLICIT_NULL_LABEL) {
-        EV_DETAIL << "removing from LIB table label=" << uit->label << endl;
-        lt->removeLibEntry(uit->label);
+        EV_DETAIL << "removing from LIB table (if it was ever installed) label=" << uit->label << endl;
+        lt->removeLibEntryIfExists(uit->label);
     }
 
     EV_DETAIL << "removing label from list of sent mappings" << endl;
@@ -1563,7 +1836,32 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
         return;
     }
 
-    // insert among received mappings
+    bool isNextHop = (it->nextHop == fromIP);
+    // Retention mode only governs mappings received from a peer that is not the
+    // FEC's next hop -- a situation that can only systematically arise from
+    // proactive DU flooding to every peer. Under DoD, a mapping is only ever
+    // received in response to a Label Request WE sent to the (then-)next hop;
+    // the FEC's next hop can in principle have since changed before the reply
+    // arrives, and the original Request/Mapping flow always accepted such a
+    // reply unconditionally -- so this gate is scoped to distributionMode=="du"
+    // to keep that DoD flow completely unchanged (verified empirically: without
+    // this scoping, a DoD-configured run diverges from the pre-this-commit
+    // baseline on exactly this race).
+    if (distributionMode == "du" && !isNextHop && retentionMode == "conservative") {
+        // RFC 5036 Section 2.6: conservative label retention -- only keep mappings
+        // from a FEC's CURRENT next hop; explicitly release anything else instead
+        // of silently ignoring it (this model's original implicit behavior, now
+        // made explicit)
+        EV_INFO << "mapping is from a peer that is not this FEC's current next hop and retentionMode is "
+                << "conservative, releasing it" << endl;
+        sendMapping(LABEL_RELEASE, fromIP, label, fec.addr, fec.length);
+        return;
+    }
+
+    // liberal retention (default): keep mappings from ANY peer, not just the
+    // FEC's current next hop -- this is what lets a later next-hop change switch
+    // over instantly (see duAdvertiseToPeer's dit-found branch), without ever
+    // sending a new Label Request
 
     FecBinding newItem;
     newItem.fecid = it->fecid;
@@ -1571,7 +1869,21 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
     newItem.label = label;
     fecDown.push_back(newItem);
 
-    // respond to pending requests
+    if (isNextHop && distributionMode == "du") {
+        // this mapping is for the FEC's CURRENT next hop: (re-)advertise it to
+        // every OPERATIONAL peer via the same per-peer/per-control-mode decision
+        // tree duAdvertiseToPeer always uses -- it transparently handles every
+        // prior state a peer's fecUp entry may be in: none yet (first
+        // advertisement, e.g. a peer that only just went OPERATIONAL), reserved
+        // but not installed (independent control -- this completes it at the
+        // SAME already-advertised label), or already installed (refresh).
+        for (auto& p : myPeers) {
+            if (p.state == peer_info::OPERATIONAL)
+                duAdvertiseToPeer(*it, p.peerIP);
+        }
+    }
+
+    // respond to pending DoD requests for this FEC (unchanged; empty under pure DU)
 
     for (auto pit = pending.begin(); pit != pending.end();) {
         if (pit->fecid != it->fecid) {
