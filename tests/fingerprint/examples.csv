@@ -420,11 +420,11 @@
 /examples/mobility/,                 -f omnetpp.ini -c VehicleMobility,             10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;ddaf-0493/tyf, PASS,
 
 /examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             35d6-f71e/tplx;2693-86e7/~tNl;c9be-fc9d/tyf, PASS, Ipv4
-/examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            027b-143f/tplx;23a6-8b4e/~tNl;7ade-27de/tyf, PASS, Ipv4
-/examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             5315-8dbe/tplx;5d19-e3d4/~tNl;10d0-50ee/tyf, PASS, Ipv4
-/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            f3f0-a4df/tplx;e97b-ce7b/~tNl;182f-657e/tyf, PASS, Ipv4
-/examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             d5c7-ee71/tplx;47a8-fa28/~tNl;d3d4-30b2/tyf, PASS, Ipv4
-/examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             18f0-9e8a/tplx;c2c8-a6d0/~tNl;d707-7683/tyf, PASS, Ipv4
+/examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            6b44-ce2b/tplx;68a5-0945/~tNl;ba79-2fee/tyf, PASS, Ipv4
+/examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             6eb7-2b02/tplx;daa3-ef10/~tNl;0506-7df1/tyf, PASS, Ipv4
+/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            9e5e-292c/tplx;90e8-88aa/~tNl;b8b8-3879/tyf, PASS, Ipv4
+/examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             5cef-8b99/tplx;ff8e-72e0/~tNl;e216-bfcc/tyf, PASS, Ipv4
+/examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             b7e4-7c7f/tplx;06d6-3c58/~tNl;ba6e-ca5a/tyf, PASS, Ipv4
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             ef09-fc39/tplx;cdc6-d6c8/~tNl;8ca7-8978/tyf, PASS, Ipv4
 
 /examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0,      100s,         92e8-be6b/tplx;ea60-9956/~tNl;0317-12ee/~tND, PASS, wireless AckingWirelessInterface Ipv4

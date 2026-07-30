@@ -22,6 +22,16 @@ class RsvpPathMsg extends RsvpPacket
     SenderDescriptor_t sender_descriptor;
     EroVector ERO;
 
+    // RFC 2205 Section 3.1.1 TIME_VALUES C-Type 1: refresh period R, in
+    // milliseconds, that the sender used for this Path message's state.
+    // computePathMessageLength() budgets TIME_VALUES_OBJECT_BYTES (8) into the
+    // Path message length, and this field supplies the value that goes into
+    // those bytes. Defaulted to match RsvpTe.ned's refreshInterval default
+    // (30s); NOT wired to the module parameter (refreshPath() does not set it),
+    // so every Path message serializes this default regardless of the sending
+    // router's actual refreshInterval.
+    int refreshPeriod = 30000;
+
     rsvpKind = PATH_MESSAGE;
 }
 

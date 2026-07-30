@@ -87,7 +87,15 @@ struct FilterSpecObj extends SenderTemplateObj
 struct LabelRequestObj
 {
     @packetData;
-    // request;
+    // RFC 3209 Section 4.3.1 LABEL_REQUEST C-Type 1: 2 reserved bytes + a
+    // 16-bit L3PID identifying the layer-3 protocol using the requested label
+    // (0x0800 = IPv4, the only payload type this model forwards over MPLS).
+    // Representation gap fix (Workstream E, Phase 2 commit 3): this field did
+    // not exist before; the wire serializer needs something concrete to write
+    // for the object's already-budgeted 4-byte body (see B6's
+    // LABEL_REQUEST_OBJECT_BYTES in RsvpTe.cc). Not wired to any per-request
+    // state -- IPv4 is the model's only payload type, so the value never varies.
+    int l3pid = 0x0800;
 }
 
 //

@@ -19,6 +19,15 @@ class RsvpResvMsg extends RsvpPacket
 {
     RsvpHopObj hop;
     FlowDescriptorVector flowDescriptor;
+
+    // RFC 2205 Section 3.1.1 TIME_VALUES C-Type 1: refresh period R, in
+    // milliseconds. Same arrangement as RsvpPathMsg.refreshPeriod:
+    // computeResvMessageLength() budgets TIME_VALUES_OBJECT_BYTES (8) for Resv,
+    // and this field supplies the value that goes into those bytes. Defaulted to
+    // RsvpTe.ned's refreshInterval default (30s); not wired to the module
+    // parameter (refreshResv() does not set it).
+    int refreshPeriod = 30000;
+
     rsvpKind = RESV_MESSAGE;
 }
 
