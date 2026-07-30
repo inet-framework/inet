@@ -439,7 +439,8 @@ acknowledgment and interframe gaps around it.)
 
 Both are visible in the cell itself — the access point's rate visualizer draws each client's PHY
 rate as a bar above it (a short red bar at 6 Mbps for ``sta[0]``, tall green bars at 54 Mbps for
-the other four, identical in both runs), while each client shows its running received-packet count:
+the other four, identical in both runs), while each client shows its running received-packet count.
+The frame-fair run is shown first, the airtime-fair run below it:
 
 .. figure:: media/downlink-cell-anomaly.png
 ..
@@ -455,8 +456,7 @@ the other four, identical in both runs), while each client shows its running rec
              origin). Grab the network's graphical inspector widget instead -- run to 2s express,
              get_inspector_screenshot(RateAnomalyShowcase, type=graphical, 900x720); it auto-fits and
              renders the bars/labels faithfully on the gray (209) canvas. Crop off the inspector
-             toolbar, scrollbars, module-name banner and zoom overlay; keep a 16px gray margin; add
-             the bold title centered on the gray band.
+             toolbar, scrollbars, module-name banner and zoom overlay; keep a 16px gray margin.
    record:   inet -u Qtenv -c DownlinkAnomaly --mcp-server-address localhost:8765
              (DownlinkBase spreads the clients 4 m apart so the per-station readouts don't overlap)
    stamp:    captured 2026-07, INET 4.6
