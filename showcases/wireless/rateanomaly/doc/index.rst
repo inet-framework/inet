@@ -437,10 +437,15 @@ next round's top-up, so over time every client gets the same share of transmit t
 frame size. (The charge is the frame's own air time — preamble, header and payload — not the
 acknowledgment and interframe gaps around it.)
 
-Both are visible in the cell itself — the access point's rate visualizer draws each client's PHY
-rate as a bar above it (a short red bar at 6 Mbps for ``sta[0]``, tall green bars at 54 Mbps for
-the other four, identical in both runs), while each client shows its running received-packet count.
-The frame-fair run is shown first, the airtime-fair run below it:
+Both runs are visible in the cell itself. The rate visualizer draws each client's PHY rate as a bar
+above the access point — a short red bar at 6 Mbps for ``sta[0]``, tall green bars at 54 Mbps for
+the other four — identical in both runs, since the rates are pinned. What changes between the two is
+how the AP divides its transmit time, and each client's running received-packet count shows the
+effect.
+
+Serving equal *frames*, the frame-fair queue lets ``sta[0]``'s slow transmissions dominate the
+channel — all five counts climb together to about the same value (~460-490), the four fast clients
+dragged down to the slow client's pace:
 
 .. figure:: media/downlink-cell-anomaly.png
 ..
@@ -459,6 +464,12 @@ The frame-fair run is shown first, the airtime-fair run below it:
    record:   inet -u Qtenv -c DownlinkAnomaly --mcp-server-address localhost:8765
              (DownlinkBase spreads the clients 4 m apart so the per-station readouts don't overlap)
    stamp:    captured 2026-07, INET 4.6
+
+Switching the queue to airtime-fair leaves the rates and the layout untouched — the bars are
+unchanged — but now each client is charged for the *time* its frames hold the channel, not their
+number. ``sta[0]``'s long 6 Mbps frames spend its budget fast, so it is served rarely (its count
+barely moves, ~132), while the four fast clients, cheap in airtime, are served far more often and
+pull ahead (~870-960):
 
 .. figure:: media/downlink-cell-fair.png
 ..
