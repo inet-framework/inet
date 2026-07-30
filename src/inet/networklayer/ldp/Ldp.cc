@@ -1334,7 +1334,7 @@ TcpSocket *Ldp::getPeerSocket(Ipv4Address peerAddr)
     return sock;
 }
 
-bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, int& outInterfaceId)
+bool Ldp::classifyPacket(Packet *packet, LabelOpVector& outLabel, int& outInterfaceId)
 {
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     Ipv4Address destAddr = ipv4Header->getDestAddress();

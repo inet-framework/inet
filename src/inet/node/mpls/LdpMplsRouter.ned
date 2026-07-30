@@ -7,6 +7,7 @@
 package inet.node.mpls;
 
 import inet.networklayer.ldp.Ldp;
+import inet.networklayer.ldp.LdpClassifier;
 
 
 //
@@ -24,7 +25,7 @@ module LdpMplsRouter extends MplsRouterBase
         double helloInterval @unit(s) = default(5s);
         hasTcp = default(true);
         hasUdp = default(true);
-        mpls.classifierModule = default(absPath(".ldp"));
+        mpls.classifierModule = default(absPath(".classifier"));
 
     submodules:
         ldp: Ldp {
@@ -32,6 +33,11 @@ module LdpMplsRouter extends MplsRouterBase
                 holdTime = parent.holdTime;
                 helloInterval = parent.helloInterval;
                 @display("p=450,80");
+        }
+        classifier: LdpClassifier {
+            parameters:
+                ldpModule = "^.ldp";
+                @display("p=250,80;is=s");
         }
 
     connections:
