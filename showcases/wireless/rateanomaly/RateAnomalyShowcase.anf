@@ -23,14 +23,14 @@ df["value"] = df["value"] * 0.002
 df["unit"] = ""
 df = df[(df["configname"] == "UplinkHomogeneous") |
         ((df["configname"] == "UplinkAnomaly") & (df["slowBitrate"].astype(str) == "6"))].copy()
-df["scenario"] = df["configname"].map({"UplinkHomogeneous": "Homogeneous (all 54 Mbps)",
-                                        "UplinkAnomaly": "Rate anomaly (sta[0] at 6 Mbps)"})
+df["scenario"] = df["configname"].map({"UplinkHomogeneous": "Baseline - UplinkHomogeneous (all 54 Mbps)",
+                                        "UplinkAnomaly": "Rate anomaly - UplinkAnomaly (sta[0] at 6 Mbps)"})
 
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, ["station"], ["scenario"])
 metadf["legend"] = list(valuedf.index)   # clean legend labels (no "scenario=" prefix)
 utils.plot_bars(valuedf, errorsdf, metadf, props)
 
-slow_level = df[(df["station"] == "sta[0]") & (df["scenario"].str.startswith("Rate anomaly"))]["value"].iloc[0]
+slow_level = df[(df["station"] == "sta[0]") & (df["scenario"].str.contains("UplinkAnomaly"))]["value"].iloc[0]
 plt.gca().axhline(slow_level, color="0.2", linestyle="--", linewidth=1.5, zorder=3)
 
 utils.postconfigure_plot(props)

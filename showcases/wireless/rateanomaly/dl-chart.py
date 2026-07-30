@@ -4,9 +4,13 @@
 # adapted client (~6 Mbps); the other four are close (54 Mbps). Both configs are averaged
 # over 3 repetitions (DCF backoff uses the RNG, so both are averaged the same way).
 #
+# The dashed line is the all-fast reference: DownlinkHomogeneous, the same cell with no rate
+# gap, where each of the five clients gets 1/5 of the airtime at 54 Mbps.
+#
 # Reproduce (from this showcase directory):
 #   inet -u Cmdenv -c DownlinkAnomaly     -r 0..2 --repeat=3 --result-dir=results/dl
 #   inet -u Cmdenv -c DownlinkAirtimeFair -r 0..2 --repeat=3 --result-dir=results/dl
+#   inet -u Cmdenv -c DownlinkHomogeneous -r 0..2 --repeat=3 --result-dir=results/dl
 #   python3 dl-chart.py
 import re, glob
 import matplotlib
@@ -25,11 +29,14 @@ def per_station_mean(config):
 
 anomaly = per_station_mean("DownlinkAnomaly")
 fair = per_station_mean("DownlinkAirtimeFair")
+baseline = sum(per_station_mean("DownlinkHomogeneous")) / 5   # all-fast, per-client
 
 x = np.arange(5)
 w = 0.38
 plt.figure(figsize=(8, 6))
 ax = plt.gca()
+ax.axhline(baseline, color="0.35", ls="--", lw=1.4, zorder=3,
+           label=f"All-fast baseline ({baseline:.1f} Mbps/client)")
 b1 = ax.bar(x - w/2, anomaly, w, color="#c0392b", label=f"Frame-fair queue (anomaly, agg {sum(anomaly):.1f} Mbps)")
 b2 = ax.bar(x + w/2, fair,    w, color="#1f618d", label=f"Airtime-fair queue (fix, agg {sum(fair):.1f} Mbps)")
 ax.bar_label(b1, fmt="%.1f", padding=2, fontsize=8)
