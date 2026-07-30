@@ -135,7 +135,7 @@ void RsvpTe::createPath(const SessionObj& session, const SenderTemplateObj& send
         if (!pit->permanent) {
             EV_INFO << "removing path from traffic database" << endl;
 
-            sit->paths.erase(pit--);
+            sit->paths.erase(pit);
         }
         else {
             EV_INFO << "path is permanent, we will try again later" << endl;
@@ -571,7 +571,9 @@ bool RsvpTe::doCACCheck(const SessionObj& session, const SenderTspecObj& tspec, 
     double sharedBW = 0.0;
 
     for (auto& elem : RSBList) {
-        if ((elem.Session_Object == session) && (elem.Flowspec_Object.req_bandwidth > sharedBW))
+        // SE-style sharing is per outgoing link: only reservations of the same
+        // session on the SAME link (OI) may share bandwidth with this request
+        if ((elem.OI == OI) && (elem.Session_Object == session) && (elem.Flowspec_Object.req_bandwidth > sharedBW))
             sharedBW = elem.Flowspec_Object.req_bandwidth;
     }
 
@@ -1115,8 +1117,12 @@ bool RsvpTe::evalNextHopInterface(Ipv4Address destAddr, const EroVector& ERO, Ip
 
         Ipv4Address peer = tedmod->getPeerByLocalAddress(OI);
         HelloState *h = findHello(peer);
-        if (!h)
-            throw cRuntimeError("Peer %s on interface %s is not an RSVP peer", peer.str().c_str(), OI.str().c_str());
+        if (!h) {
+            // the strict ERO points at a next hop that is not an RSVP Hello peer;
+            // treat the path as infeasible so the caller can answer with a PathErr
+            EV_WARN << "next (strict) hop " << peer << " on interface " << OI << " is not an RSVP peer" << endl;
+            return false;
+        }
 
         // ok, only if next hop is up and running
 
@@ -1354,7 +1360,12 @@ void RsvpTe::processHelloMsg(Packet *pk)
     delete pk;
 
     HelloState *h = findHello(peer);
-    ASSERT(h);
+    if (!h) {
+        // a Hello from a peer we are not maintaining a Hello session with
+        // (e.g. a stale or misdirected message); ignore it
+        EV_WARN << "received a Hello from unknown peer " << peer << ", ignoring" << endl;
+        return;
+    }
 
     ASSERT(h->srcInstance);
     ASSERT(rcvSrcInstance);
@@ -1453,7 +1464,10 @@ void RsvpTe::processPathErrMsg(Packet *pk)
                 break;
 
             default:
-                throw cRuntimeError("Invalid errorcode %d in message '%s'", errCode, msg->getName());
+                // an error code this model does not act on; log and ignore
+                EV_WARN << "ignoring PathErr with unhandled error code " << errCode
+                        << " in message '" << msg->getName() << "'" << endl;
+                break;
         }
 
         delete pk;
@@ -1479,8 +1493,12 @@ void RsvpTe::processPathTearMsg(Packet *pk)
 
     bool modified = false;
 
-    for (auto it = PSBList.begin(); it != PSBList.end(); it++) {
-        if (it->OutInterface.getInt() != (uint32_t)lspid)
+    // Collect the ids of the merging-backup PSBs first: removePSB() erases from
+    // PSBList (a std::vector), which would invalidate an iterator/pointer held
+    // into it while iterating.
+    std::vector<int> backupIds;
+    for (auto& elem : PSBList) {
+        if (elem.OutInterface.getInt() != (uint32_t)lspid)
             continue;
 
         // merging backup exists
@@ -1493,14 +1511,22 @@ void RsvpTe::processPathTearMsg(Packet *pk)
 
         EV_DETAIL << "merging backup must be removed too" << endl;
 
-        removePSB(&(*it));
-        --it;
-
+        backupIds.push_back(elem.id);
         modified = true;
     }
 
-    if (modified)
+    for (int id : backupIds)
+        removePSB(findPsbById(id));
+
+    if (modified) {
+        // the pointer obtained above dangles after the erasures; re-fetch it
         psb = findPSB(msg->getSession(), msg->getSenderTemplate());
+        if (!psb) {
+            // the teardown removed the last matching PSB; nothing left to forward
+            delete pk;
+            return;
+        }
+    }
 
     // forward path teardown downstream
 
@@ -1812,7 +1838,7 @@ void RsvpTe::delSession(const cXMLElement& node)
         pathList = paths->getChildrenByTagName("path");
     }
 
-    for (auto it = session->paths.begin(); it != session->paths.end(); it++) {
+    for (auto it = session->paths.begin(); it != session->paths.end(); ) {
         bool remove;
 
         if (paths) {
@@ -1843,8 +1869,10 @@ void RsvpTe::delSession(const cXMLElement& node)
                 removePSB(psb);
             }
 
-            session->paths.erase(it--);
+            it = session->paths.erase(it);
         }
+        else
+            ++it;
     }
 
     if (!paths) {
@@ -1861,7 +1889,7 @@ void RsvpTe::processCommand(const cXMLElement& node)
         delSession(node);
     }
     else
-        ASSERT(false);
+        throw cRuntimeError("Unknown scenario command '%s'", node.getTagName());
 }
 
 void RsvpTe::sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, const SenderTemplateObj& sender, Ipv4Address LIH, Ipv4Address NHOP, bool force)

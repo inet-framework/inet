@@ -1,0 +1,108 @@
+%description:
+Regression test for RsvpClassifier honoring the <extended_tunnel_id> FEC attribute.
+
+The classifier binds a FEC to an LSP only when the FEC's SESSION (destination,
+tunnel id, extended tunnel id) matches the RSVP session that distributed the label.
+RSVP traffic sessions always use routerId as their extended tunnel id, so a FEC that
+declares a DIFFERENT extended_tunnel_id must NOT bind.
+
+This reuses the examples/mpls/testte_reroute network (RSVPTE4) with an empty scenario,
+and supplies a modified FEC table: FEC id 1 declares extended_tunnel_id 250.1.1.1
+(mismatches LSR1's routerId), FEC id 2 declares none (defaults to routerId, matches).
+
+Expected: FEC 2 binds; FEC 1 does NOT bind.
+
+Before the fix, the code read a misspelled attribute name ("extened_tunnel_id"), so the
+declared 250.1.1.1 was ignored and FEC 1 fell back to routerId and bound anyway --
+which makes the %not-contains assertion below fail.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.testte_reroute.RSVPTE4
+sim-time-limit = 5s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host3"
+
+**.host2.numApps = 1
+**.host2.app[0].typename = "UdpBasicApp"
+**.host2.app[0].localPort = 100
+**.host2.app[0].destPort = 100
+**.host2.app[0].messageLength = 128 bytes
+**.host2.app[0].sendInterval = 0.01s
+**.host2.app[0].destAddresses = "host4"
+
+**.host{3..4}.numApps = 1
+**.host{3..4}.app[0].typename = "UdpSink"
+**.host{3..4}.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host4.rt"
+**.host5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/host5.rt"
+
+**.LSR1.classifier.config = xmldoc("LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("../../../../examples/mpls/testte_reroute/LSR1_rsvp.xml")
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR5.rt"
+**.LSR6.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR6.rt"
+**.LSR7.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_reroute/LSR7.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.scenarioManager.script = xml("<scenario/>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1_fec.xml
+<?xml version="1.0"?>
+<fectable>
+	<fecentry>
+		<id>1</id>
+		<destination>host3</destination>
+		<tunnel_id>1</tunnel_id>
+		<extended_tunnel_id>250.1.1.1</extended_tunnel_id>
+		<lspid>100</lspid>
+	</fecentry>
+	<fecentry>
+		<id>2</id>
+		<destination>host4</destination>
+		<tunnel_id>2</tunnel_id>
+		<lspid>200</lspid>
+	</fecentry>
+</fectable>
+
+%#--------------------------------------------------------------------------------------------------------------
+%# FEC 2 (no extended_tunnel_id, defaults to routerId) must bind to its LSP label.
+%contains: stdout
+binding fec id 2 to in-label
+%#--------------------------------------------------------------------------------------------------------------
+%# FEC 1 declares a non-matching extended_tunnel_id, so it must NOT bind.
+%# Pre-fix (misspelled attribute) it wrongly fell back to routerId and bound -> this fails.
+%not-contains: stdout
+binding fec id 1 to in-label
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
