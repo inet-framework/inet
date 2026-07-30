@@ -1,8 +1,8 @@
 %description:
 Byte-exact round-trip serialization of LDP packets (RFC 5036): the PDU/message header
 (Section 3.5.3, 3.6), Hello, Label Request, Label Mapping (also used for Label
-Withdraw/Release), Notification (with its FEC TLV), and the unwired-but-serializable
-Initialization and Address messages. Verifies serialize->bytes->deserialize reproduces the
+Withdraw/Release), Notification (with its FEC TLV), Initialization, KeepAlive, and the
+still-unwired Address message. Verifies serialize->bytes->deserialize reproduces the
 fields and the expected on-wire lengths (matching the B(...) constants in Ldp.h).
 
 %includes:
@@ -168,7 +168,24 @@ static void fillHeader(LdpPacket *p, int type, Ipv4Address lsrId)
     EV << "  PASS" << endl;
 }
 
-// === 7. Address / Address Withdraw (same class, different type; unwired, but must
+// === 7. KeepAlive (no message parameters) ===
+{
+    EV << "=== KeepAlive ===" << endl;
+    auto ka = makeShared<LdpKeepAlive>();
+    fillHeader(ka.get(), KEEP_ALIVE, Ipv4Address("10.0.0.11"));
+    ka->setChunkLength(B(18)); // PDU header(10) + message header(8), no message parameters
+
+    Packet pkt("sz"); pkt.insertAtFront(ka);
+    ASSERT(pkt.getDataLength() == B(18));
+    auto k2 = dynamicPtrCast<const LdpKeepAlive>(roundTrip(staticPtrCast<const LdpPacket>(ka)));
+    ASSERT(k2 != nullptr);
+    ASSERT(k2->getVersion() == 1);
+    ASSERT(k2->getLsrId() == Ipv4Address("10.0.0.11"));
+    ASSERT(k2->getType() == KEEP_ALIVE);
+    EV << "  PASS" << endl;
+}
+
+// === 8. Address / Address Withdraw (same class, different type; unwired, but must
 // still be serializable) ===
 {
     EV << "=== Address/AddressWithdraw ===" << endl;

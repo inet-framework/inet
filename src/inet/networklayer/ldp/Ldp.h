@@ -35,6 +35,9 @@ const B LDP_GENERIC_LABEL_TLV_BYTES = B(8);
 const B LDP_COMMON_HELLO_PARAMETERS_TLV_BYTES = B(8);
 const B LDP_STATUS_TLV_BYTES = B(14);
 
+// RFC 5036 Section 3.5.3: Common Session Parameters TLV (used by the Initialization message)
+const B LDP_COMMON_SESSION_PARAMETERS_TLV_BYTES = B(20);
+
 // Model simplification (see Ldp.ned): exactly one message per PDU, so each
 // packet's total length is the PDU header plus one message (message header + TLVs).
 const B LDP_HELLO_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_COMMON_HELLO_PARAMETERS_TLV_BYTES; // 26 B
@@ -42,6 +45,8 @@ const B LDP_LABEL_REQUEST_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTE
 // Label Mapping, and also Label Withdraw/Release (sendMapping() reuses the same wire fields -- FEC + label -- for all three message types)
 const B LDP_LABEL_MAPPING_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_FEC_TLV_BYTES + LDP_GENERIC_LABEL_TLV_BYTES; // 38 B
 const B LDP_NOTIFICATION_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_STATUS_TLV_BYTES + LDP_FEC_TLV_BYTES; // 44 B; sendNotify() always includes a FEC TLV
+const B LDP_INITIALIZATION_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES + LDP_COMMON_SESSION_PARAMETERS_TLV_BYTES; // 38 B
+const B LDP_KEEPALIVE_BYTES = LDP_PDU_HEADER_BYTES + LDP_MESSAGE_HEADER_BYTES; // 18 B; KeepAlive carries no message parameters (RFC 5036 Section 3.5.4)
 
 class IInterfaceTable;
 class IIpv4RoutingTable;
@@ -84,11 +89,37 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     typedef std::vector<PendingRequest> PendingVector;
 
     struct peer_info {
+        // LDP session FSM (RFC 5036 Section 2.5.3-2.5.5): NONEXISTENT until the TCP
+        // connection is established; OPENSENT/OPENREC while Initialization/KeepAlive
+        // are being exchanged; OPERATIONAL once the 4-way handshake completes. Label
+        // and address messages are only valid once OPERATIONAL (see
+        // Ldp::processLdpPacketFromTcp).
+        enum SessionState { NONEXISTENT, INITIALIZED, OPENSENT, OPENREC, OPERATIONAL };
+
         Ipv4Address peerIP; // Ipv4 address of LDP peer
         bool activeRole; // we're in active or passive role in this session
         TcpSocket *socket; // TCP socket
         std::string linkInterface;
         cMessage *timeout;
+
+        SessionState state = NONEXISTENT;
+        simtime_t negotiatedKeepaliveTime = 0; // min(ours, peer's KeepAlive Time) once negotiated; 0 until then
+        // KeepAlive-based session liveness (RFC 5036 Section 2.5.6), scheduled only
+        // once the session is OPERATIONAL: keepAliveSendTimer fires every
+        // negotiatedKeepaliveTime/3 without an LDP message having been SENT to this
+        // peer (reset in Ldp::sendToPeer on every send) and triggers an explicit
+        // KeepAlive; sessionHoldTimer fires negotiatedKeepaliveTime after the last
+        // LDP message RECEIVED from this peer (reset in
+        // Ldp::processLdpPacketFromTcp on every receive) and tears the session down
+        // (Ldp::processSessionHoldTimeout). This is deliberately a narrower, separate
+        // failure mode from the Hello hold-timer's adjacency-level death detection
+        // in Ldp::processHelloTimeout: that one detects "the peer/link is gone" via
+        // UDP Hello; this one detects "the TCP control channel died while the Hello
+        // adjacency is still alive" (a stale CONNECTED TcpSocket the transport layer
+        // hasn't itself noticed yet) -- the two timeouts are not merged. Cleaned up
+        // by every teardown path (see Ldp::removePeerBindings).
+        cMessage *keepAliveSendTimer = nullptr;
+        cMessage *sessionHoldTimer = nullptr;
     };
     typedef std::vector<peer_info> PeerVector;
 
@@ -96,6 +127,7 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
     // configuration
     simtime_t holdTime;
     simtime_t helloInterval;
+    simtime_t keepaliveTime; // Session KeepAlive Time we propose in Initialization messages (RFC 5036 Section 3.5.3)
     bool advertiseImplicitNull = true;
 
     // currently recognized FECs
@@ -164,12 +196,22 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
     virtual void sendToPeer(Ipv4Address dest, Packet *msg);
 
+    /** Utility: true if we hold an OPERATIONAL LDP session with this peer (session FSM gate) */
+    virtual bool isPeerOperational(Ipv4Address peerAddr);
+
     FecVector::iterator findFecEntry(FecVector& fecs, Ipv4Address addr, int length);
     FecBindVector::iterator findFecEntry(FecBindVector& fecs, int fecid, Ipv4Address peer);
 
+    // label/binding-plane sends: RFC 5036 Section 3.5.3 -- only valid once the
+    // session with 'dest' is OPERATIONAL; a no-op (EV_WARN) otherwise
     virtual void sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length);
     virtual void sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, int length);
     virtual void sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length);
+
+    // session establishment (RFC 5036 Section 2.5.3): not gated on OPERATIONAL --
+    // these ARE the messages that bring the session to OPERATIONAL
+    virtual void sendInit(Ipv4Address dest);
+    virtual void sendKeepAlive(Ipv4Address dest);
 
     virtual void rebuildFecList();
     virtual void updateFecList(Ipv4Address nextHop);
@@ -210,8 +252,14 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::BufferingCall
 
     virtual void processLDPHello(Packet *msg);
     virtual void processHelloTimeout(cMessage *msg);
+    // KeepAlive-based session liveness (RFC 5036 Section 2.5.6); see peer_info's
+    // keepAliveSendTimer/sessionHoldTimer fields for the division of labor
+    virtual void processKeepAliveSendTimeout(cMessage *msg);
+    virtual void processSessionHoldTimeout(cMessage *msg);
     virtual void processLdpPacketFromTcp(Ptr<const LdpPacket>& ldpPacket);
 
+    virtual void processINITIALIZATION(Ptr<const LdpPacket>& ldpPacket);
+    virtual void processKEEPALIVE(Ptr<const LdpPacket>& ldpPacket);
     virtual void processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket);
     virtual void processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket);
     virtual void processLABEL_RELEASE(Ptr<const LdpPacket>& ldpPacket);

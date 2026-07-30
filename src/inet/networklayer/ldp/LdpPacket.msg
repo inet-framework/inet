@@ -28,9 +28,15 @@ enum LdpMessageTypes
     UNKNOWN = 20;
 }
 
+// Status Code values (RFC 5036 Section 3.9 / IANA "Label Distribution Protocol (LDP)
+// Parameters" registry, "Status Code Name Space"); only the subset actually used by
+// this model is defined here.
 enum LdpStatusTypes
 {
+    SHUTDOWN = 10;
     NO_ROUTE = 13;
+    KEEPALIVE_TIMER_EXPIRED = 20; // RFC 5036 Section 2.5.6: no LDP message (Keepalive or otherwise) received from the peer within the negotiated KeepAlive Time; distinct from SESSION_REJECTED_BAD_KEEPALIVE_TIME, which is a negotiation-time rejection, not a runtime liveness failure
+    SESSION_REJECTED_BAD_KEEPALIVE_TIME = 24;
 }
 
 struct FecTlv
@@ -97,12 +103,14 @@ class LdpNotify extends LdpPacket
 }
 
 //
-// LDP Ini Message
+// LDP Initialization Message
 //
-//# FIXME currently unused
 // Fields mirror the Common Session Parameters TLV (RFC 5036 Section 3.5.3).
 // The receiver's LDP Identifier is itself a 6-byte (4-byte LSR-Id + 2-byte
 // label space) value, hence the split receiverLsrId/receiverLabelSpace fields.
+// Sent by both sides during session establishment (see Ldp::sendInit); the
+// A-bit (label advertisement discipline) is currently always 0 (DU) -- it gets
+// wired to the distributionMode parameter by a later commit in this workstream.
 class LdpIni extends LdpPacket
 {
     uint16_t keepAliveTime = 0;
@@ -112,6 +120,15 @@ class LdpIni extends LdpPacket
     uint16_t maxPduLength = 0;
     Ipv4Address receiverLsrId;
     uint16_t receiverLabelSpace = 0;
+}
+
+//
+// LDP KeepAlive Message
+//
+// RFC 5036 Section 3.5.4: no message parameters -- the message header (with
+// type = KEEP_ALIVE) is the entire message.
+class LdpKeepAlive extends LdpPacket
+{
 }
 
 //
