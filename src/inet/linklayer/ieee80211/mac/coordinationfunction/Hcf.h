@@ -65,6 +65,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     ITx *tx = nullptr;
 
     IQosRateSelection *rateSelection = nullptr;
+    // Names the station a datarateSelected value belongs to (see ~IRateSelection::emitDatarateSelected)
+    StationLabelCache stationLabels;
 
     // Channel Access Methods
     Edca *edca = nullptr;

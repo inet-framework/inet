@@ -53,6 +53,8 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     ITx *tx = nullptr;
 
     IRateSelection *rateSelection = nullptr;
+    // Names the station a datarateSelected value belongs to (see ~IRateSelection::emitDatarateSelected)
+    StationLabelCache stationLabels;
 
     // Channel access method
     Dcaf *channelAccess = nullptr;

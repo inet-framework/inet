@@ -10,6 +10,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/common/StationLabelCache.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
@@ -25,6 +26,15 @@ class INET_API IRateSelection
 {
   public:
     static simsignal_t datarateSelectedSignal;
+
+    // Emits datarateSelected on behalf of a coordination function. Unicast data frames are tagged
+    // with the receiver's station label as a named details object, so that a demux(datarateSelected)
+    // result filter or the statistic bar chart visualizer can key a separate per-station series on
+    // it; this mirrors the condition under which ~RateSelection applies a per-receiver configured
+    // rate, so the label always names the station whose rate is reported. Control, management and
+    // group-addressed frames carry no per-station data rate and are emitted without details: the
+    // aggregate datarateSelected statistic still records them, a bar chart ignores them.
+    static void emitDatarateSelected(cComponent *emitter, StationLabelCache& stationLabels, const Ptr<const Ieee80211MacHeader>& header, const physicallayer::IIeee80211Mode *mode);
 
   public:
     virtual ~IRateSelection() {}

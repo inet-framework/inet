@@ -13,6 +13,7 @@
 
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
+#include "inet/linklayer/ieee80211/mac/common/StationLabelCache.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 
 namespace inet {
@@ -24,7 +25,7 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
     static simsignal_t datarateChangedSignal;
 
   protected:
-    std::map<MacAddress, std::string> stationLabels; // cache of receiver MAC -> demux label (peer node name)
+    StationLabelCache stationLabels; // cache of receiver MAC -> demux label (peer node name)
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -37,7 +38,7 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
     virtual const physicallayer::IIeee80211Mode *getInitialMode();
     // The demux label identifying a receiver in the per-station datarate statistic: the receiver's
     // network node name if it can be resolved, otherwise the MAC address string. Cached per receiver.
-    virtual std::string stationLabel(const MacAddress& receiver);
+    virtual const std::string& stationLabel(const MacAddress& receiver) { return stationLabels.getLabel(receiver); }
     // Emits datarateChanged with the receiver as a named details object, so a demux(datarateChanged)
     // result filter can record a separate data-rate vector per station. The aggregate datarateChanged
     // statistic ignores the details and is therefore unchanged. Group-addressed receivers are emitted

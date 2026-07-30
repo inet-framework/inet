@@ -18,10 +18,21 @@ import inet.visualizer.canvas.common.StatisticCanvasVisualizer;
 // as a named details object, and draws one bar per station (the bar height is
 // proportional to the PHY data rate to that station, clamped to `maxRate`).
 //
-// Because it is driven by the rate control's signal, it only shows rates where
-// an adaptive rate control is configured. Interface-wide fixed rates and
-// per-receiver configured rates (`dataFrameBitratePerReceiver`) are not
-// visualized (there is no per-station rate control signal in that case).
+// In its default configuration it is driven by the rate control's signal, so it
+// only shows rates where an adaptive rate control is configured. To visualize
+// interface-wide fixed rates or per-receiver configured rates
+// (`dataFrameBitratePerReceiver`) instead, point it at the coordination
+// function's `datarateSelected` signal, which reports the rate actually selected
+// for every transmitted frame and is likewise tagged per receiver:
+//
+// <pre>
+// *.visualizer.*.rateVisualizer.displayRates = true
+// *.visualizer.*.rateVisualizer.signalName = "datarateSelected"
+// *.visualizer.*.rateVisualizer.sourceFilter = "*.accessPoint.wlan[*].mac.dcf"
+// </pre>
+//
+// In that mode a station's bar appears when the access point first sends it a
+// data frame, rather than as soon as its rate is configured.
 //
 // @see ~StatisticCanvasVisualizer, ~StatisticVisualizerBase, ~AarfRateControl
 //
