@@ -132,7 +132,8 @@ UDP flow to the server at the same time, so they continuously contend for the ch
 ..
    FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
    type:     canvas
-   config:   Homogeneous   # ../omnetpp.ini (node positions are identical across configs)
+   config:   UplinkHomogeneous   # ../omnetpp.ini (all three Uplink* configs share these
+             positions; the Downlink* ones spread the stations vertically instead)
    seed:     default
    shows:    topology -- the configurator/radioMedium/visualizer infrastructure modules,
              five sta[*] wireless hosts clustered ~8-9 m from the accessPoint, and the
@@ -144,17 +145,17 @@ UDP flow to the server at the same time, so they continuously contend for the ch
              margin trimmed with `convert -fuzz 6% -trim`. Was 858x688.
    stamp:    captured 2026-07, INET 4.6
 
-Homogeneous and RateAnomaly Configurations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The UplinkHomogeneous and UplinkAnomaly Configurations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Two runnable uplink configurations are defined. In **Homogeneous**, all five stations transmit at
-54 Mbps — the baseline, in which the channel is shared fairly and the network runs at
-full 802.11g capacity. In **RateAnomaly**, one station is slowed while the other four
+Two runnable uplink configurations are defined. In **UplinkHomogeneous**, all five stations
+transmit at 54 Mbps — the baseline, in which the channel is shared fairly and the network runs at
+full 802.11g capacity. In **UplinkAnomaly**, one station is slowed while the other four
 stay at 54 Mbps; its bitrate is swept from 36 Mbps down to 6 Mbps to show how the
 damage grows as the rate gap widens:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: [Config RateAnomaly]
+   :start-at: [Config UplinkAnomaly]
    :end-at: slowBitrate
    :language: ini
 
@@ -165,11 +166,11 @@ Each station's application-level throughput is measured at the server over the
 steady-state interval, after association settles. Each run lasts 5 s, with the first
 1 s discarded as warmup, so throughput is averaged over the remaining 4 s.
 
-In the **Homogeneous** baseline, all five stations achieve nearly the same throughput,
+In the **UplinkHomogeneous** baseline, all five stations achieve nearly the same throughput,
 about 4.6–5.0 Mbps each, for an aggregate of roughly 24 Mbps — full 802.11g saturation
 throughput at this payload size.
 
-When one station is slowed to 6 Mbps in **RateAnomaly**, every station — including the
+When one station is slowed to 6 Mbps in **UplinkAnomaly**, every station — including the
 four still configured for 54 Mbps — drops to about 2.3–2.6 Mbps. The fast stations do
 not merely lose a little throughput; they are pulled down to nearly the slow station's
 level, settling just above the floor it sets:
@@ -179,8 +180,8 @@ level, settling just above the floor it sets:
    FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
    type:     chart (matplotlib)
    anf:      RateAnomalyShowcase.anf   chart "Per-station throughput"
-   inputs:   results/*.sca   from configs Homogeneous + RateAnomaly (already recorded)
-   shows:    per-station application throughput, Homogeneous (all 54 Mbps) vs the
+   inputs:   results/*.sca   from configs UplinkHomogeneous + UplinkAnomaly (already recorded)
+   shows:    per-station application throughput, UplinkHomogeneous (all 54 Mbps) vs the
              rate anomaly (sta[0] at 6 Mbps); the four fast stations collapse to the
              slow station's level (dotted line)
    anchor:   data is structural — server.app[*] packetReceived:count x 0.002 -> Mbps.
@@ -203,10 +204,10 @@ most of the channel time and left little for the others.
    FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
    type:     chart (matplotlib)
    anf:      RateAnomalyShowcase.anf   chart "Frames per station"
-   inputs:   results/*.sca   from config RateAnomaly slowBitrate=6 (already recorded)
+   inputs:   results/*.sca   from config UplinkAnomaly slowBitrate=6 (already recorded)
    shows:    frames successfully transmitted per station in the rate-anomaly case
              (slow = 6 Mbps); near-equal counts = DCF's equal transmission opportunities
-   anchor:   data is structural — server.app[*] packetReceived:count for the RateAnomaly
+   anchor:   data is structural — server.app[*] packetReceived:count for the UplinkAnomaly
              slowBitrate=6 run. If that run is absent or counts diverge, re-derive.
    backend:  matplotlib -> identical in IDE and headless
    export:   opp_charttool imageexport RateAnomalyShowcase.anf -n "Frames per station"
@@ -224,19 +225,19 @@ whose width is the time it holds the medium:
 ..
    FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
    type:     seqchart
-   config:   RateAnomaly run 5 (slowBitrate=6), reduced to two active stations (apps on
+   config:   UplinkAnomaly run 5 (slowBitrate=6), reduced to two active stations (apps on
              sta[2..4] disabled) at LIGHT load so frames don't collide: sta[0]=6 Mbps
              sending every 3 ms, sta[1]=54 Mbps sending every 0.8 ms
    seed:     default
    shows:    four narrow 54 Mbps frames (sta[1], seq 2500-2503) then one wide 6 Mbps frame
              (sta[0], seq 667) carrying the same 1000-byte payload -- block width = airtime,
              so the slow frame occupies the channel ~8x longer (measured 7.8x on-air)
-   record:   inet -u Cmdenv -c RateAnomaly -r 5
+   record:   inet -u Cmdenv -c UplinkAnomaly -r 5
                --*.sta[2].numApps=0 --*.sta[3].numApps=0 --*.sta[4].numApps=0
                --*.sta[0].app[0].sendInterval=3ms --*.sta[1].app[0].sendInterval=0.8ms
                --record-eventlog=true --eventlog-recording-intervals=2s..2.05s
                --sim-time-limit=2.06s --result-dir=results/elog3
-   source:   results/elog3/RateAnomaly-slowBitrate=6-#0.elog
+   source:   results/elog3/UplinkAnomaly-slowBitrate=6-#0.elog
    axes:     sta[0] (6 Mbps), sta[1] (54 Mbps), accessPoint   (this top-to-bottom order)
    display:  NETWORK_COMMUNICATION; timeline SIMULATION_TIME (linear -- required so block
              width equals airtime; NONLINEAR flattens the contrast)
@@ -266,11 +267,11 @@ station halves the capacity of the entire cell:
    FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
    type:     chart (matplotlib)
    anf:      RateAnomalyShowcase.anf   chart "Throughput vs slow-station rate"
-   inputs:   results/*.sca   from configs Homogeneous + RateAnomaly (already recorded)
+   inputs:   results/*.sca   from configs UplinkHomogeneous + UplinkAnomaly (already recorded)
    shows:    aggregate, fast-station-average, and slow-station throughput vs the slow
-             station's bitrate (54 = Homogeneous baseline, 36..6 = RateAnomaly sweep)
+             station's bitrate (54 = UplinkHomogeneous baseline, 36..6 = UplinkAnomaly sweep)
    anchor:   data is structural — server.app[*] packetReceived:count grouped by the
-             slowBitrate itervar (Homogeneous -> 54). If the sweep points change, re-derive.
+             slowBitrate itervar (UplinkHomogeneous -> 54). If the sweep points change, re-derive.
    backend:  matplotlib -> identical in IDE and headless
    export:   opp_charttool imageexport RateAnomalyShowcase.anf -n "Throughput vs slow-station rate"
              -f png --dpi 150 -d doc/media/   ; size 1200x900, 8x6 in via image_export_width/height
@@ -279,7 +280,7 @@ station halves the capacity of the entire cell:
 ============================  ===============  ==============  ====================
 slow station rate (Mbps)      aggregate        slow station    fast stations (avg)
 ============================  ===============  ==============  ====================
-54 (Homogeneous baseline)     24.2             5.02            4.80
+54 (UplinkHomogeneous)        24.2             5.02            4.80
 36                            23.1             4.24            4.70
 24                            21.2             3.83            4.34
 18                            19.9             3.40            4.12
@@ -288,8 +289,8 @@ slow station rate (Mbps)      aggregate        slow station    fast stations (av
 6                             12.2             2.31            2.47
 ============================  ===============  ==============  ====================
 
-(All values in Mbps, application-level throughput. The 54 Mbps row is the Homogeneous
-baseline — the zero-gap reference point; the rows below it are the RateAnomaly sweep.)
+(All values in Mbps, application-level throughput. The 54 Mbps row is the UplinkHomogeneous
+baseline — the zero-gap reference point; the rows below it are the UplinkAnomaly sweep.)
 The fast stations' own throughput — the rightmost column — falls almost in step with the
 slow station's, even though their configuration never changes. That drop is the rate
 anomaly: equal access, unequal airtime.
@@ -306,7 +307,7 @@ before it has to contend again. DCF still hands out wins equally often, so an eq
 win means an equal share of airtime: a fast station simply packs many frames into its slice, a
 slow station only a few.
 
-The ``[Config Txop]`` configuration switches the interface to the QoS (EDCA) MAC and grants
+The ``[Config UplinkTxop]`` configuration switches the interface to the QoS (EDCA) MAC and grants
 best-effort traffic a time-based TXOP. AC_BE's *default* TXOP limit is zero — one frame per
 win, i.e. plain DCF behaviour — so the fix is simply to set a nonzero limit; here we borrow
 the standard's Video-category value (3.008 ms). (Best-effort traffic maps to AC_BE, which
@@ -314,7 +315,7 @@ INET indexes as ``edcaf[1]``.) The MAC queue is deepened too, so a fast
 station has enough frames buffered to fill a burst; those are the only changes:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: [Config Txop]
+   :start-at: [Config UplinkTxop]
    :end-at: pendingQueue.packetCapacity
    :language: ini
 
@@ -329,17 +330,18 @@ the aggregate roughly flat and keeps the fast stations near their full throughpu
    shows:    aggregate and fast-station-average application throughput vs the slow station's
              bitrate, plain DCF vs 802.11e TXOP; DCF collapses as the slow rate drops, TXOP
              stays flat and high
-   inputs:   results/solve/RateAnomaly-*.sca and results/solve/Txop-*.sca, BOTH 3 reps
+   inputs:   results/solve/UplinkAnomaly-*.sca and results/solve/UplinkTxop-*.sca, BOTH 3 reps
              (DCF is not deterministic -- same RNG/backoff -- so both are averaged alike);
-             results/Homogeneous-#0.sca for the all-fast baseline line
-   record:   inet -u Cmdenv -c RateAnomaly  -r 0..17 --repeat=3 --result-dir=results/solve
-             inet -u Cmdenv -c Txop        -r 0..17 --repeat=3 --result-dir=results/solve
-             inet -u Cmdenv -c Homogeneous -r 0               --result-dir=results
+             results/UplinkHomogeneous-#0.sca for the all-fast baseline line
+   record:   inet -u Cmdenv -c UplinkAnomaly     -r 0..17 --repeat=3 --result-dir=results/solve
+             inet -u Cmdenv -c UplinkTxop        -r 0..17 --repeat=3 --result-dir=results/solve
+             inet -u Cmdenv -c UplinkHomogeneous -r 0               --result-dir=results
    metric:   server.app[*] packetReceived:count x 0.002 -> Mbps; aggregate = sum over the 5
              apps per run, fast-avg = mean over app[1..4]; both configs averaged over 3 reps
-   anchor:   structural -- if the RateAnomaly/Txop configs or sweep points change, re-derive.
-             Txop results are kept out of results/ root so they don't contaminate the
-             DCF-only .anf charts (whose filters match packetReceived:count of any config).
+   anchor:   structural -- if the UplinkAnomaly/UplinkTxop configs or sweep points change,
+             re-derive. The sweep results are kept out of results/ root so they don't
+             contaminate the DCF-only .anf charts (whose filters match
+             packetReceived:count of any config).
    plot:     ../txop-chart.py (matplotlib; DCF red/orange, TXOP blue; 8x6 in @ dpi 150)
    stamp:    captured 2026-07, INET 4.6
 
