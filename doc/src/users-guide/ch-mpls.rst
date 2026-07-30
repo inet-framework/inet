@@ -37,6 +37,8 @@ The core modules are:
 
 - :ned:`RsvpClassifier` is a configurable ingress classifier for MPLS
 
+- :ned:`StaticIngressClassifier` is a static, XML-configured ingress classifier for MPLS, matching on IPv4 or IPv6 destination prefixes
+
 - :ned:`SegmentRouting` derives node-SID and adjacency-SID label programming from the TED, signaling-free, for SR-MPLS
 
 - :ned:`SrPolicy` is a configurable ingress classifier for MPLS that imposes SR-MPLS segment-list label stacks
@@ -263,6 +265,21 @@ This deliberately diverges from RFC 9855 Section 5's textbook two-segment form, 
 
 The backup activates the instant the protected interface goes down (:ned:`Ted`'s ``trackInterfaceState`` hook, the same physical-carrier-loss signal :ned:`Ldp`/:ned:`RsvpTe` rely on for their own failure detection) and reverts the instant it comes back up; no IGP reconvergence has to complete first. In this model, however, the ordinary node-SID recompute this same local failure triggers (see `SegmentRouting`_ above) *also* runs synchronously in the very same simulation event, and for the PLR's own traffic already reroutes to the very same post-convergence path the backup would have used. The backup mechanism's own, distinct value here is therefore in the data plane it exercises -- a genuine, RFC-shaped repair label stack pushed for any packet a downstream router still forwards to the PLR as a transit hop during the failure window -- not a measurable reduction in the convergence gap, which this discrete-event model doesn't otherwise incur. Node protection (surviving the failure of a whole neighboring router, not just one link), SRLG-aware protection, and formal micro-loop-freedom analysis (RFC 8333) are not modeled; protection is single-link only.
 
+.. _ug:sec:mpls:ipv6:
+
+IPv6 Support
+------------
+
+The MPLS data plane carries IPv6 payloads end-to-end, alongside IPv4, in the same network: each :ned:`LibTable` entry records the payload protocol its label ultimately carries, and :ned:`Mpls` stamps the popped datagram with that entry's own protocol at the true egress (rather than always assuming IPv4, as earlier versions of this model did). Both :ned:`Mpls`'s ingress path and its plain (unlabeled) from-L2 path offer IPv6 datagrams to the ingress classifier and up to L3 exactly as they already did for IPv4; TTL/Traffic-Class handling under the ``ttlModel``/``writeTcBackOnPop`` parameters dispatches to the IPv6 header's hop-limit/DSCP fields the same way it already did for IPv4's TTL/DSCP. The RFC 3032 IPv6 explicit-null label (value 2) is recognized at egress alongside the existing (IPv4) explicit-null label (0).
+
+Ingress classification is dual-stack wherever a FEC table can name a destination at all: :ned:`StaticIngressClassifier` (a static, XML-configured ingress classifier -- one ``<fecentry dest="..." prefixLength="..." label="..." interface="..."/>`` per FEC, with the destination matched by longest prefix) and :ned:`SrPolicy` (see above) both match a policy's ``dest``/prefix against either an IPv4 or an IPv6 destination, resolved from whichever native header the packet actually carries. A :ned:`StaticIngressClassifier`/:ned:`SrPolicy` table may freely mix IPv4 and IPv6 entries; each incoming packet is only ever matched against entries of its own family. :ned:`StaticIngressClassifier`'s XML also still accepts the older, IPv4-only ``netmask="a.b.c.d"`` attribute in place of ``prefixLength`` for backward compatibility; an IPv6 ``dest`` requires ``prefixLength``.
+
+:ned:`Ldp` additionally advertises and learns IPv6 FECs dynamically: if a router has an :ned:`Ipv6RoutingTable` (``hasIpv6 = true``), its IPv6 routes are turned into FECs and advertised/withdrawn via ordinary DU-mode Label Mapping messages exactly like IPv4 routes are, using RFC 7552's Address Family 2 encoding of the FEC TLV's Address Prefix element. This is real wire-format support (Address Family 1 vs. 2 selects a 4-byte or 16-byte prefix on an actual Label Mapping/Request/Notification message), not a static-configuration workaround -- but the LDP session itself (Hello discovery, TCP transport, LSR-ID, loop-detection path vectors) stays IPv4-only in this model: RFC 7552 allows a session's own transport address family to be independent of which FEC families it advertises, and that is the only part of RFC 7552 this model exploits. Because DU-mode advertisement only ever concerns FECs a router's own routing table already knows about, every transit hop along a dynamically-signaled IPv6 LSP -- not just the ingress/egress edges -- needs its own IPv6 route to the destination, exactly as a transit hop needs its own IPv4 route for an ordinary IPv4 LDP LSP.
+
+A "6PE-lite" example under ``examples/mpls/ipv6pe/`` demonstrates IPv6-addressed edge islands reachable across a small, purely IPv4-addressed, IPv4-signaled SR-MPLS core -- the transit routers carry no IPv6 configuration at all. Because an SR-MPLS node SID is allocated per router and shared by both address families (unlike an LDP- or static-XML-configured FEC, which is inherently family-specific), :ned:`SrPolicy` pushes an extra, innermost IPv6 explicit-null label under the node-SID label stack whenever a matched policy's destination is IPv6, so that the true egress -- not any of the family-agnostic transit routers doing penultimate-hop-popping along the way -- is the one that decides the payload is IPv6. See that example's README for the full walkthrough and for how this differs from a real 6PE (RFC 4798) deployment.
+
+Explicitly out of scope: BGP labeled-unicast / a real 6PE-6VPE control plane (this model's edge-to-edge IPv6-prefix-to-label mapping is static/SR-policy configuration, not a routing protocol); RSVP-TE sessions for IPv6 FECs (RFC 3209's IPv6 objects are not modeled; :ned:`RsvpTe`/:ned:`Ted`/:ned:`RsvpClassifier` remain IPv4-only throughout); LDP-over-IPv6 transport (RFC 7552 Section 6's dual-stack transport-connection and preference rules -- TCP over an IPv6 session -- are not modeled: only the FEC TLV itself is dual-stack); an IPv6-native :ned:`Ted`/:ned:`LinkStateRouting` (both stay IPv4-keyed regardless of which payload families ride over the LSPs they help establish); and SRv6 (a different data plane encoding entirely from the MPLS-based SR-MPLS this chapter describes).
+
 .. _ug:sec:mpls:mpls-enabled-router-models:
 
 MPLS-Enabled Router Models
@@ -365,8 +382,14 @@ LDP (RFC 5036)
      - Not modeled
      - n/a
    * - IPv6 (RFC 7552)
-     - Not modeled
-     - The whole subsystem is IPv4-only.
+     - Partially modeled
+     - IPv6 FECs (Address Family 2 in the FEC TLV's Address Prefix element)
+       are advertised and learned dynamically via ordinary DU-mode Label
+       Mapping messages, and label-switch real IPv6 traffic end-to-end (see
+       :ref:`ug:sec:mpls:ipv6`). The session itself -- Hello discovery, TCP
+       transport, LSR-ID, loop-detection path vectors -- remains IPv4-only;
+       RFC 7552 Section 6's dual-stack transport-connection rules are not
+       modeled.
    * - Pseudowire signaling
      - Not modeled
      - n/a
@@ -542,10 +565,12 @@ MPLS data plane (RFC 3031 + RFC 3032 + RFC 3443 + RFC 5462)
      - The implicit null label (3) can be advertised by both LDP and
        RSVP-TE via their respective ``advertiseImplicitNull`` parameters.
    * - Payload protocol at egress
-     - Partially modeled
-     - Popping the last label always re-tags the payload as IPv4; there
-       is no per-LIB-entry payload-protocol field, so non-IPv4 payloads
-       (e.g., for pseudowires) cannot be carried.
+     - Modeled
+     - Each :ned:`LibTable` entry records its own payload protocol
+       (IPv4 or IPv6; default IPv4, preserving pre-existing
+       configurations byte-for-byte); popping the last label re-tags
+       the payload according to that entry rather than always assuming
+       IPv4. See :ref:`ug:sec:mpls:ipv6`.
    * - ECMP / entropy label over FECs
      - Not modeled
      - n/a

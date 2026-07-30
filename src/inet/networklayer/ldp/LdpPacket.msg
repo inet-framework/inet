@@ -6,6 +6,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.common.L3Address;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 
 namespace inet;
@@ -40,9 +41,14 @@ enum LdpStatusTypes
     SESSION_REJECTED_BAD_KEEPALIVE_TIME = 24;
 }
 
+// Dual-stack (RFC 7552): addr may hold either an Ipv4Address or an Ipv6Address FEC
+// prefix -- L3Address::getType() distinguishes them, both on the wire
+// (LdpPacketSerializer's Address Family field: 1 = IPv4, 2 = IPv6) and in Ldp's own
+// fecList/fecUp/fecDown bookkeeping. length is the prefix length (0-32 for an IPv4
+// FEC, 0-128 for an IPv6 one) -- already family-agnostic.
 struct FecTlv
 {
-    Ipv4Address addr;
+    L3Address addr;
     int length;
 }
 
@@ -125,8 +131,8 @@ class LdpNotify extends LdpPacket
 // The receiver's LDP Identifier is itself a 6-byte (4-byte LSR-Id + 2-byte
 // label space) value, hence the split receiverLsrId/receiverLabelSpace fields.
 // Sent by both sides during session establishment (see Ldp::sendInit); the
-// A-bit (label advertisement discipline) is currently always 0 (DU) -- it gets
-// wired to the distributionMode parameter by a later commit in this workstream.
+// A-bit (label advertisement discipline) reflects Ldp's distributionMode
+// parameter (0=DU, 1=DoD).
 class LdpIni extends LdpPacket
 {
     uint16_t keepAliveTime = 0;
