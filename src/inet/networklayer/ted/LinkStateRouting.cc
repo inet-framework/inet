@@ -153,6 +153,27 @@ void LinkStateRouting::handleMessageWhenUp(cMessage *msg)
         ASSERT(false);
 }
 
+void LinkStateRouting::handleMessageWhenDown(cMessage *msg)
+{
+    // Like ~RsvpTe (see its own handleMessageWhenDown for the full rationale),
+    // ~LinkStateRouting is wired directly into the Ipv4 protocol dispatch -- there is no
+    // socket to close on stop, so a peer that hasn't yet heard about this node's shutdown
+    // can still deliver a "link state" flood message after this module has already gone
+    // down (found empirically: rsvpte_graceful_shutdown.test's downstream neighbor's
+    // in-flight LinkStateMsg arrives shortly after the shutdown). The base class's default
+    // handleMessageWhenDown() assumes that cannot happen and throws; there is nothing
+    // useful this module can do with such a message (its peer snapshot is already
+    // cleared), so just drop it, the same way the data plane drops traffic for a downed
+    // protocol. A self-message arriving while down would still indicate a real bug (e.g. a
+    // timer clear() failed to cancel), so that diagnostic is preserved via the base class.
+    if (msg->isSelfMessage()) {
+        RoutingProtocolBase::handleMessageWhenDown(msg);
+        return;
+    }
+    EV_INFO << "LinkStateRouting is down, dropping '" << msg->getName() << "'" << endl;
+    delete msg;
+}
+
 void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));

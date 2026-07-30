@@ -284,6 +284,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void handleMessageWhenDown(cMessage *msg) override;
 
     virtual void clear();
     virtual void handleStartOperation(LifecycleOperation *operation) override;

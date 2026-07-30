@@ -123,6 +123,7 @@ simple RsvpTe extends SimpleModule
         int stateLifetimeFactor = default(3); // RFC 2205's K: PSB/RSB state expires (if not refreshed) after (K + 0.5) * 1.5 * refreshInterval
         double retryInterval @unit(s) = default(1s); // delay before retrying a permanent path whose ingress PSB couldn't be created (model-specific, not an RFC 2205 value)
         bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a tunnel
+        double stopOperationExtraTime @unit(s) = default(2s); // extra time to hold up the node's later shutdown stages after a graceful shutdown sent a forced PathTear for an owned session (see handleStopOperation); this module itself goes NOT_OPERATING immediately (further inbound RSVP packets are dropped, not processed), but the local network/link layers are held up until this elapses so the just-enqueued PathTear can actually leave the node instead of being dropped by an already-stopped Ipv4/interface
         @display("i=block/control");
         @signal[lspEstablished](type=simtime_t); // LSP setup latency, emitted at the ingress when commitResv first installs the ingress label for a session
         @signal[psbCount](type=long); // current PSBList size, emitted whenever a PSB is created or removed

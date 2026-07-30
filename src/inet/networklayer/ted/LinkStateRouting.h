@@ -61,6 +61,7 @@ class INET_API LinkStateRouting : public RoutingProtocolBase, public cListener
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void handleMessageWhenDown(cMessage *msg) override;
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
