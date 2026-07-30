@@ -171,7 +171,6 @@ RsvpTe::~RsvpTe()
 void RsvpTe::initialize(int stage)
 {
     RoutingProtocolBase::initialize(stage);
-    // TODO INITSTAGE
     if (stage == INITSTAGE_LOCAL) {
         tedmod.reference(this, "tedModule", true);
         rt.reference(this, "routingTableModule", true);
@@ -298,7 +297,7 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 {
     checkTags(session, "tunnel_id endpoint setup_pri holding_pri paths");
 
-    traffic_session_t newSession;
+    TrafficSession newSession;
 
     newSession.sobj.Tunnel_Id = getParameterIntValue(session, "tunnel_id");
     newSession.sobj.Extended_Tunnel_Id = routerId.getInt();
@@ -339,9 +338,9 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 
         int lspid = getParameterIntValue(path, "lspid");
 
-        std::vector<traffic_path_t>::iterator pit;
+        std::vector<TrafficPath>::iterator pit;
 
-        traffic_path_t newPath;
+        TrafficPath newPath;
 
         newPath.sender.SrcAddress = getParameterIPAddressValue(path, "sender", routerId);
         newPath.sender.Lsp_Id = lspid;
@@ -403,7 +402,7 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
     }
 }
 
-std::vector<RsvpTe::traffic_path_t>::iterator RsvpTe::findPath(traffic_session_t *session, const SenderTemplateObj& sender)
+std::vector<RsvpTe::TrafficPath>::iterator RsvpTe::findPath(TrafficSession *session, const SenderTemplateObj& sender)
 {
     auto it = session->paths.begin();
     for (; it != session->paths.end(); it++) {
@@ -627,7 +626,7 @@ void RsvpTe::processPSB_TIMEOUT(PsbTimeoutMsg *msg)
     if (tedmod->isLocalAddress(psb->OutInterface)) {
         ASSERT(psb->OutInterface == tedmod->getInterfaceAddrByPeerAddress(psb->ERO[0].node));
 
-        sendPathTearMessage(psb->ERO[0].node, psb->Session_Object,
+        sendPathTearMessage(psb->ERO[0].node, psb->sessionObject,
                 psb->Sender_Template_Object, psb->OutInterface, routerId, false);
     }
 
@@ -683,7 +682,7 @@ bool RsvpTe::doCACCheck(const SessionObj& session, const SenderTspecObj& tspec, 
     for (auto& elem : RSBList) {
         // SE-style sharing is per outgoing link: only reservations of the same
         // session on the SAME link (OI) may share bandwidth with this request
-        if ((elem.OI == OI) && (elem.Session_Object == session) && (elem.Flowspec_Object.req_bandwidth > sharedBW))
+        if ((elem.OI == OI) && (elem.sessionObject == session) && (elem.Flowspec_Object.req_bandwidth > sharedBW))
             sharedBW = elem.Flowspec_Object.req_bandwidth;
     }
 
@@ -709,7 +708,7 @@ void RsvpTe::refreshPath(PathStateBlock *psbEle)
     Packet *pk = new Packet("Path");
     const auto& pm = makeShared<RsvpPathMsg>();
 
-    pm->setSession(psbEle->Session_Object);
+    pm->setSession(psbEle->sessionObject);
     pm->setSenderTemplate(psbEle->Sender_Template_Object);
     pm->setSenderTspec(psbEle->Sender_Tspec_Object);
 
@@ -744,11 +743,11 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle)
             if ((FilterSpecObj&)elem.Sender_Template_Object != _i.Filter_Spec_Object)
                 continue;
 
-            if (tedmod->isLocalAddress(elem.Previous_Hop_Address))
+            if (tedmod->isLocalAddress(elem.previousHopAddress))
                 continue; // IR nothing to refresh
 
-            if (!contains(phops, elem.Previous_Hop_Address))
-                phops.push_back(elem.Previous_Hop_Address);
+            if (!contains(phops, elem.previousHopAddress))
+                phops.push_back(elem.previousHopAddress);
         }
 
         for (auto& phop : phops)
@@ -765,7 +764,7 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
 
     FlowDescriptorVector flows;
 
-    msg->setSession(rsbEle->Session_Object);
+    msg->setSession(rsbEle->sessionObject);
 
     RsvpHopObj hop;
     hop.Logical_Interface_Handle = tedmod->peerRemoteInterface(PHOP);
@@ -773,13 +772,10 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
     msg->setHop(hop);
 
     for (auto& elem : PSBList) {
-        if (elem.Previous_Hop_Address != PHOP)
+        if (elem.previousHopAddress != PHOP)
             continue;
 
-        //if (it->LIH != LIH)
-//         continue;
-
-        if (elem.Session_Object != rsbEle->Session_Object)
+        if (elem.sessionObject != rsbEle->sessionObject)
             continue;
 
         for (unsigned int c = 0; c < rsbEle->FlowDescriptor.size(); c++) {
@@ -823,11 +819,11 @@ void RsvpTe::sendResvTearMessage(ResvStateBlock *rsbEle)
             if ((FilterSpecObj&)elem.Sender_Template_Object != _i.Filter_Spec_Object)
                 continue;
 
-            if (tedmod->isLocalAddress(elem.Previous_Hop_Address))
+            if (tedmod->isLocalAddress(elem.previousHopAddress))
                 continue; // IR: nothing further upstream to tear
 
-            if (!contains(phops, elem.Previous_Hop_Address))
-                phops.push_back(elem.Previous_Hop_Address);
+            if (!contains(phops, elem.previousHopAddress))
+                phops.push_back(elem.previousHopAddress);
         }
 
         for (auto& phop : phops)
@@ -844,7 +840,7 @@ void RsvpTe::sendResvTearMessage(ResvStateBlock *rsbEle, Ipv4Address PHOP)
 
     FlowDescriptorVector flows;
 
-    msg->setSession(rsbEle->Session_Object);
+    msg->setSession(rsbEle->sessionObject);
 
     RsvpHopObj hop;
     hop.Logical_Interface_Handle = tedmod->peerRemoteInterface(PHOP);
@@ -852,10 +848,10 @@ void RsvpTe::sendResvTearMessage(ResvStateBlock *rsbEle, Ipv4Address PHOP)
     msg->setHop(hop);
 
     for (auto& elem : PSBList) {
-        if (elem.Previous_Hop_Address != PHOP)
+        if (elem.previousHopAddress != PHOP)
             continue;
 
-        if (elem.Session_Object != rsbEle->Session_Object)
+        if (elem.sessionObject != rsbEle->sessionObject)
             continue;
 
         for (auto& flow : rsbEle->FlowDescriptor) {
@@ -887,7 +883,7 @@ void RsvpTe::sendResvErrorMessage(ResvStateBlock *rsbEle, int errCode)
     Packet *pk = new Packet("ResvErr");
     const auto& msg = makeShared<RsvpResvError>();
 
-    msg->setSession(rsbEle->Session_Object);
+    msg->setSession(rsbEle->sessionObject);
 
     RsvpHopObj hop;
     hop.Logical_Interface_Handle = rsbEle->OI;
@@ -914,7 +910,7 @@ void RsvpTe::preempt(Ipv4Address OI, int priority, double bandwidth)
         if (elem.OI != OI)
             continue;
 
-        if (elem.Session_Object.holdingPri != priority)
+        if (elem.sessionObject.holdingPri != priority)
             continue;
 
         if (elem.Flowspec_Object.req_bandwidth == 0.0)
@@ -1019,7 +1015,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
         double needed = req.req_bandwidth - rsb->Flowspec_Object.req_bandwidth;
 
         if (needed != 0.0) {
-            if (allocateResource(rsb->OI, rsb->Session_Object, needed)) {
+            if (allocateResource(rsb->OI, rsb->sessionObject, needed)) {
                 // allocated (deallocated) successfully
 
                 EV_DETAIL << "additional bandwidth of " << needed << " allocated sucessfully" << endl;
@@ -1035,7 +1031,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
 
                 int lspid = rsb->FlowDescriptor[maxFlowIndex].Filter_Spec_Object.Lsp_Id;
                 int oldInLabel = rsb->inLabelVector[maxFlowIndex];
-                PathStateBlock *psb = findPSB(rsb->Session_Object, (SenderTemplateObj&)rsb->FlowDescriptor[maxFlowIndex].Filter_Spec_Object);
+                PathStateBlock *psb = findPSB(rsb->sessionObject, (SenderTemplateObj&)rsb->FlowDescriptor[maxFlowIndex].Filter_Spec_Object);
 
                 EV_DETAIL << "removing filter lspid=" << lspid << " (max. flow)" << endl;
 
@@ -1071,15 +1067,14 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
 
         EV_DETAIL << "processing lspid=" << lspid << endl;
 
-        PathStateBlock *psb = findPSB(rsb->Session_Object, rsb->FlowDescriptor[i].Filter_Spec_Object);
+        PathStateBlock *psb = findPSB(rsb->sessionObject, rsb->FlowDescriptor[i].Filter_Spec_Object);
 
         LabelOpVector outLabel;
         int inInterfaceId, outInterfaceId;
 
-        bool IR = (psb->Previous_Hop_Address == routerId);
-//        bool ER = psb->OutInterface.isUnspecified();
+        bool IR = (psb->previousHopAddress == routerId);
         if (!IR) {
-            Ipv4Address localInf = tedmod->getInterfaceAddrByPeerAddress(psb->Previous_Hop_Address);
+            Ipv4Address localInf = tedmod->getInterfaceAddrByPeerAddress(psb->previousHopAddress);
             inInterfaceId = rt->getInterfaceByAddress(localInf)->getInterfaceId();
         }
         else
@@ -1123,8 +1118,8 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
 
             outInterfaceId = CHK(ift->findInterfaceByName("lo0"))->getInterfaceId();
 
-            if (!tedmod->isLocalAddress(psb->Session_Object.DestAddress)) {
-                NetworkInterface *ie = rt->getInterfaceForDestAddr(psb->Session_Object.DestAddress);
+            if (!tedmod->isLocalAddress(psb->sessionObject.DestAddress)) {
+                NetworkInterface *ie = rt->getInterfaceForDestAddr(psb->sessionObject.DestAddress);
                 if (ie)
                     outInterfaceId = ie->getInterfaceId();
             }
@@ -1156,7 +1151,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
 
         if (IR && rsb->inLabelVector[i] == -1) {
             // path established
-            sendPathNotify(psb->handler, psb->Session_Object, psb->Sender_Template_Object, PATH_CREATED, 0.0);
+            sendPathNotify(psb->handler, psb->sessionObject, psb->Sender_Template_Object, PATH_CREATED, 0.0);
             emit(lspEstablishedSignal, simTime() - psb->pathCreationTime);
         }
 
@@ -1165,7 +1160,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
             rsb->inLabelVector[i] = inLabel;
 
             // bind fec
-            rpct->bind(psb->Session_Object, psb->Sender_Template_Object, inLabel);
+            rpct->bind(psb->sessionObject, psb->Sender_Template_Object, inLabel);
         }
     }
 }
@@ -1185,7 +1180,7 @@ RsvpTe::ResvStateBlock *RsvpTe::createRSB(const Ptr<const RsvpResvMsg>& msg)
     rsbEle.commitTimerMsg = new RsbCommitTimerMsg("rsb commit");
     rsbEle.commitTimerMsg->setId(rsbEle.id);
 
-    rsbEle.Session_Object = msg->getSession();
+    rsbEle.sessionObject = msg->getSession();
     rsbEle.Next_Hop_Address = msg->getNHOP();
     rsbEle.OI = msg->getLIH();
 
@@ -1281,7 +1276,7 @@ void RsvpTe::removeRSB(ResvStateBlock *rsb)
 
     if (rsb->Flowspec_Object.req_bandwidth > 0) {
         // deallocate resources
-        allocateResource(rsb->OI, rsb->Session_Object, -rsb->Flowspec_Object.req_bandwidth);
+        allocateResource(rsb->OI, rsb->sessionObject, -rsb->Flowspec_Object.req_bandwidth);
     }
 
     for (auto it = RSBList.begin(); it != RSBList.end(); it++) {
@@ -1302,17 +1297,17 @@ void RsvpTe::removePSB(PathStateBlock *psb)
 
     EV_INFO << "removing PSB " << psb->id << " (lspid " << lspid << ")" << endl;
 
-    // remove reservation state if exists **************************************
+    // remove reservation state if exists
 
     unsigned int filterIndex;
-    ResvStateBlock *rsb = findRSB(psb->Session_Object, psb->Sender_Template_Object, filterIndex);
+    ResvStateBlock *rsb = findRSB(psb->sessionObject, psb->Sender_Template_Object, filterIndex);
     if (rsb) {
         EV_INFO << "reservation state present, will be removed too" << endl;
 
         removeRsbFilter(rsb, filterIndex);
     }
 
-    // proceed with actual removal *********************************************
+    // proceed with actual removal
 
     cancelAndDelete(psb->timerMsg);
     cancelAndDelete(psb->timeoutMsg);
@@ -1421,12 +1416,11 @@ RsvpTe::PathStateBlock *RsvpTe::createPSB(const Ptr<RsvpPathMsg>& msg)
     psbEle.timerMsg = new PsbTimerMsg("psb timer");
     psbEle.timerMsg->setId(psbEle.id);
 
-    psbEle.Session_Object = msg->getSession();
+    psbEle.sessionObject = msg->getSession();
     psbEle.Sender_Template_Object = msg->getSenderTemplate();
     psbEle.Sender_Tspec_Object = msg->getSenderTspec();
 
-    psbEle.Previous_Hop_Address = msg->getNHOP();
-//    psbEle.LIH = msg->getLIH();
+    psbEle.previousHopAddress = msg->getNHOP();
 
     psbEle.OutInterface = OI;
     psbEle.ERO = ERO;
@@ -1443,7 +1437,7 @@ RsvpTe::PathStateBlock *RsvpTe::createPSB(const Ptr<RsvpPathMsg>& msg)
     return cPSB;
 }
 
-RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const traffic_session_t& session, const traffic_path_t& path)
+RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const TrafficSession& session, const TrafficPath& path)
 {
     EroVector ERO = path.ERO;
 
@@ -1471,11 +1465,11 @@ RsvpTe::PathStateBlock *RsvpTe::createIngressPSB(const traffic_session_t& sessio
     psbEle.timerMsg = new PsbTimerMsg("psb timer");
     psbEle.timerMsg->setId(psbEle.id);
 
-    psbEle.Session_Object = session.sobj;
+    psbEle.sessionObject = session.sobj;
     psbEle.Sender_Template_Object = path.sender;
     psbEle.Sender_Tspec_Object = path.tspec;
 
-    psbEle.Previous_Hop_Address = routerId;
+    psbEle.previousHopAddress = routerId;
 
     psbEle.OutInterface = OI;
     psbEle.ERO = ERO;
@@ -1505,8 +1499,8 @@ RsvpTe::ResvStateBlock *RsvpTe::createEgressRSB(PathStateBlock *psb)
     rsbEle.commitTimerMsg = new RsbCommitTimerMsg("rsb commit");
     rsbEle.commitTimerMsg->setId(rsbEle.id);
 
-    rsbEle.Session_Object = psb->Session_Object;
-    rsbEle.Next_Hop_Address = psb->Previous_Hop_Address;
+    rsbEle.sessionObject = psb->sessionObject;
+    rsbEle.Next_Hop_Address = psb->previousHopAddress;
 
     rsbEle.OI = psb->OutInterface;
 
@@ -1581,7 +1575,6 @@ void RsvpTe::processRSVPMessage(Packet *pk)
 void RsvpTe::processHelloMsg(Packet *pk)
 {
     EV_INFO << "Received RSVP_HELLO" << endl;
-//    print(msg);
     const auto& msg = pk->peekAtFront<RsvpHelloMsg>();
     Ipv4Address sender = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     Ipv4Address peer = tedmod->primaryAddress(sender);
@@ -1669,10 +1662,8 @@ void RsvpTe::processHelloMsg(Packet *pk)
 void RsvpTe::processPathErrMsg(Packet *pk)
 {
     EV_INFO << "Received PATH_ERROR" << endl;
-//    print(msg);
 
     const auto& msg = pk->peekAtFront<RsvpPathError>();
-//    int lspid = msg->getLspId();
     int errCode = msg->getErrorCode();
 
     PathStateBlock *psb = findPSB(msg->getSession(), msg->getSenderTemplate());
@@ -1682,27 +1673,27 @@ void RsvpTe::processPathErrMsg(Packet *pk)
         return;
     }
 
-    if (psb->Previous_Hop_Address != routerId) {
-        EV_INFO << "forwarding error message to PHOP (" << psb->Previous_Hop_Address << ")" << endl;
+    if (psb->previousHopAddress != routerId) {
+        EV_INFO << "forwarding error message to PHOP (" << psb->previousHopAddress << ")" << endl;
 
         delete pk->removeControlInfo(); // FIXME
         pk->trim();
-        sendToIP(pk, psb->Previous_Hop_Address);
+        sendToIP(pk, psb->previousHopAddress);
     }
     else {
         EV_INFO << "error reached ingress router" << endl;
 
         switch (errCode) {
             case PATH_ERR_PREEMPTED:
-                sendPathNotify(psb->handler, psb->Session_Object, psb->Sender_Template_Object, PATH_PREEMPTED, 0.0);
+                sendPathNotify(psb->handler, psb->sessionObject, psb->Sender_Template_Object, PATH_PREEMPTED, 0.0);
                 break;
 
             case PATH_ERR_UNFEASIBLE:
-                sendPathNotify(psb->handler, psb->Session_Object, psb->Sender_Template_Object, PATH_UNFEASIBLE, 0.0);
+                sendPathNotify(psb->handler, psb->sessionObject, psb->Sender_Template_Object, PATH_UNFEASIBLE, 0.0);
                 break;
 
             case PATH_ERR_NEXTHOP_FAILED:
-                sendPathNotify(psb->handler, psb->Session_Object, psb->Sender_Template_Object, PATH_FAILED, 0.0);
+                sendPathNotify(psb->handler, psb->sessionObject, psb->Sender_Template_Object, PATH_FAILED, 0.0);
                 break;
 
             default:
@@ -1719,7 +1710,6 @@ void RsvpTe::processPathErrMsg(Packet *pk)
 void RsvpTe::processPathTearMsg(Packet *pk)
 {
     EV_INFO << "Received PATH_TEAR" << endl;
-//    print(msg);
 
     const auto& msg = pk->peekAtFront<RsvpPathTear>();
     int lspid = msg->getLspId();
@@ -1736,7 +1726,7 @@ void RsvpTe::processPathTearMsg(Packet *pk)
     if (psb->ERO.size() > 0) {
         EV_INFO << "forward teardown downstream" << endl;
 
-        sendPathTearMessage(psb->ERO[0].node, psb->Session_Object, psb->Sender_Template_Object,
+        sendPathTearMessage(psb->ERO[0].node, psb->sessionObject, psb->Sender_Template_Object,
                 tedmod->getInterfaceAddrByPeerAddress(psb->ERO[0].node), routerId, msg->getForce());
     }
 
@@ -1821,7 +1811,7 @@ void RsvpTe::processPathMsg(Packet *pk)
     auto msg = dynamicPtrCast<RsvpPathMsg>(pk->peekAtFront<RsvpPathMsg>()->dupShared());
     print(msg.get());
 
-    // process ERO *************************************************************
+    // process ERO
 
     EroVector ERO = msg->getERO();
 
@@ -1831,7 +1821,7 @@ void RsvpTe::processPathMsg(Packet *pk)
 
     msg->setERO(ERO);
 
-    // create PSB if doesn't exist yet *****************************************
+    // create PSB if doesn't exist yet
 
     PathStateBlock *psb = findPSB(msg->getSession(), msg->getSenderTemplate());
 
@@ -1853,11 +1843,11 @@ void RsvpTe::processPathMsg(Packet *pk)
         }
     }
 
-    // schedule timer&timeout **************************************************
+    // schedule timer&timeout
 
     scheduleTimeout(psb);
 
-    // create RSB if we're egress and doesn't exist yet ************************
+    // create RSB if we're egress and doesn't exist yet
 
     unsigned int index;
     ResvStateBlock *rsb = findRSB(msg->getSession(), msg->getSenderTemplate(), index);
@@ -1884,7 +1874,7 @@ void RsvpTe::processResvMsg(Packet *pk)
 
     Ipv4Address OI = msg->getLIH();
 
-    // find matching PSB for every flow ****************************************
+    // find matching PSB for every flow
 
     for (unsigned int m = 0; m < msg->getFlowDescriptor().size(); m++) {
         PathStateBlock *psb = findPSB(msg->getSession(), (SenderTemplateObj&)msg->getFlowDescriptor()[m].Filter_Spec_Object);
@@ -1902,11 +1892,11 @@ void RsvpTe::processResvMsg(Packet *pk)
         return;
     }
 
-    // find matching RSB *******************************************************
+    // find matching RSB
 
     ResvStateBlock *rsb = nullptr;
     for (auto& elem : RSBList) {
-        if (!(msg->isInSession(&elem.Session_Object)))
+        if (!(msg->isInSession(&elem.sessionObject)))
             continue;
 
         if (elem.Next_Hop_Address != msg->getNHOP())
@@ -2007,23 +1997,23 @@ void RsvpTe::pathProblem(PathStateBlock *psb)
 
     EV_INFO << "sending PathTear to " << nextHop << endl;
 
-    sendPathTearMessage(nextHop, psb->Session_Object, psb->Sender_Template_Object,
+    sendPathTearMessage(nextHop, psb->sessionObject, psb->Sender_Template_Object,
             tedmod->getInterfaceAddrByPeerAddress(nextHop), routerId, true);
 
     // schedule re-creation if path is permanent
 
-    auto sit = findSession(psb->Session_Object);
+    auto sit = findSession(psb->sessionObject);
     ASSERT(sit != traffic.end());
-    traffic_session_t *s = &(*sit);
+    TrafficSession *s = &(*sit);
 
     auto pit = findPath(s, psb->Sender_Template_Object);
     ASSERT(pit != s->paths.end());
-    traffic_path_t *p = &(*pit);
+    TrafficPath *p = &(*pit);
 
     if (p->permanent) {
         EV_INFO << "this path is permanent, we will try to re-create it later" << endl;
 
-        sendPathNotify(getId(), psb->Session_Object, psb->Sender_Template_Object, PATH_RETRY, retryInterval);
+        sendPathNotify(getId(), psb->sessionObject, psb->Sender_Template_Object, PATH_RETRY, retryInterval);
     }
     else {
         EV_INFO << "removing path from traffic database" << endl;
@@ -2067,7 +2057,7 @@ void RsvpTe::processPATH_NOTIFY(PathNotifyMsg *msg)
     delete msg;
 }
 
-std::vector<RsvpTe::traffic_session_t>::iterator RsvpTe::findSession(const SessionObj& session)
+std::vector<RsvpTe::TrafficSession>::iterator RsvpTe::findSession(const SessionObj& session)
 {
     auto it = traffic.begin();
     for (; it != traffic.end(); it++) {
@@ -2098,7 +2088,7 @@ void RsvpTe::delSession(const cXMLElement& node)
 
     auto sit = findSession(sobj);
     ASSERT(sit != traffic.end());
-    traffic_session_t *session = &(*sit);
+    TrafficSession *session = &(*sit);
 
     const cXMLElement *paths = getUniqueChildIfExists(&node, "paths");
     cXMLElementList pathList;
@@ -2134,7 +2124,7 @@ void RsvpTe::delSession(const cXMLElement& node)
             if (psb) {
                 ASSERT(psb->ERO.size() > 0);
 
-                sendPathTearMessage(psb->ERO[0].node, psb->Session_Object, psb->Sender_Template_Object,
+                sendPathTearMessage(psb->ERO[0].node, psb->sessionObject, psb->Sender_Template_Object,
                         tedmod->getInterfaceAddrByPeerAddress(psb->ERO[0].node), routerId, true);
 
                 removePSB(psb);
@@ -2182,7 +2172,7 @@ void RsvpTe::sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, 
 
 void RsvpTe::sendPathErrorMessage(PathStateBlock *psb, int errCode)
 {
-    sendPathErrorMessage(psb->Session_Object, psb->Sender_Template_Object, psb->Sender_Tspec_Object, psb->Previous_Hop_Address, errCode);
+    sendPathErrorMessage(psb->sessionObject, psb->Sender_Template_Object, psb->Sender_Tspec_Object, psb->previousHopAddress, errCode);
 }
 
 void RsvpTe::sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, SenderTspecObj tspec, Ipv4Address nextHop, int errCode)
@@ -2254,7 +2244,7 @@ void RsvpTe::scheduleCommitTimer(ResvStateBlock *rsbEle)
 RsvpTe::ResvStateBlock *RsvpTe::findRSB(const SessionObj& session, const SenderTemplateObj& sender, unsigned int& index)
 {
     for (auto& elem : RSBList) {
-        if (elem.Session_Object != session)
+        if (elem.sessionObject != session)
             continue;
 
         index = 0;
@@ -2273,7 +2263,7 @@ RsvpTe::ResvStateBlock *RsvpTe::findRSB(const SessionObj& session, const SenderT
 RsvpTe::PathStateBlock *RsvpTe::findPSB(const SessionObj& session, const SenderTemplateObj& sender)
 {
     for (auto& elem : PSBList) {
-        if ((elem.Session_Object == session) && (elem.Sender_Template_Object == sender))
+        if ((elem.sessionObject == session) && (elem.Sender_Template_Object == sender))
             return &(elem);
     }
     return nullptr;
@@ -2314,7 +2304,7 @@ bool operator==(const SessionObj& a, const SessionObj& b)
            a.Tunnel_Id == b.Tunnel_Id &&
            a.Extended_Tunnel_Id == b.Extended_Tunnel_Id;
     // NOTE: don't compare holdingPri and setupPri; their placement
-    // into Session_Object is only for our convenience
+    // into sessionObject is only for our convenience
 }
 
 bool operator!=(const SessionObj& a, const SessionObj& b)

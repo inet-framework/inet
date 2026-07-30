@@ -30,7 +30,6 @@ void RsvpClassifier::initialize(int stage)
         WATCH(routerId);
         WATCH(bindings);
     }
-    // TODO INITSTAGE
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         routerId = rt->getRouterId();
@@ -168,7 +167,10 @@ void RsvpClassifier::readItemFromXML(const cXMLElement *fec)
 
         newFec.session.Tunnel_Id = getParameterIntValue(fec, "tunnel_id");
         newFec.session.Extended_Tunnel_Id = getParameterIPAddressValue(fec, "extended_tunnel_id", routerId).getInt();
-        newFec.session.DestAddress = getParameterIPAddressValue(fec, "endpoint", newFec.dest); // ??? always use newFec.dest ???
+        // "endpoint" is the RSVP session's egress address; defaults to the FEC's own
+        // destination, but the XML may declare a different one (see the extended_tunnel_id
+        // mismatch case exercised by rsvpte_classifier.test)
+        newFec.session.DestAddress = getParameterIPAddressValue(fec, "endpoint", newFec.dest);
 
         newFec.sender.Lsp_Id = getParameterIntValue(fec, "lspid");
         newFec.sender.SrcAddress = routerId;

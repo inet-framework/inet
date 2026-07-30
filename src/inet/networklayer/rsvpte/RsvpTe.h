@@ -34,7 +34,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 {
   protected:
 
-    struct traffic_path_t {
+    struct TrafficPath {
         SenderTemplateObj sender;
         SenderTspecObj tspec;
 
@@ -44,20 +44,20 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         bool permanent;
     };
 
-    struct traffic_session_t {
+    struct TrafficSession {
         SessionObj sobj;
 
-        std::vector<traffic_path_t> paths;
+        std::vector<TrafficPath> paths;
     };
 
-    std::vector<traffic_session_t> traffic;
+    std::vector<TrafficSession> traffic;
 
     /**
      * Path State Block (PSB) structure
      */
     struct PathStateBlock {
         // SESSION object structure
-        SessionObj Session_Object;
+        SessionObj sessionObject;
 
         // SENDER_TEMPLATE structure
         SenderTemplateObj Sender_Template_Object;
@@ -66,10 +66,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         SenderTspecObj Sender_Tspec_Object;
 
         // Previous Hop Ipv4 address from PHOP object
-        Ipv4Address Previous_Hop_Address;
-
-        // Logical Interface Handle from PHOP object
-//        Ipv4Address LIH;
+        Ipv4Address previousHopAddress;
 
         // List of outgoing Interfaces for this (sender, destination) single entry for unicast case
         Ipv4Address OutInterface;
@@ -99,7 +96,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
      */
     struct ResvStateBlock {
         // SESSION object structure
-        SessionObj Session_Object;
+        SessionObj sessionObject;
 
         // Next Hop Ipv4 address from PHOP object
         Ipv4Address Next_Hop_Address;
@@ -113,8 +110,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
         // input labels we have currently installed in the database
         std::vector<int> inLabelVector;
 
-        // we always use shared explicit
-//        int style;
+        // no reservation style field: this model always uses shared explicit (SE)
 
         // FLOWSPEC structure
         FlowSpecObj Flowspec_Object;
@@ -205,7 +201,7 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual void processResvErrMsg(Packet *pk);
 
     virtual PathStateBlock *createPSB(const Ptr<RsvpPathMsg>& msg);
-    virtual PathStateBlock *createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
+    virtual PathStateBlock *createIngressPSB(const TrafficSession& session, const TrafficPath& path);
     virtual void removePSB(PathStateBlock *psb);
     virtual ResvStateBlock *createRSB(const Ptr<const RsvpResvMsg>& msg);
     virtual ResvStateBlock *createEgressRSB(PathStateBlock *psb);
@@ -256,8 +252,8 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     virtual PathStateBlock *findPsbById(int id);
     virtual ResvStateBlock *findRsbById(int id);
 
-    std::vector<traffic_session_t>::iterator findSession(const SessionObj& session);
-    std::vector<traffic_path_t>::iterator findPath(traffic_session_t *session, const SenderTemplateObj& sender);
+    std::vector<TrafficSession>::iterator findSession(const SessionObj& session);
+    std::vector<TrafficPath>::iterator findPath(TrafficSession *session, const SenderTemplateObj& sender);
 
     virtual HelloState *findHello(Ipv4Address peer);
 

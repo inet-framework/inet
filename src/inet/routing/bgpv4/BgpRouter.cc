@@ -422,7 +422,7 @@ void BgpRouter::listenConnectionFromPeer(SessionId sessionId)
     // accepts all incoming BGP connections on TCP_PORT; processMessageFromTcp() demuxes
     // accepted connections to the right session by peer address. This replaces the former
     // per-session listeners, which collided on the shared wildcard port when several
-    // sessions reconnected at once (see plan §4 Phase 0 result).
+    // sessions reconnected at once.
     if (listeningSocket == nullptr)
         listeningSocket = new TcpSocket();
 
