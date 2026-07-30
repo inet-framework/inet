@@ -99,6 +99,12 @@ simple RsvpTe extends SimpleModule
         bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a tunnel
         @display("i=block/control");
         @signal[tedChanged](type=inet::TedChangeInfo);
+        @signal[lspEstablished](type=simtime_t); // LSP setup latency, emitted at the ingress when commitResv first installs the ingress label for a session
+        @signal[psbCount](type=long); // current PSBList size, emitted whenever a PSB is created or removed
+        @signal[rsbCount](type=long); // current RSBList size, emitted whenever an RSB is created or removed
+        @statistic[lspEstablished](title="LSP setup latency"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[psbCount](title="number of PSBs"; record=last,vector; interpolationmode=none);
+        @statistic[rsbCount](title="number of RSBs"; record=last,vector; interpolationmode=none);
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down);

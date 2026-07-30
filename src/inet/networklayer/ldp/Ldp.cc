@@ -27,6 +27,10 @@ namespace inet {
 
 Define_Module(Ldp);
 
+simsignal_t Ldp::sessionUpSignal = registerSignal("sessionUp");
+simsignal_t Ldp::sessionDownSignal = registerSignal("sessionDown");
+simsignal_t Ldp::fecBindingCountSignal = registerSignal("fecBindingCount");
+
 std::ostream& operator<<(std::ostream& os, const Ldp::fec_bind_t& f)
 {
     os << "fecid=" << f.fecid << "  peer=" << f.peer << " label=" << f.label;
@@ -309,6 +313,7 @@ void Ldp::clearState()
     fecDown.clear();
     fecList.clear();
     pending.clear();
+    emitFecBindingCount();
 }
 
 void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)
@@ -402,6 +407,8 @@ void Ldp::updateFecListEntry(Ldp::fec_t oldItem)
         EV_INFO << "sending request message downstream" << endl;
         sendMappingRequest(oldItem.nextHop, oldItem.addr, oldItem.length);
     }
+
+    emitFecBindingCount();
 }
 
 void Ldp::rebuildFecList()
@@ -529,6 +536,11 @@ void Ldp::updateFecList(Ipv4Address nextHop)
     }
 }
 
+void Ldp::emitFecBindingCount()
+{
+    emit(fecBindingCountSignal, (long)(fecUp.size() + fecDown.size()));
+}
+
 void Ldp::sendHelloTo(Ipv4Address dest)
 {
     Packet *pk = new Packet("LDP-Hello");
@@ -624,6 +636,8 @@ void Ldp::removePeerBindings(Ipv4Address peerIP)
         uit = fecUp.erase(uit);
     }
 
+    emitFecBindingCount();
+
     EV_INFO << "updating fecList" << endl;
 
     updateFecList(peerIP);
@@ -716,6 +730,7 @@ void Ldp::socketEstablished(TcpSocket *socket)
         return;
     }
     EV_INFO << "TCP connection established with peer " << myPeers[i].peerIP << "\n";
+    emit(sessionUpSignal, (long)myPeers[i].peerIP.getInt());
 
     // we must update all entries with nextHop == peerIP
     updateFecList(myPeers[i].peerIP);
@@ -789,6 +804,7 @@ void Ldp::handleTcpConnectionDown(TcpSocket *socket)
     if (i != -1 && myPeers[i].socket == socket) {
         Ipv4Address peerIP = myPeers[i].peerIP;
         myPeers[i].socket = nullptr;
+        emit(sessionDownSignal, (long)peerIP.getInt());
         removePeerBindings(peerIP);
     }
     // defer the delete: we are called from inside socket->processMessage(), which
@@ -1180,6 +1196,8 @@ void Ldp::processLABEL_REQUEST(Ptr<const LdpPacket>& ldpPacket)
         newItem.peer = srcAddr;
         pending.push_back(newItem);
     }
+
+    emitFecBindingCount();
 }
 
 void Ldp::processLABEL_RELEASE(Ptr<const LdpPacket>& ldpPacket)
@@ -1218,6 +1236,7 @@ void Ldp::processLABEL_RELEASE(Ptr<const LdpPacket>& ldpPacket)
 
     EV_DETAIL << "removing label from list of sent mappings" << endl;
     fecUp.erase(uit);
+    emitFecBindingCount();
 }
 
 void Ldp::processLABEL_WITHDRAW(Ptr<const LdpPacket>& ldpPacket)
@@ -1327,6 +1346,8 @@ void Ldp::processLABEL_MAPPING(Ptr<const LdpPacket>& ldpPacket)
         // remove request from the list
         pit = pending.erase(pit);
     }
+
+    emitFecBindingCount();
 }
 
 int Ldp::findPeer(Ipv4Address peerAddr)
