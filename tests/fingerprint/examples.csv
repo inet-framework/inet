@@ -419,13 +419,13 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          45b6-ed3c/tplx;0000-0000/~tNl;0000-0000/~tND;9d00-b77c/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c VehicleMobility,             10s,             566c-6355/tplx;0000-0000/~tNl;0000-0000/~tND;ddaf-0493/tyf, PASS,
 
-/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             35d6-f71e/tplx;2693-86e7/~tNl;c9be-fc9d/tyf, PASS, Ipv4
-/examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            6b44-ce2b/tplx;68a5-0945/~tNl;ba79-2fee/tyf, PASS, Ipv4
-/examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             6eb7-2b02/tplx;daa3-ef10/~tNl;0506-7df1/tyf, PASS, Ipv4
-/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            9e5e-292c/tplx;90e8-88aa/~tNl;b8b8-3879/tyf, PASS, Ipv4
-/examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             5cef-8b99/tplx;ff8e-72e0/~tNl;e216-bfcc/tyf, PASS, Ipv4
-/examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             b7e4-7c7f/tplx;06d6-3c58/~tNl;ba6e-ca5a/tyf, PASS, Ipv4
-/examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             ef09-fc39/tplx;cdc6-d6c8/~tNl;8ca7-8978/tyf, PASS, Ipv4
+/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             9a21-39e0/tplx;aa3c-0e42/~tNl;0375-04cf/tyf, PASS, Ipv4
+/examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            f0dc-a341/tplx;b0e6-5d20/~tNl;8145-5fdc/tyf, PASS, Ipv4
+/examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             b915-ef4c/tplx;af6f-ea31/~tNl;46ae-e8eb/tyf, PASS, Ipv4
+/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            3c70-8432/tplx;4f80-e0a3/~tNl;390f-9582/tyf, PASS, Ipv4
+/examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             9c8d-3cff/tplx;c95f-2ae9/~tNl;fa19-ee3d/tyf, PASS, Ipv4
+/examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             e01e-20e0/tplx;ba0a-8e89/~tNl;0d6a-5d8f/tyf, PASS, Ipv4
+/examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             2b37-df93/tplx;2ca4-f2a2/~tNl;73da-db5d/tyf, PASS, Ipv4
 
 /examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0,      100s,         92e8-be6b/tplx;ea60-9956/~tNl;0317-12ee/~tND, PASS, wireless AckingWirelessInterface Ipv4
 /examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0,     100s,         366f-e8b8/tplx;ea60-9956/~tNl;e60d-1007/~tND, PASS, wireless AckingWirelessInterface Ipv4
