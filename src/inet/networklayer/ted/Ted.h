@@ -66,10 +66,21 @@ class INET_API Ted : public RoutingProtocolBase
 
     virtual void initializeTED();
 
-    virtual Ipv4AddressVector calculateShortestPath(Ipv4AddressVector dest,
-            const TeLinkStateInfoVector& topology, double req_bandwidth, int priority);
-
   public:
+    // CSPF (Constrained Shortest Path First), revived for Workstream C6 (RsvpTe's ingress
+    // path computation) -- previously DEAD code (zero callers since 2005; see calculateShortestPaths()
+    // below for the verification history). Runs Bellman-Ford (calculateShortestPaths()) on the
+    // subset of `topology` that (a) is up, (b) has at least req_bandwidth unreserved at
+    // `priority`, and (c) -- if includeAny/excludeAny are nonzero -- satisfies matchesAffinity();
+    // then walks parent pointers back from the closest reachable member of `dest` to build a
+    // full hop list. Returns an empty vector if no member of `dest` is reachable under the
+    // constraints. `dest` is a SET of acceptable destination addresses (e.g. a router's several
+    // advertised interface addresses), not a single required target -- the nearest reachable one
+    // wins.
+    virtual Ipv4AddressVector calculateShortestPath(Ipv4AddressVector dest,
+            const TeLinkStateInfoVector& topology, double req_bandwidth, int priority,
+            uint32_t includeAny = 0, uint32_t excludeAny = 0);
+
     /** @name Public interface to the Traffic Engineering Database */
     //@{
     virtual Ipv4Address getInterfaceAddrByPeerAddress(Ipv4Address peerIP);
@@ -133,8 +144,8 @@ class INET_API Ted : public RoutingProtocolBase
     //@}
 
     /** @name TE attribute query helpers (D3)
-     * Not consumed anywhere yet in this workstream -- CSPF-with-affinities
-     * (Workstream C6) and TI-LFA (Workstream F2) are the intended callers.
+     * Consumed by calculateShortestPath()/calculateShortestPaths() below (Workstream C6,
+     * CSPF-with-affinities); TI-LFA (Workstream F2) is expected to be a future caller too.
      * Static because they only look at the fields already carried by a
      * TeLinkStateInfo record (populated by initializeTED() from the
      * "linkAttributes" NED param, or defaulted to 0/empty).
@@ -177,7 +188,7 @@ class INET_API Ted : public RoutingProtocolBase
     virtual int assignIndex(std::vector<Vertex>& vertices, Ipv4Address nodeAddr);
 
     std::vector<Vertex> calculateShortestPaths(const TeLinkStateInfoVector& topology,
-            double req_bandwidth, int priority);
+            double req_bandwidth, int priority, uint32_t includeAny = 0, uint32_t excludeAny = 0);
 };
 
 std::ostream& operator<<(std::ostream& os, const TeLinkStateInfo& info);

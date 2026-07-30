@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/mpls/LibTable.h"
@@ -50,6 +51,16 @@ void RsvpClassifier::handleMessage(cMessage *)
 
 bool RsvpClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, int& outInterfaceId)
 {
+    // Dual-stack: Mpls offers every native packet to the ingress classifier,
+    // IPv6 included, so the packet's actual protocol must be checked
+    // before its header can be read as Ipv4Header. RSVP-TE bindings here are
+    // inherently IPv4 (the session/sender objects this classifier matches on, and
+    // RSVP-TE's own signalling, are IPv4-only in this model), so a non-IPv4 packet
+    // simply has no binding to match and is left unlabeled for plain L3 forwarding.
+    const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    if (protocol != &Protocol::ipv4)
+        return false;
+
     // never label OSPF(TED) and RSVP traffic
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
 
@@ -94,6 +105,22 @@ void RsvpClassifier::bind(const SessionObj& session, const SenderTemplateObj& se
             continue;
 
         EV_INFO << "binding fec id " << elem.id << " to in-label " << inLabel << endl;
+        elem.inLabel = inLabel;
+    }
+}
+
+void RsvpClassifier::rebind(const SessionObj& session, const SenderTemplateObj& oldSender, const SenderTemplateObj& newSender, int inLabel)
+{
+    for (auto& elem : bindings) {
+        if (elem.session != session)
+            continue;
+
+        if (elem.sender != oldSender)
+            continue;
+
+        EV_INFO << "make-before-break cutover: rebinding fec id " << elem.id << " from lspid "
+                << oldSender.Lsp_Id << " to lspid " << newSender.Lsp_Id << ", in-label " << inLabel << endl;
+        elem.sender = newSender;
         elem.inLabel = inLabel;
     }
 }

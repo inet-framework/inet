@@ -1,0 +1,250 @@
+%description:
+Regression test for CSPF path computation at the RSVP-TE ingress (Workstream C6):
+~RsvpTe.computeEro (default off) makes the ingress compute a full strict ERO via
+~Ted::calculateShortestPath() -- previously DEAD code (zero callers since 2005) -- whenever
+a path's configured route is empty or all-loose.
+
+Ad hoc DIAMOND: LSR1 -> {LSR2, LSR3} -> LSR4, no hosts (the tunnels terminate at LSR4
+itself; endpoint = "LSR4%routerId"). The LSR1-LSR2-LSR4 branch is 600 kbps end to end and
+the cheaper route by metric (LSR1-LSR2 metric 1, LSR2-LSR4 metric 1, total 2); the
+LSR1-LSR3-LSR4 branch is 10 Mbps end to end and the more expensive route by metric
+(LSR1-LSR3 metric 5, LSR3-LSR4 metric 5, total 10). All four LSRs have computeEro=true.
+
+Scenario:
+  1. At t=0, tunnel 1 (lspid 100, 500 kbps, permanent) is set up from the static traffic.xml.
+     With both branches fully free, CSPF picks the plain-shortest (by metric) LSR2 branch --
+     documented here as "which branch CSPF picks first" per the plan (the low-bandwidth
+     branch happens to also be the low-metric one in this topology; that is a deliberate
+     choice of this test's metrics, not a general property of CSPF).
+  2. At t=2s (after tunnel 1 has fully established, including the CAC reservation on BOTH of
+     its hops), a scenario add-session brings up tunnel 2 (lspid 200, another 500 kbps,
+     permanent). The LSR1-LSR2 and LSR2-LSR4 links now have only 100 kbps free at priority 7
+     (600k - 500k already reserved by tunnel 1) -- not enough for another 500k -- so CSPF's
+     bandwidth pruning must exclude the entire LSR2 branch and route tunnel 2 via LSR3
+     instead, even though LSR3 is the higher-metric, "naturally worse" branch.
+
+Asserted: the EV_DETAIL line RsvpTe::createIngressPSB logs at the point it installs a
+CSPF-computed ERO into the PSB (verbatim, see below), once for each tunnel, showing tunnel
+1 via LSR2 (10.1.2.1) and tunnel 2 via LSR3 (10.1.4.1) specifically.
+
+Falsification (performed manually while developing this test, as specified by the plan):
+temporarily stubbed the CSPF call in createIngressPSB to always call
+tedmod->calculateShortestPath(dest, tedmod->getLinks(), 0.0 /* stub: ignore requested
+bandwidth */, session.sobj.setupPri, path.includeAny, path.excludeAny) -- i.e. the plain,
+UNPRUNED shortest path, ignoring path.tspec.req_bandwidth entirely. Re-ran this exact test:
+it FAILED -- tunnel 2's computed ERO line showed "10.1.2.1, 10.1.4.2" (the LSR2 branch,
+identical to tunnel 1's), i.e. both tunnels piled onto the already-full LSR2 branch, and
+the not-contains check below (which guards against exactly that) failed. Restored the
+real pruning-aware call (path.tspec.req_bandwidth instead of the stubbed 0.0) and re-ran:
+PASS again, confirming the bandwidth-pruning is actually load-bearing here, not vacuous.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: CspfDiamond.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.node.mpls.RsvpMplsRouter;
+
+//
+// Ad hoc diamond: LSR1 -> {LSR2 (600 kbps branch), LSR3 (10 Mbps branch)} -> LSR4.
+// No hosts -- both tunnels terminate at LSR4 itself.
+//
+network CspfDiamond
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    submodules:
+        LSR1: RsvpMplsRouter {
+            @display("p=200,200");
+            gates: pppg[2];
+        }
+        LSR2: RsvpMplsRouter {
+            @display("p=400,100");
+            gates: pppg[2];
+        }
+        LSR3: RsvpMplsRouter {
+            @display("p=400,300");
+            gates: pppg[2];
+        }
+        LSR4: RsvpMplsRouter {
+            @display("p=600,200");
+            gates: pppg[2];
+        }
+        scenarioManager: ScenarioManager {
+            @display("p=100,100;is=s");
+        }
+    connections:
+        LSR1.pppg[0] <--> { delay = 1ms; datarate = 600kbps; } <--> LSR2.pppg[0];
+        LSR2.pppg[1] <--> { delay = 1ms; datarate = 600kbps; } <--> LSR4.pppg[0];
+        LSR1.pppg[1] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR3.pppg[0];
+        LSR3.pppg[1] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR4.pppg[1];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Addressing: LSR1.ppp0=10.1.1.1 <-> LSR2.ppp0=10.1.1.2 (600k branch, hop A)
+%#             LSR2.ppp1=10.1.2.1 <-> LSR4.ppp0=10.1.2.2 (600k branch, hop B)
+%#             LSR1.ppp1=10.1.3.1 <-> LSR3.ppp0=10.1.3.2 (10M branch, hop A)
+%#             LSR3.ppp1=10.1.4.1 <-> LSR4.ppp1=10.1.4.2 (10M branch, hop B)
+%# routerId="auto" picks the HIGHEST interface address per LSR:
+%#   LSR1 = max(10.1.1.1, 10.1.3.1) = 10.1.3.1
+%#   LSR2 = max(10.1.1.2, 10.1.2.1) = 10.1.2.1
+%#   LSR3 = max(10.1.3.2, 10.1.4.1) = 10.1.4.1
+%#   LSR4 = max(10.1.2.2, 10.1.4.2) = 10.1.4.2
+%# Metrics are set explicitly (see "Metric:" below) so the LSR2 branch is the cheaper one
+%# by metric (1+1=2) and the LSR3 branch the more expensive one (5+5=10), independent of
+%# any bandwidth-derived default metric.
+%file: LSR1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.1.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.1.3.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.1.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.1.2.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.3.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+name: ppp1	inet_addr: 10.1.4.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR4.rt
+ifconfig:
+name: ppp0	inet_addr: 10.1.2.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.1.4.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1_rsvp.xml
+<?xml version="1.0"?>
+<sessions>
+	<session>
+		<endpoint>LSR4%routerId</endpoint>
+		<tunnel_id>1</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>100</lspid>
+				<bandwidth>500000</bandwidth>
+				<permanent>true</permanent>
+			</path>
+		</paths>
+	</session>
+</sessions>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<?xml version="1.0"?>
+<scenario>
+	<at t="2s">
+		<add-session module="LSR1.rsvp">
+			<endpoint>LSR4%routerId</endpoint>
+			<tunnel_id>2</tunnel_id>
+
+			<paths>
+				<path>
+					<lspid>200</lspid>
+					<bandwidth>500000</bandwidth>
+					<permanent>true</permanent>
+				</path>
+			</paths>
+		</add-session>
+	</at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = .;../../../../src
+network = CspfDiamond
+sim-time-limit = 3s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+%# only the rsvp modules log (at detail level, so the CSPF-computed-ERO EV_DETAIL line is
+%# captured); keeping the log scoped avoids test.out bloat. NOTE: per-module cmdenv-log-level
+%# overrides are matched in FILE ORDER (first matching pattern wins), so the specific
+%# override MUST be declared before the general catch-all below.
+**.LSR*.rsvp.cmdenv-log-level = detail
+**.cmdenv-log-level = off
+
+**.LSR1.ipv4.routingTable.routingFile = "LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "LSR4.rt"
+
+**.LSR1.rsvp.traffic = xmldoc("LSR1_rsvp.xml")
+**.LSR*.rsvp.computeEro = true
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.*.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Sanity: the add-session at t=2s actually reached the ingress.
+%contains: stdout
+adding new session into database
+%#--------------------------------------------------------------------------------------------------------------
+%# Tunnel 1 (lspid 100): both branches free, CSPF picks the lower-metric LSR2 branch
+%# (LSR2's routerId 10.1.2.1, then LSR4's routerId 10.1.4.2).
+%contains: stdout
+CSPF computed ERO for session (dest=10.1.4.2, lspid=100): 10.1.2.1, 10.1.4.2
+%#--------------------------------------------------------------------------------------------------------------
+%# Tunnel 2 (lspid 200): the LSR2 branch is out of bandwidth at priority 7 (600k - 500k
+%# already reserved by tunnel 1 on BOTH its hops), so CSPF's bandwidth pruning forces the
+%# LSR3 branch (LSR3's routerId 10.1.4.1, then LSR4's routerId 10.1.4.2) -- the point of
+%# this test.
+%contains: stdout
+CSPF computed ERO for session (dest=10.1.4.2, lspid=200): 10.1.4.1, 10.1.4.2
+%#--------------------------------------------------------------------------------------------------------------
+%# Both tunnels actually establish end to end (ingress PATH_CREATED confirmation), i.e. the
+%# CSPF-computed EROs above are not just logged but actually signaled successfully. (Tunnel
+%# 1's very FIRST CSPF attempt, at t=0 before LinkStateRouting's flooding has reached LSR4's
+%# link from LSR1, legitimately finds no path yet and logs "CSPF found no feasible path" --
+%# that is correct, expected behavior, not asserted against; the retry machinery, unchanged
+%# by this commit, re-attempts it and succeeds once flooding converges, see the ERO line
+%# above.)
+%contains: stdout
+Path successfully established
+%#--------------------------------------------------------------------------------------------------------------
+%# Negative check tied to the falsification above: tunnel 2 must NOT end up on the LSR2
+%# branch (which is exactly what happens if the bandwidth-pruning silently degenerates into
+%# the plain unpruned shortest path).
+%not-contains: stdout
+CSPF computed ERO for session (dest=10.1.4.2, lspid=200): 10.1.2.1, 10.1.4.2
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

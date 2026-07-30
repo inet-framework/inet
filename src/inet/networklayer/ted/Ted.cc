@@ -224,15 +224,21 @@ int Ted::assignIndex(std::vector<Vertex>& vertices, Ipv4Address nodeAddr)
 }
 
 Ipv4AddressVector Ted::calculateShortestPath(Ipv4AddressVector dest,
-        const TeLinkStateInfoVector& topology, double req_bandwidth, int priority)
+        const TeLinkStateInfoVector& topology, double req_bandwidth, int priority,
+        uint32_t includeAny, uint32_t excludeAny)
 {
-    // FIXME comment: what do we do here?
-    std::vector<Vertex> V = calculateShortestPaths(topology, req_bandwidth, priority);
+    // Run the constrained Bellman-Ford below, then pick the CLOSEST reachable vertex that is
+    // a member of `dest` (a destination address SET -- e.g. several advertised interface
+    // addresses of the same egress router all count), and walk parent pointers back to the
+    // root to build the full hop list root..dest.
+    std::vector<Vertex> V = calculateShortestPaths(topology, req_bandwidth, priority, includeAny, excludeAny);
 
     double minDist = LS_INFINITY;
     int minIndex = -1;
 
-    // FIXME comment: what do we do in this block?
+    // Among all vertices, keep only the ones in `dest`, and track the nearest one. Vertices
+    // that Bellman-Ford never reached keep dist==LS_INFINITY, so they're never selected here
+    // unless literally nothing is reachable (minIndex then stays -1, see below).
     for (unsigned int i = 0; i < V.size(); i++) {
         if (V[i].dist >= minDist)
             continue;
@@ -374,13 +380,19 @@ bool Ted::isLocalPeer(Ipv4Address inetAddr)
 }
 
 std::vector<Ted::Vertex> Ted::calculateShortestPaths(const TeLinkStateInfoVector& topology,
-        double req_bandwidth, int priority)
+        double req_bandwidth, int priority, uint32_t includeAny, uint32_t excludeAny)
 {
     std::vector<Vertex> vertices;
     std::vector<Edge> edges;
 
-    // select edges that have enough bandwidth left, and store them into edges[].
-    // meanwhile, collect vertices in vectices[].
+    // Select edges that (a) are up, (b) have enough bandwidth left at the requested priority,
+    // and (c) satisfy the affinity constraint (Workstream C6/D3; includeAny==0 && excludeAny==0
+    // is a no-op match, so existing callers -- rebuildRoutingTable()'s plain routing-table
+    // computation -- are unaffected). Meanwhile, collect vertices in vertices[].
+    // Edge weight uses getTeMetric() (TE metric with IGP-metric fallback, Workstream D3): this
+    // is a no-op change for every shipped example/showcase today since none of them configure a
+    // nonzero teMetric via Ted's "linkAttributes" param, so getTeMetric() always returns
+    // elem.metric there -- see this commit's fingerprint verification.
     for (auto& elem : topology) {
         if (!elem.state)
             continue;
@@ -388,10 +400,13 @@ std::vector<Ted::Vertex> Ted::calculateShortestPaths(const TeLinkStateInfoVector
         if (elem.UnResvBandwidth[priority] < req_bandwidth)
             continue;
 
+        if (!matchesAffinity(elem, includeAny, excludeAny))
+            continue;
+
         Edge edge;
         edge.src = assignIndex(vertices, elem.advrouter);
         edge.dest = assignIndex(vertices, elem.linkid);
-        edge.metric = elem.metric;
+        edge.metric = getTeMetric(elem);
         edges.push_back(edge);
     }
 
@@ -400,7 +415,16 @@ std::vector<Ted::Vertex> Ted::calculateShortestPaths(const TeLinkStateInfoVector
     int srcIndex = assignIndex(vertices, srcAddr);
     vertices[srcIndex].dist = 0.0;
 
-    // FIXME comment: Dijkstra? just guessing...
+    // This is Bellman-Ford (not Dijkstra -- the "Dijkstra? just guessing..." comment that used
+    // to sit here was the original 2005 author's own doubt about which algorithm he'd written,
+    // on code that had ZERO callers until Workstream C6 revived it for RsvpTe's ingress CSPF).
+    // Verified correct by direct review plus tests/unit/Ted_calculateShortestPath.test (a
+    // hand-built topology with a known-correct answer, exercised BEFORE this function got its
+    // first real caller): the outer loop's bound (vertices.size()-1 passes, the textbook
+    // Bellman-Ford bound for a graph with no negative-weight cycles -- all link metrics/costs
+    // here are non-negative) is correct and sufficient regardless of edge insertion order; the
+    // early "no modification this pass -> stop" exit is a valid, safe optimization on top of
+    // that bound, not a substitute for it.
     for (unsigned int i = 1; i < vertices.size(); i++) {
         bool mod = false;
 

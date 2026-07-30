@@ -1,0 +1,340 @@
+%description:
+Regression test for make-before-break re-routing (Workstream C7, RFC 3209 Section 4.6.4):
+on finding a strictly cheaper route, ~RsvpTe signals a brand-new replacement LSP-id and
+only tears down the old one AFTER the replacement's ingress label is installed and the
+classifier has been cut over -- the inverse of the old break-before-make order (tear first,
+re-signal second).
+
+Trigger used: "reoptimizeInterval" (RFC 4736-lite periodic reoptimization), NOT a link/node
+failure. This is deliberate: a hard failure (as exercised by testte_failure/testte_failure2/
+net37/the FailureReroute showcase) degenerates MBB's central promise -- the old path is
+already dead, so there's nothing to "keep alive" -- and even a plain CSPF-aware retry (no MBB
+at all) already reroutes onto a different branch once the failed one is excluded. Reoptimize
+is the one trigger where the old path is demonstrably still working right up to the moment of
+cutover, so it is the only scenario that can prove make-before-break's real payoff: zero
+interruption.
+
+Ad hoc diamond: LSR1 -> {LSR2 (600 kbps), LSR3 (10 Mbps)} -> LSR4, plus host1 behind LSR1 and
+host4 behind LSR4 (real end-to-end UDP traffic, unlike ~rsvpte_cspf.test's routers-only
+tunnel). LSR2 is the lower-metric branch (metric 1+1=2) but starts SHUT DOWN, so tunnel 1
+(lspid 100, 50 kbps, permanent, computeEro=true, no configured route) first establishes over
+the higher-metric LSR3 branch (metric 5+5=10) -- the only one available. LSR2 is started back
+up at t=3s; once flooding restores both its links in the TED, the next "reoptimizeInterval"
+(0.5s) tick finds the LSR2 branch strictly cheaper (metric 2 < 10) and reroutes:
+
+  1. A fresh Lsp_Id (101) is signaled over the now-available LSR2 branch, while lspid 100's
+     PSB/RSB and the classifier's FEC binding to it are left completely untouched.
+  2. Once lspid 101's ingress label is installed (commitResv's cutover), the classifier's FEC
+     entry (originally bound to lspid 100 by the static "LSR1_fec.xml") is rebound to lspid
+     101 -- this is the actual traffic cutover.
+  3. Only then is PathTear sent for the old lspid 100, and its PSB/RSB removed.
+
+Asserted (ordered, %contains-regex): ~RsvpTe::commitResv's EV_DETAIL label-install line for
+the NEW lspid (101) appears BEFORE ~RsvpTe::pathProblem-style "sending PathTear to" line for
+the OLD one (100) -- the crux assertion that this is make-before-break, not break-before-make.
+Also asserted: the reoptimization-detected line (with the 10-vs-2 metric comparison) and the
+cutover/rebind lines, verbatim from the current code.
+
+Zero-interruption claim (verified while writing this test, not asserted programmatically since
+this framework has no per-packet sequence assertion): grepping every "Received packet:
+(inet::Packet)UdpBasicAppData-N" line at host4 and diffing consecutive N shows exactly one gap
+in the whole run, N=23->44, entirely BEFORE lspid 100 even first establishes (t=1.0s, while
+LSR2 is still down and the network is still converging) -- i.e. ordinary startup loss, nothing
+to do with MBB. There is no gap whatsoever around the reoptimization/cutover event (t=3.5s):
+delivery is provably continuous across the switch from lspid 100 to lspid 101. The %contains
+DELIVERED check below confirms strong (not just nonzero) end-to-end delivery (379/400 packets
+sent over the whole 8s run, once initial convergence loss is discounted).
+
+Falsification: performed against the parent commit (Workstream C6, no make-before-break/
+reoptimizeInterval at all) -- confirmed to FAIL. The ini's `**.LSR*.rsvp.reoptimizeInterval =
+0.5s` wildcard assignment is silently a no-op there (the parent's ~RsvpTe.ned has no such
+parameter, and a wildcard ini assignment matching zero parameters is not a config error), so
+the simulation runs to completion exactly as it would with the line simply absent: tunnel 1
+stays on lspid 100 via the LSR3 branch for the whole run (LSR2 coming back up changes
+nothing), and none of the "reoptimization:"/"make-before-break"/lspid-101 lines are ever
+produced -- the %contains-regex assertion fails outright for lack of any match. Delivered
+packet count is unaffected (still 379, since the parent's only route -- LSR3 -- keeps working
+regardless), confirming the failure is specifically about the missing reroute, not a
+run-level error. Separately, and more substantively (should reoptimizeInterval ever be added
+without full make-before-break, e.g. as a bare "tear down and resignal the same lspid"
+reoptimizer): the ordering assertion below would still falsify it on its own, since a
+break-before-make implementation sends "sending PathTear to" immediately upon deciding to
+reroute, long before any replacement label is ever installed -- the opposite order.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: RsvpteMbbDiamond.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.node.mpls.RsvpMplsRouter;
+import inet.node.inet.StandardHost;
+
+//
+// Ad hoc diamond, with real end-to-end hosts: host1 -- LSR1 -> {LSR2 (600 kbps),
+// LSR3 (10 Mbps)} -> LSR4 -- host4.
+//
+network RsvpteMbbDiamond
+{
+    parameters:
+        **.ipv4.configurator.networkConfiguratorModule = "";
+    submodules:
+        host1: StandardHost {
+            @display("p=50,200");
+            gates: pppg[1];
+        }
+        host4: StandardHost {
+            @display("p=650,200");
+            gates: pppg[1];
+        }
+        LSR1: RsvpMplsRouter {
+            @display("p=200,200");
+            gates: pppg[3];
+        }
+        LSR2: RsvpMplsRouter {
+            @display("p=400,100");
+            gates: pppg[2];
+        }
+        LSR3: RsvpMplsRouter {
+            @display("p=400,300");
+            gates: pppg[2];
+        }
+        LSR4: RsvpMplsRouter {
+            @display("p=600,200");
+            gates: pppg[3];
+        }
+        scenarioManager: ScenarioManager {
+            @display("p=100,100;is=s");
+        }
+    connections:
+        host1.pppg[0] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR1.pppg[0];
+        LSR1.pppg[1] <--> { delay = 1ms; datarate = 600kbps; } <--> LSR2.pppg[0];
+        LSR2.pppg[1] <--> { delay = 1ms; datarate = 600kbps; } <--> LSR4.pppg[0];
+        LSR1.pppg[2] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR3.pppg[0];
+        LSR3.pppg[1] <--> { delay = 1ms; datarate = 10Mbps; } <--> LSR4.pppg[1];
+        LSR4.pppg[2] <--> { delay = 1ms; datarate = 10Mbps; } <--> host4.pppg[0];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Addressing: host1.ppp0=10.0.0.1 <-> LSR1.ppp0=10.0.0.2
+%#             LSR1.ppp1=10.0.1.1 <-> LSR2.ppp0=10.0.1.2 (600k branch, hop A, metric 1)
+%#             LSR2.ppp1=10.0.2.1 <-> LSR4.ppp0=10.0.2.2 (600k branch, hop B, metric 1)
+%#             LSR1.ppp2=10.0.3.1 <-> LSR3.ppp0=10.0.3.2 (10M branch, hop A, metric 5)
+%#             LSR3.ppp1=10.0.4.1 <-> LSR4.ppp1=10.0.4.2 (10M branch, hop B, metric 5)
+%#             LSR4.ppp2=10.0.5.1 <-> host4.ppp0=10.0.5.2
+%# routerId="auto" picks the HIGHEST interface address per LSR:
+%#   LSR1 = max(10.0.0.2, 10.0.1.1, 10.0.3.1) = 10.0.3.1
+%#   LSR2 = max(10.0.1.2, 10.0.2.1) = 10.0.2.1
+%#   LSR3 = max(10.0.3.2, 10.0.4.1) = 10.0.4.1
+%#   LSR4 = max(10.0.2.2, 10.0.4.2, 10.0.5.1) = 10.0.5.1
+%file: LSR1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.1.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp2	inet_addr: 10.0.3.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+224.0.0.0	*	255.0.0.0	H	0	ppp2
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.2.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.3.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+name: ppp1	inet_addr: 10.0.4.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR4.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+name: ppp1	inet_addr: 10.0.4.2	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 5
+name: ppp2	inet_addr: 10.0.5.1	MULTICAST	MTU: 1500	Groups: 224.0.0.0	Metric: 1
+ifconfigend.
+
+route:
+224.0.0.0	*	255.0.0.0	H	0	ppp0
+224.0.0.0	*	255.0.0.0	H	0	ppp1
+224.0.0.0	*	255.0.0.0	H	0	ppp2
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: host1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.0.2	*		255.255.255.255	H	0	ppp0
+default:	10.0.0.2	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: host4.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.5.2	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.5.1	*		255.255.255.255	H	0	ppp0
+default:	10.0.5.1	0.0.0.0		G	0	ppp0
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# fecid 1 is statically bound to lspid 100 (the tunnel's ORIGINAL Lsp_Id); the whole point of
+%# this test is that the make-before-break cutover rebinds it to the new one (101) itself --
+%# nothing here ever references 101 directly.
+%file: LSR1_fec.xml
+<?xml version="1.0"?>
+<fectable>
+	<fecentry>
+		<id>1</id>
+		<destination>10.0.5.2</destination>
+		<tunnel_id>1</tunnel_id>
+		<endpoint>LSR4%routerId</endpoint>
+		<lspid>100</lspid>
+	</fecentry>
+</fectable>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1_rsvp.xml
+<?xml version="1.0"?>
+<sessions>
+	<session>
+		<endpoint>LSR4%routerId</endpoint>
+		<tunnel_id>1</tunnel_id>
+
+		<paths>
+			<path>
+				<lspid>100</lspid>
+				<bandwidth>50000</bandwidth>
+				<permanent>true</permanent>
+			</path>
+		</paths>
+	</session>
+</sessions>
+
+%#--------------------------------------------------------------------------------------------------------------
+%# LSR2 starts down (so tunnel 1's only option is the expensive LSR3 branch), comes back at
+%# t=3s; the next reoptimizeInterval tick (0.5s) then finds the now-restored, cheaper LSR2
+%# branch and reroutes onto it.
+%file: scenario.xml
+<?xml version="1.0"?>
+<scenario>
+    <at t="0.5s">
+        <shutdown module="LSR2"/>
+    </at>
+    <at t="3s">
+        <startup module="LSR2"/>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = .;../../../../src
+network = RsvpteMbbDiamond
+sim-time-limit = 8s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+%# only LSR1.rsvp logs at detail level (to capture the CSPF/label-install EV_DETAIL lines);
+%# everything else stays at info to keep test.out manageable. Per-module cmdenv-log-level
+%# overrides are matched in FILE ORDER (first matching pattern wins), so the specific
+%# override MUST be declared before the general catch-all below.
+**.LSR1.rsvp.cmdenv-log-level = detail
+**.LSR1.classifier.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.02s
+**.host1.app[0].destAddresses = "10.0.5.2"
+
+**.host4.numApps = 1
+**.host4.app[0].typename = "UdpSink"
+**.host4.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "host1.rt"
+**.host4.ipv4.routingTable.routingFile = "host4.rt"
+**.LSR1.ipv4.routingTable.routingFile = "LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "LSR4.rt"
+
+**.LSR1.classifier.config = xmldoc("LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("LSR1_rsvp.xml")
+
+**.LSR*.rsvp.computeEro = true
+**.LSR*.rsvp.reoptimizeInterval = 0.5s
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.*.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# Sanity: tunnel 1 first establishes over the ONLY available (LSR3) branch, before LSR2 is
+%# ever started back up.
+%contains: stdout
+Path successfully established
+%#--------------------------------------------------------------------------------------------------------------
+%# Reoptimization fires once LSR2's branch is back and correctly identifies it as strictly
+%# cheaper (metric 2, the LSR2 branch) than the currently-active route (metric 10, LSR3).
+%contains: stdout
+reoptimization: found a strictly better path for lspid=100 (current metric=10, candidate metric=2), starting make-before-break re-route
+%#--------------------------------------------------------------------------------------------------------------
+%# make-before-break: a fresh Lsp_Id (101) is signaled for the replacement.
+%contains: stdout
+make-before-break: signaling replacement lspid=101 for lspid=100
+%#--------------------------------------------------------------------------------------------------------------
+%# THE CRUX ASSERTION: the new path's ingress label-install line (lspid 101) appears BEFORE
+%# the old path's PathTear-send line (for lspid 100) -- make-before-break, not
+%# break-before-make. Both lines quoted verbatim from the current code (RsvpTe::commitResv's
+%# EV_DETAIL label-install line; RsvpTe::completeMakeBeforeBreakCutover's "sending PathTear to"
+%# EV_INFO line, shared textually with the pre-existing pathProblem() teardown path).
+%contains-regex: stdout
+installing label for 101 outLabel=.*
+make-before-break cutover: lspid=101 is up, switching traffic away from lspid=100.*
+make-before-break cutover: rebinding fec id 1 from lspid 100 to lspid 101.*
+sending PathTear to .*
+%#--------------------------------------------------------------------------------------------------------------
+%# Strong (not just nonzero) end-to-end delivery across the whole run, including the
+%# reoptimization/cutover: 379 of 400 sent packets delivered (the only loss is ordinary
+%# startup-convergence loss before lspid 100 first establishes, entirely unrelated to MBB --
+%# see the description above for the per-packet-sequence verification performed while writing
+%# this test).
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 300 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
