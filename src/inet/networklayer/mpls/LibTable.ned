@@ -19,7 +19,8 @@ import inet.common.SimpleModule;
 // <libentry> children. <libentry> represents an entry (row) in
 // the table, and must have the following child elements:
 // - <inLabel>: input label (integer)
-// - <inInterface>: input interface (interface name)
+// - <inInterface>: input interface (interface name, or "any" to match
+//   regardless of the incoming interface, e.g. for ingress/PUSH entries)
 // - <outInterface>: output interface (interface name)
 // - <outLabel>: output label operations, see below.
 //
@@ -34,6 +35,8 @@ simple LibTable extends SimpleModule
 {
     parameters:
         @class(LibTable);
+        string interfaceTableModule;   // The path to the InterfaceTable module; used to resolve
+                                        // the XML config's interface names to interface ids
         xml config = default(xml("<libtable/>")); // Table contents to be loaded on startup
         @display("i=block/table2");
 }

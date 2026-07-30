@@ -869,16 +869,16 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
         PathStateBlock *psb = findPSB(rsb->Session_Object, rsb->FlowDescriptor[i].Filter_Spec_Object);
 
         LabelOpVector outLabel;
-        std::string inInterface, outInterface;
+        int inInterfaceId, outInterfaceId;
 
         bool IR = (psb->Previous_Hop_Address == routerId);
 //        bool ER = psb->OutInterface.isUnspecified();
         if (!IR) {
             Ipv4Address localInf = tedmod->getInterfaceAddrByPeerAddress(psb->Previous_Hop_Address);
-            inInterface = rt->getInterfaceByAddress(localInf)->getInterfaceName();
+            inInterfaceId = rt->getInterfaceByAddress(localInf)->getInterfaceId();
         }
         else
-            inInterface = "any";
+            inInterfaceId = LibTable::ANY_INTERFACE; // ingress LSR: the label is pushed, not matched against an incoming interface
 
         // outlabel and outgoing interface
 
@@ -891,7 +891,7 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
             lop.label = rsb->FlowDescriptor[i].label;
             outLabel.push_back(lop);
 
-            outInterface = rt->getInterfaceByAddress(psb->OutInterface)->getInterfaceName();
+            outInterfaceId = rt->getInterfaceByAddress(psb->OutInterface)->getInterfaceId();
         }
         else {
             // egress router
@@ -900,22 +900,22 @@ void RsvpTe::commitResv(ResvStateBlock *rsb)
             lop.optcode = POP_OPER;
             outLabel.push_back(lop);
 
-            outInterface = "lo0";
+            outInterfaceId = CHK(ift->findInterfaceByName("lo0"))->getInterfaceId();
 
             if (!tedmod->isLocalAddress(psb->Session_Object.DestAddress)) {
                 NetworkInterface *ie = rt->getInterfaceForDestAddr(psb->Session_Object.DestAddress);
                 if (ie)
-                    outInterface = ie->getInterfaceName(); // FIXME why use name to identify an interface?
+                    outInterfaceId = ie->getInterfaceId();
             }
         }
 
         EV_DETAIL << "installing label for " << lspid << " outLabel=" << outLabel
-                  << " outInterface=" << outInterface << endl;
+                  << " outInterface=" << outInterfaceId << endl;
 
         ASSERT(rsb->inLabelVector.size() == rsb->FlowDescriptor.size());
 
-        int inLabel = lt->installLibEntry(rsb->inLabelVector[i], inInterface,
-                    outLabel, outInterface);
+        int inLabel = lt->installLibEntry(rsb->inLabelVector[i], inInterfaceId,
+                    outLabel, outInterfaceId);
 
         ASSERT(inLabel >= 0);
 

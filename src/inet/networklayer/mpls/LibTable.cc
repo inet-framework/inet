@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "inet/common/XMLUtils.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 
@@ -21,12 +22,13 @@ void LibTable::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         maxLabel = 0;
+        ift.reference(this, "interfaceTableModule", true);
         WATCH(maxLabel);
         WATCH(lib);
         WATCH_EXPR("numLabels", lib.size());
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        // read configuration
+        // read configuration (by this stage all interfaces are registered in ift)
         readTableFromXML(par("config"));
     }
 }
@@ -36,35 +38,35 @@ void LibTable::handleMessage(cMessage *msg)
     throw cRuntimeError("LibTable does not process messages, but received '%s'", msg->getName());
 }
 
-bool LibTable::resolveLabel(std::string inInterface, int inLabel,
-        LabelOpVector& outLabel, std::string& outInterface)
+bool LibTable::resolveLabel(int inInterfaceId, int inLabel,
+        LabelOpVector& outLabel, int& outInterfaceId)
 {
-    bool any = (inInterface.length() == 0);
+    bool any = (inInterfaceId == ANY_INTERFACE);
 
     for (auto& elem : lib) {
-        if (!any && elem.inInterface != inInterface)
+        if (!any && elem.inInterfaceId != inInterfaceId)
             continue;
 
         if (elem.inLabel != inLabel)
             continue;
 
         outLabel = elem.outLabel;
-        outInterface = elem.outInterface;
+        outInterfaceId = elem.outInterfaceId;
 
         return true;
     }
     return false;
 }
 
-int LibTable::installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
-        std::string outInterface)
+int LibTable::installLibEntry(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
+        int outInterfaceId)
 {
     if (inLabel == -1) {
         LibEntry newItem;
         newItem.inLabel = ++maxLabel;
-        newItem.inInterface = inInterface;
+        newItem.inInterfaceId = inInterfaceId;
         newItem.outLabel = outLabel;
-        newItem.outInterface = outInterface;
+        newItem.outInterfaceId = outInterfaceId;
         lib.push_back(newItem);
         return newItem.inLabel;
     }
@@ -73,9 +75,9 @@ int LibTable::installLibEntry(int inLabel, std::string inInterface, const LabelO
             if (elem.inLabel != inLabel)
                 continue;
 
-            elem.inInterface = inInterface;
+            elem.inInterfaceId = inInterfaceId;
             elem.outLabel = outLabel;
-            elem.outInterface = outInterface;
+            elem.outInterfaceId = outInterfaceId;
             return inLabel;
         }
         throw cRuntimeError("Cannot update LIB entry: no entry with inLabel=%d", inLabel);
@@ -111,8 +113,25 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
         newItem.inLabel = getParameterIntValue(&entry, "inLabel");
         if (newItem.inLabel <= 0)
             throw cRuntimeError("Invalid libentry at %s: inLabel must be > 0, but is %d", entry.getSourceLocation(), newItem.inLabel);
-        newItem.inInterface = getParameterStrValue(&entry, "inInterface");
-        newItem.outInterface = getParameterStrValue(&entry, "outInterface");
+
+        const char *inInterfaceName = getParameterStrValue(&entry, "inInterface");
+        if (!strcmp(inInterfaceName, "any")) {
+            // conventional sentinel for "matches regardless of incoming interface"
+            // (used e.g. for statically configured ingress/PUSH entries)
+            newItem.inInterfaceId = ANY_INTERFACE;
+        }
+        else {
+            NetworkInterface *inIe = ift->findInterfaceByName(inInterfaceName);
+            if (!inIe)
+                throw cRuntimeError("Invalid libentry at %s: inInterface '%s' not registered by any interface", entry.getSourceLocation(), inInterfaceName);
+            newItem.inInterfaceId = inIe->getInterfaceId();
+        }
+
+        const char *outInterfaceName = getParameterStrValue(&entry, "outInterface");
+        NetworkInterface *outIe = ift->findInterfaceByName(outInterfaceName);
+        if (!outIe)
+            throw cRuntimeError("Invalid libentry at %s: outInterface '%s' not registered by any interface", entry.getSourceLocation(), outInterfaceName);
+        newItem.outInterfaceId = outIe->getInterfaceId();
 
         cXMLElementList ops = getUniqueChild(&entry, "outLabel")->getChildrenByTagName("op");
         for (auto& ops_oit : ops) {
@@ -220,9 +239,9 @@ std::ostream& operator<<(std::ostream& os, const LabelOpVector& label)
 std::ostream& operator<<(std::ostream& os, const LibTable::LibEntry& lib)
 {
     os << "inLabel:" << lib.inLabel;
-    os << "    inInterface:" << lib.inInterface;
+    os << "    inInterfaceId:" << lib.inInterfaceId;
     os << "    outLabel:" << lib.outLabel;
-    os << "    outInterface:" << lib.outInterface;
+    os << "    outInterfaceId:" << lib.outInterfaceId;
     return os;
 }
 

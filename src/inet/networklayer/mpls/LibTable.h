@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
@@ -37,17 +39,21 @@ typedef std::vector<LabelOp> LabelOpVector;
 class INET_API LibTable : public SimpleModule
 {
   public:
+    // sentinel inInterfaceId meaning "any incoming interface"
+    static constexpr int ANY_INTERFACE = -1;
+
     struct LibEntry {
         int inLabel;
-        std::string inInterface;
+        int inInterfaceId;
 
         LabelOpVector outLabel;
-        std::string outInterface;
+        int outInterfaceId;
     };
 
   protected:
     int maxLabel;
     std::vector<LibEntry> lib;
+    ModuleRefByPar<IInterfaceTable> ift;
 
   protected:
     virtual void initialize(int stage) override;
@@ -59,11 +65,11 @@ class INET_API LibTable : public SimpleModule
 
   public:
     // label management
-    virtual bool resolveLabel(std::string inInterface, int inLabel,
-            LabelOpVector& outLabel, std::string& outInterface);
+    virtual bool resolveLabel(int inInterfaceId, int inLabel,
+            LabelOpVector& outLabel, int& outInterfaceId);
 
-    virtual int installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
-            std::string outInterface);
+    virtual int installLibEntry(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
+            int outInterfaceId);
 
     virtual void removeLibEntry(int inLabel);
 
