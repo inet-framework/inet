@@ -441,22 +441,36 @@ Both are visible in the cell itself — the access point's rate visualizer draws
 rate as a bar above it (a short red bar at 6 Mbps for ``sta[0]``, tall green bars at 54 Mbps for
 the other four, identical in both runs), while each client shows its running received-packet count:
 
-.. figure:: media/downlink-cell.png
+.. figure:: media/downlink-cell-anomaly.png
 ..
    FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
-   type:     canvas (Qtenv window capture, two configs composited)
-   config:   DownlinkAnomaly + DownlinkAirtimeFair, run 0
+   type:     canvas (Qtenv window capture)
+   config:   DownlinkAnomaly, run 0
    seed:     default
-   shows:    the downlink cell -- rate-visualizer bars (sta[0]=6 red, sta[1..4]=54 green,
-             identical in both) and per-station received-packet counts (anomaly all ~460-490;
-             fix sta[0]=132, the others ~870-960)
+   shows:    the downlink cell under the frame-fair AP queue -- rate-visualizer bars (sta[0]=6 red,
+             sta[1..4]=54 green) and per-station received-packet counts (all clients ~460-490)
    anchor:   at t=2s (1s past warmup); counts scale with time, the anomaly/fix contrast is
              structural. If the bars stop showing 6 vs 54, the dcf datarateSelected wiring changed.
    capture:  get_canvas_image renders visualizer annotations at the canvas origin, so this is a
-             Qtenv (xcb) window import per config -- run to 2s express, set_canvas_view fit, crop
-             to the module rectangle + 5px green margin, paint out the inspector toolbar, composite
-             the two side by side.
-   record:   inet -u Qtenv -c <Config> --mcp-server-address localhost:8765
+             Qtenv (xcb) window import -- run to 2s express, set_canvas_view fit, crop to the module
+             rectangle + 5px green margin, paint out the inspector toolbar, add the bold title.
+   record:   inet -u Qtenv -c DownlinkAnomaly --mcp-server-address localhost:8765
+             (DownlinkBase spreads the clients 4 m apart so the per-station readouts don't overlap)
+   stamp:    captured 2026-07, INET 4.6
+
+.. figure:: media/downlink-cell-fair.png
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     canvas (Qtenv window capture)
+   config:   DownlinkAirtimeFair, run 0
+   seed:     default
+   shows:    the same cell under the airtime-fair AP queue -- identical rate-visualizer bars
+             (sta[0]=6 red, sta[1..4]=54 green) but per-station counts now split: sta[0]=132,
+             the four fast clients ~870-960
+   anchor:   at t=2s (1s past warmup); counts scale with time, the anomaly/fix contrast is
+             structural. If the bars stop showing 6 vs 54, the dcf datarateSelected wiring changed.
+   capture:  same Qtenv (xcb) window flow as the anomaly figure above, for this config.
+   record:   inet -u Qtenv -c DownlinkAirtimeFair --mcp-server-address localhost:8765
              (DownlinkBase spreads the clients 4 m apart so the per-station readouts don't overlap)
    stamp:    captured 2026-07, INET 4.6
 
