@@ -60,18 +60,20 @@ disciplines that enforce airtime fairness avoid the anomaly, but they are outsid
 DCF.
 
 These airtime-fair disciplines take two forms, because the anomaly itself does — and this
-showcase reproduces both. One form is *uplink* — independent stations contending, each running
-its own DCF — and fixing it means every *contending* station must bound its own share. That is
+showcase reproduces both. One form is *uplink*: independent stations contending, each running
+its own DCF. Fixing it means every *contending* station must bound its own share, which is
 what the 802.11e standard adds with the transmission opportunity (TXOP). The mirror-image
-*downlink* form appears when one access point serves many clients of mixed rates: now a single
-transmitter divides *its own* airtime, a scheduling problem rather than a contention one. That
-is what production access points solve — the Linux ``mac80211`` stack schedules its own frames
-with a deficit-round-robin whose deficit is counted in airtime (microseconds) instead of bytes
-(Høiland-Jørgensen et al., `"Ending the Anomaly" <https://arxiv.org/abs/1703.00064>`__,
-USENIX ATC 2017), and many commercial access points expose an equivalent "airtime fairness"
-knob. That transmit-side scheduler only governs the frames a node sends itself, so it cures the
-downlink case but does nothing for distributed uplink contention — the two forms need separate
-fixes, both shown below.
+*downlink* form appears when one access point serves many clients of mixed rates. There is no
+contention to arbitrate — a single transmitter divides *its own* airtime among its
+destinations, a scheduling problem rather than a contention one.
+
+The downlink form is the one production access points face. The Linux ``mac80211`` stack
+schedules its own frames with a deficit round-robin whose deficit is counted in airtime
+(microseconds) instead of bytes (Høiland-Jørgensen et al., `"Ending the Anomaly"
+<https://arxiv.org/abs/1703.00064>`__, USENIX ATC 2017), and many commercial access points
+expose an equivalent "airtime fairness" knob. Such a transmit-side scheduler only governs the
+frames a node sends itself, so it cures the downlink case but does nothing for distributed
+uplink contention — the two forms need separate fixes, and both are shown below.
 
 The Model
 ---------
@@ -99,27 +101,29 @@ make one station slow and the rest fast purely by configuration:
 The relevant settings:
 
 - ``opMode = "g(erp)"`` — every interface runs 802.11g.
-- ``bitrate`` — the fixed data rate: 54 Mbps for the fast stations, lower for the slow
-  one.
+- ``bitrate`` — the fixed data rate. Here it is 54 Mbps everywhere; the configurations
+  below override it for one station to open the rate gap.
 - The transmit ``power`` is generous and all stations sit close to the access point, so
   every link is error-free at every rate. The slow station is slow *by configuration*,
   not because of a weak signal — this isolates the anomaly from packet loss.
-- A small MAC queue (``pendingQueue.packetCapacity``) together with an over-provisioned
-  UDP source keeps every station continuously backlogged, so the channel is fully
-  contended. This is the saturated regime in which the rate anomaly is defined.
+- A MAC queue of ten frames (``pendingQueue.packetCapacity``) together with an
+  over-provisioned UDP source keeps every station continuously backlogged, so the channel
+  is fully contended. This is the saturated regime in which the rate anomaly is defined.
+  The exact depth does not matter as long as the queue never drains — ten frames is simply
+  enough to keep one always ready to send while the excess is dropped at the queue rather
+  than buffered into a growing delay.
 
 Every station sends a saturating UDP stream to the server on its own port, so
 throughput can be measured separately for each station:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: *.sta[*].numApps
-   :end-at: *.sta[*].app[0].sendInterval
+   :start-at: [Config UplinkBase]
+   :end-at: *.server.app[*].localPort
    :language: ini
 
-The traffic settings shown here make up an abstract ``[Config UplinkBase]``, which —
-together with the radio and node placement in ``[General]`` — the two runnable uplink
-configurations extend; the downlink section later builds a parallel
-``[Config DownlinkBase]``.
+These traffic settings, together with the radio and node placement in ``[General]``, make up
+an abstract ``[Config UplinkBase]`` that every uplink configuration extends; the downlink
+section later builds a parallel ``[Config DownlinkBase]``.
 
 The Network
 ~~~~~~~~~~~
@@ -127,6 +131,8 @@ The Network
 The network contains an access point with five wireless stations clustered nearby, and
 a wired server reachable through the access point. All five stations upload a saturating
 UDP flow to the server at the same time, so they continuously contend for the channel.
+``sta[0]`` is the station the later configurations slow down; the other four always stay
+at 54 Mbps.
 
 .. figure:: media/network.png
 ..
@@ -140,22 +146,55 @@ UDP flow to the server at the same time, so they continuously contend for the ch
              wired server reachable over Eth100M
    anchor:   initial state (t=0, before run). Structural -- no timing; if the module set
              or links differ, the NED changed.
-   capture:  Qtenv + MCP server; set_canvas_view {module_path:"<root>", fit:true} then
-             get_canvas_image {module_path:"<root>", area:"viewport"}; green canvas
-             margin trimmed with `convert -fuzz 6% -trim`. Was 858x688.
+   capture:  Qtenv + MCP server; set_canvas_view {module_path:"<root>", zoom:30} then
+             get_canvas_image {module_path:"<root>", area:"all_elements", margin:8}.
+             zoom 30 (not fit:true) keeps the 2 m station spacing wide enough for the
+             labels not to collide; all_elements still leaves the unused lower half of
+             the playground, so the result is cropped to its content bounding box with
+             an 18 px margin (background #d1d1d1, threshold 18, ignoring the green
+             playground frame). Was 858x688 with a third of it empty; now 798x540.
    stamp:    captured 2026-07, INET 4.6
+
+The Configurations
+~~~~~~~~~~~~~~~~~~
+
+Six runnable configurations are defined, in two families of three. The uplink family has the
+stations contending; the downlink family has the access point serving them. Within each
+family there is a no-rate-gap baseline, the anomaly, and the fix:
+
+===================  ==========  ==========================================================
+configuration        runs        what it shows
+===================  ==========  ==========================================================
+UplinkHomogeneous    1           baseline — all five stations at 54 Mbps
+UplinkAnomaly        6 (sweep)   the anomaly — ``sta[0]`` slowed, 36 Mbps down to 6 Mbps
+UplinkTxop           6 (sweep)   the fix — the same rate gap under 802.11e TXOP
+DownlinkHomogeneous  1           baseline — the AP serves all five clients at 54 Mbps
+DownlinkAnomaly      1           the anomaly — frame-fair AP queue, ``sta[0]`` at 6 Mbps
+DownlinkAirtimeFair  1           the fix — airtime-fair AP queue, same rate gap
+===================  ==========  ==========================================================
+
+Each is run from the showcase directory with, for example:
+
+.. code-block:: bash
+
+    $ inet -u Cmdenv -c UplinkAnomaly          # all six sweep points
+    $ inet -u Qtenv  -c DownlinkAirtimeFair    # watch one run in the GUI
+
+The two sweep configurations iterate ``sta[0]``'s bitrate, so they contain six runs each;
+add ``-r <n>`` to pick one. The sections below work through the uplink family first and the
+downlink family after it, each time establishing the anomaly before introducing the fix.
 
 The UplinkHomogeneous and UplinkAnomaly Configurations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Two runnable uplink configurations are defined. In **UplinkHomogeneous**, all five stations
-transmit at 54 Mbps — the baseline, in which the channel is shared fairly and the network runs at
-full 802.11g capacity. In **UplinkAnomaly**, one station is slowed while the other four
-stay at 54 Mbps; its bitrate is swept from 36 Mbps down to 6 Mbps to show how the
+The first two uplink configurations set up the contrast. In **UplinkHomogeneous**, all five
+stations transmit at 54 Mbps — the baseline, in which the channel is shared fairly and the
+network runs at full 802.11g capacity. In **UplinkAnomaly**, one station is slowed while the
+other four stay at 54 Mbps; its bitrate is swept from 36 Mbps down to 6 Mbps to show how the
 damage grows as the rate gap widens:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: [Config UplinkAnomaly]
+   :start-at: [Config UplinkHomogeneous]
    :end-at: slowBitrate
    :language: ini
 
@@ -165,6 +204,13 @@ Results
 Each station's application-level throughput is measured at the server over the
 steady-state interval, after association settles. Each run lasts 5 s, with the first
 1 s discarded as warmup, so throughput is averaged over the remaining 4 s.
+
+DCF is not deterministic — the random backoff draws from the RNG — so results vary from
+seed to seed. The charts in this section come from a single run each, which is enough
+because the effect is far larger than the spread: individual stations differ by a few
+percent, the anomaly halves the whole cell. The two later charts that compare a *fix*
+against the anomaly average three repetitions per point, since there the run-to-run
+spread is comparable to some of the differences being plotted.
 
 In the **UplinkHomogeneous** baseline, all five stations achieve nearly the same throughput,
 about 4.6–5.0 Mbps each, for an aggregate of roughly 24 Mbps — full 802.11g saturation
@@ -307,9 +353,9 @@ before it has to contend again. DCF still hands out wins equally often, so an eq
 win means an equal share of airtime: a fast station simply packs many frames into its slice, a
 slow station only a few.
 
-The ``[Config UplinkTxop]`` configuration switches the interface to the QoS (EDCA) MAC and grants
-best-effort traffic a time-based TXOP. AC_BE's *default* TXOP limit is zero — one frame per
-win, i.e. plain DCF behaviour — so the fix is simply to set a nonzero limit; here we borrow
+The ``[Config UplinkTxop]`` configuration switches both the stations and the access point to
+the QoS (EDCA) MAC and grants best-effort traffic a time-based TXOP. AC_BE's *default* TXOP
+limit is zero — one frame per win — so the fix is simply to set a nonzero limit; here we borrow
 the standard's Video-category value (3.008 ms). (Best-effort traffic maps to AC_BE, which
 INET indexes as ``edcaf[1]``.) The MAC queue is deepened too, so a fast
 station has enough frames buffered to fill a burst; those are the only changes:
@@ -318,6 +364,12 @@ station has enough frames buffered to fill a burst; those are the only changes:
    :start-at: [Config UplinkTxop]
    :end-at: pendingQueue.packetCapacity
    :language: ini
+
+At a zero TXOP limit EDCA is *nearly* plain DCF — one frame per win either way — but not
+exactly: AC_BE contends with AIFSN 3, one slot time longer than DCF's DIFS. So this
+comparison changes the MAC as well as the TXOP limit. The difference works against the
+result shown below rather than for it: the longer AIFS makes EDCA marginally slower per
+win, so it can only understate the gain that follows.
 
 Rerunning the rate sweep tells a very different story. Where plain DCF's throughput
 collapses as the slow station slows — dragging the fast stations down with it — TXOP holds
@@ -352,10 +404,14 @@ itself falls from ~2.3 to ~0.9 Mbps — and that *is* airtime fairness, not a si
 only its fair share of time, a 6 Mbps station can clock out proportionally fewer bits, so it
 stops monopolising the medium and the others get their time back.
 
-The TXOP curves also sit clearly *above* the plain-DCF all-fast baseline across the whole
-sweep. Bursting amortises the fixed per-exchange overhead — backoff, SIFS/DIFS, the PHY
+Once the rate gap narrows past about 9 Mbps, the TXOP aggregate rises *above* the plain-DCF
+all-fast baseline altogether — it crosses the dashed line between the 9 and 12 Mbps sweep
+points and stays above it for the rest of the sweep, reaching ~28 Mbps at 36 Mbps. Bursting
+amortises the fixed per-exchange overhead — backoff, SIFS/DIFS, the PHY
 preamble and PLCP header — over several frames, so even a healthy all-fast cell gets more
-throughput under TXOP than under plain DCF. That is why modern 802.11 (n/ac/ax) does much the
+throughput under TXOP than under plain DCF. (At the two widest gaps the aggregate is still
+recovering and stays just under the baseline: 22.7 and 23.5 against 24.2 Mbps.) That is why
+modern 802.11 (n/ac/ax) does much the
 same all the time — frame aggregation (A-MPDU), typically carried inside a TXOP, amortises the
 same overhead; the showcase keeps a plain-DCF baseline only to isolate the rate-anomaly
 mechanism from this efficiency bonus. The TXOP limit is still a tradeoff, not "bigger is always
@@ -399,7 +455,7 @@ station and the access point relays them over the air — and makes ``sta[0]`` t
 pinning the rate the access point uses toward it:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: *.accessPoint.wlan[*].mac.dcf.rateSelection.dataFrameBitratePerReceiver
+   :start-at: [Config DownlinkBase]
    :end-at: dataFrameBitratePerReceiver
    :language: ini
 
@@ -428,16 +484,34 @@ flip a single switch on it, ``fairnessEnabled``:
 
 ``[Config DownlinkAnomaly]`` runs the queue **frame-fair** (``fairnessEnabled = false``): it serves
 each client an equal number of *frames*, round-robin — the downlink analog of DCF's equal channel
-access. A stock access point with a plain FIFO transmit queue collapses the same way; the
-per-client round-robin is used here only so each client's throughput is separately measurable.
-``[Config DownlinkAirtimeFair]`` runs it **airtime-fair** with a *deficit round-robin*:
-each client carries a time budget that a fixed *quantum* — 1500 µs by default, about one
-max-length frame's airtime — tops up every round, and
-each frame it sends is charged its own on-air duration — computed from the frame's rate and length,
-so a slow client's long frames drain its budget fast. A client whose budget runs out waits for the
-next round's top-up, so over time every client gets the same share of transmit time whatever its
-frame size. (The charge is the frame's own air time — preamble, header and payload — not the
-acknowledgment and interframe gaps around it.)
+access. ``[Config DownlinkAirtimeFair]`` runs it **airtime-fair** with a *deficit round-robin*:
+each client carries a time budget, topped up by a fixed *quantum* — 1500 µs by default, which is
+roughly one full-length frame's airtime at the low end of the rate range and several frames'
+worth at the high end. Each frame the client sends is charged its own on-air duration, computed
+from the rate and length actually used, so a slow client's long frames drain its budget fast.
+The top-up is granted lazily rather than every round: the scheduler passes over a backlogged
+client whose budget has gone negative, hands it one quantum, and moves on, returning to it once
+it is back in credit. Over time every client therefore gets the same share of transmit time
+whatever its frame size. (The charge is the frame's own air time — preamble, header and
+payload — not the acknowledgment and interframe gaps around it. It is applied after the fact,
+per transmission, so retransmissions are charged too; here the links are error-free and the
+access point is the only transmitter, so there are effectively none.)
+
+Both configurations also cap the queue at 50 frames *shared* across all clients, and that shared
+cap needs an overflow rule. ``AirtimeFairnessQueue`` drops from the longest per-client backlog
+rather than from the tail of whichever flow happens to overflow, which keeps a slow client's
+backlog from crowding the others out of the queue. This matters more than it sounds: it is what
+makes the frame-fair setting a clean *frame-fairness* baseline rather than a mixture of two
+effects.
+
+That is also why the anomaly baseline here is a per-client round robin and not a plain FIFO. A
+stock access point with a single drop-tail FIFO does *not* reproduce the rate anomaly cleanly —
+running this same cell with INET's default ``PendingQueue`` instead gives 4.1 Mbps to ``sta[0]``
+and only 0.7–0.8 Mbps to each fast client, for an aggregate of 8.5 Mbps. That is a different and
+deeper pathology: with one shared FIFO the slow client's backlog captures a growing share of the
+queue and it ends up with *more* throughput than anyone else, on top of the airtime effect. The
+round robin isolates the rate anomaly from that head-of-line blocking, so the comparison below
+changes one thing only — how the airtime is divided.
 
 Both runs are visible in the cell itself. The rate visualizer draws each client's PHY rate as a bar
 above the access point — a short red bar at 6 Mbps for ``sta[0]``, tall green bars at 54 Mbps for
@@ -446,7 +520,7 @@ how the AP divides its transmit time, and each client's running received-packet 
 effect.
 
 Serving equal *frames*, the frame-fair queue lets ``sta[0]``'s slow transmissions dominate the
-channel — all five counts climb together to about the same value (~460-490), the four fast clients
+channel — all five counts climb together to nearly the same value (459 to 492), the four fast clients
 dragged down to the slow client's pace:
 
 .. figure:: media/downlink-cell-anomaly.png
@@ -456,7 +530,7 @@ dragged down to the slow client's pace:
    config:   DownlinkAnomaly, run 0
    seed:     default
    shows:    the downlink cell under the frame-fair AP queue -- rate-visualizer bars (sta[0]=6 red,
-             sta[1..4]=54 green) and per-station received-packet counts (all clients ~460-490)
+             sta[1..4]=54 green) and per-station received-packet counts (all clients 459-492)
    anchor:   at t=2s (1s past warmup); counts scale with time, the anomaly/fix contrast is
              structural. If the bars stop showing 6 vs 54, the dcf datarateSelected wiring changed.
    capture:  get_canvas_image (post-2026-07 fix it renders the live inspector = Qtenv's "Export to
@@ -495,14 +569,18 @@ The per-station throughput makes the same point quantitatively:
 ..
    FIGURE RECIPE (redo via ../dl-chart.py)
    type:     chart (matplotlib)
-   shows:    per-station application throughput, frame-fair (anomaly) vs airtime-fair AP queue;
-             frame-fair collapses all five clients to ~2.7 Mbps, airtime-fair lifts the four fast
-             clients to ~5.3 while holding sta[0] to its ~0.7 Mbps time share
-   inputs:   results/dl/DownlinkAnomaly-*.sca, results/dl/DownlinkAirtimeFair-*.sca, BOTH 3 reps
-             (DCF backoff uses the RNG, so both configs are averaged alike)
+   shows:    per-station application throughput, frame-fair (anomaly) vs airtime-fair AP queue,
+             against the all-fast per-client baseline (dashed); frame-fair collapses all five
+             clients to ~2.7 Mbps, airtime-fair lifts the four fast clients to ~5.3 -- slightly
+             ABOVE the 4.9 baseline -- while holding sta[0] to its ~0.7 Mbps time share
+   inputs:   results/dl/DownlinkAnomaly-*.sca, results/dl/DownlinkAirtimeFair-*.sca and
+             results/dl/DownlinkHomogeneous-*.sca, ALL 3 reps
+             (DCF backoff uses the RNG, so all three configs are averaged alike)
    record:   inet -u Cmdenv -c DownlinkAnomaly     -r 0..2 --repeat=3 --result-dir=results/dl
              inet -u Cmdenv -c DownlinkAirtimeFair -r 0..2 --repeat=3 --result-dir=results/dl
-   metric:   sta[i].app[0] packetReceived:count x 0.002 -> Mbps; per-station mean over 3 reps
+             inet -u Cmdenv -c DownlinkHomogeneous -r 0..2 --repeat=3 --result-dir=results/dl
+   metric:   sta[i].app[0] packetReceived:count x 0.002 -> Mbps; per-station mean over 3 reps;
+             baseline = mean over the five DownlinkHomogeneous clients
    anchor:   structural -- if the Downlink configs change, re-derive
    plot:     ../dl-chart.py (matplotlib; anomaly red, fix blue; 8x6 in @ dpi 150)
    stamp:    captured 2026-07, INET 4.6
@@ -515,11 +593,21 @@ to about 5.3 Mbps each — almost exactly double — and the aggregate recovers 
 stop a little short of the ~5.5 Mbps a fast station reaches under uplink TXOP: here all five flows
 funnel through the one access-point queue rather than five independent radios.)
 
+The dashed line is what the same cell delivers with no rate gap at all — ``[Config
+DownlinkHomogeneous]``, all five clients at 54 Mbps — which works out to 4.9 Mbps each, 24.5 Mbps
+aggregate. The recovered fast clients land slightly *above* it, at 5.3. That is not a
+measurement artefact but a consequence of what the queue charges: the deficit counts a frame's
+own air time and not the acknowledgment and interframe gaps around it, and those fixed costs are
+proportionally much larger for a short 54 Mbps frame than for a long 6 Mbps one. Equal *charged*
+airtime therefore hands the fast clients slightly more than a fifth of the real channel time, and
+``sta[0]`` slightly less. The effect is small, and it is the price of an accounting rule simple
+enough to compute from the frame alone.
+
 ``sta[0]`` moves the other way, down to ~0.7 Mbps — and that is the fairness *working*, not the
 slow client being punished. Under frame-fair scheduling ``sta[0]`` was the culprit rather than the
 victim: it had been taking far more than its one-fifth share of channel *time*, so its 2.7 Mbps
 was inflated by exactly the airtime it stole from the others. Airtime fairness holds it to an equal
-*time* share, and ~0.7 Mbps is honestly all a 6 Mbps link delivers in one-fifth of the airtime —
+*time* share, and ~0.7 Mbps is honestly all a 6 Mbps link delivers in roughly a fifth of the airtime —
 while the aggregate *rises* from ~14 to ~22 Mbps, so nothing is taken from anyone. The fast
 clients' recovery is precisely the airtime ``sta[0]`` was monopolising, handed back.
 
