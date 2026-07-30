@@ -1,0 +1,122 @@
+%description:
+Regression test for RSVP-TE refresh reduction (RFC 2961 Section 5.4), using the
+shipped examples/mpls/testte_failure network (RSVPTE4) with its LSR1_rsvp.xml/
+LSR1_fec.xml traffic configuration but an empty scenario (no link failure): a single
+explicitly-routed tunnel LSR1->LSR2->LSR4->LSR5, with "refreshReduction" turned on
+for every LSR and "refreshInterval" shortened to 0.3s so several refresh cycles fit
+into a short sim-time-limit.
+
+Asserted:
+  1. after the LSP is established (RsvpTe::processPATH_NOTIFY's "Path successfully
+     established" line, ingress-only), Srefresh messages appear on both the Path
+     side (RsvpTe::sendPathSrefresh's "sending SREFRESH (PSB" line) and the Resv
+     side (RsvpTe::sendResvSrefresh's "sending SREFRESH (RSB" line) -- refresh
+     reduction is doing compression in both directions, not just one;
+  2. in that same post-establishment window, full Path/Resv refreshes
+     (refreshPath()'s "refresh path (PSB" / the PER-PHOP refreshResv(rsb, PHOP)
+     overload's "refresh reservation (RSB ...) PHOP ..." line) do NOT reappear --
+     the periodic full resends have actually stopped, not merely "also" produced
+     alongside Srefresh. (The outer, per-cycle refreshResv(rsb) wrapper also logs
+     a bare "refresh reservation (RSB ...)" line every cycle regardless of
+     whether it ends up compressing every one of its phops -- that ambiguous line
+     is deliberately NOT asserted on; only the inner, phop-specific "... PHOP ..."
+     line unambiguously means a full Resv actually went out.)
+  3. the session survives at least 3x refreshInterval without its soft state
+     expiring (DELIVERED postrun check: host traffic keeps flowing over the LSP for
+     the whole run, which is only possible if Srefresh is correctly treated as a
+     full refresh -- RsvpTe.cc's stateLifetimeFactor default (3) times the jittered
+     refresh cadence means an un-refreshed PSB/RSB would time out and tear the LSP
+     down well before sim-time-limit).
+
+Falsification: reverting the refreshReduction/Srefresh code (or leaving
+"refreshReduction" at its default false) makes assertion 1 fail outright (no
+"sending SREFRESH" line is ever produced) -- verified manually against the parent
+commit before writing this test.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.mpls.testte_failure.RSVPTE4
+sim-time-limit = 3s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.LSR*.rsvp.cmdenv-log-level = info
+**.cmdenv-log-level = off
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.host1.numApps = 1
+**.host1.app[0].typename = "UdpBasicApp"
+**.host1.app[0].localPort = 100
+**.host1.app[0].destPort = 100
+**.host1.app[0].messageLength = 128 bytes
+**.host1.app[0].sendInterval = 0.01s
+**.host1.app[0].destAddresses = "host3"
+
+**.host3.numApps = 1
+**.host3.app[0].typename = "UdpSink"
+**.host3.app[0].localPort = 100
+
+**.host1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/host1.rt"
+**.host2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/host2.rt"
+**.host3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/host3.rt"
+**.host4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/host4.rt"
+**.host5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/host5.rt"
+
+**.LSR1.classifier.config = xmldoc("../../../../examples/mpls/testte_failure/LSR1_fec.xml")
+**.LSR1.rsvp.traffic = xmldoc("../../../../examples/mpls/testte_failure/LSR1_rsvp.xml")
+
+**.LSR*.rsvp.helloInterval = 0.2s
+**.LSR*.rsvp.helloTimeout = 0.5s
+**.LSR*.rsvp.refreshInterval = 0.3s
+**.LSR*.rsvp.refreshReduction = true
+
+**.LSR1.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR3.rt"
+**.LSR4.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR4.rt"
+**.LSR5.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR5.rt"
+**.LSR6.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR6.rt"
+**.LSR7.ipv4.routingTable.routingFile = "../../../../examples/mpls/testte_failure/LSR7.rt"
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+**.scenarioManager.script = xml("<scenario/>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%# slice test.out to only the part after the LSP is up, so the assertions below are
+%# about steady-state refresh behavior, not the (necessarily full) initial signaling
+%postrun-command: awk '/Path successfully established/{f=1} f' test.out > after_establish.out
+%#--------------------------------------------------------------------------------------------------------------
+%# 1a. Srefresh compression kicks in on the Path side
+%contains: after_establish.out
+sending SREFRESH (PSB
+%#--------------------------------------------------------------------------------------------------------------
+%# 1b. Srefresh compression kicks in on the Resv side
+%contains: after_establish.out
+sending SREFRESH (RSB
+%#--------------------------------------------------------------------------------------------------------------
+%# 2a. full Path refreshes have stopped
+%not-contains: after_establish.out
+refresh path (PSB
+%#--------------------------------------------------------------------------------------------------------------
+%# 2b. full (per-phop) Resv refreshes have stopped -- see the description for why
+%# this checks the inner "... PHOP ..." line specifically, not the outer wrapper's
+%# unconditional per-cycle line
+%not-contains-regex: after_establish.out
+refresh reservation \(RSB \d+\) PHOP
+%#--------------------------------------------------------------------------------------------------------------
+%# 3. the session survives (>= 3x refreshInterval, i.e. 0.9s, well inside the 3s
+%# run) without its soft state expiring -- traffic keeps being delivered over the LSP
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

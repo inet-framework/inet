@@ -61,10 +61,27 @@ struct SenderTemplateObj
 //
 // Intserv/RSVP: Sender Tspec Structure
 //
+// RFC 2210 Section 3.1 (SENDER_TSPEC) / 3.2.1 (FLOWSPEC, Controlled-Load): the
+// Int-Serv token bucket is (r, b, p, m, M) -- token rate, bucket depth (burst
+// size), peak rate, minimum policed unit, and maximum packet size. This model's
+// admission control (RsvpTe::doCACCheck()) only ever consults "req_bandwidth"
+// (the rate, r); "burst"/"peakRate"/"minPolicedUnit"/"maxPacketSize" (b/p/m/M)
+// are carried on the wire and propagated/recorded end to end
+// (RsvpTeSerializer, PathStateBlock/ResvStateBlock) but NEVER enforced -- this
+// model has no per-LSP policing/shaping (see RsvpTe.ned's doc comment). Default
+// 0 for all four (a real Tspec would typically have "peakRate" >= "req_bandwidth"
+// and nonzero "minPolicedUnit"/"maxPacketSize", but since nothing in this model
+// validates or acts on them, an all-zero default is harmless and keeps every
+// existing traffic.xml/add-session XML -- none of which sets these attributes --
+// unaffected).
 struct SenderTspecObj
 {
     @packetData;
-    double req_bandwidth = 0;
+    double req_bandwidth = 0; // token rate [r]
+    double burst = 0; // bucket depth / burst size [b]
+    double peakRate = 0; // peak rate [p]
+    int minPolicedUnit = 0; // minimum policed unit [m]
+    int maxPacketSize = 0; // maximum packet size [M]
 }
 
 //
@@ -90,9 +107,7 @@ struct LabelRequestObj
     // RFC 3209 Section 4.3.1 LABEL_REQUEST C-Type 1: 2 reserved bytes + a
     // 16-bit L3PID identifying the layer-3 protocol using the requested label
     // (0x0800 = IPv4, the only payload type this model forwards over MPLS).
-    // Representation gap fix (Workstream E, Phase 2 commit 3): this field did
-    // not exist before; the wire serializer needs something concrete to write
-    // for the object's already-budgeted 4-byte body (see B6's
+    // This is what the wire serializer writes for the object's 4-byte body (see
     // LABEL_REQUEST_OBJECT_BYTES in RsvpTe.cc). Not wired to any per-request
     // state -- IPv4 is the model's only payload type, so the value never varies.
     int l3pid = 0x0800;

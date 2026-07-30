@@ -56,7 +56,19 @@ import inet.common.SimpleModule;
 // - <sender>: the sender (ingress) address for the SENDER_TEMPLATE object;
 //   defaults to this router's address.
 // - <bandwidth>: requested bandwidth in bits/sec for admission control;
-//   defaults to 0 (best-effort, always admitted).
+//   defaults to 0 (best-effort, always admitted). This is the SENDER_TSPEC/
+//   FLOWSPEC token rate [r] (RFC 2210).
+// - <burst>, <peak_rate>, <min_policed_unit>, <max_packet_size>: the remaining
+//   RFC 2210 Int-Serv token-bucket Tspec parameters -- bucket depth [b], peak
+//   rate [p], minimum policed unit [m], maximum packet size [M] -- all default
+//   to 0 when omitted (Workstream C11). LIMITATION: these are carried on the
+//   wire and propagated/recorded end to end (~IntServ's SenderTspecObj) exactly
+//   like <bandwidth>, but admission control (doCACCheck()) and preemption only
+//   ever consult <bandwidth> [r] -- there is no per-LSP policing/shaping in
+//   this model (that would require wiring ~inet::queueing::TokenBucket into the
+//   MPLS forwarding path, out of scope here), so a sender declaring e.g. a
+//   burst size larger than what any downstream link could actually absorb is
+//   never rejected or throttled for it.
 // - <route>: an explicit route (ERO), see below; if omitted, the path is
 //   forwarded hop-by-hop according to the routing table (no ERO), unless
 //   "computeEro" is on (see below).
@@ -116,7 +128,7 @@ import inet.common.SimpleModule;
 // </scenario>
 // </pre>
 //
-// RSVP-TE messages are subclassed from ~RsvpMessage and include ~RsvpPathMsg, ~RsvpPathTear, ~RsvpPathError, ~RsvpResvMsg, and ~RsvpHelloMsg.
+// RSVP-TE messages are subclassed from ~RsvpMessage and include ~RsvpPathMsg, ~RsvpPathTear, ~RsvpPathError, ~RsvpResvMsg, ~RsvpHelloMsg, and (refresh reduction, "refreshReduction") ~RsvpSrefreshMsg.
 //
 // RSVP-TE communicates with the following components in the system: ~Ted, ~Mpls, and may receive commands from ~ScenarioManager.
 //
@@ -140,6 +152,7 @@ simple RsvpTe extends SimpleModule
         bool advertiseImplicitNull = default(true); // penultimate hop popping: advertise the implicit null label (RFC 3032) instead of allocating a local pop entry when acting as egress for a tunnel
         bool computeEro = default(false); // C6: at the ingress, compute a full strict ERO via CSPF (Ted::calculateShortestPath()) whenever a path's configured route is empty or contains only loose hops; default off keeps every shipped example/showcase (which all hand-write EROs) fingerprint-identical -- CSPF is a purely local ingress computation with no RFC-mandated wire behavior, so defaulting it off is a scope choice, not a compliance gap. Bandwidth-feasible (Ted's UnResvBandwidth pruning at the session's setup priority) and, if configured on a path via <include_any>/<exclude_any>, affinity-constrained (RFC 3209 Section 4.7.4-style admin-group match, Workstream D3).
         double reoptimizeInterval @unit(s) = default(0s); // C7: RFC 4736-lite reoptimization. 0 (default) disables it entirely -- no timer is ever scheduled, regardless of "computeEro" -- keeping every shipped example/showcase fingerprint-identical. When nonzero, every reoptimizeInterval this router re-runs CSPF for each of its own established ingress paths; if a strictly cheaper route (lower total TE metric) is found than the one currently in use, it make-before-break reroutes onto it (same choreography "pathProblem" uses to react to a failed path: signal the new LSP-id first, cut the classifier over once its ingress label is installed, only then tear down the old one). Paths whose current route is not a full strict hop-by-hop ERO (empty, or containing a loose hop) are left alone -- this model only scores routes it can walk hop by hop against the TED.
+        bool refreshReduction = default(false); // C8 (RFC 2961 Section 5.4): refresh reduction. Default off keeps every shipped example/showcase fingerprint-identical -- like a real deployment, this is a capability negotiated/enabled per link, not a wire-mandatory behavior. When on, every Path/Resv this router sends carries a MESSAGE_ID object identifying its content; once a PSB/RSB's content has been sent in full at least once, subsequent periodic refreshes send a compact Srefresh (~RsvpSrefreshMsg) naming that id instead of resending the full object set, and the receiver treats a recognized id exactly like a full refresh (resets the state's timeout). Receivers acknowledge received MESSAGE_IDs (and negatively acknowledge an unrecognized Srefresh id) by piggybacking a MESSAGE_ID_ACK/_NACK object on the next message already travelling back toward the originator -- there is no standalone Ack message in this model (a documented scope simplification); a NACK makes the originator fall back to a full resend of that one state.
         double stopOperationExtraTime @unit(s) = default(2s); // extra time to hold up the node's later shutdown stages after a graceful shutdown sent a forced PathTear for an owned session (see handleStopOperation); this module itself goes NOT_OPERATING immediately (further inbound RSVP packets are dropped, not processed), but the local network/link layers are held up until this elapses so the just-enqueued PathTear can actually leave the node instead of being dropped by an already-stopped Ipv4/interface
         @display("i=block/control");
         @signal[lspEstablished](type=simtime_t); // LSP setup latency, emitted at the ingress when commitResv first installs the ingress label for a session
