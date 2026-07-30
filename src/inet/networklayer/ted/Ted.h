@@ -91,6 +91,8 @@ class INET_API Ted : public RoutingProtocolBase
     ModuleRefByPar<IInterfaceTable> ift;
     Ipv4Address routerId;
 
+    bool installRoutes = true; // whether rebuildRoutingTable() is allowed to touch the routing table
+
     Ipv4AddressVector interfaceAddrs; // list of local interface addresses
 
     int maxMessageId = 0;
