@@ -267,6 +267,36 @@ topology.push_back(makeLink("6.6.6.6", "1.1.1.1", 1, 1000000, false));
     }
 }
 
+// Check 9 (Workstream F2 / TI-LFA): the explicit-root overload computes an SPT rooted at an
+// arbitrary node, not just this Ted instance's own routerId. Root at R5 (1.1.1.1's own
+// neighbor, NOT routerId) and ask for the path to R4: via R1->R2 the cost is 1(R5-R1) +
+// 1(R1-R2) + 1(R2-R4) = 3; via R1->R3 it is 1 + 5 + 5 = 11 -> expect [5.5.5.5, 1.1.1.1,
+// 2.2.2.2, 4.4.4.4]. This also proves the routerId-rooted overload is unaffected: check 1
+// above (same topology, rooted at 1.1.1.1) already passed with its own expected path, and nothing
+// about this call touches ted's routerId member (it's passed as an explicit local, not read
+// from the instance).
+{
+    Ipv4AddressVector dest;
+    dest.push_back(Ipv4Address("4.4.4.4"));
+    Ipv4AddressVector path = ted.calculateShortestPath(Ipv4Address("5.5.5.5"), dest, topology, 0.0, 7);
+    CHECK_PATH("check9 (explicit root=R5, not routerId -> via R1,R2)", path,
+            "5.5.5.5", "1.1.1.1", "2.2.2.2", "4.4.4.4");
+}
+
+// Check 10: the no-root overload is a byte-for-byte-behavior-preserving wrapper: calling it
+// again with the SAME topology/query as check 1 (rooted implicitly at routerId=1.1.1.1) must
+// give the exact same answer as calling the explicit-root overload with root=routerId directly.
+{
+    Ipv4AddressVector dest;
+    dest.push_back(Ipv4Address("4.4.4.4"));
+    Ipv4AddressVector implicitRoot = ted.calculateShortestPath(dest, topology, 0.0, 7);
+    Ipv4AddressVector explicitRoot = ted.calculateShortestPath(Ipv4Address("1.1.1.1"), dest, topology, 0.0, 7);
+    bool same = pathEquals(implicitRoot, {"1.1.1.1", "2.2.2.2", "4.4.4.4"}) && pathEquals(explicitRoot, {"1.1.1.1", "2.2.2.2", "4.4.4.4"});
+    EV << "check10 (no-root wrapper == explicit root=routerId): got [" << pathToStr(implicitRoot) << "] vs [" << pathToStr(explicitRoot) << "]" << (same ? "  OK" : "  FAIL") << endl;
+    if (!same)
+        throw cRuntimeError("Broken: check10 -- the no-root overload must behave identically to explicit root=routerId");
+}
+
 EV << "ALL CSPF UNIT CHECKS PASSED" << endl;
 
 %contains: stdout

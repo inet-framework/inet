@@ -252,6 +252,66 @@ int eth1Id = check_and_cast<NetworkInterface *>(getSimulation()->getModuleByPath
     EV << "  PASS" << endl;
 }
 
+// === 8. setBackup/activateBackup: dormant backup path (Workstream F2 phase 1) ===
+// This is pure data-plane plumbing: no production code calls setBackup()/
+// activateBackup() yet (that lands in a later TI-LFA phase), but the mechanism must
+// work correctly in isolation before anything wires into it.
+{
+    EV << "=== setBackup/activateBackup: backup dormant until activated ===" << endl;
+    int l = lib->installLibEntry(-1, eth0Id, LibTable::swapLabel(700), eth1Id);
+
+    LabelOpVector out;
+    int outIf;
+
+    // primary path resolves normally before any backup is configured
+    ASSERT(lib->resolveLabel(eth0Id, l, out, outIf));
+    ASSERT(out.size() == 1 && out[0].optcode == SWAP_OPER && out[0].label == 700);
+    ASSERT(outIf == eth1Id);
+
+    // configuring a backup does NOT activate it -- resolution is still the primary path
+    lib->setBackup(l, LibTable::swapLabel(701), eth0Id);
+    ASSERT(lib->resolveLabel(eth0Id, l, out, outIf));
+    ASSERT(out.size() == 1 && out[0].optcode == SWAP_OPER && out[0].label == 700);
+    ASSERT(outIf == eth1Id);
+    EV << "  PASS (backup configured but dormant)" << endl;
+
+    // activating the backup switches resolution to the backup fields
+    bool activated = lib->activateBackup(l, true);
+    ASSERT(activated);
+    ASSERT(lib->resolveLabel(eth0Id, l, out, outIf));
+    ASSERT(out.size() == 1 && out[0].optcode == SWAP_OPER && out[0].label == 701);
+    ASSERT(outIf == eth0Id);
+    EV << "  PASS (backup active)" << endl;
+
+    // deactivating reverts to the primary path
+    bool deactivated = lib->activateBackup(l, false);
+    ASSERT(deactivated);
+    ASSERT(lib->resolveLabel(eth0Id, l, out, outIf));
+    ASSERT(out.size() == 1 && out[0].optcode == SWAP_OPER && out[0].label == 700);
+    ASSERT(outIf == eth1Id);
+    EV << "  PASS (reverted to primary)" << endl;
+
+    // activateBackup on an unknown inLabel is a no-op that reports failure, not a throw
+    ASSERT(!lib->activateBackup(123456, true));
+    EV << "  PASS (activateBackup on unknown inLabel returns false)" << endl;
+}
+
+// === 9. setBackup: error path -- configuring a backup for an unknown label throws,
+// mirroring installLibEntry()'s update-or-throw convention (setBackup is a
+// configuration operation on an entry that must already exist, not an upsert) ===
+{
+    EV << "=== setBackup: error on unknown label ===" << endl;
+    bool threw = false;
+    try {
+        lib->setBackup(123456, LibTable::popLabel(), eth0Id);
+    }
+    catch (const cRuntimeError&) {
+        threw = true;
+    }
+    ASSERT(threw);
+    EV << "  PASS" << endl;
+}
+
 EV << "All LibTable operation checks passed." << endl;
 
 %contains: stdout

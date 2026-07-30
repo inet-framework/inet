@@ -81,6 +81,18 @@ class INET_API Ted : public RoutingProtocolBase, public cListener
             const TeLinkStateInfoVector& topology, double req_bandwidth, int priority,
             uint32_t includeAny = 0, uint32_t excludeAny = 0);
 
+    // Same computation as above, but rooted at an explicit `root` router instead of this Ted
+    // instance's own routerId (TI-LFA/Workstream F2: computing extended P-space needs SPTs
+    // rooted at THIS router's neighbors, and Q-space needs an SPT rooted at the protected
+    // destination over a reversed topology -- see SegmentRouting's TI-LFA code for how this is
+    // used). The no-root overload above is now a thin wrapper: `calculateShortestPath(dest,
+    // topology, ...)` == `calculateShortestPath(routerId, dest, topology, ...)`, so every
+    // existing caller (RsvpTe's CSPF, SegmentRouting's own node-SID programming) is completely
+    // unaffected.
+    virtual Ipv4AddressVector calculateShortestPath(Ipv4Address root, Ipv4AddressVector dest,
+            const TeLinkStateInfoVector& topology, double req_bandwidth, int priority,
+            uint32_t includeAny = 0, uint32_t excludeAny = 0);
+
     /** @name Public interface to the Traffic Engineering Database */
     //@{
     virtual Ipv4Address getInterfaceAddrByPeerAddress(Ipv4Address peerIP);
@@ -193,7 +205,9 @@ class INET_API Ted : public RoutingProtocolBase, public cListener
   protected:
     virtual int assignIndex(std::vector<Vertex>& vertices, Ipv4Address nodeAddr);
 
-    std::vector<Vertex> calculateShortestPaths(const TeLinkStateInfoVector& topology,
+    // `root` used to be implicitly this Ted's own routerId (see Workstream F2's explicit-root
+    // extension); every call site now passes it explicitly.
+    std::vector<Vertex> calculateShortestPaths(Ipv4Address root, const TeLinkStateInfoVector& topology,
             double req_bandwidth, int priority, uint32_t includeAny = 0, uint32_t excludeAny = 0);
 };
 
