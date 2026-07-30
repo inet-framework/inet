@@ -8,9 +8,10 @@
 
 #include <omnetpp/cstringtokenizer.h>
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/XMLUtils.h"
+#include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/mpls/LibTable.h"
 
 namespace inet {
@@ -46,23 +47,62 @@ void SrPolicy::handleMessage(cMessage *msg)
 
 bool SrPolicy::lookupLabel(Packet *packet, LabelOpVector& outLabel, int& outInterfaceId)
 {
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    Ipv4Address destAddress = ipv4Header->getDestAddress();
+    // Dual-stack: see ~StaticIngressClassifier::lookupLabel() for the same generic-L3Address
+    // dispatch (via PacketProtocolTag + L3Tools::peekNetworkProtocolHeader()).
+    const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    L3Address destAddress = peekNetworkProtocolHeader(packet, *protocol)->getDestinationAddress();
 
-    // longest-prefix match: the entry with the most specific (longest) netmask wins
+    // longest-prefix match: the entry with the most specific (longest) prefix length wins.
+    // policyTable may hold a MIX of IPv4 and IPv6 entries; see
+    // ~StaticIngressClassifier::lookupLabel() for why cross-family entries must be skipped
+    // before calling L3Address::matches() (it would throw).
     const PolicyEntry *best = nullptr;
     for (auto& entry : policyTable) {
-        if (!Ipv4Address::maskedAddrAreEqual(destAddress, entry.dest, entry.netmask))
+        if (entry.dest.getType() != destAddress.getType())
+            continue;
+        if (!destAddress.matches(entry.dest, entry.prefixLength))
             continue;
 
-        if (!best || entry.netmask.getNetmaskLength() > best->netmask.getNetmaskLength())
+        if (!best || entry.prefixLength > best->prefixLength)
             best = &entry;
     }
 
     if (!best)
         return false;
 
-    return resolveSegmentList(best->segments, outLabel, outInterfaceId);
+    if (!resolveSegmentList(best->segments, outLabel, outInterfaceId))
+        return false;
+
+    // 6PE-lite: a node-SID label is shared by ALL traffic destined to that node, of either
+    // family -- SegmentRouting installs exactly one, family-agnostic PHP POP LIB entry per
+    // node-SID (see SegmentRouting.cc), so unlike the per-FEC LIB entries of LDP/RSVP-TE/static
+    // XML (where one entry = one FEC = one family), the popping router's own LIB entry cannot
+    // carry a payload protocol that is correct for BOTH families sharing the label. Baking
+    // payloadProtocol into that shared entry is therefore not viable for SR: it would silently
+    // mislabel the OTHER family the moment both rode the same node-SID.
+    //
+    // RFC 3032's IPv6 Explicit NULL label exists for exactly this kind of demultiplexing.
+    // Push it as the INNERMOST label -- beneath every node:/adj: segment resolveSegmentList()
+    // just produced -- so it rides through every transit PHP pop untouched: Mpls::popLabel()
+    // only stamps a payload protocol when the popped label is bottom-of-stack, and a non-
+    // bottom pop leaves the packet mpls-tagged and simply forwarded via the resolved
+    // outInterfaceId (Mpls::processMplsPacketFromL2's "still mpls" branch) -- no transit
+    // router needs to know or care that IPv6 is underneath. Only once this label reaches the
+    // bottom of the stack, at the true egress, does Mpls's IPV6_EXPLICIT_NULL_LABEL handling
+    // pop it and correctly stamp Protocol::ipv6 -- regardless of what the egress's OWN (also
+    // family-agnostic) node-SID LIB entry would have defaulted to.
+    //
+    // IPv4 destinations need no such marker: LibTable's payloadProtocol already defaults to
+    // ipv4, so the family-agnostic node-SID POP entries are correct as-is; this block is
+    // therefore a no-op for every IPv4-only policy.
+    if (destAddress.getType() == L3Address::IPv6 && !outLabel.empty()) {
+        LabelOp explicitNull;
+        explicitNull.optcode = PUSH_OPER;
+        explicitNull.label = IPV6_EXPLICIT_NULL_LABEL;
+        outLabel.insert(outLabel.begin(), explicitNull);
+    }
+
+    return true;
 }
 
 bool SrPolicy::resolveSegmentList(const std::vector<Segment>& segments, LabelOpVector& outLabel, int& outInterfaceId)
@@ -80,7 +120,7 @@ bool SrPolicy::resolveSegmentList(const std::vector<Segment>& segments, LabelOpV
         // `interfaceId` already achieves, so as the first segment it is always dropped from the
         // pushed stack -- its LIB entry lives on THIS SAME router (SegmentRouting installed it
         // here), and ingress-classified traffic never consults the LIB at all (see
-        // Mpls::tryLabelAndForwardIpv4Datagram), so pushing it would leave a label on the wire
+        // Mpls::tryLabelAndForwardDatagram), so pushing it would leave a label on the wire
         // that no router downstream would ever pop.
         skipFirst = true;
         firstInterfaceId = segments[0].interfaceId;
@@ -103,7 +143,7 @@ bool SrPolicy::resolveSegmentList(const std::vector<Segment>& segments, LabelOpV
         // The entire policy collapsed to nothing (a single-segment policy whose one segment was
         // dropped by the canonicalization above): no label needs to be imposed at all. Report
         // "no mapping" (see .ned doc's Limitations section) rather than violating Mpls's
-        // non-empty-outLabel invariant (Mpls::tryLabelAndForwardIpv4Datagram ASSERTs
+        // non-empty-outLabel invariant (Mpls::tryLabelAndForwardDatagram ASSERTs
         // outLabel.size() > 0) with an empty PUSH stack.
         return false;
     }
@@ -145,20 +185,37 @@ void SrPolicy::readPoliciesFromXML(const cXMLElement *policiesXml)
         const char *destStr = entry.getAttribute("dest");
         if (!destStr)
             throw cRuntimeError("Invalid policy at %s: missing 'dest' attribute", entry.getSourceLocation());
-        if (!Ipv4Address::isWellFormed(destStr))
-            throw cRuntimeError("Invalid policy at %s: 'dest' is not a valid IPv4 address: '%s'", entry.getSourceLocation(), destStr);
+        L3Address dest;
+        if (!dest.tryParse(destStr))
+            throw cRuntimeError("Invalid policy at %s: 'dest' is not a valid IPv4/IPv6 address: '%s'", entry.getSourceLocation(), destStr);
 
+        // Dual-stack: see ~StaticIngressClassifier::readTableFromXML() for the same
+        // netmask=/prefixLength= backward-compat rationale.
         const char *netmaskStr = entry.getAttribute("netmask");
-        if (!netmaskStr)
-            throw cRuntimeError("Invalid policy at %s: missing 'netmask' attribute", entry.getSourceLocation());
-        if (!Ipv4Address::isWellFormed(netmaskStr))
-            throw cRuntimeError("Invalid policy at %s: 'netmask' is not a valid IPv4 address: '%s'", entry.getSourceLocation(), netmaskStr);
+        const char *prefixLengthStr = entry.getAttribute("prefixLength");
+        if (netmaskStr && prefixLengthStr)
+            throw cRuntimeError("Invalid policy at %s: 'netmask' and 'prefixLength' are mutually exclusive, but both were given", entry.getSourceLocation());
+        if (!netmaskStr && !prefixLengthStr)
+            throw cRuntimeError("Invalid policy at %s: missing 'netmask' or 'prefixLength' attribute", entry.getSourceLocation());
+
+        int prefixLength;
+        if (netmaskStr) {
+            if (!Ipv4Address::isWellFormed(netmaskStr))
+                throw cRuntimeError("Invalid policy at %s: 'netmask' is not a valid IPv4 address: '%s'", entry.getSourceLocation(), netmaskStr);
+            Ipv4Address netmask(netmaskStr);
+            if (!netmask.isValidNetmask())
+                throw cRuntimeError("Invalid policy at %s: 'netmask' is not a valid netmask (non-contiguous bits): '%s'", entry.getSourceLocation(), netmaskStr);
+            prefixLength = netmask.getNetmaskLength();
+        }
+        else {
+            prefixLength = atoi(prefixLengthStr);
+            if (prefixLength < 0)
+                throw cRuntimeError("Invalid policy at %s: 'prefixLength' must be >= 0, but is '%s'", entry.getSourceLocation(), prefixLengthStr);
+        }
 
         PolicyEntry newEntry;
-        newEntry.dest = Ipv4Address(destStr);
-        newEntry.netmask = Ipv4Address(netmaskStr);
-        if (!newEntry.netmask.isValidNetmask())
-            throw cRuntimeError("Invalid policy at %s: 'netmask' is not a valid netmask (non-contiguous bits): '%s'", entry.getSourceLocation(), netmaskStr);
+        newEntry.dest = dest;
+        newEntry.prefixLength = prefixLength;
 
         const char *segmentsStr = entry.getAttribute("segments");
         if (!segmentsStr || !*segmentsStr)
@@ -222,7 +279,7 @@ void SrPolicy::readPoliciesFromXML(const cXMLElement *policiesXml)
 std::ostream& operator<<(std::ostream& os, const SrPolicy::PolicyEntry& policy)
 {
     os << "dest:" << policy.dest;
-    os << "    netmask:" << policy.netmask;
+    os << "    prefixLength:" << policy.prefixLength;
     os << "    segments:" << policy.segments.size();
     return os;
 }

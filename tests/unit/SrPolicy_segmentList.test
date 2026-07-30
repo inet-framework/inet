@@ -16,6 +16,7 @@ C=16003, D=16004. From A: B is directly connected (PHP case), C and D are transi
 own link toward B (interface lo0) also gets a real, dynamically-allocated adjacency-SID label.
 
 %includes:
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
@@ -159,13 +160,17 @@ static TeLinkStateInfo makeLink(const char *advrouter, const char *linkid, doubl
 }
 
 // Builds a minimal Ipv4-only Packet with the given destination address, the way lookupLabel()
-// expects to peek one at the front (mirrors StaticIngressClassifier's own contract).
+// expects to peek one at the front (mirrors StaticIngressClassifier's own contract). Since
+// Workstream F3 (dual-stack classification), lookupLabel() dispatches on the packet's
+// PacketProtocolTag (real ~Mpls callers always set this before calling the classifier -- see
+// Mpls::processPacketFromL3/processPacketFromL2), so this synthetic packet must carry one too.
 static Packet *makeIpv4Packet(const char *destAddr)
 {
     Packet *packet = new Packet("test");
     auto ipv4Header = makeShared<Ipv4Header>();
     ipv4Header->setDestAddress(Ipv4Address(destAddr));
     packet->insertAtBack(ipv4Header);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     return packet;
 }
 

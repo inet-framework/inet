@@ -1,0 +1,316 @@
+%description:
+Regression test for Workstream F3 Phase 3 (dual-stack static classification): proves that
+plain IPv6 traffic can be carried end to end over a statically-configured MPLS LSP whose core
+is signaled purely with IPv4-addressed router-to-router links -- a minimal 6PE-lite scenario
+(edge IPv6 traffic over an IPv4-addressed, label-switched core), built entirely with static
+XML configuration (no ~Ldp, no ~RsvpTe, no ~SrPolicy).
+
+Topology, all point-to-point ppp links (hostA -- LSR1 -- LSR2 -- LSR3 -- hostB, mirroring
+static_lsp.test's shape and IPv4 core addressing exactly):
+
+  hostA -- LSR1 (ingress) -- LSR2 (pure-IPv4 transit) -- LSR3 (egress) -- hostB
+
+- hostA/hostB: plain ~StandardHost with hasIpv6 = true added on top of the default hasIpv4 =
+  true. Each keeps an IPv4 address on its one interface purely because ~Ted (~MplsRouterBase's
+  IPv4-keyed Traffic Engineering Database, unconditionally present on every MPLS-capable node,
+  including LSR1/LSR3's host-facing side) asserts that EVERY directly-connected neighbor of an
+  interface it tracks has a resolvable Ipv4RoutingTable -- this is a pre-existing ~Ted
+  limitation (it stays IPv4-keyed; see this Workstream's plan's "explicitly out of scope"
+  section), not something Phase 3 introduces or fixes. The IPv4 address is otherwise entirely
+  dormant: neither host is ever given an IPv4 route to the other, and the traffic under test
+  is sent to hostB's IPv6 address as a LITERAL (not a symbolic hostname), so there is no
+  ambiguity about which family actually carries it -- see the `destAddresses` setting below.
+- LSR1: ~StaticMplsLsr (same node type as static_lsp.test's, ~MplsRouterBase +
+  ~StaticIngressClassifier) with hasIpv6 = true so its hostA-facing interface can also carry
+  an IPv6 address; its LSR2-facing (core) interface stays plain IPv4. Its classifier's
+  <fectable> matches hostB's IPv6 /64 prefix via the NEW `prefixLength` attribute (Part A of
+  this phase) and pushes a label -- this is the dual-stack classification this phase adds.
+- LSR2: ~StaticMplsLsr with NO IPv6 awareness at all (hasIpv6 stays false, the default) --
+  both its interfaces are plain IPv4-addressed core links. It never inspects the payload; it
+  just swaps an opaque MPLS label from its static ~LibTable, exactly like static_lsp.test's
+  transit LSR. This demonstrates that dual-stack FECs are an INGRESS/EGRESS-only concern -- a
+  pure-IPv4 transit LSR needs no IPv6 support whatsoever to carry an IPv6-payload LSP.
+- LSR3: ~StaticMplsLsr with hasIpv6 = true so its hostB-facing interface can also carry an
+  IPv6 address; its LSR2-facing (core) interface stays plain IPv4. Its static ~LibTable POP
+  entry carries `payload="ipv6"` (Workstream F3 Phase 1's per-LIB-entry payload protocol), so
+  popping the label stamps PacketProtocolTag with ~Protocol::ipv6 instead of the ipv4 default.
+  Verified by actually removing the attribute and rerunning: WITHOUT it, LSR3's Mpls module
+  aborts at runtime with "Cannot convert chunk from type inet::Ipv6Header to type
+  inet::Ipv4Header" (popLabel() stamps ipv4, and the subsequent code tries to reinterpret the
+  IPv6 bytes as an Ipv4Header) and hostB receives 0 packets -- this is the one Phase 1
+  dependency this test actually exercises end to end.
+
+IPv6 addressing is static (~Ipv6NetworkConfigurator with explicit per-interface `@address`,
+mirroring IPv6_explicit_address.test) rather than SLAAC/RA, to keep the test deterministic;
+manual `<route>` entries give hostA/hostB a default IPv6 route towards their local LSR --
+LSR1/LSR3 themselves need NO IPv6 route to the far prefix at all, since ~Mpls's
+~StaticIngressClassifier intercepts the raw packet arriving from L2 (Mpls::processPacketFromL2)
+before it would ever reach the local IPv6 routing table. IPv4 core addressing is static too
+(manual `.rt` files, exactly static_lsp.test's style and address plan).
+
+Asserted, in order:
+  1. LSR1 (ingress) pushes a label on the first hop -- doStackOps: {PUSH ...} --, resolved by
+     ~StaticIngressClassifier's longest-prefix-match lookup over hostB's IPv6 prefix;
+  2. LSR2 (transit, no IPv6 stack at all) swaps the label -- doStackOps: {SWAP ...} -- purely
+     from its static ~LibTable;
+  3. LSR3 (egress) pops the label -- doStackOps: {POP ...} -- and decapsulates back to plain
+     IPv6 (payload="ipv6"), forwarding out its hostB-facing interface;
+  4. hostB actually receives the UDP traffic sent by hostA over IPv6 (packetReceived:count > 0);
+  5. standard undisposed-object postrun guard.
+
+Proven to FAIL on the pre-Phase-3 parent commit (96144b03a8): at that commit,
+~StaticIngressClassifier::readTableFromXML() requires `dest` to be a valid IPv4 address (checked
+via Ipv4Address::isWellFormed() before the netmask/prefixLength attribute is even looked at) and
+has no `prefixLength=` support at all, so loading this test's FEC XML (dest="2001:db8:2::") throws
+"'dest' is not a valid IPv4 address" during network initialization -- a config-load error, not a
+data-plane/payload failure (Phase 1's payload-protocol fix is already present and working at that
+commit; this is purely Part A -- dual-stack classification -- being absent).
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: MplsIpv6StaticLsr.ned
+
+import inet.networklayer.mpls.StaticIngressClassifier;
+import inet.node.mpls.MplsRouterBase;
+
+//
+// A signaling-free MPLS LSR: ~MplsRouterBase plus a ~StaticIngressClassifier wired
+// as its ingress classifier. No ~Ldp, no ~RsvpTe -- every forwarding decision comes
+// from static configuration (the classifier's <fectable> and libTable's <libtable>).
+// hasIpv6 defaults to false (pure-IPv4 core LSR); set to true for an edge LSR that
+// also carries an IPv6-addressed interface toward an IPv6 host.
+//
+module MplsIpv6StaticLsr extends MplsRouterBase
+{
+    parameters:
+        mpls.classifierModule = default(absPath(".classifier"));
+    submodules:
+        classifier: StaticIngressClassifier {
+            @display("p=250,80;is=s");
+        }
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: MplsIpv6StaticLspTest.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.inet.StandardHost;
+
+//
+// hostA -- LSR1 (ingress, dual-stack-aware) -- LSR2 (pure-IPv4 transit, no IPv6 awareness at
+// all) -- LSR3 (egress, dual-stack-aware) -- hostB. A 6PE-lite scenario: IPv6 traffic over an
+// IPv4-signaled, label-switched core, all statically configured -- no signaling protocol
+// running anywhere.
+//
+network MplsIpv6StaticLspTest
+{
+    submodules:
+        hostA: StandardHost {
+            hasIpv6 = true;
+            @display("p=100,100");
+        }
+        LSR1: MplsIpv6StaticLsr {
+            hasIpv6 = true;
+            @display("p=250,100");
+        }
+        LSR2: MplsIpv6StaticLsr {
+            @display("p=400,100");
+        }
+        LSR3: MplsIpv6StaticLsr {
+            hasIpv6 = true;
+            @display("p=550,100");
+        }
+        hostB: StandardHost {
+            hasIpv6 = true;
+            @display("p=700,100");
+        }
+        configurator: Ipv6NetworkConfigurator {
+            @display("p=400,300");
+        }
+    connections:
+        hostA.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> LSR1.pppg++;
+        LSR1.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> LSR2.pppg++;
+        LSR2.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> LSR3.pppg++;
+        LSR3.pppg++ <--> { delay = 10ms; datarate = 1Mbps; } <--> hostB.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1_fec.xml
+<?xml version="1.0"?>
+<fectable>
+    <!-- Dual-stack (Workstream F3 Phase 3): dest is hostB's IPv6 /64 prefix, matched via the
+         NEW prefixLength attribute (IPv6 has no netmask-string form, so the old netmask
+         attribute could not express this entry at all). -->
+    <fecentry dest="2001:db8:2::" prefixLength="64" label="100" interface="ppp1"/>
+</fectable>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2_lib.xml
+<?xml version="1.0"?>
+<libtable>
+    <libentry>
+        <inLabel>100</inLabel>
+        <inInterface>ppp0</inInterface>
+        <outInterface>ppp1</outInterface>
+        <outLabel>
+            <op code="swap" value="200"/>
+        </outLabel>
+    </libentry>
+</libtable>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3_lib.xml
+<?xml version="1.0"?>
+<libtable>
+    <!-- Workstream F3 Phase 1's per-LIB-entry payload protocol: WITHOUT payload="ipv6" here,
+         Mpls::popLabel() would stamp PacketProtocolTag with the ipv4 default, and hostB would
+         never receive anything; this is the load-bearing Phase 1 dependency this test proves
+         end to end. -->
+    <libentry payload="ipv6">
+        <inLabel>200</inLabel>
+        <inInterface>ppp0</inInterface>
+        <outInterface>ppp1</outInterface>
+        <outLabel>
+            <op code="pop"/>
+        </outLabel>
+    </libentry>
+</libtable>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostA.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR1.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.0.2	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.1.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.0.1	10.0.0.1	255.255.255.255	H	0	ppp0
+10.0.1.2	10.0.1.2	255.255.255.255	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR2.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.1.2	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.2.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.1.1	10.0.1.1	255.255.255.255	H	0	ppp0
+10.0.2.2	10.0.2.2	255.255.255.255	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: LSR3.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.2.2	MTU: 1500	Metric: 1
+name: ppp1	inet_addr: 10.0.3.1	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+10.0.2.1	10.0.2.1	255.255.255.255	H	0	ppp0
+10.0.3.2	10.0.3.2	255.255.255.255	H	0	ppp1
+routeend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: hostB.rt
+ifconfig:
+name: ppp0	inet_addr: 10.0.3.2	MTU: 1500	Metric: 1
+ifconfigend.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: test.ini
+
+[General]
+ned-path = .;../../../../src
+network = MplsIpv6StaticLspTest
+sim-time-limit = 2s
+total-stack = 64MiB
+record-vector-results = false
+cmdenv-express-mode = false
+**.cmdenv-log-level = "info"
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+
+**.hostA.numApps = 1
+**.hostA.app[0].typename = "UdpBasicApp"
+**.hostA.app[0].localPort = 100
+**.hostA.app[0].destPort = 100
+**.hostA.app[0].messageLength = 128 bytes
+**.hostA.app[0].sendInterval = 0.01s
+# A literal IPv6 address (not the symbolic hostname "hostB"): hostB also carries a (dormant,
+# Ted-only) IPv4 address, so resolving a bare hostname could pick either family -- the literal
+# removes any ambiguity about which family this test's traffic actually flows over.
+**.hostA.app[0].destAddresses = "2001:db8:2::2"
+
+**.hostB.numApps = 1
+**.hostB.app[0].typename = "UdpSink"
+**.hostB.app[0].localPort = 100
+
+# Static IPv6 addressing (mirrors IPv6_explicit_address.test): explicit per-interface
+# addresses, deterministic -- no SLAAC/DAD timing to worry about. hostA/hostB each get a
+# manual default route towards their local LSR; LSR1/LSR3 need NO IPv6 route to the far
+# prefix at all (StaticIngressClassifier intercepts the raw L2 packet before it would ever
+# reach the local IPv6 routing table -- see this file's %description).
+*.configurator.config = xml("<config>\
+    <interface hosts='hostA' address='2001:db8:1::1'/>\
+    <interface hosts='LSR1' names='ppp0' address='2001:db8:1::2'/>\
+    <interface hosts='LSR3' names='ppp1' address='2001:db8:2::1'/>\
+    <interface hosts='hostB' address='2001:db8:2::2'/>\
+    <route hosts='hostA' destination='::/0' gateway='2001:db8:1::2' interface='ppp0'/>\
+    <route hosts='hostB' destination='::/0' gateway='2001:db8:2::1' interface='ppp0'/>\
+    </config>")
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+# IPv4 addressing/routing is entirely static (.rt files below); the "configurator" module
+# in this network is the Ipv6NetworkConfigurator above, not an Ipv4NetworkConfigurator, so
+# each node's Ipv4NodeConfigurator must be told not to look for one under that name.
+**.ipv4.configurator.networkConfiguratorModule = ""
+
+# Static IPv4 addressing (mirrors static_lsp.test's manual .rt style and address plan exactly).
+**.hostA.ipv4.routingTable.routingFile = "hostA.rt"
+**.LSR1.ipv4.routingTable.routingFile = "LSR1.rt"
+**.LSR2.ipv4.routingTable.routingFile = "LSR2.rt"
+**.LSR3.ipv4.routingTable.routingFile = "LSR3.rt"
+**.hostB.ipv4.routingTable.routingFile = "hostB.rt"
+
+# Part A of this phase: LSR1's classifier matches hostB's IPv6 prefix via the new
+# prefixLength attribute. LSR2/LSR3 never receive plain (non-MPLS) traffic in this
+# one-directional test, so their classifiers stay at the empty default.
+**.LSR1.classifier.config = xmldoc("LSR1_fec.xml")
+
+# LSR1 never receives already-labeled traffic in this test, so its libTable stays empty.
+**.LSR2.libTable.config = xmldoc("LSR2_lib.xml")
+**.LSR3.libTable.config = xmldoc("LSR3_lib.xml")
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%# 1. ingress LSR1 pushes a label (StaticIngressClassifier's longest-prefix-match lookup
+%# over hostB's IPv6 prefix -- Part A of this phase)
+%contains: stdout
+doStackOps: {PUSH
+%#--------------------------------------------------------------------------------------------------------------
+%# 2. transit LSR2 (no IPv6 awareness at all) swaps the label (pure LibTable::resolveLabel)
+%contains: stdout
+doStackOps: {SWAP
+%#--------------------------------------------------------------------------------------------------------------
+%# 3. egress LSR3 pops the label (payload="ipv6") and decapsulates back to plain IPv6
+%contains: stdout
+doStackOps: {POP
+%#--------------------------------------------------------------------------------------------------------------
+%# 4. hostB actually receives the IPv6 UDP traffic sent by hostA over the statically-switched LSP
+%postrun-command: grep "packetReceived:count" results/General-#0.sca | awk '$NF > 0 { print "DELIVERED", $0 }' > delivered.out
+%contains: delivered.out
+DELIVERED
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

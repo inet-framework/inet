@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -22,6 +23,7 @@ namespace inet {
 // RFC 3032 reserved label values (bottom of the 20-bit label space)
 constexpr int IPV4_EXPLICIT_NULL_LABEL = 0;
 constexpr int ROUTER_ALERT_LABEL = 1;
+constexpr int IPV6_EXPLICIT_NULL_LABEL = 2; // RFC 3032's "IPv6 Explicit NULL"
 constexpr int IMPLICIT_NULL_LABEL = 3;
 constexpr int RESERVED_LABEL_MAX = 15; // labels 4-15 are unassigned
 
@@ -56,15 +58,19 @@ class INET_API LibTable : public SimpleModule
         int outInterfaceId;
 
         // Optional precomputed backup path (e.g. a TI-LFA repair stack per RFC 9855),
-        // dormant until activateBackup(inLabel, true) flips backupActive. Nothing in
-        // this phase ever calls setBackup()/activateBackup() -- the fields exist purely
-        // as inert data-plane plumbing for a later workstream phase. In-class
+        // dormant until activateBackup(inLabel, true) flips backupActive. In-class
         // initializers are load-bearing here: unlike inLabel/inInterfaceId/outInterfaceId
-        // (which every factory path below assigns explicitly), no existing factory path
-        // touches these new fields, so an uninitialized bool would be indeterminate.
+        // (which every factory path below assigns explicitly), no factory path touches
+        // these fields, so an uninitialized bool would be indeterminate.
         LabelOpVector backupOutLabel;
         int backupOutInterfaceId = -1;
         bool backupActive = false;
+
+        // The network-layer protocol of the payload this label ultimately carries (IPv4 by
+        // default). Stamped on the packet's PacketProtocolTag when this entry's label is
+        // finally popped (see Mpls::popLabel()). Installers that set up an IPv6 FEC set this
+        // to &Protocol::ipv6.
+        const Protocol *payloadProtocol = &Protocol::ipv4;
     };
 
   protected:
@@ -88,10 +94,20 @@ class INET_API LibTable : public SimpleModule
   public:
     // label management
     virtual bool resolveLabel(int inInterfaceId, int inLabel,
-            LabelOpVector& outLabel, int& outInterfaceId);
+            LabelOpVector& outLabel, int& outInterfaceId, const Protocol *& outPayloadProtocol);
+
+    // Convenience overload for callers that don't need the payload protocol
+    // (RsvpClassifier.cc's ingress lookup, and LibTable_ops.test). Not virtual: it merely
+    // forwards to the 5-arg overload above, which is the one actual override point.
+    bool resolveLabel(int inInterfaceId, int inLabel,
+            LabelOpVector& outLabel, int& outInterfaceId)
+    {
+        const Protocol *ignoredPayloadProtocol;
+        return resolveLabel(inInterfaceId, inLabel, outLabel, outInterfaceId, ignoredPayloadProtocol);
+    }
 
     virtual int installLibEntry(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
-            int outInterfaceId);
+            int outInterfaceId, const Protocol *payloadProtocol = &Protocol::ipv4);
 
     // Reserve a fresh label without installing a full LIB entry. Used by LDP's
     // Downstream Unsolicited distribution mode under independent control (RFC 5036
@@ -105,7 +121,7 @@ class INET_API LibTable : public SimpleModule
     // (inLabel==-1) or UPDATES an existing entry, throwing if none exists -- this
     // creates a new entry and throws if one with this inLabel already exists.
     virtual int installReservedLabel(int inLabel, int inInterfaceId, const LabelOpVector& outLabel,
-            int outInterfaceId);
+            int outInterfaceId, const Protocol *payloadProtocol = &Protocol::ipv4);
 
     virtual void removeLibEntry(int inLabel);
 
@@ -125,8 +141,8 @@ class INET_API LibTable : public SimpleModule
     // returns the backup outLabel/outInterfaceId instead of the primary ones for that
     // entry. Returns false (does not throw) if no entry with inLabel exists, mirroring
     // removeLibEntryIfExists()'s no-op-on-miss convention -- callers on the activation
-    // path (a future phase's failure/revert handler) may race a removed entry and
-    // should not need to guard with a separate existence check.
+    // path (a failure/revert handler) may race a removed entry and should not need to
+    // guard with a separate existence check.
     virtual bool activateBackup(int inLabel, bool active);
 
     // utility

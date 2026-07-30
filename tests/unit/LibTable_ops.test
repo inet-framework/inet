@@ -3,9 +3,13 @@ Unit test for the MPLS LIB (Label Information Base) layer: LibTable::installLibE
 removeLibEntry, resolveLabel (with a specific interface id and with the ANY_INTERFACE
 wildcard), the LabelOpVector builders (pushLabel/swapLabel/popLabel) that Mpls::doStackOps
 consumes, and the reserved-label handling in readTableFromXML (RFC 3032 labels 0-15 are no
-longer uniformly rejected, per Workstream B's B3 change to LibTable.cc).
+longer uniformly rejected, per Workstream B's B3 change to LibTable.cc). Also covers the
+per-LIB-entry payload protocol (Workstream F3 Phase 1): the default Ipv4 payload protocol,
+an explicit Ipv4/Ipv6 payload protocol passed to installLibEntry(), and the XML
+payload="ipv6" attribute in readTableFromXML().
 
 %includes:
+#include "inet/common/Protocol.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include <omnetpp/cxmlelement.h>
@@ -74,9 +78,12 @@ Define_Module(TestLibTable);
 
 // Builds a <libtable> config document matching the schema documented in LibTable.ned
 // (one <libentry> with a single <op> in its <outLabel>). Caller owns and must delete
-// the returned root element.
+// the returned root element. payload (Workstream F3 Phase 1), if non-null, is set as
+// the <libentry>'s "payload" attribute (e.g. "ipv6"); left absent by default, matching
+// every pre-existing caller of this helper.
 static cXMLElement *makeLibTableXml(int inLabel, const char *inInterface,
-        const char *outInterface, const char *opCode, int opValue = -1)
+        const char *outInterface, const char *opCode, int opValue = -1,
+        const char *payload = nullptr)
 {
     auto *table = new cXMLElement("libtable", nullptr);
     auto *entry = new cXMLElement("libentry", table);
@@ -88,6 +95,8 @@ static cXMLElement *makeLibTableXml(int inLabel, const char *inInterface,
     opEl->setAttribute("code", opCode);
     if (opValue >= 0)
         opEl->setAttribute("value", std::to_string(opValue).c_str());
+    if (payload)
+        entry->setAttribute("payload", payload);
     return table;
 }
 
@@ -309,6 +318,66 @@ int eth1Id = check_and_cast<NetworkInterface *>(getSimulation()->getModuleByPath
         threw = true;
     }
     ASSERT(threw);
+    EV << "  PASS" << endl;
+}
+
+// === 10. per-LIB-entry payload protocol (Workstream F3 Phase 1): installLibEntry's
+// trailing payloadProtocol parameter defaults to &Protocol::ipv4 (every pre-existing
+// caller keeps behaving exactly as before), and an explicit &Protocol::ipv6 argument
+// is surfaced correctly by the 5-arg resolveLabel() overload ===
+{
+    EV << "=== installLibEntry/resolveLabel: payload protocol ===" << endl;
+
+    // default (no payloadProtocol argument given): ipv4, exactly as before this field existed
+    int l1 = lib->installLibEntry(-1, eth0Id, LibTable::swapLabel(800), eth1Id);
+    LabelOpVector out;
+    int outIf;
+    const Protocol *payloadProtocol;
+    ASSERT(lib->resolveLabel(eth0Id, l1, out, outIf, payloadProtocol));
+    ASSERT(payloadProtocol == &Protocol::ipv4);
+
+    // explicit ipv6 payload protocol
+    int l2 = lib->installLibEntry(-1, eth0Id, LibTable::swapLabel(801), eth1Id, &Protocol::ipv6);
+    ASSERT(lib->resolveLabel(eth0Id, l2, out, outIf, payloadProtocol));
+    ASSERT(payloadProtocol == &Protocol::ipv6);
+
+    // a backup repairs the same destination as the primary, so it reports the same
+    // payload protocol as the entry's primary path
+    lib->setBackup(l2, LibTable::swapLabel(802), eth1Id);
+    lib->activateBackup(l2, true);
+    ASSERT(lib->resolveLabel(eth0Id, l2, out, outIf, payloadProtocol));
+    ASSERT(payloadProtocol == &Protocol::ipv6);
+    lib->activateBackup(l2, false);
+
+    // the 4-arg overload (every caller pre-dating this field: RsvpClassifier.cc,
+    // and every other call in this very test) still compiles and works unchanged
+    ASSERT(lib->resolveLabel(eth0Id, l1, out, outIf));
+    EV << "  PASS" << endl;
+}
+
+// === 11. readTableFromXML: the optional payload="ipv6" attribute (Workstream F3
+// Phase 1); absent defaults to ipv4, matching every pre-existing libentry ===
+{
+    EV << "=== readTableFromXML: payload=\"ipv6\" attribute ===" << endl;
+
+    cXMLElement *ipv6Table = makeLibTableXml(4, "any", "eth0", "pop", -1, "ipv6");
+    libXml->readTableFromXML(ipv6Table);
+    delete ipv6Table;
+
+    LabelOpVector out;
+    int outIf;
+    const Protocol *payloadProtocol;
+    ASSERT(libXml->resolveLabel(LibTable::ANY_INTERFACE, 4, out, outIf, payloadProtocol));
+    ASSERT(payloadProtocol == &Protocol::ipv6);
+
+    // no payload attribute at all: defaults to ipv4, same as every other entry
+    // loaded by this test's earlier sections
+    cXMLElement *defaultTable = makeLibTableXml(5, "any", "eth1", "pop");
+    libXml->readTableFromXML(defaultTable);
+    delete defaultTable;
+
+    ASSERT(libXml->resolveLabel(LibTable::ANY_INTERFACE, 5, out, outIf, payloadProtocol));
+    ASSERT(payloadProtocol == &Protocol::ipv4);
     EV << "  PASS" << endl;
 }
 

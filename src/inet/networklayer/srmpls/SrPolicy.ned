@@ -23,8 +23,14 @@ import inet.networklayer.mpls.IIngressClassifier;
 //
 // The `policies` XML format: the root element is <policies>, containing any
 // number of <policy> elements, each a leaf element with:
-// - dest: destination prefix's network address (e.g. "10.3.3.0")
-// - netmask: the prefix's netmask (e.g. "255.255.255.0")
+// - dest: destination prefix's network address, IPv4 or IPv6 (e.g. "10.3.3.0"
+//   or "2001:db8:3::"; the family is auto-detected from the string)
+// - netmask: the prefix's IPv4 dotted netmask (e.g. "255.255.255.0"); mutually
+//   exclusive with prefixLength, kept for backward compatibility
+// - prefixLength: the prefix length as a plain integer (e.g. "24"), usable
+//   for either address family; mutually exclusive with netmask, and REQUIRED
+//   for an IPv6 dest (IPv6 has no netmask-string convention). Exactly one of
+//   netmask/prefixLength must be given.
 // - segments: a whitespace-separated, ORDERED list of segment tokens, each
 //   either "node:<sidIndex>" or "adj:<interfaceName>"
 //
@@ -32,10 +38,11 @@ import inet.networklayer.mpls.IIngressClassifier;
 // <policies>
 //     <policy dest="10.3.3.0" netmask="255.255.255.0" segments="node:3 node:5"/>
 //     <policy dest="10.9.9.0" netmask="255.255.255.0" segments="node:3 adj:ppp2"/>
+//     <policy dest="2001:db8:9::" prefixLength="64" segments="node:3"/>
 // </policies>
 // </pre>
 //
-// On a lookup, the entry with the longest matching netmask wins (standard
+// On a lookup, the entry with the longest matching prefix wins (standard
 // longest-prefix match, like ~StaticIngressClassifier); if no entry matches,
 // this classifier reports "no mapping" and ~Mpls falls back to regular L3
 // routing for that packet.
@@ -76,7 +83,23 @@ import inet.networklayer.mpls.IIngressClassifier;
 // rather than imposing an empty label stack, which ~Mpls's non-empty-
 // outLabel invariant forbids.
 //
-// Limitations (deliberate simplifications of this model, see F1's plan):
+// IPv6 destinations (6PE-lite): a node-SID label is shared by ALL traffic
+// destined to that node, of either family -- ~SegmentRouting installs one
+// family-agnostic PHP POP LIB entry per node-SID, unlike the per-FEC LIB
+// entries of Ldp/RsvpTe/static XML, where one entry = one FEC = one
+// family. So whenever a matched policy's destination is IPv6 (and the
+// resolved stack is non-empty), ~SrPolicy pushes an extra, INNERMOST label:
+// RFC 3032's IPv6 Explicit NULL (label value 2). It rides underneath every
+// node:/adj: segment, surviving every transit PHP pop untouched (a non-
+// bottom pop never stamps a payload protocol -- see ~Mpls::popLabel()), and
+// is only actually processed once it reaches the bottom of the stack at the
+// true egress, where ~Mpls's IPV6_EXPLICIT_NULL_LABEL handling pops it and
+// correctly stamps Protocol::ipv6, regardless of what the egress's own
+// (also family-agnostic) node-SID LIB entry would have defaulted to. IPv4
+// destinations need no such marker: LibTable's payloadProtocol already
+// defaults to ipv4.
+//
+// Limitations (deliberate simplifications of this model):
 // - "adj:<interfaceName>" ALWAYS resolves against the CO-LOCATED
 //   ~SegmentRouting module's OWN local adjacency-SID table -- i.e. it can
 //   only describe one of THIS router's own links. There is no adjacency-SID
@@ -90,7 +113,7 @@ import inet.networklayer.mpls.IIngressClassifier;
 //   the path, and will very likely make that router blackhole the packet
 //   (a "fail safe" outcome: the packet is dropped, not misrouted). Keep
 //   cross-node adjacency-SID steering out of policies; use node-SIDs for
-//   multi-hop explicit paths instead (see F1's "explicit path" example).
+//   multi-hop explicit paths instead.
 // - if a matched policy's first segment is currently unreachable (a "node:"
 //   target with no path) or a "later" adjacency segment is currently
 //   withdrawn (its link is down), this classifier reports "no mapping",
