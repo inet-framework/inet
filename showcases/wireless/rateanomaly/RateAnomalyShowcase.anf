@@ -30,7 +30,7 @@ valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, ["station"], ["scenario
 metadf["legend"] = list(valuedf.index)   # clean legend labels (no "scenario=" prefix)
 utils.plot_bars(valuedf, errorsdf, metadf, props)
 
-slow_level = df[(df["station"] == "sta[0]") & (df["scenario"].str.contains("UplinkAnomaly"))]["value"].iloc[0]
+slow_level = df[(df["station"] == "sta[0]") & (df["scenario"].str.contains("UplinkAnomaly"))]["value"].mean()
 plt.gca().axhline(slow_level, color="0.2", linestyle="--", linewidth=1.5, zorder=3)
 
 utils.postconfigure_plot(props)
@@ -750,7 +750,9 @@ df["station"] = df["module"].str.extract(r"app\[(\d+)\]").astype(int)
 df["mbps"] = df["value"] * 0.002
 df["slowrate"] = np.where(df["configname"] == "UplinkHomogeneous", 54.0, pd.to_numeric(df["slowBitrate"], errors="coerce"))
 
-agg = df.groupby("slowrate")["mbps"].sum().sort_index()
+# results are recorded with 3 repetitions per sweep point: sum the five stations
+# within each run first, then average the per-run aggregates over the repetitions
+agg = df.groupby(["slowrate", "runID"])["mbps"].sum().groupby("slowrate").mean().sort_index()
 fast = df[df["station"] != 0].groupby("slowrate")["mbps"].mean().sort_index()
 slow = df[df["station"] == 0].groupby("slowrate")["mbps"].mean().sort_index()
 
