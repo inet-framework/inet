@@ -147,18 +147,20 @@ this page — uplink and downlink alike — uses the same layout.
              wired server reachable over Eth100M
    anchor:   initial state (t=0, before run). Structural -- no timing; if the module set
              or links differ, the NED changed.
-   capture:  set_canvas_view {module_path:"<root>", zoom:30} then get_canvas_image
+   capture:  set_canvas_view {module_path:"<root>", zoom:18.938} then get_canvas_image
              {module_path:"<root>", area:"module_rectangle", margin:5,
              output_file:"doc/media/network.png"}. No cropping or post-processing --
              this is exactly Qtenv's right-click "Export to Image", entire module, 5 px.
-             Was 914x734.
-             zoom 30 rather than fit:true: at the fitted zoom (~19) the sta[*] labels
-             collide with the icon below. If the frame ever looks mostly empty again,
-             the cause is the layout, not the capture -- check that [General] still
-             spaces the stations 4 m apart (they span y=4..20 of the bgb=30,24
-             playground). Do not "fix" it by cropping the PNG, and note that
-             area="viewport" is no help either: it inherits the Qtenv window's 4:3
-             aspect while the content is about 2:1, so it clips or leaves a worse band.
+             Was 583x469.
+             zoom 18.938 is the same zoom as the two downlink cell figures below, so all
+             three canvas shots on this page are framed alike. Set it EXPLICITLY: fit:true
+             depends on the Qtenv window size (it yielded 18.9 in one window and 28.5 in a
+             larger one), so it does not replay. If the frame ever looks mostly empty
+             again, the cause is the layout, not the capture -- check that [General] still
+             spaces the stations 4 m apart (they span y=4..20 of the bgb=30,24 playground).
+             Do not "fix" it by cropping the PNG, and note that area="viewport" is no help
+             either: it inherits the Qtenv window's 4:3 aspect while the content is about
+             2:1, so it clips or leaves a worse band.
    stamp:    captured 2026-07, INET 4.6
 
 The Configurations
@@ -552,7 +554,8 @@ dragged down to the slow client's pace:
              structural. If the bars stop showing 6 vs 54, the dcf datarateSelected wiring changed.
    capture:  get_canvas_image (post-2026-07 fix it renders the live inspector = Qtenv's "Export to
              Image", so the visualizer overlays land in place, no chrome) -- run to 2s express,
-             set_canvas_view(RateAnomalyShowcase, fit=true), then
+             set_canvas_view(RateAnomalyShowcase, zoom=18.938) -- an explicit zoom, not
+             fit=true, which depends on the Qtenv window size -- then
              get_canvas_image(RateAnomalyShowcase, area=module_rectangle, margin=5). No cropping.
    record:   inet -u Qtenv -c DownlinkAnomaly --mcp-server-address localhost:8765
              (the 4 m station spacing set in [General] keeps the per-station readouts apart)
