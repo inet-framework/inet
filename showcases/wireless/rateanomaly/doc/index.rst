@@ -141,18 +141,21 @@ at 54 Mbps.
    config:   UplinkHomogeneous   # ../omnetpp.ini (all three Uplink* configs share these
              positions; the Downlink* ones spread the stations vertically instead)
    seed:     default
-   shows:    topology -- the configurator/radioMedium/visualizer infrastructure modules,
-             five sta[*] wireless hosts clustered ~8-9 m from the accessPoint, and the
-             wired server reachable over Eth100M
+   shows:    the topology -- five sta[*] wireless hosts clustered ~8-9 m from the
+             accessPoint, and the wired server reachable over Eth100M
    anchor:   initial state (t=0, before run). Structural -- no timing; if the module set
              or links differ, the NED changed.
    capture:  Qtenv + MCP server; set_canvas_view {module_path:"<root>", zoom:30} then
              get_canvas_image {module_path:"<root>", area:"all_elements", margin:8}.
              zoom 30 (not fit:true) keeps the 2 m station spacing wide enough for the
-             labels not to collide; all_elements still leaves the unused lower half of
-             the playground, so the result is cropped to its content bounding box with
-             an 18 px margin (background #d1d1d1, threshold 18, ignoring the green
-             playground frame). Was 858x688 with a third of it empty; now 798x540.
+             labels not to collide. Then cropped to the topology alone: the NED parks
+             configurator/radioMedium/visualizer in a tall column down the left side and
+             the playground runs well past the nodes, which together left two thirds of
+             the frame empty. Crop = content bounding box of everything right of the
+             infrastructure column (x > 200 in the zoom-30 capture), 22 px margin,
+             background #d1d1d1, threshold 18. Was 858x688 mostly empty; now 560x329.
+             Cropping rather than moving the modules keeps the two downlink cell figures,
+             which show the same playground, valid.
    stamp:    captured 2026-07, INET 4.6
 
 The Configurations
