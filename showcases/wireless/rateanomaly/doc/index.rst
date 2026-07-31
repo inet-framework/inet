@@ -141,21 +141,24 @@ at 54 Mbps.
    config:   UplinkHomogeneous   # ../omnetpp.ini (all three Uplink* configs share these
              positions; the Downlink* ones spread the stations vertically instead)
    seed:     default
-   shows:    the topology -- five sta[*] wireless hosts clustered ~8-9 m from the
-             accessPoint, and the wired server reachable over Eth100M
+   shows:    topology -- the configurator/radioMedium/visualizer infrastructure modules,
+             five sta[*] wireless hosts clustered ~8-9 m from the accessPoint, and the
+             wired server reachable over Eth100M
    anchor:   initial state (t=0, before run). Structural -- no timing; if the module set
              or links differ, the NED changed.
-   capture:  Qtenv + MCP server; set_canvas_view {module_path:"<root>", zoom:30} then
-             get_canvas_image {module_path:"<root>", area:"all_elements", margin:8}.
-             zoom 30 (not fit:true) keeps the 2 m station spacing wide enough for the
-             labels not to collide. Then cropped to the topology alone: the NED parks
-             configurator/radioMedium/visualizer in a tall column down the left side and
-             the playground runs well past the nodes, which together left two thirds of
-             the frame empty. Crop = content bounding box of everything right of the
-             infrastructure column (x > 200 in the zoom-30 capture), 22 px margin,
-             background #d1d1d1, threshold 18. Was 858x688 mostly empty; now 560x329.
-             Cropping rather than moving the modules keeps the two downlink cell figures,
-             which show the same playground, valid.
+   capture:  set_canvas_view {module_path:"<root>", zoom:30} then get_canvas_image
+             {module_path:"<root>", area:"module_rectangle", margin:5,
+             output_file:"doc/media/network.png"}. No cropping or post-processing.
+             zoom 30 rather than fit:true: at the fitted zoom (~19) the 2 m station
+             spacing is under 40 px and the sta[*] labels collide with the icon below.
+             Was 914x734.
+             The frame has empty regions -- the NED gives the network bgb=30,24 while the
+             nodes occupy roughly x=3..25, y=2..16, and it parks the three infrastructure
+             modules in a tall column down the left. Only a NED display-string change can
+             tighten that, and the two downlink cell figures frame the same playground, so
+             it is left alone deliberately. Do not "fix" this by cropping the PNG: area=
+             viewport is no help either, since it inherits the Qtenv window's 4:3 aspect
+             while the content is about 2:1.
    stamp:    captured 2026-07, INET 4.6
 
 The Configurations
