@@ -214,19 +214,20 @@ steady-state interval, after association settles. Each run lasts 5 s, with the f
 1 s discarded as warmup, so throughput is averaged over the remaining 4 s.
 
 DCF is not deterministic — the random backoff draws from the RNG — so results vary from
-seed to seed, and for one station over 4 s the spread is easily a few tenths of a Mbps.
-Every chart and table on this page therefore averages **three repetitions** per point.
-That is not ceremony: with a single run per point the slow station's curve comes out
-visibly non-monotonic, and at 9 Mbps it can read *above* the fast-station average, purely
-from backoff luck. The aggregate effect being demonstrated is much larger than the spread,
-but the per-station detail is not.
+seed to seed, by a few tenths of a Mbps for a single station over 4 s. The charts and the
+table in this section each come from **one run**, so they show a concrete realisation
+rather than an average. The aggregate effect is far larger than that scatter, but the
+per-point detail is not: in the sweep below the 9 Mbps row happens to put the slow station
+slightly *above* the fast-station average, which is backoff luck rather than a trend.
+The two later charts that compare a *fix* against the anomaly do average three
+repetitions, because there the differences being plotted are comparable to the scatter.
 
 In the **UplinkHomogeneous** baseline, all five stations achieve nearly the same throughput,
-about 4.7–5.0 Mbps each, for an aggregate of roughly 24 Mbps — full 802.11g saturation
+about 4.7–5.1 Mbps each, for an aggregate of roughly 24 Mbps — full 802.11g saturation
 throughput at this payload size.
 
 When one station is slowed to 6 Mbps in **UplinkAnomaly**, every station — including the
-four still configured for 54 Mbps — drops to about 2.1–2.9 Mbps. The fast stations do
+four still configured for 54 Mbps — drops to about 2.3–2.5 Mbps. The fast stations do
 not merely lose a little throughput; they are pulled down to nearly the slow station's
 level, settling just above the floor it sets:
 
@@ -235,10 +236,10 @@ level, settling just above the floor it sets:
    FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
    type:     chart (matplotlib)
    anf:      RateAnomalyShowcase.anf   chart "Per-station throughput"
-   inputs:   results/*.sca   from configs UplinkHomogeneous + UplinkAnomaly, 3 reps each
-             (pivot_for_barchart averages the repetitions; single runs are too noisy here)
-   record:   inet -u Cmdenv -c UplinkHomogeneous -r 0..2 --repeat=3
-             inet -u Cmdenv -c UplinkAnomaly      -r 0..17 --repeat=3
+   inputs:   results/*.sca   from configs UplinkHomogeneous + UplinkAnomaly, ONE run each
+             (no --repeat: this figure shows a single realisation, as it always has)
+   record:   inet -u Cmdenv -c UplinkHomogeneous -r 0
+             inet -u Cmdenv -c UplinkAnomaly
    shows:    per-station application throughput, UplinkHomogeneous (all 54 Mbps) vs the
              rate anomaly (sta[0] at 6 Mbps); the four fast stations collapse to the
              slow station's level (dotted line)
@@ -250,10 +251,9 @@ level, settling just above the floor it sets:
    stamp:    captured 2026-06, INET 4.6
 
 The reason is visible in the raw frame counts: over the measurement interval every
-station — fast or slow — transmits frames of the same order, about 1,070 to 1,450. The
-slow station is not starved of *turns*: it gets around 80 % as many transmissions as the
-fast stations average, while sending nine times slower. DCF hands out transmission
-opportunities at roughly the same rate to everyone, exactly as designed. But each of the
+station — fast or slow — successfully transmits a similar *number* of frames, about
+1,160 to 1,260 in this run. DCF hands out transmission opportunities at roughly the same
+rate to everyone, exactly as designed. But each of the
 slow station's frame exchanges tied up the channel several times longer — around six
 times, once the rate-independent preamble, interframe spaces, and acknowledgment are
 included — so it consumed most of the channel time and left little for the others.
@@ -263,9 +263,14 @@ included — so it consumed most of the channel time and left little for the oth
    FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
    type:     chart (matplotlib)
    anf:      RateAnomalyShowcase.anf   chart "Frames per station"
-   inputs:   results/*.sca   from config UplinkAnomaly slowBitrate=6, 3 reps (averaged)
-   record:   inet -u Cmdenv -c UplinkHomogeneous -r 0..2 --repeat=3
-             inet -u Cmdenv -c UplinkAnomaly      -r 0..17 --repeat=3
+   inputs:   results/*.sca   from config UplinkAnomaly slowBitrate=6, ONE run
+             Do NOT record this with --repeat=3: averaging only 3 seeds is the worst of
+             both worlds here. The per-station counts scatter by ~100 frames run to run,
+             so 3 samples import that scatter without cancelling it and the bars come out
+             visibly uneven; 1 run or 10+ both read flat. Measured at n=10 the four fast
+             stations agree within 8% and the slow station sits ~16% below them.
+   record:   inet -u Cmdenv -c UplinkHomogeneous -r 0
+             inet -u Cmdenv -c UplinkAnomaly
    shows:    frames successfully transmitted per station in the rate-anomaly case
              (slow = 6 Mbps); near-equal counts = DCF's equal transmission opportunities
    anchor:   data is structural — server.app[*] packetReceived:count for the UplinkAnomaly
@@ -320,7 +325,7 @@ correspondingly larger share of channel time — dragging every station's throug
 toward its own.
 
 The damage scales with the rate gap. As the slow station's rate falls from 54 to
-6 Mbps, the aggregate network throughput falls from about 24 to 13 Mbps — a single slow
+6 Mbps, the aggregate network throughput falls from about 24 to 12 Mbps — a single slow
 station halves the capacity of the entire cell:
 
 .. figure:: media/throughput-vs-rate.png
@@ -328,11 +333,12 @@ station halves the capacity of the entire cell:
    FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
    type:     chart (matplotlib)
    anf:      RateAnomalyShowcase.anf   chart "Throughput vs slow-station rate"
-   inputs:   results/*.sca   from configs UplinkHomogeneous + UplinkAnomaly, 3 reps each.
-             The script sums the five stations WITHIN a run, then averages the per-run
-             aggregates over the repetitions -- a plain groupby.sum() would triple it.
-   record:   inet -u Cmdenv -c UplinkHomogeneous -r 0..2 --repeat=3
-             inet -u Cmdenv -c UplinkAnomaly      -r 0..17 --repeat=3
+   inputs:   results/*.sca   from configs UplinkHomogeneous + UplinkAnomaly, ONE run each.
+             The script sums the five stations WITHIN a run before averaging across runs,
+             so it stays correct if repetitions are ever added -- a plain groupby.sum()
+             over repetitions would multiply the aggregate by the repetition count.
+   record:   inet -u Cmdenv -c UplinkHomogeneous -r 0
+             inet -u Cmdenv -c UplinkAnomaly
    shows:    aggregate, fast-station-average, and slow-station throughput vs the slow
              station's bitrate (54 = UplinkHomogeneous baseline, 36..6 = UplinkAnomaly sweep)
    anchor:   data is structural — server.app[*] packetReceived:count grouped by the
@@ -345,13 +351,13 @@ station halves the capacity of the entire cell:
 ============================  ===============  ==============  ====================
 slow station rate (Mbps)      aggregate        slow station    fast stations (avg)
 ============================  ===============  ==============  ====================
-54 (UplinkHomogeneous)        24.1             4.75            4.83
-36                            22.9             4.22            4.68
-24                            21.3             3.78            4.38
-18                            19.8             3.46            4.08
-12                            17.4             2.94            3.61
-9                             15.3             2.73            3.15
-6                             12.9             2.14            2.69
+54 (UplinkHomogeneous)        24.1             5.05            4.76
+36                            22.9             4.19            4.67
+24                            21.0             4.05            4.24
+18                            19.6             3.58            4.00
+12                            17.7             2.88            3.71
+9                             14.3             3.12            2.81
+6                             12.2             2.31            2.46
 ============================  ===============  ==============  ====================
 
 (All values in Mbps, application-level throughput. The 54 Mbps row is the UplinkHomogeneous
@@ -403,10 +409,10 @@ the aggregate roughly flat and keeps the fast stations near their full throughpu
              stays flat and high
    inputs:   results/solve/UplinkAnomaly-*.sca and results/solve/UplinkTxop-*.sca, BOTH 3 reps
              (DCF is not deterministic -- same RNG/backoff -- so both are averaged alike);
-             results/UplinkHomogeneous-#*.sca (3 reps) for the all-fast baseline line
+             results/UplinkHomogeneous-#*.sca for the all-fast baseline line
    record:   inet -u Cmdenv -c UplinkAnomaly     -r 0..17 --repeat=3 --result-dir=results/solve
              inet -u Cmdenv -c UplinkTxop        -r 0..17 --repeat=3 --result-dir=results/solve
-             inet -u Cmdenv -c UplinkHomogeneous -r 0..2  --repeat=3 --result-dir=results
+             inet -u Cmdenv -c UplinkHomogeneous -r 0                --result-dir=results
    metric:   server.app[*] packetReceived:count x 0.002 -> Mbps; aggregate = sum over the 5
              apps per run, fast-avg = mean over app[1..4]; both configs averaged over 3 reps
    anchor:   structural -- if the UplinkAnomaly/UplinkTxop configs or sweep points change,

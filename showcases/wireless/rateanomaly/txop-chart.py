@@ -7,7 +7,7 @@
 # Reproduce (from this showcase directory):
 #   inet -u Cmdenv -c UplinkAnomaly     -r 0..17 --repeat=3 --result-dir=results/solve
 #   inet -u Cmdenv -c UplinkTxop        -r 0..17 --repeat=3 --result-dir=results/solve
-#   inet -u Cmdenv -c UplinkHomogeneous -r 0..2  --repeat=3 --result-dir=results
+#   inet -u Cmdenv -c UplinkHomogeneous -r 0                --result-dir=results
 #   python3 txop-chart.py
 #
 # The sweep results live in results/solve/ (not results/) so they do not contaminate the
