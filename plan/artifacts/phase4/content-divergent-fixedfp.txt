@@ -1,0 +1,15 @@
+examples/inet/configurator -c DisableDestinationInterfaces for 10s
+examples/inet/hierarchical -c Hosts256 for 20s
+examples/ipv6/nclients -c PPP_SCTP for 100s
+examples/ospfv3/multiple_areas_FINAL -c LinkDown for 500s
+examples/ospfv3/multiple_areas_FINAL -c LinkDownLinkUp for 500s
+examples/ospfv3/multiple_areas_FINAL for 500s
+tutorials/bgp -c Step6 for 1000s
+tutorials/bgp -c Step9 for 1000s
+tutorials/ospf -c Step10 for 1000s
+tutorials/ospf -c Step10a for 1000s
+tutorials/ospf -c Step10b for 1000s
+tutorials/ospf -c Step10d for 1000s
+tutorials/ospf -c Step6 for 1000s
+tutorials/ospf -c Step8 for 1000s
+tutorials/ospf -c Step9 for 1000s

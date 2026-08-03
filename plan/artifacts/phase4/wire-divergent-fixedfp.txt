@@ -1,0 +1,118 @@
+examples/aodv -c IPv4FastMobility for 50s
+examples/bgpv4/BgpAndOspfv3 -c OspfOnly for 100s
+examples/bgpv4/BgpAndOspfv3 for 100s
+examples/bgpv4/BgpIpv6Basic for 30s
+examples/bgpv4/BgpWithdrawal6 for 100s
+examples/diffserv/onedomain -c Exp11 for 10s
+examples/diffserv/onedomain -c Exp12 for 10s
+examples/diffserv/onedomain -c Exp13 for 10s
+examples/diffserv/onedomain -c Exp14 for 10s
+examples/ethernet/TenBaseT1S -f bestcase.ini -c BestCase for 1ms
+examples/ethernet/TenBaseT1S -f worstcase.ini -c WorstCase for 1ms
+examples/ethernet/arptest -c ARPTest for 500s
+examples/ethernet/arptest2 -c ARPTest for 500s
+examples/ieee8021as -c Network_with_cross_traffic for 200s
+examples/inet/bulktransfer -c inet__inet for 50s
+examples/inet/bulktransfer -c inet_inet_2a for 50s
+examples/inet/bulktransfer -c inet_inet_2b for 50s
+examples/inet/dctcp -c DcTcpIncast for 100s
+examples/inet/dctcp -c TcpRenoIncast for 100s
+examples/inet/hierarchical99 -f networklayer.ini -c AdaptiveProbabilisticBroadcast for 10000s
+examples/inet/hierarchical99 -f networklayer.ini -c Flooding for 10000s
+examples/inet/hierarchical99 -f networklayer.ini -c Generic for 10000s
+examples/inet/hierarchical99 -f networklayer.ini -c ProbabilisticBroadcast for 10000s
+examples/inet/hierarchical99 -f networklayer.ini -c WiseRoute for 10000s
+examples/inet/ipsec -c UDPTraffic for 200s
+examples/inet/ipsec -f ipv6.ini -c UDPTraffic6 for 200s
+examples/inet/ipv4largenet -c IPv4LargeNet for 120s
+examples/inet/nclients -f filetransfer.ini -c Filetransfer for 50s
+examples/inet/netperfmeter -c SCTP-with-OLIA for 30s
+examples/inet/tcp_pmtud -c PmtudEnabled for 300s
+examples/inet/tcp_pmtud -c PmtudProbe for 300s
+examples/inet/tcpthroughput -c Delay-100ms-advWin64K for 100s
+examples/inet/tcpwindowscale -c WS_enabled for 600.0s
+examples/inet/udpapp -c RequestResponseTraffic for 100s
+examples/ipv6/ipv6configurator -c CustomRA for 120s
+examples/ipv6/ipv6configurator -c Default for 60s
+examples/ipv6/ipv6configurator -c Hierarchical for 60s
+examples/ipv6/ipv6configurator -c ManualRouters for 120s
+examples/ipv6/mipv6 -c Handover for 70s
+examples/ipv6/mipv6 -c RouteOptimizationTwoCNs for 60s
+examples/ipv6/mipv6roaming -c Roaming for 70s
+examples/ipv6/pmipv6 for 60s
+examples/manetrouting/dsdv -c DynamicIPv4 for 22s
+examples/manetrouting/dsdv -c IPv4 for 10s
+examples/manetrouting/dsdv -c MultiIPv4 for 10s
+examples/manetrouting/dymo -c DynamicGeneric for 22s
+examples/manetrouting/dymo -c DynamicIPv4 for 22s
+examples/manetrouting/dymo -c Generic for 10s
+examples/manetrouting/dymo -c IPv4 for 10s
+examples/manetrouting/dymo -c MultiGeneric for 10s
+examples/manetrouting/dymo -c MultiIPv4 for 10s
+examples/manetrouting/gpsr -c DynamicGeneric for 20s
+examples/manetrouting/gpsr -c DynamicIPv4 for 20s
+examples/manetrouting/gpsr -c DynamicIPv6 for 20s
+examples/manetrouting/gpsr -c Generic for 20s
+examples/manetrouting/gpsr -c IPv4 for 20s
+examples/manetrouting/gpsr -c IPv6 for 20s
+examples/manetrouting/gpsr -c Manual for 20s
+examples/manetrouting/gpsr -c MultiGeneric for 20s
+examples/manetrouting/gpsr -c MultiIPv4 for 20s
+examples/manetrouting/gpsr -c MultiIPv6 for 20s
+examples/manetrouting/multiradio -c MultiRadio for 100s
+examples/manetrouting/multiradio -c SingleRadio for 100s
+examples/mpls/ldp for 15s
+examples/mpls/net37 for 500s
+examples/mpls/testte_failure for 6s
+examples/mpls/testte_failure2 for 6s
+examples/mpls/testte_reroute for 5s
+examples/mpls/testte_routing for 5s
+examples/mpls/testte_tunnel for 5s
+examples/mrp -c LargeNetwork for 3s
+examples/mrp -c LargeNetworkWithTraffic for 3s
+examples/mrp -c MediumNetworkBase for 3s
+examples/mrp -c MediumNetworkBaseWithTraffic for 3s
+examples/mrp -c MediumNetworkLC for 3s
+examples/mrp -c MediumNetworkLCWithTraffic for 3s
+examples/mrp -c MediumNetworkRC for 3s
+examples/mrp -c MediumNetworkRCWithTraffic for 3s
+examples/mrp -c SmallNetwork for 3s
+examples/mrp -c SmallNetworkWithTraffic for 3s
+examples/ospfv2/areatests -c backbone for 1000s
+examples/ospfv2/backbone for 100s
+examples/ospfv2/fulltest for 1000s
+examples/ospfv2/simpletest -c CrashAndReboot for 500s
+examples/ospfv3/small for 200s
+examples/pim/dm_ipv6 for 120s
+examples/pim/iptv -c PIM_DM for 35s
+examples/pim/iptv -c PIM_SM for 35s
+examples/pim/sm -c Scenario4 for 100s
+examples/rip/dynamictest -c dynamic1 for 600s
+examples/rip/infinitycount for 80s
+examples/rip/mixednetwork -c disconnect for 150s
+examples/rip/simpletest -c IPv6 for 600s
+examples/rtp/unicast for 1500s
+examples/rtp/unicast2 for 500s
+examples/seaport for 1000s
+examples/wireless/hiddennode for 5s
+examples/wireless/hosttohost -c Throughput1 for 5s
+examples/wireless/lan80211 -f omnetpp-ftp.ini -c TwoHosts for 100s
+examples/wireless/nic -c BMacWithUnitDiskRadio for 100s
+examples/wireless/testnewmac -c Mac for 10s
+showcases/general/pcaprecording -c PcapRecording for 10s
+showcases/quic/linksharing for 50s
+showcases/routing/manet -c Aodv for 100s
+showcases/routing/manet -c Dsdv for 100s
+showcases/routing/manet -c Gpsr for 100s
+showcases/visualizer/canvas/datalinkactivity -c ActivityLevel for 100s
+showcases/visualizer/canvas/transportconnection -c MultipleConnections for 2s
+showcases/wireless/analogmodel -c Noise for 0.1s
+showcases/wireless/blockack -c MixedTraffic for 1s
+showcases/wireless/hiddennode -c WallOffRtsOff for 5s
+showcases/wireless/hiddennode -c WallOffRtsOn for 5s
+showcases/wireless/hiddennode -c WallOnRtsOff for 5s
+showcases/wireless/hiddennode -c WallOnRtsOn for 5s
+tutorials/ospf -c Step7 for 1000s
+tutorials/rip -c Step7TriggeredUpdates for 200s
+tutorials/wireless -c Wireless12 for 20s
+tutorials/wireless -c Wireless13 for 20s

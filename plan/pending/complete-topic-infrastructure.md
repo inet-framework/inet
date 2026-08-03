@@ -828,10 +828,25 @@ fingerprints. With the FIXED calculator on mrp Small: master deterministic
 time (`getFinalHash()`; str + checkFingerprint use it). ABI-safe (non-virtual
 private method), INET rebuild not required. Redo campaign driver:
 `plan/artifacts/rerun_parity_r0.sh` (regenerates tplx/~tNl/~tND baselines on
-fp-master, combined store, branch runs without and with the verification mode) —
-running as tag `fixedfp`, results to be recorded here. NOTE: both INET worktrees
-still carry an env-gated FPTRACE debug patch in FingerprintCalculator.cc
-(INET_FP_TRACE; no behavioral effect) — revert after the campaign.
+fp-master, combined store, branch runs without and with the verification mode).
+NOTE: both INET worktrees still carry an env-gated FPTRACE debug patch in
+FingerprintCalculator.cc (INET_FP_TRACE; no behavioral effect) — revert after the
+bucket pass.
+
+**Re-measured results (tag `fixedfp`, full-history fingerprints, 848 subjects):**
+no-mode 79 PASS / 759 FAIL / 10 ERROR; DP-mode 79/758/11 with **ZERO FAIL→PASS
+conversions** — the trajectory-verification mode adds nothing at wire level
+(wire fingerprints don't see internal event structure by construction; its earlier
+"44 conversions" were last-event mirages). Strong D9-strip input: coroutines are
+user-less AND the deferred-push mode has no measurable verification value.
+Per-subject failing-ingredient decomposition (no-mode):
+| class | subjects | meaning |
+|---|---|---|
+| only `tplx` fails | 626 | full-history wire fingerprints PASS — wire byte-identical at identical times; internal-only change (the branch's intended effect), now on solid ground |
+| all fail (`~tNl` too) | 81+37 = 118 | genuine wire divergence: manet ~25 (gpsr/dymo/dsdv/multiradio/aodv), mrp 10 (9µs delivery shift, mechanism TBD — deliverImmediately identical both sides), wireless misc ~10, TCP family ~12, ipv6configurator 4, diffserv/onedomain 4, mipv6/pim/bgp-v6 ~8, singles (list: `phase4/wire-divergent-fixedfp.txt`) |
+| only `~tND` fails | 15 | CONTENT-only: identical times/nodes/lengths, different BYTES — tutorials/ospf ×7, ospfv3 ×3, tutorials/bgp ×2, configurator, hierarchical, ipv6 SCTP (suspect: serialized field drift, e.g. Ipv4 identification or checksum inputs; list: `phase4/content-divergent-fixedfp.txt`) |
+| everything passes | 79 | fully identical incl. tplx |
+| crashes | 10 | unchanged §4.9 set |
 
 ## Phase 5 — Final cleanup & merge prep
 
