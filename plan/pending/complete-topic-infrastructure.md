@@ -801,6 +801,38 @@ no-mode). Of the 18 attribution artifacts, 9 now PASS, 9 remain.
 | R5 TCP oddballs | arptest ×2, tcp_pmtud ×2 | per-case diagnosis |
 | R6 misc | netperfmeter SCTP-OLIA, manet-showcase Gpsr | per-case |
 
+### 4.11 CRITICAL: companion fingerprint bug — ALL prior fingerprint results invalid (2026-07-17)
+
+Found while diagnosing R1 (mrp SmallNetworkWithTraffic): the `~` filter trace showed
+wire deliveries at genuinely different times (branch delivers `mrpLinkChange` to the
+peer MAC 9µs later than master — eventlog-confirmed, reception-end vs earlier
+delivery; a REAL wire-timing shift), yet tplx was equal — impossible for an
+all-event hash. Root cause in the companion omnetpp sorting commit `4f52bcee39`:
+it added a per-event `hasher_.reset()` and accumulates per-event hashes in
+`sameSimulationTimeHashes`, folding ONLY when simtime advances — but `str()` and
+`checkFingerprint()` read the raw hasher, which holds just the LAST event's hash.
+Proven empirically: instrumented addEvent shows final reported value == last event's
+own hash with 9 hashes pending in the bucket.
+
+**Consequences: every fingerprint computed on the companion omnetpp since Jun 2024
+reflects only the last (filtered) event** — for tplx, frequently the end-of-run
+marker (trivially equal); for `~tN*`, the last node-crossing delivery. The §4.9
+classifications (469 "internal-only", 40 "attribution artifacts", "provably
+identical" claims) and §4.10 DP-mode conversions (44/80) are INVALID and
+re-measured below. The 10 crashes (§4.9) stand — crashes don't depend on
+fingerprints. With the FIXED calculator on mrp Small: master deterministic
+62b0-cef0/~tNl; branch 5c17-0fd4 (real divergence); branch DP-mode 3e62-516c
+(mode does NOT align mrp).
+
+**Fix: omnetpp companion `3cc7009267`** — fold the sorted pending bucket at read
+time (`getFinalHash()`; str + checkFingerprint use it). ABI-safe (non-virtual
+private method), INET rebuild not required. Redo campaign driver:
+`plan/artifacts/rerun_parity_r0.sh` (regenerates tplx/~tNl/~tND baselines on
+fp-master, combined store, branch runs without and with the verification mode) —
+running as tag `fixedfp`, results to be recorded here. NOTE: both INET worktrees
+still carry an env-gated FPTRACE debug patch in FingerprintCalculator.cc
+(INET_FP_TRACE; no behavioral effect) — revert after the campaign.
+
 ## Phase 5 — Final cleanup & merge prep
 
 - [ ] 5.1 **[sonnet]** Confirm `__TODO` gone from history; unresolved leftovers → GitHub
