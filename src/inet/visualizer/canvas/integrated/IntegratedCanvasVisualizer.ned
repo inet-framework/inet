@@ -130,6 +130,10 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,800");
         }
+        rateVisualizer: <default("Ieee80211RateVisualizer")> like IStatisticVisualizer if typename != "" {
+            parameters:
+                @display("p=450,850");
+        }
         networkRouteVisualizer: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:
                 @display("p=450,900");
