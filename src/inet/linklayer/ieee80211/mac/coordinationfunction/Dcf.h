@@ -39,6 +39,9 @@ class Ieee80211Mac;
  */
 class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public ModeSetListener
 {
+  public:
+    static simsignal_t frameTransmittedAirtimeSignal;
+
   protected:
     Ieee80211Mac *mac = nullptr;
     IRateControl *dataAndMgmtRateControl = nullptr;
