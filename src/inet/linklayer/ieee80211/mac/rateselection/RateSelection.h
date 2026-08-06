@@ -48,16 +48,29 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
     const physicallayer::IIeee80211Mode *responseAckFrameMode = nullptr;
     const physicallayer::IIeee80211Mode *responseCtsFrameMode = nullptr;
 
+    // per-receiver unicast data-frame modes, resolved lazily from dataFrameBitratePerReceiver
+    std::map<MacAddress, const physicallayer::IIeee80211Mode *> perReceiverDataFrameMode;
+    bool perReceiverResolved = false;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+
+    // Builds perReceiverDataFrameMode on first use. Deferred out of initialize() because peer
+    // MAC addresses are assigned during INITSTAGE_LINK_LAYER with undefined intra-stage module
+    // ordering; the first transmitted data frame occurs after all init stages, so this is race-free.
+    virtual void ensurePerReceiverModesResolved();
 
     virtual const physicallayer::IIeee80211Mode *getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual const physicallayer::IIeee80211Mode *computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header);
     virtual const physicallayer::IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
 
   public:
+    // Per-receiver configured data-frame modes (resolved lazily from dataFrameBitratePerReceiver);
+    // used by the IEEE 802.11 rate visualizer to show configured rates before any traffic.
+    const std::map<MacAddress, const physicallayer::IIeee80211Mode *>& getPerReceiverDataFrameModes() { ensurePerReceiverModesResolved(); return perReceiverDataFrameMode; }
+
     static void setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const physicallayer::IIeee80211Mode *mode);
 
     // A control response frame is a control frame that is transmitted as a response to the reception of a frame a SIFS
