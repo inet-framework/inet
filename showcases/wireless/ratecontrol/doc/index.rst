@@ -140,7 +140,98 @@ Here is the received packet count at ``sinkHost``:
 .. figure:: media/numpackets.png
    :width: 50%
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`RateControlShowcase.ned <../RateControlShowcase.ned>`
+Different rates for different stations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Rate control works per receiver, not per interface: an access point keeps a
+separate rate for every client it talks to. The ``PerStationRates`` configuration
+demonstrates this in a second network (``PerStationRatesShowcase``), where an
+access point serves five 802.11g clients and a wall stands in front of ``sta[0]``
+only.
+
+The video covers the first 180 ms of the simulation. The bar chart above the
+access point is the :ned:`Ieee80211RateVisualizer`, showing the PHY rate
+:ned:`AarfRateControl` currently uses for each client; the arrows come from the
+:ned:`DataLinkCanvasVisualizer`. The :ned:`PacketDropCanvasVisualizer` marks
+dropped frames, filtered down to genuine reception errors — every station also
+discards each overheard downlink frame with reason ``NOT_ADDRESSED_TO_US``, which
+would otherwise bury the picture:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: packetDropVisualizer.displayPacketDrops
+   :end-at: packetDropVisualizer.detailsFilter
+   :language: ini
+
+.. video:: media/perstationrates.mp4
+   :width: 100%
+
+..
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   PerStationRates, run 0
+   seed:     default (the config sets no seed-set/num-rngs)
+   shows:    the per-client rate bar chart above the AP while AARF ramps the four
+             unobstructed clients up 24 -> 36 -> 48 -> 54 Mbps, with sta[0] pinned
+             at 6 Mbps by the wall the whole time; data-link arrows animate the
+             downlink traffic throughout, and packet-drop icons pile up at sta[0]
+             (and only there) as its frames fail to decode
+   drops:    detailsFilter must be "reason =~ *INCORRECTLY_RECEIVED*" -- the
+             descriptor renders the enum as "3 (INCORRECTLY_RECEIVED)", so a bare
+             "reason =~ INCORRECTLY_RECEIVED" or "reason =~ 3" silently matches
+             nothing. Verify by raising fadeOutTime to 1s and running to 0.18s in
+             express mode: drop icons must accumulate at sta[0] only.
+   anchors:  rates are reported per receiver by AarfRateControl's datarateChanged
+             signal, so a bar appears as soon as the AP first picks a rate for a
+             station. Last observed: all five bars up by ~t=0.02s (6 / 24x4),
+             36 Mbps at ~t=0.05s, 48 Mbps at ~t=0.1s, 54 Mbps at ~t=0.15s;
+             sta[0] never leaves 6 Mbps (it briefly probes 9 Mbps around t=2s,
+             well after the recorded window).
+   window:   t=0 -> 0.18s, recorded from a freshly started simulation (no
+             express-run needed). The link visualizers use
+             fadeOutMode=simulationTime, so no fade wait before recording.
+   prep:     Qtenv built-in message animation MUST be off (Preferences -> "Animate
+             messages", i.e. animation_enabled=false in ~/.config/omnetpp/.qtenvrc)
+             -- otherwise Qtenv overlays red labelled message arrows on top of the
+             visualizer arrows. Kill any running Qtenv BEFORE editing that file:
+             Qtenv rewrites it on exit and will restore the old value. Do NOT
+             launch under opp_sandbox either: it tmpfs-mounts /home and the
+             preference file becomes invisible to the simulation.
+   view:     set_canvas_view zoom=60, centred on scene (17m, 11.6m)
+             -> center_x=1020, center_y=696 in scene coords. Qtenv's own default
+             for this network is zoom 1 (the NED says bgb=30,24 in metres, so the
+             whole scene is 30x24 px) -- a fit-to-window zoom is ~24.5 and keeps
+             the whole playground with its idle infrastructure icons in frame;
+             media/perstationrates-fitzoom.mp4 is that variant, same run and
+             timing, crop=864:650:906:139 (re-read crop_rect; last seen x=898
+             y=94 w=880 h=708 at zoom 28.54).
+   anim:     playback_speed=1, min_animation_speed=1e-3 (set_animation_parameters,
+             normal profile). The clamp is REQUIRED: with the built-in animation
+             off and displaySignals=false nothing requests a model animation speed,
+             so the recorder would fall back to one frame per event (~21000 frames).
+   capture:  fps=2, crop_area=with_padding -> 360 frames. Re-read crop_rect; last
+             seen x=776 y=86 w=1138 h=740 (canvas 1122x723 at zoom 60). The canvas
+             width shifts a little between launches, so never reuse the crop blind.
+   encode:   ffmpeg -r 20 -f image2 -i "frames_drop/drop_%04d.png" \
+               -filter:v "crop=1083:635:806:126,pad=ceil(iw/2)*2:ceil(ih/2)*2" \
+               -vcodec libx264 -pix_fmt yuv420p doc/media/perstationrates.mp4 -y
+             The crop is tightened from crop_rect to drop Qtenv's floating canvas
+             toolbar (top), the zoom badge and the scrollbars (bottom/right).
+   post:     none (no bubbles in this clip)
+   variants: superseded renders of the same run live in media/unused/ --
+             perstationrates-v1-datalink+physicallink-bigbars.mp4 (also shows the
+             PhysicalLinkCanvasVisualizer as olive dotted arrows, and an enlarged
+             rate chart: barWidth=20 barSpacing=12 maxBarHeight=90, value/series/
+             title fonts 12/10/11), perstationrates-v2-datalink-only.mp4 and
+             perstationrates-fitzoom-v1-no-drops.mp4 (both predate the packet-drop
+             visualizer). Move a superseded render there rather than overwriting
+             it -- the frame dirs are deleted after encoding and media/ does not
+             track these files, so an overwrite is unrecoverable.
+   stamp:    recorded 2026-07, INET 4.6, OMNeT++ 6.4.0aipre2
+
+**AARF walks the four unobstructed clients up from 24 to 54 Mbps while the walled
+``sta[0]`` stays pinned at 6 Mbps — one access point, five links, five independent
+rate decisions.**
+
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`RateControlShowcase.ned <../RateControlShowcase.ned>`, :download:`PerStationRatesShowcase.ned <../PerStationRatesShowcase.ned>`
 
 Conclusion
 ~~~~~~~~~~
