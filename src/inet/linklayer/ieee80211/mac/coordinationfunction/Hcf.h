@@ -55,6 +55,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     static simsignal_t edcaCollisionDetectedSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
+    static simsignal_t frameTransmittedAirtimeSignal;
 
   protected:
     Ieee80211Mac *mac = nullptr;

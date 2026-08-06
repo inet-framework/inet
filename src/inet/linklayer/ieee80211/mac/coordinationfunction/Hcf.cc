@@ -10,6 +10,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/common/Ieee80211TransmittedAirtime_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
@@ -29,6 +30,7 @@ using namespace inet::physicallayer;
 simsignal_t Hcf::edcaCollisionDetectedSignal = cComponent::registerSignal("edcaCollisionDetected");
 simsignal_t Hcf::blockAckAgreementAddedSignal = cComponent::registerSignal("blockAckAgreementAdded");
 simsignal_t Hcf::blockAckAgreementDeletedSignal = cComponent::registerSignal("blockAckAgreementDeleted");
+simsignal_t Hcf::frameTransmittedAirtimeSignal = cComponent::registerSignal("frameTransmittedAirtime");
 
 Define_Module(Hcf);
 
@@ -535,6 +537,20 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
         auto step = check_and_cast<TransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
         step->setPpduEnd(simTime());
         edcaf->getTxopProcedure()->recordTransmittedDuration(header->getDurationField());
+        // Account the on-air time of the just-transmitted unicast data/mgmt frame to its
+        // receiver, a-posteriori (so each retransmission is charged), for airtime-fair
+        // transmit scheduling in AirtimeFairnessQueue. Control frames and multicast are
+        // excluded; the duration is exact (computed from the selected mode and length).
+        if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
+            auto receiver = dataOrMgmtHeader->getReceiverAddress();
+            if (!receiver.isMulticast()) {
+                auto mode = rateSelection->computeMode(packet, header, edcaf->getTxopProcedure());
+                Ieee80211TransmittedAirtime info;
+                info.setReceiverAddress(receiver);
+                info.setAirtime(mode->getDuration(packet->getDataLength()));
+                emit(frameTransmittedAirtimeSignal, &info);
+            }
+        }
         frameSequenceHandler->transmissionComplete();
     }
     else if (hcca->isOwning())
