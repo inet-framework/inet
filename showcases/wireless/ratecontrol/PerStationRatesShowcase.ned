@@ -16,10 +16,10 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 
 //
 // Access point serving five wireless clients over a wired server (copied from the rateanomaly
-// showcase). Used by the DownlinkRateAnomaly config, where a wall in front of one client makes
-// rate control settle its link on a low rate.
+// showcase). Used by the PerStationRates config, where a wall in front of one client makes
+// rate control settle its link on a low rate while the others stay fast.
 //
-network RateAnomalyDownlink
+network PerStationRatesShowcase
 {
     parameters:
         int numHosts = default(5);
