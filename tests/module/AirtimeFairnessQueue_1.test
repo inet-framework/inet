@@ -1,0 +1,97 @@
+%description:
+Tests that AirtimeFairnessQueue shares the access point's downlink airtime fairly
+among stations instead of sharing frames fairly.
+
+An access point saturates three stations at the same 54 Mbps PHY rate; sta[0]
+receives long (1400 B) frames while sta[1]/sta[2] receive short (200 B) ones, so
+one frame to sta[0] occupies several times the airtime of a frame to the others.
+A frame-fair round robin (fairnessEnabled = false) serves roughly equal frames
+per station, which gives sta[0] about 7x the bytes of a short-frame station
+(measured byte ratio 0.14). With airtime fairness, and a quantum fine enough for
+the deficit to bind on every frame, the short-frame stations recover to well
+over 0.25x of sta[0]'s bytes (measured 0.37), while every station keeps being
+served.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+network AirtimeFairnessTest
+{
+    parameters:
+        int numStations = default(3);
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        server: StandardHost;
+        accessPoint: AccessPoint;
+        sta[numStations]: WirelessHost;
+    connections:
+        accessPoint.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+network = AirtimeFairnessTest
+ned-path = .;../../../../src
+sim-time-limit = 2.5s
+warmup-period = 1s
+cmdenv-express-mode = true
+**.vector-recording = false
+
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.*.ipv4.arp.typename = "GlobalArp"
+
+# equally good links, all stations ~8-9 m from the AP
+*.sta[*].mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+*.sta[*].mobility.initialX = 9m
+*.sta[*].mobility.initialY = 8m + parentIndex() * 2m
+*.sta[*].mobility.initialZ = 0m
+*.accessPoint.mobility.initialX = 17m
+*.accessPoint.mobility.initialY = 12m
+*.accessPoint.mobility.initialZ = 0m
+
+# 802.11g, one shared rate for every frame
+*.sta[*].wlan[*].opMode = "g(erp)"
+*.accessPoint.wlan[*].opMode = "g(erp)"
+*.sta[*].wlan[*].bitrate = 54Mbps
+*.accessPoint.wlan[*].bitrate = 54Mbps
+*.sta[*].wlan[*].radio.transmitter.power = 100mW
+*.accessPoint.wlan[*].radio.transmitter.power = 100mW
+
+# saturating downlink: long frames to sta[0], short ones to sta[1]/sta[2]
+*.server.numApps = 3
+*.server.app[*].typename = "UdpBasicApp"
+*.server.app[*].destAddresses = "sta[" + string(index) + "]"
+*.server.app[*].destPort = 5000 + index
+*.server.app[*].messageLength = index == 0 ? 1400B : 200B
+*.server.app[*].sendInterval = index == 0 ? 0.3ms : 0.1ms
+*.sta[*].numApps = 1
+*.sta[*].app[0].typename = "UdpSink"
+*.sta[*].app[0].localPort = 5000 + parentIndex()
+
+# unrelated to this test: UtilizationFilter asserts in debug builds when an Ethernet
+# transmission is in progress at the moment the warmup period expires
+**.eth[*].**.statistic-recording = false
+
+# the airtime-fair transmit queue under test; the fine-grained quantum makes the
+# airtime deficit bind on every frame
+*.accessPoint.wlan[*].mac.dcf.channelAccess.pendingQueue.typename = "AirtimeFairnessQueue"
+*.accessPoint.wlan[*].mac.dcf.channelAccess.pendingQueue.packetCapacity = 50
+*.accessPoint.wlan[*].mac.dcf.channelAccess.pendingQueue.quantum = 100us
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: gawk '/sta\[[0-9]+\]\.app\[0\] packetReceived:sum\(packetBytes\)/ { match($2, /sta\[([0-9]+)\]/, m); b[m[1]] = $4 } END { printf "allServed=%s\n", (b[0]>0 && b[1]>0 && b[2]>0) ? "YES" : "NO"; printf "airtimeShared=%s\n", (b[1] > b[0]*0.25 && b[2] > b[0]*0.25) ? "YES" : "NO"; printf "values sta0=%d sta1=%d sta2=%d\n", b[0], b[1], b[2] }' results/*.sca > verdict.out
+%contains: verdict.out
+allServed=YES
+airtimeShared=YES
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object:
