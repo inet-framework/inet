@@ -958,7 +958,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     writtenbytes += errorchunk->getByteLength();
                 }
                 else
-                    writtenbytes += ADD_PADDING(error->length);
+                    writtenbytes += ADD_PADDING(errorchunk->getByteLength());
                 break;
             }
 
@@ -1889,6 +1889,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 SctpErrorChunk *errorchunk;
                 errorchunk = new SctpErrorChunk("ERROR");
                 errorchunk->setSctpChunkType(chunkType);
+                errorchunk->setMBit((error->flags & NAT_M_FLAG) != 0);
+                errorchunk->setTBit((error->flags & NAT_T_FLAG) != 0);
                 errorchunk->setBitLength(SCTP_ERROR_CHUNK_LENGTH * 8);
                 parptr = 0;
                 const struct error_cause *err = (struct error_cause *)(((unsigned char *)error) + sizeof(struct error_chunk) + parptr);
