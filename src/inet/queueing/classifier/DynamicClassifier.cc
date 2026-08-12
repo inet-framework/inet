@@ -29,9 +29,19 @@ void DynamicClassifier::initialize(int stage)
     }
 }
 
+int DynamicClassifier::getClassIndex(Packet *packet) const
+{
+    // the class of the packet, with no side effect -- unlike classifyPacket() below, which
+    // creates the branch of a class that is seen for the first time. Note that the class index
+    // is taken as it is, and not mapped through getOutputGateIndex(): that mapping depends on
+    // the number of output gates, which grows with each branch, so the same class would end up
+    // under a different key over time, and get a second branch.
+    return packetClassifierFunction->classifyPacket(packet);
+}
+
 int DynamicClassifier::classifyPacket(Packet *packet)
 {
-    int index = PacketClassifier::classifyPacket(packet);
+    int index = getClassIndex(packet);
     auto it = classIndexToGateItMap.find(index);
     if (it != classIndexToGateItMap.end())
         return it->second;
