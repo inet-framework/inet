@@ -8,6 +8,8 @@
 #ifndef __INET_DYNAMICCLASSIFIER_H
 #define __INET_DYNAMICCLASSIFIER_H
 
+#include <vector>
+
 #include "inet/queueing/classifier/PacketClassifier.h"
 
 namespace inet {
@@ -41,6 +43,7 @@ class INET_API DynamicClassifier : public PacketClassifier
     virtual int classifyPacket(Packet *packet) override;
 
     virtual int createBranch();
+    virtual cGate *createModuleBranch(int index, cGate *classifierOutputGate, std::vector<cModule *>& modulesToInitialize);
 };
 
 } // namespace queueing

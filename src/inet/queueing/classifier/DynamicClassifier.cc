@@ -42,23 +42,25 @@ int DynamicClassifier::classifyPacket(Packet *packet)
 
 int DynamicClassifier::createBranch()
 {
-    auto parentModule = getParentModule();
-    int submoduleIndex = gateSize("out");
-    int origVectorSize = parentModule->getSubmoduleVectorSize(submoduleName);
-    parentModule->setSubmoduleVectorSize(submoduleName, std::max(origVectorSize, submoduleIndex + 1));
-    auto module = moduleType->create(submoduleName, parentModule, submoduleIndex);
-    auto moduleInputGate = module->gate("in");
-    auto moduleOutputGate = module->gate("out");
+    cModule *parent = getParentModule();
+    int index = gateSize("out");
+    // grow this classifier's output gate vector
+    setGateSize("out", index + 1);
+    cGate *classifierOutputGate = gate("out", index);
+    // build the branch and collect the modules whose initialization is deferred until the
+    // whole chain (including the aggregator connection) is wired
+    std::vector<cModule *> modulesToInitialize;
+    cGate *branchOutputGate = createModuleBranch(index, classifierOutputGate, modulesToInitialize);
     // Wire the branch output into the aggregator's next input gate. An aggregator that has
     // to take notice of a runtime-added input (a pull scheduler, for example) learns about
     // it from the model change notification of this very connection, so nothing here needs
     // to know what kind of aggregator it is.
-    auto aggregator = parentModule->getSubmodule(aggregatorSubmoduleName);
+    cModule *aggregator = parent->getSubmodule(aggregatorSubmoduleName);
     aggregator->setGateSize("in", aggregator->gateSize("in") + 1);
-    auto aggregatorInputGate = aggregator->gate("in", aggregator->gateSize("in") - 1);
-    setGateSize("out", submoduleIndex + 1);
-    auto classifierOutputGate = gate("out", gateSize("out") - 1);
-    classifierOutputGate->connectTo(moduleInputGate);
+    cGate *aggregatorInputGate = aggregator->gate("in", aggregator->gateSize("in") - 1);
+    branchOutputGate->connectTo(aggregatorInputGate);
+    // the sink references resolve the far end of the path eagerly, so they can only be taken
+    // now that the whole branch, up to and including the aggregator, is connected
     outputGates.push_back(classifierOutputGate);
     PassivePacketSinkRef consumer;
     consumer.reference(classifierOutputGate, false);
@@ -66,11 +68,26 @@ int DynamicClassifier::createBranch()
     ActivePacketSinkRef collector;
     collector.reference(classifierOutputGate, false);
     collectors.push_back(collector);
-    moduleOutputGate->connectTo(aggregatorInputGate);
+    for (auto module : modulesToInitialize)
+        module->callInitialize();
+    return index;
+}
+
+cGate *DynamicClassifier::createModuleBranch(int index, cGate *classifierOutputGate, std::vector<cModule *>& modulesToInitialize)
+{
+    cModule *parent = getParentModule();
+    // the vector is only ever extended: it may have been declared larger in NED, and shrinking
+    // one that still holds submodules is an error
+    parent->setSubmoduleVectorSize(submoduleName, std::max(parent->getSubmoduleVectorSize(submoduleName), index + 1));
+    // the branch is created with its final name and index, so that its parameters (from the
+    // enclosing NED declaration and from the ini file), its display string and its result
+    // recording are all resolved for the module path it keeps
+    cModule *module = moduleType->create(submoduleName, parent, index);
+    classifierOutputGate->connectTo(module->gate("in"));
     module->finalizeParameters();
     module->buildInside();
-    module->callInitialize();
-    return submoduleIndex;
+    modulesToInitialize.push_back(module);
+    return module->gate("out");
 }
 
 } // namespace queueing
