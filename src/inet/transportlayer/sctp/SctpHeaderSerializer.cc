@@ -1671,6 +1671,50 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 break;
             }
 
+            case NR_SACK: {
+                EV << "SctpHeader: NR-SACK received\n";
+                const struct nr_sack_chunk *sac = (struct nr_sack_chunk *)(chunks + chunkPtr);
+                SctpSackChunk *chunk = new SctpSackChunk("NR_SACK");
+                chunk->setSctpChunkType(chunkType);
+                chunk->setIsNrSack(true);
+                uint32_t cumtsnack = ntohl(sac->cum_tsn_ack);
+                chunk->setCumTsnAck(cumtsnack);
+                chunk->setA_rwnd(ntohl(sac->a_rwnd));
+
+                int32_t ngaps = ntohs(sac->nr_of_gaps);
+                int32_t nnrgaps = ntohs(sac->nr_of_nr_gaps);
+                int32_t ndups = ntohs(sac->nr_of_dups);
+                chunk->setNumGaps(ngaps);
+                chunk->setNumNrGaps(nnrgaps);
+                chunk->setNumDupTsns(ndups);
+                chunk->setGapStartArraySize(ngaps);
+                chunk->setGapStopArraySize(ngaps);
+                chunk->setNrGapStartArraySize(nnrgaps);
+                chunk->setNrGapStopArraySize(nnrgaps);
+                chunk->setDupTsnsArraySize(ndups);
+
+                // the gap blocks, the non-renegable gap blocks and the duplicate TSNs
+                // follow the fixed part back to back, in that order
+                for (int32_t i = 0; i < ngaps; i++) {
+                    const struct sack_gap *gap = (struct sack_gap *)(((unsigned char *)sac) + sizeof(struct nr_sack_chunk) + i * sizeof(struct sack_gap));
+                    chunk->setGapStart(i, ntohs(gap->start) + cumtsnack);
+                    chunk->setGapStop(i, ntohs(gap->stop) + cumtsnack);
+                }
+                for (int32_t i = 0; i < nnrgaps; i++) {
+                    const struct sack_gap *gap = (struct sack_gap *)(((unsigned char *)sac) + sizeof(struct nr_sack_chunk) + (ngaps + i) * sizeof(struct sack_gap));
+                    chunk->setNrGapStart(i, ntohs(gap->start) + cumtsnack);
+                    chunk->setNrGapStop(i, ntohs(gap->stop) + cumtsnack);
+                }
+                for (int32_t i = 0; i < ndups; i++) {
+                    const struct sack_duptsn *dup = (struct sack_duptsn *)(((unsigned char *)sac) + sizeof(struct nr_sack_chunk) + (ngaps + nnrgaps) * sizeof(struct sack_gap) + i * sizeof(struct sack_duptsn));
+                    chunk->setDupTsns(i, ntohl(dup->tsn));
+                }
+
+                chunk->setBitLength(cLen * 8);
+                dest->appendSctpChunks(chunk);
+                break;
+            }
+
             case HEARTBEAT: {
                 const struct heartbeat_chunk *hbc = (struct heartbeat_chunk *)(chunks + chunkPtr);
                 SctpHeartbeatChunk *chunk = new SctpHeartbeatChunk("HEARTBEAT");
