@@ -156,7 +156,7 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
                     case LANPruneDelay: {
                         const LanPruneDelayOption *lanPruneDelayOption = static_cast<const LanPruneDelayOption *>(pimHello->getOptions(i));
                         stream.writeUint16Be(4); // length
-                        stream.writeBit(0); // FIXME T bit missing
+                        stream.writeBit(lanPruneDelayOption->getT()); // T: Should Routers Propagate Joins?
                         stream.writeNBitsOfUint64Be(lanPruneDelayOption->getPropagationDelay(), 15);
                         stream.writeUint16Be(lanPruneDelayOption->getOverrideInterval());
                         break;
@@ -183,7 +183,7 @@ void PimPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
             const auto& pimRegister = staticPtrCast<const PimRegister>(chunk);
             stream.writeBit(pimRegister->getB());
             stream.writeBit(pimRegister->getN());
-            stream.writeNBitsOfUint64Be(0, 30); // Reserved
+            stream.writeNBitsOfUint64Be(pimRegister->getReserved2(), 30); // Reserved
             break;
         }
         case RegisterStop: {
@@ -289,11 +289,12 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
                     }
                     case LANPruneDelay: {
                         uint16_t size = stream.readUint16Be();
-                        bool T = stream.readBit(); // T bit
-                        if (size != 4 || T)
+                        bool T = stream.readBit(); // T: Should Routers Propagate Joins?
+                        if (size != 4)
                             pimHello->markIncorrect();
                         pimHello->setOptionsArraySize(++i);
                         LanPruneDelayOption *lanPruneDelayOption = new LanPruneDelayOption();
+                        lanPruneDelayOption->setT(T);
                         lanPruneDelayOption->setPropagationDelay(stream.readNBitsToUint64Be(15));
                         lanPruneDelayOption->setOverrideInterval(stream.readUint16Be());
                         pimHello->setOptions(i - 1, lanPruneDelayOption);
@@ -338,7 +339,7 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             pimRegister->setChecksumMode(pimPacket->getChecksumMode());
             pimRegister->setB(stream.readBit());
             pimRegister->setN(stream.readBit());
-            stream.readNBitsToUint64Be(30); // Reserved
+            pimRegister->setReserved2(stream.readNBitsToUint64Be(30)); // Reserved
             length += B(4);
             pimRegister->setChunkLength(length);
             return pimRegister;
@@ -415,7 +416,7 @@ const Ptr<Chunk> PimPacketSerializer::deserialize(MemoryInputStream& stream) con
             length += deserializeEncodedGroupAddress(stream, pimStateRefresh, pimStateRefresh->getGroupAddressForUpdate());
             length += deserializeEncodedUnicastAddress(stream, pimStateRefresh, pimStateRefresh->getSourceAddressForUpdate());
             length += deserializeEncodedUnicastAddress(stream, pimStateRefresh, pimStateRefresh->getOriginatorAddressForUpdate());
-            stream.readBit(); // R: The Rendezvous Point Tree bit.  Set to 0 for PIM-DM.  Ignored upon receipt.
+            pimStateRefresh->setR(stream.readBit()); // R: The Rendezvous Point Tree bit.  Set to 0 for PIM-DM.  Ignored upon receipt.
             pimStateRefresh->setMetricPreference(stream.readNBitsToUint64Be(31));
             pimStateRefresh->setMetric(stream.readUint32Be());
             pimStateRefresh->setMaskLen(stream.readByte());
