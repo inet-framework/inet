@@ -179,10 +179,14 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
         if (dataHeader->getFromDS() && dataHeader->getToDS())
             stream.writeMacAddress(dataHeader->getAddress4());
         if (macHeader->getSubType() & 0x08) {
-            stream.writeUint4(dataHeader->getTid());
-            stream.writeBit(dataHeader->getEosp());
-            stream.writeUint2(dataHeader->getAckPolicy());
-            stream.writeBit(dataHeader->getAMsduPresent());
+            // QoS Control is a 16-bit little-endian field: within its first octet the TID
+            // occupies the least significant bits (B0-B3), then EOSP (B4), Ack Policy
+            // (B5-B6) and A-MSDU Present (B7); the second octet (TXOP/queue size) is not
+            // modelled
+            stream.writeByte((dataHeader->getTid() & 0x0F)
+                    | (dataHeader->getEosp() ? 0x10 : 0)
+                    | ((dataHeader->getAckPolicy() & 0x03) << 5)
+                    | (dataHeader->getAMsduPresent() ? 0x80 : 0));
             stream.writeByte(0);
         }
         if (stream.getLength() - startPos != dataHeader->getChunkLength())
@@ -439,10 +443,11 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
         if (dataHeader->getFromDS() && dataHeader->getToDS())
             dataHeader->setAddress4(stream.readMacAddress());
         if (macHeader->getSubType() & 0x08) {
-            dataHeader->setTid(stream.readUint4());
-            dataHeader->setEosp(stream.readBit());
-            dataHeader->setAckPolicy(static_cast<AckPolicy>(stream.readUint2()));
-            dataHeader->setAMsduPresent(stream.readBit());
+            uint8_t qosControl = stream.readByte();
+            dataHeader->setTid(qosControl & 0x0F);
+            dataHeader->setEosp((qosControl & 0x10) != 0);
+            dataHeader->setAckPolicy(static_cast<AckPolicy>((qosControl >> 5) & 0x03));
+            dataHeader->setAMsduPresent((qosControl & 0x80) != 0);
             stream.readByte();
         }
         return dataHeader;
