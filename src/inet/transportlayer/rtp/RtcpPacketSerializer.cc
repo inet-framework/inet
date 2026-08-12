@@ -114,11 +114,14 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             stream.writeUint32Be(senderReport.getRTPTimeStamp());
             stream.writeUint32Be(senderReport.getPacketCount());
             stream.writeUint32Be(senderReport.getByteCount());
-            ASSERT(count == rtcpSenderReportPacket->getReceptionReports().size());
+            if (count != rtcpSenderReportPacket->getReceptionReports().size())
+                throw cRuntimeError("Cannot serialize RTCP SR packet: count field (%d) does not match the number of reception reports (%d)", count, rtcpSenderReportPacket->getReceptionReports().size());
             for (short i = 0; i < count; ++i) {
                 serializeReceptionReport(stream, static_cast<const ReceptionReport *>(rtcpSenderReportPacket->getReceptionReports()[i]));
             }
-            ASSERT(rtcpSenderReportPacket->getChunkLength() == B(4) + B(24) + B(count * 24));
+            if (rtcpSenderReportPacket->getChunkLength() != B(4) + B(24) + B(count * 24))
+                throw cRuntimeError("Cannot serialize RTCP SR packet: chunkLength (%s) does not match the length implied by count=%d reception reports (%s)",
+                        rtcpSenderReportPacket->getChunkLength().str().c_str(), count, (B(4) + B(24) + B(count * 24)).str().c_str());
             break;
         }
         case RTCP_PT_RR: {
@@ -127,7 +130,9 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             for (short i = 0; i < count; ++i) {
                 serializeReceptionReport(stream, static_cast<const ReceptionReport *>(rtcpReceiverReportPacket->getReceptionReports()[i]));
             }
-            ASSERT(rtcpReceiverReportPacket->getChunkLength() == B(4) + B(4) + B(count * 24));
+            if (rtcpReceiverReportPacket->getChunkLength() != B(4) + B(4) + B(count * 24))
+                throw cRuntimeError("Cannot serialize RTCP RR packet: chunkLength (%s) does not match the length implied by count=%d reception reports (%s)",
+                        rtcpReceiverReportPacket->getChunkLength().str().c_str(), count, (B(4) + B(4) + B(count * 24)).str().c_str());
             break;
         }
         case RTCP_PT_SDES: {
@@ -135,13 +140,17 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             for (short i = 0; i < count; ++i) {
                 serializeSdesChunk(stream, static_cast<const SdesChunk *>(rtcpSdesPacket->getSdesChunks()[i]));
             }
-            ASSERT(rtcpSdesPacket->getChunkLength() == (stream.getLength() - start_position));
+            if (rtcpSdesPacket->getChunkLength() != (stream.getLength() - start_position))
+                throw cRuntimeError("Cannot serialize RTCP SDES packet: chunkLength (%s) does not match the number of bytes actually written (%s)",
+                        rtcpSdesPacket->getChunkLength().str().c_str(), (stream.getLength() - start_position).str().c_str());
             break;
         }
         case RTCP_PT_BYE: {
             const auto& rtcpByePacket = staticPtrCast<const RtcpByePacket>(chunk);
             stream.writeUint32Be(rtcpByePacket->getSsrc());
-            ASSERT(rtcpByePacket->getChunkLength() == (stream.getLength() - start_position));
+            if (rtcpByePacket->getChunkLength() != (stream.getLength() - start_position))
+                throw cRuntimeError("Cannot serialize RTCP BYE packet: chunkLength (%s) does not match the number of bytes actually written (%s)",
+                        rtcpByePacket->getChunkLength().str().c_str(), (stream.getLength() - start_position).str().c_str());
             break;
         }
         default: {
