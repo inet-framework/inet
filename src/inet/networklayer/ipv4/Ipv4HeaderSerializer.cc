@@ -23,6 +23,8 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Heade
     ASSERT((headerLength.get() & 3) == 0 && headerLength >= IPv4_MIN_HEADER_LENGTH && headerLength <= IPv4_MAX_HEADER_LENGTH);
     ASSERT(headerLength <= ipv4Header.getTotalLengthField());
     iphdr.ip_hl = headerLength.get<B>() >> 2;
+    if (ipv4Header.getVersion() < 0 || ipv4Header.getVersion() > 15)
+        throw cRuntimeError("Cannot serialize Ipv4 header: version %d does not fit the 4-bit field", ipv4Header.getVersion());
     iphdr.ip_v = ipv4Header.getVersion();
     iphdr.ip_tos = ipv4Header.getTypeOfService();
     iphdr.ip_id = htons(ipv4Header.getIdentification());
@@ -81,7 +83,7 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
     auto *opt = dynamic_cast<const TlvOptionRaw *>(option);
     if (opt) {
         unsigned int datalen = opt->getBytesArraySize();
-        ASSERT(length == 2 + datalen);
+        ASSERT(length > 1 && length == 2 + datalen); // length > 1 must hold for the length byte written above
         for (unsigned int i = 0; i < datalen; i++)
             stream.writeByte(opt->getBytes(i));
         return;
@@ -109,8 +111,12 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
             auto *opt = check_and_cast<const Ipv4OptionTimestamp *>(option);
             int bytes = (opt->getFlag() == IP_TIMESTAMP_TIMESTAMP_ONLY) ? 4 : 8;
             ASSERT(length == 4 + bytes * opt->getRecordTimestampArraySize());
-            uint8_t pointer = 5 + opt->getNextIdx() * bytes;
+            int pointer = 5 + opt->getNextIdx() * bytes;
+            if (pointer > 255)
+                throw cRuntimeError("Cannot serialize Ipv4 timestamp option: pointer %d does not fit a wire octet", pointer);
             stream.writeByte(pointer);
+            if (opt->getOverflow() < 0 || opt->getOverflow() > 0xf)
+                throw cRuntimeError("Cannot serialize Ipv4 timestamp option: overflow %d does not fit the high nibble of the flags octet", opt->getOverflow());
             uint8_t flagbyte = opt->getOverflow() << 4 | opt->getFlag();
             stream.writeByte(flagbyte);
             for (unsigned int count = 0; count < opt->getRecordTimestampArraySize(); count++) {
@@ -126,7 +132,9 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
         case IPOPTION_STRICT_SOURCE_ROUTING: {
             auto *opt = check_and_cast<const Ipv4OptionRecordRoute *>(option);
             ASSERT(length == 3 + 4 * opt->getRecordAddressArraySize());
-            uint8_t pointer = 4 + opt->getNextAddressIdx() * 4;
+            int pointer = 4 + opt->getNextAddressIdx() * 4;
+            if (pointer > 255)
+                throw cRuntimeError("Cannot serialize Ipv4 record-route option: pointer %d does not fit a wire octet", pointer);
             stream.writeByte(pointer);
             for (unsigned int count = 0; count < opt->getRecordAddressArraySize(); count++) {
                 stream.writeIpv4Address(opt->getRecordAddress(count));
@@ -189,6 +197,11 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     if (headerLength > IPv4_MIN_HEADER_LENGTH) { // options present?
         while (stream.getRemainingLength() > B(0) && stream.getPosition() - position < headerLength) {
             TlvOptionBase *option = deserializeOption(stream);
+            if (option == nullptr) {
+                // a malformed option was detected and no bytes were invented for it; stop parsing options
+                ipv4Header->markIncorrect();
+                break;
+            }
             ipv4Header->addOption(option);
         }
     }
@@ -249,7 +262,9 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 if (bytes == 8)
                     option->setRecordAddressArraySize((length - 4) / bytes);
                 option->setNextIdx((pointer - 5) / bytes);
-                for (unsigned int count = 0; count < option->getRecordAddressArraySize(); count++) {
+                // the timestamp array holds one entry per record for every flag value;
+                // the address array is only sized for the flags that carry addresses
+                for (unsigned int count = 0; count < option->getRecordTimestampArraySize(); count++) {
                     if (bytes == 8)
                         option->setRecordAddress(count, stream.readIpv4Address());
                     option->setRecordTimestamp(count, SimTime(stream.readUint32Be(), SIMTIME_MS));
@@ -299,6 +314,12 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
     stream.seek(position);
     type = stream.readByte();
     length = stream.readByte();
+    if (length < 2) {
+        // any option other than End(0)/NoOperation(1), both already handled above, occupies
+        // at least a type and a length octet on the wire; a shorter length is malformed
+        delete option;
+        return nullptr;
+    }
     option->setType(type);
     option->setLength(length);
     if (length > 2)
