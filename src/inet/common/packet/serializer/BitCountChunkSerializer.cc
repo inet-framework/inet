@@ -26,7 +26,14 @@ const Ptr<Chunk> BitCountChunkSerializer::deserialize(MemoryInputStream& stream,
 {
     auto bitCountChunk = makeShared<BitCountChunk>();
     b length = stream.getRemainingLength();
-    stream.readBitRepeatedly(bitCountChunk->getData(), length.get<b>());
+    if (length > b(0)) {
+        // recover the fill value actually on the wire from its first bit, then verify
+        // the rest of the stream repeats it
+        bool fillValue = stream.readBit();
+        bitCountChunk->setData(fillValue);
+        if (!stream.readBitRepeatedly(fillValue, (length - b(1)).get<b>()))
+            bitCountChunk->markIncorrect();
+    }
     bitCountChunk->setLength(b(length));
     ChunkSerializer::totalDeserializedLength += length;
     return bitCountChunk;
