@@ -7,6 +7,7 @@
 
 package inet.linklayer.ieee80211.mac.queue;
 
+import inet.common.Module;
 import inet.queueing.contract.IPacketQueue;
 
 //
@@ -17,9 +18,14 @@ import inet.queueing.contract.IPacketQueue;
 // `quantum`/`weight`/`fairnessEnabled`/`subqueueTypename` parameters default to those of the
 // enclosing ~AirtimeFairnessQueue, and may also be set per station, as in `branch[2].weight`.
 //
-module PerStationAirtimeQueue like IPacketQueue
+module PerStationAirtimeQueue extends Module like IPacketQueue
 {
     parameters:
+        // the state of the station, which was visible on the sub-queue and the gate directly
+        // while the branch was flattened into the queue: the airtime deficit held by the
+        // gate, and the frames waiting in the sub-queue; the leading dot makes the submodule
+        // references relative (a bare `gate.deficit` would be looked up as an absolute path)
+        displayStringTextFormat = default("deficit {.gate.deficit}\ncontains {.queue.numPackets} pk ({.queue.totalLength})");
         double quantum @unit(s) = default(1500us);
         double weight = default(1);
         bool fairnessEnabled = default(true);
