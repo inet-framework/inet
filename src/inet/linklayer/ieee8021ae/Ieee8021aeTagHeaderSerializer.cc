@@ -29,7 +29,7 @@ const Ptr<Chunk> Ieee8021aeTagTpidHeaderSerializer::deserialize(MemoryInputStrea
 {
     const auto& header = makeShared<Ieee8021aeTagTpidHeader>();
     auto tpid = stream.readUint16Be();
-    if (tpid != 0x66E5)
+    if (tpid != 0x88E5)
         header->markIncorrect();
     header->setTciAn(stream.readByte());
     header->setSl(stream.readByte());
