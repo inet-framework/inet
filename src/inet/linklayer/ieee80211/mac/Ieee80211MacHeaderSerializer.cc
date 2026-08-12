@@ -185,7 +185,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeBit(dataHeader->getAMsduPresent());
             stream.writeByte(0);
         }
-        ASSERT(stream.getLength() - startPos == dataHeader->getChunkLength());
+        if (stream.getLength() - startPos != dataHeader->getChunkLength())
+            throw cRuntimeError("Cannot serialize the Ieee80211DataHeader: chunkLength is %d B, does not match the %d B of serialized fields",
+                    (int)dataHeader->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
         return;
     }
     switch (type) {
@@ -234,7 +236,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                                 stream.writeUint16Be(addbaRequest->getBlockAckTimeoutValue().inUnit(SIMTIME_US) / 1024);
                                 stream.writeUint4(addbaRequest->get_fragmentNumber());
                                 stream.writeNBitsOfUint64Be(addbaRequest->getStartingSequenceNumber().get(), 12);
-                                ASSERT(stream.getLength() - startPos == addbaRequest->getChunkLength());
+                                if (stream.getLength() - startPos != addbaRequest->getChunkLength())
+                                    throw cRuntimeError("Cannot serialize the Ieee80211AddbaRequest: chunkLength is %d B, does not match the %d B of serialized fields",
+                                            (int)addbaRequest->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
                                 break;
                             }
                             case 1: {
@@ -247,7 +251,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                                 stream.writeUint4(addbaResponse->getTid());
                                 stream.writeNBitsOfUint64Be(addbaResponse->getBufferSize(), 10);
                                 stream.writeUint16Be(addbaResponse->getBlockAckTimeoutValue().inUnit(SIMTIME_US) / 1024);
-                                ASSERT(stream.getLength() - startPos == addbaResponse->getChunkLength());
+                                if (stream.getLength() - startPos != addbaResponse->getChunkLength())
+                                    throw cRuntimeError("Cannot serialize the Ieee80211AddbaResponse: chunkLength is %d B, does not match the %d B of serialized fields",
+                                            (int)addbaResponse->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
                                 break;
                             }
                             case 2: {
@@ -257,7 +263,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                                 stream.writeBit(delba->getInitiator());
                                 stream.writeUint4(delba->getTid());
                                 stream.writeUint16Be(delba->getReasonCode());
-                                ASSERT(stream.getLength() - startPos == delba->getChunkLength());
+                                if (stream.getLength() - startPos != delba->getChunkLength())
+                                    throw cRuntimeError("Cannot serialize the Ieee80211Delba: chunkLength is %d B, does not match the %d B of serialized fields",
+                                            (int)delba->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
                                 break;
                             }
                             default:
@@ -270,8 +278,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 }
                 break;
             }
-            else
-                ASSERT(stream.getLength() - startPos == mgmtHeader->getChunkLength());
+            else if (stream.getLength() - startPos != mgmtHeader->getChunkLength())
+                throw cRuntimeError("Cannot serialize the Ieee80211MgmtHeader: chunkLength is %d B, does not match the %d B of serialized fields",
+                        (int)mgmtHeader->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
             break;
         }
         case ST_RTS: {
@@ -279,21 +288,27 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeUint16Le(rtsFrame->getDurationField().inUnit(SIMTIME_US));
             stream.writeMacAddress(rtsFrame->getReceiverAddress());
             stream.writeMacAddress(rtsFrame->getTransmitterAddress());
-            ASSERT(stream.getLength() - startPos == rtsFrame->getChunkLength());
+            if (stream.getLength() - startPos != rtsFrame->getChunkLength())
+                throw cRuntimeError("Cannot serialize the Ieee80211RtsFrame: chunkLength is %d B, does not match the %d B of serialized fields",
+                        (int)rtsFrame->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
             break;
         }
         case ST_CTS: {
             auto ctsFrame = dynamicPtrCast<const Ieee80211CtsFrame>(chunk);
             stream.writeUint16Le(ctsFrame->getDurationField().inUnit(SIMTIME_US));
             stream.writeMacAddress(ctsFrame->getReceiverAddress());
-            ASSERT(stream.getLength() - startPos == ctsFrame->getChunkLength());
+            if (stream.getLength() - startPos != ctsFrame->getChunkLength())
+                throw cRuntimeError("Cannot serialize the Ieee80211CtsFrame: chunkLength is %d B, does not match the %d B of serialized fields",
+                        (int)ctsFrame->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
             break;
         }
         case ST_ACK: {
             auto ackFrame = dynamicPtrCast<const Ieee80211AckFrame>(chunk);
             stream.writeUint16Le(ackFrame->getDurationField().inUnit(SIMTIME_US));
             stream.writeMacAddress(ackFrame->getReceiverAddress());
-            ASSERT(stream.getLength() - startPos == ackFrame->getChunkLength());
+            if (stream.getLength() - startPos != ackFrame->getChunkLength())
+                throw cRuntimeError("Cannot serialize the Ieee80211AckFrame: chunkLength is %d B, does not match the %d B of serialized fields",
+                        (int)ackFrame->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
             break;
         }
         case ST_BLOCKACK_REQ: {
@@ -313,7 +328,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 stream.writeUint32Be(basicBlockAckReq->getFragmentNumber());
                 stream.writeUint64Be(0);
                 stream.writeUint64Be(basicBlockAckReq->getStartingSequenceNumber().get());
-                ASSERT(stream.getLength() - startPos == basicBlockAckReq->getChunkLength());
+                if (stream.getLength() - startPos != basicBlockAckReq->getChunkLength())
+                    throw cRuntimeError("Cannot serialize the Ieee80211BasicBlockAckReq: chunkLength is %d B, does not match the %d B of serialized fields",
+                            (int)basicBlockAckReq->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
             }
             else if (!multiTid && compressedBitmap) {
                 auto compressedBlockAckReq = CHK(dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(chunk));
@@ -321,7 +338,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 stream.writeUint32Be(compressedBlockAckReq->getFragmentNumber());
                 stream.writeUint64Be(0);
                 stream.writeUint64Be(compressedBlockAckReq->getStartingSequenceNumber().get());
-                ASSERT(stream.getLength() - startPos == compressedBlockAckReq->getChunkLength());
+                if (stream.getLength() - startPos != compressedBlockAckReq->getChunkLength())
+                    throw cRuntimeError("Cannot serialize the Ieee80211CompressedBlockAckReq: chunkLength is %d B, does not match the %d B of serialized fields",
+                            (int)compressedBlockAckReq->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
             }
             else if (multiTid && compressedBitmap) {
                 throw cRuntimeError("Ieee80211MacHeaderSerializer: cannot serialize the frame, Ieee80211MultiTidBlockAckReq unimplemented.");
@@ -351,7 +370,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                     stream.writeByte(basicBlockAck->getBlockAckBitmap(i).getBytes()[0]);
                     stream.writeByte(basicBlockAck->getBlockAckBitmap(i).getBytes()[1]);
                 }
-                ASSERT(stream.getLength() - startPos == basicBlockAck->getChunkLength());
+                if (stream.getLength() - startPos != basicBlockAck->getChunkLength())
+                    throw cRuntimeError("Cannot serialize the Ieee80211BasicBlockAck: chunkLength is %d B, does not match the %d B of serialized fields",
+                            (int)basicBlockAck->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
             }
             else if (!multiTid && compressedBitmap) {
                 auto compressedBlockAck = CHK(dynamicPtrCast<const Ieee80211CompressedBlockAck>(chunk));
@@ -362,7 +383,9 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 for (size_t i = 0; i < 8; ++i) {
                     stream.writeByte(compressedBlockAck->getBlockAckBitmap().getBytes()[i]);
                 }
-                ASSERT(stream.getLength() - startPos == compressedBlockAck->getChunkLength());
+                if (stream.getLength() - startPos != compressedBlockAck->getChunkLength())
+                    throw cRuntimeError("Cannot serialize the Ieee80211CompressedBlockAck: chunkLength is %d B, does not match the %d B of serialized fields",
+                            (int)compressedBlockAck->getChunkLength().get<B>(), (int)(stream.getLength() - startPos).get<B>());
             }
             else if (multiTid && compressedBitmap) {
                 throw cRuntimeError("Ieee80211MacHeaderSerializer: cannot serialize the frame, Ieee80211MultiTidBlockAck unimplemented.");
@@ -575,9 +598,6 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
                 basicBlockAckReq->setTidInfo(stream.readUint4());
                 basicBlockAckReq->setFragmentNumber(stream.readUint32Be());
                 stream.readUint64Be();
-                // the starting sequence number is a 12-bit subfield; mask off the
-                // surrounding fragment/reserved bits so a foreign or malformed frame
-                // cannot drive SequenceNumberCyclic out of its asserted 0..4095 range
                 basicBlockAckReq->setStartingSequenceNumber(SequenceNumberCyclic(stream.readUint64Be() & 0xFFF));
                 return basicBlockAckReq;
             }
