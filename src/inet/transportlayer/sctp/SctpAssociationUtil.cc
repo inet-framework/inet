@@ -1038,7 +1038,10 @@ void SctpAssociation::sendHeartbeat(const SctpPathVariables *path)
     heartbeatChunk->setSctpChunkType(HEARTBEAT);
     heartbeatChunk->setRemoteAddr(path->remoteAddress);
     heartbeatChunk->setTimeField(simTime());
-    heartbeatChunk->setByteLength(SCTP_HEARTBEAT_CHUNK_LENGTH + 12);
+    // the Heartbeat Info parameter carries the address parameter of the destination
+    // followed by the send time, so its size follows the address family
+    B addressParameterLength = path->remoteAddress.getType() == L3Address::IPv6 ? B(20) : B(8);
+    heartbeatChunk->setByteLength(B(SCTP_HEARTBEAT_CHUNK_LENGTH + 4).get<B>() + addressParameterLength.get<B>() + 4);
     if (state->auth && state->peerAuth && typeInChunkList(HEARTBEAT)) {
         authChunk = createAuthChunk();
         sctpHeartbeatbeat->appendSctpChunks(authChunk);
