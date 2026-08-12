@@ -26,6 +26,16 @@ class INET_API IRateSelection
   public:
     static simsignal_t datarateSelectedSignal;
 
+    // Emits datarateSelected on behalf of a coordination function. Unicast data frames are tagged
+    // with the name of the receiving station as a named details object, so that a
+    // demux(datarateSelected) result filter or a statistic visualizer can key a separate
+    // per-station series on it; this mirrors the condition under which ~RateSelection applies a
+    // per-receiver configured rate, so the details always name the station whose rate is
+    // reported. Control, management and group-addressed frames carry no per-station data rate and
+    // are emitted without details: the aggregate datarateSelected statistic still records them, a
+    // bar chart ignores them.
+    static void emitDatarateSelected(cComponent *emitter, const Ptr<const Ieee80211MacHeader>& header, const physicallayer::IIeee80211Mode *mode);
+
   public:
     virtual ~IRateSelection() {}
 
