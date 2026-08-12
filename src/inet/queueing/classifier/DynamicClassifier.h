@@ -31,4 +31,3 @@ class INET_API DynamicClassifier : public PacketClassifier
 } // namespace inet
 
 #endif
-
