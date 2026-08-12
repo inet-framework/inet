@@ -15,11 +15,17 @@ namespace queueing {
 
 using namespace inet::queueing;
 
+/**
+ * Creates the branch of each traffic class on demand, the first time a packet of
+ * that class is seen. See the NED file for what the branches are built from and
+ * how they are wired.
+ */
 class INET_API DynamicClassifier : public PacketClassifier
 {
   protected:
-    const char *submoduleName = nullptr;
-    cModuleType *moduleType = nullptr;
+    const char *submoduleName = nullptr; // submodule vector that holds the branches
+    cModuleType *moduleType = nullptr; // type of the per-class branch module (may be a compound)
+    const char *aggregatorSubmoduleName = nullptr; // downstream aggregator submodule (multiplexer or scheduler)
     std::map<int, int> classIndexToGateItMap;
 
   protected:
