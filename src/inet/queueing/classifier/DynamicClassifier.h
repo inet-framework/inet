@@ -25,6 +25,8 @@ class INET_API DynamicClassifier : public PacketClassifier
   protected:
     virtual void initialize(int stage) override;
     virtual int classifyPacket(Packet *packet) override;
+
+    virtual int createBranch();
 };
 
 } // namespace queueing

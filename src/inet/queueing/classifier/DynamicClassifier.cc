@@ -32,6 +32,13 @@ int DynamicClassifier::classifyPacket(Packet *packet)
     auto it = classIndexToGateItMap.find(index);
     if (it != classIndexToGateItMap.end())
         return it->second;
+    int branchIndex = createBranch();
+    classIndexToGateItMap[index] = branchIndex;
+    return branchIndex;
+}
+
+int DynamicClassifier::createBranch()
+{
     auto parentModule = getParentModule();
     int submoduleIndex = gateSize("out");
     int origVectorSize = parentModule->getSubmoduleVectorSize(submoduleName);
@@ -53,7 +60,6 @@ int DynamicClassifier::classifyPacket(Packet *packet)
     module->finalizeParameters();
     module->buildInside();
     module->callInitialize();
-    classIndexToGateItMap[index] = submoduleIndex;
     return submoduleIndex;
 }
 
