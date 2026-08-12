@@ -47,6 +47,7 @@ class Ieee80211IrPhyPreamble extends Ieee80211PhyPreamble
 
 class Ieee80211IrPhyHeader extends Ieee80211PhyHeader
 {
+    chunkLength = B(2);
     // TODO B lengthField;
     uint16_t fcs;
     ChecksumMode fcsMode = FCS_MODE_UNDEFINED;  // should be FcsMode, but OMMeT++ bug #1351 prevents that (fixed in OMNeT++ 6.2)
