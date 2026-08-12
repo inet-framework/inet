@@ -49,7 +49,12 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
     callback.startProtocolDataUnit(&Protocol::ieee80211Mac);
     callback.visitChunk(header, &Protocol::ieee80211Mac);
     // TODO fragmentation & aggregation
-    if (auto dataHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211DataHeader>(header)) {
+    if (header->getProtectedFrame() && packet->getDataLength() > b(0)) {
+        // the frame body is encrypted (a CCMP/TKIP header followed by ciphertext), so
+        // there is nothing to descend into without the key
+        callback.dissectPacket(packet, nullptr);
+    }
+    else if (auto dataHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211DataHeader>(header)) {
         if (packet->getDataLength() == b(0)) {
             // the frame body is empty: a Null or QoS-Null data frame (and the
             // CF-Poll/CF-Ack data subtypes) carry no payload, so there is nothing to dissect
