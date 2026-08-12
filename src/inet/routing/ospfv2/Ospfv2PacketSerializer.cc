@@ -427,7 +427,7 @@ void Ospfv2PacketSerializer::serializeLsa(MemoryOutputStream& stream, const Ospf
             break;
         }
         default:
-            throw cRuntimeError("Cannot serialize BGP packet: type %d not supported.", type);
+            throw cRuntimeError("Cannot serialize OSPFv2 LSA: type %d not supported.", type);
     }
 }
 
