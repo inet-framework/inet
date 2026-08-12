@@ -1,0 +1,80 @@
+# IEEE 802.11 Agent-Review Checklist (T4 enforcement)
+
+The tier-4 gate for the WLAN-specific requirements in
+[ieee80211-architectural-requirements.md](../ieee80211-architectural-requirements.md). It applies
+**in addition to** the general [agent-review-checklist.md](agent-review-checklist.md) whenever a
+diff touches `src/inet/linklayer/ieee80211/` or `src/inet/physicallayer/wireless/ieee80211/`.
+
+Use the same output format and ground rules as the general checklist (`PASS` / `FLAG` / `QUESTION`,
+precision over recall, respect the ledgers, scope to the diff).
+
+## Checklist
+
+**[AR-WLAN-STD-TRACE] Does new normative logic cite its IEEE revision and clause?**
+FLAG a new state transition, validity check, timing formula, or field semantic with no standard
+citation and no "modeling simplification" label. *Not a violation:* infrastructure code with no
+normative content.
+
+**[AR-WLAN-STD-GATING] Is amendment-specific behavior gated by mode and capabilities?**
+FLAG newer-amendment behavior that executes based on code presence alone, without an operating-mode
+or negotiated-capability condition. *Not a violation:* behavior gated through the mode set, a
+station capability, or an established agreement.
+
+**[AR-WLAN-ARCH-BOUNDARIES] Does one component reach into another's implementation state?**
+FLAG a `check_and_cast` of a peer component (MAC↔PHY, MAC↔mgmt, rate control↔anything) to a
+concrete type to read or write its state. *Not a violation:* calls through the `mac/contract/`
+interfaces or the mode APIs.
+
+**[AR-WLAN-ARCH-OWNERSHIP] Does the change create a second writable copy of protocol state?**
+FLAG a new field mirroring association, sequence, retry, NAV, backoff, TXOP, Block Ack, or
+power-save state that another component already owns, kept in sync by assignment. *Not a
+violation:* a read-only query of the owner, or a value received in a notification and used
+immediately.
+
+**[AR-WLAN-ARCH-VARIANTS] Is a variant added as scattered conditionals instead of a policy?**
+FLAG amendment/role/algorithm branching (`if (isHt)`-style) multiplying through shared logic where
+a replaceable policy module or mode object is the established pattern. *Not a violation:* a
+capability gate at a single entry point (that is AR-WLAN-STD-GATING working as intended).
+
+**[AR-WLAN-FRAME-REPRESENTATION] Is on-air information represented outside the typed frame model?**
+FLAG wire-visible information carried in a tag past the transmission boundary, a frame field added
+in C++ instead of the `.msg` definition, hand-edited generated message code, or a new frame type
+without serializer + dissector + printer registration.
+
+**[AR-WLAN-PHY-AUTHORITY / AR-WLAN-PHY-TIMING] Is PHY math or timing duplicated or hardcoded?**
+FLAG rate/duration/legality formulas reimplemented outside the mode classes, or a bare numeric
+timing constant (SIFS, slot, timeout, CW bound) in MAC/management/PHY logic instead of a derivation
+from the selected mode. *Not a violation:* standard-cited constants defined once inside a mode
+class.
+
+**[AR-WLAN-MAC-EXCHANGE] Are frame-exchange decisions made outside the exchange's state machine?**
+FLAG response-matching, timeout, retry, or completion decisions added to Rx paths, queue callbacks,
+or timers outside the frame-sequence machinery that owns the exchange.
+
+**[AR-WLAN-MAC-SEQUENCE] Is sequence/window arithmetic implemented ad hoc?**
+FLAG inline sequence-number comparison or Block Ack window arithmetic instead of use of the shared
+sequence-numbering, duplicate-removal, and Block Ack services (wrap-around correctness lives only
+in the shared code).
+
+**[AR-WLAN-MAC-QOS] Is QoS classification or EDCA state duplicated?**
+FLAG a second TID/UP→access-category mapping, or per-AC contention/TXOP/retry state held outside
+the owning EDCA function. *Not a violation:* reading a frame's TID from its typed header field.
+
+**[AR-WLAN-MAC-MULTIUSER] Does MU scheduling entangle with PPDU construction?**
+FLAG scheduler code that assembles PPDU internals or PHY code that makes user/resource-selection
+decisions, instead of exchanging a complete, validated, immutable transmission plan.
+
+**[AR-WLAN-OBS-EVENTS] Is a semantic event emitted twice, or reconstructed by an observer?**
+FLAG the same semantic event (attempt, retry, timeout, agreement change, …) emitted by two
+components, a new state owner shipping without its signals, or an observer inferring MAC decisions
+from side effects instead of subscribing to the owner's signal.
+
+**[AR-WLAN-QUAL-TESTS] Does a normative change ship without focused tests and legacy regressions?**
+FLAG new or changed normative behavior with no focused test of its correctness (boundaries,
+wrap-around, capability combinations, roles) or with no legacy fingerprint run demonstrating
+non-interference.
+
+## Output footer
+
+End with the same one-line verdict as the general checklist: `REVIEW: n PASS, n FLAG, n QUESTION`,
+with suggested `AV-*`/`NV-*` ledger rows for any `FLAG`.

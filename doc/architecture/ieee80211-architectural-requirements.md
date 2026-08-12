@@ -1,0 +1,266 @@
+# INET Framework — IEEE 802.11 Architectural Requirements
+
+Domain-specific architectural requirements for the IEEE 802.11 model, applying **in addition to**
+every general requirement in
+[architectural-requirements.md](architectural-requirements.md). They cover the subtrees
+`src/inet/linklayer/ieee80211/` and `src/inet/physicallayer/wireless/ieee80211/`, and they
+specialize the general architecture where Wi-Fi concentrates extra risk: dense normative standards
+text, shared-medium timing measured in microseconds, a large space of PHY/MAC variants and
+amendments, and protocol state (sequence numbers, Block Ack windows, NAV, backoff) whose corruption
+produces plausible-looking but wrong results.
+
+Identifiers have the form `AR-WLAN-<AREA>-<NAME>` and follow the same statement + rationale
+structure as the general requirements. Where a general rule already covers a point, the WLAN rule
+does not restate it — it says what *more* is required here.
+
+## Standard Semantics & Component Boundaries (AR-WLAN-STD, AR-WLAN-ARCH)
+
+### AR-WLAN-STD-TRACE — Normative behavior traces to an IEEE revision and clause
+Every state transition, frame-validity rule, timing formula, and field semantic that implements
+normative 802.11 behavior cites the IEEE Std 802.11 revision and clause (or annex) it realizes.
+
+The 802.11 standard is the single external authority for what the model must do; a citation such as
+"802.11-2016 §10.3.7" or "Annex G" anchors the implementation to it. The frame-sequence classes in
+`mac/framesequence/` follow Annex G sequences by construction, and that traceability is what makes
+them reviewable: a reader can check the code against the clause instead of against intuition or
+against another simulator's behavior. Untraceable normative logic is where invented behavior enters
+the model — a timeout that "seems right," a validity check borrowed from a different amendment —
+and it is unfalsifiable in review because there is nothing to check it against. Non-normative
+modeling choices (abstraction levels, simplifications) are exempt but must be *labeled* as such.
+
+### AR-WLAN-STD-GATING — Amendment-specific behavior is gated by mode and capabilities
+Behavior introduced by an amendment executes only when the selected operating mode and the
+negotiated local and peer capabilities allow it; legacy operation remains bit-identical when newer
+code is merely present.
+
+The `opMode` parameter selects an `Ieee80211ModeSet` per interface, QoS operation is a station
+capability, and Block Ack transmission requires an established agreement
+(`OriginatorBlockAckAgreementHandler`) — in each case the newer behavior has an explicit gate, not
+an implicit "the code exists, so it runs." This is what lets HT/VHT (and future HE/EHT) code live
+in the same tree as DSSS/OFDM legacy paths without destabilizing them: a b/g simulation must
+produce the same trajectory before and after an amendment lands. The gate condition itself is
+normative surface and falls under AR-WLAN-STD-TRACE.
+
+### AR-WLAN-ARCH-BOUNDARIES — MAC, management, rate selection, and PHY are distinct responsibilities
+The MAC data path, management/association logic, rate selection and control, and the PHY each own
+their decision space and interact only through typed contracts; no component reaches into another's
+implementation state.
+
+`Ieee80211Interface` composes `mgmt`, `agent`, `mac`, and `radio` as interface-typed submodules,
+and inside the MAC the coordination functions (`Dcf`, `Hcf`) delegate to distinct components —
+channel access, contention, frame sequences, data services, ack/RTS policies — through the
+interfaces in `mac/contract/`. Rate *selection* (`RateSelection`, `QosRateSelection`) is separate
+from adaptive rate *control* (`AarfRateControl`, `OnoeRateControl`) and both are separate from the
+PHY modes that define what a rate *is*. The boundary discipline is what a downcast violates: a
+component that `check_and_cast`s a peer to its concrete type to read private state has collapsed
+two decision spaces into one, and every future variant of either component now has to know about
+the coupling.
+
+### AR-WLAN-ARCH-OWNERSHIP — Every piece of mutable protocol state has exactly one owner
+Association, sequence-number, retry, NAV, backoff, TXOP, Block Ack, aggregation, and power-save
+state is each authoritative in exactly one component; other components query the owner or receive
+notifications, and never keep writable copies.
+
+The code base assigns owners deliberately: sequence spaces to the `*SequenceNumberAssignment`
+classes, retry/recovery counters to `NonQosRecoveryProcedure`/`QosRecoveryProcedure`, backoff to
+the contention machinery behind `Dcaf`/`Edcaf`, TXOP limits and accounting to `TxopProcedure`,
+Block Ack windows to the originator/recipient agreement handlers, ack bookkeeping to
+`AckHandler`/`QosAckHandler`, and association state to the management modules (`Ieee80211MgmtSta`,
+`Ieee80211MgmtAp`). A synchronized second copy of any of this state is a latent bug: the copies
+agree until a retransmission, timeout, or reassociation path updates only one of them, and the
+resulting divergence surfaces far from its cause. Single ownership is also what makes recovery
+paths explainable — there is one place where the state could have changed.
+
+### AR-WLAN-ARCH-VARIANTS — Substantial variations are isolated behind replaceable policies
+Amendment, role, and algorithm variations are expressed as replaceable policy modules and mode
+objects behind stable interfaces — never as conditionals scattered through shared logic.
+
+The pattern is already load-bearing: coordination functions (`IDcf`/`IHcf`), management roles
+(`Ieee80211MgmtSta`/`Ap`/`Adhoc` behind `IIeee80211Mgmt`), rate control (`IRateControl`), ack and
+RTS policies (`IOriginatorAckPolicy`, `IRtsPolicy` and their QoS variants), and aggregation
+policies (`IMsduAggregationPolicy`, `IMpduAggregationPolicy`) are all substitution points. A new
+amendment or algorithm arrives as a new implementation of an existing contract (or a new contract),
+so it is localized, independently testable, and cannot accidentally change legacy behavior — the
+opposite of an `if (isHe)` branch multiplying through `Hcf`. This is AR-ORG-CONTRACTS and
+AR-EXT-NOCORE applied with WLAN-specific force, because Wi-Fi's variant space (amendments × roles ×
+algorithms) is too large to survive as inline conditionals.
+
+## Frames, PHY Modes & Timing (AR-WLAN-FRAME, AR-WLAN-PHY)
+
+### AR-WLAN-FRAME-REPRESENTATION — Every on-air field is represented once, as typed packet content
+Every field that exists on the air is declared exactly once as typed chunk content in the `.msg`
+frame definitions; classification, addressing, sequence numbers, and TIDs are read from those
+fields; and serialization, dissection, and printing are registered alongside the frame types.
+
+`mac/Ieee80211Frame.msg` and `mgmt/Ieee80211MgmtFrame.msg` are the single authoritative model of
+the 802.11 wire format, with `Ieee80211MacHeaderSerializer` as the byte-level boundary and
+`Ieee80211MacProtocolDissector`/`Printer` giving generic tooling access to the same representation
+(AR-PKT-DUAL, AR-OBS-INTROSPECTION). Two failure modes are ruled out: wire information smuggled in
+tags (which would give a receiver knowledge that never crossed the medium — AR-PKT-TAGS), and
+hand-edited generated message code (which silently diverges from the `.msg` declaration the next
+time the generator runs). Sender, receiver, PHY, PCAP export, and tests all consume one frame
+model, so a field cannot mean different things on the two ends of a link.
+
+### AR-WLAN-PHY-AUTHORITY — PHY mode objects are authoritative for legality, rate, and duration
+Data rates, PPDU durations, preamble/symbol structure, and the legality of parameter combinations
+are computed by the PHY mode objects; the MAC and rate selection consult them and never duplicate
+the formulas.
+
+The mode hierarchy under `physicallayer/wireless/ieee80211/mode/` — `Ieee80211DsssMode` through
+`Ieee80211HtMode`/`Ieee80211VhtMode`, aggregated by `Ieee80211ModeSet` — encapsulates exactly the
+calculations the standard specifies per PHY: symbol intervals, preamble durations, and
+`getDuration(length)` for a payload at a given MCS. Because `RateSelection`/`QosRateSelection`
+choose *among* modes rather than computing rates themselves, an illegal combination (an MCS the
+mode set does not contain, a duration the PHY cannot produce) is unrepresentable rather than merely
+unlikely. Duplicated duration math in the MAC is the classic drift bug: the two formulas agree on
+the day they are written and disagree after the next amendment touches one of them.
+
+### AR-WLAN-PHY-TIMING — Protocol timing is derived centrally, with units, from the selected mode
+SIFS, slot time, AIFS, CW bounds, response timeouts, NAV values, and transmission durations are
+derived from the selected mode's timing parameters as unit-carrying quantities; bare numeric timing
+constants do not appear in MAC, management, or PHY logic.
+
+`IIeee80211Mode` exposes `getSifsTime()`, `getSlotTime()`, `getCcaTime()` and related quantities,
+and channel access composes them (AIFS from SIFS and slot count, timeouts from SIFS plus response
+duration) rather than hardcoding microsecond literals. Boundary behavior — whether a frame arriving
+exactly at a slot edge wins contention — is decided by these derivations, so they must be computed
+in one place to be consistent across DCF, EDCA, and the frame-sequence timeouts. A literal `10e-6`
+in a MAC source file is wrong twice: it silently encodes one PHY's SIFS into shared logic, and it
+defeats the dimensional checking that unit-annotated parameters provide (AR-CFG-PARAMS).
+
+## MAC Operation (AR-WLAN-MAC)
+
+### AR-WLAN-MAC-EXCHANGE — Each frame exchange is one explicit state machine
+Every frame exchange — data/ACK, RTS/CTS, Block Ack sequences, management request/response — is
+driven by one explicit state machine that owns the transmission, the expected response, the
+timeout, the retry decision, and the completion outcome, with deterministic ordering of
+simultaneous events.
+
+The `mac/framesequence/` package implements exactly this: `FrameSequenceHandler` executes sequences
+(`DcfFs`, `HcfFs`, composed from `GenericFrameSequences` steps) that mirror the Annex G exchange
+grammar, with recovery procedures owning the retry counters. The rule exists because the
+alternative — exchange decisions distributed across Rx handlers, timers, and queue callbacks —
+duplicates the "what response am I waiting for" decision in places that then disagree about it. One
+state machine per exchange means an ACK timeout, a retry, and an abandonment are transitions with
+one owner, observable and testable as such (AR-WLAN-OBS-EVENTS, AR-WLAN-QUAL-TESTS).
+
+### AR-WLAN-MAC-SEQUENCE — Sequence, aggregation, and Block Ack rules are shared, modulo-aware code
+Modulo-4096 sequence arithmetic, duplicate detection, Block Ack window advancement, and the
+retention of frame identity across retransmission and aggregation are implemented once in shared
+services and reused everywhere those rules apply.
+
+`LegacySequenceNumberAssignment`/`QoSSequenceNumberAssignment` own the sequence spaces, the
+`duplicateremoval` service owns duplicate detection, and the Block Ack machinery
+(`BlockAckRecord`, agreement handlers, `blockackreordering`) owns window comparison and
+advancement. All of these are wrap-around-sensitive: an ad-hoc `seq1 < seq2` comparison written
+inline is correct for 4094 of 4096 values and corrupts a Block Ack window at the boundary, which
+then manifests as a mysterious stall thousands of events later. Centralizing the arithmetic makes
+the boundary testable in one place (AR-WLAN-QUAL-TESTS) and keeps a retransmitted or aggregated
+MPDU the *same* frame — same sequence number, same identity — throughout its lifetime.
+
+### AR-WLAN-MAC-QOS — QoS classification and EDCA state are defined once
+The mapping from TID/user priority to access category is defined in one place, and each access
+category's contention, queueing, TXOP, and retry state lives in its own EDCA function; internal
+collisions are resolved by protocol policy, never by incidental code ordering.
+
+`Edca` owns the classification and instantiates one `Edcaf` per access category, each with its own
+queues, contention state, and recovery, with `TxopProcedure` bounding transmission opportunities.
+Two ACs becoming ready in the same slot is a *protocol* situation with a standard-defined outcome
+(the internal collision rules), so it must be decided by explicit policy rather than by which
+callback happened to run first — the latter is exactly the kind of hidden nondeterminism
+AR-QUAL-DETERMINISM forbids, and in a QoS MAC it changes throughput results, not just internals. A
+second TID→AC mapping anywhere else in the stack will eventually disagree with the first
+(AR-WLAN-ARCH-OWNERSHIP applied to classification).
+
+### AR-WLAN-MAC-MULTIUSER — Multi-user scheduling is separate from PPDU construction
+When multi-user transmission (MU-MIMO, OFDMA) is modeled, the scheduler produces a complete,
+validated, immutable transmission plan — users, resource units, per-user MCS — and the PHY
+constructs the PPDU from that plan; neither side reimplements or second-guesses the other.
+
+INET does not yet implement MU operation; this requirement fixes the architecture before the first
+implementation exists, because the tempting shortcut — a scheduler that reaches into PHY internals
+to assemble the PPDU while it decides — creates a coupling that no later refactoring fully removes.
+The plan object is the typed contract at the boundary (AR-ORG-CONTRACTS): the scheduler's
+user/resource selection becomes reproducible and testable without a PHY, the PHY's legality
+checking stays authoritative (AR-WLAN-PHY-AUTHORITY), and the immutability of the handed-over plan
+gives MU transmissions the same auditability that immutable `Signal` objects give single-user ones
+(AR-PKT-SIGNAL).
+
+## Observability & Verification (AR-WLAN-OBS, AR-WLAN-QUAL)
+
+### AR-WLAN-OBS-EVENTS — Each semantic MAC/PHY event is emitted once, by its owner
+Every semantic 802.11 event — contention start/end, transmission attempt, response or timeout,
+retry, Block Ack agreement change, association change, rate selection — is emitted as a declared
+signal exactly once, by the component that owns the corresponding state transition.
+
+The coordination functions already declare the pattern: `frameSequenceStarted`/`Finished`,
+`datarateSelected`, `blockAckAgreementAdded`/`Deleted`, `packetSentToPeer`/`ReceivedFromPeer` are
+NED-declared signals (AR-OBS-SIGNALS, AR-OBS-NED-TRUTH) emitted at the point of ownership.
+Emitted-once-by-the-owner is the substance: a statistic that sums an event emitted by two
+components double-counts, and a visualizer that reconstructs "retry happened" from queue
+observations is a second, drifting implementation of MAC logic. Because Wi-Fi analyses live on
+exactly these quantities (retry rates, contention time, agreement dynamics), the signal set is part
+of the model's contract, and a new state owner ships its events with it.
+
+### AR-WLAN-QUAL-TESTS — Normative behavior is paired with focused tests and legacy regressions
+Every implemented normative behavior carries a focused test of its correctness — state transitions,
+frame content, timing boundaries, wrap-around values, capability combinations, roles — and every
+amendment or MAC change runs the legacy fingerprint suites to demonstrate non-interference.
+
+This sharpens AR-QUAL-TESTS/AR-QUAL-FINGERPRINT where they are weakest for Wi-Fi: a fingerprint
+detects that the trajectory changed, but 802.11 correctness lives at boundaries a normal scenario
+never visits — sequence wrap-around, a CW at its bound, a frame arriving exactly at slot edge, a
+malformed or truncated header, an unusual capability combination, AP versus STA versus ad-hoc
+asymmetries. Focused tests (unit tests for the modulo arithmetic and mode calculations, module
+tests for exchanges and EDCA) establish that the behavior is *correct*; the wifi fingerprint suites
+establish that legacy behavior is *unchanged* (AR-WLAN-STD-GATING's testable half). A normative
+change that ships with neither has asserted both claims and demonstrated neither.
+
+## How the 802.11 rules compose
+
+Like the general requirements, these rules reinforce each other; four compound properties are the
+point:
+
+- **Transactional MAC logic.** Ownership (ARCH-OWNERSHIP) + explicit exchanges (MAC-EXCHANGE) +
+  shared sequence rules (MAC-SEQUENCE) + centralized EDCA (MAC-QOS) mean every staged frame, retry,
+  and Block Ack outcome is attributable to one owner and one transition — reconstructing behavior
+  from synchronized shadows is never necessary.
+- **One authoritative PHY calculation.** Mode authority (PHY-AUTHORITY) + central timing
+  (PHY-TIMING) + single frame representation (FRAME-REPRESENTATION) + the MU plan boundary
+  (MAC-MULTIUSER) keep rates, durations, legality checks, and PCAP fields consistent because each
+  is computed exactly once.
+- **New amendments without legacy drift.** Clause traceability (STD-TRACE) + capability gates
+  (STD-GATING) + policy isolation (ARCH-VARIANTS) + core-closed extension (AR-EXT-NOCORE) make the
+  safe path for HE/EHT-class work the easy one: new policies and modes behind existing contracts,
+  with legacy fingerprints proving non-interference.
+- **Semantic evidence for protocol decisions.** Owner-emitted events (OBS-EVENTS) + determinism and
+  fingerprints (AR-QUAL-DETERMINISM/-FINGERPRINT) + focused tests (QUAL-TESTS) let a reviewer
+  correlate a standard clause, a state transition, an emitted event, a frame, and a regression
+  result — a missing packet becomes a traceable decision instead of an unexplained symptom.
+
+## Quality attributes and enforcement
+
+The WLAN rules serve the same quality attributes as their general parents — chiefly correctness
+(fidelity to the standard), modifiability (amendment isolation), and analysability (attributable
+state and events) — and they use the same enforcement ladder (T1–T5, see
+[architectural-requirements.md](architectural-requirements.md) §*Quality attributes and
+enforcement*). The T4 rows are covered by the dedicated
+[IEEE 802.11 agent-review checklist](enforcement/ieee80211-agent-review-checklist.md), which
+applies *in addition to* the general checklist for any diff touching the 802.11 subtrees.
+
+| Requirement | Tier | Enforced by (→ how to raise) |
+|---|---|---|
+| AR-WLAN-STD-TRACE | T4 | agent review: normative logic cites revision + clause |
+| AR-WLAN-STD-GATING | T2+T4 | legacy fingerprints run with new code present + agent review of gates |
+| AR-WLAN-ARCH-BOUNDARIES | T1+T4 | `mac/contract/` interfaces (compiler); agent review for cross-component downcasts |
+| AR-WLAN-ARCH-OWNERSHIP | T4 | agent review: new mutable state has one owner, no writable copies |
+| AR-WLAN-ARCH-VARIANTS | T1+T4 | policy NED interfaces (compiler); agent review for inline amendment conditionals |
+| AR-WLAN-FRAME-REPRESENTATION | T1+T3 | typed `.msg` chunks (compiler); serializer/dissector completeness + generated-code-untouched check |
+| AR-WLAN-PHY-AUTHORITY | T1+T4 | mode APIs (compiler); agent review for duplicated rate/duration math |
+| AR-WLAN-PHY-TIMING | T3+T4 | lint for bare timing literals in `ieee80211/` + agent review |
+| AR-WLAN-MAC-EXCHANGE | T1/T2 | frame-sequence contracts (compiler) + exchange module tests / fingerprints |
+| AR-WLAN-MAC-SEQUENCE | T2 | wrap-around/boundary unit tests + Block Ack module tests |
+| AR-WLAN-MAC-QOS | T2+T4 | EDCA module tests + agent review for duplicated TID→AC mapping |
+| AR-WLAN-MAC-MULTIUSER | T4→T5 | design review of the plan/PPDU split when MU work arrives |
+| AR-WLAN-OBS-EVENTS | T3+T4 | signals declared in NED (check) + agent review for duplicate emission |
+| AR-WLAN-QUAL-TESTS | T2+T4 | wifi fingerprint suites + agent review that focused tests accompany normative changes |

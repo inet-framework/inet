@@ -12,6 +12,11 @@ user*, while these say *how the code base must be structured* to make that possi
 to keep it sustainable. They are distilled from the INET Developer's Guide and from
 recurring lessons in day-to-day INET/OMNeT++ development.
 
+Domain-specific extensions refine these rules where one protocol family concentrates extra
+risk; the first is
+[ieee80211-architectural-requirements.md](ieee80211-architectural-requirements.md), whose
+`AR-WLAN-*` rules apply in addition to everything here under the IEEE 802.11 subtrees.
+
 ## Code Organization (AR-ORG)
 
 ### AR-ORG-DOMAINS — Layered, domain-partitioned source tree with acyclic dependencies
@@ -581,6 +586,64 @@ declaration — are enforceable by an **agent reviewer** run as a CI gate, leavi
 judgment (is a fidelity level worth adding?) to a human. The enforcement status of each requirement
 is tracked in the map below.
 
+## How the requirements compose
+
+The requirements above are not independent style preferences; they form a network of mutually
+reinforcing constraints, and their aggregate effect is larger than any rule alone. Seven compound
+properties are the actual goal — each names the requirements that jointly produce it, which is also
+a review aid: a change that weakens one rule usually attacks one of these properties, and the
+property says what else to check.
+
+**A contract graph instead of a dependency tangle.** AR-ORG-DOMAINS, AR-ORG-CONTRACTS,
+AR-MOD-COMPOSITION, AR-MOD-PLUGGABLE, AR-COM-REGISTRY, AR-COM-DISPATCH, AR-EXT-NOCORE, and
+AR-EXT-ATTACH together produce *structural substitutability*: a component is replaceable not merely
+because an interface exists, but because its slot is interface-typed, its service is discoverable
+at runtime, its packet identity is explicit, and the core never learns its concrete type. This
+combination is what makes adding a protocol an extension rather than a central-core edit.
+
+**A truthful data path from model to wire to evidence.** AR-PKT-CHUNKS, AR-PKT-DUAL, AR-PKT-TAGS,
+AR-PKT-ERRORS, AR-PKT-SIGNAL, AR-OBS-INTROSPECTION, and AR-OBS-FLOWS partition information by what
+it *is* — typed content is what the packet carries, tags are local metadata, Signals are physical
+transmissions, serializers are the wire boundary, region tags preserve identity through
+transformation. The emergent property is *evidentiary continuity*: a field inspected in a packet,
+serialized into a capture, processed by the PHY, and attributed to a flow is one representation
+throughout, so analysis tooling cannot report something the model did not actually represent.
+
+**Composable but causally explicit behavior.** AR-COM-DIRECT, AR-LIFE-STAGES, AR-LIFE-OPERATIONS,
+AR-QUEUE-ROLES, and AR-QUEUE-STREAMING each put internal cooperation at its right semantic level:
+direct calls for same-instant coordination, scheduled messages for genuine events, stages for
+initialization order, queueing contracts for datapath transfer. The result is an event trajectory
+that corresponds to modeled behavior rather than implementation plumbing — which is what makes
+debugging, performance, and fingerprint signal quality good at the same time.
+
+**Observability without observer effects.** AR-ORG-VIS-SPLIT, AR-OBS-SIGNALS, AR-OBS-NED-TRUTH, and
+AR-OBS-INTROSPECTION establish a one-way path: model owner → declared signal → recorder, visualizer,
+analyzer. Consumers subscribe from the outside and events are emitted once by their owner, so
+recording is additive, never behavioral; NED remains the machine-readable statement of what exists.
+Observability becomes an external capability instead of a hidden second implementation of the model.
+
+**Fidelity as a controlled dimension.** AR-MOD-FIDELITY, AR-PKT-ERRORS, AR-PKT-SIGNAL,
+AR-EXT-FEATURES, and AR-CFG-PARAMS let a study choose detail deliberately: a coarse error model and
+a detailed analog model occupy the same contractual slot, and the choice is visible in
+configuration. Large scenarios buy affordable abstraction, focused studies buy detail, and neither
+requires replacing the surrounding architecture.
+
+**Reproducible rather than anecdotal correctness.** AR-CFG-INFER, AR-CFG-PARAMS, AR-BUILD-OUTOFTREE,
+AR-BUILD-DECLARATIVE, AR-QUAL-DETERMINISM, AR-QUAL-FINGERPRINT, AR-QUAL-TESTS, and
+AR-QUAL-TRACEABILITY form a chain — unambiguous configuration → isolated, discoverable build →
+deterministic execution → matching tests plus trajectory fingerprints → traceable baselines — in
+which each link removes a different source of uncertainty. A fingerprint is meaningful only on a
+deterministic model; a deterministic run is useful only when its inputs are known; a passing test is
+persuasive only when its type matches the claim and its baseline has provenance.
+
+**Complexity paid once, in infrastructure.** Registries, dispatchers, serializers, signals,
+lifecycle protocols, queueing contracts, and feature descriptors are up-front structure whose
+aggregate purpose is to make the *next* model cheaper to integrate: each new protocol reuses the
+same extension, observation, testing, configuration, and build paths instead of carving a bespoke
+path through the core. The architecture has a rising initial discipline cost and a falling marginal
+integration cost — without it, every new feature looks locally simple while adding one more special
+case to dispatch, inspection, build selection, and tests.
+
 ## Quality attributes and enforcement
 
 The requirements above are grouped by *architectural concern* — the axis a contributor uses to find
@@ -668,3 +731,32 @@ move every requirement as far up this ladder as it can go.
 | AR-QUAL-LOGGING | T3+T4 | `-Werror`/`clang-tidy` + agent review that programming errors throw, not log |
 | AR-QUAL-TRACEABILITY | T3 | fingerprint tags + source→config mapping (partial) |
 | AR-QUAL-ENFORCED | — | the CI gate set itself; measured by how many rows above reach T1–T4 (automated) |
+
+## Contributor workflow
+
+For a normal INET change, the requirements work as a design map rather than a reading assignment —
+the unit of review is not "does this patch look reasonable?" but "which architectural contracts does
+this patch touch, what evidence establishes compliance, and what will prevent a regression later?":
+
+1. **Scope.** Identify the affected domain, contracts, module composition, packet content, tags,
+   configuration surface, observability, build feature, and test coverage.
+2. **Seals.** If the change is under `src/inet/`, resolve exact and ancestor-directory seals first
+   (see [sealing.md](sealing.md)) — a sealed path needs explicit permission before anything else.
+3. **Applicable rules.** Read only the requirement sections that apply (including the
+   [IEEE 802.11 extensions](ieee80211-architectural-requirements.md) when in scope), plus both
+   exception ledgers and [naming-conventions.md](naming-conventions.md) for every new or renamed
+   artifact.
+4. **Smallest surface.** Establish state ownership and the smallest change surface before editing;
+   prefer the smallest change that satisfies the contracts, ownership, observability,
+   configuration, determinism, and testing requirements.
+5. **Existing mechanisms.** Implement through existing contracts, registries, signals, serializers,
+   lifecycle APIs, and feature descriptors before inventing a new mechanism.
+6. **Validate in proportion to risk.** Run [enforcement/check-architecture.sh](enforcement/check-architecture.sh)
+   (scoped to the touched subtree for focused work) and the test categories matching the claim;
+   preserve the exact commands, configurations, and statuses for review.
+7. **Reconcile, don't re-litigate.** Record only genuinely new deviations as `AV-*`/`NV-*` ledger
+   rows; deviations already in [architecture-exceptions.md](architecture-exceptions.md) or
+   [naming-exceptions.md](naming-exceptions.md) are known, not findings. Fingerprint baselines
+   change only with explicit approval and a reviewable explanation (AR-QUAL-TRACEABILITY).
+8. **Sealing last.** Sealing is the terminal state of this pipeline, not a shortcut around it: a
+   complete audit, with every deviation fixed or ledgered, precedes recording a seal.

@@ -3,7 +3,9 @@
 The tier-4 gate from [architectural-requirements.md](../architectural-requirements.md) §*Quality
 attributes and enforcement*. It enforces the **semantic** architectural requirements — the ones no
 compiler or linter can express — by having an LLM reviewer judge a diff against each item. Run it as
-a CI step on every change (and locally before pushing).
+a CI step on every change (and locally before pushing). For diffs touching
+`src/inet/linklayer/ieee80211/` or `src/inet/physicallayer/wireless/ieee80211/`, additionally run
+the [IEEE 802.11 checklist](ieee80211-agent-review-checklist.md).
 
 ## How to run
 
