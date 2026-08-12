@@ -202,7 +202,7 @@
 
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Udp -r 0,          100s,            2949-e8ce/tplx;b44e-17d8/~tNl;c2a6-b2ba/~tND;be43-9ccd/tyf, PASS, Ipv4
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Tcp -r 0,          100s,            5a1d-d203/tplx;0309-b513/~tNl;5b37-e188/~tND;a1a5-7087/tyf, PASS, Ipv4
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Sctp -r 0,              100s,            330e-4f9f/tplx;2dd1-fb30/~tNl;2571-7df1/~tND;1753-2e23/tyf, PASS, Ipv4
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Sctp -r 0,              100s,            489a-aa35/tplx;5720-aff9/~tNl;378d-e4f4/~tND;1753-2e23/tyf, PASS, Ipv4
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             eb3f-fff6/tplx;4921-f3c9/~tNl;5bf3-b6dc/~tND;0968-339c/tyf, PASS, Ipv4
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           5959-a4cd/tplx;6a0d-2074/~tNl;4831-3edc/~tND;1bb9-1773/tyf, PASS, EthernetMac Ipv4
@@ -536,8 +536,8 @@
 /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           4cd8-3f62/tplx;b668-e417/~tNl;2212-87f1/~tND;a0d7-e322/tyf, PASS, Ipv4
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           7938-2119/tplx;a91c-463a/~tNl;0a8d-b375/~tND;c770-433d/tyf, PASS, Ipv4
 
-/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            2d8b-fea2/tplx;a8ee-8eaf/~tNl;068a-0196/~tND;84a1-6b33/tyf, PASS, Ipv4
-/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            b2ff-1a3c/tplx;4183-df02/~tNl;5a0d-3ec7/~tND;6478-3dd5/tyf, PASS, Ipv4
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            eff9-eaf7/tplx;1fda-6eff/~tNl;e664-a885/~tND;84a1-6b33/tyf, PASS, Ipv4
+/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            016f-d87d/tplx;a35f-fe28/~tNl;7ec6-c964/~tND;6478-3dd5/tyf, PASS, Ipv4
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            7db2-602d/tplx;291a-b663/~tNl;10b5-fcc2/~tND;7f3a-8a99/tyf, PASS, Ipv4
 
 /examples/timing/,                   -f omnetpp.ini -c General -r 0,                0.1s,             164c-e87d/tplx;2b60-28b2/~tNl;3ad0-14cf/~tND;7af0-949a/tyf, PASS, Ipv4

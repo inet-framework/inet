@@ -39,6 +39,68 @@ int SctpHeaderSerializer::getKeysHandle()
     return keysHandle;
 }
 
+// Fills the Heartbeat Info parameter INET puts in its own HEARTBEATs: the address
+// parameter of the remote address, followed by the send time. Sets the parameter's
+// length field and returns the length of its value, in octets.
+static size_t writeHeartbeatInfo(struct heartbeat_info *hbi, const L3Address& addr, simtime_t time)
+{
+    size_t addrLen = 0;
+#ifdef INET_WITH_IPv4
+    if (addr.getType() == L3Address::IPv4) {
+        struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)HBI_INFO(hbi);
+        ipv4addr->type = htons(INIT_PARAM_IPV4);
+        ipv4addr->length = htons(sizeof(struct init_ipv4_address_parameter));
+        ipv4addr->address = htonl(addr.toIpv4().getInt());
+        addrLen = sizeof(struct init_ipv4_address_parameter);
+    }
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
+    if (addr.getType() == L3Address::IPv6) {
+        struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)HBI_INFO(hbi);
+        ipv6addr->type = htons(INIT_PARAM_IPV6);
+        ipv6addr->length = htons(sizeof(struct init_ipv6_address_parameter));
+        for (int j = 0; j < 4; j++)
+            ipv6addr->address[j] = htonl(addr.toIpv6().words()[j]);
+        addrLen = sizeof(struct init_ipv6_address_parameter);
+    }
+#endif // ifdef INET_WITH_IPv6
+    if (addrLen == 0)
+        return 0;
+    // the time goes right after the address parameter, whose size differs per family
+    uint32_t rawTime = htonl((uint32_t)time.dbl());
+    memcpy(HBI_INFO(hbi) + addrLen, &rawTime, sizeof(rawTime));
+    hbi->length = htons(addrLen + sizeof(rawTime) + 4);
+    return addrLen + sizeof(rawTime);
+}
+
+// The counterpart of writeHeartbeatInfo(): recovers the address and the time from a
+// Heartbeat Info parameter that carries them. Returns false for any other content --
+// the parameter is opaque by RFC 4960 4.2, so a peer may fill it with anything.
+static bool readHeartbeatInfo(const struct heartbeat_info *hbi, uint16_t infoLen, L3Address& addr, simtime_t& time)
+{
+    if (infoLen < 4)
+        return false;
+    const struct tlv *param = (const struct tlv *)HBI_INFO(hbi);
+    size_t addrLen = 0;
+    switch (ntohs(param->type)) {
+        case INIT_PARAM_IPV4: addrLen = sizeof(struct init_ipv4_address_parameter); break;
+        case INIT_PARAM_IPV6: addrLen = sizeof(struct init_ipv6_address_parameter); break;
+        default: return false;
+    }
+    if (ntohs(param->length) != addrLen || infoLen < addrLen + sizeof(uint32_t))
+        return false;
+    if (addrLen == sizeof(struct init_ipv4_address_parameter))
+        addr = L3Address(Ipv4Address(ntohl(((const struct init_ipv4_address_parameter *)param)->address)));
+    else {
+        const struct init_ipv6_address_parameter *v6 = (const struct init_ipv6_address_parameter *)param;
+        addr = L3Address(Ipv6Address(ntohl(v6->address[0]), ntohl(v6->address[1]), ntohl(v6->address[2]), ntohl(v6->address[3])));
+    }
+    uint32_t rawTime;
+    memcpy(&rawTime, HBI_INFO(hbi) + addrLen, sizeof(rawTime));
+    time = SimTime((int64_t)ntohl(rawTime), SIMTIME_S);
+    return true;
+}
+
 void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     uint8_t buffer[MAXBUFLEN];
@@ -503,37 +565,18 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
                 // deliver info:
                 struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbc) + sizeof(struct heartbeat_chunk));
-                L3Address addr = heartbeatChunk->getRemoteAddr();
-                simtime_t time = heartbeatChunk->getTimeField();
-                int32_t infolen = 0;
-#ifdef INET_WITH_IPv4
-                if (addr.getType() == L3Address::IPv4) {
-                    infolen = sizeof(addr.toIpv4().getInt()) + sizeof(uint32_t);
-                    hbi->type = htons(1); // mandatory
+                size_t infolen = heartbeatChunk->getInfoArraySize();
+                hbi->type = htons(1); // mandatory
+                if (infolen > 0) {
+                    // opaque Heartbeat Info: whatever the sender put there travels verbatim
                     hbi->length = htons(infolen + 4);
-                    struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)hbc) + 8);
-                    ipv4addr->type = htons(INIT_PARAM_IPV4);
-                    ipv4addr->length = htons(8);
-                    ipv4addr->address = htonl(addr.toIpv4().getInt());
-                    HBI_ADDR(hbi).v4addr = *ipv4addr;
+                    for (size_t i = 0; i < infolen; i++)
+                        HBI_INFO(hbi)[i] = heartbeatChunk->getInfo(i);
                 }
-#endif // ifdef INET_WITH_IPv4
-#ifdef INET_WITH_IPv6
-                if (addr.getType() == L3Address::IPv6) {
-                    infolen = 20 + sizeof(uint32_t);
-                    hbi->type = htons(1); // mandatory
-                    hbi->length = htons(infolen + 4);
-                    struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)hbc) + 8);
-                    ipv6addr->type = htons(INIT_PARAM_IPV6);
-                    ipv6addr->length = htons(20);
-                    for (int j = 0; j < 4; j++) {
-                        ipv6addr->address[j] = htonl(addr.toIpv6().words()[j]);
-                    }
-                    HBI_ADDR(hbi).v6addr = *ipv6addr;
+                else {
+                    infolen = writeHeartbeatInfo(hbi, heartbeatChunk->getRemoteAddr(), heartbeatChunk->getTimeField());
+                    ASSERT(infolen != 0);
                 }
-#endif // ifdef INET_WITH_IPv6
-                ASSERT(infolen != 0);
-                HBI_TIME(hbi) = htonl((uint32_t)time.dbl());
                 hbc->length = htons(sizeof(struct heartbeat_chunk) + infolen + 4);
                 writtenbytes += sizeof(struct heartbeat_chunk) + infolen + 4;
                 break;
@@ -559,38 +602,8 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         HBI_INFO(hbi)[i] = heartbeatAckChunk->getInfo(i);
                     }
                 }
-                else {
-                    L3Address addr = heartbeatAckChunk->getRemoteAddr();
-                    simtime_t time = heartbeatAckChunk->getTimeField();
-
-#ifdef INET_WITH_IPv4
-                    if (addr.getType() == L3Address::IPv4) {
-                        infolen = sizeof(addr.toIpv4().getInt()) + sizeof(uint32_t);
-                        hbi->type = htons(1); // mandatory
-                        hbi->length = htons(infolen + 4);
-                        struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)hbac) + 8);
-                        ipv4addr->type = htons(INIT_PARAM_IPV4);
-                        ipv4addr->length = htons(8);
-                        ipv4addr->address = htonl(addr.toIpv4().getInt());
-                        HBI_ADDR(hbi).v4addr = *ipv4addr;
-                    }
-#endif // ifdef INET_WITH_IPv4
-#ifdef INET_WITH_IPv6
-                    if (addr.getType() == L3Address::IPv6) {
-                        infolen = 20 + sizeof(uint32_t);
-                        hbi->type = htons(1); // mandatory
-                        hbi->length = htons(infolen + 4);
-                        struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)hbac) + 8);
-                        ipv6addr->type = htons(INIT_PARAM_IPV6);
-                        ipv6addr->length = htons(20);
-                        for (int j = 0; j < 4; j++) {
-                            ipv6addr->address[j] = htonl(addr.toIpv6().words()[j]);
-                        }
-                        HBI_ADDR(hbi).v6addr = *ipv6addr;
-                    }
-#endif // ifdef INET_WITH_IPv6
-                    HBI_TIME(hbi) = htonl((uint32_t)time.dbl());
-                }
+                else
+                    infolen = writeHeartbeatInfo(hbi, heartbeatAckChunk->getRemoteAddr(), heartbeatAckChunk->getTimeField());
                 hbac->length = htons(sizeof(struct heartbeat_ack_chunk) + infolen + 4);
                 writtenbytes += sizeof(struct heartbeat_ack_chunk) + infolen + 4;
 
@@ -1779,8 +1792,12 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                             ASSERT(ilen >= 4 && ilen == cLen - sizeof(struct heartbeat_ack_chunk));
                             uint16_t infoLen = ilen - 4;
                             parptr += ADD_PADDING(infoLen) + 4;
-                            chunk->setRemoteAddr(L3Address(Ipv4Address(ntohl(HBI_ADDR(hbi).v4addr.address))));
-                            chunk->setTimeField(ntohl((uint32_t)HBI_TIME(hbi)));
+                            L3Address remoteAddr;
+                            simtime_t sendTime;
+                            if (readHeartbeatInfo(hbi, infoLen, remoteAddr, sendTime)) {
+                                chunk->setRemoteAddr(remoteAddr);
+                                chunk->setTimeField(sendTime);
+                            }
                             chunk->setInfoArraySize(infoLen);
                             for (int32_t i = 0; i < infoLen; i++)
                                 chunk->setInfo(i, HBI_INFO(hbi)[i]);
