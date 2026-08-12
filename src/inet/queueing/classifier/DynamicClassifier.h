@@ -33,6 +33,7 @@ class INET_API DynamicClassifier : public PacketClassifier
     virtual int classifyPacket(Packet *packet) override;
 
     virtual int createBranch();
+    virtual cModule *createBranchModule(int index, cGate *classifierOutputGate);
 };
 
 } // namespace queueing
