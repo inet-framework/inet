@@ -45,6 +45,10 @@ class INET_API DynamicClassifier : public PacketClassifier
 
     virtual int createBranch();
     virtual cGate *createModuleBranch(int index, cGate *classifierOutputGate, std::vector<cModule *>& modulesToInitialize);
+
+  public:
+    virtual bool canPushSomePacket(const cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, const cGate *gate) const override;
 };
 
 } // namespace queueing

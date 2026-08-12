@@ -50,6 +50,25 @@ int DynamicClassifier::classifyPacket(Packet *packet)
     return branchIndex;
 }
 
+bool DynamicClassifier::canPushSomePacket(const cGate *gate) const
+{
+    // Not the inherited "one of the existing branches can take a packet": a packet of a class
+    // that has not been seen yet is taken by the branch created for it, and there may always be
+    // such a class, the range of the classifier function not being known here. Without this, a
+    // classifier that has no branch yet answers that it cannot accept anything, and an active
+    // source in front of it stops before the first branch is ever created. Whether a particular
+    // packet can be pushed is answered by canPushPacket() below.
+    return true;
+}
+
+bool DynamicClassifier::canPushPacket(Packet *packet, const cGate *gate) const
+{
+    // deliberately not the inherited implementation: that one classifies the packet, which
+    // creates the branch of a new class as a side effect of what is supposed to be a query
+    auto it = classIndexToGateItMap.find(getClassIndex(packet));
+    return it == classIndexToGateItMap.end() || consumers[it->second].canPushPacket(packet);
+}
+
 int DynamicClassifier::createBranch()
 {
     cModule *parent = getParentModule();
