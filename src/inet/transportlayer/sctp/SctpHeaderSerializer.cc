@@ -1998,6 +1998,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 addip = new SctpAddIPParameter("ADD_IP");
                                 addip->setParameterType(ntohs(ipparam->type));
                                 addip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
+                                addip->setByteLength(paramLength); // serialize() writes it back as the parameter length
                                 const struct init_ipv4_address_parameter *v4addr1;
                                 v4addr1 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr + sizeof(struct add_ip_parameter));
                                 L3Address localAddr(Ipv4Address(ntohl(v4addr1->address)));
@@ -2012,6 +2013,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 deleteip = new SctpDeleteIPParameter("DELETE_IP");
                                 deleteip->setParameterType(ntohs(ipparam->type));
                                 deleteip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
+                                deleteip->setByteLength(paramLength);
                                 const struct init_ipv4_address_parameter *v4addr2;
                                 v4addr2 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr + sizeof(struct add_ip_parameter));
                                 L3Address localAddr(Ipv4Address(ntohl(v4addr2->address)));
@@ -2026,6 +2028,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 priip = new SctpSetPrimaryIPParameter("SET_PRI_IP");
                                 priip->setParameterType(ntohs(ipparam->type));
                                 priip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
+                                priip->setByteLength(paramLength);
                                 const struct init_ipv4_address_parameter *v4addr3;
                                 v4addr3 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr + sizeof(struct add_ip_parameter));
                                 L3Address localAddr(Ipv4Address(ntohl(v4addr3->address)));
