@@ -65,8 +65,13 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
             auto originalTrailerPopOffset = packet->getBackOffset();
             int paddingLength = 0;
             while (packet->getDataLength() > B(0)) {
-                packet->setFrontOffset(packet->getFrontOffset() + B(paddingLength == 4 ? 0 : paddingLength));
+                // every A-MSDU subframe except the last is padded to a multiple of 4
+                // octets; hand the padding to the callback instead of just skipping it,
+                // so the dissected content still covers the whole frame
+                if (paddingLength != 0 && paddingLength != 4)
+                    callback.visitChunk(packet->popAtFront(B(paddingLength)), &Protocol::ieee80211Mac);
                 const auto& msduSubframeHeader = packet->popAtFront<ieee80211::Ieee80211MsduSubframeHeader>();
+                callback.visitChunk(msduSubframeHeader, &Protocol::ieee80211Mac);
                 auto msduEndOffset = packet->getFrontOffset() + B(msduSubframeHeader->getLength());
                 packet->setBackOffset(msduEndOffset);
                 callback.dissectPacket(packet, computeLlcProtocol(packet));
