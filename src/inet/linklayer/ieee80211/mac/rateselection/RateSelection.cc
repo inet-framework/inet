@@ -10,6 +10,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -199,6 +200,19 @@ void RateSelection::setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHea
 {
     ASSERT(mode != nullptr);
     packet->addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
+}
+
+void RateSelection::emitDatarateSelected(cComponent *emitter, const Ptr<const Ieee80211MacHeader>& header, const IIeee80211Mode *mode)
+{
+    double rate = mode->getDataMode()->getNetBitrate().get<bps>();
+    auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
+    // naming the station sweeps the network, so skip it if nothing listens anyway
+    if (dataHeader != nullptr && !dataHeader->getReceiverAddress().isMulticast() && emitter->mayHaveListeners(IRateSelection::datarateSelectedSignal)) {
+        cNamedObject details(L3AddressResolver().getHostNameWithMacAddress(dataHeader->getReceiverAddress()).c_str());
+        emitter->emit(IRateSelection::datarateSelectedSignal, rate, &details);
+    }
+    else
+        emitter->emit(IRateSelection::datarateSelectedSignal, rate);
 }
 
 } // namespace ieee80211

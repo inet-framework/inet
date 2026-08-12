@@ -69,6 +69,15 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
   public:
     static void setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const physicallayer::IIeee80211Mode *mode);
 
+    // Emits datarateSelected on behalf of a coordination function. Unicast data frames are tagged
+    // with the name of the receiving station as a named details object, so that a
+    // demux(datarateSelected) result filter or a statistic visualizer can key a separate
+    // per-station series on it; this mirrors the condition under which a per-receiver configured
+    // rate applies, so the details always name the station whose rate is reported. Control,
+    // management and group-addressed frames carry no per-station data rate and are emitted without
+    // details: the aggregate datarateSelected statistic still records them, a bar chart ignores them.
+    static void emitDatarateSelected(cComponent *emitter, const Ptr<const Ieee80211MacHeader>& header, const physicallayer::IIeee80211Mode *mode);
+
     // A control response frame is a control frame that is transmitted as a response to the reception of a frame a SIFS
     // time after the PPDU containing the frame that elicited the response, e.g. a CTS in response to an RTS
     // reception, an ACK in response to a DATA reception, a BlockAck in response to a BlockAckReq reception. In
