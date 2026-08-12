@@ -38,15 +38,15 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 4    Challenge text                              The challenge text information is present only in certain Authentication frames as defined in Table 7-17.
         // Last Vendor Specific                             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto deauthenticationFrame = dynamicPtrCast<const Ieee80211DeauthenticationFrame>(chunk)) {
+        else if (auto deauthenticationFrame = dynamicPtrCast<const Ieee80211DeauthenticationFrame>(chunk)) {
 //        type = ST_DEAUTHENTICATION;
         stream.writeUint16Be(deauthenticationFrame->getReasonCode());
     }
-    else if (auto disassociationFrame = dynamicPtrCast<const Ieee80211DisassociationFrame>(chunk)) {
+        else if (auto disassociationFrame = dynamicPtrCast<const Ieee80211DisassociationFrame>(chunk)) {
 //        type = ST_DISASSOCIATION;
         stream.writeUint16Be(disassociationFrame->getReasonCode());
     }
-    else if (auto probeRequestFrame = dynamicPtrCast<const Ieee80211ProbeRequestFrame>(chunk)) {
+        else if (auto probeRequestFrame = dynamicPtrCast<const Ieee80211ProbeRequestFrame>(chunk)) {
 //        type = ST_PROBEREQUEST;
         // 1    SSID
         const char *SSID = probeRequestFrame->getSSID();
@@ -68,9 +68,11 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 4    Extended Supported Rates    The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // Last Vendor Specific             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    // ReassociationRequest must be tested before its AssociationRequest base: a
-    // dynamicPtrCast to the base also matches the derived frame, so checking the base
-    // first would serialize a reassociation request without its Current AP address.
+        // A frame type has to be tested before the type it extends: a dynamicPtrCast to the
+    // base matches the derived frame too, so checking the base first would serialize the
+    // derived frame through the base's branch -- silently dropping the Current AP address
+    // of a reassociation request, and leaving the reassociation-response, probe-response
+    // and beacon branches unreachable.
     else if (auto reassociationRequestFrame = dynamicPtrCast<const Ieee80211ReassociationRequestFrame>(chunk)) {
 //        type = ST_REASSOCIATIONREQUEST;
         // 1    Capability
@@ -103,7 +105,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 10   QoS Capability             The QoS Capability element is present when dot11QosOption- Implemented is true.
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto associationRequestFrame = dynamicPtrCast<const Ieee80211AssociationRequestFrame>(chunk)) {
+        else if (auto associationRequestFrame = dynamicPtrCast<const Ieee80211AssociationRequestFrame>(chunk)) {
 //        type = ST_ASSOCIATIONREQUEST;
         // 1    Capability
         stream.writeUint16Be(associationRequestFrame->getCapabilityInformation());
@@ -132,28 +134,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 9    QoS Capability             The QoS Capability element is present when dot11QosOption- Implemented is true.
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto associationResponseFrame = dynamicPtrCast<const Ieee80211AssociationResponseFrame>(chunk)) {
-//        type = ST_ASSOCIATIONRESPONSE;
-        // 1    Capability
-        stream.writeUint16Be(associationResponseFrame->getCapabilityInformation());
-        // 2    Status code
-        stream.writeUint16Be(associationResponseFrame->getStatusCode());
-        // 3    AID
-        stream.writeUint16Be(associationResponseFrame->getAid());
-        // 4    Supported rates
-        stream.writeByte(1);
-        stream.writeByte(associationResponseFrame->getSupportedRates().numRates);
-        for (int i = 0; i < associationResponseFrame->getSupportedRates().numRates; i++) {
-            uint8_t rate = ceil(associationResponseFrame->getSupportedRates().rate[i] / 0.5);
-            if (associationResponseFrame->getSupportedRates().basicRate[i])
-                rate |= 0x80; // restore the BSSBasicRateSet bit
-            stream.writeByte(rate);
-        }
-        // 5    Extended Supported Rates   The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
-        // 6    EDCA Parameter Set
-        // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
-    }
-    else if (auto reassociationResponseFrame = dynamicPtrCast<const Ieee80211ReassociationResponseFrame>(chunk)) {
+        else if (auto reassociationResponseFrame = dynamicPtrCast<const Ieee80211ReassociationResponseFrame>(chunk)) {
 //        type = ST_REASSOCIATIONRESPONSE;
         // 1    Capability
         stream.writeUint16Be(reassociationResponseFrame->getCapabilityInformation());
@@ -174,7 +155,71 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 6    EDCA Parameter Set
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto beaconFrame = dynamicPtrCast<const Ieee80211BeaconFrame>(chunk)) {
+        else if (auto associationResponseFrame = dynamicPtrCast<const Ieee80211AssociationResponseFrame>(chunk)) {
+//        type = ST_ASSOCIATIONRESPONSE;
+        // 1    Capability
+        stream.writeUint16Be(associationResponseFrame->getCapabilityInformation());
+        // 2    Status code
+        stream.writeUint16Be(associationResponseFrame->getStatusCode());
+        // 3    AID
+        stream.writeUint16Be(associationResponseFrame->getAid());
+        // 4    Supported rates
+        stream.writeByte(1);
+        stream.writeByte(associationResponseFrame->getSupportedRates().numRates);
+        for (int i = 0; i < associationResponseFrame->getSupportedRates().numRates; i++) {
+            uint8_t rate = ceil(associationResponseFrame->getSupportedRates().rate[i] / 0.5);
+            if (associationResponseFrame->getSupportedRates().basicRate[i])
+                rate |= 0x80; // restore the BSSBasicRateSet bit
+            stream.writeByte(rate);
+        }
+        // 5    Extended Supported Rates   The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
+        // 6    EDCA Parameter Set
+        // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
+    }
+        else if (auto probeResponseFrame = dynamicPtrCast<const Ieee80211ProbeResponseFrame>(chunk)) {
+//        type = ST_PROBERESPONSE;
+        // 1      Timestamp (see the Beacon case for the simTime() fallback rationale)
+        stream.writeUint64Be(probeResponseFrame->getTimestamp() != 0 ? probeResponseFrame->getTimestamp() : simTime().raw());
+        // 2      Beacon interval
+        stream.writeUint16Be((uint16_t)(probeResponseFrame->getBeaconInterval().inUnit(SIMTIME_US) / 1024));
+        // 3      Capability
+        stream.writeUint16Be(probeResponseFrame->getCapabilityInformation());
+        // 4      SSID
+        const char *SSID = probeResponseFrame->getSSID();
+        unsigned int length = strlen(SSID);
+        stream.writeByte(0); // FIXME
+        stream.writeByte(length);
+        stream.writeBytes((uint8_t *)SSID, B(length));
+        // 5      Supported rates
+        stream.writeByte(1);
+        stream.writeByte(probeResponseFrame->getSupportedRates().numRates);
+        for (int i = 0; i < probeResponseFrame->getSupportedRates().numRates; i++) {
+            uint8_t rate = ceil(probeResponseFrame->getSupportedRates().rate[i] / 0.5);
+            if (probeResponseFrame->getSupportedRates().basicRate[i])
+                rate |= 0x80; // restore the BSSBasicRateSet bit
+            stream.writeByte(rate);
+        }
+        // 6      FH Parameter Set                The FH Parameter Set information element is present within Probe Response frames generated by STAs using FH PHYs.
+        // 7      DS Parameter Set                The DS Parameter Set information element is present within Probe Response frames generated by STAs using Clause 15, Clause 18, and Clause 19 PHYs.
+        // 8      CF Parameter Set                The CF Parameter Set information element is present only within Probe Response frames generated by APs supporting a PCF.
+        // 9      IBSS Parameter Set              The IBSS Parameter Set information element is present only within Probe Response frames generated by STAs in an IBSS.
+        // 10     Country                         Included if dot11MultiDomainCapabilityEnabled or dot11SpectrumManagementRequired is true.
+        // 11     FH Parameters                   FH Parameters, as specified in 7.3.2.10, may be included if dot11MultiDomainCapabilityEnabled is true.
+        // 12     FH Pattern Table                FH Pattern Table information, as specified in 7.3.2.11, may be included if dot11MultiDomainCapabilityEnabled is true.
+        // 13     Power Constraint                Shall be included if dot11SpectrumManagementRequired is true.
+        // 14     Channel Switch Announcement     May be included if dot11SpectrumManagementRequired is true.
+        // 15     Quiet                           May be included if dot11SpectrumManagementRequired is true.
+        // 16     IBSS DFS                        Shall be included if dot11SpectrumManagementRequired is true in an IBSS.
+        // 17     TPC Report                      Shall be included if dot11SpectrumManagementRequired is true.
+        // 18     ERP Information                 The ERP Information element is present within Probe Response frames generated by STAs using ERPs and is optionally present in other cases.
+        // 19     Extended Supported Rates        The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
+        // 20     RSN                             The RSN information element is only present within Probe Response frames generated by STAs that have dot11RSNA- Enabled set to TRUE.
+        // 21     BSS Load                        The BSS Load element is present when dot11QosOption- Implemented and dot11QBSSLoadImplemented are both true.
+        // 22     EDCA Parameter Set              The EDCA Parameter Set element is present when dot11QosOptionImplemented is true.
+        // Last�1 Vendor Specific                 One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements, except the Requested Information elements.
+        // Last�n Requested information elements  Elements requested by the Request information element of the Probe Request frame.
+    }
+        else if (auto beaconFrame = dynamicPtrCast<const Ieee80211BeaconFrame>(chunk)) {
 //        type = ST_BEACON;
         // 1    Timestamp: preserved verbatim for frames deserialized from a capture;
         //      simulation-built beacons carry no TSF value (timestamp == 0) and keep
@@ -220,49 +265,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 24   QoS Capability                         The QoS Capability element is present when dot11QosOption- Implemented is true and EDCA Parameter Set element is not present.
         // Last Vendor Specific                        One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto probeResponseFrame = dynamicPtrCast<const Ieee80211ProbeResponseFrame>(chunk)) {
-//        type = ST_PROBERESPONSE;
-        // 1      Timestamp (see the Beacon case for the simTime() fallback rationale)
-        stream.writeUint64Be(probeResponseFrame->getTimestamp() != 0 ? probeResponseFrame->getTimestamp() : simTime().raw());
-        // 2      Beacon interval
-        stream.writeUint16Be((uint16_t)(probeResponseFrame->getBeaconInterval().inUnit(SIMTIME_US) / 1024));
-        // 3      Capability
-        stream.writeUint16Be(probeResponseFrame->getCapabilityInformation());
-        // 4      SSID
-        const char *SSID = probeResponseFrame->getSSID();
-        unsigned int length = strlen(SSID);
-        stream.writeByte(0); // FIXME
-        stream.writeByte(length);
-        stream.writeBytes((uint8_t *)SSID, B(length));
-        // 5      Supported rates
-        stream.writeByte(1);
-        stream.writeByte(probeResponseFrame->getSupportedRates().numRates);
-        for (int i = 0; i < probeResponseFrame->getSupportedRates().numRates; i++) {
-            uint8_t rate = ceil(probeResponseFrame->getSupportedRates().rate[i] / 0.5);
-            if (probeResponseFrame->getSupportedRates().basicRate[i])
-                rate |= 0x80; // restore the BSSBasicRateSet bit
-            stream.writeByte(rate);
-        }
-        // 6      FH Parameter Set                The FH Parameter Set information element is present within Probe Response frames generated by STAs using FH PHYs.
-        // 7      DS Parameter Set                The DS Parameter Set information element is present within Probe Response frames generated by STAs using Clause 15, Clause 18, and Clause 19 PHYs.
-        // 8      CF Parameter Set                The CF Parameter Set information element is present only within Probe Response frames generated by APs supporting a PCF.
-        // 9      IBSS Parameter Set              The IBSS Parameter Set information element is present only within Probe Response frames generated by STAs in an IBSS.
-        // 10     Country                         Included if dot11MultiDomainCapabilityEnabled or dot11SpectrumManagementRequired is true.
-        // 11     FH Parameters                   FH Parameters, as specified in 7.3.2.10, may be included if dot11MultiDomainCapabilityEnabled is true.
-        // 12     FH Pattern Table                FH Pattern Table information, as specified in 7.3.2.11, may be included if dot11MultiDomainCapabilityEnabled is true.
-        // 13     Power Constraint                Shall be included if dot11SpectrumManagementRequired is true.
-        // 14     Channel Switch Announcement     May be included if dot11SpectrumManagementRequired is true.
-        // 15     Quiet                           May be included if dot11SpectrumManagementRequired is true.
-        // 16     IBSS DFS                        Shall be included if dot11SpectrumManagementRequired is true in an IBSS.
-        // 17     TPC Report                      Shall be included if dot11SpectrumManagementRequired is true.
-        // 18     ERP Information                 The ERP Information element is present within Probe Response frames generated by STAs using ERPs and is optionally present in other cases.
-        // 19     Extended Supported Rates        The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
-        // 20     RSN                             The RSN information element is only present within Probe Response frames generated by STAs that have dot11RSNA- Enabled set to TRUE.
-        // 21     BSS Load                        The BSS Load element is present when dot11QosOption- Implemented and dot11QBSSLoadImplemented are both true.
-        // 22     EDCA Parameter Set              The EDCA Parameter Set element is present when dot11QosOptionImplemented is true.
-        // Last�1 Vendor Specific                 One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements, except the Requested Information elements.
-        // Last�n Requested information elements  Elements requested by the Request information element of the Probe Request frame.
-    }
+
     else
         throw cRuntimeError("Cannot serialize frame");
 
