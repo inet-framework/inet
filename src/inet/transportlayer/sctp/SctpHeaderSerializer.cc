@@ -322,7 +322,10 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     while (uLen > 0) {
                         struct tlv *unknown = (struct tlv *)(((unsigned char *)iac) + sizeof(struct init_chunk) + parPtr);
                         unknown->type = htons(UNRECOGNIZED_PARAMETER);
-                        pLen = initAckChunk->getUnrecognizedParameters(k + 2) * 16 + initAckChunk->getUnrecognizedParameters(k + 3);
+                        pLen = initAckChunk->getUnrecognizedParameters(k + 2) * 256 + initAckChunk->getUnrecognizedParameters(k + 3);
+                        // a parameter declaring no length would not advance the walk below
+                        if (pLen == 0)
+                            break;
                         unknown->length = htons(pLen + 4);
                         for (uint32_t i = 0; i < ADD_PADDING(pLen); i++, k++)
                             unknown->value[i] = initAckChunk->getUnrecognizedParameters(k);
@@ -653,7 +656,10 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     while (uLen > 0) {
                         struct tlv *unknown = (struct tlv *)(((unsigned char *)error) + sizeof(struct error_chunk) + ecParPtr);
                         unknown->type = htons(UNRECOGNIZED_PARAMETER);
-                        pLen = cookieChunk->getUnrecognizedParameters(k + 2) * 16 + cookieChunk->getUnrecognizedParameters(k + 3);
+                        pLen = cookieChunk->getUnrecognizedParameters(k + 2) * 256 + cookieChunk->getUnrecognizedParameters(k + 3);
+                        // a parameter declaring no length would not advance the walk below
+                        if (pLen == 0)
+                            break;
                         unknown->length = htons(pLen + 4);
                         ecLen += pLen + 4;
                         for (uint32_t i = 0; i < ADD_PADDING(pLen); i++, k++)
@@ -1566,6 +1572,22 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 chunk->setSctpChunkTypes(size, FORWARD_TSN_SUPPORTED_PARAMETER);
                                 chunk->setForwardTsn(true); // else serialize (which checks getForwardTsn) drops the parameter
                                 chunklen++;
+                                break;
+                            }
+
+                            // RFC 4960 3.3.3: the INIT-ACK reports the parameters the peer's
+                            // INIT carried and this end did not recognize, each wrapped in an
+                            // Unrecognized Parameters parameter. Keep the reported parameter
+                            // verbatim -- that is exactly what serialize() re-wraps.
+                            case UNRECOGNIZED_PARAMETER: {
+                                const struct tlv *unknown = (struct tlv *)(((unsigned char *)iac) + sizeof(struct init_ack_chunk) + parptr);
+                                int reportedLen = ntohs(unknown->length) - 4;
+                                if (reportedLen > 0) {
+                                    size_t storedLen = chunk->getUnrecognizedParametersArraySize();
+                                    chunk->setUnrecognizedParametersArraySize(storedLen + ADD_PADDING(reportedLen));
+                                    for (int i = 0; i < ADD_PADDING(reportedLen); i++)
+                                        chunk->setUnrecognizedParameters(storedLen + i, unknown->value[i]);
+                                }
                                 break;
                             }
 
