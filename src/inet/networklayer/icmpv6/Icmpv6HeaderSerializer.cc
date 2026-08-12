@@ -97,6 +97,7 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                 auto option = new Ipv6NdSourceLinkLayerAddress();
                 option->setLinkLayerAddress(stream.readMacAddress());
                 if (length > 1) {
+                    option->setOptionLength(length);
                     option->setPaddingBytesArraySize(8 * (length - 1));
                     for (int i = 0; i < 8 * (length - 1); i++)
                         option->setPaddingBytes(i, stream.readByte());
