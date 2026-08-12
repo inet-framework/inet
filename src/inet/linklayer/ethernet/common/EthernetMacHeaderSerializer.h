@@ -65,7 +65,14 @@ class INET_API EthernetFcsSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    // the concrete FCS subtype (EthernetFcs vs. EthernetFragmentFcs) cannot be told
+    // apart from the serialized bytes alone, so dispatch on the requested type_info
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
+
+    // set by deserialize(stream, typeInfo) just before it delegates to the base class,
+    // and read back by deserialize(stream) to pick the subtype (single-threaded use)
+    mutable const std::type_info *requestedTypeInfo = nullptr;
 
   public:
     EthernetFcsSerializer() : FieldsChunkSerializer() {}

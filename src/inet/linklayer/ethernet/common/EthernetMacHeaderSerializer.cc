@@ -88,9 +88,16 @@ void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     stream.writeUint32Be(ethernetFcs->getFcs());
 }
 
+const Ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+{
+    requestedTypeInfo = &typeInfo;
+    return FieldsChunkSerializer::deserialize(stream, typeInfo);
+}
+
 const Ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream) const
 {
-    auto ethernetFcs = makeShared<EthernetFcs>();
+    bool isFragmentFcs = requestedTypeInfo != nullptr && *requestedTypeInfo == typeid(EthernetFragmentFcs);
+    Ptr<EthernetFcs> ethernetFcs = isFragmentFcs ? staticPtrCast<EthernetFcs>(makeShared<EthernetFragmentFcs>()) : makeShared<EthernetFcs>();
     ethernetFcs->setFcs(stream.readUint32Be());
     ethernetFcs->setFcsMode(FCS_COMPUTED);
     return ethernetFcs;
