@@ -39,31 +39,53 @@ int SctpHeaderSerializer::getKeysHandle()
     return keysHandle;
 }
 
+// Writes an address parameter (RFC 4960 3.3.2.1) of either family at @p dest and
+// returns its length in octets, or 0 for an address that is neither IPv4 nor IPv6.
+static size_t writeAddressParameter(void *dest, const L3Address& addr)
+{
+    if (addr.getType() == L3Address::IPv4) {
+        struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)dest;
+        ipv4addr->type = htons(INIT_PARAM_IPV4);
+        ipv4addr->length = htons(sizeof(struct init_ipv4_address_parameter));
+        ipv4addr->address = htonl(addr.toIpv4().getInt());
+        return sizeof(struct init_ipv4_address_parameter);
+    }
+    if (addr.getType() == L3Address::IPv6) {
+        struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)dest;
+        ipv6addr->type = htons(INIT_PARAM_IPV6);
+        ipv6addr->length = htons(sizeof(struct init_ipv6_address_parameter));
+        for (int j = 0; j < 4; j++)
+            ipv6addr->address[j] = htonl(addr.toIpv6().words()[j]);
+        return sizeof(struct init_ipv6_address_parameter);
+    }
+    return 0;
+}
+
+// The counterpart of writeAddressParameter(): returns the parameter's length in
+// octets, or 0 if @p src does not hold an address parameter.
+static size_t readAddressParameter(const void *src, L3Address& addr)
+{
+    const struct tlv *param = (const struct tlv *)src;
+    switch (ntohs(param->type)) {
+        case INIT_PARAM_IPV4:
+            addr = L3Address(Ipv4Address(ntohl(((const struct init_ipv4_address_parameter *)param)->address)));
+            return sizeof(struct init_ipv4_address_parameter);
+        case INIT_PARAM_IPV6: {
+            const struct init_ipv6_address_parameter *v6 = (const struct init_ipv6_address_parameter *)param;
+            addr = L3Address(Ipv6Address(ntohl(v6->address[0]), ntohl(v6->address[1]), ntohl(v6->address[2]), ntohl(v6->address[3])));
+            return sizeof(struct init_ipv6_address_parameter);
+        }
+        default:
+            return 0;
+    }
+}
+
 // Fills the Heartbeat Info parameter INET puts in its own HEARTBEATs: the address
 // parameter of the remote address, followed by the send time. Sets the parameter's
 // length field and returns the length of its value, in octets.
 static size_t writeHeartbeatInfo(struct heartbeat_info *hbi, const L3Address& addr, simtime_t time)
 {
-    size_t addrLen = 0;
-#ifdef INET_WITH_IPv4
-    if (addr.getType() == L3Address::IPv4) {
-        struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)HBI_INFO(hbi);
-        ipv4addr->type = htons(INIT_PARAM_IPV4);
-        ipv4addr->length = htons(sizeof(struct init_ipv4_address_parameter));
-        ipv4addr->address = htonl(addr.toIpv4().getInt());
-        addrLen = sizeof(struct init_ipv4_address_parameter);
-    }
-#endif // ifdef INET_WITH_IPv4
-#ifdef INET_WITH_IPv6
-    if (addr.getType() == L3Address::IPv6) {
-        struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)HBI_INFO(hbi);
-        ipv6addr->type = htons(INIT_PARAM_IPV6);
-        ipv6addr->length = htons(sizeof(struct init_ipv6_address_parameter));
-        for (int j = 0; j < 4; j++)
-            ipv6addr->address[j] = htonl(addr.toIpv6().words()[j]);
-        addrLen = sizeof(struct init_ipv6_address_parameter);
-    }
-#endif // ifdef INET_WITH_IPv6
+    size_t addrLen = writeAddressParameter(HBI_INFO(hbi), addr);
     if (addrLen == 0)
         return 0;
     // the time goes right after the address parameter, whose size differs per family
@@ -81,20 +103,9 @@ static bool readHeartbeatInfo(const struct heartbeat_info *hbi, uint16_t infoLen
     if (infoLen < 4)
         return false;
     const struct tlv *param = (const struct tlv *)HBI_INFO(hbi);
-    size_t addrLen = 0;
-    switch (ntohs(param->type)) {
-        case INIT_PARAM_IPV4: addrLen = sizeof(struct init_ipv4_address_parameter); break;
-        case INIT_PARAM_IPV6: addrLen = sizeof(struct init_ipv6_address_parameter); break;
-        default: return false;
-    }
-    if (ntohs(param->length) != addrLen || infoLen < addrLen + sizeof(uint32_t))
+    size_t addrLen = readAddressParameter(param, addr);
+    if (addrLen == 0 || ntohs(param->length) != addrLen || infoLen < addrLen + sizeof(uint32_t))
         return false;
-    if (addrLen == sizeof(struct init_ipv4_address_parameter))
-        addr = L3Address(Ipv4Address(ntohl(((const struct init_ipv4_address_parameter *)param)->address)));
-    else {
-        const struct init_ipv6_address_parameter *v6 = (const struct init_ipv6_address_parameter *)param;
-        addr = L3Address(Ipv6Address(ntohl(v6->address[0]), ntohl(v6->address[1]), ntohl(v6->address[2]), ntohl(v6->address[3])));
-    }
     uint32_t rawTime;
     memcpy(&rawTime, HBI_INFO(hbi) + addrLen, sizeof(rawTime));
     time = SimTime((int64_t)ntohl(rawTime), SIMTIME_S);
@@ -784,11 +795,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 asconf->length = htons(asconfChunk->getByteLength());
                 asconf->serial = htonl(asconfChunk->getSerialNumber());
                 int parPtr = 0;
-                struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
-                ipv4addr->type = htons(INIT_PARAM_IPV4);
-                ipv4addr->length = htons(8);
-                ipv4addr->address = htonl(asconfChunk->getAddressParam().toIpv4().getInt());
-                parPtr += 8;
+                parPtr += writeAddressParameter(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr, asconfChunk->getAddressParam());
                 for (unsigned int i = 0; i < asconfChunk->getAsconfParamsArraySize(); i++) {
                     SctpParameter *parameter = (SctpParameter *)(asconfChunk->getAsconfParams(i));
                     switch (parameter->getParameterType()) {
@@ -798,11 +805,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                             parPtr += 8;
                             ip->type = htons(ADD_IP_ADDRESS);
                             ip->correlation_id = htonl(addip->getRequestCorrelationId());
-                            struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
-                            ipv4addr->type = htons(INIT_PARAM_IPV4);
-                            ipv4addr->length = htons(8);
-                            ipv4addr->address = htonl(addip->getAddressParam().toIpv4().getInt());
-                            parPtr += 8;
+                            parPtr += writeAddressParameter(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr, addip->getAddressParam());
                             ip->length = htons(addip->getByteLength());
                             break;
                         }
@@ -813,11 +816,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                             parPtr += 8;
                             ip->type = htons(DELETE_IP_ADDRESS);
                             ip->correlation_id = htonl(deleteip->getRequestCorrelationId());
-                            struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
-                            ipv4addr->type = htons(INIT_PARAM_IPV4);
-                            ipv4addr->length = htons(8);
-                            ipv4addr->address = htonl(deleteip->getAddressParam().toIpv4().getInt());
-                            parPtr += 8;
+                            parPtr += writeAddressParameter(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr, deleteip->getAddressParam());
                             ip->length = htons(deleteip->getByteLength());
                             break;
                         }
@@ -828,11 +827,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                             parPtr += 8;
                             ip->type = htons(SET_PRIMARY_ADDRESS);
                             ip->correlation_id = htonl(setip->getRequestCorrelationId());
-                            struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
-                            ipv4addr->type = htons(INIT_PARAM_IPV4);
-                            ipv4addr->length = htons(8);
-                            ipv4addr->address = htonl(setip->getAddressParam().toIpv4().getInt());
-                            parPtr += 8;
+                            parPtr += writeAddressParameter(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr, setip->getAddressParam());
                             ip->length = htons(setip->getByteLength());
                             break;
                         }
@@ -872,10 +867,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                                         parPtr += 8;
                                         ip->type = htons(ADD_IP_ADDRESS);
                                         ip->correlation_id = htonl(addip->getRequestCorrelationId());
-                                        struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)errorc) + sizeof(struct error_cause) + 8);
-                                        ipv4addr->length = htons(8);
-                                        ipv4addr->address = htonl(addip->getAddressParam().toIpv4().getInt());
-                                        parPtr += 8;
+                                        parPtr += writeAddressParameter(((unsigned char *)errorc) + sizeof(struct error_cause) + 8, addip->getAddressParam());
                                         ip->length = htons(addip->getByteLength());
                                         break;
                                     }
@@ -886,11 +878,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                                         parPtr += 8;
                                         ip->type = htons(DELETE_IP_ADDRESS);
                                         ip->correlation_id = htonl(deleteip->getRequestCorrelationId());
-                                        struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)errorc) + sizeof(struct error_cause) + 8);
-                                        ipv4addr->type = htons(INIT_PARAM_IPV4);
-                                        ipv4addr->length = htons(8);
-                                        ipv4addr->address = htonl(deleteip->getAddressParam().toIpv4().getInt());
-                                        parPtr += 8;
+                                        parPtr += writeAddressParameter(((unsigned char *)errorc) + sizeof(struct error_cause) + 8, deleteip->getAddressParam());
                                         ip->length = htons(deleteip->getByteLength());
                                         break;
                                     }
@@ -901,11 +889,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                                         parPtr += 8;
                                         ip->type = htons(SET_PRIMARY_ADDRESS);
                                         ip->correlation_id = htonl(setip->getRequestCorrelationId());
-                                        struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)errorc) + sizeof(struct error_cause) + 8);
-                                        ipv4addr->type = htons(INIT_PARAM_IPV4);
-                                        ipv4addr->length = htons(8);
-                                        ipv4addr->address = htonl(setip->getAddressParam().toIpv4().getInt());
-                                        parPtr += 8;
+                                        parPtr += writeAddressParameter(((unsigned char *)errorc) + sizeof(struct error_cause) + 8, setip->getAddressParam());
                                         ip->length = htons(setip->getByteLength());
                                         break;
                                     }
@@ -1285,8 +1269,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 EV_INFO << "IPv6\n";
                                 const struct init_ipv6_address_parameter *ipv6addr;
                                 ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)init_chunk) + sizeof(struct init_chunk) + parptr);
-                                Ipv6Address ipv6Addr = Ipv6Address(ipv6addr->address[0], ipv6addr->address[1],
-                                        ipv6addr->address[2], ipv6addr->address[3]);
+                                Ipv6Address ipv6Addr = Ipv6Address(ntohl(ipv6addr->address[0]), ntohl(ipv6addr->address[1]),
+                                        ntohl(ipv6addr->address[2]), ntohl(ipv6addr->address[3]));
                                 L3Address localv6Addr(ipv6Addr);
                                 EV_INFO << "address" << ipv6Addr << "\n";
                                 chunk->setAddressesArraySize(++addrcounter);
@@ -1488,8 +1472,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 EV_INFO << "IPv6\n";
                                 const struct init_ipv6_address_parameter *ipv6addr;
                                 ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)iac) + sizeof(struct init_chunk) + parptr);
-                                Ipv6Address ipv6Addr = Ipv6Address(ipv6addr->address[0], ipv6addr->address[1],
-                                        ipv6addr->address[2], ipv6addr->address[3]);
+                                Ipv6Address ipv6Addr = Ipv6Address(ntohl(ipv6addr->address[0]), ntohl(ipv6addr->address[1]),
+                                        ntohl(ipv6addr->address[2]), ntohl(ipv6addr->address[3]));
                                 EV_INFO << "address" << ipv6Addr << "\n";
                                 L3Address localv6Addr(ipv6Addr);
 
@@ -1990,20 +1974,17 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 chunk->setSerialNumber(ntohl(asconf_chunk->serial));
                 if (cLen > (int)sizeof(struct asconf_chunk)) {
                     parptr = 0;
-                    // we supppose an ipv4 address parameter
-                    const struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr);
-                    int parlen = ADD_PADDING(ntohs(ipv4addr->length));
+                    const struct tlv *addrParam = (struct tlv *)(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr);
+                    int parlen = ADD_PADDING(ntohs(addrParam->length));
                     parptr += parlen;
                     // set pointer forwards with count of bytes in length field of TLV
-                    if (ntohs(ipv4addr->type) != INIT_PARAM_IPV4) {
+                    L3Address localAddr;
+                    if (readAddressParameter(addrParam, localAddr) == 0) {
                         if (parlen == 0)
                             throw cRuntimeError("ParamLen == 0.");
                         continue;
                     }
-                    else {
-                        L3Address localAddr(Ipv4Address(ntohl(ipv4addr->address)));
-                        chunk->setAddressParam(localAddr);
-                    }
+                    chunk->setAddressParam(localAddr);
                     while (cLen > (int)sizeof(struct asconf_chunk) + parptr) {
                         const struct add_ip_parameter *ipparam = (struct add_ip_parameter *)(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr);
                         paramType = ntohs(ipparam->type);
@@ -2016,9 +1997,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 addip->setParameterType(ntohs(ipparam->type));
                                 addip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
                                 addip->setByteLength(paramLength); // serialize() writes it back as the parameter length
-                                const struct init_ipv4_address_parameter *v4addr1;
-                                v4addr1 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr + sizeof(struct add_ip_parameter));
-                                L3Address localAddr(Ipv4Address(ntohl(v4addr1->address)));
+                                L3Address localAddr;
+                                readAddressParameter(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr + sizeof(struct add_ip_parameter), localAddr);
                                 addip->setAddressParam(localAddr);
                                 chunk->addAsconfParam(addip);
                                 break;
@@ -2031,9 +2011,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 deleteip->setParameterType(ntohs(ipparam->type));
                                 deleteip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
                                 deleteip->setByteLength(paramLength);
-                                const struct init_ipv4_address_parameter *v4addr2;
-                                v4addr2 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr + sizeof(struct add_ip_parameter));
-                                L3Address localAddr(Ipv4Address(ntohl(v4addr2->address)));
+                                L3Address localAddr;
+                                readAddressParameter(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr + sizeof(struct add_ip_parameter), localAddr);
                                 deleteip->setAddressParam(localAddr);
                                 chunk->addAsconfParam(deleteip);
                                 break;
@@ -2046,9 +2025,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 priip->setParameterType(ntohs(ipparam->type));
                                 priip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
                                 priip->setByteLength(paramLength);
-                                const struct init_ipv4_address_parameter *v4addr3;
-                                v4addr3 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr + sizeof(struct add_ip_parameter));
-                                L3Address localAddr(Ipv4Address(ntohl(v4addr3->address)));
+                                L3Address localAddr;
+                                readAddressParameter(((unsigned char *)asconf_chunk) + sizeof(struct asconf_chunk) + parptr + sizeof(struct add_ip_parameter), localAddr);
                                 priip->setAddressParam(localAddr);
                                 chunk->addAsconfParam(priip);
                                 break;
