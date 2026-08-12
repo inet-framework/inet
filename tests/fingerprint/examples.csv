@@ -575,9 +575,9 @@
 
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,        7cc6-715e/tplx;dcd3-9b9d/~tNl;7b5f-46f2/~tND;c710-ff2e/tyf, PASS, wireless
 
-/examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,         8383-735e/tplx;8e4d-20ee/~tNl;1298-9ea7/~tND;af51-7b12/tyf, PASS, wireless
+/examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,         8383-735e/tplx;8e4d-20ee/~tNl;d2b6-9157/~tND;af51-7b12/tyf, PASS, wireless
 
-/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           ea34-1b2b/tplx;336a-f6a4/~tNl;2d2e-5f3c/~tND;5202-5a49/tyf, PASS, wireless
+/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           ea34-1b2b/tplx;336a-f6a4/~tNl;7df9-84d2/~tND;5202-5a49/tyf, PASS, wireless
 
 /examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Default -r '$distance=100  && $bitrate=6  && $repetition=0',               1s,           7d44-b2bb/tplx;d318-d210/~tNl;d2c9-0b63/~tND;8940-b4a8/tyf, PASS, wireless Ipv4
 /examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Default -r '$distance=1000 && $bitrate=6  && $repetition=0',               1s,           2de9-fd45/tplx;8aa4-8d31/~tNl;03a6-2514/~tND;377c-8ff1/tyf, PASS, wireless Ipv4
@@ -660,7 +660,7 @@
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         b762-75c3/tplx;6644-8a9a/~tNl;28a9-48fd/~tND;b2d6-1329/tyf, PASS, wireless Ipv4
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         cf83-e60c/tplx;51b0-197f/~tNl;2101-b7cb/~tND;08b5-d005/tyf, PASS, wireless Ipv4
 
-/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            bf30-2f13/tplx;7b2f-653d/~tNl;6e1e-3b7b/~tND;19fe-8b0e/tyf, PASS, wireless
+/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            bf30-2f13/tplx;7b2f-653d/~tNl;6f09-d8eb/~tND;19fe-8b0e/tyf, PASS, wireless
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractAckingMac -r 0,    # abstract-config
 /examples/wireless/scaling/,         -f omnetpp.ini -c UnitDiskRadioMedium -r 0,    1s,               bb94-17a2/tplx;2220-d64e/~tNl;a863-69d0/~tND, PASS, wireless AckingWirelessInterface Ipv4
@@ -673,9 +673,9 @@
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              e7f2-040b/tplx;2c58-2e50/~tNl;2134-4ca3/~tND;9343-5f3e/tyf, PASS, wireless Ipv4
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              6f66-ec37/tplx;4b8d-fd59/~tNl;2a03-b0af/~tND;6bd8-324e/tyf, PASS, wireless Ipv4
 
-/examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    10s,          6bfb-22e5/tplx;6a24-b25b/~tNl;98d9-d2b0/~tND;708a-85d8/tyf, PASS, wireless
+/examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    10s,          6bfb-22e5/tplx;6a24-b25b/~tNl;a28b-2022/~tND;708a-85d8/tyf, PASS, wireless
 
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,           a4d8-abf4/tplx;f424-9aaf/~tNl;24fe-19e3/~tND;bb2f-ec63/tyf, PASS, wireless
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,         3b2b-5123/tplx;0009-ca8c/~tNl;a4a2-725a/~tND;032e-0333/tyf, PASS, wireless
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,           a4d8-abf4/tplx;f424-9aaf/~tNl;8105-890f/~tND;bb2f-ec63/tyf, PASS, wireless
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,         3b2b-5123/tplx;0009-ca8c/~tNl;e1e4-92c8/~tND;032e-0333/tyf, PASS, wireless
 
 /examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,      54d5-9cfc/tplx;56e1-d7a0/~tNl;2ca4-935d/~tND;b4df-273e/tyf, PASS, wireless EthernetMac Ipv4

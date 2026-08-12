@@ -19,8 +19,8 @@ Register_Serializer(Ieee8022LlcSnapHeader, Ieee8022LlcHeaderSerializer);
 void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& llcHeader = CHK(dynamicPtrCast<const Ieee8022LlcHeader>(chunk));
-    stream.writeByte(llcHeader->getSsap());
     stream.writeByte(llcHeader->getDsap());
+    stream.writeByte(llcHeader->getSsap());
     auto control = llcHeader->getControl();
     stream.writeByte(control);
     if ((control & 3) != 3)
@@ -36,8 +36,8 @@ void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
 const Ptr<Chunk> Ieee8022LlcHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     Ptr<Ieee8022LlcHeader> llcHeader = nullptr;
-    uint8_t ssap = stream.readByte();
     uint8_t dsap = stream.readByte();
+    uint8_t ssap = stream.readByte();
     uint16_t ctrl = stream.readByte();
     if ((ctrl & 3) != 3)
         ctrl |= ((uint16_t)stream.readByte()) << 8;
