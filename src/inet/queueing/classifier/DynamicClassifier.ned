@@ -16,6 +16,9 @@ package inet.queueing.classifier;
 // about it from the model change notification of the connection being made, so no extra
 // contract is needed between the two.
 //
+// The inherited `reverseOrder` parameter is not supported and is refused, because the order of
+// the output gates is the order in which the classes of the packets first appear.
+//
 // The submodule vector must be declared in the enclosing compound module, where it may be
 // empty; the classifier extends it as branches are created. A branch is created with its final
 // name and index, so parameter assignments (both from the enclosing NED declaration and from
