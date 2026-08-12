@@ -57,7 +57,8 @@ void MldHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeIpv6Address(msg->getMulticastAddress());  // Multicast Address (16 bytes)
 
     if (auto q2 = dynamicPtrCast<const Mldv2Query>(chunk)) {
-        ASSERT(q2->getRobustnessVariable() <= 7);
+        if (q2->getRobustnessVariable() > 7)
+            throw cRuntimeError("Cannot serialize MLDv2 Query: robustnessVariable (%u) does not fit the 3-bit QRV field (max 7)", q2->getRobustnessVariable());
         stream.writeUint4(q2->getResv());                              // Resv (4 bits)
         stream.writeBit(q2->getSuppressRouterProc());                  // S flag (1 bit)
         stream.writeNBitsOfUint64Be(q2->getRobustnessVariable(), 3);   // QRV (3 bits)

@@ -215,7 +215,9 @@ void MobilityHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
     }
 
     // Verify we wrote exactly the right number of bytes
-    ASSERT(stream.getLength() - startPos == b(totalLen));
+    if (stream.getLength() - startPos != b(totalLen))
+        throw cRuntimeError("Cannot serialize MobilityHeader: chunkLength (%s) does not match the number of bytes actually written (%s)",
+                totalLen.str().c_str(), B(stream.getLength() - startPos).str().c_str());
 }
 
 const Ptr<Chunk> MobilityHeaderSerializer::deserialize(MemoryInputStream& stream) const

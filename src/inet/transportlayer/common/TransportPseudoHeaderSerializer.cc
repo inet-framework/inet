@@ -21,7 +21,9 @@ void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, cons
     const auto& transportPseudoHeader = staticPtrCast<const TransportPseudoHeader>(chunk);
     auto nwProtId = transportPseudoHeader->getNetworkProtocolId();
     if (nwProtId == Protocol::ipv4.getId()) {
-        ASSERT(transportPseudoHeader->getChunkLength() == B(12));
+        if (transportPseudoHeader->getChunkLength() != B(12))
+            throw cRuntimeError("Cannot serialize Ipv4 TransportPseudoHeader: chunkLength (%s) must be 12 bytes",
+                    transportPseudoHeader->getChunkLength().str().c_str());
         stream.writeIpv4Address(transportPseudoHeader->getSrcAddress().toIpv4());
         stream.writeIpv4Address(transportPseudoHeader->getDestAddress().toIpv4());
         stream.writeByte(0);
@@ -29,7 +31,9 @@ void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, cons
         stream.writeUint16Be(transportPseudoHeader->getPacketLength().get<B>());
     }
     else if (nwProtId == Protocol::ipv6.getId()) {
-        ASSERT(transportPseudoHeader->getChunkLength() == B(40));
+        if (transportPseudoHeader->getChunkLength() != B(40))
+            throw cRuntimeError("Cannot serialize Ipv6 TransportPseudoHeader: chunkLength (%s) must be 40 bytes",
+                    transportPseudoHeader->getChunkLength().str().c_str());
         stream.writeIpv6Address(transportPseudoHeader->getSrcAddress().toIpv6());
         stream.writeIpv6Address(transportPseudoHeader->getDestAddress().toIpv6());
         stream.writeUint32Be(transportPseudoHeader->getPacketLength().get<B>());

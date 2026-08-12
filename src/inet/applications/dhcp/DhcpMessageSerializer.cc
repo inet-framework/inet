@@ -219,7 +219,9 @@ void DhcpMessageSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
         stream.writeByte(0);
     length += padding;
 
-    ASSERT(dhcpMessage->getChunkLength() == B(length));
+    if (dhcpMessage->getChunkLength() != B(length))
+        throw cRuntimeError("Cannot serialize DHCP message: chunkLength (%s) does not match the number of bytes written (%d)",
+                dhcpMessage->getChunkLength().str().c_str(), length);
 }
 
 const Ptr<Chunk> DhcpMessageSerializer::deserialize(MemoryInputStream& stream) const

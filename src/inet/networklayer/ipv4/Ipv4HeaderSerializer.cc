@@ -20,15 +20,20 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Heade
     auto startPosition = stream.getLength();
     struct ip iphdr;
     B headerLength = ipv4Header.getHeaderLength();
-    ASSERT((headerLength.get() & 3) == 0 && headerLength >= IPv4_MIN_HEADER_LENGTH && headerLength <= IPv4_MAX_HEADER_LENGTH);
-    ASSERT(headerLength <= ipv4Header.getTotalLengthField());
+    if ((headerLength.get() & 3) != 0 || headerLength < IPv4_MIN_HEADER_LENGTH || headerLength > IPv4_MAX_HEADER_LENGTH)
+        throw cRuntimeError("Cannot serialize Ipv4 header: headerLength (%s) must be a multiple of 4 octets between %s and %s",
+                headerLength.str().c_str(), IPv4_MIN_HEADER_LENGTH.str().c_str(), IPv4_MAX_HEADER_LENGTH.str().c_str());
+    if (headerLength > ipv4Header.getTotalLengthField())
+        throw cRuntimeError("Cannot serialize Ipv4 header: headerLength (%s) exceeds totalLengthField (%s)",
+                headerLength.str().c_str(), ipv4Header.getTotalLengthField().str().c_str());
     iphdr.ip_hl = headerLength.get<B>() >> 2;
     if (ipv4Header.getVersion() < 0 || ipv4Header.getVersion() > 15)
         throw cRuntimeError("Cannot serialize Ipv4 header: version %d does not fit the 4-bit field", ipv4Header.getVersion());
     iphdr.ip_v = ipv4Header.getVersion();
     iphdr.ip_tos = ipv4Header.getTypeOfService();
     iphdr.ip_id = htons(ipv4Header.getIdentification());
-    ASSERT((ipv4Header.getFragmentOffset() & 7) == 0);
+    if ((ipv4Header.getFragmentOffset() & 7) != 0)
+        throw cRuntimeError("Cannot serialize Ipv4 header: fragmentOffset (%u) must be a multiple of 8 octets", ipv4Header.getFragmentOffset());
     uint16_t ip_off = (ipv4Header.getFragmentOffset() / 8) & IP_OFFMASK;
     if (ipv4Header.getReservedBit())
         ip_off |= IP_RF;

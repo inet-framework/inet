@@ -28,7 +28,8 @@ void CfmContinuityCheckMessageSerializer::serialize(MemoryOutputStream& stream, 
     stream.writeUint8(0); // reserved
     stream.writeUint8(4); // format
     size_t nameLength = strlen(ccm->getMessageName());
-    ASSERT(nameLength <= 45);
+    if (nameLength > 45)
+        throw cRuntimeError("Cannot serialize CFM CCM: messageName length (%zu) exceeds the 45-byte MEG ID field", nameLength);
     stream.writeUint8(nameLength);
     stream.writeBytes(reinterpret_cast<const uint8_t*>(ccm->getMessageName()), B(nameLength));
     stream.writeByteRepeatedly(0, 45 - nameLength);

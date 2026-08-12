@@ -587,7 +587,9 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 }
                 else {
                     infolen = writeHeartbeatInfo(hbi, heartbeatChunk->getRemoteAddr(), heartbeatChunk->getTimeField());
-                    ASSERT(infolen != 0);
+                    if (infolen == 0)
+                        throw cRuntimeError("Cannot serialize SCTP HEARTBEAT chunk: remoteAddr (%s) has an unsupported address type; only IPv4 and IPv6 addresses can be carried in the Heartbeat Info parameter",
+                                heartbeatChunk->getRemoteAddr().str().c_str());
                 }
                 hbc->length = htons(sizeof(struct heartbeat_chunk) + infolen + 4);
                 writtenbytes += sizeof(struct heartbeat_chunk) + infolen + 4;

@@ -75,7 +75,9 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
         if (optionsLength % 4 != 0)
             stream.writeByteRepeatedly(0, 4 - optionsLength % 4);
     }
-    ASSERT(tcpHeader->getHeaderLength() == TCP_MIN_HEADER_LENGTH + B(optionsLength));
+    if (tcpHeader->getHeaderLength() != TCP_MIN_HEADER_LENGTH + B(optionsLength))
+        throw cRuntimeError("Cannot serialize Tcp header: headerLength (%s) does not match the fixed header plus options length (%s)",
+                tcpHeader->getHeaderLength().str().c_str(), (TCP_MIN_HEADER_LENGTH + B(optionsLength)).str().c_str());
 }
 
 void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpOption *option) const

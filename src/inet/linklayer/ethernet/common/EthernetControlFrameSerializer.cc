@@ -23,7 +23,8 @@ void EthernetControlFrameSerializer::serialize(MemoryOutputStream& stream, const
     stream.writeUint16Be(frame->getOpCode());
     if (frame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
         auto pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(frame);
-        ASSERT(pauseFrame != nullptr);
+        if (pauseFrame == nullptr)
+            throw cRuntimeError("Cannot serialize '%s': opCode is ETHERNET_CONTROL_PAUSE (%d) but the chunk is not an EthernetPauseFrame", frame->getClassName(), frame->getOpCode());
         stream.writeUint16Be(pauseFrame->getPauseTime());
     }
     else

@@ -40,7 +40,8 @@ void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             stream.writeUint16Be(igmpMessage->getChecksum());
             stream.writeIpv4Address(check_and_cast<const IgmpQuery *>(igmpMessage.get())->getGroupAddress());
             if (auto igmpv3Query = dynamicPtrCast<const Igmpv3Query>(igmpMessage)) {
-                ASSERT(igmpv3Query->getRobustnessVariable() <= 7);
+                if (igmpv3Query->getRobustnessVariable() > 7)
+                    throw cRuntimeError("Cannot serialize IGMPv3 Query: robustnessVariable (%u) does not fit the 3-bit QRV field (max 7)", igmpv3Query->getRobustnessVariable());
                 stream.writeUint4(igmpv3Query->getResv());
                 stream.writeBit(igmpv3Query->getSuppressRouterProc());
                 stream.writeNBitsOfUint64Be(igmpv3Query->getRobustnessVariable(), 3);
