@@ -26,10 +26,11 @@ class INET_API DynamicClassifier : public PacketClassifier
     const char *submoduleName = nullptr; // submodule vector that holds the branches
     cModuleType *moduleType = nullptr; // type of the per-class branch module (may be a compound)
     const char *aggregatorSubmoduleName = nullptr; // downstream aggregator submodule (multiplexer or scheduler)
-    std::map<int, int> classIndexToGateItMap;
+    std::map<int, int> classIndexToBranchIndex; // the branch of a class, keyed by the index the classifier function returns
 
   protected:
     virtual void initialize(int stage) override;
+    virtual int getClassIndex(Packet *packet) const;
     virtual int classifyPacket(Packet *packet) override;
 
     virtual int createBranch();

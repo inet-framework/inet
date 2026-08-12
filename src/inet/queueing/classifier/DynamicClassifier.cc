@@ -26,17 +26,29 @@ void DynamicClassifier::initialize(int stage)
             throw cRuntimeError("The submodule vector '%s' is missing from %s", submoduleName, getParentModule()->getFullPath().c_str());
         if (getParentModule()->getSubmodule(aggregatorSubmoduleName) == nullptr)
             throw cRuntimeError("The aggregator submodule '%s' is missing from %s", aggregatorSubmoduleName, getParentModule()->getFullPath().c_str());
+        if (reverseOrder)
+            throw cRuntimeError("The reverseOrder parameter is not supported: branches are created in the order the classes of the packets first appear");
     }
+}
+
+int DynamicClassifier::getClassIndex(Packet *packet) const
+{
+    // the class of the packet, with no side effect -- unlike classifyPacket() below, which
+    // creates the branch of a class that is seen for the first time. Note that the class index
+    // is taken as it is, and not mapped through getOutputGateIndex(): that mapping depends on
+    // the number of output gates, which grows with each branch, so the same class would end up
+    // under a different key over time, and get a second branch.
+    return packetClassifierFunction->classifyPacket(packet);
 }
 
 int DynamicClassifier::classifyPacket(Packet *packet)
 {
-    int index = PacketClassifier::classifyPacket(packet);
-    auto it = classIndexToGateItMap.find(index);
-    if (it != classIndexToGateItMap.end())
+    int index = getClassIndex(packet);
+    auto it = classIndexToBranchIndex.find(index);
+    if (it != classIndexToBranchIndex.end())
         return it->second;
     int branchIndex = createBranch();
-    classIndexToGateItMap[index] = branchIndex;
+    classIndexToBranchIndex[index] = branchIndex;
     return branchIndex;
 }
 
