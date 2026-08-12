@@ -113,7 +113,8 @@ void Ipv6HopByHopOptionsHeaderSerializer::serialize(MemoryOutputStream& stream, 
     const auto& hdr = staticPtrCast<const Ipv6HopByHopOptionsHeader>(chunk);
     stream.writeByte(hdr->getNextHeaderProtocol());
     B totalLen = hdr->getChunkLength();
-    ASSERT(totalLen.get() % 8 == 0 && totalLen >= B(8));
+    if (totalLen.get() % 8 != 0 || totalLen < B(8))
+        throw cRuntimeError("Cannot serialize the IPv6 Hop-by-Hop Options header: chunkLength is %d bytes, must be a multiple of 8 bytes and at least 8 bytes.", (int)totalLen.get());
     stream.writeByte((totalLen.get() - 8) / 8);
     serializeIpv6TlvOptions(stream, hdr->getTlvOptions(), totalLen - B(2));
 }
@@ -136,7 +137,8 @@ void Ipv6DestinationOptionsHeaderSerializer::serialize(MemoryOutputStream& strea
     const auto& hdr = staticPtrCast<const Ipv6DestinationOptionsHeader>(chunk);
     stream.writeByte(hdr->getNextHeaderProtocol());
     B totalLen = hdr->getChunkLength();
-    ASSERT(totalLen.get() % 8 == 0 && totalLen >= B(8));
+    if (totalLen.get() % 8 != 0 || totalLen < B(8))
+        throw cRuntimeError("Cannot serialize the IPv6 Destination Options header: chunkLength is %d bytes, must be a multiple of 8 bytes and at least 8 bytes.", (int)totalLen.get());
     stream.writeByte((totalLen.get() - 8) / 8);
     serializeIpv6TlvOptions(stream, hdr->getTlvOptions(), totalLen - B(2));
 }
@@ -159,7 +161,8 @@ void Ipv6RoutingHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     const auto& hdr = staticPtrCast<const Ipv6RoutingHeader>(chunk);
     stream.writeByte(hdr->getNextHeaderProtocol());
     B totalLen = hdr->getChunkLength();
-    ASSERT(totalLen.get() % 8 == 0 && totalLen >= B(8));
+    if (totalLen.get() % 8 != 0 || totalLen < B(8))
+        throw cRuntimeError("Cannot serialize the IPv6 Routing header: chunkLength is %d bytes, must be a multiple of 8 bytes and at least 8 bytes.", (int)totalLen.get());
     stream.writeByte((totalLen.get() - 8) / 8);
     stream.writeByte(hdr->getRoutingType());
     stream.writeByte(hdr->getSegmentsLeft());
@@ -197,7 +200,8 @@ void Ipv6FragmentHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     const auto& hdr = staticPtrCast<const Ipv6FragmentHeader>(chunk);
     stream.writeByte(hdr->getNextHeaderProtocol());
     stream.writeByte(0); // reserved
-    ASSERT((hdr->getFragmentOffset() & 7) == 0);
+    if ((hdr->getFragmentOffset() & 7) != 0)
+        throw cRuntimeError("Cannot serialize the IPv6 Fragment header: fragmentOffset is %u, must be a multiple of 8 bytes.", hdr->getFragmentOffset());
     stream.writeNBitsOfUint64Be(hdr->getFragmentOffset() / 8, 13);
     stream.writeUint2(hdr->getReserved());
     stream.writeBit(hdr->getMoreFragments());
@@ -223,7 +227,8 @@ void Ipv6AuthenticationHeaderSerializer::serialize(MemoryOutputStream& stream, c
     const auto& hdr = staticPtrCast<const Ipv6AuthenticationHeader>(chunk);
     stream.writeByte(hdr->getNextHeaderProtocol());
     B totalLen = hdr->getChunkLength();
-    ASSERT(totalLen.get() % 8 == 0 && totalLen >= B(8));
+    if (totalLen.get() % 8 != 0 || totalLen < B(8))
+        throw cRuntimeError("Cannot serialize the IPv6 Authentication header: chunkLength is %d bytes, must be a multiple of 8 bytes and at least 8 bytes.", (int)totalLen.get());
     stream.writeByte((totalLen.get() - 8) / 8);
     stream.writeByteRepeatedly(0, totalLen.get() - 2); // TODO
 }
@@ -246,7 +251,8 @@ void Ipv6EncapsulatingSecurityPayloadHeaderSerializer::serialize(MemoryOutputStr
     const auto& hdr = staticPtrCast<const Ipv6EncapsulatingSecurityPayloadHeader>(chunk);
     stream.writeByte(hdr->getNextHeaderProtocol());
     B totalLen = hdr->getChunkLength();
-    ASSERT(totalLen.get() % 8 == 0 && totalLen >= B(8));
+    if (totalLen.get() % 8 != 0 || totalLen < B(8))
+        throw cRuntimeError("Cannot serialize the IPv6 Encapsulating Security Payload header: chunkLength is %d bytes, must be a multiple of 8 bytes and at least 8 bytes.", (int)totalLen.get());
     stream.writeByte((totalLen.get() - 8) / 8);
     stream.writeByteRepeatedly(0, totalLen.get() - 2); // TODO
 }
