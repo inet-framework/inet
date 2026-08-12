@@ -71,11 +71,16 @@ void EthernetFragmentPhyHeaderSerializer::serialize(MemoryOutputStream& stream, 
             break;
         case SMD_Sx: {
             int smdSxValues[] = { 0xE6, 0x4C, 0x7F, 0xB3 };
+            if (header->getSmdNumber() >= 4)
+                throw cRuntimeError("Cannot serialize Ethernet fragment PHY header: SMD number %d is out of range", header->getSmdNumber());
             stream.writeByte(smdSxValues[header->getSmdNumber()]);
             break;
         }
         case SMD_Cx: {
             int smdCxValues[] = { 0x61, 0x52, 0x9E, 0x2A };
+            if (header->getSmdNumber() >= 4 || header->getFragmentNumber() >= 4)
+                throw cRuntimeError("Cannot serialize Ethernet fragment PHY header: SMD number %d / fragment number %d is out of range",
+                        header->getSmdNumber(), header->getFragmentNumber());
             stream.writeByte(smdCxValues[header->getSmdNumber()]);
             int fragmentNumberValues[] = { 0xE6, 0x4C, 0x7F, 0xB3 };
             stream.writeByte(fragmentNumberValues[header->getFragmentNumber()]);
@@ -90,28 +95,45 @@ const Ptr<Chunk> EthernetFragmentPhyHeaderSerializer::deserialize(MemoryInputStr
     bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, PREAMBLE_BYTES.get<B>() - 1);
     if (!preambleReadSuccessfully)
         header->markIncorrect();
+    static const int smdSxValues[] = { 0xE6, 0x4C, 0x7F, 0xB3 };
+    static const int smdCxValues[] = { 0x61, 0x52, 0x9E, 0x2A };
+    static const int fragmentNumberValues[] = { 0xE6, 0x4C, 0x7F, 0xB3 };
+    // an SMD/fragment code outside its table has no representation in the model, so the
+    // header is marked incorrect instead of storing an out-of-range index that the
+    // serializer would then use to index the table
+    auto lookup = [&header] (const int *values, uint8_t value) {
+        auto it = std::find(values, values + 4, value);
+        if (it == values + 4) {
+            header->markIncorrect();
+            return 0;
+        }
+        return (int)std::distance(values, it);
+    };
     uint8_t value = stream.readByte();
     if (value == 0x55) {
-        uint8_t value = stream.readByte();
-        if (value == 0xD5)
-            header->setPreambleType(SFD);
-        else {
-            header->setPreambleType(SMD_Sx);
-            int smdSxValues[] = { 0xE6, 0x4C, 0x7F, 0xB3 };
-            int smdNumber = std::distance(smdSxValues, std::find(smdSxValues, smdSxValues + 4, value));
-            header->setSmdNumber(smdNumber);
-            header->setFragmentNumber(0);
+        uint8_t smd = stream.readByte();
+        switch (smd) {
+            case 0xD5:
+                header->setPreambleType(SFD);
+                break;
+            case 0x07:
+                header->setPreambleType(SMD_Verify);
+                break;
+            case 0x19:
+                header->setPreambleType(SMD_Respond);
+                break;
+            default:
+                header->setPreambleType(SMD_Sx);
+                header->setSmdNumber(lookup(smdSxValues, smd));
+                break;
         }
     }
     else {
+        // an SMD_Cx preamble is one octet shorter, so the octet read above is already the
+        // SMD_Cx code; the fragment-count octet follows it
         header->setPreambleType(SMD_Cx);
-        uint8_t value = stream.readByte();
-        int smdCxValues[] = { 0x61, 0x52, 0x9E, 0x2A };
-        int smdNumber = std::distance(smdCxValues, std::find(smdCxValues, smdCxValues + 4, value));
-        header->setSmdNumber(smdNumber);
-        int fragmentNumberValues[] = { 0xE6, 0x4C, 0x7F, 0xB3 };
-        int fragmentNumber = std::distance(fragmentNumberValues, std::find(fragmentNumberValues, fragmentNumberValues + 4, value));
-        header->setFragmentNumber(fragmentNumber);
+        header->setSmdNumber(lookup(smdCxValues, value));
+        header->setFragmentNumber(lookup(fragmentNumberValues, stream.readByte()));
     }
     return header;
 }
