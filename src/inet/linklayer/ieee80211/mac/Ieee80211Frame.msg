@@ -357,7 +357,7 @@ class Ieee80211BlockAckReq extends Ieee80211TwoAddressHeader
 
 class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 {
-    chunkLength = B(38);
+    chunkLength = B(16 + 2 + 2); // header + BAR control + BAR information
 
     int tidInfo @bit(4); //  The TID_INFO subfield of the BAR Control field of the Basic BlockAckReq frame contains the TID for which a Basic BlockAck frame is requested.
 
@@ -365,7 +365,7 @@ class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
     // Control subfield, as shown in Figure 8-21. The Starting Sequence Number subfield of the Block Ack
     // Starting Sequence Control subfield contains the sequence number of the first MSDU for which this Basic
     // BlockAckReq frame is sent. The Fragment Number subfield is set to 0.
-    int fragmentNumber = 0;
+    int fragmentNumber @bit(4) = 0;
     SequenceNumberCyclic startingSequenceNumber;
 
     multiTid = 0;
@@ -374,7 +374,7 @@ class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 
 class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
 {
-    chunkLength = B(38);
+    chunkLength = B(16 + 2 + 2); // header + BAR control + BAR information
 
     int tidInfo @bit(4); // The TID_INFO subfield of the BAR Control field of the Compressed BlockAckReq frame contains the TID for which a BlockAck frame is requested.
     // The BAR Information field of the Compressed BlockAckReq frame contains the Block Ack Starting
@@ -383,7 +383,7 @@ class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
     // which this BlockAckReq frame is sent. The Fragment Number subfield of the Block Ack Starting Sequence
     // Control subfield is set to 0.
 
-    int fragmentNumber = 0;
+    int fragmentNumber @bit(4) = 0;
     SequenceNumberCyclic startingSequenceNumber;
 
     multiTid = 0;
