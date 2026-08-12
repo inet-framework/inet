@@ -30,35 +30,32 @@ int DynamicClassifier::classifyPacket(Packet *packet)
 {
     int index = PacketClassifier::classifyPacket(packet);
     auto it = classIndexToGateItMap.find(index);
-    if (it == classIndexToGateItMap.end()) {
-        auto parentModule = getParentModule();
-        int submoduleIndex = gateSize("out");
-        int origVectorSize = parentModule->getSubmoduleVectorSize(submoduleName);
-        parentModule->setSubmoduleVectorSize(submoduleName, std::max(origVectorSize, submoduleIndex + 1));
-        auto module = moduleType->create(submoduleName, parentModule, submoduleIndex);
-        auto moduleInputGate = module->gate("in");
-        auto moduleOutputGate = module->gate("out");
-        auto multiplexer = parentModule->getSubmodule("multiplexer");
-        multiplexer->setGateSize("in", multiplexer->gateSize("in") + 1);
-        auto multiplexerInputGate = multiplexer->gate("in", multiplexer->gateSize("in") - 1);
-        setGateSize("out", submoduleIndex + 1);
-        auto classifierOutputGate = gate("out", gateSize("out") - 1);
-        classifierOutputGate->connectTo(moduleInputGate);
-        outputGates.push_back(classifierOutputGate);
-        PassivePacketSinkRef consumer;
-        consumer.reference(classifierOutputGate, false);
-        consumers.push_back(consumer);
-        moduleOutputGate->connectTo(multiplexerInputGate);
-        module->finalizeParameters();
-        module->buildInside();
-        module->callInitialize();
-        classIndexToGateItMap[index] = submoduleIndex;
-        return submoduleIndex;
-    }
-    else
+    if (it != classIndexToGateItMap.end())
         return it->second;
+    auto parentModule = getParentModule();
+    int submoduleIndex = gateSize("out");
+    int origVectorSize = parentModule->getSubmoduleVectorSize(submoduleName);
+    parentModule->setSubmoduleVectorSize(submoduleName, std::max(origVectorSize, submoduleIndex + 1));
+    auto module = moduleType->create(submoduleName, parentModule, submoduleIndex);
+    auto moduleInputGate = module->gate("in");
+    auto moduleOutputGate = module->gate("out");
+    auto multiplexer = parentModule->getSubmodule("multiplexer");
+    multiplexer->setGateSize("in", multiplexer->gateSize("in") + 1);
+    auto multiplexerInputGate = multiplexer->gate("in", multiplexer->gateSize("in") - 1);
+    setGateSize("out", submoduleIndex + 1);
+    auto classifierOutputGate = gate("out", gateSize("out") - 1);
+    classifierOutputGate->connectTo(moduleInputGate);
+    outputGates.push_back(classifierOutputGate);
+    PassivePacketSinkRef consumer;
+    consumer.reference(classifierOutputGate, false);
+    consumers.push_back(consumer);
+    moduleOutputGate->connectTo(multiplexerInputGate);
+    module->finalizeParameters();
+    module->buildInside();
+    module->callInitialize();
+    classIndexToGateItMap[index] = submoduleIndex;
+    return submoduleIndex;
 }
 
 } // namespace queueing
 } // namespace inet
-
