@@ -858,7 +858,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                             errorc->cause_code = htons(error->getErrorCauseType());
                             errorc->length = htons(error->getByteLength() - 8);
                             parPtr += 4;
-                            if (check_and_cast<SctpParameter *>(error->getEncapsulatedPacket()) != nullptr) {
+                            if (error->getEncapsulatedPacket() != nullptr) {
                                 SctpParameter *encParameter = check_and_cast<SctpParameter *>(error->getEncapsulatedPacket());
                                 switch (encParameter->getParameterType()) {
                                     case ADD_IP_ADDRESS: {
@@ -2067,7 +2067,40 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 errorip->setResponseCorrelationId(ntohl(ipparam->correlation_id));
                                 const struct error_cause *errorcause;
                                 errorcause = (struct error_cause *)(((unsigned char *)asconf_ack_chunk) + sizeof(struct asconf_ack_chunk) + parptr + sizeof(struct add_ip_parameter));
-                                errorip->setErrorCauseType(htons(errorcause->cause_code));
+                                errorip->setErrorCauseType(ntohs(errorcause->cause_code));
+                                // the cause reports the parameter it refers to; keep it, the
+                                // serializer writes it back inside the cause
+                                const struct add_ip_parameter *reported;
+                                reported = (struct add_ip_parameter *)(((unsigned char *)errorcause) + sizeof(struct error_cause));
+                                uint16_t reportedType = ntohs(reported->type);
+                                if (reportedType == ADD_IP_ADDRESS || reportedType == DELETE_IP_ADDRESS || reportedType == SET_PRIMARY_ADDRESS) {
+                                    SctpParameter *reportedParam;
+                                    if (reportedType == ADD_IP_ADDRESS)
+                                        reportedParam = new SctpAddIPParameter("ADD_IP");
+                                    else if (reportedType == DELETE_IP_ADDRESS)
+                                        reportedParam = new SctpDeleteIPParameter("DELETE_IP");
+                                    else
+                                        reportedParam = new SctpSetPrimaryIPParameter("SET_PRI_IP");
+                                    reportedParam->setParameterType(reportedType);
+                                    reportedParam->setByteLength(ntohs(reported->length));
+                                    L3Address reportedAddr;
+                                    readAddressParameter(((unsigned char *)reported) + sizeof(struct add_ip_parameter), reportedAddr);
+                                    if (auto addip = dynamic_cast<SctpAddIPParameter *>(reportedParam)) {
+                                        addip->setRequestCorrelationId(ntohl(reported->correlation_id));
+                                        addip->setAddressParam(reportedAddr);
+                                    }
+                                    else if (auto deleteip = dynamic_cast<SctpDeleteIPParameter *>(reportedParam)) {
+                                        deleteip->setRequestCorrelationId(ntohl(reported->correlation_id));
+                                        deleteip->setAddressParam(reportedAddr);
+                                    }
+                                    else if (auto priip = dynamic_cast<SctpSetPrimaryIPParameter *>(reportedParam)) {
+                                        priip->setRequestCorrelationId(ntohl(reported->correlation_id));
+                                        priip->setAddressParam(reportedAddr);
+                                    }
+                                    errorip->encapsulate(reportedParam);
+                                }
+                                // after encapsulate(), which adds the encapsulated length
+                                errorip->setByteLength(paramLength);
                                 chunk->addAsconfResponse(errorip);
                                 break;
                             }
@@ -2141,11 +2174,11 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 instrrst = new SctpIncomingSsnResetRequestParameter("IN_STR_RST");
                                 instrrst->setParameterType(INCOMING_RESET_REQUEST_PARAMETER);
                                 instrrst->setSrReqSn(ntohl(inrr->srReqSn)); // Stream Reset Request Sequence Number
-                                chunklen += SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH;
+                                chunklen += SCTP_INCOMING_RESET_REQUEST_PARAMETER_LENGTH;
                                 len = SCTP_INCOMING_RESET_REQUEST_PARAMETER_LENGTH;
                                 sncounter = 0;
                                 while (ntohs(inrr->length) > len) {
-                                    snnumbers = (int)*(chunks + chunkPtr + sizeof(struct stream_reset_chunk) + parptr + SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH + sncounter * 2);
+                                    snnumbers = (int)*(chunks + chunkPtr + sizeof(struct stream_reset_chunk) + parptr + SCTP_INCOMING_RESET_REQUEST_PARAMETER_LENGTH + sncounter * 2);
                                     instrrst->setStreamNumbersArraySize(++sncounter);
                                     instrrst->setStreamNumbers(sncounter - 1, snnumbers);
                                     chunklen += 2;
@@ -2164,6 +2197,21 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                                 ssnstrrst->setSrReqSn(ntohl(ssnrr->srReqSn));
                                 chunklen += SCTP_SSN_TSN_RESET_REQUEST_PARAMETER_LENGTH;
                                 chunk->addParameter(ssnstrrst);
+                                break;
+                            }
+
+                            case ADD_INCOMING_STREAMS_REQUEST_PARAMETER:
+                            case ADD_OUTGOING_STREAMS_REQUEST_PARAMETER: {
+                                const struct add_streams_request_parameter *addsp;
+                                addsp = (struct add_streams_request_parameter *)(((unsigned char *)stream_reset_chunk) + sizeof(struct stream_reset_chunk) + parptr);
+                                SctpAddStreamsRequestParameter *addstreams;
+                                addstreams = new SctpAddStreamsRequestParameter("ADD_STREAMS");
+                                addstreams->setParameterType(paramType);
+                                addstreams->setSrReqSn(ntohl(addsp->srReqSn));
+                                addstreams->setNumberOfStreams(ntohs(addsp->numberOfStreams));
+                                addstreams->setByteLength(SCTP_ADD_STREAMS_REQUEST_PARAMETER_LENGTH);
+                                chunklen += SCTP_ADD_STREAMS_REQUEST_PARAMETER_LENGTH;
+                                chunk->addParameter(addstreams);
                                 break;
                             }
 
