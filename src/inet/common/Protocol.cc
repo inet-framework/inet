@@ -183,4 +183,6 @@ const Protocol Protocol::wiseRoute("wiseroute", "WiseRoute"); // WiseRoute Netwo
 const Protocol Protocol::gptp("gptp", "gPTP");
 const Protocol Protocol::ieee8021rTag("ieee8021rtag", "IEEE 802.1R TAG");
 const Protocol Protocol::dhcp("dhcp", "DHCP");
+const Protocol Protocol::rtp("rtp", "RTP");
+const Protocol Protocol::rtcp("rtcp", "RTCP");
 } // namespace inet
