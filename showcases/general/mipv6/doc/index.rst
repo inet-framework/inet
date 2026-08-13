@@ -17,7 +17,7 @@ a foreign one and back, while a peer keeps pinging it at its stable address.
 Without Mobile IPv6 the session dies; with it, the traffic keeps flowing —
 first through a tunnel, then, with route optimization, on the direct path.
 
-| Verified with INET version: ``4.6``
+| Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/general/mipv6 <https://github.com/inet-framework/inet/tree/master/showcases/general/mipv6>`__
 
 About Mobile IPv6
@@ -68,7 +68,9 @@ When the mobile node (MN) walks out of its home network into a foreign one:
    home agent (HA): "my home address is now reachable at this care-of
    address, for this lifetime." The home agent confirms with a *Binding
    Acknowledgement (BAck)*. No security handshake is needed here — the mobile
-   node and its home agent trust each other by prior arrangement.
+   node and its home agent trust each other by prior arrangement (the standard
+   protects this signaling with pre-configured IPsec keys, so nothing needs to
+   be established on the fly).
 5. **Delivery resumes** — the home agent now intercepts every packet addressed
    to the home address and forwards it to the care-of address inside an
    IPv6-in-IPv6 tunnel. The mobile node sends its own traffic back through the
@@ -119,11 +121,12 @@ no routing information at all:
   authenticates the *Binding Update* to the correspondent node.
 
 Note the built-in ordering: the Home Test Init needs the home-agent tunnel, so
-return routability cannot even start until the home registration is complete.
-The tokens are deliberately short-lived (a binding at a correspondent node
-lasts at most about seven minutes), so long sessions re-run the procedure
-periodically; a correspondent can also prompt a refresh with a *Binding
-Refresh Request*.
+the home half of the procedure cannot start before the home registration is
+complete — the Care-of Test half is free to run immediately. The tokens are
+deliberately short-lived (three and a half minutes; the binding they authorize
+at a correspondent node lasts at most seven), so long sessions re-run the
+procedure periodically; a correspondent can also prompt a refresh with a
+*Binding Refresh Request*.
 
 After route optimization, packets carry both addresses: the care-of address
 where routers look, and the home address in an extension header — a *type 2
@@ -194,11 +197,12 @@ Configuration notes:
 - ``useRouteOptimization`` (on the mobile node's ``mipv6`` submodule, default
   ``true``) selects between bidirectional tunneling and route optimization —
   the same scenario runs both ways with this one flag.
-- Movement detection works out of the box with realistic Router Advertisement
-  intervals: on every layer-2 association the IPv6 neighbour discovery module
-  immediately sends a Router Solicitation (its ``detectL2Movement``
-  parameter, default ``true``), so the mobile node does not wait for the next
-  periodic advertisement.
+- Movement detection does not depend on frequent Router Advertisements: on
+  every layer-2 association the IPv6 neighbour discovery module immediately
+  sends a Router Solicitation (its ``detectL2Movement`` parameter, default
+  ``true``), so the mobile node never waits for a periodic advertisement.
+  This scenario advertises every 3–7 s; even INET's 200–600 s defaults would
+  detect the move just as fast.
 - The mobile node autoconfigures its addresses, so the address configurator
   must leave hosts alone: the network sets ``assignAddressesToHosts = false``
   on the ``Ipv6NetworkConfigurator``, which then assigns addresses and routes
@@ -211,23 +215,33 @@ it is:
 
 - The IPsec protection that RFC 3775 mandates between mobile node and home
   agent is not modeled (standard practice in simulation).
-- The return-routability *message exchange* — sequence, paths, sizes, timing —
-  is faithful, but its cryptographic content is schematic: tokens are
-  computed without nonces and are not expired.
+- The return-routability *message exchange* — sequence, paths, sizes, timing,
+  and the mobile node's periodic token refresh — is faithful, but the
+  cryptographic content is schematic: the tokens are constants rather than
+  keyed, nonce-indexed values, and the correspondent never invalidates them.
 - The home agent intercepts traffic by virtue of being the home network's
   router; answering Neighbor Solicitations on behalf of the absent mobile
   node (proxy Neighbor Discovery) is not implemented. In this scenario the
   distinction is invisible — no other host lives on the home link — but a
   host on the home link could not reach an away mobile node.
-- For about a second after a handover, replies the mobile node sends from its
-  home address are dropped by its own topological-correctness check instead
-  of being routed into the reverse tunnel; the tunnel picks them up once the
-  mobility state settles with the next Binding Update. The effect is visible
-  in the results as one or two extra lost pings per handover.
-- Routers in this network have ICMPv6 Redirect generation disabled. The home
-  agent forwards tunneled packets back out of the interface they arrived on —
-  for a real home agent RFC 6275 suppresses redirects for intercepted
-  traffic; here the ``sendRedirects`` flag stands in for that rule.
+- The home agent delays its first Binding Acknowledgement by one second — a
+  stand-in for the duplicate address detection that the standard requires it
+  to perform on the home address before answering (a real registration waits
+  comparably). Until the acknowledgement lands, the mobile node's reverse
+  tunnel is not up, and replies it sends from its home address are dropped by
+  its own topological-correctness check instead of being queued or tunneled:
+  one or two lost pings per handover in the results. A visible side effect:
+  the mobile node's one-second retransmission timer fires just before the
+  delayed acknowledgement arrives, so every registration in this scenario
+  takes *two* Binding Updates — the acknowledgement that counts is the second
+  (which is why the binding cache shown later records sequence number 2).
+- Routers in this network have ICMPv6 Redirect generation disabled. A real
+  home agent captures its mobile nodes' traffic at the link layer (proxy
+  Neighbor Discovery), so intercepted packets never take the router-forwarding
+  path that generates Redirects. INET's home agent intercepts while
+  *forwarding* — back out of the interface packets arrived on, which is
+  exactly the Redirect trigger — so the ``sendRedirects`` flag stands in for
+  the difference.
 
 The Model
 ---------
@@ -281,8 +295,10 @@ hop adds 1–2 ms of transmission time on top):
 - **route-optimized**: 2 × (1 + 8) = 18 ms
 
 Note that the route-optimized value is below anything a path through the home
-agent could achieve (26 ms of propagation at minimum) — measuring it is proof
-by arithmetic that the home agent is out of the loop.
+agent could achieve: even the cheapest conceivable detour — out through the
+tunnel (1 + 5 + 5 + 8 = 19 ms) and straight back (8 + 1 = 9 ms) — costs 28 ms
+in propagation alone. Measuring 20 ms is proof by arithmetic that the home
+agent is out of the loop.
 
 The mobile node's movement has three acts (``movement.xml``): it dwells at
 home for 15 s, dashes to the foreign network in 3 s, dwells there for 30 s,
@@ -302,9 +318,10 @@ address):
    :language: ini
 
 The mobile node itself is a parametric submodule, so one configuration can
-swap it for a plain host. The three configurations below differ *only* in the
-mobile node's type and one route-optimization flag; everything else — network,
-movement, traffic — is identical.
+swap it for a plain host. The three configurations below differ only in the
+mobile node's node type and its route-optimization setting (plus the format
+of its status label); everything else — network, movement, traffic — is
+identical.
 
 WithoutMipv6 configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -314,8 +331,9 @@ WithoutMipv6 configuration
    :end-before: [Config BidirectionalTunneling]
    :language: ini
 
-The mobile node is an ordinary IPv6 host (``StandardHost6`` with a wireless
-interface). It associates with the foreign access point and SLAAC gives it a
+The mobile node is an ordinary IPv6 host — ``StandardHost6``, which has no
+radio of its own, so the configuration adds the one wireless interface. It
+associates with the foreign access point and SLAAC gives it a
 perfectly good new address — but nobody sends anything to that address. The
 pings keep targeting the old (home) address, which now leads to a network
 where nobody answers Neighbor Solicitations for it. Every ping from the
@@ -380,9 +398,10 @@ handover then separates them:
 - **without Mobile IPv6** (blue): no replies at all while away — a 37.5 s
   hole — resuming only when the node re-enters home coverage on the way back.
 - **bidirectional tunneling** (orange): after a ~4.5 s outage (scanning,
-  association, movement detection, duplicate address detection, registration,
-  and the settling described in the implementation notes), replies resume on
-  the 40 ms plateau and stay there.
+  association, movement detection, duplicate address detection on the new
+  link, and the registration with its one-second acknowledgement delay from
+  the implementation notes), replies resume on the 40 ms plateau and stay
+  there.
 - **route optimization** (green): the same outage, **exactly one reply at
   40 ms** — the single ping that was answered through the tunnel before route
   optimization completed — and then the direct path at 20 ms.
@@ -394,10 +413,9 @@ home.
 
 Details worth noticing rather than worrying about: the very first reply
 arrives only at t≈5.5 s because both hosts spend the first seconds on SLAAC
-and neighbor resolution after boot; the lone 42 ms dot at t≈27 s is a single
-802.11 retransmission; and the two slightly-elevated dots just after t=56 s
-are the first replies after the return, delayed by neighbor-cache
-re-convergence.
+and neighbor resolution after boot; and the few isolated elevated dots — the
+42.7 ms one at t≈26.5 s, and one per Mobile IPv6 run at t≈58 s — are single
+802.11 retransmissions, each worth a couple of extra milliseconds.
 
 The handover, live
 ~~~~~~~~~~~~~~~~~~
@@ -422,7 +440,8 @@ address the moment SLAAC completes in the foreign network.
    seed:     default (seed-set=1)
    shows:    home path arrow -> dash -> handover -> one tunneled dog-leg ->
              direct path; status + address labels updating live
-   anchors:  registration BU at t~20.04 (BAck ~20.07); first tunneled reply
+   anchors:  registration BU at t~20.04; the HA's BAck is delayed ~1s (home-
+             link DAD stand-in), binding active ~21.09; first tunneled reply
              ~21.54; RO complete (BU to CN) ~21.58; direct pings from 22.0.
              If these move, timing/params changed -> re-derive window.
    window:   express to 13.2s -> step 1 event -> record to 23.5s. No
@@ -443,7 +462,9 @@ The signaling, message by message
 The sequence chart below shows the same handover on the eventlog level,
 filtered to the mobility signaling and the pings (all 802.11 management and
 neighbor discovery traffic is hidden). Time flows left to right on a
-nonlinear axis; the six lifelines are the six network nodes.
+nonlinear axis, with tick labels showing offsets from the window start
+(t = 20.02 s); the six lifelines are six of the network's seven nodes —
+``apHome`` plays no part in this window and is omitted.
 
 .. figure:: media/seqchart.png
    :align: center
@@ -472,23 +493,33 @@ nonlinear axis; the six lifelines are the six network nodes.
 
 Reading it left to right:
 
-- **Registration** (t+20 ms): the *Binding Update* climbs from the mobile
-  node through the foreign network to the backbone and dips down to the home
-  agent; the *Binding Acknowledgement* comes back the same way.
+- **Registration, in two acts**: at the left edge, the first *Binding Update*
+  descends from the mobile node (top lifeline) through the foreign network to
+  the home agent. Its acknowledgement is nowhere near it: the home agent
+  holds the *Binding Acknowledgement* back for one second (the
+  duplicate-address-detection stand-in from the implementation notes), so the
+  mobile node's retransmission timer fires first — the *second* Binding
+  Update — and the two *Binding Acknowledgement* arrows appear only after
+  it, between ``ping40`` and ``ping41``. The first acknowledgement is
+  discarded for its stale sequence number; the second activates the binding.
 - **Tunneled pings, dropped replies**: ``ping39`` and ``ping40`` arrive via
   the home-agent dog-leg — every early arrow visits the ``homeAgent``
-  lifeline — but no reply comes back: these are the replies the mobile node
-  still discards while its mobility state settles (see the implementation
-  notes). ``ping41`` is the first with a reply, still through the tunnel.
+  lifeline — but no reply comes back: until the binding is active, the
+  mobile node discards its own home-address-sourced replies (the same
+  implementation note). ``ping41`` is the first with a reply, still through
+  the tunnel.
 - **Return routability**: the *Care-of Test Init (CoTI)* and *Care-of Test
-  (CoT)* travel directly between mobile node and correspondent — a full
-  second *before* the *Home Test Init (HoTI)*, which cannot leave until the
-  registration has opened the tunnel it must travel through. The *Home Test
-  (HoT)* returns via the home agent.
+  (CoT)* travel directly between mobile node and correspondent right after
+  the first tunneled ping arrives — a full second *before* the *Home Test
+  Init (HoTI)* manages to leave. The Home Test Init needs the reverse tunnel:
+  its first copy is lost along with the early replies, and it is its
+  retransmission that goes through. The *Home Test (HoT)* returns via the
+  home agent.
 - **Route optimization completes**: the *Binding Update* goes straight to the
   correspondent node, is acknowledged, and from ``ping42`` onward the arrows
-  run directly between correspondent and mobile node — **the** ``homeAgent``
-  **lifeline goes quiet**, which is route optimization in one glance.
+  run directly between correspondent and mobile node — no arrow bends at the
+  ``homeAgent`` lifeline anymore (later arrows merely cross its axis on the
+  way to the correspondent), which is route optimization in one glance.
 
 Inside the packets
 ~~~~~~~~~~~~~~~~~~
@@ -521,8 +552,11 @@ bytes of overhead in all:
 
 The same ping in the route-optimized mode, captured at the correspondent
 node: **one** IPv6 header, addressed to the care-of address directly, followed
-by a *type 2 routing header* (``routingType = 2, segmentsLeft = 1``) that
-carries the home address — 24 bytes instead of 40, and no detour:
+by a *type 2 routing header* (``routingType = 2, segmentsLeft = 1``) whose
+address field — one level deeper than the crop shows — carries the home
+address: 24 bytes instead of 40, and no detour. (Replies in the other
+direction carry the home address in a *Home Address destination option*
+instead; not shown.)
 
 .. figure:: media/ropacket.png
    :width: 100%
@@ -543,8 +577,9 @@ carries the home address — 24 bytes instead of 40, and no detour:
    stamp:    captured 2026-08, INET 4.6
 
 Meanwhile the home agent's binding cache holds exactly one entry — the
-mapping this whole protocol exists to maintain (the sequence number 2 records
-that the registration Binding Update was retransmitted once):
+mapping this whole protocol exists to maintain. The sequence number 2 is the
+two-act registration again: the acknowledgement that activated this binding
+answered the retransmitted, second Binding Update:
 
 .. figure:: media/bindingcache.png
    :align: center
@@ -583,8 +618,8 @@ building.
    seed:     default (seed-set=1)
    shows:    direct path -> dash home -> re-association -> lifetime-0 BUs
              (~52.8s) -> home path again; labels revert
-   anchors:  de-registration BUs at t~52.82 ("Deregistered binding" at HA and
-             CN ~52.824/52.832); first home-path reply ~53.01
+   anchors:  de-registration BUs (lifetime 0) to HA and CN at t~52.49, BAcks
+             ~52.50; first home-path reply ~53.01
    window:   express to 47.5s -> step 1 event -> record to 56s
    anim:     same as handover.mp4 (playback_speed=1, min_animation_speed=0.1,
              built-in animation off via private .qtenvrc)
@@ -613,8 +648,8 @@ execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.6 --init -w inet-workspace --install --build-modes=release --chdir \
-       -c 'cd inet-4.6.*/showcases/general/mipv6 && inet'
+    $ opp_env run inet-4.7 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.7.*/showcases/general/mipv6 && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -625,7 +660,7 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.6
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.7
     $ cd inet-workspace
     $ opp_env shell
 

@@ -238,14 +238,20 @@ Measured vs predicted (link-delay arithmetic; HA-BB 5ms, FR-BB 8ms, CN-BB 1ms):
   re-entering home coverage; 75 vs 138/136 replies.
 - outage out: 17.01→21.54s (~4.5s); back: ~50→53s.
 
-Protocol-event timeline (RouteOptimization, verbose re-run):
-- 20.04 BU#1 to HA (registration; right after CoA DAD) — unanswered
-- 21.04 BU#2 retransmission (+1.0s = RFC initial retransmission interval) — BAck
-- 20.55 CoTI at CN (direct path, needs no tunnel); HoTI at CN 21.56+21.57
-  (duplicate = retransmission; HoTI needed the tunnel ⇒ arrives after BAck)
-- 21.578 BU to CN → step-down 40.4→20.2ms between t=21.54 and t=22.02 replies
-- Return: 52.82 lifetime-0 BUs to HA AND CN; "Deregistered binding" logged at
-  both (52.824, 52.832); baseline restored from t=53.01
+Protocol-event timeline (RouteOptimization; CORRECTED by the round-1 pro
+review, which re-ran with an instrumented elog):
+- 20.0437 BU#1 to HA. The HA DELAYS its BAck by a hardcoded 1s (DAD stand-in,
+  Mipv6.cc:856-861). MN's 1s retransmission timer fires first: BU#2 at
+  21.0437. BAck#1 (sent 21.057, arrives 21.071) is REJECTED for stale seq
+  (Mipv6.cc:1253-1257); BAck#2 (21.073→21.087) activates the binding. Hence
+  "sequence 2" in the binding-cache figure.
+- 20.5385 CoTI leaves (direct, no tunnel needed); the FIRST HoTI leaves at the
+  same moment and is DROPPED by the Ipv6.cc:588 HoA guard (tunnel not up);
+  its 1s retransmission (21.5385) goes through via ip6tun0 → HoT back.
+- ping39/ping40 replies (20.54, 21.02) dropped by the same guard = gap #7.
+- 21.578 BU to CN → step-down 40.4→20.2ms between t=21.54 and t=22.02 replies.
+- Return (current build, post-redirect-fix): lifetime-0 BUs to HA and CN at
+  52.4948, BAcks 52.4955/52.5026; baseline restored from t=53.014.
 
 Figure-explanation notes (things visible in seqchart that MUST be explained or
 filtered): BU initial retransmission (1s), duplicate HoTI, CoTI-before-HoTI
@@ -291,5 +297,17 @@ All under doc/media/. Qtenv captures: release build, seed-set=1 (deterministic).
 
 - Phase 0 discovery: done. Phase 1 shared understanding: CONVERGED (this file).
 - Phase 1.5 enrichment: done (see findings).
-- Phase 1.75 feasibility audit: done — verdict "Suitable as-is" AWAITING USER
-  DECISION; no showcase files until user accepts.
+- Phase 1.75 feasibility audit: done — verdict "Suitable as-is", user ACCEPTED
+  ("accept and build") + gaps report written (MIPV6_IMPLEMENTATION_GAPS.md).
+- Phase 2 build: done (commits b55307ee23, ba7c3656c1, 76b802a7ba).
+  2.6 all configs green; 2.7 gate passed (twice — re-verified after the
+  sendRedirects fix). All 9 artifacts captured. Doc + toctree + static checks
+  done (literalinclude slices verified mechanically).
+- Phase 3 reviews: round 1 DONE (both on claude-fable-5). review-as-user:
+  0 High, 5 Medium, 11 Low. review-as-pro: 4 Error, 1 Missing, 8 Minor —
+  headline: BAck is 1s-DELAYED by the HA (DAD stand-in) and BAck#1 rejected
+  on seq (my earlier timeline was wrong); false RFC-6275-redirects claim;
+  4.6→4.7 version impossibility; elevated-dots sentence wrong. ALL
+  Errors+Missing+Mediums+actionable Minors/Lows applied in one pass
+  (doc, gaps report items 1+7, plan timeline). Round 2 next: fresh blind
+  reviewers on the revised doc.

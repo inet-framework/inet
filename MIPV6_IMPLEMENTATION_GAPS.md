@@ -34,6 +34,13 @@ address instead of the delay hack. Moderate effort; the `sendUnsolicitedNa()`
 helper and the RFC-4861 proxy passages quoted around
 `Ipv6NeighbourDiscovery.cc:2000–2111` are the natural attachment points.
 
+**Side effect worth knowing:** because INET's home agent intercepts on the
+router-*forwarding* path instead of at the link layer, tunneled traffic goes back
+out of the interface it arrived on and trips the RFC 4861 §8.2 ICMPv6 Redirect
+rule — a compliant (proxy-ND) home agent never takes that path, so the rule never
+fires for it. Until this gap is fixed, scenarios must disable `Ipv6.sendRedirects`
+on the home agent (the showcase does).
+
 ## 2. Return-home address reclaim via gratuitous NA (partial)
 
 **RFC 6275 §11.5.5:** a returning mobile node reclaims its home address by sending
@@ -107,22 +114,35 @@ completeness; not proposed as work.
 optimization not yet completed, or not used), packets it sends to that
 correspondent must be reverse-tunneled through the home agent.
 
-**INET today:** for roughly a second after the home registration (until the next
-Binding Update refresh settles the mobility/tunnel state), packets sourced from the
-home address are not steered into the reverse tunnel; they fall through to the
-last-resort topological-correctness guard in `Ipv6.cc:588`
-("Using HoA instead of CoA... dropping datagram") and are silently discarded.
+**INET today:** the window is opened by the home agent itself: it delays its
+first Binding Acknowledgement by a hardcoded 1 s (`Mipv6.cc:856–861`,
+`sendTime = existingBinding ? 0 : 1`) as a stand-in for the DAD it should
+perform on the home address (`// TODO solve the HA DAD problem in a different
+way`, `Mipv6.cc:645`). Until the acknowledgement lands, the mobile node's
+reverse tunnel is not up, and packets sourced from the home address — data
+replies *and the first HoTI* — fall through to the last-resort
+topological-correctness guard in `Ipv6.cc:588` ("Using HoA instead of CoA...
+dropping datagram") and are silently discarded instead of being queued or
+tunneled. A knock-on: the mobile node's 1 s retransmission timer fires just
+before the delayed acknowledgement arrives, so every fresh registration takes
+two Binding Updates, and the first acknowledgement is then rejected for its
+stale sequence number (`Mipv6.cc:1253–1257`).
 
-**Concrete failure scenario (observed in the showcase runs):** after the handover
-completes at t≈20.07, the correspondent's pings arrive tunneled and reach the
-application, but the *replies* to the first two pings (t=20.54, t=21.02) are
-dropped at the mobile node; the reverse tunnel only carries replies from t≈21.5.
-Costs ~1 s of extra outage in every handover, visible in the RTT chart.
+**Concrete failure scenario (observed in the showcase runs):** the
+correspondent's pings arrive tunneled from t≈20.54 and reach the application,
+but the replies to the first two (t=20.54, t=21.02) and the first Home Test
+Init (t=20.54) are dropped at the mobile node; the reverse tunnel carries
+traffic only from t≈21.5, after the *second* Binding Update's acknowledgement.
+Costs ~1 s of extra outage per handover, visible in the RTT chart — though
+note a compliant registration also waits ~1 s for real DAD, so only the
+*dropping* (vs. queueing/tunneling), not the delay itself, deviates from the
+RFC.
 
-**Fix sketch:** in the mobile node's outbound path, packets with a home-address
-source and no binding at the destination should be routed into the HA tunnel
-(the check exists at the wrong layer today); the guard at `Ipv6.cc:588` should
-then only ever fire for genuinely unroutable leftovers.
+**Fix sketch:** two independent halves. (a) Home agent: perform real DAD for
+the home address instead of the fixed BAck delay (folds into gap 1's proxy-ND
+work). (b) Mobile node: packets with a home-address source and no usable
+binding should be held or routed into the HA tunnel once it exists — the
+`Ipv6.cc:588` guard should only ever fire for genuinely unroutable leftovers.
 
 ## 8. Minor bookkeeping (cleanups)
 
