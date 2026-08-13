@@ -60,9 +60,19 @@ int PacketClassifierBase::callClassifyPacket(Packet *packet) const
 {
     // KLUDGE
     int index = const_cast<PacketClassifierBase *>(this)->classifyPacket(packet);
-    if (index < 0 || static_cast<unsigned int>(index) >= outputGates.size())
+    if (index < -1 || index >= (int)outputGates.size())
         throw cRuntimeError("Packet is classified to invalid output gate: %d", index);
     return index;
+}
+
+int PacketClassifierBase::createGateForPacket(Packet *packet)
+{
+    throw cRuntimeError("Packet cannot be classified to any output gate");
+}
+
+bool PacketClassifierBase::canCreateGateForPacket(Packet *packet) const
+{
+    return false;
 }
 
 void PacketClassifierBase::checkPacketStreaming(Packet *packet)
@@ -76,6 +86,8 @@ void PacketClassifierBase::startPacketStreaming(Packet *packet)
     EV_INFO << "Classifying packet" << EV_FIELD(packet) << EV_ENDL;
     inProgressStreamId = packet->getTreeId();
     inProgressGateIndex = callClassifyPacket(packet);
+    if (inProgressGateIndex == -1)
+        inProgressGateIndex = createGateForPacket(packet);
 }
 
 void PacketClassifierBase::endPacketStreaming(Packet *packet)
@@ -97,6 +109,8 @@ bool PacketClassifierBase::canPushSomePacket(const cGate *gate) const
 bool PacketClassifierBase::canPushPacket(Packet *packet, const cGate *gate) const
 {
     int index = callClassifyPacket(packet);
+    if (index == -1)
+        return canCreateGateForPacket(packet);
     return consumers[index].canPushPacket(packet);
 }
 
@@ -107,6 +121,8 @@ void PacketClassifierBase::pushPacket(Packet *packet, const cGate *gate)
     checkPacketStreaming(nullptr);
     EV_INFO << "Classifying packet" << EV_FIELD(packet) << EV_ENDL;
     int index = callClassifyPacket(packet);
+    if (index == -1)
+        index = createGateForPacket(packet);
     handlePacketProcessed(packet);
     emit(packetPushedSignal, packet);
     pushOrSendPacket(packet, outputGates[index], consumers[index]);
@@ -219,6 +235,8 @@ void PacketClassifierBase::handleCanPullPacketChanged(const cGate *gate)
     auto packet = provider.canPullPacket();
     if (packet != nullptr) {
         int index = callClassifyPacket(packet);
+        if (index == -1)
+            return; // the packet routes to no existing gate, so there is no collector to notify
         auto collector = collectors[index];
         if (collector != nullptr)
             collector.handleCanPullPacketChanged();

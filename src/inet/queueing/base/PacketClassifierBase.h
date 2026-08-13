@@ -43,8 +43,32 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public Transpa
     virtual void mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f) override;
 
     virtual size_t getOutputGateIndex(size_t i) const { return reverseOrder ? outputGates.size() - i - 1 : i; }
+
+    /**
+     * Returns the index of the output gate the packet is classified to, or -1
+     * if no existing output gate suits the packet. Classification is a query
+     * and must be free of side effects: the capacity checks (canPushPacket(),
+     * canPullPacket()) classify the same packet as its eventual delivery, and
+     * the pull path classifies it more than once.
+     */
     virtual int classifyPacket(Packet *packet) = 0;
     virtual int callClassifyPacket(Packet *packet) const;
+
+    /**
+     * Called when a packet being pushed is classified to no existing output
+     * gate. This is where side effects of taking such a packet belong: a
+     * classifier that extends itself on demand creates the new output gate
+     * here and returns its index. Called from packet delivery only, never
+     * from a query. The default refuses the packet with an error.
+     */
+    virtual int createGateForPacket(Packet *packet);
+
+    /**
+     * Returns true if createGateForPacket() would provide an output gate for
+     * the packet: the query pair of createGateForPacket(), consulted by
+     * canPushPacket() when classifyPacket() finds no gate.
+     */
+    virtual bool canCreateGateForPacket(Packet *packet) const;
 
     virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
     virtual void startPacketStreaming(Packet *packet);
