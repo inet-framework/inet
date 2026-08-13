@@ -1017,9 +1017,12 @@ void Mrp::setupContinuityCheck(int ringPort)
         sequenceCCM2++;
     }
     ccm->setEndpointIdentifier(portData->getCfmEndpointID());
-    auto name = portData->getCfmName();
-    ccm->setMessageName(name.c_str());
+    // the port's name identifies the maintenance association; there is no maintenance
+    // domain name to go with it, which the format octet of an absent name says
+    ccm->setMaName(portData->getCfmName().c_str());
     auto packet = new Packet("ContinuityCheck", ccm);
+    // the TLV that closes the message: a TLV of its own, not part of the header
+    packet->insertAtBack(makeShared<CfmEndTlv>());
     sendCCM(ringPort, packet);
 }
 

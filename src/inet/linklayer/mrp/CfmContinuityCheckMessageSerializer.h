@@ -22,6 +22,18 @@ public:
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 };
 
+/**
+ * Converts between CfmTlvBase and the binary (network byte order) TLVs of a CFM PDU.
+ * Deserializing yields the TLV the type octet names.
+ */
+class INET_API CfmTlvSerializer : public FieldsChunkSerializer
+{
+public:
+    using FieldsChunkSerializer::FieldsChunkSerializer;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+};
+
 } // namespace inet
 
 #endif
