@@ -143,7 +143,10 @@ tunneling hides it behind the home agent.
 When the mobile node returns home, it de-registers: a Binding Update with
 lifetime zero deletes the binding at the home agent and at every correspondent
 node, the tunnel disappears, and the home agent stops answering for an address
-whose owner is back. Everything collapses to plain IPv6.
+whose owner is back. The mobile node then announces its return on the home
+link with an unsolicited Neighbor Advertisement, so its neighbors switch
+their caches back to it immediately instead of waiting to re-resolve the
+address. Everything collapses to plain IPv6.
 
 A final property worth noticing: only the mobile node, its home agent, and
 (optionally) the correspondent nodes know that mobility is happening. The
@@ -190,7 +193,7 @@ image:
              margin=5 on Mipv6Showcase.mobileNode.ipv6; was 968x615. Known
              blemish: routingTable status text overlaps configurator label
              (the module's own layout).
-   stamp:    captured 2026-08, INET 4.6
+   stamp:    captured 2026-08, INET 4.7
 
 Configuration notes:
 
@@ -229,19 +232,25 @@ it is:
   to perform on the home address before answering (a real registration waits
   comparably). Until the acknowledgement lands, the mobile node's reverse
   tunnel is not up, and replies it sends from its home address are dropped by
-  its own topological-correctness check instead of being queued or tunneled:
-  one or two lost pings per handover in the results. A visible side effect:
-  the mobile node's one-second retransmission timer fires just before the
-  delayed acknowledgement arrives, so every registration in this scenario
-  takes *two* Binding Updates — the acknowledgement that counts is the second
-  (which is why the binding cache shown later records sequence number 2).
-- Routers in this network have ICMPv6 Redirect generation disabled. A real
-  home agent captures its mobile nodes' traffic at the link layer (proxy
-  Neighbor Discovery), so intercepted packets never take the router-forwarding
-  path that generates Redirects. INET's home agent intercepts while
-  *forwarding* — back out of the interface packets arrived on, which is
-  exactly the Redirect trigger — so the ``sendRedirects`` flag stands in for
-  the difference.
+  its own topological-correctness check — the node refuses to emit a packet
+  whose home-address source would look spoofed outside the home network, its
+  private version of the ingress filtering discussed earlier — instead of
+  being queued or tunneled: one or two lost pings per handover in the
+  results. A visible side effect: the mobile node's one-second retransmission
+  timer fires just before the delayed acknowledgement arrives, so the home
+  registration in this scenario always takes *two* Binding Updates (the later
+  correspondent registration completes with one) — and the acknowledgement
+  that counts is the second, which is why the binding cache shown later
+  records sequence number 2.
+- Routers in this network have ICMPv6 Redirect generation disabled
+  (``sendRedirects = false``). Traffic intercepted *toward* the mobile node
+  never triggers the rule — it is steered into the tunnel before the
+  forwarding check. The trigger is the way back: after decapsulating a
+  reverse-tunneled reply, the home agent forwards the inner packet out of the
+  very interface the tunneled packet arrived on — the textbook Redirect
+  condition — and would advise the mobile node's home address, uselessly, on
+  every reply. A real stack attributes decapsulated packets to the tunnel
+  interface instead; the flag stands in for that difference.
 
 The Model
 ---------
@@ -268,12 +277,14 @@ router:
              get_canvas_image module_rectangle margin=5; was 844x722. A route
              visualizer arrow may still be fading at some capture times;
              capture at ~12.2s (mid ping interval) for a clean shot.
-   stamp:    captured 2026-08, INET 4.6
+   stamp:    captured 2026-08, INET 4.7
 
 The status text above the mobile node is live: it shows the associated
 SSID and the mobility state (at home / away / route-optimized), and the green
 label on the right is its current wireless address. Both update as the
-simulation runs.
+simulation runs. Note that the foreign network's router is a plain
+``Router6`` — the visited network needs no Mobile IPv6 support at all, just
+as promised above.
 
 The WAN link delays are the scenario's one deliberate design choice: 5 ms
 between home agent and backbone, 8 ms between foreign router and backbone,
@@ -286,8 +297,9 @@ time — the sum of the link delays along its path:
    :end-at: correspondentNode.ethg
    :language: ned
 
-Predicted round-trip times, counting propagation only (the 2 Mbps wireless
-hop adds 1–2 ms of transmission time on top):
+Predicted round-trip times, counting propagation only (the access LANs'
+0.1 µs is negligible, and the 2 Mbps wireless hop adds 1–2 ms of
+transmission time on top):
 
 - **at home**: 2 × (1 + 5) = 12 ms
 - **tunneled**: 2 × (1 + 5) + 2 × (5 + 8) = 38 ms — every packet crosses the
@@ -389,11 +401,11 @@ whole story in one chart:
              if a level moved, the NED delays or the wifi bitrate changed.
    export:   opp_charttool imageexport Mipv6Showcase.anf -n "Ping round-trip
              time" -f png --dpi 150 -d doc/media   (8x6in -> 1200x900)
-   stamp:    captured 2026-08, INET 4.6
+   stamp:    captured 2026-08, INET 4.7
 
 **Before the move (up to t=15 s) the three runs are identical** — the curves
-coincide exactly at the 14 ms baseline, so only the top one is visible. The
-handover then separates them:
+coincide exactly at the 14 ms baseline, so only the last-drawn series (green)
+is visible. The handover then separates them:
 
 - **without Mobile IPv6** (blue): no replies at all while away — a 37.5 s
   hole — resuming only when the node re-enters home coverage on the way back.
@@ -413,9 +425,13 @@ home.
 
 Details worth noticing rather than worrying about: the very first reply
 arrives only at t≈5.5 s because both hosts spend the first seconds on SLAAC
-and neighbor resolution after boot; and the few isolated elevated dots — the
+and neighbor resolution after boot; the few isolated elevated dots — the
 42.7 ms one at t≈26.5 s, and one per Mobile IPv6 run at t≈58 s — are single
-802.11 retransmissions, each worth a couple of extra milliseconds.
+802.11 retransmissions, each worth a couple of extra milliseconds; and after
+the return, the Mobile IPv6 runs resume 1.5 s earlier than the plain host
+(t=53.0 vs t=54.5) — de-registration ends with that unsolicited Neighbor
+Advertisement announcing the return, while the plain host is only
+re-discovered when the router next resolves its address.
 
 The handover, live
 ~~~~~~~~~~~~~~~~~~
@@ -454,7 +470,7 @@ address the moment SLAAC completes in the foreign network.
    capture:  fps=2, crop_area=with_padding; 206 frames; crop was 854:732:911:96
    encode:   ffmpeg -r 10 -vcodec libx264 -pix_fmt yuv420p (pad to even dims)
    post:     none
-   stamp:    recorded 2026-08, INET 4.6
+   stamp:    recorded 2026-08, INET 4.7
 
 The signaling, message by message
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -464,7 +480,9 @@ filtered to the mobility signaling and the pings (all 802.11 management and
 neighbor discovery traffic is hidden). Time flows left to right on a
 nonlinear axis, with tick labels showing offsets from the window start
 (t = 20.02 s); the six lifelines are six of the network's seven nodes —
-``apHome`` plays no part in this window and is omitted.
+``apHome`` plays no part in this window and is omitted. Each hop of a
+message is drawn and labelled as its own arrow, so one packet appears as a
+chain of same-named arrows across the lifelines it crosses.
 
 .. figure:: media/seqchart.png
    :align: center
@@ -489,7 +507,7 @@ nonlinear axis, with tick labels showing offsets from the window start
              confuse a bare zoom_to_simulation_time_range.
    capture:  NONLINEAR timeline, NETWORK_COMMUNICATION mode, zoom to
              20.02..22.06, window 1920x1000; was 1593x599
-   stamp:    captured 2026-08, INET 4.6
+   stamp:    captured 2026-08, INET 4.7
 
 Reading it left to right:
 
@@ -516,10 +534,12 @@ Reading it left to right:
   retransmission that goes through. The *Home Test (HoT)* returns via the
   home agent.
 - **Route optimization completes**: the *Binding Update* goes straight to the
-  correspondent node, is acknowledged, and from ``ping42`` onward the arrows
-  run directly between correspondent and mobile node — no arrow bends at the
-  ``homeAgent`` lifeline anymore (later arrows merely cross its axis on the
-  way to the correspondent), which is route optimization in one glance.
+  correspondent node and is acknowledged (INET requests an acknowledgement on
+  every Binding Update; the standard makes it optional for correspondents).
+  From ``ping42`` onward the arrows run directly between correspondent and
+  mobile node — no arrow bends at the ``homeAgent`` lifeline anymore (later
+  arrows merely cross its axis on the way to the correspondent), which is
+  route optimization in one glance.
 
 Inside the packets
 ~~~~~~~~~~~~~~~~~~
@@ -530,7 +550,10 @@ agent's backbone link (Qtenv's packet inspector): **two stacked IPv6
 headers** — the outer one from the home agent (``2001:db8:0:1:...:1``) to the
 care-of address (``2001:db8:0:3:...:d``) with ``protocol = ipv6``, carrying
 the untouched inner packet from the correspondent to the *home* address, 40
-bytes of overhead in all:
+bytes of overhead in all. (The numbers after the protocol names in the
+figure, like ``ipv6(40)``, are INET's internal protocol identifiers, not the
+IANA protocol numbers; fields such as ``extensionType = 43`` are genuine wire
+values.)
 
 .. figure:: media/tunneled_packet.png
    :width: 100%
@@ -548,7 +571,7 @@ bytes of overhead in all:
              outer header) throughout the away phase
    capture:  get_inspector_screenshot 1750x2800 -> crop the chunks[7] band
              (was x60-1740, y1305-1455)
-   stamp:    captured 2026-08, INET 4.6
+   stamp:    captured 2026-08, INET 4.7
 
 The same ping in the route-optimized mode, captured at the correspondent
 node: **one** IPv6 header, addressed to the care-of address directly, followed
@@ -574,12 +597,15 @@ instead; not shown.)
              type-2 routing header) during the away phase
    capture:  get_inspector_screenshot 1750x2800 -> crop chunks band
              (was x60-1740, y1213-1360)
-   stamp:    captured 2026-08, INET 4.6
+   stamp:    captured 2026-08, INET 4.7
 
 Meanwhile the home agent's binding cache holds exactly one entry — the
-mapping this whole protocol exists to maintain. The sequence number 2 is the
-two-act registration again: the acknowledgement that activated this binding
-answered the retransmitted, second Binding Update:
+mapping this whole protocol exists to maintain. The 3600 s lifetime is the
+home-registration default (``maxHaBindingLifeTime``) — unlike the seven-
+minute correspondent bindings, home bindings are long-lived, refreshed well
+before expiry. And the sequence number 2 is the two-act registration again:
+the acknowledgement that activated this binding answered the retransmitted,
+second Binding Update:
 
 .. figure:: media/bindingcache.png
    :align: center
@@ -596,7 +622,7 @@ answered the retransmitted, second Binding Update:
    anchor:   exactly 1 entry while the mobile node is away; 0 after ~53s
    capture:  get_inspector_screenshot 1300x900 -> crop map rows
              (was x14-830, y370-430)
-   stamp:    captured 2026-08, INET 4.6
+   stamp:    captured 2026-08, INET 4.7
 
 Coming home
 ~~~~~~~~~~~
@@ -627,7 +653,7 @@ building.
              at 206 -> ffmpeg -start_number 206); crop was 854:732:911:96
    encode:   ffmpeg -r 10 -start_number 206 -vcodec libx264 -pix_fmt yuv420p
    post:     none
-   stamp:    recorded 2026-08, INET 4.6
+   stamp:    recorded 2026-08, INET 4.7
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`Mipv6Showcase.ned <../Mipv6Showcase.ned>`,

@@ -309,5 +309,16 @@ All under doc/media/. Qtenv captures: release build, seed-set=1 (deterministic).
   on seq (my earlier timeline was wrong); false RFC-6275-redirects claim;
   4.6→4.7 version impossibility; elevated-dots sentence wrong. ALL
   Errors+Missing+Mediums+actionable Minors/Lows applied in one pass
-  (doc, gaps report items 1+7, plan timeline). Round 2 next: fresh blind
-  reviewers on the revised doc.
+  (doc, gaps report items 1+7, plan timeline).
+- Round 2 DONE (both claude-fable-5). Reader: 0 High (3 Med, 8 Low). Pro:
+  1 Error + 1 Missing — my round-1 redirect fix was STILL causally wrong
+  (empirically verified: Redirects come from DECAPSULATED reverse-tunnel
+  replies re-forwarded out the physical arrival interface; forward traffic is
+  hook-steered into the tunnel before the check) + the returning-home
+  unsolicited NA explains the chart's 1.5s recovery offset (53.0 vs 54.5).
+  All fixed + polish (CN registration takes ONE BU; A-flag note; recipe
+  stamps 4.6→4.7; protocol-id-vs-IANA note; 3600s HA lifetime note; per-hop
+  arrow labels note; Router6 transparency payoff; access-LAN delay note).
+  Open items handed to user: theory-block path diagram (reader M1), TODO
+  Discussion issue link, opp_env inet-4.7 not yet released.
+- Round 3 (final, capped): running.

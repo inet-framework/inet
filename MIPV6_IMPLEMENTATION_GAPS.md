@@ -34,12 +34,17 @@ address instead of the delay hack. Moderate effort; the `sendUnsolicitedNa()`
 helper and the RFC-4861 proxy passages quoted around
 `Ipv6NeighbourDiscovery.cc:2000–2111` are the natural attachment points.
 
-**Side effect worth knowing:** because INET's home agent intercepts on the
-router-*forwarding* path instead of at the link layer, tunneled traffic goes back
-out of the interface it arrived on and trips the RFC 4861 §8.2 ICMPv6 Redirect
-rule — a compliant (proxy-ND) home agent never takes that path, so the rule never
-fires for it. Until this gap is fixed, scenarios must disable `Ipv6.sendRedirects`
-on the home agent (the showcase does).
+**Related quirk (verified empirically, round-2 review):** with `sendRedirects`
+left on, the home agent emits one ICMPv6 Redirect per *reverse-tunneled reply* —
+not for intercepted forward traffic (the pre-routing hook at `Mipv6.cc:2345-2348`
+steers that into the tunnel before the Redirect check at `Ipv6.cc:528-538`).
+After decapsulation, the inner HoA→CN packet is re-processed with the *physical*
+arrival interface (`Ipv6.cc:845-857`) and forwarded back out of it, tripping the
+RFC 4861 §8.2 condition; the Redirect is addressed, uselessly, to the mobile
+node's home address. A real stack attributes decapsulated packets to the tunnel
+interface (and §8.2 also requires the source to be an on-link neighbor, a test
+INET's simplified check omits). Until fixed, scenarios should disable
+`Ipv6.sendRedirects` on the home agent (the showcase does).
 
 ## 2. Return-home address reclaim via gratuitous NA (partial)
 
