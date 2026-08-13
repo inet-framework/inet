@@ -31,23 +31,32 @@ void DynamicClassifier::initialize(int stage)
 
 int DynamicClassifier::getClassIndex(Packet *packet) const
 {
-    // the class of the packet, with no side effect -- unlike classifyPacket() below, which
-    // creates the branch of a class that is seen for the first time. Note that the class index
-    // is taken as it is, and not mapped through getOutputGateIndex(): that mapping depends on
-    // the number of output gates, which grows with each branch, so the same class would end up
-    // under a different key over time, and get a second branch.
+    // The class of the packet, taken as the classifier function returns it, and not mapped
+    // through getOutputGateIndex(): that mapping depends on the number of output gates, which
+    // grows with each branch, so the same class would end up under a different key over time,
+    // and get a second branch.
     return packetClassifierFunction->classifyPacket(packet);
 }
 
 int DynamicClassifier::classifyPacket(Packet *packet)
 {
-    int index = getClassIndex(packet);
-    auto it = classIndexToGateItMap.find(index);
-    if (it != classIndexToGateItMap.end())
-        return it->second;
+    // a class seen for the first time has no gate yet; its branch is created by
+    // createGateForPacket(), which the base class calls on packet delivery only
+    auto it = classIndexToGateItMap.find(getClassIndex(packet));
+    return it != classIndexToGateItMap.end() ? it->second : -1;
+}
+
+int DynamicClassifier::createGateForPacket(Packet *packet)
+{
     int branchIndex = createBranch();
-    classIndexToGateItMap[index] = branchIndex;
+    classIndexToGateItMap[getClassIndex(packet)] = branchIndex;
     return branchIndex;
+}
+
+bool DynamicClassifier::canCreateGateForPacket(Packet *packet) const
+{
+    // a branch can be created for every class, so every packet gets an output gate
+    return true;
 }
 
 bool DynamicClassifier::canPushSomePacket(const cGate *gate) const
@@ -57,16 +66,9 @@ bool DynamicClassifier::canPushSomePacket(const cGate *gate) const
     // such a class, the range of the classifier function not being known here. Without this, a
     // classifier that has no branch yet answers that it cannot accept anything, and an active
     // source in front of it stops before the first branch is ever created. Whether a particular
-    // packet can be pushed is answered by canPushPacket() below.
+    // packet can be pushed is answered by the inherited canPushPacket(), through
+    // canCreateGateForPacket() above.
     return true;
-}
-
-bool DynamicClassifier::canPushPacket(Packet *packet, const cGate *gate) const
-{
-    // deliberately not the inherited implementation: that one classifies the packet, which
-    // creates the branch of a new class as a side effect of what is supposed to be a query
-    auto it = classIndexToGateItMap.find(getClassIndex(packet));
-    return it == classIndexToGateItMap.end() || consumers[it->second].canPushPacket(packet);
 }
 
 int DynamicClassifier::createBranch()
