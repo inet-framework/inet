@@ -54,10 +54,18 @@ const Ptr<Chunk> CfmContinuityCheckMessageSerializer::deserialize(MemoryInputStr
 
     stream.readUint8(); // reserved, ignored
     stream.readUint8(); // format, ignored
+    // The MEG ID is a 48-octet field whose layout the standard leaves to the format
+    // octet; this model holds a single name and writes it in the format it reads back
+    // here. A frame that fills the field differently -- an 802.1ag MAID, which carries an
+    // MD name and a short MA name with a format and a length octet each -- cannot be
+    // represented, and the length octet then reads as part of a name.
     int nameLength = stream.readUint8();
-    ASSERT(nameLength <= 45);
     uint8_t buffer[46];
     stream.readBytes(buffer, B(45));
+    if (nameLength > 45) {
+        nameLength = 45;
+        ccm->markImproperlyRepresented();
+    }
     buffer[nameLength] = '\0';
     ccm->setMessageName(reinterpret_cast<const char*>(buffer));
 
