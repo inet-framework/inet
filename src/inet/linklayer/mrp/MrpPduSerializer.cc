@@ -36,7 +36,6 @@ void MrpVersionFieldSerializer::serializeFields(MemoryOutputStream& stream, cons
 void MrpTlvSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto &tlv = staticPtrCast<const MrpTlvHeader>(chunk);
-    size_t startPos = stream.getLength().get<B>();
     stream.writeUint8(tlv->getHeaderType());
     stream.writeUint8(tlv->getValueLength());
 
@@ -122,11 +121,6 @@ void MrpTlvSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<con
 
     }
 
-    if (tlv->getHeaderType() != END) {
-        size_t length = stream.getLength().get<B>() - startPos;
-        size_t paddingLength = (4 - (length % 4)) % 4;
-        stream.writeByteRepeatedly(0, paddingLength);
-    }
 }
 
 void MrpSubTlvSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
@@ -163,7 +157,6 @@ const Ptr<Chunk> MrpVersionFieldSerializer::deserializeFields(MemoryInputStream&
 
 const Ptr<Chunk> MrpTlvSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
-    size_t startPos = stream.getPosition().get<B>();
     auto headerType = static_cast<TlvHeaderType>(stream.readUint8());
     uint8_t headerLength = stream.readUint8();
     Ptr<MrpTlvHeader> tlvReturnValue;
@@ -278,10 +271,6 @@ const Ptr<Chunk> MrpTlvSerializer::deserializeFields(MemoryInputStream& stream, 
         throw cRuntimeError("Unknown Header TYPE value: %d",
                 static_cast<int>(headerType));
     }
-
-    size_t length = stream.getPosition().get<B>() - startPos;
-    size_t paddingLength = (4 - (length % 4)) % 4;
-    stream.readByteRepeatedly(0, paddingLength);
 
     return tlvReturnValue;
 }

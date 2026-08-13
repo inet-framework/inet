@@ -628,14 +628,7 @@ void Mrp::handleMrpPDU(Packet* packet)
             }
 
             //handle suboption2 if present
-            if ((optionTlv->getOuiType() == MrpOuiType::IEC
-                    && optionTlv->getValueLength() > 4)
-                    || (optionTlv->getEd1Type() == 0x00
-                            && optionTlv->getValueLength()
-                                    > (4 + Ed1DataLength::LENGTH0))
-                    || (optionTlv->getEd1Type() == 0x04
-                            && optionTlv->getValueLength()
-                                    > (4 + Ed1DataLength::LENGTH4))) {
+            if (B(optionTlv->getValueLength()) > subOffset - version->getChunkLength() - B(2)) {
                 auto subTlv = packet->peekDataAt<MrpSubTlvHeader>(subOffset);
                 switch (subTlv->getSubType()) {
                 case RESERVED: {
@@ -722,14 +715,7 @@ void Mrp::handleMrpPDU(Packet* packet)
         }
 
         //handle suboption2 if present
-        if ((optionTlv->getOuiType() == MrpOuiType::IEC
-                && optionTlv->getValueLength() > 4)
-                || (optionTlv->getEd1Type() == 0x00
-                        && optionTlv->getValueLength()
-                                > (4 + Ed1DataLength::LENGTH0))
-                || (optionTlv->getEd1Type() == 0x04
-                        && optionTlv->getValueLength()
-                                > (4 + Ed1DataLength::LENGTH4))) {
+        if (B(optionTlv->getValueLength()) > subOffset - offset - B(2)) {
             auto subTlv = packet->peekDataAt<MrpSubTlvHeader>(subOffset);
             switch (subTlv->getSubType()) {
             case RESERVED: {
