@@ -227,10 +227,11 @@ const Ptr<Chunk> RtcpPacketSerializer::deserialize(MemoryInputStream& stream) co
             rtcpByePacket->setPacketType(rtcpPacket->getPacketType());
             rtcpByePacket->setRtcpLength(rtcpPacket->getRtcpLength());
             rtcpByePacket->setSsrc(stream.readUint32Be());
-            // more SSRC and optional data may be included
-            while (B(stream.getRemainingLength()) != B(0)) {
-                stream.readByte();
-            }
+            // A BYE packet may carry further SSRC/CSRC identifiers and an optional reason
+            // for leaving; neither is modelled. Stop at the first SSRC instead of reading
+            // the rest away: what is consumed here becomes the length of the chunk, so
+            // swallowing octets the fields do not hold would make the packet
+            // unserializable. The caller keeps them as raw bytes.
             return rtcpByePacket;
         }
         default: {
