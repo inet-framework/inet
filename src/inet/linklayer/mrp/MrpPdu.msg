@@ -247,6 +247,7 @@ class MrpSubTlvTest extends MrpSubTlvHeader
 enum MrpOuiType {
     OUI = 0x000000;
     IEC = 0x00154E;
+    SIEMENS = 0x080006;
 };
 
 //
@@ -266,10 +267,16 @@ enum Ed1DataLength {
 //
 class MrpOption extends MrpTlvHeader
 {
-    chunkLength = B(8);
+    // Type and length, the id of the organization whose extension this TLV carries, and
+    // the ed1Type octet that names the manufacturer data following it (none for the
+    // 0x01-0x03 and 0xFF types). The sub-TLV, where there is one, is a chunk of its own
+    // and is counted in valueLength by the sender.
+    chunkLength = B(6);
     headerType = OPTION;
     valueLength = 4;
-    MrpOuiType ouiType = IEC;
+    // The sub-TLVs of the auto-manager are the extension of the organization that defined
+    // them, and that is the id a dissector -- and a device -- expects to find here.
+    MrpOuiType ouiType = SIEMENS;
     //suboption1
     uint8_t ed1Type = 0xFF;
     //followed by ManufacturerData of length 2 for ed1Type 0x00 and length 26 for ed1Type 0x04
