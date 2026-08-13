@@ -7,7 +7,6 @@
 
 #include "inet/linklayer/mrp/CfmProtocolDissector.h"
 
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/mrp/CfmContinuityCheckMessage_m.h"
 
@@ -24,6 +23,15 @@ void CfmProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     const int CFM_OPCODE_CCM = 1;
     if (packet->peekDataAt<BytesChunk>(B(1), B(1))->getBytes()[0] == CFM_OPCODE_CCM)
         callback.visitChunk(packet->popAtFront<CfmContinuityCheckMessage>(), &Protocol::ieee8021qCFM);
+    // the TLV list that follows: every TLV is a chunk, the one that ends the list by its
+    // own class and the rest by the raw one, which holds what it could not read
+    while (packet->getDataLength() > b(0)) {
+        const auto& tlv = packet->popAtFront<CfmTlvBase>();
+        callback.visitChunk(tlv, &Protocol::ieee8021qCFM);
+        if (dynamicPtrCast<const CfmEndTlv>(tlv) != nullptr)
+            break;
+    }
+    // whatever is left is the padding to the minimum frame size
     if (packet->getDataLength() > b(0))
         callback.dissectPacket(packet, nullptr);
     callback.endProtocolDataUnit(&Protocol::ieee8021qCFM);
