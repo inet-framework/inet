@@ -181,7 +181,6 @@ void Mrp::initialize(int stage)
         secondaryRingPortId = resolveInterfaceIndex(par("ringPort2"));
         initRingPort(primaryRingPortId, MrpInterfaceData::PRIMARY, enableLinkCheckOnRing);
         initRingPort(secondaryRingPortId, MrpInterfaceData::SECONDARY, enableLinkCheckOnRing);
-        localBridgeAddress = relay->getBridgeAddress();
         EV_DETAIL << "Initialize MRP link layer" << EV_ENDL;
         linkUpHysteresisTimer = new cMessage("linkUpHysteresisTimer");
         startUpTimer = new cMessage("startUpTimer");
@@ -300,8 +299,26 @@ void Mrp::setTimingProfile(int maxRecoveryTime)
     }
 }
 
+// The length of an Option TLV covers everything after its own type and length octets:
+// the manufacturer id and the octets the serializer aligns it with, and the sub-TLV that
+// follows it. Leaving the sub-TLV out of the count puts the next TLV two octets before
+// where the receiver looks for it, which is how a standard dissector reads the sub-TLV as
+// a top-level TLV -- and how this module used to read it as the common TLV.
+static void setOptionValueLength(const Ptr<MrpOption>& optionTlv, const Ptr<MrpSubTlvHeader>& subTlv)
+{
+    optionTlv->setValueLength((optionTlv->getChunkLength() - B(2) + subTlv->getChunkLength()).get<B>());
+}
+
 void Mrp::start()
 {
+    // The relay picks the bridge interface and reads its address in the same
+    // initialization stage this module runs in, so asking it there is a matter of which
+    // submodule the NED file declares first. Every frame this module sends carries the
+    // address, and it also decides which test frame is its own and which manager wins an
+    // auto-manager election, so read it here: start() runs from the start-up timer, after
+    // initialization is over, and again whenever a stopped node is started.
+    localBridgeAddress = relay->getBridgeAddress();
+
     fdbClearTimer = new cMessage("fdbClearTimer");
     fdbClearDelay = new cMessage("fdbClearDelay");
     linkDownTimer = new cMessage("LinkDownTimer");
@@ -1107,8 +1124,7 @@ void Mrp::setupTestRingReq()
     if (role == MANAGER_AUTO) {
         auto optionTlv = makeShared<MrpOption>();
         auto autoMgrTlv = makeShared<MrpSubTlvHeader>();
-        uint8_t headerLength = optionTlv->getValueLength() + autoMgrTlv->getSubHeaderLength() + 2;
-        optionTlv->setValueLength(headerLength);
+        setOptionValueLength(optionTlv, autoMgrTlv);
         packet1->insertAtBack(optionTlv);
         packet1->insertAtBack(autoMgrTlv);
         packet2->insertAtBack(optionTlv);
@@ -1212,7 +1228,7 @@ void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourc
     testMgrTlv->setOtherMRMPrio(0x00);
     testMgrTlv->setOtherMRMSa(sourceAddress);
 
-    optionTlv->setValueLength(optionTlv->getValueLength() + testMgrTlv->getSubHeaderLength() + 2);
+    setOptionValueLength(optionTlv, testMgrTlv);
 
     commonTlv->setSequenceID(sequenceID);
     sequenceID++;
@@ -1259,7 +1275,7 @@ void Mrp::testPropagateReq(int ringPort, MrpPriority managerPrio, MacAddress sou
     testMgrTlv->setOtherMRMPrio(managerPrio);
     testMgrTlv->setOtherMRMSa(sourceAddress);
 
-    optionTlv->setValueLength(optionTlv->getValueLength() + testMgrTlv->getSubHeaderLength() + 2);
+    setOptionValueLength(optionTlv, testMgrTlv);
 
     commonTlv->setSequenceID(sequenceID);
     sequenceID++;
