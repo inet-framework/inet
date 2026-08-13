@@ -110,6 +110,8 @@ class INET_API Protocol
     static const Protocol ppp;
     static const Protocol quic;
     static const Protocol rip;
+    static const Protocol rtcp;
+    static const Protocol rtp;
     static const Protocol rsvpTe;
     static const Protocol rtsp;
     static const Protocol sctp;
