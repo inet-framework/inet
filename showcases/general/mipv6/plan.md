@@ -321,4 +321,17 @@ All under doc/media/. Qtenv captures: release build, seed-set=1 (deterministic).
   arrow labels note; Router6 transparency payoff; access-LAN delay note).
   Open items handed to user: theory-block path diagram (reader M1), TODO
   Discussion issue link, opp_env inet-4.7 not yet released.
-- Round 3 (final, capped): running.
+- Round 3 (final, capped) DONE — LOOP TERMINATED CLEANLY. Reader: 0 High
+  (third consecutive round; verdict "best reviewed on anticipate-the-
+  reader's-question dimension"). Pro: 0 Errors, 1 low Missing (boot-at-home
+  requirement — fixed), 7 Minors (all cheap ones applied). BONUS: pro
+  verified the released v4.7.0 tag contains this identical mipv6
+  implementation ⇒ "Verified with 4.7" + opp_env inet-4.7 are sound (though
+  the released 4.7.0 tarball predates this showcase directory — the cd path
+  works only from 4.7.x that includes it; publish-time check).
+  Error trajectory across rounds: 4 → 1 → 0.
+- REMAINING FOR USER: (1) optional protocol-path diagram in the About block
+  (recurring reader wish, needs artwork); (2) create the inet-showcases
+  tracker issue and replace the TODO Discussion link; (3) confirm the opp_env
+  pin at publish; (4) decide whether to fix INET-side blemishes from the gaps
+  report (esp. "Registeration" typo visible in the binding-cache figure).

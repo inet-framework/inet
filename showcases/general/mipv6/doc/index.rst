@@ -69,8 +69,7 @@ When the mobile node (MN) walks out of its home network into a foreign one:
    address, for this lifetime." The home agent confirms with a *Binding
    Acknowledgement (BAck)*. No security handshake is needed here — the mobile
    node and its home agent trust each other by prior arrangement (the standard
-   protects this signaling with pre-configured IPsec keys, so nothing needs to
-   be established on the fly).
+   protects this signaling with an IPsec association set up in advance).
 5. **Delivery resumes** — the home agent now intercepts every packet addressed
    to the home address and forwards it to the care-of address inside an
    IPv6-in-IPv6 tunnel. The mobile node sends its own traffic back through the
@@ -204,14 +203,17 @@ Configuration notes:
   every layer-2 association the IPv6 neighbour discovery module immediately
   sends a Router Solicitation (its ``detectL2Movement`` parameter, default
   ``true``), so the mobile node never waits for a periodic advertisement.
-  This scenario advertises every 3–7 s; even INET's 200–600 s defaults would
-  detect the move just as fast.
+  This scenario advertises every 3–7 s, but that is not what makes detection
+  fast — even INET's 200–600 s defaults would detect the move just as
+  quickly.
 - The mobile node autoconfigures its addresses, so the address configurator
   must leave hosts alone: the network sets ``assignAddressesToHosts = false``
   on the ``Ipv6NetworkConfigurator``, which then assigns addresses and routes
   to routers only. The home agent is recognized from its Router
-  Advertisements (INET sets the home-agent flag in them), which is how the
-  mobile node learns its home agent's address — at home, before ever leaving.
+  Advertisements (via the home-agent flag the standard defines for them),
+  which is how the mobile node learns its home agent's address — at home,
+  before ever leaving. The standard's remote-discovery mechanisms are not
+  modeled, so a mobile node must start the simulation in its home network.
 
 Implementation notes and simplifications, so the simulation is read for what
 it is:
@@ -235,8 +237,8 @@ it is:
   its own topological-correctness check — the node refuses to emit a packet
   whose home-address source would look spoofed outside the home network, its
   private version of the ingress filtering discussed earlier — instead of
-  being queued or tunneled: one or two lost pings per handover in the
-  results. A visible side effect: the mobile node's one-second retransmission
+  being queued or tunneled: one or two extra lost pings at the tail of each
+  handover outage. A visible side effect: the mobile node's one-second retransmission
   timer fires just before the delayed acknowledgement arrives, so the home
   registration in this scenario always takes *two* Binding Updates (the later
   correspondent registration completes with one) — and the acknowledgement
@@ -248,9 +250,9 @@ it is:
   forwarding check. The trigger is the way back: after decapsulating a
   reverse-tunneled reply, the home agent forwards the inner packet out of the
   very interface the tunneled packet arrived on — the textbook Redirect
-  condition — and would advise the mobile node's home address, uselessly, on
-  every reply. A real stack attributes decapsulated packets to the tunnel
-  interface instead; the flag stands in for that difference.
+  condition — and would send a useless Redirect to the mobile node's home
+  address on every reply. A real stack attributes decapsulated packets to the
+  tunnel interface instead; the flag stands in for that difference.
 
 The Model
 ---------
@@ -298,8 +300,8 @@ time — the sum of the link delays along its path:
    :language: ned
 
 Predicted round-trip times, counting propagation only (the access LANs'
-0.1 µs is negligible, and the 2 Mbps wireless hop adds 1–2 ms of
-transmission time on top):
+0.1 µs is negligible, and the 2 Mbps wireless hop adds about 2 ms of
+transmission and channel-access overhead on top):
 
 - **at home**: 2 × (1 + 5) = 12 ms
 - **tunneled**: 2 × (1 + 5) + 2 × (5 + 8) = 38 ms — every packet crosses the
@@ -424,10 +426,11 @@ again — for the plain host, simply because its old address works again at
 home.
 
 Details worth noticing rather than worrying about: the very first reply
-arrives only at t≈5.5 s because both hosts spend the first seconds on SLAAC
-and neighbor resolution after boot; the few isolated elevated dots — the
-42.7 ms one at t≈26.5 s, and one per Mobile IPv6 run at t≈58 s — are single
-802.11 retransmissions, each worth a couple of extra milliseconds; and after
+arrives only at t≈5.5 s — and a couple of milliseconds high — because both
+hosts spend the first seconds on SLAAC and neighbor resolution after boot;
+the few isolated elevated dots (the 42.7 ms one at t≈26.5 s, and one per run
+near the end, t≈58–59.5 s) are single 802.11 retransmissions, each worth a
+couple of extra milliseconds; and after
 the return, the Mobile IPv6 runs resume 1.5 s earlier than the plain host
 (t=53.0 vs t=54.5) — de-registration ends with that unsolicited Neighbor
 Advertisement announcing the return, while the plain host is only
@@ -443,9 +446,10 @@ Watch the sequence: the home path (correspondent → backbone → home agent →
 mobile node) while at home; the dash to the foreign network; the registration;
 then a brief moment of tunneled traffic taking the dog-leg through the home
 agent — and finally the direct path through the foreign router, with the home
-agent out of the loop. The status label flips from "at home" to "away
-(route-optimized, 1 CN)", and the address label changes to the care-of
-address the moment SLAAC completes in the foreign network.
+agent out of the loop. The status label steps from "at home" through a brief
+"away (via home agent)" to "away (route-optimized, 1 CN)", and the address
+label changes to the care-of address the moment SLAAC completes in the
+foreign network.
 
 .. video:: media/handover.mp4
    :align: center
@@ -550,10 +554,12 @@ agent's backbone link (Qtenv's packet inspector): **two stacked IPv6
 headers** — the outer one from the home agent (``2001:db8:0:1:...:1``) to the
 care-of address (``2001:db8:0:3:...:d``) with ``protocol = ipv6``, carrying
 the untouched inner packet from the correspondent to the *home* address, 40
-bytes of overhead in all. (The numbers after the protocol names in the
-figure, like ``ipv6(40)``, are INET's internal protocol identifiers, not the
-IANA protocol numbers; fields such as ``extensionType = 43`` are genuine wire
-values.)
+bytes of overhead in all. Notice that the two destination addresses share
+their interface identifier (``8aa:ff:fe00:d``) under different prefixes —
+the identity/location split, visible inside one packet. (The numbers after
+the protocol names in the figure, like ``ipv6(40)``, are INET's internal
+protocol identifiers, not the IANA protocol numbers; fields such as
+``extensionType = 43`` are genuine wire values.)
 
 .. figure:: media/tunneled_packet.png
    :width: 100%

@@ -157,6 +157,9 @@ binding should be held or routed into the HA tunnel once it exists — the
   `FIXME need revision` (assert-prone ordering).
 - `Mipv6.cc:1194` — binding-expiry timers scheduled a fixed `PRE_BINDING_EXPIRY`
   early, with a TODO to do it properly.
+- `BindingCache.cc` — the entry's info string reads "Home Registeration" (sic)
+  and embeds a literal `\n`; both are visible in inspector screenshots
+  (including the showcase's binding-cache figure).
 
 ---
 
