@@ -101,7 +101,30 @@ RFC 6275 mandates IPsec ESP protection for BU/BAck with the home agent. INET (li
 essentially every simulator) models the exchange without it. Listed for
 completeness; not proposed as work.
 
-## 7. Minor bookkeeping (cleanups)
+## 7. Early reply traffic dropped instead of reverse-tunneled (simplified)
+
+**RFC 6275 §11.3.1:** while a mobile node has no binding at a correspondent (route
+optimization not yet completed, or not used), packets it sends to that
+correspondent must be reverse-tunneled through the home agent.
+
+**INET today:** for roughly a second after the home registration (until the next
+Binding Update refresh settles the mobility/tunnel state), packets sourced from the
+home address are not steered into the reverse tunnel; they fall through to the
+last-resort topological-correctness guard in `Ipv6.cc:588`
+("Using HoA instead of CoA... dropping datagram") and are silently discarded.
+
+**Concrete failure scenario (observed in the showcase runs):** after the handover
+completes at t≈20.07, the correspondent's pings arrive tunneled and reach the
+application, but the *replies* to the first two pings (t=20.54, t=21.02) are
+dropped at the mobile node; the reverse tunnel only carries replies from t≈21.5.
+Costs ~1 s of extra outage in every handover, visible in the RTT chart.
+
+**Fix sketch:** in the mobile node's outbound path, packets with a home-address
+source and no binding at the destination should be routed into the HA tunnel
+(the check exists at the wrong layer today); the guard at `Ipv6.cc:588` should
+then only ever fire for genuinely unroutable leftovers.
+
+## 8. Minor bookkeeping (cleanups)
 
 - `BindingUpdateList.cc:122/:145` — `remainingLifetime` fields never updated
   (`// TODO`), so BUL entries don't age visibly in the inspector.

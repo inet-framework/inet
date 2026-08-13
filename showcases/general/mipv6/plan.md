@@ -255,6 +255,38 @@ asymmetry (CoTI direct vs HoTI via not-yet-ready tunnel). Ping at 21.0 lost
 Artifact capture UNLOCKED. Verbose re-run overwrote RouteOptimization results
 with identical (same-seed) data — deterministic, OK.
 
+## Artifact inventory (capture recipes' data)
+
+All under doc/media/. Qtenv captures: release build, seed-set=1 (deterministic).
+- pingrtt.png — chart, Mipv6Showcase.anf "Ping round-trip time", 8x6in 150dpi,
+  export: opp_charttool imageexport -n "Ping round-trip time" -f png --dpi 150
+  -d doc/media. Figure text must explain: home-baseline overlap (3 configs
+  identical pre-divergence, only last-drawn visible), first reply ~5.5s (SLAAC
+  boot), lone 42ms dot (802.11 retry), ~57s elevated dots (post-return ND).
+- network.png — canvas t=12s (associated, "AP: HOME/at home", green wlan addr
+  label right). set_canvas_view fit (zoom ~1.106), area=module_rectangle,
+  margin=5; was 844x722. Config RouteOptimization.
+- networklayer.png — canvas of mobileNode.ipv6 at t=0-12, zoom 1.0,
+  module_rectangle margin 5; was 968x615. Known blemish: routingTable status
+  text overlaps configurator label (module's own layout).
+- tunneled_packet.png — inspector (object) of the 170B tunneled ping at
+  homeAgent wire, config BidirectionalTunneling t~25.5 (list_logged_packets at
+  homeAgent, the 170B ping); expand depth 4; crop chunks[7] band from
+  1750x2800 shot (was x60-1740, y1305-1455). Shows double Ipv6Header.
+- ropacket.png — same but config RouteOptimization, 154B ping at
+  correspondentNode wire; crop y1213-1360. Shows type-2 routing header row.
+- bindingcache.png — inspector (object) homeAgent.ipv6.bindingCache at t~25,
+  expand depth 4, crop map rows (was x14-830, y370-430 of 1300x900).
+- handover.mp4 — video, config RouteOptimization, window 13.2->23.5s, private
+  qtenv cfg with animation_enabled=false, min_animation_speed=0.1,
+  playback_speed=1, fps=2 -> 206 frames -> ffmpeg -r 10, crop 854:732:911:96.
+  Shows: home path arrow -> dash -> handover -> tunneled dog-leg via HA ->
+  RO direct path; status + address labels update live.
+- returnhome.mp4 — same setup, window 47.5->56s, 170 frames (start_number 206),
+  -r 10. Shows: direct path -> dash home -> dereg ~52.8 -> home path again.
+- seqchart (pending) — from results/RouteOptimization-#0.elog recorded with
+  --record-eventlog=true --eventlog-recording-intervals=19s..23.5s,52s..53.5s
+
 ## Phase status
 
 - Phase 0 discovery: done. Phase 1 shared understanding: CONVERGED (this file).
