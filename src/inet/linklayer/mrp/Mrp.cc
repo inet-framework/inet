@@ -1211,7 +1211,7 @@ void Mrp::testMgrNackReq(int ringPort, MrpPriority managerPrio, MacAddress sourc
     testMgrTlv->setSubType(SubTlvHeaderType::TEST_MGR_NACK);
     testMgrTlv->setPrio(localManagerPrio);
     testMgrTlv->setSa(localBridgeAddress);
-    testMgrTlv->setOtherMRMPrio(0x00);
+    testMgrTlv->setOtherMRMPrio(managerPrio);
     testMgrTlv->setOtherMRMSa(sourceAddress);
 
     setOptionValueLength(optionTlv, testMgrTlv);
