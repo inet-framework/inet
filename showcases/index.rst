@@ -45,6 +45,7 @@ All showcases:
    :titlesonly:
 
    emulation/index
+   ethernet/index
    tsn/index
    general/index
    measurement/index
