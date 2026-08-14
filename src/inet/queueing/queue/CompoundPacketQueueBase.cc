@@ -61,7 +61,14 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, const cGate *gate)
         while (isOverloaded()) {
             auto packet = packetDropperFunction->selectPacket(this);
             EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
-            removePacket(packet);
+            // Remove the victim directly from the underlying collection instead of via
+            // removePacket(): removePacket() also emits packetRemoved, which would count the
+            // drop as both a removal and a drop, subtracting it twice from the queue-length
+            // statistic. The victim is still owned by the submodule it was queued in, so take
+            // it before dropPacket() deletes it.
+            collection->removePacket(packet);
+            if (packet->getOwner() != this)
+                take(packet);
             dropPacket(packet, QUEUE_OVERFLOW);
         }
     }
