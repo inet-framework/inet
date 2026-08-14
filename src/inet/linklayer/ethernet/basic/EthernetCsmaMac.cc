@@ -54,7 +54,7 @@ void EthernetCsmaMac::initialize(int stage)
 
         WATCH(carrierSense);
         WATCH(collision);
-        WATCH(numRetries);
+        WATCH(numAttempts);
         WATCH(numFramesSent);
         WATCH(numFramesReceived);
         WATCH_EXPR("fsmState", fsm.getStateName());
@@ -257,19 +257,19 @@ void EthernetCsmaMac::handleWithFsm(int event, cMessage *message)
                 scheduleJamTimer();
             );
             FSMA_Event_Transition(JAM_END_AND_GIVE_UP_AND_NO_CRS,
-                                  event == END_JAM_TIMER && numRetries == MAX_ATTEMPTS && !carrierSense,
+                                  event == END_JAM_TIMER && numAttempts == MAX_ATTEMPTS && !carrierSense,
                                   WAIT_IFG,
                 FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
                 giveUpTransmission();
             );
             FSMA_Event_Transition(JAM_END_AND_GIVE_UP_AND_CRS,
-                                  event == END_JAM_TIMER && numRetries == MAX_ATTEMPTS && carrierSense,
+                                  event == END_JAM_TIMER && numAttempts == MAX_ATTEMPTS && carrierSense,
                                   RECEIVING,
                 FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
                 giveUpTransmission();
             );
             FSMA_Event_Transition(JAM_END_AND_RETRY,
-                                  event == END_JAM_TIMER && numRetries < MAX_ATTEMPTS,
+                                  event == END_JAM_TIMER && numAttempts < MAX_ATTEMPTS,
                                   BACKOFF,
                 FSMA_Delay_Action(phy->endSignalTransmission(ESDNONE));
                 retryTransmission();
@@ -344,19 +344,19 @@ void EthernetCsmaMac::endTransmission()
     numFramesSent++;
     delete currentTxFrame;
     currentTxFrame = nullptr;
-    numRetries = 0;
+    numAttempts = 0;
 }
 
 void EthernetCsmaMac::abortTransmission()
 {
     EV_DEBUG << "Aborting frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
     cancelEvent(txTimer);
+    numAttempts++;
 }
 
 void EthernetCsmaMac::retryTransmission()
 {
     EV_DEBUG << "Retrying frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
-    numRetries++;
 }
 
 void EthernetCsmaMac::giveUpTransmission()
@@ -366,7 +366,7 @@ void EthernetCsmaMac::giveUpTransmission()
     details.setReason(RETRY_LIMIT_REACHED);
     details.setLimit(MAX_ATTEMPTS);
     dropCurrentTxFrame(details);
-    numRetries = 0;
+    numAttempts = 0;
 }
 
 void EthernetCsmaMac::processReceivedFrame(Packet *packet)
@@ -473,7 +473,7 @@ void EthernetCsmaMac::scheduleJamTimer()
 void EthernetCsmaMac::scheduleBackoffTimer()
 {
     EV_DEBUG << "Scheduling backoff timer" << EV_ENDL;
-    int backoffRange = (numRetries >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << numRetries);
+    int backoffRange = (numAttempts >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << numAttempts);
     int slotNumber = intuniform(0, backoffRange - 1);
     EV_DEBUG << "Executing backoff procedure" << EV_FIELD(slotNumber) << ", backoffRange = [0," << backoffRange - 1 << "]" << EV_ENDL;
     simtime_t backoffDuration = slotNumber * mode.slotBitLength / mode.bitrate;

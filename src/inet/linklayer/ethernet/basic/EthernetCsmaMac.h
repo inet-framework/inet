@@ -69,7 +69,8 @@ class INET_API EthernetCsmaMac : public MacProtocolBase, public virtual IEtherne
 
     // state
     Fsm fsm;
-    int numRetries = 0; // for exponential back-off algorithm
+    int numAttempts = 0; // number of failed transmission attempts of the current frame; drives the
+                         // exponential back-off algorithm and the give-up at MAX_ATTEMPTS (attemptLimit)
     bool carrierSense = false;
     bool collision = false;
 
