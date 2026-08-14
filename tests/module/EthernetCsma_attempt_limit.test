@@ -1,0 +1,128 @@
+%description:
+
+Tests that both half-duplex Ethernet medium access control (MAC) modules drop
+a frame after 16 transmission attempts that all collide, as IEEE 802.3-2015 4.2.3.2.5 and Table 4-2
+(attemptLimit = 16) require.
+
+Two pairs of nodes, one pair with EthernetCsmaMac and one with
+EthernetCsmaMacPhy. The two nodes of a pair send one frame each at the same
+time, and their MACs draw from two random number generators with the same
+seed, so they choose the same backoff and every attempt collides.
+
+The counter counts the attempts of the dropped frame: the entries of
+EthernetCsmaMac into its TRANSMITTING state, and the backoffs of
+EthernetCsmaMacPhy plus its first attempt.
+
+%file: AttemptCounter.cc
+
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+
+namespace inet {
+
+class AttemptCounter : public cSimpleModule, public cListener
+{
+  protected:
+    std::map<cComponent *, int> numAttempts;
+
+  protected:
+    virtual void initialize() override
+    {
+        getSystemModule()->subscribe("stateChanged", this);
+        getSystemModule()->subscribe("backoffSlotsGenerated", this);
+        getSystemModule()->subscribe(packetDroppedSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override
+    {
+        if (!strcmp(getSignalName(signal), "stateChanged")) {
+            if (!strcmp(source->getNedTypeName(), "inet.linklayer.ethernet.basic.EthernetCsmaMac") && value == 2) // TRANSMITTING
+                numAttempts[source]++;
+        }
+        else if (!strcmp(getSignalName(signal), "backoffSlotsGenerated"))
+            numAttempts[source]++;
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        auto dropDetails = check_and_cast<PacketDropDetails *>(details);
+        if (dropDetails->getReason() != RETRY_LIMIT_REACHED)
+            return;
+        int attempts = numAttempts[source];
+        if (!strcmp(source->getNedTypeName(), "inet.linklayer.ethernet.basic.EthernetCsmaMacPhy"))
+            attempts++; // the first attempt is not preceded by a backoff
+        std::cout << source->getParentModule()->getParentModule()->getName() << "[" << source->getParentModule()->getParentModule()->getIndex() << "] "
+                  << source->getComponentType()->getName() << ": dropped " << check_and_cast<Packet *>(object)->getName()
+                  << " after " << attempts << " attempts\n";
+        numAttempts[source] = 0;
+    }
+};
+
+Define_Module(AttemptCounter);
+
+} // namespace inet
+
+%file: test.ned
+
+import inet.node.ethernet.EthernetMultidropLink;
+import inet.node.ethernet.EthernetPlcaHost;
+
+simple AttemptCounter
+{
+    parameters:
+        @class(::inet::AttemptCounter);
+}
+
+network Test
+{
+    submodules:
+        counter: AttemptCounter;
+        mac[2]: EthernetPlcaHost;
+        macPhy[2]: EthernetPlcaHost;
+    connections:
+        mac[0].ethg++ <--> EthernetMultidropLink { length = 1m; } <--> mac[1].ethg++;
+        macPhy[0].ethg++ <--> EthernetMultidropLink { length = 1m; } <--> macPhy[1].ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1s
+cmdenv-express-mode = true
+record-vector-results = false
+
+num-rngs = 5
+*.mac[0].**.rng-0 = 1
+*.mac[1].**.rng-0 = 2
+*.macPhy[0].**.rng-0 = 3
+*.macPhy[1].**.rng-0 = 4
+seed-1-mt = 7
+seed-2-mt = 7
+seed-3-mt = 7
+seed-4-mt = 7
+
+*.mac[*].eth[0].plca.typename = ""
+*.macPhy[*].eth[0].typename = "EthernetInterface"
+*.macPhy[*].eth[0].duplexMode = false
+
+*.*[*].numApps = 1
+*.*[*].app[0].typename = "EthernetSourceApp"
+*.*[*].app[0].io.interface = "eth0"
+*.*[*].app[0].source.packetLength = 46B
+*.*[*].app[0].source.productionInterval = 10s
+*.*[*].app[0].source.initialProductionOffset = 1ms
+*.mac[0].app[0].io.remoteAddress = "mac[1]"
+*.mac[1].app[0].io.remoteAddress = "mac[0]"
+*.macPhy[0].app[0].io.remoteAddress = "macPhy[1]"
+*.macPhy[1].app[0].io.remoteAddress = "macPhy[0]"
+
+%contains: stdout
+mac[0] EthernetCsmaMac: dropped app[0]-0 after 16 attempts
+%contains: stdout
+mac[1] EthernetCsmaMac: dropped app[0]-0 after 16 attempts
+%contains: stdout
+macPhy[0] EthernetCsmaMacPhy: dropped app[0]-0 after 16 attempts
+%contains: stdout
+macPhy[1] EthernetCsmaMacPhy: dropped app[0]-0 after 16 attempts

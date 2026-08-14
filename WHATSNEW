@@ -432,6 +432,18 @@ Notable backward incompatible changes are the following:
 
    IPassivePacketSource has two new methods, canPullPacket(gate, filter) and pullPacket(gate, filter). The filter, an IPacketFilterFunction, is the acceptance condition of the sink. The source answers and pulls as if it held only the packets that the filter matches, and the pull has the effects of a normal pull of that packet. This is the pull counterpart of canPushPacket(packet, gate): a sink can now take a packet behind a packet that it cannot accept at the moment. PassivePacketSource and EmptyPacketSource support the filter. PacketQueue offers the first packet in queue order that the filter matches. PriorityScheduler and WrrScheduler decide as if each input held only the accepted packets, and a filtered pull spends the credit of a WrrScheduler as a normal pull does. A compound queue, such as CompoundPendingQueue, passes the filter to its parts. IPacketQueue has the new method dequeuePacket(filter): it dequeues the packet that dequeuePacket() would dequeue if the queue held only the packets that the filter matches. The base classes of the queueing model throw an error for it, so a module that cannot choose among its packets refuses the filtered call. A class outside INET that implements IPassivePacketSource or IPacketQueue directly no longer compiles until it declares the new methods. See the migration guide. Simulation results do not change.
 
+20. Half-duplex Ethernet drops a frame after 16 collisions, not 17
+
+   The two half-duplex Ethernet medium access control (MAC) modules,
+   EthernetCsmaMac and EthernetCsmaMacPhy, made a 17th transmission attempt
+   before they dropped a frame whose attempts all collided. IEEE 802.3 allows
+   16 (attemptLimit, clause 4.2.3.2.5 and Table 4-2), and both modules now
+   stop there. The backoff before each retransmission is unchanged.
+
+   This changes the results of half-duplex simulations in which a frame
+   collides 16 times in a row: the frame is dropped without the 17th attempt
+   and the backoff before it.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
