@@ -574,5 +574,20 @@ cModule *L3AddressResolver::findHostWithMacAddress(const MacAddress& addr)
     return entry ? entry->getInterfaceTable()->getHostModule() : nullptr;
 }
 
+std::string L3AddressResolver::getHostNameWithMacAddress(const MacAddress& addr)
+{
+    cModule *host = findHostWithMacAddress(addr);
+    if (host == nullptr)
+        return addr.str();
+    // the path relative to the network, so that hosts of the same name in different
+    // subnetworks get different names; for a host directly under the network this is
+    // just its name
+    std::string name = host->getFullPath();
+    std::string networkPrefix = std::string(host->getSimulation()->getSystemModule()->getFullName()) + ".";
+    if (name.compare(0, networkPrefix.length(), networkPrefix) == 0)
+        name.erase(0, networkPrefix.length());
+    return name;
+}
+
 } // namespace inet
 
