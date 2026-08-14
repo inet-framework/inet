@@ -21,6 +21,7 @@ class INET_API AarfRateControl : public RateControlBase
   protected:
     // Per-receiver adaptive state (formerly single-instance module members).
     struct State {
+        MacAddress address; // the receiver this state belongs to (for per-station rate attribution)
         const physicallayer::IIeee80211Mode *mode = nullptr;
         simtime_t timer = SIMTIME_ZERO;
         bool probing = false;

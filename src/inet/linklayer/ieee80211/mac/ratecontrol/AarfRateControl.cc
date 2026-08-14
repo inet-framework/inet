@@ -43,11 +43,12 @@ AarfRateControl::State& AarfRateControl::stateFor(const MacAddress& receiverAddr
     auto it = stations.find(receiverAddress);
     if (it == stations.end()) {
         State state;
+        state.address = receiverAddress;
         state.mode = getInitialMode();
         state.increaseThreshold = par("increaseThreshold");
         state.timer = simTime(); // the interval starts when the station is first seen, not at t=0
         it = stations.insert({receiverAddress, state}).first;
-        emitDatarateChangedSignal(state.mode);
+        emitDatarateChangedSignal(state.address, state.mode);
     }
     return it->second;
 }
@@ -60,7 +61,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     if (!isSuccessful && state.probing) { // probing packet failed
         state.numberOfConsSuccTransmissions = 0;
         state.mode = decreaseRateIfPossible(state.mode);
-        emitDatarateChangedSignal(state.mode);
+        emitDatarateChangedSignal(state.address, state.mode);
         EV_DETAIL << "Decreased rate to " << *state.mode << endl;
         multiplyIncreaseThreshold(state, factor);
         resetTimer(state);
@@ -68,7 +69,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     else if (!isSuccessful && retryCount >= decreaseThreshold - 1) { // decreaseThreshold consecutive failed transmissions
         state.numberOfConsSuccTransmissions = 0;
         state.mode = decreaseRateIfPossible(state.mode);
-        emitDatarateChangedSignal(state.mode);
+        emitDatarateChangedSignal(state.address, state.mode);
         EV_DETAIL << "Decreased rate to " << *state.mode << endl;
         resetIncreaseThreshdold(state);
         resetTimer(state);
@@ -79,7 +80,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     if (state.numberOfConsSuccTransmissions == state.increaseThreshold) {
         state.numberOfConsSuccTransmissions = 0;
         state.mode = increaseRateIfPossible(state.mode);
-        emitDatarateChangedSignal(state.mode);
+        emitDatarateChangedSignal(state.address, state.mode);
         EV_DETAIL << "Increased rate to " << *state.mode << endl;
         resetTimer(state);
         state.probing = true;
@@ -108,7 +109,7 @@ void AarfRateControl::increaseRateIfTimerIsExpired(State& state)
 {
     if (simTime() - state.timer >= interval) {
         state.mode = increaseRateIfPossible(state.mode);
-        emitDatarateChangedSignal(state.mode);
+        emitDatarateChangedSignal(state.address, state.mode);
         EV_DETAIL << "Increased rate to " << *state.mode << endl;
         resetTimer(state);
     }

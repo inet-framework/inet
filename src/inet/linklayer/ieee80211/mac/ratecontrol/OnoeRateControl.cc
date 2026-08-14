@@ -29,10 +29,11 @@ OnoeRateControl::State& OnoeRateControl::stateFor(const MacAddress& receiverAddr
     auto it = stations.find(receiverAddress);
     if (it == stations.end()) {
         State state;
+        state.address = receiverAddress;
         state.mode = getInitialMode();
         state.timer = simTime(); // the interval starts when the station is first seen, not at t=0
         it = stations.insert({receiverAddress, state}).first;
-        emitDatarateChangedSignal(state.mode);
+        emitDatarateChangedSignal(state.address, state.mode);
     }
     return it->second;
 }
@@ -81,7 +82,7 @@ void OnoeRateControl::computeMode(State& state)
     if (state.numOfSuccTransmissions > 0) {
         if (numOfFrameTransmitted >= 10 && state.avgRetriesPerFrame > 1) {
             state.mode = decreaseRateIfPossible(state.mode);
-            emitDatarateChangedSignal(state.mode);
+            emitDatarateChangedSignal(state.address, state.mode);
             EV_DETAIL << "Decreased rate to " << *state.mode << endl;
             state.credit = 0;
         }
@@ -92,7 +93,7 @@ void OnoeRateControl::computeMode(State& state)
 
         if (state.credit >= 10) {
             state.mode = increaseRateIfPossible(state.mode);
-            emitDatarateChangedSignal(state.mode);
+            emitDatarateChangedSignal(state.address, state.mode);
             EV_DETAIL << "Increased rate to " << *state.mode << endl;
             state.credit = 0;
         }

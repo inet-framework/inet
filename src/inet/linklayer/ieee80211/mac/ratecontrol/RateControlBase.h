@@ -29,8 +29,11 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
     virtual MacAddress getReceiverAddress(Packet *frame) const;
     // The mode a newly seen station starts from: the initialRate parameter, or the fastest mandatory mode.
     virtual const physicallayer::IIeee80211Mode *getInitialMode();
-    // Emits datarateChanged with the rate of the given mode.
-    virtual void emitDatarateChangedSignal(const physicallayer::IIeee80211Mode *mode);
+    // Emits datarateChanged with the receiver as a named details object, so a demux(datarateChanged)
+    // result filter can record a separate data-rate vector per station. The aggregate datarateChanged
+    // statistic ignores the details and is therefore unchanged. Group-addressed receivers are emitted
+    // without details (aggregate only).
+    virtual void emitDatarateChangedSignal(const MacAddress& receiver, const physicallayer::IIeee80211Mode *mode);
     // Drops all per-station state; called by subclasses' override when the mode set changes.
     virtual void resetRateControl() {}
 

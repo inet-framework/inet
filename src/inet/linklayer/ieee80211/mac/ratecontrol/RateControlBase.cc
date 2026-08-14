@@ -9,6 +9,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -46,10 +47,18 @@ const IIeee80211Mode *RateControlBase::getInitialMode()
     return initialRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initialRate));
 }
 
-void RateControlBase::emitDatarateChangedSignal(const IIeee80211Mode *mode)
+void RateControlBase::emitDatarateChangedSignal(const MacAddress& receiver, const IIeee80211Mode *mode)
 {
     bps rate = mode->getDataMode()->getNetBitrate();
-    emit(datarateChangedSignal, rate.get());
+    // Emit once, tagging the value with the receiver as a named details object. The aggregate
+    // datarateChanged statistic ignores the details (so it is unchanged), while a demux(datarateChanged)
+    // statistic uses the details name to record a separate data-rate vector per station.
+    if (receiver.isBroadcast() || receiver.isMulticast())
+        emit(datarateChangedSignal, rate.get());
+    else {
+        cNamedObject details(L3AddressResolver().getHostNameWithMacAddress(receiver).c_str());
+        emit(datarateChangedSignal, rate.get(), &details);
+    }
 }
 
 void RateControlBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
