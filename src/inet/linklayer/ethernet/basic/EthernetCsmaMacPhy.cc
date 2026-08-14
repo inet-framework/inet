@@ -611,8 +611,8 @@ void EthernetCsmaMacPhy::handleEndJammingPeriod()
 
 void EthernetCsmaMacPhy::handleRetransmission()
 {
-    if (++backoffs > MAX_ATTEMPTS) {
-        EV_DETAIL << "Number of retransmit attempts of frame exceeds maximum, cancelling transmission of frame\n";
+    if (++backoffs >= MAX_ATTEMPTS) {
+        EV_DETAIL << "Number of transmission attempts of frame reached maximum, cancelling transmission of frame\n";
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(MAX_ATTEMPTS);

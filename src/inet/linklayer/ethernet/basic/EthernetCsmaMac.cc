@@ -351,12 +351,12 @@ void EthernetCsmaMac::abortTransmission()
 {
     EV_DEBUG << "Aborting frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
     cancelEvent(txTimer);
+    numRetries++;
 }
 
 void EthernetCsmaMac::retryTransmission()
 {
     EV_DEBUG << "Retrying frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
-    numRetries++;
 }
 
 void EthernetCsmaMac::giveUpTransmission()

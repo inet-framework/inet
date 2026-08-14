@@ -85,7 +85,7 @@
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,             0, ERROR,   # not a complete simulations, defaults.ini included by other ini files
 /examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             ee0c-f755/tplx;5a1c-a9ae/~tNl;1b8f-1990/tyf, PASS, EthernetMac
 /examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            d8b2-0ab0/tplx;5164-36e7/~tNl;8df5-5ef0/tyf, PASS, EthernetCsmaMac
-/examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             3eee-921e/tplx;9c01-f043/~tNl;58b0-336c/tyf, PASS, EthernetCsmaMac
+/examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             e2fb-4304/tplx;61b9-f240/~tNl;826b-3474/tyf, PASS, EthernetCsmaMac
 /examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            d8b2-0ab0/tplx;5164-36e7/~tNl;51c7-9021/tyf, PASS, EthernetCsmaMac
 /examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              2298-dd5e/tplx;72a3-e2d6/~tNl, PASS, EthernetMac EthernetCsmaMac
 /examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            7ecc-a6a1/tplx;990a-3876/~tNl;f826-48f7/tyf, PASS, EthernetMac EthernetCsmaMac
