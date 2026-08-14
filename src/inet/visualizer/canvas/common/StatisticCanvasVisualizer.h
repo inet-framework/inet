@@ -32,14 +32,27 @@ class INET_API StatisticCanvasVisualizer : public StatisticVisualizerBase
         virtual ~StatisticCanvasVisualization();
     };
 
+    class INET_API GroupCanvasVisualization : public GroupVisualization {
+      public:
+        NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
+        cFigure *figure = nullptr;
+        IIndicatorFigure *indicatorFigure = nullptr;
+        cFigure::Point annotationSize = cFigure::Point(NaN, NaN);
+
+      public:
+        GroupCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cFigure *figure, IIndicatorFigure *indicatorFigure, int moduleId);
+        virtual ~GroupCanvasVisualization();
+    };
+
   protected:
     double zIndex = NaN;
     ModuleRefByPar<NetworkNodeCanvasVisualizer> networkNodeVisualizer;
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void refreshDisplay() const override;
 
-    // Creates the figure that displays the value as configured by the `figure` parameter,
+    // Creates the figure that displays the value(s) as configured by the `figure` parameter,
     // or by the figure template property named by the `propertyName` parameter; returns
     // nullptr if neither is given.
     virtual cFigure *createIndicatorFigure();
@@ -56,6 +69,11 @@ class INET_API StatisticCanvasVisualizer : public StatisticVisualizerBase
     virtual void addStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
     virtual void removeStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
     virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
+
+    virtual GroupVisualization *createGroupVisualization(cComponent *module) override;
+    virtual void addGroupVisualization(GroupVisualization *groupVisualization) override;
+    virtual void removeGroupVisualization(GroupVisualization *groupVisualization) override;
+    virtual void refreshGroupVisualization(GroupCanvasVisualization *groupVisualization) const;
 };
 
 } // namespace visualizer

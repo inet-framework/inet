@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+
 #include "inet/visualizer/canvas/common/StatisticCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -40,6 +41,20 @@ StatisticCanvasVisualizer::StatisticCanvasVisualization::StatisticCanvasVisualiz
 }
 
 StatisticCanvasVisualizer::StatisticCanvasVisualization::~StatisticCanvasVisualization()
+{
+    delete figure;
+    figure = nullptr;
+}
+
+StatisticCanvasVisualizer::GroupCanvasVisualization::GroupCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cFigure *figure, IIndicatorFigure *indicatorFigure, int moduleId) :
+    GroupVisualization(moduleId),
+    networkNodeVisualization(networkNodeVisualization),
+    figure(figure),
+    indicatorFigure(indicatorFigure)
+{
+}
+
+StatisticCanvasVisualizer::GroupCanvasVisualization::~GroupCanvasVisualization()
 {
     delete figure;
     figure = nullptr;
@@ -192,6 +207,77 @@ void StatisticCanvasVisualizer::refreshStatisticVisualization(const StatisticVis
         boxedLabelFigure->setText(getText(statisticVisualization).c_str());
         statisticCanvasVisualization->networkNodeVisualization->setAnnotationSize(figure, boxedLabelFigure->getBounds().getSize());
     }
+}
+
+StatisticVisualizerBase::GroupVisualization *StatisticCanvasVisualizer::createGroupVisualization(cComponent *module)
+{
+    auto networkNode = getContainingNode(check_and_cast<cModule *>(module));
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
+    if (networkNodeVisualization == nullptr)
+        return nullptr; // the network node is not visualized
+    cFigure *figure = createIndicatorFigure();
+    if (figure == nullptr) {
+        // a bar chart is the default figure for displaying several items
+        cProperty property("figure");
+        property.addKey("type");
+        property.setValue("type", 0, "barChart");
+        figure = createFigure(&property);
+    }
+    auto indicatorFigure = dynamic_cast<IIndicatorFigure *>(figure);
+    if (indicatorFigure == nullptr) {
+        std::string className = figure->getClassName();
+        delete figure;
+        throw cRuntimeError("Cannot display statistic values with a figure of class %s, because it is not an indicator figure", className.c_str());
+    }
+    figure->setName("statisticGroup");
+    figure->setTags((std::string("statistic ") + tags).c_str());
+    figure->setAssociatedObject(module);
+    figure->setZIndex(zIndex);
+    return new GroupCanvasVisualization(networkNodeVisualization, figure, indicatorFigure, module->getId());
+}
+
+void StatisticCanvasVisualizer::addGroupVisualization(GroupVisualization *groupVisualization)
+{
+    StatisticVisualizerBase::addGroupVisualization(groupVisualization);
+    auto groupCanvasVisualization = static_cast<GroupCanvasVisualization *>(groupVisualization);
+    auto size = groupCanvasVisualization->indicatorFigure->getSize();
+    groupCanvasVisualization->annotationSize = size;
+    groupCanvasVisualization->networkNodeVisualization->addAnnotation(groupCanvasVisualization->figure, cFigure::Rectangle(0.0, 0.0, size.x, size.y), placementHint, placementPriority);
+}
+
+void StatisticCanvasVisualizer::removeGroupVisualization(GroupVisualization *groupVisualization)
+{
+    StatisticVisualizerBase::removeGroupVisualization(groupVisualization);
+    auto groupCanvasVisualization = static_cast<GroupCanvasVisualization *>(groupVisualization);
+    if (networkNodeVisualizer != nullptr)
+        groupCanvasVisualization->networkNodeVisualization->removeAnnotation(groupCanvasVisualization->figure);
+}
+
+void StatisticCanvasVisualizer::refreshDisplay() const
+{
+    VisualizerBase::refreshDisplay();
+    if (groupMode == GROUP_NONE)
+        return;
+    if (groupMode == GROUP_NETWORK_NODE)
+        refreshSourceItemValues();
+    else if (splitMode == SPLIT_FLOW)
+        refreshFlowItemValues();
+    for (auto& it : groupVisualizations)
+        refreshGroupVisualization(static_cast<GroupCanvasVisualization *>(it.second));
+}
+
+void StatisticCanvasVisualizer::refreshGroupVisualization(GroupCanvasVisualization *groupVisualization) const
+{
+    auto indicatorFigure = groupVisualization->indicatorFigure;
+    for (auto& value : groupVisualization->values) {
+        const char *label = value.first.c_str();
+        int itemIndex = indicatorFigure->getItemIndex(label, true);
+        if (itemIndex == -1)
+            throw cRuntimeError("Cannot display the item '%s' with a figure of class %s, because it does not support several named items", label, groupVisualization->figure->getClassName());
+        indicatorFigure->setValue(itemIndex, simTime(), value.second);
+    }
+    indicatorFigure->refreshDisplay();
+    setAnnotationSize(groupVisualization->networkNodeVisualization, groupVisualization->figure, indicatorFigure->getSize(), groupVisualization->annotationSize);
 }
 
 } // namespace visualizer

@@ -7,6 +7,8 @@
 
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 
+#include <cmath>
+
 #include "inet/common/ModuleAccess.h"
 #include "omnetpp/cstatisticbuilder.h"
 
@@ -23,11 +25,17 @@ StatisticVisualizerBase::StatisticVisualization::StatisticVisualization(int modu
 {
 }
 
+StatisticVisualizerBase::GroupVisualization::GroupVisualization(int moduleId) :
+    moduleId(moduleId)
+{
+}
+
 void StatisticVisualizerBase::preDelete(cComponent *root)
 {
     if (displayStatistics) {
         unsubscribe();
         removeAllStatisticVisualizations();
+        removeAllGroupVisualizations();
     }
 }
 
@@ -75,9 +83,34 @@ void StatisticVisualizerBase::initialize(int stage)
         opacity = par("opacity");
         placementHint = parsePlacement(par("placementHint"));
         placementPriority = par("placementPriority");
+        const char *splitBy = par("splitBy");
+        if (!strcmp(splitBy, "none"))
+            splitMode = SPLIT_NONE;
+        else if (!strcmp(splitBy, "details"))
+            splitMode = SPLIT_DETAILS;
+        else if (!strcmp(splitBy, "flow"))
+            splitMode = SPLIT_FLOW;
+        else
+            throw cRuntimeError("Unknown splitBy parameter value: '%s'", splitBy);
+        const char *groupBy = par("groupBy");
+        if (!strcmp(groupBy, "none"))
+            groupMode = GROUP_NONE;
+        else if (!strcmp(groupBy, "source"))
+            groupMode = GROUP_SOURCE;
+        else if (!strcmp(groupBy, "networkNode"))
+            groupMode = GROUP_NETWORK_NODE;
+        else
+            throw cRuntimeError("Unknown groupBy parameter value: '%s'", groupBy);
+        // splitting the values of a source produces the items of that source's own group,
+        // and the items of a network node's group are its sources themselves
+        if (!((splitMode == SPLIT_NONE && groupMode != GROUP_SOURCE) ||
+              (splitMode != SPLIT_NONE && groupMode == GROUP_SOURCE)))
+            throw cRuntimeError("Cannot split the statistic by '%s' and group it by '%s': "
+                                "splitting requires groupBy = \"source\", and grouping by network node requires splitBy = \"none\"", splitBy, groupBy);
         if (displayStatistics) {
             if (opp_isempty(signalName))
                 throw cRuntimeError("The signalName parameter must be not empty");
+            subscribedSignal = registerSignal(signalName);
             subscribe();
         }
     }
@@ -91,11 +124,12 @@ void StatisticVisualizerBase::handleParameterChange(const char *name)
     else if (!strcmp(name, "format"))
         format.parseFormat(par("format"));
     removeAllStatisticVisualizations();
+    removeAllGroupVisualizations();
 }
 
 void StatisticVisualizerBase::subscribe()
 {
-    visualizationSubjectModule->subscribe(registerSignal(signalName), this);
+    visualizationSubjectModule->subscribe(subscribedSignal, this);
 }
 
 void StatisticVisualizerBase::unsubscribe()
@@ -103,7 +137,7 @@ void StatisticVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto visualizationSubjectModule = findModuleFromPar<cModule>(par("visualizationSubjectModule"), this);
     if (visualizationSubjectModule != nullptr)
-        visualizationSubjectModule->unsubscribe(registerSignal(signalName), this);
+        visualizationSubjectModule->unsubscribe(subscribedSignal, this);
 }
 
 void StatisticVisualizerBase::addResultRecorder(cComponent *source, simsignal_t signal)
@@ -169,7 +203,7 @@ const char *StatisticVisualizerBase::getUnit(cComponent *source)
     return statisticUnit;
 }
 
-std::string StatisticVisualizerBase::getRecordingMode()
+std::string StatisticVisualizerBase::getRecordingMode() const
 {
     if (*statisticExpression == '\0')
         return "statisticVisualizerLastValueRecorder";
@@ -239,6 +273,151 @@ void StatisticVisualizerBase::refreshStatisticVisualization(const StatisticVisua
             if (statisticVisualization->printValue > 1)
                 break;
         }
+    }
+}
+
+double StatisticVisualizerBase::convertToDisplayUnit(double value) const
+{
+    if (std::isnan(value) || units.empty() || opp_isempty(statisticUnit))
+        return value;
+    return cNEDValue::convertUnit(value, statisticUnit, units[0].c_str());
+}
+
+StatisticVisualizerBase::GroupVisualization *StatisticVisualizerBase::getGroupVisualization(int moduleId)
+{
+    auto it = groupVisualizations.find(moduleId);
+    return it == groupVisualizations.end() ? nullptr : it->second;
+}
+
+StatisticVisualizerBase::GroupVisualization *StatisticVisualizerBase::getOrCreateGroupVisualization(cComponent *module)
+{
+    auto groupVisualization = getGroupVisualization(module->getId());
+    if (groupVisualization == nullptr) {
+        groupVisualization = createGroupVisualization(module);
+        if (groupVisualization == nullptr)
+            return nullptr; // grouping is not supported by this visualizer (e.g. the osg one)
+        addGroupVisualization(groupVisualization);
+    }
+    return groupVisualization;
+}
+
+void StatisticVisualizerBase::addGroupVisualization(GroupVisualization *groupVisualization)
+{
+    groupVisualizations[groupVisualization->moduleId] = groupVisualization;
+}
+
+void StatisticVisualizerBase::removeGroupVisualization(GroupVisualization *groupVisualization)
+{
+    groupVisualizations.erase(groupVisualization->moduleId);
+}
+
+void StatisticVisualizerBase::removeAllGroupVisualizations()
+{
+    std::vector<GroupVisualization *> removedGroupVisualizations;
+    for (auto it : groupVisualizations)
+        removedGroupVisualizations.push_back(it.second);
+    for (auto groupVisualization : removedGroupVisualizations) {
+        removeGroupVisualization(groupVisualization);
+        delete groupVisualization;
+    }
+    registeredSourceIds.clear();
+}
+
+void StatisticVisualizerBase::processSplitValue(cComponent *source, double value, cObject *details)
+{
+    // the statistic is identified by the details object emitted with the value, the same way
+    // as the demux() result filter identifies the statistics it demultiplexes a signal into;
+    // a value emitted without a details object (e.g. the rate of a group addressed frame)
+    // belongs to no statistic
+    std::string label = details != nullptr ? details->getFullName() : "";
+    if (label.empty())
+        return;
+    auto module = check_and_cast<cModule *>(source);
+    auto groupVisualization = getGroupVisualization(module->getId());
+    if (groupVisualization == nullptr) {
+        if (!sourceFilter.matches(module))
+            return;
+        groupVisualization = getOrCreateGroupVisualization(module);
+        if (groupVisualization == nullptr)
+            return;
+    }
+    groupVisualization->values[label] = convertToDisplayUnit(value);
+}
+
+void StatisticVisualizerBase::registerSource(cComponent *source, simsignal_t signal)
+{
+    auto module = check_and_cast<cModule *>(source);
+    if (registeredSourceIds.find(module->getId()) != registeredSourceIds.end())
+        return; // already registered
+    if (!sourceFilter.matches(module))
+        return;
+    registeredSourceIds.insert(module->getId());
+    // when grouping by network node, the sources of one node are displayed together
+    auto networkNode = groupMode == GROUP_NETWORK_NODE ? getContainingNode(module) : nullptr;
+    auto groupVisualization = getOrCreateGroupVisualization(networkNode != nullptr ? networkNode : module);
+    if (groupVisualization == nullptr)
+        return;
+    // the values come from the result recorders built from statisticExpression, so that an
+    // item can display e.g. a count or a throughput rather than the raw value of the signal
+    addResultRecorder(source, signal);
+    if (groupMode == GROUP_NETWORK_NODE) {
+        std::string label = getSourceItemLabel(module, networkNode);
+        groupVisualization->recorders[label] = getResultRecorder(source, signal);
+        groupVisualization->values[label] = NaN;
+    }
+    // when splitting by flow, statisticExpression contains demuxFlow(), so the recorder chain
+    // creates a separate recorder per flow as the flows appear, see refreshFlowItemValues()
+}
+
+std::string StatisticVisualizerBase::getSourceItemLabel(cModule *module, cModule *networkNode) const
+{
+    // the label must identify the item among the ones of the same network node, so it is
+    // the path of the signal source relative to the network node, e.g. wlan[0].mac; the name
+    // alone is ambiguous for several similarly named submodules, e.g. the MACs of the
+    // network interfaces of a node
+    if (module == networkNode)
+        return module->getFullName();
+    return module->getFullPath().substr(networkNode->getFullPath().length() + 1);
+}
+
+void StatisticVisualizerBase::refreshSourceItemValues() const
+{
+    for (auto& it : groupVisualizations) {
+        auto groupVisualization = it.second;
+        for (auto& recorder : groupVisualization->recorders)
+            groupVisualization->values[recorder.first] = convertToDisplayUnit(recorder.second->getLastValue());
+    }
+}
+
+void StatisticVisualizerBase::refreshFlowItemValues() const
+{
+    for (auto& it : groupVisualizations) {
+        auto groupVisualization = it.second;
+        auto source = getSimulation()->getModule(groupVisualization->moduleId);
+        if (source == nullptr)
+            continue;
+        std::vector<LastValueRecorder *> recorders;
+        for (auto listener : source->getLocalSignalListeners(subscribedSignal))
+            if (auto resultListener = dynamic_cast<cResultListener *>(listener))
+                collectResultRecorders(resultListener, recorders);
+        for (auto recorder : recorders) {
+            const char *label = recorder->getDemuxLabel();
+            if (opp_isempty(label))
+                continue; // the recorder of the undemultiplexed statistic is not an item
+            groupVisualization->values[label] = convertToDisplayUnit(recorder->getLastValue());
+        }
+    }
+}
+
+void StatisticVisualizerBase::collectResultRecorders(cResultListener *resultListener, std::vector<LastValueRecorder *>& recorders) const
+{
+    if (auto resultRecorder = dynamic_cast<LastValueRecorder *>(resultListener)) {
+        if (getRecordingMode() == resultRecorder->getRecordingMode() && !strcmp(statisticName, resultRecorder->getStatisticName()))
+            recorders.push_back(resultRecorder);
+    }
+    else if (auto resultFilter = dynamic_cast<cResultFilter *>(resultListener)) {
+        for (auto delegate : resultFilter->getDelegates())
+            collectResultRecorders(delegate, recorders);
     }
 }
 
