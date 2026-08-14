@@ -1181,6 +1181,7 @@ void Mrp::setupLinkChangeReq(int ringPort, LinkState linkState, simtime_t time)
         throw cRuntimeError("Unknown LinkState in linkChangeRequest");
     }
     linkChangeTlv->setSa(localBridgeAddress);
+    linkChangeTlv->setPortRole(ringPort == primaryRingPortId ? MrpInterfaceData::PRIMARY : MrpInterfaceData::SECONDARY);
     linkChangeTlv->setInterval(time.inUnit(SIMTIME_MS));
     linkChangeTlv->setBlocked(1);
 

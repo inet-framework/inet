@@ -111,12 +111,14 @@ class MrpTopologyChange extends MrpTlvHeader
 //
 class MrpLinkChange extends MrpTlvHeader
 {
-    chunkLength = B(12);
+    chunkLength = B(16);
     headerType = LINKDOWN; // LINKUP or LINKDOWN
-    valueLength = 10;
+    valueLength = 14;
     MacAddress sa;
+    uint16_t portRole;
     uint16_t interval; // in milliseconds
     uint16_t blocked;
+    uint16_t reserved = 0; // the TLV ends on a four octet boundary, as every other one does
 }
 
 //
