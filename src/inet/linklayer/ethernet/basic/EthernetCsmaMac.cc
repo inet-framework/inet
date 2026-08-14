@@ -21,6 +21,7 @@ Define_Module(EthernetCsmaMac);
 simsignal_t EthernetCsmaMac::carrierSenseChangedSignal = cComponent::registerSignal("carrierSenseChanged");
 simsignal_t EthernetCsmaMac::collisionChangedSignal = cComponent::registerSignal("collisionChanged");
 simsignal_t EthernetCsmaMac::stateChangedSignal = cComponent::registerSignal("stateChanged");
+simsignal_t EthernetCsmaMac::packetPendingDelaySignal = cComponent::registerSignal("packetPendingDelay");
 
 Register_Enum(EthernetCsmaMac::State,
     (EthernetCsmaMac::IDLE,
@@ -319,6 +320,7 @@ void EthernetCsmaMac::setCurrentTransmission(Packet *packet)
 {
     ASSERT(currentTxFrame == nullptr);
     currentTxFrame = packet;
+    firstTxAttemptTime = simTime(); // the first transmission attempt starts immediately
 }
 
 void EthernetCsmaMac::startTransmission()
@@ -336,11 +338,18 @@ void EthernetCsmaMac::startTransmission()
     }
     addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
     scheduleTxTimer(currentTxFrame);
+    currentTxAttemptTime = simTime();
 }
 
 void EthernetCsmaMac::endTransmission()
 {
     EV_DEBUG << "Ending frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
+    // the frame was successfully transmitted; report how long the medium access took,
+    // measured from the start of the first transmission attempt to the start of this
+    // (i.e. the successful) transmission attempt
+    emit(packetPendingDelaySignal, currentTxAttemptTime - firstTxAttemptTime);
+    firstTxAttemptTime = -1;
+    currentTxAttemptTime = -1;
     numFramesSent++;
     delete currentTxFrame;
     currentTxFrame = nullptr;
@@ -366,6 +375,8 @@ void EthernetCsmaMac::giveUpTransmission()
     details.setReason(RETRY_LIMIT_REACHED);
     details.setLimit(MAX_ATTEMPTS);
     dropCurrentTxFrame(details);
+    firstTxAttemptTime = -1;
+    currentTxAttemptTime = -1;
     numAttempts = 0;
 }
 

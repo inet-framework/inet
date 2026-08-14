@@ -40,11 +40,20 @@ simple EthernetCsmaMac extends MacProtocolBase
         @signal[collisionChanged](type=int);
         // emitted when the state of the state machine changes, the value is one of IDLE, WAIT_IFG, TRANSMITTING, JAMMING, BACKOFF, RECEIVING
         @signal[stateChanged](type=int);
+        // emitted when a frame transmission completes successfully; the value is the medium access
+        // delay of the frame: the time from the start of the frame's first transmission attempt to
+        // the start of the transmission attempt that completed successfully (zero for frames that
+        // succeed on their first attempt; not emitted for frames dropped at the retry limit)
+        @signal[packetPendingDelay](type=simtime_t);
         // the time evolution of the incoming carrier sense signal
         @statistic[carrierSense](title="carrier sense"; type=int; source=carrierSenseChanged; record=count,vector; interpolationmode=sample-hold);
         // the time evolution of the incoming collision signal
         @statistic[collision](title="collision"; type=int; source=collisionChanged; record=count,vector; interpolationmode=sample-hold);
         // the time evolution of the state of the state machine
         @statistic[state](title="state"; type=enum; enum=IDLE, WAIT_IFG, TRANSMITTING, JAMMING, BACKOFF, RECEIVING; source=stateChanged; record=count,vector; interpolationmode=sample-hold);
+        // the medium access delay of successfully transmitted frames: the time from the start of the
+        // frame's first transmission attempt to the start of the transmission attempt that completed
+        // successfully; comparable to the packetPendingDelay statistic of ~EthernetPlca
+        @statistic[packetPendingDelay](title="packet pending delay"; unit=s; record=count,histogram,vector; interpolationmode=none);
 }
 
