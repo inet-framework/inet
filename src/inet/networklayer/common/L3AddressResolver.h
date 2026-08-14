@@ -205,6 +205,15 @@ class INET_API L3AddressResolver
      * Find the host with the specified MAC address. Returns nullptr if not found.
      */
     virtual cModule *findHostWithMacAddress(const MacAddress& addr);
+
+    /**
+     * Returns a name identifying the host with the specified MAC address: its path
+     * relative to the network, which is just the host name unless the host is nested
+     * in a subnetwork. Falls back to the MAC address string if no such host is found.
+     * Useful wherever a peer has to be named by the address a model knows it by, e.g.
+     * to label the per-peer series of a demultiplexed statistic.
+     */
+    virtual std::string getHostNameWithMacAddress(const MacAddress& addr);
     //@}
 };
 
