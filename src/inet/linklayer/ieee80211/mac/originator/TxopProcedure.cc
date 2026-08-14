@@ -96,7 +96,7 @@ simtime_t TxopProcedure::getRemaining() const
     if (start == -1)
         throw cRuntimeError("Txop has not started yet");
     auto now = simTime();
-    return now > start + limit ? 0 : now - start;
+    return now > start + limit ? 0 : start + limit - now;
 }
 
 simtime_t TxopProcedure::getDuration() const

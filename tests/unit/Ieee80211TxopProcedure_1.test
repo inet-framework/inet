@@ -1,0 +1,86 @@
+%description:
+Tests that TxopProcedure reports the remaining time until the TXOP limit.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+
+using namespace omnetpp;
+using namespace inet;
+using namespace inet::ieee80211;
+
+namespace Ieee80211TxopProcedure_1 {
+
+class TestTxopProcedure : public TxopProcedure
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL)
+            limit = par("txopLimit");
+    }
+};
+
+Define_Module(TestTxopProcedure);
+
+} // namespace Ieee80211TxopProcedure_1
+
+%file: TestNetwork.ned
+
+import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
+
+simple TestTxopProcedure extends TxopProcedure
+{
+    parameters:
+        @class(TestTxopProcedure);
+}
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        txop: TestTxopProcedure {
+            parameters:
+                txopLimit = 10ms;
+        }
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+
+%activity:
+
+auto txop = check_and_cast<TxopProcedure *>(cSimulation::getActiveSimulation()->getModuleByPath("txop"));
+
+auto getRemainingThrows = [txop]() {
+    try {
+        txop->getRemaining();
+        return false;
+    }
+    catch (const cRuntimeError&) {
+        return true;
+    }
+};
+
+ASSERT(getRemainingThrows());
+
+txop->startTxop(AC_VI);
+ASSERT(txop->getRemaining() == SimTime(10, SIMTIME_MS));
+
+wait(0.003);
+ASSERT(txop->getRemaining() == SimTime(7, SIMTIME_MS));
+
+wait(0.007);
+ASSERT(txop->getRemaining() == SIMTIME_ZERO);
+
+wait(0.001);
+ASSERT(txop->getRemaining() == SIMTIME_ZERO);
+
+txop->endTxop();
+ASSERT(getRemainingThrows());
+
+EV << "TXOP remaining time is correct at all boundaries.\n";
+
+%contains: stdout
+TXOP remaining time is correct at all boundaries.
