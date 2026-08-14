@@ -71,8 +71,10 @@ void MrpTlvSerializer::serialize(MemoryOutputStream &stream, const Ptr<const Chu
     case LINKUP: {
         const auto &lcf = staticPtrCast<const MrpLinkChange>(chunk);
         stream.writeMacAddress(lcf->getSa());
+        stream.writeUint16Be(lcf->getPortRole());
         stream.writeUint16Be(lcf->getInterval());
         stream.writeUint16Be(lcf->getBlocked());
+        stream.writeUint16Be(lcf->getReserved());
         break;
     }
     case INTEST: {
@@ -207,8 +209,10 @@ const Ptr<Chunk> MrpTlvSerializer::deserialize(MemoryInputStream &stream) const
         tlv->setHeaderType(headerType);
         tlv->setValueLength(headerLength);
         tlv->setSa(stream.readMacAddress());
+        tlv->setPortRole(stream.readUint16Be());
         tlv->setInterval(stream.readUint16Be());
         tlv->setBlocked(stream.readUint16Be());
+        tlv->setReserved(stream.readUint16Be());
         tlvReturnValue = tlv;
         break;
     }
