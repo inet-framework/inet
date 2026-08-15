@@ -43,9 +43,9 @@ class TestOriginatorQosAckPolicy : public OriginatorQosAckPolicy
 class TestRecipientQosAckPolicy : public RecipientQosAckPolicy
 {
   public:
-    static bool isCompressedResponseNeeded(const Ptr<const Ieee80211CompressedBlockAckReq>& request, RecipientBlockAckAgreement *agreement, bool enabled)
+    static bool isCompressedResponseNeeded(const Ptr<const Ieee80211CompressedBlockAckReq>& request, RecipientBlockAckAgreement *agreement)
     {
-        return isCompressedBlockAckNeeded(request, agreement, enabled);
+        return isCompressedBlockAckNeeded(request, agreement);
     }
 };
 
@@ -235,18 +235,18 @@ static Packet *makeOutstandingQosFrame(MacAddress receiverAddress, Tid tid, Frag
 
 {
     auto request = makeCompressedBlockAckReq();
-    ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, nullptr, false));
-    ASSERT(TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, nullptr, true));
+    ASSERT(TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, nullptr));
     request->setFragmentNumber(1);
-    ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, nullptr, true));
+    ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, nullptr));
     request->setFragmentNumber(0);
     RecipientBlockAckAgreement delayedAgreement(MacAddress("11:22:33:44:55:66"), 5, SequenceNumberCyclic(100), 64, SIMTIME_ZERO);
+    ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, &delayedAgreement));
     delayedAgreement.addbaResposneSent();
     delayedAgreement.setIsDelayedBlockAckPolicySupported(true);
-    ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, &delayedAgreement, true));
+    ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, &delayedAgreement));
     delayedAgreement.setIsDelayedBlockAckPolicySupported(false);
-    ASSERT(TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, &delayedAgreement, true));
-    EV << "Recipient capability, fragment, and agreement-policy gates passed.\n";
+    ASSERT(TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, &delayedAgreement));
+    EV << "Recipient fragment and agreement-policy gates passed.\n";
 }
 
 {
@@ -346,7 +346,7 @@ Established agreement produces the expected 64-bit bitmap.
 Compressed bitmap preserves leading receive-window holes.
 Compressed bitmap wraps from sequence 4095 to 0.
 Compressed bitmap preserves leading holes across sequence wrap.
-Recipient capability, fragment, and agreement-policy gates passed.
+Recipient fragment and agreement-policy gates passed.
 Originator capability, agreement, and fragmentation gates passed.
 Legacy Basic BAR and BA remain byte-exact.
 Accepted delayed agreement is retained for Basic BAR fallback.
