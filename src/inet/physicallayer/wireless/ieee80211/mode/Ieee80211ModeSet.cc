@@ -8,6 +8,7 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 #include <algorithm>
+#include <typeinfo>
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
@@ -496,6 +497,30 @@ int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
     for (size_t index = 0; index < entries.size(); index++)
         if (entries[index].mode == mode)
             return index;
+    // HT mixed and Greenfield modes have distinct cached identities because their
+    // preambles and timing differ, but they represent the same data-rate mode for
+    // mode-set membership and rate selection purposes.
+    if (mode != nullptr) {
+        for (size_t index = 0; index < entries.size(); index++) {
+            auto entryMode = entries[index].mode;
+            auto entryHeaderMode = entryMode->getHeaderMode();
+            auto modeHeaderMode = mode->getHeaderMode();
+            auto entryDataMode = entryMode->getDataMode();
+            auto modeDataMode = mode->getDataMode();
+            if (typeid(*entryMode) == typeid(*mode) &&
+                entryHeaderMode->getNetBitrate() == modeHeaderMode->getNetBitrate() &&
+                entryHeaderMode->getGrossBitrate() == modeHeaderMode->getGrossBitrate() &&
+                entryHeaderMode->getSymbolInterval() == modeHeaderMode->getSymbolInterval() &&
+                entryDataMode->getBandwidth() == modeDataMode->getBandwidth() &&
+                entryDataMode->getNetBitrate() == modeDataMode->getNetBitrate() &&
+                entryDataMode->getGrossBitrate() == modeDataMode->getGrossBitrate() &&
+                entryDataMode->getSymbolInterval() == modeDataMode->getSymbolInterval() &&
+                entryDataMode->getNumberOfSpatialStreams() == modeDataMode->getNumberOfSpatialStreams())
+            {
+                return index;
+            }
+        }
+    }
     return -1;
 }
 
@@ -511,6 +536,20 @@ int Ieee80211ModeSet::getModeIndex(const IIeee80211Mode *mode) const
 bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
 {
     return entries[getModeIndex(mode)].isMandatory;
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::findMode(const IIeee80211Mode *mode) const
+{
+    int index = findModeIndex(mode);
+    return index >= 0 ? entries[index].mode : nullptr;
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::getMode(const IIeee80211Mode *mode) const
+{
+    auto result = findMode(mode);
+    if (result == nullptr)
+        throw cRuntimeError("Unknown mode in operation mode: '%s'", getName());
+    return result;
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth, int numSpatialStreams) const
@@ -614,6 +653,20 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211M
             if (entries[i].isMandatory)
                 return entries[i].mode;
     return nullptr;
+}
+
+const Ieee80211ModeSet *Ieee80211ModeSet::getControlResponseModeSet(const IIeee80211Mode *mode) const
+{
+    // IEEE 802.11 prohibits HT-GF format for control response frames; use the
+    // HT-mixed profile while retaining the received mode's rate parameters.
+    if (dynamic_cast<const Ieee80211HtMode *>(mode) != nullptr)
+        return getModeSet("n(mixed-2.4Ghz)");
+    return this;
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::getControlResponseMode(const IIeee80211Mode *mode) const
+{
+    return getControlResponseModeSet(mode)->getMode(mode);
 }
 
 const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(const char *mode)

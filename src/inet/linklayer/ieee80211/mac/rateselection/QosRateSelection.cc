@@ -32,11 +32,11 @@ void QosRateSelection::initialize(int stage)
         double controlFrameBitrate = par("controlFrameBitrate");
         controlFrameMode = (controlFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(controlFrameBitrate));
         double responseAckFrameBitrate = par("responseAckFrameBitrate");
-        responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
+        responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getControlResponseMode(modeSet->getMode(bps(responseAckFrameBitrate)));
         double responseBlockAckFrameBitrate = par("responseBlockAckFrameBitrate");
-        responseBlockAckFrameMode = (responseBlockAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseBlockAckFrameBitrate));
+        responseBlockAckFrameMode = (responseBlockAckFrameBitrate == -1) ? nullptr : modeSet->getControlResponseMode(modeSet->getMode(bps(responseBlockAckFrameBitrate)));
         double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
-        responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseCtsFrameBitrate));
+        responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getControlResponseMode(modeSet->getMode(bps(responseCtsFrameBitrate)));
     }
 }
 
@@ -75,9 +75,11 @@ const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *pack
     auto mode = getMode(packet, dataOrMgmtHeader);
     ASSERT(modeSet->containsMode(mode));
     if (!responseAckFrameMode) {
-        if (modeSet->getIsMandatory(mode))
-            return mode;
-        else if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
+        auto responseModeSet = modeSet->getControlResponseModeSet(mode);
+        auto responseMode = responseModeSet->getMode(mode);
+        if (responseModeSet->getIsMandatory(responseMode))
+            return responseMode;
+        else if (auto slowerMode = responseModeSet->getSlowerMandatoryMode(responseMode))
             return slowerMode;
         else
             throw cRuntimeError("Mandatory mode not found");
@@ -92,9 +94,11 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
     auto mode = getMode(packet, rtsFrame);
     ASSERT(modeSet->containsMode(mode));
     if (!responseCtsFrameMode) {
-        if (modeSet->getIsMandatory(mode))
-            return mode;
-        else if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
+        auto responseModeSet = modeSet->getControlResponseModeSet(mode);
+        auto responseMode = responseModeSet->getMode(mode);
+        if (responseModeSet->getIsMandatory(responseMode))
+            return responseMode;
+        else if (auto slowerMode = responseModeSet->getSlowerMandatoryMode(responseMode))
             return slowerMode;
         else
             throw cRuntimeError("Mandatory mode not found");
@@ -112,7 +116,7 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
 const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
     if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
-        return responseBlockAckFrameMode ? responseBlockAckFrameMode : getMode(packet, blockAckReq);
+        return responseBlockAckFrameMode ? responseBlockAckFrameMode : modeSet->getControlResponseMode(getMode(packet, blockAckReq));
     else
         throw cRuntimeError("Unknown BlockAckReq frame type");
 }
@@ -248,4 +252,3 @@ void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee8021
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

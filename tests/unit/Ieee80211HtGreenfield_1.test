@@ -39,6 +39,13 @@ ASSERT(greenfieldMode->getPreambleMode()->getDuration() == SimTime(24, SIMTIME_U
 ASSERT(mixedMode->getDuration(B(0)) == SimTime(40, SIMTIME_US));
 ASSERT(greenfieldMode->getDuration(B(0)) == SimTime(28, SIMTIME_US));
 ASSERT(mixedMode->getDuration(B(0)) - greenfieldMode->getDuration(B(0)) == SimTime(12, SIMTIME_US));
+ASSERT(mixedProfile->containsMode(greenfieldMode));
+ASSERT(greenfieldProfile->containsMode(mixedMode));
+ASSERT(mixedProfile->getMode(greenfieldMode) == mixedMode);
+ASSERT(greenfieldProfile->getMode(mixedMode) == greenfieldMode);
+ASSERT(mixedProfile->getControlResponseMode(mixedMode) == mixedMode);
+ASSERT(greenfieldProfile->getControlResponseModeSet(greenfieldMode) == mixedProfile);
+ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMode) == mixedMode);
 
 EV << "HT mixed and Greenfield modes have distinct cached identities and timing.\n";
 

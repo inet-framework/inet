@@ -52,6 +52,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
     bool getIsMandatory(const IIeee80211Mode *mode) const;
 
+    const IIeee80211Mode *findMode(const IIeee80211Mode *mode) const;
+    const IIeee80211Mode *getMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *findMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
     const IIeee80211Mode *findMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
     const IIeee80211Mode *getMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
@@ -64,6 +66,9 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     const IIeee80211Mode *getFastestMandatoryMode() const;
     const IIeee80211Mode *getSlowerMandatoryMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getFasterMandatoryMode(const IIeee80211Mode *mode) const;
+
+    const Ieee80211ModeSet *getControlResponseModeSet(const IIeee80211Mode *mode) const;
+    const IIeee80211Mode *getControlResponseMode(const IIeee80211Mode *mode) const;
 
     static const Ieee80211ModeSet *findModeSet(const char *mode);
     static const Ieee80211ModeSet *getModeSet(const char *mode);
@@ -84,4 +89,3 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 } // namespace inet
 
 #endif
-

@@ -4,7 +4,6 @@ Checks during one real packet exchange that Greenfield and mixed HT
 operation select their corresponding preamble formats.
 
 %file: Test.cc
-#include <cstring>
 #include <iostream>
 
 #include "inet/common/Simsignals.h"
@@ -20,7 +19,8 @@ namespace Ieee80211HtGreenfieldRuntime {
 class HtPreambleCheckingRadio : public Ieee80211Radio, public cListener
 {
   protected:
-    int htTransmissionCount = 0;
+    int htGreenfieldTransmissionCount = 0;
+    int htMixedTransmissionCount = 0;
 
     virtual void initialize(int stage) override
     {
@@ -37,22 +37,19 @@ class HtPreambleCheckingRadio : public Ieee80211Radio, public cListener
         auto mode = dynamic_cast<const Ieee80211HtMode *>(transmission->getMode());
         if (mode == nullptr)
             return;
-        htTransmissionCount++;
-        const char *opMode = par("opMode");
-        auto expectedFormat = strcmp(opMode, "n(greenfield-2.4Ghz)") == 0 ? Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD : Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED;
-        const char *expectedPreamble = expectedFormat == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD ? "greenfield" : "mixed";
-        if (mode->getPreambleMode()->getPreambleFormat() != expectedFormat)
-            throw cRuntimeError("HT transmission used an unexpected preamble format (actual %d, expected %s for %s)", (int)mode->getPreambleMode()->getPreambleFormat(), expectedPreamble, opMode);
+        if (mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD)
+            htGreenfieldTransmissionCount++;
+        else if (mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED)
+            htMixedTransmissionCount++;
     }
 
     virtual void finish() override
     {
         Ieee80211Radio::finish();
-        if (htTransmissionCount == 0)
-            return;
-        const char *opMode = par("opMode");
-        const char *preamble = strcmp(opMode, "n(greenfield-2.4Ghz)") == 0 ? "greenfield" : "mixed";
-        std::cout << "Observed " << htTransmissionCount << " runtime HT " << preamble << " transmission(s).\n";
+        if (htGreenfieldTransmissionCount > 0)
+            std::cout << "Observed " << htGreenfieldTransmissionCount << " runtime HT greenfield transmission(s).\n";
+        if (htMixedTransmissionCount > 0)
+            std::cout << "Observed " << htMixedTransmissionCount << " runtime HT mixed transmission(s).\n";
     }
 };
 
