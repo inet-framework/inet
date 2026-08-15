@@ -170,17 +170,18 @@ const IIeee80211Mode *QosRateSelection::computeControlFrameMode(const Ptr<const 
     ASSERT(!isControlResponseFrame(header, txopProcedure));
     if (controlFrameMode)
         return controlFrameMode;
+    const bool isBlockAckFrame = dynamicPtrCast<const Ieee80211BlockAck>(header) != nullptr || dynamicPtrCast<const Ieee80211BlockAckReq>(header) != nullptr;
     // This subclause describes the rate selection rules for control frames that initiate a TXOP and that are not carried
     // in an A-MPDU.
     if (txopProcedure->isTxopInitiator(header)) {
-        // If a control frame other than a Basic BlockAckReq or Basic BlockAck is carried in a non-HT PPDU, the
+        // If a control frame other than a BlockAckReq or BlockAck is carried in a non-HT PPDU, the
         // transmitting STA shall transmit the frame using one of the rates in the BSSBasicRateSet parameter or a rate
         // from the mandatory rate set of the attached PHY if the BSSBasicRateSet is empty.
-        if (!dynamicPtrCast<const Ieee80211BasicBlockAck>(header) && !dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
+        if (!isBlockAckFrame) {
             // TODO BSSBasicRateSet
             return fastestMandatoryMode;
         }
-        // If a Basic BlockAckReq or Basic BlockAck frame is carried in a non-HT PPDU, the transmitting STA shall
+        // If a BlockAckReq or BlockAck frame is carried in a non-HT PPDU, the transmitting STA shall
         // transmit the frame using a rate supported by the receiver STA, if known (as reported in the Supported Rates
         // element and/or Extended Supported Rates element in frames transmitted by that STA). If the supported rate set
         // of the receiving STA or STAs is not known, the transmitting STA shall transmit using a rate from the
@@ -202,7 +203,7 @@ const IIeee80211Mode *QosRateSelection::computeControlFrameMode(const Ptr<const 
         // the rate or non-HT reference rate (see 9.7.9) of the previously transmitted frame that was directed to the same
         // receiving STA.
         // TODO BSSBasicRateSet
-        if (!dynamicPtrCast<const Ieee80211BasicBlockAck>(header) && !dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
+        if (!isBlockAckFrame) {
             // TODO frame sequence context
             auto it = lastTransmittedFrameMode.find(header->getReceiverAddress());
             return (it != lastTransmittedFrameMode.end()) ? it->second : fastestMandatoryMode;
