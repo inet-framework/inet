@@ -12,9 +12,10 @@
 namespace inet {
 namespace ieee80211 {
 
-BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid) :
+BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber) :
     originatorAddress(originatorAddress),
-    tid(tid)
+    tid(tid),
+    startingSequenceNumber(startingSequenceNumber)
 {
 }
 
@@ -42,6 +43,13 @@ bool BlockAckRecord::getAckState(SequenceNumberCyclic sequenceNumber, FragmentNu
     }
 }
 
+bool BlockAckRecord::getCompressedAckState(SequenceNumberCyclic sequenceNumber)
+{
+    // IEEE Std 802.11-2024, 10.25.6.1: bits preceding the maintained
+    // receive-window range are one; missing MPDUs within the range are zero.
+    return containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), 0)) || sequenceNumber < startingSequenceNumber;
+}
+
 void BlockAckRecord::removeAckStates(SequenceNumberCyclic sequenceNumber)
 {
     auto it = acknowledgmentState.begin();
@@ -51,8 +59,9 @@ void BlockAckRecord::removeAckStates(SequenceNumberCyclic sequenceNumber)
         else
             it++;
     }
+    if (startingSequenceNumber <= sequenceNumber)
+        startingSequenceNumber = sequenceNumber + 1;
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

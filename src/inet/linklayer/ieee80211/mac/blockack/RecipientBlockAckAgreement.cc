@@ -19,7 +19,7 @@ RecipientBlockAckAgreement::RecipientBlockAckAgreement(MacAddress originatorAddr
     generationId(generationId)
 {
     calculateExpirationTime();
-    blockAckRecord = new BlockAckRecord(originatorAddress, tid);
+    blockAckRecord = new BlockAckRecord(originatorAddress, tid, startingSequenceNumber);
 }
 
 void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)

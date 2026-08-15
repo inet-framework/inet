@@ -49,11 +49,18 @@ void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<const Ieee802
     }
 }
 
-// IEEE Std 802.11-2024, 11.5.4: a Basic BlockAckReq for an agreement's TID
+// IEEE Std 802.11-2024, 11.5.4: a one-TID BlockAckReq for an agreement's TID
 // also resets the recipient inactivity timer.
-void RecipientBlockAckAgreementHandler::blockAckReqReceived(const Ptr<const Ieee80211BasicBlockAckReq>& blockAckReq, IBlockAckAgreementHandlerCallback *callback)
+void RecipientBlockAckAgreementHandler::blockAckReqReceived(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IBlockAckAgreementHandlerCallback *callback)
 {
-    auto agreement = getActiveAgreement(blockAckReq->getTidInfo(), blockAckReq->getTransmitterAddress());
+    Tid tid = -1;
+    if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
+        tid = basicBlockAckReq->getTidInfo();
+    else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq))
+        tid = compressedBlockAckReq->getTidInfo();
+    else
+        throw cRuntimeError("Unsupported BlockAckReq");
+    auto agreement = getActiveAgreement(tid, blockAckReq->getTransmitterAddress());
     if (agreement != nullptr) {
         agreement->calculateExpirationTime();
         scheduleInactivityTimer(callback);
@@ -189,6 +196,8 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::processReceivedAd
         }
         else
             blockAckAgreements[id] = agreement;
+        agreement->addbaResposneSent();
+        agreement->setIsDelayedBlockAckPolicySupported(addbaResponse->getBlockAckPolicy() == 0);
         scheduleInactivityTimer(agreementHandlerCallback);
     }
     procedureCallback->processMgmtFrame(addbaResponsePacket, addbaResponse);

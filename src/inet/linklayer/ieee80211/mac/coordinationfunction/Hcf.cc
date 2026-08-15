@@ -798,7 +798,7 @@ void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
 {
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header))
         ctsProcedure->processReceivedRts(packet, rtsFrame, ctsPolicy, this);
-    else if (auto blockAckRequest = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
+    else if (auto blockAckRequest = dynamicPtrCast<const Ieee80211BlockAckReq>(header)) {
         if (recipientBlockAckAgreementHandler)
             recipientBlockAckAgreementHandler->blockAckReqReceived(blockAckRequest, this);
         if (recipientBlockAckProcedure)
@@ -1240,10 +1240,18 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
             }
         }
     }
-    else if (auto blockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(header)) {
-        EV_INFO << "BasicBlockAck has arrived" << std::endl;
-        if (originatorBlockAckAgreementHandler == nullptr || originatorBlockAckAgreementHandler->getActiveAgreement(blockAck->getTransmitterAddress(), blockAck->getTidInfo()) == nullptr) {
-            EV_INFO << "Ignoring BasicBlockAck without an active Block Ack agreement.\n";
+    else if (auto blockAck = dynamicPtrCast<const Ieee80211BlockAck>(header)) {
+        EV_INFO << blockAck->getClassName() << " has arrived" << std::endl;
+        Tid tid = -1;
+        MacAddress transmitterAddress = blockAck->getTransmitterAddress();
+        if (auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(blockAck))
+            tid = basicBlockAck->getTidInfo();
+        else if (auto compressedBlockAck = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAck))
+            tid = compressedBlockAck->getTidInfo();
+        else
+            throw cRuntimeError("Unknown BlockAck frame");
+        if (originatorBlockAckAgreementHandler == nullptr || originatorBlockAckAgreementHandler->getActiveAgreement(transmitterAddress, tid) == nullptr) {
+            EV_INFO << "Ignoring BlockAck without an active Block Ack agreement.\n";
             return;
         }
         edcaf->getRecoveryProcedure()->blockAckFrameReceived();
@@ -1261,7 +1269,7 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         edcaf->getRecoveryProcedure()->ctsFrameReceived();
     else if (header->getType() == ST_DATA_WITH_QOS)
         ; // void
-    else if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header))
+    else if (dynamicPtrCast<const Ieee80211BlockAckReq>(header))
         ; // void
     else
         throw cRuntimeError("Unknown control frame");
@@ -1357,7 +1365,7 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(receivedHeader))
         responseMode = rateSelection->computeResponseCtsFrameMode(receivedPacket, rtsFrame);
-    else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(receivedHeader))
+    else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(receivedHeader))
         responseMode = rateSelection->computeResponseBlockAckFrameMode(receivedPacket, blockAckReq);
     else if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(receivedHeader))
         responseMode = rateSelection->computeResponseAckFrameMode(receivedPacket, dataOrMgmtHeader);

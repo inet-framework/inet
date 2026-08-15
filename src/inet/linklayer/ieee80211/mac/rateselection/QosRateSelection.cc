@@ -168,7 +168,7 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
 //
 const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
-    if (!dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
+    if (!dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq) && !dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq))
         throw cRuntimeError("Unknown BlockAckReq frame type");
     const IIeee80211Mode *responseMode = nullptr;
     if (responseBlockAckFrameMode)
@@ -180,7 +180,8 @@ const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet 
         // this model has no BSSBasicRateSet/HT Control context to select another PPDU.
         responseMode = modeSet->getNonHtControlResponseMode(mode, false);
     }
-    return blockAckReq ? getPeerCompatibleMode(blockAckReq->getTransmitterAddress(), responseMode) : responseMode;
+    auto peerAddress = mib && blockAckReq->getReceiverAddress() == mib->address ? blockAckReq->getTransmitterAddress() : blockAckReq->getReceiverAddress();
+    return getPeerCompatibleMode(peerAddress, responseMode);
 }
 
 const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)

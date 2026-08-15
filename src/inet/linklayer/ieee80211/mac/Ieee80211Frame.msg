@@ -42,6 +42,7 @@ const b LENGTH_ADDBAREQ = LENGTH_MGMT + B(9); // mgmt length + action body lengt
 const b LENGTH_ADDBARESP = LENGTH_MGMT + B(9); // mgmt length + action body length
 const b LENGTH_DELBA = LENGTH_MGMT + B(6); // mgmt length + action body length
 const b LENGTH_BASIC_BLOCKACK = B(16 + 2 + (2 + 128) + 4); // header + ba control + ba information + fcs
+const b LENGTH_COMPRESSED_BLOCKACK = B(16 + 2 + (2 + 8) + 4); // header + ba control + ba information + fcs
 const b DATAFRAME_HEADER_MINLENGTH = B(2 + 2 + 3 * 6 + 2);    //bits without QoS, without Address4: 2 + 2 + 3*6(addresses) + 2
 const b QOSCONTROL_PART_LENGTH = b(2 * 8);    // QoS Control field length (bits)
 const short int MAX_NUM_FRAGMENTS = 16;
@@ -345,7 +346,7 @@ class Ieee80211BlockAckReq extends Ieee80211TwoAddressHeader
 
 class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 {
-    chunkLength = B(38);
+    chunkLength = B(20);
 
     int tidInfo; //  The TID_INFO subfield of the BAR Control field of the Basic BlockAckReq frame contains the TID for which a Basic BlockAck frame is requested.
 
@@ -362,7 +363,7 @@ class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 
 class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
 {
-    chunkLength = B(38);
+    chunkLength = B(20);
 
     int tidInfo; // The TID_INFO subfield of the BAR Control field of the Compressed BlockAckReq frame contains the TID for which a BlockAck frame is requested.
     // The BAR Information field of the Compressed BlockAckReq frame contains the Block Ack Starting
@@ -444,7 +445,7 @@ class Ieee80211BasicBlockAck extends Ieee80211BlockAck
 //
 class Ieee80211CompressedBlockAck extends Ieee80211BlockAck
 {
-    // chunkLength TODO
+    chunkLength = LENGTH_COMPRESSED_BLOCKACK - B(4);
     multiTid = 0;
     compressedBitmap = 1;
 

@@ -1,0 +1,319 @@
+%description:
+Validate one-TID HT Compressed Block Ack wire encoding and recipient bitmap construction.
+IEEE Std 802.11-2024, 9.3.1.7.2, 9.3.1.8.2, 10.25.6.1, and 10.25.6.5.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+class TestRecipientBlockAckProcedure : public RecipientBlockAckProcedure
+{
+  public:
+    using RecipientBlockAckProcedure::buildBlockAck;
+};
+
+class TestOriginatorBlockAckAgreementHandler : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    using OriginatorBlockAckAgreementHandler::updateAgreement;
+};
+
+class TestOriginatorQosAckPolicy : public OriginatorQosAckPolicy
+{
+  public:
+    static bool isCompressedRequestNeeded(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement, bool assumePeerSupport)
+    {
+        return isCompressedBlockAckReqNeeded(outstandingFrames, agreement, assumePeerSupport);
+    }
+};
+
+class TestRecipientQosAckPolicy : public RecipientQosAckPolicy
+{
+  public:
+    static bool isCompressedResponseNeeded(const Ptr<const Ieee80211CompressedBlockAckReq>& request, RecipientBlockAckAgreement *agreement, bool enabled)
+    {
+        return isCompressedBlockAckNeeded(request, agreement, enabled);
+    }
+};
+
+template<typename T>
+Ptr<const T> roundTrip(const Ptr<T>& original)
+{
+    Packet packet("original", original);
+    auto bytes = packet.peekAllAsBytes();
+    Packet decodedPacket("decoded", bytes);
+    auto decoded = decodedPacket.popAtFront<Ieee80211MacHeader>();
+    return dynamicPtrCast<const T>(decoded);
+}
+
+static Ptr<Ieee80211CompressedBlockAckReq> makeCompressedBlockAckReq()
+{
+    auto request = makeShared<Ieee80211CompressedBlockAckReq>();
+    request->setDurationField(SIMTIME_ZERO);
+    request->setReceiverAddress(MacAddress("10:20:30:40:50:60"));
+    request->setTransmitterAddress(MacAddress("11:22:33:44:55:66"));
+    request->setBarAckPolicy(true);
+    request->setTidInfo(5);
+    request->setFragmentNumber(0);
+    request->setStartingSequenceNumber(SequenceNumberCyclic(0xABC));
+    return request;
+}
+
+static Packet *makeOutstandingQosFrame(MacAddress receiverAddress, Tid tid, FragmentNumber fragmentNumber = 0, bool moreFragments = false)
+{
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setReceiverAddress(receiverAddress);
+    header->setTid(tid);
+    header->setFragmentNumber(fragmentNumber);
+    header->setMoreFragments(moreFragments);
+    return new Packet("outstanding", header);
+}
+
+%activity:
+{
+    auto request = makeCompressedBlockAckReq();
+    Packet packet("compressedBar", request);
+    auto bytes = packet.peekAllAsBytes();
+    ASSERT(bytes->getChunkLength() == B(20));
+    ASSERT(bytes->getByte(16) == 0x05 && bytes->getByte(17) == 0x50); // BAR Control: policy=1, compressed=1, TID=5
+    ASSERT(bytes->getByte(18) == 0xC0 && bytes->getByte(19) == 0xAB); // SSC: fragment=0, sequence=0xABC
+    auto decoded = roundTrip(request);
+    ASSERT(decoded != nullptr);
+    ASSERT(decoded->getBarAckPolicy() && decoded->getCompressedBitmap() && !decoded->getMultiTid());
+    ASSERT(decoded->getTidInfo() == 5 && decoded->getFragmentNumber() == 0);
+    ASSERT(decoded->getStartingSequenceNumber() == SequenceNumberCyclic(0xABC));
+    EV << "Compressed BAR encoding and round-trip passed.\n";
+}
+
+{
+    auto blockAck = makeShared<Ieee80211CompressedBlockAck>();
+    blockAck->setDurationField(SIMTIME_ZERO);
+    blockAck->setReceiverAddress(MacAddress("11:22:33:44:55:66"));
+    blockAck->setTransmitterAddress(MacAddress("10:20:30:40:50:60"));
+    blockAck->setTidInfo(5);
+    blockAck->setFragmentNumber(0);
+    blockAck->setStartingSequenceNumber(SequenceNumberCyclic(0xABC));
+    BitVector bitmap(std::vector<uint8_t>({0x05, 0, 0, 0, 0, 0, 0, 0}));
+    blockAck->setBlockAckBitmap(bitmap);
+    Packet packet("compressedBa", blockAck);
+    auto bytes = packet.peekAllAsBytes();
+    ASSERT(bytes->getChunkLength() == B(28));
+    ASSERT(bytes->getByte(16) == 0x04 && bytes->getByte(17) == 0x50); // BA Control: compressed=1, TID=5
+    ASSERT(bytes->getByte(18) == 0xC0 && bytes->getByte(19) == 0xAB);
+    ASSERT(bytes->getByte(20) == 0x05);
+    auto decoded = roundTrip(blockAck);
+    ASSERT(decoded != nullptr);
+    ASSERT(decoded->getBlockAckBitmap().getBit(0));
+    ASSERT(!decoded->getBlockAckBitmap().getBit(1));
+    ASSERT(decoded->getBlockAckBitmap().getBit(2));
+    EV << "Compressed BA encoding and round-trip passed.\n";
+}
+
+{
+    TestRecipientBlockAckProcedure procedure;
+    auto request = makeCompressedBlockAckReq();
+    request->setStartingSequenceNumber(SequenceNumberCyclic(100));
+    auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(procedure.buildBlockAck(request, nullptr));
+    ASSERT(response != nullptr && response->getChunkLength() == B(28));
+    for (int i = 0; i < 64; i++)
+        ASSERT(!response->getBlockAckBitmap().getBit(i));
+    EV << "Missing recipient state produces a null compressed BA.\n";
+}
+
+{
+    TestRecipientBlockAckProcedure procedure;
+    RecipientBlockAckAgreement emptyAgreement(MacAddress("11:22:33:44:55:66"), 5, SequenceNumberCyclic(100), 64, SIMTIME_ZERO);
+    auto request = makeCompressedBlockAckReq();
+    request->setStartingSequenceNumber(SequenceNumberCyclic(100));
+    auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(procedure.buildBlockAck(request, &emptyAgreement));
+    for (int i = 0; i < 64; i++)
+        ASSERT(!response->getBlockAckBitmap().getBit(i));
+    EV << "Empty recipient record produces a null compressed BA.\n";
+}
+
+{
+    TestRecipientBlockAckProcedure procedure;
+    RecipientBlockAckAgreement agreement(MacAddress("11:22:33:44:55:66"), 5, SequenceNumberCyclic(101), 64, SIMTIME_ZERO);
+    for (int sequenceNumber : {101, 103}) {
+        auto data = makeShared<Ieee80211DataHeader>();
+        data->setType(ST_DATA_WITH_QOS);
+        data->setAckPolicy(BLOCK_ACK);
+        data->setTid(5);
+        data->setSequenceNumber(SequenceNumberCyclic(sequenceNumber));
+        data->setFragmentNumber(0);
+        agreement.blockAckPolicyFrameReceived(data);
+    }
+    auto request = makeCompressedBlockAckReq();
+    request->setStartingSequenceNumber(SequenceNumberCyclic(101));
+    auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(procedure.buildBlockAck(request, &agreement));
+    ASSERT(response->getBlockAckBitmap().getBit(0));
+    ASSERT(!response->getBlockAckBitmap().getBit(1));
+    ASSERT(response->getBlockAckBitmap().getBit(2));
+    EV << "Established agreement produces the expected 64-bit bitmap.\n";
+}
+
+{
+    TestRecipientBlockAckProcedure procedure;
+    RecipientBlockAckAgreement agreement(MacAddress("11:22:33:44:55:66"), 5, SequenceNumberCyclic(100), 64, SIMTIME_ZERO);
+    auto data = makeShared<Ieee80211DataHeader>();
+    data->setType(ST_DATA_WITH_QOS);
+    data->setAckPolicy(BLOCK_ACK);
+    data->setTid(5);
+    data->setSequenceNumber(SequenceNumberCyclic(102));
+    data->setFragmentNumber(0);
+    agreement.blockAckPolicyFrameReceived(data);
+    auto request = makeCompressedBlockAckReq();
+    request->setStartingSequenceNumber(SequenceNumberCyclic(100));
+    auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(procedure.buildBlockAck(request, &agreement));
+    ASSERT(!response->getBlockAckBitmap().getBit(0));
+    ASSERT(!response->getBlockAckBitmap().getBit(1));
+    ASSERT(response->getBlockAckBitmap().getBit(2));
+    EV << "Compressed bitmap preserves leading receive-window holes.\n";
+}
+
+{
+    TestRecipientBlockAckProcedure procedure;
+    RecipientBlockAckAgreement agreement(MacAddress("11:22:33:44:55:66"), 5, SequenceNumberCyclic(4095), 64, SIMTIME_ZERO);
+    for (int sequenceNumber : {4095, 0}) {
+        auto data = makeShared<Ieee80211DataHeader>();
+        data->setType(ST_DATA_WITH_QOS);
+        data->setAckPolicy(BLOCK_ACK);
+        data->setTid(5);
+        data->setSequenceNumber(SequenceNumberCyclic(sequenceNumber));
+        data->setFragmentNumber(0);
+        agreement.blockAckPolicyFrameReceived(data);
+    }
+    auto request = makeCompressedBlockAckReq();
+    request->setStartingSequenceNumber(SequenceNumberCyclic(4095));
+    auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(procedure.buildBlockAck(request, &agreement));
+    ASSERT(response->getBlockAckBitmap().getBit(0));
+    ASSERT(response->getBlockAckBitmap().getBit(1));
+    ASSERT(!response->getBlockAckBitmap().getBit(2));
+    EV << "Compressed bitmap wraps from sequence 4095 to 0.\n";
+}
+
+{
+    TestRecipientBlockAckProcedure procedure;
+    RecipientBlockAckAgreement agreement(MacAddress("11:22:33:44:55:66"), 5, SequenceNumberCyclic(4095), 64, SIMTIME_ZERO);
+    auto data = makeShared<Ieee80211DataHeader>();
+    data->setType(ST_DATA_WITH_QOS);
+    data->setAckPolicy(BLOCK_ACK);
+    data->setTid(5);
+    data->setSequenceNumber(SequenceNumberCyclic(1));
+    data->setFragmentNumber(0);
+    agreement.blockAckPolicyFrameReceived(data);
+    auto request = makeCompressedBlockAckReq();
+    request->setStartingSequenceNumber(SequenceNumberCyclic(4095));
+    auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(procedure.buildBlockAck(request, &agreement));
+    ASSERT(!response->getBlockAckBitmap().getBit(0));
+    ASSERT(!response->getBlockAckBitmap().getBit(1));
+    ASSERT(response->getBlockAckBitmap().getBit(2));
+    EV << "Compressed bitmap preserves leading holes across sequence wrap.\n";
+}
+
+{
+    auto request = makeCompressedBlockAckReq();
+    ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, nullptr, false));
+    ASSERT(TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, nullptr, true));
+    request->setFragmentNumber(1);
+    ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, nullptr, true));
+    request->setFragmentNumber(0);
+    RecipientBlockAckAgreement delayedAgreement(MacAddress("11:22:33:44:55:66"), 5, SequenceNumberCyclic(100), 64, SIMTIME_ZERO);
+    delayedAgreement.addbaResposneSent();
+    delayedAgreement.setIsDelayedBlockAckPolicySupported(true);
+    ASSERT(!TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, &delayedAgreement, true));
+    delayedAgreement.setIsDelayedBlockAckPolicySupported(false);
+    ASSERT(TestRecipientQosAckPolicy::isCompressedResponseNeeded(request, &delayedAgreement, true));
+    EV << "Recipient capability, fragment, and agreement-policy gates passed.\n";
+}
+
+{
+    MacAddress receiverAddress("10:20:30:40:50:60");
+    OriginatorBlockAckAgreement immediateAgreement(receiverAddress, 5, SequenceNumberCyclic(100), 64, false, false);
+    immediateAgreement.setIsAddbaResponseReceived(true);
+    std::vector<Packet *> outstandingFrames { makeOutstandingQosFrame(receiverAddress, 5) };
+    ASSERT(!TestOriginatorQosAckPolicy::isCompressedRequestNeeded(outstandingFrames, &immediateAgreement, false));
+    ASSERT(!TestOriginatorQosAckPolicy::isCompressedRequestNeeded(outstandingFrames, nullptr, true));
+    OriginatorBlockAckAgreement delayedAgreement(receiverAddress, 5, SequenceNumberCyclic(100), 64, false, true);
+    delayedAgreement.setIsAddbaResponseReceived(true);
+    ASSERT(!TestOriginatorQosAckPolicy::isCompressedRequestNeeded(outstandingFrames, &delayedAgreement, true));
+    ASSERT(TestOriginatorQosAckPolicy::isCompressedRequestNeeded(outstandingFrames, &immediateAgreement, true));
+    delete outstandingFrames[0];
+    outstandingFrames = { makeOutstandingQosFrame(receiverAddress, 5, 1) };
+    ASSERT(!TestOriginatorQosAckPolicy::isCompressedRequestNeeded(outstandingFrames, &immediateAgreement, true));
+    delete outstandingFrames[0];
+    outstandingFrames = { makeOutstandingQosFrame(receiverAddress, 5, 0, true) };
+    ASSERT(!TestOriginatorQosAckPolicy::isCompressedRequestNeeded(outstandingFrames, &immediateAgreement, true));
+    delete outstandingFrames[0];
+    EV << "Originator capability, agreement, and fragmentation gates passed.\n";
+}
+
+{
+    auto basicRequest = makeShared<Ieee80211BasicBlockAckReq>();
+    basicRequest->setDurationField(SIMTIME_ZERO);
+    basicRequest->setReceiverAddress(MacAddress("10:20:30:40:50:60"));
+    basicRequest->setTransmitterAddress(MacAddress("11:22:33:44:55:66"));
+    basicRequest->setTidInfo(5);
+    basicRequest->setStartingSequenceNumber(SequenceNumberCyclic(0xABC));
+    Packet packet("basicBar", basicRequest);
+    auto bytes = packet.peekAllAsBytes();
+    ASSERT(bytes->getChunkLength() == B(20));
+    ASSERT(bytes->getByte(16) == 0x00 && bytes->getByte(17) == 0x50);
+    ASSERT(roundTrip(basicRequest) != nullptr);
+    auto basicBlockAck = makeShared<Ieee80211BasicBlockAck>();
+    basicBlockAck->setDurationField(SIMTIME_ZERO);
+    basicBlockAck->setReceiverAddress(MacAddress("11:22:33:44:55:66"));
+    basicBlockAck->setTransmitterAddress(MacAddress("10:20:30:40:50:60"));
+    basicBlockAck->setTidInfo(5);
+    basicBlockAck->setStartingSequenceNumber(SequenceNumberCyclic(0xABC));
+    for (int i = 0; i < 64; i++)
+        basicBlockAck->setBlockAckBitmap(i, BitVector(std::vector<uint8_t>(2, 0)));
+    Packet blockAckPacket("basicBa", basicBlockAck);
+    auto blockAckBytes = blockAckPacket.peekAllAsBytes();
+    ASSERT(blockAckBytes->getChunkLength() == B(148));
+    ASSERT(blockAckBytes->getByte(16) == 0x00 && blockAckBytes->getByte(17) == 0x50);
+    ASSERT(blockAckBytes->getByte(18) == 0xC0 && blockAckBytes->getByte(19) == 0xAB);
+    ASSERT(roundTrip(basicBlockAck) != nullptr);
+    EV << "Legacy Basic BAR and BA remain byte-exact.\n";
+}
+
+{
+    TestOriginatorBlockAckAgreementHandler handler;
+    OriginatorBlockAckAgreement agreement(MacAddress("10:20:30:40:50:60"), 5, SequenceNumberCyclic(100), 64, false, false);
+    auto delayedResponse = makeShared<Ieee80211AddbaResponse>();
+    delayedResponse->setBlockAckPolicy(false);
+    delayedResponse->setBufferSize(64);
+    delayedResponse->setBlockAckTimeoutValue(SIMTIME_ZERO);
+    handler.updateAgreement(&agreement, delayedResponse);
+    ASSERT(agreement.getIsAddbaResponseReceived());
+    ASSERT(agreement.getIsDelayedBlockAckPolicySupported());
+    EV << "Accepted delayed agreement is retained for Basic BAR fallback.\n";
+}
+
+EV << ".\n";
+
+%contains: stdout
+Compressed BAR encoding and round-trip passed.
+Compressed BA encoding and round-trip passed.
+Missing recipient state produces a null compressed BA.
+Empty recipient record produces a null compressed BA.
+Established agreement produces the expected 64-bit bitmap.
+Compressed bitmap preserves leading receive-window holes.
+Compressed bitmap wraps from sequence 4095 to 0.
+Compressed bitmap preserves leading holes across sequence wrap.
+Recipient capability, fragment, and agreement-policy gates passed.
+Originator capability, agreement, and fragmentation gates passed.
+Legacy Basic BAR and BA remain byte-exact.
+Accepted delayed agreement is retained for Basic BAR fallback.
+.
