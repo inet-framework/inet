@@ -18,10 +18,8 @@ Define_Module(RecipientQosAckPolicy);
 void RecipientQosAckPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
-        assumePeerSupportsCompressedBlockAck = par("assumePeerSupportsCompressedBlockAck");
-    }
 }
 
 simtime_t RecipientQosAckPolicy::computeBlockAckDuration(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const
@@ -70,17 +68,16 @@ bool RecipientQosAckPolicy::isBlockAckNeeded(const Ptr<const Ieee80211BlockAckRe
         // frame have been discarded from the transmit buffer due to expiry of their lifetime limit.
     }
     else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq))
-        return isCompressedBlockAckNeeded(compressedBlockAckReq, agreement, assumePeerSupportsCompressedBlockAck);
+        return isCompressedBlockAckNeeded(compressedBlockAckReq, agreement);
     else
         throw cRuntimeError("Unsupported BlockAckReq");
 }
 
-bool RecipientQosAckPolicy::isCompressedBlockAckNeeded(const Ptr<const Ieee80211CompressedBlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement, bool assumePeerSupportsCompressedBlockAck)
+bool RecipientQosAckPolicy::isCompressedBlockAckNeeded(const Ptr<const Ieee80211CompressedBlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement)
 {
-    // IEEE Std 802.11-2024, 9.3.1.7.2 and 10.25.6.5. Both endpoint policies
-    // must carry the explicit peer-capability assumption because this baseline
-    // does not model negotiated peer HT capability.
-    if (!assumePeerSupportsCompressedBlockAck || blockAckReq->getFragmentNumber() != 0)
+    // IEEE Std 802.11-2024, 9.3.1.7.2 and 10.25.6.5: an addressed, syntactically
+    // valid Compressed BlockAckReq elicits a Compressed BlockAck, including a null response.
+    if (blockAckReq->getFragmentNumber() != 0)
         return false;
     // A missing partial state still elicits the mandatory null compressed BA.
     return agreement == nullptr || (agreement->getIsAddbaResponseSent() && !agreement->getIsDelayedBlockAckPolicySupported());

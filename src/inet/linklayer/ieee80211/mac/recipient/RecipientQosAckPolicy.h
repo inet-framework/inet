@@ -20,13 +20,12 @@ class INET_API RecipientQosAckPolicy : public ModeSetListener, public IRecipient
 {
   protected:
     IQosRateSelection *rateSelection = nullptr;
-    bool assumePeerSupportsCompressedBlockAck = false;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    static bool isCompressedBlockAckNeeded(const Ptr<const Ieee80211CompressedBlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement, bool assumePeerSupportsCompressedBlockAck);
+    static bool isCompressedBlockAckNeeded(const Ptr<const Ieee80211CompressedBlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement);
     simtime_t computeBlockAckDuration(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const;
     simtime_t computeAckDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const;
 

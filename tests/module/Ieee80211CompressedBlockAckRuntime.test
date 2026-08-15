@@ -22,9 +22,9 @@ abstract = false
 sim-time-limit = 1.05s
 
 **.opMode = "n(mixed-2.4Ghz)"
-# Baseline capability management is absent, so both endpoint policies explicitly
-# opt in to compressed Block Ack; the production default remains false.
-**.assumePeerSupportsCompressedBlockAck = true
+# The originator explicitly opts in based on its peer-capability assumption;
+# the recipient requires no additional station-wide capability setting.
+**.originatorAckPolicy.assumePeerSupportsCompressedBlockAck = true
 **.cmdenv-log-level = info
 
 %contains: stdout
