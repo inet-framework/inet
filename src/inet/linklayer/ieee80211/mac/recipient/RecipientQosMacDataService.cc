@@ -151,10 +151,16 @@ IRecipientQosMacDataService::ManagementFrameReceptionResult RecipientQosMacDataS
 std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
     Enter_Method("controlFrameReceived");
-    if (auto blockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(controlHeader)) {
+    if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(controlHeader)) {
         BlockAckReordering::ReorderBuffer frames;
         if (blockAckReordering) {
-            Tid tid = blockAckReq->getTidInfo();
+            Tid tid = -1;
+            if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
+                tid = basicBlockAckReq->getTidInfo();
+            else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq))
+                tid = compressedBlockAckReq->getTidInfo();
+            else
+                return std::vector<Packet *>();
             MacAddress originatorAddr = blockAckReq->getTransmitterAddress();
             RecipientBlockAckAgreement *agreement = blockAckAgreementHandler->getAgreement(tid, originatorAddr);
             if (agreement)

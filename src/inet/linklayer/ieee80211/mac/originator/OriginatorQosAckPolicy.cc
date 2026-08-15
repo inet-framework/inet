@@ -21,6 +21,7 @@ void OriginatorQosAckPolicy::initialize(int stage)
         rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
         maxBlockAckPolicyFrameLength = par("maxBlockAckPolicyFrameLength");
         blockAckReqThreshold = par("blockAckReqThreshold");
+        assumePeerSupportsCompressedBlockAck = par("assumePeerSupportsCompressedBlockAck");
         blockAckTimeout = par("blockAckTimeout");
         ackTimeout = par("ackTimeout");
     }
@@ -52,15 +53,29 @@ SequenceNumberCyclic OriginatorQosAckPolicy::computeStartingSequenceNumber(const
     return startingSequenceNumber;
 }
 
-bool OriginatorQosAckPolicy::isCompressedBlockAckReq(const std::vector<Packet *>& outstandingFrames, int startingSequenceNumber) const
+bool OriginatorQosAckPolicy::isCompressedBlockAckReq(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement) const
 {
-    // The Compressed Bitmap subfield of the BA Control field or BAR Control field shall be set to 1 in all
-    // BlockAck and BlockAckReq frames sent from one HT STA to another HT STA and shall be set to 0 otherwise.
-    return false; // non-HT STA
-//    for (auto frame : outstandingFrames)
-//        if (frame->getSequenceNumber() >= startingSequenceNumber && frame->getFragmentNumber() > 0)
-//            return false;
-//    return true;
+    return isCompressedBlockAckReqNeeded(outstandingFrames, agreement, assumePeerSupportsCompressedBlockAck);
+}
+
+bool OriginatorQosAckPolicy::isCompressedBlockAckReqNeeded(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement, bool assumePeerSupportsCompressedBlockAck)
+{
+    // IEEE Std 802.11-2024, Table 11-8 and 10.25.6.1: use the compressed
+    // variant only for an established immediate HT Block Ack agreement.
+    // Peer HT capability is not represented by the baseline agreement contract;
+    // the parameter is an explicit assumption supplied by the configuration.
+    if (!assumePeerSupportsCompressedBlockAck || agreement == nullptr || !agreement->getIsAddbaResponseReceived() || agreement->getIsDelayedBlockAckPolicySupported())
+        return false;
+    bool hasMatchingOutstandingFrame = false;
+    for (auto frame : outstandingFrames) {
+        auto header = dynamicPtrCast<const Ieee80211DataHeader>(frame->peekAtFront<Ieee80211MacHeader>());
+        if (header == nullptr || header->getReceiverAddress() != agreement->getReceiverAddr() || header->getTid() != agreement->getTid())
+            continue;
+        hasMatchingOutstandingFrame = true;
+        if (header->getFragmentNumber() != 0 || header->getMoreFragments())
+            return false;
+    }
+    return hasMatchingOutstandingFrame;
 }
 
 // FIXME
@@ -140,4 +155,3 @@ simtime_t OriginatorQosAckPolicy::getBlockAckTimeout(Packet *packet, const Ptr<c
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

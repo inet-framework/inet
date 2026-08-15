@@ -519,7 +519,7 @@ void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
 {
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header))
         ctsProcedure->processReceivedRts(packet, rtsFrame, ctsPolicy, this);
-    else if (auto blockAckRequest = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
+    else if (auto blockAckRequest = dynamicPtrCast<const Ieee80211BlockAckReq>(header)) {
         if (recipientBlockAckProcedure)
             recipientBlockAckProcedure->processReceivedBlockAckReq(packet, blockAckRequest, recipientAckPolicy, recipientBlockAckAgreementHandler, this);
     }
@@ -877,8 +877,8 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
             }
         }
     }
-    else if (auto blockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(header)) {
-        EV_INFO << "BasicBlockAck has arrived" << std::endl;
+    else if (auto blockAck = dynamicPtrCast<const Ieee80211BlockAck>(header)) {
+        EV_INFO << blockAck->getClassName() << " has arrived" << std::endl;
         edcaf->getRecoveryProcedure()->blockAckFrameReceived();
         auto ackedSeqAndFragNums = edcaf->getAckHandler()->processReceivedBlockAck(blockAck);
         if (originatorBlockAckAgreementHandler)
@@ -895,7 +895,7 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         edcaf->getRecoveryProcedure()->ctsFrameReceived();
     else if (header->getType() == ST_DATA_WITH_QOS)
         ; // void
-    else if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header))
+    else if (dynamicPtrCast<const Ieee80211BlockAckReq>(header))
         ; // void
     else
         throw cRuntimeError("Unknown control frame");
@@ -991,7 +991,7 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(receivedHeader))
         responseMode = rateSelection->computeResponseCtsFrameMode(receivedPacket, rtsFrame);
-    else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(receivedHeader))
+    else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(receivedHeader))
         responseMode = rateSelection->computeResponseBlockAckFrameMode(receivedPacket, blockAckReq);
     else if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(receivedHeader))
         responseMode = rateSelection->computeResponseAckFrameMode(receivedPacket, dataOrMgmtHeader);

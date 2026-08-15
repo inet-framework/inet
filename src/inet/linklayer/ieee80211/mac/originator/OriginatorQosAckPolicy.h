@@ -22,6 +22,7 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
     IQosRateSelection *rateSelection = nullptr;
     int maxBlockAckPolicyFrameLength = -1;
     int blockAckReqThreshold = -1;
+    bool assumePeerSupportsCompressedBlockAck = false;
 
     simtime_t blockAckTimeout = -1;
     simtime_t ackTimeout = -1;
@@ -33,13 +34,13 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
     virtual bool checkAgreementPolicy(const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const;
     virtual std::map<MacAddress, std::vector<Packet *>> getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const;
     virtual SequenceNumberCyclic computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const;
-    virtual bool isCompressedBlockAckReq(const std::vector<Packet *>& outstandingFrames, int startingSequenceNumber) const;
-
+    static bool isCompressedBlockAckReqNeeded(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement, bool assumePeerSupportsCompressedBlockAck);
   public:
     virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const override;
     virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const override;
     virtual bool isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) const override;
     virtual bool isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const override;
+    virtual bool isCompressedBlockAckReq(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement) const override;
     virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const override;
 
     virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const override;
@@ -50,4 +51,3 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
 } /* namespace inet */
 
 #endif
-

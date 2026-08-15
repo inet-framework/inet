@@ -111,7 +111,7 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
 //
 const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
-    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
+    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq) || dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq))
         return responseBlockAckFrameMode ? responseBlockAckFrameMode : getMode(packet, blockAckReq);
     else
         throw cRuntimeError("Unknown BlockAckReq frame type");
@@ -248,4 +248,3 @@ void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee8021
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

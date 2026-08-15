@@ -146,6 +146,8 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::processReceivedAd
         }
         else
             blockAckAgreements[id] = agreement;
+        agreement->addbaResposneSent();
+        agreement->setIsDelayedBlockAckPolicySupported(addbaResponse->getBlockAckPolicy() == 0);
         scheduleInactivityTimer(agreementHandlerCallback);
     }
     procedureCallback->processMgmtFrame(addbaResponsePacket, addbaResponse);

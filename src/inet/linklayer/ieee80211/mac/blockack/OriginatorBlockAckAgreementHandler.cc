@@ -147,6 +147,14 @@ void OriginatorBlockAckAgreementHandler::processReceivedBlockAck(const Ptr<const
             scheduleInactivityTimer(callback);
         }
     }
+    else if (auto compressedBlockAck = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAck)) {
+        auto agreement = getAgreement(compressedBlockAck->getTransmitterAddress(), compressedBlockAck->getTidInfo());
+        if (agreement) {
+            agreement->setStartingSequenceNumber(compressedBlockAck->getStartingSequenceNumber());
+            agreement->calculateExpirationTime();
+            scheduleInactivityTimer(callback);
+        }
+    }
     else
         throw cRuntimeError("Unsupported BlockAck");
 }
@@ -289,6 +297,7 @@ OriginatorBlockAckAgreementResponse OriginatorBlockAckAgreementHandler::processR
 void OriginatorBlockAckAgreementHandler::updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp)
 {
     agreement->setIsAddbaResponseReceived(true);
+    agreement->setIsDelayedBlockAckPolicySupported(addbaResp->getBlockAckPolicy() == 0);
     agreement->setBufferSize(addbaResp->getBufferSize());
     agreement->setBlockAckTimeoutValue(addbaResp->getBlockAckTimeoutValue());
     agreement->calculateExpirationTime();

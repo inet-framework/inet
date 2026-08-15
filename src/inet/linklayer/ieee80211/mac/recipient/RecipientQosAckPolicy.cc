@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -19,12 +20,14 @@ void RecipientQosAckPolicy::initialize(int stage)
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+        assumePeerSupportsCompressedBlockAck = par("assumePeerSupportsCompressedBlockAck");
     }
 }
 
-simtime_t RecipientQosAckPolicy::computeBasicBlockAckDuration(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const
+simtime_t RecipientQosAckPolicy::computeBlockAckDuration(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const
 {
-    return rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq)->getDuration(LENGTH_BASIC_BLOCKACK);
+    b length = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq) ? LENGTH_COMPRESSED_BLOCKACK : LENGTH_BASIC_BLOCKACK;
+    return rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq)->getDuration(length);
 }
 
 simtime_t RecipientQosAckPolicy::computeAckDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const
@@ -66,8 +69,21 @@ bool RecipientQosAckPolicy::isBlockAckNeeded(const Ptr<const Ieee80211BlockAckRe
         // TODO The Basic BlockAckReq frame shall be discarded if all MSDUs referenced by this
         // frame have been discarded from the transmit buffer due to expiry of their lifetime limit.
     }
+    else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq))
+        return isCompressedBlockAckNeeded(compressedBlockAckReq, agreement, assumePeerSupportsCompressedBlockAck);
     else
         throw cRuntimeError("Unsupported BlockAckReq");
+}
+
+bool RecipientQosAckPolicy::isCompressedBlockAckNeeded(const Ptr<const Ieee80211CompressedBlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement, bool assumePeerSupportsCompressedBlockAck)
+{
+    // IEEE Std 802.11-2024, 9.3.1.7.2 and 10.25.6.5. Both endpoint policies
+    // must carry the explicit peer-capability assumption because this baseline
+    // does not model negotiated peer HT capability.
+    if (!assumePeerSupportsCompressedBlockAck || blockAckReq->getFragmentNumber() != 0)
+        return false;
+    // A missing partial state still elicits the mandatory null compressed BA.
+    return agreement == nullptr || (agreement->getIsAddbaResponseSent() && !agreement->getIsDelayedBlockAckPolicySupported());
 }
 
 //
@@ -89,11 +105,10 @@ simtime_t RecipientQosAckPolicy::computeAckDurationField(Packet *packet, const P
 // the PPDU carrying the frame that elicited the response and the end of the PPDU carrying the BlockAck
 // frame.
 //
-simtime_t RecipientQosAckPolicy::computeBasicBlockAckDurationField(Packet *packet, const Ptr<const Ieee80211BasicBlockAckReq>& basicBlockAckReq) const
+simtime_t RecipientQosAckPolicy::computeBlockAckDurationField(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const
 {
-    return basicBlockAckReq->getDurationField() - modeSet->getSifsTime() - computeBasicBlockAckDuration(packet, basicBlockAckReq);
+    return blockAckReq->getDurationField() - modeSet->getSifsTime() - computeBlockAckDuration(packet, blockAckReq);
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
