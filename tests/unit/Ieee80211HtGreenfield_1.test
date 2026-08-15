@@ -1,0 +1,46 @@
+%description:
+Checks that the 802.11n mixed and Greenfield mode profiles preserve distinct
+preamble formats and timing when HT modes are cached.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+
+static const Ieee80211HtMode *findMcs0LongGiMode(const Ieee80211ModeSet *modeSet)
+{
+    auto mode = dynamic_cast<const Ieee80211HtMode *>(modeSet->getMode(Mbps(6.5), MHz(20), 1));
+    return mode != nullptr && mode->getDataMode()->getModulationAndCodingScheme()->getMcsIndex() == 0 &&
+            mode->getDataMode()->getGuardIntervalType() == Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG ? mode : nullptr;
+}
+
+%activity:
+auto mixedProfile = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+auto greenfieldProfile = Ieee80211ModeSet::getModeSet("n(greenfield-2.4Ghz)");
+ASSERT(mixedProfile != nullptr);
+ASSERT(greenfieldProfile != nullptr);
+ASSERT(mixedProfile == Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"));
+ASSERT(greenfieldProfile == Ieee80211ModeSet::getModeSet("n(greenfield-2.4Ghz)"));
+
+auto mixedMode = findMcs0LongGiMode(mixedProfile);
+auto greenfieldMode = findMcs0LongGiMode(greenfieldProfile);
+ASSERT(mixedMode != nullptr);
+ASSERT(greenfieldMode != nullptr);
+ASSERT(mixedMode != greenfieldMode);
+ASSERT(mixedMode->getCenterFrequencyMode() == Ieee80211HtMode::BAND_2_4GHZ);
+ASSERT(greenfieldMode->getCenterFrequencyMode() == Ieee80211HtMode::BAND_2_4GHZ);
+ASSERT(mixedMode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED);
+ASSERT(greenfieldMode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD);
+ASSERT(mixedMode->getPreambleMode()->getDuration() == SimTime(36, SIMTIME_US));
+ASSERT(greenfieldMode->getPreambleMode()->getDuration() == SimTime(24, SIMTIME_US));
+ASSERT(mixedMode->getDuration(B(0)) == SimTime(40, SIMTIME_US));
+ASSERT(greenfieldMode->getDuration(B(0)) == SimTime(28, SIMTIME_US));
+ASSERT(mixedMode->getDuration(B(0)) - greenfieldMode->getDuration(B(0)) == SimTime(12, SIMTIME_US));
+
+EV << "HT mixed and Greenfield modes have distinct cached identities and timing.\n";
+
+%contains: stdout
+HT mixed and Greenfield modes have distinct cached identities and timing.

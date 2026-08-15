@@ -460,7 +460,7 @@ class INET_API Ieee80211HtCompliantModes
   protected:
     static OPP_THREAD_LOCAL const Ieee80211HtCompliantModes singleton;
 
-    mutable std::map<std::tuple<Hz, unsigned int, Ieee80211HtModeBase::GuardIntervalType>, const Ieee80211HtMode *> modeCache;
+    mutable std::map<std::tuple<Hz, unsigned int, Ieee80211HtMode::BandMode, Ieee80211HtPreambleMode::HighTroughputPreambleFormat, Ieee80211HtModeBase::GuardIntervalType>, const Ieee80211HtMode *> modeCache;
 
   public:
     Ieee80211HtCompliantModes();
@@ -473,4 +473,3 @@ class INET_API Ieee80211HtCompliantModes
 } /* namespace inet */
 
 #endif
-
