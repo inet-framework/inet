@@ -32,11 +32,11 @@ void QosRateSelection::initialize(int stage)
         double controlFrameBitrate = par("controlFrameBitrate");
         controlFrameMode = (controlFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(controlFrameBitrate));
         double responseAckFrameBitrate = par("responseAckFrameBitrate");
-        responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getControlResponseMode(modeSet->getMode(bps(responseAckFrameBitrate)));
+        responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
         double responseBlockAckFrameBitrate = par("responseBlockAckFrameBitrate");
-        responseBlockAckFrameMode = (responseBlockAckFrameBitrate == -1) ? nullptr : modeSet->getControlResponseMode(modeSet->getMode(bps(responseBlockAckFrameBitrate)));
+        responseBlockAckFrameMode = (responseBlockAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseBlockAckFrameBitrate));
         double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
-        responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getControlResponseMode(modeSet->getMode(bps(responseCtsFrameBitrate)));
+        responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseCtsFrameBitrate));
     }
 }
 
@@ -85,7 +85,7 @@ const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *pack
             throw cRuntimeError("Mandatory mode not found");
     }
     else
-        return responseAckFrameMode;
+        return modeSet->getControlResponseMode(responseAckFrameMode);
 }
 
 const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
@@ -104,7 +104,7 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
             throw cRuntimeError("Mandatory mode not found");
     }
     else
-        return responseCtsFrameMode;
+        return modeSet->getControlResponseMode(responseCtsFrameMode);
 }
 
 //
@@ -115,8 +115,12 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
 //
 const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
-    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
-        return responseBlockAckFrameMode ? responseBlockAckFrameMode : modeSet->getControlResponseMode(getMode(packet, blockAckReq));
+    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
+        if (responseBlockAckFrameMode)
+            return modeSet->getControlResponseMode(responseBlockAckFrameMode);
+        else
+            return modeSet->getControlResponseMode(getMode(packet, blockAckReq));
+    }
     else
         throw cRuntimeError("Unknown BlockAckReq frame type");
 }

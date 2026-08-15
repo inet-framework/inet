@@ -1,10 +1,14 @@
 %description:
 Checks that the 802.11n mixed and Greenfield mode profiles preserve distinct
-preamble formats and timing when HT modes are cached.
+preamble formats and timing while supporting cross-profile lookup, and that
+legacy ERP mode profiles retain strict mode membership.
 
 %includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssOfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 
 %global:
 using namespace inet;
@@ -15,6 +19,28 @@ static const Ieee80211HtMode *findMcs0LongGiMode(const Ieee80211ModeSet *modeSet
     auto mode = dynamic_cast<const Ieee80211HtMode *>(modeSet->getMode(Mbps(6.5), MHz(20), 1));
     return mode != nullptr && mode->getDataMode()->getModulationAndCodingScheme()->getMcsIndex() == 0 &&
             mode->getDataMode()->getGuardIntervalType() == Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG ? mode : nullptr;
+}
+
+static bool rejectsUnknownMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    try {
+        modeSet->getMode(mode);
+        return false;
+    }
+    catch (const cRuntimeError&) {
+        return true;
+    }
+}
+
+static bool rejectsControlResponseModeSet(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    try {
+        modeSet->getControlResponseModeSet(mode);
+        return false;
+    }
+    catch (const cRuntimeError&) {
+        return true;
+    }
 }
 
 %activity:
@@ -46,6 +72,33 @@ ASSERT(greenfieldProfile->getMode(mixedMode) == greenfieldMode);
 ASSERT(mixedProfile->getControlResponseMode(mixedMode) == mixedMode);
 ASSERT(greenfieldProfile->getControlResponseModeSet(greenfieldMode) == mixedProfile);
 ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMode) == mixedMode);
+
+auto greenfield5GhzMode = Ieee80211HtCompliantModes::getCompliantMode(
+        &Ieee80211HtmcsTable::htMcs0BW20MHz,
+        Ieee80211HtMode::BAND_5GHZ,
+        Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD,
+        Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
+ASSERT(greenfield5GhzMode->getCenterFrequencyMode() == Ieee80211HtMode::BAND_5GHZ);
+ASSERT(greenfield5GhzMode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD);
+ASSERT(rejectsControlResponseModeSet(greenfieldProfile, greenfield5GhzMode));
+
+auto erpMixedProfile = Ieee80211ModeSet::getModeSet("g(mixed)");
+auto erpOnlyProfile = Ieee80211ModeSet::getModeSet("g(erp)");
+auto erpMixedMode = &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps;
+auto erpOnlyMode = &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode6Mbps;
+Ieee80211DsssOfdmMode dsssOfdmMode("dsss-ofdm", nullptr, nullptr, nullptr, nullptr, &Ieee80211OfdmCompliantModes::ofdmDataMode6MbpsCS20MHz);
+ASSERT(erpMixedProfile != nullptr);
+ASSERT(erpOnlyProfile != nullptr);
+ASSERT(erpMixedMode != erpOnlyMode);
+ASSERT(erpMixedMode->getSlotTime() == SimTime(20, SIMTIME_US));
+ASSERT(erpOnlyMode->getSlotTime() == SimTime(9, SIMTIME_US));
+ASSERT(!erpMixedProfile->containsMode(erpOnlyMode));
+ASSERT(!erpOnlyProfile->containsMode(erpMixedMode));
+ASSERT(erpMixedProfile->findMode(erpOnlyMode) == nullptr);
+ASSERT(erpOnlyProfile->findMode(erpMixedMode) == nullptr);
+ASSERT(erpMixedProfile->findMode(&dsssOfdmMode) == nullptr);
+ASSERT(rejectsUnknownMode(erpMixedProfile, erpOnlyMode));
+ASSERT(rejectsUnknownMode(erpOnlyProfile, erpMixedMode));
 
 EV << "HT mixed and Greenfield modes have distinct cached identities and timing.\n";
 

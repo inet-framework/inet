@@ -38,9 +38,9 @@ void RateSelection::initialize(int stage)
         double controlFrameBitrate = par("controlFrameBitrate");
         controlFrameMode = (controlFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(controlFrameBitrate));
         double responseAckFrameBitrate = par("responseAckFrameBitrate");
-        responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getControlResponseMode(modeSet->getMode(bps(responseAckFrameBitrate)));
+        responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
         double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
-        responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getControlResponseMode(modeSet->getMode(bps(responseCtsFrameBitrate)));
+        responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseCtsFrameBitrate));
         fastestMandatoryMode = modeSet->getFastestMandatoryMode();
 //        WATCH(dataOrMgmtRateControl);
 
@@ -80,7 +80,7 @@ const IIeee80211Mode *RateSelection::getMode(Packet *packet, const Ptr<const Iee
 const IIeee80211Mode *RateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (responseAckFrameMode)
-        return responseAckFrameMode;
+        return modeSet->getControlResponseMode(responseAckFrameMode);
     else {
         auto mode = getMode(packet, dataOrMgmtHeader);
         ASSERT(modeSet->containsMode(mode));
@@ -93,7 +93,7 @@ const IIeee80211Mode *RateSelection::computeResponseAckFrameMode(Packet *packet,
 const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
 {
     if (responseCtsFrameMode)
-        return responseCtsFrameMode;
+        return modeSet->getControlResponseMode(responseCtsFrameMode);
     else {
         auto mode = getMode(packet, rtsFrame);
         ASSERT(modeSet->containsMode(mode));

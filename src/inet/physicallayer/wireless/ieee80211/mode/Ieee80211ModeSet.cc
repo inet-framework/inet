@@ -8,7 +8,6 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 #include <algorithm>
-#include <typeinfo>
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
@@ -500,24 +499,20 @@ int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
     // HT mixed and Greenfield modes have distinct cached identities because their
     // preambles and timing differ, but they represent the same data-rate mode for
     // mode-set membership and rate selection purposes.
-    if (mode != nullptr) {
+    if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode)) {
+        auto htDataMode = htMode->getDataMode();
         for (size_t index = 0; index < entries.size(); index++) {
-            auto entryMode = entries[index].mode;
-            auto entryHeaderMode = entryMode->getHeaderMode();
-            auto modeHeaderMode = mode->getHeaderMode();
-            auto entryDataMode = entryMode->getDataMode();
-            auto modeDataMode = mode->getDataMode();
-            if (typeid(*entryMode) == typeid(*mode) &&
-                entryHeaderMode->getNetBitrate() == modeHeaderMode->getNetBitrate() &&
-                entryHeaderMode->getGrossBitrate() == modeHeaderMode->getGrossBitrate() &&
-                entryHeaderMode->getSymbolInterval() == modeHeaderMode->getSymbolInterval() &&
-                entryDataMode->getBandwidth() == modeDataMode->getBandwidth() &&
-                entryDataMode->getNetBitrate() == modeDataMode->getNetBitrate() &&
-                entryDataMode->getGrossBitrate() == modeDataMode->getGrossBitrate() &&
-                entryDataMode->getSymbolInterval() == modeDataMode->getSymbolInterval() &&
-                entryDataMode->getNumberOfSpatialStreams() == modeDataMode->getNumberOfSpatialStreams())
-            {
-                return index;
+            auto entryHtMode = dynamic_cast<const Ieee80211HtMode *>(entries[index].mode);
+            if (entryHtMode != nullptr) {
+                auto entryHtDataMode = entryHtMode->getDataMode();
+                if (entryHtDataMode->getMcsIndex() == htDataMode->getMcsIndex() &&
+                    entryHtDataMode->getBandwidth() == htDataMode->getBandwidth() &&
+                    entryHtDataMode->getGuardIntervalType() == htDataMode->getGuardIntervalType() &&
+                    entryHtMode->getCenterFrequencyMode() == htMode->getCenterFrequencyMode() &&
+                    entryHtDataMode->getNumberOfSpatialStreams() == htDataMode->getNumberOfSpatialStreams())
+                {
+                    return index;
+                }
             }
         }
     }
@@ -657,10 +652,26 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211M
 
 const Ieee80211ModeSet *Ieee80211ModeSet::getControlResponseModeSet(const IIeee80211Mode *mode) const
 {
-    // IEEE 802.11 prohibits HT-GF format for control response frames; use the
-    // HT-mixed profile while retaining the received mode's rate parameters.
-    if (dynamic_cast<const Ieee80211HtMode *>(mode) != nullptr)
-        return getModeSet("n(mixed-2.4Ghz)");
+    // IEEE 802.11 prohibits HT-GF format for control response frames; use a
+    // same-band HT-mixed profile while retaining the received mode's rate parameters.
+    if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode)) {
+        const Ieee80211ModeSet *controlResponseModeSet = nullptr;
+        for (size_t index = 0; index < (&modeSets)->size(); index++) {
+            auto candidateModeSet = &(&modeSets)->at(index);
+            auto candidateMode = dynamic_cast<const Ieee80211HtMode *>(candidateModeSet->findMode(mode));
+            if (candidateMode != nullptr &&
+                candidateMode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED &&
+                candidateMode->getCenterFrequencyMode() == htMode->getCenterFrequencyMode())
+            {
+                if (controlResponseModeSet != nullptr)
+                    throw cRuntimeError("Multiple same-band HT-mixed control response mode sets for mode: '%s'", mode->getName());
+                controlResponseModeSet = candidateModeSet;
+            }
+        }
+        if (controlResponseModeSet == nullptr)
+            throw cRuntimeError("No same-band HT-mixed control response mode set for mode: '%s'", mode->getName());
+        return controlResponseModeSet;
+    }
     return this;
 }
 

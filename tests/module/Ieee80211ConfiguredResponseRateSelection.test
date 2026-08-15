@@ -1,0 +1,122 @@
+%description:
+Checks that configured response rates are cached as local modes and converted
+to HT-mixed control-response modes at compute time for DCF and QoS rate
+selection, including a Basic BlockAck response.
+
+%file: Test.cc
+#include <iostream>
+
+#include "inet/common/InitStages.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#define protected public // test-only access to verify initialized response-mode ownership
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#undef protected
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211ConfiguredResponseRateSelection {
+
+static void assertConfiguredResponse(const char *name, const IIeee80211Mode *mode)
+{
+    auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode);
+    if (htMode == nullptr)
+        throw cRuntimeError("%s did not return an HT mode", name);
+    if (htMode->getPreambleMode()->getPreambleFormat() != Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED)
+        throw cRuntimeError("%s did not return an HT-mixed mode", name);
+    if (htMode->getDataMode()->getNetBitrate() != Mbps(6.5))
+        throw cRuntimeError("%s did not return 6.5 Mbps", name);
+}
+
+class ConfiguredResponseProbe : public cSimpleModule
+{
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual void initialize(int stage) override
+    {
+        if (stage != INITSTAGE_LAST)
+            return;
+
+        auto dcfRateSelection = check_and_cast<RateSelection *>(getSimulation()->getModuleByPath("TestConfiguredResponses.host[0].wlan[0].mac.dcf.rateSelection"));
+        auto qosRateSelection = check_and_cast<QosRateSelection *>(getSimulation()->getModuleByPath("TestConfiguredResponses.host[0].wlan[0].mac.hcf.rateSelection"));
+
+        if (double(dcfRateSelection->par("responseAckFrameBitrate")) != 6.5e6
+                || double(qosRateSelection->par("responseAckFrameBitrate")) != 6.5e6)
+            throw cRuntimeError("Configured response bitrate was not applied to both rate selections");
+
+        auto sourceMode = Ieee80211ModeSet::getModeSet("n(greenfield-2.4Ghz)")->getMode(Mbps(6.5));
+        if (dcfRateSelection->responseAckFrameMode != sourceMode || dcfRateSelection->responseCtsFrameMode != sourceMode
+                || qosRateSelection->responseAckFrameMode != sourceMode || qosRateSelection->responseCtsFrameMode != sourceMode
+                || qosRateSelection->responseBlockAckFrameMode != sourceMode)
+            throw cRuntimeError("Configured response modes were not cached as local Greenfield modes");
+        Packet packet("receivedFrame");
+        packet.addTag<Ieee80211ModeReq>()->setMode(sourceMode);
+
+        assertConfiguredResponse("DCF ACK", dcfRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
+        assertConfiguredResponse("DCF CTS", dcfRateSelection->computeResponseCtsFrameMode(nullptr, nullptr));
+        assertConfiguredResponse("QoS ACK", qosRateSelection->computeResponseAckFrameMode(&packet, nullptr));
+        assertConfiguredResponse("QoS CTS", qosRateSelection->computeResponseCtsFrameMode(&packet, nullptr));
+
+        auto basicBlockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
+        assertConfiguredResponse("QoS Basic BlockAck", qosRateSelection->computeResponseBlockAckFrameMode(&packet, basicBlockAckReq));
+
+        std::cout << "Configured DCF and QoS ACK/CTS/Basic BlockAck responses use HT-mixed 6.5 Mbps modes.\n";
+    }
+};
+
+Define_Module(ConfiguredResponseProbe);
+
+} // namespace Ieee80211ConfiguredResponseRateSelection
+
+%file: test.ned
+
+import inet.examples.wireless.lan80211.Lan80211;
+
+simple ConfiguredResponseProbe
+{
+    @class(ConfiguredResponseProbe);
+}
+
+network TestConfiguredResponses extends Lan80211
+{
+    parameters:
+        numHosts = default(2);
+    submodules:
+        configuredResponseProbe: ConfiguredResponseProbe;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+include ../../../../examples/wireless/lan80211/omnetpp-ht-greenfield.ini
+network = TestConfiguredResponses
+abstract = false
+ned-path = .;../../../../src;../../../../examples;../../lib
+cmdenv-express-mode = true
+record-vector-results = false
+record-eventlog = false
+seed-set = 0
+
+[Config ConfiguredResponses]
+abstract = false
+network = TestConfiguredResponses
+sim-time-limit = 1s
+**.opMode = "n(greenfield-2.4Ghz)"
+**.qosStation = true
+**.wlan[*].mac.dcf.rateSelection.responseAckFrameBitrate = 6.5Mbps
+**.wlan[*].mac.dcf.rateSelection.responseCtsFrameBitrate = 6.5Mbps
+**.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 6.5Mbps
+**.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = 6.5Mbps
+**.wlan[*].mac.hcf.rateSelection.responseBlockAckFrameBitrate = 6.5Mbps
+
+%extraargs: -c ConfiguredResponses
+
+%contains: stdout
+Configured DCF and QoS ACK/CTS/Basic BlockAck responses use HT-mixed 6.5 Mbps modes.
