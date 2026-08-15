@@ -21,6 +21,8 @@ class INET_API RecipientBlockAckAgreement : public cObject
     SequenceNumberCyclic startingSequenceNumber;
     int bufferSize = -1;
     simtime_t blockAckTimeoutValue = 0;
+    bool isAddbaResponseSent = false;
+    bool isDelayedBlockAckPolicySupported = false;
     simtime_t expirationTime = -1;
     // The agreement stays installed until the timeout DELBA is transmitted;
     // prevent that pending teardown from being re-armed by late activity.
@@ -43,6 +45,11 @@ class INET_API RecipientBlockAckAgreement : public cObject
         if (!inactivityExpired)
             expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue;
     }
+    virtual bool getIsAddbaResponseSent() const { return isAddbaResponseSent; }
+    virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
+
+    virtual void addbaResposneSent() { isAddbaResponseSent = true; }
+    virtual void setIsDelayedBlockAckPolicySupported(bool isDelayedBlockAckPolicySupported) { this->isDelayedBlockAckPolicySupported = isDelayedBlockAckPolicySupported; }
     virtual simtime_t getExpirationTime() { return expirationTime; }
     virtual bool isInactivityExpired() const { return inactivityExpired; }
     virtual void markInactivityExpired() { inactivityExpired = true; expirationTime = SIMTIME_MAX; }

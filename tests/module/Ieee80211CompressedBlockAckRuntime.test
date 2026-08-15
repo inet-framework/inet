@@ -1,0 +1,37 @@
+%description:
+
+Checks that an explicitly enabled one-TID HT-immediate Block Ack agreement uses
+Compressed BlockAckReq and receives the SIFS Compressed BlockAck response.
+
+%extraargs: -c CompressedBlockAckRuntime -r 0
+
+%inifile: omnetpp.ini
+
+include ../../../../examples/wireless/qos/omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../../../examples;../../lib
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+seed-set = 0
+
+[Config CompressedBlockAckRuntime]
+extends = MacQosWithBlockAck
+abstract = false
+sim-time-limit = 1.05s
+
+**.opMode = "n(mixed-2.4Ghz)"
+# Baseline capability management is absent, so both endpoint policies explicitly
+# opt in to compressed Block Ack; the production default remains false.
+**.assumePeerSupportsCompressedBlockAck = true
+**.cmdenv-log-level = info
+
+%contains: stdout
+Processing Addba Request from
+
+%contains: stdout
+Processing transmitted frame CompressedBlockAckReq as originator in frame sequence.
+
+%contains: stdout
+Ieee80211CompressedBlockAck has arrived

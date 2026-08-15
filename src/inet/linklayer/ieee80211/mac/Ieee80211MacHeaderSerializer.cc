@@ -90,6 +90,24 @@ void readSequenceControl(MemoryInputStream& stream, int& fragmentNumber, ieee802
     sequenceNumber = ieee80211::SequenceNumberCyclic((sequenceControl >> 4) & 0xFFF);
 }
 
+uint16_t packBlockAckControl(bool ackPolicy, bool multiTid, bool compressedBitmap, uint16_t reserved, uint8_t tidInfo)
+{
+    return (ackPolicy ? 0x0001 : 0) |
+            (multiTid ? 0x0002 : 0) |
+            (compressedBitmap ? 0x0004 : 0) |
+            ((reserved & 0x1FF) << 3) |
+            ((tidInfo & 0xF) << 12);
+}
+
+void unpackBlockAckControl(uint16_t control, bool& ackPolicy, bool& multiTid, bool& compressedBitmap, uint16_t& reserved, uint8_t& tidInfo)
+{
+    ackPolicy = (control & 0x0001) != 0;
+    multiTid = (control & 0x0002) != 0;
+    compressedBitmap = (control & 0x0004) != 0;
+    reserved = (control >> 3) & 0x1FF;
+    tidInfo = (control >> 12) & 0xF;
+}
+
 } // namespace
 
 namespace ieee80211 {
@@ -679,8 +697,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
                     std::vector<uint8_t> bytes;
                     bytes.push_back(stream.readByte());
                     bytes.push_back(stream.readByte());
-                    BitVector *blockAckBitmap = new BitVector(bytes);
-                    basicBlockAck->setBlockAckBitmap(i, *blockAckBitmap);
+                    basicBlockAck->setBlockAckBitmap(i, BitVector(bytes));
                 }
                 return basicBlockAck;
             }
@@ -699,7 +716,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
                 for (size_t i = 0; i < 8; ++i) {
                     bytes.push_back(stream.readByte());
                 }
-                compressedBlockAck->setBlockAckBitmap(*(new BitVector(bytes)));
+                compressedBlockAck->setBlockAckBitmap(BitVector(bytes));
                 return compressedBlockAck;
             }
             else {

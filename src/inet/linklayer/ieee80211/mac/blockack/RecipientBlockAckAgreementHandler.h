@@ -49,7 +49,7 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
     virtual std::unique_ptr<RecipientBlockAckAgreement> processTransmittedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback = nullptr) override;
     virtual bool processAcknowledgedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) override;
     virtual RecipientBlockAckAgreementAbortResult processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) override;
-    virtual void blockAckReqReceived(const Ptr<const Ieee80211BasicBlockAckReq>& blockAckReq, IBlockAckAgreementHandlerCallback *callback) override;
+    virtual void blockAckReqReceived(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IBlockAckAgreementHandlerCallback *callback) override;
     virtual bool blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
 
     virtual RecipientBlockAckAgreement *getAgreement(Tid tid, MacAddress originatorAddr) override;

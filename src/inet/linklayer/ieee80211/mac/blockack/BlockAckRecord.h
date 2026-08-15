@@ -24,14 +24,16 @@ class INET_API BlockAckRecord
   protected:
     MacAddress originatorAddress = MacAddress::UNSPECIFIED_ADDRESS;
     Tid tid = -1;
+    SequenceNumberCyclic startingSequenceNumber;
     std::map<SequenceControlField, bool> acknowledgmentState;
 
   public:
-    BlockAckRecord(MacAddress originatorAddress, Tid tid);
+    BlockAckRecord(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber);
     virtual ~BlockAckRecord() {}
 
     void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
     bool getAckState(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber);
+    bool getCompressedAckState(SequenceNumberCyclic sequenceNumber);
     void removeAckStates(SequenceNumberCyclic sequenceNumber);
 
     MacAddress getOriginatorAddress() { return originatorAddress; }
@@ -42,4 +44,3 @@ class INET_API BlockAckRecord
 } /* namespace inet */
 
 #endif
-
