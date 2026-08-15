@@ -19,8 +19,5 @@ simple RecipientQosAckPolicy extends SimpleModule like IRecipientQosAckPolicy
         string modeSetModule = default(""); // Required catalog provider; supplied by the enclosing MAC // Configured MAC catalog provider
         @class(RecipientQosAckPolicy);
         string rateSelectionModule;
-        // Set only for an HT-or-later local STA when peer capability management establishes that the peer supports Compressed Block Ack.
-        // This explicit assumption is needed because peer HT capabilities are not represented by the baseline agreement contract.
-        bool assumePeerSupportsCompressedBlockAck = default(false);
         @display("i=block/control");
 }
