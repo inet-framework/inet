@@ -674,8 +674,8 @@ const Ieee80211VhtMode *Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
 {
     const char *name = ""; // TODO
     unsigned int nss = mcsMode->getNumNss();
-    auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType, nss);
-    auto mode = singleton.modeCache.find(htModeId);
+    auto vhtModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), centerFrequencyMode, preambleFormat, guardIntervalType, nss);
+    auto mode = singleton.modeCache.find(vhtModeId);
     if (mode == singleton.modeCache.end()) {
         const Ieee80211OfdmSignalMode *legacySignal = nullptr;
         const Ieee80211VhtSignalMode *htSignal = nullptr;
@@ -693,7 +693,7 @@ const Ieee80211VhtMode *Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
         const Ieee80211VhtDataMode *dataMode = new Ieee80211VhtDataMode(mcsMode, mcsMode->getBandwidth(), guardIntervalType);
         const Ieee80211VhtPreambleMode *preambleMode = new Ieee80211VhtPreambleMode(htSignal, legacySignal, preambleFormat, dataMode->getNumberOfSpatialStreams());
         const Ieee80211VhtMode *htMode = new Ieee80211VhtMode(name, preambleMode, dataMode, centerFrequencyMode);
-        singleton.modeCache.insert(std::pair<std::tuple<Hz, unsigned int, Ieee80211VhtModeBase::GuardIntervalType, unsigned int>, const Ieee80211VhtMode *>(htModeId, htMode));
+        singleton.modeCache.emplace(vhtModeId, htMode);
         return htMode;
     }
     return mode->second;
@@ -1072,4 +1072,3 @@ const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8([](){ return
 
 } /* namespace physicallayer */
 } /* namespace inet */
-

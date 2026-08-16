@@ -496,9 +496,14 @@ int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
     for (size_t index = 0; index < entries.size(); index++)
         if (entries[index].mode == mode)
             return index;
-    // HT mixed and Greenfield modes have distinct cached identities because their
-    // preambles and timing differ, but they represent the same data-rate mode for
-    // mode-set membership and rate selection purposes.
+    return -1;
+}
+
+int Ieee80211ModeSet::findEquivalentModeIndex(const IIeee80211Mode *mode) const
+{
+    int modeIndex = findModeIndex(mode);
+    if (modeIndex != -1)
+        return modeIndex;
     if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode)) {
         auto htDataMode = htMode->getDataMode();
         for (size_t index = 0; index < entries.size(); index++) {
@@ -535,7 +540,7 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
 
 const IIeee80211Mode *Ieee80211ModeSet::findMode(const IIeee80211Mode *mode) const
 {
-    int index = findModeIndex(mode);
+    int index = findEquivalentModeIndex(mode);
     return index >= 0 ? entries[index].mode : nullptr;
 }
 
@@ -650,12 +655,20 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211M
     return nullptr;
 }
 
-const Ieee80211ModeSet *Ieee80211ModeSet::getControlResponseModeSet(const IIeee80211Mode *mode) const
+const Ieee80211ModeSet::ControlResponseMode& Ieee80211ModeSet::resolveControlResponseMode(const IIeee80211Mode *mode) const
 {
-    // IEEE 802.11 prohibits HT-GF format for control response frames; use a
-    // same-band HT-mixed profile while retaining the received mode's rate parameters.
+    auto cachedMode = controlResponseModeCache.find(mode);
+    if (cachedMode != controlResponseModeCache.end())
+        return cachedMode->second;
+    if (!containsMode(mode))
+        throw cRuntimeError("Control response mode is not in operation mode '%s': '%s'", getName(), mode->getName());
+
+    const Ieee80211ModeSet *controlResponseModeSet = this;
+    const IIeee80211Mode *controlResponseMode = mode;
+    // IEEE 802.11-2024, 10.6.6.5.7 requires HT control responses to use the
+    // HT-mixed format; 19.3.9.5.1 defines HT-mixed and HT-Greenfield preambles.
     if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode)) {
-        const Ieee80211ModeSet *controlResponseModeSet = nullptr;
+        controlResponseModeSet = nullptr;
         for (size_t index = 0; index < (&modeSets)->size(); index++) {
             auto candidateModeSet = &(&modeSets)->at(index);
             auto candidateMode = dynamic_cast<const Ieee80211HtMode *>(candidateModeSet->findMode(mode));
@@ -670,14 +683,19 @@ const Ieee80211ModeSet *Ieee80211ModeSet::getControlResponseModeSet(const IIeee8
         }
         if (controlResponseModeSet == nullptr)
             throw cRuntimeError("No same-band HT-mixed control response mode set for mode: '%s'", mode->getName());
-        return controlResponseModeSet;
+        controlResponseMode = controlResponseModeSet->getMode(mode);
     }
-    return this;
+    return controlResponseModeCache.emplace(mode, ControlResponseMode { controlResponseModeSet, controlResponseMode }).first->second;
+}
+
+const Ieee80211ModeSet *Ieee80211ModeSet::getControlResponseModeSet(const IIeee80211Mode *mode) const
+{
+    return resolveControlResponseMode(mode).modeSet;
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::getControlResponseMode(const IIeee80211Mode *mode) const
 {
-    return getControlResponseModeSet(mode)->getMode(mode);
+    return resolveControlResponseMode(mode).mode;
 }
 
 const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(const char *mode)

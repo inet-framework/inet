@@ -1,7 +1,7 @@
 %description:
 
-Checks during one real packet exchange that Greenfield and mixed HT
-operation select their corresponding preamble formats.
+Checks real HT-Greenfield transmissions using response-free, group-addressed
+traffic from an ad hoc station.
 
 %file: Test.cc
 #include <iostream>
@@ -20,7 +20,6 @@ class HtPreambleCheckingRadio : public Ieee80211Radio, public cListener
 {
   protected:
     int htGreenfieldTransmissionCount = 0;
-    int htMixedTransmissionCount = 0;
 
     virtual void initialize(int stage) override
     {
@@ -39,17 +38,13 @@ class HtPreambleCheckingRadio : public Ieee80211Radio, public cListener
             return;
         if (mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD)
             htGreenfieldTransmissionCount++;
-        else if (mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED)
-            htMixedTransmissionCount++;
     }
 
     virtual void finish() override
     {
         Ieee80211Radio::finish();
         if (htGreenfieldTransmissionCount > 0)
-            std::cout << "Observed " << htGreenfieldTransmissionCount << " runtime HT greenfield transmission(s).\n";
-        if (htMixedTransmissionCount > 0)
-            std::cout << "Observed " << htMixedTransmissionCount << " runtime HT mixed transmission(s).\n";
+            std::cout << "Observed " << htGreenfieldTransmissionCount << " runtime HT-Greenfield broadcast transmission(s).\n";
     }
 };
 
@@ -59,7 +54,9 @@ Define_Module(HtPreambleCheckingRadio);
 
 %file: test.ned
 
-import inet.examples.wireless.lan80211.Lan80211;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio;
 
 module HtPreambleCheckingRadio extends Ieee80211Radio
@@ -68,10 +65,14 @@ module HtPreambleCheckingRadio extends Ieee80211Radio
         @class(HtPreambleCheckingRadio);
 }
 
-network TestHtGreenfield extends Lan80211
+network TestHtGreenfield
 {
     parameters:
-        numHosts = default(2);
+        int numHosts = default(2);
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host[numHosts]: AdhocHost;
 }
 
 %inifile: omnetpp.ini
@@ -92,20 +93,18 @@ seed-set = 0
 abstract = false
 network = TestHtGreenfield
 sim-time-limit = 2s
-*.numHosts = 2
+*.numHosts = 1
 *.host[0].numApps = 1
-*.host[0].app[0].typename = "PingApp"
-*.host[0].app[0].destAddr = "host[1]"
+*.host[0].app[0].typename = "UdpBasicApp"
+*.host[0].app[0].destAddresses = "255.255.255.255"
+*.host[0].app[0].destPort = 1000
+*.host[0].app[0].messageLength = 100B
+*.host[0].app[0].startTime = 100ms
 *.host[0].app[0].sendInterval = 100ms
-*.host[1].numApps = 1
-*.host[1].app[0].typename = "PingApp"
-*.host[1].app[0].destAddr = "host[0]"
-*.host[1].app[0].sendInterval = 100ms
-*.ap.wlan[*].opMode = "n(mixed-2.4Ghz)"
-*.host[1].wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.limitedBroadcast = true
+**.wlan[*].opMode = "n(greenfield-2.4Ghz)"
 
 %extraargs: -c HtPreambleRuntime
 
 %contains-regex: stdout
-Observed [1-9][0-9]* runtime HT greenfield transmission\(s\).
-Observed [1-9][0-9]* runtime HT mixed transmission\(s\).
+Observed [1-9][0-9]* runtime HT-Greenfield broadcast transmission\(s\).

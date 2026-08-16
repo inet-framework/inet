@@ -1,7 +1,6 @@
 %description:
-Checks that configured response rates are cached as local modes and converted
-to HT-mixed control-response modes at compute time for DCF and QoS rate
-selection, including a Basic BlockAck response.
+Checks through the public rate-selection API that configured Greenfield response
+rates are converted to HT-mixed modes for DCF and QoS ACK, CTS, and Basic BlockAck responses.
 
 %file: Test.cc
 #include <iostream>
@@ -9,10 +8,8 @@ selection, including a Basic BlockAck response.
 #include "inet/common/InitStages.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#define protected public // test-only access to verify initialized response-mode ownership
 #include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
-#undef protected
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -52,12 +49,8 @@ class ConfiguredResponseProbe : public cSimpleModule
             throw cRuntimeError("Configured response bitrate was not applied to both rate selections");
 
         auto sourceMode = Ieee80211ModeSet::getModeSet("n(greenfield-2.4Ghz)")->getMode(Mbps(6.5));
-        if (dcfRateSelection->responseAckFrameMode != sourceMode || dcfRateSelection->responseCtsFrameMode != sourceMode
-                || qosRateSelection->responseAckFrameMode != sourceMode || qosRateSelection->responseCtsFrameMode != sourceMode
-                || qosRateSelection->responseBlockAckFrameMode != sourceMode)
-            throw cRuntimeError("Configured response modes were not cached as local Greenfield modes");
         Packet packet("receivedFrame");
-        packet.addTag<Ieee80211ModeReq>()->setMode(sourceMode);
+        packet.addTag<Ieee80211ModeInd>()->setMode(sourceMode);
 
         assertConfiguredResponse("DCF ACK", dcfRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
         assertConfiguredResponse("DCF CTS", dcfRateSelection->computeResponseCtsFrameMode(nullptr, nullptr));

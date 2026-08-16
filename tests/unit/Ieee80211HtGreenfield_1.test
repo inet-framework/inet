@@ -1,14 +1,17 @@
 %description:
 Checks that the 802.11n mixed and Greenfield mode profiles preserve distinct
-preamble formats and timing while supporting cross-profile lookup, and that
-legacy ERP mode profiles retain strict mode membership.
+preamble formats and timing, retain strict membership, and support explicit
+cross-profile lookup for control-response translation. Also checks VHT cache identity.
 
 %includes:
+#include <cstring>
+
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 
 %global:
 using namespace inet;
@@ -32,10 +35,21 @@ static bool rejectsUnknownMode(const Ieee80211ModeSet *modeSet, const IIeee80211
     }
 }
 
-static bool rejectsControlResponseModeSet(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+static bool rejectsNonLocalControlResponseMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
 {
     try {
         modeSet->getControlResponseModeSet(mode);
+        return false;
+    }
+    catch (const cRuntimeError& error) {
+        return std::strstr(error.what(), "not in operation mode") != nullptr;
+    }
+}
+
+static bool rejectsMandatoryLookup(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    try {
+        modeSet->getIsMandatory(mode);
         return false;
     }
     catch (const cRuntimeError&) {
@@ -65,12 +79,17 @@ ASSERT(greenfieldMode->getPreambleMode()->getDuration() == SimTime(24, SIMTIME_U
 ASSERT(mixedMode->getDuration(B(0)) == SimTime(40, SIMTIME_US));
 ASSERT(greenfieldMode->getDuration(B(0)) == SimTime(28, SIMTIME_US));
 ASSERT(mixedMode->getDuration(B(0)) - greenfieldMode->getDuration(B(0)) == SimTime(12, SIMTIME_US));
-ASSERT(mixedProfile->containsMode(greenfieldMode));
-ASSERT(greenfieldProfile->containsMode(mixedMode));
+ASSERT(!mixedProfile->containsMode(greenfieldMode));
+ASSERT(!greenfieldProfile->containsMode(mixedMode));
+ASSERT(mixedProfile->getSlowerMode(greenfieldMode) == nullptr);
+ASSERT(greenfieldProfile->getFasterMode(mixedMode) == nullptr);
+ASSERT(rejectsMandatoryLookup(mixedProfile, greenfieldMode));
+ASSERT(rejectsMandatoryLookup(greenfieldProfile, mixedMode));
 ASSERT(mixedProfile->getMode(greenfieldMode) == mixedMode);
 ASSERT(greenfieldProfile->getMode(mixedMode) == greenfieldMode);
 ASSERT(mixedProfile->getControlResponseMode(mixedMode) == mixedMode);
 ASSERT(greenfieldProfile->getControlResponseModeSet(greenfieldMode) == mixedProfile);
+ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMode) == mixedMode);
 ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMode) == mixedMode);
 
 auto greenfield5GhzMode = Ieee80211HtCompliantModes::getCompliantMode(
@@ -80,7 +99,30 @@ auto greenfield5GhzMode = Ieee80211HtCompliantModes::getCompliantMode(
         Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
 ASSERT(greenfield5GhzMode->getCenterFrequencyMode() == Ieee80211HtMode::BAND_5GHZ);
 ASSERT(greenfield5GhzMode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD);
-ASSERT(rejectsControlResponseModeSet(greenfieldProfile, greenfield5GhzMode));
+ASSERT(!greenfieldProfile->containsMode(greenfield5GhzMode));
+ASSERT(rejectsNonLocalControlResponseMode(greenfieldProfile, greenfield5GhzMode));
+
+auto vhtMixed5GhzMode = Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+        Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED,
+        Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+auto vhtGreenfield5GhzMode = Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+        Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_GREENFIELD,
+        Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+auto vhtMixed2GhzMode = Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+        Ieee80211VhtMode::BAND_2_4GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED,
+        Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+ASSERT(vhtMixed5GhzMode != vhtGreenfield5GhzMode);
+ASSERT(vhtMixed5GhzMode != vhtMixed2GhzMode);
+ASSERT(vhtGreenfield5GhzMode != vhtMixed2GhzMode);
+ASSERT(vhtMixed5GhzMode->getCenterFrequencyMode() == Ieee80211VhtMode::BAND_5GHZ);
+ASSERT(vhtGreenfield5GhzMode->getPreambleMode()->getPreambleFormat() == Ieee80211VhtPreambleMode::HT_PREAMBLE_GREENFIELD);
+ASSERT(vhtMixed2GhzMode->getCenterFrequencyMode() == Ieee80211VhtMode::BAND_2_4GHZ);
 
 auto erpMixedProfile = Ieee80211ModeSet::getModeSet("g(mixed)");
 auto erpOnlyProfile = Ieee80211ModeSet::getModeSet("g(erp)");

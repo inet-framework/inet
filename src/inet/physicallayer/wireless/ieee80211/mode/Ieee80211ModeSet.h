@@ -27,16 +27,24 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
         bool operator()(const Entry& left, const Entry& right) { return left.mode->getDataMode()->getNetBitrate() < right.mode->getDataMode()->getNetBitrate(); }
     };
 
+    struct ControlResponseMode {
+        const Ieee80211ModeSet *modeSet;
+        const IIeee80211Mode *mode;
+    };
+
   protected:
     std::string name;
     const std::vector<Entry> entries;
+    mutable std::map<const IIeee80211Mode *, ControlResponseMode> controlResponseModeCache;
 
   public:
     static const DelayedInitializer<std::vector<Ieee80211ModeSet>> modeSets;
 
   protected:
     int findModeIndex(const IIeee80211Mode *mode) const;
+    int findEquivalentModeIndex(const IIeee80211Mode *mode) const;
     int getModeIndex(const IIeee80211Mode *mode) const;
+    const ControlResponseMode& resolveControlResponseMode(const IIeee80211Mode *mode) const;
 
   public:
     Ieee80211ModeSet(const char *name, const std::vector<Entry> entries);
