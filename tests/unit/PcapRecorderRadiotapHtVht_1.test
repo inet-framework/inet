@@ -3,6 +3,7 @@ Test legacy Rate, HT MCS, VHT, and FCS Radiotap fields without fabricating unsup
 
 %includes:
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/Checksum.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -20,6 +21,16 @@ using namespace inet::ieee80211;
 using namespace inet::physicallayer;
 
 #define REQUIRE(...) do { if (!(__VA_ARGS__)) throw cRuntimeError("REQUIRE failed at line %d: %s", __LINE__, #__VA_ARGS__); } while (false)
+
+class UnserializableFieldsChunk : public FieldsChunk
+{
+  public:
+    UnserializableFieldsChunk() { setChunkLength(B(4)); }
+    UnserializableFieldsChunk(const UnserializableFieldsChunk& other) = default;
+
+    virtual UnserializableFieldsChunk *dup() const override { return new UnserializableFieldsChunk(*this); }
+    virtual const Ptr<Chunk> dupShared() const override { return makeShared<UnserializableFieldsChunk>(*this); }
+};
 
 static uint16_t readUint16(const std::vector<uint8_t>& bytes, size_t offset)
 {
@@ -165,6 +176,14 @@ incorrectTrailer->setFcsMode(FCS_DECLARED_INCORRECT);
 declaredIncorrect.insertAtBack(incorrectTrailer);
 auto declaredIncorrectHeader = createRadiotapHeader(adapter, declaredIncorrect);
 REQUIRE(declaredIncorrectHeader.at(8) == 0x50);
+
+Packet unserializablePayload("unserializablePayload");
+unserializablePayload.insertAtBack(makeShared<UnserializableFieldsChunk>());
+auto unserializablePayloadTrailer = makeShared<Ieee80211MacTrailer>();
+unserializablePayloadTrailer->setFcsMode(FCS_COMPUTED);
+unserializablePayload.insertAtBack(unserializablePayloadTrailer);
+auto unserializablePayloadHeader = createRadiotapHeader(adapter, unserializablePayload);
+REQUIRE(unserializablePayloadHeader.at(8) == 0x10); // typed FCS remains present when payload comparison fails
 
 EV << "Legacy, HT, VHT, and FCS Radiotap fields tested successfully.\n";
 

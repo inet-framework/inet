@@ -149,6 +149,14 @@ static uint32_t readBigEndianUint32(const std::vector<uint8_t>& bytes, size_t of
     return value;
 }
 
+static void requireWholePacketRecord(const std::vector<uint8_t>& record, const Packet& packet)
+{
+    auto radiotapLength = readUint16(record, 2);
+    auto packetBytes = packet.peekData<BytesChunk>()->getBytes();
+    REQUIRE(record.size() == radiotapLength + packetBytes.size());
+    REQUIRE(std::equal(packetBytes.begin(), packetBytes.end(), record.begin() + radiotapLength));
+}
+
 %activity:
 
 auto recorder = check_and_cast<TestablePcapRecorder *>(getModuleByPath("recorder"));
@@ -207,7 +215,8 @@ Packet onlyEofPadding("onlyEofPadding");
 appendZeroLengthDelimiter(onlyEofPadding);
 appendZeroLengthDelimiter(onlyEofPadding);
 recorder->writeIeee80211(&onlyEofPadding, DIRECTION_INBOUND);
-REQUIRE(writer->records.empty());
+REQUIRE(writer->records.size() == 1);
+requireWholePacketRecord(writer->records.front(), onlyEofPadding);
 
 writer->records.clear();
 Packet malformed("malformed");
@@ -216,7 +225,8 @@ auto malformedDelimiter = makeShared<Ieee80211MpduSubframeHeader>();
 malformedDelimiter->setLength(100);
 malformed.insertAtBack(malformedDelimiter);
 recorder->writeIeee80211(&malformed, DIRECTION_INBOUND);
-REQUIRE(writer->records.empty());
+REQUIRE(writer->records.size() == 1);
+requireWholePacketRecord(writer->records.front(), malformed);
 
 writer->records.clear();
 Packet trailingPadding("trailingPadding");

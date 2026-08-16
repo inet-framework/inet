@@ -217,11 +217,11 @@ FcsMetadata getIeee80211FcsMetadata(const Packet *packet, b frontOffset, b backO
     auto endOffset = packet->getDataLength() - backOffset;
     if (endOffset - frontOffset < B(4))
         return {};
+    FcsMetadata metadata;
     try {
         auto trailer = dynamicPtrCast<const ieee80211::Ieee80211MacTrailer>(packet->peekDataAt(endOffset - B(4), B(4)));
         if (trailer == nullptr)
-            return {};
-        FcsMetadata metadata;
+            return metadata;
         metadata.isPresent = true;
         switch (trailer->getFcsMode()) {
             case FCS_DECLARED_INCORRECT:
@@ -239,7 +239,7 @@ FcsMetadata getIeee80211FcsMetadata(const Packet *packet, b frontOffset, b backO
         return metadata;
     }
     catch (cRuntimeError&) {
-        return {};
+        return metadata;
     }
 }
 
@@ -461,9 +461,7 @@ std::vector<PcapCaptureRecord> Ieee80211RadiotapPcapCaptureAdapter::createRecord
 
     std::vector<MpduRange> mpduRanges;
     auto ampduParseResult = getIeee80211AmpduMpduRanges(packet, frontOffset, backOffset, mpduRanges);
-    if (ampduParseResult == AmpduParseResult::INVALID)
-        return {};
-    if (ampduParseResult == AmpduParseResult::VALID) {
+    if (ampduParseResult == AmpduParseResult::VALID && !mpduRanges.empty()) {
         std::vector<PcapCaptureRecord> records;
         records.reserve(mpduRanges.size());
         auto ampduReference = makeAmpduReference(packet);
