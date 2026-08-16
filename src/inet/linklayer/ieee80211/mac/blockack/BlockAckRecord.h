@@ -31,13 +31,14 @@ class INET_API BlockAckRecord
     BlockAckRecord(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber);
     virtual ~BlockAckRecord() {}
 
-    void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
+    void dataFrameReceived(const Ptr<const Ieee80211DataHeader>& header, int windowSize);
     bool getAckState(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber);
     bool getCompressedAckState(SequenceNumberCyclic sequenceNumber);
-    void removeAckStates(SequenceNumberCyclic sequenceNumber);
+    void advanceStartingSequenceNumber(SequenceNumberCyclic startingSequenceNumber);
 
     MacAddress getOriginatorAddress() { return originatorAddress; }
     Tid getTid() { return tid; }
+    SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
 };
 
 } /* namespace ieee80211 */

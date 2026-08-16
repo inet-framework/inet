@@ -22,9 +22,12 @@ abstract = false
 sim-time-limit = 1.05s
 
 **.opMode = "n(mixed-2.4Ghz)"
-# The originator explicitly opts in based on its peer-capability assumption;
-# the recipient requires no additional station-wide capability setting.
-**.originatorAckPolicy.assumePeerSupportsCompressedBlockAck = true
+**.originatorBlockAckAgreementPolicy.localCompressedBlockAckSupported = true
+*.cliHost.wlan[*].address = "10:00:00:00:00:01"
+*.srvHost.wlan[*].address = "10:00:00:00:00:02"
+*.cliHost.wlan[*].mac.hcf.originatorBlockAckAgreementPolicy.compressedBlockAckPeerAddresses = "10:00:00:00:00:00"
+*.ap.wlan[*].mac.hcf.originatorBlockAckAgreementPolicy.compressedBlockAckPeerAddresses = "10:00:00:00:00:01 10:00:00:00:00:02"
+*.srvHost.wlan[*].mac.hcf.originatorBlockAckAgreementPolicy.compressedBlockAckPeerAddresses = "10:00:00:00:00:00"
 **.cmdenv-log-level = info
 
 %contains: stdout

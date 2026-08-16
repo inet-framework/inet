@@ -19,10 +19,14 @@ BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid, SequenceNu
 {
 }
 
-void BlockAckRecord::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)
+void BlockAckRecord::dataFrameReceived(const Ptr<const Ieee80211DataHeader>& header, int windowSize)
 {
     SequenceNumberCyclic sequenceNumber = header->getSequenceNumber();
     FragmentNumber fragmentNumber = header->getFragmentNumber();
+    // IEEE Std 802.11-2024, 10.25.6.3(b) and 10.25.6.4(c): a related
+    // MPDU beyond WinEndR advances the receive window before its bit is set.
+    if (startingSequenceNumber + windowSize <= sequenceNumber && sequenceNumber < startingSequenceNumber + 2048)
+        advanceStartingSequenceNumber(sequenceNumber - windowSize + 1);
     acknowledgmentState[SequenceControlField(sequenceNumber.get(), fragmentNumber)] = true;
 }
 
@@ -31,16 +35,7 @@ bool BlockAckRecord::getAckState(SequenceNumberCyclic sequenceNumber, FragmentNu
     // The status of MPDUs that are considered “old” and prior to the sequence number
     // range for which the receiver maintains status shall be reported as successfully
     // received (i.e., the corresponding bit in the bitmap shall be set to 1).
-    if (containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber))) {
-        return true;
-    }
-    else if (acknowledgmentState.size() == 0) {
-        return true; // TODO old?
-    }
-    else {
-        auto earliest = acknowledgmentState.begin();
-        return SequenceNumberCyclic(earliest->first.getSequenceNumber()) > sequenceNumber; // old = true
-    }
+    return containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber)) || sequenceNumber < startingSequenceNumber;
 }
 
 bool BlockAckRecord::getCompressedAckState(SequenceNumberCyclic sequenceNumber)
@@ -50,17 +45,20 @@ bool BlockAckRecord::getCompressedAckState(SequenceNumberCyclic sequenceNumber)
     return containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), 0)) || sequenceNumber < startingSequenceNumber;
 }
 
-void BlockAckRecord::removeAckStates(SequenceNumberCyclic sequenceNumber)
+void BlockAckRecord::advanceStartingSequenceNumber(SequenceNumberCyclic newStartingSequenceNumber)
 {
+    // IEEE Std 802.11-2024, 10.25.6.3 and 10.25.6.4: advance WinStartR
+    // for a newer related MPDU or BAR SSN, using the 12-bit sequence space.
+    if (!(startingSequenceNumber < newStartingSequenceNumber))
+        return;
     auto it = acknowledgmentState.begin();
     while (it != acknowledgmentState.end()) {
-        if (SequenceNumberCyclic(it->first.getSequenceNumber()) < sequenceNumber)
+        if (SequenceNumberCyclic(it->first.getSequenceNumber()) < newStartingSequenceNumber)
             it = acknowledgmentState.erase(it);
         else
             it++;
     }
-    if (startingSequenceNumber <= sequenceNumber)
-        startingSequenceNumber = sequenceNumber + 1;
+    startingSequenceNumber = newStartingSequenceNumber;
 }
 
 } /* namespace ieee80211 */
