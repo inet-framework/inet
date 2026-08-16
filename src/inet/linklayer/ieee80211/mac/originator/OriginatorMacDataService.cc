@@ -38,15 +38,37 @@ std::vector<Packet *> *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)
     return nullptr;
 }
 
+bool OriginatorMacDataService::isFrameEligible(const Packet *packet) const
+{
+    return !frameEligibilityFunction || frameEligibilityFunction(packet);
+}
+
+bool OriginatorMacDataService::hasEligibleFrame(queueing::IPacketQueue *pendingQueue) const
+{
+    for (int i = 0; i < pendingQueue->getNumPackets(); i++)
+        if (isFrameEligible(pendingQueue->getPacket(i)))
+            return true;
+    return false;
+}
+
 std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queueing::IPacketQueue *pendingQueue)
 {
     Enter_Method("extractFramesToTransmit");
-    if (pendingQueue->isEmpty())
+    if (!hasEligibleFrame(pendingQueue))
         return nullptr;
     else {
 //        if (msduRateLimiting)
 //            txRateLimitingIfNeeded();
-        Packet *packet = pendingQueue->dequeuePacket();
+        Packet *packet = nullptr;
+        for (int i = 0; i < pendingQueue->getNumPackets(); i++) {
+            auto candidate = pendingQueue->getPacket(i);
+            if (isFrameEligible(candidate)) {
+                pendingQueue->removePacket(candidate);
+                packet = candidate;
+                break;
+            }
+        }
+        ASSERT(packet != nullptr);
         take(packet);
         if (sequenceNumberAssignment) {
             auto frame = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
@@ -76,4 +98,3 @@ OriginatorMacDataService::~OriginatorMacDataService()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

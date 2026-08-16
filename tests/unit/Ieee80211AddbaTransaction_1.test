@@ -1,0 +1,468 @@
+%description:
+Test IEEE 802.11 ADDBA transaction identity, response handling, timeout cleanup, SSN wrap-around, and frame eligibility.
+
+%includes:
+#include <algorithm>
+
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+class TestOriginatorPolicy : public IOriginatorBlockAckAgreementPolicy
+{
+  public:
+    simtime_t addbaFailureTimeout = 1;
+
+    virtual bool isAddbaReqNeeded(Packet *, const Ptr<const Ieee80211DataHeader>&) override { return true; }
+    virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>&, OriginatorBlockAckAgreement *) override { return true; }
+    virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>&) override { return true; }
+    virtual bool isMsduSupported() const override { return true; }
+    virtual simtime_t computeAddbaFailureTimeout() const override { return addbaFailureTimeout; }
+    virtual simtime_t getBlockAckTimeoutValue() const override { return 0; }
+    virtual bool isDelayedAckPolicySupported() const override { return false; }
+    virtual int getMaximumAllowedBufferSize() const override { return 64; }
+};
+
+class TestRecipientPolicy : public IRecipientBlockAckAgreementPolicy
+{
+  public:
+    bool accepted = true;
+
+    virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>&) override { return accepted; }
+    virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>&) override { return true; }
+    virtual simtime_t getBlockAckTimeoutValue() const override { return 0; }
+    virtual bool aMsduSupported() const override { return true; }
+    virtual bool delayedBlockAckPolicySupported() const override { return false; }
+    virtual int getMaximumAllowedBufferSize() const override { return 64; }
+};
+
+class TestCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
+{
+  public:
+    Packet *managementPacket = nullptr;
+    std::vector<Packet *> managementPackets;
+    Ptr<const Ieee80211MgmtHeader> managementHeader;
+    simtime_t addbaDeadline = SIMTIME_MAX;
+
+    virtual ~TestCallback() { for (auto packet : managementPackets) delete packet; }
+    virtual void transmitControlResponseFrame(Packet *, const Ptr<const Ieee80211MacHeader>&, Packet *, const Ptr<const Ieee80211MacHeader>&) override { throw cRuntimeError("Unexpected control response"); }
+    virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        managementPacket = packet;
+        managementPackets.push_back(packet);
+        managementHeader = header;
+    }
+    virtual void scheduleInactivityTimer(simtime_t) override {}
+    virtual void scheduleAddbaResponseTimer(simtime_t deadline) override { addbaDeadline = deadline; }
+};
+
+class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    using OriginatorBlockAckAgreementHandler::buildAddbaRequest;
+    void setNextDialogToken(uint8_t token) { nextDialogToken = token; }
+    void expireNow(MacAddress receiverAddress, Tid tid) { getAgreement(receiverAddress, tid)->setAddbaResponseDeadline(simTime()); }
+};
+
+class TestPacketQueue : public queueing::IPacketQueue
+{
+  public:
+    std::vector<Packet *> packets;
+
+    virtual int getMaxNumPackets() const override { return -1; }
+    virtual int getNumPackets() const override { return packets.size(); }
+    virtual b getMaxTotalLength() const override { return b(-1); }
+    virtual b getTotalLength() const override { return b(0); }
+    virtual Packet *getPacket(int index) const override { return packets.at(index); }
+    virtual bool isEmpty() const override { return packets.empty(); }
+    virtual void removePacket(Packet *packet) override { packets.erase(std::find(packets.begin(), packets.end(), packet)); }
+    virtual void removeAllPackets() override { packets.clear(); }
+    virtual void enqueuePacket(Packet *packet) override { packets.push_back(packet); }
+    virtual Packet *dequeuePacket() override { auto packet = packets.front(); packets.erase(packets.begin()); return packet; }
+    virtual bool canPullSomePacket(const cGate *) const override { return !packets.empty(); }
+    virtual Packet *canPullPacket(const cGate *) const override { return packets.empty() ? nullptr : packets.front(); }
+    virtual Packet *pullPacket(const cGate *) override { return dequeuePacket(); }
+    virtual Packet *pullPacketStart(const cGate *, bps) override { throw cRuntimeError("Unsupported"); }
+    virtual Packet *pullPacketEnd(const cGate *) override { throw cRuntimeError("Unsupported"); }
+    virtual Packet *pullPacketProgress(const cGate *, bps, b, b) override { throw cRuntimeError("Unsupported"); }
+    virtual bool canPushSomePacket(const cGate *) const override { return true; }
+    virtual bool canPushPacket(Packet *, const cGate *) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *) override { enqueuePacket(packet); }
+    virtual void pushPacketStart(Packet *, const cGate *, bps) override { throw cRuntimeError("Unsupported"); }
+    virtual void pushPacketEnd(Packet *, const cGate *) override { throw cRuntimeError("Unsupported"); }
+    virtual void pushPacketProgress(Packet *, const cGate *, bps, b, b) override { throw cRuntimeError("Unsupported"); }
+};
+
+class TestAckHandler : public IAckHandler
+{
+  public:
+    virtual bool isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>&) override { return true; }
+    virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>&) override { return false; }
+    virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>&) override {}
+};
+
+class TestInProgressFrames : public InProgressFrames
+{
+  public:
+    void configure(IOriginatorMacDataService *dataService, IAckHandler *ackHandler) {
+        this->dataService = dataService;
+        this->ackHandler = ackHandler;
+    }
+    void addFrame(Packet *packet) { inProgressFrames.push_back(packet); }
+    bool hasEligibleFrame() { return hasEligibleFrameToTransmit(); }
+};
+
+class TestOriginatorQosMacDataService : public OriginatorQosMacDataService
+{
+  public:
+    void enableSequenceNumberAssignment() { sequenceNumberAssignment = new QoSSequenceNumberAssignment(); }
+    void release(Packet *packet) { drop(packet); }
+};
+
+static Ptr<Ieee80211DataHeader> makeQosHeader(MacAddress receiverAddress, Tid tid, SequenceNumberCyclic sequenceNumber)
+{
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setReceiverAddress(receiverAddress);
+    header->setTid(tid);
+    header->setSequenceNumber(sequenceNumber);
+    return header;
+}
+
+static Ptr<Ieee80211AddbaResponse> makeResponse(MacAddress transmitterAddress, Tid tid, uint8_t dialogToken, uint16_t statusCode)
+{
+    auto response = makeShared<Ieee80211AddbaResponse>();
+    response->setTransmitterAddress(transmitterAddress);
+    response->setTid(tid);
+    response->setDialogToken(dialogToken);
+    response->setStatusCode(statusCode);
+    response->setBufferSize(32);
+    response->setBlockAckTimeoutValue(0);
+    return response;
+}
+
+static Ptr<Ieee80211AddbaRequest> makeRequest(MacAddress transmitterAddress, Tid tid, uint8_t dialogToken, SequenceNumberCyclic startingSequenceNumber, int bufferSize)
+{
+    auto request = makeShared<Ieee80211AddbaRequest>();
+    request->setTransmitterAddress(transmitterAddress);
+    request->setTid(tid);
+    request->setDialogToken(dialogToken);
+    request->setStartingSequenceNumber(startingSequenceNumber);
+    request->setBufferSize(bufferSize);
+    request->setBlockAckPolicy(1);
+    request->setBlockAckTimeoutValue(0);
+    return request;
+}
+
+%activity:
+// IEEE Std 802.11-2024, 9.6.4.2, 10.25.2, and 11.5.2.2.
+TestOriginatorPolicy originatorPolicy;
+TestCallback callback;
+MacAddress peer1("00:00:00:00:00:01");
+MacAddress peer2("00:00:00:00:00:02");
+MacAddress peer3("00:00:00:00:00:03");
+
+{
+    TestOriginatorHandler tokenHandler;
+    tokenHandler.setNextDialogToken(255);
+    auto request255 = tokenHandler.buildAddbaRequest(peer1, 0, SequenceNumberCyclic(0), &originatorPolicy);
+    auto request1 = tokenHandler.buildAddbaRequest(peer1, 0, SequenceNumberCyclic(0), &originatorPolicy);
+    ASSERT(request255->getDialogToken() == 255);
+    ASSERT(request1->getDialogToken() == 1);
+}
+
+TestOriginatorHandler handler;
+Packet triggerPacket("trigger");
+auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
+handler.processTransmittedDataFrame(&triggerPacket, triggerHeader, &originatorPolicy, &callback);
+auto request = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
+ASSERT(request != nullptr);
+ASSERT(request->getDialogToken() != 0);
+ASSERT(request->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+handler.processTransmittedAddbaReq(request, &originatorPolicy, &callback);
+ASSERT(callback.addbaDeadline == simTime() + 1);
+
+auto wrongToken = makeResponse(peer1, 3, request->getDialogToken() + 1, 0);
+ASSERT(handler.processReceivedAddbaResp(wrongToken, &originatorPolicy, &callback) == nullptr);
+ASSERT(handler.isAddbaResponsePending(peer1, 3));
+auto wrongTid = makeResponse(peer1, 4, request->getDialogToken(), 0);
+ASSERT(handler.processReceivedAddbaResp(wrongTid, &originatorPolicy, &callback) == nullptr);
+auto wrongPeer = makeResponse(peer2, 3, request->getDialogToken(), 0);
+ASSERT(handler.processReceivedAddbaResp(wrongPeer, &originatorPolicy, &callback) == nullptr);
+
+auto success = makeResponse(peer1, 3, request->getDialogToken(), 0);
+auto established = handler.processReceivedAddbaResp(success, &originatorPolicy, &callback);
+ASSERT(established != nullptr);
+ASSERT(established->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+ASSERT(!handler.isAddbaResponsePending(peer1, 3));
+ASSERT(handler.processReceivedAddbaResp(success, &originatorPolicy, &callback) == nullptr);
+
+Packet rejectedTrigger("rejectedTrigger");
+auto rejectedHeader = makeQosHeader(peer2, 4, SequenceNumberCyclic(10));
+handler.processTransmittedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback);
+auto rejectedRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
+handler.processTransmittedAddbaReq(rejectedRequest, &originatorPolicy, &callback);
+auto rejection = makeResponse(peer2, 4, rejectedRequest->getDialogToken(), 1);
+ASSERT(handler.processReceivedAddbaResp(rejection, &originatorPolicy, &callback) == nullptr);
+ASSERT(handler.getAgreement(peer2, 4) == nullptr);
+
+Packet timeoutTrigger("timeoutTrigger");
+auto timeoutHeader = makeQosHeader(peer3, 5, SequenceNumberCyclic(20));
+handler.processTransmittedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback);
+auto timedRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
+handler.processTransmittedAddbaReq(timedRequest, &originatorPolicy, &callback);
+handler.expireNow(peer3, 5);
+handler.addbaResponseTimeoutExpired(&callback);
+ASSERT(handler.getAgreement(peer3, 5) == nullptr);
+handler.processTransmittedAddbaReq(timedRequest, &originatorPolicy, &callback);
+ASSERT(handler.getAgreement(peer3, 5) == nullptr);
+auto staleResponse = makeResponse(peer3, 5, timedRequest->getDialogToken(), 0);
+ASSERT(handler.processReceivedAddbaResp(staleResponse, &originatorPolicy, &callback) == nullptr);
+handler.processTransmittedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback);
+ASSERT(handler.isAddbaResponsePending(peer3, 5));
+
+{
+    TestOriginatorHandler invalidTimeoutHandler;
+    TestOriginatorPolicy invalidTimeoutPolicy;
+    TestCallback invalidTimeoutCallback;
+    invalidTimeoutPolicy.addbaFailureTimeout = 0;
+    Packet invalidTimeoutTrigger("invalidTimeoutTrigger");
+    auto invalidTimeoutHeader = makeQosHeader(peer2, 1, SequenceNumberCyclic(30));
+    invalidTimeoutHandler.processTransmittedDataFrame(&invalidTimeoutTrigger, invalidTimeoutHeader, &invalidTimeoutPolicy, &invalidTimeoutCallback);
+    auto invalidTimeoutRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(invalidTimeoutCallback.managementHeader);
+    bool threw = false;
+    try {
+        invalidTimeoutHandler.processTransmittedAddbaReq(invalidTimeoutRequest, &invalidTimeoutPolicy, &invalidTimeoutCallback);
+    }
+    catch (cRuntimeError&) {
+        threw = true;
+    }
+    ASSERT(threw);
+}
+
+// IEEE Std 802.11-2024, 9.6.4.2, 10.25.6.6.1, and 11.5.2.3.
+RecipientBlockAckAgreementHandler recipientHandler;
+TestRecipientPolicy recipientPolicy;
+TestCallback recipientCallback;
+auto recipientRequest = makeShared<Ieee80211AddbaRequest>();
+recipientRequest->setTransmitterAddress(peer1);
+recipientRequest->setTid(6);
+recipientRequest->setDialogToken(77);
+recipientRequest->setStartingSequenceNumber(SequenceNumberCyclic(0));
+recipientRequest->setBufferSize(64);
+recipientRequest->setBlockAckPolicy(1);
+recipientRequest->setBlockAckTimeoutValue(0);
+recipientHandler.processReceivedAddbaRequest(recipientRequest, &recipientPolicy, &recipientCallback);
+auto acceptedResponsePacket = recipientCallback.managementPacket;
+auto acceptedResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(recipientCallback.managementHeader);
+ASSERT(acceptedResponse->getDialogToken() == 77);
+ASSERT(acceptedResponse->getTid() == 6);
+ASSERT(acceptedResponse->getStatusCode() == 0);
+ASSERT(recipientHandler.getAgreement(6, peer1) == nullptr);
+auto wrongRecipientTokenResponse = makeShared<Ieee80211AddbaResponse>();
+wrongRecipientTokenResponse->setReceiverAddress(peer1);
+wrongRecipientTokenResponse->setTid(6);
+wrongRecipientTokenResponse->setDialogToken(78);
+wrongRecipientTokenResponse->setStatusCode(0);
+ASSERT(recipientHandler.processTransmittedAddbaResp(acceptedResponsePacket, wrongRecipientTokenResponse, &recipientCallback) == nullptr);
+ASSERT(recipientHandler.getAgreement(6, peer1) == nullptr);
+
+// Exercise the real management-frame extraction and sequence-assignment path:
+// the mutable header is copied, but the Packet/message identity is preserved.
+TestOriginatorQosMacDataService responseDataService;
+responseDataService.enableSequenceNumberAssignment();
+TestPacketQueue responseQueue;
+responseQueue.packets = { acceptedResponsePacket };
+auto extractedResponses = responseDataService.extractFramesToTransmit(&responseQueue);
+ASSERT(extractedResponses->size() == 1);
+auto transmittedResponsePacket = extractedResponses->at(0);
+auto transmittedResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(transmittedResponsePacket->peekAtFront<Ieee80211MacHeader>());
+ASSERT(transmittedResponsePacket == acceptedResponsePacket);
+ASSERT(transmittedResponse != acceptedResponse);
+auto firstRecipientAgreement = recipientHandler.processTransmittedAddbaResp(transmittedResponsePacket, transmittedResponse, &recipientCallback);
+delete extractedResponses;
+ASSERT(firstRecipientAgreement != nullptr);
+ASSERT(firstRecipientAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+ASSERT(recipientHandler.processTransmittedAddbaResp(transmittedResponsePacket, transmittedResponse, &recipientCallback) == nullptr);
+responseDataService.release(transmittedResponsePacket);
+
+recipientRequest->setDialogToken(79);
+recipientRequest->setStartingSequenceNumber(SequenceNumberCyclic(9));
+recipientHandler.processReceivedAddbaRequest(recipientRequest, &recipientPolicy, &recipientCallback);
+auto replacementResponsePacket = recipientCallback.managementPacket;
+auto replacementResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(recipientCallback.managementHeader);
+ASSERT(replacementResponse->getDialogToken() == 79);
+ASSERT(recipientHandler.getAgreement(6, peer1) == firstRecipientAgreement);
+ASSERT(recipientHandler.getAgreement(6, peer1)->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+auto replacementAgreement = recipientHandler.processTransmittedAddbaResp(replacementResponsePacket, replacementResponse, &recipientCallback);
+ASSERT(replacementAgreement != nullptr);
+ASSERT(replacementAgreement != firstRecipientAgreement);
+ASSERT(recipientHandler.getAgreement(6, peer1) == replacementAgreement);
+ASSERT(replacementAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(9));
+
+recipientPolicy.accepted = false;
+recipientRequest->setDialogToken(80);
+recipientRequest->setStartingSequenceNumber(SequenceNumberCyclic(12));
+recipientHandler.processReceivedAddbaRequest(recipientRequest, &recipientPolicy, &recipientCallback);
+auto refusedResponsePacket = recipientCallback.managementPacket;
+auto refusedResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(recipientCallback.managementHeader);
+ASSERT(refusedResponse->getDialogToken() == 80);
+ASSERT(refusedResponse->getTid() == 6);
+ASSERT(refusedResponse->getStatusCode() == 1);
+ASSERT(recipientHandler.getAgreement(6, peer1) == replacementAgreement);
+ASSERT(recipientHandler.processTransmittedAddbaResp(refusedResponsePacket, refusedResponse, &recipientCallback) == nullptr);
+ASSERT(recipientHandler.getAgreement(6, peer1) == replacementAgreement);
+
+recipientPolicy.accepted = true;
+recipientRequest->setTransmitterAddress(peer3);
+recipientRequest->setTid(2);
+recipientRequest->setDialogToken(0);
+recipientHandler.processReceivedAddbaRequest(recipientRequest, &recipientPolicy, &recipientCallback);
+auto zeroTokenResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(recipientCallback.managementHeader);
+ASSERT(zeroTokenResponse->getDialogToken() == 0);
+ASSERT(zeroTokenResponse->getStatusCode() == 1);
+ASSERT(recipientHandler.getAgreement(2, peer3) == nullptr);
+
+// Overlapping accepted responses retain their own negotiated parameters. The
+// exact response object, rather than peer/TID/token alone, owns staged state.
+{
+    RecipientBlockAckAgreementHandler overlapHandler;
+    TestRecipientPolicy overlapPolicy;
+    TestCallback overlapCallback;
+    auto requestA = makeRequest(peer1, 1, 90, SequenceNumberCyclic(100), 16);
+    auto requestB = makeRequest(peer1, 1, 91, SequenceNumberCyclic(200), 32);
+    overlapHandler.processReceivedAddbaRequest(requestA, &overlapPolicy, &overlapCallback);
+    auto responsePacketA = overlapCallback.managementPacket;
+    auto responseA = dynamicPtrCast<const Ieee80211AddbaResponse>(overlapCallback.managementHeader);
+    overlapHandler.processReceivedAddbaRequest(requestB, &overlapPolicy, &overlapCallback);
+    auto responsePacketB = overlapCallback.managementPacket;
+    auto responseB = dynamicPtrCast<const Ieee80211AddbaResponse>(overlapCallback.managementHeader);
+    ASSERT(overlapHandler.getAgreement(1, peer1) == nullptr);
+    auto agreementA = overlapHandler.processTransmittedAddbaResp(responsePacketA, responseA, &overlapCallback);
+    ASSERT(agreementA->getStartingSequenceNumber() == SequenceNumberCyclic(100));
+    ASSERT(agreementA->getBufferSize() == 16);
+    auto agreementB = overlapHandler.processTransmittedAddbaResp(responsePacketB, responseB, &overlapCallback);
+    ASSERT(agreementB->getStartingSequenceNumber() == SequenceNumberCyclic(200));
+    ASSERT(agreementB->getBufferSize() == 32);
+    ASSERT(overlapHandler.getAgreement(1, peer1) == agreementB);
+    ASSERT(overlapHandler.processTransmittedAddbaResp(responsePacketA, responseA, &overlapCallback) == nullptr);
+}
+
+{
+    RecipientBlockAckAgreementHandler overlapHandler;
+    TestRecipientPolicy overlapPolicy;
+    TestCallback overlapCallback;
+    // Reusing a token cannot make one queued response activate the other's SSN.
+    auto requestA = makeRequest(peer1, 1, 92, SequenceNumberCyclic(300), 24);
+    auto requestB = makeRequest(peer1, 1, 92, SequenceNumberCyclic(400), 40);
+    overlapHandler.processReceivedAddbaRequest(requestA, &overlapPolicy, &overlapCallback);
+    auto responsePacketA = overlapCallback.managementPacket;
+    auto responseA = dynamicPtrCast<const Ieee80211AddbaResponse>(overlapCallback.managementHeader);
+    overlapHandler.processReceivedAddbaRequest(requestB, &overlapPolicy, &overlapCallback);
+    auto responsePacketB = overlapCallback.managementPacket;
+    auto responseB = dynamicPtrCast<const Ieee80211AddbaResponse>(overlapCallback.managementHeader);
+    auto agreementB = overlapHandler.processTransmittedAddbaResp(responsePacketB, responseB, &overlapCallback);
+    ASSERT(agreementB->getStartingSequenceNumber() == SequenceNumberCyclic(400));
+    ASSERT(agreementB->getBufferSize() == 40);
+    auto agreementA = overlapHandler.processTransmittedAddbaResp(responsePacketA, responseA, &overlapCallback);
+    ASSERT(agreementA->getStartingSequenceNumber() == SequenceNumberCyclic(300));
+    ASSERT(agreementA->getBufferSize() == 24);
+    ASSERT(overlapHandler.getAgreement(1, peer1) == agreementA);
+    ASSERT(overlapHandler.processTransmittedAddbaResp(responsePacketB, responseB, &overlapCallback) == nullptr);
+}
+
+// A rejected overlapping request creates no staged agreement and does not
+// discard either the active agreement or an earlier accepted transaction.
+{
+    RecipientBlockAckAgreementHandler overlapHandler;
+    TestRecipientPolicy overlapPolicy;
+    TestCallback overlapCallback;
+    auto initialRequest = makeRequest(peer2, 2, 93, SequenceNumberCyclic(10), 8);
+    overlapHandler.processReceivedAddbaRequest(initialRequest, &overlapPolicy, &overlapCallback);
+    auto initialResponsePacket = overlapCallback.managementPacket;
+    auto initialResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(overlapCallback.managementHeader);
+    auto initialAgreement = overlapHandler.processTransmittedAddbaResp(initialResponsePacket, initialResponse, &overlapCallback);
+    auto requestA = makeRequest(peer2, 2, 94, SequenceNumberCyclic(500), 48);
+    overlapHandler.processReceivedAddbaRequest(requestA, &overlapPolicy, &overlapCallback);
+    auto responsePacketA = overlapCallback.managementPacket;
+    auto responseA = dynamicPtrCast<const Ieee80211AddbaResponse>(overlapCallback.managementHeader);
+    overlapPolicy.accepted = false;
+    auto requestB = makeRequest(peer2, 2, 95, SequenceNumberCyclic(600), 56);
+    overlapHandler.processReceivedAddbaRequest(requestB, &overlapPolicy, &overlapCallback);
+    auto responsePacketB = overlapCallback.managementPacket;
+    auto responseB = dynamicPtrCast<const Ieee80211AddbaResponse>(overlapCallback.managementHeader);
+    ASSERT(overlapHandler.getAgreement(2, peer2) == initialAgreement);
+    ASSERT(overlapHandler.processTransmittedAddbaResp(responsePacketB, responseB, &overlapCallback) == nullptr);
+    ASSERT(overlapHandler.getAgreement(2, peer2) == initialAgreement);
+    auto agreementA = overlapHandler.processTransmittedAddbaResp(responsePacketA, responseA, &overlapCallback);
+    ASSERT(agreementA->getStartingSequenceNumber() == SequenceNumberCyclic(500));
+    ASSERT(agreementA->getBufferSize() == 48);
+    ASSERT(overlapHandler.getAgreement(2, peer2) == agreementA);
+}
+
+{
+    RecipientBlockAckAgreementHandler overlapHandler;
+    TestRecipientPolicy overlapPolicy;
+    TestCallback overlapCallback;
+    auto requestA = makeRequest(peer2, 2, 96, SequenceNumberCyclic(700), 20);
+    overlapHandler.processReceivedAddbaRequest(requestA, &overlapPolicy, &overlapCallback);
+    auto responsePacketA = overlapCallback.managementPacket;
+    auto responseA = dynamicPtrCast<const Ieee80211AddbaResponse>(overlapCallback.managementHeader);
+    overlapPolicy.accepted = false;
+    auto requestB = makeRequest(peer2, 2, 97, SequenceNumberCyclic(800), 28);
+    overlapHandler.processReceivedAddbaRequest(requestB, &overlapPolicy, &overlapCallback);
+    auto responsePacketB = overlapCallback.managementPacket;
+    auto responseB = dynamicPtrCast<const Ieee80211AddbaResponse>(overlapCallback.managementHeader);
+    auto agreementA = overlapHandler.processTransmittedAddbaResp(responsePacketA, responseA, &overlapCallback);
+    ASSERT(agreementA->getStartingSequenceNumber() == SequenceNumberCyclic(700));
+    ASSERT(agreementA->getBufferSize() == 20);
+    ASSERT(overlapHandler.processTransmittedAddbaResp(responsePacketB, responseB, &overlapCallback) == nullptr);
+    ASSERT(overlapHandler.getAgreement(2, peer2) == agreementA);
+}
+
+OriginatorQosMacDataService dataService;
+dataService.setFrameEligibilityFunction([&handler](const Packet *packet) {
+    auto header = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+    return header == nullptr || header->getType() != ST_DATA_WITH_QOS || !handler.isAddbaResponsePending(header->getReceiverAddress(), header->getTid());
+});
+Packet heldFrame("heldFrame", makeQosHeader(peer3, 5, SequenceNumberCyclic(0)));
+Packet otherTidFrame("otherTidFrame", makeQosHeader(peer3, 4, SequenceNumberCyclic(0)));
+Packet otherPeerFrame("otherPeerFrame", makeQosHeader(peer2, 5, SequenceNumberCyclic(0)));
+auto managementHeader = makeShared<Ieee80211MgmtHeader>();
+managementHeader->setType(ST_ACTION);
+Packet managementFrame("managementFrame", managementHeader);
+TestPacketQueue mixedQueue;
+mixedQueue.packets = { &heldFrame, &otherTidFrame, &otherPeerFrame, &managementFrame };
+ASSERT(!dataService.isFrameEligible(&heldFrame));
+ASSERT(dataService.isFrameEligible(&otherTidFrame));
+ASSERT(dataService.isFrameEligible(&otherPeerFrame));
+ASSERT(dataService.isFrameEligible(&managementFrame));
+ASSERT(dataService.hasEligibleFrame(&mixedQueue));
+mixedQueue.packets = { &heldFrame };
+ASSERT(!dataService.hasEligibleFrame(&mixedQueue));
+
+// A frame prefetched for duration calculation already has an SSN, but it must
+// remain in progress without being selected while the same transaction is pending.
+TestAckHandler ackHandler;
+TestInProgressFrames inProgressFrames;
+inProgressFrames.configure(&dataService, &ackHandler);
+auto prefetchedHeldFrame = new Packet("prefetchedHeldFrame", makeQosHeader(peer3, 5, SequenceNumberCyclic(21)));
+auto prefetchedOtherTidFrame = new Packet("prefetchedOtherTidFrame", makeQosHeader(peer3, 4, SequenceNumberCyclic(1)));
+inProgressFrames.addFrame(prefetchedHeldFrame);
+inProgressFrames.addFrame(prefetchedOtherTidFrame);
+ASSERT(inProgressFrames.hasEligibleFrame());
+ASSERT(inProgressFrames.getFrameToTransmit() == prefetchedOtherTidFrame);
+
+EV << "ADDBA transaction and negotiated SSN integrity checks passed.\n";
+
+%contains: stdout
+ADDBA transaction and negotiated SSN integrity checks passed.

@@ -49,7 +49,7 @@ void InProgressFrames::forEachChild(cVisitor *v)
 bool InProgressFrames::hasEligibleFrameToTransmit()
 {
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        if (dataService->isFrameEligible(frame) && ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             return true;
     }
     return false;
@@ -82,7 +82,7 @@ Packet *InProgressFrames::getFrameToTransmit()
 {
     ensureHasFrameToTransmit();
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        if (dataService->isFrameEligible(frame) && ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             return frame;
     }
     return nullptr;
@@ -95,7 +95,7 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
         return frameToTransmit;
     else {
         for (auto frame : inProgressFrames) {
-            if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()) && frameToTransmit != frame)
+            if (dataService->isFrameEligible(frame) && ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()) && frameToTransmit != frame)
                 return frame;
         }
         auto frames = dataService->extractFramesToTransmit(pendingQueue);
@@ -175,4 +175,3 @@ InProgressFrames::~InProgressFrames()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

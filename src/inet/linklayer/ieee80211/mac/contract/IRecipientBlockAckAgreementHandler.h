@@ -24,7 +24,7 @@ class INET_API IRecipientBlockAckAgreementHandler
   public:
     virtual ~IRecipientBlockAckAgreementHandler() {}
 
-    virtual void processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback) = 0;
+    virtual RecipientBlockAckAgreement *processTransmittedAddbaResp(Packet *addbaRespPacket, const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) = 0;
     virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) = 0;
     virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) = 0;
@@ -38,4 +38,3 @@ class INET_API IRecipientBlockAckAgreementHandler
 } // namespace inet
 
 #endif
-

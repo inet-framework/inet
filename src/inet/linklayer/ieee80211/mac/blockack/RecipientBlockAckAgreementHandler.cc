@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
 
+#include <algorithm>
+
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 
 namespace inet {
@@ -65,26 +67,56 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
 }
 
 //
-// An originator that intends to use the Block Ack mechanism for the transmission of QoS data frames to an
-// intended recipient should first check whether the intended recipient STA is capable of participating in Block
-// Ack mechanism by discovering and examining its Delayed Block Ack and Immediate Block Ack capability
-// bits. If the intended recipient STA is capable of participating, the originator sends an ADDBA Request frame
-// indicating the TID for which the Block Ack is being set up.
+// Keep the accepted parameters staged until the exact corresponding successful
+// response packet is actually transmitted. Packet identity survives mutable
+// header copy-on-write during sequence-number assignment and keeps overlapping
+// transactions independent even when the originator reuses a Dialog Token.
 //
-RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::addAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaReq)
+void RecipientBlockAckAgreementHandler::clearPendingAgreements(MacAddress originatorAddr, Tid tid)
 {
-    MacAddress originatorAddr = addbaReq->getTransmitterAddress();
-    auto id = std::make_pair(originatorAddr, addbaReq->getTid());
-    auto it = blockAckAgreements.find(id);
-    if (it == blockAckAgreements.end()) {
-        RecipientBlockAckAgreement *agreement = new RecipientBlockAckAgreement(originatorAddr, addbaReq->getTid(), addbaReq->getStartingSequenceNumber(), addbaReq->getBufferSize(), addbaReq->getBlockAckTimeoutValue());
-        blockAckAgreements[id] = agreement;
-        EV_DETAIL << "Block Ack Agreement is added with the following parameters: " << *agreement << endl;
-        return agreement;
+    for (auto it = pendingBlockAckAgreements.begin(); it != pendingBlockAckAgreements.end();) {
+        if (it->originatorAddress == originatorAddr && it->tid == tid) {
+            delete it->agreement;
+            it = pendingBlockAckAgreements.erase(it);
+        }
+        else
+            it++;
+    }
+}
+
+void RecipientBlockAckAgreementHandler::stageAgreement(Packet *addbaResponsePacket, const Ptr<const Ieee80211AddbaRequest>& addbaRequest, const Ptr<const Ieee80211AddbaResponse>& addbaResponse)
+{
+    auto originatorAddr = addbaRequest->getTransmitterAddress();
+    Tid tid = addbaRequest->getTid();
+    auto agreement = new RecipientBlockAckAgreement(originatorAddr, tid, addbaRequest->getStartingSequenceNumber(), addbaResponse->getBufferSize(), addbaResponse->getBlockAckTimeoutValue());
+    pendingBlockAckAgreements.push_back({ addbaResponsePacket->getId(), originatorAddr, tid, addbaRequest->getDialogToken(), agreement });
+    EV_DETAIL << "Block Ack Agreement is staged with the following parameters: " << *agreement << endl;
+}
+
+RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::activateAgreement(Packet *addbaResponsePacket, const Ptr<const Ieee80211AddbaResponse>& addbaResponse)
+{
+    auto pendingIt = std::find_if(pendingBlockAckAgreements.begin(), pendingBlockAckAgreements.end(), [addbaResponsePacket](const PendingAgreement& pendingAgreement) {
+        return pendingAgreement.addbaResponsePacketId == addbaResponsePacket->getId();
+    });
+    if (pendingIt == pendingBlockAckAgreements.end())
+        return nullptr;
+    if (addbaResponse->getReceiverAddress() != pendingIt->originatorAddress || addbaResponse->getTid() != pendingIt->tid || addbaResponse->getDialogToken() != pendingIt->dialogToken || addbaResponse->getStatusCode() != 0) {
+        EV_WARN << "Ignoring transmitted ADDBA Response whose fields do not match its staged transaction" << endl;
+        return nullptr;
+    }
+    auto agreement = pendingIt->agreement;
+    pendingBlockAckAgreements.erase(pendingIt);
+    auto id = std::make_pair(addbaResponse->getReceiverAddress(), addbaResponse->getTid());
+    auto activeIt = blockAckAgreements.find(id);
+    if (activeIt != blockAckAgreements.end()) {
+        delete activeIt->second;
+        activeIt->second = agreement;
     }
     else
-        // TODO update?
-        return it->second;
+        blockAckAgreements[id] = agreement;
+    agreement->addbaResposneSent();
+    agreement->calculateExpirationTime();
+    return agreement;
 }
 
 //
@@ -102,10 +134,14 @@ const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MacAddre
     return delba;
 }
 
-const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
+const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, bool accepted)
 {
     auto addbaResponse = makeShared<Ieee80211AddbaResponse>();
     addbaResponse->setReceiverAddress(addbaRequest->getTransmitterAddress());
+    // IEEE Std 802.11-2024, 9.6.4.2 and 11.5.2.3: the response copies the
+    // request's Dialog Token and reports whether the agreement was accepted.
+    addbaResponse->setDialogToken(addbaRequest->getDialogToken());
+    addbaResponse->setStatusCode(accepted ? 0 : 1); // 1: REFUSED_REASON_UNSPECIFIED
     // The Block Ack Policy subfield is set to 1 for immediate Block Ack and 0 for delayed Block Ack.
     Tid tid = addbaRequest->getTid();
     addbaResponse->setTid(tid);
@@ -116,21 +152,10 @@ const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaR
     return addbaResponse;
 }
 
-void RecipientBlockAckAgreementHandler::updateAgreement(const Ptr<const Ieee80211AddbaResponse>& addbaResponse)
-{
-    auto id = std::make_pair(addbaResponse->getReceiverAddress(), addbaResponse->getTid());
-    auto it = blockAckAgreements.find(id);
-    if (it != blockAckAgreements.end()) {
-        RecipientBlockAckAgreement *agreement = it->second;
-        agreement->addbaResposneSent();
-    }
-    else
-        throw cRuntimeError("Agreement is not found");
-}
-
 void RecipientBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid)
 {
     auto agreementId = std::make_pair(originatorAddr, tid);
+    clearPendingAgreements(originatorAddr, tid);
     auto it = blockAckAgreements.find(agreementId);
     if (it != blockAckAgreements.end()) {
         RecipientBlockAckAgreement *agreement = it->second;
@@ -146,24 +171,26 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::getAgreement(Tid 
     return it != blockAckAgreements.end() ? it->second : nullptr;
 }
 
-void RecipientBlockAckAgreementHandler::processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback)
+RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::processTransmittedAddbaResp(Packet *addbaRespPacket, const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback)
 {
-    updateAgreement(addbaResp);
-    scheduleInactivityTimer(callback);
+    // IEEE Std 802.11-2024, 11.5.2.3: the recipient agreement becomes active
+    // only when the matching successful ADDBA Response is transmitted.
+    auto agreement = activateAgreement(addbaRespPacket, addbaResp);
+    if (agreement != nullptr)
+        scheduleInactivityTimer(callback);
+    return agreement;
 }
 
 void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback)
 {
     EV_INFO << "Processing Addba Request from " << addbaRequest->getTransmitterAddress() << endl;
-    if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest)) {
-        EV_DETAIL << "Addba Request has been accepted. Creating a new Block Ack Agreement." << endl;
-        auto agreement = addAgreement(addbaRequest);
-        EV_DETAIL << "Agreement is added with the following parameters: " << *agreement << endl;
-        EV_DETAIL << "Building Addba Response" << endl;
-        auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
-        auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
-        callback->processMgmtFrame(addbaResponsePacket, addbaResponse);
-    }
+    bool accepted = addbaRequest->getDialogToken() != 0 && blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest);
+    EV_DETAIL << "Building Addba Response" << endl;
+    auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy, accepted);
+    auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
+    if (accepted)
+        stageAgreement(addbaResponsePacket, addbaRequest, addbaResponse);
+    callback->processMgmtFrame(addbaResponsePacket, addbaResponse);
 }
 
 void RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
@@ -181,8 +208,9 @@ RecipientBlockAckAgreementHandler::~RecipientBlockAckAgreementHandler()
 {
     for (auto it : blockAckAgreements)
         delete it.second;
+    for (auto it : pendingBlockAckAgreements)
+        delete it.agreement;
 }
 
 } // namespace ieee80211
 } // namespace inet
-

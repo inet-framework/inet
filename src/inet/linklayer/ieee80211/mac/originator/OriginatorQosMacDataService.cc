@@ -78,21 +78,45 @@ std::vector<Packet *> *OriginatorQosMacDataService::fragmentIfNeeded(Packet *fra
     return nullptr;
 }
 
+bool OriginatorQosMacDataService::isFrameEligible(const Packet *packet) const
+{
+    return !frameEligibilityFunction || frameEligibilityFunction(packet);
+}
+
+bool OriginatorQosMacDataService::hasEligibleFrame(queueing::IPacketQueue *pendingQueue) const
+{
+    for (int i = 0; i < pendingQueue->getNumPackets(); i++)
+        if (isFrameEligible(pendingQueue->getPacket(i)))
+            return true;
+    return false;
+}
+
 std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queueing::IPacketQueue *pendingQueue)
 {
     Enter_Method("extractFramesToTransmit");
-    if (pendingQueue->isEmpty())
+    if (!hasEligibleFrame(pendingQueue))
         return nullptr;
     else {
 //        if (msduRateLimiting)
 //            txRateLimitingIfNeeded();
         Packet *packet = nullptr;
-        if (aMsduAggregationPolicy)
-            packet = aMsduAggregateIfNeeded(pendingQueue);
-        if (!packet) {
-            packet = pendingQueue->dequeuePacket();
-            take(packet);
+        for (int i = 0; i < pendingQueue->getNumPackets(); i++) {
+            auto candidate = pendingQueue->getPacket(i);
+            if (!isFrameEligible(candidate))
+                continue;
+            // The current A-MSDU policy only aggregates the queue head with
+            // frames for the same receiver and TID, so the head eligibility
+            // decision also applies to every selected subframe.
+            if (aMsduAggregationPolicy && i == 0)
+                packet = aMsduAggregateIfNeeded(pendingQueue);
+            if (!packet) {
+                pendingQueue->removePacket(candidate);
+                packet = candidate;
+                take(packet);
+            }
+            break;
         }
+        ASSERT(packet != nullptr);
         // PS Defer Queueing
         if (sequenceNumberAssignment) {
             auto header = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
@@ -129,4 +153,3 @@ OriginatorQosMacDataService::~OriginatorQosMacDataService()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
