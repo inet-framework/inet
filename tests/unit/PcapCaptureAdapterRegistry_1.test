@@ -1,0 +1,82 @@
+%description:
+Test deterministic PCAP capture adapter registry lookup, protocol resolution, and duplicate rejection.
+
+%includes:
+#include "inet/common/packet/recorder/PcapCaptureAdapterRegistry.h"
+
+%global:
+
+using namespace inet;
+
+#define REQUIRE(...) do { if (!(__VA_ARGS__)) throw cRuntimeError("REQUIRE failed at line %d: %s", __LINE__, #__VA_ARGS__); } while (false)
+
+class TestCaptureAdapter : public IPcapCaptureAdapter
+{
+  public:
+    virtual PcapLinkType getLinkType() const override { return LINKTYPE_RAW; }
+    virtual std::optional<std::pair<b, b>> tryResolvePacket(const Packet *, b frontOffset, b backOffset) const override
+    {
+        return std::pair<b, b>(frontOffset + B(1), backOffset + B(2));
+    }
+    virtual std::vector<PcapCaptureRecord> createRecords(const PcapCaptureObservation&, b, b) const override { return {}; }
+};
+
+class TestObservationAdapter : public IPcapCaptureObservationAdapter
+{
+  protected:
+    const Packet *packet;
+
+  public:
+    TestObservationAdapter(const Packet *packet) : packet(packet) {}
+    virtual std::optional<PcapCaptureObservation> tryCreateObservation(const cObject *, Direction direction) const override
+    {
+        return PcapCaptureObservation(packet, direction);
+    }
+};
+
+%activity:
+
+PcapCaptureAdapterRegistry registry;
+auto protocolAdapter = new TestCaptureAdapter();
+registry.registerProtocolAdapter(&Protocol::udp, protocolAdapter);
+REQUIRE(registry.findProtocolAdapter(&Protocol::udp) == protocolAdapter);
+REQUIRE(registry.findProtocolAdapter(&Protocol::tcp) == nullptr);
+
+registry.registerProtocolResolver(&Protocol::ipv4, &Protocol::udp);
+Packet packet("packet");
+auto resolution = registry.tryResolveProtocol(&Protocol::ipv4, &packet, B(3), B(4));
+REQUIRE(resolution.has_value());
+REQUIRE(std::get<0>(*resolution) == &Protocol::udp);
+REQUIRE(std::get<1>(*resolution) == B(4) && std::get<2>(*resolution) == B(6));
+
+bool duplicateProtocolRejected = false;
+try {
+    registry.registerProtocolAdapter(&Protocol::udp, new TestCaptureAdapter());
+}
+catch (cRuntimeError&) {
+    duplicateProtocolRejected = true;
+}
+REQUIRE(duplicateProtocolRejected);
+
+Packet first("first");
+Packet second("second");
+registry.registerObservationAdapter("z-last", new TestObservationAdapter(&second));
+registry.registerObservationAdapter("a-first", new TestObservationAdapter(&first));
+auto observation = registry.tryCreateObservation(&second, DIRECTION_INBOUND);
+REQUIRE(observation.has_value());
+REQUIRE(observation->packet == &first);
+REQUIRE(observation->direction == DIRECTION_INBOUND);
+
+bool duplicateObservationRejected = false;
+try {
+    registry.registerObservationAdapter("a-first", new TestObservationAdapter(&second));
+}
+catch (cRuntimeError&) {
+    duplicateObservationRejected = true;
+}
+REQUIRE(duplicateObservationRejected);
+
+EV << "PCAP capture adapter registry tested successfully.\n";
+
+%contains: stdout
+PCAP capture adapter registry tested successfully.

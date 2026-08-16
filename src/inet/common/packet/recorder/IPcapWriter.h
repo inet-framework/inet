@@ -8,6 +8,8 @@
 #ifndef __INET_IPCAPWRITER_H
 #define __INET_IPCAPWRITER_H
 
+#include <vector>
+
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -212,9 +214,18 @@ class INET_API IPcapWriter
     virtual void setFlush(bool flush) = 0;
 
     virtual void writePacket(simtime_t time, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *ie, PcapLinkType linkType) = 0;
+
+    /**
+     * Writes an octet prefix followed by the selected range of the original packet.
+     * Implementations which don't support scatter/gather capture fail explicitly.
+     */
+    virtual void writePacketWithPrefix(simtime_t time, const std::vector<uint8_t>& prefix, const Packet *packet, b frontOffset, b backOffset,
+            Direction direction, NetworkInterface *ie, PcapLinkType linkType)
+    {
+        throw cRuntimeError("This PCAP writer does not support prefixed packet records");
+    }
 };
 
 } // namespace inet
 
 #endif
-

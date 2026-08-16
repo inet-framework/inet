@@ -1,0 +1,147 @@
+%description:
+Test legacy Rate, HT MCS, VHT, and FCS Radiotap fields without fabricating unsupported metadata.
+
+%includes:
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/checksum/Checksum.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/pcap/Ieee80211RadiotapPcapCaptureAdapter.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+#define REQUIRE(...) do { if (!(__VA_ARGS__)) throw cRuntimeError("REQUIRE failed at line %d: %s", __LINE__, #__VA_ARGS__); } while (false)
+
+static uint16_t readUint16(const std::vector<uint8_t>& bytes, size_t offset)
+{
+    return bytes.at(offset) | bytes.at(offset + 1) << 8;
+}
+
+static uint32_t readUint32(const std::vector<uint8_t>& bytes, size_t offset)
+{
+    uint32_t value = 0;
+    for (size_t i = 0; i < 4; i++)
+        value |= static_cast<uint32_t>(bytes.at(offset + i)) << (8 * i);
+    return value;
+}
+
+static std::vector<uint8_t> createRadiotapHeader(Ieee80211RadiotapPcapCaptureAdapter& adapter, Packet& packet)
+{
+    auto records = adapter.createRecords(PcapCaptureObservation(&packet, DIRECTION_UNDEFINED), b(0), b(0));
+    REQUIRE(records.size() == 1);
+    return records.front().getPrefix();
+}
+
+%activity:
+
+Ieee80211RadiotapPcapCaptureAdapter adapter;
+
+Packet phyPacket("phyPacket");
+phyPacket.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0xfe, 0xed}));
+auto phyHeader = makeShared<Ieee80211OfdmPhyHeader>();
+phyHeader->setLengthField(B(6));
+phyPacket.insertAtBack(phyHeader);
+phyPacket.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1, 2, 3, 4, 5, 6}));
+phyPacket.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0xaa, 0xbb, 0xcc}));
+phyPacket.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
+Packet beforeResolve("beforeResolve");
+auto resolved = adapter.tryResolvePacket(&phyPacket, B(2), B(3));
+Packet afterResolve("afterResolve");
+REQUIRE(resolved.has_value());
+REQUIRE(resolved->first == B(7) && resolved->second == B(3));
+REQUIRE(afterResolve.getId() == beforeResolve.getId() + 1);
+REQUIRE(afterResolve.getTreeId() == beforeResolve.getTreeId() + 1);
+
+Packet legacy("legacy");
+legacy.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1, 2, 3, 4}));
+legacy.addTag<Ieee80211ModeReq>()->setMode(&Ieee80211OfdmCompliantModes::getCompliantMode(13, MHz(20)));
+auto legacyHeader = createRadiotapHeader(adapter, legacy);
+REQUIRE(readUint16(legacyHeader, 2) == 10);
+REQUIRE(readUint32(legacyHeader, 4) == 0x00000006); // Flags and legacy Rate
+REQUIRE(legacyHeader.at(8) == 0 && legacyHeader.at(9) == 12); // no FCS; 6 Mbit/s
+
+Packet ht("ht");
+ht.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1, 2, 3, 4}));
+ht.addTag<Ieee80211ModeReq>()->setMode(Ieee80211HtCompliantModes::getCompliantMode(
+        &Ieee80211HtmcsTable::htMcs0BW20MHz, Ieee80211HtMode::BAND_5GHZ,
+        Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG));
+auto htHeader = createRadiotapHeader(adapter, ht);
+REQUIRE(readUint16(htHeader, 2) == 12);
+REQUIRE(readUint32(htHeader, 4) == 0x00080002); // Flags and MCS, no legacy Rate
+REQUIRE(htHeader.at(8) == 0);
+REQUIRE(htHeader.at(9) == 0x17 && htHeader.at(10) == 0 && htHeader.at(11) == 0); // BW/MCS/GI/BCC, 20 MHz, MCS 0
+
+Packet ht40Short("ht40Short");
+ht40Short.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1}));
+ht40Short.addTag<Ieee80211ModeReq>()->setMode(Ieee80211HtCompliantModes::getCompliantMode(
+        &Ieee80211HtmcsTable::htMcs7BW40MHz, Ieee80211HtMode::BAND_5GHZ,
+        Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT));
+auto ht40ShortHeader = createRadiotapHeader(adapter, ht40Short);
+REQUIRE(ht40ShortHeader.at(10) == 0x05 && ht40ShortHeader.at(11) == 7);
+
+Packet vht("vht");
+vht.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1, 2, 3, 4}));
+vht.addTag<Ieee80211ModeReq>()->setMode(Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG));
+auto vhtHeader = createRadiotapHeader(adapter, vht);
+REQUIRE(readUint16(vhtHeader, 2) == 22);
+REQUIRE(readUint32(vhtHeader, 4) == 0x00200002); // Flags and VHT, no legacy Rate
+REQUIRE(vhtHeader.at(8) == 0);
+REQUIRE(readUint16(vhtHeader, 10) == 0x0044); // GI and bandwidth known
+REQUIRE(vhtHeader.at(12) == 0 && vhtHeader.at(13) == 0); // long GI, 20 MHz
+REQUIRE(vhtHeader.at(14) == 0x01); // MCS 0, NSS 1
+REQUIRE(vhtHeader.at(18) == 0); // BCC
+REQUIRE(vhtHeader.at(19) == 0 && readUint16(vhtHeader, 20) == 0); // unknown Group ID and Partial AID
+
+Packet vht160ShortNss8("vht160ShortNss8");
+vht160ShortNss8.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1}));
+vht160ShortNss8.addTag<Ieee80211ModeReq>()->setMode(Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8, Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT));
+auto vht160ShortNss8Header = createRadiotapHeader(adapter, vht160ShortNss8);
+REQUIRE(vht160ShortNss8Header.at(12) == 0x04);
+REQUIRE(vht160ShortNss8Header.at(13) == 11);
+REQUIRE(vht160ShortNss8Header.at(14) == 0x98);
+
+const std::vector<uint8_t> fcsPayload = {1, 2, 3, 4};
+Packet computedMismatch("computedMismatch");
+computedMismatch.insertAtBack(makeShared<BytesChunk>(fcsPayload));
+auto mismatchedTrailer = makeShared<Ieee80211MacTrailer>();
+mismatchedTrailer->setFcsMode(FCS_COMPUTED);
+mismatchedTrailer->setFcs(ethernetFcs(fcsPayload) ^ 1);
+computedMismatch.insertAtBack(mismatchedTrailer);
+auto computedMismatchHeader = createRadiotapHeader(adapter, computedMismatch);
+REQUIRE(computedMismatchHeader.at(8) == 0x50); // typed FCS is present and authoritatively mismatches
+
+Packet genericBitError("genericBitError");
+genericBitError.insertAtBack(makeShared<BytesChunk>(fcsPayload));
+auto correctTrailer = makeShared<Ieee80211MacTrailer>();
+correctTrailer->setFcsMode(FCS_DECLARED_CORRECT);
+genericBitError.insertAtBack(correctTrailer);
+genericBitError.setBitError(true);
+auto genericBitErrorHeader = createRadiotapHeader(adapter, genericBitError);
+REQUIRE(readUint16(genericBitErrorHeader, 2) == 9);
+REQUIRE(genericBitErrorHeader.at(8) == 0x10); // generic packet error is not BADFCS
+
+Packet declaredIncorrect("declaredIncorrect");
+declaredIncorrect.insertAtBack(makeShared<BytesChunk>(fcsPayload));
+auto incorrectTrailer = makeShared<Ieee80211MacTrailer>();
+incorrectTrailer->setFcsMode(FCS_DECLARED_INCORRECT);
+declaredIncorrect.insertAtBack(incorrectTrailer);
+auto declaredIncorrectHeader = createRadiotapHeader(adapter, declaredIncorrect);
+REQUIRE(declaredIncorrectHeader.at(8) == 0x50);
+
+EV << "Legacy, HT, VHT, and FCS Radiotap fields tested successfully.\n";
+
+%contains: stdout
+Legacy, HT, VHT, and FCS Radiotap fields tested successfully.

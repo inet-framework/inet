@@ -12,6 +12,7 @@
 
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/recorder/PcapCaptureAdapterRegistry.h"
 #include "inet/common/packet/recorder/PcapngWriter.h"
 #include "inet/common/packet/recorder/PcapWriter.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -19,12 +20,6 @@
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
-
-#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-#include "inet/physicallayer/common/Signal.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
-#endif
 
 namespace inet {
 
@@ -67,6 +62,7 @@ void PcapRecorder::initialize()
     verbose = par("verbose");
     recordEmptyPackets = par("recordEmptyPackets");
     enableConvertingPackets = par("enableConvertingPackets");
+    enableProtocolSpecificCaptureAdapters = par("enableProtocolSpecificCaptureAdapters");
     snaplen = this->par("snaplen");
     dumpBadFrames = par("dumpBadFrames");
     signalList.clear();
@@ -181,25 +177,40 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
         auto i = signalList.find(signalID);
         ASSERT(i != signalList.end());
         Direction direction = i->second;
-        if (false)
-            ;
-#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-        else if (auto signal = dynamic_cast<const physicallayer::Signal *>(obj))
-            recordPacket(signal->getEncapsulatedPacket(), direction, source);
-#endif
-        else if (auto packet = dynamic_cast<cPacket *>(obj))
+        auto observation = PcapCaptureAdapterRegistry::getInstance().tryCreateObservation(obj, direction);
+        if (observation.has_value())
+            recordPacket(*observation, source);
+        else if (auto packet = dynamic_cast<const cPacket *>(obj))
             recordPacket(packet, direction, source);
-#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-        else if (auto transmission = dynamic_cast<const physicallayer::ITransmission *>(obj))
-            recordPacket(transmission->getPacket(), direction, source);
-        else if (auto reception = dynamic_cast<const physicallayer::IReception *>(obj))
-            recordPacket(reception->getTransmission()->getPacket(), direction, source);
-#endif
     }
+}
+
+void PcapRecorder::writePacket(const Protocol *protocol, const PcapCaptureObservation& observation, b frontOffset, b backOffset, NetworkInterface *networkInterface)
+{
+    auto packet = observation.packet;
+    if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets) {
+        auto adapter = PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(protocol);
+        if (adapter != nullptr) {
+            auto records = adapter->createRecords(observation, frontOffset, backOffset);
+            for (const auto& record : records) {
+                auto dataLength = packet->getDataLength() - record.frontOffset - record.backOffset;
+                if (recordEmptyPackets || !record.getPrefix().empty() || dataLength != b(0)) {
+                    pcapWriter->writePacketWithPrefix(simTime(), record.getPrefix(), packet, record.frontOffset, record.backOffset,
+                            observation.direction, networkInterface, adapter->getLinkType());
+                    numRecorded++;
+                    emit(packetRecordedSignal, packet);
+                }
+            }
+            return;
+        }
+    }
+
+    writePacket(protocol, packet, frontOffset, backOffset, observation.direction, networkInterface);
 }
 
 void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface)
 {
+
     auto pcapLinkType = protocolToLinkType(protocol);
     if (pcapLinkType == LINKTYPE_INVALID)
         throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
@@ -221,52 +232,88 @@ void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b
         delete packet;
 }
 
-void PcapRecorder::recordPacket(const cPacket *cpacket, Direction direction, cComponent *source)
+void PcapRecorder::recordPacket(const PcapCaptureObservation& observation, cComponent *source)
 {
-    if (auto packet = dynamic_cast<const Packet *>(cpacket)) {
-        EV_INFO << "Recording packet" << EV_FIELD(source, source->getFullPath()) << EV_FIELD(direction, direction) << EV_FIELD(packet) << EV_ENDL;
-        if (verbose)
-            EV_DEBUG << "Dumping packet" << EV_FIELD(packet, packetPrinter.printPacketToString(const_cast<Packet *>(packet), "%i")) << EV_ENDL;
-        if (recordPcap && packetFilter.matches(packet) && (dumpBadFrames || !packet->hasBitError())) {
-            // get Direction
-            if (direction == DIRECTION_UNDEFINED) {
-                if (auto directionTag = packet->findTag<DirectionTag>())
-                    direction = directionTag->getDirection();
-            }
+    auto previousObservation = activeCaptureObservation;
+    activeCaptureObservation = &observation;
+    try {
+        recordPacket(observation.packet, observation.direction, source);
+        activeCaptureObservation = previousObservation;
+    }
+    catch (...) {
+        activeCaptureObservation = previousObservation;
+        throw;
+    }
+}
 
-            // get NetworkInterface
-            auto srcModule = check_and_cast<cModule *>(source);
-            auto networkInterface = findContainingNicModule(srcModule);
-            if (networkInterface == nullptr) {
-                int ifaceId = -1;
-                if (direction == DIRECTION_OUTBOUND) {
-                    if (auto ifaceTag = packet->findTag<InterfaceReq>())
-                        ifaceId = ifaceTag->getInterfaceId();
-                }
-                else if (direction == DIRECTION_INBOUND) {
-                    if (auto ifaceTag = packet->findTag<InterfaceInd>())
-                        ifaceId = ifaceTag->getInterfaceId();
-                }
-                if (ifaceId != -1) {
-                    auto ift = check_and_cast_nullable<InterfaceTable *>(getContainingNode(srcModule)->getSubmodule("interfaceTable"));
-                    networkInterface = ift->getInterfaceById(ifaceId);
-                }
-            }
+void PcapRecorder::recordPacket(const cPacket *cPacket, Direction direction, cComponent *source)
+{
+    auto packet = dynamic_cast<const Packet *>(cPacket);
+    if (packet == nullptr)
+        return;
+    const PcapCaptureObservation observation = activeCaptureObservation != nullptr && activeCaptureObservation->packet == packet ?
+            PcapCaptureObservation(packet, direction, activeCaptureObservation->transmission, activeCaptureObservation->reception) :
+            PcapCaptureObservation(packet, direction);
+    EV_INFO << "Recording packet" << EV_FIELD(source, source->getFullPath()) << EV_FIELD(direction, direction) << EV_FIELD(packet) << EV_ENDL;
+    if (verbose)
+        EV_DEBUG << "Dumping packet" << EV_FIELD(packet, packetPrinter.printPacketToString(const_cast<Packet *>(packet), "%i")) << EV_ENDL;
+    if (recordPcap && packetFilter.matches(packet) && (dumpBadFrames || !packet->hasBitError())) {
+        // get Direction
+        if (direction == DIRECTION_UNDEFINED) {
+            if (auto directionTag = packet->findTag<DirectionTag>())
+                direction = directionTag->getDirection();
+        }
 
-            const auto& packetProtocolTag = packet->getTag<PacketProtocolTag>();
-            auto protocol = packetProtocolTag->getProtocol();
-            if (contains(dumpProtocols, protocol))
+        // get NetworkInterface
+        auto srcModule = check_and_cast<cModule *>(source);
+        auto networkInterface = findContainingNicModule(srcModule);
+        if (networkInterface == nullptr) {
+            int ifaceId = -1;
+            if (direction == DIRECTION_OUTBOUND) {
+                if (auto ifaceTag = packet->findTag<InterfaceReq>())
+                    ifaceId = ifaceTag->getInterfaceId();
+            }
+            else if (direction == DIRECTION_INBOUND) {
+                if (auto ifaceTag = packet->findTag<InterfaceInd>())
+                    ifaceId = ifaceTag->getInterfaceId();
+            }
+            if (ifaceId != -1) {
+                auto ift = check_and_cast_nullable<InterfaceTable *>(getContainingNode(srcModule)->getSubmodule("interfaceTable"));
+                networkInterface = ift->getInterfaceById(ifaceId);
+            }
+        }
+
+        PcapCaptureObservation effectiveObservation(packet, direction, observation.transmission, observation.reception);
+        const auto& packetProtocolTag = packet->getTag<PacketProtocolTag>();
+        auto protocol = packetProtocolTag->getProtocol();
+        if (contains(dumpProtocols, protocol)) {
+            if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets &&
+                    PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(protocol) != nullptr)
+                writePacket(protocol, effectiveObservation, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset(), networkInterface);
+            else
                 writePacket(protocol, packet, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset(), direction, networkInterface);
-            else {
-                frontOffset = b(0);
-                backOffset = b(0);
-                dumpProtocol = nullptr;
-                Packet dissectedPacket(*packet);
-                PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), *this);
-                packetDissector.dissectPacket(&dissectedPacket);
-                if (dumpProtocol != nullptr)
-                    writePacket(dumpProtocol, packet, frontOffset, backOffset, direction, networkInterface);
+            return;
+        }
+        if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets) {
+            auto resolution = PcapCaptureAdapterRegistry::getInstance().tryResolveProtocol(protocol, packet,
+                    packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset());
+            if (resolution.has_value() && contains(dumpProtocols, std::get<0>(*resolution))) {
+                writePacket(std::get<0>(*resolution), effectiveObservation, std::get<1>(*resolution), std::get<2>(*resolution), networkInterface);
+                return;
             }
+        }
+        frontOffset = b(0);
+        backOffset = b(0);
+        dumpProtocol = nullptr;
+        Packet dissectedPacket(*packet);
+        PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), *this);
+        packetDissector.dissectPacket(&dissectedPacket);
+        if (dumpProtocol != nullptr) {
+            if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets &&
+                    PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(dumpProtocol) != nullptr)
+                writePacket(dumpProtocol, effectiveObservation, frontOffset, backOffset, networkInterface);
+            else
+                writePacket(dumpProtocol, packet, frontOffset, backOffset, direction, networkInterface);
         }
     }
 }
@@ -305,7 +352,11 @@ bool PcapRecorder::matchesLinkType(PcapLinkType pcapLinkType, const Protocol *pr
 
 PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
 {
-    if (*protocol == Protocol::ethernetPhy)
+    auto captureAdapter = enableProtocolSpecificCaptureAdapters && enableConvertingPackets ?
+            PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(protocol) : nullptr;
+    if (captureAdapter != nullptr)
+        return captureAdapter->getLinkType();
+    else if (*protocol == Protocol::ethernetPhy)
         return LINKTYPE_ETHERNET_MPACKET;
     else if (*protocol == Protocol::ethernetMac)
         return LINKTYPE_ETHERNET;
@@ -339,4 +390,3 @@ Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, b frontOffset, 
 }
 
 } // namespace inet
-

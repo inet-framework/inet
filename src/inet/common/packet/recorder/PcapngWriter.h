@@ -23,6 +23,7 @@ class INET_API PcapngWriter : public IPcapWriter
   protected:
     std::string fileName;
     FILE *dumpfile = nullptr; // pcap file
+    unsigned int snaplen = 0;
     bool flush = false;
     int nextPcapngInterfaceId = 0;
     int timePrecision = 6;
@@ -60,6 +61,8 @@ class INET_API PcapngWriter : public IPcapWriter
      * and throws an exception otherwise.
      */
     void writePacket(simtime_t time, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *ie, PcapLinkType linkType) override;
+    void writePacketWithPrefix(simtime_t time, const std::vector<uint8_t>& prefix, const Packet *packet, b frontOffset, b backOffset,
+            Direction direction, NetworkInterface *ie, PcapLinkType linkType) override;
 
     /**
      * Closes the output file if it is open.
@@ -75,4 +78,3 @@ class INET_API PcapngWriter : public IPcapWriter
 } // namespace inet
 
 #endif
-
