@@ -61,6 +61,31 @@ REQUIRE(resolved->first == B(7) && resolved->second == B(3));
 REQUIRE(afterResolve.getId() == beforeResolve.getId() + 1);
 REQUIRE(afterResolve.getTreeId() == beforeResolve.getTreeId() + 1);
 
+Packet shortPhyPacket("shortPhyPacket");
+auto shortPhyHeader = makeShared<Ieee80211OfdmPhyHeader>();
+shortPhyHeader->setLengthField(B(1));
+shortPhyPacket.insertAtBack(shortPhyHeader);
+shortPhyPacket.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0xaa}));
+shortPhyPacket.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
+auto shortResolved = adapter.tryResolvePacket(&shortPhyPacket, b(0), b(0));
+REQUIRE(shortResolved.has_value());
+REQUIRE(shortResolved->first == B(5) && shortResolved->second == b(0));
+
+Packet zeroLengthPhyPacket("zeroLengthPhyPacket");
+auto zeroLengthPhyHeader = makeShared<Ieee80211VhtPhyHeader>();
+zeroLengthPhyHeader->setChunkLength(B(5));
+zeroLengthPhyHeader->setLengthField(B(0));
+zeroLengthPhyPacket.insertAtBack(zeroLengthPhyHeader);
+zeroLengthPhyPacket.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211VhtPhy);
+REQUIRE(!adapter.tryResolvePacket(&zeroLengthPhyPacket, b(0), b(0)).has_value());
+
+Packet negativeLengthPhyPacket("negativeLengthPhyPacket");
+auto negativeLengthPhyHeader = makeShared<Ieee80211OfdmPhyHeader>();
+negativeLengthPhyHeader->setLengthField(B(-1));
+negativeLengthPhyPacket.insertAtBack(negativeLengthPhyHeader);
+negativeLengthPhyPacket.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
+REQUIRE(!adapter.tryResolvePacket(&negativeLengthPhyPacket, b(0), b(0)).has_value());
+
 Packet legacy("legacy");
 legacy.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{1, 2, 3, 4}));
 legacy.addTag<Ieee80211ModeReq>()->setMode(&Ieee80211OfdmCompliantModes::getCompliantMode(13, MHz(20)));

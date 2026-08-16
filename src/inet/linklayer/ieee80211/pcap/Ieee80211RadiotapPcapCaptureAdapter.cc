@@ -193,7 +193,9 @@ AmpduParseResult getIeee80211AmpduMpduRanges(const Packet *packet, b frontOffset
             if (offset == endOffset)
                 return AmpduParseResult::VALID;
             auto paddingLength = B((4 - (delimiter->getChunkLength() + mpduLength).get<B>() % 4) % 4);
-            if (offset + paddingLength >= endOffset)
+            // IEEE 802.11-2024, 9.7.1 and 10.12.6 permit exact final-subframe alignment padding for VHT/HE-family PPDUs.
+            // Without PHY-mode provenance, accept the structurally complete equality case instead of discarding its MPDUs.
+            if (offset + paddingLength > endOffset)
                 return AmpduParseResult::INVALID;
             offset += paddingLength;
         }
@@ -435,7 +437,7 @@ std::optional<std::pair<b, b>> Ieee80211RadiotapPcapCaptureAdapter::tryResolvePa
         else
             return std::nullopt;
         if (header->isIncorrect() || header->isIncomplete() || header->isImproperlyRepresented() ||
-                b(header->getLengthField()) < header->getChunkLength())
+                b(header->getLengthField()) <= b(0))
             return std::nullopt;
         auto resolvedFrontOffset = frontOffset + header->getChunkLength();
         auto payloadLength = b(header->getLengthField());

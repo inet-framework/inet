@@ -141,6 +141,14 @@ static uint32_t readUint32(const std::vector<uint8_t>& bytes, size_t offset)
     return value;
 }
 
+static uint32_t readBigEndianUint32(const std::vector<uint8_t>& bytes, size_t offset)
+{
+    uint32_t value = 0;
+    for (size_t i = 0; i < 4; i++)
+        value = (value << 8) | bytes.at(offset + i);
+    return value;
+}
+
 %activity:
 
 auto recorder = check_and_cast<TestablePcapRecorder *>(getModuleByPath("recorder"));
@@ -214,7 +222,13 @@ writer->records.clear();
 Packet trailingPadding("trailingPadding");
 appendMpdu(trailingPadding, firstMpdu, true);
 recorder->writeIeee80211(&trailingPadding, DIRECTION_INBOUND);
-REQUIRE(writer->records.empty());
+REQUIRE(writer->records.size() == 1);
+const auto& trailingPaddingRecord = writer->records.front();
+REQUIRE(readUint16(trailingPaddingRecord, 2) == 20);
+REQUIRE(trailingPaddingRecord.at(8) == 0x10);
+REQUIRE(trailingPaddingRecord.size() == 20 + firstMpdu.size() + 4);
+REQUIRE(std::equal(firstMpdu.begin(), firstMpdu.end(), trailingPaddingRecord.begin() + 20));
+REQUIRE(readBigEndianUint32(trailingPaddingRecord, 20 + firstMpdu.size()) == ethernetFcs(firstMpdu));
 
 EV << "PcapRecorder preserved compatibility, neutrality, and A-MPDU boundaries.\n";
 
