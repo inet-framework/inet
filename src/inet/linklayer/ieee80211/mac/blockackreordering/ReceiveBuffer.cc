@@ -59,7 +59,38 @@ void ReceiveBuffer::pruneExpiredFragmentSequences()
 // data frame, unless the sequence number of the frame is older than the NextExpectedSequenceNumber for that
 // Block Ack agreement, in which case the frame is discarded because it is either old or a duplicate.
 //
+bool ReceiveBuffer::canInsertFrame(const Ptr<const Ieee80211DataHeader>& dataHeader, SequenceNumberCyclic nextExpectedSequenceNumber) const
+{
+    auto sequenceNumber = dataHeader->getSequenceNumber();
+    auto fragmentNumber = dataHeader->getFragmentNumber();
+    if (!(nextExpectedSequenceNumber <= sequenceNumber && sequenceNumber < nextExpectedSequenceNumber + bufferSize))
+        return false;
+    int retainedLength = length;
+    for (const auto& entry : buffer) {
+        if (SequenceNumberCyclic(entry.first) < nextExpectedSequenceNumber)
+            retainedLength -= entry.second.size();
+    }
+    // IEEE Std 802.11-2024, 9.4.1.13, footnote 26: each fragment
+    // occupies one receive-buffer slot.
+    if (retainedLength >= bufferSize)
+        return false;
+    auto it = buffer.find(sequenceNumber.get());
+    if (it != buffer.end()) {
+        for (auto fragment : it->second) {
+            const auto& fragmentHeader = fragment->peekAtFront<Ieee80211DataHeader>();
+            if (fragmentHeader->getSequenceNumber() == sequenceNumber && fragmentHeader->getFragmentNumber() == fragmentNumber)
+                return false;
+        }
+    }
+    return true;
+}
+
 ReceiveBuffer::FrameInsertionResult ReceiveBuffer::insertFrameWithResult(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
+{
+    return insertFrameWithResult(dataPacket, dataHeader, nextExpectedSequenceNumber);
+}
+
+ReceiveBuffer::FrameInsertionResult ReceiveBuffer::insertFrameWithResult(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, SequenceNumberCyclic nextExpectedSequenceNumber)
 {
     auto sequenceNumber = dataHeader->getSequenceNumber();
     auto fragmentNumber = dataHeader->getFragmentNumber();
@@ -67,36 +98,38 @@ ReceiveBuffer::FrameInsertionResult ReceiveBuffer::insertFrameWithResult(Packet 
     pruneExpiredFragmentSequences();
     if (isFragmented && expiredFragmentSequences.find(sequenceNumber.get()) != expiredFragmentSequences.end())
         return FrameInsertionResult::REJECTED_EXPIRED;
-    // The total number of MPDUs in these MSDUs may not
-    // exceed the reorder buffer size in the receiver.
-    if (length < bufferSize && nextExpectedSequenceNumber <= sequenceNumber && sequenceNumber < nextExpectedSequenceNumber + bufferSize) {
-        auto it = buffer.find(sequenceNumber.get());
-        if (it != buffer.end()) {
-            auto& fragments = it->second;
-            // TODO efficiency
-            for (auto fragment : fragments) {
-                const auto& fragmentHeader = fragment->peekAtFront<Ieee80211DataHeader>();
-                if (fragmentHeader->getSequenceNumber() == sequenceNumber && fragmentHeader->getFragmentNumber() == fragmentNumber)
-                    return FrameInsertionResult::REJECTED;
-            }
-            fragments.push_back(dataPacket);
+    if (!canInsertFrame(dataHeader, nextExpectedSequenceNumber))
+        return FrameInsertionResult::REJECTED;
+    auto it = buffer.find(sequenceNumber.get());
+    if (it != buffer.end()) {
+        auto& fragments = it->second;
+        // TODO efficiency
+        for (auto fragment : fragments) {
+            const auto& fragmentHeader = fragment->peekAtFront<Ieee80211DataHeader>();
+            if (fragmentHeader->getSequenceNumber() == sequenceNumber && fragmentHeader->getFragmentNumber() == fragmentNumber)
+                return FrameInsertionResult::REJECTED;
         }
-        else {
-            buffer[sequenceNumber.get()].push_back(dataPacket);
-            bufferEntries[sequenceNumber.get()] = { simTime(), isFragmented, false };
-        }
-        // The total number of frames that can be sent depends on the total
-        // number of MPDUs in all the outstanding MSDUs.
-        length++;
-        // Once an entry has received a fragmented MPDU, keep that identity
-        // tied to the generation even if a later malformed or
-        // unfragmented-shaped header is accepted into the same sequence slot.
-        auto& bufferEntry = bufferEntries[sequenceNumber.get()];
-        bufferEntry.hasFragmentedIdentity |= isFragmented;
-        bufferEntry.receiveLifetimeActive = bufferEntry.hasFragmentedIdentity && !isComplete(buffer[sequenceNumber.get()]);
-        return FrameInsertionResult::INSERTED;
+        fragments.push_back(dataPacket);
     }
-    return FrameInsertionResult::REJECTED;
+    else {
+        buffer[sequenceNumber.get()].push_back(dataPacket);
+        bufferEntries[sequenceNumber.get()] = { simTime(), isFragmented, false };
+    }
+    // The total number of frames that can be sent depends on the total
+    // number of MPDUs in all the outstanding MSDUs.
+    length++;
+    // Once an entry has received a fragmented MPDU, keep that identity
+    // tied to the generation even if a later malformed or
+    // unfragmented-shaped header is accepted into the same sequence slot.
+    auto& bufferEntry = bufferEntries[sequenceNumber.get()];
+    bufferEntry.hasFragmentedIdentity |= isFragmented;
+    bufferEntry.receiveLifetimeActive = bufferEntry.hasFragmentedIdentity && !isComplete(buffer[sequenceNumber.get()]);
+    return FrameInsertionResult::INSERTED;
+}
+
+bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, SequenceNumberCyclic nextExpectedSequenceNumber)
+{
+    return insertFrameWithResult(dataPacket, dataHeader, nextExpectedSequenceNumber) == FrameInsertionResult::INSERTED;
 }
 
 void ReceiveBuffer::dropFramesUntil(SequenceNumberCyclic sequenceNumber)
