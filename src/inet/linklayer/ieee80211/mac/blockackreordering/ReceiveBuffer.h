@@ -48,13 +48,16 @@ class INET_API ReceiveBuffer
     SequenceNumberCyclic nextExpectedSequenceNumber;
 
     void pruneExpiredFragmentSequences();
+    bool canInsertFrame(const Ptr<const Ieee80211DataHeader>& dataHeader, SequenceNumberCyclic nextExpectedSequenceNumber) const;
 
   public:
     ReceiveBuffer(int bufferSize, SequenceNumberCyclic nextExpectedSequenceNumber);
     virtual ~ReceiveBuffer();
 
     FrameInsertionResult insertFrameWithResult(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
+    FrameInsertionResult insertFrameWithResult(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, SequenceNumberCyclic nextExpectedSequenceNumber);
     bool insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader) { return insertFrameWithResult(dataPacket, dataHeader) == FrameInsertionResult::INSERTED; }
+    bool insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, SequenceNumberCyclic nextExpectedSequenceNumber);
     void dropFramesUntil(SequenceNumberCyclic sequenceNumber);
     void removeFrame(SequenceNumberCyclic sequenceNumber);
     Fragments extractFrames();

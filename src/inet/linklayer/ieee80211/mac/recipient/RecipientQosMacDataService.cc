@@ -10,6 +10,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OneTidBlockAckReqVariant.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/duplicateremoval/QosDuplicateRemoval.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
@@ -249,20 +250,13 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
 {
     Enter_Method("controlFrameReceived");
     expireReceiveLifetime();
-    if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(controlHeader)) {
+    if (auto blockAckReqDetails = getOneTidBlockAckReqDetails(controlHeader)) {
         BlockAckReordering::ReorderBuffer frames;
         if (blockAckReordering) {
-            Tid tid = -1;
-            if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
-                tid = basicBlockAckReq->getTidInfo();
-            else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq))
-                tid = compressedBlockAckReq->getTidInfo();
-            else
-                return std::vector<Packet *>();
-            MacAddress originatorAddr = blockAckReq->getTransmitterAddress();
-            RecipientBlockAckAgreement *agreement = blockAckAgreementHandler == nullptr ? nullptr : blockAckAgreementHandler->getActiveAgreement(tid, originatorAddr);
+            MacAddress originatorAddr = blockAckReqDetails->blockAckReq->getTransmitterAddress();
+            RecipientBlockAckAgreement *agreement = blockAckAgreementHandler == nullptr ? nullptr : blockAckAgreementHandler->getActiveAgreement(blockAckReqDetails->tid, originatorAddr);
             if (agreement)
-                frames = blockAckReordering->processReceivedBlockAckReq(agreement, blockAckReq);
+                frames = blockAckReordering->processReceivedBlockAckReq(agreement, blockAckReqDetails->blockAckReq);
             else {
                 scheduleReceiveLifetimeTimer();
                 return std::vector<Packet *>();
