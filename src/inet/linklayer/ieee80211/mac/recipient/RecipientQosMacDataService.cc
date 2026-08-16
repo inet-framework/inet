@@ -30,6 +30,12 @@ void RecipientQosMacDataService::initialize()
     blockAckReordering = new BlockAckReordering();
 }
 
+void RecipientQosMacDataService::resetBlockAckReordering(Tid tid, MacAddress originatorAddr)
+{
+    if (blockAckReordering)
+        blockAckReordering->resetReceiveBuffer(tid, originatorAddr);
+}
+
 Packet *RecipientQosMacDataService::defragment(std::vector<Packet *> completeFragments)
 {
     for (auto fragment : completeFragments) {
@@ -196,4 +202,3 @@ RecipientQosMacDataService::~RecipientQosMacDataService()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

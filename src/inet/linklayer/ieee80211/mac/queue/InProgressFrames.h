@@ -49,7 +49,7 @@ class INET_API InProgressFrames : public SimpleModule
     virtual void dropFrame(Packet *packet);
     virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
-    virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
+    virtual bool hasInProgressFrames() { return hasEligibleFrameToTransmit(); }
     virtual std::vector<Packet *> getOutstandingFrames();
 
     virtual void clearDroppedFrames();
@@ -59,4 +59,3 @@ class INET_API InProgressFrames : public SimpleModule
 } /* namespace inet */
 
 #endif
-

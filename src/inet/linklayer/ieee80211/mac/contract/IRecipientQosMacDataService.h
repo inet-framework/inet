@@ -27,10 +27,10 @@ class INET_API IRecipientQosMacDataService
     virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
     virtual std::vector<Packet *> controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
     virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) = 0;
+    virtual void resetBlockAckReordering(Tid tid, MacAddress originatorAddr) = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
 #endif
-

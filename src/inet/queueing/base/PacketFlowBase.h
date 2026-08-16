@@ -16,17 +16,19 @@
 #include "inet/queueing/common/PassivePacketSourceRef.h"
 #include "inet/queueing/contract/IPacketCollection.h"
 #include "inet/queueing/contract/IPacketFlow.h"
+#include "inet/queueing/contract/IPacketExtractor.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPacketFlow, public virtual IPacketCollection
+class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPacketFlow, public virtual IPacketCollection, public virtual IPacketExtractor
 {
   protected:
     cGate *inputGate = nullptr;
     ActivePacketSourceRef producer;
     PassivePacketSourceRef provider;
     ModuleRef<IPacketCollection> collection;
+    ModuleRef<IPacketExtractor> packetExtractor;
 
     cGate *outputGate = nullptr;
     PassivePacketSinkRef consumer;
@@ -82,6 +84,7 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
     virtual Packet *getPacket(int index) const override { return collection->getPacket(index); }
     virtual bool isEmpty() const override { return collection->isEmpty(); }
     virtual void removePacket(Packet *packet) override { collection->removePacket(packet); }
+    virtual Packet *dequeuePacket(Packet *packet) override;
     virtual void removeAllPackets() override { collection->removeAllPackets(); }
 };
 
@@ -89,4 +92,3 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
 } // namespace inet
 
 #endif
-

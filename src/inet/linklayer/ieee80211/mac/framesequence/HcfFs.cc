@@ -58,9 +58,10 @@ bool HcfFs::isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 
 bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
-    bool hasFrameToTransmit = context->getInProgressFrames()->hasInProgressFrames();
-    if (hasFrameToTransmit) {
-        auto nextFrameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
+    // This predicate is the TXOP continuation boundary, so it may materialize
+    // an eligible pending frame. Availability queries elsewhere remain pure.
+    auto nextFrameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
+    if (nextFrameToTransmit != nullptr) {
         const auto& nextHeader = nextFrameToTransmit->peekAtFront<Ieee80211MacHeader>();
         return frameSequence->getCount() == 0 || (!nextHeader->getReceiverAddress().isMulticast() && context->getQoSContext()->txopProcedure->getRemaining() > 0);
     }

@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorMacDataService.h"
 
+#include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/NonQoSSequenceNumberAssignment.h"
 
@@ -32,7 +33,13 @@ std::vector<Packet *> *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)
     auto fragmentSizes = fragmentationPolicy->computeFragmentSizes(frame);
     if (fragmentSizes.size() != 0) {
         emit(packetFragmentedSignal, frame);
+        auto transactionTag = frame->findTag<Ieee80211AddbaTransactionTag>();
+        bool hasTransactionTag = transactionTag != nullptr;
+        auto transactionId = hasTransactionTag ? transactionTag->getTransactionId() : 0;
         auto fragmentFrames = fragmentation->fragmentFrame(frame, fragmentSizes);
+        if (hasTransactionTag)
+            for (auto fragment : *fragmentFrames)
+                fragment->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
         return fragmentFrames;
     }
     return nullptr;
@@ -63,8 +70,7 @@ std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queuein
         for (int i = 0; i < pendingQueue->getNumPackets(); i++) {
             auto candidate = pendingQueue->getPacket(i);
             if (isFrameEligible(candidate)) {
-                pendingQueue->removePacket(candidate);
-                packet = candidate;
+                packet = pendingQueue->dequeuePacket(candidate);
                 break;
             }
         }

@@ -8,14 +8,15 @@
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
 
-void OriginatorBlockAckAgreementHandler::createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest)
+void OriginatorBlockAckAgreementHandler::createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, uint64_t transactionId)
 {
     ASSERT(addbaRequest->getDialogToken() != 0);
-    OriginatorBlockAckAgreement *blockAckAgreement = new OriginatorBlockAckAgreement(addbaRequest->getReceiverAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaRequest->getBufferSize(), addbaRequest->getAMsduSupported(), addbaRequest->getBlockAckPolicy() == 0, addbaRequest->getDialogToken());
+    OriginatorBlockAckAgreement *blockAckAgreement = new OriginatorBlockAckAgreement(addbaRequest->getReceiverAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaRequest->getBufferSize(), addbaRequest->getAMsduSupported(), addbaRequest->getBlockAckPolicy() == 0, addbaRequest->getDialogToken(), transactionId);
     auto agreementId = std::make_pair(addbaRequest->getReceiverAddress(), addbaRequest->getTid());
     blockAckAgreements[agreementId] = blockAckAgreement;
 }
@@ -54,15 +55,34 @@ simtime_t OriginatorBlockAckAgreementHandler::computeEarliestAddbaResponseDeadli
     return earliestDeadline;
 }
 
-void OriginatorBlockAckAgreementHandler::addbaResponseTimeoutExpired(IBlockAckAgreementHandlerCallback *callback)
+simtime_t OriginatorBlockAckAgreementHandler::getAddbaResponseTimeout(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy) const
+{
+    auto timeout = blockAckAgreementPolicy->getAddbaResponseTimeout();
+    if (timeout <= 0)
+        throw cRuntimeError("ADDBA response timeout must be greater than zero");
+    return timeout;
+}
+
+void OriginatorBlockAckAgreementHandler::recordAddbaFailure(MacAddress receiverAddr, Tid tid, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy)
+{
+    auto retryBackoff = blockAckAgreementPolicy->computeAddbaRetryBackoff();
+    if (retryBackoff < 0)
+        throw cRuntimeError("ADDBA retry backoff must not be negative");
+    addbaRetryDeadlines[std::make_pair(receiverAddr, tid)] = simTime() + retryBackoff;
+}
+
+void OriginatorBlockAckAgreementHandler::addbaResponseTimeoutExpired(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
 {
     auto now = simTime();
     for (auto it = blockAckAgreements.begin(); it != blockAckAgreements.end();) {
         auto agreement = it->second;
         if (agreement->isPending() && agreement->getIsAddbaRequestSent() && agreement->getAddbaResponseDeadline() <= now) {
-            EV_INFO << "ADDBA Response timeout for receiver=" << agreement->getReceiverAddr() << " tid=" << (int)agreement->getTid() << endl;
+            EV_INFO << "ADDBA transaction timeout for receiver=" << agreement->getReceiverAddr() << " tid=" << (int)agreement->getTid() << endl;
+            auto transactionId = agreement->getTransactionId();
+            recordAddbaFailure(agreement->getReceiverAddr(), agreement->getTid(), blockAckAgreementPolicy);
             it = blockAckAgreements.erase(it);
             delete agreement;
+            callback->cancelAddbaTransaction(transactionId, nullptr);
         }
         else
             it++;
@@ -172,14 +192,23 @@ void OriginatorBlockAckAgreementHandler::terminateAgreement(MacAddress originato
     }
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback)
+void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback)
 {
-    auto agreement = getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
-    if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataHeader) && agreement == nullptr) {
-        auto addbaReq = buildAddbaRequest(dataHeader->getReceiverAddress(), dataHeader->getTid(), dataHeader->getSequenceNumber() + 1, blockAckAgreementPolicy);
-        createAgreement(addbaReq);
+    auto receiverAddr = dataHeader->getReceiverAddress();
+    auto tid = dataHeader->getTid();
+    auto agreementId = std::make_pair(receiverAddr, tid);
+    auto agreement = getAgreement(receiverAddr, tid);
+    auto retryIt = addbaRetryDeadlines.find(agreementId);
+    bool retryAllowed = retryIt == addbaRetryDeadlines.end() || retryIt->second <= simTime();
+    if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataHeader) && agreement == nullptr && retryAllowed) {
+        if (retryIt != addbaRetryDeadlines.end())
+            addbaRetryDeadlines.erase(retryIt);
+        auto addbaReq = buildAddbaRequest(receiverAddr, tid, dataHeader->getSequenceNumber() + 1, blockAckAgreementPolicy);
+        auto transactionId = nextTransactionId++;
+        createAgreement(addbaReq, transactionId);
         auto addbaPacket = new Packet("AddbaReq", addbaReq);
-        callback->processMgmtFrame(addbaPacket, addbaReq);
+        addbaPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+        procedureCallback->processMgmtFrame(addbaPacket, addbaReq);
     }
 }
 
@@ -191,14 +220,20 @@ OriginatorBlockAckAgreement *OriginatorBlockAckAgreementHandler::processReceived
     if (agreement == nullptr || !agreement->isPending() || !agreement->getIsAddbaRequestSent() || agreement->getDialogToken() != addbaResp->getDialogToken())
         return nullptr;
     if (addbaResp->getStatusCode() == 0 && blockAckAgreementPolicy->isAddbaReqAccepted(addbaResp, agreement)) {
+        auto transactionId = agreement->getTransactionId();
         updateAgreement(agreement, addbaResp);
+        addbaRetryDeadlines.erase(std::make_pair(addbaResp->getTransmitterAddress(), addbaResp->getTid()));
         scheduleInactivityTimer(callback);
         scheduleAddbaResponseTimer(callback);
+        callback->cancelAddbaTransaction(transactionId, nullptr);
         return agreement;
     }
     else {
+        auto transactionId = agreement->getTransactionId();
+        recordAddbaFailure(addbaResp->getTransmitterAddress(), addbaResp->getTid(), blockAckAgreementPolicy);
         terminateAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
         scheduleAddbaResponseTimer(callback);
+        callback->cancelAddbaTransaction(transactionId, nullptr);
         return nullptr;
     }
 }
@@ -211,21 +246,35 @@ void OriginatorBlockAckAgreementHandler::updateAgreement(OriginatorBlockAckAgree
     agreement->calculateExpirationTime();
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq(const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
+bool OriginatorBlockAckAgreementHandler::isAddbaRequestPending(const Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq) const
+{
+    auto it = blockAckAgreements.find(std::make_pair(addbaReq->getReceiverAddress(), addbaReq->getTid()));
+    auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();
+    return it != blockAckAgreements.end() && it->second->isPending() && transactionTag != nullptr &&
+            it->second->getDialogToken() == addbaReq->getDialogToken() && it->second->getTransactionId() == transactionTag->getTransactionId();
+}
+
+void OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq(Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
 {
     auto agreement = getAgreement(addbaReq->getReceiverAddress(), addbaReq->getTid());
-    if (agreement && agreement->isPending() && agreement->getDialogToken() == addbaReq->getDialogToken()) {
-        if (agreement->getAddbaResponseDeadline() < 0) {
-            auto addbaFailureTimeout = blockAckAgreementPolicy->computeAddbaFailureTimeout();
-            if (addbaFailureTimeout <= 0)
-                throw cRuntimeError("ADDBA failure timeout must be greater than zero");
-            agreement->setAddbaResponseDeadline(simTime() + addbaFailureTimeout);
-        }
+    if (isAddbaRequestPending(packet, addbaReq) && !addbaReq->getMoreFragments() && !agreement->getIsAddbaRequestSent()) {
+        agreement->setAddbaResponseDeadline(simTime() + getAddbaResponseTimeout(blockAckAgreementPolicy));
         agreement->setIsAddbaRequestSent(true);
         scheduleAddbaResponseTimer(callback);
     }
-    else
+    else if (!isAddbaRequestPending(packet, addbaReq))
         EV_WARN << "Ignoring stale transmitted ADDBA Request for receiver=" << addbaReq->getReceiverAddress() << " tid=" << (int)addbaReq->getTid() << " dialogToken=" << (int)addbaReq->getDialogToken() << endl;
+}
+
+void OriginatorBlockAckAgreementHandler::processDroppedAddbaReq(Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
+{
+    if (isAddbaRequestPending(packet, addbaReq)) {
+        auto transactionId = packet->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+        recordAddbaFailure(addbaReq->getReceiverAddress(), addbaReq->getTid(), blockAckAgreementPolicy);
+        terminateAgreement(addbaReq->getReceiverAddress(), addbaReq->getTid());
+        scheduleAddbaResponseTimer(callback);
+        callback->cancelAddbaTransaction(transactionId, packet);
+    }
 }
 
 void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)

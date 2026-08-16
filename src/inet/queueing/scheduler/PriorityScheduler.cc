@@ -71,6 +71,25 @@ void PriorityScheduler::removePacket(Packet *packet)
     throw cRuntimeError("Cannot find packet");
 }
 
+Packet *PriorityScheduler::dequeuePacket(Packet *packet)
+{
+    Enter_Method("dequeuePacket");
+    for (auto collection : collections) {
+        for (int i = 0; i < collection->getNumPackets(); i++) {
+            if (collection->getPacket(i) == packet) {
+                auto extractor = check_and_cast<IPacketExtractor *>(collection);
+                packet = extractor->dequeuePacket(packet);
+                take(packet);
+                handlePacketProcessed(packet);
+                emit(packetPulledSignal, packet);
+                drop(packet);
+                return packet;
+            }
+        }
+    }
+    throw cRuntimeError("Cannot find packet");
+}
+
 void PriorityScheduler::removeAllPackets()
 {
     Enter_Method("removeAllPackets");
@@ -107,4 +126,3 @@ void PriorityScheduler::handleCanPullPacketChanged(const cGate *gate)
 
 } // namespace queueing
 } // namespace inet
-

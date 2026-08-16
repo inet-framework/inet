@@ -44,12 +44,13 @@ class Ieee80211Mac;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public queueing::IPacketQueue::ICallback, public ModeSetListener
 {
   public:
     static simsignal_t edcaCollisionDetectedSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
+    static simsignal_t blockAckAgreementChangedSignal;
 
   protected:
     Ieee80211Mac *mac = nullptr;
@@ -118,6 +119,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual bool hasFrameToTransmit(AccessCategory ac);
     virtual void requestEligibleChannelAccess();
     virtual void resumeEligibleChannelAccess();
+    virtual void processDroppedBlockAckSetupFrame(Packet *packet);
+    virtual void handlePacketDropped(Packet *packet) override;
     virtual bool isReceptionInProgress();
 
     // Recipient
@@ -161,6 +164,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // IProcedureCallback
     virtual void scheduleInactivityTimer(simtime_t timeout) override;
     virtual void scheduleAddbaResponseTimer(simtime_t deadline) override;
+    virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override;
 
     std::string getFrameSequenceInfo() const;
 

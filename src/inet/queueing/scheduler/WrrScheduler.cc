@@ -58,6 +58,49 @@ b WrrScheduler::getTotalLength() const
     return totalLength;
 }
 
+Packet *WrrScheduler::getPacket(int index) const
+{
+    int originalIndex = index;
+    for (auto collection : collections) {
+        auto numPackets = collection->getNumPackets();
+        if (index < numPackets)
+            return collection->getPacket(index);
+        index -= numPackets;
+    }
+    throw cRuntimeError("Index %i out of range", originalIndex);
+}
+
+void WrrScheduler::removePacket(Packet *packet)
+{
+    for (auto collection : collections) {
+        for (int i = 0; i < collection->getNumPackets(); i++) {
+            if (collection->getPacket(i) == packet) {
+                collection->removePacket(packet);
+                return;
+            }
+        }
+    }
+    throw cRuntimeError("Cannot find packet");
+}
+
+Packet *WrrScheduler::dequeuePacket(Packet *packet)
+{
+    Enter_Method("dequeuePacket");
+    for (auto collection : collections) {
+        for (int i = 0; i < collection->getNumPackets(); i++) {
+            if (collection->getPacket(i) == packet) {
+                packet = check_and_cast<IPacketExtractor *>(collection)->dequeuePacket(packet);
+                take(packet);
+                handlePacketProcessed(packet);
+                emit(packetPulledSignal, packet);
+                drop(packet);
+                return packet;
+            }
+        }
+    }
+    throw cRuntimeError("Cannot find packet");
+}
+
 void WrrScheduler::removeAllPackets()
 {
     Enter_Method("removeAllPackets");
@@ -97,4 +140,3 @@ int WrrScheduler::schedulePacket()
 
 } // namespace queueing
 } // namespace inet
-

@@ -34,19 +34,21 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     OriginatorBlockAckAgreementState state = OriginatorBlockAckAgreementState::PENDING;
     bool isAddbaRequestSent = false;
     uint8_t dialogToken = 0;
+    uint64_t transactionId = 0;
     simtime_t addbaResponseDeadline = -1;
     simtime_t blockAckTimeoutValue = -1;
     simtime_t expirationTime = -1;
 
   public:
-    OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported, uint8_t dialogToken) :
+    OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported, uint8_t dialogToken, uint64_t transactionId) :
         receiverAddr(receiverAddr),
         tid(tid),
         startingSequenceNumber(startingSequenceNumber),
         bufferSize(bufferSize),
         isAMsduSupported(isAMsduSupported),
         isDelayedBlockAckPolicySupported(isDelayedBlockAckPolicySupported),
-        dialogToken(dialogToken)
+        dialogToken(dialogToken),
+        transactionId(transactionId)
     {
     }
 
@@ -65,6 +67,7 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual const simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
     virtual int getNumSentBaPolicyFrames() const { return numSentBaPolicyFrames; }
     virtual uint8_t getDialogToken() const { return dialogToken; }
+    virtual uint64_t getTransactionId() const { return transactionId; }
     virtual simtime_t getAddbaResponseDeadline() const { return addbaResponseDeadline; }
 
     virtual void setBufferSize(int bufferSize) { this->bufferSize = bufferSize; }

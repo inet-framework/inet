@@ -8,9 +8,7 @@
 #include "inet/queueing/queue/PacketQueue.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/PacketEventTag.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/TimeTag.h"
 #include "inet/queueing/function/PacketComparatorFunction.h"
 #include "inet/queueing/function/PacketDropperFunction.h"
 
@@ -104,6 +102,7 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
             auto packet = packetDropperFunction->selectPacket(this);
             EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
             queue.remove(packet);
+            notifyPacketDropped(packet);
             dropPacket(packet, QUEUE_OVERFLOW);
         }
     }
@@ -126,13 +125,21 @@ Packet *PacketQueue::pullPacket(const cGate *gate)
     }
     else
         queue.pop();
-    auto queueingTime = simTime() - packet->getArrivalTime();
-    auto packetEvent = new PacketEvent();
-    insertPacketEvent(this, packet, PEK_QUEUED, 0, queueingTime, packetEvent);
-    increaseTimeTag<QueueingTimeTag>(packet, queueingTime, queueingTime);
-    emit(packetPulledSignal, packet);
+    recordPacketDequeued(packet);
     if (collector != nullptr)
         animatePullPacket(packet, outputGate, collector.getReferencedGate());
+    return packet;
+}
+
+Packet *PacketQueue::dequeuePacket(Packet *packet)
+{
+    Enter_Method("dequeuePacket");
+    EV_INFO << "Dequeuing packet" << EV_FIELD(packet) << EV_ENDL;
+    queue.remove(packet);
+    if (buffer != nullptr)
+        buffer->removePacket(packet);
+    recordPacketDequeued(packet);
+    drop(packet);
     return packet;
 }
 
@@ -189,10 +196,10 @@ void PacketQueue::handlePacketRemoved(Packet *packet)
     if (queue.contains(packet)) {
         EV_INFO << "Removing packet" << EV_FIELD(packet) << EV_ENDL;
         queue.remove(packet);
+        notifyPacketDropped(packet);
         emit(packetRemovedSignal, packet);
     }
 }
 
 } // namespace queueing
 } // namespace inet
-

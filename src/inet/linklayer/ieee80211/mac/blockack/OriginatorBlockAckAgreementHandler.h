@@ -21,12 +21,14 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
 {
   protected:
     std::map<std::pair<MacAddress, Tid>, OriginatorBlockAckAgreement *> blockAckAgreements;
+    std::map<std::pair<MacAddress, Tid>, simtime_t> addbaRetryDeadlines;
     uint8_t nextDialogToken = 1;
+    uint64_t nextTransactionId = 1;
 
   protected:
     virtual const Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy);
     virtual uint8_t allocateDialogToken();
-    virtual void createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest);
+    virtual void createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, uint64_t transactionId);
     virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp);
     virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
     virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);
@@ -34,20 +36,24 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
     virtual simtime_t computeEarliestAddbaResponseDeadline() const;
     virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
     virtual void scheduleAddbaResponseTimer(IBlockAckAgreementHandlerCallback *callback);
+    virtual simtime_t getAddbaResponseTimeout(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy) const;
+    virtual void recordAddbaFailure(MacAddress receiverAddr, Tid tid, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy);
 
   public:
     virtual ~OriginatorBlockAckAgreementHandler();
-    virtual void processTransmittedAddbaReq(const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
-    virtual void processTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;
+    virtual void processTransmittedAddbaReq(Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
+    virtual void processDroppedAddbaReq(Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
+    virtual void processTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
     virtual void processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback) override;
     virtual OriginatorBlockAckAgreement *processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy) override;
     virtual void processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) override;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
-    virtual void addbaResponseTimeoutExpired(IBlockAckAgreementHandlerCallback *callback) override;
+    virtual void addbaResponseTimeoutExpired(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
 
     virtual OriginatorBlockAckAgreement *getAgreement(MacAddress receiverAddr, Tid tid) override;
     virtual bool isAddbaResponsePending(MacAddress receiverAddr, Tid tid) const override;
+    virtual bool isAddbaRequestPending(const Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq) const override;
 };
 
 } // namespace ieee80211

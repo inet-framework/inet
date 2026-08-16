@@ -10,11 +10,12 @@
 
 #include "inet/queueing/base/PacketSchedulerBase.h"
 #include "inet/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/contract/IPacketExtractor.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API LabelScheduler : public PacketSchedulerBase, public virtual IPacketCollection
+class INET_API LabelScheduler : public PacketSchedulerBase, public virtual IPacketCollection, public virtual IPacketExtractor
 {
   protected:
     int defaultGateIndex = -1;
@@ -35,6 +36,7 @@ class INET_API LabelScheduler : public PacketSchedulerBase, public virtual IPack
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
+    virtual Packet *dequeuePacket(Packet *packet) override;
     virtual void removeAllPackets() override;
 };
 
@@ -42,4 +44,3 @@ class INET_API LabelScheduler : public PacketSchedulerBase, public virtual IPack
 } // namespace inet
 
 #endif
-

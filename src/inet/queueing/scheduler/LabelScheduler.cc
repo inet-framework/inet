@@ -43,12 +43,45 @@ b LabelScheduler::getTotalLength() const
 
 Packet *LabelScheduler::getPacket(int index) const
 {
-    throw cRuntimeError("TODO");
+    int originalIndex = index;
+    for (auto collection : collections) {
+        auto numPackets = collection->getNumPackets();
+        if (index < numPackets)
+            return collection->getPacket(index);
+        index -= numPackets;
+    }
+    throw cRuntimeError("Index %i out of range", originalIndex);
 }
 
 void LabelScheduler::removePacket(Packet *packet)
 {
-    throw cRuntimeError("TODO");
+    for (auto collection : collections) {
+        for (int i = 0; i < collection->getNumPackets(); i++) {
+            if (collection->getPacket(i) == packet) {
+                collection->removePacket(packet);
+                return;
+            }
+        }
+    }
+    throw cRuntimeError("Cannot find packet");
+}
+
+Packet *LabelScheduler::dequeuePacket(Packet *packet)
+{
+    Enter_Method("dequeuePacket");
+    for (auto collection : collections) {
+        for (int i = 0; i < collection->getNumPackets(); i++) {
+            if (collection->getPacket(i) == packet) {
+                packet = check_and_cast<IPacketExtractor *>(collection)->dequeuePacket(packet);
+                take(packet);
+                handlePacketProcessed(packet);
+                emit(packetPulledSignal, packet);
+                drop(packet);
+                return packet;
+            }
+        }
+    }
+    throw cRuntimeError("Cannot find packet");
 }
 
 void LabelScheduler::removeAllPackets()
@@ -76,4 +109,3 @@ int LabelScheduler::schedulePacket()
 
 } // namespace queueing
 } // namespace inet
-

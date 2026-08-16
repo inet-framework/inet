@@ -7,8 +7,12 @@
 
 #include "inet/queueing/base/PacketQueueBase.h"
 
+#include <algorithm>
+
 #include "inet/common/Simsignals.h"
+#include "inet/common/PacketEventTag.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/TimeTag.h"
 
 namespace inet {
 namespace queueing {
@@ -53,6 +57,34 @@ Packet *PacketQueueBase::dequeuePacket()
     return packet;
 }
 
+void PacketQueueBase::addPacketDropCallback(IPacketQueue::ICallback *callback)
+{
+    Enter_Method("addPacketDropCallback");
+    if (std::find(packetDropCallbacks.begin(), packetDropCallbacks.end(), callback) == packetDropCallbacks.end())
+        packetDropCallbacks.push_back(callback);
+}
+
+void PacketQueueBase::removePacketDropCallback(IPacketQueue::ICallback *callback)
+{
+    Enter_Method("removePacketDropCallback");
+    packetDropCallbacks.erase(std::remove(packetDropCallbacks.begin(), packetDropCallbacks.end(), callback), packetDropCallbacks.end());
+}
+
+void PacketQueueBase::notifyPacketDropped(Packet *packet)
+{
+    for (auto callback : packetDropCallbacks)
+        callback->handlePacketDropped(packet);
+}
+
+void PacketQueueBase::recordPacketDequeued(Packet *packet)
+{
+    auto queueingTime = simTime() - packet->getArrivalTime();
+    auto packetEvent = new PacketEvent();
+    insertPacketEvent(this, packet, PEK_QUEUED, 0, queueingTime, packetEvent);
+    increaseTimeTag<QueueingTimeTag>(packet, queueingTime, queueingTime);
+    emit(packetPulledSignal, packet);
+}
+
 void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == packetPushedSignal || signal == packetPushStartedSignal)
@@ -92,4 +124,3 @@ std::string PacketQueueBase::resolveDirective(char directive) const
 
 } // namespace queueing
 } // namespace inet
-

@@ -25,15 +25,13 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
         blockAckTimeoutValue = par("blockAckTimeoutValue");
         addbaFailureTimeout = par("addbaFailureTimeout");
+        addbaRetryBackoff = par("addbaRetryBackoff");
         if (addbaFailureTimeout <= 0)
             throw cRuntimeError("addbaFailureTimeout must be greater than zero");
+        if (addbaRetryBackoff < 0)
+            throw cRuntimeError("addbaRetryBackoff must not be negative");
         WATCH(blockAckReqThreshold);
     }
-}
-
-simtime_t OriginatorBlockAckAgreementPolicy::computeAddbaFailureTimeout() const
-{
-    return addbaFailureTimeout;
 }
 
 bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)

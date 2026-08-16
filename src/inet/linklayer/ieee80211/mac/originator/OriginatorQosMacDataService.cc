@@ -11,6 +11,7 @@
 
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
+#include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
 
@@ -72,7 +73,13 @@ std::vector<Packet *> *OriginatorQosMacDataService::fragmentIfNeeded(Packet *fra
     auto fragmentSizes = fragmentationPolicy->computeFragmentSizes(frame);
     if (fragmentSizes.size() != 0) {
         emit(packetFragmentedSignal, frame);
+        auto transactionTag = frame->findTag<Ieee80211AddbaTransactionTag>();
+        bool hasTransactionTag = transactionTag != nullptr;
+        auto transactionId = hasTransactionTag ? transactionTag->getTransactionId() : 0;
         auto fragmentFrames = fragmentation->fragmentFrame(frame, fragmentSizes);
+        if (hasTransactionTag)
+            for (auto fragment : *fragmentFrames)
+                fragment->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
         return fragmentFrames;
     }
     return nullptr;
@@ -110,8 +117,7 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
             if (aMsduAggregationPolicy && i == 0)
                 packet = aMsduAggregateIfNeeded(pendingQueue);
             if (!packet) {
-                pendingQueue->removePacket(candidate);
-                packet = candidate;
+                packet = pendingQueue->dequeuePacket(candidate);
                 take(packet);
             }
             break;

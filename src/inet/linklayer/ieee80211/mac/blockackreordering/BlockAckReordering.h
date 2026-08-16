@@ -44,6 +44,7 @@ class INET_API BlockAckReordering
     virtual ~BlockAckReordering();
 
     void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba);
+    void resetReceiveBuffer(Tid tid, MacAddress originatorAddr);
     ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
     ReorderBuffer processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 };
@@ -52,4 +53,3 @@ class INET_API BlockAckReordering
 } /* namespace inet */
 
 #endif
-
