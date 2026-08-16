@@ -31,6 +31,7 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     int bufferSize = -1;
     bool isAMsduSupported = false;
     bool isDelayedBlockAckPolicySupported = false;
+    bool isCompressedBlockAckSupported = false;
     OriginatorBlockAckAgreementState state = OriginatorBlockAckAgreementState::PENDING;
     bool isAddbaRequestSent = false;
     uint8_t dialogToken = 0;
@@ -62,6 +63,7 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual bool getIsAddbaRequestSent() const { return isAddbaRequestSent; }
     virtual bool getIsAMsduSupported() const { return isAMsduSupported; }
     virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
+    virtual bool getIsCompressedBlockAckSupported() const { return isCompressedBlockAckSupported; }
     virtual MacAddress getReceiverAddr() const { return receiverAddr; }
     virtual Tid getTid() const { return tid; }
     virtual const simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
@@ -75,6 +77,7 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual void setIsAddbaRequestSent(bool isAddbaRequestSent) { this->isAddbaRequestSent = isAddbaRequestSent; }
     virtual void setIsAMsduSupported(bool isAMsduSupported) { this->isAMsduSupported = isAMsduSupported; }
     virtual void setIsDelayedBlockAckPolicySupported(bool isDelayedBlockAckPolicySupported) { this->isDelayedBlockAckPolicySupported = isDelayedBlockAckPolicySupported; }
+    virtual void setIsCompressedBlockAckSupported(bool isCompressedBlockAckSupported) { this->isCompressedBlockAckSupported = isCompressedBlockAckSupported; }
     virtual void setBlockAckTimeoutValue(const simtime_t blockAckTimeoutValue) { this->blockAckTimeoutValue = blockAckTimeoutValue; }
     virtual void setAddbaResponseDeadline(simtime_t addbaResponseDeadline) { this->addbaResponseDeadline = addbaResponseDeadline; }
 

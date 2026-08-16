@@ -18,7 +18,6 @@ class INET_API RecipientBlockAckAgreement : public cObject
   protected:
     BlockAckRecord *blockAckRecord = nullptr;
 
-    SequenceNumberCyclic startingSequenceNumber;
     int bufferSize = -1;
     simtime_t blockAckTimeoutValue = 0;
     bool isAddbaResponseSent = false;
@@ -29,12 +28,12 @@ class INET_API RecipientBlockAckAgreement : public cObject
     RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue);
     virtual ~RecipientBlockAckAgreement() { delete blockAckRecord; }
 
-    virtual void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
+    virtual void dataFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
 
     virtual BlockAckRecord *getBlockAckRecord() const { return blockAckRecord; }
     virtual simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
     virtual int getBufferSize() const { return bufferSize; }
-    virtual SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
+    virtual SequenceNumberCyclic getStartingSequenceNumber() const { return blockAckRecord->getStartingSequenceNumber(); }
     virtual bool getIsAddbaResponseSent() const { return isAddbaResponseSent; }
     virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
 

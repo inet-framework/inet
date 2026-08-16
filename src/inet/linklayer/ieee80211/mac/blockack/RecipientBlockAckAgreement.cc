@@ -13,7 +13,6 @@ namespace inet {
 namespace ieee80211 {
 
 RecipientBlockAckAgreement::RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t lastUsedTime) :
-    startingSequenceNumber(startingSequenceNumber),
     bufferSize(bufferSize),
     blockAckTimeoutValue(lastUsedTime)
 {
@@ -21,17 +20,16 @@ RecipientBlockAckAgreement::RecipientBlockAckAgreement(MacAddress originatorAddr
     blockAckRecord = new BlockAckRecord(originatorAddress, tid, startingSequenceNumber);
 }
 
-void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)
+void RecipientBlockAckAgreement::dataFrameReceived(const Ptr<const Ieee80211DataHeader>& header)
 {
-    ASSERT(header->getAckPolicy() == BLOCK_ACK);
-    blockAckRecord->blockAckPolicyFrameReceived(header);
+    blockAckRecord->dataFrameReceived(header, bufferSize);
 }
 
 std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agreement)
 {
     os << "originator address = " << agreement.blockAckRecord->getOriginatorAddress() << ", "
        << "tid = " << agreement.blockAckRecord->getTid() << ", "
-       << "starting sequence number = " << agreement.startingSequenceNumber << ", "
+       << "starting sequence number = " << agreement.getStartingSequenceNumber() << ", "
        << "buffer size = " << agreement.bufferSize << ", "
        << "block ack timeout value = " << agreement.blockAckTimeoutValue;
     return os;

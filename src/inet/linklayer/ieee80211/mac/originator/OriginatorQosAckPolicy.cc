@@ -21,7 +21,6 @@ void OriginatorQosAckPolicy::initialize(int stage)
         rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
         maxBlockAckPolicyFrameLength = par("maxBlockAckPolicyFrameLength");
         blockAckReqThreshold = par("blockAckReqThreshold");
-        assumePeerSupportsCompressedBlockAck = par("assumePeerSupportsCompressedBlockAck");
         blockAckTimeout = par("blockAckTimeout");
         ackTimeout = par("ackTimeout");
     }
@@ -55,16 +54,15 @@ SequenceNumberCyclic OriginatorQosAckPolicy::computeStartingSequenceNumber(const
 
 bool OriginatorQosAckPolicy::isCompressedBlockAckReq(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement) const
 {
-    return isCompressedBlockAckReqNeeded(outstandingFrames, agreement, assumePeerSupportsCompressedBlockAck);
+    return isCompressedBlockAckReqNeeded(outstandingFrames, agreement);
 }
 
-bool OriginatorQosAckPolicy::isCompressedBlockAckReqNeeded(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement, bool assumePeerSupportsCompressedBlockAck)
+bool OriginatorQosAckPolicy::isCompressedBlockAckReqNeeded(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement)
 {
     // IEEE Std 802.11-2024, Table 11-8 and 10.25.6.1: use the compressed
     // variant only for an established immediate HT Block Ack agreement.
-    // Peer HT capability is not represented by the baseline agreement contract;
-    // the parameter is an explicit assumption supplied by the configuration.
-    if (!assumePeerSupportsCompressedBlockAck || agreement == nullptr || !agreement->getIsAddbaResponseReceived() || agreement->getIsDelayedBlockAckPolicySupported())
+    // The agreement snapshots peer capability state when it is established.
+    if (agreement == nullptr || !agreement->getIsCompressedBlockAckSupported() || !agreement->getIsAddbaResponseReceived() || agreement->getIsDelayedBlockAckPolicySupported())
         return false;
     bool hasMatchingOutstandingFrame = false;
     for (auto frame : outstandingFrames) {

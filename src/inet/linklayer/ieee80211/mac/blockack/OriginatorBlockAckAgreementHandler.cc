@@ -16,10 +16,11 @@
 namespace inet {
 namespace ieee80211 {
 
-void OriginatorBlockAckAgreementHandler::createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, uint64_t transactionId)
+void OriginatorBlockAckAgreementHandler::createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, uint64_t transactionId, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
     ASSERT(addbaRequest->getDialogToken() != 0);
     OriginatorBlockAckAgreement *blockAckAgreement = new OriginatorBlockAckAgreement(addbaRequest->getReceiverAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaRequest->getBufferSize(), addbaRequest->getAMsduSupported(), addbaRequest->getBlockAckPolicy() == 0, addbaRequest->getDialogToken(), transactionId);
+    blockAckAgreement->setIsCompressedBlockAckSupported(blockAckAgreementPolicy->isPeerCompressedBlockAckSupported(addbaRequest->getReceiverAddress()));
     auto agreementId = std::make_pair(addbaRequest->getReceiverAddress(), addbaRequest->getTid());
     blockAckAgreements[agreementId] = blockAckAgreement;
 }
@@ -242,7 +243,7 @@ uint64_t OriginatorBlockAckAgreementHandler::processAcknowledgedDataFrame(Packet
         // after the acknowledged trigger MPDU.
         auto addbaReq = buildAddbaRequest(receiverAddr, tid, dataHeader->getSequenceNumber() + 1, blockAckAgreementPolicy);
         auto transactionId = nextTransactionId++;
-        createAgreement(addbaReq, transactionId);
+        createAgreement(addbaReq, transactionId, blockAckAgreementPolicy);
         auto addbaPacket = new Packet("AddbaReq", addbaReq);
         addbaPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
         procedureCallback->processMgmtFrame(addbaPacket, addbaReq);
@@ -261,7 +262,7 @@ OriginatorBlockAckAgreementResponse OriginatorBlockAckAgreementHandler::processR
     bool acceptedByLocalPolicy = addbaResp->getStatusCode() == 0 && blockAckAgreementPolicy->isAddbaReqAccepted(addbaResp, agreement);
     if (addbaResp->getStatusCode() == 0) {
         auto transactionId = agreement->getTransactionId();
-        updateAgreement(agreement, addbaResp);
+        updateAgreement(agreement, addbaResp, blockAckAgreementPolicy);
         if (acceptedByLocalPolicy)
             addbaRetryDeadlines.erase(std::make_pair(addbaResp->getTransmitterAddress(), addbaResp->getTid()));
         else
@@ -294,12 +295,13 @@ OriginatorBlockAckAgreementResponse OriginatorBlockAckAgreementHandler::processR
     }
 }
 
-void OriginatorBlockAckAgreementHandler::updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp)
+void OriginatorBlockAckAgreementHandler::updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
     agreement->setIsAddbaResponseReceived(true);
     agreement->setIsDelayedBlockAckPolicySupported(addbaResp->getBlockAckPolicy() == 0);
     agreement->setBufferSize(addbaResp->getBufferSize());
     agreement->setBlockAckTimeoutValue(addbaResp->getBlockAckTimeoutValue());
+    agreement->setIsCompressedBlockAckSupported(blockAckAgreementPolicy->isPeerCompressedBlockAckSupported(addbaResp->getTransmitterAddress()));
     agreement->calculateExpirationTime();
 }
 

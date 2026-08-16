@@ -29,8 +29,8 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
   protected:
     virtual const Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy);
     virtual uint8_t allocateDialogToken();
-    virtual void createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, uint64_t transactionId);
-    virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp);
+    virtual void createAgreement(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, uint64_t transactionId, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy);
+    virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy);
     virtual OriginatorBlockAckAgreement *removeAgreement(MacAddress originatorAddr, Tid tid);
     virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
     virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);

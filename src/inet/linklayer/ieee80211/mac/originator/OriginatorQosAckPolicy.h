@@ -22,7 +22,6 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
     IQosRateSelection *rateSelection = nullptr;
     int maxBlockAckPolicyFrameLength = -1;
     int blockAckReqThreshold = -1;
-    bool assumePeerSupportsCompressedBlockAck = false;
 
     simtime_t blockAckTimeout = -1;
     simtime_t ackTimeout = -1;
@@ -34,7 +33,7 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
     virtual bool checkAgreementPolicy(const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const;
     virtual std::map<MacAddress, std::vector<Packet *>> getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const;
     virtual SequenceNumberCyclic computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const;
-    static bool isCompressedBlockAckReqNeeded(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement, bool assumePeerSupportsCompressedBlockAck);
+    static bool isCompressedBlockAckReqNeeded(const std::vector<Packet *>& outstandingFrames, OriginatorBlockAckAgreement *agreement);
   public:
     virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const override;
     virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const override;
