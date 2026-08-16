@@ -6,12 +6,14 @@ IEEE Std 802.11-2024, 9.3.1.7.2, 9.3.1.8.2, 10.25.6.1, and 10.25.6.5.
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/blockack/BlockAckRecord.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OneTidBlockAckReqVariant.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementPolicy.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
@@ -26,6 +28,37 @@ class TestRecipientBlockAckProcedure : public RecipientBlockAckProcedure
 {
   public:
     using RecipientBlockAckProcedure::buildBlockAck;
+};
+
+class SpyRecipientBlockAckProcedure : public IRecipientBlockAckProcedure
+{
+  public:
+    std::vector<OneTidBlockAckReqVariant> variants;
+    std::vector<Tid> tids;
+
+    virtual void processReceivedBlockAckReq(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQosAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, IProcedureCallback *callback) override
+    {
+        auto blockAckReqDetails = getOneTidBlockAckReqDetails(blockAckReq);
+        ASSERT(blockAckReqDetails.has_value());
+        variants.push_back(blockAckReqDetails->variant);
+        tids.push_back(blockAckReqDetails->tid);
+    }
+
+    virtual void processTransmittedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck) override {}
+};
+
+class TestHcf : public Hcf
+{
+  public:
+    void setRecipientBlockAckProcedure(IRecipientBlockAckProcedure *procedure)
+    {
+        recipientBlockAckProcedure = procedure;
+    }
+
+    void processControlHeader(const Ptr<const Ieee80211MacHeader>& header)
+    {
+        recipientProcessReceivedControlFrame(nullptr, header);
+    }
 };
 
 class TestOriginatorBlockAckAgreementHandler : public OriginatorBlockAckAgreementHandler
@@ -182,6 +215,39 @@ static std::pair<Packet *, Ptr<Ieee80211DataHeader>> makeReceivedQosFrame(Sequen
 }
 
 {
+    TestHcf hcf;
+    auto spy = new SpyRecipientBlockAckProcedure();
+    hcf.setRecipientBlockAckProcedure(spy);
+    auto basicRequest = makeShared<Ieee80211BasicBlockAckReq>();
+    basicRequest->setTidInfo(3);
+    basicRequest->setStartingSequenceNumber(SequenceNumberCyclic(4095));
+    auto compressedRequest = makeShared<Ieee80211CompressedBlockAckReq>();
+    compressedRequest->setTidInfo(5);
+    compressedRequest->setStartingSequenceNumber(SequenceNumberCyclic(7));
+    auto basicDetails = getOneTidBlockAckReqDetails(basicRequest);
+    auto compressedDetails = getOneTidBlockAckReqDetails(compressedRequest);
+    ASSERT(basicDetails && basicDetails->variant == OneTidBlockAckReqVariant::BASIC && basicDetails->tid == 3 && basicDetails->startingSequenceNumber == SequenceNumberCyclic(4095));
+    ASSERT(compressedDetails && compressedDetails->variant == OneTidBlockAckReqVariant::COMPRESSED && compressedDetails->tid == 5 && compressedDetails->startingSequenceNumber == SequenceNumberCyclic(7));
+    auto multiTidRequest = makeShared<Ieee80211MultiTidBlockAckReq>();
+    ASSERT(!getOneTidBlockAckReqDetails(multiTidRequest));
+    ASSERT(!getOneTidBlockAckReqDetails(makeShared<Ieee80211RtsFrame>()));
+    hcf.processControlHeader(basicRequest);
+    hcf.processControlHeader(compressedRequest);
+    ASSERT(spy->variants == std::vector<OneTidBlockAckReqVariant>({ OneTidBlockAckReqVariant::BASIC, OneTidBlockAckReqVariant::COMPRESSED }));
+    ASSERT(spy->tids == std::vector<Tid>({ 3, 5 }));
+    bool multiTidRejectedAsUnknown = false;
+    try {
+        hcf.processControlHeader(multiTidRequest);
+    }
+    catch (const cRuntimeError& error) {
+        multiTidRejectedAsUnknown = error.getFormattedMessage() == "Unknown control frame";
+    }
+    ASSERT(multiTidRejectedAsUnknown);
+    ASSERT(spy->variants.size() == 2);
+    EV << "HCF accepts one-TID BAR variants and rejects Multi-TID as unknown.\n";
+}
+
+{
     TestRecipientBlockAckProcedure procedure;
     auto request = makeCompressedBlockAckReq();
     request->setStartingSequenceNumber(SequenceNumberCyclic(100));
@@ -265,6 +331,8 @@ static std::pair<Packet *, Ptr<Ieee80211DataHeader>> makeReceivedQosFrame(Sequen
     record.advanceStartingSequenceNumber(SequenceNumberCyclic(104));
     ASSERT(!record.hasRecordedAckState(SequenceNumberCyclic(102), 0));
     ASSERT(record.hasRecordedAckState(SequenceNumberCyclic(105), 0));
+    record.dataFrameReceived(received102.second, 64);
+    ASSERT(!record.hasRecordedAckState(SequenceNumberCyclic(102), 0));
     delete received102.first;
     delete received105.first;
     EV << "Receive-window advancement erases old state and retains overlap.\n";
@@ -358,6 +426,56 @@ static std::pair<Packet *, Ptr<Ieee80211DataHeader>> makeReceivedQosFrame(Sequen
 }
 
 {
+    // IEEE Std 802.11-2024, 9.4.1.13 footnote 26 and 10.25.6.6.2.1(b):
+    // fragments consume individual slots, and a rejected future MPDU must not move WinStartB.
+    MacAddress originatorAddress("11:22:33:44:55:66");
+    TestBlockAckReordering reordering;
+    RecipientBlockAckAgreement agreement(originatorAddress, 5, SequenceNumberCyclic(1), 2, SIMTIME_ZERO);
+    auto incomplete2Fragment0 = makeReceivedQosFrame(2, 0, true);
+    auto incomplete2Fragment1 = makeReceivedQosFrame(2, 1, true);
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, incomplete2Fragment0.first, incomplete2Fragment0.second).empty());
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, incomplete2Fragment1.first, incomplete2Fragment1.second).empty());
+    auto receiveBuffer = reordering.getReceiveBuffer(5, originatorAddress);
+    ASSERT(receiveBuffer->getLength() == 2);
+    ASSERT(receiveBuffer->getBuffer().at(2)[0] == incomplete2Fragment0.first);
+    ASSERT(receiveBuffer->getBuffer().at(2)[1] == incomplete2Fragment1.first);
+
+    auto received3 = makeReceivedQosFrame(3);
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, received3.first, received3.second).empty());
+    ASSERT(receiveBuffer->getNextExpectedSequenceNumber() == SequenceNumberCyclic(1));
+    ASSERT(receiveBuffer->getLength() == 2);
+    ASSERT(receiveBuffer->getBuffer().size() == 1);
+    ASSERT(receiveBuffer->getBuffer().at(2)[0] == incomplete2Fragment0.first);
+    ASSERT(receiveBuffer->getBuffer().at(2)[1] == incomplete2Fragment1.first);
+    ASSERT(receiveBuffer->getBuffer().find(3) == receiveBuffer->getBuffer().end());
+    ASSERT(agreement.getStartingSequenceNumber() == SequenceNumberCyclic(2));
+    ASSERT(agreement.getBlockAckRecord()->getCompressedAckState(SequenceNumberCyclic(3)));
+    EV << "Rejected future MPDU preserves a fragment-full reorder window but updates the scoreboard.\n";
+}
+
+{
+    MacAddress originatorAddress("11:22:33:44:55:66");
+    TestBlockAckReordering reordering;
+    RecipientBlockAckAgreement agreement(originatorAddress, 5, SequenceNumberCyclic(4095), 2, SIMTIME_ZERO);
+    auto incomplete4095 = makeReceivedQosFrame(4095, 0, true);
+    auto incomplete0 = makeReceivedQosFrame(0, 0, true);
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, incomplete4095.first, incomplete4095.second).empty());
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, incomplete0.first, incomplete0.second).empty());
+    auto receiveBuffer = reordering.getReceiveBuffer(5, originatorAddress);
+    ASSERT(receiveBuffer->getLength() == 2);
+
+    auto received1 = makeReceivedQosFrame(1);
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, received1.first, received1.second).empty());
+    ASSERT(receiveBuffer->getNextExpectedSequenceNumber() == SequenceNumberCyclic(0));
+    ASSERT(receiveBuffer->getLength() == 2);
+    ASSERT(receiveBuffer->getBuffer().find(4095) == receiveBuffer->getBuffer().end());
+    ASSERT(receiveBuffer->getBuffer().at(0).size() == 1 && receiveBuffer->getBuffer().at(0)[0] == incomplete0.first);
+    ASSERT(receiveBuffer->getBuffer().at(1).size() == 1 && receiveBuffer->getBuffer().at(1)[0] == received1.first);
+    ASSERT(agreement.getStartingSequenceNumber() == SequenceNumberCyclic(0));
+    EV << "Future MPDU reclaims a displaced slot across sequence wrap before advancing WinStartB.\n";
+}
+
+{
     MacAddress originatorAddress("11:22:33:44:55:66");
     TestRecipientBlockAckProcedure procedure;
     TestBlockAckReordering reordering;
@@ -369,6 +487,15 @@ static std::pair<Packet *, Ptr<Ieee80211DataHeader>> makeReceivedQosFrame(Sequen
     request->setStartingSequenceNumber(SequenceNumberCyclic(1));
     auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(procedure.buildBlockAck(request, &agreement));
     ASSERT(response->getBlockAckBitmap().getBit(63));
+    auto basicRequest = makeShared<Ieee80211BasicBlockAckReq>();
+    basicRequest->setTidInfo(5);
+    basicRequest->setStartingSequenceNumber(SequenceNumberCyclic(0));
+    auto basicResponse = dynamicPtrCast<const Ieee80211BasicBlockAck>(procedure.buildBlockAck(basicRequest, &agreement));
+    for (FragmentNumber fragmentNumber = 0; fragmentNumber < 16; fragmentNumber++)
+        ASSERT(basicResponse->getBlockAckBitmap(0).getBit(fragmentNumber));
+    for (int sequenceIndex = 1; sequenceIndex < 64; sequenceIndex++)
+        for (FragmentNumber fragmentNumber = 0; fragmentNumber < 16; fragmentNumber++)
+            ASSERT(!basicResponse->getBlockAckBitmap(sequenceIndex).getBit(fragmentNumber));
     EV << "Normal-Ack data advances and updates the Block Ack scoreboard.\n";
 }
 
@@ -685,6 +812,7 @@ EV << ".\n";
 %contains: stdout
 Compressed BAR encoding and round-trip passed.
 Compressed BA encoding and round-trip passed.
+HCF accepts one-TID BAR variants and rejects Multi-TID as unknown.
 Missing recipient state produces a null compressed BA.
 Empty recipient record produces a null compressed BA.
 Empty Basic BA distinguishes old and current-window MPDUs.
@@ -694,6 +822,8 @@ Established agreement produces the expected 64-bit bitmap.
 Compressed bitmap preserves leading receive-window holes.
 SN64 advances a size-64 scoreboard and remains buffered across a gap.
 Future MPDU returns displaced and consecutive complete MSDUs without losing gaps.
+Rejected future MPDU preserves a fragment-full reorder window but updates the scoreboard.
+Future MPDU reclaims a displaced slot across sequence wrap before advancing WinStartB.
 Normal-Ack data advances and updates the Block Ack scoreboard.
 Upward delivery advances only the reorder cursor, not WinStartR.
 Data-window slide preserves cyclic 4095-to-0 delivery order.

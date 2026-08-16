@@ -10,6 +10,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OneTidBlockAckReqVariant.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
@@ -519,9 +520,9 @@ void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
 {
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header))
         ctsProcedure->processReceivedRts(packet, rtsFrame, ctsPolicy, this);
-    else if (auto blockAckRequest = dynamicPtrCast<const Ieee80211BlockAckReq>(header)) {
+    else if (auto blockAckReqDetails = getOneTidBlockAckReqDetails(header)) {
         if (recipientBlockAckProcedure)
-            recipientBlockAckProcedure->processReceivedBlockAckReq(packet, blockAckRequest, recipientAckPolicy, recipientBlockAckAgreementHandler, this);
+            recipientBlockAckProcedure->processReceivedBlockAckReq(packet, blockAckReqDetails->blockAckReq, recipientAckPolicy, recipientBlockAckAgreementHandler, this);
     }
     else if (dynamicPtrCast<const Ieee80211AckFrame>(header))
         EV_WARN << "ACK frame received after timeout, ignoring it.\n"; // drop it, it is an ACK frame that is received after the ACKTimeout
