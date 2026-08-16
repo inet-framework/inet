@@ -26,6 +26,9 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
         blockAckTimeoutValue = par("blockAckTimeoutValue");
         addbaResponseTimeout = par("addbaResponseTimeout");
         addbaRetryBackoff = par("addbaRetryBackoff");
+        localCompressedBlockAckSupported = par("localCompressedBlockAckSupported");
+        for (const auto& address : cStringTokenizer(par("compressedBlockAckPeerAddresses")).asVector())
+            compressedBlockAckPeerAddresses.insert(MacAddress(address.c_str()));
         if (addbaResponseTimeout <= 0)
             throw cRuntimeError("addbaResponseTimeout must be greater than zero");
         if (addbaRetryBackoff < 0)

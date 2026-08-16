@@ -74,6 +74,7 @@ class TestOriginatorPolicy : public IOriginatorBlockAckAgreementPolicy
     virtual simtime_t computeAddbaRetryBackoff() const override { return addbaRetryBackoff; }
     virtual simtime_t getBlockAckTimeoutValue() const override { return 0; }
     virtual bool isDelayedAckPolicySupported() const override { return false; }
+    virtual bool isPeerCompressedBlockAckSupported(const MacAddress&) const override { return false; }
     virtual int getMaximumAllowedBufferSize() const override { return 64; }
 };
 
@@ -103,7 +104,7 @@ class TestRecipientAckPolicy : public IRecipientAckPolicy, public IRecipientQosA
     virtual bool isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>&) const override { return true; }
     virtual bool isBlockAckNeeded(const Ptr<const Ieee80211BlockAckReq>&, RecipientBlockAckAgreement *agreement) const override { return blockAckNeeded && agreement != nullptr; }
     virtual simtime_t computeAckDurationField(Packet *, const Ptr<const Ieee80211DataOrMgmtHeader>&) const override { return 0; }
-    virtual simtime_t computeBasicBlockAckDurationField(Packet *, const Ptr<const Ieee80211BasicBlockAckReq>&) const override { return 0; }
+    virtual simtime_t computeBlockAckDurationField(Packet *, const Ptr<const Ieee80211BlockAckReq>&) const override { return 0; }
 };
 
 class TestCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
@@ -2587,7 +2588,8 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
             ASSERT(frames.empty());
     }
     ASSERT(immediateFrames.size() == 1);
-    auto immediateFragments = immediateFrames.at(100);
+    ASSERT(immediateFrames.front().first == 100);
+    auto immediateFragments = immediateFrames.front().second;
     assertFragmentOrder(immediateFragments);
     reassembleOrderedFragments(immediateFragments, { 0x40, 0x41, 0x42, 0x43 });
 
@@ -2605,7 +2607,8 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
     barRequest->setStartingSequenceNumber(SequenceNumberCyclic(201));
     auto barFrames = barReordering.processReceivedBlockAckReq(&barAgreement, barRequest);
     ASSERT(barFrames.size() == 1);
-    auto barFragments = barFrames.at(201);
+    ASSERT(barFrames.front().first == 201);
+    auto barFragments = barFrames.front().second;
     assertFragmentOrder(barFragments);
     reassembleOrderedFragments(barFragments, { 0x50, 0x51, 0x52, 0x53 });
 }

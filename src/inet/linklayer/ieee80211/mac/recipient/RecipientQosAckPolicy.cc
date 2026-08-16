@@ -75,12 +75,11 @@ bool RecipientQosAckPolicy::isBlockAckNeeded(const Ptr<const Ieee80211BlockAckRe
 
 bool RecipientQosAckPolicy::isCompressedBlockAckNeeded(const Ptr<const Ieee80211CompressedBlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement)
 {
-    // IEEE Std 802.11-2024, 9.3.1.7.2 and 10.25.6.5: an addressed, syntactically
-    // valid Compressed BlockAckReq elicits a Compressed BlockAck, including a null response.
+    // IEEE Std 802.11-2024, 10.25.6.4 and 10.25.6.5: a null response
+    // requires an established HT-immediate agreement whose partial state is absent.
     if (blockAckReq->getFragmentNumber() != 0)
         return false;
-    // A missing partial state still elicits the mandatory null compressed BA.
-    return agreement == nullptr || (agreement->getIsAddbaResponseSent() && !agreement->getIsDelayedBlockAckPolicySupported());
+    return agreement != nullptr && agreement->getIsAddbaResponseSent() && !agreement->getIsDelayedBlockAckPolicySupported();
 }
 
 //

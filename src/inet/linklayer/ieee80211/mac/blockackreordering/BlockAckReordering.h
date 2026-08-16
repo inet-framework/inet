@@ -24,7 +24,7 @@ class INET_API BlockAckReordering
 {
   public:
     typedef std::vector<Packet *> Fragments;
-    typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
+    typedef std::vector<std::pair<SequenceNumber, Fragments>> ReorderBuffer;
 
     // Values in ReorderBuffer results from processReceivedQoSFrame() and
     // processReceivedBlockAckReq() contain complete fragment vectors ordered
@@ -41,8 +41,8 @@ class INET_API BlockAckReordering
     ReorderBuffer collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
 
     std::vector<Packet *> getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer);
-    void passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumberCyclic sequenceNumber);
-    void releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
+    void passedUp(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic sequenceNumber);
+    void releaseReceiveBuffer(ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
     ReceiveBuffer *createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement);
     bool addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer& reorderBuffer, SequenceNumberCyclic seqNum);
 
