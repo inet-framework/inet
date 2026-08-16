@@ -24,8 +24,9 @@ void BlockAckRecord::dataFrameReceived(const Ptr<const Ieee80211DataHeader>& hea
     SequenceNumberCyclic sequenceNumber = header->getSequenceNumber();
     FragmentNumber fragmentNumber = header->getFragmentNumber();
     // IEEE Std 802.11-2024, 10.25.6.3(b), case 3: an old related MPDU
-    // does not change the Block Ack record.
-    if (!(startingSequenceNumber <= sequenceNumber && sequenceNumber < startingSequenceNumber + 2048))
+    // does not change the Block Ack record. The cyclic comparison below already
+    // restricts the accepted range to [WinStartR, WinStartR + 2047].
+    if (!(startingSequenceNumber <= sequenceNumber))
         return;
     // Cases 1 and 2: record an in-window MPDU, or advance WinStartR
     // before recording an MPDU beyond WinEndR (also see 10.25.6.4(c)).
