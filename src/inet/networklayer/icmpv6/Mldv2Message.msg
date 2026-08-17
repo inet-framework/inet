@@ -40,10 +40,10 @@ class Mldv2Query extends MldMessage
 {
     chunkLength = B(28);             // 24 (MLDv1 Query) + 1 (Resv/S/QRV) + 1 (QQIC) + 2 (Nr of Sources); + sourceList*16
     type = ICMPv6_MLD_QUERY;         // 130
-    uint8_t resv = 0;                // 4 bits, reserved
+    uint8_t resv = 0 @bit(4);        // reserved
     bool suppressRouterProc = false; // 1 bit, S flag (suppress router-side processing)
-    uint8_t robustnessVariable = 0;  // 3 bits, QRV (Querier's Robustness Variable)
-    uint8_t queryIntervalCode = 0;   // 8 bits, QQIC (Querier's Query Interval Code)
+    uint8_t robustnessVariable = 0 @bit(3);  // QRV (Querier's Robustness Variable)
+    uint8_t queryIntervalCode = 0 @bit(8);   // QQIC (Querier's Query Interval Code)
     Ipv6AddressVector sourceList;    // Nr of Sources (16 bits) + N * 128 bits
 }
 

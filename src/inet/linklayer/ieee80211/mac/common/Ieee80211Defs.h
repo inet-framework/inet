@@ -33,6 +33,10 @@ struct SequenceNumberCyclic
 
     SequenceNumber get() const { ASSERT(value != -1); return value; }
 
+    bool isSpecified() const { return value != -1; }
+
+    std::string str() const { return value == -1 ? std::string("unspecified") : std::to_string(value); }
+
     SequenceNumberCyclic& operator=(const SequenceNumberCyclic& other) { ASSERT(other.value != -1 || value == other.value); value = other.value; return *this; }
     bool operator==(const SequenceNumberCyclic& other) const { ASSERT(value != -1 && other.value != -1); return value == other.value; }
     bool operator!=(const SequenceNumberCyclic& other) const { ASSERT(value != -1 && other.value != -1); return value != other.value; }

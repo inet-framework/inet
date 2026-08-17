@@ -26,7 +26,7 @@ class RtpHeader extends FieldsChunk
     chunkLength = RTPPACKET_FIX_HEADERLENGTH;  // 12-byte fixed header
 
     // The rtp version of this ~RtpPacket.
-    uint8_t version = 2;      // 2 bits
+    uint8_t version @bit(2) = 2;
 
     // Set to 1 if padding is used in this ~RtpPacket, 0 otherwise.
     // This implementation doesn't use padding bytes, so it is always 0.
@@ -42,7 +42,7 @@ class RtpHeader extends FieldsChunk
     bool marker = false;      // 1 bit
 
     // The type of payload carried in this ~RtpPacket.
-    int8_t payloadType;      // 7 bits
+    int8_t payloadType @bit(7);
 
     // The sequence number of this ~RtpPacket.
     uint16_t sequenceNumber;      // 16 bits

@@ -114,7 +114,7 @@ class GptpBase extends FieldsChunk
     uint8_t majorSdoId @bit(4); // The value is specified in 8.1 for all transmitted PTP messages of a gPTP domain. The value is specified in
                                 // 11.2.17 for all transmitted PTP messages of the Common Mean Link Delay Service. Any PTP message
                                 // received for which the value is not one of the values specified in those subclauses shall be ignored.
-    GptpMessageType messageType @bit(4);
+    GptpMessageType messageType @bit(4) @editable(false); // subtype discriminator, pinned per subclass
     uint8_t minorVersionPTP @bit(4) = 1; // For transmitted messages, the value shall be 1 (see 7.5.4 and 13.3.2.5 of IEEE Std 1588-2019).
                                      // For received messages, the value is ignored.
     uint8_t versionPTP @bit(4) = 2; // For transmitted messages, the value shall be 2 (see 7.5.4 and 13.3.2.4 of IEEE Std 1588-2019). For received

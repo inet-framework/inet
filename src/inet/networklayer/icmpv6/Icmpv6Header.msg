@@ -30,7 +30,7 @@ const B ICMPv6_HEADER_BYTES = B(8);
 class Icmpv6Header extends FieldsChunk
 {
     chunkLength = ICMPv6_HEADER_BYTES;
-    Icmpv6Type type;     // 1 byte
+    Icmpv6Type type @editable(false);     // 1 byte; subtype discriminator, pinned per subclass
     //int code; // 1 byte //TODO this should be specific to different ICMP types.
     int chksum = 0;     // 2 bytes
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
