@@ -97,7 +97,7 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen, int timePrec
 
     flush = false;
     nextPcapngInterfaceId = 0;
-    interfaceModuleIdToPcapngInterface.clear();
+    interfaceModuleIdAndLinkTypeToPcapngInterfaceId.clear();
     this->snaplen = snaplen;
 
     // TODO check validity of timePrecision
@@ -216,17 +216,15 @@ void PcapngWriter::writePacketWithPrefix(simtime_t stime, const std::vector<uint
     if (networkInterface == nullptr)
         throw cRuntimeError("The interface entry not found for packet");
 
-    auto it = interfaceModuleIdToPcapngInterface.find(networkInterface->getId());
+    auto interfaceKey = std::make_pair(networkInterface->getId(), linkType);
+    auto it = interfaceModuleIdAndLinkTypeToPcapngInterfaceId.find(interfaceKey);
     int pcapngInterfaceId;
-    if (it != interfaceModuleIdToPcapngInterface.end()) {
-        if (it->second.second != linkType)
-            throw cRuntimeError("linktype mismatch error: required linktype = %d, arrived linktype = %d", it->second.second, linkType);
-        pcapngInterfaceId = it->second.first;
-    }
+    if (it != interfaceModuleIdAndLinkTypeToPcapngInterfaceId.end())
+        pcapngInterfaceId = it->second;
     else {
         writeInterface(networkInterface, linkType);
         pcapngInterfaceId = nextPcapngInterfaceId++;
-        interfaceModuleIdToPcapngInterface[networkInterface->getId()] = {pcapngInterfaceId, linkType};
+        interfaceModuleIdAndLinkTypeToPcapngInterfaceId[interfaceKey] = pcapngInterfaceId;
     }
 
     b packetLength = packet->getDataLength() - frontOffset - backOffset;

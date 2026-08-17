@@ -19,6 +19,8 @@
 
 namespace inet {
 
+class PcapCaptureAdapterRegistry;
+
 /**
  * Dumps every packet using the IPacketWriter and PacketDump classes
  */
@@ -53,8 +55,13 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
     bool enableConvertingPackets = true;
     bool enableProtocolSpecificCaptureAdapters = false;
     bool recordPcap = false;
+    PcapCaptureAdapterRegistry *captureAdapterRegistry = nullptr;
     // Transiently carries enriched capture data through the legacy virtual recordPacket(cPacket *) hook.
     const PcapCaptureObservation *activeCaptureObservation = nullptr;
+    // Transiently carries one resolved protocol adapter through the legacy virtual writePacket() hooks.
+    bool captureAdapterResolutionActive = false;
+    const Protocol *activeCaptureAdapterProtocol = nullptr;
+    const IPcapCaptureAdapter *activeCaptureAdapter = nullptr;
     std::vector<IHelper *> helpers;
     PacketPrinter packetPrinter;
 
@@ -89,6 +96,12 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
     virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const;
     virtual void writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface);
     virtual void writePacket(const Protocol *protocol, const PcapCaptureObservation& observation, b frontOffset, b backOffset, NetworkInterface *networkInterface);
+    const IPcapCaptureAdapter *findProtocolCaptureAdapter(const Protocol *protocol) const;
+    PcapLinkType protocolToLinkTypeWithResolvedAdapter(const Protocol *protocol, const IPcapCaptureAdapter *adapter);
+    void writePacketWithResolvedAdapter(const Protocol *protocol, const IPcapCaptureAdapter *adapter, const Packet *packet,
+            b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface);
+    void writePacketWithResolvedAdapter(const Protocol *protocol, const IPcapCaptureAdapter *adapter, const PcapCaptureObservation& observation,
+            b frontOffset, b backOffset, NetworkInterface *networkInterface);
 };
 
 } // namespace inet

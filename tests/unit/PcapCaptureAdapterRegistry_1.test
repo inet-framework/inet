@@ -48,6 +48,9 @@ auto resolution = registry.tryResolveProtocol(&Protocol::ipv4, &packet, B(3), B(
 REQUIRE(resolution.has_value());
 REQUIRE(std::get<0>(*resolution) == &Protocol::udp);
 REQUIRE(std::get<1>(*resolution) == B(4) && std::get<2>(*resolution) == B(6));
+auto resolutionWithAdapter = registry.tryResolveProtocolWithAdapter(&Protocol::ipv4, &packet, B(3), B(4));
+REQUIRE(resolutionWithAdapter.has_value());
+REQUIRE(std::get<3>(*resolutionWithAdapter) == protocolAdapter);
 
 bool duplicateProtocolRejected = false;
 try {

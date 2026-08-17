@@ -70,19 +70,28 @@ REQUIRE(readUint32(unlimitedPcapng, unlimitedPacketBlock + 20) == 5);
 REQUIRE(readUint32(unlimitedPcapng, unlimitedPacketBlock + 24) == 5);
 REQUIRE(std::vector<uint8_t>(unlimitedPcapng.begin() + unlimitedPacketBlock + 28, unlimitedPcapng.begin() + unlimitedPacketBlock + 33) == std::vector<uint8_t>({0xaa, 0xbb, 0xcc, 0x11, 0x12}));
 
-PcapngWriter mismatchPcapngWriter;
-mismatchPcapngWriter.open("linktype-mismatch.pcapng", 64, 6);
-mismatchPcapngWriter.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET);
-bool linkTypeMismatchThrown = false;
-try {
-    mismatchPcapngWriter.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_IEEE802_11_RADIOTAP);
-}
-catch (const cRuntimeError& error) {
-    REQUIRE(std::string(error.what()).find("linktype mismatch error") != std::string::npos);
-    linkTypeMismatchThrown = true;
-}
-mismatchPcapngWriter.close();
-REQUIRE(linkTypeMismatchThrown);
+PcapngWriter multipleLinkTypesPcapngWriter;
+multipleLinkTypesPcapngWriter.open("multiple-linktypes.pcapng", 64, 6);
+multipleLinkTypesPcapngWriter.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET_MPACKET);
+multipleLinkTypesPcapngWriter.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET);
+multipleLinkTypesPcapngWriter.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET_MPACKET);
+multipleLinkTypesPcapngWriter.close();
+auto multipleLinkTypesPcapng = readFile("multiple-linktypes.pcapng");
+size_t firstInterfaceBlock = 28;
+REQUIRE(readUint32(multipleLinkTypesPcapng, firstInterfaceBlock) == 1);
+REQUIRE(readUint32(multipleLinkTypesPcapng, firstInterfaceBlock + 8) == LINKTYPE_ETHERNET_MPACKET);
+size_t firstPacketBlock = firstInterfaceBlock + readUint32(multipleLinkTypesPcapng, firstInterfaceBlock + 4);
+REQUIRE(readUint32(multipleLinkTypesPcapng, firstPacketBlock) == 6);
+REQUIRE(readUint32(multipleLinkTypesPcapng, firstPacketBlock + 8) == 0);
+size_t secondInterfaceBlock = firstPacketBlock + readUint32(multipleLinkTypesPcapng, firstPacketBlock + 4);
+REQUIRE(readUint32(multipleLinkTypesPcapng, secondInterfaceBlock) == 1);
+REQUIRE(readUint32(multipleLinkTypesPcapng, secondInterfaceBlock + 8) == LINKTYPE_ETHERNET);
+size_t secondPacketBlock = secondInterfaceBlock + readUint32(multipleLinkTypesPcapng, secondInterfaceBlock + 4);
+REQUIRE(readUint32(multipleLinkTypesPcapng, secondPacketBlock) == 6);
+REQUIRE(readUint32(multipleLinkTypesPcapng, secondPacketBlock + 8) == 1);
+size_t thirdPacketBlock = secondPacketBlock + readUint32(multipleLinkTypesPcapng, secondPacketBlock + 4);
+REQUIRE(readUint32(multipleLinkTypesPcapng, thirdPacketBlock) == 6);
+REQUIRE(readUint32(multipleLinkTypesPcapng, thirdPacketBlock + 8) == 0);
 
 PcapngWriter reopenedPcapngWriter;
 reopenedPcapngWriter.open("reopen-first.pcapng", 64, 6);
@@ -102,7 +111,7 @@ REQUIRE(readUint32(reopenedPcapng, reopenedPacketBlock + 8) == 0);
 std::remove("prefix.pcap");
 std::remove("prefix.pcapng");
 std::remove("prefix-unlimited.pcapng");
-std::remove("linktype-mismatch.pcapng");
+std::remove("multiple-linktypes.pcapng");
 std::remove("reopen-first.pcapng");
 std::remove("reopen-second.pcapng");
 EV << "Prefixed PCAP writers honor prefix ordering, snaplen, and original length.\n";

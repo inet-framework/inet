@@ -51,6 +51,12 @@ const IPcapCaptureAdapter *PcapCaptureAdapterRegistry::findProtocolAdapter(const
 
 std::optional<std::tuple<const Protocol *, b, b>> PcapCaptureAdapterRegistry::tryResolveProtocol(const Protocol *outerProtocol, const Packet *packet, b frontOffset, b backOffset) const
 {
+    auto resolution = tryResolveProtocolWithAdapter(outerProtocol, packet, frontOffset, backOffset);
+    return resolution.has_value() ? std::optional<std::tuple<const Protocol *, b, b>>({std::get<0>(*resolution), std::get<1>(*resolution), std::get<2>(*resolution)}) : std::nullopt;
+}
+
+std::optional<std::tuple<const Protocol *, b, b, const IPcapCaptureAdapter *>> PcapCaptureAdapterRegistry::tryResolveProtocolWithAdapter(const Protocol *outerProtocol, const Packet *packet, b frontOffset, b backOffset) const
+{
     auto resolver = protocolResolvers.find(outerProtocol);
     if (resolver == protocolResolvers.end())
         return std::nullopt;
@@ -58,7 +64,7 @@ std::optional<std::tuple<const Protocol *, b, b>> PcapCaptureAdapterRegistry::tr
     if (adapter == nullptr)
         return std::nullopt;
     auto offsets = adapter->tryResolvePacket(packet, frontOffset, backOffset);
-    return offsets.has_value() ? std::optional<std::tuple<const Protocol *, b, b>>({resolver->second, offsets->first, offsets->second}) : std::nullopt;
+    return offsets.has_value() ? std::optional<std::tuple<const Protocol *, b, b, const IPcapCaptureAdapter *>>({resolver->second, offsets->first, offsets->second, adapter}) : std::nullopt;
 }
 
 std::optional<PcapCaptureObservation> PcapCaptureAdapterRegistry::tryCreateObservation(const cObject *object, Direction direction) const

@@ -33,6 +33,7 @@ class INET_API PcapCaptureAdapterRegistry
     void registerObservationAdapter(const char *key, const IPcapCaptureObservationAdapter *adapter);
     const IPcapCaptureAdapter *findProtocolAdapter(const Protocol *protocol) const;
     std::optional<std::tuple<const Protocol *, b, b>> tryResolveProtocol(const Protocol *outerProtocol, const Packet *packet, b frontOffset, b backOffset) const;
+    std::optional<std::tuple<const Protocol *, b, b, const IPcapCaptureAdapter *>> tryResolveProtocolWithAdapter(const Protocol *outerProtocol, const Packet *packet, b frontOffset, b backOffset) const;
     std::optional<PcapCaptureObservation> tryCreateObservation(const cObject *object, Direction direction) const;
 
     static PcapCaptureAdapterRegistry& getInstance();

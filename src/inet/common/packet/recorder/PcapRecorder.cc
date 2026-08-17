@@ -29,6 +29,39 @@ Define_Module(PcapRecorder);
 
 simsignal_t PcapRecorder::packetRecordedSignal = registerSignal("packetRecorded");
 
+namespace {
+
+class CaptureAdapterResolutionGuard
+{
+  protected:
+    bool& active;
+    const Protocol *&activeProtocol;
+    const IPcapCaptureAdapter *&activeAdapter;
+    bool previousActive;
+    const Protocol *previousProtocol;
+    const IPcapCaptureAdapter *previousAdapter;
+
+  public:
+    CaptureAdapterResolutionGuard(bool& active, const Protocol *&activeProtocol, const IPcapCaptureAdapter *&activeAdapter,
+            const Protocol *protocol, const IPcapCaptureAdapter *adapter) :
+        active(active), activeProtocol(activeProtocol), activeAdapter(activeAdapter), previousActive(active),
+        previousProtocol(activeProtocol), previousAdapter(activeAdapter)
+    {
+        active = true;
+        activeProtocol = protocol;
+        activeAdapter = adapter;
+    }
+
+    ~CaptureAdapterResolutionGuard()
+    {
+        active = previousActive;
+        activeProtocol = previousProtocol;
+        activeAdapter = previousAdapter;
+    }
+};
+
+} // namespace
+
 PcapRecorder::~PcapRecorder()
 {
     delete pcapWriter;
@@ -59,6 +92,7 @@ void PcapRecorder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *pro
 
 void PcapRecorder::initialize()
 {
+    captureAdapterRegistry = &PcapCaptureAdapterRegistry::getInstance();
     verbose = par("verbose");
     recordEmptyPackets = par("recordEmptyPackets");
     enableConvertingPackets = par("enableConvertingPackets");
@@ -177,7 +211,7 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
         auto i = signalList.find(signalID);
         ASSERT(i != signalList.end());
         Direction direction = i->second;
-        auto observation = PcapCaptureAdapterRegistry::getInstance().tryCreateObservation(obj, direction);
+        auto observation = captureAdapterRegistry->tryCreateObservation(obj, direction);
         if (observation.has_value())
             recordPacket(*observation, source);
         // Observation adapters are optional enrichers. If none accepts the object, retain the
@@ -190,41 +224,39 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 void PcapRecorder::writePacket(const Protocol *protocol, const PcapCaptureObservation& observation, b frontOffset, b backOffset, NetworkInterface *networkInterface)
 {
     auto packet = observation.packet;
-    if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets) {
-        auto adapter = PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(protocol);
-        if (adapter != nullptr) {
-            // A protocol adapter owns its output link type and complete record layout, so its
-            // records bypass the generic link-type matching and packet-conversion helpers below.
-            auto records = adapter->createRecords(observation, frontOffset, backOffset);
-            for (const auto& record : records) {
-                auto dataLength = packet->getDataLength() - record.frontOffset - record.backOffset;
-                // A protocol-specific prefix is meaningful capture data, so a prefix-only record
-                // is not considered empty even when recordEmptyPackets is false.
-                if (recordEmptyPackets || !record.getPrefix().empty() || dataLength != b(0)) {
-                    pcapWriter->writePacketWithPrefix(simTime(), record.getPrefix(), packet, record.frontOffset, record.backOffset,
-                            observation.direction, networkInterface, adapter->getLinkType());
-                    numRecorded++;
-                    // Emit once per written record, but retain the original observed packet as the
-                    // signal value; split records such as A-MPDU MPDUs therefore share that value.
-                    emit(packetRecordedSignal, packet);
-                }
+    auto adapter = findProtocolCaptureAdapter(protocol);
+    if (adapter != nullptr) {
+        // A protocol adapter owns its output link type and complete record layout, so its
+        // records bypass the generic link-type matching and packet-conversion helpers below.
+        auto records = adapter->createRecords(observation, frontOffset, backOffset);
+        for (const auto& record : records) {
+            auto dataLength = packet->getDataLength() - record.frontOffset - record.backOffset;
+            // A protocol-specific prefix is meaningful capture data, so a prefix-only record
+            // is not considered empty even when recordEmptyPackets is false.
+            if (recordEmptyPackets || !record.getPrefix().empty() || dataLength != b(0)) {
+                pcapWriter->writePacketWithPrefix(simTime(), record.getPrefix(), packet, record.frontOffset, record.backOffset,
+                        observation.direction, networkInterface, adapter->getLinkType());
+                numRecorded++;
+                // Emit once per written record, but retain the original observed packet as the
+                // signal value; split records such as A-MPDU MPDUs therefore share that value.
+                emit(packetRecordedSignal, packet);
             }
-            return;
         }
+        return;
     }
 
-    writePacket(protocol, packet, frontOffset, backOffset, observation.direction, networkInterface);
+    writePacketWithResolvedAdapter(protocol, nullptr, packet, frontOffset, backOffset, observation.direction, networkInterface);
 }
 
 void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface)
 {
-    if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets &&
-            PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(protocol) != nullptr) {
-        writePacket(protocol, PcapCaptureObservation(packet, direction), frontOffset, backOffset, networkInterface);
+    auto adapter = findProtocolCaptureAdapter(protocol);
+    if (adapter != nullptr) {
+        writePacketWithResolvedAdapter(protocol, adapter, PcapCaptureObservation(packet, direction), frontOffset, backOffset, networkInterface);
         return;
     }
 
-    auto pcapLinkType = protocolToLinkType(protocol);
+    auto pcapLinkType = protocolToLinkTypeWithResolvedAdapter(protocol, nullptr);
     if (pcapLinkType == LINKTYPE_INVALID)
         throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
     bool convertPacket = !matchesLinkType(pcapLinkType, protocol);
@@ -304,20 +336,22 @@ void PcapRecorder::recordPacket(const cPacket *packetObject, Direction direction
         const auto& packetProtocolTag = packet->getTag<PacketProtocolTag>();
         auto protocol = packetProtocolTag->getProtocol();
         if (contains(dumpProtocols, protocol)) {
-            if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets &&
-                    PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(protocol) != nullptr)
-                writePacket(protocol, effectiveObservation, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset(), networkInterface);
+            auto adapter = findProtocolCaptureAdapter(protocol);
+            if (adapter != nullptr)
+                writePacketWithResolvedAdapter(protocol, adapter, effectiveObservation, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset(), networkInterface);
             else
-                writePacket(protocol, packet, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset(), direction, networkInterface);
+                writePacketWithResolvedAdapter(protocol, nullptr, packet, packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset(), direction, networkInterface);
             return;
         }
         if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets) {
             // Resolution is best-effort. Unsupported or malformed outer headers return no result,
             // allowing the generic dissector below to preserve the legacy capture behavior.
-            auto resolution = PcapCaptureAdapterRegistry::getInstance().tryResolveProtocol(protocol, packet,
+            auto resolution = captureAdapterRegistry->tryResolveProtocolWithAdapter(protocol, packet,
                     packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset());
             if (resolution.has_value() && contains(dumpProtocols, std::get<0>(*resolution))) {
-                writePacket(std::get<0>(*resolution), effectiveObservation, std::get<1>(*resolution), std::get<2>(*resolution), networkInterface);
+                auto resolvedProtocol = std::get<0>(*resolution);
+                writePacketWithResolvedAdapter(resolvedProtocol, std::get<3>(*resolution), effectiveObservation,
+                        std::get<1>(*resolution), std::get<2>(*resolution), networkInterface);
                 return;
             }
         }
@@ -328,11 +362,11 @@ void PcapRecorder::recordPacket(const cPacket *packetObject, Direction direction
         PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), *this);
         packetDissector.dissectPacket(&dissectedPacket);
         if (dumpProtocol != nullptr) {
-            if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets &&
-                    PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(dumpProtocol) != nullptr)
-                writePacket(dumpProtocol, effectiveObservation, frontOffset, backOffset, networkInterface);
+            auto adapter = findProtocolCaptureAdapter(dumpProtocol);
+            if (adapter != nullptr)
+                writePacketWithResolvedAdapter(dumpProtocol, adapter, effectiveObservation, frontOffset, backOffset, networkInterface);
             else
-                writePacket(dumpProtocol, packet, frontOffset, backOffset, direction, networkInterface);
+                writePacketWithResolvedAdapter(dumpProtocol, nullptr, packet, frontOffset, backOffset, direction, networkInterface);
         }
     }
 }
@@ -371,8 +405,7 @@ bool PcapRecorder::matchesLinkType(PcapLinkType pcapLinkType, const Protocol *pr
 
 PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
 {
-    auto captureAdapter = enableProtocolSpecificCaptureAdapters && enableConvertingPackets ?
-            PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(protocol) : nullptr;
+    auto captureAdapter = findProtocolCaptureAdapter(protocol);
     if (captureAdapter != nullptr)
         return captureAdapter->getLinkType();
     else if (*protocol == Protocol::ethernetPhy)
@@ -395,6 +428,36 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
         }
     }
     return LINKTYPE_INVALID;
+}
+
+const IPcapCaptureAdapter *PcapRecorder::findProtocolCaptureAdapter(const Protocol *protocol) const
+{
+    if (!enableProtocolSpecificCaptureAdapters || !enableConvertingPackets)
+        return nullptr;
+    else if (captureAdapterResolutionActive && activeCaptureAdapterProtocol == protocol)
+        return activeCaptureAdapter;
+    else
+        return captureAdapterRegistry->findProtocolAdapter(protocol);
+}
+
+PcapLinkType PcapRecorder::protocolToLinkTypeWithResolvedAdapter(const Protocol *protocol, const IPcapCaptureAdapter *adapter)
+{
+    CaptureAdapterResolutionGuard guard(captureAdapterResolutionActive, activeCaptureAdapterProtocol, activeCaptureAdapter, protocol, adapter);
+    return protocolToLinkType(protocol);
+}
+
+void PcapRecorder::writePacketWithResolvedAdapter(const Protocol *protocol, const IPcapCaptureAdapter *adapter, const Packet *packet,
+        b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface)
+{
+    CaptureAdapterResolutionGuard guard(captureAdapterResolutionActive, activeCaptureAdapterProtocol, activeCaptureAdapter, protocol, adapter);
+    writePacket(protocol, packet, frontOffset, backOffset, direction, networkInterface);
+}
+
+void PcapRecorder::writePacketWithResolvedAdapter(const Protocol *protocol, const IPcapCaptureAdapter *adapter, const PcapCaptureObservation& observation,
+        b frontOffset, b backOffset, NetworkInterface *networkInterface)
+{
+    CaptureAdapterResolutionGuard guard(captureAdapterResolutionActive, activeCaptureAdapterProtocol, activeCaptureAdapter, protocol, adapter);
+    writePacket(protocol, observation, frontOffset, backOffset, networkInterface);
 }
 
 Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const
