@@ -1,0 +1,109 @@
+%description:
+Verify directional HT negotiation and association-response classification,
+including acceptance of a genuinely legacy AP.
+
+%includes:
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::units::values;
+
+%activity:
+
+Ieee80211HtCapabilities local;
+local.supportedChannelWidths.insert(MHz(20));
+local.rxMcsSupported[0] = true;
+local.rxMcsSupported[1] = true;
+local.rxMcsSupported[2] = true;
+local.rxMcsSupported[3] = true;
+local.txMcsNss.maxMcsPerNss[0] = 3;
+local.ldpc = true;
+local.shortGi20 = true;
+local.maxAmpduLengthExponent = 1;
+
+Ieee80211HtCapabilities peer;
+peer.supportedChannelWidths.insert(MHz(20));
+peer.rxMcsSupported[0] = true;
+peer.rxMcsSupported[2] = true;
+peer.rxMcsSupported[3] = true;
+peer.txMcsNss.maxMcsPerNss[0] = 3;
+peer.maxAmpduLengthExponent = 3;
+
+Ieee80211HtOperation operation;
+operation.operatingChannelWidth = MHz(20);
+operation.basicMcsSupported[0] = true;
+
+auto negotiated = negotiateHtCapabilities(local, peer, operation);
+ASSERT(negotiated.localTxPeerRx.valid);
+ASSERT(negotiated.localRxPeerTx.valid);
+ASSERT(negotiated.localTxPeerRx.supportedMcs[0]);
+ASSERT(!negotiated.localTxPeerRx.supportedMcs[1]);
+ASSERT(negotiated.localTxPeerRx.supportedMcs[2]);
+ASSERT(negotiated.localTxPeerRx.supportedMcs[3]);
+ASSERT(negotiated.localRxPeerTx.supportedMcs[0]);
+ASSERT(!negotiated.localRxPeerTx.supportedMcs[1]);
+ASSERT(negotiated.localRxPeerTx.supportedMcs[2]);
+ASSERT(!negotiated.localTxPeerRx.receiverLdpc);
+ASSERT(negotiated.localRxPeerTx.receiverLdpc);
+ASSERT(negotiated.localTxPeerRx.receiverMaxAmpduLengthExponent == 3);
+ASSERT(negotiated.localRxPeerTx.receiverMaxAmpduLengthExponent == 1);
+
+// A 20 MHz-only peer may join a 20/40 MHz BSS.
+local.supportedChannelWidths.insert(MHz(40));
+operation.operatingChannelWidth = MHz(40);
+negotiated = negotiateHtCapabilities(local, peer, operation);
+ASSERT(negotiated.localTxPeerRx.valid);
+ASSERT(negotiated.localTxPeerRx.supportedChannelWidths.count(MHz(20)) == 1);
+
+// Table 9-226 permits an undefined Tx MCS set; unknown is not "cannot transmit".
+peer.txMcsSetDefined = false;
+peer.txMcsNss = Ieee80211HtMcsNssMap();
+negotiated = negotiateHtCapabilities(local, peer, operation);
+ASSERT(negotiated.localRxPeerTx.valid);
+
+operation.basicMcsSupported[1] = true;
+ASSERT(!supportsBasicHtMcsSet(peer, operation));
+peer.rxMcsSupported[1] = true;
+ASSERT(supportsBasicHtMcsSet(peer, operation));
+
+Ieee80211HtCapabilities rxOnly;
+rxOnly.supportedChannelWidths.insert(MHz(20));
+rxOnly.rxMcsSupported[0] = true;
+rxOnly.txMcsSetDefined = false;
+auto rxOnlyElement = makeHtCapabilitiesElement(rxOnly);
+ASSERT(!rxOnlyElement.txMcsSetDefined);
+ASSERT(!rxOnlyElement.txRxMcsSetNotEqual);
+ASSERT(rxOnlyElement.txMaxNss == 0);
+
+// Table 9-226 does not carry an exact Tx bitmap for unequal Tx/Rx sets.
+for (bool unequalModulation : {false, true}) {
+    Ieee80211HtCapabilitiesElement unequalElement;
+    unequalElement.supportedChannelWidth40Mhz = true;
+    unequalElement.rxMcsSupported[0] = true;
+    unequalElement.rxMcsSupported[7] = true;
+    unequalElement.rxMcsSupported[8] = true;
+    unequalElement.txMcsSetDefined = true;
+    unequalElement.txRxMcsSetNotEqual = true;
+    unequalElement.txMaxNss = 2;
+    unequalElement.txUnequalModulation = unequalModulation;
+    auto unequal = makeHtCapabilities(unequalElement);
+    ASSERT(unequal.txRxMcsSetNotEqual);
+    ASSERT(unequal.txMaxNss == 2);
+    ASSERT(unequal.txUnequalModulation == unequalModulation);
+    ASSERT(unequal.txMcsNss.maxMcsPerNss[0] == -1);
+    ASSERT(unequal.txMcsNss.maxMcsPerNss[1] == -1);
+    auto unequalRoundTrip = makeHtCapabilitiesElement(unequal);
+    ASSERT(unequalRoundTrip.txRxMcsSetNotEqual);
+    ASSERT(unequalRoundTrip.txMaxNss == 2);
+    ASSERT(unequalRoundTrip.txUnequalModulation == unequalModulation);
+    auto unequalNegotiated = negotiateHtCapabilities(local, unequal, operation);
+    ASSERT(unequalNegotiated.localRxPeerTx.valid);
+    ASSERT(!unequalNegotiated.localRxPeerTx.supportedMcs[0]);
+}
+
+EV << "HT directional and legacy association checks passed.\n";
+
+%contains: stdout
+HT directional and legacy association checks passed.

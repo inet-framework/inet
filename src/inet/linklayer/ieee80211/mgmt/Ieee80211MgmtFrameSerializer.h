@@ -8,6 +8,8 @@
 #ifndef __INET_IEEE80211MGMTFRAMESERIALIZER_H
 #define __INET_IEEE80211MGMTFRAMESERIALIZER_H
 
+#include <typeinfo>
+
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -23,6 +25,7 @@ class INET_API Ieee80211MgmtFrameSerializer : public FieldsChunkSerializer
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
 
   public:
     Ieee80211MgmtFrameSerializer() : FieldsChunkSerializer() {}
@@ -33,4 +36,3 @@ class INET_API Ieee80211MgmtFrameSerializer : public FieldsChunkSerializer
 } // namespace inet
 
 #endif
-

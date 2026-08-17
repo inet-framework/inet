@@ -1,0 +1,252 @@
+%description:
+Verify byte-exact HT Capabilities and HT Operation management elements, including
+non-contiguous MCS bitmaps, typed deserialization, and malformed-length rejection.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+
+static Ptr<Ieee80211AssociationResponseFrame> makeHtResponse()
+{
+    auto frame = makeShared<Ieee80211AssociationResponseFrame>();
+    frame->setStatusCode(SC_SUCCESSFUL);
+    frame->setAid(1);
+    Ieee80211SupportedRatesElement rates;
+    rates.numRates = 1;
+    rates.rate[0] = 6;
+    frame->setSupportedRates(rates);
+
+    Ieee80211HtCapabilitiesElement capabilities;
+    capabilities.ldpc = true;
+    capabilities.supportedChannelWidth40Mhz = true;
+    capabilities.greenfield = true;
+    capabilities.shortGi20 = true;
+    capabilities.shortGi40 = true;
+    capabilities.maxAmpduLengthExponent = 2;
+    capabilities.rxMcsSupported[0] = true;
+    capabilities.rxMcsSupported[2] = true;
+    capabilities.rxMcsSupported[7] = true;
+    capabilities.rxMcsSupported[15] = true;
+    capabilities.rxMcsSupported[76] = true;
+    capabilities.txMcsSetDefined = true;
+    frame->setHtCapabilitiesPresent(true);
+    frame->setHtCapabilities(capabilities);
+
+    Ieee80211HtOperationElement operation;
+    operation.primaryChannel = 36;
+    operation.secondaryChannelOffset = 1;
+    operation.staChannelWidth40Mhz = true;
+    operation.protectionMode = 2;
+    operation.basicMcsSupported[0] = true;
+    operation.basicMcsSupported[3] = true;
+    operation.basicMcsSupported[7] = true;
+    operation.basicMcsSupported[76] = true;
+    frame->setHtOperationPresent(true);
+    frame->setHtOperation(operation);
+
+    // Fixed fields/rates (9) + HT Capabilities IE (28) + HT Operation IE (24).
+    frame->setChunkLength(B(61));
+    return frame;
+}
+
+static std::vector<uint8_t> serializeResponse(const Ptr<const Ieee80211AssociationResponseFrame>& frame)
+{
+    Packet packet("ht-response", frame);
+    return packet.peekAllAsBytes()->getBytes();
+}
+
+%activity:
+
+auto original = makeHtResponse();
+auto bytes = serializeResponse(original);
+ASSERT(bytes.size() == 61);
+
+// IEEE Std 802.11-2024, 9.4.2.54: element ID 45 and fixed 26-octet body.
+ASSERT(bytes[9] == 45 && bytes[10] == 26);
+ASSERT(bytes[11] == 0x7f && bytes[12] == 0x00); // modeled flags plus SMPS=3 (disabled)
+ASSERT(bytes[13] == 0x02);
+ASSERT(bytes[14] == 0x85); // non-contiguous Rx MCS 0, 2, and 7
+ASSERT(bytes[15] == 0x80); // Rx MCS 15
+ASSERT(bytes[23] == 0x10); // Rx MCS 76
+ASSERT(bytes[26] == 0x01); // Tx MCS Set Defined (bit 96)
+
+// IEEE Std 802.11-2024, 9.4.2.55: element ID 61 and fixed 22-octet body.
+ASSERT(bytes[37] == 61 && bytes[38] == 22);
+ASSERT(bytes[39] == 36);
+ASSERT(bytes[40] == 0x05 && bytes[41] == 0x02);
+ASSERT(bytes[45] == 0x89); // non-contiguous Basic MCS 0, 3, and 7
+ASSERT(bytes[54] == 0x10); // Basic MCS 76
+
+Packet encoded("encoded", makeShared<BytesChunk>(bytes));
+auto decoded = encoded.popAtFront<Ieee80211AssociationResponseFrame>(B(bytes.size()));
+ASSERT(decoded->getHtCapabilitiesPresent());
+ASSERT(decoded->getHtOperationPresent());
+ASSERT(decoded->getHtCapabilities().rxMcsSupported[0]);
+ASSERT(!decoded->getHtCapabilities().rxMcsSupported[1]);
+ASSERT(decoded->getHtCapabilities().rxMcsSupported[2]);
+ASSERT(decoded->getHtCapabilities().rxMcsSupported[76]);
+ASSERT(decoded->getHtOperation().basicMcsSupported[0]);
+ASSERT(!decoded->getHtOperation().basicMcsSupported[1]);
+ASSERT(decoded->getHtOperation().basicMcsSupported[3]);
+ASSERT(decoded->getHtOperation().basicMcsSupported[76]);
+
+auto unequalResponse = makeHtResponse();
+auto unequalCapabilities = unequalResponse->getHtCapabilities();
+unequalCapabilities.txRxMcsSetNotEqual = true;
+unequalCapabilities.txMaxNss = 2;
+unequalCapabilities.txUnequalModulation = true;
+unequalResponse->setHtCapabilities(unequalCapabilities);
+auto unequalBytes = serializeResponse(unequalResponse);
+ASSERT(unequalBytes[26] == 0x17);
+Packet unequalEncoded("unequal-encoded", makeShared<BytesChunk>(unequalBytes));
+auto unequalDecoded = unequalEncoded.popAtFront<Ieee80211AssociationResponseFrame>(B(unequalBytes.size()));
+ASSERT(unequalDecoded->getHtCapabilities().txRxMcsSetNotEqual);
+ASSERT(unequalDecoded->getHtCapabilities().txMaxNss == 2);
+ASSERT(unequalDecoded->getHtCapabilities().txUnequalModulation);
+
+// Copy decoded fields into a fresh chunk so serialization cannot reuse cached bytes.
+auto reencoded = makeShared<Ieee80211AssociationResponseFrame>();
+reencoded->setStatusCode(decoded->getStatusCode());
+reencoded->setAid(decoded->getAid());
+reencoded->setSupportedRates(decoded->getSupportedRates());
+reencoded->setHtCapabilitiesPresent(decoded->getHtCapabilitiesPresent());
+reencoded->setHtCapabilities(decoded->getHtCapabilities());
+reencoded->setHtOperationPresent(decoded->getHtOperationPresent());
+reencoded->setHtOperation(decoded->getHtOperation());
+reencoded->setChunkLength(B(61));
+ASSERT(serializeResponse(reencoded) == bytes);
+
+auto malformed = bytes;
+malformed[10] = 25;
+bool rejected = false;
+try {
+    Packet packet("malformed", makeShared<BytesChunk>(malformed));
+    packet.popAtFront<Ieee80211AssociationResponseFrame>(B(malformed.size()));
+}
+catch (const cRuntimeError&) {
+    rejected = true;
+}
+ASSERT(rejected);
+
+auto expectRejected = [](const std::vector<uint8_t>& invalid) {
+    bool rejected = false;
+    try {
+        Packet packet("invalid", makeShared<BytesChunk>(invalid));
+        packet.popAtFront<Ieee80211AssociationResponseFrame>(B(invalid.size()));
+    }
+    catch (const cRuntimeError&) {
+        rejected = true;
+    }
+    ASSERT(rejected);
+};
+
+auto malformedOperation = bytes;
+malformedOperation[38] = 21;
+expectRejected(malformedOperation);
+auto truncated = bytes;
+truncated.pop_back();
+expectRejected(truncated);
+auto duplicate = bytes;
+duplicate.insert(duplicate.end(), bytes.begin() + 9, bytes.begin() + 37);
+expectRejected(duplicate);
+auto reservedOffset = bytes;
+reservedOffset[40] = (reservedOffset[40] & ~3) | 2;
+expectRejected(reservedOffset);
+auto invalidTxMcs = bytes;
+invalidTxMcs[26] = 0x02; // Tx undefined while Tx/Rx unequal is set
+expectRejected(invalidTxMcs);
+
+auto invalidRequest = makeShared<Ieee80211AssociationRequestFrame>();
+invalidRequest->setSSID("h");
+invalidRequest->setSupportedRates(original->getSupportedRates());
+invalidRequest->setHtOperationPresent(true);
+invalidRequest->setHtOperation(original->getHtOperation());
+invalidRequest->setChunkLength(B(34));
+bool invalidSubtypeRejected = false;
+try {
+    Packet packet("invalid-subtype", invalidRequest);
+    packet.peekAllAsBytes();
+}
+catch (const cRuntimeError&) {
+    invalidSubtypeRejected = true;
+}
+ASSERT(invalidSubtypeRejected);
+
+auto expectSerializationRejected = [](const auto& frame) {
+    bool rejected = false;
+    try {
+        Packet packet("forbidden-elements", frame);
+        packet.peekAllAsBytes();
+    }
+    catch (const cRuntimeError&) {
+        rejected = true;
+    }
+    ASSERT(rejected);
+};
+
+auto authentication = makeShared<Ieee80211AuthenticationFrame>();
+authentication->setHtCapabilitiesPresent(true);
+authentication->setHtCapabilities(original->getHtCapabilities());
+authentication->setChunkLength(B(34));
+expectSerializationRejected(authentication);
+
+auto deauthentication = makeShared<Ieee80211DeauthenticationFrame>();
+deauthentication->setHtCapabilitiesPresent(true);
+deauthentication->setHtCapabilities(original->getHtCapabilities());
+deauthentication->setChunkLength(B(30));
+expectSerializationRejected(deauthentication);
+
+auto disassociation = makeShared<Ieee80211DisassociationFrame>();
+disassociation->setHtOperationPresent(true);
+disassociation->setHtOperation(original->getHtOperation());
+disassociation->setChunkLength(B(26));
+expectSerializationRejected(disassociation);
+
+auto probeRequest = makeShared<Ieee80211ProbeRequestFrame>();
+probeRequest->setSSID("h");
+probeRequest->setSupportedRates(original->getSupportedRates());
+probeRequest->setHtOperationPresent(true);
+probeRequest->setHtOperation(original->getHtOperation());
+probeRequest->setChunkLength(B(30));
+expectSerializationRejected(probeRequest);
+
+auto reassociationRequest = makeShared<Ieee80211ReassociationRequestFrame>();
+reassociationRequest->setSSID("h");
+reassociationRequest->setSupportedRates(original->getSupportedRates());
+reassociationRequest->setHtOperationPresent(true);
+reassociationRequest->setHtOperation(original->getHtOperation());
+reassociationRequest->setChunkLength(B(40));
+expectSerializationRejected(reassociationRequest);
+
+auto allowedProbeRequest = makeShared<Ieee80211ProbeRequestFrame>();
+allowedProbeRequest->setSSID("h");
+allowedProbeRequest->setSupportedRates(original->getSupportedRates());
+allowedProbeRequest->setHtCapabilitiesPresent(true);
+allowedProbeRequest->setHtCapabilities(original->getHtCapabilities());
+allowedProbeRequest->setChunkLength(B(34));
+Packet allowedProbeRequestPacket("allowed-probe-request", allowedProbeRequest);
+ASSERT(allowedProbeRequestPacket.peekAllAsBytes()->getChunkLength() == B(34));
+
+for (bool probeResponse : {false, true}) {
+    Ptr<Ieee80211BeaconFrame> discovery = probeResponse ? staticPtrCast<Ieee80211BeaconFrame>(makeShared<Ieee80211ProbeResponseFrame>()) : makeShared<Ieee80211BeaconFrame>();
+    discovery->setSSID("");
+    discovery->setSupportedRates(original->getSupportedRates());
+    discovery->setHtCapabilitiesPresent(true);
+    discovery->setHtCapabilities(original->getHtCapabilities());
+    discovery->setHtOperationPresent(true);
+    discovery->setHtOperation(original->getHtOperation());
+    discovery->setChunkLength(B(69));
+    Packet discoveryPacket("allowed-discovery", discovery);
+    ASSERT(discoveryPacket.peekAllAsBytes()->getChunkLength() == B(69));
+}
+
+EV << "HT management element byte and validation checks passed.\n";
+
+%contains: stdout
+HT management element byte and validation checks passed.

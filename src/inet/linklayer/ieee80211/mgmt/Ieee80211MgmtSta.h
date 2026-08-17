@@ -48,6 +48,10 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
         MacAddress address; // alias bssid
         std::string ssid;
         Ieee80211SupportedRatesElement supportedRates;
+        bool htCapabilitiesPresent = false;
+        Ieee80211HtCapabilities htCapabilities;
+        bool htOperationPresent = false;
+        Ieee80211HtOperation htOperation;
         simtime_t beaconInterval;
         double rxPower;
 
@@ -114,6 +118,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     /** Utility function: sends association request */
     virtual void startAssociation(ApInfo *ap, simtime_t timeout);
+    virtual void startReassociation(ApInfo *ap, simtime_t timeout);
 
     /** Utility function: looks up AP in our AP list. Returns nullptr if not found. */
     virtual ApInfo *lookupAP(const MacAddress& address);
@@ -126,6 +131,9 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     /** Stores AP info received in a beacon or probe response */
     virtual void storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body);
+
+    /** Processes Association and Reassociation Responses without using cached Beacon capabilities. */
+    virtual void processAssociationResponse(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header);
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     virtual bool scanNextChannel();
@@ -190,4 +198,3 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 } // namespace inet
 
 #endif
-

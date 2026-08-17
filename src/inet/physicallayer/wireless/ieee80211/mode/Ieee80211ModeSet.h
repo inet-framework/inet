@@ -30,6 +30,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
   protected:
     std::string name;
     const std::vector<Entry> entries;
+    bool htOperationSupported = false;
 
   public:
     static const DelayedInitializer<std::vector<Ieee80211ModeSet>> modeSets;
@@ -39,15 +40,18 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     int getModeIndex(const IIeee80211Mode *mode) const;
 
   public:
-    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries);
+    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, bool htOperationSupported = false);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211ModeSet, name = " << name; }
 
     const char *getName() const override { return name.c_str(); }
 
     int getNumModes() const { return entries.size(); }
-    const IIeee80211Mode *getMode(int index) { return entries[index].mode; }
-    bool isMandatory(int index) { return entries[index].isMandatory; }
+    const IIeee80211Mode *getMode(int index) const { return entries[index].mode; }
+    bool isMandatory(int index) const { return entries[index].isMandatory; }
+    bool isHtOperationSupported() const { return htOperationSupported; }
+    Hz getMaximumChannelWidth() const;
+    int getMaximumNumberOfSpatialStreams() const;
 
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
     bool getIsMandatory(const IIeee80211Mode *mode) const;
@@ -84,4 +88,3 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 } // namespace inet
 
 #endif
-

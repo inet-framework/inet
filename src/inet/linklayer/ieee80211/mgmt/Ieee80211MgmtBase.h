@@ -61,6 +61,10 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Packet *frame);
 
+    /** Adds the local HT advertisement to a frame when the authoritative PHY profile supports HT operation. */
+    virtual void addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const;
+    virtual void addHtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const;
+
     /** Dispatch to frame processing methods according to frame type */
     virtual void processFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
@@ -99,4 +103,3 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 } // namespace inet
 
 #endif
-

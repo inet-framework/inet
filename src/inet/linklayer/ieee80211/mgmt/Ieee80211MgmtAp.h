@@ -27,6 +27,12 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     struct StaInfo {
         MacAddress address;
         int authSeqExpected; // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
+        bool pendingAssociationSuccessful = false;
+        short pendingAssociationId = 0;
+        const Packet *pendingAssociationResponse = nullptr;
+        bool pendingHtStateAvailable = false;
+        bool pendingHtCapabilitiesValid = false;
+        Ieee80211HtCapabilities pendingHtCapabilities;
 //        int consecFailedTrans; // TODO
 //        double expiry; // TODO association should expire after a while if STA is silent?
     };
@@ -81,7 +87,10 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     virtual StaInfo *lookupSenderSTA(const Ptr<const Ieee80211MgmtHeader>& header);
 
     /** Utility function: set fields in the given frame and send it out to the address */
-    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr);
+    virtual Packet *sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr);
+
+    virtual short reserveAssociationId(StaInfo *sta) const;
+    virtual void clearPendingAssociation(StaInfo *sta);
 
     /** Utility function: creates and sends a beacon frame */
     virtual void sendBeacon();

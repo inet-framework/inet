@@ -1,0 +1,75 @@
+%description:
+Verify the detailed IEEE 802.11 management exchange carries the standard HT
+element presence matrix and commits mutually usable peer state at both ends.
+
+%file: test.ned
+
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+network Ieee80211HtAssociationTest
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtSta";
+                wlan[*].agent.typename = "Ieee80211AgentSta";
+        }
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtAp";
+        }
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211HtAssociationTest
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 50ms
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 100m
+**.constraintAreaMaxY = 100m
+**.constraintAreaMaxZ = 0m
+*.sta.mobility.initialX = 10m
+*.sta.mobility.initialY = 10m
+*.ap.mobility.initialX = 20m
+*.ap.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 65Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.wlan[*].radio.antenna.numAntennas = 1
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+
+**.mgmt.numChannels = 1
+*.sta.wlan[*].agent.startingTime = 0s
+*.sta.wlan[*].agent.probeDelay = 1ms
+*.sta.wlan[*].agent.minChannelTime = 5ms
+*.sta.wlan[*].agent.maxChannelTime = 5ms
+*.sta.wlan[*].agent.authenticationTimeout = 20ms
+*.sta.wlan[*].agent.associationTimeout = 20ms
+
+%contains: stdout
+Association successful, AP address=
+
+%contains-regex: stdout
+Assoc .*?Ieee80211AssociationRequestFrame.*?htCapabilitiesPresent.*?true.*?htOperationPresent.*?false
+
+%contains-regex: stdout
+AssocResp-OK .*?Ieee80211AssociationResponseFrame.*?htCapabilitiesPresent.*?true.*?htOperationPresent.*?true
+
+%contains: stdout
+Installed peer HT state, peer =
