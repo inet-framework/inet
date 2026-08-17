@@ -197,28 +197,36 @@ directly:
    type:    chart (matplotlib)
    anf:     TenBaseT1S.anf   chart "Transmit opportunity rotation"
    inputs:  results/CycleAnatomy-*.vec (plca.curID vectors, controller + node[0])
-   shows:   curID staircase over ~4 idle cycles (window 950-1075 us): IDs 0..8 in fixed
-            order, stepping past the last ID to 9, then the node-0 BEACON resets all
-            counters; controller and edge node in lockstep (curves coincide). Inset zooms
-            one cycle wrap and shades the measured 2.0 us BEACON.
+   shows:   two panels. Upper: curID staircase over ~4 idle cycles (window 950-1075 us),
+            IDs 0..8 in fixed order, stepping past the last ID to 9, then the node-0
+            BEACON resets all counters; the grey band marks the cycle wrap that the
+            lower panel expands. Lower: that one cycle wrap, with the measured 2.0 us
+            BEACON shaded gold. Grey = "expanded below", gold = the beacon; the two
+            shadings are deliberately different colours so they are not equated.
+            The controller is drawn as a wide blue band with node[0] on top, so both
+            curves are visible where they coincide (they always do).
    anchors: idle-TO dwell 3.2 us; empty cycle 30.8 us; BEACON 2.0 us (all measured in this
             window at G4). If the staircase shape or these dwells change, the PLCA timing
             model changed - re-derive.
    export:  opp_charttool imageexport TenBaseT1S.anf -n "Transmit opportunity rotation"
-            -f png --dpi 150 -d doc/media   (8x6 in -> 1200x900 px)
+            -f png --dpi 150 -d doc/media   (8x7.5 in -> 1200x1125 px)
    stamp:   captured 2026-08-14, INET topic/gy/tenbaset1s-showcase @ 5e0d2fce22 + showcase
-            dir, OMNeT++ 6.4.0aipre2 (omnetpp-dev)
+            dir, OMNeT++ 6.4.0aipre2 (omnetpp-dev). Layout revised 2026-08-17: the beacon
+            zoom moved from an inset to a lower panel, same data. The superseded
+            single-panel rendering is kept at doc/media/unused/to-rotation.png.
 
 **The transmit opportunity rotates through every node ID in fixed order;
 node 0's beacon starts each cycle.**
 
 The controller and node[0] curves coincide — their sampled values never differ
 in this run, only nanosecond propagation offsets separate them — so all nodes
-count in lockstep. Each staircase tops out at 9: every node steps past the last ID, and
-on node 0 passing the node count triggers the next beacon, which resets all
-counters — the counters also start at 9 before the first beacon (not shown;
-it lies outside the plotted window). The inset zooms on one beacon (measured
-duration 2.00 µs).
+count in lockstep. That is why the thin orange line rides exactly on the wide
+blue controller band everywhere. Each staircase tops out at 9: every node steps
+past the last ID, and on node 0 passing the node count triggers the next
+beacon, which resets all counters — the counters also start at 9 before the
+first beacon (not shown; it lies outside the plotted window). The lower panel
+expands the grey-marked cycle wrap from the upper panel, and shades node 0's
+beacon (measured duration 2.00 µs).
 
 .. figure:: media/to-timelines.png
    :align: center
