@@ -7,3 +7,7 @@
 cplusplus {{
 #include "inet/common/INETDefs.h"
 }}
+
+namespace inet;
+
+@property[bit](type=int; usage=field; desc="define stored size in bits");
