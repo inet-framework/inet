@@ -747,18 +747,22 @@ utils.export_data_if_needed(csma_run, props)
 # type:    chart (matplotlib)
 # anf:     TenBaseT1S.anf   chart "Transmit opportunity rotation"
 # inputs:  results/CycleAnatomy-*.vec (plca.curID vectors, controller + node[0])
-# shows:   curID staircase over ~4 idle cycles (window 950-1075 us): IDs 0..8 in fixed
-#          order, stepping past the last ID to 9, then the node-0 BEACON resets all
-#          counters; controller and edge node in lockstep (curves coincide). Inset zooms
-#          one cycle wrap and shades the measured 2.0 us BEACON.
+# shows:   two panels. Upper: curID staircase over ~4 idle cycles (window 950-1075 us):
+#          IDs 0..8 in fixed order, stepping past the last ID to 9, then the node-0
+#          BEACON resets all counters; the grey band marks the cycle wrap that the
+#          lower panel expands. Lower: that one cycle wrap, with the measured 2.0 us
+#          BEACON shaded gold. Grey = "expanded below", gold = the beacon; the two
+#          shadings are deliberately different colours so they are not equated. The
+#          controller is drawn as a wide blue band with node[0] on top, so both are
+#          visible where they coincide (they always do).
 # anchors: idle-TO dwell 3.2 us; empty cycle 30.8 us; BEACON 2.0 us (all measured in this
 #          window at G4). If the staircase shape or these dwells change, the PLCA timing
 #          model changed - re-derive.
 # export:  opp_charttool imageexport TenBaseT1S.anf -n "Transmit opportunity rotation"
-#          -f png --dpi 150 -d doc/media   (8x6 in -> 1200x900 px)
+#          -f png --dpi 150 -d doc/media   (8x7.5 in -> 1200x1125 px)
 # stamp:   captured 2026-08-14, INET topic/gy/tenbaset1s-showcase @ 5e0d2fce22 + showcase
-#          dir, OMNeT++ 6.4.0aipre2 (omnetpp-dev)
-
+#          dir, OMNeT++ 6.4.0aipre2 (omnetpp-dev). Layout revised 2026-08-17: the beacon
+#          zoom moved from an inset to a lower panel, same data.
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -785,7 +789,30 @@ utils.add_legend_labels(df, props)
 utils.sort_rows_by_legend(df, props)
 utils.plot_vectors(df, props, sort=False)
 
-# --- BEACON zoom inset: one cycle wrap around the second beacon in the window ---
+# The controller and node[0] vectors are identical, so the curve drawn second hides
+# the first completely and the legend advertises a line that is nowhere on the plot.
+# Draw the controller as a wide blue band with node[0] riding on top: both are then
+# visible, and the lockstep is shown rather than only claimed. This has to happen
+# before postconfigure_plot(), which is what builds the legend.
+curve_styles = []
+for line in plt.gca().get_lines():
+    if "controller" in str(line.get_label()):
+        line.set_linewidth(5.0)
+        line.set_zorder(1.5)
+        line.set_solid_capstyle("butt")
+    else:
+        line.set_linewidth(1.5)
+        line.set_zorder(2.5)
+    curve_styles.append(dict(color=line.get_color(), linewidth=line.get_linewidth(),
+                             zorder=line.get_zorder(), solid_capstyle="butt"))
+
+# postconfigure_plot() loops over *every* axes of the figure and applies the chart
+# properties to each, so the lower panel is added only afterwards, and configured here.
+utils.postconfigure_plot(props)
+plt.xlabel(props["xaxis_title"])  # avoid the appended raw [s] unit
+
+# locate the second BEACON in the window: transmittedSignalType 0=NONE 1=BEACON
+# 2=COMMIT 3=DATA 4=JAM
 beacon_df = results.get_vectors(
     'type =~ vector AND name =~ "transmittedSignalType:vector" AND module =~ "**.controller.**"'
     ' AND runattr:experiment =~ CycleAnatomy',
@@ -794,24 +821,38 @@ t0_us = None
 if not beacon_df.empty:
     bt = beacon_df.iloc[0]["vectime"]
     bv = beacon_df.iloc[0]["vecvalue"]
-    starts = bt[bv == 1]  # transmittedSignalType: NONE=0, BEACON=1, COMMIT=2, DATA=3, JAM=4
+    starts = bt[bv == 1]
     if len(starts) >= 2:
         t0_us = float(starts[1]) * 1e6
-if t0_us is not None:
-    ax = plt.gca()
-    axins = ax.inset_axes([0.30, 0.60, 0.46, 0.36])
-    for _, row in df.iterrows():
-        axins.plot(row["vectime"], row["vecvalue"], drawstyle="steps-post", linewidth=1.2)
-    axins.axvspan(t0_us, t0_us + 2.0, color="gold", alpha=0.45, zorder=0)
-    axins.annotate("BEACON\n2.0 µs", xy=(t0_us + 1.0, 4.5), ha="center", fontsize=8)
-    axins.set_xlim(t0_us - 6.0, t0_us + 12.0)
-    axins.set_ylim(-0.5, 10.2)
-    axins.set_yticks([0, 9])
-    axins.tick_params(labelsize=8)
-    ax.indicate_inset_zoom(axins, edgecolor="gray")
 
-utils.postconfigure_plot(props)
-plt.xlabel(props["xaxis_title"])  # avoid the appended raw [s] unit
+if t0_us is not None:
+    zoom_lo, zoom_hi = t0_us - 6.0, t0_us + 12.0
+    fig = plt.gcf()
+    ax = plt.gca()
+
+    # upper panel: the whole window, with the expanded region marked
+    ax.set_position([0.10, 0.42, 0.87, 0.50])
+    # grey marks the window that is expanded; gold is reserved for the beacon alone,
+    # so the two shadings are never read as the same thing
+    ax.axvspan(zoom_lo, zoom_hi, color="#9e9e9e", alpha=0.28, zorder=0)
+    ax.annotate("expanded below", xy=((zoom_lo + zoom_hi) / 2.0, 11.6), ha="center",
+                fontsize=9, color="#4d4d4d")
+
+    # lower panel: one cycle wrap
+    axz = fig.add_axes([0.10, 0.075, 0.87, 0.22])
+    for (_, row), style in zip(df.iterrows(), curve_styles):
+        axz.plot(row["vectime"], row["vecvalue"], drawstyle="steps-post", **style)
+    axz.axvspan(t0_us, t0_us + 2.0, color="gold", alpha=0.45, zorder=0)
+    axz.annotate("BEACON\n2.0 \u00b5s", xy=(t0_us + 1.0, 4.5), ha="center", fontsize=9,
+                 color="#7a5c00")
+    axz.set_xlim(zoom_lo, zoom_hi)
+    axz.set_ylim(-0.5, 10.2)
+    axz.set_yticks([0, 9])
+    axz.grid(True, which="major")
+    axz.set_ylabel("curID")
+    axz.set_xlabel(props["xaxis_title"])
+    axz.set_title("one cycle wrap, expanded", fontsize=10)
+
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]>
@@ -1536,7 +1577,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="image_export_filename" value="to-rotation"/>
             <property name="image_export_width" value="8"/>
-            <property name="image_export_height" value="6"/>
+            <property name="image_export_height" value="7.5"/>
             <property name="data_export_filename" value=""/>
         </chart>
         <chart id="5" type="MATPLOTLIB" name="Transmit opportunity timelines" template="linechart_separate_mpl" icon="icons/full/obj/linechart.png">
