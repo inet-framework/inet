@@ -119,6 +119,34 @@ Notable backward incompatible changes are the following:
    These changes are backward incompatible for C++ code that directly references
    the old combined ICMP error indication or tag types.
 
+7. Packet queue extraction and lifecycle callbacks
+
+   IPacketQueue now supports queue-lifecycle callbacks and predicate-based extraction.
+   Direct C++ implementations of IPacketQueue must implement findPacket(), the
+   predicate overload of dequeuePacket(), addPacketCallback(), and
+   removePacketCallback(), and must notify callbacks exactly once whenever a
+   packet is dequeued, explicitly removed, or destructively dropped. Providers
+   connected to CompoundPacketQueueBase must also implement IPacketExtractor so
+   that a compound queue preserves the provider's scheduling policy when it
+   extracts a matching packet. Direct C++
+   implementations of IPacketExtractor must replace selected-pointer extraction
+   with findPacket(predicate) and dequeuePacket(predicate); predicates may be
+   evaluated repeatedly and must be stable and side-effect free throughout one
+   logical selection. Extractors whose IPacketCollection enumeration order is also
+   their scheduling order may override isPacketOrderPreserved(); the conservative
+   default is false.
+   IPacketBuffer::ICallback also provides an optional handlePacketDropped()
+   notification. Shared buffers invoke it only after all victims selected by one
+   overload operation have been detached from their owning queues.
+
+8. Block Ack DELBA agreement ownership
+
+   IOriginatorBlockAckAgreementHandler::processReceivedDelba() and
+   IRecipientBlockAckAgreementHandler::processReceivedDelba() now return the
+   terminated agreement as a unique_ptr. Custom handler implementations and
+   callers must adopt the new return type; a null result means the DELBA was
+   rejected or did not match an agreement.
+
 Notable backward compatible changes are the following:
 
 1. IPv6 network configurator

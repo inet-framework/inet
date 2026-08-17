@@ -52,29 +52,18 @@ bool OriginatorMacDataService::isFrameEligible(const Packet *packet) const
 
 bool OriginatorMacDataService::hasEligibleFrame(queueing::IPacketQueue *pendingQueue) const
 {
-    for (int i = 0; i < pendingQueue->getNumPackets(); i++)
-        if (isFrameEligible(pendingQueue->getPacket(i)))
-            return true;
-    return false;
+    return pendingQueue->findPacket([this](const Packet *packet) { return isFrameEligible(packet); }) != nullptr;
 }
 
 std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queueing::IPacketQueue *pendingQueue)
 {
     Enter_Method("extractFramesToTransmit");
-    if (!hasEligibleFrame(pendingQueue))
+    auto packet = pendingQueue->dequeuePacket([this](const Packet *packet) { return isFrameEligible(packet); });
+    if (packet == nullptr)
         return nullptr;
     else {
 //        if (msduRateLimiting)
 //            txRateLimitingIfNeeded();
-        Packet *packet = nullptr;
-        for (int i = 0; i < pendingQueue->getNumPackets(); i++) {
-            auto candidate = pendingQueue->getPacket(i);
-            if (isFrameEligible(candidate)) {
-                packet = pendingQueue->dequeuePacket(candidate);
-                break;
-            }
-        }
-        ASSERT(packet != nullptr);
         take(packet);
         if (sequenceNumberAssignment) {
             auto frame = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();

@@ -37,9 +37,15 @@ Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQue
 {
     auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
     if (subframes) {
+        if (!std::all_of(subframes->begin(), subframes->end(), [this](const Packet *packet) { return isFrameEligible(packet); })) {
+            delete subframes;
+            return nullptr;
+        }
         for (auto subframe : *subframes) {
-            pendingQueue->removePacket(subframe);
-            take(subframe);
+            auto dequeuedSubframe = pendingQueue->dequeuePacket([subframe](const Packet *packet) { return packet == subframe; });
+            if (dequeuedSubframe != subframe)
+                throw cRuntimeError("A-MSDU policy-selected subframe is no longer available in scheduling order");
+            take(dequeuedSubframe);
         }
         auto aggregatedFrame = aMsduAggregation->aggregateFrames(subframes);
         emit(packetAggregatedSignal, aggregatedFrame);
@@ -92,35 +98,29 @@ bool OriginatorQosMacDataService::isFrameEligible(const Packet *packet) const
 
 bool OriginatorQosMacDataService::hasEligibleFrame(queueing::IPacketQueue *pendingQueue) const
 {
-    for (int i = 0; i < pendingQueue->getNumPackets(); i++)
-        if (isFrameEligible(pendingQueue->getPacket(i)))
-            return true;
-    return false;
+    return pendingQueue->findPacket([this](const Packet *packet) { return isFrameEligible(packet); }) != nullptr;
 }
 
 std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queueing::IPacketQueue *pendingQueue)
 {
     Enter_Method("extractFramesToTransmit");
-    if (!hasEligibleFrame(pendingQueue))
+    auto predicate = [this](const Packet *packet) { return isFrameEligible(packet); };
+    auto candidate = pendingQueue->findPacket(predicate);
+    if (candidate == nullptr)
         return nullptr;
     else {
 //        if (msduRateLimiting)
 //            txRateLimitingIfNeeded();
         Packet *packet = nullptr;
-        for (int i = 0; i < pendingQueue->getNumPackets(); i++) {
-            auto candidate = pendingQueue->getPacket(i);
-            if (!isFrameEligible(candidate))
-                continue;
-            // The current A-MSDU policy only aggregates the queue head with
-            // frames for the same receiver and TID, so the head eligibility
-            // decision also applies to every selected subframe.
-            if (aMsduAggregationPolicy && i == 0)
-                packet = aMsduAggregateIfNeeded(pendingQueue);
-            if (!packet) {
-                packet = pendingQueue->dequeuePacket(candidate);
-                take(packet);
-            }
-            break;
+        // The current A-MSDU policy enumerates the queue when selecting all
+        // aggregate members. Use it only if enumeration is guaranteed to be
+        // the provider's scheduling order for the entire aggregate.
+        if (aMsduAggregationPolicy && pendingQueue->isPacketOrderPreserved() && pendingQueue->getNumPackets() != 0 && pendingQueue->getPacket(0) == candidate)
+            packet = aMsduAggregateIfNeeded(pendingQueue);
+        if (!packet) {
+            packet = pendingQueue->dequeuePacket(predicate);
+            ASSERT(packet == candidate);
+            take(packet);
         }
         ASSERT(packet != nullptr);
         // PS Defer Queueing

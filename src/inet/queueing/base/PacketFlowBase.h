@@ -84,7 +84,12 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
     virtual Packet *getPacket(int index) const override { return collection->getPacket(index); }
     virtual bool isEmpty() const override { return collection->isEmpty(); }
     virtual void removePacket(Packet *packet) override { collection->removePacket(packet); }
-    virtual Packet *dequeuePacket(Packet *packet) override;
+    // Pull-side processing runs after a packet is selected and may change its
+    // contents, so collection order before processing does not guarantee stable
+    // packet properties after extraction.
+    virtual bool isPacketOrderPreserved() const override { return false; }
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override { return packetExtractor->findPacket(predicate); }
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override { collection->removeAllPackets(); }
 };
 

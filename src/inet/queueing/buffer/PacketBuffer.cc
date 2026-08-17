@@ -58,16 +58,23 @@ void PacketBuffer::addPacket(Packet *packet)
     packets.push_back(packet);
     if (isOverloaded()) {
         if (packetDropperFunction != nullptr) {
+            std::vector<std::pair<Packet *, ICallback *>> droppedPackets;
             while (!isEmpty() && isOverloaded()) {
                 auto packet = packetDropperFunction->selectPacket(this);
                 EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
                 packets.erase(find(packets, packet));
+                ICallback *callback = nullptr;
                 auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
-                if (queue != nullptr) {
-                    ICallback *callback = dynamic_cast<ICallback *>(queue->getOwner());
-                    if (callback != nullptr)
-                        callback->handlePacketRemoved(packet);
-                }
+                if (queue != nullptr)
+                    callback = dynamic_cast<ICallback *>(queue->getOwner());
+                droppedPackets.emplace_back(packet, callback);
+            }
+            for (auto& [packet, callback] : droppedPackets)
+                if (callback != nullptr)
+                    callback->handlePacketRemoved(packet);
+            for (auto& [packet, callback] : droppedPackets) {
+                if (callback != nullptr)
+                    callback->handlePacketDropped(packet);
                 // TODO maybe the buffer should take ownership and queues should be aware of it
                 take(packet);
                 dropPacket(packet, QUEUE_OVERFLOW);
@@ -118,4 +125,3 @@ Packet *PacketBuffer::getPacket(int index) const
 
 } // namespace queueing
 } // namespace inet
-

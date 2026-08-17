@@ -57,23 +57,23 @@ Packet *PacketQueueBase::dequeuePacket()
     return packet;
 }
 
-void PacketQueueBase::addPacketDropCallback(IPacketQueue::ICallback *callback)
+void PacketQueueBase::addPacketCallback(IPacketQueue::ICallback *callback)
 {
-    Enter_Method("addPacketDropCallback");
-    if (std::find(packetDropCallbacks.begin(), packetDropCallbacks.end(), callback) == packetDropCallbacks.end())
-        packetDropCallbacks.push_back(callback);
+    Enter_Method("addPacketCallback");
+    if (std::find(packetCallbacks.begin(), packetCallbacks.end(), callback) == packetCallbacks.end())
+        packetCallbacks.push_back(callback);
 }
 
-void PacketQueueBase::removePacketDropCallback(IPacketQueue::ICallback *callback)
+void PacketQueueBase::removePacketCallback(IPacketQueue::ICallback *callback)
 {
-    Enter_Method("removePacketDropCallback");
-    packetDropCallbacks.erase(std::remove(packetDropCallbacks.begin(), packetDropCallbacks.end(), callback), packetDropCallbacks.end());
+    Enter_Method("removePacketCallback");
+    packetCallbacks.erase(std::remove(packetCallbacks.begin(), packetCallbacks.end(), callback), packetCallbacks.end());
 }
 
-void PacketQueueBase::notifyPacketDropped(Packet *packet)
+void PacketQueueBase::notifyPacketRemoved(Packet *packet, IPacketQueue::PacketRemovalReason reason)
 {
-    for (auto callback : packetDropCallbacks)
-        callback->handlePacketDropped(packet);
+    for (auto callback : packetCallbacks)
+        callback->handlePacketRemoved(packet, reason);
 }
 
 void PacketQueueBase::recordPacketDequeued(Packet *packet)

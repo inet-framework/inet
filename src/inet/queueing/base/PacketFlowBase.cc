@@ -169,11 +169,13 @@ Packet *PacketFlowBase::pullPacket(const cGate *gate)
     return packet;
 }
 
-Packet *PacketFlowBase::dequeuePacket(Packet *packet)
+Packet *PacketFlowBase::dequeuePacket(const PacketPredicate& predicate)
 {
     Enter_Method("dequeuePacket");
     checkPacketStreaming(nullptr);
-    packet = packetExtractor->dequeuePacket(packet);
+    auto packet = packetExtractor->dequeuePacket(predicate);
+    if (packet == nullptr)
+        return nullptr;
     take(packet);
     emit(packetPulledInSignal, packet);
     processPacket(packet);

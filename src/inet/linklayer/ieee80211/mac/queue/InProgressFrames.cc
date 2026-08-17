@@ -120,8 +120,11 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 
 void InProgressFrames::dropFrame(Packet *packet)
 {
+    auto it = std::find(inProgressFrames.begin(), inProgressFrames.end(), packet);
+    if (it == inProgressFrames.end())
+        return;
     EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
-    inProgressFrames.erase(std::remove(inProgressFrames.begin(), inProgressFrames.end(), packet), inProgressFrames.end());
+    inProgressFrames.erase(it);
     droppedFrames.push_back(packet);
     emit(packetDequeuedSignal, packet);
 }

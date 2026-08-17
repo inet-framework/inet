@@ -28,7 +28,7 @@ void CompoundPacketQueueBase::initialize(int stage)
             auto childQueue = dynamic_cast<IPacketQueue *>(*it);
             if (childQueue != nullptr) {
                 childQueues.push_back(childQueue);
-                childQueue->addPacketDropCallback(this);
+                childQueue->addPacketCallback(this);
             }
         }
         packetDropperFunction = createDropperFunction(par("dropperClass"));
@@ -66,11 +66,16 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, const cGate *gate)
     EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
     consumer.pushPacket(packet);
     if (packetDropperFunction != nullptr) {
+        std::vector<Packet *> droppedPackets;
         while (isOverloaded()) {
             auto packet = packetDropperFunction->selectPacket(this);
             EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
-            removePacket(packet);
-            notifyPacketDropped(packet);
+            collection->removePacket(packet);
+            emit(packetRemovedSignal, packet);
+            droppedPackets.push_back(packet);
+        }
+        for (auto packet : droppedPackets) {
+            notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::DROPPED);
             dropPacket(packet, QUEUE_OVERFLOW);
         }
     }
@@ -84,6 +89,7 @@ Packet *CompoundPacketQueueBase::pullPacket(const cGate *gate)
     Enter_Method("pullPacket");
     auto packet = provider.pullPacket();
     take(packet);
+    notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::DEQUEUED);
     emit(packetPulledSignal, packet);
     return packet;
 }
@@ -92,14 +98,23 @@ void CompoundPacketQueueBase::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
     collection->removePacket(packet);
+    notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::REMOVED);
     emit(packetRemovedSignal, packet);
 }
 
-Packet *CompoundPacketQueueBase::dequeuePacket(Packet *packet)
+Packet *CompoundPacketQueueBase::findPacket(const PacketPredicate& predicate) const
+{
+    return packetExtractor->findPacket(predicate);
+}
+
+Packet *CompoundPacketQueueBase::dequeuePacket(const PacketPredicate& predicate)
 {
     Enter_Method("dequeuePacket");
-    packet = packetExtractor->dequeuePacket(packet);
+    auto packet = packetExtractor->dequeuePacket(predicate);
+    if (packet == nullptr)
+        return nullptr;
     take(packet);
+    notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::DEQUEUED);
     // The owning leaf/provider has already recorded queue residence. The
     // compound boundary mirrors pullPacket() and emits only its pull event.
     emit(packetPulledSignal, packet);
@@ -110,7 +125,12 @@ Packet *CompoundPacketQueueBase::dequeuePacket(Packet *packet)
 void CompoundPacketQueueBase::removeAllPackets()
 {
     Enter_Method("removeAllPacket");
-    collection->removeAllPackets();
+    while (getNumPackets() != 0) {
+        auto packet = getPacket(0);
+        removePacket(packet);
+        take(packet);
+        delete packet;
+    }
 }
 
 bool CompoundPacketQueueBase::canPushSomePacket(const cGate *gate) const
@@ -146,10 +166,11 @@ void CompoundPacketQueueBase::receiveSignal(cComponent *source, simsignal_t sign
         throw cRuntimeError("Unknown signal");
 }
 
-void CompoundPacketQueueBase::handlePacketDropped(Packet *packet)
+void CompoundPacketQueueBase::handlePacketRemoved(Packet *packet, IPacketQueue::PacketRemovalReason reason)
 {
-    Enter_Method("handlePacketDropped");
-    notifyPacketDropped(packet);
+    Enter_Method("handlePacketRemoved");
+    if (reason == IPacketQueue::PacketRemovalReason::DROPPED)
+        notifyPacketRemoved(packet, reason);
 }
 
 } // namespace queueing

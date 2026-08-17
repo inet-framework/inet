@@ -22,10 +22,22 @@ namespace queueing {
 class INET_API IPacketQueue : public virtual IPacketCollection, public virtual IPacketExtractor, public virtual IPassivePacketSink, public virtual IPassivePacketSource
 {
   public:
+    enum class PacketRemovalReason {
+        DEQUEUED,
+        REMOVED,
+        DROPPED,
+    };
+
     class INET_API ICallback {
       public:
         virtual ~ICallback() {}
-        virtual void handlePacketDropped(Packet *packet) = 0;
+
+        /**
+         * Called exactly once when the packet ceases to be a member of this
+         * logical queue, before ownership is transferred or the packet is
+         * deleted. DROPPED identifies a destructive queue-side removal.
+         */
+        virtual void handlePacketRemoved(Packet *packet, PacketRemovalReason reason) = 0;
     };
 
     /**
@@ -44,14 +56,16 @@ class INET_API IPacketQueue : public virtual IPacketCollection, public virtual I
      */
     virtual Packet *dequeuePacket() = 0;
 
-    /**
-     * Dequeues the specified packet with the same accounting as dequeuePacket().
-     * The queue must contain the packet. Ownership is transferred to the caller.
-     */
-    virtual Packet *dequeuePacket(Packet *packet) = 0;
+    virtual Packet *findPacket(const PacketPredicate& predicate) const = 0;
 
-    virtual void addPacketDropCallback(ICallback *callback) = 0;
-    virtual void removePacketDropCallback(ICallback *callback) = 0;
+    /**
+     * Dequeues the first matching packet according to the queue provider's
+     * scheduling policy. Ownership is transferred to the caller.
+     */
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) = 0;
+
+    virtual void addPacketCallback(ICallback *callback) = 0;
+    virtual void removePacketCallback(ICallback *callback) = 0;
 };
 
 } // namespace queueing

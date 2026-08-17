@@ -181,15 +181,21 @@ const Ptr<Ieee80211Delba> OriginatorBlockAckAgreementHandler::buildDelba(MacAddr
     return delba;
 }
 
-void OriginatorBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid)
+OriginatorBlockAckAgreement *OriginatorBlockAckAgreementHandler::removeAgreement(MacAddress originatorAddr, Tid tid)
 {
     auto agreementId = std::make_pair(originatorAddr, tid);
     auto it = blockAckAgreements.find(agreementId);
     if (it != blockAckAgreements.end()) {
-        OriginatorBlockAckAgreement *agreement = it->second;
+        auto agreement = it->second;
         blockAckAgreements.erase(it);
-        delete agreement;
+        return agreement;
     }
+    return nullptr;
+}
+
+void OriginatorBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid)
+{
+    delete removeAgreement(originatorAddr, tid);
 }
 
 void OriginatorBlockAckAgreementHandler::processAcknowledgedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback)
@@ -296,17 +302,19 @@ void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const
         callback->cancelAddbaTransaction(transactionId, nullptr);
 }
 
-void OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
+std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
 {
     if (blockAckAgreementPolicy->isDelbaAccepted(delba)) {
         auto agreement = getAgreement(delba->getTransmitterAddress(), delba->getTid());
         bool cancelPendingTransaction = agreement != nullptr && agreement->isPending();
         auto transactionId = cancelPendingTransaction ? agreement->getTransactionId() : 0;
-        terminateAgreement(delba->getTransmitterAddress(), delba->getTid());
+        std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement(removeAgreement(delba->getTransmitterAddress(), delba->getTid()));
         scheduleAddbaResponseTimer(callback);
         if (cancelPendingTransaction)
             callback->cancelAddbaTransaction(transactionId, nullptr);
+        return terminatedAgreement;
     }
+    return nullptr;
 }
 
 OriginatorBlockAckAgreementHandler::~OriginatorBlockAckAgreementHandler()

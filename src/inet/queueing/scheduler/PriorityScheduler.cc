@@ -71,23 +71,44 @@ void PriorityScheduler::removePacket(Packet *packet)
     throw cRuntimeError("Cannot find packet");
 }
 
-Packet *PriorityScheduler::dequeuePacket(Packet *packet)
+bool PriorityScheduler::isPacketOrderPreserved() const
+{
+    if (reverseOrder)
+        return false;
+    for (auto collection : collections) {
+        auto extractor = dynamic_cast<IPacketExtractor *>(collection);
+        if (extractor == nullptr || !extractor->isPacketOrderPreserved())
+            return false;
+    }
+    return true;
+}
+
+Packet *PriorityScheduler::findPacket(const PacketPredicate& predicate) const
+{
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto index = reverseOrder ? collections.size() - i - 1 : i;
+        auto packet = check_and_cast<IPacketExtractor *>(collections[index])->findPacket(predicate);
+        if (packet != nullptr)
+            return packet;
+    }
+    return nullptr;
+}
+
+Packet *PriorityScheduler::dequeuePacket(const PacketPredicate& predicate)
 {
     Enter_Method("dequeuePacket");
-    for (auto collection : collections) {
-        for (int i = 0; i < collection->getNumPackets(); i++) {
-            if (collection->getPacket(i) == packet) {
-                auto extractor = check_and_cast<IPacketExtractor *>(collection);
-                packet = extractor->dequeuePacket(packet);
-                take(packet);
-                handlePacketProcessed(packet);
-                emit(packetPulledSignal, packet);
-                drop(packet);
-                return packet;
-            }
-        }
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto index = reverseOrder ? collections.size() - i - 1 : i;
+        auto packet = check_and_cast<IPacketExtractor *>(collections[index])->dequeuePacket(predicate);
+        if (packet == nullptr)
+            continue;
+        take(packet);
+        handlePacketProcessed(packet);
+        emit(packetPulledSignal, packet);
+        drop(packet);
+        return packet;
     }
-    throw cRuntimeError("Cannot find packet");
+    return nullptr;
 }
 
 void PriorityScheduler::removeAllPackets()

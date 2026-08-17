@@ -66,22 +66,46 @@ void LabelScheduler::removePacket(Packet *packet)
     throw cRuntimeError("Cannot find packet");
 }
 
-Packet *LabelScheduler::dequeuePacket(Packet *packet)
+int LabelScheduler::findInput(const PacketPredicate& predicate) const
 {
-    Enter_Method("dequeuePacket");
-    for (auto collection : collections) {
-        for (int i = 0; i < collection->getNumPackets(); i++) {
-            if (collection->getPacket(i) == packet) {
-                packet = check_and_cast<IPacketExtractor *>(collection)->dequeuePacket(packet);
-                take(packet);
-                handlePacketProcessed(packet);
-                emit(packetPulledSignal, packet);
-                drop(packet);
-                return packet;
+    std::vector<Packet *> candidates;
+    for (auto collection : collections)
+        candidates.push_back(check_and_cast<IPacketExtractor *>(collection)->findPacket(predicate));
+    for (auto label : labels) {
+        for (size_t i = 0; i < candidates.size(); i++) {
+            auto packet = candidates[i];
+            if (packet == nullptr)
+                continue;
+            const auto& labelsTag = packet->findTag<LabelsTag>();
+            if (labelsTag != nullptr) {
+                for (size_t j = 0; j < labelsTag->getLabelsArraySize(); j++)
+                    if (label == labelsTag->getLabels(j))
+                        return i;
             }
         }
     }
-    throw cRuntimeError("Cannot find packet");
+    return defaultGateIndex >= 0 && defaultGateIndex < (int)candidates.size() && candidates[defaultGateIndex] != nullptr ? defaultGateIndex : -1;
+}
+
+Packet *LabelScheduler::findPacket(const PacketPredicate& predicate) const
+{
+    auto index = findInput(predicate);
+    return index == -1 ? nullptr : check_and_cast<IPacketExtractor *>(collections[index])->findPacket(predicate);
+}
+
+Packet *LabelScheduler::dequeuePacket(const PacketPredicate& predicate)
+{
+    Enter_Method("dequeuePacket");
+    auto index = findInput(predicate);
+    if (index == -1)
+        return nullptr;
+    auto packet = check_and_cast<IPacketExtractor *>(collections[index])->dequeuePacket(predicate);
+    ASSERT(packet != nullptr);
+    take(packet);
+    handlePacketProcessed(packet);
+    emit(packetPulledSignal, packet);
+    drop(packet);
+    return packet;
 }
 
 void LabelScheduler::removeAllPackets()

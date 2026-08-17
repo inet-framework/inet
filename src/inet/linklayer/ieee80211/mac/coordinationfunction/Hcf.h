@@ -8,6 +8,9 @@
 #ifndef __INET_HCF_H
 #define __INET_HCF_H
 
+#include <array>
+#include <map>
+
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Hcca.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
@@ -96,7 +99,13 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     // Queues
     InProgressFrames *hccaInProgressFrame = nullptr;
-    int numPacketDropCallbacksRegistered = 0;
+
+    struct PendingFrameEligibility {
+        AccessCategory accessCategory;
+        bool eligible;
+    };
+    std::map<const Packet *, PendingFrameEligibility> pendingFrameEligibility;
+    std::array<int, AC_NUMCATEGORIES> numEligiblePendingFrames = {};
 
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;
@@ -120,8 +129,12 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual bool hasFrameToTransmit(AccessCategory ac);
     virtual void requestEligibleChannelAccess();
     virtual void resumeEligibleChannelAccess();
-    virtual void processDroppedBlockAckSetupFrame(Packet *packet);
-    virtual void handlePacketDropped(Packet *packet) override;
+    virtual bool processDroppedBlockAckSetupFrame(Packet *packet);
+    virtual bool isPacketReferencedByCurrentFrameSequence(const Packet *packet) const;
+    virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override;
+    virtual void trackPendingFrame(Packet *packet, AccessCategory accessCategory);
+    virtual void untrackPendingFrame(const Packet *packet);
+    virtual void rebuildPendingFrameEligibility();
     virtual bool isReceptionInProgress();
 
     // Recipient

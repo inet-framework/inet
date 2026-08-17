@@ -52,7 +52,9 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual bool isEmpty() const override { return collection->isEmpty(); }
     virtual Packet *getPacket(int index) const override { return collection->getPacket(index); }
     virtual void removePacket(Packet *packet) override;
-    virtual Packet *dequeuePacket(Packet *packet) override;
+    virtual bool isPacketOrderPreserved() const override { return packetExtractor->isPacketOrderPreserved(); }
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override;
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;
 
     virtual bool supportsPacketPushing(const cGate *gate) const override { return inputGate == gate; }
@@ -66,7 +68,7 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual Packet *pullPacket(const cGate *gate) override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
-    virtual void handlePacketDropped(Packet *packet) override;
+    virtual void handlePacketRemoved(Packet *packet, IPacketQueue::PacketRemovalReason reason) override;
 };
 
 } // namespace queueing

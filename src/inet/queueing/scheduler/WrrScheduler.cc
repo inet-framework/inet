@@ -83,22 +83,56 @@ void WrrScheduler::removePacket(Packet *packet)
     throw cRuntimeError("Cannot find packet");
 }
 
-Packet *WrrScheduler::dequeuePacket(Packet *packet)
+int WrrScheduler::findInput(const PacketPredicate& predicate) const
 {
-    Enter_Method("dequeuePacket");
-    for (auto collection : collections) {
-        for (int i = 0; i < collection->getNumPackets(); i++) {
-            if (collection->getPacket(i) == packet) {
-                packet = check_and_cast<IPacketExtractor *>(collection)->dequeuePacket(packet);
-                take(packet);
-                handlePacketProcessed(packet);
-                emit(packetPulledSignal, packet);
-                drop(packet);
-                return packet;
-            }
+    int firstWeighted = -1;
+    int firstNonWeighted = -1;
+    for (size_t i = 0; i < collections.size(); ++i) {
+        auto extractor = check_and_cast<IPacketExtractor *>(collections[i]);
+        if (extractor->findPacket(predicate) != nullptr) {
+            if (buckets[i] > 0)
+                return i;
+            else if (firstWeighted == -1 && weights[i] > 0)
+                firstWeighted = i;
+            else if (firstNonWeighted == -1 && weights[i] == 0)
+                firstNonWeighted = i;
         }
     }
-    throw cRuntimeError("Cannot find packet");
+    return firstWeighted != -1 ? firstWeighted : firstNonWeighted;
+}
+
+void WrrScheduler::consumeBucket(int index)
+{
+    if (weights[index] == 0)
+        return;
+    if (buckets[index] == 0) {
+        for (size_t i = 0; i < collections.size(); ++i)
+            buckets[i] = weights[i];
+    }
+    ASSERT(buckets[index] > 0);
+    buckets[index]--;
+}
+
+Packet *WrrScheduler::findPacket(const PacketPredicate& predicate) const
+{
+    auto index = findInput(predicate);
+    return index == -1 ? nullptr : check_and_cast<IPacketExtractor *>(collections[index])->findPacket(predicate);
+}
+
+Packet *WrrScheduler::dequeuePacket(const PacketPredicate& predicate)
+{
+    Enter_Method("dequeuePacket");
+    auto index = findInput(predicate);
+    if (index == -1)
+        return nullptr;
+    auto packet = check_and_cast<IPacketExtractor *>(collections[index])->dequeuePacket(predicate);
+    ASSERT(packet != nullptr);
+    consumeBucket(index);
+    take(packet);
+    handlePacketProcessed(packet);
+    emit(packetPulledSignal, packet);
+    drop(packet);
+    return packet;
 }
 
 void WrrScheduler::removeAllPackets()

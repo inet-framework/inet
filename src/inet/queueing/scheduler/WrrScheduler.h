@@ -29,6 +29,8 @@ class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacket
   protected:
     virtual void initialize(int stage) override;
     virtual int schedulePacket() override;
+    virtual int findInput(const PacketPredicate& predicate) const;
+    virtual void consumeBucket(int index);
 
   public:
     virtual ~WrrScheduler();
@@ -42,7 +44,8 @@ class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacket
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
-    virtual Packet *dequeuePacket(Packet *packet) override;
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override;
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;
 };
 

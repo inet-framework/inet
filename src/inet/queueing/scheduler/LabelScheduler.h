@@ -25,6 +25,7 @@ class INET_API LabelScheduler : public PacketSchedulerBase, public virtual IPack
   protected:
     virtual void initialize(int stage) override;
     virtual int schedulePacket() override;
+    virtual int findInput(const PacketPredicate& predicate) const;
 
   public:
     virtual int getMaxNumPackets() const override { return -1; }
@@ -36,7 +37,8 @@ class INET_API LabelScheduler : public PacketSchedulerBase, public virtual IPack
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
-    virtual Packet *dequeuePacket(Packet *packet) override;
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override;
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;
 };
 
