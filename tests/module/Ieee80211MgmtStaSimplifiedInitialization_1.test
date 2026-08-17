@@ -1,0 +1,129 @@
+%description:
+Verify simplified station BSS identity is visible to automatic network
+configuration while negotiated HT peer state is installed only at the last
+initialization stage.
+
+%file: TestInitializationObserver.cc
+
+#include "inet/common/InitStages.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
+
+namespace inet {
+
+class TestIpv4NetworkConfigurator : public Ipv4NetworkConfigurator
+{
+  public:
+    std::string getTestWirelessId(NetworkInterface *networkInterface) { return getWirelessId(networkInterface); }
+};
+
+Define_Module(TestIpv4NetworkConfigurator);
+
+class TestInitializationObserver : public cSimpleModule
+{
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_NETWORK_CONFIGURATION || stage == INITSTAGE_LAST) {
+            auto configurator = check_and_cast<TestIpv4NetworkConfigurator *>(getModuleByPath("^.configurator"));
+            auto apInterface = check_and_cast<NetworkInterface *>(getModuleByPath("^.ap.wlan[0]"));
+            auto staInterface = check_and_cast<NetworkInterface *>(getModuleByPath("^.sta.wlan[0]"));
+            auto apMib = check_and_cast<ieee80211::Ieee80211Mib *>(apInterface->getSubmodule("mib"));
+            auto staMib = check_and_cast<ieee80211::Ieee80211Mib *>(staInterface->getSubmodule("mib"));
+
+            ASSERT(staInterface->getSubmodule("agent") == nullptr);
+            if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
+                ASSERT(apMib->bssData.ssid == "review-ssid");
+                ASSERT(staMib->bssData.ssid == apMib->bssData.ssid);
+                ASSERT(configurator->getTestWirelessId(apInterface) == configurator->getTestWirelessId(staInterface));
+                ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
+                ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
+                std::cout << "Simplified STA wireless identity available during network configuration.\n";
+            }
+            else {
+                ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
+                ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
+                std::cout << "Simplified STA HT peer state installed at last initialization stage.\n";
+            }
+        }
+    }
+
+    virtual void handleMessage(cMessage *message) override { throw cRuntimeError("Unexpected message"); }
+};
+
+Define_Module(TestInitializationObserver);
+
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestIpv4NetworkConfigurator extends Ipv4NetworkConfigurator
+{
+    parameters:
+        @class(::inet::TestIpv4NetworkConfigurator);
+}
+
+simple TestInitializationObserver extends SimpleModule
+{
+    parameters:
+        @class(::inet::TestInitializationObserver);
+}
+
+network Ieee80211MgmtStaSimplifiedInitializationTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: TestIpv4NetworkConfigurator;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
+                wlan[*].agent.typename = "";
+        }
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        observer: TestInitializationObserver;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtStaSimplifiedInitializationTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1us
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:02"
+*.ap.wlan[0].mgmt.ssid = "review-ssid"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+**.wlan[0].opMode = "n(mixed-2.4Ghz)"
+**.wlan[0].bitrate = 65Mbps
+**.wlan[0].radio.bandName = "2.4 GHz"
+**.wlan[0].radio.centerFrequency = 2.4GHz
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+Simplified STA wireless identity available during network configuration.
+
+%contains: stdout
+Simplified STA HT peer state installed at last initialization stage.

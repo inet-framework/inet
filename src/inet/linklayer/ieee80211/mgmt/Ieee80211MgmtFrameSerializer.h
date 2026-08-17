@@ -19,6 +19,8 @@ namespace ieee80211 {
 
 /**
  * Converts between Ieee80211MgmtFrame and binary network byte order IEEE 802.11 mgmt frame.
+ * The input stream passed to deserialize() must be bounded to the exact management-frame body;
+ * all bytes remaining after the fixed fields are interpreted as management elements.
  */
 class INET_API Ieee80211MgmtFrameSerializer : public FieldsChunkSerializer
 {

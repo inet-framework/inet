@@ -66,6 +66,7 @@ Ieee80211MgmtAp::AssociationResponseDisposition Ieee80211MgmtAp::getAssociationR
 Ieee80211MgmtAp::~Ieee80211MgmtAp()
 {
     cancelAndDelete(beaconTimer);
+    cancelAndDelete(associationResponseTimeoutTimer);
 }
 
 void Ieee80211MgmtAp::initialize(int stage)
@@ -76,6 +77,9 @@ void Ieee80211MgmtAp::initialize(int stage)
         // read params and init vars
         ssid = par("ssid").stdstringValue();
         beaconInterval = par("beaconInterval");
+        associationResponseTimeout = par("associationResponseTimeout");
+        if (associationResponseTimeout < SIMTIME_ZERO)
+            throw cRuntimeError("parameter 'associationResponseTimeout' must not be negative");
         numAuthSteps = par("numAuthSteps");
         if (numAuthSteps != 2 && numAuthSteps != 4)
             throw cRuntimeError("parameter 'numAuthSteps' (number of frames exchanged during authentication) must be 2 or 4, not %d", numAuthSteps);
@@ -83,6 +87,7 @@ void Ieee80211MgmtAp::initialize(int stage)
         WATCH(ssid);
         WATCH(channelNumber);
         WATCH(beaconInterval);
+        WATCH(associationResponseTimeout);
         WATCH(numAuthSteps);
         WATCH(staList);
 
@@ -95,6 +100,7 @@ void Ieee80211MgmtAp::initialize(int stage)
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
+        associationResponseTimeoutTimer = new cMessage("associationResponseTimeoutTimer");
     }
 }
 
@@ -103,6 +109,14 @@ void Ieee80211MgmtAp::handleTimer(cMessage *msg)
     if (msg == beaconTimer) {
         sendBeacon();
         scheduleAfter(beaconInterval, beaconTimer);
+    }
+    else if (msg == associationResponseTimeoutTimer) {
+        auto sta = staList.find(scheduledAssociationResponseTimeoutAddress);
+        if (sta != staList.end() && isAssociationResponseTimeoutDue(sta->second,
+                scheduledAssociationResponseTimeoutTransactionId, scheduledAssociationResponseTimeoutDeadline, simTime()))
+            clearPendingAssociation(&sta->second);
+        else
+            scheduleAssociationResponseTimeout();
     }
     else {
         throw cRuntimeError("internal error: unrecognized timer '%s'", msg->getName());
@@ -210,13 +224,46 @@ uint64_t Ieee80211MgmtAp::createAssociationTransactionId()
     return nextAssociationTransactionId;
 }
 
+bool Ieee80211MgmtAp::isAssociationResponseTimeoutDue(const StaInfo& sta, uint64_t transactionId, simtime_t deadline, simtime_t currentTime)
+{
+    return transactionId != 0 && sta.pendingAssociationTransactionId == transactionId &&
+            sta.pendingAssociationDeadline == deadline && deadline <= currentTime;
+}
+
 void Ieee80211MgmtAp::clearPendingAssociation(StaInfo *sta)
 {
     mib->cancelAssociationIdReservation(sta->address);
     sta->pendingAssociationSuccessful = false;
     sta->pendingAssociationTransactionId = 0;
+    sta->pendingAssociationDeadline = SIMTIME_MAX;
     sta->pendingHtStateAvailable = false;
     sta->pendingHtCapabilitiesValid = false;
+    sta->pendingHtCapabilities = Ieee80211HtCapabilities();
+    scheduleAssociationResponseTimeout();
+}
+
+void Ieee80211MgmtAp::scheduleAssociationResponseTimeout()
+{
+    cancelEvent(associationResponseTimeoutTimer);
+    scheduledAssociationResponseTimeoutTransactionId = 0;
+    scheduledAssociationResponseTimeoutDeadline = SIMTIME_MAX;
+    for (const auto& entry : staList) {
+        const auto& sta = entry.second;
+        if (sta.pendingAssociationTransactionId != 0 && sta.pendingAssociationDeadline < scheduledAssociationResponseTimeoutDeadline) {
+            scheduledAssociationResponseTimeoutAddress = entry.first;
+            scheduledAssociationResponseTimeoutTransactionId = sta.pendingAssociationTransactionId;
+            scheduledAssociationResponseTimeoutDeadline = sta.pendingAssociationDeadline;
+        }
+    }
+    if (scheduledAssociationResponseTimeoutTransactionId != 0)
+        scheduleAt(scheduledAssociationResponseTimeoutDeadline, associationResponseTimeoutTimer);
+}
+
+void Ieee80211MgmtAp::startAssociationResponseTimeout(StaInfo *sta)
+{
+    ASSERT(sta->pendingAssociationTransactionId != 0);
+    sta->pendingAssociationDeadline = simTime() + associationResponseTimeout;
+    scheduleAssociationResponseTimeout();
 }
 
 void Ieee80211MgmtAp::sendBeacon()
@@ -247,8 +294,8 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
         sta->address = staAddress;
         mib->bssAccessPointData.stations[staAddress] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
-        clearPendingAssociation(sta);
     }
+    clearPendingAssociation(sta);
 
     // reset authentication status, when starting a new auth sequence
     // The statements below are added because the L2 handover time was greater than before when
@@ -263,7 +310,6 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
             mib->releaseAssociationId(sta->address);
         }
         mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
-        clearPendingAssociation(sta);
         mib->removePeerHtCapabilities(sta->address);
         sta->authSeqExpected = 1;
     }
@@ -336,6 +382,8 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
 
     // "11.3.2 AP association procedures"
     StaInfo *sta = lookupSenderSTA(header);
+    if (sta != nullptr)
+        clearPendingAssociation(sta);
     if (!sta || mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         const auto& body = makeShared<Ieee80211DeauthenticationFrame>();
@@ -346,7 +394,6 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     }
 
     const auto& requestBody = packet->peekData<Ieee80211AssociationRequestFrame>();
-    clearPendingAssociation(sta);
     sta->pendingAssociationSuccessful = false;
     sta->pendingHtStateAvailable = true;
     sta->pendingHtCapabilitiesValid = mib->isHtOperationSupported() && requestBody->getHtCapabilitiesPresent();
@@ -367,6 +414,7 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     addHtCapabilities(body);
     addHtOperation(body);
     body->setChunkLength(B(2 + 2 + 2 + body->getSupportedRates().numRates + 2) + getHtMgmtElementsLength(body));
+    startAssociationResponseTimeout(sta);
     sendManagementFrame(basicHtMcsSupported ? "AssocResp-OK" : "AssocResp-UnsupportedHtMcs", body, ST_ASSOCIATIONRESPONSE, sta->address, sta->pendingAssociationTransactionId);
 }
 
@@ -381,6 +429,8 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
 
     // "11.3.4 AP reassociation procedures" -- almost the same as AssociationRequest processing
     StaInfo *sta = lookupSenderSTA(header);
+    if (sta != nullptr)
+        clearPendingAssociation(sta);
     if (!sta || mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         const auto& body = makeShared<Ieee80211DeauthenticationFrame>();
@@ -391,7 +441,6 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     }
 
     const auto& requestBody = packet->peekData<Ieee80211ReassociationRequestFrame>();
-    clearPendingAssociation(sta);
     sta->pendingAssociationSuccessful = false;
     sta->pendingHtStateAvailable = true;
     sta->pendingHtCapabilitiesValid = mib->isHtOperationSupported() && requestBody->getHtCapabilitiesPresent();
@@ -412,6 +461,7 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     addHtCapabilities(body);
     addHtOperation(body);
     body->setChunkLength(B(2 + 2 + 2 + (2 + supportedRates.numRates)) + getHtMgmtElementsLength(body));
+    startAssociationResponseTimeout(sta);
     sendManagementFrame(basicHtMcsSupported ? "ReassocResp-OK" : "ReassocResp-UnsupportedHtMcs", body, ST_REASSOCIATIONRESPONSE, sta->address, sta->pendingAssociationTransactionId);
 }
 
@@ -497,6 +547,7 @@ void Ieee80211MgmtAp::start()
 void Ieee80211MgmtAp::stop()
 {
     cancelEvent(beaconTimer);
+    cancelEvent(associationResponseTimeoutTimer);
     staList.clear();
     mib->clearAssociationIds();
     Ieee80211MgmtApBase::stop();

@@ -38,6 +38,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
         int authSeqExpected; // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         bool pendingAssociationSuccessful = false;
         uint64_t pendingAssociationTransactionId = 0;
+        simtime_t pendingAssociationDeadline = SIMTIME_MAX;
         bool pendingHtStateAvailable = false;
         bool pendingHtCapabilitiesValid = false;
         Ieee80211HtCapabilities pendingHtCapabilities;
@@ -67,12 +68,17 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     std::string ssid;
     int channelNumber = -1;
     simtime_t beaconInterval;
+    simtime_t associationResponseTimeout;
     int numAuthSteps = 0;
 
     // state
     StaList staList; ///< list of STAs
     cMessage *beaconTimer = nullptr;
+    cMessage *associationResponseTimeoutTimer = nullptr;
     uint64_t nextAssociationTransactionId = 0;
+    MacAddress scheduledAssociationResponseTimeoutAddress;
+    uint64_t scheduledAssociationResponseTimeoutTransactionId = 0;
+    simtime_t scheduledAssociationResponseTimeoutDeadline = SIMTIME_MAX;
 
   public:
     Ieee80211MgmtAp() {}
@@ -100,8 +106,11 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
 
     static const Packet *getAssociationResponseFrame(ITransmitStep *transmitStep);
     static AssociationResponseDisposition getAssociationResponseDisposition(const Packet *responseFrame, uint64_t pendingTransactionId, bool exchangeSucceeded, bool retryPending);
+    static bool isAssociationResponseTimeoutDue(const StaInfo& sta, uint64_t transactionId, simtime_t deadline, simtime_t currentTime);
     virtual uint64_t createAssociationTransactionId();
     virtual void clearPendingAssociation(StaInfo *sta);
+    virtual void scheduleAssociationResponseTimeout();
+    virtual void startAssociationResponseTimeout(StaInfo *sta);
 
     /** Utility function: creates and sends a beacon frame */
     virtual void sendBeacon();

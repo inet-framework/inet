@@ -1,0 +1,154 @@
+%description:
+Verify the AP's association-response timer releases only expired uncommitted
+association IDs, preserves later replacement transactions, and never releases
+a committed association ID during a reassociation timeout.
+
+%file: TestIeee80211MgmtAp.cc
+
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211MgmtAp : public Ieee80211MgmtAp
+{
+  public:
+    short startPendingAssociation(const MacAddress& address)
+    {
+        auto& sta = staList[address];
+        sta.address = address;
+        clearPendingAssociation(&sta);
+        short aid = mib->reserveAssociationId(address);
+        sta.pendingAssociationSuccessful = true;
+        sta.pendingAssociationTransactionId = createAssociationTransactionId();
+        startAssociationResponseTimeout(&sta);
+        return aid;
+    }
+
+    short startPendingReassociation(const MacAddress& address)
+    {
+        auto& sta = staList[address];
+        sta.address = address;
+        clearPendingAssociation(&sta);
+        short aid = mib->allocateAssociationId(address);
+        ASSERT(mib->reserveAssociationId(address) == aid);
+        sta.pendingAssociationSuccessful = true;
+        sta.pendingAssociationTransactionId = createAssociationTransactionId();
+        startAssociationResponseTimeout(&sta);
+        return aid;
+    }
+
+    bool hasPendingAssociation(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it != staList.end() && it->second.pendingAssociationTransactionId != 0;
+    }
+
+    short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
+    void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
+    short getCommittedAssociationId(const MacAddress& address) const { return mib->bssAccessPointData.associationIds.at(address); }
+    simtime_t getScheduledTimeout() const { return associationResponseTimeoutTimer->getArrivalTime(); }
+};
+
+Define_Module(TestIeee80211MgmtAp);
+
+class Ieee80211MgmtApTimeoutTest : public cSimpleModule
+{
+  public:
+    Ieee80211MgmtApTimeoutTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        auto mgmt = check_and_cast<TestIeee80211MgmtAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        MacAddress replacement("02:00:00:00:00:01");
+        MacAddress expiring("02:00:00:00:00:02");
+        MacAddress committed("02:00:00:00:00:03");
+        MacAddress reused("02:00:00:00:00:04");
+        MacAddress finallyReused("02:00:00:00:00:05");
+
+        ASSERT(mgmt->startPendingAssociation(replacement) == 1);
+        ASSERT(mgmt->startPendingAssociation(expiring) == 2);
+        short committedAid = mgmt->startPendingReassociation(committed);
+        ASSERT(committedAid == 3);
+        ASSERT(mgmt->getScheduledTimeout() == SimTime(100, SIMTIME_MS));
+
+        wait(SimTime(50, SIMTIME_MS));
+        ASSERT(mgmt->startPendingAssociation(replacement) == 1);
+        ASSERT(mgmt->getScheduledTimeout() == SimTime(100, SIMTIME_MS));
+
+        wait(SimTime(51, SIMTIME_MS));
+        ASSERT(mgmt->hasPendingAssociation(replacement));
+        ASSERT(!mgmt->hasPendingAssociation(expiring));
+        ASSERT(!mgmt->hasPendingAssociation(committed));
+        ASSERT(mgmt->reserveAssociationId(replacement) == 1);
+        ASSERT(mgmt->reserveAssociationId(reused) == 2);
+        mgmt->cancelAssociationIdReservation(reused);
+        ASSERT(mgmt->getCommittedAssociationId(committed) == committedAid);
+        ASSERT(mgmt->getScheduledTimeout() == SimTime(150, SIMTIME_MS));
+
+        wait(SimTime(50, SIMTIME_MS));
+        ASSERT(!mgmt->hasPendingAssociation(replacement));
+        ASSERT(mgmt->reserveAssociationId(finallyReused) == 1);
+
+        std::cout << "AP association response timeout lifecycle verified.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtApTimeoutTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestIeee80211MgmtAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtAp);
+}
+
+simple Ieee80211MgmtApTimeoutTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApTimeoutTest);
+}
+
+network Ieee80211MgmtApTimeoutTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtAp";
+        }
+        test: Ieee80211MgmtApTimeoutTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApTimeoutTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 200ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].mgmt.associationResponseTimeout = 100ms
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+AP association response timeout lifecycle verified.

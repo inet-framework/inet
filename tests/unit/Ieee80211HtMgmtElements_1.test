@@ -97,11 +97,12 @@ ASSERT(!decoded->getHtOperation().basicMcsSupported[1]);
 ASSERT(decoded->getHtOperation().basicMcsSupported[3]);
 ASSERT(decoded->getHtOperation().basicMcsSupported[76]);
 
-// The caller supplies the exact management-body region. A legal vendor IE is
-// ignored by the field parser but retained by FieldsChunkSerializer's raw-data
-// cache, while bytes beyond the requested body remain in the packet.
+// The caller supplies the exact management-body region. A legal vendor IE before
+// the HT elements is ignored by the field parser but retained by
+// FieldsChunkSerializer's raw-data cache, while bytes beyond the requested body
+// remain in the packet.
 auto vendorBytes = bytes;
-vendorBytes.insert(vendorBytes.end(), {221, 3, 0x01, 0x02, 0x03});
+vendorBytes.insert(vendorBytes.begin() + 9, {221, 3, 0x01, 0x02, 0x03});
 auto framedBytes = vendorBytes;
 std::vector<uint8_t> trailerBytes = {0xde, 0xad, 0xbe, 0xef};
 framedBytes.insert(framedBytes.end(), trailerBytes.begin(), trailerBytes.end());

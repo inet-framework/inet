@@ -1,6 +1,6 @@
 %description:
 Verify deterministic AP association-response transaction matching and
-completion decisions, including RTS-protected responses.
+completion and timeout decisions, including RTS-protected responses.
 
 %includes:
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
@@ -19,6 +19,7 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
     using Ieee80211MgmtAp::AssociationResponseDisposition;
     using Ieee80211MgmtAp::getAssociationResponseDisposition;
     using Ieee80211MgmtAp::getAssociationResponseFrame;
+    using Ieee80211MgmtAp::isAssociationResponseTimeoutDue;
 };
 
 static Packet *makeAssociationResponse(uint64_t transactionId, bool moreFragments, bool includeTag = true)
@@ -61,12 +62,23 @@ ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42, false, true) == Disposition::RETAIN);
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42, false, false) == Disposition::COMPLETE);
 
+Ieee80211MgmtAp::StaInfo sta;
+sta.pendingAssociationTransactionId = 42;
+sta.pendingAssociationDeadline = SimTime(5);
+ASSERT(!TestIeee80211MgmtAp::isAssociationResponseTimeoutDue(sta, 42, SimTime(5), SimTime(4.999)));
+ASSERT(TestIeee80211MgmtAp::isAssociationResponseTimeoutDue(sta, 42, SimTime(5), SimTime(5)));
+ASSERT(TestIeee80211MgmtAp::isAssociationResponseTimeoutDue(sta, 42, SimTime(5), SimTime(6)));
+ASSERT(!TestIeee80211MgmtAp::isAssociationResponseTimeoutDue(sta, 41, SimTime(5), SimTime(5)));
+ASSERT(!TestIeee80211MgmtAp::isAssociationResponseTimeoutDue(sta, 42, SimTime(4), SimTime(5)));
+sta.pendingAssociationTransactionId = 0;
+ASSERT(!TestIeee80211MgmtAp::isAssociationResponseTimeoutDue(sta, 0, SimTime(5), SimTime(5)));
+
 delete nonFinalResponse;
 delete untaggedResponse;
 delete zeroTokenResponse;
 delete finalResponse;
 
-EV << "AP association transaction decisions verified.\n";
+EV << "AP association transaction and timeout decisions verified.\n";
 
 %contains: stdout
-AP association transaction decisions verified.
+AP association transaction and timeout decisions verified.
