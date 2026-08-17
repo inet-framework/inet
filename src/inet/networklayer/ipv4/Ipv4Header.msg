@@ -173,10 +173,10 @@ class Ipv4Header extends NetworkHeaderBase
 
     short version = 4;      // @bit(4)
     B headerLength = IPv4_MIN_HEADER_LENGTH;         // @bit(4), bytes, must be multiple of 4
-    short typeOfService;    // @bit(8)
-    // OMNeT++ 6.0:
-    // short __dscp @custom @getter(getDscp) @setter(setDscp);  // @bit(6), maps to bits 0-5 of ToS, stored in typeOfService
-    // short __ecn @custom @getter(getEcn) @setter(setEcn);  // @bit(2),  maps to bits 6-7 of ToS, stored in typeOfService
+    short typeOfService @bit(8);
+
+    short dscp @custom @getter(getDscp) @setter(setDscp) @bit(6);  // maps to bits 0-5 of typeOfService
+    short ecn @custom @getter(getEcn) @setter(setEcn) @bit(2);  // maps to bits 6-7 of typeOfService
 
     B totalLengthField;    // @byte(2)
 
