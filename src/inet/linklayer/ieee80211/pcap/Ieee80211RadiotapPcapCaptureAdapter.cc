@@ -268,19 +268,7 @@ RadiotapPpduFields extractRadiotapPpduFields(const Packet *packet, Direction dir
     auto mode = findIeee80211Mode(packet, transmission);
     if (mode != nullptr) {
         auto dataMode = mode->getDataMode();
-        if (dynamic_cast<const physicallayer::Ieee80211HtMode *>(mode) != nullptr) {
-            fields.isHt = true;
-            if (auto htDataMode = dynamic_cast<const physicallayer::Ieee80211HtDataMode *>(dataMode)) {
-                // IEEE 802.11-2024, Table 19-11; radiotap MCS known/flags/mcs fields.
-                fields.mcs[0] = 0x01 | 0x02 | 0x04 | 0x10; // bandwidth, MCS, GI, and BCC FEC are known
-                if (htDataMode->getBandwidth().get() > 30e6)
-                    fields.mcs[1] |= 1;
-                if (htDataMode->getGuardIntervalType() == physicallayer::Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT)
-                    fields.mcs[1] |= 1 << 2;
-                fields.mcs[2] = htDataMode->getMcsIndex();
-            }
-        }
-        else if (dynamic_cast<const physicallayer::Ieee80211VhtMode *>(mode) != nullptr) {
+        if (dynamic_cast<const physicallayer::Ieee80211VhtMode *>(mode) != nullptr) {
             fields.isVht = true;
             if (auto vhtDataMode = dynamic_cast<const physicallayer::Ieee80211VhtDataMode *>(dataMode)) {
                 // IEEE 802.11-2024, Table 21-12; radiotap VHT known/flags fields.
@@ -293,6 +281,18 @@ RadiotapPpduFields extractRadiotapPpduFields(const Packet *packet, Direction dir
                 if (mcs <= 9 && numberOfSpatialStreams >= 1 && numberOfSpatialStreams <= 8)
                     fields.vhtMcsNss[0] = (mcs << 4) | numberOfSpatialStreams;
                 fields.vhtCoding = 0; // BCC
+            }
+        }
+        else if (dynamic_cast<const physicallayer::Ieee80211HtMode *>(mode) != nullptr) {
+            fields.isHt = true;
+            if (auto htDataMode = dynamic_cast<const physicallayer::Ieee80211HtDataMode *>(dataMode)) {
+                // IEEE 802.11-2024, Table 19-11; radiotap MCS known/flags/mcs fields.
+                fields.mcs[0] = 0x01 | 0x02 | 0x04 | 0x10; // bandwidth, MCS, GI, and BCC FEC are known
+                if (htDataMode->getBandwidth().get() > 30e6)
+                    fields.mcs[1] |= 1;
+                if (htDataMode->getGuardIntervalType() == physicallayer::Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT)
+                    fields.mcs[1] |= 1 << 2;
+                fields.mcs[2] = htDataMode->getMcsIndex();
             }
         }
         else if (dataMode != nullptr) {
@@ -446,9 +446,13 @@ std::optional<std::pair<b, b>> Ieee80211RadiotapPcapCaptureAdapter::tryResolvePa
             return std::nullopt;
         auto resolvedFrontOffset = frontOffset + header->getChunkLength();
         auto payloadLength = b(header->getLengthField());
+        // The caller's back offset already excludes trailing data from the candidate range.
+        // Checking against that range guarantees that the resolved payload cannot extend into it.
         auto availablePayloadLength = packet->getDataLength() - resolvedFrontOffset - backOffset;
         if (payloadLength > availablePayloadLength)
             return std::nullopt;
+        // Convert the declared payload length back to Packet's offset representation. This retains
+        // the caller's excluded suffix and also excludes any PHY tail or padding after the payload.
         auto resolvedBackOffset = packet->getDataLength() - resolvedFrontOffset - payloadLength;
         return std::pair<b, b>(resolvedFrontOffset, resolvedBackOffset);
     }
@@ -474,8 +478,9 @@ std::vector<PcapCaptureRecord> Ieee80211RadiotapPcapCaptureAdapter::createRecord
             const auto& mpduRange = mpduRanges[i];
             auto recordBackOffset = packet->getDataLength() - mpduRange.offset - mpduRange.length;
             RadiotapRecordMetadata metadata;
-            // Radiotap defines A-MPDU status for received frames. Outbound
-            // aggregates are still split, but carry no A-MPDU status field.
+            // Radiotap defines A-MPDU status for received frames only. Outbound aggregates are
+            // still split so analyzers can decode each MPDU, but omitting the status avoids
+            // inventing nonstandard transmit-side grouping metadata.
             metadata.isAmpdu = observation.direction == DIRECTION_INBOUND;
             metadata.isLastSubframe = i == mpduRanges.size() - 1;
             metadata.ampduReference = ampduReference;

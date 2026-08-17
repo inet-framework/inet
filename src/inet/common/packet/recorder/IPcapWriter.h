@@ -217,7 +217,9 @@ class INET_API IPcapWriter
 
     /**
      * Writes an octet prefix followed by the selected range of the original packet.
-     * Implementations which don't support scatter/gather capture fail explicitly.
+     * Protocol-specific capture adapters use the prefix as part of the selected link-layer
+     * record format. The default fails explicitly instead of silently writing a malformed
+     * prefix-less record. Third-party writers must override this method before adapters are enabled.
      */
     virtual void writePacketWithPrefix(simtime_t time, const std::vector<uint8_t>& prefix, const Packet *packet, b frontOffset, b backOffset,
             Direction direction, NetworkInterface *ie, PcapLinkType linkType)

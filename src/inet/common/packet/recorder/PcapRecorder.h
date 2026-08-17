@@ -53,6 +53,7 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
     bool enableConvertingPackets = true;
     bool enableProtocolSpecificCaptureAdapters = false;
     bool recordPcap = false;
+    // Transiently carries enriched capture data through the legacy virtual recordPacket(cPacket *) hook.
     const PcapCaptureObservation *activeCaptureObservation = nullptr;
     std::vector<IHelper *> helpers;
     PacketPrinter packetPrinter;
@@ -81,7 +82,7 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual void recordPacket(const cPacket *packet, Direction direction, cComponent *source);
+    virtual void recordPacket(const cPacket *packetObject, Direction direction, cComponent *source);
     virtual void recordPacket(const PcapCaptureObservation& observation, cComponent *source);
     virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const;
     virtual Packet *tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const;

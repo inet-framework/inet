@@ -247,6 +247,8 @@ void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b
 
 void PcapRecorder::recordPacket(const PcapCaptureObservation& observation, cComponent *source)
 {
+    // Keep the established cPacket overload as the subclass extension point. Save and restore the
+    // observation so nested calls cannot leave another recording operation's PHY context active.
     auto previousObservation = activeCaptureObservation;
     activeCaptureObservation = &observation;
     try {
@@ -259,11 +261,13 @@ void PcapRecorder::recordPacket(const PcapCaptureObservation& observation, cComp
     }
 }
 
-void PcapRecorder::recordPacket(const cPacket *cPacket, Direction direction, cComponent *source)
+void PcapRecorder::recordPacket(const cPacket *packetObject, Direction direction, cComponent *source)
 {
-    auto packet = dynamic_cast<const Packet *>(cPacket);
+    auto packet = dynamic_cast<const Packet *>(packetObject);
     if (packet == nullptr)
         return;
+    // A legacy override may forward a replacement packet. Apply PHY metadata only when it forwards
+    // the exact observed packet; otherwise construct an ordinary packet-only observation.
     const PcapCaptureObservation observation = activeCaptureObservation != nullptr && activeCaptureObservation->packet == packet ?
             PcapCaptureObservation(packet, direction, activeCaptureObservation->transmission, activeCaptureObservation->reception) :
             PcapCaptureObservation(packet, direction);
@@ -308,6 +312,8 @@ void PcapRecorder::recordPacket(const cPacket *cPacket, Direction direction, cCo
             return;
         }
         if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets) {
+            // Resolution is best-effort. Unsupported or malformed outer headers return no result,
+            // allowing the generic dissector below to preserve the legacy capture behavior.
             auto resolution = PcapCaptureAdapterRegistry::getInstance().tryResolveProtocol(protocol, packet,
                     packetProtocolTag->getFrontOffset(), packetProtocolTag->getBackOffset());
             if (resolution.has_value() && contains(dumpProtocols, std::get<0>(*resolution))) {
