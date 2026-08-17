@@ -5,6 +5,7 @@ Test prefixed PCAP and PCAPng writes, including snap length and original length.
 #include <cstdio>
 #include <fstream>
 #include <iterator>
+#include <string>
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/recorder/PcapWriter.h"
 #include "inet/common/packet/recorder/PcapngWriter.h"
@@ -57,8 +58,53 @@ REQUIRE(readUint32(pcapng, packetBlock + 20) == 4);
 REQUIRE(readUint32(pcapng, packetBlock + 24) == 5);
 REQUIRE(std::vector<uint8_t>(pcapng.begin() + packetBlock + 28, pcapng.begin() + packetBlock + 32) == std::vector<uint8_t>({0xaa, 0xbb, 0xcc, 0x11}));
 
+PcapngWriter unlimitedPcapngWriter;
+unlimitedPcapngWriter.open("prefix-unlimited.pcapng", 0, 6);
+unlimitedPcapngWriter.writePacketWithPrefix(SIMTIME_ZERO, prefix, &packet, B(1), B(1), DIRECTION_INBOUND, &networkInterface, LINKTYPE_IEEE802_11_RADIOTAP);
+unlimitedPcapngWriter.close();
+auto unlimitedPcapng = readFile("prefix-unlimited.pcapng");
+size_t unlimitedInterfaceBlock = 28;
+REQUIRE(readUint32(unlimitedPcapng, unlimitedInterfaceBlock + 12) == 0);
+size_t unlimitedPacketBlock = unlimitedInterfaceBlock + readUint32(unlimitedPcapng, unlimitedInterfaceBlock + 4);
+REQUIRE(readUint32(unlimitedPcapng, unlimitedPacketBlock + 20) == 5);
+REQUIRE(readUint32(unlimitedPcapng, unlimitedPacketBlock + 24) == 5);
+REQUIRE(std::vector<uint8_t>(unlimitedPcapng.begin() + unlimitedPacketBlock + 28, unlimitedPcapng.begin() + unlimitedPacketBlock + 33) == std::vector<uint8_t>({0xaa, 0xbb, 0xcc, 0x11, 0x12}));
+
+PcapngWriter mismatchPcapngWriter;
+mismatchPcapngWriter.open("linktype-mismatch.pcapng", 64, 6);
+mismatchPcapngWriter.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET);
+bool linkTypeMismatchThrown = false;
+try {
+    mismatchPcapngWriter.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_IEEE802_11_RADIOTAP);
+}
+catch (const cRuntimeError& error) {
+    REQUIRE(std::string(error.what()).find("linktype mismatch error") != std::string::npos);
+    linkTypeMismatchThrown = true;
+}
+mismatchPcapngWriter.close();
+REQUIRE(linkTypeMismatchThrown);
+
+PcapngWriter reopenedPcapngWriter;
+reopenedPcapngWriter.open("reopen-first.pcapng", 64, 6);
+reopenedPcapngWriter.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET);
+reopenedPcapngWriter.close();
+reopenedPcapngWriter.open("reopen-second.pcapng", 64, 6);
+reopenedPcapngWriter.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_IEEE802_11_RADIOTAP);
+reopenedPcapngWriter.close();
+auto reopenedPcapng = readFile("reopen-second.pcapng");
+size_t reopenedInterfaceBlock = 28;
+REQUIRE(readUint32(reopenedPcapng, reopenedInterfaceBlock) == 1);
+REQUIRE(readUint32(reopenedPcapng, reopenedInterfaceBlock + 8) == LINKTYPE_IEEE802_11_RADIOTAP);
+size_t reopenedPacketBlock = reopenedInterfaceBlock + readUint32(reopenedPcapng, reopenedInterfaceBlock + 4);
+REQUIRE(readUint32(reopenedPcapng, reopenedPacketBlock) == 6);
+REQUIRE(readUint32(reopenedPcapng, reopenedPacketBlock + 8) == 0);
+
 std::remove("prefix.pcap");
 std::remove("prefix.pcapng");
+std::remove("prefix-unlimited.pcapng");
+std::remove("linktype-mismatch.pcapng");
+std::remove("reopen-first.pcapng");
+std::remove("reopen-second.pcapng");
 EV << "Prefixed PCAP writers honor prefix ordering, snaplen, and original length.\n";
 
 %contains: stdout

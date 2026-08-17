@@ -96,6 +96,8 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen, int timePrec
         throw cRuntimeError("Cannot open pcap file [%s] for writing: %s", filename, strerror(errno));
 
     flush = false;
+    nextPcapngInterfaceId = 0;
+    interfaceModuleIdToPcapngInterface.clear();
     this->snaplen = snaplen;
 
     // TODO check validity of timePrecision
@@ -214,21 +216,24 @@ void PcapngWriter::writePacketWithPrefix(simtime_t stime, const std::vector<uint
     if (networkInterface == nullptr)
         throw cRuntimeError("The interface entry not found for packet");
 
-    auto it = interfaceModuleIdToPcapngInterfaceId.find(networkInterface->getId());
+    auto it = interfaceModuleIdToPcapngInterface.find(networkInterface->getId());
     int pcapngInterfaceId;
-    if (it != interfaceModuleIdToPcapngInterfaceId.end())
-        pcapngInterfaceId = it->second;
+    if (it != interfaceModuleIdToPcapngInterface.end()) {
+        if (it->second.second != linkType)
+            throw cRuntimeError("linktype mismatch error: required linktype = %d, arrived linktype = %d", it->second.second, linkType);
+        pcapngInterfaceId = it->second.first;
+    }
     else {
         writeInterface(networkInterface, linkType);
         pcapngInterfaceId = nextPcapngInterfaceId++;
-        interfaceModuleIdToPcapngInterfaceId[networkInterface->getId()] = pcapngInterfaceId;
+        interfaceModuleIdToPcapngInterface[networkInterface->getId()] = {pcapngInterfaceId, linkType};
     }
 
     b packetLength = packet->getDataLength() - frontOffset - backOffset;
     size_t originalLength = prefix.size() + packetLength.get<B>();
-    // Advertise and enforce the configured snaplen for PCAPng too. The captured length is
-    // truncated, while originalPacketLength below retains the complete untruncated record length.
-    size_t capturedLength = std::min<size_t>(originalLength, snaplen);
+    // Advertise and enforce the configured snaplen for PCAPng too. A zero snaplen means unlimited;
+    // otherwise the captured length is truncated while the original length remains unchanged.
+    size_t capturedLength = snaplen == 0 ? originalLength : std::min<size_t>(originalLength, snaplen);
     uint32_t optionsLength = (4 + 4) + 4;
     uint32_t blockTotalLength = 32 + roundUp(capturedLength) + optionsLength;
     ASSERT(blockTotalLength % 4 == 0);
