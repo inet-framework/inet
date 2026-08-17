@@ -20,6 +20,8 @@ std::optional<PcapCaptureObservation> WirelessPcapCaptureObservationAdapter::try
 {
     if (auto signal = dynamic_cast<const Signal *>(object)) {
         auto packet = dynamic_cast<const Packet *>(signal->getEncapsulatedPacket());
+        // Returning nullopt keeps the recorder's generic cPacket fallback available. If the
+        // encapsulated object is not an INET Packet, that fallback ignores it as before.
         return packet != nullptr ? std::optional<PcapCaptureObservation>(PcapCaptureObservation(packet, direction)) : std::nullopt;
     }
     else if (auto transmission = dynamic_cast<const ITransmission *>(object))

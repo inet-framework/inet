@@ -180,6 +180,8 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
         auto observation = PcapCaptureAdapterRegistry::getInstance().tryCreateObservation(obj, direction);
         if (observation.has_value())
             recordPacket(*observation, source);
+        // Observation adapters are optional enrichers. If none accepts the object, retain the
+        // generic cPacket path; non-INET packet payloads eventually remain unrecorded as before.
         else if (auto packet = dynamic_cast<const cPacket *>(obj))
             recordPacket(packet, direction, source);
     }
@@ -191,13 +193,19 @@ void PcapRecorder::writePacket(const Protocol *protocol, const PcapCaptureObserv
     if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets) {
         auto adapter = PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(protocol);
         if (adapter != nullptr) {
+            // A protocol adapter owns its output link type and complete record layout, so its
+            // records bypass the generic link-type matching and packet-conversion helpers below.
             auto records = adapter->createRecords(observation, frontOffset, backOffset);
             for (const auto& record : records) {
                 auto dataLength = packet->getDataLength() - record.frontOffset - record.backOffset;
+                // A protocol-specific prefix is meaningful capture data, so a prefix-only record
+                // is not considered empty even when recordEmptyPackets is false.
                 if (recordEmptyPackets || !record.getPrefix().empty() || dataLength != b(0)) {
                     pcapWriter->writePacketWithPrefix(simTime(), record.getPrefix(), packet, record.frontOffset, record.backOffset,
                             observation.direction, networkInterface, adapter->getLinkType());
                     numRecorded++;
+                    // Emit once per written record, but retain the original observed packet as the
+                    // signal value; split records such as A-MPDU MPDUs therefore share that value.
                     emit(packetRecordedSignal, packet);
                 }
             }

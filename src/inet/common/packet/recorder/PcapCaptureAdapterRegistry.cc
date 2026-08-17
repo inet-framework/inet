@@ -16,6 +16,8 @@ PcapCaptureAdapterRegistry::~PcapCaptureAdapterRegistry()
         delete entry.second;
 }
 
+// Each protocol, resolver key, and observation key has one owner per network setup. Silently
+// replacing an entry would make capture behavior depend on registration order, so conflicts fail fast.
 void PcapCaptureAdapterRegistry::registerProtocolAdapter(const Protocol *protocol, const IPcapCaptureAdapter *adapter)
 {
     if (protocol == nullptr || adapter == nullptr || protocolAdapters.find(protocol) != protocolAdapters.end()) {
@@ -71,6 +73,8 @@ std::optional<PcapCaptureObservation> PcapCaptureAdapterRegistry::tryCreateObser
 
 PcapCaptureAdapterRegistry& PcapCaptureAdapterRegistry::getInstance()
 {
+    // SharedDataManager scopes the registry to the current network lifecycle, allowing the
+    // pre-network registration fragments to run again after the previous network is deleted.
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::PcapCaptureAdapterRegistry::instance");
     return getSimulationOrSharedDataManager()->getSharedVariable<PcapCaptureAdapterRegistry>(handle);
 }

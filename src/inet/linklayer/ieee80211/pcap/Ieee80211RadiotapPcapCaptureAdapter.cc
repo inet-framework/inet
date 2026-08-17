@@ -14,8 +14,6 @@
 
 #include "inet/common/INETMath.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/Checksum.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/recorder/PcapCaptureAdapterRegistry.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignalAnalogModel.h"
@@ -164,6 +162,8 @@ AmpduParseResult getIeee80211AmpduMpduRanges(const Packet *packet, b frontOffset
     if (frontOffset + ieee80211::LENGTH_A_MPDU_SUBFRAME_HEADER > endOffset)
         return AmpduParseResult::NOT_AGGREGATE;
 
+    // Delimiters are recognized only as typed chunks at their exact boundaries. A serialized
+    // BytesChunk is deliberately not guessed to be an aggregate; it is captured as one PSDU below.
     auto peekDelimiter = [&] (b offset) {
         return dynamicPtrCast<const ieee80211::Ieee80211MpduSubframeHeader>(packet->peekDataAt(offset, b(-1), parsingFlags));
     };
@@ -193,6 +193,7 @@ AmpduParseResult getIeee80211AmpduMpduRanges(const Packet *packet, b frontOffset
             if (offset == endOffset)
                 return AmpduParseResult::VALID;
             auto paddingLength = B((4 - (delimiter->getChunkLength() + mpduLength).get<B>() % 4) % 4);
+            // This mirrors MpduAggregation::aggregateFrames(): pad between MPDUs, but not after the last one.
             // IEEE 802.11-2024, 9.7.1 and 10.12.6 permit exact final-subframe alignment padding for VHT/HE-family PPDUs.
             // Without PHY-mode provenance, accept the structurally complete equality case instead of discarding its MPDUs.
             if (offset + paddingLength > endOffset)
@@ -219,6 +220,8 @@ FcsMetadata getIeee80211FcsMetadata(const Packet *packet, b frontOffset, b backO
         return {};
     FcsMetadata metadata;
     try {
+        // A typed trailer is authoritative evidence that the final four octets are an FCS. For a
+        // raw BytesChunk they may instead be payload, so the adapter does not infer FCS presence.
         auto trailer = dynamicPtrCast<const ieee80211::Ieee80211MacTrailer>(packet->peekDataAt(endOffset - B(4), B(4)));
         if (trailer == nullptr)
             return metadata;
@@ -227,11 +230,11 @@ FcsMetadata getIeee80211FcsMetadata(const Packet *packet, b frontOffset, b backO
             case FCS_DECLARED_INCORRECT:
                 metadata.isBad = true;
                 break;
-            case FCS_COMPUTED: {
-                auto data = packet->peekDataAt<BytesChunk>(frontOffset, endOffset - frontOffset - trailer->getChunkLength());
-                metadata.isBad = ethernetFcs(data->getBytes()) != trailer->getFcs();
+            case FCS_COMPUTED:
+                // On standard INET capture paths, a typed FCS_COMPUTED trailer was produced by INET
+                // after the final MAC fields were set. Trust it instead of serializing the MPDU and
+                // repeating the linear-time FCS calculation solely for packet capture.
                 break;
-            }
             case FCS_DECLARED_CORRECT:
             default:
                 break;
@@ -338,6 +341,8 @@ RadiotapPpduFields extractRadiotapPpduFields(const Packet *packet, Direction dir
 
 std::vector<uint8_t> serializeRadiotapHeader(const RadiotapPpduFields& fields, const RadiotapRecordMetadata& metadata)
 {
+    // Fields are appended in increasing present-bit order. Padding is relative to the beginning
+    // of this buffer, which already contains the fixed eight-octet Radiotap header.
     uint32_t present = 0;
     auto setPresentBit = [&] (RadiotapPresentBit bit) { present |= 1U << bit; };
     std::vector<uint8_t> bytes(8, 0);
@@ -482,6 +487,8 @@ std::vector<PcapCaptureRecord> Ieee80211RadiotapPcapCaptureAdapter::createRecord
         return records;
     }
 
+    // Malformed aggregates and delimiter-only input still represent an observed wireless frame.
+    // Preserve it as one whole-PSDU record instead of silently producing no capture records.
     RadiotapRecordMetadata metadata;
     auto fcsMetadata = getIeee80211FcsMetadata(packet, frontOffset, backOffset);
     metadata.hasFcs = fcsMetadata.isPresent;

@@ -209,6 +209,8 @@ void PcapngWriter::writePacketWithPrefix(simtime_t stime, const std::vector<uint
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
 
+    // Enhanced Packet Blocks refer to an Interface Description Block, unlike classic PCAP
+    // records. Fail explicitly when no interface can be resolved instead of dereferencing null.
     if (networkInterface == nullptr)
         throw cRuntimeError("The interface entry not found for packet");
 
@@ -224,6 +226,8 @@ void PcapngWriter::writePacketWithPrefix(simtime_t stime, const std::vector<uint
 
     b packetLength = packet->getDataLength() - frontOffset - backOffset;
     size_t originalLength = prefix.size() + packetLength.get<B>();
+    // Advertise and enforce the configured snaplen for PCAPng too. The captured length is
+    // truncated, while originalPacketLength below retains the complete untruncated record length.
     size_t capturedLength = std::min<size_t>(originalLength, snaplen);
     uint32_t optionsLength = (4 + 4) + 4;
     uint32_t blockTotalLength = 32 + roundUp(capturedLength) + optionsLength;
