@@ -1904,11 +1904,11 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 errorchunk->setBitLength(SCTP_ERROR_CHUNK_LENGTH * 8);
                 parptr = 0;
                 const struct error_cause *err = (struct error_cause *)(((unsigned char *)error) + sizeof(struct error_chunk) + parptr);
-                if (err->cause_code == UNSUPPORTED_HMAC) {
+                if (ntohs(err->cause_code) == UNSUPPORTED_HMAC) {
                     SctpSimpleErrorCauseParameter *errParam;
                     errParam = new SctpSimpleErrorCauseParameter();
-                    errParam->setParameterType(err->cause_code);
-                    errParam->setByteLength(err->length);
+                    errParam->setParameterType(ntohs(err->cause_code));
+                    errParam->setByteLength(ntohs(err->length));
                     errorchunk->addParameters(errParam);
                 }
                 dest->appendSctpChunks(errorchunk);
