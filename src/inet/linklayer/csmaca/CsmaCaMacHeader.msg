@@ -19,7 +19,7 @@ enum CsmaCaMacHeaderType {
 
 class CsmaCaMacHeader extends FieldsChunk
 {
-    CsmaCaMacHeaderType type;    // header type (1 byte)
+    CsmaCaMacHeaderType type @editable(false);    // header type (1 byte); subtype discriminator, pinned per subclass
     uint8_t headerLengthField;    // header length in bytes, max value is 255 (1 byte)
     MacAddress transmitterAddress;    // (6 byte)
     MacAddress receiverAddress;    // (6 byte)

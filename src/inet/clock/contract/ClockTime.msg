@@ -19,6 +19,7 @@ class clocktime_t
     @descriptor(false);
     @opaque;
     @byValue;
+    @editable;
     @cppType(inet::clocktime_t);
     @fromString(SIMTIME_AS_CLOCKTIME(string2simtime($))); @toString(simtime2string(CLOCKTIME_AS_SIMTIME($)));
     @defaultValue(CLOCKTIME_ZERO);

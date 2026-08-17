@@ -34,7 +34,7 @@ class BpduBase extends FieldsChunk
 {
     BpduProtocolIdentifier protocolIdentifier = static_cast<BpduProtocolIdentifier>(-1);    // 2 bytes, 0 for STP, 1 for RSTP (TODO use them)
     BpduProtocolVersionIdentifier protocolVersionIdentifier = static_cast<BpduProtocolVersionIdentifier>(-1);    // 1 byte, version ID, currently 0, // 3:MultipleSpanningTree
-    BpduType bpduType = static_cast<BpduType>(-1);    // 1 byte, 0 for Configuration BPDU, 1 for Topology Change Notification BPDU
+    BpduType bpduType @editable(false) = static_cast<BpduType>(-1);    // 1 byte, 0 for Configuration BPDU, 1 for Topology Change Notification BPDU; subtype discriminator, pinned per subclass
 }
 
 class BpduTcn extends BpduBase

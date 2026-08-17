@@ -116,7 +116,7 @@ class AddressListOption extends HelloOption
 class PimPacket extends FieldsChunk
 {
     short          version = 2;
-    PimPacketType  type;
+    PimPacketType  type @editable(false);   // subtype discriminator, pinned per subclass
     short          reserved = 0;    // 8 bits
     uint16_t       checksum = 0;         // The checksum is a standard IP checksum, i.e., the 16-bit one's
                                     // complement of the one's complement sum of the entire PIM

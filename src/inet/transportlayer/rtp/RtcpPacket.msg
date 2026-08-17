@@ -26,11 +26,11 @@ enum RtcpPacketType
 class RtcpPacket extends FieldsChunk
 {
     chunkLength = B(4);
-    int8_t version = 2;
+    int8_t version @bit(2) = 2;
     bool padding = 0;   // (1 bits) Used to indicate if there are extra padding bytes at the end of the RTP packet. A padding might be used to fill up a block of certain size, for example as required by an encryption algorithm. The last byte of the padding contains the number of padding bytes that were added (including itself).
-    short count = 0;    // RC (Reception report count ): (5 bits) The number of reception report blocks contained in this packet. A value of zero is valid.
+    short count @bit(5) = 0;    // RC (Reception report count ): The number of reception report blocks contained in this packet. A value of zero is valid.
     RtcpPacketType packetType = RTCP_PT_UNDEF;      // (8 bits) Contains a constant to identify RTCP packet type.
-    int rtcpLength = 0;     // (16 bits) Indicates The length of this RTCP packet in 32-bit words minus one, including the header and any padding.
+    int rtcpLength @bit(16) = 0;     // Indicates The length of this RTCP packet in 32-bit words minus one, including the header and any padding.
 }
 
 cplusplus(RtcpPacket) {{
