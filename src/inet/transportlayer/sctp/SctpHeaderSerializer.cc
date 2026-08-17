@@ -10,6 +10,7 @@
 
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/Endian.h"
+#include "inet/common/INETEndians.h" // htole32/le32toh, which Endian.h has only where the platform happens to provide them
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/ipv4/Ipv4HeaderSerializer.h"
@@ -127,7 +128,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     ch->source_port = htons(msg->getSrcPort());
     ch->destination_port = htons(msg->getDestPort());
     ch->verification_tag = htonl(msg->getVTag());
-    ch->checksum = htonl(0);
+    ch->checksum = 0;
 
     // SCTP chunks:
     size_t noChunks = msg->getSctpChunksArraySize();
@@ -1109,8 +1110,14 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         for (int k = 0; k < SHA_LENGTH; k++)
             auth->hmac[k] = result[k];
     }
-    // finally, set the CHECKSUM32 checksum field in the Sctp common header
-    ch->checksum = crc32c((unsigned char *)buffer, writtenbytes);
+    // finally, set the CHECKSUM32 checksum field in the Sctp common header. The field is
+    // network byte order like every other one; what is special is its content. RFC 4960
+    // appendix B folds a byte swap into the end of the CRC routine and then writes the
+    // field with htonl, so the octets are the CRC least significant first. Swapping and
+    // writing big endian is writing little endian, which is what this says -- and it says
+    // it on a big endian host too, where the plain assignment it replaces wrote the octets
+    // the other way round.
+    ch->checksum = htole32(crc32c((unsigned char *)buffer, writtenbytes));
     // check the serialized packet length
     if (writtenbytes != msg->getChunkLength().get<B>()) {
         throw cRuntimeError("Sctp Serializer error: writtenbytes (%lu) != msgLength(%lu) in message (%s)%s",
@@ -1139,14 +1146,16 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
     auto dest = makeShared<SctpHeader>();
 
     struct common_header *common_header = (struct common_header *)((void *)buffer);
-    int32_t tempChecksum = common_header->checksum;
+    // the field carries the CRC32c byte swapped (RFC 4960 appendix B), so reading its
+    // octets the other way round gives back the CRC the sender computed
+    uint32_t wireChecksum = common_header->checksum;
     common_header->checksum = 0;
-    int32_t chksum = crc32c((unsigned char *)common_header, bufsize);
-    common_header->checksum = tempChecksum;
+    uint32_t chksum = crc32c((unsigned char *)common_header, bufsize);
+    common_header->checksum = wireChecksum;
 
     const unsigned char *chunks = (unsigned char *)(buffer + sizeof(struct common_header));
     EV_TRACE << "SctpSerializer::parse SctpHeader\n";
-    if (tempChecksum == chksum)
+    if (le32toh(wireChecksum) == chksum)
         dest->setChecksumOk(true);
     else
         dest->setChecksumOk(false);
@@ -1156,7 +1165,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
     dest->setVTag(ntohl(common_header->verification_tag));
     dest->setChunkLength(B(SCTP_COMMON_HEADER));
     dest->setChecksumMode(CHECKSUM_COMPUTED);
-    dest->setChecksum(common_header->checksum);
+    dest->setChecksum(le32toh(common_header->checksum));
     // chunks
     uint32_t chunkPtr = 0;
 
