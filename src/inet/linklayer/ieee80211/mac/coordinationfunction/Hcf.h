@@ -96,6 +96,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     // Queues
     InProgressFrames *hccaInProgressFrame = nullptr;
+    int numPacketDropCallbacksRegistered = 0;
 
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;

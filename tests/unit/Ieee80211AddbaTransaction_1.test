@@ -242,9 +242,11 @@ class TestEdcaf : public Edcaf
   public:
     queueing::IPacketQueue *pendingQueue = nullptr;
     InProgressFrames *inProgressFrames = nullptr;
+    QosAckHandler *qosAckHandler = nullptr;
 
     virtual queueing::IPacketQueue *getPendingQueue() const override { return pendingQueue; }
     virtual InProgressFrames *getInProgressFrames() const override { return inProgressFrames; }
+    virtual QosAckHandler *getAckHandler() const override { return qosAckHandler; }
 };
 
 class TestEdca : public Edca
@@ -252,15 +254,28 @@ class TestEdca : public Edca
   public:
     Edcaf *edcaf = nullptr;
 
+    virtual int getNumEdcafs() const override { return 1; }
     virtual Edcaf *getEdcaf(AccessCategory) const override { return edcaf; }
 };
 
 class TestHcf : public Hcf
 {
   public:
+    int numProcessedDroppedSetupFrames = 0;
+    int numResumedEligibleChannelAccess = 0;
+
     void configure(Edca *edca) { this->edca = edca; }
+    void configureTransmittedData(Edca *edca, IOriginatorBlockAckAgreementHandler *handler, IOriginatorBlockAckAgreementPolicy *policy) {
+        this->edca = edca;
+        originatorBlockAckAgreementHandler = handler;
+        originatorBlockAckAgreementPolicy = policy;
+    }
+    void processTransmittedData(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, AccessCategory ac) { originatorProcessTransmittedDataFrame(packet, dataHeader, ac); }
+    void dropPacket(Packet *packet) { handlePacketDropped(packet); }
 
   protected:
+    virtual void processDroppedBlockAckSetupFrame(Packet *) override { numProcessedDroppedSetupFrames++; }
+    virtual void resumeEligibleChannelAccess() override { numResumedEligibleChannelAccess++; }
     virtual void scheduleAddbaResponseTimer(simtime_t) override {}
 };
 
@@ -404,7 +419,49 @@ MacAddress peer3("00:00:00:00:00:03");
 TestOriginatorHandler handler;
 Packet triggerPacket("trigger");
 auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
-handler.processTransmittedDataFrame(&triggerPacket, triggerHeader, &originatorPolicy, &callback, &callback);
+
+// Transmitting the trigger MPDU does not create an agreement; initiation is
+// deferred until the HCF successful-ACK path calls processAcknowledgedDataFrame().
+{
+    auto preAckHandler = new TestOriginatorHandler();
+    QosAckHandler preAckAckHandler;
+    TestEdcaf preAckEdcaf;
+    preAckEdcaf.qosAckHandler = &preAckAckHandler;
+    TestEdca preAckEdca;
+    preAckEdca.edcaf = &preAckEdcaf;
+    TestHcf preAckHcf;
+    preAckHcf.configureTransmittedData(&preAckEdca, preAckHandler, &originatorPolicy);
+    Packet preAckPacket("preAckPacket");
+    auto preAckHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
+    preAckHeader->setAckPolicy(NORMAL_ACK);
+    preAckHcf.processTransmittedData(&preAckPacket, preAckHeader, AC_BE);
+    if (preAckHandler->getAgreement(peer1, 3) != nullptr)
+        throw cRuntimeError("HCF initiated ADDBA before the trigger MPDU was acknowledged");
+    ASSERT(preAckHandler->getAgreement(peer1, 3) == nullptr);
+}
+
+// A fragmented MSDU cannot trigger ADDBA until its final fragment is ACKed,
+// otherwise the remaining fragments would precede the advertised SSN.
+{
+    TestOriginatorHandler fragmentedDataHandler;
+    TestCallback fragmentedDataCallback;
+    Packet fragmentedDataPacket("fragmentedDataPacket");
+    auto firstFragmentHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(100));
+    firstFragmentHeader->setFragmentNumber(0);
+    firstFragmentHeader->setMoreFragments(true);
+    fragmentedDataHandler.processAcknowledgedDataFrame(&fragmentedDataPacket, firstFragmentHeader, &originatorPolicy, &fragmentedDataCallback);
+    if (fragmentedDataHandler.getAgreement(peer1, 6) != nullptr || fragmentedDataCallback.managementPacket != nullptr)
+        throw cRuntimeError("ADDBA was initiated before the final data fragment was acknowledged");
+    auto finalFragmentHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(100));
+    finalFragmentHeader->setFragmentNumber(1);
+    finalFragmentHeader->setMoreFragments(false);
+    fragmentedDataHandler.processAcknowledgedDataFrame(&fragmentedDataPacket, finalFragmentHeader, &originatorPolicy, &fragmentedDataCallback);
+    auto fragmentedDataRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(fragmentedDataCallback.managementHeader);
+    ASSERT(fragmentedDataRequest != nullptr);
+    ASSERT(fragmentedDataRequest->getStartingSequenceNumber() == SequenceNumberCyclic(101));
+}
+
+handler.processAcknowledgedDataFrame(&triggerPacket, triggerHeader, &originatorPolicy, &callback);
 auto request = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
 ASSERT(request != nullptr);
 ASSERT(request->getDialogToken() != 0);
@@ -432,21 +489,21 @@ ASSERT(handler.processReceivedAddbaResp(success, &originatorPolicy, &callback) =
 
 Packet rejectedTrigger("rejectedTrigger");
 auto rejectedHeader = makeQosHeader(peer2, 4, SequenceNumberCyclic(10));
-handler.processTransmittedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback, &callback);
+handler.processAcknowledgedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback);
 auto rejectedRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
 handler.processTransmittedAddbaReq(callback.managementPacket, rejectedRequest, &originatorPolicy, &callback);
 auto rejection = makeResponse(peer2, 4, rejectedRequest->getDialogToken(), 1);
 ASSERT(handler.processReceivedAddbaResp(rejection, &originatorPolicy, &callback) == nullptr);
 ASSERT(handler.getAgreement(peer2, 4) == nullptr);
-handler.processTransmittedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback, &callback);
+handler.processAcknowledgedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback);
 ASSERT(handler.getAgreement(peer2, 4) == nullptr);
 handler.allowRetryNow(peer2, 4);
-handler.processTransmittedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback, &callback);
+handler.processAcknowledgedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback);
 ASSERT(handler.isAddbaResponsePending(peer2, 4));
 
 Packet timeoutTrigger("timeoutTrigger");
 auto timeoutHeader = makeQosHeader(peer3, 5, SequenceNumberCyclic(20));
-handler.processTransmittedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback, &callback);
+handler.processAcknowledgedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback);
 auto timedRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
 auto timedRequestPacket = callback.managementPacket;
 auto timedTransactionId = timedRequestPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
@@ -460,16 +517,16 @@ handler.processTransmittedAddbaReq(timedRequestPacket, timedRequest, &originator
 ASSERT(handler.getAgreement(peer3, 5) == nullptr);
 auto staleResponse = makeResponse(peer3, 5, timedRequest->getDialogToken(), 0);
 ASSERT(handler.processReceivedAddbaResp(staleResponse, &originatorPolicy, &callback) == nullptr);
-handler.processTransmittedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback, &callback);
+handler.processAcknowledgedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback);
 ASSERT(handler.getAgreement(peer3, 5) == nullptr);
 handler.allowRetryNow(peer3, 5);
-handler.processTransmittedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback, &callback);
+handler.processAcknowledgedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback);
 ASSERT(handler.isAddbaResponsePending(peer3, 5));
 
 // An unsent transaction has no response deadline and is retired by a typed drop callback.
 Packet unsentTrigger("unsentTrigger");
 auto unsentHeader = makeQosHeader(peer2, 5, SequenceNumberCyclic(40));
-handler.processTransmittedDataFrame(&unsentTrigger, unsentHeader, &originatorPolicy, &callback, &callback);
+handler.processAcknowledgedDataFrame(&unsentTrigger, unsentHeader, &originatorPolicy, &callback);
 ASSERT(handler.isAddbaResponsePending(peer2, 5));
 ASSERT(callback.addbaDeadline == SIMTIME_MAX);
 auto unsentRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
@@ -480,6 +537,45 @@ ASSERT(handler.getAgreement(peer2, 5) == nullptr);
 ASSERT(callback.cancelledTransactionIds.back() == unsentTransactionId);
 ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
 
+// A DELBA that terminates a pending transaction also cancels its tagged ADDBA
+// Request and recomputes the response timer.
+{
+    TestOriginatorHandler receivedDelbaHandler;
+    TestCallback receivedDelbaCallback;
+    Packet receivedDelbaTrigger("receivedDelbaTrigger");
+    auto receivedDelbaTriggerHeader = makeQosHeader(peer1, 2, SequenceNumberCyclic(60));
+    receivedDelbaHandler.processAcknowledgedDataFrame(&receivedDelbaTrigger, receivedDelbaTriggerHeader, &originatorPolicy, &receivedDelbaCallback);
+    auto receivedDelbaTransactionId = receivedDelbaCallback.managementPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+    auto receivedDelba = makeShared<Ieee80211Delba>();
+    receivedDelba->setTransmitterAddress(peer1);
+    receivedDelba->setTid(2);
+    receivedDelbaHandler.processReceivedDelba(receivedDelba, &originatorPolicy, &receivedDelbaCallback);
+    if (receivedDelbaHandler.getAgreement(peer1, 2) != nullptr || receivedDelbaCallback.cancelledTransactionIds.size() != 1 || receivedDelbaCallback.cancelledTransactionIds.back() != receivedDelbaTransactionId)
+        throw cRuntimeError("Received DELBA did not cancel the pending ADDBA transaction");
+    ASSERT(receivedDelbaHandler.getAgreement(peer1, 2) == nullptr);
+    ASSERT(receivedDelbaCallback.cancelledTransactionIds.back() == receivedDelbaTransactionId);
+    ASSERT(receivedDelbaCallback.excludedPackets.back() == nullptr);
+    ASSERT(receivedDelbaCallback.addbaDeadline == SIMTIME_MAX);
+}
+{
+    TestOriginatorHandler transmittedDelbaHandler;
+    TestCallback transmittedDelbaCallback;
+    Packet transmittedDelbaTrigger("transmittedDelbaTrigger");
+    auto transmittedDelbaTriggerHeader = makeQosHeader(peer2, 2, SequenceNumberCyclic(70));
+    transmittedDelbaHandler.processAcknowledgedDataFrame(&transmittedDelbaTrigger, transmittedDelbaTriggerHeader, &originatorPolicy, &transmittedDelbaCallback);
+    auto transmittedDelbaTransactionId = transmittedDelbaCallback.managementPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+    auto transmittedDelba = makeShared<Ieee80211Delba>();
+    transmittedDelba->setReceiverAddress(peer2);
+    transmittedDelba->setTid(2);
+    transmittedDelbaHandler.processTransmittedDelba(transmittedDelba, &transmittedDelbaCallback);
+    if (transmittedDelbaHandler.getAgreement(peer2, 2) != nullptr || transmittedDelbaCallback.cancelledTransactionIds.size() != 1 || transmittedDelbaCallback.cancelledTransactionIds.back() != transmittedDelbaTransactionId)
+        throw cRuntimeError("Transmitted DELBA did not cancel the pending ADDBA transaction");
+    ASSERT(transmittedDelbaHandler.getAgreement(peer2, 2) == nullptr);
+    ASSERT(transmittedDelbaCallback.cancelledTransactionIds.back() == transmittedDelbaTransactionId);
+    ASSERT(transmittedDelbaCallback.excludedPackets.back() == nullptr);
+    ASSERT(transmittedDelbaCallback.addbaDeadline == SIMTIME_MAX);
+}
+
 // Fragmentation preserves the local transaction identity on every MPDU, and
 // typed cancellation removes all exact siblings while retaining the dropped
 // fragment and an unrelated transaction.
@@ -488,7 +584,7 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     TestCallback fragmentedCallback;
     Packet fragmentedTrigger("fragmentedTrigger");
     auto fragmentedTriggerHeader = makeQosHeader(peer1, 7, SequenceNumberCyclic(50));
-    fragmentedHandler.processTransmittedDataFrame(&fragmentedTrigger, fragmentedTriggerHeader, &originatorPolicy, &fragmentedCallback, &fragmentedCallback);
+    fragmentedHandler.processAcknowledgedDataFrame(&fragmentedTrigger, fragmentedTriggerHeader, &originatorPolicy, &fragmentedCallback);
     auto unfragmentedRequestPacket = fragmentedCallback.managementPacket;
     auto fragmentedTransactionId = unfragmentedRequestPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
     fragmentedCallback.forgetManagementPacket(unfragmentedRequestPacket);
@@ -539,7 +635,7 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     auto invalidTimeoutHeader = makeQosHeader(peer2, 1, SequenceNumberCyclic(30));
     bool threw = false;
     try {
-        invalidTimeoutHandler.processTransmittedDataFrame(&invalidTimeoutTrigger, invalidTimeoutHeader, &invalidTimeoutPolicy, &invalidTimeoutCallback, &invalidTimeoutCallback);
+        invalidTimeoutHandler.processAcknowledgedDataFrame(&invalidTimeoutTrigger, invalidTimeoutHeader, &invalidTimeoutPolicy, &invalidTimeoutCallback);
         auto invalidRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(invalidTimeoutCallback.managementHeader);
         invalidTimeoutHandler.processTransmittedAddbaReq(invalidTimeoutCallback.managementPacket, invalidRequest, &invalidTimeoutPolicy, &invalidTimeoutCallback);
     }
@@ -635,16 +731,22 @@ inProgressFrames.addFrame(prefetchedOtherTidFrame);
 ASSERT(inProgressFrames.hasEligibleFrame());
 ASSERT(inProgressFrames.getFrameToTransmit() == prefetchedOtherTidFrame);
 
-// Availability checks must not extract, aggregate, or assign a sequence number.
+// DCF sequence predicates materialize the next eligible pending frame.
 TestPacketQueue deferredQueue;
 auto deferredFrame = new Packet("deferredFrame", makeQosHeader(peer2, 4, SequenceNumberCyclic(123)));
 deferredQueue.packets = { deferredFrame };
+TestOriginatorQosMacDataService deferredDataService;
 TestInProgressFrames deferredInProgressFrames;
-deferredInProgressFrames.configure(&dataService, &ackHandler, &deferredQueue);
-ASSERT(!deferredInProgressFrames.hasInProgressFrames());
-ASSERT(deferredQueue.getNumPackets() == 1);
+deferredInProgressFrames.configure(&deferredDataService, &ackHandler, &deferredQueue);
+bool hasDeferredInProgressFrame = deferredInProgressFrames.hasInProgressFrames();
+if (!hasDeferredInProgressFrame || deferredQueue.getNumPackets() != 0)
+    throw cRuntimeError("In-progress frame predicate did not materialize the eligible pending frame");
+ASSERT(hasDeferredInProgressFrame);
+ASSERT(deferredQueue.getNumPackets() == 0);
 ASSERT(deferredFrame->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(123));
-delete deferredFrame;
+auto deferredFrames = deferredInProgressFrames.releaseFrames();
+ASSERT(deferredFrames.size() == 1);
+delete deferredFrames.at(0);
 
 // A real leaf queue records selected-dequeue residence once, while the
 // compound boundary emits its own semantic pull without duplicating it.
@@ -688,6 +790,18 @@ Packet *compoundPacket = nullptr;
     compoundQueue.release(compoundPacket);
 }
 delete compoundPacket;
+
+// Queue-drop cleanup immediately rechecks eligible channel access, so frames
+// released by a discarded setup transaction do not wait for unrelated traffic.
+{
+    TestHcf droppedSetupHcf;
+    Packet droppedSetupPacket("droppedSetupPacket", makeShared<ByteCountChunk>(B(1)));
+    droppedSetupHcf.dropPacket(&droppedSetupPacket);
+    if (droppedSetupHcf.numProcessedDroppedSetupFrames != 1 || droppedSetupHcf.numResumedEligibleChannelAccess != 1)
+        throw cRuntimeError("Queue-drop cleanup did not resume eligible channel access");
+    ASSERT(droppedSetupHcf.numProcessedDroppedSetupFrames == 1);
+    ASSERT(droppedSetupHcf.numResumedEligibleChannelAccess == 1);
+}
 
 // Internal overflow invokes the typed queue callback once for the destructive
 // discard and never for the packet later removed normally.

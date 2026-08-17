@@ -192,8 +192,13 @@ void OriginatorBlockAckAgreementHandler::terminateAgreement(MacAddress originato
     }
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback)
+void OriginatorBlockAckAgreementHandler::processAcknowledgedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback)
 {
+    // IEEE Std 802.11-2024, Table 9-466: the Starting Sequence Number identifies
+    // the first or next MSDU/A-MSDU sent under the agreement. Wait until the
+    // final fragment is acknowledged so no remaining fragment precedes the SSN.
+    if (dataHeader->getMoreFragments())
+        return;
     auto receiverAddr = dataHeader->getReceiverAddress();
     auto tid = dataHeader->getTid();
     auto agreementId = std::make_pair(receiverAddr, tid);
@@ -203,6 +208,9 @@ void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *pac
     if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataHeader) && agreement == nullptr && retryAllowed) {
         if (retryIt != addbaRetryDeadlines.end())
             addbaRetryDeadlines.erase(retryIt);
+        // IEEE Std 802.11-2024, 10.25.2 and 11.5.2.2: Normal Ack data is
+        // permitted before an agreement exists, and the requested SSN starts
+        // after the acknowledged trigger MPDU.
         auto addbaReq = buildAddbaRequest(receiverAddr, tid, dataHeader->getSequenceNumber() + 1, blockAckAgreementPolicy);
         auto transactionId = nextTransactionId++;
         createAgreement(addbaReq, transactionId);
@@ -277,15 +285,28 @@ void OriginatorBlockAckAgreementHandler::processDroppedAddbaReq(Packet *packet, 
     }
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
+void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba, IBlockAckAgreementHandlerCallback *callback)
 {
+    auto agreement = getAgreement(delba->getReceiverAddress(), delba->getTid());
+    bool cancelPendingTransaction = agreement != nullptr && agreement->isPending();
+    auto transactionId = cancelPendingTransaction ? agreement->getTransactionId() : 0;
     terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+    scheduleAddbaResponseTimer(callback);
+    if (cancelPendingTransaction)
+        callback->cancelAddbaTransaction(transactionId, nullptr);
 }
 
-void OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy)
+void OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
 {
-    if (blockAckAgreementPolicy->isDelbaAccepted(delba))
+    if (blockAckAgreementPolicy->isDelbaAccepted(delba)) {
+        auto agreement = getAgreement(delba->getTransmitterAddress(), delba->getTid());
+        bool cancelPendingTransaction = agreement != nullptr && agreement->isPending();
+        auto transactionId = cancelPendingTransaction ? agreement->getTransactionId() : 0;
         terminateAgreement(delba->getTransmitterAddress(), delba->getTid());
+        scheduleAddbaResponseTimer(callback);
+        if (cancelPendingTransaction)
+            callback->cancelAddbaTransaction(transactionId, nullptr);
+    }
 }
 
 OriginatorBlockAckAgreementHandler::~OriginatorBlockAckAgreementHandler()
