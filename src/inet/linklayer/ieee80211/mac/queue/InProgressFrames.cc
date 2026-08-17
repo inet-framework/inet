@@ -129,6 +129,19 @@ void InProgressFrames::dropFrame(Packet *packet)
     emit(packetDequeuedSignal, packet);
 }
 
+Packet *InProgressFrames::extractFrame(Packet *packet)
+{
+    Enter_Method("extractFrame");
+    auto it = std::find(inProgressFrames.begin(), inProgressFrames.end(), packet);
+    if (it == inProgressFrames.end())
+        return nullptr;
+    EV_DEBUG << "Extracting frame " << packet->getName() << ".\n";
+    inProgressFrames.erase(it);
+    emit(packetDequeuedSignal, packet);
+    drop(packet);
+    return packet;
+}
+
 void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
 {
     for (auto it = inProgressFrames.begin(); it != inProgressFrames.end();) {

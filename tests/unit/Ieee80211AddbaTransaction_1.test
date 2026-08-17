@@ -27,7 +27,10 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
+#include "inet/queueing/gate/PacketGate.h"
+#include "inet/queueing/gate/PeriodicGate.h"
 #include "inet/queueing/queue/CompoundPacketQueueBase.h"
 #include "inet/queueing/queue/PacketQueue.h"
 #include "inet/queueing/scheduler/LabelScheduler.h"
@@ -210,7 +213,15 @@ class TestPriorityScheduler : public queueing::PriorityScheduler
 {
   public:
     void configure(const std::vector<queueing::IPacketCollection *>& collections, bool reverseOrder = false) {
+        std::vector<queueing::IPacketExtractor *> packetExtractors;
+        for (auto collection : collections)
+            packetExtractors.push_back(check_and_cast<queueing::IPacketExtractor *>(collection));
+        configure(collections, packetExtractors, reverseOrder);
+    }
+    void configure(const std::vector<queueing::IPacketCollection *>& collections, const std::vector<queueing::IPacketExtractor *>& packetExtractors, bool reverseOrder = false) {
+        ASSERT(collections.size() == packetExtractors.size());
         this->collections = collections;
+        this->packetExtractors = packetExtractors;
         this->reverseOrder = reverseOrder;
         numProcessedPackets = 0;
         processedTotalLength = b(0);
@@ -226,6 +237,8 @@ class TestWrrScheduler : public queueing::WrrScheduler
         ASSERT(collections.size() == weights.size());
         ASSERT(collections.size() == buckets.size());
         this->collections = collections;
+        for (auto collection : collections)
+            packetExtractors.push_back(check_and_cast<queueing::IPacketExtractor *>(collection));
         this->weights = new unsigned int[weights.size()];
         this->buckets = new unsigned int[buckets.size()];
         for (size_t i = 0; i < collections.size(); i++) {
@@ -242,6 +255,8 @@ class TestLabelScheduler : public queueing::LabelScheduler
   public:
     void configure(const std::vector<queueing::IPacketCollection *>& collections, const std::vector<std::string>& labels, int defaultGateIndex) {
         this->collections = collections;
+        for (auto collection : collections)
+            packetExtractors.push_back(check_and_cast<queueing::IPacketExtractor *>(collection));
         this->labels = labels;
         this->defaultGateIndex = defaultGateIndex;
     }
@@ -297,6 +312,20 @@ class TestSignalListener : public cListener
     virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override { numSignals++; }
 };
 
+class TestPacketDropSignalListener : public cListener
+{
+  public:
+    int numSignals = 0;
+    int numOtherPacketDrops = 0;
+
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *details) override {
+        numSignals++;
+        auto packetDropDetails = check_and_cast<PacketDropDetails *>(details);
+        if (packetDropDetails->getReason() == OTHER_PACKET_DROP)
+            numOtherPacketDrops++;
+    }
+};
+
 class TestAckHandler : public IAckHandler
 {
   public:
@@ -314,7 +343,9 @@ class TestInProgressFrames : public InProgressFrames
         this->pendingQueue = pendingQueue;
     }
     void addFrame(Packet *packet) { inProgressFrames.push_back(packet); }
+    void addOwnedFrame(Packet *packet) { take(packet); inProgressFrames.push_back(packet); }
     bool hasEligibleFrame() { return hasEligibleFrameToTransmit(); }
+    int getNumDroppedFrames() const { return droppedFrames.size(); }
     std::vector<Packet *> releaseFrames() {
         std::vector<Packet *> frames = inProgressFrames;
         frames.insert(frames.end(), droppedFrames.begin(), droppedFrames.end());
@@ -464,6 +495,12 @@ class TestNonQosRecoveryProcedure : public NonQosRecoveryProcedure
         rtsThreshold = INT_MAX;
         shortRetryCounter[SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())] = 1;
     }
+    void addShortRetry(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int count = 1) {
+        shortRetryCounter[SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())] = count;
+    }
+    void addLongRetry(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int count = 1) {
+        longRetryCounter[SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())] = count;
+    }
     bool hasRetry(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const {
         return shortRetryCounter.find(SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())) != shortRetryCounter.end();
     }
@@ -472,6 +509,24 @@ class TestNonQosRecoveryProcedure : public NonQosRecoveryProcedure
         shortRetryLimit = retryLimit;
         longRetryLimit = retryLimit;
         this->cwCalculator = cwCalculator;
+    }
+};
+
+class TestOnlyPacketExtractor : public queueing::IPacketExtractor
+{
+  public:
+    std::vector<Packet *> packets;
+
+    virtual bool isPacketOrderPreserved() const override { return true; }
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override {
+        auto it = std::find_if(packets.begin(), packets.end(), predicate);
+        return it == packets.end() ? nullptr : *it;
+    }
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override {
+        auto packet = findPacket(predicate);
+        if (packet != nullptr)
+            packets.erase(std::find(packets.begin(), packets.end(), packet));
+        return packet;
     }
 };
 
@@ -754,6 +809,40 @@ ASSERT(handler.isAddbaResponsePending(peer3, 5));
         delete frame;
 }
 
+
+// A transaction frame that is not referenced by an active sequence is removed
+// from in-progress ownership and reclaimed immediately, without entering the
+// deferred dropped-frame list.
+{
+    const uint64_t transactionId = 901;
+    TestPacketQueue pendingQueue;
+    QosAckHandler ackHandler;
+    TestInProgressFrames inProgressFrames;
+    auto request = makeShared<Ieee80211AddbaRequest>();
+    request->setReceiverAddress(peer1);
+    request->setSequenceNumber(SequenceNumberCyclic(31));
+    auto packet = new Packet("idleAddbaRequest", request);
+    packet->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+    inProgressFrames.addOwnedFrame(packet);
+    ackHandler.frameGotInProgress(request);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    TestHcf hcf;
+    hcf.configure(&edca);
+    TestPacketDropSignalListener dropListener;
+    hcf.subscribe(packetDroppedSignal, &dropListener);
+    hcf.cancelTransaction(transactionId);
+    ASSERT(inProgressFrames.getLength() == 0);
+    ASSERT(inProgressFrames.getNumDroppedFrames() == 0);
+    ASSERT(dropListener.numSignals == 1);
+    ASSERT(dropListener.numOtherPacketDrops == 1);
+    hcf.unsubscribe(packetDroppedSignal, &dropListener);
+}
+
 // An unsent transaction has no response deadline and is retired by a typed drop callback.
 Packet unsentTrigger("unsentTrigger");
 auto unsentHeader = makeQosHeader(peer2, 5, SequenceNumberCyclic(40));
@@ -904,9 +993,18 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
     TestBlockAckReordering reordering;
     auto oldWindowHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(1));
     auto oldWindowPacket = new Packet("oldWindowPacket", oldWindowHeader);
-    ASSERT(reordering.processReceivedQoSFrame(firstImmediateAgreement, oldWindowPacket, oldWindowHeader).empty());
+    auto oldWindowFrames = reordering.processReceivedQoSFrame(firstImmediateAgreement, oldWindowPacket, oldWindowHeader);
+    ASSERT(oldWindowFrames.empty());
     ASSERT(reordering.getNumReceiveBuffers() == 1);
     ASSERT(reordering.getReceiveBuffer(6, peer1)->getLength() == 1);
+
+    auto discardedOldWindowFrames = reordering.resetReceiveBuffer(6, peer1);
+    ASSERT(discardedOldWindowFrames.size() == 1);
+    ASSERT(discardedOldWindowFrames.front() == oldWindowPacket);
+    take(discardedOldWindowFrames.front());
+    drop(discardedOldWindowFrames.front());
+    delete discardedOldWindowFrames.front();
+    ASSERT(reordering.getNumReceiveBuffers() == 0);
 
     recipientRequest->setDialogToken(79);
     recipientRequest->setStartingSequenceNumber(SequenceNumberCyclic(9));
@@ -915,13 +1013,41 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
     ASSERT(replacementImmediateAgreement != firstImmediateAgreement);
     ASSERT(immediateRecipientHandler.getAgreement(6, peer1) == replacementImmediateAgreement);
     ASSERT(replacementImmediateAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(9));
-    reordering.resetReceiveBuffer(6, peer1);
-    ASSERT(reordering.getNumReceiveBuffers() == 0);
     auto newWindowHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(10));
     auto newWindowPacket = new Packet("newWindowPacket", newWindowHeader);
-    ASSERT(reordering.processReceivedQoSFrame(replacementImmediateAgreement, newWindowPacket, newWindowHeader).empty());
+    auto newWindowFrames = reordering.processReceivedQoSFrame(replacementImmediateAgreement, newWindowPacket, newWindowHeader);
+    ASSERT(newWindowFrames.empty());
     ASSERT(reordering.getReceiveBuffer(6, peer1)->getNextExpectedSequenceNumber() == SequenceNumberCyclic(9));
     ASSERT(reordering.getReceiveBuffer(6, peer1)->getLength() == 1);
+    auto discardedNewWindowFrames = reordering.resetReceiveBuffer(6, peer1);
+    ASSERT(discardedNewWindowFrames.size() == 1);
+    ASSERT(discardedNewWindowFrames.front() == newWindowPacket);
+    take(discardedNewWindowFrames.front());
+    drop(discardedNewWindowFrames.front());
+    delete discardedNewWindowFrames.front();
+}
+
+// The recipient data service owns reorder-buffer reset observability: every
+// buffered MPDU is reported exactly once before it is deleted.
+{
+    auto recipientDataServiceModule = cModuleType::get("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService")->create("reorderingDropDataService", this);
+    recipientDataServiceModule->callInitialize();
+    auto recipientDataService = check_and_cast<RecipientQosMacDataService *>(recipientDataServiceModule);
+    TestPacketDropSignalListener dropListener;
+    recipientDataService->subscribe(packetDroppedSignal, &dropListener);
+    auto bufferedHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(11));
+    bufferedHeader->setTransmitterAddress(peer1);
+    auto bufferedPacket = new Packet("signaledOldWindowPacket", bufferedHeader);
+    auto signaledOldWindowFrames = recipientDataService->dataFrameReceived(bufferedPacket, bufferedHeader, &immediateRecipientHandler);
+    ASSERT(signaledOldWindowFrames.empty());
+    recipientDataService->resetBlockAckReordering(6, peer1);
+    ASSERT(dropListener.numSignals == 1);
+    ASSERT(dropListener.numOtherPacketDrops == 1);
+    recipientDataService->resetBlockAckReordering(6, peer1);
+    ASSERT(dropListener.numSignals == 1);
+    recipientDataService->unsubscribe(packetDroppedSignal, &dropListener);
+    recipientDataServiceModule->callFinish();
+    recipientDataServiceModule->deleteModule();
 }
 
 recipientPolicy.accepted = false;
@@ -1266,6 +1392,23 @@ ASSERT(!dataService.hasEligibleFrame(&mixedQueue));
     firstQueue.removePacket(firstPacket);
     delete firstPacket;
 }
+
+// Priority extraction is independent of collection enumeration, so an input
+// may support predicate extraction even when it cannot report aggregate size.
+{
+    TestOnlyPacketExtractor packetExtractor;
+    auto packet = new Packet("extractorOnlyPacket", makeShared<ByteCountChunk>(B(1)));
+    packetExtractor.packets = { packet };
+    TestPriorityScheduler scheduler;
+    scheduler.configure(std::vector<queueing::IPacketCollection *>({ nullptr }), std::vector<queueing::IPacketExtractor *>({ &packetExtractor }));
+    ASSERT(scheduler.getNumPackets() == -1);
+    ASSERT(scheduler.findPacket([](const Packet *) { return true; }) == packet);
+    auto dequeuedPacket = scheduler.dequeuePacket([](const Packet *) { return true; });
+    ASSERT(dequeuedPacket == packet);
+    ASSERT(packetExtractor.packets.empty());
+    scheduler.release(packet);
+    delete packet;
+}
 {
     TestPacketQueue firstQueue;
     TestPacketQueue secondQueue;
@@ -1313,6 +1456,76 @@ ASSERT(!dataService.hasEligibleFrame(&mixedQueue));
     firstQueue.removePacket(lowPacket);
     delete blockedPacket;
     delete lowPacket;
+}
+
+
+// Closed gates expose no predicate-selected packet and remove nothing. Once
+// opened, the same exact candidate crosses through PacketFlowBase accounting.
+{
+    auto leafQueue = createPacketQueue("closedGateLeaf");
+    auto gateModule = cModuleType::get("inet.queueing.gate.PacketGate")->create("closedPredicateGate", this);
+    gateModule->par("initiallyOpen").setBoolValue(false);
+    gateModule->par("openTime").setDoubleValue(10);
+    gateModule->par("closeTime").setDoubleValue(20);
+    leafQueue->gate("out")->connectTo(gateModule->gate("in"));
+    gateModule->callInitialize();
+    auto packet = new Packet("closedGatePacket", makeShared<ByteCountChunk>(B(1)));
+    leafQueue->pushPacket(packet, nullptr);
+    auto packetExtractor = check_and_cast<queueing::IPacketExtractor *>(gateModule);
+    auto closedFoundPacket = packetExtractor->findPacket([](const Packet *) { return true; });
+    auto closedDequeuedPacket = packetExtractor->dequeuePacket([](const Packet *) { return true; });
+    ASSERT(closedFoundPacket == nullptr);
+    ASSERT(closedDequeuedPacket == nullptr);
+    ASSERT(leafQueue->getNumPackets() == 1);
+    check_and_cast<queueing::IPacketGate *>(gateModule)->open();
+    ASSERT(packetExtractor->findPacket([](const Packet *) { return true; }) == packet);
+    auto dequeuedPacket = packetExtractor->dequeuePacket([](const Packet *) { return true; });
+    ASSERT(dequeuedPacket == packet);
+    ASSERT(leafQueue->getNumPackets() == 0);
+    take(packet);
+    delete packet;
+    gateModule->callFinish();
+    leafQueue->callFinish();
+    gateModule->deleteModule();
+    leafQueue->deleteModule();
+}
+
+// An implicit guard band rejects the provider's exact first match instead of
+// skipping it and extracting a later packet that happens to fit.
+{
+    auto leafQueue = createPacketQueue("guardBandLeaf");
+    auto gateModule = cModuleType::get("inet.queueing.gate.PeriodicGate")->create("predicateGuardBandGate", this);
+    auto durations = new cValueArray();
+    durations->add(cValue(1, "s"));
+    durations->add(cValue(1, "s"));
+    gateModule->par("durations").setObjectValue(durations);
+    gateModule->par("initiallyOpen").setBoolValue(true);
+    gateModule->par("bitrate").setDoubleValue(8);
+    leafQueue->gate("out")->connectTo(gateModule->gate("in"));
+    gateModule->callInitialize();
+    auto blockedPacket = new Packet("guardBandBlockedPacket", makeShared<ByteCountChunk>(B(2)));
+    auto fittingPacket = new Packet("guardBandFittingPacket", makeShared<ByteCountChunk>(B(1)));
+    leafQueue->pushPacket(blockedPacket, nullptr);
+    leafQueue->pushPacket(fittingPacket, nullptr);
+    auto packetExtractor = check_and_cast<queueing::IPacketExtractor *>(gateModule);
+    auto blockedFoundPacket = packetExtractor->findPacket([](const Packet *) { return true; });
+    auto blockedDequeuedPacket = packetExtractor->dequeuePacket([](const Packet *) { return true; });
+    ASSERT(blockedFoundPacket == nullptr);
+    ASSERT(blockedDequeuedPacket == nullptr);
+    ASSERT(leafQueue->getNumPackets() == 2);
+    auto dequeuedPacket = packetExtractor->dequeuePacket([blockedPacket](const Packet *packet) { return packet != blockedPacket; });
+    ASSERT(dequeuedPacket == fittingPacket);
+    ASSERT(leafQueue->getNumPackets() == 1);
+    take(fittingPacket);
+    delete fittingPacket;
+    auto retainedPacket = leafQueue->dequeuePacket([blockedPacket](const Packet *packet) { return packet == blockedPacket; });
+    ASSERT(retainedPacket == blockedPacket);
+    take(blockedPacket);
+    delete blockedPacket;
+    gateModule->callFinish();
+    leafQueue->callFinish();
+    gateModule->deleteModule();
+    leafQueue->deleteModule();
 }
 
 // Every A-MSDU member is extracted through the scheduler, so provider
@@ -1476,6 +1689,33 @@ ASSERT(!dataService.hasEligibleFrame(&mixedQueue));
     ASSERT(!recoveryProcedure.hasRetry(header));
     ASSERT(retryLimitListener.numSignals == 0);
     recoveryProcedure.unsubscribe(IRecoveryProcedure::retryLimitReachedSignal, &retryLimitListener);
+}
+
+
+// Either terminal discard path clears both per-frame retry maps. Reusing the
+// same sequence/fragment identity therefore starts from zero after either
+// data-first or RTS-first failure history.
+{
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    auto header = makeShared<Ieee80211AddbaRequest>();
+    header->setSequenceNumber(SequenceNumberCyclic(43));
+    Packet shortPacket("shortTerminalDiscard", header);
+    recoveryProcedure.addShortRetry(header, 2);
+    recoveryProcedure.addLongRetry(header, 3);
+    ASSERT(recoveryProcedure.getShortRetryCount(&shortPacket, header) == 2);
+    ASSERT(recoveryProcedure.getLongRetryCount(&shortPacket, header) == 3);
+    recoveryProcedure.discardFrame(&shortPacket, header);
+    ASSERT(recoveryProcedure.getShortRetryCount(&shortPacket, header) == 0);
+    ASSERT(recoveryProcedure.getLongRetryCount(&shortPacket, header) == 0);
+
+    Packet reusedPacket("reusedTerminalDiscard", header);
+    recoveryProcedure.addLongRetry(header, 4);
+    recoveryProcedure.addShortRetry(header, 5);
+    ASSERT(recoveryProcedure.getShortRetryCount(&reusedPacket, header) == 5);
+    ASSERT(recoveryProcedure.getLongRetryCount(&reusedPacket, header) == 4);
+    recoveryProcedure.discardRtsFrame(header);
+    ASSERT(recoveryProcedure.getShortRetryCount(&reusedPacket, header) == 0);
+    ASSERT(recoveryProcedure.getLongRetryCount(&reusedPacket, header) == 0);
 }
 
 // A stale RTS-protected ADDBA request uses the management header for its retry
@@ -1681,11 +1921,15 @@ delete compoundPacket;
     auto pulledPacket = new Packet("lifecyclePulled", makeShared<ByteCountChunk>(B(1)));
     auto selectedPacket = new Packet("lifecycleSelected", makeShared<ByteCountChunk>(B(1)));
     auto removedPacket = new Packet("lifecycleRemoved", makeShared<ByteCountChunk>(B(1)));
-    auto bulkRemovedPacket = new Packet("lifecycleBulkRemoved", makeShared<ByteCountChunk>(B(1)));
+    auto firstBulkRemovedPacket = new Packet("lifecycleBulkRemovedFirst", makeShared<ByteCountChunk>(B(1)));
+    auto secondBulkRemovedPacket = new Packet("lifecycleBulkRemovedSecond", makeShared<ByteCountChunk>(B(1)));
+    auto thirdBulkRemovedPacket = new Packet("lifecycleBulkRemovedThird", makeShared<ByteCountChunk>(B(1)));
     lifecycleQueue->pushPacket(pulledPacket, nullptr);
     lifecycleQueue->pushPacket(selectedPacket, nullptr);
     lifecycleQueue->pushPacket(removedPacket, nullptr);
-    lifecycleQueue->pushPacket(bulkRemovedPacket, nullptr);
+    lifecycleQueue->pushPacket(firstBulkRemovedPacket, nullptr);
+    lifecycleQueue->pushPacket(secondBulkRemovedPacket, nullptr);
+    lifecycleQueue->pushPacket(thirdBulkRemovedPacket, nullptr);
     auto pulledResult = lifecycleQueue->dequeuePacket();
     auto selectedResult = lifecycleQueue->dequeuePacket([selectedPacket](const Packet *packet) { return packet == selectedPacket; });
     lifecycleQueue->removePacket(removedPacket);
@@ -1696,11 +1940,54 @@ delete compoundPacket;
     delete selectedResult;
     delete removedPacket;
     lifecycleQueue->removeAllPackets();
-    if (lifecycleCallback.numDequeuedPackets != 2 || lifecycleCallback.numRemovedPackets != 2 || lifecycleCallback.numDroppedPackets != 0)
+    if (lifecycleCallback.numDequeuedPackets != 2 || lifecycleCallback.numRemovedPackets != 4 || lifecycleCallback.numDroppedPackets != 0 || !lifecycleQueue->isEmpty())
         throw cRuntimeError("Typed queue lifecycle callback did not cover every departure exactly once");
     lifecycleQueue->removePacketCallback(&lifecycleCallback);
     lifecycleQueue->callFinish();
     lifecycleQueue->deleteModule();
+}
+
+
+// Bulk removal detaches only this queue's packets from a shared buffer; packets
+// belonging to another queue remain buffered and receive no removal callback.
+{
+    auto bufferModule = cModuleType::get("inet.queueing.buffer.PacketBuffer")->create("sharedRemovalBuffer", this);
+    bufferModule->callInitialize();
+    auto createBufferedQueue = [&](const char *name) {
+        auto module = cModuleType::get("inet.queueing.queue.PacketQueue")->create(name, this);
+        module->par("bufferModule").setStringValue("^.sharedRemovalBuffer");
+        module->callInitialize();
+        return check_and_cast<queueing::PacketQueue *>(module);
+    };
+    auto firstQueue = createBufferedQueue("sharedRemovalFirstQueue");
+    auto secondQueue = createBufferedQueue("sharedRemovalSecondQueue");
+    TestPacketDropCallback firstCallback;
+    TestPacketDropCallback secondCallback;
+    firstQueue->addPacketCallback(&firstCallback);
+    secondQueue->addPacketCallback(&secondCallback);
+    firstQueue->pushPacket(new Packet("sharedRemovalFirstA", makeShared<ByteCountChunk>(B(1))), nullptr);
+    firstQueue->pushPacket(new Packet("sharedRemovalFirstB", makeShared<ByteCountChunk>(B(1))), nullptr);
+    auto retainedPacket = new Packet("sharedRemovalRetained", makeShared<ByteCountChunk>(B(1)));
+    secondQueue->pushPacket(retainedPacket, nullptr);
+    firstQueue->removeAllPackets();
+    auto buffer = check_and_cast<queueing::IPacketCollection *>(bufferModule);
+    ASSERT(firstQueue->isEmpty());
+    ASSERT(secondQueue->getNumPackets() == 1);
+    ASSERT(buffer->getNumPackets() == 1);
+    ASSERT(firstCallback.numRemovedPackets == 2);
+    ASSERT(secondCallback.numRemovedPackets == 0);
+    auto dequeuedPacket = secondQueue->dequeuePacket([retainedPacket](const Packet *packet) { return packet == retainedPacket; });
+    ASSERT(dequeuedPacket == retainedPacket);
+    take(retainedPacket);
+    delete retainedPacket;
+    firstQueue->removePacketCallback(&firstCallback);
+    secondQueue->removePacketCallback(&secondCallback);
+    firstQueue->callFinish();
+    secondQueue->callFinish();
+    bufferModule->callFinish();
+    firstQueue->deleteModule();
+    secondQueue->deleteModule();
+    bufferModule->deleteModule();
 }
 
 // Internal overflow invokes the typed queue callback once for the destructive

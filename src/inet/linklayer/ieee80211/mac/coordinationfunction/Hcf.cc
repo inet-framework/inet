@@ -296,11 +296,14 @@ void Hcf::cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket)
             auto packet = inProgressFrames->getFrames(i);
             if (belongsToTransaction(packet)) {
                 auto header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
-                inProgressFrames->dropFrame(packet);
+                auto extractedPacket = inProgressFrames->extractFrame(packet);
+                ASSERT(extractedPacket == packet);
+                take(packet);
                 edcaf->getAckHandler()->dropFrame(header);
                 PacketDropDetails details;
                 details.setReason(OTHER_PACKET_DROP);
                 emit(packetDroppedSignal, packet, &details);
+                delete packet;
             }
         }
     }

@@ -37,8 +37,15 @@ void WrrScheduler::initialize(int stage)
         if (tokenizer.hasMoreTokens())
             throw cRuntimeError("Too many values given in the weights parameter.");
 
-        for (auto provider : providers)
-            collections.push_back(dynamic_cast<IPacketCollection *>(provider.get()));
+        for (size_t i = 0; i < providers.size(); i++) {
+            auto provider = providers[i].get();
+            auto collection = dynamic_cast<IPacketCollection *>(provider);
+            auto packetExtractor = dynamic_cast<IPacketExtractor *>(provider);
+            if (collection == nullptr || packetExtractor == nullptr)
+                throw cRuntimeError("Input provider at gate index %d must implement both IPacketCollection and IPacketExtractor", (int)i);
+            collections.push_back(collection);
+            packetExtractors.push_back(packetExtractor);
+        }
     }
 }
 
@@ -88,8 +95,7 @@ int WrrScheduler::findInput(const PacketPredicate& predicate) const
     int firstWeighted = -1;
     int firstNonWeighted = -1;
     for (size_t i = 0; i < collections.size(); ++i) {
-        auto extractor = check_and_cast<IPacketExtractor *>(collections[i]);
-        if (extractor->findPacket(predicate) != nullptr) {
+        if (packetExtractors[i]->findPacket(predicate) != nullptr) {
             if (buckets[i] > 0)
                 return i;
             else if (firstWeighted == -1 && weights[i] > 0)
@@ -116,7 +122,7 @@ void WrrScheduler::consumeBucket(int index)
 Packet *WrrScheduler::findPacket(const PacketPredicate& predicate) const
 {
     auto index = findInput(predicate);
-    return index == -1 ? nullptr : check_and_cast<IPacketExtractor *>(collections[index])->findPacket(predicate);
+    return index == -1 ? nullptr : packetExtractors[index]->findPacket(predicate);
 }
 
 Packet *WrrScheduler::dequeuePacket(const PacketPredicate& predicate)
@@ -125,7 +131,7 @@ Packet *WrrScheduler::dequeuePacket(const PacketPredicate& predicate)
     auto index = findInput(predicate);
     if (index == -1)
         return nullptr;
-    auto packet = check_and_cast<IPacketExtractor *>(collections[index])->dequeuePacket(predicate);
+    auto packet = packetExtractors[index]->dequeuePacket(predicate);
     ASSERT(packet != nullptr);
     consumeBucket(index);
     take(packet);

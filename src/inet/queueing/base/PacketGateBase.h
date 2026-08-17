@@ -53,6 +53,8 @@ class INET_API PacketGateBase : public PacketFlowBase, public TransparentProtoco
     virtual Packet* getPacket(int index) const override;
     virtual bool isEmpty() const override;
     virtual void removePacket(Packet *packet) override;
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override;
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;
 
     virtual IPassivePacketSink *getConsumer(const cGate *gate) override { return this; }
@@ -75,4 +77,3 @@ class INET_API PacketGateBase : public PacketFlowBase, public TransparentProtoco
 } // namespace inet
 
 #endif
-

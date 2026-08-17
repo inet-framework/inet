@@ -185,19 +185,17 @@ ReceiveBuffer *BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlock
         return it->second;
 }
 
-void BlockAckReordering::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba)
+std::vector<Packet *> BlockAckReordering::resetReceiveBuffer(Tid tid, MacAddress originatorAddr)
 {
-    resetReceiveBuffer(delba->getTid(), delba->getTransmitterAddress());
-}
-
-void BlockAckReordering::resetReceiveBuffer(Tid tid, MacAddress originatorAddr)
-{
+    std::vector<Packet *> frames;
     auto id = std::make_pair(tid, originatorAddr);
     auto it = receiveBuffers.find(id);
     if (it != receiveBuffers.end()) {
+        frames = it->second->extractFrames();
         delete it->second;
         receiveBuffers.erase(it);
     }
+    return frames;
 }
 
 void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumberCyclic sequenceNumber)

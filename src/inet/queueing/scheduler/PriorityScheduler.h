@@ -19,6 +19,7 @@ class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IP
 {
   protected:
     std::vector<IPacketCollection *> collections;
+    std::vector<IPacketExtractor *> packetExtractors;
 
   protected:
     virtual void initialize(int stage) override;

@@ -178,10 +178,11 @@ void PacketQueue::removeAllPackets()
     Enter_Method("removeAllPackets");
     EV_INFO << "Removing all packets" << EV_ENDL;
     std::vector<Packet *> packets;
-    for (int i = 0; i < getNumPackets(); i++)
+    while (!queue.isEmpty())
         packets.push_back(check_and_cast<Packet *>(queue.pop()));
     if (buffer != nullptr)
-        buffer->removeAllPackets();
+        for (auto packet : packets)
+            buffer->removePacket(packet);
     for (auto packet : packets) {
         notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::REMOVED);
         emit(packetRemovedSignal, packet);

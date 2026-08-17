@@ -21,6 +21,7 @@ class INET_API LabelScheduler : public PacketSchedulerBase, public virtual IPack
     int defaultGateIndex = -1;
     std::vector<std::string> labels;
     std::vector<IPacketCollection *> collections;
+    std::vector<IPacketExtractor *> packetExtractors;
 
   protected:
     virtual void initialize(int stage) override;

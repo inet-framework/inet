@@ -25,6 +25,7 @@ class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacket
     unsigned int *buckets = nullptr; // array of tokens in buckets (has numInputs elements)
 
     std::vector<IPacketCollection *> collections;
+    std::vector<IPacketExtractor *> packetExtractors;
 
   protected:
     virtual void initialize(int stage) override;

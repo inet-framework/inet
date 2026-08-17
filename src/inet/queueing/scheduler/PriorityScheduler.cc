@@ -16,8 +16,14 @@ void PriorityScheduler::initialize(int stage)
 {
     PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        for (auto provider : providers)
-            collections.push_back(dynamic_cast<IPacketCollection *>(provider.get()));
+        for (size_t i = 0; i < providers.size(); i++) {
+            auto provider = providers[i].get();
+            collections.push_back(dynamic_cast<IPacketCollection *>(provider));
+            auto packetExtractor = dynamic_cast<IPacketExtractor *>(provider);
+            if (packetExtractor == nullptr)
+                throw cRuntimeError("Input provider at gate index %d must implement IPacketExtractor", (int)i);
+            packetExtractors.push_back(packetExtractor);
+        }
     }
 }
 
@@ -75,9 +81,8 @@ bool PriorityScheduler::isPacketOrderPreserved() const
 {
     if (reverseOrder)
         return false;
-    for (auto collection : collections) {
-        auto extractor = dynamic_cast<IPacketExtractor *>(collection);
-        if (extractor == nullptr || !extractor->isPacketOrderPreserved())
+    for (auto packetExtractor : packetExtractors) {
+        if (!packetExtractor->isPacketOrderPreserved())
             return false;
     }
     return true;
@@ -87,7 +92,7 @@ Packet *PriorityScheduler::findPacket(const PacketPredicate& predicate) const
 {
     for (size_t i = 0; i < collections.size(); i++) {
         auto index = reverseOrder ? collections.size() - i - 1 : i;
-        auto packet = check_and_cast<IPacketExtractor *>(collections[index])->findPacket(predicate);
+        auto packet = packetExtractors[index]->findPacket(predicate);
         if (packet != nullptr)
             return packet;
     }
@@ -99,7 +104,7 @@ Packet *PriorityScheduler::dequeuePacket(const PacketPredicate& predicate)
     Enter_Method("dequeuePacket");
     for (size_t i = 0; i < collections.size(); i++) {
         auto index = reverseOrder ? collections.size() - i - 1 : i;
-        auto packet = check_and_cast<IPacketExtractor *>(collections[index])->dequeuePacket(predicate);
+        auto packet = packetExtractors[index]->dequeuePacket(predicate);
         if (packet == nullptr)
             continue;
         take(packet);

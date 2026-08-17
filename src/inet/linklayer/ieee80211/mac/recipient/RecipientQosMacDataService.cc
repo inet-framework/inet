@@ -32,8 +32,17 @@ void RecipientQosMacDataService::initialize()
 
 void RecipientQosMacDataService::resetBlockAckReordering(Tid tid, MacAddress originatorAddr)
 {
-    if (blockAckReordering)
-        blockAckReordering->resetReceiveBuffer(tid, originatorAddr);
+    Enter_Method("resetBlockAckReordering");
+    if (blockAckReordering) {
+        auto droppedFrames = blockAckReordering->resetReceiveBuffer(tid, originatorAddr);
+        for (auto packet : droppedFrames) {
+            take(packet);
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+        }
+    }
 }
 
 Packet *RecipientQosMacDataService::defragment(std::vector<Packet *> completeFragments)

@@ -20,8 +20,15 @@ void LabelScheduler::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         defaultGateIndex = par("defaultGateIndex");
         labels = cStringTokenizer(par("labels")).asVector();
-        for (auto provider : providers)
-            collections.push_back(dynamic_cast<IPacketCollection *>(provider.get()));
+        for (size_t i = 0; i < providers.size(); i++) {
+            auto provider = providers[i].get();
+            auto collection = dynamic_cast<IPacketCollection *>(provider);
+            auto packetExtractor = dynamic_cast<IPacketExtractor *>(provider);
+            if (collection == nullptr || packetExtractor == nullptr)
+                throw cRuntimeError("Input provider at gate index %d must implement both IPacketCollection and IPacketExtractor", (int)i);
+            collections.push_back(collection);
+            packetExtractors.push_back(packetExtractor);
+        }
     }
 }
 
@@ -69,8 +76,8 @@ void LabelScheduler::removePacket(Packet *packet)
 int LabelScheduler::findInput(const PacketPredicate& predicate) const
 {
     std::vector<Packet *> candidates;
-    for (auto collection : collections)
-        candidates.push_back(check_and_cast<IPacketExtractor *>(collection)->findPacket(predicate));
+    for (auto packetExtractor : packetExtractors)
+        candidates.push_back(packetExtractor->findPacket(predicate));
     for (auto label : labels) {
         for (size_t i = 0; i < candidates.size(); i++) {
             auto packet = candidates[i];
@@ -90,7 +97,7 @@ int LabelScheduler::findInput(const PacketPredicate& predicate) const
 Packet *LabelScheduler::findPacket(const PacketPredicate& predicate) const
 {
     auto index = findInput(predicate);
-    return index == -1 ? nullptr : check_and_cast<IPacketExtractor *>(collections[index])->findPacket(predicate);
+    return index == -1 ? nullptr : packetExtractors[index]->findPacket(predicate);
 }
 
 Packet *LabelScheduler::dequeuePacket(const PacketPredicate& predicate)
@@ -99,7 +106,7 @@ Packet *LabelScheduler::dequeuePacket(const PacketPredicate& predicate)
     auto index = findInput(predicate);
     if (index == -1)
         return nullptr;
-    auto packet = check_and_cast<IPacketExtractor *>(collections[index])->dequeuePacket(predicate);
+    auto packet = packetExtractors[index]->dequeuePacket(predicate);
     ASSERT(packet != nullptr);
     take(packet);
     handlePacketProcessed(packet);
