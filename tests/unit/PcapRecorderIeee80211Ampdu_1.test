@@ -102,6 +102,13 @@ class TestablePcapRecorder : public PcapRecorder
         enableConvertingPackets = true;
         writePacket(&Protocol::ieee80211Mac, PcapCaptureObservation(packet, direction), b(0), b(0), nullptr);
     }
+
+    void writeIeee80211Packet(const Packet *packet, Direction direction)
+    {
+        enableProtocolSpecificCaptureAdapters = true;
+        enableConvertingPackets = true;
+        writePacket(&Protocol::ieee80211Mac, packet, b(0), b(0), direction, nullptr);
+    }
 };
 
 Define_Module(TestablePcapRecorder);
@@ -167,6 +174,20 @@ REQUIRE(recorder->getIeee80211LinkType(true, true) == LINKTYPE_IEEE802_11_RADIOT
 auto writer = new RecordingPcapWriter();
 recorder->setWriter(writer);
 
+const std::vector<uint8_t> packetBytes = {0x08, 0x41, 0x42, 0x43, 0x44};
+Packet packetOnly("packetOnly");
+packetOnly.insertAtBack(makeShared<BytesChunk>(packetBytes));
+recorder->writeIeee80211Packet(&packetOnly, DIRECTION_INBOUND);
+REQUIRE(writer->records.size() == 1);
+const auto& packetOnlyRecord = writer->records.front();
+REQUIRE(packetOnlyRecord.at(0) == 0); // Radiotap version
+REQUIRE(packetOnlyRecord.at(1) == 0); // Radiotap padding
+REQUIRE(readUint16(packetOnlyRecord, 2) == 12);
+REQUIRE(readUint32(packetOnlyRecord, 4) == ((1U << 1) | (1U << 14)));
+REQUIRE(packetOnlyRecord.size() == 12 + packetBytes.size());
+REQUIRE(std::equal(packetBytes.begin(), packetBytes.end(), packetOnlyRecord.begin() + 12));
+
+writer->records.clear();
 const std::vector<uint8_t> firstMpdu = {0x08, 0x01, 0x02, 0x03, 0x04};
 const std::vector<uint8_t> secondMpdu = {0x88, 0x11, 0x12, 0x13, 0x14, 0x15};
 Packet aggregate("ampdu");

@@ -218,6 +218,11 @@ void PcapRecorder::writePacket(const Protocol *protocol, const PcapCaptureObserv
 
 void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface)
 {
+    if (enableProtocolSpecificCaptureAdapters && enableConvertingPackets &&
+            PcapCaptureAdapterRegistry::getInstance().findProtocolAdapter(protocol) != nullptr) {
+        writePacket(protocol, PcapCaptureObservation(packet, direction), frontOffset, backOffset, networkInterface);
+        return;
+    }
 
     auto pcapLinkType = protocolToLinkType(protocol);
     if (pcapLinkType == LINKTYPE_INVALID)
