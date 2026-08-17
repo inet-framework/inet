@@ -17,16 +17,16 @@ namespace inet {
 
 namespace ieee80211 {
 
-Register_Serializer(Ieee80211AssociationRequestFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211AssociationResponseFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211AuthenticationFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211BeaconFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211DeauthenticationFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211DisassociationFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211ProbeRequestFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211ProbeResponseFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211ReassociationRequestFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211ReassociationResponseFrame, Ieee80211MgmtFrameSerializer);
+Register_Serializer(Ieee80211AssociationRequestFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211AssociationRequestFrame>);
+Register_Serializer(Ieee80211AssociationResponseFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211AssociationResponseFrame>);
+Register_Serializer(Ieee80211AuthenticationFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211AuthenticationFrame>);
+Register_Serializer(Ieee80211BeaconFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211BeaconFrame>);
+Register_Serializer(Ieee80211DeauthenticationFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211DeauthenticationFrame>);
+Register_Serializer(Ieee80211DisassociationFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211DisassociationFrame>);
+Register_Serializer(Ieee80211ProbeRequestFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ProbeRequestFrame>);
+Register_Serializer(Ieee80211ProbeResponseFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ProbeResponseFrame>);
+Register_Serializer(Ieee80211ReassociationRequestFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ReassociationRequestFrame>);
+Register_Serializer(Ieee80211ReassociationResponseFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ReassociationResponseFrame>);
 
 static constexpr uint8_t HT_CAPABILITIES_ELEMENT_ID = 45;
 static constexpr uint8_t HT_OPERATION_ELEMENT_ID = 61;
@@ -457,7 +457,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         throw cRuntimeError("Cannot serialize frame");
 }
 
-const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
+const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStream& stream, const std::type_info& typeInfo)
 {
     int frameType = -1;
     if (typeInfo == typeid(Ieee80211AuthenticationFrame)) frameType = 0xB0;
@@ -660,11 +660,6 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
         default:
             throw cRuntimeError("Cannot deserialize frame");
     }
-}
-
-const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& stream) const
-{
-    throw cRuntimeError("Ieee80211MgmtFrameSerializer requires the target management frame type");
 }
 
 } // namespace ieee80211

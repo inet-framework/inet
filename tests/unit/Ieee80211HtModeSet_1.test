@@ -1,0 +1,21 @@
+%description:
+Verify that HT operation is enabled only for a mode set with selectable HT
+modes. The current VHT-only ac profile intentionally does not advertise HT.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet::physicallayer;
+
+%activity:
+
+const auto *htModeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+const auto *vhtOnlyModeSet = Ieee80211ModeSet::getModeSet("ac");
+
+ASSERT(htModeSet->isHtOperationSupported());
+ASSERT(!vhtOnlyModeSet->isHtOperationSupported());
+
+EV << "HT mode-set capability gates verified.\n";
+
+%contains: stdout
+HT mode-set capability gates verified.

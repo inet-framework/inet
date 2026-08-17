@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
+#include <array>
+
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
@@ -27,6 +29,7 @@ void Ieee80211Mib::initialize(int stage)
         WATCH(bssStationData.isAssociated);
         WATCH(bssAccessPointData.stations);
         WATCH(bssAccessPointData.associationIds);
+        WATCH(associationIdReservations);
         WATCH_EXPR("modeStr", getModeStr(mode));
         WATCH_EXPR("stationTypeStr", getStationTypeStr(bssStationData.stationType));
         WATCH_EXPR("qosStr", qos ? ", QoS" : ", Non-QoS");
@@ -147,30 +150,74 @@ const char *Ieee80211Mib::getStationTypeStr(Ieee80211Mib::BssStationType station
     }
 }
 
-short Ieee80211Mib::allocateAssociationId(const MacAddress& address)
+short Ieee80211Mib::reserveAssociationId(const MacAddress& address)
 {
-    auto existing = bssAccessPointData.associationIds.find(address);
-    if (existing != bssAccessPointData.associationIds.end())
-        return existing->second;
+    // IEEE Std 802.11-2024, 9.4.1.8: an AP assigns AID values in the range 1 through 2007.
+    auto committed = bssAccessPointData.associationIds.find(address);
+    if (committed != bssAccessPointData.associationIds.end())
+        return committed->second;
+    auto reserved = associationIdReservations.find(address);
+    if (reserved != associationIdReservations.end())
+        return reserved->second;
+
+    std::array<bool, 2008> used = {};
+    for (const auto& entry : bssAccessPointData.associationIds)
+        if (entry.second >= 1 && entry.second <= 2007)
+            used[entry.second] = true;
+    for (const auto& entry : associationIdReservations)
+        if (entry.second >= 1 && entry.second <= 2007)
+            used[entry.second] = true;
     for (short aid = 1; aid <= 2007; aid++) {
-        bool used = false;
-        for (const auto& entry : bssAccessPointData.associationIds)
-            if (entry.second == aid) {
-                used = true;
-                break;
-            }
-        if (!used) {
-            bssAccessPointData.associationIds[address] = aid;
+        if (!used[aid]) {
+            associationIdReservations[address] = aid;
             return aid;
         }
     }
     throw cRuntimeError("No IEEE 802.11 association ID is available");
 }
 
+short Ieee80211Mib::commitAssociationId(const MacAddress& address)
+{
+    auto committed = bssAccessPointData.associationIds.find(address);
+    if (committed != bssAccessPointData.associationIds.end()) {
+        associationIdReservations.erase(address);
+        return committed->second;
+    }
+    auto reserved = associationIdReservations.find(address);
+    if (reserved == associationIdReservations.end())
+        throw cRuntimeError("No IEEE 802.11 association ID is reserved for %s", address.str().c_str());
+    short aid = reserved->second;
+    for (const auto& entry : bssAccessPointData.associationIds)
+        if (entry.second == aid)
+            throw cRuntimeError("Reserved IEEE 802.11 association ID %d is already committed", aid);
+    bssAccessPointData.associationIds[address] = aid;
+    associationIdReservations.erase(reserved);
+    return aid;
+}
+
+void Ieee80211Mib::cancelAssociationIdReservation(const MacAddress& address)
+{
+    associationIdReservations.erase(address);
+}
+
+short Ieee80211Mib::allocateAssociationId(const MacAddress& address)
+{
+    reserveAssociationId(address);
+    return commitAssociationId(address);
+}
+
 void Ieee80211Mib::releaseAssociationId(const MacAddress& address)
 {
+    associationIdReservations.erase(address);
     bssAccessPointData.associationIds.erase(address);
     removePeerHtCapabilities(address);
+}
+
+void Ieee80211Mib::clearAssociationIds()
+{
+    associationIdReservations.clear();
+    bssAccessPointData.associationIds.clear();
+    clearPeerHtCapabilities();
 }
 
 } // namespace ieee80211

@@ -16,20 +16,28 @@ namespace inet {
 
 namespace ieee80211 {
 
+class ITransmitStep;
+
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
  * an access point (AP). See corresponding NED file for a detailed description.
  */
 class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
 {
+  protected:
+    enum class AssociationResponseDisposition {
+        IGNORE,
+        RETAIN,
+        COMPLETE,
+    };
+
   public:
     /** Describes a STA */
     struct StaInfo {
         MacAddress address;
         int authSeqExpected; // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         bool pendingAssociationSuccessful = false;
-        short pendingAssociationId = 0;
-        const Packet *pendingAssociationResponse = nullptr;
+        uint64_t pendingAssociationTransactionId = 0;
         bool pendingHtStateAvailable = false;
         bool pendingHtCapabilitiesValid = false;
         Ieee80211HtCapabilities pendingHtCapabilities;
@@ -64,6 +72,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     // state
     StaList staList; ///< list of STAs
     cMessage *beaconTimer = nullptr;
+    uint64_t nextAssociationTransactionId = 0;
 
   public:
     Ieee80211MgmtAp() {}
@@ -87,9 +96,11 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     virtual StaInfo *lookupSenderSTA(const Ptr<const Ieee80211MgmtHeader>& header);
 
     /** Utility function: set fields in the given frame and send it out to the address */
-    virtual Packet *sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr);
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr, uint64_t transactionId = 0);
 
-    virtual short reserveAssociationId(StaInfo *sta) const;
+    static const Packet *getAssociationResponseFrame(ITransmitStep *transmitStep);
+    static AssociationResponseDisposition getAssociationResponseDisposition(const Packet *responseFrame, uint64_t pendingTransactionId, bool exchangeSucceeded, bool retryPending);
+    virtual uint64_t createAssociationTransactionId();
     virtual void clearPendingAssociation(StaInfo *sta);
 
     /** Utility function: creates and sends a beacon frame */

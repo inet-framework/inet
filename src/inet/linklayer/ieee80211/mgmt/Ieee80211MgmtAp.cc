@@ -14,10 +14,12 @@
 
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequenceHandler.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
@@ -34,6 +36,31 @@ static std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtAp::StaInfo
 {
     os << "address:" << sta.address;
     return os;
+}
+
+const Packet *Ieee80211MgmtAp::getAssociationResponseFrame(ITransmitStep *transmitStep)
+{
+    if (transmitStep == nullptr)
+        return nullptr;
+    if (auto rtsTransmitStep = dynamic_cast<RtsTransmitStep *>(transmitStep))
+        return rtsTransmitStep->getProtectedFrame();
+    return transmitStep->getFrameToTransmit();
+}
+
+Ieee80211MgmtAp::AssociationResponseDisposition Ieee80211MgmtAp::getAssociationResponseDisposition(const Packet *responseFrame,
+        uint64_t pendingTransactionId, bool exchangeSucceeded, bool retryPending)
+{
+    if (responseFrame == nullptr || pendingTransactionId == 0)
+        return AssociationResponseDisposition::IGNORE;
+    auto responseHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(responseFrame->peekAtFront<Ieee80211MacHeader>());
+    if (responseHeader == nullptr || (responseHeader->getType() != ST_ASSOCIATIONRESPONSE && responseHeader->getType() != ST_REASSOCIATIONRESPONSE))
+        return AssociationResponseDisposition::IGNORE;
+    const auto& transactionTag = responseFrame->findTag<Ieee80211MgmtTransactionTag>();
+    if (transactionTag == nullptr || transactionTag->getTransactionId() != pendingTransactionId)
+        return AssociationResponseDisposition::IGNORE;
+    if ((exchangeSucceeded && responseHeader->getMoreFragments()) || (!exchangeSucceeded && retryPending))
+        return AssociationResponseDisposition::RETAIN;
+    return AssociationResponseDisposition::COMPLETE;
 }
 
 Ieee80211MgmtAp::~Ieee80211MgmtAp()
@@ -108,49 +135,48 @@ void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, cO
             auto transmitStep = dynamic_cast<ITransmitStep *>(context->getStepBeforeLast());
             auto receiveStep = dynamic_cast<IReceiveStep *>(context->getLastStep());
             if (transmitStep && receiveStep) {
-                auto responseHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(transmitStep->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>());
+                const Packet *responseFrame = getAssociationResponseFrame(transmitStep);
+                auto responseHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(responseFrame->peekAtFront<Ieee80211MacHeader>());
                 if (responseHeader != nullptr && (responseHeader->getType() == ST_ASSOCIATIONRESPONSE || responseHeader->getType() == ST_REASSOCIATIONRESPONSE)) {
                     const auto& address = responseHeader->getReceiverAddress();
                     auto sta = staList.find(address);
                     bool exchangeSucceeded = transmitStep->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
                             receiveStep->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
                             receiveStep->getReceivedFrame()->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK;
-                    bool isPendingResponse = sta != staList.end() && sta->second.pendingAssociationResponse == transmitStep->getFrameToTransmit();
-                    if (isPendingResponse && sta->second.pendingAssociationSuccessful && exchangeSucceeded) {
-                        bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
-                        mib->bssAccessPointData.associationIds[address] = sta->second.pendingAssociationId;
-                        mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
-                        if (sta->second.pendingHtStateAvailable) {
-                            // IEEE Std 802.11-2024 association state becomes effective only after the successful response exchange.
-                            if (sta->second.pendingHtCapabilitiesValid)
-                                mib->setPeerHtCapabilities(address, sta->second.pendingHtCapabilities, mib->htOperation);
-                            else
-                                mib->removePeerHtCapabilities(address);
-                        }
-                        // Signal delivery is synchronous; observers must see committed station and peer state.
-                        if (responseHeader->getType() == ST_ASSOCIATIONRESPONSE && !wasAssociated)
-                            sendAssocNotification(address);
+                    bool retryPending = false;
+                    if (!exchangeSucceeded) {
+                        auto inProgressFrames = context->getInProgressFrames();
+                        for (int i = 0; i < inProgressFrames->getLength(); i++)
+                            retryPending |= inProgressFrames->getFrames(i) == responseFrame;
                     }
-                    else if (isPendingResponse && !sta->second.pendingAssociationSuccessful && exchangeSucceeded &&
-                            mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED)
-                    {
-                        // This model does not implement negotiated management-frame protection.
-                        // IEEE Std 802.11-2024, 11.3.5.3(p): a refused (re)association
-                        // therefore moves the STA from State 4 back to State 3.
-                        mib->releaseAssociationId(address);
-                        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
-                        // Signal delivery is synchronous; observers must see the downgraded state.
-                        sendDisAssocNotification(address);
-                    }
-                    if (isPendingResponse) {
-                        bool retryPending = false;
-                        if (!exchangeSucceeded) {
-                            auto inProgressFrames = context->getInProgressFrames();
-                            for (int i = 0; i < inProgressFrames->getLength(); i++)
-                                retryPending |= inProgressFrames->getFrames(i) == transmitStep->getFrameToTransmit();
+                    uint64_t pendingTransactionId = sta == staList.end() ? 0 : sta->second.pendingAssociationTransactionId;
+                    auto disposition = getAssociationResponseDisposition(responseFrame, pendingTransactionId, exchangeSucceeded, retryPending);
+                    if (disposition == AssociationResponseDisposition::COMPLETE) {
+                        if (exchangeSucceeded && sta->second.pendingAssociationSuccessful) {
+                            bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
+                            mib->commitAssociationId(address);
+                            mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
+                            if (sta->second.pendingHtStateAvailable) {
+                                // IEEE Std 802.11-2024, 11.3.5.3: association state becomes effective only after the successful response exchange.
+                                if (sta->second.pendingHtCapabilitiesValid)
+                                    mib->setPeerHtCapabilities(address, sta->second.pendingHtCapabilities, mib->htOperation);
+                                else
+                                    mib->removePeerHtCapabilities(address);
+                            }
+                            // Signal delivery is synchronous; observers must see committed station and peer state.
+                            if (responseHeader->getType() == ST_ASSOCIATIONRESPONSE && !wasAssociated)
+                                sendAssocNotification(address);
                         }
-                        if (exchangeSucceeded || !retryPending)
-                            clearPendingAssociation(&sta->second);
+                        else if (exchangeSucceeded && mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED) {
+                            // This model does not implement negotiated management-frame protection.
+                            // IEEE Std 802.11-2024, 11.3.5.3(p): a refused (re)association
+                            // therefore moves the STA from State 4 back to State 3.
+                            mib->releaseAssociationId(address);
+                            mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+                            // Signal delivery is synchronous; observers must see the downgraded state.
+                            sendDisAssocNotification(address);
+                        }
+                        clearPendingAssociation(&sta->second);
                     }
                 }
             }
@@ -166,40 +192,29 @@ Ieee80211MgmtAp::StaInfo *Ieee80211MgmtAp::lookupSenderSTA(const Ptr<const Ieee8
     return it == staList.end() ? nullptr : &(it->second);
 }
 
-Packet *Ieee80211MgmtAp::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr)
+void Ieee80211MgmtAp::sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr, uint64_t transactionId)
 {
     auto packet = new Packet(name);
     packet->addTag<MacAddressReq>()->setDestAddress(destAddr);
     packet->addTag<Ieee80211SubtypeReq>()->setSubtype(subtype);
     packet->insertAtBack(body);
+    if (transactionId != 0)
+        packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(transactionId);
     sendDown(packet);
-    return packet;
 }
 
-short Ieee80211MgmtAp::reserveAssociationId(StaInfo *sta) const
+uint64_t Ieee80211MgmtAp::createAssociationTransactionId()
 {
-    auto existing = mib->bssAccessPointData.associationIds.find(sta->address);
-    if (existing != mib->bssAccessPointData.associationIds.end())
-        return existing->second;
-    if (sta->pendingAssociationId != 0)
-        return sta->pendingAssociationId;
-    for (short aid = 1; aid <= 2007; aid++) {
-        bool used = false;
-        for (const auto& entry : mib->bssAccessPointData.associationIds)
-            used |= entry.second == aid;
-        for (const auto& entry : staList)
-            used |= entry.second.pendingAssociationId == aid;
-        if (!used)
-            return aid;
-    }
-    throw cRuntimeError("No IEEE 802.11 association ID is available");
+    if (++nextAssociationTransactionId == 0)
+        ++nextAssociationTransactionId;
+    return nextAssociationTransactionId;
 }
 
 void Ieee80211MgmtAp::clearPendingAssociation(StaInfo *sta)
 {
+    mib->cancelAssociationIdReservation(sta->address);
     sta->pendingAssociationSuccessful = false;
-    sta->pendingAssociationId = 0;
-    sta->pendingAssociationResponse = nullptr;
+    sta->pendingAssociationTransactionId = 0;
     sta->pendingHtStateAvailable = false;
     sta->pendingHtCapabilitiesValid = false;
 }
@@ -331,6 +346,7 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     }
 
     const auto& requestBody = packet->peekData<Ieee80211AssociationRequestFrame>();
+    clearPendingAssociation(sta);
     sta->pendingAssociationSuccessful = false;
     sta->pendingHtStateAvailable = true;
     sta->pendingHtCapabilitiesValid = mib->isHtOperationSupported() && requestBody->getHtCapabilitiesPresent();
@@ -343,14 +359,15 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     // IEEE Std 802.11-2024, 11.3.5.3 g): an HT STA must support every Basic HT-MCS.
     const auto& body = makeShared<Ieee80211AssociationResponseFrame>();
     body->setStatusCode(basicHtMcsSupported ? SC_SUCCESSFUL : SC_DATARATE_UNSUP);
-    sta->pendingAssociationId = basicHtMcsSupported ? reserveAssociationId(sta) : 0;
-    body->setAid(sta->pendingAssociationId);
+    short associationId = basicHtMcsSupported ? mib->reserveAssociationId(sta->address) : 0;
+    body->setAid(associationId);
     sta->pendingAssociationSuccessful = basicHtMcsSupported;
+    sta->pendingAssociationTransactionId = createAssociationTransactionId();
     body->setSupportedRates(supportedRates);
     addHtCapabilities(body);
     addHtOperation(body);
     body->setChunkLength(B(2 + 2 + 2 + body->getSupportedRates().numRates + 2) + getHtMgmtElementsLength(body));
-    sta->pendingAssociationResponse = sendManagementFrame(basicHtMcsSupported ? "AssocResp-OK" : "AssocResp-UnsupportedHtMcs", body, ST_ASSOCIATIONRESPONSE, sta->address);
+    sendManagementFrame(basicHtMcsSupported ? "AssocResp-OK" : "AssocResp-UnsupportedHtMcs", body, ST_ASSOCIATIONRESPONSE, sta->address, sta->pendingAssociationTransactionId);
 }
 
 void Ieee80211MgmtAp::handleAssociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
@@ -374,6 +391,7 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     }
 
     const auto& requestBody = packet->peekData<Ieee80211ReassociationRequestFrame>();
+    clearPendingAssociation(sta);
     sta->pendingAssociationSuccessful = false;
     sta->pendingHtStateAvailable = true;
     sta->pendingHtCapabilitiesValid = mib->isHtOperationSupported() && requestBody->getHtCapabilitiesPresent();
@@ -386,14 +404,15 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     // send OK response
     const auto& body = makeShared<Ieee80211ReassociationResponseFrame>();
     body->setStatusCode(basicHtMcsSupported ? SC_SUCCESSFUL : SC_DATARATE_UNSUP);
-    sta->pendingAssociationId = basicHtMcsSupported ? reserveAssociationId(sta) : 0;
-    body->setAid(sta->pendingAssociationId);
+    short associationId = basicHtMcsSupported ? mib->reserveAssociationId(sta->address) : 0;
+    body->setAid(associationId);
     sta->pendingAssociationSuccessful = basicHtMcsSupported;
+    sta->pendingAssociationTransactionId = createAssociationTransactionId();
     body->setSupportedRates(supportedRates);
     addHtCapabilities(body);
     addHtOperation(body);
     body->setChunkLength(B(2 + 2 + 2 + (2 + supportedRates.numRates)) + getHtMgmtElementsLength(body));
-    sta->pendingAssociationResponse = sendManagementFrame(basicHtMcsSupported ? "ReassocResp-OK" : "ReassocResp-UnsupportedHtMcs", body, ST_REASSOCIATIONRESPONSE, sta->address);
+    sendManagementFrame(basicHtMcsSupported ? "ReassocResp-OK" : "ReassocResp-UnsupportedHtMcs", body, ST_REASSOCIATIONRESPONSE, sta->address, sta->pendingAssociationTransactionId);
 }
 
 void Ieee80211MgmtAp::handleReassociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
@@ -479,7 +498,7 @@ void Ieee80211MgmtAp::stop()
 {
     cancelEvent(beaconTimer);
     staList.clear();
-    mib->bssAccessPointData.associationIds.clear();
+    mib->clearAssociationIds();
     Ieee80211MgmtApBase::stop();
 }
 

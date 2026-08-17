@@ -1,0 +1,72 @@
+%description:
+Verify deterministic AP association-response transaction matching and
+completion decisions, including RTS-protected responses.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+
+class TestIeee80211MgmtAp : public Ieee80211MgmtAp
+{
+  public:
+    using Ieee80211MgmtAp::AssociationResponseDisposition;
+    using Ieee80211MgmtAp::getAssociationResponseDisposition;
+    using Ieee80211MgmtAp::getAssociationResponseFrame;
+};
+
+static Packet *makeAssociationResponse(uint64_t transactionId, bool moreFragments, bool includeTag = true)
+{
+    auto packet = new Packet("AssocResp-OK");
+    auto header = makeShared<Ieee80211MgmtHeader>();
+    header->setType(ST_ASSOCIATIONRESPONSE);
+    header->setMoreFragments(moreFragments);
+    packet->insertAtBack(header);
+    if (includeTag)
+        packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(transactionId);
+    return packet;
+}
+
+%activity:
+
+using Disposition = TestIeee80211MgmtAp::AssociationResponseDisposition;
+
+auto finalResponse = makeAssociationResponse(42, false);
+TransmitStep ordinaryStep(finalResponse, SIMTIME_ZERO);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseFrame(&ordinaryStep) == finalResponse);
+
+{
+    auto rtsPacket = new Packet("RTS", makeShared<Ieee80211RtsFrame>());
+    RtsTransmitStep rtsStep(finalResponse, rtsPacket, SIMTIME_ZERO);
+    ASSERT(TestIeee80211MgmtAp::getAssociationResponseFrame(&rtsStep) == finalResponse);
+}
+
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42, true, false) == Disposition::COMPLETE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 41, true, false) == Disposition::IGNORE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 0, true, false) == Disposition::IGNORE);
+
+auto zeroTokenResponse = makeAssociationResponse(0, false);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(zeroTokenResponse, 42, true, false) == Disposition::IGNORE);
+auto untaggedResponse = makeAssociationResponse(42, false, false);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(untaggedResponse, 42, true, false) == Disposition::IGNORE);
+
+auto nonFinalResponse = makeAssociationResponse(42, true);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, true, false) == Disposition::RETAIN);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42, false, true) == Disposition::RETAIN);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42, false, false) == Disposition::COMPLETE);
+
+delete nonFinalResponse;
+delete untaggedResponse;
+delete zeroTokenResponse;
+delete finalResponse;
+
+EV << "AP association transaction decisions verified.\n";
+
+%contains: stdout
+AP association transaction decisions verified.

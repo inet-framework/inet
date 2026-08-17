@@ -85,6 +85,7 @@ ASSERT(bytes[54] == 0x10); // Basic MCS 76
 
 Packet encoded("encoded", makeShared<BytesChunk>(bytes));
 auto decoded = encoded.popAtFront<Ieee80211AssociationResponseFrame>(B(bytes.size()));
+ASSERT(decoded->getChunkLength() == B(bytes.size()));
 ASSERT(decoded->getHtCapabilitiesPresent());
 ASSERT(decoded->getHtOperationPresent());
 ASSERT(decoded->getHtCapabilities().rxMcsSupported[0]);
@@ -95,6 +96,20 @@ ASSERT(decoded->getHtOperation().basicMcsSupported[0]);
 ASSERT(!decoded->getHtOperation().basicMcsSupported[1]);
 ASSERT(decoded->getHtOperation().basicMcsSupported[3]);
 ASSERT(decoded->getHtOperation().basicMcsSupported[76]);
+
+// The caller supplies the exact management-body region. A legal vendor IE is
+// ignored by the field parser but retained by FieldsChunkSerializer's raw-data
+// cache, while bytes beyond the requested body remain in the packet.
+auto vendorBytes = bytes;
+vendorBytes.insert(vendorBytes.end(), {221, 3, 0x01, 0x02, 0x03});
+auto framedBytes = vendorBytes;
+std::vector<uint8_t> trailerBytes = {0xde, 0xad, 0xbe, 0xef};
+framedBytes.insert(framedBytes.end(), trailerBytes.begin(), trailerBytes.end());
+Packet framed("framed", makeShared<BytesChunk>(framedBytes));
+auto vendorDecoded = framed.popAtFront<Ieee80211AssociationResponseFrame>(B(vendorBytes.size()));
+ASSERT(vendorDecoded->getChunkLength() == B(vendorBytes.size()));
+ASSERT(serializeResponse(vendorDecoded) == vendorBytes);
+ASSERT(framed.peekDataAsBytes()->getBytes() == trailerBytes);
 
 auto unequalResponse = makeHtResponse();
 auto unequalCapabilities = unequalResponse->getHtCapabilities();
