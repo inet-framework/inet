@@ -219,6 +219,17 @@ void PacketQueue::handlePacketRemoved(Packet *packet)
         EV_INFO << "Removing packet" << EV_FIELD(packet) << EV_ENDL;
         queue.remove(packet);
         emit(packetRemovedSignal, packet);
+        notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::REMOVED);
+    }
+}
+
+void PacketQueue::handlePacketDropping(Packet *packet)
+{
+    Enter_Method("handlePacketDropping");
+    if (queue.contains(packet)) {
+        EV_INFO << "Removing packet" << EV_FIELD(packet) << EV_ENDL;
+        queue.remove(packet);
+        emit(packetRemovedSignal, packet);
     }
 }
 

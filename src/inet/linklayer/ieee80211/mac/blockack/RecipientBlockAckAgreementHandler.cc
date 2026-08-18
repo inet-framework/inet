@@ -109,11 +109,6 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::removeAgreement(M
     return nullptr;
 }
 
-void RecipientBlockAckAgreementHandler::terminateAgreement(MacAddress originatorAddr, Tid tid)
-{
-    delete removeAgreement(originatorAddr, tid);
-}
-
 RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::getAgreement(Tid tid, MacAddress originatorAddr)
 {
     auto agreementId = std::make_pair(originatorAddr, tid);
@@ -148,9 +143,9 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::processReceivedAd
     return agreement;
 }
 
-void RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
+std::unique_ptr<RecipientBlockAckAgreement> RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
-    terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+    return std::unique_ptr<RecipientBlockAckAgreement>(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
 }
 
 std::unique_ptr<RecipientBlockAckAgreement> RecipientBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)

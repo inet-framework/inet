@@ -76,6 +76,7 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     virtual Packet *pullPacket(const cGate *gate) override;
 
     virtual void handlePacketRemoved(Packet *packet) override;
+    virtual void handlePacketDropping(Packet *packet) override;
     virtual void handlePacketDropped(Packet *packet) override;
 };
 

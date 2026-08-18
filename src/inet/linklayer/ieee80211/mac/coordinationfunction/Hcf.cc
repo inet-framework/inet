@@ -658,8 +658,16 @@ void Hcf::originatorProcessTransmittedManagementFrame(Packet *packet, const Ptr<
             if (wasPending)
                 rebuildPendingFrameEligibility();
         }
-        else
-            recipientBlockAckAgreementHandler->processTransmittedDelba(delba);
+        else {
+            auto agreement = recipientBlockAckAgreementHandler->processTransmittedDelba(delba);
+            if (agreement != nullptr) {
+                // IEEE Std 802.11-2024, 10.25.4 and 11.5.3.5: recipient
+                // resources are released whether the recipient transmitted or
+                // received DELBA. The reorder window is such a resource.
+                recipientDataService->resetBlockAckReordering(delba->getTid(), delba->getReceiverAddress());
+                emit(blockAckAgreementDeletedSignal, agreement.get());
+            }
+        }
     }
     else ; // TODO other mgmt frames if needed
 }

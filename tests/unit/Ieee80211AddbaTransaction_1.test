@@ -24,6 +24,7 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
@@ -433,6 +434,10 @@ class TestHcf : public Hcf
         originatorBlockAckAgreementHandler = handler;
         originatorBlockAckAgreementPolicy = policy;
     }
+    void configureTransmittedManagement(Edca *edca, IOriginatorQoSAckPolicy *originatorAckPolicy) {
+        this->edca = edca;
+        this->originatorAckPolicy = originatorAckPolicy;
+    }
     void configureBlockAckHandlers(IOriginatorBlockAckAgreementHandler *originatorHandler, IOriginatorBlockAckAgreementPolicy *originatorPolicy, IRecipientBlockAckAgreementHandler *recipientHandler, IRecipientBlockAckAgreementPolicy *recipientPolicy) {
         originatorBlockAckAgreementHandler = originatorHandler;
         originatorBlockAckAgreementPolicy = originatorPolicy;
@@ -440,6 +445,7 @@ class TestHcf : public Hcf
         recipientBlockAckAgreementPolicy = recipientPolicy;
     }
     void processTransmittedData(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, AccessCategory ac) { originatorProcessTransmittedDataFrame(packet, dataHeader, ac); }
+    void processTransmittedManagement(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& managementHeader, AccessCategory ac) { originatorProcessTransmittedManagementFrame(packet, managementHeader, ac); }
     void dropPacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::DROPPED); }
     void cancelTransaction(uint64_t transactionId) { cancelAddbaTransaction(transactionId, nullptr); }
     void processReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header) { recipientProcessReceivedManagementFrame(header); }
@@ -1132,6 +1138,68 @@ ASSERT(immediateRecipientHandler.getAgreement(6, peer1) == replacementImmediateA
     ASSERT(recipientDataService.numReorderingResets == 0);
     ASSERT(recipientHandler->getAgreement(2, peer2) != nullptr);
     hcf.unsubscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+}
+
+// IEEE Std 802.11-2024, 10.25.4 and 11.5.3.5: locally transmitting a
+// recipient DELBA tears down the agreement and its reorder resources before a
+// replacement agreement for the same peer and TID starts a fresh window.
+{
+    auto recipientDataServiceModule = cModuleType::get("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService")->create("transmittedDelbaDataService", this);
+    recipientDataServiceModule->callInitialize();
+    auto recipientDataService = check_and_cast<RecipientQosMacDataService *>(recipientDataServiceModule);
+    TestPacketDropSignalListener reorderDropListener;
+    recipientDataService->subscribe(packetDroppedSignal, &reorderDropListener);
+
+    auto originatorHandler = new TestOriginatorHandler();
+    auto recipientHandler = new RecipientBlockAckAgreementHandler();
+    TestRecipientPolicy transmittedDelbaPolicy;
+    TestCallback transmittedDelbaCallback;
+    auto firstRequest = makeRequest(peer2, 3, 84, SequenceNumberCyclic(100), 32);
+    auto firstAgreement = recipientHandler->processReceivedAddbaRequest(firstRequest, &transmittedDelbaPolicy, &transmittedDelbaCallback, &transmittedDelbaCallback);
+    ASSERT(firstAgreement != nullptr);
+    auto oldWindowHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(101));
+    oldWindowHeader->setTransmitterAddress(peer2);
+    auto oldWindowPacket = new Packet("transmittedDelbaOldWindow", oldWindowHeader);
+    ASSERT(recipientDataService->dataFrameReceived(oldWindowPacket, oldWindowHeader, recipientHandler).empty());
+
+    QosAckHandler transmittedDelbaAckHandler;
+    TestEdcaf transmittedDelbaEdcaf;
+    transmittedDelbaEdcaf.qosAckHandler = &transmittedDelbaAckHandler;
+    TestEdca transmittedDelbaEdca;
+    transmittedDelbaEdca.edcaf = &transmittedDelbaEdcaf;
+    OriginatorQosAckPolicy transmittedDelbaAckPolicy;
+    TestHcf hcf;
+    hcf.configureBlockAckHandlers(originatorHandler, &originatorPolicy, recipientHandler, &transmittedDelbaPolicy);
+    hcf.configureRecipientDataService(recipientDataService);
+    hcf.configureTransmittedManagement(&transmittedDelbaEdca, &transmittedDelbaAckPolicy);
+    TestSignalListener deletionListener;
+    hcf.subscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+
+    auto delba = makeShared<Ieee80211Delba>();
+    delba->setReceiverAddress(peer2);
+    delba->setTid(3);
+    delba->setInitiator(false);
+    delba->setSequenceNumber(SequenceNumberCyclic(200));
+    Packet delbaPacket("transmittedRecipientDelba", delba);
+    hcf.processTransmittedManagement(&delbaPacket, delba, AC_BE);
+    ASSERT(recipientHandler->getAgreement(3, peer2) == nullptr);
+    ASSERT(deletionListener.numSignals == 1);
+    ASSERT(reorderDropListener.numOtherPacketDrops == 1);
+
+    auto replacementRequest = makeRequest(peer2, 3, 85, SequenceNumberCyclic(10), 32);
+    auto replacementAgreement = recipientHandler->processReceivedAddbaRequest(replacementRequest, &transmittedDelbaPolicy, &transmittedDelbaCallback, &transmittedDelbaCallback);
+    ASSERT(replacementAgreement != nullptr);
+    auto newWindowHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(11));
+    newWindowHeader->setTransmitterAddress(peer2);
+    auto newWindowPacket = new Packet("transmittedDelbaNewWindow", newWindowHeader);
+    ASSERT(recipientDataService->dataFrameReceived(newWindowPacket, newWindowHeader, recipientHandler).empty());
+    recipientDataService->resetBlockAckReordering(3, peer2);
+    ASSERT(reorderDropListener.numOtherPacketDrops == 2);
+
+    hcf.unsubscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+    recipientDataService->unsubscribe(packetDroppedSignal, &reorderDropListener);
+    recipientDataServiceModule->callFinish();
+    recipientDataServiceModule->deleteModule();
 }
 
 // The reverse DELBA direction terminates the originator agreement and emits
@@ -1948,8 +2016,8 @@ delete compoundPacket;
 }
 
 
-// Bulk removal detaches only this queue's packets from a shared buffer; packets
-// belonging to another queue remain buffered and receive no removal callback.
+// Bulk removal detaches only this queue's packets from a shared buffer. A
+// direct buffer removal then notifies the owning queue exactly once.
 {
     auto bufferModule = cModuleType::get("inet.queueing.buffer.PacketBuffer")->create("sharedRemovalBuffer", this);
     bufferModule->callInitialize();
@@ -1970,14 +2038,17 @@ delete compoundPacket;
     auto retainedPacket = new Packet("sharedRemovalRetained", makeShared<ByteCountChunk>(B(1)));
     secondQueue->pushPacket(retainedPacket, nullptr);
     firstQueue->removeAllPackets();
-    auto buffer = check_and_cast<queueing::IPacketCollection *>(bufferModule);
+    auto buffer = check_and_cast<queueing::IPacketBuffer *>(bufferModule);
     ASSERT(firstQueue->isEmpty());
     ASSERT(secondQueue->getNumPackets() == 1);
     ASSERT(buffer->getNumPackets() == 1);
     ASSERT(firstCallback.numRemovedPackets == 2);
     ASSERT(secondCallback.numRemovedPackets == 0);
-    auto dequeuedPacket = secondQueue->dequeuePacket([retainedPacket](const Packet *packet) { return packet == retainedPacket; });
-    ASSERT(dequeuedPacket == retainedPacket);
+    buffer->removePacket(retainedPacket);
+    ASSERT(secondQueue->isEmpty());
+    ASSERT(buffer->getNumPackets() == 0);
+    ASSERT(secondCallback.numRemovedPackets == 1);
+    ASSERT(secondCallback.numDroppedPackets == 0);
     take(retainedPacket);
     delete retainedPacket;
     firstQueue->removePacketCallback(&firstCallback);
@@ -2035,7 +2106,7 @@ delete compoundPacket;
     secondQueue->pushPacket(new Packet("sharedSecondVictim", makeShared<ByteCountChunk>(B(1))), nullptr);
     auto retainedPacket = new Packet("sharedRetainedPacket", makeShared<ByteCountChunk>(B(3)));
     firstQueue->pushPacket(retainedPacket, nullptr);
-    if (dropCallback.numDroppedPackets != 2 || !dropCallback.allExpectedPacketsDetachedAtFirstDrop || firstQueue->getNumPackets() != 1 || secondQueue->getNumPackets() != 0)
+    if (dropCallback.numDroppedPackets != 2 || dropCallback.numRemovedPackets != 0 || !dropCallback.allExpectedPacketsDetachedAtFirstDrop || firstQueue->getNumPackets() != 1 || secondQueue->getNumPackets() != 0)
         throw cRuntimeError("Shared buffer notified a drop before detaching the full victim batch");
     auto dequeuedPacket = firstQueue->dequeuePacket([retainedPacket](const Packet *packet) { return packet == retainedPacket; });
     if (dequeuedPacket != retainedPacket)

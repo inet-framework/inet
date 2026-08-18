@@ -71,7 +71,7 @@ void PacketBuffer::addPacket(Packet *packet)
             }
             for (auto& [packet, callback] : droppedPackets)
                 if (callback != nullptr)
-                    callback->handlePacketRemoved(packet);
+                    callback->handlePacketDropping(packet);
             for (auto& [packet, callback] : droppedPackets) {
                 if (callback != nullptr)
                     callback->handlePacketDropped(packet);
