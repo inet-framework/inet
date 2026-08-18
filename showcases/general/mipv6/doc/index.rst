@@ -386,39 +386,85 @@ everything down again.
 Results
 -------
 
-The round-trip time of every ping, in all three configurations, tells the
-whole story in one chart:
+The round-trip time of every ping tells the whole story. The three
+configurations are plotted separately on identical axes, so the phases can be
+compared panel by panel; the shaded band marks the interval the mobile node
+spends away from its home network.
 
-.. figure:: media/pingrtt.png
+.. figure:: media/pingrtt-without.png
    :align: center
 
 ..
    FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
    type:     chart (matplotlib)
-   anf:      Mipv6Showcase.anf   chart "Ping round-trip time"
-   inputs:   results/*.vec (all three configs; re-run them first)
-   shows:    RTT phases: 14ms home / 40ms tunneled / 20ms route-optimized /
-             no-reply gaps; "away from home" span shaded 15..51s
-   anchor:   phase levels are link-delay arithmetic (12/38/18ms + wifi) --
-             if a level moved, the NED delays or the wifi bitrate changed.
-   export:   opp_charttool imageexport Mipv6Showcase.anf -n "Ping round-trip
-             time" -f png --dpi 150 -d doc/media   (8x6in -> 1200x900)
+   anf:      Mipv6Showcase.anf   chart "Ping round-trip time (without Mobile IPv6)"
+   inputs:   results/WithoutMipv6-#0.vec (re-run the config first)
+   shows:    RTT of every ping in the WithoutMipv6 config; the total reachability
+             gap while away; "away from home" span shaded 15..51s
+   anchor:   axes are pinned (x 0..80s, y 0..45ms) so the three panels compare
+             directly -- keep all three identical if any one is redone.
+             The gap is structural -- the home address is simply not routable
+             on the foreign link.
+   export:   opp_charttool imageexport Mipv6Showcase.anf -n "Ping round-trip time (without Mobile IPv6)"
+             -f png --dpi 150 -d doc/media   (8x6in -> 1200x900)
    stamp:    captured 2026-08, INET 4.7
 
-**Before the move (up to t=15 s) the three runs are identical** — the curves
-coincide exactly at the 14 ms baseline, so only the last-drawn series (green)
-is visible. The handover then separates them:
+**Without Mobile IPv6 the node is unreachable the whole time it is away** —
+no replies at all for 37.5 s, resuming only when it re-enters home coverage on
+the way back. Its home address means nothing on the foreign link.
 
-- **without Mobile IPv6** (blue): no replies at all while away — a 37.5 s
-  hole — resuming only when the node re-enters home coverage on the way back.
-- **bidirectional tunneling** (orange): after a ~4.5 s outage (scanning,
-  association, movement detection, duplicate address detection on the new
-  link, and the registration with its one-second acknowledgement delay from
-  the implementation notes), replies resume on the 40 ms plateau and stay
-  there.
-- **route optimization** (green): the same outage, **exactly one reply at
-  40 ms** — the single ping that was answered through the tunnel before route
-  optimization completed — and then the direct path at 20 ms.
+.. figure:: media/pingrtt-bidirectional.png
+   :align: center
+
+..
+   FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
+   type:     chart (matplotlib)
+   anf:      Mipv6Showcase.anf   chart "Ping round-trip time (bidirectional tunneling)"
+   inputs:   results/BidirectionalTunneling-#0.vec (re-run the config first)
+   shows:    RTT of every ping with route optimization off; the 40 ms tunneled
+             plateau while away; "away from home" span shaded 15..51s
+   anchor:   axes are pinned (x 0..80s, y 0..45ms) so the three panels compare
+             directly -- keep all three identical if any one is redone.
+             The 40 ms plateau is link-delay arithmetic (38 ms + wifi) -- if it
+             moved, the NED delays or the wifi bitrate changed.
+   export:   opp_charttool imageexport Mipv6Showcase.anf -n "Ping round-trip time (bidirectional tunneling)"
+             -f png --dpi 150 -d doc/media   (8x6in -> 1200x900)
+   stamp:    captured 2026-08, INET 4.7
+
+**Bidirectional tunneling restores reachability, at the cost of a detour.**
+After a ~4.5 s outage — scanning, association, movement detection, duplicate
+address detection on the new link, and the registration with its one-second
+acknowledgement delay from the implementation notes — replies resume on the
+40 ms plateau and stay there, every packet taking the long way through the home agent.
+
+.. figure:: media/pingrtt-routeopt.png
+   :align: center
+
+..
+   FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
+   type:     chart (matplotlib)
+   anf:      Mipv6Showcase.anf   chart "Ping round-trip time (route optimization)"
+   inputs:   results/RouteOptimization-#0.vec (re-run the config first)
+   shows:    RTT of every ping with route optimization on; one 40 ms tunneled
+             reply, then the 20 ms direct path; span shaded 15..51s
+   anchor:   axes are pinned (x 0..80s, y 0..45ms) so the three panels compare
+             directly -- keep all three identical if any one is redone.
+             The 20 ms plateau is link-delay arithmetic (18 ms + wifi); the lone
+             40 ms point at t=21.5s is the last pre-optimization reply.
+   export:   opp_charttool imageexport Mipv6Showcase.anf -n "Ping round-trip time (route optimization)"
+             -f png --dpi 150 -d doc/media   (8x6in -> 1200x900)
+   stamp:    captured 2026-08, INET 4.7
+
+**Route optimization removes the detour after a single tunneled packet.** The
+same outage, then **exactly one reply at 40 ms** — the single ping answered
+through the tunnel before route optimization completed — and the direct path
+at 20 ms from there on.
+
+Up to the handover the three runs are identical: while the node is at home
+Mobile IPv6 has nothing to do, so the three configurations are the same
+simulation, sample for sample, on the 14 ms baseline. Plotted on one pair of
+axes the three curves coincided exactly and hid one another, which is why they
+are shown separately here.
 
 On the way back (t≈50 s) a shorter outage covers re-association and
 de-registration, and all three configurations converge on the 14 ms baseline
