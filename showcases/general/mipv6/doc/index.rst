@@ -861,10 +861,10 @@ forwards and one that merely passes its position on the chart.
 Inside the packets
 ~~~~~~~~~~~~~~~~~~
 
-The two forwarding modes are distinguishable inside a single packet. Below is
-the parsed structure of a tunneled ping request captured on the home
-agent's backbone link (Qtenv's packet inspector): **two stacked IPv6
-headers** — the outer one from the home agent (``2001:db8:0:1:...:1``) to the
+The two forwarding modes are distinguishable inside a single packet. Below are
+the two IPv6 header chunks of a tunneled ping request, captured on the home
+agent's backbone link and expanded field by field in Qtenv's packet
+inspector: **two stacked IPv6 headers** — the outer one from the home agent (``2001:db8:0:1:...:1``) to the
 care-of address (``2001:db8:0:3:...:d``) with ``protocol = ipv6``, carrying
 the untouched inner packet from the correspondent to the *home* address, 40
 bytes of overhead in all. Notice that the two destination addresses share
@@ -875,7 +875,7 @@ protocol identifiers, not the IANA protocol numbers; fields such as
 ``extensionType = 43`` are genuine wire values.)
 
 .. figure:: media/tunneled_packet.png
-   :width: 100%
+   :align: center
 
 ..
    FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
@@ -888,20 +888,23 @@ protocol identifiers, not the IANA protocol numbers; fields such as
              homeAgent -> the 170B ping -> object inspector, expand depth 4
    anchor:   tunneled pings are 170B on the HA-backbone wire (130B + 40B
              outer header) throughout the away phase
-   capture:  get_inspector_screenshot 1750x2800 -> crop the chunks[7] band
-             (was x60-1740, y1305-1455)
+   capture:  open_inspector type=object -> expand_inspector_tree depth=5 ->
+             get_inspector_screenshot 1400x4400 -> PIL-crop (60,1778)-(800,2554),
+             which is the chunks[2] and chunks[3] Ipv6Header rows with their
+             fields; was 740x776.  depth=5 is deliberate -- depth=6 also
+             unfolds the raw bin/raw hex dumps and shifts every row offset.
    stamp:    captured 2026-08, INET 4.7
 
-The same ping in the route-optimized mode, captured at the correspondent
-node: **one** IPv6 header, addressed to the care-of address directly, followed
-by a *type 2 routing header* (``routingType = 2, segmentsLeft = 1``) whose
+The same ping in the route-optimized mode, captured at the correspondent node
+and expanded the same way: **one** IPv6 header, addressed to the care-of
+address directly, followed by a *type 2 routing header* (``routingType = 2, segmentsLeft = 1``) whose
 address field — one level deeper than the crop shows — carries the home
 address: 24 bytes instead of 40, and no detour. (Replies in the other
 direction carry the home address in a *Home Address destination option*
 instead; not shown.)
 
 .. figure:: media/ropacket.png
-   :width: 100%
+   :align: center
 
 ..
    FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
@@ -914,8 +917,12 @@ instead; not shown.)
              correspondentNode -> the 154B ping -> object inspector, depth 4
    anchor:   route-optimized pings are 154B on the CN wire (130B + 24B
              type-2 routing header) during the away phase
-   capture:  get_inspector_screenshot 1750x2800 -> crop chunks band
-             (was x60-1740, y1213-1360)
+   capture:  open_inspector type=object -> expand_inspector_tree depth=5 ->
+             get_inspector_screenshot 1400x4400 -> PIL-crop (60,1688)-(800,2358),
+             which is the chunks[2] Ipv6Header and chunks[3] Ipv6RoutingHeader
+             rows with their fields; was 740x670.  address[1] stays collapsed
+             at depth=5 (see the prose); depth=6 would open it but also unfolds
+             the hex dumps and shifts every row offset.
    stamp:    captured 2026-08, INET 4.7
 
 Meanwhile the home agent's binding cache holds exactly one entry — the
