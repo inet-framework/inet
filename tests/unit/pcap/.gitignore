@@ -1,0 +1,7 @@
+# The repo-wide .gitignore drops *.pcap, because that is what a simulation writes.
+# The captures in this directory tree are corpus data, not output, so keep them
+# visible to git -- otherwise a newly added capture is silently left out of the
+# commit. (wireshark/ keeps its own stricter rule: everything there is ignored
+# until a vetted capture is force-added.)
+!*.pcap
+!*.cap
