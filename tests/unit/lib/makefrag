@@ -1,0 +1,8 @@
+# VoipStreamPacket_m.h has a hard #error unless HAVE_FFMPEG is defined (src/makefrag
+# sets it for the INET library build); the VoipStream chunk filler includes it, so do
+# the same here. The fillers need no libav symbols themselves -- the VoipStreamPacket
+# serializer lives in libINET.
+HAVE_FFMPEG := $(shell pkg-config --exists libavcodec libavformat libavutil && echo yes)
+ifeq ($(HAVE_FFMPEG), yes)
+  CFLAGS += -DHAVE_FFMPEG
+endif
