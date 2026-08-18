@@ -702,6 +702,162 @@ arrows merely *cross* its axis on the way past, which is the visual difference
 between a packet the home agent forwards and one that simply passes its
 position on the chart. That is route optimization in one glance.
 
+Step by step
+~~~~~~~~~~~~
+
+The three panels above are enough to follow the handover. If you want to watch
+each message travel hop by hop, the six panels below cut the same window
+finer — one exchange at a time, with the dead time between exchanges skipped.
+
+One thing to know before reading them: an arrow running *upward* across the
+wireless band, from ``apForeign`` back to ``mobileNode``, is **not** Mobile
+IPv6 signaling. The access point is a learning bridge, and until it knows
+where a frame's link-layer destination lives it floods the frame to every
+port — including the wireless one the frame just arrived on. The mobile
+node's MAC discards it. It is ordinary 802.11 bridging, visible here only
+because these panels finally give it room.
+
+**1 — The first Binding Update.**
+
+.. figure:: media/seqchart2-1-registration.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart (step panel 1 of 6)
+   shared:   same eventlog, axes, event filter, timeline mode and window size
+             as the stage panels above -- see the first stage panel's recipe
+             for the full setup
+   capture:  goto_event #11077 first, then zoom 20.02..20.10
+   shows:    the first Binding Update, hop by hop from mobileNode to homeAgent
+   anchor:   BU at 20.0437 (event #11078). No acknowledgement in this window --
+             the home agent holds it for one second.
+   stamp:    captured 2026-08, INET 4.7
+
+The mobile node registers its new care-of address: one message, five hops —
+wireless to ``apForeign``, then over Ethernet through ``foreignRouter`` and
+``backbone`` to ``homeAgent``. Nothing comes back yet.
+
+**2 — A tunneled ping, and the care-of test.**
+
+.. figure:: media/seqchart2-2-tunneled.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart (step panel 2 of 6)
+   shared:   same eventlog, axes, event filter, timeline mode and window size
+             as the stage panels above -- see the first stage panel's recipe
+             for the full setup
+   capture:  goto_event #11383 first, then zoom 20.45..20.60
+   shows:    ping39 arriving through the home-agent dog-leg with no reply, and
+             the CoTI/CoT pair going directly to the correspondent
+   anchor:   ping39 leaves the correspondent at 20.50 and reaches the mobile node
+             at 20.5385; CoTI 20.5385, CoT back at 20.5580.
+   stamp:    captured 2026-08, INET 4.7
+
+``ping39`` arrives the long way — correspondent to ``backbone`` to
+``homeAgent``, and only then out to the foreign network. Its reply is
+generated but never leaves. In the same window the *Care-of Test Init* and
+*Care-of Test* run straight to the correspondent and back, needing no tunnel.
+
+**3 — The registration is retransmitted, and acknowledged.**
+
+.. figure:: media/seqchart2-3-retransmit.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart (step panel 3 of 6)
+   shared:   same eventlog, axes, event filter, timeline mode and window size
+             as the stage panels above -- see the first stage panel's recipe
+             for the full setup
+   capture:  goto_event #11829 first, then zoom 20.95..21.10
+   shows:    ping40 on the same dog-leg, the retransmitted Binding Update, and
+             both Binding Acknowledgements arriving
+   anchor:   ping40 21.00; second BU 21.0437; acknowledgements at the mobile node
+             21.0710 (stale, discarded) and 21.0870 (activates the binding).
+   stamp:    captured 2026-08, INET 4.7
+
+``ping40`` takes the same detour. The retransmission timer then fires — the
+second *Binding Update* — and both *Binding Acknowledgements* come back: the
+first discarded for its stale sequence number, the second activating the
+binding.
+
+**4 — The first ping that gets an answer.**
+
+.. figure:: media/seqchart2-4-firstreply.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart (step panel 4 of 6)
+   shared:   same eventlog, axes, event filter, timeline mode and window size
+             as the stage panels above -- see the first stage panel's recipe
+             for the full setup
+   capture:  goto_event #12227 first, then zoom 21.45..21.545
+   shows:    ping41 and the first reply that actually travels, through the
+             reverse tunnel and out to the correspondent
+   anchor:   ping41 21.50, at the mobile node 21.52, reply decapsulated at the home
+             agent 21.5344 and delivered to the correspondent 21.5404.
+   stamp:    captured 2026-08, INET 4.7
+
+With the binding active, ``ping41``'s reply finally travels: through the
+reverse tunnel to the home agent, which decapsulates it and forwards it to the
+correspondent.
+
+**5 — The home test, and the correspondent registration.**
+
+.. figure:: media/seqchart2-5-hometest.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart (step panel 5 of 6)
+   shared:   same eventlog, axes, event filter, timeline mode and window size
+             as the stage panels above -- see the first stage panel's recipe
+             for the full setup
+   capture:  goto_event #12369 first, then zoom 21.53..21.60
+   shows:    the retransmitted HoTI getting through the tunnel, HoT returning,
+             and the Binding Update to the correspondent being acknowledged
+   anchor:   HoTI retransmit 21.5385; HoT at the mobile node 21.5781; BU to the
+             correspondent 21.5781, acknowledged 21.5881, ack back 21.5978.
+   stamp:    captured 2026-08, INET 4.7
+
+The retransmitted *Home Test Init* now gets through the tunnel and the *Home
+Test* returns via the home agent. Return routability is complete, so the
+mobile node sends a *Binding Update* straight to the correspondent, which
+acknowledges it.
+
+**6 — The direct path.**
+
+.. figure:: media/seqchart2-6-direct.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart (step panel 6 of 6)
+   shared:   same eventlog, axes, event filter, timeline mode and window size
+             as the stage panels above -- see the first stage panel's recipe
+             for the full setup
+   capture:  goto_event #12770 first, then zoom 21.95..22.55
+   shows:    ping42 and ping43 running directly between correspondent and mobile
+             node, crossing the homeAgent band without touching it
+   anchor:   ping42 at 22.00 and ping43 at 22.50 take the direct path. If either
+             still bends at homeAgent, route optimization did not complete.
+   stamp:    captured 2026-08, INET 4.7
+
+``ping42`` and ``ping43`` run correspondent → ``backbone`` → ``foreignRouter``
+→ mobile node, and back the same way. Their arrows *cross* the ``homeAgent``
+band without ever touching it — the difference between a packet the home agent
+forwards and one that merely passes its position on the chart.
+
 Inside the packets
 ~~~~~~~~~~~~~~~~~~
 
