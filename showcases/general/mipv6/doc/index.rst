@@ -559,37 +559,148 @@ chain of same-named arrows across the lifelines it crosses.
              20.02..22.06, window 1920x1000; was 1593x599
    stamp:    captured 2026-08, INET 4.7
 
-Reading it left to right:
+Reading it left to right: the overview is dense, so the three panels below
+zoom into it in order, each covering one stretch of the same window.
 
-- **Registration, in two acts**: at the left edge, the first *Binding Update*
-  descends from the mobile node (top lifeline) through the foreign network to
-  the home agent. Its acknowledgement is nowhere near it: the home agent
-  holds the *Binding Acknowledgement* back for one second (the
-  duplicate-address-detection stand-in from the implementation notes), so the
-  mobile node's retransmission timer fires first — the *second* Binding
-  Update — and the two *Binding Acknowledgement* arrows appear only after
-  it, between ``ping40`` and ``ping41``. The first acknowledgement is
-  discarded for its stale sequence number; the second activates the binding.
-- **Tunneled pings, dropped replies**: ``ping39`` and ``ping40`` arrive via
-  the home-agent dog-leg — every early arrow visits the ``homeAgent``
-  lifeline — but no reply comes back: until the binding is active, the
-  mobile node discards its own home-address-sourced replies (the same
-  implementation note). ``ping41`` is the first with a reply, still through
-  the tunnel.
-- **Return routability**: the *Care-of Test Init (CoTI)* and *Care-of Test
-  (CoT)* travel directly between mobile node and correspondent right after
-  the first tunneled ping arrives — a full second *before* the *Home Test
-  Init (HoTI)* manages to leave. The Home Test Init needs the reverse tunnel:
-  its first copy is lost along with the early replies, and it is its
-  retransmission that goes through. The *Home Test (HoT)* returns via the
-  home agent.
-- **Route optimization completes**: the *Binding Update* goes straight to the
-  correspondent node and is acknowledged (INET requests an acknowledgement on
-  every Binding Update; the standard makes it optional for correspondents).
-  From ``ping42`` onward the arrows run directly between correspondent and
-  mobile node — no arrow bends at the ``homeAgent`` lifeline anymore (later
-  arrows merely cross its axis on the way to the correspondent), which is
-  route optimization in one glance.
+**Registration, and pings that get no reply.**
+
+.. figure:: media/seqchart-registration.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart (zoomed panel of the overview chart above)
+   config:   RouteOptimization, re-run with --record-eventlog=true
+             --eventlog-recording-intervals=19s..23.5s,52s..53.5s
+   seed:     default (seed-set=1)
+   source:   results/RouteOptimization-#0.elog (copy into an IDE-workspace
+             project dir first if the worktree is not a workspace project)
+   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent,
+             correspondentNode (this top-to-bottom order; apForeign is the
+             wireless transit -- removing it hides the arrows)
+   filter:   message_names: Binding Update, Binding Acknowledgement, HoTI,
+             CoTI, HoT, CoT, ping*
+   shows:    the first Binding Update reaching the home agent; ping39 and ping40
+             arriving through the home-agent dog-leg with no reply returning;
+             the CoTI/CoT pair going directly to the correspondent
+   anchor:   first BU at t=20.0437 (event #11078); CoTI 20.5385; CoT 20.5580;
+             ping39 20.50, ping40 21.00. The HoTI generated at 20.5385 is
+             deliberately absent -- it is dropped before transmission.
+   capture:  goto_event #11077 first, then zoom 20.02..21.04. NONLINEAR timeline,
+             NETWORK_COMMUNICATION mode, window 1920x1000; was 1593x600.
+             The timeline allots pixels by event density, so widening the time
+             range does NOT give clipped labels more room -- move the panel
+             boundary instead.
+   stamp:    captured 2026-08, INET 4.7
+
+At the left edge the first *Binding Update* descends from the mobile node
+(top lifeline) through the foreign network to the home agent. No
+acknowledgement follows it here: the home agent holds the *Binding
+Acknowledgement* back for one second — the duplicate-address-detection
+stand-in from the implementation notes — so it appears only in the next panel.
+
+Meanwhile ``ping39`` and ``ping40`` reach the mobile node through the
+home-agent dog-leg — every one of their arrows visits the ``homeAgent``
+lifeline — but **no reply travels back**. Until the binding is active the
+mobile node discards its own home-address-sourced replies, the same
+implementation note as before.
+
+The *Care-of Test Init (CoTI)* and *Care-of Test (CoT)* travel directly
+between mobile node and correspondent, right after the first tunneled ping
+arrives. Their partner the *Home Test Init (HoTI)* is **not drawn here even
+though the mobile node generates it at the same instant**: the Home Test Init
+needs the reverse tunnel, so this first copy is dropped along with the early
+replies, and only its retransmission — a full second later, in the next panel
+— gets through.
+
+**The binding activates, and return routability completes.**
+
+.. figure:: media/seqchart-routability.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart (zoomed panel of the overview chart above)
+   config:   RouteOptimization, re-run with --record-eventlog=true
+             --eventlog-recording-intervals=19s..23.5s,52s..53.5s
+   seed:     default (seed-set=1)
+   source:   results/RouteOptimization-#0.elog (copy into an IDE-workspace
+             project dir first if the worktree is not a workspace project)
+   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent,
+             correspondentNode (this top-to-bottom order; apForeign is the
+             wireless transit -- removing it hides the arrows)
+   filter:   message_names: Binding Update, Binding Acknowledgement, HoTI,
+             CoTI, HoT, CoT, ping*
+   shows:    the retransmitted Binding Update, both Binding Acknowledgements
+             arriving, ping41 as the first ping with a reply (still tunneled),
+             and the HoTI retransmission answered by HoT
+   anchor:   second BU 21.0437; BAcks at the mobile node 21.0710 (stale, discarded)
+             and 21.0870 (activates the binding); ping41 21.50 with its reply
+             reaching the correspondent 21.5404; HoTI retransmit 21.5385;
+             HoT back at the mobile node 21.5781, where this panel ends.
+   capture:  goto_event #11914 first, then zoom 21.03..21.5782. NONLINEAR timeline,
+             NETWORK_COMMUNICATION mode, window 1920x1000; was 1593x600.
+             The timeline allots pixels by event density, so widening the time
+             range does NOT give clipped labels more room -- move the panel
+             boundary instead.
+   stamp:    captured 2026-08, INET 4.7
+
+The mobile node's retransmission timer fires before the held acknowledgement
+arrives, so the registration takes a **second Binding Update** — visible at
+the left edge. Both *Binding Acknowledgement* chains then arrive together: the
+first is discarded for its stale sequence number, the second activates the
+binding. This is why the binding cache shown later records sequence number 2.
+
+With the binding active, ``ping41`` is the first ping to be answered — the
+reply follows the reverse tunnel back through the ``homeAgent`` lifeline. The
+retransmitted *Home Test Init* now gets through, and the *Home Test (HoT)*
+returns via the home agent, completing return routability just as the panel
+ends.
+
+**Route optimization takes effect.**
+
+.. figure:: media/seqchart-optimized.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-ide-mcp" skill)
+   type:     seqchart (zoomed panel of the overview chart above)
+   config:   RouteOptimization, re-run with --record-eventlog=true
+             --eventlog-recording-intervals=19s..23.5s,52s..53.5s
+   seed:     default (seed-set=1)
+   source:   results/RouteOptimization-#0.elog (copy into an IDE-workspace
+             project dir first if the worktree is not a workspace project)
+   axes:     mobileNode, apForeign, foreignRouter, backbone, homeAgent,
+             correspondentNode (this top-to-bottom order; apForeign is the
+             wireless transit -- removing it hides the arrows)
+   filter:   message_names: Binding Update, Binding Acknowledgement, HoTI,
+             CoTI, HoT, CoT, ping*
+   shows:    the Binding Update sent straight to the correspondent node and
+             acknowledged, then ping42 and ping43 running directly between
+             correspondent and mobile node
+   anchor:   BU to the correspondent 21.5781, acknowledged 21.5881, ack back at
+             the mobile node 21.5978; ping42 at 22.00 and ping43 at 22.50 take
+             the direct path. If any ping still bends at homeAgent, route
+             optimization did not complete.
+   capture:  goto_event #12518 first, then zoom 21.5775..22.55. NONLINEAR timeline,
+             NETWORK_COMMUNICATION mode, window 1920x1000; was 1593x600.
+             The timeline allots pixels by event density, so widening the time
+             range does NOT give clipped labels more room -- move the panel
+             boundary instead.
+   stamp:    captured 2026-08, INET 4.7
+
+The *Binding Update* now goes straight to the correspondent node and is
+acknowledged. (INET requests an acknowledgement on every Binding Update; the
+standard makes it optional for correspondents.)
+
+From ``ping42`` onward the arrows run **directly between correspondent and
+mobile node** — no arrow bends at the ``homeAgent`` lifeline any more. Later
+arrows merely *cross* its axis on the way past, which is the visual difference
+between a packet the home agent forwards and one that simply passes its
+position on the chart. That is route optimization in one glance.
 
 Inside the packets
 ~~~~~~~~~~~~~~~~~~
