@@ -1,0 +1,296 @@
+%description:
+Constructed per-chunk round-trip test (WP8).
+
+Enumerates every registered chunk-serializer type, instantiates it, fills it with
+hand-written typed code, and checks the byte round-trip (serialize -> deserialize
+-> serialize) and the length invariant. A coverage report (OK / FAILED / CRASHED /
+SKIPPED) is printed.
+
+The engine (tests/unit/lib/ChunkRoundTripTest.{h,cc}) is chunk-agnostic; the fillers
+live per protocol in tests/unit/lib/fillers/ and are collected by
+getAllChunkFillers(). Every non-skipped registered type must have at least one
+filler -- a type with none fails the test, so a chunk added to INET cannot enter
+untested. A type may have several fillers (variants) when its serializer branches
+on the content: an address family, a flag, an optional trailer, an empty vs.
+populated list.
+
+Filling is typed C++ (the chunk's own setters), never the class descriptor, so the
+test needs no @editable/@fromString annotation on the model and a renamed or
+retyped field breaks the build instead of silently going unfilled. Values come from
+FillValues, which hands out distinct, byte-asymmetric values so that a swapped,
+shifted or wrong-endian serialization shows up as a byte difference.
+
+What is configured here in the .test:
+  - skipTypes: chunks that genuinely cannot round-trip to themselves -- dispatch
+    base headers (they deserialize into a concrete subclass), structural framework
+    chunks with no standalone wire form (EmptyChunk / SliceChunk / SequenceChunk /
+    StreamBufferChunk), and chunks whose serializer is a stub.
+  - commonSetup: the checksum/FCS mode, which defaults to UNDEFINED (making the
+    chunk "not serializable"); CHECKSUM_COMPUTED / FCS_COMPUTED tells the serializer
+    to emit the stored value as-is. Casting to the base class covers all subtypes.
+  - knownUnfilled: the wire fields a filler knowingly leaves at their default.
+
+%includes:
+#include "ChunkFillers.h"
+#include "ChunkRoundTripTest.h"
+// only what commonSetup below needs: the bases that declare a checksum/FCS mode
+#include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/linklayer/csmaca/CsmaCaMacHeader_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/ipv4/IgmpMessage_m.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/routing/ospf_common/OspfPacketBase_m.h"
+#include "inet/routing/pim/PimPacket_m.h"
+#include "inet/transportlayer/sctp/SctpHeader_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+
+%global:
+
+using namespace inet;
+
+static const std::set<std::string> chunkSkipTypes = {
+    // -- Packet-framework structural chunks that have no standalone wire form (unlike
+    // the raw-data BytesChunk/ByteCountChunk/BitCountChunk/BitsChunk, which do round-
+    // trip -- see the common fillers): a SliceChunk is a view onto another chunk and a
+    // SequenceChunk a composite of sub-chunks, so their bytes do not deserialize back
+    // into the same structural type; an EmptyChunk is the zero-length placeholder
+    // (serialize is an "Invalid operation"); a StreamBufferChunk is a mutable stream
+    // scratch buffer, not a finalized chunk (serialize dereferences its null backing).
+    "inet::EmptyChunk",
+    "inet::SliceChunk",
+    "inet::SequenceChunk",
+    "inet::StreamBufferChunk",
+
+    // -- Abstract-by-convention base headers: deserialization starts on the base
+    // serializer, which branches on a type discriminator and builds the concrete
+    // subclass. Instantiated standalone the base leaves that discriminator at its
+    // -1/undefined sentinel, so its serializer throws "type N not supported". The
+    // concrete subclasses (which pin the type) are the real round-trip targets.
+    // (Not auto-detectable: RtcpReceiverReportPacket is itself a base of
+    // RtcpSenderReportPacket yet is a concrete, round-trippable chunk -- there the
+    // discriminator is pinned, not left unset.)
+    "inet::IcmpHeader",                           // ICMP type -> EchoRequest / Reply / DestUnreachable / ...
+    "inet::Icmpv6Header",                         // ICMPv6 type -> Echo / NeighbourSol / RouterAd / ...
+    "inet::ieee80211::Ieee80211MacHeader",        // 802.11 type -> data / mgmt / control frames
+    "inet::ieee80211::Ieee80211MgmtHeader",       // 802.11 mgmt subtype -> Assoc / Probe / Beacon / ...
+    "inet::ieee80211::Ieee80211DataOrMgmtHeader", // 802.11 data-or-mgmt intermediate base
+    "inet::ieee80211::Ieee80211ActionFrame",      // action-frame base; serializer casts to a concrete Addba/Delba subtype
+    "inet::bgp::BgpHeader",                       // BGP type -> Open / Update / Notification / Keepalive
+    "inet::IgmpQuery",                            // IGMP query base -> v1 / v2 / v3 query (the base has no max-response code field, so it cannot round-trip standalone)
+    "inet::MldMessage",                           // MLD message base -> MldQuery / MldReport / MldDone / Mldv2* (a bare message carries no valid ICMPv6 type)
+    "inet::ospf::OspfPacketBase",                 // OSPF common base (version/type only); "use specific OSPF chunks"
+    "inet::ospfv2::Ospfv2Packet",                 // OSPFv2 type -> Hello / DatabaseDescription / LSR / LSU / LSAck
+    "inet::ospfv3::Ospfv3Packet",                 // OSPFv3 type -> Hello / DatabaseDescription / LSR / LSU / LSAck
+    "inet::rtp::RtcpPacket",                      // RTCP packetType -> ReceiverReport / SenderReport / Sdes / Bye
+    "inet::aodv::AodvControlPacket",              // AODV packetType -> Rreq / Rrep / Rerr / RrepAck
+    "inet::BpduBase",                             // STP bpduType -> Cfg / Tcn
+    "inet::BMacHeaderBase",                       // B-MAC type -> ControlFrame (preamble/ack) / DataFrameHeader
+    "inet::XMacHeaderBase",                       // X-MAC type -> ControlFrame (preamble/ack) / DataFrameHeader
+    "inet::CsmaCaMacHeader",                      // CSMA/CA type -> Data / Ack
+    "inet::EthernetControlFrameBase",             // Ethernet control opCode -> PauseFrame / ...
+    "inet::physicallayer::EthernetPhyHeaderBase", // Ethernet PHY base -> EthernetPhyHeader / EthernetFragmentPhyHeader
+    "inet::GptpBase",                             // gPTP messageType -> Sync / FollowUp / PdelayReq / ...
+    "inet::IgmpMessage",                          // IGMP type -> Query / Report (v1/v2/v3) / Leave
+    "inet::MobilityHeader",                       // MIPv6 MH type -> BindingUpdate / -Acknowledgement / HomeTest / ...
+    "inet::MrpTlvHeader",                         // MRP tlvType -> Test / TopologyChange / LinkChange / ...
+    "inet::CfmTlvBase",                           // CFM type -> the TLV that ends the list
+    "inet::PimPacket",                            // PIM type -> Hello / JoinPrune / Assert / Register / ...
+
+    // Not round-trippable: serialized only, their deserializer throws. TransportPseudoHeader
+    // is a checksum pseudo-header ("not a valid deserializable data"); EthernetPadding is
+    // trailing zero padding ("Invalid operation").
+    "inet::TransportPseudoHeader",
+    "inet::EthernetPadding",
+
+    // (The 802.11 management frames -- Beacon, Probe/Association/Reassociation
+    // Request/Response -- used to be skipped here because the serializer's deserialize()
+    // was a stub. It now dispatches on the frame type and the serialize/deserialize
+    // directions agree, so they are exercised by their own fillers instead.)
+
+    // Multi-TID BlockAck / BlockAckReq: not modelled (empty .msg body) and not
+    // constructed anywhere in INET, so the serializer intentionally throws
+    // "unimplemented" instead of round-tripping. (It throws cleanly now -- a CHK guard
+    // replaced the former null-deref crash -- but there is simply no format to test.)
+    "inet::ieee80211::Ieee80211MultiTidBlockAck",
+    "inet::ieee80211::Ieee80211MultiTidBlockAckReq",
+
+    // HT / VHT PHY headers: placeholders. The .msg bodies are empty and both serializers
+    // are no-ops (they write and read nothing), so there is no wire format to round-trip.
+    "inet::physicallayer::Ieee80211HtPhyHeader",
+    "inet::physicallayer::Ieee80211VhtPhyHeader",
+};
+
+// commonSetup: set the checksum/FCS mode to CHECKSUM_COMPUTED / FCS_COMPUTED for
+// chunk types that carry one. It is a non-editable meta field the descriptor cannot
+// set, and it defaults to UNDEFINED, which makes the chunk "not serializable".
+// CHECKSUM_COMPUTED tells the serializer to emit the stored value as-is (it does
+// not verify it). Cast to the base classes so one line covers all subtypes (e.g.
+// every OSPF packet). Run by the engine on every chunk, before its filler.
+static void chunkCommonSetup(Chunk *c)
+{
+    if (auto p = dynamic_cast<UdpHeader *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<tcp::TcpHeader *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<ospf::OspfPacketBase *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<EthernetFcs *>(c)) p->setFcsMode(FCS_COMPUTED);
+    else if (auto p = dynamic_cast<ApskPhyHeader *>(c)) p->setFcsMode(FCS_COMPUTED);
+    else if (auto p = dynamic_cast<CsmaCaMacTrailer *>(c)) p->setFcsMode(FCS_COMPUTED);
+    else if (auto p = dynamic_cast<ieee80211::Ieee80211MacTrailer *>(c)) p->setFcsMode(FCS_COMPUTED);
+    // more checksum-carrying families, each on the base that declares checksumMode:
+    // IcmpHeader (ICMPv4), Icmpv6Header (ICMPv6, and Ipv6 ND + MLD which extend it),
+    // IgmpMessage (IGMP), PimPacket (PIM), SctpHeader.
+    else if (auto p = dynamic_cast<IcmpHeader *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<Icmpv6Header *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<IgmpMessage *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<PimPacket *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    else if (auto p = dynamic_cast<sctp::SctpHeader *>(c)) p->setChecksumMode(CHECKSUM_COMPUTED);
+    // the 802.11 PHY headers declare fcsMode per subclass (no common base with it):
+    // DsssPhyHeader covers HrDsssPhyHeader; Fhss and Ir are separate.
+    else if (auto p = dynamic_cast<physicallayer::Ieee80211DsssPhyHeader *>(c)) p->setFcsMode(FCS_COMPUTED);
+    else if (auto p = dynamic_cast<physicallayer::Ieee80211FhssPhyHeader *>(c)) p->setFcsMode(FCS_COMPUTED);
+    else if (auto p = dynamic_cast<physicallayer::Ieee80211IrPhyHeader *>(c)) p->setFcsMode(FCS_COMPUTED);
+}
+
+%activity:
+
+cLog::logLevel = LOGLEVEL_WARN;
+
+ChunkRoundTripConfig config;
+config.skipTypes = chunkSkipTypes;
+// Serializer classes that need not be exercised by a round-trip: the structural chunks
+// (they carry no fields of their own) and the abstract-base serializers whose concrete
+// subclasses register a different class. A serializer class no round-tripped type invokes
+// and that is not listed here is an untested serializer -> fails the gate below.
+config.skipSerializerClasses = {
+    "inet::EmptyChunkSerializer",
+    "inet::SliceChunkSerializer",
+    "inet::SequenceChunkSerializer",
+    "inet::StreamBufferChunkSerializer",
+    "inet::EthernetPaddingSerializer",              // padding is emitted with the frame, not round-tripped alone
+    "inet::TransportPseudoHeaderSerializer",        // used for checksum computation, never a standalone chunk
+    "inet::ospf::OspfPacketSerializer",             // OspfPacketBase abstract base; concrete OSPF packets use their own
+    "inet::physicallayer::EthernetPhyHeaderBaseSerializer", // abstract PHY base
+    // no-op serializers for the placeholder HT/VHT PHY headers (see chunkSkipTypes)
+    "inet::physicallayer::Ieee80211HtPhyHeaderSerializer",
+    "inet::physicallayer::Ieee80211VhtPhyHeaderSerializer",
+};
+config.commonSetup = chunkCommonSetup;
+config.fillers = getAllChunkFillers();
+// Coverage gate: the wire fields a filler knowingly leaves at their default value.
+// Anything not listed here that ends up unset fails the test, so a field a filler
+// forgets -- or a newly added .msg field nothing fills -- cannot pass unnoticed.
+config.knownUnfilled = R"KEYS(
+// -- fields the wire format requires to be zero (reserved / unused / must-be-zero),
+// so their "unfilled" default IS the value under test -- the type of a CFM end TLV is
+// among them: zero is what makes it the TLV that ends the list
+inet::CfmEndTlv::type
+inet::DhcpMessage::reserved
+inet::IcmpEchoReply::code
+inet::IcmpEchoRequest::code
+inet::IcmpPtb::unused
+inet::Igmpv1Query::unused
+inet::Igmpv1Report::unused
+inet::Igmpv3Report::resv1
+inet::Igmpv3Report::resv2
+inet::RgmpHello::reserved
+inet::RipPacket::unused1
+inet::aodv::Rerr::reserved
+inet::aodv::Rrep::reserved
+inet::aodv::Rreq::reserved
+inet::rtp::RtpMpegHeader::mbz
+inet::ospfv2::Ospfv2DatabaseDescriptionPacket::ddOptions.unused
+inet::ospfv2::Ospfv2DatabaseDescriptionPacket::options.unused_1
+inet::ospfv2::Ospfv2DatabaseDescriptionPacket::options.unused_2
+inet::ospfv2::Ospfv2DatabaseDescriptionPacket::options.unused_3
+inet::ospfv2::Ospfv2HelloPacket::options.unused_1
+inet::ospfv2::Ospfv2HelloPacket::options.unused_2
+inet::ospfv2::Ospfv2HelloPacket::options.unused_3
+inet::ospfv3::Ospfv3DatabaseDescriptionPacket::ddOptions.reserved
+inet::ospfv3::Ospfv3DatabaseDescriptionPacket::options.reserved
+inet::ospfv3::Ospfv3DatabaseDescriptionPacket::options.reservedOne
+inet::ospfv3::Ospfv3DatabaseDescriptionPacket::options.reservedTwo
+inet::ospfv3::Ospfv3DatabaseDescriptionPacket::reserved
+inet::ospfv3::Ospfv3DatabaseDescriptionPacket::reserved1
+inet::ospfv3::Ospfv3HelloPacket::options.reserved
+inet::ospfv3::Ospfv3HelloPacket::options.reservedOne
+inet::ospfv3::Ospfv3HelloPacket::options.reservedTwo
+inet::ospfv3::Ospfv3HelloPacket::reserved
+inet::ospfv3::Ospfv3LinkStateAcknowledgementPacket::reserved
+inet::ospfv3::Ospfv3LinkStateRequestPacket::reserved
+inet::ospfv3::Ospfv3LinkStateUpdatePacket::reserved
+// gPTP: IEEE 802.1AS-2020 11.4.2 fixes controlField at 0 for every message type
+inet::GptpAnnounce::controlField
+inet::GptpFollowUp::controlField
+inet::GptpPdelayReq::controlField
+inet::GptpPdelayResp::controlField
+inet::GptpPdelayRespFollowUp::controlField
+inet::GptpSync::controlField
+// OSPFv3: the X bit is the reserved half of the DC/X option pair (RFC 5340 A.2)
+inet::ospfv3::Ospfv3DatabaseDescriptionPacket::options.xBit
+inet::ospfv3::Ospfv3HelloPacket::options.xBit
+// PIM: the serializer writes these as fixed values regardless of the field --
+// State Refresh's R bit is "ignored upon receipt" and Graft carries no hold time
+inet::PimGraft::holdTime
+inet::PimStateRefresh::R
+// -- modelled but never serialized: the field exists in the .msg while the
+// serializer neither writes nor reads it, so no value could survive a round trip
+inet::EthernetFragmentFcs::mFcs
+inet::Ieee8021aeTagEpdHeader::sci
+inet::Ieee8021aeTagTpidHeader::sci
+inet::ieee80211::Ieee80211AuthenticationFrame::isLast
+inet::ieee80211::Ieee80211BeaconFrame::channelNumber
+inet::ieee80211::Ieee80211BeaconFrame::handoverParameters.avgBackoffTime
+inet::ieee80211::Ieee80211BeaconFrame::handoverParameters.avgErrorRate
+inet::ieee80211::Ieee80211BeaconFrame::handoverParameters.avgWaitTime
+inet::ieee80211::Ieee80211BeaconFrame::handoverParameters.estAvailBW
+inet::ieee80211::Ieee80211ProbeResponseFrame::channelNumber
+inet::ieee80211::Ieee80211ProbeResponseFrame::handoverParameters.avgBackoffTime
+inet::ieee80211::Ieee80211ProbeResponseFrame::handoverParameters.avgErrorRate
+inet::ieee80211::Ieee80211ProbeResponseFrame::handoverParameters.avgWaitTime
+inet::ieee80211::Ieee80211ProbeResponseFrame::handoverParameters.estAvailBW
+// -- 802.11 Block Ack: multiTid/compressedBitmap are the pair of bits that select
+// the concrete Basic/Compressed/MultiTid variant, so each concrete class pins them;
+// the Starting Sequence Control fragment-number subfield is always 0 (802.11 does
+// not fragment the frames a Block Ack covers), and ADDBA's blockAckAction is the
+// action code its own class fixes
+inet::ieee80211::Ieee80211AddbaRequest::_fragmentNumber
+inet::ieee80211::Ieee80211AddbaRequest::blockAckAction
+inet::ieee80211::Ieee80211BasicBlockAck::compressedBitmap
+inet::ieee80211::Ieee80211BasicBlockAck::fragmentNumber
+inet::ieee80211::Ieee80211BasicBlockAck::multiTid
+inet::ieee80211::Ieee80211BasicBlockAckReq::compressedBitmap
+inet::ieee80211::Ieee80211BasicBlockAckReq::fragmentNumber
+inet::ieee80211::Ieee80211BasicBlockAckReq::multiTid
+inet::ieee80211::Ieee80211CompressedBlockAck::compressedBitmap
+inet::ieee80211::Ieee80211CompressedBlockAck::fragmentNumber
+inet::ieee80211::Ieee80211CompressedBlockAck::multiTid
+inet::ieee80211::Ieee80211CompressedBlockAckReq::compressedBitmap
+inet::ieee80211::Ieee80211CompressedBlockAckReq::fragmentNumber
+inet::ieee80211::Ieee80211CompressedBlockAckReq::multiTid
+// -- MRP TLV length bytes: the serializer derives them from what it writes, so
+// the model field is not the value on the wire
+inet::MrpEnd::valueLength
+inet::MrpManufacturerFkt::subHeaderLength
+inet::MrpSubTlvHeader::subHeaderLength
+// -- ByteCountChunk/BitCountChunk carry a fill value their deserializer never
+// recovers (it only verifies the stream against a freshly constructed chunk's
+// default), so a non-default value could not round-trip
+inet::BitCountChunk::data
+)KEYS";
+testChunkRoundTrips(config);
+
+%contains: stdout
+=== Chunk round-trip coverage ===
+
+%contains: stdout
+FAILED: 0  CRASHED: 0
+
+%contains: stdout
+Coverage gate: 0 unexpected
+
+%contains: stdout
+Serializer-class gate: 0 unexpected
