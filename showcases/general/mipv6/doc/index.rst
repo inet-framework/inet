@@ -898,8 +898,8 @@ protocol identifiers, not the IANA protocol numbers; fields such as
 The same ping in the route-optimized mode, captured at the correspondent node
 and expanded the same way: **one** IPv6 header, addressed to the care-of
 address directly, followed by a *type 2 routing header* (``routingType = 2, segmentsLeft = 1``) whose
-address field — one level deeper than the crop shows — carries the home
-address: 24 bytes instead of 40, and no detour. (Replies in the other
+address field — collapsed here, but opened in the Wireshark dissection below —
+carries the home address: 24 bytes instead of 40, and no detour. (Replies in the other
 direction carry the home address in a *Home Address destination option*
 instead; not shown.)
 
@@ -924,6 +924,87 @@ instead; not shown.)
              at depth=5 (see the prose); depth=6 would open it but also unfolds
              the hex dumps and shifts every row offset.
    stamp:    captured 2026-08, INET 4.7
+
+The same two packets, off the wire
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+INET can also write a packet capture (PCAP) file, so the same two packets can
+be handed to Wireshark. That is worth doing as a cross-check: Wireshark knows
+nothing about INET and dissects the recorded bytes on their own terms, so
+whatever it reports is a property of the packet rather than of the simulator's
+own view of it.
+
+.. figure:: media/tunneled_packet_wireshark.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo with INET's PcapRecorder + Wireshark's tshark)
+   type:     wireshark dissection, rendered from tshark -V
+   config:   BidirectionalTunneling   # ../omnetpp.ini
+   seed:     default (seed-set=1)
+   pcap:     inet -u Cmdenv -c BidirectionalTunneling
+             --"*.homeAgent.numPcapRecorders=1"
+             --'*.homeAgent.pcapRecorder[0].pcapFile="results/tunneled.pcap"'
+             --'*.homeAgent.pcapRecorder[0].fileFormat="pcap"'
+             --'**.fcsMode="computed"' --'**.crcMode="computed"'
+             --'**.checksumMode="computed"'
+             The computed modes are required: with INET's default declared FCS
+             the recorder aborts with "Cannot serialize Ethernet FCS without a
+             properly computed FCS" and writes an empty file.
+   frame:    tshark -Y 'ipv6.nxt==41 && icmpv6.type==128' -> first match = frame 159 at t=20.42s
+   render:   tshark -V -O ipv6, then drop (a) Wireshark's generated fields,
+             i.e. lines whose trimmed text is wholly bracketed, and (b) lines
+             indented more than 8 spaces; draw the result with DejaVu Sans
+             Mono 13 px, transparent background; was 912x478
+   anchor:   two "Internet Protocol Version 6" root lines, the outer one with
+             Next Header: IPv6 (41). One root only = the tunnel was not up.
+   stamp:    captured 2026-08, INET 4.7, Wireshark 4.6.4
+
+**Wireshark independently finds the two stacked IPv6 headers** — outer from
+the home agent to the care-of address with ``Next Header: IPv6 (41)``, inner
+from the correspondent to the home address with ``Next Header: ICMPv6 (58)``.
+These are the real IANA protocol numbers, where the object inspector above
+showed INET's internal identifiers for the same two fields.
+
+.. figure:: media/ropacket_wireshark.png
+   :align: center
+   :width: 100%
+
+..
+   FIGURE RECIPE (redo with INET's PcapRecorder + Wireshark's tshark)
+   type:     wireshark dissection, rendered from tshark -V
+   config:   RouteOptimization   # ../omnetpp.ini
+   seed:     default (seed-set=1)
+   pcap:     inet -u Cmdenv -c RouteOptimization
+             --"*.correspondentNode.numPcapRecorders=1"
+             --'*.correspondentNode.pcapRecorder[0].pcapFile="results/routeopt.pcap"'
+             --'*.correspondentNode.pcapRecorder[0].fileFormat="pcap"'
+             --'**.fcsMode="computed"' --'**.crcMode="computed"'
+             --'**.checksumMode="computed"'
+             The computed modes are required: with INET's default declared FCS
+             the recorder aborts with "Cannot serialize Ethernet FCS without a
+             properly computed FCS" and writes an empty file.
+   frame:    tshark -Y 'ipv6.routing.type==2 && icmpv6.type==128' -> first match = frame 95 at t=21.92s
+   render:   tshark -V -O ipv6, then drop (a) Wireshark's generated fields,
+             i.e. lines whose trimmed text is wholly bracketed, and (b) lines
+             indented more than 8 spaces; draw the result with DejaVu Sans
+             Mono 13 px, transparent background; was 912x406
+   anchor:   one IPv6 root with Next Header: Routing Header for IPv6 (43), and
+             Address[1] holding the home address. If the routing header is
+             absent, route optimization did not complete.
+   stamp:    captured 2026-08, INET 4.7, Wireshark 4.6.4
+
+**And here the routing header gives up the field the object inspector kept
+collapsed**: ``Address[1]: 2001:db8:0:1:8aa:ff:fe00:d`` — the home address,
+carried alongside a destination of ``2001:db8:0:3:8aa:ff:fe00:d``, the care-of
+address. One packet, both halves of the identity/location split, and no home
+agent anywhere on its path.
+
+One detail to reconcile: Wireshark reports these frames as 162 and 146 bytes,
+eight fewer than the 170 B and 154 B the simulation reports for the same
+packets. INET counts the Ethernet preamble and start-of-frame delimiter, which
+a capture file does not store.
 
 Meanwhile the home agent's binding cache holds exactly one entry — the
 mapping this whole protocol exists to maintain. The 3600 s lifetime is the
