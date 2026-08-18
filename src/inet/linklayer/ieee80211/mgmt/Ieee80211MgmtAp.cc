@@ -145,9 +145,9 @@ void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, cO
 
     if (signalID == IFrameSequenceHandler::frameSequenceFinishedSignal) {
         auto context = check_and_cast<FrameSequenceContext *>(obj);
-        if (context->getNumSteps() >= 2) {
-            auto transmitStep = dynamic_cast<ITransmitStep *>(context->getStepBeforeLast());
-            auto receiveStep = dynamic_cast<IReceiveStep *>(context->getLastStep());
+        for (int stepIndex = 0; stepIndex + 1 < context->getNumSteps(); stepIndex++) {
+            auto transmitStep = dynamic_cast<ITransmitStep *>(context->getStep(stepIndex));
+            auto receiveStep = dynamic_cast<IReceiveStep *>(context->getStep(stepIndex + 1));
             if (transmitStep && receiveStep) {
                 const Packet *responseFrame = getAssociationResponseFrame(transmitStep);
                 auto responseHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(responseFrame->peekAtFront<Ieee80211MacHeader>());

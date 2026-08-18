@@ -96,6 +96,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     // associated Access Point
     cMessage *assocTimeoutMsg; // if non-nullptr: association is in progress
+    bool reassociationInProgress = false;
     AssociatedApInfo assocAP;
 
   public:
@@ -133,7 +134,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     virtual void storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body);
 
     /** Processes Association and Reassociation Responses without using cached Beacon capabilities. */
-    virtual void processAssociationResponse(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header);
+    virtual void processAssociationResponse(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool reassociation);
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     virtual bool scanNextChannel();
@@ -152,6 +153,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     /** Sends back result of association to the agent */
     virtual void sendAssociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode);
+    virtual void sendReassociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode);
 
     /** Utility function: Cancel the existing association */
     virtual void disassociate();

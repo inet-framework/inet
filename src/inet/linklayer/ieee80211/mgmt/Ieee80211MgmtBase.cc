@@ -47,11 +47,11 @@ void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, 
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
         mib->updateLocalHtCapabilities(modeSet);
-        supportedRates.numRates = std::min(8, modeSet->getNumModes());
         int rateIndex = 0;
-        for (int i = 0; i < supportedRates.numRates; i++)
+        for (int i = 0; i < modeSet->getNumModes() && rateIndex < 8; i++)
             if (modeSet->isMandatory(i))
                 supportedRates.rate[rateIndex++] = modeSet->getMode(i)->getDataMode()->getNetBitrate().get<Mbps>();
+        supportedRates.numRates = rateIndex;
     }
 }
 

@@ -37,21 +37,32 @@ void Ieee80211MgmtStaSimplified::initialize(int stage)
         mib->bssStationData.isAssociated = true;
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        L3AddressResolver addressResolver;
-        auto accessPointAddress = addressResolver.resolve(par("accessPointAddress"), L3AddressResolver::ADDR_MAC).toMac();
-        mib->bssData.bssid = accessPointAddress;
-        auto apMib = findAccessPointMib(accessPointAddress);
-        apMib->bssAccessPointData.stations[mib->address] = Ieee80211Mib::ASSOCIATED;
-        mib->bssData.ssid = apMib->bssData.ssid;
+        configureAssociation();
     }
-    else if (stage == INITSTAGE_LAST) {
-        auto apMib = findAccessPointMib(mib->bssData.bssid);
-        // Simplified management is an explicit no-air abstraction: install the state that the
-        // Association Request/Response exchange would have committed in detailed management.
-        if (mib->isHtOperationSupported() && apMib->isHtOperationSupported()) {
-            mib->setPeerHtCapabilities(apMib->address, apMib->localHtCapabilities, apMib->htOperation);
-            apMib->setPeerHtCapabilities(mib->address, mib->localHtCapabilities, apMib->htOperation);
-        }
+    else if (stage == INITSTAGE_LAST)
+        configureAssociation();
+}
+
+void Ieee80211MgmtStaSimplified::start()
+{
+    Ieee80211MgmtBase::start();
+    configureAssociation();
+}
+
+void Ieee80211MgmtStaSimplified::configureAssociation()
+{
+    L3AddressResolver addressResolver;
+    auto accessPointAddress = addressResolver.resolve(par("accessPointAddress"), L3AddressResolver::ADDR_MAC).toMac();
+    mib->bssData.bssid = accessPointAddress;
+    auto apMib = findAccessPointMib(accessPointAddress);
+    apMib->bssAccessPointData.stations[mib->address] = Ieee80211Mib::ASSOCIATED;
+    mib->bssData.ssid = apMib->bssData.ssid;
+    mib->bssStationData.isAssociated = true;
+    // Simplified management is an explicit no-air abstraction: install the state that the
+    // Association Request/Response exchange would have committed in detailed management.
+    if (mib->isHtOperationSupported() && apMib->isHtOperationSupported()) {
+        mib->setPeerHtCapabilities(apMib->address, apMib->localHtCapabilities, apMib->htOperation);
+        apMib->setPeerHtCapabilities(mib->address, mib->localHtCapabilities, apMib->htOperation);
     }
 }
 
