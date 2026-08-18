@@ -128,6 +128,9 @@ def run_speed_tests_main():
 def run_statistical_tests_main():
     run_tasks_main(run_statistical_tests, "statistical tests")
 
+def run_serializer_tests_main():
+    run_tasks_main(run_serializer_tests, "serializer tests")
+
 def run_unit_tests_main():
     run_tasks_main(run_unit_tests, "unit tests")
 

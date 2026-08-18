@@ -48,6 +48,9 @@ def get_protocol_test_tasks(**kwargs):
 def get_module_test_tasks(**kwargs):
     return get_opp_test_tasks("tests/module", name="module test", **kwargs)
 
+def get_serializer_test_tasks(**kwargs):
+    return get_opp_test_tasks("tests/serializer", name="serializer test", **kwargs)
+
 def get_unit_test_tasks(**kwargs):
     return get_opp_test_tasks("tests/unit", name="unit test", **kwargs)
 
@@ -61,6 +64,7 @@ def get_all_test_tasks(**kwargs):
                            get_protocol_test_tasks,
                            get_queueing_test_tasks,
                            get_sanitizer_test_tasks,
+                           get_serializer_test_tasks,
                            get_smoke_test_tasks,
                            get_speed_test_tasks,
                            get_statistical_test_tasks,
@@ -85,6 +89,9 @@ def run_protocol_tests(**kwargs):
 
 def run_module_tests(**kwargs):
     return get_module_test_tasks(**kwargs).run(**kwargs)
+
+def run_serializer_tests(**kwargs):
+    return get_serializer_test_tasks(**kwargs).run(**kwargs)
 
 def run_unit_tests(**kwargs):
     return get_unit_test_tasks(**kwargs).run(**kwargs)

@@ -1,0 +1,103 @@
+%description:
+Field-level check of the deserializers against an independent decoder.
+
+Both round-trip tests reproduce the bytes of a frame, which is exactly why neither can
+see a serializer that reads and writes a field in the same wrong place: the bytes come
+back identical whatever the fields mean. A swap of two same-width neighbours, a value
+read one field too early, a constant in the wrong place -- all of that survives a
+round-trip untouched. It was proved on the case: swapping the receiver and transmitter
+addresses of the 802.11 serializer in both directions leaves every round-trip green and
+fails this test on both fields.
+
+What catches it is a second opinion about the same bytes. Every expectation here comes
+from a `.fields` file next to the capture, written by tests/serializer/tools/mkfieldrefs.py from
+what tshark reads. The tool holds the mapping between tshark's field names and INET's, so
+this test needs none of its own and never runs tshark; the file it commits is already in
+INET's vocabulary, which keeps a Wireshark field rename inside the tool rather than in the
+repository.
+
+What the reference is worth depends on the mapping being right, and that is what its last
+column is for: it names the tshark field every value came from, so a reviewer can check
+the pairing. When a capture changes, regenerate the file and read the diff -- that diff is
+the review.
+
+Two rules for what is worth having in a reference:
+
+  * neighbouring fields of the same width, where a swap is possible and invisible
+    otherwise -- the three addresses of an 802.11 header, port pairs, the halves of a uuid;
+  * fields with an independent reference: a configured parameter, an address that also
+    appears a layer down, a counter that must increase.
+
+It follows that this test only guards what the mapping covers -- the tool counts the
+fields it had no mapping for, per frame, so what is missing stays visible. It is not a
+replacement for the round-trips: it is the part they structurally cannot do.
+
+The run says so itself, from the other side. After the result it prints how many fields of
+the chunks the captures dissect an expectation names, and lists, per chunk class, the ones
+none does. That list comes from INET's own class descriptors, so unlike the tool's count of
+unmapped tshark fields it is exact, and it is the work list for extending the mapping: a
+class that appears with most of its fields is one the corpus reaches but this test barely
+looks at. Fields no decoder could have an opinion about are left out of it -- what the
+simulation kernel and Chunk declare, the protocol-agnostic address and port views of
+NetworkHeaderBase/TransportHeaderBase, which the concrete header also declares under its
+own name, and the "...Mode" fields, which say how INET represents a value rather than what
+went on the wire.
+
+The numbers are printed, not asserted: the denominator moves whenever a message file gains
+a field, and this test should not fail for that. What is asserted is the count of checks
+made, so a lost expectation cannot pass unnoticed.
+
+What is left on that list is accounted for one by one in REMAINING_GAPS.md, under
+"What the field reference does not name": fields that are not on the wire at all, fields
+that are a list inside a chunk and need a path the reference cannot yet write, fields no
+frame in the corpus carries, and fields with nothing independent to compare against.
+
+Set FIELDCHECK_VERBOSE in the environment to list the chunks of every frame the checks
+look at, which is how a new expectation is placed.
+
+%includes:
+#include "SerializerTestLib.h"
+
+%global:
+
+using namespace inet;
+
+%activity:
+
+// keep the output quiet: results are logged at EV_WARN
+cLog::logLevel = LOGLEVEL_WARN;
+
+beginChunkFieldChecks();
+
+// Every expectation comes from the .fields file next to the capture, written by
+// tests/serializer/tools/mkfieldrefs.py from what tshark reads. The tool holds the mapping
+// between tshark's field names and INET's, so this test needs none of its own -- and
+// never runs tshark.
+checkChunkFieldsFromReference("../../pcap/bgp.pcap", false);
+checkChunkFieldsFromReference("../../pcap/wlan-addba-delba.pcap", false);
+checkChunkFieldsFromReference("../../pcap/derived/sctp-www-clean.cap", false);
+checkChunkFieldsFromReference("../../pcap/generated/mld-query.pcap", true);
+checkChunkFieldsFromReference("../../pcap/generated/mrp-ring.pcap", true);
+checkChunkFieldsFromReference("../../pcap/generated/mrp-linkcheck.pcap", true);
+checkChunkFieldsFromReference("../../pcap/generated/mrp-mra.pcap", true);
+checkChunkFieldsFromReference("../../pcap/generated/mld-v2.pcap", true);
+checkChunkFieldsFromReference("../../pcap/generated/rtp-rtcp.pcap", true);
+checkChunkFieldsFromReference("../../pcap/generated/tsn-rtag.pcap", true);
+checkChunkFieldsFromReference("../../pcap/derived/mipv6-clean.pcap", false);
+checkChunkFieldsFromReference("../../pcap/rarp_request.pcap", false);
+checkChunkFieldsFromReference("../../pcap/qinq.pcap", false);
+checkChunkFieldsFromReference("../../pcap/mpls-ip.pcap", false);
+checkChunkFieldsFromReference("../../pcap/stp-tcn.pcap", false);
+checkChunkFieldsFromReference("../../pcap/cfm.pcap", false);
+
+// wlan-aggregation is left out on purpose: tshark decodes what is inside the A-MSDU
+// subframes, INET leaves the subframe payload raw (see REMAINING_GAPS.md), so
+// the reference would hold expectations about chunks this dissection does not produce.
+
+reportChunkFieldChecks();
+
+%contains: stdout
+Field checks: 1825 made, 0 failed
+
+%not-contains: stdout
+FIELD-CHECK

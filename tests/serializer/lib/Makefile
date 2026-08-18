@@ -22,11 +22,29 @@ LIBS = $(LDFLAG_LIBPATH)../../../src  -lINET$(D)
 
 # Output directory
 PROJECT_OUTPUT_DIR = ../../../out
-PROJECTRELATIVE_PATH = tests/unit/lib
+PROJECTRELATIVE_PATH = tests/serializer/lib
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
-OBJS = $O/ClockTestApp.o $O/IntervalTreeTest.o $O/TCPQueueTesterFunctions.o
+OBJS = \
+    $O/ChunkFillers.o \
+    $O/ChunkRoundTripTest.o \
+    $O/SerializerTestLib.o \
+    $O/fillers/ChunkFillers_common.o \
+    $O/fillers/ChunkFillers_ethernet.o \
+    $O/fillers/ChunkFillers_gptp.o \
+    $O/fillers/ChunkFillers_ieee80211.o \
+    $O/fillers/ChunkFillers_ipv4.o \
+    $O/fillers/ChunkFillers_ipv6.o \
+    $O/fillers/ChunkFillers_linklayer.o \
+    $O/fillers/ChunkFillers_mipv6.o \
+    $O/fillers/ChunkFillers_mrp.o \
+    $O/fillers/ChunkFillers_ospf.o \
+    $O/fillers/ChunkFillers_phy.o \
+    $O/fillers/ChunkFillers_routing.o \
+    $O/fillers/ChunkFillers_rtp.o \
+    $O/fillers/ChunkFillers_sctp.o \
+    $O/fillers/ChunkFillers_transport.o
 
 # Message files
 MSGFILES =
@@ -89,6 +107,8 @@ endif
 
 #------------------------------------------------------------------------------
 # User-supplied makefile fragment(s)
+-include makefrag
+
 #------------------------------------------------------------------------------
 
 # Main target
