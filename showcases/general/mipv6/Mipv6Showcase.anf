@@ -5,7 +5,7 @@
         <input pattern="results/*.vec"/>
     </inputs>
     <charts id="0" name="">
-        <chart id="1" type="MATPLOTLIB" name="Ping round-trip time" template="linechart_mpl" icon="icons/full/obj/linechart.png">
+        <chart id="1" type="MATPLOTLIB" name="Round-trip times of all three configurations on one pair of axes (superseded, not shipped)" template="linechart_mpl" icon="icons/full/obj/linechart.png">
             <script>
 <![CDATA[import math
 from omnetpp.scave import results, chart, utils
@@ -37,12 +37,14 @@ utils.add_legend_labels(df, props)
 utils.sort_rows_by_legend(df, props)
 utils.plot_vectors(df, props, sort=False)
 
-# shade the interval the mobile node spends away from its home network
-# (movement.xml: leaves home at t=15s, is back and settled at t=51s)
+# shade the interval the mobile node spends away from its home position
+# (movement.xml: it departs at t=15s and is settled back at home at t=51s)
+# This is the movement schedule. It is NOT the interval the node is unreachable,
+# which is measured separately and does not coincide with the band.
 import matplotlib.pyplot as plt
 ax = plt.gca()
 ax.axvspan(15, 51, color="gray", alpha=0.10, zorder=0)
-ax.text(33, 0.96, "away from home", ha="center", va="top", fontsize=9,
+ax.text(33, 0.96, "away from home position", ha="center", va="top", fontsize=9,
         color="dimgray", transform=ax.get_xaxis_transform())
 
 utils.postconfigure_plot(props)
@@ -738,7 +740,7 @@ utils.export_data_if_needed(df, props)
             <property name="linewidth" value="1.5"/>
             <property name="marker" value="."/>
             <property name="markersize" value="4"/>
-            <property name="title" value="Ping round-trip time at the correspondent node"/>
+            <property name="title" value="Ping round-trip time at the correspondent node &#8212; all three configurations (superseded, not shipped)"/>
             <property name="xaxis_title" value=""/>
             <property name="xaxis_unit" value=""/>
             <property name="xaxis_min" value=""/>
@@ -770,7 +772,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="matplotlibrc" value=""/>
-            <property name="image_export_filename" value="pingrtt"/>
+            <property name="image_export_filename" value="superseded-rtt-allthree"/>
             <property name="image_export_width" value="8"/>
             <property name="image_export_height" value="6"/>
             <property name="data_export_filename" value=""/>
@@ -807,12 +809,14 @@ utils.add_legend_labels(df, props)
 utils.sort_rows_by_legend(df, props)
 utils.plot_vectors(df, props, sort=False)
 
-# shade the interval the mobile node spends away from its home network
-# (movement.xml: leaves home at t=15s, is back and settled at t=51s)
+# shade the interval the mobile node spends away from its home position
+# (movement.xml: it departs at t=15s and is settled back at home at t=51s)
+# This is the movement schedule. It is NOT the interval the node is unreachable,
+# which is measured separately and does not coincide with the band.
 import matplotlib.pyplot as plt
 ax = plt.gca()
 ax.axvspan(15, 51, color="gray", alpha=0.10, zorder=0)
-ax.text(40, 0.96, "away from home", ha="center", va="top", fontsize=9,
+ax.text(40, 0.96, "away from home position", ha="center", va="top", fontsize=9,
         color="dimgray", transform=ax.get_xaxis_transform())
 
 utils.postconfigure_plot(props)
@@ -1577,12 +1581,14 @@ utils.add_legend_labels(df, props)
 utils.sort_rows_by_legend(df, props)
 utils.plot_vectors(df, props, sort=False)
 
-# shade the interval the mobile node spends away from its home network
-# (movement.xml: leaves home at t=15s, is back and settled at t=51s)
+# shade the interval the mobile node spends away from its home position
+# (movement.xml: it departs at t=15s and is settled back at home at t=51s)
+# This is the movement schedule. It is NOT the interval the node is unreachable,
+# which is measured separately and does not coincide with the band.
 import matplotlib.pyplot as plt
 ax = plt.gca()
 ax.axvspan(15, 51, color="gray", alpha=0.10, zorder=0)
-ax.text(40, 0.96, "away from home", ha="center", va="top", fontsize=9,
+ax.text(40, 0.96, "away from home position", ha="center", va="top", fontsize=9,
         color="dimgray", transform=ax.get_xaxis_transform())
 
 utils.postconfigure_plot(props)
@@ -2347,12 +2353,14 @@ utils.add_legend_labels(df, props)
 utils.sort_rows_by_legend(df, props)
 utils.plot_vectors(df, props, sort=False)
 
-# shade the interval the mobile node spends away from its home network
-# (movement.xml: leaves home at t=15s, is back and settled at t=51s)
+# shade the interval the mobile node spends away from its home position
+# (movement.xml: it departs at t=15s and is settled back at home at t=51s)
+# This is the movement schedule. It is NOT the interval the node is unreachable,
+# which is measured separately and does not coincide with the band.
 import matplotlib.pyplot as plt
 ax = plt.gca()
 ax.axvspan(15, 51, color="gray", alpha=0.10, zorder=0)
-ax.text(40, 0.96, "away from home", ha="center", va="top", fontsize=9,
+ax.text(40, 0.96, "away from home position", ha="center", va="top", fontsize=9,
         color="dimgray", transform=ax.get_xaxis_transform())
 
 utils.postconfigure_plot(props)
