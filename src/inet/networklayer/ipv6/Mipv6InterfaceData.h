@@ -31,10 +31,19 @@ namespace inet {
 #define MIPv6_MAX_UPDATE_RATE                  3 // times
 #define MIPv6_PREFIX_ADV_RETRIES               3 // retransmissions
 #define MIPv6_PREFIX_ADV_TIMEOUT               3 // seconds
-#define MIPv6_INITIAL_BINDACK_TIMEOUT_FIRST    1 // seconds
 #define MIPv6_MAX_RR_BINDING_LIFETIME          420 // seconds
 #define MIPv6_MAX_HA_BINDING_LIFETIME          3600 // seconds (1 hour)
 /***************END of RFC 3775 Protocol Constants*****************************/
+
+/*********RFC 3775: Section 13 Protocol Configuration Variables****************/
+// InitialBindackTimeoutFirstReg is the initial Binding Update retransmission
+// timeout of a home registration for which the mobile node holds no binding
+// yet. RFC 3775 and RFC 6275 derive its 1.5 second default as 1.5 times
+// RetransTimer (RFC 4861) times DupAddrDetectTransmits (RFC 4862), so that the
+// timer outlasts the Duplicate Address Detection that the home agent performs
+// before it acknowledges such a registration.
+#define MIPv6_INITIAL_BINDACK_TIMEOUT_FIRST    1.5 // seconds
+/*********END of RFC 3775 Protocol Configuration Variables*********************/
 
 /**
  * Mobile IPv6 (RFC 3775) per-interface data: the Mobile Node's home address and
