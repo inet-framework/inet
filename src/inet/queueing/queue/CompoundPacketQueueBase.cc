@@ -14,6 +14,22 @@ namespace queueing {
 
 Define_Module(CompoundPacketQueueBase);
 
+class ScopedPacketRemoval
+{
+  protected:
+    Packet *&packetBeingRemoved;
+    Packet *previousPacket;
+
+  public:
+    ScopedPacketRemoval(Packet *&packetBeingRemoved, Packet *packet) :
+        packetBeingRemoved(packetBeingRemoved), previousPacket(packetBeingRemoved)
+    {
+        packetBeingRemoved = packet;
+    }
+
+    ~ScopedPacketRemoval() { packetBeingRemoved = previousPacket; }
+};
+
 void CompoundPacketQueueBase::initialize(int stage)
 {
     PacketQueueBase::initialize(stage);
@@ -88,7 +104,10 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, const cGate *gate)
         while (isOverloaded()) {
             auto packet = packetDropperFunction->selectPacket(this);
             EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
-            collection->removePacket(packet);
+            {
+                ScopedPacketRemoval scopedPacketRemoval(packetBeingRemoved, packet);
+                collection->removePacket(packet);
+            }
             emit(packetRemovedSignal, packet);
             droppedPackets.push_back(packet);
         }
@@ -115,7 +134,10 @@ Packet *CompoundPacketQueueBase::pullPacket(const cGate *gate)
 void CompoundPacketQueueBase::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
-    collection->removePacket(packet);
+    {
+        ScopedPacketRemoval scopedPacketRemoval(packetBeingRemoved, packet);
+        collection->removePacket(packet);
+    }
     notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::REMOVED);
     emit(packetRemovedSignal, packet);
 }
@@ -187,7 +209,8 @@ void CompoundPacketQueueBase::receiveSignal(cComponent *source, simsignal_t sign
 void CompoundPacketQueueBase::handlePacketRemoved(Packet *packet, IPacketQueue::PacketRemovalReason reason)
 {
     Enter_Method("handlePacketRemoved");
-    if (reason == IPacketQueue::PacketRemovalReason::DROPPED)
+    if (reason == IPacketQueue::PacketRemovalReason::DROPPED ||
+        (reason == IPacketQueue::PacketRemovalReason::REMOVED && packet != packetBeingRemoved))
         notifyPacketRemoved(packet, reason);
 }
 

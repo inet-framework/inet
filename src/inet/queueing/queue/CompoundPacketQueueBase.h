@@ -28,6 +28,7 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     IPacketCollection *collection = nullptr;
     IPacketExtractor *packetExtractor = nullptr;
     std::vector<IPacketQueue *> childQueues;
+    Packet *packetBeingRemoved = nullptr;
 
     IPacketDropperFunction *packetDropperFunction = nullptr;
 

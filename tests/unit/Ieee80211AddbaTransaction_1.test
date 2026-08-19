@@ -357,6 +357,22 @@ class TestPacketDropCallback : public queueing::IPacketQueue::ICallback
     }
 };
 
+class TestReentrantRemovalCallback : public queueing::IPacketQueue::ICallback
+{
+  public:
+    queueing::IPacketQueue *queue = nullptr;
+    Packet *triggerPacket = nullptr;
+    Packet *packetToRemove = nullptr;
+    bool removedPacket = false;
+
+    virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override {
+        if (!removedPacket && packet == triggerPacket && reason == queueing::IPacketQueue::PacketRemovalReason::REMOVED) {
+            removedPacket = true;
+            queue->removePacket(packetToRemove);
+        }
+    }
+};
+
 class TestPacketPulledListener : public cListener
 {
   public:
@@ -3349,6 +3365,10 @@ delete compoundPacket;
     auto secondQueue = createBufferedQueue("sharedRemovalSecondQueue");
     TestPacketDropCallback firstCallback;
     TestPacketDropCallback secondCallback;
+    TestPacketDropCallback compoundCallback;
+    TestCompoundPacketQueue bufferedCompound;
+    bufferedCompound.observeQueue(secondQueue);
+    bufferedCompound.addObserver(&compoundCallback);
     firstQueue->addPacketCallback(&firstCallback);
     secondQueue->addPacketCallback(&secondCallback);
     firstQueue->pushPacket(new Packet("sharedRemovalFirstA", makeShared<ByteCountChunk>(B(1))), nullptr);
@@ -3367,8 +3387,11 @@ delete compoundPacket;
     ASSERT(buffer->getNumPackets() == 0);
     ASSERT(secondCallback.numRemovedPackets == 1);
     ASSERT(secondCallback.numDroppedPackets == 0);
+    ASSERT(compoundCallback.numRemovedPackets == 1);
+    ASSERT(compoundCallback.numDroppedPackets == 0);
     take(retainedPacket);
     delete retainedPacket;
+    bufferedCompound.stopObserving();
     firstQueue->removePacketCallback(&firstCallback);
     secondQueue->removePacketCallback(&secondCallback);
     firstQueue->callFinish();
@@ -3426,8 +3449,10 @@ delete compoundPacket;
     overflowQueue->deleteModule();
 }
 
-// A compound's direct frontier and a nested compound boundary each forward a
-// destructive removal exactly once.
+// A compound's direct frontier and a nested compound boundary each forward
+// descendant removals exactly once. Boundary-initiated removals suppress the
+// descendant callback for the same packet, including during reentrant removal
+// of a different packet.
 {
     auto pendingQueueModule = cModuleType::get("inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue")->create("callbackPendingQueue", this);
     pendingQueueModule->callInitialize();
@@ -3439,11 +3464,78 @@ delete compoundPacket;
     TestCompoundPacketQueue outerCompound;
     outerCompound.observeQueue(pendingQueue);
     outerCompound.addObserver(&nestedCallback);
+
     auto directPacket = new Packet("directCompoundDrop", makeShared<ByteCountChunk>(B(1)));
     directLeaf->handlePacketDropped(directPacket);
     ASSERT(directCallback.numDroppedPackets == 1);
     ASSERT(nestedCallback.numDroppedPackets == 1);
     delete directPacket;
+
+    auto leafRemovedPacket = new Packet("leafRemovedPacket", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->pushPacket(leafRemovedPacket, nullptr);
+    directLeaf->removePacket(leafRemovedPacket);
+    ASSERT(directCallback.numRemovedPackets == 1);
+    ASSERT(nestedCallback.numRemovedPackets == 1);
+    take(leafRemovedPacket);
+    delete leafRemovedPacket;
+
+    directLeaf->pushPacket(new Packet("leafBulkRemovedFirst", makeShared<ByteCountChunk>(B(1))), nullptr);
+    directLeaf->pushPacket(new Packet("leafBulkRemovedSecond", makeShared<ByteCountChunk>(B(1))), nullptr);
+    directLeaf->removeAllPackets();
+    ASSERT(directCallback.numRemovedPackets == 3);
+    ASSERT(nestedCallback.numRemovedPackets == 3);
+
+    auto boundaryRemovedPacket = new Packet("boundaryRemovedPacket", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->pushPacket(boundaryRemovedPacket, nullptr);
+    pendingQueue->removePacket(boundaryRemovedPacket);
+    ASSERT(directCallback.numRemovedPackets == 4);
+    ASSERT(nestedCallback.numRemovedPackets == 4);
+    take(boundaryRemovedPacket);
+    delete boundaryRemovedPacket;
+
+    directLeaf->pushPacket(new Packet("boundaryBulkRemovedFirst", makeShared<ByteCountChunk>(B(1))), nullptr);
+    directLeaf->pushPacket(new Packet("boundaryBulkRemovedSecond", makeShared<ByteCountChunk>(B(1))), nullptr);
+    pendingQueue->removeAllPackets();
+    ASSERT(directCallback.numRemovedPackets == 6);
+    ASSERT(nestedCallback.numRemovedPackets == 6);
+
+    auto boundaryDequeuedPacket = new Packet("boundaryDequeuedPacket", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->pushPacket(boundaryDequeuedPacket, nullptr);
+    auto dequeuedPacket = pendingQueue->dequeuePacket([boundaryDequeuedPacket](const Packet *packet) { return packet == boundaryDequeuedPacket; });
+    ASSERT(dequeuedPacket == boundaryDequeuedPacket);
+    ASSERT(directCallback.numDequeuedPackets == 1);
+    ASSERT(nestedCallback.numDequeuedPackets == 0);
+    take(dequeuedPacket);
+    delete dequeuedPacket;
+
+    auto boundaryPulledPacket = new Packet("boundaryPulledPacket", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->pushPacket(boundaryPulledPacket, nullptr);
+    auto pulledPacket = pendingQueue->pullPacket(nullptr);
+    ASSERT(pulledPacket == boundaryPulledPacket);
+    ASSERT(directCallback.numDequeuedPackets == 2);
+    ASSERT(nestedCallback.numDequeuedPackets == 0);
+    take(pulledPacket);
+    delete pulledPacket;
+
+    auto reentrantTriggerPacket = new Packet("reentrantTriggerPacket", makeShared<ByteCountChunk>(B(1)));
+    auto reentrantRemovedPacket = new Packet("reentrantRemovedPacket", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->pushPacket(reentrantTriggerPacket, nullptr);
+    directLeaf->pushPacket(reentrantRemovedPacket, nullptr);
+    TestReentrantRemovalCallback reentrantCallback;
+    reentrantCallback.queue = directLeaf;
+    reentrantCallback.triggerPacket = reentrantTriggerPacket;
+    reentrantCallback.packetToRemove = reentrantRemovedPacket;
+    directLeaf->addPacketCallback(&reentrantCallback);
+    pendingQueue->removePacket(reentrantTriggerPacket);
+    ASSERT(reentrantCallback.removedPacket);
+    ASSERT(directCallback.numRemovedPackets == 8);
+    ASSERT(nestedCallback.numRemovedPackets == 8);
+    directLeaf->removePacketCallback(&reentrantCallback);
+    take(reentrantTriggerPacket);
+    take(reentrantRemovedPacket);
+    delete reentrantTriggerPacket;
+    delete reentrantRemovedPacket;
+
     outerCompound.stopObserving();
     pendingQueue->removePacketCallback(&directCallback);
     pendingQueueModule->callFinish();
@@ -3465,6 +3557,34 @@ delete compoundPacket;
     wrappedCompound.stopObserving();
     packetShaperModule->callFinish();
     packetShaperModule->deleteModule();
+}
+
+// Compound capacity enforcement detaches its leaf victim without leaking a
+// REMOVED callback before reporting the single destructive departure.
+{
+    auto pendingQueueModule = cModuleType::get("inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue")->create("callbackOverflowPendingQueue", this);
+    pendingQueueModule->par("packetCapacity").setIntValue(1);
+    pendingQueueModule->par("dropperClass").setStringValue("inet::queueing::PacketAtCollectionEndDropper");
+    pendingQueueModule->callInitialize();
+    auto pendingQueue = check_and_cast<queueing::IPacketQueue *>(pendingQueueModule);
+    TestPacketDropCallback directCallback;
+    TestPacketDropCallback nestedCallback;
+    pendingQueue->addPacketCallback(&directCallback);
+    TestCompoundPacketQueue outerCompound;
+    outerCompound.observeQueue(pendingQueue);
+    outerCompound.addObserver(&nestedCallback);
+    pendingQueue->pushPacket(new Packet("compoundRetainedPacket", makeQosHeader(peer1, 1, SequenceNumberCyclic(1))), nullptr);
+    pendingQueue->pushPacket(new Packet("compoundOverflowPacket", makeQosHeader(peer1, 1, SequenceNumberCyclic(2))), nullptr);
+    ASSERT(pendingQueue->getNumPackets() == 1);
+    ASSERT(directCallback.numDroppedPackets == 1);
+    ASSERT(directCallback.numRemovedPackets == 0);
+    ASSERT(nestedCallback.numDroppedPackets == 1);
+    ASSERT(nestedCallback.numRemovedPackets == 0);
+    outerCompound.stopObserving();
+    pendingQueue->removePacketCallback(&directCallback);
+    pendingQueue->removeAllPackets();
+    pendingQueueModule->callFinish();
+    pendingQueueModule->deleteModule();
 }
 
 // A shared buffer detaches every victim from its owning queue before the first
