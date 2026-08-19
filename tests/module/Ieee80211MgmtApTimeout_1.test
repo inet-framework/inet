@@ -1,7 +1,9 @@
 %description:
 Verify the AP's association-response timer releases only expired uncommitted
 association IDs, preserves later replacement transactions, and never releases
-a committed association ID during a reassociation timeout.
+a committed association ID during a reassociation timeout. Also verify a zero
+association-response timeout is rejected because no response exchange can
+complete before a same-time timeout event.
 
 %file: TestIeee80211MgmtAp.cc
 
@@ -15,6 +17,7 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
   public:
     short startPendingAssociation(const MacAddress& address)
     {
+        Enter_Method("startPendingAssociation");
         auto& sta = staList[address];
         sta.address = address;
         clearPendingAssociation(&sta);
@@ -27,6 +30,7 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
 
     short startPendingReassociation(const MacAddress& address)
     {
+        Enter_Method("startPendingReassociation");
         auto& sta = staList[address];
         sta.address = address;
         clearPendingAssociation(&sta);
@@ -130,6 +134,16 @@ network Ieee80211MgmtApTimeoutTestNetwork
         test: Ieee80211MgmtApTimeoutTest;
 }
 
+%file: checkZeroTimeout.sh
+
+binary="./@TESTNAME@"
+if test -x "${binary}_dbg" && { test ! -x "$binary" || test "${binary}_dbg" -nt "$binary"; }; then
+    binary="${binary}_dbg"
+fi
+if "$binary" -u Cmdenv --check-signals=false -lINET -n ../../../../src:.:../../lib -c ZeroTimeout omnetpp.ini _defaults.ini; then
+    exit 1
+fi
+
 %inifile: omnetpp.ini
 
 [General]
@@ -150,5 +164,13 @@ record-scalar-results = false
 **.mobility.constraintAreaMaxY = 100m
 **.mobility.constraintAreaMaxZ = 0m
 
+[Config ZeroTimeout]
+*.ap.wlan[0].mgmt.associationResponseTimeout = 0s
+
 %contains: stdout
 AP association response timeout lifecycle verified.
+
+%postrun-command: sh checkZeroTimeout.sh
+
+%contains: postrun-command(1).err
+parameter 'associationResponseTimeout' must be positive

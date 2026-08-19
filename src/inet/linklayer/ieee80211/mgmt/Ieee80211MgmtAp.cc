@@ -105,8 +105,8 @@ void Ieee80211MgmtAp::initialize(int stage)
         ssid = par("ssid").stdstringValue();
         beaconInterval = par("beaconInterval");
         associationResponseTimeout = par("associationResponseTimeout");
-        if (associationResponseTimeout < SIMTIME_ZERO)
-            throw cRuntimeError("parameter 'associationResponseTimeout' must not be negative");
+        if (associationResponseTimeout <= SIMTIME_ZERO)
+            throw cRuntimeError("parameter 'associationResponseTimeout' must be positive");
         numAuthSteps = par("numAuthSteps");
         if (numAuthSteps != 2 && numAuthSteps != 4)
             throw cRuntimeError("parameter 'numAuthSteps' (number of frames exchanged during authentication) must be 2 or 4, not %d", numAuthSteps);
