@@ -39,6 +39,9 @@ class TestInitializationObserver : public cSimpleModule
                 ASSERT(apMib->bssData.ssid == "review-ssid");
                 ASSERT(staMib->bssData.ssid == apMib->bssData.ssid);
                 ASSERT(configurator->getTestWirelessId(apInterface) == configurator->getTestWirelessId(staInterface));
+                ASSERT(!staMib->address.isUnspecified());
+                ASSERT(apMib->bssAccessPointData.stations.find(MacAddress::UNSPECIFIED_ADDRESS) == apMib->bssAccessPointData.stations.end());
+                ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
                 ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
                 ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
                 std::cout << "Simplified STA wireless identity available during network configuration.\n";
@@ -99,14 +102,14 @@ network Ieee80211MgmtStaSimplifiedInitializationTestNetwork
         radioMedium: Ieee80211ScalarRadioMedium;
         configurator: TestIpv4NetworkConfigurator;
         scenarioManager: ScenarioManager;
-        ap: AccessPoint {
-            parameters:
-                wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
-                wlan[*].agent.typename = "";
-        }
         sta: WirelessHost {
             parameters:
                 wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
                 wlan[*].agent.typename = "";
         }
         observer: TestInitializationObserver;
@@ -123,7 +126,7 @@ record-vector-results = false
 record-scalar-results = false
 
 *.ap.wlan[0].address = "02:00:00:00:00:01"
-*.sta.wlan[0].address = "02:00:00:00:00:02"
+*.sta.wlan[0].address = "auto"
 *.ap.wlan[0].mgmt.ssid = "review-ssid"
 *.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
 **.wlan[0].opMode = "n(mixed-2.4Ghz)"

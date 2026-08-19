@@ -1,0 +1,118 @@
+%description:
+Verify that association and reassociation management primitives are dispatched
+to their most-derived handlers, including the distinct reassociation confirm
+primitive emitted by the station agent.
+
+%includes:
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+
+class TestIeee80211AgentSta : public Ieee80211AgentSta
+{
+  public:
+    using Ieee80211AgentSta::handleResponse;
+
+    int associateConfirms = 0;
+    int reassociateConfirms = 0;
+    int scanRequests = 0;
+
+  protected:
+    virtual void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp) override
+    {
+        associateConfirms++;
+    }
+
+    virtual void processReassociateConfirm(Ieee80211Prim_ReassociateConfirm *resp) override
+    {
+        reassociateConfirms++;
+        Ieee80211AgentSta::processReassociateConfirm(resp);
+    }
+
+    virtual void sendScanRequest() override
+    {
+        scanRequests++;
+    }
+};
+
+class ConfirmListener : public cListener
+{
+  public:
+    int lastCode = 0;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override
+    {
+        lastCode = value;
+    }
+};
+
+class TestIeee80211MgmtSta : public Ieee80211MgmtSta
+{
+  public:
+    using Ieee80211MgmtSta::handleCommand;
+
+    int associateRequests = 0;
+    int reassociateRequests = 0;
+
+  protected:
+    virtual void processAssociateCommand(Ieee80211Prim_AssociateRequest *ctrl) override
+    {
+        associateRequests++;
+    }
+
+    virtual void processReassociateCommand(Ieee80211Prim_ReassociateRequest *ctrl) override
+    {
+        reassociateRequests++;
+    }
+};
+
+static void deliverConfirm(TestIeee80211AgentSta& agent, Ieee80211PrimConfirm *confirm)
+{
+    auto message = new cMessage("confirm");
+    message->setControlInfo(confirm);
+    agent.handleResponse(message);
+}
+
+%activity:
+
+TestIeee80211AgentSta agent;
+ConfirmListener listener;
+agent.subscribe("acceptConfirm", &listener);
+deliverConfirm(agent, new Ieee80211Prim_AssociateConfirm());
+ASSERT(agent.associateConfirms == 1);
+ASSERT(agent.reassociateConfirms == 0);
+
+auto reassociateConfirm = new Ieee80211Prim_ReassociateConfirm();
+reassociateConfirm->setResultCode(PRC_SUCCESS);
+deliverConfirm(agent, reassociateConfirm);
+ASSERT(agent.associateConfirms == 1);
+ASSERT(agent.reassociateConfirms == 1);
+ASSERT(listener.lastCode == PR_REASSOCIATE_CONFIRM);
+
+ConfirmListener dropListener;
+agent.subscribe("dropConfirm", &dropListener);
+auto refusedReassociateConfirm = new Ieee80211Prim_ReassociateConfirm();
+refusedReassociateConfirm->setResultCode(PRC_REFUSED);
+deliverConfirm(agent, refusedReassociateConfirm);
+ASSERT(agent.associateConfirms == 1);
+ASSERT(agent.reassociateConfirms == 2);
+ASSERT(agent.scanRequests == 1);
+ASSERT(dropListener.lastCode == PR_REASSOCIATE_CONFIRM);
+
+TestIeee80211MgmtSta mgmt;
+mgmt.handleCommand(PR_ASSOCIATE_REQUEST, new Ieee80211Prim_AssociateRequest());
+ASSERT(mgmt.associateRequests == 1);
+ASSERT(mgmt.reassociateRequests == 0);
+
+mgmt.handleCommand(PR_REASSOCIATE_REQUEST, new Ieee80211Prim_ReassociateRequest());
+ASSERT(mgmt.associateRequests == 1);
+ASSERT(mgmt.reassociateRequests == 1);
+
+EV << "Association and reassociation primitive dispatch verified.\n";
+
+%contains: stdout
+Association and reassociation primitive dispatch verified.

@@ -177,10 +177,10 @@ void Ieee80211MgmtSta::handleCommand(int msgkind, cObject *ctrl)
         processAuthenticateCommand(cmd);
     else if (auto cmd = dynamic_cast<Ieee80211Prim_DeauthenticateRequest *>(ctrl))
         processDeauthenticateCommand(cmd);
-    else if (auto cmd = dynamic_cast<Ieee80211Prim_AssociateRequest *>(ctrl))
-        processAssociateCommand(cmd);
     else if (auto cmd = dynamic_cast<Ieee80211Prim_ReassociateRequest *>(ctrl))
         processReassociateCommand(cmd);
+    else if (auto cmd = dynamic_cast<Ieee80211Prim_AssociateRequest *>(ctrl))
+        processAssociateCommand(cmd);
     else if (auto cmd = dynamic_cast<Ieee80211Prim_DisassociateRequest *>(ctrl))
         processDisassociateCommand(cmd);
     else if (ctrl)

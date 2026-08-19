@@ -43,10 +43,11 @@ void Ieee80211MgmtStaSimplified::initialize(int stage)
         configureAssociation();
 }
 
-void Ieee80211MgmtStaSimplified::start()
+void Ieee80211MgmtStaSimplified::handleStartOperation(LifecycleOperation *operation)
 {
-    Ieee80211MgmtBase::start();
-    configureAssociation();
+    Ieee80211MgmtBase::handleStartOperation(operation);
+    if (operation != nullptr)
+        configureAssociation();
 }
 
 void Ieee80211MgmtStaSimplified::configureAssociation()
