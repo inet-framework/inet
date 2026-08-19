@@ -939,8 +939,8 @@ own view of it.
    :width: 100%
 
 ..
-   FIGURE RECIPE (redo with INET's PcapRecorder + Wireshark's tshark)
-   type:     wireshark dissection, rendered from tshark -V
+   FIGURE RECIPE (redo with INET's PcapRecorder + the Wireshark GUI)
+   type:     wireshark GUI screenshot of the packet-detail pane
    config:   BidirectionalTunneling   # ../omnetpp.ini
    seed:     default (seed-set=1)
    pcap:     inet -u Cmdenv -c BidirectionalTunneling
@@ -953,10 +953,21 @@ own view of it.
              the recorder aborts with "Cannot serialize Ethernet FCS without a
              properly computed FCS" and writes an empty file.
    frame:    tshark -Y 'ipv6.nxt==41 && icmpv6.type==128' -> first match = frame 159 at t=20.42s
-   render:   tshark -V -O ipv6, then drop (a) Wireshark's generated fields,
-             i.e. lines whose trimmed text is wholly bracketed, and (b) lines
-             indented more than 8 spaces; draw the result with DejaVu Sans
-             Mono 13 px, transparent background; was 912x478
+   gui:      This desktop is Wayland, and XWayland refuses synthetic input from
+             other X clients, so the GUI cannot be driven on the main display.
+             Run it in a nested X server instead:
+               Xephyr :77 -screen 1500x1150 -ac -noreset &
+               DISPLAY=:77 QT_QPA_PLATFORM=xcb wireshark -r <one-frame>.pcap
+             QT_QPA_PLATFORM=xcb matters: under Wayland, Qt6 opens a native
+             Wayland window that X11 tools can neither see nor capture.
+   layout:   in the profile's "recent" file set gui.byte_view_show and
+             gui.packet_diagram_show to false, so the detail tree gets the
+             full window width and the addresses stop truncating.
+   expand:   window 1500x900; click the first tree row to give the pane focus,
+             then per header: Home, Down x N, Right.  N = 3 then 2 -- the inner
+             IPv6 header first, because its children appear below it and so the
+             outer row does not move.
+   capture:  import -window <id>, crop (0,487)-(772,836); was 772x349
    anchor:   two "Internet Protocol Version 6" root lines, the outer one with
              Next Header: IPv6 (41). One root only = the tunnel was not up.
    stamp:    captured 2026-08, INET 4.7, Wireshark 4.6.4
@@ -972,8 +983,8 @@ showed INET's internal identifiers for the same two fields.
    :width: 100%
 
 ..
-   FIGURE RECIPE (redo with INET's PcapRecorder + Wireshark's tshark)
-   type:     wireshark dissection, rendered from tshark -V
+   FIGURE RECIPE (redo with INET's PcapRecorder + the Wireshark GUI)
+   type:     wireshark GUI screenshot of the packet-detail pane
    config:   RouteOptimization   # ../omnetpp.ini
    seed:     default (seed-set=1)
    pcap:     inet -u Cmdenv -c RouteOptimization
@@ -986,10 +997,21 @@ showed INET's internal identifiers for the same two fields.
              the recorder aborts with "Cannot serialize Ethernet FCS without a
              properly computed FCS" and writes an empty file.
    frame:    tshark -Y 'ipv6.routing.type==2 && icmpv6.type==128' -> first match = frame 95 at t=21.92s
-   render:   tshark -V -O ipv6, then drop (a) Wireshark's generated fields,
-             i.e. lines whose trimmed text is wholly bracketed, and (b) lines
-             indented more than 8 spaces; draw the result with DejaVu Sans
-             Mono 13 px, transparent background; was 912x406
+   gui:      This desktop is Wayland, and XWayland refuses synthetic input from
+             other X clients, so the GUI cannot be driven on the main display.
+             Run it in a nested X server instead:
+               Xephyr :77 -screen 1500x1150 -ac -noreset &
+               DISPLAY=:77 QT_QPA_PLATFORM=xcb wireshark -r <one-frame>.pcap
+             QT_QPA_PLATFORM=xcb matters: under Wayland, Qt6 opens a native
+             Wayland window that X11 tools can neither see nor capture.
+   layout:   in the profile's "recent" file set gui.byte_view_show and
+             gui.packet_diagram_show to false, so the detail tree gets the
+             full window width and the addresses stop truncating.
+   expand:   window 1500x900; click the first tree row to give the pane focus,
+             then Home, Down x2, Right (the IPv6 header), then Home, Down x12,
+             Right (the routing header -- it is the tenth child of IPv6, after
+             the generated [Stream index] row, so 2 + 10).
+   capture:  import -window <id>, crop (0,487)-(772,806); was 772x319
    anchor:   one IPv6 root with Next Header: Routing Header for IPv6 (43), and
              Address[1] holding the home address. If the routing header is
              absent, route optimization did not complete.
