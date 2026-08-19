@@ -160,6 +160,9 @@ auto mixedMcs0Bw40 = Ieee80211HtCompliantModes::getCompliantMode(
         Ieee80211HtMode::BAND_2_4GHZ,
         Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED,
         Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
+// The bounded no-Basic-HT-MCS-Set approximation reuses mandatory 20 MHz MCS
+// indexes for candidates at the source bandwidth, so optional 40 MHz MCS 8
+// maps to 40 MHz MCS 0 (without changing the established response behavior).
 ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMcs8Bw40) == mixedMcs0Bw40);
 
 auto transmitter = new TestIeee80211Transmitter;

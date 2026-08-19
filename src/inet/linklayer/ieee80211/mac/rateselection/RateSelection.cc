@@ -29,6 +29,8 @@ void RateSelection::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         dataOrMgmtRateControl = dynamic_cast<IRateControl *>(findModuleByPath(par("rateControlModule")));
+        if (modeSet == nullptr)
+            throw cRuntimeError("RateSelection module %s has no mode set at link-layer initialization", getFullPath().c_str());
         resolveConfiguredModes(modeSet);
 //        WATCH(dataOrMgmtRateControl);
 

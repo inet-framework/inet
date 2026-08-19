@@ -545,6 +545,15 @@ int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
 std::map<const IIeee80211Mode *, const IIeee80211Mode *> Ieee80211ModeSet::createControlResponseModes(const std::vector<Entry>& supportedEntries)
 {
     std::map<const IIeee80211Mode *, const IIeee80211Mode *> result;
+    // IEEE 802.11-2024 Table 9-230 defines the Basic HT-MCS Set as a BSS-
+    // configured bitmap of MCS indexes. It is not modelled here, so use the
+    // mandatory entries (currently the 20 MHz entries) as a bounded fallback
+    // for the candidate indexes. Clause 10.6.6.5.3 selects CH_BANDWIDTH
+    // separately, and the candidate filter below then keeps only modes at the
+    // source bandwidth. Consequently, optional 40 MHz MCS 0..7 are treated as
+    // candidate MCSs. A modelled Basic HT-MCS Set would replace this mandatory-
+    // index fallback with the BSS-configured indexes; bandwidth filtering would
+    // remain a separate step.
     std::set<unsigned int> mandatoryHtMcsIndexes;
     for (const auto& entry : supportedEntries) {
         auto mode = dynamic_cast<const Ieee80211HtMode *>(entry.mode);
@@ -567,7 +576,8 @@ std::map<const IIeee80211Mode *, const IIeee80211Mode *> Ieee80211ModeSet::creat
                 candidates.push_back(candidate);
         }
         // IEEE 802.11-2024 10.6.6.5.3: with no Basic HT-MCS Set modelled,
-        // CandidateMCSSet is the mandatory HT MCSs. After the MCS-index bound,
+        // CandidateMCSSet uses the mandatory-index fallback. After the
+        // bandwidth and MCS-index bounds,
         // retain the highest NSS not exceeding the received NSS, then select the
         // highest indexed MCS whose per-stream modulation and coding rate do not
         // exceed those of the received MCS. The modelled MCS 0..31 are EQM.
