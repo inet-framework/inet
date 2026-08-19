@@ -241,6 +241,11 @@ unsigned int Ieee80211VhtPreambleMode::computeNumberOfHTLongTrainings(unsigned i
     return numberOfSpaceTimeStreams == 3 ? 4 : numberOfSpaceTimeStreams;
 }
 
+const simtime_t Ieee80211VhtPreambleMode::getDurationBeforeHeader() const
+{
+    return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + legacySignalMode->getDuration();
+}
+
 const simtime_t Ieee80211VhtPreambleMode::getDuration() const
 {
     // 21.3.4 Mathematical description of signals
@@ -1072,4 +1077,3 @@ const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8([](){ return
 
 } /* namespace physicallayer */
 } /* namespace inet */
-

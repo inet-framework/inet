@@ -658,6 +658,8 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
     entries(completeHtGuardIntervalVariants(name, entries))
 {
     std::vector<Entry> *nonConstEntries = const_cast<std::vector<Entry> *>(&this->entries);
+    // Keep equal-bitrate modes in declaration order because unqualified lookups
+    // intentionally preserve the historically preferred mode.
     std::stable_sort(nonConstEntries->begin(), nonConstEntries->end(), EntryNetBitrateComparator());
     auto referenceMode = entries[0].mode;
     for (auto entry : entries) {
@@ -704,9 +706,8 @@ const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate,
         auto mode = entries[index].mode;
         auto dataMode = mode->getDataMode();
         auto bitrate = dataMode->getNetBitrate();
-        auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode);
         bool guardIntervalMatches = guardInterval < SIMTIME_ZERO ||
-                (htMode != nullptr && htMode->getDataMode()->getGuardInterval() == guardInterval);
+                dataMode->getGuardInterval() == guardInterval;
         if (minBitrate <= bitrate && bitrate <= maxBitrate &&
             (std::isnan(bandwidth.get()) || dataMode->getBandwidth() == bandwidth) &&
             (numSpatialStreams == -1 || dataMode->getNumberOfSpatialStreams() == numSpatialStreams) &&
@@ -722,7 +723,8 @@ const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth, int n
 {
     const IIeee80211Mode *mode = getMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams, guardInterval);
     if (mode == nullptr)
-        throw cRuntimeError("Unknown bitrate: %g in operation mode: '%s'", bitrate.get(), getName());
+        throw cRuntimeError("Unknown mode for bitrate %g bps, bandwidth %g Hz, %d spatial streams, and %s guard interval in operation mode '%s'",
+                bitrate.get(), bandwidth.get(), numSpatialStreams, guardInterval.str().c_str(), getName());
     else
         return mode;
 }
@@ -731,7 +733,8 @@ const IIeee80211Mode *Ieee80211ModeSet::getMode(bps minBitrate, bps maxBitrate, 
 {
     const IIeee80211Mode *mode = findMode(minBitrate, maxBitrate, bandwidth, numSpatialStreams, guardInterval);
     if (mode == nullptr)
-        throw cRuntimeError("Unknown bitrate: (%g - %g) in operation mode: '%s'", minBitrate.get(), maxBitrate.get(), getName());
+        throw cRuntimeError("Unknown mode for bitrate range (%g - %g) bps, bandwidth %g Hz, %d spatial streams, and %s guard interval in operation mode '%s'",
+                minBitrate.get(), maxBitrate.get(), bandwidth.get(), numSpatialStreams, guardInterval.str().c_str(), getName());
     else
         return mode;
 }
@@ -749,19 +752,25 @@ const IIeee80211Mode *Ieee80211ModeSet::getFastestMode() const
 const IIeee80211Mode *Ieee80211ModeSet::getSlowerMode(const IIeee80211Mode *mode) const
 {
     int index = findModeIndex(mode);
-    if (index > 0)
-        return entries[index - 1].mode;
-    else
-        return nullptr;
+    if (index > 0) {
+        auto bitrate = mode->getDataMode()->getNetBitrate();
+        for (int i = index - 1; i >= 0; i--)
+            if (entries[i].mode->getDataMode()->getNetBitrate() < bitrate)
+                return entries[i].mode;
+    }
+    return nullptr;
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::getFasterMode(const IIeee80211Mode *mode) const
 {
     int index = findModeIndex(mode);
-    if (index >= 0 && index < (int)entries.size() - 1)
-        return entries[index + 1].mode;
-    else
-        return nullptr;
+    if (index >= 0) {
+        auto bitrate = mode->getDataMode()->getNetBitrate();
+        for (size_t i = index + 1; i < entries.size(); i++)
+            if (entries[i].mode->getDataMode()->getNetBitrate() > bitrate)
+                return entries[i].mode;
+    }
+    return nullptr;
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::getSlowestMandatoryMode() const
@@ -828,4 +837,3 @@ const Ieee80211ModeSet *Ieee80211ModeSet::getModeSet(const char *mode)
 } // namespace physicallayer
 
 } // namespace inet
-

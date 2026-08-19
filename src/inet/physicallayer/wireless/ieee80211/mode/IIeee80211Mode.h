@@ -44,6 +44,7 @@ class INET_API IIeee80211DataMode : public cObject, public IPrintableObject
     virtual b getCompleteLength(b dataLength) const = 0;
     virtual const simtime_t getDuration(b dataLength) const = 0;
     virtual const simtime_t getSymbolInterval() const = 0;
+    virtual const simtime_t getGuardInterval() const { return -1; }
     virtual const IModulation *getModulation() const = 0;
     virtual int getNumberOfSpatialStreams() const = 0;
 };
@@ -61,6 +62,9 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
     IIeee80211HeaderMode *_getHeaderMode() const { return const_cast<IIeee80211HeaderMode *>(getHeaderMode()); }
     IIeee80211DataMode *_getDataMode() const { return const_cast<IIeee80211DataMode *>(getDataMode()); }
     virtual const simtime_t getDuration(b dataLength) const = 0;
+    virtual const simtime_t getPreambleDuration() const { return getPreambleMode()->getDuration(); }
+    virtual const simtime_t getHeaderDuration() const { return getHeaderMode()->getDuration(); }
+    virtual const simtime_t getDataDuration(b dataLength) const { return getDuration(dataLength) - getPreambleDuration() - getHeaderDuration(); }
     virtual const simtime_t getSlotTime() const = 0;
     virtual const simtime_t getSifsTime() const = 0;
     virtual const simtime_t getRifsTime() const = 0;
@@ -77,4 +81,3 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
 } // namespace inet
 
 #endif
-

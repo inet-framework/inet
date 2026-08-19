@@ -161,6 +161,16 @@ unsigned int Ieee80211HtPreambleMode::computeNumberOfHTLongTrainings(unsigned in
     return numberOfSpaceTimeStreams == 3 ? 4 : numberOfSpaceTimeStreams;
 }
 
+const simtime_t Ieee80211HtPreambleMode::getDurationBeforeHeader() const
+{
+    if (preambleFormat == HT_PREAMBLE_MIXED)
+        return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + legacySignalMode->getDuration();
+    else if (preambleFormat == HT_PREAMBLE_GREENFIELD)
+        return getHTGreenfieldShortTrainingFieldDuration() + getFirstHTLongTrainingFieldDuration();
+    else
+        throw cRuntimeError("Unknown preamble format");
+}
+
 const simtime_t Ieee80211HtPreambleMode::getDuration() const
 {
     // 20.3.7 Mathematical description of signals
@@ -235,12 +245,12 @@ bps Ieee80211HtModeBase::getGrossBitrate() const
     return grossBitrate;
 }
 
-simtime_t Ieee80211HtDataMode::getGuardInterval() const
+const simtime_t Ieee80211HtDataMode::getGuardInterval() const
 {
     if (guardIntervalType == HT_GUARD_INTERVAL_LONG)
-        return 800E-9;
+        return getGIDuration();
     else if (guardIntervalType == HT_GUARD_INTERVAL_SHORT)
-        return 400E-9;
+        return getShortGIDuration();
     else
         throw cRuntimeError("Unknown guard interval type");
 }
@@ -567,4 +577,3 @@ const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs76BW40MHz([](){ return new Ie
 
 } /* namespace physicallayer */
 } /* namespace inet */
-
