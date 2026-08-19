@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
@@ -19,6 +21,24 @@ namespace inet {
 namespace ieee80211 {
 
 using namespace inet::physicallayer;
+
+static const IIeee80211Mode *getConfiguredControlResponseMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    // Explicit legacy/VHT overrides retain their requested mode; HT rates need the
+    // bounded non-HT control-response conversion for ACK/BlockAck.
+    return dynamic_cast<const Ieee80211HtMode *>(mode) != nullptr ? modeSet->getNonHtControlResponseMode(mode) : mode;
+}
+
+static const IIeee80211Mode *getDynamicControlResponseMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    if (dynamic_cast<const Ieee80211HtMode *>(mode) != nullptr || !modeSet->containsMode(mode))
+        return modeSet->getNonHtControlResponseMode(mode);
+    if (modeSet->getIsMandatory(mode))
+        return mode;
+    if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
+        return slowerMode;
+    return modeSet->getNonHtControlResponseMode(mode);
+}
 
 Define_Module(RateSelection);
 
@@ -37,10 +57,7 @@ void RateSelection::initialize(int stage)
         mgmtFrameMode = (mgmtFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(mgmtFrameBitrate));
         double controlFrameBitrate = par("controlFrameBitrate");
         controlFrameMode = (controlFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(controlFrameBitrate));
-        double responseAckFrameBitrate = par("responseAckFrameBitrate");
-        responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
-        double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
-        responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseCtsFrameBitrate));
+        resolveConfiguredResponseModes();
         fastestMandatoryMode = modeSet->getFastestMandatoryMode();
 //        WATCH(dataOrMgmtRateControl);
 
@@ -58,6 +75,16 @@ void RateSelection::initialize(int stage)
 //        WATCH();
 //        WATCH();
     }
+}
+
+void RateSelection::resolveConfiguredResponseModes()
+{
+    if (modeSet == nullptr)
+        return;
+    double responseAckFrameBitrate = par("responseAckFrameBitrate");
+    responseAckFrameMode = responseAckFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
+    double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
+    responseCtsFrameMode = responseCtsFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(responseCtsFrameBitrate));
 }
 
 const IIeee80211Mode *RateSelection::getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -79,28 +106,27 @@ const IIeee80211Mode *RateSelection::getMode(Packet *packet, const Ptr<const Iee
 //
 const IIeee80211Mode *RateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
+    // Keep configured responses independent of the eliciting packet; callers may
+    // resolve a configured response while constructing a test packet.
     if (responseAckFrameMode)
-        return modeSet->getControlResponseMode(responseAckFrameMode);
-    else {
-        auto mode = getMode(packet, dataOrMgmtHeader);
-        ASSERT(modeSet->containsMode(mode));
-        auto responseModeSet = modeSet->getControlResponseModeSet(mode);
-        auto responseMode = responseModeSet->getMode(mode);
-        return responseModeSet->getIsMandatory(responseMode) ? responseMode : responseModeSet->getSlowerMandatoryMode(responseMode); // TODO BSSBasicRateSet
-    }
+        return getConfiguredControlResponseMode(modeSet, responseAckFrameMode);
+    auto mode = getMode(packet, dataOrMgmtHeader);
+    ASSERT(modeSet->supportsMode(mode));
+    // IEEE 802.11-2024 10.6.6.1/10.6.6.5.2: this bounded model uses a
+    // mandatory non-HT rate for ordinary ACK responses; BSSBasicRateSet is not modelled.
+    return getDynamicControlResponseMode(modeSet, mode);
 }
 
 const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
 {
-    if (responseCtsFrameMode)
-        return modeSet->getControlResponseMode(responseCtsFrameMode);
-    else {
-        auto mode = getMode(packet, rtsFrame);
-        ASSERT(modeSet->containsMode(mode));
-        auto responseModeSet = modeSet->getControlResponseModeSet(mode);
-        auto responseMode = responseModeSet->getMode(mode);
-        return responseModeSet->getIsMandatory(responseMode) ? responseMode : responseModeSet->getSlowerMandatoryMode(responseMode); // TODO BSSBasicRateSet
+    auto mode = getMode(packet, rtsFrame);
+    ASSERT(modeSet->supportsMode(mode));
+    auto responseMode = responseCtsFrameMode ? responseCtsFrameMode : mode;
+    if (dynamic_cast<const Ieee80211HtMode *>(mode) != nullptr) {
+        // IEEE 802.11-2024 10.6.6.1 and 10.6.6.5.7 require an HT response to HT RTS; HT-GF is never a response.
+        return responseCtsFrameMode && dynamic_cast<const Ieee80211HtMode *>(responseMode) == nullptr ? responseMode : modeSet->getControlResponseMode(responseMode);
     }
+    return responseCtsFrameMode ? getConfiguredControlResponseMode(modeSet, responseMode) : getDynamicControlResponseMode(modeSet, responseMode);
 }
 
 // 802.11-1999 Std.
@@ -157,6 +183,7 @@ void RateSelection::receiveSignal(cComponent *source, simsignal_t signalID, cObj
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
         fastestMandatoryMode = modeSet->getFastestMandatoryMode();
+        resolveConfiguredResponseModes();
     }
 }
 

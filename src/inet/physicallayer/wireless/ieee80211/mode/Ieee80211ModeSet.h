@@ -16,7 +16,7 @@ namespace physicallayer {
 
 class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 {
-  protected:
+  public:
     class INET_API Entry {
       public:
         bool isMandatory;
@@ -27,27 +27,25 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
         bool operator()(const Entry& left, const Entry& right) { return left.mode->getDataMode()->getNetBitrate() < right.mode->getDataMode()->getNetBitrate(); }
     };
 
-    struct ControlResponseMode {
-        const Ieee80211ModeSet *modeSet;
-        const IIeee80211Mode *mode;
-    };
-
   protected:
     std::string name;
     const std::vector<Entry> entries;
-    mutable std::map<const IIeee80211Mode *, ControlResponseMode> controlResponseModeCache;
+    // Entries are selectable modes; supportedEntries also contains immutable PHY capabilities needed for mandatory control responses.
+    const std::vector<Entry> supportedEntries;
+    const std::map<const IIeee80211Mode *, const IIeee80211Mode *> controlResponseModes;
+    const std::vector<Entry> nonHtControlResponseEntries;
 
   public:
-    static const DelayedInitializer<std::vector<Ieee80211ModeSet>> modeSets;
+    static OPP_THREAD_LOCAL const DelayedInitializer<std::vector<Ieee80211ModeSet>> modeSets;
 
   protected:
     int findModeIndex(const IIeee80211Mode *mode) const;
-    int findEquivalentModeIndex(const IIeee80211Mode *mode) const;
     int getModeIndex(const IIeee80211Mode *mode) const;
-    const ControlResponseMode& resolveControlResponseMode(const IIeee80211Mode *mode) const;
+    static std::map<const IIeee80211Mode *, const IIeee80211Mode *> createControlResponseModes(const std::vector<Entry>& supportedEntries);
+    static std::vector<Entry> createNonHtControlResponseEntries(const std::vector<Entry>& supportedEntries);
 
   public:
-    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries);
+    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const std::vector<Entry> supportedEntries = {});
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211ModeSet, name = " << name; }
 
@@ -58,8 +56,10 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     bool isMandatory(int index) { return entries[index].isMandatory; }
 
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
+    bool supportsMode(const IIeee80211Mode *mode) const;
     bool getIsMandatory(const IIeee80211Mode *mode) const;
 
+    // Pointer lookup is intentionally strict. Use getControlResponseMode() for an explicitly requested response that needs HT-mixed translation.
     const IIeee80211Mode *findMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *findMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
@@ -75,8 +75,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     const IIeee80211Mode *getSlowerMandatoryMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getFasterMandatoryMode(const IIeee80211Mode *mode) const;
 
-    const Ieee80211ModeSet *getControlResponseModeSet(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getControlResponseMode(const IIeee80211Mode *mode) const;
+    const IIeee80211Mode *getNonHtControlResponseMode(const IIeee80211Mode *mode) const;
 
     static const Ieee80211ModeSet *findModeSet(const char *mode);
     static const Ieee80211ModeSet *getModeSet(const char *mode);

@@ -1,7 +1,6 @@
 %description:
 Checks that the 802.11n mixed and Greenfield mode profiles preserve distinct
-preamble formats and timing, retain strict membership, and support explicit
-cross-profile lookup for control-response translation. Also checks VHT cache identity.
+preamble formats and timing, retain strict membership and supplementary Greenfield control-response support, including legacy fallback rates. Also checks VHT cache identity.
 
 %includes:
 #include <cstring>
@@ -10,12 +9,20 @@ cross-profile lookup for control-response translation. Also checks VHT cache ide
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 
 %global:
 using namespace inet;
 using namespace inet::physicallayer;
+
+class TestIeee80211Transmitter : public Ieee80211Transmitter
+{
+  public:
+    const Ieee80211ModeSet *getTestModeSet() const { return modeSet; }
+    const IIeee80211Mode *getTestMode() const { return mode; }
+};
 
 static const Ieee80211HtMode *findMcs0LongGiMode(const Ieee80211ModeSet *modeSet)
 {
@@ -32,17 +39,6 @@ static bool rejectsUnknownMode(const Ieee80211ModeSet *modeSet, const IIeee80211
     }
     catch (const cRuntimeError&) {
         return true;
-    }
-}
-
-static bool rejectsNonLocalControlResponseMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
-{
-    try {
-        modeSet->getControlResponseModeSet(mode);
-        return false;
-    }
-    catch (const cRuntimeError& error) {
-        return std::strstr(error.what(), "not in operation mode") != nullptr;
     }
 }
 
@@ -85,12 +81,38 @@ ASSERT(mixedProfile->getSlowerMode(greenfieldMode) == nullptr);
 ASSERT(greenfieldProfile->getFasterMode(mixedMode) == nullptr);
 ASSERT(rejectsMandatoryLookup(mixedProfile, greenfieldMode));
 ASSERT(rejectsMandatoryLookup(greenfieldProfile, mixedMode));
-ASSERT(mixedProfile->getMode(greenfieldMode) == mixedMode);
-ASSERT(greenfieldProfile->getMode(mixedMode) == greenfieldMode);
+ASSERT(rejectsUnknownMode(mixedProfile, greenfieldMode));
+ASSERT(rejectsUnknownMode(greenfieldProfile, mixedMode));
+ASSERT(mixedProfile->supportsMode(mixedMode));
+ASSERT(greenfieldProfile->supportsMode(greenfieldMode));
+ASSERT(greenfieldProfile->supportsMode(mixedMode));
+ASSERT(!mixedProfile->supportsMode(greenfieldMode));
+ASSERT(greenfieldProfile->supportsMode(&Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps));
+ASSERT(greenfieldProfile->getNonHtControlResponseMode(greenfieldMode) == &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps);
+ASSERT(greenfieldProfile->getNonHtControlResponseMode(&Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps) == &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps);
 ASSERT(mixedProfile->getControlResponseMode(mixedMode) == mixedMode);
-ASSERT(greenfieldProfile->getControlResponseModeSet(greenfieldMode) == mixedProfile);
 ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMode) == mixedMode);
-ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMode) == mixedMode);
+
+auto transmitter = new TestIeee80211Transmitter;
+transmitter->setModeSet(greenfieldProfile);
+transmitter->setMode(greenfieldMode);
+transmitter->setModeSet(mixedProfile);
+ASSERT(transmitter->getTestModeSet() == mixedProfile);
+ASSERT(transmitter->getTestMode() == mixedMode);
+transmitter->setModeSet(greenfieldProfile);
+ASSERT(transmitter->getTestModeSet() == greenfieldProfile);
+ASSERT(transmitter->getTestMode() == greenfieldMode);
+try {
+    transmitter->setMode(mixedMode);
+    ASSERT(false);
+}
+catch (const cRuntimeError&) {
+    ASSERT(transmitter->getTestMode() == greenfieldMode);
+}
+transmitter->setModeSet(nullptr);
+ASSERT(transmitter->getTestModeSet() == nullptr);
+ASSERT(transmitter->getTestMode() == nullptr);
+delete transmitter;
 
 auto greenfield5GhzMode = Ieee80211HtCompliantModes::getCompliantMode(
         &Ieee80211HtmcsTable::htMcs0BW20MHz,
@@ -100,7 +122,7 @@ auto greenfield5GhzMode = Ieee80211HtCompliantModes::getCompliantMode(
 ASSERT(greenfield5GhzMode->getCenterFrequencyMode() == Ieee80211HtMode::BAND_5GHZ);
 ASSERT(greenfield5GhzMode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD);
 ASSERT(!greenfieldProfile->containsMode(greenfield5GhzMode));
-ASSERT(rejectsNonLocalControlResponseMode(greenfieldProfile, greenfield5GhzMode));
+ASSERT(!greenfieldProfile->supportsMode(greenfield5GhzMode));
 
 auto vhtMixed5GhzMode = Ieee80211VhtCompliantModes::getCompliantMode(
         &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,

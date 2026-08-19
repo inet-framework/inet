@@ -93,19 +93,47 @@ Register_Abstract_Class(Ieee80211ModeSet);
     HT_MODE_ENTRY(40, 30, false, FORMAT, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT) \
     HT_MODE_ENTRY(40, 31, false, FORMAT, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT)
 
-static Ieee80211ModeSet createHtModeSet(const char *name, Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat)
+static std::vector<Ieee80211ModeSet::Entry> createHtEntries(Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat)
 {
-    return Ieee80211ModeSet(name, { // This table is not complete; it only contains 2.4GHz homogeneous spatial streams, all mandatory and optional modes
+    return {
         HT_MODE_ENTRIES_20(preambleFormat)
         HT_MODE_ENTRIES_40(preambleFormat)
+    };
+}
+
+static std::vector<Ieee80211ModeSet::Entry> createHtSupportedEntries(Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat)
+{
+    auto result = createHtEntries(preambleFormat);
+    auto mixedEntries = createHtEntries(Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED);
+    if (preambleFormat == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD)
+        result.insert(result.end(), mixedEntries.begin(), mixedEntries.end());
+    result.insert(result.end(), {
+        { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
+        { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode18Mbps },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps },
     });
+    return result;
+}
+
+static Ieee80211ModeSet createHtModeSet(const char *name, Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat)
+{
+    return Ieee80211ModeSet(name, createHtEntries(preambleFormat), createHtSupportedEntries(preambleFormat));
 }
 
 #undef HT_MODE_ENTRIES_40
 #undef HT_MODE_ENTRIES_20
 #undef HT_MODE_ENTRY
 
-const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSets([]() { return new std::vector<Ieee80211ModeSet> {
+OPP_THREAD_LOCAL const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSets([]() { return new std::vector<Ieee80211ModeSet> {
     Ieee80211ModeSet("a", {
         { true, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode9MbpsCS20MHz },
@@ -473,9 +501,12 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT) },
 }),}; });
 
-Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries) :
+Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const std::vector<Entry> supportedEntries) :
     name(name),
-    entries(entries)
+    entries(entries),
+    supportedEntries(supportedEntries.empty() ? entries : supportedEntries),
+    controlResponseModes(createControlResponseModes(supportedEntries.empty() ? entries : supportedEntries)),
+    nonHtControlResponseEntries(createNonHtControlResponseEntries(supportedEntries.empty() ? entries : supportedEntries))
 {
     std::vector<Entry> *nonConstEntries = const_cast<std::vector<Entry> *>(&this->entries);
     std::stable_sort(nonConstEntries->begin(), nonConstEntries->end(), EntryNetBitrateComparator());
@@ -499,29 +530,45 @@ int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
     return -1;
 }
 
-int Ieee80211ModeSet::findEquivalentModeIndex(const IIeee80211Mode *mode) const
+std::map<const IIeee80211Mode *, const IIeee80211Mode *> Ieee80211ModeSet::createControlResponseModes(const std::vector<Entry>& supportedEntries)
 {
-    int modeIndex = findModeIndex(mode);
-    if (modeIndex != -1)
-        return modeIndex;
-    if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode)) {
-        auto htDataMode = htMode->getDataMode();
-        for (size_t index = 0; index < entries.size(); index++) {
-            auto entryHtMode = dynamic_cast<const Ieee80211HtMode *>(entries[index].mode);
-            if (entryHtMode != nullptr) {
-                auto entryHtDataMode = entryHtMode->getDataMode();
-                if (entryHtDataMode->getMcsIndex() == htDataMode->getMcsIndex() &&
-                    entryHtDataMode->getBandwidth() == htDataMode->getBandwidth() &&
-                    entryHtDataMode->getGuardIntervalType() == htDataMode->getGuardIntervalType() &&
-                    entryHtMode->getCenterFrequencyMode() == htMode->getCenterFrequencyMode() &&
-                    entryHtDataMode->getNumberOfSpatialStreams() == htDataMode->getNumberOfSpatialStreams())
-                {
-                    return index;
-                }
+    std::map<const IIeee80211Mode *, const IIeee80211Mode *> result;
+    for (const auto& sourceEntry : supportedEntries) {
+        auto source = dynamic_cast<const Ieee80211HtMode *>(sourceEntry.mode);
+        if (source == nullptr || source->getPreambleMode()->getPreambleFormat() != Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD)
+            continue;
+        for (const auto& candidateEntry : supportedEntries) {
+            auto candidate = dynamic_cast<const Ieee80211HtMode *>(candidateEntry.mode);
+            if (candidate != nullptr && candidate->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED &&
+                candidate->getCenterFrequencyMode() == source->getCenterFrequencyMode() &&
+                candidate->getDataMode()->getMcsIndex() == source->getDataMode()->getMcsIndex() &&
+                candidate->getDataMode()->getBandwidth() == source->getDataMode()->getBandwidth() &&
+                candidate->getDataMode()->getGuardIntervalType() == source->getDataMode()->getGuardIntervalType() &&
+                candidate->getDataMode()->getNumberOfSpatialStreams() == source->getDataMode()->getNumberOfSpatialStreams()) {
+                result.emplace(sourceEntry.mode, candidateEntry.mode);
+                break;
             }
         }
     }
-    return -1;
+    return result;
+}
+
+std::vector<Ieee80211ModeSet::Entry> Ieee80211ModeSet::createNonHtControlResponseEntries(const std::vector<Entry>& supportedEntries)
+{
+    std::vector<Entry> result;
+    for (const auto& entry : supportedEntries)
+        if (entry.isMandatory && dynamic_cast<const Ieee80211HtMode *>(entry.mode) == nullptr && dynamic_cast<const Ieee80211VhtMode *>(entry.mode) == nullptr)
+            result.push_back(entry);
+    std::stable_sort(result.begin(), result.end(), EntryNetBitrateComparator());
+    return result;
+}
+
+bool Ieee80211ModeSet::supportsMode(const IIeee80211Mode *mode) const
+{
+    for (const auto& entry : supportedEntries)
+        if (entry.mode == mode)
+            return true;
+    return false;
 }
 
 int Ieee80211ModeSet::getModeIndex(const IIeee80211Mode *mode) const
@@ -540,7 +587,7 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
 
 const IIeee80211Mode *Ieee80211ModeSet::findMode(const IIeee80211Mode *mode) const
 {
-    int index = findEquivalentModeIndex(mode);
+    int index = findModeIndex(mode);
     return index >= 0 ? entries[index].mode : nullptr;
 }
 
@@ -655,47 +702,42 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211M
     return nullptr;
 }
 
-const Ieee80211ModeSet::ControlResponseMode& Ieee80211ModeSet::resolveControlResponseMode(const IIeee80211Mode *mode) const
-{
-    auto cachedMode = controlResponseModeCache.find(mode);
-    if (cachedMode != controlResponseModeCache.end())
-        return cachedMode->second;
-    if (!containsMode(mode))
-        throw cRuntimeError("Control response mode is not in operation mode '%s': '%s'", getName(), mode->getName());
-
-    const Ieee80211ModeSet *controlResponseModeSet = this;
-    const IIeee80211Mode *controlResponseMode = mode;
-    // IEEE 802.11-2024, 10.6.6.5.7 requires HT control responses to use the
-    // HT-mixed format; 19.3.9.5.1 defines HT-mixed and HT-Greenfield preambles.
-    if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode)) {
-        controlResponseModeSet = nullptr;
-        for (size_t index = 0; index < (&modeSets)->size(); index++) {
-            auto candidateModeSet = &(&modeSets)->at(index);
-            auto candidateMode = dynamic_cast<const Ieee80211HtMode *>(candidateModeSet->findMode(mode));
-            if (candidateMode != nullptr &&
-                candidateMode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED &&
-                candidateMode->getCenterFrequencyMode() == htMode->getCenterFrequencyMode())
-            {
-                if (controlResponseModeSet != nullptr)
-                    throw cRuntimeError("Multiple same-band HT-mixed control response mode sets for mode: '%s'", mode->getName());
-                controlResponseModeSet = candidateModeSet;
-            }
-        }
-        if (controlResponseModeSet == nullptr)
-            throw cRuntimeError("No same-band HT-mixed control response mode set for mode: '%s'", mode->getName());
-        controlResponseMode = controlResponseModeSet->getMode(mode);
-    }
-    return controlResponseModeCache.emplace(mode, ControlResponseMode { controlResponseModeSet, controlResponseMode }).first->second;
-}
-
-const Ieee80211ModeSet *Ieee80211ModeSet::getControlResponseModeSet(const IIeee80211Mode *mode) const
-{
-    return resolveControlResponseMode(mode).modeSet;
-}
-
 const IIeee80211Mode *Ieee80211ModeSet::getControlResponseMode(const IIeee80211Mode *mode) const
 {
-    return resolveControlResponseMode(mode).mode;
+    if (!supportsMode(mode))
+        throw cRuntimeError("Control response mode is not supported by operation mode %s: %s", getName(), mode->getName());
+    auto it = controlResponseModes.find(mode);
+    return it != controlResponseModes.end() ? it->second : mode;
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::getNonHtControlResponseMode(const IIeee80211Mode *mode) const
+{
+    if (!supportsMode(mode))
+        throw cRuntimeError("Control response mode is not supported by operation mode %s: %s", getName(), mode->getName());
+    auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode);
+    if (htMode == nullptr) {
+        // VHT response-format selection remains unchanged; this fallback is HT-scoped.
+        if (dynamic_cast<const Ieee80211VhtMode *>(mode) != nullptr)
+            return mode;
+        const IIeee80211Mode *result = nullptr;
+        for (const auto& entry : nonHtControlResponseEntries) {
+            auto candidate = entry.mode;
+            if (candidate->getDataMode()->getNetBitrate() <= mode->getDataMode()->getNetBitrate() &&
+                (result == nullptr || candidate->getDataMode()->getNetBitrate() > result->getDataMode()->getNetBitrate()))
+                result = candidate;
+        }
+        return result != nullptr ? result : mode;
+    }
+    const IIeee80211Mode *result = nullptr;
+    for (const auto& entry : nonHtControlResponseEntries) {
+        auto candidate = entry.mode;
+        if (candidate->getDataMode()->getNetBitrate() <= mode->getDataMode()->getNetBitrate() &&
+            (result == nullptr || candidate->getDataMode()->getNetBitrate() > result->getDataMode()->getNetBitrate()))
+            result = candidate;
+    }
+    if (result == nullptr)
+        throw cRuntimeError("No mandatory non-HT control response mode for %s", mode->getName());
+    return result;
 }
 
 const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(const char *mode)

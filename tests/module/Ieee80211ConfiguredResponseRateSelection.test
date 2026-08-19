@@ -1,6 +1,6 @@
 %description:
-Checks through the public rate-selection API that configured Greenfield response
-rates are converted to HT-mixed modes for DCF and QoS ACK, CTS, and Basic BlockAck responses.
+Checks through the public rate-selection API that configured Greenfield response rates use
+non-HT ACK/BlockAck and HT-mixed CTS formats.
 
 %file: Test.cc
 #include <iostream>
@@ -10,6 +10,7 @@ rates are converted to HT-mixed modes for DCF and QoS ACK, CTS, and Basic BlockA
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -20,15 +21,17 @@ using namespace inet::physicallayer;
 
 namespace Ieee80211ConfiguredResponseRateSelection {
 
-static void assertConfiguredResponse(const char *name, const IIeee80211Mode *mode)
+static void assertHtMixedResponse(const char *name, const IIeee80211Mode *mode)
 {
     auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode);
-    if (htMode == nullptr)
-        throw cRuntimeError("%s did not return an HT mode", name);
-    if (htMode->getPreambleMode()->getPreambleFormat() != Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED)
-        throw cRuntimeError("%s did not return an HT-mixed mode", name);
-    if (htMode->getDataMode()->getNetBitrate() != Mbps(6.5))
-        throw cRuntimeError("%s did not return 6.5 Mbps", name);
+    if (htMode == nullptr || htMode->getPreambleMode()->getPreambleFormat() != Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED || htMode->getDataMode()->getNetBitrate() != Mbps(6.5))
+        throw cRuntimeError("%s did not return HT-mixed 6.5 Mbps", name);
+}
+
+static void assertNonHtResponse(const char *name, const IIeee80211Mode *mode)
+{
+    if (dynamic_cast<const Ieee80211HtMode *>(mode) != nullptr || mode->getDataMode()->getNetBitrate() != Mbps(6))
+        throw cRuntimeError("%s did not return non-HT 6 Mbps", name);
 }
 
 class ConfiguredResponseProbe : public cSimpleModule
@@ -43,6 +46,7 @@ class ConfiguredResponseProbe : public cSimpleModule
 
         auto dcfRateSelection = check_and_cast<RateSelection *>(getSimulation()->getModuleByPath("TestConfiguredResponses.host[0].wlan[0].mac.dcf.rateSelection"));
         auto qosRateSelection = check_and_cast<QosRateSelection *>(getSimulation()->getModuleByPath("TestConfiguredResponses.host[0].wlan[0].mac.hcf.rateSelection"));
+        auto dynamicQosRateSelection = check_and_cast<QosRateSelection *>(getSimulation()->getModuleByPath("TestConfiguredResponses.host[1].wlan[0].mac.hcf.rateSelection"));
 
         if (double(dcfRateSelection->par("responseAckFrameBitrate")) != 6.5e6
                 || double(qosRateSelection->par("responseAckFrameBitrate")) != 6.5e6)
@@ -51,16 +55,26 @@ class ConfiguredResponseProbe : public cSimpleModule
         auto sourceMode = Ieee80211ModeSet::getModeSet("n(greenfield-2.4Ghz)")->getMode(Mbps(6.5));
         Packet packet("receivedFrame");
         packet.addTag<Ieee80211ModeInd>()->setMode(sourceMode);
+        Packet nonHtPacket("receivedNonHtFrame");
+        nonHtPacket.addTag<Ieee80211ModeInd>()->setMode(&Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps);
 
-        assertConfiguredResponse("DCF ACK", dcfRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
-        assertConfiguredResponse("DCF CTS", dcfRateSelection->computeResponseCtsFrameMode(nullptr, nullptr));
-        assertConfiguredResponse("QoS ACK", qosRateSelection->computeResponseAckFrameMode(&packet, nullptr));
-        assertConfiguredResponse("QoS CTS", qosRateSelection->computeResponseCtsFrameMode(&packet, nullptr));
+        assertNonHtResponse("DCF ACK", dcfRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
+        assertHtMixedResponse("DCF CTS HT", dcfRateSelection->computeResponseCtsFrameMode(&packet, nullptr));
+        assertNonHtResponse("DCF CTS non-HT", dcfRateSelection->computeResponseCtsFrameMode(&nonHtPacket, nullptr));
+        assertNonHtResponse("QoS ACK", qosRateSelection->computeResponseAckFrameMode(&packet, nullptr));
+        assertHtMixedResponse("QoS CTS HT", qosRateSelection->computeResponseCtsFrameMode(&packet, nullptr));
+        assertNonHtResponse("QoS CTS non-HT", qosRateSelection->computeResponseCtsFrameMode(&nonHtPacket, nullptr));
 
         auto basicBlockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
-        assertConfiguredResponse("QoS Basic BlockAck", qosRateSelection->computeResponseBlockAckFrameMode(&packet, basicBlockAckReq));
+        assertNonHtResponse("QoS Basic BlockAck", qosRateSelection->computeResponseBlockAckFrameMode(&packet, basicBlockAckReq));
+        Packet optionalNonHtPacket("receivedOptionalNonHtFrame");
+        optionalNonHtPacket.addTag<Ieee80211ModeInd>()->setMode(&Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps);
+        assertNonHtResponse("Dynamic QoS ACK", dynamicQosRateSelection->computeResponseAckFrameMode(&optionalNonHtPacket, nullptr));
+        assertNonHtResponse("Dynamic QoS CTS", dynamicQosRateSelection->computeResponseCtsFrameMode(&optionalNonHtPacket, nullptr));
+        ASSERT(dynamicQosRateSelection->computeResponseBlockAckFrameMode(&optionalNonHtPacket, basicBlockAckReq) == &Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps);
+        ASSERT(dynamicQosRateSelection->computeResponseBlockAckFrameMode(&packet, basicBlockAckReq) == &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps);
 
-        std::cout << "Configured DCF and QoS ACK/CTS/Basic BlockAck responses use HT-mixed 6.5 Mbps modes.\n";
+        std::cout << "Configured DCF and QoS ACK/Basic BlockAck use non-HT 6 Mbps; HT CTS uses HT-mixed 6.5 Mbps and non-HT CTS uses non-HT 6 Mbps; dynamic non-HT Basic BlockAck retains ERP 9 Mbps.\n";
     }
 };
 
@@ -103,6 +117,9 @@ network = TestConfiguredResponses
 sim-time-limit = 1s
 **.opMode = "n(greenfield-2.4Ghz)"
 **.qosStation = true
+*.host[1].wlan[0].mac.hcf.rateSelection.responseAckFrameBitrate = -1bps
+*.host[1].wlan[0].mac.hcf.rateSelection.responseCtsFrameBitrate = -1bps
+*.host[1].wlan[0].mac.hcf.rateSelection.responseBlockAckFrameBitrate = -1bps
 **.wlan[*].mac.dcf.rateSelection.responseAckFrameBitrate = 6.5Mbps
 **.wlan[*].mac.dcf.rateSelection.responseCtsFrameBitrate = 6.5Mbps
 **.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = 6.5Mbps
@@ -112,4 +129,4 @@ sim-time-limit = 1s
 %extraargs: -c ConfiguredResponses
 
 %contains: stdout
-Configured DCF and QoS ACK/CTS/Basic BlockAck responses use HT-mixed 6.5 Mbps modes.
+Configured DCF and QoS ACK/Basic BlockAck use non-HT 6 Mbps; HT CTS uses HT-mixed 6.5 Mbps and non-HT CTS uses non-HT 6 Mbps; dynamic non-HT Basic BlockAck retains ERP 9 Mbps.

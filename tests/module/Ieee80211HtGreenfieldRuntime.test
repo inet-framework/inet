@@ -1,7 +1,6 @@
 %description:
 
-Checks real HT-Greenfield transmissions using response-free, group-addressed
-traffic from an ad hoc station.
+Checks forced HT-Greenfield RTS/HT-mixed CTS plus unicast HT-Greenfield data and non-HT ACK responses between two ad hoc stations.
 
 %file: Test.cc
 #include <iostream>
@@ -10,17 +9,22 @@ traffic from an ad hoc station.
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 using namespace inet;
 using namespace inet::physicallayer;
+using namespace inet::ieee80211;
 
 namespace Ieee80211HtGreenfieldRuntime {
+
+static OPP_THREAD_LOCAL int htGreenfieldRtsCount = 0;
+static OPP_THREAD_LOCAL int htMixedCtsCount = 0;
+static OPP_THREAD_LOCAL int htGreenfieldDataCount = 0;
+static OPP_THREAD_LOCAL int nonHtAckCount = 0;
 
 class HtPreambleCheckingRadio : public Ieee80211Radio, public cListener
 {
   protected:
-    int htGreenfieldTransmissionCount = 0;
-
     virtual void initialize(int stage) override
     {
         Ieee80211Radio::initialize(stage);
@@ -34,17 +38,26 @@ class HtPreambleCheckingRadio : public Ieee80211Radio, public cListener
             return;
         auto transmission = check_and_cast<const Ieee80211Transmission *>(obj);
         auto mode = dynamic_cast<const Ieee80211HtMode *>(transmission->getMode());
-        if (mode == nullptr)
-            return;
-        if (mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD)
-            htGreenfieldTransmissionCount++;
+        auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+        auto macHeader = transmission->getPacket()->peekDataAt<Ieee80211MacHeader>(phyHeader->getChunkLength());
+        auto isHtGreenfield = mode != nullptr && mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD;
+        auto isHtMixed = mode != nullptr && mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED;
+        if (dynamicPtrCast<const Ieee80211RtsFrame>(macHeader) && isHtGreenfield)
+            htGreenfieldRtsCount++;
+        if (dynamicPtrCast<const Ieee80211CtsFrame>(macHeader) && isHtMixed)
+            htMixedCtsCount++;
+        if (dynamicPtrCast<const Ieee80211DataHeader>(macHeader) && isHtGreenfield)
+            htGreenfieldDataCount++;
+        if (dynamicPtrCast<const Ieee80211AckFrame>(macHeader) && mode == nullptr)
+            nonHtAckCount++;
     }
 
     virtual void finish() override
     {
         Ieee80211Radio::finish();
-        if (htGreenfieldTransmissionCount > 0)
-            std::cout << "Observed " << htGreenfieldTransmissionCount << " runtime HT-Greenfield broadcast transmission(s).\n";
+        if (htGreenfieldRtsCount == 0 || htMixedCtsCount == 0 || htGreenfieldDataCount == 0 || nonHtAckCount == 0)
+            throw cRuntimeError("Expected HT-GF RTS, HT-MF CTS, HT-GF data, and non-HT ACK transmissions");
+        std::cout << "Observed " << htGreenfieldRtsCount << " HT-Greenfield RTS, " << htMixedCtsCount << " HT-mixed CTS, " << htGreenfieldDataCount << " HT-Greenfield data, and " << nonHtAckCount << " non-HT ACK response(s).\n";
     }
 };
 
@@ -93,18 +106,21 @@ seed-set = 0
 abstract = false
 network = TestHtGreenfield
 sim-time-limit = 2s
-*.numHosts = 1
+*.numHosts = 2
 *.host[0].numApps = 1
 *.host[0].app[0].typename = "UdpBasicApp"
-*.host[0].app[0].destAddresses = "255.255.255.255"
+*.host[0].app[0].destAddresses = "host[1]"
 *.host[0].app[0].destPort = 1000
 *.host[0].app[0].messageLength = 100B
 *.host[0].app[0].startTime = 100ms
+*.host[1].numApps = 1
+*.host[1].app[0].typename = "UdpSink"
+*.host[1].app[0].localPort = 1000
 *.host[0].app[0].sendInterval = 100ms
-**.limitedBroadcast = true
 **.wlan[*].opMode = "n(greenfield-2.4Ghz)"
+**.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 1B
 
 %extraargs: -c HtPreambleRuntime
 
 %contains-regex: stdout
-Observed [1-9][0-9]* runtime HT-Greenfield broadcast transmission\(s\).
+Observed [1-9][0-9]* HT-Greenfield RTS, [1-9][0-9]* HT-mixed CTS, [1-9][0-9]* HT-Greenfield data, and [1-9][0-9]* non-HT ACK response\(s\).

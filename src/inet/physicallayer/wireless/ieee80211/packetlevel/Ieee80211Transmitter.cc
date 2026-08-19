@@ -49,7 +49,7 @@ const IIeee80211Mode *Ieee80211Transmitter::computeTransmissionMode(const Packet
     const auto& modeReq = const_cast<Packet *>(packet)->findTag<Ieee80211ModeReq>();
     const auto& bitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     if (modeReq != nullptr) {
-        if (modeSet != nullptr && !modeSet->containsMode(modeReq->getMode()))
+        if (modeSet != nullptr && !modeSet->supportsMode(modeReq->getMode()))
             throw cRuntimeError("Unsupported mode requested");
         transmissionMode = modeReq->getMode();
     }
@@ -75,17 +75,24 @@ const Ieee80211Channel *Ieee80211Transmitter::computeTransmissionChannel(const P
 void Ieee80211Transmitter::setModeSet(const Ieee80211ModeSet *modeSet)
 {
     if (this->modeSet != modeSet) {
+        const IIeee80211Mode *newMode = nullptr;
+        if (modeSet != nullptr && mode != nullptr) {
+            newMode = modeSet->containsMode(mode) ? mode : modeSet->getMode(mode->getDataMode()->getNetBitrate(), mode->getDataMode()->getBandwidth(), mode->getDataMode()->getNumberOfSpatialStreams());
+        }
         this->modeSet = modeSet;
-        if (mode != nullptr)
-            mode = modeSet != nullptr ? modeSet->getMode(mode->getDataMode()->getNetBitrate()) : nullptr;
+        this->mode = newMode;
     }
 }
 
 void Ieee80211Transmitter::setMode(const IIeee80211Mode *mode)
 {
     if (this->mode != mode) {
-        if (modeSet->findMode(mode->getDataMode()->getNetBitrate(), mode->getDataMode()->getBandwidth()) == nullptr)
-            throw cRuntimeError("Invalid mode");
+        if (mode == nullptr) {
+            this->mode = nullptr;
+            return;
+        }
+        if (modeSet == nullptr || !modeSet->containsMode(mode))
+            throw cRuntimeError("Invalid or unsupported mode");
         this->mode = mode;
     }
 }
