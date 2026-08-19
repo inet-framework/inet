@@ -412,13 +412,21 @@ void Mipv6::createBUTimer(const Ipv6Address& buDest, NetworkInterface *ie, const
        If the mobile node is sending a Binding Update and does not have
        an existing binding at the home agent, it SHOULD use
        InitialBindackTimeoutFirstReg (see Section 13) as a value for the
-       initial retransmission timer.*/
-    if (!bul->isInBindingUpdateList(buDest))
+       initial retransmission timer.  This long retransmission interval
+       will allow the home agent to complete the Duplicate Address
+       Detection procedure mandated in this case*/
+    // hasActiveBinding() is the test the RFC describes. A Binding Update List entry
+    // exists from the moment a Binding Update is attempted -- the createBUTimer()
+    // overload above creates one through fetch() -- so its mere presence says nothing
+    // about whether the home agent holds a binding. Only a home registration makes the
+    // home agent run Duplicate Address Detection, so a first Binding Update sent to a
+    // correspondent node keeps the shorter INITIAL_BINDACK_TIMEOUT.
+    if (homeRegistration && !bul->hasActiveBinding(buDest))
         buIfEntry->ackTimeout = ie->getProtocolData<Mipv6InterfaceData>()->_getInitialBindAckTimeoutFirst(); // the backoff constant gets initialised here
     /*Otherwise, the mobile node should use the specified value of
        INITIAL_BINDACK_TIMEOUT for the initial retransmission timer.*/
     else
-        buIfEntry->ackTimeout = ie->getProtocolData<Mipv6InterfaceData>()->_getInitialBindAckTimeout(); // if there's an entry in the BUL, use different value
+        buIfEntry->ackTimeout = ie->getProtocolData<Mipv6InterfaceData>()->_getInitialBindAckTimeout();
 
     buIfEntry->homeRegistration = homeRegistration;
 
