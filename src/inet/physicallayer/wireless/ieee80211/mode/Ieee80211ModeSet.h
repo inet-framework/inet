@@ -35,6 +35,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     static const DelayedInitializer<std::vector<Ieee80211ModeSet>> modeSets;
 
   protected:
+    static std::vector<Entry> completeHtGuardIntervalVariants(const char *name, const std::vector<Entry>& entries);
     int findModeIndex(const IIeee80211Mode *mode) const;
     int getModeIndex(const IIeee80211Mode *mode) const;
 
@@ -46,16 +47,16 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     const char *getName() const override { return name.c_str(); }
 
     int getNumModes() const { return entries.size(); }
-    const IIeee80211Mode *getMode(int index) { return entries[index].mode; }
-    bool isMandatory(int index) { return entries[index].isMandatory; }
+    const IIeee80211Mode *getMode(int index) const { return entries[index].mode; }
+    bool isMandatory(int index) const { return entries[index].isMandatory; }
 
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
     bool getIsMandatory(const IIeee80211Mode *mode) const;
 
-    const IIeee80211Mode *findMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
-    const IIeee80211Mode *findMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
-    const IIeee80211Mode *getMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
-    const IIeee80211Mode *getMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1) const;
+    const IIeee80211Mode *findMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
+    const IIeee80211Mode *findMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
+    const IIeee80211Mode *getMode(bps bitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
+    const IIeee80211Mode *getMode(bps minBitrate, bps maxBitrate, Hz bandwidth = Hz(NaN), int numSpatialStreams = -1, simtime_t guardInterval = -1) const;
     const IIeee80211Mode *getSlowestMode() const;
     const IIeee80211Mode *getFastestMode() const;
     const IIeee80211Mode *getSlowerMode(const IIeee80211Mode *mode) const;

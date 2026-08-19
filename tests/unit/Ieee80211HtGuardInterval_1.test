@@ -1,0 +1,118 @@
+%description:
+Validate complete IEEE 802.11 HT long/short guard-interval catalog, lookup, and airtime.
+
+%includes:
+#include <cmath>
+#include <map>
+#include <tuple>
+
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+const auto modeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+ASSERT(modeSet->getNumModes() == 306);
+
+using Key = std::tuple<int, int, Ieee80211HtModeBase::GuardIntervalType>;
+std::map<Key, const Ieee80211HtMode *> modes;
+int mandatoryCount = 0;
+for (int index = 0; index < modeSet->getNumModes(); index++) {
+    auto mode = dynamic_cast<const Ieee80211HtMode *>(modeSet->getMode(index));
+    ASSERT(mode != nullptr);
+    auto dataMode = mode->getDataMode();
+    int bandwidth = dataMode->getBandwidth() == MHz(20) ? 20 : dataMode->getBandwidth() == MHz(40) ? 40 : 0;
+    int mcs = dataMode->getMcsIndex();
+    auto guardIntervalType = dataMode->getGuardIntervalType();
+    ASSERT(bandwidth != 0);
+    ASSERT((bandwidth == 20 && ((0 <= mcs && mcs <= 31) || (33 <= mcs && mcs <= 76))) ||
+           (bandwidth == 40 && 0 <= mcs && mcs <= 76));
+    ASSERT(modes.emplace(Key(bandwidth, mcs, guardIntervalType), mode).second);
+
+    bool mustBeMandatory = bandwidth == 20 && mcs <= 7 &&
+            guardIntervalType == Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG;
+    ASSERT(modeSet->isMandatory(index) == mustBeMandatory);
+    if (modeSet->isMandatory(index))
+        mandatoryCount++;
+}
+ASSERT(mandatoryCount == 8);
+
+for (int bandwidth : {20, 40}) {
+    for (int mcs = 0; mcs <= 76; mcs++) {
+        if (bandwidth == 20 && mcs == 32)
+            continue;
+        auto longMode = modes.at(Key(bandwidth, mcs, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG));
+        auto shortMode = modes.at(Key(bandwidth, mcs, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT));
+        auto longData = longMode->getDataMode();
+        auto shortData = shortMode->getDataMode();
+        ASSERT(longData->getGuardInterval() == SimTime(800, SIMTIME_NS));
+        ASSERT(shortData->getGuardInterval() == SimTime(400, SIMTIME_NS));
+        ASSERT(longData->getSymbolInterval() == SimTime(4, SIMTIME_US));
+        ASSERT(shortData->getSymbolInterval() == SimTime(3600, SIMTIME_NS));
+        ASSERT(std::fabs(shortData->getNetBitrate().get() * 9 - longData->getNetBitrate().get() * 10) < 1);
+
+        // IEEE Std 802.11-2024, 19.3.11.11.6: short GI is Data-only.
+        auto longSignal = longMode->getHeaderMode();
+        auto shortSignal = shortMode->getHeaderMode();
+        ASSERT(longSignal->getSymbolInterval() == SimTime(4, SIMTIME_US));
+        ASSERT(shortSignal->getSymbolInterval() == SimTime(4, SIMTIME_US));
+        ASSERT(longSignal->getDuration() == SimTime(8, SIMTIME_US));
+        ASSERT(shortSignal->getDuration() == SimTime(8, SIMTIME_US));
+        ASSERT(longSignal->getNetBitrate() == shortSignal->getNetBitrate());
+        ASSERT(longSignal->getGrossBitrate() == shortSignal->getGrossBitrate());
+    }
+}
+ASSERT(modes.find(Key(20, 32, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG)) == modes.end());
+
+auto mcs32 = modes.at(Key(40, 32, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG))->getDataMode();
+ASSERT(mcs32->getNumberOfSpatialStreams() == 1);
+ASSERT(mcs32->getNumberOfDataSubcarriers() == 48);
+auto mcs76Bw20 = modes.at(Key(20, 76, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG))->getDataMode();
+ASSERT(mcs76Bw20->getModulationAndCodingScheme()->getStreamExtension3Modulation()->getSubcarrierModulation() == &Qam16Modulation::singleton);
+auto mcs73Bw40 = modes.at(Key(40, 73, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG))->getDataMode();
+ASSERT(mcs73Bw40->getModulationAndCodingScheme()->getStreamExtension2Modulation()->getSubcarrierModulation() == &Qam16Modulation::singleton);
+
+auto mixedLong = modes.at(Key(20, 0, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG));
+auto mixedShort = modes.at(Key(20, 0, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT));
+ASSERT(mixedLong->getDataMode()->getDuration(B(24)) == SimTime(36, SIMTIME_US));
+ASSERT(mixedShort->getDataMode()->getDuration(B(24)) == SimTime(32400, SIMTIME_NS));
+ASSERT(mixedShort->getDataMode()->getDuration(B(27)) == SimTime(36, SIMTIME_US));
+ASSERT(mixedLong->getDataMode()->getDuration(B(30)) == SimTime(44, SIMTIME_US));
+ASSERT(mixedShort->getDataMode()->getDuration(B(30)) == SimTime(39600, SIMTIME_NS));
+
+// IEEE Std 802.11-2024, 19.4.3: Eq. (19-90) rounds mixed-format
+// short-GI Data to 4 us, while Eq. (19-92) keeps greenfield Data raw.
+ASSERT(mixedShort->getDuration(B(24)) - mixedShort->getPreambleMode()->getDuration() == SimTime(36, SIMTIME_US));
+ASSERT(mixedShort->getDuration(B(27)) - mixedShort->getPreambleMode()->getDuration() == SimTime(36, SIMTIME_US));
+ASSERT(mixedShort->getDuration(B(30)) - mixedShort->getPreambleMode()->getDuration() == SimTime(40, SIMTIME_US));
+auto greenfieldShort = Ieee80211HtCompliantModes::getCompliantMode(
+        &Ieee80211HtmcsTable::htMcs8BW20MHz, Ieee80211HtMode::BAND_2_4GHZ,
+        Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD,
+        Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
+ASSERT(greenfieldShort->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD);
+ASSERT(greenfieldShort->getDataMode()->getNumberOfSpatialStreams() == 2);
+ASSERT(greenfieldShort->getDuration(B(24)) - greenfieldShort->getPreambleMode()->getDuration() == SimTime(18, SIMTIME_US));
+ASSERT(greenfieldShort->getDuration(B(30)) - greenfieldShort->getPreambleMode()->getDuration() == SimTime(21600, SIMTIME_NS));
+
+auto unspecified65 = dynamic_cast<const Ieee80211HtMode *>(modeSet->getMode(Mbps(65), MHz(20), 1));
+auto long65 = dynamic_cast<const Ieee80211HtMode *>(modeSet->getMode(Mbps(65), MHz(20), 1, SimTime(800, SIMTIME_NS)));
+auto short65 = dynamic_cast<const Ieee80211HtMode *>(modeSet->getMode(Mbps(65), MHz(20), 1, SimTime(400, SIMTIME_NS)));
+ASSERT(unspecified65->getDataMode()->getMcsIndex() == 7);
+ASSERT(unspecified65->getDataMode()->getGuardIntervalType() == Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
+ASSERT(long65->getDataMode()->getMcsIndex() == 7);
+ASSERT(short65->getDataMode()->getMcsIndex() == 6);
+
+auto unspecified135 = dynamic_cast<const Ieee80211HtMode *>(modeSet->getMode(Mbps(135), MHz(40), 1));
+ASSERT(unspecified135->getDataMode()->getMcsIndex() == 6);
+ASSERT(unspecified135->getDataMode()->getGuardIntervalType() == Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
+ASSERT(modeSet->findMode(Mbps(65), MHz(20), 1, SimTime(600, SIMTIME_NS)) == nullptr);
+ASSERT(Ieee80211ModeSet::getModeSet("a")->findMode(Mbps(6), Hz(NaN), -1, SimTime(800, SIMTIME_NS)) == nullptr);
+
+EV << "HT guard interval catalog, timing, and lookup checks passed.\n";
+
+%contains: stdout
+HT guard interval catalog, timing, and lookup checks passed.

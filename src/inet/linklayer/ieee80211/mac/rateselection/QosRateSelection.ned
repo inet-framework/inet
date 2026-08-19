@@ -33,6 +33,7 @@ simple QosRateSelection extends SimpleModule
         double dataFrameBitrate @unit(bps) = default(-1bps); // Fastest
         double dataFrameBandwidth @unit(Hz) = default(nan Hz); // Unspecified by default
         int dataFrameNumSpatialStreams = default(-1); // Unspecified by default
+        double dataFrameGuardInterval @unit(s) = default(-1s); // Unspecified by default
 
         double mgmtFrameBitrate @unit(bps) = default(-1bps); // Fastest
         double controlFrameBitrate @unit(bps) = default(-1bps);

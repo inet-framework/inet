@@ -26,7 +26,7 @@ void QosRateSelection::initialize(int stage)
         double multicastFrameBitrate = par("multicastFrameBitrate");
         multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
         double dataFrameBitrate = par("dataFrameBitrate");
-        dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"));
+        dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"), par("dataFrameGuardInterval"));
         double mgmtFrameBitrate = par("mgmtFrameBitrate");
         mgmtFrameMode = (mgmtFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(mgmtFrameBitrate));
         double controlFrameBitrate = par("controlFrameBitrate");
