@@ -124,8 +124,11 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     /** Utility function: looks up AP in our AP list. Returns nullptr if not found. */
     virtual ApInfo *lookupAP(const MacAddress& address);
 
-    /** Utility function: clear the AP list, and cancel any pending authentications. */
+    /** Utility function: clear the AP list and cancel pending association and authentication transactions. */
     virtual void clearAPList();
+
+    /** Utility function: cancel any pending association or reassociation. */
+    virtual void cancelPendingAssociation();
 
     /** Utility function: switches to the given radio channel. */
     virtual void changeChannel(int channelNum);
