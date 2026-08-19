@@ -100,6 +100,7 @@ const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaR
 RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::removeAgreement(MacAddress originatorAddr, Tid tid)
 {
     auto agreementId = std::make_pair(originatorAddr, tid);
+    lastAddbaResponses.erase(agreementId);
     auto it = blockAckAgreements.find(agreementId);
     if (it != blockAckAgreements.end()) {
         auto agreement = it->second;
@@ -122,13 +123,21 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::processReceivedAd
     bool accepted = addbaRequest->getDialogToken() != 0 && blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest);
     EV_DETAIL << "Building Addba Response" << endl;
     auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy, accepted);
+    auto id = std::make_pair(addbaRequest->getTransmitterAddress(), addbaRequest->getTid());
+    bool hadAgreement = blockAckAgreements.find(id) != blockAckAgreements.end();
+    // Keep the immutable response body that corresponds to the most recently
+    // processed request identity. This is response replay state, not a second
+    // duplicate detector; RecipientQosMacDataService remains authoritative.
+    if (accepted || hadAgreement)
+        lastAddbaResponses[id] = addbaResponse;
+    else
+        lastAddbaResponses.erase(id);
     auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
     RecipientBlockAckAgreement *agreement = nullptr;
     if (accepted) {
         // IEEE Std 802.11-2024, 10.25.2 and 11.5.2.3: accepting the
         // request establishes or modifies the recipient agreement when the
         // successful response is formed; transmission is not a state gate.
-        auto id = std::make_pair(addbaRequest->getTransmitterAddress(), addbaRequest->getTid());
         agreement = new RecipientBlockAckAgreement(addbaRequest->getTransmitterAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaResponse->getBufferSize(), addbaResponse->getBlockAckTimeoutValue());
         auto it = blockAckAgreements.find(id);
         if (it != blockAckAgreements.end()) {
@@ -141,6 +150,24 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::processReceivedAd
     }
     procedureCallback->processMgmtFrame(addbaResponsePacket, addbaResponse);
     return agreement;
+}
+
+void RecipientBlockAckAgreementHandler::processDuplicateAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IProcedureCallback *procedureCallback)
+{
+    auto agreement = getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
+    if (agreement != nullptr) {
+        // IEEE Std 802.11-2024, 10.3.2.14.3 normally discards duplicate management bodies.
+        // Replaying the already generated response is an explicit robustness/model
+        // extension; it does not modify the agreement, reorder window, or inactivity timer.
+        auto id = std::make_pair(addbaRequest->getTransmitterAddress(), addbaRequest->getTid());
+        auto it = lastAddbaResponses.find(id);
+        if (it == lastAddbaResponses.end())
+            return;
+        // Copy the immutable snapshot so outbound sequence assignment uses COW
+        // and cannot modify the cached body used by a later retransmission.
+        auto addbaResponse = staticPtrCast<Ieee80211AddbaResponse>(it->second->dupShared());
+        procedureCallback->processMgmtFrame(new Packet("AddbaResponse", addbaResponse), addbaResponse);
+    }
 }
 
 std::unique_ptr<RecipientBlockAckAgreement> RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)

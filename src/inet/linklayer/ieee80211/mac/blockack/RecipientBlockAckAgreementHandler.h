@@ -26,6 +26,7 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
 {
   protected:
     std::map<std::pair<MacAddress, Tid>, RecipientBlockAckAgreement *> blockAckAgreements;
+    std::map<std::pair<MacAddress, Tid>, Ptr<const Ieee80211AddbaResponse>> lastAddbaResponses;
 
   protected:
     virtual RecipientBlockAckAgreement *removeAgreement(MacAddress originatorAddr, Tid tid);
@@ -37,6 +38,7 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
   public:
     virtual ~RecipientBlockAckAgreementHandler();
     virtual RecipientBlockAckAgreement *processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
+    virtual void processDuplicateAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IProcedureCallback *procedureCallback) override;
     virtual std::unique_ptr<RecipientBlockAckAgreement> processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) override;
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) override;
     virtual std::unique_ptr<RecipientBlockAckAgreement> processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) override;

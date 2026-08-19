@@ -496,8 +496,9 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader, recipientBlockAckAgreementHandler));
     }
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
-        sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
-        recipientProcessReceivedManagementFrame(mgmtHeader);
+        auto receptionResult = recipientDataService->managementFrameReceived(packet, mgmtHeader);
+        sendUp(receptionResult.completeFrames);
+        recipientProcessReceivedManagementFrame(mgmtHeader, receptionResult.duplicate);
     }
     else { // TODO else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header, recipientBlockAckAgreementHandler));
@@ -520,8 +521,15 @@ void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
         throw cRuntimeError("Unknown control frame");
 }
 
-void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header)
+void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, bool duplicate)
 {
+    if (duplicate) {
+        if (recipientBlockAckAgreementHandler) {
+            if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header))
+                recipientBlockAckAgreementHandler->processDuplicateAddbaRequest(addbaRequest, this);
+        }
+        return;
+    }
     if (recipientBlockAckAgreementHandler && originatorBlockAckAgreementHandler) {
         if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header)) {
             bool hadAgreement = recipientBlockAckAgreementHandler->getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress()) != nullptr;

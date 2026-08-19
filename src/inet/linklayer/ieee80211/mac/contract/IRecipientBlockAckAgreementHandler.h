@@ -27,6 +27,7 @@ class INET_API IRecipientBlockAckAgreementHandler
     virtual ~IRecipientBlockAckAgreementHandler() {}
 
     virtual RecipientBlockAckAgreement *processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
+    virtual void processDuplicateAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IProcedureCallback *procedureCallback) = 0;
     virtual std::unique_ptr<RecipientBlockAckAgreement> processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) = 0;
     virtual std::unique_ptr<RecipientBlockAckAgreement> processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba) = 0;
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) = 0;

@@ -69,13 +69,17 @@ class TestRecipientPolicy : public IRecipientBlockAckAgreementPolicy
   public:
     bool accepted = true;
     bool delbaAccepted = true;
+    simtime_t blockAckTimeoutValue = 0;
+    bool aMsduSupportedValue = true;
+    bool delayedBlockAckPolicySupportedValue = false;
+    int maximumAllowedBufferSize = 64;
 
     virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>&) override { return accepted; }
     virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>&) override { return delbaAccepted; }
-    virtual simtime_t getBlockAckTimeoutValue() const override { return 0; }
-    virtual bool aMsduSupported() const override { return true; }
-    virtual bool delayedBlockAckPolicySupported() const override { return false; }
-    virtual int getMaximumAllowedBufferSize() const override { return 64; }
+    virtual simtime_t getBlockAckTimeoutValue() const override { return blockAckTimeoutValue; }
+    virtual bool aMsduSupported() const override { return aMsduSupportedValue; }
+    virtual bool delayedBlockAckPolicySupported() const override { return delayedBlockAckPolicySupportedValue; }
+    virtual int getMaximumAllowedBufferSize() const override { return maximumAllowedBufferSize; }
 };
 
 class TestCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
@@ -118,6 +122,12 @@ class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
     void allowRetryNow(MacAddress receiverAddress, Tid tid) { addbaRetryDeadlines[std::make_pair(receiverAddress, tid)] = simTime(); }
     void setPendingTeardownTransaction(MacAddress receiverAddress, Tid tid, uint64_t transactionId) { pendingTeardownTransactionIds[std::make_pair(receiverAddress, tid)] = transactionId; }
     simtime_t getRetryDeadline(MacAddress receiverAddress, Tid tid) const { auto it = addbaRetryDeadlines.find(std::make_pair(receiverAddress, tid)); return it == addbaRetryDeadlines.end() ? SIMTIME_MAX : it->second; }
+};
+
+class TestRecipientHandler : public RecipientBlockAckAgreementHandler
+{
+  public:
+    int getNumCachedAddbaResponses() const { return lastAddbaResponses.size(); }
 };
 
 class TestBlockAckReordering : public BlockAckReordering
@@ -487,7 +497,7 @@ class TestRecipientDataService : public IRecipientQosMacDataService
 
     virtual std::vector<Packet *> dataFrameReceived(Packet *, const Ptr<const Ieee80211DataHeader>&, IRecipientBlockAckAgreementHandler *) override { return {}; }
     virtual std::vector<Packet *> controlFrameReceived(Packet *, const Ptr<const Ieee80211MacHeader>&, IRecipientBlockAckAgreementHandler *) override { return {}; }
-    virtual std::vector<Packet *> managementFrameReceived(Packet *, const Ptr<const Ieee80211MgmtHeader>&) override { return {}; }
+    virtual ManagementFrameReceptionResult managementFrameReceived(Packet *, const Ptr<const Ieee80211MgmtHeader>&) override { return {}; }
     virtual void resetBlockAckReordering(Tid tid, MacAddress originatorAddress) override {
         numReorderingResets++;
         lastTid = tid;
@@ -504,6 +514,7 @@ class TestHcf : public Hcf
     int numRebuildEligibilityCalls = 0;
     bool droppedSetupCancelled = false;
     bool delegateDroppedSetupHandling = false;
+    TestCallback *managementCallback = nullptr;
 
     void configure(Edca *edca) { this->edca = edca; }
     void configureMac(Ieee80211Mac *mac) { this->mac = mac; }
@@ -526,6 +537,7 @@ class TestHcf : public Hcf
     }
     void configureFrameSequenceHandler(IFrameSequenceHandler *frameSequenceHandler) { this->frameSequenceHandler = frameSequenceHandler; }
     void configureRecipientDataService(IRecipientQosMacDataService *recipientDataService) { this->recipientDataService = recipientDataService; }
+    void configureManagementCallback(TestCallback *managementCallback) { this->managementCallback = managementCallback; }
     void configureTransmittedData(Edca *edca, IOriginatorBlockAckAgreementHandler *handler, IOriginatorBlockAckAgreementPolicy *policy) {
         this->edca = edca;
         originatorBlockAckAgreementHandler = handler;
@@ -547,7 +559,7 @@ class TestHcf : public Hcf
     void removePacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::REMOVED); }
     void dequeuePacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::DEQUEUED); }
     void cancelTransaction(uint64_t transactionId) { cancelAddbaTransaction(transactionId, nullptr); }
-    void processReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header) { recipientProcessReceivedManagementFrame(header); }
+    void processReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, bool duplicate = false) { recipientProcessReceivedManagementFrame(header, duplicate); }
     void processRtsProtectionFailure(Packet *packet) { originatorProcessRtsProtectionFailed(packet); }
     void processFailedFrame(Packet *packet) { originatorProcessFailedFrame(packet); }
     void processReceivedAck(Packet *packet, Packet *lastTransmittedPacket, AccessCategory accessCategory) {
@@ -557,10 +569,17 @@ class TestHcf : public Hcf
     }
 
   protected:
+    virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        if (managementCallback != nullptr)
+            managementCallback->processMgmtFrame(packet, header);
+        else
+            Hcf::processMgmtFrame(packet, header);
+    }
     virtual bool processDroppedBlockAckSetupFrame(Packet *packet) override { numProcessedDroppedSetupFrames++; return delegateDroppedSetupHandling ? Hcf::processDroppedBlockAckSetupFrame(packet) : droppedSetupCancelled; }
     virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override { numCancelledAddbaTransactions++; Hcf::cancelAddbaTransaction(transactionId, excludedPacket); }
     virtual void rebuildPendingFrameEligibility() override { numRebuildEligibilityCalls++; Hcf::rebuildPendingFrameEligibility(); }
     virtual void resumeEligibleChannelAccess() override { numResumedEligibleChannelAccess++; }
+    virtual void scheduleInactivityTimer(simtime_t) override {}
     virtual void scheduleAddbaResponseTimer(simtime_t) override {}
 };
 
@@ -1436,6 +1455,245 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
         threw = true;
     }
     ASSERT(threw);
+}
+
+// An initially rejected request has no agreement, so its response is never
+// replayable and must not consume replay-cache state.
+{
+    auto recipientDataServiceModule = cModuleType::get("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService")->create("initiallyRejectedAddbaDataService", this);
+    recipientDataServiceModule->callInitialize();
+    auto recipientDataService = check_and_cast<RecipientQosMacDataService *>(recipientDataServiceModule);
+    auto originatorHandler = new TestOriginatorHandler();
+    auto recipientHandler = new TestRecipientHandler();
+    TestRecipientPolicy rejectingPolicy;
+    rejectingPolicy.accepted = false;
+    TestCallback responseCallback;
+    TestHcf hcf;
+    hcf.configureBlockAckHandlers(originatorHandler, &originatorPolicy, recipientHandler, &rejectingPolicy);
+    hcf.configureRecipientDataService(recipientDataService);
+    hcf.configureManagementCallback(&responseCallback);
+
+    auto rejectedRequest = makeRequest(peer3, 7, 89, SequenceNumberCyclic(90), 16);
+    rejectedRequest->setSequenceNumber(SequenceNumberCyclic(40));
+    auto rejectedReception = recipientDataService->managementFrameReceived(new Packet("initiallyRejectedAddbaRequest", rejectedRequest), rejectedRequest);
+    ASSERT(!rejectedReception.duplicate);
+    hcf.processReceivedManagementFrame(rejectedRequest, rejectedReception.duplicate);
+    ASSERT(recipientHandler->getAgreement(7, peer3) == nullptr);
+    ASSERT(recipientHandler->getNumCachedAddbaResponses() == 0);
+    ASSERT(responseCallback.managementPackets.size() == 1);
+    ASSERT(dynamicPtrCast<const Ieee80211AddbaResponse>(responseCallback.managementHeader)->getStatusCode() != 0);
+
+    auto duplicateRejectedRequest = makeRequest(peer3, 7, 89, SequenceNumberCyclic(90), 16);
+    duplicateRejectedRequest->setSequenceNumber(SequenceNumberCyclic(40));
+    duplicateRejectedRequest->setRetry(true);
+    auto duplicateReception = recipientDataService->managementFrameReceived(new Packet("duplicateInitiallyRejectedAddbaRequest", duplicateRejectedRequest), duplicateRejectedRequest);
+    ASSERT(duplicateReception.duplicate);
+    hcf.processReceivedManagementFrame(duplicateRejectedRequest, duplicateReception.duplicate);
+    ASSERT(recipientHandler->getNumCachedAddbaResponses() == 0);
+    ASSERT(responseCallback.managementPackets.size() == 1);
+
+    recipientDataServiceModule->callFinish();
+    recipientDataServiceModule->deleteModule();
+}
+
+// IEEE Std 802.11-2024, 9.2.4.1.6 and 10.3.2.14.3/Table 10-6:
+// duplicate identity comes from Retry + TA + MAC sequence/fragment, not from
+// equal ADDBA parameters. Re-sending the cached exact response is an
+// explicit robustness/model extension; it leaves recipient state untouched.
+{
+    auto recipientDataServiceModule = cModuleType::get("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService")->create("duplicateAddbaDataService", this);
+    recipientDataServiceModule->callInitialize();
+    auto recipientDataService = check_and_cast<RecipientQosMacDataService *>(recipientDataServiceModule);
+    TestPacketDropSignalListener reorderDropListener;
+    recipientDataService->subscribe(packetDroppedSignal, &reorderDropListener);
+
+    auto originatorHandler = new TestOriginatorHandler();
+    auto recipientHandler = new TestRecipientHandler();
+    TestRecipientPolicy duplicatePolicy;
+    duplicatePolicy.blockAckTimeoutValue = 1;
+    TestCallback responseCallback;
+    TestHcf hcf;
+    hcf.configureBlockAckHandlers(originatorHandler, &originatorPolicy, recipientHandler, &duplicatePolicy);
+    hcf.configureRecipientDataService(recipientDataService);
+    hcf.configureManagementCallback(&responseCallback);
+    TestSignalListener addedListener;
+    TestSignalListener changedListener;
+    hcf.subscribe(Hcf::blockAckAgreementAddedSignal, &addedListener);
+    hcf.subscribe(Hcf::blockAckAgreementChangedSignal, &changedListener);
+
+    auto firstRequest = makeRequest(peer2, 6, 90, SequenceNumberCyclic(100), 32);
+    firstRequest->setSequenceNumber(SequenceNumberCyclic(50));
+    firstRequest->setBlockAckTimeoutValue(3);
+    auto firstReception = recipientDataService->managementFrameReceived(new Packet("firstAddbaRequest", firstRequest), firstRequest);
+    ASSERT(!firstReception.duplicate);
+    ASSERT(firstReception.completeFrames.empty());
+    hcf.processReceivedManagementFrame(firstRequest, firstReception.duplicate);
+    auto firstAgreement = recipientHandler->getAgreement(6, peer2);
+    ASSERT(firstAgreement != nullptr);
+    ASSERT(recipientHandler->getNumCachedAddbaResponses() == 1);
+    auto firstBlockAckRecord = firstAgreement->getBlockAckRecord();
+    auto firstExpirationTime = firstAgreement->getExpirationTime();
+    ASSERT(addedListener.numSignals == 1);
+    ASSERT(changedListener.numSignals == 0);
+    ASSERT(responseCallback.managementPackets.size() == 1);
+    auto firstResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(responseCallback.managementHeader);
+    ASSERT(firstResponse != nullptr);
+    ASSERT(firstResponse->getDialogToken() == 90);
+    ASSERT(firstResponse->getStatusCode() == 0);
+    ASSERT(firstResponse->getTid() == 6);
+    ASSERT(firstResponse->getBlockAckPolicy());
+    ASSERT(firstResponse->getBufferSize() == 32);
+    ASSERT(firstResponse->getBlockAckTimeoutValue() == 3);
+    ASSERT(firstResponse->getAMsduSupported());
+
+    auto bufferedHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(101));
+    bufferedHeader->setTransmitterAddress(peer2);
+    auto bufferedPacket = new Packet("duplicateAddbaBufferedData", bufferedHeader);
+    ASSERT(recipientDataService->dataFrameReceived(bufferedPacket, bufferedHeader, recipientHandler).empty());
+
+    // Mutable policy is deliberately changed after negotiation. A true MAC
+    // duplicate must replay the original successful response, not rebuild it.
+    duplicatePolicy.accepted = false;
+    duplicatePolicy.blockAckTimeoutValue = 0;
+    duplicatePolicy.aMsduSupportedValue = false;
+    duplicatePolicy.maximumAllowedBufferSize = 1;
+    auto duplicateRequest = makeRequest(peer2, 6, 90, SequenceNumberCyclic(100), 32);
+    duplicateRequest->setSequenceNumber(SequenceNumberCyclic(50));
+    duplicateRequest->setRetry(true);
+    duplicateRequest->setBlockAckTimeoutValue(3);
+    auto duplicateReception = recipientDataService->managementFrameReceived(new Packet("duplicateAddbaRequest", duplicateRequest), duplicateRequest);
+    ASSERT(duplicateReception.duplicate);
+    ASSERT(duplicateReception.completeFrames.empty());
+    hcf.processReceivedManagementFrame(duplicateRequest, duplicateReception.duplicate);
+    ASSERT(recipientHandler->getAgreement(6, peer2) == firstAgreement);
+    ASSERT(firstAgreement->getBlockAckRecord() == firstBlockAckRecord);
+    ASSERT(firstAgreement->getExpirationTime() == firstExpirationTime);
+    ASSERT(addedListener.numSignals == 1);
+    ASSERT(changedListener.numSignals == 0);
+    ASSERT(reorderDropListener.numSignals == 0);
+    ASSERT(responseCallback.managementPackets.size() == 2);
+    auto duplicateResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(responseCallback.managementHeader);
+    ASSERT(duplicateResponse->getDialogToken() == firstResponse->getDialogToken());
+    ASSERT(duplicateResponse->getStatusCode() == firstResponse->getStatusCode());
+    ASSERT(duplicateResponse->getTid() == firstResponse->getTid());
+    ASSERT(duplicateResponse->getBlockAckPolicy() == firstResponse->getBlockAckPolicy());
+    ASSERT(duplicateResponse->getBufferSize() == firstResponse->getBufferSize());
+    ASSERT(duplicateResponse->getBlockAckTimeoutValue() == firstResponse->getBlockAckTimeoutValue());
+    ASSERT(duplicateResponse->getAMsduSupported() == firstResponse->getAMsduSupported());
+
+    // A rejected fresh renegotiation leaves agreement A in place, but its
+    // retransmission must replay B's rejection rather than A's old success.
+    duplicatePolicy.blockAckTimeoutValue = 1;
+    auto rejectedRequest = makeRequest(peer2, 6, 91, SequenceNumberCyclic(200), 16);
+    rejectedRequest->setSequenceNumber(SequenceNumberCyclic(51));
+    rejectedRequest->setBlockAckTimeoutValue(4);
+    auto rejectedReception = recipientDataService->managementFrameReceived(new Packet("rejectedAddbaRequest", rejectedRequest), rejectedRequest);
+    ASSERT(!rejectedReception.duplicate);
+    hcf.processReceivedManagementFrame(rejectedRequest, rejectedReception.duplicate);
+    ASSERT(recipientHandler->getAgreement(6, peer2) == firstAgreement);
+    ASSERT(changedListener.numSignals == 0);
+    ASSERT(reorderDropListener.numSignals == 0);
+    ASSERT(responseCallback.managementPackets.size() == 3);
+    ASSERT(recipientHandler->getNumCachedAddbaResponses() == 1);
+    auto rejectedResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(responseCallback.managementHeader);
+    ASSERT(rejectedResponse->getDialogToken() == 91);
+    ASSERT(rejectedResponse->getStatusCode() != 0);
+    ASSERT(rejectedResponse->getTid() == 6);
+    ASSERT(rejectedResponse->getBufferSize() == 1);
+    ASSERT(rejectedResponse->getBlockAckTimeoutValue() == 4);
+    ASSERT(!rejectedResponse->getAMsduSupported());
+
+    auto duplicateRejectedRequest = makeRequest(peer2, 6, 91, SequenceNumberCyclic(200), 16);
+    duplicateRejectedRequest->setSequenceNumber(SequenceNumberCyclic(51));
+    duplicateRejectedRequest->setRetry(true);
+    duplicateRejectedRequest->setBlockAckTimeoutValue(4);
+    auto duplicateRejectedReception = recipientDataService->managementFrameReceived(new Packet("duplicateRejectedAddbaRequest", duplicateRejectedRequest), duplicateRejectedRequest);
+    ASSERT(duplicateRejectedReception.duplicate);
+    hcf.processReceivedManagementFrame(duplicateRejectedRequest, duplicateRejectedReception.duplicate);
+    ASSERT(recipientHandler->getAgreement(6, peer2) == firstAgreement);
+    ASSERT(recipientHandler->getNumCachedAddbaResponses() == 1);
+    ASSERT(changedListener.numSignals == 0);
+    ASSERT(reorderDropListener.numSignals == 0);
+    ASSERT(responseCallback.managementPackets.size() == 4);
+    auto duplicateRejectedResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(responseCallback.managementHeader);
+    ASSERT(duplicateRejectedResponse->getDialogToken() == rejectedResponse->getDialogToken());
+    ASSERT(duplicateRejectedResponse->getStatusCode() == rejectedResponse->getStatusCode());
+    ASSERT(duplicateRejectedResponse->getTid() == rejectedResponse->getTid());
+    ASSERT(duplicateRejectedResponse->getBlockAckPolicy() == rejectedResponse->getBlockAckPolicy());
+    ASSERT(duplicateRejectedResponse->getBufferSize() == rejectedResponse->getBufferSize());
+    ASSERT(duplicateRejectedResponse->getBlockAckTimeoutValue() == rejectedResponse->getBlockAckTimeoutValue());
+    ASSERT(duplicateRejectedResponse->getAMsduSupported() == rejectedResponse->getAMsduSupported());
+
+    auto expectedHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(100));
+    expectedHeader->setTransmitterAddress(peer2);
+    auto expectedPacket = new Packet("duplicateAddbaExpectedData", expectedHeader);
+    auto expectedFrames = recipientDataService->dataFrameReceived(expectedPacket, expectedHeader, recipientHandler);
+    ASSERT(expectedFrames.size() == 1);
+    ASSERT(expectedFrames.front() == expectedPacket);
+    auto followingHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(102));
+    followingHeader->setTransmitterAddress(peer2);
+    auto followingPacket = new Packet("duplicateAddbaFollowingData", followingHeader);
+    auto followingFrames = recipientDataService->dataFrameReceived(followingPacket, followingHeader, recipientHandler);
+    ASSERT(followingFrames.size() == 1);
+    ASSERT(followingFrames.front() == bufferedPacket);
+    for (auto packet : expectedFrames) {
+        take(packet);
+        drop(packet);
+        delete packet;
+    }
+    for (auto packet : followingFrames) {
+        take(packet);
+        drop(packet);
+        delete packet;
+    }
+
+    // A new MAC identity with the exact same ADDBA body is a genuine 10.25.2
+    // renegotiation: replace the agreement and reset the reorder window,
+    // which still contains followingPacket (sequence number 102).
+    duplicatePolicy.accepted = true;
+    duplicatePolicy.blockAckTimeoutValue = 1;
+    duplicatePolicy.aMsduSupportedValue = true;
+    duplicatePolicy.maximumAllowedBufferSize = 64;
+    auto replacementRequest = makeRequest(peer2, 6, 90, SequenceNumberCyclic(100), 32);
+    replacementRequest->setSequenceNumber(SequenceNumberCyclic(52));
+    replacementRequest->setBlockAckTimeoutValue(3);
+    auto replacementReception = recipientDataService->managementFrameReceived(new Packet("replacementAddbaRequest", replacementRequest), replacementRequest);
+    ASSERT(!replacementReception.duplicate);
+    ASSERT(replacementReception.completeFrames.empty());
+    hcf.processReceivedManagementFrame(replacementRequest, replacementReception.duplicate);
+    ASSERT(recipientHandler->getAgreement(6, peer2) != firstAgreement);
+    ASSERT(addedListener.numSignals == 1);
+    ASSERT(changedListener.numSignals == 1);
+    ASSERT(reorderDropListener.numSignals == 1);
+    ASSERT(reorderDropListener.numOtherPacketDrops == 1);
+    ASSERT(responseCallback.managementPackets.size() == 5);
+
+    auto duplicateWithoutAgreement = makeRequest(peer3, 7, 91, SequenceNumberCyclic(200), 16);
+    hcf.processReceivedManagementFrame(duplicateWithoutAgreement, true);
+    ASSERT(responseCallback.managementPackets.size() == 5);
+
+    auto duplicateDelba = makeShared<Ieee80211Delba>();
+    duplicateDelba->setTransmitterAddress(peer2);
+    duplicateDelba->setTid(6);
+    duplicateDelba->setInitiator(true);
+    auto replacementAgreement = recipientHandler->getAgreement(6, peer2);
+    hcf.processReceivedManagementFrame(duplicateDelba, true);
+    ASSERT(recipientHandler->getAgreement(6, peer2) == replacementAgreement);
+
+    hcf.processReceivedManagementFrame(duplicateDelba, false);
+    ASSERT(recipientHandler->getAgreement(6, peer2) == nullptr);
+    ASSERT(recipientHandler->getNumCachedAddbaResponses() == 0);
+    auto duplicateAfterTeardown = makeRequest(peer2, 6, 90, SequenceNumberCyclic(100), 32);
+    duplicateAfterTeardown->setSequenceNumber(SequenceNumberCyclic(52));
+    duplicateAfterTeardown->setRetry(true);
+    hcf.processReceivedManagementFrame(duplicateAfterTeardown, true);
+    ASSERT(responseCallback.managementPackets.size() == 5);
+
+    hcf.unsubscribe(Hcf::blockAckAgreementAddedSignal, &addedListener);
+    hcf.unsubscribe(Hcf::blockAckAgreementChangedSignal, &changedListener);
+    recipientDataService->unsubscribe(packetDroppedSignal, &reorderDropListener);
+    recipientDataServiceModule->callFinish();
+    recipientDataServiceModule->deleteModule();
 }
 
 // IEEE Std 802.11-2024, 9.6.4.2, 10.25.2, and 11.5.2.3.
