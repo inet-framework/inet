@@ -108,23 +108,25 @@ static std::vector<Ieee80211ModeSet::Entry> createHtSupportedEntries(Ieee80211Ht
     if (preambleFormat == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD) {
         auto mixedEntries = createHtEntries(Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED);
         result.insert(result.end(), mixedEntries.begin(), mixedEntries.end());
+        // Supplement the Greenfield profile with the HT-mixed and mandatory
+        // Clause 16/18 capabilities required by IEEE 802.11-2024 19.1.1 and
+        // 19.1.4. The legacy mixed profile intentionally remains selectable-only
+        // to preserve its established rate-selection and mode-membership contract.
+        result.insert(result.end(), {
+            { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
+            { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
+            { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
+            { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps },
+            { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps },
+            { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
+            { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps },
+            { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode18Mbps },
+            { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps },
+            { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps },
+            { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps },
+            { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps },
+        });
     }
-    // IEEE 802.11-2024 19.1.1 and 19.1.4 require a 2.4 GHz HT STA to support
-    // the mandatory Clause 16/18 rates and the non-HT and HT-mixed formats.
-    result.insert(result.end(), {
-        { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
-        { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
-        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
-        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps },
-        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps },
-        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
-        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps },
-        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode18Mbps },
-        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps },
-        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps },
-        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps },
-        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps },
-    });
     return result;
 }
 
@@ -515,6 +517,7 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
     entries(entries),
     supportedEntries(supportedEntries.empty() ? entries : supportedEntries),
     controlResponseModes(createControlResponseModes(supportedEntries.empty() ? entries : supportedEntries)),
+    htMixedControlResponseModes(createHtMixedControlResponseModes(supportedEntries.empty() ? entries : supportedEntries)),
     nonHtControlResponseEntries(createNonHtControlResponseEntries(supportedEntries.empty() ? entries : supportedEntries))
 {
     std::vector<Entry> *nonConstEntries = const_cast<std::vector<Entry> *>(&this->entries);
@@ -587,6 +590,30 @@ std::map<const IIeee80211Mode *, const IIeee80211Mode *> Ieee80211ModeSet::creat
         if (response == nullptr)
             throw cRuntimeError("No mandatory HT control response mode for %s", source->getName());
         result.emplace(sourceEntry.mode, response);
+    }
+    return result;
+}
+
+std::map<const IIeee80211Mode *, const IIeee80211Mode *> Ieee80211ModeSet::createHtMixedControlResponseModes(const std::vector<Entry>& supportedEntries)
+{
+    std::map<const IIeee80211Mode *, const IIeee80211Mode *> result;
+    for (const auto& sourceEntry : supportedEntries) {
+        auto source = dynamic_cast<const Ieee80211HtMode *>(sourceEntry.mode);
+        if (source == nullptr)
+            continue;
+        for (const auto& candidateEntry : supportedEntries) {
+            auto candidate = dynamic_cast<const Ieee80211HtMode *>(candidateEntry.mode);
+            if (candidate != nullptr && candidate->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED &&
+                candidate->getCenterFrequencyMode() == source->getCenterFrequencyMode() &&
+                candidate->getDataMode()->getMcsIndex() == source->getDataMode()->getMcsIndex() &&
+                candidate->getDataMode()->getBandwidth() == source->getDataMode()->getBandwidth() &&
+                candidate->getDataMode()->getNumberOfSpatialStreams() == source->getDataMode()->getNumberOfSpatialStreams() &&
+                candidate->getDataMode()->getGuardIntervalType() == source->getDataMode()->getGuardIntervalType())
+            {
+                result.emplace(sourceEntry.mode, candidateEntry.mode);
+                break;
+            }
+        }
     }
     return result;
 }
@@ -753,13 +780,15 @@ const IIeee80211Mode *Ieee80211ModeSet::getControlResponseMode(const IIeee80211M
     auto primaryMode = it->second;
     if (configuredMode == nullptr)
         return primaryMode;
+    // A configured HT response is a deliberate model extension beyond the
+    // automatic response constraints in IEEE 802.11-2024 10.6.6.5.3 and
+    // 10.6.6.5.7. Translate only its preamble to HT-mixed, preserving the
+    // resolved configured mode's MCS, bandwidth, NSS, GI, and band.
     if (!supportsMode(configuredMode))
         throw cRuntimeError("Configured control response mode is not supported by operation mode %s: %s", getName(), configuredMode->getName());
-    auto configuredIt = controlResponseModes.find(configuredMode);
-    if (configuredIt == controlResponseModes.end())
+    auto configuredIt = htMixedControlResponseModes.find(configuredMode);
+    if (configuredIt == htMixedControlResponseModes.end())
         throw cRuntimeError("An HT RTS requires an HT-mixed CTS response, configured mode is non-HT: %s", configuredMode->getName());
-    if (configuredIt->second != primaryMode)
-        throw cRuntimeError("Configured CTS mode differs from the primary HT control response MCS for %s; alternate MCS duration selection is not modeled", mode->getName());
     return configuredIt->second;
 }
 
@@ -767,7 +796,7 @@ const IIeee80211Mode *Ieee80211ModeSet::getMandatoryControlResponseMode(const II
 {
     if (!supportsMode(mode))
         throw cRuntimeError("Control response mode is not supported by operation mode %s: %s", getName(), mode->getName());
-    if (controlResponseModes.find(mode) != controlResponseModes.end() || !containsMode(mode))
+    if (!nonHtControlResponseEntries.empty() && (controlResponseModes.find(mode) != controlResponseModes.end() || !containsMode(mode)))
         return getNonHtControlResponseMode(mode);
     if (getIsMandatory(mode))
         return mode;
@@ -780,6 +809,17 @@ const IIeee80211Mode *Ieee80211ModeSet::getNonHtControlResponseMode(const IIeee8
 {
     if (!supportsMode(mode))
         throw cRuntimeError("Control response mode is not supported by operation mode %s: %s", getName(), mode->getName());
+    if (nonHtControlResponseEntries.empty()) {
+        if (!containsMode(mode))
+            throw cRuntimeError("No non-HT control response mode for %s", mode->getName());
+        if (!mandatory)
+            return mode;
+        if (getIsMandatory(mode))
+            return mode;
+        if (auto slowerMode = getSlowerMandatoryMode(mode))
+            return slowerMode;
+        throw cRuntimeError("No mandatory control response mode for %s", mode->getName());
+    }
     if (controlResponseModes.find(mode) == controlResponseModes.end()) {
         // VHT response-format selection remains unchanged; this fallback is HT-scoped.
         if (dynamic_cast<const Ieee80211VhtMode *>(mode) != nullptr)

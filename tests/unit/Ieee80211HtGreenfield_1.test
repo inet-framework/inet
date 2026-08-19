@@ -94,10 +94,10 @@ ASSERT(mixedProfile->supportsMode(mixedMode));
 ASSERT(greenfieldProfile->supportsMode(greenfieldMode));
 ASSERT(greenfieldProfile->supportsMode(mixedMode));
 ASSERT(!mixedProfile->supportsMode(greenfieldMode));
-ASSERT(mixedProfile->supportsMode(&Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps));
+ASSERT(!mixedProfile->supportsMode(&Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps));
 ASSERT(!mixedProfile->containsMode(&Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps));
 ASSERT(greenfieldProfile->supportsMode(&Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps));
-ASSERT(mixedProfile->getNonHtControlResponseMode(mixedMode) == &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps);
+ASSERT(mixedProfile->getNonHtControlResponseMode(mixedMode) == mixedMode);
 ASSERT(greenfieldProfile->getNonHtControlResponseMode(greenfieldMode) == &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps);
 ASSERT(greenfieldProfile->getNonHtControlResponseMode(&Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps) == &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps);
 ASSERT(mixedProfile->getControlResponseMode(mixedMode) == mixedMode);
@@ -131,12 +131,24 @@ auto greenfieldMcs15 = Ieee80211HtCompliantModes::getCompliantMode(
         Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
 ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMcs7) == mixedMcs7);
 ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMcs15) == mixedMcs7);
-try {
-    greenfieldProfile->getControlResponseMode(greenfieldMcs7, greenfieldMode);
-    ASSERT(false);
-}
-catch (const cRuntimeError&) {
-}
+ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMcs7, greenfieldMode) == mixedMode);
+
+auto mixedMcs15 = Ieee80211HtCompliantModes::getCompliantMode(
+        &Ieee80211HtmcsTable::htMcs15BW20MHz,
+        Ieee80211HtMode::BAND_2_4GHZ,
+        Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED,
+        Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
+auto configuredMixedResponse = dynamic_cast<const Ieee80211HtMode *>(greenfieldProfile->getControlResponseMode(greenfieldMcs7, greenfieldMcs15));
+ASSERT(configuredMixedResponse == mixedMcs15);
+ASSERT(configuredMixedResponse->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED);
+ASSERT(configuredMixedResponse->getCenterFrequencyMode() == greenfieldMcs15->getCenterFrequencyMode());
+ASSERT(configuredMixedResponse->getDataMode()->getMcsIndex() == greenfieldMcs15->getDataMode()->getMcsIndex());
+ASSERT(configuredMixedResponse->getDataMode()->getBandwidth() == greenfieldMcs15->getDataMode()->getBandwidth());
+ASSERT(configuredMixedResponse->getDataMode()->getNumberOfSpatialStreams() == greenfieldMcs15->getDataMode()->getNumberOfSpatialStreams());
+ASSERT(configuredMixedResponse->getDataMode()->getGuardIntervalType() == greenfieldMcs15->getDataMode()->getGuardIntervalType());
+ASSERT(mixedProfile->getMandatoryControlResponseMode(mixedMcs7) == mixedMcs7);
+ASSERT(mixedProfile->getMandatoryControlResponseMode(mixedMcs15) == mixedMcs7);
+ASSERT(mixedProfile->getNonHtControlResponseMode(mixedMcs15, false) == mixedMcs15);
 
 auto greenfieldMcs8Bw40 = Ieee80211HtCompliantModes::getCompliantMode(
         &Ieee80211HtmcsTable::htMcs8BW40MHz,
@@ -162,6 +174,14 @@ ASSERT(transmitter->getTestMode() == greenfieldMode);
 Packet supportedLegacyPacket("supportedLegacy");
 supportedLegacyPacket.addTag<Ieee80211ModeReq>()->setMode(&Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps);
 ASSERT(transmitter->getTestTransmissionMode(&supportedLegacyPacket) == &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps);
+transmitter->setModeSet(mixedProfile);
+try {
+    transmitter->getTestTransmissionMode(&supportedLegacyPacket);
+    ASSERT(false);
+}
+catch (const cRuntimeError&) {
+}
+transmitter->setModeSet(greenfieldProfile);
 try {
     transmitter->setMode(mixedMode);
     ASSERT(false);

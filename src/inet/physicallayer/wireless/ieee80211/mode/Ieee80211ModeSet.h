@@ -33,6 +33,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     // Entries are selectable modes; supportedEntries also contains immutable PHY capabilities needed for mandatory control responses.
     const std::vector<Entry> supportedEntries;
     const std::map<const IIeee80211Mode *, const IIeee80211Mode *> controlResponseModes;
+    const std::map<const IIeee80211Mode *, const IIeee80211Mode *> htMixedControlResponseModes;
     const std::vector<Entry> nonHtControlResponseEntries;
 
   public:
@@ -42,6 +43,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     int findModeIndex(const IIeee80211Mode *mode) const;
     int getModeIndex(const IIeee80211Mode *mode) const;
     static std::map<const IIeee80211Mode *, const IIeee80211Mode *> createControlResponseModes(const std::vector<Entry>& supportedEntries);
+    static std::map<const IIeee80211Mode *, const IIeee80211Mode *> createHtMixedControlResponseModes(const std::vector<Entry>& supportedEntries);
     static std::vector<Entry> createNonHtControlResponseEntries(const std::vector<Entry>& supportedEntries);
 
   public:
@@ -76,12 +78,12 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     const IIeee80211Mode *getSlowerMandatoryMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getFasterMandatoryMode(const IIeee80211Mode *mode) const;
 
-    // Selects the primary response mode for an eliciting mode. configuredMode,
-    // when present, is constrained by the eliciting PPDU's response format/MCS.
+    // Automatic responses follow IEEE 802.11-2024 10.6.6.5.3/10.6.6.5.7. A
+    // configured HT mode is a deliberate override translated only to HT-mixed.
     const IIeee80211Mode *getControlResponseMode(const IIeee80211Mode *mode, const IIeee80211Mode *configuredMode = nullptr) const;
     const IIeee80211Mode *getMandatoryControlResponseMode(const IIeee80211Mode *mode) const;
-    // HT modes are always converted to a mandatory non-HT response. For a
-    // non-HT mode, mandatory=false preserves an explicitly selected rate.
+    // Greenfield HT modes are converted to non-HT responses; mixed-profile HT
+    // modes retain the selected HT format. mandatory=false preserves the rate.
     const IIeee80211Mode *getNonHtControlResponseMode(const IIeee80211Mode *mode, bool mandatory = true) const;
 
     static const Ieee80211ModeSet *findModeSet(const char *mode);
