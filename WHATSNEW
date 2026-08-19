@@ -141,11 +141,18 @@ Notable backward incompatible changes are the following:
 
 8. Block Ack DELBA agreement ownership
 
-   IOriginatorBlockAckAgreementHandler::processReceivedDelba() and
+   IOriginatorBlockAckAgreementHandler::processReceivedDelba(),
+   IOriginatorBlockAckAgreementHandler::processTransmittedDelba(), and
    IRecipientBlockAckAgreementHandler::processReceivedDelba() now return the
-   terminated agreement as a unique_ptr. Custom handler implementations and
-   callers must adopt the new return type; a null result means the DELBA was
-   rejected or did not match an agreement.
+   terminated agreement as a unique_ptr. Originator ADDBA response processing
+   now returns a typed outcome containing the established agreement and, when
+   local policy vetoes a successful response, a deferred initiator DELBA for
+   Hcf to enqueue after emitting the Added signal. Custom handler
+   implementations and callers must adopt the new return types; a null result
+   means the DELBA did not remove an agreement.
+
+   The originator policy parameter `addbaFailureTimeout` was renamed to
+   `addbaResponseTimeout`; update custom configurations accordingly.
 
 Notable backward compatible changes are the following:
 

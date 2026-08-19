@@ -121,7 +121,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void refreshDisplay() const override;
 
     void startFrameSequence(AccessCategory ac);
-    void handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);
+    int handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);
 
     void sendUp(const std::vector<Packet *>& completeFrames);
     FrameSequenceContext *buildContext(AccessCategory ac);
@@ -130,6 +130,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void requestEligibleChannelAccess();
     virtual void resumeEligibleChannelAccess();
     virtual bool processDroppedBlockAckSetupFrame(Packet *packet);
+    virtual bool processDroppedBlockAckTeardownFrame(Packet *packet);
     virtual bool isPacketReferencedByCurrentFrameSequence(const Packet *packet) const;
     virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override;
     virtual void trackPendingFrame(Packet *packet, AccessCategory accessCategory);

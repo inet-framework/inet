@@ -24,10 +24,10 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
         aMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
         blockAckTimeoutValue = par("blockAckTimeoutValue");
-        addbaFailureTimeout = par("addbaFailureTimeout");
+        addbaResponseTimeout = par("addbaResponseTimeout");
         addbaRetryBackoff = par("addbaRetryBackoff");
-        if (addbaFailureTimeout <= 0)
-            throw cRuntimeError("addbaFailureTimeout must be greater than zero");
+        if (addbaResponseTimeout <= 0)
+            throw cRuntimeError("addbaResponseTimeout must be greater than zero");
         if (addbaRetryBackoff < 0)
             throw cRuntimeError("addbaRetryBackoff must not be negative");
         WATCH(blockAckReqThreshold);

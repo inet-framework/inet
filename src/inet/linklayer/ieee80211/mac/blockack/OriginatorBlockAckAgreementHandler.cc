@@ -9,6 +9,7 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -99,7 +100,7 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
     simtime_t now = simTime();
     for (auto id : blockAckAgreements) {
         auto agreement = id.second;
-        if (agreement->getExpirationTime() == now) {
+        if (agreement->getExpirationTime() == now && !agreement->isTeardownPending()) {
             MacAddress receiverAddr = id.first.first;
             Tid tid = id.first.second;
             const auto& delba = buildDelba(receiverAddr, tid, 39);
@@ -226,21 +227,35 @@ void OriginatorBlockAckAgreementHandler::processAcknowledgedDataFrame(Packet *pa
     }
 }
 
-OriginatorBlockAckAgreement *OriginatorBlockAckAgreementHandler::processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
+OriginatorBlockAckAgreementResponse OriginatorBlockAckAgreementHandler::processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
 {
+    OriginatorBlockAckAgreementResponse response;
     auto agreement = getAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
     // IEEE Std 802.11-2024, 11.5.2.2: only a successful response matching the
     // outstanding peer, TID, and Dialog Token establishes the agreement.
     if (agreement == nullptr || !agreement->isPending() || !agreement->getIsAddbaRequestSent() || agreement->getDialogToken() != addbaResp->getDialogToken())
-        return nullptr;
-    if (addbaResp->getStatusCode() == 0 && blockAckAgreementPolicy->isAddbaReqAccepted(addbaResp, agreement)) {
+        return response;
+    bool acceptedByLocalPolicy = addbaResp->getStatusCode() == 0 && blockAckAgreementPolicy->isAddbaReqAccepted(addbaResp, agreement);
+    if (addbaResp->getStatusCode() == 0) {
         auto transactionId = agreement->getTransactionId();
         updateAgreement(agreement, addbaResp);
-        addbaRetryDeadlines.erase(std::make_pair(addbaResp->getTransmitterAddress(), addbaResp->getTid()));
+        if (acceptedByLocalPolicy)
+            addbaRetryDeadlines.erase(std::make_pair(addbaResp->getTransmitterAddress(), addbaResp->getTid()));
+        else
+            recordAddbaFailure(addbaResp->getTransmitterAddress(), addbaResp->getTid(), blockAckAgreementPolicy);
         scheduleInactivityTimer(callback);
         scheduleAddbaResponseTimer(callback);
         callback->cancelAddbaTransaction(transactionId, nullptr);
-        return agreement;
+        if (!acceptedByLocalPolicy) {
+            // IEEE Std 802.11-2024, 10.25.2 and Figure 11-32: SUCCESS
+            // establishes the peer agreement. If local policy rejects the
+            // accepted parameters, tear it down with an initiator DELBA;
+            // retain the established state until that DELBA is transmitted.
+            agreement->setTeardownPending(true);
+            response.teardownDelba = buildDelba(addbaResp->getTransmitterAddress(), addbaResp->getTid(), RC_END_BA);
+        }
+        response.agreement = agreement;
+        return response;
     }
     else {
         auto transactionId = agreement->getTransactionId();
@@ -248,7 +263,7 @@ OriginatorBlockAckAgreement *OriginatorBlockAckAgreementHandler::processReceived
         terminateAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
         scheduleAddbaResponseTimer(callback);
         callback->cancelAddbaTransaction(transactionId, nullptr);
-        return nullptr;
+        return response;
     }
 }
 
@@ -291,15 +306,31 @@ void OriginatorBlockAckAgreementHandler::processDroppedAddbaReq(Packet *packet, 
     }
 }
 
-void OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba, IBlockAckAgreementHandlerCallback *callback)
+std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba, IBlockAckAgreementHandlerCallback *callback)
 {
+    // IEEE Std 802.11-2024, 11.5.3.2: the originator tears down its local
+    // agreement when its initiator DELBA is transmitted.
     auto agreement = getAgreement(delba->getReceiverAddress(), delba->getTid());
     bool cancelPendingTransaction = agreement != nullptr && agreement->isPending();
     auto transactionId = cancelPendingTransaction ? agreement->getTransactionId() : 0;
-    terminateAgreement(delba->getReceiverAddress(), delba->getTid());
+    std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
     scheduleAddbaResponseTimer(callback);
     if (cancelPendingTransaction)
         callback->cancelAddbaTransaction(transactionId, nullptr);
+    return terminatedAgreement;
+}
+
+std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler::processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
+{
+    auto delba = packet->peekAtFront<Ieee80211Delba>();
+    if (!delba->getInitiator())
+        return nullptr;
+    auto agreement = getAgreement(delba->getReceiverAddress(), delba->getTid());
+    if (agreement == nullptr || !agreement->isTeardownPending())
+        return nullptr;
+    std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
+    scheduleAddbaResponseTimer(callback);
+    return terminatedAgreement;
 }
 
 std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
