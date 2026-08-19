@@ -38,7 +38,6 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     simtime_t addbaResponseDeadline = -1;
     simtime_t blockAckTimeoutValue = -1;
     simtime_t expirationTime = -1;
-    bool teardownPending = false;
 
   public:
     OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported, uint8_t dialogToken, uint64_t transactionId) :
@@ -78,12 +77,10 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual void setIsDelayedBlockAckPolicySupported(bool isDelayedBlockAckPolicySupported) { this->isDelayedBlockAckPolicySupported = isDelayedBlockAckPolicySupported; }
     virtual void setBlockAckTimeoutValue(const simtime_t blockAckTimeoutValue) { this->blockAckTimeoutValue = blockAckTimeoutValue; }
     virtual void setAddbaResponseDeadline(simtime_t addbaResponseDeadline) { this->addbaResponseDeadline = addbaResponseDeadline; }
-    virtual void setTeardownPending(bool teardownPending) { this->teardownPending = teardownPending; }
 
     virtual void baPolicyFrameSent() { numSentBaPolicyFrames++; }
     virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }
     virtual simtime_t getExpirationTime() { return expirationTime; }
-    virtual bool isTeardownPending() const { return teardownPending; }
 };
 
 } /* namespace ieee80211 */

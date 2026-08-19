@@ -52,7 +52,6 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual bool isEmpty() const override { return collection->isEmpty(); }
     virtual Packet *getPacket(int index) const override { return collection->getPacket(index); }
     virtual void removePacket(Packet *packet) override;
-    virtual bool isPacketOrderPreserved() const override { return packetExtractor->isPacketOrderPreserved(); }
     virtual Packet *findPacket(const PacketPredicate& predicate) const override;
     virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;

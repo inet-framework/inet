@@ -22,6 +22,7 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
   protected:
     std::map<std::pair<MacAddress, Tid>, OriginatorBlockAckAgreement *> blockAckAgreements;
     std::map<std::pair<MacAddress, Tid>, simtime_t> addbaRetryDeadlines;
+    std::map<std::pair<MacAddress, Tid>, uint64_t> pendingTeardownTransactionIds;
     uint8_t nextDialogToken = 1;
     uint64_t nextTransactionId = 1;
 
@@ -44,11 +45,11 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
     virtual ~OriginatorBlockAckAgreementHandler();
     virtual void processTransmittedAddbaReq(Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void processDroppedAddbaReq(Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
-    virtual void processAcknowledgedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback) override;
+    virtual uint64_t processAcknowledgedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback) override;
     virtual void processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback) override;
     virtual OriginatorBlockAckAgreementResponse processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
     virtual std::unique_ptr<OriginatorBlockAckAgreement> processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
-    virtual std::unique_ptr<OriginatorBlockAckAgreement> processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba, IBlockAckAgreementHandlerCallback *callback) override;
+    virtual std::unique_ptr<OriginatorBlockAckAgreement> processTransmittedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) override;
     virtual std::unique_ptr<OriginatorBlockAckAgreement> processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) override;
     virtual void addbaResponseTimeoutExpired(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) override;
@@ -56,6 +57,7 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
     virtual OriginatorBlockAckAgreement *getAgreement(MacAddress receiverAddr, Tid tid) override;
     virtual bool isAddbaResponsePending(MacAddress receiverAddr, Tid tid) const override;
     virtual bool isAddbaRequestPending(const Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq) const override;
+    virtual bool isDelbaPending(const Packet *packet, const Ptr<const Ieee80211Delba>& delba) const override;
 };
 
 } // namespace ieee80211

@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 
 #include <algorithm>
+#include <set>
 
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
@@ -33,19 +34,44 @@ void OriginatorQosMacDataService::initialize()
     fragmentation = new Fragmentation();
 }
 
-Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue)
+Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *candidate)
 {
-    auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
+    auto predicate = [this](const Packet *packet) { return isFrameEligible(packet); };
+    auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue, candidate, predicate);
     if (subframes) {
-        if (!std::all_of(subframes->begin(), subframes->end(), [this](const Packet *packet) { return isFrameEligible(packet); })) {
+        if (subframes->size() < 2 || subframes->front() != candidate) {
             delete subframes;
-            return nullptr;
+            throw cRuntimeError("A-MSDU policy must return at least two frames with the selected candidate first");
         }
+        std::set<Packet *> uniqueFrames;
         for (auto subframe : *subframes) {
+            if (subframe == nullptr || !uniqueFrames.insert(subframe).second || !isFrameEligible(subframe) || pendingQueue->findPacket([subframe](const Packet *packet) { return packet == subframe; }) != subframe) {
+                delete subframes;
+                throw cRuntimeError("A-MSDU policy returned a frame that is unavailable, ineligible, or duplicated");
+            }
+        }
+        struct AggregateFrameState { Tid tid; MacAddress receiver; MacAddress transmitter; MacAddress address3; MacAddress address4; int type; bool toDS; bool fromDS; b dataLength; b headerLength; b trailerLength; };
+        std::vector<AggregateFrameState> states;
+        for (auto subframe : *subframes) {
+            auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(subframe->peekAtFront<Ieee80211DataOrMgmtHeader>());
+            auto dataTrailer = subframe->peekAtBack<Ieee80211MacTrailer>(B(4));
+            if (dataHeader == nullptr || dataTrailer == nullptr) {
+                delete subframes;
+                throw cRuntimeError("A-MSDU policy selected a frame without a valid data header/trailer");
+            }
+            states.push_back({static_cast<Tid>(dataHeader->getTid()), dataHeader->getReceiverAddress(), dataHeader->getTransmitterAddress(), dataHeader->getAddress3(), dataHeader->getAddress4(), dataHeader->getType(), dataHeader->getToDS(), dataHeader->getFromDS(), subframe->getDataLength(), dataHeader->getChunkLength(), dataTrailer->getChunkLength()});
             auto dequeuedSubframe = pendingQueue->dequeuePacket([subframe](const Packet *packet) { return packet == subframe; });
             if (dequeuedSubframe != subframe)
                 throw cRuntimeError("A-MSDU policy-selected subframe is no longer available in scheduling order");
             take(dequeuedSubframe);
+        }
+        for (size_t i = 0; i < subframes->size(); i++) {
+            auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>((*subframes)[i]->peekAtFront<Ieee80211DataOrMgmtHeader>());
+            auto dataTrailer = (*subframes)[i]->peekAtBack<Ieee80211MacTrailer>(B(4));
+            if (dataHeader == nullptr || dataTrailer == nullptr || dataHeader->getTid() != states[i].tid || dataHeader->getReceiverAddress() != states[i].receiver || dataHeader->getTransmitterAddress() != states[i].transmitter || dataHeader->getAddress3() != states[i].address3 || dataHeader->getAddress4() != states[i].address4 || dataHeader->getType() != states[i].type || dataHeader->getToDS() != states[i].toDS || dataHeader->getFromDS() != states[i].fromDS || (*subframes)[i]->getDataLength() != states[i].dataLength || dataHeader->getChunkLength() != states[i].headerLength || dataTrailer->getChunkLength() != states[i].trailerLength) {
+                delete subframes;
+                throw cRuntimeError("A-MSDU provider changed aggregation-critical frame fields during extraction");
+            }
         }
         auto aggregatedFrame = aMsduAggregation->aggregateFrames(subframes);
         emit(packetAggregatedSignal, aggregatedFrame);
@@ -112,11 +138,10 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
 //        if (msduRateLimiting)
 //            txRateLimitingIfNeeded();
         Packet *packet = nullptr;
-        // The current A-MSDU policy enumerates the queue when selecting all
-        // aggregate members. Use it only if enumeration is guaranteed to be
-        // the provider's scheduling order for the entire aggregate.
-        if (aMsduAggregationPolicy && pendingQueue->isPacketOrderPreserved() && pendingQueue->getNumPackets() != 0 && pendingQueue->getPacket(0) == candidate)
-            packet = aMsduAggregateIfNeeded(pendingQueue);
+        // Scheduling selects the anchor; the policy may select additional
+        // eligible members, which are all extracted through the provider.
+        if (aMsduAggregationPolicy)
+            packet = aMsduAggregateIfNeeded(pendingQueue, candidate);
         if (!packet) {
             packet = pendingQueue->dequeuePacket(predicate);
             ASSERT(packet == candidate);

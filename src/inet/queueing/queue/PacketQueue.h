@@ -60,7 +60,6 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
-    virtual bool isPacketOrderPreserved() const override { return true; }
     virtual Packet *findPacket(const PacketPredicate& predicate) const override;
     virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;

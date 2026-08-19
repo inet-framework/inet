@@ -13,6 +13,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 #include "inet/linklayer/ieee80211/mac/contract/IBlockAckAgreementHandlerCallback.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementPolicy.h"
@@ -25,6 +26,7 @@ struct INET_API OriginatorBlockAckAgreementResponse
 {
     OriginatorBlockAckAgreement *agreement = nullptr;
     Ptr<const Ieee80211Delba> teardownDelba;
+    std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement;
 };
 
 class INET_API IOriginatorBlockAckAgreementHandler
@@ -35,10 +37,12 @@ class INET_API IOriginatorBlockAckAgreementHandler
     virtual void processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void processTransmittedAddbaReq(Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void processDroppedAddbaReq(Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
-    virtual void processAcknowledgedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback) = 0;
+    // Returns the transaction identity of an obsolete teardown whose packets
+    // must be cancelled by the caller, or 0 when there is none.
+    virtual uint64_t processAcknowledgedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback) = 0;
     virtual OriginatorBlockAckAgreementResponse processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual std::unique_ptr<OriginatorBlockAckAgreement> processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
-    virtual std::unique_ptr<OriginatorBlockAckAgreement> processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba, IBlockAckAgreementHandlerCallback *callback) = 0;
+    virtual std::unique_ptr<OriginatorBlockAckAgreement> processTransmittedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual std::unique_ptr<OriginatorBlockAckAgreement> processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
     virtual void addbaResponseTimeoutExpired(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
@@ -46,6 +50,7 @@ class INET_API IOriginatorBlockAckAgreementHandler
     virtual OriginatorBlockAckAgreement *getAgreement(MacAddress receiverAddr, Tid tid) = 0;
     virtual bool isAddbaResponsePending(MacAddress receiverAddr, Tid tid) const = 0;
     virtual bool isAddbaRequestPending(const Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq) const = 0;
+    virtual bool isDelbaPending(const Packet *packet, const Ptr<const Ieee80211Delba>& delba) const { return true; }
 };
 
 } // namespace ieee80211

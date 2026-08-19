@@ -24,8 +24,6 @@ void LabelScheduler::initialize(int stage)
             auto provider = providers[i].get();
             auto collection = dynamic_cast<IPacketCollection *>(provider);
             auto packetExtractor = dynamic_cast<IPacketExtractor *>(provider);
-            if (collection == nullptr || packetExtractor == nullptr)
-                throw cRuntimeError("Input provider at gate index %d must implement both IPacketCollection and IPacketExtractor", (int)i);
             collections.push_back(collection);
             packetExtractors.push_back(packetExtractor);
         }
@@ -35,23 +33,35 @@ void LabelScheduler::initialize(int stage)
 int LabelScheduler::getNumPackets() const
 {
     int size = 0;
-    for (auto collection : collections)
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto collection = collections[i];
+        if (collection == nullptr)
+            throw cRuntimeError("Cannot getNumPackets(): input provider at gate index %d does not implement IPacketCollection", (int)i);
         size += collection->getNumPackets();
+    }
     return size;
 }
 
 b LabelScheduler::getTotalLength() const
 {
     b totalLength(0);
-    for (auto collection : collections)
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto collection = collections[i];
+        if (collection == nullptr)
+            throw cRuntimeError("Cannot getTotalLength(): input provider at gate index %d does not implement IPacketCollection", (int)i);
         totalLength += collection->getTotalLength();
+    }
     return totalLength;
 }
 
 Packet *LabelScheduler::getPacket(int index) const
 {
     int originalIndex = index;
-    for (auto collection : collections) {
+    for (size_t i = 0; i < collections.size(); i++)
+        if (collections[i] == nullptr)
+            throw cRuntimeError("Cannot getPacket(): input provider at gate index %d does not implement IPacketCollection", (int)i);
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto collection = collections[i];
         auto numPackets = collection->getNumPackets();
         if (index < numPackets)
             return collection->getPacket(index);
@@ -62,7 +72,11 @@ Packet *LabelScheduler::getPacket(int index) const
 
 void LabelScheduler::removePacket(Packet *packet)
 {
-    for (auto collection : collections) {
+    for (size_t i = 0; i < collections.size(); i++)
+        if (collections[i] == nullptr)
+            throw cRuntimeError("Cannot removePacket(): input provider at gate index %d does not implement IPacketCollection", (int)i);
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto collection = collections[i];
         for (int i = 0; i < collection->getNumPackets(); i++) {
             if (collection->getPacket(i) == packet) {
                 collection->removePacket(packet);
@@ -76,8 +90,11 @@ void LabelScheduler::removePacket(Packet *packet)
 int LabelScheduler::findInput(const PacketPredicate& predicate) const
 {
     std::vector<Packet *> candidates;
-    for (auto packetExtractor : packetExtractors)
-        candidates.push_back(packetExtractor->findPacket(predicate));
+    for (size_t i = 0; i < packetExtractors.size(); i++) {
+        if (packetExtractors[i] == nullptr)
+            throw cRuntimeError("Cannot findPacket(): input provider at gate index %d does not implement IPacketExtractor", (int)i);
+        candidates.push_back(packetExtractors[i]->findPacket(predicate));
+    }
     for (auto label : labels) {
         for (size_t i = 0; i < candidates.size(); i++) {
             auto packet = candidates[i];
@@ -103,6 +120,9 @@ Packet *LabelScheduler::findPacket(const PacketPredicate& predicate) const
 Packet *LabelScheduler::dequeuePacket(const PacketPredicate& predicate)
 {
     Enter_Method("dequeuePacket");
+    for (size_t i = 0; i < packetExtractors.size(); i++)
+        if (packetExtractors[i] == nullptr)
+            throw cRuntimeError("Cannot dequeuePacket(): input provider at gate index %d does not implement IPacketExtractor", (int)i);
     auto index = findInput(predicate);
     if (index == -1)
         return nullptr;
@@ -118,6 +138,10 @@ Packet *LabelScheduler::dequeuePacket(const PacketPredicate& predicate)
 void LabelScheduler::removeAllPackets()
 {
     Enter_Method("removeAllPackets");
+    for (size_t i = 0; i < collections.size(); i++) {
+        if (collections[i] == nullptr)
+            throw cRuntimeError("Cannot removeAllPackets(): input provider at gate index %d does not implement IPacketCollection", (int)i);
+    }
     for (auto collection : collections)
         collection->removeAllPackets();
 }

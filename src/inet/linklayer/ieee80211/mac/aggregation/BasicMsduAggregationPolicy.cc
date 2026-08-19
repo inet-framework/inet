@@ -56,40 +56,52 @@ bool BasicMsduAggregationPolicy::isEligible(Packet *packet, const Ptr<const Ieee
     return true;
 }
 
-std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queueing::IPacketQueue *queue)
+std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queueing::IPacketQueue *queue, Packet *candidate, const std::function<bool(const Packet *)>& isFrameEligible)
 {
     Enter_Method("computeAggregateFrames");
-    ASSERT(!queue->isEmpty());
+    ASSERT(candidate != nullptr);
+    ASSERT(queue->findPacket([candidate](const Packet *packet) { return packet == candidate; }) == candidate);
     b aMsduLength = b(0);
-    Ptr<const Ieee80211DataHeader> firstHeader = nullptr;
-    auto frames = new std::vector<Packet *>();
+    int candidateIndex = -1;
     for (int i = 0; i < queue->getNumPackets(); i++) {
-        auto dataPacket = queue->getPacket(i);
+        if (queue->getPacket(i) == candidate) { candidateIndex = i; break; }
+    }
+    if (candidateIndex == -1)
+        return nullptr;
+    const auto& firstHeader = dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211DataOrMgmtHeader>());
+    if (firstHeader == nullptr || !isFrameEligible(candidate))
+        return nullptr;
+    auto frames = new std::vector<Packet *>();
+    auto appendIfEligible = [&](Packet *dataPacket) {
+        if (!isFrameEligible(dataPacket))
+            return false;
         const auto& dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
         if (dataHeader == nullptr)
-            break;
-        if (firstHeader == nullptr)
-            firstHeader = dataHeader;
+            return false;
         const auto& dataTrailer = dataPacket->peekAtBack<Ieee80211MacTrailer>(B(4));
-        if (!isEligible(dataPacket, staticPtrCast<const Ieee80211DataHeader>(dataHeader), dataTrailer, firstHeader, aMsduLength)) {
-            EV_TRACE << "Queued " << *dataPacket << " is not eligible for A-MSDU aggregation.\n";
-            break;
-        }
-        EV_TRACE << "Queued " << *dataPacket << " is eligible for A-MSDU aggregation.\n";
+        if (!isEligible(dataPacket, dataHeader, dataTrailer, firstHeader, aMsduLength))
+            return false;
         frames->push_back(dataPacket);
-        aMsduLength += dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
+        aMsduLength += dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER);
+        return true;
+    };
+    if (!appendIfEligible(candidate)) {
+        delete frames;
+        return nullptr;
+    }
+    int numPackets = queue->getNumPackets();
+    for (int offset = 1; offset < numPackets; offset++) {
+        auto dataPacket = queue->getPacket((candidateIndex + offset) % numPackets);
+        appendIfEligible(dataPacket);
     }
     if (frames->size() <= 1 || !isAggregationPossible(frames->size(), aMsduLength.get<B>())) {
         EV_DEBUG << "A-MSDU aggregation is not possible, collected " << frames->size() << " packets.\n";
         delete frames;
         return nullptr;
     }
-    else {
-        EV_DEBUG << "A-MSDU aggregation is possible, collected " << frames->size() << " packets.\n";
-        return frames;
-    }
+    EV_DEBUG << "A-MSDU aggregation is possible, collected " << frames->size() << " packets.\n";
+    return frames;
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

@@ -35,7 +35,6 @@ class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IP
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
-    virtual bool isPacketOrderPreserved() const override;
     virtual Packet *findPacket(const PacketPredicate& predicate) const override;
     virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;

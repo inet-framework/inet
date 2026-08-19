@@ -28,13 +28,6 @@ class INET_API IPacketExtractor
 
   public:
     virtual ~IPacketExtractor() {}
-    /**
-     * Returns true when IPacketCollection::getPacket() enumeration order on
-     * the same object is also the order in which this extractor selects
-     * packets. The conservative default prevents clients from bypassing a
-     * provider-specific scheduling policy.
-     */
-    virtual bool isPacketOrderPreserved() const { return false; }
     virtual Packet *findPacket(const PacketPredicate& predicate) const = 0;
     virtual Packet *dequeuePacket(const PacketPredicate& predicate) = 0;
 };

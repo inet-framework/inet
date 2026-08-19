@@ -66,9 +66,10 @@ void Hcf::initialize(int stage)
             originatorDataService->setFrameEligibilityFunction([this](const Packet *packet) {
                 if (auto addbaReq = dynamicPtrCast<const Ieee80211AddbaRequest>(packet->peekAtFront<Ieee80211MacHeader>()))
                     return originatorBlockAckAgreementHandler->isAddbaRequestPending(packet, addbaReq);
+                if (auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>()))
+                    return originatorBlockAckAgreementHandler->isDelbaPending(packet, delba);
                 auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
-                auto agreement = dataHeader == nullptr ? nullptr : originatorBlockAckAgreementHandler->getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
-                return dataHeader == nullptr || dataHeader->getType() != ST_DATA_WITH_QOS || ((agreement == nullptr || !agreement->isTeardownPending()) && !originatorBlockAckAgreementHandler->isAddbaResponsePending(dataHeader->getReceiverAddress(), dataHeader->getTid()));
+                return dataHeader == nullptr || dataHeader->getType() != ST_DATA_WITH_QOS || (!originatorBlockAckAgreementHandler->isAddbaResponsePending(dataHeader->getReceiverAddress(), dataHeader->getTid()));
             });
         }
     }
@@ -543,10 +544,14 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
             auto response = originatorBlockAckAgreementHandler->processReceivedAddbaResp(addbaResp, originatorBlockAckAgreementPolicy, this);
             if (wasPending && !originatorBlockAckAgreementHandler->isAddbaResponsePending(addbaResp->getTransmitterAddress(), addbaResp->getTid()))
                 rebuildPendingFrameEligibility();
-            if (response.agreement != nullptr)
+            if (response.agreement != nullptr) {
                 emit(blockAckAgreementAddedSignal, response.agreement);
+                if (response.teardownDelba != nullptr)
+                    emit(blockAckAgreementDeletedSignal, response.agreement);
+            }
             if (response.teardownDelba != nullptr) {
                 auto delbaPacket = new Packet("Delba", response.teardownDelba);
+                delbaPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(response.agreement == nullptr ? 0 : response.agreement->getTransactionId());
                 processMgmtFrame(delbaPacket, response.teardownDelba);
             }
             resumeEligibleChannelAccess();
@@ -688,7 +693,7 @@ void Hcf::originatorProcessTransmittedManagementFrame(Packet *packet, const Ptr<
     else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader)) {
         if (delba->getInitiator()) {
             bool wasPending = originatorBlockAckAgreementHandler->isAddbaResponsePending(delba->getReceiverAddress(), delba->getTid());
-            auto agreement = originatorBlockAckAgreementHandler->processTransmittedDelba(delba, this);
+            auto agreement = originatorBlockAckAgreementHandler->processTransmittedDelba(packet, this);
             if (wasPending)
                 rebuildPendingFrameEligibility();
             if (agreement != nullptr && agreement->getIsAddbaResponseReceived())
@@ -845,7 +850,9 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(lastTransmittedHeader)) {
             if (originatorBlockAckAgreementHandler) {
                 bool wasPending = originatorBlockAckAgreementHandler->isAddbaResponsePending(dataHeader->getReceiverAddress(), dataHeader->getTid());
-                originatorBlockAckAgreementHandler->processAcknowledgedDataFrame(lastTransmittedPacket, dataHeader, originatorBlockAckAgreementPolicy, this);
+                auto obsoleteTeardownTransactionId = originatorBlockAckAgreementHandler->processAcknowledgedDataFrame(lastTransmittedPacket, dataHeader, originatorBlockAckAgreementPolicy, this);
+                if (obsoleteTeardownTransactionId != 0)
+                    cancelAddbaTransaction(obsoleteTeardownTransactionId, nullptr);
                 if (!wasPending && originatorBlockAckAgreementHandler->isAddbaResponsePending(dataHeader->getReceiverAddress(), dataHeader->getTid()))
                     rebuildPendingFrameEligibility();
             }
@@ -930,8 +937,6 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             OriginatorBlockAckAgreement *agreement = nullptr;
             if (originatorBlockAckAgreementHandler)
                 agreement = originatorBlockAckAgreementHandler->getAgreement(dataFrame->getReceiverAddress(), dataFrame->getTid());
-            if (agreement != nullptr && agreement->isTeardownPending())
-                agreement = nullptr;
             auto ackPolicy = originatorAckPolicy->computeAckPolicy(packet, dataFrame, agreement);
             auto dataHeader = packet->removeAtFront<Ieee80211DataHeader>();
             dataHeader->setAckPolicy(ackPolicy);
