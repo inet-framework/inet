@@ -24,13 +24,10 @@ void CompoundPacketQueueBase::initialize(int stage)
         provider.reference(outputGate, true, -1);
         collection = check_and_cast<IPacketCollection *>(provider.get());
         packetExtractor = check_and_cast<IPacketExtractor *>(provider.get());
-        for (cModule::SubmoduleIterator it(this); !it.end(); it++) {
-            auto childQueue = dynamic_cast<IPacketQueue *>(*it);
-            if (childQueue != nullptr) {
-                childQueues.push_back(childQueue);
-                childQueue->addPacketCallback(this);
-            }
-        }
+        // Observe the nearest queue on every descendant branch. Nested
+        // compound queues forward their own frontier, so stopping at a queue
+        // avoids duplicate notifications while traversing non-queue wrappers.
+        registerQueueFrontier(this);
         packetDropperFunction = createDropperFunction(par("dropperClass"));
         subscribe(packetDroppedSignal, this);
         subscribe(packetCreatedSignal, this);
@@ -40,6 +37,27 @@ void CompoundPacketQueueBase::initialize(int stage)
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }
+}
+
+void CompoundPacketQueueBase::registerQueueFrontier(cModule *module)
+{
+    for (cModule::SubmoduleIterator it(module); !it.end(); it++) {
+        auto childModule = *it;
+        auto childQueue = dynamic_cast<IPacketQueue *>(childModule);
+        if (childQueue != nullptr) {
+            childQueues.push_back(childQueue);
+            childQueue->addPacketCallback(this);
+        }
+        else
+            registerQueueFrontier(childModule);
+    }
+}
+
+void CompoundPacketQueueBase::finish()
+{
+    for (auto childQueue : childQueues)
+        childQueue->removePacketCallback(this);
+    childQueues.clear();
 }
 
 IPacketDropperFunction *CompoundPacketQueueBase::createDropperFunction(const char *dropperClass) const

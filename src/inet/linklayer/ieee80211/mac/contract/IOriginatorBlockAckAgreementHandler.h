@@ -43,7 +43,10 @@ class INET_API IOriginatorBlockAckAgreementHandler
     virtual OriginatorBlockAckAgreementResponse processReceivedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual std::unique_ptr<OriginatorBlockAckAgreement> processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual std::unique_ptr<OriginatorBlockAckAgreement> processTransmittedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
-    virtual std::unique_ptr<OriginatorBlockAckAgreement> processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
+    // Returns true when the packet completed or aborted its tagged teardown
+    // transaction and sibling packets were cancelled through the callback.
+    virtual bool processAcknowledgedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
+    virtual bool processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
     virtual void addbaResponseTimeoutExpired(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
 

@@ -136,13 +136,22 @@ Notable backward incompatible changes are the following:
    ordinary IPassivePacketSource inputs; they require IPacketCollection only when
    collection/aggregate access is used and IPacketExtractor only when predicate
    extraction is used, reporting the unsupported operation lazily.
+   PriorityScheduler aggregate queries no longer return -1 when an input lacks
+   IPacketCollection; getNumPackets() and getTotalLength() now report that
+   unsupported operation with cRuntimeError. Update callers that treated -1 as
+   an unknown aggregate size, or connect collection-capable providers.
    A-MSDU policies now receive the provider-selected anchor and frame-eligibility
    predicate. Additional policy-selected members are removed through exact
    predicate dequeues, preserving scheduler/flow accounting without requiring
    collection enumeration order to match scheduling order.
+   BasicMsduAggregationPolicy conservatively considers only collection members
+   after the anchor and never bypasses an earlier blocked same-flow member.
    IPacketBuffer::ICallback also provides an optional handlePacketDropped()
    notification. Shared buffers invoke it only after all victims selected by one
-   overload operation have been detached from their owning queues.
+   overload operation have been detached from their owning queues. Compound
+   queues propagate destructive drops through arbitrary non-queue wrappers and
+   nested compound queues exactly once. PacketBuffer rejects packets owned by a
+   cPacketQueue whose owner cannot participate in the buffer callback contract.
 
 8. Block Ack DELBA agreement ownership
 
@@ -161,9 +170,12 @@ Notable backward incompatible changes are the following:
    terminate a newer peer/TID agreement. The replacement setup reports that
    obsolete identity so Hcf also removes all of its queued or in-progress packets.
    Originator DELBA transmission handlers now receive the full Packet so this
-   identity is retained. Custom handler implementations and callers must adopt
-   the new signatures and return types; a null result means the DELBA did not
-   remove an agreement.
+   identity is retained. A transaction-tagged initiator DELBA remains eligible
+   across MAC retries and is retired only when its final fragment is acknowledged
+   or the transaction is terminally aborted. Custom handler implementations and
+   callers must adopt processAcknowledgedDelba() and the boolean
+   processAbortedDelba() outcome; processTransmittedDelba() still returns the
+   agreement removed by an untagged DELBA, or null when none was removed.
 
    The originator policy parameter `addbaFailureTimeout` was renamed to
    `addbaResponseTimeout`; update custom configurations accordingly.

@@ -60,7 +60,6 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
 {
     Enter_Method("computeAggregateFrames");
     ASSERT(candidate != nullptr);
-    ASSERT(queue->findPacket([candidate](const Packet *packet) { return packet == candidate; }) == candidate);
     b aMsduLength = b(0);
     int candidateIndex = -1;
     for (int i = 0; i < queue->getNumPackets(); i++) {
@@ -72,11 +71,21 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
     if (firstHeader == nullptr || !isFrameEligible(candidate))
         return nullptr;
     auto frames = new std::vector<Packet *>();
+    auto hasSameFlow = [&](const Ptr<const Ieee80211DataHeader>& dataHeader) {
+        return dataHeader != nullptr && dataHeader->getTid() == firstHeader->getTid() &&
+                dataHeader->getReceiverAddress() == firstHeader->getReceiverAddress() &&
+                dataHeader->getTransmitterAddress() == firstHeader->getTransmitterAddress();
+    };
     auto appendIfEligible = [&](Packet *dataPacket) {
-        if (!isFrameEligible(dataPacket))
-            return false;
         const auto& dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
-        if (dataHeader == nullptr)
+        if (!hasSameFlow(dataHeader))
+            return true;
+        // IEEE Std 802.11-2024, 5.1.3: preserve the ordering of MSDUs with the
+        // same traffic identifier. Enumeration order is the conservative
+        // intra-flow order for this built-in policy. Never overtake a
+        // same-flow packet which is held by transaction eligibility or cannot
+        // fit in the current A-MSDU.
+        if (!isFrameEligible(dataPacket))
             return false;
         const auto& dataTrailer = dataPacket->peekAtBack<Ieee80211MacTrailer>(B(4));
         if (!isEligible(dataPacket, dataHeader, dataTrailer, firstHeader, aMsduLength))
@@ -89,11 +98,11 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
         delete frames;
         return nullptr;
     }
-    int numPackets = queue->getNumPackets();
-    for (int offset = 1; offset < numPackets; offset++) {
-        auto dataPacket = queue->getPacket((candidateIndex + offset) % numPackets);
-        appendIfEligible(dataPacket);
-    }
+    // Do not wrap around: providers may schedule in an order different from
+    // their IPacketCollection enumeration (for example reverse priority).
+    for (int i = candidateIndex + 1; i < queue->getNumPackets(); i++)
+        if (!appendIfEligible(queue->getPacket(i)))
+            break;
     if (frames->size() <= 1 || !isAggregationPossible(frames->size(), aMsduLength.get<B>())) {
         EV_DEBUG << "A-MSDU aggregation is not possible, collected " << frames->size() << " packets.\n";
         delete frames;

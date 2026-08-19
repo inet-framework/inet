@@ -136,13 +136,9 @@ bool Hcf::processDroppedBlockAckTeardownFrame(Packet *packet)
 {
     if (originatorBlockAckAgreementHandler) {
         auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>());
-        if (delba != nullptr) {
-            auto agreement = originatorBlockAckAgreementHandler->processAbortedDelba(packet, this);
-            if (agreement != nullptr) {
-                emit(blockAckAgreementDeletedSignal, agreement.get());
-                rebuildPendingFrameEligibility();
-                return true;
-            }
+        if (delba != nullptr && originatorBlockAckAgreementHandler->processAbortedDelba(packet, this)) {
+            rebuildPendingFrameEligibility();
+            return true;
         }
     }
     return false;
@@ -845,6 +841,10 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
             throw cRuntimeError("Unknown frame"); // TODO qos, nonqos frame
         auto lastTransmittedDataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(lastTransmittedHeader);
         edcaf->getAckHandler()->processReceivedAck(ackFrame, lastTransmittedDataOrMgmtHeader);
+        if (auto delba = dynamicPtrCast<const Ieee80211Delba>(lastTransmittedHeader)) {
+            if (delba->getInitiator() && originatorBlockAckAgreementHandler != nullptr && originatorBlockAckAgreementHandler->processAcknowledgedDelba(lastTransmittedPacket, this))
+                rebuildPendingFrameEligibility();
+        }
         edcaf->getInProgressFrames()->dropFrame(lastTransmittedPacket);
         edcaf->getAckHandler()->dropFrame(lastTransmittedDataOrMgmtHeader);
         if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(lastTransmittedHeader)) {

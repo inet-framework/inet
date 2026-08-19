@@ -338,8 +338,12 @@ std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler:
         auto it = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
         if (it == pendingTeardownTransactionIds.end() || it->second != transactionTag->getTransactionId())
             return nullptr;
-        if (!delba->getMoreFragments())
-            pendingTeardownTransactionIds.erase(it);
+        // IEEE Std 802.11-2024, 11.5.3.2: teardown is performed by
+        // transmitting DELBA. IEEE Std 802.11-2024, 10.23.2.12.1 and
+        // 10.3.4.4 require unsuccessful MMPDU attempts to be retried until
+        // success or the applicable retry limit. Keep the local transaction
+        // live across ordinary MAC retries and retire it only after the final
+        // fragment is acknowledged or the frame is terminally aborted.
         return nullptr;
     }
     auto agreement = getAgreement(delba->getReceiverAddress(), delba->getTid());
@@ -352,11 +356,28 @@ std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler:
     return terminatedAgreement;
 }
 
-std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler::processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
+bool OriginatorBlockAckAgreementHandler::processAcknowledgedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
+{
+    auto delba = packet->peekAtFront<Ieee80211Delba>();
+    if (!delba->getInitiator() || delba->getMoreFragments())
+        return false;
+    auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();
+    if (transactionTag == nullptr)
+        return false;
+    auto it = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
+    if (it == pendingTeardownTransactionIds.end() || it->second != transactionTag->getTransactionId())
+        return false;
+    auto transactionId = it->second;
+    pendingTeardownTransactionIds.erase(it);
+    callback->cancelAddbaTransaction(transactionId, packet);
+    return true;
+}
+
+bool OriginatorBlockAckAgreementHandler::processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
 {
     auto delba = packet->peekAtFront<Ieee80211Delba>();
     if (!delba->getInitiator())
-        return nullptr;
+        return false;
     auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();
     if (transactionTag != nullptr) {
         auto it = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
@@ -364,9 +385,10 @@ std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler:
             auto transactionId = it->second;
             pendingTeardownTransactionIds.erase(it);
             callback->cancelAddbaTransaction(transactionId, packet);
+            return true;
         }
     }
-    return nullptr;
+    return false;
 }
 
 std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)

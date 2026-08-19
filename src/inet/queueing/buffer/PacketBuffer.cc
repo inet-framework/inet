@@ -53,6 +53,9 @@ b PacketBuffer::getTotalLength() const
 void PacketBuffer::addPacket(Packet *packet)
 {
     Enter_Method("addPacket");
+    auto ownerQueue = dynamic_cast<cPacketQueue *>(packet->getOwner());
+    if (ownerQueue != nullptr && dynamic_cast<ICallback *>(ownerQueue->getOwner()) == nullptr)
+        throw cRuntimeError("Cannot buffer packet owned by cPacketQueue whose owner does not implement IPacketBuffer::ICallback");
     EV_INFO << "Adding packet" << EV_FIELD(packet) << EV_ENDL;
     emit(packetAddedSignal, packet);
     packets.push_back(packet);
@@ -63,10 +66,8 @@ void PacketBuffer::addPacket(Packet *packet)
                 auto packet = packetDropperFunction->selectPacket(this);
                 EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
                 packets.erase(find(packets, packet));
-                ICallback *callback = nullptr;
                 auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
-                if (queue != nullptr)
-                    callback = dynamic_cast<ICallback *>(queue->getOwner());
+                auto callback = queue != nullptr ? check_and_cast<ICallback *>(queue->getOwner()) : nullptr;
                 droppedPackets.emplace_back(packet, callback);
             }
             for (auto& [packet, callback] : droppedPackets)

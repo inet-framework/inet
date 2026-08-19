@@ -32,7 +32,11 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     IPacketDropperFunction *packetDropperFunction = nullptr;
 
   protected:
+    using cListener::finish;
+
     virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void registerQueueFrontier(cModule *module);
 
     virtual IPacketDropperFunction *createDropperFunction(const char *dropperClass) const;
 

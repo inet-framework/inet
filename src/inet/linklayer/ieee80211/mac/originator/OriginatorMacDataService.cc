@@ -39,7 +39,7 @@ std::vector<Packet *> *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)
         auto fragmentFrames = fragmentation->fragmentFrame(frame, fragmentSizes);
         if (hasTransactionTag)
             for (auto fragment : *fragmentFrames)
-                fragment->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+                fragment->addTagIfAbsent<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
         return fragmentFrames;
     }
     return nullptr;
