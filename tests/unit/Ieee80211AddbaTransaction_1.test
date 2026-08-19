@@ -3449,6 +3449,34 @@ delete compoundPacket;
     overflowQueue->deleteModule();
 }
 
+// A compound unregisters from child queues during pre-delete even when finish
+// is skipped, and repeated lifecycle cleanup is harmless.
+{
+    auto pendingQueueModule = cModuleType::get("inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue")->create("preDeletePendingQueue", this);
+    pendingQueueModule->callInitialize();
+    auto pendingQueue = check_and_cast<queueing::IPacketQueue *>(pendingQueueModule);
+    auto leafQueue = check_and_cast<queueing::PacketQueue *>(pendingQueueModule->getSubmodule("managementQueue"));
+    TestPacketDropCallback callback;
+    pendingQueue->addPacketCallback(&callback);
+
+    auto observedPacket = new Packet("preDeleteObservedPacket", makeShared<ByteCountChunk>(B(1)));
+    leafQueue->pushPacket(observedPacket, nullptr);
+    leafQueue->removePacket(observedPacket);
+    ASSERT(callback.numRemovedPackets == 1);
+    take(observedPacket);
+    delete observedPacket;
+
+    pendingQueueModule->callPreDelete(pendingQueueModule);
+    auto unobservedPacket = new Packet("preDeleteUnobservedPacket", makeShared<ByteCountChunk>(B(1)));
+    leafQueue->pushPacket(unobservedPacket, nullptr);
+    leafQueue->removePacket(unobservedPacket);
+    ASSERT(callback.numRemovedPackets == 1);
+    take(unobservedPacket);
+    delete unobservedPacket;
+
+    pendingQueueModule->deleteModule();
+}
+
 // A compound's direct frontier and a nested compound boundary each forward
 // descendant removals exactly once. Boundary-initiated removals suppress the
 // descendant callback for the same packet, including during reentrant removal

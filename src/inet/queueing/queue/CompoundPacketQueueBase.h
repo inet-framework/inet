@@ -37,7 +37,9 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
 
     virtual void initialize(int stage) override;
     virtual void finish() override;
+    virtual void preDelete(cComponent *root) override;
     virtual void registerQueueFrontier(cModule *module);
+    virtual void unregisterChildQueueCallbacks();
 
     virtual IPacketDropperFunction *createDropperFunction(const char *dropperClass) const;
 

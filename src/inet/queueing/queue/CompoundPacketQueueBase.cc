@@ -71,6 +71,18 @@ void CompoundPacketQueueBase::registerQueueFrontier(cModule *module)
 
 void CompoundPacketQueueBase::finish()
 {
+    unregisterChildQueueCallbacks();
+    PacketQueueBase::finish();
+}
+
+void CompoundPacketQueueBase::preDelete(cComponent *root)
+{
+    unregisterChildQueueCallbacks();
+    PacketQueueBase::preDelete(root);
+}
+
+void CompoundPacketQueueBase::unregisterChildQueueCallbacks()
+{
     for (auto childQueue : childQueues)
         childQueue->removePacketCallback(this);
     childQueues.clear();
