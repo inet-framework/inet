@@ -83,6 +83,7 @@ void Ieee80211MgmtStaSimplified::configureAssociation()
 
 void Ieee80211MgmtStaSimplified::stop()
 {
+    mib->bssStationData.isAssociated = false;
     auto apMib = findAccessPointMib(mib->bssData.bssid, false);
     if (apMib != nullptr) {
         apMib->bssAccessPointData.stations.erase(mib->address);

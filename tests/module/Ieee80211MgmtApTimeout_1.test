@@ -3,11 +3,19 @@ Verify the AP's association-response timer releases only expired uncommitted
 association IDs, preserves later replacement transactions, and never releases
 a committed association ID during a reassociation timeout. Also verify a zero
 association-response timeout is rejected because no response exchange can
-complete before a same-time timeout event.
+complete before a same-time timeout event. Verify an acknowledged successful
+reassociation response commits an authenticated station before emitting one AP
+association notification, without notifying again for same-AP reassociation.
 
 %file: TestIeee80211MgmtAp.cc
 
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameSequenceHandler.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -42,6 +50,42 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         return aid;
     }
 
+    short startSuccessfulReassociation(const MacAddress& address, Ieee80211Mib::BssMemberStatus status)
+    {
+        Enter_Method("startSuccessfulReassociation");
+        auto& sta = staList[address];
+        sta.address = address;
+        clearPendingAssociation(&sta);
+        mib->bssAccessPointData.stations[address] = status;
+        short aid = mib->reserveAssociationId(address);
+        sta.pendingAssociationSuccessful = true;
+        sta.pendingAssociationTransactionId = createAssociationTransactionId();
+        startAssociationResponseTimeout(&sta);
+        return aid;
+    }
+
+    void finishSuccessfulReassociation(const MacAddress& address)
+    {
+        auto response = new Packet("ReassocResp-OK");
+        auto responseHeader = makeShared<Ieee80211MgmtHeader>();
+        responseHeader->setType(ST_REASSOCIATIONRESPONSE);
+        responseHeader->setReceiverAddress(address);
+        response->insertAtBack(responseHeader);
+        response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(staList.at(address).pendingAssociationTransactionId);
+
+        FrameSequenceContext context(MacAddress::UNSPECIFIED_ADDRESS, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+        auto transmitStep = new TransmitStep(response, SIMTIME_ZERO);
+        transmitStep->setCompletion(IFrameSequenceStep::Completion::ACCEPTED);
+        context.addStep(transmitStep);
+        auto receiveStep = new ReceiveStep();
+        receiveStep->setCompletion(IFrameSequenceStep::Completion::ACCEPTED);
+        receiveStep->setFrameToReceive(new Packet("ACK", makeShared<Ieee80211AckFrame>()));
+        context.addStep(receiveStep);
+
+        receiveSignal(this, IFrameSequenceHandler::frameSequenceFinishedSignal, &context, nullptr);
+        delete response;
+    }
+
     bool hasPendingAssociation(const MacAddress& address) const
     {
         auto it = staList.find(address);
@@ -50,21 +94,47 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
 
     short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
     void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
+    bool hasCommittedAssociationId(const MacAddress& address) const { return mib->bssAccessPointData.associationIds.find(address) != mib->bssAccessPointData.associationIds.end(); }
     short getCommittedAssociationId(const MacAddress& address) const { return mib->bssAccessPointData.associationIds.at(address); }
+    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const { return mib->bssAccessPointData.stations.at(address); }
     simtime_t getScheduledTimeout() const { return associationResponseTimeoutTimer->getArrivalTime(); }
 };
 
 Define_Module(TestIeee80211MgmtAp);
 
-class Ieee80211MgmtApTimeoutTest : public cSimpleModule
+class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
 {
+    using cListener::finish;
+
+  protected:
+    TestIeee80211MgmtAp *mgmt = nullptr;
+    MacAddress expectedAssociatedAddress;
+    short expectedAssociationId = 0;
+    int associationNotifications = 0;
+
   public:
     Ieee80211MgmtApTimeoutTest() : cSimpleModule(65536) {}
 
   protected:
+    virtual void initialize() override
+    {
+        mgmt = check_and_cast<TestIeee80211MgmtAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        mgmt->subscribe(l2ApAssociatedSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        ASSERT(source == mgmt);
+        ASSERT(signalID == l2ApAssociatedSignal);
+        const auto& notification = check_and_cast<Ieee80211MgmtAp::NotificationInfoSta *>(value);
+        ASSERT(notification->getStaAddress() == expectedAssociatedAddress);
+        ASSERT(mgmt->getStationStatus(expectedAssociatedAddress) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->getCommittedAssociationId(expectedAssociatedAddress) == expectedAssociationId);
+        associationNotifications++;
+    }
+
     virtual void activity() override
     {
-        auto mgmt = check_and_cast<TestIeee80211MgmtAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
         MacAddress replacement("02:00:00:00:00:01");
         MacAddress expiring("02:00:00:00:00:02");
         MacAddress committed("02:00:00:00:00:03");
@@ -95,7 +165,24 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule
         ASSERT(!mgmt->hasPendingAssociation(replacement));
         ASSERT(mgmt->reserveAssociationId(finallyReused) == 1);
 
+        expectedAssociatedAddress = MacAddress("02:00:00:00:00:06");
+        expectedAssociationId = mgmt->startSuccessfulReassociation(expectedAssociatedAddress, Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mgmt->getStationStatus(expectedAssociatedAddress) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(!mgmt->hasCommittedAssociationId(expectedAssociatedAddress));
+        mgmt->finishSuccessfulReassociation(expectedAssociatedAddress);
+        ASSERT(associationNotifications == 1);
+        ASSERT(!mgmt->hasPendingAssociation(expectedAssociatedAddress));
+
+        short sameApAid = mgmt->startSuccessfulReassociation(expectedAssociatedAddress, Ieee80211Mib::ASSOCIATED);
+        ASSERT(sameApAid == expectedAssociationId);
+        ASSERT(mgmt->getStationStatus(expectedAssociatedAddress) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->getCommittedAssociationId(expectedAssociatedAddress) == expectedAssociationId);
+        mgmt->finishSuccessfulReassociation(expectedAssociatedAddress);
+        ASSERT(associationNotifications == 1);
+        ASSERT(!mgmt->hasPendingAssociation(expectedAssociatedAddress));
+
         std::cout << "AP association response timeout lifecycle verified.\n";
+        std::cout << "AP reassociation notification commit ordering verified.\n";
     }
 };
 
@@ -169,6 +256,9 @@ record-scalar-results = false
 
 %contains: stdout
 AP association response timeout lifecycle verified.
+
+%contains: stdout
+AP reassociation notification commit ordering verified.
 
 %postrun-command: sh checkZeroTimeout.sh
 

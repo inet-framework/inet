@@ -1,6 +1,7 @@
 %description:
-Verify deterministic AP association-response transaction matching and
-completion and timeout decisions, including RTS-protected responses.
+Verify deterministic AP association- and reassociation-response transaction
+matching and completion and timeout decisions, including RTS-protected
+responses.
 
 %includes:
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
@@ -25,11 +26,12 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
     using Ieee80211MgmtAp::isAssociationResponseDecisionPoint;
 };
 
-static Packet *makeAssociationResponse(uint64_t transactionId, bool moreFragments, bool includeTag = true)
+static Packet *makeAssociationResponse(uint64_t transactionId, bool moreFragments, bool includeTag = true,
+        Ieee80211FrameType subtype = ST_ASSOCIATIONRESPONSE)
 {
     auto packet = new Packet("AssocResp-OK");
     auto header = makeShared<Ieee80211MgmtHeader>();
-    header->setType(ST_ASSOCIATIONRESPONSE);
+    header->setType(subtype);
     header->setMoreFragments(moreFragments);
     packet->insertAtBack(header);
     if (includeTag)
@@ -71,6 +73,10 @@ ackStep.setFrameToReceive(new Packet("ACK", makeShared<Ieee80211AckFrame>()));
 ASSERT(TestIeee80211MgmtAp::isAssociationResponseDecisionPoint(&ordinaryStep, &ackStep));
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42, true, false) == Disposition::COMPLETE);
 
+auto reassociationResponse = makeAssociationResponse(42, false, true, ST_REASSOCIATIONRESPONSE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseHeader(reassociationResponse)->getType() == ST_REASSOCIATIONRESPONSE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(reassociationResponse, 42, true, false) == Disposition::COMPLETE);
+
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 41, true, false) == Disposition::IGNORE);
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 0, true, false) == Disposition::IGNORE);
 
@@ -106,9 +112,10 @@ delete nonFinalResponse;
 delete untaggedResponse;
 delete zeroTokenResponse;
 delete aggregate;
+delete reassociationResponse;
 delete finalResponse;
 
-EV << "AP association transaction and timeout decisions verified.\n";
+EV << "AP association and reassociation transaction and timeout decisions verified.\n";
 
 %contains: stdout
-AP association transaction and timeout decisions verified.
+AP association and reassociation transaction and timeout decisions verified.

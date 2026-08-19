@@ -208,7 +208,7 @@ void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, cO
                                     mib->removePeerHtCapabilities(address);
                             }
                             // Signal delivery is synchronous; observers must see committed station and peer state.
-                            if (responseHeader->getType() == ST_ASSOCIATIONRESPONSE && !wasAssociated)
+                            if (!wasAssociated)
                                 sendAssocNotification(address);
                         }
                         else if (exchangeSucceeded && mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED) {
