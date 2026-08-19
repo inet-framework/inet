@@ -77,7 +77,17 @@ void Ieee80211Transmitter::setModeSet(const Ieee80211ModeSet *modeSet)
     if (this->modeSet != modeSet) {
         const IIeee80211Mode *newMode = nullptr;
         if (modeSet != nullptr && mode != nullptr) {
-            newMode = modeSet->containsMode(mode) ? mode : modeSet->getMode(mode->getDataMode()->getNetBitrate(), mode->getDataMode()->getBandwidth(), mode->getDataMode()->getNumberOfSpatialStreams());
+            if (modeSet->containsMode(mode))
+                newMode = mode;
+            else {
+                auto oldDataMode = mode->getDataMode();
+                newMode = modeSet->getMode(oldDataMode->getNetBitrate(), oldDataMode->getBandwidth(), oldDataMode->getNumberOfSpatialStreams());
+                // OFDM modes with different channel spacing may have the same
+                // bitrate, occupied bandwidth, and NSS. Their symbol intervals
+                // distinguish those non-equivalent PHY modes (e.g. a vs p).
+                if (newMode->getDataMode()->getSymbolInterval() != oldDataMode->getSymbolInterval())
+                    throw cRuntimeError("No equivalent current mode in operation mode %s", modeSet->getName());
+            }
         }
         this->modeSet = modeSet;
         this->mode = newMode;
@@ -150,8 +160,17 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
-    const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
-    const simtime_t dataDuration = duration - headerDuration - preambleDuration;
+    const simtime_t modeledDataDuration = transmissionMode->getDataMode()->getDuration(B(phyHeader->getLengthField()));
+    // HT/VHT include their SIG fields in the PHY preamble duration, so their
+    // mode duration is exactly preamble + modeled data. Other PHYs expose a
+    // separate header; their residual data interval may also include a trailing
+    // signal extension (ERP). Keep that extension in chronological data time.
+    const bool headerIncludedInPreamble = duration == preambleDuration + modeledDataDuration;
+    const simtime_t headerDuration = headerIncludedInPreamble ? SIMTIME_ZERO : transmissionMode->getHeaderMode()->getDuration();
+    const simtime_t dataDuration = headerIncludedInPreamble ? modeledDataDuration : duration - headerDuration - preambleDuration;
+    if (preambleDuration < SIMTIME_ZERO || headerDuration < SIMTIME_ZERO || dataDuration < SIMTIME_ZERO ||
+        preambleDuration + headerDuration + dataDuration != duration)
+        throw cRuntimeError("Invalid transmission duration decomposition for mode %s", transmissionMode->getName());
     auto analogModel = getAnalogModel()->createAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, transmissionBandwidth, transmissionPower);
     return new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, transmissionMode, transmissionChannel);
 }

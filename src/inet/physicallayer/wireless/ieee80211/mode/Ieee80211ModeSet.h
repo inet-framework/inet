@@ -45,7 +45,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     static std::vector<Entry> createNonHtControlResponseEntries(const std::vector<Entry>& supportedEntries);
 
   public:
-    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const std::vector<Entry> supportedEntries = {});
+    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries);
+    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const std::vector<Entry> supportedEntries);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211ModeSet, name = " << name; }
 
@@ -75,8 +76,13 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     const IIeee80211Mode *getSlowerMandatoryMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getFasterMandatoryMode(const IIeee80211Mode *mode) const;
 
-    const IIeee80211Mode *getControlResponseMode(const IIeee80211Mode *mode) const;
-    const IIeee80211Mode *getNonHtControlResponseMode(const IIeee80211Mode *mode) const;
+    // Selects the primary response mode for an eliciting mode. configuredMode,
+    // when present, is constrained by the eliciting PPDU's response format/MCS.
+    const IIeee80211Mode *getControlResponseMode(const IIeee80211Mode *mode, const IIeee80211Mode *configuredMode = nullptr) const;
+    const IIeee80211Mode *getMandatoryControlResponseMode(const IIeee80211Mode *mode) const;
+    // HT modes are always converted to a mandatory non-HT response. For a
+    // non-HT mode, mandatory=false preserves an explicitly selected rate.
+    const IIeee80211Mode *getNonHtControlResponseMode(const IIeee80211Mode *mode, bool mandatory = true) const;
 
     static const Ieee80211ModeSet *findModeSet(const char *mode);
     static const Ieee80211ModeSet *getModeSet(const char *mode);

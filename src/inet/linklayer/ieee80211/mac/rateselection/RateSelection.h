@@ -52,7 +52,7 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    void resolveConfiguredResponseModes();
+    void resolveConfiguredModes(const physicallayer::Ieee80211ModeSet *newModeSet);
 
     virtual const physicallayer::IIeee80211Mode *getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual const physicallayer::IIeee80211Mode *computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header);
@@ -78,4 +78,3 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
 } // namespace inet
 
 #endif
-

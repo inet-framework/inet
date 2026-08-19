@@ -8,6 +8,7 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 #include <algorithm>
+#include <set>
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
@@ -104,9 +105,12 @@ static std::vector<Ieee80211ModeSet::Entry> createHtEntries(Ieee80211HtPreambleM
 static std::vector<Ieee80211ModeSet::Entry> createHtSupportedEntries(Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat)
 {
     auto result = createHtEntries(preambleFormat);
-    auto mixedEntries = createHtEntries(Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED);
-    if (preambleFormat == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD)
+    if (preambleFormat == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD) {
+        auto mixedEntries = createHtEntries(Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED);
         result.insert(result.end(), mixedEntries.begin(), mixedEntries.end());
+    }
+    // IEEE 802.11-2024 19.1.1 and 19.1.4 require a 2.4 GHz HT STA to support
+    // the mandatory Clause 16/18 rates and the non-HT and HT-mixed formats.
     result.insert(result.end(), {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
         { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
@@ -501,6 +505,11 @@ OPP_THREAD_LOCAL const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee802
         { false, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT) },
 }),}; });
 
+Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries) :
+    Ieee80211ModeSet(name, entries, entries)
+{
+}
+
 Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const std::vector<Entry> supportedEntries) :
     name(name),
     entries(entries),
@@ -533,22 +542,51 @@ int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
 std::map<const IIeee80211Mode *, const IIeee80211Mode *> Ieee80211ModeSet::createControlResponseModes(const std::vector<Entry>& supportedEntries)
 {
     std::map<const IIeee80211Mode *, const IIeee80211Mode *> result;
+    std::set<unsigned int> mandatoryHtMcsIndexes;
+    for (const auto& entry : supportedEntries) {
+        auto mode = dynamic_cast<const Ieee80211HtMode *>(entry.mode);
+        if (entry.isMandatory && mode != nullptr)
+            mandatoryHtMcsIndexes.insert(mode->getDataMode()->getMcsIndex());
+    }
     for (const auto& sourceEntry : supportedEntries) {
         auto source = dynamic_cast<const Ieee80211HtMode *>(sourceEntry.mode);
-        if (source == nullptr || source->getPreambleMode()->getPreambleFormat() != Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD)
+        if (source == nullptr)
             continue;
+        std::vector<const Ieee80211HtMode *> candidates;
         for (const auto& candidateEntry : supportedEntries) {
             auto candidate = dynamic_cast<const Ieee80211HtMode *>(candidateEntry.mode);
             if (candidate != nullptr && candidate->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED &&
                 candidate->getCenterFrequencyMode() == source->getCenterFrequencyMode() &&
-                candidate->getDataMode()->getMcsIndex() == source->getDataMode()->getMcsIndex() &&
                 candidate->getDataMode()->getBandwidth() == source->getDataMode()->getBandwidth() &&
-                candidate->getDataMode()->getGuardIntervalType() == source->getDataMode()->getGuardIntervalType() &&
-                candidate->getDataMode()->getNumberOfSpatialStreams() == source->getDataMode()->getNumberOfSpatialStreams()) {
-                result.emplace(sourceEntry.mode, candidateEntry.mode);
-                break;
-            }
+                mandatoryHtMcsIndexes.find(candidate->getDataMode()->getMcsIndex()) != mandatoryHtMcsIndexes.end() &&
+                candidate->getDataMode()->getMcsIndex() <= source->getDataMode()->getMcsIndex() &&
+                candidate->getDataMode()->getNumberOfSpatialStreams() <= source->getDataMode()->getNumberOfSpatialStreams())
+                candidates.push_back(candidate);
         }
+        // IEEE 802.11-2024 10.6.6.5.3: with no Basic HT-MCS Set modelled,
+        // CandidateMCSSet is the mandatory HT MCSs. After the MCS-index bound,
+        // retain the highest NSS not exceeding the received NSS, then select the
+        // highest indexed MCS whose per-stream modulation and coding rate do not
+        // exceed those of the received MCS. The modelled MCS 0..31 are EQM.
+        int highestNss = -1;
+        for (auto candidate : candidates)
+            highestNss = std::max(highestNss, candidate->getDataMode()->getNumberOfSpatialStreams());
+        const Ieee80211HtMode *response = nullptr;
+        auto sourceMcs = source->getDataMode()->getModulationAndCodingScheme();
+        int sourceModulation = sourceMcs->getModulation()->getSubcarrierModulation()->getCodeWordSize();
+        double sourceCodeRate = sourceMcs->getCode()->getForwardErrorCorrection()->getCodeRate();
+        for (auto candidate : candidates) {
+            auto candidateDataMode = candidate->getDataMode();
+            auto candidateMcs = candidateDataMode->getModulationAndCodingScheme();
+            if (candidateDataMode->getNumberOfSpatialStreams() == highestNss &&
+                candidateMcs->getModulation()->getSubcarrierModulation()->getCodeWordSize() <= sourceModulation &&
+                candidateMcs->getCode()->getForwardErrorCorrection()->getCodeRate() <= sourceCodeRate &&
+                (response == nullptr || candidateDataMode->getMcsIndex() > response->getDataMode()->getMcsIndex()))
+                response = candidate;
+        }
+        if (response == nullptr)
+            throw cRuntimeError("No mandatory HT control response mode for %s", source->getName());
+        result.emplace(sourceEntry.mode, response);
     }
     return result;
 }
@@ -702,31 +740,52 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211M
     return nullptr;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::getControlResponseMode(const IIeee80211Mode *mode) const
+const IIeee80211Mode *Ieee80211ModeSet::getControlResponseMode(const IIeee80211Mode *mode, const IIeee80211Mode *configuredMode) const
 {
     if (!supportsMode(mode))
         throw cRuntimeError("Control response mode is not supported by operation mode %s: %s", getName(), mode->getName());
     auto it = controlResponseModes.find(mode);
-    return it != controlResponseModes.end() ? it->second : mode;
+    if (it == controlResponseModes.end()) {
+        if (configuredMode != nullptr)
+            return getNonHtControlResponseMode(configuredMode, false);
+        return getMandatoryControlResponseMode(mode);
+    }
+    auto primaryMode = it->second;
+    if (configuredMode == nullptr)
+        return primaryMode;
+    if (!supportsMode(configuredMode))
+        throw cRuntimeError("Configured control response mode is not supported by operation mode %s: %s", getName(), configuredMode->getName());
+    auto configuredIt = controlResponseModes.find(configuredMode);
+    if (configuredIt == controlResponseModes.end())
+        throw cRuntimeError("An HT RTS requires an HT-mixed CTS response, configured mode is non-HT: %s", configuredMode->getName());
+    if (configuredIt->second != primaryMode)
+        throw cRuntimeError("Configured CTS mode differs from the primary HT control response MCS for %s; alternate MCS duration selection is not modeled", mode->getName());
+    return configuredIt->second;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::getNonHtControlResponseMode(const IIeee80211Mode *mode) const
+const IIeee80211Mode *Ieee80211ModeSet::getMandatoryControlResponseMode(const IIeee80211Mode *mode) const
 {
     if (!supportsMode(mode))
         throw cRuntimeError("Control response mode is not supported by operation mode %s: %s", getName(), mode->getName());
-    auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode);
-    if (htMode == nullptr) {
+    if (controlResponseModes.find(mode) != controlResponseModes.end() || !containsMode(mode))
+        return getNonHtControlResponseMode(mode);
+    if (getIsMandatory(mode))
+        return mode;
+    if (auto slowerMode = getSlowerMandatoryMode(mode))
+        return slowerMode;
+    return getNonHtControlResponseMode(mode);
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::getNonHtControlResponseMode(const IIeee80211Mode *mode, bool mandatory) const
+{
+    if (!supportsMode(mode))
+        throw cRuntimeError("Control response mode is not supported by operation mode %s: %s", getName(), mode->getName());
+    if (controlResponseModes.find(mode) == controlResponseModes.end()) {
         // VHT response-format selection remains unchanged; this fallback is HT-scoped.
         if (dynamic_cast<const Ieee80211VhtMode *>(mode) != nullptr)
             return mode;
-        const IIeee80211Mode *result = nullptr;
-        for (const auto& entry : nonHtControlResponseEntries) {
-            auto candidate = entry.mode;
-            if (candidate->getDataMode()->getNetBitrate() <= mode->getDataMode()->getNetBitrate() &&
-                (result == nullptr || candidate->getDataMode()->getNetBitrate() > result->getDataMode()->getNetBitrate()))
-                result = candidate;
-        }
-        return result != nullptr ? result : mode;
+        if (!mandatory)
+            return mode;
     }
     const IIeee80211Mode *result = nullptr;
     for (const auto& entry : nonHtControlResponseEntries) {
