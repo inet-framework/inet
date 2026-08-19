@@ -17,6 +17,7 @@ namespace inet {
 namespace ieee80211 {
 
 class ITransmitStep;
+class IReceiveStep;
 
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
@@ -105,6 +106,9 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
     virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& destAddr, uint64_t transactionId = 0);
 
     static const Packet *getAssociationResponseFrame(ITransmitStep *transmitStep);
+    static Ptr<const Ieee80211MacHeader> getMacHeader(const Packet *frame);
+    static Ptr<const Ieee80211MgmtHeader> getAssociationResponseHeader(const Packet *responseFrame);
+    static bool isAssociationResponseDecisionPoint(ITransmitStep *transmitStep, IReceiveStep *receiveStep);
     static AssociationResponseDisposition getAssociationResponseDisposition(const Packet *responseFrame, uint64_t pendingTransactionId, bool exchangeSucceeded, bool retryPending);
     static bool isAssociationResponseTimeoutDue(const StaInfo& sta, uint64_t transactionId, simtime_t deadline, simtime_t currentTime);
     virtual uint64_t createAssociationTransactionId();

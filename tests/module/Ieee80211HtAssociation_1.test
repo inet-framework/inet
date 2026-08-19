@@ -1,12 +1,70 @@
 %description:
-Verify the detailed IEEE 802.11 management exchange carries the standard HT
-element presence matrix and commits mutually usable peer state at both ends.
+Verify the RTS/CTS-protected detailed IEEE 802.11 management exchange carries
+the standard HT element presence matrix and commits mutually usable peer state
+at both ends.
+
+%file: Ieee80211HtAssociationChecker.cc
+
+#include "inet/common/Simsignals.h"
+#include "inet/common/SimpleModule.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
+{
+    using cListener::finish;
+
+  protected:
+    int apAssociationNotifications = 0;
+
+    virtual void initialize() override
+    {
+        getModuleByPath("^.ap.wlan[0].mgmt")->subscribe(l2ApAssociatedSignal, this);
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        throw cRuntimeError("Unexpected message");
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        apAssociationNotifications++;
+    }
+
+    virtual void finish() override
+    {
+        auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        const auto& staAddress = staMib->address;
+        ASSERT(apMib->bssAccessPointData.stations.at(staAddress) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(apMib->bssAccessPointData.associationIds.at(staAddress) != 0);
+        ASSERT(apMib->findPeerHtState(staAddress) != nullptr);
+        ASSERT(apMib->findPeerHtState(staAddress)->valid);
+        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
+        ASSERT(staMib->findPeerHtState(apMib->address)->valid);
+        ASSERT(apAssociationNotifications == 1);
+        EV << "RTS-protected association committed at AP and STA.\n";
+    }
+};
+
+Define_Module(Ieee80211HtAssociationChecker);
 
 %file: test.ned
 
+import inet.common.SimpleModule;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple Ieee80211HtAssociationChecker extends SimpleModule
+{
+    parameters:
+        @class(::Ieee80211HtAssociationChecker);
+}
 
 network Ieee80211HtAssociationTest
 {
@@ -21,6 +79,7 @@ network Ieee80211HtAssociationTest
             parameters:
                 wlan[*].mgmt.typename = "Ieee80211MgmtAp";
         }
+        test: Ieee80211HtAssociationChecker;
 }
 
 %inifile: omnetpp.ini
@@ -55,6 +114,7 @@ record-scalar-results = false
 **.wlan[*].radio.receiver.snirThreshold = 4dB
 
 **.mgmt.numChannels = 1
+*.ap.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 0B
 *.sta.wlan[*].agent.startingTime = 0s
 *.sta.wlan[*].agent.probeDelay = 1ms
 *.sta.wlan[*].agent.minChannelTime = 5ms
@@ -73,3 +133,6 @@ AssocResp-OK .*?Ieee80211AssociationResponseFrame.*?htCapabilitiesPresent.*?true
 
 %contains: stdout
 Installed peer HT state, peer =
+
+%contains: stdout
+RTS-protected association committed at AP and STA.

@@ -1,7 +1,8 @@
 %description:
 Verify that association and reassociation management primitives are dispatched
 to their most-derived handlers, including the distinct reassociation confirm
-primitive emitted by the station agent.
+primitive emitted by the station agent. Verify association timeout ownership,
+confirm typing, restart eligibility, and late-response rejection.
 
 %includes:
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
@@ -54,9 +55,47 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
 {
   public:
     using Ieee80211MgmtSta::handleCommand;
+    using Ieee80211MgmtSta::shouldDisassociateOnReassociationFailure;
 
     int associateRequests = 0;
     int reassociateRequests = 0;
+    int associateConfirms = 0;
+    int reassociateConfirms = 0;
+    int reassociationFailures = 0;
+    Ieee80211PrimResultCode lastAssociationResult = PRC_SUCCESS;
+    Ieee80211PrimResultCode lastReassociationResult = PRC_SUCCESS;
+
+    void prepareAssociationTimeout(ApInfo *ap, bool reassociation)
+    {
+        ASSERT(assocTimeoutMsg == nullptr);
+        assocTimeoutMsg = new cMessage("assocTimeout", 2);
+        assocTimeoutMsg->setContextPointer(ap);
+        reassociationInProgress = reassociation;
+    }
+
+    void deliverAssociationTimeout()
+    {
+        ASSERT(assocTimeoutMsg != nullptr);
+        handleTimer(assocTimeoutMsg);
+    }
+
+    bool canStartAnotherAssociation() const { return assocTimeoutMsg == nullptr; }
+    bool isReassociationInProgress() const { return reassociationInProgress; }
+
+    void deliverLateAssociationResponse(bool reassociation)
+    {
+        auto packet = new Packet("LateAssocResp");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        processAssociationResponse(packet, header, reassociation);
+    }
+
+    void deliverMismatchedAssociationResponse(const MacAddress& address, bool reassociation)
+    {
+        auto packet = new Packet("MismatchedAssocResp");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        processAssociationResponse(packet, header, reassociation);
+    }
 
   protected:
     virtual void processAssociateCommand(Ieee80211Prim_AssociateRequest *ctrl) override
@@ -67,6 +106,23 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     virtual void processReassociateCommand(Ieee80211Prim_ReassociateRequest *ctrl) override
     {
         reassociateRequests++;
+    }
+
+    virtual void sendAssociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode) override
+    {
+        associateConfirms++;
+        lastAssociationResult = resultCode;
+    }
+
+    virtual void sendReassociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode) override
+    {
+        reassociateConfirms++;
+        lastReassociationResult = resultCode;
+    }
+
+    virtual void handleReassociationFailure(ApInfo *ap) override
+    {
+        reassociationFailures++;
     }
 };
 
@@ -112,7 +168,42 @@ mgmt.handleCommand(PR_REASSOCIATE_REQUEST, new Ieee80211Prim_ReassociateRequest(
 ASSERT(mgmt.associateRequests == 1);
 ASSERT(mgmt.reassociateRequests == 1);
 
-EV << "Association and reassociation primitive dispatch verified.\n";
+Ieee80211MgmtSta::ApInfo timeoutAp;
+timeoutAp.address = MacAddress("02:00:00:00:00:01");
+MacAddress otherApAddress("02:00:00:00:00:02");
+ASSERT(TestIeee80211MgmtSta::shouldDisassociateOnReassociationFailure(true, timeoutAp.address, timeoutAp.address));
+ASSERT(!TestIeee80211MgmtSta::shouldDisassociateOnReassociationFailure(true, timeoutAp.address, otherApAddress));
+ASSERT(!TestIeee80211MgmtSta::shouldDisassociateOnReassociationFailure(false, timeoutAp.address, timeoutAp.address));
+mgmt.prepareAssociationTimeout(&timeoutAp, false);
+mgmt.deliverMismatchedAssociationResponse(otherApAddress, false);
+ASSERT(!mgmt.canStartAnotherAssociation());
+ASSERT(mgmt.associateConfirms == 0);
+mgmt.deliverAssociationTimeout();
+ASSERT(mgmt.canStartAnotherAssociation());
+ASSERT(!mgmt.isReassociationInProgress());
+ASSERT(mgmt.associateConfirms == 1);
+ASSERT(mgmt.reassociateConfirms == 0);
+ASSERT(mgmt.lastAssociationResult == PRC_TIMEOUT);
+ASSERT(mgmt.reassociationFailures == 0);
+
+mgmt.deliverLateAssociationResponse(false);
+ASSERT(mgmt.associateConfirms == 1);
+ASSERT(mgmt.reassociateConfirms == 0);
+
+mgmt.prepareAssociationTimeout(&timeoutAp, true);
+mgmt.deliverAssociationTimeout();
+ASSERT(mgmt.canStartAnotherAssociation());
+ASSERT(!mgmt.isReassociationInProgress());
+ASSERT(mgmt.associateConfirms == 1);
+ASSERT(mgmt.reassociateConfirms == 1);
+ASSERT(mgmt.lastReassociationResult == PRC_TIMEOUT);
+ASSERT(mgmt.reassociationFailures == 1);
+
+mgmt.deliverLateAssociationResponse(true);
+ASSERT(mgmt.associateConfirms == 1);
+ASSERT(mgmt.reassociateConfirms == 1);
+
+EV << "Association and reassociation primitive dispatch and timeout ownership verified.\n";
 
 %contains: stdout
-Association and reassociation primitive dispatch verified.
+Association and reassociation primitive dispatch and timeout ownership verified.

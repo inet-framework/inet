@@ -17,9 +17,12 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
 {
   public:
     using Ieee80211MgmtAp::AssociationResponseDisposition;
+    using Ieee80211MgmtAp::getAssociationResponseHeader;
     using Ieee80211MgmtAp::getAssociationResponseDisposition;
     using Ieee80211MgmtAp::getAssociationResponseFrame;
+    using Ieee80211MgmtAp::getMacHeader;
     using Ieee80211MgmtAp::isAssociationResponseTimeoutDue;
+    using Ieee80211MgmtAp::isAssociationResponseDecisionPoint;
 };
 
 static Packet *makeAssociationResponse(uint64_t transactionId, bool moreFragments, bool includeTag = true)
@@ -46,9 +49,28 @@ ASSERT(TestIeee80211MgmtAp::getAssociationResponseFrame(&ordinaryStep) == finalR
     auto rtsPacket = new Packet("RTS", makeShared<Ieee80211RtsFrame>());
     RtsTransmitStep rtsStep(finalResponse, rtsPacket, SIMTIME_ZERO);
     ASSERT(TestIeee80211MgmtAp::getAssociationResponseFrame(&rtsStep) == finalResponse);
+
+    rtsStep.setCompletion(IFrameSequenceStep::Completion::ACCEPTED);
+    ReceiveStep ctsStep;
+    ctsStep.setCompletion(IFrameSequenceStep::Completion::ACCEPTED);
+    ctsStep.setFrameToReceive(new Packet("CTS", makeShared<Ieee80211CtsFrame>()));
+    ASSERT(!TestIeee80211MgmtAp::isAssociationResponseDecisionPoint(&rtsStep, &ctsStep));
+
+    ReceiveStep expiredCtsStep;
+    expiredCtsStep.setCompletion(IFrameSequenceStep::Completion::EXPIRED);
+    ASSERT(TestIeee80211MgmtAp::isAssociationResponseDecisionPoint(&rtsStep, &expiredCtsStep));
+    const Packet *protectedResponse = TestIeee80211MgmtAp::getAssociationResponseFrame(&rtsStep);
+    ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(protectedResponse, 42, false, true) == Disposition::RETAIN);
+    ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(protectedResponse, 42, false, false) == Disposition::COMPLETE);
 }
 
+ordinaryStep.setCompletion(IFrameSequenceStep::Completion::ACCEPTED);
+ReceiveStep ackStep;
+ackStep.setCompletion(IFrameSequenceStep::Completion::ACCEPTED);
+ackStep.setFrameToReceive(new Packet("ACK", makeShared<Ieee80211AckFrame>()));
+ASSERT(TestIeee80211MgmtAp::isAssociationResponseDecisionPoint(&ordinaryStep, &ackStep));
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42, true, false) == Disposition::COMPLETE);
+
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 41, true, false) == Disposition::IGNORE);
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 0, true, false) == Disposition::IGNORE);
 
@@ -56,6 +78,13 @@ auto zeroTokenResponse = makeAssociationResponse(0, false);
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(zeroTokenResponse, 42, true, false) == Disposition::IGNORE);
 auto untaggedResponse = makeAssociationResponse(42, false, false);
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(untaggedResponse, 42, true, false) == Disposition::IGNORE);
+
+auto aggregate = new Packet("A-MPDU-like");
+aggregate->insertAtBack(makeShared<Ieee80211MpduSubframeHeader>());
+aggregate->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(42);
+ASSERT(TestIeee80211MgmtAp::getMacHeader(aggregate) == nullptr);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseHeader(aggregate) == nullptr);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(aggregate, 42, true, false) == Disposition::IGNORE);
 
 auto nonFinalResponse = makeAssociationResponse(42, true);
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, true, false) == Disposition::RETAIN);
@@ -76,6 +105,7 @@ ASSERT(!TestIeee80211MgmtAp::isAssociationResponseTimeoutDue(sta, 0, SimTime(5),
 delete nonFinalResponse;
 delete untaggedResponse;
 delete zeroTokenResponse;
+delete aggregate;
 delete finalResponse;
 
 EV << "AP association transaction and timeout decisions verified.\n";

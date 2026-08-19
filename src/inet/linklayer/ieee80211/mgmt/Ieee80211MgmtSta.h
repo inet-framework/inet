@@ -136,6 +136,11 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     /** Processes Association and Reassociation Responses without using cached Beacon capabilities. */
     virtual void processAssociationResponse(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool reassociation);
 
+    /** Applies the failed-reassociation state transition for the target AP. */
+    virtual void handleReassociationFailure(ApInfo *ap);
+    static bool shouldDisassociateOnReassociationFailure(bool isAssociated,
+            const MacAddress& associatedApAddress, const MacAddress& targetApAddress);
+
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     virtual bool scanNextChannel();
 
