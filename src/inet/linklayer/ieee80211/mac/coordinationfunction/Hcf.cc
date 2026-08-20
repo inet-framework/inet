@@ -676,11 +676,6 @@ void Hcf::channelGranted(IChannelAccess *channelAccess)
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
         EV_DETAIL << "Channel access granted to the " << printAccessCategory(ac) << " queue" << std::endl;
-        if (shouldRestartHt40ChannelAccess(edcaf)) {
-            EV_INFO << "Secondary channel was busy during DIFS before channel access for HT40 transmission, restarting backoff.\n";
-            edcaf->restartChannelAccess(this);
-            return;
-        }
         auto internallyCollidedEdcafs = edca->getInternallyCollidedEdcafs();
         if (internallyCollidedEdcafs.size() > 0) {
             EV_INFO << "Internal collision happened with the following queues:" << std::endl;
@@ -694,6 +689,11 @@ void Hcf::channelGranted(IChannelAccess *channelAccess)
             EV_DETAIL << "Releasing channel because no eligible frame is available.\n";
             edcaf->releaseChannel(this);
             mac->sendDownPendingRadioConfigMsg();
+            return;
+        }
+        if (shouldRestartHt40ChannelAccess(edcaf)) {
+            EV_INFO << "Secondary channel was busy during DIFS before channel access for HT40 transmission, restarting backoff.\n";
+            edcaf->restartChannelAccess(this);
             return;
         }
         edcaf->getTxopProcedure()->startTxop(ac);
