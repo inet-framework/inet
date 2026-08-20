@@ -8,6 +8,7 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 
 #include "inet/common/math/Functions.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarMediumAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
@@ -115,9 +116,34 @@ bool Ieee80211Receiver::computeHtCcaBusy(const IListening *listening, const IInt
 {
     const auto *bandListening = check_and_cast<const BandListening *>(listening);
     const auto *mediumAnalogModel = listening->getReceiverRadio()->getMedium()->getAnalogModel();
-    const INoise *noise = mediumAnalogModel->computeNoise(listening, interference);
-    bool busy = noise->computeMaxPower(listening->getStartTime(), listening->getEndTime()) >= htCcaEnergyDetection;
-    delete noise;
+    bool busy = false;
+    if (dynamic_cast<const ScalarMediumAnalogModel *>(mediumAnalogModel) != nullptr) {
+        W totalPower = W(0);
+        const auto *backgroundNoise = interference->getBackgroundNoise();
+        if (backgroundNoise != nullptr)
+            totalPower += backgroundNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
+        const auto listeningMin = bandListening->getCenterFrequency() - bandListening->getBandwidth() / 2;
+        const auto listeningMax = bandListening->getCenterFrequency() + bandListening->getBandwidth() / 2;
+        for (auto reception : *interference->getInterferingReceptions()) {
+            const auto *signal = dynamic_cast<const INarrowbandSignalAnalogModel *>(reception->getAnalogModel());
+            if (signal != nullptr) {
+                const auto signalMin = signal->getCenterFrequency() - signal->getBandwidth() / 2;
+                const auto signalMax = signal->getCenterFrequency() + signal->getBandwidth() / 2;
+                const auto overlapMin = std::max(listeningMin, signalMin);
+                const auto overlapMax = std::min(listeningMax, signalMax);
+                if (overlapMin < overlapMax && signal->getBandwidth() > Hz(0)) {
+                    double fraction = (overlapMax - overlapMin).get() / signal->getBandwidth().get();
+                    totalPower += signal->computeMinPower(reception->getStartTime(), reception->getEndTime()) * fraction;
+                }
+            }
+        }
+        busy = totalPower >= htCcaEnergyDetection;
+    }
+    else {
+        const INoise *noise = mediumAnalogModel->computeNoise(listening, interference);
+        busy = noise->computeMaxPower(listening->getStartTime(), listening->getEndTime()) >= htCcaEnergyDetection;
+        delete noise;
+    }
     if (busy)
         return true;
 
