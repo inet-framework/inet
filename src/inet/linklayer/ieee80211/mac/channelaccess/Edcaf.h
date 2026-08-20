@@ -88,6 +88,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     // IChannelAccess
     virtual void requestChannel(IChannelAccess::ICallback *callback) override;
     virtual void releaseChannel(IChannelAccess::ICallback *callback) override;
+    virtual void restartChannelAccess(IChannelAccess::ICallback *callback);
 
     // IContention::ICallback
     virtual void channelAccessGranted() override;

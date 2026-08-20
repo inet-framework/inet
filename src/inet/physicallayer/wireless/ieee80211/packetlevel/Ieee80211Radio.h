@@ -12,6 +12,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetCoordinator.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/IIeee80211CcaProvider.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -21,7 +22,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211Radio
+class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211Radio, public IIeee80211CcaProvider
 {
   public:
     /**
@@ -38,6 +39,11 @@ class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211Radio
     ModuleRefByPar<IIeee80211ModeSetCoordinator> modeSetCoordinator;
     bool changingModeSet = false;
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
+    Ieee80211SecondaryChannelOffset htSecondaryChannelOffset = IEEE80211_SECONDARY_CHANNEL_NONE;
+    std::unique_ptr<Ieee80211CcaSnapshot> ccaSnapshot;
+    std::string opMode;
+    const Ieee80211ModeSet *modeSet = nullptr;
+    const IIeee80211Band *band = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -53,11 +59,14 @@ class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211Radio
     virtual void encapsulate(Packet *packet) const override;
     virtual void decapsulate(Packet *packet) const override;
 
+    virtual bool computeIsBandBusy(Hz centerFrequency) const;
+    virtual void updateCcaState();
+    virtual void updateTransceiverState() override;
+
   public:
     Ieee80211Radio();
 
-    // Update behavioral consumers before publishing the new mode set.
-    // Failures are fatal simulation errors; these setters do not roll back.
+class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211Radio, public IIeee80211CcaProvider
     // Behavioral consumers implement IIeee80211ModeSetListener.
     virtual const Ieee80211Channel *getChannel() const override;
     virtual bool isHtChannelWidthSupported(Hz channelWidth) const override;

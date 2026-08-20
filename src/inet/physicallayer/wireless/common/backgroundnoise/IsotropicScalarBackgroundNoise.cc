@@ -43,12 +43,14 @@ const INoise *IsotropicScalarBackgroundNoise::computeNoise(const IListening *lis
     simtime_t endTime = listening->getEndTime();
     Hz centerFrequency = bandListening->getCenterFrequency();
     Hz listeningBandwidth = bandListening->getBandwidth();
-    if (std::isnan(bandwidth.get()))
-        bandwidth = listeningBandwidth;
-    else if (bandwidth != listeningBandwidth)
-        throw cRuntimeError("Background noise bandwidth doesn't match listening bandwidth");
-    const auto& powerFunction = makeShared<math::Boxcar1DFunction<W, simtime_t>>(startTime, endTime, power);
-    return new ScalarNoise(startTime, endTime, centerFrequency, bandwidth, powerFunction);
+    Hz noiseBandwidth = std::isnan(bandwidth.get()) ? listeningBandwidth : bandwidth;
+    // A scalar background-noise power is the integrated power over its
+    // configured bandwidth. Per-channel HT40 CCA listens to 20 MHz slices,
+    // so preserve the equivalent flat noise density instead of rejecting a
+    // narrower listening band.
+    W listeningPower = power * (listeningBandwidth / noiseBandwidth);
+    const auto& powerFunction = makeShared<math::Boxcar1DFunction<W, simtime_t>>(startTime, endTime, listeningPower);
+    return new ScalarNoise(startTime, endTime, centerFrequency, listeningBandwidth, powerFunction);
 }
 
 } // namespace physicallayer
