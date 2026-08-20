@@ -169,7 +169,7 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
                 throw cRuntimeError("HT 40 MHz operation requires a secondary channel offset of above or below");
 
             bool publishModeSet = targetModeSet != this->modeSet || targetBand != this->band ||
-                    !std::isnan(newBandwidth.get()) || !std::isnan(newBitrate.get()) || *requestedOpMode;
+                    *requestedOpMode;
 
             if (targetChannelNumber != -1 &&
                     (currentChannel == nullptr || targetBand != this->band || targetChannelNumber != currentChannel->getChannelNumber() ||

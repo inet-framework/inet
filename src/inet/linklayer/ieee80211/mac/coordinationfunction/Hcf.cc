@@ -206,10 +206,12 @@ bool Hcf::shouldRestartHt40ChannelAccess(Edcaf *edcaf)
             mode->getDataMode()->getBandwidth() != MHz(40))
         return false;
     // IEEE Std 802.11-2024, 11.15.9 item b):
-    // If the secondary channel was busy during DIFS before channel access,
-    // invoke the backoff procedure with the current CW[AC].
-    simtime_t difs = modeSet->getSifsTime() + 2 * modeSet->getSlotTime();
-    return !rx->isSecondaryChannelIdleFor(difs);
+    // Secondary channel must be idle during an interval of DIFS for the 2.4 GHz band
+    // and PIFS for the 5 GHz band immediately preceding the expiration of the backoff counter.
+    // If the secondary channel was busy during this interval, invoke the backoff procedure with the current CW[AC].
+    bool is24GHz = modeSet != nullptr && strstr(modeSet->getName(), "2.4Ghz") != nullptr;
+    simtime_t requiredIdle = modeSet->getSifsTime() + (is24GHz ? 2 : 1) * modeSet->getSlotTime();
+    return !rx->isSecondaryChannelIdleFor(requiredIdle);
 }
 
 void Hcf::channelGranted(IChannelAccess *channelAccess)
@@ -226,7 +228,7 @@ void Hcf::channelGranted(IChannelAccess *channelAccess)
             emit(edcaCollisionDetectedSignal, (unsigned long)internallyCollidedEdcafs.size());
         }
         if (shouldRestartHt40ChannelAccess(edcaf)) {
-            EV_INFO << "Secondary channel was busy during DIFS before channel access for HT40 transmission, restarting backoff.\n";
+            EV_INFO << "Secondary channel was busy during required interval before channel access for HT40 transmission, restarting backoff.\n";
             edcaf->restartChannelAccess(this);
             return;
         }
