@@ -77,8 +77,9 @@ void Ieee80211Transmitter::setModeSet(const Ieee80211ModeSet *modeSet)
     if (this->modeSet != modeSet) {
         auto newMode = mode;
         if (mode != nullptr && modeSet != nullptr && !modeSet->containsMode(mode)) {
-            auto dataMode = mode->getDataMode();
-            newMode = modeSet->getMode(dataMode->getNetBitrate(), dataMode->getBandwidth(), dataMode->getNumberOfSpatialStreams(), dataMode->getGuardInterval());
+            newMode = modeSet->findCompatibleMode(mode);
+            if (newMode == nullptr)
+                throw cRuntimeError("Cannot map current mode to operation mode '%s' without changing bitrate, bandwidth, spatial streams, or guard interval", modeSet->getName());
         }
         else if (modeSet == nullptr)
             newMode = nullptr;

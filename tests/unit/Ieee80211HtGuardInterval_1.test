@@ -226,6 +226,46 @@ const auto legacyOfdmModeSet = Ieee80211ModeSet::getModeSet("a");
 ASSERT(legacyOfdmModeSet->findMode(Mbps(6), Hz(NaN), -1, SimTime(800, SIMTIME_NS)) != nullptr);
 ASSERT(legacyOfdmModeSet->findMode(Mbps(6), Hz(NaN), -1, SimTime(400, SIMTIME_NS)) == nullptr);
 
+// Mode-set remapping preserves the complete modeled PHY tuple. In
+// particular, a negative GI is an actual absence for compatibility lookup,
+// not findMode()'s public wildcard.
+const auto erpModeSet = Ieee80211ModeSet::getModeSet("g(erp)");
+const auto pModeSet = Ieee80211ModeSet::getModeSet("p");
+const auto aMode = legacyOfdmModeSet->getMode(Mbps(6), MHz(20), 1, SimTime(800, SIMTIME_NS));
+const auto erpMode = erpModeSet->findCompatibleMode(aMode);
+ASSERT(erpMode != nullptr);
+ASSERT(erpMode->getDataMode()->getNetBitrate() == aMode->getDataMode()->getNetBitrate());
+ASSERT(erpMode->getDataMode()->getBandwidth() == aMode->getDataMode()->getBandwidth());
+ASSERT(erpMode->getDataMode()->getGuardInterval() == aMode->getDataMode()->getGuardInterval());
+
+const auto dsssModeSet = Ieee80211ModeSet::getModeSet("b");
+const auto mixedModeSet = Ieee80211ModeSet::getModeSet("g(mixed)");
+const auto dsssMode = dsssModeSet->getMode(Mbps(1));
+ASSERT(dsssMode->getDataMode()->getGuardInterval() < SIMTIME_ZERO);
+ASSERT(mixedModeSet->findCompatibleMode(dsssMode) != nullptr);
+
+TestIeee80211Transmitter legacyTransmitter;
+legacyTransmitter.setModeSet(legacyOfdmModeSet);
+legacyTransmitter.setMode(aMode);
+legacyTransmitter.setModeSet(erpModeSet);
+ASSERT(legacyTransmitter.getSelectedModeSet() == erpModeSet);
+ASSERT(legacyTransmitter.getSelectedMode() == erpMode);
+const auto modeBeforeRejectedTransition = legacyTransmitter.getSelectedMode();
+bool rejectedIncompatibleModeSet = false;
+try {
+    legacyTransmitter.setModeSet(pModeSet);
+}
+catch (cRuntimeError&) {
+    rejectedIncompatibleModeSet = true;
+}
+ASSERT(rejectedIncompatibleModeSet);
+ASSERT(legacyTransmitter.getSelectedModeSet() == erpModeSet);
+ASSERT(legacyTransmitter.getSelectedMode() == modeBeforeRejectedTransition);
+const auto pMode = pModeSet->getMode(2); // the declared 6 Mbps 10 MHz mode
+legacyTransmitter.setModeSetAndMode(pModeSet, pMode);
+ASSERT(legacyTransmitter.getSelectedModeSet() == pModeSet);
+ASSERT(legacyTransmitter.getSelectedMode() == pMode);
+
 Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
         Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED,
         Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
@@ -240,6 +280,30 @@ catch (cRuntimeError&) {
 }
 ASSERT(rejectedVhtGreenfieldAfterMixed);
 const auto vhtModeSet = Ieee80211ModeSet::getModeSet("ac");
+const auto vhtLongMcs0 = Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+const auto vhtShortMcs0 = Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT);
+// IEEE Std 802.11-2024, Tables 21-5/21-8 and 21.4.3, Eqs. (21-109)/(21-110).
+ASSERT(vhtLongMcs0->getDataMode()->getSymbolInterval() == SimTime(4, SIMTIME_US));
+ASSERT(vhtShortMcs0->getDataMode()->getSymbolInterval() == SimTime(3600, SIMTIME_NS));
+ASSERT(vhtLongMcs0->getHeaderMode()->getSymbolInterval() == SimTime(4, SIMTIME_US));
+ASSERT(vhtShortMcs0->getHeaderMode()->getSymbolInterval() == SimTime(4, SIMTIME_US));
+ASSERT(vhtLongMcs0->getHeaderMode()->getNetBitrate() == vhtShortMcs0->getHeaderMode()->getNetBitrate());
+ASSERT(vhtLongMcs0->getHeaderMode()->getGrossBitrate() == vhtShortMcs0->getHeaderMode()->getGrossBitrate());
+ASSERT(vhtShortMcs0->getDataMode()->getDuration(B(24)) == SimTime(32400, SIMTIME_NS));
+ASSERT(vhtShortMcs0->getDataDuration(B(24)) == SimTime(36, SIMTIME_US));
+ASSERT(vhtShortMcs0->getDataMode()->getDuration(B(27)) == SimTime(36, SIMTIME_US));
+ASSERT(vhtShortMcs0->getDataDuration(B(27)) == SimTime(36, SIMTIME_US));
+ASSERT(vhtShortMcs0->getDataMode()->getDuration(B(30)) == SimTime(39600, SIMTIME_NS));
+ASSERT(vhtShortMcs0->getDataDuration(B(30)) == SimTime(40, SIMTIME_US));
+ASSERT(vhtLongMcs0->getDataMode()->getDuration(B(24)) == SimTime(36, SIMTIME_US));
+ASSERT(vhtLongMcs0->getDataDuration(B(24)) == SimTime(36, SIMTIME_US));
+for (auto vhtMode : {vhtLongMcs0, vhtShortMcs0})
+    for (auto dataLength : {B(24), B(27), B(30)})
+        ASSERT(vhtMode->getDuration(dataLength) == vhtMode->getPreambleDuration() + vhtMode->getHeaderDuration() + vhtMode->getDataDuration(dataLength));
 bool foundVhtLongGuardInterval = false;
 bool foundVhtShortGuardInterval = false;
 for (int index = 0; index < vhtModeSet->getNumModes(); index++) {

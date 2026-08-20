@@ -520,6 +520,33 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
     return entries[getModeIndex(mode)].isMandatory;
 }
 
+const IIeee80211Mode *Ieee80211ModeSet::findCompatibleMode(const IIeee80211Mode *mode) const
+{
+    if (mode == nullptr)
+        return nullptr;
+
+    const auto sourceDataMode = mode->getDataMode();
+    const auto sourceBitrate = sourceDataMode->getNetBitrate();
+    const auto sourceBandwidth = sourceDataMode->getBandwidth();
+    const auto sourceGuardInterval = sourceDataMode->getGuardInterval();
+    const auto minBitrate = sourceBitrate - Mbps(0.05);
+    const auto maxBitrate = sourceBitrate + Mbps(0.05);
+    for (const auto& entry : entries) {
+        const auto candidateDataMode = entry.mode->getDataMode();
+        const auto candidateBandwidth = candidateDataMode->getBandwidth();
+        const auto candidateGuardInterval = candidateDataMode->getGuardInterval();
+        const bool bandwidthMatches = (std::isnan(sourceBandwidth.get()) && std::isnan(candidateBandwidth.get())) ||
+                (!std::isnan(sourceBandwidth.get()) && !std::isnan(candidateBandwidth.get()) && sourceBandwidth == candidateBandwidth);
+        const bool guardIntervalMatches = (sourceGuardInterval < SIMTIME_ZERO && candidateGuardInterval < SIMTIME_ZERO) ||
+                (sourceGuardInterval >= SIMTIME_ZERO && candidateGuardInterval == sourceGuardInterval);
+        if (minBitrate <= candidateDataMode->getNetBitrate() && candidateDataMode->getNetBitrate() <= maxBitrate &&
+            bandwidthMatches && candidateDataMode->getNumberOfSpatialStreams() == sourceDataMode->getNumberOfSpatialStreams() &&
+            guardIntervalMatches)
+            return entry.mode;
+    }
+    return nullptr;
+}
+
 const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval) const
 {
     return findMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams, guardInterval);
