@@ -181,12 +181,10 @@ void Rx::ccaStateChanged(const Ieee80211CcaSnapshot& snapshot)
     ht40Cca = snapshot.isHt40();
     primaryCcaBusy = snapshot.isPrimaryBusy();
     secondaryCcaBusy = snapshot.isSecondaryBusy();
-    if (!ht40Cca)
+    if (!ht40Cca || secondaryCcaBusy)
         secondaryCcaIdleSince = -1;
-    else if (!wasHt40Cca || (wasSecondaryBusy && !secondaryCcaBusy))
+    else if (!wasHt40Cca || wasSecondaryBusy)
         secondaryCcaIdleSince = simTime();
-    else if (secondaryCcaBusy)
-        secondaryCcaIdleSince = -1;
     recomputeMediumFree();
 }
 
