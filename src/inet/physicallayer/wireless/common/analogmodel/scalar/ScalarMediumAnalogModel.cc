@@ -123,20 +123,26 @@ const INoise *ScalarMediumAnalogModel::computeNoise(const IListening *listening,
     std::map<simtime_t, W> powerChanges;
     powerChanges[math::getLowerBound<simtime_t>()] = W(0);
     powerChanges[math::getUpperBound<simtime_t>()] = W(0);
+    auto listeningMin = commonCenterFrequency - commonBandwidth / 2;
+    auto listeningMax = commonCenterFrequency + commonBandwidth / 2;
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
     for (auto reception : *interferingReceptions) {
         auto signalAnalogModel = reception->getAnalogModel();
         auto receptionAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(signalAnalogModel);
         Hz signalCenterFrequency = receptionAnalogModel->getCenterFrequency();
         Hz signalBandwidth = receptionAnalogModel->getBandwidth();
-        if (commonCenterFrequency == signalCenterFrequency && commonBandwidth >= signalBandwidth)
+        auto signalMin = signalCenterFrequency - signalBandwidth / 2;
+        auto signalMax = signalCenterFrequency + signalBandwidth / 2;
+        if (signalMin >= listeningMin && signalMax <= listeningMax)
             addReception(reception, noiseStartTime, noiseEndTime, powerChanges);
         else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, signalCenterFrequency, signalBandwidth))
             throw cRuntimeError("Partially interfering signals are not supported by ScalarMediumAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
     const ScalarNoise *scalarBackgroundNoise = dynamic_cast<const ScalarNoise *>(interference->getBackgroundNoise());
     if (scalarBackgroundNoise) {
-        if (commonCenterFrequency == scalarBackgroundNoise->getCenterFrequency() && commonBandwidth >= scalarBackgroundNoise->getBandwidth())
+        auto bgMin = scalarBackgroundNoise->getCenterFrequency() - scalarBackgroundNoise->getBandwidth() / 2;
+        auto bgMax = scalarBackgroundNoise->getCenterFrequency() + scalarBackgroundNoise->getBandwidth() / 2;
+        if (bgMin >= listeningMin && bgMax <= listeningMax)
             addNoise(scalarBackgroundNoise, noiseStartTime, noiseEndTime, powerChanges);
         else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, scalarBackgroundNoise->getCenterFrequency(), scalarBackgroundNoise->getBandwidth()))
             throw cRuntimeError("Partially interfering background noise is not supported by ScalarMediumAnalogModel, enable ignorePartialInterference to avoid this error!");
