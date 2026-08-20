@@ -128,7 +128,6 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
     if (message->getKind() == RADIO_C_CONFIGURE) {
         Ieee80211ConfigureRadioCommand *configureCommand = dynamic_cast<Ieee80211ConfigureRadioCommand *>(message->getControlInfo());
         if (configureCommand != nullptr) {
-            Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
             Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
             const Ieee80211Channel *currentChannel = ieee80211Receiver->getChannel();
             const char *requestedOpMode = configureCommand->getOpMode();
@@ -153,14 +152,16 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
             Hz newBandwidth = configureCommand->getBandwidth();
             Hz targetBandwidth = std::isnan(newBandwidth.get()) ? ieee80211Receiver->getBandwidth() : newBandwidth;
             bps newBitrate = configureCommand->getBitrate();
-            bps targetBitrate = std::isnan(newBitrate.get()) ? ieee80211Transmitter->getBitrate() : newBitrate;
             const IIeee80211Mode *mode = configureCommand->getMode();
-            Hz targetModeBandwidth = !std::isnan(targetBandwidth.get()) ? targetBandwidth : Hz(MHz(20));
-            const IIeee80211Mode *resolvedMode = mode != nullptr ? mode : nullptr;
-            if (resolvedMode == nullptr && targetModeSet != nullptr && targetBitrate != bps(-1))
-                resolvedMode = targetModeSet->getMode(targetBitrate, targetModeBandwidth);
+            const IIeee80211Mode *resolvedMode = mode;
+            if (resolvedMode == nullptr && targetModeSet != nullptr && !std::isnan(newBitrate.get())) {
+                if (!std::isnan(newBandwidth.get()))
+                    resolvedMode = targetModeSet->getMode(newBitrate, newBandwidth);
+                else
+                    resolvedMode = targetModeSet->getMode(newBitrate);
+            }
             if (targetModeSet != nullptr && !strcmp(targetModeSet->getName(), "n(mixed-2.4Ghz)") &&
-                    ((targetModeBandwidth == MHz(40)) ||
+                    ((targetBandwidth == MHz(40)) ||
                      (resolvedMode != nullptr && dynamic_cast<const Ieee80211HtMode *>(resolvedMode) != nullptr &&
                       resolvedMode->getDataMode()->getBandwidth() == MHz(40))) &&
                     targetSecondaryChannelOffset == IEEE80211_SECONDARY_CHANNEL_NONE)
@@ -169,10 +170,6 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
             bool publishModeSet = targetModeSet != this->modeSet || targetBand != this->band ||
                     !std::isnan(newBandwidth.get()) || !std::isnan(newBitrate.get()) || *requestedOpMode;
 
-            if (!std::isnan(newBandwidth.get()))
-                setBandwidth(newBandwidth);
-            if (!std::isnan(newBitrate.get()))
-                setBitrate(newBitrate);
             if (targetChannelNumber != -1 &&
                     (currentChannel == nullptr || targetBand != this->band || targetChannelNumber != currentChannel->getChannelNumber() ||
                      targetSecondaryChannelOffset != currentChannel->getSecondaryChannelOffset()))
@@ -180,12 +177,10 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
             else if (targetBand != this->band)
                 setBand(targetBand);
             this->opMode = targetOpMode;
-            if (resolvedMode != nullptr)
-                setMode(resolvedMode);
             if (publishModeSet && targetModeSet != nullptr)
                 setModeSet(targetModeSet);
-            delete message;
-            return;
+            if (resolvedMode != nullptr)
+                setMode(resolvedMode);
         }
     }
     FlatRadioBase::handleUpperCommand(message);
