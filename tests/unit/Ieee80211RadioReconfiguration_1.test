@@ -1,0 +1,68 @@
+%description:
+Validate IEEE 802.11 radio reconfiguration: mode resolution with fixed bitrates and channel switching.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+{
+    // Validate Mode resolution for fixed bitrates in g(mixed)
+    const Ieee80211ModeSet *modeSetG = Ieee80211ModeSet::getModeSet("g(mixed)");
+    ASSERT(modeSetG != nullptr);
+
+    // 54 Mbps OFDM rate in g(mixed) has 20 MHz bandwidth
+    const IIeee80211Mode *mode54 = modeSetG->getMode(bps(54000000));
+    ASSERT(mode54 != nullptr);
+    ASSERT(mode54->getDataMode()->getBandwidth() == MHz(20));
+    ASSERT(mode54->getDataMode()->getNetBitrate() == bps(54000000));
+    EV << "Resolved 54Mbps mode bitrate=" << mode54->getDataMode()->getNetBitrate().get() << " bw=" << mode54->getDataMode()->getBandwidth().get() << "\n";
+
+    // 11 Mbps DSSS/CCK rate has 22 MHz bandwidth
+    const IIeee80211Mode *mode11 = modeSetG->getMode(bps(11000000));
+    ASSERT(mode11 != nullptr);
+    ASSERT(mode11->getDataMode()->getBandwidth() == MHz(22));
+    ASSERT(mode11->getDataMode()->getNetBitrate() == bps(11000000));
+    EV << "Resolved 11Mbps mode bitrate=" << mode11->getDataMode()->getNetBitrate().get() << " bw=" << mode11->getDataMode()->getBandwidth().get() << "\n";
+
+    // Mode resolution for HT MCS rates in n(mixed-2.4Ghz)
+    const Ieee80211ModeSet *modeSetN = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+    ASSERT(modeSetN != nullptr);
+
+    const IIeee80211Mode *modeMcs7_20 = modeSetN->getMode(bps(65000000), Hz(MHz(20)), -1);
+    ASSERT(modeMcs7_20 != nullptr);
+    ASSERT(modeMcs7_20->getDataMode()->getBandwidth() == MHz(20));
+    ASSERT(modeMcs7_20->getDataMode()->getNetBitrate() == bps(65000000));
+    EV << "Resolved MCS7 20MHz bitrate=" << modeMcs7_20->getDataMode()->getNetBitrate().get() << " bw=" << modeMcs7_20->getDataMode()->getBandwidth().get() << "\n";
+
+    const IIeee80211Mode *modeMcs7_40 = modeSetN->getMode(bps(135000000), Hz(MHz(40)), -1);
+    ASSERT(modeMcs7_40 != nullptr);
+    ASSERT(modeMcs7_40->getDataMode()->getBandwidth() == MHz(40));
+    ASSERT(modeMcs7_40->getDataMode()->getNetBitrate() == bps(135000000));
+    EV << "Resolved MCS7 40MHz bitrate=" << modeMcs7_40->getDataMode()->getNetBitrate().get() << " bw=" << modeMcs7_40->getDataMode()->getBandwidth().get() << "\n";
+
+    // Validate ConfigureRadioCommand structure
+    Ieee80211ConfigureRadioCommand cmd;
+    cmd.setChannelNumber(4);
+    ASSERT(cmd.getChannelNumber() == 4);
+    ASSERT(std::isnan(cmd.getBitrate().get()));
+    ASSERT(cmd.getMode() == nullptr);
+    EV << "ConfigureRadioCommand channel change only verified.\n";
+}
+
+EV << ".\n";
+
+%contains: stdout
+Resolved 54Mbps mode bitrate=5.4e+07 bw=2e+07
+Resolved 11Mbps mode bitrate=1.1e+07 bw=2.2e+07
+Resolved MCS7 20MHz bitrate=6.5e+07 bw=2e+07
+Resolved MCS7 40MHz bitrate=1.35e+08 bw=4e+07
+ConfigureRadioCommand channel change only verified.
+.
