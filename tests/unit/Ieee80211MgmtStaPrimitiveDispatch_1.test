@@ -108,6 +108,15 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         processAssociationResponse(packet, header, reassociation);
     }
 
+    void deliverPendingAssociationResponse(bool reassociation)
+    {
+        auto packet = new Packet("PendingAssocResp");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        auto ap = static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer());
+        header->setTransmitterAddress(ap->address);
+        processAssociationResponse(packet, header, reassociation);
+    }
+
   protected:
     virtual void processAssociateCommand(Ieee80211Prim_AssociateRequest *ctrl) override
     {
@@ -201,17 +210,36 @@ mgmt.deliverLateAssociationResponse(false);
 ASSERT(mgmt.associateConfirms == 1);
 ASSERT(mgmt.reassociateConfirms == 0);
 
+// IEEE Std 802.11-2024, 11.3.5.2 and 11.3.5.4 correlate the response
+// procedure with the corresponding association or reassociation request.
+mgmt.prepareAssociationTimeout(&timeoutAp, false);
+mgmt.deliverPendingAssociationResponse(true);
+ASSERT(!mgmt.canStartAnotherAssociation());
+ASSERT(!mgmt.isReassociationInProgress());
+ASSERT(mgmt.associateConfirms == 1);
+ASSERT(mgmt.reassociateConfirms == 0);
+mgmt.deliverAssociationTimeout();
+ASSERT(mgmt.canStartAnotherAssociation());
+ASSERT(mgmt.associateConfirms == 2);
+ASSERT(mgmt.reassociateConfirms == 0);
+ASSERT(mgmt.lastAssociationResult == PRC_TIMEOUT);
+
 mgmt.prepareAssociationTimeout(&timeoutAp, true);
+mgmt.deliverPendingAssociationResponse(false);
+ASSERT(!mgmt.canStartAnotherAssociation());
+ASSERT(mgmt.isReassociationInProgress());
+ASSERT(mgmt.associateConfirms == 2);
+ASSERT(mgmt.reassociateConfirms == 0);
 mgmt.deliverAssociationTimeout();
 ASSERT(mgmt.canStartAnotherAssociation());
 ASSERT(!mgmt.isReassociationInProgress());
-ASSERT(mgmt.associateConfirms == 1);
+ASSERT(mgmt.associateConfirms == 2);
 ASSERT(mgmt.reassociateConfirms == 1);
 ASSERT(mgmt.lastReassociationResult == PRC_TIMEOUT);
 ASSERT(mgmt.reassociationFailures == 1);
 
 mgmt.deliverLateAssociationResponse(true);
-ASSERT(mgmt.associateConfirms == 1);
+ASSERT(mgmt.associateConfirms == 2);
 ASSERT(mgmt.reassociateConfirms == 1);
 
 mgmt.prepareAssociationTimeoutInApList(otherApAddress, true);

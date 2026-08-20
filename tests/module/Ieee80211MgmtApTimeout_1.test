@@ -64,14 +64,31 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         return aid;
     }
 
-    void finishSuccessfulReassociation(const MacAddress& address)
+    short startPendingAssociatedReassociation(const MacAddress& address)
     {
+        Enter_Method("startPendingAssociatedReassociation");
+        auto& sta = staList[address];
+        sta.address = address;
+        clearPendingAssociation(&sta);
+        short aid = mib->allocateAssociationId(address);
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
+        ASSERT(mib->reserveAssociationId(address) == aid);
+        sta.pendingAssociationSuccessful = true;
+        sta.pendingAssociationTransactionId = createAssociationTransactionId();
+        startAssociationResponseTimeout(&sta);
+        return aid;
+    }
+
+    void finishSuccessfulReassociation(const MacAddress& address, uint64_t transactionId = 0)
+    {
+        if (transactionId == 0)
+            transactionId = staList.at(address).pendingAssociationTransactionId;
         auto response = new Packet("ReassocResp-OK");
         auto responseHeader = makeShared<Ieee80211MgmtHeader>();
         responseHeader->setType(ST_REASSOCIATIONRESPONSE);
         responseHeader->setReceiverAddress(address);
         response->insertAtBack(responseHeader);
-        response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(staList.at(address).pendingAssociationTransactionId);
+        response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(transactionId);
 
         FrameSequenceContext context(MacAddress::UNSPECIFIED_ADDRESS, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
         auto transmitStep = new TransmitStep(response, SIMTIME_ZERO);
@@ -86,11 +103,31 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         delete response;
     }
 
+    void deauthenticate(const MacAddress& address)
+    {
+        Enter_Method("deauthenticate");
+        auto packet = new Packet("Deauth");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleDeauthenticationFrame(packet, header);
+    }
+
+    void disassociate(const MacAddress& address)
+    {
+        Enter_Method("disassociate");
+        auto packet = new Packet("Disassoc");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleDisassociationFrame(packet, header);
+    }
+
     bool hasPendingAssociation(const MacAddress& address) const
     {
         auto it = staList.find(address);
         return it != staList.end() && it->second.pendingAssociationTransactionId != 0;
     }
+
+    uint64_t getPendingAssociationTransactionId(const MacAddress& address) const { return staList.at(address).pendingAssociationTransactionId; }
 
     short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
     void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
@@ -109,8 +146,10 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
   protected:
     TestIeee80211MgmtAp *mgmt = nullptr;
     MacAddress expectedAssociatedAddress;
+    MacAddress expectedDisassociatedAddress;
     short expectedAssociationId = 0;
     int associationNotifications = 0;
+    int disassociationNotifications = 0;
 
   public:
     Ieee80211MgmtApTimeoutTest() : cSimpleModule(65536) {}
@@ -120,17 +159,25 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
     {
         mgmt = check_and_cast<TestIeee80211MgmtAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
         mgmt->subscribe(l2ApAssociatedSignal, this);
+        mgmt->subscribe(l2ApDisassociatedSignal, this);
     }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
     {
         ASSERT(source == mgmt);
-        ASSERT(signalID == l2ApAssociatedSignal);
         const auto& notification = check_and_cast<Ieee80211MgmtAp::NotificationInfoSta *>(value);
-        ASSERT(notification->getStaAddress() == expectedAssociatedAddress);
-        ASSERT(mgmt->getStationStatus(expectedAssociatedAddress) == Ieee80211Mib::ASSOCIATED);
-        ASSERT(mgmt->getCommittedAssociationId(expectedAssociatedAddress) == expectedAssociationId);
-        associationNotifications++;
+        if (signalID == l2ApAssociatedSignal) {
+            ASSERT(notification->getStaAddress() == expectedAssociatedAddress);
+            ASSERT(mgmt->getStationStatus(expectedAssociatedAddress) == Ieee80211Mib::ASSOCIATED);
+            ASSERT(mgmt->getCommittedAssociationId(expectedAssociatedAddress) == expectedAssociationId);
+            associationNotifications++;
+        }
+        else {
+            ASSERT(signalID == l2ApDisassociatedSignal);
+            ASSERT(notification->getStaAddress() == expectedDisassociatedAddress);
+            ASSERT(!mgmt->hasPendingAssociation(expectedDisassociatedAddress));
+            disassociationNotifications++;
+        }
     }
 
     virtual void activity() override
@@ -180,6 +227,30 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
         mgmt->finishSuccessfulReassociation(expectedAssociatedAddress);
         ASSERT(associationNotifications == 1);
         ASSERT(!mgmt->hasPendingAssociation(expectedAssociatedAddress));
+
+        MacAddress deauthenticated("02:00:00:00:00:07");
+        mgmt->startPendingAssociatedReassociation(deauthenticated);
+        uint64_t staleDeauthenticationTransaction = mgmt->getPendingAssociationTransactionId(deauthenticated);
+        expectedDisassociatedAddress = deauthenticated;
+        mgmt->deauthenticate(deauthenticated);
+        ASSERT(disassociationNotifications == 1);
+        ASSERT(!mgmt->hasPendingAssociation(deauthenticated));
+        ASSERT(!mgmt->hasCommittedAssociationId(deauthenticated));
+        ASSERT(mgmt->getStationStatus(deauthenticated) == Ieee80211Mib::NOT_AUTHENTICATED);
+        mgmt->finishSuccessfulReassociation(deauthenticated, staleDeauthenticationTransaction);
+        ASSERT(!mgmt->hasCommittedAssociationId(deauthenticated));
+
+        MacAddress disassociated("02:00:00:00:00:08");
+        mgmt->startPendingAssociatedReassociation(disassociated);
+        uint64_t staleDisassociationTransaction = mgmt->getPendingAssociationTransactionId(disassociated);
+        expectedDisassociatedAddress = disassociated;
+        mgmt->disassociate(disassociated);
+        ASSERT(disassociationNotifications == 2);
+        ASSERT(!mgmt->hasPendingAssociation(disassociated));
+        ASSERT(!mgmt->hasCommittedAssociationId(disassociated));
+        ASSERT(mgmt->getStationStatus(disassociated) == Ieee80211Mib::AUTHENTICATED);
+        mgmt->finishSuccessfulReassociation(disassociated, staleDisassociationTransaction);
+        ASSERT(!mgmt->hasCommittedAssociationId(disassociated));
 
         std::cout << "AP association response timeout lifecycle verified.\n";
         std::cout << "AP reassociation notification commit ordering verified.\n";

@@ -678,6 +678,16 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         return;
     }
 
+    // IEEE Std 802.11-2024, 11.3.5.2 and 11.3.5.4: process only the response
+    // corresponding to the association or reassociation procedure in progress.
+    if (reassociation != reassociationInProgress) {
+        EV_INFO << "Association response subtype does not match the pending "
+                << (reassociationInProgress ? "reassociation" : "association")
+                << " attempt, ignoring frame\n";
+        delete packet;
+        return;
+    }
+
     MacAddress address = header->getTransmitterAddress();
     ApInfo *ap = static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer());
     if (ap == nullptr || ap->address != address) {
