@@ -1,0 +1,100 @@
+%description:
+Validate IEEE 802.11n HT40 Clear Channel Assessment (CCA) sub-band partial-overlap energy apportioning and sensitivity sensing.
+
+%includes:
+#include "inet/common/Units.h"
+#include "inet/common/math/Functions.h"
+#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarReceptionAnalogModel.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+static W computeApportionedPower(const BandListening& listening, const INarrowbandSignalAnalogModel& signal, W signalPower)
+{
+    auto listeningMin = listening.getCenterFrequency() - listening.getBandwidth() / 2;
+    auto listeningMax = listening.getCenterFrequency() + listening.getBandwidth() / 2;
+    auto signalMin = signal.getCenterFrequency() - signal.getBandwidth() / 2;
+    auto signalMax = signal.getCenterFrequency() + signal.getBandwidth() / 2;
+    auto overlapMin = std::max(listeningMin, signalMin);
+    auto overlapMax = std::min(listeningMax, signalMax);
+    if (overlapMin < overlapMax && signal.getBandwidth() > Hz(0)) {
+        double fraction = (overlapMax - overlapMin).get() / signal.getBandwidth().get();
+        return signalPower * fraction;
+    }
+    return W(0);
+}
+
+%activity:
+{
+    const IIeee80211Band *band24 = Ieee80211CompliantBands::getBand("2.4 GHz");
+    ASSERT(band24 != nullptr);
+
+    // Channel 0 (2412 MHz) HT40+ (secondary above, bonded = 2422 MHz, span = [2402, 2442] MHz)
+    Ieee80211Channel ch0Above(band24, 0, IEEE80211_SECONDARY_CHANNEL_ABOVE);
+    Hz primaryCenter = ch0Above.getCenterFrequency();
+    Hz secondaryCenter = ch0Above.getSecondaryCenterFrequency();
+    Hz bondedCenter = ch0Above.getBondedCenterFrequency();
+
+    BandListening primaryListening(nullptr, 0, 1, Coord::ZERO, Coord::ZERO, primaryCenter, MHz(20));
+    BandListening secondaryListening(nullptr, 0, 1, Coord::ZERO, Coord::ZERO, secondaryCenter, MHz(20));
+
+    // Sensitivities per IEEE Std 802.11-2024 Clause 19.3.19.6
+    W htCca20 = mW(math::dBmW2mW(-82.0));
+    W htCca40 = mW(math::dBmW2mW(-79.0));
+    W htCcaEd = mW(math::dBmW2mW(-62.0));
+
+    // 1. Bonded 40 MHz transmission at -60 dBm (span [2402, 2442] MHz)
+    W p40 = mW(math::dBmW2mW(-60.0));
+    ScalarReceptionAnalogModel bondedSignal(0, 0, 1, bondedCenter, MHz(40), p40);
+
+    W primaryApportioned = computeApportionedPower(primaryListening, bondedSignal, p40);
+    W secondaryApportioned = computeApportionedPower(secondaryListening, bondedSignal, p40);
+
+    // Each 20 MHz slice receives 50% of the 40 MHz bonded power
+    ASSERT(fabs((primaryApportioned - p40 * 0.5).get()) < 1e-12);
+    ASSERT(fabs((secondaryApportioned - p40 * 0.5).get()) < 1e-12);
+    ASSERT(fabs((primaryApportioned + secondaryApportioned - p40).get()) < 1e-12);
+
+    // Since p40 = -60 dBm, 50% power = -63.01 dBm (< htCcaEd = -62 dBm)
+    ASSERT(primaryApportioned < htCcaEd);
+    ASSERT(secondaryApportioned < htCcaEd);
+
+    // 2. High-power 40 MHz transmission at -55 dBm -> apportioned = -58.01 dBm (>= htCcaEd)
+    W p40_high = mW(math::dBmW2mW(-55.0));
+    ScalarReceptionAnalogModel bondedHighSignal(0, 0, 1, bondedCenter, MHz(40), p40_high);
+    W primaryHighApportioned = computeApportionedPower(primaryListening, bondedHighSignal, p40_high);
+    ASSERT(primaryHighApportioned >= htCcaEd);
+
+    // 3. Primary 20 MHz signal (span [2402, 2422] MHz)
+    W p20 = mW(math::dBmW2mW(-75.0));
+    ScalarReceptionAnalogModel primarySignal(0, 0, 1, primaryCenter, MHz(20), p20);
+    W primaryFromPrimary = computeApportionedPower(primaryListening, primarySignal, p20);
+    W secondaryFromPrimary = computeApportionedPower(secondaryListening, primarySignal, p20);
+    ASSERT(fabs((primaryFromPrimary - p20).get()) < 1e-12);
+    ASSERT(secondaryFromPrimary == W(0));
+
+    // 4. Partially overlapping 20 MHz signal on Channel 2 (center 2417 MHz, span [2407, 2427] MHz)
+    ScalarReceptionAnalogModel ch2Signal(0, 0, 1, Hz(2417000000.0), MHz(20), p20);
+    W primaryFromCh2 = computeApportionedPower(primaryListening, ch2Signal, p20);
+    W secondaryFromCh2 = computeApportionedPower(secondaryListening, ch2Signal, p20);
+    // Overlap with primary [2402, 2422]: [2407, 2422] = 15 MHz (75%)
+    ASSERT(fabs((primaryFromCh2 - p20 * 0.75).get()) < 1e-12);
+    // Overlap with secondary [2422, 2442]: [2422, 2427] = 5 MHz (25%)
+    ASSERT(fabs((secondaryFromCh2 - p20 * 0.25).get()) < 1e-12);
+    ASSERT(fabs((primaryFromCh2 + secondaryFromCh2 - p20).get()) < 1e-12);
+
+    EV << "HT40 CCA sub-band partial-overlap power apportioning PASSED.\n";
+}
+
+EV << ".\n";
+
+%contains: stdout
+HT40 CCA sub-band partial-overlap power apportioning PASSED.
+.
