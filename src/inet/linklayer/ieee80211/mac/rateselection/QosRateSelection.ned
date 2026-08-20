@@ -34,10 +34,10 @@ simple QosRateSelection extends SimpleModule
         // a configured HT bitrate is an upper bound mapped to the highest mandatory
         // non-HT rate at or below it; it does not select an exact HT BlockAck PPDU.
         double responseBlockAckFrameBitrate @unit(bps) = default(-1bps);
-        // -1 selects the standard-derived automatic response. A configured HT value is a deliberate
-        // model override translated only to HT-mixed while preserving the resolved configured mode's
-        // MCS, bandwidth, NSS, and GI; it can therefore bypass IEEE 802.11-2024
-        // 10.6.6.5.3/10.6.6.5.7 response constraints.
+        // -1 selects the standard-derived automatic response. A configured value must resolve to a
+        // selectable mode; for an HT RTS it must be HT and is translated to the corresponding HT-mixed
+        // CTS while preserving MCS, bandwidth, NSS, and GI. An explicitly configured HT value is a
+        // deliberate override and may bypass IEEE 802.11-2024 10.6.6.5.3/10.6.6.5.7 response constraints.
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
 
         double dataFrameBitrate @unit(bps) = default(-1bps); // Fastest

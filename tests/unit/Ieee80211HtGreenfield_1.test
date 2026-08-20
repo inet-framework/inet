@@ -5,6 +5,7 @@ preamble formats and timing, retain strict membership, and support the legacy
 
 %includes:
 #include <cstring>
+#include <string>
 
 #include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
@@ -57,6 +58,37 @@ static bool rejectsMandatoryLookup(const Ieee80211ModeSet *modeSet, const IIeee8
     catch (const cRuntimeError&) {
         return true;
     }
+}
+
+static bool rejectsLegacyConfiguredCts(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *htMode, const IIeee80211Mode *legacyMode)
+{
+    try {
+        modeSet->getControlResponseMode(htMode, legacyMode);
+        return false;
+    }
+    catch (const cRuntimeError& error) {
+        return std::string(error.getFormattedMessage()).find("HT RTS requires an HT-mixed CTS response") != std::string::npos;
+    }
+}
+
+static void assertTransmitterDurationDecomposition(const IIeee80211Mode *mode)
+{
+    auto duration = mode->getDuration(B(0));
+    auto preambleDuration = mode->getPreambleMode()->getDuration();
+    auto modeledDataDuration = mode->getDataMode()->getDuration(B(0));
+    bool headerIncludedInPreamble = duration == preambleDuration + modeledDataDuration;
+    auto headerDuration = headerIncludedInPreamble ? SIMTIME_ZERO : mode->getHeaderMode()->getDuration();
+    auto dataDuration = headerIncludedInPreamble ? modeledDataDuration : duration - headerDuration - preambleDuration;
+    ASSERT(preambleDuration >= SIMTIME_ZERO);
+    ASSERT(headerDuration >= SIMTIME_ZERO);
+    ASSERT(dataDuration >= SIMTIME_ZERO);
+    ASSERT(preambleDuration + headerDuration + dataDuration == duration);
+    if (dynamic_cast<const Ieee80211VhtMode *>(mode) != nullptr)
+        ASSERT(headerDuration == SIMTIME_ZERO);
+    if (dynamic_cast<const Ieee80211ErpOfdmMode *>(mode) != nullptr)
+        ASSERT(dataDuration > modeledDataDuration);
+    if (dynamic_cast<const Ieee80211OfdmMode *>(mode) != nullptr && dynamic_cast<const Ieee80211ErpOfdmMode *>(mode) == nullptr)
+        ASSERT(headerDuration > SIMTIME_ZERO);
 }
 
 %activity:
@@ -144,6 +176,7 @@ ASSERT(greenfieldProfile->supportsMode(greenfieldMcs8));
 // modelled, 10.6.6.5.3 selects mandatory one-stream MCS 0 for the CTS.
 ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMcs8) == mixedMode);
 ASSERT(greenfieldProfile->getControlResponseMode(greenfieldMcs8, greenfieldMode) == mixedMode);
+ASSERT(rejectsLegacyConfiguredCts(greenfieldProfile, greenfieldMode, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps));
 
 auto greenfieldMcs7 = Ieee80211HtCompliantModes::getCompliantMode(
         &Ieee80211HtmcsTable::htMcs7BW20MHz,
@@ -286,6 +319,8 @@ ASSERT(vhtGreenfield5GhzMode->getPreambleMode()->getPreambleFormat() == Ieee8021
 ASSERT(vhtMixed2GhzMode->getCenterFrequencyMode() == Ieee80211VhtMode::BAND_2_4GHZ);
 ASSERT(vhtMixed5GhzMode->getDuration(B(0)) == vhtMixed5GhzMode->getPreambleMode()->getDuration() + vhtMixed5GhzMode->getDataMode()->getDuration(B(0)));
 ASSERT(vhtMixed5GhzMode->getDataMode()->getDuration(B(0)) >= SIMTIME_ZERO);
+assertTransmitterDurationDecomposition(ofdmProfile->getMode(Mbps(6)));
+assertTransmitterDurationDecomposition(vhtMixed5GhzMode);
 
 auto erpMixedProfile = Ieee80211ModeSet::getModeSet("g(mixed)");
 auto erpOnlyProfile = Ieee80211ModeSet::getModeSet("g(erp)");
@@ -294,6 +329,7 @@ auto erpOnlyMode = &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode6Mbps;
 Ieee80211DsssOfdmMode dsssOfdmMode("dsss-ofdm", nullptr, nullptr, nullptr, nullptr, &Ieee80211OfdmCompliantModes::ofdmDataMode6MbpsCS20MHz);
 ASSERT(erpMixedProfile != nullptr);
 ASSERT(erpOnlyProfile != nullptr);
+assertTransmitterDurationDecomposition(erpMixedProfile->getMode(Mbps(6)));
 ASSERT(erpMixedMode != erpOnlyMode);
 ASSERT(erpMixedMode->getSlotTime() == SimTime(20, SIMTIME_US));
 ASSERT(erpOnlyMode->getSlotTime() == SimTime(9, SIMTIME_US));

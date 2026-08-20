@@ -119,6 +119,13 @@ Notable backward incompatible changes are the following:
    These changes are backward incompatible for C++ code that directly references
    the old combined ICMP error indication or tag types.
 
+7. 802.11n control-response rate selection
+
+   Ordinary ACK and Basic BlockAck responses in the n(mixed-2.4Ghz) profile now
+   use the mandatory non-HT fallback because BSSBasicRateSet is not modelled.
+   This can change airtime, timeout trajectories, throughput, and fingerprints
+   in existing simulations. An HT RTS continues to receive an HT-mixed CTS.
+
 Notable backward compatible changes are the following:
 
 1. IPv6 network configurator

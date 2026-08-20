@@ -58,6 +58,11 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     const IIeee80211Mode *getMode(int index) { return entries[index].mode; }
     bool isMandatory(int index) { return entries[index].isMandatory; }
 
+    // containsMode() covers entries selectable as the persistent operating mode
+    // (for example through Ieee80211Transmitter::setMode()). supportsMode()
+    // additionally covers immutable PHY capabilities that may be selected per
+    // packet through Ieee80211ModeReq, such as legacy control responses in a
+    // 2.4 GHz HT profile.
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
     bool supportsMode(const IIeee80211Mode *mode) const;
     bool getIsMandatory(const IIeee80211Mode *mode) const;
@@ -78,8 +83,12 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     const IIeee80211Mode *getSlowerMandatoryMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getFasterMandatoryMode(const IIeee80211Mode *mode) const;
 
-    // Automatic responses follow IEEE 802.11-2024 10.6.6.5.3/10.6.6.5.7. A
-    // configured HT mode is a deliberate override translated only to HT-mixed.
+    // Automatic responses follow IEEE 802.11-2024 10.6.6.5.3/10.6.6.5.7.
+    // A configured CTS mode must be selectable and, for an HT RTS, must be HT;
+    // it is translated only to the corresponding HT-mixed response. An explicitly
+    // configured HT mode is a deliberate override and may bypass those response
+    // constraints. A legacy configured CTS rate is rejected by rate-selection
+    // initialization, while this API keeps the direct HT/legacy combination fatal.
     const IIeee80211Mode *getControlResponseMode(const IIeee80211Mode *mode, const IIeee80211Mode *configuredMode = nullptr) const;
     const IIeee80211Mode *getMandatoryControlResponseMode(const IIeee80211Mode *mode) const;
     // 2.4 GHz HT modes are converted to non-HT responses. With mandatory=false,

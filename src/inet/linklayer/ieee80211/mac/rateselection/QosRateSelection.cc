@@ -16,6 +16,20 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+static const IIeee80211Mode *resolveConfiguredResponseCtsFrameMode(const Ieee80211ModeSet *modeSet, double bitrate, const char *modulePath)
+{
+    if (bitrate == -1)
+        return nullptr;
+    try {
+        return modeSet->getMode(bps(bitrate));
+    }
+    catch (const cRuntimeError& error) {
+        throw cRuntimeError("%s has invalid responseCtsFrameBitrate=%g bps for operation mode '%s'; "
+                "the configured CTS rate must resolve to a selectable mode (HT RTS responses require an HT mode): %s",
+                modulePath, bitrate, modeSet->getName(), error.getFormattedMessage().c_str());
+    }
+}
+
 Define_Module(QosRateSelection);
 
 void QosRateSelection::initialize(int stage)
@@ -46,7 +60,7 @@ void QosRateSelection::resolveConfiguredModes(const Ieee80211ModeSet *newModeSet
     double responseBlockAckFrameBitrate = par("responseBlockAckFrameBitrate");
     auto newResponseBlockAckFrameMode = responseBlockAckFrameBitrate == -1 ? nullptr : newModeSet->getMode(bps(responseBlockAckFrameBitrate));
     double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
-    auto newResponseCtsFrameMode = responseCtsFrameBitrate == -1 ? nullptr : newModeSet->getMode(bps(responseCtsFrameBitrate));
+    auto newResponseCtsFrameMode = resolveConfiguredResponseCtsFrameMode(newModeSet, responseCtsFrameBitrate, getFullPath().c_str());
     auto newFastestMandatoryMode = newModeSet->getFastestMandatoryMode();
 
     modeSet = newModeSet;
