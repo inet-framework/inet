@@ -82,8 +82,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     // configured HT mode is a deliberate override translated only to HT-mixed.
     const IIeee80211Mode *getControlResponseMode(const IIeee80211Mode *mode, const IIeee80211Mode *configuredMode = nullptr) const;
     const IIeee80211Mode *getMandatoryControlResponseMode(const IIeee80211Mode *mode) const;
-    // Greenfield HT modes are converted to non-HT responses; mixed-profile HT
-    // modes retain the selected HT format. mandatory=false preserves the rate.
+    // 2.4 GHz HT modes are converted to non-HT responses. With mandatory=false,
+    // the input bitrate is used as a ceiling for selecting that non-HT mode.
     const IIeee80211Mode *getNonHtControlResponseMode(const IIeee80211Mode *mode, bool mandatory = true) const;
 
     static const Ieee80211ModeSet *findModeSet(const char *mode);

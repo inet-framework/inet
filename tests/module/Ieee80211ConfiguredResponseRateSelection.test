@@ -1,7 +1,6 @@
 %description:
-Checks through the public rate-selection API that Greenfield ACK/BlockAck responses use
-non-HT rates, mixed responses retain HT rates, and configured HT CTS rates use exact
-HT-mixed counterparts.
+Checks through the public rate-selection API that 2.4 GHz HT ACK/BlockAck responses use
+non-HT rates and configured HT CTS rates use exact HT-mixed counterparts.
 
 %file: Test.cc
 #include <cstring>
@@ -100,9 +99,9 @@ class ConfiguredResponseProbe : public cSimpleModule
 
         auto basicBlockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
         assertNonHtResponse("QoS Basic BlockAck", qosRateSelection->computeResponseBlockAckFrameMode(&packet, basicBlockAckReq));
-        assertHtMixedResponse("Dynamic mixed QoS ACK", dynamicQosRateSelection->computeResponseAckFrameMode(&mixedPacket, nullptr));
+        assertNonHtResponse("Dynamic mixed QoS ACK", dynamicQosRateSelection->computeResponseAckFrameMode(&mixedPacket, nullptr));
         assertHtMixedResponse("Dynamic mixed QoS CTS", dynamicQosRateSelection->computeResponseCtsFrameMode(&mixedPacket, nullptr));
-        assertHtMixedResponse("Dynamic mixed QoS Basic BlockAck", dynamicQosRateSelection->computeResponseBlockAckFrameMode(&mixedPacket, basicBlockAckReq));
+        assertNonHtResponse("Dynamic mixed QoS Basic BlockAck", dynamicQosRateSelection->computeResponseBlockAckFrameMode(&mixedPacket, basicBlockAckReq));
         auto optionalHtMode = Ieee80211HtCompliantModes::getCompliantMode(
                 &Ieee80211HtmcsTable::htMcs8BW20MHz,
                 Ieee80211HtMode::BAND_2_4GHZ,
@@ -130,9 +129,9 @@ class ConfiguredResponseProbe : public cSimpleModule
         ASSERT(qosRateSelection->computeMode(&dataPacket, dataHeader, nullptr) == mixedSourceMode);
         assertHtMixedResponse("Rebound DCF CTS mixed", dcfRateSelection->computeResponseCtsFrameMode(&mixedPacket, nullptr));
         assertHtMixedResponse("Rebound QoS CTS mixed", qosRateSelection->computeResponseCtsFrameMode(&mixedPacket, nullptr));
-        assertHtMixedResponse("Rebound DCF ACK mixed", dcfRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
-        assertHtMixedResponse("Rebound QoS ACK mixed", qosRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
-        assertHtMixedResponse("Rebound QoS BlockAck mixed", qosRateSelection->computeResponseBlockAckFrameMode(nullptr, basicBlockAckReq));
+        assertNonHtResponse("Rebound DCF ACK mixed", dcfRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
+        assertNonHtResponse("Rebound QoS ACK mixed", qosRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
+        assertNonHtResponse("Rebound QoS BlockAck mixed", qosRateSelection->computeResponseBlockAckFrameMode(nullptr, basicBlockAckReq));
         wlan->emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("n(greenfield-2.4Ghz)")));
         ASSERT(dcfRateSelection->computeMode(&dataPacket, dataHeader) == sourceMode);
         ASSERT(qosRateSelection->computeMode(&dataPacket, dataHeader, nullptr) == sourceMode);
@@ -142,7 +141,7 @@ class ConfiguredResponseProbe : public cSimpleModule
         assertNonHtResponse("Rebound QoS ACK Greenfield", qosRateSelection->computeResponseAckFrameMode(nullptr, nullptr));
         assertNonHtResponse("Rebound QoS BlockAck Greenfield", qosRateSelection->computeResponseBlockAckFrameMode(nullptr, basicBlockAckReq));
 
-        std::cout << "Mixed ACK/Basic BlockAck remain HT while Greenfield responses use non-HT 6 Mbps; configured HT CTS uses the exact HT-mixed MCS override and requires an eliciting mode tag.\n";
+        std::cout << "Mixed and Greenfield ACK/Basic BlockAck use non-HT 6 Mbps; configured HT CTS uses the exact HT-mixed MCS override and requires an eliciting mode tag.\n";
     }
 };
 
@@ -204,4 +203,4 @@ sim-time-limit = 1s
 %extraargs: -c ConfiguredResponses
 
 %contains: stdout
-Mixed ACK/Basic BlockAck remain HT while Greenfield responses use non-HT 6 Mbps; configured HT CTS uses the exact HT-mixed MCS override and requires an eliciting mode tag.
+Mixed and Greenfield ACK/Basic BlockAck use non-HT 6 Mbps; configured HT CTS uses the exact HT-mixed MCS override and requires an eliciting mode tag.

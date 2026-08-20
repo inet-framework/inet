@@ -108,25 +108,28 @@ static std::vector<Ieee80211ModeSet::Entry> createHtSupportedEntries(Ieee80211Ht
     if (preambleFormat == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD) {
         auto mixedEntries = createHtEntries(Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED);
         result.insert(result.end(), mixedEntries.begin(), mixedEntries.end());
-        // Supplement the Greenfield profile with the HT-mixed and mandatory
-        // Clause 16/18 capabilities required by IEEE 802.11-2024 19.1.1 and
-        // 19.1.4. The legacy mixed profile intentionally remains selectable-only
-        // to preserve its established rate-selection and mode-membership contract.
-        result.insert(result.end(), {
-            { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
-            { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
-            { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
-            { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps },
-            { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps },
-            { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
-            { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps },
-            { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode18Mbps },
-            { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps },
-            { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps },
-            { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps },
-            { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps },
-        });
     }
+    // Every 2.4 GHz HT STA supports the mandatory Clause 16/18 modes, and a
+    // Greenfield STA additionally supports HT-mixed PPDUs (IEEE 802.11-2024
+    // 19.1.1 and 19.1.4). These are supplementary capabilities rather than
+    // selectable operating modes, so they are kept out of createHtEntries().
+    result.insert(result.end(), {
+        { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
+        { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode2MbpsShortPreamble },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckShortPreamble },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode6Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode9Mbps },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
+        { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckShortPreamble },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode18Mbps },
+        { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps },
+        { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps },
+    });
     return result;
 }
 

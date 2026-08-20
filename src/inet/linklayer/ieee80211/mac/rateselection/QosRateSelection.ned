@@ -26,7 +26,13 @@ simple QosRateSelection extends SimpleModule
 
         double multicastFrameBitrate @unit(bps) = default(-1bps);
 
+        // -1 selects the standard-derived automatic response. In a 2.4 GHz HT profile,
+        // a configured HT bitrate is an upper bound mapped to the highest mandatory
+        // non-HT rate at or below it; it does not select an exact HT ACK PPDU.
         double responseAckFrameBitrate @unit(bps) = default(-1bps);
+        // -1 selects the standard-derived automatic response. In a 2.4 GHz HT profile,
+        // a configured HT bitrate is an upper bound mapped to the highest mandatory
+        // non-HT rate at or below it; it does not select an exact HT BlockAck PPDU.
         double responseBlockAckFrameBitrate @unit(bps) = default(-1bps);
         // -1 selects the standard-derived automatic response. A configured HT value is a deliberate
         // model override translated only to HT-mixed while preserving the resolved configured mode's
@@ -42,4 +48,3 @@ simple QosRateSelection extends SimpleModule
         double controlFrameBitrate @unit(bps) = default(-1bps);
         @display("i=block/cogwheel");
 }
-
