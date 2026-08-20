@@ -32,18 +32,31 @@ std::ostream& ScalarSnir::printToStream(std::ostream& stream, int level, int evF
     return stream;
 }
 
+static double computeBandwidthScale(const ScalarReceptionAnalogModel *signalModel, const ScalarNoise *scalarNoise)
+{
+    Hz signalBw = signalModel->getBandwidth();
+    Hz noiseBw = scalarNoise->getBandwidth();
+    if (signalBw > Hz(0) && noiseBw > signalBw)
+        return (signalBw / noiseBw).get<unit>();
+    return 1.0;
+}
+
 double ScalarSnir::computeMin() const
 {
     auto scalarSignalAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getAnalogModel());
     const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
-    return (scalarSignalAnalogModel->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get<unit>();
+    double bwScale = computeBandwidthScale(scalarSignalAnalogModel, scalarNoise);
+    W effectiveNoise = scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime()) * bwScale;
+    return (scalarSignalAnalogModel->getPower() / effectiveNoise).get<unit>();
 }
 
 double ScalarSnir::computeMax() const
 {
     auto scalarSignalAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getAnalogModel());
     const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
-    return (scalarSignalAnalogModel->getPower() / scalarNoise->computeMinPower(reception->getStartTime(), reception->getEndTime())).get<unit>();
+    double bwScale = computeBandwidthScale(scalarSignalAnalogModel, scalarNoise);
+    W effectiveNoise = scalarNoise->computeMinPower(reception->getStartTime(), reception->getEndTime()) * bwScale;
+    return (scalarSignalAnalogModel->getPower() / effectiveNoise).get<unit>();
 }
 
 double ScalarSnir::getMin() const
@@ -71,12 +84,13 @@ double ScalarSnir::computeMean(simtime_t startTime, simtime_t endTime) const
 {
     auto scalarSignalAnalogModel = check_and_cast<const ScalarReceptionAnalogModel *>(reception->getAnalogModel());
     const ScalarNoise *scalarNoise = check_and_cast<const ScalarNoise *>(noise);
+    double bwScale = computeBandwidthScale(scalarSignalAnalogModel, scalarNoise);
     const auto& signalPowerFunction = makeShared<math::ConstantFunction<W, math::Domain<simtime_t>>>(scalarSignalAnalogModel->getPower());
     const auto& snirFunction = signalPowerFunction->divide(scalarNoise->getPower());
     math::Point<simtime_t> startPoint(startTime);
     math::Point<simtime_t> endPoint(endTime);
     math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b0, 0b0);
-    return snirFunction->getMean(interval);
+    return snirFunction->getMean(interval) / bwScale;
 }
 
 } // namespace physicallayer
