@@ -54,17 +54,16 @@ const INoise *IsotropicDimensionalBackgroundNoise::computeNoise(const IListening
     if (!std::isnan(powerSpectralDensity.get()))
         noisePowerSpectralDensity = powerSpectralDensity;
     else {
-        if (std::isnan(bandwidth.get()))
-            bandwidth = listeningBandwidth;
-        else if (bandwidth != listeningBandwidth)
-            throw cRuntimeError("The powerSpectralDensity parameter is not specified and the power parameter cannot be used, because background noise bandwidth doesn't match listening bandwidth");
-        // NOTE: dividing by the bandwidth here makes sure the total background noise power in the listening band is the given power
-        noisePowerSpectralDensity = power / bandwidth;
+        Hz noiseBandwidth = std::isnan(bandwidth.get()) ? listeningBandwidth : bandwidth;
+        // A scalar power parameter denotes integrated power over the
+        // configured band. Keep its equivalent flat PSD when a per-channel
+        // CCA query selects a narrower HT40 slice.
+        noisePowerSpectralDensity = power / noiseBandwidth;
     }
     const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& powerFunction = makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(noisePowerSpectralDensity);
     const simtime_t startTime = listening->getStartTime();
     const simtime_t endTime = listening->getEndTime();
-    return new DimensionalNoise(startTime, endTime, centerFrequency, bandwidth, makeFirstQuadrantLimitedFunction(powerFunction));
+    return new DimensionalNoise(startTime, endTime, centerFrequency, listeningBandwidth, makeFirstQuadrantLimitedFunction(powerFunction));
 }
 
 } // namespace physicallayer
