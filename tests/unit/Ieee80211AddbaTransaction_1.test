@@ -412,6 +412,18 @@ class TestSignalListener : public cListener
     virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override { numSignals++; }
 };
 
+class TestPacketArrivalListener : public cListener
+{
+  public:
+    int numSignals = 0;
+    cGate *lastArrivalGate = nullptr;
+
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *value, cObject *) override {
+        numSignals++;
+        lastArrivalGate = check_and_cast<Packet *>(value)->getArrivalGate();
+    }
+};
+
 class TestOrderedSignalListener : public cListener
 {
   public:
@@ -3311,46 +3323,124 @@ auto deferredFrames = deferredInProgressFrames.releaseFrames();
 ASSERT(deferredFrames.size() == 1);
 delete deferredFrames.at(0);
 
-// A simulation-registered real queue records selected-dequeue residence and
-// emits its semantic pull exactly once.
-Packet *compoundPacket = nullptr;
+// A real queue with a downstream collector predicate-dequeues a non-front
+// packet, records its residence and semantic pull once, and animates it to the
+// collector while retaining the front packet.
 {
     TestPacketPulledListener pullListener;
-    auto leafQueue = createPacketQueue("selectedDequeueQueue");
+    TestPacketDropCallback removalCallback;
+    auto leafQueueModule = cModuleType::get("inet.queueing.queue.PacketQueue")->create("selectedDequeueQueue", this);
+    auto sinkModule = cModuleType::get("inet.queueing.sink.FullPacketSink")->create("selectedDequeueSink", this);
+    leafQueueModule->gate("out")->connectTo(sinkModule->gate("in"));
+    leafQueueModule->callInitialize();
+    sinkModule->callInitialize();
+    auto leafQueue = check_and_cast<queueing::PacketQueue *>(leafQueueModule);
     pullListener.leaf = leafQueue;
     leafQueue->subscribe(packetPulledSignal, &pullListener);
-    compoundPacket = new Packet("compoundPacket", makeQosHeader(peer1, 1, SequenceNumberCyclic(1)));
-    auto queueingTimeTag = compoundPacket->addRegionTag<QueueingTimeTag>();
+    leafQueue->addPacketCallback(&removalCallback);
+    auto frontPacket = new Packet("selectedDequeueFront", makeShared<ByteCountChunk>(B(1)));
+    auto selectedPacket = new Packet("selectedDequeueMatch", makeQosHeader(peer1, 1, SequenceNumberCyclic(1)));
+    auto queueingTimeTag = selectedPacket->addRegionTag<QueueingTimeTag>();
     queueingTimeTag->setBitTotalTimesArraySize(1);
     queueingTimeTag->setBitTotalTimes(0, 0);
     queueingTimeTag->setPacketTotalTimesArraySize(1);
     queueingTimeTag->setPacketTotalTimes(0, 0);
-    compoundPacket->addRegionTag<PacketEventTag>();
-    compoundPacket->setArrivalTime(simTime() - 1);
-    leafQueue->pushPacket(compoundPacket, nullptr);
-    auto dequeuedPacket = leafQueue->dequeuePacket([compoundPacket](const Packet *packet) { return packet == compoundPacket; });
-    ASSERT(dequeuedPacket == compoundPacket);
+    selectedPacket->addRegionTag<PacketEventTag>();
+    selectedPacket->setArrivalTime(simTime() - 1);
+    leafQueue->pushPacket(frontPacket, nullptr);
+    leafQueue->pushPacket(selectedPacket, nullptr);
+    auto dequeuedPacket = leafQueue->dequeuePacket([selectedPacket](const Packet *packet) { return packet == selectedPacket; });
+    ASSERT(dequeuedPacket == selectedPacket);
     int numQueuedEvents = 0;
-    compoundPacket->mapAllRegionTags<PacketEventTag>(b(0), compoundPacket->getTotalLength(), [&](b, b, const Ptr<const PacketEventTag>& tag) {
+    selectedPacket->mapAllRegionTags<PacketEventTag>(b(0), selectedPacket->getTotalLength(), [&](b, b, const Ptr<const PacketEventTag>& tag) {
         for (size_t i = 0; i < tag->getPacketEventsArraySize(); i++)
             if (tag->getPacketEvents(i)->getKind() == PEK_QUEUED)
                 numQueuedEvents++;
     });
     simtime_t totalQueueingTime = -1;
-    compoundPacket->mapAllRegionTags<QueueingTimeTag>(b(0), compoundPacket->getTotalLength(), [&](b, b, const Ptr<const QueueingTimeTag>& tag) {
+    selectedPacket->mapAllRegionTags<QueueingTimeTag>(b(0), selectedPacket->getTotalLength(), [&](b, b, const Ptr<const QueueingTimeTag>& tag) {
         ASSERT(tag->getPacketTotalTimesArraySize() == 1);
         totalQueueingTime = tag->getPacketTotalTimes(0);
     });
     ASSERT(numQueuedEvents == 1);
     ASSERT(totalQueueingTime == 1);
-    ASSERT(leafQueue->getNumPackets() == 0);
+    ASSERT(leafQueue->getNumPackets() == 1);
+    ASSERT(leafQueue->getPacket(0) == frontPacket);
     ASSERT(pullListener.numLeafPulls == 1);
+    ASSERT(removalCallback.numDequeuedPackets == 1);
+    ASSERT(selectedPacket->getArrivalGate() == sinkModule->gate("in"));
     leafQueue->unsubscribe(packetPulledSignal, &pullListener);
-    leafQueue->callFinish();
-    leafQueue->deleteModule();
-    compoundPacket = nullptr;
+    leafQueue->removePacketCallback(&removalCallback);
+    leafQueue->removePacket(frontPacket);
+    take(frontPacket);
+    take(selectedPacket);
+    delete frontPacket;
+    delete selectedPacket;
+    sinkModule->callFinish();
+    leafQueueModule->callFinish();
+    sinkModule->deleteModule();
+    leafQueueModule->deleteModule();
 }
-delete compoundPacket;
+
+// Predicate extraction through a concrete PacketFlowBase module processes a
+// non-front packet once. The queue animates it to the flow input before the
+// flow signals, and the flow then animates it to the final collector.
+{
+    TestPacketPulledListener pullListener;
+    TestPacketDropCallback removalCallback;
+    TestPacketArrivalListener flowInputListener;
+    TestPacketArrivalListener flowOutputListener;
+    auto leafQueueModule = cModuleType::get("inet.queueing.queue.PacketQueue")->create("selectedFlowLeaf", this);
+    auto gateModule = cModuleType::get("inet.queueing.gate.PacketGate")->create("selectedFlowGate", this);
+    auto sinkModule = cModuleType::get("inet.queueing.sink.FullPacketSink")->create("selectedFlowSink", this);
+    gateModule->par("initiallyOpen").setBoolValue(true);
+    gateModule->par("openTime").setDoubleValue(10);
+    gateModule->par("closeTime").setDoubleValue(20);
+    leafQueueModule->gate("out")->connectTo(gateModule->gate("in"));
+    gateModule->gate("out")->connectTo(sinkModule->gate("in"));
+    leafQueueModule->callInitialize();
+    gateModule->callInitialize();
+    sinkModule->callInitialize();
+    auto leafQueue = check_and_cast<queueing::PacketQueue *>(leafQueueModule);
+    auto packetGate = check_and_cast<queueing::PacketGate *>(gateModule);
+    auto packetExtractor = check_and_cast<queueing::IPacketExtractor *>(gateModule);
+    pullListener.leaf = leafQueue;
+    leafQueue->subscribe(packetPulledSignal, &pullListener);
+    leafQueue->addPacketCallback(&removalCallback);
+    gateModule->subscribe(packetPulledInSignal, &flowInputListener);
+    gateModule->subscribe(packetPulledOutSignal, &flowOutputListener);
+    auto frontPacket = new Packet("selectedFlowFront", makeShared<ByteCountChunk>(B(1)));
+    auto selectedPacket = new Packet("selectedFlowMatch", makeShared<ByteCountChunk>(B(1)));
+    leafQueue->pushPacket(frontPacket, nullptr);
+    leafQueue->pushPacket(selectedPacket, nullptr);
+    auto dequeuedPacket = packetExtractor->dequeuePacket([selectedPacket](const Packet *packet) { return packet == selectedPacket; });
+    ASSERT(dequeuedPacket == selectedPacket);
+    ASSERT(leafQueue->getNumPackets() == 1);
+    ASSERT(leafQueue->getPacket(0) == frontPacket);
+    ASSERT(pullListener.numLeafPulls == 1);
+    ASSERT(removalCallback.numDequeuedPackets == 1);
+    ASSERT(flowInputListener.numSignals == 1);
+    ASSERT(flowInputListener.lastArrivalGate == gateModule->gate("in"));
+    ASSERT(flowOutputListener.numSignals == 1);
+    ASSERT(flowOutputListener.lastArrivalGate == gateModule->gate("in"));
+    ASSERT(packetGate->resolveDirective('p') == "1");
+    ASSERT(selectedPacket->getArrivalGate() == sinkModule->gate("in"));
+    leafQueue->unsubscribe(packetPulledSignal, &pullListener);
+    leafQueue->removePacketCallback(&removalCallback);
+    gateModule->unsubscribe(packetPulledInSignal, &flowInputListener);
+    gateModule->unsubscribe(packetPulledOutSignal, &flowOutputListener);
+    leafQueue->removePacket(frontPacket);
+    take(frontPacket);
+    take(selectedPacket);
+    delete frontPacket;
+    delete selectedPacket;
+    sinkModule->callFinish();
+    gateModule->callFinish();
+    leafQueueModule->callFinish();
+    sinkModule->deleteModule();
+    gateModule->deleteModule();
+    leafQueueModule->deleteModule();
+}
 
 // Ordinary queue overflow must not trigger channel-access re-evaluation, while
 // cancelling a dropped setup transaction must immediately release held traffic.
