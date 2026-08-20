@@ -159,7 +159,7 @@ void Rx::recomputeMediumFree()
 {
     bool oldMediumFree = mediumFree;
     // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
-    bool primaryPhysicallyIdle = ht40Cca ? !primaryCcaBusy : receptionState == IRadio::RECEPTION_STATE_IDLE;
+    bool primaryPhysicallyIdle = (receptionState == IRadio::RECEPTION_STATE_IDLE) && (!ht40Cca || !primaryCcaBusy);
     mediumFree = primaryPhysicallyIdle && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
     if (mediumFree != oldMediumFree) {
         for (auto contention : contentions)
