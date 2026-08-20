@@ -1,0 +1,70 @@
+%description:
+Validate HT 40 MHz primary and secondary channel geometry and offset parsing.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+{
+    // Test parsing
+    ASSERT(Ieee80211Channel::parseSecondaryChannelOffset("none") == IEEE80211_SECONDARY_CHANNEL_NONE);
+    ASSERT(Ieee80211Channel::parseSecondaryChannelOffset("above") == IEEE80211_SECONDARY_CHANNEL_ABOVE);
+    ASSERT(Ieee80211Channel::parseSecondaryChannelOffset("below") == IEEE80211_SECONDARY_CHANNEL_BELOW);
+    ASSERT(std::string(Ieee80211Channel::getSecondaryChannelOffsetName(IEEE80211_SECONDARY_CHANNEL_NONE)) == "none");
+    ASSERT(std::string(Ieee80211Channel::getSecondaryChannelOffsetName(IEEE80211_SECONDARY_CHANNEL_ABOVE)) == "above");
+    ASSERT(std::string(Ieee80211Channel::getSecondaryChannelOffsetName(IEEE80211_SECONDARY_CHANNEL_BELOW)) == "below");
+    EV << "Secondary channel offset parsing verified.\n";
+
+    const IIeee80211Band *band24 = Ieee80211CompliantBands::getBand("2.4 GHz");
+    ASSERT(band24 != nullptr);
+
+    // Channel 0 (IEEE 1, 2412 MHz) with secondary above (+20 MHz -> IEEE 5, 2432 MHz, bonded 2422 MHz)
+    Ieee80211Channel ch0Above(band24, 0, IEEE80211_SECONDARY_CHANNEL_ABOVE);
+    ASSERT(ch0Above.getChannelNumber() == 0);
+    ASSERT(ch0Above.getSecondaryChannelOffset() == IEEE80211_SECONDARY_CHANNEL_ABOVE);
+    ASSERT(ch0Above.getCenterFrequency() == Hz(2412000000.0));
+    ASSERT(ch0Above.getSecondaryCenterFrequency() == Hz(2432000000.0));
+    ASSERT(ch0Above.getBondedCenterFrequency() == Hz(2422000000.0));
+    ASSERT(ch0Above.getSecondaryChannelNumber() == 4);
+    EV << "HT40+ channel 0 center=" << ch0Above.getCenterFrequency().get()
+       << " secondary=" << ch0Above.getSecondaryCenterFrequency().get()
+       << " bonded=" << ch0Above.getBondedCenterFrequency().get() << "\n";
+
+    // Channel 4 (IEEE 5, 2432 MHz) with secondary below (-20 MHz -> IEEE 1, 2412 MHz, bonded 2422 MHz)
+    Ieee80211Channel ch4Below(band24, 4, IEEE80211_SECONDARY_CHANNEL_BELOW);
+    ASSERT(ch4Below.getChannelNumber() == 4);
+    ASSERT(ch4Below.getSecondaryChannelOffset() == IEEE80211_SECONDARY_CHANNEL_BELOW);
+    ASSERT(ch4Below.getCenterFrequency() == Hz(2432000000.0));
+    ASSERT(ch4Below.getSecondaryCenterFrequency() == Hz(2412000000.0));
+    ASSERT(ch4Below.getBondedCenterFrequency() == Hz(2422000000.0));
+    ASSERT(ch4Below.getSecondaryChannelNumber() == 0);
+    EV << "HT40- channel 4 center=" << ch4Below.getCenterFrequency().get()
+       << " secondary=" << ch4Below.getSecondaryCenterFrequency().get()
+       << " bonded=" << ch4Below.getBondedCenterFrequency().get() << "\n";
+
+    // Validate invalid secondary offset exception
+    bool exceptionCaught = false;
+    try {
+        Ieee80211Channel ch0Below(band24, 0, IEEE80211_SECONDARY_CHANNEL_BELOW);
+        (void)ch0Below.getSecondaryCenterFrequency();
+    }
+    catch (std::exception& e) {
+        exceptionCaught = true;
+    }
+    ASSERT(exceptionCaught);
+    EV << "Invalid secondary channel offset correctly rejected.\n";
+}
+
+EV << ".\n";
+
+%contains: stdout
+Secondary channel offset parsing verified.
+HT40+ channel 0 center=2.412e+09 secondary=2.432e+09 bonded=2.422e+09
+HT40- channel 4 center=2.432e+09 secondary=2.412e+09 bonded=2.422e+09
+Invalid secondary channel offset correctly rejected.
+.

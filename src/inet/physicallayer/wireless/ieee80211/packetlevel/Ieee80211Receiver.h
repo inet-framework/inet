@@ -20,6 +20,10 @@ namespace physicallayer {
 class INET_API Ieee80211Receiver : public FlatReceiverBase
 {
   protected:
+    W htCca20Sensitivity = W(NaN);
+    W htCca40Sensitivity = W(NaN);
+    W htCcaEnergyDetection = W(NaN);
+
     const Ieee80211ModeSet *modeSet = nullptr;
     const IIeee80211Band *band = nullptr;
     const Ieee80211Channel *channel = nullptr;
@@ -30,10 +34,17 @@ class INET_API Ieee80211Receiver : public FlatReceiverBase
     virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
 
+    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
+    virtual bool isHtCcaOperation() const;
+    virtual bool computeHtCcaBusy(const IListening *listening, const IInterference *interference) const;
+
     virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 
   public:
     virtual ~Ieee80211Receiver();
+
+    virtual const Ieee80211ModeSet *getModeSet() const { return modeSet; }
+    virtual const Ieee80211Channel *getChannel() const { return channel; }
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 

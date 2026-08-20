@@ -37,6 +37,10 @@ class INET_API Rx : public SimpleModule, public IRx
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
     physicallayer::IRadioSignal::SignalPart receivedPart = physicallayer::IRadioSignal::SIGNAL_PART_NONE;
     bool mediumFree = true; // cached state
+    bool ht40Cca = false;
+    bool primaryCcaBusy = false;
+    bool secondaryCcaBusy = false;
+    simtime_t secondaryCcaIdleSince = -1;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -53,7 +57,9 @@ class INET_API Rx : public SimpleModule, public IRx
 
     virtual bool isReceptionInProgress() const override;
     virtual bool isMediumFree() const override { return mediumFree; }
+    virtual bool isSecondaryChannelIdleFor(simtime_t interval) const override;
     virtual void receptionStateChanged(physicallayer::IRadio::ReceptionState newReceptionState) override;
+    virtual void ccaStateChanged(const physicallayer::Ieee80211CcaSnapshot& snapshot) override;
     virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState transmissionState) override;
     virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) override;
     virtual bool lowerFrameReceived(Packet *packet) override;

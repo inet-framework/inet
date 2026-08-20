@@ -25,7 +25,10 @@ module Ieee80211Receiver extends NarrowbandReceiverBase
     parameters:
         string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac");
         string bandName @enum("2.4 GHz","5 GHz","5 GHz (20 MHz)","5 GHz (40 MHz)","5 GHz (80 MHz)","5 GHz (160 MHz)","5.9 GHz");
-        int channelNumber;
+        double htCca20Sensitivity @unit(dBm) = default(-82 dBm); // IEEE 802.11 HT 20 MHz CCA sensitivity
+        double htCca40Sensitivity @unit(dBm) = default(-79 dBm); // IEEE 802.11 HT 40 MHz CCA sensitivity
+        double htCcaEnergyDetection @unit(dBm) = default(-62 dBm); // IEEE 802.11 HT energy-detection threshold
+        int channelNumber = default(-1);
         modulation = default("BPSK"); // TODO this is simply wrong
         errorModel.typename = default("Ieee80211NistErrorModel");
         // TODO remove when opMode is removed from the error model
