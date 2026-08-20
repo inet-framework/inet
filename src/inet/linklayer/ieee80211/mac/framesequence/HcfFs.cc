@@ -13,6 +13,14 @@
 namespace inet {
 namespace ieee80211 {
 
+static bool hasMoreTxOpsForFrame(RepeatingFs *frameSequence, FrameSequenceContext *context, Packet *nextFrameToTransmit)
+{
+    if (nextFrameToTransmit == nullptr)
+        return false;
+    const auto& nextHeader = nextFrameToTransmit->peekAtFront<Ieee80211MacHeader>();
+    return frameSequence->getCount() == 0 || (!nextHeader->getReceiverAddress().isMulticast() && context->getQoSContext()->txopProcedure->getRemaining() > 0);
+}
+
 HcfFs::HcfFs() :
     // G.3 EDCA and HCCA sequences
     // hcf-sequence =
@@ -61,18 +69,14 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
     // This predicate is the TXOP continuation boundary, so it may materialize
     // an eligible pending frame. Availability queries elsewhere remain pure.
     auto nextFrameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-    if (nextFrameToTransmit != nullptr) {
-        const auto& nextHeader = nextFrameToTransmit->peekAtFront<Ieee80211MacHeader>();
-        return frameSequence->getCount() == 0 || (!nextHeader->getReceiverAddress().isMulticast() && context->getQoSContext()->txopProcedure->getRemaining() > 0);
-    }
-    return false;
+    return hasMoreTxOpsForFrame(frameSequence, context, nextFrameToTransmit);
 }
 
 bool HcfFs::hasMoreTxOpsAndMulticast(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
-    return hasMoreTxOps(frameSequence, context) && context->getInProgressFrames()->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast();
+    auto nextFrameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
+    return hasMoreTxOpsForFrame(frameSequence, context, nextFrameToTransmit) && nextFrameToTransmit->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast();
 }
 
 } // namespace ieee80211
 } // namespace inet
-

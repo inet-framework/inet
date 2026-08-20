@@ -75,6 +75,7 @@ void Dcf::channelGranted(IChannelAccess *channelAccess)
         if (this->channelAccess->getInProgressFrames()->getFrameToTransmit() == nullptr) {
             EV_DETAIL << "Releasing channel because no frame is available.\n";
             channelAccess->releaseChannel(this);
+            mac->sendDownPendingRadioConfigMsg();
             return;
         }
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);

@@ -159,6 +159,8 @@ Packet *WrrScheduler::dequeuePacket(const PacketPredicate& predicate)
     take(packet);
     handlePacketProcessed(packet);
     emit(packetPulledSignal, packet);
+    if (collector != nullptr)
+        animatePullPacket(packet, outputGate, collector.getReferencedGate());
     drop(packet);
     return packet;
 }

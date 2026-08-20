@@ -124,6 +124,20 @@ class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
     simtime_t getRetryDeadline(MacAddress receiverAddress, Tid tid) const { auto it = addbaRetryDeadlines.find(std::make_pair(receiverAddress, tid)); return it == addbaRetryDeadlines.end() ? SIMTIME_MAX : it->second; }
 };
 
+class TestTimeoutCancellationCallback : public TestCallback
+{
+  public:
+    TestOriginatorHandler *handler = nullptr;
+    std::vector<std::pair<MacAddress, Tid>> expiredAgreementIds;
+    bool allExpiredAgreementsGoneBeforeCallbacks = true;
+
+    virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override {
+        for (const auto& agreementId : expiredAgreementIds)
+            allExpiredAgreementsGoneBeforeCallbacks &= handler->getAgreement(agreementId.first, agreementId.second) == nullptr;
+        TestCallback::cancelAddbaTransaction(transactionId, excludedPacket);
+    }
+};
+
 class TestRecipientHandler : public RecipientBlockAckAgreementHandler
 {
   public:
@@ -363,10 +377,11 @@ class TestReentrantRemovalCallback : public queueing::IPacketQueue::ICallback
     queueing::IPacketQueue *queue = nullptr;
     Packet *triggerPacket = nullptr;
     Packet *packetToRemove = nullptr;
+    queueing::IPacketQueue::PacketRemovalReason triggerReason = queueing::IPacketQueue::PacketRemovalReason::REMOVED;
     bool removedPacket = false;
 
     virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override {
-        if (!removedPacket && packet == triggerPacket && reason == queueing::IPacketQueue::PacketRemovalReason::REMOVED) {
+        if (!removedPacket && packet == triggerPacket && reason == triggerReason) {
             removedPacket = true;
             queue->removePacket(packetToRemove);
         }
@@ -762,8 +777,9 @@ class TestDcaf : public Dcaf
 class TestDcf : public Dcf
 {
   public:
-    TestFrameSequenceHandler *configure(TestDcaf *channelAccess) {
+    TestFrameSequenceHandler *configure(TestDcaf *channelAccess, Ieee80211Mac *mac) {
         this->channelAccess = channelAccess;
+        this->mac = mac;
         auto handler = new TestFrameSequenceHandler();
         frameSequenceHandler = handler;
         return handler;
@@ -1103,22 +1119,25 @@ ASSERT(callback.addbaDeadline == simTime() + 1);
 auto requestTransactionId = callback.managementPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
 
 auto wrongToken = makeResponse(peer1, 3, request->getDialogToken() + 1, 0);
-ASSERT(handler.processReceivedAddbaResp(wrongToken, &originatorPolicy, &callback).agreement == nullptr);
+ASSERT(handler.processReceivedAddbaResp(wrongToken, &originatorPolicy, &callback).establishedAgreement == nullptr);
 ASSERT(handler.isAddbaResponsePending(peer1, 3));
 auto wrongTid = makeResponse(peer1, 4, request->getDialogToken(), 0);
-ASSERT(handler.processReceivedAddbaResp(wrongTid, &originatorPolicy, &callback).agreement == nullptr);
+ASSERT(handler.processReceivedAddbaResp(wrongTid, &originatorPolicy, &callback).establishedAgreement == nullptr);
 auto wrongPeer = makeResponse(peer2, 3, request->getDialogToken(), 0);
-ASSERT(handler.processReceivedAddbaResp(wrongPeer, &originatorPolicy, &callback).agreement == nullptr);
+ASSERT(handler.processReceivedAddbaResp(wrongPeer, &originatorPolicy, &callback).establishedAgreement == nullptr);
 
 auto success = makeResponse(peer1, 3, request->getDialogToken(), 0);
 auto establishedResponse = handler.processReceivedAddbaResp(success, &originatorPolicy, &callback);
-auto established = establishedResponse.agreement;
+auto established = establishedResponse.establishedAgreement;
 ASSERT(established != nullptr);
+ASSERT(establishedResponse.terminatedAgreement == nullptr);
+ASSERT(establishedResponse.teardownDelba == nullptr);
+ASSERT(establishedResponse.teardownTransactionId == 0);
 ASSERT(callback.cancelledTransactionIds.back() == requestTransactionId);
 ASSERT(callback.excludedPackets.back() == nullptr);
 ASSERT(established->getStartingSequenceNumber() == SequenceNumberCyclic(0));
 ASSERT(!handler.isAddbaResponsePending(peer1, 3));
-ASSERT(handler.processReceivedAddbaResp(success, &originatorPolicy, &callback).agreement == nullptr);
+ASSERT(handler.processReceivedAddbaResp(success, &originatorPolicy, &callback).establishedAgreement == nullptr);
 
 // IEEE Std 802.11-2024, 10.25.2 and Figure 11-32: a successful matching
 // response establishes the agreement even when local policy rejects the
@@ -1137,9 +1156,10 @@ ASSERT(handler.processReceivedAddbaResp(success, &originatorPolicy, &callback).a
     vetoHandler.processTransmittedAddbaReq(vetoCallback.managementPacket, vetoRequest, &vetoPolicy, &vetoCallback);
     auto vetoResponse = makeResponse(peer3, 6, vetoRequest->getDialogToken(), 0);
     auto vetoResponseOutcome = vetoHandler.processReceivedAddbaResp(vetoResponse, &vetoPolicy, &vetoCallback);
-    auto vetoAgreement = vetoResponseOutcome.agreement;
+    auto vetoAgreement = vetoResponseOutcome.terminatedAgreement.get();
     ASSERT(vetoAgreement != nullptr);
-    ASSERT(vetoResponseOutcome.terminatedAgreement.get() == vetoAgreement);
+    ASSERT(vetoResponseOutcome.establishedAgreement == nullptr);
+    ASSERT(vetoResponseOutcome.teardownTransactionId == vetoTransactionId);
     ASSERT(vetoAgreement->getIsAddbaResponseReceived());
     ASSERT(vetoHandler.getAgreement(peer3, 6) == nullptr);
     auto vetoDelba = vetoResponseOutcome.teardownDelba;
@@ -1149,7 +1169,7 @@ ASSERT(handler.processReceivedAddbaResp(success, &originatorPolicy, &callback).a
     ASSERT(vetoDelba->getTid() == 6);
     ASSERT(vetoDelba->getReasonCode() == RC_END_BA);
     Packet vetoDelbaPacket("vetoDelba", vetoDelba);
-    vetoDelbaPacket.addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(vetoTransactionId);
+    vetoDelbaPacket.addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(vetoResponseOutcome.teardownTransactionId);
     ASSERT(vetoHandler.isDelbaPending(&vetoDelbaPacket, vetoDelba));
     ASSERT(vetoHandler.getAgreement(peer3, 6) == nullptr);
     ASSERT(vetoHandler.getRetryDeadline(peer3, 6) > simTime());
@@ -1179,7 +1199,7 @@ handler.processAcknowledgedDataFrame(&rejectedTrigger, rejectedHeader, &originat
 auto rejectedRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
 handler.processTransmittedAddbaReq(callback.managementPacket, rejectedRequest, &originatorPolicy, &callback);
 auto rejection = makeResponse(peer2, 4, rejectedRequest->getDialogToken(), 1);
-ASSERT(handler.processReceivedAddbaResp(rejection, &originatorPolicy, &callback).agreement == nullptr);
+ASSERT(handler.processReceivedAddbaResp(rejection, &originatorPolicy, &callback).establishedAgreement == nullptr);
 ASSERT(handler.getAgreement(peer2, 4) == nullptr);
 handler.processAcknowledgedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback);
 ASSERT(handler.getAgreement(peer2, 4) == nullptr);
@@ -1202,12 +1222,47 @@ ASSERT(callback.excludedPackets.back() == nullptr);
 handler.processTransmittedAddbaReq(timedRequestPacket, timedRequest, &originatorPolicy, &callback);
 ASSERT(handler.getAgreement(peer3, 5) == nullptr);
 auto staleResponse = makeResponse(peer3, 5, timedRequest->getDialogToken(), 0);
-ASSERT(handler.processReceivedAddbaResp(staleResponse, &originatorPolicy, &callback).agreement == nullptr);
+ASSERT(handler.processReceivedAddbaResp(staleResponse, &originatorPolicy, &callback).establishedAgreement == nullptr);
 handler.processAcknowledgedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback);
 ASSERT(handler.getAgreement(peer3, 5) == nullptr);
 handler.allowRetryNow(peer3, 5);
 handler.processAcknowledgedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback);
 ASSERT(handler.isAddbaResponsePending(peer3, 5));
+
+// All simultaneously expired agreements are erased before cancellation can
+// reenter the MAC and query or mutate transaction state.
+{
+    TestOriginatorHandler timeoutHandler;
+    TestOriginatorPolicy timeoutPolicy;
+    TestTimeoutCancellationCallback timeoutCallback;
+    timeoutCallback.handler = &timeoutHandler;
+    timeoutCallback.expiredAgreementIds = { { peer1, 1 }, { peer2, 2 } };
+
+    Packet firstTimeoutTrigger("firstTimeoutTrigger");
+    auto firstTimeoutHeader = makeQosHeader(peer1, 1, SequenceNumberCyclic(40));
+    timeoutHandler.processAcknowledgedDataFrame(&firstTimeoutTrigger, firstTimeoutHeader, &timeoutPolicy, &timeoutCallback);
+    auto firstTimeoutRequestPacket = timeoutCallback.managementPacket;
+    auto firstTimeoutRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(timeoutCallback.managementHeader);
+    auto firstTimeoutTransactionId = firstTimeoutRequestPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+    timeoutHandler.processTransmittedAddbaReq(firstTimeoutRequestPacket, firstTimeoutRequest, &timeoutPolicy, &timeoutCallback);
+
+    Packet secondTimeoutTrigger("secondTimeoutTrigger");
+    auto secondTimeoutHeader = makeQosHeader(peer2, 2, SequenceNumberCyclic(50));
+    timeoutHandler.processAcknowledgedDataFrame(&secondTimeoutTrigger, secondTimeoutHeader, &timeoutPolicy, &timeoutCallback);
+    auto secondTimeoutRequestPacket = timeoutCallback.managementPacket;
+    auto secondTimeoutRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(timeoutCallback.managementHeader);
+    auto secondTimeoutTransactionId = secondTimeoutRequestPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+    timeoutHandler.processTransmittedAddbaReq(secondTimeoutRequestPacket, secondTimeoutRequest, &timeoutPolicy, &timeoutCallback);
+
+    timeoutHandler.expireNow(peer1, 1);
+    timeoutHandler.expireNow(peer2, 2);
+    timeoutHandler.addbaResponseTimeoutExpired(&timeoutPolicy, &timeoutCallback);
+    ASSERT(timeoutCallback.allExpiredAgreementsGoneBeforeCallbacks);
+    ASSERT(timeoutCallback.cancelledTransactionIds.size() == 2);
+    ASSERT(std::find(timeoutCallback.cancelledTransactionIds.begin(), timeoutCallback.cancelledTransactionIds.end(), firstTimeoutTransactionId) != timeoutCallback.cancelledTransactionIds.end());
+    ASSERT(std::find(timeoutCallback.cancelledTransactionIds.begin(), timeoutCallback.cancelledTransactionIds.end(), secondTimeoutTransactionId) != timeoutCallback.cancelledTransactionIds.end());
+    ASSERT(timeoutCallback.addbaDeadline == SIMTIME_MAX);
+}
 
 // Transaction cancellation leaves packets borrowed by the active frame
 // sequence under that sequence's ownership, including RTS-protected packets.
@@ -2474,10 +2529,13 @@ ASSERT(!dataService.hasEligibleFrame(&mixedQueue));
     grantedEdca.internallyCollidedEdcafs = { &grantedEdcaf };
     TestHcf grantedHcf;
     grantedHcf.configure(&grantedEdca);
+    TestMac grantedMac;
+    grantedHcf.configureMac(&grantedMac);
     TestSignalListener collisionListener;
     grantedHcf.subscribe(Hcf::edcaCollisionDetectedSignal, &collisionListener);
     grantedHcf.grantChannel(&grantedEdcaf);
     ASSERT(grantedEdcaf.numReleaseChannelCalls == 1);
+    ASSERT(grantedMac.numPendingRadioConfigSends == 1);
     ASSERT(collisionListener.numSignals == 0);
     grantedHcf.unsubscribe(Hcf::edcaCollisionDetectedSignal, &collisionListener);
 }
@@ -3635,17 +3693,22 @@ delete compoundPacket;
     dropCallback.expectedPacketCountsAtFirstDrop = { { firstQueue, 1 }, { secondQueue, 0 } };
     firstQueue->addPacketCallback(&dropCallback);
     secondQueue->addPacketCallback(&dropCallback);
-    firstQueue->pushPacket(new Packet("sharedFirstVictim", makeShared<ByteCountChunk>(B(1))), nullptr);
-    secondQueue->pushPacket(new Packet("sharedSecondVictim", makeShared<ByteCountChunk>(B(1))), nullptr);
+    auto firstVictim = new Packet("sharedFirstVictim", makeShared<ByteCountChunk>(B(1)));
     auto retainedPacket = new Packet("sharedRetainedPacket", makeShared<ByteCountChunk>(B(3)));
+    TestReentrantRemovalCallback reentrantCallback;
+    reentrantCallback.queue = firstQueue;
+    reentrantCallback.triggerPacket = firstVictim;
+    reentrantCallback.packetToRemove = retainedPacket;
+    reentrantCallback.triggerReason = queueing::IPacketQueue::PacketRemovalReason::DROPPED;
+    firstQueue->addPacketCallback(&reentrantCallback);
+    firstQueue->pushPacket(firstVictim, nullptr);
+    secondQueue->pushPacket(new Packet("sharedSecondVictim", makeShared<ByteCountChunk>(B(1))), nullptr);
     firstQueue->pushPacket(retainedPacket, nullptr);
-    if (dropCallback.numDroppedPackets != 2 || dropCallback.numRemovedPackets != 0 || !dropCallback.allExpectedPacketsDetachedAtFirstDrop || firstQueue->getNumPackets() != 1 || secondQueue->getNumPackets() != 0)
-        throw cRuntimeError("Shared buffer notified a drop before detaching the full victim batch");
-    auto dequeuedPacket = firstQueue->dequeuePacket([retainedPacket](const Packet *packet) { return packet == retainedPacket; });
-    if (dequeuedPacket != retainedPacket)
-        throw cRuntimeError("Shared buffer retained the wrong packet after overload");
-    take(dequeuedPacket);
-    delete dequeuedPacket;
+    if (dropCallback.numDroppedPackets != 2 || dropCallback.numRemovedPackets != 1 || !dropCallback.allExpectedPacketsDetachedAtFirstDrop || !reentrantCallback.removedPacket || firstQueue->getNumPackets() != 0 || secondQueue->getNumPackets() != 0)
+        throw cRuntimeError("Shared buffer reentrant removal violated the detached victim batch contract");
+    take(retainedPacket);
+    delete retainedPacket;
+    firstQueue->removePacketCallback(&reentrantCallback);
     firstQueue->removePacketCallback(&dropCallback);
     secondQueue->removePacketCallback(&dropCallback);
     firstQueue->callFinish();
@@ -3654,6 +3717,28 @@ delete compoundPacket;
     firstQueue->deleteModule();
     secondQueue->deleteModule();
     bufferModule->deleteModule();
+}
+
+// The multicast continuation predicate materializes its candidate once and
+// reuses that result for both the TXOP and receiver-address decisions.
+{
+    TestOriginatorQosMacDataService multicastDataService;
+    TestPacketQueue multicastPendingQueue;
+    TestAckHandler multicastAckHandler;
+    auto multicastFrame = new Packet("multicastTxopFrame", makeQosHeader(MacAddress::BROADCAST_ADDRESS, 1, SequenceNumberCyclic(4)));
+    multicastPendingQueue.packets = { multicastFrame };
+    TestInProgressFrames multicastInProgressFrames;
+    multicastInProgressFrames.configure(&multicastDataService, &multicastAckHandler, &multicastPendingQueue);
+    TestTxopProcedure multicastTxopProcedure;
+    FrameSequenceContext multicastContext(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &multicastInProgressFrames, nullptr, nullptr, nullptr, new QoSContext(nullptr, nullptr, nullptr, &multicastTxopProcedure));
+    HcfFs multicastHcfFs;
+    RepeatingFs multicastRepeatingFs(new TestEmptyFrameSequence(), [](RepeatingFs *, FrameSequenceContext *) { return false; });
+    ASSERT(multicastHcfFs.hasMoreTxOpsAndMulticast(&multicastRepeatingFs, &multicastContext));
+    ASSERT(multicastPendingQueue.numSelectedDequeues == 1);
+    ASSERT(multicastPendingQueue.getNumPackets() == 0);
+    auto multicastFrames = multicastInProgressFrames.releaseFrames();
+    ASSERT(multicastFrames == std::vector<Packet *>({ multicastFrame }));
+    delete multicastFrame;
 }
 
 // At the TXOP continuation boundary, an eligible pending frame is
@@ -3696,9 +3781,11 @@ delete compoundPacket;
     TestDcaf dcaf;
     dcaf.configure(&dcfInProgressFrames);
     TestDcf dcf;
-    auto dcfHandler = dcf.configure(&dcaf);
+    TestMac dcfMac;
+    auto dcfHandler = dcf.configure(&dcaf, &dcfMac);
     dcf.grant(&dcaf);
     ASSERT(dcaf.numReleasedChannels == 1);
+    ASSERT(dcfMac.numPendingRadioConfigSends == 1);
     ASSERT(dcfHandler->numStartedSequences == 0);
 }
 {
@@ -3711,9 +3798,11 @@ delete compoundPacket;
     TestDcaf dcaf;
     dcaf.configure(&dcfInProgressFrames);
     TestDcf dcf;
-    auto dcfHandler = dcf.configure(&dcaf);
+    TestMac dcfMac;
+    auto dcfHandler = dcf.configure(&dcaf, &dcfMac);
     dcf.grant(&dcaf);
     ASSERT(dcaf.numReleasedChannels == 0);
+    ASSERT(dcfMac.numPendingRadioConfigSends == 0);
     ASSERT(dcfHandler->numStartedSequences == 1);
     ASSERT(dcfPendingQueue.getNumPackets() == 0);
     ASSERT(dcfInProgressFrames.getFrameToTransmit() == firstDcfFrame);

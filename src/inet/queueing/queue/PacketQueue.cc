@@ -158,6 +158,8 @@ Packet *PacketQueue::dequeuePacket(const PacketPredicate& predicate)
         buffer->removePacket(packet);
     notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::DEQUEUED);
     recordPacketDequeued(packet);
+    if (collector != nullptr)
+        animatePullPacket(packet, outputGate, collector.getReferencedGate());
     drop(packet);
     return packet;
 }

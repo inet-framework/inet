@@ -69,6 +69,9 @@ void Hcf::initialize(int stage)
                 if (auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>()))
                     return originatorBlockAckAgreementHandler->isDelbaPending(packet, delba);
                 auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+                // Hold this peer/TID while its ADDBA response is pending so no
+                // already-sequenced MPDU can precede the advertised SSN. The
+                // response timeout starts only after the request is transmitted.
                 return dataHeader == nullptr || dataHeader->getType() != ST_DATA_WITH_QOS || (!originatorBlockAckAgreementHandler->isAddbaResponsePending(dataHeader->getReceiverAddress(), dataHeader->getTid()));
             });
         }
@@ -149,6 +152,8 @@ void Hcf::handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemo
     Enter_Method("handlePacketRemoved");
     untrackPendingFrame(packet);
     bool shouldResume = false;
+    // HCF treats explicit REMOVED notifications as terminal transaction
+    // disposal; code relocating a packet must use dequeuePacket().
     if (reason == queueing::IPacketQueue::PacketRemovalReason::DROPPED || reason == queueing::IPacketQueue::PacketRemovalReason::REMOVED) {
         shouldResume |= processDroppedBlockAckSetupFrame(packet);
         shouldResume |= processDroppedBlockAckTeardownFrame(packet);
@@ -292,6 +297,8 @@ void Hcf::scheduleAddbaResponseTimer(simtime_t deadline)
 void Hcf::cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket)
 {
     Enter_Method("cancelAddbaTransaction");
+    // Frames borrowed by the active sequence cannot be removed here. The
+    // sequence's failure paths detect their now-stale transaction and discard them.
     auto belongsToTransaction = [this, transactionId, excludedPacket](Packet *packet) {
         auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();
         return packet != excludedPacket && !isPacketReferencedByCurrentFrameSequence(packet) && transactionTag != nullptr && transactionTag->getTransactionId() == transactionId;
@@ -384,6 +391,7 @@ void Hcf::channelGranted(IChannelAccess *channelAccess)
         if (!hasFrameToTransmit(ac)) {
             EV_DETAIL << "Releasing channel because no eligible frame is available.\n";
             edcaf->releaseChannel(this);
+            mac->sendDownPendingRadioConfigMsg();
             return;
         }
         edcaf->getTxopProcedure()->startTxop(ac);
@@ -548,14 +556,17 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
             auto response = originatorBlockAckAgreementHandler->processReceivedAddbaResp(addbaResp, originatorBlockAckAgreementPolicy, this);
             if (wasPending && !originatorBlockAckAgreementHandler->isAddbaResponsePending(addbaResp->getTransmitterAddress(), addbaResp->getTid()))
                 rebuildPendingFrameEligibility();
-            if (response.agreement != nullptr) {
-                emit(blockAckAgreementAddedSignal, response.agreement);
-                if (response.teardownDelba != nullptr)
-                    emit(blockAckAgreementDeletedSignal, response.agreement);
+            if (response.teardownDelba != nullptr && (response.terminatedAgreement == nullptr || response.teardownTransactionId == 0))
+                throw cRuntimeError("Invalid locally vetoed ADDBA response outcome");
+            if (response.establishedAgreement != nullptr)
+                emit(blockAckAgreementAddedSignal, response.establishedAgreement);
+            if (response.terminatedAgreement != nullptr) {
+                emit(blockAckAgreementAddedSignal, response.terminatedAgreement.get());
+                emit(blockAckAgreementDeletedSignal, response.terminatedAgreement.get());
             }
             if (response.teardownDelba != nullptr) {
                 auto delbaPacket = new Packet("Delba", response.teardownDelba);
-                delbaPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(response.agreement == nullptr ? 0 : response.agreement->getTransactionId());
+                delbaPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(response.teardownTransactionId);
                 processMgmtFrame(delbaPacket, response.teardownDelba);
             }
             resumeEligibleChannelAccess();

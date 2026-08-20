@@ -23,9 +23,9 @@ class INET_API IPacketQueue : public virtual IPacketCollection, public virtual I
 {
   public:
     enum class PacketRemovalReason {
-        DEQUEUED,
-        REMOVED,
-        DROPPED,
+        DEQUEUED,  // Normal queue processing transferred ownership out of the queue.
+        REMOVED,   // Explicit removal outside normal queue processing.
+        DROPPED,   // The queue destructively removed the packet.
     };
 
     class INET_API ICallback {

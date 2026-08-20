@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 
+#include <vector>
+
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
@@ -75,6 +77,7 @@ void OriginatorBlockAckAgreementHandler::recordAddbaFailure(MacAddress receiverA
 void OriginatorBlockAckAgreementHandler::addbaResponseTimeoutExpired(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
 {
     auto now = simTime();
+    std::vector<uint64_t> expiredTransactionIds;
     for (auto it = blockAckAgreements.begin(); it != blockAckAgreements.end();) {
         auto agreement = it->second;
         if (agreement->isPending() && agreement->getIsAddbaRequestSent() && agreement->getAddbaResponseDeadline() <= now) {
@@ -83,11 +86,13 @@ void OriginatorBlockAckAgreementHandler::addbaResponseTimeoutExpired(IOriginator
             recordAddbaFailure(agreement->getReceiverAddr(), agreement->getTid(), blockAckAgreementPolicy);
             it = blockAckAgreements.erase(it);
             delete agreement;
-            callback->cancelAddbaTransaction(transactionId, nullptr);
+            expiredTransactionIds.push_back(transactionId);
         }
         else
             it++;
     }
+    for (auto transactionId : expiredTransactionIds)
+        callback->cancelAddbaTransaction(transactionId, nullptr);
     scheduleAddbaResponseTimer(callback);
 }
 
@@ -259,15 +264,16 @@ OriginatorBlockAckAgreementResponse OriginatorBlockAckAgreementHandler::processR
         if (!acceptedByLocalPolicy) {
             // IEEE Std 802.11-2024, 10.25.2 Note 3: delete a successful
             // agreement rejected by local policy and continue with Normal Ack.
+            response.terminatedAgreement.reset(removeAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid()));
+            if (response.terminatedAgreement == nullptr)
+                throw cRuntimeError("Cannot terminate locally vetoed Block Ack agreement");
             response.teardownDelba = buildDelba(addbaResp->getTransmitterAddress(), addbaResp->getTid(), RC_END_BA);
             pendingTeardownTransactionIds[std::make_pair(addbaResp->getTransmitterAddress(), addbaResp->getTid())] = transactionId;
-            response.agreement = removeAgreement(addbaResp->getTransmitterAddress(), addbaResp->getTid());
-            if (response.agreement != nullptr)
-                response.terminatedAgreement.reset(response.agreement);
+            response.teardownTransactionId = transactionId;
             scheduleInactivityTimer(callback);
         }
         else
-            response.agreement = agreement;
+            response.establishedAgreement = agreement;
         return response;
     }
     else {

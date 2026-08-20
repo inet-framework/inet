@@ -177,8 +177,10 @@ Notable backward incompatible changes are the following:
    processAbortedDelba() outcome; processTransmittedDelba() still returns the
    agreement removed by an untagged DELBA, or null when none was removed.
 
-   The originator policy parameter `addbaFailureTimeout` was renamed to
-   `addbaResponseTimeout`; update custom configurations accordingly.
+   OriginatorBlockAckAgreementPolicy now exposes the new `addbaResponseTimeout`
+   and `addbaRetryBackoff` NED parameters. C++ implementations of
+   IOriginatorBlockAckAgreementPolicy must replace computeAddbaFailureTimeout()
+   with getAddbaResponseTimeout() and implement computeAddbaRetryBackoff().
 
 Notable backward compatible changes are the following:
 

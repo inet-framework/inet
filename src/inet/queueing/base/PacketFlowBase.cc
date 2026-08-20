@@ -181,6 +181,8 @@ Packet *PacketFlowBase::dequeuePacket(const PacketPredicate& predicate)
     processPacket(packet);
     handlePacketProcessed(packet);
     emit(packetPulledOutSignal, packet);
+    if (collector != nullptr)
+        animatePullPacket(packet, outputGate, collector.getReferencedGate());
     drop(packet);
     return packet;
 }

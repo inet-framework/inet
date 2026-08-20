@@ -24,9 +24,12 @@ namespace ieee80211 {
 
 struct INET_API OriginatorBlockAckAgreementResponse
 {
-    OriginatorBlockAckAgreement *agreement = nullptr;
-    Ptr<const Ieee80211Delba> teardownDelba;
+    // Borrowed from the handler; valid while the established agreement remains installed.
+    OriginatorBlockAckAgreement *establishedAgreement = nullptr;
+    // Owns the agreement that was established and immediately terminated after a local veto.
     std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement;
+    Ptr<const Ieee80211Delba> teardownDelba;
+    uint64_t teardownTransactionId = 0;
 };
 
 class INET_API IOriginatorBlockAckAgreementHandler
