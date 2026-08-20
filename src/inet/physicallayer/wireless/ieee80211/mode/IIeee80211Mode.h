@@ -42,8 +42,12 @@ class INET_API IIeee80211DataMode : public cObject, public IPrintableObject
     virtual bps getGrossBitrate() const = 0;
     virtual b getPaddingLength(b dataLength) const = 0;
     virtual b getCompleteLength(b dataLength) const = 0;
+    // Returns the raw duration of the encoded data symbol train. PPDU-format
+    // rules may round this duration at the enclosing mode level.
     virtual const simtime_t getDuration(b dataLength) const = 0;
     virtual const simtime_t getSymbolInterval() const = 0;
+    // Returns the guard interval used by the data symbols, or -1 when the PHY
+    // has no meaningful guard interval (for example, non-OFDM modes).
     virtual const simtime_t getGuardInterval() const { return -1; }
     virtual const IModulation *getModulation() const = 0;
     virtual int getNumberOfSpatialStreams() const = 0;

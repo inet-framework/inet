@@ -30,185 +30,10 @@ std::vector<Ieee80211ModeSet::Entry> Ieee80211ModeSet::completeHtGuardIntervalVa
         return entries;
 
     std::vector<Entry> completeEntries = entries;
-    const Ieee80211Htmcs *legalMcsModes[] = {
-        &Ieee80211HtmcsTable::htMcs0BW20MHz,
-        &Ieee80211HtmcsTable::htMcs1BW20MHz,
-        &Ieee80211HtmcsTable::htMcs2BW20MHz,
-        &Ieee80211HtmcsTable::htMcs3BW20MHz,
-        &Ieee80211HtmcsTable::htMcs4BW20MHz,
-        &Ieee80211HtmcsTable::htMcs5BW20MHz,
-        &Ieee80211HtmcsTable::htMcs6BW20MHz,
-        &Ieee80211HtmcsTable::htMcs7BW20MHz,
-        &Ieee80211HtmcsTable::htMcs8BW20MHz,
-        &Ieee80211HtmcsTable::htMcs9BW20MHz,
-        &Ieee80211HtmcsTable::htMcs10BW20MHz,
-        &Ieee80211HtmcsTable::htMcs11BW20MHz,
-        &Ieee80211HtmcsTable::htMcs12BW20MHz,
-        &Ieee80211HtmcsTable::htMcs13BW20MHz,
-        &Ieee80211HtmcsTable::htMcs14BW20MHz,
-        &Ieee80211HtmcsTable::htMcs15BW20MHz,
-        &Ieee80211HtmcsTable::htMcs16BW20MHz,
-        &Ieee80211HtmcsTable::htMcs17BW20MHz,
-        &Ieee80211HtmcsTable::htMcs18BW20MHz,
-        &Ieee80211HtmcsTable::htMcs19BW20MHz,
-        &Ieee80211HtmcsTable::htMcs20BW20MHz,
-        &Ieee80211HtmcsTable::htMcs21BW20MHz,
-        &Ieee80211HtmcsTable::htMcs22BW20MHz,
-        &Ieee80211HtmcsTable::htMcs23BW20MHz,
-        &Ieee80211HtmcsTable::htMcs24BW20MHz,
-        &Ieee80211HtmcsTable::htMcs25BW20MHz,
-        &Ieee80211HtmcsTable::htMcs26BW20MHz,
-        &Ieee80211HtmcsTable::htMcs27BW20MHz,
-        &Ieee80211HtmcsTable::htMcs28BW20MHz,
-        &Ieee80211HtmcsTable::htMcs29BW20MHz,
-        &Ieee80211HtmcsTable::htMcs30BW20MHz,
-        &Ieee80211HtmcsTable::htMcs31BW20MHz,
-        &Ieee80211HtmcsTable::htMcs33BW20MHz,
-        &Ieee80211HtmcsTable::htMcs34BW20MHz,
-        &Ieee80211HtmcsTable::htMcs35BW20MHz,
-        &Ieee80211HtmcsTable::htMcs36BW20MHz,
-        &Ieee80211HtmcsTable::htMcs37BW20MHz,
-        &Ieee80211HtmcsTable::htMcs38BW20MHz,
-        &Ieee80211HtmcsTable::htMcs39BW20MHz,
-        &Ieee80211HtmcsTable::htMcs40BW20MHz,
-        &Ieee80211HtmcsTable::htMcs41BW20MHz,
-        &Ieee80211HtmcsTable::htMcs42BW20MHz,
-        &Ieee80211HtmcsTable::htMcs43BW20MHz,
-        &Ieee80211HtmcsTable::htMcs44BW20MHz,
-        &Ieee80211HtmcsTable::htMcs45BW20MHz,
-        &Ieee80211HtmcsTable::htMcs46BW20MHz,
-        &Ieee80211HtmcsTable::htMcs47BW20MHz,
-        &Ieee80211HtmcsTable::htMcs48BW20MHz,
-        &Ieee80211HtmcsTable::htMcs49BW20MHz,
-        &Ieee80211HtmcsTable::htMcs50BW20MHz,
-        &Ieee80211HtmcsTable::htMcs51BW20MHz,
-        &Ieee80211HtmcsTable::htMcs52BW20MHz,
-        &Ieee80211HtmcsTable::htMcs53BW20MHz,
-        &Ieee80211HtmcsTable::htMcs54BW20MHz,
-        &Ieee80211HtmcsTable::htMcs55BW20MHz,
-        &Ieee80211HtmcsTable::htMcs56BW20MHz,
-        &Ieee80211HtmcsTable::htMcs57BW20MHz,
-        &Ieee80211HtmcsTable::htMcs58BW20MHz,
-        &Ieee80211HtmcsTable::htMcs59BW20MHz,
-        &Ieee80211HtmcsTable::htMcs60BW20MHz,
-        &Ieee80211HtmcsTable::htMcs61BW20MHz,
-        &Ieee80211HtmcsTable::htMcs62BW20MHz,
-        &Ieee80211HtmcsTable::htMcs63BW20MHz,
-        &Ieee80211HtmcsTable::htMcs64BW20MHz,
-        &Ieee80211HtmcsTable::htMcs65BW20MHz,
-        &Ieee80211HtmcsTable::htMcs66BW20MHz,
-        &Ieee80211HtmcsTable::htMcs67BW20MHz,
-        &Ieee80211HtmcsTable::htMcs68BW20MHz,
-        &Ieee80211HtmcsTable::htMcs69BW20MHz,
-        &Ieee80211HtmcsTable::htMcs70BW20MHz,
-        &Ieee80211HtmcsTable::htMcs71BW20MHz,
-        &Ieee80211HtmcsTable::htMcs72BW20MHz,
-        &Ieee80211HtmcsTable::htMcs73BW20MHz,
-        &Ieee80211HtmcsTable::htMcs74BW20MHz,
-        &Ieee80211HtmcsTable::htMcs75BW20MHz,
-        &Ieee80211HtmcsTable::htMcs76BW20MHz,
-        &Ieee80211HtmcsTable::htMcs0BW40MHz,
-        &Ieee80211HtmcsTable::htMcs1BW40MHz,
-        &Ieee80211HtmcsTable::htMcs2BW40MHz,
-        &Ieee80211HtmcsTable::htMcs3BW40MHz,
-        &Ieee80211HtmcsTable::htMcs4BW40MHz,
-        &Ieee80211HtmcsTable::htMcs5BW40MHz,
-        &Ieee80211HtmcsTable::htMcs6BW40MHz,
-        &Ieee80211HtmcsTable::htMcs7BW40MHz,
-        &Ieee80211HtmcsTable::htMcs8BW40MHz,
-        &Ieee80211HtmcsTable::htMcs9BW40MHz,
-        &Ieee80211HtmcsTable::htMcs10BW40MHz,
-        &Ieee80211HtmcsTable::htMcs11BW40MHz,
-        &Ieee80211HtmcsTable::htMcs12BW40MHz,
-        &Ieee80211HtmcsTable::htMcs13BW40MHz,
-        &Ieee80211HtmcsTable::htMcs14BW40MHz,
-        &Ieee80211HtmcsTable::htMcs15BW40MHz,
-        &Ieee80211HtmcsTable::htMcs16BW40MHz,
-        &Ieee80211HtmcsTable::htMcs17BW40MHz,
-        &Ieee80211HtmcsTable::htMcs18BW40MHz,
-        &Ieee80211HtmcsTable::htMcs19BW40MHz,
-        &Ieee80211HtmcsTable::htMcs20BW40MHz,
-        &Ieee80211HtmcsTable::htMcs21BW40MHz,
-        &Ieee80211HtmcsTable::htMcs22BW40MHz,
-        &Ieee80211HtmcsTable::htMcs23BW40MHz,
-        &Ieee80211HtmcsTable::htMcs24BW40MHz,
-        &Ieee80211HtmcsTable::htMcs25BW40MHz,
-        &Ieee80211HtmcsTable::htMcs26BW40MHz,
-        &Ieee80211HtmcsTable::htMcs27BW40MHz,
-        &Ieee80211HtmcsTable::htMcs28BW40MHz,
-        &Ieee80211HtmcsTable::htMcs29BW40MHz,
-        &Ieee80211HtmcsTable::htMcs30BW40MHz,
-        &Ieee80211HtmcsTable::htMcs31BW40MHz,
-        &Ieee80211HtmcsTable::htMcs32BW40MHz,
-        &Ieee80211HtmcsTable::htMcs33BW40MHz,
-        &Ieee80211HtmcsTable::htMcs34BW40MHz,
-        &Ieee80211HtmcsTable::htMcs35BW40MHz,
-        &Ieee80211HtmcsTable::htMcs36BW40MHz,
-        &Ieee80211HtmcsTable::htMcs37BW40MHz,
-        &Ieee80211HtmcsTable::htMcs38BW40MHz,
-        &Ieee80211HtmcsTable::htMcs39BW40MHz,
-        &Ieee80211HtmcsTable::htMcs40BW40MHz,
-        &Ieee80211HtmcsTable::htMcs41BW40MHz,
-        &Ieee80211HtmcsTable::htMcs42BW40MHz,
-        &Ieee80211HtmcsTable::htMcs43BW40MHz,
-        &Ieee80211HtmcsTable::htMcs44BW40MHz,
-        &Ieee80211HtmcsTable::htMcs45BW40MHz,
-        &Ieee80211HtmcsTable::htMcs46BW40MHz,
-        &Ieee80211HtmcsTable::htMcs47BW40MHz,
-        &Ieee80211HtmcsTable::htMcs48BW40MHz,
-        &Ieee80211HtmcsTable::htMcs49BW40MHz,
-        &Ieee80211HtmcsTable::htMcs50BW40MHz,
-        &Ieee80211HtmcsTable::htMcs51BW40MHz,
-        &Ieee80211HtmcsTable::htMcs52BW40MHz,
-        &Ieee80211HtmcsTable::htMcs53BW40MHz,
-        &Ieee80211HtmcsTable::htMcs54BW40MHz,
-        &Ieee80211HtmcsTable::htMcs55BW40MHz,
-        &Ieee80211HtmcsTable::htMcs56BW40MHz,
-        &Ieee80211HtmcsTable::htMcs57BW40MHz,
-        &Ieee80211HtmcsTable::htMcs58BW40MHz,
-        &Ieee80211HtmcsTable::htMcs59BW40MHz,
-        &Ieee80211HtmcsTable::htMcs60BW40MHz,
-        &Ieee80211HtmcsTable::htMcs61BW40MHz,
-        &Ieee80211HtmcsTable::htMcs62BW40MHz,
-        &Ieee80211HtmcsTable::htMcs63BW40MHz,
-        &Ieee80211HtmcsTable::htMcs64BW40MHz,
-        &Ieee80211HtmcsTable::htMcs65BW40MHz,
-        &Ieee80211HtmcsTable::htMcs66BW40MHz,
-        &Ieee80211HtmcsTable::htMcs67BW40MHz,
-        &Ieee80211HtmcsTable::htMcs68BW40MHz,
-        &Ieee80211HtmcsTable::htMcs69BW40MHz,
-        &Ieee80211HtmcsTable::htMcs70BW40MHz,
-        &Ieee80211HtmcsTable::htMcs71BW40MHz,
-        &Ieee80211HtmcsTable::htMcs72BW40MHz,
-        &Ieee80211HtmcsTable::htMcs73BW40MHz,
-        &Ieee80211HtmcsTable::htMcs74BW40MHz,
-        &Ieee80211HtmcsTable::htMcs75BW40MHz,
-        &Ieee80211HtmcsTable::htMcs76BW40MHz,
-    };
-
-    // Preserve the historical catalog entries first. Add the missing legal
-    // (bandwidth, MCS) tuples from Tables 19-27 through 19-41 in table order.
-    for (auto mcsMode : legalMcsModes) {
-        bool found = false;
-        for (const auto& entry : completeEntries) {
-            auto htMode = dynamic_cast<const Ieee80211HtMode *>(entry.mode);
-            if (htMode != nullptr &&
-                htMode->getDataMode()->getBandwidth() == mcsMode->getBandwidth() &&
-                htMode->getDataMode()->getMcsIndex() == mcsMode->getMcsIndex())
-            {
-                found = true;
-                break;
-            }
-        }
-        if (!found)
-            completeEntries.push_back({false, Ieee80211HtCompliantModes::getCompliantMode(
-                    mcsMode, Ieee80211HtMode::BAND_2_4GHZ,
-                    Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED,
-                    Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT)});
-    }
-
     // IEEE Std 802.11-2024, Table 19-6 defines the 800 ns and 400 ns GIs.
-    // Add the alternate GI for every legal tuple above; short GI is optional.
+    // Add only the alternate GI for each mode explicitly declared above;
+    // declaration order, mandatory flags, and the historical catalog remain
+    // authoritative for this operation mode.
     auto numberOfBaseEntries = completeEntries.size();
     for (size_t index = 0; index < numberOfBaseEntries; index++) {
         auto htMode = check_and_cast<const Ieee80211HtMode *>(completeEntries[index].mode);
@@ -789,24 +614,43 @@ const IIeee80211Mode *Ieee80211ModeSet::getFastestMandatoryMode() const
     return nullptr;
 }
 
+const IIeee80211Mode *Ieee80211ModeSet::getMandatoryModeAtOrBelow(const IIeee80211Mode *mode) const
+{
+    const auto bitrate = mode->getDataMode()->getNetBitrate();
+    const IIeee80211Mode *result = nullptr;
+    for (const auto& entry : entries) {
+        const auto entryBitrate = entry.mode->getDataMode()->getNetBitrate();
+        if (entry.isMandatory && entryBitrate <= bitrate &&
+            (result == nullptr || entryBitrate > result->getDataMode()->getNetBitrate()))
+            result = entry.mode;
+    }
+    return result;
+}
+
 const IIeee80211Mode *Ieee80211ModeSet::getSlowerMandatoryMode(const IIeee80211Mode *mode) const
 {
-    int index = findModeIndex(mode);
-    if (index > 0)
-        for (int i = index - 1; i >= 0; i--)
-            if (entries[i].isMandatory)
-                return entries[i].mode;
-    return nullptr;
+    const auto bitrate = mode->getDataMode()->getNetBitrate();
+    const IIeee80211Mode *result = nullptr;
+    for (const auto& entry : entries) {
+        const auto entryBitrate = entry.mode->getDataMode()->getNetBitrate();
+        if (entry.isMandatory && entryBitrate < bitrate &&
+            (result == nullptr || entryBitrate > result->getDataMode()->getNetBitrate()))
+            result = entry.mode;
+    }
+    return result;
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211Mode *mode) const
 {
-    int index = findModeIndex(mode);
-    if (index >= 0)
-        for (size_t i = index + 1; i < entries.size(); i++)
-            if (entries[i].isMandatory)
-                return entries[i].mode;
-    return nullptr;
+    const auto bitrate = mode->getDataMode()->getNetBitrate();
+    const IIeee80211Mode *result = nullptr;
+    for (const auto& entry : entries) {
+        const auto entryBitrate = entry.mode->getDataMode()->getNetBitrate();
+        if (entry.isMandatory && entryBitrate > bitrate &&
+            (result == nullptr || entryBitrate < result->getDataMode()->getNetBitrate()))
+            result = entry.mode;
+    }
+    return result;
 }
 
 const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(const char *mode)

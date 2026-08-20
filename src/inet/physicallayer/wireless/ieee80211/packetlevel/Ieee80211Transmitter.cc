@@ -87,6 +87,14 @@ void Ieee80211Transmitter::setModeSet(const Ieee80211ModeSet *modeSet)
     }
 }
 
+void Ieee80211Transmitter::setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    if (modeSet != nullptr && mode != nullptr && !modeSet->containsMode(mode))
+        throw cRuntimeError("Invalid mode");
+    this->modeSet = modeSet;
+    this->mode = mode;
+}
+
 void Ieee80211Transmitter::setMode(const IIeee80211Mode *mode)
 {
     if (this->mode != mode) {

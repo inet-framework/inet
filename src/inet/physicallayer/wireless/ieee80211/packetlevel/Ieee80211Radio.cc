@@ -58,13 +58,14 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
         Ieee80211ConfigureRadioCommand *configureCommand = dynamic_cast<Ieee80211ConfigureRadioCommand *>(message->getControlInfo());
         if (configureCommand != nullptr) {
             const char *opMode = configureCommand->getOpMode();
-            if (*opMode)
-                setModeSet(Ieee80211ModeSet::getModeSet(opMode));
             const Ieee80211ModeSet *modeSet = configureCommand->getModeSet();
-            if (modeSet != nullptr)
-                setModeSet(modeSet);
+            const Ieee80211ModeSet *newModeSet = modeSet != nullptr ? modeSet : (*opMode ? Ieee80211ModeSet::getModeSet(opMode) : nullptr);
             const IIeee80211Mode *mode = configureCommand->getMode();
-            if (mode != nullptr)
+            if (newModeSet != nullptr && mode != nullptr)
+                setModeSetAndMode(newModeSet, mode);
+            else if (newModeSet != nullptr)
+                setModeSet(newModeSet);
+            else if (mode != nullptr)
                 setMode(mode);
             const IIeee80211Band *band = configureCommand->getBand();
             if (band != nullptr)
@@ -87,6 +88,19 @@ void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
     ieee80211Transmitter->setModeSet(modeSet);
     ieee80211Receiver->setModeSet(modeSet);
     EV << "Changing radio mode set to " << modeSet << endl;
+    receptionTimer = nullptr;
+    emit(listeningChangedSignal, 0);
+}
+
+void Ieee80211Radio::setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
+{
+    if (modeSet != nullptr && mode != nullptr && !modeSet->containsMode(mode))
+        throw cRuntimeError("Invalid mode");
+    Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
+    Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
+    ieee80211Transmitter->setModeSetAndMode(modeSet, mode);
+    ieee80211Receiver->setModeSet(modeSet);
+    EV << "Changing radio mode set to " << modeSet << " and mode to " << mode << endl;
     receptionTimer = nullptr;
     emit(listeningChangedSignal, 0);
 }
@@ -329,4 +343,3 @@ const Ptr<const Ieee80211PhyHeader> Ieee80211Radio::peekIeee80211PhyHeaderAtFron
 } // namespace physicallayer
 
 } // namespace inet
-

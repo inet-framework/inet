@@ -75,10 +75,8 @@ const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *pack
     auto mode = getMode(packet, dataOrMgmtHeader);
     ASSERT(modeSet->containsMode(mode));
     if (!responseAckFrameMode) {
-        if (modeSet->getIsMandatory(mode))
-            return mode;
-        else if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
-            return slowerMode;
+        if (auto mandatoryMode = modeSet->getMandatoryModeAtOrBelow(mode))
+            return mandatoryMode;
         else
             throw cRuntimeError("Mandatory mode not found");
     }
@@ -92,10 +90,8 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
     auto mode = getMode(packet, rtsFrame);
     ASSERT(modeSet->containsMode(mode));
     if (!responseCtsFrameMode) {
-        if (modeSet->getIsMandatory(mode))
-            return mode;
-        else if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
-            return slowerMode;
+        if (auto mandatoryMode = modeSet->getMandatoryModeAtOrBelow(mode))
+            return mandatoryMode;
         else
             throw cRuntimeError("Mandatory mode not found");
     }
@@ -248,4 +244,3 @@ void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee8021
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

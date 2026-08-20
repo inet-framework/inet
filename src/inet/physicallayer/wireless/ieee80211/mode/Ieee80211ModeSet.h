@@ -63,6 +63,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     const IIeee80211Mode *getFasterMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getSlowestMandatoryMode() const;
     const IIeee80211Mode *getFastestMandatoryMode() const;
+    const IIeee80211Mode *getMandatoryModeAtOrBelow(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getSlowerMandatoryMode(const IIeee80211Mode *mode) const;
     const IIeee80211Mode *getFasterMandatoryMode(const IIeee80211Mode *mode) const;
 
@@ -85,4 +86,3 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 } // namespace inet
 
 #endif
-

@@ -6,11 +6,12 @@ Validate complete IEEE 802.11 HT long/short guard-interval catalog, lookup, and 
 #include <map>
 #include <tuple>
 
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
-#include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
 
 %global:
 using namespace inet;
@@ -20,11 +21,72 @@ class TestIeee80211Transmitter : public Ieee80211Transmitter
 {
   public:
     const IIeee80211Mode *getSelectedMode() const { return mode; }
+    const Ieee80211ModeSet *getSelectedModeSet() const { return modeSet; }
+};
+
+class TestIeee80211Mgmt : public ieee80211::Ieee80211MgmtBase
+{
+  protected:
+    virtual void handleTimer(cMessage *frame) override {}
+    virtual void handleCommand(int msgkind, cObject *ctrl) override {}
+    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<const ieee80211::Ieee80211MgmtHeader>& header) override {}
+    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<const ieee80211::Ieee80211MgmtHeader>& header) override {}
+    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<const ieee80211::Ieee80211MgmtHeader>& header) override {}
+    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<const ieee80211::Ieee80211MgmtHeader>& header) override {}
+    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<const ieee80211::Ieee80211MgmtHeader>& header) override {}
+    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<const ieee80211::Ieee80211MgmtHeader>& header) override {}
+    virtual void handleDisassociationFrame(Packet *packet, const Ptr<const ieee80211::Ieee80211MgmtHeader>& header) override {}
+    virtual void handleBeaconFrame(Packet *packet, const Ptr<const ieee80211::Ieee80211MgmtHeader>& header) override {}
+    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<const ieee80211::Ieee80211MgmtHeader>& header) override {}
+    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<const ieee80211::Ieee80211MgmtHeader>& header) override {}
+
+  public:
+    void applyModeSet(const Ieee80211ModeSet *modeSet)
+    {
+        receiveSignal(nullptr, modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet), nullptr);
+    }
+
+    const ieee80211::Ieee80211SupportedRatesElement& getSupportedRates() const { return supportedRates; }
 };
 
 %activity:
+// Reject unsupported VHT greenfield before any mixed-format cache request.
+bool rejectedVhtGreenfieldBeforeMixed = false;
+try {
+    Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+            Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_GREENFIELD,
+            Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+}
+catch (cRuntimeError&) {
+    rejectedVhtGreenfieldBeforeMixed = true;
+}
+ASSERT(rejectedVhtGreenfieldBeforeMixed);
+
 const auto modeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
-ASSERT(modeSet->getNumModes() == 306);
+ASSERT(modeSet->getNumModes() == 128);
+
+TestIeee80211Mgmt mgmt;
+mgmt.applyModeSet(modeSet);
+const auto& htSupportedRates = mgmt.getSupportedRates();
+const double expectedHtSupportedRates[] = {6.5, 13, 19.5, 26, 39, 52, 58.5, 65};
+ASSERT(htSupportedRates.numRates == 8);
+for (int i = 0; i < htSupportedRates.numRates; i++) {
+    ASSERT(htSupportedRates.rate[i] == expectedHtSupportedRates[i]);
+    if (i > 0)
+        ASSERT(htSupportedRates.rate[i - 1] < htSupportedRates.rate[i]);
+}
+
+mgmt.applyModeSet(Ieee80211ModeSet::getModeSet("a"));
+const auto& legacySupportedRates = mgmt.getSupportedRates();
+const double expectedLegacySupportedRates[] = {6, 12, 24};
+ASSERT(legacySupportedRates.numRates == 3);
+for (int i = 0; i < legacySupportedRates.numRates; i++) {
+    ASSERT(legacySupportedRates.rate[i] == expectedLegacySupportedRates[i]);
+    if (i > 0)
+        ASSERT(legacySupportedRates.rate[i - 1] < legacySupportedRates.rate[i]);
+}
+for (int i = legacySupportedRates.numRates; i < 8; i++)
+    ASSERT(legacySupportedRates.rate[i] == 0);
 
 using Key = std::tuple<int, int, Ieee80211HtModeBase::GuardIntervalType>;
 std::map<Key, const Ieee80211HtMode *> modes;
@@ -37,8 +99,7 @@ for (int index = 0; index < modeSet->getNumModes(); index++) {
     int mcs = dataMode->getMcsIndex();
     auto guardIntervalType = dataMode->getGuardIntervalType();
     ASSERT(bandwidth != 0);
-    ASSERT((bandwidth == 20 && ((0 <= mcs && mcs <= 31) || (33 <= mcs && mcs <= 76))) ||
-           (bandwidth == 40 && 0 <= mcs && mcs <= 76));
+    ASSERT((bandwidth == 20 || bandwidth == 40) && 0 <= mcs && mcs <= 31);
     ASSERT(modes.emplace(Key(bandwidth, mcs, guardIntervalType), mode).second);
 
     bool mustBeMandatory = bandwidth == 20 && mcs <= 7 &&
@@ -58,9 +119,7 @@ for (int index = 0; index < modeSet->getNumModes(); index++) {
 }
 
 for (int bandwidth : {20, 40}) {
-    for (int mcs = 0; mcs <= 76; mcs++) {
-        if (bandwidth == 20 && mcs == 32)
-            continue;
+    for (int mcs = 0; mcs <= 31; mcs++) {
         auto longMode = modes.at(Key(bandwidth, mcs, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG));
         auto shortMode = modes.at(Key(bandwidth, mcs, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT));
         auto longData = longMode->getDataMode();
@@ -84,14 +143,6 @@ for (int bandwidth : {20, 40}) {
 }
 ASSERT(modes.find(Key(20, 32, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG)) == modes.end());
 
-auto mcs32 = modes.at(Key(40, 32, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG))->getDataMode();
-ASSERT(mcs32->getNumberOfSpatialStreams() == 1);
-ASSERT(mcs32->getNumberOfDataSubcarriers() == 48);
-auto mcs76Bw20 = modes.at(Key(20, 76, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG))->getDataMode();
-ASSERT(mcs76Bw20->getModulationAndCodingScheme()->getStreamExtension3Modulation()->getSubcarrierModulation() == &Qam16Modulation::singleton);
-auto mcs73Bw40 = modes.at(Key(40, 73, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG))->getDataMode();
-ASSERT(mcs73Bw40->getModulationAndCodingScheme()->getStreamExtension2Modulation()->getSubcarrierModulation() == &Qam16Modulation::singleton);
-
 auto mixedLong = modes.at(Key(20, 0, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG));
 auto mixedShort = modes.at(Key(20, 0, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT));
 ASSERT(mixedLong->getDataMode()->getDuration(B(24)) == SimTime(36, SIMTIME_US));
@@ -105,6 +156,18 @@ ASSERT(mixedShort->getDataMode()->getDuration(B(30)) == SimTime(39600, SIMTIME_N
 ASSERT(mixedShort->getDataDuration(B(24)) == SimTime(36, SIMTIME_US));
 ASSERT(mixedShort->getDataDuration(B(27)) == SimTime(36, SIMTIME_US));
 ASSERT(mixedShort->getDataDuration(B(30)) == SimTime(40, SIMTIME_US));
+
+// Preserve representative historical optional-rate timing and bitrate values.
+auto mixedShortMcs8 = modes.at(Key(20, 8, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT));
+auto mixedShortMcs0Bw40 = modes.at(Key(40, 0, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT));
+ASSERT(std::fabs(mixedShortMcs8->getDataMode()->getNetBitrate().get() - 14.4444444444444e6) < 1);
+ASSERT(mixedShortMcs8->getDataMode()->getDuration(B(24)) == SimTime(18, SIMTIME_US));
+ASSERT(mixedShortMcs8->getDataDuration(B(24)) == SimTime(20, SIMTIME_US));
+ASSERT(mixedShortMcs8->getDuration(B(24)) == SimTime(60, SIMTIME_US));
+ASSERT(mixedShortMcs0Bw40->getDataMode()->getNetBitrate() == Mbps(15));
+ASSERT(mixedShortMcs0Bw40->getDataMode()->getDuration(B(24)) == SimTime(14400, SIMTIME_NS));
+ASSERT(mixedShortMcs0Bw40->getDataDuration(B(24)) == SimTime(16, SIMTIME_US));
+ASSERT(mixedShortMcs0Bw40->getDuration(B(24)) == SimTime(52, SIMTIME_US));
 auto greenfieldShort = Ieee80211HtCompliantModes::getCompliantMode(
         &Ieee80211HtmcsTable::htMcs8BW20MHz, Ieee80211HtMode::BAND_2_4GHZ,
         Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD,
@@ -159,8 +222,23 @@ auto unspecified135 = dynamic_cast<const Ieee80211HtMode *>(modeSet->getMode(Mbp
 ASSERT(unspecified135->getDataMode()->getMcsIndex() == 6);
 ASSERT(unspecified135->getDataMode()->getGuardIntervalType() == Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
 ASSERT(modeSet->findMode(Mbps(65), MHz(20), 1, SimTime(600, SIMTIME_NS)) == nullptr);
-ASSERT(Ieee80211ModeSet::getModeSet("a")->findMode(Mbps(6), Hz(NaN), -1, SimTime(800, SIMTIME_NS)) == nullptr);
+const auto legacyOfdmModeSet = Ieee80211ModeSet::getModeSet("a");
+ASSERT(legacyOfdmModeSet->findMode(Mbps(6), Hz(NaN), -1, SimTime(800, SIMTIME_NS)) != nullptr);
+ASSERT(legacyOfdmModeSet->findMode(Mbps(6), Hz(NaN), -1, SimTime(400, SIMTIME_NS)) == nullptr);
 
+Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+        Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED,
+        Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+bool rejectedVhtGreenfieldAfterMixed = false;
+try {
+    Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+            Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_GREENFIELD,
+            Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+}
+catch (cRuntimeError&) {
+    rejectedVhtGreenfieldAfterMixed = true;
+}
+ASSERT(rejectedVhtGreenfieldAfterMixed);
 const auto vhtModeSet = Ieee80211ModeSet::getModeSet("ac");
 bool foundVhtLongGuardInterval = false;
 bool foundVhtShortGuardInterval = false;
@@ -184,6 +262,43 @@ ASSERT(vhtOneSymbol->getDataDuration(B(24)) == SimTime(4, SIMTIME_US));
 ASSERT(vhtOneSymbol->getPreambleDuration() == SimTime(20, SIMTIME_US));
 ASSERT(vhtOneSymbol->getHeaderDuration() >= SIMTIME_ZERO);
 ASSERT(vhtOneSymbol->getDuration(B(24)) == vhtOneSymbol->getPreambleDuration() + vhtOneSymbol->getHeaderDuration() + vhtOneSymbol->getDataDuration(B(24)));
+
+for (const auto candidateSet : {modeSet, vhtModeSet}) {
+    for (int index = 0; index < candidateSet->getNumModes(); index++) {
+        auto mode = candidateSet->getMode(index);
+        auto slowerMode = candidateSet->getSlowerMode(mode);
+        auto fasterMode = candidateSet->getFasterMode(mode);
+        auto slowerMandatoryMode = candidateSet->getSlowerMandatoryMode(mode);
+        auto fasterMandatoryMode = candidateSet->getFasterMandatoryMode(mode);
+        ASSERT(slowerMode == nullptr || slowerMode->getDataMode()->getNetBitrate() < mode->getDataMode()->getNetBitrate());
+        ASSERT(fasterMode == nullptr || fasterMode->getDataMode()->getNetBitrate() > mode->getDataMode()->getNetBitrate());
+        ASSERT(slowerMandatoryMode == nullptr || slowerMandatoryMode->getDataMode()->getNetBitrate() < mode->getDataMode()->getNetBitrate());
+        ASSERT(fasterMandatoryMode == nullptr || fasterMandatoryMode->getDataMode()->getNetBitrate() > mode->getDataMode()->getNetBitrate());
+    }
+}
+
+// The equal-rate mandatory candidate is selected by bitrate, not entry index.
+auto equalRateVhtMode = Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss2, Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+auto mandatoryAtEqualRate = vhtModeSet->getMandatoryModeAtOrBelow(equalRateVhtMode);
+ASSERT(mandatoryAtEqualRate != nullptr);
+ASSERT(mandatoryAtEqualRate->getDataMode()->getNetBitrate() == equalRateVhtMode->getDataMode()->getNetBitrate());
+ASSERT(vhtModeSet->getIsMandatory(mandatoryAtEqualRate));
+
+transmitter.setModeSetAndMode(vhtModeSet, vhtOneSymbol);
+ASSERT(transmitter.getSelectedModeSet() == vhtModeSet);
+ASSERT(transmitter.getSelectedMode() == vhtOneSymbol);
+bool rejectedCombinedModeUpdate = false;
+try {
+    transmitter.setModeSetAndMode(modeSet, greenfieldShortOneSymbol);
+}
+catch (cRuntimeError&) {
+    rejectedCombinedModeUpdate = true;
+}
+ASSERT(rejectedCombinedModeUpdate);
+ASSERT(transmitter.getSelectedModeSet() == vhtModeSet);
+ASSERT(transmitter.getSelectedMode() == vhtOneSymbol);
 
 EV << "HT guard interval catalog, timing, and lookup checks passed.\n";
 

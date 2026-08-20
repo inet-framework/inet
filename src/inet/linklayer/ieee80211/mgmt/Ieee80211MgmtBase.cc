@@ -45,11 +45,24 @@ void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, 
 
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
-        supportedRates.numRates = std::min(8, modeSet->getNumModes());
+        for (int i = 0; i < 8; i++)
+            supportedRates.rate[i] = 0;
         int rateIndex = 0;
-        for (int i = 0; i < supportedRates.numRates; i++)
-            if (modeSet->isMandatory(i))
-                supportedRates.rate[rateIndex++] = modeSet->getMode(i)->getDataMode()->getNetBitrate().get<Mbps>();
+        for (int i = 0; i < modeSet->getNumModes() && rateIndex < 8; i++) {
+            if (!modeSet->isMandatory(i))
+                continue;
+            double rate = modeSet->getMode(i)->getDataMode()->getNetBitrate().get<Mbps>();
+            bool alreadyStored = false;
+            for (int j = 0; j < rateIndex; j++) {
+                if (supportedRates.rate[j] == rate) {
+                    alreadyStored = true;
+                    break;
+                }
+            }
+            if (!alreadyStored)
+                supportedRates.rate[rateIndex++] = rate;
+        }
+        supportedRates.numRates = rateIndex;
     }
 }
 
@@ -163,4 +176,3 @@ void Ieee80211MgmtBase::stop()
 } // namespace ieee80211
 
 } // namespace inet
-

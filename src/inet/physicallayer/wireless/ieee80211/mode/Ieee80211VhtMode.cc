@@ -243,7 +243,9 @@ unsigned int Ieee80211VhtPreambleMode::computeNumberOfHTLongTrainings(unsigned i
 
 const simtime_t Ieee80211VhtPreambleMode::getDurationBeforeHeader() const
 {
-    return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + legacySignalMode->getDuration();
+    // IEEE Std 802.11-2024, 21.3.2: the L-SIG duration is part of the
+    // pre-header timing of the supported VHT mixed format.
+    return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + getLSIGDuration();
 }
 
 const simtime_t Ieee80211VhtPreambleMode::getDuration() const
@@ -677,9 +679,13 @@ Ieee80211VhtCompliantModes::~Ieee80211VhtCompliantModes()
 
 const Ieee80211VhtMode *Ieee80211VhtCompliantModes::getCompliantMode(const Ieee80211Vhtmcs *mcsMode, Ieee80211VhtMode::BandMode centerFrequencyMode, Ieee80211VhtPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211VhtModeBase::GuardIntervalType guardIntervalType)
 {
+    // IEEE Std 802.11-2024, 21.3.2 permits VHT PPDUs only in the mixed
+    // preamble format represented by this mode implementation.
+    if (preambleFormat != Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED)
+        throw cRuntimeError("Unsupported VHT preamble format: only HT_PREAMBLE_MIXED is supported (IEEE Std 802.11-2024, 21.3.2)");
     const char *name = ""; // TODO
     unsigned int nss = mcsMode->getNumNss();
-    auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType, nss);
+    auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType, nss, centerFrequencyMode, preambleFormat);
     auto mode = singleton.modeCache.find(htModeId);
     if (mode == singleton.modeCache.end()) {
         const Ieee80211OfdmSignalMode *legacySignal = nullptr;
@@ -698,7 +704,7 @@ const Ieee80211VhtMode *Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
         const Ieee80211VhtDataMode *dataMode = new Ieee80211VhtDataMode(mcsMode, mcsMode->getBandwidth(), guardIntervalType);
         const Ieee80211VhtPreambleMode *preambleMode = new Ieee80211VhtPreambleMode(htSignal, legacySignal, preambleFormat, dataMode->getNumberOfSpatialStreams());
         const Ieee80211VhtMode *htMode = new Ieee80211VhtMode(name, preambleMode, dataMode, centerFrequencyMode);
-        singleton.modeCache.insert(std::pair<std::tuple<Hz, unsigned int, Ieee80211VhtModeBase::GuardIntervalType, unsigned int>, const Ieee80211VhtMode *>(htModeId, htMode));
+        singleton.modeCache.insert(std::pair<decltype(htModeId), const Ieee80211VhtMode *>(htModeId, htMode));
         return htMode;
     }
     return mode->second;

@@ -26,9 +26,9 @@ simple RateSelection extends SimpleModule like IRateSelection
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
 
         double dataFrameBitrate @unit(bps) = default(-1bps); // Fastest
-        double dataFrameBandwidth @unit(Hz) = default(nan Hz); // Used only when dataFrameBitrate is specified
-        int dataFrameNumSpatialStreams = default(-1); // Used only when dataFrameBitrate is specified
-        double dataFrameGuardInterval @unit(s) = default(-1s); // Used only when dataFrameBitrate is specified
+        double dataFrameBandwidth @unit(Hz) = default(nan Hz); // Explicit mode qualifier when dataFrameBitrate is specified
+        int dataFrameNumSpatialStreams = default(-1); // Explicit mode qualifier when dataFrameBitrate is specified
+        double dataFrameGuardInterval @unit(s) = default(-1s); // Explicit mode qualifier when dataFrameBitrate is specified
 
         double mgmtFrameBitrate @unit(bps) = default(-1bps); // Fastest
         double controlFrameBitrate @unit(bps) = default(-1bps);
