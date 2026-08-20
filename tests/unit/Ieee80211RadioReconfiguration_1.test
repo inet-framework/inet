@@ -55,6 +55,18 @@ using namespace inet::physicallayer;
     ASSERT(std::isnan(cmd.getBitrate().get()));
     ASSERT(cmd.getMode() == nullptr);
     EV << "ConfigureRadioCommand channel change only verified.\n";
+
+    // Validate ConfigureRadioCommand with channel object
+    const IIeee80211Band *band24 = Ieee80211CompliantBands::getBand("2.4 GHz");
+    ASSERT(band24 != nullptr);
+    Ieee80211Channel channelObj(band24, 6, IEEE80211_SECONDARY_CHANNEL_ABOVE);
+    Ieee80211ConfigureRadioCommand cmdChannel;
+    cmdChannel.setChannel(&channelObj);
+    ASSERT(cmdChannel.getChannel() != nullptr);
+    ASSERT(cmdChannel.getChannel()->getBand() == band24);
+    ASSERT(cmdChannel.getChannel()->getChannelNumber() == 6);
+    ASSERT(cmdChannel.getChannel()->getSecondaryChannelOffset() == IEEE80211_SECONDARY_CHANNEL_ABOVE);
+    EV << "ConfigureRadioCommand with channel object verified.\n";
 }
 
 EV << ".\n";
@@ -65,4 +77,6 @@ Resolved 11Mbps mode bitrate=1.1e+07 bw=2.2e+07
 Resolved MCS7 20MHz bitrate=6.5e+07 bw=2e+07
 Resolved MCS7 40MHz bitrate=1.35e+08 bw=4e+07
 ConfigureRadioCommand channel change only verified.
+ConfigureRadioCommand with channel object verified.
 .
+

@@ -108,7 +108,7 @@ void Dcaf::releaseChannel(IChannelAccess::ICallback *callback)
 void Dcaf::restartChannelAccess(IChannelAccess::ICallback *callback)
 {
     Enter_Method("restartChannelAccess");
-    ASSERT(owning && this->callback == callback);
+    ASSERT(owning && (callback == nullptr || this->callback == callback));
     owning = false;
     emit(channelOwnershipChangedSignal, owning);
     // IEEE Std 802.11-2024, 11.15.9 item b): retain the current CW and draw a

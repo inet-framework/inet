@@ -132,12 +132,13 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
             const Ieee80211Channel *currentChannel = ieee80211Receiver->getChannel();
             const char *requestedOpMode = configureCommand->getOpMode();
             std::string targetOpMode = *requestedOpMode ? requestedOpMode : this->opMode;
+            const Ieee80211Channel *channel = configureCommand->getChannel();
             const IIeee80211Band *bandParam = configureCommand->getBand();
-            const IIeee80211Band *targetBand = bandParam != nullptr ? bandParam : this->band;
+            const IIeee80211Band *targetBand = bandParam != nullptr ? bandParam :
+                    (channel != nullptr && channel->getBand() != nullptr) ? channel->getBand() : this->band;
             const Ieee80211ModeSet *modeSetParam = configureCommand->getModeSet();
             const Ieee80211ModeSet *targetModeSet = modeSetParam != nullptr ? modeSetParam :
                     *targetOpMode.c_str() ? Ieee80211ModeSet::getModeSet(targetOpMode.c_str()) : this->modeSet;
-            const Ieee80211Channel *channel = configureCommand->getChannel();
             int newChannelNumber = configureCommand->getChannelNumber();
             int targetChannelNumber = channel != nullptr ? channel->getChannelNumber() :
                     newChannelNumber != -1 ? newChannelNumber :
