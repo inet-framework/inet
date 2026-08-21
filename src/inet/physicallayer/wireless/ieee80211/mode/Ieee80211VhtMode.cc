@@ -649,6 +649,7 @@ const simtime_t Ieee80211VhtMode::getDataDuration(b dataBitLength) const
     if (dataMode->getGuardInterval() == dataMode->getShortGIDuration()) {
         // IEEE Std 802.11-2024, 21.4.3, Eq. (21-109): short-GI VHT data
         // airtime is the raw TSYMS train rounded up to a TSYML boundary.
+        // This corrects the previous implementation that used the raw short-GI symbol train.
         const auto longGiSymbolInterval = dataMode->getDFTPeriod() + dataMode->getGIDuration();
         const auto numberOfLongGiSymbols = (dataDuration.raw() + longGiSymbolInterval.raw() - 1) / longGiSymbolInterval.raw();
         dataDuration = SimTime::fromRaw(numberOfLongGiSymbols * longGiSymbolInterval.raw());

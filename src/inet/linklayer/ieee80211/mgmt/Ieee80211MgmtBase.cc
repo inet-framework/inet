@@ -45,6 +45,10 @@ void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, 
 
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
+        // BUG FIX: Previous implementation set numRates = min(8, getNumModes()) but only
+        // populated rateIndex entries, leaving remaining slots uninitialized/stale while
+        // advertising them via numRates. Now we zero all slots, iterate ALL modes (not just
+        // first 8), collect distinct mandatory bitrates, and set numRates to actual count.
         for (int i = 0; i < 8; i++)
             supportedRates.rate[i] = 0;
         int rateIndex = 0;

@@ -475,6 +475,7 @@ const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs30BW40MHz([](){ return new Ie
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs31BW40MHz([](){ return new Ieee80211Htmcs(31, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Ieee80211HtCompliantCodes::htConvolutionalCode5_6, MHz(40));});
 
 // IEEE Std 802.11-2024, Table 19-35: optional MCS 32 is one BPSK stream.
+// This corrects the previous incorrect 4-stream all-BPSK constructor.
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs32BW40MHz([](){ return new Ieee80211Htmcs(32, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40));});
 
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs33BW20MHz([](){ return new Ieee80211Htmcs(33, &Qam16Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20));});
@@ -523,6 +524,8 @@ const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs72BW20MHz([](){ return new Ie
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs73BW20MHz([](){ return new Ieee80211Htmcs(73, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs74BW20MHz([](){ return new Ieee80211Htmcs(74, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs75BW20MHz([](){ return new Ieee80211Htmcs(75, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20));});
+// IEEE Std 802.11-2024, Table 19-38 (continued): MCS 76 uses 64-QAM for streams 1-3 and 16-QAM for stream 4.
+// This corrects the previous incorrect QPSK modulation for the 4th stream.
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs76BW20MHz([](){ return new Ieee80211Htmcs(76, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20));});
 
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs33BW40MHz([](){ return new Ieee80211Htmcs(33, &Qam16Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40));});
@@ -569,6 +572,8 @@ const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs69BW40MHz([](){ return new Ie
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs70BW40MHz([](){ return new Ieee80211Htmcs(70, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &Qam16Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs71BW40MHz([](){ return new Ieee80211Htmcs(71, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &Qam16Modulation::singleton, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs72BW40MHz([](){ return new Ieee80211Htmcs(72, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &QpskModulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
+// IEEE Std 802.11-2024, Table 19-40: MCS 73 uses 64-QAM for streams 1-2 and 16-QAM for stream 3.
+// This corrects the previous incorrect 64-QAM modulation for the 3rd stream.
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs73BW40MHz([](){ return new Ieee80211Htmcs(73, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs74BW40MHz([](){ return new Ieee80211Htmcs(74, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs75BW40MHz([](){ return new Ieee80211Htmcs(75, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});

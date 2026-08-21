@@ -485,6 +485,9 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
     std::vector<Entry> *nonConstEntries = const_cast<std::vector<Entry> *>(&this->entries);
     // Keep equal-bitrate modes in declaration order because unqualified lookups
     // intentionally preserve the historically preferred mode.
+    // NOTE: This depends on (a) base entries being declared before appended variants
+    // and (b) std::stable_sort preserving that order for ties. Future catalog edits
+    // that reorder completeHtGuardIntervalVariants or the base list may break this invariant.
     std::stable_sort(nonConstEntries->begin(), nonConstEntries->end(), EntryNetBitrateComparator());
     auto referenceMode = entries[0].mode;
     for (auto entry : entries) {
@@ -537,7 +540,9 @@ const IIeee80211Mode *Ieee80211ModeSet::findCompatibleMode(const IIeee80211Mode 
         const auto candidateGuardInterval = candidateDataMode->getGuardInterval();
         const bool bandwidthMatches = (std::isnan(sourceBandwidth.get()) && std::isnan(candidateBandwidth.get())) ||
                 (!std::isnan(sourceBandwidth.get()) && !std::isnan(candidateBandwidth.get()) && sourceBandwidth == candidateBandwidth);
-        const bool guardIntervalMatches = (sourceGuardInterval < SIMTIME_ZERO && candidateGuardInterval < SIMTIME_ZERO) ||
+        // GI = -1 indicates unconstrained guard interval (e.g., non-OFDM modes).
+        // Treat GI = -1 as matching any candidate GI, and require exact match when both are >= 0.
+        const bool guardIntervalMatches = (sourceGuardInterval < SIMTIME_ZERO) || (candidateGuardInterval < SIMTIME_ZERO) ||
                 (sourceGuardInterval >= SIMTIME_ZERO && candidateGuardInterval == sourceGuardInterval);
         if (minBitrate <= candidateDataMode->getNetBitrate() && candidateDataMode->getNetBitrate() <= maxBitrate &&
             bandwidthMatches && candidateDataMode->getNumberOfSpatialStreams() == sourceDataMode->getNumberOfSpatialStreams() &&
@@ -643,6 +648,10 @@ const IIeee80211Mode *Ieee80211ModeSet::getFastestMandatoryMode() const
 
 const IIeee80211Mode *Ieee80211ModeSet::getMandatoryModeAtOrBelow(const IIeee80211Mode *mode) const
 {
+    // Returns the highest-bitrate mandatory mode whose bitrate is <= the given mode's bitrate.
+    // For equal-bitrate mandatory modes, returns the first-encountered entry (strict > comparison).
+    // This may return a different mode object than the input when the input is mandatory and
+    // shares bitrate with another mandatory mode, but the resulting rate is behavior-equivalent.
     const auto bitrate = mode->getDataMode()->getNetBitrate();
     const IIeee80211Mode *result = nullptr;
     for (const auto& entry : entries) {

@@ -59,6 +59,9 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
         if (configureCommand != nullptr) {
             const char *opMode = configureCommand->getOpMode();
             const Ieee80211ModeSet *modeSet = configureCommand->getModeSet();
+            // NOTE: When both modeSet and opMode are present, modeSet takes precedence
+            // and opMode is silently ignored. This differs from the previous behavior
+            // where both were applied sequentially (with modeSet as final state).
             const Ieee80211ModeSet *newModeSet = modeSet != nullptr ? modeSet : (*opMode ? Ieee80211ModeSet::getModeSet(opMode) : nullptr);
             const IIeee80211Mode *mode = configureCommand->getMode();
             if (newModeSet != nullptr && mode != nullptr)
