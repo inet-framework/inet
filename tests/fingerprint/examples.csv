@@ -475,7 +475,7 @@
 /examples/pim/sm_ipv6/,              -f omnetpp.ini -c General -r 0,                120s,            0a21-bad8/~tNlb, PASS, MLD EthernetMac Ipv6
 /examples/pim/ssm_ipv6/,             -f omnetpp.ini -c General -r 0,                60s,             6eba-9db0/~tNl, PASS, MLD EthernetMac Ipv6
 
-/examples/seaport/,                  -f omnetpp.ini -c General -r 0,                1000s,           32cb-156a/tplx;fcf4-00cd/~tNl;e3e9-834d/tyf, PASS, igmp EthernetMac Ipv4
+/examples/seaport/,                  -f omnetpp.ini -c General -r 0,                1000s,           d2b0-5f71/tplx;0271-eeef/~tNl;e3e9-834d/tyf, PASS, igmp EthernetMac Ipv4
 
 /examples/quic/basic3/,                 -f omnetpp.ini -c General -r 0,                  0.2s,            bc45-9531/tplx;e47e-ec5f/~tNl, PASS, quic Ipv4
 /examples/quic/byte_order/,             -f omnetpp.ini -c General -r 0,                  250s,            8a06-75cc/tplx;3780-832d/~tNl, PASS, quic Ipv4
