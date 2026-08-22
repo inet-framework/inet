@@ -42,12 +42,10 @@ Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQue
     if (subframes) {
         if (subframes->size() < 2 || subframes->front() != candidate)
             throw cRuntimeError("A-MSDU policy must return at least two frames with the selected candidate first");
-        std::unordered_set<Packet *> availableFrames;
-        for (int i = 0; i < pendingQueue->getNumPackets(); i++)
-            availableFrames.insert(pendingQueue->getPacket(i));
         std::unordered_set<Packet *> uniqueFrames;
         for (auto subframe : *subframes) {
-            if (subframe == nullptr || !uniqueFrames.insert(subframe).second || availableFrames.find(subframe) == availableFrames.end() || !isFrameEligible(subframe))
+            auto identity = [subframe](const Packet *packet) { return packet == subframe; };
+            if (subframe == nullptr || !uniqueFrames.insert(subframe).second || pendingQueue->findPacket(identity) != subframe || !isFrameEligible(subframe))
                 throw cRuntimeError("A-MSDU policy returned a frame that is unavailable, ineligible, or duplicated");
         }
         struct AggregateFrameState { Tid tid; MacAddress receiver; MacAddress transmitter; MacAddress address3; MacAddress address4; int type; bool toDS; bool fromDS; b dataLength; b headerLength; b trailerLength; };

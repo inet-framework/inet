@@ -2847,6 +2847,41 @@ ASSERT(!dataService.hasEligibleFrame(&mixedQueue));
     delete frames;
 }
 
+// A-MSDU validation discovers selected members by identity without enumerating
+// an unrelated trailing backlog through the packet collection API.
+{
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(8)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    TestPacketQueue queue;
+    auto firstSubframe = makeAggregatePacket("backlogAggregateFirst", SequenceNumberCyclic(14));
+    auto secondSubframe = makeAggregatePacket("backlogAggregateSecond", SequenceNumberCyclic(15));
+    queue.packets = { firstSubframe, secondSubframe };
+    for (int i = 0; i < 128; i++)
+        queue.packets.push_back(makeAggregatePacket("backlogAggregateTail", SequenceNumberCyclic(16 + i)));
+    TestSelectedMsduAggregationPolicy aggregationPolicy;
+    aggregationPolicy.selectedPackets = { firstSubframe, secondSubframe };
+    TestOriginatorQosMacDataService service;
+    service.enableMsduAggregationPolicy(&aggregationPolicy);
+    auto frames = service.extractFramesToTransmit(&queue);
+    ASSERT(frames != nullptr);
+    ASSERT(frames->size() == 1);
+    ASSERT(frames->front()->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent());
+    ASSERT(queue.getNumPackets() == 128);
+    ASSERT(queue.numGetPacketCalls == 0);
+    service.release(frames->front());
+    delete frames->front();
+    delete frames;
+    for (auto packet : queue.packets)
+        delete packet;
+    queue.packets.clear();
+}
+
 // The built-in policy is anchored on the provider-selected candidate. Held
 // enumeration members do not hide later compatible frames, while an oversized
 // anchor falls back to ordinary dequeue without aggregating its followers.
