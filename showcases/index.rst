@@ -48,6 +48,7 @@ All showcases:
    tsn/index
    general/index
    measurement/index
+   mobileip/index
    mobility/index
    quic/index
    routing/index

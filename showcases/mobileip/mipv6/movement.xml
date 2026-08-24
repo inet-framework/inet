@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Movement script for the mobile node (TurtleMobility).
+
+  The node dwells on its home link, then moves once to the foreign link and stays
+  there: at home 0-25 s, moving 25-30 s, on the foreign link from then on. The
+  x coordinates match the access point positions in MobileIpv6Showcase.ned.
+-->
+<movement>
+    <set x="300" y="120"/>
+    <wait t="25"/>
+    <moveto x="600" y="120" t="5"/>
+    <wait t="10000"/>
+</movement>
