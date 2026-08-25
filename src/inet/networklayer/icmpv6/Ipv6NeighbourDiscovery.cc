@@ -1211,8 +1211,11 @@ void Ipv6NeighbourDiscovery::processRsPacket(Packet *packet, const Ipv6RouterSol
             scheduleAt(scheduledTime, msg);
             advIfEntry->nextScheduledRATime = scheduledTime;
         }
-        else
+        else {
+            EV_DETAIL << "A multicast RA is already scheduled at " << advIfEntry->nextScheduledRATime
+                      << "; it will serve this solicitation\n";
             delete msg;
+        }
     }
     else {
         EV_INFO << "This interface is a host, discarding RA message\n";
@@ -1727,6 +1730,17 @@ void Ipv6NeighbourDiscovery::sendSolicitedRa(cMessage *msg)
     Ipv6Address destAddr = Ipv6Address("FF02::1");
     EV_DETAIL << "Testing condition!\n";
     createAndSendRaPacket(destAddr, ie);
+
+    /*When this advertisement was scheduled it became the next multicast Router
+      Advertisement to be sent, so nextScheduledRATime was set to its send time
+      (RFC 4861 Section 6.2.6). It has now been sent, and the next multicast
+      advertisement is the pending periodic one again. Point nextScheduledRATime back
+      at it; left in the past, it would make every later solicitation compare against
+      an advertisement that has already gone out, and be ignored for as long as no
+      periodic advertisement is sent.*/
+    if (AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie))
+        advIfEntry->nextScheduledRATime = advIfEntry->raTimeoutMsg->getArrivalTime();
+
     delete msg;
 }
 
