@@ -43,6 +43,9 @@ Mobile IPv6 is dense with abbreviations, so here is the cast of characters:
 - **Correspondent node (CN)** — simply the peer the mobile node talks to: a
   server, another host, anything. It can be anywhere in the internet, and it
   needs Mobile IPv6 support only if it takes part in route optimization.
+- **Binding** — the association between a home address and a care-of address,
+  valid for a limited lifetime; creating, refreshing and deleting bindings is
+  what all Mobile IPv6 signaling does.
 
 The mobile node acquires both of its addresses by *stateless address
 autoconfiguration* (SLAAC): routers periodically multicast Router
@@ -67,13 +70,19 @@ When the mobile node (MN) walks out of its home network into a foreign one:
 4. **Registration** — the mobile node sends a *Binding Update (BU)* to its
    home agent (HA): "my home address is now reachable at this care-of
    address, for this lifetime." The home agent confirms with a *Binding
-   Acknowledgement (BAck)*. No security handshake is needed here — the mobile
+   Acknowledgement (BAck)*. Every Binding Update carries a sequence number
+   that counts up, and the acknowledgement echoes the number of the update it
+   answers; each end discards anything below the highest number it has already
+   seen as stale, which is how a retransmission is told apart from a newer
+   registration. No security handshake is needed here — the mobile
    node and its home agent trust each other by prior arrangement (the standard
    protects this signaling with an IPsec association set up in advance).
 5. **Delivery resumes** — the home agent now intercepts every packet addressed
    to the home address and forwards it to the care-of address inside an
-   IPv6-in-IPv6 tunnel. The mobile node sends its own traffic back through the
-   same tunnel in reverse.
+   IPv6-in-IPv6 tunnel: it wraps the whole original packet inside a new one
+   addressed to the care-of address, and the mobile node unwraps
+   (decapsulates) it again. The mobile node sends its own traffic back through
+   the same tunnel in reverse.
 
 Bindings are soft state: they expire unless the mobile node refreshes them
 with further Binding Updates, so a crashed or vanished mobile node simply ages
@@ -245,14 +254,16 @@ it is:
   that counts is the second, which is why the binding cache shown later
   records sequence number 2.
 - Routers in this network have ICMPv6 Redirect generation disabled
-  (``sendRedirects = false``). Traffic intercepted *toward* the mobile node
-  never triggers the rule — it is steered into the tunnel before the
-  forwarding check. The trigger is the way back: after decapsulating a
-  reverse-tunneled reply, the home agent forwards the inner packet out of the
-  very interface the tunneled packet arrived on — the textbook Redirect
-  condition — and would send a useless Redirect to the mobile node's home
-  address on every reply. A real stack attributes decapsulated packets to the
-  tunnel interface instead; the flag stands in for that difference.
+  (``sendRedirects = false``). A router sends a Redirect when it forwards a
+  packet back out of the very interface that packet arrived on, to tell the
+  sender about a better first hop. Traffic intercepted *toward* the mobile
+  node never meets that condition — it is steered into the tunnel before the
+  forwarding check. The way back does: after decapsulating a reverse-tunneled
+  reply, the home agent forwards the inner packet out of the very interface
+  the tunneled packet arrived on, and would send a useless Redirect to the
+  mobile node's home address on every reply. A real stack attributes
+  decapsulated packets to the tunnel interface instead; the flag stands in for
+  that difference.
 
 The Model
 ---------
@@ -307,6 +318,9 @@ transmission and channel-access overhead on top):
 - **tunneled**: 2 × (1 + 5) + 2 × (5 + 8) = 38 ms — every packet crosses the
   backbone twice, once to the home agent and once through the tunnel
 - **route-optimized**: 2 × (1 + 8) = 18 ms
+
+Add the wireless hop to each and these become the three plateaus the Results
+section measures: 14 ms at home, 40 ms tunneled, 20 ms route-optimized.
 
 Note that the route-optimized value is below anything a path through the home
 agent could achieve: even the cheapest conceivable detour — out through the
@@ -490,7 +504,7 @@ configuration (t = 13.2 s to 23.5 s). The colored polylines are drawn by
 INET's network-route visualizer: each traces the path a ping actually took.
 Watch the sequence: the home path (correspondent → backbone → home agent →
 mobile node) while at home; the dash to the foreign network; the registration;
-then a brief moment of tunneled traffic taking the dog-leg through the home
+then a brief moment of tunneled traffic taking the detour through the home
 agent — and finally the direct path through the foreign router, with the home
 agent out of the loop. The status label steps from "at home" through a brief
 "away (via home agent)" to "away (route-optimized, 1 CN)", and the address
@@ -504,7 +518,7 @@ foreign network.
    VIDEO RECIPE (redo via the "video-recording" skill)
    config:   RouteOptimization
    seed:     default (seed-set=1)
-   shows:    home path arrow -> dash -> handover -> one tunneled dog-leg ->
+   shows:    home path arrow -> dash -> handover -> one tunneled detour ->
              direct path; status + address labels updating live
    anchors:  registration BU at t~20.04; the HA's BAck is delayed ~1s (home-
              link DAD stand-in), binding active ~21.09; first tunneled reply
@@ -533,6 +547,16 @@ nonlinear axis, with tick labels showing offsets from the window start
 ``apHome`` plays no part in this window and is omitted. Each hop of a
 message is drawn and labelled as its own arrow, so one packet appears as a
 chain of same-named arrows across the lifelines it crosses.
+
+Each lifeline occupies a horizontal band on the chart. An arrow that *bends*
+at a lifeline stops at that node, which then starts a new arrow onward; an
+arrow that merely *crosses* a lifeline's band passes that node without
+touching it. That is how the chart shows whether the home agent is in the
+path or not.
+
+The ping names carry the ICMPv6 sequence number, which starts at zero: the
+correspondent node sends ``ping0`` at t = 1 s and one more every 0.5 s, so
+``ping39`` leaves at t = 20.5 s, just after this window opens.
 
 .. figure:: media/seqchart.png
    :align: center
@@ -582,7 +606,7 @@ zoom into it in order, each covering one stretch of the same window.
    filter:   message_names: Binding Update, Binding Acknowledgement, HoTI,
              CoTI, HoT, CoT, ping*
    shows:    the first Binding Update reaching the home agent; ping39 and ping40
-             arriving through the home-agent dog-leg with no reply returning;
+             arriving through the home-agent detour with no reply returning;
              the CoTI/CoT pair going directly to the correspondent
    anchor:   first BU at t=20.0437 (event #11078); CoTI 20.5385; CoT 20.5580;
              ping39 20.50, ping40 21.00. The HoTI generated at 20.5385 is
@@ -601,7 +625,7 @@ Acknowledgement* back for one second — the duplicate-address-detection
 stand-in from the implementation notes — so it appears only in the next panel.
 
 Meanwhile ``ping39`` and ``ping40`` reach the mobile node through the
-home-agent dog-leg — every one of their arrows visits the ``homeAgent``
+home-agent detour — every one of their arrows visits the ``homeAgent``
 lifeline — but **no reply travels back**. Until the binding is active the
 mobile node discards its own home-address-sourced replies, the same
 implementation note as before.
@@ -752,7 +776,7 @@ wireless to ``apForeign``, then over Ethernet through ``foreignRouter`` and
              as the stage panels above -- see the first stage panel's recipe
              for the full setup
    capture:  goto_event #11383 first, then zoom 20.45..20.60
-   shows:    ping39 arriving through the home-agent dog-leg with no reply, and
+   shows:    ping39 arriving through the home-agent detour with no reply, and
              the CoTI/CoT pair going directly to the correspondent
    anchor:   ping39 leaves the correspondent at 20.50 and reaches the mobile node
              at 20.5385; CoTI 20.5385, CoT back at 20.5580.
@@ -776,7 +800,7 @@ generated but never leaves. In the same window the *Care-of Test Init* and
              as the stage panels above -- see the first stage panel's recipe
              for the full setup
    capture:  goto_event #11829 first, then zoom 20.95..21.10
-   shows:    ping40 on the same dog-leg, the retransmitted Binding Update, and
+   shows:    ping40 on the same detour, the retransmitted Binding Update, and
              both Binding Acknowledgements arriving
    anchor:   ping40 21.00; second BU 21.0437; acknowledgements at the mobile node
              21.0710 (stale, discarded) and 21.0870 (activates the binding).
@@ -863,7 +887,7 @@ Inside the packets
 
 The two forwarding modes are distinguishable inside a single packet. Below are
 the two IPv6 header chunks of a tunneled ping request, captured on the home
-agent's backbone link and expanded field by field in Qtenv's packet
+agent's backbone link and expanded field by field in Qtenv's object
 inspector: **two stacked IPv6 headers** — the outer one from the home agent (``2001:db8:0:1:...:1``) to the
 care-of address (``2001:db8:0:3:...:d``) with ``protocol = ipv6``, carrying
 the untouched inner packet from the correspondent to the *home* address, 40
@@ -1061,8 +1085,8 @@ The second video shows the return (t = 47.5 s to 56 s), still in the
 right after re-association — the de-registration Binding Updates (lifetime
 zero) to the home agent and the correspondent node. The status label returns
 to "at home", the address label to the home address, and the pings to the
-14 ms home path. The binding cache empties; Mobile IPv6 has left the
-building.
+14 ms home path. The binding cache empties, and the node is an ordinary
+IPv6 host again.
 
 .. video:: media/returnhome.mp4
    :align: center
