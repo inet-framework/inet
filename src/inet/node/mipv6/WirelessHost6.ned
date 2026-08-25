@@ -25,7 +25,7 @@ import inet.node.ipv6.StandardHost6;
 module WirelessHost6 extends StandardHost6
 {
     numWlanInterfaces = 1;
-    ipv6.hasMipv6 = true;
+    ipv6.hasMipv6 = default(true);
     ipv6.mipv6.isMobileNode = true; // Is a Mobile Node
     ipv6.mipv6.isHomeAgent = false; // Is a Home Agent
     @display("i=device/wifilaptop");
