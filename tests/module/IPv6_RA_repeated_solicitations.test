@@ -1,0 +1,107 @@
+%description:
+Tests that an IPv6 router answers every valid Router Solicitation, not just the
+first one on an advertising interface (RFC 4861 Section 6.2.6).
+
+hostA and hostB share a link with router R. hostA solicits first and is answered.
+hostB is then shut down and restarted at t=20s, so it loses its addresses and has
+to perform Router Discovery again, at a time when no periodic Router Advertisement
+is due (the RFC 4861 default MinRtrAdvInterval/MaxRtrAdvInterval of 200s/600s are
+far longer than hostB's MAX_RTR_SOLICITATIONS budget of about 9s).
+
+The router must answer hostB's solicitation. If it does not, hostB gives up with
+"No RA messages were received", never autoconfigures a global address, and its
+traffic to srv is silently lost while the run still exits with status 0.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network RepeatedSolicitations
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        scenarioManager: ScenarioManager;
+        configurator: Ipv6FlatNetworkConfigurator;
+        switch: EthernetSwitch;
+        R: Router6;
+        hostA: StandardHost6;
+        hostB: StandardHost6;
+        srv: StandardHost6;
+    connections:
+        hostA.ethg++ <--> ethline <--> switch.ethg++;
+        hostB.ethg++ <--> ethline <--> switch.ethg++;
+        R.ethg++ <--> ethline <--> switch.ethg++;
+        R.ethg++ <--> ethline <--> srv.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = RepeatedSolicitations
+sim-time-limit = 60s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+# RFC 4861 defaults, and also INET's own NED defaults
+**.R.ipv6.neighbourDiscovery.minIntervalBetweenRAs = 200s
+**.R.ipv6.neighbourDiscovery.maxIntervalBetweenRAs = 600s
+
+# udp apps
+**.hostB.numApps = 1
+**.hostB.app[0].typename = "UdpBasicApp"
+**.hostB.app[0].destAddresses = "srv"
+**.hostB.app[0].destPort = 1000
+**.hostB.app[0].messageLength = 64B
+**.hostB.app[0].startTime = 40s
+**.hostB.app[0].sendInterval = 1s
+
+**.srv.numApps = 1
+**.srv.app[0].typename = "UdpSink"
+**.srv.app[0].localPort = 1000
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+
+<scenario>
+    <at t="1.0">
+        <shutdown module="hostB"/>
+    </at>
+    <at t="20.0">
+        <startup module="hostB"/>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+No RA messages were received
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RepeatedSolicitations.hostB.ipv6.neighbourDiscovery: Assigning new address to: eth0
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RepeatedSolicitations.srv.app[0]: received 20 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
