@@ -1,0 +1,197 @@
+%description:
+ICMPv4 Timestamp: a node that answers a Timestamp Request (type 13) must answer with a
+Timestamp Reply (type 14).
+
+h1 opens a raw Ipv4Socket bound to the ICMPv4 protocol, sends h2 a Timestamp Request and
+prints type, code and length of whatever comes back. INET has no Timestamp message class,
+so the injected header is an IcmpEchoRequest chunk with its type field overwritten to 13 --
+byte for byte the first 8 bytes of a real RFC 792 Timestamp Request (type, code, checksum,
+identifier, sequence number) -- followed by 12 bytes standing for the Originate, Receive
+and Transmit timestamp fields, giving the 20 byte message RFC 792 prescribes.
+
+Clause: RFC 792, Timestamp or Timestamp Reply Message. "The Timestamp Reply is returned to
+the requestor with the type field set to 14", carrying the Originate, Receive and Transmit
+timestamps. A conforming reply is therefore type 14, code 0, and 20 bytes long.
+
+Finding IPV4-059. Icmp::processIcmpMessage() routes ICMP_TIMESTAMP_REQUEST into
+processEchoRequest(), so the node answers with a 16 byte type 0 Echo Reply that carries an
+identifier and a sequence number and no timestamps at all. (The same line is also an abort
+path: if the type 13 header is not already an IcmpEchoRequest object -- which is what the
+deserializer produces for a real type 13 datagram -- the run dies with "Cannot convert chunk
+from type inet::IcmpHeader to type inet::IcmpEchoRequest".)
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: TestApp.ned
+
+import inet.applications.contract.IApp;
+
+simple TestApp like IApp
+{
+    parameters:
+        @display("i=block/app");
+        string destAddr = default("");
+        int icmpType;
+        int icmpCode = default(0);
+        int payloadLength @unit(B) = default(8B);
+        bool useEchoRequestClass = default(false);
+        double startTime @unit(s) = default(1s);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: TestApp.cc
+
+#include "inet/common/InitStages.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
+#include "inet/networklayer/ipv4/Icmp.h"
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+
+namespace @TESTNAME@ {
+
+using namespace inet;
+
+class INET_API TestApp : public cSimpleModule, public Ipv4Socket::ICallback
+{
+  protected:
+    Ipv4Socket *socket = nullptr;
+    cMessage *timer = nullptr;
+
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void sendIcmp();
+
+  public:
+    virtual ~TestApp() { cancelAndDelete(timer); delete socket; }
+    virtual void socketDataArrived(Ipv4Socket *socket, Packet *packet) override;
+    virtual void socketClosed(Ipv4Socket *socket) override {}
+};
+
+Define_Module(TestApp);
+
+void TestApp::initialize(int stage)
+{
+    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
+        socket = new Ipv4Socket(gate("socketOut"));
+        socket->setCallback(this);
+        socket->bind(&Protocol::icmpv4, Ipv4Address());
+        if (par("destAddr").stdstringValue() != "") {
+            timer = new cMessage("send");
+            scheduleAt(par("startTime"), timer);
+        }
+    }
+}
+
+void TestApp::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage())
+        sendIcmp();
+    else
+        socket->processMessage(msg);
+}
+
+void TestApp::sendIcmp()
+{
+    int type = (int)par("icmpType").intValue();
+    Packet *packet = new Packet("raw-icmp");
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(par("payloadLength").intValue())));
+    Ptr<IcmpHeader> header;
+    if (par("useEchoRequestClass")) {
+        auto echo = makeShared<IcmpEchoRequest>();
+        echo->setIdentifier(1234);
+        echo->setSeqNumber(1);
+        header = echo;
+    }
+    else
+        header = makeShared<IcmpHeader>();
+    header->setType(static_cast<IcmpType>(type));
+    header->setCode((int)par("icmpCode").intValue());
+    Icmp::insertChecksum(CHECKSUM_DECLARED_CORRECT, header, packet);
+    packet->insertAtFront(header);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+    EV_INFO << "TESTAPP: sending raw ICMP type=" << type << " bytes=" << packet->getByteLength() << "\n";
+    L3Address dest = L3AddressResolver().resolve(par("destAddr").stringValue());
+    socket->sendTo(packet, dest.toIpv4());
+}
+
+void TestApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
+{
+    const auto& header = packet->peekAtFront<IcmpHeader>();
+    EV_INFO << "TESTAPP: received ICMP type=" << (int)header->getType()
+            << " code=" << header->getCode()
+            << " icmpBytes=" << packet->getByteLength() << "\n";
+    delete packet;
+}
+
+} // namespace
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
+
+network IcmpConformanceNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        h1: StandardHost;
+        h2: StandardHost;
+    connections:
+        h1.ethg++ <--> ethline <--> h2.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+record-scalar-results = false
+network = IcmpConformanceNetwork
+ned-path = .;../../../../../src
+sim-time-limit = 10s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.arp.typename = "GlobalArp"
+
+**.configurator.config = xml("<config><interface hosts='*' address='10.0.0.x' netmask='255.255.255.0'/></config>")
+
+**.h1.numApps = 1
+**.h1.app[0].typename = "TestApp"
+**.h1.app[0].destAddr = "10.0.0.2"
+**.h1.app[0].icmpType = 13
+**.h1.app[0].payloadLength = 12B
+**.h1.app[0].useEchoRequestClass = true
+**.h1.app[0].startTime = 1s
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 792: the answer to a Timestamp Request is a type 14 Timestamp Reply
+%contains: stdout
+TESTAPP: received ICMP type=14 code=0
+%#--------------------------------------------------------------------------------------------------------------
+%# ... 20 bytes long, i.e. carrying the Originate, Receive and Transmit timestamps
+%contains-regex: stdout
+received ICMP type=14 code=0 icmpBytes=20$
+%#--------------------------------------------------------------------------------------------------------------
+%# and specifically NOT an Echo Reply
+%not-contains: stdout
+TESTAPP: received ICMP type=0
+%#--------------------------------------------------------------------------------------------------------------
+%expected-failure: IPV4-059 -- Icmp::processIcmpMessage() dispatches ICMP_TIMESTAMP_REQUEST to processEchoRequest(), so the node replies with a type 0 Echo Reply instead of a type 14 Timestamp Reply, and no Originate/Receive/Transmit timestamps are produced. Fails RFC 792.
+%#--------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,196 @@
+%description:
+ICMPv4 handling of message types the implementation does not act on: they must be
+silently discarded, and must not disturb the node.
+
+h1 opens a raw Ipv4Socket bound to the ICMPv4 protocol and sends h2 three hand-built
+ICMP messages, one per second: type 4 (Source Quench, deprecated), type 17 (Address
+Mask Request) and type 200 (unassigned/experimental). h2's Icmp module reaches the
+`default:` label of the switch in Icmp::processIcmpMessage() for each of them.
+
+Required behaviour:
+  - RFC 1122 section 3.2.2: "If an ICMP message of unknown type is received, it MUST
+    be silently discarded."
+  - RFC 6633 section 3: a host MUST silently ignore a received Source Quench.
+  - RFC 1122 section 3.2.2.9: a host that is not an authoritative agent MUST NOT
+    answer an Address Mask Request.
+So all three are dropped without a reply, and the simulation runs to its time limit.
+
+Findings IPV4-065, IPV4-066. Icmp::processIcmpMessage() ends its switch with
+`throw cRuntimeError("Unknown ICMP type %d")`, so the very first such message aborts
+the whole simulation. That abort is reachable from the network by any peer, i.e. it
+is a remotely triggerable denial of service, not just a missing feature.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: TestApp.ned
+
+import inet.applications.contract.IApp;
+
+simple TestApp like IApp
+{
+    parameters:
+        @display("i=block/app");
+        string destAddr = default("");
+        string icmpTypes = default("");   // whitespace separated list, one message sent per type
+        int icmpCode = default(0);
+        double startTime @unit(s) = default(1s);
+        double sendInterval @unit(s) = default(1s);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: TestApp.cc
+
+#include <sstream>
+
+#include "inet/common/InitStages.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
+#include "inet/networklayer/ipv4/Icmp.h"
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+
+namespace @TESTNAME@ {
+
+using namespace inet;
+
+class INET_API TestApp : public cSimpleModule, public Ipv4Socket::ICallback
+{
+  protected:
+    Ipv4Socket *socket = nullptr;
+    cMessage *timer = nullptr;
+    std::vector<int> types;
+    size_t nextIndex = 0;
+
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void sendIcmp(int type);
+
+  public:
+    virtual ~TestApp() { cancelAndDelete(timer); delete socket; }
+    virtual void socketDataArrived(Ipv4Socket *socket, Packet *packet) override;
+    virtual void socketClosed(Ipv4Socket *socket) override {}
+};
+
+Define_Module(TestApp);
+
+void TestApp::initialize(int stage)
+{
+    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
+        socket = new Ipv4Socket(gate("socketOut"));
+        socket->setCallback(this);
+        socket->bind(&Protocol::icmpv4, Ipv4Address());
+        std::istringstream stream(par("icmpTypes").stdstringValue());
+        int type;
+        while (stream >> type)
+            types.push_back(type);
+        if (par("destAddr").stdstringValue() != "" && !types.empty()) {
+            timer = new cMessage("send");
+            scheduleAt(par("startTime"), timer);
+        }
+    }
+}
+
+void TestApp::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage()) {
+        sendIcmp(types[nextIndex++]);
+        if (nextIndex < types.size())
+            scheduleAfter(par("sendInterval"), timer);
+    }
+    else
+        socket->processMessage(msg);
+}
+
+void TestApp::sendIcmp(int type)
+{
+    Packet *packet = new Packet("raw-icmp");
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(8)));
+    auto header = makeShared<IcmpHeader>();
+    header->setType(static_cast<IcmpType>(type));
+    header->setCode((int)par("icmpCode").intValue());
+    Icmp::insertChecksum(CHECKSUM_DECLARED_CORRECT, header, packet);
+    packet->insertAtFront(header);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
+    EV_INFO << "TESTAPP: sending raw ICMP type=" << type << "\n";
+    L3Address dest = L3AddressResolver().resolve(par("destAddr").stringValue());
+    socket->sendTo(packet, dest.toIpv4());
+}
+
+void TestApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
+{
+    const auto& header = packet->peekAtFront<IcmpHeader>();
+    EV_INFO << "TESTAPP: received ICMP type=" << (int)header->getType()
+            << " code=" << header->getCode() << "\n";
+    delete packet;
+}
+
+} // namespace
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
+
+network IcmpConformanceNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        h1: StandardHost;
+        h2: StandardHost;
+    connections:
+        h1.ethg++ <--> ethline <--> h2.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+record-scalar-results = false
+network = IcmpConformanceNetwork
+ned-path = .;../../../../../src
+sim-time-limit = 10s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.arp.typename = "GlobalArp"
+
+**.configurator.config = xml("<config><interface hosts='*' address='10.0.0.x' netmask='255.255.255.0'/></config>")
+
+**.h1.numApps = 1
+**.h1.app[0].typename = "TestApp"
+**.h1.app[0].destAddr = "10.0.0.2"
+**.h1.app[0].icmpTypes = "4 17 200"
+**.h1.app[0].startTime = 1s
+**.h1.app[0].sendInterval = 1s
+
+%#--------------------------------------------------------------------------------------------------------------
+%# all three messages get sent, i.e. neither type 4 nor type 17 took the node down
+%contains: stdout
+TESTAPP: sending raw ICMP type=200
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 1122 3.2.2 / RFC 6633 3: the receiver must not treat an unhandled type as an error
+%not-contains: stderr
+Unknown ICMP type
+%#--------------------------------------------------------------------------------------------------------------
+%# the discard must be silent: no ICMP message may come back to h1
+%not-contains: stdout
+TESTAPP: received ICMP
+%#--------------------------------------------------------------------------------------------------------------
+%expected-failure: IPV4-065, IPV4-066 -- Icmp::processIcmpMessage() throws cRuntimeError("Unknown ICMP type %d") from the default branch of its switch, so the type 4 message aborts the simulation at t=1s instead of being silently discarded. Fails RFC 1122 3.2.2 and RFC 6633 3.
+%#--------------------------------------------------------------------------------------------------------------

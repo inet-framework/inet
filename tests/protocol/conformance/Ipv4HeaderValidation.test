@@ -1,0 +1,234 @@
+%description:
+IPv4 receive-path header validation: a datagram whose header is malformed must be
+discarded before it is delivered to a transport user.
+
+An Injector module acts as a fake PPP link peer: it hand-builds complete PPP frames
+around handcrafted Ipv4Header chunks and sends them onto the wire, so they enter
+Ipv4::handleIncomingDatagram() exactly like any received datagram. Each datagram
+carries a UDP payload addressed to a UdpSink on the peer host, so anything the sink
+logs was accepted by the IPv4 layer.
+
+Injected datagrams, one per second:
+  1s goodChecksum      well-formed header, correct computed checksum    -> MUST be accepted
+  2s badChecksum       computed checksum then bit-flipped               -> MUST be discarded
+  3s declaredIncorrect checksumMode=declaredIncorrect (INET's own       -> MUST be discarded
+                       encoding of "this header has a bad checksum")
+  4s badVersion        version field = 6, checksum correct for it       -> MUST be discarded
+  5s shortHeaderLen    IHL = 4 words, below the 5-word minimum          -> MUST be discarded
+
+Clauses: RFC 1122 section 3.2.1.2 (a host MUST verify the IPv4 header checksum and
+silently discard a datagram that fails it), RFC 1812 sections 4.2.2.5 and 5.2.2 (a
+router MUST verify the header checksum, and MUST discard a datagram whose Version is
+not 4 or whose IHL is less than 5).
+
+Finding IPV4-002. The guard in Ipv4::handleIncomingDatagram() reads
+
+    if (!ipv4Header->isCorrect() && !ipv4Header->verifyChecksum()) { drop }
+
+Both operands are negated and combined with &&, so a structurally well-formed chunk
+(isCorrect() == true) short-circuits the expression and verifyChecksum() is never
+called. There is no version test and no header-length test on the receive path at
+all. All five datagrams above are currently delivered to the sink.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: Injector.ned
+
+simple Injector
+{
+    parameters:
+        @display("i=block/source");
+    gates:
+        inout g;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: Injector.cc
+
+#include "inet/common/InitStages.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ppp/PppFrame_m.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+
+namespace @TESTNAME@
+{
+
+using namespace inet;
+
+class INET_API Injector : public cSimpleModule
+{
+  protected:
+    Ipv4Address peerAddress;
+    int counter = 0;
+
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    void inject(int variant);
+};
+
+Define_Module(Injector);
+
+void Injector::initialize(int stage)
+{
+    if (stage == INITSTAGE_LAST) {
+        auto ift = check_and_cast<IInterfaceTable *>(getModuleByPath("^.host.interfaceTable"));
+        auto ie = ift->findInterfaceByName("ppp0");
+        if (ie == nullptr)
+            throw cRuntimeError("peer has no ppp0 interface");
+        peerAddress = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+        EV_INFO << "INJECTOR: peer ppp0 address is " << peerAddress << endl;
+        for (int i = 0; i < 5; i++)
+            scheduleAt(SimTime(i + 1, SIMTIME_S), new cMessage("inject", i));
+    }
+}
+
+void Injector::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage()) {
+        inject(msg->getKind());
+        delete msg;
+    }
+    else
+        delete msg;
+}
+
+void Injector::inject(int variant)
+{
+    static const char *names[] = { "goodChecksum", "badChecksum", "declaredIncorrect", "badVersion", "shortHeaderLen" };
+    const char *name = names[variant];
+
+    auto packet = new Packet(name, makeShared<ByteCountChunk>(B(100)));
+
+    auto udpHeader = makeShared<UdpHeader>();
+    udpHeader->setSourcePort(1000);
+    udpHeader->setDestinationPort(2000);
+    udpHeader->setTotalLengthField(udpHeader->getChunkLength() + packet->getDataLength());
+    udpHeader->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
+    udpHeader->setChecksum(0xC00D);
+    packet->insertAtFront(udpHeader);
+
+    auto ipv4Header = makeShared<Ipv4Header>();
+    ipv4Header->setSrcAddress(Ipv4Address("10.0.0.99"));
+    ipv4Header->setDestAddress(peerAddress);
+    ipv4Header->setProtocolId(IP_PROT_UDP);
+    ipv4Header->setTimeToLive(64);
+    ipv4Header->setIdentification(1000 + variant);
+    ipv4Header->setHeaderLength(ipv4Header->getChunkLength());
+    ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + packet->getDataLength());
+
+    switch (variant) {
+        case 0: // well-formed header with a correct computed checksum
+            ipv4Header->setChecksumMode(CHECKSUM_COMPUTED);
+            ipv4Header->updateChecksum();
+            break;
+        case 1: // well-formed header, computed checksum then deliberately corrupted
+            ipv4Header->setChecksumMode(CHECKSUM_COMPUTED);
+            ipv4Header->updateChecksum();
+            ipv4Header->setChecksum(ipv4Header->getChecksum() ^ 0xFFFF);
+            break;
+        case 2: // INET's canonical "this header has a bad checksum" encoding
+            ipv4Header->setChecksumMode(CHECKSUM_DECLARED_INCORRECT);
+            ipv4Header->setChecksum(0xBAAD);
+            break;
+        case 3: // version field says 6, checksum is correct for exactly this header
+            ipv4Header->setVersion(6);
+            ipv4Header->setChecksumMode(CHECKSUM_COMPUTED);
+            ipv4Header->updateChecksum();
+            break;
+        case 4: // IHL = 4 words, below the 5-word minimum (checksum declared correct,
+                // because the serializer refuses to compute one for such a header)
+            ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
+            ipv4Header->setChecksum(0xC00D);
+            ipv4Header->setHeaderLength(B(16));
+            break;
+    }
+
+    EV_INFO << "INJECTOR: sending " << name
+            << " version=" << ipv4Header->getVersion()
+            << " ihl=" << ipv4Header->getHeaderLength()
+            << " checksumMode=" << ipv4Header->getChecksumMode()
+            << " checksum=0x" << std::hex << ipv4Header->getChecksum() << std::dec
+            << " verifyChecksum()=" << (ipv4Header->getChecksumMode() == CHECKSUM_COMPUTED && ipv4Header->getHeaderLength() >= B(20) ? (ipv4Header->verifyChecksum() ? "true" : "false") : "n/a")
+            << endl;
+
+    packet->insertAtFront(ipv4Header);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+
+    auto pppHeader = makeShared<PppHeader>();
+    pppHeader->setProtocol(ProtocolGroup::getPppProtocolGroup()->getProtocolNumber(&Protocol::ipv4));
+    packet->insertAtFront(pppHeader);
+    packet->insertAtBack(makeShared<PppTrailer>());
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
+
+    send(packet, "g$o");
+}
+
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: TestNetwork.ned
+
+import inet.node.inet.StandardHost;
+
+network TestNetwork
+{
+    submodules:
+        injector: Injector;
+        host: StandardHost;
+    connections:
+        injector.g <--> { datarate = 100Mbps; delay = 0s; } <--> host.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../../src
+network = TestNetwork
+sim-time-limit = 10s
+cmdenv-express-mode = false
+cmdenv-log-prefix = ""
+
+**.checksumMode = "computed"
+
+*.host.ipv4.configurator.typename = "HostAutoConfigurator"
+*.host.ipv4.configurator.interfaces = "ppp0"
+*.host.ipv4.configurator.addressBase = "10.0.0.0"
+*.host.ipv4.configurator.netmask = "255.255.255.0"
+
+*.host.numApps = 1
+*.host.app[0].typename = "UdpSink"
+*.host.app[0].localPort = 2000
+
+%#--------------------------------------------------------------------------------------------------------------
+%# the control datagram, the only well-formed one, must be delivered
+%contains: stdout
+Received packet: (inet::Packet)goodChecksum
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 1122 3.2.1.2 / RFC 1812 4.2.2.5: a bad header checksum must be discarded
+%not-contains: stdout
+Received packet: (inet::Packet)badChecksum
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Received packet: (inet::Packet)declaredIncorrect
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 1812 5.2.2: Version != 4 must be discarded
+%not-contains: stdout
+Received packet: (inet::Packet)badVersion
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 1812 5.2.2: IHL < 5 must be discarded
+%not-contains: stdout
+Received packet: (inet::Packet)shortHeaderLen
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep -E "INJECTOR: |Received packet: |received [0-9]+ packets" test.out > result.txt || true
+%#--------------------------------------------------------------------------------------------------------------
+%expected-failure: IPV4-002 -- Ipv4::handleIncomingDatagram() combines !isCorrect() and !verifyChecksum() with &&, so a well-formed chunk is never checksum-checked, and the receive path has no Version or IHL check at all. All four malformed datagrams are delivered. Fails RFC 1122 3.2.1.2, RFC 1812 4.2.2.5 and 5.2.2.

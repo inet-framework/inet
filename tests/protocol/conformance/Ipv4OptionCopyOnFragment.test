@@ -1,0 +1,255 @@
+%description:
+IPv4 option handling on fragmentation: the 'copied' flag of an option decides which
+fragments the option is placed in.
+
+hostA sends a 600 B raw IPv4 payload to hostB over a PPP link with a 300 B MTU, so the
+datagram is split into three fragments. The datagram carries two options, attached via an
+Ipv4OptionsReq tag: a Stream ID option (type 136, copy bit 1) and a Timestamp option
+(type 68, copy bit 0). A netfilter PREROUTING probe on hostB logs the options of every
+arriving datagram; PREROUTING runs before reassembly, so it sees the individual fragments.
+
+Clause: RFC 791 section 3.1, Options. "Options may appear or not in datagrams. ... If the
+copied flag is 1, the option is copied into all fragments on fragmentation; if 0, the
+option is copied into only the first fragment." Expected log therefore is
+  fragment first=1 options= 136/4 68/8
+  fragment first=0 options= 136/4
+  fragment first=0 options= 136/4
+
+Finding IPV4-041. Ipv4::fragmentAndSend() builds every fragment from
+staticPtrCast<Ipv4Header>(ipv4Header->dupShared()), so the complete option list is carried
+into every fragment regardless of the copy bit (the FIXME in that function says as much).
+Record Route and Timestamp are therefore duplicated into non-first fragments, which is a
+wire format violation and inflates every fragment's header.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: OptionSender.ned
+
+import inet.applications.contract.IApp;
+
+simple OptionSender like IApp
+{
+    parameters:
+        string destAddress = default("");
+        int payloadLength @unit(B) = default(600B);
+        @display("i=block/app");
+    gates:
+        input socketIn;
+        output socketOut;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: OptionSender.cc
+
+#include "inet/common/InitStages.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
+
+namespace @TESTNAME@ {
+
+using namespace inet;
+
+class INET_API OptionSender : public cSimpleModule
+{
+  protected:
+    Ipv4Socket socket;
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+};
+
+Define_Module(OptionSender);
+
+void OptionSender::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+        socket.setOutputGate(gate("socketOut"));
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+        socket.bind(&Protocol::echo, Ipv4Address::UNSPECIFIED_ADDRESS);
+        if (strlen(par("destAddress").stringValue()) != 0)
+            scheduleAt(SimTime(1, SIMTIME_S), new cMessage("send"));
+    }
+}
+
+void OptionSender::handleMessage(cMessage *msg)
+{
+    if (!msg->isSelfMessage()) { // received data, just drop it
+        delete msg;
+        return;
+    }
+    delete msg;
+
+    auto packet = new Packet("optdata", makeShared<ByteCountChunk>(B(par("payloadLength").intValue())));
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
+
+    auto optReq = packet->addTag<Ipv4OptionsReq>();
+
+    // copy bit = 1 (type 136): must be present in every fragment
+    auto *streamId = new Ipv4OptionStreamId();
+    streamId->setStreamId(4242);
+    optReq->appendOption(streamId);
+
+    // copy bit = 0 (type 68): must be present in the first fragment only
+    auto *timestamp = new Ipv4OptionTimestamp();
+    timestamp->setFlag(IP_TIMESTAMP_TIMESTAMP_ONLY);
+    timestamp->setRecordTimestampArraySize(1);
+    timestamp->setRecordTimestamp(0, simTime());
+    timestamp->setLength(8);
+    optReq->appendOption(timestamp);
+
+    Ipv4Address dest = L3AddressResolver().resolve(par("destAddress")).toIpv4();
+    EV_INFO << "SENDER: sending " << packet->getByteLength() << " B to " << dest << endl;
+    socket.sendTo(packet, dest);
+}
+
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: FragmentProbe.ned
+
+simple FragmentProbe
+{
+    parameters:
+        string networkProtocolModule;
+        string resultFile = default("result.txt");
+        @display("i=block/control");
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: FragmentProbe.cc
+
+#include <fstream>
+
+#include "inet/common/InitStages.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/contract/INetfilter.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+
+namespace @TESTNAME@ {
+
+using namespace inet;
+
+class INET_API FragmentProbe : public cSimpleModule, public NetfilterBase::HookBase
+{
+  protected:
+    INetfilter *netfilter = nullptr;
+    std::ofstream out;
+  protected:
+    virtual void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("no messages expected"); }
+    virtual void finish() override { out.close(); }
+
+  public:
+    virtual Result datagramPreRoutingHook(Packet *datagram) override;
+    virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *datagram) override { return ACCEPT; }
+};
+
+Define_Module(FragmentProbe);
+
+void FragmentProbe::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        out.open(par("resultFile").stringValue());
+        if (out.fail())
+            throw cRuntimeError("cannot open result file");
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
+        netfilter = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolModule").stringValue()));
+        netfilter->registerHook(0, this);
+    }
+}
+
+INetfilter::IHook::Result FragmentProbe::datagramPreRoutingHook(Packet *datagram)
+{
+    Enter_Method_Silent();
+    const auto& hdr = datagram->peekAtFront<Ipv4Header>();
+    if (hdr->getProtocolId() != IP_PROT_ECHO)
+        return ACCEPT;
+    // the fragment offset itself is deliberately not logged: it depends on the header
+    // size, which is exactly what a fix for this defect changes
+    out << "fragment first=" << (hdr->getFragmentOffset() == 0 ? 1 : 0)
+        << " options=";
+    for (size_t i = 0; i < hdr->getOptionArraySize(); i++)
+        out << " " << hdr->getOption(i).getType() << "/" << hdr->getOption(i).getLength();
+    out << "\n";
+    out.flush();
+    return ACCEPT;
+}
+
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: TestNetwork.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
+
+module ProbedHost extends StandardHost
+{
+    submodules:
+        fragProbe: FragmentProbe {
+            networkProtocolModule = "^.ipv4.ip";
+            @display("p=100,50");
+        }
+}
+
+network TestNetwork
+{
+    types:
+        channel line extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        hostA: StandardHost;
+        hostB: ProbedHost;
+    connections:
+        hostA.pppg++ <--> line <--> hostB.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../../src
+network = TestNetwork
+sim-time-limit = 5s
+cmdenv-express-mode = false
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "OptionSender"
+*.hostA.app[0].destAddress = "hostB"
+*.hostA.app[0].payloadLength = 600B
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "OptionSender"
+
+*.host*.ppp[*].ppp.mtu = 300B
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 791 3.1: the first fragment carries both options
+%contains-regex: result.txt
+^fragment first=1 options= 136/4 68/8$
+%#--------------------------------------------------------------------------------------------------------------
+%# ... and every later fragment carries the copy-bit-1 option alone
+%contains-regex: result.txt
+^fragment first=0 options= 136/4$
+%#--------------------------------------------------------------------------------------------------------------
+%# the copy-bit-0 Timestamp option must not appear in a non-first fragment
+%not-contains-regex: result.txt
+^fragment first=0 options=.* 68/
+%#--------------------------------------------------------------------------------------------------------------
+%expected-failure: IPV4-041 -- Ipv4::fragmentAndSend() duplicates the whole header (ipv4Header->dupShared()) into every fragment, so the copy-bit-0 Timestamp option is carried into all three fragments. Fails RFC 791 3.1.
+%#--------------------------------------------------------------------------------------------------------------

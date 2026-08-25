@@ -1,0 +1,108 @@
+%description:
+IPv4 fragment reassembly timeout: when the reassembly timer for a partially received
+datagram expires, the receiver must give up on its own initiative and report the event
+with ICMP Time Exceeded, code 1.
+
+h1 sends two 3000 B UDP datagrams to h2, at t=1s and at t=100s. h1's Ethernet MTU is
+500 B, so each datagram becomes 7 fragments. The r--h2 link is 100x slower than h1--r
+and r's egress queue holds a single packet, so only the first two fragments of each
+datagram survive the rate step. Both reassemblies therefore stall permanently, and no
+further fragment of the first datagram will ever arrive.
+
+Clause: RFC 1122 section 3.3.2. "The reassembly timeout MUST be a fixed value" and when
+it expires "an ICMP Time Exceeded message SHOULD be sent to the source host, with code 1
+(fragment reassembly time exceeded)". With fragmentTimeout at its 60 s default the first
+datagram must be reaped at about t=61s -- driven by a timer, not by unrelated traffic --
+and the resulting ICMP must carry code 1.
+
+Findings IPV4-012 (the timeout is not timer driven) and IPV4-013 (wrong ICMP code).
+Ipv4FragBuf::purgeStaleFragments() is called only from Ipv4::reassembleAndDeliver(), i.e.
+only when some other fragment happens to arrive, so today the first datagram is reaped at
+t=100s, 39 s late, and a receiver that stops getting fragments altogether never times out
+at all. The call it makes is sendErrorMessage(..., ICMP_TIME_EXCEEDED, 0), i.e. code 0
+("time to live exceeded in transit") instead of code 1.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
+
+network IcmpReassemblyNetwork
+{
+    types:
+        channel fastline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 1Gbps;
+        }
+        channel slowline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        h1: StandardHost;
+        r: Router;
+        h2: StandardHost;
+    connections:
+        h1.ethg++ <--> fastline <--> r.ethg++;
+        r.ethg++ <--> slowline <--> h2.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+record-scalar-results = false
+network = IcmpReassemblyNetwork
+ned-path = .;../../../../../src
+sim-time-limit = 200s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "t=%t %C: "
+
+**.arp.typename = "GlobalArp"
+
+# force fragmentation at h1
+**.h1.eth[*].mac.mtu = 500B
+
+# make the r --> h2 direction lose all but the first two fragments
+**.r.eth[*].queue.typename = "DropTailQueue"
+**.r.eth[*].queue.packetCapacity = 1
+
+**.h1.numApps = 1
+**.h1.app[0].typename = "UdpBasicApp"
+**.h1.app[0].destAddresses = "h2"
+**.h1.app[0].destPort = 1000
+**.h1.app[0].messageLength = 3000B
+**.h1.app[0].startTime = 1s
+**.h1.app[0].sendInterval = 99s
+**.h1.app[0].stopTime = 101s
+
+**.h2.numApps = 1
+**.h2.app[0].typename = "UdpSink"
+**.h2.app[0].localPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 1122 3.3.2: the ICMP Time Exceeded must carry code 1, "fragment reassembly time exceeded"
+%contains-regex: stdout
+ICMP-error-#[0-9]+-type11-code1
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains-regex: stdout
+ICMP-error-#[0-9]+-type11-code0
+%#--------------------------------------------------------------------------------------------------------------
+%# the timeout must be driven by its own timer: the first datagram stalls at t~1s and
+%# fragmentTimeout is 60s, so it must be reaped at t~61s and not when the second
+%# datagram's first fragment happens to arrive at t~100s
+%postrun-command: grep "ICMP_TIME_EXCEEDED" test.out | grep -oE "^t=[0-9.]+" | sort -u > timeexceeded_times.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: timeexceeded_times.out
+^t=6[01]\.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains-regex: timeexceeded_times.out
+^t=100\.
+%#--------------------------------------------------------------------------------------------------------------
+%expected-failure: IPV4-012, IPV4-013 -- Ipv4FragBuf::purgeStaleFragments() runs only when another fragment arrives (from Ipv4::reassembleAndDeliver), so the stalled reassembly is reaped at t=100s instead of t=61s, and it calls sendErrorMessage(..., ICMP_TIME_EXCEEDED, 0), producing code 0 instead of the code 1 required by RFC 1122 3.3.2.
+%#--------------------------------------------------------------------------------------------------------------

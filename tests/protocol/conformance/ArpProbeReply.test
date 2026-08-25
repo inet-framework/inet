@@ -1,0 +1,110 @@
+%description:
+ARP Probe handling: an ARP request whose sender protocol address is all zeroes is a legal
+RFC 5227 ARP Probe and must be processed like any other ARP request.
+
+Two StandardHosts on an Ethernet link. At t=1s a trigger module calls INET's own
+Arp::sendArpProbe(ie, ie->getMacAddress(), <host2's address>) on host1's ARP module -- the
+RFC 5227 probe builder, which sets srcIpAddress to Ipv4Address::UNSPECIFIED_ADDRESS. The
+frame is broadcast on the real link and reaches host2's ARP module through the normal
+dispatcher path; no INET source is modified and the packet is built by INET code.
+
+Clauses: RFC 5227 section 2.1.1 defines the ARP Probe as an ARP request with an all-zero
+'sender IP address' field, sent to check whether an address is already in use. Section 2.5
+requires the address owner to answer it: "a host ... MUST respond to conflicting ARP
+Probes ... to defend its address". host2 owns the probed address, so it must send an
+ARP reply and the run must complete normally.
+
+Finding IPV4-087. Arp::processArpPacket() rejects an unspecified sender address with
+`throw cRuntimeError("wrong ARP packet: source IPv4 address is empty")`, which kills the
+whole simulation instead of dropping or answering the frame. Any peer that sends a probe --
+INET's own sendArpProbe(), a hand-written model, or an emulated external host -- takes the
+simulation down; sendArpProbe() currently has no caller in the tree, which is the only
+reason INET does not do this to itself today.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: ArpProbeTrigger.ned
+
+simple ArpProbeTrigger
+{
+    parameters:
+        @display("i=block/control");
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: ArpProbeTrigger.cc
+
+#include "inet/networklayer/arp/ipv4/Arp.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+
+namespace @TESTNAME@ {
+
+using namespace inet;
+
+class INET_API ArpProbeTrigger : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override { scheduleAt(SimTime(1, SIMTIME_S), new cMessage("trigger")); }
+    virtual void handleMessage(cMessage *msg) override;
+};
+
+Define_Module(ArpProbeTrigger);
+
+void ArpProbeTrigger::handleMessage(cMessage *msg)
+{
+    delete msg;
+
+    auto *arp = check_and_cast<Arp *>(getModuleByPath("^.host1.ipv4.arp"));
+    auto *ift = check_and_cast<IInterfaceTable *>(getModuleByPath("^.host1.interfaceTable"));
+    NetworkInterface *ie = ift->findInterfaceByName("eth0");
+    if (ie == nullptr)
+        throw cRuntimeError("eth0 not found on host1");
+
+    Ipv4Address probedAddr = L3AddressResolver().addressOf(getModuleByPath("^.host2")).toIpv4();
+    EV_INFO << "TRIGGER: sending ARP Probe for " << probedAddr << " from " << ie->getMacAddress() << endl;
+    arp->sendArpProbe(ie, ie->getMacAddress(), probedAddr);
+}
+
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: TestNetwork.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+
+network TestNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        trigger: ArpProbeTrigger;
+        host1: StandardHost;
+        host2: StandardHost;
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../../src
+network = TestNetwork
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+cmdenv-log-prefix = "%C: "
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 5227 2.5: the owner of the probed address answers the probe
+%contains: stdout
+TestNetwork.host2.ipv4.arp: Sending (inet::Packet)arpREPLY
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 5227 2.1.1: an all-zero sender protocol address is legal, not an error
+%not-contains: stderr
+wrong ARP packet: source IPv4 address is empty
+%#--------------------------------------------------------------------------------------------------------------
+%expected-failure: IPV4-087 -- Arp::processArpPacket() throws cRuntimeError("wrong ARP packet: source IPv4 address is empty") for an unspecified sender protocol address, so a legal RFC 5227 ARP Probe aborts the simulation instead of drawing a reply. Fails RFC 5227 2.1.1 and 2.5.
+%#--------------------------------------------------------------------------------------------------------------

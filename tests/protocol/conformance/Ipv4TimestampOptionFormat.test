@@ -1,0 +1,284 @@
+%description:
+Format of the IPv4 Timestamp option inserted by the Ipv4 module's enableTimestampOption
+parameter: the option must be well formed and accounted for in the header.
+
+hostA and hostB are StandardHosts on an Ethernet link, with
+hostA.ipv4.ip.enableTimestampOption = true. checksumMode and fcsMode are "computed" so
+that frames are really serialized. An OptionProbe netfilter module on each host logs, for
+every datagram, the header length, the chunk length, the option list (type/length), two
+derived verdicts and the byte count the header serializes to:
+  optionMinLengthOk       every option other than EOL/NOP has length >= 4
+  optionsFitHeaderLength  20 B + the sum of the option lengths <= headerLength
+hostA's app sends two datagrams: at t=1s a plain one (carrying only the auto-inserted
+Timestamp option), at t=2s one that also carries an application-supplied Stream ID option
+so that headerLength exceeds the 20 B minimum.
+
+Clause: RFC 791 section 3.1. Every option other than End of Option List and No Operation
+is a type-length-value triple whose length octet counts the type and length octets
+themselves, so the minimum is 2 and a Timestamp option (type, length, pointer, overflow/
+flags, plus 4 or 8 bytes per entry) is at least 4 bytes; and the Internet Header Length
+field measures the header "including options", so the options must fit inside it.
+
+Finding IPV4-047. Ipv4::encapsulate() adds the Ipv4OptionTimestamp after
+setHeaderLength()/setTotalLengthField() have already run and never sets the option's
+length field, so the option comes out with length 0 and the header never grows. Two
+consequences show up in one run: at t=1s headerLength stays 20, the serializer skips its
+whole option block and the option is silently dropped from the wire form while the
+in-memory chunk still carries it; at t=2s the Stream ID option pushes headerLength to 24,
+the serializer does walk the option list, and Ipv4HeaderSerializer::serializeOption()
+trips its ASSERT on the length-0 Timestamp option and aborts the simulation.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: OptionSender.ned
+
+import inet.applications.contract.IApp;
+
+simple OptionSender like IApp
+{
+    parameters:
+        string destAddress = default("");
+        int payloadLength @unit(B) = default(100B);
+        @display("i=block/app");
+    gates:
+        input socketIn;
+        output socketOut;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: OptionSender.cc
+
+#include "inet/common/InitStages.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
+
+namespace @TESTNAME@ {
+
+using namespace inet;
+
+class INET_API OptionSender : public cSimpleModule
+{
+  protected:
+    Ipv4Socket socket;
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    void sendData(bool withStreamIdOption);
+};
+
+Define_Module(OptionSender);
+
+void OptionSender::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+        socket.setOutputGate(gate("socketOut"));
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+        socket.bind(&Protocol::echo, Ipv4Address::UNSPECIFIED_ADDRESS);
+        if (strlen(par("destAddress").stringValue()) != 0) {
+            scheduleAt(SimTime(1, SIMTIME_S), new cMessage("plain"));
+            scheduleAt(SimTime(2, SIMTIME_S), new cMessage("withStreamId"));
+        }
+    }
+}
+
+void OptionSender::handleMessage(cMessage *msg)
+{
+    if (!msg->isSelfMessage()) {
+        delete msg;
+        return;
+    }
+    bool withStreamIdOption = !strcmp(msg->getName(), "withStreamId");
+    delete msg;
+    sendData(withStreamIdOption);
+}
+
+void OptionSender::sendData(bool withStreamIdOption)
+{
+    auto packet = new Packet(withStreamIdOption ? "withStreamId" : "plain",
+            makeShared<ByteCountChunk>(B(par("payloadLength").intValue())));
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
+
+    if (withStreamIdOption) {
+        auto *streamId = new Ipv4OptionStreamId();
+        streamId->setStreamId(4242);
+        packet->addTag<Ipv4OptionsReq>()->appendOption(streamId);
+    }
+
+    Ipv4Address dest = L3AddressResolver().resolve(par("destAddress")).toIpv4();
+    EV_INFO << "SENDER: sending " << packet->getName() << " to " << dest << endl;
+    socket.sendTo(packet, dest);
+}
+
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: OptionProbe.ned
+
+simple OptionProbe
+{
+    parameters:
+        string networkProtocolModule;
+        string label;
+        string resultFile = default("result.txt");
+        @display("i=block/control");
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: OptionProbe.cc
+
+#include <fstream>
+
+#include "inet/common/InitStages.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/MemoryOutputStream.h"
+#include "inet/networklayer/contract/INetfilter.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+
+namespace @TESTNAME@ {
+
+using namespace inet;
+
+class INET_API OptionProbe : public cSimpleModule, public NetfilterBase::HookBase
+{
+  protected:
+    INetfilter *netfilter = nullptr;
+    std::ofstream out;
+    const char *label = nullptr;
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("no messages expected"); }
+    void dump(const char *hook, Packet *datagram);
+
+  public:
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { dump("PREROUTING", datagram); return ACCEPT; }
+    virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(Packet *datagram) override { dump("POSTROUTING", datagram); return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *datagram) override { return ACCEPT; }
+};
+
+Define_Module(OptionProbe);
+
+void OptionProbe::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        label = par("label").stringValue();
+        out.open(par("resultFile").stringValue(), std::ios::app);
+        if (out.fail())
+            throw cRuntimeError("cannot open result file");
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
+        netfilter = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolModule").stringValue()));
+        netfilter->registerHook(0, this);
+    }
+}
+
+void OptionProbe::dump(const char *hook, Packet *datagram)
+{
+    Enter_Method_Silent();
+    const auto& hdr = datagram->peekAtFront<Ipv4Header>();
+    if (hdr->getProtocolId() != IP_PROT_ECHO)
+        return;
+    out << label << " " << hook << " packet=" << datagram->getName()
+        << " headerLength=" << hdr->getHeaderLength().get<B>()
+        << " chunkLength=" << hdr->getChunkLength().get<B>()
+        << " options=";
+    bool minLengthOk = true;
+    B optionBytes = B(0);
+    for (size_t i = 0; i < hdr->getOptionArraySize(); i++) {
+        const auto& option = hdr->getOption(i);
+        out << " " << option.getType() << "/" << option.getLength();
+        if (option.getType() != IPOPTION_END_OF_OPTIONS && option.getType() != IPOPTION_NO_OPTION && option.getLength() < 4)
+            minLengthOk = false;
+        optionBytes += B(option.getLength());
+    }
+    out << " optionMinLengthOk=" << (minLengthOk ? "yes" : "no")
+        << " optionsFitHeaderLength=" << (B(20) + optionBytes <= hdr->getHeaderLength() ? "yes" : "no");
+    try {
+        MemoryOutputStream stream;
+        Chunk::serialize(stream, hdr);
+        out << " serializedHeaderBytes=" << stream.getLength().get<B>();
+    }
+    catch (const std::exception& e) {
+        out << " serializationFailed";
+    }
+    out << "\n";
+    out.flush();
+}
+
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: TestNetwork.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+
+module ProbedHost extends StandardHost
+{
+    parameters:
+        string probeLabel;
+    submodules:
+        optProbe: OptionProbe {
+            networkProtocolModule = "^.ipv4.ip";
+            label = parent.probeLabel;
+            @display("p=100,50");
+        }
+}
+
+network TestNetwork
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        hostA: ProbedHost { probeLabel = "hostA"; }
+        hostB: ProbedHost { probeLabel = "hostB"; }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../../src
+network = TestNetwork
+sim-time-limit = 5s
+cmdenv-express-mode = false
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "OptionSender"
+*.hostA.app[0].destAddress = "hostB"
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "OptionSender"
+
+*.hostA.ipv4.ip.enableTimestampOption = true
+*.host*.ipv4.ip.checksumMode = "computed"
+*.host*.eth[*].fcsMode = "computed"
+
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 791 3.1: an option's length octet counts the whole option, so a Timestamp option
+%# is at least 4 bytes long
+%not-contains: result.txt
+optionMinLengthOk=no
+%#--------------------------------------------------------------------------------------------------------------
+%# RFC 791 3.1: the Internet Header Length covers the options, so they must fit inside it
+%not-contains: result.txt
+optionsFitHeaderLength=no
+%#--------------------------------------------------------------------------------------------------------------
+%# a well formed header serializes; today it trips an ASSERT in the option serializer
+%not-contains: result.txt
+serializationFailed
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stderr
+does not hold in function 'serializeOption'
+%#--------------------------------------------------------------------------------------------------------------
+%expected-failure: IPV4-047 -- Ipv4::encapsulate() inserts the Ipv4OptionTimestamp after headerLength/totalLength are computed and never sets the option's length field, so the option has length 0 and is not counted in headerLength. The option is silently lost when the header serializes alone, and aborts the run in Ipv4HeaderSerializer::serializeOption() as soon as another option is present. Fails RFC 791 3.1.
+%#--------------------------------------------------------------------------------------------------------------
