@@ -7,7 +7,6 @@
 package inet.showcases.general.mipv6;
 
 import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
-import inet.node.contract.INetworkNode;
 import inet.node.ipv6.Router6;
 import inet.node.mipv6.CorrespondentNode6;
 import inet.node.mipv6.HomeAgent6;
@@ -74,7 +73,7 @@ network Mipv6Showcase
             parameters:
                 @display("p=600,200;i=device/accesspoint_s");
         }
-        mobileNode: <default("WirelessHost6")> like INetworkNode {
+        mobileNode: WirelessHost6 {
             parameters:
                 @display("p=300,150;i=device/wifilaptop");
         }

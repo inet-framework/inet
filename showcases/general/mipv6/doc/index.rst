@@ -345,10 +345,10 @@ address):
    :end-at: app[0].startTime
    :language: ini
 
-The mobile node itself is a parametric submodule, so one configuration can
-swap it for a plain host. The three configurations below differ only in the
-mobile node's node type and its route-optimization setting (plus the format
-of its status label); everything else — network, movement, traffic — is
+The mobile node is a ``WirelessHost6`` in all three configurations below.
+They differ only in whether its Mobile IPv6 (MIPv6) engine is present at all
+and, when it is, whether route optimization is enabled (plus the format of
+its status label); everything else — network, movement, traffic — is
 identical.
 
 WithoutMipv6 configuration
@@ -359,14 +359,15 @@ WithoutMipv6 configuration
    :end-before: [Config BidirectionalTunneling]
    :language: ini
 
-The mobile node is an ordinary IPv6 host — ``StandardHost6``, which has no
-radio of its own, so the configuration adds the one wireless interface. It
-associates with the foreign access point and SLAAC gives it a
-perfectly good new address — but nobody sends anything to that address. The
-pings keep targeting the old (home) address, which now leads to a network
-where nobody answers Neighbor Solicitations for it. Every ping from the
-moment it leaves home coverage until it walks back is lost. This is the
-problem Mobile IPv6 exists to solve, measured.
+Setting ``hasMipv6 = false`` removes the ``mipv6`` module from the mobile
+node's IPv6 network layer, leaving an ordinary wireless IPv6 host. It
+associates with the foreign access point and stateless address
+autoconfiguration (SLAAC) gives it a perfectly good new address — but nobody
+sends anything to that address. The pings keep targeting the old (home)
+address, which now leads to a network where nobody answers Neighbor
+Solicitations for it. Every ping from the moment it leaves home coverage
+until it walks back is lost. This is the problem Mobile IPv6 (MIPv6) exists
+to solve, measured.
 
 BidirectionalTunneling configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
