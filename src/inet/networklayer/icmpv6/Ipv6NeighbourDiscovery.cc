@@ -897,7 +897,18 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
 
     if (!tentativeAddr.isLinkLocal()) {
-        // DAD completed for a global address -- nothing else to do
+        // DAD completed for a global address. When it is the care-of address formed at a
+        // handover, the mobile node may now register it with its home agent: until this
+        // point its uniqueness on the visited link was unverified (RFC 4862 Section 5.4).
+        auto git = dadGlobalList.find(ie->getInterfaceId());
+        if (git != dadGlobalList.end() && git->second.addr == tentativeAddr) {
+            [[maybe_unused]] bool homeNetwork = git->second.hFlag;
+            dadGlobalList.erase(git);
+#ifdef INET_WITH_MIPV6
+            if (rt6->isMobileNode() && !homeNetwork) // if we are not in the home network, send BUs
+                mipv6->initiateMipv6Protocol(ie, tentativeAddr);
+#endif
+        }
         return;
     }
 
@@ -908,7 +919,21 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
     if (it != dadGlobalList.end()) {
         DadGlobalEntry& entry = it->second;
 
-        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(entry.addr, false, simTime() + entry.validLifetime,
+        // Clear the tentative flag on the addresses that were already on the interface when
+        // the Router Advertisement arrived: the link-local address whose DAD just completed,
+        // and the home address. This has to happen before the address formed from the new
+        // prefix is added below, because that address has not been verified yet.
+        for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAddresses(); i++) {
+            Ipv6Address addr = ie->getProtocolData<Ipv6InterfaceData>()->getAddress(i);
+            ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->permanentlyAssign(addr);
+        }
+
+        // RFC 4862 Section 5.4 requires DAD on every unicast address, so the care-of address
+        // formed from the new prefix is assigned as tentative; the loop at the end of this
+        // function starts DAD for it. The MIPv6 registration is not started here but when
+        // that DAD completes (see above), so no Binding Update can advertise an address
+        // whose uniqueness on the visited link is still unverified.
+        ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->assignAddress(entry.addr, true, simTime() + entry.validLifetime,
                 simTime() + entry.preferredLifetime, entry.hFlag);
 
         // moved from processRAPrefixInfoForAddrAutoConf()
@@ -916,24 +941,9 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
         if (!entry.CoA.isUnspecified())
             ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->removeAddress(entry.CoA);
 
-        // set addresses on this interface to tentative=false
-        for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAddresses(); i++) {
-            // TODO improve this code so that only addresses are permanently assigned
-            // which are formed based on the new prefix from the RA
-            Ipv6Address addr = ie->getProtocolData<Ipv6InterfaceData>()->getAddress(i);
-            ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->permanentlyAssign(addr);
-        }
-
-#ifdef INET_WITH_MIPV6
-        // if we have MIPv6 protocols on this node we will eventually have to
-        // call some appropriate methods
-        if (rt6->isMobileNode()) {
-            if (entry.hFlag == false) // if we are not in the home network, send BUs
-                mipv6->initiateMipv6Protocol(ie, tentativeAddr);
-        }
-#endif
-
-        dadGlobalList.erase(it->first);
+        // The MIPv6 protocol is initiated once the care-of address assigned above has
+        // passed DAD; the dadGlobalList entry is kept until then. dadHasFailed() drops
+        // it, so a care-of address that is already in use is never registered.
     }
 
     // Assign global scope addresses to routers. The Ipv6FlatNetworkConfigurator assigns
