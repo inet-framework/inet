@@ -1,0 +1,95 @@
+%description:
+Verify Supported Rates length validation at the eight-rate boundary for
+IEEE 802.11 management frame serialization and deserialization.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+
+static Ptr<Ieee80211AssociationResponseFrame> makeResponse(short numRates)
+{
+    auto frame = makeShared<Ieee80211AssociationResponseFrame>();
+    frame->setStatusCode(SC_SUCCESSFUL);
+    frame->setAid(1);
+
+    Ieee80211SupportedRatesElement rates;
+    rates.numRates = numRates;
+    for (int i = 0; i < 8; i++)
+        rates.rate[i] = (i + 1) * 0.5;
+    frame->setSupportedRates(rates);
+    frame->setChunkLength(B(8 + numRates));
+    return frame;
+}
+
+static std::vector<uint8_t> serializeResponse(const Ptr<const Ieee80211AssociationResponseFrame>& frame)
+{
+    Packet packet("response", frame);
+    return packet.peekAllAsBytes()->getBytes();
+}
+
+static std::vector<uint8_t> makeRawResponse(const std::vector<uint8_t>& rates)
+{
+    std::vector<uint8_t> bytes = {0, 0, 0, 0, 0, 1, 1, (uint8_t)rates.size()};
+    bytes.insert(bytes.end(), rates.begin(), rates.end());
+    return bytes;
+}
+
+%activity:
+
+auto validFrame = makeResponse(8);
+auto validBytes = serializeResponse(validFrame);
+ASSERT(validBytes.size() == 16);
+ASSERT(validBytes[6] == 1 && validBytes[7] == 8);
+for (int i = 0; i < 8; i++)
+    ASSERT(validBytes[8 + i] == i + 1);
+
+Packet validPacket("valid", makeShared<BytesChunk>(validBytes));
+auto decoded = validPacket.popAtFront<Ieee80211AssociationResponseFrame>(B(validBytes.size()));
+ASSERT(decoded->getSupportedRates().numRates == 8);
+for (int i = 0; i < 8; i++)
+    ASSERT(decoded->getSupportedRates().rate[i] == (i + 1) * 0.5);
+
+auto invalidBytes = makeRawResponse({1, 2, 3, 4, 5, 6, 7, 8, 9});
+bool deserializationRejected = false;
+try {
+    Packet invalidPacket("invalid", makeShared<BytesChunk>(invalidBytes));
+    invalidPacket.popAtFront<Ieee80211AssociationResponseFrame>(B(invalidBytes.size()));
+}
+catch (const cRuntimeError&) {
+    deserializationRejected = true;
+}
+ASSERT(deserializationRejected);
+
+auto invalidFrame = makeResponse(9);
+bool serializationRejected = false;
+try {
+    serializeResponse(invalidFrame);
+}
+catch (const cRuntimeError&) {
+    serializationRejected = true;
+}
+ASSERT(serializationRejected);
+
+auto negativeFrame = makeResponse(0);
+auto negativeRates = negativeFrame->getSupportedRates();
+negativeRates.numRates = -1;
+negativeFrame->setSupportedRates(negativeRates);
+bool negativeSerializationRejected = false;
+try {
+    serializeResponse(negativeFrame);
+}
+catch (const cRuntimeError&) {
+    negativeSerializationRejected = true;
+}
+ASSERT(negativeSerializationRejected);
+
+EV << "Supported Rates length validation checks passed.\n";
+
+%contains: stdout
+Supported Rates length validation checks passed.
