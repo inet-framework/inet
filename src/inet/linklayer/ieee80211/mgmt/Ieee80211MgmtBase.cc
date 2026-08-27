@@ -48,9 +48,12 @@ void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, 
         modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
         mib->updateLocalHtCapabilities(modeSet);
         int rateIndex = 0;
-        for (int i = 0; i < modeSet->getNumModes() && rateIndex < 8; i++)
-            if (modeSet->isMandatory(i))
-                supportedRates.rate[rateIndex++] = modeSet->getMode(i)->getDataMode()->getNetBitrate().get<Mbps>();
+        // Supported Rates carries the legacy OperationalRateSet only. HT/VHT
+        // MCS support is advertised through the corresponding capabilities
+        // elements (IEEE Std 802.11-2024, 9.4.2.3, 9.4.2.54.4, 11.1.4.6).
+        for (const auto *mode : modeSet->getLegacyOperationalModes())
+            if (rateIndex < 8)
+                supportedRates.rate[rateIndex++] = mode->getDataMode()->getNetBitrate().get<Mbps>();
         supportedRates.numRates = rateIndex;
     }
 }

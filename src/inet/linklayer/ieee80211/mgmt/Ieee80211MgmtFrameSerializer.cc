@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrameSerializer.h"
 
 #include <algorithm>
+#include <cmath>
 #include <vector>
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
@@ -31,6 +32,8 @@ Register_Serializer(Ieee80211ReassociationResponseFrame, Ieee80211TypedMgmtFrame
 static constexpr uint8_t HT_CAPABILITIES_ELEMENT_ID = 45;
 static constexpr uint8_t HT_OPERATION_ELEMENT_ID = 61;
 static constexpr uint8_t MAX_SUPPORTED_RATES = 8;
+static constexpr double SUPPORTED_RATE_UNIT = 0.5;
+static constexpr double MAX_SUPPORTED_RATE_UNITS = 127;
 
 static void validateSupportedRatesCount(int numRates)
 {
@@ -45,9 +48,16 @@ static void writeSupportedRatesElement(MemoryOutputStream& stream, const Ieee802
     stream.writeByte(1);
     stream.writeByte(supportedRates.numRates);
     for (int i = 0; i < supportedRates.numRates; i++) {
-        uint8_t rate = ceil(supportedRates.rate[i] / 0.5);
-        // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
-        stream.writeByte(rate);
+        const double rate = supportedRates.rate[i];
+        const double rateUnits = std::ceil(rate / SUPPORTED_RATE_UNIT);
+        // IEEE Std 802.11-2024, 9.4.2.3 and 11.1.4.6: a legacy rate is
+        // represented in 500 kb/s units, rounded up when necessary, up to
+        // 63.5 Mb/s. The basic rate bit is not modeled by
+        // Ieee80211SupportedRatesElement and is therefore left clear.
+        if (!std::isfinite(rate) || rate <= 0 || !std::isfinite(rateUnits) ||
+                rateUnits > MAX_SUPPORTED_RATE_UNITS)
+            throw cRuntimeError("Unsupported Supported Rate value: %g Mb/s", rate);
+        stream.writeByte(static_cast<uint8_t>(rateUnits));
     }
 }
 

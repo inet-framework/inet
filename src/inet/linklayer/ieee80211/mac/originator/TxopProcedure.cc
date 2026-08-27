@@ -71,7 +71,7 @@ void TxopProcedure::startTxop(AccessCategory ac)
     if (start != -1)
         throw cRuntimeError("Txop is already running");
     if (limit == -1) {
-        auto referenceMode = modeSet->getSlowestMandatoryMode();
+        auto referenceMode = modeSet->getReferenceMode();
         limit = getTxopLimit(referenceMode, ac).get<s>();
     }
     // The STA selects between single and multiple protection when it transmits the first frame of a TXOP.
