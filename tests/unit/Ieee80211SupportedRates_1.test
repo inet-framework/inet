@@ -1,0 +1,157 @@
+%description:
+Verify primary Supported Rates lengths, encoded values, basic-rate membership,
+and malformed-element rejection.
+
+%includes:
+#include <algorithm>
+#include <cstdint>
+#include <vector>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+
+static Ptr<Ieee80211AssociationResponseFrame> makeResponse(short numRates,
+        Ieee80211StatusCode statusCode = SC_SUCCESSFUL, short aid = 1)
+{
+    auto frame = makeShared<Ieee80211AssociationResponseFrame>();
+    frame->setStatusCode(statusCode);
+    frame->setAid(aid);
+
+    Ieee80211SupportedRatesElement rates;
+    rates.numRates = numRates;
+    for (int i = 0; i < 8; i++) {
+        rates.rate[i] = (i + 1) * 0.5;
+        rates.basicRate[i] = i % 2 == 0;
+    }
+    frame->setSupportedRates(rates);
+    frame->setChunkLength(B(8 + std::max(0, (int)numRates)));
+    return frame;
+}
+
+template<typename Frame>
+static std::vector<uint8_t> serializeFrame(const Ptr<Frame>& frame)
+{
+    Packet packet("response", frame);
+    return packet.peekAllAsBytes()->getBytes();
+}
+
+static std::vector<uint8_t> makeRawResponse(uint16_t wireAid, const std::vector<uint8_t>& rates,
+        uint16_t statusCode = SC_SUCCESSFUL)
+{
+    std::vector<uint8_t> bytes = {
+        0, 0, // Capability
+        static_cast<uint8_t>(statusCode >> 8), static_cast<uint8_t>(statusCode),
+        static_cast<uint8_t>(wireAid >> 8), static_cast<uint8_t>(wireAid),
+        1, static_cast<uint8_t>(rates.size())};
+    bytes.insert(bytes.end(), rates.begin(), rates.end());
+    return bytes;
+}
+
+template<typename Frame>
+static Ptr<const Frame> deserializeFrame(const std::vector<uint8_t>& bytes)
+{
+    Packet packet("response", makeShared<BytesChunk>(bytes));
+    return packet.popAtFront<Frame>(B(bytes.size()));
+}
+
+%activity:
+
+// Primary Supported Rates accepts exactly one through eight octets.
+auto oneRateFrame = makeResponse(1);
+auto oneRateBytes = serializeFrame(oneRateFrame);
+ASSERT(oneRateBytes.size() == 9);
+ASSERT(oneRateBytes[6] == 1 && oneRateBytes[7] == 1);
+ASSERT(oneRateBytes[8] == (0x80 | 1));
+auto oneRateDecoded = deserializeFrame<Ieee80211AssociationResponseFrame>(oneRateBytes);
+ASSERT(oneRateDecoded->getAid() == 1);
+ASSERT(oneRateDecoded->getSupportedRates().numRates == 1);
+ASSERT(oneRateDecoded->getSupportedRates().basicRate[0]);
+
+auto eightRateFrame = makeResponse(8);
+auto eightRateBytes = serializeFrame(eightRateFrame);
+ASSERT(eightRateBytes.size() == 16);
+ASSERT(eightRateBytes[6] == 1 && eightRateBytes[7] == 8);
+for (int i = 0; i < 8; i++)
+    ASSERT(eightRateBytes[8 + i] == (static_cast<uint8_t>(i + 1) | (i % 2 == 0 ? 0x80 : 0)));
+auto eightRateDecoded = deserializeFrame<Ieee80211AssociationResponseFrame>(eightRateBytes);
+ASSERT(eightRateDecoded->getSupportedRates().numRates == 8);
+for (int i = 0; i < 8; i++) {
+    ASSERT(eightRateDecoded->getSupportedRates().rate[i] == (i + 1) * 0.5);
+    ASSERT(eightRateDecoded->getSupportedRates().basicRate[i] == (i % 2 == 0));
+}
+
+auto zeroRateFrame = makeResponse(0);
+bool zeroRateSerializationRejected = false;
+try {
+    serializeFrame(zeroRateFrame);
+}
+catch (const cRuntimeError&) {
+    zeroRateSerializationRejected = true;
+}
+ASSERT(zeroRateSerializationRejected);
+
+auto nineRateRaw = makeRawResponse(1, {1, 2, 3, 4, 5, 6, 7, 8, 9});
+bool nineRateDeserializationRejected = false;
+try {
+    deserializeFrame<Ieee80211AssociationResponseFrame>(nineRateRaw);
+}
+catch (const cRuntimeError&) {
+    nineRateDeserializationRejected = true;
+}
+ASSERT(nineRateDeserializationRejected);
+
+auto truncatedPrimary = makeRawResponse(1, {1});
+truncatedPrimary[7] = 2;
+bool truncatedPrimaryRejected = false;
+try {
+    deserializeFrame<Ieee80211AssociationResponseFrame>(truncatedPrimary);
+}
+catch (const cRuntimeError&) {
+    truncatedPrimaryRejected = true;
+}
+ASSERT(truncatedPrimaryRejected);
+
+// IEEE Std 802.11-2024, 9.4.2.3 and 11.1.4.6 encode legacy rates in 500 kb/s
+// units up to 63.5 Mb/s. HT MCS 7 is 65 Mb/s and remains an HT MCS.
+auto maximumRateFrame = makeResponse(1);
+auto maximumRates = maximumRateFrame->getSupportedRates();
+maximumRates.rate[0] = 63.5;
+maximumRateFrame->setSupportedRates(maximumRates);
+auto maximumRateBytes = serializeFrame(maximumRateFrame);
+ASSERT(maximumRateBytes[8] == 0xFF);
+auto decodedMaximumRate = deserializeFrame<Ieee80211AssociationResponseFrame>(maximumRateBytes);
+ASSERT(decodedMaximumRate->getSupportedRates().rate[0] == 63.5);
+ASSERT(decodedMaximumRate->getSupportedRates().basicRate[0]);
+
+auto roundedRateFrame = makeResponse(1);
+auto roundedRates = roundedRateFrame->getSupportedRates();
+roundedRates.rate[0] = 2.25;
+roundedRateFrame->setSupportedRates(roundedRates);
+auto roundedRateBytes = serializeFrame(roundedRateFrame);
+ASSERT(roundedRateBytes[8] == 0x85);
+auto decodedRoundedRate = deserializeFrame<Ieee80211AssociationResponseFrame>(roundedRateBytes);
+ASSERT(decodedRoundedRate->getSupportedRates().rate[0] == 2.5);
+
+auto unrepresentableRateFrame = makeResponse(1);
+auto unrepresentableRates = unrepresentableRateFrame->getSupportedRates();
+unrepresentableRates.rate[0] = 65;
+unrepresentableRateFrame->setSupportedRates(unrepresentableRates);
+bool unrepresentableRateRejected = false;
+try {
+    serializeFrame(unrepresentableRateFrame);
+}
+catch (const cRuntimeError&) {
+    unrepresentableRateRejected = true;
+}
+ASSERT(unrepresentableRateRejected);
+
+EV << "Supported Rates validation checks passed.\n";
+
+%contains: stdout
+Supported Rates validation checks passed.

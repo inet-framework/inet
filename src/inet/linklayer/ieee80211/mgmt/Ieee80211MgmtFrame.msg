@@ -114,8 +114,9 @@ enum Ieee80211HwmpCode
 //
 struct Ieee80211SupportedRatesElement
 {
-    short numRates; // number of rates (max 8)
+    short numRates; // number of rates (1..8)
     double rate[8]; // in Mbit/s; should be multiple of 500 kbit/s
+    bool basicRate[8]; // BSS membership/basic-rate bit
 }
 
 //

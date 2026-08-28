@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrameSerializer.h"
 
+#include <cmath>
+
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 
@@ -24,6 +26,62 @@ Register_Serializer(Ieee80211ProbeRequestFrame, Ieee80211TypedMgmtFrameSerialize
 Register_Serializer(Ieee80211ProbeResponseFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ProbeResponseFrame>);
 Register_Serializer(Ieee80211ReassociationRequestFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ReassociationRequestFrame>);
 Register_Serializer(Ieee80211ReassociationResponseFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ReassociationResponseFrame>);
+
+static constexpr uint8_t SUPPORTED_RATES_ELEMENT_ID = 1;
+static constexpr uint8_t MAX_SUPPORTED_RATES = 8;
+static constexpr double SUPPORTED_RATE_UNIT = 0.5;
+static constexpr double MAX_SUPPORTED_RATE_UNITS = 127;
+
+static void validateSupportedRatesCount(int numRates)
+{
+    // IEEE Std 802.11-2024, 9.4.2.3: the Supported Rates field contains
+    // one to eight octets.
+    if (numRates < 1 || numRates > MAX_SUPPORTED_RATES)
+        throw cRuntimeError("Malformed Supported Rates element length: %d", numRates);
+}
+
+static uint8_t encodeSupportedRate(double rate, bool basicRate)
+{
+    const double rateUnits = std::ceil(rate / SUPPORTED_RATE_UNIT);
+    // IEEE Std 802.11-2024, 9.4.2.3 and 11.1.4.6: a legacy rate is
+    // represented in 500 kb/s units, rounded up when necessary, up to
+    // 63.5 Mb/s. Bit 7 identifies a basic rate.
+    if (!std::isfinite(rate) || rate <= 0 || !std::isfinite(rateUnits) ||
+            rateUnits < 1 || rateUnits > MAX_SUPPORTED_RATE_UNITS)
+        throw cRuntimeError("Unsupported Supported Rate value: %g Mb/s", rate);
+    return static_cast<uint8_t>(rateUnits) | (basicRate ? 0x80 : 0);
+}
+
+static void writeSupportedRatesElement(MemoryOutputStream& stream, const Ieee80211SupportedRatesElement& supportedRates)
+{
+    validateSupportedRatesCount(supportedRates.numRates);
+    stream.writeByte(SUPPORTED_RATES_ELEMENT_ID);
+    stream.writeByte(supportedRates.numRates);
+    for (int i = 0; i < supportedRates.numRates; i++)
+        stream.writeByte(encodeSupportedRate(supportedRates.rate[i], supportedRates.basicRate[i]));
+}
+
+static Ieee80211SupportedRatesElement readSupportedRatesElement(MemoryInputStream& stream)
+{
+    Ieee80211SupportedRatesElement supportedRates;
+    const uint8_t elementId = stream.readByte();
+    if (elementId != SUPPORTED_RATES_ELEMENT_ID)
+        throw cRuntimeError("Expected Supported Rates element, got element ID %d", elementId);
+    const uint8_t numRates = stream.readByte();
+    validateSupportedRatesCount(numRates);
+    if (stream.getRemainingLength() < B(numRates))
+        throw cRuntimeError("Malformed Supported Rates element: length=%d remaining=%" PRId64,
+                numRates, stream.getRemainingLength().get<B>());
+    supportedRates.numRates = numRates;
+    for (int i = 0; i < supportedRates.numRates; i++) {
+        const uint8_t encodedRate = stream.readByte();
+        if ((encodedRate & 0x7F) == 0)
+            throw cRuntimeError("Malformed Supported Rates element: zero rate at index %d", i);
+        supportedRates.basicRate[i] = (encodedRate & 0x80) != 0;
+        supportedRates.rate[i] = (double)(encodedRate & 0x7F) * SUPPORTED_RATE_UNIT;
+    }
+    return supportedRates;
+}
 
 void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -55,14 +113,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeByte(length);
         stream.writeBytes((uint8_t *)SSID, B(length));
         // 2    Supported rates
-        const Ieee80211SupportedRatesElement& supportedRates = probeRequestFrame->getSupportedRates();
-        stream.writeByte(1);
-        stream.writeByte(supportedRates.numRates);
-        for (int i = 0; i < supportedRates.numRates; i++) {
-            uint8_t rate = ceil(supportedRates.rate[i] / 0.5);
-            // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
-            stream.writeByte(rate);
-        }
+        writeSupportedRatesElement(stream, probeRequestFrame->getSupportedRates());
         // 3    Request information         May be included if dot11MultiDomainCapabilityEnabled is true.
         // 4    Extended Supported Rates    The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // Last Vendor Specific             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
@@ -80,14 +131,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeByte(length);
         stream.writeBytes((uint8_t *)SSID, B(length));
         // 4    Supported rates
-        const Ieee80211SupportedRatesElement& supportedRates = associationRequestFrame->getSupportedRates();
-        stream.writeByte(1);
-        stream.writeByte(supportedRates.numRates);
-        for (int i = 0; i < supportedRates.numRates; i++) {
-            uint8_t rate = ceil(supportedRates.rate[i] / 0.5);
-            // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
-            stream.writeByte(rate);
-        }
+        writeSupportedRatesElement(stream, associationRequestFrame->getSupportedRates());
         // 5    Extended Supported Rates   The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // 6    Power Capability           The Power Capability element shall be present if dot11SpectrumManagementRequired is true.
         // 7    Supported Channel          The Supported Channels element shall be present if dot11SpectrumManagementRequired is true.
@@ -111,14 +155,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeByte(length);
         stream.writeBytes((uint8_t *)SSID, B(length));
         // 5    Supported rates
-        const Ieee80211SupportedRatesElement& supportedRates = reassociationRequestFrame->getSupportedRates();
-        stream.writeByte(1);
-        stream.writeByte(supportedRates.numRates);
-        for (int i = 0; i < supportedRates.numRates; i++) {
-            uint8_t rate = ceil(supportedRates.rate[i] / 0.5);
-            // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
-            stream.writeByte(rate);
-        }
+        writeSupportedRatesElement(stream, reassociationRequestFrame->getSupportedRates());
         // 6    Extended Supported Rates   The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // 7    Power Capability           The Power Capability element shall be present if dot11SpectrumManagementRequired is true.
         // 8    Supported Channels         The Supported Channels element shall be present if dot11SpectrumManagementRequired is true.
@@ -135,13 +172,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 3    AID
         stream.writeUint16Be(associationResponseFrame->getAid());
         // 4    Supported rates
-        stream.writeByte(1);
-        stream.writeByte(associationResponseFrame->getSupportedRates().numRates);
-        for (int i = 0; i < associationResponseFrame->getSupportedRates().numRates; i++) {
-            uint8_t rate = ceil(associationResponseFrame->getSupportedRates().rate[i] / 0.5);
-            // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
-            stream.writeByte(rate);
-        }
+        writeSupportedRatesElement(stream, associationResponseFrame->getSupportedRates());
         // 5    Extended Supported Rates   The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // 6    EDCA Parameter Set
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
@@ -155,13 +186,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 3    AID
         stream.writeUint16Be(reassociationResponseFrame->getAid());
         // 4    Supported rates
-        stream.writeByte(1);
-        stream.writeByte(reassociationResponseFrame->getSupportedRates().numRates);
-        for (int i = 0; i < reassociationResponseFrame->getSupportedRates().numRates; i++) {
-            uint8_t rate = ceil(reassociationResponseFrame->getSupportedRates().rate[i] / 0.5);
-            // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
-            stream.writeByte(rate);
-        }
+        writeSupportedRatesElement(stream, reassociationResponseFrame->getSupportedRates());
         // 5    Extended Supported Rates   The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // 6    EDCA Parameter Set
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
@@ -181,13 +206,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeByte(length);
         stream.writeBytes((uint8_t *)SSID, B(length));
         // 5    Supported rates
-        stream.writeByte(1);
-        stream.writeByte(beaconFrame->getSupportedRates().numRates);
-        for (int i = 0; i < beaconFrame->getSupportedRates().numRates; i++) {
-            uint8_t rate = ceil(beaconFrame->getSupportedRates().rate[i] / 0.5);
-            // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
-            stream.writeByte(rate);
-        }
+        writeSupportedRatesElement(stream, beaconFrame->getSupportedRates());
         // 6    Frequency-Hopping (FH) Parameter Set   The FH Parameter Set information element is present within Beacon frames generated by STAs using FH PHYs.
         // 7    DS Parameter Set                       The DS Parameter Set information element is present within Beacon frames generated by STAs using Clause 15, Clause 18, and Clause 19 PHYs.
         // 8    CF Parameter Set                       The CF Parameter Set information element is present only within Beacon frames generated by APs supporting a PCF.
@@ -224,13 +243,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         stream.writeByte(length);
         stream.writeBytes((uint8_t *)SSID, B(length));
         // 5      Supported rates
-        stream.writeByte(1);
-        stream.writeByte(probeResponseFrame->getSupportedRates().numRates);
-        for (int i = 0; i < probeResponseFrame->getSupportedRates().numRates; i++) {
-            uint8_t rate = ceil(probeResponseFrame->getSupportedRates().rate[i] / 0.5);
-            // rate |= 0x80 if rate contained in the BSSBasicRateSet parameter
-            stream.writeByte(rate);
-        }
+        writeSupportedRatesElement(stream, probeResponseFrame->getSupportedRates());
         // 6      FH Parameter Set                The FH Parameter Set information element is present within Probe Response frames generated by STAs using FH PHYs.
         // 7      DS Parameter Set                The DS Parameter Set information element is present within Probe Response frames generated by STAs using Clause 15, Clause 18, and Clause 19 PHYs.
         // 8      CF Parameter Set                The CF Parameter Set information element is present only within Probe Response frames generated by APs supporting a PCF.
@@ -305,12 +318,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStrea
             SSID[length] = '\0';
             frame->setSSID(SSID);
 
-            Ieee80211SupportedRatesElement supRat;
-            stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            frame->setSupportedRates(supRat);
+            frame->setSupportedRates(readSupportedRatesElement(stream));
             return frame;
         }
 
@@ -328,12 +336,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStrea
             SSID[length] = '\0';
             frame->setSSID(SSID);
 
-            Ieee80211SupportedRatesElement supRat;
-            stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            frame->setSupportedRates(supRat);
+            frame->setSupportedRates(readSupportedRatesElement(stream));
             return frame;
         }
 
@@ -352,12 +355,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStrea
             SSID[length] = '\0';
             frame->setSSID(SSID);
 
-            Ieee80211SupportedRatesElement supRat;
-            stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            frame->setSupportedRates(supRat);
+            frame->setSupportedRates(readSupportedRatesElement(stream));
             return frame;
         }
 
@@ -368,12 +366,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStrea
             frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Be());
             frame->setAid(stream.readUint16Be());
 
-            Ieee80211SupportedRatesElement supRat;
-            stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            frame->setSupportedRates(supRat);
+            frame->setSupportedRates(readSupportedRatesElement(stream));
             return frame;
         }
 
@@ -384,12 +377,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStrea
             frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Be());
             frame->setAid(stream.readUint16Be());
 
-            Ieee80211SupportedRatesElement supRat;
-            stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            frame->setSupportedRates(supRat);
+            frame->setSupportedRates(readSupportedRatesElement(stream));
             return frame;
         }
 
@@ -410,12 +398,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStrea
             SSID[length] = '\0';
             frame->setSSID(SSID);
 
-            Ieee80211SupportedRatesElement supRat;
-            stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            frame->setSupportedRates(supRat);
+            frame->setSupportedRates(readSupportedRatesElement(stream));
             return frame;
         }
 
@@ -436,12 +419,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStrea
             SSID[length] = '\0';
             frame->setSSID(SSID);
 
-            Ieee80211SupportedRatesElement supRat;
-            stream.readByte();
-            supRat.numRates = stream.readByte();
-            for (int i = 0; i < supRat.numRates; i++)
-                supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
-            frame->setSupportedRates(supRat);
+            frame->setSupportedRates(readSupportedRatesElement(stream));
             return frame;
         }
 
