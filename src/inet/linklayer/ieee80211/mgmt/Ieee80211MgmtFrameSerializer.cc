@@ -14,16 +14,16 @@ namespace inet {
 
 namespace ieee80211 {
 
-Register_Serializer(Ieee80211AssociationRequestFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211AssociationResponseFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211AuthenticationFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211BeaconFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211DeauthenticationFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211DisassociationFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211ProbeRequestFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211ProbeResponseFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211ReassociationRequestFrame, Ieee80211MgmtFrameSerializer);
-Register_Serializer(Ieee80211ReassociationResponseFrame, Ieee80211MgmtFrameSerializer);
+Register_Serializer(Ieee80211AssociationRequestFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211AssociationRequestFrame>);
+Register_Serializer(Ieee80211AssociationResponseFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211AssociationResponseFrame>);
+Register_Serializer(Ieee80211AuthenticationFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211AuthenticationFrame>);
+Register_Serializer(Ieee80211BeaconFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211BeaconFrame>);
+Register_Serializer(Ieee80211DeauthenticationFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211DeauthenticationFrame>);
+Register_Serializer(Ieee80211DisassociationFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211DisassociationFrame>);
+Register_Serializer(Ieee80211ProbeRequestFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ProbeRequestFrame>);
+Register_Serializer(Ieee80211ProbeResponseFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ProbeResponseFrame>);
+Register_Serializer(Ieee80211ReassociationRequestFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ReassociationRequestFrame>);
+Register_Serializer(Ieee80211ReassociationResponseFrame, Ieee80211TypedMgmtFrameSerializer<Ieee80211ReassociationResponseFrame>);
 
 void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -67,7 +67,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 4    Extended Supported Rates    The Extended Supported Rates element is present whenever there are more than eight supported rates, and it is optional otherwise.
         // Last Vendor Specific             One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto associationRequestFrame = dynamicPtrCast<const Ieee80211AssociationRequestFrame>(chunk)) {
+    else if (auto associationRequestFrame = dynamicPtrCast<const Ieee80211AssociationRequestFrame>(chunk); associationRequestFrame && !dynamicPtrCast<const Ieee80211ReassociationRequestFrame>(chunk)) {
 //        type = ST_ASSOCIATIONREQUEST;
         // 1    Capability
         stream.writeUint16Be(0); // FIXME
@@ -126,7 +126,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 10   QoS Capability             The QoS Capability element is present when dot11QosOption- Implemented is true.
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto associationResponseFrame = dynamicPtrCast<const Ieee80211AssociationResponseFrame>(chunk)) {
+    else if (auto associationResponseFrame = dynamicPtrCast<const Ieee80211AssociationResponseFrame>(chunk); associationResponseFrame && !dynamicPtrCast<const Ieee80211ReassociationResponseFrame>(chunk)) {
 //        type = ST_ASSOCIATIONRESPONSE;
         // 1    Capability
         stream.writeUint16Be(0); // FIXME
@@ -166,7 +166,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 6    EDCA Parameter Set
         // Last Vendor Specific            One or more vendor-specific information elements may appear in this frame. This information element follows all other information elements.
     }
-    else if (auto beaconFrame = dynamicPtrCast<const Ieee80211BeaconFrame>(chunk)) {
+    else if (auto beaconFrame = dynamicPtrCast<const Ieee80211BeaconFrame>(chunk); beaconFrame && !dynamicPtrCast<const Ieee80211ProbeResponseFrame>(chunk)) {
 //        type = ST_BEACON;
         // 1    Timestamp
         stream.writeUint64Be(simTime().raw()); // FIXME
@@ -255,9 +255,22 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         throw cRuntimeError("Cannot serialize frame");
 }
 
-const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStream& stream, const std::type_info& typeInfo)
 {
-    switch (0) { // TODO receive and dispatch on type_info parameter
+    int frameType = -1;
+    if (typeInfo == typeid(Ieee80211AuthenticationFrame)) frameType = 0xB0;
+    else if (typeInfo == typeid(Ieee80211DeauthenticationFrame)) frameType = 0xC0;
+    else if (typeInfo == typeid(Ieee80211DisassociationFrame)) frameType = 0xA0;
+    else if (typeInfo == typeid(Ieee80211ProbeRequestFrame)) frameType = 0x40;
+    else if (typeInfo == typeid(Ieee80211AssociationRequestFrame)) frameType = 0x00;
+    else if (typeInfo == typeid(Ieee80211ReassociationRequestFrame)) frameType = 0x02;
+    else if (typeInfo == typeid(Ieee80211AssociationResponseFrame)) frameType = 0x01;
+    else if (typeInfo == typeid(Ieee80211ReassociationResponseFrame)) frameType = 0x03;
+    else if (typeInfo == typeid(Ieee80211BeaconFrame)) frameType = 0x80;
+    else if (typeInfo == typeid(Ieee80211ProbeResponseFrame)) frameType = 0x50;
+    else throw cRuntimeError("Unsupported IEEE 802.11 management frame type: %s", typeInfo.name());
+
+    switch (frameType) {
         case 0xB0: // ST_AUTHENTICATION
         {
             auto frame = makeShared<Ieee80211AuthenticationFrame>();
@@ -304,6 +317,9 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
         case 0x00: // ST_ASSOCIATIONREQUEST
         {
             auto frame = makeShared<Ieee80211AssociationRequestFrame>();
+
+            stream.readUint16Be();
+            stream.readUint16Be();
 
             char SSID[256];
             stream.readByte();
@@ -437,4 +453,3 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
 } // namespace ieee80211
 
 } // namespace inet
-
