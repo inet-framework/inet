@@ -120,15 +120,22 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
     }
     else if (msg->getKind() == MK_ASSOC_TIMEOUT) {
         // association timed out
+        ASSERT(msg == assocTimeoutMsg);
         ApInfo *ap = (ApInfo *)msg->getContextPointer();
+        bool reassociation = reassociationInProgress;
         EV << "Association timed out, AP address = " << ap->address << "\n";
 
+        assocTimeoutMsg = nullptr;
+        reassociationInProgress = false;
+        delete msg;
+
         // send back failure report to agent
-        if (reassociationInProgress)
+        if (reassociation) {
+            handleReassociationFailure(ap);
             sendReassociationConfirm(ap, PRC_TIMEOUT);
+        }
         else
             sendAssociationConfirm(ap, PRC_TIMEOUT);
-        reassociationInProgress = false;
     }
     else if (msg->getKind() == MK_SCAN_MAXCHANNELTIME) {
         // go to next channel during scanning
@@ -200,11 +207,20 @@ Ieee80211MgmtSta::ApInfo *Ieee80211MgmtSta::lookupAP(const MacAddress& address)
 
 void Ieee80211MgmtSta::clearAPList()
 {
+    cancelPendingAssociation();
+
     for (auto& elem : apList)
         if (elem.authTimeoutMsg)
             cancelAndDelete(elem.authTimeoutMsg);
 
     apList.clear();
+}
+
+void Ieee80211MgmtSta::cancelPendingAssociation()
+{
+    cancelAndDelete(assocTimeoutMsg);
+    assocTimeoutMsg = nullptr;
+    reassociationInProgress = false;
 }
 
 void Ieee80211MgmtSta::changeChannel(int channelNum)
@@ -323,14 +339,8 @@ void Ieee80211MgmtSta::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 
     if (isScanning)
         throw cRuntimeError("processScanCommand: scanning already in progress");
-    if (mib->bssStationData.isAssociated) {
+    if (mib->bssStationData.isAssociated)
         disassociate();
-    }
-    else if (assocTimeoutMsg) {
-        EV << "Cancelling ongoing association process\n";
-        cancelAndDelete(assocTimeoutMsg);
-        assocTimeoutMsg = nullptr;
-    }
 
     // clear existing AP list (and cancel any pending authentications) -- we want to start with a clean page
     clearAPList();
@@ -444,6 +454,8 @@ void Ieee80211MgmtSta::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
 
     if (mib->bssStationData.isAssociated && assocAP.address == address)
         disassociate();
+    else if (assocTimeoutMsg && assocTimeoutMsg->getContextPointer() == ap)
+        cancelPendingAssociation();
 
     if (ap->isAuthenticated)
         ap->isAuthenticated = false;
@@ -491,11 +503,8 @@ void Ieee80211MgmtSta::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
     if (mib->bssStationData.isAssociated && address == assocAP.address) {
         disassociate();
     }
-    else if (assocTimeoutMsg) {
-        // pending association
-        cancelAndDelete(assocTimeoutMsg);
-        assocTimeoutMsg = nullptr;
-    }
+    else
+        cancelPendingAssociation();
 
     // create and send disassociation request
     const auto& body = makeShared<Ieee80211DisassociationFrame>();
@@ -507,6 +516,7 @@ void Ieee80211MgmtSta::disassociate()
 {
     EV << "Disassociating from AP address=" << assocAP.address << "\n";
     ASSERT(mib->bssStationData.isAssociated);
+    cancelPendingAssociation();
     mib->bssStationData.isAssociated = false;
     cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
@@ -664,35 +674,47 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         return;
     }
 
+    // IEEE Std 802.11-2024, 11.3.5.2 and 11.3.5.4: process only the response
+    // corresponding to the association or reassociation procedure in progress.
+    if (reassociation != reassociationInProgress) {
+        EV_INFO << "Association response subtype does not match the pending "
+                << (reassociationInProgress ? "reassociation" : "association")
+                << " attempt, ignoring frame\n";
+        delete packet;
+        return;
+    }
+
+    MacAddress address = header->getTransmitterAddress();
+    ApInfo *ap = static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer());
+    if (ap == nullptr || ap->address != address) {
+        EV << "Association response is not from the pending AP, ignoring frame\n";
+        delete packet;
+        return;
+    }
+
     // extract frame contents
     const auto& responseBody = packet->peekData<Ieee80211AssociationResponseFrame>();
-    MacAddress address = header->getTransmitterAddress();
     int statusCode = responseBody->getStatusCode();
-
-    // look up AP data structure
-    ApInfo *ap = lookupAP(address);
-    if (!ap)
-        throw cRuntimeError("handleAssociationResponseFrame: AP not known: address=%s", address.str().c_str());
 
     delete packet;
 
-    if (mib->bssStationData.isAssociated) {
-        EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
-        mib->bssStationData.isAssociated = false;
-        cancelAndDelete(assocAP.beaconTimeoutMsg);
-        assocAP.beaconTimeoutMsg = nullptr;
-        assocAP = AssociatedApInfo();
-    }
-
-    cancelAndDelete(assocTimeoutMsg);
-    assocTimeoutMsg = nullptr;
-    reassociationInProgress = false;
+    cancelPendingAssociation();
 
     if (statusCode != SC_SUCCESSFUL) {
         EV << "Association failed with AP address=" << ap->address << "\n";
+        if (reassociation)
+            handleReassociationFailure(ap);
     }
     else {
         EV << "Association successful, AP address=" << ap->address << "\n";
+
+        if (mib->bssStationData.isAssociated) {
+            EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
+            mib->bssStationData.isAssociated = false;
+            cancelAndDelete(assocAP.beaconTimeoutMsg);
+            assocAP.beaconTimeoutMsg = nullptr;
+            assocAP = AssociatedApInfo();
+        }
 
         // change our state to "associated"
         mib->bssData.ssid = ap->ssid;
@@ -713,6 +735,20 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         sendAssociationConfirm(ap, statusCodeToPrimResultCode(statusCode));
 }
 
+void Ieee80211MgmtSta::handleReassociationFailure(ApInfo *ap)
+{
+    // IEEE Std 802.11-2024, 11.3.5.4(f): failed or timed-out reassociation
+    // disassociates the STA only when the target is its current AP.
+    if (shouldDisassociateOnReassociationFailure(mib->bssStationData.isAssociated, assocAP.address, ap->address))
+        disassociate();
+}
+
+bool Ieee80211MgmtSta::shouldDisassociateOnReassociationFailure(bool isAssociated,
+        const MacAddress& associatedApAddress, const MacAddress& targetApAddress)
+{
+    return isAssociated && associatedApAddress == targetApAddress;
+}
+
 void Ieee80211MgmtSta::handleReassociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     dropManagementFrame(packet);
@@ -728,11 +764,7 @@ void Ieee80211MgmtSta::handleDisassociationFrame(Packet *packet, const Ptr<const
     EV << "Received Disassociation frame\n";
     const MacAddress& address = header->getAddress3(); // source address
 
-    if (assocTimeoutMsg) {
-        // pending association
-        cancelAndDelete(assocTimeoutMsg);
-        assocTimeoutMsg = nullptr;
-    }
+    cancelPendingAssociation();
     if (!mib->bssStationData.isAssociated || address != assocAP.address) {
         EV << "Not associated with that AP -- ignoring frame\n";
         delete packet;
