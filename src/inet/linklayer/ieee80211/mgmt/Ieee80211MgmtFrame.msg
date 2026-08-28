@@ -127,6 +127,32 @@ struct Ieee80211ExtendedSupportedRatesElement
     bool basicRate[255]; // BSS membership/basic-rate bit
 }
 
+// IEEE Std 802.11-2024, 9.4.2.54: modeled fields in the fixed 26-octet HT Capabilities body.
+struct Ieee80211HtCapabilitiesElement
+{
+    bool ldpc;
+    bool supportedChannelWidth40Mhz;
+    bool greenfield;
+    bool shortGi20;
+    bool shortGi40;
+    short maxAmpduLengthExponent;
+    bool rxMcsSupported[77];
+    bool txMcsSetDefined;
+    bool txRxMcsSetNotEqual;
+    short txMaxNss;
+    bool txUnequalModulation;
+}
+
+// IEEE Std 802.11-2024, 9.4.2.55: modeled fields in the fixed 22-octet HT Operation body.
+struct Ieee80211HtOperationElement
+{
+    short primaryChannel;
+    short secondaryChannelOffset;
+    bool staChannelWidth40Mhz;
+    short protectionMode;
+    bool basicMcsSupported[77];
+}
+
 //
 // Frame body base class used to hide various frame body types
 //
@@ -134,6 +160,10 @@ class Ieee80211MgmtFrame extends FieldsChunk
 {
     bool extendedSupportedRatesPresent;
     Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
+    bool htCapabilitiesPresent;
+    Ieee80211HtCapabilitiesElement htCapabilities;
+    bool htOperationPresent;
+    Ieee80211HtOperationElement htOperation;
 }
 
 //

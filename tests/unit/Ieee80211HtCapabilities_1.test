@@ -1,8 +1,9 @@
 %description:
-Verify directional HT negotiation, sparse MCS bitmaps, and HT operation
-compatibility for undefined or unequal Tx MCS advertisements.
+Verify directional HT negotiation and association-response classification,
+including acceptance of a genuinely legacy AP.
 
 %includes:
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
 
 using namespace inet;
@@ -67,18 +68,42 @@ ASSERT(!supportsBasicHtMcsSet(peer, operation));
 peer.rxMcsSupported[1] = true;
 ASSERT(supportsBasicHtMcsSet(peer, operation));
 
-// An unequal Tx/Rx advertisement carries only summary Tx fields, so the exact
-// Tx bitmap is unknown while the peer remains eligible for association.
-peer.txMcsSetDefined = true;
-peer.txRxMcsSetNotEqual = true;
-peer.txMaxNss = 2;
-peer.txMcsNss = Ieee80211HtMcsNssMap();
-negotiated = negotiateHtCapabilities(local, peer, operation);
-ASSERT(negotiated.localRxPeerTx.valid);
-ASSERT(!negotiated.localRxPeerTx.supportedMcs[0]);
-ASSERT(negotiated.localTxPeerRx.supportedMcs[0]);
+Ieee80211HtCapabilities rxOnly;
+rxOnly.supportedChannelWidths.insert(MHz(20));
+rxOnly.rxMcsSupported[0] = true;
+rxOnly.txMcsSetDefined = false;
+auto rxOnlyElement = makeHtCapabilitiesElement(rxOnly);
+ASSERT(!rxOnlyElement.txMcsSetDefined);
+ASSERT(!rxOnlyElement.txRxMcsSetNotEqual);
+ASSERT(rxOnlyElement.txMaxNss == 0);
 
-EV << "HT directional and sparse capability checks passed.\n";
+// Table 9-226 does not carry an exact Tx bitmap for unequal Tx/Rx sets.
+for (bool unequalModulation : {false, true}) {
+    Ieee80211HtCapabilitiesElement unequalElement;
+    unequalElement.supportedChannelWidth40Mhz = true;
+    unequalElement.rxMcsSupported[0] = true;
+    unequalElement.rxMcsSupported[7] = true;
+    unequalElement.rxMcsSupported[8] = true;
+    unequalElement.txMcsSetDefined = true;
+    unequalElement.txRxMcsSetNotEqual = true;
+    unequalElement.txMaxNss = 2;
+    unequalElement.txUnequalModulation = unequalModulation;
+    auto unequal = makeHtCapabilities(unequalElement);
+    ASSERT(unequal.txRxMcsSetNotEqual);
+    ASSERT(unequal.txMaxNss == 2);
+    ASSERT(unequal.txUnequalModulation == unequalModulation);
+    ASSERT(unequal.txMcsNss.maxMcsPerNss[0] == -1);
+    ASSERT(unequal.txMcsNss.maxMcsPerNss[1] == -1);
+    auto unequalRoundTrip = makeHtCapabilitiesElement(unequal);
+    ASSERT(unequalRoundTrip.txRxMcsSetNotEqual);
+    ASSERT(unequalRoundTrip.txMaxNss == 2);
+    ASSERT(unequalRoundTrip.txUnequalModulation == unequalModulation);
+    auto unequalNegotiated = negotiateHtCapabilities(local, unequal, operation);
+    ASSERT(unequalNegotiated.localRxPeerTx.valid);
+    ASSERT(!unequalNegotiated.localRxPeerTx.supportedMcs[0]);
+}
+
+EV << "HT directional and legacy association checks passed.\n";
 
 %contains: stdout
-HT directional and sparse capability checks passed.
+HT directional and legacy association checks passed.
