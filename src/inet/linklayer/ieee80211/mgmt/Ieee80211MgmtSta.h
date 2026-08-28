@@ -48,6 +48,8 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
         MacAddress address; // alias bssid
         std::string ssid;
         Ieee80211SupportedRatesElement supportedRates;
+        bool extendedSupportedRatesPresent = false;
+        Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
         simtime_t beaconInterval;
         double rxPower;
 
@@ -190,4 +192,3 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 } // namespace inet
 
 #endif
-

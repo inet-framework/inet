@@ -119,11 +119,21 @@ struct Ieee80211SupportedRatesElement
     bool basicRate[8]; // BSS membership/basic-rate bit
 }
 
+// IEEE Std 802.11-2024, 9.4.2.11: overflow of Supported Rates.
+struct Ieee80211ExtendedSupportedRatesElement
+{
+    short numRates; // number of rates (1..255)
+    double rate[255]; // in Mbit/s; should be multiple of 500 kbit/s
+    bool basicRate[255]; // BSS membership/basic-rate bit
+}
+
 //
 // Frame body base class used to hide various frame body types
 //
 class Ieee80211MgmtFrame extends FieldsChunk
 {
+    bool extendedSupportedRatesPresent;
+    Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
 }
 
 //

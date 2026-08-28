@@ -45,11 +45,31 @@ void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, 
 
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
-        supportedRates.numRates = std::min(8, modeSet->getNumModes());
+        supportedRates = Ieee80211SupportedRatesElement();
+        extendedSupportedRates = Ieee80211ExtendedSupportedRatesElement();
         int rateIndex = 0;
-        for (int i = 0; i < supportedRates.numRates; i++)
-            if (modeSet->isMandatory(i))
-                supportedRates.rate[rateIndex++] = modeSet->getMode(i)->getDataMode()->getNetBitrate().get<Mbps>();
+        int extendedRateIndex = 0;
+        // Supported Rates carries the legacy OperationalRateSet only. HT/VHT
+        // MCS support is advertised through the corresponding capabilities
+        // elements (IEEE Std 802.11-2024, 9.4.2.3, 9.4.2.54.4, 11.1.4.6).
+        for (const auto *mode : modeSet->getLegacyOperationalModes()) {
+            bool isBasicRate = modeSet->getIsMandatory(mode);
+            double rate = mode->getDataMode()->getNetBitrate().get<Mbps>();
+            if (rateIndex < 8) {
+                supportedRates.rate[rateIndex] = rate;
+                supportedRates.basicRate[rateIndex] = isBasicRate;
+                rateIndex++;
+            }
+            else if (extendedRateIndex < 255) {
+                extendedSupportedRates.rate[extendedRateIndex] = rate;
+                extendedSupportedRates.basicRate[extendedRateIndex] = isBasicRate;
+                extendedRateIndex++;
+            }
+            else
+                throw cRuntimeError("Mode set '%s' contains more than 263 legacy operational rates", modeSet->getName());
+        }
+        supportedRates.numRates = rateIndex;
+        extendedSupportedRates.numRates = extendedRateIndex;
     }
 }
 
@@ -163,4 +183,3 @@ void Ieee80211MgmtBase::stop()
 } // namespace ieee80211
 
 } // namespace inet
-

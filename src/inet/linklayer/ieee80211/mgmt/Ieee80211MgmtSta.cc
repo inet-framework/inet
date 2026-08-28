@@ -267,12 +267,9 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
 
     // create and send association request
     const auto& body = makeShared<Ieee80211AssociationRequestFrame>();
-
-    // TODO set the following too?
-    // string SSID
-//    Ieee80211SupportedRatesElement supportedRates;
-
-    body->setChunkLength(B(2 + 2 + strlen(body->getSSID()) + 2 + body->getSupportedRates().numRates + 2));
+    body->setSSID(ap->ssid.c_str());
+    setSupportedRateElements(body);
+    body->setChunkLength(B(2 + 2 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body));
     sendManagementFrame("Assoc", body, ST_ASSOCIATIONREQUEST, ap->address);
 
     // schedule timeout
@@ -375,8 +372,8 @@ void Ieee80211MgmtSta::sendProbeRequest()
     EV << "Sending Probe Request, BSSID=" << scanning.bssid << ", SSID=\"" << scanning.ssid << "\"\n";
     const auto& body = makeShared<Ieee80211ProbeRequestFrame>();
     body->setSSID(scanning.ssid.c_str());
-    body->setSupportedRates(supportedRates);
-    body->setChunkLength(B((2 + scanning.ssid.length()) + (2 + body->getSupportedRates().numRates)));
+    setSupportedRateElements(body);
+    body->setChunkLength(B(2 + scanning.ssid.length()) + getSupportedRateElementsLength(body));
     sendManagementFrame("ProbeReq", body, ST_PROBEREQUEST, scanning.bssid);
 }
 
@@ -397,6 +394,8 @@ void Ieee80211MgmtSta::sendScanConfirm()
         bss.setBSSID(ap->address);
         bss.setSSID(ap->ssid.c_str());
         bss.setSupportedRates(ap->supportedRates);
+        bss.setExtendedSupportedRatesPresent(ap->extendedSupportedRatesPresent);
+        bss.setExtendedSupportedRates(ap->extendedSupportedRates);
         bss.setBeaconInterval(ap->beaconInterval);
         bss.setRxPower(ap->rxPower);
     }
@@ -747,6 +746,8 @@ void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     ap->address = address;
     ap->ssid = body->getSSID();
     ap->supportedRates = body->getSupportedRates();
+    ap->extendedSupportedRatesPresent = body->getExtendedSupportedRatesPresent();
+    ap->extendedSupportedRates = body->getExtendedSupportedRates();
     ap->beaconInterval = body->getBeaconInterval();
     auto signalPowerInd = packet->getTag<SignalPowerInd>();
     if (signalPowerInd != nullptr) {
@@ -758,4 +759,3 @@ void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
 
 } // namespace ieee80211
 } // namespace inet
-
