@@ -50,6 +50,10 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
         Ieee80211SupportedRatesElement supportedRates;
         bool extendedSupportedRatesPresent = false;
         Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
+        bool htCapabilitiesPresent = false;
+        Ieee80211HtCapabilities htCapabilities;
+        bool htOperationPresent = false;
+        Ieee80211HtOperation htOperation;
         simtime_t beaconInterval;
         double rxPower;
 

@@ -81,6 +81,10 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
         return length;
     }
 
+    /** Adds the local HT advertisement to a frame when the authoritative PHY profile supports HT operation. */
+    virtual void addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const;
+    virtual void addHtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const;
+
     /** Dispatch to frame processing methods according to frame type */
     virtual void processFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
