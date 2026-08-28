@@ -124,7 +124,11 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         EV << "Association timed out, AP address = " << ap->address << "\n";
 
         // send back failure report to agent
-        sendAssociationConfirm(ap, PRC_TIMEOUT);
+        if (reassociationInProgress)
+            sendReassociationConfirm(ap, PRC_TIMEOUT);
+        else
+            sendAssociationConfirm(ap, PRC_TIMEOUT);
+        reassociationInProgress = false;
     }
     else if (msg->getKind() == MK_SCAN_MAXCHANNELTIME) {
         // go to next channel during scanning
@@ -172,10 +176,10 @@ void Ieee80211MgmtSta::handleCommand(int msgkind, cObject *ctrl)
         processAuthenticateCommand(cmd);
     else if (auto cmd = dynamic_cast<Ieee80211Prim_DeauthenticateRequest *>(ctrl))
         processDeauthenticateCommand(cmd);
-    else if (auto cmd = dynamic_cast<Ieee80211Prim_AssociateRequest *>(ctrl))
-        processAssociateCommand(cmd);
     else if (auto cmd = dynamic_cast<Ieee80211Prim_ReassociateRequest *>(ctrl))
         processReassociateCommand(cmd);
+    else if (auto cmd = dynamic_cast<Ieee80211Prim_AssociateRequest *>(ctrl))
+        processAssociateCommand(cmd);
     else if (auto cmd = dynamic_cast<Ieee80211Prim_DisassociateRequest *>(ctrl))
         processDisassociateCommand(cmd);
     else if (ctrl)
@@ -271,9 +275,29 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     setSupportedRateElements(body);
     body->setChunkLength(B(2 + 2 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body));
     sendManagementFrame("Assoc", body, ST_ASSOCIATIONREQUEST, ap->address);
+    reassociationInProgress = false;
 
     // schedule timeout
     ASSERT(assocTimeoutMsg == nullptr);
+    assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
+    assocTimeoutMsg->setContextPointer(ap);
+    scheduleAfter(timeout, assocTimeoutMsg);
+}
+
+void Ieee80211MgmtSta::startReassociation(ApInfo *ap, simtime_t timeout)
+{
+    if (!mib->bssStationData.isAssociated || assocTimeoutMsg)
+        throw cRuntimeError("startReassociation: not associated or association currently in progress");
+    if (!ap->isAuthenticated)
+        throw cRuntimeError("startReassociation: not authenticated with AP address='%s'", ap->address.str().c_str());
+    changeChannel(ap->channel);
+    const auto& body = makeShared<Ieee80211ReassociationRequestFrame>();
+    body->setCurrentAP(assocAP.address);
+    body->setSSID(ap->ssid.c_str());
+    setSupportedRateElements(body);
+    body->setChunkLength(B(2 + 2 + 6 + (2 + strlen(body->getSSID()))) + getSupportedRateElementsLength(body));
+    sendManagementFrame("Reassoc", body, ST_REASSOCIATIONREQUEST, ap->address);
+    reassociationInProgress = true;
     assocTimeoutMsg = new cMessage("assocTimeout", MK_ASSOC_TIMEOUT);
     assocTimeoutMsg->setContextPointer(ap);
     scheduleAfter(timeout, assocTimeoutMsg);
@@ -447,9 +471,17 @@ void Ieee80211MgmtSta::processAssociateCommand(Ieee80211Prim_AssociateRequest *c
 
 void Ieee80211MgmtSta::processReassociateCommand(Ieee80211Prim_ReassociateRequest *ctrl)
 {
-    // treat the same way as association
-    // TODO refine
-    processAssociateCommand(ctrl);
+    const MacAddress& address = ctrl->getAddress();
+    if (!mib->bssStationData.isAssociated) {
+        auto confirm = new Ieee80211Prim_ReassociateConfirm();
+        confirm->setAddress(address);
+        sendConfirm(confirm, PRC_REFUSED);
+        return;
+    }
+    ApInfo *ap = lookupAP(address);
+    if (!ap)
+        throw cRuntimeError("processReassociateCommand: AP not known: address = %s", address.str().c_str());
+    startReassociation(ap, ctrl->getTimeout());
 }
 
 void Ieee80211MgmtSta::processDisassociateCommand(Ieee80211Prim_DisassociateRequest *ctrl)
@@ -490,7 +522,16 @@ void Ieee80211MgmtSta::sendAuthenticationConfirm(ApInfo *ap, Ieee80211PrimResult
 
 void Ieee80211MgmtSta::sendAssociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode)
 {
-    sendConfirm(new Ieee80211Prim_AssociateConfirm(), resultCode);
+    auto confirm = new Ieee80211Prim_AssociateConfirm();
+    confirm->setAddress(ap->address);
+    sendConfirm(confirm, resultCode);
+}
+
+void Ieee80211MgmtSta::sendReassociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode)
+{
+    auto confirm = new Ieee80211Prim_ReassociateConfirm();
+    confirm->setAddress(ap->address);
+    sendConfirm(confirm, resultCode);
 }
 
 void Ieee80211MgmtSta::sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode resultCode)
@@ -610,7 +651,12 @@ void Ieee80211MgmtSta::handleAssociationRequestFrame(Packet *packet, const Ptr<c
 
 void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
-    EV << "Received Association Response frame\n";
+    processAssociationResponse(packet, header, false);
+}
+
+void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool reassociation)
+{
+    EV << "Received Association or Reassociation Response frame\n";
 
     if (!assocTimeoutMsg) {
         EV << "No association in progress, ignoring frame\n";
@@ -622,14 +668,13 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
     const auto& responseBody = packet->peekData<Ieee80211AssociationResponseFrame>();
     MacAddress address = header->getTransmitterAddress();
     int statusCode = responseBody->getStatusCode();
-    // TODO short aid;
-    // TODO Ieee80211SupportedRatesElement supportedRates;
-    delete packet;
 
     // look up AP data structure
     ApInfo *ap = lookupAP(address);
     if (!ap)
         throw cRuntimeError("handleAssociationResponseFrame: AP not known: address=%s", address.str().c_str());
+
+    delete packet;
 
     if (mib->bssStationData.isAssociated) {
         EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
@@ -641,6 +686,7 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
 
     cancelAndDelete(assocTimeoutMsg);
     assocTimeoutMsg = nullptr;
+    reassociationInProgress = false;
 
     if (statusCode != SC_SUCCESSFUL) {
         EV << "Association failed with AP address=" << ap->address << "\n";
@@ -661,7 +707,10 @@ void Ieee80211MgmtSta::handleAssociationResponseFrame(Packet *packet, const Ptr<
     }
 
     // report back to agent
-    sendAssociationConfirm(ap, statusCodeToPrimResultCode(statusCode));
+    if (reassociation)
+        sendReassociationConfirm(ap, statusCodeToPrimResultCode(statusCode));
+    else
+        sendAssociationConfirm(ap, statusCodeToPrimResultCode(statusCode));
 }
 
 void Ieee80211MgmtSta::handleReassociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
@@ -671,8 +720,7 @@ void Ieee80211MgmtSta::handleReassociationRequestFrame(Packet *packet, const Ptr
 
 void Ieee80211MgmtSta::handleReassociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
-    EV << "Received Reassociation Response frame\n";
-    // TODO handle with the same code as Association Response?
+    processAssociationResponse(packet, header, true);
 }
 
 void Ieee80211MgmtSta::handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
