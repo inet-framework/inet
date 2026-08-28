@@ -30,6 +30,9 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
   protected:
     std::string name;
     const std::vector<Entry> entries;
+    // PHY timing and contention parameters remain anchored to the first
+    // configured mode, even though entries are sorted by bitrate for lookup.
+    const IIeee80211Mode *referenceMode;
 
   public:
     static const DelayedInitializer<std::vector<Ieee80211ModeSet>> modeSets;
@@ -68,11 +71,14 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     static const Ieee80211ModeSet *findModeSet(const char *mode);
     static const Ieee80211ModeSet *getModeSet(const char *mode);
 
-    simtime_t getSifsTime() const { return entries[0].mode->getSifsTime(); }
-    simtime_t getSlotTime() const { return entries[0].mode->getSlotTime(); }
-    simtime_t getPhyRxStartDelay() const { return entries[0].mode->getPhyRxStartDelay(); }
-    int getCwMin() const { return entries[0].mode->getLegacyCwMin(); }
-    int getCwMax() const { return entries[0].mode->getLegacyCwMax(); }
+    // PHY timing, contention and TXOP policy remain anchored to the first
+    // configured mode, which is the reference mode before bitrate sorting.
+    const IIeee80211Mode *getReferenceMode() const { return referenceMode; }
+    simtime_t getSifsTime() const { return referenceMode->getSifsTime(); }
+    simtime_t getSlotTime() const { return referenceMode->getSlotTime(); }
+    simtime_t getPhyRxStartDelay() const { return referenceMode->getPhyRxStartDelay(); }
+    int getCwMin() const { return referenceMode->getLegacyCwMin(); }
+    int getCwMax() const { return referenceMode->getLegacyCwMax(); }
 
     IIeee80211Mode *_getSlowestMode() const { return const_cast<IIeee80211Mode *>(getSlowestMode()); }
     IIeee80211Mode *_getFastestMode() const { return const_cast<IIeee80211Mode *>(getFastestMode()); }
@@ -84,4 +90,3 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 } // namespace inet
 
 #endif
-

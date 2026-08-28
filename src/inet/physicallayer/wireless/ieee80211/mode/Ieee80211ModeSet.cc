@@ -457,11 +457,15 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
 
 Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries) :
     name(name),
-    entries(entries)
+    entries(entries),
+    referenceMode(entries.empty() ? nullptr : entries.front().mode)
 {
+    if (this->entries.empty())
+        throw cRuntimeError("IEEE 802.11 mode set '%s' must contain at least one mode", this->name.c_str());
+    if (referenceMode == nullptr)
+        throw cRuntimeError("IEEE 802.11 mode set '%s' has a null reference mode", this->name.c_str());
     std::vector<Entry> *nonConstEntries = const_cast<std::vector<Entry> *>(&this->entries);
     std::stable_sort(nonConstEntries->begin(), nonConstEntries->end(), EntryNetBitrateComparator());
-    auto referenceMode = entries[0].mode;
     for (auto entry : entries) {
         auto mode = entry.mode;
         if (mode->getSifsTime() != referenceMode->getSifsTime() ||
@@ -626,4 +630,3 @@ const Ieee80211ModeSet *Ieee80211ModeSet::getModeSet(const char *mode)
 } // namespace physicallayer
 
 } // namespace inet
-
