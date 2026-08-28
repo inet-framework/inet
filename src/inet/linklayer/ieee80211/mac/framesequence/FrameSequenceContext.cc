@@ -28,6 +28,17 @@ simtime_t FrameSequenceContext::getIfs() const
     return getNumSteps() == 0 ? 0 : modeSet->getSifsTime(); // TODO pifs
 }
 
+bool FrameSequenceContext::isFramePending(const Packet *frame) const
+{
+    if (frame == nullptr || inProgressFrames == nullptr)
+        return false;
+    for (int i = 0; i < inProgressFrames->getLength(); i++) {
+        if (inProgressFrames->getFrames(i) == frame)
+            return true;
+    }
+    return false;
+}
+
 simtime_t FrameSequenceContext::getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const
 {
     return qosContext ? qosContext->ackPolicy->getAckTimeout(packet, dataOrMgmtframe) : nonQoSContext->ackPolicy->getAckTimeout(packet, dataOrMgmtframe);
@@ -78,4 +89,3 @@ void FrameSequenceNumPacketsFilter::receiveSignal(cResultFilter *prev, simtime_t
 
 } // namespace ieee80211
 } // namespace inet
-

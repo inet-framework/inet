@@ -44,6 +44,13 @@ class INET_API ITransmitStep : public IFrameSequenceStep
     virtual Type getType() override { return Type::TRANSMIT; }
 
     virtual Packet *getFrameToTransmit() = 0;
+    // Returns the frame that originated this transmit step. For an ordinary
+    // transmit this is the frame being sent; an RTS step overrides it with
+    // the frame protected by the RTS/CTS exchange.
+    virtual const Packet *getOriginatingFrame() { return getFrameToTransmit(); }
+    // Keep the protected-frame terminology available to existing callers
+    // while exposing the same read-only contract through ITransmitStep.
+    virtual const Packet *getProtectedFrame() { return getOriginatingFrame(); }
     virtual simtime_t getIfs() = 0;
 };
 
@@ -73,4 +80,3 @@ class INET_API IFrameSequence
 } // namespace inet
 
 #endif
-
