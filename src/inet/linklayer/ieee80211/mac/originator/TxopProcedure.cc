@@ -7,16 +7,11 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 
-#include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
-#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
-
 namespace inet {
 namespace ieee80211 {
 
 using namespace inet::physicallayer;
+using OperatingPhy = Ieee80211ModeSet::OperatingPhy;
 
 simsignal_t TxopProcedure::txopStartedSignal = cComponent::registerSignal("txopStarted");
 simsignal_t TxopProcedure::txopEndedSignal = cComponent::registerSignal("txopEnded");
@@ -33,19 +28,32 @@ void TxopProcedure::initialize(int stage)
     }
 }
 
-s TxopProcedure::getTxopLimit(const IIeee80211Mode *mode, AccessCategory ac)
+// IEEE Std 802.11-2024, Table 9-194 selects the default TXOP limit by the
+// operating PHY clause. The existing INET values are retained for compatibility;
+// full Table 9-194/9-195 modernization is a separate change.
+s TxopProcedure::getTxopLimit(OperatingPhy operatingPhy, AccessCategory ac)
 {
     switch (ac) {
         case AC_BK: return s(0);
         case AC_BE: return s(0);
         case AC_VI:
-            if (dynamic_cast<const Ieee80211DsssMode *>(mode) || dynamic_cast<const Ieee80211HrDsssMode *>(mode)) return ms(6.016);
-            else if (dynamic_cast<const Ieee80211HtMode *>(mode) || dynamic_cast<const Ieee80211OfdmMode *>(mode)) return ms(3.008);
-            else return s(0);
+            switch (operatingPhy) {
+                case OperatingPhy::HR_DSSS: return ms(6.016);
+                case OperatingPhy::OFDM:
+                case OperatingPhy::ERP:
+                case OperatingPhy::HT:
+                case OperatingPhy::VHT: return ms(3.008);
+                default: throw cRuntimeError("Unknown operating PHY = %d", static_cast<int>(operatingPhy));
+            }
         case AC_VO:
-            if (dynamic_cast<const Ieee80211DsssMode *>(mode) || dynamic_cast<const Ieee80211HrDsssMode *>(mode)) return ms(3.264);
-            else if (dynamic_cast<const Ieee80211HtMode *>(mode) || dynamic_cast<const Ieee80211OfdmMode *>(mode)) return ms(1.504);
-            else return s(0);
+            switch (operatingPhy) {
+                case OperatingPhy::HR_DSSS: return ms(3.264);
+                case OperatingPhy::OFDM:
+                case OperatingPhy::ERP:
+                case OperatingPhy::HT:
+                case OperatingPhy::VHT: return ms(1.504);
+                default: throw cRuntimeError("Unknown operating PHY = %d", static_cast<int>(operatingPhy));
+            }
         default: throw cRuntimeError("Unknown access category = %d", ac);
     }
 }
@@ -71,8 +79,7 @@ void TxopProcedure::startTxop(AccessCategory ac)
     if (start != -1)
         throw cRuntimeError("Txop is already running");
     if (limit == -1) {
-        auto referenceMode = modeSet->getReferenceMode();
-        limit = getTxopLimit(referenceMode, ac).get<s>();
+        limit = getTxopLimit(modeSet->getOperatingPhy(), ac).get<s>();
     }
     // The STA selects between single and multiple protection when it transmits the first frame of a TXOP.
     // All subsequent frames transmitted by the STA in the same TXOP use the same class of duration settings.
@@ -133,4 +140,3 @@ void TxopDurationFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cO
 
 } // namespace ieee80211
 } // namespace inet
-

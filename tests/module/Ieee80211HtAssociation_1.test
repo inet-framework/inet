@@ -5,12 +5,34 @@ at both ends.
 
 %file: Ieee80211HtAssociationChecker.cc
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 using namespace inet;
 using namespace inet::ieee80211;
+
+class Ieee80211HcfRtsFailureMac : public Ieee80211Mac
+{
+  protected:
+    bool firstRtsBlocked = false;
+
+    virtual void handleLowerPacket(Packet *packet) override
+    {
+        const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (!firstRtsBlocked && header->getType() == ST_RTS) {
+            firstRtsBlocked = true;
+            EV_INFO << "Intentionally blocking the first RTS frame.\n";
+            delete packet;
+        }
+        else
+            Ieee80211Mac::handleLowerPacket(packet);
+    }
+};
+
+Define_Module(Ieee80211HcfRtsFailureMac);
 
 class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
 {
@@ -56,9 +78,16 @@ Define_Module(Ieee80211HtAssociationChecker);
 %file: test.ned
 
 import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module Ieee80211HcfRtsFailureMac extends Ieee80211Mac
+{
+    parameters:
+        @class(::Ieee80211HcfRtsFailureMac);
+}
 
 simple Ieee80211HtAssociationChecker extends SimpleModule
 {
@@ -74,6 +103,7 @@ network Ieee80211HtAssociationTest
             parameters:
                 wlan[*].mgmt.typename = "Ieee80211MgmtSta";
                 wlan[*].agent.typename = "Ieee80211AgentSta";
+                wlan[*].mac.typename = "Ieee80211HcfRtsFailureMac";
         }
         ap: AccessPoint {
             parameters:
@@ -114,7 +144,10 @@ record-scalar-results = false
 **.wlan[*].radio.receiver.snirThreshold = 4dB
 
 **.mgmt.numChannels = 1
+*.ap.wlan[*].mac.qosStation = true
 *.ap.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 0B
+*.ap.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 0B
+*.ap.wlan[*].mac.hcf.rateControl.typename = "AarfRateControl"
 *.sta.wlan[*].agent.startingTime = 0s
 *.sta.wlan[*].agent.probeDelay = 1ms
 *.sta.wlan[*].agent.minChannelTime = 5ms
@@ -133,6 +166,9 @@ AssocResp-OK .*?Ieee80211AssociationResponseFrame.*?htCapabilitiesPresent.*?true
 
 %contains: stdout
 Installed peer HT state, peer =
+
+%contains: stdout
+Intentionally blocking the first RTS frame.
 
 %contains: stdout
 RTS-protected association committed at AP and STA.

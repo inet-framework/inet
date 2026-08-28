@@ -35,13 +35,13 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211OfdmCompliantModes::ofdmMode36Mbps, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode48Mbps, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode54Mbps, true },
-    }),
+    }, OperatingPhy::OFDM),
     Ieee80211ModeSet("b", {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps, true },
         { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps, true },
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble, true },
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble, true },
-    }),
+    }, OperatingPhy::HR_DSSS),
     // TODO slotTime, cwMin, cwMax must be identical in all modes
     Ieee80211ModeSet("g(mixed)", {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps, true },
@@ -56,7 +56,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps, true },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps, true },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps, true }, // TODO ERP-CCK, ERP-PBCC, DSSS-OFDM
-    }),
+    }, OperatingPhy::ERP),
     Ieee80211ModeSet("g(erp)", {
         { true, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode6Mbps, true },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode9Mbps, true },
@@ -66,7 +66,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode36Mbps, true },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode48Mbps, true },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode54Mbps, true },
-    }),
+    }, OperatingPhy::ERP),
     Ieee80211ModeSet("p", {
         { true, &Ieee80211OfdmCompliantModes::ofdmMode3MbpsCS10MHz, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode4_5MbpsCS10MHz, true },
@@ -76,7 +76,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211OfdmCompliantModes::ofdmMode18MbpsCS10MHz, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS10MHz, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode27Mbps, true },
-        }),
+        }, OperatingPhy::OFDM),
     Ieee80211ModeSet("n(mixed-2.4Ghz)", { // This table is not complete; it only contains 2.4GHz homogeneous spatial streams, all mandatory and optional modes
         { true, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs0BW20MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs1BW20MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG) },
@@ -152,7 +152,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble, true },
         { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps, true },
         { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps, true }
-    }, true),
+    }, OperatingPhy::HT, true),
     Ieee80211ModeSet("ac", {
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
@@ -471,11 +471,12 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS20MHz, true },
     // Intentional model limitation: unlike IEEE Std 802.11-2024, 11.38.1,
     // this VHT-only profile has no selectable HT modes.
-    }, false),}; });
+    }, OperatingPhy::VHT),}; });
 
-Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, bool htOperationSupported) :
+Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, OperatingPhy operatingPhy, bool htOperationSupported) :
     name(name),
     entries(entries),
+    operatingPhy(operatingPhy),
     referenceMode(entries.empty() ? nullptr : entries.front().mode),
     htOperationSupported(htOperationSupported)
 {
@@ -505,6 +506,11 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
                 this->legacyOperationalModes.push_back(entry.mode);
         }
     }
+    // IEEE Std 802.11-2024, 9.4.2.3 and 11.1.4.6: an ordinary STA
+    // advertises its applicable operational rates in Supported Rates. This
+    // model has no selector-only S1G/CMMG mode-set exception.
+    if (this->legacyOperationalModes.empty())
+        throw cRuntimeError("IEEE 802.11 mode set '%s' must contain at least one legacy operational mode for Supported Rates", this->name.c_str());
     for (const auto *mode : this->legacyOperationalModes) {
         if (mode == nullptr)
             throw cRuntimeError("IEEE 802.11 mode set '%s' contains a null legacy operational mode", this->name.c_str());

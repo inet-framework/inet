@@ -21,7 +21,6 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
-#include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -73,6 +72,9 @@ void Ieee80211Mac::initialize(int stage)
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
         dcf = check_and_cast<Dcf *>(getSubmodule("dcf"));
         hcf = check_and_cast_nullable<Hcf *>(getSubmodule("hcf"));
+        auto managementGate = gate("mgmtOut")->getNextGate();
+        if (managementGate != nullptr)
+            frameTransmissionCallback = dynamic_cast<IFrameTransmissionCallback *>(managementGate->getOwnerModule());
         if (mib->qos && !hcf)
             throw cRuntimeError("Missing hcf module, required for QoS");
     }
@@ -374,6 +376,15 @@ void Ieee80211Mac::sendDownPendingRadioConfigMsg()
     }
 }
 
+void Ieee80211Mac::notifyFrameTransmission(const Packet *frame, IFrameTransmissionCallback::Status status)
+{
+    Enter_Method("notifyFrameTransmission");
+    if (frameTransmissionCallback != nullptr) {
+        IFrameTransmissionCallback::Result result(frame, status);
+        frameTransmissionCallback->frameTransmissionFinished(result);
+    }
+}
+
 void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     Enter_Method("processUpperFrame(\"%s\")", packet->getName());
@@ -418,4 +429,3 @@ void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 
 } // namespace ieee80211
 } // namespace inet
-

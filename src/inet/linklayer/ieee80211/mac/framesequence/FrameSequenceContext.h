@@ -88,7 +88,6 @@ class INET_API FrameSequenceContext : public cObject
     virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;
     virtual simtime_t getIfs() const;
 
-    virtual bool isFramePending(const Packet *frame) const;
     virtual bool isForUs(const Ptr<const Ieee80211MacHeader>& header) const;
     virtual bool isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const;
 };

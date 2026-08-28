@@ -47,8 +47,7 @@ class INET_API RtsTransmitStep : public TransmitStep
         protectedFrame(protectedFrame)
     {}
 
-    virtual const Packet *getOriginatingFrame() override { return protectedFrame; }
-    virtual const Packet *getProtectedFrame() override { return protectedFrame; }
+    virtual const Packet *getProtectedFrame() { return protectedFrame; }
 };
 
 class INET_API ReceiveStep : public IReceiveStep

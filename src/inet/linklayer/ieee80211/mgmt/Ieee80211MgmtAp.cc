@@ -12,8 +12,6 @@
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #endif // ifdef INET_WITH_ETHERNET
 
-#include "inet/linklayer/ieee80211/mac/contract/IFrameSequenceHandler.h"
-#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
@@ -35,61 +33,6 @@ static std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtAp::StaInfo
 {
     os << "address:" << sta.address;
     return os;
-}
-
-const Packet *Ieee80211MgmtAp::getAssociationResponseFrame(ITransmitStep *transmitStep)
-{
-    return transmitStep == nullptr ? nullptr : transmitStep->getOriginatingFrame();
-}
-
-Ptr<const Ieee80211MacHeader> Ieee80211MgmtAp::getMacHeader(const Packet *frame)
-{
-    if (frame == nullptr)
-        return nullptr;
-    const auto& frontChunk = frame->peekAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR);
-    return dynamicPtrCast<const Ieee80211MacHeader>(frontChunk);
-}
-
-Ptr<const Ieee80211MgmtHeader> Ieee80211MgmtAp::getAssociationResponseHeader(const Packet *responseFrame)
-{
-    if (responseFrame == nullptr || responseFrame->findTag<Ieee80211MgmtTransactionTag>() == nullptr)
-        return nullptr;
-    const auto& responseHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(getMacHeader(responseFrame));
-    if (responseHeader == nullptr || (responseHeader->getType() != ST_ASSOCIATIONRESPONSE && responseHeader->getType() != ST_REASSOCIATIONRESPONSE))
-        return nullptr;
-    return responseHeader;
-}
-
-bool Ieee80211MgmtAp::isAssociationResponseDecisionPoint(ITransmitStep *transmitStep, IReceiveStep *receiveStep)
-{
-    if (transmitStep == nullptr || receiveStep == nullptr)
-        return false;
-    // The originating frame is the transmitted frame for ordinary exchanges,
-    // and the protected management frame for an RTS/CTS exchange. Ordinary
-    // transmissions therefore reach their decision point immediately; RTS
-    // transactions wait until the CTS step has completed.
-    if (transmitStep->getOriginatingFrame() == transmitStep->getFrameToTransmit())
-        return true;
-    const auto& receivedHeader = getMacHeader(receiveStep->getReceivedFrame());
-    return transmitStep->getCompletion() != IFrameSequenceStep::Completion::ACCEPTED ||
-            receiveStep->getCompletion() != IFrameSequenceStep::Completion::ACCEPTED ||
-            receivedHeader == nullptr || receivedHeader->getType() != ST_CTS;
-}
-
-Ieee80211MgmtAp::AssociationResponseDisposition Ieee80211MgmtAp::getAssociationResponseDisposition(const Packet *responseFrame,
-        uint64_t pendingTransactionId, bool exchangeSucceeded, bool retryPending)
-{
-    if (responseFrame == nullptr || pendingTransactionId == 0)
-        return AssociationResponseDisposition::IGNORE;
-    const auto& responseHeader = getAssociationResponseHeader(responseFrame);
-    if (responseHeader == nullptr)
-        return AssociationResponseDisposition::IGNORE;
-    const auto& transactionTag = responseFrame->findTag<Ieee80211MgmtTransactionTag>();
-    if (transactionTag == nullptr || transactionTag->getTransactionId() != pendingTransactionId)
-        return AssociationResponseDisposition::IGNORE;
-    if ((exchangeSucceeded && responseHeader->getMoreFragments()) || (!exchangeSucceeded && retryPending))
-        return AssociationResponseDisposition::RETAIN;
-    return AssociationResponseDisposition::COMPLETE;
 }
 
 Ieee80211MgmtAp::~Ieee80211MgmtAp()
@@ -120,7 +63,6 @@ void Ieee80211MgmtAp::initialize(int stage)
         // subscribe for notifications
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(Ieee80211Radio::radioChannelChangedSignal, this);
-        getContainingNicModule(this)->subscribe(IFrameSequenceHandler::frameSequenceFinishedSignal, this);
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
@@ -154,66 +96,72 @@ void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, in
     }
 }
 
-void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+Ieee80211MgmtAp::AssociationResponseDisposition Ieee80211MgmtAp::getAssociationResponseDisposition(const Packet *responseFrame,
+        uint64_t pendingTransactionId, IFrameTransmissionCallback::Status status)
 {
-    Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (responseFrame == nullptr || pendingTransactionId == 0)
+        return AssociationResponseDisposition::IGNORE;
+    const auto& transactionTag = responseFrame->findTag<Ieee80211MgmtTransactionTag>();
+    if (transactionTag == nullptr || transactionTag->getTransactionId() != pendingTransactionId)
+        return AssociationResponseDisposition::IGNORE;
+    const auto& frontChunk = responseFrame->peekAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR);
+    const auto& responseHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(frontChunk);
+    if (responseHeader == nullptr || (responseHeader->getType() != ST_ASSOCIATIONRESPONSE && responseHeader->getType() != ST_REASSOCIATIONRESPONSE))
+        return AssociationResponseDisposition::IGNORE;
+    if (status == IFrameTransmissionCallback::Status::ACKNOWLEDGED && responseHeader->getMoreFragments())
+        return AssociationResponseDisposition::RETAIN;
+    return AssociationResponseDisposition::COMPLETE;
+}
 
-    if (signalID == IFrameSequenceHandler::frameSequenceFinishedSignal) {
-        auto context = check_and_cast<FrameSequenceContext *>(obj);
-        for (int stepIndex = 0; stepIndex + 1 < context->getNumSteps(); stepIndex++) {
-            auto transmitStep = dynamic_cast<ITransmitStep *>(context->getStep(stepIndex));
-            auto receiveStep = dynamic_cast<IReceiveStep *>(context->getStep(stepIndex + 1));
-            if (transmitStep && receiveStep) {
-                const Packet *responseFrame = getAssociationResponseFrame(transmitStep);
-                const auto& responseHeader = getAssociationResponseHeader(responseFrame);
-                if (responseHeader != nullptr) {
-                    if (!isAssociationResponseDecisionPoint(transmitStep, receiveStep))
-                        continue;
-                    const auto& receivedHeader = getMacHeader(receiveStep->getReceivedFrame());
-                    const auto& address = responseHeader->getReceiverAddress();
-                    auto sta = staList.find(address);
-                    bool exchangeSucceeded = transmitStep->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
-                            receiveStep->getCompletion() == IFrameSequenceStep::Completion::ACCEPTED &&
-                            receivedHeader != nullptr && receivedHeader->getType() == ST_ACK;
-                    bool retryPending = false;
-                    if (!exchangeSucceeded)
-                        retryPending = context->isFramePending(responseFrame);
-                    uint64_t pendingTransactionId = sta == staList.end() ? 0 : sta->second.pendingAssociationTransactionId;
-                    auto disposition = getAssociationResponseDisposition(responseFrame, pendingTransactionId, exchangeSucceeded, retryPending);
-                    if (disposition == AssociationResponseDisposition::COMPLETE) {
-                        if (exchangeSucceeded && sta->second.pendingAssociationSuccessful) {
-                            bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
-                            mib->commitAssociationId(address);
-                            mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
-                            if (sta->second.pendingHtStateAvailable) {
-                                // IEEE Std 802.11-2024, 11.3.5.3: association state becomes effective only after the successful response exchange.
-                                if (sta->second.pendingHtCapabilitiesValid)
-                                    mib->setPeerHtCapabilities(address, sta->second.pendingHtCapabilities, mib->htOperation);
-                                else
-                                    mib->removePeerHtCapabilities(address);
-                            }
-                            // Signal delivery is synchronous; observers must see committed station and peer state.
-                            if (!wasAssociated)
-                                sendAssocNotification(address);
-                        }
-                        else if (exchangeSucceeded && mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED) {
-                            // This model does not implement negotiated management-frame protection.
-                            // IEEE Std 802.11-2024, 11.3.5.3(p) for association and 11.3.5.5(n)
-                            // for same-AP reassociation therefore require the existing association
-                            // state to be cleared after this acknowledged refusal.
-                            mib->releaseAssociationId(address);
-                            mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
-                            // Signal delivery is synchronous; observers must see the downgraded state.
-                            sendDisAssocNotification(address);
-                        }
-                        clearPendingAssociation(&sta->second);
-                    }
-                }
+void Ieee80211MgmtAp::frameTransmissionFinished(const IFrameTransmissionCallback::Result& result)
+{
+    Enter_Method("frameTransmissionFinished");
+    const Packet *responseFrame = result.getFrame();
+    if (responseFrame == nullptr)
+        return;
+    const auto& responseHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(responseFrame->peekAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR));
+    if (responseHeader == nullptr || (responseHeader->getType() != ST_ASSOCIATIONRESPONSE && responseHeader->getType() != ST_REASSOCIATIONRESPONSE))
+        return;
+    auto address = responseHeader->getReceiverAddress();
+    auto sta = staList.find(address);
+    uint64_t pendingTransactionId = sta == staList.end() ? 0 : sta->second.pendingAssociationTransactionId;
+    auto disposition = getAssociationResponseDisposition(responseFrame, pendingTransactionId, result.getStatus());
+    if (disposition == AssociationResponseDisposition::IGNORE)
+        return;
+    ASSERT(sta != staList.end());
+    if (disposition == AssociationResponseDisposition::RETAIN)
+        return;
+
+    if (result.getStatus() == IFrameTransmissionCallback::Status::ACKNOWLEDGED) {
+        if (sta->second.pendingAssociationSuccessful) {
+            bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
+            mib->commitAssociationId(address);
+            mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
+            if (sta->second.pendingHtStateAvailable) {
+                // IEEE Std 802.11-2024, 11.3.5.3: association state becomes effective only after the successful response exchange.
+                if (sta->second.pendingHtCapabilitiesValid)
+                    mib->setPeerHtCapabilities(address, sta->second.pendingHtCapabilities, mib->htOperation);
+                else
+                    mib->removePeerHtCapabilities(address);
             }
+            // Signal delivery is synchronous; observers must see committed station and peer state.
+            if (!wasAssociated)
+                sendAssocNotification(address);
         }
+        else if (mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED) {
+            // This model does not implement negotiated management-frame protection.
+            // IEEE Std 802.11-2024, 11.3.5.3(p) for association and 11.3.5.5(n)
+            // for same-AP reassociation therefore require the existing association
+            // state to be cleared after this acknowledged refusal.
+            mib->releaseAssociationId(address);
+            mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+            // Signal delivery is synchronous; observers must see the downgraded state.
+            sendDisAssocNotification(address);
+        }
+        clearPendingAssociation(&sta->second);
     }
-    else
-        Ieee80211MgmtApBase::receiveSignal(source, signalID, obj, details);
+    else if (result.getStatus() == IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED)
+        clearPendingAssociation(&sta->second);
 }
 
 Ieee80211MgmtAp::StaInfo *Ieee80211MgmtAp::lookupSenderSTA(const Ptr<const Ieee80211MgmtHeader>& header)

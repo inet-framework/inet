@@ -20,7 +20,7 @@ class SparseModeSet : public Ieee80211ModeSet
     using Ieee80211ModeSet::Entry;
 
     SparseModeSet(const std::vector<Entry>& entries, bool htOperationSupported = true) :
-        Ieee80211ModeSet("sparse", entries, htOperationSupported)
+        Ieee80211ModeSet("sparse", entries, OperatingPhy::HT, htOperationSupported)
     {}
 };
 
@@ -47,8 +47,12 @@ for (int mcsIndex = 0; mcsIndex < 8; mcsIndex++)
     sparseEntries.push_back({true, findHtMode(htModeSet, mcsIndex, MHz(20))});
 sparseEntries.push_back({false, findHtMode(htModeSet, 8, MHz(20))});
 sparseEntries.push_back({false, findHtMode(htModeSet, 10, MHz(20))});
+// IEEE Std 802.11-2024, 9.4.2.3 and 11.1.4.6: an ordinary HT profile
+// includes its applicable legacy operational rates in Supported Rates.
+sparseEntries.push_back({true, htModeSet->getMode(Mbps(1)), true});
 SparseModeSet sparse(sparseEntries);
 ASSERT(sparse.isHtOperationSupported());
+ASSERT(sparse.getLegacyOperationalModes().size() == 1);
 for (int mcsIndex = 0; mcsIndex < 77; mcsIndex++) {
     bool expected = mcsIndex < 8 || mcsIndex == 8 || mcsIndex == 10;
     ASSERT(sparse.getHtMcsSupported()[mcsIndex] == expected);
@@ -57,10 +61,33 @@ for (int mcsIndex = 0; mcsIndex < 77; mcsIndex++) {
 ASSERT(sparse.getHtSupportedChannelWidths().size() == 1);
 ASSERT(sparse.getHtSupportedChannelWidths().count(MHz(20)) == 1);
 
+// All mandatory HT MCSs without an eligible legacy operational mode are
+// rejected at the mode-set boundary before management serialization.
+auto htOnlyEntries = sparseEntries;
+for (auto& entry : htOnlyEntries)
+    entry.isLegacyOperational = false;
+bool htOnlyRejected = false;
+try {
+    SparseModeSet invalid(htOnlyEntries);
+}
+catch (const cRuntimeError&) {
+    htOnlyRejected = true;
+}
+ASSERT(htOnlyRejected);
+bool nonHtOnlyRejected = false;
+try {
+    SparseModeSet invalid(htOnlyEntries, false);
+}
+catch (const cRuntimeError&) {
+    nonHtOnlyRejected = true;
+}
+ASSERT(nonHtOnlyRejected);
+
 std::vector<SparseModeSet::Entry> missingMandatory;
 for (int mcsIndex = 0; mcsIndex < 7; mcsIndex++)
     missingMandatory.push_back({true, findHtMode(htModeSet, mcsIndex, MHz(20))});
 missingMandatory.push_back({false, findHtMode(htModeSet, 8, MHz(20))});
+missingMandatory.push_back({true, htModeSet->getMode(Mbps(1)), true});
 bool missingMandatoryRejected = false;
 try {
     SparseModeSet invalid(missingMandatory);

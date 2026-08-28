@@ -267,6 +267,8 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
         details.setLimit(recoveryProcedure->getShortRetryLimit());
         emit(packetDroppedSignal, packet, &details);
         emit(linkBrokenSignal, packet);
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader))
+            mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
     }
 }
 
@@ -311,6 +313,8 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
         ackHandler->processReceivedAck(dynamicPtrCast<const Ieee80211AckFrame>(receivedHeader), lastTransmittedDataOrMgmtHeader);
         channelAccess->getInProgressFrames()->dropFrame(lastTransmittedPacket);
         ackHandler->dropFrame(lastTransmittedDataOrMgmtHeader);
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedDataOrMgmtHeader))
+            mac->notifyFrameTransmission(lastTransmittedPacket, IFrameTransmissionCallback::Status::ACKNOWLEDGED);
     }
     else if (receivedHeader->getType() == ST_RTS)
         ; // void
@@ -344,6 +348,8 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
         details.setLimit(-1); // TODO
         emit(packetDroppedSignal, failedPacket, &details);
         emit(linkBrokenSignal, failedPacket);
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(failedHeader))
+            mac->notifyFrameTransmission(failedPacket, IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
     }
     else {
         EV_INFO << "Retrying frame " << failedPacket->getName() << ".\n";
@@ -391,4 +397,3 @@ Dcf::~Dcf()
 
 } // namespace ieee80211
 } // namespace inet
-
