@@ -1,0 +1,76 @@
+%description:
+Verify that HT operation is enabled only for a mode set with selectable HT
+modes. The current VHT-only ac profile intentionally does not advertise HT.
+Also verify exact sparse HT MCS and width derivation from typed mode entries.
+
+%includes:
+#include <vector>
+
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%global:
+
+class SparseModeSet : public Ieee80211ModeSet
+{
+  public:
+    using Ieee80211ModeSet::Entry;
+
+    SparseModeSet(const std::vector<Entry>& entries, bool htOperationSupported = true) :
+        Ieee80211ModeSet("sparse", entries, htOperationSupported)
+    {}
+};
+
+static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcsIndex, Hz bandwidth)
+{
+    for (int i = 0; i < modeSet->getNumModes(); i++) {
+        const auto *mode = modeSet->getMode(i);
+        if (mode->getHtMcsIndex() == mcsIndex && mode->getDataMode()->getBandwidth() == bandwidth)
+            return mode;
+    }
+    return nullptr;
+}
+
+%activity:
+
+const auto *htModeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+const auto *vhtOnlyModeSet = Ieee80211ModeSet::getModeSet("ac");
+
+ASSERT(htModeSet->isHtOperationSupported());
+ASSERT(!vhtOnlyModeSet->isHtOperationSupported());
+
+std::vector<SparseModeSet::Entry> sparseEntries;
+for (int mcsIndex = 0; mcsIndex < 8; mcsIndex++)
+    sparseEntries.push_back({true, findHtMode(htModeSet, mcsIndex, MHz(20))});
+sparseEntries.push_back({false, findHtMode(htModeSet, 8, MHz(20))});
+sparseEntries.push_back({false, findHtMode(htModeSet, 10, MHz(20))});
+SparseModeSet sparse(sparseEntries);
+ASSERT(sparse.isHtOperationSupported());
+for (int mcsIndex = 0; mcsIndex < 77; mcsIndex++) {
+    bool expected = mcsIndex < 8 || mcsIndex == 8 || mcsIndex == 10;
+    ASSERT(sparse.getHtMcsSupported()[mcsIndex] == expected);
+    ASSERT(sparse.getHtMcsMandatory()[mcsIndex] == (mcsIndex < 8));
+}
+ASSERT(sparse.getHtSupportedChannelWidths().size() == 1);
+ASSERT(sparse.getHtSupportedChannelWidths().count(MHz(20)) == 1);
+
+std::vector<SparseModeSet::Entry> missingMandatory;
+for (int mcsIndex = 0; mcsIndex < 7; mcsIndex++)
+    missingMandatory.push_back({true, findHtMode(htModeSet, mcsIndex, MHz(20))});
+missingMandatory.push_back({false, findHtMode(htModeSet, 8, MHz(20))});
+bool missingMandatoryRejected = false;
+try {
+    SparseModeSet invalid(missingMandatory);
+}
+catch (const cRuntimeError&) {
+    missingMandatoryRejected = true;
+}
+ASSERT(missingMandatoryRejected);
+
+EV << "HT mode-set capability and sparse-MCS checks verified.\n";
+
+%contains: stdout
+HT mode-set capability and sparse-MCS checks verified.

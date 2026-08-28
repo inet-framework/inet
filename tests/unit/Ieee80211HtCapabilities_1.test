@@ -1,0 +1,84 @@
+%description:
+Verify directional HT negotiation, sparse MCS bitmaps, and HT operation
+compatibility for undefined or unequal Tx MCS advertisements.
+
+%includes:
+#include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::units::values;
+
+%activity:
+
+Ieee80211HtCapabilities local;
+local.supportedChannelWidths.insert(MHz(20));
+local.rxMcsSupported[0] = true;
+local.rxMcsSupported[1] = true;
+local.rxMcsSupported[2] = true;
+local.rxMcsSupported[3] = true;
+local.txMcsNss.maxMcsPerNss[0] = 3;
+local.ldpc = true;
+local.shortGi20 = true;
+local.maxAmpduLengthExponent = 1;
+
+Ieee80211HtCapabilities peer;
+peer.supportedChannelWidths.insert(MHz(20));
+peer.rxMcsSupported[0] = true;
+peer.rxMcsSupported[2] = true;
+peer.rxMcsSupported[3] = true;
+peer.txMcsNss.maxMcsPerNss[0] = 3;
+peer.maxAmpduLengthExponent = 3;
+
+Ieee80211HtOperation operation;
+operation.operatingChannelWidth = MHz(20);
+operation.basicMcsSupported[0] = true;
+
+auto negotiated = negotiateHtCapabilities(local, peer, operation);
+ASSERT(negotiated.localTxPeerRx.valid);
+ASSERT(negotiated.localRxPeerTx.valid);
+ASSERT(negotiated.localTxPeerRx.supportedMcs[0]);
+ASSERT(!negotiated.localTxPeerRx.supportedMcs[1]);
+ASSERT(negotiated.localTxPeerRx.supportedMcs[2]);
+ASSERT(negotiated.localTxPeerRx.supportedMcs[3]);
+ASSERT(negotiated.localRxPeerTx.supportedMcs[0]);
+ASSERT(!negotiated.localRxPeerTx.supportedMcs[1]);
+ASSERT(negotiated.localRxPeerTx.supportedMcs[2]);
+ASSERT(!negotiated.localTxPeerRx.receiverLdpc);
+ASSERT(negotiated.localRxPeerTx.receiverLdpc);
+ASSERT(negotiated.localTxPeerRx.receiverMaxAmpduLengthExponent == 3);
+ASSERT(negotiated.localRxPeerTx.receiverMaxAmpduLengthExponent == 1);
+
+// A 20 MHz-only peer may join a 20/40 MHz BSS.
+local.supportedChannelWidths.insert(MHz(40));
+operation.operatingChannelWidth = MHz(40);
+negotiated = negotiateHtCapabilities(local, peer, operation);
+ASSERT(negotiated.localTxPeerRx.valid);
+ASSERT(negotiated.localTxPeerRx.supportedChannelWidths.count(MHz(20)) == 1);
+
+// Table 9-226 permits an undefined Tx MCS set; unknown is not "cannot transmit".
+peer.txMcsSetDefined = false;
+peer.txMcsNss = Ieee80211HtMcsNssMap();
+negotiated = negotiateHtCapabilities(local, peer, operation);
+ASSERT(negotiated.localRxPeerTx.valid);
+
+operation.basicMcsSupported[1] = true;
+ASSERT(!supportsBasicHtMcsSet(peer, operation));
+peer.rxMcsSupported[1] = true;
+ASSERT(supportsBasicHtMcsSet(peer, operation));
+
+// An unequal Tx/Rx advertisement carries only summary Tx fields, so the exact
+// Tx bitmap is unknown while the peer remains eligible for association.
+peer.txMcsSetDefined = true;
+peer.txRxMcsSetNotEqual = true;
+peer.txMaxNss = 2;
+peer.txMcsNss = Ieee80211HtMcsNssMap();
+negotiated = negotiateHtCapabilities(local, peer, operation);
+ASSERT(negotiated.localRxPeerTx.valid);
+ASSERT(!negotiated.localRxPeerTx.supportedMcs[0]);
+ASSERT(negotiated.localTxPeerRx.supportedMcs[0]);
+
+EV << "HT directional and sparse capability checks passed.\n";
+
+%contains: stdout
+HT directional and sparse capability checks passed.

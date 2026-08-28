@@ -152,7 +152,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble, true },
         { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps, true },
         { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps, true }
-    }),
+    }, true),
     Ieee80211ModeSet("ac", {
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
@@ -469,12 +469,15 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz, true },
         { true, &Ieee80211OfdmCompliantModes::ofdmMode12MbpsCS20MHz, true },
         { true, &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS20MHz, true },
-}),}; });
+    // Intentional model limitation: unlike IEEE Std 802.11-2024, 11.38.1,
+    // this VHT-only profile has no selectable HT modes.
+    }, false),}; });
 
-Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries) :
+Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, bool htOperationSupported) :
     name(name),
     entries(entries),
-    referenceMode(entries.empty() ? nullptr : entries.front().mode)
+    referenceMode(entries.empty() ? nullptr : entries.front().mode),
+    htOperationSupported(htOperationSupported)
 {
     if (this->entries.empty())
         throw cRuntimeError("IEEE 802.11 mode set '%s' must contain at least one mode", this->name.c_str());
@@ -511,6 +514,22 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
         if (!this->entries[modeIndex].isLegacyOperational)
             throw cRuntimeError("Legacy operational mode '%s' is not marked eligible in IEEE 802.11 mode set '%s'", mode->getName(), this->name.c_str());
     }
+    for (const auto& entry : this->entries) {
+        int mcsIndex = entry.mode->getHtMcsIndex();
+        if (mcsIndex < 0)
+            continue;
+        if (mcsIndex >= 77)
+            throw cRuntimeError("HT MCS index %d in mode '%s' is outside the modeled range 0..76 in mode set '%s'",
+                    mcsIndex, entry.mode->getName(), this->name.c_str());
+        htMcsSupported[mcsIndex] = true;
+        htMcsMandatory[mcsIndex] = htMcsMandatory[mcsIndex] || entry.isMandatory;
+        htSupportedChannelWidths.insert(entry.mode->getDataMode()->getBandwidth());
+    }
+    if (htOperationSupported) {
+        for (int mcsIndex = 0; mcsIndex < 8; mcsIndex++)
+            if (!htMcsSupported[mcsIndex] || !htMcsMandatory[mcsIndex])
+                throw cRuntimeError("HT operation mode set '%s' must mark mandatory HT MCS %d as supported", this->name.c_str(), mcsIndex);
+    }
     for (auto entry : entries) {
         auto mode = entry.mode;
         if (mode->getSifsTime() != referenceMode->getSifsTime() ||
@@ -520,6 +539,22 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
             // FIXME throw cRuntimeError("Sifs, slot and phyRxStartDelay time must be identical within a ModeSet");
         }
     }
+}
+
+Hz Ieee80211ModeSet::getMaximumChannelWidth() const
+{
+    Hz maximum(0);
+    for (const auto& entry : entries)
+        maximum = std::max(maximum, entry.mode->getDataMode()->getBandwidth());
+    return maximum;
+}
+
+int Ieee80211ModeSet::getMaximumNumberOfSpatialStreams() const
+{
+    int maximum = 0;
+    for (const auto& entry : entries)
+        maximum = std::max(maximum, entry.mode->getDataMode()->getNumberOfSpatialStreams());
+    return maximum;
 }
 
 int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const

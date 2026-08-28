@@ -51,6 +51,10 @@ class INET_API IIeee80211DataMode : public cObject, public IPrintableObject
 class INET_API IIeee80211Mode : public cObject, public IPrintableObject
 {
   public:
+    // Returns the HT MCS index represented by this mode, or -1 for modes from
+    // other PHY generations. HT capability derivation must use this typed
+    // mode contract rather than concrete-type or name-based inference.
+    virtual int getHtMcsIndex() const { return -1; }
     virtual int getLegacyCwMin() const = 0;
     virtual int getLegacyCwMax() const = 0;
     virtual const char *getName() const = 0;
@@ -77,4 +81,3 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
 } // namespace inet
 
 #endif
-
