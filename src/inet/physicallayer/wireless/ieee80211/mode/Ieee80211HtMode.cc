@@ -380,7 +380,7 @@ const Ieee80211HtMode *Ieee80211HtCompliantModes::getCompliantMode(const Ieee802
         const Ieee80211HtDataMode *dataMode = new Ieee80211HtDataMode(mcsMode, mcsMode->getBandwidth(), guardIntervalType);
         const Ieee80211HtPreambleMode *preambleMode = new Ieee80211HtPreambleMode(htSignal, legacySignal, preambleFormat, dataMode->getNumberOfSpatialStreams());
         const Ieee80211HtMode *htMode = new Ieee80211HtMode(name, preambleMode, dataMode, centerFrequencyMode);
-        singleton.modeCache.insert(std::pair<std::tuple<Hz, unsigned int, Ieee80211HtMode::BandMode, Ieee80211HtPreambleMode::HighTroughputPreambleFormat, Ieee80211HtModeBase::GuardIntervalType>, const Ieee80211HtMode *>(htModeId, htMode));
+        singleton.modeCache.emplace(htModeId, htMode);
         return htMode;
     }
     return mode->second;

@@ -37,10 +37,11 @@ class TestIeee80211Receiver : public Ieee80211Receiver
 class TestIeee80211Radio : public Ieee80211Radio
 {
   public:
-    void setup(ITransmitter *tx, IReceiver *rx)
+    void setup(Ieee80211Transmitter *tx, Ieee80211Receiver *rx)
     {
         transmitter = tx;
         receiver = rx;
+        setComponentType(cModuleType::get("inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio"));
     }
 };
 

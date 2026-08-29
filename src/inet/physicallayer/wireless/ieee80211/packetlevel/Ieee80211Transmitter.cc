@@ -49,7 +49,7 @@ const IIeee80211Mode *Ieee80211Transmitter::computeTransmissionMode(const Packet
     const auto& modeReq = const_cast<Packet *>(packet)->findTag<Ieee80211ModeReq>();
     const auto& bitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     if (modeReq != nullptr) {
-        if (modeSet != nullptr && !modeSet->containsMode(modeReq->getMode()))
+        if (modeSet != nullptr && !modeSet->supportsMode(modeReq->getMode()))
             throw cRuntimeError("Unsupported mode requested");
         transmissionMode = modeReq->getMode();
     }
@@ -166,9 +166,18 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
-    const simtime_t preambleDuration = transmissionMode->getPreambleDuration();
-    const simtime_t headerDuration = transmissionMode->getHeaderDuration();
-    const simtime_t dataDuration = transmissionMode->getDataDuration(B(phyHeader->getLengthField()));
+    const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
+    const simtime_t modeledDataDuration = transmissionMode->getDataMode()->getDuration(B(phyHeader->getLengthField()));
+    // HT/VHT include their SIG fields in the PHY preamble duration, so their
+    // mode duration is exactly preamble + modeled data. Other PHYs expose a
+    // separate header; their residual data interval may also include a trailing
+    // signal extension (ERP). Keep that extension in chronological data time.
+    const bool headerIncludedInPreamble = duration == preambleDuration + modeledDataDuration;
+    const simtime_t headerDuration = headerIncludedInPreamble ? SIMTIME_ZERO : transmissionMode->getHeaderMode()->getDuration();
+    const simtime_t dataDuration = headerIncludedInPreamble ? modeledDataDuration : duration - headerDuration - preambleDuration;
+    if (preambleDuration < SIMTIME_ZERO || headerDuration < SIMTIME_ZERO || dataDuration < SIMTIME_ZERO ||
+        preambleDuration + headerDuration + dataDuration != duration)
+        throw cRuntimeError("Invalid transmission duration decomposition for mode %s", transmissionMode->getName());
     auto analogModel = getAnalogModel()->createAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, transmissionBandwidth, transmissionPower);
     return new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, transmissionMode, transmissionChannel);
 }
