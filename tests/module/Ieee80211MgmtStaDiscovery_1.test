@@ -6,6 +6,7 @@ channel. Legacy packet-domain discovery keeps its channelNumber unchanged.
 %file: TestIeee80211MgmtStaDiscovery.cc
 
 #include <string>
+#include <vector>
 
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -24,12 +25,17 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
 {
   public:
     int changedChannel = -1;
+    std::vector<int> changedChannels;
     int associationConfirms = 0;
     int reassociationConfirms = 0;
     Ieee80211PrimResultCode lastAssociationResult = PRC_SUCCESS;
     Ieee80211PrimResultCode lastReassociationResult = PRC_SUCCESS;
 
-    virtual void changeChannel(int channel) override { changedChannel = channel; }
+    virtual void changeChannel(int channel) override
+    {
+        changedChannel = channel;
+        changedChannels.push_back(channel);
+    }
 
     virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
             int subtype, const MacAddress& address) override
@@ -90,7 +96,8 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         Enter_Method("finishAuthenticationForTest");
         auto ap = lookupAP(address);
         ASSERT(ap != nullptr);
-        cancelAndDelete(ap->authTimeoutMsg);
+        if (ap->authTimeoutMsg != nullptr)
+            cancelAndDelete(ap->authTimeoutMsg);
         ap->authTimeoutMsg = nullptr;
         ap->isAuthenticated = true;
     }
@@ -101,6 +108,22 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         auto ap = lookupAP(address);
         ASSERT(ap != nullptr);
         startAssociation(ap, SimTime(1, SIMTIME_MS));
+    }
+
+    void startReassociationForTest(const MacAddress& address)
+    {
+        Enter_Method("startReassociationForTest");
+        auto ap = lookupAP(address);
+        ASSERT(ap != nullptr);
+        startReassociation(ap, SimTime(1, SIMTIME_MS));
+    }
+
+    void deliverReassociationTimeoutForTest()
+    {
+        Enter_Method("deliverReassociationTimeoutForTest");
+        ASSERT(assocTimeoutMsg != nullptr);
+        cancelEvent(assocTimeoutMsg);
+        handleTimer(assocTimeoutMsg);
     }
 
     void cancelAssociationForTest()
@@ -176,6 +199,13 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
     }
 
     bool hasPeerHtState(const MacAddress& address) const { return mib->findPeerHtState(address) != nullptr; }
+
+    bool isAssociatedForTest() const { return mib->bssStationData.isAssociated; }
+    const MacAddress& getAssociatedAddressForTest() const { return assocAP.address; }
+    bool hasBeaconTimeoutForTest() const { return assocAP.beaconTimeoutMsg != nullptr; }
+    bool hasPendingAssociationForTest() const { return assocTimeoutMsg != nullptr; }
+    bool isReassociationInProgressForTest() const { return reassociationInProgress; }
+    void clearChangedChannelsForTest() { changedChannels.clear(); }
 
     void setPrimaryChannelForTest(int channel)
     {
@@ -267,6 +297,45 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(htNegotiationFailures == 0);
 
         auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+
+        // IEEE Std 802.11-2024, 11.3.5.4(f): a refused or timed-out
+        // reassociation to another AP keeps the current association and
+        // restores the current AP's channel before reporting failure.
+        mgmt->finishAuthenticationForTest(probeAddress);
+        staMib->setPeerHtCapabilities(probeAddress, staMib->localHtCapabilities, staMib->getHtOperation());
+        mgmt->clearChangedChannelsForTest();
+        mgmt->startReassociationForTest(probeAddress);
+        mgmt->deliverResponse(probeAddress, true, SC_DATARATE_UNSUP, TestIeee80211MgmtStaDiscovery::ResponseHtForm::LEGACY);
+        ASSERT(mgmt->changedChannels.size() == 2);
+        ASSERT(mgmt->changedChannels[0] == 6);
+        ASSERT(mgmt->changedChannels[1] == 11);
+        ASSERT(mgmt->isAssociatedForTest());
+        ASSERT(mgmt->getAssociatedAddressForTest() == address);
+        ASSERT(mgmt->hasBeaconTimeoutForTest());
+        ASSERT(mgmt->hasPeerHtState(address));
+        ASSERT(!mgmt->hasPeerHtState(probeAddress));
+        ASSERT(!mgmt->hasPendingAssociationForTest());
+        ASSERT(!mgmt->isReassociationInProgressForTest());
+        ASSERT(mgmt->reassociationConfirms == 1);
+        ASSERT(mgmt->lastReassociationResult == PRC_REFUSED);
+
+        staMib->setPeerHtCapabilities(probeAddress, staMib->localHtCapabilities, staMib->getHtOperation());
+        mgmt->clearChangedChannelsForTest();
+        mgmt->startReassociationForTest(probeAddress);
+        mgmt->deliverReassociationTimeoutForTest();
+        ASSERT(mgmt->changedChannels.size() == 2);
+        ASSERT(mgmt->changedChannels[0] == 6);
+        ASSERT(mgmt->changedChannels[1] == 11);
+        ASSERT(mgmt->isAssociatedForTest());
+        ASSERT(mgmt->getAssociatedAddressForTest() == address);
+        ASSERT(mgmt->hasBeaconTimeoutForTest());
+        ASSERT(mgmt->hasPeerHtState(address));
+        ASSERT(!mgmt->hasPeerHtState(probeAddress));
+        ASSERT(!mgmt->hasPendingAssociationForTest());
+        ASSERT(!mgmt->isReassociationInProgressForTest());
+        ASSERT(mgmt->reassociationConfirms == 2);
+        ASSERT(mgmt->lastReassociationResult == PRC_TIMEOUT);
+
         auto dcfRateSelection = check_and_cast<RateSelection *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateSelection"));
         auto qosRateSelection = check_and_cast<QosRateSelection *>(getModuleByPath("^.sta.wlan[0].mac.hcf.rateSelection"));
         const auto *modeSet = physicallayer::Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
@@ -350,7 +419,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(mgmt->hasPeerHtState(address));
         mgmt->prepareResponse(probeAddress, true);
         mgmt->deliverResponse(probeAddress, true, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::PARTIAL);
-        ASSERT(mgmt->reassociationConfirms == 1);
+        ASSERT(mgmt->reassociationConfirms == 3);
         ASSERT(mgmt->lastReassociationResult == PRC_SUCCESS);
         ASSERT(!mgmt->hasPeerHtState(probeAddress));
         ASSERT(htNegotiationFailures == 3);
@@ -403,6 +472,7 @@ network Ieee80211MgmtStaDiscoveryTestNetwork
 network = Ieee80211MgmtStaDiscoveryTestNetwork
 ned-path = .;../../../../src;../../lib
 sim-time-limit = 10ms
+seed-set = 0
 cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false

@@ -946,8 +946,11 @@ void Ieee80211MgmtSta::handleReassociationFailure(ApInfo *ap)
     // disassociates the STA only when the target is its current AP.
     if (shouldDisassociateOnReassociationFailure(mib->bssStationData.isAssociated, assocAP.address, ap->address))
         disassociate();
-    else
+    else {
         mib->removePeerHtCapabilities(ap->address);
+        if (mib->bssStationData.isAssociated)
+            changeChannel(assocAP.channel);
+    }
 }
 
 bool Ieee80211MgmtSta::shouldDisassociateOnReassociationFailure(bool isAssociated,
