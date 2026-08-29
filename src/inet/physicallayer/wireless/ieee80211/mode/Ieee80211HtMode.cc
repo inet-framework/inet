@@ -161,6 +161,16 @@ unsigned int Ieee80211HtPreambleMode::computeNumberOfHTLongTrainings(unsigned in
     return numberOfSpaceTimeStreams == 3 ? 4 : numberOfSpaceTimeStreams;
 }
 
+const simtime_t Ieee80211HtPreambleMode::getDurationBeforeHeader() const
+{
+    if (preambleFormat == HT_PREAMBLE_MIXED)
+        return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + legacySignalMode->getDuration();
+    else if (preambleFormat == HT_PREAMBLE_GREENFIELD)
+        return getHTGreenfieldShortTrainingFieldDuration() + getFirstHTLongTrainingFieldDuration();
+    else
+        throw cRuntimeError("Unknown preamble format");
+}
+
 const simtime_t Ieee80211HtPreambleMode::getDuration() const
 {
     // 20.3.7 Mathematical description of signals
@@ -178,12 +188,8 @@ const simtime_t Ieee80211HtPreambleMode::getDuration() const
 bps Ieee80211HtSignalMode::computeGrossBitrate() const
 {
     unsigned int numberOfCodedBitsPerSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * getNumberOfDataSubcarriers();
-    if (guardIntervalType == HT_GUARD_INTERVAL_LONG)
-        return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
-    else if (guardIntervalType == HT_GUARD_INTERVAL_SHORT)
-        return bps(numberOfCodedBitsPerSymbol / getShortGISymbolInterval());
-    else
-        throw cRuntimeError("Unknown guard interval type");
+    // IEEE Std 802.11-2024, 19.3.11.11.6: the short GI applies only to the Data field.
+    return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
 }
 
 bps Ieee80211HtSignalMode::computeNetBitrate() const
@@ -239,6 +245,16 @@ bps Ieee80211HtModeBase::getGrossBitrate() const
     return grossBitrate;
 }
 
+const simtime_t Ieee80211HtDataMode::getGuardInterval() const
+{
+    if (guardIntervalType == HT_GUARD_INTERVAL_LONG)
+        return getGIDuration();
+    else if (guardIntervalType == HT_GUARD_INTERVAL_SHORT)
+        return getShortGIDuration();
+    else
+        throw cRuntimeError("Unknown guard interval type");
+}
+
 int Ieee80211HtModeBase::getNumberOfDataSubcarriers() const
 {
     return Ieee80211Htmcs::getNumberOfDataSubcarriers(bandwidth, mcsIndex);
@@ -285,6 +301,22 @@ const simtime_t Ieee80211HtDataMode::getDuration(b dataLength) const
     return numberOfSymbols * getSymbolInterval();
 }
 
+const simtime_t Ieee80211HtMode::getDuration(b dataLength) const
+{
+    auto dataDuration = dataMode->getDuration(dataLength);
+    if (preambleMode->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED &&
+        dataMode->getGuardIntervalType() == Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT)
+    {
+        // IEEE Std 802.11-2024, 19.4.3, Eq. (19-90): mixed-format short-GI
+        // Data airtime is rounded up to a 4 us boundary. Eq. (19-92) leaves
+        // greenfield short-GI Data airtime at its raw 3.6 us symbol duration.
+        auto longGiSymbolInterval = dataMode->getDFTPeriod() + dataMode->getGIDuration();
+        auto numberOfLongGiSymbols = (dataDuration.raw() + longGiSymbolInterval.raw() - 1) / longGiSymbolInterval.raw();
+        dataDuration = SimTime::fromRaw(numberOfLongGiSymbols * longGiSymbolInterval.raw());
+    }
+    return preambleMode->getDuration() + dataDuration;
+}
+
 const simtime_t Ieee80211HtMode::getSlotTime() const
 {
     if (centerFrequencyMode == BAND_2_4GHZ)
@@ -326,7 +358,7 @@ Ieee80211HtCompliantModes::~Ieee80211HtCompliantModes()
 const Ieee80211HtMode *Ieee80211HtCompliantModes::getCompliantMode(const Ieee80211Htmcs *mcsMode, Ieee80211HtMode::BandMode centerFrequencyMode, Ieee80211HtPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211HtModeBase::GuardIntervalType guardIntervalType)
 {
     const char *name = ""; // TODO
-    auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType);
+    auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), centerFrequencyMode, preambleFormat, guardIntervalType);
     auto mode = singleton.modeCache.find(htModeId);
     if (mode == singleton.modeCache.end()) {
         const Ieee80211OfdmModulation *modulation = nullptr;
@@ -348,7 +380,7 @@ const Ieee80211HtMode *Ieee80211HtCompliantModes::getCompliantMode(const Ieee802
         const Ieee80211HtDataMode *dataMode = new Ieee80211HtDataMode(mcsMode, mcsMode->getBandwidth(), guardIntervalType);
         const Ieee80211HtPreambleMode *preambleMode = new Ieee80211HtPreambleMode(htSignal, legacySignal, preambleFormat, dataMode->getNumberOfSpatialStreams());
         const Ieee80211HtMode *htMode = new Ieee80211HtMode(name, preambleMode, dataMode, centerFrequencyMode);
-        singleton.modeCache.insert(std::pair<std::tuple<Hz, unsigned int, Ieee80211HtModeBase::GuardIntervalType>, const Ieee80211HtMode *>(htModeId, htMode));
+        singleton.modeCache.insert(std::pair<std::tuple<Hz, unsigned int, Ieee80211HtMode::BandMode, Ieee80211HtPreambleMode::HighTroughputPreambleFormat, Ieee80211HtModeBase::GuardIntervalType>, const Ieee80211HtMode *>(htModeId, htMode));
         return htMode;
     }
     return mode->second;
@@ -442,7 +474,9 @@ const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs29BW40MHz([](){ return new Ie
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs30BW40MHz([](){ return new Ieee80211Htmcs(30, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs31BW40MHz([](){ return new Ieee80211Htmcs(31, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Ieee80211HtCompliantCodes::htConvolutionalCode5_6, MHz(40));});
 
-const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs32BW40MHz([](){ return new Ieee80211Htmcs(32, &BpskModulation::singleton, &BpskModulation::singleton, &BpskModulation::singleton, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40));});
+// IEEE Std 802.11-2024, Table 19-35: optional MCS 32 is one BPSK stream.
+// This corrects the previous incorrect 4-stream all-BPSK constructor.
+const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs32BW40MHz([](){ return new Ieee80211Htmcs(32, &BpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40));});
 
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs33BW20MHz([](){ return new Ieee80211Htmcs(33, &Qam16Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs34BW20MHz([](){ return new Ieee80211Htmcs(34, &Qam64Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(20));});
@@ -490,7 +524,9 @@ const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs72BW20MHz([](){ return new Ie
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs73BW20MHz([](){ return new Ieee80211Htmcs(73, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs74BW20MHz([](){ return new Ieee80211Htmcs(74, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs75BW20MHz([](){ return new Ieee80211Htmcs(75, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20));});
-const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs76BW20MHz([](){ return new Ieee80211Htmcs(76, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20));});
+// IEEE Std 802.11-2024, Table 19-38 (continued): MCS 76 uses 64-QAM for streams 1-3 and 16-QAM for stream 4.
+// This corrects the previous incorrect QPSK modulation for the 4th stream.
+const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs76BW20MHz([](){ return new Ieee80211Htmcs(76, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(20));});
 
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs33BW40MHz([](){ return new Ieee80211Htmcs(33, &Qam16Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs34BW40MHz([](){ return new Ieee80211Htmcs(34, &Qam64Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, MHz(40));});
@@ -536,7 +572,9 @@ const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs69BW40MHz([](){ return new Ie
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs70BW40MHz([](){ return new Ieee80211Htmcs(70, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &Qam16Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs71BW40MHz([](){ return new Ieee80211Htmcs(71, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &Qam16Modulation::singleton, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs72BW40MHz([](){ return new Ieee80211Htmcs(72, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &QpskModulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
-const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs73BW40MHz([](){ return new Ieee80211Htmcs(73, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
+// IEEE Std 802.11-2024, Table 19-40: MCS 73 uses 64-QAM for streams 1-2 and 16-QAM for stream 3.
+// This corrects the previous incorrect 64-QAM modulation for the 3rd stream.
+const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs73BW40MHz([](){ return new Ieee80211Htmcs(73, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs74BW40MHz([](){ return new Ieee80211Htmcs(74, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam16Modulation::singleton, &Qam16Modulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs75BW40MHz([](){ return new Ieee80211Htmcs(75, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &Qam64Modulation::singleton, &QpskModulation::singleton, &Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4, MHz(40));});
 
@@ -544,4 +582,3 @@ const DI<Ieee80211Htmcs> Ieee80211HtmcsTable::htMcs76BW40MHz([](){ return new Ie
 
 } /* namespace physicallayer */
 } /* namespace inet */
-
