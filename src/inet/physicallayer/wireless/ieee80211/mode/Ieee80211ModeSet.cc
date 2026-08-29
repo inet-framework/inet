@@ -578,6 +578,8 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
     if (this->referenceMode->getLegacyCwMin() < 0 || this->referenceMode->getLegacyCwMax() < this->referenceMode->getLegacyCwMin())
         throw cRuntimeError("Reference mode '%s' in IEEE 802.11 mode set '%s' has invalid contention window bounds", this->referenceMode->getName(), this->name.c_str());
     std::vector<Entry> *nonConstEntries = const_cast<std::vector<Entry> *>(&this->entries);
+    // Keep equal-bitrate modes in declaration order because unqualified lookups
+    // intentionally preserve the historically preferred mode.
     std::stable_sort(nonConstEntries->begin(), nonConstEntries->end(), EntryNetBitrateComparator());
     // Explicit Supported-Rates eligibility on the authoritative Entry keeps
     // HT/VHT MCSs out without concrete-type or name-based inference. The
@@ -663,20 +665,52 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
     return entries[getModeIndex(mode)].isMandatory;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth, int numSpatialStreams) const
+const IIeee80211Mode *Ieee80211ModeSet::findCompatibleMode(const IIeee80211Mode *mode) const
 {
-    return findMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams);
+    if (mode == nullptr)
+        return nullptr;
+
+    const auto sourceDataMode = mode->getDataMode();
+    const auto sourceBitrate = sourceDataMode->getNetBitrate();
+    const auto sourceBandwidth = sourceDataMode->getBandwidth();
+    const auto sourceGuardInterval = sourceDataMode->getGuardInterval();
+    const auto minBitrate = sourceBitrate - Mbps(0.05);
+    const auto maxBitrate = sourceBitrate + Mbps(0.05);
+    for (const auto& entry : entries) {
+        const auto candidateDataMode = entry.mode->getDataMode();
+        const auto candidateBandwidth = candidateDataMode->getBandwidth();
+        const auto candidateGuardInterval = candidateDataMode->getGuardInterval();
+        const bool bandwidthMatches = (std::isnan(sourceBandwidth.get()) && std::isnan(candidateBandwidth.get())) ||
+                (!std::isnan(sourceBandwidth.get()) && !std::isnan(candidateBandwidth.get()) && sourceBandwidth == candidateBandwidth);
+        // GI = -1 indicates unconstrained guard interval (e.g., non-OFDM modes).
+        // Treat GI = -1 as matching any candidate GI, and require exact match when both are >= 0.
+        const bool guardIntervalMatches = (sourceGuardInterval < SIMTIME_ZERO) || (candidateGuardInterval < SIMTIME_ZERO) ||
+                (sourceGuardInterval >= SIMTIME_ZERO && candidateGuardInterval == sourceGuardInterval);
+        if (minBitrate <= candidateDataMode->getNetBitrate() && candidateDataMode->getNetBitrate() <= maxBitrate &&
+            bandwidthMatches && candidateDataMode->getNumberOfSpatialStreams() == sourceDataMode->getNumberOfSpatialStreams() &&
+            guardIntervalMatches)
+            return entry.mode;
+    }
+    return nullptr;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams) const
+const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval) const
+{
+    return findMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams, guardInterval);
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval) const
 {
     for (size_t index = 0; index < entries.size(); index++) {
         auto mode = entries[index].mode;
         auto dataMode = mode->getDataMode();
         auto bitrate = dataMode->getNetBitrate();
+        bool guardIntervalMatches = guardInterval < SIMTIME_ZERO ||
+                dataMode->getGuardInterval() == guardInterval;
         if (minBitrate <= bitrate && bitrate <= maxBitrate &&
             (std::isnan(bandwidth.get()) || dataMode->getBandwidth() == bandwidth) &&
-            (numSpatialStreams == -1 || dataMode->getNumberOfSpatialStreams() == numSpatialStreams))
+            (numSpatialStreams == -1 || dataMode->getNumberOfSpatialStreams() == numSpatialStreams) &&
+            guardIntervalMatches)
         {
             return entries[index].mode;
         }
@@ -684,20 +718,22 @@ const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate,
     return nullptr;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth, int numSpatialStreams) const
+const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval) const
 {
-    const IIeee80211Mode *mode = getMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams);
+    const IIeee80211Mode *mode = getMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams, guardInterval);
     if (mode == nullptr)
-        throw cRuntimeError("Unknown bitrate: %g in operation mode: '%s'", bitrate.get(), getName());
+        throw cRuntimeError("Unknown mode for bitrate %g bps, bandwidth %g Hz, %d spatial streams, and %s guard interval in operation mode '%s'",
+                bitrate.get(), bandwidth.get(), numSpatialStreams, guardInterval.str().c_str(), getName());
     else
         return mode;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::getMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams) const
+const IIeee80211Mode *Ieee80211ModeSet::getMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams, simtime_t guardInterval) const
 {
-    const IIeee80211Mode *mode = findMode(minBitrate, maxBitrate, bandwidth, numSpatialStreams);
+    const IIeee80211Mode *mode = findMode(minBitrate, maxBitrate, bandwidth, numSpatialStreams, guardInterval);
     if (mode == nullptr)
-        throw cRuntimeError("Unknown bitrate: (%g - %g) in operation mode: '%s'", minBitrate.get(), maxBitrate.get(), getName());
+        throw cRuntimeError("Unknown mode for bitrate range (%g - %g) bps, bandwidth %g Hz, %d spatial streams, and %s guard interval in operation mode '%s'",
+                minBitrate.get(), maxBitrate.get(), bandwidth.get(), numSpatialStreams, guardInterval.str().c_str(), getName());
     else
         return mode;
 }
@@ -715,19 +751,25 @@ const IIeee80211Mode *Ieee80211ModeSet::getFastestMode() const
 const IIeee80211Mode *Ieee80211ModeSet::getSlowerMode(const IIeee80211Mode *mode) const
 {
     int index = findModeIndex(mode);
-    if (index > 0)
-        return entries[index - 1].mode;
-    else
-        return nullptr;
+    if (index > 0) {
+        auto bitrate = mode->getDataMode()->getNetBitrate();
+        for (int i = index - 1; i >= 0; i--)
+            if (entries[i].mode->getDataMode()->getNetBitrate() < bitrate)
+                return entries[i].mode;
+    }
+    return nullptr;
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::getFasterMode(const IIeee80211Mode *mode) const
 {
     int index = findModeIndex(mode);
-    if (index >= 0 && index < (int)entries.size() - 1)
-        return entries[index + 1].mode;
-    else
-        return nullptr;
+    if (index >= 0) {
+        auto bitrate = mode->getDataMode()->getNetBitrate();
+        for (size_t i = index + 1; i < entries.size(); i++)
+            if (entries[i].mode->getDataMode()->getNetBitrate() > bitrate)
+                return entries[i].mode;
+    }
+    return nullptr;
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::getSlowestMandatoryMode() const
@@ -758,24 +800,47 @@ const IIeee80211Mode *Ieee80211ModeSet::getFastestLegacyOperationalMode() const
     return legacyOperationalModes.empty() ? nullptr : legacyOperationalModes.back();
 }
 
+const IIeee80211Mode *Ieee80211ModeSet::getMandatoryModeAtOrBelow(const IIeee80211Mode *mode) const
+{
+    // Returns the highest-bitrate mandatory mode whose bitrate is <= the given mode's bitrate.
+    // For equal-bitrate mandatory modes, returns the first-encountered entry (strict > comparison).
+    // This may return a different mode object than the input when the input is mandatory and
+    // shares bitrate with another mandatory mode, but the resulting rate is behavior-equivalent.
+    const auto bitrate = mode->getDataMode()->getNetBitrate();
+    const IIeee80211Mode *result = nullptr;
+    for (const auto& entry : entries) {
+        const auto entryBitrate = entry.mode->getDataMode()->getNetBitrate();
+        if (entry.isMandatory && entryBitrate <= bitrate &&
+            (result == nullptr || entryBitrate > result->getDataMode()->getNetBitrate()))
+            result = entry.mode;
+    }
+    return result;
+}
+
 const IIeee80211Mode *Ieee80211ModeSet::getSlowerMandatoryMode(const IIeee80211Mode *mode) const
 {
-    int index = findModeIndex(mode);
-    if (index > 0)
-        for (int i = index - 1; i >= 0; i--)
-            if (entries[i].isMandatory)
-                return entries[i].mode;
-    return nullptr;
+    const auto bitrate = mode->getDataMode()->getNetBitrate();
+    const IIeee80211Mode *result = nullptr;
+    for (const auto& entry : entries) {
+        const auto entryBitrate = entry.mode->getDataMode()->getNetBitrate();
+        if (entry.isMandatory && entryBitrate < bitrate &&
+            (result == nullptr || entryBitrate > result->getDataMode()->getNetBitrate()))
+            result = entry.mode;
+    }
+    return result;
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::getFasterMandatoryMode(const IIeee80211Mode *mode) const
 {
-    int index = findModeIndex(mode);
-    if (index >= 0)
-        for (size_t i = index + 1; i < entries.size(); i++)
-            if (entries[i].isMandatory)
-                return entries[i].mode;
-    return nullptr;
+    const auto bitrate = mode->getDataMode()->getNetBitrate();
+    const IIeee80211Mode *result = nullptr;
+    for (const auto& entry : entries) {
+        const auto entryBitrate = entry.mode->getDataMode()->getNetBitrate();
+        if (entry.isMandatory && entryBitrate > bitrate &&
+            (result == nullptr || entryBitrate < result->getDataMode()->getNetBitrate()))
+            result = entry.mode;
+    }
+    return result;
 }
 
 const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(const char *mode)
