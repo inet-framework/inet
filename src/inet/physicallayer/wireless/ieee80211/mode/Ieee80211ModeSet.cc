@@ -34,14 +34,15 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211OfdmCompliantModes::ofdmMode36Mbps },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode48Mbps },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode54Mbps },
-    }),
+    }, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz, OperatingPhy::OFDM),
     Ieee80211ModeSet("b", {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
         { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble },
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble },
-    }),
-    // TODO slotTime, cwMin, cwMax must be identical in all modes
+    }, &Ieee80211DsssCompliantModes::dsssMode1Mbps, OperatingPhy::HR_DSSS),
+    // Mixed-ERP timing is intentionally anchored to the explicitly selected
+    // DSSS reference mode; the entries do not need identical timing values.
     Ieee80211ModeSet("g(mixed)", {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps },
         { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps },
@@ -55,7 +56,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps }, // TODO ERP-CCK, ERP-PBCC, DSSS-OFDM
-    }),
+    }, &Ieee80211DsssCompliantModes::dsssMode1Mbps, OperatingPhy::ERP),
     Ieee80211ModeSet("g(erp)", {
         { true, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode6Mbps },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode9Mbps },
@@ -65,7 +66,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode36Mbps },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode48Mbps },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode54Mbps },
-    }),
+    }, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode6Mbps, OperatingPhy::ERP),
     Ieee80211ModeSet("p", {
         { true, &Ieee80211OfdmCompliantModes::ofdmMode3MbpsCS10MHz },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode4_5MbpsCS10MHz },
@@ -75,7 +76,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211OfdmCompliantModes::ofdmMode18MbpsCS10MHz },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS10MHz },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode27Mbps },
-        }),
+        }, &Ieee80211OfdmCompliantModes::ofdmMode3MbpsCS10MHz, OperatingPhy::OFDM),
     Ieee80211ModeSet("n(mixed-2.4Ghz)", { // This table is not complete; it only contains 2.4GHz homogeneous spatial streams, all mandatory and optional modes
         { true, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs0BW20MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs1BW20MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG) },
@@ -141,7 +142,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs29BW40MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT) },
         { false, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs30BW40MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT) },
         { false, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs31BW40MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT) }
-    }),
+    }, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs0BW20MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG), OperatingPhy::HT),
     Ieee80211ModeSet("ac", {
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
@@ -453,24 +454,40 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs7BW160MHzNss8, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT) },
         { false, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs8BW160MHzNss8, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT) },
         { false, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT) },
-}),}; });
+    }, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG), OperatingPhy::VHT),}; });
 
-Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries) :
+Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const IIeee80211Mode *referenceMode,
+        OperatingPhy operatingPhy) :
     name(name),
-    entries(entries)
+    entries(entries),
+    operatingPhy(operatingPhy),
+    referenceMode(referenceMode)
 {
+    if (this->entries.empty())
+        throw cRuntimeError("IEEE 802.11 mode set '%s' must contain at least one mode", this->name.c_str());
+    if (this->referenceMode == nullptr)
+        throw cRuntimeError("IEEE 802.11 mode set '%s' has a null reference mode", this->name.c_str());
+    int referenceModeCount = 0;
+    for (const auto& entry : this->entries) {
+        if (entry.mode == nullptr)
+            throw cRuntimeError("IEEE 802.11 mode set '%s' contains a null mode", this->name.c_str());
+        if (entry.mode == this->referenceMode)
+            referenceModeCount++;
+    }
+    if (referenceModeCount == 0)
+        throw cRuntimeError("Reference mode '%s' is not contained in IEEE 802.11 mode set '%s'", this->referenceMode->getName(), this->name.c_str());
+    if (referenceModeCount > 1)
+        throw cRuntimeError("Reference mode '%s' occurs %d times in IEEE 802.11 mode set '%s'", this->referenceMode->getName(), referenceModeCount, this->name.c_str());
+    if (this->referenceMode->getSifsTime() <= SIMTIME_ZERO)
+        throw cRuntimeError("Reference mode '%s' in IEEE 802.11 mode set '%s' has a non-positive SIFS time", this->referenceMode->getName(), this->name.c_str());
+    if (this->referenceMode->getSlotTime() <= SIMTIME_ZERO)
+        throw cRuntimeError("Reference mode '%s' in IEEE 802.11 mode set '%s' has a non-positive slot time", this->referenceMode->getName(), this->name.c_str());
+    if (this->referenceMode->getPhyRxStartDelay() <= SIMTIME_ZERO)
+        throw cRuntimeError("Reference mode '%s' in IEEE 802.11 mode set '%s' has a non-positive PHY RX start delay", this->referenceMode->getName(), this->name.c_str());
+    if (this->referenceMode->getLegacyCwMin() < 0 || this->referenceMode->getLegacyCwMax() < this->referenceMode->getLegacyCwMin())
+        throw cRuntimeError("Reference mode '%s' in IEEE 802.11 mode set '%s' has invalid contention window bounds", this->referenceMode->getName(), this->name.c_str());
     std::vector<Entry> *nonConstEntries = const_cast<std::vector<Entry> *>(&this->entries);
     std::stable_sort(nonConstEntries->begin(), nonConstEntries->end(), EntryNetBitrateComparator());
-    auto referenceMode = entries[0].mode;
-    for (auto entry : entries) {
-        auto mode = entry.mode;
-        if (mode->getSifsTime() != referenceMode->getSifsTime() ||
-            mode->getSlotTime() != referenceMode->getSlotTime() ||
-            mode->getPhyRxStartDelay() != referenceMode->getPhyRxStartDelay())
-        {
-            // FIXME throw cRuntimeError("Sifs, slot and phyRxStartDelay time must be identical within a ModeSet");
-        }
-    }
 }
 
 int Ieee80211ModeSet::findModeIndex(const IIeee80211Mode *mode) const
@@ -626,4 +643,3 @@ const Ieee80211ModeSet *Ieee80211ModeSet::getModeSet(const char *mode)
 } // namespace physicallayer
 
 } // namespace inet
-
