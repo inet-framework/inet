@@ -54,6 +54,23 @@ sparseEntries.push_back({true, htModeSet->getMode(Mbps(1)), true});
 SparseModeSet sparse(sparseEntries, sparseEntries[0].mode);
 ASSERT(sparse.isHtOperationSupported());
 ASSERT(sparse.getLegacyOperationalModes().size() == 1);
+ASSERT(sparse.getFastestLegacyOperationalMode() == sparse.getLegacyOperationalModes().front());
+
+// The peer-HT fallback is the fastest mandatory legacy operational mode, not
+// merely the last rate in the complete (mandatory plus optional) list.
+SparseModeSet legacyFallback({
+        { true, findHtMode(htModeSet, 0, MHz(20)) },
+        { true, htModeSet->getMode(Mbps(1)), true },
+        { true, htModeSet->getMode(Mbps(2)), true },
+        { false, htModeSet->getMode(Mbps(5.5)), true },
+    }, findHtMode(htModeSet, 0, MHz(20)), false);
+ASSERT(legacyFallback.getFastestLegacyOperationalMode() == htModeSet->getMode(Mbps(2)));
+
+SparseModeSet optionalOnlyFallback({
+        { true, findHtMode(htModeSet, 0, MHz(20)) },
+        { false, htModeSet->getMode(Mbps(1)), true },
+    }, findHtMode(htModeSet, 0, MHz(20)), false);
+ASSERT(optionalOnlyFallback.getFastestLegacyOperationalMode() == htModeSet->getMode(Mbps(1)));
 for (int mcsIndex = 0; mcsIndex < 77; mcsIndex++) {
     bool expected = mcsIndex < 8 || mcsIndex == 8 || mcsIndex == 10;
     ASSERT(sparse.getHtMcsSupported()[mcsIndex] == expected);
