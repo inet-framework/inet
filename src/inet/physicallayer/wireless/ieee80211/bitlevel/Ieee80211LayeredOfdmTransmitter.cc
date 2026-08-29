@@ -312,7 +312,7 @@ const ITransmission *Ieee80211LayeredOfdmTransmitter::createTransmission(const I
     // TODO: compute channel
     const simtime_t preambleDuration = mode->getPreambleLength();
     const simtime_t headerDuration = mode->getHeaderMode()->getDuration();
-    const simtime_t dataDuration = mode->getDataMode()->getDuration(packet->getDataLength());
+    const simtime_t dataDuration = mode->getDataDuration(packet->getDataLength());
     return new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, packetModel, bitModel, symbolModel, sampleModel, analogModel, mode, nullptr);
 }
 
@@ -331,4 +331,3 @@ Ieee80211LayeredOfdmTransmitter::~Ieee80211LayeredOfdmTransmitter()
 } // namespace physicallayer
 
 } // namespace inet
-

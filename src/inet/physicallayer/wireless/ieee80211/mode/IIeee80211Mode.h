@@ -42,8 +42,13 @@ class INET_API IIeee80211DataMode : public cObject, public IPrintableObject
     virtual bps getGrossBitrate() const = 0;
     virtual b getPaddingLength(b dataLength) const = 0;
     virtual b getCompleteLength(b dataLength) const = 0;
+    // Returns the raw duration of the encoded data symbol train. PPDU-format
+    // rules may round this duration at the enclosing mode level.
     virtual const simtime_t getDuration(b dataLength) const = 0;
     virtual const simtime_t getSymbolInterval() const = 0;
+    // Returns the guard interval used by the data symbols, or -1 when the PHY
+    // has no meaningful guard interval (for example, non-OFDM modes).
+    virtual const simtime_t getGuardInterval() const { return -1; }
     virtual const IModulation *getModulation() const = 0;
     virtual int getNumberOfSpatialStreams() const = 0;
 };
@@ -68,6 +73,9 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
     IIeee80211HeaderMode *_getHeaderMode() const { return const_cast<IIeee80211HeaderMode *>(getHeaderMode()); }
     IIeee80211DataMode *_getDataMode() const { return const_cast<IIeee80211DataMode *>(getDataMode()); }
     virtual const simtime_t getDuration(b dataLength) const = 0;
+    virtual const simtime_t getPreambleDuration() const { return getPreambleMode()->getDuration(); }
+    virtual const simtime_t getHeaderDuration() const { return getHeaderMode()->getDuration(); }
+    virtual const simtime_t getDataDuration(b dataLength) const { return getDuration(dataLength) - getPreambleDuration() - getHeaderDuration(); }
     virtual const simtime_t getSlotTime() const = 0;
     virtual const simtime_t getSifsTime() const = 0;
     virtual const simtime_t getRifsTime() const = 0;
