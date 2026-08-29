@@ -156,21 +156,23 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
     // already published to earlier listeners. Keep the reentrancy guard during
     // publication so every listener observes the same committed mode set.
     std::exception_ptr observerFailure;
-    try {
-        if (modeSet != nullptr)
-            emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
-    }
-    catch (...) {
-        observerFailure = std::current_exception();
-    }
-    // Listening changes are independent committed facts: the medium must get
-    // its publication attempt even when a mode-set observer throws.
-    try {
-        emit(listeningChangedSignal, 0);
-    }
-    catch (...) {
-        if (!observerFailure)
+    if (getComponentType() != nullptr) {
+        try {
+            if (modeSet != nullptr)
+                emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
+        }
+        catch (...) {
             observerFailure = std::current_exception();
+        }
+        // Listening changes are independent committed facts: the medium must get
+        // its publication attempt even when a mode-set observer throws.
+        try {
+            emit(listeningChangedSignal, 0);
+        }
+        catch (...) {
+            if (!observerFailure)
+                observerFailure = std::current_exception();
+        }
     }
     changingModeSet = false;
     if (observerFailure)
@@ -184,7 +186,8 @@ void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
     ieee80211Transmitter->setMode(mode);
     EV << "Changing radio mode to " << mode << endl;
     receptionTimer = nullptr;
-    emit(listeningChangedSignal, 0);
+    if (getComponentType() != nullptr)
+        emit(listeningChangedSignal, 0);
 }
 
 void Ieee80211Radio::setBand(const IIeee80211Band *band)
