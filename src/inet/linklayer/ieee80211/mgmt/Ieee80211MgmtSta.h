@@ -25,6 +25,33 @@ namespace ieee80211 {
 class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 {
   public:
+    enum class HtAssociationResponseStatus {
+        LEGACY,
+        VALID_HT,
+        INVALID_HT,
+    };
+
+    /** Describes a successful association response whose HT negotiation could not be used. */
+    class INET_API HtNegotiationFailure : public cObject {
+      private:
+        MacAddress peerAddress;
+        bool reassociation = false;
+        HtAssociationResponseStatus status = HtAssociationResponseStatus::INVALID_HT;
+        std::string reason;
+
+      public:
+        void setPeerAddress(const MacAddress& address) { peerAddress = address; }
+        void setReassociation(bool value) { reassociation = value; }
+        void setStatus(HtAssociationResponseStatus value) { status = value; }
+        void setReason(const std::string& value) { reason = value; }
+        const MacAddress& getPeerAddress() const { return peerAddress; }
+        bool isReassociation() const { return reassociation; }
+        HtAssociationResponseStatus getStatus() const { return status; }
+        const std::string& getReason() const { return reason; }
+    };
+
+    static simsignal_t htNegotiationFailedSignal;
+
     //
     // Encapsulates information about the ongoing scanning process
     //
@@ -50,6 +77,10 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
         Ieee80211SupportedRatesElement supportedRates;
         bool extendedSupportedRatesPresent = false;
         Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
+        bool htCapabilitiesPresent = false;
+        Ieee80211HtCapabilities htCapabilities;
+        bool htOperationPresent = false;
+        Ieee80211HtOperation htOperation;
         simtime_t beaconInterval;
         double rxPower;
 
@@ -136,6 +167,14 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     /** Processes Association and Reassociation Responses without using cached Beacon capabilities. */
     virtual void processAssociationResponse(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool reassociation);
+
+    /** Classifies the HT elements in a successful association response. */
+    virtual HtAssociationResponseStatus classifyAssociationResponse(
+            const Ptr<const Ieee80211AssociationResponseFrame>& responseBody,
+            Ieee80211HtCapabilities& responseHtCapabilities, Ieee80211HtOperation& responseHtOperation,
+            std::string& reason) const;
+
+    static const char *getHtAssociationResponseStatusName(HtAssociationResponseStatus status);
 
     /** Applies the failed-reassociation state transition for the target AP. */
     virtual void handleReassociationFailure(ApInfo *ap);

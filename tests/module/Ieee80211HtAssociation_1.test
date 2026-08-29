@@ -1,0 +1,246 @@
+%description:
+Verify the RTS/CTS-protected detailed IEEE 802.11 management exchange carries
+the standard HT element presence matrix and commits mutually usable peer state
+at both ends.
+
+%file: Ieee80211HtAssociationChecker.cc
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/SimpleModule.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+class Ieee80211HcfRtsFailureMac : public Ieee80211Mac
+{
+  protected:
+    bool firstRtsBlocked = false;
+
+    virtual void handleLowerPacket(Packet *packet) override
+    {
+        const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (!firstRtsBlocked && header->getType() == ST_RTS) {
+            firstRtsBlocked = true;
+            EV_INFO << "Intentionally blocking the first RTS frame.\n";
+            delete packet;
+        }
+        else
+            Ieee80211Mac::handleLowerPacket(packet);
+    }
+};
+
+Define_Module(Ieee80211HcfRtsFailureMac);
+
+class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
+{
+    using cListener::finish;
+
+  protected:
+    int apAssociationNotifications = 0;
+    cMessage *channelChangeTimer = nullptr;
+    cModule *apQosEdcaf = nullptr;
+
+  public:
+    virtual ~Ieee80211HtAssociationChecker()
+    {
+        if (channelChangeTimer != nullptr)
+            cancelAndDelete(channelChangeTimer);
+    }
+
+  protected:
+    virtual void initialize() override
+    {
+        getModuleByPath("^.ap.wlan[0].mgmt")->subscribe(l2ApAssociatedSignal, this);
+        apQosEdcaf = getModuleByPath("^.ap.wlan[0].mac.hcf.edca.edcaf[3]");
+        apQosEdcaf->subscribe(packetSentToPeerSignal, this);
+        channelChangeTimer = new cMessage("channelChange");
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        if (message != channelChangeTimer)
+            throw cRuntimeError("Unexpected message");
+        auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        auto apRadio = check_and_cast<physicallayer::Ieee80211Radio *>(getModuleByPath("^.ap.wlan[0].radio"));
+        auto staRadio = check_and_cast<physicallayer::Ieee80211Radio *>(getModuleByPath("^.sta.wlan[0].radio"));
+        ASSERT(apMib->requirePrimaryChannel() == 6);
+        apRadio->setChannelNumber(11);
+        // Keep the response exchange on-air after the AP's channel update so
+        // the terminal ACK can still be received while the pending operation
+        // snapshot is committed.
+        staRadio->setChannelNumber(11);
+        ASSERT(apMib->requirePrimaryChannel() == 11);
+        delete message;
+        channelChangeTimer = nullptr;
+        std::cout << "AP primary channel follows a dynamic radio change from 6 to 11 before association ACK.\n";
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        if (source == apQosEdcaf && signalID == packetSentToPeerSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_ASSOCIATIONRESPONSE && channelChangeTimer != nullptr && !channelChangeTimer->isScheduled())
+                scheduleAfter(SimTime(1, SIMTIME_US), channelChangeTimer);
+        }
+        else if (signalID == l2ApAssociatedSignal)
+            apAssociationNotifications++;
+    }
+
+    virtual void finish() override
+    {
+        auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        const auto& staAddress = staMib->address;
+        ASSERT(apMib->requirePrimaryChannel() == 11);
+        ASSERT(channelChangeTimer == nullptr);
+        ASSERT(apMib->bssAccessPointData.stations.at(staAddress) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(apMib->bssAccessPointData.associationIds.at(staAddress) != 0);
+        ASSERT(apMib->findPeerHtState(staAddress) != nullptr);
+        ASSERT(apMib->findPeerHtState(staAddress)->valid);
+        ASSERT(apMib->hasPrimaryChannel());
+        ASSERT(apMib->requirePrimaryChannel() == 11);
+        ASSERT(apMib->findPeerHtState(staAddress)->negotiatedCapabilities.operation.primaryChannel == 6);
+        ASSERT(staMib->bssStationData.isAssociated);
+        // IEEE Std 802.11-2024, 9.4.2.54.2/Figure 9-456 and Table 9-224: the n(mixed-2.4Ghz)
+        // profile exposes both short-GI capability bits from its typed HT
+        // mode entries, and the association exchange carries them on wire.
+        ASSERT(staMib->localHtCapabilities.shortGi20);
+        ASSERT(staMib->localHtCapabilities.shortGi40);
+        ASSERT(apMib->localHtCapabilities.shortGi20);
+        ASSERT(apMib->localHtCapabilities.shortGi40);
+        // Bridge the MIB-derived capability contract to the actual management
+        // frame serializer: the n(mixed-2.4Ghz) profile must advertise both
+        // short-GI bits in HT Capabilities (IEEE Std 802.11-2024, 9.4.2.54.2,
+        // Figure 9-456 and Table 9-224).
+        auto serializedResponse = makeShared<Ieee80211AssociationResponseFrame>();
+        serializedResponse->setStatusCode(SC_SUCCESSFUL);
+        serializedResponse->setAid(1);
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 6;
+        serializedResponse->setSupportedRates(rates);
+        setHtCapabilities(serializedResponse, staMib->localHtCapabilities);
+        serializedResponse->setChunkLength(B(37)); // fixed fields/rates (9) + HT Capabilities IE (28)
+        Packet serializedPacket("mib-ht-capabilities", serializedResponse);
+        auto serializedBytes = serializedPacket.peekAllAsBytes()->getBytes();
+        ASSERT(serializedBytes.size() == 37);
+        ASSERT(serializedBytes[9] == 45 && serializedBytes[10] == 26);
+        ASSERT((serializedBytes[11] & (1 << 5)) != 0);
+        ASSERT((serializedBytes[11] & (1 << 6)) != 0);
+        ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
+        ASSERT(staMib->findPeerHtState(apMib->address)->valid);
+        ASSERT(staMib->findPeerHtState(apMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
+        ASSERT(apAssociationNotifications == 1);
+        EV << "RTS-protected association committed at AP and STA.\n";
+    }
+};
+
+Define_Module(Ieee80211HtAssociationChecker);
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module Ieee80211HcfRtsFailureMac extends Ieee80211Mac
+{
+    parameters:
+        @class(::Ieee80211HcfRtsFailureMac);
+}
+
+simple Ieee80211HtAssociationChecker extends SimpleModule
+{
+    parameters:
+        @class(::Ieee80211HtAssociationChecker);
+}
+
+network Ieee80211HtAssociationTest
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtSta";
+                wlan[*].agent.typename = "Ieee80211AgentSta";
+                wlan[*].mac.typename = "Ieee80211HcfRtsFailureMac";
+        }
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtAp";
+                wlan[*].radio.channelNumber = 6;
+        }
+        test: Ieee80211HtAssociationChecker;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211HtAssociationTest
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 50ms
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 100m
+**.constraintAreaMaxY = 100m
+**.constraintAreaMaxZ = 0m
+*.sta.mobility.initialX = 10m
+*.sta.mobility.initialY = 10m
+*.ap.mobility.initialX = 20m
+*.ap.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 65Mbps
+*.sta.wlan[0].radio.channelNumber = 6
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.wlan[*].radio.antenna.numAntennas = 1
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+
+**.mgmt.numChannels = 1
+*.ap.wlan[*].mac.qosStation = true
+*.ap.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 0B
+*.ap.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 0B
+*.ap.wlan[*].mac.hcf.rateControl.typename = "AarfRateControl"
+*.sta.wlan[*].agent.startingTime = 0s
+*.sta.wlan[*].agent.channelsToScan = "6"
+*.sta.wlan[*].agent.probeDelay = 1ms
+*.sta.wlan[*].agent.minChannelTime = 5ms
+*.sta.wlan[*].agent.maxChannelTime = 5ms
+*.sta.wlan[*].agent.authenticationTimeout = 20ms
+*.sta.wlan[*].agent.associationTimeout = 20ms
+
+%contains: stdout
+Association successful, AP address=
+
+%contains-regex: stdout
+Assoc .*?Ieee80211AssociationRequestFrame.*?htCapabilitiesPresent.*?true.*?htOperationPresent.*?false
+
+%contains-regex: stdout
+AssocResp-OK .*?Ieee80211AssociationResponseFrame.*?htCapabilitiesPresent.*?true.*?htOperationPresent.*?true
+
+%contains: stdout
+Installed peer HT state, peer =
+
+%contains: stdout
+Intentionally blocking the first RTS frame.
+
+%contains: stdout
+RTS-protected association committed at AP and STA.
