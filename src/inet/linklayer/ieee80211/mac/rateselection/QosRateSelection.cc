@@ -20,6 +20,23 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+static const IIeee80211Mode *resolveConfiguredResponseCtsFrameMode(const Ieee80211ModeSet *modeSet, double bitrate, const char *modulePath)
+{
+    if (bitrate == -1)
+        return nullptr;
+    try {
+        auto result = modeSet->getMode(bps(bitrate));
+        if (modeSet->isHtOperationSupported() && result->getHtMcsIndex() < 0)
+            throw cRuntimeError("legacy mode '%s' is not selectable for HT CTS responses", result->getName());
+        return result;
+    }
+    catch (const cRuntimeError& error) {
+        throw cRuntimeError("%s has invalid responseCtsFrameBitrate=%g bps for operation mode '%s'; "
+                "the configured CTS rate must resolve to a selectable mode (HT RTS responses require an HT mode): %s",
+                modulePath, bitrate, modeSet->getName(), error.getFormattedMessage().c_str());
+    }
+}
+
 Define_Module(QosRateSelection);
 
 void QosRateSelection::initialize(int stage)
@@ -29,6 +46,8 @@ void QosRateSelection::initialize(int stage)
         mib.reference(this, "mibModule", true);
     if (stage == INITSTAGE_LINK_LAYER) {
         dataOrMgmtRateControl = dynamic_cast<IRateControl *>(findModuleByPath(par("rateControlModule")));
+        if (modeSet == nullptr)
+            throw cRuntimeError("QosRateSelection module %s has no mode set at link-layer initialization", getFullPath().c_str());
         updateModes();
     }
 }
@@ -59,20 +78,29 @@ void QosRateSelection::updateModes()
     if (modeSet == nullptr)
         return;
     double multicastFrameBitrate = par("multicastFrameBitrate");
-    multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
+    auto newMulticastFrameMode = multicastFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
     double dataFrameBitrate = par("dataFrameBitrate");
-    dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"), par("dataFrameGuardInterval"));
+    auto newDataFrameMode = dataFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"), par("dataFrameGuardInterval"));
     double mgmtFrameBitrate = par("mgmtFrameBitrate");
-    mgmtFrameMode = (mgmtFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(mgmtFrameBitrate));
+    auto newMgmtFrameMode = mgmtFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(mgmtFrameBitrate));
     double controlFrameBitrate = par("controlFrameBitrate");
-    controlFrameMode = (controlFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(controlFrameBitrate));
+    auto newControlFrameMode = controlFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(controlFrameBitrate));
     double responseAckFrameBitrate = par("responseAckFrameBitrate");
-    responseAckFrameMode = (responseAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
+    auto newResponseAckFrameMode = responseAckFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(responseAckFrameBitrate));
     double responseBlockAckFrameBitrate = par("responseBlockAckFrameBitrate");
-    responseBlockAckFrameMode = (responseBlockAckFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseBlockAckFrameBitrate));
+    auto newResponseBlockAckFrameMode = responseBlockAckFrameBitrate == -1 ? nullptr : modeSet->getMode(bps(responseBlockAckFrameBitrate));
     double responseCtsFrameBitrate = par("responseCtsFrameBitrate");
-    responseCtsFrameMode = (responseCtsFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(responseCtsFrameBitrate));
-    fastestMandatoryMode = modeSet->getFastestMandatoryMode();
+    auto newResponseCtsFrameMode = resolveConfiguredResponseCtsFrameMode(modeSet, responseCtsFrameBitrate, getFullPath().c_str());
+    auto newFastestMandatoryMode = modeSet->getFastestMandatoryMode();
+
+    multicastFrameMode = newMulticastFrameMode;
+    dataFrameMode = newDataFrameMode;
+    mgmtFrameMode = newMgmtFrameMode;
+    controlFrameMode = newControlFrameMode;
+    responseAckFrameMode = newResponseAckFrameMode;
+    responseBlockAckFrameMode = newResponseBlockAckFrameMode;
+    responseCtsFrameMode = newResponseCtsFrameMode;
+    fastestMandatoryMode = newFastestMandatoryMode;
     lastTransmittedFrameMode.clear();
     perReceiverDataFrameMode.clear();
     perReceiverResolved = false;
@@ -109,36 +137,27 @@ bool QosRateSelection::isControlResponseFrame(const Ptr<const Ieee80211MacHeader
 //
 const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
-    // TODO BSSBasicRateSet, alternate rate
-    auto mode = getMode(packet, dataOrMgmtHeader);
-    ASSERT(modeSet->containsMode(mode));
-    const IIeee80211Mode *responseMode;
-    if (!responseAckFrameMode) {
-        if (auto mandatoryMode = modeSet->getMandatoryModeAtOrBelow(mode))
-            responseMode = mandatoryMode;
-        else
-            throw cRuntimeError("Mandatory mode not found");
+    const IIeee80211Mode *responseMode = nullptr;
+    if (responseAckFrameMode)
+        responseMode = modeSet->getNonHtControlResponseMode(responseAckFrameMode, false);
+    else {
+        auto mode = getMode(packet, dataOrMgmtHeader);
+        ASSERT(modeSet->supportsMode(mode));
+        // IEEE 802.11-2024 10.6.6.1/10.6.6.5.2: this bounded model uses a
+        // mandatory non-HT rate for ordinary ACK responses; BSSBasicRateSet is not modelled.
+        responseMode = modeSet->getMandatoryControlResponseMode(mode);
     }
-    else
-        responseMode = responseAckFrameMode;
-    return getPeerCompatibleMode(dataOrMgmtHeader->getTransmitterAddress(), responseMode);
+    return dataOrMgmtHeader ? getPeerCompatibleMode(dataOrMgmtHeader->getTransmitterAddress(), responseMode) : responseMode;
 }
 
 const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
 {
-    // TODO BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, rtsFrame);
-    ASSERT(modeSet->containsMode(mode));
-    const IIeee80211Mode *responseMode;
-    if (!responseCtsFrameMode) {
-        if (auto mandatoryMode = modeSet->getMandatoryModeAtOrBelow(mode))
-            responseMode = mandatoryMode;
-        else
-            throw cRuntimeError("Mandatory mode not found");
-    }
-    else
-        responseMode = responseCtsFrameMode;
-    return getPeerCompatibleMode(rtsFrame->getTransmitterAddress(), responseMode);
+    ASSERT(modeSet->supportsMode(mode));
+    // The eliciting mode is required even when a CTS rate is configured because
+    // the response format and CandidateMCSSet depend on the received PPDU.
+    auto responseMode = modeSet->getControlResponseMode(mode, responseCtsFrameMode);
+    return rtsFrame ? getPeerCompatibleMode(rtsFrame->getTransmitterAddress(), responseMode) : responseMode;
 }
 
 //
@@ -149,12 +168,19 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
 //
 const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
-    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
-        auto mode = responseBlockAckFrameMode ? responseBlockAckFrameMode : getMode(packet, blockAckReq);
-        return getPeerCompatibleMode(blockAckReq->getTransmitterAddress(), mode);
-    }
-    else
+    if (!dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
         throw cRuntimeError("Unknown BlockAckReq frame type");
+    const IIeee80211Mode *responseMode = nullptr;
+    if (responseBlockAckFrameMode)
+        responseMode = modeSet->getNonHtControlResponseMode(responseBlockAckFrameMode, false);
+    else {
+        auto mode = getMode(packet, blockAckReq);
+        ASSERT(modeSet->supportsMode(mode));
+        // IEEE 802.11-2024 10.6.6.5.2 permits non-HT Basic BlockAck responses;
+        // this model has no BSSBasicRateSet/HT Control context to select another PPDU.
+        responseMode = modeSet->getNonHtControlResponseMode(mode, false);
+    }
+    return blockAckReq ? getPeerCompatibleMode(blockAckReq->getTransmitterAddress(), responseMode) : responseMode;
 }
 
 const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
@@ -288,11 +314,10 @@ const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& 
     // supported for HT (802.11n) modes using negotiated PeerHtState. Non-HT
     // modes (legacy and VHT) return unchanged because VHT capability negotiation
     // (VHT Capabilities/Operation elements) is not yet modeled in MIB.
-    if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
+    if (mode == nullptr || peerAddress.isMulticast() || !mib || mib->mode == Ieee80211Mib::INDEPENDENT || mode->getHtMcsIndex() < 0)
         return mode;
     return selectPeerCompatibleMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress);
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

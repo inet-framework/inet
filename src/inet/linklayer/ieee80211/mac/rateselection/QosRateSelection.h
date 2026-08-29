@@ -63,7 +63,6 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void updateModes();
-
     // Builds perReceiverDataFrameMode on first use. Deferred out of initialize() because peer
     // MAC addresses are assigned during INITSTAGE_LINK_LAYER with undefined intra-stage module
     // ordering; the first transmitted data frame occurs after all init stages, so this is race-free.
@@ -96,4 +95,3 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
 } /* namespace inet */
 
 #endif
-
