@@ -59,6 +59,7 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void updateModes();
 
     // Builds perReceiverDataFrameMode on first use. Deferred out of initialize() because peer
     // MAC addresses are assigned during INITSTAGE_LINK_LAYER with undefined intra-stage module
