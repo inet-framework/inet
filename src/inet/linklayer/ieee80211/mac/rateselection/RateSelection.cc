@@ -35,7 +35,7 @@ void RateSelection::initialize(int stage)
         double multicastFrameBitrate = par("multicastFrameBitrate");
         multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
         double dataFrameBitrate = par("dataFrameBitrate");
-        dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"));
+        dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"), par("dataFrameGuardInterval"));
         double mgmtFrameBitrate = par("mgmtFrameBitrate");
         mgmtFrameMode = (mgmtFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(mgmtFrameBitrate));
         double controlFrameBitrate = par("controlFrameBitrate");
@@ -108,7 +108,7 @@ const IIeee80211Mode *RateSelection::computeResponseAckFrameMode(Packet *packet,
     else {
         auto mode = getMode(packet, dataOrMgmtHeader);
         ASSERT(modeSet->containsMode(mode));
-        auto responseMode = modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO BSSBasicRateSet
+        auto responseMode = modeSet->getMandatoryModeAtOrBelow(mode); // TODO BSSBasicRateSet
         return getPeerCompatibleMode(dataOrMgmtHeader->getTransmitterAddress(), responseMode);
     }
 }
@@ -120,7 +120,7 @@ const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet,
     else {
         auto mode = getMode(packet, rtsFrame);
         ASSERT(modeSet->containsMode(mode));
-        auto responseMode = modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO BSSBasicRateSet
+        auto responseMode = modeSet->getMandatoryModeAtOrBelow(mode); // TODO BSSBasicRateSet
         return getPeerCompatibleMode(rtsFrame->getTransmitterAddress(), responseMode);
     }
 }
