@@ -37,7 +37,7 @@ class TestIeee80211Receiver : public Ieee80211Receiver
 class TestIeee80211Radio : public Ieee80211Radio
 {
   public:
-    void setup(Ieee80211Transmitter *tx, Ieee80211Receiver *rx)
+    void setup(ITransmitter *tx, IReceiver *rx)
     {
         transmitter = tx;
         receiver = rx;
@@ -74,6 +74,10 @@ class TestRateSelectionAccessor : public ieee80211::RateSelection
     static void notifyModeSet(ieee80211::RateSelection *rs, const Ieee80211ModeSet *ms) {
         static_cast<TestRateSelectionAccessor *>(rs)->receiveSignal(nullptr, modesetChangedSignal, const_cast<Ieee80211ModeSet *>(ms), nullptr);
     }
+    static const Ieee80211ModeSet *getModeSet(const ieee80211::RateSelection *rs) { return static_cast<const TestRateSelectionAccessor *>(rs)->modeSet; }
+    static void applyModeSet(ieee80211::RateSelection *rs, const Ieee80211ModeSet *ms) {
+        static_cast<TestRateSelectionAccessor *>(rs)->receiveSignal(nullptr, modesetChangedSignal, const_cast<Ieee80211ModeSet *>(ms), nullptr);
+    }
 };
 
 class TestQosRateSelectionAccessor : public ieee80211::QosRateSelection
@@ -84,6 +88,10 @@ class TestQosRateSelectionAccessor : public ieee80211::QosRateSelection
     static const IIeee80211Mode *getFastestMandatoryMode(const ieee80211::QosRateSelection *rs) { return static_cast<const TestQosRateSelectionAccessor *>(rs)->fastestMandatoryMode; }
     static const Ieee80211ModeSet *readModeSet(const ieee80211::QosRateSelection *rs) { return static_cast<const TestQosRateSelectionAccessor *>(rs)->modeSet; }
     static void notifyModeSet(ieee80211::QosRateSelection *rs, const Ieee80211ModeSet *ms) {
+        static_cast<TestQosRateSelectionAccessor *>(rs)->receiveSignal(nullptr, modesetChangedSignal, const_cast<Ieee80211ModeSet *>(ms), nullptr);
+    }
+    static const Ieee80211ModeSet *getModeSet(const ieee80211::QosRateSelection *rs) { return static_cast<const TestQosRateSelectionAccessor *>(rs)->modeSet; }
+    static void applyModeSet(ieee80211::QosRateSelection *rs, const Ieee80211ModeSet *ms) {
         static_cast<TestQosRateSelectionAccessor *>(rs)->receiveSignal(nullptr, modesetChangedSignal, const_cast<Ieee80211ModeSet *>(ms), nullptr);
     }
 };
@@ -470,24 +478,24 @@ rateSelection->par("multicastFrameBitrate").setDoubleValue(6e6);
 rateSelection->par("mgmtFrameBitrate").setDoubleValue(6e6);
 rateSelection->par("controlFrameBitrate").setDoubleValue(6e6);
 rateSelection->par("responseAckFrameBitrate").setDoubleValue(6e6);
-rateSelection->par("responseCtsFrameBitrate").setDoubleValue(6e6);
+rateSelection->par("responseCtsFrameBitrate").setDoubleValue(-1);
 rateSelection->finalizeParameters();
 rateSelection->buildInside();
 
-TestRateSelectionAccessor::notifyModeSet(rateSelection, erpModeSet);
-ASSERT(TestRateSelectionAccessor::readModeSet(rateSelection) == erpModeSet);
+TestRateSelectionAccessor::applyModeSet(rateSelection, erpModeSet);
+ASSERT(TestRateSelectionAccessor::getModeSet(rateSelection) == erpModeSet);
 ASSERT(erpModeSet->containsMode(TestRateSelectionAccessor::getDataFrameMode(rateSelection)));
 ASSERT(erpModeSet->containsMode(TestRateSelectionAccessor::getMulticastFrameMode(rateSelection)));
 ASSERT(erpModeSet->containsMode(TestRateSelectionAccessor::getMgmtFrameMode(rateSelection)));
 ASSERT(erpModeSet->containsMode(TestRateSelectionAccessor::getControlFrameMode(rateSelection)));
 ASSERT(erpModeSet->containsMode(TestRateSelectionAccessor::getResponseAckFrameMode(rateSelection)));
-ASSERT(erpModeSet->containsMode(TestRateSelectionAccessor::getResponseCtsFrameMode(rateSelection)));
+ASSERT(TestRateSelectionAccessor::getResponseCtsFrameMode(rateSelection) == nullptr);
 ASSERT(erpModeSet->containsMode(TestRateSelectionAccessor::getFastestMandatoryMode(rateSelection)));
 ASSERT(TestRateSelectionAccessor::getFastestMandatoryMode(rateSelection) == erpModeSet->getMode(Mbps(24)));
 
 // Dynamically switch rateSelection to HT mode set
-TestRateSelectionAccessor::notifyModeSet(rateSelection, modeSet);
-ASSERT(TestRateSelectionAccessor::readModeSet(rateSelection) == modeSet);
+TestRateSelectionAccessor::applyModeSet(rateSelection, modeSet);
+ASSERT(TestRateSelectionAccessor::getModeSet(rateSelection) == modeSet);
 ASSERT(modeSet->containsMode(TestRateSelectionAccessor::getDataFrameMode(rateSelection)));
 ASSERT(!erpModeSet->containsMode(TestRateSelectionAccessor::getDataFrameMode(rateSelection)));
 ASSERT(modeSet->containsMode(TestRateSelectionAccessor::getMulticastFrameMode(rateSelection)));
@@ -495,7 +503,7 @@ ASSERT(!erpModeSet->containsMode(TestRateSelectionAccessor::getMulticastFrameMod
 ASSERT(modeSet->containsMode(TestRateSelectionAccessor::getMgmtFrameMode(rateSelection)));
 ASSERT(modeSet->containsMode(TestRateSelectionAccessor::getControlFrameMode(rateSelection)));
 ASSERT(modeSet->containsMode(TestRateSelectionAccessor::getResponseAckFrameMode(rateSelection)));
-ASSERT(modeSet->containsMode(TestRateSelectionAccessor::getResponseCtsFrameMode(rateSelection)));
+ASSERT(TestRateSelectionAccessor::getResponseCtsFrameMode(rateSelection) == nullptr);
 ASSERT(modeSet->containsMode(TestRateSelectionAccessor::getFastestMandatoryMode(rateSelection)));
 
 // Also verify HT-specific fixed mode configured with bandwidth, stream, and guard interval
@@ -510,14 +518,15 @@ rateSelectionHt->par("multicastFrameBitrate").setDoubleValue(6e6);
 rateSelectionHt->par("mgmtFrameBitrate").setDoubleValue(6e6);
 rateSelectionHt->par("controlFrameBitrate").setDoubleValue(6e6);
 rateSelectionHt->par("responseAckFrameBitrate").setDoubleValue(6e6);
-rateSelectionHt->par("responseCtsFrameBitrate").setDoubleValue(6e6);
+rateSelectionHt->par("responseCtsFrameBitrate").setDoubleValue(6.5e6);
 rateSelectionHt->finalizeParameters();
 rateSelectionHt->buildInside();
 
-TestRateSelectionAccessor::notifyModeSet(rateSelectionHt, modeSet);
-ASSERT(TestRateSelectionAccessor::readModeSet(rateSelectionHt) == modeSet);
+TestRateSelectionAccessor::applyModeSet(rateSelectionHt, modeSet);
+ASSERT(TestRateSelectionAccessor::getModeSet(rateSelectionHt) == modeSet);
 ASSERT(modeSet->containsMode(TestRateSelectionAccessor::getDataFrameMode(rateSelectionHt)));
 ASSERT(TestRateSelectionAccessor::getDataFrameMode(rateSelectionHt) == short65);
+ASSERT(modeSet->containsMode(TestRateSelectionAccessor::getResponseCtsFrameMode(rateSelectionHt)));
 
 auto *qosRateSelection = check_and_cast<ieee80211::QosRateSelection *>(cModuleType::get("inet.linklayer.ieee80211.mac.rateselection.QosRateSelection")->create("qosRateSelection", this));
 qosRateSelection->par("rateControlModule").setStringValue("");
@@ -528,18 +537,18 @@ qosRateSelection->par("mgmtFrameBitrate").setDoubleValue(6e6);
 qosRateSelection->par("controlFrameBitrate").setDoubleValue(6e6);
 qosRateSelection->par("responseAckFrameBitrate").setDoubleValue(6e6);
 qosRateSelection->par("responseBlockAckFrameBitrate").setDoubleValue(6e6);
-qosRateSelection->par("responseCtsFrameBitrate").setDoubleValue(6e6);
+qosRateSelection->par("responseCtsFrameBitrate").setDoubleValue(-1);
 qosRateSelection->finalizeParameters();
 qosRateSelection->buildInside();
 
-TestQosRateSelectionAccessor::notifyModeSet(qosRateSelection, erpModeSet);
-ASSERT(TestQosRateSelectionAccessor::readModeSet(qosRateSelection) == erpModeSet);
+TestQosRateSelectionAccessor::applyModeSet(qosRateSelection, erpModeSet);
+ASSERT(TestQosRateSelectionAccessor::getModeSet(qosRateSelection) == erpModeSet);
 ASSERT(erpModeSet->containsMode(TestQosRateSelectionAccessor::getDataFrameMode(qosRateSelection)));
 ASSERT(erpModeSet->containsMode(TestQosRateSelectionAccessor::getResponseBlockAckFrameMode(qosRateSelection)));
 ASSERT(erpModeSet->containsMode(TestQosRateSelectionAccessor::getFastestMandatoryMode(qosRateSelection)));
 
-TestQosRateSelectionAccessor::notifyModeSet(qosRateSelection, modeSet);
-ASSERT(TestQosRateSelectionAccessor::readModeSet(qosRateSelection) == modeSet);
+TestQosRateSelectionAccessor::applyModeSet(qosRateSelection, modeSet);
+ASSERT(TestQosRateSelectionAccessor::getModeSet(qosRateSelection) == modeSet);
 ASSERT(modeSet->containsMode(TestQosRateSelectionAccessor::getDataFrameMode(qosRateSelection)));
 ASSERT(!erpModeSet->containsMode(TestQosRateSelectionAccessor::getDataFrameMode(qosRateSelection)));
 ASSERT(modeSet->containsMode(TestQosRateSelectionAccessor::getResponseBlockAckFrameMode(qosRateSelection)));
