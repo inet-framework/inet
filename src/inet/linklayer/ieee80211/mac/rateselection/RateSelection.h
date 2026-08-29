@@ -63,7 +63,6 @@ class INET_API RateSelection : public IRateSelection, public ModeSetModuleBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void updateModes();
-
     // Builds perReceiverDataFrameMode on first use. Deferred out of initialize() because peer
     // MAC addresses are assigned during INITSTAGE_LINK_LAYER with undefined intra-stage module
     // ordering; the first transmitted data frame occurs after all init stages, so this is race-free.
