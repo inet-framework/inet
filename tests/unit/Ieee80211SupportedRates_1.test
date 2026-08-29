@@ -1,0 +1,316 @@
+%description:
+Verify Supported Rates and Extended Supported Rates lengths, basic-rate
+membership, split/merge behavior, and malformed-element rejection.
+
+%includes:
+#include <algorithm>
+#include <cstdint>
+#include <vector>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+
+static Ptr<Ieee80211AssociationResponseFrame> makeResponse(short numRates,
+        Ieee80211StatusCode statusCode = SC_SUCCESSFUL, short aid = 1)
+{
+    auto frame = makeShared<Ieee80211AssociationResponseFrame>();
+    frame->setStatusCode(statusCode);
+    frame->setAid(aid);
+
+    Ieee80211SupportedRatesElement rates;
+    rates.numRates = numRates;
+    for (int i = 0; i < 8; i++) {
+        rates.rate[i] = (i + 1) * 0.5;
+        rates.basicRate[i] = i % 2 == 0;
+    }
+    frame->setSupportedRates(rates);
+    frame->setChunkLength(B(8 + std::max(0, (int)numRates)));
+    return frame;
+}
+
+template<typename Frame>
+static std::vector<uint8_t> serializeFrame(const Ptr<Frame>& frame)
+{
+    Packet packet("response", frame);
+    return packet.peekAllAsBytes()->getBytes();
+}
+
+static std::vector<uint8_t> makeRawResponse(uint16_t wireAid, const std::vector<uint8_t>& rates,
+        uint16_t statusCode = SC_SUCCESSFUL)
+{
+    std::vector<uint8_t> bytes = {
+        0, 0, // Capability
+        static_cast<uint8_t>(statusCode >> 8), static_cast<uint8_t>(statusCode),
+        static_cast<uint8_t>(wireAid >> 8), static_cast<uint8_t>(wireAid),
+        1, static_cast<uint8_t>(rates.size())};
+    bytes.insert(bytes.end(), rates.begin(), rates.end());
+    return bytes;
+}
+
+template<typename Frame>
+static Ptr<const Frame> deserializeFrame(const std::vector<uint8_t>& bytes)
+{
+    Packet packet("response", makeShared<BytesChunk>(bytes));
+    return packet.popAtFront<Frame>(B(bytes.size()));
+}
+
+%activity:
+
+// Primary Supported Rates accepts exactly one through eight octets.
+auto oneRateFrame = makeResponse(1);
+auto oneRateBytes = serializeFrame(oneRateFrame);
+ASSERT(oneRateBytes.size() == 9);
+ASSERT(oneRateBytes[6] == 1 && oneRateBytes[7] == 1);
+ASSERT(oneRateBytes[8] == (0x80 | 1));
+auto oneRateDecoded = deserializeFrame<Ieee80211AssociationResponseFrame>(oneRateBytes);
+ASSERT(oneRateDecoded->getAid() == 1);
+ASSERT(oneRateDecoded->getSupportedRates().numRates == 1);
+ASSERT(oneRateDecoded->getSupportedRates().basicRate[0]);
+
+auto eightRateFrame = makeResponse(8);
+auto eightRateBytes = serializeFrame(eightRateFrame);
+ASSERT(eightRateBytes.size() == 16);
+ASSERT(eightRateBytes[6] == 1 && eightRateBytes[7] == 8);
+for (int i = 0; i < 8; i++)
+    ASSERT(eightRateBytes[8 + i] == (static_cast<uint8_t>(i + 1) | (i % 2 == 0 ? 0x80 : 0)));
+auto eightRateDecoded = deserializeFrame<Ieee80211AssociationResponseFrame>(eightRateBytes);
+ASSERT(eightRateDecoded->getSupportedRates().numRates == 8);
+for (int i = 0; i < 8; i++) {
+    ASSERT(eightRateDecoded->getSupportedRates().rate[i] == (i + 1) * 0.5);
+    ASSERT(eightRateDecoded->getSupportedRates().basicRate[i] == (i % 2 == 0));
+}
+
+auto zeroRateFrame = makeResponse(0);
+bool zeroRateSerializationRejected = false;
+try {
+    serializeFrame(zeroRateFrame);
+}
+catch (const cRuntimeError&) {
+    zeroRateSerializationRejected = true;
+}
+ASSERT(zeroRateSerializationRejected);
+
+auto nineRateRaw = makeRawResponse(1, {1, 2, 3, 4, 5, 6, 7, 8, 9});
+bool nineRateDeserializationRejected = false;
+try {
+    deserializeFrame<Ieee80211AssociationResponseFrame>(nineRateRaw);
+}
+catch (const cRuntimeError&) {
+    nineRateDeserializationRejected = true;
+}
+ASSERT(nineRateDeserializationRejected);
+
+auto truncatedPrimary = makeRawResponse(1, {1});
+truncatedPrimary[7] = 2;
+bool truncatedPrimaryRejected = false;
+try {
+    deserializeFrame<Ieee80211AssociationResponseFrame>(truncatedPrimary);
+}
+catch (const cRuntimeError&) {
+    truncatedPrimaryRejected = true;
+}
+ASSERT(truncatedPrimaryRejected);
+
+// An eight-rate primary element and a five-rate Extended Supported Rates
+// element preserve both rate values and basic membership.
+auto splitFrame = makeResponse(8, SC_SUCCESSFUL, 2007);
+Ieee80211ExtendedSupportedRatesElement extendedRates;
+extendedRates.numRates = 5;
+for (int i = 0; i < 5; i++) {
+    extendedRates.rate[i] = (i + 9) * 0.5;
+    extendedRates.basicRate[i] = i == 1 || i == 4;
+}
+splitFrame->setExtendedSupportedRatesPresent(true);
+splitFrame->setExtendedSupportedRates(extendedRates);
+splitFrame->setChunkLength(B(6) + B(2 + 8) + B(2 + 5));
+auto splitBytes = serializeFrame(splitFrame);
+ASSERT(splitBytes.size() == 23);
+ASSERT(splitBytes[4] == 0x07 && splitBytes[5] == 0xD7);
+ASSERT(splitBytes[16] == 50 && splitBytes[17] == 5);
+for (int i = 0; i < 5; i++)
+    ASSERT(splitBytes[18 + i] == (static_cast<uint8_t>(i + 9) | ((i == 1 || i == 4) ? 0x80 : 0)));
+auto splitDecoded = deserializeFrame<Ieee80211AssociationResponseFrame>(splitBytes);
+ASSERT(splitDecoded->getAid() == 2007);
+ASSERT(splitDecoded->getExtendedSupportedRatesPresent());
+ASSERT(splitDecoded->getExtendedSupportedRates().numRates == 5);
+for (int i = 0; i < 5; i++) {
+    ASSERT(splitDecoded->getExtendedSupportedRates().rate[i] == (i + 9) * 0.5);
+    ASSERT(splitDecoded->getExtendedSupportedRates().basicRate[i] == (i == 1 || i == 4));
+}
+
+auto extendedZero = makeRawResponse(1, {1});
+extendedZero.push_back(50);
+extendedZero.push_back(0);
+bool extendedZeroRejected = false;
+try {
+    deserializeFrame<Ieee80211AssociationResponseFrame>(extendedZero);
+}
+catch (const cRuntimeError&) {
+    extendedZeroRejected = true;
+}
+ASSERT(extendedZeroRejected);
+
+auto extendedTruncated = makeRawResponse(1, {1});
+extendedTruncated.push_back(50);
+extendedTruncated.push_back(2);
+extendedTruncated.push_back(2);
+bool extendedTruncatedRejected = false;
+try {
+    deserializeFrame<Ieee80211AssociationResponseFrame>(extendedTruncated);
+}
+catch (const cRuntimeError&) {
+    extendedTruncatedRejected = true;
+}
+ASSERT(extendedTruncatedRejected);
+
+auto extendedDuplicate = makeRawResponse(1, {1});
+extendedDuplicate.insert(extendedDuplicate.end(), {50, 1, 2, 50, 1, 3});
+bool extendedDuplicateRejected = false;
+try {
+    deserializeFrame<Ieee80211AssociationResponseFrame>(extendedDuplicate);
+}
+catch (const cRuntimeError&) {
+    extendedDuplicateRejected = true;
+}
+ASSERT(extendedDuplicateRejected);
+
+auto primaryDuplicate = makeRawResponse(1, {1});
+primaryDuplicate.insert(primaryDuplicate.end(), {1, 1, 2});
+bool primaryDuplicateRejected = false;
+try {
+    deserializeFrame<Ieee80211AssociationResponseFrame>(primaryDuplicate);
+}
+catch (const cRuntimeError&) {
+    primaryDuplicateRejected = true;
+}
+ASSERT(primaryDuplicateRejected);
+
+// IEEE Std 802.11-2024, 9.4.2.3 and 11.1.4.6 encode legacy rates in 500 kb/s
+// units up to 63.5 Mb/s. HT MCS 7 is 65 Mb/s and remains an HT MCS.
+auto maximumRateFrame = makeResponse(1);
+auto maximumRates = maximumRateFrame->getSupportedRates();
+maximumRates.rate[0] = 63.5;
+maximumRateFrame->setSupportedRates(maximumRates);
+auto maximumRateBytes = serializeFrame(maximumRateFrame);
+ASSERT(maximumRateBytes[8] == 0xFF);
+auto decodedMaximumRate = deserializeFrame<Ieee80211AssociationResponseFrame>(maximumRateBytes);
+ASSERT(decodedMaximumRate->getSupportedRates().rate[0] == 63.5);
+ASSERT(decodedMaximumRate->getSupportedRates().basicRate[0]);
+
+auto roundedRateFrame = makeResponse(1);
+auto roundedRates = roundedRateFrame->getSupportedRates();
+roundedRates.rate[0] = 2.25;
+roundedRateFrame->setSupportedRates(roundedRates);
+auto roundedRateBytes = serializeFrame(roundedRateFrame);
+ASSERT(roundedRateBytes[8] == 0x85);
+auto decodedRoundedRate = deserializeFrame<Ieee80211AssociationResponseFrame>(roundedRateBytes);
+ASSERT(decodedRoundedRate->getSupportedRates().rate[0] == 2.5);
+
+auto unrepresentableRateFrame = makeResponse(1);
+auto unrepresentableRates = unrepresentableRateFrame->getSupportedRates();
+unrepresentableRates.rate[0] = 65;
+unrepresentableRateFrame->setSupportedRates(unrepresentableRates);
+bool unrepresentableRateRejected = false;
+try {
+    serializeFrame(unrepresentableRateFrame);
+}
+catch (const cRuntimeError&) {
+    unrepresentableRateRejected = true;
+}
+ASSERT(unrepresentableRateRejected);
+
+const double nLegacyRates[] = {1, 2, 5.5, 6, 11, 12, 24};
+const auto *nModeSet = physicallayer::Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+const auto& nLegacyModes = nModeSet->getLegacyOperationalModes();
+ASSERT(nLegacyModes.size() == sizeof(nLegacyRates) / sizeof(nLegacyRates[0]));
+for (size_t i = 0; i < nLegacyModes.size(); i++) {
+    ASSERT(nModeSet->containsMode(nLegacyModes[i]));
+    ASSERT(nLegacyModes[i]->getDataMode()->getNetBitrate().get<Mbps>() == nLegacyRates[i]);
+    ASSERT(nModeSet->getMode(Mbps(nLegacyRates[i])) == nLegacyModes[i]);
+}
+const auto *nPrimaryMode = nModeSet->getMode(Mbps(6.5));
+ASSERT(nModeSet->getReferenceMode() == nPrimaryMode);
+ASSERT(nModeSet->getSifsTime() == nPrimaryMode->getSifsTime());
+ASSERT(nModeSet->getSlotTime() == nPrimaryMode->getSlotTime());
+ASSERT(nModeSet->getPhyRxStartDelay() == nPrimaryMode->getPhyRxStartDelay());
+ASSERT(nModeSet->getCwMin() == nPrimaryMode->getLegacyCwMin());
+ASSERT(nModeSet->getCwMax() == nPrimaryMode->getLegacyCwMax());
+ASSERT(nModeSet->getSlowestMandatoryMode() == nLegacyModes.front());
+ASSERT(nModeSet->getMode(Mbps(65))->getDataMode()->getNetBitrate().get<Mbps>() == 65);
+
+const double aLegacyRates[] = {6, 12, 24, 9, 18, 36, 48, 54};
+const auto *aModeSet = physicallayer::Ieee80211ModeSet::getModeSet("a");
+const auto& aLegacyModes = aModeSet->getLegacyOperationalModes();
+ASSERT(aLegacyModes.size() == sizeof(aLegacyRates) / sizeof(aLegacyRates[0]));
+for (size_t i = 0; i < aLegacyModes.size(); i++) {
+    ASSERT(aModeSet->containsMode(aLegacyModes[i]));
+    ASSERT(aLegacyModes[i]->getDataMode()->getNetBitrate().get<Mbps>() == aLegacyRates[i]);
+}
+
+const double pLegacyRates[] = {3, 6, 12, 4.5, 9, 18, 24, 27};
+const auto *pModeSet = physicallayer::Ieee80211ModeSet::getModeSet("p");
+const auto& pLegacyModes = pModeSet->getLegacyOperationalModes();
+ASSERT(pLegacyModes.size() == sizeof(pLegacyRates) / sizeof(pLegacyRates[0]));
+for (size_t i = 0; i < pLegacyModes.size(); i++) {
+    ASSERT(pModeSet->containsMode(pLegacyModes[i]));
+    ASSERT(pLegacyModes[i]->getDataMode()->getNetBitrate().get<Mbps>() == pLegacyRates[i]);
+}
+
+const double gLegacyRates[] = {1, 2, 5.5, 6, 11, 12, 24, 9, 18, 36, 48, 54};
+const auto *gModeSet = physicallayer::Ieee80211ModeSet::getModeSet("g(mixed)");
+const auto& gLegacyModes = gModeSet->getLegacyOperationalModes();
+ASSERT(gLegacyModes.size() == sizeof(gLegacyRates) / sizeof(gLegacyRates[0]));
+for (size_t i = 0; i < gLegacyModes.size(); i++) {
+    ASSERT(gModeSet->containsMode(gLegacyModes[i]));
+    ASSERT(gLegacyModes[i]->getDataMode()->getNetBitrate().get<Mbps>() == gLegacyRates[i]);
+}
+
+const double acLegacyRates[] = {6, 12, 24};
+const auto *acModeSet = physicallayer::Ieee80211ModeSet::getModeSet("ac");
+const auto& acLegacyModes = acModeSet->getLegacyOperationalModes();
+ASSERT(acLegacyModes.size() == sizeof(acLegacyRates) / sizeof(acLegacyRates[0]));
+for (size_t i = 0; i < acLegacyModes.size(); i++) {
+    ASSERT(acModeSet->containsMode(acLegacyModes[i]));
+    ASSERT(acLegacyModes[i]->getDataMode()->getNetBitrate().get<Mbps>() == acLegacyRates[i]);
+    ASSERT(acModeSet->getMode(Mbps(acLegacyRates[i])) == acLegacyModes[i]);
+}
+const auto *acPrimaryMode = acModeSet->getMode(Mbps(6.5));
+ASSERT(acModeSet->getReferenceMode() == acPrimaryMode);
+ASSERT(acModeSet->getSifsTime() == acPrimaryMode->getSifsTime());
+ASSERT(acModeSet->getSlotTime() == acPrimaryMode->getSlotTime());
+ASSERT(acModeSet->getPhyRxStartDelay() == acPrimaryMode->getPhyRxStartDelay());
+ASSERT(acModeSet->getCwMin() == acPrimaryMode->getLegacyCwMin());
+ASSERT(acModeSet->getCwMax() == acPrimaryMode->getLegacyCwMax());
+ASSERT(acModeSet->getSlowestMandatoryMode() == acLegacyModes.front());
+
+// Mode-set timing is anchored to the explicitly configured reference mode.
+// Keep the legacy profiles literal here so a reference-mode change cannot
+// silently alter their established contention behavior.
+auto assertTiming = [](const physicallayer::Ieee80211ModeSet *modeSet,
+        simtime_t sifsTime, simtime_t slotTime, simtime_t phyRxStartDelay,
+        int cwMin, int cwMax) {
+    ASSERT(modeSet->getSifsTime() == sifsTime);
+    ASSERT(modeSet->getSlotTime() == slotTime);
+    ASSERT(modeSet->getPhyRxStartDelay() == phyRxStartDelay);
+    ASSERT(modeSet->getCwMin() == cwMin);
+    ASSERT(modeSet->getCwMax() == cwMax);
+};
+assertTiming(physicallayer::Ieee80211ModeSet::getModeSet("a"), SimTime(16, SIMTIME_US), SimTime(9, SIMTIME_US), SimTime(25, SIMTIME_US), 15, 1023);
+assertTiming(physicallayer::Ieee80211ModeSet::getModeSet("b"), SimTime(10, SIMTIME_US), SimTime(20, SIMTIME_US), SimTime(192, SIMTIME_US), 31, 1023);
+assertTiming(gModeSet, SimTime(10, SIMTIME_US), SimTime(20, SIMTIME_US), SimTime(192, SIMTIME_US), 31, 1023);
+assertTiming(physicallayer::Ieee80211ModeSet::getModeSet("g(erp)"), SimTime(10, SIMTIME_US), SimTime(9, SIMTIME_US), SimTime(25, SIMTIME_US), 15, 1023);
+assertTiming(pModeSet, SimTime(32, SIMTIME_US), SimTime(13, SIMTIME_US), SimTime(49, SIMTIME_US), 15, 1023);
+assertTiming(nModeSet, SimTime(10, SIMTIME_US), SimTime(20, SIMTIME_US), SimTime(24, SIMTIME_US), 15, 1023);
+assertTiming(acModeSet, SimTime(16, SIMTIME_US), SimTime(9, SIMTIME_US), SimTime(24, SIMTIME_US), 15, 1023);
+
+EV << "Supported Rates and AID validation checks passed.\n";
+
+%contains: stdout
+Supported Rates and AID validation checks passed.

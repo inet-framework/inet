@@ -36,6 +36,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     NetworkInterface *myIface = nullptr;
     physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     Ieee80211SupportedRatesElement supportedRates;
+    Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
 
     // statistics
     long numMgmtFramesReceived;
@@ -60,6 +61,25 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Packet *frame);
+
+    /** Populates the primary and (when needed) Extended Supported Rates elements. */
+    template<typename Frame>
+    void setSupportedRateElements(const Ptr<Frame>& frame) const
+    {
+        frame->setSupportedRates(supportedRates);
+        frame->setExtendedSupportedRatesPresent(extendedSupportedRates.numRates > 0);
+        frame->setExtendedSupportedRates(extendedSupportedRates);
+    }
+
+    /** Returns the encoded length of the primary and optional Extended Supported Rates elements. */
+    template<typename Frame>
+    B getSupportedRateElementsLength(const Ptr<Frame>& frame) const
+    {
+        B length = B(2 + frame->getSupportedRates().numRates);
+        if (frame->getExtendedSupportedRatesPresent())
+            length += B(2 + frame->getExtendedSupportedRates().numRates);
+        return length;
+    }
 
     /** Dispatch to frame processing methods according to frame type */
     virtual void processFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
@@ -99,4 +119,3 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 } // namespace inet
 
 #endif
-
