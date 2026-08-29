@@ -10,6 +10,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -173,15 +174,9 @@ void RateSelection::setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHea
 
 const IIeee80211Mode *RateSelection::getPeerCompatibleMode(const MacAddress& peerAddress, const IIeee80211Mode *mode) const
 {
-    if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0 || mib->findPeerHtState(peerAddress) != nullptr)
+    if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
         return mode;
-    const auto *legacyMode = modeSet->getFastestLegacyOperationalMode();
-    if (legacyMode == nullptr)
-        throw cRuntimeError("No legacy operational mode is available for peer %s", peerAddress.str().c_str());
-    // Before HT negotiation (and after an invalid negotiation), unicast must
-    // remain legal for a legacy receiver. The mode set owns this operational
-    // legacy fallback and prefers its fastest mandatory mode.
-    return legacyMode;
+    return selectPeerCompatibleMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress);
 }
 
 } // namespace ieee80211

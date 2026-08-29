@@ -278,6 +278,23 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(dcfHtMode->getHtMcsIndex() >= 0);
         ASSERT(qosHtMode->getHtMcsIndex() >= 0);
 
+        // Both production selectors consume the same negotiated directional
+        // capability gate. A sparse peer that advertises only MCS 0 must not
+        // receive the configured faster HT mode.
+        Ieee80211HtCapabilities sparsePeer;
+        sparsePeer.supportedChannelWidths.insert(MHz(20));
+        sparsePeer.rxMcsSupported[0] = true;
+        sparsePeer.txMcsNss.maxMcsPerNss[0] = 0;
+        Ieee80211HtOperation sparseOperation;
+        sparseOperation.operatingChannelWidth = MHz(20);
+        sparseOperation.basicMcsSupported[0] = true;
+        staMib->setPeerHtCapabilities(address, sparsePeer, sparseOperation);
+        const auto *dcfSparseMode = dcfRateSelection->computeMode(&ratePacket, dataHeader);
+        const auto *qosSparseMode = qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr);
+        ASSERT(dcfSparseMode == qosSparseMode);
+        ASSERT(dcfSparseMode->getHtMcsIndex() == 0);
+        ASSERT(dcfSparseMode->getDataMode()->getBandwidth() == MHz(20));
+
         // The invalid/absent negotiated state is a legacy-only unicast
         // condition, while group-addressed traffic keeps its existing HT
         // selection policy.

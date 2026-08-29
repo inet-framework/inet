@@ -562,6 +562,33 @@ void Ieee80211MgmtSta::clearCurrentAssociation()
     assocAP = AssociatedApInfo(); // clear it
 }
 
+bool Ieee80211MgmtSta::terminateCurrentAssociationFromPeer(const MacAddress& address)
+{
+    if (!mib->bssStationData.isAssociated || address != assocAP.address)
+        return false;
+
+    // Keep a stable AP-list object for the primitive confirmation while the
+    // association snapshot is cleared. A pending transaction for a different
+    // AP remains valid after the current association is terminated.
+    ApInfo *pendingAp = assocTimeoutMsg ? static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer()) : nullptr;
+    bool pendingReassociation = reassociationInProgress;
+    bool terminatesPendingRequest = pendingAp != nullptr && pendingAp->address == address;
+    if (terminatesPendingRequest)
+        cancelPendingAssociation();
+
+    EV << "Setting isAssociated flag to false\n";
+    clearCurrentAssociation();
+    if (terminatesPendingRequest) {
+        // The primitive API has no peer-aborted result; a termination of a
+        // same-peer pending request is reported as a refusal after teardown.
+        if (pendingReassociation)
+            sendReassociationConfirm(pendingAp, PRC_REFUSED);
+        else
+            sendAssociationConfirm(pendingAp, PRC_REFUSED);
+    }
+    return true;
+}
+
 void Ieee80211MgmtSta::stop()
 {
     if (host != nullptr && isScanning && scanning.activeScan)
@@ -694,8 +721,31 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
 void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Received Deauthentication frame\n";
-    const MacAddress& address = header->getAddress3(); // source address
+    // IEEE Std 802.11-2024, 9.3.3.1: Address 2 is the transmitter/source
+    // address used to identify the peer that sent this frame.
+    const MacAddress& address = header->getTransmitterAddress();
     ApInfo *ap = lookupAP(address);
+    bool isCurrentAp = mib->bssStationData.isAssociated && address == assocAP.address;
+
+    // IEEE Std 802.11-2024, 11.3.4.5: deauthentication from the current AP
+    // returns the STA to State 1. Do this before consulting the discovery
+    // cache: association state itself is authoritative for this transition.
+    if (isCurrentAp) {
+        // Clear the cached authentication state before the shared helper emits
+        // a possible same-peer transaction refusal, so observers see the
+        // complete State-1 transition in that callback as well.
+        if (ap != nullptr) {
+            ap->isAuthenticated = false;
+            if (ap->authTimeoutMsg) {
+                cancelAndDelete(ap->authTimeoutMsg);
+                ap->authTimeoutMsg = nullptr;
+            }
+        }
+        ASSERT(terminateCurrentAssociationFromPeer(address));
+        delete packet;
+        return;
+    }
+
     if (!ap || !ap->isAuthenticated) {
         EV << "Unknown AP, or not authenticated with that AP -- ignoring frame\n";
         delete packet;
@@ -896,27 +946,10 @@ void Ieee80211MgmtSta::handleDisassociationFrame(Packet *packet, const Ptr<const
     // IEEE Std 802.11-2024, 11.3.5.7: process a Disassociation only from the
     // AP whose peer state is State 3/4. In particular, a pending association
     // to another AP must survive an unrelated frame.
-    if (!mib->bssStationData.isAssociated || address != assocAP.address) {
+    if (!terminateCurrentAssociationFromPeer(address)) {
         EV << "Not associated with that AP -- ignoring frame\n";
         delete packet;
         return;
-    }
-
-    ApInfo *pendingAp = assocTimeoutMsg ? static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer()) : nullptr;
-    bool pendingReassociation = reassociationInProgress;
-    bool terminatesPendingRequest = pendingAp != nullptr && pendingAp->address == address;
-    if (terminatesPendingRequest)
-        cancelPendingAssociation();
-
-    EV << "Setting isAssociated flag to false\n";
-    clearCurrentAssociation();
-    if (terminatesPendingRequest) {
-        // INET primitive policy: the current API has no peer-aborted result,
-        // so a same-peer terminated association/reassociation maps to refusal.
-        if (pendingReassociation)
-            sendReassociationConfirm(pendingAp, PRC_REFUSED);
-        else
-            sendAssociationConfirm(pendingAp, PRC_REFUSED);
     }
     delete packet;
 }

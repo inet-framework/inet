@@ -211,6 +211,9 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     /** Utility function: clear the existing association without touching a pending transition. */
     virtual void clearCurrentAssociation();
 
+    /** Processes a peer-initiated termination of the current association. */
+    virtual bool terminateCurrentAssociationFromPeer(const MacAddress& address);
+
     /** Utility function: sends a confirmation to the agent */
     virtual void sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode resultCode);
 

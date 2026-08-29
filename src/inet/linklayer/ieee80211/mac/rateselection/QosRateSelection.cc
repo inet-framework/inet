@@ -9,6 +9,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
@@ -256,14 +257,9 @@ void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee8021
 
 const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& peerAddress, const IIeee80211Mode *mode) const
 {
-    if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0 || mib->findPeerHtState(peerAddress) != nullptr)
+    if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
         return mode;
-    const auto *legacyMode = modeSet->getFastestLegacyOperationalMode();
-    if (legacyMode == nullptr)
-        throw cRuntimeError("No legacy operational mode is available for peer %s", peerAddress.str().c_str());
-    // The mode set owns the legal operational legacy fallback. This keeps
-    // unicast control/data traffic legacy until the MIB has a valid HT state.
-    return legacyMode;
+    return selectPeerCompatibleMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress);
 }
 
 } /* namespace ieee80211 */
