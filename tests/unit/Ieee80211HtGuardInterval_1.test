@@ -11,6 +11,8 @@ Validate complete IEEE 802.11 HT long/short guard-interval catalog, lookup, and 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
 
 %global:
@@ -22,6 +24,37 @@ class TestIeee80211Transmitter : public Ieee80211Transmitter
   public:
     const IIeee80211Mode *getSelectedMode() const { return mode; }
     const Ieee80211ModeSet *getSelectedModeSet() const { return modeSet; }
+};
+
+class TestIeee80211Receiver : public Ieee80211Receiver
+{
+  public:
+    const Ieee80211ModeSet *getSelectedModeSet() const { return modeSet; }
+};
+
+class TestIeee80211Radio : public Ieee80211Radio
+{
+  public:
+    void setup(ITransmitter *tx, IReceiver *rx)
+    {
+        transmitter = tx;
+        receiver = rx;
+    }
+};
+
+class TestModeSetListener : public cListener
+{
+  public:
+    const Ieee80211ModeSet *receivedModeSet = nullptr;
+    int notifications = 0;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override
+    {
+        if (signalID == modesetChangedSignal) {
+            receivedModeSet = dynamic_cast<const Ieee80211ModeSet *>(obj);
+            notifications++;
+        }
+    }
 };
 
 class TestIeee80211Mgmt : public ieee80211::Ieee80211MgmtBase
@@ -362,6 +395,40 @@ catch (cRuntimeError&) {
 ASSERT(rejectedCombinedModeUpdate);
 ASSERT(transmitter.getSelectedModeSet() == vhtModeSet);
 ASSERT(transmitter.getSelectedMode() == vhtOneSymbol);
+
+// Verify Ieee80211Radio setModeSet and setModeSetAndMode publish modesetChangedSignal
+TestIeee80211Transmitter radioTx;
+TestIeee80211Receiver radioRx;
+TestIeee80211Radio radio;
+radio.setup(&radioTx, &radioRx);
+
+TestModeSetListener radioListener;
+radio.subscribe(modesetChangedSignal, &radioListener);
+
+radio.setModeSet(vhtModeSet);
+ASSERT(radioTx.getSelectedModeSet() == vhtModeSet);
+ASSERT(radioRx.getSelectedModeSet() == vhtModeSet);
+ASSERT(radioListener.notifications == 1);
+ASSERT(radioListener.receivedModeSet == vhtModeSet);
+
+radio.setModeSetAndMode(modeSet, modeSet->getMode(0));
+ASSERT(radioTx.getSelectedModeSet() == modeSet);
+ASSERT(radioTx.getSelectedMode() == modeSet->getMode(0));
+ASSERT(radioRx.getSelectedModeSet() == modeSet);
+ASSERT(radioListener.notifications == 2);
+ASSERT(radioListener.receivedModeSet == modeSet);
+
+bool radioRejectedInvalidMode = false;
+try {
+    radio.setModeSetAndMode(modeSet, vhtOneSymbol);
+}
+catch (cRuntimeError&) {
+    radioRejectedInvalidMode = true;
+}
+ASSERT(radioRejectedInvalidMode);
+ASSERT(radioTx.getSelectedModeSet() == modeSet);
+ASSERT(radioRx.getSelectedModeSet() == modeSet);
+ASSERT(radioListener.notifications == 2);
 
 EV << "HT guard interval catalog, timing, and lookup checks passed.\n";
 
