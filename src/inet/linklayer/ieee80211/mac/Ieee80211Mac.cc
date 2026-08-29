@@ -64,6 +64,7 @@ void Ieee80211Mac::initialize(int stage)
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radioModule->subscribe(IRadio::receivedSignalPartChangedSignal, this);
+        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
@@ -341,6 +342,14 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, intva
     else if (signalID == IRadio::receivedSignalPartChangedSignal) {
         rx->receivedSignalPartChanged(static_cast<IRadioSignal::SignalPart>(value));
     }
+}
+
+void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
+    if (signalID == modesetChangedSignal)
+        modeSet = check_and_cast<physicallayer::Ieee80211ModeSet *>(obj);
 }
 
 void Ieee80211Mac::configureRadioMode(IRadio::RadioMode radioMode)

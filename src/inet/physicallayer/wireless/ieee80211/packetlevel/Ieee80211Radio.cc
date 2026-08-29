@@ -9,6 +9,7 @@
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
@@ -93,6 +94,8 @@ void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
     EV << "Changing radio mode set to " << modeSet << endl;
     receptionTimer = nullptr;
     emit(listeningChangedSignal, 0);
+    if (modeSet != nullptr)
+        emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
 }
 
 void Ieee80211Radio::setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode)
@@ -106,6 +109,8 @@ void Ieee80211Radio::setModeSetAndMode(const Ieee80211ModeSet *modeSet, const II
     EV << "Changing radio mode set to " << modeSet << " and mode to " << mode << endl;
     receptionTimer = nullptr;
     emit(listeningChangedSignal, 0);
+    if (modeSet != nullptr)
+        emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
 }
 
 void Ieee80211Radio::setMode(const IIeee80211Mode *mode)

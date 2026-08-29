@@ -221,6 +221,10 @@ void RateSelection::emitDatarateSelected(cComponent *emitter, const Ptr<const Ie
 
 const IIeee80211Mode *RateSelection::getPeerCompatibleMode(const MacAddress& peerAddress, const IIeee80211Mode *mode) const
 {
+    // IEEE Std 802.11-2024, 10.6.5.8: Peer compatibility filtering is currently
+    // supported for HT (802.11n) modes using negotiated PeerHtState. Non-HT
+    // modes (legacy and VHT) return unchanged because VHT capability negotiation
+    // (VHT Capabilities/Operation elements) is not yet modeled in MIB.
     if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
         return mode;
     return selectPeerCompatibleMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress);
