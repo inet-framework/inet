@@ -535,8 +535,14 @@ void Ieee80211MgmtSta::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
     if (mib->bssStationData.isAssociated && address == assocAP.address) {
         disassociate();
     }
-    else
-        cancelPendingAssociation();
+    else if (assocTimeoutMsg) {
+        // IEEE Std 802.11-2024, 6.5.9.1.2 scopes PeerSTAAddress to the peer
+        // being disassociated; the model cancels only a matching pending
+        // transaction.
+        auto pendingAp = static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer());
+        if (pendingAp != nullptr && pendingAp->address == address)
+            cancelPendingAssociation();
+    }
 
     // create and send disassociation request
     const auto& body = makeShared<Ieee80211DisassociationFrame>();
