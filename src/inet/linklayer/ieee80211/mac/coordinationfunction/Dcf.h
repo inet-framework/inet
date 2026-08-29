@@ -28,6 +28,7 @@
 #include "inet/linklayer/ieee80211/mac/originator/AckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/OriginatorProtectionMechanism.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -37,7 +38,7 @@ class Ieee80211Mac;
 /**
  * Implements IEEE 802.11 Distributed Coordination Function.
  */
-class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public ModeSetListener
+class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public ModeSetListener, public queueing::IPacketQueue::ICallback
 {
   protected:
     Ieee80211Mac *mac = nullptr;
@@ -87,7 +88,6 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void initialize(int stage) override;
     virtual void forEachChild(cVisitor *v) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     virtual void sendUp(const std::vector<Packet *>& completeFrames);
     virtual bool hasFrameToTransmit();
@@ -118,6 +118,8 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
+    // queueing::IPacketQueue::ICallback
+    virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override;
     virtual bool isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const;
     virtual bool isForUs(const Ptr<const Ieee80211MacHeader>& header) const;
 
@@ -134,4 +136,3 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 } /* namespace inet */
 
 #endif
-

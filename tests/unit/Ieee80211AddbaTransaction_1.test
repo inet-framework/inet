@@ -1,0 +1,939 @@
+%description:
+Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DCF/HCF continuation, and queue accounting.
+
+%includes:
+#include <algorithm>
+#include <climits>
+
+#include "inet/common/PacketEventTag.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag_m.h"
+#include "inet/common/LabelsTag_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/queueing/gate/PacketGate.h"
+#include "inet/queueing/gate/PeriodicGate.h"
+#include "inet/queueing/queue/CompoundPacketQueueBase.h"
+#include "inet/queueing/queue/PacketQueue.h"
+#include "inet/queueing/scheduler/LabelScheduler.h"
+#include "inet/queueing/scheduler/PriorityScheduler.h"
+#include "inet/queueing/scheduler/WrrScheduler.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+class TestPacketQueue : public queueing::IPacketQueue
+{
+  public:
+    std::vector<Packet *> packets;
+    std::vector<ICallback *> callbacks;
+    int numSelectedDequeues = 0;
+    mutable int numGetPacketCalls = 0;
+
+    void notifyPacketRemoved(Packet *packet, PacketRemovalReason reason) {
+        for (auto callback : callbacks)
+            callback->handlePacketRemoved(packet, reason);
+    }
+
+    virtual int getMaxNumPackets() const override { return -1; }
+    virtual int getNumPackets() const override { return packets.size(); }
+    virtual b getMaxTotalLength() const override { return b(-1); }
+    virtual b getTotalLength() const override { return b(0); }
+    virtual Packet *getPacket(int index) const override { numGetPacketCalls++; return packets.at(index); }
+    virtual bool isEmpty() const override { return packets.empty(); }
+    virtual void removePacket(Packet *packet) override {
+        packets.erase(std::find(packets.begin(), packets.end(), packet));
+        notifyPacketRemoved(packet, PacketRemovalReason::REMOVED);
+    }
+    virtual void removeAllPackets() override {
+        auto removedPackets = packets;
+        packets.clear();
+        for (auto packet : removedPackets)
+            notifyPacketRemoved(packet, PacketRemovalReason::REMOVED);
+    }
+    virtual void enqueuePacket(Packet *packet) override { packets.push_back(packet); }
+    virtual Packet *dequeuePacket() override {
+        auto packet = packets.front();
+        packets.erase(packets.begin());
+        notifyPacketRemoved(packet, PacketRemovalReason::DEQUEUED);
+        return packet;
+    }
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override {
+        auto it = std::find_if(packets.begin(), packets.end(), predicate);
+        return it == packets.end() ? nullptr : *it;
+    }
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override {
+        auto packet = findPacket(predicate);
+        if (packet != nullptr) {
+            numSelectedDequeues++;
+            packets.erase(std::find(packets.begin(), packets.end(), packet));
+            notifyPacketRemoved(packet, PacketRemovalReason::DEQUEUED);
+        }
+        return packet;
+    }
+    void dropPacketFromQueue(Packet *packet) {
+        packets.erase(std::find(packets.begin(), packets.end(), packet));
+        notifyPacketRemoved(packet, PacketRemovalReason::DROPPED);
+    }
+    virtual void addPacketCallback(ICallback *callback) override {
+        if (std::find(callbacks.begin(), callbacks.end(), callback) == callbacks.end())
+            callbacks.push_back(callback);
+    }
+    virtual void removePacketCallback(ICallback *callback) override { callbacks.erase(std::remove(callbacks.begin(), callbacks.end(), callback), callbacks.end()); }
+    virtual bool canPullSomePacket(const cGate *) const override { return !packets.empty(); }
+    virtual Packet *canPullPacket(const cGate *) const override { return packets.empty() ? nullptr : packets.front(); }
+    virtual Packet *pullPacket(const cGate *) override { return dequeuePacket(); }
+    virtual Packet *pullPacketStart(const cGate *, bps) override { throw cRuntimeError("Unsupported"); }
+    virtual Packet *pullPacketEnd(const cGate *) override { throw cRuntimeError("Unsupported"); }
+    virtual Packet *pullPacketProgress(const cGate *, bps, b, b) override { throw cRuntimeError("Unsupported"); }
+    virtual bool canPushSomePacket(const cGate *) const override { return true; }
+    virtual bool canPushPacket(Packet *, const cGate *) const override { return true; }
+    virtual void pushPacket(Packet *packet, const cGate *) override { enqueuePacket(packet); }
+    virtual void pushPacketStart(Packet *, const cGate *, bps) override { throw cRuntimeError("Unsupported"); }
+    virtual void pushPacketEnd(Packet *, const cGate *) override { throw cRuntimeError("Unsupported"); }
+    virtual void pushPacketProgress(Packet *, const cGate *, bps, b, b) override { throw cRuntimeError("Unsupported"); }
+};
+class TestCompoundPacketQueue : public queueing::CompoundPacketQueueBase
+{
+  public:
+    void configure(queueing::IPacketCollection *collection, queueing::IPacketExtractor *packetExtractor) {
+        this->collection = collection;
+        this->packetExtractor = packetExtractor;
+    }
+    void release(Packet *packet) {
+        take(packet);
+        drop(packet);
+    }
+    void observeDescendantQueues(cModule *module) { registerQueueFrontier(module); }
+    void observeQueue(queueing::IPacketQueue *queue) { childQueues.push_back(queue); queue->addPacketCallback(this); }
+    void addObserver(queueing::IPacketQueue::ICallback *callback) { packetCallbacks.push_back(callback); }
+    void stopObserving() {
+        for (auto queue : childQueues)
+            queue->removePacketCallback(this);
+        childQueues.clear();
+        packetCallbacks.clear();
+    }
+};
+
+class TestPriorityScheduler : public queueing::PriorityScheduler
+{
+  public:
+    void configure(const std::vector<queueing::IPacketCollection *>& collections, bool reverseOrder = false) {
+        std::vector<queueing::IPacketExtractor *> packetExtractors;
+        for (auto collection : collections)
+            packetExtractors.push_back(check_and_cast<queueing::IPacketExtractor *>(collection));
+        configure(collections, packetExtractors, reverseOrder);
+    }
+    void configure(const std::vector<queueing::IPacketCollection *>& collections, const std::vector<queueing::IPacketExtractor *>& packetExtractors, bool reverseOrder = false) {
+        ASSERT(collections.size() == packetExtractors.size());
+        this->collections = collections;
+        this->packetExtractors = packetExtractors;
+        this->reverseOrder = reverseOrder;
+        numProcessedPackets = 0;
+        processedTotalLength = b(0);
+    }
+    int getNumProcessedPackets() const { return numProcessedPackets; }
+    void release(Packet *packet) { take(packet); drop(packet); }
+};
+
+class TestWrrScheduler : public queueing::WrrScheduler
+{
+  public:
+    void configure(const std::vector<queueing::IPacketCollection *>& collections, const std::vector<unsigned int>& weights, const std::vector<unsigned int>& buckets) {
+        ASSERT(collections.size() == weights.size());
+        ASSERT(collections.size() == buckets.size());
+        this->collections = collections;
+        for (auto collection : collections)
+            packetExtractors.push_back(check_and_cast<queueing::IPacketExtractor *>(collection));
+        this->weights = new unsigned int[weights.size()];
+        this->buckets = new unsigned int[buckets.size()];
+        for (size_t i = 0; i < collections.size(); i++) {
+            this->weights[i] = weights[i];
+            this->buckets[i] = buckets[i];
+        }
+        numProcessedPackets = 0;
+        processedTotalLength = b(0);
+    }
+    unsigned int getBucket(int index) const { return buckets[index]; }
+    int getNumProcessedPackets() const { return numProcessedPackets; }
+    void release(Packet *packet) { take(packet); drop(packet); }
+};
+
+class TestLabelScheduler : public queueing::LabelScheduler
+{
+  public:
+    void configure(const std::vector<queueing::IPacketCollection *>& collections, const std::vector<std::string>& labels, int defaultGateIndex) {
+        this->collections = collections;
+        for (auto collection : collections)
+            packetExtractors.push_back(check_and_cast<queueing::IPacketExtractor *>(collection));
+        this->labels = labels;
+        this->defaultGateIndex = defaultGateIndex;
+    }
+    void release(Packet *packet) { take(packet); drop(packet); }
+};
+
+class TestPacketDropCallback : public queueing::IPacketQueue::ICallback
+{
+  public:
+    int numDequeuedPackets = 0;
+    int numRemovedPackets = 0;
+    int numDroppedPackets = 0;
+    int64_t lastDroppedPacketId = -1;
+    std::vector<std::pair<queueing::IPacketQueue *, int>> expectedPacketCountsAtFirstDrop;
+    bool allExpectedPacketsDetachedAtFirstDrop = true;
+
+    virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override {
+        if (reason == queueing::IPacketQueue::PacketRemovalReason::DEQUEUED)
+            numDequeuedPackets++;
+        else if (reason == queueing::IPacketQueue::PacketRemovalReason::REMOVED)
+            numRemovedPackets++;
+        else if (reason == queueing::IPacketQueue::PacketRemovalReason::DROPPED) {
+            if (numDroppedPackets == 0)
+                for (auto& [queue, expectedPacketCount] : expectedPacketCountsAtFirstDrop)
+                    allExpectedPacketsDetachedAtFirstDrop &= queue->getNumPackets() == expectedPacketCount;
+            numDroppedPackets++;
+            lastDroppedPacketId = packet->getId();
+        }
+    }
+};
+
+class TestReentrantRemovalCallback : public queueing::IPacketQueue::ICallback
+{
+  public:
+    queueing::IPacketQueue *queue = nullptr;
+    Packet *triggerPacket = nullptr;
+    Packet *packetToRemove = nullptr;
+    queueing::IPacketQueue::PacketRemovalReason triggerReason = queueing::IPacketQueue::PacketRemovalReason::REMOVED;
+    bool removedPacket = false;
+
+    virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override {
+        if (!removedPacket && packet == triggerPacket && reason == triggerReason) {
+            removedPacket = true;
+            queue->removePacket(packetToRemove);
+        }
+    }
+};
+
+class TestPacketPulledListener : public cListener
+{
+  public:
+    cComponent *leaf = nullptr;
+    cComponent *compound = nullptr;
+    int numLeafPulls = 0;
+    int numCompoundPulls = 0;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t, cObject *, cObject *) override {
+        if (source == leaf)
+            numLeafPulls++;
+        else if (source == compound)
+            numCompoundPulls++;
+    }
+};
+
+class TestPacketArrivalListener : public cListener
+{
+  public:
+    int numSignals = 0;
+    cGate *lastArrivalGate = nullptr;
+
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *value, cObject *) override {
+        numSignals++;
+        lastArrivalGate = check_and_cast<Packet *>(value)->getArrivalGate();
+    }
+};
+class TestOnlyPacketExtractor : public queueing::IPacketExtractor
+{
+  public:
+    std::vector<Packet *> packets;
+
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override {
+        auto it = std::find_if(packets.begin(), packets.end(), predicate);
+        return it == packets.end() ? nullptr : *it;
+    }
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override {
+        auto packet = findPacket(predicate);
+        if (packet != nullptr)
+            packets.erase(std::find(packets.begin(), packets.end(), packet));
+        return packet;
+    }
+};
+static Ptr<Ieee80211DataHeader> makeQosHeader(MacAddress receiverAddress, Tid tid, SequenceNumberCyclic sequenceNumber)
+{
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setReceiverAddress(receiverAddress);
+    header->setTid(tid);
+    header->setSequenceNumber(sequenceNumber);
+    return header;
+}
+%activity:
+MacAddress peer1("00:00:00:00:00:01");
+auto createPacketQueue = [this](const char *name, int packetCapacity = -1, const char *dropperClass = "") {
+    auto module = cModuleType::get("inet.queueing.queue.PacketQueue")->create(name, this);
+    module->par("packetCapacity").setIntValue(packetCapacity);
+    module->par("dropperClass").setStringValue(dropperClass);
+    module->callInitialize();
+    return check_and_cast<queueing::PacketQueue *>(module);
+};
+// Predicate extraction follows each provider's scheduling policy instead of
+// the compound collection's gate-order enumeration.
+{
+    TestPacketQueue firstQueue;
+    TestPacketQueue secondQueue;
+    auto firstPacket = new Packet("priorityFirstPacket", makeShared<ByteCountChunk>(B(1)));
+    auto secondPacket = new Packet("prioritySecondPacket", makeShared<ByteCountChunk>(B(1)));
+    firstQueue.packets = { firstPacket };
+    secondQueue.packets = { secondPacket };
+    TestPriorityScheduler scheduler;
+    scheduler.configure({ &firstQueue, &secondQueue }, true);
+    auto predicate = [](const Packet *) { return true; };
+    ASSERT(scheduler.findPacket(predicate) == secondPacket);
+    auto dequeuedPacket = scheduler.dequeuePacket(predicate);
+    ASSERT(dequeuedPacket == secondPacket);
+    scheduler.release(secondPacket);
+    delete secondPacket;
+    firstQueue.removePacket(firstPacket);
+    delete firstPacket;
+}
+
+// Priority extraction is independent of collection enumeration, so an input
+// may support predicate extraction even when it cannot report aggregate size.
+{
+    TestOnlyPacketExtractor packetExtractor;
+    auto packet = new Packet("extractorOnlyPacket", makeShared<ByteCountChunk>(B(1)));
+    packetExtractor.packets = { packet };
+    TestPriorityScheduler scheduler;
+    scheduler.configure(std::vector<queueing::IPacketCollection *>({ nullptr }), std::vector<queueing::IPacketExtractor *>({ &packetExtractor }));
+    bool aggregateQueryFailed = false;
+    try {
+        scheduler.getNumPackets();
+    }
+    catch (cRuntimeError& error) {
+        aggregateQueryFailed = std::string(error.what()).find("getNumPackets") != std::string::npos && std::string(error.what()).find("IPacketCollection") != std::string::npos;
+    }
+    ASSERT(aggregateQueryFailed);
+    bool aggregateLengthQueryFailed = false;
+    try {
+        scheduler.getTotalLength();
+    }
+    catch (cRuntimeError& error) {
+        aggregateLengthQueryFailed = std::string(error.what()).find("getTotalLength") != std::string::npos && std::string(error.what()).find("IPacketCollection") != std::string::npos;
+    }
+    ASSERT(aggregateLengthQueryFailed);
+    ASSERT(scheduler.findPacket([](const Packet *) { return true; }) == packet);
+    auto dequeuedPacket = scheduler.dequeuePacket([](const Packet *) { return true; });
+    ASSERT(dequeuedPacket == packet);
+    ASSERT(packetExtractor.packets.empty());
+    scheduler.release(packet);
+    delete packet;
+}
+// Collection-only providers remain usable for aggregate queries and fail only
+// when predicate extraction is actually requested.
+{
+    TestPacketQueue firstCollection;
+    TestPacketQueue collectionOnly;
+    auto firstPacket = new Packet("extractablePacket", makeShared<ByteCountChunk>(B(1)));
+    auto collectionOnlyPacket = new Packet("collectionOnlyPacket", makeShared<ByteCountChunk>(B(1)));
+    firstCollection.packets = { firstPacket };
+    collectionOnly.packets = { collectionOnlyPacket };
+    TestPriorityScheduler scheduler;
+    scheduler.configure(std::vector<queueing::IPacketCollection *>({ &firstCollection, &collectionOnly }), std::vector<queueing::IPacketExtractor *>({ &firstCollection, nullptr }));
+    ASSERT(scheduler.getNumPackets() == 2);
+    bool extractionFailed = false;
+    try {
+        scheduler.findPacket([](const Packet *) { return true; });
+    }
+    catch (cRuntimeError& error) {
+        extractionFailed = std::string(error.what()).find("findPacket") != std::string::npos && std::string(error.what()).find("IPacketExtractor") != std::string::npos;
+    }
+    ASSERT(extractionFailed);
+    firstCollection.removePacket(firstPacket);
+    collectionOnly.removePacket(collectionOnlyPacket);
+    delete firstPacket;
+    delete collectionOnlyPacket;
+}
+{
+    TestPacketQueue firstQueue;
+    TestPacketQueue secondQueue;
+    auto firstPacket = new Packet("wrrFirstPacket", makeShared<ByteCountChunk>(B(1)));
+    auto secondPacket = new Packet("wrrSecondPacket", makeShared<ByteCountChunk>(B(1)));
+    firstQueue.packets = { firstPacket };
+    secondQueue.packets = { secondPacket };
+    TestWrrScheduler scheduler;
+    scheduler.configure({ &firstQueue, &secondQueue }, { 1, 2 }, { 0, 2 });
+    auto predicate = [](const Packet *) { return true; };
+    ASSERT(scheduler.findPacket(predicate) == secondPacket);
+    ASSERT(scheduler.findPacket(predicate) == secondPacket);
+    ASSERT(scheduler.getBucket(1) == 2);
+    auto dequeuedPacket = scheduler.dequeuePacket(predicate);
+    ASSERT(dequeuedPacket == secondPacket);
+    ASSERT(scheduler.getBucket(1) == 1);
+    scheduler.release(secondPacket);
+    delete secondPacket;
+    firstQueue.removePacket(firstPacket);
+    delete firstPacket;
+}
+{
+    TestPacketQueue firstQueue;
+    TestPacketQueue secondQueue;
+    auto blockedPacket = new Packet("labelBlockedPacket", makeShared<ByteCountChunk>(B(1)));
+    auto lowPacket = new Packet("labelLowPacket", makeShared<ByteCountChunk>(B(1)));
+    auto highPacket = new Packet("labelHighPacket", makeShared<ByteCountChunk>(B(1)));
+    auto lowLabels = lowPacket->addTag<LabelsTag>();
+    lowLabels->setLabelsArraySize(1);
+    lowLabels->setLabels(0, "low");
+    auto highLabels = highPacket->addTag<LabelsTag>();
+    highLabels->setLabelsArraySize(1);
+    highLabels->setLabels(0, "high");
+    firstQueue.packets = { blockedPacket, lowPacket };
+    secondQueue.packets = { highPacket };
+    TestLabelScheduler scheduler;
+    scheduler.configure({ &firstQueue, &secondQueue }, { "high", "low" }, 0);
+    auto predicate = [blockedPacket](const Packet *packet) { return packet != blockedPacket; };
+    ASSERT(scheduler.findPacket(predicate) == highPacket);
+    auto dequeuedPacket = scheduler.dequeuePacket(predicate);
+    ASSERT(dequeuedPacket == highPacket);
+    scheduler.release(highPacket);
+    delete highPacket;
+    firstQueue.removePacket(blockedPacket);
+    firstQueue.removePacket(lowPacket);
+    delete blockedPacket;
+    delete lowPacket;
+}
+
+
+// Closed gates expose no predicate-selected packet and remove nothing. Once
+// opened, the same exact candidate crosses through PacketFlowBase accounting.
+{
+    auto leafQueue = createPacketQueue("closedGateLeaf");
+    auto gateModule = cModuleType::get("inet.queueing.gate.PacketGate")->create("closedPredicateGate", this);
+    gateModule->par("initiallyOpen").setBoolValue(false);
+    gateModule->par("openTime").setDoubleValue(10);
+    gateModule->par("closeTime").setDoubleValue(20);
+    leafQueue->gate("out")->connectTo(gateModule->gate("in"));
+    gateModule->callInitialize();
+    auto packet = new Packet("closedGatePacket", makeShared<ByteCountChunk>(B(1)));
+    leafQueue->pushPacket(packet, nullptr);
+    auto packetExtractor = check_and_cast<queueing::IPacketExtractor *>(gateModule);
+    auto closedFoundPacket = packetExtractor->findPacket([](const Packet *) { return true; });
+    auto closedDequeuedPacket = packetExtractor->dequeuePacket([](const Packet *) { return true; });
+    ASSERT(closedFoundPacket == nullptr);
+    ASSERT(closedDequeuedPacket == nullptr);
+    ASSERT(leafQueue->getNumPackets() == 1);
+    check_and_cast<queueing::IPacketGate *>(gateModule)->open();
+    ASSERT(packetExtractor->findPacket([](const Packet *) { return true; }) == packet);
+    auto dequeuedPacket = packetExtractor->dequeuePacket([](const Packet *) { return true; });
+    ASSERT(dequeuedPacket == packet);
+    ASSERT(leafQueue->getNumPackets() == 0);
+    take(packet);
+    delete packet;
+    gateModule->callFinish();
+    leafQueue->callFinish();
+    gateModule->deleteModule();
+    leafQueue->deleteModule();
+}
+
+// An implicit guard band rejects the provider's exact first match instead of
+// skipping it and extracting a later packet that happens to fit.
+{
+    auto leafQueue = createPacketQueue("guardBandLeaf");
+    auto gateModule = cModuleType::get("inet.queueing.gate.PeriodicGate")->create("predicateGuardBandGate", this);
+    auto durations = new cValueArray();
+    durations->add(cValue(1, "s"));
+    durations->add(cValue(1, "s"));
+    gateModule->par("durations").setObjectValue(durations);
+    gateModule->par("initiallyOpen").setBoolValue(true);
+    gateModule->par("bitrate").setDoubleValue(8);
+    leafQueue->gate("out")->connectTo(gateModule->gate("in"));
+    gateModule->callInitialize();
+    auto blockedPacket = new Packet("guardBandBlockedPacket", makeShared<ByteCountChunk>(B(2)));
+    auto fittingPacket = new Packet("guardBandFittingPacket", makeShared<ByteCountChunk>(B(1)));
+    leafQueue->pushPacket(blockedPacket, nullptr);
+    leafQueue->pushPacket(fittingPacket, nullptr);
+    auto packetExtractor = check_and_cast<queueing::IPacketExtractor *>(gateModule);
+    auto blockedFoundPacket = packetExtractor->findPacket([](const Packet *) { return true; });
+    auto blockedDequeuedPacket = packetExtractor->dequeuePacket([](const Packet *) { return true; });
+    ASSERT(blockedFoundPacket == nullptr);
+    ASSERT(blockedDequeuedPacket == nullptr);
+    ASSERT(leafQueue->getNumPackets() == 2);
+    auto dequeuedPacket = packetExtractor->dequeuePacket([blockedPacket](const Packet *packet) { return packet != blockedPacket; });
+    ASSERT(dequeuedPacket == fittingPacket);
+    ASSERT(leafQueue->getNumPackets() == 1);
+    take(fittingPacket);
+    delete fittingPacket;
+    auto retainedPacket = leafQueue->dequeuePacket([blockedPacket](const Packet *packet) { return packet == blockedPacket; });
+    ASSERT(retainedPacket == blockedPacket);
+    take(blockedPacket);
+    delete blockedPacket;
+    gateModule->callFinish();
+    leafQueue->callFinish();
+    gateModule->deleteModule();
+    leafQueue->deleteModule();
+}
+// A real queue with a downstream collector predicate-dequeues a non-front
+// packet, records its residence and semantic pull once, and animates it to the
+// collector while retaining the front packet.
+{
+    TestPacketPulledListener pullListener;
+    TestPacketDropCallback removalCallback;
+    auto leafQueueModule = cModuleType::get("inet.queueing.queue.PacketQueue")->create("selectedDequeueQueue", this);
+    auto sinkModule = cModuleType::get("inet.queueing.sink.FullPacketSink")->create("selectedDequeueSink", this);
+    leafQueueModule->gate("out")->connectTo(sinkModule->gate("in"));
+    leafQueueModule->callInitialize();
+    sinkModule->callInitialize();
+    auto leafQueue = check_and_cast<queueing::PacketQueue *>(leafQueueModule);
+    pullListener.leaf = leafQueue;
+    leafQueue->subscribe(packetPulledSignal, &pullListener);
+    leafQueue->addPacketCallback(&removalCallback);
+    auto frontPacket = new Packet("selectedDequeueFront", makeShared<ByteCountChunk>(B(1)));
+    auto selectedPacket = new Packet("selectedDequeueMatch", makeQosHeader(peer1, 1, SequenceNumberCyclic(1)));
+    auto queueingTimeTag = selectedPacket->addRegionTag<QueueingTimeTag>();
+    queueingTimeTag->setBitTotalTimesArraySize(1);
+    queueingTimeTag->setBitTotalTimes(0, 0);
+    queueingTimeTag->setPacketTotalTimesArraySize(1);
+    queueingTimeTag->setPacketTotalTimes(0, 0);
+    selectedPacket->addRegionTag<PacketEventTag>();
+    selectedPacket->setArrivalTime(simTime() - 1);
+    leafQueue->pushPacket(frontPacket, nullptr);
+    leafQueue->pushPacket(selectedPacket, nullptr);
+    auto dequeuedPacket = leafQueue->dequeuePacket([selectedPacket](const Packet *packet) { return packet == selectedPacket; });
+    ASSERT(dequeuedPacket == selectedPacket);
+    int numQueuedEvents = 0;
+    selectedPacket->mapAllRegionTags<PacketEventTag>(b(0), selectedPacket->getTotalLength(), [&](b, b, const Ptr<const PacketEventTag>& tag) {
+        for (size_t i = 0; i < tag->getPacketEventsArraySize(); i++)
+            if (tag->getPacketEvents(i)->getKind() == PEK_QUEUED)
+                numQueuedEvents++;
+    });
+    simtime_t totalQueueingTime = -1;
+    selectedPacket->mapAllRegionTags<QueueingTimeTag>(b(0), selectedPacket->getTotalLength(), [&](b, b, const Ptr<const QueueingTimeTag>& tag) {
+        ASSERT(tag->getPacketTotalTimesArraySize() == 1);
+        totalQueueingTime = tag->getPacketTotalTimes(0);
+    });
+    ASSERT(numQueuedEvents == 1);
+    ASSERT(totalQueueingTime == 1);
+    ASSERT(leafQueue->getNumPackets() == 1);
+    ASSERT(leafQueue->getPacket(0) == frontPacket);
+    ASSERT(pullListener.numLeafPulls == 1);
+    ASSERT(removalCallback.numDequeuedPackets == 1);
+    ASSERT(selectedPacket->getArrivalGate() == sinkModule->gate("in"));
+    leafQueue->unsubscribe(packetPulledSignal, &pullListener);
+    leafQueue->removePacketCallback(&removalCallback);
+    leafQueue->removePacket(frontPacket);
+    take(frontPacket);
+    take(selectedPacket);
+    delete frontPacket;
+    delete selectedPacket;
+    sinkModule->callFinish();
+    leafQueueModule->callFinish();
+    sinkModule->deleteModule();
+    leafQueueModule->deleteModule();
+}
+
+// Predicate extraction through a concrete PacketFlowBase module processes a
+// non-front packet once. The queue animates it to the flow input before the
+// flow signals, and the flow then animates it to the final collector.
+{
+    TestPacketPulledListener pullListener;
+    TestPacketDropCallback removalCallback;
+    TestPacketArrivalListener flowInputListener;
+    TestPacketArrivalListener flowOutputListener;
+    auto leafQueueModule = cModuleType::get("inet.queueing.queue.PacketQueue")->create("selectedFlowLeaf", this);
+    auto gateModule = cModuleType::get("inet.queueing.gate.PacketGate")->create("selectedFlowGate", this);
+    auto sinkModule = cModuleType::get("inet.queueing.sink.FullPacketSink")->create("selectedFlowSink", this);
+    gateModule->par("initiallyOpen").setBoolValue(true);
+    gateModule->par("openTime").setDoubleValue(10);
+    gateModule->par("closeTime").setDoubleValue(20);
+    leafQueueModule->gate("out")->connectTo(gateModule->gate("in"));
+    gateModule->gate("out")->connectTo(sinkModule->gate("in"));
+    leafQueueModule->callInitialize();
+    gateModule->callInitialize();
+    sinkModule->callInitialize();
+    auto leafQueue = check_and_cast<queueing::PacketQueue *>(leafQueueModule);
+    auto packetGate = check_and_cast<queueing::PacketGate *>(gateModule);
+    auto packetExtractor = check_and_cast<queueing::IPacketExtractor *>(gateModule);
+    pullListener.leaf = leafQueue;
+    leafQueue->subscribe(packetPulledSignal, &pullListener);
+    leafQueue->addPacketCallback(&removalCallback);
+    gateModule->subscribe(packetPulledInSignal, &flowInputListener);
+    gateModule->subscribe(packetPulledOutSignal, &flowOutputListener);
+    auto frontPacket = new Packet("selectedFlowFront", makeShared<ByteCountChunk>(B(1)));
+    auto selectedPacket = new Packet("selectedFlowMatch", makeShared<ByteCountChunk>(B(1)));
+    leafQueue->pushPacket(frontPacket, nullptr);
+    leafQueue->pushPacket(selectedPacket, nullptr);
+    auto dequeuedPacket = packetExtractor->dequeuePacket([selectedPacket](const Packet *packet) { return packet == selectedPacket; });
+    ASSERT(dequeuedPacket == selectedPacket);
+    ASSERT(leafQueue->getNumPackets() == 1);
+    ASSERT(leafQueue->getPacket(0) == frontPacket);
+    ASSERT(pullListener.numLeafPulls == 1);
+    ASSERT(removalCallback.numDequeuedPackets == 1);
+    ASSERT(flowInputListener.numSignals == 1);
+    ASSERT(flowInputListener.lastArrivalGate == gateModule->gate("in"));
+    ASSERT(flowOutputListener.numSignals == 1);
+    ASSERT(flowOutputListener.lastArrivalGate == gateModule->gate("in"));
+    ASSERT(packetGate->resolveDirective('p') == "1");
+    ASSERT(selectedPacket->getArrivalGate() == sinkModule->gate("in"));
+    leafQueue->unsubscribe(packetPulledSignal, &pullListener);
+    leafQueue->removePacketCallback(&removalCallback);
+    gateModule->unsubscribe(packetPulledInSignal, &flowInputListener);
+    gateModule->unsubscribe(packetPulledOutSignal, &flowOutputListener);
+    leafQueue->removePacket(frontPacket);
+    take(frontPacket);
+    take(selectedPacket);
+    delete frontPacket;
+    delete selectedPacket;
+    sinkModule->callFinish();
+    gateModule->callFinish();
+    leafQueueModule->callFinish();
+    sinkModule->deleteModule();
+    gateModule->deleteModule();
+    leafQueueModule->deleteModule();
+}
+// The typed queue callback covers every non-destructive ownership departure,
+// including bulk removal, exactly once at the queue boundary.
+{
+    auto lifecycleQueue = createPacketQueue("lifecycleQueue");
+    TestPacketDropCallback lifecycleCallback;
+    lifecycleQueue->addPacketCallback(&lifecycleCallback);
+    auto pulledPacket = new Packet("lifecyclePulled", makeShared<ByteCountChunk>(B(1)));
+    auto selectedPacket = new Packet("lifecycleSelected", makeShared<ByteCountChunk>(B(1)));
+    auto removedPacket = new Packet("lifecycleRemoved", makeShared<ByteCountChunk>(B(1)));
+    auto firstBulkRemovedPacket = new Packet("lifecycleBulkRemovedFirst", makeShared<ByteCountChunk>(B(1)));
+    auto secondBulkRemovedPacket = new Packet("lifecycleBulkRemovedSecond", makeShared<ByteCountChunk>(B(1)));
+    auto thirdBulkRemovedPacket = new Packet("lifecycleBulkRemovedThird", makeShared<ByteCountChunk>(B(1)));
+    lifecycleQueue->pushPacket(pulledPacket, nullptr);
+    lifecycleQueue->pushPacket(selectedPacket, nullptr);
+    lifecycleQueue->pushPacket(removedPacket, nullptr);
+    lifecycleQueue->pushPacket(firstBulkRemovedPacket, nullptr);
+    lifecycleQueue->pushPacket(secondBulkRemovedPacket, nullptr);
+    lifecycleQueue->pushPacket(thirdBulkRemovedPacket, nullptr);
+    auto pulledResult = lifecycleQueue->dequeuePacket();
+    auto selectedResult = lifecycleQueue->dequeuePacket([selectedPacket](const Packet *packet) { return packet == selectedPacket; });
+    lifecycleQueue->removePacket(removedPacket);
+    take(pulledResult);
+    take(selectedResult);
+    take(removedPacket);
+    delete pulledResult;
+    delete selectedResult;
+    delete removedPacket;
+    lifecycleQueue->removeAllPackets();
+    if (lifecycleCallback.numDequeuedPackets != 2 || lifecycleCallback.numRemovedPackets != 4 || lifecycleCallback.numDroppedPackets != 0 || !lifecycleQueue->isEmpty())
+        throw cRuntimeError("Typed queue lifecycle callback did not cover every departure exactly once");
+    lifecycleQueue->removePacketCallback(&lifecycleCallback);
+    lifecycleQueue->callFinish();
+    lifecycleQueue->deleteModule();
+}
+
+
+// Bulk removal detaches only this queue's packets from a shared buffer. A
+// direct buffer removal then notifies the owning queue exactly once.
+{
+    auto bufferModule = cModuleType::get("inet.queueing.buffer.PacketBuffer")->create("sharedRemovalBuffer", this);
+    bufferModule->callInitialize();
+    auto createBufferedQueue = [&](const char *name) {
+        auto module = cModuleType::get("inet.queueing.queue.PacketQueue")->create(name, this);
+        module->par("bufferModule").setStringValue("^.sharedRemovalBuffer");
+        module->callInitialize();
+        return check_and_cast<queueing::PacketQueue *>(module);
+    };
+    auto firstQueue = createBufferedQueue("sharedRemovalFirstQueue");
+    auto secondQueue = createBufferedQueue("sharedRemovalSecondQueue");
+    TestPacketDropCallback firstCallback;
+    TestPacketDropCallback secondCallback;
+    TestPacketDropCallback compoundCallback;
+    TestCompoundPacketQueue bufferedCompound;
+    bufferedCompound.observeQueue(secondQueue);
+    bufferedCompound.addObserver(&compoundCallback);
+    firstQueue->addPacketCallback(&firstCallback);
+    secondQueue->addPacketCallback(&secondCallback);
+    firstQueue->pushPacket(new Packet("sharedRemovalFirstA", makeShared<ByteCountChunk>(B(1))), nullptr);
+    firstQueue->pushPacket(new Packet("sharedRemovalFirstB", makeShared<ByteCountChunk>(B(1))), nullptr);
+    auto retainedPacket = new Packet("sharedRemovalRetained", makeShared<ByteCountChunk>(B(1)));
+    secondQueue->pushPacket(retainedPacket, nullptr);
+    firstQueue->removeAllPackets();
+    auto buffer = check_and_cast<queueing::IPacketBuffer *>(bufferModule);
+    ASSERT(firstQueue->isEmpty());
+    ASSERT(secondQueue->getNumPackets() == 1);
+    ASSERT(buffer->getNumPackets() == 1);
+    ASSERT(firstCallback.numRemovedPackets == 2);
+    ASSERT(secondCallback.numRemovedPackets == 0);
+    buffer->removePacket(retainedPacket);
+    ASSERT(secondQueue->isEmpty());
+    ASSERT(buffer->getNumPackets() == 0);
+    ASSERT(secondCallback.numRemovedPackets == 1);
+    ASSERT(secondCallback.numDroppedPackets == 0);
+    ASSERT(compoundCallback.numRemovedPackets == 1);
+    ASSERT(compoundCallback.numDroppedPackets == 0);
+    take(retainedPacket);
+    delete retainedPacket;
+    bufferedCompound.stopObserving();
+    firstQueue->removePacketCallback(&firstCallback);
+    secondQueue->removePacketCallback(&secondCallback);
+    firstQueue->callFinish();
+    secondQueue->callFinish();
+    bufferModule->callFinish();
+    firstQueue->deleteModule();
+    secondQueue->deleteModule();
+    bufferModule->deleteModule();
+}
+
+// A shared buffer rejects cPacketQueue ownership it cannot detach before any
+// mutation, preventing a later overload drop from corrupting the owner queue.
+{
+    auto bufferModule = cModuleType::get("inet.queueing.buffer.PacketBuffer")->create("unsupportedOwnerBuffer", this);
+    bufferModule->callInitialize();
+    auto buffer = check_and_cast<queueing::IPacketBuffer *>(bufferModule);
+    cPacketQueue unsupportedOwnerQueue("unsupportedOwnerQueue");
+    auto packet = new Packet("unsupportedOwnerPacket", makeShared<ByteCountChunk>(B(1)));
+    unsupportedOwnerQueue.insert(packet);
+    bool unsupportedOwnerRejected = false;
+    try {
+        buffer->addPacket(packet);
+    }
+    catch (cRuntimeError& error) {
+        unsupportedOwnerRejected = std::string(error.what()).find("IPacketBuffer::ICallback") != std::string::npos;
+    }
+    ASSERT(unsupportedOwnerRejected);
+    ASSERT(buffer->getNumPackets() == 0);
+    ASSERT(unsupportedOwnerQueue.contains(packet));
+    unsupportedOwnerQueue.remove(packet);
+    take(packet);
+    delete packet;
+    bufferModule->callFinish();
+    bufferModule->deleteModule();
+}
+
+// Internal overflow invokes the typed queue callback once for the destructive
+// discard and never for the packet later removed normally.
+{
+    auto overflowQueue = createPacketQueue("overflowQueue", 1, "inet::queueing::PacketAtCollectionEndDropper");
+    TestPacketDropCallback dropCallback;
+    overflowQueue->addPacketCallback(&dropCallback);
+    auto retainedPacket = new Packet("retainedPacket", makeShared<ByteCountChunk>(B(1)));
+    auto overflowPacket = new Packet("overflowPacket", makeShared<ByteCountChunk>(B(1)));
+    auto overflowPacketId = overflowPacket->getId();
+    overflowQueue->pushPacket(retainedPacket, nullptr);
+    overflowQueue->pushPacket(overflowPacket, nullptr);
+    ASSERT(dropCallback.numDroppedPackets == 1);
+    ASSERT(dropCallback.lastDroppedPacketId == overflowPacketId);
+    overflowQueue->removePacketCallback(&dropCallback);
+    auto dequeuedPacket = overflowQueue->dequeuePacket([retainedPacket](const Packet *packet) { return packet == retainedPacket; });
+    ASSERT(dequeuedPacket == retainedPacket);
+    ASSERT(dropCallback.numDroppedPackets == 1);
+    overflowQueue->callFinish();
+    overflowQueue->deleteModule();
+}
+
+// A compound unregisters from child queues during pre-delete even when finish
+// is skipped, and repeated lifecycle cleanup is harmless.
+{
+    auto pendingQueueModule = cModuleType::get("inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue")->create("preDeletePendingQueue", this);
+    pendingQueueModule->callInitialize();
+    auto pendingQueue = check_and_cast<queueing::IPacketQueue *>(pendingQueueModule);
+    auto leafQueue = check_and_cast<queueing::PacketQueue *>(pendingQueueModule->getSubmodule("managementQueue"));
+    TestPacketDropCallback callback;
+    pendingQueue->addPacketCallback(&callback);
+
+    auto observedPacket = new Packet("preDeleteObservedPacket", makeShared<ByteCountChunk>(B(1)));
+    leafQueue->pushPacket(observedPacket, nullptr);
+    leafQueue->removePacket(observedPacket);
+    ASSERT(callback.numRemovedPackets == 1);
+    take(observedPacket);
+    delete observedPacket;
+
+    pendingQueueModule->callPreDelete(pendingQueueModule);
+    auto unobservedPacket = new Packet("preDeleteUnobservedPacket", makeShared<ByteCountChunk>(B(1)));
+    leafQueue->pushPacket(unobservedPacket, nullptr);
+    leafQueue->removePacket(unobservedPacket);
+    ASSERT(callback.numRemovedPackets == 1);
+    take(unobservedPacket);
+    delete unobservedPacket;
+
+    pendingQueueModule->deleteModule();
+}
+
+// A compound's direct frontier and a nested compound boundary each forward
+// descendant removals exactly once. Boundary-initiated removals suppress the
+// descendant callback for the same packet, including during reentrant removal
+// of a different packet.
+{
+    auto pendingQueueModule = cModuleType::get("inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue")->create("callbackPendingQueue", this);
+    pendingQueueModule->callInitialize();
+    auto pendingQueue = check_and_cast<queueing::IPacketQueue *>(pendingQueueModule);
+    auto directLeaf = check_and_cast<queueing::PacketQueue *>(pendingQueueModule->getSubmodule("managementQueue"));
+    TestPacketDropCallback directCallback;
+    TestPacketDropCallback nestedCallback;
+    pendingQueue->addPacketCallback(&directCallback);
+    TestCompoundPacketQueue outerCompound;
+    outerCompound.observeQueue(pendingQueue);
+    outerCompound.addObserver(&nestedCallback);
+
+    auto directPacket = new Packet("directCompoundDrop", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->handlePacketDropped(directPacket);
+    ASSERT(directCallback.numDroppedPackets == 1);
+    ASSERT(nestedCallback.numDroppedPackets == 1);
+    delete directPacket;
+
+    auto leafRemovedPacket = new Packet("leafRemovedPacket", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->pushPacket(leafRemovedPacket, nullptr);
+    directLeaf->removePacket(leafRemovedPacket);
+    ASSERT(directCallback.numRemovedPackets == 1);
+    ASSERT(nestedCallback.numRemovedPackets == 1);
+    take(leafRemovedPacket);
+    delete leafRemovedPacket;
+
+    directLeaf->pushPacket(new Packet("leafBulkRemovedFirst", makeShared<ByteCountChunk>(B(1))), nullptr);
+    directLeaf->pushPacket(new Packet("leafBulkRemovedSecond", makeShared<ByteCountChunk>(B(1))), nullptr);
+    directLeaf->removeAllPackets();
+    ASSERT(directCallback.numRemovedPackets == 3);
+    ASSERT(nestedCallback.numRemovedPackets == 3);
+
+    auto boundaryRemovedPacket = new Packet("boundaryRemovedPacket", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->pushPacket(boundaryRemovedPacket, nullptr);
+    pendingQueue->removePacket(boundaryRemovedPacket);
+    ASSERT(directCallback.numRemovedPackets == 4);
+    ASSERT(nestedCallback.numRemovedPackets == 4);
+    take(boundaryRemovedPacket);
+    delete boundaryRemovedPacket;
+
+    directLeaf->pushPacket(new Packet("boundaryBulkRemovedFirst", makeShared<ByteCountChunk>(B(1))), nullptr);
+    directLeaf->pushPacket(new Packet("boundaryBulkRemovedSecond", makeShared<ByteCountChunk>(B(1))), nullptr);
+    pendingQueue->removeAllPackets();
+    ASSERT(directCallback.numRemovedPackets == 6);
+    ASSERT(nestedCallback.numRemovedPackets == 6);
+
+    auto boundaryDequeuedPacket = new Packet("boundaryDequeuedPacket", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->pushPacket(boundaryDequeuedPacket, nullptr);
+    auto dequeuedPacket = pendingQueue->dequeuePacket([boundaryDequeuedPacket](const Packet *packet) { return packet == boundaryDequeuedPacket; });
+    ASSERT(dequeuedPacket == boundaryDequeuedPacket);
+    ASSERT(directCallback.numDequeuedPackets == 1);
+    ASSERT(nestedCallback.numDequeuedPackets == 0);
+    take(dequeuedPacket);
+    delete dequeuedPacket;
+
+    auto boundaryPulledPacket = new Packet("boundaryPulledPacket", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->pushPacket(boundaryPulledPacket, nullptr);
+    auto pulledPacket = pendingQueue->pullPacket(nullptr);
+    ASSERT(pulledPacket == boundaryPulledPacket);
+    ASSERT(directCallback.numDequeuedPackets == 2);
+    ASSERT(nestedCallback.numDequeuedPackets == 0);
+    take(pulledPacket);
+    delete pulledPacket;
+
+    auto reentrantTriggerPacket = new Packet("reentrantTriggerPacket", makeShared<ByteCountChunk>(B(1)));
+    auto reentrantRemovedPacket = new Packet("reentrantRemovedPacket", makeShared<ByteCountChunk>(B(1)));
+    directLeaf->pushPacket(reentrantTriggerPacket, nullptr);
+    directLeaf->pushPacket(reentrantRemovedPacket, nullptr);
+    TestReentrantRemovalCallback reentrantCallback;
+    reentrantCallback.queue = directLeaf;
+    reentrantCallback.triggerPacket = reentrantTriggerPacket;
+    reentrantCallback.packetToRemove = reentrantRemovedPacket;
+    directLeaf->addPacketCallback(&reentrantCallback);
+    pendingQueue->removePacket(reentrantTriggerPacket);
+    ASSERT(reentrantCallback.removedPacket);
+    ASSERT(directCallback.numRemovedPackets == 8);
+    ASSERT(nestedCallback.numRemovedPackets == 8);
+    directLeaf->removePacketCallback(&reentrantCallback);
+    take(reentrantTriggerPacket);
+    take(reentrantRemovedPacket);
+    delete reentrantTriggerPacket;
+    delete reentrantRemovedPacket;
+
+    outerCompound.stopObserving();
+    pendingQueue->removePacketCallback(&directCallback);
+    pendingQueueModule->callFinish();
+    pendingQueueModule->deleteModule();
+
+    // Starting the frontier at the enclosing module forces traversal through
+    // PacketShaper, which is not an IPacketQueue, before reaching its leaf.
+    auto packetShaperModule = cModuleType::get("inet.queueing.shaper.PacketShaper")->create("callbackPacketShaper", this);
+    packetShaperModule->callInitialize();
+    auto wrappedLeaf = check_and_cast<queueing::PacketQueue *>(packetShaperModule->getSubmodule("queue"));
+    TestPacketDropCallback wrappedCallback;
+    TestCompoundPacketQueue wrappedCompound;
+    wrappedCompound.observeDescendantQueues(this);
+    wrappedCompound.addObserver(&wrappedCallback);
+    auto wrappedPacket = new Packet("wrappedCompoundDrop", makeShared<ByteCountChunk>(B(1)));
+    wrappedLeaf->handlePacketDropped(wrappedPacket);
+    ASSERT(wrappedCallback.numDroppedPackets == 1);
+    delete wrappedPacket;
+    wrappedCompound.stopObserving();
+    packetShaperModule->callFinish();
+    packetShaperModule->deleteModule();
+}
+
+// Compound capacity enforcement detaches its leaf victim without leaking a
+// REMOVED callback before reporting the single destructive departure.
+{
+    auto pendingQueueModule = cModuleType::get("inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue")->create("callbackOverflowPendingQueue", this);
+    pendingQueueModule->par("packetCapacity").setIntValue(1);
+    pendingQueueModule->par("dropperClass").setStringValue("inet::queueing::PacketAtCollectionEndDropper");
+    pendingQueueModule->callInitialize();
+    auto pendingQueue = check_and_cast<queueing::IPacketQueue *>(pendingQueueModule);
+    TestPacketDropCallback directCallback;
+    TestPacketDropCallback nestedCallback;
+    pendingQueue->addPacketCallback(&directCallback);
+    TestCompoundPacketQueue outerCompound;
+    outerCompound.observeQueue(pendingQueue);
+    outerCompound.addObserver(&nestedCallback);
+    pendingQueue->pushPacket(new Packet("compoundRetainedPacket", makeQosHeader(peer1, 1, SequenceNumberCyclic(1))), nullptr);
+    pendingQueue->pushPacket(new Packet("compoundOverflowPacket", makeQosHeader(peer1, 1, SequenceNumberCyclic(2))), nullptr);
+    ASSERT(pendingQueue->getNumPackets() == 1);
+    ASSERT(directCallback.numDroppedPackets == 1);
+    ASSERT(directCallback.numRemovedPackets == 0);
+    ASSERT(nestedCallback.numDroppedPackets == 1);
+    ASSERT(nestedCallback.numRemovedPackets == 0);
+    outerCompound.stopObserving();
+    pendingQueue->removePacketCallback(&directCallback);
+    pendingQueue->removeAllPackets();
+    pendingQueueModule->callFinish();
+    pendingQueueModule->deleteModule();
+}
+
+// A shared buffer detaches every victim from its owning queue before the first
+// typed drop callback. This keeps protocol cleanup from reentering while a
+// later victim is still selectable from another queue.
+{
+    auto bufferModule = cModuleType::get("inet.queueing.buffer.PacketBuffer")->create("sharedOverflowBuffer", this);
+    bufferModule->par("dataCapacity").setIntValue(24);
+    bufferModule->par("dropperClass").setStringValue("inet::queueing::PacketAtCollectionBeginDropper");
+    bufferModule->callInitialize();
+    auto createBufferedQueue = [&](const char *name) {
+        auto module = cModuleType::get("inet.queueing.queue.PacketQueue")->create(name, this);
+        module->par("bufferModule").setStringValue("^.sharedOverflowBuffer");
+        module->callInitialize();
+        return check_and_cast<queueing::PacketQueue *>(module);
+    };
+    auto firstQueue = createBufferedQueue("sharedOverflowFirstQueue");
+    auto secondQueue = createBufferedQueue("sharedOverflowSecondQueue");
+    TestPacketDropCallback dropCallback;
+    dropCallback.expectedPacketCountsAtFirstDrop = { { firstQueue, 1 }, { secondQueue, 0 } };
+    firstQueue->addPacketCallback(&dropCallback);
+    secondQueue->addPacketCallback(&dropCallback);
+    auto firstVictim = new Packet("sharedFirstVictim", makeShared<ByteCountChunk>(B(1)));
+    auto retainedPacket = new Packet("sharedRetainedPacket", makeShared<ByteCountChunk>(B(3)));
+    TestReentrantRemovalCallback reentrantCallback;
+    reentrantCallback.queue = firstQueue;
+    reentrantCallback.triggerPacket = firstVictim;
+    reentrantCallback.packetToRemove = retainedPacket;
+    reentrantCallback.triggerReason = queueing::IPacketQueue::PacketRemovalReason::DROPPED;
+    firstQueue->addPacketCallback(&reentrantCallback);
+    firstQueue->pushPacket(firstVictim, nullptr);
+    secondQueue->pushPacket(new Packet("sharedSecondVictim", makeShared<ByteCountChunk>(B(1))), nullptr);
+    firstQueue->pushPacket(retainedPacket, nullptr);
+    if (dropCallback.numDroppedPackets != 2 || dropCallback.numRemovedPackets != 1 || !dropCallback.allExpectedPacketsDetachedAtFirstDrop || !reentrantCallback.removedPacket || firstQueue->getNumPackets() != 0 || secondQueue->getNumPackets() != 0)
+        throw cRuntimeError("Shared buffer reentrant removal violated the detached victim batch contract");
+    take(retainedPacket);
+    delete retainedPacket;
+    firstQueue->removePacketCallback(&reentrantCallback);
+    firstQueue->removePacketCallback(&dropCallback);
+    secondQueue->removePacketCallback(&dropCallback);
+    firstQueue->callFinish();
+    secondQueue->callFinish();
+    bufferModule->callFinish();
+    firstQueue->deleteModule();
+    secondQueue->deleteModule();
+    bufferModule->deleteModule();
+}
+EV << "ADDBA transaction and negotiated SSN integrity checks passed.\n";
+%contains: stdout
+ADDBA transaction and negotiated SSN integrity checks passed.

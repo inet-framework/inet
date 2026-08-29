@@ -66,9 +66,9 @@ void Hcf::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         // Edca resolves its Edcaf array at the link-layer stage. Install the
-        // queue signal listeners after all child initialization has completed.
+        // queue callbacks after all child initialization has completed.
         for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
-            check_and_cast<cModule *>(edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue())->subscribe(packetDroppedSignal, this);
+            edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue()->addPacketCallback(this);
     }
 }
 
@@ -153,16 +153,11 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     }
 }
 
-void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Hcf::handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason)
 {
-    if (signalID == packetDroppedSignal) {
-        Enter_Method("%s", cComponent::getSignalName(signalID));
-        auto packet = check_and_cast<Packet *>(obj);
-        if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
-            mac->notifyFrameTransmission(packet, FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
-    }
-    else
-        ModeSetListener::receiveSignal(source, signalID, obj, details);
+    Enter_Method("handlePacketRemoved");
+    if (reason == queueing::IPacketQueue::PacketRemovalReason::DROPPED && packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
+        mac->notifyFrameTransmission(packet, FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
 }
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)
@@ -812,4 +807,3 @@ Hcf::~Hcf()
 
 } // namespace ieee80211
 } // namespace inet
-

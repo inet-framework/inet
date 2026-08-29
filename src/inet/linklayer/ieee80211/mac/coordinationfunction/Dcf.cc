@@ -51,8 +51,8 @@ void Dcf::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         // Dcaf resolves its pending queue at the link-layer stage. Install
-        // this signal listener after all child initialization has completed.
-        check_and_cast<cModule *>(channelAccess->getPendingQueue())->subscribe(packetDroppedSignal, this);
+        // this callback after all child initialization has completed.
+        channelAccess->getPendingQueue()->addPacketCallback(this);
     }
 }
 
@@ -120,16 +120,11 @@ void Dcf::processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&
     throw cRuntimeError("Unknown management frame");
 }
 
-void Dcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Dcf::handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason)
 {
-    if (signalID == packetDroppedSignal) {
-        Enter_Method("%s", cComponent::getSignalName(signalID));
-        auto packet = check_and_cast<Packet *>(obj);
-        if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
-            mac->notifyFrameTransmission(packet, FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
-    }
-    else
-        ModeSetListener::receiveSignal(source, signalID, obj, details);
+    Enter_Method("handlePacketRemoved");
+    if (reason == queueing::IPacketQueue::PacketRemovalReason::DROPPED && packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
+        mac->notifyFrameTransmission(packet, FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
 }
 
 void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -416,4 +411,3 @@ Dcf::~Dcf()
 
 } // namespace ieee80211
 } // namespace inet
-
