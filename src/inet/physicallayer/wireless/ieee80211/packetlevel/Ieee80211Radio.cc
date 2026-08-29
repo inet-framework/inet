@@ -137,9 +137,10 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
     abortIncompatibleReception();
     if (modeSetCoordinator != nullptr)
         modeSetCoordinator->completeModeSetChange(modeSet);
-    else if (modeSet != nullptr)
+    else if (modeSet != nullptr && getComponentType() != nullptr)
         emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
-    emit(listeningChangedSignal, 0);
+    if (getComponentType() != nullptr)
+        emit(listeningChangedSignal, 0);
     changingModeSet = false;
     EV << "Changing radio mode set to " << modeSet << " and mode to " << transmitter->getMode() << endl;
 }
@@ -177,7 +178,8 @@ void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     ieee80211Transmitter->setMode(mode);
     EV << "Changing radio mode to " << mode << endl;
-    emit(listeningChangedSignal, 0);
+    if (getComponentType() != nullptr)
+        emit(listeningChangedSignal, 0);
 }
 
 void Ieee80211Radio::setBand(const IIeee80211Band *band)
@@ -193,7 +195,8 @@ void Ieee80211Radio::setBand(const IIeee80211Band *band)
         Ieee80211RadioChannelChangedDetails details(channel->getBand());
         emit(radioChannelChangedSignal, channel->getChannelNumber(), &details);
     }
-    emit(listeningChangedSignal, 0);
+    if (getComponentType() != nullptr)
+        emit(listeningChangedSignal, 0);
 }
 
 void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
@@ -208,7 +211,8 @@ void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
     abortIncompatibleReception();
     Ieee80211RadioChannelChangedDetails details(channel->getBand());
     emit(radioChannelChangedSignal, channel->getChannelNumber(), &details);
-    emit(listeningChangedSignal, 0);
+    if (getComponentType() != nullptr)
+        emit(listeningChangedSignal, 0);
 }
 
 void Ieee80211Radio::setChannelNumber(int newChannelNumber)
@@ -221,7 +225,8 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     abortIncompatibleReception();
     Ieee80211RadioChannelChangedDetails details(ieee80211Transmitter->getChannel()->getBand());
     emit(radioChannelChangedSignal, newChannelNumber, &details);
-    emit(listeningChangedSignal, 0);
+    if (getComponentType() != nullptr)
+        emit(listeningChangedSignal, 0);
 }
 
 void Ieee80211Radio::insertFcs(const Ptr<Ieee80211PhyHeader>& phyHeader) const
