@@ -20,9 +20,12 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementPolicy.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
@@ -623,11 +626,28 @@ class TestHcf : public Hcf
     virtual void scheduleAddbaResponseTimer(simtime_t) override {}
 };
 
+class TestTxopProcedure : public TxopProcedure
+{
+  public:
+    std::vector<int> *eventOrder = nullptr;
+    virtual simtime_t getRemaining() const override { return 1; }
+    virtual void endTxop() override { if (eventOrder != nullptr) eventOrder->push_back(2); }
+};
+
 class TestMac : public Ieee80211Mac
 {
   public:
     int numPendingRadioConfigSends = 0;
     virtual void sendDownPendingRadioConfigMsg() override { numPendingRadioConfigSends++; }
+};
+
+class TestEmptyFrameSequence : public IFrameSequence
+{
+  public:
+    virtual void startSequence(FrameSequenceContext *, int) override {}
+    virtual IFrameSequenceStep *prepareStep(FrameSequenceContext *) override { return nullptr; }
+    virtual bool completeStep(FrameSequenceContext *) override { return true; }
+    virtual std::string getHistory() const override { return ""; }
 };
 
 class TestFragmentationPolicy : public IFragmentationPolicy
@@ -755,6 +775,33 @@ class TestFrameSequenceHandler : public IFrameSequenceHandler
     virtual void transmissionComplete() override {}
     virtual bool isSequenceRunning() override { return running; }
     virtual void handleStartRxTimeout() override {}
+};
+
+class TestDcaf : public Dcaf
+{
+  public:
+    int numReleasedChannels = 0;
+
+    void configure(InProgressFrames *inProgressFrames) { this->inProgressFrames = inProgressFrames; }
+    virtual void releaseChannel(IChannelAccess::ICallback *) override { numReleasedChannels++; }
+};
+
+class TestDcf : public Dcf
+{
+  public:
+    TestFrameSequenceHandler *configure(TestDcaf *channelAccess, Ieee80211Mac *mac) {
+        this->channelAccess = channelAccess;
+        this->mac = mac;
+        auto handler = new TestFrameSequenceHandler();
+        frameSequenceHandler = handler;
+        return handler;
+    }
+    void grant(TestDcaf *channelAccess) { channelGranted(channelAccess); }
+
+  protected:
+    virtual FrameSequenceContext *buildContext() override {
+        return new FrameSequenceContext(MacAddress::UNSPECIFIED_ADDRESS, nullptr, channelAccess->getInProgressFrames(), nullptr, nullptr, new NonQoSContext(nullptr), nullptr);
+    }
 };
 
 static Ptr<Ieee80211DataHeader> makeQosHeader(MacAddress receiverAddress, Tid tid, SequenceNumberCyclic sequenceNumber)
@@ -2236,6 +2283,279 @@ for (auto removalReason : { queueing::IPacketQueue::PacketRemovalReason::DROPPED
     teardownHcf.unsubscribe(Hcf::blockAckAgreementDeletedSignal, &deletedListener);
 }
 
+OriginatorQosMacDataService dataService;
+dataService.setFrameEligibilityFunction([&handler](const Packet *packet) {
+    auto header = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+    return header == nullptr || header->getType() != ST_DATA_WITH_QOS || !handler.isAddbaResponsePending(header->getReceiverAddress(), header->getTid());
+});
+Packet heldFrame("heldFrame", makeQosHeader(peer3, 5, SequenceNumberCyclic(0)));
+Packet otherTidFrame("otherTidFrame", makeQosHeader(peer3, 4, SequenceNumberCyclic(0)));
+Packet otherPeerFrame("otherPeerFrame", makeQosHeader(peer2, 5, SequenceNumberCyclic(0)));
+auto managementHeader = makeShared<Ieee80211MgmtHeader>();
+managementHeader->setType(ST_ACTION);
+Packet managementFrame("managementFrame", managementHeader);
+TestPacketQueue mixedQueue;
+mixedQueue.packets = { &heldFrame, &otherTidFrame, &otherPeerFrame, &managementFrame };
+ASSERT(!dataService.isFrameEligible(&heldFrame));
+ASSERT(dataService.isFrameEligible(&otherTidFrame));
+ASSERT(dataService.isFrameEligible(&otherPeerFrame));
+ASSERT(dataService.isFrameEligible(&managementFrame));
+ASSERT(dataService.hasEligibleFrame(&mixedQueue));
+mixedQueue.packets = { &heldFrame };
+ASSERT(!dataService.hasEligibleFrame(&mixedQueue));
+
+// HCF availability is a count lookup: rebuilding evaluates each pending frame
+// once, while repeated availability checks neither enumerate queues nor
+// reevaluate the Block Ack eligibility predicate.
+{
+    TestOriginatorQosMacDataService indexedDataService;
+    bool addbaResponsePending = true;
+    int numEligibilityChecks = 0;
+    Packet *setupFrame = nullptr;
+    indexedDataService.setFrameEligibilityFunction([&](const Packet *packet) {
+        numEligibilityChecks++;
+        return !addbaResponsePending || packet == setupFrame;
+    });
+    TestAckHandler indexedAckHandler;
+    TestPacketQueue pendingQueues[AC_NUMCATEGORIES];
+    TestInProgressFrames inProgressFrames[AC_NUMCATEGORIES];
+    TestEdcaf edcafs[AC_NUMCATEGORIES];
+    TestEdca indexedEdca;
+    indexedEdca.numEdcafs = AC_NUMCATEGORIES;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        inProgressFrames[ac].configure(&indexedDataService, &indexedAckHandler);
+        edcafs[ac].pendingQueue = &pendingQueues[ac];
+        edcafs[ac].inProgressFrames = &inProgressFrames[ac];
+        indexedEdca.edcafs[ac] = &edcafs[ac];
+    }
+    std::vector<Packet *> indexedPackets;
+    for (int i = 0; i < 128; i++) {
+        auto packet = new Packet("heldIndexedFrame", makeShared<ByteCountChunk>(B(1)));
+        indexedPackets.push_back(packet);
+        pendingQueues[AC_BK].enqueuePacket(packet);
+    }
+    auto voiceFrame = new Packet("eligibleVoiceFrame", makeShared<ByteCountChunk>(B(1)));
+    indexedPackets.push_back(voiceFrame);
+    pendingQueues[AC_VO].enqueuePacket(voiceFrame);
+    TestHcf indexedHcf;
+    indexedHcf.configureEligibilityIndex(&indexedEdca, &indexedDataService);
+    indexedHcf.rebuildEligibilityIndex();
+    auto requireIndex = [](bool condition, const char *message) {
+        if (!condition)
+            throw cRuntimeError("Eligibility index test failed: %s", message);
+    };
+    requireIndex(indexedHcf.getNumTrackedPendingFrames() == 129, "initial cardinality");
+    requireIndex(indexedHcf.getNumEligiblePendingFrames(AC_BK) == 0, "initial background count");
+    requireIndex(indexedHcf.getNumEligiblePendingFrames(AC_VO) == 0, "initial voice count");
+    int eligibilityChecksAfterRebuild = numEligibilityChecks;
+    int queueReadsAfterRebuild = 0;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        queueReadsAfterRebuild += pendingQueues[ac].numGetPacketCalls;
+    bool allHeldQueriesUnavailable = true;
+    for (int i = 0; i < 1000; i++) {
+        bool hasBackgroundFrame = indexedHcf.hasFrame(AC_BK);
+        bool hasVoiceFrame = indexedHcf.hasFrame(AC_VO);
+        allHeldQueriesUnavailable &= !hasBackgroundFrame && !hasVoiceFrame;
+    }
+    requireIndex(allHeldQueriesUnavailable, "all-held availability");
+    ASSERT(allHeldQueriesUnavailable);
+    bool predicateWasNotReevaluated = numEligibilityChecks == eligibilityChecksAfterRebuild;
+    requireIndex(predicateWasNotReevaluated, "availability reevaluated the predicate");
+    ASSERT(predicateWasNotReevaluated);
+    int queueReadsAfterQueries = 0;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        queueReadsAfterQueries += pendingQueues[ac].numGetPacketCalls;
+    bool queueWasNotEnumerated = queueReadsAfterQueries == queueReadsAfterRebuild;
+    requireIndex(queueWasNotEnumerated, "availability enumerated a pending queue");
+    ASSERT(queueWasNotEnumerated);
+
+    auto originalSetupFrame = new Packet("eligibleSetupFrame", makeShared<ByteCountChunk>(B(1)));
+    setupFrame = originalSetupFrame;
+    indexedPackets.push_back(originalSetupFrame);
+    indexedHcf.trackFrame(originalSetupFrame, AC_BK);
+    pendingQueues[AC_BK].enqueuePacket(originalSetupFrame);
+    bool hasSetupFrame = indexedHcf.hasFrame(AC_BK);
+    requireIndex(hasSetupFrame, "tracked setup frame unavailable");
+    auto replacementFrame = new Packet("eligibleReplacementFrame", makeShared<ByteCountChunk>(B(1)));
+    setupFrame = replacementFrame;
+    indexedPackets.push_back(replacementFrame);
+    indexedHcf.trackFrame(replacementFrame, AC_BK);
+    pendingQueues[AC_BK].enqueuePacket(replacementFrame);
+    indexedHcf.untrackFrame(indexedPackets.front());
+    pendingQueues[AC_BK].removePacket(indexedPackets.front());
+    requireIndex(indexedHcf.getNumEligiblePendingFrames(AC_BK) == 2, "existing-victim count");
+    auto tailDroppedArrival = new Packet("tailDroppedArrival", makeShared<ByteCountChunk>(B(1)));
+    indexedHcf.trackFrame(tailDroppedArrival, AC_BK);
+    indexedHcf.untrackFrame(tailDroppedArrival);
+    indexedHcf.untrackFrame(tailDroppedArrival);
+    delete tailDroppedArrival;
+    requireIndex(indexedHcf.getNumEligiblePendingFrames(AC_BK) == 2, "tail-drop count");
+    indexedHcf.untrackFrame(replacementFrame);
+    pendingQueues[AC_BK].removePacket(replacementFrame);
+    indexedHcf.untrackFrame(originalSetupFrame);
+    pendingQueues[AC_BK].removePacket(originalSetupFrame);
+    bool hasFrameAfterSelectedRemovals = indexedHcf.hasFrame(AC_BK);
+    requireIndex(!hasFrameAfterSelectedRemovals, "selected removals left availability");
+
+    addbaResponsePending = false;
+    indexedHcf.rebuildEligibilityIndex();
+    requireIndex(indexedHcf.getNumEligiblePendingFrames(AC_BK) == pendingQueues[AC_BK].getNumPackets(), "terminal-transition background count");
+    requireIndex(indexedHcf.getNumEligiblePendingFrames(AC_VO) == 1, "terminal-transition voice count");
+    addbaResponsePending = true;
+    setupFrame = nullptr;
+    indexedHcf.rebuildEligibilityIndex();
+    bool hasBackgroundFrameAfterCreation = indexedHcf.hasFrame(AC_BK);
+    bool hasVoiceFrameAfterCreation = indexedHcf.hasFrame(AC_VO);
+    requireIndex(!hasBackgroundFrameAfterCreation && !hasVoiceFrameAfterCreation, "creation-transition availability");
+    auto inProgressFrame = new Packet("inProgressOnlyFrame", makeQosHeader(peer1, 3, SequenceNumberCyclic(1)));
+    setupFrame = inProgressFrame;
+    inProgressFrames[AC_VI].addFrame(inProgressFrame);
+    bool hasInProgressFrame = indexedHcf.hasFrame(AC_VI);
+    requireIndex(hasInProgressFrame, "eligible in-progress frame unavailable");
+    requireIndex(indexedHcf.getNumTrackedPendingFrames() == 128, "in-progress frame entered pending index");
+    auto releasedFrames = inProgressFrames[AC_VI].releaseFrames();
+    requireIndex(releasedFrames.size() == 1, "in-progress release count");
+    delete releasedFrames.front();
+    setupFrame = nullptr;
+    bool hasFrameAfterInProgressRelease = indexedHcf.hasFrame(AC_VI);
+    requireIndex(!hasFrameAfterInProgressRelease, "released in-progress frame remained available");
+
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        pendingQueues[ac].removeAllPackets();
+    for (auto packet : indexedPackets)
+        delete packet;
+}
+
+// IEEE Std 802.11-2024, 10.23.2.4: after the current owner releases the
+// channel, Hcf re-arms every AC that has an eligible frame, and no idle AC.
+{
+    TestOriginatorQosMacDataService armingDataService;
+    armingDataService.setFrameEligibilityFunction([](const Packet *) { return true; });
+    TestAckHandler armingAckHandler;
+    TestPacketQueue armingPendingQueues[AC_NUMCATEGORIES];
+    TestInProgressFrames armingInProgressFrames[AC_NUMCATEGORIES];
+    TestEdcaf armingEdcafs[AC_NUMCATEGORIES];
+    TestEdca armingEdca;
+    armingEdca.numEdcafs = AC_NUMCATEGORIES;
+    armingEdca.edcaf = nullptr;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        armingInProgressFrames[ac].configure(&armingDataService, &armingAckHandler, &armingPendingQueues[ac]);
+        armingEdcafs[ac].pendingQueue = &armingPendingQueues[ac];
+        armingEdcafs[ac].inProgressFrames = &armingInProgressFrames[ac];
+        armingEdca.edcafs[ac] = &armingEdcafs[ac];
+    }
+    auto backgroundFrame = new Packet("armingBackgroundFrame", makeQosHeader(peer1, 1, SequenceNumberCyclic(1)));
+    auto voiceFrame = new Packet("armingVoiceFrame", makeQosHeader(peer1, 2, SequenceNumberCyclic(1)));
+    armingInProgressFrames[AC_BK].addOwnedFrame(backgroundFrame);
+    armingInProgressFrames[AC_VO].addOwnedFrame(voiceFrame);
+    TestHcf armingHcf;
+    armingHcf.configureEligibilityIndex(&armingEdca, &armingDataService);
+    armingHcf.requestEligible();
+    ASSERT(armingEdca.requestedAccessCategories.size() == 2);
+    ASSERT(armingEdca.requestedAccessCategories[0] == AC_BK);
+    ASSERT(armingEdca.requestedAccessCategories[1] == AC_VO);
+    auto releasedBackground = armingInProgressFrames[AC_BK].releaseFrames();
+    auto releasedVoice = armingInProgressFrames[AC_VO].releaseFrames();
+    for (auto frame : releasedBackground)
+        delete frame;
+    for (auto frame : releasedVoice)
+        delete frame;
+}
+
+// The frame-sequence boundary releases the owner and ends its TXOP before
+// re-arming eligible ACs; an already-active AC receives the callback without
+// restarting contention.
+{
+    TestOriginatorQosMacDataService sequenceDataService;
+    sequenceDataService.setFrameEligibilityFunction([](const Packet *) { return true; });
+    TestAckHandler sequenceAckHandler;
+    TestPacketQueue sequencePendingQueues[AC_NUMCATEGORIES];
+    TestInProgressFrames sequenceInProgressFrames[AC_NUMCATEGORIES];
+    TestEdcaf sequenceEdcafs[AC_NUMCATEGORIES];
+    TestEdca sequenceEdca;
+    sequenceEdca.numEdcafs = AC_NUMCATEGORIES;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        sequenceInProgressFrames[ac].configure(&sequenceDataService, &sequenceAckHandler, &sequencePendingQueues[ac]);
+        sequenceEdcafs[ac].pendingQueue = &sequencePendingQueues[ac];
+        sequenceEdcafs[ac].inProgressFrames = &sequenceInProgressFrames[ac];
+        sequenceEdcafs[ac].setAccessCategory(AccessCategory(ac));
+        sequenceEdca.edcafs[ac] = &sequenceEdcafs[ac];
+    }
+    sequenceEdca.edcaf = &sequenceEdcafs[AC_BE];
+    sequenceInProgressFrames[AC_BK].addFrame(new Packet("sequenceBackgroundFrame", makeQosHeader(peer1, 1, SequenceNumberCyclic(70))));
+    sequenceInProgressFrames[AC_VO].addFrame(new Packet("sequenceVoiceFrame", makeQosHeader(peer1, 2, SequenceNumberCyclic(71))));
+    sequenceEdcafs[AC_VO].contentionActive = true;
+    std::vector<int> eventOrder;
+    sequenceEdcafs[AC_BE].eventOrder = &eventOrder;
+    TestTxopProcedure sequenceTxop;
+    sequenceTxop.eventOrder = &eventOrder;
+    sequenceEdcafs[AC_BE].setTxopProcedure(&sequenceTxop);
+    sequenceEdca.eventOrder = &eventOrder;
+    TestHcf sequenceHcf;
+    sequenceHcf.configureEligibilityIndex(&sequenceEdca, &sequenceDataService);
+    auto sequenceHandler = new TestFrameSequenceHandler();
+    sequenceHcf.configureFrameSequenceHandler(sequenceHandler);
+    TestMac sequenceMac;
+    sequenceHcf.configureMac(&sequenceMac);
+    sequenceHcf.finishSequence();
+    ASSERT(eventOrder == std::vector<int>({ 1, 2, 3, 3 }));
+    ASSERT(sequenceEdca.requestedAccessCategories.size() == 2);
+    ASSERT(sequenceEdca.requestedAccessCategories[0] == AC_BK);
+    ASSERT(sequenceEdca.requestedAccessCategories[1] == AC_VO);
+    ASSERT(sequenceEdcafs[AC_VO].numRequestChannelCalls == 1);
+    ASSERT(sequenceEdcafs[AC_VO].numContentionStarts == 0);
+    auto releasedBackground = sequenceInProgressFrames[AC_BK].releaseFrames();
+    auto releasedVoice = sequenceInProgressFrames[AC_VO].releaseFrames();
+    for (auto frame : releasedBackground)
+        delete frame;
+    for (auto frame : releasedVoice)
+        delete frame;
+}
+
+// IEEE Std 802.11-2024, 10.23.2.4: a collided AC with no eligible frame is
+// not a handled collision and must not mutate recovery state or be counted.
+{
+    TestEdcaf emptyCollidedEdcaf;
+    emptyCollidedEdcaf.setAccessCategory(AC_BK);
+    TestInProgressFrames emptyInProgressFrames;
+    TestOriginatorQosMacDataService emptyDataService;
+    TestAckHandler emptyAckHandler;
+    TestPacketQueue emptyPendingQueue;
+    emptyInProgressFrames.configure(&emptyDataService, &emptyAckHandler, &emptyPendingQueue);
+    emptyCollidedEdcaf.inProgressFrames = &emptyInProgressFrames;
+    TestHcf collisionHcf;
+    ASSERT(collisionHcf.processInternalCollision({ &emptyCollidedEdcaf }) == 0);
+}
+
+// A channel grant whose collision-controller vector contains only an AC with
+// no eligible frame releases the channel without opening a TXOP or emitting a
+// phantom collision statistic.
+{
+    TestPacketQueue grantedPendingQueue;
+    TestOriginatorQosMacDataService grantedDataService;
+    TestAckHandler grantedAckHandler;
+    TestInProgressFrames grantedInProgressFrames;
+    grantedInProgressFrames.configure(&grantedDataService, &grantedAckHandler, &grantedPendingQueue);
+    TestEdcaf grantedEdcaf;
+    grantedEdcaf.setAccessCategory(AC_BE);
+    grantedEdcaf.pendingQueue = &grantedPendingQueue;
+    grantedEdcaf.inProgressFrames = &grantedInProgressFrames;
+    TestEdca grantedEdca;
+    grantedEdca.edcaf = &grantedEdcaf;
+    grantedEdca.internallyCollidedEdcafs = { &grantedEdcaf };
+    TestHcf grantedHcf;
+    grantedHcf.configure(&grantedEdca);
+    TestMac grantedMac;
+    grantedHcf.configureMac(&grantedMac);
+    TestSignalListener collisionListener;
+    grantedHcf.subscribe(Hcf::edcaCollisionDetectedSignal, &collisionListener);
+    grantedHcf.grantChannel(&grantedEdcaf);
+    ASSERT(grantedEdcaf.numReleaseChannelCalls == 1);
+    ASSERT(grantedMac.numPendingRadioConfigSends == 1);
+    ASSERT(collisionListener.numSignals == 0);
+    grantedHcf.unsubscribe(Hcf::edcaCollisionDetectedSignal, &collisionListener);
+}
+
 // A direct IPacketQueue implementation without OMNeT++ signals cannot leave
 // the index stale because ownership departures use the typed queue callback.
 {
@@ -2858,6 +3178,192 @@ for (auto removalReason : { queueing::IPacketQueue::PacketRemovalReason::DROPPED
     secondQueue.removePacket(otherInputPacket);
     delete otherInputPacket;
 }
+
+// Discarding a stale setup frame clears its per-frame retry state without
+// emitting the retry-limit semantic event.
+{
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    TestSignalListener retryLimitListener;
+    recoveryProcedure.subscribe(IRecoveryProcedure::retryLimitReachedSignal, &retryLimitListener);
+    auto header = makeShared<Ieee80211AddbaRequest>();
+    header->setSequenceNumber(SequenceNumberCyclic(42));
+    Packet packet("staleRecoveryPacket", header);
+    recoveryProcedure.addRetry(header);
+    ASSERT(recoveryProcedure.hasRetry(header));
+    recoveryProcedure.discardFrame(&packet, header);
+    ASSERT(!recoveryProcedure.hasRetry(header));
+    ASSERT(retryLimitListener.numSignals == 0);
+    recoveryProcedure.unsubscribe(IRecoveryProcedure::retryLimitReachedSignal, &retryLimitListener);
+}
+
+
+// Either terminal discard path clears both per-frame retry maps. Reusing the
+// same sequence/fragment identity therefore starts from zero after either
+// data-first or RTS-first failure history.
+{
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    auto header = makeShared<Ieee80211AddbaRequest>();
+    header->setSequenceNumber(SequenceNumberCyclic(43));
+    Packet shortPacket("shortTerminalDiscard", header);
+    recoveryProcedure.addShortRetry(header, 2);
+    recoveryProcedure.addLongRetry(header, 3);
+    ASSERT(recoveryProcedure.getShortRetryCount(&shortPacket, header) == 2);
+    ASSERT(recoveryProcedure.getLongRetryCount(&shortPacket, header) == 3);
+    recoveryProcedure.discardFrame(&shortPacket, header);
+    ASSERT(recoveryProcedure.getShortRetryCount(&shortPacket, header) == 0);
+    ASSERT(recoveryProcedure.getLongRetryCount(&shortPacket, header) == 0);
+
+    Packet reusedPacket("reusedTerminalDiscard", header);
+    recoveryProcedure.addLongRetry(header, 4);
+    recoveryProcedure.addShortRetry(header, 5);
+    ASSERT(recoveryProcedure.getShortRetryCount(&reusedPacket, header) == 5);
+    ASSERT(recoveryProcedure.getLongRetryCount(&reusedPacket, header) == 4);
+    recoveryProcedure.discardRtsFrame(header);
+    ASSERT(recoveryProcedure.getShortRetryCount(&reusedPacket, header) == 0);
+    ASSERT(recoveryProcedure.getLongRetryCount(&reusedPacket, header) == 0);
+}
+
+// A stale RTS-protected ADDBA request uses the management header for its retry
+// check and clears the RTS short-retry entry even when the protected frame is
+// long. It is a transaction discard, not a retry-limit or link-break event.
+{
+    TestCwCalculator cwCalculator;
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    recoveryProcedure.configureRts(10, 4, &cwCalculator);
+    QosAckHandler ackHandler;
+    TestOriginatorQosMacDataService originatorDataService;
+    TestInProgressFrames activeFrames;
+    activeFrames.configure(&originatorDataService, &ackHandler);
+    TestEdcaf edcaf;
+    edcaf.inProgressFrames = &activeFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    edca.nonQosRecoveryProcedure = &recoveryProcedure;
+    auto staleHandler = new TestOriginatorHandler();
+    TestHcf hcf;
+    hcf.configureTransmittedData(&edca, staleHandler, &originatorPolicy);
+    TestSignalListener packetDropListener;
+    TestSignalListener linkBrokenListener;
+    hcf.subscribe(packetDroppedSignal, &packetDropListener);
+    hcf.subscribe(linkBrokenSignal, &linkBrokenListener);
+    auto request = makeShared<Ieee80211AddbaRequest>();
+    request->setReceiverAddress(peer1);
+    request->setTid(3);
+    request->setDialogToken(91);
+    request->setSequenceNumber(SequenceNumberCyclic(77));
+    auto packet = new Packet("staleRtsProtectedAddba", request);
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+    ASSERT(packet->getByteLength() >= 10);
+    activeFrames.addFrame(packet);
+    ackHandler.processTransmittedDataOrMgmtFrame(request);
+    ASSERT(ackHandler.getMgmtOrNonQoSAckStatus(request) == QosAckHandler::Status::WAITING_FOR_NORMAL_ACK);
+    hcf.processRtsProtectionFailure(packet);
+    ASSERT(recoveryProcedure.getShortRetryCount(packet, request) == 0);
+    ASSERT(recoveryProcedure.getLongRetryCount(packet, request) == 0);
+    ASSERT(ackHandler.getMgmtOrNonQoSAckStatus(request) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+    ASSERT(packetDropListener.numSignals == 1);
+    ASSERT(linkBrokenListener.numSignals == 0);
+    hcf.unsubscribe(packetDroppedSignal, &packetDropListener);
+    hcf.unsubscribe(linkBrokenSignal, &linkBrokenListener);
+    auto releasedFrames = activeFrames.releaseFrames();
+    ASSERT(releasedFrames.size() == 1);
+    delete releasedFrames.front();
+}
+
+// At the RTS retry limit, the same long protected management frame still
+// clears its short-retry entry and emits each terminal event exactly once.
+{
+    TestCwCalculator cwCalculator;
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    recoveryProcedure.configureRts(10, 1, &cwCalculator);
+    QosAckHandler ackHandler;
+    TestOriginatorQosMacDataService originatorDataService;
+    TestInProgressFrames activeFrames;
+    activeFrames.configure(&originatorDataService, &ackHandler);
+    TestEdcaf edcaf;
+    edcaf.inProgressFrames = &activeFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    edca.nonQosRecoveryProcedure = &recoveryProcedure;
+    TestHcf hcf;
+    TestMac retryLimitedRtsProtectedAddbaMac;
+    hcf.configureMac(&retryLimitedRtsProtectedAddbaMac);
+    hcf.configureTransmittedData(&edca, new TestOriginatorHandler(), &originatorPolicy);
+    TestSignalListener retryLimitListener;
+    TestSignalListener packetDropListener;
+    TestSignalListener linkBrokenListener;
+    recoveryProcedure.subscribe(IRecoveryProcedure::retryLimitReachedSignal, &retryLimitListener);
+    hcf.subscribe(packetDroppedSignal, &packetDropListener);
+    hcf.subscribe(linkBrokenSignal, &linkBrokenListener);
+    auto request = makeShared<Ieee80211AddbaRequest>();
+    request->setReceiverAddress(peer1);
+    request->setTid(3);
+    request->setDialogToken(92);
+    request->setSequenceNumber(SequenceNumberCyclic(78));
+    auto packet = new Packet("retryLimitedRtsProtectedAddba", request);
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+    ASSERT(packet->getByteLength() >= 10);
+    activeFrames.addFrame(packet);
+    ackHandler.processTransmittedDataOrMgmtFrame(request);
+    hcf.processRtsProtectionFailure(packet);
+    ASSERT(recoveryProcedure.getShortRetryCount(packet, request) == 0);
+    ASSERT(recoveryProcedure.getLongRetryCount(packet, request) == 0);
+    ASSERT(ackHandler.getMgmtOrNonQoSAckStatus(request) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+    ASSERT(retryLimitListener.numSignals == 1);
+    ASSERT(packetDropListener.numSignals == 1);
+    ASSERT(linkBrokenListener.numSignals == 1);
+    recoveryProcedure.unsubscribe(IRecoveryProcedure::retryLimitReachedSignal, &retryLimitListener);
+    hcf.unsubscribe(packetDroppedSignal, &packetDropListener);
+    hcf.unsubscribe(linkBrokenSignal, &linkBrokenListener);
+    auto releasedFrames = activeFrames.releaseFrames();
+    ASSERT(releasedFrames.size() == 1);
+    delete releasedFrames.front();
+}
+
+// A frame prefetched for duration calculation already has an SSN, but it must
+// remain in progress without being selected while the same transaction is pending.
+TestAckHandler ackHandler;
+TestInProgressFrames inProgressFrames;
+inProgressFrames.configure(&dataService, &ackHandler);
+auto prefetchedHeldFrame = new Packet("prefetchedHeldFrame", makeQosHeader(peer3, 5, SequenceNumberCyclic(21)));
+auto prefetchedOtherTidFrame = new Packet("prefetchedOtherTidFrame", makeQosHeader(peer3, 4, SequenceNumberCyclic(1)));
+inProgressFrames.addFrame(prefetchedHeldFrame);
+inProgressFrames.addFrame(prefetchedOtherTidFrame);
+ASSERT(inProgressFrames.hasEligibleFrame());
+ASSERT(inProgressFrames.getFrameToTransmit() == prefetchedOtherTidFrame);
+
+// Repeated cleanup requests move an in-progress frame to the discard list once.
+{
+    TestInProgressFrames idempotentDropFrames;
+    auto frame = new Packet("idempotentDropFrame", makeQosHeader(peer1, 1, SequenceNumberCyclic(22)));
+    idempotentDropFrames.addFrame(frame);
+    idempotentDropFrames.dropFrame(frame);
+    idempotentDropFrames.dropFrame(frame);
+    auto releasedFrames = idempotentDropFrames.releaseFrames();
+    ASSERT(releasedFrames.size() == 1);
+    ASSERT(releasedFrames.front() == frame);
+    delete frame;
+}
+
+// DCF sequence predicates materialize the next eligible pending frame.
+TestPacketQueue deferredQueue;
+auto deferredFrame = new Packet("deferredFrame", makeQosHeader(peer2, 4, SequenceNumberCyclic(123)));
+deferredQueue.packets = { deferredFrame };
+TestOriginatorQosMacDataService deferredDataService;
+TestInProgressFrames deferredInProgressFrames;
+deferredInProgressFrames.configure(&deferredDataService, &ackHandler, &deferredQueue);
+bool hasDeferredInProgressFrame = deferredInProgressFrames.hasInProgressFrames();
+if (!hasDeferredInProgressFrame || deferredQueue.getNumPackets() != 0)
+    throw cRuntimeError("In-progress frame predicate did not materialize the eligible pending frame");
+ASSERT(hasDeferredInProgressFrame);
+ASSERT(deferredQueue.getNumPackets() == 0);
+ASSERT(deferredFrame->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(123));
+auto deferredFrames = deferredInProgressFrames.releaseFrames();
+ASSERT(deferredFrames.size() == 1);
+delete deferredFrames.at(0);
+
 // A real queue with a downstream collector predicate-dequeues a non-front
 // packet, records its residence and semantic pull once, and animates it to the
 // collector while retaining the front packet.
@@ -3343,6 +3849,99 @@ for (auto removalReason : { queueing::IPacketQueue::PacketRemovalReason::DROPPED
     secondQueue->deleteModule();
     bufferModule->deleteModule();
 }
+
+// The multicast continuation predicate materializes its candidate once and
+// reuses that result for both the TXOP and receiver-address decisions.
+{
+    TestOriginatorQosMacDataService multicastDataService;
+    TestPacketQueue multicastPendingQueue;
+    TestAckHandler multicastAckHandler;
+    auto multicastFrame = new Packet("multicastTxopFrame", makeQosHeader(MacAddress::BROADCAST_ADDRESS, 1, SequenceNumberCyclic(4)));
+    multicastPendingQueue.packets = { multicastFrame };
+    TestInProgressFrames multicastInProgressFrames;
+    multicastInProgressFrames.configure(&multicastDataService, &multicastAckHandler, &multicastPendingQueue);
+    TestTxopProcedure multicastTxopProcedure;
+    FrameSequenceContext multicastContext(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &multicastInProgressFrames, nullptr, nullptr, nullptr, new QoSContext(nullptr, nullptr, nullptr, &multicastTxopProcedure));
+    HcfFs multicastHcfFs;
+    RepeatingFs multicastRepeatingFs(new TestEmptyFrameSequence(), [](RepeatingFs *, FrameSequenceContext *) { return false; });
+    ASSERT(multicastHcfFs.hasMoreTxOpsAndMulticast(&multicastRepeatingFs, &multicastContext));
+    ASSERT(multicastPendingQueue.numSelectedDequeues == 1);
+    ASSERT(multicastPendingQueue.getNumPackets() == 0);
+    auto multicastFrames = multicastInProgressFrames.releaseFrames();
+    ASSERT(multicastFrames == std::vector<Packet *>({ multicastFrame }));
+    delete multicastFrame;
+}
+
+// At the TXOP continuation boundary, an eligible pending frame is
+// materialized by the real repeating-sequence lifecycle.
+{
+    TestOriginatorQosMacDataService txopDataService;
+    TestPacketQueue txopPendingQueue;
+    auto initialTxopFrame = new Packet("initialTxopFrame", makeQosHeader(peer1, 1, SequenceNumberCyclic(2)));
+    auto continuedTxopFrame = new Packet("continuedTxopFrame", makeQosHeader(peer1, 1, SequenceNumberCyclic(3)));
+    txopPendingQueue.packets = { continuedTxopFrame };
+    TestInProgressFrames txopInProgressFrames;
+    txopInProgressFrames.configure(&txopDataService, &ackHandler, &txopPendingQueue);
+    txopInProgressFrames.addFrame(initialTxopFrame);
+    TestTxopProcedure txopProcedure;
+    FrameSequenceContext txopContext(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &txopInProgressFrames, nullptr, nullptr, nullptr, new QoSContext(nullptr, nullptr, nullptr, &txopProcedure));
+    HcfFs hcfFs;
+    RepeatingFs repeatingFs(new TestEmptyFrameSequence(), [&hcfFs](RepeatingFs *frameSequence, FrameSequenceContext *context) { return hcfFs.hasMoreTxOps(frameSequence, context); });
+    repeatingFs.startSequence(&txopContext, 0);
+    ASSERT(repeatingFs.getCount() == 1);
+    ASSERT(txopPendingQueue.getNumPackets() == 1);
+    txopInProgressFrames.dropFrame(initialTxopFrame);
+    repeatingFs.repeatSequence(&txopContext);
+    ASSERT(repeatingFs.getCount() == 2);
+    ASSERT(txopPendingQueue.getNumPackets() == 0);
+    ASSERT(txopPendingQueue.numSelectedDequeues == 1);
+    ASSERT(txopInProgressFrames.getFrameToTransmit() == continuedTxopFrame);
+    auto txopFrames = txopInProgressFrames.releaseFrames();
+    ASSERT(txopFrames.size() == 2);
+    for (auto frame : txopFrames)
+        delete frame;
+}
+
+// Legacy DCF materializes its first queued frame before starting DcfFs, and a
+// stale empty grant is released without dereferencing a null frame.
+{
+    TestOriginatorQosMacDataService dcfDataService;
+    TestPacketQueue dcfPendingQueue;
+    TestInProgressFrames dcfInProgressFrames;
+    dcfInProgressFrames.configure(&dcfDataService, &ackHandler, &dcfPendingQueue);
+    TestDcaf dcaf;
+    dcaf.configure(&dcfInProgressFrames);
+    TestDcf dcf;
+    TestMac dcfMac;
+    auto dcfHandler = dcf.configure(&dcaf, &dcfMac);
+    dcf.grant(&dcaf);
+    ASSERT(dcaf.numReleasedChannels == 1);
+    ASSERT(dcfMac.numPendingRadioConfigSends == 1);
+    ASSERT(dcfHandler->numStartedSequences == 0);
+}
+{
+    TestOriginatorQosMacDataService dcfDataService;
+    TestPacketQueue dcfPendingQueue;
+    auto firstDcfFrame = new Packet("firstDcfFrame", makeQosHeader(peer1, 0, SequenceNumberCyclic(0)));
+    dcfPendingQueue.packets = { firstDcfFrame };
+    TestInProgressFrames dcfInProgressFrames;
+    dcfInProgressFrames.configure(&dcfDataService, &ackHandler, &dcfPendingQueue);
+    TestDcaf dcaf;
+    dcaf.configure(&dcfInProgressFrames);
+    TestDcf dcf;
+    TestMac dcfMac;
+    auto dcfHandler = dcf.configure(&dcaf, &dcfMac);
+    dcf.grant(&dcaf);
+    ASSERT(dcaf.numReleasedChannels == 0);
+    ASSERT(dcfMac.numPendingRadioConfigSends == 0);
+    ASSERT(dcfHandler->numStartedSequences == 1);
+    ASSERT(dcfPendingQueue.getNumPackets() == 0);
+    ASSERT(dcfInProgressFrames.getFrameToTransmit() == firstDcfFrame);
+    auto dcfFrames = dcfInProgressFrames.releaseFrames();
+    ASSERT(dcfFrames.size() == 1);
+    delete dcfFrames.at(0);
+}
+
 EV << "ADDBA transaction and negotiated SSN integrity checks passed.\n";
 
 %contains: stdout

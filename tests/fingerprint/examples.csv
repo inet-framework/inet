@@ -659,6 +659,7 @@
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         acd6-0108/tplx;b339-294a/~tNl;58ed-6137/~tND;a4c3-19bf/tyf, PASS, wireless Ipv4
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         9ece-fbfb/tplx;c1af-29ff/~tNl;01a6-2535/~tND;b2d6-1329/tyf, PASS, wireless Ipv4
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         d094-b008/tplx;173a-e3fb/~tNl;82c5-b383/~tND;08b5-d005/tyf, PASS, wireless Ipv4
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithTransactionalBlockAck -r 0, 3s, c4ff-d71f/tplx;68ba-2827/~tNl;9a98-cc02/~tND, PASS, wireless Ipv4
 
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            bf30-2f13/tplx;7b2f-653d/~tNl;6e1e-3b7b/~tND;19fe-8b0e/tyf, PASS, wireless
 
