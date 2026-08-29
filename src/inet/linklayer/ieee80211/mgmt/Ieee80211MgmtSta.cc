@@ -521,6 +521,12 @@ void Ieee80211MgmtSta::disassociate()
     EV << "Disassociating from AP address=" << assocAP.address << "\n";
     ASSERT(mib->bssStationData.isAssociated);
     cancelPendingAssociation();
+    clearCurrentAssociation();
+}
+
+void Ieee80211MgmtSta::clearCurrentAssociation()
+{
+    ASSERT(mib->bssStationData.isAssociated);
     mib->bssStationData.isAssociated = false;
     mib->removePeerHtCapabilities(assocAP.address);
     cancelAndDelete(assocAP.beaconTimeoutMsg);
@@ -794,20 +800,35 @@ void Ieee80211MgmtSta::handleReassociationResponseFrame(Packet *packet, const Pt
 void Ieee80211MgmtSta::handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Received Disassociation frame\n";
-    const MacAddress& address = header->getAddress3(); // source address
+    // IEEE Std 802.11-2024, 9.3.3.1: Address 2 carries the transmitter (TA/SA).
+    const MacAddress& address = header->getTransmitterAddress();
 
-    cancelPendingAssociation();
+    // IEEE Std 802.11-2024, 11.3.5.7: process a Disassociation only from the
+    // AP whose peer state is State 3/4. In particular, a pending association
+    // to another AP must survive an unrelated frame.
     if (!mib->bssStationData.isAssociated || address != assocAP.address) {
         EV << "Not associated with that AP -- ignoring frame\n";
         delete packet;
         return;
     }
 
+    ApInfo *pendingAp = assocTimeoutMsg ? static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer()) : nullptr;
+    bool pendingReassociation = reassociationInProgress;
+    bool terminatesPendingRequest = pendingAp != nullptr && pendingAp->address == address;
+    if (terminatesPendingRequest)
+        cancelPendingAssociation();
+
     EV << "Setting isAssociated flag to false\n";
-    mib->bssStationData.isAssociated = false;
-    mib->removePeerHtCapabilities(address);
-    cancelAndDelete(assocAP.beaconTimeoutMsg);
-    assocAP.beaconTimeoutMsg = nullptr;
+    clearCurrentAssociation();
+    if (terminatesPendingRequest) {
+        // INET primitive policy: the current API has no peer-aborted result,
+        // so a same-peer terminated association/reassociation maps to refusal.
+        if (pendingReassociation)
+            sendReassociationConfirm(pendingAp, PRC_REFUSED);
+        else
+            sendAssociationConfirm(pendingAp, PRC_REFUSED);
+    }
+    delete packet;
 }
 
 void Ieee80211MgmtSta::handleBeaconFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)

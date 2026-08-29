@@ -216,8 +216,6 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
         mib->bssAccessPointData.stations[staAddress] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
     }
-    clearPendingAssociation(sta);
-
     // reset authentication status, when starting a new auth sequence
     // The statements below are added because the L2 handover time was greater than before when
     // a STA wants to re-connect to an AP with which it was associated before. When the STA wants to
@@ -226,6 +224,11 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
     // receives authentication frame number 1 from STA, which will cause the AP to return an Auth-Error
     // making the MN STA to start the handover process all over again.
     if (frameAuthSeq == 1) {
+        // INET policy: an accepted new authentication sequence supersedes any
+        // association response that is still owned by the MAC. IEEE 802.11-2024
+        // 11.3.4 does not require an associated peer to downgrade on frame 1;
+        // keep this cancellation scoped to this existing model transition.
+        clearPendingAssociation(sta);
         if (mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED) {
             sendDisAssocNotification(sta->address);
             mib->releaseAssociationId(sta->address);

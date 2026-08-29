@@ -168,6 +168,9 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     /** Utility function: Cancel the existing association */
     virtual void disassociate();
 
+    /** Utility function: clear the existing association without touching a pending transition. */
+    virtual void clearCurrentAssociation();
+
     /** Utility function: sends a confirmation to the agent */
     virtual void sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode resultCode);
 

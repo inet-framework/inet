@@ -1,0 +1,301 @@
+%description:
+Verify that a station processes a Disassociation only when it is transmitted
+by the currently associated AP. Foreign and pending-only frames preserve an
+active association transaction, while a current-AP frame clears the current
+association and emits one typed refusal only for a same-AP pending request.
+
+%file: TestIeee80211MgmtSta.cc
+
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211MgmtSta : public Ieee80211MgmtSta
+{
+  protected:
+    ApInfo *ensureAccessPoint(const MacAddress& address)
+    {
+        auto ap = lookupAP(address);
+        if (ap == nullptr) {
+            apList.push_back(ApInfo());
+            ap = &apList.back();
+            ap->address = address;
+            ap->channel = 1;
+            ap->ssid = "SSID";
+            ap->beaconInterval = SimTime(100, SIMTIME_MS);
+            ap->isAuthenticated = true;
+        }
+        return ap;
+    }
+
+  public:
+    int associateConfirms = 0;
+    int reassociateConfirms = 0;
+    Ieee80211PrimResultCode lastAssociationResult = PRC_SUCCESS;
+    Ieee80211PrimResultCode lastReassociationResult = PRC_SUCCESS;
+    MacAddress lastAssociationAddress;
+    MacAddress lastReassociationAddress;
+    bool confirmationSawClearedAssociation = false;
+
+    void setAssociated(const MacAddress& address)
+    {
+        Enter_Method("setAssociated");
+        ASSERT(!mib->bssStationData.isAssociated);
+        ensureAccessPoint(address);
+        mib->bssData.bssid = address;
+        mib->bssStationData.isAssociated = true;
+        assocAP = AssociatedApInfo();
+        assocAP.address = address;
+        assocAP.channel = 1;
+        assocAP.ssid = "SSID";
+        assocAP.beaconInterval = SimTime(100, SIMTIME_MS);
+        assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", 6);
+        scheduleAfter(SimTime(1, SIMTIME_S), assocAP.beaconTimeoutMsg);
+    }
+
+    void preparePendingAssociation(const MacAddress& address, bool reassociation)
+    {
+        Enter_Method("preparePendingAssociation");
+        ASSERT(assocTimeoutMsg == nullptr);
+        auto ap = ensureAccessPoint(address);
+        assocTimeoutMsg = new cMessage("assocTimeout", 2);
+        assocTimeoutMsg->setContextPointer(ap);
+        reassociationInProgress = reassociation;
+        scheduleAfter(SimTime(1, SIMTIME_S), assocTimeoutMsg);
+    }
+
+    void abandonPendingAssociation()
+    {
+        Enter_Method("abandonPendingAssociation");
+        cancelPendingAssociation();
+    }
+
+    bool hasPendingAssociation() const { return assocTimeoutMsg != nullptr; }
+    bool isPendingAssociationScheduled() const { return assocTimeoutMsg != nullptr && assocTimeoutMsg->isScheduled(); }
+    bool isReassociationPending() const { return reassociationInProgress; }
+    bool isAssociated() const { return mib->bssStationData.isAssociated; }
+    MacAddress getAssociatedAddress() const { return assocAP.address; }
+
+    void deliverDisassociation(const MacAddress& transmitter, const MacAddress& address3)
+    {
+        Enter_Method("deliverDisassociation");
+        auto packet = new Packet("Disassociation");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(transmitter);
+        header->setAddress3(address3);
+        handleDisassociationFrame(packet, header);
+    }
+
+    void deliverAssociationResponse(const MacAddress& transmitter, bool reassociation, Ieee80211StatusCode statusCode)
+    {
+        Enter_Method("deliverAssociationResponse");
+        auto packet = new Packet("AssociationResponse");
+        auto body = makeShared<Ieee80211AssociationResponseFrame>();
+        body->setStatusCode(statusCode);
+        body->setChunkLength(B(6));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(transmitter);
+        processAssociationResponse(packet, header, reassociation);
+    }
+
+  protected:
+    virtual void sendAssociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode) override
+    {
+        associateConfirms++;
+        lastAssociationAddress = ap->address;
+        lastAssociationResult = resultCode;
+        confirmationSawClearedAssociation = confirmationSawClearedAssociation ||
+                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified());
+    }
+
+    virtual void sendReassociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode) override
+    {
+        reassociateConfirms++;
+        lastReassociationAddress = ap->address;
+        lastReassociationResult = resultCode;
+        confirmationSawClearedAssociation = confirmationSawClearedAssociation ||
+                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified());
+    }
+};
+
+Define_Module(TestIeee80211MgmtSta);
+
+class Ieee80211MgmtStaDisassociationTest : public cSimpleModule
+{
+  protected:
+    TestIeee80211MgmtSta *mgmt = nullptr;
+
+  public:
+    Ieee80211MgmtStaDisassociationTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void initialize() override
+    {
+        mgmt = check_and_cast<TestIeee80211MgmtSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+    }
+
+    virtual void activity() override
+    {
+        const MacAddress currentAp("02:00:00:00:00:01");
+        const MacAddress targetAp("02:00:00:00:00:02");
+        const MacAddress foreignAp("02:00:00:00:00:03");
+
+        // A pending-only target is not an associated peer and cannot cancel
+        // the request merely by transmitting a Disassociation.
+        mgmt->preparePendingAssociation(targetAp, true);
+        mgmt->deliverDisassociation(targetAp, foreignAp);
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(mgmt->isPendingAssociationScheduled());
+        ASSERT(mgmt->isReassociationPending());
+        mgmt->abandonPendingAssociation();
+
+        // Address 3 is deliberately the pending target; Address 2 is
+        // unrelated. Validation must use the transmitter address.
+        mgmt->preparePendingAssociation(targetAp, false);
+        mgmt->deliverDisassociation(foreignAp, targetAp);
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(mgmt->isPendingAssociationScheduled());
+        ASSERT(!mgmt->isReassociationPending());
+        mgmt->abandonPendingAssociation();
+
+        // A current-AP frame tears down the current pair when no request is
+        // pending, including the beacon timer and copied association state.
+        mgmt->setAssociated(currentAp);
+        mgmt->deliverDisassociation(currentAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress().isUnspecified());
+        ASSERT(mgmt->associateConfirms == 0);
+        ASSERT(mgmt->reassociateConfirms == 0);
+
+        // A foreign frame leaves both the current association and a request
+        // to another AP untouched.
+        mgmt->setAssociated(currentAp);
+        mgmt->preparePendingAssociation(targetAp, true);
+        mgmt->deliverDisassociation(foreignAp, currentAp);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(mgmt->isPendingAssociationScheduled());
+        ASSERT(mgmt->isReassociationPending());
+        ASSERT(mgmt->reassociateConfirms == 0);
+
+        // The current AP can clear its own association without cancelling the
+        // reassociation transaction to another AP; that response can still
+        // complete the pending request.
+        mgmt->deliverDisassociation(currentAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress().isUnspecified());
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(mgmt->isPendingAssociationScheduled());
+        ASSERT(mgmt->isReassociationPending());
+        mgmt->deliverAssociationResponse(targetAp, true, SC_SUCCESSFUL);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == targetAp);
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(mgmt->reassociateConfirms == 1);
+        ASSERT(mgmt->lastReassociationResult == PRC_SUCCESS);
+        mgmt->deliverDisassociation(targetAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+
+        // A same-AP pending reassociation is terminated exactly once. The
+        // overridden confirmation also proves that teardown precedes the
+        // primitive visible to the agent.
+        mgmt->setAssociated(targetAp);
+        mgmt->preparePendingAssociation(targetAp, true);
+        mgmt->deliverDisassociation(targetAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress().isUnspecified());
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(mgmt->reassociateConfirms == 2);
+        ASSERT(mgmt->lastReassociationAddress == targetAp);
+        ASSERT(mgmt->lastReassociationResult == PRC_REFUSED);
+        ASSERT(mgmt->confirmationSawClearedAssociation);
+        mgmt->deliverAssociationResponse(targetAp, true, SC_SUCCESSFUL);
+        ASSERT(mgmt->reassociateConfirms == 2);
+
+        // Exercise the association confirmation branch as well, even though
+        // normal station sequencing starts association while unassociated.
+        mgmt->setAssociated(currentAp);
+        mgmt->preparePendingAssociation(currentAp, false);
+        mgmt->deliverDisassociation(currentAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(mgmt->associateConfirms == 1);
+        ASSERT(mgmt->lastAssociationAddress == currentAp);
+        ASSERT(mgmt->lastAssociationResult == PRC_REFUSED);
+
+        std::cout << "STA Disassociation peer filtering and pending-request preservation verified.\n";
+        std::cout << "STA same-peer disassociation confirmation typing and teardown verified.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtStaDisassociationTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+
+simple TestIeee80211MgmtSta extends Ieee80211MgmtSta
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtSta);
+}
+
+simple Ieee80211MgmtStaDisassociationTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtStaDisassociationTest);
+}
+
+network Ieee80211MgmtStaDisassociationTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtSta";
+        }
+        test: Ieee80211MgmtStaDisassociationTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtStaDisassociationTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.sta.wlan[0].address = "02:00:00:00:00:09"
+*.sta.wlan[0].agent.startingTime = 1s
+**.wlan[*].opMode = "g(mixed)"
+**.wlan[*].bitrate = 11Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+STA Disassociation peer filtering and pending-request preservation verified.
+
+%contains: stdout
+STA same-peer disassociation confirmation typing and teardown verified.

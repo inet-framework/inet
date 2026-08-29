@@ -25,6 +25,16 @@ namespace ieee80211 {
 class TestIeee80211MgmtAp : public Ieee80211MgmtAp
 {
   public:
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype,
+            const MacAddress& destAddr, uint64_t transactionId = 0) override
+    {
+        // Authentication replies are irrelevant to this AP-side transaction
+        // test; suppress them so the tester MAC does not need auth actions.
+        if (subtype == ST_AUTHENTICATION)
+            return;
+        Ieee80211MgmtAp::sendManagementFrame(name, body, subtype, destAddr, transactionId);
+    }
+
     virtual void start() override
     {
         // Keep the AP beacon timer out of this focused exchange.  The STA's
@@ -155,6 +165,34 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         auto& sta = staList[address];
         sta.address = address;
         mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+    }
+
+    void setAuthenticationSequenceExpected(const MacAddress& address, int sequenceNumber)
+    {
+        staList.at(address).authSeqExpected = sequenceNumber;
+    }
+
+    void submitAuthentication(const MacAddress& address, int sequenceNumber)
+    {
+        Enter_Method("submitAuthentication");
+        auto packet = new Packet("Authentication");
+        auto body = makeShared<Ieee80211AuthenticationFrame>();
+        body->setSequenceNumber(sequenceNumber);
+        body->setStatusCode(SC_SUCCESSFUL);
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAuthenticationFrame(packet, header);
+    }
+
+    bool hasPendingHtState(const MacAddress& address) const
+    {
+        return staList.at(address).pendingHtStateAvailable;
+    }
+
+    void setPendingHtState(const MacAddress& address)
+    {
+        staList.at(address).pendingHtStateAvailable = true;
     }
 
     void submitDuplicateRequest(const MacAddress& address, bool reassociation)
@@ -426,6 +464,40 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->hasPendingAssociation(failed));
         ASSERT(mgmt->getStationStatus(failed) == Ieee80211Mib::ASSOCIATED);
         ASSERT(mgmt->getCommittedAssociationId(failed) == failedAid);
+
+        // Authentication traffic with an invalid sequence number must not
+        // revoke the response transaction that the MAC still owns.
+        MacAddress invalidAuthentication("02:00:00:00:00:0d");
+        short invalidAuthenticationAid = mgmt->startPendingAssociation(invalidAuthentication);
+        uint64_t invalidAuthenticationTransaction = mgmt->getPendingAssociationTransactionId(invalidAuthentication);
+        mgmt->setAuthenticationSequenceExpected(invalidAuthentication, 1);
+        mgmt->markAuthenticated(invalidAuthentication);
+        mgmt->setPendingHtState(invalidAuthentication);
+        mgmt->submitAuthentication(invalidAuthentication, 2);
+        ASSERT(mgmt->hasPendingAssociation(invalidAuthentication));
+        ASSERT(mgmt->getPendingAssociationTransactionId(invalidAuthentication) == invalidAuthenticationTransaction);
+        ASSERT(mgmt->hasPendingHtState(invalidAuthentication));
+        ASSERT(mgmt->reserveAssociationId(invalidAuthentication) == invalidAuthenticationAid);
+        expectedAssociatedAddress = invalidAuthentication;
+        expectedAssociationId = invalidAuthenticationAid;
+        mgmt->finishAssociationResponse(invalidAuthentication, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, invalidAuthenticationTransaction);
+        ASSERT(!mgmt->hasPendingAssociation(invalidAuthentication));
+        ASSERT(mgmt->getStationStatus(invalidAuthentication) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->getCommittedAssociationId(invalidAuthentication) == invalidAuthenticationAid);
+
+        // Frame 1 keeps the existing INET restart policy: it supersedes an
+        // in-flight response, and a stale terminal callback is harmless.
+        MacAddress restartedAuthentication("02:00:00:00:00:0e");
+        short restartedAuthenticationAid = mgmt->startPendingAssociation(restartedAuthentication);
+        uint64_t restartedAuthenticationTransaction = mgmt->getPendingAssociationTransactionId(restartedAuthentication);
+        mgmt->setAuthenticationSequenceExpected(restartedAuthentication, 1);
+        mgmt->markAuthenticated(restartedAuthentication);
+        mgmt->submitAuthentication(restartedAuthentication, 1);
+        ASSERT(!mgmt->hasPendingAssociation(restartedAuthentication));
+        ASSERT(mgmt->reserveAssociationId(restartedAuthentication) == restartedAuthenticationAid);
+        mgmt->cancelAssociationIdReservation(restartedAuthentication);
+        mgmt->finishAssociationResponse(restartedAuthentication, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, restartedAuthenticationTransaction);
+        ASSERT(!mgmt->hasCommittedAssociationId(restartedAuthentication));
 
         std::cout << "AP association response delayed-completion lifecycle verified.\n";
         std::cout << "AP reassociation notification commit ordering verified.\n";
