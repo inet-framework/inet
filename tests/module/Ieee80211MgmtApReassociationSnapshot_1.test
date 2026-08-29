@@ -1,0 +1,190 @@
+%description:
+Verify that an AP reassociation response commits the exact HT Operation
+snapshot advertised when the response was constructed, even if the AP radio
+changes channel before the terminal ACK callback.
+
+%file: TestIeee80211MgmtApReassociationSnapshot.cc
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class Ieee80211MgmtApReassociationSnapshotAp : public Ieee80211MgmtAp
+{
+  protected:
+    int advertisedPrimaryChannel = -1;
+
+    virtual void start() override
+    {
+        // The response is injected directly below; keep beacon traffic out
+        // of this focused transaction.
+        Ieee80211MgmtApBase::start();
+    }
+
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& destAddr, uint64_t transactionId = 0) override
+    {
+        if (subtype == ST_REASSOCIATIONRESPONSE) {
+            ASSERT(body->getHtOperationPresent());
+            advertisedPrimaryChannel = body->getHtOperation().primaryChannel;
+        }
+    }
+
+  public:
+    void markAuthenticated(const MacAddress& address)
+    {
+        auto& sta = staList[address];
+        sta.address = address;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+    }
+
+    void submitReassociationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitReassociationRequest");
+        auto packet = new Packet("ReassociationRequest");
+        auto body = makeShared<Ieee80211ReassociationRequestFrame>();
+        body->setCurrentAP(mib->address);
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setHtCapabilitiesPresent(true);
+        body->setHtCapabilities(makeHtCapabilitiesElement(mib->localHtCapabilities));
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleReassociationRequestFrame(packet, header);
+    }
+
+    int getAdvertisedPrimaryChannel() const { return advertisedPrimaryChannel; }
+
+    uint64_t getPendingTransactionId(const MacAddress& address) const
+    {
+        return staList.at(address).pendingAssociationTransactionId;
+    }
+
+    void finishReassociationResponse(const MacAddress& address)
+    {
+        Enter_Method("finishReassociationResponse");
+        auto response = new Packet("ReassociationResponse");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_REASSOCIATIONRESPONSE);
+        header->setReceiverAddress(address);
+        response->insertAtBack(header);
+        response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(getPendingTransactionId(address));
+        IFrameTransmissionCallback::Result result(response, IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+        frameTransmissionFinished(result);
+        delete response;
+    }
+
+    bool hasPendingAssociation(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it != staList.end() && it->second.pendingAssociationTransactionId != 0;
+    }
+};
+
+Define_Module(Ieee80211MgmtApReassociationSnapshotAp);
+
+class Ieee80211MgmtApReassociationSnapshotTest : public cSimpleModule
+{
+  public:
+    Ieee80211MgmtApReassociationSnapshotTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        auto mgmt = check_and_cast<Ieee80211MgmtApReassociationSnapshotAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        auto radio = check_and_cast<physicallayer::Ieee80211Radio *>(getModuleByPath("^.ap.wlan[0].radio"));
+        const MacAddress staAddress("02:00:00:00:00:09");
+
+        mgmt->markAuthenticated(staAddress);
+        mgmt->submitReassociationRequest(staAddress);
+        ASSERT(mgmt->getAdvertisedPrimaryChannel() == 6);
+        ASSERT(mib->requirePrimaryChannel() == 6);
+
+        radio->setChannelNumber(11);
+        ASSERT(mib->requirePrimaryChannel() == 11);
+        mgmt->finishReassociationResponse(staAddress);
+
+        ASSERT(!mgmt->hasPendingAssociation(staAddress));
+        ASSERT(mib->bssAccessPointData.stations.at(staAddress) == Ieee80211Mib::ASSOCIATED);
+        const auto *peerState = mib->findPeerHtState(staAddress);
+        ASSERT(peerState != nullptr);
+        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 6);
+        std::cout << "AP reassociation commits the response-time HT Operation snapshot after a channel change.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtApReassociationSnapshotTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple Ieee80211MgmtApReassociationSnapshotAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApReassociationSnapshotAp);
+}
+
+simple Ieee80211MgmtApReassociationSnapshotTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApReassociationSnapshotTest);
+}
+
+network Ieee80211MgmtApReassociationSnapshotNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtApReassociationSnapshotAp";
+        }
+        test: Ieee80211MgmtApReassociationSnapshotTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApReassociationSnapshotNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1ms
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.ap.wlan[0].radio.channelNumber = 6
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 65Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.mobility.initialX = 0m
+*.ap.mobility.initialY = 0m
+
+%contains: stdout
+AP reassociation commits the response-time HT Operation snapshot after a channel change.

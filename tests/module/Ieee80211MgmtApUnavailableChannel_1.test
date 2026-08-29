@@ -1,0 +1,44 @@
+%description:
+An HT-capable AP must not serialize a management frame before its radio has
+published a valid primary channel.  A radio channel of -1 suppresses the
+initial channel signal, so the first beacon deterministically reports the
+missing MIB-owned channel instead of serializing an invalid value.
+
+%file: test.ned
+
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+network Ieee80211MgmtApUnavailableChannelTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApUnavailableChannelTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10us
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].radio.channelNumber = -1
+*.ap.wlan[0].mgmt.beaconInterval = 1us
+**.wlan[0].opMode = "n(mixed-2.4Ghz)"
+**.wlan[0].bitrate = 65Mbps
+**.wlan[0].radio.bandName = "2.4 GHz"
+**.wlan[0].radio.centerFrequency = 2.4GHz
+*.ap.mobility.initFromDisplayString = false
+*.ap.mobility.initialX = 0m
+*.ap.mobility.initialY = 0m
+
+%exitcode: 1
+
+%postrun-command: grep "<!>" test.* > test_err.out || true
+
+%contains: test_err.out
+IEEE 802.11 primary channel is unavailable

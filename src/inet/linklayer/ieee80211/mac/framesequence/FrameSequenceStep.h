@@ -74,4 +74,3 @@ class INET_API ReceiveStep : public IReceiveStep
 } // namespace inet
 
 #endif
-

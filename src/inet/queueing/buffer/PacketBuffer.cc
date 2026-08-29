@@ -66,7 +66,7 @@ void PacketBuffer::addPacket(Packet *packet)
                 if (queue != nullptr) {
                     ICallback *callback = dynamic_cast<ICallback *>(queue->getOwner());
                     if (callback != nullptr)
-                        callback->handlePacketRemoved(packet);
+                        callback->handlePacketDropped(packet);
                 }
                 // TODO maybe the buffer should take ownership and queues should be aware of it
                 take(packet);
@@ -118,4 +118,3 @@ Packet *PacketBuffer::getPacket(int index) const
 
 } // namespace queueing
 } // namespace inet
-

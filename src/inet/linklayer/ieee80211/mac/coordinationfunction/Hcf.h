@@ -35,6 +35,7 @@
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
 
 namespace inet {
@@ -45,7 +46,7 @@ class Ieee80211Mac;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener, public queueing::IPacketQueue::ICallback
 {
   public:
     static simsignal_t edcaCollisionDetectedSignal;
@@ -156,6 +157,9 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
+    // queueing::IPacketQueue::ICallback
+    virtual void handlePacketDropped(Packet *packet) override;
+
     // IProcedureCallback
     virtual void scheduleInactivityTimer(simtime_t timeout) override;
 
@@ -174,4 +178,3 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 } /* namespace inet */
 
 #endif
-

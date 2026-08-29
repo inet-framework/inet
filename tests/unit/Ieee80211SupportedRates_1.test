@@ -1,6 +1,7 @@
 %description:
 Verify Supported Rates and Extended Supported Rates lengths, basic-rate
-membership, split/merge behavior, and malformed-element rejection.
+membership, split/merge behavior, malformed-element rejection, and logical
+Association/Reassociation Response AID encoding.
 
 %includes:
 #include <algorithm>
@@ -35,6 +36,21 @@ static Ptr<Ieee80211AssociationResponseFrame> makeResponse(short numRates,
     return frame;
 }
 
+static Ptr<Ieee80211ReassociationResponseFrame> makeReassociationResponse(short aid,
+        Ieee80211StatusCode statusCode = SC_SUCCESSFUL)
+{
+    auto frame = makeShared<Ieee80211ReassociationResponseFrame>();
+    frame->setStatusCode(statusCode);
+    frame->setAid(aid);
+    Ieee80211SupportedRatesElement rates;
+    rates.numRates = 1;
+    rates.rate[0] = 0.5;
+    rates.basicRate[0] = true;
+    frame->setSupportedRates(rates);
+    frame->setChunkLength(B(9));
+    return frame;
+}
+
 template<typename Frame>
 static std::vector<uint8_t> serializeFrame(const Ptr<Frame>& frame)
 {
@@ -48,7 +64,7 @@ static std::vector<uint8_t> makeRawResponse(uint16_t wireAid, const std::vector<
     std::vector<uint8_t> bytes = {
         0, 0, // Capability
         static_cast<uint8_t>(statusCode >> 8), static_cast<uint8_t>(statusCode),
-        static_cast<uint8_t>(wireAid >> 8), static_cast<uint8_t>(wireAid),
+        static_cast<uint8_t>(wireAid), static_cast<uint8_t>(wireAid >> 8),
         1, static_cast<uint8_t>(rates.size())};
     bytes.insert(bytes.end(), rates.begin(), rates.end());
     return bytes;
@@ -67,6 +83,7 @@ static Ptr<const Frame> deserializeFrame(const std::vector<uint8_t>& bytes)
 auto oneRateFrame = makeResponse(1);
 auto oneRateBytes = serializeFrame(oneRateFrame);
 ASSERT(oneRateBytes.size() == 9);
+ASSERT(oneRateBytes[4] == 1 && oneRateBytes[5] == 0xC0);
 ASSERT(oneRateBytes[6] == 1 && oneRateBytes[7] == 1);
 ASSERT(oneRateBytes[8] == (0x80 | 1));
 auto oneRateDecoded = deserializeFrame<Ieee80211AssociationResponseFrame>(oneRateBytes);
@@ -97,7 +114,7 @@ catch (const cRuntimeError&) {
 }
 ASSERT(zeroRateSerializationRejected);
 
-auto nineRateRaw = makeRawResponse(1, {1, 2, 3, 4, 5, 6, 7, 8, 9});
+auto nineRateRaw = makeRawResponse(0xC001, {1, 2, 3, 4, 5, 6, 7, 8, 9});
 bool nineRateDeserializationRejected = false;
 try {
     deserializeFrame<Ieee80211AssociationResponseFrame>(nineRateRaw);
@@ -107,7 +124,7 @@ catch (const cRuntimeError&) {
 }
 ASSERT(nineRateDeserializationRejected);
 
-auto truncatedPrimary = makeRawResponse(1, {1});
+auto truncatedPrimary = makeRawResponse(0xC001, {1});
 truncatedPrimary[7] = 2;
 bool truncatedPrimaryRejected = false;
 try {
@@ -132,7 +149,7 @@ splitFrame->setExtendedSupportedRates(extendedRates);
 splitFrame->setChunkLength(B(6) + B(2 + 8) + B(2 + 5));
 auto splitBytes = serializeFrame(splitFrame);
 ASSERT(splitBytes.size() == 23);
-ASSERT(splitBytes[4] == 0x07 && splitBytes[5] == 0xD7);
+ASSERT(splitBytes[4] == 0xD7 && splitBytes[5] == 0xC7);
 ASSERT(splitBytes[16] == 50 && splitBytes[17] == 5);
 for (int i = 0; i < 5; i++)
     ASSERT(splitBytes[18 + i] == (static_cast<uint8_t>(i + 9) | ((i == 1 || i == 4) ? 0x80 : 0)));
@@ -145,7 +162,7 @@ for (int i = 0; i < 5; i++) {
     ASSERT(splitDecoded->getExtendedSupportedRates().basicRate[i] == (i == 1 || i == 4));
 }
 
-auto extendedZero = makeRawResponse(1, {1});
+auto extendedZero = makeRawResponse(0xC001, {1});
 extendedZero.push_back(50);
 extendedZero.push_back(0);
 bool extendedZeroRejected = false;
@@ -157,7 +174,7 @@ catch (const cRuntimeError&) {
 }
 ASSERT(extendedZeroRejected);
 
-auto extendedTruncated = makeRawResponse(1, {1});
+auto extendedTruncated = makeRawResponse(0xC001, {1});
 extendedTruncated.push_back(50);
 extendedTruncated.push_back(2);
 extendedTruncated.push_back(2);
@@ -170,7 +187,7 @@ catch (const cRuntimeError&) {
 }
 ASSERT(extendedTruncatedRejected);
 
-auto extendedDuplicate = makeRawResponse(1, {1});
+auto extendedDuplicate = makeRawResponse(0xC001, {1});
 extendedDuplicate.insert(extendedDuplicate.end(), {50, 1, 2, 50, 1, 3});
 bool extendedDuplicateRejected = false;
 try {
@@ -181,7 +198,7 @@ catch (const cRuntimeError&) {
 }
 ASSERT(extendedDuplicateRejected);
 
-auto primaryDuplicate = makeRawResponse(1, {1});
+auto primaryDuplicate = makeRawResponse(0xC001, {1});
 primaryDuplicate.insert(primaryDuplicate.end(), {1, 1, 2});
 bool primaryDuplicateRejected = false;
 try {
@@ -191,6 +208,91 @@ catch (const cRuntimeError&) {
     primaryDuplicateRejected = true;
 }
 ASSERT(primaryDuplicateRejected);
+
+// IEEE Std 802.11-2024, 9.2.2, 9.3.3.6/Table 9-65,
+// 9.3.3.8/Table 9-67, and 9.4.1.8/Figure 9-146 require the marked
+// multi-octet AID to be transmitted least-significant octet first.
+// Decode independently supplied compliant vectors so a reciprocal
+// serializer/deserializer bug cannot pass.
+for (short aid : {short(1), short(2007)}) {
+    auto association = makeResponse(1, SC_SUCCESSFUL, aid);
+    auto associationBytes = serializeFrame(association);
+    uint16_t wireAid = static_cast<uint16_t>(0xC000 | aid);
+    ASSERT(associationBytes[4] == static_cast<uint8_t>(wireAid));
+    ASSERT(associationBytes[5] == static_cast<uint8_t>(wireAid >> 8));
+    ASSERT(deserializeFrame<Ieee80211AssociationResponseFrame>(associationBytes)->getAid() == aid);
+    auto reassociation = makeReassociationResponse(aid);
+    auto reassociationBytes = serializeFrame(reassociation);
+    ASSERT(reassociationBytes[4] == static_cast<uint8_t>(wireAid));
+    ASSERT(reassociationBytes[5] == static_cast<uint8_t>(wireAid >> 8));
+    ASSERT(deserializeFrame<Ieee80211ReassociationResponseFrame>(reassociationBytes)->getAid() == aid);
+}
+
+const std::vector<uint8_t> compliantAidOne = {0, 0, 0, 0, 0x01, 0xC0, 1, 1, 1};
+ASSERT(deserializeFrame<Ieee80211AssociationResponseFrame>(compliantAidOne)->getAid() == 1);
+ASSERT(deserializeFrame<Ieee80211ReassociationResponseFrame>(compliantAidOne)->getAid() == 1);
+const std::vector<uint8_t> compliantAid2007 = {0, 0, 0, 0, 0xD7, 0xC7, 1, 1, 1};
+ASSERT(deserializeFrame<Ieee80211AssociationResponseFrame>(compliantAid2007)->getAid() == 2007);
+ASSERT(deserializeFrame<Ieee80211ReassociationResponseFrame>(compliantAid2007)->getAid() == 2007);
+
+auto unsuccessful = makeResponse(1, SC_DATARATE_UNSUP, 0);
+auto unsuccessfulBytes = serializeFrame(unsuccessful);
+ASSERT(unsuccessfulBytes[4] == 0 && unsuccessfulBytes[5] == 0);
+ASSERT(deserializeFrame<Ieee80211AssociationResponseFrame>(unsuccessfulBytes)->getAid() == 0);
+auto unsuccessfulReassociation = makeReassociationResponse(0, SC_DATARATE_UNSUP);
+auto unsuccessfulReassociationBytes = serializeFrame(unsuccessfulReassociation);
+ASSERT(deserializeFrame<Ieee80211ReassociationResponseFrame>(unsuccessfulReassociationBytes)->getAid() == 0);
+
+for (uint16_t invalidWireAid : {uint16_t(1), uint16_t(0x8001), uint16_t(0xC000), uint16_t(0xC7D8)}) {
+    auto invalidWire = makeRawResponse(invalidWireAid, {1});
+    bool rejected = false;
+    try {
+        deserializeFrame<Ieee80211AssociationResponseFrame>(invalidWire);
+    }
+    catch (const cRuntimeError&) {
+        rejected = true;
+    }
+    ASSERT(rejected);
+    rejected = false;
+    try {
+        deserializeFrame<Ieee80211ReassociationResponseFrame>(invalidWire);
+    }
+    catch (const cRuntimeError&) {
+        rejected = true;
+    }
+    ASSERT(rejected);
+}
+
+for (short invalidLogicalAid : {short(0), short(2008)}) {
+    auto invalidAssociation = makeResponse(1, SC_SUCCESSFUL, invalidLogicalAid);
+    bool rejected = false;
+    try {
+        serializeFrame(invalidAssociation);
+    }
+    catch (const cRuntimeError&) {
+        rejected = true;
+    }
+    ASSERT(rejected);
+    auto invalidReassociation = makeReassociationResponse(invalidLogicalAid);
+    rejected = false;
+    try {
+        serializeFrame(invalidReassociation);
+    }
+    catch (const cRuntimeError&) {
+        rejected = true;
+    }
+    ASSERT(rejected);
+}
+
+auto unsuccessfulWithAid = makeRawResponse(1, {1}, SC_DATARATE_UNSUP);
+bool unsuccessfulAidRejected = false;
+try {
+    deserializeFrame<Ieee80211AssociationResponseFrame>(unsuccessfulWithAid);
+}
+catch (const cRuntimeError&) {
+    unsuccessfulAidRejected = true;
+}
+ASSERT(unsuccessfulAidRejected);
 
 // IEEE Std 802.11-2024, 9.4.2.3 and 11.1.4.6 encode legacy rates in 500 kb/s
 // units up to 63.5 Mb/s. HT MCS 7 is 65 Mb/s and remains an HT MCS.

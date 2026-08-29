@@ -1,0 +1,593 @@
+%description:
+Verify the AP association-response state machine by injecting a delayed
+terminal MAC completion: pending state survives beyond the former AP response
+deadline, commits exactly once, and preserves its association ID while
+duplicate association or reassociation requests are coalesced. Also verify
+failure, deauthentication, disassociation, and same-AP reassociation cleanup.
+Exercise the live DCF path by suppressing two acknowledgments until the retry
+limit drops an Association Response, then verify that a fresh transaction
+recovers through a real response/ACK exchange and reuses the released AID.
+
+%file: TestIeee80211MgmtAp.cc
+
+#include <vector>
+
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211MgmtAp : public Ieee80211MgmtAp
+{
+  public:
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype,
+            const MacAddress& destAddr, uint64_t transactionId = 0) override
+    {
+        // Authentication replies are irrelevant to this AP-side transaction
+        // test; suppress them so the tester MAC does not need auth actions.
+        if (subtype == ST_AUTHENTICATION)
+            return;
+        Ieee80211MgmtAp::sendManagementFrame(name, body, subtype, destAddr, transactionId);
+    }
+
+    virtual void start() override
+    {
+        // Keep the AP beacon timer out of this focused exchange.  The STA's
+        // scripted tester must see exactly the two failed response attempts
+        // followed by the response for the recovered transaction.
+        Ieee80211MgmtApBase::start();
+    }
+
+    short startPendingAssociation(const MacAddress& address)
+    {
+        Enter_Method("startPendingAssociation");
+        auto& sta = staList[address];
+        sta.address = address;
+        clearPendingAssociation(&sta);
+        short aid = mib->reserveAssociationId(address);
+        sta.pendingAssociationSuccessful = true;
+        sta.pendingAssociationTransactionId = createAssociationTransactionId();
+        return aid;
+    }
+
+    void submitAssociationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitAssociationRequest");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAssociationRequestFrame(packet, header);
+    }
+
+    short startPendingReassociation(const MacAddress& address)
+    {
+        Enter_Method("startPendingReassociation");
+        auto& sta = staList[address];
+        sta.address = address;
+        clearPendingAssociation(&sta);
+        short aid = mib->allocateAssociationId(address);
+        ASSERT(mib->reserveAssociationId(address) == aid);
+        sta.pendingAssociationSuccessful = true;
+        sta.pendingAssociationTransactionId = createAssociationTransactionId();
+        return aid;
+    }
+
+    short startSuccessfulReassociation(const MacAddress& address, Ieee80211Mib::BssMemberStatus status)
+    {
+        Enter_Method("startSuccessfulReassociation");
+        auto& sta = staList[address];
+        sta.address = address;
+        clearPendingAssociation(&sta);
+        mib->bssAccessPointData.stations[address] = status;
+        short aid = mib->reserveAssociationId(address);
+        sta.pendingAssociationSuccessful = true;
+        sta.pendingAssociationTransactionId = createAssociationTransactionId();
+        return aid;
+    }
+
+    short startPendingAssociatedReassociation(const MacAddress& address)
+    {
+        Enter_Method("startPendingAssociatedReassociation");
+        auto& sta = staList[address];
+        sta.address = address;
+        clearPendingAssociation(&sta);
+        short aid = mib->allocateAssociationId(address);
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
+        ASSERT(mib->reserveAssociationId(address) == aid);
+        sta.pendingAssociationSuccessful = true;
+        sta.pendingAssociationTransactionId = createAssociationTransactionId();
+        return aid;
+    }
+
+    void finishAssociationResponse(const MacAddress& address, IFrameTransmissionCallback::Status status,
+            bool moreFragments = false, uint64_t transactionId = 0)
+    {
+        if (transactionId == 0)
+            transactionId = staList.at(address).pendingAssociationTransactionId;
+        auto response = new Packet("ReassocResp");
+        auto responseHeader = makeShared<Ieee80211MgmtHeader>();
+        responseHeader->setType(ST_REASSOCIATIONRESPONSE);
+        responseHeader->setReceiverAddress(address);
+        responseHeader->setMoreFragments(moreFragments);
+        response->insertAtBack(responseHeader);
+        response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(transactionId);
+        IFrameTransmissionCallback::Result result(response, status);
+        frameTransmissionFinished(result);
+        delete response;
+    }
+
+    void deauthenticate(const MacAddress& address)
+    {
+        Enter_Method("deauthenticate");
+        auto packet = new Packet("Deauth");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleDeauthenticationFrame(packet, header);
+    }
+
+    void disassociate(const MacAddress& address)
+    {
+        Enter_Method("disassociate");
+        auto packet = new Packet("Disassoc");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleDisassociationFrame(packet, header);
+    }
+
+    bool hasPendingAssociation(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it != staList.end() && it->second.pendingAssociationTransactionId != 0;
+    }
+
+    uint64_t getPendingAssociationTransactionId(const MacAddress& address) const { return staList.at(address).pendingAssociationTransactionId; }
+
+    short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
+    void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
+    bool hasCommittedAssociationId(const MacAddress& address) const { return mib->bssAccessPointData.associationIds.find(address) != mib->bssAccessPointData.associationIds.end(); }
+    short getCommittedAssociationId(const MacAddress& address) const { return mib->bssAccessPointData.associationIds.at(address); }
+    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const { return mib->bssAccessPointData.stations.at(address); }
+    void markAuthenticated(const MacAddress& address)
+    {
+        auto& sta = staList[address];
+        sta.address = address;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+    }
+
+    void setAuthenticationSequenceExpected(const MacAddress& address, int sequenceNumber)
+    {
+        staList.at(address).authSeqExpected = sequenceNumber;
+    }
+
+    void submitAuthentication(const MacAddress& address, int sequenceNumber)
+    {
+        Enter_Method("submitAuthentication");
+        auto packet = new Packet("Authentication");
+        auto body = makeShared<Ieee80211AuthenticationFrame>();
+        body->setSequenceNumber(sequenceNumber);
+        body->setStatusCode(SC_SUCCESSFUL);
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAuthenticationFrame(packet, header);
+    }
+
+    bool hasPendingHtState(const MacAddress& address) const
+    {
+        return staList.at(address).pendingHtStateAvailable;
+    }
+
+    void setPendingHtState(const MacAddress& address)
+    {
+        staList.at(address).pendingHtStateAvailable = true;
+    }
+
+    void submitDuplicateRequest(const MacAddress& address, bool reassociation)
+    {
+        auto packet = new Packet(reassociation ? "DuplicateReassoc" : "DuplicateAssoc");
+        if (reassociation) {
+            auto body = makeShared<Ieee80211ReassociationRequestFrame>();
+            body->setCurrentAP(MacAddress::UNSPECIFIED_ADDRESS);
+            body->setSSID("SSID");
+            Ieee80211SupportedRatesElement rates;
+            rates.numRates = 1;
+            rates.rate[0] = 1;
+            body->setSupportedRates(rates);
+            body->setChunkLength(B(1));
+            packet->insertAtBack(body);
+        }
+        else {
+            auto body = makeShared<Ieee80211AssociationRequestFrame>();
+            body->setSSID("SSID");
+            Ieee80211SupportedRatesElement rates;
+            rates.numRates = 1;
+            rates.rate[0] = 1;
+            body->setSupportedRates(rates);
+            body->setChunkLength(B(1));
+            packet->insertAtBack(body);
+        }
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        if (reassociation)
+            handleReassociationRequestFrame(packet, header);
+        else
+            handleAssociationRequestFrame(packet, header);
+    }
+
+};
+
+Define_Module(TestIeee80211MgmtAp);
+
+class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
+{
+    using cListener::finish;
+
+  protected:
+    TestIeee80211MgmtAp *mgmt = nullptr;
+    cModule *apDcf = nullptr;
+    cModule *apRecoveryProcedure = nullptr;
+    cModule *staDcf = nullptr;
+    MacAddress expectedAssociatedAddress;
+    MacAddress expectedDisassociatedAddress;
+    short expectedAssociationId = 0;
+    int associationNotifications = 0;
+    int disassociationNotifications = 0;
+    int retryLimitReachedNotifications = 0;
+    int retryLimitReachedDrops = 0;
+    int staAckTransmissions = 0;
+    std::vector<bool> associationResponseRetries;
+
+  public:
+    Ieee80211MgmtApTimeoutTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void initialize() override
+    {
+        mgmt = check_and_cast<TestIeee80211MgmtAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        apDcf = getModuleByPath("^.ap.wlan[0].mac.dcf");
+        apRecoveryProcedure = getModuleByPath("^.ap.wlan[0].mac.dcf.recoveryProcedure");
+        staDcf = getModuleByPath("^.sta.wlan[0].mac.dcf");
+        mgmt->subscribe(l2ApAssociatedSignal, this);
+        mgmt->subscribe(l2ApDisassociatedSignal, this);
+        apDcf->subscribe(packetSentToPeerSignal, this);
+        apDcf->subscribe(packetDroppedSignal, this);
+        apRecoveryProcedure->subscribe(IRecoveryProcedure::retryLimitReachedSignal, this);
+        staDcf->subscribe(packetSentToPeerSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        if (source == mgmt) {
+            const auto& notification = check_and_cast<Ieee80211MgmtAp::NotificationInfoSta *>(value);
+            if (signalID == l2ApAssociatedSignal) {
+                ASSERT(notification->getStaAddress() == expectedAssociatedAddress);
+                ASSERT(mgmt->getStationStatus(expectedAssociatedAddress) == Ieee80211Mib::ASSOCIATED);
+                ASSERT(mgmt->getCommittedAssociationId(expectedAssociatedAddress) == expectedAssociationId);
+                associationNotifications++;
+            }
+            else {
+                ASSERT(signalID == l2ApDisassociatedSignal);
+                ASSERT(notification->getStaAddress() == expectedDisassociatedAddress);
+                ASSERT(!mgmt->hasPendingAssociation(expectedDisassociatedAddress));
+                disassociationNotifications++;
+            }
+        }
+        else if (source == apDcf && signalID == packetSentToPeerSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_ASSOCIATIONRESPONSE && header->getReceiverAddress() == expectedAssociatedAddress) {
+                associationResponseRetries.push_back(header->getRetry());
+                ASSERT(associationResponseRetries.size() <= 3);
+            }
+        }
+        else if (source == apRecoveryProcedure && signalID == IRecoveryProcedure::retryLimitReachedSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_ASSOCIATIONRESPONSE && header->getReceiverAddress() == expectedAssociatedAddress)
+                retryLimitReachedNotifications++;
+        }
+        else if (source == apDcf && signalID == packetDroppedSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_ASSOCIATIONRESPONSE && header->getReceiverAddress() == expectedAssociatedAddress) {
+                auto packetDropDetails = check_and_cast<PacketDropDetails *>(details);
+                ASSERT(packetDropDetails->getReason() == RETRY_LIMIT_REACHED);
+                retryLimitReachedDrops++;
+            }
+        }
+        else if (source == staDcf && signalID == packetSentToPeerSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_ACK && header->getReceiverAddress() == MacAddress("02:00:00:00:00:01"))
+                staAckTransmissions++;
+        }
+        else
+            ASSERT(false);
+    }
+
+    virtual void activity() override
+    {
+        // The old AP-local deadline was 100 ms in this test. Keep the
+        // transaction pending beyond it and verify that the reserved AID and
+        // transaction token remain stable until the MAC reports completion.
+        expectedAssociatedAddress = MacAddress("02:00:00:00:00:01");
+        uint64_t delayedTransaction = 0;
+        short delayedAid = mgmt->startPendingAssociation(expectedAssociatedAddress);
+        expectedAssociationId = delayedAid;
+        delayedTransaction = mgmt->getPendingAssociationTransactionId(expectedAssociatedAddress);
+        ASSERT(delayedAid == 1);
+        mgmt->markAuthenticated(expectedAssociatedAddress);
+        mgmt->submitDuplicateRequest(expectedAssociatedAddress, false);
+        mgmt->submitDuplicateRequest(expectedAssociatedAddress, true);
+        ASSERT(mgmt->getPendingAssociationTransactionId(expectedAssociatedAddress) == delayedTransaction);
+        ASSERT(mgmt->reserveAssociationId(expectedAssociatedAddress) == delayedAid);
+
+        MacAddress notReusedWhilePending("02:00:00:00:00:02");
+        ASSERT(mgmt->reserveAssociationId(notReusedWhilePending) == 2);
+        mgmt->cancelAssociationIdReservation(notReusedWhilePending);
+        wait(SimTime(150, SIMTIME_MS));
+        ASSERT(mgmt->hasPendingAssociation(expectedAssociatedAddress));
+        ASSERT(mgmt->getPendingAssociationTransactionId(expectedAssociatedAddress) == delayedTransaction);
+        ASSERT(mgmt->reserveAssociationId(notReusedWhilePending) == 2);
+        mgmt->cancelAssociationIdReservation(notReusedWhilePending);
+
+        mgmt->finishAssociationResponse(expectedAssociatedAddress, IFrameTransmissionCallback::Status::ACKNOWLEDGED, true, delayedTransaction);
+        ASSERT(mgmt->hasPendingAssociation(expectedAssociatedAddress));
+        ASSERT(associationNotifications == 0);
+        mgmt->finishAssociationResponse(expectedAssociatedAddress, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, delayedTransaction);
+        ASSERT(associationNotifications == 1);
+        ASSERT(!mgmt->hasPendingAssociation(expectedAssociatedAddress));
+        ASSERT(mgmt->getCommittedAssociationId(expectedAssociatedAddress) == delayedAid);
+        // A duplicate terminal callback cannot commit or notify a second time.
+        mgmt->finishAssociationResponse(expectedAssociatedAddress, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, delayedTransaction);
+        ASSERT(associationNotifications == 1);
+
+        expectedAssociatedAddress = MacAddress("02:00:00:00:00:06");
+        expectedAssociationId = mgmt->startSuccessfulReassociation(expectedAssociatedAddress, Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mgmt->getStationStatus(expectedAssociatedAddress) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(!mgmt->hasCommittedAssociationId(expectedAssociatedAddress));
+        mgmt->finishAssociationResponse(expectedAssociatedAddress, IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+        ASSERT(associationNotifications == 2);
+        ASSERT(!mgmt->hasPendingAssociation(expectedAssociatedAddress));
+
+        short sameApAid = mgmt->startSuccessfulReassociation(expectedAssociatedAddress, Ieee80211Mib::ASSOCIATED);
+        ASSERT(sameApAid == expectedAssociationId);
+        ASSERT(mgmt->getStationStatus(expectedAssociatedAddress) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->getCommittedAssociationId(expectedAssociatedAddress) == expectedAssociationId);
+        mgmt->finishAssociationResponse(expectedAssociatedAddress, IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+        ASSERT(associationNotifications == 2);
+        ASSERT(!mgmt->hasPendingAssociation(expectedAssociatedAddress));
+
+        MacAddress deauthenticated("02:00:00:00:00:07");
+        mgmt->startPendingAssociatedReassociation(deauthenticated);
+        uint64_t staleDeauthenticationTransaction = mgmt->getPendingAssociationTransactionId(deauthenticated);
+        expectedDisassociatedAddress = deauthenticated;
+        mgmt->deauthenticate(deauthenticated);
+        ASSERT(disassociationNotifications == 1);
+        ASSERT(!mgmt->hasPendingAssociation(deauthenticated));
+        ASSERT(!mgmt->hasCommittedAssociationId(deauthenticated));
+        ASSERT(mgmt->getStationStatus(deauthenticated) == Ieee80211Mib::NOT_AUTHENTICATED);
+        mgmt->finishAssociationResponse(deauthenticated, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, staleDeauthenticationTransaction);
+        ASSERT(!mgmt->hasCommittedAssociationId(deauthenticated));
+
+        MacAddress disassociated("02:00:00:00:00:08");
+        mgmt->startPendingAssociatedReassociation(disassociated);
+        uint64_t staleDisassociationTransaction = mgmt->getPendingAssociationTransactionId(disassociated);
+        expectedDisassociatedAddress = disassociated;
+        mgmt->disassociate(disassociated);
+        ASSERT(disassociationNotifications == 2);
+        ASSERT(!mgmt->hasPendingAssociation(disassociated));
+        ASSERT(!mgmt->hasCommittedAssociationId(disassociated));
+        ASSERT(mgmt->getStationStatus(disassociated) == Ieee80211Mib::AUTHENTICATED);
+        mgmt->finishAssociationResponse(disassociated, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, staleDisassociationTransaction);
+        ASSERT(!mgmt->hasCommittedAssociationId(disassociated));
+
+        // A terminal retry result clears a pending transaction and releases
+        // its reservation, while a result for an unknown STA is ignored.
+        MacAddress terminalFailure("02:00:00:00:00:0b");
+        short terminalFailureAid = mgmt->startPendingAssociation(terminalFailure);
+        uint64_t terminalFailureTransaction = mgmt->getPendingAssociationTransactionId(terminalFailure);
+        mgmt->finishAssociationResponse(terminalFailure, IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED, false, terminalFailureTransaction);
+        ASSERT(!mgmt->hasPendingAssociation(terminalFailure));
+        ASSERT(!mgmt->hasCommittedAssociationId(terminalFailure));
+        ASSERT(mgmt->reserveAssociationId(terminalFailure) == terminalFailureAid);
+        mgmt->cancelAssociationIdReservation(terminalFailure);
+        mgmt->finishAssociationResponse(MacAddress("02:00:00:00:00:0c"), IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, 1);
+
+        // Exercise the real AP response path.  With actions "BBA", the tester
+        // MAC consumes the AP's first two responses: the same response is
+        // observed twice, but neither blocked copy reaches the recipient ACK
+        // procedure.  The third action accepts the response for the new
+        // transaction and sends a real ACK.
+        MacAddress failed("02:00:00:00:00:09");
+        expectedAssociatedAddress = failed;
+        mgmt->markAuthenticated(failed);
+        int notificationsBeforeRetry = associationNotifications;
+        mgmt->submitAssociationRequest(failed);
+        uint64_t failedTransaction = mgmt->getPendingAssociationTransactionId(failed);
+        short failedAid = mgmt->reserveAssociationId(failed);
+        ASSERT(failedAid == 3);
+        ASSERT(!mgmt->hasCommittedAssociationId(failed));
+        mgmt->submitAssociationRequest(failed);
+        ASSERT(mgmt->getPendingAssociationTransactionId(failed) == failedTransaction);
+
+        for (int i = 0; i < 100 && (associationResponseRetries.size() < 2 || retryLimitReachedNotifications == 0 || retryLimitReachedDrops == 0 || mgmt->hasPendingAssociation(failed)); i++)
+            wait(SimTime(1, SIMTIME_MS));
+
+        ASSERT(associationResponseRetries.size() == 2);
+        ASSERT(!associationResponseRetries[0]);
+        ASSERT(associationResponseRetries[1]);
+        ASSERT(retryLimitReachedNotifications == 1);
+        ASSERT(retryLimitReachedDrops == 1);
+        ASSERT(!mgmt->hasPendingAssociation(failed));
+        ASSERT(!mgmt->hasCommittedAssociationId(failed));
+        ASSERT(mgmt->getStationStatus(failed) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(associationNotifications == notificationsBeforeRetry);
+        MacAddress reusable("02:00:00:00:00:0a");
+        ASSERT(mgmt->reserveAssociationId(reusable) == failedAid);
+        mgmt->cancelAssociationIdReservation(reusable);
+
+        expectedAssociationId = failedAid;
+        mgmt->submitAssociationRequest(failed);
+        uint64_t recoveredTransaction = mgmt->getPendingAssociationTransactionId(failed);
+        ASSERT(recoveredTransaction != failedTransaction);
+        ASSERT(mgmt->reserveAssociationId(failed) == failedAid);
+        ASSERT(!mgmt->hasCommittedAssociationId(failed));
+        for (int i = 0; i < 100 && associationNotifications != notificationsBeforeRetry + 1; i++)
+            wait(SimTime(1, SIMTIME_MS));
+
+        ASSERT(associationResponseRetries.size() == 3);
+        ASSERT(!associationResponseRetries[2]);
+        ASSERT(staAckTransmissions == 1);
+        ASSERT(associationNotifications == notificationsBeforeRetry + 1);
+        ASSERT(!mgmt->hasPendingAssociation(failed));
+        ASSERT(mgmt->getStationStatus(failed) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->hasCommittedAssociationId(failed));
+        ASSERT(mgmt->getCommittedAssociationId(failed) == failedAid);
+        // A stale completion from the failed transaction must not clear the
+        // recovered transaction's committed association.
+        mgmt->finishAssociationResponse(failed, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, failedTransaction);
+        ASSERT(associationNotifications == notificationsBeforeRetry + 1);
+        ASSERT(!mgmt->hasPendingAssociation(failed));
+        ASSERT(mgmt->getStationStatus(failed) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->getCommittedAssociationId(failed) == failedAid);
+
+        // Authentication traffic with an invalid sequence number must not
+        // revoke the response transaction that the MAC still owns.
+        MacAddress invalidAuthentication("02:00:00:00:00:0d");
+        short invalidAuthenticationAid = mgmt->startPendingAssociation(invalidAuthentication);
+        uint64_t invalidAuthenticationTransaction = mgmt->getPendingAssociationTransactionId(invalidAuthentication);
+        mgmt->setAuthenticationSequenceExpected(invalidAuthentication, 1);
+        mgmt->markAuthenticated(invalidAuthentication);
+        mgmt->setPendingHtState(invalidAuthentication);
+        mgmt->submitAuthentication(invalidAuthentication, 2);
+        ASSERT(mgmt->hasPendingAssociation(invalidAuthentication));
+        ASSERT(mgmt->getPendingAssociationTransactionId(invalidAuthentication) == invalidAuthenticationTransaction);
+        ASSERT(mgmt->hasPendingHtState(invalidAuthentication));
+        ASSERT(mgmt->reserveAssociationId(invalidAuthentication) == invalidAuthenticationAid);
+        expectedAssociatedAddress = invalidAuthentication;
+        expectedAssociationId = invalidAuthenticationAid;
+        mgmt->finishAssociationResponse(invalidAuthentication, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, invalidAuthenticationTransaction);
+        ASSERT(!mgmt->hasPendingAssociation(invalidAuthentication));
+        ASSERT(mgmt->getStationStatus(invalidAuthentication) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->getCommittedAssociationId(invalidAuthentication) == invalidAuthenticationAid);
+
+        // Frame 1 keeps the existing INET restart policy: it supersedes an
+        // in-flight response, and a stale terminal callback is harmless.
+        MacAddress restartedAuthentication("02:00:00:00:00:0e");
+        short restartedAuthenticationAid = mgmt->startPendingAssociation(restartedAuthentication);
+        uint64_t restartedAuthenticationTransaction = mgmt->getPendingAssociationTransactionId(restartedAuthentication);
+        mgmt->setAuthenticationSequenceExpected(restartedAuthentication, 1);
+        mgmt->markAuthenticated(restartedAuthentication);
+        mgmt->submitAuthentication(restartedAuthentication, 1);
+        ASSERT(!mgmt->hasPendingAssociation(restartedAuthentication));
+        ASSERT(mgmt->reserveAssociationId(restartedAuthentication) == restartedAuthenticationAid);
+        mgmt->cancelAssociationIdReservation(restartedAuthentication);
+        mgmt->finishAssociationResponse(restartedAuthentication, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, restartedAuthenticationTransaction);
+        ASSERT(!mgmt->hasCommittedAssociationId(restartedAuthentication));
+
+        std::cout << "AP association response delayed-completion lifecycle verified.\n";
+        std::cout << "AP reassociation notification commit ordering verified.\n";
+        std::cout << "AP retry-limit exhaustion and association recovery verified.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtApTimeoutTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestIeee80211MgmtAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtAp);
+}
+
+simple Ieee80211MgmtApTimeoutTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApTimeoutTest);
+}
+
+network Ieee80211MgmtApTimeoutTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtAp";
+        }
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mac.typename = "Ieee80211TesterMac";
+                wlan[*].agent.typename = "";
+        }
+        test: Ieee80211MgmtApTimeoutTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApTimeoutTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 200ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:09"
+*.ap.mobility.initialX = 0m
+*.ap.mobility.initialY = 0m
+*.sta.mobility.initialX = 1m
+*.sta.mobility.initialY = 0m
+**.wlan[*].opMode = "g(mixed)"
+**.wlan[*].bitrate = 11Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+*.sta.wlan[0].mac.actions = "BBA"
+*.sta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.ap.wlan[0].mac.dcf.recoveryProcedure.shortRetryLimit = 2
+*.ap.wlan[0].mac.dcf.rtsPolicy.rtsThreshold = 4096B
+
+%contains: stdout
+AP association response delayed-completion lifecycle verified.
+
+%contains: stdout
+AP reassociation notification commit ordering verified.
+
+%contains: stdout
+AP retry-limit exhaustion and association recovery verified.

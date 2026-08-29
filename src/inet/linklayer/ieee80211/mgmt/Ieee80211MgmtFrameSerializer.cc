@@ -37,6 +37,9 @@ static constexpr uint8_t MAX_SUPPORTED_RATES = 8;
 static constexpr uint16_t MAX_EXTENDED_SUPPORTED_RATES = 255;
 static constexpr double SUPPORTED_RATE_UNIT = 0.5;
 static constexpr double MAX_SUPPORTED_RATE_UNITS = 127;
+static constexpr uint16_t ASSOCIATION_ID_MARKER = 0xC000;
+static constexpr uint16_t ASSOCIATION_ID_MASK = 0x3FFF;
+static constexpr int MAX_LOGICAL_ASSOCIATION_ID = 2007;
 
 static void validateSupportedRatesCount(int numRates)
 {
@@ -336,6 +339,35 @@ static void readHtElements(MemoryInputStream& stream, const Ptr<Ieee80211MgmtFra
     }
 }
 
+static uint16_t encodeAssociationId(Ieee80211StatusCode statusCode, int aid)
+{
+    if (statusCode == SC_SUCCESSFUL) {
+        if (aid < 1 || aid > MAX_LOGICAL_ASSOCIATION_ID)
+            throw cRuntimeError("Malformed successful Association Response AID: %d", aid);
+        return ASSOCIATION_ID_MARKER | static_cast<uint16_t>(aid);
+    }
+    // This model uses zero for unsuccessful response AIDs. Keep that
+    // policy explicit at the wire boundary instead of accepting a stale ID.
+    if (aid != 0)
+        throw cRuntimeError("Malformed unsuccessful Association Response AID: %d", aid);
+    return 0;
+}
+
+static int decodeAssociationId(Ieee80211StatusCode statusCode, uint16_t wireAid)
+{
+    if (statusCode == SC_SUCCESSFUL) {
+        if ((wireAid & ASSOCIATION_ID_MARKER) != ASSOCIATION_ID_MARKER)
+            throw cRuntimeError("Malformed successful Association Response AID: missing marker 0xC000");
+        const int aid = wireAid & ASSOCIATION_ID_MASK;
+        if (aid < 1 || aid > MAX_LOGICAL_ASSOCIATION_ID)
+            throw cRuntimeError("Malformed successful Association Response AID: %d", aid);
+        return aid;
+    }
+    if (wireAid != 0)
+        throw cRuntimeError("Malformed unsuccessful Association Response AID: expected zero, got 0x%04x", wireAid);
+    return 0;
+}
+
 void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     if (auto authenticationFrame = dynamicPtrCast<const Ieee80211AuthenticationFrame>(chunk)) {
@@ -429,7 +461,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 2    Status code
         stream.writeUint16Be(associationResponseFrame->getStatusCode());
         // 3    AID
-        stream.writeUint16Be(associationResponseFrame->getAid());
+        stream.writeUint16Le(encodeAssociationId(associationResponseFrame->getStatusCode(), associationResponseFrame->getAid()));
         // 4    Supported rates
         writeSupportedRateElements(stream, associationResponseFrame);
         writeHtElements(stream, associationResponseFrame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
@@ -444,7 +476,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 2    Status code
         stream.writeUint16Be(reassociationResponseFrame->getStatusCode());
         // 3    AID
-        stream.writeUint16Be(reassociationResponseFrame->getAid());
+        stream.writeUint16Le(encodeAssociationId(reassociationResponseFrame->getStatusCode(), reassociationResponseFrame->getAid()));
         // 4    Supported rates
         writeSupportedRateElements(stream, reassociationResponseFrame);
         writeHtElements(stream, reassociationResponseFrame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
@@ -633,7 +665,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStrea
             auto frame = makeShared<Ieee80211AssociationResponseFrame>();
             stream.readUint16Be();
             frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Be());
-            frame->setAid(stream.readUint16Be());
+            frame->setAid(decodeAssociationId(frame->getStatusCode(), stream.readUint16Le()));
 
             frame->setSupportedRates(readSupportedRatesElement(stream));
             readHtElements(stream, frame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
@@ -645,7 +677,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFrame(MemoryInputStrea
             auto frame = makeShared<Ieee80211ReassociationResponseFrame>();
             stream.readUint16Be();
             frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Be());
-            frame->setAid(stream.readUint16Be());
+            frame->setAid(decodeAssociationId(frame->getStatusCode(), stream.readUint16Le()));
 
             frame->setSupportedRates(readSupportedRatesElement(stream));
             readHtElements(stream, frame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
