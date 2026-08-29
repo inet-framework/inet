@@ -8,9 +8,11 @@
 #ifndef __INET_QOSRATESELECTION_H
 #define __INET_QOSRATESELECTION_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/IQosRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -32,6 +34,7 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
 {
   protected:
     IRateControl *dataOrMgmtRateControl = nullptr;
+    ModuleRefByPar<Ieee80211Mib> mib;
 
     const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     std::map<MacAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
@@ -56,6 +59,8 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
     virtual const physicallayer::IIeee80211Mode *getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual const physicallayer::IIeee80211Mode *computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure);
     virtual const physicallayer::IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+    virtual const physicallayer::IIeee80211Mode *getPeerCompatibleMode(const MacAddress& peerAddress,
+            const physicallayer::IIeee80211Mode *mode) const;
 
     virtual bool isControlResponseFrame(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure);
 
@@ -78,4 +83,3 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
 } /* namespace inet */
 
 #endif
-

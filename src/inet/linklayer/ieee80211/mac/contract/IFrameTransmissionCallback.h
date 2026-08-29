@@ -26,6 +26,7 @@ class INET_API IFrameTransmissionCallback
     enum class Status {
         ACKNOWLEDGED,
         RETRY_LIMIT_REACHED,
+        DROPPED_BEFORE_TRANSMISSION,
     };
 
     class INET_API Result final

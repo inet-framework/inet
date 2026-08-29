@@ -70,6 +70,8 @@ ASSERT(bytes.size() == 61);
 // IEEE Std 802.11-2024, 9.4.2.54: element ID 45 and fixed 26-octet body.
 ASSERT(bytes[9] == 45 && bytes[10] == 26);
 ASSERT(bytes[11] == 0x7f && bytes[12] == 0x00); // modeled flags plus SMPS=3 (disabled)
+ASSERT((bytes[11] & (1 << 5)) != 0); // Short GI for 20 MHz (HT Capabilities B5)
+ASSERT((bytes[11] & (1 << 6)) != 0); // Short GI for 40 MHz (HT Capabilities B6)
 ASSERT(bytes[13] == 0x02);
 ASSERT(bytes[14] == 0x85); // non-contiguous Rx MCS 0, 2, and 7
 ASSERT(bytes[15] == 0x80); // Rx MCS 15

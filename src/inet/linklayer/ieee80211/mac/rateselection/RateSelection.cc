@@ -25,6 +25,7 @@ Define_Module(RateSelection);
 void RateSelection::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        mib.reference(this, "mibModule", true);
         getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
@@ -80,22 +81,24 @@ const IIeee80211Mode *RateSelection::getMode(Packet *packet, const Ptr<const Iee
 const IIeee80211Mode *RateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (responseAckFrameMode)
-        return responseAckFrameMode;
+        return getPeerCompatibleMode(dataOrMgmtHeader->getTransmitterAddress(), responseAckFrameMode);
     else {
         auto mode = getMode(packet, dataOrMgmtHeader);
         ASSERT(modeSet->containsMode(mode));
-        return modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO BSSBasicRateSet
+        auto responseMode = modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO BSSBasicRateSet
+        return getPeerCompatibleMode(dataOrMgmtHeader->getTransmitterAddress(), responseMode);
     }
 }
 
 const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
 {
     if (responseCtsFrameMode)
-        return responseCtsFrameMode;
+        return getPeerCompatibleMode(rtsFrame->getTransmitterAddress(), responseCtsFrameMode);
     else {
         auto mode = getMode(packet, rtsFrame);
         ASSERT(modeSet->containsMode(mode));
-        return modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO BSSBasicRateSet
+        auto responseMode = modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO BSSBasicRateSet
+        return getPeerCompatibleMode(rtsFrame->getTransmitterAddress(), responseMode);
     }
 }
 
@@ -115,15 +118,15 @@ const IIeee80211Mode *RateSelection::computeResponseCtsFrameMode(Packet *packet,
 const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (dataOrMgmtHeader->getReceiverAddress().isMulticast() && multicastFrameMode)
-        return multicastFrameMode;
+        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), multicastFrameMode);
     if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
-        return dataFrameMode;
+        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataFrameMode);
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
-        return mgmtFrameMode;
+        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), mgmtFrameMode);
     if (dataOrMgmtRateControl)
-        return dataOrMgmtRateControl->getRate();
+        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate());
     else
-        return fastestMandatoryMode;
+        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
 }
 
 // 802.11-1999 Std.
@@ -135,7 +138,7 @@ const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const 
 const IIeee80211Mode *RateSelection::computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header)
 {
     // TODO BSSBasicRateSet
-    return fastestMandatoryMode;
+    return getPeerCompatibleMode(header->getReceiverAddress(), fastestMandatoryMode);
 }
 
 const IIeee80211Mode *RateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -168,6 +171,18 @@ void RateSelection::setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHea
     packet->addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
 }
 
+const IIeee80211Mode *RateSelection::getPeerCompatibleMode(const MacAddress& peerAddress, const IIeee80211Mode *mode) const
+{
+    if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0 || mib->findPeerHtState(peerAddress) != nullptr)
+        return mode;
+    const auto *legacyMode = modeSet->getFastestLegacyOperationalMode();
+    if (legacyMode == nullptr)
+        throw cRuntimeError("No legacy operational mode is available for peer %s", peerAddress.str().c_str());
+    // Before HT negotiation (and after an invalid negotiation), unicast must
+    // remain legal for a legacy receiver. The mode set owns this operational
+    // legacy fallback and prefers its fastest mandatory mode.
+    return legacyMode;
+}
+
 } // namespace ieee80211
 } // namespace inet
-

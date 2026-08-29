@@ -48,6 +48,7 @@ ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42,
 auto nonFinalResponse = makeAssociationResponse(42, true);
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, Status::ACKNOWLEDGED) == Disposition::RETAIN);
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, Status::RETRY_LIMIT_REACHED) == Disposition::COMPLETE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, Status::DROPPED_BEFORE_TRANSMISSION) == Disposition::COMPLETE);
 
 auto reassociationResponse = makeAssociationResponse(42, false, true, ST_REASSOCIATIONRESPONSE);
 ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(reassociationResponse, 42, Status::ACKNOWLEDGED) == Disposition::COMPLETE);

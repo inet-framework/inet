@@ -12,6 +12,7 @@
 #include "inet/linklayer/ieee80211/mac/framesequence/DcfFs.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -47,6 +48,10 @@ void Dcf::initialize(int stage)
         originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism *>(getSubmodule("originatorProtectionMechanism"));
         WATCH_EXPR("frameSequenceInfo", frameSequenceHandler->isSequenceRunning() ? "Fs: " + frameSequenceHandler->getFrameSequence()->getHistory() : "");
     }
+    else if (stage == INITSTAGE_LAST)
+        // Dcaf resolves its pending queue at the link-layer stage. Install
+        // this callback after all child initialization has completed.
+        channelAccess->getPendingQueue()->setPacketDropCallback(this);
 }
 
 void Dcf::forEachChild(cVisitor *v)
@@ -111,6 +116,13 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
 void Dcf::processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
 {
     throw cRuntimeError("Unknown management frame");
+}
+
+void Dcf::handlePacketDropped(Packet *packet)
+{
+    Enter_Method("handlePacketDropped");
+    if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
+        mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
 }
 
 void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)

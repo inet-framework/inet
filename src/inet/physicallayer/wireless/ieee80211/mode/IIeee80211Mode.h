@@ -55,6 +55,9 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
     // other PHY generations. HT capability derivation must use this typed
     // mode contract rather than concrete-type or name-based inference.
     virtual int getHtMcsIndex() const { return -1; }
+    // Returns whether this mode uses the optional 400 ns HT guard interval.
+    // Non-HT modes deliberately report false.
+    virtual bool isHtShortGuardInterval() const { return false; }
     virtual int getLegacyCwMin() const = 0;
     virtual int getLegacyCwMax() const = 0;
     virtual const char *getName() const = 0;

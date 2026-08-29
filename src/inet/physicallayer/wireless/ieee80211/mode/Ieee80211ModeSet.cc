@@ -546,7 +546,10 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
                     mcsIndex, entry.mode->getName(), this->name.c_str());
         htMcsSupported[mcsIndex] = true;
         htMcsMandatory[mcsIndex] = htMcsMandatory[mcsIndex] || entry.isMandatory;
-        htSupportedChannelWidths.insert(entry.mode->getDataMode()->getBandwidth());
+        auto bandwidth = entry.mode->getDataMode()->getBandwidth();
+        htSupportedChannelWidths.insert(bandwidth);
+        if (entry.mode->isHtShortGuardInterval())
+            htShortGuardIntervalChannelWidths.insert(bandwidth);
     }
     if (htOperationSupported) {
         for (int mcsIndex = 0; mcsIndex < 8; mcsIndex++)
@@ -674,6 +677,18 @@ const IIeee80211Mode *Ieee80211ModeSet::getFastestMandatoryMode() const
         if (entries[i].isMandatory)
             return entries[i].mode;
     return nullptr;
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::getFastestLegacyOperationalMode() const
+{
+    const IIeee80211Mode *fastestMandatoryLegacyMode = nullptr;
+    for (const auto *mode : legacyOperationalModes) {
+        if (getIsMandatory(mode))
+            fastestMandatoryLegacyMode = mode;
+    }
+    if (fastestMandatoryLegacyMode != nullptr)
+        return fastestMandatoryLegacyMode;
+    return legacyOperationalModes.empty() ? nullptr : legacyOperationalModes.back();
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::getSlowerMandatoryMode(const IIeee80211Mode *mode) const

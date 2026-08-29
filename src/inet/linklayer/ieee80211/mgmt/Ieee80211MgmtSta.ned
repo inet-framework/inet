@@ -35,10 +35,10 @@ simple Ieee80211MgmtSta extends SimpleModule like IIeee80211Mgmt
         @display("i=block/cogwheel");
         @signal[l2Associated](type=inet::NetworkInterface);
         @signal[l2BeaconLost](type=inet::NetworkInterface);
+        @signal[htNegotiationFailed](type="inet::ieee80211::Ieee80211MgmtSta::HtNegotiationFailure");
     gates:
         input macIn @labels(Ieee80211MacHeader);
         output macOut @labels(Ieee80211MacHeader);
         input agentIn;   // Used for attaching an agent algorithm
         output agentOut; // Used for attaching an agent algorithm
 }
-

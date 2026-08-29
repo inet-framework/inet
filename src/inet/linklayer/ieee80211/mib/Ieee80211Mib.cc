@@ -86,6 +86,8 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     const auto& supportedMcs = modeSet->getHtMcsSupported();
     const auto& mandatoryMcs = modeSet->getHtMcsMandatory();
     localHtCapabilities.supportedChannelWidths = modeSet->getHtSupportedChannelWidths();
+    localHtCapabilities.shortGi20 = modeSet->isHtShortGuardIntervalSupported(MHz(20));
+    localHtCapabilities.shortGi40 = modeSet->isHtShortGuardIntervalSupported(MHz(40));
     for (int mcs = 0; mcs < 77; mcs++) {
         localHtCapabilities.rxMcsSupported[mcs] = supportedMcs[mcs];
         if (mcs < 32 && supportedMcs[mcs]) {

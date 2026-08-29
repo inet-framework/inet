@@ -144,7 +144,7 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const IFrameTransmissionCallback
         }
         clearPendingAssociation(&sta->second);
     }
-    else if (result.getStatus() == IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED)
+    else
         clearPendingAssociation(&sta->second);
 }
 

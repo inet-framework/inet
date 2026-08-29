@@ -14,6 +14,7 @@
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
@@ -61,6 +62,11 @@ void Hcf::initialize(int stage)
             recipientBlockAckProcedure = new RecipientBlockAckProcedure();
         }
     }
+    else if (stage == INITSTAGE_LAST)
+        // Edca resolves its Edcaf array at the link-layer stage. Install the
+        // queue callbacks after all child initialization has completed.
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+            edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue()->setPacketDropCallback(this);
 }
 
 std::string Hcf::getFrameSequenceInfo() const
@@ -142,6 +148,13 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
             edca->requestChannelAccess(ac, this);
         }
     }
+}
+
+void Hcf::handlePacketDropped(Packet *packet)
+{
+    Enter_Method("handlePacketDropped");
+    if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
+        mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
 }
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)

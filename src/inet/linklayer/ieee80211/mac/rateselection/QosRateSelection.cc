@@ -21,6 +21,8 @@ Define_Module(QosRateSelection);
 void QosRateSelection::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        mib.reference(this, "mibModule", true);
     if (stage == INITSTAGE_LINK_LAYER) {
         dataOrMgmtRateControl = dynamic_cast<IRateControl *>(findModuleByPath(par("rateControlModule")));
         double multicastFrameBitrate = par("multicastFrameBitrate");
@@ -74,16 +76,18 @@ const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *pack
     // TODO BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, dataOrMgmtHeader);
     ASSERT(modeSet->containsMode(mode));
+    const IIeee80211Mode *responseMode;
     if (!responseAckFrameMode) {
         if (modeSet->getIsMandatory(mode))
-            return mode;
+            responseMode = mode;
         else if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
-            return slowerMode;
+            responseMode = slowerMode;
         else
             throw cRuntimeError("Mandatory mode not found");
     }
     else
-        return responseAckFrameMode;
+        responseMode = responseAckFrameMode;
+    return getPeerCompatibleMode(dataOrMgmtHeader->getTransmitterAddress(), responseMode);
 }
 
 const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
@@ -91,16 +95,18 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
     // TODO BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, rtsFrame);
     ASSERT(modeSet->containsMode(mode));
+    const IIeee80211Mode *responseMode;
     if (!responseCtsFrameMode) {
         if (modeSet->getIsMandatory(mode))
-            return mode;
+            responseMode = mode;
         else if (auto slowerMode = modeSet->getSlowerMandatoryMode(mode))
-            return slowerMode;
+            responseMode = slowerMode;
         else
             throw cRuntimeError("Mandatory mode not found");
     }
     else
-        return responseCtsFrameMode;
+        responseMode = responseCtsFrameMode;
+    return getPeerCompatibleMode(rtsFrame->getTransmitterAddress(), responseMode);
 }
 
 //
@@ -111,8 +117,10 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
 //
 const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
-    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
-        return responseBlockAckFrameMode ? responseBlockAckFrameMode : getMode(packet, blockAckReq);
+    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
+        auto mode = responseBlockAckFrameMode ? responseBlockAckFrameMode : getMode(packet, blockAckReq);
+        return getPeerCompatibleMode(blockAckReq->getTransmitterAddress(), mode);
+    }
     else
         throw cRuntimeError("Unknown BlockAckReq frame type");
 }
@@ -120,9 +128,9 @@ const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet 
 const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
-        return dataFrameMode;
+        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataFrameMode);
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
-        return mgmtFrameMode;
+        return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), mgmtFrameMode);
     // This subclause describes the rate selection rules for group addressed data and management frames, excluding
     // the following:
     //   — Non-STBC Beacon and non-STBC PSMP frames
@@ -141,9 +149,9 @@ const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
         // that is not yet associated with a BSS), the frame shall be transmitted in a non-HT PPDU using one of the
         // mandatory PHY rates.
         if (dataOrMgmtRateControl)
-            return dataOrMgmtRateControl->getRate();
+            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate());
         else
-            return fastestMandatoryMode;
+            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
     }
     // A data or management frame not identified in 9.7.5.1 through 9.7.5.5 shall be sent using any data rate or MCS
     // subject to the following constraints:
@@ -159,9 +167,9 @@ const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
         // TODO Supported Rates element, Extended Supported Rates element
         // TODO OperationalRateSet or the HTOperationalMCSset
         if (dataOrMgmtRateControl)
-            return dataOrMgmtRateControl->getRate();
+            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), dataOrMgmtRateControl->getRate());
         else
-            return fastestMandatoryMode;
+            return getPeerCompatibleMode(dataOrMgmtHeader->getReceiverAddress(), fastestMandatoryMode);
     }
 }
 
@@ -227,7 +235,7 @@ const IIeee80211Mode *QosRateSelection::computeMode(Packet *packet, const Ptr<co
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         return computeDataOrMgmtFrameMode(dataOrMgmtHeader);
     else
-        return computeControlFrameMode(header, txopProcedure);
+        return getPeerCompatibleMode(header->getReceiverAddress(), computeControlFrameMode(header, txopProcedure));
 }
 
 void QosRateSelection::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -246,6 +254,17 @@ void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee8021
     lastTransmittedFrameMode[receiverAddr] = getMode(packet, header);
 }
 
+const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& peerAddress, const IIeee80211Mode *mode) const
+{
+    if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0 || mib->findPeerHtState(peerAddress) != nullptr)
+        return mode;
+    const auto *legacyMode = modeSet->getFastestLegacyOperationalMode();
+    if (legacyMode == nullptr)
+        throw cRuntimeError("No legacy operational mode is available for peer %s", peerAddress.str().c_str());
+    // The mode set owns the legal operational legacy fallback. This keeps
+    // unicast control/data traffic legacy until the MIB has a valid HT state.
+    return legacyMode;
+}
+
 } /* namespace ieee80211 */
 } /* namespace inet */
-

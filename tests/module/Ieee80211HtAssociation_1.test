@@ -9,6 +9,8 @@ at both ends.
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/SimpleModule.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
@@ -106,6 +108,32 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
         ASSERT(apMib->requirePrimaryChannel() == 11);
         ASSERT(apMib->findPeerHtState(staAddress)->negotiatedCapabilities.operation.primaryChannel == 6);
         ASSERT(staMib->bssStationData.isAssociated);
+        // IEEE Std 802.11-2024, 9.4.2.54.2/Figure 9-456 and Table 9-224: the n(mixed-2.4Ghz)
+        // profile exposes both short-GI capability bits from its typed HT
+        // mode entries, and the association exchange carries them on wire.
+        ASSERT(staMib->localHtCapabilities.shortGi20);
+        ASSERT(staMib->localHtCapabilities.shortGi40);
+        ASSERT(apMib->localHtCapabilities.shortGi20);
+        ASSERT(apMib->localHtCapabilities.shortGi40);
+        // Bridge the MIB-derived capability contract to the actual management
+        // frame serializer: the n(mixed-2.4Ghz) profile must advertise both
+        // short-GI bits in HT Capabilities (IEEE Std 802.11-2024, 9.4.2.54.2,
+        // Figure 9-456 and Table 9-224).
+        auto serializedResponse = makeShared<Ieee80211AssociationResponseFrame>();
+        serializedResponse->setStatusCode(SC_SUCCESSFUL);
+        serializedResponse->setAid(1);
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 6;
+        serializedResponse->setSupportedRates(rates);
+        setHtCapabilities(serializedResponse, staMib->localHtCapabilities);
+        serializedResponse->setChunkLength(B(37)); // fixed fields/rates (9) + HT Capabilities IE (28)
+        Packet serializedPacket("mib-ht-capabilities", serializedResponse);
+        auto serializedBytes = serializedPacket.peekAllAsBytes()->getBytes();
+        ASSERT(serializedBytes.size() == 37);
+        ASSERT(serializedBytes[9] == 45 && serializedBytes[10] == 26);
+        ASSERT((serializedBytes[11] & (1 << 5)) != 0);
+        ASSERT((serializedBytes[11] & (1 << 6)) != 0);
         ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
         ASSERT(staMib->findPeerHtState(apMib->address)->valid);
         ASSERT(staMib->findPeerHtState(apMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
