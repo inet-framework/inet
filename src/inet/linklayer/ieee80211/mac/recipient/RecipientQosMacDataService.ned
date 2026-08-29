@@ -22,6 +22,7 @@ module RecipientQosMacDataService extends Module
 {
     parameters:
         @class(RecipientQosMacDataService);
+        double maxReceiveLifetime @unit(s) = default(524288us); // IEEE Std 802.11-2024 dot11MaxReceiveLifetime default: 512 TUs
         @display("i=block/join");
         @signal[packetDefragmented](type=inet::Packet);
         @signal[packetDeaggregated](type=inet::Packet);
@@ -30,4 +31,3 @@ module RecipientQosMacDataService extends Module
         @statistic[packetDeaggregated](title="packets deaggregated"; record=count);
         @statistic[packetDropDuplicateDetected](title="packet drops: duplicate detected"; source=packetDropReasonIsDuplicateDetected(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
-

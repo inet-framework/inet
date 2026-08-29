@@ -11,6 +11,7 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/Ieee80211FragmentedActionContextTag.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 
 namespace inet {
@@ -338,7 +339,11 @@ void OriginatorBlockAckAgreementHandler::processDroppedAddbaReq(Packet *packet, 
 
 std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler::processTransmittedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
 {
-    auto delba = packet->peekAtFront<Ieee80211Delba>();
+    auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
+    // IEEE Std 802.11-2024, 10.4 and 11.5.3.2: an untagged DELBA MMPDU
+    // likewise cannot tear down the agreement before its final fragment.
+    if (delba->getMoreFragments())
+        return nullptr;
     auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();
     if (transactionTag != nullptr) {
         auto it = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
@@ -364,7 +369,7 @@ std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler:
 
 bool OriginatorBlockAckAgreementHandler::processAcknowledgedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
 {
-    auto delba = packet->peekAtFront<Ieee80211Delba>();
+    auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
     if (!delba->getInitiator() || delba->getMoreFragments())
         return false;
     auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();
@@ -381,7 +386,7 @@ bool OriginatorBlockAckAgreementHandler::processAcknowledgedDelba(Packet *packet
 
 bool OriginatorBlockAckAgreementHandler::processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
 {
-    auto delba = packet->peekAtFront<Ieee80211Delba>();
+    auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
     if (!delba->getInitiator())
         return false;
     auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();

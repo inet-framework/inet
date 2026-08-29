@@ -184,6 +184,10 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
                 stream.writeUint32Be(0);
             if (type == ST_ACTION) {
                 auto actionFrame = dynamicPtrCast<const Ieee80211ActionFrame>(chunk);
+                // A fragmented action MPDU uses a generic management header;
+                // its action-body slice is a separate packet chunk.
+                if (actionFrame == nullptr)
+                    break;
                 switch (actionFrame->getCategory()) {
                     case 3: {
                         stream.writeByte(actionFrame->getCategory());
@@ -423,6 +427,17 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             actionFrame->setSequenceNumber(sequenceNumber);
             if (order)
                 stream.readUint32Be();
+            if (actionFrame->getMoreFragments() || actionFrame->getFragmentNumber() != 0) {
+                auto mgmtHeader = makeShared<Ieee80211MgmtHeader>();
+                copyBasicFields(mgmtHeader, macHeader);
+                mgmtHeader->setDurationField(actionFrame->getDurationField());
+                mgmtHeader->setReceiverAddress(actionFrame->getReceiverAddress());
+                mgmtHeader->setTransmitterAddress(actionFrame->getTransmitterAddress());
+                mgmtHeader->setAddress3(actionFrame->getAddress3());
+                mgmtHeader->setFragmentNumber(actionFrame->getFragmentNumber());
+                mgmtHeader->setSequenceNumber(actionFrame->getSequenceNumber());
+                return mgmtHeader;
+            }
             actionFrame->setCategory(stream.readByte());
             switch (actionFrame->getCategory()) {
                 case 3: {
@@ -460,6 +475,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
                         case 2: {
                             auto delba = makeShared<Ieee80211Delba>();
                             copyBasicFields(delba, macHeader);
+                            copyActionFrameFields(delba, actionFrame);
                             delba->setBlockAckAction(blockAckAction);
                             delba->setReserved(stream.readNBitsToUint64Be(11));
                             delba->setInitiator(stream.readBit());

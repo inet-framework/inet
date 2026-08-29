@@ -19,12 +19,42 @@ Define_Module(RecipientMacDataService);
 void RecipientMacDataService::initialize()
 {
     duplicateRemoval = new LegacyDuplicateRemoval();
-    basicReassembly = new BasicReassembly();
+    basicReassembly = new BasicReassembly(par("maxReceiveLifetime"));
+    reassemblyTimer = new cMessage("reassemblyTimer");
+}
+
+void RecipientMacDataService::handleMessage(cMessage *message)
+{
+    if (message != reassemblyTimer)
+        throw cRuntimeError("Unknown message");
+    expireReassemblyFragments();
+    scheduleReassemblyTimer();
+}
+
+void RecipientMacDataService::expireReassemblyFragments()
+{
+    for (auto packet : basicReassembly->removeExpiredFragments(simTime())) {
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+    }
+}
+
+void RecipientMacDataService::scheduleReassemblyTimer()
+{
+    if (reassemblyTimer->isScheduled())
+        cancelEvent(reassemblyTimer);
+    auto nextExpirationTime = basicReassembly->getNextExpirationTime();
+    if (nextExpirationTime != SIMTIME_MAX)
+        scheduleAt(nextExpirationTime, reassemblyTimer);
 }
 
 Packet *RecipientMacDataService::defragment(Packet *dataOrMgmtFrame)
 {
+    expireReassemblyFragments();
     Packet *packet = basicReassembly->addFragment(dataOrMgmtFrame);
+    scheduleReassemblyTimer();
     if (packet && packet->peekAtFront<Ieee80211DataOrMgmtHeader>()) {
         emit(packetDefragmentedSignal, packet);
         return packet;
@@ -72,10 +102,10 @@ std::vector<Packet *> RecipientMacDataService::controlFrameReceived(Packet *cont
 
 RecipientMacDataService::~RecipientMacDataService()
 {
+    cancelAndDelete(reassemblyTimer);
     delete duplicateRemoval;
     delete basicReassembly;
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
