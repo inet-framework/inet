@@ -36,6 +36,8 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     MacAddress lastReassociationAddress;
     bool confirmationSawClearedAssociation = false;
     bool confirmationSawDeauthenticatedAssociation = false;
+    bool lastAssociationConfirmationSawTerminalState = false;
+    bool lastReassociationConfirmationSawTerminalState = false;
 
     void setAssociated(const MacAddress& address, bool cacheAp = true)
     {
@@ -127,6 +129,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         associationConfirms++;
         lastAssociationAddress = ap->address;
         lastAssociationResult = resultCode;
+        lastAssociationConfirmationSawTerminalState = !ap->isAuthenticated && assocTimeoutMsg == nullptr;
         confirmationSawClearedAssociation = confirmationSawClearedAssociation ||
                 (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified());
         confirmationSawDeauthenticatedAssociation = confirmationSawDeauthenticatedAssociation ||
@@ -138,6 +141,7 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         reassociationConfirms++;
         lastReassociationAddress = ap->address;
         lastReassociationResult = resultCode;
+        lastReassociationConfirmationSawTerminalState = !ap->isAuthenticated && assocTimeoutMsg == nullptr;
         confirmationSawClearedAssociation = confirmationSawClearedAssociation ||
                 (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified());
         confirmationSawDeauthenticatedAssociation = confirmationSawDeauthenticatedAssociation ||
@@ -237,34 +241,99 @@ class Ieee80211MgmtStaDeauthenticationTest : public cSimpleModule
         ASSERT(mgmt->lastReassociationResult == PRC_SUCCESS);
         mgmt->deliverDeauthentication(targetAp, foreignAp);
 
+        // A deauthentication from an unrelated AP does not cancel an initial
+        // association to the pending target, but the target's deauthentication
+        // cancels it and emits exactly one refusal.
+        ASSERT(!mgmt->isAssociated());
+        mgmt->preparePendingAssociation(targetAp, false);
+        mgmt->authenticatePeer(foreignAp);
+        mgmt->installPeerHtState(targetAp);
+        mgmt->installPeerHtState(foreignAp);
+        int associationConfirmsBeforeTargetDeauthentication = mgmt->associationConfirms;
+        mgmt->deliverDeauthentication(foreignAp, targetAp);
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(mgmt->isPendingAssociationScheduled());
+        ASSERT(mgmt->isAuthenticated(targetAp));
+        ASSERT(mgmt->hasPeerHtState(targetAp));
+        ASSERT(!mgmt->isAuthenticated(foreignAp));
+        ASSERT(!mgmt->hasPeerHtState(foreignAp));
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeTargetDeauthentication);
+        mgmt->deliverDeauthentication(targetAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(!mgmt->isAuthenticated(targetAp));
+        ASSERT(!mgmt->hasPeerHtState(targetAp));
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeTargetDeauthentication + 1);
+        ASSERT(mgmt->lastAssociationAddress == targetAp);
+        ASSERT(mgmt->lastAssociationResult == PRC_REFUSED);
+        ASSERT(mgmt->lastAssociationConfirmationSawTerminalState);
+        mgmt->deliverAssociationResponse(targetAp, false, SC_SUCCESSFUL);
+        ASSERT(!mgmt->isAssociated());
+        mgmt->deliverDeauthentication(targetAp, foreignAp);
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeTargetDeauthentication + 1);
+
+        // A target deauthentication cancels a reassociation without disturbing
+        // the current AP association or its negotiated HT state.
+        mgmt->setAssociated(currentAp);
+        mgmt->installPeerHtState(currentAp);
+        mgmt->preparePendingAssociation(targetAp, true);
+        mgmt->installPeerHtState(targetAp);
+        int reassociationConfirmsBeforeTargetDeauthentication = mgmt->reassociationConfirms;
+        associationConfirmsBeforeTargetDeauthentication = mgmt->associationConfirms;
+        mgmt->deliverDeauthentication(targetAp, currentAp);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(mgmt->hasBeaconTimer());
+        ASSERT(mgmt->hasPeerHtState(currentAp));
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(!mgmt->isAuthenticated(targetAp));
+        ASSERT(!mgmt->hasPeerHtState(targetAp));
+        ASSERT(mgmt->reassociationConfirms == reassociationConfirmsBeforeTargetDeauthentication + 1);
+        ASSERT(mgmt->lastReassociationAddress == targetAp);
+        ASSERT(mgmt->lastReassociationResult == PRC_REFUSED);
+        ASSERT(mgmt->lastReassociationConfirmationSawTerminalState);
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeTargetDeauthentication);
+        mgmt->deliverAssociationResponse(targetAp, true, SC_SUCCESSFUL);
+        mgmt->deliverDeauthentication(targetAp, currentAp);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(mgmt->hasBeaconTimer());
+        ASSERT(mgmt->hasPeerHtState(currentAp));
+        ASSERT(mgmt->reassociationConfirms == reassociationConfirmsBeforeTargetDeauthentication + 1);
+        mgmt->deliverDeauthentication(currentAp, targetAp);
+
         // A same-peer pending association is canceled once, and its refusal
         // is observed only after current association state was cleared.
         mgmt->setAssociated(currentAp);
         mgmt->preparePendingAssociation(currentAp, false);
+        int associationConfirmsBeforeSamePeer = mgmt->associationConfirms;
         mgmt->deliverDeauthentication(currentAp, foreignAp);
         ASSERT(!mgmt->isAssociated());
         ASSERT(!mgmt->hasPendingAssociation());
         ASSERT(!mgmt->isReassociationPending());
-        ASSERT(mgmt->associationConfirms == 1);
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeSamePeer + 1);
         ASSERT(mgmt->lastAssociationAddress == currentAp);
         ASSERT(mgmt->lastAssociationResult == PRC_REFUSED);
         ASSERT(mgmt->confirmationSawClearedAssociation);
         ASSERT(mgmt->confirmationSawDeauthenticatedAssociation);
         mgmt->deliverAssociationResponse(currentAp, false, SC_SUCCESSFUL);
-        ASSERT(mgmt->associationConfirms == 1);
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeSamePeer + 1);
 
         // The same transaction rule applies to a pending reassociation.
         mgmt->setAssociated(currentAp);
         mgmt->preparePendingAssociation(currentAp, true);
+        int reassociationConfirmsBeforeSamePeer = mgmt->reassociationConfirms;
         mgmt->deliverDeauthentication(currentAp, foreignAp);
         ASSERT(!mgmt->isAssociated());
         ASSERT(!mgmt->hasPendingAssociation());
         ASSERT(!mgmt->isReassociationPending());
-        ASSERT(mgmt->reassociationConfirms == 2);
+        ASSERT(mgmt->reassociationConfirms == reassociationConfirmsBeforeSamePeer + 1);
         ASSERT(mgmt->lastReassociationAddress == currentAp);
         ASSERT(mgmt->lastReassociationResult == PRC_REFUSED);
         mgmt->deliverAssociationResponse(currentAp, true, SC_SUCCESSFUL);
-        ASSERT(mgmt->reassociationConfirms == 2);
+        ASSERT(mgmt->reassociationConfirms == reassociationConfirmsBeforeSamePeer + 1);
 
         std::cout << "STA Deauthentication peer filtering and association teardown verified.\n";
         std::cout << "STA deauthentication transaction cancellation and preservation verified.\n";

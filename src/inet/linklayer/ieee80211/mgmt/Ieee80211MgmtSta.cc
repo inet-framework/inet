@@ -725,6 +725,8 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
     // address used to identify the peer that sent this frame.
     const MacAddress& address = header->getTransmitterAddress();
     ApInfo *ap = lookupAP(address);
+    ApInfo *pendingAp = assocTimeoutMsg ? static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer()) : nullptr;
+    bool isPendingAp = pendingAp != nullptr && pendingAp->address == address;
     bool isCurrentAp = mib->bssStationData.isAssociated && address == assocAP.address;
 
     // IEEE Std 802.11-2024, 11.3.4.5: deauthentication from the current AP
@@ -742,6 +744,27 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
             }
         }
         ASSERT(terminateCurrentAssociationFromPeer(address));
+        delete packet;
+        return;
+    }
+
+    // IEEE Std 802.11-2024, 11.3.5.1, 11.3.5.2 and 11.3.5.4: a
+    // deauthentication from the target AP terminates the pending association
+    // or reassociation, even when that AP is not the current AP.
+    if (isPendingAp) {
+        bool pendingReassociation = reassociationInProgress;
+        EV << "Cancelling pending association with deauthenticated AP\n";
+        pendingAp->isAuthenticated = false;
+        if (pendingAp->authTimeoutMsg) {
+            cancelAndDelete(pendingAp->authTimeoutMsg);
+            pendingAp->authTimeoutMsg = nullptr;
+        }
+        mib->removePeerHtCapabilities(address);
+        cancelPendingAssociation();
+        if (pendingReassociation)
+            sendReassociationConfirm(pendingAp, PRC_REFUSED);
+        else
+            sendAssociationConfirm(pendingAp, PRC_REFUSED);
         delete packet;
         return;
     }
