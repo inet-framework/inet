@@ -43,6 +43,15 @@ Define_Module(Ieee80211MgmtSta);
 
 #define MAX_BEACONS_MISSED        3.5  // beacon lost timeout, in beacon intervals (doesn't need to be integer)
 
+Ieee80211MgmtSta::~Ieee80211MgmtSta()
+{
+    cancelAndDelete(scanTimer);
+    cancelAndDelete(assocTimeoutMsg);
+    for (auto& ap : apList)
+        cancelAndDelete(ap.authTimeoutMsg);
+    cancelAndDelete(assocAP.beaconTimeoutMsg);
+}
+
 std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSta::ScanningInfo& scanning)
 {
     os << "activeScan=" << scanning.activeScan
@@ -139,6 +148,8 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
             sendAssociationConfirm(ap, PRC_TIMEOUT);
     }
     else if (msg->getKind() == MK_SCAN_MAXCHANNELTIME) {
+        ASSERT(msg == scanTimer);
+        scanTimer = nullptr;
         // go to next channel during scanning
         bool done = scanNextChannel();
         if (done)
@@ -146,19 +157,25 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         delete msg;
     }
     else if (msg->getKind() == MK_SCAN_SENDPROBE) {
+        ASSERT(msg == scanTimer);
+        scanTimer = nullptr;
         // Active Scan: send a probe request, then wait for minChannelTime (11.1.3.2.2)
         delete msg;
         sendProbeRequest();
-        cMessage *timerMsg = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
-        scheduleAfter(scanning.minChannelTime, timerMsg); // TODO actually, we should start waiting after ProbeReq actually got transmitted
+        ASSERT(scanTimer == nullptr);
+        scanTimer = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
+        scheduleAfter(scanning.minChannelTime, scanTimer); // TODO actually, we should start waiting after ProbeReq actually got transmitted
     }
     else if (msg->getKind() == MK_SCAN_MINCHANNELTIME) {
+        ASSERT(msg == scanTimer);
+        scanTimer = nullptr;
         // Active Scan: after minChannelTime, possibly listen for the remaining time until maxChannelTime
         delete msg;
         if (scanning.busyChannelDetected) {
             EV << "Busy channel detected during minChannelTime, continuing listening until maxChannelTime elapses\n";
-            cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
-            scheduleAfter(scanning.maxChannelTime - scanning.minChannelTime, timerMsg);
+            ASSERT(scanTimer == nullptr);
+            scanTimer = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
+            scheduleAfter(scanning.maxChannelTime - scanning.minChannelTime, scanTimer);
         }
         else {
             EV << "Channel was empty during minChannelTime, going to next channel\n";
@@ -222,6 +239,12 @@ void Ieee80211MgmtSta::cancelPendingAssociation()
     cancelAndDelete(assocTimeoutMsg);
     assocTimeoutMsg = nullptr;
     reassociationInProgress = false;
+}
+
+void Ieee80211MgmtSta::cancelScanTimer()
+{
+    cancelAndDelete(scanTimer);
+    scanTimer = nullptr;
 }
 
 void Ieee80211MgmtSta::changeChannel(int channelNum)
@@ -390,15 +413,17 @@ bool Ieee80211MgmtSta::scanNextChannel()
     changeChannel(newChannel);
     scanning.busyChannelDetected = false;
 
+    ASSERT(scanTimer == nullptr);
     if (scanning.activeScan) {
         // Active Scan: first wait probeDelay, then send a probe. Listening
         // for minChannelTime or maxChannelTime takes place after that. (11.1.3.2)
-        scheduleAfter(scanning.probeDelay, new cMessage("sendProbe", MK_SCAN_SENDPROBE));
+        scanTimer = new cMessage("sendProbe", MK_SCAN_SENDPROBE);
+        scheduleAfter(scanning.probeDelay, scanTimer);
     }
     else {
         // Passive Scan: spend maxChannelTime on the channel (11.1.3.1)
-        cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
-        scheduleAfter(scanning.maxChannelTime, timerMsg);
+        scanTimer = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
+        scheduleAfter(scanning.maxChannelTime, scanTimer);
     }
 
     return false;
@@ -532,6 +557,27 @@ void Ieee80211MgmtSta::clearCurrentAssociation()
     cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
     assocAP = AssociatedApInfo(); // clear it
+}
+
+void Ieee80211MgmtSta::stop()
+{
+    if (host != nullptr && isScanning && scanning.activeScan)
+        host->unsubscribe(IRadio::receptionStateChangedSignal, this);
+    isScanning = false;
+    cancelScanTimer();
+    scanning = ScanningInfo();
+
+    clearAPList();
+
+    if (mib->bssStationData.isAssociated)
+        clearCurrentAssociation();
+    else {
+        cancelAndDelete(assocAP.beaconTimeoutMsg);
+        assocAP.beaconTimeoutMsg = nullptr;
+        assocAP = AssociatedApInfo();
+    }
+
+    Ieee80211MgmtBase::stop();
 }
 
 void Ieee80211MgmtSta::sendAuthenticationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode)

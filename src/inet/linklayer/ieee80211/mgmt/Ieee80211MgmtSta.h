@@ -89,6 +89,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     // scanning status
     bool isScanning;
+    cMessage *scanTimer;
     ScanningInfo scanning;
 
     // ApInfo list: we collect scanning results and keep track of ongoing authentications here
@@ -102,7 +103,8 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     AssociatedApInfo assocAP;
 
   public:
-    Ieee80211MgmtSta() : host(nullptr), numChannels(-1), isScanning(false), assocTimeoutMsg(nullptr) {}
+    Ieee80211MgmtSta() : host(nullptr), numChannels(-1), isScanning(false), scanTimer(nullptr), assocTimeoutMsg(nullptr) {}
+    virtual ~Ieee80211MgmtSta();
 
     virtual const ApInfo *getAssociatedAp() { return &assocAP; }
 
@@ -149,6 +151,9 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     virtual bool scanNextChannel();
 
+    /** Utility function: cancels and deletes the outstanding scan timer, if any. */
+    virtual void cancelScanTimer();
+
     /** Broadcasts a Probe Request */
     virtual void sendProbeRequest();
 
@@ -179,6 +184,9 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     /** Called by the signal handler whenever a change occurs we're interested in */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+
+    /** lifecycle support */
+    virtual void stop() override;
 
     /** Utility function: converts Ieee80211StatusCode (->frame) to Ieee80211PrimResultCode (->primitive) */
     virtual Ieee80211PrimResultCode statusCodeToPrimResultCode(int statusCode);

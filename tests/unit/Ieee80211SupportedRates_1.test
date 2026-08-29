@@ -64,7 +64,7 @@ static std::vector<uint8_t> makeRawResponse(uint16_t wireAid, const std::vector<
     std::vector<uint8_t> bytes = {
         0, 0, // Capability
         static_cast<uint8_t>(statusCode >> 8), static_cast<uint8_t>(statusCode),
-        static_cast<uint8_t>(wireAid >> 8), static_cast<uint8_t>(wireAid),
+        static_cast<uint8_t>(wireAid), static_cast<uint8_t>(wireAid >> 8),
         1, static_cast<uint8_t>(rates.size())};
     bytes.insert(bytes.end(), rates.begin(), rates.end());
     return bytes;
@@ -83,7 +83,7 @@ static Ptr<const Frame> deserializeFrame(const std::vector<uint8_t>& bytes)
 auto oneRateFrame = makeResponse(1);
 auto oneRateBytes = serializeFrame(oneRateFrame);
 ASSERT(oneRateBytes.size() == 9);
-ASSERT(oneRateBytes[4] == 0xC0 && oneRateBytes[5] == 1);
+ASSERT(oneRateBytes[4] == 1 && oneRateBytes[5] == 0xC0);
 ASSERT(oneRateBytes[6] == 1 && oneRateBytes[7] == 1);
 ASSERT(oneRateBytes[8] == (0x80 | 1));
 auto oneRateDecoded = deserializeFrame<Ieee80211AssociationResponseFrame>(oneRateBytes);
@@ -149,7 +149,7 @@ splitFrame->setExtendedSupportedRates(extendedRates);
 splitFrame->setChunkLength(B(6) + B(2 + 8) + B(2 + 5));
 auto splitBytes = serializeFrame(splitFrame);
 ASSERT(splitBytes.size() == 23);
-ASSERT(splitBytes[4] == 0xC7 && splitBytes[5] == 0xD7);
+ASSERT(splitBytes[4] == 0xD7 && splitBytes[5] == 0xC7);
 ASSERT(splitBytes[16] == 50 && splitBytes[17] == 5);
 for (int i = 0; i < 5; i++)
     ASSERT(splitBytes[18 + i] == (static_cast<uint8_t>(i + 9) | ((i == 1 || i == 4) ? 0x80 : 0)));
@@ -209,16 +209,31 @@ catch (const cRuntimeError&) {
 }
 ASSERT(primaryDuplicateRejected);
 
-// Successful Association and Reassociation Responses use logical AIDs 1..2007
-// in the model and the marked value on the wire.
+// IEEE Std 802.11-2024, 9.2.2, 9.3.3.6/Table 9-65,
+// 9.3.3.8/Table 9-67, and 9.4.1.8/Figure 9-146 require the marked
+// multi-octet AID to be transmitted least-significant octet first.
+// Decode independently supplied compliant vectors so a reciprocal
+// serializer/deserializer bug cannot pass.
 for (short aid : {short(1), short(2007)}) {
     auto association = makeResponse(1, SC_SUCCESSFUL, aid);
     auto associationBytes = serializeFrame(association);
+    uint16_t wireAid = static_cast<uint16_t>(0xC000 | aid);
+    ASSERT(associationBytes[4] == static_cast<uint8_t>(wireAid));
+    ASSERT(associationBytes[5] == static_cast<uint8_t>(wireAid >> 8));
     ASSERT(deserializeFrame<Ieee80211AssociationResponseFrame>(associationBytes)->getAid() == aid);
     auto reassociation = makeReassociationResponse(aid);
     auto reassociationBytes = serializeFrame(reassociation);
+    ASSERT(reassociationBytes[4] == static_cast<uint8_t>(wireAid));
+    ASSERT(reassociationBytes[5] == static_cast<uint8_t>(wireAid >> 8));
     ASSERT(deserializeFrame<Ieee80211ReassociationResponseFrame>(reassociationBytes)->getAid() == aid);
 }
+
+const std::vector<uint8_t> compliantAidOne = {0, 0, 0, 0, 0x01, 0xC0, 1, 1, 1};
+ASSERT(deserializeFrame<Ieee80211AssociationResponseFrame>(compliantAidOne)->getAid() == 1);
+ASSERT(deserializeFrame<Ieee80211ReassociationResponseFrame>(compliantAidOne)->getAid() == 1);
+const std::vector<uint8_t> compliantAid2007 = {0, 0, 0, 0, 0xD7, 0xC7, 1, 1, 1};
+ASSERT(deserializeFrame<Ieee80211AssociationResponseFrame>(compliantAid2007)->getAid() == 2007);
+ASSERT(deserializeFrame<Ieee80211ReassociationResponseFrame>(compliantAid2007)->getAid() == 2007);
 
 auto unsuccessful = makeResponse(1, SC_DATARATE_UNSUP, 0);
 auto unsuccessfulBytes = serializeFrame(unsuccessful);
