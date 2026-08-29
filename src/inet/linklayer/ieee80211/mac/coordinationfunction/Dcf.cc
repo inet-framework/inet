@@ -51,7 +51,7 @@ void Dcf::initialize(int stage)
     else if (stage == INITSTAGE_LAST)
         // Dcaf resolves its pending queue at the link-layer stage. Install
         // this callback after all child initialization has completed.
-        channelAccess->getPendingQueue()->setPacketDropCallback(this);
+        channelAccess->getPendingQueue()->addPacketCallback(this);
 }
 
 void Dcf::forEachChild(cVisitor *v)
@@ -118,10 +118,10 @@ void Dcf::processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&
     throw cRuntimeError("Unknown management frame");
 }
 
-void Dcf::handlePacketDropped(Packet *packet)
+void Dcf::handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason)
 {
-    Enter_Method("handlePacketDropped");
-    if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
+    Enter_Method("handlePacketRemoved");
+    if (reason == queueing::IPacketQueue::PacketRemovalReason::DROPPED && packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
         mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
 }
 

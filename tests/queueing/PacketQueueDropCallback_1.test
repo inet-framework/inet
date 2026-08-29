@@ -25,8 +25,9 @@ class TestPacketQueueDropCallback : public cSimpleModule, public IPacketQueue::I
     std::string lastPacketName;
     bool packetWasOwned = false;
 
-    virtual void handlePacketDropped(Packet *packet) override
+    virtual void handlePacketRemoved(Packet *packet, IPacketQueue::PacketRemovalReason reason) override
     {
+        ASSERT(reason == IPacketQueue::PacketRemovalReason::DROPPED);
         notificationCount++;
         lastPacketName = packet->getName();
         packetWasOwned = packet->getOwner() != nullptr;
@@ -36,7 +37,7 @@ class TestPacketQueueDropCallback : public cSimpleModule, public IPacketQueue::I
     {
         auto queue = check_and_cast<PacketQueue *>(getModuleByPath("^.queue"));
         auto buffer = check_and_cast<PacketBuffer *>(getModuleByPath("^.buffer"));
-        queue->setPacketDropCallback(this);
+        queue->addPacketCallback(this);
         ASSERT(queue->getMaxNumPackets() == -1);
         ASSERT(buffer->getMaxNumPackets() == 0);
 

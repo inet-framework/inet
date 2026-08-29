@@ -24,6 +24,7 @@ void PacketFlowBase::initialize(int stage)
         provider.reference(inputGate, false);
         collector.reference(outputGate, false);
         collection.reference(inputGate, false);
+        packetExtractor.reference(inputGate, false);
         WATCH(inProgressStreamId);
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -168,6 +169,24 @@ Packet *PacketFlowBase::pullPacket(const cGate *gate)
     return packet;
 }
 
+Packet *PacketFlowBase::dequeuePacket(const PacketPredicate& predicate)
+{
+    Enter_Method("dequeuePacket");
+    checkPacketStreaming(nullptr);
+    auto packet = packetExtractor->dequeuePacket(predicate);
+    if (packet == nullptr)
+        return nullptr;
+    take(packet);
+    emit(packetPulledInSignal, packet);
+    processPacket(packet);
+    handlePacketProcessed(packet);
+    emit(packetPulledOutSignal, packet);
+    if (collector != nullptr)
+        animatePullPacket(packet, outputGate, collector.getReferencedGate());
+    drop(packet);
+    return packet;
+}
+
 Packet *PacketFlowBase::pullPacketStart(const cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
@@ -234,4 +253,3 @@ void PacketFlowBase::handlePullPacketProcessed(Packet *packet, const cGate *gate
 
 } // namespace queueing
 } // namespace inet
-

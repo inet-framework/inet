@@ -45,6 +45,8 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     virtual bool isOverloaded() const;
 
   public:
+    using PacketQueueBase::dequeuePacket;
+
     virtual ~PacketQueue() { delete packetDropperFunction; }
 
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
@@ -58,6 +60,8 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override;
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;
 
     virtual bool supportsPacketPushing(const cGate *gate) const override { return inputGate == gate; }
@@ -71,6 +75,7 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     virtual Packet *pullPacket(const cGate *gate) override;
 
     virtual void handlePacketRemoved(Packet *packet) override;
+    virtual void handlePacketDropping(Packet *packet) override;
     virtual void handlePacketDropped(Packet *packet) override;
 };
 

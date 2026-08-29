@@ -17,7 +17,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListener
+class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListener, public IPacketQueue::ICallback
 {
   protected:
     int packetCapacity = -1;
@@ -26,17 +26,28 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     PassivePacketSinkRef consumer;
     PassivePacketSourceRef provider;
     IPacketCollection *collection = nullptr;
+    IPacketExtractor *packetExtractor = nullptr;
+    std::vector<IPacketQueue *> childQueues;
+    Packet *packetBeingRemoved = nullptr;
 
     IPacketDropperFunction *packetDropperFunction = nullptr;
 
   protected:
+    using cListener::finish;
+
     virtual void initialize(int stage) override;
+    virtual void finish() override;
+    virtual void preDelete(cComponent *root) override;
+    virtual void registerQueueFrontier(cModule *module);
+    virtual void unregisterChildQueueCallbacks();
 
     virtual IPacketDropperFunction *createDropperFunction(const char *dropperClass) const;
 
     virtual bool isOverloaded() const;
 
   public:
+    using PacketQueueBase::dequeuePacket;
+
     virtual ~CompoundPacketQueueBase() { delete packetDropperFunction; }
 
     virtual int getMaxNumPackets() const override { return packetCapacity; }
@@ -48,13 +59,14 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual bool isEmpty() const override { return collection->isEmpty(); }
     virtual Packet *getPacket(int index) const override { return collection->getPacket(index); }
     virtual void removePacket(Packet *packet) override;
+    virtual Packet *findPacket(const PacketPredicate& predicate) const override;
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override;
     virtual void removeAllPackets() override;
 
     virtual bool supportsPacketPushing(const cGate *gate) const override { return inputGate == gate; }
     virtual bool canPushSomePacket(const cGate *gate) const override;
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override;
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
-    virtual void setPacketDropCallback(IPacketQueue::ICallback *callback) override;
 
     virtual bool supportsPacketPulling(const cGate *gate) const override { return outputGate == gate; }
     virtual bool canPullSomePacket(const cGate *gate) const override { return provider.canPullSomePacket(); }
@@ -62,6 +74,7 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual Packet *pullPacket(const cGate *gate) override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+    virtual void handlePacketRemoved(Packet *packet, IPacketQueue::PacketRemovalReason reason) override;
 };
 
 } // namespace queueing

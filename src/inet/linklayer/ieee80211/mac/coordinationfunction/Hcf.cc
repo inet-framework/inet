@@ -66,7 +66,7 @@ void Hcf::initialize(int stage)
         // Edca resolves its Edcaf array at the link-layer stage. Install the
         // queue callbacks after all child initialization has completed.
         for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
-            edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue()->setPacketDropCallback(this);
+            edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue()->addPacketCallback(this);
 }
 
 std::string Hcf::getFrameSequenceInfo() const
@@ -150,10 +150,10 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     }
 }
 
-void Hcf::handlePacketDropped(Packet *packet)
+void Hcf::handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason)
 {
-    Enter_Method("handlePacketDropped");
-    if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
+    Enter_Method("handlePacketRemoved");
+    if (reason == queueing::IPacketQueue::PacketRemovalReason::DROPPED && packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
         mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
 }
 

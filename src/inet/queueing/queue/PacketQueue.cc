@@ -8,9 +8,7 @@
 #include "inet/queueing/queue/PacketQueue.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/PacketEventTag.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/TimeTag.h"
 #include "inet/queueing/function/PacketComparatorFunction.h"
 #include "inet/queueing/function/PacketDropperFunction.h"
 
@@ -100,11 +98,15 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
             throw cRuntimeError("Queue is overloaded while using a packet buffer");
     }
     else if (packetDropperFunction != nullptr) {
+        std::vector<Packet *> droppedPackets;
         while (isOverloaded()) {
             auto packet = packetDropperFunction->selectPacket(this);
             EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
             queue.remove(packet);
-            notifyPacketDropped(packet);
+            droppedPackets.push_back(packet);
+        }
+        for (auto packet : droppedPackets) {
+            notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::DROPPED);
             dropPacket(packet, QUEUE_OVERFLOW);
         }
     }
@@ -127,13 +129,38 @@ Packet *PacketQueue::pullPacket(const cGate *gate)
     }
     else
         queue.pop();
-    auto queueingTime = simTime() - packet->getArrivalTime();
-    auto packetEvent = new PacketEvent();
-    insertPacketEvent(this, packet, PEK_QUEUED, 0, queueingTime, packetEvent);
-    increaseTimeTag<QueueingTimeTag>(packet, queueingTime, queueingTime);
-    emit(packetPulledSignal, packet);
+    notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::DEQUEUED);
+    recordPacketDequeued(packet);
     if (collector != nullptr)
         animatePullPacket(packet, outputGate, collector.getReferencedGate());
+    return packet;
+}
+
+Packet *PacketQueue::findPacket(const PacketPredicate& predicate) const
+{
+    for (int i = 0; i < queue.getLength(); i++) {
+        auto packet = check_and_cast<Packet *>(queue.get(i));
+        if (predicate(packet))
+            return packet;
+    }
+    return nullptr;
+}
+
+Packet *PacketQueue::dequeuePacket(const PacketPredicate& predicate)
+{
+    Enter_Method("dequeuePacket");
+    auto packet = findPacket(predicate);
+    if (packet == nullptr)
+        return nullptr;
+    EV_INFO << "Dequeuing packet" << EV_FIELD(packet) << EV_ENDL;
+    queue.remove(packet);
+    if (buffer != nullptr)
+        buffer->removePacket(packet);
+    notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::DEQUEUED);
+    recordPacketDequeued(packet);
+    if (collector != nullptr)
+        animatePullPacket(packet, outputGate, collector.getReferencedGate());
+    drop(packet);
     return packet;
 }
 
@@ -144,6 +171,7 @@ void PacketQueue::removePacket(Packet *packet)
     queue.remove(packet);
     if (buffer != nullptr)
         buffer->removePacket(packet);
+    notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::REMOVED);
     emit(packetRemovedSignal, packet);
 }
 
@@ -152,11 +180,13 @@ void PacketQueue::removeAllPackets()
     Enter_Method("removeAllPackets");
     EV_INFO << "Removing all packets" << EV_ENDL;
     std::vector<Packet *> packets;
-    for (int i = 0; i < getNumPackets(); i++)
+    while (!queue.isEmpty())
         packets.push_back(check_and_cast<Packet *>(queue.pop()));
     if (buffer != nullptr)
-        buffer->removeAllPackets();
+        for (auto packet : packets)
+            buffer->removePacket(packet);
     for (auto packet : packets) {
+        notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::REMOVED);
         emit(packetRemovedSignal, packet);
         delete packet;
     }
@@ -191,14 +221,24 @@ void PacketQueue::handlePacketRemoved(Packet *packet)
         EV_INFO << "Removing packet" << EV_FIELD(packet) << EV_ENDL;
         queue.remove(packet);
         emit(packetRemovedSignal, packet);
+        notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::REMOVED);
+    }
+}
+
+void PacketQueue::handlePacketDropping(Packet *packet)
+{
+    Enter_Method("handlePacketDropping");
+    if (queue.contains(packet)) {
+        EV_INFO << "Removing packet" << EV_FIELD(packet) << EV_ENDL;
+        queue.remove(packet);
+        emit(packetRemovedSignal, packet);
     }
 }
 
 void PacketQueue::handlePacketDropped(Packet *packet)
 {
     Enter_Method("handlePacketDropped");
-    handlePacketRemoved(packet);
-    notifyPacketDropped(packet);
+    notifyPacketRemoved(packet, IPacketQueue::PacketRemovalReason::DROPPED);
 }
 
 } // namespace queueing

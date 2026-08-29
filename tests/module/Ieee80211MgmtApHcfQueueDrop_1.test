@@ -23,7 +23,7 @@ class TestHcfManagementQueue : public queueing::PacketQueue
 {
   public:
     void setPacketCapacityForTest(int capacity) { packetCapacity = capacity; }
-    bool hasPacketDropCallbackForTest() const { return packetDropCallback != nullptr; }
+    bool hasPacketDropCallbackForTest() const { return !packetCallbacks.empty(); }
 };
 
 Define_Module(TestHcfManagementQueue);
@@ -32,7 +32,7 @@ class TestCompoundPendingQueueForHcf : public queueing::CompoundPacketQueueBase
 {
   public:
     void setPacketCapacityForTest(int capacity) { packetCapacity = capacity; }
-    bool hasPacketDropCallbackForTest() const { return packetDropCallback != nullptr; }
+    bool hasPacketDropCallbackForTest() const { return !packetCallbacks.empty(); }
 };
 
 Define_Module(TestCompoundPendingQueueForHcf);
