@@ -46,6 +46,15 @@ simsignal_t Ieee80211MgmtSta::htNegotiationFailedSignal = cComponent::registerSi
 
 #define MAX_BEACONS_MISSED        3.5  // beacon lost timeout, in beacon intervals (doesn't need to be integer)
 
+Ieee80211MgmtSta::~Ieee80211MgmtSta()
+{
+    cancelAndDelete(scanTimer);
+    cancelAndDelete(assocTimeoutMsg);
+    for (auto& ap : apList)
+        cancelAndDelete(ap.authTimeoutMsg);
+    cancelAndDelete(assocAP.beaconTimeoutMsg);
+}
+
 std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSta::ScanningInfo& scanning)
 {
     os << "activeScan=" << scanning.activeScan
@@ -142,6 +151,8 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
             sendAssociationConfirm(ap, PRC_TIMEOUT);
     }
     else if (msg->getKind() == MK_SCAN_MAXCHANNELTIME) {
+        ASSERT(msg == scanTimer);
+        scanTimer = nullptr;
         // go to next channel during scanning
         bool done = scanNextChannel();
         if (done)
@@ -149,19 +160,25 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
         delete msg;
     }
     else if (msg->getKind() == MK_SCAN_SENDPROBE) {
+        ASSERT(msg == scanTimer);
+        scanTimer = nullptr;
         // Active Scan: send a probe request, then wait for minChannelTime (11.1.3.2.2)
         delete msg;
         sendProbeRequest();
-        cMessage *timerMsg = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
-        scheduleAfter(scanning.minChannelTime, timerMsg); // TODO actually, we should start waiting after ProbeReq actually got transmitted
+        ASSERT(scanTimer == nullptr);
+        scanTimer = new cMessage("minChannelTime", MK_SCAN_MINCHANNELTIME);
+        scheduleAfter(scanning.minChannelTime, scanTimer); // TODO actually, we should start waiting after ProbeReq actually got transmitted
     }
     else if (msg->getKind() == MK_SCAN_MINCHANNELTIME) {
+        ASSERT(msg == scanTimer);
+        scanTimer = nullptr;
         // Active Scan: after minChannelTime, possibly listen for the remaining time until maxChannelTime
         delete msg;
         if (scanning.busyChannelDetected) {
             EV << "Busy channel detected during minChannelTime, continuing listening until maxChannelTime elapses\n";
-            cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
-            scheduleAfter(scanning.maxChannelTime - scanning.minChannelTime, timerMsg);
+            ASSERT(scanTimer == nullptr);
+            scanTimer = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
+            scheduleAfter(scanning.maxChannelTime - scanning.minChannelTime, scanTimer);
         }
         else {
             EV << "Channel was empty during minChannelTime, going to next channel\n";
@@ -225,6 +242,12 @@ void Ieee80211MgmtSta::cancelPendingAssociation()
     cancelAndDelete(assocTimeoutMsg);
     assocTimeoutMsg = nullptr;
     reassociationInProgress = false;
+}
+
+void Ieee80211MgmtSta::cancelScanTimer()
+{
+    cancelAndDelete(scanTimer);
+    scanTimer = nullptr;
 }
 
 void Ieee80211MgmtSta::changeChannel(int channelNum)
@@ -393,15 +416,17 @@ bool Ieee80211MgmtSta::scanNextChannel()
     changeChannel(newChannel);
     scanning.busyChannelDetected = false;
 
+    ASSERT(scanTimer == nullptr);
     if (scanning.activeScan) {
         // Active Scan: first wait probeDelay, then send a probe. Listening
         // for minChannelTime or maxChannelTime takes place after that. (11.1.3.2)
-        scheduleAfter(scanning.probeDelay, new cMessage("sendProbe", MK_SCAN_SENDPROBE));
+        scanTimer = new cMessage("sendProbe", MK_SCAN_SENDPROBE);
+        scheduleAfter(scanning.probeDelay, scanTimer);
     }
     else {
         // Passive Scan: spend maxChannelTime on the channel (11.1.3.1)
-        cMessage *timerMsg = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
-        scheduleAfter(scanning.maxChannelTime, timerMsg);
+        scanTimer = new cMessage("maxChannelTime", MK_SCAN_MAXCHANNELTIME);
+        scheduleAfter(scanning.maxChannelTime, scanTimer);
     }
 
     return false;
@@ -524,10 +549,65 @@ void Ieee80211MgmtSta::disassociate()
     EV << "Disassociating from AP address=" << assocAP.address << "\n";
     ASSERT(mib->bssStationData.isAssociated);
     cancelPendingAssociation();
+    clearCurrentAssociation();
+}
+
+void Ieee80211MgmtSta::clearCurrentAssociation()
+{
+    ASSERT(mib->bssStationData.isAssociated);
     mib->bssStationData.isAssociated = false;
+    mib->removePeerHtCapabilities(assocAP.address);
     cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
     assocAP = AssociatedApInfo(); // clear it
+}
+
+bool Ieee80211MgmtSta::terminateCurrentAssociationFromPeer(const MacAddress& address)
+{
+    if (!mib->bssStationData.isAssociated || address != assocAP.address)
+        return false;
+
+    // Keep a stable AP-list object for the primitive confirmation while the
+    // association snapshot is cleared. A pending transaction for a different
+    // AP remains valid after the current association is terminated.
+    ApInfo *pendingAp = assocTimeoutMsg ? static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer()) : nullptr;
+    bool pendingReassociation = reassociationInProgress;
+    bool terminatesPendingRequest = pendingAp != nullptr && pendingAp->address == address;
+    if (terminatesPendingRequest)
+        cancelPendingAssociation();
+
+    EV << "Setting isAssociated flag to false\n";
+    clearCurrentAssociation();
+    if (terminatesPendingRequest) {
+        // The primitive API has no peer-aborted result; a termination of a
+        // same-peer pending request is reported as a refusal after teardown.
+        if (pendingReassociation)
+            sendReassociationConfirm(pendingAp, PRC_REFUSED);
+        else
+            sendAssociationConfirm(pendingAp, PRC_REFUSED);
+    }
+    return true;
+}
+
+void Ieee80211MgmtSta::stop()
+{
+    if (host != nullptr && isScanning && scanning.activeScan)
+        host->unsubscribe(IRadio::receptionStateChangedSignal, this);
+    isScanning = false;
+    cancelScanTimer();
+    scanning = ScanningInfo();
+
+    clearAPList();
+
+    if (mib->bssStationData.isAssociated)
+        clearCurrentAssociation();
+    else {
+        cancelAndDelete(assocAP.beaconTimeoutMsg);
+        assocAP.beaconTimeoutMsg = nullptr;
+        assocAP = AssociatedApInfo();
+    }
+
+    Ieee80211MgmtBase::stop();
 }
 
 void Ieee80211MgmtSta::sendAuthenticationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode)
@@ -641,8 +721,54 @@ void Ieee80211MgmtSta::handleAuthenticationFrame(Packet *packet, const Ptr<const
 void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Received Deauthentication frame\n";
-    const MacAddress& address = header->getAddress3(); // source address
+    // IEEE Std 802.11-2024, 9.3.3.1: Address 2 is the transmitter/source
+    // address used to identify the peer that sent this frame.
+    const MacAddress& address = header->getTransmitterAddress();
     ApInfo *ap = lookupAP(address);
+    ApInfo *pendingAp = assocTimeoutMsg ? static_cast<ApInfo *>(assocTimeoutMsg->getContextPointer()) : nullptr;
+    bool isPendingAp = pendingAp != nullptr && pendingAp->address == address;
+    bool isCurrentAp = mib->bssStationData.isAssociated && address == assocAP.address;
+
+    // IEEE Std 802.11-2024, 11.3.4.5: deauthentication from the current AP
+    // returns the STA to State 1. Do this before consulting the discovery
+    // cache: association state itself is authoritative for this transition.
+    if (isCurrentAp) {
+        // Clear the cached authentication state before the shared helper emits
+        // a possible same-peer transaction refusal, so observers see the
+        // complete State-1 transition in that callback as well.
+        if (ap != nullptr) {
+            ap->isAuthenticated = false;
+            if (ap->authTimeoutMsg) {
+                cancelAndDelete(ap->authTimeoutMsg);
+                ap->authTimeoutMsg = nullptr;
+            }
+        }
+        ASSERT(terminateCurrentAssociationFromPeer(address));
+        delete packet;
+        return;
+    }
+
+    // IEEE Std 802.11-2024, 11.3.5.1, 11.3.5.2 and 11.3.5.4: a
+    // deauthentication from the target AP terminates the pending association
+    // or reassociation, even when that AP is not the current AP.
+    if (isPendingAp) {
+        bool pendingReassociation = reassociationInProgress;
+        EV << "Cancelling pending association with deauthenticated AP\n";
+        pendingAp->isAuthenticated = false;
+        if (pendingAp->authTimeoutMsg) {
+            cancelAndDelete(pendingAp->authTimeoutMsg);
+            pendingAp->authTimeoutMsg = nullptr;
+        }
+        mib->removePeerHtCapabilities(address);
+        cancelPendingAssociation();
+        if (pendingReassociation)
+            sendReassociationConfirm(pendingAp, PRC_REFUSED);
+        else
+            sendAssociationConfirm(pendingAp, PRC_REFUSED);
+        delete packet;
+        return;
+    }
+
     if (!ap || !ap->isAuthenticated) {
         EV << "Unknown AP, or not authenticated with that AP -- ignoring frame\n";
         delete packet;
@@ -658,6 +784,7 @@ void Ieee80211MgmtSta::handleDeauthenticationFrame(Packet *packet, const Ptr<con
 
     EV << "Setting isAuthenticated flag for that AP to false\n";
     ap->isAuthenticated = false;
+    mib->removePeerHtCapabilities(address);
     delete packet;
 }
 
@@ -811,12 +938,8 @@ void Ieee80211MgmtSta::handleReassociationFailure(ApInfo *ap)
 {
     // IEEE Std 802.11-2024, 11.3.5.4(f): failed or timed-out reassociation
     // disassociates the STA only when the target is its current AP.
-    if (shouldDisassociateOnReassociationFailure(mib->bssStationData.isAssociated, assocAP.address, ap->address)) {
-        // This peer state belongs to the completed failed reassociation, not
-        // to the generic lifecycle reset performed by disassociate().
-        mib->removePeerHtCapabilities(ap->address);
+    if (shouldDisassociateOnReassociationFailure(mib->bssStationData.isAssociated, assocAP.address, ap->address))
         disassociate();
-    }
     else
         mib->removePeerHtCapabilities(ap->address);
 }
@@ -840,19 +963,18 @@ void Ieee80211MgmtSta::handleReassociationResponseFrame(Packet *packet, const Pt
 void Ieee80211MgmtSta::handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
 {
     EV << "Received Disassociation frame\n";
-    const MacAddress& address = header->getAddress3(); // source address
+    // IEEE Std 802.11-2024, 9.3.3.1: Address 2 carries the transmitter (TA/SA).
+    const MacAddress& address = header->getTransmitterAddress();
 
-    cancelPendingAssociation();
-    if (!mib->bssStationData.isAssociated || address != assocAP.address) {
+    // IEEE Std 802.11-2024, 11.3.5.7: process a Disassociation only from the
+    // AP whose peer state is State 3/4. In particular, a pending association
+    // to another AP must survive an unrelated frame.
+    if (!terminateCurrentAssociationFromPeer(address)) {
         EV << "Not associated with that AP -- ignoring frame\n";
         delete packet;
         return;
     }
-
-    EV << "Setting isAssociated flag to false\n";
-    mib->bssStationData.isAssociated = false;
-    cancelAndDelete(assocAP.beaconTimeoutMsg);
-    assocAP.beaconTimeoutMsg = nullptr;
+    delete packet;
 }
 
 void Ieee80211MgmtSta::handleBeaconFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)

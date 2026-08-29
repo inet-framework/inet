@@ -25,6 +25,9 @@ class INET_API Ieee80211MgmtStaSimplified : public Ieee80211MgmtBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void configureAssociation();
+    virtual void stop() override;
 
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg) override;
@@ -52,4 +55,3 @@ class INET_API Ieee80211MgmtStaSimplified : public Ieee80211MgmtBase
 } // namespace inet
 
 #endif
-
