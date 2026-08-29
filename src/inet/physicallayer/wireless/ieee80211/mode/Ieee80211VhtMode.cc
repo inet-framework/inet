@@ -696,8 +696,8 @@ const Ieee80211VhtMode *Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
         throw cRuntimeError("Unsupported VHT preamble format: only HT_PREAMBLE_MIXED is supported (IEEE Std 802.11-2024, 21.3.2)");
     const char *name = ""; // TODO
     unsigned int nss = mcsMode->getNumNss();
-    auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType, nss, centerFrequencyMode, preambleFormat);
-    auto mode = singleton.modeCache.find(htModeId);
+    auto vhtModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType, nss, centerFrequencyMode, preambleFormat);
+    auto mode = singleton.modeCache.find(vhtModeId);
     if (mode == singleton.modeCache.end()) {
         const Ieee80211OfdmSignalMode *legacySignal = nullptr;
         const Ieee80211VhtSignalMode *htSignal = nullptr;
@@ -715,7 +715,7 @@ const Ieee80211VhtMode *Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
         const Ieee80211VhtDataMode *dataMode = new Ieee80211VhtDataMode(mcsMode, mcsMode->getBandwidth(), guardIntervalType);
         const Ieee80211VhtPreambleMode *preambleMode = new Ieee80211VhtPreambleMode(htSignal, legacySignal, preambleFormat, dataMode->getNumberOfSpatialStreams());
         const Ieee80211VhtMode *htMode = new Ieee80211VhtMode(name, preambleMode, dataMode, centerFrequencyMode);
-        singleton.modeCache.insert(std::pair<decltype(htModeId), const Ieee80211VhtMode *>(htModeId, htMode));
+        singleton.modeCache.emplace(vhtModeId, htMode);
         return htMode;
     }
     return mode->second;
