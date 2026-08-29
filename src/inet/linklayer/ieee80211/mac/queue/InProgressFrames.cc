@@ -49,7 +49,7 @@ void InProgressFrames::forEachChild(cVisitor *v)
 bool InProgressFrames::hasEligibleFrameToTransmit()
 {
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        if (dataService->isFrameEligible(frame) && ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             return true;
     }
     return false;
@@ -82,7 +82,7 @@ Packet *InProgressFrames::getFrameToTransmit()
 {
     ensureHasFrameToTransmit();
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        if (dataService->isFrameEligible(frame) && ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             return frame;
     }
     return nullptr;
@@ -95,7 +95,7 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
         return frameToTransmit;
     else {
         for (auto frame : inProgressFrames) {
-            if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()) && frameToTransmit != frame)
+            if (dataService->isFrameEligible(frame) && ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()) && frameToTransmit != frame)
                 return frame;
         }
         auto frames = dataService->extractFramesToTransmit(pendingQueue);
@@ -120,10 +120,26 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 
 void InProgressFrames::dropFrame(Packet *packet)
 {
+    auto it = std::find(inProgressFrames.begin(), inProgressFrames.end(), packet);
+    if (it == inProgressFrames.end())
+        return;
     EV_DEBUG << "Dropping frame " << packet->getName() << ".\n";
-    inProgressFrames.erase(std::remove(inProgressFrames.begin(), inProgressFrames.end(), packet), inProgressFrames.end());
+    inProgressFrames.erase(it);
     droppedFrames.push_back(packet);
     emit(packetDequeuedSignal, packet);
+}
+
+Packet *InProgressFrames::extractFrame(Packet *packet)
+{
+    Enter_Method("extractFrame");
+    auto it = std::find(inProgressFrames.begin(), inProgressFrames.end(), packet);
+    if (it == inProgressFrames.end())
+        return nullptr;
+    EV_DEBUG << "Extracting frame " << packet->getName() << ".\n";
+    inProgressFrames.erase(it);
+    emit(packetDequeuedSignal, packet);
+    drop(packet);
+    return packet;
 }
 
 void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums)
@@ -175,4 +191,3 @@ InProgressFrames::~InProgressFrames()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

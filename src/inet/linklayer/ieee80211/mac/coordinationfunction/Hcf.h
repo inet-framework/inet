@@ -8,6 +8,9 @@
 #ifndef __INET_HCF_H
 #define __INET_HCF_H
 
+#include <array>
+#include <map>
+
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Hcca.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
@@ -59,6 +62,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     cMessage *startRxTimer = nullptr;
     cMessage *inactivityTimer = nullptr;
+    cMessage *addbaResponseTimer = nullptr;
 
     // Transmission and Reception
     IRx *rx = nullptr;
@@ -97,6 +101,13 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // Queues
     InProgressFrames *hccaInProgressFrame = nullptr;
 
+    struct PendingFrameEligibility {
+        AccessCategory accessCategory;
+        bool eligible;
+    };
+    std::map<const Packet *, PendingFrameEligibility> pendingFrameEligibility;
+    std::array<int, AC_NUMCATEGORIES> numEligiblePendingFrames = {};
+
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;
 
@@ -111,12 +122,20 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void refreshDisplay() const override;
 
     void startFrameSequence(AccessCategory ac);
-    void handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);
+    int handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs);
 
     void sendUp(const std::vector<Packet *>& completeFrames);
     FrameSequenceContext *buildContext(AccessCategory ac);
     virtual bool hasFrameToTransmit();
     virtual bool hasFrameToTransmit(AccessCategory ac);
+    virtual void requestEligibleChannelAccess();
+    virtual void resumeEligibleChannelAccess();
+    virtual bool processDroppedBlockAckSetupFrame(Packet *packet);
+    virtual bool processDroppedBlockAckTeardownFrame(Packet *packet);
+    virtual bool isPacketReferencedByCurrentFrameSequence(const Packet *packet) const;
+    virtual void trackPendingFrame(Packet *packet, AccessCategory accessCategory);
+    virtual void untrackPendingFrame(const Packet *packet);
+    virtual void rebuildPendingFrameEligibility();
     virtual bool isReceptionInProgress();
 
     // Recipient
@@ -126,7 +145,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
     // Originator
-    virtual void originatorProcessTransmittedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, AccessCategory ac);
+    virtual void originatorProcessTransmittedManagementFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, AccessCategory ac);
     virtual void originatorProcessTransmittedControlFrame(const Ptr<const Ieee80211MacHeader>& controlHeader, AccessCategory ac);
     virtual void originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, AccessCategory ac);
     virtual void originatorProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac);
@@ -162,6 +181,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     // IProcedureCallback
     virtual void scheduleInactivityTimer(simtime_t timeout) override;
+    virtual void scheduleAddbaResponseTimer(simtime_t deadline) override;
+    virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override;
 
     std::string getFrameSequenceInfo() const;
 
