@@ -78,9 +78,10 @@ class INET_API Ieee80211Mib : public SimpleModule
     // This is a deliberately model-backed subset, not a full Annex C HT MIB implementation.
     bool localHtCapabilitiesValid = false;
     Ieee80211HtCapabilities localHtCapabilities;
-    Ieee80211HtOperation htOperation;
 
   private:
+    Ieee80211HtOperation htOperation;
+    bool primaryChannelAvailable = false;
     std::map<MacAddress, short> associationIdReservations;
     std::map<MacAddress, PeerHtState> peerHtStates;
 
@@ -99,6 +100,10 @@ class INET_API Ieee80211Mib : public SimpleModule
     void clearAssociationIds();
     void updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet);
     bool isHtOperationSupported() const { return localHtCapabilitiesValid; }
+    bool hasPrimaryChannel() const { return primaryChannelAvailable; }
+    int requirePrimaryChannel() const;
+    void setPrimaryChannel(int primaryChannel);
+    const Ieee80211HtOperation& getHtOperation() const;
     const PeerHtState *findPeerHtState(const MacAddress& address) const;
     void setPeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities, const Ieee80211HtOperation& operation);
     void removePeerHtCapabilities(const MacAddress& address);

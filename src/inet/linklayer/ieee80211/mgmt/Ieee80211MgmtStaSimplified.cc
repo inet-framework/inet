@@ -76,8 +76,8 @@ void Ieee80211MgmtStaSimplified::configureAssociation()
     // Simplified management is an explicit no-air abstraction: install the state that the
     // Association Request/Response exchange would have committed in detailed management.
     if (mib->isHtOperationSupported() && apMib->isHtOperationSupported()) {
-        mib->setPeerHtCapabilities(apMib->address, apMib->localHtCapabilities, apMib->htOperation);
-        apMib->setPeerHtCapabilities(mib->address, mib->localHtCapabilities, apMib->htOperation);
+        mib->setPeerHtCapabilities(apMib->address, apMib->localHtCapabilities, apMib->getHtOperation());
+        apMib->setPeerHtCapabilities(mib->address, mib->localHtCapabilities, apMib->getHtOperation());
     }
 }
 

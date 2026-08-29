@@ -38,6 +38,8 @@ class TestInitializationObserver : public cSimpleModule
             auto staMib = check_and_cast<ieee80211::Ieee80211Mib *>(staInterface->getSubmodule("mib"));
 
             ASSERT(staInterface->getSubmodule("agent") == nullptr);
+            ASSERT(apMib->hasPrimaryChannel());
+            ASSERT(apMib->requirePrimaryChannel() == 6);
             if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
                 ASSERT(apMib->bssData.ssid == "review-ssid");
                 ASSERT(staMib->bssData.ssid == apMib->bssData.ssid);
@@ -52,6 +54,8 @@ class TestInitializationObserver : public cSimpleModule
             else {
                 ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
                 ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
+                ASSERT(apMib->findPeerHtState(staMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
+                ASSERT(staMib->findPeerHtState(apMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
                 std::cout << "Simplified STA HT peer state installed at last initialization stage.\n";
                 scheduleAt(SimTime(1500, SIMTIME_NS), new cMessage("checkShutdown"));
                 scheduleAt(SimTime(2500, SIMTIME_NS), new cMessage("checkShutdownRestart"));
@@ -180,6 +184,7 @@ record-scalar-results = false
 *.ap.wlan[0].address = "02:00:00:00:00:01"
 *.sta.wlan[0].address = "auto"
 *.ap.wlan[0].mgmt.ssid = "review-ssid"
+*.ap.wlan[0].radio.channelNumber = 6
 *.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
 **.wlan[0].opMode = "n(mixed-2.4Ghz)"
 **.hasStatus = true

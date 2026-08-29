@@ -10,6 +10,7 @@ at both ends.
 #include "inet/common/Simsignals.h"
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
 using namespace inet;
 using namespace inet::ieee80211;
@@ -40,20 +41,54 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
 
   protected:
     int apAssociationNotifications = 0;
+    cMessage *channelChangeTimer = nullptr;
+    cModule *apQosEdcaf = nullptr;
 
+  public:
+    virtual ~Ieee80211HtAssociationChecker()
+    {
+        if (channelChangeTimer != nullptr)
+            cancelAndDelete(channelChangeTimer);
+    }
+
+  protected:
     virtual void initialize() override
     {
         getModuleByPath("^.ap.wlan[0].mgmt")->subscribe(l2ApAssociatedSignal, this);
+        apQosEdcaf = getModuleByPath("^.ap.wlan[0].mac.hcf.edca.edcaf[3]");
+        apQosEdcaf->subscribe(packetSentToPeerSignal, this);
+        channelChangeTimer = new cMessage("channelChange");
     }
 
     virtual void handleMessage(cMessage *message) override
     {
-        throw cRuntimeError("Unexpected message");
+        if (message != channelChangeTimer)
+            throw cRuntimeError("Unexpected message");
+        auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        auto apRadio = check_and_cast<physicallayer::Ieee80211Radio *>(getModuleByPath("^.ap.wlan[0].radio"));
+        auto staRadio = check_and_cast<physicallayer::Ieee80211Radio *>(getModuleByPath("^.sta.wlan[0].radio"));
+        ASSERT(apMib->requirePrimaryChannel() == 6);
+        apRadio->setChannelNumber(11);
+        // Keep the response exchange on-air after the AP's channel update so
+        // the terminal ACK can still be received while the pending operation
+        // snapshot is committed.
+        staRadio->setChannelNumber(11);
+        ASSERT(apMib->requirePrimaryChannel() == 11);
+        delete message;
+        channelChangeTimer = nullptr;
+        std::cout << "AP primary channel follows a dynamic radio change from 6 to 11 before association ACK.\n";
     }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
     {
-        apAssociationNotifications++;
+        if (source == apQosEdcaf && signalID == packetSentToPeerSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_ASSOCIATIONRESPONSE && channelChangeTimer != nullptr && !channelChangeTimer->isScheduled())
+                scheduleAfter(SimTime(1, SIMTIME_US), channelChangeTimer);
+        }
+        else if (signalID == l2ApAssociatedSignal)
+            apAssociationNotifications++;
     }
 
     virtual void finish() override
@@ -61,13 +96,19 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
         auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
         auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
         const auto& staAddress = staMib->address;
+        ASSERT(apMib->requirePrimaryChannel() == 11);
+        ASSERT(channelChangeTimer == nullptr);
         ASSERT(apMib->bssAccessPointData.stations.at(staAddress) == Ieee80211Mib::ASSOCIATED);
         ASSERT(apMib->bssAccessPointData.associationIds.at(staAddress) != 0);
         ASSERT(apMib->findPeerHtState(staAddress) != nullptr);
         ASSERT(apMib->findPeerHtState(staAddress)->valid);
+        ASSERT(apMib->hasPrimaryChannel());
+        ASSERT(apMib->requirePrimaryChannel() == 11);
+        ASSERT(apMib->findPeerHtState(staAddress)->negotiatedCapabilities.operation.primaryChannel == 6);
         ASSERT(staMib->bssStationData.isAssociated);
         ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
         ASSERT(staMib->findPeerHtState(apMib->address)->valid);
+        ASSERT(staMib->findPeerHtState(apMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
         ASSERT(apAssociationNotifications == 1);
         EV << "RTS-protected association committed at AP and STA.\n";
     }
@@ -108,6 +149,7 @@ network Ieee80211HtAssociationTest
         ap: AccessPoint {
             parameters:
                 wlan[*].mgmt.typename = "Ieee80211MgmtAp";
+                wlan[*].radio.channelNumber = 6;
         }
         test: Ieee80211HtAssociationChecker;
 }
@@ -136,6 +178,7 @@ record-scalar-results = false
 
 **.wlan[*].opMode = "n(mixed-2.4Ghz)"
 **.wlan[*].bitrate = 65Mbps
+*.sta.wlan[0].radio.channelNumber = 6
 **.wlan[*].radio.bandName = "2.4 GHz"
 **.wlan[*].radio.centerFrequency = 2.4GHz
 **.wlan[*].radio.antenna.numAntennas = 1
@@ -149,6 +192,7 @@ record-scalar-results = false
 *.ap.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 0B
 *.ap.wlan[*].mac.hcf.rateControl.typename = "AarfRateControl"
 *.sta.wlan[*].agent.startingTime = 0s
+*.sta.wlan[*].agent.channelsToScan = "6"
 *.sta.wlan[*].agent.probeDelay = 1ms
 *.sta.wlan[*].agent.minChannelTime = 5ms
 *.sta.wlan[*].agent.maxChannelTime = 5ms

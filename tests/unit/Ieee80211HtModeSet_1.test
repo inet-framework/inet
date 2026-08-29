@@ -4,6 +4,7 @@ modes. The current VHT-only ac profile intentionally does not advertise HT.
 Also verify exact sparse HT MCS and width derivation from typed mode entries.
 
 %includes:
+#include <algorithm>
 #include <vector>
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -19,8 +20,8 @@ class SparseModeSet : public Ieee80211ModeSet
   public:
     using Ieee80211ModeSet::Entry;
 
-    SparseModeSet(const std::vector<Entry>& entries, bool htOperationSupported = true) :
-        Ieee80211ModeSet("sparse", entries, OperatingPhy::HT, htOperationSupported)
+    SparseModeSet(const std::vector<Entry>& entries, const IIeee80211Mode *referenceMode, bool htOperationSupported = true) :
+        Ieee80211ModeSet("sparse", entries, referenceMode, OperatingPhy::HT, htOperationSupported)
     {}
 };
 
@@ -50,7 +51,7 @@ sparseEntries.push_back({false, findHtMode(htModeSet, 10, MHz(20))});
 // IEEE Std 802.11-2024, 9.4.2.3 and 11.1.4.6: an ordinary HT profile
 // includes its applicable legacy operational rates in Supported Rates.
 sparseEntries.push_back({true, htModeSet->getMode(Mbps(1)), true});
-SparseModeSet sparse(sparseEntries);
+SparseModeSet sparse(sparseEntries, sparseEntries[0].mode);
 ASSERT(sparse.isHtOperationSupported());
 ASSERT(sparse.getLegacyOperationalModes().size() == 1);
 for (int mcsIndex = 0; mcsIndex < 77; mcsIndex++) {
@@ -68,7 +69,7 @@ for (auto& entry : htOnlyEntries)
     entry.isLegacyOperational = false;
 bool htOnlyRejected = false;
 try {
-    SparseModeSet invalid(htOnlyEntries);
+    SparseModeSet invalid(htOnlyEntries, htOnlyEntries[0].mode);
 }
 catch (const cRuntimeError&) {
     htOnlyRejected = true;
@@ -76,7 +77,7 @@ catch (const cRuntimeError&) {
 ASSERT(htOnlyRejected);
 bool nonHtOnlyRejected = false;
 try {
-    SparseModeSet invalid(htOnlyEntries, false);
+    SparseModeSet invalid(htOnlyEntries, htOnlyEntries[0].mode, false);
 }
 catch (const cRuntimeError&) {
     nonHtOnlyRejected = true;
@@ -90,12 +91,40 @@ missingMandatory.push_back({false, findHtMode(htModeSet, 8, MHz(20))});
 missingMandatory.push_back({true, htModeSet->getMode(Mbps(1)), true});
 bool missingMandatoryRejected = false;
 try {
-    SparseModeSet invalid(missingMandatory);
+    SparseModeSet invalid(missingMandatory, missingMandatory[0].mode);
 }
 catch (const cRuntimeError&) {
     missingMandatoryRejected = true;
 }
 ASSERT(missingMandatoryRejected);
+
+// The timing reference is explicit and remains stable when lookup entries are
+// reordered by bitrate. A reference must also be present exactly once.
+auto reorderedEntries = sparseEntries;
+std::swap(reorderedEntries.front(), reorderedEntries.back());
+SparseModeSet reordered(reorderedEntries, sparseEntries[0].mode);
+ASSERT(reordered.getReferenceMode() == sparseEntries[0].mode);
+ASSERT(reordered.getSifsTime() == sparseEntries[0].mode->getSifsTime());
+ASSERT(reordered.getSlotTime() == sparseEntries[0].mode->getSlotTime());
+ASSERT(reordered.getPhyRxStartDelay() == sparseEntries[0].mode->getPhyRxStartDelay());
+
+bool nullReferenceRejected = false;
+try {
+    SparseModeSet invalid(sparseEntries, nullptr);
+}
+catch (const cRuntimeError&) {
+    nullReferenceRejected = true;
+}
+ASSERT(nullReferenceRejected);
+
+bool notContainedReferenceRejected = false;
+try {
+    SparseModeSet invalid(sparseEntries, vhtOnlyModeSet->getMode(0));
+}
+catch (const cRuntimeError&) {
+    notContainedReferenceRejected = true;
+}
+ASSERT(notContainedReferenceRejected);
 
 EV << "HT mode-set capability and sparse-MCS checks verified.\n";
 

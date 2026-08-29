@@ -44,8 +44,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     std::string name;
     const std::vector<Entry> entries;
     const OperatingPhy operatingPhy;
-    // PHY timing and contention parameters remain anchored to the first
-    // configured mode, even though entries are sorted by bitrate for lookup.
+    // PHY timing and contention parameters remain anchored to the explicitly
+    // configured reference mode, even though entries are sorted by bitrate for lookup.
     const IIeee80211Mode *referenceMode;
     std::vector<const IIeee80211Mode *> legacyOperationalModes;
     std::array<bool, 77> htMcsSupported = {};
@@ -61,7 +61,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     int getModeIndex(const IIeee80211Mode *mode) const;
 
   public:
-    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, OperatingPhy operatingPhy, bool htOperationSupported = false);
+    Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const IIeee80211Mode *referenceMode,
+            OperatingPhy operatingPhy, bool htOperationSupported = false);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211ModeSet, name = " << name; }
 
@@ -100,8 +101,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     static const Ieee80211ModeSet *findModeSet(const char *mode);
     static const Ieee80211ModeSet *getModeSet(const char *mode);
 
-    // PHY timing and contention policy remain anchored to the first configured
-    // mode, which is the reference mode before bitrate sorting.
+    // PHY timing and contention policy remain anchored to the explicitly
+    // configured reference mode, independent of bitrate sorting.
     OperatingPhy getOperatingPhy() const { return operatingPhy; }
     const IIeee80211Mode *getReferenceMode() const { return referenceMode; }
     simtime_t getSifsTime() const { return referenceMode->getSifsTime(); }

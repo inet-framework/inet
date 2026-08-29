@@ -24,6 +24,7 @@ void Ieee80211Mib::initialize(int stage)
         WATCH(mode);
         WATCH(qos);
         WATCH(localHtCapabilitiesValid);
+        WATCH(primaryChannelAvailable);
         WATCH(bssData.bssid);
         WATCH(bssStationData.stationType);
         WATCH(bssStationData.isAssociated);
@@ -36,7 +37,29 @@ void Ieee80211Mib::initialize(int stage)
         WATCH_EXPR("ssidStr", getSsidStr());
         WATCH_EXPR("ssid", bssData.ssid.empty() ? std::string("-") : bssData.ssid); // associated SSID ("-" if none), for node display strings
         WATCH_EXPR("associatedStr", bssStationData.stationType == STATION ? (bssStationData.isAssociated ? "\nAssociated" : "\nNot associated") : "");
+        WATCH_EXPR("primaryChannel", primaryChannelAvailable ? std::to_string(htOperation.primaryChannel) : "unavailable");
     }
+}
+
+int Ieee80211Mib::requirePrimaryChannel() const
+{
+    if (!primaryChannelAvailable)
+        throw cRuntimeError("IEEE 802.11 primary channel is unavailable");
+    return htOperation.primaryChannel;
+}
+
+void Ieee80211Mib::setPrimaryChannel(int primaryChannel)
+{
+    if (primaryChannel < 0 || primaryChannel > 255)
+        throw cRuntimeError("IEEE 802.11 primary channel must be in the range 0..255, not %d", primaryChannel);
+    htOperation.primaryChannel = primaryChannel;
+    primaryChannelAvailable = true;
+}
+
+const Ieee80211HtOperation& Ieee80211Mib::getHtOperation() const
+{
+    requirePrimaryChannel();
+    return htOperation;
 }
 
 void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet)
@@ -44,10 +67,12 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     // The radio publishes its initial channel at PHYSICAL_LAYER before the MAC
     // publishes its mode set at LINK_LAYER. Preserve that independent BSS
     // operation input when rebuilding the mode-derived capability subset.
+    bool wasPrimaryChannelAvailable = primaryChannelAvailable;
     int primaryChannel = htOperation.primaryChannel;
     localHtCapabilities = Ieee80211HtCapabilities();
     htOperation = Ieee80211HtOperation();
     htOperation.primaryChannel = primaryChannel;
+    primaryChannelAvailable = wasPrimaryChannelAvailable;
     localHtCapabilitiesValid = modeSet != nullptr && modeSet->isHtOperationSupported();
     if (!localHtCapabilitiesValid) {
         clearPeerHtCapabilities();

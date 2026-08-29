@@ -84,7 +84,7 @@ void Ieee80211MgmtBase::addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) 
 void Ieee80211MgmtBase::addHtOperation(const Ptr<Ieee80211MgmtFrame>& frame) const
 {
     if (mib->isHtOperationSupported())
-        setHtOperation(frame, mib->htOperation);
+        setHtOperation(frame, mib->getHtOperation());
 }
 
 void Ieee80211MgmtBase::handleMessageWhenUp(cMessage *msg)

@@ -377,6 +377,26 @@ ASSERT(acModeSet->getCwMin() == acPrimaryMode->getLegacyCwMin());
 ASSERT(acModeSet->getCwMax() == acPrimaryMode->getLegacyCwMax());
 ASSERT(acModeSet->getSlowestMandatoryMode() == acLegacyModes.front());
 
+// Mode-set timing is anchored to the explicitly configured reference mode.
+// Keep the legacy profiles literal here so a reference-mode change cannot
+// silently alter their established contention behavior.
+auto assertTiming = [](const physicallayer::Ieee80211ModeSet *modeSet,
+        simtime_t sifsTime, simtime_t slotTime, simtime_t phyRxStartDelay,
+        int cwMin, int cwMax) {
+    ASSERT(modeSet->getSifsTime() == sifsTime);
+    ASSERT(modeSet->getSlotTime() == slotTime);
+    ASSERT(modeSet->getPhyRxStartDelay() == phyRxStartDelay);
+    ASSERT(modeSet->getCwMin() == cwMin);
+    ASSERT(modeSet->getCwMax() == cwMax);
+};
+assertTiming(physicallayer::Ieee80211ModeSet::getModeSet("a"), SimTime(16, SIMTIME_US), SimTime(9, SIMTIME_US), SimTime(25, SIMTIME_US), 15, 1023);
+assertTiming(physicallayer::Ieee80211ModeSet::getModeSet("b"), SimTime(10, SIMTIME_US), SimTime(20, SIMTIME_US), SimTime(192, SIMTIME_US), 31, 1023);
+assertTiming(gModeSet, SimTime(10, SIMTIME_US), SimTime(20, SIMTIME_US), SimTime(192, SIMTIME_US), 31, 1023);
+assertTiming(physicallayer::Ieee80211ModeSet::getModeSet("g(erp)"), SimTime(10, SIMTIME_US), SimTime(9, SIMTIME_US), SimTime(25, SIMTIME_US), 15, 1023);
+assertTiming(pModeSet, SimTime(32, SIMTIME_US), SimTime(13, SIMTIME_US), SimTime(49, SIMTIME_US), 15, 1023);
+assertTiming(nModeSet, SimTime(10, SIMTIME_US), SimTime(20, SIMTIME_US), SimTime(24, SIMTIME_US), 15, 1023);
+assertTiming(acModeSet, SimTime(16, SIMTIME_US), SimTime(9, SIMTIME_US), SimTime(24, SIMTIME_US), 15, 1023);
+
 EV << "Supported Rates and AID validation checks passed.\n";
 
 %contains: stdout

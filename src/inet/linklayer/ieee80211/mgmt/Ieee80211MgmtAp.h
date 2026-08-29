@@ -40,6 +40,8 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, public IFrameTransm
         bool pendingHtStateAvailable = false;
         bool pendingHtCapabilitiesValid = false;
         Ieee80211HtCapabilities pendingHtCapabilities;
+        bool pendingHtOperationValid = false;
+        Ieee80211HtOperation pendingHtOperation;
 //        int consecFailedTrans; // TODO
 //        double expiry; // TODO association should expire after a while if STA is silent?
     };
@@ -64,7 +66,6 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, public IFrameTransm
   protected:
     // configuration
     std::string ssid;
-    int channelNumber = -1;
     simtime_t beaconInterval;
     int numAuthSteps = 0;
 
@@ -81,16 +82,12 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, public IFrameTransm
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
 
-    using Ieee80211MgmtApBase::receiveSignal;
-
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg) override;
 
     /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
     virtual void handleCommand(int msgkind, cObject *ctrl) override;
 
-    /** Called by a signal handler whenever a change occurs we're interested in */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
     virtual void frameTransmissionFinished(const IFrameTransmissionCallback::Result& result) override;
 
     /** Utility function: return sender STA's entry from our STA list, or nullptr if not in there */
