@@ -32,7 +32,6 @@
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
-#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
@@ -55,6 +54,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     static simsignal_t edcaCollisionDetectedSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
+    static simsignal_t blockAckAgreementChangedSignal;
 
   protected:
     Ieee80211Mac *mac = nullptr;
@@ -133,6 +133,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual bool processDroppedBlockAckSetupFrame(Packet *packet);
     virtual bool processDroppedBlockAckTeardownFrame(Packet *packet);
     virtual bool isPacketReferencedByCurrentFrameSequence(const Packet *packet) const;
+    virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override;
     virtual void trackPendingFrame(Packet *packet, AccessCategory accessCategory);
     virtual void untrackPendingFrame(const Packet *packet);
     virtual void rebuildPendingFrameEligibility();
@@ -141,7 +142,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // Recipient
     virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
-    virtual void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header);
+    virtual void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, bool duplicate);
     virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
     // Originator
@@ -175,9 +176,6 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // IProcedureCallback
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
-
-    // queueing::IPacketQueue::ICallback
-    virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override;
 
     // IProcedureCallback
     virtual void scheduleInactivityTimer(simtime_t timeout) override;

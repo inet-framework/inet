@@ -27,6 +27,7 @@ using namespace inet::physicallayer;
 simsignal_t Hcf::edcaCollisionDetectedSignal = cComponent::registerSignal("edcaCollisionDetected");
 simsignal_t Hcf::blockAckAgreementAddedSignal = cComponent::registerSignal("blockAckAgreementAdded");
 simsignal_t Hcf::blockAckAgreementDeletedSignal = cComponent::registerSignal("blockAckAgreementDeleted");
+simsignal_t Hcf::blockAckAgreementChangedSignal = cComponent::registerSignal("blockAckAgreementChanged");
 
 Define_Module(Hcf);
 
@@ -510,8 +511,9 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader, recipientBlockAckAgreementHandler));
     }
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
-        sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
-        recipientProcessReceivedManagementFrame(mgmtHeader);
+        auto receptionResult = recipientDataService->managementFrameReceived(packet, mgmtHeader);
+        sendUp(receptionResult.completeFrames);
+        recipientProcessReceivedManagementFrame(mgmtHeader, receptionResult.duplicate);
     }
     else { // TODO else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header, recipientBlockAckAgreementHandler));
@@ -534,13 +536,27 @@ void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
         throw cRuntimeError("Unknown control frame");
 }
 
-void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header)
+void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, bool duplicate)
 {
+    if (duplicate) {
+        if (recipientBlockAckAgreementHandler) {
+            if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header))
+                recipientBlockAckAgreementHandler->processDuplicateAddbaRequest(addbaRequest, this);
+        }
+        return;
+    }
     if (recipientBlockAckAgreementHandler && originatorBlockAckAgreementHandler) {
         if (auto addbaRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(header)) {
-            recipientBlockAckAgreementHandler->processReceivedAddbaRequest(addbaRequest, recipientBlockAckAgreementPolicy, this);
-            auto agreement = recipientBlockAckAgreementHandler->getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
-            emit(blockAckAgreementAddedSignal, agreement);
+            bool hadAgreement = recipientBlockAckAgreementHandler->getAgreement(addbaRequest->getTid(), addbaRequest->getTransmitterAddress()) != nullptr;
+            auto agreement = recipientBlockAckAgreementHandler->processReceivedAddbaRequest(addbaRequest, recipientBlockAckAgreementPolicy, this, this);
+            if (agreement != nullptr) {
+                if (hadAgreement) {
+                    recipientDataService->resetBlockAckReordering(addbaRequest->getTid(), addbaRequest->getTransmitterAddress());
+                    emit(blockAckAgreementChangedSignal, agreement);
+                }
+                else
+                    emit(blockAckAgreementAddedSignal, agreement);
+            }
         }
         else if (auto addbaResp = dynamicPtrCast<const Ieee80211AddbaResponse>(header)) {
             bool wasPending = originatorBlockAckAgreementHandler->isAddbaResponsePending(addbaResp->getTransmitterAddress(), addbaResp->getTid());
@@ -563,10 +579,14 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
             resumeEligibleChannelAccess();
         }
         else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
+            // IEEE Std 802.11-2024, 9.4.1.16, 10.25.4, and 11.5.3.3:
+            // Initiator selects the agreement direction; the transmitter is the peer.
             if (delba->getInitiator()) {
-                auto agreement = recipientBlockAckAgreementHandler->getAgreement(delba->getTid(), delba->getReceiverAddress());
-                emit(blockAckAgreementDeletedSignal, agreement);
-                recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy);
+                auto agreement = recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy);
+                if (agreement != nullptr) {
+                    recipientDataService->resetBlockAckReordering(delba->getTid(), delba->getTransmitterAddress());
+                    emit(blockAckAgreementDeletedSignal, agreement.get());
+                }
             }
             else {
                 bool wasPending = originatorBlockAckAgreementHandler->isAddbaResponsePending(delba->getTransmitterAddress(), delba->getTid());
@@ -693,8 +713,8 @@ void Hcf::originatorProcessTransmittedManagementFrame(Packet *packet, const Ptr<
         if (originatorBlockAckAgreementHandler)
             originatorBlockAckAgreementHandler->processTransmittedAddbaReq(packet, addbaReq, originatorBlockAckAgreementPolicy, this);
     }
-    else if (auto addbaResp = dynamicPtrCast<const Ieee80211AddbaResponse>(mgmtHeader))
-        recipientBlockAckAgreementHandler->processTransmittedAddbaResp(addbaResp, this);
+    else if (dynamicPtrCast<const Ieee80211AddbaResponse>(mgmtHeader))
+        ; // Recipient agreement was established when the successful response was formed.
     else if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader)) {
         if (delba->getInitiator()) {
             bool wasPending = originatorBlockAckAgreementHandler->isAddbaResponsePending(delba->getReceiverAddress(), delba->getTid());
@@ -704,8 +724,16 @@ void Hcf::originatorProcessTransmittedManagementFrame(Packet *packet, const Ptr<
             if (agreement != nullptr && agreement->getIsAddbaResponseReceived())
                 emit(blockAckAgreementDeletedSignal, agreement.get());
         }
-        else
-            recipientBlockAckAgreementHandler->processTransmittedDelba(delba);
+        else {
+            auto agreement = recipientBlockAckAgreementHandler->processTransmittedDelba(delba);
+            if (agreement != nullptr) {
+                // IEEE Std 802.11-2024, 10.25.4 and 11.5.3.5: recipient
+                // resources are released whether the recipient transmitted or
+                // received DELBA. The reorder window is such a resource.
+                recipientDataService->resetBlockAckReordering(delba->getTid(), delba->getReceiverAddress());
+                emit(blockAckAgreementDeletedSignal, agreement.get());
+            }
+        }
     }
     else ; // TODO other mgmt frames if needed
 }

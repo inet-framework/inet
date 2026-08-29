@@ -53,6 +53,7 @@ module Hcf extends Module like IHcf
         @signal[datarateSelected](type=double);
         @signal[blockAckAgreementAdded];
         @signal[blockAckAgreementDeleted];
+        @signal[blockAckAgreementChanged];
         @statistic[packetSentToPeer](title="packets sent"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetSentToPeerUnicast](title="packets sent: unicast"; source=ieee80211Unicast(packetSentToPeer); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetSentToPeerMulticast](title="packets sent: multicast"; source=ieee80211Multicast(packetSentToPeer); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
@@ -78,6 +79,7 @@ module Hcf extends Module like IHcf
         @statistic[datarateSelected](title="datarates selected"; record=vector; interpolationmode=none);
         @statistic[blockAckAgreementAdded](title="added block ack agreements"; record=count);
         @statistic[blockAckAgreementDeleted](title="deleted block ack agreements"; record=count);
+        @statistic[blockAckAgreementChanged](title="changed block ack agreements"; record=count);
         @statistic[blockAckAgreementActive](title="active block ack agreements"; source=warmup(count(blockAckAgreementAdded)-count(blockAckAgreementDeleted)); record=vector; interpolationmode=sample-hold; autoWarmupFilter=false);
 
     submodules:
