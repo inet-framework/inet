@@ -40,7 +40,11 @@ class INET_API Ieee80211Transmitter : public FlatTransmitterBase, public IIeee80
     virtual const IIeee80211Mode *computeTransmissionMode(const Packet *packet) const;
     virtual const Ieee80211Channel *computeTransmissionChannel(const Packet *packet) const;
 
+    // Re-selects the current mode only when bitrate, bandwidth, NSS, and GI
+    // remain compatible. Use setModeSetAndMode for an explicit transition.
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
+    // Applies a mode set and an explicitly selected mode as one validated update.
+    virtual void setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode);
     virtual void setMode(const IIeee80211Mode *mode);
     virtual void setBand(const IIeee80211Band *band);
     virtual void setChannel(const Ieee80211Channel *channel);

@@ -47,6 +47,7 @@ class INET_API Ieee80211Radio : public FlatRadioBase
     Ieee80211Radio();
 
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
+    virtual void setModeSetAndMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *mode);
     virtual void setMode(const IIeee80211Mode *mode);
     virtual void setBand(const IIeee80211Band *band);
     virtual void setChannel(const Ieee80211Channel *channel);
@@ -57,4 +58,3 @@ class INET_API Ieee80211Radio : public FlatRadioBase
 } // namespace inet
 
 #endif
-
