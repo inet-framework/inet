@@ -835,6 +835,8 @@ Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> en
         htSupportedChannelWidths.insert(bandwidth);
         if (entry.mode->isHtShortGuardInterval())
             htShortGuardIntervalChannelWidths.insert(bandwidth);
+        if (entry.mode->isHtGreenfield())
+            htGreenfieldSupported = true;
     }
     if (htOperationSupported) {
         for (int mcsIndex = 0; mcsIndex < 8; mcsIndex++)
@@ -1257,6 +1259,14 @@ const IIeee80211Mode *Ieee80211ModeSet::getNonHtControlResponseMode(const IIeee8
     if (result == nullptr)
         throw cRuntimeError("No mandatory non-HT control response mode for %s", mode->getName());
     return result;
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::findHtMixedMode(const IIeee80211Mode *mode) const
+{
+    if (mode == nullptr)
+        return nullptr;
+    auto it = htMixedControlResponseModes.find(mode);
+    return it != htMixedControlResponseModes.end() ? it->second : nullptr;
 }
 
 const Ieee80211ModeSet *Ieee80211ModeSet::findModeSet(const char *mode)

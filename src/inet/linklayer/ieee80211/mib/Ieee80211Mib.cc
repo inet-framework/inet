@@ -172,6 +172,7 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
             localHtCapabilities.txMcsNss.maxMcsPerNss[nss] = std::max(localHtCapabilities.txMcsNss.maxMcsPerNss[nss], mcs % 8);
         }
     }
+    localHtCapabilities.greenfield = modeSet->isHtGreenfieldSupported();
     if (localHtCapabilities.supportedChannelWidths.empty())
         throw cRuntimeError("HT operation mode set '%s' does not provide an HT channel width", modeSet->getName());
     localHtCapabilities.maxAmpduLengthExponent = par("htMaxAmpduLengthExponent");
