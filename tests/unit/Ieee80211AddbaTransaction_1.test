@@ -532,6 +532,14 @@ class TestBasicReassembly : public BasicReassembly
     using BasicReassembly::BasicReassembly;
 
     size_t getNumActiveReassemblies() const { return fragmentsMap.size(); }
+    bool hasContradictoryTerminalFragmentNumbers() const {
+        ASSERT(fragmentsMap.size() == 1);
+        return fragmentsMap.begin()->second.hasContradictoryTerminalFragmentNumbers;
+    }
+    uint16_t getAllFragments() const {
+        ASSERT(fragmentsMap.size() == 1);
+        return fragmentsMap.begin()->second.allFragments;
+    }
     size_t getNumExpiredContexts() const { return expiredSequenceNumbersMap.size(); }
     size_t getNumExpiredSequenceNumbers() const {
         size_t count = 0;
@@ -5261,6 +5269,99 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     delete purgedFragments.front();
     delete purgeFragments->at(1);
     delete purgeFragments;
+}
+
+// A terminal duplicate on an occupied nonterminal slot is still observed for
+// contradiction tracking, but cannot establish an affirmative completion mask.
+{
+    TestBasicReassembly reassembly(SimTime(1, SIMTIME_US));
+    auto firstFragment = makeTaggedManagementPacket("reassemblyDuplicateTerminalFirst", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(601), 0, true, 1);
+    auto secondFragment = makeTaggedManagementPacket("reassemblyDuplicateTerminalSecond", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(601), 1, true, 2);
+    auto duplicateTerminal = makeTaggedManagementPacket("reassemblyDuplicateTerminal", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(601), 1, false, 3);
+    ASSERT(reassembly.addFragment(firstFragment) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    auto expiration = reassembly.getNextExpirationTime();
+    ASSERT(expiration != SIMTIME_MAX);
+    ASSERT(reassembly.getAllFragments() == 0);
+    ASSERT(reassembly.addFragment(secondFragment) == nullptr);
+    ASSERT(reassembly.addFragment(duplicateTerminal) == nullptr);
+    ASSERT(!reassembly.hasContradictoryTerminalFragmentNumbers());
+    ASSERT(reassembly.getAllFragments() == 0);
+    ASSERT(reassembly.getNextExpirationTime() == expiration);
+    auto expiredFragments = reassembly.removeExpiredFragments(expiration);
+    ASSERT(expiredFragments.size() == 2);
+    ASSERT(reassembly.getNumActiveReassemblies() == 0);
+    for (auto fragment : expiredFragments)
+        delete fragment;
+}
+
+// A terminal duplicate on an occupied slot with a different number from the
+// retained terminal marker invalidates completion, even when all slots arrive.
+{
+    TestBasicReassembly reassembly(SimTime(1, SIMTIME_US));
+    auto retainedTerminal = makeTaggedManagementPacket("reassemblyRetainedTerminal", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(602), 2, false, 1);
+    auto retainedFragment = makeTaggedManagementPacket("reassemblyRetainedFragment", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(602), 1, true, 2);
+    auto duplicateTerminal = makeTaggedManagementPacket("reassemblyContradictoryDuplicateTerminal", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(602), 1, false, 3);
+    auto firstFragment = makeTaggedManagementPacket("reassemblyContradictoryDuplicateFirst", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(602), 0, true, 4);
+    ASSERT(reassembly.addFragment(retainedTerminal) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    auto expiration = reassembly.getNextExpirationTime();
+    ASSERT(expiration != SIMTIME_MAX);
+    ASSERT(reassembly.getAllFragments() == 7);
+    ASSERT(reassembly.addFragment(retainedFragment) == nullptr);
+    ASSERT(reassembly.addFragment(duplicateTerminal) == nullptr);
+    ASSERT(reassembly.hasContradictoryTerminalFragmentNumbers());
+    ASSERT(reassembly.getAllFragments() == 7);
+    ASSERT(reassembly.getNextExpirationTime() == expiration);
+    ASSERT(reassembly.addFragment(firstFragment) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    ASSERT(reassembly.hasContradictoryTerminalFragmentNumbers());
+    ASSERT(reassembly.getNextExpirationTime() == expiration);
+    auto expiredFragments = reassembly.removeExpiredFragments(expiration);
+    ASSERT(expiredFragments.size() == 3);
+    ASSERT(reassembly.getNumActiveReassemblies() == 0);
+    for (auto fragment : expiredFragments)
+        delete fragment;
+}
+
+// Contradictory terminal markers invalidate completion independent of their
+// arrival order. The invalid entry remains owned until receive-lifetime
+// expiry, which returns each uniquely retained fragment to the caller.
+for (auto terminalOrder : { std::pair<int, int>(1, 2), std::pair<int, int>(2, 1) }) {
+    TestBasicReassembly reassembly(SimTime(1, SIMTIME_US));
+    auto firstTerminal = makeTaggedManagementPacket("reassemblyContradictoryFirstTerminal", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(600), terminalOrder.first, false, 1);
+    auto secondTerminal = makeTaggedManagementPacket("reassemblyContradictorySecondTerminal", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(600), terminalOrder.second, false, 2);
+    auto firstFragment = makeTaggedManagementPacket("reassemblyContradictoryFirstFragment", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(600), 0, true, 3);
+    ASSERT(reassembly.addFragment(firstTerminal) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    ASSERT(!reassembly.hasContradictoryTerminalFragmentNumbers());
+    auto expiration = reassembly.getNextExpirationTime();
+    ASSERT(expiration != SIMTIME_MAX);
+    ASSERT(reassembly.addFragment(secondTerminal) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    ASSERT(reassembly.hasContradictoryTerminalFragmentNumbers());
+    ASSERT(reassembly.getNextExpirationTime() == expiration);
+    ASSERT(reassembly.addFragment(firstFragment) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    ASSERT(reassembly.hasContradictoryTerminalFragmentNumbers());
+    ASSERT(reassembly.getNextExpirationTime() == expiration);
+
+    auto expiredFragments = reassembly.removeExpiredFragments(expiration);
+    ASSERT(expiredFragments.size() == 3);
+    ASSERT(reassembly.getNumActiveReassemblies() == 0);
+    ASSERT(reassembly.getNextExpirationTime() == SIMTIME_MAX);
+    for (auto fragment : expiredFragments)
+        delete fragment;
 }
 
 // Expired reassembly stores exact observed generations, rejects late

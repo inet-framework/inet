@@ -223,9 +223,15 @@ Packet *BasicReassembly::addFragment(Packet *packet)
 
     // update entry
     uint16_t fragmentBit = 1 << fragNum;
+    if (!header->getMoreFragments()) {
+        if (value.terminalFragmentNumber == -1)
+            value.terminalFragmentNumber = fragNum;
+        else if (value.terminalFragmentNumber != fragNum)
+            value.hasContradictoryTerminalFragmentNumbers = true;
+    }
     if (!value.fragments[fragNum]) {
         value.receivedFragments |= fragmentBit;
-        if (!header->getMoreFragments())
+        if (!header->getMoreFragments() && value.allFragments == 0)
             value.allFragments = (fragmentBit << 1) - 1;
         value.fragments[fragNum] = packet;
     }
@@ -235,7 +241,7 @@ Packet *BasicReassembly::addFragment(Packet *packet)
 //    MacAddress txAddress = header->getTransmitterAddress();
 
     // if all fragments arrived, return assembled frame
-    if (value.allFragments != 0 && value.allFragments == value.receivedFragments) {
+    if (!value.hasContradictoryTerminalFragmentNumbers && value.allFragments != 0 && value.allFragments == value.receivedFragments) {
         Defragmentation defragmentation;
         value.fragments.erase(std::remove(value.fragments.begin(), value.fragments.end(), nullptr), value.fragments.end());
         auto defragmentedFrame = defragmentation.defragmentFrames(&value.fragments);

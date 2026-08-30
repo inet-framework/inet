@@ -61,6 +61,8 @@ class INET_API BasicReassembly : public IReassembly, public cObject
         std::vector<Packet *> fragments;
         uint16_t receivedFragments = 0; // each bit corresponds to a fragment number
         uint16_t allFragments = 0; // bits for all fragments set to one (0..numFragments-1); 0 means unfilled
+        int terminalFragmentNumber = -1;
+        bool hasContradictoryTerminalFragmentNumbers = false;
         simtime_t receptionStartTime;
     };
     typedef std::map<Key, Value> FragmentsMap;
