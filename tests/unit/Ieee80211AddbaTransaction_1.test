@@ -521,7 +521,7 @@ class TestBasicReassembly : public BasicReassembly
     size_t getNumExpiredSequenceNumbers() const {
         size_t count = 0;
         for (const auto& entry : expiredSequenceNumbersMap)
-            count += entry.second.count();
+            count += entry.second.size();
         return count;
     }
 };
@@ -2115,10 +2115,9 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     ASSERT(fragmentedCallback.managementPackets.size() == 1);
     delete fragments;
 
-    // Seeing the final fragment first does not imply completeness. Without a
-    // receiver-visible generation discriminator, a later non-Retry fragment 0
-    // is ambiguous with sequence-number reuse, so the reassembler quarantines
-    // the identity instead of assembling a potentially hybrid MMPDU.
+    // IEEE Std 802.11-2024, 10.5 permits fragments to be received out of
+    // order. The final fragment therefore starts a reassembly and fragment 0
+    // completes it when it arrives later.
     auto outOfOrderFragments = makeFragments("outOfOrderAddbaRequest", 4, 61);
     for (auto& fragment : *outOfOrderFragments)
         fragment = convertToWireRepresentation(fragment);
@@ -2127,9 +2126,17 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     ASSERT(recipientHandler->getAgreement(4, peer2) == nullptr);
     ASSERT(fragmentedCallback.managementPackets.size() == 1);
     auto outOfOrderCompleteReception = receiveFragment(outOfOrderFragments->at(0));
-    ASSERT(outOfOrderCompleteReception.completeHeader == nullptr);
-    ASSERT(recipientHandler->getAgreement(4, peer2) == nullptr);
-    ASSERT(fragmentedCallback.managementPackets.size() == 1);
+    ASSERT(outOfOrderCompleteReception.completeHeader != nullptr);
+    ASSERT(outOfOrderCompleteReception.completeHeader->getFragmentNumber() == 0);
+    ASSERT(!outOfOrderCompleteReception.completeHeader->getMoreFragments());
+    auto outOfOrderRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(outOfOrderCompleteReception.completeHeader);
+    ASSERT(outOfOrderRequest != nullptr);
+    ASSERT(outOfOrderRequest->getTid() == 4);
+    ASSERT(outOfOrderRequest->getDialogToken() == 74);
+    ASSERT(outOfOrderRequest->getStartingSequenceNumber() == SequenceNumberCyclic(104));
+    hcf.processReceivedManagementFrame(outOfOrderCompleteReception.completeHeader);
+    ASSERT(recipientHandler->getAgreement(4, peer2) != nullptr);
+    ASSERT(fragmentedCallback.managementPackets.size() == 2);
     delete outOfOrderFragments;
 
     // The receive timer releases an incomplete MMPDU at
@@ -4863,10 +4870,8 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
 }
 
 // IEEE Std 802.11-2024, 10.5 requires reconstruction in Fragment Number
-// order. A later fragment can arrive before a non-Retry fragment 0, but this
-// receiver has no generation discriminator at the reassembly boundary. The
-// ambiguous identity is quarantined instead of allowing sequence reuse to
-// assemble a hybrid frame.
+// order. A later fragment can arrive before fragment 0, and the receiver's
+// observed sequence-number generation keeps a later sequence reuse separate.
 {
     TestBasicReassembly reassembly;
     auto makeResponseFragments = [&](const char *name, uint8_t dialogToken, uint16_t statusCode, const std::vector<uint8_t>& payload, int sequenceNumber, int fragmentCount) {
@@ -4886,159 +4891,116 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
         return fragmentation.fragmentFrame(packet, fragmentSizes);
     };
 
-    const std::vector<uint8_t> originalPayload = { 0x10, 0x11, 0x12 };
-    auto oldFragments = makeResponseFragments("reassemblyOldResponse", 17, 1, originalPayload, 4095, 2);
-    ASSERT(oldFragments->size() == 2);
-    ASSERT(reassembly.addFragment(oldFragments->at(0)) == nullptr);
-    ASSERT(reassembly.getNumActiveReassemblies() == 1);
-
-    auto originalCompleted = reassembly.addFragment(oldFragments->at(1));
-    ASSERT(originalCompleted != nullptr);
-    ASSERT(reassembly.getNumActiveReassemblies() == 0);
-    auto originalHeader = originalCompleted->peekAtFront<Ieee80211MgmtHeader>();
-    auto originalResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(originalHeader);
-    ASSERT(originalResponse != nullptr);
-    ASSERT(originalResponse->getDialogToken() == 17);
-    ASSERT(originalResponse->getStatusCode() == 1);
-    ASSERT(!originalResponse->getRetry());
-    ASSERT(originalCompleted->peekAt<BytesChunk>(originalResponse->getChunkLength(), B(originalPayload.size()))->getBytes() == originalPayload);
-    delete originalCompleted;
-    delete oldFragments;
-
     const std::vector<uint8_t> outOfOrderPayload = { 0x14, 0x15, 0x16, 0x17 };
     auto outOfOrderFragments = makeResponseFragments("reassemblyOutOfOrderResponse", 23, 5, outOfOrderPayload, 4094, 2);
     ASSERT(reassembly.addFragment(outOfOrderFragments->at(1)) == nullptr);
     ASSERT(reassembly.getNumActiveReassemblies() == 1);
     auto outOfOrderExpiration = reassembly.getNextExpirationTime();
     ASSERT(outOfOrderExpiration != SIMTIME_MAX);
-    // A Retry fragment 0 cannot be correlated to the later-only generation
-    // either, so it must not complete the frame.
     auto retryOutOfOrderFirst = outOfOrderFragments->at(0)->dup();
     auto retryOutOfOrderHeader = retryOutOfOrderFirst->removeAtFront<Ieee80211MgmtHeader>();
     retryOutOfOrderHeader->setRetry(true);
     retryOutOfOrderFirst->insertAtFront(retryOutOfOrderHeader);
     auto outOfOrderCompleted = reassembly.addFragment(retryOutOfOrderFirst);
-    ASSERT(outOfOrderCompleted == nullptr);
-    ASSERT(reassembly.getNumActiveReassemblies() == 1);
-    ASSERT(reassembly.getNextExpirationTime() == outOfOrderExpiration);
-    auto expiredOutOfOrder = reassembly.removeExpiredFragments(outOfOrderExpiration);
-    ASSERT(expiredOutOfOrder.empty());
+    ASSERT(outOfOrderCompleted != nullptr);
     ASSERT(reassembly.getNumActiveReassemblies() == 0);
+    auto outOfOrderHeader = outOfOrderCompleted->peekAtFront<Ieee80211MgmtHeader>();
+    auto outOfOrderResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(outOfOrderHeader);
+    ASSERT(outOfOrderResponse != nullptr);
+    ASSERT(outOfOrderResponse->getDialogToken() == 23);
+    ASSERT(outOfOrderResponse->getStatusCode() == 5);
+    ASSERT(outOfOrderResponse->getRetry());
+    ASSERT(outOfOrderCompleted->peekAt<BytesChunk>(outOfOrderResponse->getChunkLength(), B(outOfOrderPayload.size()))->getBytes() == outOfOrderPayload);
+    delete outOfOrderCompleted;
     delete outOfOrderFragments->at(0);
     delete outOfOrderFragments;
 
-    // A later-only fragment from an older generation must not be merged with
-    // a reused non-Retry fragment 0. The new generation has three fragments,
-    // so an old final fragment would otherwise make it complete immediately.
-    const std::vector<uint8_t> stalePayload = { 0x20, 0x21, 0x22, 0x23 };
-    auto staleFragments = makeResponseFragments("reassemblyStaleResponse", 21, 2, stalePayload, 4095, 2);
-    ASSERT(reassembly.addFragment(staleFragments->at(1)) == nullptr);
+    // A sequence number exactly half a space away has no cyclic ordering.
+    // Neither an independently accepted unfragmented frame nor a rejected
+    // fragmented frame at that boundary may disturb an active generation.
+    const std::vector<uint8_t> halfSpacePayload = { 0x18, 0x19, 0x1a };
+    auto preservedFragments = makeResponseFragments("reassemblyPreservedResponse", 25, 6, halfSpacePayload, 4093, 2);
+    ASSERT(reassembly.addFragment(preservedFragments->at(1)) == nullptr);
     ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    auto halfSpaceStandalone = makeTaggedManagementPacket("reassemblyHalfSpaceStandalone", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(2046), 0, false, 0);
+    ASSERT(reassembly.addFragment(halfSpaceStandalone) == halfSpaceStandalone);
+    delete halfSpaceStandalone;
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    auto halfSpaceFragments = makeResponseFragments("reassemblyHalfSpaceResponse", 27, 7, halfSpacePayload, 2046, 2);
+    ASSERT(reassembly.addFragment(halfSpaceFragments->at(0)) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    auto preservedCompleted = reassembly.addFragment(preservedFragments->at(0));
+    ASSERT(preservedCompleted != nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 0);
+    delete preservedCompleted;
+    delete preservedFragments;
+    delete halfSpaceFragments->at(1);
+    delete halfSpaceFragments;
+
+    // The old final fragment remains buffered while the receiver observes the
+    // numeric wrap and enough baseline sequence-space progress to identify a
+    // reused raw number. A delayed old fragment 0 and the real new fragment 0
+    // are indistinguishable, so their new extended generation is quarantined.
+    const std::vector<uint8_t> oldPayload = { 0x20, 0x21, 0x22, 0x23 };
+    auto oldFragments = makeResponseFragments("reassemblyOldResponse", 17, 1, oldPayload, 4095, 2);
+    auto lateOldFirstFragment = oldFragments->at(0)->dup();
+    ASSERT(reassembly.addFragment(oldFragments->at(1)) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    auto oldExpiration = reassembly.getNextExpirationTime();
+    wait(1e-9);
+    for (int sequenceNumber = 0; sequenceNumber <= 2048; sequenceNumber++) {
+        auto standalone = makeTaggedManagementPacket("reassemblySequenceAdvance", ST_ACTION, peer1, peer2,
+                SequenceNumberCyclic(sequenceNumber), 0, false, sequenceNumber);
+        ASSERT(reassembly.addFragment(standalone) == standalone);
+        delete standalone;
+    }
 
     const std::vector<uint8_t> newPayload = { 0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6 };
     auto newFragments = makeResponseFragments("reassemblyNewResponse", 29, 37, newPayload, 4095, 3);
-    auto quarantineExpiration = reassembly.getNextExpirationTime();
-    ASSERT(quarantineExpiration != SIMTIME_MAX);
+    ASSERT(reassembly.addFragment(lateOldFirstFragment) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    ASSERT(reassembly.getNumExpiredSequenceNumbers() == 1);
     ASSERT(reassembly.addFragment(newFragments->at(0)) == nullptr);
     ASSERT(reassembly.getNumActiveReassemblies() == 1);
-    ASSERT(reassembly.getNextExpirationTime() == quarantineExpiration);
     ASSERT(reassembly.addFragment(newFragments->at(1)) == nullptr);
     ASSERT(reassembly.addFragment(newFragments->at(2)) == nullptr);
     ASSERT(reassembly.getNumActiveReassemblies() == 1);
-    ASSERT(reassembly.getNextExpirationTime() == quarantineExpiration);
-    auto beforeQuarantineExpiry = reassembly.removeExpiredFragments(quarantineExpiration - SimTime(1, SIMTIME_US));
-    ASSERT(beforeQuarantineExpiry.empty());
-    ASSERT(reassembly.getNumActiveReassemblies() == 1);
-    ASSERT(reassembly.getNextExpirationTime() == quarantineExpiration);
-    auto expiredQuarantine = reassembly.removeExpiredFragments(quarantineExpiration);
-    ASSERT(expiredQuarantine.empty());
+    auto expiredOld = reassembly.removeExpiredFragments(oldExpiration);
+    ASSERT(expiredOld.size() == 1);
+    delete expiredOld.front();
     ASSERT(reassembly.getNumActiveReassemblies() == 0);
     ASSERT(reassembly.getNumExpiredSequenceNumbers() == 2);
+    delete oldFragments->at(0);
+    delete oldFragments;
+    delete newFragments;
 
-    auto lateStaleFragments = makeResponseFragments("reassemblyLateStaleResponse", 31, 3, stalePayload, 4095, 2);
-    ASSERT(reassembly.addFragment(lateStaleFragments->at(1)) == nullptr);
-    ASSERT(reassembly.getNumActiveReassemblies() == 0);
-    delete lateStaleFragments->at(0);
-    delete lateStaleFragments;
-
+    // Purge is the explicit lifecycle boundary that retires both ambiguous
+    // generations. A fresh frame can then complete with only its own bytes.
+    reassembly.purge(peer1, -1, 4095, 4095);
+    ASSERT(reassembly.getNumExpiredSequenceNumbers() == 0);
     auto recoveredFragments = makeResponseFragments("reassemblyRecoveredResponse", 29, 37, newPayload, 4095, 3);
     ASSERT(reassembly.addFragment(recoveredFragments->at(0)) == nullptr);
-    ASSERT(reassembly.getNumActiveReassemblies() == 1);
-    ASSERT(reassembly.getNumExpiredSequenceNumbers() == 1);
     ASSERT(reassembly.addFragment(recoveredFragments->at(1)) == nullptr);
     auto completed = reassembly.addFragment(recoveredFragments->at(2));
     ASSERT(completed != nullptr);
-    ASSERT(reassembly.getNumActiveReassemblies() == 0);
     auto completedHeader = completed->peekAtFront<Ieee80211MgmtHeader>();
     auto completedResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(completedHeader);
     ASSERT(completedResponse != nullptr);
     ASSERT(completedResponse->getDialogToken() == 29);
     ASSERT(completedResponse->getStatusCode() == 37);
+    ASSERT(completedResponse->getSequenceNumber() == SequenceNumberCyclic(4095));
+    ASSERT(completedResponse->getFragmentNumber() == 0);
+    ASSERT(!completedResponse->getMoreFragments());
     ASSERT(completed->peekAt<BytesChunk>(completedResponse->getChunkLength(), B(newPayload.size()))->getBytes() == newPayload);
     delete completed;
-    delete staleFragments->at(0);
-    delete staleFragments;
-    delete newFragments;
     delete recoveredFragments;
-
-    const std::vector<uint8_t> incompletePayload = { 0x30, 0x31 };
-    auto incompleteFragments = makeResponseFragments("reassemblyOldUnfragmentedResponse", 41, 2, incompletePayload, 4094, 2);
-    ASSERT(reassembly.addFragment(incompleteFragments->at(0)) == nullptr);
-    ASSERT(reassembly.getNumActiveReassemblies() == 1);
-    auto unfragmentedResponse = makeResponse(peer1, 3, 53, 43);
-    unfragmentedResponse->setReceiverAddress(peer2);
-    unfragmentedResponse->setSequenceNumber(SequenceNumberCyclic(4094));
-    auto unfragmentedPacket = new Packet("reassemblyNewUnfragmentedResponse", unfragmentedResponse);
-    unfragmentedPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
-    ASSERT(reassembly.addFragment(unfragmentedPacket) == unfragmentedPacket);
-    ASSERT(reassembly.getNumActiveReassemblies() == 0);
-    auto unfragmentedHeader = unfragmentedPacket->peekAtFront<Ieee80211MgmtHeader>();
-    auto unfragmentedResponseHeader = dynamicPtrCast<const Ieee80211AddbaResponse>(unfragmentedHeader);
-    ASSERT(unfragmentedResponseHeader != nullptr);
-    ASSERT(unfragmentedResponseHeader->getDialogToken() == 53);
-    ASSERT(unfragmentedResponseHeader->getStatusCode() == 43);
-    delete unfragmentedPacket;
-    delete incompleteFragments->at(1);
-    delete incompleteFragments;
-
-    // Direct reassembly cannot rely on duplicate removal to correlate a
-    // Retry fragment 0 with an active generation. A same-key Retry collision
-    // therefore quarantines the identity just like a non-Retry collision.
-    {
-        TestBasicReassembly retryReassembly;
-        const std::vector<uint8_t> oldRetryPayload = { 0x60, 0x61, 0x62, 0x63 };
-        auto oldRetryFragments = makeResponseFragments("reassemblyOldRetryResponse", 61, 6, oldRetryPayload, 4093, 2);
-        ASSERT(retryReassembly.addFragment(oldRetryFragments->at(0)) == nullptr);
-        ASSERT(retryReassembly.getNumActiveReassemblies() == 1);
-
-        const std::vector<uint8_t> newRetryPayload = { 0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6 };
-        auto newRetryFragments = makeResponseFragments("reassemblyNewRetryResponse", 71, 7, newRetryPayload, 4093, 3);
-        auto retryExpiration = retryReassembly.getNextExpirationTime();
-        auto retryFirst = newRetryFragments->at(0)->dup();
-        auto retryFirstHeader = retryFirst->removeAtFront<Ieee80211MgmtHeader>();
-        retryFirstHeader->setRetry(true);
-        retryFirst->insertAtFront(retryFirstHeader);
-        ASSERT(retryReassembly.addFragment(retryFirst) == nullptr);
-        ASSERT(retryReassembly.getNumActiveReassemblies() == 1);
-        ASSERT(retryReassembly.getNextExpirationTime() == retryExpiration);
-        ASSERT(retryReassembly.addFragment(newRetryFragments->at(1)) == nullptr);
-        ASSERT(retryReassembly.addFragment(newRetryFragments->at(2)) == nullptr);
-        ASSERT(retryReassembly.getNumActiveReassemblies() == 1);
-        ASSERT(retryReassembly.getNextExpirationTime() == retryExpiration);
-        auto expiredRetryQuarantine = retryReassembly.removeExpiredFragments(retryExpiration);
-        ASSERT(expiredRetryQuarantine.empty());
-        ASSERT(retryReassembly.getNumActiveReassemblies() == 0);
-        ASSERT(retryReassembly.getNumExpiredSequenceNumbers() == 1);
-        delete oldRetryFragments->at(1);
-        delete oldRetryFragments;
-        delete newRetryFragments->at(0);
-        delete newRetryFragments;
-    }
 }
 
-// Expired reassembly stores only sequence identity bits, rejects late
-// fragments, and permits a non-Retry fragment-0 sequence reuse to create a
-// fresh active context.
+// Expired reassembly stores exact observed generations, rejects late
+// fragments, and does not clear a tombstone when a same-generation fragment 0
+// arrives without an observed sequence-space advance. Unfragmented frames are
+// accepted independently and never mixed with the tombstone.
 {
     TestBasicReassembly reassembly(SimTime(1, SIMTIME_US));
     auto firstFragment = makeTaggedManagementPacket("reassemblyExpiredFirst", ST_ACTION, peer1, peer2, SequenceNumberCyclic(430), 0, true, 0);
@@ -5056,15 +5018,21 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     ASSERT(reassembly.getNumExpiredSequenceNumbers() == 1);
     auto reusedFirstFragment = makeTaggedManagementPacket("reassemblyReusedFirst", ST_ACTION, peer1, peer2, SequenceNumberCyclic(430), 0, true, 0);
     ASSERT(reassembly.addFragment(reusedFirstFragment) == nullptr);
-    ASSERT(reassembly.getNumActiveReassemblies() == 1);
-    ASSERT(reassembly.getNumExpiredContexts() == 0);
+    ASSERT(reassembly.getNumActiveReassemblies() == 0);
+    ASSERT(reassembly.getNumExpiredContexts() == 1);
+    ASSERT(reassembly.getNumExpiredSequenceNumbers() == 1);
+    auto unfragmentedPacket = makeTaggedManagementPacket("reassemblyUnfragmentedAfterExpiry", ST_ACTION, peer1, peer2,
+            SequenceNumberCyclic(430), 0, false, 0);
+    ASSERT(reassembly.addFragment(unfragmentedPacket) == unfragmentedPacket);
+    delete unfragmentedPacket;
+    ASSERT(reassembly.getNumExpiredSequenceNumbers() == 1);
     for (int sequenceNumber = 0; sequenceNumber < 64; sequenceNumber++) {
         auto fragment = makeTaggedManagementPacket("reassemblyManyExpiredFirst", ST_ACTION, peer1, peer2, SequenceNumberCyclic(500 + sequenceNumber), 0, true, 0);
         ASSERT(reassembly.addFragment(fragment) == nullptr);
     }
-    ASSERT(reassembly.getNumActiveReassemblies() == 65);
+    ASSERT(reassembly.getNumActiveReassemblies() == 64);
     auto manyExpiredFragments = reassembly.removeExpiredFragments(simTime() + SimTime(3, SIMTIME_US));
-    ASSERT(manyExpiredFragments.size() == 65);
+    ASSERT(manyExpiredFragments.size() == 64);
     for (auto fragment : manyExpiredFragments)
         delete fragment;
     ASSERT(reassembly.getNumActiveReassemblies() == 0);

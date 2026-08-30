@@ -17,96 +17,180 @@ namespace ieee80211 {
 
 Register_Class(BasicReassembly);
 
-/*
- * FIXME this function needs a serious review
- */
+BasicReassembly::SequenceSpaceKey BasicReassembly::getSequenceSpaceKey(const ContextKey& contextKey) const
+{
+    // IEEE Std 802.11-2024, Table 10-5 defines one baseline sequence-number
+    // space for frames not covered by a more specific space, and a separate
+    // space for individually addressed QoS Data indexed by RA and TID.
+    if (contextKey.type == ST_DATA_WITH_QOS && !contextKey.receiverAddress.isMulticast())
+        return { contextKey.macAddress, contextKey.receiverAddress, contextKey.tid };
+    else
+        return { contextKey.macAddress, MacAddress::UNSPECIFIED_ADDRESS, -1 };
+}
+
+SequenceNumber BasicReassembly::getRawSequenceNumber(ExtendedSequenceNumber extendedSequenceNumber)
+{
+    auto rawSequenceNumber = extendedSequenceNumber % NUM_SEQUENCE_NUMBERS;
+    if (rawSequenceNumber < 0)
+        rawSequenceNumber += NUM_SEQUENCE_NUMBERS;
+    return static_cast<SequenceNumber>(rawSequenceNumber);
+}
+
+BasicReassembly::SequenceObservation BasicReassembly::observeSequenceNumber(const SequenceSpaceKey& sequenceSpaceKey, SequenceNumber sequenceNumber)
+{
+    auto sequenceSpaceIt = sequenceSpacesMap.find(sequenceSpaceKey);
+    if (sequenceSpaceIt == sequenceSpacesMap.end()) {
+        sequenceSpacesMap.emplace(sequenceSpaceKey, SequenceSpaceValue{ sequenceNumber });
+        return { sequenceNumber, false };
+    }
+
+    auto& highWatermark = sequenceSpaceIt->second.highWatermark;
+    auto highWaterSequenceNumber = getRawSequenceNumber(highWatermark);
+    auto highWaterCyclic = SequenceNumberCyclic(highWaterSequenceNumber);
+    auto sequenceCyclic = SequenceNumberCyclic(sequenceNumber);
+
+    if (sequenceCyclic == highWaterCyclic)
+        return { highWatermark, false };
+
+    // SequenceNumberCyclic uses the IEEE 802.11 half-space ordering: a
+    // sequence number is ahead when its forward distance is in 1..2047.
+    if (highWaterCyclic < sequenceCyclic) {
+        auto forwardDistance = (sequenceNumber - highWaterSequenceNumber + NUM_SEQUENCE_NUMBERS) % NUM_SEQUENCE_NUMBERS;
+        ASSERT(forwardDistance > 0 && forwardDistance < NUM_SEQUENCE_NUMBERS / 2);
+        highWatermark += forwardDistance;
+        return { highWatermark, false };
+    }
+    else if (sequenceCyclic < highWaterCyclic) {
+        auto backwardDistance = (highWaterSequenceNumber - sequenceNumber + NUM_SEQUENCE_NUMBERS) % NUM_SEQUENCE_NUMBERS;
+        ASSERT(backwardDistance > 0 && backwardDistance < NUM_SEQUENCE_NUMBERS / 2);
+        return { highWatermark - backwardDistance, false };
+    }
+
+    // Exactly half a sequence-number space has no ordering under the cyclic
+    // comparison. A fragmented MPDU must not be assigned a generation on
+    // guesswork. An unfragmented MPDU is safe to accept because it is never
+    // combined with buffered fragments; leave the high-water unchanged.
+    return { highWatermark, true };
+}
+
+void BasicReassembly::pruneExpiredSequenceNumbers(const SequenceSpaceKey& sequenceSpaceKey)
+{
+    auto sequenceSpaceIt = sequenceSpacesMap.find(sequenceSpaceKey);
+    if (sequenceSpaceIt == sequenceSpacesMap.end())
+        return;
+    auto oldestRetainedGeneration = sequenceSpaceIt->second.highWatermark - NUM_SEQUENCE_NUMBERS;
+    for (auto contextIt = expiredSequenceNumbersMap.begin(); contextIt != expiredSequenceNumbersMap.end();) {
+        if (!(getSequenceSpaceKey(contextIt->first) == sequenceSpaceKey)) {
+            ++contextIt;
+            continue;
+        }
+        auto& expiredSequenceNumbers = contextIt->second;
+        for (auto sequenceIt = expiredSequenceNumbers.begin(); sequenceIt != expiredSequenceNumbers.end();) {
+            if (*sequenceIt < oldestRetainedGeneration)
+                sequenceIt = expiredSequenceNumbers.erase(sequenceIt);
+            else
+                ++sequenceIt;
+        }
+        if (expiredSequenceNumbers.empty())
+            contextIt = expiredSequenceNumbersMap.erase(contextIt);
+        else
+            ++contextIt;
+    }
+}
+
 Packet *BasicReassembly::addFragment(Packet *packet)
 {
     const auto& header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
-    // Find the entry for this frame. The sequence number is a 12-bit field,
-    // so an expired identity can be represented by one bit in its
-    // transmitter/receiver/type/TID context instead of retaining a map node
-    // (and an empty fragment vector) for every sequence number.
-    Key key;
-    key.macAddress = header->getTransmitterAddress();
-    key.receiverAddress = header->getReceiverAddress();
-    key.type = header->getType();
-    key.tid = -1;
+    ContextKey contextKey;
+    contextKey.macAddress = header->getTransmitterAddress();
+    contextKey.receiverAddress = header->getReceiverAddress();
+    contextKey.type = header->getType();
+    contextKey.tid = -1;
     if (header->getType() == ST_DATA_WITH_QOS)
         if (const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
-            key.tid = qosDataHeader->getTid();
-    key.seqNum = header->getSequenceNumber().get();
+            contextKey.tid = qosDataHeader->getTid();
     short fragNum = header->getFragmentNumber();
     ASSERT(fragNum >= 0 && fragNum < MAX_NUM_FRAGMENTS);
+    bool isFragmented = header->getMoreFragments() || fragNum != 0;
+    auto sequenceSpaceKey = getSequenceSpaceKey(contextKey);
+    // This observed-epoch policy can separate only wraps for which sequence
+    // progress was received. A completely unseen wrap is indistinguishable
+    // from the same generation with the MAC metadata available here, so an
+    // equal raw sequence remains in the current observed epoch to preserve
+    // valid out-of-order completion.
+    auto sequenceObservation = observeSequenceNumber(sequenceSpaceKey, header->getSequenceNumber().get());
+
+    if (sequenceObservation.ambiguous) {
+        if (isFragmented) {
+            delete packet;
+            return nullptr;
+        }
+        return packet;
+    }
+
+    Key key;
+    key.macAddress = contextKey.macAddress;
+    key.receiverAddress = contextKey.receiverAddress;
+    key.type = contextKey.type;
+    key.tid = contextKey.tid;
+    key.extendedSequenceNumber = sequenceObservation.extendedSequenceNumber;
 
     auto it = fragmentsMap.find(key);
-    // IEEE Std 802.11-2024, 10.4/10.5 requires fragmented MPDUs to be
-    // reconstructed from their fragment numbers; §26.3.2.1 permits level-3
-    // dynamic fragments to arrive out of order. At this boundary the receiver
-    // sees only the modulo-4096 sequence identity and cannot distinguish a
-    // reused fragmented fragment 0, including one marked Retry, from one
-    // belonging to the active generation. Quarantine every fragmented
-    // fragment-0 collision instead of replacing or merging state, because
-    // delayed fragments from the old generation could otherwise complete a
-    // hybrid frame. An unfragmented non-Retry fragment 0 is safe to return
-    // after retiring conflicting fragmented state because it is never
-    // assembled with it.
-    bool isUnfragmented = fragNum == 0 && !header->getMoreFragments();
-    if (it != fragmentsMap.end()) {
-        auto& value = it->second;
-        if (value.quarantined) {
-            if (isUnfragmented && !header->getRetry()) {
-                fragmentsMap.erase(it);
-                it = fragmentsMap.end();
-            }
-            else {
-                delete packet;
-                return nullptr;
-            }
-        }
-        else if (fragNum == 0) {
-            if (isUnfragmented && !header->getRetry()) {
-                for (auto fragment : value.fragments)
-                    if (fragment != nullptr)
-                        delete fragment;
-                fragmentsMap.erase(it);
-                it = fragmentsMap.end();
-            }
-            else if (!isUnfragmented) {
-                for (auto fragment : value.fragments)
-                    if (fragment != nullptr)
-                        delete fragment;
-                value.fragments.clear();
-                value.receivedFragments = 0;
-                value.allFragments = 0;
-                value.quarantined = true;
-                delete packet;
-                return nullptr;
-            }
-        }
-    }
-    if (it == fragmentsMap.end()) {
-        auto contextKey = key.getContextKey();
-        auto expiredIt = expiredSequenceNumbersMap.find(contextKey);
-        if (expiredIt != expiredSequenceNumbersMap.end() && expiredIt->second.test(key.seqNum)) {
-            // A non-Retry fragment 0 can be a new MMPDU after sequence-number
-            // reuse. All other fragments of the expired MMPDU are discarded.
-            if (fragNum == 0 && !header->getRetry()) {
-                expiredIt->second.reset(key.seqNum);
-                if (expiredIt->second.none())
-                    expiredSequenceNumbersMap.erase(expiredIt);
-            }
-            else {
-                delete packet;
-                return nullptr;
-            }
-        }
+
+    auto expiredIt = expiredSequenceNumbersMap.find(contextKey);
+    if (isFragmented && expiredIt != expiredSequenceNumbersMap.end() &&
+            expiredIt->second.find(key.extendedSequenceNumber) != expiredIt->second.end()) {
+        // A tombstone is scoped to the observed extended generation. Keep it
+        // even when a non-Retry fragment 0 arrives: without an observed
+        // sequence-space advance that fragment is not distinguishable from a
+        // late fragment of the expired MPDU.
+        delete packet;
+        return nullptr;
     }
 
-    // Frame is not fragmented. Clear a matching expired identity first so a
-    // valid, unfragmented sequence-number reuse also retires the tombstone.
-    if (!header->getMoreFragments() && fragNum == 0)
+    // An unfragmented MPDU is never assembled with a fragmented MPDU. A new
+    // non-Retry frame retires an active same-generation reassembly, while a
+    // Retry leaves it available for its original fragments.
+    if (!isFragmented) {
+        if (it != fragmentsMap.end() && !header->getRetry()) {
+            for (auto fragment : it->second.fragments)
+                if (fragment != nullptr)
+                    delete fragment;
+            fragmentsMap.erase(it);
+        }
+        pruneExpiredSequenceNumbers(sequenceSpaceKey);
         return packet;
+    }
+
+    // A same-raw active or expired entry in another observed epoch makes all
+    // fragments of the new epoch ambiguous, including fragment 0. Quarantine
+    // the new extended identity rather than allowing a delayed old fragment
+    // to seed a hybrid frame. purge() is the explicit recovery boundary.
+    bool hasOtherGeneration = false;
+    for (const auto& entry : fragmentsMap) {
+        const auto& otherKey = entry.first;
+        if (otherKey.getContextKey() == contextKey &&
+                getRawSequenceNumber(otherKey.extendedSequenceNumber) == header->getSequenceNumber().get() &&
+                otherKey.extendedSequenceNumber != key.extendedSequenceNumber) {
+            hasOtherGeneration = true;
+            break;
+        }
+    }
+    if (!hasOtherGeneration && expiredIt != expiredSequenceNumbersMap.end()) {
+        for (auto extendedSequenceNumber : expiredIt->second) {
+            if (extendedSequenceNumber != key.extendedSequenceNumber &&
+                    getRawSequenceNumber(extendedSequenceNumber) == header->getSequenceNumber().get()) {
+                hasOtherGeneration = true;
+                break;
+            }
+        }
+    }
+    if (hasOtherGeneration) {
+        expiredSequenceNumbersMap[contextKey].insert(key.extendedSequenceNumber);
+        pruneExpiredSequenceNumbers(sequenceSpaceKey);
+        delete packet;
+        return nullptr;
+    }
 
     if (it == fragmentsMap.end()) {
         Value value;
@@ -118,11 +202,12 @@ Packet *BasicReassembly::addFragment(Packet *packet)
 
     // update entry
     uint16_t fragmentBit = 1 << fragNum;
-    value.receivedFragments |= fragmentBit;
-    if (!header->getMoreFragments())
-        value.allFragments = (fragmentBit << 1) - 1;
-    if (!value.fragments[fragNum])
+    if (!value.fragments[fragNum]) {
+        value.receivedFragments |= fragmentBit;
+        if (!header->getMoreFragments())
+            value.allFragments = (fragmentBit << 1) - 1;
         value.fragments[fragNum] = packet;
+    }
     else
         delete packet;
 
@@ -139,10 +224,13 @@ Packet *BasicReassembly::addFragment(Packet *packet)
         for (auto fragment : value.fragments)
             delete fragment;
         fragmentsMap.erase(key);
+        pruneExpiredSequenceNumbers(sequenceSpaceKey);
         return defragmentedFrame;
     }
-    else
+    else {
+        pruneExpiredSequenceNumbers(sequenceSpaceKey);
         return nullptr;
+    }
 }
 
 simtime_t BasicReassembly::getNextExpirationTime() const
@@ -163,8 +251,11 @@ std::vector<Packet *> BasicReassembly::removeExpiredFragments(simtime_t currentT
             for (auto fragment : value.fragments)
                 if (fragment != nullptr)
                     expiredFragments.push_back(fragment);
-            expiredSequenceNumbersMap[entry.first.getContextKey()].set(entry.first.seqNum);
+            auto contextKey = entry.first.getContextKey();
+            auto sequenceSpaceKey = getSequenceSpaceKey(contextKey);
+            expiredSequenceNumbersMap[contextKey].insert(entry.first.extendedSequenceNumber);
             it = fragmentsMap.erase(it);
+            pruneExpiredSequenceNumbers(sequenceSpaceKey);
         }
         else
             ++it;
@@ -180,7 +271,7 @@ void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumb
                 sequenceNumber >= startSeqNumber || sequenceNumber <= endSeqNumber;
     };
     for (auto it = fragmentsMap.begin(); it != fragmentsMap.end();) {
-        auto sequenceNumber = it->first.seqNum;
+        auto sequenceNumber = getRawSequenceNumber(it->first.extendedSequenceNumber);
         if (it->first.macAddress == address && it->first.tid == tid && isInSequenceRange(sequenceNumber)) {
             for (auto fragment : it->second.fragments)
                 delete fragment;
@@ -192,10 +283,13 @@ void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumb
 
     for (auto it = expiredSequenceNumbersMap.begin(); it != expiredSequenceNumbersMap.end();) {
         if (it->first.macAddress == address && it->first.tid == tid) {
-            for (int sequenceNumber = 0; sequenceNumber < NUM_SEQUENCE_NUMBERS; sequenceNumber++)
-                if (isInSequenceRange(sequenceNumber))
-                    it->second.reset(sequenceNumber);
-            if (it->second.none())
+            for (auto sequenceIt = it->second.begin(); sequenceIt != it->second.end();) {
+                if (isInSequenceRange(getRawSequenceNumber(*sequenceIt)))
+                    sequenceIt = it->second.erase(sequenceIt);
+                else
+                    ++sequenceIt;
+            }
+            if (it->second.empty())
                 it = expiredSequenceNumbersMap.erase(it);
             else
                 ++it;
