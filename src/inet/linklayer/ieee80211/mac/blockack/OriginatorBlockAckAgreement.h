@@ -38,6 +38,9 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     simtime_t addbaResponseDeadline = -1;
     simtime_t blockAckTimeoutValue = -1;
     simtime_t expirationTime = -1;
+    // The agreement stays installed until the timeout DELBA is transmitted;
+    // prevent that pending teardown from being re-armed by late activity.
+    bool inactivityExpired = false;
 
   public:
     OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported, uint8_t dialogToken, uint64_t transactionId) :
@@ -79,8 +82,13 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual void setAddbaResponseDeadline(simtime_t addbaResponseDeadline) { this->addbaResponseDeadline = addbaResponseDeadline; }
 
     virtual void baPolicyFrameSent() { numSentBaPolicyFrames++; }
-    virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }
+    virtual void calculateExpirationTime() {
+        if (!inactivityExpired)
+            expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue;
+    }
     virtual simtime_t getExpirationTime() { return expirationTime; }
+    virtual bool isInactivityExpired() const { return inactivityExpired; }
+    virtual void markInactivityExpired() { inactivityExpired = true; expirationTime = SIMTIME_MAX; }
 };
 
 } /* namespace ieee80211 */

@@ -104,6 +104,9 @@ class TestCallback : public IProcedureCallback, public IBlockAckAgreementHandler
     std::vector<Packet *> managementPackets;
     Ptr<const Ieee80211MgmtHeader> managementHeader;
     simtime_t addbaDeadline = SIMTIME_MAX;
+    simtime_t originatorInactivityDeadline = SIMTIME_MAX;
+    simtime_t recipientInactivityDeadline = SIMTIME_MAX;
+    std::vector<std::pair<BlockAckAgreementRole, simtime_t>> inactivityDeadlineUpdates;
     std::vector<uint64_t> cancelledTransactionIds;
     std::vector<Packet *> excludedPackets;
     std::vector<uint64_t> cancelledTeardownGenerationIds;
@@ -118,7 +121,13 @@ class TestCallback : public IProcedureCallback, public IBlockAckAgreementHandler
         managementPackets.push_back(packet);
         managementHeader = header;
     }
-    virtual void scheduleInactivityTimer(simtime_t) override {}
+    virtual void scheduleInactivityTimer(BlockAckAgreementRole role, simtime_t deadline) override {
+        inactivityDeadlineUpdates.emplace_back(role, deadline);
+        if (role == BlockAckAgreementRole::ORIGINATOR)
+            originatorInactivityDeadline = deadline;
+        else
+            recipientInactivityDeadline = deadline;
+    }
     virtual void scheduleAddbaResponseTimer(simtime_t deadline) override { addbaDeadline = deadline; }
     virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override {
         cancelledTransactionIds.push_back(transactionId);
@@ -138,6 +147,8 @@ class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
     void addEstablishedAgreement(MacAddress receiverAddress, Tid tid) {
         auto agreement = new OriginatorBlockAckAgreement(receiverAddress, tid, SequenceNumberCyclic(0), 64, true, false, 1, nextTransactionId++);
         agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(0);
+        agreement->calculateExpirationTime();
         blockAckAgreements[std::make_pair(receiverAddress, tid)] = agreement;
     }
     void setNextDialogToken(uint8_t token) { nextDialogToken = token; }
@@ -145,6 +156,7 @@ class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
     void allowRetryNow(MacAddress receiverAddress, Tid tid) { addbaRetryDeadlines[std::make_pair(receiverAddress, tid)] = simTime(); }
     void setPendingTeardownTransaction(MacAddress receiverAddress, Tid tid, uint64_t transactionId) { pendingTeardownTransactionIds[std::make_pair(receiverAddress, tid)] = transactionId; }
     simtime_t getRetryDeadline(MacAddress receiverAddress, Tid tid) const { auto it = addbaRetryDeadlines.find(std::make_pair(receiverAddress, tid)); return it == addbaRetryDeadlines.end() ? SIMTIME_MAX : it->second; }
+    void publishInactivityDeadline(IBlockAckAgreementHandlerCallback *callback) { scheduleInactivityTimer(callback); }
 };
 
 class TestTimeoutCancellationCallback : public TestCallback
@@ -634,6 +646,7 @@ class TestHcf : public Hcf
     bool cancelManagement(uint64_t transactionId, Packet *excludedPacket = nullptr) { return cancelManagementTransaction(transactionId, excludedPacket); }
     void cancelTransaction(uint64_t transactionId) { cancelAddbaTransaction(transactionId, nullptr); }
     void cancelTeardown(bool initiator, MacAddress peerAddress, Tid tid, uint64_t generationId, Packet *excludedPacket = nullptr) { cancelBlockAckTeardown(initiator, peerAddress, tid, generationId, excludedPacket); }
+    bool processDroppedTeardown(Packet *packet) { return processDroppedBlockAckTeardownFrame(packet); }
     void processReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, bool duplicate = false) { recipientProcessReceivedManagementFrame(header, duplicate); }
     void processReceivedFrame(Packet *packet) { recipientProcessReceivedFrame(packet, packet->peekAtFront<Ieee80211MacHeader>()); }
     void processRtsProtectionFailure(Packet *packet) { originatorProcessRtsProtectionFailed(packet); }
@@ -660,7 +673,7 @@ class TestHcf : public Hcf
     virtual void cancelBlockAckTeardown(bool initiator, MacAddress peerAddress, Tid tid, uint64_t generationId, Packet *excludedPacket) override { numCancelledBlockAckTeardowns++; cancelledBlockAckTeardownGenerationIds.push_back(generationId); Hcf::cancelBlockAckTeardown(initiator, peerAddress, tid, generationId, excludedPacket); }
     virtual void rebuildPendingFrameEligibility() override { numRebuildEligibilityCalls++; Hcf::rebuildPendingFrameEligibility(); }
     virtual void resumeEligibleChannelAccess() override { numResumedEligibleChannelAccess++; }
-    virtual void scheduleInactivityTimer(simtime_t) override {}
+    virtual void scheduleInactivityTimer(BlockAckAgreementRole, simtime_t) override {}
     virtual void scheduleAddbaResponseTimer(simtime_t) override {}
 };
 
@@ -4899,6 +4912,168 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     delete currentPacket;
 }
 
+// Inactivity deadlines are absolute simulation times, and expiry is
+// one-shot while the tagged DELBA waits in the local transmission queues.
+// IEEE Std 802.11-2024, 11.5.4 and 10.25.4.
+{
+    wait(1);
+    TestRecipientHandler recipientHandler;
+    TestRecipientPolicy recipientPolicy;
+    recipientPolicy.blockAckTimeoutValue = 3;
+    TestCallback setupCallback;
+    auto request = makeRequest(peer2, 12, 109, SequenceNumberCyclic(330), 32);
+    request->setBlockAckTimeoutValue(3);
+    auto agreement = recipientHandler.processReceivedAddbaRequest(request, &recipientPolicy, &setupCallback, &setupCallback);
+    ASSERT(agreement != nullptr);
+    auto creationTime = simTime();
+    ASSERT(creationTime > 0);
+    ASSERT(agreement->getExpirationTime() == creationTime + 3);
+    ASSERT(setupCallback.recipientInactivityDeadline == creationTime + 3);
+
+    auto basicBlockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
+    basicBlockAckReq->setTransmitterAddress(peer2);
+    basicBlockAckReq->setTidInfo(12);
+    wait(1);
+    auto barReceptionTime = simTime();
+    recipientHandler.blockAckReqReceived(basicBlockAckReq, &setupCallback);
+    ASSERT(agreement->getExpirationTime() == barReceptionTime + 3);
+    ASSERT(agreement->getExpirationTime() > creationTime + 3);
+    ASSERT(setupCallback.recipientInactivityDeadline == barReceptionTime + 3);
+
+    wait(4);
+    TestCallback expiryCallback;
+    recipientHandler.blockAckAgreementExpired(&expiryCallback, &expiryCallback);
+    ASSERT(recipientHandler.getAgreement(12, peer2) == agreement);
+    ASSERT(agreement->isInactivityExpired());
+    ASSERT(expiryCallback.managementPackets.size() == 1);
+    ASSERT(expiryCallback.recipientInactivityDeadline == SIMTIME_MAX);
+
+    // The same overdue agreement is not emitted a second time, and a late
+    // data frame cannot re-arm its inactivity deadline.
+    recipientHandler.blockAckAgreementExpired(&expiryCallback, &expiryCallback);
+    ASSERT(expiryCallback.managementPackets.size() == 1);
+    auto lateQosHeader = makeQosHeader(peer2, 12, SequenceNumberCyclic(331));
+    lateQosHeader->setTransmitterAddress(peer2);
+    lateQosHeader->setAckPolicy(AckPolicy::BLOCK_ACK);
+    recipientHandler.qosFrameReceived(lateQosHeader, &expiryCallback);
+    ASSERT(expiryCallback.recipientInactivityDeadline == SIMTIME_MAX);
+    TestCallback lateBarCallback;
+    recipientHandler.blockAckReqReceived(basicBlockAckReq, &lateBarCallback);
+    ASSERT(lateBarCallback.recipientInactivityDeadline == SIMTIME_MAX);
+
+    // The originator uses the same absolute-deadline and one-shot rules.
+    TestOriginatorHandler originatorHandler;
+    originatorHandler.addEstablishedAgreement(peer1, 13);
+    auto originatorAgreement = originatorHandler.getAgreement(peer1, 13);
+    originatorAgreement->setBlockAckTimeoutValue(2);
+    originatorAgreement->calculateExpirationTime();
+    auto originatorCreationTime = simTime();
+    TestCallback originatorCallback;
+    originatorHandler.publishInactivityDeadline(&originatorCallback);
+    ASSERT(originatorCallback.originatorInactivityDeadline == originatorCreationTime + 2);
+    wait(3);
+    originatorHandler.blockAckAgreementExpired(&originatorCallback, &originatorCallback);
+    ASSERT(originatorHandler.getAgreement(peer1, 13) == originatorAgreement);
+    ASSERT(originatorAgreement->isInactivityExpired());
+    ASSERT(originatorCallback.managementPackets.size() == 1);
+    ASSERT(originatorCallback.originatorInactivityDeadline == SIMTIME_MAX);
+    originatorHandler.blockAckAgreementExpired(&originatorCallback, &originatorCallback);
+    ASSERT(originatorCallback.managementPackets.size() == 1);
+
+    // A role with no finite deadline publishes SIMTIME_MAX independently;
+    // Hcf can therefore retain a finite deadline from the other role.
+    TestOriginatorHandler noDeadlineOriginatorHandler;
+    noDeadlineOriginatorHandler.addEstablishedAgreement(peer1, 14);
+    TestCallback roleCallback;
+    roleCallback.scheduleInactivityTimer(BlockAckAgreementRole::RECIPIENT, simTime() + 10);
+    noDeadlineOriginatorHandler.publishInactivityDeadline(&roleCallback);
+    ASSERT(roleCallback.originatorInactivityDeadline == SIMTIME_MAX);
+    ASSERT(roleCallback.recipientInactivityDeadline == simTime() + 10);
+    roleCallback.scheduleInactivityTimer(BlockAckAgreementRole::RECIPIENT, SIMTIME_MAX);
+    ASSERT(roleCallback.recipientInactivityDeadline == SIMTIME_MAX);
+
+}
+
+// A timeout DELBA can be aborted before its final fragment is transmitted.
+// The matching generation is retired locally, and the returned ownership lets
+// HCF release role-specific resources without rearming a timed-out agreement.
+{
+    TestOriginatorHandler originatorHandler;
+    originatorHandler.addEstablishedAgreement(peer1, 15);
+    auto originatorAgreement = originatorHandler.getAgreement(peer1, 15);
+    originatorAgreement->setBlockAckTimeoutValue(2);
+    originatorAgreement->calculateExpirationTime();
+    originatorAgreement->markInactivityExpired();
+    auto originatorGenerationId = originatorAgreement->getTransactionId();
+    auto originatorFirstFragment = makeTaggedDelbaPacket("originatorExpiredDelbaFirst", peer1, 15, SequenceNumberCyclic(340), 0, true, originatorGenerationId);
+    auto originatorFinalFragment = makeTaggedDelbaPacket("originatorExpiredDelbaFinal", peer1, 15, SequenceNumberCyclic(340), 1, false, originatorGenerationId);
+    TestCallback originatorAbortCallback;
+    ASSERT(originatorHandler.processTransmittedDelba(originatorFirstFragment, &originatorAbortCallback) == nullptr);
+    auto originatorAbortResult = originatorHandler.processAbortedDelba(originatorFinalFragment, &originatorAbortCallback);
+    ASSERT(originatorAbortResult.handled);
+    ASSERT(originatorAbortResult.terminatedAgreement != nullptr);
+    ASSERT(originatorAbortResult.terminatedAgreement->getTransactionId() == originatorGenerationId);
+    ASSERT(originatorHandler.getAgreement(peer1, 15) == nullptr);
+    ASSERT(originatorAbortCallback.originatorInactivityDeadline == SIMTIME_MAX);
+    ASSERT(originatorAbortCallback.cancelledTeardownGenerationIds.back() == originatorGenerationId);
+    auto staleOriginatorAbortResult = originatorHandler.processAbortedDelba(originatorFinalFragment, &originatorAbortCallback);
+    ASSERT(!staleOriginatorAbortResult.handled);
+    ASSERT(staleOriginatorAbortResult.terminatedAgreement == nullptr);
+    // Retiring the agreement is terminal for this generation: a late BlockAck
+    // must not resurrect it or publish a new inactivity deadline.
+    auto lateOriginatorBlockAck = makeShared<Ieee80211BasicBlockAck>();
+    lateOriginatorBlockAck->setTransmitterAddress(peer1);
+    lateOriginatorBlockAck->setTidInfo(15);
+    lateOriginatorBlockAck->setStartingSequenceNumber(SequenceNumberCyclic(340));
+    TestCallback lateOriginatorActivityCallback;
+    originatorHandler.processReceivedBlockAck(lateOriginatorBlockAck, &lateOriginatorActivityCallback);
+    ASSERT(originatorHandler.getAgreement(peer1, 15) == nullptr);
+    ASSERT(lateOriginatorActivityCallback.originatorInactivityDeadline == SIMTIME_MAX);
+    ASSERT(lateOriginatorActivityCallback.inactivityDeadlineUpdates.empty());
+    delete originatorFirstFragment;
+    delete originatorFinalFragment;
+
+    TestRecipientHandler recipientHandler;
+    TestRecipientPolicy recipientPolicy;
+    recipientPolicy.blockAckTimeoutValue = 2;
+    TestCallback recipientSetupCallback;
+    auto recipientRequest = makeRequest(peer2, 16, 110, SequenceNumberCyclic(341), 32);
+    recipientRequest->setBlockAckTimeoutValue(2);
+    auto recipientAgreement = recipientHandler.processReceivedAddbaRequest(recipientRequest, &recipientPolicy, &recipientSetupCallback, &recipientSetupCallback);
+    ASSERT(recipientAgreement != nullptr);
+    recipientAgreement->markInactivityExpired();
+    auto recipientGenerationId = recipientAgreement->getGenerationId();
+    auto recipientFirstFragment = makeTaggedRecipientDelbaPacket("recipientExpiredDelbaFirst", peer2, 16, SequenceNumberCyclic(342), 0, true, recipientGenerationId);
+    auto recipientFinalFragment = makeTaggedRecipientDelbaPacket("recipientExpiredDelbaFinal", peer2, 16, SequenceNumberCyclic(342), 1, false, recipientGenerationId);
+    TestCallback recipientAbortCallback;
+    ASSERT(recipientHandler.processTransmittedDelba(recipientFirstFragment, &recipientAbortCallback) == nullptr);
+    auto recipientAbortResult = recipientHandler.processAbortedDelba(recipientFinalFragment, &recipientAbortCallback);
+    ASSERT(recipientAbortResult.handled);
+    ASSERT(recipientAbortResult.terminatedAgreement != nullptr);
+    ASSERT(recipientAbortResult.terminatedAgreement->getGenerationId() == recipientGenerationId);
+    ASSERT(recipientHandler.getAgreement(16, peer2) == nullptr);
+    ASSERT(recipientAbortCallback.recipientInactivityDeadline == SIMTIME_MAX);
+    ASSERT(recipientAbortCallback.cancelledTeardownGenerationIds.back() == recipientGenerationId);
+    auto staleRecipientAbortResult = recipientHandler.processAbortedDelba(recipientFinalFragment, &recipientAbortCallback);
+    ASSERT(!staleRecipientAbortResult.handled);
+    ASSERT(staleRecipientAbortResult.terminatedAgreement == nullptr);
+    // Likewise, late recipient traffic cannot recreate a retired agreement.
+    auto lateRecipientQosHeader = makeQosHeader(peer1, 16, SequenceNumberCyclic(343));
+    lateRecipientQosHeader->setTransmitterAddress(peer2);
+    lateRecipientQosHeader->setAckPolicy(AckPolicy::BLOCK_ACK);
+    auto lateRecipientBlockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
+    lateRecipientBlockAckReq->setTransmitterAddress(peer2);
+    lateRecipientBlockAckReq->setTidInfo(16);
+    TestCallback lateRecipientActivityCallback;
+    recipientHandler.qosFrameReceived(lateRecipientQosHeader, &lateRecipientActivityCallback);
+    recipientHandler.blockAckReqReceived(lateRecipientBlockAckReq, &lateRecipientActivityCallback);
+    ASSERT(recipientHandler.getAgreement(16, peer2) == nullptr);
+    ASSERT(lateRecipientActivityCallback.recipientInactivityDeadline == SIMTIME_MAX);
+    ASSERT(lateRecipientActivityCallback.inactivityDeadlineUpdates.empty());
+    delete recipientFirstFragment;
+    delete recipientFinalFragment;
+}
+
 // HCF routes recipient DELBAs to the recipient owner and rebuilds its
 // eligibility index when replacement or final teardown changes the generation.
 // The replacement callback removes queued stale siblings; the active current
@@ -4938,6 +5113,40 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     hcf.configureTransmittedManagement(&edca, &ackPolicy);
     hcf.configureManagementCallback(&managementCallback);
     hcf.observePendingQueue(&pendingQueue);
+
+    // HCF owns the terminal cleanup when a fragmented timeout DELBA is
+    // aborted before its final fragment is transmitted. The handler returns
+    // the retired agreement, allowing HCF to emit the deletion signal and to
+    // release recipient reorder resources exactly once.
+    TestSignalListener expiredDeletionListener;
+    hcf.subscribe(Hcf::blockAckAgreementDeletedSignal, &expiredDeletionListener);
+    originatorHandler->addEstablishedAgreement(peer1, 15);
+    auto expiredOriginatorAgreement = originatorHandler->getAgreement(peer1, 15);
+    expiredOriginatorAgreement->markInactivityExpired();
+    auto expiredOriginatorGenerationId = expiredOriginatorAgreement->getTransactionId();
+    auto expiredOriginatorDelba = makeTaggedDelbaPacket("hcfExpiredOriginatorDelba", peer1, 15, SequenceNumberCyclic(324), 1, false, expiredOriginatorGenerationId);
+    ASSERT(hcf.processDroppedTeardown(expiredOriginatorDelba));
+    ASSERT(originatorHandler->getAgreement(peer1, 15) == nullptr);
+    delete expiredOriginatorDelba;
+
+    auto expiredRecipientRequest = makeRequest(peer2, 15, 105, SequenceNumberCyclic(325), 32);
+    auto expiredRecipientAgreement = recipientHandler->processReceivedAddbaRequest(expiredRecipientRequest, &hcfRecipientPolicy, &managementCallback, &managementCallback);
+    ASSERT(expiredRecipientAgreement != nullptr);
+    expiredRecipientAgreement->markInactivityExpired();
+    auto expiredRecipientGenerationId = expiredRecipientAgreement->getGenerationId();
+    auto expiredRecipientDelba = makeTaggedRecipientDelbaPacket("hcfExpiredRecipientDelba", peer2, 15, SequenceNumberCyclic(326), 1, false, expiredRecipientGenerationId);
+    ASSERT(hcf.processDroppedTeardown(expiredRecipientDelba));
+    ASSERT(recipientHandler->getAgreement(15, peer2) == nullptr);
+    ASSERT(recipientDataService.numReorderingResets == 1);
+    ASSERT(expiredDeletionListener.numSignals == 2);
+    delete expiredRecipientDelba;
+    hcf.unsubscribe(Hcf::blockAckAgreementDeletedSignal, &expiredDeletionListener);
+    // Keep the following generation-lifecycle assertions focused on their
+    // own transactions rather than on the setup cleanup above.
+    hcf.numCancelledBlockAckTeardowns = 0;
+    hcf.cancelledBlockAckTeardownGenerationIds.clear();
+    hcf.numRebuildEligibilityCalls = 0;
+    recipientDataService.numReorderingResets = 0;
 
     auto stalePacket = makeTaggedRecipientDelbaPacket("hcfStaleRecipientDelba", peer2, 11, SequenceNumberCyclic(321), 0, false, firstGenerationId);
     pendingQueue.enqueuePacket(stalePacket);
