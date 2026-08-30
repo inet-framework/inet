@@ -28,7 +28,7 @@ static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcs
 }
 
 static Ieee80211Mib::PeerHtState makePeerState(std::initializer_list<int> mcsIndexes,
-        std::initializer_list<Hz> bandwidths, Hz operatingChannelWidth, bool shortGi20 = false, bool shortGi40 = false)
+        std::initializer_list<Hz> bandwidths, Hz operatingChannelWidth, bool shortGi20 = false, bool shortGi40 = false, bool greenfield = false)
 {
     Ieee80211Mib::PeerHtState state;
     state.valid = true;
@@ -40,6 +40,7 @@ static Ieee80211Mib::PeerHtState makePeerState(std::initializer_list<int> mcsInd
         receiverCapabilities.supportedChannelWidths.insert(bandwidth);
     receiverCapabilities.receiverShortGi20 = shortGi20;
     receiverCapabilities.receiverShortGi40 = shortGi40;
+    receiverCapabilities.receiverGreenfield = greenfield;
     state.negotiatedCapabilities.operation.operatingChannelWidth = operatingChannelWidth;
     return state;
 }
@@ -190,6 +191,28 @@ catch (const cRuntimeError&) {
     outsideGreenfieldModeRejected = true;
 }
 ASSERT(outsideGreenfieldModeRejected);
+
+const auto *mcs0Greenfield = findHtMode(greenfieldModeSet, 0, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
+ASSERT(mcs0Greenfield != nullptr);
+ASSERT(mcs0Greenfield->isHtGreenfield());
+
+// When destination advertises Greenfield reception, HT-Greenfield candidate mode is selected.
+auto greenfieldCapablePeer = makePeerState({0}, {MHz(20)}, MHz(20), false, false, true);
+const auto *greenfieldSelection = selectPeerCompatibleMode(greenfieldModeSet, &greenfieldCapablePeer, mcs0Greenfield, peer);
+ASSERT(greenfieldSelection == mcs0Greenfield);
+ASSERT(greenfieldSelection->isHtGreenfield());
+
+// When destination did not advertise Greenfield reception, isCompatibleHtMode rejects Greenfield mode,
+// falling back to the legal HT-mixed equivalent mode.
+auto mixedOnlyDestinationPeer = makePeerState({0}, {MHz(20)}, MHz(20), false, false, false);
+const auto *mixedFallbackSelection = selectPeerCompatibleMode(greenfieldModeSet, &mixedOnlyDestinationPeer, mcs0Greenfield, peer);
+ASSERT(mixedFallbackSelection == htMixedCtsMode);
+ASSERT(!mixedFallbackSelection->isHtGreenfield());
+
+// HT-mixed mode candidates remain unaffected regardless of Greenfield receiver capability.
+const auto *mixedCandidateSelection = selectPeerCompatibleMode(modeSet, &mixedOnlyDestinationPeer, mcs0Long, peer);
+ASSERT(mixedCandidateSelection == mcs0Long);
+ASSERT(!mixedCandidateSelection->isHtGreenfield());
 
 EV << "Peer-compatible HT mode selection checks verified.\n";
 
