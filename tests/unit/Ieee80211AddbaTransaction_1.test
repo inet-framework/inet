@@ -10,6 +10,7 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/LabelsTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/BasicMsduAggregationPolicy.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
@@ -2005,8 +2006,9 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     ASSERT(fragmentedCallback.managementPackets.size() == 1);
     delete fragments;
 
-    // Seeing the final fragment first does not imply completeness. Dispatch
-    // occurs only when the missing lower-numbered fragment later arrives.
+    // Seeing the final fragment first does not imply completeness. A later
+    // non-Retry fragment 0 announces a fresh MMPDU identity and discards the
+    // incomplete final-first reception.
     auto outOfOrderFragments = makeFragments("outOfOrderAddbaRequest", 4, 61);
     for (auto& fragment : *outOfOrderFragments)
         fragment = convertToWireRepresentation(fragment);
@@ -2015,10 +2017,9 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     ASSERT(recipientHandler->getAgreement(4, peer2) == nullptr);
     ASSERT(fragmentedCallback.managementPackets.size() == 1);
     auto outOfOrderCompleteReception = receiveFragment(outOfOrderFragments->at(0));
-    ASSERT(outOfOrderCompleteReception.completeHeader != nullptr);
-    hcf.processReceivedManagementFrame(outOfOrderCompleteReception.completeHeader);
-    ASSERT(recipientHandler->getAgreement(4, peer2) != nullptr);
-    ASSERT(fragmentedCallback.managementPackets.size() == 2);
+    ASSERT(outOfOrderCompleteReception.completeHeader == nullptr);
+    ASSERT(recipientHandler->getAgreement(4, peer2) == nullptr);
+    ASSERT(fragmentedCallback.managementPackets.size() == 1);
     delete outOfOrderFragments;
 
     // The receive timer releases an incomplete MMPDU at
@@ -2240,6 +2241,94 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
     take(discardedNewWindowFrames.front());
     drop(discardedNewWindowFrames.front());
     delete discardedNewWindowFrames.front();
+}
+
+// IEEE Std 802.11-2024, 10.4 and 10.5: fragments are transmitted from
+// fragment 0 upward and the destination reconstructs an MMPDU in Fragment
+// Number order. BlockAckReordering receives fragments in arrival order, so
+// both immediate and BAR-triggered complete vectors must be normalized before
+// they reach BasicReassembly.
+{
+    auto makeQosFragment = [&](const char *name, SequenceNumberCyclic sequenceNumber, Tid tid, int fragmentNumber, bool moreFragments, uint8_t payloadByte) {
+        auto dataHeader = makeQosHeader(peer2, tid, sequenceNumber);
+        dataHeader->setTransmitterAddress(peer1);
+        dataHeader->setFragmentNumber(fragmentNumber);
+        dataHeader->setMoreFragments(moreFragments);
+        dataHeader->setAckPolicy(BLOCK_ACK);
+        auto packet = new Packet(name, dataHeader);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>({ payloadByte })));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    auto assertFragmentOrder = [](const BlockAckReordering::Fragments& fragments) {
+        ASSERT(fragments.size() == 4);
+        for (int fragmentNumber = 0; fragmentNumber < 4; fragmentNumber++)
+            ASSERT(fragments.at(fragmentNumber)->peekAtFront<Ieee80211DataHeader>()->getFragmentNumber() == fragmentNumber);
+    };
+    auto reassembleOrderedFragments = [&](const BlockAckReordering::Fragments& fragments, const std::vector<uint8_t>& expectedPayload) {
+        TestBasicReassembly reassembly;
+        auto firstHeader = fragments.at(0)->peekAtFront<Ieee80211DataHeader>();
+        auto staleHeader = makeQosHeader(firstHeader->getReceiverAddress(), firstHeader->getTid(), firstHeader->getSequenceNumber());
+        staleHeader->setTransmitterAddress(firstHeader->getTransmitterAddress());
+        staleHeader->setFragmentNumber(0);
+        staleHeader->setMoreFragments(true);
+        staleHeader->setAckPolicy(BLOCK_ACK);
+        auto stalePacket = new Packet("blockAckStaleGeneration", staleHeader);
+        stalePacket->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>({ 0xde, 0xad })));
+        stalePacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        ASSERT(reassembly.addFragment(stalePacket) == nullptr);
+        ASSERT(reassembly.getNumActiveReassemblies() == 1);
+        Packet *completedPacket = nullptr;
+        int numCompletedPackets = 0;
+        for (auto fragment : fragments) {
+            auto packet = reassembly.addFragment(fragment);
+            if (packet != nullptr) {
+                completedPacket = packet;
+                numCompletedPackets++;
+            }
+        }
+        ASSERT(numCompletedPackets == 1);
+        ASSERT(completedPacket != nullptr);
+        ASSERT(reassembly.getNumActiveReassemblies() == 0);
+        auto completedHeader = completedPacket->peekAtFront<Ieee80211DataHeader>();
+        ASSERT(completedPacket->peekAt<BytesChunk>(completedHeader->getChunkLength(), B(expectedPayload.size()))->getBytes() == expectedPayload);
+        delete completedPacket;
+    };
+
+    RecipientBlockAckAgreement immediateAgreement(peer1, 6, SequenceNumberCyclic(100), 64, 0);
+    TestBlockAckReordering immediateReordering;
+    BlockAckReordering::ReorderBuffer immediateFrames;
+    for (int fragmentNumber : { 1, 2, 3, 0 }) {
+        auto packet = makeQosFragment("immediateOutOfOrderFragment", SequenceNumberCyclic(100), 6, fragmentNumber, fragmentNumber != 3, 0x40 + fragmentNumber);
+        auto dataHeader = packet->peekAtFront<Ieee80211DataHeader>();
+        auto frames = immediateReordering.processReceivedQoSFrame(&immediateAgreement, packet, dataHeader);
+        if (fragmentNumber == 0)
+            immediateFrames = frames;
+        else
+            ASSERT(frames.empty());
+    }
+    ASSERT(immediateFrames.size() == 1);
+    auto immediateFragments = immediateFrames.at(100);
+    assertFragmentOrder(immediateFragments);
+    reassembleOrderedFragments(immediateFragments, { 0x40, 0x41, 0x42, 0x43 });
+
+    RecipientBlockAckAgreement barAgreement(peer1, 6, SequenceNumberCyclic(200), 64, 0);
+    TestBlockAckReordering barReordering;
+    for (int fragmentNumber : { 1, 2, 3, 0 }) {
+        auto packet = makeQosFragment("barOutOfOrderFragment", SequenceNumberCyclic(201), 6, fragmentNumber, fragmentNumber != 3, 0x50 + fragmentNumber);
+        auto dataHeader = packet->peekAtFront<Ieee80211DataHeader>();
+        ASSERT(barReordering.processReceivedQoSFrame(&barAgreement, packet, dataHeader).empty());
+    }
+    auto barRequest = makeShared<Ieee80211BasicBlockAckReq>();
+    barRequest->setTransmitterAddress(peer1);
+    barRequest->setReceiverAddress(peer2);
+    barRequest->setTidInfo(6);
+    barRequest->setStartingSequenceNumber(SequenceNumberCyclic(201));
+    auto barFrames = barReordering.processReceivedBlockAckReq(&barAgreement, barRequest);
+    ASSERT(barFrames.size() == 1);
+    auto barFragments = barFrames.at(201);
+    assertFragmentOrder(barFragments);
+    reassembleOrderedFragments(barFragments, { 0x50, 0x51, 0x52, 0x53 });
 }
 
 // The recipient data service owns reorder-buffer reset observability: every
@@ -4672,6 +4761,97 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     delete unrelated;
     for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
         pendingQueues[ac].removePacketCallback(&hcf);
+}
+
+// IEEE Std 802.11-2024, 10.5 requires reconstruction in Fragment Number
+// order. The model additionally treats a non-Retry fragment 0 as the
+// generation marker for a reused sequence identity, discarding incomplete
+// same-key state (including after sequence-space wraparound).
+{
+    TestBasicReassembly reassembly;
+    auto makeResponseFragments = [&](const char *name, uint8_t dialogToken, uint16_t statusCode, const std::vector<uint8_t>& payload, int sequenceNumber) {
+        auto response = makeResponse(peer1, 3, dialogToken, statusCode);
+        response->setReceiverAddress(peer2);
+        response->setSequenceNumber(SequenceNumberCyclic(sequenceNumber));
+        auto packet = new Packet(name, response);
+        packet->insertAtBack(makeShared<BytesChunk>(payload));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        auto managementHeaderLength = makeShared<Ieee80211MgmtHeader>()->getChunkLength();
+        auto bodyLength = (int)(response->getChunkLength() - managementHeaderLength).get<B>() + (int)payload.size();
+        Fragmentation fragmentation;
+        return fragmentation.fragmentFrame(packet, { 8, bodyLength - 8 });
+    };
+
+    const std::vector<uint8_t> originalPayload = { 0x10, 0x11, 0x12 };
+    auto oldFragments = makeResponseFragments("reassemblyOldResponse", 17, 1, originalPayload, 4095);
+    ASSERT(oldFragments->size() == 2);
+    ASSERT(reassembly.addFragment(oldFragments->at(0)) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+
+    // A Retry fragment 0 is a duplicate of the incomplete MMPDU and must not
+    // reset its active state before the new non-Retry MMPDU arrives.
+    auto retryFragment = oldFragments->at(0)->dup();
+    auto retryHeader = retryFragment->removeAtFront<Ieee80211MgmtHeader>();
+    retryHeader->setRetry(true);
+    retryFragment->insertAtFront(retryHeader);
+    ASSERT(reassembly.addFragment(retryFragment) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+
+    auto originalCompleted = reassembly.addFragment(oldFragments->at(1));
+    ASSERT(originalCompleted != nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 0);
+    auto originalHeader = originalCompleted->peekAtFront<Ieee80211MgmtHeader>();
+    auto originalResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(originalHeader);
+    ASSERT(originalResponse != nullptr);
+    ASSERT(originalResponse->getDialogToken() == 17);
+    ASSERT(originalResponse->getStatusCode() == 1);
+    ASSERT(!originalResponse->getRetry());
+    ASSERT(originalCompleted->peekAt<BytesChunk>(originalResponse->getChunkLength(), B(originalPayload.size()))->getBytes() == originalPayload);
+    delete originalCompleted;
+    delete oldFragments;
+
+    const std::vector<uint8_t> stalePayload = { 0x20, 0x21, 0x22, 0x23 };
+    auto staleFragments = makeResponseFragments("reassemblyStaleResponse", 21, 2, stalePayload, 4095);
+    ASSERT(reassembly.addFragment(staleFragments->at(0)) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+
+    const std::vector<uint8_t> newPayload = { 0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6 };
+    auto newFragments = makeResponseFragments("reassemblyNewResponse", 29, 37, newPayload, 4095);
+    ASSERT(reassembly.addFragment(newFragments->at(0)) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    auto completed = reassembly.addFragment(newFragments->at(1));
+    ASSERT(completed != nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 0);
+    auto completedHeader = completed->peekAtFront<Ieee80211MgmtHeader>();
+    auto completedResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(completedHeader);
+    ASSERT(completedResponse != nullptr);
+    ASSERT(completedResponse->getDialogToken() == 29);
+    ASSERT(completedResponse->getStatusCode() == 37);
+    ASSERT(completed->peekAt<BytesChunk>(completedResponse->getChunkLength(), B(newPayload.size()))->getBytes() == newPayload);
+    delete completed;
+    delete staleFragments->at(1);
+    delete staleFragments;
+    delete newFragments;
+
+    const std::vector<uint8_t> incompletePayload = { 0x30, 0x31 };
+    auto incompleteFragments = makeResponseFragments("reassemblyOldUnfragmentedResponse", 41, 2, incompletePayload, 4094);
+    ASSERT(reassembly.addFragment(incompleteFragments->at(0)) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    auto unfragmentedResponse = makeResponse(peer1, 3, 53, 43);
+    unfragmentedResponse->setReceiverAddress(peer2);
+    unfragmentedResponse->setSequenceNumber(SequenceNumberCyclic(4094));
+    auto unfragmentedPacket = new Packet("reassemblyNewUnfragmentedResponse", unfragmentedResponse);
+    unfragmentedPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    ASSERT(reassembly.addFragment(unfragmentedPacket) == unfragmentedPacket);
+    ASSERT(reassembly.getNumActiveReassemblies() == 0);
+    auto unfragmentedHeader = unfragmentedPacket->peekAtFront<Ieee80211MgmtHeader>();
+    auto unfragmentedResponseHeader = dynamicPtrCast<const Ieee80211AddbaResponse>(unfragmentedHeader);
+    ASSERT(unfragmentedResponseHeader != nullptr);
+    ASSERT(unfragmentedResponseHeader->getDialogToken() == 53);
+    ASSERT(unfragmentedResponseHeader->getStatusCode() == 43);
+    delete unfragmentedPacket;
+    delete incompleteFragments->at(1);
+    delete incompleteFragments;
 }
 
 // Expired reassembly stores only sequence identity bits, rejects late

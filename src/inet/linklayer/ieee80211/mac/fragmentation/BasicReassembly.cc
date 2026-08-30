@@ -40,6 +40,17 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     ASSERT(fragNum >= 0 && fragNum < MAX_NUM_FRAGMENTS);
 
     auto it = fragmentsMap.find(key);
+    // In this model, a non-Retry fragment 0 marks a new generation when a
+    // sequence identity is reused, so discard any incomplete same-key
+    // reception. IEEE Std 802.11-2024, 10.5 separately requires reconstruction
+    // in Fragment Number order.
+    if (it != fragmentsMap.end() && fragNum == 0 && !header->getRetry()) {
+        for (auto fragment : it->second.fragments)
+            if (fragment != nullptr)
+                delete fragment;
+        fragmentsMap.erase(it);
+        it = fragmentsMap.end();
+    }
     if (it == fragmentsMap.end()) {
         auto contextKey = key.getContextKey();
         auto expiredIt = expiredSequenceNumbersMap.find(contextKey);
