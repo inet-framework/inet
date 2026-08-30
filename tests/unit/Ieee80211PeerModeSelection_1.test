@@ -172,6 +172,25 @@ ASSERT(firstSelection == secondSelection);
 ASSERT(firstSelection->getHtMcsIndex() == 8);
 ASSERT(!firstSelection->isHtShortGuardInterval());
 
+// Greenfield mode set supports HT-mixed control responses (e.g. CTS) per
+// IEEE 802.11-2024 10.6.6.5.7 even though HT-mixed modes are not selectable entries.
+const auto *greenfieldModeSet = Ieee80211ModeSet::getModeSet("n(greenfield-2.4Ghz)");
+const auto *htMixedCtsMode = mcs0Long; // htMcs0BW20MHz mixed format
+ASSERT(!greenfieldModeSet->containsMode(htMixedCtsMode));
+ASSERT(greenfieldModeSet->supportsMode(htMixedCtsMode));
+auto greenfieldPeer = makePeerState({0}, {MHz(20)}, MHz(20));
+const auto *greenfieldCtsSelection = selectPeerCompatibleMode(greenfieldModeSet, &greenfieldPeer, htMixedCtsMode, peer);
+ASSERT(greenfieldCtsSelection == htMixedCtsMode);
+
+bool outsideGreenfieldModeRejected = false;
+try {
+    selectPeerCompatibleMode(greenfieldModeSet, &greenfieldPeer, modeOutsideSet, peer);
+}
+catch (const cRuntimeError&) {
+    outsideGreenfieldModeRejected = true;
+}
+ASSERT(outsideGreenfieldModeRejected);
+
 EV << "Peer-compatible HT mode selection checks verified.\n";
 
 %contains: stdout
