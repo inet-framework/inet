@@ -2658,11 +2658,46 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
     auto bufferedPacket = new Packet("signaledOldWindowPacket", bufferedHeader);
     auto signaledOldWindowFrames = recipientDataService->dataFrameReceived(bufferedPacket, bufferedHeader, &immediateRecipientHandler);
     ASSERT(signaledOldWindowFrames.empty());
+
+    auto makeBasicFragment = [&](const char *name, MacAddress transmitterAddress, Tid tid, int sequenceNumber, int fragmentNumber, bool moreFragments, uint8_t payloadByte) {
+        auto dataHeader = makeQosHeader(peer1, tid, SequenceNumberCyclic(sequenceNumber));
+        dataHeader->setTransmitterAddress(transmitterAddress);
+        dataHeader->setFragmentNumber(fragmentNumber);
+        dataHeader->setMoreFragments(moreFragments);
+        dataHeader->setAckPolicy(BLOCK_ACK);
+        auto packet = new Packet(name, dataHeader);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>({ payloadByte })));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    auto targetFirst = makeBasicFragment("signaledTargetBasicFragment", peer2, 7, 20, 0, true, 0x81);
+    ASSERT(recipientDataService->dataFrameReceived(targetFirst, targetFirst->peekAtFront<Ieee80211DataHeader>(), &immediateRecipientHandler).empty());
+    auto samePeerDifferentTidFirst = makeBasicFragment("signaledDifferentTidBasicFragment", peer2, 8, 21, 0, true, 0x82);
+    ASSERT(recipientDataService->dataFrameReceived(samePeerDifferentTidFirst, samePeerDifferentTidFirst->peekAtFront<Ieee80211DataHeader>(), &immediateRecipientHandler).empty());
+    auto differentPeerSameTidFirst = makeBasicFragment("signaledDifferentPeerBasicFragment", peer3, 7, 22, 0, true, 0x83);
+    ASSERT(recipientDataService->dataFrameReceived(differentPeerSameTidFirst, differentPeerSameTidFirst->peekAtFront<Ieee80211DataHeader>(), &immediateRecipientHandler).empty());
+
     recipientDataService->resetBlockAckReordering(6, peer1);
     ASSERT(dropListener.numSignals == 1);
     ASSERT(dropListener.numOtherPacketDrops == 1);
+    // Resetting one originator/TID agreement also purges its BasicReassembly
+    // state, while retaining fragments for a different TID or peer.
+    recipientDataService->resetBlockAckReordering(7, peer2);
+    ASSERT(dropListener.numSignals == 2);
+    ASSERT(dropListener.numOtherPacketDrops == 2);
     recipientDataService->resetBlockAckReordering(6, peer1);
-    ASSERT(dropListener.numSignals == 1);
+    recipientDataService->resetBlockAckReordering(7, peer2);
+    ASSERT(dropListener.numSignals == 2);
+    auto samePeerDifferentTidFinal = makeBasicFragment("signaledDifferentTidBasicFinal", peer2, 8, 21, 1, false, 0x92);
+    auto samePeerDifferentTidFrames = recipientDataService->dataFrameReceived(samePeerDifferentTidFinal,
+            samePeerDifferentTidFinal->peekAtFront<Ieee80211DataHeader>(), &immediateRecipientHandler);
+    ASSERT(samePeerDifferentTidFrames.size() == 1);
+    delete samePeerDifferentTidFrames.front();
+    auto differentPeerSameTidFinal = makeBasicFragment("signaledDifferentPeerBasicFinal", peer3, 7, 22, 1, false, 0x93);
+    auto differentPeerSameTidFrames = recipientDataService->dataFrameReceived(differentPeerSameTidFinal,
+            differentPeerSameTidFinal->peekAtFront<Ieee80211DataHeader>(), &immediateRecipientHandler);
+    ASSERT(differentPeerSameTidFrames.size() == 1);
+    delete differentPeerSameTidFrames.front();
     recipientDataService->unsubscribe(packetDroppedSignal, &dropListener);
     recipientDataServiceModule->callFinish();
     recipientDataServiceModule->deleteModule();
@@ -5153,6 +5188,10 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     const std::vector<uint8_t> oldPayload = { 0x20, 0x21, 0x22, 0x23 };
     auto oldFragments = makeResponseFragments("reassemblyOldResponse", 17, 1, oldPayload, 4095, 2);
     auto lateOldFirstFragment = oldFragments->at(0)->dup();
+    auto lateOldRetryFragment = oldFragments->at(0)->dup();
+    auto lateOldRetryHeader = lateOldRetryFragment->removeAtFront<Ieee80211MgmtHeader>();
+    lateOldRetryHeader->setRetry(true);
+    lateOldRetryFragment->insertAtFront(lateOldRetryHeader);
     ASSERT(reassembly.addFragment(oldFragments->at(1)) == nullptr);
     ASSERT(reassembly.getNumActiveReassemblies() == 1);
     auto oldExpiration = reassembly.getNextExpirationTime();
@@ -5167,6 +5206,7 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     const std::vector<uint8_t> newPayload = { 0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6 };
     auto newFragments = makeResponseFragments("reassemblyNewResponse", 29, 37, newPayload, 4095, 3);
     ASSERT(reassembly.addFragment(lateOldFirstFragment) == nullptr);
+    ASSERT(reassembly.addFragment(lateOldRetryFragment) == nullptr);
     ASSERT(reassembly.getNumActiveReassemblies() == 1);
     ASSERT(reassembly.getNumExpiredSequenceNumbers() == 1);
     ASSERT(reassembly.addFragment(newFragments->at(0)) == nullptr);
@@ -5183,12 +5223,20 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     delete oldFragments;
     delete newFragments;
 
-    // Purge is the explicit lifecycle boundary that retires both ambiguous
-    // generations. A fresh frame can then complete with only its own bytes.
-    reassembly.purge(peer1, -1, 4095, 4095);
-    ASSERT(reassembly.getNumExpiredSequenceNumbers() == 0);
+    // Once the old active entry and the quarantined generation are gone, the
+    // receiver can observe one more modulo-4096 wrap. The later non-Retry
+    // fragment 0 retires the older same-raw tombstone without an external
+    // purge, and only the later generation's bytes are reconstructed.
+    for (int sequenceNumber = 0; sequenceNumber <= 2048; sequenceNumber++) {
+        auto standalone = makeTaggedManagementPacket("reassemblySecondSequenceAdvance", ST_ACTION, peer1, peer2,
+                SequenceNumberCyclic(sequenceNumber), 0, false, sequenceNumber);
+        ASSERT(reassembly.addFragment(standalone) == standalone);
+        delete standalone;
+    }
     auto recoveredFragments = makeResponseFragments("reassemblyRecoveredResponse", 29, 37, newPayload, 4095, 3);
+    ASSERT(reassembly.getNumExpiredSequenceNumbers() == 1);
     ASSERT(reassembly.addFragment(recoveredFragments->at(0)) == nullptr);
+    ASSERT(reassembly.getNumExpiredSequenceNumbers() == 0);
     ASSERT(reassembly.addFragment(recoveredFragments->at(1)) == nullptr);
     auto completed = reassembly.addFragment(recoveredFragments->at(2));
     ASSERT(completed != nullptr);
@@ -5203,6 +5251,16 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     ASSERT(completed->peekAt<BytesChunk>(completedResponse->getChunkLength(), B(newPayload.size()))->getBytes() == newPayload);
     delete completed;
     delete recoveredFragments;
+
+    // purge() remains the explicit agreement/lifecycle boundary and returns
+    // detached fragments to its caller for observable drop handling.
+    auto purgeFragments = makeResponseFragments("reassemblyPurgedResponse", 31, 41, { 0xb0, 0xb1, 0xb2 }, 4094, 2);
+    ASSERT(reassembly.addFragment(purgeFragments->at(0)) == nullptr);
+    auto purgedFragments = reassembly.purge(peer1, -1, 4094, 4094);
+    ASSERT(purgedFragments.size() == 1);
+    delete purgedFragments.front();
+    delete purgeFragments->at(1);
+    delete purgeFragments;
 }
 
 // Expired reassembly stores exact observed generations, rejects late
@@ -5220,6 +5278,34 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     ASSERT(reassembly.getNumActiveReassemblies() == 0);
     ASSERT(reassembly.getNumExpiredContexts() == 1);
     ASSERT(reassembly.getNumExpiredSequenceNumbers() == 1);
+
+    // A receive-lifetime tombstone does not require an external purge for
+    // recovery. Once the receiver observes a later generation in the same
+    // sequence space, its non-Retry fragment 0 retires the older tombstone.
+    {
+        TestBasicReassembly wrapRecovery(SimTime(1, SIMTIME_US));
+        auto expiredFirst = makeTaggedManagementPacket("reassemblyExpiredWrapFirst", ST_ACTION, peer1, peer2,
+                SequenceNumberCyclic(430), 0, true, 0);
+        ASSERT(wrapRecovery.addFragment(expiredFirst) == nullptr);
+        auto expiration = wrapRecovery.getNextExpirationTime();
+        auto expired = wrapRecovery.removeExpiredFragments(expiration);
+        ASSERT(expired.size() == 1);
+        delete expired.front();
+        for (int sequenceNumber = 431; sequenceNumber <= 2479; sequenceNumber++) {
+            auto standalone = makeTaggedManagementPacket("reassemblyExpiredWrapAdvance", ST_ACTION, peer1, peer2,
+                    SequenceNumberCyclic(sequenceNumber), 0, false, sequenceNumber);
+            ASSERT(wrapRecovery.addFragment(standalone) == standalone);
+            delete standalone;
+        }
+        auto recoveredFirst = makeTaggedManagementPacket("reassemblyExpiredWrapRecoveredFirst", ST_ACTION, peer1, peer2,
+                SequenceNumberCyclic(430), 0, true, 1);
+        ASSERT(wrapRecovery.addFragment(recoveredFirst) == nullptr);
+        ASSERT(wrapRecovery.getNumExpiredSequenceNumbers() == 0);
+        ASSERT(wrapRecovery.getNumActiveReassemblies() == 1);
+        // Leave the recovered, incomplete reassembly for the destructor to own
+        // and clean up; completion is covered by the exact-payload recovery test above.
+    }
+
     auto lateFinalFragment = makeTaggedManagementPacket("reassemblyLateFinal", ST_ACTION, peer1, peer2, SequenceNumberCyclic(430), 1, false, 0, true);
     ASSERT(reassembly.addFragment(lateFinalFragment) == nullptr);
     ASSERT(reassembly.getNumActiveReassemblies() == 0);

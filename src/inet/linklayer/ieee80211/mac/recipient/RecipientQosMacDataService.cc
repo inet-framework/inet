@@ -80,6 +80,15 @@ void RecipientQosMacDataService::resetBlockAckReordering(Tid tid, MacAddress ori
             delete packet;
         }
     }
+    if (basicReassembly) {
+        auto droppedFragments = basicReassembly->purge(originatorAddr, tid, 0, 4095);
+        for (auto packet : droppedFragments) {
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+        }
+    }
     scheduleReceiveLifetimeTimer();
 }
 

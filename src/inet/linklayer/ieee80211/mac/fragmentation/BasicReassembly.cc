@@ -165,7 +165,15 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     // A same-raw active or expired entry in another observed epoch makes all
     // fragments of the new epoch ambiguous, including fragment 0. Quarantine
     // the new extended identity rather than allowing a delayed old fragment
-    // to seed a hybrid frame. purge() is the explicit recovery boundary.
+    // to seed a hybrid frame. IEEE Std 802.11-2024, 9.2.4.1.6, 10.3.2.14.2,
+    // and 10.5
+    // define the modulo-4096 sequence identity, fragment identity, and
+    // receive-lifetime discard boundary; the following recovery policy keeps
+    // the ambiguous generation rejected while allowing a later observed
+    // generation to make progress. A fragmented non-Retry fragment 0 is the
+    // only marker that can retire older same-raw tombstones, and only when no
+    // active same-raw generation remains. A tombstone for the incoming
+    // generation is never cleared by this path.
     bool hasOtherGeneration = false;
     for (const auto& entry : fragmentsMap) {
         const auto& otherKey = entry.first;
@@ -175,6 +183,19 @@ Packet *BasicReassembly::addFragment(Packet *packet)
             hasOtherGeneration = true;
             break;
         }
+    }
+    bool isNewGenerationMarker = fragNum == 0 && !header->getRetry();
+    if (!hasOtherGeneration && isNewGenerationMarker && expiredIt != expiredSequenceNumbersMap.end()) {
+        for (auto sequenceIt = expiredIt->second.begin(); sequenceIt != expiredIt->second.end();) {
+            if (*sequenceIt < key.extendedSequenceNumber &&
+                    getRawSequenceNumber(*sequenceIt) == header->getSequenceNumber().get())
+                sequenceIt = expiredIt->second.erase(sequenceIt);
+            else
+                ++sequenceIt;
+        }
+        if (expiredIt->second.empty())
+            expiredSequenceNumbersMap.erase(expiredIt);
+        expiredIt = expiredSequenceNumbersMap.find(contextKey);
     }
     if (!hasOtherGeneration && expiredIt != expiredSequenceNumbersMap.end()) {
         for (auto extendedSequenceNumber : expiredIt->second) {
@@ -263,8 +284,9 @@ std::vector<Packet *> BasicReassembly::removeExpiredFragments(simtime_t currentT
     return expiredFragments;
 }
 
-void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber)
+std::vector<Packet *> BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber)
 {
+    std::vector<Packet *> purgedFragments;
     auto isInSequenceRange = [startSeqNumber, endSeqNumber](int sequenceNumber) {
         return startSeqNumber <= endSeqNumber ?
                 sequenceNumber >= startSeqNumber && sequenceNumber <= endSeqNumber :
@@ -274,7 +296,8 @@ void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumb
         auto sequenceNumber = getRawSequenceNumber(it->first.extendedSequenceNumber);
         if (it->first.macAddress == address && it->first.tid == tid && isInSequenceRange(sequenceNumber)) {
             for (auto fragment : it->second.fragments)
-                delete fragment;
+                if (fragment != nullptr)
+                    purgedFragments.push_back(fragment);
             it = fragmentsMap.erase(it);
         }
         else
@@ -297,6 +320,7 @@ void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumb
         else
             ++it;
     }
+    return purgedFragments;
 }
 
 BasicReassembly::~BasicReassembly()
