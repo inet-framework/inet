@@ -23,13 +23,17 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/BasicFragmentationPolicy.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/Ieee80211FragmentedActionContextTag.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
@@ -80,6 +84,15 @@ class TestRecipientPolicy : public IRecipientBlockAckAgreementPolicy
     virtual bool aMsduSupported() const override { return aMsduSupportedValue; }
     virtual bool delayedBlockAckPolicySupported() const override { return delayedBlockAckPolicySupportedValue; }
     virtual int getMaximumAllowedBufferSize() const override { return maximumAllowedBufferSize; }
+};
+
+class TestRecipientAckPolicy : public IRecipientAckPolicy, public IRecipientQosAckPolicy
+{
+  public:
+    virtual bool isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>&) const override { return true; }
+    virtual bool isBlockAckNeeded(const Ptr<const Ieee80211BlockAckReq>&, RecipientBlockAckAgreement *) const override { return false; }
+    virtual simtime_t computeAckDurationField(Packet *, const Ptr<const Ieee80211DataOrMgmtHeader>&) const override { return 0; }
+    virtual simtime_t computeBasicBlockAckDurationField(Packet *, const Ptr<const Ieee80211BasicBlockAckReq>&) const override { return 0; }
 };
 
 class TestCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
@@ -555,6 +568,7 @@ class TestHcf : public Hcf
     int numResumedEligibleChannelAccess = 0;
     int numCancelledAddbaTransactions = 0;
     int numRebuildEligibilityCalls = 0;
+    int numTransmittedControlResponses = 0;
     bool droppedSetupCancelled = false;
     bool delegateDroppedSetupHandling = false;
     TestCallback *managementCallback = nullptr;
@@ -580,6 +594,10 @@ class TestHcf : public Hcf
     }
     void configureFrameSequenceHandler(IFrameSequenceHandler *frameSequenceHandler) { this->frameSequenceHandler = frameSequenceHandler; }
     void configureRecipientDataService(IRecipientQosMacDataService *recipientDataService) { this->recipientDataService = recipientDataService; }
+    void configureRecipientAck(IRecipientQosAckPolicy *recipientAckPolicy) {
+        this->recipientAckPolicy = recipientAckPolicy;
+        recipientAckProcedure = new RecipientAckProcedure();
+    }
     void configureManagementCallback(TestCallback *managementCallback) { this->managementCallback = managementCallback; }
     void configureTransmittedData(Edca *edca, IOriginatorBlockAckAgreementHandler *handler, IOriginatorBlockAckAgreementPolicy *policy) {
         this->edca = edca;
@@ -603,6 +621,7 @@ class TestHcf : public Hcf
     void dequeuePacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::DEQUEUED); }
     void cancelTransaction(uint64_t transactionId) { cancelAddbaTransaction(transactionId, nullptr); }
     void processReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, bool duplicate = false) { recipientProcessReceivedManagementFrame(header, duplicate); }
+    void processReceivedFrame(Packet *packet) { recipientProcessReceivedFrame(packet, packet->peekAtFront<Ieee80211MacHeader>()); }
     void processRtsProtectionFailure(Packet *packet) { originatorProcessRtsProtectionFailed(packet); }
     void processFailedFrame(Packet *packet) { originatorProcessFailedFrame(packet); }
     void processReceivedAck(Packet *packet, Packet *lastTransmittedPacket, AccessCategory accessCategory) {
@@ -612,6 +631,10 @@ class TestHcf : public Hcf
     }
 
   protected:
+    virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>&, Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        numTransmittedControlResponses++;
+        delete responsePacket;
+    }
     virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
         if (managementCallback != nullptr)
             managementCallback->processMgmtFrame(packet, header);
@@ -653,7 +676,7 @@ class TestEmptyFrameSequence : public IFrameSequence
 class TestFragmentationPolicy : public IFragmentationPolicy
 {
   public:
-    virtual std::vector<int> computeFragmentSizes(Packet *) override { return { 2, 2 }; }
+    virtual std::vector<int> computeFragmentSizes(Packet *) override { return { 8, 5 }; }
 };
 
 class TestMsduAggregationPolicy : public IMsduAggregationPolicy
@@ -976,7 +999,7 @@ auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
     TestOriginatorQosMacDataService dataService;
     auto originatorHandler = new TestOriginatorHandler();
     dataService.setFrameEligibilityFunction([originatorHandler](const Packet *packet) {
-        auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>());
+        auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
         return delba == nullptr || originatorHandler->isDelbaPending(packet, delba);
     });
     TestInProgressFrames inProgressFrames;
@@ -1024,7 +1047,7 @@ auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
     TestOriginatorQosMacDataService dataService;
     auto originatorHandler = new TestOriginatorHandler();
     dataService.setFrameEligibilityFunction([originatorHandler](const Packet *packet) {
-        auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>());
+        auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
         return delba == nullptr || originatorHandler->isDelbaPending(packet, delba);
     });
     TestInProgressFrames inProgressFrames;
@@ -1044,19 +1067,33 @@ auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
     hcf.configureTransmittedData(&edca, originatorHandler, &policy);
     hcf.configureTransmittedManagement(&edca, &ackPolicy);
 
-    auto sibling = makeTaggedDelbaPacket("acknowledgedDelbaSibling", peer1, 6, SequenceNumberCyclic(204), 0, true, transactionId);
-    auto finalPacket = makeTaggedDelbaPacket("acknowledgedFinalDelba", peer1, 6, SequenceNumberCyclic(204), 1, false, transactionId);
-    auto siblingHeader = sibling->peekAtFront<Ieee80211Delba>();
-    auto finalHeader = finalPacket->peekAtFront<Ieee80211Delba>();
+    auto completeDelba = makeShared<Ieee80211Delba>();
+    completeDelba->setReceiverAddress(peer1);
+    completeDelba->setTid(6);
+    completeDelba->setInitiator(true);
+    completeDelba->setSequenceNumber(SequenceNumberCyclic(204));
+    auto completeDelbaPacket = new Packet("acknowledgedDelba", completeDelba);
+    completeDelbaPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+    completeDelbaPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    Fragmentation fragmentation;
+    auto delbaFragments = fragmentation.fragmentFrame(completeDelbaPacket, { 4, 2 });
+    auto sibling = delbaFragments->at(0);
+    auto finalPacket = delbaFragments->at(1);
+    auto siblingHeader = sibling->peekAtFront<Ieee80211MgmtHeader>();
+    auto finalHeader = finalPacket->peekAtFront<Ieee80211MgmtHeader>();
+    ASSERT(dynamicPtrCast<const Ieee80211Delba>(siblingHeader) == nullptr);
+    ASSERT(dynamicPtrCast<const Ieee80211Delba>(finalHeader) == nullptr);
     originatorHandler->setPendingTeardownTransaction(peer1, 6, transactionId);
     inProgressFrames.addOwnedFrame(sibling);
     inProgressFrames.addOwnedFrame(finalPacket);
     ackHandler.frameGotInProgress(siblingHeader);
     ackHandler.frameGotInProgress(finalHeader);
+    hcf.processTransmittedManagement(sibling, siblingHeader, AC_BE);
+    ASSERT(originatorHandler->isDelbaPending(sibling, findFragmentedActionContext<Ieee80211Delba>(sibling)));
     hcf.processTransmittedManagement(finalPacket, finalHeader, AC_BE);
     Packet ackPacket("transactionalDelbaAck", makeShared<Ieee80211AckFrame>());
     hcf.processReceivedAck(&ackPacket, finalPacket, AC_BE);
-    ASSERT(!originatorHandler->isDelbaPending(finalPacket, finalHeader));
+    ASSERT(!originatorHandler->isDelbaPending(finalPacket, findFragmentedActionContext<Ieee80211Delba>(finalPacket)));
     ASSERT(hcf.numCancelledAddbaTransactions == 1);
     ASSERT(inProgressFrames.getLength() == 0);
     ASSERT(inProgressFrames.getNumDroppedFrames() == 1);
@@ -1067,6 +1104,7 @@ auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
     auto releasedFrames = inProgressFrames.releaseFrames();
     ASSERT(releasedFrames == std::vector<Packet *>({ finalPacket }));
     delete finalPacket;
+    delete delbaFragments;
 }
 
 // Reaching the retry limit aborts the teardown through HCF, clears its sibling
@@ -1081,7 +1119,7 @@ auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
     TestOriginatorQosMacDataService dataService;
     auto originatorHandler = new TestOriginatorHandler();
     dataService.setFrameEligibilityFunction([originatorHandler](const Packet *packet) {
-        auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>());
+        auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
         return delba == nullptr || originatorHandler->isDelbaPending(packet, delba);
     });
     TestInProgressFrames inProgressFrames;
@@ -1463,8 +1501,17 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     auto transmittedDelba = makeShared<Ieee80211Delba>();
     transmittedDelba->setReceiverAddress(peer2);
     transmittedDelba->setTid(2);
+    transmittedDelba->setInitiator(true);
+    transmittedDelba->setMoreFragments(true);
+    auto transmittedFinalDelba = staticPtrCast<Ieee80211Delba>(transmittedDelba->dupShared());
+    transmittedFinalDelba->setMoreFragments(false);
+    transmittedFinalDelba->setFragmentNumber(1);
     Packet transmittedDelbaPacket("transmittedDelba", transmittedDelba);
-    auto terminatedPendingAgreement = transmittedDelbaHandler.processTransmittedDelba(&transmittedDelbaPacket, &transmittedDelbaCallback);
+    ASSERT(transmittedDelbaHandler.processTransmittedDelba(&transmittedDelbaPacket, &transmittedDelbaCallback) == nullptr);
+    ASSERT(transmittedDelbaHandler.getAgreement(peer2, 2) != nullptr);
+    ASSERT(transmittedDelbaCallback.cancelledTransactionIds.empty());
+    Packet transmittedFinalDelbaPacket("transmittedFinalDelba", transmittedFinalDelba);
+    auto terminatedPendingAgreement = transmittedDelbaHandler.processTransmittedDelba(&transmittedFinalDelbaPacket, &transmittedDelbaCallback);
     ASSERT(terminatedPendingAgreement != nullptr);
     ASSERT(terminatedPendingAgreement->isPending());
     if (transmittedDelbaHandler.getAgreement(peer2, 2) != nullptr || transmittedDelbaCallback.cancelledTransactionIds.size() != 1 || transmittedDelbaCallback.cancelledTransactionIds.back() != transmittedDelbaTransactionId)
@@ -1475,18 +1522,21 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     ASSERT(transmittedDelbaCallback.addbaDeadline == SIMTIME_MAX);
 }
 
-// Fragmentation preserves the local transaction identity on every MPDU, and
-// typed cancellation removes all exact siblings while retaining the dropped
-// fragment and an unrelated transaction.
+// Fragmentation preserves the local transaction identity on every MPDU.
+// Transaction-scoped cancellation removes all exact siblings while retaining
+// the dropped fragment and an unrelated transaction.
 {
-    TestOriginatorHandler fragmentedHandler;
+    auto fragmentedHandler = new TestOriginatorHandler();
     TestCallback fragmentedCallback;
     Packet fragmentedTrigger("fragmentedTrigger");
     auto fragmentedTriggerHeader = makeQosHeader(peer1, 7, SequenceNumberCyclic(50));
-    fragmentedHandler.processAcknowledgedDataFrame(&fragmentedTrigger, fragmentedTriggerHeader, &originatorPolicy, &fragmentedCallback);
+    fragmentedHandler->processAcknowledgedDataFrame(&fragmentedTrigger, fragmentedTriggerHeader, &originatorPolicy, &fragmentedCallback);
     auto unfragmentedRequestPacket = fragmentedCallback.managementPacket;
     auto fragmentedTransactionId = unfragmentedRequestPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
     fragmentedCallback.forgetManagementPacket(unfragmentedRequestPacket);
+    auto unfragmentedRequestHeader = unfragmentedRequestPacket->removeAtFront<Ieee80211AddbaRequest>();
+    unfragmentedRequestHeader->setSequenceNumber(SequenceNumberCyclic(50));
+    unfragmentedRequestPacket->insertAtFront(unfragmentedRequestHeader);
     unfragmentedRequestPacket->insertAtBack(makeShared<ByteCountChunk>(B(4)));
     unfragmentedRequestPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
     TestFragmentationPolicy fragmentationPolicy;
@@ -1495,8 +1545,11 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     auto fragments = fragmentationDataService.fragment(unfragmentedRequestPacket);
     ASSERT(fragments != nullptr);
     ASSERT(fragments->size() == 2);
-    for (auto fragment : *fragments)
+    for (auto fragment : *fragments) {
         ASSERT(fragment->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId() == fragmentedTransactionId);
+        ASSERT(dynamicPtrCast<const Ieee80211AddbaRequest>(fragment->peekAtFront<Ieee80211MgmtHeader>()) == nullptr);
+        ASSERT(findFragmentedActionContext<Ieee80211AddbaRequest>(fragment) != nullptr);
+    }
     auto unrelatedPacket = new Packet("unrelatedTransaction", makeShared<ByteCountChunk>(B(1)));
     unrelatedPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(fragmentedTransactionId + 1);
     auto droppedFragment = fragments->at(0);
@@ -1505,15 +1558,30 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     fragmentedPendingQueue.packets = { droppedFragment, siblingFragment, unrelatedPacket };
     TestInProgressFrames fragmentedInProgressFrames;
     TestEdcaf fragmentedEdcaf;
+    TestQosAckHandler fragmentedAckHandler;
     fragmentedEdcaf.pendingQueue = &fragmentedPendingQueue;
     fragmentedEdcaf.inProgressFrames = &fragmentedInProgressFrames;
+    fragmentedEdcaf.qosAckHandler = &fragmentedAckHandler;
     TestEdca fragmentedEdca;
     fragmentedEdca.edcaf = &fragmentedEdcaf;
     TestHcf fragmentedHcf;
     fragmentedHcf.configure(&fragmentedEdca);
-    auto droppedRequest = droppedFragment->peekAtFront<Ieee80211AddbaRequest>();
-    fragmentedHandler.processDroppedAddbaReq(droppedFragment, droppedRequest, &originatorPolicy, &fragmentedHcf);
-    ASSERT(fragmentedHandler.getAgreement(peer1, 7) == nullptr);
+    OriginatorQosAckPolicy fragmentedAckPolicy;
+    TestRecipientPolicy fragmentedRecipientPolicy;
+    fragmentedHcf.configureBlockAckHandlers(fragmentedHandler, &originatorPolicy, new TestRecipientHandler(), &fragmentedRecipientPolicy);
+    fragmentedHcf.configureTransmittedManagement(&fragmentedEdca, &fragmentedAckPolicy);
+    auto fragmentedAgreement = fragmentedHandler->getAgreement(peer1, 7);
+    ASSERT(fragmentedAgreement != nullptr);
+    ASSERT(!fragmentedAgreement->getIsAddbaRequestSent());
+    auto firstFragmentHeader = droppedFragment->peekAtFront<Ieee80211MgmtHeader>();
+    auto finalFragmentHeader = siblingFragment->peekAtFront<Ieee80211MgmtHeader>();
+    fragmentedHcf.processTransmittedManagement(droppedFragment, firstFragmentHeader, AC_BE);
+    ASSERT(!fragmentedAgreement->getIsAddbaRequestSent());
+    fragmentedHcf.processTransmittedManagement(siblingFragment, finalFragmentHeader, AC_BE);
+    ASSERT(fragmentedAgreement->getIsAddbaRequestSent());
+    auto droppedRequest = findFragmentedActionContext<Ieee80211AddbaRequest>(droppedFragment);
+    fragmentedHandler->processDroppedAddbaReq(droppedFragment, droppedRequest, &originatorPolicy, &fragmentedHcf);
+    ASSERT(fragmentedHandler->getAgreement(peer1, 7) == nullptr);
     ASSERT(fragmentedPendingQueue.getNumPackets() == 2);
     ASSERT(std::find(fragmentedPendingQueue.packets.begin(), fragmentedPendingQueue.packets.end(), droppedFragment) != fragmentedPendingQueue.packets.end());
     ASSERT(std::find(fragmentedPendingQueue.packets.begin(), fragmentedPendingQueue.packets.end(), siblingFragment) == fragmentedPendingQueue.packets.end());
@@ -1564,7 +1632,8 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     rejectedRequest->setSequenceNumber(SequenceNumberCyclic(40));
     auto rejectedReception = recipientDataService->managementFrameReceived(new Packet("initiallyRejectedAddbaRequest", rejectedRequest), rejectedRequest);
     ASSERT(!rejectedReception.duplicate);
-    hcf.processReceivedManagementFrame(rejectedRequest, rejectedReception.duplicate);
+    ASSERT(rejectedReception.completeHeader != nullptr);
+    hcf.processReceivedManagementFrame(rejectedReception.completeHeader, rejectedReception.duplicate);
     ASSERT(recipientHandler->getAgreement(7, peer3) == nullptr);
     ASSERT(recipientHandler->getNumCachedAddbaResponses() == 0);
     ASSERT(responseCallback.managementPackets.size() == 1);
@@ -1575,7 +1644,8 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     duplicateRejectedRequest->setRetry(true);
     auto duplicateReception = recipientDataService->managementFrameReceived(new Packet("duplicateInitiallyRejectedAddbaRequest", duplicateRejectedRequest), duplicateRejectedRequest);
     ASSERT(duplicateReception.duplicate);
-    hcf.processReceivedManagementFrame(duplicateRejectedRequest, duplicateReception.duplicate);
+    ASSERT(duplicateReception.completeHeader != nullptr);
+    hcf.processReceivedManagementFrame(duplicateReception.completeHeader, duplicateReception.duplicate);
     ASSERT(recipientHandler->getNumCachedAddbaResponses() == 0);
     ASSERT(responseCallback.managementPackets.size() == 1);
 
@@ -1614,7 +1684,8 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     auto firstReception = recipientDataService->managementFrameReceived(new Packet("firstAddbaRequest", firstRequest), firstRequest);
     ASSERT(!firstReception.duplicate);
     ASSERT(firstReception.completeFrames.empty());
-    hcf.processReceivedManagementFrame(firstRequest, firstReception.duplicate);
+    ASSERT(firstReception.completeHeader != nullptr);
+    hcf.processReceivedManagementFrame(firstReception.completeHeader, firstReception.duplicate);
     auto firstAgreement = recipientHandler->getAgreement(6, peer2);
     ASSERT(firstAgreement != nullptr);
     ASSERT(recipientHandler->getNumCachedAddbaResponses() == 1);
@@ -1651,7 +1722,8 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     auto duplicateReception = recipientDataService->managementFrameReceived(new Packet("duplicateAddbaRequest", duplicateRequest), duplicateRequest);
     ASSERT(duplicateReception.duplicate);
     ASSERT(duplicateReception.completeFrames.empty());
-    hcf.processReceivedManagementFrame(duplicateRequest, duplicateReception.duplicate);
+    ASSERT(duplicateReception.completeHeader != nullptr);
+    hcf.processReceivedManagementFrame(duplicateReception.completeHeader, duplicateReception.duplicate);
     ASSERT(recipientHandler->getAgreement(6, peer2) == firstAgreement);
     ASSERT(firstAgreement->getBlockAckRecord() == firstBlockAckRecord);
     ASSERT(firstAgreement->getExpirationTime() == firstExpirationTime);
@@ -1676,7 +1748,8 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     rejectedRequest->setBlockAckTimeoutValue(4);
     auto rejectedReception = recipientDataService->managementFrameReceived(new Packet("rejectedAddbaRequest", rejectedRequest), rejectedRequest);
     ASSERT(!rejectedReception.duplicate);
-    hcf.processReceivedManagementFrame(rejectedRequest, rejectedReception.duplicate);
+    ASSERT(rejectedReception.completeHeader != nullptr);
+    hcf.processReceivedManagementFrame(rejectedReception.completeHeader, rejectedReception.duplicate);
     ASSERT(recipientHandler->getAgreement(6, peer2) == firstAgreement);
     ASSERT(changedListener.numSignals == 0);
     ASSERT(reorderDropListener.numSignals == 0);
@@ -1696,7 +1769,8 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     duplicateRejectedRequest->setBlockAckTimeoutValue(4);
     auto duplicateRejectedReception = recipientDataService->managementFrameReceived(new Packet("duplicateRejectedAddbaRequest", duplicateRejectedRequest), duplicateRejectedRequest);
     ASSERT(duplicateRejectedReception.duplicate);
-    hcf.processReceivedManagementFrame(duplicateRejectedRequest, duplicateRejectedReception.duplicate);
+    ASSERT(duplicateRejectedReception.completeHeader != nullptr);
+    hcf.processReceivedManagementFrame(duplicateRejectedReception.completeHeader, duplicateRejectedReception.duplicate);
     ASSERT(recipientHandler->getAgreement(6, peer2) == firstAgreement);
     ASSERT(recipientHandler->getNumCachedAddbaResponses() == 1);
     ASSERT(changedListener.numSignals == 0);
@@ -1747,7 +1821,8 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     auto replacementReception = recipientDataService->managementFrameReceived(new Packet("replacementAddbaRequest", replacementRequest), replacementRequest);
     ASSERT(!replacementReception.duplicate);
     ASSERT(replacementReception.completeFrames.empty());
-    hcf.processReceivedManagementFrame(replacementRequest, replacementReception.duplicate);
+    ASSERT(replacementReception.completeHeader != nullptr);
+    hcf.processReceivedManagementFrame(replacementReception.completeHeader, replacementReception.duplicate);
     ASSERT(recipientHandler->getAgreement(6, peer2) != firstAgreement);
     ASSERT(addedListener.numSignals == 1);
     ASSERT(changedListener.numSignals == 1);
@@ -1779,6 +1854,278 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     hcf.unsubscribe(Hcf::blockAckAgreementAddedSignal, &addedListener);
     hcf.unsubscribe(Hcf::blockAckAgreementChangedSignal, &changedListener);
     recipientDataService->unsubscribe(packetDroppedSignal, &reorderDropListener);
+    recipientDataServiceModule->callFinish();
+    recipientDataServiceModule->deleteModule();
+}
+
+// IEEE Std 802.11-2024, 10.4-10.5: each management MPDU fragment is
+// acknowledged independently, but its action body is dispatched only after
+// the final fragment and every preceding fragment have been received.
+{
+    auto fragmentationPolicyModule = cModuleType::get("inet.linklayer.ieee80211.mac.fragmentation.BasicFragmentationPolicy")->create("addbaFragmentationPolicy", this);
+    fragmentationPolicyModule->par("fragmentationThreshold").setIntValue(34);
+    fragmentationPolicyModule->callInitialize();
+    auto fragmentationPolicy = check_and_cast<BasicFragmentationPolicy *>(fragmentationPolicyModule);
+    auto policyRequest = makeRequest(peer2, 2, 72, SequenceNumberCyclic(102), 32);
+    auto policyPacket = new Packet("policyAddbaRequest", policyRequest);
+    policyPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    ASSERT(fragmentationPolicy->computeFragmentSizes(policyPacket) == std::vector<int>({ 6, 3 }));
+    delete policyPacket;
+    auto groupAddressedRequest = makeRequest(peer2, 2, 72, SequenceNumberCyclic(102), 32);
+    groupAddressedRequest->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
+    auto groupAddressedPacket = new Packet("groupAddressedAddbaRequest", groupAddressedRequest);
+    groupAddressedPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    ASSERT(fragmentationPolicy->computeFragmentSizes(groupAddressedPacket).empty());
+    delete groupAddressedPacket;
+    fragmentationPolicyModule->callFinish();
+    fragmentationPolicyModule->deleteModule();
+
+    auto recipientDataServiceModule = cModuleType::get("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService")->create("fragmentedAddbaDataService", this);
+    recipientDataServiceModule->callInitialize();
+    auto recipientDataService = check_and_cast<RecipientQosMacDataService *>(recipientDataServiceModule);
+    auto originatorHandler = new TestOriginatorHandler();
+    auto recipientHandler = new TestRecipientHandler();
+    TestRecipientPolicy fragmentedPolicy;
+    TestCallback fragmentedCallback;
+    TestHcf hcf;
+    hcf.configureBlockAckHandlers(originatorHandler, &originatorPolicy, recipientHandler, &fragmentedPolicy);
+    hcf.configureRecipientDataService(recipientDataService);
+    hcf.configureManagementCallback(&fragmentedCallback);
+
+    auto makeFragments = [&](const char *name, Tid tid, int sequenceNumber) {
+        auto request = makeRequest(peer2, tid, 70 + tid, SequenceNumberCyclic(100 + tid), 32);
+        request->setSequenceNumber(SequenceNumberCyclic(sequenceNumber));
+        auto packet = new Packet(name, request);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(4)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        Fragmentation fragmentation;
+        return fragmentation.fragmentFrame(packet, { 8, 5 });
+    };
+    auto receiveFragment = [&](Packet *fragment) {
+        auto header = fragment->peekAtFront<Ieee80211MgmtHeader>();
+        return recipientDataService->managementFrameReceived(fragment, header);
+    };
+    auto convertToWireRepresentation = [](Packet *fragment) {
+        std::string name = fragment->getName();
+        const auto& trailer = fragment->popAtBack<Ieee80211MacTrailer>(B(4));
+        auto wireFragment = new Packet(name.c_str(), fragment->peekDataAsBytes());
+        wireFragment->copyTags(*fragment);
+        wireFragment->insertAtBack(trailer);
+        delete fragment;
+        return wireFragment;
+    };
+
+    auto fragments = makeFragments("fragmentedAddbaRequest", 3, 60);
+    for (auto& fragment : *fragments)
+        fragment = convertToWireRepresentation(fragment);
+    auto commonManagementHeaderLength = makeShared<Ieee80211MgmtHeader>()->getChunkLength();
+    ASSERT(fragments->at(0)->getByteLength() == commonManagementHeaderLength.get<B>() + 8 + 4);
+    ASSERT(fragments->at(1)->getByteLength() == commonManagementHeaderLength.get<B>() + 5 + 4);
+    ASSERT(dynamicPtrCast<const Ieee80211AddbaRequest>(fragments->at(0)->peekAtFront<Ieee80211MgmtHeader>()) == nullptr);
+    ASSERT(dynamicPtrCast<const Ieee80211AddbaRequest>(fragments->at(1)->peekAtFront<Ieee80211MgmtHeader>()) == nullptr);
+    auto duplicateFirstFragment = fragments->at(0)->dup();
+    auto duplicateHeader = duplicateFirstFragment->removeAtFront<Ieee80211MgmtHeader>();
+    duplicateHeader->setRetry(true);
+    duplicateFirstFragment->insertAtFront(duplicateHeader);
+
+    auto firstReception = receiveFragment(fragments->at(0));
+    ASSERT(firstReception.completeHeader == nullptr);
+    ASSERT(recipientHandler->getAgreement(3, peer2) == nullptr);
+    ASSERT(fragmentedCallback.managementPackets.empty());
+
+    auto duplicateReception = receiveFragment(duplicateFirstFragment);
+    ASSERT(duplicateReception.duplicate);
+    ASSERT(duplicateReception.completeHeader == nullptr);
+    ASSERT(recipientHandler->getAgreement(3, peer2) == nullptr);
+    ASSERT(fragmentedCallback.managementPackets.empty());
+
+    auto completeReception = receiveFragment(fragments->at(1));
+    ASSERT(!completeReception.duplicate);
+    ASSERT(completeReception.completeHeader != nullptr);
+    ASSERT(completeReception.completeHeader->getFragmentNumber() == 0);
+    ASSERT(!completeReception.completeHeader->getMoreFragments());
+    auto completeRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(completeReception.completeHeader);
+    ASSERT(completeRequest != nullptr);
+    ASSERT(completeRequest->getTid() == 3);
+    ASSERT(completeRequest->getDialogToken() == 73);
+    ASSERT(completeRequest->getStartingSequenceNumber() == SequenceNumberCyclic(103));
+    hcf.processReceivedManagementFrame(completeReception.completeHeader);
+    ASSERT(recipientHandler->getAgreement(3, peer2) != nullptr);
+    ASSERT(fragmentedCallback.managementPackets.size() == 1);
+    delete fragments;
+
+    // Seeing the final fragment first does not imply completeness. Dispatch
+    // occurs only when the missing lower-numbered fragment later arrives.
+    auto outOfOrderFragments = makeFragments("outOfOrderAddbaRequest", 4, 61);
+    for (auto& fragment : *outOfOrderFragments)
+        fragment = convertToWireRepresentation(fragment);
+    auto finalFirstReception = receiveFragment(outOfOrderFragments->at(1));
+    ASSERT(finalFirstReception.completeHeader == nullptr);
+    ASSERT(recipientHandler->getAgreement(4, peer2) == nullptr);
+    ASSERT(fragmentedCallback.managementPackets.size() == 1);
+    auto outOfOrderCompleteReception = receiveFragment(outOfOrderFragments->at(0));
+    ASSERT(outOfOrderCompleteReception.completeHeader != nullptr);
+    hcf.processReceivedManagementFrame(outOfOrderCompleteReception.completeHeader);
+    ASSERT(recipientHandler->getAgreement(4, peer2) != nullptr);
+    ASSERT(fragmentedCallback.managementPackets.size() == 2);
+    delete outOfOrderFragments;
+
+    // The receive timer releases an incomplete MMPDU at
+    // dot11MaxReceiveLifetime even if no matching fragment arrives.
+    {
+        auto expiringDataServiceModule = cModuleType::get("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService")->create("expiringFragmentDataService", this);
+        expiringDataServiceModule->par("maxReceiveLifetime").setDoubleValue(1e-6);
+        expiringDataServiceModule->callInitialize();
+        auto expiringDataService = check_and_cast<RecipientQosMacDataService *>(expiringDataServiceModule);
+        TestPacketDropSignalListener expiryDropListener;
+        expiringDataService->subscribe(packetDroppedSignal, &expiryDropListener);
+        auto expiredFragments = makeFragments("expiredAddbaRequest", 1, 66);
+        auto firstExpiredReception = expiringDataService->managementFrameReceived(expiredFragments->at(0), expiredFragments->at(0)->peekAtFront<Ieee80211MgmtHeader>());
+        ASSERT(firstExpiredReception.completeHeader == nullptr);
+        ASSERT(expiryDropListener.numOtherPacketDrops == 0);
+        wait(2e-6);
+        ASSERT(expiryDropListener.numOtherPacketDrops == 1);
+        auto lateFinalReception = expiringDataService->managementFrameReceived(expiredFragments->at(1), expiredFragments->at(1)->peekAtFront<Ieee80211MgmtHeader>());
+        ASSERT(lateFinalReception.completeHeader == nullptr);
+        // The late final fragment must be discarded, not buffered as the
+        // beginning of another reassembly. A subsequent non-Retry fragment 0
+        // starts a new sequence reuse and therefore cannot combine with it.
+        auto restartedFragments = makeFragments("restartedAddbaRequest", 1, 66);
+        auto restartedReception = expiringDataService->managementFrameReceived(restartedFragments->at(0), restartedFragments->at(0)->peekAtFront<Ieee80211MgmtHeader>());
+        ASSERT(restartedReception.completeHeader == nullptr);
+        delete restartedFragments->at(1);
+        delete restartedFragments;
+        expiringDataServiceModule->callFinish();
+        expiringDataServiceModule->deleteModule();
+        delete expiredFragments;
+    }
+
+    // Frame type and destination address are part of the reassembly identity;
+    // fragments sharing only TA and sequence number cannot cross-associate.
+    {
+        BasicReassembly isolatedReassembly;
+        auto firstMmpdu = makeFragments("isolatedAddbaRequest", 0, 67);
+        auto otherDestinationMmpdu = makeFragments("otherDestinationAddbaRequest", 0, 67);
+        auto setReceiverAddress = [](Packet *fragment, const MacAddress& receiverAddress) {
+            auto header = fragment->removeAtFront<Ieee80211MgmtHeader>();
+            header->setReceiverAddress(receiverAddress);
+            fragment->insertAtFront(header);
+        };
+        for (auto fragment : *firstMmpdu)
+            setReceiverAddress(fragment, peer1);
+        for (auto fragment : *otherDestinationMmpdu)
+            setReceiverAddress(fragment, peer3);
+        auto dataHeader = makeShared<Ieee80211DataHeader>();
+        dataHeader->setType(ST_DATA);
+        dataHeader->setTransmitterAddress(peer2);
+        dataHeader->setReceiverAddress(peer1);
+        dataHeader->setSequenceNumber(SequenceNumberCyclic(67));
+        dataHeader->setFragmentNumber(1);
+        dataHeader->setMoreFragments(false);
+        auto dataFragment = new Packet("sameSequenceDataFragment", dataHeader);
+        dataFragment->insertAtBack(makeShared<ByteCountChunk>(B(5)));
+        dataFragment->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        ASSERT(isolatedReassembly.addFragment(firstMmpdu->at(0)) == nullptr);
+        ASSERT(isolatedReassembly.addFragment(otherDestinationMmpdu->at(1)) == nullptr);
+        ASSERT(isolatedReassembly.addFragment(dataFragment) == nullptr);
+        auto completeMmpdu = isolatedReassembly.addFragment(firstMmpdu->at(1));
+        ASSERT(completeMmpdu != nullptr);
+        delete completeMmpdu;
+        delete otherDestinationMmpdu->at(0);
+        delete firstMmpdu;
+        delete otherDestinationMmpdu;
+    }
+
+    // Drive the real HCF recipient entry point: every MPDU, including an
+    // ignored duplicate, is ACKed before the data service gates action-body
+    // dispatch on complete reassembly.
+    TestRecipientAckPolicy recipientAckPolicy;
+    hcf.configureRecipientAck(&recipientAckPolicy);
+    auto hcfFragments = makeFragments("hcfFragmentedAddbaRequest", 7, 65);
+    for (auto& fragment : *hcfFragments)
+        fragment = convertToWireRepresentation(fragment);
+    auto hcfDuplicateFirstFragment = hcfFragments->at(0)->dup();
+    auto hcfDuplicateHeader = hcfDuplicateFirstFragment->removeAtFront<Ieee80211MgmtHeader>();
+    hcfDuplicateHeader->setRetry(true);
+    hcfDuplicateFirstFragment->insertAtFront(hcfDuplicateHeader);
+    auto numManagementPacketsBeforeHcfReception = fragmentedCallback.managementPackets.size();
+    hcf.processReceivedFrame(hcfFragments->at(0));
+    ASSERT(hcf.numTransmittedControlResponses == 1);
+    ASSERT(recipientHandler->getAgreement(7, peer2) == nullptr);
+    ASSERT(fragmentedCallback.managementPackets.size() == numManagementPacketsBeforeHcfReception);
+    hcf.processReceivedFrame(hcfDuplicateFirstFragment);
+    ASSERT(hcf.numTransmittedControlResponses == 2);
+    ASSERT(recipientHandler->getAgreement(7, peer2) == nullptr);
+    ASSERT(fragmentedCallback.managementPackets.size() == numManagementPacketsBeforeHcfReception);
+    hcf.processReceivedFrame(hcfFragments->at(1));
+    ASSERT(hcf.numTransmittedControlResponses == 3);
+    ASSERT(recipientHandler->getAgreement(7, peer2) != nullptr);
+    ASSERT(fragmentedCallback.managementPackets.size() == numManagementPacketsBeforeHcfReception + 1);
+    delete hcfFragments;
+
+    auto verifyFragmentedActionRoundTrip = [&](const char *name, const Ptr<Ieee80211ActionFrame>& action, const std::function<void(const Ptr<const Ieee80211ActionFrame>&)>& verify) {
+        auto bodyLength = (int)(action->getChunkLength() - commonManagementHeaderLength).get<B>();
+        auto firstFragmentLength = (bodyLength - 1) & ~1;
+        ASSERT(firstFragmentLength > 0 && firstFragmentLength < bodyLength);
+        auto packet = new Packet(name, action);
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        Fragmentation fragmentation;
+        auto actionFragments = fragmentation.fragmentFrame(packet, { firstFragmentLength, bodyLength - firstFragmentLength });
+        for (auto& fragment : *actionFragments) {
+            ASSERT(dynamicPtrCast<const Ieee80211ActionFrame>(fragment->peekAtFront<Ieee80211MgmtHeader>()) == nullptr);
+            ASSERT(fragment->getTag<Ieee80211FragmentedActionContextTag>()->getActionFrame() != nullptr);
+            fragment = convertToWireRepresentation(fragment);
+        }
+        auto incompleteReception = receiveFragment(actionFragments->at(0));
+        ASSERT(incompleteReception.completeHeader == nullptr);
+        auto completedReception = receiveFragment(actionFragments->at(1));
+        ASSERT(completedReception.completeHeader != nullptr);
+        auto completedAction = dynamicPtrCast<const Ieee80211ActionFrame>(completedReception.completeHeader);
+        ASSERT(completedAction != nullptr);
+        ASSERT(completedAction->getReceiverAddress() == action->getReceiverAddress());
+        ASSERT(completedAction->getTransmitterAddress() == action->getTransmitterAddress());
+        ASSERT(completedAction->getAddress3() == action->getAddress3());
+        ASSERT(completedAction->getSequenceNumber() == action->getSequenceNumber());
+        verify(completedAction);
+        delete actionFragments;
+        return completedAction;
+    };
+
+    auto fragmentedResponse = makeResponse(peer2, 5, 81, 0);
+    fragmentedResponse->setSequenceNumber(SequenceNumberCyclic(62));
+    verifyFragmentedActionRoundTrip("fragmentedAddbaResponse", fragmentedResponse, [](const Ptr<const Ieee80211ActionFrame>& action) {
+        auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(action);
+        ASSERT(response != nullptr);
+        ASSERT(response->getTid() == 5);
+        ASSERT(response->getDialogToken() == 81);
+        ASSERT(response->getStatusCode() == 0);
+    });
+
+    for (bool initiator : { false, true }) {
+        if (initiator) {
+            auto delbaAgreementRequest = makeRequest(peer2, 6, 86, SequenceNumberCyclic(106), 32);
+            ASSERT(recipientHandler->processReceivedAddbaRequest(delbaAgreementRequest, &fragmentedPolicy, &fragmentedCallback, &fragmentedCallback) != nullptr);
+            ASSERT(recipientHandler->getAgreement(6, peer2) != nullptr);
+        }
+        auto fragmentedDelba = makeShared<Ieee80211Delba>();
+        fragmentedDelba->setTransmitterAddress(peer2);
+        fragmentedDelba->setSequenceNumber(SequenceNumberCyclic(initiator ? 64 : 63));
+        fragmentedDelba->setInitiator(initiator);
+        fragmentedDelba->setTid(6);
+        fragmentedDelba->setReasonCode(39);
+        auto completeDelba = verifyFragmentedActionRoundTrip(initiator ? "fragmentedOriginatorDelba" : "fragmentedRecipientDelba", fragmentedDelba, [initiator](const Ptr<const Ieee80211ActionFrame>& action) {
+            auto delba = dynamicPtrCast<const Ieee80211Delba>(action);
+            ASSERT(delba != nullptr);
+            ASSERT(delba->getInitiator() == initiator);
+            ASSERT(delba->getTid() == 6);
+            ASSERT(delba->getReasonCode() == 39);
+        });
+        if (initiator) {
+            hcf.processReceivedManagementFrame(completeDelba);
+            ASSERT(recipientHandler->getAgreement(6, peer2) == nullptr);
+        }
+    }
+
     recipientDataServiceModule->callFinish();
     recipientDataServiceModule->deleteModule();
 }
@@ -1991,8 +2338,17 @@ ASSERT(immediateRecipientHandler.getAgreement(6, peer1) == replacementImmediateA
     delba->setTid(3);
     delba->setInitiator(false);
     delba->setSequenceNumber(SequenceNumberCyclic(200));
+    delba->setMoreFragments(true);
+    auto finalDelba = staticPtrCast<Ieee80211Delba>(delba->dupShared());
+    finalDelba->setMoreFragments(false);
+    finalDelba->setFragmentNumber(1);
     Packet delbaPacket("transmittedRecipientDelba", delba);
     hcf.processTransmittedManagement(&delbaPacket, delba, AC_BE);
+    ASSERT(recipientHandler->getAgreement(3, peer2) != nullptr);
+    ASSERT(deletionListener.numSignals == 0);
+    ASSERT(reorderDropListener.numOtherPacketDrops == 0);
+    Packet finalDelbaPacket("transmittedRecipientDelbaFinal", finalDelba);
+    hcf.processTransmittedManagement(&finalDelbaPacket, finalDelba, AC_BE);
     ASSERT(recipientHandler->getAgreement(3, peer2) == nullptr);
     ASSERT(deletionListener.numSignals == 1);
     ASSERT(reorderDropListener.numOtherPacketDrops == 1);

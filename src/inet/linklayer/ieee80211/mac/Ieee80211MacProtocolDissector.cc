@@ -65,10 +65,14 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
         else
             callback.dissectPacket(packet, computeLlcProtocol(packet));
     }
-    else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ActionFrame>(header))
-        ASSERT(packet->getDataLength() == b(0));
-    else if (dynamicPtrCast<const inet::ieee80211::Ieee80211MgmtHeader>(header))
-        callback.dissectPacket(packet, &Protocol::ieee80211Mgmt);
+    else if (auto mgmtHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211MgmtHeader>(header)) {
+        if (mgmtHeader->getMoreFragments() || mgmtHeader->getFragmentNumber() != 0)
+            callback.dissectPacket(packet, nullptr);
+        else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ActionFrame>(header))
+            ASSERT(packet->getDataLength() == b(0));
+        else
+            callback.dissectPacket(packet, &Protocol::ieee80211Mgmt);
+    }
     // TODO else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ControlFrame>(header))
     else
         ASSERT(packet->getDataLength() == b(0));
@@ -77,4 +81,3 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
 }
 
 } // namespace inet
-

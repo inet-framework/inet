@@ -27,6 +27,7 @@ class INET_API RecipientMacDataService : public SimpleModule, public IRecipientM
 
   protected:
     IReassembly *basicReassembly = nullptr; // FIXME use Defragmentation
+    cMessage *reassemblyTimer = nullptr;
 
 //    MpduHeaderAndFcsValidation *mpduHeaderAndFcsValidation = nullptr;
 //    Address1Filtering *address1Filtering = nullptr;
@@ -37,6 +38,9 @@ class INET_API RecipientMacDataService : public SimpleModule, public IRecipientM
 
   protected:
     virtual void initialize() override;
+    virtual void handleMessage(cMessage *message) override;
+    virtual void expireReassemblyFragments();
+    virtual void scheduleReassemblyTimer();
     virtual Packet *defragment(Packet *dataOrMgmtFrame);
     virtual std::vector<Packet *> dataOrMgmtFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
@@ -52,4 +56,3 @@ class INET_API RecipientMacDataService : public SimpleModule, public IRecipientM
 } /* namespace inet */
 
 #endif
-

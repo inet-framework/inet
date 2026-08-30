@@ -27,6 +27,7 @@ class INET_API RecipientQosMacDataService : public IRecipientQosMacDataService, 
 {
   protected:
     IReassembly *basicReassembly = nullptr;
+    cMessage *reassemblyTimer = nullptr;
 
     IMpduDeaggregation *aMpduDeaggregation = nullptr;
 //    MpduHeaderAndFcsValidation *mpduHeaderAndFcsValidation = nullptr;
@@ -41,7 +42,10 @@ class INET_API RecipientQosMacDataService : public IRecipientQosMacDataService, 
   protected:
     virtual ~RecipientQosMacDataService();
     virtual void initialize() override;
+    virtual void handleMessage(cMessage *message) override;
 
+    virtual void expireReassemblyFragments();
+    virtual void scheduleReassemblyTimer();
     virtual Packet *defragment(std::vector<Packet *> completeFragments);
     virtual Packet *defragment(Packet *mgmtFragment);
 
