@@ -341,5 +341,5 @@
 
 /showcases/wireless/throughput/,     -f omnetpp.ini -c General -r 0,                1s,         030e-c416/tplx;66e6-0bca/~tNl;3cb6-43bd/~tND;e6a5-bde0/tyf, PASS,    wireless Ipv4
 
-/showcases/wireless/txop/,     -f omnetpp.ini -c General -r 0,                5s,         d2b6-a5d1/tplx;3a6f-4c28/~tNl;c87d-3f3a/tyf, PASS,    wireless Ipv4
+/showcases/wireless/txop/,     -f omnetpp.ini -c General -r 0,                5s,         1ecd-df80/tplx;86dd-208d/~tNl;c87d-3f3a/tyf, PASS,    wireless Ipv4
 
