@@ -11,6 +11,7 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/Ieee80211BlockAckAgreementTag_m.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Ieee80211FragmentedActionContextTag.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 
@@ -111,6 +112,7 @@ void OriginatorBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCall
             Tid tid = id.first.second;
             const auto& delba = buildDelba(receiverAddr, tid, 39);
             auto delbaPacket = new Packet("Delba", delba);
+            delbaPacket->addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(agreement->getTransactionId());
             procedureCallback->processMgmtFrame(delbaPacket, delba); // 39 - TIMEOUT see: Table 8-36—Reason codes
         }
     }
@@ -307,11 +309,16 @@ bool OriginatorBlockAckAgreementHandler::isDelbaPending(const Packet *packet, co
 {
     if (!delba->getInitiator())
         return true;
-    auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();
-    if (transactionTag == nullptr)
-        return true;
-    auto it = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
-    return it != pendingTeardownTransactionIds.end() && it->second == transactionTag->getTransactionId();
+    auto agreementTag = packet->findTag<Ieee80211BlockAckAgreementTag>();
+    if (agreementTag != nullptr) {
+        auto generationId = agreementTag->getGenerationId();
+        auto agreementIt = blockAckAgreements.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
+        if (agreementIt != blockAckAgreements.end())
+            return agreementIt->second->getTransactionId() == generationId;
+        auto teardownIt = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
+        return teardownIt != pendingTeardownTransactionIds.end() && teardownIt->second == generationId;
+    }
+    return true;
 }
 
 void OriginatorBlockAckAgreementHandler::processTransmittedAddbaReq(Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback)
@@ -344,18 +351,23 @@ std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler:
     // likewise cannot tear down the agreement before its final fragment.
     if (delba->getMoreFragments())
         return nullptr;
-    auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();
-    if (transactionTag != nullptr) {
-        auto it = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
-        if (it == pendingTeardownTransactionIds.end() || it->second != transactionTag->getTransactionId())
+    auto agreementTag = packet->findTag<Ieee80211BlockAckAgreementTag>();
+    if (agreementTag != nullptr) {
+        auto generationId = agreementTag->getGenerationId();
+        auto teardownIt = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
+        if (teardownIt != pendingTeardownTransactionIds.end() && teardownIt->second == generationId)
             return nullptr;
-        // IEEE Std 802.11-2024, 11.5.3.2: teardown is performed by
-        // transmitting DELBA. IEEE Std 802.11-2024, 10.23.2.12.1 and
-        // 10.3.4.4 require unsuccessful MMPDU attempts to be retried until
-        // success or the applicable retry limit. Keep the local transaction
-        // live across ordinary MAC retries and retire it only after the final
-        // fragment is acknowledged or the frame is terminally aborted.
-        return nullptr;
+        auto agreement = getAgreement(delba->getReceiverAddress(), delba->getTid());
+        if (agreement == nullptr || agreement->getTransactionId() != generationId)
+            return nullptr;
+        bool cancelPendingTransaction = agreement->isPending();
+        std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
+        pendingTeardownTransactionIds[std::make_pair(delba->getReceiverAddress(), delba->getTid())] = generationId;
+        scheduleAddbaResponseTimer(callback);
+        if (cancelPendingTransaction)
+            callback->cancelAddbaTransaction(generationId, nullptr);
+        callback->cancelBlockAckTeardown(true, delba->getReceiverAddress(), delba->getTid(), generationId, packet);
+        return terminatedAgreement;
     }
     auto agreement = getAgreement(delba->getReceiverAddress(), delba->getTid());
     bool cancelPendingTransaction = agreement != nullptr && agreement->isPending();
@@ -372,15 +384,15 @@ bool OriginatorBlockAckAgreementHandler::processAcknowledgedDelba(Packet *packet
     auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
     if (!delba->getInitiator() || delba->getMoreFragments())
         return false;
-    auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();
-    if (transactionTag == nullptr)
+    auto agreementTag = packet->findTag<Ieee80211BlockAckAgreementTag>();
+    if (agreementTag == nullptr)
         return false;
     auto it = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
-    if (it == pendingTeardownTransactionIds.end() || it->second != transactionTag->getTransactionId())
+    if (it == pendingTeardownTransactionIds.end() || it->second != agreementTag->getGenerationId())
         return false;
     auto transactionId = it->second;
     pendingTeardownTransactionIds.erase(it);
-    callback->cancelAddbaTransaction(transactionId, packet);
+    callback->cancelBlockAckTeardown(true, delba->getReceiverAddress(), delba->getTid(), transactionId, packet);
     return true;
 }
 
@@ -389,13 +401,13 @@ bool OriginatorBlockAckAgreementHandler::processAbortedDelba(Packet *packet, IBl
     auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
     if (!delba->getInitiator())
         return false;
-    auto transactionTag = packet->findTag<Ieee80211AddbaTransactionTag>();
-    if (transactionTag != nullptr) {
+    auto agreementTag = packet->findTag<Ieee80211BlockAckAgreementTag>();
+    if (agreementTag != nullptr) {
         auto it = pendingTeardownTransactionIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
-        if (it != pendingTeardownTransactionIds.end() && it->second == transactionTag->getTransactionId()) {
+        if (it != pendingTeardownTransactionIds.end() && it->second == agreementTag->getGenerationId()) {
             auto transactionId = it->second;
             pendingTeardownTransactionIds.erase(it);
-            callback->cancelAddbaTransaction(transactionId, packet);
+            callback->cancelBlockAckTeardown(true, delba->getReceiverAddress(), delba->getTid(), transactionId, packet);
             return true;
         }
     }
@@ -408,10 +420,19 @@ std::unique_ptr<OriginatorBlockAckAgreement> OriginatorBlockAckAgreementHandler:
         auto agreement = getAgreement(delba->getTransmitterAddress(), delba->getTid());
         bool cancelPendingTransaction = agreement != nullptr && agreement->isPending();
         auto transactionId = cancelPendingTransaction ? agreement->getTransactionId() : 0;
+        auto agreementId = std::make_pair(delba->getTransmitterAddress(), delba->getTid());
+        auto pendingTeardownIt = pendingTeardownTransactionIds.find(agreementId);
+        auto pendingTeardownTransactionId = pendingTeardownIt == pendingTeardownTransactionIds.end() ? 0 : pendingTeardownIt->second;
+        if (pendingTeardownIt != pendingTeardownTransactionIds.end())
+            pendingTeardownTransactionIds.erase(pendingTeardownIt);
         std::unique_ptr<OriginatorBlockAckAgreement> terminatedAgreement(removeAgreement(delba->getTransmitterAddress(), delba->getTid()));
         scheduleAddbaResponseTimer(callback);
         if (cancelPendingTransaction)
             callback->cancelAddbaTransaction(transactionId, nullptr);
+        if (pendingTeardownTransactionId != 0)
+            callback->cancelBlockAckTeardown(true, delba->getTransmitterAddress(), delba->getTid(), pendingTeardownTransactionId, nullptr);
+        if (terminatedAgreement != nullptr)
+            callback->cancelBlockAckTeardown(true, delba->getTransmitterAddress(), delba->getTid(), terminatedAgreement->getTransactionId(), nullptr);
         return terminatedAgreement;
     }
     return nullptr;

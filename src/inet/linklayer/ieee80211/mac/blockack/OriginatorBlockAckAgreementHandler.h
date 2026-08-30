@@ -22,6 +22,8 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
   protected:
     std::map<std::pair<MacAddress, Tid>, OriginatorBlockAckAgreement *> blockAckAgreements;
     std::map<std::pair<MacAddress, Tid>, simtime_t> addbaRetryDeadlines;
+    // A tagged local DELBA remains eligible after its agreement is removed
+    // until the final fragment is acknowledged or terminally aborted.
     std::map<std::pair<MacAddress, Tid>, uint64_t> pendingTeardownTransactionIds;
     uint8_t nextDialogToken = 1;
     uint64_t nextTransactionId = 1;

@@ -162,20 +162,27 @@ Notable backward incompatible changes are the following:
    now returns a typed outcome containing the established agreement and, when
    local policy vetoes a successful response, its immediately terminated local
    agreement and a best-effort initiator DELBA for Hcf to enqueue after emitting
-   the Added and Deleted signals. Such DELBAs carry the ADDBA transaction identity
-   and ordinary data continues with Normal Ack. They remain eligible through the
+   the Added and Deleted signals. Such locally generated DELBAs carry
+   sender-local agreement-generation metadata (the originator reuses its ADDBA
+   transaction identity), and ordinary data continues with Normal Ack. They remain
+   eligible through the
    final fragment; aborting one fragment cancels its siblings. After retry backoff,
    a replacement ADDBA setup invalidates an older queued DELBA, so an unreported
    disposal cannot suppress setup indefinitely and a delayed frame cannot
    terminate a newer peer/TID agreement. The replacement setup reports that
    obsolete identity so Hcf also removes all of its queued or in-progress packets.
-   Originator DELBA transmission handlers now receive the full Packet so this
-   identity is retained. A transaction-tagged initiator DELBA remains eligible
-   across MAC retries and is retired only when its final fragment is acknowledged
-   or the transaction is terminally aborted. Custom handler implementations and
-   callers must adopt processAcknowledgedDelba() and the boolean
-   processAbortedDelba() outcome; processTransmittedDelba() still returns the
-   agreement removed by an untagged DELBA, or null when none was removed.
+   Originator and recipient DELBA transmission handlers now receive the full
+   Packet so sender-local agreement-generation metadata is retained through
+   fragmentation and MAC retries. This changes
+   IRecipientBlockAckAgreementHandler::processTransmittedDelba() from accepting
+   only a DELBA header to accepting Packet*; custom handler implementations and
+   callers must migrate to the Packet form. A locally tagged DELBA carrying
+   agreement-generation metadata remains eligible across MAC retries and is
+   retired only when its final fragment is acknowledged or the teardown is
+   terminally aborted. Custom handler
+   implementations and callers must adopt processAcknowledgedDelba() and the
+   boolean processAbortedDelba() outcome; processTransmittedDelba() still returns
+   the agreement removed by an untagged DELBA, or null when none was removed.
 
    OriginatorBlockAckAgreementPolicy now exposes the new `addbaResponseTimeout`
    and `addbaRetryBackoff` NED parameters. C++ implementations of
