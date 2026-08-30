@@ -167,14 +167,13 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
-    const simtime_t modeledDataDuration = transmissionMode->getDataMode()->getDuration(B(phyHeader->getLengthField()));
+    const simtime_t dataDuration = transmissionMode->getDataDuration(B(phyHeader->getLengthField()));
     // HT/VHT include their SIG fields in the PHY preamble duration, so their
-    // mode duration is exactly preamble + modeled data. Other PHYs expose a
+    // mode duration is exactly preamble + data duration. Other PHYs expose a
     // separate header; their residual data interval may also include a trailing
     // signal extension (ERP). Keep that extension in chronological data time.
-    const bool headerIncludedInPreamble = duration == preambleDuration + modeledDataDuration;
+    const bool headerIncludedInPreamble = duration == preambleDuration + dataDuration;
     const simtime_t headerDuration = headerIncludedInPreamble ? SIMTIME_ZERO : transmissionMode->getHeaderMode()->getDuration();
-    const simtime_t dataDuration = headerIncludedInPreamble ? modeledDataDuration : duration - headerDuration - preambleDuration;
     if (preambleDuration < SIMTIME_ZERO || headerDuration < SIMTIME_ZERO || dataDuration < SIMTIME_ZERO ||
         preambleDuration + headerDuration + dataDuration != duration)
         throw cRuntimeError("Invalid transmission duration decomposition for mode %s", transmissionMode->getName());

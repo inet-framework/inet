@@ -71,19 +71,19 @@ static bool rejectsLegacyConfiguredCts(const Ieee80211ModeSet *modeSet, const II
     }
 }
 
-static void assertTransmitterDurationDecomposition(const IIeee80211Mode *mode)
+static void assertTransmitterDurationDecomposition(const IIeee80211Mode *mode, b dataLength = B(0))
 {
-    auto duration = mode->getDuration(B(0));
+    auto duration = mode->getDuration(dataLength);
     auto preambleDuration = mode->getPreambleMode()->getDuration();
-    auto modeledDataDuration = mode->getDataMode()->getDuration(B(0));
-    bool headerIncludedInPreamble = duration == preambleDuration + modeledDataDuration;
+    auto modeledDataDuration = mode->getDataMode()->getDuration(dataLength);
+    auto dataDuration = mode->getDataDuration(dataLength);
+    bool headerIncludedInPreamble = duration == preambleDuration + dataDuration;
     auto headerDuration = headerIncludedInPreamble ? SIMTIME_ZERO : mode->getHeaderMode()->getDuration();
-    auto dataDuration = headerIncludedInPreamble ? modeledDataDuration : duration - headerDuration - preambleDuration;
     ASSERT(preambleDuration >= SIMTIME_ZERO);
     ASSERT(headerDuration >= SIMTIME_ZERO);
     ASSERT(dataDuration >= SIMTIME_ZERO);
     ASSERT(preambleDuration + headerDuration + dataDuration == duration);
-    if (dynamic_cast<const Ieee80211VhtMode *>(mode) != nullptr)
+    if (dynamic_cast<const Ieee80211VhtMode *>(mode) != nullptr || dynamic_cast<const Ieee80211HtMode *>(mode) != nullptr)
         ASSERT(headerDuration == SIMTIME_ZERO);
     if (dynamic_cast<const Ieee80211ErpOfdmMode *>(mode) != nullptr)
         ASSERT(dataDuration > modeledDataDuration);
@@ -326,8 +326,21 @@ ASSERT(vhtMixed5GhzMode->getCenterFrequencyMode() == Ieee80211VhtMode::BAND_5GHZ
 ASSERT(vhtMixed2GhzMode->getCenterFrequencyMode() == Ieee80211VhtMode::BAND_2_4GHZ);
 ASSERT(vhtMixed5GhzMode->getDuration(B(0)) == vhtMixed5GhzMode->getPreambleMode()->getDuration() + vhtMixed5GhzMode->getDataMode()->getDuration(B(0)));
 ASSERT(vhtMixed5GhzMode->getDataMode()->getDuration(B(0)) >= SIMTIME_ZERO);
-assertTransmitterDurationDecomposition(ofdmProfile->getMode(Mbps(6)));
-assertTransmitterDurationDecomposition(vhtMixed5GhzMode);
+auto vhtShortGi5GhzMode = Ieee80211VhtCompliantModes::getCompliantMode(
+        &Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+        Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED,
+        Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT);
+assertTransmitterDurationDecomposition(ofdmProfile->getMode(Mbps(6)), B(0));
+assertTransmitterDurationDecomposition(ofdmProfile->getMode(Mbps(6)), B(64));
+assertTransmitterDurationDecomposition(vhtMixed5GhzMode, B(0));
+assertTransmitterDurationDecomposition(vhtMixed5GhzMode, B(64));
+assertTransmitterDurationDecomposition(vhtShortGi5GhzMode, B(0));
+assertTransmitterDurationDecomposition(vhtShortGi5GhzMode, B(64));
+assertTransmitterDurationDecomposition(mixedMode, B(0));
+assertTransmitterDurationDecomposition(mixedMode, B(64));
+assertTransmitterDurationDecomposition(greenfieldMode, B(0));
+assertTransmitterDurationDecomposition(greenfieldMode, B(64));
 
 auto erpMixedProfile = Ieee80211ModeSet::getModeSet("g(mixed)");
 auto erpOnlyProfile = Ieee80211ModeSet::getModeSet("g(erp)");
