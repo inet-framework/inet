@@ -22,6 +22,7 @@ namespace Ieee80211HtHeterogeneousGreenfieldRuntime {
 
 static OPP_THREAD_LOCAL int greenfieldStaMixedDataCount = 0;
 static OPP_THREAD_LOCAL int greenfieldStaGreenfieldDataCount = 0;
+static OPP_THREAD_LOCAL int greenfieldStaMixedCtsCount = 0;
 static OPP_THREAD_LOCAL int mixedStaDataCount = 0;
 static OPP_THREAD_LOCAL int apForwardedDataCount = 0;
 static OPP_THREAD_LOCAL int nonHtAckCount = 0;
@@ -72,6 +73,8 @@ class HeterogeneousHtCheckingRadio : public Ieee80211Radio, public cListener
             else if (isAp && isHtMixed)
                 apForwardedDataCount++;
         }
+        if (dynamicPtrCast<const Ieee80211CtsFrame>(macHeader) && isHtMixed && isHost0)
+            greenfieldStaMixedCtsCount++;
         if (dynamicPtrCast<const Ieee80211AckFrame>(macHeader) && mode == nullptr)
             nonHtAckCount++;
     }
@@ -81,9 +84,10 @@ class HeterogeneousHtCheckingRadio : public Ieee80211Radio, public cListener
         Ieee80211Radio::finish();
         if (greenfieldStaGreenfieldDataCount > 0)
             throw cRuntimeError("Greenfield station sent %d HT-Greenfield frame(s) to mixed-only AP", greenfieldStaGreenfieldDataCount);
-        if (greenfieldStaMixedDataCount == 0 || mixedStaDataCount == 0 || apForwardedDataCount == 0 || nonHtAckCount == 0)
-            throw cRuntimeError("Expected bidirectional HT-mixed data and non-HT ACK exchanges");
+        if (greenfieldStaMixedDataCount == 0 || greenfieldStaMixedCtsCount == 0 || mixedStaDataCount == 0 || apForwardedDataCount == 0 || nonHtAckCount == 0)
+            throw cRuntimeError("Expected bidirectional HT-mixed data, GF-STA HT-mixed CTS responses, and non-HT ACK exchanges");
         std::cout << "Observed " << greenfieldStaMixedDataCount << " GF-STA HT-mixed data, "
+                  << greenfieldStaMixedCtsCount << " GF-STA HT-mixed CTS, "
                   << mixedStaDataCount << " Mixed-STA data, "
                   << apForwardedDataCount << " AP forwarded data, 0 Greenfield data, and "
                   << nonHtAckCount << " non-HT ACK response(s).\n";
@@ -156,6 +160,7 @@ seed-set = 0
 *.host[1].mobility.initialX = 260m
 
 **.wlan[*].radio.typename = "HeterogeneousHtCheckingRadio"
+**.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 1B
 
 [Config HeterogeneousHtRuntime]
 abstract = false
@@ -196,4 +201,4 @@ sim-time-limit = 2s
 %extraargs: -c HeterogeneousHtRuntime
 
 %contains-regex: stdout
-Observed [1-9][0-9]* GF-STA HT-mixed data, [1-9][0-9]* Mixed-STA data, [1-9][0-9]* AP forwarded data, 0 Greenfield data, and [1-9][0-9]* non-HT ACK response\(s\).
+Observed [1-9][0-9]* GF-STA HT-mixed data, [1-9][0-9]* GF-STA HT-mixed CTS, [1-9][0-9]* Mixed-STA data, [1-9][0-9]* AP forwarded data, 0 Greenfield data, and [1-9][0-9]* non-HT ACK response\(s\).
