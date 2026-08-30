@@ -8,6 +8,8 @@
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
 
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/Ieee80211BlockAckAgreementTag_m.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/Ieee80211FragmentedActionContextTag.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -58,6 +60,7 @@ void RecipientBlockAckAgreementHandler::blockAckAgreementExpired(IProcedureCallb
             Tid tid = id.first.second;
             const auto& delba = buildDelba(receiverAddr, tid, 39);
             auto delbaPacket = new Packet("Delba", delba);
+            delbaPacket->addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(agreement->getGenerationId());
             procedureCallback->processMgmtFrame(delbaPacket, delba); // 39 - TIMEOUT see: Table 8-36—Reason codes
         }
     }
@@ -77,6 +80,13 @@ const Ptr<Ieee80211Delba> RecipientBlockAckAgreementHandler::buildDelba(MacAddre
     delba->setTid(tid);
     delba->setReasonCode(reasonCode);
     return delba;
+}
+
+uint64_t RecipientBlockAckAgreementHandler::allocateAgreementGenerationId()
+{
+    if (nextAgreementGenerationId == 0)
+        throw cRuntimeError("Block Ack agreement generation ID exhausted");
+    return nextAgreementGenerationId++;
 }
 
 const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, bool accepted)
@@ -138,9 +148,18 @@ RecipientBlockAckAgreement *RecipientBlockAckAgreementHandler::processReceivedAd
         // IEEE Std 802.11-2024, 10.25.2 and 11.5.2.3: accepting the
         // request establishes or modifies the recipient agreement when the
         // successful response is formed; transmission is not a state gate.
-        agreement = new RecipientBlockAckAgreement(addbaRequest->getTransmitterAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaResponse->getBufferSize(), addbaResponse->getBlockAckTimeoutValue());
+        auto pendingTeardownIt = pendingTeardownGenerationIds.find(id);
+        auto pendingTeardownGenerationId = pendingTeardownIt == pendingTeardownGenerationIds.end() ? 0 : pendingTeardownIt->second;
+        if (pendingTeardownIt != pendingTeardownGenerationIds.end())
+            pendingTeardownGenerationIds.erase(pendingTeardownIt);
+        if (pendingTeardownGenerationId != 0 && agreementHandlerCallback != nullptr)
+            agreementHandlerCallback->cancelBlockAckTeardown(false, id.first, id.second, pendingTeardownGenerationId, nullptr);
+        auto generationId = allocateAgreementGenerationId();
+        agreement = new RecipientBlockAckAgreement(addbaRequest->getTransmitterAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaResponse->getBufferSize(), addbaResponse->getBlockAckTimeoutValue(), generationId);
         auto it = blockAckAgreements.find(id);
         if (it != blockAckAgreements.end()) {
+            if (agreementHandlerCallback != nullptr && (pendingTeardownGenerationId == 0 || pendingTeardownGenerationId != it->second->getGenerationId()))
+                agreementHandlerCallback->cancelBlockAckTeardown(false, id.first, id.second, it->second->getGenerationId(), nullptr);
             delete it->second;
             it->second = agreement;
         }
@@ -170,19 +189,102 @@ void RecipientBlockAckAgreementHandler::processDuplicateAddbaRequest(const Ptr<c
     }
 }
 
-std::unique_ptr<RecipientBlockAckAgreement> RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)
+bool RecipientBlockAckAgreementHandler::isDelbaPending(const Packet *packet, const Ptr<const Ieee80211Delba>& delba) const
 {
+    if (delba->getInitiator())
+        return false;
+    auto agreementTag = packet->findTag<Ieee80211BlockAckAgreementTag>();
+    if (agreementTag == nullptr)
+        return true;
+    auto it = blockAckAgreements.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
+    if (it != blockAckAgreements.end())
+        return it->second->getGenerationId() == agreementTag->getGenerationId();
+    auto teardownIt = pendingTeardownGenerationIds.find(std::make_pair(delba->getReceiverAddress(), delba->getTid()));
+    return teardownIt != pendingTeardownGenerationIds.end() && teardownIt->second == agreementTag->getGenerationId();
+}
+
+std::unique_ptr<RecipientBlockAckAgreement> RecipientBlockAckAgreementHandler::processTransmittedDelba(Packet *packet)
+{
+    auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
+    if (delba->getInitiator())
+        return nullptr;
     // IEEE Std 802.11-2024, 10.4 and 11.5.3.5: the DELBA MMPDU has not
     // been transmitted while a later fragment is still outstanding.
     if (delba->getMoreFragments())
         return nullptr;
+    auto agreementTag = packet->findTag<Ieee80211BlockAckAgreementTag>();
+    if (agreementTag != nullptr) {
+        auto agreement = getAgreement(delba->getTid(), delba->getReceiverAddress());
+        auto agreementId = std::make_pair(delba->getReceiverAddress(), delba->getTid());
+        if (agreement != nullptr) {
+            if (agreement->getGenerationId() != agreementTag->getGenerationId())
+                return nullptr;
+            auto terminatedAgreement = std::unique_ptr<RecipientBlockAckAgreement>(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
+            pendingTeardownGenerationIds[agreementId] = agreementTag->getGenerationId();
+            return terminatedAgreement;
+        }
+        auto teardownIt = pendingTeardownGenerationIds.find(agreementId);
+        if (teardownIt == pendingTeardownGenerationIds.end() || teardownIt->second != agreementTag->getGenerationId())
+            return nullptr;
+        return nullptr;
+    }
     return std::unique_ptr<RecipientBlockAckAgreement>(removeAgreement(delba->getReceiverAddress(), delba->getTid()));
+}
+
+bool RecipientBlockAckAgreementHandler::processAcknowledgedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
+{
+    auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
+    if (delba->getInitiator() || delba->getMoreFragments())
+        return false;
+    auto agreementTag = packet->findTag<Ieee80211BlockAckAgreementTag>();
+    if (agreementTag == nullptr)
+        return false;
+    auto agreementId = std::make_pair(delba->getReceiverAddress(), delba->getTid());
+    auto it = pendingTeardownGenerationIds.find(agreementId);
+    if (it == pendingTeardownGenerationIds.end() || it->second != agreementTag->getGenerationId())
+        return false;
+    auto generationId = it->second;
+    pendingTeardownGenerationIds.erase(it);
+    if (callback != nullptr)
+        callback->cancelBlockAckTeardown(false, delba->getReceiverAddress(), delba->getTid(), generationId, packet);
+    return true;
+}
+
+bool RecipientBlockAckAgreementHandler::processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback)
+{
+    auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
+    if (delba->getInitiator())
+        return false;
+    auto agreementTag = packet->findTag<Ieee80211BlockAckAgreementTag>();
+    if (agreementTag == nullptr)
+        return false;
+    auto agreementId = std::make_pair(delba->getReceiverAddress(), delba->getTid());
+    auto it = pendingTeardownGenerationIds.find(agreementId);
+    if (it == pendingTeardownGenerationIds.end() || it->second != agreementTag->getGenerationId())
+        return false;
+    auto generationId = it->second;
+    pendingTeardownGenerationIds.erase(it);
+    if (callback != nullptr)
+        callback->cancelBlockAckTeardown(false, delba->getReceiverAddress(), delba->getTid(), generationId, packet);
+    return true;
+}
+
+uint64_t RecipientBlockAckAgreementHandler::getPendingTeardownGenerationId(Tid tid, MacAddress originatorAddr) const
+{
+    auto it = pendingTeardownGenerationIds.find(std::make_pair(originatorAddr, tid));
+    return it == pendingTeardownGenerationIds.end() ? 0 : it->second;
 }
 
 std::unique_ptr<RecipientBlockAckAgreement> RecipientBlockAckAgreementHandler::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy)
 {
-    if (blockAckAgreementPolicy->isDelbaAccepted(delba))
-        return std::unique_ptr<RecipientBlockAckAgreement>(removeAgreement(delba->getTransmitterAddress(), delba->getTid()));
+    if (blockAckAgreementPolicy->isDelbaAccepted(delba)) {
+        auto agreementId = std::make_pair(delba->getTransmitterAddress(), delba->getTid());
+        auto pendingTeardownIt = pendingTeardownGenerationIds.find(agreementId);
+        if (pendingTeardownIt != pendingTeardownGenerationIds.end())
+            pendingTeardownGenerationIds.erase(pendingTeardownIt);
+        std::unique_ptr<RecipientBlockAckAgreement> terminatedAgreement(removeAgreement(delba->getTransmitterAddress(), delba->getTid()));
+        return terminatedAgreement;
+    }
     return nullptr;
 }
 

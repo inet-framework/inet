@@ -15,6 +15,7 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/Ieee80211BlockAckAgreementTag_m.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
@@ -105,6 +106,9 @@ class TestCallback : public IProcedureCallback, public IBlockAckAgreementHandler
     simtime_t addbaDeadline = SIMTIME_MAX;
     std::vector<uint64_t> cancelledTransactionIds;
     std::vector<Packet *> excludedPackets;
+    std::vector<uint64_t> cancelledTeardownGenerationIds;
+    std::vector<Packet *> excludedTeardownPackets;
+    std::vector<bool> cancelledTeardownInitiators;
 
     virtual ~TestCallback() { for (auto packet : managementPackets) delete packet; }
     void forgetManagementPacket(Packet *packet) { managementPackets.erase(std::remove(managementPackets.begin(), managementPackets.end(), packet), managementPackets.end()); }
@@ -120,6 +124,11 @@ class TestCallback : public IProcedureCallback, public IBlockAckAgreementHandler
         cancelledTransactionIds.push_back(transactionId);
         excludedPackets.push_back(excludedPacket);
     }
+    virtual void cancelBlockAckTeardown(bool initiator, MacAddress, Tid, uint64_t generationId, Packet *excludedPacket) override {
+        cancelledTeardownInitiators.push_back(initiator);
+        cancelledTeardownGenerationIds.push_back(generationId);
+        excludedTeardownPackets.push_back(excludedPacket);
+    }
 };
 
 class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
@@ -127,7 +136,7 @@ class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
   public:
     using OriginatorBlockAckAgreementHandler::buildAddbaRequest;
     void addEstablishedAgreement(MacAddress receiverAddress, Tid tid) {
-        auto agreement = new OriginatorBlockAckAgreement(receiverAddress, tid, SequenceNumberCyclic(0), 64, true, false, 1, 1);
+        auto agreement = new OriginatorBlockAckAgreement(receiverAddress, tid, SequenceNumberCyclic(0), 64, true, false, 1, nextTransactionId++);
         agreement->setIsAddbaResponseReceived(true);
         blockAckAgreements[std::make_pair(receiverAddress, tid)] = agreement;
     }
@@ -568,6 +577,8 @@ class TestHcf : public Hcf
     int numProcessedDroppedSetupFrames = 0;
     int numResumedEligibleChannelAccess = 0;
     int numCancelledAddbaTransactions = 0;
+    int numCancelledBlockAckTeardowns = 0;
+    std::vector<uint64_t> cancelledBlockAckTeardownGenerationIds;
     int numRebuildEligibilityCalls = 0;
     int numTransmittedControlResponses = 0;
     bool droppedSetupCancelled = false;
@@ -622,6 +633,7 @@ class TestHcf : public Hcf
     void dequeuePacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::DEQUEUED); }
     bool cancelManagement(uint64_t transactionId, Packet *excludedPacket = nullptr) { return cancelManagementTransaction(transactionId, excludedPacket); }
     void cancelTransaction(uint64_t transactionId) { cancelAddbaTransaction(transactionId, nullptr); }
+    void cancelTeardown(bool initiator, MacAddress peerAddress, Tid tid, uint64_t generationId, Packet *excludedPacket = nullptr) { cancelBlockAckTeardown(initiator, peerAddress, tid, generationId, excludedPacket); }
     void processReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, bool duplicate = false) { recipientProcessReceivedManagementFrame(header, duplicate); }
     void processReceivedFrame(Packet *packet) { recipientProcessReceivedFrame(packet, packet->peekAtFront<Ieee80211MacHeader>()); }
     void processRtsProtectionFailure(Packet *packet) { originatorProcessRtsProtectionFailed(packet); }
@@ -645,6 +657,7 @@ class TestHcf : public Hcf
     }
     virtual bool processDroppedBlockAckSetupFrame(Packet *packet) override { numProcessedDroppedSetupFrames++; return delegateDroppedSetupHandling ? Hcf::processDroppedBlockAckSetupFrame(packet) : droppedSetupCancelled; }
     virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override { numCancelledAddbaTransactions++; Hcf::cancelAddbaTransaction(transactionId, excludedPacket); }
+    virtual void cancelBlockAckTeardown(bool initiator, MacAddress peerAddress, Tid tid, uint64_t generationId, Packet *excludedPacket) override { numCancelledBlockAckTeardowns++; cancelledBlockAckTeardownGenerationIds.push_back(generationId); Hcf::cancelBlockAckTeardown(initiator, peerAddress, tid, generationId, excludedPacket); }
     virtual void rebuildPendingFrameEligibility() override { numRebuildEligibilityCalls++; Hcf::rebuildPendingFrameEligibility(); }
     virtual void resumeEligibleChannelAccess() override { numResumedEligibleChannelAccess++; }
     virtual void scheduleInactivityTimer(simtime_t) override {}
@@ -870,7 +883,21 @@ static Packet *makeTaggedDelbaPacket(const char *name, MacAddress receiverAddres
     delba->setFragmentNumber(fragmentNumber);
     delba->setMoreFragments(moreFragments);
     auto packet = new Packet(name, delba);
-    packet->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+    packet->addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(transactionId);
+    return packet;
+}
+
+static Packet *makeTaggedRecipientDelbaPacket(const char *name, MacAddress receiverAddress, Tid tid, SequenceNumberCyclic sequenceNumber, int fragmentNumber, bool moreFragments, uint64_t generationId)
+{
+    auto delba = makeShared<Ieee80211Delba>();
+    delba->setReceiverAddress(receiverAddress);
+    delba->setTid(tid);
+    delba->setInitiator(false);
+    delba->setSequenceNumber(sequenceNumber);
+    delba->setFragmentNumber(fragmentNumber);
+    delba->setMoreFragments(moreFragments);
+    auto packet = new Packet(name, delba);
+    packet->addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(generationId);
     return packet;
 }
 
@@ -1001,8 +1028,8 @@ auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
     finalDelba->setMoreFragments(false);
     Packet firstDelbaPacket("firstDelbaFragment", firstDelba);
     Packet finalDelbaPacket("finalDelbaFragment", finalDelba);
-    firstDelbaPacket.addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(77);
-    finalDelbaPacket.addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(77);
+    firstDelbaPacket.addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(77);
+    finalDelbaPacket.addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(77);
     fragmentedDelbaHandler.setPendingTeardownTransaction(peer1, 6, 77);
     ASSERT(fragmentedDelbaHandler.isDelbaPending(&firstDelbaPacket, firstDelba));
     ASSERT(fragmentedDelbaHandler.processTransmittedDelba(&firstDelbaPacket, &fragmentedDelbaCallback) == nullptr);
@@ -1015,15 +1042,15 @@ auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
     ASSERT(!fragmentedDelbaHandler.processAcknowledgedDelba(&firstDelbaPacket, &fragmentedDelbaCallback));
     ASSERT(fragmentedDelbaHandler.processAcknowledgedDelba(&finalDelbaPacket, &fragmentedDelbaCallback));
     ASSERT(!fragmentedDelbaHandler.isDelbaPending(&finalDelbaPacket, finalDelba));
-    ASSERT(fragmentedDelbaCallback.cancelledTransactionIds.back() == 77);
-    ASSERT(fragmentedDelbaCallback.excludedPackets.back() == &finalDelbaPacket);
+    ASSERT(fragmentedDelbaCallback.cancelledTeardownGenerationIds.back() == 77);
+    ASSERT(fragmentedDelbaCallback.excludedTeardownPackets.back() == &finalDelbaPacket);
 
     fragmentedDelbaHandler.setPendingTeardownTransaction(peer1, 6, 78);
-    firstDelbaPacket.getTagForUpdate<Ieee80211AddbaTransactionTag>()->setTransactionId(78);
+    firstDelbaPacket.getTagForUpdate<Ieee80211BlockAckAgreementTag>()->setGenerationId(78);
     ASSERT(fragmentedDelbaHandler.processAbortedDelba(&firstDelbaPacket, &fragmentedDelbaCallback));
     ASSERT(!fragmentedDelbaHandler.isDelbaPending(&firstDelbaPacket, firstDelba));
-    ASSERT(fragmentedDelbaCallback.cancelledTransactionIds.back() == 78);
-    ASSERT(fragmentedDelbaCallback.excludedPackets.back() == &firstDelbaPacket);
+    ASSERT(fragmentedDelbaCallback.cancelledTeardownGenerationIds.back() == 78);
+    ASSERT(fragmentedDelbaCallback.excludedTeardownPackets.back() == &firstDelbaPacket);
 }
 
 // IEEE Std 802.11-2024, 10.23.2.12.1 and 11.5.3.2: the HCF retry path keeps a
@@ -1112,7 +1139,7 @@ auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
     completeDelba->setInitiator(true);
     completeDelba->setSequenceNumber(SequenceNumberCyclic(204));
     auto completeDelbaPacket = new Packet("acknowledgedDelba", completeDelba);
-    completeDelbaPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+    completeDelbaPacket->addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(transactionId);
     completeDelbaPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
     Fragmentation fragmentation;
     auto delbaFragments = fragmentation.fragmentFrame(completeDelbaPacket, { 4, 2 });
@@ -1133,13 +1160,13 @@ auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
     Packet ackPacket("transactionalDelbaAck", makeShared<Ieee80211AckFrame>());
     hcf.processReceivedAck(&ackPacket, finalPacket, AC_BE);
     ASSERT(!originatorHandler->isDelbaPending(finalPacket, findFragmentedActionContext<Ieee80211Delba>(finalPacket)));
-    ASSERT(hcf.numCancelledAddbaTransactions == 1);
+    ASSERT(hcf.numCancelledBlockAckTeardowns == 1);
     ASSERT(inProgressFrames.getLength() == 0);
     ASSERT(inProgressFrames.getNumDroppedFrames() == 1);
     ASSERT(!ackHandler.hasMgmtEntry(siblingHeader));
     ASSERT(!ackHandler.hasMgmtEntry(finalHeader));
     ASSERT(!originatorHandler->processAcknowledgedDelba(finalPacket, &hcf));
-    ASSERT(hcf.numCancelledAddbaTransactions == 1);
+    ASSERT(hcf.numCancelledBlockAckTeardowns == 1);
     auto releasedFrames = inProgressFrames.releaseFrames();
     ASSERT(releasedFrames == std::vector<Packet *>({ finalPacket }));
     delete finalPacket;
@@ -1190,13 +1217,13 @@ auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
     hcf.processTransmittedManagement(finalPacket, finalHeader, AC_BE);
     hcf.processFailedFrame(finalPacket);
     ASSERT(!originatorHandler->isDelbaPending(finalPacket, finalHeader));
-    ASSERT(hcf.numCancelledAddbaTransactions == 1);
+    ASSERT(hcf.numCancelledBlockAckTeardowns == 1);
     ASSERT(inProgressFrames.getLength() == 0);
     ASSERT(inProgressFrames.getNumDroppedFrames() == 1);
     ASSERT(!ackHandler.hasMgmtEntry(siblingHeader));
     ASSERT(!ackHandler.hasMgmtEntry(finalHeader));
     ASSERT(!originatorHandler->processAbortedDelba(finalPacket, &hcf));
-    ASSERT(hcf.numCancelledAddbaTransactions == 1);
+    ASSERT(hcf.numCancelledBlockAckTeardowns == 1);
     auto releasedFrames = inProgressFrames.releaseFrames();
     ASSERT(releasedFrames == std::vector<Packet *>({ finalPacket }));
     delete finalPacket;
@@ -1262,7 +1289,7 @@ ASSERT(handler.processReceivedAddbaResp(success, &originatorPolicy, &callback).e
     ASSERT(vetoDelba->getTid() == 6);
     ASSERT(vetoDelba->getReasonCode() == RC_END_BA);
     Packet vetoDelbaPacket("vetoDelba", vetoDelba);
-    vetoDelbaPacket.addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(vetoResponseOutcome.teardownTransactionId);
+    vetoDelbaPacket.addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(vetoResponseOutcome.teardownTransactionId);
     ASSERT(vetoHandler.isDelbaPending(&vetoDelbaPacket, vetoDelba));
     ASSERT(vetoHandler.getAgreement(peer3, 6) == nullptr);
     ASSERT(vetoHandler.getRetryDeadline(peer3, 6) > simTime());
@@ -2690,8 +2717,8 @@ ASSERT(immediateRecipientHandler.getAgreement(6, peer1) == replacementImmediateA
     auto heldTeardownRetryHeader = makeQosHeader(peer1, 7, SequenceNumberCyclic(212));
     auto obsoleteHeldTeardownTransactionId = heldTeardownOriginatorHandler->processAcknowledgedDataFrame(&heldTeardownRetryTrigger, heldTeardownRetryHeader, &heldTeardownOriginatorPolicy, &heldTeardownRetryCallback);
     ASSERT(heldTeardownRetryCallback.managementPacket != nullptr);
-    ASSERT(obsoleteHeldTeardownTransactionId == heldDelbaPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId());
-    heldTeardownHcf.cancelTransaction(obsoleteHeldTeardownTransactionId);
+    ASSERT(obsoleteHeldTeardownTransactionId == heldDelbaPacket->getTag<Ieee80211BlockAckAgreementTag>()->getGenerationId());
+    heldTeardownHcf.cancelTeardown(true, peer1, 7, obsoleteHeldTeardownTransactionId);
     ASSERT(heldTeardownQueue.getNumPackets() == 1);
     ASSERT(heldTeardownQueue.getPacket(0) == heldDataPacket);
     heldTeardownHcf.rebuildEligibilityIndex();
@@ -4739,6 +4766,542 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     delete unrelated;
     for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
         pendingQueues[ac].removePacketCallback(&hcf);
+}
+
+// An originator inactivity DELBA retains the agreement transaction identity.
+// Once that agreement is replaced, every stale fragment is rejected while a
+// final DELBA carrying the current generation removes the replacement once.
+{
+    TestOriginatorHandler expiryHandler;
+    TestOriginatorPolicy expiryPolicy;
+    TestCallback setupCallback;
+    Packet trigger("originatorExpiryTrigger");
+    auto triggerHeader = makeQosHeader(peer1, 9, SequenceNumberCyclic(300));
+    expiryHandler.processAcknowledgedDataFrame(&trigger, triggerHeader, &expiryPolicy, &setupCallback);
+    auto setupRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(setupCallback.managementHeader);
+    expiryHandler.processTransmittedAddbaReq(setupCallback.managementPacket, setupRequest, &expiryPolicy, &setupCallback);
+    auto setupResponse = makeResponse(peer1, 9, setupRequest->getDialogToken(), 0);
+    setupResponse->setBlockAckTimeoutValue(1);
+    auto establishedOutcome = expiryHandler.processReceivedAddbaResp(setupResponse, &expiryPolicy, &setupCallback);
+    auto firstAgreement = establishedOutcome.establishedAgreement;
+    ASSERT(firstAgreement != nullptr);
+    auto firstGenerationId = firstAgreement->getTransactionId();
+    firstAgreement->setBlockAckTimeoutValue(1);
+    firstAgreement->calculateExpirationTime();
+    wait(1);
+    TestCallback expiryCallback;
+    expiryHandler.blockAckAgreementExpired(&expiryCallback, &expiryCallback);
+    auto stalePacket = expiryCallback.managementPacket;
+    auto staleDelba = dynamicPtrCast<const Ieee80211Delba>(expiryCallback.managementHeader);
+    ASSERT(stalePacket != nullptr && staleDelba != nullptr);
+    ASSERT(stalePacket->getTag<Ieee80211BlockAckAgreementTag>()->getGenerationId() == firstGenerationId);
+
+    auto receivedDelba = makeShared<Ieee80211Delba>();
+    receivedDelba->setTransmitterAddress(peer1);
+    receivedDelba->setTid(9);
+    auto terminatedFirstAgreement = expiryHandler.processReceivedDelba(receivedDelba, &expiryPolicy, &expiryCallback);
+    ASSERT(terminatedFirstAgreement != nullptr);
+    TestCallback replacementCallback;
+    Packet replacementTrigger("originatorReplacementTrigger");
+    auto replacementHeader = makeQosHeader(peer1, 9, SequenceNumberCyclic(301));
+    expiryHandler.processAcknowledgedDataFrame(&replacementTrigger, replacementHeader, &expiryPolicy, &replacementCallback);
+    auto replacementRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(replacementCallback.managementHeader);
+    expiryHandler.processTransmittedAddbaReq(replacementCallback.managementPacket, replacementRequest, &expiryPolicy, &replacementCallback);
+    auto replacementResponse = makeResponse(peer1, 9, replacementRequest->getDialogToken(), 0);
+    auto replacementOutcome = expiryHandler.processReceivedAddbaResp(replacementResponse, &expiryPolicy, &replacementCallback);
+    auto secondAgreement = replacementOutcome.establishedAgreement;
+    ASSERT(secondAgreement != nullptr);
+    auto secondGenerationId = secondAgreement->getTransactionId();
+    ASSERT(secondGenerationId != firstGenerationId);
+    ASSERT(!expiryHandler.isDelbaPending(stalePacket, staleDelba));
+
+    auto staleFragmentBody = staticPtrCast<Ieee80211Delba>(staleDelba->dupShared());
+    staleFragmentBody->setSequenceNumber(SequenceNumberCyclic(302));
+    auto staleFragmentSource = new Packet("originatorStaleDelbaSource", staleFragmentBody);
+    staleFragmentSource->addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(firstGenerationId);
+    staleFragmentSource->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    Fragmentation fragmentation;
+    auto staleFragments = fragmentation.fragmentFrame(staleFragmentSource, { 4, 2 });
+    for (auto fragment : *staleFragments)
+        ASSERT(fragment->getTag<Ieee80211BlockAckAgreementTag>()->getGenerationId() == firstGenerationId);
+    ASSERT(!expiryHandler.isDelbaPending(staleFragments->at(0), findFragmentedActionContext<Ieee80211Delba>(staleFragments->at(0))));
+    ASSERT(expiryHandler.processTransmittedDelba(staleFragments->at(1), &expiryCallback) == nullptr);
+    ASSERT(expiryHandler.getAgreement(peer1, 9) == secondAgreement);
+    delete staleFragments->at(0);
+    delete staleFragments->at(1);
+    delete staleFragments;
+
+    auto currentDelba = makeShared<Ieee80211Delba>();
+    currentDelba->setReceiverAddress(peer1);
+    currentDelba->setTid(9);
+    currentDelba->setInitiator(true);
+    auto currentPacket = new Packet("originatorCurrentDelba", currentDelba);
+    currentPacket->addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(secondGenerationId);
+    auto terminatedSecondAgreement = expiryHandler.processTransmittedDelba(currentPacket, &replacementCallback);
+    ASSERT(terminatedSecondAgreement != nullptr);
+    ASSERT(expiryHandler.getAgreement(peer1, 9) == nullptr);
+    ASSERT(expiryHandler.processTransmittedDelba(currentPacket, &replacementCallback) == nullptr);
+    delete currentPacket;
+}
+
+// A recipient inactivity DELBA gets a handler-owned generation on every
+// accepted replacement. Stale final fragments cannot remove the replacement,
+// while a current-generation final DELBA removes it exactly once.
+{
+    TestRecipientHandler expiryHandler;
+    TestRecipientPolicy expiryPolicy;
+    expiryPolicy.blockAckTimeoutValue = 1;
+    TestCallback expiryCallback;
+    auto request = makeRequest(peer2, 10, 101, SequenceNumberCyclic(310), 32);
+    request->setBlockAckTimeoutValue(1);
+    auto firstAgreement = expiryHandler.processReceivedAddbaRequest(request, &expiryPolicy, &expiryCallback, &expiryCallback);
+    ASSERT(firstAgreement != nullptr);
+    auto firstGenerationId = firstAgreement->getGenerationId();
+    wait(1);
+    expiryHandler.blockAckAgreementExpired(&expiryCallback, &expiryCallback);
+    auto stalePacket = expiryCallback.managementPacket;
+    auto staleDelba = dynamicPtrCast<const Ieee80211Delba>(expiryCallback.managementHeader);
+    ASSERT(stalePacket != nullptr && staleDelba != nullptr);
+    ASSERT(stalePacket->getTag<Ieee80211BlockAckAgreementTag>()->getGenerationId() == firstGenerationId);
+
+    auto replacementRequest = makeRequest(peer2, 10, 102, SequenceNumberCyclic(311), 32);
+    replacementRequest->setBlockAckTimeoutValue(1);
+    auto secondAgreement = expiryHandler.processReceivedAddbaRequest(replacementRequest, &expiryPolicy, &expiryCallback, &expiryCallback);
+    ASSERT(secondAgreement != nullptr);
+    auto secondGenerationId = secondAgreement->getGenerationId();
+    ASSERT(secondGenerationId != firstGenerationId);
+    ASSERT(!expiryHandler.isDelbaPending(stalePacket, staleDelba));
+    ASSERT(expiryHandler.processTransmittedDelba(stalePacket) == nullptr);
+    ASSERT(expiryHandler.getAgreement(10, peer2) == secondAgreement);
+    ASSERT(std::find(expiryCallback.cancelledTeardownGenerationIds.begin(), expiryCallback.cancelledTeardownGenerationIds.end(), firstGenerationId) != expiryCallback.cancelledTeardownGenerationIds.end());
+
+    auto staleFragmentBody = staticPtrCast<Ieee80211Delba>(staleDelba->dupShared());
+    staleFragmentBody->setSequenceNumber(SequenceNumberCyclic(312));
+    auto staleFragmentSource = new Packet("recipientStaleDelbaSource", staleFragmentBody);
+    staleFragmentSource->addTag<Ieee80211BlockAckAgreementTag>()->setGenerationId(firstGenerationId);
+    staleFragmentSource->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    Fragmentation fragmentation;
+    auto staleFragments = fragmentation.fragmentFrame(staleFragmentSource, { 4, 2 });
+    for (auto fragment : *staleFragments)
+        ASSERT(fragment->getTag<Ieee80211BlockAckAgreementTag>()->getGenerationId() == firstGenerationId);
+    ASSERT(!expiryHandler.isDelbaPending(staleFragments->at(0), findFragmentedActionContext<Ieee80211Delba>(staleFragments->at(0))));
+    ASSERT(expiryHandler.processTransmittedDelba(staleFragments->at(1)) == nullptr);
+    ASSERT(expiryHandler.getAgreement(10, peer2) == secondAgreement);
+    delete staleFragments->at(0);
+    delete staleFragments->at(1);
+    delete staleFragments;
+
+    auto currentPacket = makeTaggedRecipientDelbaPacket("recipientCurrentDelba", peer2, 10, SequenceNumberCyclic(313), 0, false, secondGenerationId);
+    auto terminatedAgreement = expiryHandler.processTransmittedDelba(currentPacket);
+    ASSERT(terminatedAgreement != nullptr);
+    ASSERT(expiryHandler.getAgreement(10, peer2) == nullptr);
+    ASSERT(expiryHandler.processTransmittedDelba(currentPacket) == nullptr);
+    delete currentPacket;
+}
+
+// HCF routes recipient DELBAs to the recipient owner and rebuilds its
+// eligibility index when replacement or final teardown changes the generation.
+// The replacement callback removes queued stale siblings; the active current
+// frame is then consumed exactly once.
+{
+    auto originatorHandler = new TestOriginatorHandler();
+    auto recipientHandler = new TestRecipientHandler();
+    TestOriginatorPolicy hcfOriginatorPolicy;
+    TestRecipientPolicy hcfRecipientPolicy;
+    TestCallback managementCallback;
+    auto request = makeRequest(peer2, 11, 103, SequenceNumberCyclic(320), 32);
+    auto firstAgreement = recipientHandler->processReceivedAddbaRequest(request, &hcfRecipientPolicy, &managementCallback, &managementCallback);
+    ASSERT(firstAgreement != nullptr);
+    auto firstGenerationId = firstAgreement->getGenerationId();
+
+    TestOriginatorQosMacDataService dataService;
+    dataService.setFrameEligibilityFunction([recipientHandler](const Packet *packet) {
+        auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
+        return delba == nullptr || recipientHandler->isDelbaPending(packet, delba);
+    });
+    TestPacketQueue pendingQueue;
+    QosAckHandler ackHandler;
+    TestInProgressFrames inProgressFrames;
+    inProgressFrames.configure(&dataService, &ackHandler, &pendingQueue);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    TestRecipientDataService recipientDataService;
+    OriginatorQosAckPolicy ackPolicy;
+    TestHcf hcf;
+    hcf.configureBlockAckHandlers(originatorHandler, &hcfOriginatorPolicy, recipientHandler, &hcfRecipientPolicy);
+    hcf.configureRecipientDataService(&recipientDataService);
+    hcf.configureEligibilityIndex(&edca, &dataService);
+    hcf.configureTransmittedManagement(&edca, &ackPolicy);
+    hcf.configureManagementCallback(&managementCallback);
+    hcf.observePendingQueue(&pendingQueue);
+
+    auto stalePacket = makeTaggedRecipientDelbaPacket("hcfStaleRecipientDelba", peer2, 11, SequenceNumberCyclic(321), 0, false, firstGenerationId);
+    pendingQueue.enqueuePacket(stalePacket);
+    hcf.trackFrame(stalePacket, AC_BE);
+    ASSERT(hcf.getNumEligiblePendingFrames(AC_BE) == 1);
+
+    auto replacementRequest = makeRequest(peer2, 11, 104, SequenceNumberCyclic(322), 32);
+    hcf.processReceivedManagementFrame(replacementRequest);
+    auto secondAgreement = recipientHandler->getAgreement(11, peer2);
+    ASSERT(secondAgreement != nullptr);
+    ASSERT(secondAgreement->getGenerationId() != firstGenerationId);
+    ASSERT(pendingQueue.isEmpty());
+    ASSERT(hcf.getNumEligiblePendingFrames(AC_BE) == 0);
+    ASSERT(hcf.numCancelledBlockAckTeardowns == 1);
+    ASSERT(hcf.numRebuildEligibilityCalls > 0);
+
+    auto currentPacket = makeTaggedRecipientDelbaPacket("hcfCurrentRecipientDelba", peer2, 11, SequenceNumberCyclic(323), 0, false, secondAgreement->getGenerationId());
+    pendingQueue.enqueuePacket(currentPacket);
+    hcf.trackFrame(currentPacket, AC_BE);
+    ASSERT(hcf.getNumEligiblePendingFrames(AC_BE) == 1);
+    TestSignalListener deletionListener;
+    hcf.subscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+    hcf.processTransmittedManagement(currentPacket, currentPacket->peekAtFront<Ieee80211MgmtHeader>(), AC_BE);
+    ASSERT(recipientHandler->getAgreement(11, peer2) == nullptr);
+    ASSERT(deletionListener.numSignals == 1);
+    ASSERT(recipientDataService.numReorderingResets == 2);
+    ASSERT(hcf.getNumEligiblePendingFrames(AC_BE) == 0);
+    hcf.processTransmittedManagement(currentPacket, currentPacket->peekAtFront<Ieee80211MgmtHeader>(), AC_BE);
+    ASSERT(deletionListener.numSignals == 1);
+    ASSERT(recipientDataService.numReorderingResets == 2);
+    hcf.unsubscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+    pendingQueue.removePacket(currentPacket);
+    delete currentPacket;
+}
+
+// A rejected peer DELBA must not retire a locally pending recipient teardown.
+// Once the same DELBA is accepted, HCF cancels exactly that generation without
+// repeating the first-transmission reset or deletion notification.
+{
+    auto originatorHandler = new TestOriginatorHandler();
+    auto recipientHandler = new TestRecipientHandler();
+    TestOriginatorPolicy originatorPolicy;
+    TestRecipientPolicy recipientPolicy;
+    TestCallback responseCallback;
+    TestOriginatorQosMacDataService dataService;
+    dataService.setFrameEligibilityFunction([recipientHandler](const Packet *packet) {
+        auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
+        return delba == nullptr || recipientHandler->isDelbaPending(packet, delba);
+    });
+    TestPacketQueue pendingQueue;
+    TestQosAckHandler ackHandler;
+    TestInProgressFrames inProgressFrames;
+    inProgressFrames.configure(&dataService, &ackHandler, &pendingQueue);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    TestCwCalculator cwCalculator;
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    recoveryProcedure.configureRts(INT_MAX, 2, &cwCalculator);
+    edca.nonQosRecoveryProcedure = &recoveryProcedure;
+    OriginatorQosAckPolicy ackPolicy;
+    TestMac mac;
+    TestRecipientDataService recipientDataService;
+    TestHcf hcf;
+    hcf.configureMac(&mac);
+    hcf.configureBlockAckHandlers(originatorHandler, &originatorPolicy, recipientHandler, &recipientPolicy);
+    hcf.configureRecipientDataService(&recipientDataService);
+    hcf.configureEligibilityIndex(&edca, &dataService);
+    hcf.configureTransmittedManagement(&edca, &ackPolicy);
+    TestSignalListener deletionListener;
+    TestPacketDropSignalListener dropListener;
+    hcf.subscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+    hcf.subscribe(packetDroppedSignal, &dropListener);
+
+    auto request = makeRequest(peer2, 14, 109, SequenceNumberCyclic(370), 32);
+    auto agreement = recipientHandler->processReceivedAddbaRequest(request, &recipientPolicy, &responseCallback, &hcf);
+    ASSERT(agreement != nullptr);
+    auto generationId = agreement->getGenerationId();
+    auto pendingPacket = makeTaggedRecipientDelbaPacket("recipientRejectedPeerDelba", peer2, 14, SequenceNumberCyclic(371), 0, false, generationId);
+    auto pendingHeader = pendingPacket->peekAtFront<Ieee80211Delba>();
+    inProgressFrames.addOwnedFrame(pendingPacket);
+    ackHandler.frameGotInProgress(pendingHeader);
+    hcf.trackFrame(pendingPacket, AC_BE);
+    hcf.processTransmittedManagement(pendingPacket, pendingHeader, AC_BE);
+    ASSERT(recipientHandler->getAgreement(14, peer2) == nullptr);
+    ASSERT(recipientHandler->isDelbaPending(pendingPacket, pendingHeader));
+    ASSERT(recipientDataService.numReorderingResets == 1);
+    ASSERT(deletionListener.numSignals == 1);
+    ASSERT(hcf.numCancelledBlockAckTeardowns == 1);
+    ASSERT(hcf.cancelledBlockAckTeardownGenerationIds.back() == generationId);
+    hcf.processFailedFrame(pendingPacket);
+
+    recipientPolicy.delbaAccepted = false;
+    auto rejectedDelba = makeShared<Ieee80211Delba>();
+    rejectedDelba->setTransmitterAddress(peer2);
+    rejectedDelba->setReceiverAddress(peer1);
+    rejectedDelba->setTid(14);
+    rejectedDelba->setInitiator(true);
+    hcf.processReceivedManagementFrame(rejectedDelba);
+    ASSERT(recipientHandler->isDelbaPending(pendingPacket, pendingHeader));
+    ASSERT(inProgressFrames.getLength() == 1);
+    ASSERT(inProgressFrames.getFrameToTransmit() == pendingPacket);
+    ASSERT(hcf.hasFrame(AC_BE));
+    ASSERT(hcf.numCancelledBlockAckTeardowns == 1);
+    ASSERT(hcf.cancelledBlockAckTeardownGenerationIds.back() == generationId);
+    ASSERT(dropListener.numOtherPacketDrops == 0);
+    ASSERT(recipientDataService.numReorderingResets == 1);
+    ASSERT(deletionListener.numSignals == 1);
+
+    recipientPolicy.delbaAccepted = true;
+    auto acceptedDelba = makeShared<Ieee80211Delba>();
+    acceptedDelba->setTransmitterAddress(peer2);
+    acceptedDelba->setReceiverAddress(peer1);
+    acceptedDelba->setTid(14);
+    acceptedDelba->setInitiator(true);
+    hcf.processReceivedManagementFrame(acceptedDelba);
+    ASSERT(recipientHandler->getPendingTeardownGenerationId(14, peer2) == 0);
+    ASSERT(inProgressFrames.getLength() == 0);
+    ASSERT(!hcf.hasFrame(AC_BE));
+    ASSERT(hcf.numCancelledBlockAckTeardowns == 2);
+    ASSERT(hcf.cancelledBlockAckTeardownGenerationIds.back() == generationId);
+    ASSERT(dropListener.numOtherPacketDrops == 1);
+    ASSERT(recipientDataService.numReorderingResets == 1);
+    ASSERT(deletionListener.numSignals == 1);
+    auto staleProbe = makeTaggedRecipientDelbaPacket("recipientRejectedPeerDelbaProbe", peer2, 14, SequenceNumberCyclic(372), 0, false, generationId);
+    ASSERT(!recipientHandler->isDelbaPending(staleProbe, staleProbe->peekAtFront<Ieee80211Delba>()));
+    delete staleProbe;
+
+    hcf.unsubscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+    hcf.unsubscribe(packetDroppedSignal, &dropListener);
+}
+
+// A tagged originator DELBA removes the agreement on its first transmission,
+// but remains selectable through an unacknowledged retry. ACK, terminal abort,
+// and replacement each retire only their exact teardown generation.
+{
+    auto originatorHandler = new TestOriginatorHandler();
+    auto recipientHandler = new TestRecipientHandler();
+    TestOriginatorPolicy originatorPolicy;
+    TestRecipientPolicy recipientPolicy;
+    TestOriginatorQosMacDataService dataService;
+    dataService.setFrameEligibilityFunction([originatorHandler](const Packet *packet) {
+        auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
+        return delba == nullptr || originatorHandler->isDelbaPending(packet, delba);
+    });
+    TestPacketQueue pendingQueue;
+    TestQosAckHandler ackHandler;
+    TestInProgressFrames inProgressFrames;
+    inProgressFrames.configure(&dataService, &ackHandler, &pendingQueue);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    TestCwCalculator cwCalculator;
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    recoveryProcedure.configureRts(INT_MAX, 2, &cwCalculator);
+    edca.nonQosRecoveryProcedure = &recoveryProcedure;
+    OriginatorQosAckPolicy ackPolicy;
+    TestMac mac;
+    TestHcf hcf;
+    hcf.configureMac(&mac);
+    hcf.configureBlockAckHandlers(originatorHandler, &originatorPolicy, recipientHandler, &recipientPolicy);
+    hcf.configureEligibilityIndex(&edca, &dataService);
+    hcf.configureTransmittedManagement(&edca, &ackPolicy);
+    TestSignalListener deletionListener;
+    TestPacketDropSignalListener dropListener;
+    hcf.subscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+    hcf.subscribe(packetDroppedSignal, &dropListener);
+
+    originatorHandler->addEstablishedAgreement(peer1, 12);
+    auto firstGenerationId = originatorHandler->getAgreement(peer1, 12)->getTransactionId();
+    auto acknowledgedPacket = makeTaggedDelbaPacket("originatorRetryAcknowledged", peer1, 12, SequenceNumberCyclic(350), 0, false, firstGenerationId);
+    auto acknowledgedHeader = acknowledgedPacket->peekAtFront<Ieee80211Delba>();
+    inProgressFrames.addOwnedFrame(acknowledgedPacket);
+    ackHandler.frameGotInProgress(acknowledgedHeader);
+    hcf.trackFrame(acknowledgedPacket, AC_BE);
+    hcf.processTransmittedManagement(acknowledgedPacket, acknowledgedHeader, AC_BE);
+    ASSERT(originatorHandler->getAgreement(peer1, 12) == nullptr);
+    ASSERT(originatorHandler->isDelbaPending(acknowledgedPacket, acknowledgedHeader));
+    ASSERT(deletionListener.numSignals == 1);
+    hcf.processFailedFrame(acknowledgedPacket);
+    ASSERT(originatorHandler->isDelbaPending(acknowledgedPacket, acknowledgedPacket->peekAtFront<Ieee80211Delba>()));
+    ASSERT(inProgressFrames.getFrameToTransmit() == acknowledgedPacket);
+    hcf.processTransmittedManagement(acknowledgedPacket, acknowledgedPacket->peekAtFront<Ieee80211Delba>(), AC_BE);
+    Packet acknowledgedAck("originatorRetryAck", makeShared<Ieee80211AckFrame>());
+    hcf.processReceivedAck(&acknowledgedAck, acknowledgedPacket, AC_BE);
+    ASSERT(!originatorHandler->isDelbaPending(acknowledgedPacket, acknowledgedPacket->peekAtFront<Ieee80211Delba>()));
+    ASSERT(deletionListener.numSignals == 1);
+    ASSERT(inProgressFrames.getLength() == 0);
+    auto acknowledgedFrames = inProgressFrames.releaseFrames();
+    ASSERT(acknowledgedFrames == std::vector<Packet *>({ acknowledgedPacket }));
+    delete acknowledgedPacket;
+
+    originatorHandler->addEstablishedAgreement(peer1, 12);
+    auto abortedGenerationId = originatorHandler->getAgreement(peer1, 12)->getTransactionId();
+    auto abortedPacket = makeTaggedDelbaPacket("originatorRetryAborted", peer1, 12, SequenceNumberCyclic(351), 0, false, abortedGenerationId);
+    auto abortedHeader = abortedPacket->peekAtFront<Ieee80211Delba>();
+    inProgressFrames.addOwnedFrame(abortedPacket);
+    ackHandler.frameGotInProgress(abortedHeader);
+    hcf.trackFrame(abortedPacket, AC_BE);
+    hcf.processTransmittedManagement(abortedPacket, abortedHeader, AC_BE);
+    ASSERT(originatorHandler->isDelbaPending(abortedPacket, abortedHeader));
+    hcf.processFailedFrame(abortedPacket);
+    ASSERT(originatorHandler->isDelbaPending(abortedPacket, abortedPacket->peekAtFront<Ieee80211Delba>()));
+    ASSERT(inProgressFrames.getFrameToTransmit() == abortedPacket);
+    hcf.processTransmittedManagement(abortedPacket, abortedPacket->peekAtFront<Ieee80211Delba>(), AC_BE);
+    hcf.processFailedFrame(abortedPacket);
+    ASSERT(!originatorHandler->isDelbaPending(abortedPacket, abortedPacket->peekAtFront<Ieee80211Delba>()));
+    ASSERT(deletionListener.numSignals == 2);
+    auto abortedFrames = inProgressFrames.releaseFrames();
+    ASSERT(abortedFrames == std::vector<Packet *>({ abortedPacket }));
+    delete abortedPacket;
+
+    originatorHandler->addEstablishedAgreement(peer1, 12);
+    auto replacedGenerationId = originatorHandler->getAgreement(peer1, 12)->getTransactionId();
+    auto replacedPacket = makeTaggedDelbaPacket("originatorRetryReplaced", peer1, 12, SequenceNumberCyclic(352), 0, false, replacedGenerationId);
+    auto replacedHeader = replacedPacket->peekAtFront<Ieee80211Delba>();
+    inProgressFrames.addOwnedFrame(replacedPacket);
+    ackHandler.frameGotInProgress(replacedHeader);
+    hcf.trackFrame(replacedPacket, AC_BE);
+    hcf.processTransmittedManagement(replacedPacket, replacedHeader, AC_BE);
+    ASSERT(originatorHandler->isDelbaPending(replacedPacket, replacedHeader));
+    TestCallback replacementCallback;
+    Packet replacementTrigger("originatorRetryReplacementTrigger");
+    auto replacementHeader = makeQosHeader(peer1, 12, SequenceNumberCyclic(353));
+    auto obsoleteGenerationId = originatorHandler->processAcknowledgedDataFrame(&replacementTrigger, replacementHeader, &originatorPolicy, &replacementCallback);
+    ASSERT(obsoleteGenerationId == replacedGenerationId);
+    hcf.cancelTeardown(true, peer1, 12, obsoleteGenerationId);
+    auto replacedProbe = makeTaggedDelbaPacket("originatorRetryReplacedProbe", peer1, 12, SequenceNumberCyclic(354), 0, false, replacedGenerationId);
+    ASSERT(!originatorHandler->isDelbaPending(replacedProbe, replacedProbe->peekAtFront<Ieee80211Delba>()));
+    delete replacedProbe;
+    ASSERT(originatorHandler->getAgreement(peer1, 12) != nullptr);
+    ASSERT(originatorHandler->getAgreement(peer1, 12)->getTransactionId() != replacedGenerationId);
+    ASSERT(inProgressFrames.getLength() == 0);
+    ASSERT(deletionListener.numSignals == 3);
+    ASSERT(dropListener.numOtherPacketDrops == 1);
+
+    hcf.unsubscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+    hcf.unsubscribe(packetDroppedSignal, &dropListener);
+}
+
+// Recipient teardown generations follow the same retry lifetime as
+// originator generations, including recipient-side ACK/abort callbacks and
+// replacement disposal while an old final DELBA is still in progress.
+{
+    auto originatorHandler = new TestOriginatorHandler();
+    auto recipientHandler = new TestRecipientHandler();
+    TestOriginatorPolicy originatorPolicy;
+    TestRecipientPolicy recipientPolicy;
+    TestCallback responseCallback;
+    TestOriginatorQosMacDataService dataService;
+    dataService.setFrameEligibilityFunction([recipientHandler](const Packet *packet) {
+        auto delba = findFragmentedActionContext<Ieee80211Delba>(packet);
+        return delba == nullptr || recipientHandler->isDelbaPending(packet, delba);
+    });
+    TestPacketQueue pendingQueue;
+    TestQosAckHandler ackHandler;
+    TestInProgressFrames inProgressFrames;
+    inProgressFrames.configure(&dataService, &ackHandler, &pendingQueue);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    TestCwCalculator cwCalculator;
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    recoveryProcedure.configureRts(INT_MAX, 2, &cwCalculator);
+    edca.nonQosRecoveryProcedure = &recoveryProcedure;
+    OriginatorQosAckPolicy ackPolicy;
+    TestMac mac;
+    TestRecipientDataService recipientDataService;
+    TestHcf hcf;
+    hcf.configureMac(&mac);
+    hcf.configureBlockAckHandlers(originatorHandler, &originatorPolicy, recipientHandler, &recipientPolicy);
+    hcf.configureRecipientDataService(&recipientDataService);
+    hcf.configureEligibilityIndex(&edca, &dataService);
+    hcf.configureTransmittedManagement(&edca, &ackPolicy);
+    TestSignalListener deletionListener;
+    TestPacketDropSignalListener dropListener;
+    hcf.subscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+    hcf.subscribe(packetDroppedSignal, &dropListener);
+
+    auto firstRequest = makeRequest(peer2, 13, 105, SequenceNumberCyclic(360), 32);
+    auto firstAgreement = recipientHandler->processReceivedAddbaRequest(firstRequest, &recipientPolicy, &responseCallback, &hcf);
+    ASSERT(firstAgreement != nullptr);
+    auto firstGenerationId = firstAgreement->getGenerationId();
+    auto acknowledgedPacket = makeTaggedRecipientDelbaPacket("recipientRetryAcknowledged", peer2, 13, SequenceNumberCyclic(361), 0, false, firstGenerationId);
+    auto acknowledgedHeader = acknowledgedPacket->peekAtFront<Ieee80211Delba>();
+    inProgressFrames.addOwnedFrame(acknowledgedPacket);
+    ackHandler.frameGotInProgress(acknowledgedHeader);
+    hcf.trackFrame(acknowledgedPacket, AC_BE);
+    hcf.processTransmittedManagement(acknowledgedPacket, acknowledgedHeader, AC_BE);
+    ASSERT(recipientHandler->getAgreement(13, peer2) == nullptr);
+    ASSERT(recipientHandler->isDelbaPending(acknowledgedPacket, acknowledgedHeader));
+    ASSERT(deletionListener.numSignals == 1);
+    ASSERT(recipientDataService.numReorderingResets == 1);
+    hcf.processFailedFrame(acknowledgedPacket);
+    ASSERT(recipientHandler->isDelbaPending(acknowledgedPacket, acknowledgedPacket->peekAtFront<Ieee80211Delba>()));
+    ASSERT(inProgressFrames.getFrameToTransmit() == acknowledgedPacket);
+    hcf.processTransmittedManagement(acknowledgedPacket, acknowledgedPacket->peekAtFront<Ieee80211Delba>(), AC_BE);
+    Packet acknowledgedAck("recipientRetryAck", makeShared<Ieee80211AckFrame>());
+    hcf.processReceivedAck(&acknowledgedAck, acknowledgedPacket, AC_BE);
+    ASSERT(!recipientHandler->isDelbaPending(acknowledgedPacket, acknowledgedPacket->peekAtFront<Ieee80211Delba>()));
+    ASSERT(deletionListener.numSignals == 1);
+    ASSERT(recipientDataService.numReorderingResets == 1);
+    auto acknowledgedFrames = inProgressFrames.releaseFrames();
+    ASSERT(acknowledgedFrames == std::vector<Packet *>({ acknowledgedPacket }));
+    delete acknowledgedPacket;
+
+    auto abortedRequest = makeRequest(peer2, 13, 106, SequenceNumberCyclic(362), 32);
+    auto abortedAgreement = recipientHandler->processReceivedAddbaRequest(abortedRequest, &recipientPolicy, &responseCallback, &hcf);
+    ASSERT(abortedAgreement != nullptr);
+    auto abortedGenerationId = abortedAgreement->getGenerationId();
+    auto abortedPacket = makeTaggedRecipientDelbaPacket("recipientRetryAborted", peer2, 13, SequenceNumberCyclic(363), 0, false, abortedGenerationId);
+    auto abortedHeader = abortedPacket->peekAtFront<Ieee80211Delba>();
+    inProgressFrames.addOwnedFrame(abortedPacket);
+    ackHandler.frameGotInProgress(abortedHeader);
+    hcf.trackFrame(abortedPacket, AC_BE);
+    hcf.processTransmittedManagement(abortedPacket, abortedHeader, AC_BE);
+    ASSERT(recipientHandler->isDelbaPending(abortedPacket, abortedHeader));
+    hcf.processFailedFrame(abortedPacket);
+    ASSERT(recipientHandler->isDelbaPending(abortedPacket, abortedPacket->peekAtFront<Ieee80211Delba>()));
+    ASSERT(inProgressFrames.getFrameToTransmit() == abortedPacket);
+    hcf.processTransmittedManagement(abortedPacket, abortedPacket->peekAtFront<Ieee80211Delba>(), AC_BE);
+    hcf.processFailedFrame(abortedPacket);
+    ASSERT(!recipientHandler->isDelbaPending(abortedPacket, abortedPacket->peekAtFront<Ieee80211Delba>()));
+    ASSERT(deletionListener.numSignals == 2);
+    ASSERT(recipientDataService.numReorderingResets == 2);
+    auto abortedFrames = inProgressFrames.releaseFrames();
+    ASSERT(abortedFrames == std::vector<Packet *>({ abortedPacket }));
+    delete abortedPacket;
+
+    auto replacedRequest = makeRequest(peer2, 13, 107, SequenceNumberCyclic(364), 32);
+    auto replacedAgreement = recipientHandler->processReceivedAddbaRequest(replacedRequest, &recipientPolicy, &responseCallback, &hcf);
+    ASSERT(replacedAgreement != nullptr);
+    auto replacedGenerationId = replacedAgreement->getGenerationId();
+    auto replacedPacket = makeTaggedRecipientDelbaPacket("recipientRetryReplaced", peer2, 13, SequenceNumberCyclic(365), 0, false, replacedGenerationId);
+    auto replacedHeader = replacedPacket->peekAtFront<Ieee80211Delba>();
+    inProgressFrames.addOwnedFrame(replacedPacket);
+    ackHandler.frameGotInProgress(replacedHeader);
+    hcf.trackFrame(replacedPacket, AC_BE);
+    hcf.processTransmittedManagement(replacedPacket, replacedHeader, AC_BE);
+    ASSERT(recipientHandler->isDelbaPending(replacedPacket, replacedHeader));
+    auto replacementRequest = makeRequest(peer2, 13, 108, SequenceNumberCyclic(366), 32);
+    auto replacementAgreement = recipientHandler->processReceivedAddbaRequest(replacementRequest, &recipientPolicy, &responseCallback, &hcf);
+    ASSERT(replacementAgreement != nullptr);
+    ASSERT(replacementAgreement->getGenerationId() != replacedGenerationId);
+    auto replacedProbe = makeTaggedRecipientDelbaPacket("recipientRetryReplacedProbe", peer2, 13, SequenceNumberCyclic(367), 0, false, replacedGenerationId);
+    ASSERT(!recipientHandler->isDelbaPending(replacedProbe, replacedProbe->peekAtFront<Ieee80211Delba>()));
+    delete replacedProbe;
+    ASSERT(recipientHandler->getAgreement(13, peer2) == replacementAgreement);
+    ASSERT(inProgressFrames.getLength() == 0);
+    ASSERT(deletionListener.numSignals == 3);
+    ASSERT(recipientDataService.numReorderingResets == 3);
+    ASSERT(dropListener.numOtherPacketDrops == 1);
+
+    hcf.unsubscribe(Hcf::blockAckAgreementDeletedSignal, &deletionListener);
+    hcf.unsubscribe(packetDroppedSignal, &dropListener);
 }
 
 EV << "ADDBA transaction and negotiated SSN integrity checks passed.\n";

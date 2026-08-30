@@ -11,6 +11,7 @@
 #include <array>
 #include <map>
 #include <set>
+#include <tuple>
 
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Hcca.h"
@@ -122,6 +123,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     std::set<uint64_t> completedManagementTransactions;
     eventnumber_t completedManagementTransactionsEventNumber = -1;
     std::set<uint64_t> cancelledManagementTransactions;
+    std::set<std::tuple<bool, MacAddress, Tid, uint64_t>> blockAckTeardownsBeingCancelled;
 
     // Protection mechanisms
     SingleProtectionMechanism *singleProtectionMechanism = nullptr;
@@ -196,6 +198,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void scheduleInactivityTimer(simtime_t timeout) override;
     virtual void scheduleAddbaResponseTimer(simtime_t deadline) override;
     virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override;
+    virtual void cancelBlockAckTeardown(bool initiator, MacAddress peerAddress, Tid tid, uint64_t generationId, Packet *excludedPacket) override;
 
     std::string getFrameSequenceInfo() const;
 
