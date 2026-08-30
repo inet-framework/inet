@@ -10,6 +10,22 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/LabelsTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/BasicMsduAggregationPolicy.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementPolicy.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/queueing/gate/PacketGate.h"
 #include "inet/queueing/gate/PeriodicGate.h"
@@ -22,6 +38,100 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 %global:
 using namespace inet;
 using namespace inet::ieee80211;
+
+class TestOriginatorPolicy : public IOriginatorBlockAckAgreementPolicy
+{
+  public:
+    simtime_t addbaResponseTimeout = 1;
+    simtime_t addbaRetryBackoff = 2;
+    bool addbaAccepted = true;
+    bool delbaAccepted = true;
+
+    virtual bool isAddbaReqNeeded(Packet *, const Ptr<const Ieee80211DataHeader>&) override { return true; }
+    virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>&, OriginatorBlockAckAgreement *) override { return addbaAccepted; }
+    virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>&) override { return delbaAccepted; }
+    virtual bool isMsduSupported() const override { return true; }
+    virtual simtime_t getAddbaResponseTimeout() const override { return addbaResponseTimeout; }
+    virtual simtime_t computeAddbaRetryBackoff() const override { return addbaRetryBackoff; }
+    virtual simtime_t getBlockAckTimeoutValue() const override { return 0; }
+    virtual bool isDelayedAckPolicySupported() const override { return false; }
+    virtual int getMaximumAllowedBufferSize() const override { return 64; }
+};
+
+class TestRecipientPolicy : public IRecipientBlockAckAgreementPolicy
+{
+  public:
+    bool accepted = true;
+    bool delbaAccepted = true;
+    simtime_t blockAckTimeoutValue = 0;
+    bool aMsduSupportedValue = true;
+    bool delayedBlockAckPolicySupportedValue = false;
+    int maximumAllowedBufferSize = 64;
+
+    virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>&) override { return accepted; }
+    virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>&) override { return delbaAccepted; }
+    virtual simtime_t getBlockAckTimeoutValue() const override { return blockAckTimeoutValue; }
+    virtual bool aMsduSupported() const override { return aMsduSupportedValue; }
+    virtual bool delayedBlockAckPolicySupported() const override { return delayedBlockAckPolicySupportedValue; }
+    virtual int getMaximumAllowedBufferSize() const override { return maximumAllowedBufferSize; }
+};
+
+class TestCallback : public IProcedureCallback, public IBlockAckAgreementHandlerCallback
+{
+  public:
+    Packet *managementPacket = nullptr;
+    std::vector<Packet *> managementPackets;
+    Ptr<const Ieee80211MgmtHeader> managementHeader;
+    simtime_t addbaDeadline = SIMTIME_MAX;
+    std::vector<uint64_t> cancelledTransactionIds;
+    std::vector<Packet *> excludedPackets;
+
+    virtual ~TestCallback() { for (auto packet : managementPackets) delete packet; }
+    void forgetManagementPacket(Packet *packet) { managementPackets.erase(std::remove(managementPackets.begin(), managementPackets.end(), packet), managementPackets.end()); }
+    virtual void transmitControlResponseFrame(Packet *, const Ptr<const Ieee80211MacHeader>&, Packet *, const Ptr<const Ieee80211MacHeader>&) override { throw cRuntimeError("Unexpected control response"); }
+    virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        managementPacket = packet;
+        managementPackets.push_back(packet);
+        managementHeader = header;
+    }
+    virtual void scheduleInactivityTimer(simtime_t) override {}
+    virtual void scheduleAddbaResponseTimer(simtime_t deadline) override { addbaDeadline = deadline; }
+    virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override {
+        cancelledTransactionIds.push_back(transactionId);
+        excludedPackets.push_back(excludedPacket);
+    }
+};
+
+class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
+{
+  public:
+    using OriginatorBlockAckAgreementHandler::buildAddbaRequest;
+    void addEstablishedAgreement(MacAddress receiverAddress, Tid tid) {
+        auto agreement = new OriginatorBlockAckAgreement(receiverAddress, tid, SequenceNumberCyclic(0), 64, true, false, 1, 1);
+        agreement->setIsAddbaResponseReceived(true);
+        blockAckAgreements[std::make_pair(receiverAddress, tid)] = agreement;
+    }
+    void setNextDialogToken(uint8_t token) { nextDialogToken = token; }
+    void expireNow(MacAddress receiverAddress, Tid tid) { getAgreement(receiverAddress, tid)->setAddbaResponseDeadline(simTime()); }
+    void allowRetryNow(MacAddress receiverAddress, Tid tid) { addbaRetryDeadlines[std::make_pair(receiverAddress, tid)] = simTime(); }
+    void setPendingTeardownTransaction(MacAddress receiverAddress, Tid tid, uint64_t transactionId) { pendingTeardownTransactionIds[std::make_pair(receiverAddress, tid)] = transactionId; }
+    simtime_t getRetryDeadline(MacAddress receiverAddress, Tid tid) const { auto it = addbaRetryDeadlines.find(std::make_pair(receiverAddress, tid)); return it == addbaRetryDeadlines.end() ? SIMTIME_MAX : it->second; }
+};
+
+class TestTimeoutCancellationCallback : public TestCallback
+{
+  public:
+    TestOriginatorHandler *handler = nullptr;
+    std::vector<std::pair<MacAddress, Tid>> expiredAgreementIds;
+    bool allExpiredAgreementsGoneBeforeCallbacks = true;
+
+    virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override {
+        for (const auto& agreementId : expiredAgreementIds)
+            allExpiredAgreementsGoneBeforeCallbacks &= handler->getAgreement(agreementId.first, agreementId.second) == nullptr;
+        TestCallback::cancelAddbaTransaction(transactionId, excludedPacket);
+    }
+};
+
 class TestPacketQueue : public queueing::IPacketQueue
 {
   public:
@@ -93,6 +203,37 @@ class TestPacketQueue : public queueing::IPacketQueue
     virtual void pushPacketEnd(Packet *, const cGate *) override { throw cRuntimeError("Unsupported"); }
     virtual void pushPacketProgress(Packet *, const cGate *, bps, b, b) override { throw cRuntimeError("Unsupported"); }
 };
+
+class TestWrongDequeueQueue : public TestPacketQueue
+{
+  public:
+    Packet *wrongPacket = nullptr;
+    int numPredicateDequeues = 0;
+
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override {
+        if (numPredicateDequeues++ == 0)
+            return TestPacketQueue::dequeuePacket(predicate);
+        packets.erase(std::find(packets.begin(), packets.end(), wrongPacket));
+        notifyPacketRemoved(wrongPacket, PacketRemovalReason::DEQUEUED);
+        return wrongPacket;
+    }
+};
+
+class TestRepeatedDequeueQueue : public TestPacketQueue
+{
+  public:
+    Packet *repeatedPacket = nullptr;
+    int numPredicateDequeues = 0;
+
+    virtual Packet *dequeuePacket(const PacketPredicate& predicate) override {
+        if (numPredicateDequeues++ == 0) {
+            repeatedPacket = TestPacketQueue::dequeuePacket(predicate);
+            return repeatedPacket;
+        }
+        return repeatedPacket;
+    }
+};
+
 class TestCompoundPacketQueue : public queueing::CompoundPacketQueueBase
 {
   public:
@@ -241,6 +382,256 @@ class TestPacketArrivalListener : public cListener
         lastArrivalGate = check_and_cast<Packet *>(value)->getArrivalGate();
     }
 };
+
+class TestSignalListener : public cListener
+{
+  public:
+    int numSignals = 0;
+
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override { numSignals++; }
+};
+
+class TestPacketDropSignalListener : public cListener
+{
+  public:
+    int numSignals = 0;
+    int numOtherPacketDrops = 0;
+
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *details) override {
+        numSignals++;
+        auto packetDropDetails = check_and_cast<PacketDropDetails *>(details);
+        if (packetDropDetails->getReason() == OTHER_PACKET_DROP)
+            numOtherPacketDrops++;
+    }
+};
+
+class TestAckHandler : public IAckHandler
+{
+  public:
+    virtual bool isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>&) override { return true; }
+    virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>&) override { return false; }
+    virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>&) override {}
+};
+
+class TestQosAckHandler : public QosAckHandler
+{
+  public:
+    bool hasMgmtEntry(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const {
+        auto id = std::make_pair(header->getReceiverAddress(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
+        return mgmtAckStatuses.find(id) != mgmtAckStatuses.end();
+    }
+};
+
+class TestInProgressFrames : public InProgressFrames
+{
+  public:
+    void configure(IOriginatorMacDataService *dataService, IAckHandler *ackHandler, queueing::IPacketQueue *pendingQueue = nullptr) {
+        this->dataService = dataService;
+        this->ackHandler = ackHandler;
+        this->pendingQueue = pendingQueue;
+    }
+    void addFrame(Packet *packet) { inProgressFrames.push_back(packet); }
+    void addOwnedFrame(Packet *packet) { take(packet); inProgressFrames.push_back(packet); }
+    bool hasEligibleFrame() { return hasEligibleFrameToTransmit(); }
+    int getNumDroppedFrames() const { return droppedFrames.size(); }
+    std::vector<Packet *> releaseFrames() {
+        std::vector<Packet *> frames = inProgressFrames;
+        frames.insert(frames.end(), droppedFrames.begin(), droppedFrames.end());
+        for (auto frame : frames)
+            if (frame->getOwner() == this)
+                drop(frame);
+        inProgressFrames.clear();
+        droppedFrames.clear();
+        return frames;
+    }
+};
+
+class TestEdcaf : public Edcaf
+{
+  public:
+    queueing::IPacketQueue *pendingQueue = nullptr;
+    InProgressFrames *inProgressFrames = nullptr;
+    QosAckHandler *qosAckHandler = nullptr;
+    QosRecoveryProcedure *qosRecoveryProcedure = nullptr;
+    StationRetryCounters stationRetryCounters;
+    int numReleaseChannelCalls = 0;
+    std::vector<int> *eventOrder = nullptr;
+    bool contentionActive = false;
+    int numRequestChannelCalls = 0;
+    int numContentionStarts = 0;
+
+    virtual queueing::IPacketQueue *getPendingQueue() const override { return pendingQueue; }
+    virtual InProgressFrames *getInProgressFrames() const override { return inProgressFrames; }
+    virtual QosAckHandler *getAckHandler() const override { return qosAckHandler; }
+    virtual QosRecoveryProcedure *getRecoveryProcedure() const override { return qosRecoveryProcedure; }
+    virtual StationRetryCounters *getStationRetryCounters() const override { return const_cast<StationRetryCounters *>(&stationRetryCounters); }
+    virtual void releaseChannel(IChannelAccess::ICallback *) override { numReleaseChannelCalls++; if (eventOrder != nullptr) eventOrder->push_back(1); }
+    virtual void requestChannel(IChannelAccess::ICallback *) override { numRequestChannelCalls++; if (!contentionActive) numContentionStarts++; }
+    void setAccessCategory(AccessCategory accessCategory) { ac = accessCategory; }
+    void setTxopProcedure(TxopProcedure *txopProcedure) { this->txopProcedure = txopProcedure; }
+};
+
+class TestEdca : public Edca
+{
+  public:
+    Edcaf *edcaf = nullptr;
+    std::array<Edcaf *, AC_NUMCATEGORIES> edcafs = {};
+    int numEdcafs = 1;
+    NonQosRecoveryProcedure *nonQosRecoveryProcedure = nullptr;
+    std::vector<AccessCategory> requestedAccessCategories;
+    std::vector<Edcaf *> internallyCollidedEdcafs;
+    std::vector<int> *eventOrder = nullptr;
+
+    virtual int getNumEdcafs() const override { return numEdcafs; }
+    virtual Edcaf *getEdcaf(AccessCategory accessCategory) const override { return numEdcafs == 1 ? edcaf : edcafs[accessCategory]; }
+    virtual Edcaf *getChannelOwner() override { return edcaf; }
+    virtual std::vector<Edcaf *> getInternallyCollidedEdcafs() override { return internallyCollidedEdcafs; }
+    virtual void requestChannelAccess(AccessCategory accessCategory, IChannelAccess::ICallback *callback) override { requestedAccessCategories.push_back(accessCategory); if (eventOrder != nullptr) eventOrder->push_back(3); getEdcaf(accessCategory)->requestChannel(callback); }
+    virtual NonQosRecoveryProcedure *getMgmtAndNonQoSRecoveryProcedure() const override { return nonQosRecoveryProcedure; }
+};
+
+class TestHcf : public Hcf
+{
+  public:
+    int numProcessedDroppedSetupFrames = 0;
+    int numResumedEligibleChannelAccess = 0;
+    int numCancelledAddbaTransactions = 0;
+    int numRebuildEligibilityCalls = 0;
+    bool droppedSetupCancelled = false;
+    bool delegateDroppedSetupHandling = false;
+    TestCallback *managementCallback = nullptr;
+
+    void configure(Edca *edca) { this->edca = edca; }
+    void configureMac(Ieee80211Mac *mac) { this->mac = mac; }
+    void configureEligibilityIndex(Edca *edca, IOriginatorMacDataService *originatorDataService) {
+        this->edca = edca;
+        this->originatorDataService = originatorDataService;
+    }
+    void rebuildEligibilityIndex() { rebuildPendingFrameEligibility(); }
+    void trackFrame(Packet *packet, AccessCategory accessCategory) { trackPendingFrame(packet, accessCategory); }
+    void untrackFrame(Packet *packet) { untrackPendingFrame(packet); }
+    bool hasFrame(AccessCategory accessCategory) { return hasFrameToTransmit(accessCategory); }
+    void requestEligible() { requestEligibleChannelAccess(); }
+    int processInternalCollision(const std::vector<Edcaf *>& edcafs) { return handleInternalCollision(edcafs); }
+    void grantChannel(IChannelAccess *channelAccess) { channelGranted(channelAccess); }
+    void finishSequence() { frameSequenceFinished(); }
+    int getNumEligiblePendingFrames(AccessCategory accessCategory) const { return numEligiblePendingFrames[accessCategory]; }
+    int getNumTrackedPendingFrames() const { return pendingFrameEligibility.size(); }
+    void observePendingQueue(queueing::IPacketQueue *pendingQueue) {
+        pendingQueue->addPacketCallback(this);
+    }
+    void configureFrameSequenceHandler(IFrameSequenceHandler *frameSequenceHandler) { this->frameSequenceHandler = frameSequenceHandler; }
+    void configureRecipientDataService(IRecipientQosMacDataService *recipientDataService) { this->recipientDataService = recipientDataService; }
+    void configureManagementCallback(TestCallback *managementCallback) { this->managementCallback = managementCallback; }
+    void configureTransmittedData(Edca *edca, IOriginatorBlockAckAgreementHandler *handler, IOriginatorBlockAckAgreementPolicy *policy) {
+        this->edca = edca;
+        originatorBlockAckAgreementHandler = handler;
+        originatorBlockAckAgreementPolicy = policy;
+    }
+    void configureTransmittedManagement(Edca *edca, IOriginatorQoSAckPolicy *originatorAckPolicy) {
+        this->edca = edca;
+        this->originatorAckPolicy = originatorAckPolicy;
+    }
+    void configureBlockAckHandlers(IOriginatorBlockAckAgreementHandler *originatorHandler, IOriginatorBlockAckAgreementPolicy *originatorPolicy, IRecipientBlockAckAgreementHandler *recipientHandler, IRecipientBlockAckAgreementPolicy *recipientPolicy) {
+        originatorBlockAckAgreementHandler = originatorHandler;
+        originatorBlockAckAgreementPolicy = originatorPolicy;
+        recipientBlockAckAgreementHandler = recipientHandler;
+        recipientBlockAckAgreementPolicy = recipientPolicy;
+    }
+    void processTransmittedData(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, AccessCategory ac) { originatorProcessTransmittedDataFrame(packet, dataHeader, ac); }
+    void processTransmittedManagement(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& managementHeader, AccessCategory ac) { originatorProcessTransmittedManagementFrame(packet, managementHeader, ac); }
+    void dropPacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::DROPPED); }
+    void removePacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::REMOVED); }
+    void dequeuePacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::DEQUEUED); }
+    void cancelTransaction(uint64_t transactionId) { cancelAddbaTransaction(transactionId, nullptr); }
+    void processRtsProtectionFailure(Packet *packet) { originatorProcessRtsProtectionFailed(packet); }
+    void processFailedFrame(Packet *packet) { originatorProcessFailedFrame(packet); }
+    void processReceivedAck(Packet *packet, Packet *lastTransmittedPacket, AccessCategory accessCategory) {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto lastTransmittedHeader = lastTransmittedPacket->peekAtFront<Ieee80211MacHeader>();
+        originatorProcessReceivedControlFrame(packet, header, lastTransmittedPacket, lastTransmittedHeader, accessCategory);
+    }
+
+  protected:
+    virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        if (managementCallback != nullptr)
+            managementCallback->processMgmtFrame(packet, header);
+        else
+            Hcf::processMgmtFrame(packet, header);
+    }
+    virtual bool processDroppedBlockAckSetupFrame(Packet *packet) override { numProcessedDroppedSetupFrames++; return delegateDroppedSetupHandling ? Hcf::processDroppedBlockAckSetupFrame(packet) : droppedSetupCancelled; }
+    virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override { numCancelledAddbaTransactions++; Hcf::cancelAddbaTransaction(transactionId, excludedPacket); }
+    virtual void rebuildPendingFrameEligibility() override { numRebuildEligibilityCalls++; Hcf::rebuildPendingFrameEligibility(); }
+    virtual void resumeEligibleChannelAccess() override { numResumedEligibleChannelAccess++; }
+    virtual void scheduleInactivityTimer(simtime_t) override {}
+    virtual void scheduleAddbaResponseTimer(simtime_t) override {}
+};
+
+class TestMac : public Ieee80211Mac
+{
+  public:
+    int numPendingRadioConfigSends = 0;
+    virtual void sendDownPendingRadioConfigMsg() override { numPendingRadioConfigSends++; }
+};
+
+class TestFragmentationPolicy : public IFragmentationPolicy
+{
+  public:
+    virtual std::vector<int> computeFragmentSizes(Packet *) override { return { 2, 2 }; }
+};
+
+class TestMsduAggregationPolicy : public IMsduAggregationPolicy
+{
+  public:
+    int numCalls = 0;
+
+    virtual std::vector<Packet *> *computeAggregateFrames(queueing::IPacketQueue *, Packet *, const std::function<bool(const Packet *)>&) override { numCalls++; return nullptr; }
+};
+
+class TestSelectedMsduAggregationPolicy : public IMsduAggregationPolicy
+{
+  public:
+    int numCalls = 0;
+    std::vector<Packet *> selectedPackets;
+
+    virtual std::vector<Packet *> *computeAggregateFrames(queueing::IPacketQueue *, Packet *, const std::function<bool(const Packet *)>&) override { numCalls++; return new std::vector<Packet *>(selectedPackets); }
+};
+
+class TestBasicMsduAggregationPolicy : public BasicMsduAggregationPolicy
+{
+  public:
+    void configure(b maximumSize) {
+        qOsCheck = true;
+        subframeNumThreshold = -1;
+        aggregationLengthThreshold = -1;
+        maxAMsduSize = maximumSize;
+    }
+};
+
+class TestNonQosRecoveryProcedure : public NonQosRecoveryProcedure
+{
+  public:
+    void addRetry(const Ptr<const Ieee80211DataOrMgmtHeader>& header) {
+        rtsThreshold = INT_MAX;
+        shortRetryCounter[SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())] = 1;
+    }
+    void addShortRetry(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int count = 1) {
+        shortRetryCounter[SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())] = count;
+    }
+    void addLongRetry(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int count = 1) {
+        longRetryCounter[SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())] = count;
+    }
+    bool hasRetry(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const {
+        return shortRetryCounter.find(SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())) != shortRetryCounter.end();
+    }
+    void configureRts(int threshold, int retryLimit, ICwCalculator *cwCalculator) {
+        rtsThreshold = threshold;
+        shortRetryLimit = retryLimit;
+        longRetryLimit = retryLimit;
+        this->cwCalculator = cwCalculator;
+    }
+};
+
 class TestOnlyPacketExtractor : public queueing::IPacketExtractor
 {
   public:
@@ -257,6 +648,59 @@ class TestOnlyPacketExtractor : public queueing::IPacketExtractor
         return packet;
     }
 };
+
+class TestCwCalculator : public IRecoveryProcedure::ICwCalculator
+{
+  public:
+    int cw = 1;
+    virtual void incrementCw() override { cw++; }
+    virtual void resetCw() override { cw = 1; }
+    virtual int getCw() override { return cw; }
+};
+
+class TestOriginatorQosMacDataService : public OriginatorQosMacDataService
+{
+  public:
+    void enableMsduAggregationPolicy(IMsduAggregationPolicy *policy) {
+        aMsduAggregationPolicy = policy;
+        if (aMsduAggregation == nullptr)
+            aMsduAggregation = new MsduAggregation();
+    }
+    void enableSequenceNumberAssignment() { sequenceNumberAssignment = new QoSSequenceNumberAssignment(); }
+    void enableFragmentation(IFragmentationPolicy *policy) {
+        fragmentationPolicy = policy;
+        fragmentation = new Fragmentation();
+    }
+    std::vector<Packet *> *fragment(Packet *packet) { return fragmentIfNeeded(packet); }
+    void release(Packet *packet) { drop(packet); }
+};
+
+class TestFrameSequenceHandler : public IFrameSequenceHandler
+{
+  public:
+    IFrameSequence *frameSequence = nullptr;
+    FrameSequenceContext *context = nullptr;
+    bool running = false;
+    int numStartedSequences = 0;
+
+    virtual ~TestFrameSequenceHandler() {
+        delete frameSequence;
+        delete context;
+    }
+    virtual const FrameSequenceContext *getContext() const override { return context; }
+    virtual const IFrameSequence *getFrameSequence() const override { return frameSequence; }
+    virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, ICallback *) override {
+        this->frameSequence = frameSequence;
+        this->context = context;
+        running = true;
+        numStartedSequences++;
+    }
+    virtual void processResponse(Packet *) override {}
+    virtual void transmissionComplete() override {}
+    virtual bool isSequenceRunning() override { return running; }
+    virtual void handleStartRxTimeout() override {}
+};
+
 static Ptr<Ieee80211DataHeader> makeQosHeader(MacAddress receiverAddress, Tid tid, SequenceNumberCyclic sequenceNumber)
 {
     auto header = makeShared<Ieee80211DataHeader>();
@@ -266,8 +710,41 @@ static Ptr<Ieee80211DataHeader> makeQosHeader(MacAddress receiverAddress, Tid ti
     header->setSequenceNumber(sequenceNumber);
     return header;
 }
+
+static Packet *makeTaggedDelbaPacket(const char *name, MacAddress receiverAddress, Tid tid, SequenceNumberCyclic sequenceNumber, int fragmentNumber, bool moreFragments, uint64_t transactionId)
+{
+    auto delba = makeShared<Ieee80211Delba>();
+    delba->setReceiverAddress(receiverAddress);
+    delba->setTid(tid);
+    delba->setInitiator(true);
+    delba->setSequenceNumber(sequenceNumber);
+    delba->setFragmentNumber(fragmentNumber);
+    delba->setMoreFragments(moreFragments);
+    auto packet = new Packet(name, delba);
+    packet->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+    return packet;
+}
+
+static Ptr<Ieee80211AddbaResponse> makeResponse(MacAddress transmitterAddress, Tid tid, uint8_t dialogToken, uint16_t statusCode)
+{
+    auto response = makeShared<Ieee80211AddbaResponse>();
+    response->setTransmitterAddress(transmitterAddress);
+    response->setTid(tid);
+    response->setDialogToken(dialogToken);
+    response->setStatusCode(statusCode);
+    response->setBufferSize(32);
+    response->setBlockAckTimeoutValue(0);
+    return response;
+}
+
+
 %activity:
+// IEEE Std 802.11-2024, 9.6.4.2, 10.25.2, and 11.5.2.2.
+TestOriginatorPolicy originatorPolicy;
+TestCallback callback;
 MacAddress peer1("00:00:00:00:00:01");
+MacAddress peer2("00:00:00:00:00:02");
+MacAddress peer3("00:00:00:00:00:03");
 auto createPacketQueue = [this](const char *name, int packetCapacity = -1, const char *dropperClass = "") {
     auto module = cModuleType::get("inet.queueing.queue.PacketQueue")->create(name, this);
     module->par("packetCapacity").setIntValue(packetCapacity);
@@ -275,6 +752,749 @@ auto createPacketQueue = [this](const char *name, int packetCapacity = -1, const
     module->callInitialize();
     return check_and_cast<queueing::PacketQueue *>(module);
 };
+
+{
+    TestOriginatorHandler tokenHandler;
+    tokenHandler.setNextDialogToken(255);
+    auto request255 = tokenHandler.buildAddbaRequest(peer1, 0, SequenceNumberCyclic(0), &originatorPolicy);
+    auto request1 = tokenHandler.buildAddbaRequest(peer1, 0, SequenceNumberCyclic(0), &originatorPolicy);
+    ASSERT(request255->getDialogToken() == 255);
+    ASSERT(request1->getDialogToken() == 1);
+}
+
+TestOriginatorHandler handler;
+Packet triggerPacket("trigger");
+auto triggerHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
+
+// Transmitting the trigger MPDU does not create an agreement; initiation is
+// deferred until the HCF successful-ACK path calls processAcknowledgedDataFrame().
+{
+    auto preAckHandler = new TestOriginatorHandler();
+    QosAckHandler preAckAckHandler;
+    TestEdcaf preAckEdcaf;
+    preAckEdcaf.qosAckHandler = &preAckAckHandler;
+    TestEdca preAckEdca;
+    preAckEdca.edcaf = &preAckEdcaf;
+    TestHcf preAckHcf;
+    preAckHcf.configureTransmittedData(&preAckEdca, preAckHandler, &originatorPolicy);
+    Packet preAckPacket("preAckPacket");
+    auto preAckHeader = makeQosHeader(peer1, 3, SequenceNumberCyclic(4095));
+    preAckHeader->setAckPolicy(NORMAL_ACK);
+    preAckHcf.processTransmittedData(&preAckPacket, preAckHeader, AC_BE);
+    if (preAckHandler->getAgreement(peer1, 3) != nullptr)
+        throw cRuntimeError("HCF initiated ADDBA before the trigger MPDU was acknowledged");
+    ASSERT(preAckHandler->getAgreement(peer1, 3) == nullptr);
+}
+
+// A fragmented MSDU cannot trigger ADDBA until its final fragment is ACKed,
+// otherwise the remaining fragments would precede the advertised SSN.
+{
+    TestOriginatorHandler fragmentedDataHandler;
+    TestCallback fragmentedDataCallback;
+    Packet fragmentedDataPacket("fragmentedDataPacket");
+    auto firstFragmentHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(100));
+    firstFragmentHeader->setFragmentNumber(0);
+    firstFragmentHeader->setMoreFragments(true);
+    fragmentedDataHandler.processAcknowledgedDataFrame(&fragmentedDataPacket, firstFragmentHeader, &originatorPolicy, &fragmentedDataCallback);
+    if (fragmentedDataHandler.getAgreement(peer1, 6) != nullptr || fragmentedDataCallback.managementPacket != nullptr)
+        throw cRuntimeError("ADDBA was initiated before the final data fragment was acknowledged");
+    auto finalFragmentHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(100));
+    finalFragmentHeader->setFragmentNumber(1);
+    finalFragmentHeader->setMoreFragments(false);
+    fragmentedDataHandler.processAcknowledgedDataFrame(&fragmentedDataPacket, finalFragmentHeader, &originatorPolicy, &fragmentedDataCallback);
+    auto fragmentedDataRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(fragmentedDataCallback.managementHeader);
+    ASSERT(fragmentedDataRequest != nullptr);
+    ASSERT(fragmentedDataRequest->getStartingSequenceNumber() == SequenceNumberCyclic(101));
+}
+
+// A fragmented, transaction-tagged DELBA remains eligible through every
+// nonfinal fragment. Aborting one fragment invalidates the transaction and asks
+// the HCF callback to remove its sibling fragments.
+{
+    TestOriginatorHandler fragmentedDelbaHandler;
+    TestCallback fragmentedDelbaCallback;
+    auto firstDelba = makeShared<Ieee80211Delba>();
+    firstDelba->setReceiverAddress(peer1);
+    firstDelba->setTid(6);
+    firstDelba->setInitiator(true);
+    firstDelba->setFragmentNumber(0);
+    firstDelba->setMoreFragments(true);
+    auto finalDelba = staticPtrCast<Ieee80211Delba>(firstDelba->dupShared());
+    finalDelba->setFragmentNumber(1);
+    finalDelba->setMoreFragments(false);
+    Packet firstDelbaPacket("firstDelbaFragment", firstDelba);
+    Packet finalDelbaPacket("finalDelbaFragment", finalDelba);
+    firstDelbaPacket.addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(77);
+    finalDelbaPacket.addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(77);
+    fragmentedDelbaHandler.setPendingTeardownTransaction(peer1, 6, 77);
+    ASSERT(fragmentedDelbaHandler.isDelbaPending(&firstDelbaPacket, firstDelba));
+    ASSERT(fragmentedDelbaHandler.processTransmittedDelba(&firstDelbaPacket, &fragmentedDelbaCallback) == nullptr);
+    ASSERT(fragmentedDelbaHandler.isDelbaPending(&finalDelbaPacket, finalDelba));
+    ASSERT(fragmentedDelbaHandler.processTransmittedDelba(&finalDelbaPacket, &fragmentedDelbaCallback) == nullptr);
+    // A failed attempt remains eligible for retransmission.
+    ASSERT(fragmentedDelbaHandler.isDelbaPending(&finalDelbaPacket, finalDelba));
+    ASSERT(fragmentedDelbaHandler.processTransmittedDelba(&finalDelbaPacket, &fragmentedDelbaCallback) == nullptr);
+    ASSERT(fragmentedDelbaHandler.isDelbaPending(&finalDelbaPacket, finalDelba));
+    ASSERT(!fragmentedDelbaHandler.processAcknowledgedDelba(&firstDelbaPacket, &fragmentedDelbaCallback));
+    ASSERT(fragmentedDelbaHandler.processAcknowledgedDelba(&finalDelbaPacket, &fragmentedDelbaCallback));
+    ASSERT(!fragmentedDelbaHandler.isDelbaPending(&finalDelbaPacket, finalDelba));
+    ASSERT(fragmentedDelbaCallback.cancelledTransactionIds.back() == 77);
+    ASSERT(fragmentedDelbaCallback.excludedPackets.back() == &finalDelbaPacket);
+
+    fragmentedDelbaHandler.setPendingTeardownTransaction(peer1, 6, 78);
+    firstDelbaPacket.getTagForUpdate<Ieee80211AddbaTransactionTag>()->setTransactionId(78);
+    ASSERT(fragmentedDelbaHandler.processAbortedDelba(&firstDelbaPacket, &fragmentedDelbaCallback));
+    ASSERT(!fragmentedDelbaHandler.isDelbaPending(&firstDelbaPacket, firstDelba));
+    ASSERT(fragmentedDelbaCallback.cancelledTransactionIds.back() == 78);
+    ASSERT(fragmentedDelbaCallback.excludedPackets.back() == &firstDelbaPacket);
+}
+
+// IEEE Std 802.11-2024, 10.23.2.12.1 and 11.5.3.2: the HCF retry path keeps a
+// transaction-tagged DELBA selectable and preserves its negative ACK state.
+{
+    constexpr uint64_t transactionId = 79;
+    TestCwCalculator cwCalculator;
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    recoveryProcedure.configureRts(INT_MAX, 2, &cwCalculator);
+    TestQosAckHandler ackHandler;
+    TestPacketQueue pendingQueue;
+    TestOriginatorQosMacDataService dataService;
+    auto originatorHandler = new TestOriginatorHandler();
+    dataService.setFrameEligibilityFunction([originatorHandler](const Packet *packet) {
+        auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>());
+        return delba == nullptr || originatorHandler->isDelbaPending(packet, delba);
+    });
+    TestInProgressFrames inProgressFrames;
+    inProgressFrames.configure(&dataService, &ackHandler, &pendingQueue);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    edca.nonQosRecoveryProcedure = &recoveryProcedure;
+    TestOriginatorPolicy policy;
+    OriginatorQosAckPolicy ackPolicy;
+    TestHcf hcf;
+    hcf.configureTransmittedData(&edca, originatorHandler, &policy);
+    hcf.configureTransmittedManagement(&edca, &ackPolicy);
+
+    auto packet = makeTaggedDelbaPacket("failedTransactionalDelba", peer1, 6, SequenceNumberCyclic(203), 0, false, transactionId);
+    auto delba = packet->peekAtFront<Ieee80211Delba>();
+    originatorHandler->setPendingTeardownTransaction(peer1, 6, transactionId);
+    inProgressFrames.addOwnedFrame(packet);
+    ackHandler.frameGotInProgress(delba);
+    hcf.processTransmittedManagement(packet, delba, AC_BE);
+    ASSERT(ackHandler.getMgmtOrNonQoSAckStatus(delba) == QosAckHandler::Status::WAITING_FOR_NORMAL_ACK);
+    hcf.processFailedFrame(packet);
+    ASSERT(originatorHandler->isDelbaPending(packet, packet->peekAtFront<Ieee80211Delba>()));
+    ASSERT(ackHandler.getMgmtOrNonQoSAckStatus(delba) == QosAckHandler::Status::NORMAL_ACK_NOT_ARRIVED);
+    ASSERT(ackHandler.hasMgmtEntry(delba));
+    ASSERT(inProgressFrames.getFrameToTransmit() == packet);
+    ASSERT(inProgressFrames.getNumDroppedFrames() == 0);
+    auto releasedFrames = inProgressFrames.releaseFrames();
+    ASSERT(releasedFrames == std::vector<Packet *>({ packet }));
+    delete packet;
+}
+
+// A final-fragment ACK retires the DELBA transaction through HCF exactly once,
+// removes its in-progress sibling, and clears both ACK-handler entries.
+{
+    constexpr uint64_t transactionId = 80;
+    TestCwCalculator cwCalculator;
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    recoveryProcedure.configureRts(INT_MAX, 2, &cwCalculator);
+    TestQosAckHandler ackHandler;
+    TestPacketQueue pendingQueue;
+    TestOriginatorQosMacDataService dataService;
+    auto originatorHandler = new TestOriginatorHandler();
+    dataService.setFrameEligibilityFunction([originatorHandler](const Packet *packet) {
+        auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>());
+        return delba == nullptr || originatorHandler->isDelbaPending(packet, delba);
+    });
+    TestInProgressFrames inProgressFrames;
+    inProgressFrames.configure(&dataService, &ackHandler, &pendingQueue);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    edca.nonQosRecoveryProcedure = &recoveryProcedure;
+    TestOriginatorPolicy policy;
+    OriginatorQosAckPolicy ackPolicy;
+    TestHcf hcf;
+    TestMac acknowledgedDelbaMac;
+    hcf.configureMac(&acknowledgedDelbaMac);
+    hcf.configureTransmittedData(&edca, originatorHandler, &policy);
+    hcf.configureTransmittedManagement(&edca, &ackPolicy);
+
+    auto sibling = makeTaggedDelbaPacket("acknowledgedDelbaSibling", peer1, 6, SequenceNumberCyclic(204), 0, true, transactionId);
+    auto finalPacket = makeTaggedDelbaPacket("acknowledgedFinalDelba", peer1, 6, SequenceNumberCyclic(204), 1, false, transactionId);
+    auto siblingHeader = sibling->peekAtFront<Ieee80211Delba>();
+    auto finalHeader = finalPacket->peekAtFront<Ieee80211Delba>();
+    originatorHandler->setPendingTeardownTransaction(peer1, 6, transactionId);
+    inProgressFrames.addOwnedFrame(sibling);
+    inProgressFrames.addOwnedFrame(finalPacket);
+    ackHandler.frameGotInProgress(siblingHeader);
+    ackHandler.frameGotInProgress(finalHeader);
+    hcf.processTransmittedManagement(finalPacket, finalHeader, AC_BE);
+    Packet ackPacket("transactionalDelbaAck", makeShared<Ieee80211AckFrame>());
+    hcf.processReceivedAck(&ackPacket, finalPacket, AC_BE);
+    ASSERT(!originatorHandler->isDelbaPending(finalPacket, finalHeader));
+    ASSERT(hcf.numCancelledAddbaTransactions == 1);
+    ASSERT(inProgressFrames.getLength() == 0);
+    ASSERT(inProgressFrames.getNumDroppedFrames() == 1);
+    ASSERT(!ackHandler.hasMgmtEntry(siblingHeader));
+    ASSERT(!ackHandler.hasMgmtEntry(finalHeader));
+    ASSERT(!originatorHandler->processAcknowledgedDelba(finalPacket, &hcf));
+    ASSERT(hcf.numCancelledAddbaTransactions == 1);
+    auto releasedFrames = inProgressFrames.releaseFrames();
+    ASSERT(releasedFrames == std::vector<Packet *>({ finalPacket }));
+    delete finalPacket;
+}
+
+// Reaching the retry limit aborts the teardown through HCF, clears its sibling
+// and both ACK-handler entries, and records one terminal cancellation.
+{
+    constexpr uint64_t transactionId = 81;
+    TestCwCalculator cwCalculator;
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    recoveryProcedure.configureRts(INT_MAX, 1, &cwCalculator);
+    TestQosAckHandler ackHandler;
+    TestPacketQueue pendingQueue;
+    TestOriginatorQosMacDataService dataService;
+    auto originatorHandler = new TestOriginatorHandler();
+    dataService.setFrameEligibilityFunction([originatorHandler](const Packet *packet) {
+        auto delba = dynamicPtrCast<const Ieee80211Delba>(packet->peekAtFront<Ieee80211MacHeader>());
+        return delba == nullptr || originatorHandler->isDelbaPending(packet, delba);
+    });
+    TestInProgressFrames inProgressFrames;
+    inProgressFrames.configure(&dataService, &ackHandler, &pendingQueue);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    edca.nonQosRecoveryProcedure = &recoveryProcedure;
+    TestOriginatorPolicy policy;
+    OriginatorQosAckPolicy ackPolicy;
+    TestHcf hcf;
+    TestMac retryLimitedDelbaMac;
+    hcf.configureMac(&retryLimitedDelbaMac);
+    hcf.configureTransmittedData(&edca, originatorHandler, &policy);
+    hcf.configureTransmittedManagement(&edca, &ackPolicy);
+
+    auto sibling = makeTaggedDelbaPacket("retryLimitedDelbaSibling", peer1, 6, SequenceNumberCyclic(205), 0, true, transactionId);
+    auto finalPacket = makeTaggedDelbaPacket("retryLimitedFinalDelba", peer1, 6, SequenceNumberCyclic(205), 1, false, transactionId);
+    auto siblingHeader = sibling->peekAtFront<Ieee80211Delba>();
+    auto finalHeader = finalPacket->peekAtFront<Ieee80211Delba>();
+    originatorHandler->setPendingTeardownTransaction(peer1, 6, transactionId);
+    inProgressFrames.addOwnedFrame(sibling);
+    inProgressFrames.addOwnedFrame(finalPacket);
+    ackHandler.frameGotInProgress(siblingHeader);
+    ackHandler.frameGotInProgress(finalHeader);
+    hcf.processTransmittedManagement(finalPacket, finalHeader, AC_BE);
+    hcf.processFailedFrame(finalPacket);
+    ASSERT(!originatorHandler->isDelbaPending(finalPacket, finalHeader));
+    ASSERT(hcf.numCancelledAddbaTransactions == 1);
+    ASSERT(inProgressFrames.getLength() == 0);
+    ASSERT(inProgressFrames.getNumDroppedFrames() == 1);
+    ASSERT(!ackHandler.hasMgmtEntry(siblingHeader));
+    ASSERT(!ackHandler.hasMgmtEntry(finalHeader));
+    ASSERT(!originatorHandler->processAbortedDelba(finalPacket, &hcf));
+    ASSERT(hcf.numCancelledAddbaTransactions == 1);
+    auto releasedFrames = inProgressFrames.releaseFrames();
+    ASSERT(releasedFrames == std::vector<Packet *>({ finalPacket }));
+    delete finalPacket;
+}
+
+handler.processAcknowledgedDataFrame(&triggerPacket, triggerHeader, &originatorPolicy, &callback);
+auto request = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
+ASSERT(request != nullptr);
+ASSERT(request->getDialogToken() != 0);
+ASSERT(request->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+handler.processTransmittedAddbaReq(callback.managementPacket, request, &originatorPolicy, &callback);
+ASSERT(callback.addbaDeadline == simTime() + 1);
+auto requestTransactionId = callback.managementPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+
+auto wrongToken = makeResponse(peer1, 3, request->getDialogToken() + 1, 0);
+ASSERT(handler.processReceivedAddbaResp(wrongToken, &originatorPolicy, &callback).establishedAgreement == nullptr);
+ASSERT(handler.isAddbaResponsePending(peer1, 3));
+auto wrongTid = makeResponse(peer1, 4, request->getDialogToken(), 0);
+ASSERT(handler.processReceivedAddbaResp(wrongTid, &originatorPolicy, &callback).establishedAgreement == nullptr);
+auto wrongPeer = makeResponse(peer2, 3, request->getDialogToken(), 0);
+ASSERT(handler.processReceivedAddbaResp(wrongPeer, &originatorPolicy, &callback).establishedAgreement == nullptr);
+
+auto success = makeResponse(peer1, 3, request->getDialogToken(), 0);
+auto establishedResponse = handler.processReceivedAddbaResp(success, &originatorPolicy, &callback);
+auto established = establishedResponse.establishedAgreement;
+ASSERT(established != nullptr);
+ASSERT(establishedResponse.terminatedAgreement == nullptr);
+ASSERT(establishedResponse.teardownDelba == nullptr);
+ASSERT(establishedResponse.teardownTransactionId == 0);
+ASSERT(callback.cancelledTransactionIds.back() == requestTransactionId);
+ASSERT(callback.excludedPackets.back() == nullptr);
+ASSERT(established->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+ASSERT(!handler.isAddbaResponsePending(peer1, 3));
+ASSERT(handler.processReceivedAddbaResp(success, &originatorPolicy, &callback).establishedAgreement == nullptr);
+
+// IEEE Std 802.11-2024, 10.25.2 and Figure 11-32: a successful matching
+// response establishes the agreement even when local policy rejects the
+// negotiated parameters; the originator immediately deletes its local state
+// and sends END_BA on a best-effort basis.
+{
+    TestOriginatorHandler vetoHandler;
+    TestCallback vetoCallback;
+    TestOriginatorPolicy vetoPolicy;
+    vetoPolicy.addbaAccepted = false;
+    Packet vetoTrigger("vetoTrigger");
+    auto vetoHeader = makeQosHeader(peer3, 6, SequenceNumberCyclic(30));
+    vetoHandler.processAcknowledgedDataFrame(&vetoTrigger, vetoHeader, &vetoPolicy, &vetoCallback);
+    auto vetoRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(vetoCallback.managementHeader);
+    auto vetoTransactionId = vetoCallback.managementPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+    vetoHandler.processTransmittedAddbaReq(vetoCallback.managementPacket, vetoRequest, &vetoPolicy, &vetoCallback);
+    auto vetoResponse = makeResponse(peer3, 6, vetoRequest->getDialogToken(), 0);
+    auto vetoResponseOutcome = vetoHandler.processReceivedAddbaResp(vetoResponse, &vetoPolicy, &vetoCallback);
+    auto vetoAgreement = vetoResponseOutcome.terminatedAgreement.get();
+    ASSERT(vetoAgreement != nullptr);
+    ASSERT(vetoResponseOutcome.establishedAgreement == nullptr);
+    ASSERT(vetoResponseOutcome.teardownTransactionId == vetoTransactionId);
+    ASSERT(vetoAgreement->getIsAddbaResponseReceived());
+    ASSERT(vetoHandler.getAgreement(peer3, 6) == nullptr);
+    auto vetoDelba = vetoResponseOutcome.teardownDelba;
+    ASSERT(vetoDelba != nullptr);
+    ASSERT(vetoDelba->getInitiator());
+    ASSERT(vetoDelba->getReceiverAddress() == peer3);
+    ASSERT(vetoDelba->getTid() == 6);
+    ASSERT(vetoDelba->getReasonCode() == RC_END_BA);
+    Packet vetoDelbaPacket("vetoDelba", vetoDelba);
+    vetoDelbaPacket.addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(vetoResponseOutcome.teardownTransactionId);
+    ASSERT(vetoHandler.isDelbaPending(&vetoDelbaPacket, vetoDelba));
+    ASSERT(vetoHandler.getAgreement(peer3, 6) == nullptr);
+    ASSERT(vetoHandler.getRetryDeadline(peer3, 6) > simTime());
+    TestCallback vetoRetryCallback;
+    Packet vetoRetryTrigger("vetoRetryTrigger");
+    auto vetoRetryHeader = makeQosHeader(peer3, 6, SequenceNumberCyclic(31));
+    vetoHandler.processAcknowledgedDataFrame(&vetoRetryTrigger, vetoRetryHeader, &vetoPolicy, &vetoRetryCallback);
+    ASSERT(vetoRetryCallback.managementPacket == nullptr);
+    vetoHandler.allowRetryNow(peer3, 6);
+    auto obsoleteVetoTransactionId = vetoHandler.processAcknowledgedDataFrame(&vetoRetryTrigger, vetoRetryHeader, &vetoPolicy, &vetoRetryCallback);
+    ASSERT(obsoleteVetoTransactionId == vetoTransactionId);
+    ASSERT(vetoRetryCallback.managementPacket != nullptr);
+    auto newerAgreement = vetoHandler.getAgreement(peer3, 6);
+    ASSERT(newerAgreement != nullptr);
+    ASSERT(newerAgreement->getTransactionId() != vetoTransactionId);
+    ASSERT(!vetoHandler.isDelbaPending(&vetoDelbaPacket, vetoDelba));
+    ASSERT(!vetoHandler.processAbortedDelba(&vetoDelbaPacket, &vetoCallback));
+    ASSERT(!vetoHandler.isDelbaPending(&vetoDelbaPacket, vetoDelba));
+    auto vetoTerminated = vetoHandler.processTransmittedDelba(&vetoDelbaPacket, &vetoCallback);
+    ASSERT(vetoTerminated == nullptr);
+    ASSERT(vetoHandler.getAgreement(peer3, 6) == newerAgreement);
+}
+
+Packet rejectedTrigger("rejectedTrigger");
+auto rejectedHeader = makeQosHeader(peer2, 4, SequenceNumberCyclic(10));
+handler.processAcknowledgedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback);
+auto rejectedRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
+handler.processTransmittedAddbaReq(callback.managementPacket, rejectedRequest, &originatorPolicy, &callback);
+auto rejection = makeResponse(peer2, 4, rejectedRequest->getDialogToken(), 1);
+ASSERT(handler.processReceivedAddbaResp(rejection, &originatorPolicy, &callback).establishedAgreement == nullptr);
+ASSERT(handler.getAgreement(peer2, 4) == nullptr);
+handler.processAcknowledgedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback);
+ASSERT(handler.getAgreement(peer2, 4) == nullptr);
+handler.allowRetryNow(peer2, 4);
+handler.processAcknowledgedDataFrame(&rejectedTrigger, rejectedHeader, &originatorPolicy, &callback);
+ASSERT(handler.isAddbaResponsePending(peer2, 4));
+
+Packet timeoutTrigger("timeoutTrigger");
+auto timeoutHeader = makeQosHeader(peer3, 5, SequenceNumberCyclic(20));
+handler.processAcknowledgedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback);
+auto timedRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
+auto timedRequestPacket = callback.managementPacket;
+auto timedTransactionId = timedRequestPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+handler.processTransmittedAddbaReq(timedRequestPacket, timedRequest, &originatorPolicy, &callback);
+handler.expireNow(peer3, 5);
+handler.addbaResponseTimeoutExpired(&originatorPolicy, &callback);
+ASSERT(handler.getAgreement(peer3, 5) == nullptr);
+ASSERT(callback.cancelledTransactionIds.back() == timedTransactionId);
+ASSERT(callback.excludedPackets.back() == nullptr);
+handler.processTransmittedAddbaReq(timedRequestPacket, timedRequest, &originatorPolicy, &callback);
+ASSERT(handler.getAgreement(peer3, 5) == nullptr);
+auto staleResponse = makeResponse(peer3, 5, timedRequest->getDialogToken(), 0);
+ASSERT(handler.processReceivedAddbaResp(staleResponse, &originatorPolicy, &callback).establishedAgreement == nullptr);
+handler.processAcknowledgedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback);
+ASSERT(handler.getAgreement(peer3, 5) == nullptr);
+handler.allowRetryNow(peer3, 5);
+handler.processAcknowledgedDataFrame(&timeoutTrigger, timeoutHeader, &originatorPolicy, &callback);
+ASSERT(handler.isAddbaResponsePending(peer3, 5));
+
+// All simultaneously expired agreements are erased before cancellation can
+// reenter the MAC and query or mutate transaction state.
+{
+    TestOriginatorHandler timeoutHandler;
+    TestOriginatorPolicy timeoutPolicy;
+    TestTimeoutCancellationCallback timeoutCallback;
+    timeoutCallback.handler = &timeoutHandler;
+    timeoutCallback.expiredAgreementIds = { { peer1, 1 }, { peer2, 2 } };
+
+    Packet firstTimeoutTrigger("firstTimeoutTrigger");
+    auto firstTimeoutHeader = makeQosHeader(peer1, 1, SequenceNumberCyclic(40));
+    timeoutHandler.processAcknowledgedDataFrame(&firstTimeoutTrigger, firstTimeoutHeader, &timeoutPolicy, &timeoutCallback);
+    auto firstTimeoutRequestPacket = timeoutCallback.managementPacket;
+    auto firstTimeoutRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(timeoutCallback.managementHeader);
+    auto firstTimeoutTransactionId = firstTimeoutRequestPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+    timeoutHandler.processTransmittedAddbaReq(firstTimeoutRequestPacket, firstTimeoutRequest, &timeoutPolicy, &timeoutCallback);
+
+    Packet secondTimeoutTrigger("secondTimeoutTrigger");
+    auto secondTimeoutHeader = makeQosHeader(peer2, 2, SequenceNumberCyclic(50));
+    timeoutHandler.processAcknowledgedDataFrame(&secondTimeoutTrigger, secondTimeoutHeader, &timeoutPolicy, &timeoutCallback);
+    auto secondTimeoutRequestPacket = timeoutCallback.managementPacket;
+    auto secondTimeoutRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(timeoutCallback.managementHeader);
+    auto secondTimeoutTransactionId = secondTimeoutRequestPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+    timeoutHandler.processTransmittedAddbaReq(secondTimeoutRequestPacket, secondTimeoutRequest, &timeoutPolicy, &timeoutCallback);
+
+    timeoutHandler.expireNow(peer1, 1);
+    timeoutHandler.expireNow(peer2, 2);
+    timeoutHandler.addbaResponseTimeoutExpired(&timeoutPolicy, &timeoutCallback);
+    ASSERT(timeoutCallback.allExpiredAgreementsGoneBeforeCallbacks);
+    ASSERT(timeoutCallback.cancelledTransactionIds.size() == 2);
+    ASSERT(std::find(timeoutCallback.cancelledTransactionIds.begin(), timeoutCallback.cancelledTransactionIds.end(), firstTimeoutTransactionId) != timeoutCallback.cancelledTransactionIds.end());
+    ASSERT(std::find(timeoutCallback.cancelledTransactionIds.begin(), timeoutCallback.cancelledTransactionIds.end(), secondTimeoutTransactionId) != timeoutCallback.cancelledTransactionIds.end());
+    ASSERT(timeoutCallback.addbaDeadline == SIMTIME_MAX);
+}
+
+// Transaction cancellation leaves packets borrowed by the active frame
+// sequence under that sequence's ownership, including RTS-protected packets.
+{
+    const uint64_t transactionId = 900;
+    TestPacketQueue pendingQueue;
+    TestInProgressFrames activeFrames;
+    auto directRequest = makeShared<Ieee80211AddbaRequest>();
+    auto directPacket = new Packet("activeAddbaRequest", directRequest);
+    directPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+    auto protectedRequest = makeShared<Ieee80211AddbaRequest>();
+    auto protectedPacket = new Packet("rtsProtectedAddbaRequest", protectedRequest);
+    protectedPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+    activeFrames.addFrame(directPacket);
+    activeFrames.addFrame(protectedPacket);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &activeFrames;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    auto frameSequenceHandler = new TestFrameSequenceHandler();
+    frameSequenceHandler->running = true;
+    frameSequenceHandler->context = new FrameSequenceContext(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &activeFrames, nullptr, nullptr, nullptr, nullptr);
+    frameSequenceHandler->context->addStep(new TransmitStep(directPacket, 0));
+    frameSequenceHandler->context->addStep(new RtsTransmitStep(protectedPacket, new Packet("rts", makeShared<Ieee80211RtsFrame>()), 0));
+    TestHcf hcf;
+    hcf.configure(&edca);
+    hcf.configureFrameSequenceHandler(frameSequenceHandler);
+    hcf.cancelTransaction(transactionId);
+    ASSERT(activeFrames.getLength() == 2);
+    auto releasedFrames = activeFrames.releaseFrames();
+    ASSERT(releasedFrames.size() == 2);
+    for (auto frame : releasedFrames)
+        delete frame;
+}
+
+
+// A transaction frame that is not referenced by an active sequence is removed
+// from in-progress ownership and reclaimed immediately, without entering the
+// deferred dropped-frame list.
+{
+    const uint64_t transactionId = 901;
+    TestPacketQueue pendingQueue;
+    QosAckHandler ackHandler;
+    TestInProgressFrames inProgressFrames;
+    auto request = makeShared<Ieee80211AddbaRequest>();
+    request->setReceiverAddress(peer1);
+    request->setSequenceNumber(SequenceNumberCyclic(31));
+    auto packet = new Packet("idleAddbaRequest", request);
+    packet->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+    inProgressFrames.addOwnedFrame(packet);
+    ackHandler.frameGotInProgress(request);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    TestHcf hcf;
+    hcf.configure(&edca);
+    TestPacketDropSignalListener dropListener;
+    hcf.subscribe(packetDroppedSignal, &dropListener);
+    hcf.cancelTransaction(transactionId);
+    ASSERT(inProgressFrames.getLength() == 0);
+    ASSERT(inProgressFrames.getNumDroppedFrames() == 0);
+    ASSERT(dropListener.numSignals == 1);
+    ASSERT(dropListener.numOtherPacketDrops == 1);
+    hcf.unsubscribe(packetDroppedSignal, &dropListener);
+}
+
+// An unsent transaction has no response deadline and is retired by a typed drop callback.
+Packet unsentTrigger("unsentTrigger");
+auto unsentHeader = makeQosHeader(peer2, 5, SequenceNumberCyclic(40));
+handler.processAcknowledgedDataFrame(&unsentTrigger, unsentHeader, &originatorPolicy, &callback);
+ASSERT(handler.isAddbaResponsePending(peer2, 5));
+
+// Real observed pending queues treat REMOVED as terminal for an unsent tagged
+// ADDBA Request, while DEQUEUED is only ownership transfer. The held same-TID
+// data frame becomes eligible exactly once after terminal cleanup.
+auto verifyObservedPendingRemoval = [&](queueing::IPacketQueue::PacketRemovalReason removalReason, bool removeAll) {
+    auto observedHandler = new TestOriginatorHandler();
+    TestOriginatorQosMacDataService observedDataService;
+    observedDataService.setFrameEligibilityFunction([observedHandler](const Packet *packet) {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (auto addbaReq = dynamicPtrCast<const Ieee80211AddbaRequest>(header))
+            return observedHandler->isAddbaRequestPending(packet, addbaReq);
+        auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        return dataHeader == nullptr || !observedHandler->isAddbaResponsePending(dataHeader->getReceiverAddress(), dataHeader->getTid());
+    });
+    TestPacketQueue observedQueue;
+    TestAckHandler observedAckHandler;
+    TestInProgressFrames observedInProgressFrames;
+    observedInProgressFrames.configure(&observedDataService, &observedAckHandler, &observedQueue);
+    TestEdcaf observedEdcaf;
+    observedEdcaf.pendingQueue = &observedQueue;
+    observedEdcaf.inProgressFrames = &observedInProgressFrames;
+    TestEdca observedEdca;
+    observedEdca.edcaf = &observedEdcaf;
+    TestHcf observedHcf;
+    observedHcf.configureEligibilityIndex(&observedEdca, &observedDataService);
+    auto observedRecipientHandler = new RecipientBlockAckAgreementHandler();
+    TestRecipientPolicy observedRecipientPolicy;
+    observedHcf.configureBlockAckHandlers(observedHandler, &originatorPolicy, observedRecipientHandler, &observedRecipientPolicy);
+    observedHcf.delegateDroppedSetupHandling = true;
+    observedHcf.observePendingQueue(&observedQueue);
+    TestCallback observedCallback;
+    Packet observedTrigger("observedTrigger");
+    auto observedHeader = makeQosHeader(peer2, 6, SequenceNumberCyclic(60));
+    observedHandler->processAcknowledgedDataFrame(&observedTrigger, observedHeader, &originatorPolicy, &observedCallback);
+    auto observedRequestPacket = observedCallback.managementPacket;
+    auto observedRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(observedCallback.managementHeader);
+    observedCallback.forgetManagementPacket(observedRequestPacket);
+    auto heldDataPacket = new Packet("heldSameTidData", makeQosHeader(peer2, 6, SequenceNumberCyclic(61)));
+    observedQueue.enqueuePacket(observedRequestPacket);
+    observedQueue.enqueuePacket(heldDataPacket);
+    observedHcf.trackFrame(observedRequestPacket, AC_BK);
+    observedHcf.trackFrame(heldDataPacket, AC_BK);
+    ASSERT(observedHcf.getNumEligiblePendingFrames(AC_BK) == 1);
+    if (removalReason == queueing::IPacketQueue::PacketRemovalReason::DEQUEUED) {
+        auto dequeuedPacket = observedQueue.dequeuePacket();
+        ASSERT(dequeuedPacket == observedRequestPacket);
+        ASSERT(observedHandler->isAddbaResponsePending(peer2, 6));
+        ASSERT(observedHcf.numResumedEligibleChannelAccess == 0);
+        observedHandler->processDroppedAddbaReq(dequeuedPacket, observedRequest, &originatorPolicy, &observedCallback);
+        delete dequeuedPacket;
+    }
+    else {
+        if (removeAll)
+            observedQueue.removeAllPackets();
+        else
+            observedQueue.removePacket(observedRequestPacket);
+        ASSERT(observedHandler->getAgreement(peer2, 6) == nullptr);
+        ASSERT(observedHcf.getNumEligiblePendingFrames(AC_BK) == (removeAll ? 0 : 1));
+        ASSERT(observedHcf.numResumedEligibleChannelAccess == 1);
+        if (!removeAll)
+            observedQueue.removePacket(heldDataPacket);
+        delete observedRequestPacket;
+    }
+    delete heldDataPacket;
+};
+verifyObservedPendingRemoval(queueing::IPacketQueue::PacketRemovalReason::REMOVED, false);
+verifyObservedPendingRemoval(queueing::IPacketQueue::PacketRemovalReason::REMOVED, true);
+verifyObservedPendingRemoval(queueing::IPacketQueue::PacketRemovalReason::DEQUEUED, false);
+
+ASSERT(callback.addbaDeadline == SIMTIME_MAX);
+auto unsentRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(callback.managementHeader);
+auto unsentRequestPacket = callback.managementPacket;
+auto unsentTransactionId = unsentRequestPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+handler.processDroppedAddbaReq(unsentRequestPacket, unsentRequest, &originatorPolicy, &callback);
+ASSERT(handler.getAgreement(peer2, 5) == nullptr);
+ASSERT(callback.cancelledTransactionIds.back() == unsentTransactionId);
+ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
+
+// A DELBA that terminates a pending transaction also cancels its tagged ADDBA
+// Request and recomputes the response timer.
+{
+    TestOriginatorHandler receivedDelbaHandler;
+    TestCallback receivedDelbaCallback;
+    Packet receivedDelbaTrigger("receivedDelbaTrigger");
+    auto receivedDelbaTriggerHeader = makeQosHeader(peer1, 2, SequenceNumberCyclic(60));
+    receivedDelbaHandler.processAcknowledgedDataFrame(&receivedDelbaTrigger, receivedDelbaTriggerHeader, &originatorPolicy, &receivedDelbaCallback);
+    auto receivedDelbaTransactionId = receivedDelbaCallback.managementPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+    auto receivedDelba = makeShared<Ieee80211Delba>();
+    receivedDelba->setTransmitterAddress(peer1);
+    receivedDelba->setTid(2);
+    auto terminatedAgreement = receivedDelbaHandler.processReceivedDelba(receivedDelba, &originatorPolicy, &receivedDelbaCallback);
+    ASSERT(terminatedAgreement != nullptr);
+    if (receivedDelbaHandler.getAgreement(peer1, 2) != nullptr || receivedDelbaCallback.cancelledTransactionIds.size() != 1 || receivedDelbaCallback.cancelledTransactionIds.back() != receivedDelbaTransactionId)
+        throw cRuntimeError("Received DELBA did not cancel the pending ADDBA transaction");
+    ASSERT(receivedDelbaHandler.getAgreement(peer1, 2) == nullptr);
+    ASSERT(receivedDelbaCallback.cancelledTransactionIds.back() == receivedDelbaTransactionId);
+    ASSERT(receivedDelbaCallback.excludedPackets.back() == nullptr);
+    ASSERT(receivedDelbaCallback.addbaDeadline == SIMTIME_MAX);
+}
+{
+    TestOriginatorHandler transmittedDelbaHandler;
+    TestCallback transmittedDelbaCallback;
+    Packet transmittedDelbaTrigger("transmittedDelbaTrigger");
+    auto transmittedDelbaTriggerHeader = makeQosHeader(peer2, 2, SequenceNumberCyclic(70));
+    transmittedDelbaHandler.processAcknowledgedDataFrame(&transmittedDelbaTrigger, transmittedDelbaTriggerHeader, &originatorPolicy, &transmittedDelbaCallback);
+    auto transmittedDelbaTransactionId = transmittedDelbaCallback.managementPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+    auto transmittedDelba = makeShared<Ieee80211Delba>();
+    transmittedDelba->setReceiverAddress(peer2);
+    transmittedDelba->setTid(2);
+    Packet transmittedDelbaPacket("transmittedDelba", transmittedDelba);
+    auto terminatedPendingAgreement = transmittedDelbaHandler.processTransmittedDelba(&transmittedDelbaPacket, &transmittedDelbaCallback);
+    ASSERT(terminatedPendingAgreement != nullptr);
+    ASSERT(terminatedPendingAgreement->isPending());
+    if (transmittedDelbaHandler.getAgreement(peer2, 2) != nullptr || transmittedDelbaCallback.cancelledTransactionIds.size() != 1 || transmittedDelbaCallback.cancelledTransactionIds.back() != transmittedDelbaTransactionId)
+        throw cRuntimeError("Transmitted DELBA did not cancel the pending ADDBA transaction");
+    ASSERT(transmittedDelbaHandler.getAgreement(peer2, 2) == nullptr);
+    ASSERT(transmittedDelbaCallback.cancelledTransactionIds.back() == transmittedDelbaTransactionId);
+    ASSERT(transmittedDelbaCallback.excludedPackets.back() == nullptr);
+    ASSERT(transmittedDelbaCallback.addbaDeadline == SIMTIME_MAX);
+}
+
+// Fragmentation preserves the local transaction identity on every MPDU, and
+// typed cancellation removes all exact siblings while retaining the dropped
+// fragment and an unrelated transaction.
+{
+    TestOriginatorHandler fragmentedHandler;
+    TestCallback fragmentedCallback;
+    Packet fragmentedTrigger("fragmentedTrigger");
+    auto fragmentedTriggerHeader = makeQosHeader(peer1, 7, SequenceNumberCyclic(50));
+    fragmentedHandler.processAcknowledgedDataFrame(&fragmentedTrigger, fragmentedTriggerHeader, &originatorPolicy, &fragmentedCallback);
+    auto unfragmentedRequestPacket = fragmentedCallback.managementPacket;
+    auto fragmentedTransactionId = unfragmentedRequestPacket->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId();
+    fragmentedCallback.forgetManagementPacket(unfragmentedRequestPacket);
+    unfragmentedRequestPacket->insertAtBack(makeShared<ByteCountChunk>(B(4)));
+    unfragmentedRequestPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    TestFragmentationPolicy fragmentationPolicy;
+    TestOriginatorQosMacDataService fragmentationDataService;
+    fragmentationDataService.enableFragmentation(&fragmentationPolicy);
+    auto fragments = fragmentationDataService.fragment(unfragmentedRequestPacket);
+    ASSERT(fragments != nullptr);
+    ASSERT(fragments->size() == 2);
+    for (auto fragment : *fragments)
+        ASSERT(fragment->getTag<Ieee80211AddbaTransactionTag>()->getTransactionId() == fragmentedTransactionId);
+    auto unrelatedPacket = new Packet("unrelatedTransaction", makeShared<ByteCountChunk>(B(1)));
+    unrelatedPacket->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(fragmentedTransactionId + 1);
+    auto droppedFragment = fragments->at(0);
+    auto siblingFragment = fragments->at(1);
+    TestPacketQueue fragmentedPendingQueue;
+    fragmentedPendingQueue.packets = { droppedFragment, siblingFragment, unrelatedPacket };
+    TestInProgressFrames fragmentedInProgressFrames;
+    TestEdcaf fragmentedEdcaf;
+    fragmentedEdcaf.pendingQueue = &fragmentedPendingQueue;
+    fragmentedEdcaf.inProgressFrames = &fragmentedInProgressFrames;
+    TestEdca fragmentedEdca;
+    fragmentedEdca.edcaf = &fragmentedEdcaf;
+    TestHcf fragmentedHcf;
+    fragmentedHcf.configure(&fragmentedEdca);
+    auto droppedRequest = droppedFragment->peekAtFront<Ieee80211AddbaRequest>();
+    fragmentedHandler.processDroppedAddbaReq(droppedFragment, droppedRequest, &originatorPolicy, &fragmentedHcf);
+    ASSERT(fragmentedHandler.getAgreement(peer1, 7) == nullptr);
+    ASSERT(fragmentedPendingQueue.getNumPackets() == 2);
+    ASSERT(std::find(fragmentedPendingQueue.packets.begin(), fragmentedPendingQueue.packets.end(), droppedFragment) != fragmentedPendingQueue.packets.end());
+    ASSERT(std::find(fragmentedPendingQueue.packets.begin(), fragmentedPendingQueue.packets.end(), siblingFragment) == fragmentedPendingQueue.packets.end());
+    ASSERT(std::find(fragmentedPendingQueue.packets.begin(), fragmentedPendingQueue.packets.end(), unrelatedPacket) != fragmentedPendingQueue.packets.end());
+    fragmentedPendingQueue.removePacket(droppedFragment);
+    fragmentedPendingQueue.removePacket(unrelatedPacket);
+    delete droppedFragment;
+    delete fragments;
+    delete unrelatedPacket;
+}
+
+{
+    TestOriginatorHandler invalidTimeoutHandler;
+    TestOriginatorPolicy invalidTimeoutPolicy;
+    TestCallback invalidTimeoutCallback;
+    invalidTimeoutPolicy.addbaResponseTimeout = 0;
+    Packet invalidTimeoutTrigger("invalidTimeoutTrigger");
+    auto invalidTimeoutHeader = makeQosHeader(peer2, 1, SequenceNumberCyclic(30));
+    bool threw = false;
+    try {
+        invalidTimeoutHandler.processAcknowledgedDataFrame(&invalidTimeoutTrigger, invalidTimeoutHeader, &invalidTimeoutPolicy, &invalidTimeoutCallback);
+        auto invalidRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(invalidTimeoutCallback.managementHeader);
+        invalidTimeoutHandler.processTransmittedAddbaReq(invalidTimeoutCallback.managementPacket, invalidRequest, &invalidTimeoutPolicy, &invalidTimeoutCallback);
+    }
+    catch (cRuntimeError&) {
+        threw = true;
+    }
+    ASSERT(threw);
+}
+
+// A direct IPacketQueue implementation without OMNeT++ signals cannot leave
+// the index stale because ownership departures use the typed queue callback.
+{
+    TestOriginatorQosMacDataService customQueueDataService;
+    TestPacketQueue customQueue;
+    TestAckHandler customQueueAckHandler;
+    TestInProgressFrames customQueueInProgressFrames;
+    customQueueInProgressFrames.configure(&customQueueDataService, &customQueueAckHandler, &customQueue);
+    TestEdcaf customQueueEdcaf;
+    customQueueEdcaf.pendingQueue = &customQueue;
+    customQueueEdcaf.inProgressFrames = &customQueueInProgressFrames;
+    TestEdca customQueueEdca;
+    customQueueEdca.edcaf = &customQueueEdcaf;
+    TestHcf customQueueHcf;
+    customQueueHcf.configureEligibilityIndex(&customQueueEdca, &customQueueDataService);
+    customQueueHcf.observePendingQueue(&customQueue);
+    customQueueHcf.rebuildEligibilityIndex();
+    auto customPacket = new Packet("customQueuePacket", makeShared<ByteCountChunk>(B(1)));
+    customQueueHcf.trackFrame(customPacket, AC_BK);
+    customQueue.enqueuePacket(customPacket);
+    if (customQueueHcf.getNumEligiblePendingFrames(AC_BK) != 1)
+        throw cRuntimeError("Custom queue enqueue was not indexed");
+    auto customDequeuedPacket = customQueue.dequeuePacket();
+    if (customDequeuedPacket != customPacket || customQueueHcf.getNumTrackedPendingFrames() != 0)
+        throw cRuntimeError("Custom queue departure callback left the index stale");
+    delete customDequeuedPacket;
+}
+
+// Top-level queue lifecycle callbacks maintain the same index incrementally;
+// destructive drops are distinguished from ordinary departures.
+{
+    TestOriginatorQosMacDataService indexedDataService;
+    indexedDataService.setFrameEligibilityFunction([](const Packet *) { return true; });
+    QosAckHandler indexedAckHandler;
+    TestInProgressFrames indexedInProgressFrames;
+    indexedInProgressFrames.configure(&indexedDataService, &indexedAckHandler);
+    TestEdcaf indexedEdcaf;
+    TestEdca indexedEdca;
+    indexedEdca.edcaf = &indexedEdcaf;
+    indexedEdcaf.inProgressFrames = &indexedInProgressFrames;
+    auto overflowQueue = createPacketQueue("indexedOverflowQueue", 1, "inet::queueing::PacketAtCollectionEndDropper");
+    indexedEdcaf.pendingQueue = overflowQueue;
+    TestHcf indexedHcf;
+    indexedHcf.configureEligibilityIndex(&indexedEdca, &indexedDataService);
+    indexedHcf.observePendingQueue(overflowQueue);
+    indexedHcf.rebuildEligibilityIndex();
+    auto retainedPacket = new Packet("indexedRetainedPacket", makeShared<ByteCountChunk>(B(1)));
+    indexedHcf.trackFrame(retainedPacket, AC_BK);
+    overflowQueue->pushPacket(retainedPacket, nullptr);
+    auto droppedArrival = new Packet("indexedDroppedArrival", makeShared<ByteCountChunk>(B(1)));
+    indexedHcf.trackFrame(droppedArrival, AC_BK);
+    overflowQueue->pushPacket(droppedArrival, nullptr);
+    if (indexedHcf.getNumTrackedPendingFrames() != 1 || indexedHcf.getNumEligiblePendingFrames(AC_BK) != 1)
+        throw cRuntimeError("Eligibility index did not account for overflow");
+    auto selectedPacket = overflowQueue->dequeuePacket([](const Packet *) { return true; });
+    if (selectedPacket != retainedPacket || indexedHcf.getNumTrackedPendingFrames() != 0)
+        throw cRuntimeError("Eligibility index did not account for selected dequeue");
+    bool hasFrameAfterSelectedDequeue = indexedHcf.hasFrame(AC_BK);
+    if (hasFrameAfterSelectedDequeue)
+        throw cRuntimeError("Eligibility index reports a frame after selected dequeue");
+    take(selectedPacket);
+    delete selectedPacket;
+    overflowQueue->callFinish();
+    overflowQueue->deleteModule();
+}
+
 // Predicate extraction follows each provider's scheduling policy instead of
 // the compound collection's gate-order enumeration.
 {
@@ -470,6 +1690,367 @@ auto createPacketQueue = [this](const char *name, int packetCapacity = -1, const
     gateModule->deleteModule();
     leafQueue->deleteModule();
 }
+
+// Every A-MSDU member is extracted through the scheduler, so provider
+// accounting runs for all policy-selected subframes.
+{
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(8)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    TestPacketQueue firstQueue;
+    TestPacketQueue secondQueue;
+    auto firstSubframe = makeAggregatePacket("schedulerAggregateFirst", SequenceNumberCyclic(10));
+    auto secondSubframe = makeAggregatePacket("schedulerAggregateSecond", SequenceNumberCyclic(11));
+    firstQueue.enqueuePacket(firstSubframe);
+    secondQueue.enqueuePacket(secondSubframe);
+    TestPriorityScheduler scheduler;
+    scheduler.configure({ &firstQueue, &secondQueue });
+    TestCompoundPacketQueue compoundQueue;
+    compoundQueue.configure(&scheduler, &scheduler);
+    TestSelectedMsduAggregationPolicy aggregationPolicy;
+    aggregationPolicy.selectedPackets = { firstSubframe, secondSubframe };
+    TestOriginatorQosMacDataService service;
+    service.enableMsduAggregationPolicy(&aggregationPolicy);
+    auto frames = service.extractFramesToTransmit(&compoundQueue);
+    if (frames == nullptr || frames->size() != 1 || scheduler.getNumProcessedPackets() != 2 || !firstQueue.isEmpty() || !secondQueue.isEmpty())
+        throw cRuntimeError("A-MSDU extraction bypassed scheduler processing");
+    service.release(frames->front());
+    delete frames->front();
+    delete frames;
+}
+
+// A-MSDU validation discovers selected members by identity without enumerating
+// an unrelated trailing backlog through the packet collection API.
+{
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(8)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    TestPacketQueue queue;
+    auto firstSubframe = makeAggregatePacket("backlogAggregateFirst", SequenceNumberCyclic(14));
+    auto secondSubframe = makeAggregatePacket("backlogAggregateSecond", SequenceNumberCyclic(15));
+    queue.packets = { firstSubframe, secondSubframe };
+    for (int i = 0; i < 128; i++)
+        queue.packets.push_back(makeAggregatePacket("backlogAggregateTail", SequenceNumberCyclic(16 + i)));
+    TestSelectedMsduAggregationPolicy aggregationPolicy;
+    aggregationPolicy.selectedPackets = { firstSubframe, secondSubframe };
+    TestOriginatorQosMacDataService service;
+    service.enableMsduAggregationPolicy(&aggregationPolicy);
+    auto frames = service.extractFramesToTransmit(&queue);
+    ASSERT(frames != nullptr);
+    ASSERT(frames->size() == 1);
+    ASSERT(frames->front()->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent());
+    ASSERT(queue.getNumPackets() == 128);
+    ASSERT(queue.numGetPacketCalls == 0);
+    service.release(frames->front());
+    delete frames->front();
+    delete frames;
+    for (auto packet : queue.packets)
+        delete packet;
+    queue.packets.clear();
+}
+
+// The built-in policy is anchored on the provider-selected candidate. Held
+// enumeration members do not hide later compatible frames, while an oversized
+// anchor falls back to ordinary dequeue without aggregating its followers.
+{
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber, int payloadLength) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(payloadLength)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    TestPacketQueue queue;
+    auto anchor = makeAggregatePacket("basicPolicyAnchor", SequenceNumberCyclic(20), 8);
+    auto held = makeAggregatePacket("basicPolicyHeld", SequenceNumberCyclic(21), 8);
+    auto compatible = makeAggregatePacket("basicPolicyCompatible", SequenceNumberCyclic(22), 8);
+    auto heldHeader = held->removeAtFront<Ieee80211DataHeader>();
+    heldHeader->setTid(2);
+    held->insertAtFront(heldHeader);
+    queue.packets = { anchor, held, compatible };
+    TestBasicMsduAggregationPolicy policy;
+    policy.configure(B(4065));
+    auto selected = policy.computeAggregateFrames(&queue, anchor, [held](const Packet *packet) { return packet != held; });
+    ASSERT(selected != nullptr);
+    ASSERT(selected->size() == 2);
+    ASSERT(selected->at(0) == anchor);
+    ASSERT(selected->at(1) == compatible);
+    delete selected;
+    auto oversizedAnchor = makeAggregatePacket("basicPolicyOversizedAnchor", SequenceNumberCyclic(23), 64);
+    auto smallFollower1 = makeAggregatePacket("basicPolicySmallFollower1", SequenceNumberCyclic(24), 1);
+    auto smallFollower2 = makeAggregatePacket("basicPolicySmallFollower2", SequenceNumberCyclic(25), 1);
+    queue.packets = { oversizedAnchor, smallFollower1, smallFollower2 };
+    policy.configure(B(30));
+    ASSERT(policy.computeAggregateFrames(&queue, oversizedAnchor, [](const Packet *) { return true; }) == nullptr);
+    auto prefix = makeAggregatePacket("basicPolicyPrefix", SequenceNumberCyclic(26), 8);
+    auto middleAnchor = makeAggregatePacket("basicPolicyMiddleAnchor", SequenceNumberCyclic(27), 8);
+    auto suffix = makeAggregatePacket("basicPolicySuffix", SequenceNumberCyclic(28), 8);
+    queue.packets = { prefix, middleAnchor, suffix };
+    policy.configure(B(4065));
+    selected = policy.computeAggregateFrames(&queue, middleAnchor, [prefix](const Packet *packet) { return packet != prefix; });
+    ASSERT(selected != nullptr);
+    ASSERT(selected->size() == 2);
+    ASSERT(selected->at(0) == middleAnchor);
+    ASSERT(selected->at(1) == suffix);
+    delete selected;
+    auto capacityAnchor = makeAggregatePacket("basicPolicyCapacityAnchor", SequenceNumberCyclic(29), 8);
+    auto oversizedMiddle = makeAggregatePacket("basicPolicyOversizedMiddle", SequenceNumberCyclic(30), 64);
+    auto smallSuffix = makeAggregatePacket("basicPolicySmallSuffix", SequenceNumberCyclic(31), 1);
+    queue.packets = { capacityAnchor, oversizedMiddle, smallSuffix };
+    policy.configure(B(40));
+    ASSERT(policy.computeAggregateFrames(&queue, capacityAnchor, [](const Packet *) { return true; }) == nullptr);
+    queue.packets.clear();
+    for (auto packet : { anchor, held, compatible, oversizedAnchor, smallFollower1, smallFollower2, prefix, middleAnchor, suffix, capacityAnchor, oversizedMiddle, smallSuffix })
+        delete packet;
+}
+
+// Contract validation owns both already-extracted frames and an unexpected
+// non-null provider result, so a caught provider error leaves only the frame
+// which was never extracted in the queue.
+{
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(8)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    TestWrongDequeueQueue queue;
+    auto first = makeAggregatePacket("badProviderFirst", SequenceNumberCyclic(35));
+    auto second = makeAggregatePacket("badProviderSecond", SequenceNumberCyclic(36));
+    auto wrong = makeAggregatePacket("badProviderWrong", SequenceNumberCyclic(37));
+    queue.packets = { first, second, wrong };
+    queue.wrongPacket = wrong;
+    TestSelectedMsduAggregationPolicy aggregationPolicy;
+    aggregationPolicy.selectedPackets = { first, second };
+    TestOriginatorQosMacDataService service;
+    service.enableMsduAggregationPolicy(&aggregationPolicy);
+    bool contractError = false;
+    try {
+        service.extractFramesToTransmit(&queue);
+    }
+    catch (cRuntimeError& error) {
+        contractError = std::string(error.what()).find("no longer available") != std::string::npos;
+    }
+    ASSERT(contractError);
+    ASSERT(queue.packets.size() == 1);
+    ASSERT(queue.packets.front() == second);
+    queue.packets.clear();
+    delete second;
+}
+
+// Returning an already-extracted pointer for a later exact dequeue is also a
+// provider contract violation, but the cleanup guard must adopt it only once.
+{
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(8)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    TestRepeatedDequeueQueue queue;
+    auto first = makeAggregatePacket("repeatedProviderFirst", SequenceNumberCyclic(38));
+    auto second = makeAggregatePacket("repeatedProviderSecond", SequenceNumberCyclic(39));
+    queue.packets = { first, second };
+    TestSelectedMsduAggregationPolicy aggregationPolicy;
+    aggregationPolicy.selectedPackets = { first, second };
+    TestOriginatorQosMacDataService service;
+    service.enableMsduAggregationPolicy(&aggregationPolicy);
+    bool contractError = false;
+    try {
+        service.extractFramesToTransmit(&queue);
+    }
+    catch (cRuntimeError& error) {
+        contractError = std::string(error.what()).find("no longer available") != std::string::npos;
+    }
+    ASSERT(contractError);
+    ASSERT(queue.packets.size() == 1);
+    ASSERT(queue.packets.front() == second);
+    queue.packets.clear();
+    delete second;
+}
+
+// Reverse-priority scheduling may select an anchor after an eligible packet in
+// collection enumeration. The built-in policy must never wrap and append that
+// earlier packet after the anchor.
+{
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(8)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    TestPacketQueue firstQueue;
+    TestPacketQueue secondQueue;
+    auto earlierPacket = makeAggregatePacket("reverseEarlier", SequenceNumberCyclic(32));
+    auto reverseAnchor = makeAggregatePacket("reverseAnchor", SequenceNumberCyclic(33));
+    auto reverseSuffix = makeAggregatePacket("reverseSuffix", SequenceNumberCyclic(34));
+    firstQueue.packets = { earlierPacket };
+    secondQueue.packets = { reverseAnchor, reverseSuffix };
+    TestPriorityScheduler scheduler;
+    scheduler.configure({ &firstQueue, &secondQueue }, true);
+    TestCompoundPacketQueue compoundQueue;
+    compoundQueue.configure(&scheduler, &scheduler);
+    auto candidate = compoundQueue.findPacket([](const Packet *) { return true; });
+    ASSERT(candidate == reverseAnchor);
+    TestBasicMsduAggregationPolicy policy;
+    policy.configure(B(4065));
+    auto selected = policy.computeAggregateFrames(&compoundQueue, candidate, [](const Packet *) { return true; });
+    ASSERT(selected != nullptr);
+    ASSERT(selected->size() == 2);
+    ASSERT(selected->at(0) == reverseAnchor);
+    ASSERT(selected->at(1) == reverseSuffix);
+    delete selected;
+    firstQueue.packets.clear();
+    secondQueue.packets.clear();
+    delete earlierPacket;
+    delete reverseAnchor;
+    delete reverseSuffix;
+}
+
+// A flow provider may expose an enumeration order different from its
+// scheduling behavior. Candidate-aware aggregation still extracts every
+// selected member through the provider and runs its processing exactly once.
+{
+    auto leafQueue = createPacketQueue("aggregationFlowLeaf");
+    auto flowModule = cModuleType::get("inet.queueing.common.BackPressureBarrier")->create("aggregationFlow", this);
+    leafQueue->gate("out")->connectTo(flowModule->gate("in"));
+    flowModule->callInitialize();
+    TestSignalListener flowListener;
+    flowModule->subscribe(packetPulledOutSignal, &flowListener);
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(8)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    auto firstSubframe = makeAggregatePacket("flowAggregateFirst", SequenceNumberCyclic(12));
+    auto secondSubframe = makeAggregatePacket("flowAggregateSecond", SequenceNumberCyclic(13));
+    leafQueue->pushPacket(firstSubframe, nullptr);
+    leafQueue->pushPacket(secondSubframe, nullptr);
+    auto flowCollection = check_and_cast<queueing::IPacketCollection *>(flowModule);
+    auto flowExtractor = check_and_cast<queueing::IPacketExtractor *>(flowModule);
+    TestCompoundPacketQueue compoundQueue;
+    compoundQueue.configure(flowCollection, flowExtractor);
+    TestSelectedMsduAggregationPolicy aggregationPolicy;
+    aggregationPolicy.selectedPackets = { firstSubframe, secondSubframe };
+    TestOriginatorQosMacDataService service;
+    service.enableMsduAggregationPolicy(&aggregationPolicy);
+    auto frames = service.extractFramesToTransmit(&compoundQueue);
+    if (frames == nullptr || frames->size() != 1 || !frames->front()->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent() || aggregationPolicy.numCalls != 1 || flowListener.numSignals != 2 || leafQueue->getNumPackets() != 0)
+        throw cRuntimeError("A-MSDU aggregation bypassed PacketFlowBase extraction");
+    service.release(frames->front());
+    delete frames->front();
+    delete frames;
+    flowModule->unsubscribe(packetPulledOutSignal, &flowListener);
+    flowModule->callFinish();
+    flowModule->deleteModule();
+    leafQueue->callFinish();
+    leafQueue->deleteModule();
+}
+
+// End-to-end compound extraction uses the provider's reverse-priority choice
+// as the aggregate anchor while leaving an ineligible higher-level frame held.
+{
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(8)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    TestPacketQueue firstQueue;
+    TestPacketQueue secondQueue;
+    auto heldPacket = makeAggregatePacket("compoundHeldPacket", SequenceNumberCyclic(1));
+    auto selectedPacket = makeAggregatePacket("compoundSelectedPacket", SequenceNumberCyclic(2));
+    auto companionPacket = makeAggregatePacket("compoundCompanionPacket", SequenceNumberCyclic(3));
+    firstQueue.packets = { heldPacket };
+    secondQueue.packets = { selectedPacket, companionPacket };
+    TestPriorityScheduler scheduler;
+    scheduler.configure({ &firstQueue, &secondQueue }, true);
+    TestCompoundPacketQueue compoundQueue;
+    compoundQueue.configure(&scheduler, &scheduler);
+    TestSelectedMsduAggregationPolicy aggregationPolicy;
+    aggregationPolicy.selectedPackets = { selectedPacket, companionPacket };
+    TestOriginatorQosMacDataService service;
+    service.enableMsduAggregationPolicy(&aggregationPolicy);
+    service.setFrameEligibilityFunction([heldPacket](const Packet *packet) { return packet != heldPacket; });
+    auto frames = service.extractFramesToTransmit(&compoundQueue);
+    ASSERT(frames != nullptr);
+    ASSERT(frames->size() == 1);
+    ASSERT(frames->front()->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent());
+    ASSERT(aggregationPolicy.numCalls == 1);
+    ASSERT(firstQueue.getNumPackets() == 1);
+    ASSERT(secondQueue.isEmpty());
+    service.release(frames->front());
+    delete frames->front();
+    delete frames;
+    firstQueue.removePacket(heldPacket);
+    delete heldPacket;
+}
+
+// A-MSDU aggregation may select multiple WRR members, but each exact dequeue
+// must still update WRR accounting.
+{
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(8)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    TestPacketQueue firstQueue;
+    TestPacketQueue secondQueue;
+    auto selectedPacket = makeAggregatePacket("wrrAggregateSelectedPacket", SequenceNumberCyclic(3));
+    auto sameInputPacket = makeAggregatePacket("wrrAggregateSameInputPacket", SequenceNumberCyclic(4));
+    auto otherInputPacket = makeAggregatePacket("wrrAggregateOtherInputPacket", SequenceNumberCyclic(5));
+    firstQueue.packets = { selectedPacket, sameInputPacket };
+    secondQueue.packets = { otherInputPacket };
+    TestWrrScheduler scheduler;
+    scheduler.configure({ &firstQueue, &secondQueue }, { 1, 1 }, { 1, 1 });
+    TestCompoundPacketQueue compoundQueue;
+    compoundQueue.configure(&scheduler, &scheduler);
+    ASSERT(compoundQueue.getPacket(0) == selectedPacket);
+    TestSelectedMsduAggregationPolicy aggregationPolicy;
+    aggregationPolicy.selectedPackets = { selectedPacket, sameInputPacket };
+    TestOriginatorQosMacDataService service;
+    service.enableMsduAggregationPolicy(&aggregationPolicy);
+    auto frames = service.extractFramesToTransmit(&compoundQueue);
+    ASSERT(frames != nullptr);
+    ASSERT(frames->size() == 1);
+    ASSERT(frames->front()->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent());
+    ASSERT(aggregationPolicy.numCalls == 1);
+    ASSERT(firstQueue.isEmpty());
+    ASSERT(secondQueue.getNumPackets() == 1);
+    ASSERT(scheduler.getNumProcessedPackets() == 2);
+    ASSERT(scheduler.getBucket(0) == 0);
+    ASSERT(scheduler.getBucket(1) == 1);
+    service.release(frames->front());
+    delete frames->front();
+    delete frames;
+    secondQueue.removePacket(otherInputPacket);
+    delete otherInputPacket;
+}
 // A real queue with a downstream collector predicate-dequeues a non-front
 // packet, records its residence and semantic pull once, and animates it to the
 // collector while retaining the front packet.
@@ -588,6 +2169,27 @@ auto createPacketQueue = [this](const char *name, int packetCapacity = -1, const
     gateModule->deleteModule();
     leafQueueModule->deleteModule();
 }
+
+// Ordinary queue overflow must not trigger channel-access re-evaluation, while
+// cancelling a dropped setup transaction must immediately release held traffic.
+{
+    TestHcf droppedSetupHcf;
+    Packet droppedSetupPacket("droppedSetupPacket", makeShared<ByteCountChunk>(B(1)));
+    droppedSetupHcf.dropPacket(&droppedSetupPacket);
+    ASSERT(droppedSetupHcf.numProcessedDroppedSetupFrames == 1);
+    ASSERT(droppedSetupHcf.numResumedEligibleChannelAccess == 0);
+    droppedSetupHcf.droppedSetupCancelled = true;
+    droppedSetupHcf.dropPacket(&droppedSetupPacket);
+    ASSERT(droppedSetupHcf.numProcessedDroppedSetupFrames == 2);
+    ASSERT(droppedSetupHcf.numResumedEligibleChannelAccess == 1);
+    droppedSetupHcf.removePacket(&droppedSetupPacket);
+    ASSERT(droppedSetupHcf.numProcessedDroppedSetupFrames == 3);
+    ASSERT(droppedSetupHcf.numResumedEligibleChannelAccess == 2);
+    droppedSetupHcf.dequeuePacket(&droppedSetupPacket);
+    ASSERT(droppedSetupHcf.numProcessedDroppedSetupFrames == 3);
+    ASSERT(droppedSetupHcf.numResumedEligibleChannelAccess == 2);
+}
+
 // The typed queue callback covers every non-destructive ownership departure,
 // including bulk removal, exactly once at the queue boundary.
 {
@@ -935,5 +2537,6 @@ auto createPacketQueue = [this](const char *name, int packetCapacity = -1, const
     bufferModule->deleteModule();
 }
 EV << "ADDBA transaction and negotiated SSN integrity checks passed.\n";
+
 %contains: stdout
 ADDBA transaction and negotiated SSN integrity checks passed.
