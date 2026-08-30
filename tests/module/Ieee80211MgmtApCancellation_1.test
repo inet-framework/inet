@@ -1,0 +1,657 @@
+%description:
+Verify that superseding an AP association response cancels every tagged
+fragment owned by the real DCF or HCF MAC.  A deterministic contention module
+holds the response until the test grants access, and a test MAC holds the
+first frame handoff so authentication restart, deauthentication, and
+disassociation can all cancel an active response before it reaches the PHY.
+The test also cancels a DCF response after CTS and a HCF response during its
+IFS, before either response crosses the Tx-to-MAC handoff. Replacement
+responses are then completed through the ordinary ACK path.
+
+%file: TestIeee80211MgmtApCancellation.cc
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/Tx.h"
+#include "inet/linklayer/ieee80211/mac/contention/Contention.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/contract/IContention.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/queueing/contract/IPacketQueue.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestBlockedContention : public Contention
+{
+  protected:
+    IContention::ICallback *blockedCallback = nullptr;
+
+  public:
+    virtual void startContention(int, simtime_t, simtime_t, simtime_t, IContention::ICallback *callback) override
+    {
+        Enter_Method("startContention");
+        ASSERT(blockedCallback == nullptr);
+        blockedCallback = callback;
+    }
+
+    virtual bool isContentionInProgress() override { return blockedCallback != nullptr; }
+
+    bool hasBlockedContention() const { return blockedCallback != nullptr; }
+
+    void grantAccess()
+    {
+        Enter_Method("grantAccess");
+        ASSERT(blockedCallback != nullptr);
+        auto callback = blockedCallback;
+        blockedCallback = nullptr;
+        callback->channelAccessGranted();
+    }
+};
+
+Define_Module(TestBlockedContention);
+
+class TestInspectableTx : public Tx
+{
+  protected:
+    bool holdDelayedAssociationResponse = false;
+
+  public:
+    bool isWaitingForIfs() const { return frame != nullptr && !transmitting && endIfsTimer != nullptr && endIfsTimer->isScheduled(); }
+
+    void setHoldDelayedAssociationResponse(bool hold) { holdDelayedAssociationResponse = hold; }
+
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *callback) override
+    {
+        Enter_Method("transmitFrame");
+        bool hold = holdDelayedAssociationResponse && ifs > 0 && (header->getType() == ST_ASSOCIATIONRESPONSE || header->getType() == ST_REASSOCIATIONRESPONSE);
+        Tx::transmitFrame(packet, header, ifs, callback);
+        if (hold && !transmitting && endIfsTimer->isScheduled()) {
+            cancelEvent(endIfsTimer);
+            scheduleAfter(SimTime(1, SIMTIME_S), endIfsTimer);
+        }
+    }
+};
+
+Define_Module(TestInspectableTx);
+
+class TestHoldingIeee80211Mac : public Ieee80211Mac
+{
+  protected:
+    Packet *heldFrame = nullptr;
+    bool holdNextFrame = true;
+    int rtsHandoffCount = 0;
+    int ctsReceivedCount = 0;
+    std::vector<uint64_t> managementHandoffTransactionIds;
+
+    void discardHeldFrame()
+    {
+        if (heldFrame != nullptr) {
+            auto frame = heldFrame;
+            heldFrame = nullptr;
+            if (frame->getOwner() == this)
+                drop(frame);
+            delete frame;
+        }
+    }
+
+  public:
+    virtual ~TestHoldingIeee80211Mac() { discardHeldFrame(); }
+
+    virtual void sendDownFrame(Packet *frame) override
+    {
+        auto header = frame->peekAtFront<Ieee80211MacHeader>();
+        if (header->getType() == ST_RTS)
+            rtsHandoffCount++;
+        if (header->getType() == ST_ASSOCIATIONRESPONSE || header->getType() == ST_REASSOCIATIONRESPONSE) {
+            auto transactionTag = frame->findTag<Ieee80211MgmtTransactionTag>();
+            if (transactionTag != nullptr)
+                managementHandoffTransactionIds.push_back(transactionTag->getTransactionId());
+        }
+        if (holdNextFrame) {
+            ASSERT(heldFrame == nullptr);
+            holdNextFrame = false;
+            take(frame);
+            heldFrame = frame;
+        }
+        else
+            Ieee80211Mac::sendDownFrame(frame);
+    }
+
+    virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override
+    {
+        if (header->getType() == ST_CTS)
+            ctsReceivedCount++;
+        Ieee80211Mac::processLowerFrame(packet, header);
+    }
+
+    bool hasHeldFrame() const { return heldFrame != nullptr; }
+
+    bool isWaitingForIfs() const
+    {
+        auto tx = check_and_cast<TestInspectableTx *>(getSubmodule("tx"));
+        return tx->isWaitingForIfs();
+    }
+
+    int getRtsHandoffCount() const { return rtsHandoffCount; }
+    int getCtsReceivedCount() const { return ctsReceivedCount; }
+    int getManagementHandoffCount(uint64_t transactionId) const { return std::count(managementHandoffTransactionIds.begin(), managementHandoffTransactionIds.end(), transactionId); }
+
+    void disarmHold()
+    {
+        Enter_Method("disarmHold");
+        ASSERT(heldFrame == nullptr);
+        holdNextFrame = false;
+    }
+
+    void armDelayedAssociationResponseHold()
+    {
+        Enter_Method("armDelayedAssociationResponseHold");
+        auto tx = check_and_cast<TestInspectableTx *>(getSubmodule("tx"));
+        tx->setHoldDelayedAssociationResponse(true);
+    }
+
+    void disarmDelayedAssociationResponseHold()
+    {
+        Enter_Method("disarmDelayedAssociationResponseHold");
+        auto tx = check_and_cast<TestInspectableTx *>(getSubmodule("tx"));
+        tx->setHoldDelayedAssociationResponse(false);
+    }
+
+    void armHold()
+    {
+        Enter_Method("armHold");
+        ASSERT(heldFrame == nullptr);
+        holdNextFrame = true;
+    }
+
+    void completeHeldTransmission()
+    {
+        Enter_Method("completeHeldTransmission");
+        ASSERT(heldFrame != nullptr);
+        auto tx = check_and_cast<Tx *>(getSubmodule("tx"));
+        tx->radioTransmissionFinished();
+        discardHeldFrame();
+    }
+};
+
+Define_Module(TestHoldingIeee80211Mac);
+
+class TestIeee80211MgmtApCancellation : public Ieee80211MgmtAp
+{
+  public:
+    std::vector<IFrameTransmissionCallback::Status> responseStatuses;
+    std::vector<uint64_t> responseTransactionIds;
+
+    virtual void start() override
+    {
+        // Keep beacon traffic out of the deterministic transaction exchange.
+        Ieee80211MgmtApBase::start();
+    }
+
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype,
+            const MacAddress& destAddr, uint64_t transactionId = 0) override
+    {
+        // Authentication is driven directly by the test and its response is
+        // irrelevant to the AP association-response transaction.
+        if (subtype == ST_AUTHENTICATION)
+            return;
+        Ieee80211MgmtAp::sendManagementFrame(name, body, subtype, destAddr, transactionId);
+    }
+
+    void markAuthenticated(const MacAddress& address)
+    {
+        Enter_Method("markAuthenticated");
+        auto& sta = staList[address];
+        sta.address = address;
+        sta.authSeqExpected = 1;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+    }
+
+    void submitAssociationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitAssociationRequest");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAssociationRequestFrame(packet, header);
+    }
+
+    void submitAuthentication(const MacAddress& address, int sequenceNumber)
+    {
+        Enter_Method("submitAuthentication");
+        auto packet = new Packet("Authentication");
+        auto body = makeShared<Ieee80211AuthenticationFrame>();
+        body->setSequenceNumber(sequenceNumber);
+        body->setStatusCode(SC_SUCCESSFUL);
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAuthenticationFrame(packet, header);
+    }
+
+    void submitDeauthentication(const MacAddress& address)
+    {
+        Enter_Method("submitDeauthentication");
+        auto packet = new Packet("Deauthentication");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleDeauthenticationFrame(packet, header);
+    }
+
+    void submitDisassociation(const MacAddress& address)
+    {
+        Enter_Method("submitDisassociation");
+        auto packet = new Packet("Disassociation");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleDisassociationFrame(packet, header);
+    }
+
+    bool hasPendingAssociation(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it != staList.end() && it->second.pendingAssociationTransactionId != 0;
+    }
+
+    uint64_t getPendingAssociationTransactionId(const MacAddress& address) const
+    {
+        return staList.at(address).pendingAssociationTransactionId;
+    }
+
+    short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
+    void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
+    bool hasCommittedAssociationId(const MacAddress& address) const
+    {
+        return mib->bssAccessPointData.associationIds.find(address) != mib->bssAccessPointData.associationIds.end();
+    }
+
+    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const
+    {
+        return mib->bssAccessPointData.stations.at(address);
+    }
+
+  protected:
+    virtual void frameTransmissionFinished(const IFrameTransmissionCallback::Result& result) override
+    {
+        responseStatuses.push_back(result.getStatus());
+        auto frame = result.getFrame();
+        auto transactionTag = frame == nullptr ? nullptr : frame->findTag<Ieee80211MgmtTransactionTag>();
+        responseTransactionIds.push_back(transactionTag == nullptr ? 0 : transactionTag->getTransactionId());
+        Ieee80211MgmtAp::frameTransmissionFinished(result);
+    }
+};
+
+Define_Module(TestIeee80211MgmtApCancellation);
+
+class TransactionSignalListener : public cListener
+{
+  public:
+    std::vector<uint64_t> sentTransactionIds;
+    std::vector<uint64_t> lowerTransactionIds;
+    std::vector<uint64_t> droppedTransactionIds;
+
+    virtual void receiveSignal(cComponent *, simsignal_t signalID, cObject *value, cObject *) override
+    {
+        auto packet = dynamic_cast<Packet *>(value);
+        if (packet == nullptr || (signalID != packetSentToPeerSignal && signalID != packetSentToLowerSignal && signalID != packetDroppedSignal))
+            return;
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header->getType() != ST_ASSOCIATIONRESPONSE && header->getType() != ST_REASSOCIATIONRESPONSE)
+            return;
+        auto transactionTag = packet->findTag<Ieee80211MgmtTransactionTag>();
+        if (transactionTag == nullptr)
+            return;
+        if (signalID == packetSentToPeerSignal)
+            sentTransactionIds.push_back(transactionTag->getTransactionId());
+        else if (signalID == packetSentToLowerSignal)
+            lowerTransactionIds.push_back(transactionTag->getTransactionId());
+        else
+            droppedTransactionIds.push_back(transactionTag->getTransactionId());
+    }
+};
+
+class Ieee80211MgmtApCancellationTest : public cSimpleModule
+{
+  protected:
+    enum class Supersession {
+        AUTHENTICATION_RESTART,
+        DEAUTHENTICATION,
+        DISASSOCIATION,
+    };
+
+    static int countTransaction(queueing::IPacketQueue *queue, uint64_t transactionId)
+    {
+        int count = 0;
+        for (int i = 0; i < queue->getNumPackets(); i++) {
+            auto transactionTag = queue->getPacket(i)->findTag<Ieee80211MgmtTransactionTag>();
+            if (transactionTag != nullptr && transactionTag->getTransactionId() == transactionId)
+                count++;
+        }
+        return count;
+    }
+
+    static int countTransaction(InProgressFrames *frames, uint64_t transactionId)
+    {
+        int count = 0;
+        for (int i = 0; i < frames->getLength(); i++) {
+            auto transactionTag = frames->getFrames(i)->findTag<Ieee80211MgmtTransactionTag>();
+            if (transactionTag != nullptr && transactionTag->getTransactionId() == transactionId)
+                count++;
+        }
+        return count;
+    }
+
+    void runActiveCancellation(const char *apName, bool qos, const MacAddress& station, Supersession supersession, bool expectReplacement, bool cancelDuringIfs = false)
+    {
+        auto apBase = std::string("^.") + apName + ".wlan[0]";
+        auto mgmt = check_and_cast<TestIeee80211MgmtApCancellation *>(getModuleByPath((apBase + ".mgmt").c_str()));
+        auto mac = check_and_cast<TestHoldingIeee80211Mac *>(getModuleByPath((apBase + ".mac").c_str()));
+        auto pendingQueuePath = apBase + (qos ? ".mac.hcf.edca.edcaf[3].pendingQueue" : ".mac.dcf.channelAccess.pendingQueue");
+        auto inProgressFramesPath = apBase + (qos ? ".mac.hcf.edca.edcaf[3].inProgressFrames" : ".mac.dcf.channelAccess.inProgressFrames");
+        auto contentionPath = apBase + (qos ? ".mac.hcf.edca.edcaf[3].contention" : ".mac.dcf.channelAccess.contention");
+        auto dropSignalSourcePath = apBase + (qos ? ".mac.hcf" : ".mac.dcf");
+        auto sentSignalSourcePath = apBase + (qos ? ".mac.hcf.edca.edcaf[3]" : ".mac.dcf");
+        auto pendingQueue = check_and_cast<queueing::IPacketQueue *>(getModuleByPath(pendingQueuePath.c_str()));
+        auto inProgressFrames = check_and_cast<InProgressFrames *>(getModuleByPath(inProgressFramesPath.c_str()));
+        auto contention = check_and_cast<TestBlockedContention *>(getModuleByPath(contentionPath.c_str()));
+        auto dropSignalSource = getModuleByPath(dropSignalSourcePath.c_str());
+        auto sentSignalSource = getModuleByPath(sentSignalSourcePath.c_str());
+        TransactionSignalListener signalListener;
+        sentSignalSource->subscribe(packetSentToPeerSignal, &signalListener);
+        mac->subscribe(packetSentToLowerSignal, &signalListener);
+        dropSignalSource->subscribe(packetDroppedSignal, &signalListener);
+
+        if (supersession != Supersession::DISASSOCIATION)
+            mgmt->markAuthenticated(station);
+        mgmt->submitAssociationRequest(station);
+        auto oldTransactionId = mgmt->getPendingAssociationTransactionId(station);
+        auto oldAssociationId = mgmt->reserveAssociationId(station);
+        ASSERT(oldTransactionId != 0);
+        ASSERT(oldAssociationId != 0);
+        for (int i = 0; i < 1000 && countTransaction(pendingQueue, oldTransactionId) == 0; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(countTransaction(pendingQueue, oldTransactionId) > 0);
+        ASSERT(inProgressFrames->getLength() == 0);
+        ASSERT(contention->hasBlockedContention());
+
+        auto oldRtsHandoffCount = mac->getRtsHandoffCount();
+        auto oldCtsReceivedCount = mac->getCtsReceivedCount();
+        auto oldManagementHandoffCount = mac->getManagementHandoffCount(oldTransactionId);
+        if (cancelDuringIfs) {
+            mac->disarmHold();
+            mac->armDelayedAssociationResponseHold();
+        }
+        contention->grantAccess();
+        if (cancelDuringIfs) {
+            for (int i = 0; i < 1000 && (!mac->isWaitingForIfs() || mac->getCtsReceivedCount() == oldCtsReceivedCount || mac->getRtsHandoffCount() == oldRtsHandoffCount); i++)
+                wait(SimTime(1, SIMTIME_US));
+            ASSERT(mac->isWaitingForIfs());
+            ASSERT(mac->getCtsReceivedCount() > oldCtsReceivedCount);
+            ASSERT(mac->getRtsHandoffCount() > oldRtsHandoffCount);
+            ASSERT(!mac->hasHeldFrame());
+        }
+        else {
+            for (int i = 0; i < 1000 && !mac->hasHeldFrame(); i++)
+                wait(SimTime(1, SIMTIME_US));
+            ASSERT(mac->hasHeldFrame());
+        }
+        auto oldInProgressCount = countTransaction(inProgressFrames, oldTransactionId);
+        ASSERT(oldInProgressCount > 0);
+        auto oldDroppedCount = signalListener.droppedTransactionIds.size();
+        auto oldSentCount = signalListener.sentTransactionIds.size();
+        auto oldLowerCount = signalListener.lowerTransactionIds.size();
+        auto oldCallbackCount = mgmt->responseStatuses.size();
+
+        if (supersession == Supersession::AUTHENTICATION_RESTART)
+            mgmt->submitAuthentication(station, 1);
+        else if (supersession == Supersession::DEAUTHENTICATION)
+            mgmt->submitDeauthentication(station);
+        else
+            mgmt->submitDisassociation(station);
+        ASSERT(!mgmt->hasPendingAssociation(station));
+        ASSERT(countTransaction(pendingQueue, oldTransactionId) == 0);
+        ASSERT(countTransaction(inProgressFrames, oldTransactionId) == 0);
+        ASSERT(signalListener.droppedTransactionIds.size() - oldDroppedCount == (size_t)oldInProgressCount);
+        ASSERT(signalListener.sentTransactionIds.size() == oldSentCount);
+        ASSERT(signalListener.lowerTransactionIds.size() == oldLowerCount);
+        ASSERT(mgmt->responseStatuses.size() == oldCallbackCount);
+        ASSERT(mac->getManagementHandoffCount(oldTransactionId) == oldManagementHandoffCount);
+        if (cancelDuringIfs)
+            mac->disarmDelayedAssociationResponseHold();
+
+        auto reusableAddress = MacAddress((std::string("02:00:00:00:10:") + (qos ? "02" : "01")).c_str());
+        if (!mgmt->hasCommittedAssociationId(station)) {
+            ASSERT(mgmt->reserveAssociationId(reusableAddress) == oldAssociationId);
+            mgmt->cancelAssociationIdReservation(reusableAddress);
+        }
+
+        uint64_t replacementTransactionId = 0;
+        if (expectReplacement) {
+            if (supersession == Supersession::DEAUTHENTICATION)
+                mgmt->submitAuthentication(station, 1);
+            ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::AUTHENTICATED);
+            mgmt->submitAssociationRequest(station);
+            replacementTransactionId = mgmt->getPendingAssociationTransactionId(station);
+            ASSERT(replacementTransactionId != 0 && replacementTransactionId != oldTransactionId);
+            ASSERT(mgmt->hasPendingAssociation(station));
+        }
+
+        if (!cancelDuringIfs) {
+            mac->completeHeldTransmission();
+            ASSERT(!mac->hasHeldFrame());
+        }
+        else {
+            ASSERT(!mac->hasHeldFrame());
+            ASSERT(!mac->isWaitingForIfs());
+        }
+        if (expectReplacement) {
+            for (int i = 0; i < 1000 && countTransaction(pendingQueue, replacementTransactionId) == 0; i++)
+                wait(SimTime(1, SIMTIME_US));
+            ASSERT(countTransaction(pendingQueue, replacementTransactionId) > 0);
+            ASSERT(contention->hasBlockedContention());
+            // The DCF delayed case has already sent its RTS and the station's
+            // NAV covers the cancelled exchange. Let that reservation expire
+            // before starting the replacement; no replacement frame is
+            // eligible to cross the handoff during this interval.
+            if (cancelDuringIfs && !qos)
+                wait(SimTime(1, SIMTIME_MS));
+            contention->grantAccess();
+            for (int i = 0; i < 100000 && mgmt->hasPendingAssociation(station); i++) {
+                if (contention->hasBlockedContention())
+                    contention->grantAccess();
+                wait(SimTime(1, SIMTIME_US));
+            }
+            ASSERT(mgmt->responseStatuses.size() > oldCallbackCount);
+            ASSERT(!mgmt->hasPendingAssociation(station));
+            ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::ASSOCIATED);
+            ASSERT(mgmt->hasCommittedAssociationId(station));
+            ASSERT(mgmt->reserveAssociationId(station) == oldAssociationId);
+            for (size_t i = oldCallbackCount; i < mgmt->responseTransactionIds.size(); i++)
+                ASSERT(mgmt->responseTransactionIds[i] == replacementTransactionId);
+            ASSERT(std::find(signalListener.sentTransactionIds.begin(), signalListener.sentTransactionIds.end(), oldTransactionId) == signalListener.sentTransactionIds.end());
+            ASSERT(std::find(signalListener.lowerTransactionIds.begin(), signalListener.lowerTransactionIds.end(), oldTransactionId) == signalListener.lowerTransactionIds.end());
+            ASSERT(std::find(signalListener.sentTransactionIds.begin(), signalListener.sentTransactionIds.end(), replacementTransactionId) != signalListener.sentTransactionIds.end());
+        }
+        else {
+            for (int i = 0; i < 100; i++)
+                wait(SimTime(1, SIMTIME_US));
+            ASSERT(mgmt->responseStatuses.size() == oldCallbackCount);
+            ASSERT(!mgmt->hasCommittedAssociationId(station));
+            ASSERT(std::find(signalListener.sentTransactionIds.begin(), signalListener.sentTransactionIds.end(), oldTransactionId) == signalListener.sentTransactionIds.end());
+            ASSERT(std::find(signalListener.lowerTransactionIds.begin(), signalListener.lowerTransactionIds.end(), oldTransactionId) == signalListener.lowerTransactionIds.end());
+        }
+
+        sentSignalSource->unsubscribe(packetSentToPeerSignal, &signalListener);
+        mac->unsubscribe(packetSentToLowerSignal, &signalListener);
+        dropSignalSource->unsubscribe(packetDroppedSignal, &signalListener);
+    }
+
+  public:
+    Ieee80211MgmtApCancellationTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        runActiveCancellation("apDcf", false, MacAddress("02:00:00:00:00:09"), Supersession::AUTHENTICATION_RESTART, true);
+        runActiveCancellation("apDcf", false, MacAddress("02:00:00:00:00:09"), Supersession::AUTHENTICATION_RESTART, true, true);
+        runActiveCancellation("apHcf", true, MacAddress("02:00:00:00:00:0a"), Supersession::DEAUTHENTICATION, true);
+        runActiveCancellation("apHcf", true, MacAddress("02:00:00:00:00:0a"), Supersession::AUTHENTICATION_RESTART, true, true);
+        auto hcfMac = check_and_cast<TestHoldingIeee80211Mac *>(getModuleByPath("^.apHcf.wlan[0].mac"));
+        hcfMac->armHold();
+        runActiveCancellation("apHcf", true, MacAddress("02:00:00:00:00:0a"), Supersession::DISASSOCIATION, false);
+        std::cout << "AP DCF/HCF association transaction supersession cancellation and replacement completion verified.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtApCancellationTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.Tx;
+import inet.linklayer.ieee80211.mac.contention.Contention;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestBlockedContention extends Contention
+{
+    parameters:
+        @class(::inet::ieee80211::TestBlockedContention);
+}
+
+simple TestInspectableTx extends Tx
+{
+    parameters:
+        @class(::inet::ieee80211::TestInspectableTx);
+}
+
+module TestHoldingIeee80211Mac extends Ieee80211Mac
+{
+    parameters:
+        @class(::inet::ieee80211::TestHoldingIeee80211Mac);
+}
+
+simple TestIeee80211MgmtApCancellation extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtApCancellation);
+}
+
+simple Ieee80211MgmtApCancellationTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApCancellationTest);
+}
+
+network Ieee80211MgmtApCancellationTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        apDcf: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtApCancellation";
+                wlan[*].mac.typename = "TestHoldingIeee80211Mac";
+                wlan[*].mac.tx.typename = "TestInspectableTx";
+                wlan[*].mac.dcf.channelAccess.contention.typename = "TestBlockedContention";
+        }
+        staDcf: WirelessHost {
+            parameters:
+                wlan[*].mac.typename = "Ieee80211TesterMac";
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        apHcf: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtApCancellation";
+                wlan[*].mac.typename = "TestHoldingIeee80211Mac";
+                wlan[*].mac.tx.typename = "TestInspectableTx";
+                wlan[*].mac.qosStation = true;
+                wlan[*].mac.hcf.edca.edcaf[*].contention.typename = "TestBlockedContention";
+        }
+        staHcf: WirelessHost {
+            parameters:
+                wlan[*].mac.typename = "Ieee80211TesterMac";
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        test: Ieee80211MgmtApCancellationTest;
+    connections allowunconnected:
+        // The wireless interfaces connect to the shared radio medium through
+        // their radioIn gates; no wired traffic is needed by this regression.
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApCancellationTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 100ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.apDcf.wlan[0].mgmt.beaconInterval = 10s
+*.apHcf.wlan[0].mgmt.beaconInterval = 10s
+*.apDcf.wlan[0].mgmt.numAuthSteps = 2
+*.apHcf.wlan[0].mgmt.numAuthSteps = 2
+*.apDcf.wlan[0].address = "02:00:00:00:00:01"
+*.apHcf.wlan[0].address = "02:00:00:00:00:02"
+*.staDcf.wlan[0].address = "02:00:00:00:00:09"
+*.staHcf.wlan[0].address = "02:00:00:00:00:0a"
+*.staDcf.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.staHcf.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:02"
+*.staDcf.wlan[0].mac.actions = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+*.staHcf.wlan[0].mac.actions = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+*.apDcf.wlan[0].mac.dcf.rtsPolicy.rtsThreshold = 0B
+*.apHcf.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = 0B
+*.apDcf.wlan[0].mac.dcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 32B
+*.apHcf.wlan[0].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 32B
+*.apDcf.mobility.initialX = 0m
+*.apDcf.mobility.initialY = 0m
+*.staDcf.mobility.initialX = 1m
+*.staDcf.mobility.initialY = 0m
+*.apHcf.mobility.initialX = 0m
+*.apHcf.mobility.initialY = 20m
+*.staHcf.mobility.initialX = 1m
+*.staHcf.mobility.initialY = 20m
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.wlan[*].opMode = "g(mixed)"
+**.wlan[*].bitrate = 11Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+
+%contains: stdout
+AP DCF/HCF association transaction supersession cancellation and replacement completion verified.

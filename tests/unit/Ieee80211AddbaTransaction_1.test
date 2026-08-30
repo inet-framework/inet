@@ -37,6 +37,7 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 #include "inet/queueing/gate/PacketGate.h"
 #include "inet/queueing/gate/PeriodicGate.h"
 #include "inet/queueing/queue/CompoundPacketQueueBase.h"
@@ -617,8 +618,9 @@ class TestHcf : public Hcf
     void processTransmittedData(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, AccessCategory ac) { originatorProcessTransmittedDataFrame(packet, dataHeader, ac); }
     void processTransmittedManagement(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& managementHeader, AccessCategory ac) { originatorProcessTransmittedManagementFrame(packet, managementHeader, ac); }
     void dropPacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::DROPPED); }
-    void removePacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::REMOVED); }
+    void removePacket(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason = queueing::IPacketQueue::PacketRemovalReason::REMOVED) { handlePacketRemoved(packet, reason); }
     void dequeuePacket(Packet *packet) { handlePacketRemoved(packet, queueing::IPacketQueue::PacketRemovalReason::DEQUEUED); }
+    bool cancelManagement(uint64_t transactionId, Packet *excludedPacket = nullptr) { return cancelManagementTransaction(transactionId, excludedPacket); }
     void cancelTransaction(uint64_t transactionId) { cancelAddbaTransaction(transactionId, nullptr); }
     void processReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, bool duplicate = false) { recipientProcessReceivedManagementFrame(header, duplicate); }
     void processReceivedFrame(Packet *packet) { recipientProcessReceivedFrame(packet, packet->peekAtFront<Ieee80211MacHeader>()); }
@@ -661,7 +663,13 @@ class TestMac : public Ieee80211Mac
 {
   public:
     int numPendingRadioConfigSends = 0;
+    std::vector<IFrameTransmissionCallback::Status> transmissionStatuses;
+    std::vector<const Packet *> transmissionFrames;
     virtual void sendDownPendingRadioConfigMsg() override { numPendingRadioConfigSends++; }
+    virtual void notifyFrameTransmission(const Packet *frame, IFrameTransmissionCallback::Status status) override {
+        transmissionFrames.push_back(frame);
+        transmissionStatuses.push_back(status);
+    }
 };
 
 class TestEmptyFrameSequence : public IFrameSequence
@@ -780,6 +788,7 @@ class TestFrameSequenceHandler : public IFrameSequenceHandler
     IFrameSequence *frameSequence = nullptr;
     FrameSequenceContext *context = nullptr;
     bool running = false;
+    bool cancellationRequested = false;
     int numStartedSequences = 0;
 
     virtual ~TestFrameSequenceHandler() {
@@ -798,6 +807,7 @@ class TestFrameSequenceHandler : public IFrameSequenceHandler
     virtual void transmissionComplete() override {}
     virtual bool isSequenceRunning() override { return running; }
     virtual void handleStartRxTimeout() override {}
+    virtual void cancelFrameSequence() override { cancellationRequested = true; }
 };
 
 class TestDcaf : public Dcaf
@@ -805,21 +815,34 @@ class TestDcaf : public Dcaf
   public:
     int numReleasedChannels = 0;
 
-    void configure(InProgressFrames *inProgressFrames) { this->inProgressFrames = inProgressFrames; }
+    void configure(InProgressFrames *inProgressFrames, queueing::IPacketQueue *pendingQueue = nullptr) {
+        this->inProgressFrames = inProgressFrames;
+        this->pendingQueue = pendingQueue;
+    }
+    virtual queueing::IPacketQueue *getPendingQueue() const override { return pendingQueue; }
     virtual void releaseChannel(IChannelAccess::ICallback *) override { numReleasedChannels++; }
 };
 
 class TestDcf : public Dcf
 {
   public:
-    TestFrameSequenceHandler *configure(TestDcaf *channelAccess, Ieee80211Mac *mac) {
+    TestFrameSequenceHandler *configure(TestDcaf *channelAccess, Ieee80211Mac *mac, AckHandler *ackHandler = nullptr) {
         this->channelAccess = channelAccess;
         this->mac = mac;
+        this->ackHandler = ackHandler;
         auto handler = new TestFrameSequenceHandler();
         frameSequenceHandler = handler;
         return handler;
     }
     void grant(TestDcaf *channelAccess) { channelGranted(channelAccess); }
+    bool cancelManagement(uint64_t transactionId, Packet *excludedPacket) { return cancelManagementTransaction(transactionId, excludedPacket); }
+    void notifyRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) { handlePacketRemoved(packet, reason); }
+    void configureFailurePath(NonQosRecoveryProcedure *recoveryProcedure) {
+        this->recoveryProcedure = recoveryProcedure;
+        this->stationRetryCounters = new StationRetryCounters();
+    }
+    void processFailedFrame(Packet *packet) { originatorProcessFailedFrame(packet); }
+    void processRtsProtectionFailure(Packet *packet) { originatorProcessRtsProtectionFailed(packet); }
 
   protected:
     virtual FrameSequenceContext *buildContext() override {
@@ -848,6 +871,22 @@ static Packet *makeTaggedDelbaPacket(const char *name, MacAddress receiverAddres
     delba->setMoreFragments(moreFragments);
     auto packet = new Packet(name, delba);
     packet->addTag<Ieee80211AddbaTransactionTag>()->setTransactionId(transactionId);
+    return packet;
+}
+
+static Packet *makeTaggedManagementPacket(const char *name, Ieee80211FrameType type, MacAddress transmitterAddress, MacAddress receiverAddress,
+        SequenceNumberCyclic sequenceNumber, int fragmentNumber, bool moreFragments, uint64_t transactionId, bool retry = false)
+{
+    auto header = makeShared<Ieee80211MgmtHeader>();
+    header->setType(type);
+    header->setTransmitterAddress(transmitterAddress);
+    header->setReceiverAddress(receiverAddress);
+    header->setSequenceNumber(sequenceNumber);
+    header->setFragmentNumber(fragmentNumber);
+    header->setMoreFragments(moreFragments);
+    header->setRetry(retry);
+    auto packet = new Packet(name, header);
+    packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(transactionId);
     return packet;
 }
 
@@ -1351,6 +1390,85 @@ ASSERT(handler.isAddbaResponsePending(peer3, 5));
     ASSERT(releasedFrames.size() == 2);
     for (auto frame : releasedFrames)
         delete frame;
+}
+
+// Management transaction cancellation keeps active direct and RTS-protected
+// frames alive until the sequence retires them, while making both frames
+// ineligible immediately and suppressing terminal callbacks/retries.
+for (auto coordination : { 0, 1 }) {
+    const uint64_t transactionId = 902 + coordination;
+    TestPacketQueue pendingQueue;
+    TestInProgressFrames inProgressFrames;
+    AckHandler dcfAckHandler;
+    TestQosAckHandler hcfAckHandler;
+    inProgressFrames.configure(nullptr, &dcfAckHandler, &pendingQueue);
+    auto directPacket = makeTaggedManagementPacket("activeManagementDirect", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(32 + coordination), 0, true, transactionId);
+    auto protectedPacket = makeTaggedManagementPacket("activeManagementRtsProtected", ST_REASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(32 + coordination), 1, false, transactionId);
+    inProgressFrames.addOwnedFrame(directPacket);
+    inProgressFrames.addOwnedFrame(protectedPacket);
+
+    TestFrameSequenceHandler *frameSequenceHandler;
+    TestMac mac;
+    if (coordination == 0) {
+        TestDcaf channelAccess;
+        channelAccess.configure(&inProgressFrames, &pendingQueue);
+        TestDcf dcf;
+        frameSequenceHandler = dcf.configure(&channelAccess, &mac, &dcfAckHandler);
+        frameSequenceHandler->running = true;
+        frameSequenceHandler->context = new FrameSequenceContext(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &inProgressFrames, nullptr, nullptr, new NonQoSContext(nullptr), nullptr);
+        frameSequenceHandler->context->addStep(new TransmitStep(directPacket, 0));
+        frameSequenceHandler->context->addStep(new RtsTransmitStep(protectedPacket, new Packet("activeManagementRts", makeShared<Ieee80211RtsFrame>()), 0));
+        TestSignalListener dropListener;
+        dcf.subscribe(packetDroppedSignal, &dropListener);
+        ASSERT(dcf.cancelManagement(transactionId, nullptr));
+        ASSERT(frameSequenceHandler->cancellationRequested);
+        ASSERT(inProgressFrames.getLength() == 0);
+        ASSERT(inProgressFrames.getNumDroppedFrames() == 2);
+        ASSERT(dropListener.numSignals == 2);
+        ASSERT(mac.transmissionStatuses.empty());
+        dcf.processFailedFrame(directPacket);
+        dcf.processRtsProtectionFailure(protectedPacket);
+        ASSERT(!directPacket->peekAtFront<Ieee80211MgmtHeader>()->getRetry());
+        ASSERT(!protectedPacket->peekAtFront<Ieee80211MgmtHeader>()->getRetry());
+        auto releasedFrames = inProgressFrames.releaseFrames();
+        ASSERT(releasedFrames.size() == 2);
+        for (auto frame : releasedFrames)
+            delete frame;
+    }
+    else {
+        TestEdcaf edcaf;
+        edcaf.pendingQueue = &pendingQueue;
+        edcaf.inProgressFrames = &inProgressFrames;
+        inProgressFrames.configure(nullptr, &hcfAckHandler, &pendingQueue);
+        edcaf.qosAckHandler = &hcfAckHandler;
+        TestEdca edca;
+        edca.edcaf = &edcaf;
+        TestHcf hcf;
+        hcf.configure(&edca);
+        hcf.configureMac(&mac);
+        frameSequenceHandler = new TestFrameSequenceHandler();
+        frameSequenceHandler->running = true;
+        frameSequenceHandler->context = new FrameSequenceContext(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &inProgressFrames, nullptr, nullptr, nullptr, nullptr);
+        frameSequenceHandler->context->addStep(new TransmitStep(directPacket, 0));
+        frameSequenceHandler->context->addStep(new RtsTransmitStep(protectedPacket, new Packet("activeManagementRts", makeShared<Ieee80211RtsFrame>()), 0));
+        hcf.configureFrameSequenceHandler(frameSequenceHandler);
+        TestSignalListener dropListener;
+        hcf.subscribe(packetDroppedSignal, &dropListener);
+        ASSERT(hcf.cancelManagement(transactionId, nullptr));
+        ASSERT(frameSequenceHandler->cancellationRequested);
+        ASSERT(inProgressFrames.getLength() == 0);
+        ASSERT(inProgressFrames.getNumDroppedFrames() == 2);
+        ASSERT(dropListener.numSignals == 2);
+        ASSERT(mac.transmissionStatuses.empty());
+        hcf.processFailedFrame(directPacket);
+        hcf.processRtsProtectionFailure(protectedPacket);
+        ASSERT(!directPacket->peekAtFront<Ieee80211MgmtHeader>()->getRetry());
+        ASSERT(!protectedPacket->peekAtFront<Ieee80211MgmtHeader>()->getRetry());
+        auto releasedFrames = inProgressFrames.releaseFrames();
+        ASSERT(releasedFrames.size() == 2);
+        for (auto frame : releasedFrames)
+            delete frame;
+    }
 }
 
 
@@ -4296,6 +4414,331 @@ delete deferredFrames.at(0);
     auto dcfFrames = dcfInProgressFrames.releaseFrames();
     ASSERT(dcfFrames.size() == 1);
     delete dcfFrames.at(0);
+}
+
+// A terminal management-frame failure cancels all fragmented siblings in DCF,
+// including frames held by a different queue stage, while leaving the current
+// borrowed frame and an unrelated transaction untouched.
+for (auto responseType : { ST_ASSOCIATIONRESPONSE, ST_REASSOCIATIONRESPONSE }) {
+    TestOriginatorQosMacDataService managementDcfDataService;
+    TestPacketQueue managementDcfPendingQueue;
+    AckHandler managementDcfAckHandler;
+    TestInProgressFrames managementDcfInProgressFrames;
+    managementDcfInProgressFrames.configure(&managementDcfDataService, &managementDcfAckHandler, &managementDcfPendingQueue);
+    TestDcaf managementDcaf;
+    managementDcaf.configure(&managementDcfInProgressFrames, &managementDcfPendingQueue);
+    TestMac managementDcfMac;
+    TestDcf managementDcf;
+    managementDcf.configure(&managementDcaf, &managementDcfMac, &managementDcfAckHandler);
+    auto currentFrame = makeTaggedManagementPacket("managementDcfCurrent", responseType, peer1, peer2, SequenceNumberCyclic(301 + responseType), 0, true, 500 + responseType);
+    auto inProgressSibling = makeTaggedManagementPacket("managementDcfInProgressSibling", responseType, peer1, peer2, SequenceNumberCyclic(301 + responseType), 1, false, 500 + responseType);
+    auto pendingSibling = makeTaggedManagementPacket("managementDcfPendingSibling", responseType, peer1, peer2, SequenceNumberCyclic(301 + responseType), 2, false, 500 + responseType);
+    auto unrelatedFrame = makeTaggedManagementPacket("managementDcfUnrelated", responseType, peer1, peer2, SequenceNumberCyclic(302 + responseType), 0, false, 700 + responseType);
+    managementDcfInProgressFrames.addOwnedFrame(currentFrame);
+    managementDcfInProgressFrames.addOwnedFrame(inProgressSibling);
+    managementDcfPendingQueue.packets = { pendingSibling, unrelatedFrame };
+    ASSERT(managementDcf.cancelManagement(500 + responseType, currentFrame));
+    ASSERT(managementDcfInProgressFrames.getLength() == 1);
+    ASSERT(managementDcfInProgressFrames.getFrames(0) == currentFrame);
+    ASSERT(managementDcfPendingQueue.getNumPackets() == 1);
+    ASSERT(managementDcfPendingQueue.getPacket(0) == unrelatedFrame);
+    ASSERT(managementDcfMac.transmissionStatuses.empty());
+    auto remainingDcfFrames = managementDcfInProgressFrames.releaseFrames();
+    ASSERT(remainingDcfFrames.size() == 1);
+    delete remainingDcfFrames.front();
+    managementDcfPendingQueue.removePacket(unrelatedFrame);
+    delete unrelatedFrame;
+}
+
+// HCF cancellation spans every EDCA, but does not cross transaction identity
+// boundaries. The active sequence's current frame is deliberately excluded.
+{
+    std::array<TestPacketQueue, AC_NUMCATEGORIES> managementHcfPendingQueues;
+    std::array<QosAckHandler, AC_NUMCATEGORIES> managementHcfAckHandlers;
+    std::array<TestOriginatorQosMacDataService, AC_NUMCATEGORIES> managementHcfDataServices;
+    std::array<TestInProgressFrames, AC_NUMCATEGORIES> managementHcfInProgressFrames;
+    std::array<TestEdcaf, AC_NUMCATEGORIES> managementHcfEdcafs;
+    TestEdca managementHcfEdca;
+    managementHcfEdca.numEdcafs = AC_NUMCATEGORIES;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        managementHcfInProgressFrames[ac].configure(&managementHcfDataServices[ac], &managementHcfAckHandlers[ac], &managementHcfPendingQueues[ac]);
+        managementHcfEdcafs[ac].pendingQueue = &managementHcfPendingQueues[ac];
+        managementHcfEdcafs[ac].inProgressFrames = &managementHcfInProgressFrames[ac];
+        managementHcfEdcafs[ac].qosAckHandler = &managementHcfAckHandlers[ac];
+        managementHcfEdcafs[ac].setAccessCategory(AccessCategory(ac));
+        managementHcfEdca.edcafs[ac] = &managementHcfEdcafs[ac];
+    }
+    managementHcfEdca.edcaf = &managementHcfEdcafs[AC_BE];
+    TestMac managementHcfMac;
+    TestHcf managementHcf;
+    managementHcf.configure(&managementHcfEdca);
+    managementHcf.configureMac(&managementHcfMac);
+    auto currentFrame = makeTaggedManagementPacket("managementHcfCurrent", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(401), 0, true, 800);
+    auto crossAcSibling = makeTaggedManagementPacket("managementHcfCrossAcSibling", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(401), 1, false, 800);
+    auto pendingSibling = makeTaggedManagementPacket("managementHcfPendingSibling", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(401), 2, false, 800);
+    auto unrelatedFrame = makeTaggedManagementPacket("managementHcfUnrelated", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(402), 0, false, 801);
+    managementHcfInProgressFrames[AC_BE].addOwnedFrame(currentFrame);
+    managementHcfInProgressFrames[AC_BK].addOwnedFrame(crossAcSibling);
+    managementHcfPendingQueues[AC_VO].packets = { pendingSibling };
+    managementHcfPendingQueues[AC_BK].packets = { unrelatedFrame };
+    ASSERT(managementHcf.cancelManagement(800, currentFrame));
+    ASSERT(managementHcfInProgressFrames[AC_BE].getLength() == 1);
+    ASSERT(managementHcfInProgressFrames[AC_BE].getFrames(0) == currentFrame);
+    ASSERT(managementHcfInProgressFrames[AC_BK].getLength() == 0);
+    ASSERT(managementHcfPendingQueues[AC_VO].isEmpty());
+    ASSERT(managementHcfPendingQueues[AC_BK].getNumPackets() == 1);
+    ASSERT(managementHcfPendingQueues[AC_BK].getPacket(0) == unrelatedFrame);
+    auto remainingHcfFrames = managementHcfInProgressFrames[AC_BE].releaseFrames();
+    ASSERT(remainingHcfFrames.size() == 1);
+    delete remainingHcfFrames.front();
+    managementHcfPendingQueues[AC_BK].removePacket(unrelatedFrame);
+    delete unrelatedFrame;
+
+    auto reassociationCurrentFrame = makeTaggedManagementPacket("managementHcfReassociationCurrent", ST_REASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(403), 0, true, 802);
+    auto reassociationInProgressSibling = makeTaggedManagementPacket("managementHcfReassociationInProgressSibling", ST_REASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(403), 1, false, 802);
+    auto reassociationPendingSibling = makeTaggedManagementPacket("managementHcfReassociationPendingSibling", ST_REASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(403), 2, false, 802);
+    managementHcfInProgressFrames[AC_BE].addOwnedFrame(reassociationCurrentFrame);
+    managementHcfInProgressFrames[AC_VI].addOwnedFrame(reassociationInProgressSibling);
+    managementHcfPendingQueues[AC_BK].packets = { reassociationPendingSibling };
+    ASSERT(managementHcf.cancelManagement(802, reassociationCurrentFrame));
+    ASSERT(managementHcfInProgressFrames[AC_BE].getLength() == 1);
+    ASSERT(managementHcfInProgressFrames[AC_BE].getFrames(0) == reassociationCurrentFrame);
+    ASSERT(managementHcfInProgressFrames[AC_VI].getLength() == 0);
+    ASSERT(managementHcfPendingQueues[AC_BK].isEmpty());
+    auto remainingReassociationFrames = managementHcfInProgressFrames[AC_BE].releaseFrames();
+    ASSERT(remainingReassociationFrames.size() == 1);
+    delete remainingReassociationFrames.front();
+}
+
+// DROPPED and explicit REMOVED management departures report one terminal
+// callback, including a same-token bulk removal; DEQUEUED remains a normal
+// hand-off into transmission processing.
+{
+    TestOriginatorQosMacDataService dcfRemovalDataService;
+    TestPacketQueue dcfRemovalQueue;
+    AckHandler dcfRemovalAckHandler;
+    TestInProgressFrames dcfRemovalInProgressFrames;
+    dcfRemovalInProgressFrames.configure(&dcfRemovalDataService, &dcfRemovalAckHandler, &dcfRemovalQueue);
+    TestDcaf dcfRemovalDcaf;
+    dcfRemovalDcaf.configure(&dcfRemovalInProgressFrames, &dcfRemovalQueue);
+    TestMac dcfRemovalMac;
+    TestDcf dcfRemoval;
+    dcfRemoval.configure(&dcfRemovalDcaf, &dcfRemovalMac, &dcfRemovalAckHandler);
+    dcfRemovalQueue.addPacketCallback(&dcfRemoval);
+    auto droppedPacket = makeTaggedManagementPacket("dcfDroppedManagement", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(410), 0, false, 810);
+    dcfRemovalQueue.packets = { droppedPacket };
+    dcfRemovalQueue.dropPacketFromQueue(droppedPacket);
+    delete droppedPacket;
+    ASSERT(dcfRemovalMac.transmissionStatuses.size() == 1);
+    ASSERT(dcfRemovalMac.transmissionStatuses.back() == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+    auto removedPacket = makeTaggedManagementPacket("dcfRemovedManagement", ST_REASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(411), 0, false, 811);
+    dcfRemovalQueue.packets = { removedPacket };
+    dcfRemovalQueue.removePacket(removedPacket);
+    delete removedPacket;
+    ASSERT(dcfRemovalMac.transmissionStatuses.size() == 2);
+    auto bulkFirst = makeTaggedManagementPacket("dcfBulkManagementFirst", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(412), 0, true, 812);
+    auto bulkSecond = makeTaggedManagementPacket("dcfBulkManagementSecond", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(412), 1, false, 812);
+    auto dequeuedPacket = makeTaggedManagementPacket("dcfDequeuedManagement", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(413), 0, false, 813);
+    dcfRemovalQueue.packets = { bulkFirst, bulkSecond };
+    dcfRemovalQueue.removeAllPackets();
+    ASSERT(dcfRemovalMac.transmissionStatuses.size() == 3);
+    delete bulkFirst;
+    delete bulkSecond;
+    dcfRemovalQueue.packets = { dequeuedPacket };
+    ASSERT(dcfRemovalQueue.dequeuePacket() == dequeuedPacket);
+    delete dequeuedPacket;
+    ASSERT(dcfRemovalMac.transmissionStatuses.size() == 3);
+    dcfRemovalQueue.removePacketCallback(&dcfRemoval);
+}
+
+{
+    std::array<TestPacketQueue, AC_NUMCATEGORIES> hcfRemovalQueues;
+    std::array<QosAckHandler, AC_NUMCATEGORIES> hcfRemovalAckHandlers;
+    std::array<TestOriginatorQosMacDataService, AC_NUMCATEGORIES> hcfRemovalDataServices;
+    std::array<TestInProgressFrames, AC_NUMCATEGORIES> hcfRemovalInProgressFrames;
+    std::array<TestEdcaf, AC_NUMCATEGORIES> hcfRemovalEdcafs;
+    TestEdca hcfRemovalEdca;
+    hcfRemovalEdca.numEdcafs = AC_NUMCATEGORIES;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        hcfRemovalInProgressFrames[ac].configure(&hcfRemovalDataServices[ac], &hcfRemovalAckHandlers[ac], &hcfRemovalQueues[ac]);
+        hcfRemovalEdcafs[ac].pendingQueue = &hcfRemovalQueues[ac];
+        hcfRemovalEdcafs[ac].inProgressFrames = &hcfRemovalInProgressFrames[ac];
+        hcfRemovalEdcafs[ac].qosAckHandler = &hcfRemovalAckHandlers[ac];
+        hcfRemovalEdcafs[ac].setAccessCategory(AccessCategory(ac));
+        hcfRemovalEdca.edcafs[ac] = &hcfRemovalEdcafs[ac];
+    }
+    hcfRemovalEdca.edcaf = &hcfRemovalEdcafs[AC_BE];
+    TestMac hcfRemovalMac;
+    TestHcf hcfRemoval;
+    hcfRemoval.configure(&hcfRemovalEdca);
+    hcfRemoval.configureMac(&hcfRemovalMac);
+    hcfRemovalQueues[AC_VO].addPacketCallback(&hcfRemoval);
+    auto removedPacket = makeTaggedManagementPacket("hcfRemovedManagement", ST_REASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(420), 0, false, 820);
+    hcfRemovalQueues[AC_VO].packets = { removedPacket };
+    hcfRemovalQueues[AC_VO].removePacket(removedPacket);
+    delete removedPacket;
+    ASSERT(hcfRemovalMac.transmissionStatuses.size() == 1);
+    auto bulkFirst = makeTaggedManagementPacket("hcfBulkManagementFirst", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(421), 0, true, 821);
+    auto bulkSecond = makeTaggedManagementPacket("hcfBulkManagementSecond", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(421), 1, false, 821);
+    auto untaggedPacket = new Packet("hcfBulkUntaggedManagement", makeShared<Ieee80211MgmtHeader>());
+    hcfRemovalQueues[AC_VO].packets = { bulkFirst, bulkSecond, untaggedPacket };
+    hcfRemovalQueues[AC_VO].removeAllPackets();
+    ASSERT(hcfRemovalMac.transmissionStatuses.size() == 2);
+    delete bulkFirst;
+    delete bulkSecond;
+    delete untaggedPacket;
+    auto dequeuedPacket = makeTaggedManagementPacket("hcfDequeuedManagement", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(422), 0, false, 822);
+    hcfRemovalQueues[AC_VO].packets = { dequeuedPacket };
+    ASSERT(hcfRemovalQueues[AC_VO].dequeuePacket() == dequeuedPacket);
+    delete dequeuedPacket;
+    ASSERT(hcfRemovalMac.transmissionStatuses.size() == 2);
+    hcfRemovalQueues[AC_VO].removePacketCallback(&hcfRemoval);
+}
+
+// A retry-exhausted fragmented association/reassociation response cancels its
+// siblings through the real DCF failure callback path. The current failed
+// frame is retired by DCF, while unrelated transaction state survives.
+for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
+    auto responseType = responseIndex == 0 ? ST_ASSOCIATIONRESPONSE : ST_REASSOCIATIONRESPONSE;
+    constexpr int firstSequenceNumber = 440;
+    uint64_t transactionId = 830 + responseIndex;
+    TestCwCalculator cwCalculator;
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    recoveryProcedure.configureRts(INT_MAX, 1, &cwCalculator);
+    AckHandler ackHandler;
+    TestPacketQueue pendingQueue;
+    TestOriginatorQosMacDataService dataService;
+    TestInProgressFrames inProgressFrames;
+    inProgressFrames.configure(&dataService, &ackHandler, &pendingQueue);
+    TestDcaf dcaf;
+    dcaf.configure(&inProgressFrames, &pendingQueue);
+    TestMac mac;
+    TestDcf dcf;
+    dcf.configure(&dcaf, &mac, &ackHandler);
+    dcf.configureFailurePath(&recoveryProcedure);
+    pendingQueue.addPacketCallback(&dcf);
+
+    auto current = makeTaggedManagementPacket("dcfFailureCurrent", responseType, peer1, peer2,
+            SequenceNumberCyclic(firstSequenceNumber + responseIndex), 0, true, transactionId);
+    auto inProgressSibling = makeTaggedManagementPacket("dcfFailureInProgressSibling", responseType, peer1, peer2,
+            SequenceNumberCyclic(firstSequenceNumber + responseIndex), 1, false, transactionId);
+    auto pendingSibling = makeTaggedManagementPacket("dcfFailurePendingSibling", responseType, peer1, peer2,
+            SequenceNumberCyclic(firstSequenceNumber + responseIndex), 2, false, transactionId);
+    auto unrelated = makeTaggedManagementPacket("dcfFailureUnrelated", responseType, peer1, peer2,
+            SequenceNumberCyclic(firstSequenceNumber + responseIndex + 1), 0, false, transactionId + 100);
+    auto currentHeader = current->peekAtFront<Ieee80211MgmtHeader>();
+    auto inProgressSiblingHeader = inProgressSibling->peekAtFront<Ieee80211MgmtHeader>();
+    inProgressFrames.addOwnedFrame(current);
+    inProgressFrames.addOwnedFrame(inProgressSibling);
+    pendingQueue.packets = { pendingSibling, unrelated };
+    ackHandler.frameGotInProgress(currentHeader);
+    ackHandler.frameGotInProgress(inProgressSiblingHeader);
+    ackHandler.processTransmittedDataOrMgmtFrame(currentHeader);
+    ackHandler.processTransmittedDataOrMgmtFrame(inProgressSiblingHeader);
+    recoveryProcedure.addShortRetry(inProgressSiblingHeader, 2);
+
+    dcf.processFailedFrame(current);
+
+    ASSERT(mac.transmissionStatuses.size() == 1);
+    ASSERT(mac.transmissionStatuses.front() == IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
+    ASSERT(mac.transmissionFrames.front() == current);
+    ASSERT(inProgressFrames.getLength() == 0);
+    ASSERT(inProgressFrames.getNumDroppedFrames() == 1);
+    ASSERT(pendingQueue.getNumPackets() == 1);
+    ASSERT(pendingQueue.getPacket(0) == unrelated);
+    ASSERT(ackHandler.getAckStatus(currentHeader) == AckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+    ASSERT(ackHandler.getAckStatus(inProgressSiblingHeader) == AckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+    ASSERT(!recoveryProcedure.hasRetry(currentHeader));
+    ASSERT(!recoveryProcedure.hasRetry(inProgressSiblingHeader));
+    auto retiredFrames = inProgressFrames.releaseFrames();
+    ASSERT(retiredFrames == std::vector<Packet *>({ current }));
+    delete current;
+    pendingQueue.packets.clear();
+    delete unrelated;
+    pendingQueue.removePacketCallback(&dcf);
+}
+
+// The same retry-exhaustion path in HCF spans EDCA queues, clears each
+// sibling's QoS ACK/retry bookkeeping, and emits one terminal callback for
+// both association response variants.
+for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
+    auto responseType = responseIndex == 0 ? ST_ASSOCIATIONRESPONSE : ST_REASSOCIATIONRESPONSE;
+    constexpr int firstSequenceNumber = 450;
+    uint64_t transactionId = 840 + responseIndex;
+    std::array<TestPacketQueue, AC_NUMCATEGORIES> pendingQueues;
+    std::array<TestQosAckHandler, AC_NUMCATEGORIES> ackHandlers;
+    std::array<TestOriginatorQosMacDataService, AC_NUMCATEGORIES> dataServices;
+    std::array<TestInProgressFrames, AC_NUMCATEGORIES> inProgressFrames;
+    std::array<TestEdcaf, AC_NUMCATEGORIES> edcafs;
+    TestEdca edca;
+    edca.numEdcafs = AC_NUMCATEGORIES;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        inProgressFrames[ac].configure(&dataServices[ac], &ackHandlers[ac], &pendingQueues[ac]);
+        edcafs[ac].pendingQueue = &pendingQueues[ac];
+        edcafs[ac].inProgressFrames = &inProgressFrames[ac];
+        edcafs[ac].qosAckHandler = &ackHandlers[ac];
+        edcafs[ac].setAccessCategory(AccessCategory(ac));
+        edca.edcafs[ac] = &edcafs[ac];
+    }
+    edca.edcaf = &edcafs[AC_BE];
+    TestCwCalculator cwCalculator;
+    TestNonQosRecoveryProcedure recoveryProcedure;
+    recoveryProcedure.configureRts(INT_MAX, 1, &cwCalculator);
+    edca.nonQosRecoveryProcedure = &recoveryProcedure;
+    OriginatorQosAckPolicy ackPolicy;
+    TestMac mac;
+    TestHcf hcf;
+    hcf.configure(&edca);
+    hcf.configureMac(&mac);
+    hcf.configureTransmittedManagement(&edca, &ackPolicy);
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        pendingQueues[ac].addPacketCallback(&hcf);
+
+    auto current = makeTaggedManagementPacket("hcfFailureCurrent", responseType, peer1, peer2,
+            SequenceNumberCyclic(firstSequenceNumber + responseIndex), 0, true, transactionId);
+    auto inProgressSibling = makeTaggedManagementPacket("hcfFailureInProgressSibling", responseType, peer1, peer2,
+            SequenceNumberCyclic(firstSequenceNumber + responseIndex), 1, false, transactionId);
+    auto pendingSibling = makeTaggedManagementPacket("hcfFailurePendingSibling", responseType, peer1, peer2,
+            SequenceNumberCyclic(firstSequenceNumber + responseIndex), 2, false, transactionId);
+    auto unrelated = makeTaggedManagementPacket("hcfFailureUnrelated", responseType, peer1, peer2,
+            SequenceNumberCyclic(firstSequenceNumber + responseIndex + 1), 0, false, transactionId + 100);
+    auto currentHeader = current->peekAtFront<Ieee80211MgmtHeader>();
+    auto inProgressSiblingHeader = inProgressSibling->peekAtFront<Ieee80211MgmtHeader>();
+    inProgressFrames[AC_BE].addOwnedFrame(current);
+    inProgressFrames[AC_VI].addOwnedFrame(inProgressSibling);
+    pendingQueues[AC_VO].packets = { pendingSibling };
+    pendingQueues[AC_BK].packets = { unrelated };
+    ackHandlers[AC_BE].frameGotInProgress(currentHeader);
+    ackHandlers[AC_VI].frameGotInProgress(inProgressSiblingHeader);
+    hcf.processTransmittedManagement(current, currentHeader, AC_BE);
+    hcf.processTransmittedManagement(inProgressSibling, inProgressSiblingHeader, AC_VI);
+    ASSERT(ackHandlers[AC_BE].getMgmtOrNonQoSAckStatus(currentHeader) == QosAckHandler::Status::WAITING_FOR_NORMAL_ACK);
+    ASSERT(ackHandlers[AC_VI].getMgmtOrNonQoSAckStatus(inProgressSiblingHeader) == QosAckHandler::Status::WAITING_FOR_NORMAL_ACK);
+    recoveryProcedure.addShortRetry(inProgressSiblingHeader, 2);
+
+    hcf.processFailedFrame(current);
+
+    ASSERT(mac.transmissionStatuses.size() == 1);
+    ASSERT(mac.transmissionStatuses.front() == IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
+    ASSERT(mac.transmissionFrames.front() == current);
+    ASSERT(inProgressFrames[AC_BE].getLength() == 0);
+    ASSERT(inProgressFrames[AC_BE].getNumDroppedFrames() == 1);
+    ASSERT(inProgressFrames[AC_VI].getLength() == 0);
+    ASSERT(pendingQueues[AC_VO].isEmpty());
+    ASSERT(pendingQueues[AC_BK].getNumPackets() == 1);
+    ASSERT(pendingQueues[AC_BK].getPacket(0) == unrelated);
+    ASSERT(ackHandlers[AC_BE].getMgmtOrNonQoSAckStatus(currentHeader) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+    ASSERT(ackHandlers[AC_VI].getMgmtOrNonQoSAckStatus(inProgressSiblingHeader) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+    ASSERT(!recoveryProcedure.hasRetry(currentHeader));
+    ASSERT(!recoveryProcedure.hasRetry(inProgressSiblingHeader));
+    auto retiredFrames = inProgressFrames[AC_BE].releaseFrames();
+    ASSERT(retiredFrames == std::vector<Packet *>({ current }));
+    delete current;
+    pendingQueues[AC_VO].packets.clear();
+    pendingQueues[AC_BK].packets.clear();
+    delete unrelated;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        pendingQueues[ac].removePacketCallback(&hcf);
 }
 
 EV << "ADDBA transaction and negotiated SSN integrity checks passed.\n";

@@ -8,6 +8,8 @@
 #ifndef __INET_DCF_H
 #define __INET_DCF_H
 
+#include <set>
+
 #include "inet/linklayer/ieee80211/mac/channelaccess/Dcaf.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
@@ -80,6 +82,17 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;
 
+    // A management transaction may have several fragmented MPDUs in the
+    // pending/in-progress queues. Keep the transaction identity only while
+    // removing its siblings so queue callbacks cannot report the same logical
+    // transaction recursively. A transaction has one pending original before
+    // fragmentation; the completed set additionally spans the synchronous
+    // callbacks of a bulk queue removal and is cleared at the next event.
+    std::set<uint64_t> managementTransactionsBeingCancelled;
+    std::set<uint64_t> completedManagementTransactions;
+    eventnumber_t completedManagementTransactionsEventNumber = -1;
+    std::set<uint64_t> cancelledManagementTransactions;
+
     // Station counters
     StationRetryCounters *stationRetryCounters = nullptr;
 
@@ -97,6 +110,11 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
+
+    virtual bool isPacketReferencedByCurrentFrameSequence(const Packet *packet) const;
+    virtual bool isManagementTransactionCancelled(const Packet *packet) const;
+    virtual bool isCurrentFrameSequenceCancelled(const Packet *packet) const;
+    virtual bool cancelManagementTransaction(uint64_t transactionId, Packet *excludedPacket);
 
   protected:
     // IChannelAccess::ICallback
@@ -125,6 +143,8 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     virtual ~Dcf();
+
+    virtual void cancelManagementTransaction(uint64_t transactionId);
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
