@@ -2115,9 +2115,8 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     ASSERT(fragmentedCallback.managementPackets.size() == 1);
     delete fragments;
 
-    // Seeing the final fragment first does not imply completeness. A later
-    // non-Retry fragment 0 announces a fresh MMPDU identity and discards the
-    // incomplete final-first reception.
+    // Seeing the final fragment first does not imply completeness, but a later
+    // non-Retry fragment 0 completes the same out-of-order MMPDU.
     auto outOfOrderFragments = makeFragments("outOfOrderAddbaRequest", 4, 61);
     for (auto& fragment : *outOfOrderFragments)
         fragment = convertToWireRepresentation(fragment);
@@ -2126,9 +2125,17 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     ASSERT(recipientHandler->getAgreement(4, peer2) == nullptr);
     ASSERT(fragmentedCallback.managementPackets.size() == 1);
     auto outOfOrderCompleteReception = receiveFragment(outOfOrderFragments->at(0));
-    ASSERT(outOfOrderCompleteReception.completeHeader == nullptr);
-    ASSERT(recipientHandler->getAgreement(4, peer2) == nullptr);
-    ASSERT(fragmentedCallback.managementPackets.size() == 1);
+    ASSERT(outOfOrderCompleteReception.completeHeader != nullptr);
+    ASSERT(outOfOrderCompleteReception.completeHeader->getFragmentNumber() == 0);
+    ASSERT(!outOfOrderCompleteReception.completeHeader->getMoreFragments());
+    auto outOfOrderRequest = dynamicPtrCast<const Ieee80211AddbaRequest>(outOfOrderCompleteReception.completeHeader);
+    ASSERT(outOfOrderRequest != nullptr);
+    ASSERT(outOfOrderRequest->getTid() == 4);
+    ASSERT(outOfOrderRequest->getDialogToken() == 74);
+    ASSERT(outOfOrderRequest->getStartingSequenceNumber() == SequenceNumberCyclic(104));
+    hcf.processReceivedManagementFrame(outOfOrderCompleteReception.completeHeader);
+    ASSERT(recipientHandler->getAgreement(4, peer2) != nullptr);
+    ASSERT(fragmentedCallback.managementPackets.size() == 2);
     delete outOfOrderFragments;
 
     // The receive timer releases an incomplete MMPDU at
@@ -4873,9 +4880,9 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
 }
 
 // IEEE Std 802.11-2024, 10.5 requires reconstruction in Fragment Number
-// order. The model additionally treats a non-Retry fragment 0 as the
-// generation marker for a reused sequence identity, discarding incomplete
-// same-key state (including after sequence-space wraparound).
+// order. A later fragment can arrive before a non-Retry fragment 0, so the
+// reassembler preserves that later-only state while retaining its generation
+// replacement heuristic once fragment 0 is already present.
 {
     TestBasicReassembly reassembly;
     auto makeResponseFragments = [&](const char *name, uint8_t dialogToken, uint16_t statusCode, const std::vector<uint8_t>& payload, int sequenceNumber) {
@@ -4918,6 +4925,22 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     ASSERT(originalCompleted->peekAt<BytesChunk>(originalResponse->getChunkLength(), B(originalPayload.size()))->getBytes() == originalPayload);
     delete originalCompleted;
     delete oldFragments;
+
+    const std::vector<uint8_t> outOfOrderPayload = { 0x14, 0x15, 0x16, 0x17 };
+    auto outOfOrderFragments = makeResponseFragments("reassemblyOutOfOrderResponse", 23, 5, outOfOrderPayload, 4094);
+    ASSERT(reassembly.addFragment(outOfOrderFragments->at(1)) == nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 1);
+    auto outOfOrderCompleted = reassembly.addFragment(outOfOrderFragments->at(0));
+    ASSERT(outOfOrderCompleted != nullptr);
+    ASSERT(reassembly.getNumActiveReassemblies() == 0);
+    auto outOfOrderHeader = outOfOrderCompleted->peekAtFront<Ieee80211MgmtHeader>();
+    auto outOfOrderResponse = dynamicPtrCast<const Ieee80211AddbaResponse>(outOfOrderHeader);
+    ASSERT(outOfOrderResponse != nullptr);
+    ASSERT(outOfOrderResponse->getDialogToken() == 23);
+    ASSERT(outOfOrderResponse->getStatusCode() == 5);
+    ASSERT(outOfOrderCompleted->peekAt<BytesChunk>(outOfOrderResponse->getChunkLength(), B(outOfOrderPayload.size()))->getBytes() == outOfOrderPayload);
+    delete outOfOrderCompleted;
+    delete outOfOrderFragments;
 
     const std::vector<uint8_t> stalePayload = { 0x20, 0x21, 0x22, 0x23 };
     auto staleFragments = makeResponseFragments("reassemblyStaleResponse", 21, 2, stalePayload, 4095);

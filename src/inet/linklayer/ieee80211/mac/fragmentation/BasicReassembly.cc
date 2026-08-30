@@ -40,11 +40,17 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     ASSERT(fragNum >= 0 && fragNum < MAX_NUM_FRAGMENTS);
 
     auto it = fragmentsMap.find(key);
-    // In this model, a non-Retry fragment 0 marks a new generation when a
-    // sequence identity is reused, so discard any incomplete same-key
-    // reception. IEEE Std 802.11-2024, 10.5 separately requires reconstruction
-    // in Fragment Number order.
-    if (it != fragmentsMap.end() && fragNum == 0 && !header->getRetry()) {
+    // IEEE Std 802.11-2024, 10.4/10.5 requires fragmented MPDUs to be
+    // reconstructed from their fragment numbers; §26.3.2.1 permits level-3
+    // dynamic fragments to arrive out of order. Keep a later-only active entry
+    // when its non-Retry fragment 0 arrives. Once fragment 0 is already
+    // present, this generic reassembler cannot distinguish sequence-number
+    // reuse from a duplicate non-Retry fragment 0, so retain the generation
+    // replacement heuristic. An unfragmented non-Retry fragment 0 also retires
+    // any conflicting active fragmented entry.
+    bool isUnfragmented = fragNum == 0 && !header->getMoreFragments();
+    bool hasFirstFragment = it != fragmentsMap.end() && (it->second.receivedFragments & 1) != 0;
+    if (it != fragmentsMap.end() && fragNum == 0 && !header->getRetry() && (isUnfragmented || hasFirstFragment)) {
         for (auto fragment : it->second.fragments)
             if (fragment != nullptr)
                 delete fragment;
