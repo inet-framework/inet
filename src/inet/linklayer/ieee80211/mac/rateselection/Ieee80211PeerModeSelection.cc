@@ -86,6 +86,11 @@ static bool isCompatibleHtMode(const IIeee80211Mode *mode, const Ieee80211Mib::P
             bandwidth > operation.operatingChannelWidth)
         return false;
 
+    // IEEE Std 802.11-2024, 19.1.1 and 19.1.4: an HT-greenfield PPDU may only
+    // be transmitted to a receiver that advertised HT-greenfield support.
+    if (mode->isHtGreenfield() && !receiverCapabilities.receiverGreenfield)
+        return false;
+
     // IEEE Std 802.11-2024, 10.17 and Table 9-224: a short guard interval
     // is usable only when the receiver advertised it for this channel width.
     if (mode->isHtShortGuardInterval()) {
@@ -137,14 +142,20 @@ const IIeee80211Mode *selectPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
     if (!htEligible || operation == nullptr || peerHtState == nullptr || !peerHtState->valid ||
             !peerHtState->negotiatedCapabilities || !peerHtState->negotiatedCapabilities->localTxPeerRx.valid)
         return getLegacyFallback(modeSet, mode, peerAddress);
-    if (isCompatibleHtMode(mode, peerHtState, *operation))
-        return mode;
+
+    const IIeee80211Mode *effectiveMode = mode;
+    if (effectiveMode->isHtGreenfield() && !peerHtState->negotiatedCapabilities->localTxPeerRx.receiverGreenfield)
+        effectiveMode = modeSet->findHtMixedMode(mode);
+    if (effectiveMode != nullptr && isCompatibleHtMode(effectiveMode, peerHtState, *operation))
+        return effectiveMode;
 
     auto candidateBitrate = mode->getDataMode()->getNetBitrate();
     const IIeee80211Mode *bestMode = nullptr;
     for (int i = 0; i < modeSet->getNumModes(); i++) {
         const auto *candidate = modeSet->getMode(i);
-        if (candidate->getHtMcsIndex() < 0 ||
+        if (candidate->isHtGreenfield() && !peerHtState->negotiatedCapabilities->localTxPeerRx.receiverGreenfield)
+            candidate = modeSet->findHtMixedMode(candidate);
+        if (candidate == nullptr || candidate->getHtMcsIndex() < 0 ||
                 candidate->getDataMode()->getNetBitrate() > candidateBitrate ||
                 !isCompatibleHtMode(candidate, peerHtState, *operation))
             continue;

@@ -1,0 +1,199 @@
+%description:
+Verifies bidirectional unicast delivery and dynamic PPDU format selection in a
+heterogeneous BSS with one n(greenfield-2.4Ghz) station, an n(mixed-2.4Ghz)
+access point, and an n(mixed-2.4Ghz) station. Because the AP is mixed-only, the
+Greenfield station must recognize that the peer cannot receive Greenfield PPDUs
+and dynamically select the compatible HT-mixed format for uplink transmissions.
+
+%file: Test.cc
+#include <iostream>
+
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::ieee80211;
+
+namespace Ieee80211HtHeterogeneousGreenfieldRuntime {
+
+static OPP_THREAD_LOCAL int greenfieldStaMixedDataCount = 0;
+static OPP_THREAD_LOCAL int greenfieldStaGreenfieldDataCount = 0;
+static OPP_THREAD_LOCAL int mixedStaDataCount = 0;
+static OPP_THREAD_LOCAL int apForwardedDataCount = 0;
+static OPP_THREAD_LOCAL int nonHtAckCount = 0;
+
+class HeterogeneousHtCheckingRadio : public Ieee80211Radio, public cListener
+{
+    using cListener::finish;
+
+  protected:
+    virtual void initialize(int stage) override
+    {
+        Ieee80211Radio::initialize(stage);
+        if (stage == INITSTAGE_LOCAL)
+            subscribe(transmissionStartedSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override
+    {
+        if (signalID != transmissionStartedSignal)
+            return;
+        auto transmission = check_and_cast<const Ieee80211Transmission *>(obj);
+        auto mode = dynamic_cast<const Ieee80211HtMode *>(transmission->getMode());
+        auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+        if (transmission->getPreambleDuration() < SIMTIME_ZERO || transmission->getHeaderDuration() < SIMTIME_ZERO || transmission->getDataDuration() < SIMTIME_ZERO ||
+            transmission->getPreambleDuration() + transmission->getHeaderDuration() + transmission->getDataDuration() != transmission->getDuration())
+            throw cRuntimeError("Invalid preamble/header/data duration decomposition");
+        if (mode != nullptr && (transmission->getHeaderDuration() != SIMTIME_ZERO ||
+            transmission->getDataDuration() != mode->getDataMode()->getDuration(B(phyHeader->getLengthField()))))
+            throw cRuntimeError("HT transmission did not keep SIG in the preamble and data in the data interval");
+        auto macHeader = transmission->getPacket()->peekDataAt<Ieee80211MacHeader>(phyHeader->getChunkLength());
+        bool isHtGreenfield = mode != nullptr && mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD;
+        bool isHtMixed = mode != nullptr && mode->getPreambleMode()->getPreambleFormat() == Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED;
+
+        std::string fullPath = getFullPath();
+        bool isHost0 = fullPath.find("host[0]") != std::string::npos;
+        bool isHost1 = fullPath.find("host[1]") != std::string::npos;
+        bool isAp = fullPath.find("ap") != std::string::npos;
+
+        if (dynamicPtrCast<const Ieee80211DataHeader>(macHeader)) {
+            if (isHost0) {
+                if (isHtGreenfield)
+                    greenfieldStaGreenfieldDataCount++;
+                else if (isHtMixed)
+                    greenfieldStaMixedDataCount++;
+            }
+            else if (isHost1 && isHtMixed)
+                mixedStaDataCount++;
+            else if (isAp && isHtMixed)
+                apForwardedDataCount++;
+        }
+        if (dynamicPtrCast<const Ieee80211AckFrame>(macHeader) && mode == nullptr)
+            nonHtAckCount++;
+    }
+
+    virtual void finish() override
+    {
+        Ieee80211Radio::finish();
+        if (greenfieldStaGreenfieldDataCount > 0)
+            throw cRuntimeError("Greenfield station sent %d HT-Greenfield frame(s) to mixed-only AP", greenfieldStaGreenfieldDataCount);
+        if (greenfieldStaMixedDataCount == 0 || mixedStaDataCount == 0 || apForwardedDataCount == 0 || nonHtAckCount == 0)
+            throw cRuntimeError("Expected bidirectional HT-mixed data and non-HT ACK exchanges");
+        std::cout << "Observed " << greenfieldStaMixedDataCount << " GF-STA HT-mixed data, "
+                  << mixedStaDataCount << " Mixed-STA data, "
+                  << apForwardedDataCount << " AP forwarded data, 0 Greenfield data, and "
+                  << nonHtAckCount << " non-HT ACK response(s).\n";
+    }
+};
+
+Define_Module(HeterogeneousHtCheckingRadio);
+
+} // namespace Ieee80211HtHeterogeneousGreenfieldRuntime
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module HeterogeneousHtCheckingRadio extends Ieee80211Radio
+{
+    parameters:
+        @class(HeterogeneousHtCheckingRadio);
+}
+
+network TestHeterogeneousHtGreenfield
+{
+    parameters:
+        int numHosts = default(2);
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host[numHosts]: WirelessHost {
+            wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+            wlan[*].agent.typename = "";
+        }
+        ap: AccessPoint {
+            wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
+        }
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestHeterogeneousHtGreenfield
+abstract = false
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = true
+record-vector-results = false
+record-eventlog = false
+seed-set = 0
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 600m
+**.constraintAreaMaxY = 400m
+**.constraintAreaMaxZ = 0m
+
+**.arp.typename = "GlobalArp"
+
+*.ap.wlan[*].address = "10:00:00:00:00:00"
+*.host[*].**.mgmt.accessPointAddress = "10:00:00:00:00:00"
+
+*.ap.mobility.typename = "StationaryMobility"
+*.ap.mobility.initialX = 250m
+*.ap.mobility.initialY = 200m
+*.host[*].mobility.typename = "StationaryMobility"
+*.host[*].mobility.initialY = 200m
+*.host[0].mobility.initialX = 240m
+*.host[1].mobility.initialX = 260m
+
+**.wlan[*].radio.typename = "HeterogeneousHtCheckingRadio"
+
+[Config HeterogeneousHtRuntime]
+abstract = false
+sim-time-limit = 2s
+*.numHosts = 2
+
+# Node configuration: host[0] is Greenfield, AP and host[1] are Mixed-HT
+*.host[0].wlan[*].opMode = "n(greenfield-2.4Ghz)"
+*.host[0].wlan[*].bitrate = 13Mbps
+*.host[1].wlan[*].opMode = "n(mixed-2.4Ghz)"
+*.host[1].wlan[*].bitrate = 13Mbps
+*.ap.wlan[*].opMode = "n(mixed-2.4Ghz)"
+*.ap.wlan[*].bitrate = 13Mbps
+
+# Bidirectional UDP traffic between host[0] and host[1] through AP
+*.host[0].numApps = 2
+*.host[0].app[0].typename = "UdpBasicApp"
+*.host[0].app[0].destAddresses = "host[1]"
+*.host[0].app[0].destPort = 1000
+*.host[0].app[0].messageLength = 100B
+*.host[0].app[0].startTime = 100ms
+*.host[0].app[0].sendInterval = 100ms
+
+*.host[0].app[1].typename = "UdpSink"
+*.host[0].app[1].localPort = 2000
+
+*.host[1].numApps = 2
+*.host[1].app[0].typename = "UdpSink"
+*.host[1].app[0].localPort = 1000
+
+*.host[1].app[1].typename = "UdpBasicApp"
+*.host[1].app[1].destAddresses = "host[0]"
+*.host[1].app[1].destPort = 2000
+*.host[1].app[1].messageLength = 100B
+*.host[1].app[1].startTime = 150ms
+*.host[1].app[1].sendInterval = 100ms
+
+%extraargs: -c HeterogeneousHtRuntime
+
+%contains-regex: stdout
+Observed [1-9][0-9]* GF-STA HT-mixed data, [1-9][0-9]* Mixed-STA data, [1-9][0-9]* AP forwarded data, 0 Greenfield data, and [1-9][0-9]* non-HT ACK response\(s\).

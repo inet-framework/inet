@@ -143,6 +143,7 @@ void Ieee80211Mac::updateLocalHtCapabilities(bool reconfiguration)
     // The equal-case Tx MCS set is represented by the maximum MCS index per
     // spatial-stream group. Rebuild it from the filtered Rx bitmap; MCS 32 is
     // not part of this map's MCS 0..31 NSS encoding.
+    localHtCapabilities.greenfield = modeSet->isHtGreenfieldSupported();
     localHtCapabilities.txMcsNss = Ieee80211HtMcsNssMap();
     for (int mcs = 0; mcs < 32; mcs++) {
         if (localHtCapabilities.rxMcsSupported[mcs]) {
