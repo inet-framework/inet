@@ -36,6 +36,7 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
@@ -987,6 +988,30 @@ auto createPacketQueue = [this](const char *name, int packetCapacity = -1, const
     module->callInitialize();
     return check_and_cast<queueing::PacketQueue *>(module);
 };
+
+// maxReceiveLifetime is a relative duration and must be nonnegative before
+// either recipient allocates a receive-lifetime consumer. Zero remains valid.
+auto assertMaxReceiveLifetimeValidation = [this](const char *typeName, const char *namePrefix) {
+    auto invalidModule = cModuleType::get(typeName)->create((std::string(namePrefix) + "Negative").c_str(), this);
+    invalidModule->par("maxReceiveLifetime").setDoubleValue(-1e-6);
+    bool threw = false;
+    try {
+        invalidModule->callInitialize();
+    }
+    catch (cRuntimeError&) {
+        threw = true;
+    }
+    ASSERT(threw);
+    invalidModule->deleteModule();
+
+    auto zeroModule = cModuleType::get(typeName)->create((std::string(namePrefix) + "Zero").c_str(), this);
+    zeroModule->par("maxReceiveLifetime").setDoubleValue(0);
+    zeroModule->callInitialize();
+    zeroModule->callFinish();
+    zeroModule->deleteModule();
+};
+assertMaxReceiveLifetimeValidation("inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService", "recipientMacDataServiceLifetime");
+assertMaxReceiveLifetimeValidation("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService", "recipientQosMacDataServiceLifetime");
 
 {
     TestOriginatorHandler tokenHandler;

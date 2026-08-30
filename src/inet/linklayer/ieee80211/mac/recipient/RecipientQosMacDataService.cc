@@ -24,6 +24,8 @@ Define_Module(RecipientQosMacDataService);
 void RecipientQosMacDataService::initialize()
 {
     maxReceiveLifetime = par("maxReceiveLifetime");
+    if (maxReceiveLifetime < SIMTIME_ZERO)
+        throw cRuntimeError("maxReceiveLifetime must not be negative");
     duplicateRemoval = new QoSDuplicateRemoval();
     basicReassembly = new BasicReassembly(maxReceiveLifetime);
     aMsduDeaggregation = new MsduDeaggregation();
