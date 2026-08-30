@@ -132,8 +132,8 @@ const IIeee80211Mode *selectPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
         return mode;
     if (modeSet == nullptr)
         throw cRuntimeError("Cannot select a peer-compatible HT mode without an IEEE 802.11 mode set");
-    if (!modeSet->containsMode(mode))
-        throw cRuntimeError("HT mode '%s' is not contained in IEEE 802.11 mode set '%s'",
+    if (!modeSet->supportsMode(mode))
+        throw cRuntimeError("HT mode '%s' is not supported by IEEE 802.11 mode set '%s'",
                 mode->getName(), modeSet->getName());
 
     if (peerHtState == nullptr || !peerHtState->valid || !peerHtState->negotiatedCapabilities.localTxPeerRx.valid)
