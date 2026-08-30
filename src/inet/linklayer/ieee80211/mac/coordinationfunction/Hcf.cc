@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 
+#include <algorithm>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/blockack/Ieee80211AddbaTransactionTag_m.h"
@@ -153,7 +155,24 @@ bool Hcf::processDroppedBlockAckTeardownFrame(Packet *packet)
     auto agreementTag = packet->findTag<Ieee80211BlockAckAgreementTag>();
     if (agreementTag != nullptr && blockAckTeardownsBeingCancelled.find(std::make_tuple(delba->getInitiator(), delba->getReceiverAddress(), delba->getTid(), agreementTag->getGenerationId())) != blockAckTeardownsBeingCancelled.end())
         return false;
-    bool aborted = delba->getInitiator() ? originatorBlockAckAgreementHandler != nullptr && originatorBlockAckAgreementHandler->processAbortedDelba(packet, this) : recipientBlockAckAgreementHandler != nullptr && recipientBlockAckAgreementHandler->processAbortedDelba(packet, this);
+    bool aborted = false;
+    if (delba->getInitiator()) {
+        if (originatorBlockAckAgreementHandler != nullptr) {
+            auto result = originatorBlockAckAgreementHandler->processAbortedDelba(packet, this);
+            aborted = result.handled;
+            if (result.terminatedAgreement != nullptr && result.terminatedAgreement->getIsAddbaResponseReceived())
+                emit(blockAckAgreementDeletedSignal, result.terminatedAgreement.get());
+        }
+    }
+    else if (recipientBlockAckAgreementHandler != nullptr) {
+        auto result = recipientBlockAckAgreementHandler->processAbortedDelba(packet, this);
+        aborted = result.handled;
+        if (result.terminatedAgreement != nullptr) {
+            if (recipientDataService != nullptr)
+                recipientDataService->resetBlockAckReordering(delba->getTid(), delba->getReceiverAddress());
+            emit(blockAckAgreementDeletedSignal, result.terminatedAgreement.get());
+        }
+    }
     if (aborted) {
         rebuildPendingFrameEligibility();
         return true;
@@ -414,10 +433,20 @@ void Hcf::scheduleStartRxTimer(simtime_t timeout)
     scheduleAfter(timeout, startRxTimer);
 }
 
-void Hcf::scheduleInactivityTimer(simtime_t timeout)
+void Hcf::scheduleInactivityTimer(BlockAckAgreementRole role, simtime_t deadline)
 {
     Enter_Method("scheduleInactivityTimer");
-    rescheduleAfter(timeout, inactivityTimer);
+    if (role == BlockAckAgreementRole::ORIGINATOR)
+        originatorInactivityDeadline = deadline;
+    else
+        recipientInactivityDeadline = deadline;
+    auto earliestDeadline = std::min(originatorInactivityDeadline, recipientInactivityDeadline);
+    if (earliestDeadline == SIMTIME_MAX) {
+        if (inactivityTimer->isScheduled())
+            cancelEvent(inactivityTimer);
+    }
+    else
+        rescheduleAt(std::max(earliestDeadline, simTime()), inactivityTimer);
 }
 
 void Hcf::scheduleAddbaResponseTimer(simtime_t deadline)
@@ -729,6 +758,8 @@ void Hcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header))
         ctsProcedure->processReceivedRts(packet, rtsFrame, ctsPolicy, this);
     else if (auto blockAckRequest = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
+        if (recipientBlockAckAgreementHandler)
+            recipientBlockAckAgreementHandler->blockAckReqReceived(blockAckRequest, this);
         if (recipientBlockAckProcedure)
             recipientBlockAckProcedure->processReceivedBlockAckReq(packet, blockAckRequest, recipientAckPolicy, recipientBlockAckAgreementHandler, this);
     }
@@ -787,7 +818,7 @@ void Hcf::recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtH
             // Initiator selects the agreement direction; the transmitter is the peer.
             if (delba->getInitiator()) {
                 auto pendingTeardownGenerationId = recipientBlockAckAgreementHandler->getPendingTeardownGenerationId(delba->getTid(), delba->getTransmitterAddress());
-                auto agreement = recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy);
+                auto agreement = recipientBlockAckAgreementHandler->processReceivedDelba(delba, recipientBlockAckAgreementPolicy, this);
                 auto remainingTeardownGenerationId = recipientBlockAckAgreementHandler->getPendingTeardownGenerationId(delba->getTid(), delba->getTransmitterAddress());
                 if (agreement != nullptr) {
                     recipientDataService->resetBlockAckReordering(delba->getTid(), delba->getTransmitterAddress());
@@ -967,7 +998,7 @@ void Hcf::originatorProcessTransmittedManagementFrame(Packet *packet, const Ptr<
             }
         }
         else {
-            auto agreement = recipientBlockAckAgreementHandler->processTransmittedDelba(packet);
+            auto agreement = recipientBlockAckAgreementHandler->processTransmittedDelba(packet, this);
             if (agreement != nullptr) {
                 // IEEE Std 802.11-2024, 10.25.4 and 11.5.3.5: recipient
                 // resources are released whether the recipient transmitted or

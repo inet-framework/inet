@@ -65,6 +65,11 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     cMessage *startRxTimer = nullptr;
     cMessage *inactivityTimer = nullptr;
     cMessage *addbaResponseTimer = nullptr;
+    // The two agreement handlers share one timer but publish independent
+    // absolute deadlines. Keep both until the handlers explicitly retire
+    // their role so one role cannot cancel the other's timeout.
+    simtime_t originatorInactivityDeadline = SIMTIME_MAX;
+    simtime_t recipientInactivityDeadline = SIMTIME_MAX;
 
     // Transmission and Reception
     IRx *rx = nullptr;
@@ -195,7 +200,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
     // IProcedureCallback
-    virtual void scheduleInactivityTimer(simtime_t timeout) override;
+    virtual void scheduleInactivityTimer(BlockAckAgreementRole role, simtime_t deadline) override;
     virtual void scheduleAddbaResponseTimer(simtime_t deadline) override;
     virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override;
     virtual void cancelBlockAckTeardown(bool initiator, MacAddress peerAddress, Tid tid, uint64_t generationId, Packet *excludedPacket) override;

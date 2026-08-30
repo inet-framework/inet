@@ -24,6 +24,14 @@ class Packet;
 
 namespace ieee80211 {
 
+struct INET_API RecipientBlockAckAgreementAbortResult
+{
+    bool handled = false;
+    std::unique_ptr<RecipientBlockAckAgreement> terminatedAgreement;
+
+    explicit operator bool() const { return handled; }
+};
+
 class INET_API IRecipientBlockAckAgreementHandler
 {
   public:
@@ -31,11 +39,12 @@ class INET_API IRecipientBlockAckAgreementHandler
 
     virtual RecipientBlockAckAgreement *processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
     virtual void processDuplicateAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IProcedureCallback *procedureCallback) = 0;
-    virtual std::unique_ptr<RecipientBlockAckAgreement> processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy) = 0;
-    virtual std::unique_ptr<RecipientBlockAckAgreement> processTransmittedDelba(Packet *packet) = 0;
+    virtual std::unique_ptr<RecipientBlockAckAgreement> processReceivedDelba(const Ptr<const Ieee80211Delba>& delba, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback = nullptr) = 0;
+    virtual std::unique_ptr<RecipientBlockAckAgreement> processTransmittedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback = nullptr) = 0;
     virtual bool processAcknowledgedDelba(Packet *, IBlockAckAgreementHandlerCallback *) { return false; }
-    virtual bool processAbortedDelba(Packet *, IBlockAckAgreementHandlerCallback *) { return false; }
+    virtual RecipientBlockAckAgreementAbortResult processAbortedDelba(Packet *, IBlockAckAgreementHandlerCallback *) { return {}; }
     virtual void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback) = 0;
+    virtual void blockAckReqReceived(const Ptr<const Ieee80211BasicBlockAckReq>& blockAckReq, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
 
     virtual RecipientBlockAckAgreement *getAgreement(Tid tid, MacAddress originatorAddr) = 0;

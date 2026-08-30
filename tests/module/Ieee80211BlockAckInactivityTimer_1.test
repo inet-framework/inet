@@ -1,0 +1,129 @@
+%description:
+Exercise the shared HCF Block Ack inactivity timer with independent originator
+and recipient deadlines. Verify that the timer keeps the earliest absolute
+deadline, preserves the other role when one role is cleared, and is cancelled
+only after both roles publish SIMTIME_MAX.
+
+%file: TestIeee80211BlockAckInactivityTimer.cc
+
+#include "inet/common/InitStages.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestHcfInactivityTimer : public Hcf
+{
+  public:
+    void updateInactivityDeadline(BlockAckAgreementRole role, simtime_t deadline) { scheduleInactivityTimer(role, deadline); }
+    simtime_t getOriginatorDeadline() const { return originatorInactivityDeadline; }
+    simtime_t getRecipientDeadline() const { return recipientInactivityDeadline; }
+    bool isInactivityTimerScheduled() const { return inactivityTimer->isScheduled(); }
+    simtime_t getInactivityTimerArrivalTime() const { return inactivityTimer->getArrivalTime(); }
+
+  protected:
+    virtual int numInitStages() const override { return 1; }
+
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL)
+            inactivityTimer = new cMessage("blockAckInactivityTimer");
+    }
+};
+
+Define_Module(TestHcfInactivityTimer);
+
+class Ieee80211BlockAckInactivityTimerTest : public cSimpleModule
+{
+  protected:
+    TestHcfInactivityTimer *hcf = nullptr;
+
+  protected:
+    virtual void initialize() override
+    {
+        hcf = check_and_cast<TestHcfInactivityTimer *>(getModuleByPath("^.hcf"));
+        scheduleAt(SimTime(1, SIMTIME_US), new cMessage("checkInactivityTimer"));
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        auto startTime = simTime();
+        ASSERT(startTime > 0);
+
+        auto originatorDeadline = startTime + SimTime(2, SIMTIME_US);
+        auto recipientDeadline = startTime + SimTime(5, SIMTIME_US);
+        hcf->updateInactivityDeadline(BlockAckAgreementRole::ORIGINATOR, originatorDeadline);
+        ASSERT(hcf->getOriginatorDeadline() == originatorDeadline);
+        ASSERT(hcf->getRecipientDeadline() == SIMTIME_MAX);
+        ASSERT(hcf->isInactivityTimerScheduled());
+        ASSERT(hcf->getInactivityTimerArrivalTime() == originatorDeadline);
+
+        // A later recipient deadline must not replace the earlier originator
+        // deadline in the shared timer.
+        hcf->updateInactivityDeadline(BlockAckAgreementRole::RECIPIENT, recipientDeadline);
+        ASSERT(hcf->getRecipientDeadline() == recipientDeadline);
+        ASSERT(hcf->getInactivityTimerArrivalTime() == originatorDeadline);
+
+        // Clearing one role leaves the other role's deadline armed.
+        hcf->updateInactivityDeadline(BlockAckAgreementRole::ORIGINATOR, SIMTIME_MAX);
+        ASSERT(hcf->getOriginatorDeadline() == SIMTIME_MAX);
+        ASSERT(hcf->getInactivityTimerArrivalTime() == recipientDeadline);
+        hcf->updateInactivityDeadline(BlockAckAgreementRole::RECIPIENT, SIMTIME_MAX);
+        ASSERT(hcf->getRecipientDeadline() == SIMTIME_MAX);
+        ASSERT(!hcf->isInactivityTimerScheduled());
+
+        // The reverse update order still replaces the shared timer with an
+        // earlier deadline and preserves the later role when it is cleared.
+        auto reverseRecipientDeadline = startTime + SimTime(8, SIMTIME_US);
+        auto reverseOriginatorDeadline = startTime + SimTime(1, SIMTIME_US);
+        hcf->updateInactivityDeadline(BlockAckAgreementRole::RECIPIENT, reverseRecipientDeadline);
+        ASSERT(hcf->getInactivityTimerArrivalTime() == reverseRecipientDeadline);
+        hcf->updateInactivityDeadline(BlockAckAgreementRole::ORIGINATOR, reverseOriginatorDeadline);
+        ASSERT(hcf->getInactivityTimerArrivalTime() == reverseOriginatorDeadline);
+        hcf->updateInactivityDeadline(BlockAckAgreementRole::ORIGINATOR, SIMTIME_MAX);
+        ASSERT(hcf->getInactivityTimerArrivalTime() == reverseRecipientDeadline);
+        hcf->updateInactivityDeadline(BlockAckAgreementRole::RECIPIENT, SIMTIME_MAX);
+        ASSERT(!hcf->isInactivityTimerScheduled());
+
+        delete message;
+        endSimulation();
+    }
+};
+
+Define_Module(Ieee80211BlockAckInactivityTimerTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+
+simple TestHcfInactivityTimer
+{
+    parameters:
+        @class(::inet::ieee80211::TestHcfInactivityTimer);
+}
+
+simple Ieee80211BlockAckInactivityTimerTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211BlockAckInactivityTimerTest);
+}
+
+network Ieee80211BlockAckInactivityTimerTestNetwork
+{
+    submodules:
+        hcf: TestHcfInactivityTimer;
+        test: Ieee80211BlockAckInactivityTimerTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211BlockAckInactivityTimerTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10us
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
