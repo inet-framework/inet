@@ -26,10 +26,16 @@ class INET_API BlockAckReordering
     typedef std::vector<Packet *> Fragments;
     typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
 
+    // Values in ReorderBuffer results from processReceivedQoSFrame() and
+    // processReceivedBlockAckReq() contain complete fragment vectors ordered
+    // by ascending Fragment Number. The vectors only reorder packet pointers;
+    // packet ownership remains with the caller of those methods.
+
   protected:
     std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
 
   protected:
+    static Fragments sortFragmentsByFragmentNumber(const Fragments& fragments);
     ReorderBuffer collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
     ReorderBuffer collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
 

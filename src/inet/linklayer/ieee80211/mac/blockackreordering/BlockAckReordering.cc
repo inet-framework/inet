@@ -7,10 +7,23 @@
 
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
 
+#include <algorithm>
+
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 
 namespace inet {
 namespace ieee80211 {
+
+BlockAckReordering::Fragments BlockAckReordering::sortFragmentsByFragmentNumber(const Fragments& fragments)
+{
+    auto sortedFragments = fragments;
+    std::stable_sort(sortedFragments.begin(), sortedFragments.end(), [](const Packet *first, const Packet *second) {
+        auto firstFragmentNumber = first->peekAtFront<Ieee80211DataOrMgmtHeader>()->getFragmentNumber();
+        auto secondFragmentNumber = second->peekAtFront<Ieee80211DataOrMgmtHeader>()->getFragmentNumber();
+        return firstFragmentNumber < secondFragmentNumber;
+    });
+    return sortedFragments;
+}
 
 //
 // The recipient flushes received MSDUs from its receive buffer as described in this subclause. [...]
@@ -113,7 +126,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMp
         auto fragments = it.second;
         if (SequenceNumberCyclic(sequenceNumber) < startingSequenceNumber)
             if (isComplete(fragments))
-                completePrecedingMpdus[sequenceNumber] = fragments;
+                completePrecedingMpdus[sequenceNumber] = sortFragmentsByFragmentNumber(fragments);
     }
     return completePrecedingMpdus;
 }
@@ -140,7 +153,7 @@ bool BlockAckReordering::addMsduIfComplete(ReceiveBuffer *receiveBuffer, Reorder
     if (it != buffer.end()) {
         auto fragments = it->second;
         if (isComplete(fragments)) {
-            reorderBuffer[seqNum.get()] = fragments;
+            reorderBuffer[seqNum.get()] = sortFragmentsByFragmentNumber(fragments);
             return true;
         }
     }
@@ -232,7 +245,7 @@ std::vector<Packet *> BlockAckReordering::getEarliestCompleteMsduOrAMsduIfExists
             }
         }
     }
-    return earliestFragments;
+    return sortFragmentsByFragmentNumber(earliestFragments);
 }
 
 BlockAckReordering::~BlockAckReordering()
