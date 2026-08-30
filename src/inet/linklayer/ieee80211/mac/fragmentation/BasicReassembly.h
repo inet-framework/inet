@@ -92,7 +92,7 @@ class INET_API BasicReassembly : public IReassembly, public cObject
     BasicReassembly(simtime_t maxReceiveLifetime) : maxReceiveLifetime(maxReceiveLifetime) {}
     virtual ~BasicReassembly();
     virtual Packet *addFragment(Packet *packet) override;
-    virtual void purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber) override;
+    virtual std::vector<Packet *> purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber) override;
     virtual simtime_t getNextExpirationTime() const override;
     virtual std::vector<Packet *> removeExpiredFragments(simtime_t currentTime) override;
 };

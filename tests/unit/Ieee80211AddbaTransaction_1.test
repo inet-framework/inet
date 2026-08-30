@@ -36,6 +36,7 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
@@ -183,6 +184,8 @@ class TestRecipientHandler : public RecipientBlockAckAgreementHandler
 class TestBlockAckReordering : public BlockAckReordering
 {
   public:
+    using BlockAckReordering::BlockAckReordering;
+
     int getNumReceiveBuffers() const { return receiveBuffers.size(); }
     ReceiveBuffer *getReceiveBuffer(Tid tid, MacAddress originatorAddress) const {
         auto it = receiveBuffers.find(std::make_pair(tid, originatorAddress));
@@ -993,6 +996,30 @@ auto createPacketQueue = [this](const char *name, int packetCapacity = -1, const
     module->callInitialize();
     return check_and_cast<queueing::PacketQueue *>(module);
 };
+
+// maxReceiveLifetime is a relative duration and must be nonnegative before
+// either recipient allocates a receive-lifetime consumer. Zero remains valid.
+auto assertMaxReceiveLifetimeValidation = [this](const char *typeName, const char *namePrefix) {
+    auto invalidModule = cModuleType::get(typeName)->create((std::string(namePrefix) + "Negative").c_str(), this);
+    invalidModule->par("maxReceiveLifetime").setDoubleValue(-1e-6);
+    bool threw = false;
+    try {
+        invalidModule->callInitialize();
+    }
+    catch (cRuntimeError&) {
+        threw = true;
+    }
+    ASSERT(threw);
+    invalidModule->deleteModule();
+
+    auto zeroModule = cModuleType::get(typeName)->create((std::string(namePrefix) + "Zero").c_str(), this);
+    zeroModule->par("maxReceiveLifetime").setDoubleValue(0);
+    zeroModule->callInitialize();
+    zeroModule->callFinish();
+    zeroModule->deleteModule();
+};
+assertMaxReceiveLifetimeValidation("inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService", "recipientMacDataServiceLifetime");
+assertMaxReceiveLifetimeValidation("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService", "recipientQosMacDataServiceLifetime");
 
 {
     TestOriginatorHandler tokenHandler;
@@ -2458,6 +2485,174 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
     reassembleOrderedFragments(barFragments, { 0x50, 0x51, 0x52, 0x53 });
 }
 
+// Receive-buffer lifetime starts when the first fragment of an incomplete
+// fragmented MPDU is retained. Later fragments do not refresh that deadline;
+// complete MPDUs held only for ordering remain available until normal window
+// processing releases them.
+{
+    auto makeReorderFragment = [&](const char *name, SequenceNumberCyclic sequenceNumber, int fragmentNumber, bool moreFragments, uint8_t payloadByte) {
+        auto dataHeader = makeQosHeader(peer2, 6, sequenceNumber);
+        dataHeader->setTransmitterAddress(peer1);
+        dataHeader->setFragmentNumber(fragmentNumber);
+        dataHeader->setMoreFragments(moreFragments);
+        dataHeader->setAckPolicy(BLOCK_ACK);
+        auto packet = new Packet(name, dataHeader);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>({ payloadByte })));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+
+    auto lifetime = SimTime(1, SIMTIME_US);
+    RecipientBlockAckAgreement agreement(peer1, 6, SequenceNumberCyclic(100), 64, 0);
+    TestBlockAckReordering reordering(lifetime);
+    auto firstFragment = makeReorderFragment("receiveLifetimeFirstFragment", SequenceNumberCyclic(100), 1, true, 0x61);
+    auto firstReceptionTime = simTime();
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, firstFragment, firstFragment->peekAtFront<Ieee80211DataHeader>()).empty());
+    auto firstDeadline = reordering.getNextExpirationTime();
+    ASSERT(firstDeadline == firstReceptionTime + lifetime);
+    wait(0.5e-6);
+    auto laterFragment = makeReorderFragment("receiveLifetimeLaterFragment", SequenceNumberCyclic(100), 2, false, 0x62);
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, laterFragment, laterFragment->peekAtFront<Ieee80211DataHeader>()).empty());
+    ASSERT(reordering.getNextExpirationTime() == firstDeadline);
+
+    auto completeEntry = makeReorderFragment("receiveLifetimeCompleteEntry", SequenceNumberCyclic(101), 0, false, 0x63);
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, completeEntry, completeEntry->peekAtFront<Ieee80211DataHeader>()).empty());
+    auto receiveBuffer = reordering.getReceiveBuffer(6, peer1);
+    ASSERT(receiveBuffer->getLength() == 3);
+    ASSERT(receiveBuffer->getNextExpectedSequenceNumber() == SequenceNumberCyclic(100));
+    auto expiredFragments = reordering.removeExpiredFragments(firstDeadline);
+    ASSERT(expiredFragments.size() == 2);
+    ASSERT(receiveBuffer->getLength() == 1);
+    ASSERT(receiveBuffer->getNextExpectedSequenceNumber() == SequenceNumberCyclic(100));
+    ASSERT(receiveBuffer->getBuffer().find(101) != receiveBuffer->getBuffer().end());
+    for (auto packet : expiredFragments)
+        delete packet;
+
+    auto lateFragment = makeReorderFragment("receiveLifetimeLateFragment", SequenceNumberCyclic(100), 0, true, 0x64);
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, lateFragment, lateFragment->peekAtFront<Ieee80211DataHeader>()).empty());
+    ASSERT(receiveBuffer->getLength() == 1);
+    auto retainedCompleteEntry = reordering.resetReceiveBuffer(6, peer1);
+    ASSERT(retainedCompleteEntry.size() == 1);
+    delete retainedCompleteEntry.front();
+
+    // The tombstone is retired by normal modulo-window progress, so a later
+    // complete wrap can reuse the raw sequence number without permanent loss.
+    RecipientBlockAckAgreement wrapAgreement(peer1, 6, SequenceNumberCyclic(4094), 64, 0);
+    TestBlockAckReordering wrapReordering(lifetime);
+    auto wrapFragment = makeReorderFragment("receiveLifetimeWrapFragment", SequenceNumberCyclic(4095), 1, false, 0x65);
+    ASSERT(wrapReordering.processReceivedQoSFrame(&wrapAgreement, wrapFragment, wrapFragment->peekAtFront<Ieee80211DataHeader>()).empty());
+    auto wrapDeadline = wrapReordering.getNextExpirationTime();
+    auto expiredWrapFragments = wrapReordering.removeExpiredFragments(wrapDeadline);
+    ASSERT(expiredWrapFragments.size() == 1);
+    delete expiredWrapFragments.front();
+    auto wrapReceiveBuffer = wrapReordering.getReceiveBuffer(6, peer1);
+    wrapReceiveBuffer->setNextExpectedSequenceNumber(SequenceNumberCyclic(0));
+    for (int sequenceNumber = 1; sequenceNumber <= 4095; sequenceNumber++)
+        wrapReceiveBuffer->setNextExpectedSequenceNumber(SequenceNumberCyclic(sequenceNumber));
+    auto reusedWrapFragment = makeReorderFragment("receiveLifetimeReusedWrapFragment", SequenceNumberCyclic(4095), 0, true, 0x66);
+    ASSERT(wrapReordering.processReceivedQoSFrame(&wrapAgreement, reusedWrapFragment, reusedWrapFragment->peekAtFront<Ieee80211DataHeader>()).empty());
+    auto reusedWrapFragments = wrapReordering.resetReceiveBuffer(6, peer1);
+    ASSERT(reusedWrapFragments.size() == 1);
+    delete reusedWrapFragments.front();
+}
+
+// Different terminal markers for one sequence cannot be interpreted as a
+// complete MPDU. Keep the entry incomplete and expiring instead of releasing
+// a hybrid or clearing its receive-lifetime deadline.
+{
+    auto makeContradictoryFragment = [&](const char *name, int fragmentNumber, bool moreFragments, uint8_t payloadByte) {
+        auto dataHeader = makeQosHeader(peer2, 6, SequenceNumberCyclic(250));
+        dataHeader->setTransmitterAddress(peer1);
+        dataHeader->setFragmentNumber(fragmentNumber);
+        dataHeader->setMoreFragments(moreFragments);
+        dataHeader->setAckPolicy(BLOCK_ACK);
+        auto packet = new Packet(name, dataHeader);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>({ payloadByte })));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    auto lifetime = SimTime(1, SIMTIME_US);
+    RecipientBlockAckAgreement agreement(peer1, 6, SequenceNumberCyclic(250), 64, 0);
+    TestBlockAckReordering reordering(lifetime);
+    auto finalFragment = makeContradictoryFragment("contradictoryFinalFragment", 1, false, 0x67);
+    auto receptionTime = simTime();
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, finalFragment, finalFragment->peekAtFront<Ieee80211DataHeader>()).empty());
+    auto fragmentZero = makeContradictoryFragment("contradictoryFragmentZero", 0, false, 0x68);
+    ASSERT(reordering.processReceivedQoSFrame(&agreement, fragmentZero, fragmentZero->peekAtFront<Ieee80211DataHeader>()).empty());
+    ASSERT(reordering.getNextExpirationTime() == receptionTime + lifetime);
+    auto receiveBuffer = reordering.getReceiveBuffer(6, peer1);
+    ASSERT(receiveBuffer->getLength() == 2);
+    auto expiredFragments = reordering.removeExpiredFragments(receptionTime + lifetime);
+    ASSERT(expiredFragments.size() == 2);
+    for (auto packet : expiredFragments)
+        delete packet;
+    ASSERT(receiveBuffer->getLength() == 0);
+}
+
+// A retained reorder-buffer fragment arms the recipient's common lifetime
+// timer. Reorder expiry and BasicReassembly expiry are staggered, and every
+// detached packet is reported exactly once as OTHER_PACKET_DROP.
+{
+    auto serviceModule = cModuleType::get("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService")->create("reorderLifetimeDataService", this);
+    auto lifetime = SimTime(2, SIMTIME_US);
+    serviceModule->par("maxReceiveLifetime").setDoubleValue(lifetime.dbl());
+    serviceModule->callInitialize();
+    auto service = check_and_cast<RecipientQosMacDataService *>(serviceModule);
+    TestPacketDropSignalListener dropListener;
+    service->subscribe(packetDroppedSignal, &dropListener);
+
+    RecipientBlockAckAgreementHandler agreementHandler;
+    TestRecipientPolicy policy;
+    TestCallback callback;
+    auto request = makeRequest(peer1, 6, 92, SequenceNumberCyclic(300), 64);
+    auto agreement = agreementHandler.processReceivedAddbaRequest(request, &policy, &callback, &callback);
+    ASSERT(agreement != nullptr);
+
+    auto makeServiceFragment = [&](const char *name, MacAddress transmitterAddress, SequenceNumberCyclic sequenceNumber, int fragmentNumber, bool moreFragments, uint8_t payloadByte) {
+        auto dataHeader = makeQosHeader(peer2, 6, sequenceNumber);
+        dataHeader->setTransmitterAddress(transmitterAddress);
+        dataHeader->setFragmentNumber(fragmentNumber);
+        dataHeader->setMoreFragments(moreFragments);
+        dataHeader->setAckPolicy(BLOCK_ACK);
+        auto packet = new Packet(name, dataHeader);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>({ payloadByte })));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+
+    auto reorderFirstFragment = makeServiceFragment("serviceReorderFirstFragment", peer1, SequenceNumberCyclic(300), 1, true, 0x71);
+    ASSERT(service->dataFrameReceived(reorderFirstFragment, reorderFirstFragment->peekAtFront<Ieee80211DataHeader>(), &agreementHandler).empty());
+    auto reorderFinalFragment = makeServiceFragment("serviceReorderFinalFragment", peer1, SequenceNumberCyclic(300), 2, false, 0x72);
+    ASSERT(service->dataFrameReceived(reorderFinalFragment, reorderFinalFragment->peekAtFront<Ieee80211DataHeader>(), &agreementHandler).empty());
+    ASSERT(dropListener.numSignals == 0);
+    wait(0.5e-6);
+
+    // No agreement for peer3: this fragment is retained by BasicReassembly,
+    // with a later deadline than the already retained reorder fragments.
+    auto basicFragment = makeServiceFragment("serviceBasicFragment", peer3, SequenceNumberCyclic(350), 0, true, 0x73);
+    ASSERT(service->dataFrameReceived(basicFragment, basicFragment->peekAtFront<Ieee80211DataHeader>(), &agreementHandler).empty());
+    wait(1.6e-6);
+    ASSERT(dropListener.numSignals == 2);
+    ASSERT(dropListener.numOtherPacketDrops == 2);
+
+    // The expired sequence remains tombstoned until the reorder window moves
+    // past it. A late fragment is rejected and reported once by the service,
+    // while no hybrid or partial frame is delivered.
+    auto lateReorderFragment = makeServiceFragment("serviceLateReorderFragment", peer1, SequenceNumberCyclic(300), 0, true, 0x74);
+    ASSERT(service->dataFrameReceived(lateReorderFragment, lateReorderFragment->peekAtFront<Ieee80211DataHeader>(), &agreementHandler).empty());
+    ASSERT(dropListener.numSignals == 3);
+    ASSERT(dropListener.numOtherPacketDrops == 3);
+    ASSERT(agreement->getBlockAckRecord()->getAckState(SequenceNumberCyclic(300), 0));
+    wait(0.3e-6);
+    ASSERT(dropListener.numSignals == 3);
+    wait(0.2e-6);
+    ASSERT(dropListener.numSignals == 4);
+    ASSERT(dropListener.numOtherPacketDrops == 4);
+    service->unsubscribe(packetDroppedSignal, &dropListener);
+    serviceModule->callFinish();
+    serviceModule->deleteModule();
+}
+
 // The recipient data service owns reorder-buffer reset observability: every
 // buffered MPDU is reported exactly once before it is deleted.
 {
@@ -2471,11 +2666,46 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
     auto bufferedPacket = new Packet("signaledOldWindowPacket", bufferedHeader);
     auto signaledOldWindowFrames = recipientDataService->dataFrameReceived(bufferedPacket, bufferedHeader, &immediateRecipientHandler);
     ASSERT(signaledOldWindowFrames.empty());
+
+    auto makeBasicFragment = [&](const char *name, MacAddress transmitterAddress, Tid tid, int sequenceNumber, int fragmentNumber, bool moreFragments, uint8_t payloadByte) {
+        auto dataHeader = makeQosHeader(peer1, tid, SequenceNumberCyclic(sequenceNumber));
+        dataHeader->setTransmitterAddress(transmitterAddress);
+        dataHeader->setFragmentNumber(fragmentNumber);
+        dataHeader->setMoreFragments(moreFragments);
+        dataHeader->setAckPolicy(BLOCK_ACK);
+        auto packet = new Packet(name, dataHeader);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>({ payloadByte })));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    auto targetFirst = makeBasicFragment("signaledTargetBasicFragment", peer2, 7, 20, 0, true, 0x81);
+    ASSERT(recipientDataService->dataFrameReceived(targetFirst, targetFirst->peekAtFront<Ieee80211DataHeader>(), &immediateRecipientHandler).empty());
+    auto samePeerDifferentTidFirst = makeBasicFragment("signaledDifferentTidBasicFragment", peer2, 8, 21, 0, true, 0x82);
+    ASSERT(recipientDataService->dataFrameReceived(samePeerDifferentTidFirst, samePeerDifferentTidFirst->peekAtFront<Ieee80211DataHeader>(), &immediateRecipientHandler).empty());
+    auto differentPeerSameTidFirst = makeBasicFragment("signaledDifferentPeerBasicFragment", peer3, 7, 22, 0, true, 0x83);
+    ASSERT(recipientDataService->dataFrameReceived(differentPeerSameTidFirst, differentPeerSameTidFirst->peekAtFront<Ieee80211DataHeader>(), &immediateRecipientHandler).empty());
+
     recipientDataService->resetBlockAckReordering(6, peer1);
     ASSERT(dropListener.numSignals == 1);
     ASSERT(dropListener.numOtherPacketDrops == 1);
+    // Resetting one originator/TID agreement also purges its BasicReassembly
+    // state, while retaining fragments for a different TID or peer.
+    recipientDataService->resetBlockAckReordering(7, peer2);
+    ASSERT(dropListener.numSignals == 2);
+    ASSERT(dropListener.numOtherPacketDrops == 2);
     recipientDataService->resetBlockAckReordering(6, peer1);
-    ASSERT(dropListener.numSignals == 1);
+    recipientDataService->resetBlockAckReordering(7, peer2);
+    ASSERT(dropListener.numSignals == 2);
+    auto samePeerDifferentTidFinal = makeBasicFragment("signaledDifferentTidBasicFinal", peer2, 8, 21, 1, false, 0x92);
+    auto samePeerDifferentTidFrames = recipientDataService->dataFrameReceived(samePeerDifferentTidFinal,
+            samePeerDifferentTidFinal->peekAtFront<Ieee80211DataHeader>(), &immediateRecipientHandler);
+    ASSERT(samePeerDifferentTidFrames.size() == 1);
+    delete samePeerDifferentTidFrames.front();
+    auto differentPeerSameTidFinal = makeBasicFragment("signaledDifferentPeerBasicFinal", peer3, 7, 22, 1, false, 0x93);
+    auto differentPeerSameTidFrames = recipientDataService->dataFrameReceived(differentPeerSameTidFinal,
+            differentPeerSameTidFinal->peekAtFront<Ieee80211DataHeader>(), &immediateRecipientHandler);
+    ASSERT(differentPeerSameTidFrames.size() == 1);
+    delete differentPeerSameTidFrames.front();
     recipientDataService->unsubscribe(packetDroppedSignal, &dropListener);
     recipientDataServiceModule->callFinish();
     recipientDataServiceModule->deleteModule();
@@ -5029,6 +5259,16 @@ for (int responseIndex = 0; responseIndex < 2; responseIndex++) {
     ASSERT(completed->peekAt<BytesChunk>(completedResponse->getChunkLength(), B(newPayload.size()))->getBytes() == newPayload);
     delete completed;
     delete recoveredFragments;
+
+    // purge() remains the explicit agreement/lifecycle boundary and returns
+    // detached fragments to its caller for observable drop handling.
+    auto purgeFragments = makeResponseFragments("reassemblyPurgedResponse", 31, 41, { 0xb0, 0xb1, 0xb2 }, 4094, 2);
+    ASSERT(reassembly.addFragment(purgeFragments->at(0)) == nullptr);
+    auto purgedFragments = reassembly.purge(peer1, -1, 4094, 4094);
+    ASSERT(purgedFragments.size() == 1);
+    delete purgedFragments.front();
+    delete purgeFragments->at(1);
+    delete purgeFragments;
 }
 
 // A terminal duplicate on an occupied nonterminal slot is still observed for
