@@ -46,10 +46,24 @@ class INET_API IFrameSequenceHandler
     virtual void transmissionComplete() = 0;
     virtual bool isSequenceRunning() = 0;
     virtual void handleStartRxTimeout() = 0;
+
+    /**
+     * Requests cancellation at the next ownership-safe frame-sequence
+     * boundary. An in-flight transmit step remains owned by the sequence
+     * until its physical transmission completion is delivered.
+     */
+    virtual void cancelFrameSequence() {}
+
+    /**
+     * Aborts a frame sequence immediately after its pending transmission has
+     * been cancelled before lower-layer handoff. This is separate from
+     * cancelFrameSequence() because an already handed-down copy must be
+     * allowed to complete first.
+     */
+    virtual void abortFrameSequence() {}
 };
 
 } // namespace ieee80211
 } // namespace inet
 
 #endif
-

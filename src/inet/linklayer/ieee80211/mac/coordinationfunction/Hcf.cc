@@ -179,6 +179,12 @@ void Hcf::handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemo
         resumeEligibleChannelAccess();
 }
 
+void Hcf::cancelManagementTransaction(uint64_t transactionId)
+{
+    Enter_Method("cancelManagementTransaction");
+    cancelManagementTransaction(transactionId, nullptr);
+}
+
 bool Hcf::cancelManagementTransaction(uint64_t transactionId, Packet *excludedPacket)
 {
     Enter_Method("cancelManagementTransaction");
@@ -201,6 +207,8 @@ bool Hcf::cancelManagementTransaction(uint64_t transactionId, Packet *excludedPa
         auto transactionTag = packet->findTag<Ieee80211MgmtTransactionTag>();
         return packet != excludedPacket && transactionTag != nullptr && transactionTag->getTransactionId() == transactionId;
     };
+    bool frameSequenceCancellationRequested = false;
+    bool pendingTransmissionCancelled = false;
     for (int ac = 0; ac < edca->getNumEdcafs(); ac++) {
         auto edcaf = edca->getEdcaf(AccessCategory(ac));
         auto pendingQueue = edcaf->getPendingQueue();
@@ -219,9 +227,26 @@ bool Hcf::cancelManagementTransaction(uint64_t transactionId, Packet *excludedPa
         for (int i = inProgressFrames->getLength() - 1; i >= 0; i--) {
             auto packet = inProgressFrames->getFrames(i);
             if (belongsToTransaction(packet)) {
-                ASSERT(!isPacketReferencedByCurrentFrameSequence(packet));
-                if (isPacketReferencedByCurrentFrameSequence(packet))
-                    throw cRuntimeError("Cannot cancel management transaction %llu: sibling frame is referenced by the active frame sequence", (unsigned long long)transactionId);
+                if (isPacketReferencedByCurrentFrameSequence(packet)) {
+                    // Keep the packet alive for raw pointers held by the
+                    // active sequence, but remove it from eligibility
+                    // immediately. The sequence retires it at its next safe
+                    // boundary.
+                    inProgressFrames->dropFrame(packet);
+                    cancelledManagementTransactions.insert(transactionId);
+                    PacketDropDetails details;
+                    details.setReason(OTHER_PACKET_DROP);
+                    emit(packetDroppedSignal, packet, &details);
+                    bool currentFrameSequenceCancelled = isCurrentFrameSequenceCancelled(packet);
+                    frameSequenceCancellationRequested |= currentFrameSequenceCancelled;
+                    // A sequence can retain completed steps in its context.
+                    // Only cancel Tx when the current transmit/protected step
+                    // belongs to this transaction; the callback owner alone
+                    // is not enough to identify a historical frame.
+                    if (currentFrameSequenceCancelled && tx != nullptr)
+                        pendingTransmissionCancelled |= tx->cancelPendingTransmission(this);
+                    continue;
+                }
                 auto header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
                 auto extractedPacket = inProgressFrames->extractFrame(packet);
                 ASSERT(extractedPacket == packet);
@@ -236,6 +261,11 @@ bool Hcf::cancelManagementTransaction(uint64_t transactionId, Packet *excludedPa
                 delete packet;
             }
         }
+    }
+    if (frameSequenceCancellationRequested && frameSequenceHandler != nullptr) {
+        frameSequenceHandler->cancelFrameSequence();
+        if (pendingTransmissionCancelled)
+            frameSequenceHandler->abortFrameSequence();
     }
     managementTransactionsBeingCancelled.erase(transactionId);
     completedManagementTransactions.insert(transactionId);
@@ -349,6 +379,33 @@ bool Hcf::isPacketReferencedByCurrentFrameSequence(const Packet *packet) const
             return true;
     }
     return false;
+}
+
+bool Hcf::isManagementTransactionCancelled(const Packet *packet) const
+{
+    if (packet == nullptr)
+        return false;
+    auto transactionTag = packet->findTag<Ieee80211MgmtTransactionTag>();
+    return transactionTag != nullptr && cancelledManagementTransactions.find(transactionTag->getTransactionId()) != cancelledManagementTransactions.end();
+}
+
+bool Hcf::isCurrentFrameSequenceCancelled(const Packet *packet) const
+{
+    if (packet == nullptr || frameSequenceHandler == nullptr || !frameSequenceHandler->isSequenceRunning())
+        return false;
+    auto context = frameSequenceHandler->getContext();
+    if (context == nullptr)
+        return false;
+    auto transmitStep = dynamic_cast<ITransmitStep *>(context->getLastStep());
+    if (transmitStep == nullptr)
+        transmitStep = dynamic_cast<ITransmitStep *>(context->getStepBeforeLast());
+    if (transmitStep == nullptr)
+        return false;
+    if (transmitStep->getFrameToTransmit() == packet)
+        return isManagementTransactionCancelled(packet) || (dynamic_cast<RtsTransmitStep *>(transmitStep) != nullptr &&
+                isManagementTransactionCancelled(dynamic_cast<RtsTransmitStep *>(transmitStep)->getProtectedFrame()));
+    auto rtsTransmitStep = dynamic_cast<RtsTransmitStep *>(transmitStep);
+    return rtsTransmitStep != nullptr && rtsTransmitStep->getProtectedFrame() == packet && isManagementTransactionCancelled(packet);
 }
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)
@@ -640,6 +697,7 @@ void Hcf::frameSequenceFinished()
     }
     else
         throw cRuntimeError("Frame sequence finished but channel owner not found!");
+    cancelledManagementTransactions.clear();
 }
 
 void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
@@ -781,6 +839,19 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
 void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
 {
     Enter_Method("originatorProcessRtsProtectionFailed");
+    if (isManagementTransactionCancelled(packet)) {
+        auto protectedHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        auto edcaf = edca->getChannelOwner();
+        if (edcaf != nullptr) {
+            auto recoveryProcedure = edca->getMgmtAndNonQoSRecoveryProcedure();
+            if (recoveryProcedure != nullptr)
+                recoveryProcedure->discardRtsFrame(protectedHeader);
+            edcaf->getInProgressFrames()->dropFrame(packet);
+            if (edcaf->getAckHandler() != nullptr)
+                edcaf->getAckHandler()->dropFrame(protectedHeader);
+        }
+        return;
+    }
     auto protectedHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
@@ -835,11 +906,15 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
 void Hcf::originatorProcessTransmittedFrame(Packet *packet)
 {
     Enter_Method("originatorProcessTransmittedFrame");
+    if (isCurrentFrameSequenceCancelled(packet))
+        return;
     EV_INFO << "Processing transmitted frame " << packet->getName() << " as originator in frame sequence.\n";
     auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         edcaf->emit(packetSentToPeerSignal, packet);
+        if (isCurrentFrameSequenceCancelled(packet))
+            return;
         AccessCategory ac = edcaf->getAccessCategory();
         if (transmittedHeader->getReceiverAddress().isMulticast()) {
             edcaf->getRecoveryProcedure()->multicastFrameTransmitted();
@@ -922,6 +997,19 @@ void Hcf::originatorProcessTransmittedControlFrame(const Ptr<const Ieee80211MacH
 void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
 {
     Enter_Method("originatorProcessFailedFrame");
+    if (isManagementTransactionCancelled(failedPacket)) {
+        auto failedHeader = failedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        auto edcaf = edca->getChannelOwner();
+        if (edcaf != nullptr) {
+            auto recoveryProcedure = edca->getMgmtAndNonQoSRecoveryProcedure();
+            if (recoveryProcedure != nullptr)
+                recoveryProcedure->discardFrame(failedPacket, failedHeader);
+            edcaf->getInProgressFrames()->dropFrame(failedPacket);
+            if (edcaf->getAckHandler() != nullptr)
+                edcaf->getAckHandler()->dropFrame(failedHeader);
+        }
+        return;
+    }
     auto failedHeader = failedPacket->peekAtFront<Ieee80211MacHeader>();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {

@@ -122,6 +122,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     std::set<uint64_t> managementTransactionsBeingCancelled;
     std::set<uint64_t> completedManagementTransactions;
     eventnumber_t completedManagementTransactionsEventNumber = -1;
+    std::set<uint64_t> cancelledManagementTransactions;
     std::set<std::tuple<bool, MacAddress, Tid, uint64_t>> blockAckTeardownsBeingCancelled;
 
     // Protection mechanisms
@@ -146,6 +147,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual bool processDroppedBlockAckSetupFrame(Packet *packet);
     virtual bool processDroppedBlockAckTeardownFrame(Packet *packet);
     virtual bool isPacketReferencedByCurrentFrameSequence(const Packet *packet) const;
+    virtual bool isManagementTransactionCancelled(const Packet *packet) const;
+    virtual bool isCurrentFrameSequenceCancelled(const Packet *packet) const;
     virtual bool cancelManagementTransaction(uint64_t transactionId, Packet *excludedPacket);
     virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override;
     virtual void trackPendingFrame(Packet *packet, AccessCategory accessCategory);
@@ -201,6 +204,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     virtual ~Hcf();
+
+    virtual void cancelManagementTransaction(uint64_t transactionId);
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

@@ -11,6 +11,7 @@
 #include <map>
 
 #include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/contract/IManagementFrameTransactionHandler.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApBase.h"
 
 namespace inet {
@@ -73,6 +74,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, public IFrameTransm
     StaList staList; ///< list of STAs
     cMessage *beaconTimer = nullptr;
     uint64_t nextAssociationTransactionId = 0;
+    ModuleRefByPar<IManagementFrameTransactionHandler> managementFrameTransactionHandler;
 
   public:
     Ieee80211MgmtAp() {}
@@ -98,6 +100,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, public IFrameTransm
 
     virtual uint64_t createAssociationTransactionId();
     virtual void clearPendingAssociation(StaInfo *sta);
+    virtual void supersedePendingAssociation(StaInfo *sta);
 
     /** Classifies a terminal management-MPDU result using its transaction tag and fragment state. */
     static AssociationResponseDisposition getAssociationResponseDisposition(const Packet *responseFrame,

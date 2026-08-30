@@ -59,6 +59,7 @@ void Ieee80211MgmtAp::initialize(int stage)
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
+        managementFrameTransactionHandler.reference(this, "macModule", true);
     }
 }
 
@@ -184,6 +185,17 @@ void Ieee80211MgmtAp::clearPendingAssociation(StaInfo *sta)
     sta->pendingHtOperation = Ieee80211HtOperation();
 }
 
+void Ieee80211MgmtAp::supersedePendingAssociation(StaInfo *sta)
+{
+    auto transactionId = sta->pendingAssociationTransactionId;
+    // Clear the AP bookkeeping before entering the MAC so synchronous queue
+    // callbacks cannot mistake this superseded frame for the active
+    // transaction.
+    clearPendingAssociation(sta);
+    if (transactionId != 0 && managementFrameTransactionHandler)
+        managementFrameTransactionHandler->cancelManagementTransaction(transactionId);
+}
+
 void Ieee80211MgmtAp::sendBeacon()
 {
     EV << "Sending beacon\n";
@@ -228,7 +240,7 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
         // association response that is still owned by the MAC. IEEE 802.11-2024
         // 11.3.4 does not require an associated peer to downgrade on frame 1;
         // keep this cancellation scoped to this existing model transition.
-        clearPendingAssociation(sta);
+        supersedePendingAssociation(sta);
         if (mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED) {
             sendDisAssocNotification(sta->address);
             mib->releaseAssociationId(sta->address);
@@ -288,7 +300,7 @@ void Ieee80211MgmtAp::handleDeauthenticationFrame(Packet *packet, const Ptr<cons
     delete packet;
 
     if (sta) {
-        clearPendingAssociation(sta);
+        supersedePendingAssociation(sta);
         // mark STA as not authenticated; alternatively, it could also be removed from staList
         if (mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED) {
             sendDisAssocNotification(sta->address);
@@ -432,7 +444,7 @@ void Ieee80211MgmtAp::handleDisassociationFrame(Packet *packet, const Ptr<const 
     delete packet;
 
     if (sta) {
-        clearPendingAssociation(sta);
+        supersedePendingAssociation(sta);
         if (mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED) {
             sendDisAssocNotification(sta->address);
             mib->releaseAssociationId(sta->address);
@@ -506,6 +518,8 @@ void Ieee80211MgmtAp::start()
 void Ieee80211MgmtAp::stop()
 {
     cancelEvent(beaconTimer);
+    for (auto& entry : staList)
+        supersedePendingAssociation(&entry.second);
     staList.clear();
     mib->clearAssociationIds();
     Ieee80211MgmtApBase::stop();

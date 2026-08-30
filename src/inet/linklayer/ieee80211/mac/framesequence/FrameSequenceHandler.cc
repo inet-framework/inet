@@ -31,6 +31,11 @@ void FrameSequenceHandler::handleStartRxTimeout()
 void FrameSequenceHandler::processResponse(Packet *frame)
 {
     ASSERT(callback != nullptr);
+    if (frameSequenceCancellationRequested) {
+        delete frame;
+        abortFrameSequence();
+        return;
+    }
     auto lastStep = context->getLastStep();
     switch (lastStep->getType()) {
         case IFrameSequenceStep::Type::RECEIVE: {
@@ -52,7 +57,10 @@ void FrameSequenceHandler::processResponse(Packet *frame)
 void FrameSequenceHandler::transmissionComplete()
 {
     if (isSequenceRunning()) {
-        finishFrameSequenceStep();
+        if (frameSequenceCancellationRequested)
+            abortFrameSequence();
+        else
+            finishFrameSequenceStep();
         if (isSequenceRunning())
             startFrameSequenceStep();
     }
@@ -63,6 +71,7 @@ void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, Fra
     EV_INFO << "Starting frame sequence.\n";
     this->callback = callback;
     if (!isSequenceRunning()) {
+        frameSequenceCancellationRequested = false;
         this->frameSequence = frameSequence;
         this->context = context;
         frameSequence->startSequence(context, 0);
@@ -75,6 +84,10 @@ void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, Fra
 void FrameSequenceHandler::startFrameSequenceStep()
 {
     ASSERT(isSequenceRunning());
+    if (frameSequenceCancellationRequested) {
+        abortFrameSequence();
+        return;
+    }
     auto nextStep = frameSequence->prepareStep(context);
     EV_INFO << "Starting next frame sequence step: history = " << frameSequence->getHistory() << "\n";
     if (nextStep == nullptr)
@@ -119,6 +132,8 @@ void FrameSequenceHandler::finishFrameSequenceStep()
             case IFrameSequenceStep::Type::TRANSMIT: {
                 auto transmitStep = static_cast<ITransmitStep *>(lastStep);
                 callback->originatorProcessTransmittedFrame(transmitStep->getFrameToTransmit());
+                if (frameSequenceCancellationRequested && isSequenceRunning())
+                    abortFrameSequence();
                 break;
             }
             case IFrameSequenceStep::Type::RECEIVE: {
@@ -143,6 +158,7 @@ void FrameSequenceHandler::finishFrameSequence()
     context = nullptr;
     frameSequence = nullptr;
     callback = nullptr;
+    frameSequenceCancellationRequested = false;
     inProgressFrames->clearDroppedFrames();
 }
 
@@ -166,6 +182,7 @@ void FrameSequenceHandler::abortFrameSequence()
     context = nullptr;
     frameSequence = nullptr;
     callback = nullptr;
+    frameSequenceCancellationRequested = false;
     inProgressFrames->clearDroppedFrames();
 }
 
@@ -177,4 +194,3 @@ FrameSequenceHandler::~FrameSequenceHandler()
 
 } // namespace ieee80211
 } // namespace inet
-

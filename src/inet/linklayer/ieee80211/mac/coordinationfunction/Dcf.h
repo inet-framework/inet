@@ -91,6 +91,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     std::set<uint64_t> managementTransactionsBeingCancelled;
     std::set<uint64_t> completedManagementTransactions;
     eventnumber_t completedManagementTransactionsEventNumber = -1;
+    std::set<uint64_t> cancelledManagementTransactions;
 
     // Station counters
     StationRetryCounters *stationRetryCounters = nullptr;
@@ -111,6 +112,8 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
     virtual bool isPacketReferencedByCurrentFrameSequence(const Packet *packet) const;
+    virtual bool isManagementTransactionCancelled(const Packet *packet) const;
+    virtual bool isCurrentFrameSequenceCancelled(const Packet *packet) const;
     virtual bool cancelManagementTransaction(uint64_t transactionId, Packet *excludedPacket);
 
   protected:
@@ -141,6 +144,8 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     virtual ~Dcf();
+
+    virtual void cancelManagementTransaction(uint64_t transactionId);
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

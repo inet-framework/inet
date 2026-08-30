@@ -385,6 +385,15 @@ void Ieee80211Mac::notifyFrameTransmission(const Packet *frame, IFrameTransmissi
     }
 }
 
+void Ieee80211Mac::cancelManagementTransaction(uint64_t transactionId)
+{
+    Enter_Method("cancelManagementTransaction");
+    if (mib->qos)
+        hcf->cancelManagementTransaction(transactionId);
+    else
+        dcf->cancelManagementTransaction(transactionId);
+}
+
 void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     Enter_Method("processUpperFrame(\"%s\")", packet->getName());

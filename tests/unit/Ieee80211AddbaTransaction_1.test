@@ -817,6 +817,7 @@ class TestFrameSequenceHandler : public IFrameSequenceHandler
     IFrameSequence *frameSequence = nullptr;
     FrameSequenceContext *context = nullptr;
     bool running = false;
+    bool cancellationRequested = false;
     int numStartedSequences = 0;
 
     virtual ~TestFrameSequenceHandler() {
@@ -835,6 +836,7 @@ class TestFrameSequenceHandler : public IFrameSequenceHandler
     virtual void transmissionComplete() override {}
     virtual bool isSequenceRunning() override { return running; }
     virtual void handleStartRxTimeout() override {}
+    virtual void cancelFrameSequence() override { cancellationRequested = true; }
 };
 
 class TestDcaf : public Dcaf
@@ -869,6 +871,7 @@ class TestDcf : public Dcf
         this->stationRetryCounters = new StationRetryCounters();
     }
     void processFailedFrame(Packet *packet) { originatorProcessFailedFrame(packet); }
+    void processRtsProtectionFailure(Packet *packet) { originatorProcessRtsProtectionFailed(packet); }
 
   protected:
     virtual FrameSequenceContext *buildContext() override {
@@ -1430,6 +1433,85 @@ ASSERT(handler.isAddbaResponsePending(peer3, 5));
     ASSERT(releasedFrames.size() == 2);
     for (auto frame : releasedFrames)
         delete frame;
+}
+
+// Management transaction cancellation keeps active direct and RTS-protected
+// frames alive until the sequence retires them, while making both frames
+// ineligible immediately and suppressing terminal callbacks/retries.
+for (auto coordination : { 0, 1 }) {
+    const uint64_t transactionId = 902 + coordination;
+    TestPacketQueue pendingQueue;
+    TestInProgressFrames inProgressFrames;
+    AckHandler dcfAckHandler;
+    TestQosAckHandler hcfAckHandler;
+    inProgressFrames.configure(nullptr, &dcfAckHandler, &pendingQueue);
+    auto directPacket = makeTaggedManagementPacket("activeManagementDirect", ST_ASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(32 + coordination), 0, true, transactionId);
+    auto protectedPacket = makeTaggedManagementPacket("activeManagementRtsProtected", ST_REASSOCIATIONRESPONSE, peer1, peer2, SequenceNumberCyclic(32 + coordination), 1, false, transactionId);
+    inProgressFrames.addOwnedFrame(directPacket);
+    inProgressFrames.addOwnedFrame(protectedPacket);
+
+    TestFrameSequenceHandler *frameSequenceHandler;
+    TestMac mac;
+    if (coordination == 0) {
+        TestDcaf channelAccess;
+        channelAccess.configure(&inProgressFrames, &pendingQueue);
+        TestDcf dcf;
+        frameSequenceHandler = dcf.configure(&channelAccess, &mac, &dcfAckHandler);
+        frameSequenceHandler->running = true;
+        frameSequenceHandler->context = new FrameSequenceContext(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &inProgressFrames, nullptr, nullptr, new NonQoSContext(nullptr), nullptr);
+        frameSequenceHandler->context->addStep(new TransmitStep(directPacket, 0));
+        frameSequenceHandler->context->addStep(new RtsTransmitStep(protectedPacket, new Packet("activeManagementRts", makeShared<Ieee80211RtsFrame>()), 0));
+        TestSignalListener dropListener;
+        dcf.subscribe(packetDroppedSignal, &dropListener);
+        ASSERT(dcf.cancelManagement(transactionId, nullptr));
+        ASSERT(frameSequenceHandler->cancellationRequested);
+        ASSERT(inProgressFrames.getLength() == 0);
+        ASSERT(inProgressFrames.getNumDroppedFrames() == 2);
+        ASSERT(dropListener.numSignals == 2);
+        ASSERT(mac.transmissionStatuses.empty());
+        dcf.processFailedFrame(directPacket);
+        dcf.processRtsProtectionFailure(protectedPacket);
+        ASSERT(!directPacket->peekAtFront<Ieee80211MgmtHeader>()->getRetry());
+        ASSERT(!protectedPacket->peekAtFront<Ieee80211MgmtHeader>()->getRetry());
+        auto releasedFrames = inProgressFrames.releaseFrames();
+        ASSERT(releasedFrames.size() == 2);
+        for (auto frame : releasedFrames)
+            delete frame;
+    }
+    else {
+        TestEdcaf edcaf;
+        edcaf.pendingQueue = &pendingQueue;
+        edcaf.inProgressFrames = &inProgressFrames;
+        inProgressFrames.configure(nullptr, &hcfAckHandler, &pendingQueue);
+        edcaf.qosAckHandler = &hcfAckHandler;
+        TestEdca edca;
+        edca.edcaf = &edcaf;
+        TestHcf hcf;
+        hcf.configure(&edca);
+        hcf.configureMac(&mac);
+        frameSequenceHandler = new TestFrameSequenceHandler();
+        frameSequenceHandler->running = true;
+        frameSequenceHandler->context = new FrameSequenceContext(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &inProgressFrames, nullptr, nullptr, nullptr, nullptr);
+        frameSequenceHandler->context->addStep(new TransmitStep(directPacket, 0));
+        frameSequenceHandler->context->addStep(new RtsTransmitStep(protectedPacket, new Packet("activeManagementRts", makeShared<Ieee80211RtsFrame>()), 0));
+        hcf.configureFrameSequenceHandler(frameSequenceHandler);
+        TestSignalListener dropListener;
+        hcf.subscribe(packetDroppedSignal, &dropListener);
+        ASSERT(hcf.cancelManagement(transactionId, nullptr));
+        ASSERT(frameSequenceHandler->cancellationRequested);
+        ASSERT(inProgressFrames.getLength() == 0);
+        ASSERT(inProgressFrames.getNumDroppedFrames() == 2);
+        ASSERT(dropListener.numSignals == 2);
+        ASSERT(mac.transmissionStatuses.empty());
+        hcf.processFailedFrame(directPacket);
+        hcf.processRtsProtectionFailure(protectedPacket);
+        ASSERT(!directPacket->peekAtFront<Ieee80211MgmtHeader>()->getRetry());
+        ASSERT(!protectedPacket->peekAtFront<Ieee80211MgmtHeader>()->getRetry());
+        auto releasedFrames = inProgressFrames.releaseFrames();
+        ASSERT(releasedFrames.size() == 2);
+        for (auto frame : releasedFrames)
+            delete frame;
+    }
 }
 
 
