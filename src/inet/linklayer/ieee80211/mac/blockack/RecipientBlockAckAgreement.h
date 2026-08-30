@@ -21,7 +21,6 @@ class INET_API RecipientBlockAckAgreement : public cObject
     SequenceNumberCyclic startingSequenceNumber;
     int bufferSize = -1;
     simtime_t blockAckTimeoutValue = 0;
-    bool isAddbaResponseSent = false;
     simtime_t expirationTime = -1;
 
   public:
@@ -35,7 +34,6 @@ class INET_API RecipientBlockAckAgreement : public cObject
     virtual int getBufferSize() const { return bufferSize; }
     virtual SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
 
-    virtual void addbaResposneSent() { isAddbaResponseSent = true; }
     virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }
     virtual simtime_t getExpirationTime() { return expirationTime; }
     friend std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agreement);
@@ -45,4 +43,3 @@ class INET_API RecipientBlockAckAgreement : public cObject
 } /* namespace inet */
 
 #endif
-

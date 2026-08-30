@@ -77,6 +77,16 @@ void ReceiveBuffer::removeFrame(SequenceNumberCyclic sequenceNumber)
         throw cRuntimeError("Unknown sequence number: %d", sequenceNumber.get());
 }
 
+ReceiveBuffer::Fragments ReceiveBuffer::extractFrames()
+{
+    Fragments frames;
+    for (auto& [sequenceNumber, fragments] : buffer)
+        frames.insert(frames.end(), fragments.begin(), fragments.end());
+    buffer.clear();
+    length = 0;
+    return frames;
+}
+
 ReceiveBuffer::~ReceiveBuffer()
 {
     for (auto fragments : buffer) {
@@ -87,4 +97,3 @@ ReceiveBuffer::~ReceiveBuffer()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
