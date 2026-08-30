@@ -63,6 +63,9 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
     // Returns whether this mode uses the optional 400 ns HT guard interval.
     // Non-HT modes deliberately report false.
     virtual bool isHtShortGuardInterval() const = 0;
+    // Returns whether this mode uses the HT Greenfield preamble format.
+    // Non-HT modes and HT-mixed modes report false.
+    virtual bool isHtGreenfield() const { return false; }
     virtual int getLegacyCwMin() const = 0;
     virtual int getLegacyCwMax() const = 0;
     virtual const char *getName() const = 0;
@@ -92,4 +95,3 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
 } // namespace inet
 
 #endif
-

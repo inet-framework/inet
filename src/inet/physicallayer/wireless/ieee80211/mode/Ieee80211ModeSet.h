@@ -51,6 +51,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     std::array<bool, 77> htMcsMandatory = {};
     std::set<Hz> htSupportedChannelWidths;
     std::set<Hz> htShortGuardIntervalChannelWidths;
+    bool htGreenfieldSupported = false;
     bool htOperationSupported = false;
     // Entries are selectable modes; supportedEntries also contains immutable PHY capabilities needed for mandatory control responses.
     const std::vector<Entry> supportedEntries;
@@ -93,6 +94,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     const std::set<Hz>& getHtSupportedChannelWidths() const { return htSupportedChannelWidths; }
     const std::set<Hz>& getHtShortGuardIntervalChannelWidths() const { return htShortGuardIntervalChannelWidths; }
     bool isHtShortGuardIntervalSupported(Hz bandwidth) const { return htShortGuardIntervalChannelWidths.count(bandwidth) != 0; }
+    bool isHtGreenfieldSupported() const { return htGreenfieldSupported; }
 
     // containsMode() covers entries selectable as the persistent operating mode
     // (for example through Ieee80211Transmitter::setMode()). supportsMode()
@@ -134,6 +136,8 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     // 2.4 GHz HT modes are converted to non-HT responses. With mandatory=false,
     // the input bitrate is used as a ceiling for selecting that non-HT mode.
     const IIeee80211Mode *getNonHtControlResponseMode(const IIeee80211Mode *mode, bool mandatory = true) const;
+    // Returns the HT-mixed equivalent mode for an HT mode, or nullptr if not an HT mode or not mapped.
+    const IIeee80211Mode *findHtMixedMode(const IIeee80211Mode *mode) const;
 
     static const Ieee80211ModeSet *findModeSet(const char *mode);
     static const Ieee80211ModeSet *getModeSet(const char *mode);

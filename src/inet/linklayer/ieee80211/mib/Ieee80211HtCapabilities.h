@@ -72,6 +72,7 @@ struct Ieee80211HtDirectionalCapabilities
     Ieee80211HtMcsNssMap mcsNss;
     std::array<bool, 77> supportedMcs = {};
     bool receiverLdpc = false;
+    bool receiverGreenfield = false;
     bool receiverShortGi20 = false;
     bool receiverShortGi40 = false;
     int receiverMaxAmpduLengthExponent = 0;
@@ -116,9 +117,11 @@ inline Ieee80211NegotiatedHtCapabilities negotiateHtCapabilities(const Ieee80211
                 negotiated.localRxPeerTx.mcsNss.maxMcsPerNss[nss] = mcs;
         }
     }
-    // LDPC and short-GI bits advertise receiver capability, so they are directional.
+    // LDPC, Greenfield, and short-GI bits advertise receiver capability, so they are directional.
     negotiated.localTxPeerRx.receiverLdpc = peer.ldpc;
     negotiated.localRxPeerTx.receiverLdpc = local.ldpc;
+    negotiated.localTxPeerRx.receiverGreenfield = peer.greenfield;
+    negotiated.localRxPeerTx.receiverGreenfield = local.greenfield;
     negotiated.localTxPeerRx.receiverShortGi20 = peer.shortGi20;
     negotiated.localRxPeerTx.receiverShortGi20 = local.shortGi20;
     negotiated.localTxPeerRx.receiverShortGi40 = peer.shortGi40;
