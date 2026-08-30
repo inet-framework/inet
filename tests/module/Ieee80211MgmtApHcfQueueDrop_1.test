@@ -191,6 +191,64 @@ class Ieee80211MgmtApHcfQueueDropTest : public cSimpleModule
         ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::ASSOCIATED);
         ASSERT(mgmt->getCommittedAssociationId(station) == committedAid);
 
+        // An explicit single-packet removal follows the same terminal path as
+        // a queue drop: the AP must release both the pending transaction and
+        // its reserved AID before another station can reserve it.
+        const MacAddress explicitlyRemovedStation("02:00:00:00:00:0b");
+        mgmt->markAuthenticated(explicitlyRemovedStation);
+        mgmt->submitAssociationRequest(explicitlyRemovedStation);
+        for (int i = 0; i < 100 && managementQueue->isEmpty(); i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->hasPendingAssociation(explicitlyRemovedStation));
+        auto explicitlyRemovedPacket = managementQueue->findPacket([](const Packet *packet) {
+            return packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr;
+        });
+        ASSERT(explicitlyRemovedPacket != nullptr);
+        managementQueue->removePacket(explicitlyRemovedPacket);
+        take(explicitlyRemovedPacket);
+        delete explicitlyRemovedPacket;
+        for (int i = 0; i < 100 && mgmt->statuses.size() < 5; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->statuses.size() == 5);
+        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(!mgmt->hasPendingAssociation(explicitlyRemovedStation));
+        ASSERT(mgmt->getCommittedAssociationId(explicitlyRemovedStation) == 0);
+        auto explicitlyRemovedAid = mgmt->reserveAssociationId(explicitlyRemovedStation);
+        ASSERT(explicitlyRemovedAid != 0);
+        mgmt->cancelAssociationIdReservation(explicitlyRemovedStation);
+
+        // Compound removeAllPackets exercises explicit bulk departure for two
+        // independent association transactions and must clear both states.
+        const MacAddress bulkRemovedStation1("02:00:00:00:00:0c");
+        const MacAddress bulkRemovedStation2("02:00:00:00:00:0d");
+        mgmt->markAuthenticated(bulkRemovedStation1);
+        mgmt->markAuthenticated(bulkRemovedStation2);
+        mgmt->submitAssociationRequest(bulkRemovedStation1);
+        mgmt->submitAssociationRequest(bulkRemovedStation2);
+        for (int i = 0; i < 100 && managementQueue->getNumPackets() < 2; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->hasPendingAssociation(bulkRemovedStation1));
+        ASSERT(mgmt->hasPendingAssociation(bulkRemovedStation2));
+        // The compound boundary is the queue observed by HCF. Its
+        // removeAllPackets() implementation removes each child packet while
+        // suppressing the child's duplicate REMOVED notification, then
+        // reports the terminal departure once at the boundary.
+        compoundQueue->removeAllPackets();
+        for (int i = 0; i < 100 && mgmt->statuses.size() < 7; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->statuses.size() == 7);
+        ASSERT(mgmt->statuses[5] == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(mgmt->statuses[6] == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(!mgmt->hasPendingAssociation(bulkRemovedStation1));
+        ASSERT(!mgmt->hasPendingAssociation(bulkRemovedStation2));
+        ASSERT(mgmt->getCommittedAssociationId(bulkRemovedStation1) == 0);
+        ASSERT(mgmt->getCommittedAssociationId(bulkRemovedStation2) == 0);
+        auto bulkAid1 = mgmt->reserveAssociationId(bulkRemovedStation1);
+        auto bulkAid2 = mgmt->reserveAssociationId(bulkRemovedStation2);
+        ASSERT(bulkAid1 != 0 && bulkAid2 != 0 && bulkAid1 != bulkAid2);
+        mgmt->cancelAssociationIdReservation(bulkRemovedStation1);
+        mgmt->cancelAssociationIdReservation(bulkRemovedStation2);
+
         std::cout << "HCF compound pending-queue drop cleanup, AID preservation, and reassociation recovery verified.\n";
     }
 };

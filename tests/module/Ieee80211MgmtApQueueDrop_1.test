@@ -66,6 +66,11 @@ class TestIeee80211MgmtApQueueDrop : public Ieee80211MgmtAp
 
     short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
     void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
+    short getCommittedAssociationId(const MacAddress& address) const
+    {
+        auto it = mib->bssAccessPointData.associationIds.find(address);
+        return it == mib->bssAccessPointData.associationIds.end() ? 0 : it->second;
+    }
     Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const { return mib->bssAccessPointData.stations.at(address); }
 
   protected:
@@ -129,6 +134,59 @@ class Ieee80211MgmtApQueueDropTest : public cSimpleModule
         ASSERT(mgmt->transactionIds.back() == secondTransactionId);
         ASSERT(!mgmt->hasPendingAssociation(station));
         ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::ASSOCIATED);
+
+        // Explicit single removal from the real DCF pending queue is a
+        // terminal management outcome and releases the AP-side reservation.
+        const MacAddress explicitlyRemovedStation("02:00:00:00:00:0b");
+        mgmt->markAuthenticated(explicitlyRemovedStation);
+        mgmt->submitAssociationRequest(explicitlyRemovedStation);
+        for (int i = 0; i < 100 && queue->isEmpty(); i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->hasPendingAssociation(explicitlyRemovedStation));
+        auto explicitlyRemovedPacket = queue->findPacket([](const Packet *packet) {
+            return packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr;
+        });
+        ASSERT(explicitlyRemovedPacket != nullptr);
+        queue->removePacket(explicitlyRemovedPacket);
+        take(explicitlyRemovedPacket);
+        delete explicitlyRemovedPacket;
+        for (int i = 0; i < 100 && mgmt->statuses.size() < 3; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->statuses.size() == 3);
+        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(!mgmt->hasPendingAssociation(explicitlyRemovedStation));
+        ASSERT(mgmt->getCommittedAssociationId(explicitlyRemovedStation) == 0);
+        auto explicitlyRemovedAid = mgmt->reserveAssociationId(explicitlyRemovedStation);
+        ASSERT(explicitlyRemovedAid != 0);
+        mgmt->cancelAssociationIdReservation(explicitlyRemovedStation);
+
+        // Bulk removal invokes the callback once per independent transaction;
+        // both pending states and both reservations must be released.
+        const MacAddress bulkRemovedStation1("02:00:00:00:00:0c");
+        const MacAddress bulkRemovedStation2("02:00:00:00:00:0d");
+        mgmt->markAuthenticated(bulkRemovedStation1);
+        mgmt->markAuthenticated(bulkRemovedStation2);
+        mgmt->submitAssociationRequest(bulkRemovedStation1);
+        mgmt->submitAssociationRequest(bulkRemovedStation2);
+        for (int i = 0; i < 100 && queue->getNumPackets() < 2; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->hasPendingAssociation(bulkRemovedStation1));
+        ASSERT(mgmt->hasPendingAssociation(bulkRemovedStation2));
+        queue->removeAllPackets();
+        for (int i = 0; i < 100 && mgmt->statuses.size() < 5; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->statuses.size() == 5);
+        ASSERT(mgmt->statuses[3] == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(mgmt->statuses[4] == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(!mgmt->hasPendingAssociation(bulkRemovedStation1));
+        ASSERT(!mgmt->hasPendingAssociation(bulkRemovedStation2));
+        ASSERT(mgmt->getCommittedAssociationId(bulkRemovedStation1) == 0);
+        ASSERT(mgmt->getCommittedAssociationId(bulkRemovedStation2) == 0);
+        auto bulkAid1 = mgmt->reserveAssociationId(bulkRemovedStation1);
+        auto bulkAid2 = mgmt->reserveAssociationId(bulkRemovedStation2);
+        ASSERT(bulkAid1 != 0 && bulkAid2 != 0 && bulkAid1 != bulkAid2);
+        mgmt->cancelAssociationIdReservation(bulkRemovedStation1);
+        mgmt->cancelAssociationIdReservation(bulkRemovedStation2);
 
         std::cout << "DCF pending-queue overflow terminal cleanup and retransmission recovery verified.\n";
     }

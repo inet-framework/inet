@@ -10,6 +10,7 @@
 
 #include <array>
 #include <map>
+#include <set>
 
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Hcca.h"
@@ -111,6 +112,16 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // Frame sequence handler
     IFrameSequenceHandler *frameSequenceHandler = nullptr;
 
+    // A management transaction may have several fragmented MPDUs in the
+    // pending/in-progress queues. Keep the transaction identity only while
+    // removing its siblings so queue callbacks cannot report the same logical
+    // transaction recursively. A transaction has one pending original before
+    // fragmentation; the completed set additionally spans the synchronous
+    // callbacks of a bulk queue removal and is cleared at the next event.
+    std::set<uint64_t> managementTransactionsBeingCancelled;
+    std::set<uint64_t> completedManagementTransactions;
+    eventnumber_t completedManagementTransactionsEventNumber = -1;
+
     // Protection mechanisms
     SingleProtectionMechanism *singleProtectionMechanism = nullptr;
 
@@ -133,6 +144,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual bool processDroppedBlockAckSetupFrame(Packet *packet);
     virtual bool processDroppedBlockAckTeardownFrame(Packet *packet);
     virtual bool isPacketReferencedByCurrentFrameSequence(const Packet *packet) const;
+    virtual bool cancelManagementTransaction(uint64_t transactionId, Packet *excludedPacket);
     virtual void handlePacketRemoved(Packet *packet, queueing::IPacketQueue::PacketRemovalReason reason) override;
     virtual void trackPendingFrame(Packet *packet, AccessCategory accessCategory);
     virtual void untrackPendingFrame(const Packet *packet);

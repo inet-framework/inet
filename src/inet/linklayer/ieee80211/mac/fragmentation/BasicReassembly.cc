@@ -23,10 +23,10 @@ Register_Class(BasicReassembly);
 Packet *BasicReassembly::addFragment(Packet *packet)
 {
     const auto& header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
-    // Frame is not fragmented
-    if (!header->getMoreFragments() && header->getFragmentNumber() == 0)
-        return packet;
-    // find entry for this frame
+    // Find the entry for this frame. The sequence number is a 12-bit field,
+    // so an expired identity can be represented by one bit in its
+    // transmitter/receiver/type/TID context instead of retaining a map node
+    // (and an empty fragment vector) for every sequence number.
     Key key;
     key.macAddress = header->getTransmitterAddress();
     key.receiverAddress = header->getReceiverAddress();
@@ -38,19 +38,31 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     key.seqNum = header->getSequenceNumber().get();
     short fragNum = header->getFragmentNumber();
     ASSERT(fragNum >= 0 && fragNum < MAX_NUM_FRAGMENTS);
+
     auto it = fragmentsMap.find(key);
-    if (it != fragmentsMap.end() && it->second.expired) {
-        // A non-Retry fragment 0 can be a new MMPDU after sequence-number
-        // reuse. All other fragments of the expired MMPDU are discarded.
-        if (fragNum == 0 && !header->getRetry()) {
-            fragmentsMap.erase(it);
-            it = fragmentsMap.end();
-        }
-        else {
-            delete packet;
-            return nullptr;
+    if (it == fragmentsMap.end()) {
+        auto contextKey = key.getContextKey();
+        auto expiredIt = expiredSequenceNumbersMap.find(contextKey);
+        if (expiredIt != expiredSequenceNumbersMap.end() && expiredIt->second.test(key.seqNum)) {
+            // A non-Retry fragment 0 can be a new MMPDU after sequence-number
+            // reuse. All other fragments of the expired MMPDU are discarded.
+            if (fragNum == 0 && !header->getRetry()) {
+                expiredIt->second.reset(key.seqNum);
+                if (expiredIt->second.none())
+                    expiredSequenceNumbersMap.erase(expiredIt);
+            }
+            else {
+                delete packet;
+                return nullptr;
+            }
         }
     }
+
+    // Frame is not fragmented. Clear a matching expired identity first so a
+    // valid, unfragmented sequence-number reuse also retires the tombstone.
+    if (!header->getMoreFragments() && fragNum == 0)
+        return packet;
+
     if (it == fragmentsMap.end()) {
         Value value;
         value.receptionStartTime = simTime();
@@ -92,43 +104,59 @@ simtime_t BasicReassembly::getNextExpirationTime() const
 {
     simtime_t nextExpirationTime = SIMTIME_MAX;
     for (const auto& entry : fragmentsMap)
-        if (!entry.second.expired)
-            nextExpirationTime = std::min(nextExpirationTime, entry.second.receptionStartTime + maxReceiveLifetime);
+        nextExpirationTime = std::min(nextExpirationTime, entry.second.receptionStartTime + maxReceiveLifetime);
     return nextExpirationTime;
 }
 
 std::vector<Packet *> BasicReassembly::removeExpiredFragments(simtime_t currentTime)
 {
     std::vector<Packet *> expiredFragments;
-    for (auto& entry : fragmentsMap) {
+    for (auto it = fragmentsMap.begin(); it != fragmentsMap.end();) {
+        auto& entry = *it;
         auto& value = entry.second;
-        if (!value.expired && currentTime >= value.receptionStartTime + maxReceiveLifetime) {
+        if (currentTime >= value.receptionStartTime + maxReceiveLifetime) {
             for (auto fragment : value.fragments)
                 if (fragment != nullptr)
                     expiredFragments.push_back(fragment);
-            value.fragments.clear();
-            value.receivedFragments = 0;
-            value.allFragments = 0;
-            value.expired = true;
+            expiredSequenceNumbersMap[entry.first.getContextKey()].set(entry.first.seqNum);
+            it = fragmentsMap.erase(it);
         }
+        else
+            ++it;
     }
     return expiredFragments;
 }
 
 void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber)
 {
-    for (auto it = fragmentsMap.begin(); it != fragmentsMap.end();) {
-        auto sequenceNumber = it->first.seqNum;
-        bool isInSequenceRange = startSeqNumber <= endSeqNumber ?
+    auto isInSequenceRange = [startSeqNumber, endSeqNumber](int sequenceNumber) {
+        return startSeqNumber <= endSeqNumber ?
                 sequenceNumber >= startSeqNumber && sequenceNumber <= endSeqNumber :
                 sequenceNumber >= startSeqNumber || sequenceNumber <= endSeqNumber;
-        if (it->first.macAddress == address && it->first.tid == tid && isInSequenceRange) {
+    };
+    for (auto it = fragmentsMap.begin(); it != fragmentsMap.end();) {
+        auto sequenceNumber = it->first.seqNum;
+        if (it->first.macAddress == address && it->first.tid == tid && isInSequenceRange(sequenceNumber)) {
             for (auto fragment : it->second.fragments)
                 delete fragment;
             it = fragmentsMap.erase(it);
         }
         else
             it++;
+    }
+
+    for (auto it = expiredSequenceNumbersMap.begin(); it != expiredSequenceNumbersMap.end();) {
+        if (it->first.macAddress == address && it->first.tid == tid) {
+            for (int sequenceNumber = 0; sequenceNumber < NUM_SEQUENCE_NUMBERS; sequenceNumber++)
+                if (isInSequenceRange(sequenceNumber))
+                    it->second.reset(sequenceNumber);
+            if (it->second.none())
+                it = expiredSequenceNumbersMap.erase(it);
+            else
+                ++it;
+        }
+        else
+            ++it;
     }
 }
 
