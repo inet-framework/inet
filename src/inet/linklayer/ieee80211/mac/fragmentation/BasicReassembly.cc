@@ -42,20 +42,48 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     auto it = fragmentsMap.find(key);
     // IEEE Std 802.11-2024, 10.4/10.5 requires fragmented MPDUs to be
     // reconstructed from their fragment numbers; §26.3.2.1 permits level-3
-    // dynamic fragments to arrive out of order. Keep a later-only active entry
-    // when its non-Retry fragment 0 arrives. Once fragment 0 is already
-    // present, this generic reassembler cannot distinguish sequence-number
-    // reuse from a duplicate non-Retry fragment 0, so retain the generation
-    // replacement heuristic. An unfragmented non-Retry fragment 0 also retires
-    // any conflicting active fragmented entry.
+    // dynamic fragments to arrive out of order. At this boundary the receiver
+    // sees only the modulo-4096 sequence identity and cannot distinguish a
+    // reused fragmented fragment 0, including one marked Retry, from one
+    // belonging to the active generation. Quarantine every fragmented
+    // fragment-0 collision instead of replacing or merging state, because
+    // delayed fragments from the old generation could otherwise complete a
+    // hybrid frame. An unfragmented non-Retry fragment 0 is safe to return
+    // after retiring conflicting fragmented state because it is never
+    // assembled with it.
     bool isUnfragmented = fragNum == 0 && !header->getMoreFragments();
-    bool hasFirstFragment = it != fragmentsMap.end() && (it->second.receivedFragments & 1) != 0;
-    if (it != fragmentsMap.end() && fragNum == 0 && !header->getRetry() && (isUnfragmented || hasFirstFragment)) {
-        for (auto fragment : it->second.fragments)
-            if (fragment != nullptr)
-                delete fragment;
-        fragmentsMap.erase(it);
-        it = fragmentsMap.end();
+    if (it != fragmentsMap.end()) {
+        auto& value = it->second;
+        if (value.quarantined) {
+            if (isUnfragmented && !header->getRetry()) {
+                fragmentsMap.erase(it);
+                it = fragmentsMap.end();
+            }
+            else {
+                delete packet;
+                return nullptr;
+            }
+        }
+        else if (fragNum == 0) {
+            if (isUnfragmented && !header->getRetry()) {
+                for (auto fragment : value.fragments)
+                    if (fragment != nullptr)
+                        delete fragment;
+                fragmentsMap.erase(it);
+                it = fragmentsMap.end();
+            }
+            else if (!isUnfragmented) {
+                for (auto fragment : value.fragments)
+                    if (fragment != nullptr)
+                        delete fragment;
+                value.fragments.clear();
+                value.receivedFragments = 0;
+                value.allFragments = 0;
+                value.quarantined = true;
+                delete packet;
+                return nullptr;
+            }
+        }
     }
     if (it == fragmentsMap.end()) {
         auto contextKey = key.getContextKey();
