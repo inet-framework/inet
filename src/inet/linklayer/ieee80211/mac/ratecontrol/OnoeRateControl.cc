@@ -42,7 +42,7 @@ void OnoeRateControl::handleMessage(cMessage *msg)
 
 void OnoeRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp)
 {
-    computeModeIfTimerIsExpired();
+    computeModeIfTimerIsExpired(getReceiverAddress(frame));
     if (isSuccessful)
         numOfSuccTransmissions++;
     else if (isGivenUp)
@@ -51,10 +51,10 @@ void OnoeRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
         numOfRetries++;
 }
 
-void OnoeRateControl::computeModeIfTimerIsExpired()
+void OnoeRateControl::computeModeIfTimerIsExpired(const MacAddress& receiverAddress)
 {
     if (simTime() - timer >= interval) {
-        computeMode();
+        computeMode(receiverAddress);
         timer = simTime();
     }
 }
@@ -63,7 +63,7 @@ void OnoeRateControl::frameReceived(Packet *frame)
 {
 }
 
-void OnoeRateControl::computeMode()
+void OnoeRateControl::computeMode(const MacAddress& receiverAddress)
 {
     int numOfFrameTransmitted = numOfSuccTransmissions + numOfGivenUpTransmissions + numOfRetries;
     avgRetriesPerFrame = double(numOfRetries) / (numOfSuccTransmissions + numOfGivenUpTransmissions);
@@ -71,7 +71,7 @@ void OnoeRateControl::computeMode()
     if (numOfSuccTransmissions > 0) {
         if (numOfFrameTransmitted >= 10 && avgRetriesPerFrame > 1) {
             currentMode = decreaseRateIfPossible(currentMode);
-            emitDatarateChangedSignal();
+            emitDatarateChangedSignal(receiverAddress, currentMode);
             EV_DETAIL << "Decreased rate to " << *currentMode << endl;
             credit = 0;
         }
@@ -82,7 +82,7 @@ void OnoeRateControl::computeMode()
 
         if (credit >= 10) {
             currentMode = increaseRateIfPossible(currentMode);
-            emitDatarateChangedSignal();
+            emitDatarateChangedSignal(receiverAddress, currentMode);
             EV_DETAIL << "Increased rate to " << *currentMode << endl;
             credit = 0;
         }
@@ -91,10 +91,10 @@ void OnoeRateControl::computeMode()
     }
 }
 
-const IIeee80211Mode *OnoeRateControl::getRate()
+const IIeee80211Mode *OnoeRateControl::getRate(const MacAddress& receiverAddress)
 {
     Enter_Method("getRate");
-    computeModeIfTimerIsExpired();
+    computeModeIfTimerIsExpired(receiverAddress);
     EV_INFO << "The current mode is " << currentMode << " the net bitrate is " << currentMode->getDataMode()->getNetBitrate() << std::endl;
     return currentMode;
 }

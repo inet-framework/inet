@@ -37,10 +37,10 @@ class INET_API AarfRateControl : public RateControlBase
     virtual void multiplyIncreaseThreshold(double factor);
     virtual void resetIncreaseThreshdold();
     virtual void resetTimer();
-    virtual void increaseRateIfTimerIsExpired();
+    virtual void increaseRateIfTimerIsExpired(const MacAddress& receiverAddress);
 
   public:
-    virtual const physicallayer::IIeee80211Mode *getRate() override;
+    virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) override;
     virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) override;
     virtual void frameReceived(Packet *frame) override;
 };

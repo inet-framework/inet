@@ -27,7 +27,13 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
-    virtual void emitDatarateChangedSignal();
+    // The receiver of a frame the rate control is being given feedback about.
+    virtual MacAddress getReceiverAddress(Packet *frame) const;
+    // Emits datarateChanged with the receiver as a named details object, so a demux(datarateChanged)
+    // result filter can record a separate data-rate vector per station. The aggregate datarateChanged
+    // statistic ignores the details and is therefore unchanged. Group-addressed receivers are emitted
+    // without details (aggregate only).
+    virtual void emitDatarateChangedSignal(const MacAddress& receiver, const physicallayer::IIeee80211Mode *mode);
 
     const physicallayer::IIeee80211Mode *increaseRateIfPossible(const physicallayer::IIeee80211Mode *currentMode);
     const physicallayer::IIeee80211Mode *decreaseRateIfPossible(const physicallayer::IIeee80211Mode *currentMode);

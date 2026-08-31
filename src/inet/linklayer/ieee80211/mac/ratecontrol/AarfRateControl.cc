@@ -43,12 +43,13 @@ void AarfRateControl::handleMessage(cMessage *msg)
 
 void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp)
 {
-    increaseRateIfTimerIsExpired();
+    MacAddress receiverAddress = getReceiverAddress(frame);
+    increaseRateIfTimerIsExpired(receiverAddress);
 
     if (!isSuccessful && probing) { // probing packet failed
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
-        emitDatarateChangedSignal();
+        emitDatarateChangedSignal(receiverAddress, currentMode);
         EV_DETAIL << "Decreased rate to " << *currentMode << endl;
         multiplyIncreaseThreshold(factor);
         resetTimer();
@@ -56,7 +57,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     else if (!isSuccessful && retryCount >= decreaseThreshold - 1) { // decreaseThreshold consecutive failed transmissions
         numberOfConsSuccTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
-        emitDatarateChangedSignal();
+        emitDatarateChangedSignal(receiverAddress, currentMode);
         EV_DETAIL << "Decreased rate to " << *currentMode << endl;
         resetIncreaseThreshdold();
         resetTimer();
@@ -67,7 +68,7 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     if (numberOfConsSuccTransmissions == increaseThreshold) {
         numberOfConsSuccTransmissions = 0;
         currentMode = increaseRateIfPossible(currentMode);
-        emitDatarateChangedSignal();
+        emitDatarateChangedSignal(receiverAddress, currentMode);
         EV_DETAIL << "Increased rate to " << *currentMode << endl;
         resetTimer();
         probing = true;
@@ -93,11 +94,11 @@ void AarfRateControl::resetTimer()
     timer = simTime();
 }
 
-void AarfRateControl::increaseRateIfTimerIsExpired()
+void AarfRateControl::increaseRateIfTimerIsExpired(const MacAddress& receiverAddress)
 {
     if (simTime() - timer >= interval) {
         currentMode = increaseRateIfPossible(currentMode);
-        emitDatarateChangedSignal();
+        emitDatarateChangedSignal(receiverAddress, currentMode);
         EV_DETAIL << "Increased rate to " << *currentMode << endl;
         resetTimer();
     }
@@ -107,10 +108,10 @@ void AarfRateControl::frameReceived(Packet *frame)
 {
 }
 
-const IIeee80211Mode *AarfRateControl::getRate()
+const IIeee80211Mode *AarfRateControl::getRate(const MacAddress& receiverAddress)
 {
     Enter_Method("getRate");
-    increaseRateIfTimerIsExpired();
+    increaseRateIfTimerIsExpired(receiverAddress);
     EV_INFO << "The current mode is " << currentMode << " the net bitrate is " << currentMode->getDataMode()->getNetBitrate() << std::endl;
     return currentMode;
 }
