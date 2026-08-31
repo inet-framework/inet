@@ -43,7 +43,7 @@ here — see *Auditing* at the bottom.
 
 | Id | Deviation | Should be | Where | Status |
 |---|---|---|---|---|
-| NV-02 | Plural deep packages (`…/tables`, `…/modes`, `.../messages`, `.../profiles`, `.../flavours`, `.../headers`) | singular | `routing/eigrp/tables`, `routing/pim/{modes,tables}`, `routing/eigrp/messages`, `transportlayer/rtp/profiles`, `transportlayer/tcp/flavours`, `transportlayer/tcp_common/headers` | Open |
+| NV-02 | Plural deep packages (`…/tables`, `…/modes`, `.../messages`, `.../profiles`, `.../flavours`, `.../headers`) | singular | `routing/eigrp/tables`, `routing/pim/{modes,tables}`, `routing/eigrp/messages`, `transportlayer/rtp/profiles`, `transportlayer/tcp/flavours`, `transportlayer/{tcp_common,udp,sctp}/headers`, `networklayer/{ipv4,ipv6}/headers` | Open |
 | NV-03 | Underscored package names | run-together lowercase | `routing/ospf_common`, `transportlayer/tcp_common`, `transportlayer/tcp_lwip` | Open |
 | NV-04 | `CamelCase` / underscored example-scenario folders | lowercase, run-together | `examples/bgpv4/BgpCompleteTest` (and siblings), `examples/voipstream/VoIPStreamTest`, `examples/ethernet/TenBaseT1S`, `examples/ospfv3/multiple_areas_FINAL` | Open |
 
@@ -93,7 +93,8 @@ here — see *Auditing* at the bottom.
 
 | Id | Deviation | Should be | Where | Status |
 |---|---|---|---|---|
-| NV-17 | Hyphenated icon file name `europe-er.png` | run-together lowercase | `images/maps/` | Open (trivial) |
+| NV-17 | Hyphenated icon file names `europe-er.png`, `world-er.png` | run-together lowercase | `images/maps/` | Open (trivial) |
+| NV-18 | `camelCase` and underscored icon names: `voipPhone.png`, `signal_arrival.png`, `signal_departure.png`, `signal_power_0..3.png` | run-together lowercase; the `_vs`/`_s`/`_l`/`_vl` size suffix is sanctioned | `images/misc/` | Open (trivial) |
 
 ---
 
@@ -115,3 +116,4 @@ find here rather than fixing it silently in place:
 | Area | Date | Findings |
 |---|---|---|
 | Repo-wide convention scan (packages, modules, gates, params, signals, `.msg` types/fields, C++ types/methods/members/enums/macros/constants, `.ini`, `.oppfeatures`, directories, tests, icons) | 2026-07-20 | Seeded this ledger: NS-01…05, NV-01…17. Not an exhaustive per-file audit — a sampling scan; individual files may hold further violations not yet listed. |
+| `check-naming.sh` over `src/inet`, `images/`, `.github/workflows/` — the mechanical rules NR-PKG, NR-DIR, NR-GEN, NR-ASSET, NR-CI | 2026-08-31 | [sweep/naming.md](report/sweep/naming.md). 23 hits: 11 known, 12 new. NV-02 and NV-17 extended, NV-18 opened. NR-GEN and NR-CI clean. |

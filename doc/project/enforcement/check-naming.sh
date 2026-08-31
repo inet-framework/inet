@@ -44,7 +44,10 @@ report "${missing%$'\n'}"
 if [ "$SCOPE" = "src/inet" ]; then
   echo
   echo "== NR-ASSET: an icon file is lowercase and run-together =="
-  report "$(find images -type f \( -name '*.png' -o -name '*.svg' \) 2>/dev/null | grep -E '/[^/]*([A-Z]|_|-)[^/]*\.(png|svg)$')"
+  # The trailing _vs / _s / _l / _vl size suffix is the OMNeT++ icon convention, not a violation.
+  report "$(find images -type f \( -name '*.png' -o -name '*.svg' \) 2>/dev/null \
+            | sed -E 's/_(vs|s|l|vl)\.(png|svg)$/.\2/' \
+            | grep -E '/[^/]*([A-Z]|_|-)[^/]*\.(png|svg)$' | sort -u)"
 
   echo
   echo "== NR-CI: a workflow file is lowercase and hyphenated =="

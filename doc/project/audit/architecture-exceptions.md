@@ -38,7 +38,7 @@ Grouped by cluster (the check reports the individual `file:line` hits). Counts a
 
 | Id | Coupling | Where (examples) | Suggested resolution | Status |
 |---|---|---|---|---|
-| AV-ORG-01 | `common/` infra → `NetworkInterface` / `IInterfaceTable` / `InterfaceTable` / `InterfaceTag` (~11) | `MessageDispatcher`, `LifecycleController`, `InterfaceOperations`, `IInterfaceRegistrationListener`, `packet/recorder/*` | These are foundational *node-structure* abstractions, like AS-01 — either **sanction + allowlist** them (and ideally move them to `common/`), or invert via a `common/`-side interface. Pick one and record it. | Open (decide) |
+| AV-ORG-01 | `common/` infra → `NetworkInterface` / `IInterfaceTable` / `InterfaceTable` / `InterfaceTag` (~11) | `MessageDispatcher`, `LifecycleController`, `InterfaceOperations`, `IInterfaceRegistrationListener`, `FingerprintCalculator`, `packet/recorder/*` | These are foundational *node-structure* abstractions, like AS-01 — either **sanction + allowlist** them (and ideally move them to `common/`), or invert via a `common/`-side interface. Pick one and record it. | Open (decide) |
 
 ### Observation/recording infra → physical layer — *decide*
 
@@ -72,3 +72,4 @@ violation list. When it reports something new:
 | Area | Date | Findings |
 |---|---|---|
 | `check-architecture.sh` over `src/inet` (AR-ORG-DOMAINS, AR-ORG-VIS-SPLIT) | 2026-07-20 | AS-01 (allowlisted); AV-ORG-01…05 + AV-VIS-01. Include-graph only — behavioral violations of these ARs (e.g. vis *logic* not reached via an include) are not covered by this check and need T4 agent review. |
+| `check-architecture.sh`, re-run | 2026-08-31 | [sweep/architecture.md](report/sweep/architecture.md). 25 couplings in 15 files, **all inside the existing clusters** — nothing new. `FingerprintCalculator.cc` added to the AV-ORG-01 examples. The two `Open (decide)` clusters now block the `common/packet/` seal (SR-AUDIT-FIRST). |

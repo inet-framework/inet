@@ -533,6 +533,10 @@ descriptive `camelCase` name string, ideally identical to the member** (`new cMe
 
 **An icon file is lowercase and run-together, and its path is the icon name.**
 
+A trailing `_vs`, `_s`, `_l` or `_vl` is the **OMNeT++ icon size suffix** and is not an underscore in
+the name: `router_l.png` is the large variant of `router`. It is the one sanctioned underscore in an
+asset name.
+
 - **Icons under `images/` are lowercase, run-together file names** grouped in category folders
   (`block/`, `misc/`, `background/`, `maps/`, `3d/`), referenced from NED as
   `@display("i=<category>/<name>")` with no extension (`i=block/checker`, `i=misc/cloud`). A
