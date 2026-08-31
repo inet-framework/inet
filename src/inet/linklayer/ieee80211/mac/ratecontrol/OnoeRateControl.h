@@ -34,12 +34,12 @@ class INET_API OnoeRateControl : public RateControlBase
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void computeMode();
+    virtual void computeMode(const MacAddress& receiverAddress);
     virtual void resetStatisticalVariables();
-    virtual void computeModeIfTimerIsExpired();
+    virtual void computeModeIfTimerIsExpired(const MacAddress& receiverAddress);
 
   public:
-    virtual const physicallayer::IIeee80211Mode *getRate() override;
+    virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) override;
     virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) override;
     virtual void frameReceived(Packet *frame) override;
 };
