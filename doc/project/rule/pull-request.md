@@ -8,12 +8,12 @@ divided costs all three of them time, and it hides real defects.
 
 Each rule has a stable identifier of the form `PR-<AREA>-<NAME>`, a one-line statement, and a
 short rationale. The other documents in this folder say what the *code* must look like —
-[architectural-requirements.md](architectural-requirements.md),
-[naming-conventions.md](naming-conventions.md), [sealing.md](sealing.md). This one says what
+[architectural-requirements.md](architecture.md),
+[naming-conventions.md](naming.md), [sealing.md](sealing.md). This one says what
 the *change* must look like. It is the concrete form of step 4 of the *Contributor workflow*
 (smallest change surface) and of the reviewable-patch clauses of
-[AR-QUAL-FINGERPRINT](architectural-requirements.md) and
-[AR-QUAL-TRACEABILITY](architectural-requirements.md).
+[AR-QUAL-FINGERPRINT](architecture.md) and
+[AR-QUAL-TRACEABILITY](architecture.md).
 
 **The commit is the unit of review, not the pull request.** A reviewer reads a series of
 commits, one at a time, and asks one question per commit: *is this change right?* That
@@ -22,9 +22,56 @@ changes, the reviewer must first separate them mentally, and the reviewer does t
 again for every later reader of the history. Divide the work in advance, because you are the
 only person who knows where the boundaries are.
 
+## Index
+
+Every rule in document order. The identifier links to the rule; the statement is its lead sentence.
+
+**Commit content (PR-SPLIT)**
+
+| Rule | Statement |
+| --- | --- |
+| [PR-SPLIT-ONE-CHANGE](#pr-split-one-change) | One commit makes exactly one change |
+| [PR-SPLIT-WHITESPACE](#pr-split-whitespace) | A whitespace change touches only whitespace |
+| [PR-SPLIT-MECHANICAL](#pr-split-mechanical) | A mechanical sweep is separate from work that needs thought |
+| [PR-SPLIT-MOVE](#pr-split-move) | A file move is its own commit |
+| [PR-SPLIT-PREPARE](#pr-split-prepare) | Preparation comes before the change that needs it |
+| [PR-SPLIT-UPSTREAM](#pr-split-upstream) | A shared-component change is separate from, and before, the model that needs it |
+| [PR-SPLIT-BASELINE](#pr-split-baseline) | Updated expected results are their own commit |
+| [PR-SPLIT-DRIVEBY](#pr-split-driveby) | No unrelated fixes |
+
+**Commit series (PR-SERIES)**
+
+| Rule | Statement |
+| --- | --- |
+| [PR-SERIES-BUILDS](#pr-series-builds) | Every commit builds and passes its tests |
+| [PR-SERIES-ORDER](#pr-series-order) | Prerequisites first, no fixup commits |
+| [PR-SERIES-LINEAR](#pr-series-linear) | Rebase the topic branch; do not merge into it |
+
+**Commit messages (PR-MSG)**
+
+| Rule | Statement |
+| --- | --- |
+| [PR-MSG-SUBJECT](#pr-msg-subject) | `area: what the commit does` |
+| [PR-MSG-WHY](#pr-msg-why) | The body gives the reason, not the content |
+| [PR-MSG-GENERIC](#pr-msg-generic) | A shared-component commit explains itself in generic terms |
+| [PR-MSG-STANDALONE](#pr-msg-standalone) | The message carries its own context |
+| [PR-MSG-FACTS](#pr-msg-facts) | The message contains only facts about the change |
+
+**The pull request (PR-REQ)**
+
+| Rule | Statement |
+| --- | --- |
+| [PR-REQ-TOPIC](#pr-req-topic) | One pull request, one topic |
+| [PR-REQ-STORY](#pr-req-story) | The description states the topic, the reason, and the reading order |
+| [PR-REQ-ARCH](#pr-req-arch) | The description names the architectural surface |
+| [PR-REQ-CLEAN](#pr-req-clean) | No leftovers |
+
 ## Commit content (PR-SPLIT)
 
-### PR-SPLIT-ONE-CHANGE — One commit makes exactly one change
+### PR-SPLIT-ONE-CHANGE
+
+**One commit makes exactly one change**
+
 A commit contains one self-contained change, and the whole of that change.
 
 Use the subject line as the test: if you cannot say what the commit does in one line without
@@ -33,7 +80,10 @@ change is not a commit: the tree after the commit must build, and the model afte
 must be consistent (PR-SERIES-BUILDS). "One change" means one *decision*, not one file — a
 decision that touches eight files is still one commit.
 
-### PR-SPLIT-WHITESPACE — A whitespace change touches only whitespace
+### PR-SPLIT-WHITESPACE
+
+**A whitespace change touches only whitespace**
+
 A commit that changes whitespace changes nothing else. It may change whitespace in many
 files, but it must not contain one line of functional change.
 
@@ -49,7 +99,10 @@ The rule also applies in the small: do not tidy the lines around your edit. Put 
 its own commit. Put that commit *before* the functional commits, so the functional diffs apply
 to the final layout.
 
-### PR-SPLIT-MECHANICAL — A mechanical sweep is separate from work that needs thought
+### PR-SPLIT-MECHANICAL
+
+**A mechanical sweep is separate from work that needs thought**
+
 A large mechanical edit — a rename across the tree, a signature sweep, a re-generation of
 generated code, a header or copyright update, an automatic reformat — is its own commit and
 changes nothing else.
@@ -60,7 +113,10 @@ argument"), spot-checks some sites, and trusts the tests. State that rule in the
 three hunks of new logic hide among 400 mechanical hunks, the reviewer must read everything to
 find the three, and normally does not.
 
-### PR-SPLIT-MOVE — A file move is its own commit
+### PR-SPLIT-MOVE
+
+**A file move is its own commit**
+
 Move or rename files in a commit that does not change their content. Change the content in the
 next commit.
 
@@ -69,7 +125,10 @@ deleted file and a new file: the diff disappears, and the history of the file br
 point. Two commits keep the rename visible and keep the real edit small. This holds for `.ned`,
 `.msg` and C++ files, and for whole directories.
 
-### PR-SPLIT-PREPARE — Preparation comes before the change that needs it
+### PR-SPLIT-PREPARE
+
+**Preparation comes before the change that needs it**
+
 When a fix needs a refactor first, commit the refactor alone, and keep it behavior-preserving.
 The fix follows in the next commit.
 
@@ -78,7 +137,10 @@ safe?* — and the fingerprint tests answer it — and *is the fix right?*, on a
 lines. In a mixed commit neither question has a safe answer, because every changed line is a
 candidate cause of the behavior change.
 
-### PR-SPLIT-UPSTREAM — A shared-component change is separate from, and before, the model that needs it
+### PR-SPLIT-UPSTREAM
+
+**A shared-component change is separate from, and before, the model that needs it**
+
 When a fix in one protocol model needs a new capability in a shared component, divide the work
 into two commits. The first commit adds the capability to the shared component, and explains
 the *generic* need. The second commit changes the protocol model that uses it.
@@ -95,7 +157,10 @@ gain a feature that makes sense for one protocol only (AR-ORG-DOMAINS, AR-ORG-CO
 order matters for the same reason: the shared commit must build and be correct alone, and a
 later revert of the protocol fix must leave the framework in a working state.
 
-### PR-SPLIT-BASELINE — Updated expected results are their own commit
+### PR-SPLIT-BASELINE
+
+**Updated expected results are their own commit**
+
 Regenerated fingerprints (`tests/fingerprint/*.csv`), statistical baselines, and other recorded
 expectations go in a commit that contains no source change.
 
@@ -105,7 +170,10 @@ reason. Put the baseline commit directly after the commit that changes behavior.
 source commit the same update is invisible, and "the fingerprint changed" stops being a
 conscious decision — which is the whole point of AR-QUAL-FINGERPRINT and AR-QUAL-TRACEABILITY.
 
-### PR-SPLIT-DRIVEBY — No unrelated fixes
+### PR-SPLIT-DRIVEBY
+
+**No unrelated fixes**
+
 Do not add a fix that you found on the way to a commit that does something else.
 
 An unrelated fix inside another commit shares that commit's fate: a revert of the main change
@@ -116,7 +184,10 @@ request.
 
 ## Commit series (PR-SERIES)
 
-### PR-SERIES-BUILDS — Every commit builds and passes its tests
+### PR-SERIES-BUILDS
+
+**Every commit builds and passes its tests**
+
 Every commit in the series compiles and passes the test categories that apply to it, not only
 the last commit.
 
@@ -124,7 +195,10 @@ the last commit.
 middle commit makes it useless. The rule also protects review itself: a reviewer can judge
 commit N only if the tree after commit N is consistent.
 
-### PR-SERIES-ORDER — Prerequisites first, no fixup commits
+### PR-SERIES-ORDER
+
+**Prerequisites first, no fixup commits**
+
 Order the commits so that each one depends only on the commits before it. A commit that
 corrects an earlier commit of the same series must not survive to review: rebase the correction
 into the commit it repairs (`git commit --fixup` and `git rebase --autosquash`).
@@ -133,7 +207,10 @@ The series is the author's final reasoning, not a record of how the author got t
 in previous commit" teaches nobody anything, and it breaks PR-SERIES-BUILDS in the middle of
 the series.
 
-### PR-SERIES-LINEAR — Rebase the topic branch; do not merge into it
+### PR-SERIES-LINEAR
+
+**Rebase the topic branch; do not merge into it**
+
 Keep the series linear on top of the target branch. Do not merge the target branch into your
 topic branch to resolve a conflict — rebase the series instead.
 
@@ -143,7 +220,10 @@ branch afterwards is the maintainer's decision; the branch you submit stays line
 
 ## Commit messages (PR-MSG)
 
-### PR-MSG-SUBJECT — `area: what the commit does`
+### PR-MSG-SUBJECT
+
+**`area: what the commit does`**
+
 One line: the component or tree area, a colon, then what the commit does, in the present tense.
 Keep it below about 72 characters and end it without a full stop. Then one empty line, then the
 body.
@@ -154,7 +234,10 @@ the area (`ospfv3: fix:`, `python: refactor:`). Name the *behavior*, never the m
 `ExternalProcess: don't kill the process group when a spawned command fails`, not "update
 ExternalProcess.cc" and not a list of file names or links.
 
-### PR-MSG-WHY — The body gives the reason, not the content
+### PR-MSG-WHY
+
+**The body gives the reason, not the content**
+
 The diff already shows what changed. The body says why: the symptom, the cause, why this
 solution and not an obvious alternative, and what the change deliberately does not repair.
 
@@ -162,40 +245,61 @@ For a bug fix, write the symptom in the words a future reader will search for �
 message, the wrong packet, the failed assertion. For a behavior change, name the standard
 clause or the reference that makes the new behavior the correct one.
 
-### PR-MSG-GENERIC — A shared-component commit explains itself in generic terms
+### PR-MSG-GENERIC
+
+**A shared-component commit explains itself in generic terms**
+
 The message of a PR-SPLIT-UPSTREAM commit describes the new capability and the general need for
 it. It may name the model that needs it first, but a reader must understand the commit without
 that model.
 
-### PR-MSG-STANDALONE — The message carries its own context
+### PR-MSG-STANDALONE
+
+**The message carries its own context**
+
 Do not write "as discussed", "review comments", "address feedback", or "see the ticket". Write
 the fact itself. An issue or pull request number is a useful addition, never a replacement.
 
-### PR-MSG-FACTS — The message contains only facts about the change
+### PR-MSG-FACTS
+
+**The message contains only facts about the change**
+
 No attribution trailers for tools or assistants, no progress notes, no apologies, and no
 speculation about future work. Keep a `Fixes #<n>` style reference when it is accurate.
 
 ## The pull request (PR-REQ)
 
-### PR-REQ-TOPIC — One pull request, one topic
+### PR-REQ-TOPIC
+
+**One pull request, one topic**
+
 A pull request carries one topic, at a size a reviewer can hold in the head at once. Two topics
 are two pull requests, even when the same developer wrote them on the same day. A long series
 on one topic is fine; a short series on three topics is not.
 
-### PR-REQ-STORY — The description states the topic, the reason, and the reading order
+### PR-REQ-STORY
+
+**The description states the topic, the reason, and the reading order**
+
 The description says what the change achieves and why it is needed, and it names the order in
 which the commits should be read when that order is not obvious. It lists the tests that were
 run, with the exact commands and the resulting status, and it names every baseline update
 (*Contributor workflow*, step 6).
 
-### PR-REQ-ARCH — The description names the architectural surface
+### PR-REQ-ARCH
+
+**The description names the architectural surface**
+
 Name the contracts, the packet content, the configuration surface, and the feature descriptors
 that the change touches. Record genuinely new deviations as `AV-*` or `NV-*` rows in
-[architecture-exceptions.md](architecture-exceptions.md) or
-[naming-exceptions.md](naming-exceptions.md), and name them here. If the change touches a
+[architecture-exceptions.md](../audit/architecture-exceptions.md) or
+[naming-exceptions.md](../audit/naming-exceptions.md), and name them here. If the change touches a
 sealed path, state the permission for it (see [sealing.md](sealing.md)).
 
-### PR-REQ-CLEAN — No leftovers
+### PR-REQ-CLEAN
+
+**No leftovers**
+
 The branch contains no debug output, no commented-out code, no `#if 0` block, no build output
 or IDE files, and no TODO without an issue number. A change that is not ready for this stays a
 draft.
@@ -218,7 +322,7 @@ draft.
 ## Enforcement
 
 The tiers are the ones defined in
-[architectural-requirements.md](architectural-requirements.md) §*Enforcement tiers*. Most of
+[architectural-requirements.md](architecture.md) §*Enforcement tiers*. Most of
 these rules are mechanically checkable, which makes them cheap to enforce and unnecessary to
 argue about.
 

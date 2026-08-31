@@ -3,7 +3,7 @@
 The rules for *sealing* INET source files: freezing a file against further AI modification once it
 has been reviewed and brought into compliance with the architecture and naming requirements. This
 document is the **policy**; the authoritative list of what is currently sealed lives in
-[sealing-status.md](sealing-status.md).
+[sealing-status.md](../audit/seal-list.md).
 
 **Files are unsealed by default.** Nothing is sealed unless it matches an entry in the sealed list;
 that list is an allowlist of the small, settled part of the tree that has been driven all the way to
@@ -11,10 +11,10 @@ a reviewed, compliant, frozen state, so that scarce review attention moves forwa
 re-touching settled ground.
 
 Sealing is the terminal state of the enforcement pipeline. A change is checked mechanically by
-[`.clang-tidy`](enforcement/.clang-tidy) and [`check-architecture.sh`](enforcement/check-architecture.sh),
-semantically by the [agent-review checklist](enforcement/agent-review-checklist.md), and its
-deviations are tracked in [naming-exceptions.md](naming-exceptions.md) and
-[architecture-exceptions.md](architecture-exceptions.md). Sealing records the result:
+[`.clang-tidy`](../../../.clang-tidy) and [`check-architecture.sh`](../enforcement/check-architecture.sh),
+semantically by the [agent-review checklist](../enforcement/checklist/general.md), and its
+deviations are tracked in [naming-exceptions.md](../audit/naming-exceptions.md) and
+[architecture-exceptions.md](../audit/architecture-exceptions.md). Sealing records the result:
 *this file has passed the gate and is now frozen, so later broad tasks cannot silently churn it.*
 
 ## 🔒 Sealed files — DO NOT MODIFY
@@ -55,25 +55,25 @@ review and before offering to seal.** For a folder, the audit covers the whole s
 under it must comply (or carry a recorded exception) before the folder can be sealed as a unit. The
 audit checks against:
 
-1. [architectural-requirements.md](architectural-requirements.md) — the `AR-*` design rules
+1. [architectural-requirements.md](architecture.md) — the `AR-*` design rules
    (dependency direction, contracts, composition, observation neutrality, …).
-2. [naming-conventions.md](naming-conventions.md) — the `AR-QUAL-NAMING` surface the linter cannot
+2. [naming-conventions.md](naming.md) — the `AR-QUAL-NAMING` surface the linter cannot
    see (NED/`.msg`/semantic names, role suffixes).
 3. The enforcement gates that apply: it must be clean under
-   [`check-architecture.sh`](enforcement/check-architecture.sh) and the relevant
-   [agent-review checklist](enforcement/agent-review-checklist.md) items.
+   [`check-architecture.sh`](../enforcement/check-architecture.sh) and the relevant
+   [agent-review checklist](../enforcement/checklist/general.md) items.
 
 Present the audit result first. A file seals only once it complies, **or** once a specific
 non-compliance is explicitly accepted by the user in the conversation. An accepted non-compliance is
 recorded in the appropriate ledger — a sanctioned coupling as an `AS-*` row in
-[architecture-exceptions.md](architecture-exceptions.md), a sanctioned name as an `NS-*`
-row in [naming-exceptions.md](naming-exceptions.md) — and the file may then seal with that exception
+[architecture-exceptions.md](../audit/architecture-exceptions.md), a sanctioned name as an `NS-*`
+row in [naming-exceptions.md](../audit/naming-exceptions.md) — and the file may then seal with that exception
 on record. Do not seal over an *un*sanctioned violation (`AV-*` / `NV-*`); fix it or get it
 sanctioned first.
 
 ## Recording a seal
 
-To seal something, add its path to the sealed list in [sealing-status.md](sealing-status.md), in the
+To seal something, add its path to the sealed list in [sealing-status.md](../audit/seal-list.md), in the
 **same commit** that records the compliant state. Use a trailing `/` for a recursive folder seal, no
 trailing slash for a single file. Keep the list grouped and ordered as that document describes; do
 not silently drop entries.

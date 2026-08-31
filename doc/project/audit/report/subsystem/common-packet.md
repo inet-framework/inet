@@ -4,7 +4,7 @@
 - **Date:** 2026-07-20
 - **Command:** `doc/architecture/enforcement/check-architecture.sh src/inet/common/packet`
 - **Result:** FAIL — 8 `AR-ORG-DOMAINS` couplings across 5 files; 0 `AR-ORG-VIS-SPLIT`.
-- **Rules:** [architectural-requirements.md](../architectural-requirements.md) AR-ORG-DOMAINS,
+- **Rules:** [architectural-requirements.md](../../../rule/architecture.md) AR-ORG-DOMAINS,
   AR-ORG-VIS-SPLIT. Foundational value types (addresses, protocol ids) are allowlisted (AS-01).
 
 ## Findings
@@ -43,7 +43,7 @@ to what these modules do — but it splits into two kinds with different fixabil
 ## Recommendation
 
 Treat this subtree as **observation infrastructure** and pick one disposition per kind, recording it
-in [architecture-exceptions.md](../architecture-exceptions.md):
+in [architecture-exceptions.md](../../architecture-exceptions.md):
 
 1. **Physical-layer coupling (AV-ORG-02, findings 1/6/7/8):** *sanction* — either allowlist
    `physicallayer/common/Signal.h` + the reception/transmission contracts for `common/packet/`, or

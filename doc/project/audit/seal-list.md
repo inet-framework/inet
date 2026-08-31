@@ -1,7 +1,7 @@
 # Sealing — status
 
 The authoritative list of **sealed** paths. The rules that govern sealing — what "sealed" means, the
-audit-before-seal workflow, how to add and remove entries — are in [sealing.md](sealing.md).
+audit-before-seal workflow, how to add and remove entries — are in [sealing.md](../rule/sealing.md).
 
 **Default: unsealed.** Every file in the repository is freely modifiable unless it matches an entry
 below. Paths are relative to `src/inet/`. An entry is either:

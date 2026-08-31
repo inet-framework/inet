@@ -1,6 +1,6 @@
 # Naming Exceptions and Violations
 
-Known places where the INET code base departs from [naming-conventions.md](naming-conventions.md).
+Known places where the INET code base departs from [naming-conventions.md](../rule/naming.md).
 That document states the **target** rules; this one is the ledger of reality against them, so the
 conventions can stay clean and prescriptive while the deviations are tracked (and, where
 appropriate, worked off) here.
@@ -98,7 +98,7 @@ here — see *Auditing* at the bottom.
 
 ## Auditing
 
-When auditing a file or area against [naming-conventions.md](naming-conventions.md), record what you
+When auditing a file or area against [naming-conventions.md](../rule/naming.md), record what you
 find here rather than fixing it silently in place:
 
 1. For each name that breaks a rule, add a row: if it is a deliberate, permanent choice, add it to

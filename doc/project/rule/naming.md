@@ -12,7 +12,7 @@ The affix vocabulary is deliberately **redundancy-free**: each affix has one mea
 each role has one affix. Where two forms could express the same role, one is canonical and
 the other is to be avoided — this is what makes `FooHeaderSerializer` the only name for the
 serializer of a `FooHeader`. These conventions are the concrete form of the architectural
-requirement [AR-QUAL-NAMING](architectural-requirements.md); both humans and tooling infer a
+requirement [AR-QUAL-NAMING](architecture.md); both humans and tooling infer a
 component's category and how to compose it from its name.
 
 This document aims to cover **every** kind of name in an INET project — NED, message,
@@ -20,7 +20,7 @@ C++, configuration, build, and asset names. The rules here are the **target**: t
 stated prescriptively, describing the ideal rather than the current state. Known places
 where the existing code does not (yet) follow them — both permanent, sanctioned exceptions
 and violations awaiting a rename — are recorded separately in
-[naming-exceptions.md](naming-exceptions.md), which serves as the rename backlog (see
+[naming-exceptions.md](../audit/naming-exceptions.md), which serves as the rename backlog (see
 *Auditing* at the end).
 
 ## Casing at a glance
@@ -409,7 +409,7 @@ The rules above describe the target, not the current state of every file. Real d
 both permanent, sanctioned exceptions (`IPsec`, the `applications`/`networks` packages, the SI
 unit typedefs) and violations still awaiting a rename (`Msg`/`Message` types, underscored
 packages, `rtp` leading-underscore members, and so on) — are tracked in
-[naming-exceptions.md](naming-exceptions.md), which is the rename backlog. When you audit a file
+[naming-exceptions.md](../audit/naming-exceptions.md), which is the rename backlog. When you audit a file
 or area against this document, record what you find there (with a suggested fix and a status)
 rather than fixing it silently or weakening a rule here to match the code.
 

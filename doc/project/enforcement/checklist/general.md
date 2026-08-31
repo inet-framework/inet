@@ -1,11 +1,11 @@
 # Agent-Review Checklist (T4 enforcement)
 
-The tier-4 gate from [architectural-requirements.md](../architectural-requirements.md) §*Quality
+The tier-4 gate from [architectural-requirements.md](../../rule/architecture.md) §*Quality
 attributes and enforcement*. It enforces the **semantic** architectural requirements — the ones no
 compiler or linter can express — by having an LLM reviewer judge a diff against each item. Run it as
 a CI step on every change (and locally before pushing). For diffs touching
 `src/inet/linklayer/ieee80211/` or `src/inet/physicallayer/wireless/ieee80211/`, additionally run
-the [IEEE 802.11 checklist](ieee80211-agent-review-checklist.md).
+the [IEEE 802.11 checklist](ieee80211.md).
 
 ## How to run
 
@@ -24,8 +24,8 @@ Ground rules:
 2. **Judge only what static checks miss.** The compiler, `clang-tidy`, and `check-architecture.sh`
    already cover the mechanical rules; you cover *semantics* (intent, logic, duplication).
 3. **Respect the ledgers.** Couplings already recorded in
-   [architecture-exceptions.md](../architecture-exceptions.md) or names in
-   [naming-exceptions.md](../naming-exceptions.md) are known — don't re-flag them; flag only *new*
+   [architecture-exceptions.md](../../audit/architecture-exceptions.md) or names in
+   [naming-exceptions.md](../../audit/naming-exceptions.md) are known — don't re-flag them; flag only *new*
    deviations, and propose them as new ledger rows.
 4. **Scope to the diff.** Review what the change adds or moves, not the whole pre-existing tree.
 
@@ -79,7 +79,7 @@ FLAG absolute machine paths, `-march=native`, or per-machine flags baked into bu
 declared in the build descriptors.
 
 **[AR-QUAL-NAMING] Do new NED/`.msg`/semantic names follow the conventions?**
-FLAG names that break [naming-conventions.md](../naming-conventions.md) on the NED/message side that
+FLAG names that break [naming-conventions.md](../../rule/naming.md) on the NED/message side that
 `clang-tidy` can't see (wrong role suffix, `Msg`/`Message` packet, abbreviated field). Propose new
 findings as `naming-exceptions.md` rows.
 
