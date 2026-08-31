@@ -1,6 +1,6 @@
 # The project documentation structure
 
-> **Kind:** decision · **Status:** draft · **Stands on:** the documents in `doc/architecture/`, and the
+> **Kind:** decision · **Status:** implemented 2026-08-31 · **Stands on:** the documents in `doc/architecture/`, and the
 > `omnet-julia/` document set as a source of ideas
 
 A new structure for the documents that govern the INET Framework: the requirements, the designs, the
@@ -578,6 +578,10 @@ splits come out of `architectural-requirements.md`.
 
 ## 13. The order of the work
 
+**Every phase below is implemented.** Section 15 records what the implementation changed about the
+design, and what it found.
+
+
 **Phase 1 — the frame.** Create `doc/project/`, move every existing document, repair the links, and
 write `README.md`. The set works after this step, with no new text.
 
@@ -629,3 +633,84 @@ The questions the drafts raised, and the answers. All were settled on 2026-08-31
    as directly.
 
 Nothing else is open. The design is ready to build.
+
+## 15. What the implementation changed
+
+Implemented on 2026-08-31, in the `topic/project-documentation` worktree, as eleven commits. Four
+things differ from the design above, and each is a fact the design could not have known.
+
+### 15.1 An identifier heading holds the identifier alone
+
+The design said "each identifier is a heading, so a citation links to the rule itself". That is not
+enough. `### AR-ORG-DOMAINS — Layered, domain-partitioned source tree with acyclic dependencies`
+anchors as `#ar-org-domains--layered-domain-partitioned-source-tree-with-acyclic-dependencies` —
+nobody writes that by hand, and it breaks the moment the statement is reworded.
+
+The heading now holds the identifier alone, and the statement becomes the bold lead sentence of the
+body. The anchor is then the lowercased identifier. It also leaves the first body line free for the
+seal flag, which is where `SR-FLAG-PLACEMENT` puts it. An Index table at the head of each document
+restores the overview that the heading used to give, and it is generated.
+
+101 headings were converted, in five documents. The rule is
+[DR-ID-HEADING](../../doc/project/rule/documentation.md#dr-id-heading).
+
+### 15.2 The requirements were not citable at all
+
+They were bullet items, so nothing could link to one, and no requirement could carry a seal flag.
+The 27 accepted requirements are now headings, each with a `⬜` flag, and the document declares
+`Seal: by requirement, complete`.
+
+### 15.3 The naming rule identifiers, as they came out
+
+The design's coverage table proposed identifiers by artifact kind. The document's own section
+boundaries were a better fit, so the 23 `NR-*` rules follow them: `NR-CASE`, `NR-WORD`, `NR-PKG`,
+`NR-NED-ROLE`, `NR-NED-TYPE`, `NR-NED-GATE`, `NR-NED-PARAM`, `NR-NED-PROP`, `NR-NED-SIGNAL`,
+`NR-MSG-TYPE`, `NR-MSG-FIELD`, `NR-CPP-TYPE`, `NR-CPP-NAME`, `NR-CPP-REG`, `NR-CPP-TIMER`, `NR-GEN`,
+`NR-INI`, `NR-FEATURE`, `NR-DIR`, `NR-TEST`, `NR-ASSET`, `NR-TOOL`, `NR-CI`. The last three are new;
+branch and commit names stayed with `PR-*`, and document names with `DR-NAME`, as designed.
+
+### 15.4 A sixth gate: the link checker
+
+The design named five gate scripts. Writing the documents needed a sixth immediately — a link checker
+— because a broken `#anchor` is silent: it lands the reader at the top of the right document, and
+they believe they are in the right place. It found 114 broken links after the move.
+`enforcement/check-links.sh` is now the `T3` gate for
+[DR-LINK-RELATIVE](../../doc/project/rule/documentation.md#dr-link-relative).
+
+## 16. What the implementation found
+
+Four facts about the repository, none of which were visible before the documents were arranged to
+make them visible.
+
+**The clang-tidy configuration had never run.** `doc/architecture/enforcement/.clang-tidy` said in
+its own header that it had to be moved to the repository root to take effect, and it never was.
+clang-tidy finds its configuration by walking up from the source file. Meanwhile
+`_scripts/clang-tidy/run.sh` held a second, different check list inline, behind a hand-run `--fix`,
+which CI also never called. Both are now one file at the root.
+
+**No rule gate runs in CI.** `.github/workflows/` holds twelve test and build workflows and not one
+rule check. Every `T3` row in the gate inventory is a script a person must remember to run, which is
+the weakest form of every rule it covers. This is the largest remaining gap, and
+[enforcement/README.md](../../doc/project/enforcement/README.md) says so in the inventory rather than
+implying coverage that does not exist.
+
+**The one sealed path does not satisfy the seal rules.** `common/packet/` was sealed over two
+`AV-ORG` clusters that are still `Open (decide)` rather than sanctioned, which
+[SR-AUDIT-FIRST](../../doc/project/rule/sealing.md#sr-audit-first) forbids. It is recorded in
+[audit/seal-list.md](../../doc/project/audit/seal-list.md) rather than quietly repaired: either the
+two clusters get sanctioned as `AS-*` rows, or the couplings are inverted, or the seal comes off.
+That is the user's call.
+
+**The commit gate failed on its own history.** `check-commits.sh`, run over the commits that built
+this structure, flagged a 74-character subject against `PR-MSG-SUBJECT`. It was repaired by a replay
+rather than left, which is the smallest possible demonstration that the gate is real.
+
+## 17. What is left
+
+| Work | Why it waits |
+| --- | --- |
+| wire the gates into `.github/workflows/` | the largest gap; needs a CI decision, not a document |
+| fill `evidence/claim-coverage.md` | a deliberate pass over 27 requirements and twelve test categories |
+| decide `common/packet/`: sanction, invert, or unseal | the user's call |
+| audit and close the first units | nothing in the set has been through a document audit; every flag is `⬜` or absent |
+| `evidence/risks.md` | deferred by decision 4; the `RISK-*` prefix stays reserved |
