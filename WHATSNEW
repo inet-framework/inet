@@ -1,6 +1,62 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.7.x (in development)
+---------------------------
+
+Notable backward incompatible changes are the following:
+
+1. IEEE 802.11 rate control per receiver
+
+   IEEE 802.11 rate control now selects and adapts the transmission rate
+   separately for each peer a station transmits to. The rate controls previously
+   kept a single set of adaptive state per module, so the feedback of all peers
+   was blended into one rate.
+
+   To make this possible, the getRate() method of the IRateControl C++ interface,
+   implemented by AarfRateControl and OnoeRateControl, now takes the MAC address
+   of the receiver. This change requires the modification of rate control models
+   implemented outside INET, which no longer compile until their getRate() is
+   given the new argument. Simulation models that only configure a rate control
+   are unaffected.
+
+   Rate selection no longer consults the rate control for group-addressed frames,
+   which are never acknowledged and so could never have their rate corrected by
+   feedback. They now take a mandatory rate, as they already did when no rate
+   control was configured.
+
+   These changes may change the statistical results of simulations that use an
+   adaptive rate control, either where a station transmits to several peers or
+   where it sends group-addressed traffic.
+
+Notable backward compatible changes are the following:
+
+1. IEEE 802.11 per-station rate statistics
+
+   The datarateChanged signal of the rate controls is now emitted with the name of
+   the receiving station as a named details object, and a new dataratePerStation
+   statistic demultiplexes it into one data rate vector per peer. The
+   datarateSelected signal of Dcf and Hcf is tagged the same way, which also covers
+   fixed and configured rates. The declaration of the aggregate datarateChanged
+   statistic is unchanged and it still ignores the details, but the values it
+   records move: the rate control no longer reports a rate when the mode set
+   changes, and reports one per station when that station is first seen instead.
+
+2. IEEE 802.11 per-receiver configured data frame rates
+
+   RateSelection and QosRateSelection gained a dataFrameBitratePerReceiver
+   parameter, a map from peer interface module path to bitrate, which fixes the
+   rate of originated unicast data frames separately for each peer. It is empty by
+   default, so it changes nothing unless it is configured. The dataFrameBitrate
+   parameter, which fixes one rate for the whole interface, is unchanged.
+
+3. Naming the host owning a MAC address
+
+   A new L3AddressResolver::getHostNameWithMacAddress() method names the host that
+   owns a MAC address, by the host's path relative to the network, and falls back
+   to the MAC address string when no host owns the address.
+
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 
