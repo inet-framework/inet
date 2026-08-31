@@ -71,7 +71,11 @@ section indexes them so the registry stays one place to look.
 | `audit/architecture-exceptions.md` | by row | 0 | 0 | 0 |
 | `audit/naming-exceptions.md` | by row | 0 | 0 | 0 |
 | `design/decisions.md` | by decision | 0 | 0 | 17 |
+| `design/node-anatomy.md` | by section | 0 | 0 | 6 |
+| `design/packet-anatomy.md` | by section | 0 | 0 | 5 |
+| `design/protocol-anatomy.md` | by section | 0 | 0 | 5 |
 | `design/rejected-designs.md` | by decision | 0 | 0 | 10 |
+| `design/test-anatomy.md` | by section | 0 | 0 | 5 |
 | `domain/ieee80211.md` | by rule | 0 | 0 | 14 |
 | `requirement/accepted-requirements.md` | by requirement, complete | 0 | 27 | 0 |
 | `rule/architecture.md` | by rule | 0 | 0 | 40 |
