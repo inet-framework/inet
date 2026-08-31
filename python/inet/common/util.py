@@ -5,6 +5,7 @@ import hashlib
 import importlib
 import io
 import IPython
+import IPython.terminal.interactiveshell
 import logging
 import os
 import pandas

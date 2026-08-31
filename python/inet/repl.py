@@ -1,5 +1,6 @@
 import argparse
 import IPython
+import IPython.terminal.ipapp
 import logging
 import omnetpp
 
