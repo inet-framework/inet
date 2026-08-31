@@ -1,29 +1,92 @@
-# Naming Conventions
+# Naming rules
 
-How things are named in the INET Framework. The goal is **guessability in both
-directions**: given a concept, you can derive its name; given a name, you can tell what
-*kind* of thing it is and what it does — without looking it up. A name is built from two
-independent choices that compose: its **casing**, fixed by the *kind* of entity (a type,
-a parameter, a package…), and its **role affixes**, a fixed vocabulary of prefixes and
-suffixes that mark what part a component plays. Meaningful, scheme-following names take
-priority over brevity.
+> **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `NR-*` · **Stands on:** [architecture.md](architecture.md)
 
-The affix vocabulary is deliberately **redundancy-free**: each affix has one meaning, and
-each role has one affix. Where two forms could express the same role, one is canonical and
-the other is to be avoided — this is what makes `FooHeaderSerializer` the only name for the
-serializer of a `FooHeader`. These conventions are the concrete form of the architectural
-requirement [AR-QUAL-NAMING](architecture.md); both humans and tooling infer a
-component's category and how to compose it from its name.
+How everything in INET is named. The goal is **guessability in both directions**: given a concept you
+can derive its name, and given a name you can tell what *kind* of thing it is and what it does,
+without looking it up.
 
-This document aims to cover **every** kind of name in an INET project — NED, message,
-C++, configuration, build, and asset names. The rules here are the **target**: they are
-stated prescriptively, describing the ideal rather than the current state. Known places
-where the existing code does not (yet) follow them — both permanent, sanctioned exceptions
-and violations awaiting a rename — are recorded separately in
-[naming-exceptions.md](../audit/naming-exceptions.md), which serves as the rename backlog (see
-*Auditing* at the end).
+A name is built from two choices that compose. Its **casing** is fixed by the kind of entity — a
+type, a parameter, a package. Its **role affixes** come from a fixed vocabulary that marks the part a
+component plays. Meaningful, scheme-following names beat short ones.
 
-## Casing at a glance
+The affix vocabulary is **free of redundancy**: each affix has one meaning, and each role has one
+affix. Where two forms could express one role, one is canonical and the other is to be avoided. That
+is what makes `FooHeaderSerializer` the only name for the serializer of a `FooHeader`.
+
+These rules are the concrete form of [AR-QUAL-NAMING](architecture.md#ar-qual-naming). Both a human
+and a tool infer a component's category, and how to compose it, from its name.
+
+A rule has a stable identifier `NR-<AREA>`, and the identifier is the heading, so a citation links to
+the rule: [NR-NED-GATE](naming.md#nr-ned-gate). Cite the identifier in a review or in a ledger row
+rather than repeating the rule.
+
+**The rules here are the target.** They are stated for the ideal, not for the current state of every
+file. Where the code departs from them, the departure is recorded in
+[audit/naming-exceptions.md](../audit/naming-exceptions.md) — as an `NS-*` sanctioned exception or an
+`NV-*` rename candidate. Do not weaken a rule here to match the code.
+
+What this document does *not* name: a branch, a commit or a pull request, which are
+[pull-request.md](pull-request.md); and a document, a report or a plan, which are
+[documentation.md](documentation.md).
+
+## Index
+
+Every naming rule in document order. The identifier links to the rule; the statement is its lead sentence.
+
+**General**
+
+| Rule | Statement |
+| --- | --- |
+| [NR-CASE](#nr-case) | Casing alone places a name in one of a few families. |
+| [NR-WORD](#nr-word) | An acronym is a word, and a name is spelled out rather than abbreviated. |
+
+**NED names**
+
+| Rule | Statement |
+| --- | --- |
+| [NR-PKG](#nr-pkg) | A package, a directory and a namespace share one lowercase run-together name; a file is named for the type it defines. |
+| [NR-NED-ROLE](#nr-ned-role) | A module carries an affix from a fixed vocabulary, and the affix says what part the module plays. |
+| [NR-NED-TYPE](#nr-ned-type) | A module interface is `I<Concept>`; a network and a channel are `PascalCase` like any other NED type. |
+| [NR-NED-GATE](#nr-ned-gate) | A gate is `<stem>In` or `<stem>Out`, and the stem names the peer it faces. |
+| [NR-NED-PARAM](#nr-ned-param) | A parameter is `camelCase`, carries its `@unit` when it is a physical quantity, and means one thing. |
+| [NR-NED-PROP](#nr-ned-prop) | A property is `@lowercase`, and it is spelled the same wherever it appears. |
+| [NR-NED-SIGNAL](#nr-ned-signal) | A signal is `<subject><PastParticiple>` in NED and `<name>Signal` in C++. |
+
+**Message (`.msg`) names**
+
+| Rule | Statement |
+| --- | --- |
+| [NR-MSG-TYPE](#nr-msg-type) | A message type is named for the role it plays on the wire, or for the metadata it carries beside it. |
+| [NR-MSG-FIELD](#nr-msg-field) | A field is `camelCase` and spelled out, and it carries its unit. |
+
+**C++ names**
+
+| Rule | Statement |
+| --- | --- |
+| [NR-CPP-TYPE](#nr-cpp-type) | A C++ type is `PascalCase` and matches the NED type it implements. |
+| [NR-CPP-NAME](#nr-cpp-name) | A function, a member and a local are `camelCase`, and the verb says what the function does. |
+| [NR-CPP-REG](#nr-cpp-reg) | A registration macro is `Register_<Thing>`, and the identifier it registers follows the domain's own spelling. |
+| [NR-CPP-TIMER](#nr-cpp-timer) | A self-message member ends in `Timer` or `Msg`, and its name string matches the member. |
+
+**Configuration, build and assets**
+
+| Rule | Statement |
+| --- | --- |
+| [NR-INI](#nr-ini) | A config section is `[Config <PascalCase>]` and an iteration variable is `${camelCase}`. |
+| [NR-FEATURE](#nr-feature) | A feature id is the `PascalCase` protocol stem, with `Examples` and `Tests` companions. |
+| [NR-DIR](#nr-dir) | A directory is lowercase and run-together, singular, and it matches the NED package it holds. |
+| [NR-TEST](#nr-test) | A test file is named for what it tests, and a fingerprint tag is a lowercase descriptive word. |
+| [NR-ASSET](#nr-asset) | An icon file is lowercase and run-together, and its path is the icon name. |
+| [NR-GEN](#nr-gen) | A generated file carries the name of its source, with the generator's suffix, and it is never hand-edited. |
+| [NR-TOOL](#nr-tool) | A Python module is lowercase and run-together; a script is a lowercase hyphenated verb phrase that says what it does. |
+| [NR-CI](#nr-ci) | A workflow file is named for the job it runs, lowercase and hyphenated, and it matches the test category it drives. |
+
+## General
+
+### NR-CASE
+
+**Casing alone places a name in one of a few families.**
 
 Casing alone places a name in one of a few families. In short: **types** — things you
 instantiate, extend, or send — are `PascalCase`; **everything you configure or call** —
@@ -52,7 +115,11 @@ namespaces** are `lowercase`; **enum values, constants, and macros** are `ALL_CA
 | Icon paths | `lowercase`, run-together | `block/checker` |
 | Files | the `PascalCase` type they define | `Ipv4Header.msg`, `Udp.cc` |
 
-## Words and acronyms
+*Enforced at T3 — [`.clang-tidy`](../../../.clang-tidy) for the C++ half; agent review for the rest.*
+
+### NR-WORD
+
+**An acronym is a word, and a name is spelled out rather than abbreviated.**
 
 - **An acronym is a word: capitalize only its first letter in a name.** Write
   `Ipv4Address`, not `IPv4Address`; `TcpConnection`, not `TCPConnection`; `Ieee80211Mac`,
@@ -69,9 +136,13 @@ namespaces** are `lowercase`; **enum values, constants, and macros** are `ALL_CA
 
 ---
 
-# NED names
+## NED names
 
-## Packages and files
+*Enforced at T4 — agent review.*
+
+### NR-PKG
+
+**A package, a directory and a namespace share one lowercase run-together name; a file is named for the type it defines.**
 
 - **Package names are lowercase, run-together, and singular**, and a package path always
   equals its directory path under `src/inet` (`inet.linklayer.ethernet.common` *is* the
@@ -85,7 +156,11 @@ namespaces** are `lowercase`; **enum values, constants, and macros** are `ALL_CA
   `Ipv4Header`. Code generated from a `.msg` file carries the `_m` marker
   (`Ipv4Header_m.h`, `Ipv4Header_m.cc`) — the only underscore in an INET source file name.
 
-## Modules: role affixes
+*Enforced at T3 — [check-naming.sh](../enforcement/check-naming.sh).*
+
+### NR-NED-ROLE
+
+**A module carries an affix from a fixed vocabulary, and the affix says what part the module plays.**
 
 A module name reads as `[standard/vendor prefix] + Concept + [role suffix] + [variant]`.
 The concept is a domain noun — very often itself a recognizable word such as `App`,
@@ -93,7 +168,7 @@ The concept is a domain noun — very often itself a recognizable word such as `
 `Interface`, `Service`. The affixes around it mark its role and variation; read a module
 name by stripping the affixes you recognize.
 
-### Role suffixes — what the module *is*
+#### Role suffixes — what the module *is*
 
 Each suffix marks exactly one structural role, so the suffix alone tells you a module's
 gate/behaviour shape:
@@ -120,7 +195,7 @@ are known to chain without reading their NED.
 `*OsgVisualizer` in the 3D OSG scene, and the plain `*Visualizer` is the back-end-independent
 base/integrator.
 
-### Role prefixes — how the module *varies*
+#### Role prefixes — how the module *varies*
 
 | Prefix | Meaning | Example |
 |---|---|---|
@@ -136,7 +211,7 @@ base/integrator.
 suffix: `SimpleIeee8021qFilter` / `DualIeee8021qFilter`, `SingleRateThreeColorMeter` /
 `DualRateThreeColorMeter`.
 
-### The `6` variant marker and composition order
+#### The `6` variant marker and composition order
 
 **Append `6` for the IPv6 variant of a node or module whose plain name is IPv4-default:**
 `Router6`, `StandardHost6`, `WirelessHost6`, `HomeAgent6`. Protocol names themselves embed
@@ -145,7 +220,11 @@ outward from the concept in one fixed order — standard/vendor prefix first, ro
 last, variant `6` at the very end: `Ieee80211` + `Mgmt` + `Ap` → `Ieee80211MgmtAp`;
 `Multicast` + `Router` + `6` → `MulticastRouter6`. Never reorder the words.
 
-## Interfaces, networks, and channels
+*Enforced at T4 — agent review; a wrong role suffix is the most common finding.*
+
+### NR-NED-TYPE
+
+**A module interface is `I<Concept>`; a network and a channel are `PascalCase` like any other NED type.**
 
 - **A module interface is the concept prefixed with `I`** and lives in a `contract` package:
   `IApp`, `IMacProtocol`, `IRadio`, `INetworkInterface`, `IPacketQueue`, `IClock`. The `I` is
@@ -156,7 +235,11 @@ last, variant `6` at the very end: `Ieee80211` + `Mgmt` + `Ap` → `Ieee80211Mgm
 - **Channels** are `PascalCase`, named for their characteristics (`Eth100M`, and
   `DatarateChannel` extensions).
 
-## Gates
+*Enforced at T4 — agent review.*
+
+### NR-NED-GATE
+
+**A gate is `<stem>In` or `<stem>Out`, and the stem names the peer it faces.**
 
 - **Direction is a suffix, `In` or `Out`; a bidirectional gate is an `inout` and takes
   neither.** `upperLayerIn` and `upperLayerOut` are the two halves of one logical port.
@@ -168,7 +251,11 @@ last, variant `6` at the very end: `Ieee80211` + `Mgmt` + `Ap` → `Ieee80211Mgm
 - **A gate vector adds `[]`, and its stem still carries the direction:** `upperLayerOut[]`,
   `generatorIn[]`. Prefer `<stem>In[]`/`<stem>Out[]` for new gate vectors.
 
-## Parameters
+*Enforced at T4 — agent review.*
+
+### NR-NED-PARAM
+
+**A parameter is `camelCase`, carries its `@unit` when it is a physical quantity, and means one thing.**
 
 - **Parameters are `camelCase`**, named for the quantity they set: `bitrate`, `sendInterval`,
   `packetLength`, `startTime`.
@@ -183,7 +270,11 @@ last, variant `6` at the very end: `Ieee80211` + `Mgmt` + `Ap` → `Ieee80211Mgm
 - **Every physical quantity declares `@unit`** (`@unit(s)`, `@unit(bps)`, `@unit(m)`, …) — a
   parameter's unit is part of its contract, never a bare number.
 
-## Properties
+*Enforced at T1 — `@unit` is checked by the NED compiler; T4 for the single-meaning rule.*
+
+### NR-NED-PROP
+
+**A property is `@lowercase`, and it is spelled the same wherever it appears.**
 
 NED and message **properties are lowercase, camelCase, prefixed with `@`**, and take their
 arguments either indexed in `[]` (one per named instance) or by value in `()`:
@@ -196,7 +287,11 @@ looks for: **`@networkNode`** (a compound module is a node), **`@networkInterfac
 **`@lifecycleSupport`** (handles start/shutdown/crash), **`@application`** (an app submodule),
 and **`@omittedTypename(OmittedFoo)`** (names the no-op type for an optional submodule).
 
-## Signals and statistics
+*Enforced at T1 — the NED compiler rejects an unknown property.*
+
+### NR-NED-SIGNAL
+
+**A signal is `<subject><PastParticiple>` in NED and `<name>Signal` in C++.**
 
 - **Signal and statistic names are `camelCase`, undecorated** in their NED `@signal[...]` /
   `@statistic[...]` bracket: `packetSent`, `packetReceived`, `queueLength`, `endToEndDelay`.
@@ -214,13 +309,17 @@ and **`@omittedTypename(OmittedFoo)`** (names the no-op type for an optional sub
 
 ---
 
-# Message (.msg) names
+## Message (`.msg`) names
 
 Modern INET represents a protocol data unit as a generic `Packet` carrying typed **chunks**;
 the message types declared in `.msg` files are those chunks and the metadata that rides with
 them.
 
-## Packets, headers, and tags
+*Enforced at T4 — agent review.*
+
+### NR-MSG-TYPE
+
+**A message type is named for the role it plays on the wire, or for the metadata it carries beside it.**
 
 - **An on-wire header chunk is `<Protocol>Header`**; a trailer is `<Protocol>Trailer`; a frame
   check sequence is `<Protocol>Fcs` (`Ipv4Header`, `EthernetMacHeader`, `PppTrailer`,
@@ -241,7 +340,11 @@ them.
     (`DispatchProtocolInd`, `SocketInd`, `EcnInd`). Every `*Req` has a matching `*Ind`; use
     `Req`/`Ind`, not `Request`/`Indication`, for tags.
 
-## Message fields and properties
+*Enforced at T4 — agent review.*
+
+### NR-MSG-FIELD
+
+**A field is `camelCase` and spelled out, and it carries its unit.**
 
 - **Fields are `camelCase`, undecorated** — no Hungarian prefixes, no leading underscore:
   `sequenceNo`, `srcPort`, `destPort`, `headerLength`, `moreFragments`. Boolean fields usually
@@ -260,9 +363,13 @@ them.
 
 ---
 
-# C++ names
+## C++ names
 
-## Types
+*Enforced at T4 — agent review.*
+
+### NR-CPP-TYPE
+
+**A C++ type is `PascalCase` and matches the NED type it implements.**
 
 - **Classes, structs, and MSG-generated types are `PascalCase`.** Class-name suffixes mark the
   class's role, mirroring the module and message suffixes above (`*Base`, `*Table`, `*Filter`,
@@ -299,7 +406,11 @@ them.
   the rare occasion a dedicated exception type is warranted, name it `<Condition>Exception`
   (`ConnectionClosedException`); reserve `cTerminationException` for ending a run cleanly.
 
-## Functions and variables
+*Enforced at T3 — [`.clang-tidy`](../../../.clang-tidy).*
+
+### NR-CPP-NAME
+
+**A function, a member and a local are `camelCase`, and the verb says what the function does.**
 
 - **Methods and free functions are `camelCase` and verb-first**; the subject is the object, not
   the name (`sendAck`, `retransmitData`, `findContainingNode`). Getters and setters are strictly
@@ -322,7 +433,11 @@ them.
   like a registered enumerated value — which takes `camelCase` (`Protocol::ipv4`,
   `dsssHeaderMode1Mbps`). Keep new scalar constants ALL_CAPS.
 
-## Registration macros and registered identifiers
+*Enforced at T3 — [`.clang-tidy`](../../../.clang-tidy).*
+
+### NR-CPP-REG
+
+**A registration macro is `Register_<Thing>`, and the identifier it registers follows the domain's own spelling.**
 
 - **Registration macros are named `Define_<Thing>` / `Register_<Thing>`** — each word
   capitalized, underscore-separated — and you use far more than you define. The common ones and
@@ -342,7 +457,11 @@ them.
   natural-caps human-readable name (`"Ethernet MAC"`, `"IEEE 802.11 DSSS PHY"`). They are listed
   alphabetically, split into a standard-protocols block and an INET-specific block.
 
-## Messages and timers
+*Enforced at T1 — the macro will not compile without its argument; T4 for the identifier spelling.*
+
+### NR-CPP-TIMER
+
+**A self-message member ends in `Timer` or `Msg`, and its name string matches the member.**
 
 A self-message or timer is held in a `camelCase` member named for its purpose, ending in
 `*Timer` (`txTimer`, `endTxTimer`, `retransmitTimer`) or `*Msg`. **Give the `cMessage` a
@@ -350,9 +469,13 @@ descriptive `camelCase` name string, ideally identical to the member** (`new cMe
 
 ---
 
-# Configuration, build, and assets
+## Configuration, build and assets
 
-## Configuration (`.ini`)
+*Enforced at T4 — agent review.*
+
+### NR-INI
+
+**A config section is `[Config <PascalCase>]` and an iteration variable is `${camelCase}`.**
 
 - **Config sections are `[Config PascalCase]`**, named for the scenario; a combination of
   configs joins their names with hyphens (`[Config Rstp-LargeNet]` `extends = LargeNet, Rstp`).
@@ -364,7 +487,11 @@ descriptive `camelCase` name string, ideally identical to the member** (`new cMe
 - INET does not use `experiment-label` / `measurement-label` / `replication-label`; scenario
   identity comes from the config name and iteration variables.
 
-## Features (`.oppfeatures`)
+*Enforced at T3 — [check-naming.sh](../enforcement/check-naming.sh).*
+
+### NR-FEATURE
+
+**A feature id is the `PascalCase` protocol stem, with `Examples` and `Tests` companions.**
 
 - **A feature `id` is `PascalCase` with acronyms as words** (`Aodv`, `Bgpv4`, `Ospfv2`, `Mrp`),
   paired with a free-text, spaced human-readable `name` (`"AODV"`, `"BGPv4 routing"`). Its
@@ -373,7 +500,11 @@ descriptive `camelCase` name string, ideally identical to the member** (`new cMe
   `<Feature>Examples`, `<Feature>Showcases`, `<Feature>Tests`, `<Feature>Tutorial`. New
   feature ids follow the `Aodv`/`Bgpv4` form.
 
-## Directories
+*Enforced at T3 — `inet_featuretool` validates the descriptor.*
+
+### NR-DIR
+
+**A directory is lowercase and run-together, singular, and it matches the NED package it holds.**
 
 - **Example, showcase, tutorial, and test directories are lowercase, run-together words**,
   usually the protocol or feature they exercise (`examples/aodv`, `examples/ethernet`,
@@ -381,7 +512,11 @@ descriptive `camelCase` name string, ideally identical to the member** (`new cMe
   test *kind*: `fingerprint`, `module`, `unit`, `statistical`, `validation`, `packet`, `speed`.
   Prefer lowercase, run-together names for new scenario folders.
 
-## Tests
+*Enforced at T3 — [check-naming.sh](../enforcement/check-naming.sh).*
+
+### NR-TEST
+
+**A test file is named for what it tests, and a fingerprint tag is a lowercase descriptive word.**
 
 - **A fingerprint test is identified by its working directory plus its run command**, not a
   separate name: `<dir>, -f <inifile> -c <ConfigName> -r <run#>, <timelimit>, <fingerprint>,
@@ -392,7 +527,11 @@ descriptive `camelCase` name string, ideally identical to the member** (`new cMe
   (`AntennaOrientation_1.test`, `Clock_SettableLinear_1.test`) — `PascalCase` subject, optional
   numeric variant.
 
-## Icons and images
+*Enforced at T3 — [check-naming.sh](../enforcement/check-naming.sh).*
+
+### NR-ASSET
+
+**An icon file is lowercase and run-together, and its path is the icon name.**
 
 - **Icons under `images/` are lowercase, run-together file names** grouped in category folders
   (`block/`, `misc/`, `background/`, `maps/`, `3d/`), referenced from NED as
@@ -402,6 +541,43 @@ descriptive `camelCase` name string, ideally identical to the member** (`new cMe
   set and are referenced, not shipped, by INET.
 
 ---
+
+*Enforced at T3 — [check-naming.sh](../enforcement/check-naming.sh).*
+
+### NR-GEN
+
+**A generated file carries the name of its source, with the generator's suffix, and it is never
+hand-edited.**
+
+`Foo.msg` produces `Foo_m.h` and `Foo_m.cc`; the pair sits beside its source and takes its name from
+it. The same holds for anything else a tool writes: the name says which file to edit instead. A
+generated file follows the seal of its source — see
+[SR-SEAL-GENERATED](sealing.md#sr-seal-generated).
+
+*Enforced at T1 — the message compiler names the pair.*
+
+### NR-TOOL
+
+**A Python module is lowercase and run-together; a script is a lowercase hyphenated verb phrase that
+says what it does.**
+
+`python/inet/simulation/`, `python/inet/scave/` for the modules; `check-ned-file-names`,
+`removetrailingspaces` for the scripts under `_scripts/`. A script that checks something starts with
+`check-`, and one that changes files in place says so in its name. The historical run-together script
+names (`removetrailingspaces`, `namespaceize.pl`) are the departures, not the rule.
+
+*Enforced at T4 — agent review.*
+
+### NR-CI
+
+**A workflow file is named for the job it runs, lowercase and hyphenated, and it matches the test
+category it drives.**
+
+`fingerprint-tests.yml`, `module-tests.yml`, `statistical-tests.yml`, `build-linux.yml`. A workflow
+that runs the test category `<x>` is `<x>-tests.yml`, so the failing check name in a pull request
+says which suite broke without opening it. A rule gate is `check-<rule family>.yml`.
+
+*Enforced at T3 — [check-naming.sh](../enforcement/check-naming.sh).*
 
 ## Auditing and exceptions
 
