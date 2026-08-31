@@ -758,5 +758,9 @@ this patch touch, what evidence establishes compliance, and what will prevent a 
    rows; deviations already in [architecture-exceptions.md](architecture-exceptions.md) or
    [naming-exceptions.md](naming-exceptions.md) are known, not findings. Fingerprint baselines
    change only with explicit approval and a reviewable explanation (AR-QUAL-TRACEABILITY).
-8. **Sealing last.** Sealing is the terminal state of this pipeline, not a shortcut around it: a
+8. **Submit a reviewable change.** Divide the work into commits by concern — whitespace and
+   mechanical sweeps apart from logic, the shared-component change before the model that needs
+   it, baseline updates in their own patch — and write messages that state the reason. The rules
+   and their enforcement are in [pull-requests.md](pull-requests.md).
+9. **Sealing last.** Sealing is the terminal state of this pipeline, not a shortcut around it: a
    complete audit, with every deviation fixed or ledgered, precedes recording a seal.
