@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
@@ -62,11 +63,12 @@ void Hcf::initialize(int stage)
             recipientBlockAckProcedure = new RecipientBlockAckProcedure();
         }
     }
-    else if (stage == INITSTAGE_LAST)
+    else if (stage == INITSTAGE_LAST) {
         // Edca resolves its Edcaf array at the link-layer stage. Install the
-        // queue callbacks after all child initialization has completed.
+        // queue signal listeners after all child initialization has completed.
         for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
-            edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue()->setPacketDropCallback(this);
+            check_and_cast<cModule *>(edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue())->subscribe(packetDroppedSignal, this);
+    }
 }
 
 std::string Hcf::getFrameSequenceInfo() const
@@ -150,11 +152,16 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     }
 }
 
-void Hcf::handlePacketDropped(Packet *packet)
+void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("handlePacketDropped");
-    if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
-        mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+    if (signalID == packetDroppedSignal) {
+        Enter_Method("%s", cComponent::getSignalName(signalID));
+        auto packet = check_and_cast<Packet *>(obj);
+        if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
+            mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+    }
+    else
+        ModeSetListener::receiveSignal(source, signalID, obj, details);
 }
 
 void Hcf::scheduleStartRxTimer(simtime_t timeout)

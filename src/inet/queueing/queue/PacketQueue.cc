@@ -104,7 +104,6 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
             auto packet = packetDropperFunction->selectPacket(this);
             EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
             queue.remove(packet);
-            notifyPacketDropped(packet);
             dropPacket(packet, QUEUE_OVERFLOW);
         }
     }
@@ -192,13 +191,6 @@ void PacketQueue::handlePacketRemoved(Packet *packet)
         queue.remove(packet);
         emit(packetRemovedSignal, packet);
     }
-}
-
-void PacketQueue::handlePacketDropped(Packet *packet)
-{
-    Enter_Method("handlePacketDropped");
-    handlePacketRemoved(packet);
-    notifyPacketDropped(packet);
 }
 
 } // namespace queueing

@@ -22,29 +22,12 @@ class INET_API IPacketQueue : public virtual IPacketCollection, public virtual I
 {
   public:
     /**
-     * Receives a synchronous notification while a packet is still valid and
-     * owned by the queue, immediately before the queue drops it.
-     */
-    class INET_API ICallback {
-      public:
-        virtual ~ICallback() {}
-        virtual void handlePacketDropped(Packet *packet) = 0;
-    };
-
-  public:
-    /**
      * Enqueues the packet into the packet queue. The onwership of the packet
      * is transferred from the caller to the queue.
      *
      * The queue must not be full. The packet must not be nullptr.
      */
     virtual void enqueuePacket(Packet *packet) = 0;
-
-    /**
-     * Installs the owner that is synchronously notified before a queued
-     * packet is deleted because of an overflow/dropper decision.
-     */
-    virtual void setPacketDropCallback(ICallback *callback) = 0;
 
     /**
      * Dequeues the packet from the packet queue. The onwership of the packet

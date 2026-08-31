@@ -106,7 +106,7 @@ class Ieee80211MgmtApQueueDropTest : public cSimpleModule
         ASSERT(!mgmt->hasPendingAssociation(station));
         ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::AUTHENTICATED);
 
-        // The queue-owned callback runs before deletion, so the reservation
+        // The existing packetDroppedSignal is delivered before deletion, so the reservation
         // is released synchronously and can be reused by another STA.
         ASSERT(mgmt->reserveAssociationId(reusable) == 1);
         mgmt->cancelAssociationIdReservation(reusable);

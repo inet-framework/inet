@@ -1,7 +1,7 @@
 %description:
 Verify that a tagged Association or Reassociation Response dropped from an
 HCF EDCA compound pending queue reaches the AP as a terminal outcome. The
-child management queue callback is propagated through the compound queue,
+child management queue drop signal is propagated through the compound queue,
 pending state is cleared, and a retransmission completes without disturbing a
 committed association.
 
@@ -23,7 +23,6 @@ class TestHcfManagementQueue : public queueing::PacketQueue
 {
   public:
     void setPacketCapacityForTest(int capacity) { packetCapacity = capacity; }
-    bool hasPacketDropCallbackForTest() const { return packetDropCallback != nullptr; }
 };
 
 Define_Module(TestHcfManagementQueue);
@@ -32,7 +31,6 @@ class TestCompoundPendingQueueForHcf : public queueing::CompoundPacketQueueBase
 {
   public:
     void setPacketCapacityForTest(int capacity) { packetCapacity = capacity; }
-    bool hasPacketDropCallbackForTest() const { return packetDropCallback != nullptr; }
 };
 
 Define_Module(TestCompoundPendingQueueForHcf);
@@ -132,8 +130,6 @@ class Ieee80211MgmtApHcfQueueDropTest : public cSimpleModule
 
         ASSERT(compoundQueue->getMaxNumPackets() == -1);
         ASSERT(managementQueue->getMaxNumPackets() == 0);
-        ASSERT(compoundQueue->hasPacketDropCallbackForTest());
-        ASSERT(managementQueue->hasPacketDropCallbackForTest());
         mgmt->markAuthenticated(station);
         mgmt->submitAssociationRequest(station);
         for (int i = 0; i < 100 && mgmt->statuses.empty(); i++)

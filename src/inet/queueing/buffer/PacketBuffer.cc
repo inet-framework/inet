@@ -66,7 +66,7 @@ void PacketBuffer::addPacket(Packet *packet)
                 if (queue != nullptr) {
                     ICallback *callback = dynamic_cast<ICallback *>(queue->getOwner());
                     if (callback != nullptr)
-                        callback->handlePacketDropped(packet);
+                        callback->handlePacketRemoved(packet);
                 }
                 // TODO maybe the buffer should take ownership and queues should be aware of it
                 take(packet);

@@ -27,13 +27,6 @@ class INET_API IPacketBuffer : public virtual IPacketCollection
          * The packet is never nullptr.
          */
         virtual void handlePacketRemoved(Packet *packet) = 0;
-
-        /**
-         * Notifies the packet owner before a packet is deleted because of an
-         * overflow/dropper decision. The default keeps compatibility with
-         * buffers that only distinguish removal from retention.
-         */
-        virtual void handlePacketDropped(Packet *packet) { handlePacketRemoved(packet); }
     };
 
   public:

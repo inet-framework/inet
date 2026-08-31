@@ -63,23 +63,12 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, const cGate *gate)
             EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
             removePacket(packet);
             take(packet);
-            notifyPacketDropped(packet);
             dropPacket(packet, QUEUE_OVERFLOW);
         }
     }
     ASSERT(!isOverloaded());
     cNamedObject packetPushEndedDetails("atomicOperationEnded");
     emit(packetPushEndedSignal, nullptr, &packetPushEndedDetails);
-}
-
-void CompoundPacketQueueBase::setPacketDropCallback(IPacketQueue::ICallback *callback)
-{
-    PacketQueueBase::setPacketDropCallback(callback);
-    for (cModule::SubmoduleIterator it(this); !it.end(); ++it) {
-        auto queue = dynamic_cast<IPacketQueue *>(*it);
-        if (queue != nullptr)
-            queue->setPacketDropCallback(callback);
-    }
 }
 
 Packet *CompoundPacketQueueBase::pullPacket(const cGate *gate)
