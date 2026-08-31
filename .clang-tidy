@@ -1,15 +1,36 @@
-# Starter clang-tidy config that enforces the C++ side of naming-conventions.md
-# (which concretizes AR-QUAL-NAMING). This is a STARTER staged under doc/architecture/ — to
-# activate it, move it to the repository root so it applies to all of src/inet.
+# The clang-tidy configuration for INET. It sits at the repository root because clang-tidy
+# finds its configuration by walking up from the source file; a copy staged elsewhere is
+# never read. It is the T3 gate for two rule families:
 #
-# Scope: this only sees C++ identifiers. The NED-, .msg-, .ini-, and .oppfeatures-side
-# rules in naming-conventions.md need a separate small linter.
+#   readability-identifier-naming  — the C++ half of doc/project/rule/naming.md (NR-CASE,
+#                                    NR-CPP-TYPE, NR-CPP-NAME), which concretizes AR-QUAL-NAMING
+#   bugprone-* / modernize-*       — the C++ half of doc/project/rule/quality.md
 #
-# Expect first runs to report the known deviations catalogued in naming-exceptions.md
-# (rtp leading-underscore members NV-08, PascalCase static constants NV-10, etc.).
-# Feed anything new into that ledger; don't weaken the rules here to match the code.
+# The bugprone and modernize list came from _scripts/clang-tidy/run.sh, which was a hand-run
+# --fix tool that CI never called. That script is gone; doc/project/enforcement/check-cpp.sh
+# runs this configuration instead, without --fix by default, because a gate reports and does
+# not rewrite.
+#
+# Scope: this only sees C++ identifiers. The NED, .msg, .ini and .oppfeatures rules of
+# naming.md need doc/project/enforcement/check-naming.sh and agent review.
+#
+# Expect the first runs to report the known deviations catalogued in
+# doc/project/audit/naming-exceptions.md (rtp leading-underscore members NV-08, PascalCase
+# static constants NV-10, and so on). Feed anything new into that ledger; do not weaken the
+# rules here to match the code.
 
-Checks: '-*,readability-identifier-naming'
+Checks: >
+  -*,
+  readability-identifier-naming,
+  bugprone-*,
+  -bugprone-narrowing-conversions,
+  -bugprone-reserved-identifier,
+  modernize-*,
+  -modernize-avoid-c-arrays,
+  -modernize-use-trailing-return-type,
+  -modernize-use-emplace,
+  -modernize-use-auto,
+  -modernize-pass-by-value
 WarningsAsErrors: ''
 HeaderFilterRegex: 'inet/.*'
 
