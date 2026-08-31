@@ -34,6 +34,12 @@ class INET_API IBlockAckAgreementHandlerCallback
     virtual void scheduleInactivityTimer(BlockAckAgreementRole role, simtime_t deadline) = 0;
     virtual void scheduleAddbaResponseTimer(simtime_t deadline) = 0;
     virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) = 0;
+    // Marks originator data frames that were waiting for this agreement's
+    // Block Ack exchange as eligible for retry with an alternative
+    // acknowledgment policy. This is needed whenever an agreement becomes
+    // unavailable, including before its retained teardown object is removed.
+    // The return value reports whether any ACK state changed.
+    virtual bool releaseBlockAckAgreementFrames(MacAddress peerAddress, Tid tid) { return false; }
     // Removes queued siblings of a sender-local DELBA without assuming that
     // the frame is still removable from the active frame sequence. The
     // agreement owner remains responsible for rejecting stale packets.

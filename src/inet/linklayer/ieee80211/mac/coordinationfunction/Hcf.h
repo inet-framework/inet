@@ -70,6 +70,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // their role so one role cannot cancel the other's timeout.
     simtime_t originatorInactivityDeadline = SIMTIME_MAX;
     simtime_t recipientInactivityDeadline = SIMTIME_MAX;
+    bool blockAckInactivityExpiryInProgress = false;
 
     // Transmission and Reception
     IRx *rx = nullptr;
@@ -203,6 +204,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void scheduleInactivityTimer(BlockAckAgreementRole role, simtime_t deadline) override;
     virtual void scheduleAddbaResponseTimer(simtime_t deadline) override;
     virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) override;
+    virtual bool releaseBlockAckAgreementFrames(MacAddress peerAddress, Tid tid) override;
     virtual void cancelBlockAckTeardown(bool initiator, MacAddress peerAddress, Tid tid, uint64_t generationId, Packet *excludedPacket) override;
 
     std::string getFrameSequenceInfo() const;

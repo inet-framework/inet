@@ -392,7 +392,7 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
 {
     switch (step) {
         case 0: {
-            auto blockAckReqParams = context->getQoSContext()->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), context->getQoSContext()->txopProcedure);
+            auto blockAckReqParams = context->getQoSContext()->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), context->getQoSContext()->txopProcedure, context->getQoSContext()->blockAckAgreementHandler);
             auto receiverAddr = std::get<0>(blockAckReqParams);
             auto startingSequenceNumber = std::get<1>(blockAckReqParams);
             auto tid = std::get<2>(blockAckReqParams);
@@ -434,4 +434,3 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
 
 } // namespace ieee80211
 } // namespace inet
-

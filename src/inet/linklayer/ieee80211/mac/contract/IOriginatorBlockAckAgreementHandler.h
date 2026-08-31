@@ -58,10 +58,14 @@ class INET_API IOriginatorBlockAckAgreementHandler
     // transaction and sibling packets were cancelled through the callback.
     virtual bool processAcknowledgedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual OriginatorBlockAckAgreementAbortResult processAbortedDelba(Packet *packet, IBlockAckAgreementHandlerCallback *callback) = 0;
-    virtual void blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
+    virtual bool blockAckAgreementExpired(IProcedureCallback *procedureCallback, IBlockAckAgreementHandlerCallback *agreementHandlerCallback) = 0;
     virtual void addbaResponseTimeoutExpired(IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IBlockAckAgreementHandlerCallback *callback) = 0;
 
     virtual OriginatorBlockAckAgreement *getAgreement(MacAddress receiverAddr, Tid tid) = 0;
+    // Returns the installed agreement only while it can be used by the data
+    // plane. Lifecycle code must use getAgreement() to retain generation-safe
+    // teardown state after inactivity expiry.
+    virtual OriginatorBlockAckAgreement *getActiveAgreement(MacAddress receiverAddr, Tid tid) = 0;
     virtual bool isAddbaResponsePending(MacAddress receiverAddr, Tid tid) const = 0;
     virtual bool isAddbaRequestPending(const Packet *packet, const Ptr<const Ieee80211AddbaRequest>& addbaReq) const = 0;
     virtual bool isDelbaPending(const Packet *packet, const Ptr<const Ieee80211Delba>& delba) const { return true; }

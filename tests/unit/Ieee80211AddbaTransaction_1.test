@@ -19,6 +19,7 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/linklayer/ieee80211/mac/blockack/Ieee80211BlockAckAgreementTag_m.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/blockackreordering/BlockAckReordering.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementPolicy.h"
@@ -31,12 +32,14 @@ Test IEEE 802.11 ADDBA transactions, reordering reset, fragmentation cleanup, DC
 #include "inet/linklayer/ieee80211/mac/fragmentation/Ieee80211FragmentedActionContextTag.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/TxOpFs.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
@@ -93,8 +96,10 @@ class TestRecipientPolicy : public IRecipientBlockAckAgreementPolicy
 class TestRecipientAckPolicy : public IRecipientAckPolicy, public IRecipientQosAckPolicy
 {
   public:
+    bool blockAckNeeded = false;
+
     virtual bool isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>&) const override { return true; }
-    virtual bool isBlockAckNeeded(const Ptr<const Ieee80211BlockAckReq>&, RecipientBlockAckAgreement *) const override { return false; }
+    virtual bool isBlockAckNeeded(const Ptr<const Ieee80211BlockAckReq>&, RecipientBlockAckAgreement *agreement) const override { return blockAckNeeded && agreement != nullptr; }
     virtual simtime_t computeAckDurationField(Packet *, const Ptr<const Ieee80211DataOrMgmtHeader>&) const override { return 0; }
     virtual simtime_t computeBasicBlockAckDurationField(Packet *, const Ptr<const Ieee80211BasicBlockAckReq>&) const override { return 0; }
 };
@@ -142,6 +147,17 @@ class TestCallback : public IProcedureCallback, public IBlockAckAgreementHandler
     }
 };
 
+class TestControlResponseCallback : public TestCallback
+{
+  public:
+    int numControlResponses = 0;
+
+    virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>&, Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        numControlResponses++;
+        delete responsePacket;
+    }
+};
+
 class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
 {
   public:
@@ -159,6 +175,15 @@ class TestOriginatorHandler : public OriginatorBlockAckAgreementHandler
     void setPendingTeardownTransaction(MacAddress receiverAddress, Tid tid, uint64_t transactionId) { pendingTeardownTransactionIds[std::make_pair(receiverAddress, tid)] = transactionId; }
     simtime_t getRetryDeadline(MacAddress receiverAddress, Tid tid) const { auto it = addbaRetryDeadlines.find(std::make_pair(receiverAddress, tid)); return it == addbaRetryDeadlines.end() ? SIMTIME_MAX : it->second; }
     void publishInactivityDeadline(IBlockAckAgreementHandlerCallback *callback) { scheduleInactivityTimer(callback); }
+};
+
+class TestOriginatorQosAckPolicy : public OriginatorQosAckPolicy
+{
+  public:
+    void configureBlockAckSelection(int maxFrameLength, int threshold) {
+        maxBlockAckPolicyFrameLength = maxFrameLength;
+        blockAckReqThreshold = threshold;
+    }
 };
 
 class TestTimeoutCancellationCallback : public TestCallback
@@ -179,6 +204,13 @@ class TestRecipientHandler : public RecipientBlockAckAgreementHandler
 {
   public:
     int getNumCachedAddbaResponses() const { return lastAddbaResponses.size(); }
+};
+
+class TestRecipientBlockAckProcedure : public RecipientBlockAckProcedure
+{
+  public:
+    int getNumReceivedBlockAckReq() const { return numReceivedBlockAckReq; }
+    int getNumSentBlockAck() const { return numSentBlockAck; }
 };
 
 class TestBlockAckReordering : public BlockAckReordering
@@ -620,6 +652,7 @@ class TestHcf : public Hcf
     std::vector<uint64_t> cancelledBlockAckTeardownGenerationIds;
     int numRebuildEligibilityCalls = 0;
     int numTransmittedControlResponses = 0;
+    bool managementProcessedDuringBlockAckExpiry = false;
     bool droppedSetupCancelled = false;
     bool delegateDroppedSetupHandling = false;
     TestCallback *managementCallback = nullptr;
@@ -683,6 +716,11 @@ class TestHcf : public Hcf
         auto lastTransmittedHeader = lastTransmittedPacket->peekAtFront<Ieee80211MacHeader>();
         originatorProcessReceivedControlFrame(packet, header, lastTransmittedPacket, lastTransmittedHeader, accessCategory);
     }
+    void processInactivityTimeout() {
+        if (inactivityTimer == nullptr)
+            inactivityTimer = new cMessage("BlockAckInactivityTimer");
+        handleMessage(inactivityTimer);
+    }
 
   protected:
     virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>&, Packet *, const Ptr<const Ieee80211MacHeader>&) override {
@@ -690,6 +728,7 @@ class TestHcf : public Hcf
         delete responsePacket;
     }
     virtual void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        managementProcessedDuringBlockAckExpiry |= blockAckInactivityExpiryInProgress;
         if (managementCallback != nullptr)
             managementCallback->processMgmtFrame(packet, header);
         else
@@ -2608,28 +2647,28 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
     auto agreement = agreementHandler.processReceivedAddbaRequest(request, &policy, &callback, &callback);
     ASSERT(agreement != nullptr);
 
-    auto makeServiceFragment = [&](const char *name, MacAddress transmitterAddress, SequenceNumberCyclic sequenceNumber, int fragmentNumber, bool moreFragments, uint8_t payloadByte) {
+    auto makeServiceFragment = [&](const char *name, MacAddress transmitterAddress, SequenceNumberCyclic sequenceNumber, int fragmentNumber, bool moreFragments, uint8_t payloadByte, AckPolicy ackPolicy) {
         auto dataHeader = makeQosHeader(peer2, 6, sequenceNumber);
         dataHeader->setTransmitterAddress(transmitterAddress);
         dataHeader->setFragmentNumber(fragmentNumber);
         dataHeader->setMoreFragments(moreFragments);
-        dataHeader->setAckPolicy(BLOCK_ACK);
+        dataHeader->setAckPolicy(ackPolicy);
         auto packet = new Packet(name, dataHeader);
         packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>({ payloadByte })));
         packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
         return packet;
     };
 
-    auto reorderFirstFragment = makeServiceFragment("serviceReorderFirstFragment", peer1, SequenceNumberCyclic(300), 1, true, 0x71);
+    auto reorderFirstFragment = makeServiceFragment("serviceReorderFirstFragment", peer1, SequenceNumberCyclic(300), 1, true, 0x71, BLOCK_ACK);
     ASSERT(service->dataFrameReceived(reorderFirstFragment, reorderFirstFragment->peekAtFront<Ieee80211DataHeader>(), &agreementHandler).empty());
-    auto reorderFinalFragment = makeServiceFragment("serviceReorderFinalFragment", peer1, SequenceNumberCyclic(300), 2, false, 0x72);
+    auto reorderFinalFragment = makeServiceFragment("serviceReorderFinalFragment", peer1, SequenceNumberCyclic(300), 2, false, 0x72, BLOCK_ACK);
     ASSERT(service->dataFrameReceived(reorderFinalFragment, reorderFinalFragment->peekAtFront<Ieee80211DataHeader>(), &agreementHandler).empty());
     ASSERT(dropListener.numSignals == 0);
     wait(0.5e-6);
 
     // No agreement for peer3: this fragment is retained by BasicReassembly,
     // with a later deadline than the already retained reorder fragments.
-    auto basicFragment = makeServiceFragment("serviceBasicFragment", peer3, SequenceNumberCyclic(350), 0, true, 0x73);
+    auto basicFragment = makeServiceFragment("serviceBasicFragment", peer3, SequenceNumberCyclic(350), 0, true, 0x73, NORMAL_ACK);
     ASSERT(service->dataFrameReceived(basicFragment, basicFragment->peekAtFront<Ieee80211DataHeader>(), &agreementHandler).empty());
     wait(1.6e-6);
     ASSERT(dropListener.numSignals == 2);
@@ -2638,7 +2677,7 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
     // The expired sequence remains tombstoned until the reorder window moves
     // past it. A late fragment is rejected and reported once by the service,
     // while no hybrid or partial frame is delivered.
-    auto lateReorderFragment = makeServiceFragment("serviceLateReorderFragment", peer1, SequenceNumberCyclic(300), 0, true, 0x74);
+    auto lateReorderFragment = makeServiceFragment("serviceLateReorderFragment", peer1, SequenceNumberCyclic(300), 0, true, 0x74, BLOCK_ACK);
     ASSERT(service->dataFrameReceived(lateReorderFragment, lateReorderFragment->peekAtFront<Ieee80211DataHeader>(), &agreementHandler).empty());
     ASSERT(dropListener.numSignals == 3);
     ASSERT(dropListener.numOtherPacketDrops == 3);
@@ -2672,7 +2711,7 @@ RecipientBlockAckAgreement *replacementImmediateAgreement = nullptr;
         dataHeader->setTransmitterAddress(transmitterAddress);
         dataHeader->setFragmentNumber(fragmentNumber);
         dataHeader->setMoreFragments(moreFragments);
-        dataHeader->setAckPolicy(BLOCK_ACK);
+        dataHeader->setAckPolicy(NORMAL_ACK);
         auto packet = new Packet(name, dataHeader);
         packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>({ payloadByte })));
         packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
@@ -5595,6 +5634,7 @@ for (auto terminalOrder : { std::pair<int, int>(1, 2), std::pair<int, int>(2, 1)
     request->setBlockAckTimeoutValue(3);
     auto agreement = recipientHandler.processReceivedAddbaRequest(request, &recipientPolicy, &setupCallback, &setupCallback);
     ASSERT(agreement != nullptr);
+    ASSERT(recipientHandler.getActiveAgreement(12, peer2) == agreement);
     auto creationTime = simTime();
     ASSERT(creationTime > 0);
     ASSERT(agreement->getExpirationTime() == creationTime + 3);
@@ -5614,6 +5654,7 @@ for (auto terminalOrder : { std::pair<int, int>(1, 2), std::pair<int, int>(2, 1)
     TestCallback expiryCallback;
     recipientHandler.blockAckAgreementExpired(&expiryCallback, &expiryCallback);
     ASSERT(recipientHandler.getAgreement(12, peer2) == agreement);
+    ASSERT(recipientHandler.getActiveAgreement(12, peer2) == nullptr);
     ASSERT(agreement->isInactivityExpired());
     ASSERT(expiryCallback.managementPackets.size() == 1);
     ASSERT(expiryCallback.recipientInactivityDeadline == SIMTIME_MAX);
@@ -5635,6 +5676,7 @@ for (auto terminalOrder : { std::pair<int, int>(1, 2), std::pair<int, int>(2, 1)
     TestOriginatorHandler originatorHandler;
     originatorHandler.addEstablishedAgreement(peer1, 13);
     auto originatorAgreement = originatorHandler.getAgreement(peer1, 13);
+    ASSERT(originatorHandler.getActiveAgreement(peer1, 13) == originatorAgreement);
     originatorAgreement->setBlockAckTimeoutValue(2);
     originatorAgreement->calculateExpirationTime();
     auto originatorCreationTime = simTime();
@@ -5644,6 +5686,7 @@ for (auto terminalOrder : { std::pair<int, int>(1, 2), std::pair<int, int>(2, 1)
     wait(3);
     originatorHandler.blockAckAgreementExpired(&originatorCallback, &originatorCallback);
     ASSERT(originatorHandler.getAgreement(peer1, 13) == originatorAgreement);
+    ASSERT(originatorHandler.getActiveAgreement(peer1, 13) == nullptr);
     ASSERT(originatorAgreement->isInactivityExpired());
     ASSERT(originatorCallback.managementPackets.size() == 1);
     ASSERT(originatorCallback.originatorInactivityDeadline == SIMTIME_MAX);
@@ -5662,6 +5705,255 @@ for (auto terminalOrder : { std::pair<int, int>(1, 2), std::pair<int, int>(2, 1)
     roleCallback.scheduleInactivityTimer(BlockAckAgreementRole::RECIPIENT, SIMTIME_MAX);
     ASSERT(roleCallback.recipientInactivityDeadline == SIMTIME_MAX);
 
+}
+
+// Expiry quarantines the retained originator agreement from ACK/BAR selection.
+// HCF also releases both kinds of outstanding Block Ack state before resuming
+// channel access, so those frames can be retried with Normal Ack.
+{
+    auto originatorHandler = new TestOriginatorHandler();
+    originatorHandler->addEstablishedAgreement(peer1, 4);
+    auto agreement = originatorHandler->getAgreement(peer1, 4);
+    agreement->setBlockAckTimeoutValue(1);
+    agreement->calculateExpirationTime();
+
+    TestOriginatorQosAckPolicy ackPolicy;
+    ackPolicy.configureBlockAckSelection(1000, 1);
+    auto makeDataPacket = [&](const char *name, int sequenceNumber, AckPolicy ackPolicyValue) {
+        auto header = makeQosHeader(peer1, 4, SequenceNumberCyclic(sequenceNumber));
+        header->setAckPolicy(ackPolicyValue);
+        return new Packet(name, header);
+    };
+
+    auto waitingFrame = makeDataPacket("expiryWaitingForBlockAck", 500, BLOCK_ACK);
+    auto waitingHeader = waitingFrame->peekAtFront<Ieee80211DataHeader>();
+    auto notRequestedFrame = makeDataPacket("expiryBlockAckNotRequested", 501, BLOCK_ACK);
+    auto notRequestedHeader = notRequestedFrame->peekAtFront<Ieee80211DataHeader>();
+    auto eligibleFrame = makeDataPacket("expiryEligibleFrame", 502, NORMAL_ACK);
+    auto eligibleHeader = eligibleFrame->peekAtFront<Ieee80211DataHeader>();
+    auto completingFrame = makeDataPacket("expiryDuringTransmission", 503, BLOCK_ACK);
+    auto completingHeader = completingFrame->peekAtFront<Ieee80211DataHeader>();
+    ASSERT(ackPolicy.computeAckPolicy(eligibleFrame, eligibleHeader, agreement) == BLOCK_ACK);
+
+    TestOriginatorQosMacDataService dataService;
+    TestPacketQueue pendingQueue;
+    TestQosAckHandler ackHandler;
+    TestInProgressFrames inProgressFrames;
+    inProgressFrames.configure(&dataService, &ackHandler, &pendingQueue);
+    inProgressFrames.addFrame(waitingFrame);
+    inProgressFrames.addFrame(notRequestedFrame);
+    inProgressFrames.addFrame(eligibleFrame);
+    inProgressFrames.addFrame(completingFrame);
+    ackHandler.frameGotInProgress(waitingHeader);
+    ackHandler.processTransmittedDataOrMgmtFrame(waitingHeader);
+    auto blockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
+    blockAckReq->setReceiverAddress(peer1);
+    blockAckReq->setTidInfo(4);
+    blockAckReq->setStartingSequenceNumber(SequenceNumberCyclic(500));
+    ackHandler.processTransmittedBlockAckReq(blockAckReq);
+    ackHandler.frameGotInProgress(notRequestedHeader);
+    ackHandler.processTransmittedDataOrMgmtFrame(notRequestedHeader);
+    ackHandler.frameGotInProgress(completingHeader);
+    ASSERT(ackHandler.getQoSDataAckStatus(waitingHeader) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+    ASSERT(ackHandler.getQoSDataAckStatus(notRequestedHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+    ASSERT(ackHandler.getQoSDataAckStatus(completingHeader) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+
+    TestTxopProcedure txopProcedure;
+    FrameSequenceContext context(MacAddress::UNSPECIFIED_ADDRESS, nullptr, &inProgressFrames, nullptr, nullptr, nullptr,
+            new QoSContext(&ackPolicy, nullptr, originatorHandler, &txopProcedure));
+    TxOpFs txOpFs;
+    ASSERT(txOpFs.selectTxOpSequence(&txOpFs, &context) == 2);
+
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    auto recipientHandler = new TestRecipientHandler();
+    TestOriginatorPolicy originatorPolicy;
+    TestRecipientPolicy recipientPolicy;
+    TestCallback managementCallback;
+    TestHcf hcf;
+    hcf.configureBlockAckHandlers(originatorHandler, &originatorPolicy, recipientHandler, &recipientPolicy);
+    hcf.configureEligibilityIndex(&edca, &dataService);
+    hcf.configureManagementCallback(&managementCallback);
+
+    wait(1);
+    hcf.processInactivityTimeout();
+    ASSERT(originatorHandler->getAgreement(peer1, 4) == agreement);
+    ASSERT(originatorHandler->getActiveAgreement(peer1, 4) == nullptr);
+    ASSERT(agreement->isInactivityExpired());
+    ASSERT(managementCallback.managementPackets.size() == 1);
+    ASSERT(hcf.managementProcessedDuringBlockAckExpiry);
+    ASSERT(ackHandler.getQoSDataAckStatus(waitingHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED);
+    ASSERT(ackHandler.getQoSDataAckStatus(notRequestedHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED);
+    ASSERT(ackHandler.getQoSDataAckStatus(completingHeader) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+    hcf.processTransmittedData(completingFrame, completingHeader, AC_BE);
+    ASSERT(ackHandler.getQoSDataAckStatus(completingHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED);
+    ASSERT(ackHandler.isEligibleToTransmit(waitingHeader));
+    ASSERT(ackHandler.isEligibleToTransmit(notRequestedHeader));
+    ASSERT(ackHandler.isEligibleToTransmit(completingHeader));
+    ASSERT(hcf.numRebuildEligibilityCalls == 1);
+    ASSERT(hcf.numResumedEligibleChannelAccess == 1);
+    ASSERT(ackPolicy.computeAckPolicy(eligibleFrame, eligibleHeader, agreement) == NORMAL_ACK);
+    ASSERT(txOpFs.selectTxOpSequence(&txOpFs, &context) == 1);
+
+    auto lateBlockAck = makeShared<Ieee80211BasicBlockAck>();
+    lateBlockAck->setTransmitterAddress(peer1);
+    lateBlockAck->setTidInfo(4);
+    lateBlockAck->setStartingSequenceNumber(SequenceNumberCyclic(500));
+    auto lateBlockAckPacket = new Packet("postExpiryBlockAck", lateBlockAck);
+    auto transmittedBlockAckReqPacket = new Packet("preExpiryBlockAckReq", blockAckReq);
+    hcf.processReceivedAck(lateBlockAckPacket, transmittedBlockAckReqPacket, AC_BE);
+    ASSERT(ackHandler.getQoSDataAckStatus(waitingHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED);
+    ASSERT(ackHandler.getQoSDataAckStatus(notRequestedHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED);
+    delete lateBlockAckPacket;
+    delete transmittedBlockAckReqPacket;
+
+    auto frames = inProgressFrames.releaseFrames();
+    for (auto frame : frames)
+        delete frame;
+}
+
+// Any terminal originator agreement removal releases outstanding BA-policy
+// frames as well. Otherwise active-agreement BAR filtering would leave those
+// frames permanently ineligible after peer or local DELBA teardown.
+{
+    auto originatorHandler = new TestOriginatorHandler();
+    auto recipientHandler = new TestRecipientHandler();
+    TestOriginatorPolicy originatorPolicy;
+    TestRecipientPolicy recipientPolicy;
+    TestOriginatorQosAckPolicy ackPolicy;
+    ackPolicy.configureBlockAckSelection(1000, 1);
+    TestOriginatorQosMacDataService dataService;
+    TestPacketQueue pendingQueue;
+    TestQosAckHandler ackHandler;
+    TestInProgressFrames inProgressFrames;
+    inProgressFrames.configure(&dataService, &ackHandler, &pendingQueue);
+    TestEdcaf edcaf;
+    edcaf.pendingQueue = &pendingQueue;
+    edcaf.inProgressFrames = &inProgressFrames;
+    edcaf.qosAckHandler = &ackHandler;
+    TestEdca edca;
+    edca.edcaf = &edcaf;
+    TestHcf hcf;
+    hcf.configureBlockAckHandlers(originatorHandler, &originatorPolicy, recipientHandler, &recipientPolicy);
+    hcf.configureEligibilityIndex(&edca, &dataService);
+    hcf.configureTransmittedManagement(&edca, &ackPolicy);
+
+    originatorHandler->addEstablishedAgreement(peer1, 6);
+    auto peerTeardownHeader = makeQosHeader(peer1, 6, SequenceNumberCyclic(520));
+    peerTeardownHeader->setAckPolicy(BLOCK_ACK);
+    auto peerTeardownFrame = new Packet("peerDelbaOutstandingData", peerTeardownHeader);
+    inProgressFrames.addFrame(peerTeardownFrame);
+    ackHandler.frameGotInProgress(peerTeardownHeader);
+    ackHandler.processTransmittedDataOrMgmtFrame(peerTeardownHeader);
+    ASSERT(ackHandler.getQoSDataAckStatus(peerTeardownHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+    auto peerDelba = makeShared<Ieee80211Delba>();
+    peerDelba->setTransmitterAddress(peer1);
+    peerDelba->setTid(6);
+    peerDelba->setInitiator(false);
+    hcf.processReceivedManagementFrame(peerDelba);
+    ASSERT(originatorHandler->getAgreement(peer1, 6) == nullptr);
+    ASSERT(ackHandler.getQoSDataAckStatus(peerTeardownHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED);
+    ASSERT(ackHandler.isEligibleToTransmit(peerTeardownHeader));
+
+    originatorHandler->addEstablishedAgreement(peer1, 7);
+    auto localTeardownAgreement = originatorHandler->getAgreement(peer1, 7);
+    auto localTeardownHeader = makeQosHeader(peer1, 7, SequenceNumberCyclic(530));
+    localTeardownHeader->setAckPolicy(BLOCK_ACK);
+    auto localTeardownFrame = new Packet("localDelbaOutstandingData", localTeardownHeader);
+    inProgressFrames.addFrame(localTeardownFrame);
+    ackHandler.frameGotInProgress(localTeardownHeader);
+    ackHandler.processTransmittedDataOrMgmtFrame(localTeardownHeader);
+    ASSERT(ackHandler.getQoSDataAckStatus(localTeardownHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+    auto localDelbaPacket = makeTaggedDelbaPacket("localTerminalDelba", peer1, 7, SequenceNumberCyclic(531), 0, false, localTeardownAgreement->getTransactionId());
+    auto localDelba = localDelbaPacket->peekAtFront<Ieee80211MgmtHeader>();
+    hcf.processTransmittedManagement(localDelbaPacket, localDelba, AC_BE);
+    ASSERT(originatorHandler->getAgreement(peer1, 7) == nullptr);
+    ASSERT(ackHandler.getQoSDataAckStatus(localTeardownHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED);
+    ASSERT(ackHandler.isEligibleToTransmit(localTeardownHeader));
+    delete localDelbaPacket;
+
+    auto frames = inProgressFrames.releaseFrames();
+    for (auto frame : frames)
+        delete frame;
+}
+
+// An expired recipient agreement remains available to the DELBA lifecycle,
+// but BA-policy data is dropped, BAR cannot release reordering state, and no
+// Block Ack response is generated.
+{
+    TestRecipientHandler recipientHandler;
+    TestRecipientPolicy recipientPolicy;
+    recipientPolicy.blockAckTimeoutValue = 1;
+    TestCallback setupCallback;
+    auto request = makeRequest(peer2, 5, 111, SequenceNumberCyclic(600), 32);
+    request->setBlockAckTimeoutValue(1);
+    auto agreement = recipientHandler.processReceivedAddbaRequest(request, &recipientPolicy, &setupCallback, &setupCallback);
+    ASSERT(agreement != nullptr);
+    ASSERT(recipientHandler.getActiveAgreement(5, peer2) == agreement);
+
+    auto serviceModule = cModuleType::get("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService")->create("expiredAgreementDataService", this);
+    serviceModule->callInitialize();
+    auto service = check_and_cast<RecipientQosMacDataService *>(serviceModule);
+    TestPacketDropSignalListener dropListener;
+    service->subscribe(packetDroppedSignal, &dropListener);
+
+    auto bufferedHeader = makeQosHeader(peer1, 5, SequenceNumberCyclic(601));
+    bufferedHeader->setTransmitterAddress(peer2);
+    bufferedHeader->setAckPolicy(BLOCK_ACK);
+    auto bufferedPacket = new Packet("preExpiryBufferedData", bufferedHeader);
+    bufferedPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    ASSERT(service->dataFrameReceived(bufferedPacket, bufferedHeader, &recipientHandler).empty());
+    ASSERT(agreement->getBlockAckRecord()->getAckState(SequenceNumberCyclic(601), 0));
+
+    auto blockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
+    blockAckReq->setTransmitterAddress(peer2);
+    blockAckReq->setReceiverAddress(peer1);
+    blockAckReq->setTidInfo(5);
+    blockAckReq->setStartingSequenceNumber(SequenceNumberCyclic(601));
+    auto blockAckReqPacket = new Packet("expiredAgreementBar", blockAckReq);
+    RecipientQosAckPolicy productionAckPolicy;
+    ASSERT(productionAckPolicy.isBlockAckNeeded(blockAckReq, agreement));
+    TestRecipientAckPolicy ackPolicy;
+    ackPolicy.blockAckNeeded = true;
+    TestRecipientBlockAckProcedure blockAckProcedure;
+    TestControlResponseCallback responseCallback;
+    blockAckProcedure.processReceivedBlockAckReq(blockAckReqPacket, blockAckReq, &ackPolicy, &recipientHandler, &responseCallback);
+    ASSERT(responseCallback.numControlResponses == 1);
+
+    wait(1);
+    TestCallback expiryCallback;
+    recipientHandler.blockAckAgreementExpired(&expiryCallback, &expiryCallback);
+    ASSERT(recipientHandler.getAgreement(5, peer2) == agreement);
+    ASSERT(recipientHandler.getActiveAgreement(5, peer2) == nullptr);
+    ASSERT(agreement->isInactivityExpired());
+    ASSERT(!productionAckPolicy.isBlockAckNeeded(blockAckReq, agreement));
+
+    auto expiredHeader = makeQosHeader(peer1, 5, SequenceNumberCyclic(602));
+    expiredHeader->setTransmitterAddress(peer2);
+    expiredHeader->setAckPolicy(BLOCK_ACK);
+    auto expiredPacket = new Packet("postExpiryBlockAckData", expiredHeader);
+    expiredPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    ASSERT(service->dataFrameReceived(expiredPacket, expiredHeader, &recipientHandler).empty());
+    ASSERT(dropListener.numSignals == 1);
+    ASSERT(dropListener.numOtherPacketDrops == 1);
+    ASSERT(!agreement->getBlockAckRecord()->getAckState(SequenceNumberCyclic(602), 0));
+
+    ASSERT(service->controlFrameReceived(blockAckReqPacket, blockAckReq, &recipientHandler).empty());
+    ASSERT(dropListener.numSignals == 1);
+    blockAckProcedure.processReceivedBlockAckReq(blockAckReqPacket, blockAckReq, &ackPolicy, &recipientHandler, &responseCallback);
+    ASSERT(responseCallback.numControlResponses == 1);
+
+    service->resetBlockAckReordering(5, peer2);
+    ASSERT(dropListener.numSignals == 2);
+    ASSERT(dropListener.numOtherPacketDrops == 2);
+    service->unsubscribe(packetDroppedSignal, &dropListener);
+    serviceModule->callFinish();
+    serviceModule->deleteModule();
+    delete blockAckReqPacket;
 }
 
 // A timeout DELBA can be aborted before its final fragment is transmitted.

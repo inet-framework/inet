@@ -321,8 +321,14 @@ void Hcf::handleMessage(cMessage *msg)
     }
     else if (msg == inactivityTimer) {
         if (originatorBlockAckAgreementHandler && recipientBlockAckAgreementHandler) {
-            originatorBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
-            recipientBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
+            blockAckInactivityExpiryInProgress = true;
+            bool changed = originatorBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
+            changed |= recipientBlockAckAgreementHandler->blockAckAgreementExpired(this, this);
+            blockAckInactivityExpiryInProgress = false;
+            if (changed) {
+                rebuildPendingFrameEligibility();
+                resumeEligibleChannelAccess();
+            }
         }
         else
             throw cRuntimeError("Unknown event");
@@ -375,7 +381,7 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     auto pendingQueue = edca->getEdcaf(ac)->getPendingQueue();
     trackPendingFrame(packet, ac);
     pendingQueue->enqueuePacket(packet);
-    if (hasFrameToTransmit(ac)) {
+    if (!blockAckInactivityExpiryInProgress && hasFrameToTransmit(ac)) {
         auto edcaf = edca->getChannelOwner();
         if (edcaf == nullptr || edcaf->getAccessCategory() != ac) {
             EV_DETAIL << "Requesting channel for access category " << printAccessCategory(ac) << endl;
@@ -460,6 +466,20 @@ void Hcf::scheduleAddbaResponseTimer(simtime_t deadline)
     }
     else
         rescheduleAt(deadline, addbaResponseTimer);
+}
+
+bool Hcf::releaseBlockAckAgreementFrames(MacAddress peerAddress, Tid tid)
+{
+    Enter_Method("releaseBlockAckAgreementFrames");
+    if (edca == nullptr)
+        return false;
+    bool changed = false;
+    for (int ac = 0; ac < edca->getNumEdcafs(); ac++) {
+        auto edcaf = edca->getEdcaf(AccessCategory(ac));
+        if (edcaf != nullptr && edcaf->getAckHandler() != nullptr)
+            changed |= edcaf->getAckHandler()->releaseBlockAckAgreementFrames(peerAddress, tid);
+    }
+    return changed;
 }
 
 void Hcf::cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket)
@@ -970,6 +990,9 @@ void Hcf::originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<const 
 {
     auto edcaf = edca->getEdcaf(ac);
     edcaf->getAckHandler()->processTransmittedDataOrMgmtFrame(dataHeader);
+    if (dataHeader->getAckPolicy() == BLOCK_ACK &&
+            (originatorBlockAckAgreementHandler == nullptr || originatorBlockAckAgreementHandler->getActiveAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid()) == nullptr))
+        edcaf->getAckHandler()->releaseBlockAckAgreementFrames(dataHeader->getReceiverAddress(), dataHeader->getTid());
     if (dataHeader->getAckPolicy() == NO_ACK)
         edcaf->getInProgressFrames()->dropFrame(packet);
 }
@@ -1190,10 +1213,13 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
     }
     else if (auto blockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(header)) {
         EV_INFO << "BasicBlockAck has arrived" << std::endl;
+        if (originatorBlockAckAgreementHandler == nullptr || originatorBlockAckAgreementHandler->getActiveAgreement(blockAck->getTransmitterAddress(), blockAck->getTidInfo()) == nullptr) {
+            EV_INFO << "Ignoring BasicBlockAck without an active Block Ack agreement.\n";
+            return;
+        }
         edcaf->getRecoveryProcedure()->blockAckFrameReceived();
         auto ackedSeqAndFragNums = edcaf->getAckHandler()->processReceivedBlockAck(blockAck);
-        if (originatorBlockAckAgreementHandler)
-            originatorBlockAckAgreementHandler->processReceivedBlockAck(blockAck, this);
+        originatorBlockAckAgreementHandler->processReceivedBlockAck(blockAck, this);
         EV_TRACE << "It has acknowledged the following frames:" << std::endl;
         for (auto it : ackedSeqAndFragNums)
             EV_TRACE << "   sequenceNumber = " << it.second.second.getSequenceNumber() << ", fragmentNumber = " << (int)it.second.second.getFragmentNumber() << std::endl;
@@ -1266,7 +1292,7 @@ void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         if (auto dataFrame = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
             OriginatorBlockAckAgreement *agreement = nullptr;
             if (originatorBlockAckAgreementHandler)
-                agreement = originatorBlockAckAgreementHandler->getAgreement(dataFrame->getReceiverAddress(), dataFrame->getTid());
+                agreement = originatorBlockAckAgreementHandler->getActiveAgreement(dataFrame->getReceiverAddress(), dataFrame->getTid());
             auto ackPolicy = originatorAckPolicy->computeAckPolicy(packet, dataFrame, agreement);
             auto dataHeader = packet->removeAtFront<Ieee80211DataHeader>();
             dataHeader->setAckPolicy(ackPolicy);
