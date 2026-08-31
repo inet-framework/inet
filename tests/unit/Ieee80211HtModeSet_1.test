@@ -21,7 +21,7 @@ class SparseModeSet : public Ieee80211ModeSet
     using Ieee80211ModeSet::Entry;
 
     SparseModeSet(const std::vector<Entry>& entries, const IIeee80211Mode *referenceMode, bool htOperationSupported = true) :
-        Ieee80211ModeSet("sparse", entries, referenceMode, OperatingPhy::HT, htOperationSupported)
+        Ieee80211ModeSet("sparse", entries, referenceMode, PhyType::HT, htOperationSupported)
     {}
 };
 

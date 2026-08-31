@@ -20,7 +20,7 @@ namespace physicallayer {
 class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 {
   public:
-    enum class OperatingPhy {
+    enum class PhyType {
         OFDM,
         HR_DSSS,
         ERP,
@@ -43,7 +43,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
   protected:
     std::string name;
     const std::vector<Entry> entries;
-    const OperatingPhy operatingPhy;
+    const PhyType phyType;
     // PHY timing and contention parameters remain anchored to the explicitly
     // configured reference mode, even though entries are sorted by bitrate for lookup.
     const IIeee80211Mode *referenceMode;
@@ -63,7 +63,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 
   public:
     Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const IIeee80211Mode *referenceMode,
-            OperatingPhy operatingPhy, bool htOperationSupported = false);
+            PhyType phyType, bool htOperationSupported = false);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "Ieee80211ModeSet, name = " << name; }
 
@@ -107,7 +107,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
 
     // PHY timing and contention policy remain anchored to the explicitly
     // configured reference mode, independent of bitrate sorting.
-    OperatingPhy getOperatingPhy() const { return operatingPhy; }
+    PhyType getPhyType() const { return phyType; }
     const IIeee80211Mode *getReferenceMode() const { return referenceMode; }
     simtime_t getSifsTime() const { return referenceMode->getSifsTime(); }
     simtime_t getSlotTime() const { return referenceMode->getSlotTime(); }

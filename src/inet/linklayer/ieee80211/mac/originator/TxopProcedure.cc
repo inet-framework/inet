@@ -11,7 +11,7 @@ namespace inet {
 namespace ieee80211 {
 
 using namespace inet::physicallayer;
-using OperatingPhy = Ieee80211ModeSet::OperatingPhy;
+using PhyType = Ieee80211ModeSet::PhyType;
 
 simsignal_t TxopProcedure::txopStartedSignal = cComponent::registerSignal("txopStarted");
 simsignal_t TxopProcedure::txopEndedSignal = cComponent::registerSignal("txopEnded");
@@ -29,30 +29,30 @@ void TxopProcedure::initialize(int stage)
 }
 
 // IEEE Std 802.11-2024, Table 9-194 selects the default TXOP limit by the
-// operating PHY clause. The existing INET values are retained for compatibility;
+// PHY type clause. The existing INET values are retained for compatibility;
 // full Table 9-194/9-195 modernization is a separate change.
-s TxopProcedure::getTxopLimit(OperatingPhy operatingPhy, AccessCategory ac)
+s TxopProcedure::getTxopLimit(PhyType phyType, AccessCategory ac)
 {
     switch (ac) {
         case AC_BK: return s(0);
         case AC_BE: return s(0);
         case AC_VI:
-            switch (operatingPhy) {
-                case OperatingPhy::HR_DSSS: return ms(6.016);
-                case OperatingPhy::OFDM:
-                case OperatingPhy::ERP:
-                case OperatingPhy::HT:
-                case OperatingPhy::VHT: return ms(3.008);
-                default: throw cRuntimeError("Unknown operating PHY = %d", static_cast<int>(operatingPhy));
+            switch (phyType) {
+                case PhyType::HR_DSSS: return ms(6.016);
+                case PhyType::OFDM:
+                case PhyType::ERP:
+                case PhyType::HT:
+                case PhyType::VHT: return ms(3.008);
+                default: throw cRuntimeError("Unknown PHY type = %d", static_cast<int>(phyType));
             }
         case AC_VO:
-            switch (operatingPhy) {
-                case OperatingPhy::HR_DSSS: return ms(3.264);
-                case OperatingPhy::OFDM:
-                case OperatingPhy::ERP:
-                case OperatingPhy::HT:
-                case OperatingPhy::VHT: return ms(1.504);
-                default: throw cRuntimeError("Unknown operating PHY = %d", static_cast<int>(operatingPhy));
+            switch (phyType) {
+                case PhyType::HR_DSSS: return ms(3.264);
+                case PhyType::OFDM:
+                case PhyType::ERP:
+                case PhyType::HT:
+                case PhyType::VHT: return ms(1.504);
+                default: throw cRuntimeError("Unknown PHY type = %d", static_cast<int>(phyType));
             }
         default: throw cRuntimeError("Unknown access category = %d", ac);
     }
@@ -79,7 +79,7 @@ void TxopProcedure::startTxop(AccessCategory ac)
     if (start != -1)
         throw cRuntimeError("Txop is already running");
     if (limit == -1) {
-        limit = getTxopLimit(modeSet->getOperatingPhy(), ac).get<s>();
+        limit = getTxopLimit(modeSet->getPhyType(), ac).get<s>();
     }
     // The STA selects between single and multiple protection when it transmits the first frame of a TXOP.
     // All subsequent frames transmitted by the STA in the same TXOP use the same class of duration settings.

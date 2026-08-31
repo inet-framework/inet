@@ -35,13 +35,13 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211OfdmCompliantModes::ofdmMode36Mbps, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode48Mbps, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode54Mbps, true },
-    }, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz, OperatingPhy::OFDM),
+    }, &Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz, PhyType::OFDM),
     Ieee80211ModeSet("b", {
         { true, &Ieee80211DsssCompliantModes::dsssMode1Mbps, true },
         { true, &Ieee80211DsssCompliantModes::dsssMode2Mbps, true },
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode5_5MbpsCckLongPreamble, true },
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble, true },
-    }, &Ieee80211DsssCompliantModes::dsssMode1Mbps, OperatingPhy::HR_DSSS),
+    }, &Ieee80211DsssCompliantModes::dsssMode1Mbps, PhyType::HR_DSSS),
     // Mixed-ERP timing is intentionally anchored to the explicitly selected
     // DSSS reference mode; the entries do not need identical timing values.
     Ieee80211ModeSet("g(mixed)", {
@@ -57,7 +57,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode36Mbps, true },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode48Mbps, true },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps, true }, // TODO ERP-CCK, ERP-PBCC, DSSS-OFDM
-    }, &Ieee80211DsssCompliantModes::dsssMode1Mbps, OperatingPhy::ERP),
+    }, &Ieee80211DsssCompliantModes::dsssMode1Mbps, PhyType::ERP),
     Ieee80211ModeSet("g(erp)", {
         { true, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode6Mbps, true },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode9Mbps, true },
@@ -67,7 +67,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode36Mbps, true },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode48Mbps, true },
         { false, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode54Mbps, true },
-    }, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode6Mbps, OperatingPhy::ERP),
+    }, &Ieee80211ErpOfdmCompliantModes::erpOnlyOfdmMode6Mbps, PhyType::ERP),
     Ieee80211ModeSet("p", {
         { true, &Ieee80211OfdmCompliantModes::ofdmMode3MbpsCS10MHz, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode4_5MbpsCS10MHz, true },
@@ -77,7 +77,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { false, &Ieee80211OfdmCompliantModes::ofdmMode18MbpsCS10MHz, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS10MHz, true },
         { false, &Ieee80211OfdmCompliantModes::ofdmMode27Mbps, true },
-        }, &Ieee80211OfdmCompliantModes::ofdmMode3MbpsCS10MHz, OperatingPhy::OFDM),
+        }, &Ieee80211OfdmCompliantModes::ofdmMode3MbpsCS10MHz, PhyType::OFDM),
     Ieee80211ModeSet("n(mixed-2.4Ghz)", { // This table is not complete; it only contains 2.4GHz homogeneous spatial streams, all mandatory and optional modes
         { true, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs0BW20MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs1BW20MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG) },
@@ -153,7 +153,7 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckLongPreamble, true },
         { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode12Mbps, true },
         { true, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode24Mbps, true }
-    }, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs0BW20MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG), OperatingPhy::HT, true),
+    }, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs0BW20MHz, Ieee80211HtMode::BAND_2_4GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG), PhyType::HT, true),
     Ieee80211ModeSet("ac", {
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs1BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG) },
@@ -472,13 +472,13 @@ const DelayedInitializer<std::vector<Ieee80211ModeSet>> Ieee80211ModeSet::modeSe
         { true, &Ieee80211OfdmCompliantModes::ofdmMode24MbpsCS20MHz, true },
     // Intentional model limitation: unlike IEEE Std 802.11-2024, 11.38.1,
     // this VHT-only profile has no selectable HT modes.
-    }, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG), OperatingPhy::VHT),}; });
+    }, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1, Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG), PhyType::VHT),}; });
 
 Ieee80211ModeSet::Ieee80211ModeSet(const char *name, const std::vector<Entry> entries, const IIeee80211Mode *referenceMode,
-        OperatingPhy operatingPhy, bool htOperationSupported) :
+        PhyType phyType, bool htOperationSupported) :
     name(name),
     entries(entries),
-    operatingPhy(operatingPhy),
+    phyType(phyType),
     referenceMode(referenceMode),
     htOperationSupported(htOperationSupported)
 {
