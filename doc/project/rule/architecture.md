@@ -1,21 +1,32 @@
-# INET Framework — Architectural Requirements
+# Architecture rules
 
-Requirements from the perspective of INET developers and model contributors: the
-design rules the code base must follow so that models remain composable,
-extensible, and maintainable.
+> **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `AR-*` · **Stands on:** [accepted-requirements.md](../requirement/accepted-requirements.md), [decisions.md](../design/decisions.md)
 
-Each requirement has a stable identifier of the form `AR-<AREA>-<NAME>` followed by a
-one-line statement and one or two paragraphs of rationale. These architectural
-requirements complement the user-facing requirements in
-[requirements.md](requirements.md): the latter say *what INET must do for a simulation
-user*, while these say *how the code base must be structured* to make that possible and
-to keep it sustainable. They are distilled from the INET Developer's Guide and from
-recurring lessons in day-to-day INET/OMNeT++ development.
+What the structure of the INET code base must respect, so that models stay composable,
+extensible and maintainable. These rules are the developer's side of
+[accepted-requirements.md](../requirement/accepted-requirements.md): that document says what INET
+must do for a simulation user, and this one says how the code must be built to make it possible and
+to keep it possible.
 
-Domain-specific extensions refine these rules where one protocol family concentrates extra
-risk; the first is
-[ieee80211-architectural-requirements.md](ieee80211-architectural-requirements.md), whose
-`AR-WLAN-*` rules apply in addition to everything here under the IEEE 802.11 subtrees.
+A rule has a stable identifier `AR-<AREA>-<NAME>`, a one-line statement, and one or two paragraphs of
+reason. The identifier names the rule and not its position, so a regroup breaks no citation. Each
+identifier is a heading, so a citation links to the rule itself:
+[AR-ORG-DOMAINS](architecture.md#ar-org-domains).
+
+The rules come from the INET Developer's Guide and from the lessons of day-to-day INET and OMNeT++
+work. Why the code is built this way, and what each choice costs, is in
+[decisions.md](../design/decisions.md). What a rule is worth as a group of rules is
+§*What the rules produce together* of that document.
+
+**Each rule closes with the tier it is enforced at**, in the ladder that
+[enforcement/README.md](../enforcement/README.md) defines. `T1` will not build, `T2` fails a test,
+`T3` a script flags it, `T4` an agent reviewer flags it, `T5` a human decides.
+
+A protocol family that concentrates extra risk gets its own extension. The first is
+[domain/ieee80211.md](../domain/ieee80211.md), whose `AR-WLAN-*` rules apply in addition to
+everything here under the IEEE 802.11 subtrees. Known departures from these rules are in
+[audit/architecture-exceptions.md](../audit/architecture-exceptions.md), as `AS-*` sanctioned
+exceptions and `AV-*` open violations.
 
 ## Code Organization (AR-ORG)
 
@@ -35,6 +46,8 @@ packet chunks, tags, the queueing contracts) sit in `common` and know nothing ab
 protocols that use them, so that an individual protocol can be built, understood, and
 reasoned about without pulling in unrelated layers.
 
+*Enforced at T1→T3 — NED package=directory (compiler) → include-graph layering script.*
+
 ### AR-ORG-CONTRACTS — Every extensible role is a separate contract (C++ + NED interface)
 Every role that is meant to be substitutable is defined first as a contract — a paired C++
 interface and NED `moduleinterface` — kept separate from the reusable base implementations
@@ -50,6 +63,8 @@ with confidence that it satisfies the same contract, and that the contract can b
 and reasoned about independently of any one implementation (`IInterfaceTable`, for example,
 lets the interface table be replaced without recompiling the modules that use it).
 
+*Enforced at T1 — NED `like`/`moduleinterface` + C++ virtuals; contract-package purity → lint (T3).*
+
 ### AR-ORG-VIS-SPLIT — Model logic, visualization, and instrumentation live in separate packages
 Model logic, visualization, and infrastructure are separate packages; protocol code contains
 no visualization or instrumentation logic.
@@ -61,6 +76,8 @@ or swapping a 2D canvas visualizer for a 3D OSG one, cannot change a single simu
 separation keeps the protocol code small and focused, lets visualization evolve on its own
 schedule, and guarantees the neutrality property that users depend on (see AR-OBS-SIGNALS):
 observation is always additive and side-effect free.
+
+*Enforced at T3+T4 — `#include visualizer/` check (T3) + agent review for vis logic in protocol code.*
 
 ### AR-ORG-KERNEL — Build on the OMNeT++ kernel; do not reimplement or patch its facilities
 INET is a model library layered on the OMNeT++ simulation kernel and respects that boundary in
@@ -78,6 +95,8 @@ and it keeps INET's own code focused on network modeling.
 
 ## Module Design (AR-MOD)
 
+*Enforced at T4 — agent review: "does this reimplement or patch a kernel facility?".*
+
 ### AR-MOD-COMPOSITION — Build behavior from small single-purpose modules, structure from compound modules
 Functionality is built by composing small, single-purpose modules: behavior lives in simple
 modules, structure lives in compound modules, and composition is preferred over inheritance.
@@ -91,6 +110,8 @@ consumer; a network interface into queue, classifier, MAC, and PHY. This keeps e
 independently testable and replaceable, and it means new behavior is usually obtained by
 re-wiring or substituting a submodule rather than by editing or subclassing an existing one.
 
+*Enforced at T1+T4 — NED composition (compiler); agent review for composition-over-inheritance.*
+
 ### AR-MOD-PLUGGABLE — Submodules are interface-typed with replaceable defaults and can be omitted
 Submodules are declared against module interfaces with replaceable default types, and optional
 submodules can be omitted entirely through configuration.
@@ -102,6 +123,8 @@ without touching NED or C++. Optionality is first-class too: submodules guarded 
 unconfigured, so a node carries a clock, an energy model, or a given protocol only when the
 scenario asks for it. Substitutability and omittability together are what make the same node
 type serve wired, wireless, and specialized scenarios by configuration alone.
+
+*Enforced at T1 — NED `like` / default type / `if typename` (compiler).*
 
 ### AR-MOD-FIDELITY — The same concern is offered at multiple, configuration-selectable levels of detail
 A modeled concern is offered at several levels of fidelity — statistical vs. detailed, flat vs.
@@ -118,6 +141,8 @@ model — a coarse model and a detailed model of the same thing present the same
 are interchangeable, and no part of the framework forces worst-case fidelity on a study that
 does not need it.
 
+*Enforced at T4→T5 — agent flags hardcoded fidelity; whether a level is worth adding is human judgment.*
+
 ### AR-MOD-NODEBASE — Nodes assembled from shared per-layer bases; services found by lookup, not path
 Network nodes are assembled incrementally from shared per-layer base modules, and node-scoped
 services are located by lookup within the enclosing node rather than by hardcoded module paths.
@@ -133,6 +158,8 @@ restructuring a node does not silently break its internals.
 
 ## Packet Representation (AR-PKT)
 
+*Enforced at T1/T2 — NED extension + `absPath`/`^` resolution (compiler/runtime).*
+
 ### AR-PKT-CHUNKS — Packet content is typed, immutable, shared chunks manipulated as views
 Packet content is represented as typed, immutable, shared chunks, and packet operations create
 views rather than copying or destroying the underlying data.
@@ -146,6 +173,8 @@ PCAP export, or re-inspection. Immutability is enforced once a chunk is shared, 
 handed to several modules cannot be mutated out from under any of them. Modeling packet contents
 as first-class typed objects — rather than opaque byte buffers or ad-hoc C++ structs — is the
 foundation that the serializer, dissector, tagging, and generic buffer facilities all build on.
+
+*Enforced at T1/T2 — Chunk types (compiler) + runtime immutability asserts (debug).*
 
 ### AR-PKT-DUAL — Every header supports both field-based and raw-byte form via registered serializers
 Every protocol header supports both a structured field-based representation and a raw-byte
@@ -161,6 +190,8 @@ it is encoded on the wire." This dual representation is what enables hardware em
 import/export, cross-checking against real implementations, and fingerprinting over actual packet
 content (AR-QUAL-FINGERPRINT's `PACKET_DATA` ingredient), while still letting everyday model code
 work with readable fields.
+
+*Enforced at T2 — serializer registry + fingerprint `D` ingredient → serializer-completeness test.*
 
 ### AR-PKT-TAGS — Metadata travels in tags, never in wire content, and stops at the transmission boundary
 Packet metadata travels in tags attached to packets or to byte regions, never encoded in wire
@@ -178,6 +209,8 @@ transmitted data, physical-layer protocols strip them at the point of transmissi
 receiver gets is the wire content, from which it re-derives its own tags. This boundary keeps the
 simulation honest about what information is actually available where.
 
+*Enforced at T1/T2 — tag API (compiler); PHY strips tags (tested).*
+
 ### AR-PKT-ERRORS — Transmission errors are representable at multiple fidelity levels
 Transmission errors are representable at several levels of fidelity, selectable per use case.
 
@@ -189,6 +222,8 @@ study that cares about capture, interference, and partial corruption can opt int
 configurable receiver parameters. Making error fidelity a selectable dimension — rather than a
 fixed assumption baked into the packet — is a specific instance of AR-MOD-FIDELITY applied to the
 error model.
+
+*Enforced at T1 — chunk/error API (compiler).*
 
 ### AR-PKT-SIGNAL — Physical transmissions are modeled as immutable Signals distinct from packets
 A physical transmission is represented by a `Signal` that encapsulates a `Packet` together with
@@ -210,6 +245,8 @@ competing error models and none should be architecturally privileged.
 
 ## Protocol Interaction (AR-COM)
 
+*Enforced at T1/T2 — Signal API (compiler) + runtime asserts.*
+
 ### AR-COM-REGISTRY — Modules declare the protocols and services they provide in a global registry
 At initialization, each module registers the protocols it handles and the services it provides for
 them into a global registry, and message dispatch is driven by these registrations.
@@ -222,6 +259,8 @@ string buried in connection code, and the same protocol may register only once p
 that dispatching is never ambiguous. This registration-driven approach decouples *what* a module
 does for a protocol from *where* it sits in the node, and it is the mechanism that makes protocol
 dispatch (AR-COM-DISPATCH) and no-core-change extensibility (AR-EXT-NOCORE) possible.
+
+*Enforced at T1/T2 — registration macros (compiler) + runtime "register once" check.*
 
 ### AR-COM-DISPATCH — Address peers by protocol/service, not by wiring topology
 Modules address their peers by protocol and service rather than by wiring topology, so the same
@@ -236,6 +275,8 @@ many-to-many arrangements, so a simple host can use a linear stack while a compl
 TSN device) freely interconnects protocols outside strict layering. Because routing between layers
 is by identity, a node can insert a shaper, filter, or extra protocol into the path without every
 neighbor being rewired, and one protocol implementation serves many different node structures.
+
+*Enforced at T2 — MessageDispatcher + tags at runtime (tested).*
 
 ### AR-COM-SOCKETS — Applications use socket-style callback APIs, not raw message exchange
 Applications interact with protocols through socket-style APIs with callback interfaces rather
@@ -252,6 +293,8 @@ to its socket. Sockets must be explicitly closed before deletion, because closin
 operation that releases resources on the local node, the peer, or elsewhere — not a
 memory-management detail. The socket is a thin, uniform façade over message passing; it adds no
 protocol behavior but makes the common case of *using* a protocol far simpler and more consistent.
+
+*Enforced at T1+T4 — socket API provided (compiler); agent review that apps use sockets, not raw messages.*
 
 ### AR-COM-DIRECT — Same-instant, same-node coordination uses direct C++ calls, not zero-time messages
 Coordination between submodules of the same node that happens at the same simulation instant is
@@ -270,6 +313,8 @@ boilerplate of turning a direct call into a round-trip through the scheduler.
 
 ## Initialization & Lifecycle (AR-LIFE)
 
+*Enforced at T3+T4 — lint for `scheduleAt(simTime())`/zero-delay send + agent review; runtime zero-delay hook (T2).*
+
 ### AR-LIFE-STAGES — A single global multi-stage initialization order that models slot into
 Cross-module initialization follows one globally defined stage sequence; each stage has a
 documented contract, and new models slot into existing stages rather than inventing their own
@@ -283,6 +328,8 @@ which stage to do which part of its setup in; network interfaces, for instance, 
 the node's `InterfaceTable` in the link-layer stage. A new protocol does not invent a private
 bring-up protocol; it declares what it needs in each existing stage. This shared contract is what
 lets independently authored modules initialize correctly in one another's presence.
+
+*Enforced at T1/T2 — `INITSTAGE_*` / `Define_InitStage_Dependency` (compiler) + runtime ordering.*
 
 ### AR-LIFE-OPERATIONS — Shutdown/restart/crash via a common lifecycle protocol, scriptable
 Modules that support shutdown, restart, or crash implement the common lifecycle-operation protocol
@@ -301,6 +348,8 @@ which is essential for reliability and resilience studies.
 
 ## Composable Packet Processing (AR-QUEUE)
 
+*Enforced at T2 — `@lifecycleSupport` + module/lifecycle tests.*
+
 ### AR-QUEUE-ROLES — Standard push/pull source/sink contracts let processing elements chain arbitrarily
 Packet-processing elements implement standard push/pull source and sink contracts, so queues,
 filters, schedulers, shapers, classifiers, and similar elements compose into arbitrary chains.
@@ -313,6 +362,8 @@ egress pipeline, a DiffServ block, a TSN gate array — declaratively in NED. Th
 otherwise be bespoke per-protocol buffering code into a reusable algebra of interchangeable parts,
 and it is the same abstraction that lets an application talk to a queue through a direct reference
 (AR-COM-DIRECT) rather than through messages.
+
+*Enforced at T1 — queueing `I*` contracts (compiler).*
 
 ### AR-QUEUE-STREAMING — Processing contracts support progressive transfer (preemption, cut-through)
 The processing contracts support progressive packet transfer, so preemption and cut-through
@@ -327,6 +378,8 @@ is what lets INET model TSN and cut-through switches within the ordinary datapat
 
 ## Observability (AR-OBS)
 
+*Enforced at T1/T2 — streaming API (compiler) + tests.*
+
 ### AR-OBS-SIGNALS — Models expose behavior via declared signals; recording/visualization only subscribe
 Models expose observable behavior by emitting declared signals, and statistics recording and
 visualization subscribe to those signals and never participate in protocol logic.
@@ -338,6 +391,8 @@ visualizer requires no change to the protocol, and — crucially — the act of 
 not to perturb the simulation. This one-way, subscribe-from-outside discipline is the mechanism
 behind both AR-ORG-VIS-SPLIT and the user-facing neutrality guarantee.
 
+*Enforced at T1/T2 — NED `@signal`/`@statistic` (compiler) + fingerprint neutrality.*
+
 ### AR-OBS-NED-TRUTH — A module's external interface is defined in NED, the single source of truth
 A module's external interface — parameters, gates, signals, and statistics — is declared in its NED
 definition, which is the single source of truth, and other documentation must not duplicate it.
@@ -348,6 +403,8 @@ Developer's Guide and prose docs deliberately do not restate them, both to avoid
 the NED declaration is the artifact tools actually consume (the IDE, the documentation generator,
 the statistics configuration). Treating NED as authoritative means a module's contract with the
 outside world is machine-readable, always current, and defined in exactly one place.
+
+*Enforced at T1+T4 — NED authoritative, reference generated from it; agent review for prose duplicating NED.*
 
 ### AR-OBS-INTROSPECTION — Each protocol registers dissection, printing, and filtering support
 Each protocol registers support for the common introspection tooling — packet dissection, printing,
@@ -362,6 +419,8 @@ packet representation, and expression-based packet filters (`nodeFilter`/`interf
 `packetFilter`) work uniformly across the whole framework. The requirement is that introspection
 support ships *with* each protocol as a registered capability, not as a central switch statement
 that every new protocol would have to be threaded into.
+
+*Enforced at T3+T4 — dissector/printer-completeness test + agent review.*
 
 ### AR-OBS-FLOWS — End-to-end measurement is enabled by region tags that survive packet transformation
 Cross-module, end-to-end measurements are supported by attaching flow membership to packet data on a
@@ -379,6 +438,8 @@ protocol having to cooperate explicitly.
 
 ## Configuration & Parameterization (AR-CFG)
 
+*Enforced at T1/T2 — region-tag API (compiler) + flow tests.*
+
 ### AR-CFG-INFER — Structure is inferred, not repeated; configuration stays DRY
 Facts that can be derived from the model are derived rather than restated, and configuration is
 defined once and propagated, so the same fact is never stated in two places that can drift apart.
@@ -392,6 +453,8 @@ configurator that optimizes a derived structure (e.g. routing tables) must prese
 that any packet routed by the unoptimized structure is still routed identically. INET's scale
 (thousands of parameters across a node graph) makes redundant configuration a real source of silent
 inconsistency; inference and single-point definition are the defenses.
+
+*Enforced at T1+T4 — NED gate/size inference (compiler); agent review for DRY.*
 
 ### AR-CFG-PARAMS — Parameters are typed, unit-annotated, single-meaning, and default-provided
 A module parameter carries its type and (for physical quantities) its unit, provides a sensible
@@ -409,6 +472,8 @@ turns configuration into guesswork.
 
 ## Extensibility (AR-EXT)
 
+*Enforced at T1+T4 — **units library + `@unit` (compile-time dimensional analysis)**; agent review for single-meaning fields.*
+
 ### AR-EXT-NOCORE — New protocols are added purely through existing contracts and registration points
 New protocols are added purely through the existing contract and registration points; adding one
 requires no modification of core code.
@@ -421,6 +486,8 @@ and the existing dispatch, packet, and tooling machinery picks it up. The core n
 dependency on the new protocol, which keeps the framework open for extension while closed for
 modification.
 
+*Enforced at T3+T4 — feature-off build (core→optional deps) + agent review "no core edits for a new protocol".*
+
 ### AR-EXT-ATTACH — Shared core structures are extended by attaching protocol-specific data
 Shared core data structures are extended by attaching protocol-specific data to them, so the core
 never depends on optional protocols.
@@ -432,6 +499,8 @@ container (`NetworkInterface`, for example) defines an attachment mechanism; the
 owns the attached type, using composition because it cannot add data by subclassing a shared module.
 This inverts the usual dependency: `common` structures stay ignorant of the layers above them, so an
 optional protocol can be compiled out entirely without leaving dangling references in the core.
+
+*Enforced at T1/T3 — attachment API (compiler) + feature-off build.*
 
 ### AR-EXT-FEATURES — Optional functionality is partitioned into independently disableable features
 Optional functionality is partitioned into independently disableable features with declared
@@ -448,6 +517,8 @@ monolithic must-build-everything blob.
 
 ## Build & Project Structure (AR-BUILD)
 
+*Enforced at T3 — `inet_featuretool` dependency validation + feature-matrix build.*
+
 ### AR-BUILD-OUTOFTREE — Build output is relocatable and out-of-tree
 Compiling INET and generating derived sources must be able to place all artifacts outside the source
 tree, in a relocatable location keyed by build mode and configuration, so that multiple build
@@ -460,6 +531,8 @@ directory, depending on no mutable state in the tree and leaving none behind. Th
 that makes debug and release builds, several OMNeT++/INET version pairs, concurrent git worktrees,
 and parallel CI jobs tractable instead of a source of clobbering, stale-artifact, and
 wrong-commit-tested bugs.
+
+*Enforced at T2/T3 — CI clean/isolated build (opp_ci from a pinned commit).*
 
 ### AR-BUILD-DECLARATIVE — Build configuration is declarative with a single source of truth
 The information needed to build INET is described declaratively in one authoritative, introspectable
@@ -476,6 +549,8 @@ and is expressed the same declarative way.
 
 ## Quality & Conventions (AR-QUAL)
 
+*Enforced at T1+T4 — build descriptors (`.oppfeatures`, opp descriptors); agent review for single-source-of-truth.*
+
 ### AR-QUAL-FINGERPRINT — Behavioral regressions are guarded by trajectory fingerprints; baselines change in a reviewable step
 Behavioral regressions are guarded by simulation-trajectory fingerprints, and changes that
 intentionally alter behavior update the recorded expectations in a separate, reviewable step.
@@ -490,6 +565,8 @@ patch — never to quietly weaken the test — so that "the fingerprint changed"
 auditable decision. This regime is only meaningful because model behavior is deterministic
 (AR-QUAL-DETERMINISM).
 
+*Enforced at T2 ✔ — fingerprint tests on CI.*
+
 ### AR-QUAL-TESTS — Contributions ship with tests in the category matching their nature
 Contributions ship with tests in the categories matching their nature — unit, module behavior,
 statistical, validation — in addition to fingerprint coverage.
@@ -500,6 +577,8 @@ external references or standards. A change is expected to bring the kind of test
 exercises what it introduces, rather than leaning on fingerprints alone (which detect *that* behavior
 changed, not *whether it is correct*). Matching test type to the nature of the code is what gives the
 suite both regression safety and genuine correctness evidence.
+
+*Enforced at T2+T4 — test suites on CI; coverage/mutation gate + agent review that a change ships matching tests.*
 
 ### AR-QUAL-DETERMINISM — Model code is deterministic and exactly reproducible
 A simulation produces identical results from identical inputs, run after run, regardless of memory
@@ -516,6 +595,8 @@ to mean anything and for results to be scientifically reproducible (the user-fac
 single nondeterministic tie-break can turn a green suite intermittently red for reasons unrelated to
 any real change, and it is the first thing that must hold for parallel execution to be sound.
 
+*Enforced at T2 ✔ — fingerprint stability (same seed → same fingerprint; parallel-safe).*
+
 ### AR-QUAL-NAMING — Framework-wide naming conventions make a component's role legible from its name
 Modules, packages, signals, and packet types follow the framework-wide naming conventions, so a
 component's role is recognizable from its name alone.
@@ -530,6 +611,8 @@ the name, and structurally similar entities must not drift onto different conven
 off-convention name is effectively mislabeled and undermines discoverability across a framework this
 large.
 
+*Enforced at T3+T4 — `clang-tidy` (C++) + agent review for NED/`.msg`/semantic names.*
+
 ### AR-QUAL-DISPLAY — Visual conventions are consistent and complete: one distinguishing icon per category
 INET modules carry `@display` icons that convey their role at a glance, and this visual vocabulary is
 as disciplined as the naming vocabulary: semantically distinct categories get distinct icons, size
@@ -541,6 +624,8 @@ diagrams are meant to support. Consistent, complete iconography is the visual co
 AR-QUAL-NAMING — part of how a framework this large stays navigable to the humans composing simulations
 from it — and it must be maintained as a first-class convention, not left to accrete ad hoc as modules
 are added.
+
+*Enforced at T3+T4 — "every module has an icon" coverage check + agent review.*
 
 ### AR-QUAL-LOGGING — Common log-level semantics; programming errors are exceptions, never just logged
 Log output follows the common level semantics and formatting rules, and programming errors raise
@@ -557,6 +642,8 @@ must throw (via `check_and_cast`, `ASSERT`, or an explicit exception) so it fail
 run, instead of being downgraded to a log line a user might never see. Logging communicates what the
 model is doing; exceptions enforce what the code requires.
 
+*Enforced at T3+T4 — `-Werror`/`clang-tidy` + agent review that programming errors throw, not log.*
+
 ### AR-QUAL-TRACEABILITY — Test coverage maps to model structure, and baseline changes carry provenance
 It is possible to determine which tests exercise a given part of the model, and each accepted change to
 a test baseline is traceable to the code change that justified it.
@@ -568,6 +655,8 @@ Test-baseline artifacts (fingerprint and statistical stores) should be structure
 parallel development branches do not inherently conflict over them, and every baseline update should be
 attributable to the specific change that caused it. Traceability turns the test suite from an opaque
 pass/fail gate into a tool that tells developers what to run and explains why a baseline moved.
+
+*Enforced at T3 — fingerprint tags + source→config mapping (partial).*
 
 ### AR-QUAL-ENFORCED — Quality rules are machine-checked, not just documented
 Every architectural requirement that *can* be mechanically verified is backed by an automated check —
@@ -583,184 +672,8 @@ fingerprint, an off-convention name should trip the linter. And "review" is itse
 that no static check can express but that remain *judgeable* — visualization logic leaking into a
 protocol, a zero-time message standing in for a procedure call, prose that duplicates a NED
 declaration — are enforceable by an **agent reviewer** run as a CI gate, leaving only genuine design
-judgment (is a fidelity level worth adding?) to a human. The enforcement status of each requirement
-is tracked in the map below.
+judgment (is a fidelity level worth adding?) to a human. Which gate covers which rule is the gate
+inventory of [enforcement/README.md](../enforcement/README.md).
 
-## How the requirements compose
+*Enforced at T3 — the gate inventory itself; measured by how many rules above reach T1 to T4.*
 
-The requirements above are not independent style preferences; they form a network of mutually
-reinforcing constraints, and their aggregate effect is larger than any rule alone. Seven compound
-properties are the actual goal — each names the requirements that jointly produce it, which is also
-a review aid: a change that weakens one rule usually attacks one of these properties, and the
-property says what else to check.
-
-**A contract graph instead of a dependency tangle.** AR-ORG-DOMAINS, AR-ORG-CONTRACTS,
-AR-MOD-COMPOSITION, AR-MOD-PLUGGABLE, AR-COM-REGISTRY, AR-COM-DISPATCH, AR-EXT-NOCORE, and
-AR-EXT-ATTACH together produce *structural substitutability*: a component is replaceable not merely
-because an interface exists, but because its slot is interface-typed, its service is discoverable
-at runtime, its packet identity is explicit, and the core never learns its concrete type. This
-combination is what makes adding a protocol an extension rather than a central-core edit.
-
-**A truthful data path from model to wire to evidence.** AR-PKT-CHUNKS, AR-PKT-DUAL, AR-PKT-TAGS,
-AR-PKT-ERRORS, AR-PKT-SIGNAL, AR-OBS-INTROSPECTION, and AR-OBS-FLOWS partition information by what
-it *is* — typed content is what the packet carries, tags are local metadata, Signals are physical
-transmissions, serializers are the wire boundary, region tags preserve identity through
-transformation. The emergent property is *evidentiary continuity*: a field inspected in a packet,
-serialized into a capture, processed by the PHY, and attributed to a flow is one representation
-throughout, so analysis tooling cannot report something the model did not actually represent.
-
-**Composable but causally explicit behavior.** AR-COM-DIRECT, AR-LIFE-STAGES, AR-LIFE-OPERATIONS,
-AR-QUEUE-ROLES, and AR-QUEUE-STREAMING each put internal cooperation at its right semantic level:
-direct calls for same-instant coordination, scheduled messages for genuine events, stages for
-initialization order, queueing contracts for datapath transfer. The result is an event trajectory
-that corresponds to modeled behavior rather than implementation plumbing — which is what makes
-debugging, performance, and fingerprint signal quality good at the same time.
-
-**Observability without observer effects.** AR-ORG-VIS-SPLIT, AR-OBS-SIGNALS, AR-OBS-NED-TRUTH, and
-AR-OBS-INTROSPECTION establish a one-way path: model owner → declared signal → recorder, visualizer,
-analyzer. Consumers subscribe from the outside and events are emitted once by their owner, so
-recording is additive, never behavioral; NED remains the machine-readable statement of what exists.
-Observability becomes an external capability instead of a hidden second implementation of the model.
-
-**Fidelity as a controlled dimension.** AR-MOD-FIDELITY, AR-PKT-ERRORS, AR-PKT-SIGNAL,
-AR-EXT-FEATURES, and AR-CFG-PARAMS let a study choose detail deliberately: a coarse error model and
-a detailed analog model occupy the same contractual slot, and the choice is visible in
-configuration. Large scenarios buy affordable abstraction, focused studies buy detail, and neither
-requires replacing the surrounding architecture.
-
-**Reproducible rather than anecdotal correctness.** AR-CFG-INFER, AR-CFG-PARAMS, AR-BUILD-OUTOFTREE,
-AR-BUILD-DECLARATIVE, AR-QUAL-DETERMINISM, AR-QUAL-FINGERPRINT, AR-QUAL-TESTS, and
-AR-QUAL-TRACEABILITY form a chain — unambiguous configuration → isolated, discoverable build →
-deterministic execution → matching tests plus trajectory fingerprints → traceable baselines — in
-which each link removes a different source of uncertainty. A fingerprint is meaningful only on a
-deterministic model; a deterministic run is useful only when its inputs are known; a passing test is
-persuasive only when its type matches the claim and its baseline has provenance.
-
-**Complexity paid once, in infrastructure.** Registries, dispatchers, serializers, signals,
-lifecycle protocols, queueing contracts, and feature descriptors are up-front structure whose
-aggregate purpose is to make the *next* model cheaper to integrate: each new protocol reuses the
-same extension, observation, testing, configuration, and build paths instead of carving a bespoke
-path through the core. The architecture has a rising initial discipline cost and a falling marginal
-integration cost — without it, every new feature looks locally simple while adding one more special
-case to dispatch, inspection, build selection, and tests.
-
-## Quality attributes and enforcement
-
-The requirements above are grouped by *architectural concern* — the axis a contributor uses to find
-the rules that apply to the code in front of them. This section adds two orthogonal views: which
-*quality attributes* (in the ISO/IEC 25010 and structural-characteristics vocabulary) each group
-serves, and *how* each requirement is actually enforced.
-
-### Quality-attribute coverage
-
-| AR group | Quality attributes served |
-|---|---|
-| AR-ORG | Modularity, Analysability, Modifiability |
-| AR-MOD | Modularity, Reusability, Modifiability; Fidelity = performance⇄accuracy trade-off |
-| AR-PKT | Compatibility / Interoperability, Correctness, Performance efficiency |
-| AR-COM | Modularity, Extensibility, Interoperability |
-| AR-LIFE | Reliability (recoverability), Testability |
-| AR-QUEUE | Modularity, Reusability, Extensibility |
-| AR-OBS | Analysability, Testability |
-| AR-CFG | Configurability, Maintainability (DRY) |
-| AR-EXT | Extensibility, Modularity, Modifiability |
-| AR-BUILD | Deployability, Portability, Reproducibility |
-| AR-QUAL | Testability, Reliability, Analysability, plus the enforcement/governance dimension |
-
-### Enforcement tiers
-
-Each requirement is enforced at the strongest tier available to it; the goal of AR-QUAL-ENFORCED is to
-move every requirement as far up this ladder as it can go.
-
-- **T1 — won't build.** The compiler or NED toolchain rejects non-compliance.
-- **T2 — fails a CI test.** A fingerprint, unit, module, statistical, or validation test breaks.
-- **T3 — flagged by a deterministic check.** A linter, `featuretool`, build matrix, or a custom
-  architecture script reports it in CI.
-- **T4 — flagged by an agent reviewer.** An LLM reviewer, run as a CI gate, judges the diff against
-  the requirement — catching *semantic* violations no static rule can express (visualization logic in
-  a protocol, a zero-time message used as a procedure call, prose duplicating NED). This rung is what
-  makes the "judgment" requirements enforceable rather than merely hoped-for, and it scales in a way
-  human review does not.
-- **T5 — human review.** Reserved for genuine design judgment and final sign-off (is a fidelity level
-  worth adding? does this read as one system?).
-
-*Proposed* checks below are achievable today with off-the-shelf tooling; starter artifacts live under
-`doc/architecture/enforcement/`.
-
-### Enforcement map
-
-| Requirement | Tier | Enforced by (→ how to raise) |
-|---|---|---|
-| AR-ORG-DOMAINS | T1→T3 | NED package=directory (compiler) → include-graph layering script |
-| AR-ORG-CONTRACTS | T1 | NED `like`/`moduleinterface` + C++ virtuals; contract-package purity → lint (T3) |
-| AR-ORG-VIS-SPLIT | T3+T4 | `#include visualizer/` check (T3) + agent review for vis logic in protocol code |
-| AR-ORG-KERNEL | T4 | agent review: "does this reimplement or patch a kernel facility?" |
-| AR-MOD-COMPOSITION | T1+T4 | NED composition (compiler); agent review for composition-over-inheritance |
-| AR-MOD-PLUGGABLE | T1 | NED `like` / default type / `if typename` (compiler) |
-| AR-MOD-FIDELITY | T4→T5 | agent flags hardcoded fidelity; whether a level is worth adding is human judgment |
-| AR-MOD-NODEBASE | T1/T2 | NED extension + `absPath`/`^` resolution (compiler/runtime) |
-| AR-PKT-CHUNKS | T1/T2 | Chunk types (compiler) + runtime immutability asserts (debug) |
-| AR-PKT-DUAL | T2 | serializer registry + fingerprint `D` ingredient → serializer-completeness test |
-| AR-PKT-TAGS | T1/T2 | tag API (compiler); PHY strips tags (tested) |
-| AR-PKT-ERRORS | T1 | chunk/error API (compiler) |
-| AR-PKT-SIGNAL | T1/T2 | Signal API (compiler) + runtime asserts |
-| AR-COM-REGISTRY | T1/T2 | registration macros (compiler) + runtime "register once" check |
-| AR-COM-DISPATCH | T2 | MessageDispatcher + tags at runtime (tested) |
-| AR-COM-SOCKETS | T1+T4 | socket API provided (compiler); agent review that apps use sockets, not raw messages |
-| AR-COM-DIRECT | T3+T4 | lint for `scheduleAt(simTime())`/zero-delay send + agent review; runtime zero-delay hook (T2) |
-| AR-LIFE-STAGES | T1/T2 | `INITSTAGE_*` / `Define_InitStage_Dependency` (compiler) + runtime ordering |
-| AR-LIFE-OPERATIONS | T2 | `@lifecycleSupport` + module/lifecycle tests |
-| AR-QUEUE-ROLES | T1 | queueing `I*` contracts (compiler) |
-| AR-QUEUE-STREAMING | T1/T2 | streaming API (compiler) + tests |
-| AR-OBS-SIGNALS | T1/T2 | NED `@signal`/`@statistic` (compiler) + fingerprint neutrality |
-| AR-OBS-NED-TRUTH | T1+T4 | NED authoritative, reference generated from it; agent review for prose duplicating NED |
-| AR-OBS-INTROSPECTION | T3+T4 | dissector/printer-completeness test + agent review |
-| AR-OBS-FLOWS | T1/T2 | region-tag API (compiler) + flow tests |
-| AR-CFG-INFER | T1+T4 | NED gate/size inference (compiler); agent review for DRY |
-| AR-CFG-PARAMS | T1+T4 | **units library + `@unit` (compile-time dimensional analysis)**; agent review for single-meaning fields |
-| AR-EXT-NOCORE | T3+T4 | feature-off build (core→optional deps) + agent review "no core edits for a new protocol" |
-| AR-EXT-ATTACH | T1/T3 | attachment API (compiler) + feature-off build |
-| AR-EXT-FEATURES | T3 | `inet_featuretool` dependency validation + feature-matrix build |
-| AR-BUILD-OUTOFTREE | T2/T3 | CI clean/isolated build (opp_ci from a pinned commit) |
-| AR-BUILD-DECLARATIVE | T1+T4 | build descriptors (`.oppfeatures`, opp descriptors); agent review for single-source-of-truth |
-| AR-QUAL-FINGERPRINT | T2 ✔ | fingerprint tests on CI |
-| AR-QUAL-TESTS | T2+T4 | test suites on CI; coverage/mutation gate + agent review that a change ships matching tests |
-| AR-QUAL-DETERMINISM | T2 ✔ | fingerprint stability (same seed → same fingerprint; parallel-safe) |
-| AR-QUAL-NAMING | T3+T4 | `clang-tidy` (C++) + agent review for NED/`.msg`/semantic names |
-| AR-QUAL-DISPLAY | T3+T4 | "every module has an icon" coverage check + agent review |
-| AR-QUAL-LOGGING | T3+T4 | `-Werror`/`clang-tidy` + agent review that programming errors throw, not log |
-| AR-QUAL-TRACEABILITY | T3 | fingerprint tags + source→config mapping (partial) |
-| AR-QUAL-ENFORCED | — | the CI gate set itself; measured by how many rows above reach T1–T4 (automated) |
-
-## Contributor workflow
-
-For a normal INET change, the requirements work as a design map rather than a reading assignment —
-the unit of review is not "does this patch look reasonable?" but "which architectural contracts does
-this patch touch, what evidence establishes compliance, and what will prevent a regression later?":
-
-1. **Scope.** Identify the affected domain, contracts, module composition, packet content, tags,
-   configuration surface, observability, build feature, and test coverage.
-2. **Seals.** If the change is under `src/inet/`, resolve exact and ancestor-directory seals first
-   (see [sealing.md](sealing.md)) — a sealed path needs explicit permission before anything else.
-3. **Applicable rules.** Read only the requirement sections that apply (including the
-   [IEEE 802.11 extensions](ieee80211-architectural-requirements.md) when in scope), plus both
-   exception ledgers and [naming-conventions.md](naming-conventions.md) for every new or renamed
-   artifact.
-4. **Smallest surface.** Establish state ownership and the smallest change surface before editing;
-   prefer the smallest change that satisfies the contracts, ownership, observability,
-   configuration, determinism, and testing requirements.
-5. **Existing mechanisms.** Implement through existing contracts, registries, signals, serializers,
-   lifecycle APIs, and feature descriptors before inventing a new mechanism.
-6. **Validate in proportion to risk.** Run [enforcement/check-architecture.sh](enforcement/check-architecture.sh)
-   (scoped to the touched subtree for focused work) and the test categories matching the claim;
-   preserve the exact commands, configurations, and statuses for review.
-7. **Reconcile, don't re-litigate.** Record only genuinely new deviations as `AV-*`/`NV-*` ledger
-   rows; deviations already in [architecture-exceptions.md](architecture-exceptions.md) or
-   [naming-exceptions.md](naming-exceptions.md) are known, not findings. Fingerprint baselines
-   change only with explicit approval and a reviewable explanation (AR-QUAL-TRACEABILITY).
-8. **Submit a reviewable change.** Divide the work into commits by concern — whitespace and
-   mechanical sweeps apart from logic, the shared-component change before the model that needs
-   it, baseline updates in their own patch — and write messages that state the reason. The rules
-   and their enforcement are in [pull-requests.md](pull-requests.md).
-9. **Sealing last.** Sealing is the terminal state of this pipeline, not a shortcut around it: a
-   complete audit, with every deviation fixed or ledgered, precedes recording a seal.
