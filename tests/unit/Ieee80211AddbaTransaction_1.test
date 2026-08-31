@@ -2152,6 +2152,44 @@ ASSERT(callback.excludedPackets.back() == unsentRequestPacket);
     fragmentationPolicyModule->callFinish();
     fragmentationPolicyModule->deleteModule();
 
+    // IEEE Std 802.11-2024, 10.2.7 Note 2, 10.4, and 10.11: A-MSDUs are fragmented
+    // only with capability-gated HE dynamic fragmentation (26.3.2). The
+    // basic policy does not implement that procedure, so an oversized
+    // A-MSDU must remain a single MPDU candidate.
+    auto makeQosDataPacket = [&](const char *name, SequenceNumberCyclic sequenceNumber, int payloadLength) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(payloadLength)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    auto firstMsdu = makeQosDataPacket("oversizedAmsduFirst", SequenceNumberCyclic(110), 20);
+    auto secondMsdu = makeQosDataPacket("oversizedAmsduSecond", SequenceNumberCyclic(111), 20);
+    auto amsduMembers = new std::vector<Packet *>({ firstMsdu, secondMsdu });
+    MsduAggregation msduAggregation;
+    auto oversizedAmsdu = msduAggregation.aggregateFrames(amsduMembers);
+    delete amsduMembers;
+    const auto& oversizedAmsduHeader = oversizedAmsdu->peekAtFront<Ieee80211DataHeader>();
+    const auto& oversizedAmsduTrailer = oversizedAmsdu->peekAtBack<Ieee80211MacTrailer>(B(4));
+    ASSERT(oversizedAmsduHeader->getAMsduPresent());
+    ASSERT((oversizedAmsdu->getDataLength() - oversizedAmsduHeader->getChunkLength() - oversizedAmsduTrailer->getChunkLength()).get<B>() == 70);
+    ASSERT(oversizedAmsdu->getByteLength() == 100);
+
+    auto amsduFragmentationPolicyModule = cModuleType::get("inet.linklayer.ieee80211.mac.fragmentation.BasicFragmentationPolicy")->create("oversizedAmsduFragmentationPolicy", this);
+    amsduFragmentationPolicyModule->par("fragmentationThreshold").setIntValue(90);
+    amsduFragmentationPolicyModule->callInitialize();
+    auto amsduFragmentationPolicy = check_and_cast<BasicFragmentationPolicy *>(amsduFragmentationPolicyModule);
+    ASSERT(oversizedAmsdu->getByteLength() > 90);
+    ASSERT(amsduFragmentationPolicy->computeFragmentSizes(oversizedAmsdu).empty());
+    auto ordinaryQosData = makeQosDataPacket("ordinaryQosData", SequenceNumberCyclic(112), 70);
+    ASSERT(amsduFragmentationPolicy->computeFragmentSizes(ordinaryQosData) == std::vector<int>({ 60, 10 }));
+    delete oversizedAmsdu;
+    delete ordinaryQosData;
+    amsduFragmentationPolicyModule->callFinish();
+    amsduFragmentationPolicyModule->deleteModule();
+
     auto recipientDataServiceModule = cModuleType::get("inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService")->create("fragmentedAddbaDataService", this);
     recipientDataServiceModule->callInitialize();
     auto recipientDataService = check_and_cast<RecipientQosMacDataService *>(recipientDataServiceModule);
@@ -3911,6 +3949,75 @@ ASSERT(!dataService.hasEligibleFrame(&mixedQueue));
     for (auto packet : queue.packets)
         delete packet;
     queue.packets.clear();
+}
+
+// IEEE Std 802.11-2024, 9.3.2.2.1-9.3.2.2.2 and Figure 9-123: only
+// non-final Basic A-MSDU subframes carry 0-3 octets of alignment padding.
+// The policy's size check must include that padding and accept the exact
+// serialized limit.
+{
+    auto makeAggregatePacket = [&](const char *name, SequenceNumberCyclic sequenceNumber, int payloadLength) {
+        auto header = makeQosHeader(peer1, 1, sequenceNumber);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTransmitterAddress(peer2);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(payloadLength)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    };
+    const int firstPayloadLengths[] = { 5, 4, 7 };
+    const int expectedAmsduLengths[] = { 39, 39, 43 };
+    for (int i = 0; i < 3; i++) {
+        TestPacketQueue queue;
+        auto first = makeAggregatePacket("paddingBoundaryFirst", SequenceNumberCyclic(15 + i * 2), firstPayloadLengths[i]);
+        auto second = makeAggregatePacket("paddingBoundarySecond", SequenceNumberCyclic(16 + i * 2), 5);
+        queue.packets = { first, second };
+        TestBasicMsduAggregationPolicy policy;
+        policy.configure(B(expectedAmsduLengths[i] - 1));
+        ASSERT(policy.computeAggregateFrames(&queue, first, [](const Packet *) { return true; }) == nullptr);
+        policy.configure(B(expectedAmsduLengths[i]));
+        auto selected = policy.computeAggregateFrames(&queue, first, [](const Packet *) { return true; });
+        ASSERT(selected != nullptr);
+        ASSERT(selected->size() == 2);
+        ASSERT(selected->at(0) == first);
+        ASSERT(selected->at(1) == second);
+        MsduAggregation aggregation;
+        auto aggregated = aggregation.aggregateFrames(selected);
+        delete selected;
+        aggregated->popAtFront<Ieee80211DataHeader>();
+        aggregated->popAtBack<Ieee80211MacTrailer>(B(4));
+        ASSERT(aggregated->getDataLength().get<B>() == expectedAmsduLengths[i]);
+        // The expected length ends with the second 14-byte header and its
+        // 5-byte MSDU; any final padding would make this assertion fail.
+        const auto& finalSubframeHeader = aggregated->peekDataAt<Ieee80211MsduSubframeHeader>(B(expectedAmsduLengths[i] - 14 - 5), B(14));
+        ASSERT(finalSubframeHeader != nullptr);
+        ASSERT(finalSubframeHeader->getLength() == 5);
+        delete aggregated;
+        queue.packets.clear();
+    }
+
+    // BasicMsduAggregationPolicy.ned documents -1 as an unlimited maximum.
+    TestPacketQueue unlimitedQueue;
+    auto unlimitedFirst = makeAggregatePacket("unlimitedPaddingFirst", SequenceNumberCyclic(21), 7);
+    auto unlimitedSecond = makeAggregatePacket("unlimitedPaddingSecond", SequenceNumberCyclic(22), 5);
+    unlimitedQueue.packets = { unlimitedFirst, unlimitedSecond };
+    auto unlimitedPolicyModule = cModuleType::get("inet.linklayer.ieee80211.mac.aggregation.BasicMsduAggregationPolicy")->create("unlimitedAmsduPolicy", this);
+    unlimitedPolicyModule->par("maxAMsduSize").setIntValue(-1);
+    unlimitedPolicyModule->callInitialize();
+    auto unlimitedPolicy = check_and_cast<BasicMsduAggregationPolicy *>(unlimitedPolicyModule);
+    auto unlimitedSelection = unlimitedPolicy->computeAggregateFrames(&unlimitedQueue, unlimitedFirst, [](const Packet *) { return true; });
+    ASSERT(unlimitedSelection != nullptr);
+    ASSERT(unlimitedSelection->size() == 2);
+    MsduAggregation unlimitedAggregation;
+    auto unlimitedAggregate = unlimitedAggregation.aggregateFrames(unlimitedSelection);
+    delete unlimitedSelection;
+    unlimitedAggregate->popAtFront<Ieee80211DataHeader>();
+    unlimitedAggregate->popAtBack<Ieee80211MacTrailer>(B(4));
+    ASSERT(unlimitedAggregate->getDataLength().get<B>() == 43);
+    delete unlimitedAggregate;
+    unlimitedQueue.packets.clear();
+    unlimitedPolicyModule->callFinish();
+    unlimitedPolicyModule->deleteModule();
 }
 
 // The built-in policy is anchored on the provider-selected candidate. Held
