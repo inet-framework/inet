@@ -19,25 +19,35 @@ namespace ieee80211 {
 class INET_API AarfRateControl : public RateControlBase
 {
   protected:
-    simtime_t timer = SIMTIME_ZERO;
+    // Per-receiver adaptive state (formerly single-instance module members).
+    struct State {
+        MacAddress address; // the receiver this state belongs to (for per-station rate attribution)
+        const physicallayer::IIeee80211Mode *mode = nullptr;
+        simtime_t timer = SIMTIME_ZERO;
+        bool probing = false;
+        int increaseThreshold = -1;
+        int numberOfConsSuccTransmissions = 0;
+    };
+    std::map<MacAddress, State> stations;
+
+    // configuration, shared across stations
     simtime_t interval = SIMTIME_ZERO;
-    bool probing = false;
-    int increaseThreshold = -1;
     int maxIncreaseThreshold = -1;
     int decreaseThreshold = -1;
     double factor = -1;
-
-    int numberOfConsSuccTransmissions = 0;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void multiplyIncreaseThreshold(double factor);
-    virtual void resetIncreaseThreshdold();
-    virtual void resetTimer();
-    virtual void increaseRateIfTimerIsExpired(const MacAddress& receiverAddress);
+    virtual State& getState(const MacAddress& receiverAddress);
+    virtual void resetRateControl() override { stations.clear(); }
+
+    virtual void multiplyIncreaseThreshold(State& state, double factor);
+    virtual void resetIncreaseThreshdold(State& state);
+    virtual void resetTimer(State& state);
+    virtual void increaseRateIfTimerIsExpired(State& state);
 
   public:
     virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) override;

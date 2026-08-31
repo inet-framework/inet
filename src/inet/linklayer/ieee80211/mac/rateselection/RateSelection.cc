@@ -120,7 +120,10 @@ const IIeee80211Mode *RateSelection::computeDataOrMgmtFrameMode(const Ptr<const 
         return dataFrameMode;
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
         return mgmtFrameMode;
-    if (dataOrMgmtRateControl)
+    // Rate control adapts to the feedback of one peer, and a group-addressed frame has no peer:
+    // it is never acknowledged, so nothing would ever correct a rate chosen for it. Group-addressed
+    // frames therefore take a mandatory rate, as the clause above requires.
+    if (dataOrMgmtRateControl && !dataOrMgmtHeader->getReceiverAddress().isMulticast())
         return dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress());
     else
         return fastestMandatoryMode;

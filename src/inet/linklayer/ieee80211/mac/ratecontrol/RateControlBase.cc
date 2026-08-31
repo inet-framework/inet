@@ -20,9 +20,6 @@ simsignal_t RateControlBase::datarateChangedSignal = cComponent::registerSignal(
 void RateControlBase::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
-
-    if (stage == INITSTAGE_LOCAL)
-        WATCH_EXPR("currentMode", currentMode ? currentMode->getName() : "none");
 }
 
 const IIeee80211Mode *RateControlBase::increaseRateIfPossible(const IIeee80211Mode *currentMode)
@@ -41,6 +38,12 @@ MacAddress RateControlBase::getReceiverAddress(Packet *frame) const
 {
     const auto& header = frame->peekAtFront<Ieee80211MacHeader>();
     return header->getReceiverAddress();
+}
+
+const IIeee80211Mode *RateControlBase::getInitialMode()
+{
+    double initialRate = par("initialRate");
+    return initialRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initialRate));
 }
 
 void RateControlBase::emitDatarateChangedSignal(const MacAddress& receiver, const IIeee80211Mode *mode)
@@ -63,10 +66,7 @@ void RateControlBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
 
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
-        double initRate = par("initialRate");
-        currentMode = initRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initRate));
-        // no particular station yet: the initial rate applies to all of them
-        emitDatarateChangedSignal(MacAddress::BROADCAST_ADDRESS, currentMode);
+        resetRateControl();
     }
 }
 

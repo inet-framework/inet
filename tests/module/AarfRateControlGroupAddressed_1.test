@@ -1,0 +1,84 @@
+%description:
+Tests that AarfRateControl keeps no adaptive state for a group-addressed receiver.
+
+A group-addressed frame is never acknowledged, so the rate control never gets feedback about
+it. If such a frame were served from adaptive state of its own, that state would be created on
+the first broadcast and then raised once per interval by the periodic increase, with nothing
+able to lower it again.
+
+The source sends a unicast stream to sink and a broadcast stream at the same time. Every rate
+the rate control reports must therefore belong to sink: the count of the aggregate
+datarateChanged statistic must equal the count of sink's own dataratePerStation series, because
+a rate emitted for a group address would be untagged and would show up only in the aggregate.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+network AarfRateControlGroupAddressedTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        source: AdhocHost;
+        sink: AdhocHost;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+network = AarfRateControlGroupAddressedTest
+ned-path = .;../../../../src
+sim-time-limit = 2s
+cmdenv-express-mode = true
+**.vector-recording = false
+
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.radioMedium.backgroundNoise.power = -100dBm
+*.configurator.addStaticRoutes = true
+
+*.*.wlan[*].opMode = "g(erp)"
+*.*.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+*.*.wlan[*].agent.typename = ""
+*.*.wlan[*].radio.transmitter.power = 50mW
+
+*.*.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+*.source.mobility.initialX = 0m
+*.source.mobility.initialY = 0m
+*.source.mobility.initialZ = 0m
+*.sink.mobility.initialX = 20m
+*.sink.mobility.initialY = 0m
+*.sink.mobility.initialZ = 0m
+
+# a short interval, so an unfed group-addressed state would be raised many times over the run
+*.source.wlan[*].mac.dcf.rateControl.typename = "AarfRateControl"
+*.source.wlan[*].mac.dcf.rateControl.initialRate = 6Mbps
+*.source.wlan[*].mac.dcf.rateControl.interval = 0.05s
+*.source.wlan[*].mac.dcf.rateSelection.dataFrameBitrate = -1bps
+
+# a unicast stream; the group-addressed frames come from ARP, which broadcasts its requests
+*.source.numApps = 1
+*.source.app[0].typename = "UdpBasicApp"
+*.source.app[0].destAddresses = "sink"
+*.source.app[0].destPort = 5000
+*.source.app[0].messageLength = 1000B
+*.source.app[0].sendInterval = 1ms
+*.sink.numApps = 1
+*.sink.app[0].typename = "UdpSink"
+*.sink.app[0].localPort = 5000
+
+*.source.wlan[*].mac.dcf.rateControl.datarateChanged.result-recording-modes = count
+*.source.wlan[*].mac.dcf.rateControl.dataratePerStation.result-recording-modes = count
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: gawk '$1 == "scalar" && $2 ~ /\.source\./ { if ($3 == "datarateChanged:count") agg = $4; else if ($3 == "sink:dataratePerStation:count") per = $4; else if ($3 == "arpRequestSent:count") bc = $4 } END { printf "groupAddressedSent=%s\n", (bc > 0) ? "YES" : "NO"; printf "allRatesAttributed=%s\n", (agg > 0 && agg == per) ? "YES" : "NO"; printf "values aggregate=%d sinkSeries=%d arpRequests=%d\n", agg, per, bc }' results/*.sca > verdict.out
+%contains: verdict.out
+groupAddressedSent=YES
+allRatesAttributed=YES
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object:
