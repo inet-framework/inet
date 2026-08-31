@@ -1,0 +1,103 @@
+%description:
+Tests that AarfRateControl adapts its rate separately for each receiver, so that
+feedback from one peer does not move the rate used towards another.
+
+One source saturates two ad-hoc peers at once: nearSink 20 m away, farSink 1200 m
+away on a link poor enough that frames to it are lost and retried. The rate towards
+the near peer must therefore stay at the initial 54 Mbps, while the rate towards the
+far peer falls well below it, and both peers must keep receiving.
+
+Measured here: 54 Mbps towards the near peer and 24.7 Mbps towards the far one, with
+3653 and 1350 packets delivered.
+
+With one set of adaptive state per module (the behavior before rate control was keyed
+on the receiver) the two peers share a single rate, which the far peer's retries drag
+down to a blend of the two: 29.6 Mbps time-average, with the near peer served at that
+blended rate instead of the 54 Mbps its own link supports, delivering 3080 packets to
+the near peer and only 380 to the far one.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+network AarfRateControlPerReceiverTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        source: AdhocHost;
+        nearSink: AdhocHost;
+        farSink: AdhocHost;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+network = AarfRateControlPerReceiverTest
+ned-path = .;../../../../src
+sim-time-limit = 2s
+cmdenv-express-mode = true
+**.vector-recording = false
+
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.radioMedium.backgroundNoise.power = -100dBm
+*.*.ipv4.arp.typename = "GlobalArp"
+*.configurator.addStaticRoutes = false
+
+# ad-hoc, so no association is needed and a distant peer simply has a worse link
+*.*.wlan[*].opMode = "g(erp)"
+*.*.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+*.*.wlan[*].agent.typename = ""
+*.*.wlan[*].radio.transmitter.power = 50mW
+
+*.*.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+*.source.mobility.initialX = 0m
+*.source.mobility.initialY = 0m
+*.source.mobility.initialZ = 0m
+*.nearSink.mobility.initialX = 20m
+*.nearSink.mobility.initialY = 0m
+*.nearSink.mobility.initialZ = 0m
+*.farSink.mobility.initialX = 1200m
+*.farSink.mobility.initialY = 0m
+*.farSink.mobility.initialZ = 0m
+
+# the rate control under test, adapting from the same starting rate for every peer
+*.source.wlan[*].mac.dcf.rateControl.typename = "AarfRateControl"
+*.source.wlan[*].mac.dcf.rateControl.initialRate = 54Mbps
+*.source.wlan[*].mac.dcf.rateControl.increaseThreshold = 20
+*.source.wlan[*].mac.dcf.rateControl.decreaseThreshold = 5
+*.source.wlan[*].mac.dcf.rateSelection.dataFrameBitrate = -1bps
+
+# the same saturating stream to each peer
+*.source.numApps = 2
+*.source.app[0].typename = "UdpBasicApp"
+*.source.app[0].destAddresses = "nearSink"
+*.source.app[0].destPort = 5000
+*.source.app[1].typename = "UdpBasicApp"
+*.source.app[1].destAddresses = "farSink"
+*.source.app[1].destPort = 5001
+*.source.app[*].messageLength = 1000B
+*.source.app[*].sendInterval = 0.5ms
+*.nearSink.numApps = 1
+*.nearSink.app[0].typename = "UdpSink"
+*.nearSink.app[0].localPort = 5000
+*.farSink.numApps = 1
+*.farSink.app[0].typename = "UdpSink"
+*.farSink.app[0].localPort = 5001
+
+# the per-station rates the verdict is computed from, as a scalar per peer
+*.source.wlan[*].mac.dcf.rateControl.dataratePerStation.result-recording-modes = timeavg
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: gawk '/(near|far)Sink:dataratePerStation:timeavg/ { match($3, /^([a-zA-Z]+)Sink:/, m); r[m[1]] = $4 } /(near|far)Sink\.app\[0\] packetReceived:count/ { match($2, /\.([a-zA-Z]+)Sink\./, m); c[m[1]] = $4 } END { printf "bothServed=%s\n", (c["near"] > 0 && c["far"] > 0) ? "YES" : "NO"; printf "nearRateUndragged=%s\n", (r["near"] > 50e6) ? "YES" : "NO"; printf "farRateReduced=%s\n", (r["far"] > 0 && r["far"] < 30e6) ? "YES" : "NO"; printf "values near=%.1fMbps far=%.1fMbps nearPk=%d farPk=%d\n", r["near"]/1e6, r["far"]/1e6, c["near"], c["far"] }' results/*.sca > verdict.out
+%contains: verdict.out
+bothServed=YES
+nearRateUndragged=YES
+farRateReduced=YES
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object:

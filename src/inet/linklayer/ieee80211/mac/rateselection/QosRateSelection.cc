@@ -140,10 +140,10 @@ const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
         // If both the BSSBasicRateSet parameter and the BSSBasicMCSSet parameter are empty (e.g., a scanning STA
         // that is not yet associated with a BSS), the frame shall be transmitted in a non-HT PPDU using one of the
         // mandatory PHY rates.
-        if (dataOrMgmtRateControl)
-            return dataOrMgmtRateControl->getRate(dataOrMgmtHeader->getReceiverAddress());
-        else
-            return fastestMandatoryMode;
+        // The rate control is not consulted for these frames. It adapts to the feedback of one
+        // peer, and a group-addressed frame has no peer: it is never acknowledged, so nothing
+        // would ever correct a rate chosen for it.
+        return fastestMandatoryMode;
     }
     // A data or management frame not identified in 9.7.5.1 through 9.7.5.5 shall be sent using any data rate or MCS
     // subject to the following constraints:
