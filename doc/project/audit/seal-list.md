@@ -75,9 +75,13 @@ section indexes them so the registry stays one place to look.
 | `domain/ieee80211.md` | by rule | 0 | 0 | 14 |
 | `requirement/accepted-requirements.md` | by requirement, complete | 0 | 27 | 0 |
 | `rule/architecture.md` | by rule | 0 | 0 | 40 |
+| `rule/documentation.md` | whole | 0 | 0 | 1 |
 | `rule/naming.md` | by rule | 0 | 0 | 23 |
 | `rule/pull-request.md` | by rule | 0 | 0 | 20 |
+| `rule/quality.md` | by rule | 0 | 0 | 13 |
+| `rule/release.md` | by rule | 0 | 0 | 8 |
 | `rule/sealing.md` | whole | 0 | 0 | 1 |
+| `rule/testing.md` | by rule | 0 | 0 | 13 |
 <!-- END SEAL INDEX -->
 
 Nothing is closed yet, and that is the honest state: no document in this set has been audited against
