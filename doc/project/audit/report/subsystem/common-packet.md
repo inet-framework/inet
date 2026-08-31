@@ -1,5 +1,6 @@
 # Architecture audit report — `src/inet/common/packet`
 
+> **Kind:** report · **Status:** snapshot 2026-07-20 · **Seal:** none · **Owns:** — · **Stands on:** [rule/architecture.md](../../../rule/architecture.md)
 - **Scope:** `src/inet/common/packet` (recursive)
 - **Date:** 2026-07-20
 - **Command:** `doc/architecture/enforcement/check-architecture.sh src/inet/common/packet`

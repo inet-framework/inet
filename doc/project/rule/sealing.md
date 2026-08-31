@@ -12,7 +12,7 @@ broad tasks cannot silently churn it.*
 This document is the **policy**. What is sealed right now lives in three places, and §*SR-STATE-WHERE*
 says which.
 
-## 🔒 The rule that overrides every other instruction
+## The rule that overrides every other instruction
 
 **A sealed path and a closed unit MUST NOT be modified by an AI in any way — no edits, no
 reformatting, no "while I'm here" cleanups, no incidental change as part of a larger task — unless
@@ -64,7 +64,7 @@ Every sealing rule in document order.
 **Everything is unsealed by default.**
 
 Nothing is sealed unless it matches an entry in [audit/seal-list.md](../audit/seal-list.md) or
-carries a 🔒 flag. Absence *is* the unsealed state; there are no rows to maintain for the things that
+carries a `🔒` flag. Absence *is* the unsealed state; there are no rows to maintain for the things that
 are not sealed. The sealed list is an allowlist of the small, settled part of the tree that has been
 driven all the way to a reviewed, compliant, frozen state, so that scarce review attention moves
 forward instead of re-touching settled ground.
@@ -148,11 +148,11 @@ citation to it survives.
 | Flag | Reading |
 | --- | --- |
 | no flag | **Open, not yet considered.** The default. Nothing is claimed. |
-| ⬜ | **Open on purpose.** The unit was looked at and left open: still under discussion, or waiting for a decision. |
-| 🔒 | **Closed.** The unit was audited, it complies, and the user froze it. |
+| `⬜` | **Open on purpose.** The unit was looked at and left open: still under discussion, or waiting for a decision. |
+| `🔒` | **Closed.** The unit was audited, it complies, and the user froze it. |
 
 The default keeps the cost at zero, so a document carries flags only on the units that need them.
-⬜ is not maintenance work; it is a statement. Use it to mark the frontier — the units being worked
+`⬜` is not maintenance work; it is a statement. Use it to mark the frontier — the units being worked
 on now — so a reader can tell *we left this open* from *we never got here*.
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh) rejects any other glyph.*
@@ -174,7 +174,7 @@ rule closed. The flag goes on the body instead:
 ```markdown
 ### NR-NED-GATE
 
-🔒 **A gate is `<stem>In` or `<stem>Out`, and the stem names the peer it faces.**
+`🔒` **A gate is `<stem>In` or `<stem>Out`, and the stem names the peer it faces.**
 ```
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh).*
@@ -205,7 +205,7 @@ A flag in a document that declares `none`, or on a unit kind the header did not 
 
 The header becomes `**Seal:** whole; closed` and the inline flags come out, in the same commit. A
 document does not carry both forms: the promotion is what keeps a settled document quiet instead of
-speckled with 🔒 on every heading.
+speckled with a flag on every heading.
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh) reports a `by <unit>` document whose units are all closed.*
 

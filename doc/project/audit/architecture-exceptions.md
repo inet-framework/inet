@@ -1,5 +1,6 @@
 # Architecture Exceptions and Violations
 
+> **Kind:** ledger · **Status:** current · **Seal:** by row · **Owns:** `AS-*`, `AV-*` · **Stands on:** [rule/architecture.md](../rule/architecture.md), [README.md](README.md)
 Known places where the INET code base departs from the dependency-direction requirements in
 [architectural-requirements.md](../rule/architecture.md) — chiefly **AR-ORG-DOMAINS**
 (dependencies point protocols → infrastructure, never the reverse) and **AR-ORG-VIS-SPLIT** (model

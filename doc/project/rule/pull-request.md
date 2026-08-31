@@ -1,5 +1,6 @@
 # Pull Requests and Commits
 
+> **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `PR-*` · **Stands on:** [architecture.md](architecture.md), [testing.md](testing.md)
 How to divide a change into commits, how to write the commit messages, and what a pull
 request must contain. The rules exist for the *reader* of the change: the reviewer who must
 judge it now, the developer who bisects a regression two years later, and the developer who

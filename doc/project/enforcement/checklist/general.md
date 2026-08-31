@@ -1,5 +1,6 @@
 # Agent-Review Checklist (T4 enforcement)
 
+> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rule/architecture.md](../../rule/architecture.md), [README.md](../README.md)
 The tier-4 gate from [architectural-requirements.md](../../rule/architecture.md) §*Quality
 attributes and enforcement*. It enforces the **semantic** architectural requirements — the ones no
 compiler or linter can express — by having an LLM reviewer judge a diff against each item. Run it as

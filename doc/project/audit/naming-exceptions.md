@@ -1,5 +1,6 @@
 # Naming Exceptions and Violations
 
+> **Kind:** ledger · **Status:** current · **Seal:** by row · **Owns:** `NS-*`, `NV-*` · **Stands on:** [rule/naming.md](../rule/naming.md), [README.md](README.md)
 Known places where the INET code base departs from [naming-conventions.md](../rule/naming.md).
 That document states the **target** rules; this one is the ledger of reality against them, so the
 conventions can stay clean and prescriptive while the deviations are tracked (and, where
