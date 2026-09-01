@@ -45,7 +45,8 @@ Every decision in document order. The identifier links to the decision; the stat
 | [D-SIGNAL](#d-signal) | A physical transmission is a Signal, distinct from the packet it carries |
 | [D-REGISTRY](#d-registry) | Peers are addressed by protocol and service, not by wiring |
 | [D-SOCKETS](#d-sockets) | Applications talk to transports through socket-style APIs |
-| [D-DIRECT](#d-direct) | Same-instant, same-node coordination is a direct C++ call |
+| [D-DIRECT](#d-direct) | Required same-instant, same-node coordination is a direct C++ call |
+| [D-NOTIFY](#d-notify) | Signals publish completed facts to independent consumers |
 | [D-QUEUEING](#d-queueing) | A datapath is a chain of push and pull elements |
 | [D-FIDELITY](#d-fidelity) | One concern is offered at several levels of detail, in one contractual slot |
 | [D-OBSERVE](#d-observe) | Observation is one way: the model emits, the observer subscribes |
@@ -193,16 +194,36 @@ messages.** The socket owns the message shapes.
 
 ### D-DIRECT
 
-**Same-instant, same-node coordination is a direct C++ call**
+**Required same-instant, same-node coordination is a direct C++ call**
 
-**Two submodules of one node that must agree at one instant call each other; they do not exchange a
-zero-time message.** A message means an event, and an event means time passes or the medium is
-crossed.
+**When one submodule requires another to perform a command or answer a query at the same instant,
+they interact through a typed C++ call; they do not exchange a zero-time message.** The caller names
+the required peer and the interaction has a defined completion. Announcing a completed fact to
+independent consumers instead follows [D-NOTIFY](#d-notify).
 
 - *Serves* `R-RUN-REPRO`, and the quality of every event trace and fingerprint.
 - *Costs* a compile-time coupling where a message would have been anonymous, and the loss of that
   interaction from the event log.
 - *Kept true by* [AR-COM-DIRECT](../rule/architecture.md#ar-com-direct).
+
+### D-NOTIFY
+
+**Signals publish completed facts to independent consumers**
+
+**A module announces a completed occurrence or state change with a declared signal when zero or more
+decoupled consumers may react synchronously without a reply or dependence on their relative
+invocation order.** A behavioral listener may drive its own reaction through the ordinary model
+contracts; recording, visualization and analysis remain passive observers under
+[D-OBSERVE](#d-observe).
+
+- *Serves* `R-COMPOSE-NODES`, `R-SCOPE-CROSSCUT`. Independently authored behavior can attach without
+  making the publisher know its consumers.
+- *Costs* a relationship that is weaker at compile time and harder to follow than a direct call.
+  Signal names are global, subscription scope is hierarchical, pointer-payload lifetime must be
+  known, and invocation order among listeners to one emission is undefined; behavior that needs
+  stronger guarantees must use another contract.
+- *Kept true by* [AR-COM-NOTIFY](../rule/architecture.md#ar-com-notify),
+  [AR-OBS-NED-TRUTH](../rule/architecture.md#ar-obs-ned-truth).
 
 ### D-QUEUEING
 
@@ -237,6 +258,8 @@ study chooses in configuration.** A large scenario buys abstraction; a focused s
 
 **A model declares signals and emits them; recording, visualization and analysis subscribe from
 outside and never call back in.** Visualization and instrumentation live in their own packages.
+Behavioral listeners are a separate role governed by [D-NOTIFY](#d-notify); adding or removing an
+observer cannot alter them or the modeled result.
 
 - *Serves* `R-VIS-NEUTRAL`, `R-RESULT-BUILTIN`, `R-RUN-REPRO`. Turning observation on cannot change
   the result.
@@ -309,12 +332,13 @@ transformation. The emergent property is *evidentiary continuity*: a field inspe
 serialized into a capture, processed by the PHY, and attributed to a flow is one representation
 throughout, so analysis tooling cannot report something the model did not actually represent.
 
-**Composable but causally explicit behavior.** AR-COM-DIRECT, AR-LIFE-STAGES, AR-LIFE-OPERATIONS,
-AR-QUEUE-ROLES, and AR-QUEUE-STREAMING each put internal cooperation at its right semantic level:
-direct calls for same-instant coordination, scheduled messages for genuine events, stages for
-initialization order, queueing contracts for datapath transfer. The result is an event trajectory
-that corresponds to modeled behavior rather than implementation plumbing — which is what makes
-debugging, performance, and fingerprint signal quality good at the same time.
+**Composable but causally explicit behavior.** AR-COM-DIRECT, AR-COM-NOTIFY, AR-LIFE-STAGES,
+AR-LIFE-OPERATIONS, AR-QUEUE-ROLES, and AR-QUEUE-STREAMING each put internal cooperation at its right
+semantic level: direct calls for required same-instant commands and queries, declared signals for
+synchronous listener-order-independent notifications, scheduled messages for genuine events,
+stages for initialization order, and queueing contracts for datapath transfer. The result is an event
+trajectory that corresponds to modeled behavior rather than implementation plumbing — which is
+what makes debugging, performance, and fingerprint signal quality good at the same time.
 
 **Observability without observer effects.** AR-ORG-VIS-SPLIT, AR-OBS-SIGNALS, AR-OBS-NED-TRUTH, and
 AR-OBS-INTROSPECTION establish a one-way path: model owner → declared signal → recorder, visualizer,
@@ -343,4 +367,3 @@ same extension, observation, testing, configuration, and build paths instead of 
 path through the core. The architecture has a rising initial discipline cost and a falling marginal
 integration cost — without it, every new feature looks locally simple while adding one more special
 case to dispatch, inspection, build selection, and tests.
-

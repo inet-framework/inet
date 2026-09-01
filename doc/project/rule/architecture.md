@@ -68,7 +68,8 @@ Every rule in document order. The identifier links to the rule; the statement is
 | [AR-COM-REGISTRY](#ar-com-registry) | Modules declare the protocols and services they provide in a global registry |
 | [AR-COM-DISPATCH](#ar-com-dispatch) | Address peers by protocol/service, not by wiring topology |
 | [AR-COM-SOCKETS](#ar-com-sockets) | Applications use socket-style callback APIs, not raw message exchange |
-| [AR-COM-DIRECT](#ar-com-direct) | Same-instant, same-node coordination uses direct C++ calls, not zero-time messages |
+| [AR-COM-DIRECT](#ar-com-direct) | Required same-instant, same-node coordination uses direct typed calls, not zero-time messages |
+| [AR-COM-NOTIFY](#ar-com-notify) | Behavior-driving signals publish completed facts, not commands or listener-ordered coordination |
 
 **Initialization & Lifecycle (AR-LIFE)**
 
@@ -485,25 +486,51 @@ protocol behavior but makes the common case of *using* a protocol far simpler an
 
 ### AR-COM-DIRECT
 
-**Same-instant, same-node coordination uses direct C++ calls, not zero-time messages**
+**Required same-instant, same-node coordination uses direct typed calls, not zero-time messages**
 
-Coordination between submodules of the same node that happens at the same simulation instant is
-expressed as direct, typed C++ calls, not as messages sent with zero delay.
+When one submodule requires another to perform a command or answer a query at the same simulation
+instant, the interaction is expressed as a direct, typed C++ call, not as a message sent with zero
+delay.
 
-Message passing models communication that takes simulation time or crosses the physical medium;
-using `send()` or `scheduleAt(simTime())` for control flow that occurs at the same instant between
-sibling submodules is a category error that inflates the event count, obscures causality, and
-forces even trivial passthroughs to carry message classes and dispatch code they do not need. For
-same-instant intra-node coordination INET uses direct calls through typed references and the
-service/socket and queueing APIs, with `Enter_Method` establishing the correct module context,
-reserving genuine events for things that actually advance simulation time. This keeps the event
-trajectory meaningful — each event corresponds to something that "happens" in the network — so
-that fingerprints reflect real behavior rather than internal plumbing, and it avoids the
-boilerplate of turning a direct call into a round-trip through the scheduler.
-
-## Initialization & Lifecycle (AR-LIFE)
+Message passing models an interaction whose delivery is itself a simulator event, whether because
+time passes, the physical medium is crossed, or an explicit event boundary matters. Using `send()`
+or `scheduleAt(simTime())` merely to disguise same-instant control flow between sibling submodules
+is a category error that inflates the event count, obscures causality, and forces even trivial
+passthroughs to carry message classes and dispatch code they do not need. For required same-instant
+intra-node coordination INET uses direct calls through typed references and the service/socket and
+queueing APIs, with `Enter_Method` establishing the correct module context. A fire-and-forget
+announcement of a completed fact to independent consumers follows AR-COM-NOTIFY. This separation
+reserves scheduler events for modeled deliveries and event boundaries, keeps the event trajectory
+meaningful, and avoids turning procedure calls into scheduler plumbing.
 
 *Enforced at T3+T4 — lint for `scheduleAt(simTime())`/zero-delay send + agent review; runtime zero-delay hook (T2).*
+
+### AR-COM-NOTIFY
+
+**Behavior-driving signals publish completed facts, not commands or listener-ordered coordination**
+
+A module may emit a declared signal to announce a completed occurrence or state change to zero or
+more independent consumers. Emission is synchronous and fire-and-forget: the publisher restores its
+own invariants before `emit()`, completes its operation without requiring a particular listener,
+reply or acknowledgement, and does not transfer ownership. A behavioral listener may drive its own
+reaction through the ordinary model contracts; when that listener is a module, it establishes its
+module context with `Enter_Method` or `Enter_Method_Silent`. It treats object and details payloads
+as borrowed and immutable, does not retain them beyond the callback unless the declared contract
+guarantees a longer lifetime, and does not depend on its position in the listener invocation order
+or on replay. Successive emissions retain normal simulator causality and may form an ordered stream
+of facts.
+
+The signal name and payload type are declared in NED, and the subscription source, scope and
+lifecycle are explicit in configuration or initialization. Because names are global and signals
+propagate through the module hierarchy, a listener subscribes at the narrowest useful scope and
+filters the source wherever unrelated emitters can merge. A command, query, return value, required
+handshake, ownership transfer, buffering, modeled delay, or coordination whose correctness depends
+on relative invocation order among consumers uses a typed direct or service API, or messages and
+gates when it belongs to the simulated event trajectory.
+
+*Enforced at T1/T2+T4 — NED signal/type checking + kernel listener-list checks + agent review of notification semantics.*
+
+## Initialization & Lifecycle (AR-LIFE)
 
 ### AR-LIFE-STAGES
 
@@ -595,6 +622,10 @@ producer of an event is decoupled from every consumer of it, so adding a new sta
 visualizer requires no change to the protocol, and — crucially — the act of observing is guaranteed
 not to perturb the simulation. This one-way, subscribe-from-outside discipline is the mechanism
 behind both AR-ORG-VIS-SPLIT and the user-facing neutrality guarantee.
+
+This rule governs observational consumers. The same declared signal may also have behavioral
+listeners under AR-COM-NOTIFY, but attaching or removing a recorder, visualizer or analyzer must not
+alter those listeners or any modeled state transition.
 
 *Enforced at T1/T2 — NED `@signal`/`@statistic` (compiler) + fingerprint neutrality.*
 
@@ -937,4 +968,3 @@ judgment (is a fidelity level worth adding?) to a human. Which gate covers which
 inventory of [enforcement/README.md](../enforcement/README.md).
 
 *Enforced at T3 — the gate inventory itself; measured by how many rules above reach T1 to T4.*
-

@@ -44,7 +44,8 @@ not rewire the node, and a module written for one node layout works in another â
 | --- | --- |
 | the packet, with its content | a pointer to a sibling module |
 | tags, which are how a layer asks and answers | a path into another node's tree |
-| a direct call, for same-instant coordination inside the node ([D-DIRECT](decisions.md#d-direct)) | a zero-time message standing in for that call |
+| a direct typed call, for a required same-instant command or query ([D-DIRECT](decisions.md#d-direct)) | a zero-time message standing in for that call |
+| a declared signal, for a completed fact announced to independent listeners ([D-NOTIFY](decisions.md#d-notify)) | a signal used as a command, query or listener-ordered coordination |
 
 ## The aspects that attach to any node
 
