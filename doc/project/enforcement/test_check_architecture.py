@@ -104,6 +104,50 @@ class CheckArchitectureTest(unittest.TestCase):
         self.assertIn("AR-QUAL-DETERMINISM", result.stdout)
         self.assertIn("Bad.cc", result.stdout)
 
+    def test_spaced_std_determinism_sources_are_reported(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/SpacedChrono.cc",
+            "auto now = std\n    :: chrono :: system_clock :: now();\n",
+        )
+        self.write(
+            "src/inet/linklayer/ethernet/SpacedRandom.cc",
+            "auto seed = std /* legal whitespace */ :: random_device{}();\n",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("SpacedChrono.cc", result.stdout)
+        self.assertIn("SpacedRandom.cc", result.stdout)
+
+    def test_global_and_std_rand_time_calls_are_reported(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/BadCalls.cc",
+            "auto first = :: rand();\nauto second = std :: time(nullptr);\n",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("BadCalls.cc", result.stdout)
+
+    def test_member_and_unrelated_qualified_calls_are_ignored(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/Deterministic.cc",
+            """auto first = object.time();
+auto second = pointer->time();
+auto third = other :: time();
+auto fourth = object.rand();
+auto fifth = pointer -> rand();
+auto sixth = other::rand();
+auto seventh = other::std::chrono::steady_clock::now();
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
     def test_determinism_scan_ignores_comments_and_literals(self) -> None:
         self.write(
             "src/inet/linklayer/ethernet/Prose.cc",

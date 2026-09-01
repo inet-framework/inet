@@ -5,19 +5,22 @@ from __future__ import annotations
 
 import re
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 
 SOURCE_SUFFIXES = {".cc", ".h", ".icc"}
-FORBIDDEN = re.compile(
-    r"std::random_device|std::chrono::|"
-    r"(?<![A-Za-z0-9_])rand\s*\(|"
-    r"(?<![A-Za-z0-9_])time\s*\("
-)
 RAW_STRING = re.compile(r'(?:u8|u|U|L)?R"([^ ()\\\t\r\n]{0,16})\(')
+CPP_TOKEN = re.compile(r"[A-Za-z_]\w*|::|->|[^\s]")
 RESULT_FILTERS_ALLOW = re.compile(
     r"(?:startTime = time\(nullptr\);|time_t t = time\(nullptr\);)"
 )
+
+
+@dataclass(frozen=True)
+class Token:
+    text: str
+    line: int
 
 
 def blank(output: list[str], start: int, end: int) -> None:
@@ -73,6 +76,58 @@ def strip_comments_and_literals(text: str) -> str:
     return "".join(output)
 
 
+def cpp_tokens(code: str) -> list[Token]:
+    tokens: list[Token] = []
+    line = 1
+    previous = 0
+    for match in CPP_TOKEN.finditer(code):
+        line += code.count("\n", previous, match.start())
+        tokens.append(Token(match.group(0), line))
+        previous = match.start()
+    return tokens
+
+
+def is_identifier(token: Token) -> bool:
+    return token.text[0].isalpha() or token.text[0] == "_"
+
+
+def is_root_std(tokens: list[Token], index: int) -> bool:
+    if tokens[index].text != "std" or index == 0:
+        return tokens[index].text == "std"
+    previous = tokens[index - 1].text
+    if previous in {".", "->"}:
+        return False
+    if previous != "::":
+        return True
+    return index < 2 or not is_identifier(tokens[index - 2])
+
+
+def forbidden_lines(code: str) -> set[int]:
+    tokens = cpp_tokens(code)
+    lines: set[int] = set()
+    for index, token in enumerate(tokens):
+        if token.text == "std" and is_root_std(tokens, index) and index + 2 < len(tokens):
+            is_random_device = tokens[index + 2].text == "random_device"
+            is_chrono_scope = (
+                tokens[index + 2].text == "chrono"
+                and index + 3 < len(tokens)
+                and tokens[index + 3].text == "::"
+            )
+            if tokens[index + 1].text == "::" and (is_random_device or is_chrono_scope):
+                lines.add(token.line)
+
+        if token.text not in {"rand", "time"} or index + 1 >= len(tokens) or tokens[index + 1].text != "(":
+            continue
+        if index == 0 or tokens[index - 1].text not in {".", "->", "::"}:
+            lines.add(token.line)
+        elif tokens[index - 1].text == "::":
+            if index < 2 or not is_identifier(tokens[index - 2]):
+                lines.add(token.line)
+            elif tokens[index - 2].text == "std" and is_root_std(tokens, index - 2):
+                lines.add(token.line)
+    return lines
+
+
 def allowed(relative: Path, code: str) -> bool:
     return (
         relative.as_posix() == "src/inet/common/ResultFilters.cc"
@@ -96,10 +151,13 @@ def main() -> int:
             if not path.is_file() or path.suffix not in SOURCE_SUFFIXES:
                 continue
             relative = path.resolve().relative_to(root)
-            original_lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-            code_lines = strip_comments_and_literals("\n".join(original_lines)).splitlines()
-            for line_number, (original, code) in enumerate(zip(original_lines, code_lines), start=1):
-                if FORBIDDEN.search(code) and not allowed(relative, code):
+            original_text = path.read_text(encoding="utf-8", errors="replace")
+            original_lines = original_text.splitlines()
+            code_lines = strip_comments_and_literals(original_text).splitlines()
+            for line_number in sorted(forbidden_lines("\n".join(code_lines))):
+                original = original_lines[line_number - 1]
+                code = code_lines[line_number - 1]
+                if not allowed(relative, code):
                     findings.append(f"{relative}:{line_number}:{original}")
     except (OSError, ValueError) as error:
         print(f"error: determinism scan failed: {error}", file=sys.stderr)

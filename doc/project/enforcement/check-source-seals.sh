@@ -134,20 +134,90 @@ else
 fi
 
 # Extract path cells only from the canonical "Sealed paths" section. Document-seal rows and
-# generated index entries are deliberately outside this source-path guard.
+# generated index entries are deliberately outside this source-path guard. Markdown permits
+# optional whitespace around table cells, so parse cells instead of matching one rendering.
+trim_cell() {
+  trimmed_cell="$1"
+  trimmed_cell="${trimmed_cell#"${trimmed_cell%%[![:space:]]*}"}"
+  trimmed_cell="${trimmed_cell%"${trimmed_cell##*[![:space:]]}"}"
+}
+
+strip_html_comments() {
+  remaining_text="$1"
+  visible_text=""
+  while [ -n "$remaining_text" ]; do
+    if [ "$in_comment" -eq 1 ]; then
+      if [[ "$remaining_text" == *"-->"* ]]; then
+        remaining_text="${remaining_text#*-->}"
+        in_comment=0
+      else
+        remaining_text=""
+      fi
+    elif [[ "$remaining_text" == *"<!--"* ]]; then
+      visible_text+="${remaining_text%%<!--*}"
+      remaining_text="${remaining_text#*<!--}"
+      in_comment=1
+    else
+      visible_text+="$remaining_text"
+      remaining_text=""
+    fi
+  done
+}
+
 SEALED_PATTERNS=()
-while IFS= read -r line; do
-  if [[ "$line" =~ \`([^\`]+)\` ]]; then
-    pattern="${BASH_REMATCH[1]}"
-    SEALED_PATTERNS+=("$pattern")
+in_paths=0
+in_comment=0
+line_number=0
+path_cell_pattern='^`([^`]+)`([[:space:]].*)?$'
+while IFS= read -r line || [ -n "$line" ]; do
+  line_number=$((line_number + 1))
+  strip_html_comments "$line"
+  trim_cell "$visible_text"
+  trimmed_line="$trimmed_cell"
+
+  if [ "$trimmed_line" = "## Sealed paths" ]; then
+    in_paths=1
+    continue
+  elif [ "$trimmed_line" = "## Sealed documents" ]; then
+    in_paths=0
+    continue
   fi
-done < <(printf '%s\n' "$status_text" | awk '
-  /^## Sealed paths$/ { in_paths = 1; next }
-  /^## Sealed documents$/ { in_paths = 0 }
-  /<!--/ { in_comment = 1 }
-  /-->/ { in_comment = 0; next }
-  in_paths && !in_comment && /^\| 🔒 \|/ { print }
-')
+
+  if [ "$in_paths" -ne 1 ] || [[ "$trimmed_line" != *"|"* ]]; then
+    continue
+  fi
+
+  row="$trimmed_line"
+  if [[ "$row" == \|* ]]; then
+    row="${row:1}"
+  fi
+  if [[ "$row" == *\| ]]; then
+    row="${row::-1}"
+  fi
+  IFS='|' read -r -a cells <<< "$row"
+  trim_cell "${cells[0]:-}"
+  if [ "$trimmed_cell" != "🔒" ]; then
+    continue
+  fi
+
+  trim_cell "${cells[1]:-}"
+  path_cell="$trimmed_cell"
+  if [[ ! "$path_cell" =~ $path_cell_pattern ]] || [[ "${BASH_REMATCH[2]:-}" == *'`'* ]]; then
+    echo "error: malformed active seal row in $status_label:$line_number: expected exactly one non-empty backtick path in the Path cell" >&2
+    exit 2
+  fi
+  pattern="${BASH_REMATCH[1]}"
+  trim_cell "$pattern"
+  if [ "$pattern" != "$trimmed_cell" ] || [[ "$pattern" == /* || "$pattern" == "src/inet" || \
+       "$pattern" == src/inet/* || \
+       "$pattern" == *"//"* || "$pattern" == "." || "$pattern" == ".." || \
+       "$pattern" == ./* || "$pattern" == ../* || "$pattern" == *"/./"* || \
+       "$pattern" == */. || "$pattern" == *"/../"* || "$pattern" == */.. ]]; then
+    echo "error: malformed active seal row in $status_label:$line_number: seal path must be normalized and relative to src/inet" >&2
+    exit 2
+  fi
+  SEALED_PATTERNS+=("$pattern")
+done <<< "$status_text"
 
 if [ ${#SEALED_PATTERNS[@]} -eq 0 ]; then
   echo "info: No sealed paths found in $status_label. All files unsealed."

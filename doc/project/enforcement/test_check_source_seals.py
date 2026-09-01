@@ -63,9 +63,49 @@ class CheckSourceSealsTest(unittest.TestCase):
             text=True,
         )
 
+    def write_registry_row(self, row):
+        self.write(
+            "doc/project/audit/seal-list.md",
+            f"""# Seal list
+
+## Sealed paths
+
+| Status | Path | Note |
+| --- | --- | --- |
+{row}
+
+## Sealed documents
+""",
+        )
+
     def test_commented_template_row_is_not_a_seal(self):
         result = self.check("src/inet/common/INETDefs.h")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_seal_rows_allow_optional_markdown_cell_spacing(self):
+        for row in (
+            "|🔒|`sealed/`|active directory seal|",
+            "|   🔒   |   `sealed/`   | active directory seal |",
+            "|🔒|`sealed/`|active directory seal <!-- note -->|",
+        ):
+            with self.subTest(row=row):
+                self.write_registry_row(row)
+                result = self.check("src/inet/sealed/Old.cc")
+                self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+                self.assertIn("matches sealed directory 'sealed/'", result.stdout)
+
+    def test_malformed_active_seal_rows_fail_closed(self):
+        for row in (
+            "| 🔒 | sealed/ | missing code span |",
+            "| 🔒 | `` | empty code span |",
+            "| 🔒 | `sealed/` and `other/` | multiple code spans |",
+            "| 🔒 | `../sealed/` | noncanonical path |",
+        ):
+            with self.subTest(row=row):
+                self.write_registry_row(row)
+                result = self.check("src/inet/sealed/Old.cc")
+                self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+                self.assertIn("malformed active seal row", result.stderr)
 
     def test_generated_message_sibling_inherits_exact_seal(self):
         result = self.check("src/inet/proto/Foo_m.cc")
