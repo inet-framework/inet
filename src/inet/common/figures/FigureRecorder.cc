@@ -34,7 +34,7 @@ void FigureRecorder::init(Context *ctx)
     if (!figure)
         throw cRuntimeError("Figure '%s' in module '%s' not found", figureName.c_str(), module->getFullPath().c_str());
     indicatorFigure = check_and_cast<IIndicatorFigure *>(figure);
-    if (series > indicatorFigure->getNumSeries())
+    if (series < 0 || series >= indicatorFigure->getNumSeries())
         throw cRuntimeError("series :%d is out of bounds, figure '%s' supports %d series", series, figureName.c_str(), indicatorFigure->getNumSeries());
 }
 
