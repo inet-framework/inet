@@ -18,6 +18,8 @@ namespace inet {
 
 namespace ieee80211 {
 
+// IEEE Std 802.11-2024, 9.2.2: fixed-width numeric management fields use least-significant octet first.
+
 Register_Serializer(Ieee80211AssociationRequestFrame, Ieee80211MgmtFrameSerializer);
 Register_Serializer(Ieee80211AssociationResponseFrame, Ieee80211MgmtFrameSerializer);
 Register_Serializer(Ieee80211AuthenticationFrame, Ieee80211MgmtFrameSerializer);
@@ -37,6 +39,9 @@ static constexpr uint8_t MAX_SUPPORTED_RATES = 8;
 static constexpr uint16_t MAX_EXTENDED_SUPPORTED_RATES = 255;
 static constexpr double SUPPORTED_RATE_UNIT = 0.5;
 static constexpr double MAX_SUPPORTED_RATE_UNITS = 127;
+static constexpr uint16_t ASSOCIATION_ID_MARKER = 0xC000;
+static constexpr uint16_t ASSOCIATION_ID_MASK = 0x3FFF;
+static constexpr int MAX_LOGICAL_ASSOCIATION_ID = 2007;
 
 static void validateSupportedRatesCount(int numRates)
 {
@@ -433,6 +438,35 @@ static void deserializeSupportedRates(MemoryInputStream& stream, Ieee80211MgmtFr
     }
 }
 
+static uint16_t encodeAssociationId(Ieee80211StatusCode statusCode, int aid)
+{
+    if (statusCode == SC_SUCCESSFUL) {
+        if (aid < 1 || aid > MAX_LOGICAL_ASSOCIATION_ID)
+            throw cRuntimeError("Malformed successful Association Response AID: %d", aid);
+        return ASSOCIATION_ID_MARKER | static_cast<uint16_t>(aid);
+    }
+    // This model uses zero for unsuccessful response AIDs. Keep that
+    // policy explicit at the wire boundary instead of accepting a stale ID.
+    if (aid != 0)
+        throw cRuntimeError("Malformed unsuccessful Association Response AID: %d", aid);
+    return 0;
+}
+
+static int decodeAssociationId(Ieee80211StatusCode statusCode, uint16_t wireAid)
+{
+    if (statusCode == SC_SUCCESSFUL) {
+        if ((wireAid & ASSOCIATION_ID_MARKER) != ASSOCIATION_ID_MARKER)
+            throw cRuntimeError("Malformed successful Association Response AID: missing marker 0xC000");
+        const int aid = wireAid & ASSOCIATION_ID_MASK;
+        if (aid < 1 || aid > MAX_LOGICAL_ASSOCIATION_ID)
+            throw cRuntimeError("Malformed successful Association Response AID: %d", aid);
+        return aid;
+    }
+    if (wireAid != 0)
+        throw cRuntimeError("Malformed unsuccessful Association Response AID: expected zero, got 0x%04x", wireAid);
+    return 0;
+}
+
 } // namespace
 
 // IEEE Std 802.11-2024, 9.2.2: octets in multi-octet numeric fields are transmitted
@@ -530,7 +564,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 2    Status code
         stream.writeUint16Le(associationResponseFrame->getStatusCode());
         // 3    AID
-        stream.writeUint16Le(associationResponseFrame->getAid());
+        stream.writeUint16Le(encodeAssociationId(associationResponseFrame->getStatusCode(), associationResponseFrame->getAid()));
         // 4    Supported rates
         writeSupportedRateElements(stream, associationResponseFrame);
         writeHtElements(stream, associationResponseFrame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
@@ -545,7 +579,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 2    Status code
         stream.writeUint16Le(reassociationResponseFrame->getStatusCode());
         // 3    AID
-        stream.writeUint16Le(reassociationResponseFrame->getAid());
+        stream.writeUint16Le(encodeAssociationId(reassociationResponseFrame->getStatusCode(), reassociationResponseFrame->getAid()));
         // 4    Supported rates
         writeSupportedRateElements(stream, reassociationResponseFrame);
         writeHtElements(stream, reassociationResponseFrame, HT_CAPABILITIES_ALLOWED | HT_OPERATION_ALLOWED | EXTENDED_SUPPORTED_RATES_ALLOWED);
@@ -701,7 +735,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         auto frame = makeShared<Ieee80211AssociationResponseFrame>();
         stream.readUint16Le();
         frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Le());
-        frame->setAid(stream.readUint16Le());
+        frame->setAid(decodeAssociationId(frame->getStatusCode(), stream.readUint16Le()));
 
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
@@ -713,7 +747,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         auto frame = makeShared<Ieee80211ReassociationResponseFrame>();
         stream.readUint16Le();
         frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Le());
-        frame->setAid(stream.readUint16Le());
+        frame->setAid(decodeAssociationId(frame->getStatusCode(), stream.readUint16Le()));
 
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
