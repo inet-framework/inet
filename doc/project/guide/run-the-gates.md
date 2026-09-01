@@ -99,6 +99,8 @@ cover the **semantic** rules: visualization logic inside a protocol, a zero-time
 for a call, prose that duplicates a NED declaration, a test whose category does not match its claim.
 Those are tier 4, and they need the [agent-review checklist](../enforcement/checklist/general.md).
 
-The pull-request `project-gates.yml` workflow runs the enforcement checker tests and rejects changes
-to paths that were sealed at the branch merge base. The remaining rule gates above still depend on
-contributors running them by hand, and are the next CI coverage gap to close.
+The pull-request `enforcement-tests.yml` workflow runs the enforcement checker tests.
+`check-sealing.yml` evaluates paths sealed at the branch merge base and, when necessary, waits for
+the protected approval required by [SR-PR-APPROVAL](../rule/sealing.md#sr-pr-approval). The remaining
+rule gates above still depend on contributors running them by hand, and are the next CI coverage gap
+to close.

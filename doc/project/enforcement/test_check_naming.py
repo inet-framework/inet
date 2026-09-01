@@ -171,6 +171,67 @@ class Other {}
         self.assertEqual(1, result.returncode)
         self.assertIn("NR-PKG", result.stdout)
 
+    def test_worktree_checks_multiline_forward_changed_to_nonconforming_definition(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo {}
+class bad_name
+;
+""")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("\n;\n", "\n{}\n"), encoding="utf-8")
+
+        result = self.check()
+
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-MSG-TYPE", result.stdout)
+        self.assertIn("bad_name", result.stdout)
+
+    def test_staged_checks_multiline_forward_changed_to_nonconforming_definition(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo {}
+class bad_name
+;
+""")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("\n;\n", "\n{}\n"), encoding="utf-8")
+        self.run_command("git", "add", str(path.relative_to(self.root)))
+
+        result = self.check("--staged")
+
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-MSG-TYPE", result.stdout)
+        self.assertIn("bad_name", result.stdout)
+
+    def test_base_checks_multiline_forward_changed_to_nonconforming_definition(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo {}
+class bad_name
+;
+""")
+        self.commit_all()
+        base = self.head()
+        path.write_text(path.read_text(encoding="utf-8").replace("\n;\n", "\n{}\n"), encoding="utf-8")
+        self.commit_all()
+
+        result = self.check("--base", base)
+
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-MSG-TYPE", result.stdout)
+        self.assertIn("bad_name", result.stdout)
+
+    def test_changed_comment_does_not_activate_multiline_forward_declaration(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo {}
+class bad_name
+;
+""")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("\n;\n", "\n// still forward\n;\n"), encoding="utf-8")
+
+        result = self.check()
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
     def test_reports_mechanical_rule_families(self) -> None:
         self.write("src/inet/foo/Bad.ned", """package inet.BadPath;
 simple bad_type
@@ -372,6 +433,28 @@ simple Outside
         self.assertIn("NR-NED/MSG", result.stdout)
         self.assertIn("Bad_inside", result.stdout)
         self.assertNotIn("Bad_outside", result.stdout)
+
+    def test_wrapper_rejects_rule_gate_workflow_without_check_prefix(self) -> None:
+        self.write("src/inet/foo/Foo.ned", "package inet.foo;\nsimple Foo {}\n")
+        self.write(".github/workflows/project-gates.yml", "name: project gates\n")
+        self.commit_all()
+
+        result = self.check_wrapper()
+
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-CI", result.stdout)
+        self.assertIn(".github/workflows/project-gates.yml", result.stdout)
+
+    def test_wrapper_accepts_ci_workflow_filename_forms(self) -> None:
+        self.write("src/inet/foo/Foo.ned", "package inet.foo;\nsimple Foo {}\n")
+        self.write(".github/workflows/build-linux.yml", "name: build linux\n")
+        self.write(".github/workflows/enforcement-tests.yml", "name: enforcement tests\n")
+        self.write(".github/workflows/check-sealing.yml", "name: check sealing\n")
+        self.commit_all()
+
+        result = self.check_wrapper()
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
     def test_invalid_base_returns_usage_error_through_wrapper(self) -> None:
         self.write("src/inet/foo/Foo.ned", "package inet.foo;\nsimple Foo {}\n")

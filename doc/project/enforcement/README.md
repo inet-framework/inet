@@ -45,12 +45,15 @@ measured.
 | [check-source-seals.sh](check-source-seals.sh) | T3 | pull-request CI and by hand | source-path `SR-*`: recursive and generated-file seal coverage from [seal-list.md](../audit/seal-list.md) |
 | [checklist/general.md](checklist/general.md) | T4 | by an agent, on every change | the semantic architecture rules |
 | [checklist/ieee80211.md](checklist/ieee80211.md) | T4 | by an agent, on an 802.11 diff | `AR-WLAN-*` |
-| the test suites | T2 | GitHub Actions, twelve workflows | `TR-*`, `AR-QUAL-FINGERPRINT`, `AR-QUAL-DETERMINISM` |
+| the test suites | T2 | GitHub Actions test workflows | `TR-*`, `AR-QUAL-FINGERPRINT`, `AR-QUAL-DETERMINISM` |
 | `inet_featuretool` | T3 | the feature workflow | `AR-EXT-FEATURES` |
 
-The pull-request [project-gates workflow](../../../.github/workflows/project-gates.yml) runs the
-enforcement checker tests and the source-seal guard. The other `T3` gates above are still by hand;
-a person must remember to run them, which is the weakest form of every rule they cover.
+The pull-request [enforcement-tests workflow](../../../.github/workflows/enforcement-tests.yml) runs
+the checker regressions without privileged credentials. The trusted
+[sealing workflow](../../../.github/workflows/check-sealing.yml) runs base-branch checker code over
+the exact pull-request head and routes sealed hits through protected approval. The other `T3` gates
+above are still by hand; a person must remember to run them, which is the weakest form of every rule
+they cover.
 
 ## How to run them
 
@@ -67,6 +70,7 @@ python3 doc/project/enforcement/check-ned-msg-naming.py --base origin/master
 doc/project/enforcement/check-commits.sh origin/master..HEAD
 doc/project/enforcement/check-source-seals.sh --diff       # changed source paths against seals
 doc/project/enforcement/check-source-seals.sh --base origin/master  # committed branch paths
+doc/project/enforcement/check-source-seals.sh --base <base-sha> --head <head-sha>
 doc/project/enforcement/check-source-seals.sh src/inet/foo/Foo.cc
 doc/project/enforcement/check-seals.sh                    # document flags and generated index
 doc/project/enforcement/check-seals.sh --write            # check and rewrite the index
@@ -82,9 +86,20 @@ wrapper selects branch mode for `--base` and a complete recursive declaration sc
 subtree. The source-seal gate defaults to the working-tree diff when no option is supplied; use
 `--staged` or explicit source paths as needed. Its `--base <ref>` mode checks the committed branch
 from `merge-base(<ref>, HEAD)` and reads the seal registry from that merge base, so removing a seal
-inside the branch cannot hide a source change. `check-seals.sh` checks document flags, while
+inside the branch cannot hide a source change. `--head <ref>` lets trusted base-branch workflow code
+inspect another exact commit without checking it out. The protected workflow alone adds
+`--ci-approved` after its required reviewer approves that base/head range; pull-request content must
+never supply the option. `check-seals.sh` checks document flags, while
 `check-source-seals.sh` checks paths under `src/inet/`. These gates return `2` for invalid usage or a
 missing canonical input; do not substitute a skill-package copy when a canonical gate is unavailable.
+
+The repository environment named `sealed-source-change` is part of that fail-closed path. Configure
+required reviewers, prevent self-review and administrator bypass, and set its environment variable
+`SEALED_SOURCE_APPROVAL` to `granted`. Without that exact variable the approval job fails even if an
+unprotected environment was created accidentally. Require `check-sealing.yml` itself through an
+organization ruleset's **Require workflows to pass before merging** rule, pinned to the trusted base
+branch. A name-only required status is not the authority, because another pull-request workflow can
+emit the same job name.
 
 [guide/run-the-gates.md](../guide/run-the-gates.md) says which of them to run before a push, and in
 which order.

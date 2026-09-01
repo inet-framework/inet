@@ -9,10 +9,10 @@
 #   doc/project/enforcement/check-source-seals.sh [file...]
 #   doc/project/enforcement/check-source-seals.sh --diff
 #   doc/project/enforcement/check-source-seals.sh --staged
-#   doc/project/enforcement/check-source-seals.sh --base <ref>
+#   doc/project/enforcement/check-source-seals.sh --base <ref> [--head <ref>] [--ci-approved]
 #
 # Exit status:
-#   0 = All target files are unsealed (or no files provided)
+#   0 = All target files are unsealed, or sealed files carry trusted CI approval
 #   1 = One or more target files are SEALED (explicit approval required)
 #   2 = Error (e.g. the canonical registry is unavailable)
 
@@ -29,8 +29,46 @@ fi
 # Select input mode and reject option typos before collecting target files.
 mode="paths"
 base_ref=""
+head_ref=""
+ci_approved=0
 if [ $# -eq 0 ]; then
   mode="diff"
+elif [ "$1" = "--base" ]; then
+  if [ $# -lt 2 ] || [[ "${2:-}" == --* ]]; then
+    echo "error: --base requires a Git reference" >&2
+    exit 2
+  fi
+  mode="base"
+  base_ref="$2"
+  shift 2
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --head)
+        if [ -n "$head_ref" ] || [ $# -lt 2 ] || [[ "${2:-}" == --* ]]; then
+          echo "error: --head requires exactly one Git reference" >&2
+          exit 2
+        fi
+        head_ref="$2"
+        shift 2
+        ;;
+      --ci-approved)
+        if [ "$ci_approved" -eq 1 ]; then
+          echo "error: --ci-approved may be specified only once" >&2
+          exit 2
+        fi
+        ci_approved=1
+        shift
+        ;;
+      *)
+        echo "error: unknown --base argument: '$1'" >&2
+        exit 2
+        ;;
+    esac
+  done
+  if [ "$ci_approved" -eq 1 ] && [ -z "$head_ref" ]; then
+    echo "error: --ci-approved requires an explicit --head reference" >&2
+    exit 2
+  fi
 elif [[ "${1:-}" == --* ]]; then
   case "$1" in
     --diff)
@@ -47,13 +85,9 @@ elif [[ "${1:-}" == --* ]]; then
         exit 2
       fi
       ;;
-    --base)
-      if [ $# -ne 2 ] || [[ "${2:-}" == --* ]]; then
-        echo "error: --base requires exactly one Git reference" >&2
-        exit 2
-      fi
-      mode="base"
-      base_ref="$2"
+    --head|--ci-approved)
+      echo "error: $1 is valid only after --base" >&2
+      exit 2
       ;;
     *)
       echo "error: unknown option: '$1'" >&2
@@ -73,10 +107,21 @@ fi
 # branch's registry would let the same branch remove a seal row and then modify the formerly sealed
 # source without detection.
 merge_base=""
+base_commit=""
+head_commit=""
 status_label="$STATUS_FILE"
 if [ "$mode" = "base" ]; then
-  if ! merge_base="$(git merge-base "$base_ref" HEAD 2>/dev/null)" || [ -z "$merge_base" ]; then
-    echo "error: '$base_ref' has no merge base with HEAD" >&2
+  if ! base_commit="$(git rev-parse --verify "${base_ref}^{commit}" 2>/dev/null)" || [ -z "$base_commit" ]; then
+    echo "error: invalid base reference: '$base_ref'" >&2
+    exit 2
+  fi
+  effective_head_ref="${head_ref:-HEAD}"
+  if ! head_commit="$(git rev-parse --verify "${effective_head_ref}^{commit}" 2>/dev/null)" || [ -z "$head_commit" ]; then
+    echo "error: invalid head reference: '$effective_head_ref'" >&2
+    exit 2
+  fi
+  if ! merge_base="$(git merge-base "$base_commit" "$head_commit" 2>/dev/null)" || [ -z "$merge_base" ]; then
+    echo "error: '$base_ref' has no merge base with '$effective_head_ref'" >&2
     exit 2
   fi
   if ! status_text="$(git show "${merge_base}:doc/project/audit/seal-list.md" 2>/dev/null)"; then
@@ -133,7 +178,7 @@ elif [ "$mode" = "base" ]; then
   while IFS= read -r -d '' f; do
     TARGET_FILES+=("$f")
   # Disable rename detection so both the old sealed path and new path are checked.
-  done < <(git diff --no-renames --name-only -z "$merge_base" HEAD -- src/inet 2>/dev/null)
+  done < <(git diff --no-ext-diff --no-renames --name-only -z "$merge_base" "$head_commit" -- src/inet 2>/dev/null)
 else
   for arg in "$@"; do
     normalized="${arg#./}"
@@ -206,9 +251,16 @@ done
 
 echo
 if [ "$sealed_hits" -gt 0 ]; then
-  echo "GUARD VIOLATION: $sealed_hits file(s) are SEALED under src/inet/."
-  echo "STOP: You must obtain explicit user permission in this conversation before modifying sealed files."
-  exit 1
+  if [ "$ci_approved" -eq 1 ]; then
+    echo "GUARD APPROVED: $sealed_hits sealed file(s) are authorized for this CI range."
+    echo "MERGE BASE: $merge_base"
+    echo "HEAD: $head_commit"
+    exit 0
+  else
+    echo "GUARD VIOLATION: $sealed_hits file(s) are SEALED under src/inet/."
+    echo "STOP: You must obtain explicit user permission in this conversation before modifying sealed files."
+    exit 1
+  fi
 else
   echo "GUARD PASSED: All checked files are unsealed. Proceeding is safe."
   exit 0

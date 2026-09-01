@@ -78,6 +78,10 @@ class CheckSourceSealsTest(unittest.TestCase):
             ("--diff", "src/inet/open/Keep.cc"),
             ("--base",),
             ("--base", "HEAD", "extra"),
+            ("--head", "HEAD"),
+            ("--ci-approved",),
+            ("--base", "HEAD", "--ci-approved"),
+            ("--base", "HEAD", "--head"),
         ):
             with self.subTest(args=args):
                 result = self.check(*args)
@@ -87,7 +91,12 @@ class CheckSourceSealsTest(unittest.TestCase):
     def test_invalid_base_returns_usage_error(self):
         result = self.check("--base", "missing-ref")
         self.assertEqual(2, result.returncode, result.stdout + result.stderr)
-        self.assertIn("no merge base", result.stderr)
+        self.assertIn("invalid base reference", result.stderr)
+
+    def test_invalid_explicit_head_returns_usage_error(self):
+        result = self.check("--base", "HEAD", "--head", "missing-ref")
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("invalid head reference", result.stderr)
 
     def test_explicit_non_source_or_outside_path_is_rejected(self):
         for path in (
@@ -135,6 +144,33 @@ class CheckSourceSealsTest(unittest.TestCase):
 
         self.assertEqual(1, result.returncode, result.stdout + result.stderr)
         self.assertIn("src/inet/sealed/Old.cc", result.stdout)
+
+    def test_base_mode_checks_explicit_head_without_checking_it_out(self):
+        base = self.head()
+        self.write("src/inet/sealed/Old.cc", "int value = 2;\n")
+        self.git("add", ".")
+        self.git("commit", "-qm", "change sealed source")
+        head = self.head()
+        self.git("checkout", "-q", base)
+
+        result = self.check("--base", base, "--head", head)
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("src/inet/sealed/Old.cc", result.stdout)
+
+    def test_trusted_ci_approval_allows_exact_explicit_range(self):
+        base = self.head()
+        self.write("src/inet/sealed/Old.cc", "int value = 2;\n")
+        self.git("add", ".")
+        self.git("commit", "-qm", "change sealed source")
+        head = self.head()
+        self.git("checkout", "-q", base)
+
+        result = self.check("--base", base, "--head", head, "--ci-approved")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("GUARD APPROVED", result.stdout)
+        self.assertIn(f"HEAD: {head}", result.stdout)
 
     def test_base_mode_checks_old_path_of_committed_rename(self):
         base = self.head()
