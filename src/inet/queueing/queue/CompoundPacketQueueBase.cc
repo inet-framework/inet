@@ -62,6 +62,7 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, const cGate *gate)
             auto packet = packetDropperFunction->selectPacket(this);
             EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
             removePacket(packet);
+            take(packet);
             dropPacket(packet, QUEUE_OVERFLOW);
         }
     }
