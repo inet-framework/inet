@@ -96,7 +96,7 @@ an index.**
 | [report/subsystem/](report/subsystem/) | the path with slashes turned to hyphens, `src/inet/` stripped: `common-packet.md` | rewritten by each re-audit |
 | [report/pull-request/](report/pull-request/) | `pr-<number>.md` | one per pull request |
 | [report/sweep/](report/sweep/) | the rule family: `naming.md`, `architecture.md` | rewritten by each sweep |
-| [report/document/](report/document/) | the document path with slashes turned to hyphens: `rule-naming.md` | rewritten by each re-audit |
+| `report/document/` | the document path with slashes turned to hyphens: `rule-naming.md` | rewritten by each re-audit; **empty — no document has been audited yet** |
 
 The three pull request reports in this tree — [pr-1124](report/pull-request/pr-1124.md),
 [pr-1125](report/pull-request/pr-1125.md), [pr-1144](report/pull-request/pr-1144.md) — are the worked
