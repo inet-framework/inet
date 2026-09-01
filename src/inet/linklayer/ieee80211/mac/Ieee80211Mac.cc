@@ -25,6 +25,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211HtChannelWidthProvider.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -66,6 +67,18 @@ void Ieee80211Mac::initialize(int stage)
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
+        std::set<Hz> operationalChannelWidths;
+        if (modeSet->isHtOperationSupported()) {
+            const auto *transmitterWidthProvider = dynamic_cast<const IIeee80211HtChannelWidthProvider *>(radio->getTransmitter());
+            const auto *receiverWidthProvider = dynamic_cast<const IIeee80211HtChannelWidthProvider *>(radio->getReceiver());
+            if (transmitterWidthProvider == nullptr || receiverWidthProvider == nullptr)
+                throw cRuntimeError("HT operation requires transmitter and receiver PHY channel-width providers");
+            for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
+                if (transmitterWidthProvider->isHtChannelWidthSupported(channelWidth) &&
+                        receiverWidthProvider->isHtChannelWidthSupported(channelWidth))
+                    operationalChannelWidths.insert(channelWidth);
+        }
+        mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths);
         emit(modesetChangedSignal, modeSet);
         if (isUp())
             initializeRadioMode();

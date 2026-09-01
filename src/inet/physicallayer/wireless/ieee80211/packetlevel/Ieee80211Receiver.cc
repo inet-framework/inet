@@ -98,6 +98,14 @@ void Ieee80211Receiver::setChannelNumber(int channelNumber)
         setChannel(new Ieee80211Channel(band, channelNumber));
 }
 
+bool Ieee80211Receiver::isHtChannelWidthSupported(Hz channelWidth) const
+{
+    // The receiver listens around the primary-channel center and cannot yet
+    // represent simultaneous primary-only and primary/secondary reception.
+    return channelWidth == MHz(20) && channelWidth <= getBandwidth() && modeSet != nullptr &&
+            modeSet->getHtSupportedChannelWidths().count(channelWidth) != 0;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

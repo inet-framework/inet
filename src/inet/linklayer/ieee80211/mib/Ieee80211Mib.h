@@ -92,7 +92,7 @@ class INET_API Ieee80211Mib : public SimpleModule
     std::string getSsidStr() const;
     short allocateAssociationId(const MacAddress& address);
     void releaseAssociationId(const MacAddress& address);
-    void updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet);
+    void updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet, const std::set<Hz>& operationalChannelWidths);
     bool isHtOperationSupported() const { return localHtCapabilitiesValid; }
     const PeerHtState *findPeerHtState(const MacAddress& address) const;
     void setPeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities, const Ieee80211HtOperation& operation);

@@ -9,6 +9,7 @@
 #define __INET_IEEE80211RECEIVER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211HtChannelWidthProvider.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
@@ -17,7 +18,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211Receiver : public FlatReceiverBase
+class INET_API Ieee80211Receiver : public FlatReceiverBase, public IIeee80211HtChannelWidthProvider
 {
   protected:
     const Ieee80211ModeSet *modeSet = nullptr;
@@ -41,6 +42,7 @@ class INET_API Ieee80211Receiver : public FlatReceiverBase
     virtual void setBand(const IIeee80211Band *band);
     virtual void setChannel(const Ieee80211Channel *channel);
     virtual void setChannelNumber(int channelNumber);
+    virtual bool isHtChannelWidthSupported(Hz channelWidth) const override;
 };
 
 } // namespace physicallayer

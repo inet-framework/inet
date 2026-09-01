@@ -114,6 +114,14 @@ void Ieee80211Transmitter::setChannelNumber(int channelNumber)
         setChannel(new Ieee80211Channel(band, channelNumber));
 }
 
+bool Ieee80211Transmitter::isHtChannelWidthSupported(Hz channelWidth) const
+{
+    // The packet-level PHY currently represents only the primary channel.
+    // Until a primary/secondary compound channel determines the analog-model
+    // center frequency, advertising a 40 MHz HT width would be false.
+    return channelWidth == MHz(20) && modeSet != nullptr && modeSet->getHtSupportedChannelWidths().count(channelWidth) != 0;
+}
+
 std::ostream& Ieee80211Transmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211Transmitter";
