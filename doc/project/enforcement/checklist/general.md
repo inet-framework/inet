@@ -32,6 +32,13 @@ Ground rules:
 
 ## Checklist
 
+**[AR-ORG-CONTRACT-PURITY] Does a contract header declare anything that is not part of the role?**
+FLAG a `static` helper, a utility function, a non-trivial inline body, or a policy decision added to a
+C++ interface or a NED `moduleinterface`. Ask where it goes instead: the `*Base` class if it serves
+implementors, the caller's side if it serves callers, the owning module if it encodes a modeling
+decision. *Not a violation:* a pure virtual, a nested type the role needs, a `static simsignal_t`
+signal identity, or a trivial virtual destructor.
+
 **[AR-ORG-VIS-SPLIT] Does protocol/model code contain visualization or instrumentation logic?**
 FLAG if a protocol/mobility/physical module draws on a canvas, builds a figure, or references a
 visualizer beyond emitting a signal. *Not a violation:* emitting a `@signal` that a visualizer

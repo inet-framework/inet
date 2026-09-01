@@ -25,6 +25,7 @@ protocol-specific code has drifted into `common/`. The two need to be told apart
 
 | Id | Coupling | Rule | Why it stays |
 |---|---|---|---|
+| AS-02 | a contract declares a static helper that names its own enum: `IRoute::sourceTypeName`, `IRadio::getRadioModeName`, `getRadioReceptionStateName`, `getRadioTransmissionStateName`, and the three `cEnum *` registrations beside them | AR-ORG-CONTRACT-PURITY | The printable form of an enum the contract itself declares is part of the vocabulary it defines, like a signal identity: a caller and an implementor need the same word for it. Eight members in two files, and the only such members in 176 contract headers. |
 | AS-01 | `common/` → address & protocol-id value types: `MacAddress`, `Ipv4Address`, `Ipv6Address`, `L3Address`, `L3AddressResolver`, `EtherType`, `IpProtocolId` | AR-ORG-DOMAINS | Foundational value types used framework-wide; they *should* live in `common/`, but relocating them is a large, mechanical, high-churn change. Allowlisted in `check-architecture.sh`. **Real fix:** move them under `common/`. |
 
 ---
@@ -72,4 +73,5 @@ violation list. When it reports something new:
 | Area | Date | Findings |
 |---|---|---|
 | `check-architecture.sh` over `src/inet` (AR-ORG-DOMAINS, AR-ORG-VIS-SPLIT) | 2026-07-20 | AS-01 (allowlisted); AV-ORG-01…05 + AV-VIS-01. Include-graph only — behavioral violations of these ARs (e.g. vis *logic* not reached via an include) are not covered by this check and need T4 agent review. |
+| Contract purity across all 176 contract headers (AR-ORG-CONTRACT-PURITY) | 2026-09-01 | [sweep/contract-purity.md](report/sweep/contract-purity.md). 8 static non-signal members in 2 files, all enum-naming helpers — sanctioned as AS-02. No violation in the tree; the rule was produced by a pull request under review (see [pr-1124.md](report/pull-request/pr-1124.md) F-4). |
 | `check-architecture.sh`, re-run | 2026-08-31 | [sweep/architecture.md](report/sweep/architecture.md). 25 couplings in 15 files, **all inside the existing clusters** — nothing new. `FingerprintCalculator.cc` added to the AV-ORG-01 examples. The two `Open (decide)` clusters now block the `common/packet/` seal (SR-AUDIT-FIRST). |

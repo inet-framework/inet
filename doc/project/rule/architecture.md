@@ -38,6 +38,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | --- | --- |
 | [AR-ORG-DOMAINS](#ar-org-domains) | Layered, domain-partitioned source tree with acyclic dependencies |
 | [AR-ORG-CONTRACTS](#ar-org-contracts) | Every extensible role is a separate contract (C++ + NED interface) |
+| [AR-ORG-CONTRACT-PURITY](#ar-org-contract-purity) | A contract declares the role and nothing else |
 | [AR-ORG-VIS-SPLIT](#ar-org-vis-split) | Model logic, visualization, and instrumentation live in separate packages |
 | [AR-ORG-KERNEL](#ar-org-kernel) | Build on the OMNeT++ kernel; do not reimplement or patch its facilities |
 
@@ -169,6 +170,45 @@ and reasoned about independently of any one implementation (`IInterfaceTable`, f
 lets the interface table be replaced without recompiling the modules that use it).
 
 *Enforced at T1 — NED `like`/`moduleinterface` + C++ virtuals; contract-package purity → lint (T3).*
+
+### AR-ORG-CONTRACT-PURITY
+
+**A contract declares the role and nothing else**
+
+A C++ interface or a NED `moduleinterface` states what an implementation must provide, and carries
+no code of its own. No utility function, no helper for implementors, no convenience for callers, and
+no policy — only the operations that make up the role, plus the identities its observations use.
+
+A contract has two audiences and it belongs to neither of them: the **implementor**, who must satisfy
+every member, and the **caller**, who may rely on every member. Every symbol in the contract is
+therefore a promise to both. A static helper is a promise to neither — an implementation cannot
+override it, a caller cannot substitute it, and it is in the header only because the header was a
+convenient namespace. It also drags the contract's dependencies along with it: the moment a helper
+touches a concrete frame or a concrete mode, every implementor of the interface, present and future,
+must compile against them.
+
+The line to draw is **behavior**, not file size. A contract may declare the identities its role's
+observations use — `static simsignal_t datarateSelectedSignal` is part of the vocabulary the contract
+defines, which is why seven contract headers under `linklayer/ieee80211/mac/contract/` each have a
+small `.cc` that does nothing but define theirs. The printable form of an enum the contract itself
+declares is the same case — `IRadio::getRadioModeName` names `IRadio::RadioMode`, and a caller and an
+implementor need the same word for it. A function with logic in it is a different thing, even when it
+is short.
+
+The tree already reads this way. A sweep of all 176 contract headers found eight static non-signal
+members, in two files, and every one is an enum-naming helper of that second kind
+([sweep/contract-purity.md](../audit/report/sweep/contract-purity.md)). This rule writes down what
+INET does; it does not ask for a change.
+
+Where does the helper go? If it serves the **implementors**, it belongs in the `*Base` class they
+already extend ([AR-ORG-CONTRACTS](#ar-org-contracts) keeps contract, base and concrete apart for
+exactly this). If it serves the **callers**, it belongs with the callers, or in a utility of its own.
+If it encodes a **policy** — when to attach details to a signal, which frames carry a per-station
+value — then it is a modeling decision, and it belongs to the module that owns that decision, not to
+the interface that names the role.
+
+*Enforced at T4 — agent review: does a contract header declare anything that is not a pure virtual, a
+type, or a signal identity?*
 
 ### AR-ORG-VIS-SPLIT
 
