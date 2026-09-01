@@ -252,18 +252,32 @@ Interception rules render as `* Fault injection: on tap 'tap', drop the first da
 
 ## 10. Running tests
 
-Build the library and run a config:
+Every test is a self-contained `opp_test` `.test` file. The suites live next to this
+library, one folder per subject:
+
+| Folder | Subject |
+| --- | --- |
+| [`../self/`](../self) | the framework itself: the matching engine, the combinators, injection, interception |
+| [`../tcp/`](../tcp) | TCP |
+| [`../arp/`](../arp), [`../ipv4/`](../ipv4), [`../ipv6/`](../ipv6), [`../ethernet/`](../ethernet) | one folder per protocol |
+| [`../wifi/`](../wifi) | the IEEE 802.11 conformance suite (its own runner) |
+
+Build the library, then run a suite:
 
 ```sh
 cd tests/protocol/lib
 ./build.sh
-./run-demo.sh -c Pass                       # run a config from omnetpp.ini
-./run-demo.sh -c Trace                       # logEvents mode: print the event trace
-./run-demo.sh -c Pass --*.tester.printDescription=true
+inet_run_protocol_tests                      # every suite
+inet_run_protocol_tests -w self              # one suite (the folder name)
+inet_run_protocol_tests -w ipv               # every suite whose folder matches
 ```
 
-A scenario is an ini config selecting a network and a `testName`. Share common settings via
-[`protocoltest-base.ini`](protocoltest-base.ini) (`include protocoltest-base.ini`).
+The runner finds the suites itself: every direct subfolder of `tests/protocol` that holds
+`.test` files is one suite. A new protocol folder needs no registration.
+
+To run one test and read its output, use `opp_test` directly in the suite folder. Share
+common ini settings via [`protocoltest-base.ini`](protocoltest-base.ini)
+(`include protocoltest-base.ini`).
 
 ### Self-contained `.test` cases (program + network in one file)
 
@@ -271,7 +285,7 @@ A test does not need a `ProtocolTester` declared in its network. Define the prog
 `Define_ProtocolTestProgram()` (one per build, no name/selection) and the framework attaches
 a `ProtocolTester` to whatever network runs — so a test can target an **unmodified external
 network** just by pointing `network =` at it. See the `opp_test` examples in [`../`](..):
-`tcp/TcpHandshake.test`, `ViolationDetected.test`,
+`tcp/TcpHandshake.test`, `self/ViolationDetected.test`,
 `tcp/TcpRetransmit.test`. Each carries its program in `%global`, its (tester-less)
 network in `%file`, and asserts the verdict line with `%contains`.
 
@@ -309,10 +323,10 @@ two fail the run. Allowed values: `PASS` (the default when absent), `FAIL`, `ERR
 
 ## 11. Cookbook
 
-All snippets are from [`ProtocolTests.cc`](ProtocolTests.cc); the config column is the
-`omnetpp.ini` section that runs them.
+All snippets come from the `.test` files in the suite folders; the name in brackets is
+the test file that runs them.
 
-### TCP three-way handshake — sequence/ack relations (`TcpHandshake`)
+### TCP three-way handshake — sequence/ack relations (`../tcp/TcpHandshake.test`)
 Observe SYN / SYN+ACK / ACK at the initiator, asserting the ack numbers follow seq+1 via
 captures.
 ```cpp
@@ -373,7 +387,7 @@ ACK (server → client). Add a scenario with `DhcpClient`/`DhcpServer` apps and 
 ### Ethernet PLCA state machine (`Plca`, 10BASE-T1S) — state channel
 PLCA's beacon / transmit-opportunity cycle lives in two state machines, not the packet
 trace, so this asserts the FSM signals (§8) instead. On a controller + 2-node multidrop bus
-(`PlcaMultidropDemo`): the controller sends the BEACON, node[0] synchronises, the transmit
+(`../ethernet/PlcaBeaconCycle.test`): the controller sends the BEACON, node[0] synchronises, the transmit
 opportunity rotates to node[0] (`curID == 1`), node[0] COMMITs and its data FSM transmits,
 and the controller receives the frame — while the control FSM must never `CS_ABORT`.
 ```cpp
@@ -384,12 +398,13 @@ and the controller receives the frame — while the control FSM must never `CS_A
 .once(on("node[0].eth[0].plca").signal("dataStateChanged").is(EthernetPlca::DS_TRANSMIT).within(0.001))
 .never(on("node[0].eth[0].plca").signal("controlStateChanged").is(EthernetPlca::CS_ABORT).within(0.001));
 ```
-Author it by first running `PlcaTrace` (`stateSignals = "controlStateChanged dataStateChanged
-curID rxCmd txCmd"`) to read the real sequence. See `plca_beacon_cycle` in `ProtocolTests.cc`.
+Author it by first setting `stateSignals = "controlStateChanged dataStateChanged
+curID rxCmd txCmd"` on the tester to read the real sequence. See
+[`../ethernet/PlcaBeaconCycle.test`](../ethernet/PlcaBeaconCycle.test).
 
-### Mobile IPv6 registration + route optimization (`Mipv6`, RFC 6275)
+### Mobile IPv6 registration + route optimization (`../ipv6/Mipv6Registration.test`, RFC 6275)
 MIPv6 is a message-exchange protocol (no FSM-state signal), so this asserts the Mobility Header
-sequence as packets. On a minimal MN/HA/CN handover network (`Mipv6Demo`), after the mobile node
+sequence as packets. On a minimal MN/HA/CN handover network, after the mobile node
 roams to a foreign link it registers with its Home Agent (Binding Update → Binding Acknowledgement),
 then route-optimizes with the correspondent node via the return-routability procedure (HoTI/CoTI →
 HoT/CoT with the cookies echoed) and a direct Binding Update.

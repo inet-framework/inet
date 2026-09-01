@@ -1,0 +1,102 @@
+%description:
+
+Protocol Test Framework self test -- time-scheduled packet injection.
+
+The test builds an IP/UDP datagram and pushes it up host2's Ethernet interface at t=0.5s,
+as if it had arrived from the wire. host2 runs a UdpEchoApp, so it echoes the datagram
+back. The test then asserts that host2 sends the echo to the lower layer.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/DirectionTag_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+
+static Packet *buildInjectedUdpDatagram(const CaptureStore&)
+{
+    auto packet = new Packet("injectedUdp");
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(16)));
+
+    auto udpHeader = makeShared<UdpHeader>();
+    udpHeader->setSrcPort(1234);
+    udpHeader->setDestPort(5000);
+    udpHeader->setTotalLengthField(B(24)); // 8B header + 16B payload
+    udpHeader->setChecksum(0);
+    udpHeader->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
+    packet->insertAtFront(udpHeader);
+
+    auto ipv4Header = makeShared<Ipv4Header>();
+    ipv4Header->setSrcAddress(Ipv4Address("10.0.0.1"));  // host1
+    ipv4Header->setDestAddress(Ipv4Address("10.0.0.2")); // host2
+    ipv4Header->setProtocolId(IP_PROT_UDP);
+    ipv4Header->setTimeToLive(64);
+    ipv4Header->setTotalLengthField(B(20) + B(24));      // IP header + UDP datagram
+    ipv4Header->setChecksum(0);
+    ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
+    packet->insertAtFront(ipv4Header);
+
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+    packet->addTag<DirectionTag>()->setDirection(DIRECTION_INBOUND);
+    // Route it up to the network protocol, as a decapsulated inbound frame would be.
+    auto dispatchReq = packet->addTag<DispatchProtocolReq>();
+    dispatchReq->setProtocol(&Protocol::ipv4);
+    dispatchReq->setServicePrimitive(SP_INDICATION);
+    return packet;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("udp_inject_echo")
+        .inject(inject("host2").into("eth[0]", "upperLayerOut").at(0.5)
+                  .describe("a UDP datagram to port 5000").packet(buildInjectedUdpDatagram))
+        // The inject is an ordered step, so this expect is anchored at the injection time.
+        .once(on("host2.udp").signal("packetSentToLower")
+                  .packet("udp.srcPort == 5000").within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "udp_inject_echo compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// An ordinary two-host network -- note: NO tester module (attached at runtime).
+network SelfTestNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = SelfTestNet
+sim-time-limit = 1s
+seed-set = 0
+
+*.host1.numApps = 0
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpEchoApp"
+*.host2.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST udp_inject_echo: PASS

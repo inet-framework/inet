@@ -1,0 +1,111 @@
+%description:
+
+Ethernet PLCA beacon cycle (IEEE 802.3cg, 10BASE-T1S).
+
+PLCA behaviour lives in two state machines, not in the packet trace, so this test observes
+the state-change signals directly. It asserts one full cycle: the controller sends the
+BEACON, node[0] synchronises to it, the transmit opportunity reaches node[0], node[0]
+commits and transmits, and the controller receives the frame. The control state machine
+must never abort.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/physicallayer/wired/ethernet/EthernetPlca.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+using inet::physicallayer::EthernetPlca;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("plca_beacon_cycle")
+        // 1. The controller (local_nodeID 0) starts a PLCA cycle by sending the BEACON.
+        .once(on("controller.eth[0].plca").signal("controlStateChanged")
+                   .is(EthernetPlca::CS_SEND_BEACON).describe("the controller sends a BEACON").within(0.001))
+        // 2. The controller signals BEACON to the PHY while doing so.
+        .once(on("controller.eth[0].plca").signal("txCmd")
+                   .is(EthernetPlca::CMD_BEACON).describe("the controller's TX command is BEACON").within(0.001))
+        // 3. node[0] detects the beacon and synchronises its cycle to it.
+        .once(on("node[0].eth[0].plca").signal("controlStateChanged")
+                   .is(EthernetPlca::CS_SYNCING).describe("node[0] synchronises to the beacon").within(0.001))
+        // 4. The transmit opportunity rotates from the controller (curID 0) to node[0] (curID 1).
+        .once(on("node[0].eth[0].plca").signal("curID")
+                   .is(1).describe("the transmit opportunity reaches node[0]").within(0.001))
+        // 5. node[0] has a pending frame, so it COMMITs to transmit in its opportunity.
+        .once(on("node[0].eth[0].plca").signal("controlStateChanged")
+                   .is(EthernetPlca::CS_COMMIT).describe("node[0] commits to transmit in its opportunity").within(0.001))
+        // 6. node[0]'s data state machine transmits the frame.
+        .once(on("node[0].eth[0].plca").signal("dataStateChanged")
+                   .is(EthernetPlca::DS_TRANSMIT).describe("node[0]'s data FSM transmits the frame").within(0.001))
+        // 7. The controller receives node[0]'s frame in turn (its data FSM enters RECEIVE).
+        .once(on("controller.eth[0].plca").signal("dataStateChanged")
+                   .is(EthernetPlca::DS_RECEIVE).describe("the controller receives node[0]'s frame").within(0.001))
+        // 8. Throughout, the control FSM must never enter its ABORT state.
+        .never(on("node[0].eth[0].plca").signal("controlStateChanged")
+                   .is(EthernetPlca::CS_ABORT).describe("node[0]'s control FSM must not abort").within(0.001));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "plca_beacon_cycle compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.EthernetPlcaHost;
+import inet.node.ethernet.EthernetMultidropLink;
+import inet.physicallayer.wired.common.WireJunction;
+
+// An Ethernet 10BASE-T1S multidrop bus: a controller (PLCA local_nodeID 0, which sends
+// the periodic BEACON) and numNodes data nodes, joined through WireJunctions. This is the
+// wiring of INET's examples/ethernet/TenBaseT1S/MultidropNetwork. NO tester module here.
+network PlcaMultidropNet
+{
+    parameters:
+        int numNodes;
+    submodules:
+        controller: EthernetPlcaHost {
+            eth[*].plca.plca_node_count = default(parent.numNodes + 1);
+            eth[*].plca.local_nodeID = default(0);
+            @display("p=250,100;i=device/card");
+        }
+        node[numNodes]: EthernetPlcaHost {
+            eth[*].plca.plca_node_count = default(parent.numNodes + 1);
+            eth[*].plca.local_nodeID = default(this.index + 1);
+            @display("p=400,220,row,160;i=device/card");
+        }
+        j[numNodes]: WireJunction {
+            @display("p=400,100,row,160");
+        }
+    connections:
+        controller.ethg++ <--> EthernetMultidropLink { length = 100cm; } <--> j[0].port++;
+        for i=0..numNodes-1 {
+            j[i].port++ <--> EthernetMultidropLink { length = 100cm; } <--> j[i + 1].port++ if i < numNodes - 1;
+            j[i].port++ <--> EthernetMultidropLink { length = 50cm; } <--> node[i].ethg++;
+        }
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PlcaMultidropNet
+sim-time-limit = 2ms
+seed-set = 0
+
+*.numNodes = 2
+# node[0] sends raw Ethernet frames to the controller, so it uses its transmit opportunity.
+*.*.ethernet.hasSocketSupport = true
+*.node[0].numApps = 1
+*.node[0].app[0].typename = "EthernetSourceApp"
+*.node[0].app[0].io.interface = "eth0"
+*.node[0].app[0].io.remoteAddress = "controller"
+*.node[0].app[0].source.packetLength = 46B
+*.node[0].app[0].source.productionInterval = 200us
+*.controller.numApps = 1
+*.controller.app[0].typename = "EthernetSinkApp"
+*.controller.app[0].io.interface = "eth0"
+*.controller.app[0].io.localAddress = "controller"
+
+%contains: stdout
+PROTOCOLTEST plca_beacon_cycle: PASS

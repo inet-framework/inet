@@ -1,0 +1,84 @@
+%description:
+
+Protocol Test Framework self test -- the intercept mutate action.
+
+A PacketTap is spliced on the link. The test drives it to corrupt the first TCP data
+segment instead of dropping it. host2's MAC discards the corrupted frame, so host1's TCP
+retransmits the same sequence number after the retransmission timeout.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("tcp_retransmit_mutate")
+        .intercept(intercept("tap")
+                     .match("tcp.destPort == 1000 && tcp.synBit == false").minBytes(100).nth(1)
+                     .mutate([](Packet *frame) { frame->setBitError(true); })
+                     .describe("the first data segment (corrupt it)"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.destPort == 1000 && tcp.synBit == false")
+                  .after(0.15)
+                  .capture("dataSeq", "tcp.sequenceNo")
+                  .describe("the data segment")
+                  .within(0.3))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.sequenceNo == {dataSeq} && tcp.synBit == false")
+                  .notBefore(0.3)
+                  .describe("the retransmitted data segment (same sequence number)")
+                  .within(5.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "tcp_retransmit_mutate compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a PacketTap spliced on the link -- note: NO tester (attached at runtime).
+network MutateNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        tap: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> tap.a;
+        tap.b       <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = MutateNet
+sim-time-limit = 8s
+seed-set = 0
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 100B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+# static ARP: the only frames on the wire are the TCP/IP ones.
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST tcp_retransmit_mutate: PASS

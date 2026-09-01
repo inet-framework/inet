@@ -1,0 +1,126 @@
+%description:
+
+Protocol Test Framework self test -- reactive injection (stimulus and response).
+
+The test itself is the only TCP peer. host1 opens a connection to a phantom address that
+nobody owns, so no real peer answers. The test observes host1's SYN, captures its
+sequence number and source port, injects a SYN+ACK that acknowledges the captured
+sequence number, and then observes host1's final ACK. The whole three-way handshake is
+driven by the test.
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/DirectionTag_m.h"
+#include "inet/common/checksum/ChecksumMode_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+using inet::tcp::TcpHeader;
+
+
+static Packet *buildSynAck(const CaptureStore& captures)
+{
+    intval_t isn = captures.at("isn").intValue();
+    intval_t clientPort = captures.at("clientPort").intValue();
+
+    auto packet = new Packet("injSYNACK");
+    auto tcpHeader = makeShared<TcpHeader>();
+    tcpHeader->setSrcPort(1000);            // the peer's listening port (= connectPort)
+    tcpHeader->setDestPort(clientPort);     // host1's ephemeral port (captured)
+    tcpHeader->setSynBit(true);
+    tcpHeader->setAckBit(true);
+    tcpHeader->setSequenceNo(5000);         // the peer's ISN (chosen by the test)
+    tcpHeader->setAckNo(isn + 1);           // acknowledge host1's SYN
+    tcpHeader->setWindow(16384);
+    tcpHeader->setHeaderLength(B(20));
+    tcpHeader->setChecksum(0);
+    tcpHeader->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
+    packet->insertAtFront(tcpHeader);
+
+    auto ipv4Header = makeShared<Ipv4Header>();
+    ipv4Header->setSrcAddress(Ipv4Address("10.0.0.99")); // phantom peer
+    ipv4Header->setDestAddress(Ipv4Address("10.0.0.1")); // host1
+    ipv4Header->setProtocolId(IP_PROT_TCP);
+    ipv4Header->setTimeToLive(64);
+    ipv4Header->setTotalLengthField(B(20) + B(20));
+    ipv4Header->setChecksum(0);
+    ipv4Header->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
+    packet->insertAtFront(ipv4Header);
+
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+    packet->addTag<DirectionTag>()->setDirection(DIRECTION_INBOUND);
+    auto dispatchReq = packet->addTag<DispatchProtocolReq>();
+    dispatchReq->setProtocol(&Protocol::ipv4);
+    dispatchReq->setServicePrimitive(SP_INDICATION);
+    return packet;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("tcp_handshake_peer")
+        // 1. host1's outgoing SYN; capture its ISN and ephemeral source port.
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.synBit == true && tcp.ackBit == false")
+                  .describe("host1's SYN (SYN set, ACK clear)")
+                  .capture("isn", "tcp.sequenceNo")
+                  .capture("clientPort", "tcp.srcPort")
+                  .within(1.0))
+        // 2. Reactively inject a SYN+ACK acknowledging host1's ISN+1.
+        .inject(inject("host1").into("eth[0]", "upperLayerOut").after(0.001)
+                  .describe("a SYN+ACK acknowledging host1's ISN+1").packet(buildSynAck))
+        // 3. host1's final ACK, acknowledging the peer's ISN+1 (5000+1).
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .packet("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == 5001")
+                  .describe("host1's final ACK (acknowledging the peer's ISN+1)")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "tcp_handshake_peer compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// An ordinary two-host network -- note: NO tester module (attached at runtime).
+network SelfTestNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = SelfTestNet
+sim-time-limit = 1s
+seed-set = 0
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "10.0.0.99"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 5s
+*.host1.app[0].sendBytes = 10B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 0
+
+%contains: stdout
+PROTOCOLTEST tcp_handshake_peer: PASS

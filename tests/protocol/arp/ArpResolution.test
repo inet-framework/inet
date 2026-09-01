@@ -1,0 +1,67 @@
+%description:
+
+ARP address resolution (RFC 826).
+
+Before host1 can send its first datagram to host2 it must resolve host2's MAC address.
+host1 broadcasts an ARP request (opcode 1) and host2 answers with a reply (opcode 2).
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("arp_resolution")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+                  .packet("arp.opcode == 1").describe("an ARP request").within(0.2))
+        .once(on("host1.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("arp.opcode == 2").describe("host2's ARP reply").within(0.2));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "arp_resolution compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// An ordinary two-host network -- note: NO tester module. The framework attaches a
+// ProtocolTester at runtime because this build defines a Define_ProtocolTestProgram.
+network SelfTestNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = SelfTestNet
+sim-time-limit = 1s
+seed-set = 0
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 5000
+*.host1.app[0].localPort = 4000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].sendInterval = 0.2s
+*.host1.app[0].startTime = 0.1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST arp_resolution: PASS

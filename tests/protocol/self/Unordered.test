@@ -1,0 +1,78 @@
+%description:
+
+Protocol Test Framework self test -- the unordered combinator and a never() assertion.
+
+host1 runs two UDP flows, to ports 5000 and 5001. unordered() must accept the two
+datagrams in either order. never() must hold, because nothing goes to port 9999.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("multi_flow")
+        .unordered({
+            on("host1.udp").signal("packetSentToLower")
+              .packet("udp.destPort == 5000").describe("a datagram to port 5000").within(1.0),
+            on("host1.udp").signal("packetSentToLower")
+              .packet("udp.destPort == 5001").describe("a datagram to port 5001").within(1.0)
+        })
+        .never(on("host1").signal("packetSentToLower")
+                    .packet("udp.destPort == 9999").describe("any datagram to port 9999").within(0.3));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "multi_flow compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// An ordinary two-host network -- note: NO tester module. The framework attaches a
+// ProtocolTester at runtime because this build defines a Define_ProtocolTestProgram.
+network SelfTestNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = SelfTestNet
+sim-time-limit = 1s
+seed-set = 0
+
+*.host1.numApps = 2
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 5000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].sendInterval = 0.2s
+*.host1.app[0].startTime = 0.1s
+*.host1.app[1].typename = "UdpBasicApp"
+*.host1.app[1].destAddresses = "host2"
+*.host1.app[1].destPort = 5001
+*.host1.app[1].messageLength = 100B
+*.host1.app[1].sendInterval = 0.2s
+*.host1.app[1].startTime = 0.15s
+*.host2.numApps = 2
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 5000
+*.host2.app[1].typename = "UdpSink"
+*.host2.app[1].localPort = 5001
+
+%contains: stdout
+PROTOCOLTEST multi_flow: PASS
