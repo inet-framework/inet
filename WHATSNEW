@@ -81,6 +81,12 @@ Notable backward compatible changes are the following:
    to the MAC address string when no host owns the address.
 
 
+4. A bar chart indicator figure
+
+   The new "barChart" figure type displays several named values at once, one bar
+   each, with a value to color gradient and an optional autoscaled range. Unlike
+   the other indicator figures the number of its items is not fixed.
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 
