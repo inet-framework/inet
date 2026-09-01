@@ -69,10 +69,9 @@ ambiguous how many groups each one stood for.
 
 Recognizing the pattern makes the addresses in this showcase readable: ``ff:fe``
 near the middle is the inserted marker, and the final digits come from the MAC
-address. Take that as a reading aid for these addresses rather than a general rule.
-The 16-bit groups do not line up with the byte boundaries, so ``00ff`` is really the
-third MAC byte followed by the inserted ``FF``; it only looks tidy here because
-these MAC addresses have zeros in the middle.
+address. The inserted pair straddles two groups — ``00ff`` is the third MAC byte
+followed by the inserted ``FF`` — so read it as a guide to these addresses rather
+than a rule for splitting any address.
 
 Two hosts with different MAC addresses therefore produce different interface
 identifiers. This is what makes autoconfiguration work without a server: the host
@@ -109,8 +108,8 @@ A host does not have to wait for the next periodic Router Advertisement. Once it
 link-local address has passed its check, it waits a random time of up to one second
 — so that hosts starting together do not all solicit at the same instant — and then
 sends a Router Solicitation. If nothing
-answers after three attempts, four seconds apart, the host concludes that there is
-no router on the link. It keeps its link-local address and can still reach
+answers after three attempts, four seconds apart, the host concludes about nine
+seconds after the first attempt that there is no router on the link. It keeps its link-local address and can still reach
 neighbors on the same link. It does not stop listening, though: a Router
 Advertisement that arrives later is still processed, and the host configures itself
 then.
@@ -267,8 +266,8 @@ results are:
   completed check without having counted a started one, so the two statistics below
   no longer agree.
 - :par:`retransTimer` — the interval between Duplicate Address Detection probes,
-  one second by default, and therefore also the wait after the last probe. INET
-  adds a random delay of up to one more second before accepting the address, so a
+  one second by default, and therefore also the wait after the last probe. INET adds
+  a random delay of up to one more second to the first of those intervals, so a
   successful check with the default of one probe takes between one and two seconds.
   Note that INET truncates this parameter to whole seconds, so a value below one
   second becomes zero.
@@ -278,8 +277,9 @@ results are:
   Router Solicitation differs from host to host in the results below.
 - :par:`minIntervalBetweenRAs` and :par:`maxIntervalBetweenRAs` — how often a
   router sends unsolicited Router Advertisements, 200 and 600 seconds by default.
-  These defaults are far longer than the simulations here, so every Router
-  Advertisement seen below was triggered by a Router Solicitation.
+  Both are far longer than the simulations here, so no unsolicited Router
+  Advertisement is ever sent; every one seen below answers a Router Solicitation.
+  See the limitations below for why a real router would have advertised sooner.
 - :par:`hostBootupTime` and :par:`routerBootupTime` — when a node assigns its
   link-local address. Both are random: ``uniform(0.4s, 1s)`` for hosts and
   ``uniform(0s, 0.3s)`` for routers, so a router starts before the hosts it serves.
@@ -305,7 +305,7 @@ visible in them; the video shows the change happening.
 What INET does not model
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Three limitations bound what this showcase can claim:
+Four limitations bound what this showcase can claim:
 
 - There is no DHCPv6 implementation. A Router Advertisement can carry a *Managed*
   flag, which tells hosts to obtain addresses from a DHCPv6 server instead. INET's
@@ -326,6 +326,13 @@ Three limitations bound what this showcase can claim:
 - The lifetimes of an address that is already configured are not refreshed by
   later Router Advertisements. Lifetime expiry is therefore not demonstrated, and
   both simulations are kept well short of any lifetime.
+- A router that has just started advertising is supposed to send its first few
+  Router Advertisements quickly — up to three of them, no more than 16 seconds
+  apart — before settling into the slow periodic schedule. INET goes straight to the
+  slow schedule. This is why every Router Advertisement in the results below was
+  triggered by a Router Solicitation: a conformant router would have advertised
+  within the first 16 seconds, and most of these hosts would never have needed to
+  ask.
 
 The Model
 ---------
@@ -421,8 +428,11 @@ Autoconfiguration
 ~~~~~~~~~~~~~~~~~
 
 The following video runs the ``Autoconfiguration`` simulation to t = 8 s. Frame
-capture begins a little after the start, so all six link-local addresses are already
-in place in the first frame and each host is labelled with an ``fe80::`` address.
+capture begins a little after the start, so the first frame already shows five
+``fe80::`` labels, one on each host and one on the server. The router's two labels
+are global from the outset, because its global addresses come from the configurator
+before the run begins and outrank a tentative link-local address.
+
 Watch each label change as the host obtains its global address: ``host[0]`` and
 ``host[1]`` change first, then the server, then ``host[2]`` and ``host[3]``.
 
@@ -449,7 +459,8 @@ address was actually accepted.
 
 The log excerpts below come from a Cmdenv run of each configuration with
 ``--cmdenv-log-level=detail``, with the module paths shortened to the node name for
-readability; the full paths read
+readability, and the trailing ``on eth0`` dropped from the address-check lines; the
+full paths read
 ``Ipv6AutoconfigurationShowcase.host[0].ipv6.neighbourDiscovery``. Both runs use the
 default seed, so the times reproduce exactly.
 
@@ -522,19 +533,21 @@ Detection, which stops them using an advertisement that was already on the link,
 then the router's rate limit, which delays the advertisement they asked for. All four
 hosts and the server hold a global address by 7.1 s.
 
-Two further details show up in a full log and are worth naming, because neither is
-explained by the story so far. ``host[0]`` sends a Router Solicitation of its own at
-2.381 s, after it was already configured at 2.137 s: receiving an advertisement does
-not cancel a solicitation a host has already scheduled. And a second advertisement
-goes out at 5.572 s, only 0.198 s after the one at 5.374 s. That one is superfluous.
-When the router scheduled the earlier answer it should have cancelled the later one
-it superseded, and INET does not; a conformant router would have sent a single
-advertisement here. Nothing depends on it, because both hosts were configured by the
-5.374 s advertisement.
+Two further details show up in a full log. ``host[0]`` starts router discovery at
+2.381 s even though it took the prefix at 2.137 s, because receiving an advertisement
+does not cancel a solicitation the host has already scheduled. Its solicitation does
+not leave at once, though: the tentative global address is already the preferred
+source, so the datagram waits until that address passes its check at 3.158 s and only
+then goes on the wire. And a second advertisement goes out at 5.572 s, 0.198 s after
+the one at 5.374 s. That one is superfluous: when the router scheduled the earlier
+answer it should have cancelled the later one it superseded, and INET does not.
+Nothing on the page depends on it, because both hosts were configured by the 5.374 s
+advertisement.
 
-The server is served by a Router Advertisement on the other interface. That
-interface has its own timer, so it is not affected by the 2.137 s advertisement on
-the host link, and the answer comes 1.40 s after it:
+The server is served by a Router Advertisement on the other interface, 0.435 s
+after it asked. That interface has its own timer, so the 2.137 s advertisement on the
+host link does not defer it; had both links shared one interface, the three-second
+rate limit would have held this answer back until at least 5.14 s:
 
 .. code-block:: none
 
