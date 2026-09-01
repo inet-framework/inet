@@ -13,7 +13,8 @@ the [IEEE 802.11 checklist](ieee80211.md).
 Input: the change under review (a diff / PR / working tree). For **each** checklist item, output one
 of:
 
-- `PASS` — the change plainly complies (or the item doesn't apply).
+- `PASS` — the change plainly complies with the requirement.
+- `N/A — <reason>` — the requirement does not apply to this change type.
 - `FLAG — <file>:<line> — <one-line reason>` — a clear violation.
 - `QUESTION — <file>:<line> — <what to check>` — plausibly a violation but genuinely a judgment call;
   escalate to human review (T5), don't block on it.
@@ -27,7 +28,8 @@ Ground rules:
 3. **Respect the ledgers.** Couplings already recorded in
    [architecture-exceptions.md](../../audit/architecture-exceptions.md) or names in
    [naming-exceptions.md](../../audit/naming-exceptions.md) are known — don't re-flag them; flag only *new*
-   deviations, and propose them as new ledger rows.
+   deviations. State the ledger disposition for each new deviation, and propose a row only when it
+   will remain unresolved beyond the reviewed change.
 4. **Scope to the diff.** Review what the change adds or moves, not the whole pre-existing tree.
 
 ## Checklist
@@ -104,12 +106,20 @@ declared in the build descriptors.
 
 **[AR-QUAL-NAMING] Do new NED/`.msg`/semantic names follow the conventions?**
 FLAG names that break [naming-conventions.md](../../rule/naming.md) on the NED/message side that
-`clang-tidy` can't see (wrong role suffix, `Msg`/`Message` packet, abbreviated field). Propose new
-findings as `naming-exceptions.md` rows.
+`clang-tidy` can't see (wrong role suffix, `Msg`/`Message` packet, abbreviated field). Apply the
+ledger-disposition ground rule: propose a `naming-exceptions.md` row only if the deviation will
+remain unresolved beyond the reviewed change.
 
 **[AR-QUAL-LOGGING] Is a programming error logged instead of thrown?**
 FLAG a violated invariant / impossible state that is written to the log and execution continues, where
 it should `throw`/`ASSERT`/`check_and_cast`. *Not a violation:* informational logging.
+
+**[AR-QUAL-DETERMINISM] Does simulation logic depend on non-deterministic sources or pointer ordering?**
+FLAG behavioral dependence on unordered-container iteration order, ordering or tie-breaking by raw
+pointer address (including ordered pointer-keyed containers), raw `rand()`, `std::random_device`, or
+wall-clock time (`std::chrono`, `time()`) in simulation execution paths. *Not a violation:* iteration
+whose order cannot affect the trajectory, explicit sorting by stable semantic keys, OMNeT++ `cRNG`
+streams, or non-simulation diagnostic benchmarking.
 
 **[AR-QUAL-TESTS] Does the change ship with tests matching its nature?**
 FLAG new behavior with no accompanying unit/module/statistical/validation test (fingerprints alone
@@ -130,5 +140,8 @@ semantically distinct role.
 
 ## Output footer
 
-End with a one-line verdict: `REVIEW: n PASS, n FLAG, n QUESTION` and, for any `FLAG`, a suggested
-ledger row (`AV-*` or `NV-*`) so the finding lands in the backlog rather than being lost.
+End with a one-line verdict: `REVIEW: n PASS, n FLAG, n QUESTION, n N/A`. For every `FLAG`, state its
+ledger disposition. Propose an `AV-*` or `NV-*` violation row only when the violation will remain
+unresolved beyond the reviewed change, and propose a sanctioned exception only when the deviation
+is deliberate and cannot reasonably be corrected. Do not propose a ledger entry for a finding
+expected to be fixed in the reviewed change.
