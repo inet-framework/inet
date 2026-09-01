@@ -22,6 +22,7 @@ simple Ieee80211MgmtApSimplified extends SimpleModule like IIeee80211Mgmt
         string interfaceTableModule;
         string mibModule;
         string macModule;               // The path to the MAC module
+        string radioModule = default("^.radio");
         string ssid = default("SSID");
         @display("i=block/cogwheel");
     gates:

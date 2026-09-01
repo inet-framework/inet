@@ -9,6 +9,7 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -70,10 +71,12 @@ inline Ieee80211HtCapabilities makeHtCapabilities(const Ieee80211HtCapabilitiesE
     return capabilities;
 }
 
-inline Ieee80211HtOperationElement makeHtOperationElement(const Ieee80211HtOperation& operation)
+inline Ieee80211HtOperationElement makeHtOperationElement(const physicallayer::IIeee80211Band *band, const Ieee80211HtOperation& operation)
 {
+    if (band == nullptr)
+        throw cRuntimeError("Cannot encode HT Operation without an IEEE 802.11 band");
     Ieee80211HtOperationElement element;
-    element.primaryChannel = operation.primaryChannel;
+    element.primaryChannel = band->getStandardChannelNumber(operation.primaryChannel);
     element.secondaryChannelOffset = operation.secondaryChannelOffset;
     element.staChannelWidth40Mhz = operation.operatingChannelWidth == MHz(40);
     element.protectionMode = static_cast<int>(operation.protectionMode);
@@ -82,14 +85,16 @@ inline Ieee80211HtOperationElement makeHtOperationElement(const Ieee80211HtOpera
     return element;
 }
 
-inline Ieee80211HtOperation makeHtOperation(const Ieee80211HtOperationElement& element)
+inline Ieee80211HtOperation makeHtOperation(const physicallayer::IIeee80211Band *band, const Ieee80211HtOperationElement& element)
 {
+    if (band == nullptr)
+        throw cRuntimeError("Cannot decode HT Operation without an IEEE 802.11 band");
     if (element.secondaryChannelOffset == 2 || element.secondaryChannelOffset < 0 || element.secondaryChannelOffset > 3)
         throw cRuntimeError("Invalid HT Secondary Channel Offset: %d", element.secondaryChannelOffset);
     if (element.protectionMode < 0 || element.protectionMode > 3)
         throw cRuntimeError("Invalid HT Protection field: %d", element.protectionMode);
     Ieee80211HtOperation operation;
-    operation.primaryChannel = element.primaryChannel;
+    operation.primaryChannel = band->getChannelIndex(element.primaryChannel);
     operation.secondaryChannelOffset = element.secondaryChannelOffset;
     operation.operatingChannelWidth = element.staChannelWidth40Mhz ? MHz(40) : MHz(20);
     operation.protectionMode = static_cast<Ieee80211HtProtectionMode>(element.protectionMode);
@@ -114,10 +119,10 @@ inline void setHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame, const Ieee80
     frame->setHtCapabilities(makeHtCapabilitiesElement(capabilities));
 }
 
-inline void setHtOperation(const Ptr<Ieee80211MgmtFrame>& frame, const Ieee80211HtOperation& operation)
+inline void setHtOperation(const Ptr<Ieee80211MgmtFrame>& frame, const physicallayer::IIeee80211Band *band, const Ieee80211HtOperation& operation)
 {
     frame->setHtOperationPresent(true);
-    frame->setHtOperation(makeHtOperationElement(operation));
+    frame->setHtOperation(makeHtOperationElement(band, operation));
 }
 
 } // namespace ieee80211
