@@ -1,0 +1,196 @@
+%description:
+Verify that a packet-domain IEEE 802.11 OFDM receiver removes sender-local
+packet tags while retaining the protocol and receiver indication tags required
+by the upper layers.
+
+%file: TestIeee80211PacketDomainTagBoundary.cc
+
+#include "inet/applications/base/ApplicationPacket_m.h"
+#include "inet/applications/udpapp/UdpBasicApp.h"
+#include "inet/applications/udpapp/UdpSink.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+class TaggedUdpBasicApp : public UdpBasicApp
+{
+  protected:
+    virtual void sendPacket() override
+    {
+        std::ostringstream str;
+        str << packetName << "-" << numSent;
+        auto packet = new Packet(str.str().c_str());
+        const auto& payload = makeShared<ApplicationPacket>();
+        payload->setChunkLength(B(par("messageLength")));
+        payload->setSequenceNumber(numSent);
+        payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
+        packet->insertAtBack(payload);
+        packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(0x1234);
+        L3Address destAddr = chooseDestAddr();
+        emit(packetSentSignal, packet);
+        socket.sendTo(packet, destAddr, destPort);
+        numSent++;
+    }
+};
+
+Define_Module(TaggedUdpBasicApp);
+
+class CheckingUdpSink : public UdpSink
+{
+  protected:
+    virtual void processPacket(Packet *packet) override
+    {
+        ASSERT(packet->findTag<Ieee80211MgmtTransactionTag>() == nullptr);
+        UdpSink::processPacket(packet);
+    }
+};
+
+Define_Module(CheckingUdpSink);
+
+class Ieee80211PacketDomainTagBoundaryTest : public cSimpleModule, public cListener
+{
+  public:
+    Ieee80211PacketDomainTagBoundaryTest() : cSimpleModule(65536) {}
+
+  protected:
+    cModule *sourceRadio = nullptr;
+    cModule *destinationRadio = nullptr;
+    int sourcePacketsWithTransactionTag = 0;
+    int destinationPackets = 0;
+
+    virtual void initialize() override
+    {
+        sourceRadio = getModuleByPath("^.sourceHost.wlan[0].radio");
+        destinationRadio = getModuleByPath("^.destinationHost.wlan[0].radio");
+        sourceRadio->subscribe(packetReceivedFromUpperSignal, this);
+        destinationRadio->subscribe(packetSentToUpperSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        auto packet = check_and_cast<Packet *>(value);
+        if (source == sourceRadio && signalID == packetReceivedFromUpperSignal) {
+            if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
+                sourcePacketsWithTransactionTag++;
+        }
+        else if (source == destinationRadio && signalID == packetSentToUpperSignal) {
+            ASSERT(packet->findTag<Ieee80211MgmtTransactionTag>() == nullptr);
+            ASSERT(packet->findTag<PacketProtocolTag>() != nullptr);
+            ASSERT(packet->findTag<SnirInd>() != nullptr);
+            ASSERT(packet->findTag<ErrorRateInd>() != nullptr);
+            ASSERT(packet->findTag<physicallayer::Ieee80211ModeInd>() != nullptr);
+            ASSERT(packet->findTag<physicallayer::Ieee80211ChannelInd>() != nullptr);
+            destinationPackets++;
+        }
+    }
+
+    virtual void activity() override
+    {
+        wait(SimTime(100, SIMTIME_MS));
+        ASSERT(sourcePacketsWithTransactionTag > 0);
+        ASSERT(destinationPackets > 0);
+        std::cout << "Packet-domain receiver tag boundary verified.\n";
+    }
+};
+
+Define_Module(Ieee80211PacketDomainTagBoundaryTest);
+
+%file: test.ned
+
+import inet.applications.udpapp.UdpBasicApp;
+import inet.applications.udpapp.UdpSink;
+import inet.common.SimpleModule;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+
+simple TaggedUdpBasicApp extends UdpBasicApp
+{
+    parameters:
+        @class(::TaggedUdpBasicApp);
+}
+
+simple CheckingUdpSink extends UdpSink
+{
+    parameters:
+        @class(::CheckingUdpSink);
+}
+
+simple Ieee80211PacketDomainTagBoundaryTest extends SimpleModule
+{
+    parameters:
+        @class(::Ieee80211PacketDomainTagBoundaryTest);
+}
+
+network Ieee80211PacketDomainTagBoundaryTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211DimensionalRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        sourceHost: AdhocHost;
+        destinationHost: AdhocHost;
+        test: Ieee80211PacketDomainTagBoundaryTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211PacketDomainTagBoundaryTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 200ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+**.arp.typename = "GlobalArp"
+**.checksumMode = "computed"
+**.fcsMode = "computed"
+**.mobility.initFromDisplayString = false
+**.mobility.typename = "StationaryMobility"
+*.sourceHost.mobility.initialX = 0m
+*.sourceHost.mobility.initialY = 0m
+*.destinationHost.mobility.initialX = 100m
+*.destinationHost.mobility.initialY = 0m
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 200m
+**.constraintAreaMaxY = 100m
+**.constraintAreaMaxZ = 0m
+
+*.sourceHost.numApps = 1
+*.sourceHost.app[0].typename = "TaggedUdpBasicApp"
+*.sourceHost.app[0].destAddresses = "destinationHost"
+*.sourceHost.app[0].destPort = 5000
+*.sourceHost.app[0].messageLength = 100B
+*.sourceHost.app[0].sendInterval = 1s
+*.sourceHost.app[0].startTime = 10ms
+
+*.destinationHost.numApps = 1
+*.destinationHost.app[0].typename = "CheckingUdpSink"
+*.destinationHost.app[0].localPort = 5000
+
+*.sourceHost.wlan[*].typename = "Ieee80211Interface"
+*.destinationHost.wlan[*].typename = "Ieee80211Interface"
+**.wlan[*].radio.typename = "Ieee80211OfdmRadio"
+**.wlan[*].radio.transmitter.power = 0.1mW
+**.wlan[*].radio.receiver.sensitivity = -109dBm
+**.wlan[*].radio.receiver.snirThreshold = 0.1dB
+**.wlan[*].radio.receiver.energyDetection = -90dBm
+**.wlan[*].radio.bandwidth = 20MHz
+**.wlan[*].radio.centerFrequency = 2.412GHz
+**.wlan[*].radio.receiver.channelSpacing = 5MHz
+**.wlan[*].radio.receiver.levelOfDetail = "packet"
+**.wlan[*].radio.receiver.errorModel.snirOffset = -2dB
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.**.responseAckFrameBitrate = 6Mbps
+**.wlan[*].mac.**.*Retry* = 0
+
+%contains: stdout
+Packet-domain receiver tag boundary verified.
