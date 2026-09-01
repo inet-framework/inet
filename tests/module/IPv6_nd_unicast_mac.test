@@ -1,0 +1,96 @@
+%description:
+Tests that a locally-originated IPv6 unicast datagram sent out on a pinned
+output interface takes the next hop's Ethernet address from the Neighbour
+Cache, instead of the Ethernet broadcast address (FF:FF:FF:FF:FF:FF).
+
+Every Neighbour Discovery message pins its output interface, so the defect
+was visible on both the solicited Neighbour Advertisement and the unicast
+Neighbour Solicitation that Neighbour Unreachability Detection sends.
+
+RFC 4861 Section 5.2: Once the IP address of the next-hop node is known,
+the sender examines the Neighbor Cache for link-layer information about
+that neighbor.
+
+RFC 4861 Section 7.2.4: Otherwise, the node MUST set the Solicited flag to
+one and unicast the advertisement to the Source Address of the solicitation.
+
+Topology: a router and three hosts on one switched Ethernet link. H1 sends
+UDP to H2, so address resolution has to run and H2 has to answer with a
+solicited Neighbour Advertisement. The run is long enough for Neighbour
+Unreachability Detection to probe as well.
+
+An IPv6-only Ethernet link carries multicast and unicast frames only, so no
+frame in this simulation may be addressed to the broadcast address.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network NdUnicastMacTestNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        switch1: EthernetSwitch;
+        R1: Router6;
+        H1: StandardHost6;
+        H2: StandardHost6;
+        H3: StandardHost6;
+    connections:
+        H1.ethg++ <--> ethline <--> switch1.ethg++;
+        H2.ethg++ <--> ethline <--> switch1.ethg++;
+        H3.ethg++ <--> ethline <--> switch1.ethg++;
+        R1.ethg++ <--> ethline <--> switch1.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = NdUnicastMacTestNetwork
+sim-time-limit = 120s
+cpu-time-limit = 60s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+# H1 sends UDP to H2 on the same link, so address resolution has to run
+*.H1.numApps = 1
+*.H1.app[0].typename = "UdpBasicApp"
+*.H1.app[0].destAddresses = "H2(ipv6)"
+*.H1.app[0].destPort = 5000
+*.H1.app[0].messageLength = 100B
+*.H1.app[0].sendInterval = 1s
+*.H1.app[0].startTime = 5s
+
+*.H2.numApps = 1
+*.H2.app[0].typename = "UdpSink"
+*.H2.app[0].localPort = 5000
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+received 115 packets
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+dest = FF-FF-FF-FF-FF-FF
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
