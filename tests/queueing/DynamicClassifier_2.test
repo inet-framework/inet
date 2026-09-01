@@ -1,0 +1,113 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source (ActivePacketSource)
+and are classified by a dynamic classifier (DynamicClassifier) into a branch that holds a queue
+of a limited capacity, drained slowly by a packet server (PacketServer).
+
+The test covers the back-pressure of an already created branch. An active source asks only
+whether some packet can be pushed, and takes the answer as the licence to produce one and push
+it, so a classifier that answers yes while the branch of the packet is full pushes into a full
+queue, and the queue fails the run. The producer must stop instead.
+
+It stays stopped for the rest of the run, and this is not what the classifier decides: a queue
+notifies its producer that it has room again only at initialization, so a source in front of a
+queue that once filled up never restarts, with a dynamic classifier or without one.
+
+%file: test.ned
+
+import inet.queueing.classifier.DynamicClassifier;
+import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.server.PacketServer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+module TestSlowBranch
+{
+    gates:
+        input in;
+        output out;
+    submodules:
+        queue: PacketQueue {
+            packetCapacity = 2;
+            @display("p=100,100");
+        }
+        server: PacketServer {
+            processingTime = 10s;
+            @display("p=200,100");
+        }
+    connections:
+        in --> queue.in;
+        queue.out --> server.in;
+        server.out --> out;
+}
+
+network TestDynamicClassifierBackPressure
+{
+    submodules:
+        producer: ActivePacketSource {
+            packetLength = 1B;
+            productionInterval = 1s;
+            @display("p=100,100");
+        }
+        classifier: DynamicClassifier {
+            moduleType = "TestSlowBranch";
+            submoduleName = "branch";
+            @display("p=200,100");
+        }
+        branch[0]: TestSlowBranch { // grown on demand, one branch per class
+            @display("p=300,100,column,80");
+        }
+        multiplexer: PacketMultiplexer {
+            @display("p=400,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=500,100");
+        }
+    connections allowunconnected:
+        producer.out --> classifier.in;
+        multiplexer.out --> consumer.in;
+}
+
+%file: Test.cc
+#include "inet/common/packet/Packet.h"
+#include "inet/queueing/function/PacketClassifierFunction.h"
+
+using namespace inet;
+
+static int testClassifyToOneClass(Packet *packet)
+{
+    return 0;
+}
+
+Register_Packet_Classifier_Function(TestOneClassClassifier, testClassifyToOneClass);
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestDynamicClassifierBackPressure
+sim-time-limit = 30s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.classifier.classifierClass = "TestOneClassClassifier"
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+%#--------------------------------------------------------------------------------------------------------------
+%# three packets fill the branch: one in the server, two in the queue
+%contains-regex: stdout
+At 0s producer: Producing packet, .*?producer-0.*?
+At 1s producer: Producing packet, .*?producer-1.*?
+At 2s producer: Producing packet, .*?producer-2.*?
+At 10s server: Processing packet ended, .*?producer-0.*?
+%#--------------------------------------------------------------------------------------------------------------
+%# the load-bearing assertion: the fourth packet is never produced, because the classifier
+%# answers that the full branch cannot take one -- without it the queue fails the run instead
+%not-contains: stdout
+producer-3
+%#--------------------------------------------------------------------------------------------------------------
+%# and the run ends normally rather than on the overloaded queue
+%contains: stdout
+<!> Simulation time limit reached

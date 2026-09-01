@@ -75,6 +75,23 @@ bool DynamicClassifier::canPushPacket(Packet *packet, const cGate *gate) const
     return consumers[classIndexToBranchIndex.at(getClassIndex(packet))].canPushPacket(packet);
 }
 
+bool DynamicClassifier::canPushSomePacket(const cGate *gate) const
+{
+    // The inherited answer is "one of the existing branches can take a packet", which is false
+    // for a classifier that has not built any branch yet: an active source in front of such a
+    // classifier stops and waits for the notification that packets can be pushed again, and
+    // never gets it, because nothing else creates the first branch. Answer true instead, the
+    // branch of the class of the first packet being created for it.
+    //
+    // Once a branch exists the inherited answer is used, and deliberately so. An active source
+    // takes this as the licence to produce a packet and push it -- it cannot ask
+    // canPushPacket() about a packet it has not created yet -- so answering true while every
+    // branch is full pushes into a full queue, which a queue without a packet dropper refuses.
+    // The price is that a full branch also stops a source that would have opened a new class,
+    // but stopping is the safe error, and it is what a statically wired classifier does too.
+    return outputGates.empty() || PacketClassifierBase::canPushSomePacket(gate);
+}
+
 void DynamicClassifier::createBranchIfAbsent(Packet *packet)
 {
     int classIndex = getClassIndex(packet);
