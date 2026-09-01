@@ -12,16 +12,69 @@
 #   NR-GEN    — a generated *_m.h / *_m.cc sits beside its .msg
 #
 # Usage (from the INET repository root):
-#   doc/project/enforcement/check-naming.sh            # the whole tree
-#   doc/project/enforcement/check-naming.sh src/inet/linklayer   # one subtree
+#   doc/project/enforcement/check-naming.sh                         # whole-tree paths + working-tree declarations
+#   doc/project/enforcement/check-naming.sh --base origin/master    # whole-tree paths + committed declarations
+#   doc/project/enforcement/check-naming.sh src/inet/linklayer      # complete audit of one subtree
+#   doc/project/enforcement/check-naming.sh --base origin/master src/inet/linklayer
 #
 # Exit status 0 = clean, 1 = candidates, 2 = invalid invocation or missing canonical gate. A hit that is already a row in
 # doc/project/audit/naming-exceptions.md is known — record a genuinely new one as NV-*.
 
 set -uo pipefail
-SCOPE="${1:-src/inet}"
+
+usage() {
+  echo "usage: $0 [--base REF] [src/inet/<subtree>]" >&2
+}
+
+BASE=""
+SCOPE="src/inet"
+SCOPE_EXPLICIT=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --base)
+      if [ $# -lt 2 ] || [[ "$2" == --* ]]; then
+        echo "error: --base requires a Git reference" >&2
+        usage
+        exit 2
+      fi
+      BASE="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --*)
+      echo "error: unknown option: '$1'" >&2
+      usage
+      exit 2
+      ;;
+    *)
+      if [ "$SCOPE_EXPLICIT" -eq 1 ]; then
+        echo "error: multiple scopes provided: '$SCOPE' and '$1'" >&2
+        usage
+        exit 2
+      fi
+      SCOPE="$1"
+      SCOPE_EXPLICIT=1
+      shift
+      ;;
+  esac
+done
+
+if [[ "$SCOPE" != "src/inet" && "$SCOPE" != src/inet/* ]]; then
+  echo "error: scope must be src/inet or a subtree: '$SCOPE'" >&2
+  exit 2
+fi
 if [ ! -d "$SCOPE" ]; then
   echo "error: '$SCOPE' not found (run from the INET repository root)" >&2
+  exit 2
+fi
+REPOSITORY_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+RESOLVED_SCOPE="$(cd "$SCOPE" && pwd -P)"
+if [ -z "$REPOSITORY_ROOT" ] || { [ "$RESOLVED_SCOPE" != "$REPOSITORY_ROOT/src/inet" ] && \
+                                  [[ "$RESOLVED_SCOPE" != "$REPOSITORY_ROOT"/src/inet/* ]]; }; then
+  echo "error: scope resolves outside src/inet: '$SCOPE'" >&2
   exit 2
 fi
 status=0
@@ -56,23 +109,30 @@ if [ "$SCOPE" = "src/inet" ]; then
 fi
 
 echo
-if [ "$SCOPE" = "src/inet" ]; then
-  echo "== NR-NED/MSG: changed declaration names =="
-  NED_MSG_GATE="doc/project/enforcement/check-ned-msg-naming.py"
-  if [ ! -f "$NED_MSG_GATE" ]; then
-    echo "error: canonical gate missing: $NED_MSG_GATE" >&2
+NED_MSG_GATE="doc/project/enforcement/check-ned-msg-naming.py"
+if [ -n "$BASE" ]; then
+  echo "== NR-NED/MSG: declarations changed since merge-base($BASE, HEAD) within $SCOPE =="
+  NED_MSG_ARGS=(--base "$BASE" --scope "$SCOPE")
+elif [ "$SCOPE_EXPLICIT" -eq 1 ]; then
+  echo "== NR-NED/MSG: declaration names in $SCOPE =="
+  NED_MSG_ARGS=("$SCOPE")
+else
+  echo "== NR-NED/MSG: changed declaration names in the working tree =="
+  NED_MSG_ARGS=()
+fi
+if [ ! -f "$NED_MSG_GATE" ]; then
+  echo "error: canonical gate missing: $NED_MSG_GATE" >&2
+  status=2
+elif ! command -v python3 >/dev/null 2>&1; then
+  echo "error: python3 is required for canonical gate: $NED_MSG_GATE" >&2
+  status=2
+else
+  python3 "$NED_MSG_GATE" "${NED_MSG_ARGS[@]}"
+  gate_status=$?
+  if [ "$gate_status" -eq 2 ]; then
     status=2
-  elif ! command -v python3 >/dev/null 2>&1; then
-    echo "error: python3 is required for canonical gate: $NED_MSG_GATE" >&2
-    status=2
-  else
-    python3 "$NED_MSG_GATE"
-    gate_status=$?
-    if [ "$gate_status" -eq 2 ]; then
-      status=2
-    elif [ "$gate_status" -ne 0 ] && [ "$status" -eq 0 ]; then
-      status=1
-    fi
+  elif [ "$gate_status" -ne 0 ] && [ "$status" -eq 0 ]; then
+    status=1
   fi
 fi
 

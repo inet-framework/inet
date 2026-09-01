@@ -28,7 +28,9 @@ doc/project/enforcement/check-cpp.sh src/inet/<path>
 doc/project/enforcement/check-naming.sh src/inet/<path>
 ```
 
-Record the exact commands and their output. The report must let someone repeat the audit.
+The scoped naming command checks every NED and MSG declaration under the subtree, not only the
+working-tree diff. Record the exact commands and their output. The report must let someone repeat
+the audit.
 
 ## 3. Read for what a gate cannot see
 
