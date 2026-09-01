@@ -9,30 +9,31 @@ someone has to supply that address: an administrator configures it by hand, or a
 DHCP server hands it out. Both answers need something on the network besides the
 host itself.
 
-IPv6 removes that dependency. A host builds its own addresses from two things it
-already has: the identifier of its own network interface, and a prefix that the
-local router announces to everyone on the link. This is called Stateless Address
+IPv6 offers a way that needs neither. A host builds its own addresses from two
+things: the identifier of its own network interface, and a prefix that the local
+router announces to everyone on the link. This is called Stateless Address
 Autoconfiguration (SLAAC). No server keeps any state, and nothing is configured
-by hand.
+by hand. IPv6 also has a stateful alternative, DHCPv6, which is widely used where
+an operator wants central control; this showcase is about the stateless method,
+and INET does not implement DHCPv6.
 
 Building your own address raises an obvious risk. If two hosts pick the same
 address, both break. IPv6 answers this with Duplicate Address Detection (DAD):
 before a host uses an address, it asks the link whether anyone already has it.
 
 This showcase demonstrates both mechanisms. In the first simulation, four hosts
-and a server start with no addresses at all and end up fully configured. In the
-second, a host carrying a duplicated hardware address joins the same network, and
-Duplicate Address Detection refuses the address it tried to claim.
+and a server start with no addresses and end up fully configured. In the second, a
+host carrying a duplicated hardware address joins the same network, and Duplicate
+Address Detection refuses the address it tried to claim.
 
-| Verified with INET version: ``4.6``
+| Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/general/ipv6autoconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/general/ipv6autoconfiguration>`__
 
 About IPv6 Address Autoconfiguration
 ------------------------------------
 
 Stateless Address Autoconfiguration (SLAAC) is part of a larger protocol called
-Neighbor Discovery (ND), defined in RFC 4861. Neighbor Discovery replaces several
-separate IPv4 mechanisms with one protocol. Address autoconfiguration itself is
+Neighbor Discovery (ND), defined in RFC 4861. Address autoconfiguration itself is
 defined in RFC 4862.
 
 The interface identifier
@@ -40,10 +41,33 @@ The interface identifier
 
 Every IPv6 address is 128 bits. On an Ethernet link the lower 64 bits are the
 *interface identifier*, and a host derives it from the 48-bit MAC address of its
-network interface. Two hosts with different MAC addresses therefore produce
-different interface identifiers. This is what makes autoconfiguration work
-without a server: the host already owns a value that is supposed to be unique on
-the link.
+network interface. The derivation is called Modified EUI-64, and it takes three
+steps:
+
+1. Split the MAC address in half and insert the two bytes ``FF:FE`` between the
+   halves. This stretches 48 bits to 64.
+2. Invert the second-lowest bit of the first byte. This bit distinguishes a
+   globally unique identifier from a locally assigned one.
+3. Write the result as four groups of 16 bits.
+
+For the MAC address ``0A-AA-00-00-00-09``, which one of the hosts in this
+showcase uses, the steps give:
+
+.. code-block:: none
+
+   0A-AA-00-00-00-09          the MAC address
+   0A-AA-00-FF-FE-00-00-09    after inserting FF:FE
+   08-AA-00-FF-FE-00-00-09    after inverting the bit (0A becomes 08)
+   08aa:00ff:fe00:0009        the interface identifier
+
+Leading zeros are dropped when the address is printed, so this identifier appears
+as ``8aa:ff:fe00:9`` in every figure and log excerpt below. Recognizing this
+pattern makes the addresses in this showcase readable: the ``ff:fe`` in the middle
+is the inserted marker, and the last digits come straight from the MAC address.
+
+Two hosts with different MAC addresses therefore produce different interface
+identifiers. This is what makes autoconfiguration work without a server: the host
+already owns a value that is supposed to be unique on the link.
 
 The link-local address
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -67,29 +91,38 @@ it. Two messages carry this information:
   on their own, and also in answer to a Router Solicitation.
 
 A host does not have to wait for the next periodic Router Advertisement. It sends
-a Router Solicitation as soon as its link-local address is ready, and gives up
-after three attempts if nothing answers.
+a Router Solicitation as soon as its link-local address is ready. If nothing
+answers after three attempts, four seconds apart, the host concludes that there is
+no router on the link. It keeps its link-local address and can still reach
+neighbors on the same link. It does not stop listening, though: a Router
+Advertisement that arrives later is still processed, and the host configures itself
+then.
 
-A router must not flood the link with Router Advertisements. It leaves a minimum
-gap of three seconds between two Router Advertisements sent to the all-nodes
-multicast address. A Router Solicitation that arrives inside that gap is served
-by the next Router Advertisement rather than by one of its own. This is why
-several hosts starting at the same time are not all configured at the same
-moment.
+The standard also allows a router to answer a solicitation with a Router
+Advertisement addressed to the soliciting host alone. INET always sends it to the
+all-nodes multicast address, which is what lets one answer serve several hosts in
+the results below.
+
+A router must not flood the link with Router Advertisements. Each advertising
+interface keeps its own record of when it last sent one, and defers each solicited
+Router Advertisement to at least three seconds after that, plus a small random
+delay. Two consequences matter for reading the results. A router with two
+interfaces runs two independent timers, so an advertisement on one link says
+nothing about the timing on the other. And when several solicitations are pending
+at once, each deferral is computed on its own, so two advertisements can still end
+up closer together than three seconds.
 
 The Prefix Information option
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A Router Advertisement carries a *Prefix Information option* for each prefix on
-the link. The option holds:
-
-- the prefix itself, and its length, which is 64 bits for autoconfiguration;
-- the *autonomous* flag, which tells hosts they may build an address from this
-  prefix;
-- the *on-link* flag, which tells hosts that addresses in this prefix are
-  reachable directly, without going through the router;
-- a *valid lifetime* and a *preferred lifetime*, which say how long the address
-  may be used.
+the link. The two fields this showcase depends on are the prefix itself, which is
+64 bits long for autoconfiguration, and the *autonomous* flag, which tells hosts
+they may build an address from this prefix. The option also carries an *on-link*
+flag, and two different lifetimes: the *preferred lifetime*, after which the
+address should no longer be used to start new communication, and the longer *valid
+lifetime*, after which the address stops existing. This showcase does not run long
+enough for either to matter.
 
 A host that receives a Prefix Information option with the autonomous flag set
 combines the prefix with its own interface identifier. The result is its global
@@ -98,31 +131,39 @@ address.
 Duplicate Address Detection
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A newly built address is *tentative*. The host must not send ordinary traffic
-from a tentative address. First it runs Duplicate Address Detection (DAD).
+A newly built address is *tentative*. The host must not send ordinary traffic from
+a tentative address. First it runs Duplicate Address Detection (DAD).
 
-The host sends a **Neighbor Solicitation** that names the tentative address as
-its target. The source address of this message is the unspecified address
-``::``, because the host has no address it is allowed to use yet. Two answers
-mean failure:
+The host sends a **Neighbor Solicitation** that names the tentative address as its
+target. The source address of this message is the unspecified address ``::``,
+because the host has no address it is allowed to use yet. Two answers mean
+failure:
 
 - another host answers with a **Neighbor Advertisement**, which means it already
   holds the address;
 - another host sends a Neighbor Solicitation for the same target, which means it
   is testing the same address at the same time.
 
-Either way, the address is refused and never assigned. If nothing answers within
-the retransmission timer, the address becomes permanent.
+Either way, the address is refused and is never assigned. Failure is therefore
+immediate: it takes one round trip on the link. Success, by contrast, can only be
+concluded from silence, so the host has to wait out a timer before the address
+becomes usable.
 
 The solicited-node multicast address
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A Neighbor Solicitation is not broadcast. It is sent to the *solicited-node
-multicast address* of the target, which is ``ff02::1:ff`` followed by the low 24
-bits of the target address. On Ethernet this maps to a multicast MAC address, so
-network cards whose address does not match discard the frame in hardware. This is
-the main practical difference from IPv4 Address Resolution Protocol (ARP), which
-broadcasts to every node on the link.
+multicast address* of the target: the prefix ``ff02::1:ff00:0/104`` with the low 24
+bits of the target address filling the remainder. A host testing
+``fe80::8aa:ff:fe00:9`` therefore sends to ``ff02::1:ff00:9``. On Ethernet this maps
+to the multicast MAC address ``33-33-FF-00-00-09``, so network cards whose address
+does not match discard the frame in hardware. IPv4 Address Resolution Protocol
+(ARP) instead broadcasts, and every node has to inspect the packet.
+
+The saving is at the receiving node, not on the wire. An Ethernet switch that does
+not track multicast membership still forwards the frame to every port, as the
+switch in this showcase does. What changes is that only the intended target spends
+any effort on it.
 
 The order of events
 ~~~~~~~~~~~~~~~~~~~
@@ -138,6 +179,15 @@ Putting the pieces together, a host that joins a link performs these steps:
 
 Each address is therefore checked separately, and a host runs Duplicate Address
 Detection twice before it is fully configured.
+
+Two points about this ordering are specific to INET rather than required by the
+standard. INET waits for step 2 to finish before starting step 3, while RFC 4861
+allows a host to send its Router Solicitation earlier, from the unspecified source
+address, without waiting for the check to pass. And while a host is still in step 2
+it ignores any Router Advertisement that arrives. Both have a visible effect in the
+results below: a host that is still checking its link-local address when an
+advertisement passes by does not use it, and has to ask for one of its own
+afterwards.
 
 IPv6 Address Autoconfiguration in INET
 --------------------------------------
@@ -160,8 +210,17 @@ Stateless Address Autoconfiguration (SLAAC) with nothing to do.
 
 Setting :par:`assignAddressesToHosts` to ``false`` changes this. The configurator
 then addresses only router interfaces, and sets up the prefixes those interfaces
-advertise. Host interfaces are left empty, so every host address seen in this
-showcase is one the host worked out for itself.
+advertise. Host interfaces are left without addresses, so every host address seen
+in this showcase is one the host worked out for itself. The router is the
+exception: its global addresses come from the configurator, and only its link-local
+addresses are built and checked by the router itself.
+
+The parameter withholds *addresses* from hosts, not routes. The configurator still
+installs an on-link route for the link's prefix and a default route via the router
+in every host before the simulation starts. Neighbor Discovery would install a
+default router entry anyway once the first Router Advertisement arrives, so nothing
+here depends on the pre-installed routes — but a model built on this pattern should
+not assume the hosts learned their routing table from the protocol.
 
 The prefixes are chosen in an XML configuration:
 
@@ -171,63 +230,70 @@ The prefixes are chosen in an XML configuration:
 Each link gets its own ``/64`` prefix, which Stateless Address Autoconfiguration
 (SLAAC) requires. The ``among`` attribute names the nodes that share a link. The
 switch is not named, because it works at layer 2 and has no IPv6 address of its
-own.
-
-The same XML configuration can set per-interface Neighbor Discovery parameters,
-including ``advValidLifetime`` and ``advPreferredLifetime`` for the advertised
-prefix, ``minRtrAdvInterval`` and ``maxRtrAdvInterval`` for how often Router
-Advertisements are sent, ``advAutonomousFlag`` and ``advOnLinkFlag`` for the two
-flags in the Prefix Information option, and ``dupAddrDetectTransmits`` for the
-number of Duplicate Address Detection probes. This showcase keeps the defaults.
+own. The same XML configuration can override the advertised lifetimes, the Router
+Advertisement intervals, the Prefix Information flags and the number of Duplicate
+Address Detection probes per interface. This showcase keeps the defaults: one
+Duplicate Address Detection probe per address, a valid lifetime of 30 days, a
+preferred lifetime of 7 days, and both Prefix Information flags set.
 
 Neighbor Discovery parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The :ned:`Ipv6NeighbourDiscovery` module inside each node's network layer
-implements Router Discovery, Stateless Address Autoconfiguration (SLAAC) and
-Duplicate Address Detection (DAD). Its parameters include:
+implements router discovery, Stateless Address Autoconfiguration (SLAAC) and
+Duplicate Address Detection (DAD). The parameters that matter for reading the
+results are:
 
 - :par:`dupAddrDetectTransmits` — how many Neighbor Solicitations to send for
-  Duplicate Address Detection (DAD). Setting it to ``0`` disables the check.
-- :par:`retransTimer` — the wait between those Neighbor Solicitations, one second
-  by default.
+  Duplicate Address Detection (DAD), one by default. Setting it to ``0`` skips the
+  probing: the address is accepted at once, and is counted as a completed check.
+- :par:`retransTimer` — the wait before the address is accepted, one second by
+  default. A random delay of up to one more second is added, to account for the
+  time a node needs to join the solicited-node multicast group. A successful check
+  therefore takes between one and two seconds.
 - :par:`minIntervalBetweenRAs` and :par:`maxIntervalBetweenRAs` — how often a
-  router sends unsolicited Router Advertisements. The defaults, 200 and 600
-  seconds, follow RFC 4861.
+  router sends unsolicited Router Advertisements, 200 and 600 seconds by default.
+  These defaults are far longer than the simulations here, so every Router
+  Advertisement seen below was triggered by a Router Solicitation.
 - :par:`hostBootupTime` and :par:`routerBootupTime` — when a node assigns its
-  link-local address. Routers start earlier than hosts, so that a router is ready
-  to answer by the time hosts ask.
-- :par:`optimisticDad` — if set, an address may be used as a source address while
-  Duplicate Address Detection (DAD) is still running.
-- :par:`sendGratuitousNa` — if set, a node announces each new address to the link
-  once Duplicate Address Detection (DAD) completes.
+  link-local address. Both are random: ``uniform(0.4s, 1s)`` for hosts and
+  ``uniform(0s, 0.3s)`` for routers, so a router starts before the hosts it serves.
+  The randomness is why identically configured hosts do not start together in the
+  results below.
 
-The module records three statistics: ``startDad`` counts the Duplicate Address
-Detection runs a node begins, ``dadCompleted`` counts those that succeed, and
-``dadFailed`` counts those that find a duplicate.
+The module records three statistics, written to the ``.sca`` result file:
+``startDad`` counts the Duplicate Address Detection runs a node begins,
+``dadCompleted`` counts those that succeed, and ``dadFailed`` counts those that
+find a duplicate.
 
 Seeing the addresses appear
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:ned:`InterfaceTableVisualizer` writes each interface's current IPv6 address next
-to its node on the canvas. Because host interfaces start empty, the labels appear
-one by one as Stateless Address Autoconfiguration (SLAAC) proceeds.
+:ned:`InterfaceTableVisualizer` writes an interface's IPv6 address next to its
+node on the canvas. The ``format = "%a"`` setting selects one address per
+interface: the *preferred* one, which is the address the node would use to reach
+an off-link destination. A host therefore shows its link-local address first, and
+that label is then **replaced** by the global address once the host has one. The
+figures in this page show the end state, so the link-local addresses are no longer
+visible in them; the video shows the change happening.
 
 What INET does not model
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Three limitations are worth knowing before reading the results:
+Three limitations bound what this showcase can claim:
 
-- There is no DHCPv6 implementation, so the *Managed* flag in a Router
-  Advertisement has no effect. Stateless Address Autoconfiguration (SLAAC) is the
-  only way a host obtains an address here.
+- There is no DHCPv6 implementation. A Router Advertisement can carry a *Managed*
+  flag, which tells hosts to obtain addresses from a DHCPv6 server instead, but
+  since no such server exists here the flag has no effect. Stateless Address
+  Autoconfiguration (SLAAC) is the only way a host obtains an address.
 - Temporary privacy addresses are not implemented. Every address is derived from
-  the MAC address, so addresses are stable and predictable. This is what makes
-  the duplicate-address simulation below possible, but real hosts often use
-  randomized identifiers instead.
+  the MAC address, so addresses are stable and predictable. That is what makes the
+  duplicate-address simulation below possible; real hosts often use randomized
+  identifiers instead, precisely so that their addresses cannot be traced back to
+  their hardware.
 - The lifetimes of an address that is already configured are not refreshed by
-  later Router Advertisements. For this reason the showcase does not run long
-  enough for prefix lifetimes to matter, and does not demonstrate them.
+  later Router Advertisements. Lifetime expiry is therefore not demonstrated, and
+  both simulations are kept well short of any lifetime.
 
 The Model
 ---------
@@ -243,9 +309,14 @@ has a different prefix. The ``configurator`` sets up the router's addresses and
 advertised prefixes, the ``visualizer`` displays interface addresses, and the
 ``scenarioManager`` starts a node during the second simulation.
 
-The addresses in the figure are the ones the nodes built for themselves. The four
-hosts share the prefix ``2001:db8:1:1::/64``, while the server, being on the other
-link, uses ``2001:db8:1:2::/64``. The router has one address on each link.
+Every host address in the figure was built by the host itself. The four hosts
+share the prefix ``2001:db8:1:1::/64``, while the server, being on the other link,
+uses ``2001:db8:1:2::/64`` — which is the only visible sign that the second prefix
+in the XML configuration is real. The router's two global addresses come from the
+configurator, as described above.
+
+Each interface in the figure carries two addresses, a link-local one and a global
+one, but the label shows only the preferred address, which is the global one.
 
 The general configuration is:
 
@@ -253,6 +324,10 @@ The general configuration is:
    :start-at: [General]
    :end-before: [Config Autoconfiguration]
    :language: ini
+
+The first setting points each node's own IPv6 configurator submodule at the
+network-level :ned:`Ipv6NetworkConfigurator`, so that the two agree on which
+addresses and prefixes to use.
 
 Autoconfiguration Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -262,8 +337,8 @@ Autoconfiguration Configuration
    :end-before: [Config DuplicateAddress]
    :language: ini
 
-There is nothing else to configure, and that is the point of the simulation.
-Every node starts with an empty interface, and the addresses are the result.
+There is nothing else to configure, and that is the point of the simulation. No
+host is given an address, and the addresses are the result.
 
 DuplicateAddress Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -274,18 +349,27 @@ DuplicateAddress Configuration
 
 This configuration gives ``host[0]`` and ``host[3]`` the same MAC address. Both
 therefore derive the same interface identifier, and both would build the same
-link-local address.
+link-local address ``fe80::8aa:ff:fe00:10``.
 
-``host[3]`` starts in the ``DOWN`` state, and the ``scenarioManager`` starts it
-after 15 seconds:
+Setting :par:`hasStatus` to ``true`` gives every node a status submodule, which is
+what allows a node to be started and stopped during the run. ``host[3]`` begins in
+the ``DOWN`` state, and the ``scenarioManager`` starts it after 15 seconds:
 
 .. literalinclude:: ../clone.xml
    :language: xml
 
 The delay separates the two nodes in time. By the time ``host[3]`` joins,
-``host[0]`` has held its addresses for more than ten seconds. This is the
-situation an operator meets after cloning a virtual machine without changing its
-hardware address.
+``host[0]`` has held its addresses for more than ten seconds. This is the situation
+an operator meets after cloning a virtual machine without changing its hardware
+address, and it exercises the first of the two failure conditions described
+earlier: an established owner answers with a Neighbor Advertisement. The second
+condition, two hosts testing the same address at the same moment, would need them
+to start together; it is not shown here.
+
+Because assigning explicit MAC addresses to ``host[0]`` and ``host[3]`` also
+shifts the addresses INET generates automatically for the other nodes, the host
+addresses in this simulation differ from those in the first one. Only the
+identifiers change; the mechanism does not.
 
 Results
 -------
@@ -293,16 +377,25 @@ Results
 Autoconfiguration
 ~~~~~~~~~~~~~~~~~
 
-The following video shows the first eight seconds of the ``Autoconfiguration``
-simulation. Every node starts without an address. Labels appear next to the nodes
-as each address passes Duplicate Address Detection (DAD).
+The following video covers the first eight seconds of the ``Autoconfiguration``
+simulation. It starts just after the six nodes have assigned their link-local
+addresses, so each host is labelled with an ``fe80::`` address at the beginning.
+Watch each label change as the host obtains its global address: ``host[0]`` and
+``host[1]`` change first, then the server, then ``host[2]`` and ``host[3]``.
+
+The label changes the moment the global address is *assigned*, which is before
+Duplicate Address Detection (DAD) has confirmed it. A tentative global address is
+already the preferred one, because a link-local address could not be used to reach
+an off-link destination anyway. So the label showing a global address does not yet
+mean the host may use it; the log excerpts below give the times at which each
+address was actually accepted.
 
 .. video:: media/autoconfiguration.mp4
    :width: 100%
    :align: center
 
 The log shows the order described earlier. Link-local addresses are built first,
-between 0.29 s and 0.88 s:
+at times drawn from :par:`hostBootupTime` and :par:`routerBootupTime`:
 
 .. code-block:: none
 
@@ -313,9 +406,9 @@ between 0.29 s and 0.88 s:
    0.686599  host[2]: Assigning Link Local Address
    0.875035  host[3]: Assigning Link Local Address
 
-Each of them is then checked by Duplicate Address Detection (DAD). Once a host's
-link-local address is permanent, the host starts router discovery, and the router
-answers:
+Each of them is then checked by Duplicate Address Detection (DAD), which takes
+between one and two seconds. Once a host's link-local address is accepted, the
+host starts router discovery, and the router answers:
 
 .. code-block:: none
 
@@ -327,14 +420,29 @@ answers:
    2.137484  host[1]: Assigning new address to: eth0
 
 One detail here is worth noting. ``host[0]`` obtains the prefix from the Router
-Advertisement that ``host[1]`` asked for, because that Router Advertisement is
-sent to the all-nodes multicast address. A single answer serves every host that
-is listening.
+Advertisement that ``host[1]`` asked for, because that Router Advertisement is sent
+to the all-nodes multicast address. A single answer serves every host that is
+ready to use it.
 
-The remaining hosts are served later, and the reason is the three-second minimum
-gap between Router Advertisements. ``host[3]`` sends its Router Solicitation at
-2.85 s and ``host[2]`` at 3.39 s, both inside the gap that opened at 2.14 s, so
-their prefix arrives with the Router Advertisement at 5.37 s:
+``host[2]`` and ``host[3]`` were also on the link at 2.137 s, and their network
+cards did receive that same Router Advertisement. They did not use it, because
+neither had finished checking its own link-local address yet — that happened at
+2.61 s and 2.71 s. As described above, a host in the middle of Duplicate Address
+Detection ignores Router Advertisements. Each therefore had to send a Router
+Solicitation of its own once its check finished:
+
+.. code-block:: none
+
+   2.612195  host[2]: DAD completed for address fe80::8aa:ff:fe00:b, address is unique
+   2.711113  host[3]: DAD completed for address fe80::8aa:ff:fe00:c, address is unique
+   2.851464  host[3]: Initiating Router Discovery
+   3.390352  host[2]: Initiating Router Discovery
+
+The answer to those solicitations did not come immediately. The router had already
+sent a Router Advertisement to the all-nodes multicast address on this interface at
+2.137 s, so it deferred each answer to at least three seconds after that, plus a
+random delay. For ``host[2]``'s solicitation the delay came out at 0.237 s, giving
+5.374 s:
 
 .. code-block:: none
 
@@ -344,14 +452,27 @@ their prefix arrives with the Router Advertisement at 5.37 s:
    7.053168  host[2]: DAD completed for address 2001:db8:1:1:8aa:ff:fe00:b, address is unique
    7.094921  host[3]: DAD completed for address 2001:db8:1:1:8aa:ff:fe00:c, address is unique
 
-All four hosts and the server hold a global address by 7.1 s. The multicast
-addresses used along the way are visible in the packet headers: Router
-Solicitations are sent to ``ff02::2``, and Router Advertisements come from the
-router's link-local address ``fe80::8aa:ff:fe00:2`` to ``ff02::1``.
+Because this advertisement goes to the all-nodes multicast address, it serves both
+hosts, exactly as the 2.137 s one served ``host[0]`` and ``host[1]``. A further
+advertisement follows at 5.572 s, deferred from ``host[3]``'s earlier solicitation;
+by then both hosts are already configured, so it changes nothing. This is the case
+mentioned earlier, where deferrals computed separately for two pending
+solicitations end up closer together than three seconds.
 
-The statistics confirm that every node ran Duplicate Address Detection (DAD)
-exactly twice, once for its link-local address and once for its global address,
-and that no address was refused:
+So two separate mechanisms delay these two hosts: first their own Duplicate Address
+Detection, which stops them using an advertisement that was already on the link,
+and then the router's rate limit, which delays the advertisement they asked for. All
+four hosts and the server hold a global address by 7.1 s.
+
+The server is served by a Router Advertisement on the other interface, at 3.54 s.
+That interface has its own timer, so it is not affected by the 2.137 s
+advertisement on the host link. This is why the server obtains
+``2001:db8:1:2:8aa:ff:fe00:1``, from the second prefix, while the hosts obtain
+addresses from the first.
+
+The statistics in the ``.sca`` result file confirm that every node ran Duplicate
+Address Detection (DAD) exactly twice, once for its link-local address and once
+for its global address, and that no address was refused:
 
 .. list-table::
    :header-rows: 1
@@ -382,7 +503,7 @@ Duplicate Address
 
 In the second simulation, ``host[3]`` starts after 15 seconds with the same MAC
 address as ``host[0]``. It builds the same link-local address, and Duplicate
-Address Detection (DAD) refuses it 30 microseconds later:
+Address Detection (DAD) refuses it about 30 microseconds later:
 
 .. code-block:: none
 
@@ -392,9 +513,11 @@ Address Detection (DAD) refuses it 30 microseconds later:
    15.712316  host[3]: DAD failed for address fe80::8aa:ff:fe00:10 on eth0 --
               Loss of DAD, address will not be assigned
 
-This is the first of the two failure cases described earlier. ``host[0]`` already
-holds the address, so it answers the Neighbor Solicitation with a Neighbor
-Advertisement, and ``host[3]`` gives up the address.
+``host[0]`` already holds the address, so it answers the Neighbor Solicitation
+with a Neighbor Advertisement, and ``host[3]`` gives up the address. The contrast
+with the first simulation is sharp: a successful check waits out a timer for one
+to two seconds, while a failed one is settled in the time it takes a frame to
+cross the link and come back.
 
 The consequence is visible on the canvas at the end of the simulation:
 
@@ -428,8 +551,8 @@ The statistics show the same result, and show that no other node is affected:
      - 2
      - 0
 
-``host[3]`` begins one Duplicate Address Detection run and completes none. This
-is the outcome the mechanism exists to produce: a collision is caught before the
+``host[3]`` begins one Duplicate Address Detection run and completes none. This is
+the outcome the mechanism exists to produce: a collision is caught before the
 address is used, rather than after both hosts are broken.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
@@ -439,6 +562,10 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 
 Try It Yourself
 ---------------
+
+The showcase contains two configurations, ``Autoconfiguration`` and
+``DuplicateAddress``. Both write their Duplicate Address Detection statistics to
+``results/``, where the OMNeT++ Analysis tool or ``opp_scavetool`` can read them.
 
 If you already have INET and OMNeT++ installed, start the IDE by typing
 ``omnetpp``, import the INET project into the IDE, then navigate to the
@@ -452,8 +579,8 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 
 .. code-block:: bash
 
-    $ opp_env run inet-4.6 --init -w inet-workspace --install --build-modes=release --chdir \
-       -c 'cd inet-4.6.*/showcases/general/ipv6autoconfiguration && inet'
+    $ opp_env run inet-4.7 --init -w inet-workspace --install --build-modes=release --chdir \
+       -c 'cd inet-4.7.*/showcases/general/ipv6autoconfiguration && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the
@@ -464,14 +591,14 @@ workspace and then open an interactive shell:
 
 .. code-block:: bash
 
-    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.6
+    $ opp_env install --init -w inet-workspace --build-modes=release inet-4.7
     $ cd inet-workspace
     $ opp_env shell
 
 Inside the shell, start the IDE by typing ``omnetpp``, import the INET project,
 then start exploring.
 
-.. TODO: replace the issue number below once the showcase discussion issue is opened
+.. TODO: replace the issue-tracker link below once the showcase discussion issue is opened
 
 Discussion
 ----------
