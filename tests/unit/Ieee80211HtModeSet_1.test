@@ -1,0 +1,89 @@
+%description:
+Verify that IEEE 802.11 mode sets retain an explicitly configured timing
+reference after bitrate sorting and classify the operating PHY used for
+mode-dependent TXOP defaults.
+
+%includes:
+#include <vector>
+
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%global:
+
+class ExplicitModeSet : public Ieee80211ModeSet
+{
+  public:
+    using Ieee80211ModeSet::Entry;
+
+    ExplicitModeSet(const std::vector<Entry>& entries, const IIeee80211Mode *referenceMode, PhyType phyType) :
+        Ieee80211ModeSet("explicit", entries, referenceMode, phyType)
+    {}
+};
+
+%activity:
+
+const auto *htModeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+const auto *vhtModeSet = Ieee80211ModeSet::getModeSet("ac");
+const auto *htReference = htModeSet->getMode(Mbps(6.5));
+
+ASSERT(htModeSet->getPhyType() == Ieee80211ModeSet::PhyType::HT);
+ASSERT(htModeSet->getReferenceMode() == htReference);
+ASSERT(htModeSet->getSifsTime() == htReference->getSifsTime());
+ASSERT(htModeSet->getSlotTime() == htReference->getSlotTime());
+ASSERT(htModeSet->getPhyRxStartDelay() == SimTime(24, SIMTIME_US));
+
+ASSERT(Ieee80211ModeSet::getModeSet("a")->getPhyType() == Ieee80211ModeSet::PhyType::OFDM);
+ASSERT(Ieee80211ModeSet::getModeSet("b")->getPhyType() == Ieee80211ModeSet::PhyType::HR_DSSS);
+ASSERT(Ieee80211ModeSet::getModeSet("g(mixed)")->getPhyType() == Ieee80211ModeSet::PhyType::ERP);
+ASSERT(Ieee80211ModeSet::getModeSet("g(erp)")->getPhyType() == Ieee80211ModeSet::PhyType::ERP);
+ASSERT(Ieee80211ModeSet::getModeSet("p")->getPhyType() == Ieee80211ModeSet::PhyType::OFDM);
+ASSERT(vhtModeSet->getPhyType() == Ieee80211ModeSet::PhyType::VHT);
+
+// Deliberately pass the faster mode first. The configured reference remains
+// authoritative after the constructor sorts entries by bitrate.
+std::vector<ExplicitModeSet::Entry> reorderedEntries = {
+    {false, htModeSet->getMode(Mbps(65))},
+    {true, htReference},
+};
+ExplicitModeSet reordered(reorderedEntries, htReference, Ieee80211ModeSet::PhyType::HT);
+ASSERT(reordered.getReferenceMode() == htReference);
+ASSERT(reordered.getMode(0) == htReference);
+ASSERT(reordered.getSifsTime() == htReference->getSifsTime());
+ASSERT(reordered.getSlotTime() == htReference->getSlotTime());
+ASSERT(reordered.getPhyRxStartDelay() == htReference->getPhyRxStartDelay());
+
+bool nullReferenceRejected = false;
+try {
+    ExplicitModeSet invalid(reorderedEntries, nullptr, Ieee80211ModeSet::PhyType::HT);
+}
+catch (const cRuntimeError&) {
+    nullReferenceRejected = true;
+}
+ASSERT(nullReferenceRejected);
+
+bool duplicateReferenceRejected = false;
+try {
+    ExplicitModeSet invalid({{true, htReference}, {false, htReference}}, htReference, Ieee80211ModeSet::PhyType::HT);
+}
+catch (const cRuntimeError&) {
+    duplicateReferenceRejected = true;
+}
+ASSERT(duplicateReferenceRejected);
+
+bool foreignReferenceRejected = false;
+try {
+    ExplicitModeSet invalid(reorderedEntries, vhtModeSet->getMode(Mbps(6.5)), Ieee80211ModeSet::PhyType::HT);
+}
+catch (const cRuntimeError&) {
+    foreignReferenceRejected = true;
+}
+ASSERT(foreignReferenceRejected);
+
+EV << "Explicit mode-set timing references and operating PHY classifications verified.\n";
+
+%contains: stdout
+Explicit mode-set timing references and operating PHY classifications verified.
