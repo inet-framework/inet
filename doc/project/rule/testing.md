@@ -23,6 +23,7 @@ Every test rule in document order.
 | Rule | Statement |
 | --- | --- |
 | [TR-CAT-MATCH](#tr-cat-match) | The test category matches the kind of claim the change makes |
+| [TR-FOCUSED-EVIDENCE](#tr-focused-evidence) | Validation runs the directly related cases and records reproducible evidence |
 | [TR-SHIP-WITH](#tr-ship-with) | New behavior ships with its test, in the same pull request |
 | [TR-FP-NOT-ENOUGH](#tr-fp-not-enough) | A fingerprint is never the only test of new behavior |
 | [TR-VALIDATE-EXTERNAL](#tr-validate-external) | A claim about the real world is checked against something outside INET |
@@ -73,6 +74,27 @@ A test in the wrong category is persuasive and empty. A module test cannot estab
 and a statistical test cannot establish that a field is encoded correctly.
 
 *Enforced at T4 — agent review: does the test type match the claim?*
+
+### TR-FOCUSED-EVIDENCE
+
+**Validation runs the cases directly related to the changed contract through explicit filters, and
+records enough context to reproduce the result.**
+
+Select cases from the changed paths, symbols and behavioral contracts, in the category required by
+[TR-CAT-MATCH](#tr-cat-match), and state that mapping. Invoke the test runner with an explicit case,
+tag or filter. An unfiltered category or repository-wide suite is useful integration coverage, but
+it is not a substitute for evidence that reaches the changed behavior. If no directly related case
+exists, report that coverage gap instead of hiding it inside a broader green suite; new behavior
+still owes a test under [TR-SHIP-WITH](#tr-ship-with).
+
+A reported result includes the working directory, the exact build and test commands, build mode,
+configuration, run and seed where applicable, explicit filter, exit status, and the paths of any
+logs, captures or result artifacts used to support the claim. When compiled INET source or
+generated-code inputs changed, rebuild the matching INET library before the test so the executable
+and generated sources are current with the source tree.
+
+*Enforced at T4 — agent review of the change-to-test mapping, command scope, library freshness and
+reported evidence.*
 
 ### TR-SHIP-WITH
 

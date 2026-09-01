@@ -27,6 +27,19 @@ test in the wrong category is persuasive and empty
 | `features` | a feature builds with its neighbours off | that it works |
 | `misc` | what does not fit above | — |
 
+## The production path
+
+**A test that calls a helper directly establishes only the helper's contract.** It does not establish
+that a production module invokes the helper, supplies the intended inputs, or lets the result affect
+observable behavior. A fixture that reproduces the production selection or dispatch logic has the
+same limitation: it tests the reproduced path, not the integrated one.
+
+A claim that a helper is integrated into model behavior therefore needs module or protocol evidence
+that enters through the production gate, API or configuration and observes the resulting behavior.
+The helper-level unit test remains valuable for boundaries and computations; the production-path
+test establishes the wiring and use. Both must be selected and reported as directly related evidence
+under [TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence).
+
 ## The one that is different
 
 **A fingerprint is not a test of correctness.** It hashes the event trajectory of a configuration and
