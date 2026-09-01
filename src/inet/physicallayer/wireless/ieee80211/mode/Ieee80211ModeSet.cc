@@ -746,6 +746,18 @@ const IIeee80211Mode *Ieee80211ModeSet::getFastestMandatoryMode() const
     return nullptr;
 }
 
+const IIeee80211Mode *Ieee80211ModeSet::getFastestLegacyOperationalMode() const
+{
+    const IIeee80211Mode *fastestMandatoryLegacyMode = nullptr;
+    for (const auto *mode : legacyOperationalModes) {
+        if (getIsMandatory(mode))
+            fastestMandatoryLegacyMode = mode;
+    }
+    if (fastestMandatoryLegacyMode != nullptr)
+        return fastestMandatoryLegacyMode;
+    return legacyOperationalModes.empty() ? nullptr : legacyOperationalModes.back();
+}
+
 const IIeee80211Mode *Ieee80211ModeSet::getSlowerMandatoryMode(const IIeee80211Mode *mode) const
 {
     int index = findModeIndex(mode);

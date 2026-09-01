@@ -8,10 +8,12 @@
 #ifndef __INET_RATESELECTION_H
 #define __INET_RATESELECTION_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -33,6 +35,7 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
 {
   protected:
     IRateControl *dataOrMgmtRateControl = nullptr;
+    ModuleRefByPar<Ieee80211Mib> mib;
     const physicallayer::IIeee80211Mode *fastestMandatoryMode = nullptr;
 
     const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
@@ -65,6 +68,8 @@ class INET_API RateSelection : public IRateSelection, public SimpleModule, publi
     virtual const physicallayer::IIeee80211Mode *getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual const physicallayer::IIeee80211Mode *computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header);
     virtual const physicallayer::IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+    virtual const physicallayer::IIeee80211Mode *getPeerCompatibleMode(const MacAddress& peerAddress,
+            const physicallayer::IIeee80211Mode *mode) const;
 
   public:
     static void setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const physicallayer::IIeee80211Mode *mode);
