@@ -30,9 +30,11 @@ module Dcf extends Module like IDcf
     parameters:
         string rxModule;
         string txModule;
+        string mibModule = default("^.^.mib");
 
         *.rateSelectionModule = "^.rateSelection";
         *.rxModule = "^." + this.rxModule;
+        *.mibModule = default(absPath(this.mibModule));
 
         @class(Dcf);
         displayStringTextFormat = default("{frameSequenceInfo}");
