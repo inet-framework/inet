@@ -32,7 +32,7 @@ Every test rule in document order.
 
 | Rule | Statement |
 | --- | --- |
-| [TR-BASELINE-DELIBERATE](#tr-baseline-deliberate) | A baseline changes on purpose, never as a side effect |
+| [TR-BASELINE-DELIBERATE](#tr-baseline-deliberate) | A baseline changes only after explicit approval, never as a side effect |
 | [TR-BASELINE-PROVENANCE](#tr-baseline-provenance) | A baseline change names its cause and its reason |
 | [TR-BASELINE-COMMIT](#tr-baseline-commit) | A baseline update travels with the change that causes it |
 
@@ -133,17 +133,23 @@ judge whether the agreement is good.
 
 ### TR-BASELINE-DELIBERATE
 
-**A recorded expectation changes because someone decided it should, never as a side effect of
-another change.**
+**A recorded expectation changes only after its exact scope and reason receive explicit approval,
+never as a side effect of another change.**
 
 A fingerprint `.csv`, a statistical baseline, an expected output: each is a claim that *these values
 are correct*. Regenerating one to make CI green is the single fastest way to lose every regression
-guarantee the suite provides, and it is invisible in a large diff. The defence is the message: the
-commit that moves the values states which behavior moved and why the new values are right
+guarantee the suite provides, and it is invisible in a large diff. Before regeneration, present the
+specific baselines or configurations that would move, the behavior that caused the movement, and
+why the new values would be right; the human responsible for accepting the change approves that
+proposal explicitly. Approval of the source change is not implicit approval to rewrite its recorded
+expectations.
+
+The defence continues in the commit message: the commit that moves the values states which behavior
+moved and why the new values are right
 ([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)).
 
-*Enforced at T4 — agent review of the message against the moved values; T3 for a baseline-only commit
-that gives no reason.*
+*Enforced at T5 for explicit approval; T4 for review of the message against the moved values; T3 for
+a baseline-only commit that gives no reason.*
 
 ### TR-BASELINE-PROVENANCE
 
