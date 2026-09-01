@@ -1,6 +1,6 @@
 %description:
 Verify byte-exact HT Capabilities and HT Operation management elements, including
-non-contiguous MCS bitmaps, typed deserialization, and malformed-length rejection.
+frame-subtype-specific Basic HT-MCS presence, typed deserialization, and malformed-length rejection.
 
 %includes:
 #include "inet/common/packet/Packet.h"
@@ -82,8 +82,10 @@ ASSERT(bytes[26] == 0x01); // Tx MCS Set Defined (bit 96)
 ASSERT(bytes[37] == 61 && bytes[38] == 22);
 ASSERT(bytes[39] == 36);
 ASSERT(bytes[40] == 0x05 && bytes[41] == 0x02);
-ASSERT(bytes[45] == 0x89); // non-contiguous Basic MCS 0, 3, and 7
-ASSERT(bytes[54] == 0x10); // Basic MCS 76
+// IEEE Std 802.11-2024, Table 9-230: Basic HT-MCS Set is reserved in
+// Association and Reassociation Responses and is transmitted as zero.
+for (int i = 45; i < 61; i++)
+    ASSERT(bytes[i] == 0);
 
 Packet encoded("encoded", makeShared<BytesChunk>(bytes));
 auto decoded = encoded.popAtFront<Ieee80211AssociationResponseFrame>(B(bytes.size()));
@@ -94,10 +96,27 @@ ASSERT(decoded->getHtCapabilities().rxMcsSupported[0]);
 ASSERT(!decoded->getHtCapabilities().rxMcsSupported[1]);
 ASSERT(decoded->getHtCapabilities().rxMcsSupported[2]);
 ASSERT(decoded->getHtCapabilities().rxMcsSupported[76]);
-ASSERT(decoded->getHtOperation().basicMcsSupported[0]);
+ASSERT(!decoded->getHtOperation().basicMcsSupported[0]);
 ASSERT(!decoded->getHtOperation().basicMcsSupported[1]);
-ASSERT(decoded->getHtOperation().basicMcsSupported[3]);
-ASSERT(decoded->getHtOperation().basicMcsSupported[76]);
+ASSERT(!decoded->getHtOperation().basicMcsSupported[3]);
+ASSERT(!decoded->getHtOperation().basicMcsSupported[76]);
+
+auto reassociation = makeShared<Ieee80211ReassociationResponseFrame>();
+reassociation->setStatusCode(original->getStatusCode());
+reassociation->setAid(original->getAid());
+reassociation->setSupportedRates(original->getSupportedRates());
+reassociation->setHtCapabilitiesPresent(true);
+reassociation->setHtCapabilities(original->getHtCapabilities());
+reassociation->setHtOperationPresent(true);
+reassociation->setHtOperation(original->getHtOperation());
+reassociation->setChunkLength(B(61));
+auto reassociationBytes = serializeResponse(reassociation);
+for (int i = 45; i < 61; i++)
+    ASSERT(reassociationBytes[i] == 0);
+Packet encodedReassociation("encoded-reassociation", makeShared<BytesChunk>(reassociationBytes));
+auto decodedReassociation = encodedReassociation.popAtFront<Ieee80211ReassociationResponseFrame>(B(reassociationBytes.size()));
+ASSERT(!decodedReassociation->getHtOperation().basicMcsSupported[0]);
+ASSERT(!decodedReassociation->getHtOperation().basicMcsSupported[76]);
 
 // The caller supplies the exact management-body region. A legal vendor IE before
 // the HT elements is ignored by the field parser but retained by
@@ -261,7 +280,17 @@ for (bool probeResponse : {false, true}) {
     discovery->setHtOperation(original->getHtOperation());
     discovery->setChunkLength(B(69));
     Packet discoveryPacket("allowed-discovery", discovery);
-    ASSERT(discoveryPacket.peekAllAsBytes()->getChunkLength() == B(69));
+    auto discoveryBytes = discoveryPacket.peekAllAsBytes()->getBytes();
+    ASSERT(discoveryBytes.size() == 69);
+    Packet encodedDiscovery("encoded-discovery", makeShared<BytesChunk>(discoveryBytes));
+    Ptr<const Ieee80211BeaconFrame> decodedDiscovery;
+    if (probeResponse)
+        decodedDiscovery = encodedDiscovery.popAtFront<Ieee80211ProbeResponseFrame>(B(discoveryBytes.size()));
+    else
+        decodedDiscovery = encodedDiscovery.popAtFront<Ieee80211BeaconFrame>(B(discoveryBytes.size()));
+    ASSERT(decodedDiscovery->getHtOperation().basicMcsSupported[0]);
+    ASSERT(decodedDiscovery->getHtOperation().basicMcsSupported[3]);
+    ASSERT(decodedDiscovery->getHtOperation().basicMcsSupported[76]);
 }
 
 EV << "HT management element byte and validation checks passed.\n";

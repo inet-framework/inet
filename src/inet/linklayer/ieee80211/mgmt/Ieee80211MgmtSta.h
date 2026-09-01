@@ -165,13 +165,17 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     /** Stores AP info received in a beacon or probe response */
     virtual void storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body);
 
-    /** Processes Association and Reassociation Responses without using cached Beacon capabilities. */
+    /** Processes Association and Reassociation Responses using the selected BSS discovery state. */
     virtual void processAssociationResponse(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool reassociation);
+
+    /** Returns whether the selected BSS's cached HT advertisement is usable locally. */
+    virtual bool isHtBssSupported(const ApInfo *ap, std::string& reason) const;
 
     /** Classifies the HT elements in a successful association response. */
     virtual HtAssociationResponseStatus classifyAssociationResponse(
             const Ptr<const Ieee80211AssociationResponseFrame>& responseBody,
             bool hasReceivedBand,
+            const Ieee80211HtOperation *selectedBssHtOperation,
             Ieee80211HtCapabilities& responseHtCapabilities, Ieee80211HtOperation& responseHtOperation,
             std::string& reason) const;
 
