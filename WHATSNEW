@@ -29,6 +29,14 @@ Notable backward incompatible changes are the following:
    adaptive rate control, either where a station transmits to several peers or
    where it sends group-addressed traffic.
 
+2. Figure result recorder bounds check
+
+   A @statistic(record=figure; targetFigure=name:N) with N equal to the number of
+   items the figure displays was accepted and then wrote one past the end. It is
+   now rejected at initialization, so a model that used the boundary index by
+   mistake stops with an error instead of writing into an item that does not
+   exist.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
