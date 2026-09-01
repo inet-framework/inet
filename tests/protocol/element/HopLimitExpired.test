@@ -5,7 +5,7 @@ When SendWithHopLimit stamps a hop limit of 0, ReceiveWithHopLimit's filter pred
 (hopLimit > 0) fails, so the checker drops the packet and it never reaches the sink. This
 exercises the drop path of the checker (a PacketFilterBase).
 
-%file: PeHopLimitExpired.cc
+%file: HopLimitExpired.cc
 
 #include "ProtocolTest.h"
 

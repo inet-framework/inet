@@ -8,7 +8,7 @@ ReceiveAtL3Address checker) and leaves the DestinationL3AddressHeader in place, 
 receiver that checks and pops that header, not the forwarder. This guards against the earlier
 double-pop bug where Forwarding stripped the header prematurely.
 
-%file: PeForwardingLocal.cc
+%file: ForwardingLocal.cc
 
 #include "ProtocolTest.h"
 #include "inet/common/ProtocolTag_m.h"

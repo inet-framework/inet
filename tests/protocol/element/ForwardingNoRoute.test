@@ -6,7 +6,7 @@ table only has a route to 10.0.0.10. The destination is neither this node nor a 
 Forwarding drops the packet (NO_ROUTE_FOUND) and it never reaches the sink. This exercises the
 explicit no-route path, distinct from local delivery.
 
-%file: PeForwardingNoRoute.cc
+%file: ForwardingNoRoute.cc
 
 #include "ProtocolTest.h"
 

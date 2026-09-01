@@ -5,7 +5,7 @@ StreamingTransmitter sends a packet onto the channel as a signal that starts and
 (rather than all at once); DestreamingReceiver collects the whole packet back once the signal
 ends. The 100-byte packet must cross the channel and reach the sink.
 
-%file: PeTransceiverStreaming.cc
+%file: TransceiverStreaming.cc
 
 #include "ProtocolTest.h"
 

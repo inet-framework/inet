@@ -4,7 +4,7 @@ Atomic protocolelement test: destination-port addressing (matching port).
 SendToPort prepends a DestinationPortHeader with the configured port; ReceiveAtPort accepts a
 packet only if its port matches. Here both use port 1000, so the packet is accepted and delivered.
 
-%file: PeSendToPort.cc
+%file: SendToPort.cc
 
 #include "ProtocolTest.h"
 #include "inet/protocolelement/selectivity/DestinationPortHeader_m.h"

@@ -8,7 +8,7 @@ not pass out-of-order packets straight through. (The complementary in-order *rel
 synchronously with the gap-filling packet and so is not separately observable through this
 framework; this test pins the buffering/hold behaviour.)
 
-%file: PeReordering.cc
+%file: Reordering.cc
 
 #include "ProtocolTest.h"
 #include "inet/common/ProtocolTag_m.h"

@@ -11,7 +11,7 @@ demonstrates the exponential growth of the backoff window.
 Note: the exact delay depends on the (fixed) test RNG seed; the 2s / 256s thresholds leave a wide
 margin around the expected ~127s draw.
 
-%file: PeBackoffGrows.cc
+%file: BackoffGrows.cc
 
 #include "ProtocolTest.h"
 #include "inet/common/packet/Packet.h"

@@ -4,7 +4,7 @@ Atomic protocolelement test: destination-port addressing (non-matching port is d
 SendToPort addresses the packet to port 1000, but ReceiveAtPort listens on port 2000. The port
 does not match, so ReceiveAtPort's filter drops the packet and it never reaches the sink.
 
-%file: PeReceiveAtPortDrop.cc
+%file: ReceiveAtPortDrop.cc
 
 #include "ProtocolTest.h"
 

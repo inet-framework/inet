@@ -8,7 +8,7 @@ and reports success back up so Resending releases the packet. With a lossless li
 acknowledged on the first try, so the sink receives each source packet exactly once (no
 retransmissions). Four source packets -> exactly four deliveries.
 
-%file: PeAcknowledge.cc
+%file: Acknowledge.cc
 
 #include "ProtocolTest.h"
 

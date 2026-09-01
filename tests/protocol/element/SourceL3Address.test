@@ -6,7 +6,7 @@ ReceiveFromL3Address pops that header and records the sender into an L3AddressIn
 dropping the packet. The test checks the header carries the right source address on egress and that
 the receiver surfaces it as an indication tag on delivery.
 
-%file: PeSourceL3Address.cc
+%file: SourceL3Address.cc
 
 #include "ProtocolTest.h"
 #include "inet/networklayer/common/L3Address.h"

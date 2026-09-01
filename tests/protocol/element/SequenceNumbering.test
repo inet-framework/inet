@@ -4,7 +4,7 @@ Atomic protocolelement test: sequence numbering.
 SequenceNumbering prepends a SequenceNumberHeader whose counter increments per packet. The test
 checks that the first emitted packet carries sequence number 0 and the second carries 1.
 
-%file: PeSequenceNumbering.cc
+%file: SequenceNumbering.cc
 
 #include "ProtocolTest.h"
 #include "inet/protocolelement/ordering/SequenceNumberHeader_m.h"

@@ -5,7 +5,7 @@ FragmentNumberHeaderBasedFragmenter splits a 100-byte packet into 20-byte fragme
 FragmentNumberHeaderBasedDefragmenter reassembles them. The sink must receive exactly the
 original 100-byte packet, reassembled.
 
-%file: PeDefragmentation.cc
+%file: Defragmentation.cc
 
 #include "ProtocolTest.h"
 

@@ -4,7 +4,7 @@ Atomic protocolelement test: padding inserter.
 PaddingInserter pads a short packet up to a configured minimum length. A 20-byte packet padded
 to a minimum of 64 bytes must leave the inserter at least 64 bytes long.
 
-%file: PePadding.cc
+%file: Padding.cc
 
 #include "ProtocolTest.h"
 

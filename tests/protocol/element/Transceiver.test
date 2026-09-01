@@ -5,7 +5,7 @@ PacketTransmitter serialises a packet into a signal sent over a DatarateChannel;
 turns the received signal back into a packet. The test checks a packet crosses the channel and
 reaches the sink (the transmission consumes time proportional to the packet length and datarate).
 
-%file: PeTransceiver.cc
+%file: Transceiver.cc
 
 #include "ProtocolTest.h"
 

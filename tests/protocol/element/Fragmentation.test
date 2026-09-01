@@ -6,7 +6,7 @@ of payload each (via a LengthBasedFragmenterPolicy). Observed directly at the si
 produce several small fragments rather than one whole packet. (The fragmenter is a 1-to-N pusher,
 so its multiple outputs are observed where they are consumed -- at the sink.)
 
-%file: PeFragmentation.cc
+%file: Fragmentation.cc
 
 #include "ProtocolTest.h"
 

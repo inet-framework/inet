@@ -10,7 +10,7 @@ with probability packetLossProbability, so some hops need retransmission (with b
 attempts) to get through; the reliability recovers each hop locally and the packet still reaches the
 destination app several hops away. No real protocols -- only protocolelement + queueing modules.
 
-%file: PeWirelessMultihop.cc
+%file: WirelessMultihop.cc
 
 #include "ProtocolTest.h"
 

@@ -5,7 +5,7 @@ SendWithHopLimit prepends a HopLimitHeader carrying the configured hop limit; Re
 accepts the packet while the hop limit is positive, strips the header and forwards it. Here the
 hop limit is 5 (> 0), so the packet is delivered to the sink.
 
-%file: PeHopLimit.cc
+%file: HopLimit.cc
 
 #include "ProtocolTest.h"
 #include "inet/protocolelement/forwarding/HopLimitHeader_m.h"

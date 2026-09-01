@@ -7,7 +7,7 @@ failure, prompting Resending to retransmit; the retransmission is not dropped an
 The sink thus receives nothing until after the acknowledgement timeout (0.1s) and only then the
 retransmitted packet -- proving the timeout + retransmit path works.
 
-%file: PeAcknowledgeRetransmit.cc
+%file: AcknowledgeRetransmit.cc
 
 #include "ProtocolTest.h"
 

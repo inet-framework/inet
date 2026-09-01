@@ -5,7 +5,7 @@ SendFromPort stamps a SourcePortHeader carrying the sender's port (1234). Receiv
 header and records the port into an L4PortInd tag, without dropping the packet. Together with the
 source L3 address element this lets a receiver reconstruct who to reply to.
 
-%file: PeSourcePort.cc
+%file: SourcePort.cc
 
 #include "ProtocolTest.h"
 #include "inet/protocolelement/selectivity/SourcePortHeader_m.h"

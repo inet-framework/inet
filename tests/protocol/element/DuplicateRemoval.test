@@ -6,7 +6,7 @@ packet twice (original + one duplicate, same sequence number); DuplicateRemoval 
 first copy and drop the duplicate. Over 3 source packets, the sink must therefore receive exactly
 3 packets, not 6.
 
-%file: PeDuplicateRemoval.cc
+%file: DuplicateRemoval.cc
 
 #include "ProtocolTest.h"
 

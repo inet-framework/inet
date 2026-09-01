@@ -6,7 +6,7 @@ packet with the internal "checksum" protocol) and that InternetChecksumHeaderChe
 it and forwards the packet on, so it reaches the sink. Self-contained: the network, the
 ProtocolTest program, the config and the expected verdict are all in this file.
 
-%file: PeChecksum.cc
+%file: Checksum.cc
 
 #include "ProtocolTest.h"
 #include "inet/protocolelement/checksum/header/ChecksumHeader_m.h"

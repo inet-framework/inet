@@ -149,5 +149,5 @@ Example compounds (all from protocol elements):
 
 Earlier draft used **point-to-point per-neighbour links** (no medium, MAC dropped). Kept only as a
 fallback if the shared-medium MAC path proves too costly; the draft
-`tests/protocol/protocolelement/PeWirelessLink.test` (unvalidated) reflects that older approach and
+`tests/protocol/element/WirelessLink.test` (unvalidated) reflects that older approach and
 will be reworked to the shared-medium design.

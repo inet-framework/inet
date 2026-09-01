@@ -8,7 +8,7 @@ packet with the next-hop address (10.0.0.2), the outgoing interface (0), and a d
 for the hop-limit protocol (the next element on the egress path). The routing table is a NED
 parameter, not a hard-coded C++ table.
 
-%file: PeForwarding.cc
+%file: Forwarding.cc
 
 #include "ProtocolTest.h"
 #include "inet/common/ProtocolTag_m.h"

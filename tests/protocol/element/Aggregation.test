@@ -6,7 +6,7 @@ larger packet (here up to 3 subpackets of 100 bytes each, via a LengthBasedAggre
 Observed at the sink, the aggregated packet must be at least 300 bytes -- i.e. it really carries
 the three subpackets, not just one. (The aggregator is an N-to-1 pusher, observed at the sink.)
 
-%file: PeAggregation.cc
+%file: Aggregation.cc
 
 #include "ProtocolTest.h"
 

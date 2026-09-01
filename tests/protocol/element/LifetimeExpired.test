@@ -9,7 +9,7 @@ expiry path, the time-based counterpart of the hop-limit-expired test.
 Note: the delayer is declared before the sender so it initializes (and caches its gates) first;
 otherwise the sender's protocol registration can reach the delayer before its gates are set.
 
-%file: PeLifetimeExpired.cc
+%file: LifetimeExpired.cc
 
 #include "ProtocolTest.h"
 

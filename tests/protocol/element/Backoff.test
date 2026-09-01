@@ -8,7 +8,7 @@ CW = 1, and the delay is at most 1 slot = 1s. The packet must therefore always r
 1s -- proving the window is small for a low attempt (an over-large or fixed window would routinely
 exceed this). The complementary "window grows with attempt" case is PeBackoffGrows.
 
-%file: PeBackoff.cc
+%file: Backoff.cc
 
 #include "ProtocolTest.h"
 #include "inet/common/packet/Packet.h"

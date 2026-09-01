@@ -5,7 +5,7 @@ PacketStreamer takes a whole packet and streams it out over time (start/progress
 configured datarate; PacketDestreamer collects a stream back into a whole packet. A 100-byte
 packet must survive the stream / destream round-trip and reach the sink.
 
-%file: PeStreaming.cc
+%file: Streaming.cc
 
 #include "ProtocolTest.h"
 

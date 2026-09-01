@@ -11,7 +11,7 @@ sequence number. No real protocols -- only protocolelement + queueing modules.
 
 This variant is lossless, so the packet is acknowledged on the first attempt and delivered.
 
-%file: PeWirelessLink.cc
+%file: WirelessLink.cc
 
 #include "ProtocolTest.h"
 

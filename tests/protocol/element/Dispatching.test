@@ -6,7 +6,7 @@ encodes that protocol's numeric id into a ProtocolHeader; ReceiveWithProtocol de
 restores the protocol on the packet. The test checks the encoded id matches the sequenceNumber
 protocol and that the packet is delivered.
 
-%file: PeDispatching.cc
+%file: Dispatching.cc
 
 #include "ProtocolTest.h"
 #include "inet/protocolelement/common/AccessoryProtocol.h"

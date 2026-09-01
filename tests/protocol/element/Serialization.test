@@ -5,7 +5,7 @@ PacketSerializer flattens a packet's chunk tree into raw bytes (simulating on-wi
 serialization); PacketDeserializer rebuilds a chunk tree from the bytes. A 100-byte packet must
 survive the round-trip unchanged in length and reach the sink.
 
-%file: PeSerialization.cc
+%file: Serialization.cc
 
 #include "ProtocolTest.h"
 
