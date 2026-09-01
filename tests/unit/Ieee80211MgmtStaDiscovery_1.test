@@ -1,0 +1,121 @@
+%description:
+Verify that serialized Beacon and Probe Response discovery preserves the HT
+Operation primary channel as the cached AP channel, while legacy discovery
+continues to use channelNumber (including channel 0).
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::units::values;
+
+%global:
+
+class TestIeee80211MgmtSta : public Ieee80211MgmtSta
+{
+  public:
+    using Ieee80211MgmtSta::lookupAP;
+    using Ieee80211MgmtSta::storeAPInfo;
+
+    int changedChannel = -1;
+
+    virtual void changeChannel(int channel) override { changedChannel = channel; }
+};
+
+static Ptr<Ieee80211BeaconFrame> makeDiscovery(bool probeResponse, int channelNumber, int primaryChannel, bool withHt)
+{
+    Ptr<Ieee80211BeaconFrame> body = probeResponse ? staticPtrCast<Ieee80211BeaconFrame>(makeShared<Ieee80211ProbeResponseFrame>()) : makeShared<Ieee80211BeaconFrame>();
+    body->setSSID("serialized");
+    Ieee80211SupportedRatesElement rates;
+    rates.numRates = 1;
+    rates.rate[0] = 6;
+    body->setSupportedRates(rates);
+    body->setBeaconInterval(SimTime(100, SIMTIME_MS));
+    body->setChannelNumber(channelNumber);
+    if (withHt) {
+        Ieee80211HtCapabilities capabilities;
+        capabilities.supportedChannelWidths.insert(MHz(20));
+        capabilities.rxMcsSupported[0] = true;
+        capabilities.txMcsNss.maxMcsPerNss[0] = 0;
+        setHtCapabilities(body, capabilities);
+        Ieee80211HtOperation operation;
+        operation.primaryChannel = primaryChannel;
+        operation.basicMcsSupported[0] = true;
+        setHtOperation(body, operation);
+    }
+    body->setChunkLength(B(8 + 2 + 2 + (2 + 10)) + B(3) + getHtMgmtElementsLength(body));
+    return body;
+}
+
+static void storeSerializedDiscovery(TestIeee80211MgmtSta& sta, const Ptr<Ieee80211BeaconFrame>& original,
+        const MacAddress& address)
+{
+    Packet packet("discovery", original);
+    auto bytes = packet.peekAllAsBytes()->getBytes();
+    Packet encoded("encoded", makeShared<BytesChunk>(bytes));
+    encoded.addTag<SignalPowerInd>()->setPower(mW(1));
+    Ptr<const Ieee80211BeaconFrame> decoded;
+    if (dynamicPtrCast<const Ieee80211ProbeResponseFrame>(original) != nullptr)
+        decoded = encoded.popAtFront<Ieee80211ProbeResponseFrame>(B(bytes.size()));
+    else
+        decoded = encoded.popAtFront<Ieee80211BeaconFrame>(B(bytes.size()));
+    auto header = makeShared<Ieee80211MgmtHeader>();
+    header->setTransmitterAddress(address);
+    sta.storeAPInfo(&encoded, header, decoded);
+}
+
+static void storePacketDomainDiscovery(TestIeee80211MgmtSta& sta, const Ptr<Ieee80211BeaconFrame>& body,
+        const MacAddress& address)
+{
+    Packet packet("packet-domain-discovery", body);
+    packet.addTag<SignalPowerInd>()->setPower(mW(1));
+    auto header = makeShared<Ieee80211MgmtHeader>();
+    header->setTransmitterAddress(address);
+    sta.storeAPInfo(&packet, header, body);
+}
+
+%activity:
+
+TestIeee80211MgmtSta sta;
+const MacAddress beaconAddress("02:00:00:00:00:01");
+const MacAddress probeAddress("02:00:00:00:00:02");
+const MacAddress legacyAddress("02:00:00:00:00:03");
+
+// The serialized body has the fixed channelNumber at its default value, but
+// HT Operation carries the authoritative primary channel (Table 9-230/11.14).
+storeSerializedDiscovery(sta, makeDiscovery(false, 0, 11, true), beaconAddress);
+ASSERT(sta.lookupAP(beaconAddress)->channel == 11);
+sta.changeChannel(sta.lookupAP(beaconAddress)->channel);
+ASSERT(sta.changedChannel == 11);
+
+// Probe Response follows the same discovery rule. Its concrete subtype is
+// decoded above, and the serialized fixed channel field is ignored in favor
+// of HT Operation.
+storeSerializedDiscovery(sta, makeDiscovery(true, 3, 6, true), probeAddress);
+ASSERT(sta.lookupAP(probeAddress)->channel == 6);
+sta.changeChannel(sta.lookupAP(probeAddress)->channel);
+ASSERT(sta.changedChannel == 6);
+
+// When both packet-domain fields are available, the HT primary remains the
+// deterministic authority even if the legacy field disagrees.
+storePacketDomainDiscovery(sta, makeDiscovery(true, 3, 6, true), probeAddress);
+ASSERT(sta.lookupAP(probeAddress)->channel == 6);
+
+// Without HT Operation, preserve the packet-domain channelNumber exactly,
+// including its legal/default value of zero. The management-body serializer
+// does not encode the legacy field, so these assertions intentionally use the
+// original packet-domain body.
+storePacketDomainDiscovery(sta, makeDiscovery(false, 7, 0, false), legacyAddress);
+ASSERT(sta.lookupAP(legacyAddress)->channel == 7);
+storePacketDomainDiscovery(sta, makeDiscovery(false, 0, 0, false), legacyAddress);
+ASSERT(sta.lookupAP(legacyAddress)->channel == 0);
+
+EV << "Serialized HT discovery channel and legacy fallback checks passed.\n";
+
+%contains: stdout
+Serialized HT discovery channel and legacy fallback checks passed.

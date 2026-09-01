@@ -1,6 +1,6 @@
 %description:
-Verify directional HT negotiation and typed HT capability conversion,
-including unequal Tx/Rx advertisements.
+Verify directional HT negotiation and association-response classification,
+including acceptance of a genuinely legacy AP.
 
 %includes:
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
@@ -103,7 +103,7 @@ for (bool unequalModulation : {false, true}) {
     ASSERT(!unequalNegotiated.localRxPeerTx.supportedMcs[0]);
 }
 
-EV << "HT directional and typed capability checks passed.\n";
+EV << "HT directional and legacy association checks passed.\n";
 
 %contains: stdout
-HT directional and typed capability checks passed.
+HT directional and legacy association checks passed.
