@@ -88,6 +88,7 @@ void Ieee80211Receiver::setChannel(const Ieee80211Channel *channel)
     if (this->channel != channel) {
         delete this->channel;
         this->channel = channel;
+        this->band = channel->getBand();
         setCenterFrequency(channel->getCenterFrequency());
     }
 }

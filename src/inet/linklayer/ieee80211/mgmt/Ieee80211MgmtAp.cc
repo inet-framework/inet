@@ -61,8 +61,6 @@ void Ieee80211MgmtAp::initialize(int stage)
         // TODO fill in supportedRates
 
         // subscribe for notifications
-        cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
-        radioModule->subscribe(Ieee80211Radio::radioChannelChangedSignal, this);
         getContainingNicModule(this)->subscribe(IFrameSequenceHandler::frameSequenceFinishedSignal, this);
 
         // start beacon timer (randomize startup time)
@@ -94,6 +92,7 @@ void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, in
         EV << "updating channel number\n";
         channelNumber = value;
     }
+    Ieee80211MgmtApBase::receiveSignal(source, signalID, value, details);
 }
 
 void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
