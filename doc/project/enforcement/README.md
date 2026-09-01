@@ -42,15 +42,15 @@ measured.
 | [check-ned-msg-naming.py](check-ned-msg-naming.py) | T3 | by hand; not yet in CI | declaration-level `NR-*`: NED/MSG package and file/type agreement, casing, fields, signals/statistics, and gate names |
 | [check-commits.sh](check-commits.sh) | T3 | by hand; not yet in CI | `PR-SPLIT-WHITESPACE`, `PR-SPLIT-MOVE`, `PR-SPLIT-BASELINE`, `PR-SERIES-ORDER`, `PR-SERIES-LINEAR`, `PR-MSG-SUBJECT`, `PR-MSG-FACTS` |
 | [check-seals.sh](check-seals.sh) | T3 | by hand; not yet in CI | `SR-FLAG-PLACEMENT`, `SR-FLAG-COVERAGE`, and the generated index of [seal-list.md](../audit/seal-list.md) |
-| [check-source-seals.sh](check-source-seals.sh) | T3 | by hand; not yet in CI | source-path `SR-*`: recursive and generated-file seal coverage from [seal-list.md](../audit/seal-list.md) |
+| [check-source-seals.sh](check-source-seals.sh) | T3 | pull-request CI and by hand | source-path `SR-*`: recursive and generated-file seal coverage from [seal-list.md](../audit/seal-list.md) |
 | [checklist/general.md](checklist/general.md) | T4 | by an agent, on every change | the semantic architecture rules |
 | [checklist/ieee80211.md](checklist/ieee80211.md) | T4 | by an agent, on an 802.11 diff | `AR-WLAN-*` |
 | the test suites | T2 | GitHub Actions, twelve workflows | `TR-*`, `AR-QUAL-FINGERPRINT`, `AR-QUAL-DETERMINISM` |
 | `inet_featuretool` | T3 | the feature workflow | `AR-EXT-FEATURES` |
 
-**Nothing in this folder runs in CI yet.** That is the honest state, and it is the first thing to
-repair. `.github/workflows/` holds twelve test workflows and no rule gate. Every `T3` row above is a
-script a person must remember to run, which is the weakest form of every rule it covers.
+The pull-request [project-gates workflow](../../../.github/workflows/project-gates.yml) runs the
+enforcement checker tests and the source-seal guard. The other `T3` gates above are still by hand;
+a person must remember to run them, which is the weakest form of every rule they cover.
 
 ## How to run them
 
@@ -66,6 +66,7 @@ python3 doc/project/enforcement/check-ned-msg-naming.py --staged
 python3 doc/project/enforcement/check-ned-msg-naming.py --base origin/master
 doc/project/enforcement/check-commits.sh origin/master..HEAD
 doc/project/enforcement/check-source-seals.sh --diff       # changed source paths against seals
+doc/project/enforcement/check-source-seals.sh --base origin/master  # committed branch paths
 doc/project/enforcement/check-source-seals.sh src/inet/foo/Foo.cc
 doc/project/enforcement/check-seals.sh                    # document flags and generated index
 doc/project/enforcement/check-seals.sh --write            # check and rewrite the index
@@ -79,7 +80,9 @@ for the final branch check. Explicit `.ned`/`.msg` files and directories are sca
 `--scope src/inet/<path>` restricts a diff mode without including sibling subtrees. The naming
 wrapper selects branch mode for `--base` and a complete recursive declaration scan for an explicit
 subtree. The source-seal gate defaults to the working-tree diff when no option is supplied; use
-`--staged` or explicit source paths as needed. `check-seals.sh` checks document flags, while
+`--staged` or explicit source paths as needed. Its `--base <ref>` mode checks the committed branch
+from `merge-base(<ref>, HEAD)` and reads the seal registry from that merge base, so removing a seal
+inside the branch cannot hide a source change. `check-seals.sh` checks document flags, while
 `check-source-seals.sh` checks paths under `src/inet/`. These gates return `2` for invalid usage or a
 missing canonical input; do not substitute a skill-package copy when a canonical gate is unavailable.
 

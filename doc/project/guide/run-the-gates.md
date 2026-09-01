@@ -57,6 +57,7 @@ make -j$(nproc) MODE=debug && make -j$(nproc) MODE=release
 doc/project/enforcement/check-architecture.sh
 doc/project/enforcement/check-naming.sh --base origin/master
 doc/project/enforcement/check-commits.sh origin/master..HEAD
+doc/project/enforcement/check-source-seals.sh --base origin/master
 
 # 3. rerun each recorded, explicitly filtered test command against a fresh matching library
 ```
@@ -98,6 +99,6 @@ cover the **semantic** rules: visualization logic inside a protocol, a zero-time
 for a call, prose that duplicates a NED declaration, a test whose category does not match its claim.
 Those are tier 4, and they need the [agent-review checklist](../enforcement/checklist/general.md).
 
-**Nothing in `enforcement/` runs in CI yet.** `.github/workflows/` holds twelve test workflows and no
-rule gate, so every check above is one a person must remember to run. That is the weakest form of
-every rule it covers, and it is the first thing worth repairing.
+The pull-request `project-gates.yml` workflow runs the enforcement checker tests and rejects changes
+to paths that were sealed at the branch merge base. The remaining rule gates above still depend on
+contributors running them by hand, and are the next CI coverage gap to close.
