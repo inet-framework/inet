@@ -9,7 +9,6 @@ from pathlib import Path
 
 
 SOURCE_SUFFIXES = {".cc", ".h", ".icc"}
-EXCLUDED_PARTS = {"visualizer", "thirdparty", "external"}
 FORBIDDEN = re.compile(
     r"std::random_device|std::chrono::|"
     r"(?<![A-Za-z0-9_])rand\s*\(|"
@@ -97,8 +96,6 @@ def main() -> int:
             if not path.is_file() or path.suffix not in SOURCE_SUFFIXES:
                 continue
             relative = path.resolve().relative_to(root)
-            if EXCLUDED_PARTS.intersection(relative.parts):
-                continue
             original_lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
             code_lines = strip_comments_and_literals("\n".join(original_lines)).splitlines()
             for line_number, (original, code) in enumerate(zip(original_lines, code_lines), start=1):

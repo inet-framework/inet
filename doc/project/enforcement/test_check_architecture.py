@@ -79,6 +79,21 @@ class CheckArchitectureTest(unittest.TestCase):
         self.assertIn("AR-QUAL-DETERMINISM", result.stdout)
         self.assertIn("Bad.cc", result.stdout)
 
+    def test_determinism_scan_does_not_exclude_named_directories(self) -> None:
+        paths = (
+            "src/inet/visualizer/BadVisualizer.cc",
+            "src/inet/thirdparty/BadThirdParty.cc",
+            "src/inet/applications/external/BadExternal.cc",
+        )
+        for path in paths:
+            self.write(path, "auto seed = std::random_device{}();\n")
+
+        result = self.check("src/inet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        for path in paths:
+            self.assertIn(Path(path).name, result.stdout)
+
     def test_wall_clock_time_with_output_pointer_is_reported(self) -> None:
         self.write(
             "src/inet/linklayer/ethernet/Bad.cc",
