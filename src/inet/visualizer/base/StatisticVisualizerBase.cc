@@ -86,6 +86,22 @@ void StatisticVisualizerBase::initialize(int stage)
             splitMode = SPLIT_FLOW;
         else
             throw cRuntimeError("Unknown splitBy parameter value: '%s'", splitBy);
+        const char *groupBy = par("groupBy");
+        if (!strcmp(groupBy, "none"))
+            groupMode = GROUP_NONE;
+        else if (!strcmp(groupBy, "source"))
+            groupMode = GROUP_SOURCE;
+        else if (!strcmp(groupBy, "networkNode"))
+            groupMode = GROUP_NETWORK_NODE;
+        else
+            throw cRuntimeError("Unknown groupBy parameter value: '%s'", groupBy);
+        // splitting the values of a source produces the items of that source's own group,
+        // and the items of a network node's group are its sources themselves
+        if (!((splitMode == SPLIT_NONE && groupMode != GROUP_SOURCE) ||
+              (splitMode != SPLIT_NONE && groupMode == GROUP_SOURCE)))
+            throw cRuntimeError("Cannot split the statistic by '%s' and group it by '%s': "
+                                "splitting requires groupBy = \"source\", grouping by source requires a splitBy "
+                                "other than \"none\", and grouping by network node requires splitBy = \"none\"", splitBy, groupBy);
         if (displayStatistics) {
             if (opp_isempty(signalName))
                 throw cRuntimeError("The signalName parameter must be not empty");
@@ -291,7 +307,11 @@ void StatisticVisualizerBase::processSplitValue(cComponent *source, double value
     auto statisticVisualization = getOrCreateStatisticVisualization(module, subscribedSignal);
     if (statisticVisualization == nullptr)
         return;
-    statisticVisualization->items[label].value = convertToDisplayUnit(value);
+    auto& item = statisticVisualization->items[label];
+    if (item.sourceModuleId == -1)
+        statisticVisualization->itemsVersion++;
+    item.sourceModuleId = module->getId();
+    item.value = convertToDisplayUnit(value);
 }
 
 void StatisticVisualizerBase::registerSource(cComponent *source, simsignal_t signal)
@@ -302,14 +322,59 @@ void StatisticVisualizerBase::registerSource(cComponent *source, simsignal_t sig
     if (!sourceFilter.matches(module))
         return;
     registeredSourceIds.insert(module->getId());
-    auto statisticVisualization = getOrCreateStatisticVisualization(module, signal);
+    // when grouping by network node, the sources of one node are displayed together
+    auto networkNode = groupMode == GROUP_NETWORK_NODE ? getContainingNode(module) : nullptr;
+    auto statisticVisualization = getOrCreateStatisticVisualization(networkNode != nullptr ? networkNode : module, signal);
     if (statisticVisualization == nullptr)
         return;
     // the values come from the result recorders built from statisticExpression, so that an
     // item can display e.g. a count or a throughput rather than the raw value of the signal
     addResultRecorder(source, signal);
+    if (groupMode == GROUP_NETWORK_NODE) {
+        auto& item = statisticVisualization->items[getSourceItemLabel(module, networkNode)];
+        item.sourceModuleId = module->getId();
+        item.recorder = getResultRecorder(source, signal);
+        statisticVisualization->itemsVersion++;
+    }
     // when splitting by flow, statisticExpression contains demuxFlow(), so the recorder chain
     // creates a separate recorder per flow as the flows appear, see refreshFlowItemValues()
+}
+
+std::string StatisticVisualizerBase::getSourceItemLabel(cModule *module, cModule *networkNode) const
+{
+    // the label must identify the item among the ones of the same network node, so it is
+    // the path of the signal source relative to the network node, e.g. wlan[0].mac; the name
+    // alone is ambiguous for several similarly named submodules, e.g. the MACs of the
+    // network interfaces of a node
+    if (module == networkNode)
+        return module->getFullName();
+    return module->getFullPath().substr(networkNode->getFullPath().length() + 1);
+}
+
+void StatisticVisualizerBase::removeItemsOfDeletedSources() const
+{
+    for (auto& it : statisticVisualizations) {
+        auto statisticVisualization = it.second;
+        for (auto item = statisticVisualization->items.begin(); item != statisticVisualization->items.end(); ) {
+            if (item->second.sourceModuleId != -1 && getSimulation()->getModule(item->second.sourceModuleId) == nullptr) {
+                registeredSourceIds.erase(item->second.sourceModuleId);
+                item = statisticVisualization->items.erase(item);
+                statisticVisualization->itemsVersion++;
+            }
+            else
+                ++item;
+        }
+    }
+}
+
+void StatisticVisualizerBase::refreshSourceItemValues() const
+{
+    // the result recorder of a deleted source is deleted with it
+    // (cResultListener::unsubscribedFrom), so the item must go before it is read
+    removeItemsOfDeletedSources();
+    for (auto& it : statisticVisualizations)
+        for (auto& item : it.second->items)
+            item.second.value = convertToDisplayUnit(item.second.recorder->getLastValue());
 }
 
 void StatisticVisualizerBase::refreshFlowItemValues() const
@@ -328,6 +393,8 @@ void StatisticVisualizerBase::refreshFlowItemValues() const
             if (opp_isempty(label))
                 continue; // the recorder of the undemultiplexed statistic is not an item
             auto& item = statisticVisualization->items[label];
+            if (item.recorder == nullptr)
+                statisticVisualization->itemsVersion++;
             item.recorder = recorder;
             item.value = convertToDisplayUnit(recorder->getLastValue());
         }

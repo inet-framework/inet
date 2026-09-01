@@ -27,6 +27,7 @@ class INET_API StatisticCanvasVisualizer : public StatisticVisualizerBase
         const int networkNodeId = -1; // the network node the figure is displayed above
         cFigure *figure = nullptr;
         cFigure::Point annotationSize = cFigure::Point(NaN, NaN);
+        int displayedItemsVersion = -1; // the version of the item set the figure was last given
 
       public:
         StatisticCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, int networkNodeId, cFigure *figure, int moduleId, simsignal_t signal, const char *unit);

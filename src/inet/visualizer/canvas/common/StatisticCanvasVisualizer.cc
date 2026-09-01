@@ -142,7 +142,7 @@ StatisticVisualizerBase::StatisticVisualization *StatisticCanvasVisualizer::crea
     if (networkNodeVisualization == nullptr)
         return nullptr; // the network node is not visualized
     cFigure *figure = createIndicatorFigure();
-    if (figure == nullptr && splitMode == SPLIT_NONE) {
+    if (figure == nullptr && splitMode == SPLIT_NONE && groupMode == GROUP_NONE) {
         // a single value is displayed with a text label by default
         auto boxedLabelFigure = new BoxedLabelFigure("statistic");
         boxedLabelFigure->setFont(font);
@@ -221,9 +221,11 @@ void StatisticCanvasVisualizer::refreshDisplay() const
     // the visualization of a deleted module must go before anything reads its figure; the
     // removal changes state, which is why refreshDisplay() being const is stepped around here
     const_cast<StatisticCanvasVisualizer *>(this)->removeVisualizationsOfDeletedModules();
-    if (splitMode == SPLIT_NONE)
+    if (splitMode == SPLIT_NONE && groupMode == GROUP_NONE)
         return; // a single value is refreshed when its signal is received
-    if (splitMode == SPLIT_FLOW)
+    if (groupMode == GROUP_NETWORK_NODE)
+        refreshSourceItemValues();
+    else if (splitMode == SPLIT_FLOW)
         refreshFlowItemValues();
     for (auto& it : statisticVisualizations)
         refreshFigure(static_cast<StatisticCanvasVisualization *>(it.second));
@@ -234,8 +236,10 @@ void StatisticCanvasVisualizer::refreshFigure(StatisticCanvasVisualization *stat
     auto figure = statisticCanvasVisualization->figure;
     auto& items = statisticCanvasVisualization->items;
     if (auto indicatorFigure = dynamic_cast<IIndicatorFigure *>(figure)) {
-        if ((int)items.size() != indicatorFigure->getNumItems())
+        if (statisticCanvasVisualization->displayedItemsVersion != statisticCanvasVisualization->itemsVersion) {
             setFigureItems(figure, items);
+            statisticCanvasVisualization->displayedItemsVersion = statisticCanvasVisualization->itemsVersion;
+        }
         int index = 0;
         for (auto& item : items)
             indicatorFigure->setValue(index++, simTime(), item.second.value);

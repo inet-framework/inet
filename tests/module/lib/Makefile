@@ -29,6 +29,7 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
 OBJS = \
+    $O/BarChartProbe.o \
     $O/EthTestApp.o \
     $O/IGMPTester.o \
     $O/MeterTestApp.o \

@@ -87,6 +87,26 @@ Notable backward compatible changes are the following:
    each, with a value to color gradient and an optional autoscaled range. Unlike
    the other indicator figures the number of its items is not fixed.
 
+5. Displaying several values of a statistic at once
+
+   ~StatisticVisualizerBase gained the splitBy and groupBy parameters, so every
+   statistic visualizer has them. splitBy splits the values a signal source emits
+   into several statistics, by the details object emitted with the value or by the
+   packet's flow; groupBy determines which statistics are displayed together as the
+   items of one figure, those of a source or those of a network node. The default is
+   neither, which is what the visualizer did before.
+
+   The figure that displays a statistic can now be given in the new figure
+   parameter, as the attributes of a figure the way an @figure property gives them,
+   which a template property along the module path could not be from an ini file.
+   A figure type is also looked up among the types registered with
+   Register_Figure(), not only as an inet::<Type>Figure class.
+
+   An indicator figure driven by the statistic visualizer is now given the value in
+   the display unit, the one the text label would show, rather than the raw value.
+   A model that configures such a figure through the propertyName template and
+   lists several units sees the figure follow the same unit as the label.
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 

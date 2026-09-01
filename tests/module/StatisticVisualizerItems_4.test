@@ -1,0 +1,95 @@
+%description:
+Tests that an item whose signal source is deleted disappears from the figure,
+instead of the visualizer reading the result recorder that was deleted with it.
+
+The scenario is the one of StatisticVisualizerItems_1 -- three sending applications
+whose packet counts are the three items of one bar chart above the server -- but a
+scenario manager deletes the whole server node while the simulation runs.
+
+Deleting a network node deletes its visualization, which is a figure group, and that
+takes the statistic figure with it. The visualizer keeps its own pointer to both, and
+its refresh runs on every frame, so the visualization has to be dropped -- without
+touching the annotation or the figure, which no longer exist. Nothing may be left to
+display, and the run must end cleanly rather than reading freed memory.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.common.scenario.ScenarioManager;
+import inet.test.moduletest.lib.BarChartProbe;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
+
+network StatisticVisualizerItemsNodeDeletionTest
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        probe: BarChartProbe;
+        visualizer: IntegratedCanvasVisualizer;
+        configurator: Ipv4NetworkConfigurator;
+        server: StandardHost;
+        switch_: EthernetSwitch;
+        receiver: StandardHost;
+    connections:
+        server.ethg++ <--> Eth100M <--> switch_.ethg++;
+        switch_.ethg++ <--> Eth100M <--> receiver.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<scenario>
+    <at t="1.5">
+        <delete-module module="StatisticVisualizerItemsNodeDeletionTest.server"/>
+    </at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+network = StatisticVisualizerItemsNodeDeletionTest
+ned-path = .;../../../../src
+sim-time-limit = 3s
+cmdenv-express-mode = true
+**.vector-recording = false
+
+# the visualizer is inactive without a GUI; the fake GUI also drives refreshDisplay()
+cmdenv-fake-gui = true
+cmdenv-fake-gui-before-event-probability = 0.1
+cmdenv-fake-gui-after-event-probability = 0.1
+
+*.server.numApps = 3
+*.server.app[*].typename = "UdpBasicApp"
+*.server.app[*].destAddresses = "receiver"
+*.server.app[*].messageLength = 1000B
+*.server.app[0].destPort = 1000
+*.server.app[1].destPort = 1001
+*.server.app[2].destPort = 1002
+*.server.app[0].sendInterval = 10ms
+*.server.app[1].sendInterval = 25ms
+*.server.app[2].sendInterval = 60ms
+
+*.receiver.numApps = 3
+*.receiver.app[*].typename = "UdpSink"
+*.receiver.app[0].localPort = 1000
+*.receiver.app[1].localPort = 1001
+*.receiver.app[2].localPort = 1002
+
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+*.visualizer.statisticVisualizer.displayStatistics = true
+*.visualizer.statisticVisualizer.groupBy = "networkNode"
+*.visualizer.statisticVisualizer.signalName = "packetSent"
+*.visualizer.statisticVisualizer.sourceFilter = "*.server.app[*]"
+*.visualizer.statisticVisualizer.statisticExpression = "count"
+*.visualizer.statisticVisualizer.figure = {type: "barChart", valueFormat: "%.0f", title: "packets"}
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test.out
+barChart: none
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object:
