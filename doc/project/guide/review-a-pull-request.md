@@ -80,8 +80,9 @@ configuration, the feature descriptors, and the tests
 [agent-review checklist](../enforcement/checklist/general.md) over the diff, and the
 [802.11 checklist](../enforcement/checklist/ieee80211.md) when the diff touches those subtrees.
 
-If the branch touches a sealed path, the permission for it must be stated
-([rule/sealing.md](../rule/sealing.md)).
+If the branch touches a sealed path, the permission for it must be stated. That statement is review
+evidence; merge authorization comes from the trusted, head-bound decision in
+[SR-PR-APPROVAL](../rule/sealing.md#sr-pr-approval).
 
 ## 5. Write the report
 

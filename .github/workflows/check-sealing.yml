@@ -1,0 +1,133 @@
+name: "Check: sealing"
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-seal-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  detect-sealed-source:
+    name: Detect sealed source
+    runs-on: ubuntu-latest
+    outputs:
+      sealed: ${{ steps.check.outputs.sealed }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+      - name: Fetch pull-request head as data
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git fetch --no-tags origin "+refs/pull/${PR_NUMBER}/head:refs/remotes/pull/${PR_NUMBER}/head"
+          actual_head_sha="$(git rev-parse "refs/remotes/pull/${PR_NUMBER}/head^{commit}")"
+          if [ "$actual_head_sha" != "$EXPECTED_HEAD_SHA" ]; then
+            echo "error: fetched pull-request head $actual_head_sha, expected $EXPECTED_HEAD_SHA" >&2
+            exit 2
+          fi
+      - name: Detect pre-existing source seals
+        id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set +e
+          doc/project/enforcement/check-source-seals.sh --base "$BASE_SHA" --head "$HEAD_SHA"
+          status=$?
+          set -e
+          case "$status" in
+            0)
+              echo "sealed=false" >> "$GITHUB_OUTPUT"
+              ;;
+            1)
+              echo "sealed=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              exit "$status"
+              ;;
+          esac
+
+  approve-sealed-source:
+    name: Approve sealed source
+    needs: detect-sealed-source
+    if: needs.detect-sealed-source.outputs.sealed == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: sealed-source-change
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+      - name: Verify protected environment configuration
+        env:
+          SEALED_SOURCE_APPROVAL: ${{ vars.SEALED_SOURCE_APPROVAL }}
+        run: |
+          if [ "$SEALED_SOURCE_APPROVAL" != "granted" ]; then
+            echo "error: configure the protected sealed-source-change environment with SEALED_SOURCE_APPROVAL=granted" >&2
+            exit 2
+          fi
+      - name: Fetch pull-request head as data
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git fetch --no-tags origin "+refs/pull/${PR_NUMBER}/head:refs/remotes/pull/${PR_NUMBER}/head"
+          actual_head_sha="$(git rev-parse "refs/remotes/pull/${PR_NUMBER}/head^{commit}")"
+          if [ "$actual_head_sha" != "$EXPECTED_HEAD_SHA" ]; then
+            echo "error: fetched pull-request head $actual_head_sha, expected $EXPECTED_HEAD_SHA" >&2
+            exit 2
+          fi
+      - name: Authorize exact source-seal range
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: doc/project/enforcement/check-source-seals.sh --base "$BASE_SHA" --head "$HEAD_SHA" --ci-approved
+
+  source-seal-policy:
+    name: Source seal policy
+    needs:
+      - detect-sealed-source
+      - approve-sealed-source
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      APPROVAL_RESULT: ${{ needs.approve-sealed-source.result }}
+      DETECTION_RESULT: ${{ needs.detect-sealed-source.result }}
+      SEALED: ${{ needs.detect-sealed-source.outputs.sealed }}
+    steps:
+      - name: Resolve source-seal policy
+        run: |
+          if [ "$DETECTION_RESULT" != "success" ]; then
+            echo "error: source-seal detection did not complete successfully" >&2
+            exit 1
+          fi
+          case "$SEALED" in
+            false)
+              echo "No pre-existing sealed source paths changed."
+              ;;
+            true)
+              if [ "$APPROVAL_RESULT" != "success" ]; then
+                echo "error: sealed source changes require protected-environment approval" >&2
+                exit 1
+              fi
+              echo "Sealed source changes received protected-environment approval."
+              ;;
+            *)
+              echo "error: source-seal detection produced no decision" >&2
+              exit 1
+              ;;
+          esac

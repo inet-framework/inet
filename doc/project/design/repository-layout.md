@@ -23,7 +23,7 @@ to it must respect. This document is the inventory.
 | `templates/` | the project and model templates the IDE offers |
 | `releng/`, `bin/` | release engineering and the launchers |
 | `plan/` | the design and implementation plans; a done plan is one step of the history |
-| `.github/workflows/` | twelve test and build workflows |
+| `.github/workflows/` | test, build and project-rule workflows |
 | `.oppfeatures` | the feature descriptors — the single source of truth for the partition |
 
 ## The source tree

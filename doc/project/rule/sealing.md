@@ -54,6 +54,7 @@ Every sealing rule in document order.
 | [SR-CITE-THE-AUDIT](#sr-cite-the-audit) | Every seal cites the audit report that earned it |
 | [SR-RECORD-IN-COMMIT](#sr-record-in-commit) | A seal is recorded in the same commit that records the compliant state |
 | [SR-RULE-CHANGE-STALES](#sr-rule-change-stales) | A rule change marks every seal that cites it for re-audit |
+| [SR-PR-APPROVAL](#sr-pr-approval) | A sealed-source pull request needs trusted approval bound to its exact head |
 | [SR-VIOLATION-IN-SEALED](#sr-violation-in-sealed) | A violation found in a sealed path is reported, not repaired |
 | [SR-UNSEAL](#sr-unseal) | Unsealing is a deliberate act, with a reason in the commit |
 
@@ -269,6 +270,25 @@ Without this rule the seal list slowly becomes a list of old opinions, which is 
 because it is trusted.
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh) can find the rows; deciding *material* is T5.*
+
+### SR-PR-APPROVAL
+
+**A pull request that changes a path sealed before the branch began needs trusted approval bound to
+the exact reviewed head.**
+
+Permission in the current conversation authorizes an AI to prepare the named change; it does not by
+itself give pull-request CI a trustworthy fact to consume. The pull-request description records that
+permission for review, but content controlled by the branch cannot authorize itself. Merge
+authorization therefore comes from a required base-branch workflow and protected environment whose
+required reviewer sees the sealed paths and immutable head commit detected by trusted checker code.
+
+The approval covers only that workflow run and head commit. Adding or replacing a commit triggers a
+new check and requires a new decision. An absent, unconfigured, rejected or stale approval fails
+closed. This merge authorization does not retroactively replace the current-conversation permission
+an AI needed before modifying the sealed path.
+
+*Enforced at T3 — [check-source-seals.sh](../enforcement/check-source-seals.sh) and the protected
+pull-request workflow; T5 — the required reviewer grants the approval.*
 
 ### SR-VIOLATION-IN-SEALED
 

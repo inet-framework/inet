@@ -8,7 +8,7 @@
 #   NR-PKG    — a directory is lowercase, run-together, with no underscore and no hyphen
 #   NR-DIR    — a package directory is singular
 #   NR-ASSET  — an icon file is lowercase and run-together
-#   NR-CI     — a workflow file is lowercase and hyphenated
+#   NR-CI     — a workflow file is build-*, *-tests, or check-* and lowercase/hyphenated
 #   NR-GEN    — a generated *_m.h / *_m.cc sits beside its .msg
 #
 # Usage (from the INET repository root):
@@ -104,8 +104,17 @@ if [ "$SCOPE" = "src/inet" ]; then
             | grep -E '/[^/]*([A-Z]|_|-)[^/]*\.(png|svg)$' | sort -u)"
 
   echo
-  echo "== NR-CI: a workflow file is lowercase and hyphenated =="
-  report "$(find .github/workflows -type f -name '*.yml' 2>/dev/null | grep -E '/[^/]*([A-Z]|_)[^/]*\.yml$')"
+  echo "== NR-CI: a workflow file is build-*, *-tests, or check-* and lowercase/hyphenated =="
+  workflow_violations=""
+  while IFS= read -r workflow; do
+    workflow_name="${workflow##*/}"
+    if [[ ! "$workflow_name" =~ ^[a-z0-9]+(-[a-z0-9]+)*-tests\.yml$ && \
+          ! "$workflow_name" =~ ^build-[a-z0-9]+(-[a-z0-9]+)*\.yml$ && \
+          ! "$workflow_name" =~ ^check-[a-z0-9]+(-[a-z0-9]+)*\.yml$ ]]; then
+      workflow_violations+="$workflow"$'\n'
+    fi
+  done < <(find .github/workflows -type f -name '*.yml' 2>/dev/null | sort)
+  report "${workflow_violations%$'\n'}"
 fi
 
 echo

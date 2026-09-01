@@ -1,0 +1,20 @@
+name: "Tests: project enforcement"
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    # nothing
+
+permissions:
+  contents: read
+
+jobs:
+  enforcement-tests:
+    name: Enforcement checker tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run enforcement checker tests
+        run: python3 -m unittest discover -v -s doc/project/enforcement -p 'test_*.py'

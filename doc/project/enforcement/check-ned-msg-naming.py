@@ -38,6 +38,14 @@ class Target:
     structural_rules: frozenset[str] = frozenset()
 
 
+@dataclass(frozen=True)
+class MsgTypeDeclaration:
+    name_line: int
+    definition_line: int
+    kind: str
+    name: str
+
+
 class UsageError(Exception):
     pass
 
@@ -115,8 +123,8 @@ def declaration_delimiter(text: str) -> tuple[str, int] | None:
     return None
 
 
-def msg_type_declarations(lines: list[str]) -> list[tuple[int, str, str]]:
-    declarations: list[tuple[int, str, str]] = []
+def msg_type_declarations(lines: list[str]) -> list[MsgTypeDeclaration]:
+    declarations: list[MsgTypeDeclaration] = []
     pending: tuple[int, str, str] | None = None
     for number, line in enumerate(lines, 1):
         if pending is not None:
@@ -124,7 +132,8 @@ def msg_type_declarations(lines: list[str]) -> list[tuple[int, str, str]]:
             if delimiter is None:
                 continue
             if delimiter[0] == "definition":
-                declarations.append(pending)
+                name_line, kind, name = pending
+                declarations.append(MsgTypeDeclaration(name_line, number, kind, name))
             pending = None
             continue
         match = MSG_TYPE_RE.match(line)
@@ -134,7 +143,7 @@ def msg_type_declarations(lines: list[str]) -> list[tuple[int, str, str]]:
             if delimiter is None:
                 pending = (number, kind, name)
             elif delimiter[0] == "definition":
-                declarations.append((number, kind, name))
+                declarations.append(MsgTypeDeclaration(number, number, kind, name))
     return declarations
 
 
@@ -146,7 +155,7 @@ def declared_type_names(path: Path, lines: list[str]) -> set[str]:
             if match:
                 names.add(match.group(2))
         return names
-    return {name for _, _, name in msg_type_declarations(lines)}
+    return {declaration.name for declaration in msg_type_declarations(lines)}
 
 
 def ned_package_name(lines: list[str]) -> str | None:
@@ -487,9 +496,18 @@ def check_msg(
 ) -> list[Finding]:
     findings: list[Finding] = []
     declarations = msg_type_declarations(lines)
-    for number, kind, name in declarations:
-        if selected(number, selected_lines) and not PASCAL_RE.fullmatch(name):
-            add(findings, path, number, "NR-MSG-TYPE", f"MSG {kind} '{name}' must be PascalCase")
+    for declaration in declarations:
+        declaration_selected = selected(declaration.name_line, selected_lines) or selected(
+            declaration.definition_line, selected_lines
+        )
+        if declaration_selected and not PASCAL_RE.fullmatch(declaration.name):
+            add(
+                findings,
+                path,
+                declaration.name_line,
+                "NR-MSG-TYPE",
+                f"MSG {declaration.kind} '{declaration.name}' must be PascalCase",
+            )
 
     context_kind: str | None = None
     pending_kind: str | None = None
@@ -555,9 +573,9 @@ def check_msg(
             field_buffer_selected = False
 
     if selected_lines is None or "file-type" in structural_rules:
-        names = {name for _, _, name in declarations}
+        names = {declaration.name for declaration in declarations}
         if path.stem not in names:
-            line = declarations[0][0] if declarations else 1
+            line = declarations[0].name_line if declarations else 1
             add(findings, path, line, "NR-PKG", f"file stem '{path.stem}' must match a defined MSG type")
     return findings
 
