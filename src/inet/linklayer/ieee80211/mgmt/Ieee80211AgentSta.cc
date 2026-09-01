@@ -98,10 +98,10 @@ void Ieee80211AgentSta::handleResponse(cMessage *msg)
         processScanConfirm(ptr);
     else if (auto ptr = dynamic_cast<Ieee80211Prim_AuthenticateConfirm *>(ctrl))
         processAuthenticateConfirm(ptr);
-    else if (auto ptr = dynamic_cast<Ieee80211Prim_AssociateConfirm *>(ctrl))
-        processAssociateConfirm(ptr);
     else if (auto ptr = dynamic_cast<Ieee80211Prim_ReassociateConfirm *>(ctrl))
         processReassociateConfirm(ptr);
+    else if (auto ptr = dynamic_cast<Ieee80211Prim_AssociateConfirm *>(ctrl))
+        processAssociateConfirm(ptr);
     else if (ctrl)
         throw cRuntimeError("handleResponse(): unrecognized control info class `%s'", ctrl->getClassName());
     else
