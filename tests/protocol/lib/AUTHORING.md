@@ -271,8 +271,8 @@ A test does not need a `ProtocolTester` declared in its network. Define the prog
 `Define_ProtocolTestProgram()` (one per build, no name/selection) and the framework attaches
 a `ProtocolTester` to whatever network runs — so a test can target an **unmodified external
 network** just by pointing `network =` at it. See the `opp_test` examples in [`../`](..):
-`ProtocolTest_TcpHandshake.test`, `ProtocolTest_ViolationDetected.test`,
-`ProtocolTest_TcpRetransmit.test`. Each carries its program in `%global`, its (tester-less)
+`tcp/TcpHandshake.test`, `ViolationDetected.test`,
+`tcp/TcpRetransmit.test`. Each carries its program in `%global`, its (tester-less)
 network in `%file`, and asserts the verdict line with `%contains`.
 
 How the attach works: defining a `Define_ProtocolTestProgram()` registers it as the default

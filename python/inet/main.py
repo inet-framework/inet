@@ -122,6 +122,9 @@ def run_protocol_tests_main():
 def run_protocol_element_tests_main():
     run_tasks_main(run_protocol_element_tests, "protocol element tests")
 
+def run_protocol_tcp_tests_main():
+    run_tasks_main(run_protocol_tcp_tests, "protocol tcp tests")
+
 def run_queueing_tests_main():
     run_tasks_main(run_queueing_tests, "queueing tests")
 

@@ -11,5 +11,6 @@ cd "$(dirname "$0")"
 INET_DIR="${INET_DIR:-$(cd ../../.. && pwd)}"
 
 printf 'LIBS += -Wl,-rpath,%s/src\n' "$INET_DIR" > makefrag
-opp_makemake -f --deep -s -o protocoltest -I"$INET_DIR/src" -L"$INET_DIR/src" -lINET
+# $(D) expands to _dbg in a debug build, so the library links the same INET as its caller
+opp_makemake -f --deep -s -o protocoltest -I"$INET_DIR/src" -L"$INET_DIR/src" -lINET'$(D)'
 make MODE="${MODE:-release}" -j"$(nproc)"

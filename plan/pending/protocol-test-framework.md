@@ -619,9 +619,9 @@ Each phase is a milestone with its own commit(s); work in a dedicated worktree.
   - **New cookbook tests** added and passing: `arp_resolution` (`ArpResolution` config — ARP
     request/reply via `arp.opcode`) and `ipv4_fragmentation` (`Fragmentation` config — a
     4000 B datagram over the 1500 B MTU, asserting `ipv4.moreFragments` / `fragmentOffset`).
-  - **Self-contained `.test` examples** (`tests/protocol/`): `ProtocolTest_TcpHandshake.test`
-    (PASS), `ProtocolTest_ViolationDetected.test` (asserts the framework reports a FAIL on a
-    wrong assertion), `ProtocolTest_TcpRetransmit.test` (MITM PASS). Each carries its **program
+  - **Self-contained `.test` examples** (`tests/protocol/`): `tcp/TcpHandshake.test`
+    (PASS), `ViolationDetected.test` (asserts the framework reports a FAIL on a
+    wrong assertion), `tcp/TcpRetransmit.test` (MITM PASS). Each carries its **program
     in `%global`** and its **(tester-less) network in `%file`** — the network needs no
     `ProtocolTester`, so the same program runs against any unmodified external network.
     Validated end-to-end: `opp_test gen` → `opp_makemake`/`make` → run, each reaching its

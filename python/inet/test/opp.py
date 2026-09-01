@@ -48,7 +48,7 @@ if importlib.util.find_spec("omnetpp.test"):
             return self.subprocess_result.returncode
 
 class OppTestTask(TestTask):
-    def __init__(self, simulation_project, working_directory, test_file_name, mode="debug", debug=False, remove_launch=True, **kwargs):
+    def __init__(self, simulation_project, working_directory, test_file_name, mode="debug", debug=False, remove_launch=True, lib_directory=None, lib_name="test", **kwargs):
         super().__init__(**kwargs)
         self.locals = locals()
         self.locals.pop("self")
@@ -59,6 +59,10 @@ class OppTestTask(TestTask):
         self.mode = mode
         self.debug = debug
         self.remove_launch = remove_launch
+        # the lib folder is in the test folder unless the test folder names another one
+        self.lib_directory = lib_directory or os.path.join(working_directory, "lib")
+        # the library that the lib folder builds; tests/protocol/lib builds "protocoltest"
+        self.lib_name = lib_name
 
     def get_parameters_string(self, **kwargs):
         return self.test_file_name
@@ -68,17 +72,17 @@ class OppTestTask(TestTask):
         test_file_name = os.path.join(self.working_directory, self.test_file_name)
         test_binary_name = re.sub(r"\.test", "", self.test_file_name)
         test_directory = os.path.join(self.working_directory, f"work/{test_binary_name}")
-        has_lib = os.path.exists(os.path.join(self.working_directory, "lib"))
+        has_lib = os.path.exists(self.lib_directory)
         os.makedirs(test_directory, exist_ok=True)
         # paths are relative to test_directory, so they must be computed from the actual
         # nesting depth of the test folder (it may be deeper than tests/<kind>)
         src_relative_path = os.path.relpath(self.simulation_project.get_full_path("src"), test_directory)
-        lib_relative_path = os.path.relpath(os.path.join(self.working_directory, "lib"), test_directory)
+        lib_relative_path = os.path.relpath(self.lib_directory, test_directory)
         args = ["opp_test", "gen", "-v", self.test_file_name]
         subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
-        args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", f"-L{src_relative_path}", *([f"-ltest{binary_suffix}", f"-L{lib_relative_path}"] if has_lib else []), "-P", test_directory, f"-I{src_relative_path}", f"-I{lib_relative_path}"]
+        args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", f"-L{src_relative_path}", *([f"-l{self.lib_name}{binary_suffix}", f"-L{lib_relative_path}"] if has_lib else []), "-P", test_directory, f"-I{src_relative_path}", f"-I{lib_relative_path}"]
         subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
@@ -112,7 +116,7 @@ class OppTestTask(TestTask):
         else:
             return self.task_result_class(self, result="FAIL", reason=f"Non-zero exit code: {subprocess_result.returncode}", stdout=stdout, stderr=stderr)
 
-def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_match=False, **kwargs):
+def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_match=False, lib_folder=None, lib_name="test", **kwargs):
     """
     Returns multiple opp test tasks matching the provided filter criteria. The returned tasks can be run by
     calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
@@ -126,25 +130,26 @@ def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_m
         The result can be run (and re-run) without providing additional parameters.
     """
     def create_test_task(test_file_name):
-        return OppTestTask(simulation_project, simulation_project.get_full_path(test_folder), os.path.basename(test_file_name), task_result_class=TestTaskResult, **dict(kwargs, pass_keyboard_interrupt=True))
+        return OppTestTask(simulation_project, simulation_project.get_full_path(test_folder), os.path.basename(test_file_name), lib_directory=simulation_project.get_full_path(lib_folder) if lib_folder else None, lib_name=lib_name, task_result_class=TestTaskResult, **dict(kwargs, pass_keyboard_interrupt=True))
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     test_file_names = list(builtins.filter(lambda test_file_name: matches_filter(test_file_name, filter, None, full_match),
                                            glob.glob(os.path.join(simulation_project.get_full_path(test_folder), "*.test"))))
     test_tasks = list(map(create_test_task, test_file_names))
-    return MultipleOppTestTasks(tasks=test_tasks, simulation_project=simulation_project, test_folder=test_folder, multiple_task_results_class=MultipleTestTaskResults, **kwargs)
+    return MultipleOppTestTasks(tasks=test_tasks, simulation_project=simulation_project, test_folder=test_folder, lib_folder=lib_folder, multiple_task_results_class=MultipleTestTaskResults, **kwargs)
 
 class MultipleOppTestTasks(MultipleSimulationTestTasks):
-    def __init__(self, test_folder=None, **kwargs):
+    def __init__(self, test_folder=None, lib_folder=None, **kwargs):
         super().__init__(**kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
         self.test_folder = test_folder
+        self.lib_folder = lib_folder
 
     def build_before_run(self, **kwargs):
         test_directory = self.simulation_project.get_full_path(self.test_folder)
-        lib_directory = os.path.join(test_directory, "lib")
+        lib_directory = self.simulation_project.get_full_path(self.lib_folder) if self.lib_folder else os.path.join(test_directory, "lib")
         if os.path.exists(lib_directory):
             args = ["make", f"MODE={self.mode}", "-j", str(multiprocessing.cpu_count())]
             subprocess_result = run_command_with_logging(args, cwd=lib_directory, env=self.simulation_project.get_env())

@@ -43,10 +43,13 @@ def get_queueing_test_tasks(**kwargs):
     return get_opp_test_tasks("tests/queueing", name="queueing test", **kwargs)
 
 def get_protocol_test_tasks(**kwargs):
-    return get_opp_test_tasks("tests/protocol", name="protocol test", **kwargs)
+    return get_opp_test_tasks("tests/protocol", name="protocol test", lib_name="protocoltest", **kwargs)
 
 def get_protocol_element_test_tasks(**kwargs):
     return get_opp_test_tasks("tests/protocol/element", name="protocol element test", **kwargs)
+
+def get_protocol_tcp_test_tasks(**kwargs):
+    return get_opp_test_tasks("tests/protocol/tcp", name="protocol tcp test", lib_folder="tests/protocol/lib", lib_name="protocoltest", **kwargs)
 
 def get_module_test_tasks(**kwargs):
     return get_opp_test_tasks("tests/module", name="module test", **kwargs)
@@ -62,6 +65,7 @@ def get_all_test_tasks(**kwargs):
                            get_module_test_tasks,
                            get_packet_test_tasks,
                            get_protocol_element_test_tasks,
+                           get_protocol_tcp_test_tasks,
                            get_protocol_test_tasks,
                            get_queueing_test_tasks,
                            get_sanitizer_test_tasks,
@@ -89,6 +93,9 @@ def run_protocol_tests(**kwargs):
 
 def run_protocol_element_tests(**kwargs):
     return get_protocol_element_test_tasks(**kwargs).run(**kwargs)
+
+def run_protocol_tcp_tests(**kwargs):
+    return get_protocol_tcp_test_tasks(**kwargs).run(**kwargs)
 
 def run_module_tests(**kwargs):
     return get_module_test_tasks(**kwargs).run(**kwargs)
