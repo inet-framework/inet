@@ -33,23 +33,53 @@ void DynamicClassifier::initialize(int stage)
 
 int DynamicClassifier::getClassIndex(Packet *packet) const
 {
-    // the class of the packet, with no side effect -- unlike classifyPacket() below, which
-    // creates the branch of a class that is seen for the first time. Note that the class index
-    // is taken as it is, and not mapped through getOutputGateIndex(): that mapping depends on
-    // the number of output gates, which grows with each branch, so the same class would end up
-    // under a different key over time, and get a second branch.
+    // The class of the packet, taken as the classifier function returns it, and not mapped
+    // through getOutputGateIndex(): that mapping depends on the number of output gates, which
+    // grows with each branch, so the same class would end up under a different key over time,
+    // and get a second branch.
     return packetClassifierFunction->classifyPacket(packet);
 }
 
 int DynamicClassifier::classifyPacket(Packet *packet)
 {
-    int index = getClassIndex(packet);
-    auto it = classIndexToBranchIndex.find(index);
-    if (it != classIndexToBranchIndex.end())
-        return it->second;
-    int branchIndex = createBranch();
-    classIndexToBranchIndex[index] = branchIndex;
-    return branchIndex;
+    // a plain lookup, free of side effects: the branch of a class that is seen for the first
+    // time is created before the base class classifies, on the delivery path only
+    auto it = classIndexToBranchIndex.find(getClassIndex(packet));
+    return it != classIndexToBranchIndex.end() ? it->second : -1;
+}
+
+void DynamicClassifier::pushPacket(Packet *packet, const cGate *gate)
+{
+    Enter_Method("pushPacket");
+    // usually a no-op: a source that asked canPushPacket() first already had it created
+    createBranchIfAbsent(packet);
+    PacketClassifier::pushPacket(packet, gate);
+}
+
+void DynamicClassifier::startPacketStreaming(Packet *packet)
+{
+    // the one place all three streaming push operations classify through
+    createBranchIfAbsent(packet);
+    PacketClassifier::startPacketStreaming(packet);
+}
+
+bool DynamicClassifier::canPushPacket(Packet *packet, const cGate *gate) const
+{
+    // The answer has to hold for this very packet, because a source that asks may push exactly
+    // it next. Answering yes for a class that has no branch would promise on behalf of a branch
+    // that does not exist and may refuse its first packet, so the branch is created here and
+    // asked. This is the one query whose answer decides the fate of a packet, and it therefore
+    // has to build the thing that decides it; classification itself stays a pure lookup.
+    // KLUDGE the query is const, the model change it needs is not
+    const_cast<DynamicClassifier *>(this)->createBranchIfAbsent(packet);
+    return consumers[classIndexToBranchIndex.at(getClassIndex(packet))].canPushPacket(packet);
+}
+
+void DynamicClassifier::createBranchIfAbsent(Packet *packet)
+{
+    int classIndex = getClassIndex(packet);
+    if (classIndexToBranchIndex.find(classIndex) == classIndexToBranchIndex.end())
+        classIndexToBranchIndex[classIndex] = createBranch();
 }
 
 int DynamicClassifier::createBranch()
