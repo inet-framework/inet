@@ -220,6 +220,14 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         processAssociationResponse(packet, header, reassociation);
     }
 
+    void resetAssociationState()
+    {
+        Enter_Method("resetAssociationState");
+        cancelPendingAssociation();
+        if (mib->bssStationData.isAssociated)
+            clearCurrentAssociation();
+    }
+
     bool hasPeerHtState(const MacAddress& address) const { return mib->findPeerHtState(address) != nullptr; }
 
     bool isAssociatedForTest() const { return mib->bssStationData.isAssociated; }
@@ -317,6 +325,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         // IEEE Std 802.11-2024, 11.3.5.2 and 11.3.5.4: a successful
         // association remains successful when the HT exchange is absent or
         // unusable; only the negotiated HT state is suppressed.
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::LEGACY);
         ASSERT(mgmt->associationConfirms == 2);
@@ -324,6 +333,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 0);
 
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID);
         ASSERT(mgmt->associationConfirms == 3);
@@ -331,6 +341,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(htNegotiationFailures == 0);
 
         auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+
         // IEEE Std 802.11-2024, 11.3.5.4(f): a refused or timed-out
         // reassociation to another AP keeps the current association and
         // restores the current AP's channel before reporting failure.
@@ -368,6 +379,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->isReassociationInProgressForTest());
         ASSERT(mgmt->reassociationConfirms == 2);
         ASSERT(mgmt->lastReassociationResult == PRC_TIMEOUT);
+
         auto dcfRateSelection = check_and_cast<RateSelection *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateSelection"));
         auto qosRateSelection = check_and_cast<QosRateSelection *>(getModuleByPath("^.sta.wlan[0].mac.hcf.rateSelection"));
         const auto *modeSet = physicallayer::Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
@@ -434,6 +446,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(dcfRateSelection->computeMode(&ratePacket, dataHeader)->getHtMcsIndex() >= 0);
         ASSERT(qosRateSelection->computeMode(&ratePacket, dataHeader, nullptr)->getHtMcsIndex() >= 0);
 
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::PARTIAL);
         ASSERT(mgmt->associationConfirms == 4);
@@ -443,6 +456,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(!lastFailureReason.empty());
         ASSERT(!lastFailureWasReassociation);
 
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::UNUSABLE);
         ASSERT(mgmt->associationConfirms == 5);
@@ -450,6 +464,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 2);
 
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_DATARATE_UNSUP, TestIeee80211MgmtStaDiscovery::ResponseHtForm::LEGACY);
         ASSERT(mgmt->associationConfirms == 6);
@@ -459,6 +474,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
 
         // The same policy applies to reassociation responses, and its
         // diagnostic retains the procedure context for observers.
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID);
         ASSERT(mgmt->hasPeerHtState(address));
@@ -472,10 +488,12 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
 
         // Missing packet-domain channel metadata is an invalid HT response,
         // not an exception. The association result itself remains successful.
+        mgmt->resetAssociationState();
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID, false);
         ASSERT(mgmt->associationConfirms == 8);
         ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
+        ASSERT(mgmt->isAssociatedForTest());
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 4);
         ASSERT(lastFailureReason.find("channel") != std::string::npos || lastFailureReason.find("band") != std::string::npos);
