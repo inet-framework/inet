@@ -1,9 +1,10 @@
 %description:
-Verify that IEEE 802.11 mode sets retain an explicitly configured timing
-reference after bitrate sorting and classify the operating PHY used for
-mode-dependent TXOP defaults.
+Verify that HT operation is enabled only for a mode set with selectable HT
+modes. The current VHT-only ac profile intentionally does not advertise HT.
+Also verify exact sparse HT MCS and width derivation from typed mode entries.
 
 %includes:
+#include <algorithm>
 #include <vector>
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -14,90 +15,143 @@ using namespace inet::units::values;
 
 %global:
 
-class ExplicitModeSet : public Ieee80211ModeSet
+class SparseModeSet : public Ieee80211ModeSet
 {
   public:
     using Ieee80211ModeSet::Entry;
 
-    ExplicitModeSet(const std::vector<Entry>& entries, const IIeee80211Mode *referenceMode, PhyType phyType) :
-        Ieee80211ModeSet("explicit", entries, referenceMode, phyType)
+    SparseModeSet(const std::vector<Entry>& entries, const IIeee80211Mode *referenceMode, bool htOperationSupported = true) :
+        Ieee80211ModeSet("sparse", entries, referenceMode, PhyType::HT, htOperationSupported)
     {}
 };
+
+static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcsIndex, Hz bandwidth)
+{
+    for (int i = 0; i < modeSet->getNumModes(); i++) {
+        const auto *mode = modeSet->getMode(i);
+        if (mode->getHtMcsIndex() == mcsIndex && mode->getDataMode()->getBandwidth() == bandwidth)
+            return mode;
+    }
+    return nullptr;
+}
 
 %activity:
 
 const auto *htModeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
-const auto *vhtModeSet = Ieee80211ModeSet::getModeSet("ac");
-const auto *htReference = htModeSet->getMode(Mbps(6.5));
-const auto *legacyMode = htModeSet->getMode(Mbps(1));
+const auto *vhtOnlyModeSet = Ieee80211ModeSet::getModeSet("ac");
 
-ASSERT(htModeSet->getPhyType() == Ieee80211ModeSet::PhyType::HT);
-ASSERT(htModeSet->getReferenceMode() == htReference);
-ASSERT(htModeSet->getSifsTime() == htReference->getSifsTime());
-ASSERT(htModeSet->getSlotTime() == htReference->getSlotTime());
-ASSERT(htModeSet->getPhyRxStartDelay() == SimTime(24, SIMTIME_US));
+ASSERT(htModeSet->isHtOperationSupported());
+ASSERT(!vhtOnlyModeSet->isHtOperationSupported());
 
-ASSERT(Ieee80211ModeSet::getModeSet("a")->getPhyType() == Ieee80211ModeSet::PhyType::OFDM);
-ASSERT(Ieee80211ModeSet::getModeSet("b")->getPhyType() == Ieee80211ModeSet::PhyType::HR_DSSS);
-ASSERT(Ieee80211ModeSet::getModeSet("g(mixed)")->getPhyType() == Ieee80211ModeSet::PhyType::ERP);
-ASSERT(Ieee80211ModeSet::getModeSet("g(erp)")->getPhyType() == Ieee80211ModeSet::PhyType::ERP);
-ASSERT(Ieee80211ModeSet::getModeSet("p")->getPhyType() == Ieee80211ModeSet::PhyType::OFDM);
-ASSERT(vhtModeSet->getPhyType() == Ieee80211ModeSet::PhyType::VHT);
+std::vector<SparseModeSet::Entry> sparseEntries;
+for (int mcsIndex = 0; mcsIndex < 8; mcsIndex++)
+    sparseEntries.push_back({true, findHtMode(htModeSet, mcsIndex, MHz(20))});
+sparseEntries.push_back({false, findHtMode(htModeSet, 8, MHz(20))});
+sparseEntries.push_back({false, findHtMode(htModeSet, 10, MHz(20))});
+// IEEE Std 802.11-2024, 9.4.2.3 and 11.1.4.6: an ordinary HT profile
+// includes its applicable legacy operational rates in Supported Rates.
+sparseEntries.push_back({true, htModeSet->getMode(Mbps(1)), true});
+SparseModeSet sparse(sparseEntries, sparseEntries[0].mode);
+ASSERT(sparse.isHtOperationSupported());
+ASSERT(sparse.getLegacyOperationalModes().size() == 1);
+for (int mcsIndex = 0; mcsIndex < 77; mcsIndex++) {
+    bool expected = mcsIndex < 8 || mcsIndex == 8 || mcsIndex == 10;
+    ASSERT(sparse.getHtMcsSupported()[mcsIndex] == expected);
+    ASSERT(sparse.getHtMcsMandatory()[mcsIndex] == (mcsIndex < 8));
+}
+ASSERT(sparse.getHtSupportedChannelWidths().size() == 1);
+ASSERT(sparse.getHtSupportedChannelWidths().count(MHz(20)) == 1);
+ASSERT(sparse.isHtShortGuardIntervalSupported(MHz(20)));
 
-// Deliberately pass the faster mode first. The configured reference remains
-// authoritative after the constructor sorts entries by bitrate.
-std::vector<ExplicitModeSet::Entry> reorderedEntries = {
-    {false, htModeSet->getMode(Mbps(65))},
-    {true, htReference},
-    {true, legacyMode, true},
-};
-ExplicitModeSet reordered(reorderedEntries, htReference, Ieee80211ModeSet::PhyType::HT);
-ASSERT(reordered.getReferenceMode() == htReference);
-ASSERT(reordered.getMode(0) == legacyMode);
-ASSERT(reordered.getMode(1) == htReference);
-ASSERT(reordered.getLegacyOperationalModes().size() == 1);
-ASSERT(reordered.getLegacyOperationalModes()[0] == legacyMode);
-ASSERT(reordered.getSifsTime() == htReference->getSifsTime());
-ASSERT(reordered.getSlotTime() == htReference->getSlotTime());
-ASSERT(reordered.getPhyRxStartDelay() == htReference->getPhyRxStartDelay());
+// Guard-interval support is aggregated only from typed HT mode entries. A
+// profile may therefore expose a short-GI mode independently of its mandatory
+// long-GI MCS entries, while non-HT/VHT modes cannot contribute to HT bits.
+SparseModeSet short20({
+        { false, findHtMode(htModeSet, 8, MHz(20)) },
+        { true, htModeSet->getMode(Mbps(1)), true },
+    }, findHtMode(htModeSet, 8, MHz(20)), false);
+ASSERT(short20.isHtShortGuardIntervalSupported(MHz(20)));
+ASSERT(!short20.isHtShortGuardIntervalSupported(MHz(40)));
 
-bool emptyLegacyRejected = false;
+SparseModeSet short40({
+        { false, findHtMode(htModeSet, 0, MHz(40)) },
+        { true, htModeSet->getMode(Mbps(1)), true },
+    }, findHtMode(htModeSet, 0, MHz(40)), false);
+ASSERT(!short40.isHtShortGuardIntervalSupported(MHz(20)));
+ASSERT(short40.isHtShortGuardIntervalSupported(MHz(40)));
+
+SparseModeSet longOnly({
+        { false, findHtMode(htModeSet, 0, MHz(20)) },
+        { true, htModeSet->getMode(Mbps(1)), true },
+    }, findHtMode(htModeSet, 0, MHz(20)), false);
+ASSERT(!longOnly.isHtShortGuardIntervalSupported(MHz(20)));
+ASSERT(vhtOnlyModeSet->getHtShortGuardIntervalChannelWidths().empty());
+
+// All mandatory HT MCSs without an eligible legacy operational mode are
+// rejected at the mode-set boundary before management serialization.
+auto htOnlyEntries = sparseEntries;
+for (auto& entry : htOnlyEntries)
+    entry.isLegacyOperational = false;
+bool htOnlyRejected = false;
 try {
-    ExplicitModeSet invalid({{false, htReference}}, htReference, Ieee80211ModeSet::PhyType::HT);
+    SparseModeSet invalid(htOnlyEntries, htOnlyEntries[0].mode);
 }
 catch (const cRuntimeError&) {
-    emptyLegacyRejected = true;
+    htOnlyRejected = true;
 }
-ASSERT(emptyLegacyRejected);
+ASSERT(htOnlyRejected);
+bool nonHtOnlyRejected = false;
+try {
+    SparseModeSet invalid(htOnlyEntries, htOnlyEntries[0].mode, false);
+}
+catch (const cRuntimeError&) {
+    nonHtOnlyRejected = true;
+}
+ASSERT(nonHtOnlyRejected);
+
+std::vector<SparseModeSet::Entry> missingMandatory;
+for (int mcsIndex = 0; mcsIndex < 7; mcsIndex++)
+    missingMandatory.push_back({true, findHtMode(htModeSet, mcsIndex, MHz(20))});
+missingMandatory.push_back({false, findHtMode(htModeSet, 8, MHz(20))});
+missingMandatory.push_back({true, htModeSet->getMode(Mbps(1)), true});
+bool missingMandatoryRejected = false;
+try {
+    SparseModeSet invalid(missingMandatory, missingMandatory[0].mode);
+}
+catch (const cRuntimeError&) {
+    missingMandatoryRejected = true;
+}
+ASSERT(missingMandatoryRejected);
+
+// The timing reference is explicit and remains stable when lookup entries are
+// reordered by bitrate. A reference must also be present exactly once.
+auto reorderedEntries = sparseEntries;
+std::swap(reorderedEntries.front(), reorderedEntries.back());
+SparseModeSet reordered(reorderedEntries, sparseEntries[0].mode);
+ASSERT(reordered.getReferenceMode() == sparseEntries[0].mode);
+ASSERT(reordered.getSifsTime() == sparseEntries[0].mode->getSifsTime());
+ASSERT(reordered.getSlotTime() == sparseEntries[0].mode->getSlotTime());
+ASSERT(reordered.getPhyRxStartDelay() == sparseEntries[0].mode->getPhyRxStartDelay());
 
 bool nullReferenceRejected = false;
 try {
-    ExplicitModeSet invalid(reorderedEntries, nullptr, Ieee80211ModeSet::PhyType::HT);
+    SparseModeSet invalid(sparseEntries, nullptr);
 }
 catch (const cRuntimeError&) {
     nullReferenceRejected = true;
 }
 ASSERT(nullReferenceRejected);
 
-bool duplicateReferenceRejected = false;
+bool notContainedReferenceRejected = false;
 try {
-    ExplicitModeSet invalid({{true, htReference}, {false, htReference}}, htReference, Ieee80211ModeSet::PhyType::HT);
+    SparseModeSet invalid(sparseEntries, vhtOnlyModeSet->getMode(0));
 }
 catch (const cRuntimeError&) {
-    duplicateReferenceRejected = true;
+    notContainedReferenceRejected = true;
 }
-ASSERT(duplicateReferenceRejected);
+ASSERT(notContainedReferenceRejected);
 
-bool foreignReferenceRejected = false;
-try {
-    ExplicitModeSet invalid(reorderedEntries, vhtModeSet->getMode(Mbps(6.5)), Ieee80211ModeSet::PhyType::HT);
-}
-catch (const cRuntimeError&) {
-    foreignReferenceRejected = true;
-}
-ASSERT(foreignReferenceRejected);
-
-EV << "Explicit mode-set timing references and operating PHY classifications verified.\n";
+EV << "HT mode-set capability and sparse-MCS checks verified.\n";
 
 %contains: stdout
-Explicit mode-set timing references and operating PHY classifications verified.
+HT mode-set capability and sparse-MCS checks verified.
