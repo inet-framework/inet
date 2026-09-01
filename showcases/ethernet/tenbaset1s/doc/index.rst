@@ -32,8 +32,8 @@ configuration line.
    1bc2af2784, 5e0d2fce22 before publishing; also applies to the opp_env
    version below.
 
-How PLCA Hands Out the Channel
-------------------------------
+About 10BASE-T1S and PLCA
+-------------------------
 
 10BASE-T1S (IEEE 802.3cg-2019) is the short-reach member of the single-pair
 Ethernet family. Its multidrop mode connects at least 8 nodes to one twisted
@@ -102,7 +102,8 @@ PLCA sublayer removed:
    shows:   same lanes, same window, same traffic as the PLCA twin, with the plca submodule
             removed. All 8 nodes transmit at t=100.00us and all 8 jam; retries collide again
             at 112.8, 164.0, 176.8, 324.1 and 397.6 us. Only 3 of the 8 frames are delivered
-            inside the 520 us window (node[0] at 189.7, node[5] at 256.9, node[7] at 330.4).
+            in the span PLCA needed for all 8 (frames appear at 100.0 us, PLCA's last one
+            completes at 640.5 us): node[0] at 189.7, node[5] at 256.9, node[7] at 330.4.
    anchors: 8 simultaneous DATA starts at 100.00 us, 8 JAM cells at 100.01 us; first
             successful frame 189.7 us; 3 DATA cells survive to full width in-window.
             If the retry pattern becomes regular, the backoff or seed changed - re-derive.
@@ -173,8 +174,8 @@ costs 3.2 µs, and a cycle in which nobody transmits takes 30.8 µs. Idle nodes
 cost microseconds, not frame times, which is why a mostly-quiet segment still
 rotates quickly.
 
-The Model and What You Can Vary
--------------------------------
+The Model
+---------
 
 The network is one mixing segment: N edge nodes and one zonal controller. In a
 real design the controller bridges this segment to the vehicle backbone; that
@@ -228,7 +229,7 @@ Offered load        ``source.productionInterval``      30%, 50%, 70%, 85%
 Bursting            ``*.eth[*].plca.max_bc``           0, i.e. off
 =================== ================================== ==========================
 
-The interface stack
+The Interface Stack
 ~~~~~~~~~~~~~~~~~~~
 
 :ned:`EthernetPlcaHost` is a ``StandardHost`` with the IP layers switched off
@@ -254,7 +255,7 @@ off bursting — sending several frames in one opportunity — because bursting
 changes the bound arithmetic derived below. That is the module default, though
 the in-tree example configurations enable it.
 
-The traffic
+The Traffic
 ~~~~~~~~~~~
 
 Each edge node sends fixed-size frames to the controller at a steady rate, and
@@ -296,8 +297,8 @@ the factor 1.25 accounts for the uplink plus the quarter-volume downlink. The
 top loads match the aggregate regime Ford bench-tested for 10BASE-T1S node
 counts; real designs sit well below them.
 
-Sweeping the knobs
-~~~~~~~~~~~~~~~~~~
+Configuration
+~~~~~~~~~~~~~
 
 The load grid and the node counts are iteration variables, so one
 configuration expands into a run for every combination, and ``repeat`` gives
@@ -316,7 +317,7 @@ differ deliberately: PLCA is near-deterministic and its repetitions differ only
 in traffic jitter, while CSMA/CD's random backoff needs more seeds before its
 tail shows up at all.
 
-What gets recorded
+What Gets Recorded
 ~~~~~~~~~~~~~~~~~~
 
 ``[General]`` sets ``**.vector-recording = false`` and each configuration then
@@ -336,8 +337,8 @@ everything, which is where ``plca.curID`` for the rotation figure and
 utilization configurations additionally record ``phy.busUsed`` with a
 ``+timeavg`` mode, which measures how much of the time the wire carries data.
 
-The configurations
-~~~~~~~~~~~~~~~~~~
+Configurations and Runs
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Seven runnable configurations turn those knobs, in matched pairs wherever the
 page compares the two schemes:
@@ -357,8 +358,33 @@ Configuration           Runs  What it sets                    What it produces h
 Three further sections — ``PlcaBase``, ``CsmaCdBase`` and
 ``CycleAnatomyBase`` — are ``abstract`` and exist only to be extended.
 
-Promise 1: The Longest Wait Can Be Computed
--------------------------------------------
+What the Model Leaves Out
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+The model covers the PLCA protocol rather than a complete 10BASE-T1S product,
+and leaves the following out:
+
+- Loss of node 0 and the resynchronization that follows are not modeled;
+  beacons always arrive.
+- There is no noise and there are no reception errors: frames are lost only to
+  collisions (CSMA/CD) or queue overflow.
+- Real constrained nodes often reach the PHY over a serial host interface that
+  can cap their rate below wire speed; hosts here send at wire speed.
+- Bursting is off and multiple node IDs per station are not modeled. These are
+  the product knobs for favouring one node; every configuration here grants one
+  opportunity per node per cycle.
+
+Results
+-------
+
+The three promises, in the order the Goals stated them: the worst-case wait
+is computable, nothing is lost to arbitration, and every station is served
+equally often.
+
+The Longest Wait Can Be Computed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 The reason a rotation can be turned into a deadline is that every part of a
 cycle has a fixed cost. A busy opportunity costs the frame on the wire —
@@ -468,8 +494,9 @@ node counts beyond about 8 are an electrical qualification exercise on real
 cabling — node spacing, stub capacitance — and this model covers the protocol,
 not the analog limits.
 
-Promise 2: Nothing Is Dropped
------------------------------
+Nothing Is Dropped to Arbitration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 A bounded wait is only half of a guarantee. The other half is that the frame
 is still there at the end of it.
@@ -501,8 +528,9 @@ One statistic in these runs is easy to misread: the MAC still reports
 collisions on the PLCA runs. Those are local signals that pace the MAC from
 below. Nothing collides on the wire.
 
-Promise 3: Every Station Gets an Equal Share
---------------------------------------------
+Every Station Gets an Equal Share
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 The third promise only becomes visible when the wire is full, so both
 protocols are given more traffic than they can carry, using maximum-size
@@ -558,22 +586,6 @@ equal-size frames. One turn spent on a 1518-byte frame occupies 12312 bit
 times of the cycle against 680 for a 64-byte one, so a station sending
 maximum-size frames takes about 18× the wire time of a 64-byte neighbour on
 the same segment.
-
-What the Model Leaves Out
--------------------------
-
-The model covers the PLCA protocol rather than a complete 10BASE-T1S product,
-and leaves the following out:
-
-- Loss of node 0 and the resynchronization that follows are not modeled;
-  beacons always arrive.
-- There is no noise and there are no reception errors: frames are lost only to
-  collisions (CSMA/CD) or queue overflow.
-- Real constrained nodes often reach the PHY over a serial host interface that
-  can cap their rate below wire speed; hosts here send at wire speed.
-- Bursting is off and multiple node IDs per station are not modeled. These are
-  the product knobs for favouring one node; every configuration here grants one
-  opportunity per node per cycle.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`MultidropNetwork.ned <../MultidropNetwork.ned>`
