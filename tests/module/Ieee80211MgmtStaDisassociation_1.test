@@ -32,10 +32,12 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
   public:
     int associateConfirms = 0;
     int reassociateConfirms = 0;
+    int managementFramesSent = 0;
     Ieee80211PrimResultCode lastAssociationResult = PRC_SUCCESS;
     Ieee80211PrimResultCode lastReassociationResult = PRC_SUCCESS;
     MacAddress lastAssociationAddress;
     MacAddress lastReassociationAddress;
+    MacAddress lastManagementFrameAddress;
     bool confirmationSawClearedAssociation = false;
 
     void setAssociated(const MacAddress& address)
@@ -71,6 +73,15 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
         cancelPendingAssociation();
     }
 
+    void requestDisassociation(const MacAddress& address)
+    {
+        Enter_Method("requestDisassociation");
+        auto request = new Ieee80211Prim_DisassociateRequest();
+        request->setAddress(address);
+        request->setReasonCode(RC_UNSPECIFIED);
+        handleCommand(PR_DISASSOCIATE_REQUEST, request);
+    }
+
     bool hasPendingAssociation() const { return assocTimeoutMsg != nullptr; }
     bool isPendingAssociationScheduled() const { return assocTimeoutMsg != nullptr && assocTimeoutMsg->isScheduled(); }
     bool isReassociationPending() const { return reassociationInProgress; }
@@ -101,6 +112,15 @@ class TestIeee80211MgmtSta : public Ieee80211MgmtSta
     }
 
   protected:
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype, const MacAddress& address) override
+    {
+        (void)name;
+        (void)body;
+        (void)subtype;
+        managementFramesSent++;
+        lastManagementFrameAddress = address;
+    }
+
     virtual void sendAssociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode) override
     {
         associateConfirms++;
@@ -226,6 +246,81 @@ class Ieee80211MgmtStaDisassociationTest : public cSimpleModule
         ASSERT(mgmt->associateConfirms == 1);
         ASSERT(mgmt->lastAssociationAddress == currentAp);
         ASSERT(mgmt->lastAssociationResult == PRC_REFUSED);
+
+        // An unrelated primitive request must not cancel an in-progress
+        // reassociation to another AP, and that response must still complete.
+        mgmt->setAssociated(currentAp);
+        mgmt->preparePendingAssociation(targetAp, true);
+        int reassociateConfirmsBefore = mgmt->reassociateConfirms;
+        mgmt->requestDisassociation(foreignAp);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(mgmt->isPendingAssociationScheduled());
+        ASSERT(mgmt->isReassociationPending());
+        ASSERT(mgmt->managementFramesSent == 1);
+        ASSERT(mgmt->lastManagementFrameAddress == foreignAp);
+        mgmt->deliverAssociationResponse(targetAp, true, SC_SUCCESSFUL);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == targetAp);
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(mgmt->reassociateConfirms == reassociateConfirmsBefore + 1);
+        ASSERT(mgmt->lastReassociationResult == PRC_SUCCESS);
+
+        // A request naming the pending target cancels that transaction but
+        // leaves the current association intact; a late response is ignored.
+        mgmt->deliverDisassociation(targetAp, foreignAp);
+        mgmt->setAssociated(currentAp);
+        mgmt->preparePendingAssociation(targetAp, true);
+        reassociateConfirmsBefore = mgmt->reassociateConfirms;
+        mgmt->requestDisassociation(targetAp);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(mgmt->reassociateConfirms == reassociateConfirmsBefore);
+        ASSERT(mgmt->managementFramesSent == 2);
+        ASSERT(mgmt->lastManagementFrameAddress == targetAp);
+        mgmt->deliverAssociationResponse(targetAp, true, SC_SUCCESSFUL);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(mgmt->reassociateConfirms == reassociateConfirmsBefore);
+
+        // The same peer scoping applies while unassociated and an initial
+        // association is pending: an unrelated request preserves it.
+        mgmt->deliverDisassociation(currentAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        mgmt->preparePendingAssociation(targetAp, false);
+        int associateConfirmsBefore = mgmt->associateConfirms;
+        mgmt->requestDisassociation(foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(mgmt->isPendingAssociationScheduled());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(mgmt->managementFramesSent == 3);
+        ASSERT(mgmt->lastManagementFrameAddress == foreignAp);
+        mgmt->deliverAssociationResponse(targetAp, false, SC_SUCCESSFUL);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == targetAp);
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(mgmt->associateConfirms == associateConfirmsBefore + 1);
+        ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
+
+        // A same-target request cancels an initial association while the STA
+        // is unassociated, and a response arriving afterwards is ignored.
+        mgmt->deliverDisassociation(targetAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        mgmt->preparePendingAssociation(targetAp, false);
+        associateConfirmsBefore = mgmt->associateConfirms;
+        mgmt->requestDisassociation(targetAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(mgmt->managementFramesSent == 4);
+        ASSERT(mgmt->lastManagementFrameAddress == targetAp);
+        mgmt->deliverAssociationResponse(targetAp, false, SC_SUCCESSFUL);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->associateConfirms == associateConfirmsBefore);
 
         std::cout << "STA Disassociation peer filtering and pending-request preservation verified.\n";
         std::cout << "STA same-peer disassociation confirmation typing and teardown verified.\n";
