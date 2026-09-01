@@ -30,6 +30,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
       public:
         bool isMandatory;
         const IIeee80211Mode *mode;
+        bool isLegacyOperational = false;
     };
 
     struct EntryNetBitrateComparator {
@@ -43,6 +44,7 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     // PHY timing and contention parameters remain anchored to the explicitly
     // configured reference mode, even though entries are sorted by bitrate for lookup.
     const IIeee80211Mode *referenceMode;
+    std::vector<const IIeee80211Mode *> legacyOperationalModes;
 
   public:
     static const DelayedInitializer<std::vector<Ieee80211ModeSet>> modeSets;
@@ -60,8 +62,13 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
     const char *getName() const override { return name.c_str(); }
 
     int getNumModes() const { return entries.size(); }
-    const IIeee80211Mode *getMode(int index) { return entries[index].mode; }
-    bool isMandatory(int index) { return entries[index].isMandatory; }
+    const IIeee80211Mode *getMode(int index) const { return entries[index].mode; }
+    bool isMandatory(int index) const { return entries[index].isMandatory; }
+
+    // The management policy advertises all explicitly eligible representable
+    // legacy modes in deterministic mandatory-first order. Overflow is split
+    // into the Extended Supported Rates element by management.
+    const std::vector<const IIeee80211Mode *>& getLegacyOperationalModes() const { return legacyOperationalModes; }
 
     bool containsMode(const IIeee80211Mode *mode) const { return findModeIndex(mode) != -1; }
     bool getIsMandatory(const IIeee80211Mode *mode) const;

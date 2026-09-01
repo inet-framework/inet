@@ -144,10 +144,10 @@ void Ieee80211MgmtAp::sendBeacon()
     EV << "Sending beacon\n";
     const auto& body = makeShared<Ieee80211BeaconFrame>();
     body->setSSID(ssid.c_str());
-    body->setSupportedRates(supportedRates);
+    setSupportedRateElements(body);
     body->setBeaconInterval(beaconInterval);
     body->setChannelNumber(channelNumber);
-    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates)));
+    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length())) + getSupportedRateElementsLength(body));
     sendManagementFrame("Beacon", body, ST_BEACON, MacAddress::BROADCAST_ADDRESS);
 }
 
@@ -264,8 +264,8 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     const auto& body = makeShared<Ieee80211AssociationResponseFrame>();
     body->setStatusCode(SC_SUCCESSFUL);
     body->setAid(mib->allocateAssociationId(sta->address));
-    body->setSupportedRates(supportedRates);
-    body->setChunkLength(B(2 + 2 + 2 + body->getSupportedRates().numRates + 2));
+    setSupportedRateElements(body);
+    body->setChunkLength(B(2 + 2 + 2) + getSupportedRateElementsLength(body));
     sendManagementFrame("AssocResp-OK", body, ST_ASSOCIATIONRESPONSE, sta->address);
 }
 
@@ -295,8 +295,8 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     const auto& body = makeShared<Ieee80211ReassociationResponseFrame>();
     body->setStatusCode(SC_SUCCESSFUL);
     body->setAid(mib->allocateAssociationId(sta->address));
-    body->setSupportedRates(supportedRates);
-    body->setChunkLength(B(2 + (2 + ssid.length()) + (2 + supportedRates.numRates) + 6));
+    setSupportedRateElements(body);
+    body->setChunkLength(B(2 + 2 + 2) + getSupportedRateElementsLength(body));
     sendManagementFrame("ReassocResp-OK", body, ST_REASSOCIATIONRESPONSE, sta->address);
 }
 
@@ -341,10 +341,10 @@ void Ieee80211MgmtAp::handleProbeRequestFrame(Packet *packet, const Ptr<const Ie
     EV << "Sending ProbeResponse frame\n";
     const auto& body = makeShared<Ieee80211ProbeResponseFrame>();
     body->setSSID(ssid.c_str());
-    body->setSupportedRates(supportedRates);
+    setSupportedRateElements(body);
     body->setBeaconInterval(beaconInterval);
     body->setChannelNumber(channelNumber);
-    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates)));
+    body->setChunkLength(B(8 + 2 + 2 + (2 + ssid.length())) + getSupportedRateElementsLength(body));
     sendManagementFrame("ProbeResp", body, ST_PROBERESPONSE, staAddress);
 }
 
