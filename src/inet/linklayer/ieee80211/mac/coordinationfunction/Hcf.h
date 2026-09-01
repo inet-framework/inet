@@ -35,7 +35,6 @@
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
-#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
 
 namespace inet {
@@ -108,6 +107,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void initialize(int stage) override;
     virtual void forEachChild(cVisitor *v) override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void refreshDisplay() const override;
 
     void startFrameSequence(AccessCategory ac);

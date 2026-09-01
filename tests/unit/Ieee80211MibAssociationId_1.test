@@ -1,0 +1,44 @@
+%description:
+Verify deterministic IEEE 802.11 association ID reservation, commit,
+cancellation, reuse, and lifecycle clearing.
+
+%includes:
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+
+Ieee80211Mib mib;
+MacAddress first("02:00:00:00:00:01");
+MacAddress second("02:00:00:00:00:02");
+MacAddress third("02:00:00:00:00:03");
+MacAddress fourth("02:00:00:00:00:04");
+
+ASSERT(mib.reserveAssociationId(first) == 1);
+ASSERT(mib.reserveAssociationId(second) == 2);
+ASSERT(mib.reserveAssociationId(first) == 1);
+
+mib.cancelAssociationIdReservation(first);
+ASSERT(mib.reserveAssociationId(third) == 1);
+
+ASSERT(mib.commitAssociationId(second) == 2);
+ASSERT(mib.bssAccessPointData.associationIds.at(second) == 2);
+mib.cancelAssociationIdReservation(second);
+ASSERT(mib.bssAccessPointData.associationIds.at(second) == 2);
+
+ASSERT(mib.commitAssociationId(third) == 1);
+mib.releaseAssociationId(second);
+ASSERT(mib.bssAccessPointData.associationIds.count(second) == 0);
+ASSERT(mib.allocateAssociationId(fourth) == 2);
+
+mib.reserveAssociationId(first);
+mib.clearAssociationIds();
+ASSERT(mib.bssAccessPointData.associationIds.empty());
+ASSERT(mib.reserveAssociationId(second) == 1);
+
+EV << "Association ID ownership checks passed.\n";
+
+%contains: stdout
+Association ID ownership checks passed.

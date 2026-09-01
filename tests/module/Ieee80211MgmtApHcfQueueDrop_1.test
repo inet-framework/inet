@@ -1,0 +1,299 @@
+%description:
+Verify that a tagged Association or Reassociation Response dropped from an
+HCF EDCA compound pending queue reaches the AP as a terminal outcome. The
+child management queue drop signal is propagated through the compound queue,
+pending state is cleared, and a retransmission completes without disturbing a
+committed association.
+
+%file: TestIeee80211MgmtApHcfQueueDrop.cc
+
+#include <vector>
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/queueing/queue/CompoundPacketQueueBase.h"
+#include "inet/queueing/queue/PacketQueue.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestHcfManagementQueue : public queueing::PacketQueue
+{
+  public:
+    void setPacketCapacityForTest(int capacity) { packetCapacity = capacity; }
+};
+
+Define_Module(TestHcfManagementQueue);
+
+class TestCompoundPendingQueueForHcf : public queueing::CompoundPacketQueueBase
+{
+  public:
+    void setPacketCapacityForTest(int capacity) { packetCapacity = capacity; }
+};
+
+Define_Module(TestCompoundPendingQueueForHcf);
+
+class TestIeee80211MgmtApHcfQueueDrop : public Ieee80211MgmtAp
+{
+  public:
+    std::vector<IFrameTransmissionCallback::Status> statuses;
+    std::vector<uint64_t> transactionIds;
+
+    void markAuthenticated(const MacAddress& address)
+    {
+        Enter_Method("markAuthenticated");
+        auto& sta = staList[address];
+        sta.address = address;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+    }
+
+    void submitAssociationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitAssociationRequest");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAssociationRequestFrame(packet, header);
+    }
+
+    void submitReassociationRequest(const MacAddress& address, const MacAddress& currentAp)
+    {
+        Enter_Method("submitReassociationRequest");
+        auto packet = new Packet("ReassociationRequest");
+        auto body = makeShared<Ieee80211ReassociationRequestFrame>();
+        body->setSSID("SSID");
+        body->setCurrentAP(currentAp);
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleReassociationRequestFrame(packet, header);
+    }
+
+    bool hasPendingAssociation(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it != staList.end() && it->second.pendingAssociationTransactionId != 0;
+    }
+
+    uint64_t getPendingAssociationTransactionId(const MacAddress& address) const { return staList.at(address).pendingAssociationTransactionId; }
+    short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
+    void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
+    short getCommittedAssociationId(const MacAddress& address) const
+    {
+        auto it = mib->bssAccessPointData.associationIds.find(address);
+        return it == mib->bssAccessPointData.associationIds.end() ? 0 : it->second;
+    }
+    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const { return mib->bssAccessPointData.stations.at(address); }
+
+  protected:
+    virtual void frameTransmissionFinished(const IFrameTransmissionCallback::Result& result) override
+    {
+        statuses.push_back(result.getStatus());
+        auto frame = result.getFrame();
+        auto transactionTag = frame == nullptr ? nullptr : frame->findTag<Ieee80211MgmtTransactionTag>();
+        transactionIds.push_back(transactionTag == nullptr ? 0 : transactionTag->getTransactionId());
+        Ieee80211MgmtAp::frameTransmissionFinished(result);
+    }
+};
+
+Define_Module(TestIeee80211MgmtApHcfQueueDrop);
+
+class Ieee80211MgmtApHcfQueueDropTest : public cSimpleModule
+{
+  public:
+    Ieee80211MgmtApHcfQueueDropTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        auto mgmt = check_and_cast<TestIeee80211MgmtApHcfQueueDrop *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        auto compoundQueue = check_and_cast<TestCompoundPendingQueueForHcf *>(getModuleByPath("^.ap.wlan[0].mac.hcf.edca.edcaf[3].pendingQueue"));
+        auto managementQueue = check_and_cast<TestHcfManagementQueue *>(getModuleByPath("^.ap.wlan[0].mac.hcf.edca.edcaf[3].pendingQueue.managementQueue"));
+        const MacAddress station("02:00:00:00:00:09");
+        const MacAddress reusable("02:00:00:00:00:0a");
+        const MacAddress apAddress("02:00:00:00:00:01");
+
+        ASSERT(compoundQueue->getMaxNumPackets() == -1);
+        ASSERT(managementQueue->getMaxNumPackets() == 0);
+        mgmt->markAuthenticated(station);
+        mgmt->submitAssociationRequest(station);
+        for (int i = 0; i < 100 && mgmt->statuses.empty(); i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->statuses.size() == 1);
+        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(mgmt->transactionIds.back() != 0);
+        auto firstTransactionId = mgmt->transactionIds.back();
+        ASSERT(!mgmt->hasPendingAssociation(station));
+        ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mgmt->getCommittedAssociationId(station) == 0);
+        ASSERT(mgmt->reserveAssociationId(reusable) == 1);
+        mgmt->cancelAssociationIdReservation(reusable);
+
+        managementQueue->setPacketCapacityForTest(-1);
+        mgmt->submitAssociationRequest(station);
+        for (int i = 0; i < 100 && !mgmt->hasPendingAssociation(station); i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->hasPendingAssociation(station));
+        auto secondTransactionId = mgmt->getPendingAssociationTransactionId(station);
+        ASSERT(secondTransactionId != 0 && secondTransactionId != firstTransactionId);
+        for (int i = 0; i < 10000 && mgmt->statuses.size() < 2; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->statuses.size() == 2);
+        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+        ASSERT(mgmt->transactionIds.back() == secondTransactionId);
+        ASSERT(!mgmt->hasPendingAssociation(station));
+        ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::ASSOCIATED);
+        auto committedAid = mgmt->getCommittedAssociationId(station);
+        ASSERT(committedAid == 1);
+
+        managementQueue->setPacketCapacityForTest(-1);
+        compoundQueue->setPacketCapacityForTest(0);
+        mgmt->submitReassociationRequest(station, apAddress);
+        for (int i = 0; i < 100 && mgmt->statuses.size() < 3; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->statuses.size() == 3);
+        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(!mgmt->hasPendingAssociation(station));
+        ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->getCommittedAssociationId(station) == committedAid);
+
+        compoundQueue->setPacketCapacityForTest(-1);
+        mgmt->submitReassociationRequest(station, apAddress);
+        for (int i = 0; i < 100 && !mgmt->hasPendingAssociation(station); i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->hasPendingAssociation(station));
+        auto reassociationTransactionId = mgmt->getPendingAssociationTransactionId(station);
+        for (int i = 0; i < 10000 && mgmt->statuses.size() < 4; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->statuses.size() == 4);
+        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+        ASSERT(mgmt->transactionIds.back() == reassociationTransactionId);
+        ASSERT(!mgmt->hasPendingAssociation(station));
+        ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(mgmt->getCommittedAssociationId(station) == committedAid);
+
+        std::cout << "HCF compound pending-queue drop cleanup, AID preservation, and reassociation recovery verified.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtApHcfQueueDropTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue;
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.queue.CompoundPacketQueueBase;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.PriorityScheduler;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestHcfManagementQueue extends PacketQueue
+{
+    parameters:
+        @class(::inet::ieee80211::TestHcfManagementQueue);
+        packetCapacity = default(0);
+        dropperClass = default("inet::queueing::PacketAtCollectionEndDropper");
+}
+
+module TestCompoundPendingQueueForHcf extends CompoundPacketQueueBase
+{
+    parameters:
+        @class(::inet::ieee80211::TestCompoundPendingQueueForHcf);
+        packetCapacity = default(-1);
+        dropperClass = default("inet::queueing::PacketAtCollectionEndDropper");
+    submodules:
+        classifier: PacketClassifier {
+            parameters:
+                classifierClass = default("inet::ieee80211::MgmtOverDataClassifier");
+        }
+        managementQueue: TestHcfManagementQueue;
+        multicastQueue: PacketQueue;
+        unicastQueue: PacketQueue;
+        prioritizer: PriorityScheduler;
+    connections:
+        in --> classifier.in;
+        classifier.out++ --> managementQueue.in;
+        classifier.out++ --> multicastQueue.in;
+        classifier.out++ --> unicastQueue.in;
+        managementQueue.out --> prioritizer.in++;
+        multicastQueue.out --> prioritizer.in++;
+        unicastQueue.out --> prioritizer.in++;
+        prioritizer.out --> out;
+}
+
+simple TestIeee80211MgmtApHcfQueueDrop extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtApHcfQueueDrop);
+}
+
+simple Ieee80211MgmtApHcfQueueDropTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApHcfQueueDropTest);
+}
+
+network Ieee80211MgmtApHcfQueueDropTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtApHcfQueueDrop";
+                wlan[*].mac.qosStation = true;
+                wlan[*].mac.hcf.edca.edcaf[*].pendingQueue.typename = "TestCompoundPendingQueueForHcf";
+        }
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        test: Ieee80211MgmtApHcfQueueDropTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApHcfQueueDropTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 50ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:09"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+
+%contains: stdout
+HCF compound pending-queue drop cleanup, AID preservation, and reassociation recovery verified.

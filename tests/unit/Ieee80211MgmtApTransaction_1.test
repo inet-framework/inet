@@ -1,0 +1,80 @@
+%description:
+Verify deterministic AP association- and reassociation-response result
+classification.  Matching transaction tags complete only on a final ACK,
+retain ACKed non-final fragments, and clear on a terminal retry-limit result;
+stale, missing, and malformed responses are ignored.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+
+class TestIeee80211MgmtAp : public Ieee80211MgmtAp
+{
+  public:
+    using Ieee80211MgmtAp::AssociationResponseDisposition;
+    using Ieee80211MgmtAp::getAssociationResponseDisposition;
+};
+
+static Packet *makeAssociationResponse(uint64_t transactionId, bool moreFragments = false,
+        bool includeTag = true, Ieee80211FrameType subtype = ST_ASSOCIATIONRESPONSE)
+{
+    auto packet = new Packet("AssociationResponse");
+    auto header = makeShared<Ieee80211MgmtHeader>();
+    header->setType(subtype);
+    header->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+    header->setMoreFragments(moreFragments);
+    packet->insertAtBack(header);
+    if (includeTag)
+        packet->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(transactionId);
+    return packet;
+}
+
+%activity:
+
+using Disposition = TestIeee80211MgmtAp::AssociationResponseDisposition;
+using Status = IFrameTransmissionCallback::Status;
+
+auto finalResponse = makeAssociationResponse(42);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42, Status::ACKNOWLEDGED) == Disposition::COMPLETE);
+
+auto nonFinalResponse = makeAssociationResponse(42, true);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, Status::ACKNOWLEDGED) == Disposition::RETAIN);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, Status::RETRY_LIMIT_REACHED) == Disposition::COMPLETE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, Status::DROPPED_BEFORE_TRANSMISSION) == Disposition::COMPLETE);
+
+auto reassociationResponse = makeAssociationResponse(42, false, true, ST_REASSOCIATIONRESPONSE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(reassociationResponse, 42, Status::ACKNOWLEDGED) == Disposition::COMPLETE);
+
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 41, Status::ACKNOWLEDGED) == Disposition::IGNORE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 0, Status::ACKNOWLEDGED) == Disposition::IGNORE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nullptr, 42, Status::ACKNOWLEDGED) == Disposition::IGNORE);
+
+auto zeroTokenResponse = makeAssociationResponse(0);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(zeroTokenResponse, 42, Status::ACKNOWLEDGED) == Disposition::IGNORE);
+auto untaggedResponse = makeAssociationResponse(42, false, false);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(untaggedResponse, 42, Status::ACKNOWLEDGED) == Disposition::IGNORE);
+
+auto aggregate = new Packet("A-MPDU-like");
+aggregate->insertAtBack(makeShared<Ieee80211MpduSubframeHeader>());
+aggregate->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(42);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(aggregate, 42, Status::ACKNOWLEDGED) == Disposition::IGNORE);
+
+delete aggregate;
+delete untaggedResponse;
+delete zeroTokenResponse;
+delete reassociationResponse;
+delete nonFinalResponse;
+delete finalResponse;
+
+EV << "AP management transmission-result classification verified.\n";
+
+%contains: stdout
+AP management transmission-result classification verified.

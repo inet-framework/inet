@@ -1,0 +1,278 @@
+%description:
+Exercise an AP QoS/HCF management response protected by RTS when the peer
+does not return CTS.  The deterministic two-attempt retry exhaustion must
+reach the typed terminal callback, clear the AP's pending association
+transaction, release its reserved AID, and emit no association notification.
+
+%file: TestIeee80211MgmtApHcfRtsTimeout.cc
+
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211MgmtApHcf : public Ieee80211MgmtAp
+{
+  public:
+    int terminalCallbacks = 0;
+    int associationResponseCallbacks = 0;
+    IFrameTransmissionCallback::Status lastStatus = IFrameTransmissionCallback::Status::ACKNOWLEDGED;
+
+    virtual void start() override
+    {
+        // Keep beacon generation out of this focused transaction.  The HCF
+        // exchange below is then the only AP-originated management traffic.
+        Ieee80211MgmtApBase::start();
+    }
+
+    void markAuthenticated(const MacAddress& address)
+    {
+        auto& sta = staList[address];
+        sta.address = address;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+    }
+
+    short submitAssociationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitAssociationRequest");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAssociationRequestFrame(packet, header);
+        return mib->reserveAssociationId(address);
+    }
+
+    bool hasPendingAssociation(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it != staList.end() && it->second.pendingAssociationTransactionId != 0;
+    }
+
+    uint64_t getPendingAssociationTransactionId(const MacAddress& address) const
+    {
+        return staList.at(address).pendingAssociationTransactionId;
+    }
+
+    short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
+    void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
+
+    bool hasCommittedAssociationId(const MacAddress& address) const
+    {
+        return mib->bssAccessPointData.associationIds.find(address) != mib->bssAccessPointData.associationIds.end();
+    }
+
+    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const
+    {
+        return mib->bssAccessPointData.stations.at(address);
+    }
+
+  protected:
+    virtual void frameTransmissionFinished(const IFrameTransmissionCallback::Result& result) override
+    {
+        terminalCallbacks++;
+        lastStatus = result.getStatus();
+        const auto *frame = result.getFrame();
+        if (frame != nullptr) {
+            const auto& header = frame->peekAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR);
+            const auto& mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header);
+            if (mgmtHeader != nullptr && (mgmtHeader->getType() == ST_ASSOCIATIONRESPONSE || mgmtHeader->getType() == ST_REASSOCIATIONRESPONSE))
+                associationResponseCallbacks++;
+        }
+        Ieee80211MgmtAp::frameTransmissionFinished(result);
+    }
+};
+
+Define_Module(TestIeee80211MgmtApHcf);
+
+class Ieee80211MgmtApHcfRtsTimeoutTest : public cSimpleModule, public cListener
+{
+    using cListener::finish;
+
+  protected:
+    TestIeee80211MgmtApHcf *mgmt = nullptr;
+    cModule *apHcf = nullptr;
+    cModule *apRecoveryProcedure = nullptr;
+    cModule *apQosEdcaf = nullptr;
+    MacAddress expectedAddress;
+    int associationNotifications = 0;
+    int hcfDrops = 0;
+    int retryLimitNotifications = 0;
+    int rtsAttempts = 0;
+
+  public:
+    Ieee80211MgmtApHcfRtsTimeoutTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void initialize() override
+    {
+        mgmt = check_and_cast<TestIeee80211MgmtApHcf *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        apHcf = getModuleByPath("^.ap.wlan[0].mac.hcf");
+        apRecoveryProcedure = getModuleByPath("^.ap.wlan[0].mac.hcf.edca.mgmtAndNonQoSRecoveryProcedure");
+        apQosEdcaf = getModuleByPath("^.ap.wlan[0].mac.hcf.edca.edcaf[3]");
+        mgmt->subscribe(l2ApAssociatedSignal, this);
+        apHcf->subscribe(packetDroppedSignal, this);
+        apRecoveryProcedure->subscribe(IRecoveryProcedure::retryLimitReachedSignal, this);
+        apQosEdcaf->subscribe(packetSentToPeerSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *value, cObject *details) override
+    {
+        if (source == mgmt && signalID == l2ApAssociatedSignal) {
+            const auto& notification = check_and_cast<Ieee80211MgmtAp::NotificationInfoSta *>(value);
+            ASSERT(notification->getStaAddress() == expectedAddress);
+            associationNotifications++;
+        }
+        else if (source == apQosEdcaf && signalID == packetSentToPeerSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_RTS && header->getReceiverAddress() == expectedAddress)
+                rtsAttempts++;
+        }
+        else if (source == apRecoveryProcedure && signalID == IRecoveryProcedure::retryLimitReachedSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_ASSOCIATIONRESPONSE && header->getReceiverAddress() == expectedAddress)
+                retryLimitNotifications++;
+        }
+        else if (source == apHcf && signalID == packetDroppedSignal) {
+            auto packet = check_and_cast<Packet *>(value);
+            const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+            if (header->getType() == ST_ASSOCIATIONRESPONSE && header->getReceiverAddress() == expectedAddress) {
+                auto packetDropDetails = check_and_cast<PacketDropDetails *>(details);
+                ASSERT(packetDropDetails->getReason() == RETRY_LIMIT_REACHED);
+                hcfDrops++;
+            }
+        }
+    }
+
+    virtual void activity() override
+    {
+        expectedAddress = MacAddress("02:00:00:00:00:09");
+        mgmt->markAuthenticated(expectedAddress);
+        short associationId = mgmt->submitAssociationRequest(expectedAddress);
+        uint64_t transactionId = mgmt->getPendingAssociationTransactionId(expectedAddress);
+        ASSERT(associationId == 1);
+        ASSERT(transactionId != 0);
+        ASSERT(mgmt->hasPendingAssociation(expectedAddress));
+        ASSERT(mgmt->getStationStatus(expectedAddress) == Ieee80211Mib::AUTHENTICATED);
+
+        // The tester MAC blocks both RTS attempts.  There is intentionally no
+        // ctsTimeout override: the normal HCF timeout and retry path must
+        // deliver the terminal callback.
+        for (int i = 0; i < 100 && mgmt->terminalCallbacks == 0; i++)
+            wait(SimTime(1, SIMTIME_MS));
+
+        ASSERT(rtsAttempts == 2);
+        ASSERT(retryLimitNotifications == 1);
+        ASSERT(hcfDrops == 1);
+        ASSERT(mgmt->terminalCallbacks == 1);
+        ASSERT(mgmt->associationResponseCallbacks == 1);
+        ASSERT(mgmt->lastStatus == IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
+        ASSERT(associationNotifications == 0);
+        ASSERT(!mgmt->hasPendingAssociation(expectedAddress));
+        ASSERT(!mgmt->hasCommittedAssociationId(expectedAddress));
+        ASSERT(mgmt->getStationStatus(expectedAddress) == Ieee80211Mib::AUTHENTICATED);
+
+        // A failed transaction releases its reservation so another STA can
+        // reuse the same AID.
+        MacAddress reusable("02:00:00:00:00:0a");
+        ASSERT(mgmt->reserveAssociationId(reusable) == associationId);
+        mgmt->cancelAssociationIdReservation(reusable);
+
+        std::cout << "HCF management RTS retry exhaustion and typed AP terminal cleanup verified.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtApHcfRtsTimeoutTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestIeee80211MgmtApHcf extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtApHcf);
+}
+
+simple Ieee80211MgmtApHcfRtsTimeoutTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApHcfRtsTimeoutTest);
+}
+
+network Ieee80211MgmtApHcfRtsTimeoutTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtApHcf";
+        }
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mac.typename = "Ieee80211TesterMac";
+                wlan[*].agent.typename = "";
+        }
+        test: Ieee80211MgmtApHcfRtsTimeoutTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApHcfRtsTimeoutTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 50ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:09"
+*.ap.mobility.initialX = 0m
+*.ap.mobility.initialY = 0m
+*.sta.mobility.initialX = 1m
+*.sta.mobility.initialY = 0m
+**.wlan[*].opMode = "g(mixed)"
+**.wlan[*].bitrate = 11Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+*.ap.wlan[0].mac.qosStation = true
+*.ap.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = 0B
+*.ap.wlan[0].mac.hcf.edca.mgmtAndNonQoSRecoveryProcedure.shortRetryLimit = 2
+*.sta.wlan[0].mac.actions = "BB"
+*.sta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+
+%contains: stdout
+HCF management RTS retry exhaustion and typed AP terminal cleanup verified.

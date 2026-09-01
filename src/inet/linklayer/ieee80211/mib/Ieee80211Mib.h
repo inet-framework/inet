@@ -82,6 +82,7 @@ class INET_API Ieee80211Mib : public SimpleModule
   private:
     Ieee80211HtOperation htOperation;
     bool primaryChannelAvailable = false;
+    std::map<MacAddress, short> associationIdReservations;
     std::map<MacAddress, PeerHtState> peerHtStates;
 
   protected:
@@ -91,8 +92,12 @@ class INET_API Ieee80211Mib : public SimpleModule
     static const char *getModeStr(Ieee80211Mib::Mode mode);
     static const char *getStationTypeStr(Ieee80211Mib::BssStationType stationType);
     std::string getSsidStr() const;
+    short reserveAssociationId(const MacAddress& address);
+    short commitAssociationId(const MacAddress& address);
+    void cancelAssociationIdReservation(const MacAddress& address);
     short allocateAssociationId(const MacAddress& address);
     void releaseAssociationId(const MacAddress& address);
+    void clearAssociationIds();
     void updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet, const std::set<Hz>& operationalChannelWidths);
     bool isHtOperationSupported() const { return localHtCapabilitiesValid; }
     bool hasPrimaryChannel() const { return primaryChannelAvailable; }
