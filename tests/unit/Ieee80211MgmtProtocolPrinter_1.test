@@ -1,0 +1,56 @@
+%description:
+Verify compact set notation for sparse, contiguous, mixed, and empty HT MCS
+bitmaps in the IEEE 802.11 management protocol printer.
+
+%includes:
+#include <initializer_list>
+#include <string>
+
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtProtocolPrinter.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+
+static Ptr<Ieee80211MgmtFrame> makeFrame(std::initializer_list<int> rxMcs, std::initializer_list<int> basicMcs)
+{
+    auto frame = makeShared<Ieee80211MgmtFrame>();
+    Ieee80211HtCapabilitiesElement capabilities;
+    for (int mcs : rxMcs)
+        capabilities.rxMcsSupported[mcs] = true;
+    frame->setHtCapabilitiesPresent(true);
+    frame->setHtCapabilities(capabilities);
+
+    Ieee80211HtOperationElement operation;
+    for (int mcs : basicMcs)
+        operation.basicMcsSupported[mcs] = true;
+    frame->setHtOperationPresent(true);
+    frame->setHtOperation(operation);
+    return frame;
+}
+
+static std::string printHtSuffix(const Ptr<const Ieee80211MgmtFrame>& frame)
+{
+    Ieee80211MgmtProtocolPrinter printer;
+    ProtocolPrinter::Context context;
+    printer.print(frame, &Protocol::ieee80211Mgmt, nullptr, context);
+    auto info = context.infoColumn.str();
+    auto suffixStart = info.find(" HT-Cap(");
+    return suffixStart == std::string::npos ? info : info.substr(suffixStart);
+}
+
+%activity:
+
+ASSERT(printHtSuffix(makeFrame({0, 2, 7, 15, 76}, {0, 2, 7, 15, 76})) ==
+        " HT-Cap(width=20MHz,rxMcs={0,2,7,15,76},tx=undefined) HT-Op(primary=0,width=20MHz,basicMcs={0,2,7,15,76})");
+ASSERT(printHtSuffix(makeFrame({0, 1, 2, 3, 4, 5, 6, 7}, {0, 1, 2, 3, 7, 9, 10, 11})) ==
+        " HT-Cap(width=20MHz,rxMcs={0..7},tx=undefined) HT-Op(primary=0,width=20MHz,basicMcs={0..3,7,9..11})");
+ASSERT(printHtSuffix(makeFrame({}, {})) ==
+        " HT-Cap(width=20MHz,rxMcs={},tx=undefined) HT-Op(primary=0,width=20MHz,basicMcs={})");
+
+EV << "HT MCS bitmap printer formatting verified.\n";
+
+%contains: stdout
+HT MCS bitmap printer formatting verified.
