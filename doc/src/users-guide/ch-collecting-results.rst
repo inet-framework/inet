@@ -131,6 +131,27 @@ Recording PCAP traces also support using packet filters, which in turn allows
 one to produce multiple files for the same network interface containing different
 kinds of traffic.
 
+The :ned:`PcapRecorder` parameters select the observation and representation in
+separate steps. :par:`moduleNamePatterns` selects the sibling modules whose
+signals are observed. :par:`dumpProtocols` is a space-separated list of INET
+protocol names and selects the protocol representation written to the capture;
+the recorder dissects a packet until it finds a listed protocol and writes that
+portion with the corresponding PCAP link type. Its default is
+``"ethernetmac ppp ieee80211mac"``. For example, selecting ``ipv4`` can produce
+an IP-level capture from packets observed at an interface. This parameter does
+not select the observation point and is not a general content filter; use
+:par:`packetFilter` to select packets by headers or fields.
+
+PCAP stores bytes, so every checksum or FCS included in the selected
+representation must have an actual serializable value. Many protocol and link
+layer modules default to ``"declared"`` checksum or FCS handling: the model
+records whether the field is correct without computing its numeric value. Set
+the applicable :par:`checksumMode` and :par:`fcsMode` parameters to
+``"computed"`` when the capture includes those fields. These modes perform
+protocol work and verification rather than merely changing recorder output, so
+they are part of the simulation configuration and should be held constant when
+comparing runs.
+
 .. _ug:sec:results:recording-routing-tables:
 
 Recording Routing Tables

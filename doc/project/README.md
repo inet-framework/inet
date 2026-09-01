@@ -48,8 +48,12 @@ history/       How did the current state come to be?
 3. **About to add a protocol** — [guide/add-a-protocol.md](guide/add-a-protocol.md).
 4. **About to review** — [guide/review-a-pull-request.md](guide/review-a-pull-request.md) and
    [enforcement/checklist/general.md](enforcement/checklist/general.md).
-5. **Asking "why does INET not do X?"** — [design/rejected-designs.md](design/rejected-designs.md).
-6. **Writing in this folder** — [rule/documentation.md](rule/documentation.md).
+5. **Diagnosing a failed run or implausible result** —
+   [guide/diagnose-a-simulation.md](guide/diagnose-a-simulation.md).
+6. **Comparing or plotting simulation results** —
+   [guide/analyze-simulation-results.md](guide/analyze-simulation-results.md).
+7. **Asking "why does INET not do X?"** — [design/rejected-designs.md](design/rejected-designs.md).
+8. **Writing in this folder** — [rule/documentation.md](rule/documentation.md).
 
 ## Every document
 
@@ -91,6 +95,8 @@ In the order of the chain.
 | [guide/review-a-pull-request.md](guide/review-a-pull-request.md) | procedure | — | How do I audit a branch against the `PR-*` rules? |
 | [guide/change-a-baseline.md](guide/change-a-baseline.md) | procedure | — | How do I change a recorded expectation? |
 | [guide/run-the-gates.md](guide/run-the-gates.md) | procedure | — | What do I run before a push? |
+| [guide/diagnose-a-simulation.md](guide/diagnose-a-simulation.md) | procedure | — | How do I explain a failed run or implausible result with reproducible evidence? |
+| [guide/analyze-simulation-results.md](guide/analyze-simulation-results.md) | procedure | — | How do I compare, summarize, and plot simulation results without false repetitions? |
 | [history/design-history.md](history/design-history.md) | history | — | How did the current state come to be? |
 
 ## The header
