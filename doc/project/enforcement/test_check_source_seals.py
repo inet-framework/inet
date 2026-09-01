@@ -48,9 +48,12 @@ class CheckSourceSealsTest(unittest.TestCase):
         path.write_text(content, encoding="utf-8")
 
     def git(self, *args):
-        subprocess.run(
+        return subprocess.run(
             ["git", *args], cwd=self.root, check=True, capture_output=True, text=True
         )
+
+    def head(self):
+        return self.git("rev-parse", "HEAD").stdout.strip()
 
     def check(self, *args):
         return subprocess.run(
@@ -70,11 +73,21 @@ class CheckSourceSealsTest(unittest.TestCase):
         self.assertIn("generated from sealed message file 'proto/Foo.msg'", result.stdout)
 
     def test_invalid_option_or_option_arguments_are_rejected(self):
-        for args in (("--bogus",), ("--diff", "src/inet/open/Keep.cc")):
+        for args in (
+            ("--bogus",),
+            ("--diff", "src/inet/open/Keep.cc"),
+            ("--base",),
+            ("--base", "HEAD", "extra"),
+        ):
             with self.subTest(args=args):
                 result = self.check(*args)
                 self.assertEqual(2, result.returncode, result.stdout + result.stderr)
                 self.assertIn("error:", result.stderr)
+
+    def test_invalid_base_returns_usage_error(self):
+        result = self.check("--base", "missing-ref")
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        self.assertIn("no merge base", result.stderr)
 
     def test_explicit_non_source_or_outside_path_is_rejected(self):
         for path in (
@@ -109,6 +122,49 @@ class CheckSourceSealsTest(unittest.TestCase):
         )
         self.git("add", "-A")
         result = self.check("--staged")
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("src/inet/sealed/Old.cc", result.stdout)
+
+    def test_base_mode_checks_committed_edit_to_sealed_file(self):
+        base = self.head()
+        self.write("src/inet/sealed/Old.cc", "int value = 2;\n")
+        self.git("add", ".")
+        self.git("commit", "-qm", "change sealed source")
+
+        result = self.check("--base", base)
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("src/inet/sealed/Old.cc", result.stdout)
+
+    def test_base_mode_checks_old_path_of_committed_rename(self):
+        base = self.head()
+        os.rename(
+            self.root / "src/inet/sealed/Old.cc",
+            self.root / "src/inet/open/Renamed.cc",
+        )
+        self.git("add", "-A")
+        self.git("commit", "-qm", "rename sealed source")
+
+        result = self.check("--base", base)
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("src/inet/sealed/Old.cc", result.stdout)
+
+    def test_base_mode_uses_merge_base_registry_when_branch_removes_seal(self):
+        base = self.head()
+        registry = self.root / "doc/project/audit/seal-list.md"
+        registry.write_text(
+            registry.read_text(encoding="utf-8").replace(
+                "| 🔒 | `sealed/` | active directory seal |\n", ""
+            ),
+            encoding="utf-8",
+        )
+        self.write("src/inet/sealed/Old.cc", "int value = 2;\n")
+        self.git("add", ".")
+        self.git("commit", "-qm", "remove seal and change source")
+
+        result = self.check("--base", base)
+
         self.assertEqual(1, result.returncode, result.stdout + result.stderr)
         self.assertIn("src/inet/sealed/Old.cc", result.stdout)
 

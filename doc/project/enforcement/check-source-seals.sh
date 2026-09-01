@@ -9,6 +9,7 @@
 #   doc/project/enforcement/check-source-seals.sh [file...]
 #   doc/project/enforcement/check-source-seals.sh --diff
 #   doc/project/enforcement/check-source-seals.sh --staged
+#   doc/project/enforcement/check-source-seals.sh --base <ref>
 #
 # Exit status:
 #   0 = All target files are unsealed (or no files provided)
@@ -25,6 +26,68 @@ if [ -z "$REPOSITORY_ROOT" ] || [ ! -f "$STATUS_FILE" ]; then
   exit 2
 fi
 
+# Select input mode and reject option typos before collecting target files.
+mode="paths"
+base_ref=""
+if [ $# -eq 0 ]; then
+  mode="diff"
+elif [[ "${1:-}" == --* ]]; then
+  case "$1" in
+    --diff)
+      mode="diff"
+      if [ $# -ne 1 ]; then
+        echo "error: $1 does not accept file arguments" >&2
+        exit 2
+      fi
+      ;;
+    --staged)
+      mode="staged"
+      if [ $# -ne 1 ]; then
+        echo "error: $1 does not accept file arguments" >&2
+        exit 2
+      fi
+      ;;
+    --base)
+      if [ $# -ne 2 ] || [[ "${2:-}" == --* ]]; then
+        echo "error: --base requires exactly one Git reference" >&2
+        exit 2
+      fi
+      mode="base"
+      base_ref="$2"
+      ;;
+    *)
+      echo "error: unknown option: '$1'" >&2
+      exit 2
+      ;;
+  esac
+else
+  for arg in "$@"; do
+    if [[ "$arg" == --* ]]; then
+      echo "error: unknown option in file list: '$arg'" >&2
+      exit 2
+    fi
+  done
+fi
+
+# A committed branch is checked against the registry that governed its merge base. Reading the
+# branch's registry would let the same branch remove a seal row and then modify the formerly sealed
+# source without detection.
+merge_base=""
+status_label="$STATUS_FILE"
+if [ "$mode" = "base" ]; then
+  if ! merge_base="$(git merge-base "$base_ref" HEAD 2>/dev/null)" || [ -z "$merge_base" ]; then
+    echo "error: '$base_ref' has no merge base with HEAD" >&2
+    exit 2
+  fi
+  if ! status_text="$(git show "${merge_base}:doc/project/audit/seal-list.md" 2>/dev/null)"; then
+    echo "error: canonical seal registry unavailable at merge base $merge_base" >&2
+    exit 2
+  fi
+  status_label="doc/project/audit/seal-list.md at merge base $merge_base"
+else
+  status_text="$(<"$STATUS_FILE")"
+fi
+
 # Extract path cells only from the canonical "Sealed paths" section. Document-seal rows and
 # generated index entries are deliberately outside this source-path guard.
 SEALED_PATTERNS=()
@@ -33,47 +96,17 @@ while IFS= read -r line; do
     pattern="${BASH_REMATCH[1]}"
     SEALED_PATTERNS+=("$pattern")
   fi
-done < <(awk '
+done < <(printf '%s\n' "$status_text" | awk '
   /^## Sealed paths$/ { in_paths = 1; next }
   /^## Sealed documents$/ { in_paths = 0 }
   /<!--/ { in_comment = 1 }
   /-->/ { in_comment = 0; next }
   in_paths && !in_comment && /^\| 🔒 \|/ { print }
-' "$STATUS_FILE")
+')
 
 if [ ${#SEALED_PATTERNS[@]} -eq 0 ]; then
-  echo "info: No sealed paths found in $STATUS_FILE. All files unsealed."
+  echo "info: No sealed paths found in $status_label. All files unsealed."
   exit 0
-fi
-
-# Select input mode and reject option typos before collecting target files.
-mode="paths"
-if [ $# -eq 0 ]; then
-  mode="diff"
-elif [[ "${1:-}" == --* ]]; then
-  case "$1" in
-    --diff)
-      mode="diff"
-      ;;
-    --staged)
-      mode="staged"
-      ;;
-    *)
-      echo "error: unknown option: '$1'" >&2
-      exit 2
-      ;;
-  esac
-  if [ $# -ne 1 ]; then
-    echo "error: $1 does not accept file arguments" >&2
-    exit 2
-  fi
-else
-  for arg in "$@"; do
-    if [[ "$arg" == --* ]]; then
-      echo "error: unknown option in file list: '$arg'" >&2
-      exit 2
-    fi
-  done
 fi
 
 # Collect target files.
@@ -96,6 +129,11 @@ elif [ "$mode" = "staged" ]; then
     # Disable rename detection so both the old sealed path and new path are checked.
     done < <(git diff --no-renames --name-only -z --cached -- src/inet 2>/dev/null)
   fi
+elif [ "$mode" = "base" ]; then
+  while IFS= read -r -d '' f; do
+    TARGET_FILES+=("$f")
+  # Disable rename detection so both the old sealed path and new path are checked.
+  done < <(git diff --no-renames --name-only -z "$merge_base" HEAD -- src/inet 2>/dev/null)
 else
   for arg in "$@"; do
     normalized="${arg#./}"
