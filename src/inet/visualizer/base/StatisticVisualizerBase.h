@@ -9,6 +9,10 @@
 #define __INET_STATISTICVISUALIZERBASE_H
 
 #include <functional>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 #include "inet/common/StringFormat.h"
 #include "inet/visualizer/base/VisualizerBase.h"
@@ -22,6 +26,14 @@ namespace visualizer {
 class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
 {
   public:
+    // Determines whether the values a signal source emits are split into several
+    // statistics, and what identifies each of them.
+    enum SplitMode {
+        SPLIT_NONE, // the source emits the values of a single statistic
+        SPLIT_DETAILS, // one statistic per distinct details object emitted with the value
+        SPLIT_FLOW, // one statistic per packet flow of the source, demultiplexed by the flow tag
+    };
+
     class INET_API LastValueRecorder : public cNumericResultRecorder {
       protected:
         double lastValue = NaN;
@@ -34,12 +46,23 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
         double getLastValue() const { return lastValue; }
     };
 
+    // Displays the last value of a statistic, or of several statistics at once when the
+    // values of a source are split. Each value is one item of the figure, identified by its
+    // label; an unsplit statistic has a single item whose label is empty. The items are not
+    // known in advance, they appear as their labels do, which is the live counterpart of the
+    // demux() result filter used for recording.
     class INET_API StatisticVisualization {
       public:
-        LastValueRecorder *recorder = nullptr;
-        const int moduleId = -1;
+        class INET_API Item {
+          public:
+            LastValueRecorder *recorder = nullptr; // provides the value of this item
+            double value = NaN; // the last value, in the display unit
+        };
+
+        const int moduleId = -1; // the signal source the visualization belongs to
         const simsignal_t signal = -1;
         const char *unit = nullptr;
+        std::map<std::string, Item> items; // item label -> item; displayed in label order
         mutable double printValue = NaN;
         mutable const char *printUnit = nullptr;
 
@@ -65,9 +88,11 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     bool displayStatistics = false;
     ModuleFilter sourceFilter;
     const char *signalName = nullptr;
+    simsignal_t subscribedSignal = SIMSIGNAL_NULL; // the signal named by signalName, resolved once
     const char *statisticName = nullptr;
     const char *statisticUnit = nullptr;
     const char *statisticExpression = nullptr;
+    SplitMode splitMode = SPLIT_NONE;
     StringFormat format;
     std::vector<std::string> units;
     cFigure::Font font;
@@ -78,7 +103,8 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     double placementPriority;
     //@}
 
-    std::map<std::pair<int, simsignal_t>, const StatisticVisualization *> statisticVisualizations;
+    std::map<int, StatisticVisualization *> statisticVisualizations; // module id -> visualization
+    std::set<int> registeredSourceIds; // signal sources whose result recorders are already attached
 
   protected:
     virtual void initialize(int stage) override;
@@ -91,28 +117,55 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual void addResultRecorder(cComponent *source, simsignal_t signal);
     virtual LastValueRecorder *getResultRecorder(cComponent *source, simsignal_t signal);
     virtual LastValueRecorder *findResultRecorder(cResultListener *resultListener);
-    virtual std::string getText(const StatisticVisualization *statisticVisualization);
+    virtual std::string getText(const StatisticVisualization *statisticVisualization) const;
     virtual const char *getUnit(cComponent *source);
-    virtual std::string getRecordingMode();
+    virtual std::string getRecordingMode() const;
+    // Converts a value from the statistic unit to the first display unit, if both are given.
+    virtual double convertToDisplayUnit(double value) const;
 
-    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) = 0;
-    virtual const StatisticVisualization *getStatisticVisualization(cComponent *source, simsignal_t signal);
-    virtual void addStatisticVisualization(const StatisticVisualization *statisticVisualization);
-    virtual void removeStatisticVisualization(const StatisticVisualization *statisticVisualization);
+    // Creates the visualization of one module, along with the figure that displays it;
+    // returns nullptr if the module is not visualized.
+    virtual StatisticVisualization *createStatisticVisualization(cComponent *module, simsignal_t signal) = 0;
+    virtual StatisticVisualization *getStatisticVisualization(int moduleId);
+    virtual StatisticVisualization *getOrCreateStatisticVisualization(cComponent *module, simsignal_t signal);
+    virtual void addStatisticVisualization(StatisticVisualization *statisticVisualization);
+    virtual void removeStatisticVisualization(StatisticVisualization *statisticVisualization);
     virtual void removeAllStatisticVisualizations();
 
-    virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization);
+    virtual void refreshStatisticVisualization(StatisticVisualization *statisticVisualization);
     virtual void processSignal(cComponent *source, simsignal_t signal, std::function<void(cIListener *)> receiveSignal);
+
+    /** @name Splitting the values of one signal into several items */
+    //@{
+    // Stores the value of a signal as the last value of the item identified by the
+    // details object emitted with it (SPLIT_DETAILS).
+    virtual void processSplitValue(cComponent *source, double value, cObject *details);
+    // Registers a signal source as the source of the per flow items (SPLIT_FLOW) by
+    // attaching the result recorders that provide the values.
+    virtual void registerSource(cComponent *source, simsignal_t signal);
+    // Updates the values of the items from their result recorders, before rendering.
+    virtual void refreshFlowItemValues() const;
+    // Collects all result recorders in the result listener chain of a signal, including
+    // the ones created per flow by a demuxFlow() result filter.
+    virtual void collectResultRecorders(cResultListener *resultListener, std::vector<LastValueRecorder *>& recorders) const;
+    //@}
 
   public:
 #define PROCESS_SIGNAL(value) { processSignal(source, signal, [=] (cIListener *listener) { listener->receiveSignal(source, signal, value, details); }); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details) override { PROCESS_SIGNAL(b); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details) override { PROCESS_SIGNAL(l); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, uintval_t l, cObject *details) override { PROCESS_SIGNAL(l); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override { PROCESS_SIGNAL(d); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, const SimTime& t, cObject *details) override { PROCESS_SIGNAL(t); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details) override { PROCESS_SIGNAL(s); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override { PROCESS_SIGNAL(obj); }
+#define PROCESS_NUMERIC_SIGNAL(value, doubleValue) { \
+        if (splitMode == SPLIT_NONE) PROCESS_SIGNAL(value) \
+        else if (splitMode == SPLIT_DETAILS) processSplitValue(source, doubleValue, details); \
+        else registerSource(source, signal); }
+#define PROCESS_NONNUMERIC_SIGNAL(value) { \
+        if (splitMode == SPLIT_NONE) PROCESS_SIGNAL(value) \
+        else if (splitMode != SPLIT_DETAILS) registerSource(source, signal); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details) override { PROCESS_NUMERIC_SIGNAL(b, b); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t l, cObject *details) override { PROCESS_NUMERIC_SIGNAL(l, l); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, uintval_t l, cObject *details) override { PROCESS_NUMERIC_SIGNAL(l, l); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override { PROCESS_NUMERIC_SIGNAL(d, d); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, const SimTime& t, cObject *details) override { PROCESS_NUMERIC_SIGNAL(t, t.dbl()); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details) override { PROCESS_NONNUMERIC_SIGNAL(s); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override { PROCESS_NONNUMERIC_SIGNAL(obj); }
 };
 
 } // namespace visualizer
