@@ -1,33 +1,29 @@
-10BASE-T1S Multidrop Ethernet with PLCA
-=======================================
+Bounded Channel Access on 10BASE-T1S: PLCA versus CSMA/CD
+=========================================================
 
 Goals
 -----
 
 Automotive and industrial networks are beginning to replace CAN and similar
-fieldbuses with 10BASE-T1S, a 10 Mbps Ethernet that connects up to a few dozen
-nodes to one unshielded twisted pair. Carrying ordinary Ethernet frames all the
-way out to the sensor and actuator edge removes a protocol translation from the
-vehicle or the machine, but it also inherits Ethernet's original problem: on a
+fieldbuses with 10BASE-T1S, a 10 Mbps Ethernet that connects a few dozen nodes
+to one unshielded twisted pair. Carrying ordinary Ethernet frames all the way
+out to the sensor and actuator edge removes a protocol translation from the
+vehicle or the machine. It also inherits Ethernet's original problem: on a
 shared wire, arbitration by collision produces random waiting times with no
-upper limit. Control traffic cannot be designed against a delay that has no
+upper limit. A control loop cannot be designed against a delay that has no
 worst case.
 
-Physical Layer Collision Avoidance (PLCA) is the mechanism the standard adds to
-solve this. It rotates a single transmit opportunity through the nodes of the
-segment in a fixed order, so frames never collide on the wire, and the longest
-a node can ever wait is one full rotation — a duration that can be computed in
-advance from the node count and the frame size.
+Physical Layer Collision Avoidance (PLCA) is what the standard adds to fix
+this, and it makes three promises. A frame never waits longer than one
+rotation of the channel, and that time can be computed in advance. No frame is
+ever discarded for losing an arbitration. Every station gets the same number
+of turns as every other.
 
-In this showcase, we compare the two arbitration schemes on the same
-10BASE-T1S segment, with identical hardware, traffic and cabling, switched
-between them by a single configuration line. We measure worst-case medium
-access latency against the analytical bound, how that bound scales as nodes are
-added, and what each scheme delivers when every station always has a frame to
-send. By the end of this showcase, you will understand how PLCA arbitrates the
-medium, how to compute the access-latency guarantee for a segment you are
-designing, and what plain CSMA/CD (Carrier Sense Multiple Access with Collision
-Detection) costs on the same wire.
+This showcase takes those three promises one at a time and measures each one
+on a 10BASE-T1S segment, against the scheme PLCA replaces: plain Carrier Sense
+Multiple Access with Collision Detection (CSMA/CD), running on the same wire,
+with the same hardware and the same traffic, switched by a single
+configuration line.
 
 | Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/ethernet/tenbaset1s <https://github.com/inet-framework/inet/tree/master/showcases/ethernet/tenbaset1s>`__
@@ -36,106 +32,102 @@ Detection) costs on the same wire.
    1bc2af2784, 5e0d2fce22 before publishing; also applies to the opp_env
    version below.
 
-About 10BASE-T1S and PLCA
--------------------------
+How PLCA Hands Out the Channel
+------------------------------
 
 10BASE-T1S (IEEE 802.3cg-2019) is the short-reach member of the single-pair
-Ethernet family. Its multidrop mode connects up to at least 8 nodes — a floor,
-not a cap — to one twisted pair of up to at least 25 m: a shared bus the
-standard calls a mixing segment. It targets the sensor and actuator edge of
-vehicles and machines, where it is positioned to take over roles held by CAN,
-LIN, and FlexRay, using ordinary Ethernet frames. Do not confuse it with
-10BASE-T1L, the long-reach, point-to-point sibling.
+Ethernet family. Its multidrop mode connects at least 8 nodes to one twisted
+pair of at least 25 m — a floor, not a cap — forming a shared bus that the
+standard calls a mixing segment. Do not confuse it with 10BASE-T1L, the
+long-reach, point-to-point sibling.
 
-On a shared wire, plain CSMA/CD access is random: colliding nodes back off for
-random times, so waiting times have no upper limit. PLCA avoids this. It
-rotates a single transmit opportunity through the node IDs in fixed order;
-node 0 — often called the PLCA coordinator (OPEN Alliance) — sends a short
-beacon signal to start each cycle. A node with a frame ready transmits in its
-own opportunity; a node with nothing to send yields it after a few
-microseconds. The Ethernet MAC itself is unchanged: PLCA is a thin sublayer
-below it that simply delays the MAC until the node's opportunity arrives.
-Unlike CAN, the rotation carries no frame priorities — every node waits its
-turn, whatever the message.
+PLCA rotates a single transmit opportunity through the node IDs in a fixed
+order. Node 0 — often called the PLCA coordinator — sends a short beacon
+signal to start each cycle, and every node then counts opportunities in step
+with every other. A node with a frame ready transmits when the count reaches
+its own ID; a node with nothing to send yields after a few microseconds. The
+Ethernet MAC itself is unchanged. PLCA is a thin sublayer below it that holds
+the MAC back until the node's turn arrives.
 
-The Model
----------
+The clearest way to see this is to watch every station on the segment at once.
+In the run below, all eight edge nodes are handed a frame at the same instant,
+100 µs into the run — the worst thing that can happen to a shared wire. Each
+row is one station, and the colour says what that station is putting on the
+wire:
 
-The network is one mixing segment: N edge nodes and one zonal controller. In a
-real design the controller bridges this segment to the vehicle backbone; that
-side is not modeled here. All nodes are :ned:`EthernetPlcaHost` — a host whose
-applications exchange raw Ethernet frames through an interface with a PLCA
-sublayer. The pair itself is a chain of :ned:`WireJunction` modules connected
-by :ned:`EthernetMultidropLink` cables, with 1 m of trunk between neighbors and
-10 cm stubs down to the nodes, spacing that real harnesses use.
-
-.. figure:: media/network.png
+.. figure:: media/ownership-plca.png
    :align: center
 
 ..
-   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
-   type:     canvas
-   config:   CycleAnatomy   # omnetpp.ini
-   seed:     default (r 0)
-   shows:    one 10BASE-T1S mixing segment - controller + 8 edge nodes on a
-             daisy-chained WireJunction bus (N=8 operating point)
-   anchor:   initial state (t=0, before run). Structural self-check: controller,
-             j[0..7], node[0..7]; if the module set/links differ, the NED changed.
-   capture:  get_canvas_image, module_path=MultidropNetwork, area=all_elements,
-             margin=10; cropped to 1174x400 (empty bottom band removed)
-   stamp:    captured 2026-08-14, INET @ 5e0d2fce22 + showcase, OMNeT++ 6.4.0aipre2
+   FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
+   type:    chart (matplotlib)
+   anf:     TenBaseT1S.anf   chart "Channel ownership (PLCA)"
+   inputs:  results/CycleAnatomy-#0.vec (eth[0].phy transmittedSignalType, all 9 stations)
+   shows:   one lane per station over the start-up cycle (80-620 us). All 8 edge nodes are
+            given a frame at t=100us; the channel is handed out strictly in node-ID order,
+            node[1] first and node[7] last, one per ~68 us, with no overlap anywhere.
+            node[0] sends LAST: from the 3.2 us yield cadence its own TO ran 97.6-100.8 us
+            and its frame arrived at 100.0 us, too late to claim a TO already in progress,
+            so it waits a full rotation and sends at 572.5 us.
+   anchors: node[1] DATA starts 100.8 us; node[7] DATA starts 508.9 us; beacons (orange) at
+            92.4 and 567.3 us; node[0] COMMIT 572.5 us. Zero JAM cells anywhere in the lane
+            set. If any two DATA cells overlap in time, PLCA is not arbitrating - re-derive.
+   export:  opp_charttool imageexport TenBaseT1S.anf -n "Channel ownership (PLCA)"
+            -f png --dpi 150 -d doc/media   (8x4.5 in -> 1200x675 px)
+   stamp:   captured 2026-09-01, INET topic/gy/tenbaset1s-showcase, OMNeT++ 6.4.0aipre2
 
+The eight frames go out one after another in node-ID order, each taking about
+68 µs, with no overlap anywhere in the picture. Nothing negotiates and nothing
+retries; the order was fixed before the traffic existed.
 
-The convention used throughout is that N counts the edge nodes, and the
-controller is PLCA node 0, so a cycle has N+1 transmit opportunities. The
-network file assigns the two mandatory PLCA parameters accordingly, and lays
-out the trunk and the stubs:
+One detail in that figure is worth pausing on, because it is the whole point
+of the mechanism. ``node[0]`` sends last, not first. Its own opportunity ran
+from 97.6 µs to 100.8 µs, and its frame only arrived at 100.0 µs — a node has
+to be ready when its opportunity opens, and this one was 2.4 µs late. It gets
+no second chance within the cycle: it waits for the next beacon and transmits
+at 572.5 µs, one full rotation after the frame appeared. That wait is the
+price of the guarantee, and it is exactly what the guarantee bounds.
 
-.. literalinclude:: ../MultidropNetwork.ned
-   :language: ned
-   :start-at: network MultidropNetwork
+Now the same eight frames, at the same instant, on the same wire, with the
+PLCA sublayer removed:
 
-Every configuration inherits one of two abstract base sections. The CSMA/CD
-variant differs in a single line, which removes the ``plca`` submodule; the
-MAC, PHY, queue, and cable are identical on both sides:
+.. figure:: media/ownership-csmacd.png
+   :align: center
 
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: [Config PlcaBase]
-   :end-at: **.plca.typename = ""
+..
+   FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
+   type:    chart (matplotlib)
+   anf:     TenBaseT1S.anf   chart "Channel ownership (CSMA/CD)"
+   inputs:  results/CsmaCdCycleAnatomy-#0.vec (eth[0].phy transmittedSignalType, all 9 stations)
+   shows:   same lanes, same window, same traffic as the PLCA twin, with the plca submodule
+            removed. All 8 nodes transmit at t=100.00us and all 8 jam; retries collide again
+            at 112.8, 164.0, 176.8, 324.1 and 397.6 us. Only 3 of the 8 frames are delivered
+            inside the 520 us window (node[0] at 189.7, node[5] at 256.9, node[7] at 330.4).
+   anchors: 8 simultaneous DATA starts at 100.00 us, 8 JAM cells at 100.01 us; first
+            successful frame 189.7 us; 3 DATA cells survive to full width in-window.
+            If the retry pattern becomes regular, the backoff or seed changed - re-derive.
+   export:  opp_charttool imageexport TenBaseT1S.anf -n "Channel ownership (CSMA/CD)"
+            -f png --dpi 150 -d doc/media   (8x4.5 in -> 1200x675 px)
+   stamp:   captured 2026-09-01, INET topic/gy/tenbaset1s-showcase, OMNeT++ 6.4.0aipre2
 
-The PLCA base section pins ``max_bc = 0``, which turns off bursting — sending
-several frames in one opportunity. That is the default, but the in-tree example
-configurations enable it, and bursting changes the bound arithmetic derived
-below.
+All eight stations start transmitting at 100.00 µs, detect each other 10 ns
+later, and jam. They back off by random amounts and collide again at 112.8,
+164.0, 176.8, 324.1 and 397.6 µs. PLCA had all eight frames delivered 540 µs
+after they appeared; in that same span CSMA/CD delivers three, at 189.7, 256.9
+and 330.4 µs. No station did anything wrong; the scheme simply has no notion of
+whose turn it is.
 
-In the latency configurations, every edge node sends 64-byte frames to the
-controller cyclically, and the controller sends frames back at a quarter of
-that volume. A 64-byte frame is the ini's ``packetLength = 46B`` payload plus
-18 bytes of header and frame check sequence. Each production interval is
-jittered by ±10% so that the nodes drift out of phase, and each node starts at
-a random offset. Offered load L counts total wire occupancy in both directions,
-which gives these per-node periods at N=8:
+Because the whole mechanism rests on every station counting the same cycle,
+PLCA is all-or-nothing per segment. A station without the sublayer transmits
+whenever the medium looks idle, which means inside somebody else's transmit
+opportunity, so it does not merely degrade the rotation — it breaks it. Every
+node on a mixing segment must run PLCA, with the same node count configured.
+Mixing PLCA and non-PLCA Ethernet is done by putting a switch between them,
+not by sharing a wire.
 
-===================== ========= ========= ======== ========
-Offered load L        30%       50%       70%      85%
-===================== ========= ========= ======== ========
-Period per node       2.267 ms  1.360 ms  971 µs   800 µs
-===================== ========= ========= ======== ========
-
-In the period formula behind this table, 68 µs is one fully busy 64-byte
-transmit opportunity — 680 bit times, the frame plus its gap — and the factor
-1.25 accounts for the uplink plus the quarter-volume downlink. The top loads
-match the aggregate regime Ford bench-tested in their node-count analysis
-(cited under *Sources* below); designed operating points typically sit well
-below the tested top loads.
-
-The PLCA Cycle Up Close
------------------------
-
-Every PLCA node keeps a counter, ``curID``, that tracks which node ID owns the
-current transmit opportunity. Watching that counter during a run shows the
-rotation directly:
+Underneath, each node keeps a counter, ``curID``, holding the ID whose turn it
+currently is. Watching that counter is how you confirm the nodes really are in
+step:
 
 .. figure:: media/to-rotation.png
    :align: center
@@ -162,105 +154,152 @@ rotation directly:
             dir, OMNeT++ 6.4.0aipre2 (omnetpp-dev). Layout revised 2026-08-17: the beacon
             zoom moved from an inset to a lower panel, same data. The superseded
             single-panel rendering is kept at doc/media/unused/to-rotation.png.
+   note:    the 3.2 us yield and 30.8 us empty cycle quoted below this figure used to come
+            from a second figure, "Transmit opportunity timelines". That figure was retired
+            in the 2026-09-01 rework (its three claims were not readable in the rendering);
+            its chart is still in TenBaseT1S.anf and its last rendering is kept at
+            doc/media/unused/to-timelines.png.
 
+This window is an idle stretch of the same run, so every opportunity is
+yielded and the counter simply climbs. The controller's curve and ``node[0]``'s
+lie exactly on top of each other, which is what "in step" means: only
+nanoseconds of propagation separate them. Each staircase runs past the last ID
+to 9, and node 0 answers that by sending the next beacon, which resets every
+counter to 0. The lower panel expands one such wrap; the beacon it shades
+measures 2.0 µs.
 
-The controller and node[0] curves coincide — their sampled values never differ
-in this run, and only nanosecond propagation offsets separate them — so all
-nodes count in lockstep. That is why the thin orange line rides exactly on the
-wide blue controller band everywhere. Each staircase tops out at 9: every node
-steps past the last ID, and on node 0 passing the node count triggers the next
-beacon, which resets all counters. The counters also start at 9 before the
-first beacon, which lies outside the plotted window. The lower panel expands
-the grey-marked cycle wrap from the upper panel and shades node 0's beacon,
-whose measured duration is 2.00 µs.
+Two numbers from this figure are used later: an opportunity that a node yields
+costs 3.2 µs, and a cycle in which nobody transmits takes 30.8 µs. Idle nodes
+cost microseconds, not frame times, which is why a mostly-quiet segment still
+rotates quickly.
 
-The next chart shows what the opportunities themselves look like on the wire,
-over the tail of a busy start-up cycle followed by one completely empty cycle:
+The Model and What You Can Vary
+-------------------------------
 
-.. figure:: media/to-timelines.png
+The network is one mixing segment: N edge nodes and one zonal controller. In a
+real design the controller bridges this segment to the vehicle backbone; that
+side is not modeled here. All nodes are :ned:`EthernetPlcaHost` — a host whose
+applications exchange raw Ethernet frames through an interface that has a PLCA
+sublayer. The pair itself is a chain of :ned:`WireJunction` modules connected
+by :ned:`EthernetMultidropLink` cables, with 1 m of trunk between neighbours
+and 10 cm stubs down to the nodes, spacing that real harnesses use.
+
+.. figure:: media/network.png
    :align: center
 
 ..
-   FIGURE RECIPE (redo via the "inet-showcase-charts" skill)
-   type:    chart (matplotlib)
-   anf:     TenBaseT1S.anf   chart "Transmit opportunity timelines"
-   inputs:  results/CycleAnatomy-*.vec (phy signal-type lanes: controller received = the
-            bus, controller transmitted = beacons, node[0] transmitted); chart form follows
-            examples/ethernet/TenBaseT1S worstcase/bestcase .anf (plot_vectors_separate +
-            enum strips); window 505-700 us = tail of the busy start-up cycle + one
-            empty cycle
-   shows:   last DATA of the busy start-up cycle, BEACON, the controller's own 3.2 us
-            yielded TO,
-            node[0] COMMIT+DATA, seven 3.2 us yields, then a whole 30.8 us empty cycle -
-            idle slots cost microseconds, not frame times.
-   anchors: BEACON 2.0 us at cycle start (controller lane); busy TO = 680 BT = 68.0 us
-            total (observed here as COMMIT 9.6 us + DATA 58.4 us; the stretched COMMIT
-            is start-up alignment against the preceding beacon/yield - do not chase a
-            ~71 us figure); yielded TO 3.2 us. Measured at G4; if the lane grammar
-            changes, the PLCA FSM or scenario changed - re-derive.
-   export:  opp_charttool imageexport TenBaseT1S.anf -n "Transmit opportunity timelines"
-            -f png --dpi 150 -d doc/media   (8x6 in -> 1200x900 px)
-   stamp:   captured 2026-08-14, INET topic/gy/tenbaset1s-showcase @ 5e0d2fce22 + showcase
-            dir, OMNeT++ 6.4.0aipre2 (omnetpp-dev)
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     canvas
+   config:   CycleAnatomy   # omnetpp.ini
+   seed:     default (r 0)
+   shows:    one 10BASE-T1S mixing segment - controller + 8 edge nodes on a
+             daisy-chained WireJunction bus (N=8 operating point)
+   anchor:   initial state (t=0, before run). Structural self-check: controller,
+             j[0..7], node[0..7]; if the module set/links differ, the NED changed.
+   capture:  get_canvas_image, module_path=MultidropNetwork, area=all_elements,
+             margin=10; cropped to 1174x400 (empty bottom band removed)
+   stamp:    captured 2026-08-14, INET @ 5e0d2fce22 + showcase, OMNeT++ 6.4.0aipre2
 
+N counts the edge nodes. The controller is PLCA node 0 and edge node ``i`` is
+PLCA node ``i+1``, so a cycle has N+1 opportunities. The network file assigns
+the two mandatory PLCA parameters accordingly, and lays out the trunk and the
+stubs:
 
-The three lanes are a bus view. The top lane is everything the controller
-receives, which is effectively the bus itself; the middle lane is what the
-controller transmits, meaning its beacons and its own frames; the bottom lane
-is what node[0] transmits. The thin slivers in the controller's transmit lane
-are the 2 µs beacons. A COMMIT is the short claim signal a node sends at the
-start of its opportunity while its frame is still on the way. Yielded
-opportunities appear as 3.2 µs silences, so an idle slot costs microseconds
-rather than a frame time, and a fully idle cycle takes 30.8 µs as measured
-here.
+.. literalinclude:: ../MultidropNetwork.ned
+   :language: ned
+   :start-at: network MultidropNetwork
 
-That structure is what makes the worst case computable. The arithmetic comes
-from the standard's own cycle structure, with two INET accounting details: a
-1 ns gap after the beacon at the start of each cycle, and the end-of-stream
-delimiter counted in the frame's wire time. That delimiter costs one
-octet-time per the standard's own line encoding — it is not a simulator quirk.
+Everything the rest of this page measures is one of five knobs, and it is
+worth knowing which five before reading any result:
 
-A busy transmit opportunity costs the frame on the wire (preamble, frame and
-delimiter, which is 584 bit times at 64 B) plus one 96-bit interpacket gap,
-giving 680 bit times. It does not also pay the opportunity timer, because the
-COMMIT stops the other nodes' timers and covers the sender's own gap. An idle
-opportunity costs the 32 bit-time opportunity timer, and the beacon costs 20
-bit times. The worst case for a node is therefore one fully busy cycle, in
-which every other node transmits before its own turn comes round. At N=8 with
-64 B frames that is 20 + 9 × 680 = 6140 bit times, or **614 µs**; in general
-the bound is 68 µs × (N+1) + 2 µs, equivalently written 68·N + 70 µs.
+=================== ================================== ==========================
+Knob                Set by                             Values used here
+=================== ================================== ==========================
+Arbitration scheme  ``**.plca.typename``               PLCA, or removed (CSMA/CD)
+Node count N        ``*.numNodes``                     8, 16, 40
+Frame size          ``source.packetLength``            46 B and 1500 B payload
+Offered load        ``source.productionInterval``      30%, 50%, 70%, 85%
+Bursting            ``*.eth[*].plca.max_bc``           0, i.e. off
+=================== ================================== ==========================
 
-This is the number a segment is designed against. At N=8 with 64 B frames,
-every node is guaranteed a transmit opportunity at least every 0.61 ms or so,
-so a 10 ms control loop fits with more than 15× margin. The bound scales with
-the largest frame any node on the segment may send, which means it should be
-budgeted for that frame rather than the typical one: at 1518 B the same
-eight-node segment guarantees only 11.1 ms. Counting only MAC frame bits, the
-fully busy cycle carries 75.0% of the wire at 64 B, or 98.6% at 1518 B.
+The first knob is the one the whole comparison turns on, and it really is a
+single line. Every configuration inherits one of two abstract sections; the
+CSMA/CD variant simply deletes the ``plca`` submodule, leaving the MAC, the
+PHY, the queue and the cable identical on both sides:
 
-Results
--------
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config PlcaBase]
+   :end-at: **.plca.typename = ""
 
-Access latency under load
-~~~~~~~~~~~~~~~~~~~~~~~~~
+The last knob is fixed throughout. ``max_bc = 0`` turns off bursting — sending
+several frames in one opportunity — because bursting changes the bound
+arithmetic derived below. That is the default, though the in-tree example
+configurations enable it.
 
-Access latency here is measured from a frame's first transmission attempt until
-the transmission that succeeds begins. Time spent queued behind the station's
-own earlier frames is not counted, and neither is a head-of-queue frame's
-initial wait for a busy medium, which is up to about 70 µs here; even adding
-that wait back, PLCA stays under the 614 µs bound.
+The traffic is the same in every configuration: each edge node sends
+fixed-size frames to the controller at a steady rate, and the controller
+answers each node. The applications exchange raw Ethernet frames, with no IP
+stack in the way:
 
-The two sides are recorded at slightly different points. PLCA runs are measured
-below the PLCA sublayer, where the delay the rotation imposes is visible, and
-CSMA/CD runs at the MAC, which has no sublayer beneath it. On the PLCA runs
-both vantage points recorded identical maxima in all 25 runs, so the comparison
-is not an artifact of where the statistic is taken. The two sides also differ
-in repetitions — 3 runs per load point for PLCA against 10 for CSMA/CD —
-because PLCA is near-deterministic, its repetitions differing only in traffic
-jitter, while CSMA/CD's random backoff needs more seeds to expose its tail.
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: *.node[*].numApps = 2
+   :end-at: *.controller.app[*].source.packetLength = 46B
 
-The chart shows the worst observed access latency for each protocol at each
-offered load, at N=8 with 64-byte frames:
+A 46-byte payload plus 18 bytes of header and frame check sequence is a
+64-byte frame, the smallest Ethernet allows. In the latency configurations
+each production interval is jittered by ±10% and each node starts at a random
+offset, so the nodes drift out of phase. Offered load L counts wire occupancy
+in both directions, which gives these per-node periods at N=8:
+
+===================== ========= ========= ======== ========
+Offered load L        30%       50%       70%      85%
+===================== ========= ========= ======== ========
+Period per node       2.267 ms  1.360 ms  971 µs   800 µs
+===================== ========= ========= ======== ========
+
+Behind that table, 68 µs is one fully busy 64-byte transmit opportunity and
+the factor 1.25 accounts for the uplink plus the quarter-volume downlink. The
+top loads match the aggregate regime Ford bench-tested for 10BASE-T1S node
+counts; real designs sit well below them.
+
+Six configurations turn those knobs. ``CycleAnatomy`` and
+``CsmaCdCycleAnatomy`` produced the two ownership figures above — the same
+traffic with and without PLCA. ``PlcaLatency`` and ``CsmaCdLatency`` sweep the
+load grid at N=8 for the first promise, and ``PlcaLatency`` also covers N=16,
+with ``Scale40Plca`` adding the 40-node point. ``PlcaUtilization`` and
+``CsmaCdUtilization`` saturate the wire for the third promise.
+
+Promise 1: The Longest Wait Can Be Computed
+-------------------------------------------
+
+The reason a rotation can be turned into a deadline is that every part of a
+cycle has a fixed cost. A busy opportunity costs the frame on the wire —
+preamble, frame and end-of-stream delimiter, 584 bit times at 64 B — plus one
+96-bit interpacket gap, giving 680 bit times, or 68 µs. It does not also pay
+the opportunity timer, because the sender's COMMIT stops the other nodes'
+timers. An idle opportunity costs the 32 bit-time opportunity timer, the 3.2 µs
+seen in the rotation figure. The beacon costs 20 bit times.
+
+The worst case for a node is one fully busy cycle, in which every other node
+transmits before its turn comes round. At N=8 with 64-byte frames that is
+20 + 9 × 680 = 6140 bit times:
+
+.. code-block:: none
+
+   bound(N) = 68 µs × (N+1) + 2 µs = 68·N + 70 µs
+   bound(8) = 614 µs
+
+This is the number a segment is designed against. At N=8, every node is
+guaranteed a turn at least every 0.61 ms, so a 10 ms control loop fits with
+more than 15× margin. The bound scales with the largest frame any node on the
+segment may send, so it must be budgeted for that frame rather than the
+typical one: at 1518 B the same eight-node segment guarantees only 11.1 ms.
+
+Whether the real worst case stays under that line is the first thing to
+measure. Access latency here is the time from a frame's first transmission
+attempt until the transmission that succeeds begins:
 
 .. figure:: media/access-latency-vs-load.png
    :align: center
@@ -285,61 +324,28 @@ offered load, at N=8 with 64-byte frames:
    stamp:   captured 2026-08-14, INET topic/gy/tenbaset1s-showcase @ 5e0d2fce22 + showcase
             dir, OMNeT++ 6.4.0aipre2 (omnetpp-dev)
 
+The two sides are read at slightly different points, as the legend says: PLCA
+below its sublayer, where the delay the rotation imposes is visible, and
+CSMA/CD at the MAC, which has nothing beneath it. On the PLCA runs the two
+vantage points reported the same maximum in all 25 runs, so the comparison is
+not an artifact of where the statistic is taken. PLCA also needs fewer
+repetitions than CSMA/CD — three per load point against ten — because it is
+near-deterministic, while CSMA/CD's random backoff needs more seeds to expose
+its tail.
 
-The vertical axis is logarithmic, so each gridline is a factor of ten, and the
-dashed line is the analytical 614 µs cycle bound derived above. A PLCA frame
-waits at most one fully busy cycle, and the measured maximum grows toward that
-line with load without ever crossing it: 228–296 µs at 30% load, and 484–488 µs
-at 85%, which is 79% of the bound.
+The vertical axis is logarithmic, and the dashed line is the 614 µs bound. The
+PLCA maximum climbs toward that line as load rises — 228–296 µs at 30% load,
+484–488 µs at 85% — and never crosses it. At the top of the grid it is using
+79% of its own worst case.
 
-CSMA/CD tells the opposite story. Its maxima are already 1.3–4.2 ms at 30% load
-and 9–43 ms at 50%; past its stability limit they diverge, reaching roughly
-180 ms and beyond within the 2 s run, and stations begin discarding frames
-after exhausting their 16 transmission attempts. The annotations at 70% and 85%
-give the measured drop counts, 3–10 and 20–33 frames per 2 s run. Those frames
-are absent from the curves, because a frame that never transmits has no access
-latency to record — which means the CSMA/CD curves are censored, and the worst
-frames are precisely the missing ones. The plotted maxima also keep growing
-with observation time, because what is being measured past the stability limit
-is the delay of a diverging queue, and that has no worst case at all. PLCA is
-stable at every load on the grid.
+CSMA/CD is already at 1.3–4.2 ms at 30% load and 9–43 ms at 50%. Past its
+stability limit the maxima diverge, reaching a few hundred milliseconds within
+the 2 s run, and they keep growing the longer you watch, because what is being
+measured there is the delay of a queue that never drains. There is no number
+to design against, at any load.
 
-The two latency configurations set the load grid, the jittered traffic, and the
-seeded repetitions:
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: [Config PlcaLatency]
-   :end-before: [Config Scale40Plca]
-
-One statistic in these runs is easy to misread: the MAC still reports
-collisions on the PLCA runs. Those are local signals that pace the MAC from
-below — nothing collides on the wire.
-
-End-to-end delay is stable through 50% load on both sides, and both plateau at
-a payload throughput of a little over half the wire at 64-byte frames. That
-ceiling is framing overhead common to both protocols, not collision loss, and
-it differs slightly between them. A 46-byte payload is 368 bits. Under plain
-CSMA/CD a 64-byte frame occupies 576 bit times on the wire plus its 96-bit
-interpacket gap, capping payload at 368/672 = 54.8%; under PLCA the busy
-opportunity is 680 bit times, capping it at 368/680 = 54.1%. The measured
-figures sit just below each cap: 53.0–53.3% for CSMA/CD, 53.9% for PLCA.
-
-The divergence above 50% has a different cause. Under contention, CSMA/CD's
-delivered share of wire occupancy tops out at about 68% (measured), and the
-loss does not spread evenly — it concentrates on unlucky stations through the
-capture effect. Its queues diverge at 70% and 85% load, while PLCA's stay
-shallow at every load. When a station does give up, it does so on the
-standard's own schedule: after 16 attempts, having accumulated up to about
-366 ms of backoff at worst. The tail is long, but it ends in a drop rather than
-in delivery.
-
-Scaling with node count
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Because the bound grows linearly with the node count, sizing a segment is
-arithmetic. The chart puts the measured worst case at three node counts against
-that bound:
+The bound grows linearly with the node count, so sizing a segment is
+arithmetic. Three node counts, measured against the same formula:
 
 .. figure:: media/latency-vs-node-count.png
    :align: center
@@ -365,36 +371,67 @@ that bound:
    stamp:   captured 2026-08-14, INET topic/gy/tenbaset1s-showcase @ 5e0d2fce22 + showcase
             dir, OMNeT++ 6.4.0aipre2 (omnetpp-dev)
 
+Measured maxima are 488 µs at N=8, 837 µs at N=16 and 1232 µs at N=40, against
+bounds of 614 µs, 1.158 ms and 2.79 ms. Forty nodes is the envelope that ODVA
+and shipping transceivers specify for in-cabinet use, and it sits at only 44%
+of its bound: with 41 stations drifting out of phase, a fully busy rotation
+stops being reachable in practice. The bound is a guarantee, not an operating
+point.
 
-Measured maxima at 85% load are 488 µs at N=8, 837 µs at N=16, and 1232 µs at
-N=40, taken over all stations including the controller, against bounds of
-614 µs, 1.158 ms, and 2.79 ms respectively. Forty nodes is the envelope that
-ODVA — the industrial-automation standards body behind EtherNet/IP — and
-shipping transceivers specify for in-cabinet use. The 40-node point sits at
-44.2% of its bound: with 41 de-synchronized stations, a fully busy rotation is
-statistically unreachable, which is a useful reminder that the bound is a
-guarantee rather than an operating point.
+Two practical notes. With bursting off the controller can serve only one
+downlink frame per cycle, so downlink-heavy zones need sizing with that in
+mind; the 40-node configuration halves its downlink for that reason, which
+puts it at about 76.5% offered load rather than the grid's 85%. The bound
+comparison is unaffected, because the bound does not depend on load. Second,
+node counts beyond about 8 are an electrical qualification exercise on real
+cabling — node spacing, stub capacitance — and this model covers the protocol,
+not the analog limits.
 
-Two practical notes. With burst off, the controller can serve at most one
-downlink frame per cycle, so downlink-heavy zones need to be sized with that in
-mind. The 40-node configuration therefore runs its downlink halved, at one
-frame per 32 ms per node, which puts its total offered load at about 76.5%
-rather than the grid's 85%; the bound comparison is unaffected, because the
-bound does not depend on load. Separately, node counts beyond about 8 are an
-electrical qualification exercise on real cabling — node spacing, stub
-capacitance — and the simulation models the protocol, not the analog limits.
+Promise 2: Nothing Is Dropped
+-----------------------------
 
-Delivery at saturation
-~~~~~~~~~~~~~~~~~~~~~~
+A bounded wait is only half of a guarantee. The other half is that the frame
+is still there at the end of it.
 
-What happens when every station always has a frame to send? Both protocols fill
-the wire, in configurations ``PlcaUtilization`` and ``CsmaCdUtilization``: PLCA
-delivers 9.744 Mbps of application goodput at 1518-byte frames, and CSMA/CD
-delivers 9.56–9.59 Mbps, about 98% of PLCA's. With maximum-size frames the
-per-frame overhead is small, which is why nearly all of the 10 Mbps arrives as
-payload, in contrast to the roughly 54% payload ceiling at 64 bytes. The
-aggregate is therefore not where the two differ. The difference is who gets to
-send, and what gets lost:
+CSMA/CD gives up. A station that keeps losing arbitration retries with an
+exponentially growing random backoff, and after 16 attempts the standard tells
+it to discard the frame, having spent up to about 366 ms trying. Those
+discards are visible in the load sweep: none at all at 30% and 50% load, then
+3–10 frames per 2 s run at 70% and 20–33 at 85%. They are annotated on the
+access-latency chart rather than plotted in it, because a frame that never
+transmits has no access latency to record — which also means those curves are
+censored, and the frames missing from them are precisely the worst ones.
+
+PLCA has no equivalent failure mode. A station that finds the medium busy is
+not competing with anyone; it is waiting for a turn that is already coming.
+Across every PLCA run on this page — every load, every node count, saturation
+included — not one frame was discarded for losing arbitration, because there
+is no arbitration to lose.
+
+That promise is about arbitration, and it is worth being exact about what it
+does not cover. If an application offers more than 10 Mbps, the interface queue
+overflows no matter which scheme is running underneath. In the saturation runs
+below, both sides shed almost exactly the same number of frames that way
+(154 312 under PLCA, 154 251 under CSMA/CD). PLCA guarantees that a frame
+which reaches the wire is never thrown away for losing a race; it cannot
+invent bandwidth that is not there.
+
+One statistic in these runs is easy to misread: the MAC still reports
+collisions on the PLCA runs. Those are local signals that pace the MAC from
+below. Nothing collides on the wire.
+
+Promise 3: Every Station Gets an Equal Share
+--------------------------------------------
+
+The third promise only becomes visible when the wire is full, so both
+protocols are given more traffic than they can carry, using maximum-size
+frames.
+
+The totals are nearly identical: PLCA delivers 9.744 Mbps of application
+goodput, CSMA/CD 9.56–9.59 Mbps, about 98% of it. Saturated Ethernet keeps its
+aggregate throughput, which has been known since Boggs, Mogul and Kent
+measured it in 1988. The aggregate is not where these two differ. The
+difference is in who gets to send:
 
 .. figure:: media/per-station-goodput.png
    :align: center
@@ -419,69 +456,43 @@ send, and what gets lost:
    stamp:   captured 2026-08-14, INET topic/gy/tenbaset1s-showcase @ 5e0d2fce22 + showcase
             dir, OMNeT++ 6.4.0aipre2 (omnetpp-dev)
 
+The blue bars are level. PLCA's stations differ by at most one frame — 180
+against 181 — and that single frame is only the 2 s window cutting mid-cycle;
+the mechanism grants exactly one opportunity per node per cycle.
 
-The chart shows seed #0. PLCA's stations differ by at most one frame — 180
-against 181, a ratio of 1.0056 — because the 2 s window cuts mid-cycle; the
-mechanism itself is exactly fair, granting one opportunity per node per cycle,
-and it dropped nothing. Across all ten CSMA/CD seeds the luckiest-to-unluckiest
-ratio ranges from 1.6× to 6.7×, and 75–81 frames per 2 s run are dropped. Note
-also that the controller's bar is no larger than a single node's, even though
-it offers eight times the traffic: with burst off it gets one opportunity per
-cycle like everyone else, which is the downlink limit described under *Scaling
-with node count* above.
+The orange bars are not level. Under contention CSMA/CD's losses concentrate
+on unlucky stations through the capture effect: in this seed the luckiest
+station sends 2.5× what the unluckiest does, and across the ten seeds that
+ratio ranges from 1.6× to 6.7×. On top of the uneven shares, 75–81 frames per
+run hit the retry limit and were discarded; the PLCA side discarded none.
 
-The fairness PLCA provides is per transmit opportunity rather than per byte.
-Stations receive exactly equal frame counts, which is equal wire time only when
-they send equal-size frames — a station sending 1518-byte frames takes about
-21× the wire time of a 64-byte neighbor on the same segment.
+Note also that on the PLCA side the controller's bar is the same height as any
+single node's, even though it offers eight times the traffic. With bursting
+off it gets one opportunity per cycle like everyone else — the downlink limit
+described under *Promise 1*.
 
-The saturation runs use maximum-size (1518-byte) frames, because the analytical
-utilization anchor is computed for them; a 64-byte variant shows the overhead
-tax instead. PLCA's measured bus utilization matches the cycle arithmetic
-exactly: 99.2% at 1518-byte frames, and 85.6% at 64-byte frames. The
-utilization statistic counts DATA-signal presence only, with preamble and
-delimiter included and beacons, COMMIT signals and interpacket gaps excluded —
-it is DATA time divided by total time.
+Fairness of this kind is per transmit opportunity, not per byte. Stations
+receive equal frame counts, which is equal wire time only if they send
+equal-size frames. One turn spent on a 1518-byte frame occupies 12312 bit
+times of the cycle against 680 for a 64-byte one, so a station sending
+maximum-size frames takes about 18× the wire time of a 64-byte neighbour on
+the same segment.
 
-Limitations
------------
+What the Model Leaves Out
+-------------------------
 
 The model covers the PLCA protocol rather than a complete 10BASE-T1S product,
 and leaves the following out:
 
-- PLCA and plain-CSMA/CD stations cannot share one mixing segment in the model;
-  mixing is possible only through a switch port.
 - Loss of node 0 and the resynchronization that follows are not modeled;
   beacons always arrive.
 - There is no noise and there are no reception errors: frames are lost only to
   collisions (CSMA/CD) or queue overflow.
 - Real constrained nodes often reach the PHY over a serial host interface that
   can cap their rate below wire speed; hosts here send at wire speed.
-- Burst mode is not used here, and multiple node IDs per station are not
-  modeled. These are the product knobs for favoring one node; every
-  configuration in this showcase grants one opportunity per node per cycle.
-
-Sources and Further Reading
----------------------------
-
-- IEEE Std 802.3cg-2019 — 10BASE-T1S and the PLCA reconciliation sublayer.
-- K. Kim, E. Choi, J.-W. Choi, "Network Performance Evaluation of IEEE
-  802.3cg", J-KICS, vol. 45, no. 4, pp. 706–711, 2020,
-  DOI 10.7840/kics.2020.45.4.706 — related simulation study of the same
-  standard.
-- D. Boggs, J. Mogul, C. Kent, "Measured Capacity of an Ethernet: Myths and
-  Reality", Proc. ACM SIGCOMM '88, pp. 222–234, DOI 10.1145/52324.52347 —
-  the classic measurement study showing that saturated 10 Mbps Ethernet keeps
-  its aggregate throughput; our CSMA/CD goodput matches its conclusion.
-- Y.-T. Wu, J. Palathanam (Ford), 10BASE-T1S node count analysis, IEEE
-  Ethernet Tech Day 2024 — `slides
-  <https://standards.ieee.org/wp-content/uploads/2024/11/201-yu-ting-wu-jibu-palathanam-nodecount-analysis.pdf>`__
-  — the bench-tested load regime and node-count guidance cited above.
-- OPEN Alliance, "10BASE-T1S PLCA Management Registers", v1.2, 2022 — the
-  source of the "PLCA coordinator" term and of the register-level defaults.
-- ODVA, `EtherNet/IP In-Cabinet profile
-  <https://www.odva.org/technology-standards/market-drivers/ethernetip-in-cabinet/>`__
-  — the 40-node, 25 m in-cabinet deployment envelope.
+- Bursting is off and multiple node IDs per station are not modeled. These are
+  the product knobs for favouring one node; every configuration here grants one
+  opportunity per node per cycle.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`MultidropNetwork.ned <../MultidropNetwork.ned>`
@@ -493,11 +504,6 @@ If you already have INET and OMNeT++ installed, start the IDE by typing
 ``omnetpp``, import the INET project, then navigate to the
 ``inet/showcases/ethernet/tenbaset1s`` folder in the `Project Explorer`. There,
 you can view and edit the showcase files, run simulations, and analyze results.
-
-The simulation offers six configurations: ``PlcaLatency`` and
-``CsmaCdLatency`` for the headline latency comparison, ``CycleAnatomy`` to
-watch a single cycle up close, ``Scale40Plca`` for the 40-node point, and
-``PlcaUtilization`` and ``CsmaCdUtilization`` for the saturation study.
 
 Otherwise, there is an easy way to install INET and OMNeT++ using `opp_env
 <https://omnetpp.org/opp_env>`__, and run the simulation interactively:
