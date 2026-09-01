@@ -15,21 +15,37 @@ Before you regenerate anything, answer in words: **which behavior moved, and why
 the right one?** A standard clause, a repaired defect, a deliberate model change. If you cannot
 answer, the fingerprint has found a regression and the baseline is correct as it stands.
 
-## 2. Check the scope of the movement
+## 2. Obtain explicit approval
+
+Present the exact baselines or configurations expected to move, the source change that causes the
+movement, and the reason the new values will be right. Obtain explicit approval from the human
+responsible for accepting the change before regenerating anything
+([TR-BASELINE-DELIBERATE](../rule/testing.md#tr-baseline-deliberate)). Permission to make the source
+change does not by itself authorize rewriting its expectations.
+
+If investigation is still needed, keep the failing outputs as evidence. Investigation may calculate
+candidate values, but those values do not replace a tracked baseline until approval is recorded.
+
+## 3. Check the scope of the movement
 
 ```bash
-cd tests/fingerprint && ./runtest
+cd tests/fingerprint
+./fingerprinttest -m '<affected-case-or-tag-regex>'
 ```
 
-A change that moves far more configurations than expected is telling you something. A serializer
-change that moves a mobility fingerprint is not a serializer change.
+Start with an explicit filter for the configurations directly related to the changed contract and
+record the command, mode, configuration, run/seed, status and generated artifacts
+([TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence)). A broader integration run may then
+look for collateral movement, but it does not replace the focused evidence. A change that moves far
+more configurations than expected is telling you something. A serializer change that moves a
+mobility fingerprint is not a serializer change.
 
-## 3. Regenerate
+## 4. Regenerate
 
-Regenerate only the baselines the change actually moves. A blanket regeneration sweeps up unrelated
-drift and hides it under your reason.
+After approval, regenerate only the baselines the change actually moves. A blanket regeneration
+sweeps up unrelated drift and hides it under your reason.
 
-## 4. Commit it with the change that causes it
+## 5. Commit it with the change that causes it
 
 **The regenerated values go in the same commit as the source change that moves them**
 ([PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline),
@@ -69,7 +85,7 @@ schedule these configurations record. The behavior of INET does not change.
 
 Do not put such a re-record inside an unrelated fix. It has no cause there.
 
-## 5. Name it in the pull request
+## 6. Name it in the pull request
 
 The description lists every baseline update
 ([PR-REQ-STORY](../rule/pull-request.md#pr-req-story)). A reviewer who has to discover a baseline

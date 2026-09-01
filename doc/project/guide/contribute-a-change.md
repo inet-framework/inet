@@ -57,7 +57,8 @@ Record only a genuinely new deviation, as an `AV-*` row in
 [audit/architecture-exceptions.md](../audit/architecture-exceptions.md) or an `NV-*` row in
 [audit/naming-exceptions.md](../audit/naming-exceptions.md). A deviation that a ledger already holds
 is known, not a finding. A fingerprint baseline changes only with explicit approval and a reviewable
-explanation — see [change-a-baseline.md](change-a-baseline.md).
+explanation of its exact scope, cause and correctness — see
+[change-a-baseline.md](change-a-baseline.md).
 
 ## 8. Submit a reviewable change
 
