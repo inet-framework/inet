@@ -48,6 +48,19 @@ simple StatisticVisualizerBase extends VisualizerBase
         string placementHint = default("top"); // Annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // Determines the order of annotation positioning
 
+        // Determines whether the values a signal source emits are split into several
+        // statistics, and what identifies each of them:
+        //  - "none": the source emits the values of a single statistic
+        //  - "details": one statistic per distinct details object emitted with the value,
+        //    i.e. the live counterpart of the demux() result filter
+        //  - "flow": one statistic per packet flow of the source, in which case
+        //    `statisticExpression` must contain demuxFlow(); the values then come from the
+        //    result recorders it builds, so an item can display e.g. a count or a throughput
+        // The values a source is split into are displayed together, as the items of the one
+        // figure of that source, which must be a figure that displays several items.
+        string splitBy @enum("none","details","flow") = default("none");
+
+
         @class(StatisticVisualizerBase);
 }
 
