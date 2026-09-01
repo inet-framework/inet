@@ -75,7 +75,7 @@ section indexes them so the registry stays one place to look.
 | `design/packet-anatomy.md` | by section | 0 | 0 | 5 |
 | `design/protocol-anatomy.md` | by section | 0 | 0 | 5 |
 | `design/rejected-designs.md` | by decision | 0 | 0 | 10 |
-| `design/test-anatomy.md` | by section | 0 | 0 | 5 |
+| `design/test-anatomy.md` | by section | 0 | 0 | 6 |
 | `domain/ieee80211.md` | by rule | 0 | 0 | 14 |
 | `requirement/accepted-requirements.md` | by requirement, complete | 0 | 27 | 0 |
 | `rule/architecture.md` | by rule | 0 | 0 | 42 |
@@ -85,7 +85,7 @@ section indexes them so the registry stays one place to look.
 | `rule/quality.md` | by rule | 0 | 0 | 13 |
 | `rule/release.md` | by rule | 0 | 0 | 8 |
 | `rule/sealing.md` | whole | 0 | 0 | 1 |
-| `rule/testing.md` | by rule | 0 | 0 | 13 |
+| `rule/testing.md` | by rule | 0 | 0 | 14 |
 <!-- END SEAL INDEX -->
 
 Nothing is closed yet, and that is the honest state: no document in this set has been audited against

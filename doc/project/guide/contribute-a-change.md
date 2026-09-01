@@ -1,6 +1,6 @@
 # Contribute a change
 
-> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [architecture.md](../rule/architecture.md), [pull-request.md](../rule/pull-request.md), [sealing.md](../rule/sealing.md)
+> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [architecture.md](../rule/architecture.md), [testing.md](../rule/testing.md), [pull-request.md](../rule/pull-request.md), [sealing.md](../rule/sealing.md)
 
 The nine steps from a task to a merged change. The rules work as a design map, not as a reading
 assignment: the question is not *does this patch look reasonable?* but **which contracts does this
@@ -38,10 +38,18 @@ descriptors before you invent a new mechanism. A new mechanism is a cost that ev
 
 ## 6. Validate in proportion to risk
 
-Run [enforcement/check-architecture.sh](../enforcement/check-architecture.sh), scoped to the touched
-subtree for focused work, and the test categories that match the claim. Keep the exact commands, the
-configurations and the resulting statuses; the pull request description needs them.
-[guide/run-the-gates.md](run-the-gates.md) lists the gates in order.
+When compiled INET source or generated-code inputs changed, build a fresh INET library in the mode
+the tests will load. Then run [enforcement/check-architecture.sh](../enforcement/check-architecture.sh),
+scoped to the touched subtree for focused work. Map changed paths, symbols and contracts to the
+directly related cases in the category that matches the claim, and invoke those cases through
+explicit filters. If no directly related case exists, report the coverage gap; an unfiltered
+broader suite does not fill it
+([TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence)).
+
+Keep the working directory, exact build and test commands, build mode, configurations, runs and
+seeds, filters, exit statuses and artifact paths. Before a push, add the project-wide gates and both
+debug and release compilation checks. [run-the-gates.md](run-the-gates.md) gives the focused and
+before-push sequences without conflating them.
 
 ## 7. Reconcile, do not re-litigate
 
