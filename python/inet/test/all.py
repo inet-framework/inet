@@ -46,9 +46,11 @@ def get_protocol_test_tasks(simulation_project=None, **kwargs):
     """
     Returns the protocol test tasks of every suite under tests/protocol.
 
-    Each direct subfolder that holds .test files is one suite, for example arp, element,
-    ethernet, ipv4, ipv6, self or tcp. A new subfolder needs no registration here. Select
-    one suite with the working directory filter, for example:
+    Each direct subfolder that holds .test files at any depth is one suite, for example
+    arp, element, ethernet, ipv4, ipv6, self, tcp or wifi. The suite folder is the root a
+    test is built and run from, so a test may sit in a subfolder of it and still reach the
+    files the whole suite shares. A new subfolder needs no registration here. Select one
+    suite with the working directory filter, for example:
 
         inet_run_protocol_tests -w self
 
@@ -62,7 +64,11 @@ def get_protocol_test_tasks(simulation_project=None, **kwargs):
     full_match = kwargs.get("full_match", False)
     test_tasks = []
     for folder in sorted(glob.glob(os.path.join(simulation_project.get_full_path(protocol_folder), "*"))):
-        test_file_names = glob.glob(os.path.join(folder, "*.test"))
+        # a suite may group its tests in subfolders, so look for them at any depth, but
+        # never inside the generated work folder
+        test_file_names = [test_file_name
+                           for test_file_name in glob.glob(os.path.join(folder, "**", "*.test"), recursive=True)
+                           if "/work/" not in test_file_name]
         if not test_file_names:
             continue
         suite_name = os.path.basename(folder)

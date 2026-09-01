@@ -63,6 +63,10 @@ class OppTestTask(TestTask):
         self.lib_directory = lib_directory or os.path.join(working_directory, "lib")
         # the library that the lib folder builds; tests/protocol/lib builds "protocoltest"
         self.lib_name = lib_name
+        # a test that models an unimplemented feature declares "%# expected-result: FAIL",
+        # so its failure is the expected outcome rather than a regression
+        match = re.search(r"^%# *expected-result: *(\w+)", read_file(os.path.join(working_directory, test_file_name)), re.MULTILINE)
+        self.expected_result = match.group(1) if match else "PASS"
 
     def get_parameters_string(self, **kwargs):
         return self.test_file_name
@@ -70,7 +74,9 @@ class OppTestTask(TestTask):
     def run_protected(self, **kwargs):
         binary_suffix = "_dbg" if self.mode == "debug" else ""
         test_file_name = os.path.join(self.working_directory, self.test_file_name)
-        test_binary_name = re.sub(r"\.test", "", self.test_file_name)
+        # the test file may sit in a subfolder of the test folder, but opp_test always
+        # extracts it into work/<basename>
+        test_binary_name = os.path.basename(re.sub(r"\.test$", "", self.test_file_name))
         test_directory = os.path.join(self.working_directory, f"work/{test_binary_name}")
         has_lib = os.path.exists(self.lib_directory)
         os.makedirs(test_directory, exist_ok=True)
@@ -78,11 +84,12 @@ class OppTestTask(TestTask):
         # nesting depth of the test folder (it may be deeper than tests/<kind>)
         src_relative_path = os.path.relpath(self.simulation_project.get_full_path("src"), test_directory)
         lib_relative_path = os.path.relpath(self.lib_directory, test_directory)
+        test_folder_relative_path = os.path.relpath(self.working_directory, test_directory)
         args = ["opp_test", "gen", "-v", self.test_file_name]
         subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
-        args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", f"-L{src_relative_path}", *([f"-l{self.lib_name}{binary_suffix}", f"-L{lib_relative_path}"] if has_lib else []), "-P", test_directory, f"-I{src_relative_path}", f"-I{lib_relative_path}"]
+        args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", f"-L{src_relative_path}", *([f"-l{self.lib_name}{binary_suffix}", f"-L{lib_relative_path}"] if has_lib else []), "-P", test_directory, f"-I{src_relative_path}", f"-I{lib_relative_path}", f"-I{test_folder_relative_path}"]
         subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
@@ -91,7 +98,9 @@ class OppTestTask(TestTask):
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
         test_program = f"{test_binary_name}/{test_binary_name}{binary_suffix}"
-        simulation_args = ["--check-signals=false", "-lINET", "-n", f"{src_relative_path}:.:{lib_relative_path if has_lib else ''}"]
+        ned_directory = os.path.join(self.working_directory, "ned")
+        ned_relative_path = os.path.relpath(ned_directory, test_directory) if os.path.exists(ned_directory) else ""
+        simulation_args = ["--check-signals=false", "-lINET", "-n", ":".join(filter(None, [src_relative_path, ".", lib_relative_path if has_lib else "", ned_relative_path]))]
         if not self.debug:
             args = ["opp_test", "run", "-v", "-p", test_program, self.test_file_name, "-a", *simulation_args]
             subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
@@ -109,12 +118,11 @@ class OppTestTask(TestTask):
         stderr = subprocess_result.stderr
         match = re.search(r"Aggregate result: (\w+)", stdout)
         if match:
-            result = match.group(1)
-            return self.task_result_class(self, result=match.group(1), stdout=stdout, stderr=stderr)
+            return self.task_result_class(self, result=match.group(1), expected_result=self.expected_result, stdout=stdout, stderr=stderr)
         elif subprocess_result.returncode == signal.SIGINT.value or subprocess_result.returncode == -signal.SIGINT.value:
             return self.task_result_class(self, result="CANCEL", reason="Cancel by user")
         else:
-            return self.task_result_class(self, result="FAIL", reason=f"Non-zero exit code: {subprocess_result.returncode}", stdout=stdout, stderr=stderr)
+            return self.task_result_class(self, result="FAIL", expected_result=self.expected_result, reason=f"Non-zero exit code: {subprocess_result.returncode}", stdout=stdout, stderr=stderr)
 
 def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_match=False, lib_folder=None, lib_name="test", **kwargs):
     """
@@ -130,11 +138,11 @@ def get_opp_test_tasks(test_folder, simulation_project=None, filter=".*", full_m
         The result can be run (and re-run) without providing additional parameters.
     """
     def create_test_task(test_file_name):
-        return OppTestTask(simulation_project, simulation_project.get_full_path(test_folder), os.path.basename(test_file_name), lib_directory=simulation_project.get_full_path(lib_folder) if lib_folder else None, lib_name=lib_name, task_result_class=TestTaskResult, **dict(kwargs, pass_keyboard_interrupt=True))
+        return OppTestTask(simulation_project, simulation_project.get_full_path(test_folder), os.path.relpath(test_file_name, simulation_project.get_full_path(test_folder)), lib_directory=simulation_project.get_full_path(lib_folder) if lib_folder else None, lib_name=lib_name, task_result_class=TestTaskResult, **dict(kwargs, pass_keyboard_interrupt=True))
     if simulation_project is None:
         simulation_project = get_default_simulation_project()
     test_file_names = list(builtins.filter(lambda test_file_name: matches_filter(test_file_name, filter, None, full_match),
-                                           glob.glob(os.path.join(simulation_project.get_full_path(test_folder), "*.test"))))
+                                           glob.glob(os.path.join(simulation_project.get_full_path(test_folder), "**", "*.test"), recursive=True)))
     test_tasks = list(map(create_test_task, test_file_names))
     return MultipleOppTestTasks(tasks=test_tasks, simulation_project=simulation_project, test_folder=test_folder, lib_folder=lib_folder, multiple_task_results_class=MultipleTestTaskResults, **kwargs)
 
