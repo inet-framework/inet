@@ -107,6 +107,14 @@ Notable backward compatible changes are the following:
    A model that configures such a figure through the propertyName template and
    lists several units sees the figure follow the same unit as the label.
 
+6. IEEE 802.11 per-peer data rate visualizer
+
+   The new ~Ieee80211RateCanvasVisualizer displays the data rate a node is using
+   towards each of its peers as a bar chart above the node. It is a configuration
+   of ~StatisticCanvasVisualizer rather than new visualizer code, and is selected
+   as the type of the statistic visualizer of the integrated visualizer.
+
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 
