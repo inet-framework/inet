@@ -114,8 +114,17 @@ enum Ieee80211HwmpCode
 //
 struct Ieee80211SupportedRatesElement
 {
-    short numRates; // number of rates (max 8)
+    short numRates; // number of rates (1..8)
     double rate[8]; // in Mbit/s; should be multiple of 500 kbit/s
+    bool basicRate[8]; // BSS membership/basic-rate bit
+}
+
+// IEEE Std 802.11-2024, 9.4.2.11: overflow of Supported Rates.
+struct Ieee80211ExtendedSupportedRatesElement
+{
+    short numRates; // number of rates (1..255)
+    double rate[255]; // in Mbit/s; should be multiple of 500 kbit/s
+    bool basicRate[255]; // BSS membership/basic-rate bit
 }
 
 //
@@ -123,6 +132,8 @@ struct Ieee80211SupportedRatesElement
 //
 class Ieee80211MgmtFrame extends FieldsChunk
 {
+    bool extendedSupportedRatesPresent;
+    Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
 }
 
 //
