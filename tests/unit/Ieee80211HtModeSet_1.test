@@ -7,6 +7,7 @@ Also verify exact sparse HT MCS and width derivation from typed mode entries.
 #include <algorithm>
 #include <vector>
 
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 using namespace inet;
@@ -25,11 +26,13 @@ class SparseModeSet : public Ieee80211ModeSet
     {}
 };
 
-static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcsIndex, Hz bandwidth)
+static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcsIndex, Hz bandwidth,
+        Ieee80211HtModeBase::GuardIntervalType guardIntervalType)
 {
     for (int i = 0; i < modeSet->getNumModes(); i++) {
         const auto *mode = modeSet->getMode(i);
-        if (mode->getHtMcsIndex() == mcsIndex && mode->getDataMode()->getBandwidth() == bandwidth)
+        if (mode->getHtMcsIndex() == mcsIndex && mode->getDataMode()->getBandwidth() == bandwidth &&
+                mode->isHtShortGuardInterval() == (guardIntervalType == Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT))
             return mode;
     }
     return nullptr;
@@ -43,11 +46,38 @@ const auto *vhtOnlyModeSet = Ieee80211ModeSet::getModeSet("ac");
 ASSERT(htModeSet->isHtOperationSupported());
 ASSERT(!vhtOnlyModeSet->isHtOperationSupported());
 
+// The built-in HT catalog is complete for the advertised MCS, widths, and
+// guard intervals. Only long-GI 20 MHz MCS 0-7 are mandatory.
+int htModeCount = 0;
+for (int i = 0; i < htModeSet->getNumModes(); i++) {
+    const auto *mode = htModeSet->getMode(i);
+    if (mode->getHtMcsIndex() >= 0) {
+        ASSERT(mode->getHtMcsIndex() < 32);
+        htModeCount++;
+    }
+}
+ASSERT(htModeCount == 32 * 2 * 2);
+for (int mcsIndex = 0; mcsIndex < 32; mcsIndex++) {
+    ASSERT(htModeSet->getHtMcsSupported()[mcsIndex]);
+    for (auto bandwidth : {MHz(20), MHz(40)}) {
+        for (auto guardIntervalType : {Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT}) {
+            const auto *mode = findHtMode(htModeSet, mcsIndex, bandwidth, guardIntervalType);
+            ASSERT(mode != nullptr);
+            ASSERT(htModeSet->containsMode(mode));
+            bool mandatory = bandwidth == MHz(20) && guardIntervalType == Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG && mcsIndex < 8;
+            ASSERT(htModeSet->getIsMandatory(mode) == mandatory);
+        }
+    }
+}
+ASSERT(htModeSet->getHtSupportedChannelWidths().size() == 2);
+ASSERT(htModeSet->isHtShortGuardIntervalSupported(MHz(20)));
+ASSERT(htModeSet->isHtShortGuardIntervalSupported(MHz(40)));
+
 std::vector<SparseModeSet::Entry> sparseEntries;
 for (int mcsIndex = 0; mcsIndex < 8; mcsIndex++)
-    sparseEntries.push_back({true, findHtMode(htModeSet, mcsIndex, MHz(20))});
-sparseEntries.push_back({false, findHtMode(htModeSet, 8, MHz(20))});
-sparseEntries.push_back({false, findHtMode(htModeSet, 10, MHz(20))});
+    sparseEntries.push_back({true, findHtMode(htModeSet, mcsIndex, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG)});
+sparseEntries.push_back({false, findHtMode(htModeSet, 8, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT)});
+sparseEntries.push_back({false, findHtMode(htModeSet, 10, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT)});
 // IEEE Std 802.11-2024, 9.4.2.3 and 11.1.4.6: an ordinary HT profile
 // includes its applicable legacy operational rates in Supported Rates.
 sparseEntries.push_back({true, htModeSet->getMode(Mbps(1)), true});
@@ -67,23 +97,23 @@ ASSERT(sparse.isHtShortGuardIntervalSupported(MHz(20)));
 // profile may therefore expose a short-GI mode independently of its mandatory
 // long-GI MCS entries, while non-HT/VHT modes cannot contribute to HT bits.
 SparseModeSet short20({
-        { false, findHtMode(htModeSet, 8, MHz(20)) },
+        { false, findHtMode(htModeSet, 8, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT) },
         { true, htModeSet->getMode(Mbps(1)), true },
-    }, findHtMode(htModeSet, 8, MHz(20)), false);
+    }, findHtMode(htModeSet, 8, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT), false);
 ASSERT(short20.isHtShortGuardIntervalSupported(MHz(20)));
 ASSERT(!short20.isHtShortGuardIntervalSupported(MHz(40)));
 
 SparseModeSet short40({
-        { false, findHtMode(htModeSet, 0, MHz(40)) },
+        { false, findHtMode(htModeSet, 0, MHz(40), Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT) },
         { true, htModeSet->getMode(Mbps(1)), true },
-    }, findHtMode(htModeSet, 0, MHz(40)), false);
+    }, findHtMode(htModeSet, 0, MHz(40), Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT), false);
 ASSERT(!short40.isHtShortGuardIntervalSupported(MHz(20)));
 ASSERT(short40.isHtShortGuardIntervalSupported(MHz(40)));
 
 SparseModeSet longOnly({
-        { false, findHtMode(htModeSet, 0, MHz(20)) },
+        { false, findHtMode(htModeSet, 0, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG) },
         { true, htModeSet->getMode(Mbps(1)), true },
-    }, findHtMode(htModeSet, 0, MHz(20)), false);
+    }, findHtMode(htModeSet, 0, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG), false);
 ASSERT(!longOnly.isHtShortGuardIntervalSupported(MHz(20)));
 ASSERT(vhtOnlyModeSet->getHtShortGuardIntervalChannelWidths().empty());
 
@@ -111,8 +141,8 @@ ASSERT(nonHtOnlyRejected);
 
 std::vector<SparseModeSet::Entry> missingMandatory;
 for (int mcsIndex = 0; mcsIndex < 7; mcsIndex++)
-    missingMandatory.push_back({true, findHtMode(htModeSet, mcsIndex, MHz(20))});
-missingMandatory.push_back({false, findHtMode(htModeSet, 8, MHz(20))});
+    missingMandatory.push_back({true, findHtMode(htModeSet, mcsIndex, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG)});
+missingMandatory.push_back({false, findHtMode(htModeSet, 8, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT)});
 missingMandatory.push_back({true, htModeSet->getMode(Mbps(1)), true});
 bool missingMandatoryRejected = false;
 try {
