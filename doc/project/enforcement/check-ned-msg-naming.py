@@ -1,0 +1,567 @@
+#!/usr/bin/env python3
+"""Check the mechanical NED/MSG subset of doc/project/rule/naming.md."""
+
+from __future__ import annotations
+
+import argparse
+import re
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+
+RECONCILE = " [reconcile: doc/project/audit/naming-exceptions.md]"
+PASCAL_RE = re.compile(r"^[A-Z][A-Za-z0-9]*$")
+CAMEL_RE = re.compile(r"^[a-z][A-Za-z0-9]*$")
+LOWER_RE = re.compile(r"^[a-z][a-z0-9]*$")
+NED_TYPE_RE = re.compile(r"^\s*(simple|module|moduleinterface|network|channel|channelinterface)\s+([A-Za-z_]\w*)\b")
+MSG_TYPE_RE = re.compile(r"^\s*(class|struct|packet|message|enum)\s+([A-Za-z_]\w*)\b(.*)$")
+HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
+CPP_BLOCK_RE = re.compile(r"\bcplusplus(?:\s*\([^)]*\))?\s*\{\{")
+
+
+@dataclass(frozen=True, order=True)
+class Finding:
+    path: str
+    line: int
+    rule: str
+    message: str
+
+    def render(self) -> str:
+        return f"{self.path}:{self.line}: {self.rule}: {self.message}{RECONCILE}"
+
+
+@dataclass(frozen=True)
+class Target:
+    selected_lines: frozenset[int] | None
+    structural_rules: frozenset[str] = frozenset()
+
+
+class UsageError(Exception):
+    pass
+
+
+def run_git(root: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", *args], cwd=root, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    if result.returncode != 0:
+        raise UsageError(result.stderr.strip() or f"git {' '.join(args)} failed")
+    return result.stdout
+
+
+def repository_root() -> Path:
+    cwd = Path.cwd().resolve()
+    result = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        cwd=cwd,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if result.returncode != 0:
+        raise UsageError("run from an INET Git repository root")
+    root = Path(result.stdout.strip()).resolve()
+    if root != cwd or not (root / "src/inet").is_dir():
+        raise UsageError("run from the INET repository root containing src/inet")
+    return root
+
+
+def git_paths(root: Path, args: list[str]) -> set[Path]:
+    output = run_git(root, *args)
+    return {Path(line) for line in output.splitlines() if line}
+
+
+def diff_added_lines(root: Path, path: Path, staged: bool) -> set[int]:
+    args = ["diff", "--unified=0", "--no-color"]
+    if staged:
+        args.append("--cached")
+    else:
+        args.append("HEAD")
+    args.extend(["--", path.as_posix()])
+    lines: set[int] = set()
+    for line in run_git(root, *args).splitlines():
+        match = HUNK_RE.match(line)
+        if match:
+            start = int(match.group(1))
+            count = int(match.group(2) or "1")
+            lines.update(range(start, start + count))
+    return lines
+
+
+def naming_lines(path: Path, text: str) -> list[str]:
+    lines = strip_comments(text.splitlines())
+    return mask_msg_cplusplus(lines) if path.suffix == ".msg" else lines
+
+
+def declaration_delimiter(text: str) -> tuple[str, int] | None:
+    brace = text.find("{")
+    semicolon = text.find(";")
+    if brace != -1 and (semicolon == -1 or brace < semicolon):
+        return "definition", brace
+    if semicolon != -1:
+        return "forward", semicolon
+    return None
+
+
+def msg_type_declarations(lines: list[str]) -> list[tuple[int, str, str]]:
+    declarations: list[tuple[int, str, str]] = []
+    pending: tuple[int, str, str] | None = None
+    for number, line in enumerate(lines, 1):
+        if pending is not None:
+            delimiter = declaration_delimiter(line)
+            if delimiter is None:
+                continue
+            if delimiter[0] == "definition":
+                declarations.append(pending)
+            pending = None
+            continue
+        match = MSG_TYPE_RE.match(line)
+        if match:
+            kind, name, rest = match.groups()
+            delimiter = declaration_delimiter(rest)
+            if delimiter is None:
+                pending = (number, kind, name)
+            elif delimiter[0] == "definition":
+                declarations.append((number, kind, name))
+    return declarations
+
+
+def declared_type_names(path: Path, lines: list[str]) -> set[str]:
+    if path.suffix == ".ned":
+        names: set[str] = set()
+        for line in lines:
+            match = NED_TYPE_RE.match(line)
+            if match:
+                names.add(match.group(2))
+        return names
+    return {name for _, _, name in msg_type_declarations(lines)}
+
+
+def ned_package_name(lines: list[str]) -> str | None:
+    package: str | None = None
+    for line in lines:
+        match = re.match(r"^\s*package\s+([A-Za-z0-9_.]+)\s*;", line)
+        if match:
+            package = match.group(1)
+    return package
+
+
+def structural_transitions(root: Path, path: Path, staged: bool) -> set[str]:
+    old_lines = naming_lines(path, run_git(root, "show", f"HEAD:{path.as_posix()}"))
+    if staged:
+        new_text = run_git(root, "show", f":{path.as_posix()}")
+    else:
+        new_text = (root / path).read_text(encoding="utf-8")
+    new_lines = naming_lines(path, new_text)
+    rules: set[str] = set()
+    if path.suffix == ".ned":
+        old_package = ned_package_name(old_lines)
+        new_package = ned_package_name(new_lines)
+        if old_package is not None and new_package is None:
+            rules.add("package")
+    if path.name != "package.ned":
+        old_names = declared_type_names(path, old_lines)
+        new_names = declared_type_names(path, new_lines)
+        if path.stem in old_names and path.stem not in new_names:
+            rules.add("file-type")
+    return rules
+
+
+def diff_targets(root: Path, staged: bool) -> dict[Path, Target]:
+    common = ["diff"]
+    if staged:
+        common.append("--cached")
+    else:
+        common.append("HEAD")
+
+    full = git_paths(root, [*common, "--name-only", "--diff-filter=ACR", "--", "src/inet"])
+    modified = git_paths(root, [*common, "--name-only", "--diff-filter=M", "--", "src/inet"])
+    if not staged:
+        full |= git_paths(root, ["ls-files", "--others", "--exclude-standard", "--", "src/inet"])
+
+    targets: dict[Path, Target] = {}
+    for path in full:
+        if path.suffix in {".ned", ".msg"} and (staged or (root / path).is_file()):
+            targets[path] = Target(None)
+    for path in modified - full:
+        if path.suffix in {".ned", ".msg"} and (staged or (root / path).is_file()):
+            selected = diff_added_lines(root, path, staged)
+            structural_rules = structural_transitions(root, path, staged)
+            if selected or structural_rules:
+                targets[path] = Target(frozenset(selected), frozenset(structural_rules))
+    return targets
+
+
+def explicit_targets(root: Path, names: list[str]) -> dict[Path, Target]:
+    targets: dict[Path, Target] = {}
+    for name in names:
+        candidate = Path(name)
+        absolute = candidate.resolve() if candidate.is_absolute() else (root / candidate).resolve()
+        try:
+            relative = absolute.relative_to(root)
+        except ValueError as exc:
+            raise UsageError(f"path is outside the repository: {name}") from exc
+        if not relative.as_posix().startswith("src/inet/"):
+            raise UsageError(f"path is outside src/inet: {name}")
+        if not absolute.is_file():
+            raise UsageError(f"file not found: {name}")
+        if relative.suffix not in {".ned", ".msg"}:
+            raise UsageError(f"unsupported file type: {name}; expected .ned or .msg")
+        targets[relative] = Target(None)
+    return targets
+
+
+def strip_comments(lines: list[str]) -> list[str]:
+    cleaned: list[str] = []
+    in_block = False
+    for line in lines:
+        output: list[str] = []
+        index = 0
+        in_string = False
+        while index < len(line):
+            if in_block:
+                end = line.find("*/", index)
+                if end == -1:
+                    index = len(line)
+                    continue
+                in_block = False
+                index = end + 2
+                continue
+            if not in_string and line.startswith("/*", index):
+                in_block = True
+                index += 2
+                continue
+            if not in_string and line.startswith("//", index):
+                break
+            char = line[index]
+            if char == '"' and (index == 0 or line[index - 1] != "\\"):
+                in_string = not in_string
+            output.append(char)
+            index += 1
+        cleaned.append("".join(output))
+    return cleaned
+
+
+def mask_msg_cplusplus(lines: list[str]) -> list[str]:
+    masked: list[str] = []
+    in_cplusplus = False
+    for line in lines:
+        opener = CPP_BLOCK_RE.search(line) if not in_cplusplus else None
+        if opener:
+            in_cplusplus = True
+            masked.append("")
+            if "}}" in line[opener.end():]:
+                in_cplusplus = False
+            continue
+        if in_cplusplus:
+            masked.append("")
+            if "}}" in line:
+                in_cplusplus = False
+            continue
+        masked.append(line)
+    return masked
+
+
+def expected_ned_package(path: Path) -> str:
+    relative_dir = path.parent.relative_to(Path("src/inet"))
+    parts = ["inet", *relative_dir.parts]
+    return ".".join(parts)
+
+
+def selected(line: int, selected_lines: frozenset[int] | None) -> bool:
+    return selected_lines is None or line in selected_lines
+
+
+def add(findings: list[Finding], path: Path, line: int, rule: str, message: str) -> None:
+    findings.append(Finding(path.as_posix(), line, rule, message))
+
+
+def check_ned(
+    path: Path,
+    lines: list[str],
+    selected_lines: frozenset[int] | None,
+    structural_rules: frozenset[str],
+) -> list[Finding]:
+    findings: list[Finding] = []
+    package: tuple[int, str] | None = None
+    declarations: list[tuple[int, str]] = []
+    section: tuple[str, int] | None = None
+
+    for number, line in enumerate(lines, 1):
+        stripped = line.strip()
+        indent = len(line) - len(line.lstrip())
+
+        package_match = re.match(r"^\s*package\s+([A-Za-z0-9_.]+)\s*;", line)
+        if package_match:
+            package = (number, package_match.group(1))
+
+        type_match = NED_TYPE_RE.match(line)
+        if type_match:
+            name = type_match.group(2)
+            declarations.append((number, name))
+            if selected(number, selected_lines) and not PASCAL_RE.fullmatch(name):
+                add(findings, path, number, "NR-NED-TYPE", f"NED type '{name}' must be PascalCase")
+
+        section_match = re.match(r"^\s*(parameters|gates)\s*:\s*$", line)
+        if section_match:
+            section = (section_match.group(1), indent)
+            continue
+        if section is not None:
+            kind, section_indent = section
+            if (stripped == "}" and indent <= section_indent) or (
+                re.match(r"^[A-Za-z][A-Za-z0-9]*\s*:\s*$", stripped) and indent <= section_indent
+            ):
+                section = None
+            elif selected(number, selected_lines):
+                if kind == "parameters":
+                    match = re.match(
+                        r"^\s*(?:volatile\s+)?(?:bool|int|double|string|xml|object|quantity|[A-Za-z_]\w*(?:::\w+)*)\s+([A-Za-z_]\w*)\b",
+                        line,
+                    )
+                    if match and not CAMEL_RE.fullmatch(match.group(1)):
+                        add(findings, path, number, "NR-NED-PARAM", f"parameter '{match.group(1)}' must be camelCase")
+                elif kind == "gates":
+                    match = re.match(r"^\s*(input|output|inout)\s+([A-Za-z_]\w*)", line)
+                    if match:
+                        direction, name = match.groups()
+                        if not CAMEL_RE.fullmatch(name):
+                            add(findings, path, number, "NR-NED-GATE", f"gate '{name}' must be camelCase")
+                        if direction == "input" and name != "in" and not name.endswith("In"):
+                            add(findings, path, number, "NR-NED-GATE", f"input gate '{name}' must be 'in' or end in 'In'")
+                        if direction == "output" and name != "out" and not name.endswith("Out"):
+                            add(findings, path, number, "NR-NED-GATE", f"output gate '{name}' must be 'out' or end in 'Out'")
+
+        if selected(number, selected_lines):
+            for property_name in ("signal", "statistic"):
+                for match in re.finditer(rf"@{property_name}\[([^\]]+)\]", line):
+                    name = match.group(1).removesuffix("*")
+                    if not CAMEL_RE.fullmatch(name):
+                        add(findings, path, number, "NR-NED-SIGNAL", f"{property_name} '{match.group(1)}' must be camelCase (a terminal '*' is allowed)")
+
+    if package is not None:
+        line, name = package
+        if selected(line, selected_lines) or "package" in structural_rules:
+            if any(not LOWER_RE.fullmatch(part) for part in name.split(".")):
+                add(findings, path, line, "NR-PKG", f"package '{name}' must use lowercase run-together segments")
+            expected = expected_ned_package(path)
+            if name != expected:
+                add(findings, path, line, "NR-PKG", f"package '{name}' must match path package '{expected}'")
+    elif selected_lines is None or "package" in structural_rules:
+        add(findings, path, 1, "NR-PKG", f"file must declare package '{expected_ned_package(path)}'")
+
+    if path.name != "package.ned" and (selected_lines is None or "file-type" in structural_rules):
+        names = {name for _, name in declarations}
+        if path.stem not in names:
+            line = declarations[0][0] if declarations else 1
+            add(findings, path, line, "NR-PKG", f"file stem '{path.stem}' must match a defined NED type")
+    return findings
+
+
+def msg_field_name(line: str) -> str | None:
+    stripped = line.strip()
+    if not stripped.endswith(";") or stripped.startswith("@"):
+        return None
+    without_properties = stripped[:-1].split("@", 1)[0].split("=", 1)[0].strip()
+    without_array = re.sub(r"\[[^\]]*\]\s*$", "", without_properties).strip()
+    match = re.search(r"([A-Za-z_]\w*)\s*$", without_array)
+    if not match:
+        return None
+    prefix = without_array[: match.start()].strip()
+    if not prefix or prefix.endswith(("{", ",")):
+        return None
+    return match.group(1)
+
+
+def consume_msg_text(
+    buffered_text: str,
+    buffered_selected: bool,
+    text: str,
+    text_selected: bool,
+) -> tuple[list[tuple[str, bool]], str, bool]:
+    statements: list[tuple[str, bool]] = []
+    statement: list[str] = []
+    statement_selected = False
+    in_string = False
+    escaped = False
+    segments = ((buffered_text, buffered_selected), ("\n" + text, text_selected))
+    for segment, segment_selected in segments:
+        for char in segment:
+            if char == '"' and not escaped:
+                in_string = not in_string
+            if char == ";" and not in_string:
+                statements.append(("".join(statement) + ";", statement_selected or segment_selected))
+                statement = []
+                statement_selected = False
+            else:
+                statement.append(char)
+                statement_selected = statement_selected or segment_selected
+            escaped = char == "\\" and not escaped
+            if char != "\\":
+                escaped = False
+    remainder = "".join(statement)
+    if not remainder.strip():
+        return statements, "", False
+    return statements, remainder, statement_selected
+
+
+def msg_body_fragment(text: str, initial_depth: int) -> tuple[str, int]:
+    depth = initial_depth
+    in_string = False
+    escaped = False
+    for index, char in enumerate(text):
+        if char == '"' and not escaped:
+            in_string = not in_string
+        elif not in_string:
+            if char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if depth <= 0:
+                    return text[:index], 0
+        escaped = char == "\\" and not escaped
+        if char != "\\":
+            escaped = False
+    return text, depth
+
+
+def add_msg_field_findings(
+    findings: list[Finding], path: Path, number: int, statements: list[tuple[str, bool]]
+) -> None:
+    for statement, statement_selected in statements:
+        if not statement_selected:
+            continue
+        name = msg_field_name(statement)
+        if name is None:
+            continue
+        if not CAMEL_RE.fullmatch(name):
+            add(findings, path, number, "NR-MSG-FIELD", f"MSG field '{name}' must be camelCase")
+
+
+def check_msg(
+    path: Path,
+    lines: list[str],
+    selected_lines: frozenset[int] | None,
+    structural_rules: frozenset[str],
+) -> list[Finding]:
+    findings: list[Finding] = []
+    declarations = msg_type_declarations(lines)
+    for number, kind, name in declarations:
+        if selected(number, selected_lines) and not PASCAL_RE.fullmatch(name):
+            add(findings, path, number, "NR-MSG-TYPE", f"MSG {kind} '{name}' must be PascalCase")
+
+    context_kind: str | None = None
+    pending_kind: str | None = None
+    brace_depth = 0
+    field_buffer = ""
+    field_buffer_selected = False
+
+    for number, line in enumerate(lines, 1):
+        if context_kind is not None:
+            body, new_depth = msg_body_fragment(line, brace_depth)
+            statements, field_buffer, field_buffer_selected = consume_msg_text(
+                field_buffer, field_buffer_selected, body, selected(number, selected_lines)
+            )
+            if context_kind in {"class", "struct", "packet", "message"}:
+                add_msg_field_findings(findings, path, number, statements)
+            brace_depth = new_depth
+            if brace_depth <= 0:
+                context_kind = None
+                brace_depth = 0
+                field_buffer = ""
+                field_buffer_selected = False
+            continue
+
+        entered_kind: str | None = None
+        open_index = -1
+        if pending_kind is not None:
+            delimiter = declaration_delimiter(line)
+            if delimiter is None:
+                continue
+            kind, index = delimiter
+            if kind == "definition":
+                entered_kind = pending_kind
+                open_index = index
+            pending_kind = None
+            if entered_kind is None:
+                continue
+        else:
+            type_match = MSG_TYPE_RE.match(line)
+            if type_match is None:
+                continue
+            kind, _, rest = type_match.groups()
+            delimiter = declaration_delimiter(rest)
+            if delimiter is None:
+                pending_kind = kind
+                continue
+            delimiter_kind, index = delimiter
+            if delimiter_kind == "forward":
+                continue
+            entered_kind = kind
+            open_index = type_match.start(3) + index
+
+        body, brace_depth = msg_body_fragment(line[open_index + 1:], 1)
+        statements, field_buffer, field_buffer_selected = consume_msg_text(
+            "", False, body, selected(number, selected_lines)
+        )
+        if entered_kind in {"class", "struct", "packet", "message"}:
+            add_msg_field_findings(findings, path, number, statements)
+        if brace_depth > 0:
+            context_kind = entered_kind
+        else:
+            brace_depth = 0
+            field_buffer = ""
+            field_buffer_selected = False
+
+    if selected_lines is None or "file-type" in structural_rules:
+        names = {name for _, _, name in declarations}
+        if path.stem not in names:
+            line = declarations[0][0] if declarations else 1
+            add(findings, path, line, "NR-PKG", f"file stem '{path.stem}' must match a defined MSG type")
+    return findings
+
+
+def check_file(root: Path, path: Path, target: Target, staged: bool) -> list[Finding]:
+    text = run_git(root, "show", f":{path.as_posix()}") if staged else (root / path).read_text(encoding="utf-8")
+    lines = naming_lines(path, text)
+    if path.suffix == ".msg":
+        return check_msg(path, lines, target.selected_lines, target.structural_rules)
+    return check_ned(path, lines, target.selected_lines, target.structural_rules)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--diff", action="store_true", help="check working-tree additions against HEAD (default)")
+    mode.add_argument("--staged", action="store_true", help="check staged additions")
+    parser.add_argument("files", nargs="*", help="explicit NED/MSG files to scan completely")
+    args = parser.parse_args()
+    if args.files and (args.diff or args.staged):
+        parser.error("explicit files cannot be combined with --diff or --staged")
+    return args
+
+
+def main() -> int:
+    try:
+        args = parse_args()
+        root = repository_root()
+        targets = explicit_targets(root, args.files) if args.files else diff_targets(root, args.staged)
+        findings: list[Finding] = []
+        for path in sorted(targets):
+            findings.extend(check_file(root, path, targets[path], args.staged and not args.files))
+        findings.sort()
+        for finding in findings:
+            print(finding.render())
+        if findings:
+            print(f"FAIL: {len(findings)} mechanical naming candidate(s). Reconcile each with naming-exceptions.md.")
+            return 1
+        print(f"PASS: checked {len(targets)} applicable NED/MSG file(s); no mechanical naming candidates.")
+        return 0
+    except UsageError as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())
