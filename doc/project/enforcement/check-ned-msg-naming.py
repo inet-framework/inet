@@ -73,9 +73,19 @@ def git_paths(root: Path, args: list[str]) -> set[Path]:
     return {Path(line) for line in output.splitlines() if line}
 
 
-def diff_added_lines(root: Path, path: Path, staged: bool) -> set[int]:
-    args = ["diff", "--unified=0", "--no-color"]
+def diff_arguments(staged: bool, base: str | None) -> list[str]:
+    if base is not None:
+        return ["diff", base, "HEAD"]
     if staged:
+        return ["diff", "--cached"]
+    return ["diff", "HEAD"]
+
+
+def diff_added_lines(root: Path, path: Path, staged: bool, base: str | None) -> set[int]:
+    args = ["diff", "--unified=0", "--no-color"]
+    if base is not None:
+        args.extend([base, "HEAD"])
+    elif staged:
         args.append("--cached")
     else:
         args.append("HEAD")
@@ -148,9 +158,12 @@ def ned_package_name(lines: list[str]) -> str | None:
     return package
 
 
-def structural_transitions(root: Path, path: Path, staged: bool) -> set[str]:
-    old_lines = naming_lines(path, run_git(root, "show", f"HEAD:{path.as_posix()}"))
-    if staged:
+def structural_transitions(root: Path, path: Path, staged: bool, base: str | None) -> set[str]:
+    old_revision = base if base is not None else "HEAD"
+    old_lines = naming_lines(path, run_git(root, "show", f"{old_revision}:{path.as_posix()}"))
+    if base is not None:
+        new_text = run_git(root, "show", f"HEAD:{path.as_posix()}")
+    elif staged:
         new_text = run_git(root, "show", f":{path.as_posix()}")
     else:
         new_text = (root / path).read_text(encoding="utf-8")
@@ -169,47 +182,68 @@ def structural_transitions(root: Path, path: Path, staged: bool) -> set[str]:
     return rules
 
 
-def diff_targets(root: Path, staged: bool) -> dict[Path, Target]:
-    common = ["diff"]
-    if staged:
-        common.append("--cached")
-    else:
-        common.append("HEAD")
-
-    full = git_paths(root, [*common, "--name-only", "--diff-filter=ACR", "--", "src/inet"])
-    modified = git_paths(root, [*common, "--name-only", "--diff-filter=M", "--", "src/inet"])
-    if not staged:
-        full |= git_paths(root, ["ls-files", "--others", "--exclude-standard", "--", "src/inet"])
+def diff_targets(root: Path, staged: bool, base: str | None, scope: Path) -> dict[Path, Target]:
+    common = diff_arguments(staged, base)
+    pathspec = scope.as_posix()
+    full = git_paths(root, [*common, "--name-only", "--diff-filter=ACR", "--", pathspec])
+    modified = git_paths(root, [*common, "--name-only", "--diff-filter=M", "--", pathspec])
+    if not staged and base is None:
+        full |= git_paths(root, ["ls-files", "--others", "--exclude-standard", "--", pathspec])
 
     targets: dict[Path, Target] = {}
     for path in full:
-        if path.suffix in {".ned", ".msg"} and (staged or (root / path).is_file()):
+        target_exists = staged or base is not None or (root / path).is_file()
+        if path.suffix in {".ned", ".msg"} and target_exists:
             targets[path] = Target(None)
     for path in modified - full:
-        if path.suffix in {".ned", ".msg"} and (staged or (root / path).is_file()):
-            selected = diff_added_lines(root, path, staged)
-            structural_rules = structural_transitions(root, path, staged)
+        target_exists = staged or base is not None or (root / path).is_file()
+        if path.suffix in {".ned", ".msg"} and target_exists:
+            selected = diff_added_lines(root, path, staged, base)
+            structural_rules = structural_transitions(root, path, staged, base)
             if selected or structural_rules:
                 targets[path] = Target(frozenset(selected), frozenset(structural_rules))
     return targets
 
 
+def source_path(root: Path, name: str) -> tuple[Path, Path]:
+    candidate = Path(name)
+    absolute = candidate.resolve() if candidate.is_absolute() else (root / candidate).resolve()
+    try:
+        relative = absolute.relative_to(root)
+    except ValueError as exc:
+        raise UsageError(f"path is outside the repository: {name}") from exc
+    if relative.parts[:2] != ("src", "inet"):
+        raise UsageError(f"path is outside src/inet: {name}")
+    return absolute, relative
+
+
+def source_scope(root: Path, name: str) -> Path:
+    absolute, relative = source_path(root, name)
+    if not absolute.is_dir():
+        raise UsageError(f"scope directory not found: {name}")
+    return relative
+
+
 def explicit_targets(root: Path, names: list[str]) -> dict[Path, Target]:
     targets: dict[Path, Target] = {}
     for name in names:
-        candidate = Path(name)
-        absolute = candidate.resolve() if candidate.is_absolute() else (root / candidate).resolve()
-        try:
-            relative = absolute.relative_to(root)
-        except ValueError as exc:
-            raise UsageError(f"path is outside the repository: {name}") from exc
-        if not relative.as_posix().startswith("src/inet/"):
-            raise UsageError(f"path is outside src/inet: {name}")
-        if not absolute.is_file():
-            raise UsageError(f"file not found: {name}")
-        if relative.suffix not in {".ned", ".msg"}:
-            raise UsageError(f"unsupported file type: {name}; expected .ned or .msg")
-        targets[relative] = Target(None)
+        absolute, relative = source_path(root, name)
+        if absolute.is_dir():
+            candidates = sorted(
+                path for path in absolute.rglob("*")
+                if path.is_file() and path.suffix in {".ned", ".msg"}
+            )
+        elif absolute.is_file():
+            if relative.suffix not in {".ned", ".msg"}:
+                raise UsageError(f"unsupported file type: {name}; expected .ned or .msg")
+            candidates = [absolute]
+        else:
+            raise UsageError(f"file or directory not found: {name}")
+        for candidate in candidates:
+            resolved, candidate_relative = source_path(root, str(candidate))
+            if not resolved.is_file():
+                raise UsageError(f"file not found: {candidate}")
+            targets[candidate_relative] = Target(None)
     return targets
 
 
@@ -522,8 +556,19 @@ def check_msg(
     return findings
 
 
-def check_file(root: Path, path: Path, target: Target, staged: bool) -> list[Finding]:
-    text = run_git(root, "show", f":{path.as_posix()}") if staged else (root / path).read_text(encoding="utf-8")
+def check_file(
+    root: Path,
+    path: Path,
+    target: Target,
+    staged: bool,
+    revision: str | None,
+) -> list[Finding]:
+    if revision is not None:
+        text = run_git(root, "show", f"{revision}:{path.as_posix()}")
+    elif staged:
+        text = run_git(root, "show", f":{path.as_posix()}")
+    else:
+        text = (root / path).read_text(encoding="utf-8")
     lines = naming_lines(path, text)
     if path.suffix == ".msg":
         return check_msg(path, lines, target.selected_lines, target.structural_rules)
@@ -535,10 +580,12 @@ def parse_args() -> argparse.Namespace:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--diff", action="store_true", help="check working-tree additions against HEAD (default)")
     mode.add_argument("--staged", action="store_true", help="check staged additions")
-    parser.add_argument("files", nargs="*", help="explicit NED/MSG files to scan completely")
+    mode.add_argument("--base", metavar="REF", help="check committed additions from merge-base(REF, HEAD) through HEAD")
+    parser.add_argument("--scope", default="src/inet", help="restrict a diff mode to this src/inet subtree")
+    parser.add_argument("paths", nargs="*", help="explicit NED/MSG files or directories to scan completely")
     args = parser.parse_args()
-    if args.files and (args.diff or args.staged):
-        parser.error("explicit files cannot be combined with --diff or --staged")
+    if args.paths and (args.diff or args.staged or args.base is not None or args.scope != "src/inet"):
+        parser.error("explicit paths cannot be combined with a diff mode or --scope")
     return args
 
 
@@ -546,10 +593,21 @@ def main() -> int:
     try:
         args = parse_args()
         root = repository_root()
-        targets = explicit_targets(root, args.files) if args.files else diff_targets(root, args.staged)
+        base = None
+        revision = None
+        if args.paths:
+            targets = explicit_targets(root, args.paths)
+        else:
+            scope = source_scope(root, args.scope)
+            if args.base is not None:
+                base = run_git(root, "merge-base", args.base, "HEAD").strip()
+                if not base:
+                    raise UsageError(f"'{args.base}' has no merge base with HEAD")
+                revision = "HEAD"
+            targets = diff_targets(root, args.staged, base, scope)
         findings: list[Finding] = []
         for path in sorted(targets):
-            findings.extend(check_file(root, path, targets[path], args.staged and not args.files))
+            findings.extend(check_file(root, path, targets[path], args.staged and not args.paths, revision))
         findings.sort()
         for finding in findings:
             print(finding.render())

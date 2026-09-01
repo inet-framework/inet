@@ -59,8 +59,11 @@ script a person must remember to run, which is the weakest form of every rule it
 doc/project/enforcement/check-architecture.sh              # the whole tree
 doc/project/enforcement/check-architecture.sh src/inet/common/packet   # one subtree
 doc/project/enforcement/check-cpp.sh src/inet/linklayer/ethernet
-doc/project/enforcement/check-naming.sh
-python3 doc/project/enforcement/check-ned-msg-naming.py  # added/staged NED and MSG declarations
+doc/project/enforcement/check-naming.sh --base origin/master  # final branch check
+doc/project/enforcement/check-naming.sh src/inet/linklayer    # complete subtree audit
+python3 doc/project/enforcement/check-ned-msg-naming.py       # working-tree declarations
+python3 doc/project/enforcement/check-ned-msg-naming.py --staged
+python3 doc/project/enforcement/check-ned-msg-naming.py --base origin/master
 doc/project/enforcement/check-commits.sh origin/master..HEAD
 doc/project/enforcement/check-source-seals.sh --diff       # changed source paths against seals
 doc/project/enforcement/check-source-seals.sh src/inet/foo/Foo.cc
@@ -70,12 +73,15 @@ python3 -m unittest discover -s doc/project/enforcement -p 'test_*.py'
 ```
 
 The NED/MSG checker is diff-focused by default: it checks added, copied, renamed, and untracked
-files completely, and checks only added lines in modified files. `--staged` reads the index;
-explicit `.ned` and `.msg` paths are checked completely. The source-seal gate defaults to the
-working-tree diff when no option is supplied; use `--staged` or explicit source paths as needed.
-`check-seals.sh` checks document flags, while `check-source-seals.sh` checks paths under `src/inet/`.
-Both gates return `2` for an invalid invocation or missing canonical registry; do not substitute a
-skill-package copy when a canonical gate is unavailable.
+files completely, and checks only added lines in modified files. `--staged` reads the index.
+`--base <ref>` compares the merge base of `<ref>` and `HEAD` with the committed `HEAD` tree; use it
+for the final branch check. Explicit `.ned`/`.msg` files and directories are scanned completely, and
+`--scope src/inet/<path>` restricts a diff mode without including sibling subtrees. The naming
+wrapper selects branch mode for `--base` and a complete recursive declaration scan for an explicit
+subtree. The source-seal gate defaults to the working-tree diff when no option is supplied; use
+`--staged` or explicit source paths as needed. `check-seals.sh` checks document flags, while
+`check-source-seals.sh` checks paths under `src/inet/`. These gates return `2` for invalid usage or a
+missing canonical input; do not substitute a skill-package copy when a canonical gate is unavailable.
 
 [guide/run-the-gates.md](../guide/run-the-gates.md) says which of them to run before a push, and in
 which order.

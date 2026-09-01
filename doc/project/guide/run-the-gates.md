@@ -55,7 +55,7 @@ make -j$(nproc) MODE=debug && make -j$(nproc) MODE=release
 
 # 2. run the rules a script can check
 doc/project/enforcement/check-architecture.sh
-doc/project/enforcement/check-naming.sh
+doc/project/enforcement/check-naming.sh --base origin/master
 doc/project/enforcement/check-commits.sh origin/master..HEAD
 
 # 3. rerun each recorded, explicitly filtered test command against a fresh matching library
@@ -85,9 +85,11 @@ A scoped run is the one worth doing often while developing:
 
 ```bash
 doc/project/enforcement/check-architecture.sh src/inet/linklayer/ethernet
+doc/project/enforcement/check-naming.sh src/inet/linklayer/ethernet
 ```
 
-The scoped run is not the final project-wide architecture and naming pass before a push.
+The naming command scans declaration names in every NED and MSG file under the subtree. The scoped
+run is not the final project-wide architecture and naming pass before a push.
 
 ## What none of them cover
 

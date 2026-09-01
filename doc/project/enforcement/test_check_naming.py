@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -10,6 +11,7 @@ from pathlib import Path
 
 
 CHECKER = Path(__file__).resolve().parent / "check-ned-msg-naming.py"
+WRAPPER = Path(__file__).resolve().parent / "check-naming.sh"
 
 
 class NamingCheckerTest(unittest.TestCase):
@@ -39,6 +41,18 @@ class NamingCheckerTest(unittest.TestCase):
 
     def check(self, *args: str) -> subprocess.CompletedProcess[str]:
         return self.run_command(sys.executable, str(CHECKER), *args)
+
+    def check_wrapper(self, *args: str) -> subprocess.CompletedProcess[str]:
+        enforcement = self.root / "doc/project/enforcement"
+        enforcement.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(CHECKER, enforcement / CHECKER.name)
+        shutil.copy2(WRAPPER, enforcement / WRAPPER.name)
+        return self.run_command("bash", str(enforcement / WRAPPER.name), *args)
+
+    def head(self) -> str:
+        result = self.run_command("git", "rev-parse", "HEAD")
+        self.assertEqual(0, result.returncode, result.stderr)
+        return result.stdout.strip()
 
     def test_explicit_clean_ned_and_msg(self) -> None:
         self.write("src/inet/foo/Foo.ned", """package inet.foo;
@@ -208,6 +222,130 @@ simple NewThing
         result = self.check("--diff")
         self.assertEqual(1, result.returncode)
         self.assertIn("NR-NED-PARAM", result.stdout)
+
+    def test_base_mode_checks_committed_content_not_worktree(self) -> None:
+        path = self.write("src/inet/foo/Foo.ned", """package inet.foo;
+simple Foo
+{
+    parameters:
+        bool goodName;
+}
+""")
+        self.commit_all()
+        base = self.head()
+        path.write_text(path.read_text(encoding="utf-8").replace("goodName", "Bad_committed"), encoding="utf-8")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("Bad_committed", "Bad_worktree"), encoding="utf-8")
+
+        result = self.check("--base", base)
+
+        self.assertEqual(1, result.returncode)
+        self.assertIn("Bad_committed", result.stdout)
+        self.assertNotIn("Bad_worktree", result.stdout)
+
+    def test_base_mode_preserves_added_line_filtering(self) -> None:
+        path = self.write("src/inet/foo/Legacy.ned", """package inet.foo;
+simple Legacy
+{
+    parameters:
+        bool Bad_legacy;
+}
+""")
+        self.commit_all()
+        base = self.head()
+        path.write_text(path.read_text(encoding="utf-8").replace("        bool Bad_legacy;", "        bool Bad_legacy;\n        bool goodName;"), encoding="utf-8")
+        self.commit_all()
+
+        result = self.check("--base", base)
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_base_mode_checks_structural_deletions(self) -> None:
+        path = self.write("src/inet/foo/Foo.ned", "package inet.foo;\nsimple Foo {}\n")
+        self.commit_all()
+        base = self.head()
+        path.write_text("simple Foo {}\n", encoding="utf-8")
+        self.commit_all()
+
+        result = self.check("--base", base)
+
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-PKG", result.stdout)
+
+    def test_wrapper_base_mode_checks_clean_committed_branch(self) -> None:
+        self.write("README.md", "fixture\n")
+        self.commit_all()
+        base = self.head()
+        self.write("src/inet/foo/Foo.ned", """package inet.foo;
+simple Foo
+{
+    parameters:
+        bool Bad_committed;
+}
+""")
+        self.commit_all()
+
+        result = self.check_wrapper("--base", base)
+
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-NED/MSG", result.stdout)
+        self.assertIn("Bad_committed", result.stdout)
+
+    def test_wrapper_default_preserves_worktree_mode(self) -> None:
+        self.write("README.md", "fixture\n")
+        self.commit_all()
+        self.write("src/inet/foo/Foo.ned", """package inet.foo;
+simple Foo
+{
+    parameters:
+        bool Bad_worktree;
+}
+""")
+
+        result = self.check_wrapper()
+
+        self.assertEqual(1, result.returncode)
+        self.assertIn("Bad_worktree", result.stdout)
+
+    def test_wrapper_scoped_audit_checks_only_that_subtree(self) -> None:
+        self.write("src/inet/inside/Inside.ned", """package inet.inside;
+simple Inside
+{
+    parameters:
+        bool Bad_inside;
+}
+""")
+        self.write("src/inet/outside/Outside.ned", """package inet.outside;
+simple Outside
+{
+    parameters:
+        bool Bad_outside;
+}
+""")
+
+        result = self.check_wrapper("src/inet/inside")
+
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-NED/MSG", result.stdout)
+        self.assertIn("Bad_inside", result.stdout)
+        self.assertNotIn("Bad_outside", result.stdout)
+
+    def test_invalid_base_returns_usage_error_through_wrapper(self) -> None:
+        self.write("src/inet/foo/Foo.ned", "package inet.foo;\nsimple Foo {}\n")
+        self.commit_all()
+
+        result = self.check_wrapper("--base", "missing-ref")
+
+        self.assertEqual(2, result.returncode)
+        self.assertIn("missing-ref", result.stderr)
+
+    def test_wrapper_rejects_scope_outside_src_inet(self) -> None:
+        self.write("src/inet/foo/Foo.ned", "package inet.foo;\nsimple Foo {}\n")
+
+        result = self.check_wrapper(".")
+
+        self.assertEqual(2, result.returncode)
+        self.assertIn("scope must be src/inet", result.stderr)
 
     def test_staged_mode_checks_staged_additions(self) -> None:
         path = self.write("src/inet/foo/Stage.ned", """package inet.foo;
