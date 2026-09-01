@@ -75,7 +75,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 
 | Rule | Statement |
 | --- | --- |
-| [AR-LIFE-STAGES](#ar-life-stages) | A single global multi-stage initialization order that models slot into |
+| [AR-LIFE-STAGES](#ar-life-stages) | Models use the global initialization order and declare every stage they handle |
 | [AR-LIFE-OPERATIONS](#ar-life-operations) | Shutdown/restart/crash via a common lifecycle protocol, scriptable |
 
 **Composable Packet Processing (AR-QUEUE)**
@@ -534,7 +534,8 @@ gates when it belongs to the simulated event trajectory.
 
 ### AR-LIFE-STAGES
 
-**A single global multi-stage initialization order that models slot into**
+**Models slot into one global multi-stage initialization order, and their effective stage count
+covers every stage they handle.**
 
 Cross-module initialization follows one globally defined stage sequence; each stage has a
 documented contract, and new models slot into existing stages rather than inventing their own
@@ -549,7 +550,15 @@ the node's `InterfaceTable` in the link-layer stage. A new protocol does not inv
 bring-up protocol; it declares what it needs in each existing stage. This shared contract is what
 lets independently authored modules initialize correctly in one another's presence.
 
-*Enforced at T1/T2 — `INITSTAGE_*` / `Define_InitStage_Dependency` (compiler) + runtime ordering.*
+The effective `numInitStages()` of a concrete module includes its inherited implementation. It must
+return a count greater than the highest stage handled by that module or any of its base classes. A
+derived `initialize(stage)` that handles a later stage than its inherited count therefore overrides
+`numInitStages()` and preserves the base requirement as well as its own. Otherwise OMNeT++ never
+calls the apparently valid later-stage branch, and compilation gives no warning.
+
+*Enforced at T1/T2+T4 — `INITSTAGE_*` / `Define_InitStage_Dependency` compile and runtime ordering
+checks apply; initialization tests exercise the required stage; agent review compares the effective
+inherited `numInitStages()` with every handled stage.*
 
 ### AR-LIFE-OPERATIONS
 
