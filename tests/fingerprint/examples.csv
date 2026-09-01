@@ -6,10 +6,10 @@
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  1000s,           8668-d4e7/tplx;e2b1-205b/~tNl;4083-075c/~tND;e1f1-f93c/tyf, PASS, wireless adhoc Ipv4
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless adhoc # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             5749-0281/tplx;f38a-cb93/~tNl;fd9b-683f/~tND;0eb8-3e3b/tyf, PASS, wireless adhoc Ipv4
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             8d50-a4b1/tplx;d392-4369/~tNl;8da4-91dc/~tND;2c1e-66e5/tyf, PASS, wireless adhoc Ipv4
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             ed2f-2d62/tplx;8a06-c4b3/~tNl;cddb-a568/~tND;a587-3a4d/tyf, PASS, wireless adhoc Ipv4
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             1486-cbae/tplx;521b-977a/~tNl;91c2-9aa9/~tND;2c1e-66e5/tyf, PASS, wireless adhoc Ipv4
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             783f-d09a/tplx;13d1-ec15/~tNl;5aaf-cc7c/~tND;a587-3a4d/tyf, PASS, wireless adhoc Ipv4
 /examples/adhoc/qos/,                -f omnetpp.ini -c Fragmentation,               10s,             9c66-e6f0/tplx;cc9e-d1a6/~tNl;53c8-e1b0/~tND;33b7-00f9/tyf, PASS, wireless adhoc Ipv4
-/examples/adhoc/qos/,                -f omnetpp.ini -c MsduAggregation,             10s,             6139-16b9/tplx;cfcf-1e52/~tNl;31df-c237/~tND;df04-18f7/tyf, PASS, wireless adhoc Ipv4
+/examples/adhoc/qos/,                -f omnetpp.ini -c MsduAggregation,             10s,             85bd-85c6/tplx;22f6-085d/~tNl;dc0d-4e19/~tND;df04-18f7/tyf, PASS, wireless adhoc Ipv4
 
 /examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          77fe-0daf/tplx;1d8d-30ff/~tNl;6467-0c74/~tND;ac08-940e/tyf, PASS, wireless adhoc AckingWirelessInterface Ipv4
 /examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          ed5e-39c4/tplx;3f90-6604/~tNl;b754-ceda/~tND, PASS, wireless adhoc AckingWirelessInterface Ipv4
@@ -596,7 +596,7 @@
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,          3785-bc39/tplx;18be-f36c/~tNl;c76d-5483/~tND, PASS, wireless Ipv4
 # /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                100s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, ERROR, wireless # [Config Ping2] # __interactive__
 
-/examples/wireless/lan80211ac/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,         aef4-cdb5/tplx;538b-6566/~tNl, PASS, Ipv4
+/examples/wireless/lan80211ac/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,         bb14-f903/tplx;538b-6566/~tNl, PASS, Ipv4
 # /examples/wireless/lan80211ac/,      -f omnetpp.ini -c Ping2 -r 0,                  ---100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,   # [Config Ping2] # __interactive__
 
 /examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredCompliant80211Ping -r 0, 100s,      88dd-4b30/tplx;6264-75f5/~tNl;77ce-e367/~tND;7a22-c289/tyf, PASS, wireless Ipv4

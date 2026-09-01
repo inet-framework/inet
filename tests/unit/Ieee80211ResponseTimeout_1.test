@@ -1,0 +1,262 @@
+%description:
+Verify the actual non-QoS ACK/CTS, QoS CTS, and QoS BlockAck response-timeout
+policies use SIFS + slot + the selected HT/VHT response PHY RX-start delay.
+The HT/VHT response delay is 24 us, independent of the transmitting mode
+set's reference profile.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/contract/IQosRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRtsPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/RtsPolicy.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace omnetpp;
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::units::values;
+
+namespace Ieee80211ResponseTimeout_1 {
+
+class TestRateSelection : public SimpleModule, public IRateSelection, public IQosRateSelection
+{
+  protected:
+    const physicallayer::IIeee80211Mode *responseMode = nullptr;
+
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            const auto *modeSet = physicallayer::Ieee80211ModeSet::getModeSet(par("responseModeSet"));
+            responseMode = modeSet->getMode(Mbps(6.5));
+            if (responseMode == nullptr)
+                throw cRuntimeError("Response mode set '%s' has no 6.5 Mbps mode", modeSet->getName());
+        }
+    }
+
+  public:
+    virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet,
+            const Ptr<const Ieee80211RtsFrame>& rtsFrame) override { return responseMode; }
+    virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet,
+            const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override { return responseMode; }
+    virtual const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet,
+            const Ptr<const Ieee80211BlockAckReq>& blockAckReq) override { return responseMode; }
+    virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet,
+            const Ptr<const Ieee80211MacHeader>& header) override { return responseMode; }
+    virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet,
+            const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure) override { return responseMode; }
+};
+
+Define_Module(TestRateSelection);
+
+class TestOriginatorAckPolicy : public OriginatorAckPolicy
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet(par("modeSetName")));
+            rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+            ackTimeout = -1;
+        }
+    }
+
+  public:
+    simtime_t calculateAckTimeout() const { return getAckTimeout(nullptr, Ptr<const Ieee80211DataOrMgmtHeader>()); }
+};
+
+Define_Module(TestOriginatorAckPolicy);
+
+class TestRtsPolicy : public RtsPolicy
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet(par("modeSetName")));
+            rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+            ctsTimeout = -1;
+        }
+    }
+
+  public:
+    simtime_t calculateCtsTimeout() const { return getCtsTimeout(nullptr, Ptr<const Ieee80211RtsFrame>()); }
+};
+
+Define_Module(TestRtsPolicy);
+
+class TestQosRtsPolicy : public QosRtsPolicy
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet(par("modeSetName")));
+            rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+            ctsTimeout = -1;
+        }
+    }
+
+  public:
+    simtime_t calculateCtsTimeout() const { return getCtsTimeout(nullptr, Ptr<const Ieee80211RtsFrame>()); }
+};
+
+Define_Module(TestQosRtsPolicy);
+
+class TestOriginatorQosAckPolicy : public OriginatorQosAckPolicy
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            modeSet = const_cast<physicallayer::Ieee80211ModeSet *>(physicallayer::Ieee80211ModeSet::getModeSet(par("modeSetName")));
+            rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
+            ackTimeout = -1;
+            blockAckTimeout = -1;
+        }
+    }
+
+  public:
+    simtime_t calculateAckTimeout() const { return getAckTimeout(nullptr, Ptr<const Ieee80211DataOrMgmtHeader>()); }
+    simtime_t calculateBlockAckTimeout() const { return getBlockAckTimeout(nullptr, Ptr<const Ieee80211BlockAckReq>()); }
+};
+
+Define_Module(TestOriginatorQosAckPolicy);
+
+} // namespace Ieee80211ResponseTimeout_1
+
+%file: TestNetwork.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.originator.OriginatorAckPolicy;
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosAckPolicy;
+import inet.linklayer.ieee80211.mac.originator.QosRtsPolicy;
+import inet.linklayer.ieee80211.mac.originator.RtsPolicy;
+
+simple TestRateSelection extends SimpleModule
+{
+    parameters:
+        @class(TestRateSelection);
+        string responseModeSet;
+}
+
+simple TestOriginatorAckPolicy extends OriginatorAckPolicy
+{
+    parameters:
+        @class(TestOriginatorAckPolicy);
+        string modeSetName;
+}
+
+simple TestRtsPolicy extends RtsPolicy
+{
+    parameters:
+        @class(TestRtsPolicy);
+        string modeSetName;
+}
+
+simple TestQosRtsPolicy extends QosRtsPolicy
+{
+    parameters:
+        @class(TestQosRtsPolicy);
+        string modeSetName;
+}
+
+simple TestOriginatorQosAckPolicy extends OriginatorQosAckPolicy
+{
+    parameters:
+        @class(TestOriginatorQosAckPolicy);
+        string modeSetName;
+}
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        nRateSelection: TestRateSelection {
+            parameters:
+                responseModeSet = "n(mixed-2.4Ghz)";
+        }
+        acRateSelection: TestRateSelection {
+            parameters:
+                responseModeSet = "ac";
+        }
+        nAck: TestOriginatorAckPolicy {
+            parameters:
+                modeSetName = "n(mixed-2.4Ghz)";
+                rateSelectionModule = "^.nRateSelection";
+        }
+        acAck: TestOriginatorAckPolicy {
+            parameters:
+                modeSetName = "ac";
+                rateSelectionModule = "^.acRateSelection";
+        }
+        nRts: TestRtsPolicy {
+            parameters:
+                modeSetName = "n(mixed-2.4Ghz)";
+                rateSelectionModule = "^.nRateSelection";
+        }
+        acRts: TestRtsPolicy {
+            parameters:
+                modeSetName = "ac";
+                rateSelectionModule = "^.acRateSelection";
+        }
+        nQosRts: TestQosRtsPolicy {
+            parameters:
+                modeSetName = "n(mixed-2.4Ghz)";
+                rateSelectionModule = "^.nRateSelection";
+        }
+        acQosRts: TestQosRtsPolicy {
+            parameters:
+                modeSetName = "ac";
+                rateSelectionModule = "^.acRateSelection";
+        }
+        nQosAck: TestOriginatorQosAckPolicy {
+            parameters:
+                modeSetName = "n(mixed-2.4Ghz)";
+                rateSelectionModule = "^.nRateSelection";
+        }
+        acQosAck: TestOriginatorQosAckPolicy {
+            parameters:
+                modeSetName = "ac";
+                rateSelectionModule = "^.acRateSelection";
+        }
+}
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+%activity:
+
+auto nAck = check_and_cast<TestOriginatorAckPolicy *>(cSimulation::getActiveSimulation()->getModuleByPath("nAck"));
+auto acAck = check_and_cast<TestOriginatorAckPolicy *>(cSimulation::getActiveSimulation()->getModuleByPath("acAck"));
+auto nRts = check_and_cast<TestRtsPolicy *>(cSimulation::getActiveSimulation()->getModuleByPath("nRts"));
+auto acRts = check_and_cast<TestRtsPolicy *>(cSimulation::getActiveSimulation()->getModuleByPath("acRts"));
+auto nQosRts = check_and_cast<TestQosRtsPolicy *>(cSimulation::getActiveSimulation()->getModuleByPath("nQosRts"));
+auto acQosRts = check_and_cast<TestQosRtsPolicy *>(cSimulation::getActiveSimulation()->getModuleByPath("acQosRts"));
+auto nQosAck = check_and_cast<TestOriginatorQosAckPolicy *>(cSimulation::getActiveSimulation()->getModuleByPath("nQosAck"));
+auto acQosAck = check_and_cast<TestOriginatorQosAckPolicy *>(cSimulation::getActiveSimulation()->getModuleByPath("acQosAck"));
+
+// n uses 10 us SIFS + 20 us slot; ac uses 16 us SIFS + 9 us slot. Both
+// response modes now contribute the standard 24 us PHY RX-start delay.
+ASSERT(nAck->calculateAckTimeout() == SimTime(54, SIMTIME_US));
+ASSERT(acAck->calculateAckTimeout() == SimTime(49, SIMTIME_US));
+ASSERT(nRts->calculateCtsTimeout() == SimTime(54, SIMTIME_US));
+ASSERT(acRts->calculateCtsTimeout() == SimTime(49, SIMTIME_US));
+ASSERT(nQosRts->calculateCtsTimeout() == SimTime(54, SIMTIME_US));
+ASSERT(acQosRts->calculateCtsTimeout() == SimTime(49, SIMTIME_US));
+ASSERT(nQosAck->calculateAckTimeout() == SimTime(54, SIMTIME_US));
+ASSERT(acQosAck->calculateAckTimeout() == SimTime(49, SIMTIME_US));
+ASSERT(nQosAck->calculateBlockAckTimeout() == SimTime(54, SIMTIME_US));
+ASSERT(acQosAck->calculateBlockAckTimeout() == SimTime(49, SIMTIME_US));
+
+EV << "ACK, CTS, QoS CTS, and QoS BlockAck response timeouts use SIFS + slot + 24 us.\n";
+
+%contains: stdout
+ACK, CTS, QoS CTS, and QoS BlockAck response timeouts use SIFS + slot + 24 us.
