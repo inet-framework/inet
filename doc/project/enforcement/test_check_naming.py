@@ -88,6 +88,82 @@ class Foo
         result = self.check("src/inet/foo/Foo.ned", "src/inet/foo/Foo.msg")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
+    def test_explicit_msg_requires_valid_namespace(self) -> None:
+        for label, namespace in (
+            ("missing", ""),
+            ("uppercase", "namespace inet::Tcp;\n"),
+            ("foreign", "namespace other::foo;\n"),
+        ):
+            with self.subTest(label=label):
+                path = self.write("src/inet/foo/Foo.msg", f"{namespace}class Foo {{}}\n")
+                result = self.check(str(path.relative_to(self.root)))
+                self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+                self.assertIn("namespace", result.stdout)
+
+    def test_explicit_msg_allows_multiple_valid_namespaces(self) -> None:
+        path = self.write(
+            "src/inet/foo/Foo.msg",
+            """namespace inet;
+class Helper {}
+namespace inet::foo;
+class Foo {}
+""",
+        )
+
+        result = self.check(str(path.relative_to(self.root)))
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_untracked_msg_missing_namespace_is_checked(self) -> None:
+        self.write("README.md", "fixture\n")
+        self.commit_all()
+        self.write("src/inet/foo/Foo.msg", "class Foo {}\n")
+
+        result = self.check()
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("MSG file must declare", result.stdout)
+
+    def test_staged_msg_namespace_uses_index_content(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", "namespace inet;\nclass Foo {}\n")
+        self.commit_all()
+        path.write_text("namespace inet::Tcp;\nclass Foo {}\n", encoding="utf-8")
+        self.run_command("git", "add", str(path.relative_to(self.root)))
+        path.write_text("namespace inet;\nclass Foo {}\n", encoding="utf-8")
+
+        result = self.check("--staged")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("inet::Tcp", result.stdout)
+
+    def test_base_msg_namespace_uses_committed_head_content(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", "namespace inet;\nclass Foo {}\n")
+        self.commit_all()
+        base = self.head()
+        path.write_text("namespace other::foo;\nclass Foo {}\n", encoding="utf-8")
+        self.commit_all()
+        path.write_text("namespace inet;\nclass Foo {}\n", encoding="utf-8")
+
+        result = self.check("--base", base)
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("other::foo", result.stdout)
+
+    def test_renamed_msg_is_scanned_for_namespace(self) -> None:
+        old_path = self.write("src/inet/foo/Old.msg", "namespace Inet;\nclass Renamed {}\n")
+        self.commit_all()
+        new_path = old_path.with_name("Renamed.msg")
+        move = self.run_command(
+            "git", "mv", str(old_path.relative_to(self.root)), str(new_path.relative_to(self.root))
+        )
+        self.assertEqual(0, move.returncode, move.stderr)
+
+        for args in ((), ("--staged",)):
+            with self.subTest(args=args):
+                result = self.check(*args)
+                self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+                self.assertIn("namespace 'Inet'", result.stdout)
+
     def test_ned_comment_after_even_backslash_run_is_stripped(self) -> None:
         self.write("src/inet/foo/Foo.ned", r'''package inet.foo;
 simple Foo
@@ -549,6 +625,55 @@ simple Stage
         result = self.check("--staged")
         self.assertEqual(1, result.returncode)
         self.assertIn("NR-PKG", result.stdout)
+
+    def test_msg_namespace_deletion_is_checked(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", "namespace inet;\nclass Foo {}\n")
+        self.commit_all()
+        path.write_text("class Foo {}\n", encoding="utf-8")
+
+        result = self.check()
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("MSG file must declare", result.stdout)
+
+    def test_first_of_duplicate_msg_namespaces_deletion_is_checked(self) -> None:
+        path = self.write(
+            "src/inet/foo/Foo.msg",
+            "namespace inet;\nclass Helper {}\nnamespace inet;\nclass Foo {}\n",
+        )
+        self.commit_all()
+        path.write_text("class Helper {}\nnamespace inet;\nclass Foo {}\n", encoding="utf-8")
+
+        result = self.check()
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("must precede the first type declaration", result.stdout)
+
+    def test_staged_msg_namespace_deletion_uses_index(self) -> None:
+        original = "namespace inet;\nclass Foo {}\n"
+        path = self.write("src/inet/foo/Foo.msg", original)
+        self.commit_all()
+        path.write_text("class Foo {}\n", encoding="utf-8")
+        self.run_command("git", "add", str(path.relative_to(self.root)))
+        path.write_text(original, encoding="utf-8")
+
+        result = self.check("--staged")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("MSG file must declare", result.stdout)
+
+    def test_base_msg_namespace_deletion_uses_head(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", "namespace inet;\nclass Foo {}\n")
+        self.commit_all()
+        base = self.head()
+        path.write_text("class Foo {}\n", encoding="utf-8")
+        self.commit_all()
+        path.write_text("namespace inet;\nclass Foo {}\n", encoding="utf-8")
+
+        result = self.check("--base", base)
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("MSG file must declare", result.stdout)
 
     def test_structural_deletions_are_checked(self) -> None:
         ned_path = self.write("src/inet/foo/Foo.ned", "package inet.foo;\nsimple Foo {}\n")

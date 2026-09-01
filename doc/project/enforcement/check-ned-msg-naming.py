@@ -7,6 +7,7 @@ import argparse
 import re
 import subprocess
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -17,6 +18,9 @@ CAMEL_RE = re.compile(r"^[a-z][A-Za-z0-9]*$")
 LOWER_RE = re.compile(r"^[a-z][a-z0-9]*$")
 NED_TYPE_RE = re.compile(r"^\s*(simple|module|moduleinterface|network|channel|channelinterface)\s+([A-Za-z_]\w*)\b")
 MSG_TYPE_RE = re.compile(r"^\s*(class|struct|packet|message|enum)\s+([A-Za-z_]\w*)\b(.*)$")
+MSG_NAMESPACE_RE = re.compile(
+    r"^\s*namespace\s+([A-Za-z_]\w*(?:\s*::\s*[A-Za-z_]\w*)*)\s*;\s*$"
+)
 HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
 CPP_BLOCK_RE = re.compile(r"\bcplusplus(?:\s*\([^)]*\))?\s*\{\{")
 
@@ -44,6 +48,12 @@ class MsgTypeDeclaration:
     definition_line: int
     kind: str
     name: str
+
+
+@dataclass(frozen=True)
+class MsgNamespaceDeclaration:
+    line: int
+    name: str | None
 
 
 class UsageError(Exception):
@@ -147,6 +157,24 @@ def msg_type_declarations(lines: list[str]) -> list[MsgTypeDeclaration]:
     return declarations
 
 
+def msg_namespace_declarations(lines: list[str]) -> list[MsgNamespaceDeclaration]:
+    declarations: list[MsgNamespaceDeclaration] = []
+    for number, line in enumerate(lines, 1):
+        if not re.match(r"^\s*namespace\b", line):
+            continue
+        match = MSG_NAMESPACE_RE.match(line)
+        name = re.sub(r"\s*::\s*", "::", match.group(1)) if match else None
+        declarations.append(MsgNamespaceDeclaration(number, name))
+    return declarations
+
+
+def valid_msg_namespace(name: str | None) -> bool:
+    if name is None:
+        return False
+    parts = name.split("::")
+    return len(parts) <= 2 and parts[0] == "inet" and all(LOWER_RE.fullmatch(part) for part in parts)
+
+
 def declared_type_names(path: Path, lines: list[str]) -> set[str]:
     if path.suffix == ".ned":
         names: set[str] = set()
@@ -183,6 +211,19 @@ def structural_transitions(root: Path, path: Path, staged: bool, base: str | Non
         new_package = ned_package_name(new_lines)
         if old_package is not None and new_package is None:
             rules.add("package")
+    elif path.suffix == ".msg":
+        old_namespaces = Counter(
+            declaration.name
+            for declaration in msg_namespace_declarations(old_lines)
+            if valid_msg_namespace(declaration.name)
+        )
+        new_namespaces = Counter(
+            declaration.name
+            for declaration in msg_namespace_declarations(new_lines)
+            if valid_msg_namespace(declaration.name)
+        )
+        if old_namespaces - new_namespaces:
+            rules.add("namespace")
     if path.name != "package.ned":
         old_names = declared_type_names(path, old_lines)
         new_names = declared_type_names(path, new_lines)
@@ -496,6 +537,64 @@ def check_msg(
 ) -> list[Finding]:
     findings: list[Finding] = []
     declarations = msg_type_declarations(lines)
+    namespaces = msg_namespace_declarations(lines)
+    check_all_namespaces = selected_lines is None or "namespace" in structural_rules
+
+    for namespace in namespaces:
+        if not (check_all_namespaces or selected(namespace.line, selected_lines)):
+            continue
+        if namespace.name is None:
+            add(findings, path, namespace.line, "NR-MSG-FIELD", "MSG namespace declaration is malformed")
+            continue
+        parts = namespace.name.split("::")
+        if any(not LOWER_RE.fullmatch(part) for part in parts):
+            add(
+                findings,
+                path,
+                namespace.line,
+                "NR-PKG",
+                f"namespace '{namespace.name}' must use lowercase run-together segments",
+            )
+        elif parts[0] != "inet" or len(parts) > 2:
+            add(
+                findings,
+                path,
+                namespace.line,
+                "NR-PKG",
+                f"namespace '{namespace.name}' must be 'inet' or an 'inet::<protocol>' sub-namespace",
+            )
+
+    namespace_properties = [
+        number for number, line in enumerate(lines, 1) if re.search(r"@namespace\s*\(", line)
+    ]
+    for number in namespace_properties:
+        if check_all_namespaces or selected(number, selected_lines):
+            add(
+                findings,
+                path,
+                number,
+                "NR-MSG-FIELD",
+                "MSG files must use a namespace statement, not an @namespace property",
+            )
+
+    if not namespaces and check_all_namespaces:
+        add(findings, path, 1, "NR-MSG-FIELD", "MSG file must declare an 'inet' namespace")
+
+    if namespaces and declarations:
+        first_namespace_line = namespaces[0].line
+        first_declaration = declarations[0]
+        opening_check_active = check_all_namespaces or selected(first_namespace_line, selected_lines)
+        opening_check_active = opening_check_active or selected(first_declaration.name_line, selected_lines)
+        opening_check_active = opening_check_active or selected(first_declaration.definition_line, selected_lines)
+        if opening_check_active and first_namespace_line > first_declaration.name_line:
+            add(
+                findings,
+                path,
+                first_declaration.name_line,
+                "NR-MSG-FIELD",
+                "MSG namespace statement must precede the first type declaration",
+            )
+
     for declaration in declarations:
         declaration_selected = selected(declaration.name_line, selected_lines) or selected(
             declaration.definition_line, selected_lines
