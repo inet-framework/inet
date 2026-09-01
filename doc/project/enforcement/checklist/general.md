@@ -50,10 +50,26 @@ responsibilities. *Not a violation:* extending a `*Base` for genuine shared mach
 FLAG an app that hand-rolls command/indication messages instead of using `UdpSocket`/`TcpSocket`/peer.
 *Not a violation:* a new protocol implementing the socket-facing side.
 
-**[AR-COM-DIRECT] Is a zero-time message standing in for a direct call?**
-FLAG `scheduleAt(simTime(), …)` or a zero-delay `send()` used for same-instant, same-node coordination
-between sibling submodules. *Not a violation:* a message that advances simulation time or crosses the
-medium.
+**[AR-COM-DIRECT] Is a zero-time message standing in for a required direct call?**
+FLAG `scheduleAt(simTime(), …)` or a zero-delay `send()` used for a same-instant command, query,
+return value or required handshake between sibling submodules. *Not a violation:* a message that
+represents a modeled delivery or explicit event boundary, including at the same simulation time; a
+message that crosses the medium; or a fire-and-forget signal that satisfies AR-COM-NOTIFY.
+
+**[AR-COM-NOTIFY] Is a behavior-driving signal really an independent notification?**
+FLAG a publisher that depends on a particular listener, reply or relative invocation order among
+listeners; a signal used for ownership transfer, buffering, modeled delay or listener-ordered
+coordination; emission before the publisher restores its invariants; a behavioral module listener
+that omits `Enter_Method`/`Enter_Method_Silent`, retains a pointer beyond its declared lifetime,
+mutates a borrowed payload, or modifies the currently firing subscription list; or a broad ancestor
+subscription that fails to filter unrelated sources. *Not a violation:* an independent consumer
+reacting synchronously to completed facts in emission order without participating in the
+publisher's operation.
+
+**[AR-OBS-SIGNALS] Can attaching an observer change modeled behavior?**
+FLAG a recorder, visualizer or analyzer that mutates modeled state, schedules a modeled action, or
+calls back into the producer. *Not a violation:* a separate behavioral listener that satisfies
+AR-COM-NOTIFY, even when it consumes a signal that is also recorded or visualized.
 
 **[AR-OBS-NED-TRUTH] Does prose/code duplicate what a NED declaration owns?**
 FLAG doc text that restates parameters/gates/signals/statistics already in NED, or C++ that hardcodes a

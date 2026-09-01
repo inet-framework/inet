@@ -55,10 +55,12 @@ clause instead of against intuition, which is the only way a protocol model can 
 
 ## What it emits
 
-A protocol declares signals and statistics in NED, and emits them. It does not record, draw or
-aggregate: an observer subscribes from outside ([D-OBSERVE](decisions.md#d-observe)). This is what
-makes turning observation on free of any effect on the result
-([R-VIS-NEUTRAL](../requirement/accepted-requirements.md#r-vis-neutral)).
+A protocol declares signals and statistics in NED and emits each fact at the state transition that
+owns it. A declared signal may notify behavioral consumers when it satisfies
+[D-NOTIFY](decisions.md#d-notify). Recording, visualization and analysis remain external observers:
+the protocol does not record, draw or aggregate, and attaching an observer has no effect on the
+result ([D-OBSERVE](decisions.md#d-observe),
+[R-VIS-NEUTRAL](../requirement/accepted-requirements.md#r-vis-neutral)).
 
 ## Fidelity
 

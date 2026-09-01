@@ -46,21 +46,24 @@ Every rejected design in document order.
 
 **A zero-time message for same-instant coordination inside a node**
 
-**The option.** Two submodules of one node that must agree at one instant exchange a message with
-zero delay, instead of calling each other. Everything is then a message, the module boundary stays
-anonymous, and the interaction shows up in the event log for free.
+**The option.** Two submodules of one node that interact at one instant exchange a message with zero
+delay, instead of using a typed call for a required interaction or a signal for an independent
+notification. Everything is then a message, the module boundary stays anonymous, and the
+interaction shows up in the event log for free.
 
 **What it would buy.** One interaction mechanism instead of two, no compile-time coupling between
 sibling submodules, and a uniform trace.
 
 **Why it lost.** An event stops meaning what it means. The event log, the sequence chart and the
 fingerprint all rest on the reading that an event is *something that happened in the model*; when
-half the events are procedure calls in disguise, the trajectory describes the implementation instead
-of the behavior, and the fingerprint's signal quality falls with it. The zero-delay message also
-hides the causal order inside one instant, which is exactly the order a debugging session needs.
+half the events are procedure calls or notifications in disguise, the trajectory describes the
+implementation instead of the behavior, and the fingerprint's signal quality falls with it. A
+required command or query has a typed peer under [D-DIRECT](decisions.md#d-direct); an
+order-independent announcement has no scheduler event under [D-NOTIFY](decisions.md#d-notify).
 
-*Beaten by* [D-DIRECT](decisions.md#d-direct),
-kept in force by [AR-COM-DIRECT](../rule/architecture.md#ar-com-direct).
+*Beaten by* [D-DIRECT](decisions.md#d-direct) and [D-NOTIFY](decisions.md#d-notify),
+kept in force by [AR-COM-DIRECT](../rule/architecture.md#ar-com-direct) and
+[AR-COM-NOTIFY](../rule/architecture.md#ar-com-notify).
 
 ### REJ-02
 
