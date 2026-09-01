@@ -28,6 +28,7 @@
 #include "inet/linklayer/ieee80211/mac/originator/AckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/OriginatorProtectionMechanism.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 namespace ieee80211 {
