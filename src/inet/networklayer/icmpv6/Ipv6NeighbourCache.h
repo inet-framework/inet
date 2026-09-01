@@ -95,7 +95,17 @@ class INET_API Ipv6NeighbourCache
         bool isDefaultRouter() const { return prevDefaultRouter && nextDefaultRouter; }
 
         Neighbour() {}
+
+        /**
+         * Returns a one-line summary of the entry (address, interface, MAC address,
+         * router flags, reachability state, and the number of packets queued for
+         * address resolution), for watches and logging.
+         */
+        std::string str() const;
     };
+
+    friend std::ostream& operator<<(std::ostream& os, const Key& e);
+    friend std::ostream& operator<<(std::ostream& os, const Neighbour& e);
 
     // Design note: we could have polymorphic entries in the neighbour cache
     // (i.e. a separate Router class subclassed from Neighbour), but then

@@ -7,6 +7,8 @@
 
 #include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
 
+#include <sstream>
+
 #include "inet/common/stlutils.h"
 
 namespace inet {
@@ -49,22 +51,36 @@ std::ostream& operator<<(std::ostream& os, const Ipv6NeighbourCache::Key& e)
     return os << "if=" << e.interfaceID << " " << e.address; // FIXME try printing interface name
 }
 
+std::string Ipv6NeighbourCache::Neighbour::str() const
+{
+    std::stringstream out;
+    // the key identifies the entry, so include it: the neighbour cache is
+    // displayed as a list of Neighbours, without the keys they are stored under
+    if (nceKey)
+        out << nceKey->address << " if=" << nceKey->interfaceID << " ";
+    out << (macAddress.isUnspecified() ? "<no MAC address>" : macAddress.str());
+    if (isRouter)
+        out << " ROUTER";
+    if (isDefaultRouter())
+        out << " DefaultRtr";
+    if (isHomeAgent)
+        out << " HomeAgent";
+    out << " " << stateName(reachabilityState);
+    out << " reachabilityExp:" << reachabilityExpires;
+    if (numProbesSent)
+        out << " probesSent:" << numProbesSent;
+    // address resolution is in progress while the state is INCOMPLETE; the packets
+    // waiting for it are held in the entry, so show how many there are
+    if (reachabilityState == INCOMPLETE || !pendingPackets.empty())
+        out << " pendingPackets:" << pendingPackets.size();
+    if (isRouter)
+        out << " rtrExp:" << routerExpiryTime;
+    return out.str();
+}
+
 std::ostream& operator<<(std::ostream& os, const Ipv6NeighbourCache::Neighbour& e)
 {
-    os << e.macAddress;
-    if (e.isRouter)
-        os << " ROUTER";
-    if (e.isDefaultRouter())
-        os << "DefaultRtr";
-    if (e.isHomeAgent)
-        os << " Home Agent";
-    os << " " << Ipv6NeighbourCache::stateName(e.reachabilityState);
-    os << " reachabilityExp:" << e.reachabilityExpires;
-    if (e.numProbesSent)
-        os << " probesSent:" << e.numProbesSent;
-    if (e.isRouter)
-        os << " rtrExp:" << e.routerExpiryTime;
-    return os;
+    return os << e.str();
 }
 
 Ipv6NeighbourCache::Ipv6NeighbourCache(cSimpleModule& neighbourDiscovery)
