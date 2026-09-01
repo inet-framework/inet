@@ -27,6 +27,7 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
     std::vector<int> changedChannels;
     int associationConfirms = 0;
     int reassociationConfirms = 0;
+    int managementFramesSent = 0;
     Ieee80211PrimResultCode lastAssociationResult = PRC_SUCCESS;
     Ieee80211PrimResultCode lastReassociationResult = PRC_SUCCESS;
 
@@ -41,6 +42,7 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
     {
         // The channel-tuning seam is the subject of this test; no peer is
         // needed for the generated authentication/association requests.
+        managementFramesSent++;
     }
 
     void storeSerializedDiscovery(const MacAddress& address, int primaryChannel, bool probeResponse)
@@ -107,6 +109,24 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         auto ap = lookupAP(address);
         ASSERT(ap != nullptr);
         startAssociation(ap, SimTime(1, SIMTIME_MS));
+    }
+
+    void associateThroughCommandForTest(const MacAddress& address)
+    {
+        Enter_Method("associateThroughCommandForTest");
+        auto request = new Ieee80211Prim_AssociateRequest();
+        request->setAddress(address);
+        request->setTimeout(SimTime(1, SIMTIME_MS));
+        handleCommand(0, request);
+    }
+
+    void setUnsupportedCachedBasicMcsForTest(const MacAddress& address)
+    {
+        Enter_Method("setUnsupportedCachedBasicMcsForTest");
+        auto ap = lookupAP(address);
+        ASSERT(ap != nullptr && ap->htOperationPresent);
+        ap->htOperation.basicMcsSupported.fill(false);
+        ap->htOperation.basicMcsSupported[32] = true;
     }
 
     void startReassociationForTest(const MacAddress& address)
@@ -274,19 +294,33 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(mgmt->changedChannel == 11);
         mgmt->cancelAssociationForTest();
 
+        // The Basic HT-MCS Set is authoritative in the cached Beacon/Probe
+        // Response. An unsupported set refuses the production command before
+        // channel tuning or Association Request transmission.
+        mgmt->setUnsupportedCachedBasicMcsForTest(address);
+        int framesBeforeRefusal = mgmt->managementFramesSent;
+        int channelsBeforeRefusal = mgmt->changedChannels.size();
+        mgmt->associateThroughCommandForTest(address);
+        ASSERT(mgmt->associationConfirms == 1);
+        ASSERT(mgmt->lastAssociationResult == PRC_REFUSED);
+        ASSERT(mgmt->managementFramesSent == framesBeforeRefusal);
+        ASSERT((int)mgmt->changedChannels.size() == channelsBeforeRefusal);
+        ASSERT(!mgmt->hasPendingAssociationForTest());
+        mgmt->storeSerializedDiscovery(address, 11, false);
+
         // IEEE Std 802.11-2024, 11.3.5.2 and 11.3.5.4: a successful
         // association remains successful when the HT exchange is absent or
         // unusable; only the negotiated HT state is suppressed.
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::LEGACY);
-        ASSERT(mgmt->associationConfirms == 1);
+        ASSERT(mgmt->associationConfirms == 2);
         ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 0);
 
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID);
-        ASSERT(mgmt->associationConfirms == 2);
+        ASSERT(mgmt->associationConfirms == 3);
         ASSERT(mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 0);
 
@@ -332,7 +366,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
 
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::PARTIAL);
-        ASSERT(mgmt->associationConfirms == 3);
+        ASSERT(mgmt->associationConfirms == 4);
         ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 1);
@@ -341,14 +375,14 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
 
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::UNUSABLE);
-        ASSERT(mgmt->associationConfirms == 4);
+        ASSERT(mgmt->associationConfirms == 5);
         ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 2);
 
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_DATARATE_UNSUP, TestIeee80211MgmtStaDiscovery::ResponseHtForm::LEGACY);
-        ASSERT(mgmt->associationConfirms == 5);
+        ASSERT(mgmt->associationConfirms == 6);
         ASSERT(mgmt->lastAssociationResult == PRC_REFUSED);
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 2);
@@ -370,7 +404,7 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         // not an exception. The association result itself remains successful.
         mgmt->prepareResponse(address, false);
         mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID, false);
-        ASSERT(mgmt->associationConfirms == 7);
+        ASSERT(mgmt->associationConfirms == 8);
         ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 4);

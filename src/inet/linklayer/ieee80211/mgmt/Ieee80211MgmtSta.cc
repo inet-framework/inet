@@ -486,6 +486,12 @@ void Ieee80211MgmtSta::processAssociateCommand(Ieee80211Prim_AssociateRequest *c
     ApInfo *ap = lookupAP(address);
     if (!ap)
         throw cRuntimeError("processAssociateCommand: AP not known: address = %s", address.str().c_str());
+    std::string reason;
+    if (!isHtBssSupported(ap, reason)) {
+        EV_INFO << "Association refused before request transmission: " << reason << endl;
+        sendAssociationConfirm(ap, PRC_REFUSED);
+        return;
+    }
     startAssociation(ap, ctrl->getTimeout());
 }
 
@@ -501,6 +507,12 @@ void Ieee80211MgmtSta::processReassociateCommand(Ieee80211Prim_ReassociateReques
     ApInfo *ap = lookupAP(address);
     if (!ap)
         throw cRuntimeError("processReassociateCommand: AP not known: address = %s", address.str().c_str());
+    std::string reason;
+    if (!isHtBssSupported(ap, reason)) {
+        EV_INFO << "Reassociation refused before request transmission: " << reason << endl;
+        sendReassociationConfirm(ap, PRC_REFUSED);
+        return;
+    }
     startReassociation(ap, ctrl->getTimeout());
 }
 
@@ -712,7 +724,9 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
     const auto *receivedChannel = channelInd != nullptr ? channelInd->getChannel() : nullptr;
     const auto *band = receivedChannel != nullptr ? receivedChannel->getBand() : nullptr;
     if (statusCode == SC_SUCCESSFUL)
-        responseHtStatus = classifyAssociationResponse(responseBody, band != nullptr, responseHtCapabilities, responseHtOperation, responseHtReason);
+        responseHtStatus = classifyAssociationResponse(responseBody, band != nullptr,
+                ap->htOperationPresent ? &ap->htOperation : nullptr,
+                responseHtCapabilities, responseHtOperation, responseHtReason);
     delete packet;
 
     cancelPendingAssociation();
@@ -773,6 +787,7 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
 Ieee80211MgmtSta::HtAssociationResponseStatus Ieee80211MgmtSta::classifyAssociationResponse(
         const Ptr<const Ieee80211AssociationResponseFrame>& responseBody,
         bool hasReceivedBand,
+        const Ieee80211HtOperation *selectedBssHtOperation,
         Ieee80211HtCapabilities& responseHtCapabilities, Ieee80211HtOperation& responseHtOperation,
         std::string& reason) const
 {
@@ -793,10 +808,18 @@ Ieee80211MgmtSta::HtAssociationResponseStatus Ieee80211MgmtSta::classifyAssociat
         reason = "successful HT association response has no received channel indication or band";
         return HtAssociationResponseStatus::INVALID_HT;
     }
+    if (selectedBssHtOperation == nullptr) {
+        reason = "successful HT association response has no cached HT Operation from BSS discovery";
+        return HtAssociationResponseStatus::INVALID_HT;
+    }
     // Keep the existing deserialization behavior: malformed received HT
     // elements are rejected by makeHtCapabilities/makeHtOperation.
     responseHtCapabilities = makeHtCapabilities(responseBody->getHtCapabilities());
     responseHtOperation = makeHtOperation(responseBody->getHtOperation());
+    // Table 9-230 reserves the Basic HT-MCS Set in Association and
+    // Reassociation Responses. Use the selected BSS's Beacon/Probe Response
+    // advertisement instead of interpreting those reserved response bits.
+    responseHtOperation.basicMcsSupported = selectedBssHtOperation->basicMcsSupported;
     auto negotiated = negotiateHtCapabilities(mib->localHtCapabilities, responseHtCapabilities, responseHtOperation);
     if (!supportsBasicHtMcsSet(mib->localHtCapabilities, responseHtOperation) ||
             !negotiated.localTxPeerRx.valid || !negotiated.localRxPeerTx.valid) {
@@ -804,6 +827,25 @@ Ieee80211MgmtSta::HtAssociationResponseStatus Ieee80211MgmtSta::classifyAssociat
         return HtAssociationResponseStatus::INVALID_HT;
     }
     return HtAssociationResponseStatus::VALID_HT;
+}
+
+bool Ieee80211MgmtSta::isHtBssSupported(const ApInfo *ap, std::string& reason) const
+{
+    if (!mib->isHtOperationSupported())
+        return true;
+    if (!ap->htCapabilitiesPresent && !ap->htOperationPresent)
+        return true;
+    if (ap->htCapabilitiesPresent != ap->htOperationPresent) {
+        reason = "selected BSS contains only one of the HT Capabilities and HT Operation elements";
+        return false;
+    }
+    auto negotiated = negotiateHtCapabilities(mib->localHtCapabilities, ap->htCapabilities, ap->htOperation);
+    if (!supportsBasicHtMcsSet(mib->localHtCapabilities, ap->htOperation) ||
+            !negotiated.localTxPeerRx.valid || !negotiated.localRxPeerTx.valid) {
+        reason = "selected BSS HT advertisement has no bidirectionally usable common mode";
+        return false;
+    }
+    return true;
 }
 
 const char *Ieee80211MgmtSta::getHtAssociationResponseStatusName(HtAssociationResponseStatus status)
