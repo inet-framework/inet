@@ -1,0 +1,146 @@
+%description:
+Exercise the HCF internal-collision recovery owner with an AC_VO management
+frame. The colliding EDCAF's station retry counters must be used, retry-limit
+drop must occur, and the typed terminal callback must be delivered exactly once.
+
+%file: TestIeee80211HcfInternalCollision.cc
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211HcfInternalCollision : public Hcf
+{
+  public:
+    void injectVoManagementCollision(const MacAddress& receiverAddress)
+    {
+        Enter_Method("injectVoManagementCollision");
+        auto packet = new Packet("internally-collided-management");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(ST_ASSOCIATIONRESPONSE);
+        header->setReceiverAddress(receiverAddress);
+        packet->insertAtFront(header);
+        auto edcaf = edca->getEdcaf(AccessCategory::AC_VO);
+        edcaf->getPendingQueue()->enqueuePacket(packet);
+        handleInternalCollision({edcaf});
+    }
+
+    int getStationShortRetryCount(AccessCategory ac) const
+    {
+        return edca->getEdcaf(ac)->getStationRetryCounters()->getStationShortRetryCount();
+    }
+};
+
+Define_Module(TestIeee80211HcfInternalCollision);
+
+class TestIeee80211MgmtApInternalCollision : public Ieee80211MgmtAp
+{
+  public:
+    int terminalCallbacks = 0;
+    IFrameTransmissionCallback::Status lastStatus = IFrameTransmissionCallback::Status::ACKNOWLEDGED;
+
+  protected:
+    virtual void frameTransmissionFinished(const IFrameTransmissionCallback::Result& result) override
+    {
+        terminalCallbacks++;
+        lastStatus = result.getStatus();
+        Ieee80211MgmtAp::frameTransmissionFinished(result);
+    }
+};
+
+Define_Module(TestIeee80211MgmtApInternalCollision);
+
+class Ieee80211HcfInternalCollisionTest : public cSimpleModule
+{
+  public:
+    Ieee80211HcfInternalCollisionTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        auto hcf = check_and_cast<TestIeee80211HcfInternalCollision *>(getModuleByPath("^.ap.wlan[0].mac.hcf"));
+        auto mgmt = check_and_cast<TestIeee80211MgmtApInternalCollision *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_BE) == 0);
+        ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_VO) == 0);
+
+        hcf->injectVoManagementCollision(MacAddress("02:00:00:00:00:09"));
+
+        ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_BE) == 0);
+        ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_VO) == 1);
+        ASSERT(mgmt->terminalCallbacks == 1);
+        ASSERT(mgmt->lastStatus == IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
+        std::cout << "HCF AC_VO management internal-collision retry ownership verified.\n";
+    }
+};
+
+Define_Module(Ieee80211HcfInternalCollisionTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module TestIeee80211HcfInternalCollision extends Hcf
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211HcfInternalCollision);
+}
+
+simple TestIeee80211MgmtApInternalCollision extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtApInternalCollision);
+}
+
+simple Ieee80211HcfInternalCollisionTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211HcfInternalCollisionTest);
+}
+
+network Ieee80211HcfInternalCollisionTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtApInternalCollision";
+                wlan[*].mac.qosStation = true;
+                wlan[*].mac.hcf.typename = "TestIeee80211HcfInternalCollision";
+        }
+        test: Ieee80211HcfInternalCollisionTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211HcfInternalCollisionTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+*.ap.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = 4096B
+*.ap.wlan[0].mac.hcf.edca.mgmtAndNonQoSRecoveryProcedure.shortRetryLimit = 1
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+HCF AC_VO management internal-collision retry ownership verified.
