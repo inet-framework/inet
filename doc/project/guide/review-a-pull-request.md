@@ -37,8 +37,10 @@ git show -w --ignore-blank-lines --numstat --pretty="" <commit> -- <file>
 # PR-SPLIT-MOVE — a rename next to a content change
 git show --name-status -M -C <commit> | grep -E "^[RC]"
 
-# PR-SPLIT-BASELINE — a baseline and a source file in one commit
-git show --name-only --pretty="" <commit> | grep -E "^tests/.*\.csv$|^src/"
+# PR-SPLIT-BASELINE — which commits change source, and which change only baselines
+git log --format="%h %s" --name-only $MB..refs/pr/<n>
+# the source change of a commit that also moves baselines
+git show <commit> -- . ':!tests'
 
 # PR-SERIES-LINEAR / PR-SERIES-ORDER
 git log --merges $MB..refs/pr/<n>
@@ -62,6 +64,11 @@ Read each commit against the rules that need judgment:
   change behavior?
 - **[PR-SPLIT-DRIVEBY](../rule/pull-request.md#pr-split-driveby)** — is a hunk unrelated to the
   subject line?
+- **[PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline)** — the regenerated values belong
+  in the commit that moves them, and that commit's message must say which behavior moved and why the
+  new values are right. A baseline commit that stands alone after a source commit is one change
+  divided in two: ask for a squash. A baseline commit that no source commit causes — a compiler or
+  solver version change — is correct as it stands, and its own message carries the reason.
 - **[PR-MSG-WHY](../rule/pull-request.md#pr-msg-why)** — does the body give the reason, or repeat the
   diff?
 
@@ -83,5 +90,6 @@ If the branch touches a sealed path, the permission for it must be stated
 it breaks, and what would repair it.
 
 **Say what you did not check.** `PR-SERIES-BUILDS` needs a per-commit CI build, and a review that
-does not run one records `not verified` rather than `PASS`. A report that hides its gaps is worse
-than a shorter one.
+does not run one records `not verified` rather than `PASS`. The same holds for a branch that moves
+fingerprints: only a run of the suite at each commit shows that the recorded values match the source
+beside them. A report that hides its gaps is worse than a shorter one.

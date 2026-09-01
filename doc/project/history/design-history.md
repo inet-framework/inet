@@ -46,6 +46,23 @@ The rules predate this folder. They were written into `architectural-requirement
 seeded by a repository-wide scan on 2026-07-20 that produced `NS-01`…`NS-05`, `NV-01`…`NV-17`,
 `AS-01` and `AV-ORG-01`…`AV-VIS-01`.
 
+- 2026-09-01 — **`PR-SPLIT-BASELINE` was inverted.** The rule said that a regenerated baseline is a
+  commit of its own, directly after the commit that changes behavior. It now says that the baseline
+  travels inside the commit that moves it, and that it stands alone only when no single commit causes
+  the movement. The reason is that the two forms of the rule contradicted each other: a source commit
+  without its recorded values fails its own fingerprint test, which is exactly what
+  [PR-SERIES-BUILDS](../rule/pull-request.md#pr-series-builds) forbids, and it makes `git bisect` over
+  the suite name the behavior commit as the first bad commit. A revert or a cherry-pick of one half
+  also left the other half behind. What the old form bought — that a baseline never moves unnoticed —
+  now comes from the message and from T4 review instead of from the commit boundary, and the T3 check
+  in [check-commits.sh](../enforcement/check-commits.sh) was inverted with it: it now flags a
+  baseline-only commit that stands directly after a source commit, or one that gives no reason.
+  [AR-QUAL-FINGERPRINT](../rule/architecture.md#ar-qual-fingerprint) held the same "separate,
+  reviewable patch" wording and moved with the rule. No seal cites either identifier, so
+  [SR-RULE-CHANGE-STALES](../rule/sealing.md#sr-rule-change-stales) marks nothing for re-audit. The
+  two pull-request reports of 2026-08-31 judged `PR-1124` and `PR-1144` against the old form; they
+  are snapshots and they stay as they are.
+
 ## The seals
 
 `common/packet/` was sealed on 2026-07-20, as the first and so far only sealed path. The audit that

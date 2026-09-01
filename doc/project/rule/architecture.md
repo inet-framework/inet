@@ -118,7 +118,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 
 | Rule | Statement |
 | --- | --- |
-| [AR-QUAL-FINGERPRINT](#ar-qual-fingerprint) | Behavioral regressions are guarded by trajectory fingerprints; baselines change in a reviewable step |
+| [AR-QUAL-FINGERPRINT](#ar-qual-fingerprint) | Behavioral regressions are guarded by trajectory fingerprints; a baseline changes in a deliberate, reviewable step |
 | [AR-QUAL-TESTS](#ar-qual-tests) | Contributions ship with tests in the category matching their nature |
 | [AR-QUAL-DETERMINISM](#ar-qual-determinism) | Model code is deterministic and exactly reproducible |
 | [AR-QUAL-NAMING](#ar-qual-naming) | Framework-wide naming conventions make a component's role legible from its name |
@@ -748,19 +748,21 @@ and is expressed the same declarative way.
 
 ### AR-QUAL-FINGERPRINT
 
-**Behavioral regressions are guarded by trajectory fingerprints; baselines change in a reviewable step**
+**Behavioral regressions are guarded by trajectory fingerprints; a baseline changes in a deliberate,
+reviewable step**
 
-Behavioral regressions are guarded by simulation-trajectory fingerprints, and changes that
-intentionally alter behavior update the recorded expectations in a separate, reviewable step.
+Behavioral regressions are guarded by simulation-trajectory fingerprints, and a change that alters
+behavior on purpose updates the recorded expectations in the same step, with a stated reason.
 
 A fingerprint is a hash over the simulation's event trajectory (module paths, timing, packet data,
 per configurable "ingredients"), so any unintended change in behavior shows up as a broken
 fingerprint test on CI and in pull requests. INET extends the standard OMNeT++ ingredients with
 network-aware ones (a cross-node communication filter, node/interface path, packet data) so a
 fingerprint can be scoped to exactly the behavior under test. When a change legitimately alters
-behavior, the workflow is to regenerate and commit the updated baseline CSVs as a distinct, reviewable
-patch — never to quietly weaken the test — so that "the fingerprint changed" is always a conscious,
-auditable decision. This regime is only meaningful because model behavior is deterministic
+behavior, the workflow is to regenerate the baseline CSVs and to commit them together with the source
+change that moves them, under a message that says which behavior moved and why the new values are
+right — never to quietly weaken the test — so that "the fingerprint changed" is always a conscious,
+auditable decision ([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)). This regime is only meaningful because model behavior is deterministic
 (AR-QUAL-DETERMINISM).
 
 *Enforced at T2 ✔ — fingerprint tests on CI.*

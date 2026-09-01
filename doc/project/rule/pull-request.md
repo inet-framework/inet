@@ -37,7 +37,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | [PR-SPLIT-MOVE](#pr-split-move) | A file move is its own commit |
 | [PR-SPLIT-PREPARE](#pr-split-prepare) | Preparation comes before the change that needs it |
 | [PR-SPLIT-UPSTREAM](#pr-split-upstream) | A shared-component change is separate from, and before, the model that needs it |
-| [PR-SPLIT-BASELINE](#pr-split-baseline) | Updated expected results are their own commit |
+| [PR-SPLIT-BASELINE](#pr-split-baseline) | A regenerated baseline travels with the change that causes it |
 | [PR-SPLIT-DRIVEBY](#pr-split-driveby) | No unrelated fixes |
 
 **Commit series (PR-SERIES)**
@@ -160,16 +160,46 @@ later revert of the protocol fix must leave the framework in a working state.
 
 ### PR-SPLIT-BASELINE
 
-**Updated expected results are their own commit**
+**A regenerated baseline travels with the change that causes it**
 
-Regenerated fingerprints (`tests/fingerprint/*.csv`), statistical baselines, and other recorded
-expectations go in a commit that contains no source change.
+When one source change moves a recorded expectation — a fingerprint (`tests/fingerprint/*.csv`), a
+statistical baseline, an expected output — the regenerated values go in the same commit as that
+source change. The message of that commit says which behavior moved and why the new values are
+correct.
 
-A baseline update is a claim, not a side effect: *these values change on purpose, and the new
-values are correct*. The message must name the commit that causes the change and give the
-reason. Put the baseline commit directly after the commit that changes behavior. Inside a
-source commit the same update is invisible, and "the fingerprint changed" stops being a
-conscious decision — which is the whole point of AR-QUAL-FINGERPRINT and AR-QUAL-TRACEABILITY.
+A baseline update is a claim, not a side effect: *these values change on purpose, and the new values
+are correct*. The claim lives in the message. It does not live in the commit boundary. One commit
+also makes the attribution exact, which is what [AR-QUAL-TRACEABILITY](architecture.md) asks for: the
+change that justifies the new values is the change that carries them.
+
+The commit is the unit that must be true on its own. A source commit without its baselines fails its
+own fingerprint test, and that breaks [PR-SERIES-BUILDS](#pr-series-builds): `git bisect` over the
+suite then names the behavior commit as the first bad commit, and the per-commit CI build goes red in
+the middle of the series. The two halves also separate under every operation that moves a commit. A
+revert of the source commit leaves the new values in the tree. A cherry-pick to a maintenance branch
+takes the code and forgets the values. They are one decision, so they are one commit, and `git blame`
+on a moved value lands on the commit that explains it.
+
+The cost of this rule is the size of the diff. A large re-record buries the source change under
+thousands of lines, so read the source alone:
+
+```bash
+git show <sha> -- . ':!tests'
+```
+
+What the earlier form of this rule protected — that a baseline never moves unnoticed
+([TR-BASELINE-DELIBERATE](testing.md#tr-baseline-deliberate)) — now rests on the message and on
+review, not on the commit boundary.
+
+**A baseline update stands alone only when no single source commit causes it.** A re-record after a
+compiler, tool or solver version change; drift that came from outside the branch; a mass re-record
+over unrelated configurations. No commit beside it can carry the reason, so the message carries the
+whole reason ([TR-BASELINE-PROVENANCE](testing.md#tr-baseline-provenance)). A baseline-only commit
+that stands directly after the source commit that moves the values is the divided form of one change:
+squash the two.
+
+A value that is recorded for the first time is not a baseline update. A new fingerprint row for a new
+example is the test of that example, and it belongs to the commit that adds the example.
 
 ### PR-SPLIT-DRIVEBY
 
@@ -314,7 +344,8 @@ draft.
 | You move a file and edit it | one commit | move commit, then edit commit (PR-SPLIT-MOVE) |
 | A refactor makes the fix possible | one commit | behavior-preserving refactor, then fix (PR-SPLIT-PREPARE) |
 | An 802.11 fix needs a queueing feature | one commit | generic queueing feature, then 802.11 fix (PR-SPLIT-UPSTREAM) |
-| Your fix changes fingerprints | source and `.csv` together | source commit, then baseline commit (PR-SPLIT-BASELINE) |
+| Your fix changes fingerprints | a baseline commit after the fix | the source and the `.csv` in one commit, with the reason in the message (PR-SPLIT-BASELINE) |
+| A compiler update moves fingerprints | fold them into the next fix | a baseline-only commit that names the cause (PR-SPLIT-BASELINE) |
 | You see an unrelated bug on the way | fold it in | separate commit, or separate pull request (PR-SPLIT-DRIVEBY) |
 | A reviewer finds a defect in commit 2 of 5 | add commit 6 | rebase the correction into commit 2 (PR-SERIES-ORDER) |
 | The target branch moved under you | merge it in | rebase the series (PR-SERIES-LINEAR) |
@@ -331,7 +362,7 @@ argue about.
 |---|---|---|
 | PR-SPLIT-WHITESPACE | T3 | per-commit check: a file whose diff is empty under `git diff -w` but not otherwise, in a commit that also has real changes |
 | PR-SPLIT-MOVE | T3 | per-commit check: a delete/add pair with high similarity plus a content change |
-| PR-SPLIT-BASELINE | T3 | per-commit check: `tests/**/*.csv` and `src/**` changed in the same commit |
+| PR-SPLIT-BASELINE | T3+T4 | per-commit check: a baseline-only commit directly after a source commit, or one with no reason in the body (T3) + agent review that the commit which moves the values explains the movement (T4) |
 | PR-SPLIT-MECHANICAL | T3+T4 | diff-size and hunk-uniformity heuristic (T3) + agent review |
 | PR-SERIES-BUILDS | T2 | CI builds and tests every commit of the branch, not only the head |
 | PR-SERIES-ORDER | T3 | subject-line check for `fixup!`, `squash!`, "typo", "address review" |

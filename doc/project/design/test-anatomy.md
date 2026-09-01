@@ -58,7 +58,7 @@ correct*, and all three change only under
 [TR-BASELINE-DELIBERATE](../rule/testing.md#tr-baseline-deliberate),
 [TR-BASELINE-PROVENANCE](../rule/testing.md#tr-baseline-provenance) and
 [TR-BASELINE-COMMIT](../rule/testing.md#tr-baseline-commit) — deliberately, with a stated reason, in
-a commit of their own.
+the commit that moves them.
 
 ## What holds it all up
 

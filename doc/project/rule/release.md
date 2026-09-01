@@ -88,7 +88,7 @@ whose results differ after an upgrade must be able to find out, in one place, wh
 one of the ones that changed on purpose. Without this note the only honest answer to *why are my
 numbers different?* is *nobody knows*.
 
-*Enforced at T4 — agent review against the baseline commits in the release range.*
+*Enforced at T4 — agent review against the commits that move a baseline in the release range.*
 
 ### RR-FEATURE-STABLE
 

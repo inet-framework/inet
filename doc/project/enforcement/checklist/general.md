@@ -92,6 +92,15 @@ it should `throw`/`ASSERT`/`check_and_cast`. *Not a violation:* informational lo
 FLAG new behavior with no accompanying unit/module/statistical/validation test (fingerprints alone
 detect *that* behavior changed, not *whether it is correct*).
 
+**[AR-QUAL-TRACEABILITY] Does a commit that moves a recorded expectation explain the movement?**
+FLAG a commit that changes a fingerprint `.csv`, a statistical baseline or an expected output and
+whose message does not say which behavior moved and why the new values are right. FLAG a
+baseline-only commit that stands directly after the source commit that moves the values, and ask for
+a squash: that is one change in two commits
+([PR-SPLIT-BASELINE](../../rule/pull-request.md#pr-split-baseline)). *Not a violation:* a first
+recording for new content, or a re-record that names a cause outside the branch, such as a compiler
+or solver version change.
+
 **[AR-QUAL-DISPLAY] Does a new module have a distinguishing icon?**
 FLAG a new module type with no `@display("i=…")`, or one reusing a generic catch-all icon for a
 semantically distinct role.

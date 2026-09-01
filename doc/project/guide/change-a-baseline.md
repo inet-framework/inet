@@ -29,25 +29,45 @@ change that moves a mobility fingerprint is not a serializer change.
 Regenerate only the baselines the change actually moves. A blanket regeneration sweeps up unrelated
 drift and hides it under your reason.
 
-## 4. Commit it alone
+## 4. Commit it with the change that causes it
 
-**The baseline update is its own commit, directly after the commit that changes behavior**
+**The regenerated values go in the same commit as the source change that moves them**
 ([PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline),
-[TR-BASELINE-COMMIT](../rule/testing.md#tr-baseline-commit)). No source change in it.
+[TR-BASELINE-COMMIT](../rule/testing.md#tr-baseline-commit)). The commit then passes its own
+fingerprint test, and `git bisect` over the suite gives a true answer.
 
-The message names the commit that causes the change and gives the reason
+The body of the message gives the reason
 ([TR-BASELINE-PROVENANCE](../rule/testing.md#tr-baseline-provenance)):
 
 ```
-tests(fingerprint): update the Ethernet baselines for the PLCA burst fix
+ethernet: reset the PLCA burst counter after the last frame of the burst
 
-<sha> repairs the burst counter, which was reset one transmission early.
-The 14 configurations below all use PLCA with maxBurstCount > 1 and now
-show one more frame per burst, which is what 802.3cg 148.4.5.4 requires.
+The counter was reset one transmission early, so a burst carried one frame
+fewer than 802.3cg 148.4.5.4 requires.
+
+The 14 fingerprints below all use PLCA with maxBurstCount > 1 and now show
+one more frame per burst. No other configuration moves.
 ```
 
 "Fingerprints updated" is not a reason. Two years later this message is the only thing that tells a
-bisecting developer whether the movement was intended.
+developer with a bisect in hand whether the movement was intended.
+
+The reviewer reads the source change alone with `git show <sha> -- . ':!tests'`.
+
+### When the update stands alone
+
+A re-record that no single commit causes keeps a commit of its own: a compiler, tool or solver
+version change, or drift that came from outside the branch. Then the message must carry the whole
+reason, because no commit beside it can:
+
+```
+tests(fingerprint): re-record the 11 z3-dependent gsandcs baselines for clang-23
+
+The SAT solver of clang-23 chooses a different model, which changes the
+schedule these configurations record. The behavior of INET does not change.
+```
+
+Do not put such a re-record inside an unrelated fix. It has no cause there.
 
 ## 5. Name it in the pull request
 

@@ -33,7 +33,7 @@ Every test rule in document order.
 | --- | --- |
 | [TR-BASELINE-DELIBERATE](#tr-baseline-deliberate) | A baseline changes on purpose, never as a side effect |
 | [TR-BASELINE-PROVENANCE](#tr-baseline-provenance) | A baseline change names its cause and its reason |
-| [TR-BASELINE-COMMIT](#tr-baseline-commit) | A baseline update is its own commit |
+| [TR-BASELINE-COMMIT](#tr-baseline-commit) | A baseline update travels with the change that causes it |
 
 **Determinism**
 
@@ -116,10 +116,12 @@ another change.**
 
 A fingerprint `.csv`, a statistical baseline, an expected output: each is a claim that *these values
 are correct*. Regenerating one to make CI green is the single fastest way to lose every regression
-guarantee the suite provides, and it is invisible in a large diff — which is precisely why
-[PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline) puts it in a commit of its own.
+guarantee the suite provides, and it is invisible in a large diff. The defence is the message: the
+commit that moves the values states which behavior moved and why the new values are right
+([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)).
 
-*Enforced at T3 — a per-commit check that source and baseline do not change together.*
+*Enforced at T4 — agent review of the message against the moved values; T3 for a baseline-only commit
+that gives no reason.*
 
 ### TR-BASELINE-PROVENANCE
 
@@ -134,13 +136,20 @@ was intended.
 
 ### TR-BASELINE-COMMIT
 
-**A baseline update is its own commit, directly after the commit that changes behavior.**
+**A baseline update travels with the commit that changes the behavior. It stands alone only when no
+single commit causes it.**
 
 The rule is [PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline); it is repeated here because it is
-a test rule as much as a commit rule. Inside a source commit the update is invisible, and "the
-fingerprint changed" stops being a conscious decision.
+a test rule as much as a commit rule. The test suite is the reason for this form. A commit that moves
+a trajectory and leaves the recorded values behind fails its own fingerprint test, so `git bisect`
+over the suite names it as the first bad commit and teaches the next developer something false.
 
-*Enforced at T3 — the same per-commit check.*
+A re-record that no single commit causes — a compiler, tool or solver version change, or drift from
+outside the branch — keeps a commit of its own, because there is no commit beside it to hold the
+reason.
+
+*Enforced at T3 — a baseline-only commit that stands directly after the source commit that moves the
+values; T4 for the reason itself.*
 
 ## Determinism
 

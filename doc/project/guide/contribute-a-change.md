@@ -54,8 +54,8 @@ explanation — see [change-a-baseline.md](change-a-baseline.md).
 ## 8. Submit a reviewable change
 
 Divide the work into commits by concern: the whitespace and mechanical sweeps apart from the logic,
-the shared-component change before the model that needs it, the baseline update in its own patch.
-Write messages that state the reason. Every rule for this step is in
+the shared-component change before the model that needs it, the regenerated baselines inside the
+commit that moves them. Write messages that state the reason. Every rule for this step is in
 [pull-request.md](../rule/pull-request.md).
 
 ## 9. Sealing last

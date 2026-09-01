@@ -7,7 +7,7 @@
 #
 #   PR-SPLIT-WHITESPACE  — a file whose diff is empty ignoring whitespace, in a commit with real changes
 #   PR-SPLIT-MOVE        — a rename together with a content change
-#   PR-SPLIT-BASELINE    — a baseline and a source file in one commit
+#   PR-SPLIT-BASELINE    — a baseline-only commit that repeats the commit before it, or gives no reason
 #   PR-SERIES-ORDER      — a fixup, squash or "address review" subject
 #   PR-SERIES-LINEAR     — a merge commit inside the series
 #   PR-MSG-SUBJECT       — "area: what it does", under 72 characters, no file path, no link
@@ -55,12 +55,28 @@ done <<< "$COMMITS"
 [ "$ok" -eq 1 ] && echo "  ok"
 
 echo
-echo "== PR-SPLIT-BASELINE: a baseline and a source file in one commit =="
+echo "== PR-SPLIT-BASELINE: a baseline update travels with the change that causes it =="
+# A baseline belongs in the commit that moves it, so that the commit passes its own
+# fingerprint test (PR-SERIES-BUILDS) and a bisect over the suite stays truthful.
+# A commit that holds baselines only is correct when no single source commit causes the
+# movement — a compiler, tool or solver version change. Two things are checkable here:
+# such a commit must not stand directly after a source commit of the same series, and it
+# must give its reason in the body.
 ok=1
 while read -r sha; do
-  files=$(git show --name-only --pretty="" "$sha")
-  if echo "$files" | grep -qE "^tests/.*\.(csv|json)$" && echo "$files" | grep -qE "^src/"; then
-    flag "${sha:0:9} changes a baseline and a source file together"; ok=0
+  files=$(git show --name-only --pretty="" "$sha" | grep -v '^$')
+  # a baseline-only commit: every changed file is a recorded expectation
+  echo "$files" | grep -qE "^tests/.*\.(csv|json)$" || continue
+  echo "$files" | grep -qvE "^tests/.*\.(csv|json)$" && continue
+  short=${sha:0:9}
+  parent=$(git rev-parse "$sha^" 2>/dev/null || true)
+  if [ -n "$parent" ] && echo "$COMMITS" | grep -q "^$parent$" \
+     && git show --name-only --pretty="" "$parent" | grep -qE "^src/"; then
+    flag "$short holds baselines only and follows source commit ${parent:0:9}: squash the two"; ok=0
+  fi
+  body=$(git log -1 --format=%b "$sha" | grep -v '^$' | grep -vE "^(Fixes|Closes|Refs) ")
+  if [ -z "$body" ]; then
+    flag "$short holds baselines only and gives no reason in the body"; ok=0
   fi
 done <<< "$COMMITS"
 [ "$ok" -eq 1 ] && echo "  ok"
