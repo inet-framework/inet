@@ -209,8 +209,14 @@ stubs:
    :language: ned
    :start-at: network MultidropNetwork
 
-Everything the rest of this page measures is one of five knobs, and it is
-worth knowing which five before reading any result:
+The two PLCA parameters are the only ones a mixing segment really forces you
+to get right, and the network file derives both from ``numNodes`` so they
+cannot drift apart: every station gets the same ``plca_node_count`` of N+1,
+and ``local_nodeID`` is 0 on the controller and ``this.index + 1`` on the edge
+nodes. Both are ``default(...)``, so a configuration can still override them
+for a station.
+
+Everything the rest of this page measures is one of five knobs:
 
 =================== ================================== ==========================
 Knob                Set by                             Values used here
@@ -222,30 +228,56 @@ Offered load        ``source.productionInterval``      30%, 50%, 70%, 85%
 Bursting            ``*.eth[*].plca.max_bc``           0, i.e. off
 =================== ================================== ==========================
 
-The first knob is the one the whole comparison turns on, and it really is a
-single line. Every configuration inherits one of two abstract sections; the
-CSMA/CD variant simply deletes the ``plca`` submodule, leaving the MAC, the
-PHY, the queue and the cable identical on both sides:
+The interface stack
+~~~~~~~~~~~~~~~~~~~
+
+:ned:`EthernetPlcaHost` is a ``StandardHost`` with the IP layers switched off
+and its interfaces set to :ned:`EthernetPlcaInterface`. That interface is a
+plain stack of four submodules — ``queue``, ``mac``, ``plca``, ``phy`` — wired
+in that order down to the wire, so the PLCA sublayer sits between an unmodified
+:ned:`EthernetCsmaMac` and the :ned:`EthernetCsmaPhy`.
+
+That layout is what makes the comparison a one-line change. The ``plca``
+submodule is declared ``like IProtocolLayer``, which means setting its
+``typename`` to the empty string omits it altogether and connects the MAC
+straight to the PHY. Nothing else moves: the same MAC, PHY, queue and cable
+run on both sides of every comparison on this page.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: [Config PlcaBase]
    :end-at: **.plca.typename = ""
 
-The last knob is fixed throughout. ``max_bc = 0`` turns off bursting — sending
-several frames in one opportunity — because bursting changes the bound
-arithmetic derived below. That is the default, though the in-tree example
-configurations enable it.
+Those two sections are ``abstract``, so they cannot be run on their own; every
+real configuration extends one of them. ``max_bc = 0`` in the PLCA base turns
+off bursting — sending several frames in one opportunity — because bursting
+changes the bound arithmetic derived below. That is the module default, though
+the in-tree example configurations enable it.
 
-The traffic is the same in every configuration: each edge node sends
-fixed-size frames to the controller at a steady rate, and the controller
-answers each node. The applications exchange raw Ethernet frames, with no IP
-stack in the way:
+The traffic
+~~~~~~~~~~~
+
+Each edge node sends fixed-size frames to the controller at a steady rate, and
+the controller answers each node. Because there is no IP stack, the
+applications speak raw Ethernet: an :ned:`EthernetSourceApp` is a packet
+source plus a socket, an :ned:`EthernetSinkApp` is a socket plus a sink, and
+``*.*.ethernet.hasSocketSupport = true`` is what gives the host the socket
+layer they bind to.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: *.node[*].numApps = 2
    :end-at: *.controller.app[*].source.packetLength = 46B
+
+Three details in that block are worth decoding. Addresses are built from the
+module's own position with ``ancestorIndex``: on an edge node,
+``ancestorIndex(2)`` walks up from the ``io`` submodule past ``app[1]`` to the
+node's own index, so each sink binds to its own address; on the controller,
+``ancestorIndex(1) - 1`` turns source ``app[k]`` into a stream aimed at
+``node[k-1]``, which is why the controller needs ``1 + N`` applications — one
+sink plus one source per edge node. And ``io.steal = true`` matters because
+this is a bus: every station receives every frame, and a stealing socket
+consumes the ones addressed to it instead of passing them on.
 
 A 46-byte payload plus 18 bytes of header and frame check sequence is a
 64-byte frame, the smallest Ethernet allows. In the latency configurations
@@ -264,12 +296,66 @@ the factor 1.25 accounts for the uplink plus the quarter-volume downlink. The
 top loads match the aggregate regime Ford bench-tested for 10BASE-T1S node
 counts; real designs sit well below them.
 
-Six configurations turn those knobs. ``CycleAnatomy`` and
-``CsmaCdCycleAnatomy`` produced the two ownership figures above — the same
-traffic with and without PLCA. ``PlcaLatency`` and ``CsmaCdLatency`` sweep the
-load grid at N=8 for the first promise, and ``PlcaLatency`` also covers N=16,
-with ``Scale40Plca`` adding the 40-node point. ``PlcaUtilization`` and
-``CsmaCdUtilization`` saturate the wire for the third promise.
+Sweeping the knobs
+~~~~~~~~~~~~~~~~~~
+
+The load grid and the node counts are iteration variables, so one
+configuration expands into a run for every combination, and ``repeat`` gives
+each combination several seeds. ``seed-set = ${repetition}`` in ``[General]``
+is what makes those seeds actually differ — without it every repetition would
+replay the same random numbers:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: [Config PlcaLatency]
+   :end-before: [Config Scale40Plca]
+
+``PlcaLatency`` therefore expands to 2 node counts × 4 loads × 3 repetitions =
+24 runs, and ``CsmaCdLatency`` to 4 loads × 10 repetitions = 40. The two sides
+differ deliberately: PLCA is near-deterministic and its repetitions differ only
+in traffic jitter, while CSMA/CD's random backoff needs more seeds before its
+tail shows up at all.
+
+What gets recorded
+~~~~~~~~~~~~~~~~~~
+
+``[General]`` sets ``**.vector-recording = false`` and each configuration then
+switches back on only the vectors it needs. This is worth copying: vector
+recording on every signal of a 41-node segment produces enormous files, and
+the scalar and histogram recording that most of the results here come from is
+unaffected by the switch.
+
+The access latency plotted below is ``packetPendingDelay``, recorded at
+``eth[*].plca`` on the PLCA runs and at ``eth[*].mac`` on the CSMA/CD runs,
+which have no sublayer beneath the MAC. Its ``count`` also serves as the
+per-station count of successful transmissions behind the goodput chart.
+Discards come from ``mac.packetDropRetryLimitReached`` and
+``queue.droppedPacketsQueueOverflow``. The two cycle configurations record
+everything, which is where ``plca.curID`` for the rotation figure and
+``phy.transmittedSignalType`` for the ownership figures come from; the
+utilization configurations additionally record ``phy.busUsed`` with a
+``+timeavg`` mode, which measures how much of the time the wire carries data.
+
+The configurations
+~~~~~~~~~~~~~~~~~~
+
+Seven runnable configurations turn those knobs, in matched pairs wherever the
+page compares the two schemes:
+
+======================= ===== =============================== ==============================
+Configuration           Runs  What it sets                    What it produces here
+======================= ===== =============================== ==============================
+``CycleAnatomy``        1     N=8, 30% load, 2 ms, PLCA       PLCA ownership figure, rotation
+``CsmaCdCycleAnatomy``  1     the same without PLCA           CSMA/CD ownership figure
+``PlcaLatency``         24    N=8,16 × load grid × 3          Promise 1, both charts
+``CsmaCdLatency``       40    N=8 × load grid × 10            Promise 1 and 2, CSMA/CD side
+``Scale40Plca``         1     N=40, downlink halved           the 40-node point
+``PlcaUtilization``     2     N=8 saturated, 1500 B and 46 B  Promise 3, PLCA side
+``CsmaCdUtilization``   20    the same without PLCA, 10 seeds Promise 3, CSMA/CD side
+======================= ===== =============================== ==============================
+
+Three further sections — ``PlcaBase``, ``CsmaCdBase`` and
+``CycleAnatomyBase`` — are ``abstract`` and exist only to be extended.
 
 Promise 1: The Longest Wait Can Be Computed
 -------------------------------------------
@@ -324,14 +410,9 @@ attempt until the transmission that succeeds begins:
    stamp:   captured 2026-08-14, INET topic/gy/tenbaset1s-showcase @ 5e0d2fce22 + showcase
             dir, OMNeT++ 6.4.0aipre2 (omnetpp-dev)
 
-The two sides are read at slightly different points, as the legend says: PLCA
-below its sublayer, where the delay the rotation imposes is visible, and
-CSMA/CD at the MAC, which has nothing beneath it. On the PLCA runs the two
-vantage points reported the same maximum in all 25 runs, so the comparison is
-not an artifact of where the statistic is taken. PLCA also needs fewer
-repetitions than CSMA/CD — three per load point against ten — because it is
-near-deterministic, while CSMA/CD's random backoff needs more seeds to expose
-its tail.
+The legend names the two vantage points described above. That they differ does
+not bias the comparison: on the PLCA runs the sublayer and the MAC reported the
+same maximum in all 25 runs — the 24 of ``PlcaLatency`` plus ``Scale40Plca``.
 
 The vertical axis is logarithmic, and the dashed line is the 614 µs bound. The
 PLCA maximum climbs toward that line as load rises — 228–296 µs at 30% load,
