@@ -1,4 +1,6 @@
-# The `protocolelement` Module Library
+# What a protocol element is made of
+
+> **Kind:** design · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [protocol-anatomy.md](protocol-anatomy.md), [packet-anatomy.md](packet-anatomy.md), [rule/architecture.md](../rule/architecture.md)
 
 *A study of `inet/src/inet/protocolelement` — INET's library of small, composable
 protocol-processing elements.*
@@ -297,9 +299,10 @@ elements snap together into real protocols.
 
 ## 5. Element catalog
 
-Every element in the package — grouped by subsystem, with its role, C++ base
-class, parameters, gates, and the header/tag it manipulates — is catalogued in
-the companion file **[ELEMENTS.md](ELEMENTS.md)**. The table below is the index.
+The table below indexes the package by subsystem. The role, C++ base class,
+parameters, gates and the header or tag of one element are in its own `.ned` and
+`.h` under `src/inet/protocolelement/`, which stays authoritative
+([DR-CITE-DONT-REPEAT](../rule/documentation.md#dr-cite-dont-repeat)).
 
 | Subsystem | Concern | Key elements |
 |-----------|---------|--------------|
