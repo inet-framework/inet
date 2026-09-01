@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/DcfFs.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
@@ -47,6 +48,11 @@ void Dcf::initialize(int stage)
         stationRetryCounters = new StationRetryCounters();
         originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism *>(getSubmodule("originatorProtectionMechanism"));
         WATCH_EXPR("frameSequenceInfo", frameSequenceHandler->isSequenceRunning() ? "Fs: " + frameSequenceHandler->getFrameSequence()->getHistory() : "");
+    }
+    else if (stage == INITSTAGE_LAST) {
+        // Dcaf resolves its pending queue at the link-layer stage. Install
+        // this signal listener after all child initialization has completed.
+        check_and_cast<cModule *>(channelAccess->getPendingQueue())->subscribe(packetDroppedSignal, this);
     }
 }
 
@@ -112,6 +118,18 @@ void Dcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
 void Dcf::processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
 {
     throw cRuntimeError("Unknown management frame");
+}
+
+void Dcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    if (signalID == packetDroppedSignal) {
+        Enter_Method("%s", cComponent::getSignalName(signalID));
+        auto packet = check_and_cast<Packet *>(obj);
+        if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
+            mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+    }
+    else
+        ModeSetListener::receiveSignal(source, signalID, obj, details);
 }
 
 void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)

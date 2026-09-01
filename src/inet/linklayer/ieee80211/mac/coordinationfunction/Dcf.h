@@ -28,7 +28,6 @@
 #include "inet/linklayer/ieee80211/mac/originator/AckHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/OriginatorProtectionMechanism.h"
-#include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -88,6 +87,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void initialize(int stage) override;
     virtual void forEachChild(cVisitor *v) override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     virtual void sendUp(const std::vector<Packet *>& completeFrames);
     virtual bool hasFrameToTransmit();

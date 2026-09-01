@@ -1,0 +1,210 @@
+%description:
+Verify that a tagged Association Response dropped by the real DCF pending
+queue reaches the AP as a terminal DROPPED_BEFORE_TRANSMISSION outcome. The
+pending association and reserved AID are cleared, and a retransmitted request
+gets a new transaction token.
+
+%file: TestIeee80211MgmtApQueueDrop.cc
+
+#include <vector>
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/queueing/queue/PacketQueue.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestPendingQueue : public queueing::PacketQueue
+{
+  public:
+    void setPacketCapacityForTest(int capacity) { packetCapacity = capacity; }
+};
+
+Define_Module(TestPendingQueue);
+
+class TestIeee80211MgmtApQueueDrop : public Ieee80211MgmtAp
+{
+  public:
+    std::vector<IFrameTransmissionCallback::Status> statuses;
+    std::vector<uint64_t> transactionIds;
+
+    void markAuthenticated(const MacAddress& address)
+    {
+        Enter_Method("markAuthenticated");
+        auto& sta = staList[address];
+        sta.address = address;
+        mib->bssAccessPointData.stations[address] = Ieee80211Mib::AUTHENTICATED;
+    }
+
+    void submitAssociationRequest(const MacAddress& address)
+    {
+        Enter_Method("submitAssociationRequest");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAssociationRequestFrame(packet, header);
+    }
+
+    bool hasPendingAssociation(const MacAddress& address) const
+    {
+        auto it = staList.find(address);
+        return it != staList.end() && it->second.pendingAssociationTransactionId != 0;
+    }
+
+    uint64_t getPendingAssociationTransactionId(const MacAddress& address) const { return staList.at(address).pendingAssociationTransactionId; }
+
+    short reserveAssociationId(const MacAddress& address) { return mib->reserveAssociationId(address); }
+    void cancelAssociationIdReservation(const MacAddress& address) { mib->cancelAssociationIdReservation(address); }
+    Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const { return mib->bssAccessPointData.stations.at(address); }
+
+  protected:
+    virtual void frameTransmissionFinished(const IFrameTransmissionCallback::Result& result) override
+    {
+        statuses.push_back(result.getStatus());
+        auto frame = result.getFrame();
+        auto transactionTag = frame == nullptr ? nullptr : frame->findTag<Ieee80211MgmtTransactionTag>();
+        transactionIds.push_back(transactionTag == nullptr ? 0 : transactionTag->getTransactionId());
+        Ieee80211MgmtAp::frameTransmissionFinished(result);
+    }
+};
+
+Define_Module(TestIeee80211MgmtApQueueDrop);
+
+class Ieee80211MgmtApQueueDropTest : public cSimpleModule
+{
+  public:
+    Ieee80211MgmtApQueueDropTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void activity() override
+    {
+        auto mgmt = check_and_cast<TestIeee80211MgmtApQueueDrop *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        auto queue = check_and_cast<TestPendingQueue *>(getModuleByPath("^.ap.wlan[0].mac.dcf.channelAccess.pendingQueue"));
+        const MacAddress station("02:00:00:00:00:09");
+        const MacAddress reusable("02:00:00:00:00:0a");
+
+        ASSERT(queue->getMaxNumPackets() == 0);
+        mgmt->markAuthenticated(station);
+        mgmt->submitAssociationRequest(station);
+        for (int i = 0; i < 100 && mgmt->statuses.empty(); i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->statuses.size() == 1);
+        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(mgmt->transactionIds.back() != 0);
+        auto firstTransactionId = mgmt->transactionIds.back();
+        ASSERT(!mgmt->hasPendingAssociation(station));
+        ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::AUTHENTICATED);
+
+        // The existing packetDroppedSignal is delivered before deletion, so the reservation
+        // is released synchronously and can be reused by another STA.
+        ASSERT(mgmt->reserveAssociationId(reusable) == 1);
+        mgmt->cancelAssociationIdReservation(reusable);
+
+        // A retransmitted request is not mistaken for the dropped transaction.
+        // Open the test queue after the first terminal callback so the second
+        // response can complete through the ordinary DCF/ACK path.
+        queue->setPacketCapacityForTest(-1);
+        mgmt->submitAssociationRequest(station);
+        for (int i = 0; i < 100 && !mgmt->hasPendingAssociation(station); i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->hasPendingAssociation(station));
+        auto secondTransactionId = mgmt->getPendingAssociationTransactionId(station);
+        ASSERT(secondTransactionId != 0);
+        ASSERT(secondTransactionId != firstTransactionId);
+        for (int i = 0; i < 10000 && mgmt->statuses.size() < 2; i++)
+            wait(SimTime(1, SIMTIME_US));
+        ASSERT(mgmt->statuses.size() == 2);
+        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+        ASSERT(mgmt->transactionIds.back() == secondTransactionId);
+        ASSERT(!mgmt->hasPendingAssociation(station));
+        ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::ASSOCIATED);
+
+        std::cout << "DCF pending-queue overflow terminal cleanup and retransmission recovery verified.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtApQueueDropTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.linklayer.ieee80211.mac.queue.PendingQueue;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestPendingQueue extends PendingQueue
+{
+    parameters:
+        @class(::inet::ieee80211::TestPendingQueue);
+}
+
+simple TestIeee80211MgmtApQueueDrop extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtApQueueDrop);
+}
+
+simple Ieee80211MgmtApQueueDropTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtApQueueDropTest);
+}
+
+network Ieee80211MgmtApQueueDropTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtApQueueDrop";
+                wlan[*].mac.dcf.channelAccess.pendingQueue.typename = "TestPendingQueue";
+        }
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+                wlan[*].agent.typename = "";
+        }
+        test: Ieee80211MgmtApQueueDropTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtApQueueDropTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.ap.wlan[0].mgmt.beaconInterval = 10s
+*.ap.wlan[0].mac.dcf.channelAccess.pendingQueue.packetCapacity = 0
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:09"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+
+%contains: stdout
+DCF pending-queue overflow terminal cleanup and retransmission recovery verified.
