@@ -1,0 +1,4 @@
+<config>
+    <interface among="host[*] router" prefix="2001:db8:1:1::/64"/>
+    <interface among="router server" prefix="2001:db8:1:2::/64"/>
+</config>

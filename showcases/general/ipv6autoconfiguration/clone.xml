@@ -1,0 +1,5 @@
+<scenario>
+    <at t="15">
+        <startup module="host[3]"/>
+    </at>
+</scenario>

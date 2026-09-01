@@ -9,5 +9,6 @@ simulations with INET.
 
    pcaprecording/doc/index
    diffserv/doc/index
+   ipv6autoconfiguration/doc/index
 .. mobility/doc/index
 .. dynamic/doc/index
