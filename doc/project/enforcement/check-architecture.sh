@@ -1,41 +1,64 @@
 #!/usr/bin/env bash
 #
-# Starter architecture check for INET — a T3 fitness function (see AR-QUAL-ENFORCED).
-# Enforces two dependency-direction rules from architectural-requirements.md over the
-# C++ #include graph:
+# Architecture check for INET — a T3 fitness function (see AR-QUAL-ENFORCED).
+# Enforces the mechanical parts of four rules from doc/project/rule/architecture.md:
 #
 #   AR-ORG-DOMAINS   — the shared 'common' package must not depend on any protocol layer
 #                      (dependencies point protocols -> infrastructure, never the reverse)
 #   AR-ORG-VIS-SPLIT — model/protocol code must not depend on the visualizer package
+#   AR-COM-SOCKETS   — applications must include transport contracts, not implementation
+#                      modules, when they use socket-style protocol APIs
+#   AR-QUAL-DETERMINISM — model code must not use process-, clock-, or libc-global randomness
 #
 # Usage (from the INET repository root):
-#   doc/architecture/enforcement/check-architecture.sh            # full check
-#   doc/architecture/enforcement/check-architecture.sh <SUBTREE>  # scope both checks to a subset,
-#                                                        # e.g. src/inet/common/packet
+#   doc/project/enforcement/check-architecture.sh            # full check
+#   doc/project/enforcement/check-architecture.sh <SUBTREE>  # scope checks to a subset,
+#                                                     # e.g. src/inet/common/packet
 #
-# With no argument, AR-ORG-DOMAINS covers src/inet/common and AR-ORG-VIS-SPLIT covers all of
-# src/inet. A SUBTREE argument restricts both checks to that directory — useful for a
-# focused, per-package audit report.
+# With no argument, AR-ORG-DOMAINS covers src/inet/common, AR-ORG-VIS-SPLIT and
+# AR-QUAL-DETERMINISM cover src/inet, and AR-COM-SOCKETS covers src/inet/applications. A
+# SUBTREE argument restricts all applicable checks to that directory — useful for a focused,
+# per-package audit report.
 #
-# Exit status 0 = clean, 1 = violations found. Wire it into CI to make the rule a gate.
-# This is intentionally a grep-level starter; a robust version would parse the full
-# include graph (e.g. dependency-cruiser / a small Python tool) and check for cycles.
+# Exit status 0 = clean, 1 = candidates found, 2 = invalid scope or usage. Reconcile candidates
+# with doc/project/audit/architecture-exceptions.md before classifying them as violations.
 
 set -uo pipefail
-SCOPE="${1:-}"
-if [ -n "$SCOPE" ]; then
-  DOMAIN_SCOPE="$SCOPE"; VIS_SCOPE="$SCOPE"
-else
-  DOMAIN_SCOPE="src/inet/common"; VIS_SCOPE="src/inet"
+if [ "$#" -gt 1 ]; then
+  echo "usage: $0 [src/inet/<subtree>]" >&2
+  exit 2
 fi
-status=0
 
-for d in "$DOMAIN_SCOPE" "$VIS_SCOPE"; do
-  if [ ! -d "$d" ]; then
-    echo "error: '$d' not found (run from the INET repo root)" >&2
-    exit 2
+SCOPE="${1:-src/inet}"
+SCOPE="${SCOPE#./}"
+SCOPE="${SCOPE%/}"
+if [[ "$SCOPE" == *"//"* || "$SCOPE" == *"/./"* || "$SCOPE" == */. || \
+      "$SCOPE" == *"/../"* || "$SCOPE" == */.. ]]; then
+  echo "error: scope must be a normalized src/inet path without '.' or '..' components: '$SCOPE'" >&2
+  exit 2
+fi
+if [[ "$SCOPE" != "src/inet" && "$SCOPE" != src/inet/* ]]; then
+  echo "error: scope must be src/inet or one of its subtrees: '$SCOPE'" >&2
+  exit 2
+fi
+if [ ! -d "$SCOPE" ]; then
+  echo "error: '$SCOPE' not found (run from the INET repo root)" >&2
+  exit 2
+fi
+
+intersect_scope() {
+  local canonical="$1"
+  local requested="$2"
+  if [[ "$requested" == "$canonical" || "$requested" == "$canonical"/* ]]; then
+    printf '%s\n' "$requested"
+  elif [[ "$canonical" == "$requested"/* ]]; then
+    printf '%s\n' "$canonical"
   fi
-done
+}
+
+DOMAIN_SCOPE="$(intersect_scope "src/inet/common" "$SCOPE")"
+VIS_SCOPE="$SCOPE"
+status=0
 
 LAYERS='physicallayer|linklayer|networklayer|transportlayer|routing|applications'
 
@@ -49,15 +72,19 @@ ALLOW+='|linklayer/common/MacAddress\.h'
 ALLOW+='|linklayer/common/EtherType_m\.h'
 ALLOW+='|networklayer/common/IpProtocolId_m\.h'
 
-echo "== AR-ORG-DOMAINS: $DOMAIN_SCOPE must not #include a protocol layer (foundational value types allowlisted) =="
-hits=$(grep -rEn "#include \"inet/(${LAYERS})/" "$DOMAIN_SCOPE" 2>/dev/null | grep -vE "$ALLOW")
-if [ -n "$hits" ]; then
-  echo "$hits" | sed 's/^/  VIOLATION: /'
-  echo "  ^ common/ reaches up into a protocol layer — invert the dependency (AR-EXT-ATTACH),"
-  echo "    or record a sanctioned exception in architecture-exceptions.md."
-  status=1
+if [ -n "$DOMAIN_SCOPE" ]; then
+  echo "== AR-ORG-DOMAINS: $DOMAIN_SCOPE must not #include a protocol layer (foundational value types allowlisted) =="
+  hits=$(grep -rEn "#include \"inet/(${LAYERS})/" "$DOMAIN_SCOPE" 2>/dev/null | grep -vE "$ALLOW")
+  if [ -n "$hits" ]; then
+    echo "$hits" | sed 's/^/  VIOLATION: /'
+    echo "  ^ common/ reaches up into a protocol layer — invert the dependency (AR-EXT-ATTACH),"
+    echo "    or record a sanctioned exception in architecture-exceptions.md."
+    status=1
+  else
+    echo "  ok"
+  fi
 else
-  echo "  ok"
+  echo "== AR-ORG-DOMAINS: N/A (scope does not intersect src/inet/common) =="
 fi
 
 echo
@@ -71,9 +98,47 @@ else
 fi
 
 echo
+APP_SCOPE="$(intersect_scope "src/inet/applications" "$SCOPE")"
+if [ -n "$APP_SCOPE" ]; then
+  echo "== AR-COM-SOCKETS: $APP_SCOPE must include transport contracts, not implementations =="
+  app_hits=$(grep -rEn --include='*.h' --include='*.cc' --include='*.icc' \
+    '^[[:space:]]*#[[:space:]]*include[[:space:]]+"inet/transportlayer/[^/"[:space:]]+/' \
+    "$APP_SCOPE" 2>/dev/null | grep -vE '/transportlayer/(contract|common)/' || true)
+  if [ -n "$app_hits" ]; then
+    echo "$app_hits" | sed 's/^/  CANDIDATE: /'
+    echo "  ^ applications may depend on transport contracts, but not transport implementations."
+    status=1
+  else
+    echo "  ok"
+  fi
+else
+  echo "== AR-COM-SOCKETS: N/A (scope does not intersect src/inet/applications) =="
+fi
+
+echo
+echo "== AR-QUAL-DETERMINISM: $SCOPE =="
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+DET_GATE="$SCRIPT_DIR/check-determinism.py"
+if [ ! -f "$DET_GATE" ] || ! command -v python3 >/dev/null 2>&1; then
+  echo "error: canonical determinism checker or python3 is unavailable: $DET_GATE" >&2
+  exit 2
+fi
+det_hits=$(python3 "$DET_GATE" "$SCOPE")
+det_status=$?
+if [ "$det_status" -eq 2 ]; then
+  exit 2
+elif [ "$det_status" -ne 0 ]; then
+  echo "$det_hits" | sed 's/^/  CANDIDATE: /'
+  echo "  ^ route stochasticity through the OMNeT++ RNG and derive ordering from model state."
+  status=1
+else
+  echo "  ok"
+fi
+
+echo
 if [ "$status" -eq 0 ]; then
   echo "PASS: architecture checks clean."
 else
-  echo "FAIL: architecture violations found (record permanent exceptions, fix the rest)."
+  echo "FAIL: architecture candidates found (record permanent exceptions, fix the rest)."
 fi
 exit "$status"
