@@ -45,6 +45,9 @@ def get_queueing_test_tasks(**kwargs):
 def get_protocol_test_tasks(**kwargs):
     return get_opp_test_tasks("tests/protocol", name="protocol test", **kwargs)
 
+def get_protocol_element_test_tasks(**kwargs):
+    return get_opp_test_tasks("tests/protocol/element", name="protocol element test", **kwargs)
+
 def get_module_test_tasks(**kwargs):
     return get_opp_test_tasks("tests/module", name="module test", **kwargs)
 
@@ -58,6 +61,7 @@ def get_all_test_tasks(**kwargs):
                            get_fingerprint_test_tasks,
                            get_module_test_tasks,
                            get_packet_test_tasks,
+                           get_protocol_element_test_tasks,
                            get_protocol_test_tasks,
                            get_queueing_test_tasks,
                            get_sanitizer_test_tasks,
@@ -82,6 +86,9 @@ def run_queueing_tests(**kwargs):
 
 def run_protocol_tests(**kwargs):
     return get_protocol_test_tasks(**kwargs).run(**kwargs)
+
+def run_protocol_element_tests(**kwargs):
+    return get_protocol_element_test_tasks(**kwargs).run(**kwargs)
 
 def run_module_tests(**kwargs):
     return get_module_test_tasks(**kwargs).run(**kwargs)

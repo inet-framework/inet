@@ -70,11 +70,15 @@ class OppTestTask(TestTask):
         test_directory = os.path.join(self.working_directory, f"work/{test_binary_name}")
         has_lib = os.path.exists(os.path.join(self.working_directory, "lib"))
         os.makedirs(test_directory, exist_ok=True)
+        # paths are relative to test_directory, so they must be computed from the actual
+        # nesting depth of the test folder (it may be deeper than tests/<kind>)
+        src_relative_path = os.path.relpath(self.simulation_project.get_full_path("src"), test_directory)
+        lib_relative_path = os.path.relpath(os.path.join(self.working_directory, "lib"), test_directory)
         args = ["opp_test", "gen", "-v", self.test_file_name]
         subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
-        args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", "-L../../../../src", *([f"-ltest{binary_suffix}", "-L../../lib"] if has_lib else []), "-P", test_directory, "-I../../../../src", "-I../../lib"]
+        args = ["opp_makemake", "-f", "--deep", f"-lINET{binary_suffix}", f"-L{src_relative_path}", *([f"-ltest{binary_suffix}", f"-L{lib_relative_path}"] if has_lib else []), "-P", test_directory, f"-I{src_relative_path}", f"-I{lib_relative_path}"]
         subprocess_result = run_command_with_logging(args, cwd=test_directory, env=self.simulation_project.get_env())
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
@@ -83,7 +87,7 @@ class OppTestTask(TestTask):
         if subprocess_result.returncode != 0:
             return self.task_result_class(self, result="ERROR", stderr=subprocess_result.stderr)
         test_program = f"{test_binary_name}/{test_binary_name}{binary_suffix}"
-        simulation_args = ["--check-signals=false", "-lINET", "-n", f"../../../../src:.:{'../../lib' if has_lib else ''}"]
+        simulation_args = ["--check-signals=false", "-lINET", "-n", f"{src_relative_path}:.:{lib_relative_path if has_lib else ''}"]
         if not self.debug:
             args = ["opp_test", "run", "-v", "-p", test_program, self.test_file_name, "-a", *simulation_args]
             subprocess_result = run_command_with_logging(args, cwd=self.working_directory, env=self.simulation_project.get_env())
