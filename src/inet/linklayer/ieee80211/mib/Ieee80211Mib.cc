@@ -38,7 +38,7 @@ void Ieee80211Mib::initialize(int stage)
     }
 }
 
-void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet)
+void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet, const std::set<Hz>& operationalChannelWidths)
 {
     // The radio publishes its initial channel at PHYSICAL_LAYER before the MAC
     // publishes its mode set at LINK_LAYER. Preserve that independent BSS
@@ -54,14 +54,19 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     }
 
     // IEEE Std 802.11-2024, 9.4.2.54.4 and 9.4.2.55: advertise exactly the
-    // HT modes and HT-only channel widths present in the authoritative mode
-    // set. In particular, do not infer dense MCS blocks or HT widths from
-    // legacy/VHT modes that happen to share the set.
+    // HT modes come from the authoritative mode set, while advertised channel
+    // widths are restricted to those the configured transmitter and receiver
+    // can actually operate. In particular, do not infer dense MCS blocks or HT
+    // widths from legacy/VHT modes that happen to share the set.
     const auto& supportedMcs = modeSet->getHtMcsSupported();
     const auto& mandatoryMcs = modeSet->getHtMcsMandatory();
-    localHtCapabilities.supportedChannelWidths = modeSet->getHtSupportedChannelWidths();
-    localHtCapabilities.shortGi20 = modeSet->isHtShortGuardIntervalSupported(MHz(20));
-    localHtCapabilities.shortGi40 = modeSet->isHtShortGuardIntervalSupported(MHz(40));
+    for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
+        if (operationalChannelWidths.count(channelWidth) != 0)
+            localHtCapabilities.supportedChannelWidths.insert(channelWidth);
+    localHtCapabilities.shortGi20 = localHtCapabilities.supportedChannelWidths.count(MHz(20)) != 0 &&
+            modeSet->isHtShortGuardIntervalSupported(MHz(20));
+    localHtCapabilities.shortGi40 = localHtCapabilities.supportedChannelWidths.count(MHz(40)) != 0 &&
+            modeSet->isHtShortGuardIntervalSupported(MHz(40));
     for (int mcs = 0; mcs < 77; mcs++) {
         localHtCapabilities.rxMcsSupported[mcs] = supportedMcs[mcs];
         if (mcs < 32 && supportedMcs[mcs]) {
@@ -81,7 +86,7 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
         throw cRuntimeError("htSecondaryChannelOffset must be 0, 1, or 3");
     bool use40Mhz = htOperation.secondaryChannelOffset != 0;
     if (use40Mhz && localHtCapabilities.supportedChannelWidths.count(MHz(40)) == 0)
-        throw cRuntimeError("40 MHz HT operation requires a 40 MHz-capable mode set");
+        throw cRuntimeError("40 MHz HT operation requires a configured PHY that can operate a 40 MHz channel width");
     htOperation.operatingChannelWidth = use40Mhz ? MHz(40) : MHz(20);
     int protectionMode = par("htProtectionMode");
     if (protectionMode < 0 || protectionMode > 3)
