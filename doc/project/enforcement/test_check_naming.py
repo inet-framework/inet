@@ -1,0 +1,385 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+
+CHECKER = Path(__file__).resolve().parent / "check-ned-msg-naming.py"
+
+
+class NamingCheckerTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.root = Path(self.temporary.name)
+        self.run_command("git", "init", "-q")
+        self.run_command("git", "config", "user.email", "test@example.invalid")
+        self.run_command("git", "config", "user.name", "Naming Test")
+
+    def tearDown(self) -> None:
+        self.temporary.cleanup()
+
+    def run_command(self, *args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(args, cwd=self.root, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    def write(self, relative: str, text: str) -> Path:
+        path = self.root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+        return path
+
+    def commit_all(self) -> None:
+        self.run_command("git", "add", ".")
+        result = self.run_command("git", "commit", "-qm", "fixture")
+        self.assertEqual(0, result.returncode, result.stderr)
+
+    def check(self, *args: str) -> subprocess.CompletedProcess[str]:
+        return self.run_command(sys.executable, str(CHECKER), *args)
+
+    def test_explicit_clean_ned_and_msg(self) -> None:
+        self.write("src/inet/foo/Foo.ned", """package inet.foo;
+simple Foo
+{
+    parameters:
+        bool enabled;
+    gates:
+        input in;
+        output out;
+    @signal[bytesInFlight*](type=long);
+    @statistic[queueLength*](source=count);
+}
+""")
+        self.write("src/inet/foo/Foo.msg", """namespace inet;
+cplusplus {{
+class bad_name {};
+}}
+cplusplus(Foo) {{
+struct also_bad {};
+}}
+class Forward;
+class SplitForward
+;
+class Helper { @existingClass; }
+const int BAD_GLOBAL = 1;
+class Foo
+{
+    int fieldName;
+}
+""")
+        result = self.check("src/inet/foo/Foo.ned", "src/inet/foo/Foo.msg")
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_reports_one_line_msg_field(self) -> None:
+        self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo { int Bad_field; }
+""")
+        result = self.check("src/inet/foo/Foo.msg")
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-MSG-FIELD", result.stdout)
+
+    def test_reports_multiline_msg_field(self) -> None:
+        self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo
+{
+    int
+        Bad_field;
+}
+""")
+        result = self.check("src/inet/foo/Foo.msg")
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-MSG-FIELD", result.stdout)
+
+    def test_braces_in_msg_string_do_not_change_type_context(self) -> None:
+        self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo
+{
+    string marker = "{";
+}
+const int BAD_GLOBAL = 1;
+""")
+        result = self.check("src/inet/foo/Foo.msg")
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_multiline_msg_forward_is_not_a_definition(self) -> None:
+        self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo
+;
+class Other {}
+""")
+        result = self.check("src/inet/foo/Foo.msg")
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-PKG", result.stdout)
+
+    def test_reports_mechanical_rule_families(self) -> None:
+        self.write("src/inet/foo/Bad.ned", """package inet.BadPath;
+simple bad_type
+{
+    parameters:
+        bool Bad_param;
+    gates:
+        input packet;
+        output PacketOut;
+    @signal[BadSignal](type=long);
+    @statistic[bad-stat](source=count);
+}
+""")
+        self.write("src/inet/foo/Bad.msg", """namespace inet;
+class bad_type
+{
+    int Bad_field;
+}
+""")
+        result = self.check("src/inet/foo/Bad.ned", "src/inet/foo/Bad.msg")
+        self.assertEqual(1, result.returncode)
+        for rule in (
+            "NR-PKG", "NR-NED-TYPE", "NR-NED-PARAM", "NR-NED-GATE",
+            "NR-NED-SIGNAL", "NR-MSG-TYPE", "NR-MSG-FIELD",
+        ):
+            self.assertIn(rule, result.stdout)
+
+    def test_modified_file_checks_only_added_lines(self) -> None:
+        path = self.write("src/inet/foo/Legacy.ned", """package inet.foo;
+simple Legacy
+{
+    parameters:
+        bool Bad_legacy;
+}
+""")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("        bool Bad_legacy;", "        bool Bad_legacy;\n        bool goodName;"), encoding="utf-8")
+        result = self.check()
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_modified_msg_checks_multiline_added_field(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo
+{
+    int goodName;
+}
+""")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("    int goodName;", "    int goodName;\n    int\n        Bad_field;"), encoding="utf-8")
+        result = self.check()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-MSG-FIELD", result.stdout)
+
+    def test_modified_msg_checks_changed_identifier_before_unchanged_semicolon(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo
+{
+    int goodField
+    ;
+}
+""")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("goodField", "Bad_field"), encoding="utf-8")
+        result = self.check()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-MSG-FIELD", result.stdout)
+
+    def test_modified_msg_does_not_surface_adjacent_legacy_field(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo
+{
+    int goodName;
+    int Bad_legacy
+    ;
+}
+""")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("goodName", "betterName"), encoding="utf-8")
+        result = self.check()
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_untracked_file_is_scanned_completely(self) -> None:
+        self.write("README.md", "fixture\n")
+        self.commit_all()
+        self.write("src/inet/foo/NewThing.ned", """package inet.foo;
+simple NewThing
+{
+    parameters:
+        bool Bad_name;
+}
+""")
+        result = self.check("--diff")
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-NED-PARAM", result.stdout)
+
+    def test_staged_mode_checks_staged_additions(self) -> None:
+        path = self.write("src/inet/foo/Stage.ned", """package inet.foo;
+simple Stage
+{
+    parameters:
+        bool goodName;
+}
+""")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("        bool goodName;", "        bool goodName;\n        bool Bad_name;"), encoding="utf-8")
+        self.run_command("git", "add", str(path.relative_to(self.root)))
+        result = self.check("--staged")
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-NED-PARAM", result.stdout)
+
+    def test_staged_mode_reads_index_not_worktree(self) -> None:
+        path = self.write("src/inet/foo/Stage.ned", """package inet.foo;
+simple Stage
+{
+    parameters:
+        bool goodName;
+}
+""")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("goodName", "Bad_staged"), encoding="utf-8")
+        self.run_command("git", "add", str(path.relative_to(self.root)))
+        path.write_text(path.read_text(encoding="utf-8").replace("Bad_staged", "goodUnstaged"), encoding="utf-8")
+        result = self.check("--staged")
+        self.assertEqual(1, result.returncode)
+        self.assertIn("Bad_staged", result.stdout)
+        self.assertNotIn("goodUnstaged", result.stdout)
+
+    def test_staged_mode_ignores_unstaged_violation(self) -> None:
+        path = self.write("src/inet/foo/Stage.ned", """package inet.foo;
+simple Stage
+{
+    parameters:
+        bool originalName;
+}
+""")
+        self.commit_all()
+        path.write_text(path.read_text(encoding="utf-8").replace("originalName", "goodStaged"), encoding="utf-8")
+        self.run_command("git", "add", str(path.relative_to(self.root)))
+        path.write_text(path.read_text(encoding="utf-8").replace("goodStaged", "Bad_unstaged"), encoding="utf-8")
+        result = self.check("--staged")
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        working_result = self.check()
+        self.assertEqual(1, working_result.returncode)
+        self.assertIn("Bad_unstaged", working_result.stdout)
+
+    def test_staged_new_file_missing_from_worktree_is_checked(self) -> None:
+        self.write("README.md", "fixture\n")
+        self.commit_all()
+        path = self.write("src/inet/foo/Stage.ned", """package inet.foo;
+simple Stage
+{
+    parameters:
+        bool Bad_staged;
+}
+""")
+        self.run_command("git", "add", str(path.relative_to(self.root)))
+        path.unlink()
+        result = self.check("--staged")
+        self.assertEqual(1, result.returncode)
+        self.assertIn("Bad_staged", result.stdout)
+
+    def test_staged_structural_deletion_uses_index(self) -> None:
+        original = "package inet.foo;\nsimple Foo {}\n"
+        path = self.write("src/inet/foo/Foo.ned", original)
+        self.commit_all()
+        path.write_text("simple Foo {}\n", encoding="utf-8")
+        self.run_command("git", "add", str(path.relative_to(self.root)))
+        path.write_text(original, encoding="utf-8")
+        result = self.check("--staged")
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-PKG", result.stdout)
+
+    def test_structural_deletions_are_checked(self) -> None:
+        ned_path = self.write("src/inet/foo/Foo.ned", "package inet.foo;\nsimple Foo {}\n")
+        msg_path = self.write("src/inet/foo/Primary.msg", "class Primary {}\nclass Other {}\n")
+        self.commit_all()
+        ned_path.write_text("simple Foo {}\n", encoding="utf-8")
+        msg_path.write_text("class Other {}\n", encoding="utf-8")
+        result = self.check()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-PKG", result.stdout)
+
+    def test_package_deletion_is_checked_in_legacy_package_path(self) -> None:
+        path = self.write("src/inet/foo_bar/Foo.ned", "package inet.foo_bar;\nsimple Foo {}\n")
+        self.commit_all()
+        path.write_text("simple Foo {}\n", encoding="utf-8")
+        result = self.check()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-PKG", result.stdout)
+
+    def test_deletions_inside_comments_and_cplusplus_are_not_structural(self) -> None:
+        path = self.write("src/inet/foo/Legacy.msg", """namespace inet;
+/*
+class Legacy {}
+*/
+cplusplus(Legacy) {{
+class Legacy {};
+}}
+class Other {}
+""")
+        self.commit_all()
+        text = path.read_text(encoding="utf-8")
+        text = text.replace("class Legacy {}\n", "").replace("class Legacy {};\n", "")
+        path.write_text(text, encoding="utf-8")
+        result = self.check()
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_secondary_type_does_not_surface_legacy_file_mismatch(self) -> None:
+        path = self.write("src/inet/foo/Legacy.msg", "class Other {}\n")
+        self.commit_all()
+        path.write_text("class Other {}\nclass Secondary {}\n", encoding="utf-8")
+        result = self.check()
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_renamed_file_is_scanned_completely(self) -> None:
+        old_path = self.write("src/inet/foo/Old.ned", "package inet.foo;\nsimple Old {}\n")
+        self.commit_all()
+        new_path = old_path.with_name("New.ned")
+        result = self.run_command("git", "mv", str(old_path.relative_to(self.root)), str(new_path.relative_to(self.root)))
+        self.assertEqual(0, result.returncode, result.stderr)
+        result = self.check()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-PKG", result.stdout)
+        staged_result = self.check("--staged")
+        self.assertEqual(1, staged_result.returncode)
+        self.assertIn("NR-PKG", staged_result.stdout)
+
+    def test_copied_staged_file_is_scanned_completely(self) -> None:
+        source = self.write("src/inet/foo/Source.ned", "package inet.foo;\nsimple Source {}\n")
+        self.commit_all()
+        copy = source.with_name("Copy.ned")
+        copy.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+        self.run_command("git", "add", str(copy.relative_to(self.root)))
+        result = self.check("--staged")
+        self.assertEqual(1, result.returncode)
+        self.assertIn("NR-PKG", result.stdout)
+
+    def test_deleted_files_are_ignored_without_reading(self) -> None:
+        path = self.write("src/inet/foo/Foo.ned", "package inet.foo;\nsimple Foo {}\n")
+        self.commit_all()
+        path.unlink()
+        working_result = self.check()
+        self.assertEqual(0, working_result.returncode, working_result.stdout + working_result.stderr)
+        self.run_command("git", "add", "-u")
+        staged_result = self.check("--staged")
+        self.assertEqual(0, staged_result.returncode, staged_result.stdout + staged_result.stderr)
+
+    def test_diagnostics_are_stably_sorted(self) -> None:
+        self.write("src/inet/zeta/Zeta.ned", "package inet.zeta;\nsimple bad {}\n")
+        self.write("src/inet/alpha/Alpha.ned", "package inet.alpha;\nsimple bad {}\n")
+        result = self.check("src/inet/zeta/Zeta.ned", "src/inet/alpha/Alpha.ned")
+        self.assertEqual(1, result.returncode)
+        diagnostics = [line for line in result.stdout.splitlines() if line.startswith("src/")]
+        self.assertEqual(diagnostics, sorted(diagnostics))
+
+    def test_invalid_path_returns_usage_error(self) -> None:
+        self.write("README.md", "fixture\n")
+        result = self.check("README.md")
+        self.assertEqual(2, result.returncode)
+
+    def test_explicit_unsupported_file_returns_usage_error(self) -> None:
+        self.write("src/inet/foo/Foo.cc", "// fixture\n")
+        result = self.check("src/inet/foo/Foo.cc")
+        self.assertEqual(2, result.returncode)
+        self.assertIn("unsupported file type", result.stderr)
+
+
+if __name__ == "__main__":
+    unittest.main()

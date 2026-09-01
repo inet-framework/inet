@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
 # The naming gate for INET — a T3 fitness function (see AR-QUAL-ENFORCED).
-# It enforces the mechanical half of doc/project/rule/naming.md: the names a script can see.
-# The C++ identifiers are check-cpp.sh; the NED, .msg and semantic names are T4 agent review.
+# It enforces the path/asset half of doc/project/rule/naming.md: the names a script can see.
+# The C++ identifiers are check-cpp.sh; declaration-level NED/MSG names are checked by the
+# canonical diff-aware check-ned-msg-naming.py gate below.
 #
 #   NR-PKG    — a directory is lowercase, run-together, with no underscore and no hyphen
 #   NR-DIR    — a package directory is singular
@@ -14,7 +15,7 @@
 #   doc/project/enforcement/check-naming.sh            # the whole tree
 #   doc/project/enforcement/check-naming.sh src/inet/linklayer   # one subtree
 #
-# Exit status 0 = clean, 1 = violations. A hit that is already a row in
+# Exit status 0 = clean, 1 = candidates, 2 = invalid invocation or missing canonical gate. A hit that is already a row in
 # doc/project/audit/naming-exceptions.md is known — record a genuinely new one as NV-*.
 
 set -uo pipefail
@@ -55,8 +56,31 @@ if [ "$SCOPE" = "src/inet" ]; then
 fi
 
 echo
+if [ "$SCOPE" = "src/inet" ]; then
+  echo "== NR-NED/MSG: changed declaration names =="
+  NED_MSG_GATE="doc/project/enforcement/check-ned-msg-naming.py"
+  if [ ! -f "$NED_MSG_GATE" ]; then
+    echo "error: canonical gate missing: $NED_MSG_GATE" >&2
+    status=2
+  elif ! command -v python3 >/dev/null 2>&1; then
+    echo "error: python3 is required for canonical gate: $NED_MSG_GATE" >&2
+    status=2
+  else
+    python3 "$NED_MSG_GATE"
+    gate_status=$?
+    if [ "$gate_status" -eq 2 ]; then
+      status=2
+    elif [ "$gate_status" -ne 0 ] && [ "$status" -eq 0 ]; then
+      status=1
+    fi
+  fi
+fi
+
+echo
 if [ "$status" -eq 0 ]; then
   echo "PASS: naming checks clean."
+elif [ "$status" -eq 2 ]; then
+  echo "ERROR: naming gate could not run." >&2
 else
   echo "FAIL: naming violations found. A hit already listed in"
   echo "      doc/project/audit/naming-exceptions.md is known; record a new one as an NV-* row."
