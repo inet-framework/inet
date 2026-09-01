@@ -60,14 +60,29 @@ showcase uses, the steps give:
    08-AA-00-FF-FE-00-00-09    after inverting the bit (0A becomes 08)
    08aa:00ff:fe00:0009        the interface identifier
 
-Leading zeros are dropped when the address is printed, so this identifier appears
-as ``8aa:ff:fe00:9`` in every figure and log excerpt below. Recognizing this
-pattern makes the addresses in this showcase readable: the ``ff:fe`` in the middle
-is the inserted marker, and the last digits come straight from the MAC address.
+Two printing rules shorten the result. Leading zeros inside a 16-bit group are
+dropped, so ``00ff`` is written ``ff``. And one run of all-zero groups may be
+replaced by ``::``, which is why the link-local address below is written
+``fe80::8aa:ff:fe00:9`` rather than ``fe80:0000:0000:0000:08aa:00ff:fe00:0009``.
+The ``::`` may appear only once in an address, because otherwise it would be
+ambiguous how many groups each one stood for.
+
+Recognizing the pattern makes the addresses in this showcase readable: ``ff:fe``
+near the middle is the inserted marker, and the final digits come from the MAC
+address. Take that as a reading aid for these addresses rather than a general rule.
+The 16-bit groups do not line up with the byte boundaries, so ``00ff`` is really the
+third MAC byte followed by the inserted ``FF``; it only looks tidy here because
+these MAC addresses have zeros in the middle.
 
 Two hosts with different MAC addresses therefore produce different interface
 identifiers. This is what makes autoconfiguration work without a server: the host
-already owns a value that is supposed to be unique on the link.
+already owns a value that is supposed to be unique on the link. Throughout this
+page, *the link* means one Ethernet broadcast domain — everything reachable
+without passing through a router, which in IPv4 terms is one subnet.
+
+``0A-AA-00-00-00-09`` is the address INET generated for ``host[0]`` in the first
+simulation. MAC addresses are assigned automatically there; only the second
+simulation sets any by hand.
 
 The link-local address
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -90,8 +105,10 @@ it. Two messages carry this information:
   multicast address ``ff02::1``. Routers send Router Advertisements periodically
   on their own, and also in answer to a Router Solicitation.
 
-A host does not have to wait for the next periodic Router Advertisement. It sends
-a Router Solicitation as soon as its link-local address is ready. If nothing
+A host does not have to wait for the next periodic Router Advertisement. Once its
+link-local address has passed its check, it waits a random time of up to one second
+— so that hosts starting together do not all solicit at the same instant — and then
+sends a Router Solicitation. If nothing
 answers after three attempts, four seconds apart, the host concludes that there is
 no router on the link. It keeps its link-local address and can still reach
 neighbors on the same link. It does not stop listening, though: a Router
@@ -104,13 +121,17 @@ all-nodes multicast address, which is what lets one answer serve several hosts i
 the results below.
 
 A router must not flood the link with Router Advertisements. Each advertising
-interface keeps its own record of when it last sent one, and defers each solicited
-Router Advertisement to at least three seconds after that, plus a small random
-delay. Two consequences matter for reading the results. A router with two
-interfaces runs two independent timers, so an advertisement on one link says
-nothing about the timing on the other. And when several solicitations are pending
-at once, each deferral is computed on its own, so two advertisements can still end
-up closer together than three seconds.
+interface keeps its own record of when it last sent one, and defers a solicited
+Router Advertisement to at least three seconds after that, plus a random delay of
+up to half a second. If an advertisement is already scheduled to go out no later
+than the newly computed time, the router schedules nothing: the pending
+advertisement will serve the new solicitation as well.
+
+Two consequences matter for reading the results. A router with two interfaces runs
+two independent timers, so an advertisement on one link says nothing about the
+timing on the other. And because each deferral carries its own random delay, the
+order in which solicitations arrive does not decide the order in which they are
+answered.
 
 The Prefix Information option
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -155,15 +176,11 @@ The solicited-node multicast address
 A Neighbor Solicitation is not broadcast. It is sent to the *solicited-node
 multicast address* of the target: the prefix ``ff02::1:ff00:0/104`` with the low 24
 bits of the target address filling the remainder. A host testing
-``fe80::8aa:ff:fe00:9`` therefore sends to ``ff02::1:ff00:9``. On Ethernet this maps
-to the multicast MAC address ``33-33-FF-00-00-09``, so network cards whose address
-does not match discard the frame in hardware. IPv4 Address Resolution Protocol
-(ARP) instead broadcasts, and every node has to inspect the packet.
-
-The saving is at the receiving node, not on the wire. An Ethernet switch that does
-not track multicast membership still forwards the frame to every port, as the
-switch in this showcase does. What changes is that only the intended target spends
-any effort on it.
+``fe80::8aa:ff:fe00:9`` therefore sends to ``ff02::1:ff00:9``, which on Ethernet
+maps to the multicast MAC address ``33-33-FF-00-00-09``. IPv4 Address Resolution
+Protocol (ARP) instead broadcasts, and every node on the link has to inspect the
+packet. On real hardware the network card of an uninvolved node rejects the
+multicast frame without waking the processor.
 
 The order of events
 ~~~~~~~~~~~~~~~~~~~
@@ -246,11 +263,19 @@ results are:
 
 - :par:`dupAddrDetectTransmits` — how many Neighbor Solicitations to send for
   Duplicate Address Detection (DAD), one by default. Setting it to ``0`` skips the
-  probing: the address is accepted at once, and is counted as a completed check.
-- :par:`retransTimer` — the wait before the address is accepted, one second by
-  default. A random delay of up to one more second is added, to account for the
-  time a node needs to join the solicited-node multicast group. A successful check
-  therefore takes between one and two seconds.
+  probing entirely: the address is accepted at once. Note that INET then counts a
+  completed check without having counted a started one, so the two statistics below
+  no longer agree.
+- :par:`retransTimer` — the interval between Duplicate Address Detection probes,
+  one second by default, and therefore also the wait after the last probe. INET
+  adds a random delay of up to one more second before accepting the address, so a
+  successful check with the default of one probe takes between one and two seconds.
+  Note that INET truncates this parameter to whole seconds, so a value below one
+  second becomes zero.
+- The delay before a host sends its first Router Solicitation, once its link-local
+  address is accepted, is a further random value of up to one second. It is not a
+  parameter, and it is the reason the gap between a host's completed check and its
+  Router Solicitation differs from host to host in the results below.
 - :par:`minIntervalBetweenRAs` and :par:`maxIntervalBetweenRAs` — how often a
   router sends unsolicited Router Advertisements, 200 and 600 seconds by default.
   These defaults are far longer than the simulations here, so every Router
@@ -261,10 +286,10 @@ results are:
   The randomness is why identically configured hosts do not start together in the
   results below.
 
-The module records three statistics, written to the ``.sca`` result file:
-``startDad`` counts the Duplicate Address Detection runs a node begins,
-``dadCompleted`` counts those that succeed, and ``dadFailed`` counts those that
-find a duplicate.
+The module records three statistics, as both counts in the ``.sca`` file and
+vectors in the ``.vec`` file: ``startDad`` counts the Duplicate Address Detection
+runs a node begins, ``dadCompleted`` counts those that succeed, and ``dadFailed``
+counts those that find a duplicate.
 
 Seeing the addresses appear
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -283,9 +308,16 @@ What INET does not model
 Three limitations bound what this showcase can claim:
 
 - There is no DHCPv6 implementation. A Router Advertisement can carry a *Managed*
-  flag, which tells hosts to obtain addresses from a DHCPv6 server instead, but
-  since no such server exists here the flag has no effect. Stateless Address
-  Autoconfiguration (SLAAC) is the only way a host obtains an address.
+  flag, which tells hosts to obtain addresses from a DHCPv6 server instead. INET's
+  router sends the flag, but its hosts never read it, so setting it does not
+  suppress Stateless Address Autoconfiguration (SLAAC). SLAAC is the only way a
+  host obtains an address here, whatever the flag says.
+- The link-layer multicast filtering described above is not modelled. INET's
+  Ethernet interface accepts every multicast frame, and the address check happens
+  one layer up, in the IPv6 module. Uninvolved nodes therefore do receive and
+  examine a Neighbor Solicitation addressed to someone else's solicited-node
+  multicast address, which real hardware would have discarded. The protocol
+  behaviour is right; the saving in receiver effort is not visible in the model.
 - Temporary privacy addresses are not implemented. Every address is derived from
   the MAC address, so addresses are stable and predictable. That is what makes the
   duplicate-address simulation below possible; real hosts often use randomized
@@ -303,6 +335,11 @@ All simulations use the following network:
 .. figure:: media/network.png
    :align: center
 
+.. FIGURE RECIPE: Qtenv + MCP server on the Autoconfiguration config;
+   run_simulation {"time_limit":"8s"} then get_canvas_image
+   {"area":"module_rectangle","margin":5}. Determinism self-check: host[0] must be
+   labelled 2001:db8:1:1:8aa:ff:fe00:9 and the server 2001:db8:1:2:8aa:ff:fe00:1.
+
 Four hosts and a router are attached to a switch, so they share one link and one
 prefix. A server is attached to the router over a separate link, which therefore
 has a different prefix. The ``configurator`` sets up the router's addresses and
@@ -318,6 +355,10 @@ configurator, as described above.
 Each interface in the figure carries two addresses, a link-local one and a global
 one, but the label shows only the preferred address, which is the global one.
 
+The interface identifiers run ``:1``, ``:2``, ``:3``, then jump to ``:9`` through
+``:c``. Nothing is missing: the switch's own ports took the MAC addresses in
+between, and the switch has no IPv6 address to display.
+
 The general configuration is:
 
 .. literalinclude:: ../omnetpp.ini
@@ -325,9 +366,9 @@ The general configuration is:
    :end-before: [Config Autoconfiguration]
    :language: ini
 
-The first setting points each node's own IPv6 configurator submodule at the
-network-level :ned:`Ipv6NetworkConfigurator`, so that the two agree on which
-addresses and prefixes to use.
+The ``networkConfiguratorModule`` setting points each node's own IPv6 configurator
+submodule at the network-level :ned:`Ipv6NetworkConfigurator`, so that the two agree
+on which addresses and prefixes to use.
 
 Autoconfiguration Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -366,10 +407,12 @@ earlier: an established owner answers with a Neighbor Advertisement. The second
 condition, two hosts testing the same address at the same moment, would need them
 to start together; it is not shown here.
 
-Because assigning explicit MAC addresses to ``host[0]`` and ``host[3]`` also
-shifts the addresses INET generates automatically for the other nodes, the host
-addresses in this simulation differ from those in the first one. Only the
-identifiers change; the mechanism does not.
+Assigning explicit MAC addresses to ``host[0]`` and ``host[3]`` also shifts the
+ones INET generates automatically for ``host[1]`` and ``host[2]``, so those two
+hosts have different addresses here than in the first simulation. ``host[1]`` in
+particular inherits the ``:9`` identifier that belonged to ``host[0]`` before. The
+router and the server are unaffected. Only the identifiers change; the mechanism
+does not.
 
 Results
 -------
@@ -377,9 +420,9 @@ Results
 Autoconfiguration
 ~~~~~~~~~~~~~~~~~
 
-The following video covers the first eight seconds of the ``Autoconfiguration``
-simulation. It starts just after the six nodes have assigned their link-local
-addresses, so each host is labelled with an ``fe80::`` address at the beginning.
+The following video runs the ``Autoconfiguration`` simulation to t = 8 s. Frame
+capture begins a little after the start, so all six link-local addresses are already
+in place in the first frame and each host is labelled with an ``fe80::`` address.
 Watch each label change as the host obtains its global address: ``host[0]`` and
 ``host[1]`` change first, then the server, then ``host[2]`` and ``host[3]``.
 
@@ -394,8 +437,24 @@ address was actually accepted.
    :width: 100%
    :align: center
 
-The log shows the order described earlier. Link-local addresses are built first,
-at times drawn from :par:`hostBootupTime` and :par:`routerBootupTime`:
+.. VIDEO RECIPE: run the Autoconfiguration config in Qtenv with an MCP server
+   (opp_run -u Qtenv -c Autoconfiguration --mcp-server-address localhost:8765),
+   then: set_animation_parameters {"profile":"normal","playback_speed":1,
+   "min_animation_speed":0.5} -- without min_animation_speed you get one frame per
+   event -- then record_video {"time_limit":"8s","fps":20,"crop_area":"network_area",
+   "output_dir":"<this doc>/media"}. Encode the frames with the ffmpeg command the
+   tool returns, then re-crop "crop=1080:466:0:34" to remove the Qtenv toolbar, and
+   delete the PNG frames. Determinism self-check: host[3] must complete DAD for
+   2001:db8:1:1:8aa:ff:fe00:c at 7.094921.
+
+The log excerpts below come from a Cmdenv run of each configuration with
+``--cmdenv-log-level=detail``, with the module paths shortened to the node name for
+readability; the full paths read
+``Ipv6AutoconfigurationShowcase.host[0].ipv6.neighbourDiscovery``. Both runs use the
+default seed, so the times reproduce exactly.
+
+The log shows the order described earlier. Link-local addresses are built first, at
+times drawn from :par:`hostBootupTime` and :par:`routerBootupTime`:
 
 .. code-block:: none
 
@@ -424,12 +483,14 @@ Advertisement that ``host[1]`` asked for, because that Router Advertisement is s
 to the all-nodes multicast address. A single answer serves every host that is
 ready to use it.
 
-``host[2]`` and ``host[3]`` were also on the link at 2.137 s, and their network
-cards did receive that same Router Advertisement. They did not use it, because
-neither had finished checking its own link-local address yet — that happened at
-2.61 s and 2.71 s. As described above, a host in the middle of Duplicate Address
-Detection ignores Router Advertisements. Each therefore had to send a Router
-Solicitation of its own once its check finished:
+``host[2]`` and ``host[3]`` were also on the link at 2.137 s, and did receive that
+same Router Advertisement. They did not use it, because neither had finished
+checking its own link-local address yet — that happened at 2.61 s and 2.71 s. As
+described above, a host in the middle of Duplicate Address Detection ignores Router
+Advertisements. Each therefore had to send a Router Solicitation of its own, after
+the random delay of up to one second that follows a completed check. That delay is
+why the two gaps below differ so much: 0.14 s for ``host[3]``, 0.78 s for
+``host[2]``.
 
 .. code-block:: none
 
@@ -438,11 +499,12 @@ Solicitation of its own once its check finished:
    2.851464  host[3]: Initiating Router Discovery
    3.390352  host[2]: Initiating Router Discovery
 
-The answer to those solicitations did not come immediately. The router had already
-sent a Router Advertisement to the all-nodes multicast address on this interface at
-2.137 s, so it deferred each answer to at least three seconds after that, plus a
-random delay. For ``host[2]``'s solicitation the delay came out at 0.237 s, giving
-5.374 s:
+Note that ``host[3]`` solicits first, at 2.851 s, and ``host[2]`` second, at
+3.390 s — but ``host[2]`` is answered first. The router had already sent a Router
+Advertisement to the all-nodes multicast address on this interface at 2.137 s, so it
+deferred each answer to at least three seconds after that plus a random delay, and
+the two draws came out at 0.435 s and 0.237 s respectively. The random delay, not
+the arrival order, decides which answer goes out first:
 
 .. code-block:: none
 
@@ -453,22 +515,36 @@ random delay. For ``host[2]``'s solicitation the delay came out at 0.237 s, givi
    7.094921  host[3]: DAD completed for address 2001:db8:1:1:8aa:ff:fe00:c, address is unique
 
 Because this advertisement goes to the all-nodes multicast address, it serves both
-hosts, exactly as the 2.137 s one served ``host[0]`` and ``host[1]``. A further
-advertisement follows at 5.572 s, deferred from ``host[3]``'s earlier solicitation;
-by then both hosts are already configured, so it changes nothing. This is the case
-mentioned earlier, where deferrals computed separately for two pending
-solicitations end up closer together than three seconds.
+hosts, exactly as the 2.137 s one served ``host[0]`` and ``host[1]``.
 
 So two separate mechanisms delay these two hosts: first their own Duplicate Address
-Detection, which stops them using an advertisement that was already on the link,
-and then the router's rate limit, which delays the advertisement they asked for. All
-four hosts and the server hold a global address by 7.1 s.
+Detection, which stops them using an advertisement that was already on the link, and
+then the router's rate limit, which delays the advertisement they asked for. All four
+hosts and the server hold a global address by 7.1 s.
 
-The server is served by a Router Advertisement on the other interface, at 3.54 s.
-That interface has its own timer, so it is not affected by the 2.137 s
-advertisement on the host link. This is why the server obtains
-``2001:db8:1:2:8aa:ff:fe00:1``, from the second prefix, while the hosts obtain
-addresses from the first.
+Two further details show up in a full log and are worth naming, because neither is
+explained by the story so far. ``host[0]`` sends a Router Solicitation of its own at
+2.381 s, after it was already configured at 2.137 s: receiving an advertisement does
+not cancel a solicitation a host has already scheduled. And a second advertisement
+goes out at 5.572 s, only 0.198 s after the one at 5.374 s. That one is superfluous.
+When the router scheduled the earlier answer it should have cancelled the later one
+it superseded, and INET does not; a conformant router would have sent a single
+advertisement here. Nothing depends on it, because both hosts were configured by the
+5.374 s advertisement.
+
+The server is served by a Router Advertisement on the other interface. That
+interface has its own timer, so it is not affected by the 2.137 s advertisement on
+the host link, and the answer comes 1.40 s after it:
+
+.. code-block:: none
+
+   3.103720  server:  Initiating Router Discovery
+   3.538770  router:  Create and send RA invoked!
+   3.538781  server:  Assigning new address to: eth0
+   5.339691  server:  DAD completed for address 2001:db8:1:2:8aa:ff:fe00:1, address is unique
+
+This is why the server obtains its address from the second prefix, while the hosts
+obtain theirs from the first.
 
 The statistics in the ``.sca`` result file confirm that every node ran Duplicate
 Address Detection (DAD) exactly twice, once for its link-local address and once
@@ -523,6 +599,11 @@ The consequence is visible on the canvas at the end of the simulation:
 
 .. figure:: media/duplicate_address.png
    :align: center
+
+.. FIGURE RECIPE: Qtenv + MCP server; setup_config {"config_name":"DuplicateAddress"},
+   run_simulation {"time_limit":"18s"}, then get_canvas_image
+   {"area":"module_rectangle","margin":5}. Determinism self-check: host[3] must show
+   <unspec> and host[0] must show 2001:db8:1:1:8aa:ff:fe00:10.
 
 ``host[3]`` shows ``<unspec>``: it has no address at all. The failure stops it at
 the first step, so it never reaches router discovery and never builds a global
