@@ -35,6 +35,7 @@
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
 
 namespace inet {

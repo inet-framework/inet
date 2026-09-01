@@ -15,6 +15,7 @@
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
@@ -261,6 +262,8 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
             details.setLimit(-1); // TODO
             emit(packetDroppedSignal, internallyCollidedFrame, &details);
             emit(linkBrokenSignal, internallyCollidedFrame);
+            if (dynamicPtrCast<const Ieee80211MgmtHeader>(internallyCollidedHeader))
+                mac->notifyFrameTransmission(internallyCollidedFrame, IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
             if (hasFrameToTransmit(ac))
                 edcaf->requestChannel(this);
         }
@@ -392,7 +395,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
         }
         else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader)) {
             edca->getMgmtAndNonQoSRecoveryProcedure()->rtsFrameTransmissionFailed(mgmtHeader, edcaf->getStationRetryCounters());
-            retryLimitReached = edca->getMgmtAndNonQoSRecoveryProcedure()->isRtsFrameRetryLimitReached(packet, dataHeader);
+            retryLimitReached = edca->getMgmtAndNonQoSRecoveryProcedure()->isRtsFrameRetryLimitReached(packet, mgmtHeader);
         }
         else
             throw cRuntimeError("Unknown frame"); // TODO QoSDataFrame, NonQoSDataFrame
@@ -410,6 +413,8 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
             details.setLimit(-1); // TODO
             emit(packetDroppedSignal, packet, &details);
             emit(linkBrokenSignal, packet);
+            if (dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader))
+                mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
         }
     }
     else
@@ -531,6 +536,8 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             details.setLimit(-1); // TODO
             emit(packetDroppedSignal, failedPacket, &details);
             emit(linkBrokenSignal, failedPacket);
+            if (dynamicPtrCast<const Ieee80211MgmtHeader>(failedHeader))
+                mac->notifyFrameTransmission(failedPacket, IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
         }
         else {
             EV_INFO << "Retrying frame " << failedPacket->getName() << ".\n";
@@ -586,7 +593,7 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         }
         else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedHeader)) {
             if (dataAndMgmtRateControl) {
-                int retryCount = edca->getMgmtAndNonQoSRecoveryProcedure()->getRetryCount(lastTransmittedPacket, dataHeader);
+                int retryCount = edca->getMgmtAndNonQoSRecoveryProcedure()->getRetryCount(lastTransmittedPacket, mgmtHeader);
                 dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
             }
             edca->getMgmtAndNonQoSRecoveryProcedure()->ackFrameReceived(lastTransmittedPacket, mgmtHeader, edcaf->getStationRetryCounters());
@@ -597,6 +604,8 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         edcaf->getAckHandler()->processReceivedAck(ackFrame, lastTransmittedDataOrMgmtHeader);
         edcaf->getInProgressFrames()->dropFrame(lastTransmittedPacket);
         edcaf->getAckHandler()->dropFrame(lastTransmittedDataOrMgmtHeader);
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedHeader))
+            mac->notifyFrameTransmission(lastTransmittedPacket, IFrameTransmissionCallback::Status::ACKNOWLEDGED);
     }
     else if (auto blockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(header)) {
         EV_INFO << "BasicBlockAck has arrived" << std::endl;
