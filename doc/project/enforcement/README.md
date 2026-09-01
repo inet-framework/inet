@@ -36,11 +36,13 @@ measured.
 | Gate | Tier | Runs | Covers |
 | --- | --- | --- | --- |
 | the C++ compiler and the NED toolchain | T1 | every build | the contract, composition, chunk, tag, signal, socket, queueing and lifecycle APIs |
-| [check-architecture.sh](check-architecture.sh) | T3 | by hand; not yet in CI | `AR-ORG-DOMAINS`, `AR-ORG-VIS-SPLIT` over the `#include` graph |
+| [check-architecture.sh](check-architecture.sh) | T3 | by hand; not yet in CI | `AR-ORG-DOMAINS`, `AR-ORG-VIS-SPLIT`, `AR-COM-SOCKETS`, and the source-level part of `AR-QUAL-DETERMINISM` |
 | [check-cpp.sh](check-cpp.sh) | T3 | by hand; not yet in CI | the C++ half of `NR-*` and the bug and modernization rules of `QR-*`, through the root [`.clang-tidy`](../../../.clang-tidy) |
-| [check-naming.sh](check-naming.sh) | T3 | by hand; not yet in CI | the mechanical half of `NR-*`: file names, package names, generated pairs, icon names |
+| [check-naming.sh](check-naming.sh) | T3 | by hand; not yet in CI | the path and asset half of `NR-*`: directory names, generated pairs, icon names, workflow names |
+| [check-ned-msg-naming.py](check-ned-msg-naming.py) | T3 | by hand; not yet in CI | declaration-level `NR-*`: NED/MSG package and file/type agreement, casing, fields, signals/statistics, and gate names |
 | [check-commits.sh](check-commits.sh) | T3 | by hand; not yet in CI | `PR-SPLIT-WHITESPACE`, `PR-SPLIT-MOVE`, `PR-SPLIT-BASELINE`, `PR-SERIES-ORDER`, `PR-SERIES-LINEAR`, `PR-MSG-SUBJECT`, `PR-MSG-FACTS` |
 | [check-seals.sh](check-seals.sh) | T3 | by hand; not yet in CI | `SR-FLAG-PLACEMENT`, `SR-FLAG-COVERAGE`, and the generated index of [seal-list.md](../audit/seal-list.md) |
+| [check-source-seals.sh](check-source-seals.sh) | T3 | by hand; not yet in CI | source-path `SR-*`: recursive and generated-file seal coverage from [seal-list.md](../audit/seal-list.md) |
 | [checklist/general.md](checklist/general.md) | T4 | by an agent, on every change | the semantic architecture rules |
 | [checklist/ieee80211.md](checklist/ieee80211.md) | T4 | by an agent, on an 802.11 diff | `AR-WLAN-*` |
 | the test suites | T2 | GitHub Actions, twelve workflows | `TR-*`, `AR-QUAL-FINGERPRINT`, `AR-QUAL-DETERMINISM` |
@@ -58,10 +60,22 @@ doc/project/enforcement/check-architecture.sh              # the whole tree
 doc/project/enforcement/check-architecture.sh src/inet/common/packet   # one subtree
 doc/project/enforcement/check-cpp.sh src/inet/linklayer/ethernet
 doc/project/enforcement/check-naming.sh
+python3 doc/project/enforcement/check-ned-msg-naming.py  # added/staged NED and MSG declarations
 doc/project/enforcement/check-commits.sh origin/master..HEAD
-doc/project/enforcement/check-seals.sh                     # check
-doc/project/enforcement/check-seals.sh --write             # check and rewrite the index
+doc/project/enforcement/check-source-seals.sh --diff       # changed source paths against seals
+doc/project/enforcement/check-source-seals.sh src/inet/foo/Foo.cc
+doc/project/enforcement/check-seals.sh                    # document flags and generated index
+doc/project/enforcement/check-seals.sh --write            # check and rewrite the index
+python3 -m unittest discover -s doc/project/enforcement -p 'test_*.py'
 ```
+
+The NED/MSG checker is diff-focused by default: it checks added, copied, renamed, and untracked
+files completely, and checks only added lines in modified files. `--staged` reads the index;
+explicit `.ned` and `.msg` paths are checked completely. The source-seal gate defaults to the
+working-tree diff when no option is supplied; use `--staged` or explicit source paths as needed.
+`check-seals.sh` checks document flags, while `check-source-seals.sh` checks paths under `src/inet/`.
+Both gates return `2` for an invalid invocation or missing canonical registry; do not substitute a
+skill-package copy when a canonical gate is unavailable.
 
 [guide/run-the-gates.md](../guide/run-the-gates.md) says which of them to run before a push, and in
 which order.
