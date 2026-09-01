@@ -270,8 +270,14 @@ def strip_comments(lines: list[str]) -> list[str]:
             if not in_string and line.startswith("//", index):
                 break
             char = line[index]
-            if char == '"' and (index == 0 or line[index - 1] != "\\"):
-                in_string = not in_string
+            if char == '"':
+                backslash_run = 0
+                cursor = index - 1
+                while cursor >= 0 and line[cursor] == "\\":
+                    backslash_run += 1
+                    cursor -= 1
+                if backslash_run % 2 == 0:
+                    in_string = not in_string
             output.append(char)
             index += 1
         cleaned.append("".join(output))

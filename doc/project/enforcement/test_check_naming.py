@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import runpy
 import shutil
 import subprocess
 import sys
@@ -86,6 +87,48 @@ class Foo
 """)
         result = self.check("src/inet/foo/Foo.ned", "src/inet/foo/Foo.msg")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_ned_comment_after_even_backslash_run_is_stripped(self) -> None:
+        self.write("src/inet/foo/Foo.ned", r'''package inet.foo;
+simple Foo
+{
+    parameters:
+        string value = default("literal://path/*part*/\\"); // @signal[BadSignal](type=long);
+}
+''')
+
+        result = self.check("src/inet/foo/Foo.ned")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_msg_comment_after_even_backslash_run_is_stripped(self) -> None:
+        self.write("src/inet/foo/Foo.msg", r'''namespace inet;
+packet Foo
+{
+    string value = "literal://path/*part*/\\"; // int Bad_field;
+}
+''')
+
+        result = self.check("src/inet/foo/Foo.msg")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_comment_markers_inside_strings_are_preserved(self) -> None:
+        strip_comments = runpy.run_path(str(CHECKER))["strip_comments"]
+        lines = [
+            r'value = "literal://path"; // trailing comment',
+            r'value = "literal/*part*/path"; /* trailing comment */',
+            r'value = "escaped quote: \" // literal"; // trailing comment',
+        ]
+
+        self.assertEqual(
+            [
+                r'value = "literal://path"; ',
+                r'value = "literal/*part*/path"; ',
+                r'value = "escaped quote: \" // literal"; ',
+            ],
+            strip_comments(lines),
+        )
 
     def test_reports_one_line_msg_field(self) -> None:
         self.write("src/inet/foo/Foo.msg", """namespace inet;
