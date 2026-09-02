@@ -242,7 +242,36 @@ That layout is what makes the comparison a one-line change. The ``plca``
 submodule is declared ``like IProtocolLayer``, which means setting its
 ``typename`` to the empty string omits it altogether and connects the MAC
 straight to the PHY. Nothing else moves: the same MAC, PHY, queue and cable
-run on both sides of every comparison on this page.
+run on both sides of every comparison on this page. Opening the interface in
+both configurations shows the whole difference:
+
+.. figure:: media/interface-stack.png
+   :align: center
+
+..
+   FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   type:     canvas, two captures composited side by side
+   config:   CycleAnatomy (left) and CsmaCdCycleAnatomy (right)  # omnetpp.ini
+   seed:     default (r 0)
+   shows:    node[0].eth[0] opened up. Left: queue - mac - plca - phy. Right: the same
+             interface with the plca submodule omitted, mac wired straight to phy.
+   anchor:   initial state (t=0, before run); the banner reads EthernetPlcaInterface in
+             BOTH panels - that is the point, the interface type does not change, only
+             whether the optional layer is instantiated. If the right panel grows a plca
+             box or the banner differs, CsmaCdBase stopped removing the layer.
+   capture:  launch each config with an MCP server and the state labels suppressed, so
+             the FSM text does not overlap the module names:
+               inet -u Qtenv -c <Config> '--**.displayStringTextFormat=""' \
+                    --mcp-server-address localhost:8765
+             then, per config:
+               set_canvas_view {module_path:"MultidropNetwork.node[0].eth[0]", fit:true}
+               get_canvas_image {module_path:"MultidropNetwork.node[0].eth[0]",
+                                 area:"module_rectangle", margin:8}
+   compose:  montage -label 'PLCA: queue - mac - plca - phy' iface-plca.png \
+               -label 'CSMA/CD: plca.typename = "", mac connects straight to phy' \
+               iface-csmacd.png -tile 2x1 -geometry +12+12 -gravity north \
+               -background white -fill black -pointsize 15 interface-stack.png
+   stamp:    captured 2026-09-02, INET topic/gy/tenbaset1s-showcase, OMNeT++ 6.4.0aipre2
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
