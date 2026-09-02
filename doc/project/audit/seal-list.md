@@ -70,7 +70,7 @@ section indexes them so the registry stays one place to look.
 | --- | --- | ---: | ---: | ---: |
 | `audit/architecture-exceptions.md` | by row | 0 | 0 | 0 |
 | `audit/naming-exceptions.md` | by row | 0 | 0 | 0 |
-| `design/decisions.md` | by decision | 0 | 0 | 18 |
+| `design/decisions.md` | by decision | 0 | 0 | 20 |
 | `design/node-anatomy.md` | by section | 0 | 0 | 6 |
 | `design/packet-anatomy.md` | by section | 0 | 0 | 5 |
 | `design/protocol-anatomy.md` | by section | 0 | 0 | 5 |

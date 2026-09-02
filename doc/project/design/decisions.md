@@ -10,9 +10,9 @@ A decision below could have gone another way and did not. Each one names the req
 and the price it charges, because a design that carries no cost has not been described honestly. The
 option that lost is in [rejected-designs.md](rejected-designs.md), as a `REJ-*` entry.
 
-A decision is a *choice*. The rule that a change is checked against is in
-[rule/architecture.md](../rule/architecture.md), as an `AR-*` rule. Most decisions here have one or
-more `AR-*` rules that keep them true; the decision says why, and the rule says what to check.
+A decision is a *choice*. The rule that a change is checked against is under `rule/`, as shown in
+the [project chain](../README.md#the-chain). Most decisions here have one or more project rules that
+keep them true; the decision says why, and the rule says what to check.
 
 **Cite, do not repeat.** What each part *is*, in its settled form, is in the anatomy documents:
 [node-anatomy.md](node-anatomy.md), [protocol-anatomy.md](protocol-anatomy.md),
@@ -25,7 +25,7 @@ used is a chapter of the Developer's Guide under `doc/src/developers-guide/`.
 2. One or two sentences on what it buys.
 3. *Serves* — the requirements and the user-visible capability behind it.
 4. *Costs* — what the choice charges, and who pays.
-5. *Kept true by* — the `AR-*` rules that stop it from eroding.
+5. *Kept true by* — the project rules that stop it from eroding.
 
 ## Index
 
@@ -38,7 +38,8 @@ Every decision in document order. The identifier links to the decision; the stat
 | [D-KERNEL](#d-kernel) | Build on the OMNeT++ kernel |
 | [D-NED-TRUTH](#d-ned-truth) | NED is the single source of truth for a module's external interface |
 | [D-COMPOSE](#d-compose) | Behavior comes from small simple modules, structure from compound modules |
-| [D-CONTRACTS](#d-contracts) | Every extensible role is a named contract |
+| [D-CONTRACTS](#d-contracts) | Every extensible role is a named contract with invariant caller-visible semantics |
+| [D-OWNERSHIP](#d-ownership) | Every object's lifetime follows one explicit ownership model |
 | [D-CHUNKS](#d-chunks) | Packet content is a tree of typed, immutable, shared chunks |
 | [D-DUAL](#d-dual) | Every header has both a field form and a raw-byte form |
 | [D-TAGS](#d-tags) | Local metadata travels in tags, never in wire content |
@@ -52,6 +53,7 @@ Every decision in document order. The identifier links to the decision; the stat
 | [D-OBSERVE](#d-observe) | Observation is one way: the model emits, the observer subscribes |
 | [D-EXTEND-BY-ATTACH](#d-extend-by-attach) | A new protocol extends the core by attaching to it, never by editing it |
 | [D-FEATURES](#d-features) | Optional functionality is partitioned into features that can be switched off |
+| [D-STABLE-CODES](#d-stable-codes) | Externally visible numeric codes have stable identities |
 | [D-FINGERPRINT](#d-fingerprint) | A behavioral regression is caught by a trajectory fingerprint |
 
 ## The decisions
@@ -100,17 +102,37 @@ inheritance chain.** A node, a protocol stack and a datapath are all composition
 
 ### D-CONTRACTS
 
-**Every extensible role is a named contract**
+**Every extensible role is a named contract with invariant caller-visible semantics**
 
 **A role that more than one implementation can fill is a C++ abstract class and a NED
-`moduleinterface`, and a slot that holds it is interface-typed with a replaceable default.** A user
-swaps an implementation in configuration; the core never learns the concrete type.
+`moduleinterface`, and a slot that holds it is interface-typed with a replaceable default.** The
+contract declares the caller-visible meaning and outcome distinctions of each operation; every
+implementation, adapter and caller preserves them. A user swaps an implementation in
+configuration without changing those semantics, and the core never learns the concrete type.
 
 - *Serves* `R-COMPOSE-NODES`, `R-SCOPE-FIDELITY`.
-- *Costs* an interface for every role, and the discipline to keep it minimal. A contract that grows
-  a method for one implementation stops being a contract.
+- *Costs* an interface for every role, and the discipline to keep it minimal while defining every
+  meaningful outcome. A contract that grows a method for one implementation, or lets implementations
+  reinterpret absence, refusal or failure, stops being a contract.
 - *Kept true by* [AR-ORG-CONTRACTS](../rule/architecture.md#ar-org-contracts),
   [AR-MOD-PLUGGABLE](../rule/architecture.md#ar-mod-pluggable).
+
+### D-OWNERSHIP
+
+**Every object's lifetime follows one explicit ownership model**
+
+**Every object is exclusively owned, shared through a reference-counted contract, or borrowed for a
+declared lifetime.** Owners and holders determine when an object is retained, transferred, released
+or destroyed; a borrower never extends that lifetime. Every supported terminal path settles each
+owning obligation exactly once.
+
+- *Serves* `R-RUN-LIFECYCLE`, `R-RUN-REPRO`. Cleanup and deferred work cannot depend on an implicit
+  guess about who still owns an object.
+- *Costs* ownership-aware APIs and a review of every success, refusal, error, cancellation and
+  teardown path. Shared ownership also costs reference counting where exclusive ownership would be
+  cheaper.
+- *Kept true by* [QR-OBJECT-OWNERSHIP](../rule/quality.md#qr-object-ownership) and, for shared packet
+  content, [AR-PKT-CHUNKS](../rule/architecture.md#ar-pkt-chunks).
 
 ### D-CHUNKS
 
@@ -292,6 +314,23 @@ is fully excluded from the build.** The user compiles the subset they need.
 - *Costs* a dependency graph to keep valid and a build matrix to test. A feature that is never built
   without its neighbours is a feature in name only.
 - *Kept true by* [AR-EXT-FEATURES](../rule/architecture.md#ar-ext-features).
+
+### D-STABLE-CODES
+
+**Externally visible numeric codes have stable identities**
+
+**An enum value or named categorical code that crosses an implementation boundary is assigned an
+explicit number whose meaning is preserved across ordinary refactoring and releases.** Its number is
+an external identity, not its present position in a declaration. A deliberate change is a
+compatibility break with a migration path; codes confined to one implementation remain free to
+change with it.
+
+- *Serves* `R-DIST-COMPAT`, `R-RESULT-EXPORT`, `R-RESULT-AUTOMATION`. Configuration, captures,
+  recorded results and external tools continue to interpret the same number as the same category.
+- *Costs* explicit assignments, unused gaps when values retire, and a migration obligation when an
+  established number or meaning must change.
+- *Kept true by* [RR-NUMERIC-STABLE](../rule/release.md#rr-numeric-stable) and
+  [RR-BREAK-MIGRATE](../rule/release.md#rr-break-migrate).
 
 ### D-FINGERPRINT
 
