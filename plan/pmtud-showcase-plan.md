@@ -85,7 +85,23 @@ found" below.
    serialized capture. **NOT FIXED** — the one-line fix changes packet content, which
    could move fingerprints, and that sweep was too expensive to run here. Bug-report
    candidate; decide with the user.
-4. The agent saw master storm on that scenario (~750k messages in the FES, 4.7 GB
+4. **A tunnel MTU below 1280 is an unrecoverable black hole.** RFC 2473 Section 7.1
+   says a tunnel entry point must report at least the IPv6 minimum link MTU in its
+   Packet Too Big (case a), and must *encapsulate and fragment* rather than refuse when
+   the inner packet is no larger than that minimum (case b). INET does neither:
+   `Icmpv6::sendPtbMessage()` passes the caller's value through unclamped and
+   `Ipv6::fragmentAndSend()` refuses every oversized forwarded packet regardless of
+   size. Verified: `Discovery` with `tun[0].mtu = 1200B` delivers 0 of 16. The sender
+   correctly floors its estimate at 1280, the tunnel then refuses the 1280-byte
+   fragments, and it never recovers. **NOT FIXED** — the full fix needs case (b), which
+   is more than a clamp. The showcase page warns readers to treat 1280 as a hard lower
+   bound.
+5. **Incoming Packet Too Big messages are not validated.** RFC 8201 Section 4 asks a
+   node to check that the datagram quoted in the message is one it actually sent.
+   `Icmpv6::processICMPv6Message()` and `Ipv6::handleIcmpErrorIndication()` do not, so
+   any node that can guess enough about a flow can force a sender to shrink its
+   packets. **NOT FIXED.** Noted on the showcase page.
+6. The agent saw master storm on that scenario (~750k messages in the FES, 4.7 GB
    resident) while this branch runs clean, and could not attribute it.
    **Attribution is now known: that is the `isWireless` phantom-link bug fixed by
    commit 0a93193944** — the probe's `<wireless>` workaround had been removed, so

@@ -48,7 +48,10 @@ The node that does the wrapping has two roles at once, and the rules for them di
 
 - For the **inner** packet it is a *router*. It is forwarding somebody else's packet,
   so it may not split it. If the inner packet is larger than the tunnel will accept,
-  the packet is discarded and a Packet Too Big message goes back to the sender.
+  INET discards it and sends a Packet Too Big message back to the sender. (RFC 2473
+  asks for this only when the packet is larger than the 1280-byte IPv6 minimum;
+  smaller ones should be wrapped and the resulting outer packet fragmented. INET
+  refuses in both cases.)
 - For the **outer** packet it is the *sender*. It built that packet itself, so it may
   split it. If the outer packet is too large for the link, it is fragmented and the
   far end of the tunnel puts the pieces back together.
@@ -70,7 +73,12 @@ filter; Packet Too Big is on that list.
 When the message does not arrive, the sender never learns and keeps sending the same
 size. Every one of those packets is discarded. Small packets continue to work, so the
 network looks healthy while large transfers hang. This is called a Path MTU Discovery
-black hole.
+black hole, and it is what this showcase demonstrates.
+
+A message travelling backwards can also be *invented* rather than lost. A node that
+accepts any Packet Too Big it receives can be told to shrink its packets by anyone who
+can guess enough about a flow, which is why RFC 8201 asks a node to check that the
+datagram quoted in the message is one it actually sent. INET performs no such check.
 
 Because the mechanism cannot be relied on, network operators fall back on a cruder
 one: they configure tunnel routers to rewrite the Maximum Segment Size option inside
@@ -95,8 +103,10 @@ The value that avoids fragmentation is the link's limit minus the outer header:
     1500 (Ethernet)  -  40 (outer IPv6 header)  =  1460
 
 Set the tunnel to 1460 and the two checks line up. Any inner packet the tunnel accepts
-still fits the link once wrapped, so nothing is ever fragmented. Anything larger is
-refused at the first check and never reaches the second.
+still fits the link once wrapped, so the tunnel never has to split anything, and
+anything larger is refused at the first check instead. That does not mean nothing is
+fragmented anywhere — it means the tunnel is not the one doing it. The sender may
+still split its own packets, and in the ``Discovery`` configuration below it does.
 
 RFC 2473 expects a tunnel to derive this number from the path between its endpoints
 and to keep it up to date as that path changes. INET's tunnel interface has a fixed
@@ -107,17 +117,26 @@ Discovering the path limit
 
 The ``Ipv6`` module carries out Path MTU Discovery and has two parameters for it:
 
-- ``pathMtuDiscovery`` — whether the node acts on incoming Packet Too Big messages.
-  Enabled by default. Turning it off restores the behaviour of a node that never
-  learns.
+- ``pathMtuDiscovery`` — whether the node records what an incoming Packet Too Big
+  message reports, and whether it uses what it has recorded when sending. Enabled by
+  default. Turning it off restores the behaviour of a node that never learns. A TCP
+  connection reacts to these messages on its own account and is not affected by this
+  parameter.
 - ``pathMtuAgingTime`` — how long a learned value is kept before the node tries a
   larger size again, ten minutes by default. A path can widen, and nothing would tell
   the sender if it never retried.
 
 A learned value is never raised by an incoming message, only lowered, and it is never
-taken below 1280 bytes, which RFC 8201 fixes as the smallest MTU any IPv6 link must
-support. The ten-minute retry has no effect in a ten-second run; it matters in longer
-ones.
+taken below 1280 bytes. That number is the smallest MTU any IPv6 link must support,
+fixed by RFC 8200; RFC 8201 only forbids reducing the estimate past it. The ten-minute
+retry has no effect in a ten-second run; it matters in longer ones.
+
+The floor protects the sender, not the path. Setting a tunnel's ``mtu`` below 1280
+produces a tunnel that refuses packets no sender is allowed to shrink far enough to
+fit, and the traffic is then lost permanently. RFC 2473 tells a tunnel entry point to
+report at least the IPv6 minimum and to encapsulate and fragment small packets rather
+than refuse them; INET does neither, so treat 1280 as a hard lower bound when setting
+this parameter.
 
 The learned value is held in the node's routing table, alongside the cached next hop
 for that destination, and the node reports it in its log when it changes — ``Path MTU
@@ -165,8 +184,10 @@ Three things about that policy are worth knowing before adapting it.
 The first entry discards ICMPv6 — protocol number 58 — travelling from anywhere beyond
 the firewall towards ``hostA``'s network. The selector matches on addresses rather
 than on the message type, because the type selector only works for IPv4's ICMP. So
-this filter drops *all* ICMPv6 between those two address ranges, not only Packet Too
-Big. That is realistic: firewalls that cause this problem block ICMP broadly.
+this filter drops *all* ICMPv6 travelling from the far range towards ``hostA``'s
+network, not only Packet Too Big. It is a one-way rule: ICMPv6 that ``hostA`` sends
+outward is not affected. Dropping a whole class of ICMPv6 in one direction is
+realistic — firewalls that cause this problem block ICMP broadly.
 
 ``LocalAddress`` and ``RemoteAddress`` are named from the point of view of the
 direction, not of the node. For an ``OUT`` policy, ``LocalAddress`` matches the
@@ -176,12 +197,20 @@ endpoint, as here, that is easy to get backwards.
 The two ``BYPASS`` entries are not optional. When no policy matches, the default is to
 discard, so a policy file with only the first entry would silence the node completely.
 
-The address ranges are chosen so that neither side can be one of the firewall's own
-addresses. Neighbor Discovery sends its unicast messages from a node's global address,
-so a filter written in terms of address *scope* would discard the firewall's own
-Neighbor Advertisements and break the network. Multicast Neighbor Discovery is never
-filtered, so Router Advertisements and Duplicate Address Detection are unaffected
-either way.
+The address ranges have to be chosen with the firewall's own traffic in mind. Neighbor
+Discovery sends its unicast messages from a node's global address, so a filter written
+in terms of address *scope* — link-local against global — would discard the firewall's
+own Neighbour Advertisements and break the network.
+
+The ranges used here work, but not because the firewall's addresses are outside them:
+its ``eth1`` address ``2001:db8:2::1`` is in fact inside the source range. They work
+because the firewall never *sources* anything towards ``hostA`` from that interface.
+When it answers ``hostA``, it uses its ``eth0`` address ``2001:db8:1::1``, which the
+rule does not match. That is a subtle thing to depend on, and it is worth checking
+rather than assuming when adapting this policy.
+
+Multicast Neighbor Discovery bypasses the policy database entirely, so Router
+Advertisements and Duplicate Address Detection are unaffected either way.
 
 The Model
 ---------
@@ -249,8 +278,10 @@ The rest of the scenario is the same in every configuration:
    :language: ini
 
 ``hostA`` sends UDP packets to ``hostB`` twice a second from 2 s to 9.75 s, which is 16
-packets, and ``hostB`` runs ``UdpSink``. Traffic starts at 2 s so that Neighbor
-Discovery finishes first.
+packets, and ``hostB`` runs ``UdpSink``. Traffic starts at 2 s so that Duplicate Address Detection
+has finished and every node holds a usable address, which takes about 1.6 s here.
+Address resolution has not finished by then — the first datagram triggers a Neighbour
+Solicitation and waits for the answer — but that only delays it briefly.
 
 Only two things differ between the configurations: how much data the application
 writes, and what the tunnel will accept.
@@ -290,7 +321,8 @@ IPv6 header, so 1452 bytes of data makes a 1500-byte packet.
 Fragmentation Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The tunnel keeps its default limit, so it accepts the 1500-byte inner packet:
+The tunnel's limit is set to 1500, which is also its default, so it accepts the
+1500-byte inner packet:
 
 .. literalinclude:: ../omnetpp.ini
    :caption: omnetpp.ini
@@ -308,8 +340,8 @@ application.
 BlackHole Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The tunnel's limit is lowered to 1460 so that nothing is ever fragmented, which is the
-correct thing to configure. The firewall discards ICMPv6 heading towards ``hostA``:
+The tunnel's limit is lowered to 1460 so that the tunnel never has to split anything,
+which is the correct thing to configure. The firewall discards ICMPv6 heading towards ``hostA``:
 
 .. literalinclude:: ../omnetpp.ini
    :caption: omnetpp.ini
@@ -382,8 +414,8 @@ Results
      - 20 (16 data)
      - 20 (16 data)
 
-The frame counts are ``eth[n].mac`` transmission counts, so they include control
-traffic as well as application data. Four or five frames per link are Neighbor
+The frame counts are the ``packetReceivedFromUpper:count`` statistic of each link's
+``eth[n].mac`` module, so they include control traffic as well as application data. Four or five frames per link are Neighbor
 Discovery, depending on the configuration, which is why the data figure is given
 separately in brackets. It is the data figures that carry the argument.
 
@@ -399,9 +431,16 @@ merely forwards what it is given.
 
 That is the real effect of Path MTU Discovery here. It did not remove the
 fragmentation, because the application still writes 1452 bytes and UDP has no way to
-write less. What it changed is *who does the work*: a router in the forwarding path
-before, the sending host afterwards. That is where IPv6 wants it, and it is why
-routers are forbidden to fragment in the first place.
+write less. What it changed is *where* the work happens. In ``Fragmentation`` the two
+tunnel routers carry it: ``borderA`` splits every packet and ``borderB`` puts every one
+back together, in the middle of the network. In ``Discovery`` the two hosts carry it
+instead, and the routers only forward what they are given.
+
+Both are legal. ``borderA`` was splitting a packet it had built itself rather than one
+it was forwarding, which is the one case where a router may still fragment — so no
+prohibited operation was stopped. The gain is simply that the per-packet cost moved
+out of the forwarding path and onto the machines at either end, which are far better
+placed to absorb it.
 
 ``SizedToFit`` is the only configuration with no fragmentation anywhere, and it is the
 one an operator should aim for.
@@ -442,7 +481,12 @@ Two offsets appear here and they count from different places. The Fragment heade
 ``fragmentOffset`` of 1448 counts from the start of the inner IPv6 datagram, while
 chunk ``[4]``'s ``offset`` of 1400 counts from the start of the application's own
 data. They differ by the 48 bytes of inner IPv6 and UDP header that sit between the
-two starting points.
+two starting points, and chunk ``[4]`` holds only application data for the same reason
+— those inner headers travelled in the first fragment.
+
+One detail the figure does not show faithfully: on the wire the Fragment Offset field
+is 13 bits counted in units of 8 bytes, so it would hold 181 rather than 1448. INET
+stores the byte offset and displays that.
 
 The value 1448 itself is worth a word, because the obvious arithmetic gives 1452: the
 link's 1500 bytes, less the 40-byte outer header, less the 8-byte Fragment header.
