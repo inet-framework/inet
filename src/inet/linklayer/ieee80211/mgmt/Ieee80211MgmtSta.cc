@@ -47,6 +47,66 @@ simsignal_t Ieee80211MgmtSta::htNegotiationFailedSignal = cComponent::registerSi
 
 #define MAX_BEACONS_MISSED        3.5  // beacon lost timeout, in beacon intervals (doesn't need to be integer)
 
+static bool decodeHtCapabilities(const Ieee80211HtCapabilitiesElement& element,
+        Ieee80211HtCapabilities& capabilities, std::string& reason)
+{
+    try {
+        capabilities = makeHtCapabilities(element);
+        return true;
+    }
+    catch (const cRuntimeError& error) {
+        reason = error.what();
+        return false;
+    }
+}
+
+static bool decodeHtOperation(const IIeee80211Band *band,
+        const Ieee80211HtOperationElement& element, Ieee80211HtOperation& operation, std::string& reason)
+{
+    try {
+        operation = makeHtOperation(band, element);
+        return true;
+    }
+    catch (const cRuntimeError& error) {
+        reason = error.what();
+        return false;
+    }
+}
+
+static bool validateHtOperation(const IIeee80211Band *band, const Ieee80211HtOperation& operation,
+        std::string& reason)
+{
+    if (band == nullptr) {
+        reason = "HT Operation has no IEEE 802.11 band";
+        return false;
+    }
+
+    // IEEE Std 802.11-2024, Table 9-230 and 11.15.2: the channel width and
+    // secondary-channel offset form one tuple, and a 40 MHz tuple must name
+    // an actually supported pair in the selected band.
+    if (operation.operatingChannelWidth == MHz(20)) {
+        if (operation.secondaryChannelOffset != 0) {
+            reason = "20 MHz HT Operation has a secondary channel offset";
+            return false;
+        }
+    }
+    else if (operation.operatingChannelWidth == MHz(40)) {
+        if (operation.secondaryChannelOffset != 1 && operation.secondaryChannelOffset != 3) {
+            reason = "40 MHz HT Operation has no valid secondary channel offset";
+            return false;
+        }
+        if (!band->isHt40OperationSupported(operation.primaryChannel, operation.secondaryChannelOffset)) {
+            reason = "40 MHz HT Operation names an unsupported primary/secondary channel pair";
+            return false;
+        }
+    }
+    else {
+        reason = "HT Operation has an unsupported channel width";
+        return false;
+    }
+    return true;
+}
+
 Ieee80211MgmtSta::~Ieee80211MgmtSta()
 {
     cancelAndDelete(scanTimer);
@@ -952,12 +1012,19 @@ Ieee80211MgmtSta::HtAssociationResponseStatus Ieee80211MgmtSta::classifyAssociat
         reason = "successful HT association response has no cached HT Operation from BSS discovery";
         return HtAssociationResponseStatus::INVALID_HT;
     }
-    // Keep the existing deserialization behavior: malformed received HT
-    // elements are rejected by makeHtCapabilities/makeHtOperation. The
-    // standards-facing primary channel is converted to the internal radio
-    // channel index by the received band's explicit mapping.
-    responseHtCapabilities = makeHtCapabilities(responseBody->getHtCapabilities());
-    responseHtOperation = makeHtOperation(band, responseBody->getHtOperation());
+    // The response is peer input. Keep the conversion helpers strict for
+    // local/configuration use, but turn their failures into an unusable HT
+    // negotiation at this receive boundary.
+    if (!decodeHtCapabilities(responseBody->getHtCapabilities(), responseHtCapabilities, reason)) {
+        reason = "invalid HT Capabilities in association response: " + reason;
+        return HtAssociationResponseStatus::INVALID_HT;
+    }
+    if (!decodeHtOperation(band, responseBody->getHtOperation(), responseHtOperation, reason)) {
+        reason = "invalid HT Operation in association response: " + reason;
+        return HtAssociationResponseStatus::INVALID_HT;
+    }
+    if (!validateHtOperation(band, responseHtOperation, reason))
+        return HtAssociationResponseStatus::INVALID_HT;
     // Table 9-230 reserves the Basic HT-MCS Set in Association and
     // Reassociation Responses. Use the selected BSS's Beacon/Probe Response
     // advertisement instead of interpreting those reserved response bits.
@@ -1050,10 +1117,10 @@ void Ieee80211MgmtSta::handleBeaconFrame(Packet *packet, const Ptr<const Ieee802
 {
     EV << "Received Beacon frame\n";
     const auto& beaconBody = packet->peekData<Ieee80211BeaconFrame>();
-    storeAPInfo(packet, header, beaconBody);
+    bool accepted = storeAPInfo(packet, header, beaconBody);
 
     // if it is out associate AP, restart beacon timeout
-    if (mib->bssStationData.isAssociated && header->getTransmitterAddress() == assocAP.address) {
+    if (accepted && mib->bssStationData.isAssociated && header->getTransmitterAddress() == assocAP.address) {
         EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
         ASSERT(assocAP.beaconTimeoutMsg != nullptr);
         rescheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
@@ -1078,55 +1145,113 @@ void Ieee80211MgmtSta::handleProbeResponseFrame(Packet *packet, const Ptr<const 
     delete packet;
 }
 
-void Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body)
+bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body)
 {
     auto address = header->getTransmitterAddress();
     ApInfo *ap = lookupAP(address);
-    if (ap) {
-        EV << "AP address=" << address << ", SSID=" << body->getSSID() << " already in our AP list, refreshing the info\n";
-    }
-    else {
-        EV << "Inserting AP address=" << address << ", SSID=" << body->getSSID() << " into our AP list\n";
-        apList.push_back(ApInfo());
-        ap = &apList.back();
+    ApInfo candidate;
+    if (ap != nullptr) {
+        // Authentication state belongs to the cached AP record, not to one
+        // advertisement. Keep its timer and state untouched until validation
+        // has completed successfully.
+        candidate.isAuthenticated = ap->isAuthenticated;
+        candidate.authSeqExpected = ap->authSeqExpected;
+        candidate.authTimeoutMsg = ap->authTimeoutMsg;
+        candidate.rxPower = ap->rxPower;
     }
 
-    int legacyChannel = body->getChannelNumber();
-    ap->address = address;
-    ap->ssid = body->getSSID();
-    ap->supportedRates = body->getSupportedRates();
-    ap->extendedSupportedRatesPresent = body->getExtendedSupportedRatesPresent();
-    ap->extendedSupportedRates = body->getExtendedSupportedRates();
-    ap->htCapabilitiesPresent = body->getHtCapabilitiesPresent();
-    if (ap->htCapabilitiesPresent)
-        ap->htCapabilities = makeHtCapabilities(body->getHtCapabilities());
-    ap->htOperationPresent = body->getHtOperationPresent();
-    if (ap->htOperationPresent) {
-        const auto& channelInd = packet->findTag<Ieee80211ChannelInd>();
-        const auto *receivedChannel = channelInd != nullptr ? channelInd->getChannel() : nullptr;
-        if (receivedChannel == nullptr)
-            throw cRuntimeError("HT Operation discovery requires an IEEE 802.11 channel indication");
-        ap->htOperation = makeHtOperation(receivedChannel->getBand(), body->getHtOperation());
-        if (ap->htOperation.primaryChannel != receivedChannel->getChannelNumber())
-            throw cRuntimeError("HT Operation primary channel %d does not match received channel index %d",
-                    ap->htOperation.primaryChannel, receivedChannel->getChannelNumber());
-        // IEEE Std 802.11-2024, Table 9-230 and 11.14: the HT Operation
-        // element is the authoritative advertisement of the BSS primary
-        // channel. Its standards-facing channel number has already been
-        // converted to the received radio's internal channel index above.
-        ap->channel = ap->htOperation.primaryChannel;
+    candidate.address = address;
+    candidate.ssid = body->getSSID();
+    candidate.supportedRates = body->getSupportedRates();
+    candidate.extendedSupportedRatesPresent = body->getExtendedSupportedRatesPresent();
+    candidate.extendedSupportedRates = body->getExtendedSupportedRates();
+    bool htCapabilitiesPresent = body->getHtCapabilitiesPresent();
+    bool htOperationPresent = body->getHtOperationPresent();
+    bool ignoreHt = mib != nullptr && !mib->isHtOperationSupported();
+    std::string reason;
+    if (ignoreHt) {
+        // A legacy STA ignores optional HT information, including malformed
+        // typed values, and retains the legacy channel advertisement.
+        candidate.channel = body->getChannelNumber();
+        candidate.htCapabilitiesPresent = false;
+        candidate.htOperationPresent = false;
+    }
+    else {
+        if (htCapabilitiesPresent != htOperationPresent) {
+            reason = "Beacon or Probe Response contains only one of the HT Capabilities and HT Operation elements";
+            EV_WARN << "Ignoring HT discovery from AP address=" << address << ": " << reason << "\n";
+            return false;
+        }
+        candidate.htCapabilitiesPresent = htCapabilitiesPresent;
+        candidate.htOperationPresent = htOperationPresent;
+        if (htCapabilitiesPresent && !decodeHtCapabilities(body->getHtCapabilities(), candidate.htCapabilities, reason)) {
+            EV_WARN << "Ignoring HT discovery from AP address=" << address
+                    << ": invalid HT Capabilities: " << reason << "\n";
+            return false;
+        }
+        if (htOperationPresent) {
+            const auto& channelInd = packet->findTag<Ieee80211ChannelInd>();
+            const auto *receivedChannel = channelInd != nullptr ? channelInd->getChannel() : nullptr;
+            if (receivedChannel == nullptr) {
+                reason = "HT Operation discovery has no received channel indication";
+                EV_WARN << "Ignoring HT discovery from AP address=" << address << ": " << reason << "\n";
+                return false;
+            }
+            if (!decodeHtOperation(receivedChannel->getBand(), body->getHtOperation(), candidate.htOperation, reason)) {
+                EV_WARN << "Ignoring HT discovery from AP address=" << address
+                        << ": invalid HT Operation: " << reason << "\n";
+                return false;
+            }
+            if (candidate.htOperation.primaryChannel != receivedChannel->getChannelNumber()) {
+                reason = "HT Operation primary channel does not match the received channel index";
+                EV_WARN << "Ignoring HT discovery from AP address=" << address << ": " << reason << "\n";
+                return false;
+            }
+            if (!validateHtOperation(receivedChannel->getBand(), candidate.htOperation, reason)) {
+                EV_WARN << "Ignoring HT discovery from AP address=" << address << ": " << reason << "\n";
+                return false;
+            }
+            // IEEE Std 802.11-2024, Table 9-230 and 11.14: the HT Operation
+            // primary channel is authoritative once converted to the
+            // received radio's internal channel index.
+            candidate.channel = candidate.htOperation.primaryChannel;
+        }
+        else
+            candidate.channel = body->getChannelNumber();
+    }
+    candidate.beaconInterval = body->getBeaconInterval();
+    auto signalPowerInd = packet->getTag<SignalPowerInd>();
+    bool currentAp = address == assocAP.address;
+    if (signalPowerInd != nullptr)
+        candidate.rxPower = signalPowerInd->getPower().get<W>();
+
+    if (ap == nullptr) {
+        apList.push_back(ApInfo());
+        ap = &apList.back();
+        EV << "Inserting AP address=" << address << ", SSID=" << body->getSSID() << " into our AP list\n";
     }
     else
-        ap->channel = legacyChannel;
-    ap->beaconInterval = body->getBeaconInterval();
-    auto signalPowerInd = packet->getTag<SignalPowerInd>();
-    if (signalPowerInd != nullptr) {
-        ap->rxPower = signalPowerInd->getPower().get<W>();
-        if (ap->address == assocAP.address)
-            assocAP.rxPower = ap->rxPower;
-    }
+        EV << "AP address=" << address << ", SSID=" << body->getSSID()
+                << " already in our AP list, refreshing the info\n";
+    ap->channel = candidate.channel;
+    ap->address = candidate.address;
+    ap->ssid = candidate.ssid;
+    ap->supportedRates = candidate.supportedRates;
+    ap->extendedSupportedRatesPresent = candidate.extendedSupportedRatesPresent;
+    ap->extendedSupportedRates = candidate.extendedSupportedRates;
+    ap->htCapabilitiesPresent = candidate.htCapabilitiesPresent;
+    ap->htCapabilities = candidate.htCapabilities;
+    ap->htOperationPresent = candidate.htOperationPresent;
+    ap->htOperation = candidate.htOperation;
+    ap->beaconInterval = candidate.beaconInterval;
+    ap->rxPower = candidate.rxPower;
+    ap->isAuthenticated = candidate.isAuthenticated;
+    ap->authSeqExpected = candidate.authSeqExpected;
+    ap->authTimeoutMsg = candidate.authTimeoutMsg;
+    if (signalPowerInd != nullptr && currentAp)
+        assocAP.rxPower = candidate.rxPower;
+    return true;
 }
 
 } // namespace ieee80211
 } // namespace inet
-

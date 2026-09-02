@@ -82,11 +82,12 @@ static void storeSerializedDiscovery(TestIeee80211MgmtSta& sta, const Ptr<Ieee80
     }
 }
 
-static void storePacketDomainDiscovery(TestIeee80211MgmtSta& sta, const Ptr<Ieee80211BeaconFrame>& body,
-        const MacAddress& address, int receivedChannelIndex = -1, bool addChannelInd = true)
+static bool storePacketDomainDiscovery(TestIeee80211MgmtSta& sta, const Ptr<Ieee80211BeaconFrame>& body,
+        const MacAddress& address, int receivedChannelIndex = -1, bool addChannelInd = true,
+        int signalPowerMilliwatts = 1)
 {
     Packet packet("packet-domain-discovery", body);
-    packet.addTag<SignalPowerInd>()->setPower(mW(1));
+    packet.addTag<SignalPowerInd>()->setPower(mW(signalPowerMilliwatts));
     const auto *band = &physicallayer::Ieee80211CompliantBands::band2_4GHz;
     int channelIndex = body->getHtOperationPresent() ?
             (receivedChannelIndex >= 0 ? receivedChannelIndex : band->getChannelIndex(body->getHtOperation().primaryChannel)) : 0;
@@ -95,7 +96,7 @@ static void storePacketDomainDiscovery(TestIeee80211MgmtSta& sta, const Ptr<Ieee
         packet.addTag<physicallayer::Ieee80211ChannelInd>()->setChannel(&channel);
     auto header = makeShared<Ieee80211MgmtHeader>();
     header->setTransmitterAddress(address);
-    sta.storeAPInfo(&packet, header, body);
+    return sta.storeAPInfo(&packet, header, body);
 }
 
 %activity:
@@ -126,23 +127,139 @@ ASSERT(sta.changedChannel == 13);
 storePacketDomainDiscovery(sta, makeDiscovery(true, 3, 13, true), probeAddress);
 ASSERT(sta.lookupAP(probeAddress)->channel == 13);
 
-bool rejected = false;
-try {
-    storePacketDomainDiscovery(sta, makeDiscovery(true, 3, 6, true), probeAddress, 13);
-}
-catch (const cRuntimeError&) {
-    rejected = true;
-}
-ASSERT(rejected);
+// Invalid refreshes are rejected without changing the existing cached AP or
+// raising a runtime error at the peer-input boundary.
+auto cachedProbe = sta.lookupAP(probeAddress);
+cachedProbe->isAuthenticated = true;
+cachedProbe->authSeqExpected = 3;
+cachedProbe->authTimeoutMsg = new cMessage("authentication-timeout");
+int cachedChannel = cachedProbe->channel;
+auto cachedSsid = cachedProbe->ssid;
+auto cachedSupportedRates = cachedProbe->supportedRates;
+bool cachedExtendedSupportedRatesPresent = cachedProbe->extendedSupportedRatesPresent;
+bool cachedHtCapabilitiesPresent = cachedProbe->htCapabilitiesPresent;
+auto cachedHtCapabilities = cachedProbe->htCapabilities;
+bool cachedHtOperationPresent = cachedProbe->htOperationPresent;
+auto cachedHtOperation = cachedProbe->htOperation;
+auto cachedBeaconInterval = cachedProbe->beaconInterval;
+double cachedRxPower = cachedProbe->rxPower;
+bool cachedIsAuthenticated = cachedProbe->isAuthenticated;
+int cachedAuthSeqExpected = cachedProbe->authSeqExpected;
+auto cachedAuthTimeout = cachedProbe->authTimeoutMsg;
+ASSERT(cachedSsid == "serialized");
+ASSERT(cachedBeaconInterval == SimTime(100, SIMTIME_MS));
+ASSERT(cachedRxPower == mW(1).get<W>());
+auto invalidRefresh = makeDiscovery(true, 3, 6, true);
+invalidRefresh->setSSID("changed");
+Ieee80211SupportedRatesElement changedRates;
+changedRates.numRates = 1;
+changedRates.rate[0] = 12;
+invalidRefresh->setSupportedRates(changedRates);
+invalidRefresh->setBeaconInterval(SimTime(200, SIMTIME_MS));
+invalidRefresh->setChannelNumber(11);
+ASSERT(!storePacketDomainDiscovery(sta, invalidRefresh, probeAddress, 13, true, 7));
+auto unchangedProbe = sta.lookupAP(probeAddress);
+ASSERT(unchangedProbe->channel == cachedChannel);
+ASSERT(unchangedProbe->ssid == cachedSsid);
+ASSERT(unchangedProbe->supportedRates.numRates == cachedSupportedRates.numRates);
+ASSERT(unchangedProbe->supportedRates.rate[0] == cachedSupportedRates.rate[0]);
+ASSERT(unchangedProbe->extendedSupportedRatesPresent == cachedExtendedSupportedRatesPresent);
+ASSERT(unchangedProbe->htCapabilitiesPresent == cachedHtCapabilitiesPresent);
+ASSERT(unchangedProbe->htCapabilities.supportedChannelWidths == cachedHtCapabilities.supportedChannelWidths);
+ASSERT(unchangedProbe->htCapabilities.rxMcsSupported == cachedHtCapabilities.rxMcsSupported);
+ASSERT(unchangedProbe->htCapabilities.maxAmpduLengthExponent == cachedHtCapabilities.maxAmpduLengthExponent);
+ASSERT(unchangedProbe->htOperationPresent == cachedHtOperationPresent);
+ASSERT(unchangedProbe->htOperation.primaryChannel == cachedHtOperation.primaryChannel);
+ASSERT(unchangedProbe->htOperation.secondaryChannelOffset == cachedHtOperation.secondaryChannelOffset);
+ASSERT(unchangedProbe->htOperation.operatingChannelWidth == cachedHtOperation.operatingChannelWidth);
+ASSERT(unchangedProbe->beaconInterval == cachedBeaconInterval);
+ASSERT(unchangedProbe->rxPower == cachedRxPower);
+ASSERT(unchangedProbe->isAuthenticated == cachedIsAuthenticated);
+ASSERT(unchangedProbe->authSeqExpected == cachedAuthSeqExpected);
+ASSERT(sta.lookupAP(probeAddress)->authTimeoutMsg == cachedAuthTimeout);
+ASSERT(!storePacketDomainDiscovery(sta, makeDiscovery(true, 3, 6, true), probeAddress, -1, false));
+ASSERT(sta.lookupAP(probeAddress)->channel == 13);
 
-rejected = false;
-try {
-    storePacketDomainDiscovery(sta, makeDiscovery(true, 3, 6, true), probeAddress, -1, false);
-}
-catch (const cRuntimeError&) {
-    rejected = true;
-}
-ASSERT(rejected);
+// A malformed typed capability is also rejected atomically. The new AP must
+// not be inserted before the conversion has succeeded.
+auto malformedCapabilities = makeDiscovery(true, 3, 13, true);
+auto capabilitiesElement = malformedCapabilities->getHtCapabilities();
+capabilitiesElement.maxAmpduLengthExponent = 4;
+malformedCapabilities->setHtCapabilities(capabilitiesElement);
+const MacAddress malformedCapabilitiesAddress("02:00:00:00:00:04");
+ASSERT(!storePacketDomainDiscovery(sta, malformedCapabilities, malformedCapabilitiesAddress));
+ASSERT(sta.lookupAP(malformedCapabilitiesAddress) == nullptr);
+
+auto malformedOperation = makeDiscovery(true, 3, 13, true);
+auto malformedOperationElement = malformedOperation->getHtOperation();
+malformedOperationElement.secondaryChannelOffset = 2;
+malformedOperation->setHtOperation(malformedOperationElement);
+const MacAddress malformedOperationAddress("02:00:00:00:00:05");
+ASSERT(!storePacketDomainDiscovery(sta, malformedOperation, malformedOperationAddress));
+ASSERT(sta.lookupAP(malformedOperationAddress) == nullptr);
+
+auto unmappablePrimary = makeDiscovery(true, 3, 6, true);
+auto unmappablePrimaryElement = unmappablePrimary->getHtOperation();
+unmappablePrimaryElement.primaryChannel = 99;
+unmappablePrimary->setHtOperation(unmappablePrimaryElement);
+const MacAddress unmappablePrimaryAddress("02:00:00:00:00:06");
+// Supply a valid received channel explicitly so the fixture does not try to
+// convert the deliberately unmappable standards-facing primary itself.
+ASSERT(!storePacketDomainDiscovery(sta, unmappablePrimary, unmappablePrimaryAddress, 6));
+ASSERT(sta.lookupAP(unmappablePrimaryAddress) == nullptr);
+
+// A 20 MHz advertisement cannot carry a secondary offset. The same complete
+// tuple validation is applied to 40 MHz operation, including the band edges.
+auto inconsistent20 = makeDiscovery(true, 3, 13, true);
+auto inconsistent20Element = inconsistent20->getHtOperation();
+inconsistent20Element.secondaryChannelOffset = 1;
+inconsistent20->setHtOperation(inconsistent20Element);
+ASSERT(!storePacketDomainDiscovery(sta, inconsistent20, probeAddress));
+ASSERT(sta.lookupAP(probeAddress)->channel == 13);
+
+auto validHt40Above = makeDiscovery(true, 3, 0, true);
+auto validHt40AboveCapabilities = validHt40Above->getHtCapabilities();
+validHt40AboveCapabilities.supportedChannelWidth40Mhz = true;
+validHt40Above->setHtCapabilities(validHt40AboveCapabilities);
+auto validHt40AboveOperation = validHt40Above->getHtOperation();
+validHt40AboveOperation.staChannelWidth40Mhz = true;
+validHt40AboveOperation.secondaryChannelOffset = 1;
+validHt40Above->setHtOperation(validHt40AboveOperation);
+ASSERT(storePacketDomainDiscovery(sta, validHt40Above, probeAddress, 0));
+ASSERT(sta.lookupAP(probeAddress)->channel == 0);
+
+auto validHt40Below = makeDiscovery(true, 3, 12, true);
+auto validHt40BelowCapabilities = validHt40Below->getHtCapabilities();
+validHt40BelowCapabilities.supportedChannelWidth40Mhz = true;
+validHt40Below->setHtCapabilities(validHt40BelowCapabilities);
+auto validHt40BelowOperation = validHt40Below->getHtOperation();
+validHt40BelowOperation.staChannelWidth40Mhz = true;
+validHt40BelowOperation.secondaryChannelOffset = 3;
+validHt40Below->setHtOperation(validHt40BelowOperation);
+ASSERT(storePacketDomainDiscovery(sta, validHt40Below, probeAddress, 12));
+ASSERT(sta.lookupAP(probeAddress)->channel == 12);
+
+auto inconsistent40 = makeDiscovery(true, 3, 12, true);
+auto inconsistent40Capabilities = inconsistent40->getHtCapabilities();
+inconsistent40Capabilities.supportedChannelWidth40Mhz = true;
+inconsistent40->setHtCapabilities(inconsistent40Capabilities);
+auto inconsistent40Operation = inconsistent40->getHtOperation();
+inconsistent40Operation.staChannelWidth40Mhz = true;
+inconsistent40Operation.secondaryChannelOffset = 0;
+inconsistent40->setHtOperation(inconsistent40Operation);
+ASSERT(!storePacketDomainDiscovery(sta, inconsistent40, probeAddress, 12));
+ASSERT(sta.lookupAP(probeAddress)->channel == 12);
+
+auto invalidHt40Edge = makeDiscovery(true, 3, 13, true);
+auto invalidHt40EdgeCapabilities = invalidHt40Edge->getHtCapabilities();
+invalidHt40EdgeCapabilities.supportedChannelWidth40Mhz = true;
+invalidHt40Edge->setHtCapabilities(invalidHt40EdgeCapabilities);
+auto invalidHt40EdgeOperation = invalidHt40Edge->getHtOperation();
+invalidHt40EdgeOperation.staChannelWidth40Mhz = true;
+invalidHt40EdgeOperation.secondaryChannelOffset = 1;
+invalidHt40Edge->setHtOperation(invalidHt40EdgeOperation);
+ASSERT(!storePacketDomainDiscovery(sta, invalidHt40Edge, probeAddress, 13));
+ASSERT(sta.lookupAP(probeAddress)->channel == 12);
 
 // Without HT Operation, preserve the packet-domain channelNumber exactly,
 // including its legal/default value of zero. The management-body serializer
