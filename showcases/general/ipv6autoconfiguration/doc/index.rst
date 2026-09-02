@@ -231,12 +231,10 @@ in this showcase is one the host worked out for itself. The router is the
 exception: its global addresses come from the configurator, and only its link-local
 addresses are built and checked by the router itself.
 
-The parameter withholds *addresses* from hosts, not routes. The configurator still
-installs an on-link route for the link's prefix and a default route via the router
-in every host before the simulation starts. Neighbor Discovery would install a
-default router entry anyway once the first Router Advertisement arrives, so nothing
-here depends on the pre-installed routes — but a model built on this pattern should
-not assume the hosts learned their routing table from the protocol.
+The parameter withholds *addresses* from hosts, not routes: the configurator still
+installs an on-link route and a default route in every host before the run, so a model
+built on this pattern should not assume the hosts learned their routing table from the
+protocol.
 
 The prefixes are chosen in an XML configuration:
 
@@ -262,9 +260,7 @@ results are:
 
 - :par:`dupAddrDetectTransmits` — how many Neighbor Solicitations to send for
   Duplicate Address Detection (DAD), one by default. Setting it to ``0`` skips the
-  probing entirely: the address is accepted at once. Note that INET then counts a
-  completed check without having counted a started one, so the two statistics below
-  no longer agree.
+  probing entirely, and INET then counts a completed check without a started one.
 - :par:`retransTimer` — the interval between Duplicate Address Detection probes,
   one second by default, and therefore also the wait after the last probe. INET adds
   a random delay of up to one more second to the first of those intervals, so a
@@ -385,8 +381,10 @@ Autoconfiguration Configuration
    :end-before: [Config DuplicateAddress]
    :language: ini
 
-There is nothing else to configure, and that is the point of the simulation. No
-host is given an address, and the addresses are the result.
+No host is given an address; the addresses are the result. The only other thing the
+configuration does is send four UDP packets from ``host[0]`` to the server, starting at
+8 s, once every node has finished configuring itself. They are there to show that the
+self-assigned addresses actually carry traffic.
 
 DuplicateAddress Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -534,15 +532,12 @@ then the router's rate limit, which delays the advertisement they asked for. All
 hosts and the server hold a global address by 7.1 s.
 
 Two further details show up in a full log. ``host[0]`` starts router discovery at
-2.381 s even though it took the prefix at 2.137 s, because receiving an advertisement
-does not cancel a solicitation the host has already scheduled. Its solicitation does
-not leave at once, though: the tentative global address is already the preferred
-source, so the datagram waits until that address passes its check at 3.158 s and only
-then goes on the wire. And a second advertisement goes out at 5.572 s, 0.198 s after
-the one at 5.374 s. That one is superfluous: when the router scheduled the earlier
-answer it should have cancelled the later one it superseded, and INET does not.
-Nothing on the page depends on it, because both hosts were configured by the 5.374 s
-advertisement.
+2.381 s even though it took the prefix at 2.137 s — receiving an advertisement does not
+cancel a solicitation already scheduled — and its solicitation only leaves at 3.158 s,
+because the tentative global address is already the preferred source and the datagram
+waits for it. A second advertisement also goes out at 5.572 s, 0.198 s after the one at
+5.374 s; it is superfluous, because INET does not cancel the advertisement it
+supersedes.
 
 The server is served by a Router Advertisement on the other interface, 0.435 s
 after it asked. That interface has its own timer, so the 2.137 s advertisement on the
@@ -586,6 +581,29 @@ for its global address, and that no address was refused:
 
 The router's two runs are for the link-local addresses of its two interfaces. Its
 global addresses come from the configurator, so they are not checked.
+
+The addresses work
+~~~~~~~~~~~~~~~~~~
+
+Addresses appearing on a canvas is not the same as addresses being usable, so from
+8 s ``host[0]`` sends four UDP packets to the server. The server receives all four.
+They cross the router, so they exercise both prefixes and the default route that
+``host[0]`` learned from the Router Advertisement.
+
+The first packet shows one more thing. ``host[0]`` does not have to resolve the
+router's link-layer address, because the Router Advertisement it accepted already
+carried it. The router does have to resolve the server's, so it holds the first
+packet for about 16 microseconds while a Neighbor Solicitation and a Neighbor
+Advertisement cross the second link, and forwards it once the answer arrives:
+
+.. code-block:: none
+
+   8.000028  router: no link-layer address for next hop yet, passing datagram to Neighbour Discovery module
+   8.000028  router: Preparing to send NS to solicited-node multicast group
+   8.000044  router: Sending queued packet UdpBasicAppData-0
+
+No packet is lost. A datagram whose next hop is not yet known is held rather than
+dropped, and sent as soon as the neighbor answers.
 
 Duplicate Address
 ~~~~~~~~~~~~~~~~~
