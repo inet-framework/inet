@@ -387,6 +387,39 @@ auto now = WallClock::now();
         self.assertEqual(1, result.returncode, result.stdout + result.stderr)
         self.assertIn("BadCalls.cc", result.stdout)
 
+    def test_rand_and_time_calls_in_unevaluated_operands_are_ignored(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/UnevaluatedCalls.cc",
+            """using RandomResult = decltype(::rand());
+constexpr auto timeSize = sizeof(std::time(nullptr));
+constexpr bool randomIsNoexcept = noexcept(rand());
+static_assert(requires {
+    std::rand();
+    ::time(nullptr);
+});
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_rand_and_time_calls_after_requires_expressions_are_reported(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/EvaluatedCalls.cc",
+            """static_assert(requires { rand(); std::time(nullptr); });
+auto randomValue = rand();
+auto wallTime = std::time(nullptr);
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertNotIn("EvaluatedCalls.cc:1:", result.stdout)
+        self.assertIn("EvaluatedCalls.cc:2:", result.stdout)
+        self.assertIn("EvaluatedCalls.cc:3:", result.stdout)
+
     def test_member_and_unrelated_qualified_calls_are_ignored(self) -> None:
         self.write(
             "src/inet/linklayer/ethernet/Deterministic.cc",

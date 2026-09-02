@@ -433,7 +433,12 @@ def forbidden_lines(code: str) -> set[int]:
             candidates = canonical_names(name, scopes)
             if RANDOM_DEVICE in candidates:
                 lines.add(token.line)
-            if end < len(tokens) and tokens[end].text == "(" and name[-1] in {"rand", "time"}:
+            if (
+                end < len(tokens)
+                and tokens[end].text == "("
+                and name[-1] in {"rand", "time"}
+                and not is_in_unevaluated_operand(tokens, index, context)
+            ):
                 if len(name) == 1 or ("std", name[-1]) in candidates:
                     lines.add(tokens[end - 1].line)
             if end < len(tokens) and tokens[end].text == "(" and name[-1] == "now":
