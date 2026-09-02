@@ -1010,10 +1010,17 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(NetworkInterface *ie)
     // or the unspecified address.
     Ipv6Address myIPv6Address = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
 
-    if (myIPv6Address.isUnspecified())
-        myIPv6Address = ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress(); // so we use the link local address instead
+    // getPreferredAddress() returns the default source address for off-link destinations,
+    // and deliberately prefers a global address even while Duplicate Address Detection (DAD)
+    // is still running for it. A solicitation only has to reach the link-local all-routers
+    // multicast address, so fall back to the link-local address rather than straight to the
+    // unspecified address: a tentative address is not assigned to the interface yet
+    // (RFC 4862 Section 5.4), and Ipv6 would substitute it on transmission, releasing the
+    // solicitation with a source address that contradicts the option chosen below.
+    if (myIPv6Address.isUnspecified() || ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(myIPv6Address))
+        myIPv6Address = ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
 
-    if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(myIPv6Address))
+    if (myIPv6Address.isUnspecified() || ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(myIPv6Address))
         myIPv6Address = Ipv6Address::UNSPECIFIED_ADDRESS;
 
     Ipv6Address destAddr = Ipv6Address::ALL_ROUTERS_2; // all_routers multicast
