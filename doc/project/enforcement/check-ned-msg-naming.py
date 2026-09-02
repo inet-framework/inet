@@ -578,16 +578,17 @@ def consume_msg_text(
     escaped = False
     segments = ((buffered_text, buffered_selected), ("\n" + text, text_selected))
     for segment, segment_selected in segments:
+        selected_content = segment_selected and bool(segment.strip())
         for char in segment:
             if char == '"' and not escaped:
                 in_string = not in_string
             if char == ";" and not in_string:
-                statements.append(("".join(statement) + ";", statement_selected or segment_selected))
+                statements.append(("".join(statement) + ";", statement_selected or selected_content))
                 statement = []
                 statement_selected = False
             else:
                 statement.append(char)
-                statement_selected = statement_selected or segment_selected
+                statement_selected = statement_selected or selected_content
             escaped = char == "\\" and not escaped
             if char != "\\":
                 escaped = False

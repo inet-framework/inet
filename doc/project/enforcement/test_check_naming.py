@@ -515,6 +515,61 @@ class Foo
         self.assertEqual(1, result.returncode)
         self.assertIn("NR-MSG-FIELD", result.stdout)
 
+    def test_worktree_comment_only_line_does_not_select_multiline_legacy_msg_field(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo
+{
+    int Bad_legacy
+    ;
+}
+""")
+        self.commit_all()
+        path.write_text(
+            path.read_text(encoding="utf-8").replace("    ;", "    // explanation\n    ;"),
+            encoding="utf-8",
+        )
+
+        result = self.check()
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_staged_comment_only_line_does_not_select_multiline_legacy_msg_field(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo
+{
+    int Bad_legacy
+    ;
+}
+""")
+        self.commit_all()
+        original = path.read_text(encoding="utf-8")
+        path.write_text(original.replace("    ;", "    /* explanation */\n    ;"), encoding="utf-8")
+        self.run_command("git", "add", str(path.relative_to(self.root)))
+        path.write_text(original, encoding="utf-8")
+
+        result = self.check("--staged")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_base_comment_only_line_does_not_select_multiline_legacy_msg_field(self) -> None:
+        path = self.write("src/inet/foo/Foo.msg", """namespace inet;
+class Foo
+{
+    int Bad_legacy
+    ;
+}
+""")
+        self.commit_all()
+        base = self.head()
+        original = path.read_text(encoding="utf-8")
+        path.write_text(original.replace("    ;", "    // explanation\n    ;"), encoding="utf-8")
+        self.commit_all()
+        path.write_text(original, encoding="utf-8")
+
+        result = self.check("--base", base)
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
     def test_modified_msg_does_not_surface_adjacent_legacy_field(self) -> None:
         path = self.write("src/inet/foo/Foo.msg", """namespace inet;
 class Foo
