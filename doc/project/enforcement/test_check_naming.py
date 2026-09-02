@@ -88,6 +88,132 @@ class Foo
         result = self.check("src/inet/foo/Foo.ned", "src/inet/foo/Foo.msg")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
+    def test_explicit_checks_multiline_ned_parameters_and_gates(self) -> None:
+        self.write("src/inet/foo/Foo.ned", """package inet.foo;
+simple Foo
+{
+    parameters:
+        bool
+            Bad_parameter;
+    gates:
+        input
+            Bad_gate;
+}
+""")
+
+        result = self.check("src/inet/foo/Foo.ned")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("NR-NED-PARAM", result.stdout)
+        self.assertIn("Bad_parameter", result.stdout)
+        self.assertIn("NR-NED-GATE", result.stdout)
+        self.assertIn("Bad_gate", result.stdout)
+
+    def test_worktree_checks_changed_multiline_ned_declarations_only(self) -> None:
+        path = self.write("src/inet/foo/Foo.ned", """package inet.foo;
+simple Foo
+{
+    parameters:
+        bool
+            Bad_legacyParameter;
+        bool
+            Bad_changedParameter;
+    gates:
+        input
+            Bad_legacyGate;
+        input
+            Bad_changedGate;
+}
+""")
+        self.commit_all()
+        text = path.read_text(encoding="utf-8")
+        text = text.replace(
+            "        bool\n            Bad_changedParameter;",
+            "        volatile bool\n            Bad_changedParameter;",
+        )
+        text = text.replace(
+            "        input\n            Bad_changedGate;",
+            "        output\n            Bad_changedGate;",
+        )
+        path.write_text(text, encoding="utf-8")
+
+        result = self.check()
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("Bad_changedParameter", result.stdout)
+        self.assertIn("Bad_changedGate", result.stdout)
+        self.assertNotIn("Bad_legacyParameter", result.stdout)
+        self.assertNotIn("Bad_legacyGate", result.stdout)
+
+    def test_staged_checks_multiline_ned_declarations_from_index_only(self) -> None:
+        path = self.write("src/inet/foo/Foo.ned", """package inet.foo;
+simple Foo
+{
+    parameters:
+        bool
+            goodParameter;
+    gates:
+        input
+            socketIn;
+}
+""")
+        self.commit_all()
+        staged = path.read_text(encoding="utf-8")
+        staged = staged.replace("goodParameter", "Bad_stagedParameter")
+        staged = staged.replace("socketIn", "Bad_stagedGate")
+        path.write_text(staged, encoding="utf-8")
+        self.run_command("git", "add", str(path.relative_to(self.root)))
+        worktree = staged.replace("Bad_stagedParameter", "Bad_worktreeParameter")
+        worktree = worktree.replace("Bad_stagedGate", "Bad_worktreeGate")
+        path.write_text(worktree, encoding="utf-8")
+
+        result = self.check("--staged")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("Bad_stagedParameter", result.stdout)
+        self.assertIn("Bad_stagedGate", result.stdout)
+        self.assertNotIn("Bad_worktreeParameter", result.stdout)
+        self.assertNotIn("Bad_worktreeGate", result.stdout)
+
+    def test_base_checks_changed_multiline_ned_terminators_only(self) -> None:
+        path = self.write("src/inet/foo/Foo.ned", """package inet.foo;
+simple Foo
+{
+    parameters:
+        bool
+            Bad_legacyParameter;
+        bool
+            Bad_committedParameter
+            @mutable;
+    gates:
+        input
+            Bad_legacyGate;
+        input
+            Bad_committedGate
+            @loose;
+}
+""")
+        self.commit_all()
+        base = self.head()
+        text = path.read_text(encoding="utf-8")
+        text = text.replace("            @mutable;", "            @mutable = default(false);")
+        text = text.replace("            @loose;", "            @loose @directIn;")
+        path.write_text(text, encoding="utf-8")
+        self.commit_all()
+        worktree = text.replace("Bad_committedParameter", "Bad_worktreeParameter")
+        worktree = worktree.replace("Bad_committedGate", "Bad_worktreeGate")
+        path.write_text(worktree, encoding="utf-8")
+
+        result = self.check("--base", base)
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("Bad_committedParameter", result.stdout)
+        self.assertIn("Bad_committedGate", result.stdout)
+        self.assertNotIn("Bad_legacyParameter", result.stdout)
+        self.assertNotIn("Bad_legacyGate", result.stdout)
+        self.assertNotIn("Bad_worktreeParameter", result.stdout)
+        self.assertNotIn("Bad_worktreeGate", result.stdout)
+
     def test_first_double_brace_ends_cplusplus_masking(self) -> None:
         self.write("src/inet/foo/Foo.msg", """namespace inet;
 cplusplus {{
