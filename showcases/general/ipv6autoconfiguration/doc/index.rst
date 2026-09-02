@@ -11,11 +11,10 @@ need something else to be in place first — a person who knows the addressing p
 that subnet, or a running DHCP server holding a pool of free addresses.
 
 IPv6 adds a third method that needs neither. A host derives its own addresses from
-two pieces of information it can already obtain: the identifier of its own network
-interface, and a prefix that the local router announces to everyone on the link. This
-is called Stateless Address Autoconfiguration (SLAAC). No server keeps any state, and
-nothing is configured by hand. IPv6 also has a stateful alternative, DHCPv6, which is widely used where an
-operator wants central control; this showcase is about the stateless method.
+two pieces of information it can already obtain: its MAC address, and a prefix that
+the local router announces to everyone on the link. This is called Stateless Address
+Autoconfiguration (SLAAC). No server keeps any state, and nothing is configured by
+hand.
 
 Deriving an address locally removes the central authority that guaranteed it was
 unique, so two hosts can end up with the same address. Each of their neighbors stores
