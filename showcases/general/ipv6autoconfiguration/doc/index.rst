@@ -71,8 +71,10 @@ before it has a routable address.
 Router discovery
 ~~~~~~~~~~~~~~~~
 
-To build a routable address, the host needs a prefix, and only the router knows
-it. Two messages carry this information:
+To build a routable address, the host needs the prefix in use on the link. Hosts
+that have already configured themselves hold that prefix too, but Neighbor Discovery
+gives them no way to pass it on: a host learns the prefix only from a router, and only
+a router announces it. Two messages are involved:
 
 - A **Router Solicitation** is sent by a host that wants the prefix now. It goes
   to the all-routers multicast address ``ff02::2``, so only routers process it.
