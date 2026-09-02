@@ -1,0 +1,75 @@
+%description:
+Tests that a Router Solicitation whose IP source address is a real (not
+unspecified) address carries the Source Link-Layer Address option, even when
+Duplicate Address Detection (DAD) is still running for the host's global
+address at the moment the solicitation is sent.
+
+RFC 4861 Section 6.3.7: "A host sends Router Solicitations to the all-routers
+multicast address.  The IP source address is set to either one of the
+interface's unicast addresses or the unspecified address.  The Source
+Link-Layer Address option SHOULD be set to the host's link-layer address, if
+the IP source address is not the unspecified address."
+
+The router logs the link-layer address it extracts from each solicitation, so
+a missing option shows up as an all-zero MAC address.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network RsSourceLinkLayerOptionNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        router: Router6;
+        switch: EthernetSwitch;
+        host[2]: StandardHost6;
+    connections:
+        router.ethg++ <--> ethline <--> switch.ethg++;
+        for i=0..1 {
+            host[i].ethg++ <--> ethline <--> switch.ethg++;
+        }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = RsSourceLinkLayerOptionNetwork
+sim-time-limit = 10s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Stateless address autoconfiguration: the configurator only hands out the prefix
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.configurator.assignAddressesToHosts = false
+*.configurator.config = xml("<config><interface among='host[*] router' prefix='2001:db8:1:1::/64'/></config>")
+
+# Advertise often, so that a host holds a tentative global address by the time
+# its own Router Solicitation is due
+*.router.ipv6.neighbourDiscovery.minIntervalBetweenRAs = 0.1s
+*.router.ipv6.neighbourDiscovery.maxIntervalBetweenRAs = 0.2s
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+MAC Address '00-00-00-00-00-00' extracted
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+MAC Address '0A-AA-
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
