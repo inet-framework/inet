@@ -195,11 +195,10 @@ while IFS= read -r line || [ -n "$line" ]; do
     continue
   fi
 
-  strip_html_comments "$line"
-
-  # Fenced examples are not canonical registry text. Backtick info strings containing a backtick
-  # are not valid Markdown fence openers; tilde fence info strings have no corresponding limit.
-  if [[ "$visible_text" =~ $fence_open_pattern ]]; then
+  # A fence opener must occur on the raw Markdown line while outside an HTML comment. Recognizing
+  # it before comment stripping prevents removed comments from joining or exposing fence markers,
+  # and keeps comment-like text in a valid fence info string from changing comment state.
+  if [ "$in_comment" -eq 0 ] && [[ "$line" =~ $fence_open_pattern ]]; then
     opening_fence="${BASH_REMATCH[1]}"
     fence_info="${BASH_REMATCH[2]}"
     opening_fence_char="${opening_fence:0:1}"
@@ -210,6 +209,8 @@ while IFS= read -r line || [ -n "$line" ]; do
       continue
     fi
   fi
+
+  strip_html_comments "$line"
 
   trim_cell "$visible_text"
   trimmed_line="$trimmed_cell"

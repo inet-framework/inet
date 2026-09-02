@@ -185,6 +185,58 @@ class CheckSourceSealsTest(unittest.TestCase):
                 self.assertEqual(0, result.returncode, result.stdout + result.stderr)
                 self.assertIn("No sealed paths found", result.stdout)
 
+    def test_comment_stripping_does_not_synthesize_fence_openers(self):
+        for opening_fence in ("```markdown", "~~~~markdown"):
+            with self.subTest(opening_fence=opening_fence):
+                self.write(
+                    "doc/project/audit/seal-list.md",
+                    f"""# Seal list
+
+## Sealed paths
+
+<!-- example prefix -->{opening_fence}
+| Status | Path | Note |
+| --- | --- | --- |
+| 🔒 | `sealed/` | active directory seal |
+
+## Sealed documents
+""",
+                )
+
+                result = self.check("src/inet/sealed/Old.cc")
+
+                self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+                self.assertIn("matches sealed directory 'sealed/'", result.stdout)
+
+    def test_comment_markers_in_fence_info_do_not_leak_comment_state(self):
+        for opening_fence, closing_fence in (
+            ("```<!-- example", "```"),
+            ("~~~~<!-- example", "~~~~"),
+        ):
+            with self.subTest(opening_fence=opening_fence):
+                self.write(
+                    "doc/project/audit/seal-list.md",
+                    f"""# Seal list
+
+{opening_fence}
+example
+{closing_fence}
+
+## Sealed paths
+
+| Status | Path | Note |
+| --- | --- | --- |
+| 🔒 | `sealed/` | active directory seal |
+
+## Sealed documents
+""",
+                )
+
+                result = self.check("src/inet/sealed/Old.cc")
+
+                self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+                self.assertIn("matches sealed directory 'sealed/'", result.stdout)
+
     def test_seal_rows_allow_optional_markdown_cell_spacing(self):
         for row in (
             "|🔒|`sealed/`|active directory seal|",
