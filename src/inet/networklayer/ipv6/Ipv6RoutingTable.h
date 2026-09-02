@@ -62,7 +62,14 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
         int interfaceId = -1;
         Ipv6Address nextHopAddr;
         simtime_t expiryTime;
-        // more destination specific data may be added here, e.g. path MTU
+        // RFC 8201 Path MTU Discovery state. pathMtu is the current path MTU
+        // estimate towards the destination (0 = unknown, i.e. use the link MTU
+        // of the outgoing interface). pathMtuExpiryTime is when the estimate is
+        // to be discarded so that a larger value can be tried again (RFC 8201
+        // Section 5.4); 0 means never.
+        int pathMtu = 0;
+        simtime_t pathMtuExpiryTime;
+        // more destination specific data may be added here
     };
     friend std::ostream& operator<<(std::ostream& os, const DestCacheEntry& e);
     typedef std::map<Ipv6Address, DestCacheEntry> DestCache;
@@ -244,6 +251,23 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
      * Removes all destination cache entries for the specified interface
      */
     void purgeDestCacheForInterfaceId(int interfaceId);
+
+    /**
+     * Returns the RFC 8201 path MTU estimate cached for the given destination,
+     * or 0 if there is none (or the cached one has aged out, in which case it
+     * is dropped, so that a larger packet size is tried again).
+     */
+    virtual int getPathMtu(const Ipv6Address& dest);
+
+    /**
+     * Lowers the cached path MTU estimate for the given destination to the given
+     * value, and (re)arms its expiry. An ICMPv6 Packet Too Big message may only
+     * ever decrease the estimate (RFC 8201 Section 4), so a value that is not
+     * smaller than the currently cached one is ignored. expiryTime is the
+     * absolute simulation time at which the estimate is to be discarded;
+     * 0 means never. Returns true if the estimate was actually lowered.
+     */
+    virtual bool reducePathMtu(const Ipv6Address& dest, int pathMtu, simtime_t expiryTime);
 
     //@}
 

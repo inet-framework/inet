@@ -31,6 +31,8 @@ std::ostream& operator<<(std::ostream& os, const Ipv6Route& e)
 std::ostream& operator<<(std::ostream& os, const Ipv6RoutingTable::DestCacheEntry& e)
 {
     os << "if=" << e.interfaceId << " " << e.nextHopAddr; // FIXME try printing interface name
+    if (e.pathMtu != 0)
+        os << " pathMtu=" << e.pathMtu;
     return os;
 };
 
@@ -575,6 +577,44 @@ void Ipv6RoutingTable::purgeDestCacheForInterfaceId(int interfaceId)
             ++it;
         }
     }
+}
+
+int Ipv6RoutingTable::getPathMtu(const Ipv6Address& dest)
+{
+    Enter_Method("getPathMtu(%s)", dest.str().c_str());
+
+    auto it = destCache.find(dest);
+    if (it == destCache.end())
+        return 0;
+    DestCacheEntry& entry = it->second;
+    if (entry.pathMtu != 0 && entry.pathMtuExpiryTime > 0 && simTime() >= entry.pathMtuExpiryTime) {
+        // RFC 8201 Section 5.4: after the estimate has aged out, try the link MTU
+        // again, so that an increase of the real path MTU is eventually detected.
+        EV_INFO << "Path MTU estimate " << entry.pathMtu << " for " << dest << " has aged out\n";
+        entry.pathMtu = 0;
+        entry.pathMtuExpiryTime = 0;
+    }
+    return entry.pathMtu;
+}
+
+bool Ipv6RoutingTable::reducePathMtu(const Ipv6Address& dest, int pathMtu, simtime_t expiryTime)
+{
+    Enter_Method("reducePathMtu(%s, %d)", dest.str().c_str(), pathMtu);
+
+    // Note: this may create a destination cache entry that has no next hop yet
+    // (interfaceId == -1). That is harmless: such an entry is treated as a miss
+    // by lookupDestCache(), so next-hop determination still runs and fills it in.
+    DestCacheEntry& entry = destCache[dest];
+    if (entry.pathMtu != 0 && pathMtu >= entry.pathMtu) {
+        // RFC 8201 Section 4: a Packet Too Big message never raises the estimate
+        EV_DETAIL << "Ignoring path MTU " << pathMtu << " for " << dest
+                  << ", not smaller than the cached " << entry.pathMtu << "\n";
+        return false;
+    }
+    EV_INFO << "Path MTU for " << dest << " reduced to " << pathMtu << "\n";
+    entry.pathMtu = pathMtu;
+    entry.pathMtuExpiryTime = expiryTime;
+    return true;
 }
 
 void Ipv6RoutingTable::addOrUpdateOnLinkPrefix(const Ipv6Address& destPrefix, int prefixLength,
