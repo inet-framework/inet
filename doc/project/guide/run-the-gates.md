@@ -95,9 +95,10 @@ run is not the final project-wide architecture and naming pass before a push.
 ## What none of them cover
 
 The gates cover dependency direction, C++ identifiers, file names and the commit series. They do not
-cover the **semantic** rules: visualization logic inside a protocol, a zero-time message standing in
-for a call, prose that duplicates a NED declaration, a test whose category does not match its claim.
-Those are tier 4, and they need the [agent-review checklist](../enforcement/checklist/general.md).
+cover the **semantic** project rules: substitutable operation outcomes, object ownership,
+externally exposed enum values or named numeric codes, visualization logic inside a protocol, a zero-time message
+standing in for a call, or a test whose category does not match its claim. Those are tier 4, and
+they need the [agent-review checklist](../enforcement/checklist/general.md).
 
 The pull-request `enforcement-tests.yml` workflow runs the enforcement checker tests.
 `check-sealing.yml` evaluates paths sealed at the branch merge base and, when necessary, waits for

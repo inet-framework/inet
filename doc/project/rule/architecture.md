@@ -37,7 +37,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | Rule | Statement |
 | --- | --- |
 | [AR-ORG-DOMAINS](#ar-org-domains) | Layered, domain-partitioned source tree with acyclic dependencies |
-| [AR-ORG-CONTRACTS](#ar-org-contracts) | Every extensible role is a separate contract (C++ + NED interface) |
+| [AR-ORG-CONTRACTS](#ar-org-contracts) | Every extensible role is a separate paired contract whose implementations preserve its caller-visible semantics |
 | [AR-ORG-CONTRACT-PURITY](#ar-org-contract-purity) | A contract declares the role and nothing else |
 | [AR-ORG-VIS-SPLIT](#ar-org-vis-split) | Model logic, visualization, and instrumentation live in separate packages |
 | [AR-ORG-KERNEL](#ar-org-kernel) | Build on the OMNeT++ kernel; do not reimplement or patch its facilities |
@@ -154,7 +154,8 @@ reasoned about without pulling in unrelated layers.
 
 ### AR-ORG-CONTRACTS
 
-**Every extensible role is a separate contract (C++ + NED interface)**
+**Every extensible role is a separate paired contract whose implementations preserve its
+caller-visible semantics.**
 
 Every role that is meant to be substitutable is defined first as a contract — a paired C++
 interface and NED `moduleinterface` — kept separate from the reusable base implementations
@@ -170,7 +171,15 @@ with confidence that it satisfies the same contract, and that the contract can b
 and reasoned about independently of any one implementation (`IInterfaceTable`, for example,
 lets the interface table be replaced without recompiling the modules that use it).
 
-*Enforced at T1 — NED `like`/`moduleinterface` + C++ virtuals; contract-package purity → lint (T3).*
+The paired contract also declares the meaning of each caller-visible operation and which outcome
+distinctions exist. Where applicable, those distinctions may include a valid empty result, absence
+or unsupported capability, invalid or out-of-range input, refusal, and failure. Implementations,
+adapters, and callers preserve every distinction that the contract declares. A default
+implementation, return value, or argument must not silently collapse or change those declared
+semantics according to the selected implementation or the caller's static type.
+
+*Enforced at T1 — NED `like`/`moduleinterface` + C++ virtuals; contract-package purity → lint (T3);
+T4 for semantic substitutability.*
 
 ### AR-ORG-CONTRACT-PURITY
 
