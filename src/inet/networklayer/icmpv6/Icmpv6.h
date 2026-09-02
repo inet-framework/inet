@@ -44,6 +44,14 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
      */
     virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code);
 
+    /**
+     *  Sends an ICMPv6 Packet Too Big message reporting the given next-hop MTU
+     *  (RFC 4443 Section 3.2). This is a separate method because, unlike the
+     *  other error types, Packet Too Big carries a value that only the caller
+     *  knows. Ownership of the datagram stays with the caller.
+     */
+    virtual void sendPtbMessage(Packet *datagram, int mtu);
+
     static bool verifyChecksum(const Packet *packet);
 
   protected:
@@ -57,9 +65,9 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
     virtual Packet *createParamProblemMsg(Icmpv6ParameterProblem code); // TODOSection 3.4 describes a pointer. What is it?
 
     /**
-     * Common tail of sendErrorMessage(): quotes the offending datagram into the
-     * (already created) error message, then sends it to its source -- or processes
-     * it locally if the datagram was locally originated.
+     * Common tail of sendErrorMessage() and sendPtbMessage(): quotes the offending
+     * datagram into the (already created) error message, then sends it to its
+     * source -- or processes it locally if the datagram was locally originated.
      * Takes ownership of errorMsg; origDatagram stays with the caller.
      */
     virtual void quoteAndSendErrorMessage(Packet *errorMsg, Packet *origDatagram, Icmpv6Type type, int code);

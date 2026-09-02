@@ -268,8 +268,8 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
 
     if (type == ICMPv6_DESTINATION_UNREACHABLE)
         errorMsg = createDestUnreachableMsg(static_cast<Icmpv6DestUnav>(code));
-    // TODO implement MTU support.
     else if (type == ICMPv6_PACKET_TOO_BIG)
+        // the next-hop MTU is not known here; callers that know it use sendPtbMessage()
         errorMsg = createPacketTooBigMsg(0);
     else if (type == ICMPv6_TIME_EXCEEDED)
         errorMsg = createTimeExceededMsg(static_cast<Icmpv6TimeEx>(code));
@@ -279,6 +279,18 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
         throw cRuntimeError("Unknown ICMPv6 error type: %d\n", type);
 
     quoteAndSendErrorMessage(errorMsg, origDatagram, type, code);
+}
+
+void Icmpv6::sendPtbMessage(Packet *origDatagram, int mtu)
+{
+    Enter_Method("sendPtbMessage(datagram, mtu=%d)", mtu);
+
+    bool fromNetwork = origDatagram->findTag<InterfaceInd>() != nullptr;
+
+    if (fromNetwork && !validateDatagramPromptingError(origDatagram))
+        return;
+
+    quoteAndSendErrorMessage(createPacketTooBigMsg(mtu), origDatagram, ICMPv6_PACKET_TOO_BIG, 0);
 }
 
 void Icmpv6::quoteAndSendErrorMessage(Packet *errorMsg, Packet *origDatagram, Icmpv6Type type, int code)
