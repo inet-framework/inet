@@ -23,6 +23,7 @@ AMBIENT_CLOCKS = {
 }
 GROUPING_PREFIX_KEYWORDS = {"case", "co_return", "co_yield", "return", "throw"}
 UNEVALUATED_OPERATORS = {"decltype", "noexcept", "sizeof"}
+DELIMITER_PAIRS = {"(": ")", "[": "]", "{": "}"}
 
 
 @dataclass(frozen=True)
@@ -204,6 +205,8 @@ def parse_using(tokens: list[Token], index: int, scopes: list[Scope], lines: set
                 scopes[-1].aliases[tokens[index + 1].text] = target
                 if target == RANDOM_DEVICE:
                     lines.add(tokens[parsed[1] - 1].line)
+            elif parsed[0] == ("decltype",):
+                return index + 1
     else:
         parsed = qualified_name(tokens, index + 1)
         if parsed is not None and parsed[1] == semicolon:
@@ -222,6 +225,8 @@ def parse_typedef(tokens: list[Token], index: int, scopes: list[Scope], lines: s
     if semicolon is None:
         return None
     parsed = qualified_name(tokens, index + 1)
+    if parsed is not None and parsed[0] == ("decltype",):
+        return index + 1
     if parsed is not None and semicolon > parsed[1] and is_identifier(tokens[semicolon - 1]):
         target = unique_tracked_name(parsed[0], scopes)
         if target is not None:
@@ -246,30 +251,121 @@ def grouping_parentheses_before(tokens: list[Token], index: int) -> int:
     return count - 1 if is_call or previous.text in {")", "]", "}", ">"} else count
 
 
-def parenthesized_unevaluated_context(tokens: list[Token]) -> list[bool]:
-    """Mark tokens enclosed by a parenthesized unevaluated operand."""
-    context = [False] * len(tokens)
-    parentheses: list[bool] = []
-    unevaluated_depth = 0
+def opening_delimiters(tokens: list[Token]) -> dict[int, int]:
+    closing_to_opening = {closing: opening for opening, closing in DELIMITER_PAIRS.items()}
+    stack: list[tuple[str, int]] = []
+    openings: dict[int, int] = {}
     for index, token in enumerate(tokens):
-        context[index] = unevaluated_depth > 0
-        if token.text == "(":
-            begins_unevaluated = index > 0 and tokens[index - 1].text in UNEVALUATED_OPERATORS
-            parentheses.append(begins_unevaluated)
-            if begins_unevaluated:
-                unevaluated_depth += 1
-        elif token.text == ")" and parentheses:
-            if parentheses.pop():
-                unevaluated_depth -= 1
+        if token.text in DELIMITER_PAIRS:
+            stack.append((token.text, index))
+        elif (
+            token.text in closing_to_opening
+            and stack
+            and stack[-1][0] == closing_to_opening[token.text]
+        ):
+            _, opening = stack.pop()
+            openings[index] = opening
+    return openings
+
+
+def is_lambda_capture(
+    tokens: list[Token],
+    closing_bracket: int,
+    openings: dict[int, int],
+) -> bool:
+    opening = openings.get(closing_bracket)
+    if opening is None or tokens[opening].text != "[":
+        return False
+    if opening == 0:
+        return True
+    previous = tokens[opening - 1]
+    return (
+        previous.text in GROUPING_PREFIX_KEYWORDS
+        or (
+            not is_identifier(previous)
+            and previous.text not in {")", "]", "}"}
+        )
+    )
+
+
+def is_lambda_body_open(
+    tokens: list[Token],
+    brace: int,
+    openings: dict[int, int],
+) -> bool:
+    cursor = brace - 1
+    while cursor >= 0 and tokens[cursor].text not in {";", "{", "}"}:
+        if tokens[cursor].text == "]" and is_lambda_capture(tokens, cursor, openings):
+            return True
+        if tokens[cursor].text in {")", "]"}:
+            opening = openings.get(cursor)
+            if opening is None:
+                return False
+            cursor = opening - 1
+        else:
+            cursor -= 1
+    return False
+
+
+def can_begin_requires_expression(tokens: list[Token], requires: int) -> bool:
+    if requires == 0:
+        return True
+    previous = tokens[requires - 1]
+    return (
+        previous.text in GROUPING_PREFIX_KEYWORDS | {"sizeof"}
+        or (
+            not is_identifier(previous)
+            and previous.text not in {")", "]", "}"}
+        )
+    )
+
+
+def is_requires_expression_open(
+    tokens: list[Token],
+    brace: int,
+    openings: dict[int, int],
+) -> bool:
+    cursor = brace - 1
+    if cursor >= 0 and tokens[cursor].text == "requires":
+        return True
+    if cursor < 0 or tokens[cursor].text != ")":
+        return False
+    opening = openings.get(cursor)
+    requires = opening - 1 if opening is not None else -1
+    return (
+        requires >= 0
+        and tokens[requires].text == "requires"
+        and can_begin_requires_expression(tokens, requires)
+    )
+
+
+def evaluated_context(tokens: list[Token]) -> list[bool]:
+    """Classify tokens by whether their enclosing expression executes."""
+    context = [True] * len(tokens)
+    openings = opening_delimiters(tokens)
+    frames: list[tuple[str, bool]] = []
+    evaluated = True
+    for index, token in enumerate(tokens):
+        context[index] = evaluated
+        if token.text in DELIMITER_PAIRS:
+            frames.append((DELIMITER_PAIRS[token.text], evaluated))
+            if token.text == "(" and index > 0 and tokens[index - 1].text in UNEVALUATED_OPERATORS:
+                evaluated = False
+            elif token.text == "{" and is_lambda_body_open(tokens, index, openings):
+                evaluated = True
+            elif token.text == "{" and is_requires_expression_open(tokens, index, openings):
+                evaluated = False
+        elif frames and token.text == frames[-1][0]:
+            _, evaluated = frames.pop()
     return context
 
 
 def is_in_unevaluated_operand(
     tokens: list[Token],
     name_start: int,
-    parenthesized_context: list[bool],
+    context: list[bool],
 ) -> bool:
-    if parenthesized_context[name_start]:
+    if not context[name_start]:
         return True
     cursor = name_start - 1
     if (
@@ -286,12 +382,12 @@ def constructed_clock_now_line(
     name_start: int,
     name_end: int,
     candidates: set[tuple[str, ...]],
-    parenthesized_context: list[bool],
+    context: list[bool],
 ) -> int | None:
     if (
         not any(candidate in AMBIENT_CLOCKS for candidate in candidates)
         or name_end + 1 >= len(tokens)
-        or is_in_unevaluated_operand(tokens, name_start, parenthesized_context)
+        or is_in_unevaluated_operand(tokens, name_start, context)
     ):
         return None
     if (tokens[name_end].text, tokens[name_end + 1].text) not in {("{", "}"), ("(", ")")}:
@@ -311,7 +407,7 @@ def constructed_clock_now_line(
 
 def forbidden_lines(code: str) -> set[int]:
     tokens = cpp_tokens(code)
-    parenthesized_context = parenthesized_unevaluated_context(tokens)
+    context = evaluated_context(tokens)
     lines: set[int] = set()
     scopes = [Scope()]
     index = 0
@@ -341,10 +437,13 @@ def forbidden_lines(code: str) -> set[int]:
                 if len(name) == 1 or ("std", name[-1]) in candidates:
                     lines.add(tokens[end - 1].line)
             if end < len(tokens) and tokens[end].text == "(" and name[-1] == "now":
-                if any(candidate[:-1] in AMBIENT_CLOCKS for candidate in candidates):
+                if (
+                    any(candidate[:-1] in AMBIENT_CLOCKS for candidate in candidates)
+                    and not is_in_unevaluated_operand(tokens, index, context)
+                ):
                     lines.add(tokens[end - 1].line)
             object_now_line = constructed_clock_now_line(
-                tokens, index, end, candidates, parenthesized_context
+                tokens, index, end, candidates, context
             )
             if object_now_line is not None:
                 lines.add(object_now_line)
