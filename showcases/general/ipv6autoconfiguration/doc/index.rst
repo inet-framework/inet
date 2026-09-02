@@ -4,27 +4,32 @@ IPv6 Address Autoconfiguration
 Goals
 -----
 
-A host that joins a network cannot do anything until it has an address. In IPv4,
-someone has to supply that address: an administrator configures it by hand, or a
-DHCP server hands it out. Both answers need something on the network besides the
-host itself.
+A host that joins a network cannot send or receive IP packets until it has an IP
+address. In IPv4 it cannot produce one by itself: either an administrator types an
+address into the host's configuration, or a DHCP server leases it one. Both methods
+need something else to be in place first — a person who knows the addressing plan of
+that subnet, or a running DHCP server holding a pool of free addresses.
 
-IPv6 offers a way that needs neither. A host builds its own addresses from two
-things: the identifier of its own network interface, and a prefix that the local
-router announces to everyone on the link. This is called Stateless Address
-Autoconfiguration (SLAAC). No server keeps any state, and nothing is configured
-by hand. IPv6 also has a stateful alternative, DHCPv6, which is widely used where
-an operator wants central control; this showcase is about the stateless method,
-and INET does not implement DHCPv6.
+IPv6 adds a third method that needs neither. A host derives its own addresses from
+two pieces of information it can already obtain: the identifier of its own network
+interface, and a prefix that the local router announces to everyone on the link. This
+is called Stateless Address Autoconfiguration (SLAAC). No server keeps any state, and
+nothing is configured by hand. IPv6 also has a stateful alternative, DHCPv6, which is widely used where an
+operator wants central control; this showcase is about the stateless method.
 
-Building your own address raises an obvious risk. If two hosts pick the same
-address, both break. IPv6 answers this with Duplicate Address Detection (DAD):
-before a host uses an address, it asks the link whether anyone already has it.
+Deriving an address locally removes the central authority that guaranteed it was
+unique, so two hosts can end up with the same address. Each of their neighbors stores
+a single link-layer address against it, so traffic reaches only whichever of the two
+answered most recently, and moves between them as their advertisements overwrite one
+another. IPv6 guards against this with Duplicate Address Detection (DAD): before a
+host uses an address, it asks the other nodes on the link whether one of them already
+holds it.
 
-This showcase demonstrates both mechanisms. In the first simulation, four hosts
-and a server start with no addresses and end up fully configured. In the second, a
-host carrying a duplicated hardware address joins the same network, and Duplicate
-Address Detection refuses the address it tried to claim.
+This showcase demonstrates both mechanisms. In the first simulation, four hosts and
+a server start with no addresses and end up holding a link-local address, a global
+address and a default router each, and then exchange traffic. In the second, a host
+carrying a duplicated MAC address joins the same network, and Duplicate Address
+Detection refuses the address it tried to claim.
 
 | Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/general/ipv6autoconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/general/ipv6autoconfiguration>`__
@@ -89,8 +94,8 @@ The link-local address
 The first address a host builds is a *link-local address*. It combines the fixed
 prefix ``fe80::/64`` with the interface identifier. A link-local address works
 only on the local link, and routers never forward packets that carry one. Its
-purpose is to let the host talk to its neighbors and to its router before it has
-any routable address.
+purpose is to let the host exchange packets with its neighbors and with its router
+before it has a routable address.
 
 Router discovery
 ~~~~~~~~~~~~~~~~
@@ -107,12 +112,12 @@ it. Two messages carry this information:
 A host does not have to wait for the next periodic Router Advertisement. Once its
 link-local address has passed its check, it waits a random time of up to one second
 — so that hosts starting together do not all solicit at the same instant — and then
-sends a Router Solicitation. If nothing
-answers after three attempts, four seconds apart, the host concludes about nine
-seconds after the first attempt that there is no router on the link. It keeps its link-local address and can still reach
-neighbors on the same link. It does not stop listening, though: a Router
-Advertisement that arrives later is still processed, and the host configures itself
-then.
+sends a Router Solicitation. If no router answers after three attempts, four seconds
+apart, the host concludes about nine seconds after the first attempt that there is no
+router on the link. It keeps its link-local address and can still exchange packets
+with neighbors on the same link, but it has no global address and can reach nothing
+beyond the link. It does not stop listening, though: a Router Advertisement that
+arrives later is still processed, and the host configures itself then.
 
 The standard also allows a router to answer a solicitation with a Router
 Advertisement addressed to the soliciting host alone. INET always sends it to the
@@ -141,8 +146,8 @@ the link. The two fields this showcase depends on are the prefix itself, which i
 they may build an address from this prefix. The option also carries an *on-link*
 flag, and two different lifetimes: the *preferred lifetime*, after which the
 address should no longer be used to start new communication, and the longer *valid
-lifetime*, after which the address stops existing. This showcase does not run long
-enough for either to matter.
+lifetime*, after which the address stops existing. Neither simulation here runs long
+enough for either lifetime to expire.
 
 A host that receives a Prefix Information option with the autonomous flag set
 combines the prefix with its own interface identifier. The result is its global
@@ -151,8 +156,9 @@ address.
 Duplicate Address Detection
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A newly built address is *tentative*. The host must not send ordinary traffic from
-a tentative address. First it runs Duplicate Address Detection (DAD).
+A newly derived address is *tentative*. The host must not use a tentative address as
+the source address of ordinary data packets. First it runs Duplicate Address
+Detection (DAD).
 
 The host sends a **Neighbor Solicitation** that names the tentative address as its
 target. The source address of this message is the unspecified address ``::``,
@@ -194,7 +200,7 @@ Putting the pieces together, a host that joins a link performs these steps:
 6. Run Duplicate Address Detection (DAD) on the global address.
 
 Each address is therefore checked separately, and a host runs Duplicate Address
-Detection twice before it is fully configured.
+Detection twice before it holds both addresses.
 
 Two points about this ordering are specific to INET rather than required by the
 standard. INET waits for step 2 to finish before starting step 3, while RFC 4861
@@ -255,8 +261,8 @@ Neighbor Discovery parameters
 
 The :ned:`Ipv6NeighbourDiscovery` module inside each node's network layer
 implements router discovery, Stateless Address Autoconfiguration (SLAAC) and
-Duplicate Address Detection (DAD). The parameters that matter for reading the
-results are:
+Duplicate Address Detection (DAD). The parameters that shape the timings seen in
+the results are:
 
 - :par:`dupAddrDetectTransmits` — how many Neighbor Solicitations to send for
   Duplicate Address Detection (DAD), one by default. Setting it to ``0`` skips the
@@ -301,13 +307,13 @@ visible in them; the video shows the change happening.
 What INET does not model
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Four limitations bound what this showcase can claim:
+Four limitations of the current implementation bound what this showcase can claim:
 
-- There is no DHCPv6 implementation. A Router Advertisement can carry a *Managed*
-  flag, which tells hosts to obtain addresses from a DHCPv6 server instead. INET's
-  router sends the flag, but its hosts never read it, so setting it does not
-  suppress Stateless Address Autoconfiguration (SLAAC). SLAAC is the only way a
-  host obtains an address here, whatever the flag says.
+- INET currently has no DHCPv6 implementation. A Router Advertisement can carry a
+  *Managed* flag, which tells hosts to obtain addresses from a DHCPv6 server instead.
+  INET's router sends the flag, but its hosts never read it, so setting it does not
+  suppress Stateless Address Autoconfiguration (SLAAC). SLAAC is the only way a host
+  obtains an address here, whatever the flag says.
 - The link-layer multicast filtering described above is not modelled. INET's
   Ethernet interface accepts every multicast frame, and the address check happens
   one layer up, in the IPv6 module. Uninvolved nodes therefore do receive and
@@ -351,9 +357,9 @@ advertised prefixes, the ``visualizer`` displays interface addresses, and the
 
 Every host address in the figure was built by the host itself. The four hosts
 share the prefix ``2001:db8:1:1::/64``, while the server, being on the other link,
-uses ``2001:db8:1:2::/64`` — which is the only visible sign that the second prefix
-in the XML configuration is real. The router's two global addresses come from the
-configurator, as described above.
+uses ``2001:db8:1:2::/64``. That difference is what shows the second prefix in the
+XML configuration is really being advertised. The router's two global addresses come
+from the configurator, as described above.
 
 Each interface in the figure carries two addresses, a link-local one and a global
 one, but the label shows only the preferred address, which is the global one.
@@ -397,8 +403,8 @@ This configuration gives ``host[0]`` and ``host[3]`` the same MAC address. Both
 therefore derive the same interface identifier, and both would build the same
 link-local address ``fe80::8aa:ff:fe00:10``.
 
-Setting :par:`hasStatus` to ``true`` gives every node a status submodule, which is
-what allows a node to be started and stopped during the run. ``host[3]`` begins in
+Setting :par:`hasStatus` to ``true`` gives every node a status submodule, without
+which the ``scenarioManager`` cannot start or stop a node during the run. ``host[3]`` begins in
 the ``DOWN`` state, and the ``scenarioManager`` starts it after 15 seconds:
 
 .. literalinclude:: ../clone.xml
@@ -487,10 +493,10 @@ host starts router discovery, and the router answers:
    2.137484  host[0]: Assigning new address to: eth0
    2.137484  host[1]: Assigning new address to: eth0
 
-One detail here is worth noting. ``host[0]`` obtains the prefix from the Router
-Advertisement that ``host[1]`` asked for, because that Router Advertisement is sent
-to the all-nodes multicast address. A single answer serves every host that is
-ready to use it.
+``host[0]`` never asked for this prefix: it obtains it from the Router Advertisement
+that ``host[1]`` solicited, because that advertisement is sent to the all-nodes
+multicast address rather than to ``host[1]`` alone. One answer therefore serves every
+host on the link that is ready to use it.
 
 ``host[2]`` and ``host[3]`` were also on the link at 2.137 s, and did receive that
 same Router Advertisement. They did not use it, because neither had finished
