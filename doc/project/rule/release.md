@@ -1,6 +1,6 @@
 # Release rules
 
-> **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `RR-*` · **Stands on:** [accepted-requirements.md](../requirement/accepted-requirements.md), [testing.md](testing.md)
+> **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `RR-*` · **Stands on:** [accepted-requirements.md](../requirement/accepted-requirements.md), [decisions.md](../design/decisions.md), [testing.md](testing.md)
 
 What a release owes its users. INET is a model library that other people's published results depend
 on: a simulation run against version 4.5 must still be reproducible after 4.6 ships, or the result

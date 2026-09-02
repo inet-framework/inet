@@ -1,6 +1,6 @@
 # Code quality rules
 
-> **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `QR-*` · **Stands on:** [naming.md](naming.md), [architecture.md](architecture.md)
+> **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `QR-*` · **Stands on:** [decisions.md](../design/decisions.md), [naming.md](naming.md), [architecture.md](architecture.md)
 
 How the code of INET reads, and what keeps it readable. A human reads this code to learn what a
 protocol does, and often to learn what the *standard* says. Every rule here serves that reader.
