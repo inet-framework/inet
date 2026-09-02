@@ -68,6 +68,7 @@ Ipv6NeighbourDiscovery::~Ipv6NeighbourDiscovery()
 
     for (auto *entry : advIfList) {
         cancelAndDelete(entry->raTimeoutMsg);
+        cancelAndDelete(entry->pendingSolicitedRaMsg);
         delete entry;
     }
 
@@ -1208,7 +1209,18 @@ void Ipv6NeighbourDiscovery::processRsPacket(Packet *packet, const Ipv6RouterSol
         // computed time, ignore the random delay and let that advertisement serve
         // this solicitation (RFC 4861 Section 6.2.6).
         if (scheduledTime < advIfEntry->nextScheduledRATime) {
+            /*This advertisement becomes the next multicast RA on the interface, so it
+              supersedes the solicited one that was pending until now: that one was
+              scheduled to serve the earlier solicitations, and this one, being earlier,
+              serves them too. Sending both would put two multicast RAs on the link less
+              than MIN_DELAY_BETWEEN_RAS apart, which RFC 4861 Section 6.2.6 forbids.*/
+            if (advIfEntry->pendingSolicitedRaMsg) {
+                EV_DETAIL << "Cancelling the solicited RA scheduled at " << advIfEntry->nextScheduledRATime
+                          << "; this earlier one supersedes it\n";
+                cancelAndDelete(advIfEntry->pendingSolicitedRaMsg);
+            }
             scheduleAt(scheduledTime, msg);
+            advIfEntry->pendingSolicitedRaMsg = msg;
             advIfEntry->nextScheduledRATime = scheduledTime;
         }
         else
@@ -1727,6 +1739,8 @@ void Ipv6NeighbourDiscovery::sendSolicitedRa(cMessage *msg)
     Ipv6Address destAddr = Ipv6Address("FF02::1");
     EV_DETAIL << "Testing condition!\n";
     createAndSendRaPacket(destAddr, ie);
+    if (AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie))
+        advIfEntry->pendingSolicitedRaMsg = nullptr;
     delete msg;
 }
 
@@ -2693,6 +2707,7 @@ void Ipv6NeighbourDiscovery::stop()
     // cancel and delete all advertising interface entries
     for (auto *entry : advIfList) {
         cancelAndDelete(entry->raTimeoutMsg);
+        cancelAndDelete(entry->pendingSolicitedRaMsg);
         delete entry;
     }
     advIfList.clear();
