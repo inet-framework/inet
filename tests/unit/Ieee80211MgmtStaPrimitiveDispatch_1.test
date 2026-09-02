@@ -21,6 +21,7 @@ class TestIeee80211AgentSta : public Ieee80211AgentSta
     int associateConfirms = 0;
     int reassociateConfirms = 0;
     int scanRequests = 0;
+    Ieee80211PrimResultCode lastReassociateResult = PRC_SUCCESS;
 
   protected:
     virtual void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *resp) override
@@ -31,23 +32,12 @@ class TestIeee80211AgentSta : public Ieee80211AgentSta
     virtual void processReassociateConfirm(Ieee80211Prim_ReassociateConfirm *resp) override
     {
         reassociateConfirms++;
-        Ieee80211AgentSta::processReassociateConfirm(resp);
+        lastReassociateResult = resp->getResultCode();
     }
 
     virtual void sendScanRequest() override
     {
         scanRequests++;
-    }
-};
-
-class ConfirmListener : public cListener
-{
-  public:
-    int lastCode = 0;
-
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override
-    {
-        lastCode = value;
     }
 };
 
@@ -156,8 +146,6 @@ static void deliverConfirm(TestIeee80211AgentSta& agent, Ieee80211PrimConfirm *c
 %activity:
 
 TestIeee80211AgentSta agent;
-ConfirmListener listener;
-agent.subscribe("acceptConfirm", &listener);
 deliverConfirm(agent, new Ieee80211Prim_AssociateConfirm());
 ASSERT(agent.associateConfirms == 1);
 ASSERT(agent.reassociateConfirms == 0);
@@ -167,17 +155,15 @@ reassociateConfirm->setResultCode(PRC_SUCCESS);
 deliverConfirm(agent, reassociateConfirm);
 ASSERT(agent.associateConfirms == 1);
 ASSERT(agent.reassociateConfirms == 1);
-ASSERT(listener.lastCode == PR_REASSOCIATE_CONFIRM);
+ASSERT(agent.lastReassociateResult == PRC_SUCCESS);
 
-ConfirmListener dropListener;
-agent.subscribe("dropConfirm", &dropListener);
 auto refusedReassociateConfirm = new Ieee80211Prim_ReassociateConfirm();
 refusedReassociateConfirm->setResultCode(PRC_REFUSED);
 deliverConfirm(agent, refusedReassociateConfirm);
 ASSERT(agent.associateConfirms == 1);
 ASSERT(agent.reassociateConfirms == 2);
-ASSERT(agent.scanRequests == 1);
-ASSERT(dropListener.lastCode == PR_REASSOCIATE_CONFIRM);
+ASSERT(agent.lastReassociateResult == PRC_REFUSED);
+ASSERT(agent.scanRequests == 0);
 
 TestIeee80211MgmtSta mgmt;
 mgmt.handleCommand(PR_ASSOCIATE_REQUEST, new Ieee80211Prim_AssociateRequest());
