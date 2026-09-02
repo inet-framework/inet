@@ -24,7 +24,8 @@ another. IPv6 guards against this with Duplicate Address Detection (DAD): before
 host uses an address, it asks the other nodes on the link whether one of them already
 holds it.
 
-This showcase demonstrates both mechanisms. In the first simulation, four hosts and
+This showcase demonstrates both mechanisms, Stateless Address Autoconfiguration
+(SLAAC) and Duplicate Address Detection (DAD). In the first simulation, four hosts and
 a server start with no addresses and end up holding a link-local address, a global
 address and a default router each, and then exchange traffic. In the second, a host
 carrying a duplicated MAC address joins the same network, and Duplicate Address
