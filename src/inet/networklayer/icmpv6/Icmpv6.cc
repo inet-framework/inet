@@ -278,6 +278,11 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
     else
         throw cRuntimeError("Unknown ICMPv6 error type: %d\n", type);
 
+    quoteAndSendErrorMessage(errorMsg, origDatagram, type, code);
+}
+
+void Icmpv6::quoteAndSendErrorMessage(Packet *errorMsg, Packet *origDatagram, Icmpv6Type type, int code)
+{
     // Encapsulate the original datagram, but the whole ICMPv6 error
     // packet cannot be larger than the minimum Ipv6 MTU (RFC 4443 2.4. (c)).
     // NOTE: since we just overwrite the errorMsg length without actually

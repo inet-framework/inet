@@ -56,6 +56,14 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
     virtual Packet *createTimeExceededMsg(Icmpv6TimeEx code);
     virtual Packet *createParamProblemMsg(Icmpv6ParameterProblem code); // TODOSection 3.4 describes a pointer. What is it?
 
+    /**
+     * Common tail of sendErrorMessage(): quotes the offending datagram into the
+     * (already created) error message, then sends it to its source -- or processes
+     * it locally if the datagram was locally originated.
+     * Takes ownership of errorMsg; origDatagram stays with the caller.
+     */
+    virtual void quoteAndSendErrorMessage(Packet *errorMsg, Packet *origDatagram, Icmpv6Type type, int code);
+
   protected:
     /**
      * Initialization
