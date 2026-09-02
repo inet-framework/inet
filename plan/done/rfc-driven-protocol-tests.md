@@ -24,14 +24,14 @@ is permitted only to select practical candidates. INET names first appear in the
 
 ## Task list
 
-- [ ] Step 1: cache rfc791.txt and rfc792.txt
-- [ ] Step 2: checklist.md — catalog with IDs, quotes, class, strength, status
-- [ ] Step 3: checks/ttl-decrement.md, checks/fragment-reassembly.md, checks/dont-fragment.md
-- [ ] Step 4: Rfc791TtlDecrement.test, Rfc791FragmentReassembly.test, Rfc791DontFragment.test
-- [ ] Step 5: run the ipv4 suite; write results.md
-- [ ] Step 6: categories.md; fill the ledger in checklist.md
-- [ ] RFC-WORKFLOW.md
-- [ ] Move this plan to plan/done/
+- [x] Step 1: cache rfc791.txt and rfc792.txt
+- [x] Step 2: checklist.md — catalog with IDs, quotes, class, strength, status
+- [x] Step 3: checks/ttl-decrement.md, checks/fragment-reassembly.md, checks/dont-fragment.md
+- [x] Step 4: Rfc791TtlDecrement.test, Rfc791FragmentReassembly.test, Rfc791DontFragment.test
+- [x] Step 5: run the ipv4 suite; write results.md — 4 of 4 tests PASS
+- [x] Step 6: categories.md; the ledger in checklist.md names the tests
+- [x] RFC-WORKFLOW.md
+- [x] Move this plan to plan/done/
 
 ## Decision log
 
@@ -39,3 +39,8 @@ is permitted only to select practical candidates. INET names first appear in the
   first draft tied catalog entries to code locations; that draft was discarded.
 - 2026-09-02: The three examples share one mockup: source host A — router R — destination
   host B, with a small MTU on the R–B link. One scenario serves all three checks.
+- 2026-09-02: Both authoring failures were test errors, not model gaps: the MTU parameter
+  lives on the MAC module (`eth[1].mac.mtu`), unit-bearing fields need unit literals, and
+  the ICMP dissector name is `icmpv4`. Details in tests/protocol/ipv4/rfc/results.md.
+- 2026-09-02: Final state: 4 of 4 ipv4 protocol tests PASS; the INET model conforms to all
+  selected RFC 791/792 statements in this pass.

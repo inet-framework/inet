@@ -1,0 +1,88 @@
+%description:
+
+RFC 791 — a gateway decreases the TTL of a forwarded datagram.
+
+Checks R791-TTL-1 (must) and R791-TTL-3 (description) from rfc/checklist.md. The English
+procedure and the mockup are in rfc/checks/ttl-decrement.md; the program steps below map
+one to one onto its expected observations. Mapping of the mockup: host A = hostA,
+gateway R = router, host B = hostB; link 1 = hostA-router, link 2 = router-hostB.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("rfc791_ttl_decrement")
+        // Expected observation 1: link 1 shows the sender value (R791-TTL-3).
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.timeToLive == 32")
+                  .capture("ttl", "ipv4.timeToLive")
+                  .describe("the datagram on link 1 with the sender TTL")
+                  .within(0.5))
+        // Expected observation 2: link 2 shows the recorded value minus 1 (R791-TTL-1).
+        .once(on("router.eth[1].mac").signal("packetSentToLower")
+                  .packet("udp.destPort == 5000 && ipv4.timeToLive == {ttl} - 1")
+                  .describe("the same datagram on link 2 with the TTL decreased by one")
+                  .within(0.1))
+        // Expected observation 3: host B receives it with the decreased TTL.
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                  .packet("udp.destPort == 5000 && ipv4.timeToLive == {ttl} - 1")
+                  .describe("the datagram at host B with the TTL decreased by one")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "rfc791_ttl_decrement compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+// The mockup of rfc/checks/ttl-decrement.md: hostA -- router -- hostB.
+network Rfc791Net
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=250,100"); }
+        router: Router { @display("p=400,100"); }
+        hostB: StandardHost { @display("p=550,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++; // link 1 = router.eth[0]
+        router.ethg++ <--> Eth100M <--> hostB.ethg++; // link 2 = router.eth[1]
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Rfc791Net
+sim-time-limit = 1s
+seed-set = 0
+
+# Static ARP keeps the wire free of ARP request/reply noise.
+*.ipv4.arp.typename = "GlobalArp"
+
+# One UDP datagram, 100 octets of application data, sender TTL 32.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].timeToLive = 32
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 1s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST rfc791_ttl_decrement: PASS
