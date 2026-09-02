@@ -1067,7 +1067,7 @@ void Ipv6::fragmentAndSend(Packet *packet)
     // routed datagrams are not fragmented
     if (!fromHL) {
         // FIXME check for multicast datagrams, how many ICMP error should be sent
-        sendIcmpError(packet, ICMPv6_PACKET_TOO_BIG, 0); // TODO set MTU
+        sendIcmpPacketTooBigError(packet, mtu);
         return;
     }
 
@@ -1517,6 +1517,12 @@ INetfilter::IHook::Result Ipv6::datagramLocalOutHook(Packet *packet)
 void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code)
 {
     icmp->sendErrorMessage(packet, type, code);
+    delete packet;
+}
+
+void Ipv6::sendIcmpPacketTooBigError(Packet *packet, int mtu)
+{
+    icmp->sendPtbMessage(packet, mtu);
     delete packet;
 }
 

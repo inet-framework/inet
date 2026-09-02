@@ -211,6 +211,12 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
 
     void sendIcmpError(Packet *origPacket, Icmpv6Type type, int code);
 
+    /**
+     * Sends an ICMPv6 Packet Too Big error reporting the given next-hop MTU,
+     * and disposes of the offending packet.
+     */
+    void sendIcmpPacketTooBigError(Packet *origPacket, int mtu);
+
     // NetFilter functions:
 
   protected:
