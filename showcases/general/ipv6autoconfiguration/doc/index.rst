@@ -17,12 +17,9 @@ Autoconfiguration (SLAAC). No server keeps any state, and nothing is configured 
 hand.
 
 Deriving an address locally removes the central authority that guaranteed it was
-unique, so two hosts can end up with the same address. Each of their neighbors stores
-a single link-layer address against it, so traffic reaches only whichever of the two
-answered most recently, and moves between them as their advertisements overwrite one
-another. IPv6 guards against this with Duplicate Address Detection (DAD): before a
-host uses an address, it asks the other nodes on the link whether one of them already
-holds it.
+unique, so two hosts can end up with the same address. IPv6 guards against this with
+Duplicate Address Detection (DAD): before a host uses an address, it asks the other
+nodes on the link whether one of them already holds it.
 
 This showcase demonstrates both mechanisms, Stateless Address Autoconfiguration
 (SLAAC) and Duplicate Address Detection (DAD). In the first simulation, four hosts and
@@ -155,6 +152,13 @@ address.
 
 Duplicate Address Detection
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Two hosts that derive the same address both treat it as theirs. Their neighbors
+cannot tell the two apart: a neighbor records one link-layer address for that IPv6
+address, so packets meant for one host may be delivered to the other, and which host
+receives them can change as each of the two answers for the address in turn. Neither
+host can be reached reliably. Duplicate Address Detection (DAD) catches this before
+either of them starts using the address.
 
 A newly derived address is *tentative*. The host must not use a tentative address as
 the source address of ordinary data packets. First it runs Duplicate Address
