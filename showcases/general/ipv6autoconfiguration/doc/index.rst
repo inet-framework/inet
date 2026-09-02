@@ -365,12 +365,10 @@ Autoconfiguration Configuration
    :end-before: [Config DuplicateAddress]
    :language: ini
 
-No host is given an address; the addresses are the result. No MAC addresses appear
-either — INET assigns those automatically, and only the second configuration sets any
-by hand. The only other thing the configuration does is send four UDP packets from
-``host[0]`` to the server, starting at 8 s, once every node has finished configuring
-itself. They are there to show that the self-assigned addresses actually carry
-traffic.
+No host is given an address; the addresses are the result. The only other thing the
+configuration does is send four UDP packets from ``host[0]`` to the server, starting
+at 8 s, once every node has finished configuring itself. They are there to show that
+the self-assigned addresses actually carry traffic.
 
 DuplicateAddress Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
