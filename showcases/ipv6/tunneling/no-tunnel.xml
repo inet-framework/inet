@@ -15,11 +15,12 @@
 
     <route hosts="borderA" destination="fd00:a::/64"     interface="eth0"/>
     <route hosts="borderA" destination="2001:db8:1::/64" interface="eth1"/>
+    <route hosts="borderA" destination="::" prefixLength="0" gateway="2001:db8:1::2" interface="eth1"/>
+
     <route hosts="transit" destination="2001:db8:1::/64" interface="eth0"/>
     <route hosts="transit" destination="2001:db8:2::/64" interface="eth1"/>
+
     <route hosts="borderB" destination="2001:db8:2::/64" interface="eth0"/>
     <route hosts="borderB" destination="fd00:b::/64"     interface="eth1"/>
-
-    <route hosts="borderA" destination="2001:db8:2::/64" gateway="2001:db8:1::2" interface="eth1"/>
-    <route hosts="borderB" destination="2001:db8:1::/64" gateway="2001:db8:2::1" interface="eth0"/>
+    <route hosts="borderB" destination="::" prefixLength="0" gateway="2001:db8:2::1" interface="eth0"/>
 </config>

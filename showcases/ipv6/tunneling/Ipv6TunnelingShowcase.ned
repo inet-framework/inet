@@ -15,34 +15,34 @@ import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network Ipv6TunnelingShowcase
 {
-    @display("bgb=1180,420");
+    @display("bgb=1010,395");
     submodules:
         configurator: Ipv6NetworkConfigurator {
-            @display("p=70,50;is=s");
+            @display("p=60,40;is=s");
         }
         visualizer: IntegratedCanvasVisualizer {
-            @display("p=70,140;is=s");
+            @display("p=145,40;is=s");
         }
         hostA: StandardHost6 {
-            @display("p=200,300");
+            @display("p=85,255");
         }
         borderA: Router6 {
-            @display("p=380,200");
+            @display("p=255,185");
         }
         transit: Router6 {
-            @display("p=590,120");
+            @display("p=475,105");
         }
         borderB: Router6 {
-            @display("p=800,200");
+            @display("p=695,185");
         }
         switchB: EthernetSwitch {
-            @display("p=950,300");
+            @display("p=765,300");
         }
         hostB1: StandardHost6 {
-            @display("p=1090,230");
+            @display("p=935,240");
         }
         hostB2: StandardHost6 {
-            @display("p=1090,360");
+            @display("p=935,345");
         }
     connections:
         hostA.ethg++ <--> Eth100M <--> borderA.ethg++;
