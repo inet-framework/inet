@@ -7,3 +7,4 @@ These showcases demonstrate various aspects of IPv6:
    :maxdepth: 1
 
    tunneling/doc/index
+   pathmtudiscovery/doc/index
