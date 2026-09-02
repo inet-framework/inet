@@ -51,6 +51,7 @@ Every quality rule in document order.
 | --- | --- |
 | [QR-SIZE](#qr-size) | A function, a file and a line have budgets |
 | [QR-STATE-OWNER](#qr-state-owner) | One piece of state has one owner |
+| [QR-OBJECT-OWNERSHIP](#qr-object-ownership) | Every object follows its declared exclusive, shared, or borrowed ownership contract |
 | [QR-DUP](#qr-dup) | A constant is defined once and propagated |
 | [QR-TODO](#qr-todo) | A TODO carries an issue number |
 
@@ -194,6 +195,25 @@ Two modules that both maintain "the current data rate" will disagree, and the ru
 disagree is the one nobody can explain. Decide the owner before you write the field. This is what
 makes a model's behavior attributable to a module, which every debugging session and every
 sequence chart depends on.
+
+*Enforced at T4 — agent review.*
+
+### QR-OBJECT-OWNERSHIP
+
+**Every object follows a declared exclusive, shared/reference-counted, or borrowed ownership
+contract; each owning obligation has exactly one supported-path disposition, and borrowed access
+never outlives its declared lifetime.**
+
+Exclusive ownership has exactly one owner. Shared or reference-counted ownership may have multiple
+holders, and each holder retains, transfers, or releases its owning obligation according to the
+shared contract; destruction occurs only when that contract says the final owning reference is
+released. At the end of every supported success, refusal, error, exception, cancellation, or
+teardown path, each owning obligation has exactly one disposition: retention by a defined owner or
+holder, transfer, or discharge through release or destruction as its model requires. Retention is
+valid when the owner and cleanup path remain defined; it is not itself a leak. A borrowed pointer or
+reference may be used only within the lifetime promised by its owner and must not escape through a
+stored callback, deferred operation, or longer-lived container. Canonical `Ptr<Chunk>` sharing under
+[AR-PKT-CHUNKS](architecture.md#ar-pkt-chunks) follows the shared/reference-counted model.
 
 *Enforced at T4 — agent review.*
 

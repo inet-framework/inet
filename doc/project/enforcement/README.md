@@ -1,6 +1,6 @@
 # Enforcement
 
-> **Kind:** reference · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [architecture.md](../rule/architecture.md), [naming.md](../rule/naming.md), [pull-request.md](../rule/pull-request.md), [sealing.md](../rule/sealing.md)
+> **Kind:** reference · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [architecture.md](../rule/architecture.md), [naming.md](../rule/naming.md), [quality.md](../rule/quality.md), [pull-request.md](../rule/pull-request.md), [release.md](../rule/release.md), [sealing.md](../rule/sealing.md)
 
 The machinery that checks the rules. This document holds two things: the **tier ladder**, which every
 rule document cites, and the **gate inventory**, which lists the checks that really exist.
@@ -23,9 +23,9 @@ line of its section. This document does not repeat those tiers, because two copi
 | **T5** | **A human decides.** Genuine design judgment and final sign-off. Is a fidelity level worth adding? Does this read as one system? |
 
 T4 needs its own discipline, and [checklist/general.md](checklist/general.md) states it: **precision
-over recall**. The reviewer flags only a clear violation, asks a question when it is unsure, and
-never re-flags a deviation that a ledger already records. A noisy gate gets ignored, and an ignored
-gate enforces nothing.
+over recall**. The reviewer flags only a clear violation, asks a question only for a plausible rule
+conflict requiring human judgment, and never re-flags a deviation that a ledger already records. A
+noisy gate gets ignored, and an ignored gate enforces nothing.
 
 ## The gate inventory
 
@@ -43,7 +43,7 @@ measured.
 | [check-commits.sh](check-commits.sh) | T3 | by hand; not yet in CI | `PR-SPLIT-WHITESPACE`, `PR-SPLIT-MOVE`, `PR-SPLIT-BASELINE`, `PR-SERIES-ORDER`, `PR-SERIES-LINEAR`, `PR-MSG-SUBJECT`, `PR-MSG-FACTS` |
 | [check-seals.sh](check-seals.sh) | T3 | by hand; not yet in CI | `SR-FLAG-PLACEMENT`, `SR-FLAG-COVERAGE`, and the generated index of [seal-list.md](../audit/seal-list.md) |
 | [check-source-seals.sh](check-source-seals.sh) | T3 | pull-request CI and by hand | source-path `SR-*`: recursive and generated-file seal coverage from [seal-list.md](../audit/seal-list.md) |
-| [checklist/general.md](checklist/general.md) | T4 | by an agent, on every change | the semantic architecture rules |
+| [checklist/general.md](checklist/general.md) | T4 | by an agent, on every change | the semantic project rules listed in the checklist |
 | [checklist/ieee80211.md](checklist/ieee80211.md) | T4 | by an agent, on an 802.11 diff | `AR-WLAN-*` |
 | the test suites | T2 | GitHub Actions test workflows | `TR-*`, `AR-QUAL-FINGERPRINT`, `AR-QUAL-DETERMINISM` |
 | `inet_featuretool` | T3 | the feature workflow | `AR-EXT-FEATURES` |
