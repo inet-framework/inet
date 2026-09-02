@@ -28,11 +28,11 @@ knowledge.
 | Step | Action | Artifact |
 | --- | --- | --- |
 | 1 | Download the RFC and its companions | `<proto>/rfc/rfcNNN.txt` |
-| 2 | Extract checkable statements | `<proto>/rfc/checklist.md` |
-| 3 | Write the English check procedure with a mockup | `<proto>/rfc/checks/<name>.md` |
+| 2 | Extract checkable statements | `<proto>/rfc/rfcNNN-checklist.md` |
+| 3 | Write the English check procedure with a mockup | `<proto>/rfc/rfcNNN-checks.md` |
 | 4 | Write the protocol test | `<proto>/RfcNNN<Name>.test` |
-| 5 | Run the test and analyze the simulation model | `<proto>/rfc/results.md` |
-| 6 | Decide the category of each check | `<proto>/rfc/categories.md` |
+| 5 | Run the test and analyze the simulation model | `<proto>/rfc/rfcNNN-results.md` |
+| 6 | Decide the category of each check | `<proto>/rfc/rfcNNN-categories.md` |
 
 `<proto>` is a suite folder under `tests/protocol/`, for example `ipv4/`.
 
@@ -44,17 +44,17 @@ Cache the RFC text in the suite folder, under `rfc/`:
 curl -s https://www.rfc-editor.org/rfc/rfc791.txt -o tests/protocol/ipv4/rfc/rfc791.txt
 ```
 
-- Record the source URL and the download date in `checklist.md`.
+- Record the source URL and the download date in `rfcNNN-checklist.md`.
 - Also cache the companion RFCs that the primary RFC delegates to. Error signals often live
   in a companion (IPv4 delegates error reports to ICMP, RFC 792).
 - The cached file gives stable line numbers. All quotes in later artifacts point into it,
   for example `rfc791.txt:1013-1014`.
 
-## Step 2 — extract checkable statements (`checklist.md`)
+## Step 2 — extract checkable statements (`rfcNNN-checklist.md`)
 
 Read the RFC and write one catalog entry per checkable statement. An entry contains:
 
-- **ID** — `RNNN-AREA-n`, for example `R791-TTL-1`. The ID is stable forever. Never
+- **ID** — `RFCNNN-AREA-n`, for example `RFC791-TTL-1`. The ID is stable forever. Never
   renumber; append new entries at the end of an area.
 - **Quote** — the verbatim RFC sentence with a line reference into the cached file.
 - **Strength** — the word the RFC uses: `must`, `may`, or `description` for normative prose
@@ -75,10 +75,11 @@ file. The ledger is the frontier of the work; each pass extends it.
 Do not aim for completeness in the first pass. Extract the statements of a few areas well,
 mark the rest out of scope, and note that at the end of the catalog.
 
-## Step 3 — write the English check description (`checks/<name>.md`)
+## Step 3 — write the English check description (`rfcNNN-checks.md`)
 
-One document per check. A check can cover several catalog entries when one scenario shows
-them together. The document contains:
+One file per RFC, with one section per check. A check can cover several catalog entries
+when one scenario shows them together. A common-mockup section at the top serves all
+checks; each check section contains:
 
 - **Checks** — the catalog IDs with their strength.
 - **Requirement** — a short restatement of the RFC clauses.
@@ -107,12 +108,12 @@ Translate the English document into a self-contained `opp_test` file with the fr
 
 - File name: `RfcNNN<CheckName>.test`, for example `Rfc791TtlDecrement.test`. Program name:
   `rfcNNN_<check_name>`.
-- The `%description` names the catalog IDs, points to the check document, and gives the
+- The `%description` names the catalog IDs, points to the check section, and gives the
   mockup mapping (host A = `hostA`, gateway R = `router`, ...).
 - One program step per numbered expected observation, in order, with a comment that names
   the observation. Use `capture` for recorded values and relative comparisons.
 - When a mapping is imperfect (for example, a window that cannot cover an instant), write
-  the deviation into the `%description` and into `results.md`. Do not silently weaken the
+  the deviation into the `%description` and into `rfcNNN-results.md`. Do not silently weaken the
   English expectation.
 - When the faithful assertion fails because the model lacks a feature, keep the assertion
   and declare `%# expected-result: FAIL` (see AUTHORING.md). Never invert the assertion.
@@ -124,7 +125,7 @@ Translate the English document into a self-contained `opp_test` file with the fr
   wrong path applies nothing. On a deadline miss, run the tester without `testName` first
   and read the real frames in the trace.
 
-## Step 5 — run and analyze (`results.md`)
+## Step 5 — run and analyze (`rfcNNN-results.md`)
 
 Build the framework library once per INET build, then run the suite:
 
@@ -135,7 +136,7 @@ inet_run_protocol_tests -p inet -w ipv4
 
 (`-p inet` skips the project discovery; discovery crashes on a `~/.omnetpp` directory.)
 
-Record in `results.md`:
+Record in `rfcNNN-results.md`:
 
 - the date, the INET commit, and the verdict of every test;
 - for each failure, its class: **test error** (fix the test), **model gap** (keep the
@@ -145,7 +146,7 @@ Record in `results.md`:
   file and line references. This is the first artifact that may reference code;
 - sharpening candidates for the next pass.
 
-## Step 6 — decide the category (`categories.md`)
+## Step 6 — decide the category (`rfcNNN-categories.md`)
 
 The INET test tree has several categories. Judge every check after it runs:
 
@@ -170,7 +171,7 @@ The workflow is a loop, not a one-shot process. A later pass:
 2. promotes `candidate` and `later` entries to `selected` as the toolset allows (injection,
    interception, and state signals unlock the `later` class);
 3. deepens selected checks — sharper field assertions, timing bounds, fault variants;
-4. re-runs everything and updates the ledger and `results.md`.
+4. re-runs everything and updates the ledger and `rfcNNN-results.md`.
 
 The catalog IDs and the ledger carry the state between passes. A pass is complete when the
 ledger, the results, and the plan document agree.
@@ -188,17 +189,14 @@ tests/protocol/
     rfc/
       rfc791.txt               step 1: cached RFC texts
       rfc792.txt
-      checklist.md             step 2: catalog + coverage ledger
-      checks/
-        ttl-decrement.md       step 3: English procedures with mockups
-        fragment-reassembly.md
-        dont-fragment.md
-      results.md               step 5: verdicts + model analysis
-      categories.md            step 6: category decisions
+      rfc791-checklist.md      step 2: catalog + coverage ledger
+      rfc791-checks.md         step 3: English procedures, one section per check
+      rfc791-results.md        step 5: verdicts + model analysis
+      rfc791-categories.md     step 6: category decisions
 ```
 
 ## Pass log
 
 | Pass | Date | Scope | Result |
 | --- | --- | --- | --- |
-| 1 | 2026-09-02 | RFC 791 + RFC 792 error signals; 17 catalog entries; 3 checks; 3 tests | see `ipv4/rfc/results.md` |
+| 1 | 2026-09-02 | RFC 791 + RFC 792 error signals; 17 catalog entries; 3 checks; 3 tests | see `ipv4/rfc/rfc791-results.md` |

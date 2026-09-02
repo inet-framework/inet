@@ -2,8 +2,8 @@
 
 RFC 791 — a gateway decreases the TTL of a forwarded datagram.
 
-Checks R791-TTL-1 (must) and R791-TTL-3 (description) from rfc/checklist.md. The English
-procedure and the mockup are in rfc/checks/ttl-decrement.md; the program steps below map
+Checks RFC791-TTL-1 (must) and RFC791-TTL-3 (description) from rfc/rfc791-checklist.md. The English
+procedure and the mockup are in rfc/rfc791-checks.md#ttl-decrement; the program steps below map
 one to one onto its expected observations. Mapping of the mockup: host A = hostA,
 gateway R = router, host B = hostB; link 1 = hostA-router, link 2 = router-hostB.
 
@@ -18,13 +18,13 @@ using namespace inet::protocoltest;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc791_ttl_decrement")
-        // Expected observation 1: link 1 shows the sender value (R791-TTL-3).
+        // Expected observation 1: link 1 shows the sender value (RFC791-TTL-3).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
                   .packet("udp.destPort == 5000 && ipv4.timeToLive == 32")
                   .capture("ttl", "ipv4.timeToLive")
                   .describe("the datagram on link 1 with the sender TTL")
                   .within(0.5))
-        // Expected observation 2: link 2 shows the recorded value minus 1 (R791-TTL-1).
+        // Expected observation 2: link 2 shows the recorded value minus 1 (RFC791-TTL-1).
         .once(on("router.eth[1].mac").signal("packetSentToLower")
                   .packet("udp.destPort == 5000 && ipv4.timeToLive == {ttl} - 1")
                   .describe("the same datagram on link 2 with the TTL decreased by one")
@@ -47,7 +47,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of rfc/checks/ttl-decrement.md: hostA -- router -- hostB.
+// The mockup of rfc/rfc791-checks.md#ttl-decrement: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:

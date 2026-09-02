@@ -15,21 +15,21 @@ is permitted only to select practical candidates. INET names first appear in the
 | Step | Action | Artifact |
 | --- | --- | --- |
 | 1 | Download the RFC and its error-signal companion | `tests/protocol/ipv4/rfc/rfc791.txt`, `rfc792.txt` |
-| 2 | Extract checkable statements | `tests/protocol/ipv4/rfc/checklist.md` |
-| 3 | Write the English check procedure with a mockup | `tests/protocol/ipv4/rfc/checks/*.md` |
+| 2 | Extract checkable statements | `tests/protocol/ipv4/rfc/rfc791-checklist.md` |
+| 3 | Write the English check procedure with a mockup | `tests/protocol/ipv4/rfc/rfc791-checks.md` |
 | 4 | Write the protocol test with `tests/protocol/lib` | `tests/protocol/ipv4/Rfc791*.test` |
-| 5 | Run the tests and analyze the simulation model | `tests/protocol/ipv4/rfc/results.md` |
-| 6 | Decide the category of each check | `tests/protocol/ipv4/rfc/categories.md` |
+| 5 | Run the tests and analyze the simulation model | `tests/protocol/ipv4/rfc/rfc791-results.md` |
+| 6 | Decide the category of each check | `tests/protocol/ipv4/rfc/rfc791-categories.md` |
 | — | Describe the whole process | `tests/protocol/RFC-WORKFLOW.md` |
 
 ## Task list
 
 - [x] Step 1: cache rfc791.txt and rfc792.txt
-- [x] Step 2: checklist.md — catalog with IDs, quotes, class, strength, status
-- [x] Step 3: checks/ttl-decrement.md, checks/fragment-reassembly.md, checks/dont-fragment.md
+- [x] Step 2: rfc791-checklist.md — catalog with IDs, quotes, class, strength, status
+- [x] Step 3: rfc791-checks.md — three sections: TTL decrement, Fragment and reassembly, Don't fragment
 - [x] Step 4: Rfc791TtlDecrement.test, Rfc791FragmentReassembly.test, Rfc791DontFragment.test
-- [x] Step 5: run the ipv4 suite; write results.md — 4 of 4 tests PASS
-- [x] Step 6: categories.md; the ledger in checklist.md names the tests
+- [x] Step 5: run the ipv4 suite; write rfc791-results.md — 4 of 4 tests PASS
+- [x] Step 6: rfc791-categories.md; the ledger in rfc791-checklist.md names the tests
 - [x] RFC-WORKFLOW.md
 - [x] Move this plan to plan/done/
 
@@ -41,6 +41,10 @@ is permitted only to select practical candidates. INET names first appear in the
   host B, with a small MTU on the R–B link. One scenario serves all three checks.
 - 2026-09-02: Both authoring failures were test errors, not model gaps: the MTU parameter
   lives on the MAC module (`eth[1].mac.mtu`), unit-bearing fields need unit literals, and
-  the ICMP dissector name is `icmpv4`. Details in tests/protocol/ipv4/rfc/results.md.
+  the ICMP dissector name is `icmpv4`. Details in tests/protocol/ipv4/rfc/rfc791-results.md.
 - 2026-09-02: Final state: 4 of 4 ipv4 protocol tests PASS; the INET model conforms to all
   selected RFC 791/792 statements in this pass.
+- 2026-09-02: Naming revision on user request: identifiers use the RFC791- prefix (was
+  R791-), the per-RFC artifacts carry the RFC number in the file name (rfc791-checklist.md,
+  rfc791-checks.md, rfc791-results.md, rfc791-categories.md), and all English procedures
+  live in one file with one section per check.

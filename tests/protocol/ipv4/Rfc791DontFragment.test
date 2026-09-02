@@ -3,15 +3,15 @@
 RFC 791 / RFC 792 — a gateway discards a too-large datagram that carries the don't
 fragment flag, and it reports the drop to the source.
 
-Checks R791-FRAG-5 (must) and R792-DU-4 (must + may) from rfc/checklist.md. The English
-procedure and the mockup are in rfc/checks/dont-fragment.md. The 1028-octet DF datagram
+Checks RFC791-FRAG-5 (must) and RFC792-DU-4 (must + may) from rfc/rfc791-checklist.md. The English
+procedure and the mockup are in rfc/rfc791-checks.md#dont-fragment. The 1028-octet DF datagram
 meets a 576-octet MTU on link 2: the gateway must not fragment it, so nothing of it may
 appear on link 2, and a cooperative gateway returns ICMP destination unreachable, code 4.
 Mapping of the mockup: host A = hostA, gateway R = router, host B = hostB.
 
 The ICMP step asserts a "may" clause of RFC 792. A silent discard also conforms to the
 RFCs. If this step fails on some implementation, record an implementation gap against the
-"may" clause, not a specification violation (see rfc/checks/dont-fragment.md, Notes).
+"may" clause, not a specification violation (see rfc/rfc791-checks.md#dont-fragment, Notes).
 
 %includes:
 #include "ProtocolTest.h"
@@ -31,12 +31,12 @@ Define_ProtocolTestProgram()
                   .describe("the DF datagram on link 1")
                   .within(0.5))
         // Expected observation 2: ICMP destination unreachable, code 4, toward host A
-        // (R792-DU-4).
+        // (RFC792-DU-4).
         .once(on("router.eth[0].mac").signal("packetSentToLower")
                   .packet("icmpv4.type == 3 && icmpv4.code == 4") // the dissector protocol name is icmpv4
                   .describe("ICMP 'fragmentation needed and DF set' toward host A")
                   .within(0.1))
-        // Expected observation 3: nothing of the datagram on link 2 (R791-FRAG-5).
+        // Expected observation 3: nothing of the datagram on link 2 (RFC791-FRAG-5).
         // A gateway that fragments despite DF would also skip the ICMP error, so the
         // step above already fails in that case; this step guards the time after it.
         .never(on("router.eth[1].mac").signal("packetSentToLower")
@@ -56,7 +56,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of rfc/checks/dont-fragment.md: hostA -- router -- hostB.
+// The mockup of rfc/rfc791-checks.md#dont-fragment: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:

@@ -2,9 +2,9 @@
 
 RFC 791 — a gateway fragments a large datagram and the destination reassembles it.
 
-Checks R791-FRAG-1, R791-FRAG-2, R791-FRAG-3, R791-FRAG-4, and R791-REASM-1 from
-rfc/checklist.md. The English procedure, the mockup, and the size arithmetic are in
-rfc/checks/fragment-reassembly.md. A 1028-octet datagram meets a 576-octet MTU on link 2:
+Checks RFC791-FRAG-1, RFC791-FRAG-2, RFC791-FRAG-3, RFC791-FRAG-4, and RFC791-REASM-1 from
+rfc/rfc791-checklist.md. The English procedure, the mockup, and the size arithmetic are in
+rfc/rfc791-checks.md#fragment-and-reassembly. A 1028-octet datagram meets a 576-octet MTU on link 2:
 the expected split is 552 + 456 data octets, so the last fragment sits at octet offset 552.
 Mapping of the mockup: host A = hostA, gateway R = router, host B = hostB.
 
@@ -26,26 +26,26 @@ Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc791_fragment_reassembly")
         // Expected observation 1: the complete datagram on link 1 carries zero
-        // fragmentation information (R791-FRAG-1).
+        // fragmentation information (RFC791-FRAG-1).
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
                   .packet("udp.destPort == 5000 && ipv4.moreFragments == false && ipv4.fragmentOffset == 0")
                   .describe("the complete datagram on link 1 with zero fragmentation information")
                   .within(0.5))
         // Expected observation 2: the first fragment on link 2 -- offset 0, MF = 1;
-        // record the identification (R791-FRAG-4).
+        // record the identification (RFC791-FRAG-4).
         .once(on("router.eth[1].mac").signal("packetSentToLower")
                   .packet("ipv4.fragmentOffset == 0 && ipv4.moreFragments == true")
                   .capture("id", "ipv4.identification")
                   .describe("the first fragment on link 2")
                   .within(0.1))
         // Expected observation 3: the last fragment -- same identification, octet offset
-        // 552, MF = 0 (R791-FRAG-2, R791-FRAG-3, R791-FRAG-4).
+        // 552, MF = 0 (RFC791-FRAG-2, RFC791-FRAG-3, RFC791-FRAG-4).
         .once(on("router.eth[1].mac").signal("packetSentToLower")
                   .packet("ipv4.identification == {id} && ipv4.fragmentOffset == 552 && ipv4.moreFragments == false")
                   .describe("the last fragment on link 2 at octet offset 552")
                   .within(0.1))
         // Expected observation 5: host B delivers one complete 1008-octet UDP datagram
-        // above IP (R791-REASM-1).
+        // above IP (RFC791-REASM-1).
         .once(on("hostB.udp").signal("packetReceivedFromLower")
                   .packet("udp.destPort == 5000 && udp.totalLengthField == 1008B") // the field carries a byte unit
                   .describe("the reassembled 1008-octet UDP datagram above IP at host B")
@@ -69,7 +69,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of rfc/checks/fragment-reassembly.md: hostA -- router -- hostB.
+// The mockup of rfc/rfc791-checks.md#fragment-and-reassembly: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:
