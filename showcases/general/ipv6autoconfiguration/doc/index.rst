@@ -42,48 +42,22 @@ The interface identifier
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Every IPv6 address is 128 bits. On an Ethernet link the lower 64 bits are the
-*interface identifier*, and a host derives it from the 48-bit MAC address of its
-network interface. The derivation is called Modified EUI-64, and it takes three
-steps:
+*interface identifier*, which a host derives from the 48-bit MAC address of its
+network interface by a fixed rule called Modified EUI-64. The rule inserts two bytes
+in the middle of the MAC address and flips one bit; what matters here is only that
+the identifier follows from the MAC address alone. ``host[0]``, whose MAC address is
+``0A-AA-00-00-00-09``, ends up with the identifier ``8aa:ff:fe00:9``, which is how it
+appears in every figure and log excerpt below.
 
-1. Split the MAC address in half and insert the two bytes ``FF:FE`` between the
-   halves. This stretches 48 bits to 64.
-2. Invert the second-lowest bit of the first byte. This bit distinguishes a
-   globally unique identifier from a locally assigned one.
-3. Write the result as four groups of 16 bits.
-
-For the MAC address ``0A-AA-00-00-00-09``, which one of the hosts in this
-showcase uses, the steps give:
-
-.. code-block:: none
-
-   0A-AA-00-00-00-09          the MAC address
-   0A-AA-00-FF-FE-00-00-09    after inserting FF:FE
-   08-AA-00-FF-FE-00-00-09    after inverting the bit (0A becomes 08)
-   08aa:00ff:fe00:0009        the interface identifier
-
-Two printing rules shorten the result. Leading zeros inside a 16-bit group are
-dropped, so ``00ff`` is written ``ff``. And one run of all-zero groups may be
-replaced by ``::``, which is why the link-local address below is written
-``fe80::8aa:ff:fe00:9`` rather than ``fe80:0000:0000:0000:08aa:00ff:fe00:0009``.
-The ``::`` may appear only once in an address, because otherwise it would be
-ambiguous how many groups each one stood for.
-
-Recognizing the pattern makes the addresses in this showcase readable: ``ff:fe``
-near the middle is the inserted marker, and the final digits come from the MAC
-address. The inserted pair straddles two groups — ``00ff`` is the third MAC byte
-followed by the inserted ``FF`` — so read it as a guide to these addresses rather
-than a rule for splitting any address.
+Addresses are printed with the leading zeros of each 16-bit group dropped, and one
+run of all-zero groups replaced by ``::``. That host's link-local address is
+therefore written ``fe80::8aa:ff:fe00:9``.
 
 Two hosts with different MAC addresses therefore produce different interface
 identifiers. This is what makes autoconfiguration work without a server: the host
 already owns a value that is supposed to be unique on the link. Throughout this
 page, *the link* means one Ethernet broadcast domain — everything reachable
 without passing through a router, which in IPv4 terms is one subnet.
-
-``0A-AA-00-00-00-09`` is the address INET generated for ``host[0]`` in the first
-simulation. MAC addresses are assigned automatically there; only the second
-simulation sets any by hand.
 
 The link-local address
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -391,10 +365,12 @@ Autoconfiguration Configuration
    :end-before: [Config DuplicateAddress]
    :language: ini
 
-No host is given an address; the addresses are the result. The only other thing the
-configuration does is send four UDP packets from ``host[0]`` to the server, starting at
-8 s, once every node has finished configuring itself. They are there to show that the
-self-assigned addresses actually carry traffic.
+No host is given an address; the addresses are the result. No MAC addresses appear
+either — INET assigns those automatically, and only the second configuration sets any
+by hand. The only other thing the configuration does is send four UDP packets from
+``host[0]`` to the server, starting at 8 s, once every node has finished configuring
+itself. They are there to show that the self-assigned addresses actually carry
+traffic.
 
 DuplicateAddress Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
