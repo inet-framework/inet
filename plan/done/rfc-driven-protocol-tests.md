@@ -14,13 +14,13 @@ is permitted only to select practical candidates. INET names first appear in the
 
 | Step | Action | Artifact |
 | --- | --- | --- |
-| 1 | Download the RFC and its error-signal companion | `tests/protocol/ipv4/rfc/rfc791.txt`, `rfc792.txt` |
-| 2 | Extract checkable statements | `tests/protocol/ipv4/rfc/rfc791-checklist.md` |
-| 3 | Write the English check procedure with a mockup | `tests/protocol/ipv4/rfc/rfc791-checks.md` |
+| 1 | Download the RFC and its error-signal companion | `doc/project/evidence/rfc/ipv4/rfc791.txt`, `rfc792.txt` |
+| 2 | Extract checkable statements | `doc/project/evidence/rfc/ipv4/rfc791-checklist.md` |
+| 3 | Write the English check procedure with a mockup | `doc/project/evidence/rfc/ipv4/rfc791-checks.md` |
 | 4 | Write the protocol test with `tests/protocol/lib` | `tests/protocol/ipv4/Rfc791*.test` |
-| 5 | Run the tests and analyze the simulation model | `tests/protocol/ipv4/rfc/rfc791-results.md` |
-| 6 | Decide the category of each check | `tests/protocol/ipv4/rfc/rfc791-categories.md` |
-| — | Describe the whole process | `tests/protocol/RFC-WORKFLOW.md` |
+| 5 | Run the tests and analyze the simulation model | `doc/project/evidence/rfc/ipv4/rfc791-results.md` |
+| 6 | Decide the category of each check | `doc/project/evidence/rfc/ipv4/rfc791-categories.md` |
+| — | Describe the whole process | `doc/project/guide/derive-tests-from-an-rfc.md` |
 
 ## Task list
 
@@ -41,7 +41,7 @@ is permitted only to select practical candidates. INET names first appear in the
   host B, with a small MTU on the R–B link. One scenario serves all three checks.
 - 2026-09-02: Both authoring failures were test errors, not model gaps: the MTU parameter
   lives on the MAC module (`eth[1].mac.mtu`), unit-bearing fields need unit literals, and
-  the ICMP dissector name is `icmpv4`. Details in tests/protocol/ipv4/rfc/rfc791-results.md.
+  the ICMP dissector name is `icmpv4`. Details in doc/project/evidence/rfc/ipv4/rfc791-results.md.
 - 2026-09-02: Final state: 4 of 4 ipv4 protocol tests PASS; the INET model conforms to all
   selected RFC 791/792 statements in this pass.
 - 2026-09-02: Naming revision on user request: identifiers use the RFC791- prefix (was
@@ -53,3 +53,6 @@ is permitted only to select practical candidates. INET names first appear in the
   doc/project/guide/derive-tests-from-an-rfc.md. Each document received the doc/project
   header line, the checklist follows DR-INDEX and DR-ID-HEADING, and the README map lists
   both entries. The tests stay in tests/protocol/ipv4/.
+- 2026-09-02: Branch move on user request: the whole work now lives on the branch
+  `topic/rfc-tests` in the worktree `/home/levy/workspace/inet-rfc-tests`; the master
+  branch in inet-master carries none of these commits.
