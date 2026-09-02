@@ -14,7 +14,7 @@ import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network PathMtuDiscoveryShowcase
 {
-    @display("bgb=1080,300");
+    @display("bgb=1180,330");
     submodules:
         configurator: Ipv6NetworkConfigurator {
             @display("p=60,40;is=s");
@@ -23,22 +23,22 @@ network PathMtuDiscoveryShowcase
             @display("p=145,40;is=s");
         }
         hostA: StandardHost6 {
-            @display("p=80,190");
+            @display("p=80,240");
         }
         firewall: Router6 {
-            @display("p=250,190");
+            @display("p=290,150");
         }
         borderA: Router6 {
-            @display("p=420,190");
+            @display("p=500,240");
         }
         transit: Router6 {
-            @display("p=590,120");
+            @display("p=690,150");
         }
         borderB: Router6 {
-            @display("p=760,190");
+            @display("p=890,240");
         }
         hostB: StandardHost6 {
-            @display("p=940,190");
+            @display("p=1090,150");
         }
     connections:
         hostA.ethg++ <--> Eth100M <--> firewall.ethg++;

@@ -71,11 +71,17 @@ provider has any reason to carry them, and providers filter them at their border
 a matter of course. The consequence is the one that matters here: a packet carrying
 these addresses will not cross a public network.
 
-So an organisation with two sites, both numbered from Unique Local Addresses, has a
-concrete problem. Each site works internally. Neither site can reach the other across
-a public network, because that network will not carry the addresses. A tunnel between
-the two border routers solves it: the inner packet keeps the Unique Local Addresses,
-and the outer packet uses the border routers' public addresses.
+So two networks that both use Unique Local Addresses have a concrete problem. Each
+works internally. Neither can reach the other across a public network, because that
+network will not carry the addresses. RFC 4193 anticipates this and allows the
+addresses to be routed between co-operating sites where the routes are deliberately
+set up — which is exactly what a tunnel does. The inner packet keeps the Unique Local
+Addresses, and the outer packet uses the border routers' public addresses.
+
+The two prefixes in this showcase, ``fd00:a::/64`` and ``fd00:b::/64``, are written to
+be easy to read and to tell apart. A real prefix has 40 pseudo-random bits in the
+middle and looks more like ``fd2b:47a1:9c3e::/48``, and a single organisation numbers
+all of its sites out of one such prefix.
 
 A tunnel is not a Virtual Private Network
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -92,9 +98,11 @@ IPv6-in-IPv6 tunneling in INET
 ------------------------------
 
 In INET a tunnel is not a protocol module. It is a *virtual network interface* called
-``Ipv6TunnelInterface``. A packet routed to that interface is wrapped in an outer IPv6
-header and handed back to IPv6, which forwards the resulting datagram toward the exit
-point like any other locally originated packet. At the far end, IPv6 sees a datagram
+``Ipv6TunnelInterface``. A packet routed to that interface is handed back to IPv6 with
+the tunnel endpoints attached to it, and IPv6 wraps it in the outer header and
+forwards the result toward the exit point like any other locally originated packet.
+The wrapping is done by the ordinary IPv6 code that encapsulates any payload; the
+tunnel interface only says which addresses to use. At the far end, IPv6 sees a datagram
 addressed to itself whose Next Header field says ``IPv6``, removes the outer header,
 and processes the inner packet as if it had just arrived from the network.
 
@@ -138,7 +146,8 @@ are set individually:
    :end-at: *.borderA.tun[0].destination
    :language: ini
 
-The interface takes three parameters:
+Three parameters describe the tunnel (the module declares two more that every
+network interface has):
 
 - ``source`` — the tunnel entry point, which must be an address of this node. It
   becomes the source address of the outer header.
@@ -246,17 +255,18 @@ The addresses in the figure are the point of the network:
      - Unique Local Address
    * - ``borderA`` – ``transit``
      - ``2001:db8:1::/64``
-     - public
+     - globally routable
    * - ``transit`` – ``borderB``
      - ``2001:db8:2::/64``
-     - public
+     - globally routable
    * - ``borderB`` – site B hosts
      - ``fd00:b::/64``
      - Unique Local Address
 
-Both sites use Unique Local Addresses. Both border routers also have a public address
-on the link toward ``transit``, and those two public addresses are the tunnel
-endpoints.
+Both sites use Unique Local Addresses. Both border routers also have a globally
+routable address on the link toward ``transit``, and those two addresses are the
+tunnel endpoints. ``2001:db8::/32`` is the range RFC 3849 reserves for documentation;
+it stands in here for real provider-assigned addresses.
 
 Routing is configured by hand rather than computed, using
 ``*.configurator.addStaticRoutes = false`` and an explicit route for every node. This
@@ -274,8 +284,9 @@ That is the output of the configurator's ``dumpRoutes`` option, which prints eve
 node's routing table at the start of the run. ``<unspec>`` means the route has no next
 hop because the destination is on a directly attached link.
 
-Two entries, both for public prefixes, and nothing that matches either site's
-addresses. Any packet carrying them that reaches ``transit`` is discarded. In a real
+Those are the routes the configurator created. The table also holds the link-local
+``fe80::/10`` route that every IPv6 interface gets, which never carries traffic
+between sites. What matters is that nothing in it matches either site's addresses. Any packet carrying them that reaches ``transit`` is discarded. In a real
 network the absence is not a configuration choice — it is unavoidable, for the reasons
 given above. Here it has to be arranged deliberately, because a shortest-path
 configurator would happily install routes that reality would not.
@@ -387,9 +398,10 @@ than one outer header on the wire and the packet does not grow.
 
 What stops it is the hop limit. Each border router forwards the inner packet, and
 forwarding decrements its hop limit. INET starts an IPv6 packet with a hop limit of
-30, and each round trip costs two decrements, so a packet survives about fifteen round
-trips before it is discarded. The loop is self-limiting, which is why this
-configuration terminates rather than running forever.
+30, and each round trip costs two decrements, so a packet reaches ``borderB`` about
+fifteen times before it is discarded there. The loop is self-limiting: each individual packet dies
+on its own hop limit, rather than circulating for ever. New packets keep entering the
+loop until the sender stops, and the run itself ends on the simulation time limit.
 
 This is an ordinary routing loop that happens to run through a tunnel. It is worth
 separating from a different failure with a similar-sounding name. In *recursive
@@ -399,7 +411,21 @@ tunnel again, and wraps it once more, without ever putting anything on the wire.
 one has no hop limit to stop it, which is why router operating systems detect it
 specifically and shut the tunnel down. It is not what happens here — each border
 router reaches the other's public address by the ordinary route out of its Ethernet
-interface.
+interface. This page's own advice contains the trap, though: a *default* route into
+the tunnel, mentioned earlier as one of the route shapes you might use, would send the
+outer packet into the tunnel as well, and that is the real thing.
+
+RFC 2473 also defines protection against genuinely nested tunnels: a Tunnel
+Encapsulation Limit option that says how many further levels of encapsulation are
+allowed, after which the packet is discarded. INET does not implement it. It would not
+have helped here in any case, because nothing in this configuration nests.
+
+Two other numbers here are INET's rather than the standard's. RFC 2473 says the outer
+header's hop limit should start at the usual IPv6 default of 64, where INET uses 30 —
+so on real equipment a loop like this one would run about twice as long. And RFC 2473
+expects a tunnel's MTU to be derived from the path between the endpoints and updated
+as that path changes, where ``Ipv6TunnelInterface`` has a fixed value you set
+yourself.
 
 Results
 -------
@@ -465,11 +491,12 @@ from ``2001:db8:1::1`` to ``2001:db8:2::2``, the two public tunnel endpoints. Ch
 ``fd00:b::b2`` addresses.
 
 The field the figure calls ``protocol`` is the header's Next Header field, the one
-described earlier. On the outer header it reads ``ipv6(41)``, which is what tells the
-exit point that the payload is another IPv6 datagram; 41 is the number assigned to
-IPv6 for exactly this purpose. On the inner header it reads ``udp(69)``. The 69 is an
-internal identifier used inside INET, not the number that appears on the wire, which
-for UDP is 17.
+described earlier. On the outer header it names ``ipv6``, which is what tells the exit
+point that the payload is another IPv6 datagram. On the inner header it names ``udp``.
+
+The numbers in brackets are not the values that travel on the wire. ``ipv6(40)`` and
+``udp(69)`` are identifiers INET uses internally; the Next Header bytes in the actual
+headers are 41 for IPv6 and 17 for UDP.
 
 The transit network forwards this frame using the addresses in chunk ``[2]``, which it
 has routes for. The addresses in chunk ``[3]``, which it has no routes for, are just
@@ -500,10 +527,20 @@ never reply. They are Neighbor Discovery messages, which every node exchanges to
 resolve its neighbours' link-layer addresses. The 240 packets above that baseline are
 the loop.
 
-Sixteen packets, each making about fifteen round trips before its hop limit runs out,
-put roughly 240 extra packets onto the transit link — traffic that is never delivered
-to anyone. This is why a routing loop through a tunnel matters in practice. The visible symptom is
-that one destination is unreachable; the expensive consequence is that the link
+Sixteen packets, each bouncing until its hop limit runs out, put roughly 240 extra
+packets onto the transit link. Almost all of that is data that never reaches anyone:
+224 of the 240 are the looping packets themselves. The remaining 16 are ICMPv6 Time
+Exceeded messages, one per packet, generated when its hop limit finally reaches zero.
+
+Those 16 are worth following, because they close a loop with the baseline. In
+``NoTunnel`` the error could not get home: it was addressed to ``fd00:a::a``, which
+the transit network cannot route, so it died alongside the packet that caused it and
+``hostA`` learned nothing. Here the tunnel gives that same error a path back, so
+``hostA`` does learn that its packets are expiring. The network is the same and the
+address is the same; the tunnel is the only difference.
+
+This is why a routing loop through a tunnel matters in practice. The visible symptom
+is that one destination is unreachable. The expensive consequence is that the link
 between the sites carries many times its normal load to accomplish nothing.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
