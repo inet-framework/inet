@@ -17,6 +17,13 @@ PASCAL_RE = re.compile(r"^[A-Z][A-Za-z0-9]*$")
 CAMEL_RE = re.compile(r"^[a-z][A-Za-z0-9]*$")
 LOWER_RE = re.compile(r"^[a-z][a-z0-9]*$")
 NED_TYPE_RE = re.compile(r"^\s*(simple|module|moduleinterface|network|channel|channelinterface)\s+([A-Za-z_]\w*)\b")
+NED_PARAMETER_RE = re.compile(
+    r"^\s*(?:volatile\s+)?"
+    r"(?:bool|int|double|string|xml|object|quantity|typename|"
+    r"[A-Za-z_]\w*(?:\s*::\s*[A-Za-z_]\w*)*)\s+([A-Za-z_]\w*)\b",
+    re.DOTALL,
+)
+NED_GATE_RE = re.compile(r"^\s*(input|output|inout)\s+([A-Za-z_]\w*)\b", re.DOTALL)
 MSG_TYPE_RE = re.compile(r"^\s*(class|struct|packet|message|enum)\s+([A-Za-z_]\w*)\b(.*)$")
 MSG_NAMESPACE_RE = re.compile(
     r"^\s*namespace\s+([A-Za-z_]\w*(?:\s*::\s*[A-Za-z_]\w*)*)\s*;\s*$"
@@ -40,6 +47,20 @@ class Finding:
 class Target:
     selected_lines: frozenset[int] | None
     structural_rules: frozenset[str] = frozenset()
+
+
+@dataclass(frozen=True)
+class NedSectionStatement:
+    kind: str
+    text: str
+    line_by_offset: tuple[int, ...]
+
+    @property
+    def contributing_lines(self) -> frozenset[int]:
+        return frozenset(
+            line for character, line in zip(self.text, self.line_by_offset)
+            if not character.isspace()
+        )
 
 
 @dataclass(frozen=True)
@@ -365,6 +386,92 @@ def selected(line: int, selected_lines: frozenset[int] | None) -> bool:
     return selected_lines is None or line in selected_lines
 
 
+def consume_ned_text(
+    buffered_text: str,
+    buffered_lines: tuple[int, ...],
+    text: str,
+    line: int,
+) -> tuple[list[tuple[str, tuple[int, ...]]], str, tuple[int, ...]]:
+    separator = "\n" if buffered_text else ""
+    combined = buffered_text + separator + text
+    line_by_offset = buffered_lines + (line,) * (len(separator) + len(text))
+    statements: list[tuple[str, tuple[int, ...]]] = []
+    grouping: list[str] = []
+    pairs = {"(": ")", "[": "]", "{": "}"}
+    in_string = False
+    escaped = False
+    start = 0
+    for index, character in enumerate(combined):
+        if in_string:
+            if character == '"' and not escaped:
+                in_string = False
+            escaped = character == "\\" and not escaped
+            if character != "\\":
+                escaped = False
+            continue
+        if character == '"':
+            in_string = True
+        elif character in pairs:
+            grouping.append(pairs[character])
+        elif grouping and character == grouping[-1]:
+            grouping.pop()
+        elif character == ";" and not grouping:
+            end = index + 1
+            statements.append((combined[start:end], line_by_offset[start:end]))
+            start = end
+    remainder = combined[start:]
+    remainder_lines = line_by_offset[start:]
+    if not remainder.strip():
+        return statements, "", ()
+    return statements, remainder, remainder_lines
+
+
+def ned_section_statements(lines: list[str]) -> list[NedSectionStatement]:
+    statements: list[NedSectionStatement] = []
+    section: tuple[str, int] | None = None
+    buffered_text = ""
+    buffered_lines: tuple[int, ...] = ()
+    for number, line in enumerate(lines, 1):
+        stripped = line.strip()
+        indent = len(line) - len(line.lstrip())
+        section_match = re.match(r"^\s*(parameters|gates)\s*:\s*$", line)
+        if section_match:
+            section = (section_match.group(1), indent)
+            buffered_text = ""
+            buffered_lines = ()
+            continue
+        if section is None:
+            continue
+        kind, section_indent = section
+        if (stripped == "}" and indent <= section_indent) or (
+            re.match(r"^[A-Za-z][A-Za-z0-9]*\s*:\s*$", stripped)
+            and indent <= section_indent
+        ):
+            section = None
+            buffered_text = ""
+            buffered_lines = ()
+            continue
+        completed, buffered_text, buffered_lines = consume_ned_text(
+            buffered_text, buffered_lines, line, number
+        )
+        statements.extend(
+            NedSectionStatement(kind, text, statement_lines)
+            for text, statement_lines in completed
+        )
+    return statements
+
+
+def ned_statement_selected(
+    statement: NedSectionStatement,
+    selected_lines: frozenset[int] | None,
+) -> bool:
+    return selected_lines is None or bool(statement.contributing_lines & selected_lines)
+
+
+def ned_match_line(statement: NedSectionStatement, match: re.Match[str], group: int) -> int:
+    return statement.line_by_offset[match.start(group)]
+
+
 def add(findings: list[Finding], path: Path, line: int, rule: str, message: str) -> None:
     findings.append(Finding(path.as_posix(), line, rule, message))
 
@@ -378,12 +485,8 @@ def check_ned(
     findings: list[Finding] = []
     package: tuple[int, str] | None = None
     declarations: list[tuple[int, str]] = []
-    section: tuple[str, int] | None = None
 
     for number, line in enumerate(lines, 1):
-        stripped = line.strip()
-        indent = len(line) - len(line.lstrip())
-
         package_match = re.match(r"^\s*package\s+([A-Za-z0-9_.]+)\s*;", line)
         if package_match:
             package = (number, package_match.group(1))
@@ -395,41 +498,38 @@ def check_ned(
             if selected(number, selected_lines) and not PASCAL_RE.fullmatch(name):
                 add(findings, path, number, "NR-NED-TYPE", f"NED type '{name}' must be PascalCase")
 
-        section_match = re.match(r"^\s*(parameters|gates)\s*:\s*$", line)
-        if section_match:
-            section = (section_match.group(1), indent)
-            continue
-        if section is not None:
-            kind, section_indent = section
-            if (stripped == "}" and indent <= section_indent) or (
-                re.match(r"^[A-Za-z][A-Za-z0-9]*\s*:\s*$", stripped) and indent <= section_indent
-            ):
-                section = None
-            elif selected(number, selected_lines):
-                if kind == "parameters":
-                    match = re.match(
-                        r"^\s*(?:volatile\s+)?(?:bool|int|double|string|xml|object|quantity|[A-Za-z_]\w*(?:::\w+)*)\s+([A-Za-z_]\w*)\b",
-                        line,
-                    )
-                    if match and not CAMEL_RE.fullmatch(match.group(1)):
-                        add(findings, path, number, "NR-NED-PARAM", f"parameter '{match.group(1)}' must be camelCase")
-                elif kind == "gates":
-                    match = re.match(r"^\s*(input|output|inout)\s+([A-Za-z_]\w*)", line)
-                    if match:
-                        direction, name = match.groups()
-                        if not CAMEL_RE.fullmatch(name):
-                            add(findings, path, number, "NR-NED-GATE", f"gate '{name}' must be camelCase")
-                        if direction == "input" and name != "in" and not name.endswith("In"):
-                            add(findings, path, number, "NR-NED-GATE", f"input gate '{name}' must be 'in' or end in 'In'")
-                        if direction == "output" and name != "out" and not name.endswith("Out"):
-                            add(findings, path, number, "NR-NED-GATE", f"output gate '{name}' must be 'out' or end in 'Out'")
-
         if selected(number, selected_lines):
             for property_name in ("signal", "statistic"):
                 for match in re.finditer(rf"@{property_name}\[([^\]]+)\]", line):
                     name = match.group(1).removesuffix("*")
                     if not CAMEL_RE.fullmatch(name):
                         add(findings, path, number, "NR-NED-SIGNAL", f"{property_name} '{match.group(1)}' must be camelCase (a terminal '*' is allowed)")
+
+    for statement in ned_section_statements(lines):
+        if not ned_statement_selected(statement, selected_lines):
+            continue
+        if statement.kind == "parameters":
+            match = NED_PARAMETER_RE.match(statement.text)
+            if match and not CAMEL_RE.fullmatch(match.group(1)):
+                line = ned_match_line(statement, match, 1)
+                add(
+                    findings,
+                    path,
+                    line,
+                    "NR-NED-PARAM",
+                    f"parameter '{match.group(1)}' must be camelCase",
+                )
+        elif statement.kind == "gates":
+            match = NED_GATE_RE.match(statement.text)
+            if match:
+                direction, name = match.groups()
+                line = ned_match_line(statement, match, 2)
+                if not CAMEL_RE.fullmatch(name):
+                    add(findings, path, line, "NR-NED-GATE", f"gate '{name}' must be camelCase")
+                if direction == "input" and name != "in" and not name.endswith("In"):
+                    add(findings, path, line, "NR-NED-GATE", f"input gate '{name}' must be 'in' or end in 'In'")
+                if direction == "output" and name != "out" and not name.endswith("Out"):
+                    add(findings, path, line, "NR-NED-GATE", f"output gate '{name}' must be 'out' or end in 'Out'")
 
     if package is not None:
         line, name = package
