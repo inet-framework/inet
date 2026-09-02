@@ -167,6 +167,8 @@ strip_html_comments() {
 SEALED_PATTERNS=()
 in_paths=0
 in_comment=0
+saw_paths_heading=0
+saw_documents_heading=0
 line_number=0
 path_cell_pattern='^`([^`]+)`([[:space:]].*)?$'
 while IFS= read -r line || [ -n "$line" ]; do
@@ -176,9 +178,13 @@ while IFS= read -r line || [ -n "$line" ]; do
   trimmed_line="$trimmed_cell"
 
   if [ "$trimmed_line" = "## Sealed paths" ]; then
+    saw_paths_heading=1
     in_paths=1
     continue
   elif [ "$trimmed_line" = "## Sealed documents" ]; then
+    if [ "$in_paths" -eq 1 ]; then
+      saw_documents_heading=1
+    fi
     in_paths=0
     continue
   fi
@@ -218,6 +224,11 @@ while IFS= read -r line || [ -n "$line" ]; do
   fi
   SEALED_PATTERNS+=("$pattern")
 done <<< "$status_text"
+
+if [ "$saw_paths_heading" -ne 1 ] || [ "$saw_documents_heading" -ne 1 ]; then
+  echo "error: canonical Sealed paths section unavailable in $status_label: expected '## Sealed paths' followed by '## Sealed documents'" >&2
+  exit 2
+fi
 
 if [ ${#SEALED_PATTERNS[@]} -eq 0 ]; then
   echo "info: No sealed paths found in $status_label. All files unsealed."

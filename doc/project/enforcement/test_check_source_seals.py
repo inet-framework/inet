@@ -82,6 +82,52 @@ class CheckSourceSealsTest(unittest.TestCase):
         result = self.check("src/inet/common/INETDefs.h")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
+    def test_structurally_valid_empty_sealed_paths_section_is_allowed(self):
+        self.write(
+            "doc/project/audit/seal-list.md",
+            """# Seal list
+
+## Sealed paths
+
+| Status | Path | Note |
+| --- | --- | --- |
+
+## Sealed documents
+""",
+        )
+
+        result = self.check("src/inet/open/Keep.cc")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("No sealed paths found", result.stdout)
+
+    def test_missing_or_renamed_sealed_paths_headings_fail_closed(self):
+        registry = """# Seal list
+
+## Sealed paths
+
+| Status | Path | Note |
+| --- | --- | --- |
+
+## Sealed documents
+"""
+        for original, replacement in (
+            ("## Sealed paths\n", ""),
+            ("## Sealed paths", "## Source seals"),
+            ("## Sealed documents\n", ""),
+            ("## Sealed documents", "## Document seals"),
+        ):
+            with self.subTest(original=original, replacement=replacement):
+                self.write(
+                    "doc/project/audit/seal-list.md",
+                    registry.replace(original, replacement),
+                )
+
+                result = self.check("src/inet/open/Keep.cc")
+
+                self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+                self.assertIn("canonical Sealed paths section unavailable", result.stderr)
+
     def test_seal_rows_allow_optional_markdown_cell_spacing(self):
         for row in (
             "|🔒|`sealed/`|active directory seal|",
