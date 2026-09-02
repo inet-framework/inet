@@ -128,6 +128,63 @@ class CheckSourceSealsTest(unittest.TestCase):
                 self.assertEqual(2, result.returncode, result.stdout + result.stderr)
                 self.assertIn("canonical Sealed paths section unavailable", result.stderr)
 
+    def test_fenced_canonical_headings_do_not_mask_renamed_real_sections(self):
+        for opening_fence, closing_fence in (
+            ("```markdown", "```"),
+            ("~~~~markdown", "~~~~"),
+        ):
+            with self.subTest(opening_fence=opening_fence):
+                self.write(
+                    "doc/project/audit/seal-list.md",
+                    f"""# Seal list
+
+{opening_fence}
+## Sealed paths
+
+## Sealed documents
+{closing_fence}
+
+## Source seals
+
+| Status | Path | Note |
+| --- | --- | --- |
+
+## Document seals
+""",
+                )
+
+                result = self.check("src/inet/open/Keep.cc")
+
+                self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+                self.assertIn("canonical Sealed paths section unavailable", result.stderr)
+
+    def test_fenced_rows_are_not_active_seals(self):
+        for opening_fence, closing_fence in (
+            ("```markdown", "```"),
+            ("~~~~markdown", "~~~~"),
+        ):
+            with self.subTest(opening_fence=opening_fence):
+                self.write(
+                    "doc/project/audit/seal-list.md",
+                    f"""# Seal list
+
+## Sealed paths
+
+{opening_fence}
+| Status | Path | Note |
+| --- | --- | --- |
+| 🔒 | `sealed/` | example only |
+{closing_fence}
+
+## Sealed documents
+""",
+                )
+
+                result = self.check("src/inet/sealed/Old.cc")
+
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                self.assertIn("No sealed paths found", result.stdout)
+
     def test_seal_rows_allow_optional_markdown_cell_spacing(self):
         for row in (
             "|🔒|`sealed/`|active directory seal|",

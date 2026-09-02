@@ -167,13 +167,50 @@ strip_html_comments() {
 SEALED_PATTERNS=()
 in_paths=0
 in_comment=0
+in_fence=0
+fence_char=""
+fence_length=0
 saw_paths_heading=0
 saw_documents_heading=0
 line_number=0
 path_cell_pattern='^`([^`]+)`([[:space:]].*)?$'
+fence_open_pattern='^ {0,3}(`{3,}|~{3,})(.*)$'
+fence_close_pattern='^ {0,3}(`{3,}|~{3,})[[:space:]]*$'
 while IFS= read -r line || [ -n "$line" ]; do
   line_number=$((line_number + 1))
+
+  # Markdown comment markers inside a fenced block are literal example text, so inspect the raw
+  # line for the matching closing fence before stripping comments. A closing fence must use the
+  # opening character and at least the opening run length.
+  if [ "$in_fence" -eq 1 ]; then
+    if [[ "$line" =~ $fence_close_pattern ]]; then
+      closing_fence="${BASH_REMATCH[1]}"
+      if [ "${closing_fence:0:1}" = "$fence_char" ] && \
+         [ "${#closing_fence}" -ge "$fence_length" ]; then
+        in_fence=0
+        fence_char=""
+        fence_length=0
+      fi
+    fi
+    continue
+  fi
+
   strip_html_comments "$line"
+
+  # Fenced examples are not canonical registry text. Backtick info strings containing a backtick
+  # are not valid Markdown fence openers; tilde fence info strings have no corresponding limit.
+  if [[ "$visible_text" =~ $fence_open_pattern ]]; then
+    opening_fence="${BASH_REMATCH[1]}"
+    fence_info="${BASH_REMATCH[2]}"
+    opening_fence_char="${opening_fence:0:1}"
+    if [ "$opening_fence_char" != '`' ] || [[ "$fence_info" != *'`'* ]]; then
+      in_fence=1
+      fence_char="$opening_fence_char"
+      fence_length="${#opening_fence}"
+      continue
+    fi
+  fi
+
   trim_cell "$visible_text"
   trimmed_line="$trimmed_cell"
 
