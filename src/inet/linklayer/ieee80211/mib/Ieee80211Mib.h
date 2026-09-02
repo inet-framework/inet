@@ -98,7 +98,8 @@ class INET_API Ieee80211Mib : public SimpleModule
     short allocateAssociationId(const MacAddress& address);
     void releaseAssociationId(const MacAddress& address);
     void clearAssociationIds();
-    void updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet, const std::set<Hz>& operationalChannelWidths);
+    void updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet,
+            const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit);
     bool isHtOperationSupported() const { return localHtCapabilitiesValid; }
     bool hasPrimaryChannel() const { return primaryChannelAvailable; }
     int requirePrimaryChannel() const;

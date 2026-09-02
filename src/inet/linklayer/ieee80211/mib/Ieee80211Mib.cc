@@ -62,7 +62,8 @@ const Ieee80211HtOperation& Ieee80211Mib::getHtOperation() const
     return htOperation;
 }
 
-void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet, const std::set<Hz>& operationalChannelWidths)
+void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeSet *modeSet,
+        const std::set<Hz>& operationalChannelWidths, int operationalHtSpatialStreamLimit)
 {
     // The radio publishes its initial channel at PHYSICAL_LAYER before the MAC
     // publishes its mode set at LINK_LAYER. Preserve that independent BSS
@@ -78,13 +79,14 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
         clearPeerHtCapabilities();
         return;
     }
+    if (operationalHtSpatialStreamLimit <= 0)
+        throw cRuntimeError("HT operation requires a positive operational spatial-stream limit");
 
     // IEEE Std 802.11-2024, 9.4.2.54.4 and 9.4.2.55: advertise exactly the
     // HT modes come from the authoritative mode set, while advertised channel
     // widths are restricted to those the configured transmitter and receiver
     // can actually operate. In particular, do not infer dense MCS blocks or HT
     // widths from legacy/VHT modes that happen to share the set.
-    const auto& supportedMcs = modeSet->getHtMcsSupported();
     const auto& mandatoryMcs = modeSet->getHtMcsMandatory();
     for (auto channelWidth : modeSet->getHtSupportedChannelWidths())
         if (operationalChannelWidths.count(channelWidth) != 0)
@@ -93,13 +95,24 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
             modeSet->isHtShortGuardIntervalSupported(MHz(20));
     localHtCapabilities.shortGi40 = localHtCapabilities.supportedChannelWidths.count(MHz(40)) != 0 &&
             modeSet->isHtShortGuardIntervalSupported(MHz(40));
-    for (int mcs = 0; mcs < 77; mcs++) {
-        localHtCapabilities.rxMcsSupported[mcs] = supportedMcs[mcs];
-        if (mcs < 32 && supportedMcs[mcs]) {
+    for (int index = 0; index < modeSet->getNumModes(); index++) {
+        const auto *mode = modeSet->getMode(index);
+        int mcs = mode->getHtMcsIndex();
+        if (mcs >= 0 && mcs < 77 && operationalChannelWidths.count(mode->getDataMode()->getBandwidth()) != 0 &&
+                mode->getDataMode()->getNumberOfSpatialStreams() <= operationalHtSpatialStreamLimit)
+            localHtCapabilities.rxMcsSupported[mcs] = true;
+    }
+    for (int mcs = 0; mcs < 77; mcs++)
+        htOperation.basicMcsSupported[mcs] = mandatoryMcs[mcs] && localHtCapabilities.rxMcsSupported[mcs];
+    // The equal-case Tx MCS set is represented by the maximum MCS index per
+    // spatial-stream group. Rebuild it from the filtered Rx bitmap; MCS 32 is
+    // not part of this map's MCS 0..31 NSS encoding.
+    localHtCapabilities.txMcsNss = Ieee80211HtMcsNssMap();
+    for (int mcs = 0; mcs < 32; mcs++) {
+        if (localHtCapabilities.rxMcsSupported[mcs]) {
             int nss = mcs / 8;
             localHtCapabilities.txMcsNss.maxMcsPerNss[nss] = std::max(localHtCapabilities.txMcsNss.maxMcsPerNss[nss], mcs % 8);
         }
-        htOperation.basicMcsSupported[mcs] = mandatoryMcs[mcs];
     }
     if (localHtCapabilities.supportedChannelWidths.empty())
         throw cRuntimeError("HT operation mode set '%s' does not provide an HT channel width", modeSet->getName());

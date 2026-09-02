@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 
+#include <algorithm>
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -66,6 +68,8 @@ void Ieee80211Mac::initialize(int stage)
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
+        int operationalHtSpatialStreamLimit = std::min(radio->getAntenna()->getNumAntennas(),
+                modeSet->getMaximumNumberOfSpatialStreams());
         std::set<Hz> operationalChannelWidths;
         if (modeSet->isHtOperationSupported()) {
             const auto *transmitterWidthProvider = dynamic_cast<const IIeee80211HtChannelWidthProvider *>(radio->getTransmitter());
@@ -77,7 +81,7 @@ void Ieee80211Mac::initialize(int stage)
                         receiverWidthProvider->isHtChannelWidthSupported(channelWidth))
                     operationalChannelWidths.insert(channelWidth);
         }
-        mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths);
+        mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         emit(modesetChangedSignal, modeSet);
         if (isUp())
             initializeRadioMode();
@@ -442,4 +446,3 @@ void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 
 } // namespace ieee80211
 } // namespace inet
-
