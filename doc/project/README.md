@@ -46,8 +46,10 @@ history/       How did the current state come to be?
 2. **New to the code base** — [design/repository-layout.md](design/repository-layout.md), then
    [design/decisions.md](design/decisions.md).
 3. **About to add a protocol** — [guide/add-a-protocol.md](guide/add-a-protocol.md).
-4. **About to review** — [guide/review-a-pull-request.md](guide/review-a-pull-request.md) and
-   [enforcement/checklist/general.md](enforcement/checklist/general.md).
+4. **About to review code** — [guide/review-a-code-change.md](guide/review-a-code-change.md), then
+   [guide/review-a-pull-request.md](guide/review-a-pull-request.md) as well for a branch or pull
+   request. Use the [general checklist](enforcement/checklist/general.md), plus the
+   [IEEE 802.11 checklist](enforcement/checklist/ieee80211.md) when applicable, for rule compliance.
 5. **Diagnosing a failed run or implausible result** —
    [guide/diagnose-a-simulation.md](guide/diagnose-a-simulation.md).
 6. **Comparing or plotting simulation results** —
@@ -92,6 +94,7 @@ In the order of the chain.
 | [guide/contribute-a-change.md](guide/contribute-a-change.md) | procedure | — | The nine steps from scope to seal. |
 | [guide/add-a-protocol.md](guide/add-a-protocol.md) | procedure | — | How do I add a protocol without touching the core? |
 | [guide/audit-a-subsystem.md](guide/audit-a-subsystem.md) | procedure | — | How do I audit a directory and take it to a seal? |
+| [guide/review-a-code-change.md](guide/review-a-code-change.md) | procedure | — | How do I review a code change for correctness and rule compliance? |
 | [guide/review-a-pull-request.md](guide/review-a-pull-request.md) | procedure | — | How do I audit a branch against the `PR-*` rules? |
 | [guide/change-a-baseline.md](guide/change-a-baseline.md) | procedure | — | How do I change a recorded expectation? |
 | [guide/run-the-gates.md](guide/run-the-gates.md) | procedure | — | What do I run before a push? |

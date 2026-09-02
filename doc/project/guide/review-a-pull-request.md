@@ -1,14 +1,15 @@
 # Review a pull request
 
-> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rule/pull-request.md](../rule/pull-request.md), [audit/README.md](../audit/README.md)
+> **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rule/pull-request.md](../rule/pull-request.md), [review-a-code-change.md](review-a-code-change.md), [audit/README.md](../audit/README.md)
 
 How to audit a branch against the `PR-*` rules and write the report. The rules are
 [rule/pull-request.md](../rule/pull-request.md); three worked examples are in
 [audit/report/pull-request/](../audit/report/pull-request/pr-1144.md).
 
-**The commit is the unit of review, not the pull request.** Read the series one commit at a time and
-ask one question per commit: *is this change right?* That question has an answer only when the commit
-holds one change.
+**The commit is the unit of the `PR-*` audit, not the pull request.** Read the series one commit at a
+time so each commit can be judged as one change. Review each commit's code correctness with
+[review-a-code-change.md](review-a-code-change.md), then review the integrated branch contract so a
+correct commit series cannot hide a cross-commit regression.
 
 ## 1. Get the branch and the merge base
 
@@ -72,23 +73,38 @@ Read each commit against the rules that need judgment:
 - **[PR-MSG-WHY](../rule/pull-request.md#pr-msg-why)** — does the body give the reason, or repeat the
   diff?
 
-## 4. Check what the change touches
+## 4. Review each commit's correctness
 
-Beyond the `PR-*` rules, name the architectural surface: the contracts, the packet content, the
-configuration, the feature descriptors, and the tests
-([PR-REQ-ARCH](../rule/pull-request.md#pr-req-arch)). Run the
-[agent-review checklist](../enforcement/checklist/general.md) over the diff, and the
-[802.11 checklist](../enforcement/checklist/ieee80211.md) when the diff touches those subtrees.
+For every commit, apply [review-a-code-change.md](review-a-code-change.md) to that exact diff. Name
+the changed contracts, trace their callers and terminal paths, and run the canonical tier-4
+checklists it selects. This is also the code-correctness evidence required by
+[PR-REQ-ARCH](../rule/pull-request.md#pr-req-arch); the `PR-*` structure audit does not substitute for
+it.
 
 If the branch touches a sealed path, the permission for it must be stated. That statement is review
 evidence; merge authorization comes from the trusted, head-bound decision in
 [SR-PR-APPROVAL](../rule/sealing.md#sr-pr-approval).
 
-## 5. Write the report
+## 5. Review the integrated branch contract
+
+After the commit-by-commit pass, review the merge-base-to-head change as one integrated code change
+under [review-a-code-change.md](review-a-code-change.md). Recheck interfaces and their final
+implementations, generated inputs and consumers, feature-off and effective configurations, semantic
+siblings, terminal paths, tests, and baselines in the final tree. This pass catches contracts that
+are locally valid in separate commits but inconsistent when composed.
+
+## 6. Write the report
 
 `audit/report/pull-request/pr-<n>.md`. One row per rule with a verdict — `PASS`, `FLAG`, `PARTIAL` or
 `not verified` — and evidence for each. Then one numbered finding per problem, with the commit, what
 it breaks, and what would repair it.
+
+`PARTIAL` is limited to this composite `PR-*` evaluation: use it only when independently checkable
+parts of one pull-request rule have different outcomes. It is never a tier-4 checklist verdict and
+never substitutes for a correctness finding, checklist `FLAG`, checklist `QUESTION`, or `not
+verified` result. Present correctness findings and checklist output in the order defined by
+[review-a-code-change.md](review-a-code-change.md), with the commit or integrated branch scope made
+explicit.
 
 **Say what you did not check.** `PR-SERIES-BUILDS` needs a per-commit CI build, and a review that
 does not run one records `not verified` rather than `PASS`. The same holds for a branch that moves
