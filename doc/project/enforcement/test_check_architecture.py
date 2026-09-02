@@ -120,6 +120,89 @@ class CheckArchitectureTest(unittest.TestCase):
         self.assertIn("SpacedChrono.cc", result.stdout)
         self.assertIn("SpacedRandom.cc", result.stdout)
 
+    def test_deterministic_chrono_types_and_operations_are_ignored(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/DeterministicChrono.cc",
+            """using Duration = std::chrono::duration<double>;
+using Clock = std::chrono::system_clock;
+using TimePoint = Clock::time_point;
+auto duration = Duration{1};
+auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+auto epoch = TimePoint{};
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_imported_and_aliased_random_devices_are_reported_at_the_use(self) -> None:
+        sources = {
+            "UsingRandom.cc": "using std::random_device;\nauto seed = random_device{}();\n",
+            "UsingNamespaceRandom.cc": "using namespace std;\nauto seed = random_device{}();\n",
+            "NamespaceAliasRandom.cc": "namespace standard = std;\nauto seed = standard::random_device{}();\n",
+            "TypeAliasRandom.cc": "using RandomDevice = std::random_device;\nauto seed = RandomDevice{}();\n",
+            "AliasChainRandom.cc": """namespace standard = std;
+using RandomDevice = standard::random_device;
+using EntropySource = RandomDevice;
+auto seed = EntropySource{}();
+""",
+        }
+        for name, source in sources.items():
+            self.write(f"src/inet/linklayer/ethernet/{name}", source)
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        for name, source in sources.items():
+            with self.subTest(name=name):
+                use_line = len(source.splitlines())
+                self.assertIn(f"{name}:{use_line}:", result.stdout)
+
+    def test_random_device_imports_and_aliases_are_forbidden_without_a_draw(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/ImportedRandom.cc",
+            """using std::random_device;
+using RandomDevice = std::random_device;
+typedef std::random_device EntropySource;
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        for line in (1, 2, 3):
+            self.assertIn(f"ImportedRandom.cc:{line}:", result.stdout)
+
+    def test_direct_imported_and_aliased_chrono_clock_reads_are_reported(self) -> None:
+        sources = {
+            "DirectClocks.cc": """auto wall = std::chrono::system_clock::now();
+auto monotonic = std::chrono::steady_clock::now();
+auto highResolution = std::chrono::high_resolution_clock::now();
+""",
+            "UsingClock.cc": "using std::chrono::system_clock;\nauto now = system_clock::now();\n",
+            "UsingNamespaceClock.cc": "using namespace std::chrono;\nauto now = system_clock::now();\n",
+            "NamespaceAliasClock.cc": "namespace chrono = std::chrono;\nauto now = chrono::system_clock::now();\n",
+            "TypeAliasClock.cc": "using Clock = std::chrono::steady_clock;\nauto now = Clock::now();\n",
+            "TypedefClock.cc": "typedef std::chrono::high_resolution_clock Clock;\nauto now = Clock::now();\n",
+            "AliasChainClock.cc": """namespace standard = std;
+namespace chrono = standard::chrono;
+using Clock = chrono::system_clock;
+using WallClock = Clock;
+auto now = WallClock::now();
+""",
+        }
+        for name, source in sources.items():
+            self.write(f"src/inet/linklayer/ethernet/{name}", source)
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        for name, source in sources.items():
+            with self.subTest(name=name):
+                use_line = len(source.splitlines())
+                self.assertIn(f"{name}:{use_line}:", result.stdout)
+
     def test_global_and_std_rand_time_calls_are_reported(self) -> None:
         self.write(
             "src/inet/linklayer/ethernet/BadCalls.cc",

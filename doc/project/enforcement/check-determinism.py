@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -15,12 +15,24 @@ CPP_TOKEN = re.compile(r"[A-Za-z_]\w*|::|->|[^\s]")
 RESULT_FILTERS_ALLOW = re.compile(
     r"(?:startTime = time\(nullptr\);|time_t t = time\(nullptr\);)"
 )
+RANDOM_DEVICE = ("std", "random_device")
+AMBIENT_CLOCKS = {
+    ("std", "chrono", "system_clock"),
+    ("std", "chrono", "steady_clock"),
+    ("std", "chrono", "high_resolution_clock"),
+}
 
 
 @dataclass(frozen=True)
 class Token:
     text: str
     line: int
+
+
+@dataclass
+class Scope:
+    aliases: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    using_namespaces: list[tuple[str, ...]] = field(default_factory=list)
 
 
 def blank(output: list[str], start: int, end: int) -> None:
@@ -91,40 +103,168 @@ def is_identifier(token: Token) -> bool:
     return token.text[0].isalpha() or token.text[0] == "_"
 
 
-def is_root_std(tokens: list[Token], index: int) -> bool:
-    if tokens[index].text != "std" or index == 0:
-        return tokens[index].text == "std"
-    previous = tokens[index - 1].text
-    if previous in {".", "->"}:
+def is_name_start(tokens: list[Token], index: int) -> bool:
+    if not is_identifier(tokens[index]) or index == 0:
+        return is_identifier(tokens[index])
+    if tokens[index - 1].text in {".", "->"}:
         return False
-    if previous != "::":
-        return True
-    return index < 2 or not is_identifier(tokens[index - 2])
+    return tokens[index - 1].text != "::" or index < 2 or not is_identifier(tokens[index - 2])
+
+
+def qualified_name(tokens: list[Token], index: int) -> tuple[tuple[str, ...], int] | None:
+    if index < len(tokens) and tokens[index].text == "::":
+        index += 1
+    if index >= len(tokens) or not is_identifier(tokens[index]):
+        return None
+    parts = [tokens[index].text]
+    index += 1
+    while index + 1 < len(tokens) and tokens[index].text == "::" and is_identifier(tokens[index + 1]):
+        parts.append(tokens[index + 1].text)
+        index += 2
+    return tuple(parts), index
+
+
+def visible_alias(scopes: list[Scope], name: str) -> tuple[str, ...] | None:
+    for scope in reversed(scopes):
+        if name in scope.aliases:
+            return scope.aliases[name]
+    return None
+
+
+def canonical_names(name: tuple[str, ...], scopes: list[Scope]) -> set[tuple[str, ...]]:
+    if not name:
+        return set()
+    if name[0] == "std":
+        return {name}
+    alias = visible_alias(scopes, name[0])
+    if alias is not None:
+        return {alias + name[1:]}
+    return {
+        namespace + name
+        for scope in scopes
+        for namespace in scope.using_namespaces
+    }
+
+
+def is_tracked_name(name: tuple[str, ...]) -> bool:
+    return name == ("std",) or name == RANDOM_DEVICE or name[:2] == ("std", "chrono")
+
+
+def unique_tracked_name(name: tuple[str, ...], scopes: list[Scope]) -> tuple[str, ...] | None:
+    names = {candidate for candidate in canonical_names(name, scopes) if is_tracked_name(candidate)}
+    return next(iter(names)) if len(names) == 1 else None
+
+
+def statement_end(tokens: list[Token], index: int) -> int | None:
+    while index < len(tokens) and tokens[index].text != ";":
+        index += 1
+    return index if index < len(tokens) else None
+
+
+def parse_namespace_alias(tokens: list[Token], index: int, scopes: list[Scope]) -> int | None:
+    if (
+        index + 3 >= len(tokens)
+        or tokens[index].text != "namespace"
+        or not is_identifier(tokens[index + 1])
+        or tokens[index + 2].text != "="
+    ):
+        return None
+    parsed = qualified_name(tokens, index + 3)
+    if parsed is None:
+        return None
+    name, end = parsed
+    if end >= len(tokens) or tokens[end].text != ";":
+        return None
+    target = unique_tracked_name(name, scopes)
+    if target is not None:
+        scopes[-1].aliases[tokens[index + 1].text] = target
+    return end + 1
+
+
+def parse_using(tokens: list[Token], index: int, scopes: list[Scope], lines: set[int]) -> int | None:
+    if tokens[index].text != "using":
+        return None
+    semicolon = statement_end(tokens, index + 1)
+    if semicolon is None:
+        return None
+
+    if index + 2 < semicolon and tokens[index + 1].text == "namespace":
+        parsed = qualified_name(tokens, index + 2)
+        if parsed is not None and parsed[1] == semicolon:
+            target = unique_tracked_name(parsed[0], scopes)
+            if target is not None:
+                scopes[-1].using_namespaces.append(target)
+    elif index + 2 < semicolon and is_identifier(tokens[index + 1]) and tokens[index + 2].text == "=":
+        parsed = qualified_name(tokens, index + 3)
+        if parsed is not None:
+            target = unique_tracked_name(parsed[0], scopes)
+            if target is not None:
+                scopes[-1].aliases[tokens[index + 1].text] = target
+                if target == RANDOM_DEVICE:
+                    lines.add(tokens[parsed[1] - 1].line)
+    else:
+        parsed = qualified_name(tokens, index + 1)
+        if parsed is not None and parsed[1] == semicolon:
+            target = unique_tracked_name(parsed[0], scopes)
+            if target is not None:
+                scopes[-1].aliases[parsed[0][-1]] = target
+                if target == RANDOM_DEVICE:
+                    lines.add(tokens[parsed[1] - 1].line)
+    return semicolon + 1
+
+
+def parse_typedef(tokens: list[Token], index: int, scopes: list[Scope], lines: set[int]) -> int | None:
+    if tokens[index].text != "typedef":
+        return None
+    semicolon = statement_end(tokens, index + 1)
+    if semicolon is None:
+        return None
+    parsed = qualified_name(tokens, index + 1)
+    if parsed is not None and semicolon > parsed[1] and is_identifier(tokens[semicolon - 1]):
+        target = unique_tracked_name(parsed[0], scopes)
+        if target is not None:
+            scopes[-1].aliases[tokens[semicolon - 1].text] = target
+            if target == RANDOM_DEVICE:
+                lines.add(tokens[parsed[1] - 1].line)
+    return semicolon + 1
 
 
 def forbidden_lines(code: str) -> set[int]:
     tokens = cpp_tokens(code)
     lines: set[int] = set()
-    for index, token in enumerate(tokens):
-        if token.text == "std" and is_root_std(tokens, index) and index + 2 < len(tokens):
-            is_random_device = tokens[index + 2].text == "random_device"
-            is_chrono_scope = (
-                tokens[index + 2].text == "chrono"
-                and index + 3 < len(tokens)
-                and tokens[index + 3].text == "::"
-            )
-            if tokens[index + 1].text == "::" and (is_random_device or is_chrono_scope):
-                lines.add(token.line)
-
-        if token.text not in {"rand", "time"} or index + 1 >= len(tokens) or tokens[index + 1].text != "(":
+    scopes = [Scope()]
+    index = 0
+    while index < len(tokens):
+        next_index = parse_namespace_alias(tokens, index, scopes)
+        if next_index is None:
+            next_index = parse_using(tokens, index, scopes, lines)
+        if next_index is None:
+            next_index = parse_typedef(tokens, index, scopes, lines)
+        if next_index is not None:
+            index = next_index
             continue
-        if index == 0 or tokens[index - 1].text not in {".", "->", "::"}:
-            lines.add(token.line)
-        elif tokens[index - 1].text == "::":
-            if index < 2 or not is_identifier(tokens[index - 2]):
+
+        token = tokens[index]
+        if token.text == "{":
+            scopes.append(Scope())
+        elif token.text == "}" and len(scopes) > 1:
+            scopes.pop()
+        elif is_name_start(tokens, index):
+            parsed = qualified_name(tokens, index)
+            assert parsed is not None
+            name, end = parsed
+            candidates = canonical_names(name, scopes)
+            if RANDOM_DEVICE in candidates:
                 lines.add(token.line)
-            elif tokens[index - 2].text == "std" and is_root_std(tokens, index - 2):
-                lines.add(token.line)
+            if end < len(tokens) and tokens[end].text == "(" and name[-1] in {"rand", "time"}:
+                if len(name) == 1 or ("std", name[-1]) in candidates:
+                    lines.add(tokens[end - 1].line)
+            if end < len(tokens) and tokens[end].text == "(" and name[-1] == "now":
+                if any(candidate[:-1] in AMBIENT_CLOCKS for candidate in candidates):
+                    lines.add(tokens[end - 1].line)
+            index = end
+            continue
+        index += 1
     return lines
 
 

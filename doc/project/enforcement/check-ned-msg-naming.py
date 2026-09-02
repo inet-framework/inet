@@ -335,6 +335,7 @@ def strip_comments(lines: list[str]) -> list[str]:
 
 
 def mask_msg_cplusplus(lines: list[str]) -> list[str]:
+    # The OMNeT++ MSG lexer defines the first literal }} as the block delimiter.
     masked: list[str] = []
     in_cplusplus = False
     for line in lines:
