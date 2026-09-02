@@ -88,6 +88,20 @@ class Foo
         result = self.check("src/inet/foo/Foo.ned", "src/inet/foo/Foo.msg")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
+    def test_first_double_brace_ends_cplusplus_masking(self) -> None:
+        self.write("src/inet/foo/Foo.msg", """namespace inet;
+cplusplus {{
+class ignored_bad_name {};
+}}
+class also_bad_name {}
+""")
+
+        result = self.check("src/inet/foo/Foo.msg")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertNotIn("ignored_bad_name", result.stdout)
+        self.assertIn("also_bad_name", result.stdout)
+
     def test_explicit_msg_requires_valid_namespace(self) -> None:
         for label, namespace in (
             ("missing", ""),
