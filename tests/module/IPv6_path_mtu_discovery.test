@@ -1,0 +1,80 @@
+%description:
+Tests RFC 8201 Path MTU Discovery: the source learns the path MTU from an
+ICMPv6 Packet Too Big message and fragments its later datagrams to it.
+
+NClientsEth example network is used (cli -- r1 -- r2 -- r3 -- srv).
+The r2-r3 link has a reduced MTU (1400 bytes). The client sends 1400-byte UDP
+datagrams once a second. The first one is too big for the r2-r3 link, so r2
+drops it and answers with an ICMPv6 Packet Too Big reporting MTU=1400. The
+client caches that as the path MTU towards the server, and fragments every
+later datagram to 1400 bytes, so those do get through.
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../examples;../../../../src
+network = inet.examples.ipv6.nclients.NClientsEth
+sim-time-limit = 15s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# number of client computers
+*.n = 1
+
+# Reduce MTU on r2's interface toward r3 to trigger Packet Too Big
+*.r2.eth[1].*.mtu = 1400B
+
+# udp apps: send several large datagrams, so that the ones after the first
+# can benefit from the learned path MTU
+**.cli[*].numApps = 1
+**.cli[*].app[0].typename = "UdpBasicApp"
+**.cli[*].app[0].destAddresses = "srv"
+**.cli[*].app[0].destPort = 1000
+**.cli[*].app[0].messageLength = 1400B
+
+**.cli[*].app[0].startTime = 10s
+**.cli[*].app[0].stopTime = 14s
+**.cli[*].app[0].sendInterval = 1s
+
+**.srv.numApps = 1
+**.srv.app[0].typename = "UdpSink"
+**.srv.app[0].localPort = 1000
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue" # in routers
+**.eth[*].queue.dataQueue.packetCapacity = 10  # in routers
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# the router reports the MTU of the link it could not forward on
+%contains: stdout
+NClientsEth.r2.ipv6.icmpv6: sending ICMP error: (inet::Packet)Packet Too Big
+%#--------------------------------------------------------------------------------------------------------------
+%# the source stores it as the path MTU towards the server
+%contains-regex: stdout
+NClientsEth\.cli\[0\]\.ipv6\.routingTable: Path MTU for .* reduced to 1400
+%#--------------------------------------------------------------------------------------------------------------
+%# and fragments to it instead of to the 1500-byte MTU of its own link
+%contains-regex: stdout
+NClientsEth\.cli\[0\]\.ipv6\.ipv6: Using cached path MTU 1400 towards .* instead of the link MTU 1500
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+NClientsEth.cli[0].ipv6.ipv6: Breaking datagram into 2 fragments
+%#--------------------------------------------------------------------------------------------------------------
+%# the first datagram is the one that is lost
+%not-contains: stdout
+Received packet: (inet::Packet)UdpBasicAppData-0 (1400 B)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Received packet: (inet::Packet)UdpBasicAppData-1 (1400 B)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Received packet: (inet::Packet)UdpBasicAppData-3 (1400 B)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

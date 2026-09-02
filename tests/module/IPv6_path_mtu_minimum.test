@@ -1,12 +1,16 @@
 %description:
-Tests that a router sends ICMPv6 Packet Too Big when a forwarded packet
-exceeds the outgoing interface's MTU.
+Tests the RFC 8201 Section 4 rules on the reported MTU: a Packet Too Big that
+reports less than the IPv6 minimum link MTU (1280 bytes) must not push the path
+MTU estimate below 1280, and a Packet Too Big may only ever lower the estimate,
+never raise it.
 
 NClientsEth example network is used (cli -- r1 -- r2 -- r3 -- srv).
-The r2-r3 link has a reduced MTU (576 bytes). The client sends a large
-UDP datagram (1200 bytes) which traverses r1 and arrives at r2. At r2,
-the datagram exceeds the MTU of the outgoing interface toward r3,
-triggering ICMPv6 PACKET_TOO_BIG, reporting the 576-byte MTU of that link.
+The r2-r3 link has an MTU of 800 bytes, which is below the IPv6 minimum. The
+client sends 2000-byte UDP datagrams, so it fragments them already for its own
+1500-byte link. r2 cannot forward the first fragment and answers with a Packet
+Too Big reporting MTU=800. The client clamps that to 1280. The datagrams that
+follow are fragmented to 1280, which r2 still cannot forward, so it answers
+with MTU=800 again -- and the estimate stays at 1280.
 
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
@@ -21,19 +25,18 @@ cmdenv-log-prefix = "%C: "
 # number of client computers
 *.n = 1
 
-# Reduce MTU on r2's interface toward r3 to trigger Packet Too Big
-*.r2.eth[1].*.mtu = 576B
+# MTU below the IPv6 minimum of 1280 bytes on r2's interface toward r3
+*.r2.eth[1].*.mtu = 800B
 
-# udp apps: send a large datagram that will exceed the reduced MTU
 **.cli[*].numApps = 1
 **.cli[*].app[0].typename = "UdpBasicApp"
 **.cli[*].app[0].destAddresses = "srv"
 **.cli[*].app[0].destPort = 1000
-**.cli[*].app[0].messageLength = 1200B
+**.cli[*].app[0].messageLength = 2000B
 
 **.cli[*].app[0].startTime = 10s
-**.cli[*].app[0].stopTime = 11s
-**.cli[*].app[0].sendInterval = 10s
+**.cli[*].app[0].stopTime = 13s
+**.cli[*].app[0].sendInterval = 1s
 
 **.srv.numApps = 1
 **.srv.app[0].typename = "UdpSink"
@@ -47,14 +50,16 @@ cmdenv-log-prefix = "%C: "
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
+%# a reported MTU below the IPv6 minimum is raised to 1280 (RFC 8201 Section 4)
 %contains: stdout
-NClientsEth.r2.ipv6.icmpv6: sending ICMP error: (inet::Packet)Packet Too Big
+NClientsEth.cli[0].ipv6.ipv6: Packet Too Big reports MTU=800, below the IPv6 minimum; using 1280 instead
 %#--------------------------------------------------------------------------------------------------------------
-%# the message reports the MTU of the link r2 could not forward on, so that the
-%# source can act on it (see IPv6_path_mtu_discovery). 576 is below the IPv6
-%# minimum link MTU, so the source clamps it to 1280 (RFC 8201 Section 4).
-%contains: stdout
-NClientsEth.cli[0].ipv6.ipv6: Packet Too Big reports MTU=576, below the IPv6 minimum; using 1280 instead
+%contains-regex: stdout
+NClientsEth\.cli\[0\]\.ipv6\.routingTable: Path MTU for .* reduced to 1280
+%#--------------------------------------------------------------------------------------------------------------
+%# a later Packet Too Big never raises the estimate again
+%contains-regex: stdout
+NClientsEth\.cli\[0\]\.ipv6\.routingTable: Ignoring path MTU 1280 for .*, not smaller than the cached 1280
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

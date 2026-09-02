@@ -56,6 +56,16 @@ import inet.common.SimpleModule;
 // these are processed in order. The processing time is determined by the
 // `procDelay` module parameter.
 //
+// <b>Path MTU Discovery</b>
+//
+// When the `pathMtuDiscovery` parameter is turned on (the default), ~Ipv6
+// implements RFC 8201: it learns the path MTU towards a destination from the
+// ICMPv6 Packet Too Big messages it receives, caches the estimate in the
+// destination cache of ~Ipv6RoutingTable, and fragments locally originated
+// datagrams to that estimate instead of to the MTU of the first-hop link.
+// An estimate is discarded after `pathMtuAgingTime`, so that a path MTU that
+// has grown again is eventually discovered.
+//
 // @see ~Ipv6RoutingTable, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
 simple Ipv6 extends SimpleModule
@@ -67,6 +77,8 @@ simple Ipv6 extends SimpleModule
         string ipv6NeighbourDiscoveryModule;
         string icmpv6Module;
         double procDelay @unit(s) = default(0s);
+        bool pathMtuDiscovery = default(true); // RFC 8201: learn the path MTU from received ICMPv6 Packet Too Big messages and fragment locally originated datagrams to the cached path MTU instead of the first-hop link MTU. The estimates are kept in the destination cache of ~Ipv6RoutingTable.
+        double pathMtuAgingTime @unit(s) = default(10min); // RFC 8201 Section 5.4: how long a reduced path MTU estimate is kept before the link MTU is tried again, so that an increase of the real path MTU is detected. The RFC requires at least 5 minutes and recommends 10 minutes. 0 means never age out.
         bool sendRedirects = default(true); // RFC 4861 Section 8.2: when a router forwards a packet back out the interface it arrived on, send the source an ICMPv6 Redirect. Disable on wireless multi-hop / ad-hoc networks (e.g. MANET routing), where the geographic next hop is not directly reachable by the source, so redirects are useless and trigger a storm.
         displayStringTextFormat = default("{ipv6StatusText}");
         @display("i=block/network2");

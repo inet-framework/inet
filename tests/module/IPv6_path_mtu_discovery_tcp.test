@@ -1,12 +1,14 @@
 %description:
-Tests that a router sends ICMPv6 Packet Too Big when a forwarded packet
-exceeds the outgoing interface's MTU.
+Tests that the ICMPv6 Packet Too Big message is still delivered to the
+transport layer after the ~Ipv6 module has taken the reported MTU out of it
+for its own path MTU cache.
 
 NClientsEth example network is used (cli -- r1 -- r2 -- r3 -- srv).
-The r2-r3 link has a reduced MTU (576 bytes). The client sends a large
-UDP datagram (1200 bytes) which traverses r1 and arrives at r2. At r2,
-the datagram exceeds the MTU of the outgoing interface toward r3,
-triggering ICMPv6 PACKET_TOO_BIG, reporting the 576-byte MTU of that link.
+The r2-r3 link has a reduced MTU (1400 bytes), and the client runs a TCP bulk
+transfer with `pmtudEnabled` turned on and an MSS large enough to overflow that
+link. Both layers must react to the same Packet Too Big: ~Ipv6 caches the
+1400-byte path MTU, and ~Tcp lowers snd_mss to 1400 - 40 (IPv6 header) - 20
+(TCP header) = 1340 bytes.
 
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
@@ -14,7 +16,7 @@ triggering ICMPv6 PACKET_TOO_BIG, reporting the 576-byte MTU of that link.
 record-vector-results = false
 ned-path = ../../../../examples;../../../../src
 network = inet.examples.ipv6.nclients.NClientsEth
-sim-time-limit = 15s
+sim-time-limit = 30s
 cmdenv-express-mode = false
 cmdenv-log-prefix = "%C: "
 
@@ -22,21 +24,23 @@ cmdenv-log-prefix = "%C: "
 *.n = 1
 
 # Reduce MTU on r2's interface toward r3 to trigger Packet Too Big
-*.r2.eth[1].*.mtu = 576B
+*.r2.eth[1].*.mtu = 1400B
 
-# udp apps: send a large datagram that will exceed the reduced MTU
+# TCP Path MTU Discovery (RFC 8201) on the client
+**.tcp.mss = 1400
+**.cli[*].tcp.pmtudEnabled = true
+
 **.cli[*].numApps = 1
-**.cli[*].app[0].typename = "UdpBasicApp"
-**.cli[*].app[0].destAddresses = "srv"
-**.cli[*].app[0].destPort = 1000
-**.cli[*].app[0].messageLength = 1200B
-
-**.cli[*].app[0].startTime = 10s
-**.cli[*].app[0].stopTime = 11s
-**.cli[*].app[0].sendInterval = 10s
+**.cli[*].app[0].typename = "TcpSessionApp"
+**.cli[*].app[0].connectAddress = "srv"
+**.cli[*].app[0].connectPort = 1000
+**.cli[*].app[0].tOpen = 10s
+**.cli[*].app[0].tSend = 10.5s
+**.cli[*].app[0].sendBytes = 50000B
+**.cli[*].app[0].tClose = 25s
 
 **.srv.numApps = 1
-**.srv.app[0].typename = "UdpSink"
+**.srv.app[0].typename = "TcpSinkApp"
 **.srv.app[0].localPort = 1000
 
 # Ethernet NIC configuration
@@ -47,14 +51,13 @@ cmdenv-log-prefix = "%C: "
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
-%contains: stdout
-NClientsEth.r2.ipv6.icmpv6: sending ICMP error: (inet::Packet)Packet Too Big
+%# the network layer learns the path MTU ...
+%contains-regex: stdout
+NClientsEth\.cli\[0\]\.ipv6\.routingTable: Path MTU for .* reduced to 1400
 %#--------------------------------------------------------------------------------------------------------------
-%# the message reports the MTU of the link r2 could not forward on, so that the
-%# source can act on it (see IPv6_path_mtu_discovery). 576 is below the IPv6
-%# minimum link MTU, so the source clamps it to 1280 (RFC 8201 Section 4).
-%contains: stdout
-NClientsEth.cli[0].ipv6.ipv6: Packet Too Big reports MTU=576, below the IPv6 minimum; using 1280 instead
+%# ... and the same indication still reaches TCP, which lowers its MSS
+%contains-regex: stdout
+PMTUD: reducing snd_mss from \d+ to 1340 \(reported MTU=1400\)
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

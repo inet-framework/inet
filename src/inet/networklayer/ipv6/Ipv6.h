@@ -66,6 +66,8 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
 
     // working vars
     bool sendRedirects = true; // whether to send ICMPv6 Redirects when forwarding back out the arrival interface (RFC 4861 8.2)
+    bool pathMtuDiscovery = true; // whether to learn and use per-destination path MTU estimates (RFC 8201)
+    simtime_t pathMtuAgingTime; // how long a reduced path MTU estimate is kept (RFC 8201 5.4); 0 means forever
     unsigned int curFragmentId = -1; // counter, used to assign unique fragmentIds to datagrams
     Ipv6FragBuf fragbuf; // fragmentation reassembly buffer
     simtime_t lastCheckTime; // when fragbuf was last checked for state fragments
@@ -216,6 +218,20 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
      * and disposes of the offending packet.
      */
     void sendIcmpPacketTooBigError(Packet *origPacket, int mtu);
+
+    /**
+     * RFC 8201: takes the reported next-hop MTU out of a received Packet Too Big
+     * message and lowers the cached path MTU estimate for the destination of the
+     * quoted datagram. The indication itself is left untouched, so that it can
+     * still be delivered to the transport layer.
+     */
+    virtual void updatePathMtu(const Ipv6Header& quotedHeader, int reportedMtu);
+
+    /**
+     * Returns the MTU to fragment a locally originated datagram to: the MTU of
+     * the outgoing interface, lowered to the cached path MTU estimate (if any).
+     */
+    virtual int getSendMtu(const NetworkInterface *ie, const Ipv6Address& destAddr, bool fromHL);
 
     // NetFilter functions:
 

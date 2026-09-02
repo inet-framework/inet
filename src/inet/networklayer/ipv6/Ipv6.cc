@@ -89,6 +89,8 @@ void Ipv6::initialize(int stage)
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
         sendRedirects = par("sendRedirects");
+        pathMtuDiscovery = par("pathMtuDiscovery");
+        pathMtuAgingTime = par("pathMtuAgingTime");
         fragbuf.init(icmp);
 
         // NetFilter:
@@ -316,6 +318,13 @@ void Ipv6::handleIcmpErrorIndication(Indication *indication)
     l3Ind->setDestAddress(ipv6Header->getDestAddress());
     originalPacket->addTagIfAbsent<HopLimitInd>()->setHopLimit(ipv6Header->getHopLimit());
 
+    // RFC 8201: a Packet Too Big lowers our path MTU estimate for the destination
+    // of the datagram it quotes. This only reads the indication; the indication is
+    // still delivered to the transport layer below, which may act on it as well
+    // (Tcp lowers snd_mss on it, see TcpConnection::processIcmpv6Error()).
+    if (pathMtuDiscovery && errorInd->getType() == ICMPv6_PACKET_TOO_BIG)
+        updatePathMtu(*ipv6Header, errorInd->getMtu());
+
     // Dispatch the same Indication to the appropriate transport protocol.
     // SP_INDICATION routes via protocolToGateIndex to the transport module's ipIn gate.
     // The offending packet may begin with an IPv6 extension header (e.g. a Type-2
@@ -336,6 +345,46 @@ void Ipv6::handleIcmpErrorIndication(Indication *indication)
 
     EV_INFO << "Forwarding ICMPv6 error indication to transport protocol " << protocol->getName() << "\n";
     send(indication, "transportOut");
+}
+
+void Ipv6::updatePathMtu(const Ipv6Header& quotedHeader, int reportedMtu)
+{
+    if (reportedMtu <= 0) {
+        // a Packet Too Big that carries no usable next-hop MTU tells us nothing
+        EV_WARN << "Packet Too Big message reports no usable MTU (" << reportedMtu << "), ignored\n";
+        return;
+    }
+
+    // RFC 8201 Section 4: a reported MTU below the IPv6 minimum link MTU must not
+    // shrink the path MTU below 1280; the source keeps sending 1280-byte packets
+    // (with a Fragment header, which fragmentAndSend() adds anyway).
+    int pathMtu = reportedMtu;
+    if (pathMtu < IPv6_MIN_MTU) {
+        EV_INFO << "Packet Too Big reports MTU=" << reportedMtu << ", below the IPv6 minimum; using "
+                << IPv6_MIN_MTU << " instead\n";
+        pathMtu = IPv6_MIN_MTU;
+    }
+
+    const Ipv6Address& destAddr = quotedHeader.getDestAddress();
+    simtime_t expiryTime = pathMtuAgingTime > 0 ? simTime() + pathMtuAgingTime : SIMTIME_ZERO;
+    if (rt->reducePathMtu(destAddr, pathMtu, expiryTime))
+        EV_INFO << "Path MTU towards " << destAddr << " is now " << pathMtu << "\n";
+}
+
+int Ipv6::getSendMtu(const NetworkInterface *ie, const Ipv6Address& destAddr, bool fromHL)
+{
+    int mtu = ie->getMtu();
+    // Only the originating node fragments in IPv6, so only there is the path MTU
+    // (as opposed to the MTU of the first hop) of any use.
+    if (fromHL && pathMtuDiscovery) {
+        int pathMtu = rt->getPathMtu(destAddr);
+        if (pathMtu > 0 && (mtu <= 0 || pathMtu < mtu)) {
+            EV_DETAIL << "Using cached path MTU " << pathMtu << " towards " << destAddr
+                      << " instead of the link MTU " << mtu << "\n";
+            mtu = pathMtu;
+        }
+    }
+    return mtu;
 }
 
 NetworkInterface *Ipv6::getSourceInterfaceFrom(Packet *packet)
@@ -1056,7 +1105,7 @@ void Ipv6::fragmentAndSend(Packet *packet)
         return;
     }
 
-    int mtu = ie->getMtu();
+    int mtu = getSendMtu(ie, ipv6Header->getDestAddress(), fromHL);
 
     // check if datagram does not require fragmentation
     if (packet->getDataLength() <= B(mtu)) {
