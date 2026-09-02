@@ -504,7 +504,14 @@ const Ipv6Address& Ipv6RoutingTable::lookupDestCache(const Ipv6Address& dest, in
     }
     DestCacheEntry& entry = it->second;
     if (entry.expiryTime > 0 && simTime() > entry.expiryTime) {
-        destCache.erase(it);
+        // Only the next-hop information has aged out. The path MTU estimate has
+        // a lifetime of its own (RFC 8201 Section 5.4) and must survive this, so
+        // the entry is only removed once there is nothing left worth keeping.
+        entry.interfaceId = -1;
+        entry.nextHopAddr = Ipv6Address::UNSPECIFIED_ADDRESS;
+        entry.expiryTime = 0;
+        if (entry.pathMtu == 0)
+            destCache.erase(it);
         outInterfaceId = -1;
         return Ipv6Address::UNSPECIFIED_ADDRESS;
     }
@@ -550,7 +557,21 @@ void Ipv6RoutingTable::updateDestCache(const Ipv6Address& dest, const Ipv6Addres
 
 void Ipv6RoutingTable::purgeDestCache()
 {
-    destCache.clear();
+    // Discard the cached next-hop decisions, so that the next packet to each
+    // destination is routed again with the current routing table. The path MTU
+    // estimates are not routing decisions: they have a lifetime of their own
+    // (RFC 8201 Section 5.4) and are kept, so an entry survives only for as
+    // long as it still holds one.
+    for (auto it = destCache.begin(); it != destCache.end();) {
+        DestCacheEntry& entry = it->second;
+        entry.interfaceId = -1;
+        entry.nextHopAddr = Ipv6Address::UNSPECIFIED_ADDRESS;
+        entry.expiryTime = 0;
+        if (entry.pathMtu == 0)
+            destCache.erase(it++);
+        else
+            ++it;
+    }
 }
 
 void Ipv6RoutingTable::purgeDestCacheEntriesToNeighbour(const Ipv6Address& nextHopAddr, int interfaceId)
