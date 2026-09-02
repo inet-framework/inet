@@ -165,7 +165,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     virtual void changeChannel(int channelNum);
 
     /** Stores AP info received in a beacon or probe response */
-    virtual void storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body);
+    virtual bool storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body);
 
     /** Processes Association and Reassociation Responses using the selected BSS discovery state. */
     virtual void processAssociationResponse(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool reassociation);
@@ -264,4 +264,3 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 } // namespace inet
 
 #endif
-

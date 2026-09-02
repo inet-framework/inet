@@ -90,6 +90,48 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         storeAPInfo(&encoded, header, decoded);
     }
 
+    void deliverDiscovery(const MacAddress& address, bool probeResponse, bool malformedCapabilities,
+            bool malformedOperation, int legacyChannel = 9, bool channelIndicationPresent = true)
+    {
+        Enter_Method("deliverDiscovery");
+        Ptr<Ieee80211BeaconFrame> body = probeResponse ?
+                staticPtrCast<Ieee80211BeaconFrame>(makeShared<Ieee80211ProbeResponseFrame>()) :
+                makeShared<Ieee80211BeaconFrame>();
+        body->setSSID("malformed");
+        body->setChannelNumber(legacyChannel);
+        body->setBeaconInterval(SimTime(100, SIMTIME_MS));
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 6;
+        body->setSupportedRates(rates);
+        setHtCapabilities(body, mib->localHtCapabilities);
+        setHtOperation(body, &physicallayer::Ieee80211CompliantBands::band2_4GHz, mib->getHtOperation());
+        if (malformedCapabilities) {
+            auto capabilities = body->getHtCapabilities();
+            capabilities.maxAmpduLengthExponent = 4;
+            body->setHtCapabilities(capabilities);
+        }
+        if (malformedOperation) {
+            auto operation = body->getHtOperation();
+            operation.secondaryChannelOffset = 1;
+            body->setHtOperation(operation);
+        }
+        body->setChunkLength(B(8 + 2 + 2 + (2 + 10)) + B(3) + getHtMgmtElementsLength(body));
+        auto packet = new Packet("malformed-discovery");
+        packet->insertAtBack(body);
+        packet->addTag<SignalPowerInd>()->setPower(mW(1));
+        const auto *band = &physicallayer::Ieee80211CompliantBands::band2_4GHz;
+        physicallayer::Ieee80211Channel channel(band, mib->getHtOperation().primaryChannel);
+        if (channelIndicationPresent)
+            packet->addTag<physicallayer::Ieee80211ChannelInd>()->setChannel(&channel);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        if (probeResponse)
+            handleProbeResponseFrame(packet, header);
+        else
+            handleBeaconFrame(packet, header);
+    }
+
     void startAuthenticationForTest(const MacAddress& address)
     {
         Enter_Method("startAuthenticationForTest");
@@ -180,10 +222,11 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         reassociationInProgress = reassociation;
     }
 
-    enum class ResponseHtForm { LEGACY, VALID, PARTIAL, UNUSABLE };
+    enum class ResponseHtForm { LEGACY, VALID, PARTIAL, UNUSABLE, MALFORMED_CAPABILITIES, MALFORMED_OPERATION, UNMAPPABLE_PRIMARY };
 
     void deliverResponse(const MacAddress& address, bool reassociation, Ieee80211StatusCode statusCode, ResponseHtForm htForm,
-            bool channelIndicationPresent = true)
+            bool channelIndicationPresent = true, int responsePrimaryChannel = -1,
+            int responseSecondaryChannelOffset = -1, int responseOperatingChannelWidth = 0)
     {
         Enter_Method("deliverResponse");
         Ptr<Ieee80211AssociationResponseFrame> body;
@@ -200,6 +243,16 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         if (htForm != ResponseHtForm::LEGACY) {
             auto capabilities = mib->localHtCapabilities;
             auto operation = mib->getHtOperation();
+            if (responsePrimaryChannel >= 0)
+                operation.primaryChannel = responsePrimaryChannel;
+            if (responseOperatingChannelWidth == 20)
+                operation.operatingChannelWidth = MHz(20);
+            else if (responseOperatingChannelWidth == 40) {
+                operation.operatingChannelWidth = MHz(40);
+                capabilities.supportedChannelWidths.insert(MHz(40));
+            }
+            if (responseSecondaryChannelOffset >= 0)
+                operation.secondaryChannelOffset = responseSecondaryChannelOffset;
             if (htForm == ResponseHtForm::UNUSABLE) {
                 capabilities.rxMcsSupported.fill(false);
                 capabilities.txMcsNss.maxMcsPerNss.fill(-1);
@@ -207,12 +260,28 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
             setHtCapabilities(body, capabilities);
             if (htForm != ResponseHtForm::PARTIAL)
                 setHtOperation(body, &physicallayer::Ieee80211CompliantBands::band2_4GHz, operation);
+            if (htForm == ResponseHtForm::MALFORMED_CAPABILITIES) {
+                auto malformedCapabilities = body->getHtCapabilities();
+                malformedCapabilities.maxAmpduLengthExponent = 4;
+                body->setHtCapabilities(malformedCapabilities);
+            }
+            if (htForm == ResponseHtForm::MALFORMED_OPERATION) {
+                auto malformedOperation = body->getHtOperation();
+                malformedOperation.secondaryChannelOffset = 2;
+                body->setHtOperation(malformedOperation);
+            }
+            if (htForm == ResponseHtForm::UNMAPPABLE_PRIMARY) {
+                auto unmappableOperation = body->getHtOperation();
+                unmappableOperation.primaryChannel = 99;
+                body->setHtOperation(unmappableOperation);
+            }
         }
         body->setChunkLength(B(9) + getHtMgmtElementsLength(body));
         auto packet = new Packet("AssociationResponse");
         packet->insertAtBack(body);
         const auto *band = &physicallayer::Ieee80211CompliantBands::band2_4GHz;
-        physicallayer::Ieee80211Channel channel(band, mib->getHtOperation().primaryChannel);
+        int channelNumber = responsePrimaryChannel >= 0 ? responsePrimaryChannel : mib->getHtOperation().primaryChannel;
+        physicallayer::Ieee80211Channel channel(band, channelNumber);
         if (channelIndicationPresent)
             packet->addTag<physicallayer::Ieee80211ChannelInd>()->setChannel(&channel);
         auto header = makeShared<Ieee80211MgmtHeader>();
@@ -233,9 +302,17 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
     bool isAssociatedForTest() const { return mib->bssStationData.isAssociated; }
     const MacAddress& getAssociatedAddressForTest() const { return assocAP.address; }
     bool hasBeaconTimeoutForTest() const { return assocAP.beaconTimeoutMsg != nullptr; }
+    simtime_t getBeaconTimeoutArrivalForTest() const { return assocAP.beaconTimeoutMsg->getArrivalTime(); }
+    simtime_t getBeaconIntervalForTest() const { return assocAP.beaconInterval; }
     bool hasPendingAssociationForTest() const { return assocTimeoutMsg != nullptr; }
     bool isReassociationInProgressForTest() const { return reassociationInProgress; }
     void clearChangedChannelsForTest() { changedChannels.clear(); }
+
+    void setLegacyForTest()
+    {
+        Enter_Method("setLegacyForTest");
+        mib->localHtCapabilitiesValid = false;
+    }
 
     void setPrimaryChannelForTest(int channel)
     {
@@ -300,6 +377,14 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         mgmt->storeSerializedDiscovery(probeAddress, 13, true);
         ASSERT(mgmt->getCachedAp(probeAddress)->channel == 13);
 
+        // Malformed Beacon and Probe Response HT elements are peer input:
+        // neither one may abort the simulation or create a new cache entry.
+        const MacAddress malformedAddress("02:00:00:00:00:03");
+        mgmt->deliverDiscovery(malformedAddress, false, true, false);
+        ASSERT(mgmt->getCachedAp(malformedAddress) == nullptr);
+        mgmt->deliverDiscovery(malformedAddress, true, false, true);
+        ASSERT(mgmt->getCachedAp(malformedAddress) == nullptr);
+
         mgmt->startAuthenticationForTest(address);
         ASSERT(mgmt->changedChannel == 6);
         mgmt->finishAuthenticationForTest(address);
@@ -339,6 +424,19 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(mgmt->associationConfirms == 3);
         ASSERT(mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 0);
+
+        // An invalid Beacon from the associated AP must not extend the
+        // beacon-loss deadline, even though the handler reaches the normal
+        // management-frame path.
+        simtime_t beaconDeadline = mgmt->getBeaconTimeoutArrivalForTest();
+        wait(SimTime(1, SIMTIME_US));
+        mgmt->deliverDiscovery(address, false, false, true);
+        ASSERT(mgmt->getBeaconTimeoutArrivalForTest() == beaconDeadline);
+        ASSERT(mgmt->getCachedAp(address)->channel == 6);
+        wait(SimTime(1, SIMTIME_US));
+        mgmt->deliverDiscovery(address, false, false, false);
+        ASSERT(mgmt->getBeaconTimeoutArrivalForTest() ==
+                simTime() + 3.5 * mgmt->getBeaconIntervalForTest());
 
         auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
 
@@ -497,6 +595,143 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->hasPeerHtState(address));
         ASSERT(htNegotiationFailures == 4);
         ASSERT(lastFailureReason.find("channel") != std::string::npos || lastFailureReason.find("band") != std::string::npos);
+
+        // Typed conversion failures in both successful response subtypes
+        // preserve the successful association result while producing exactly
+        // one HT negotiation diagnostic.
+        mgmt->resetAssociationState();
+        mgmt->prepareResponse(address, false);
+        mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::MALFORMED_CAPABILITIES);
+        ASSERT(mgmt->associationConfirms == 9);
+        ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
+        ASSERT(!mgmt->hasPeerHtState(address));
+        ASSERT(htNegotiationFailures == 5);
+
+        mgmt->resetAssociationState();
+        mgmt->prepareResponse(address, false);
+        mgmt->deliverResponse(address, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID);
+        ASSERT(mgmt->associationConfirms == 10);
+        ASSERT(mgmt->hasPeerHtState(address));
+        mgmt->prepareResponse(address, true);
+        mgmt->deliverResponse(address, true, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::MALFORMED_OPERATION);
+        ASSERT(mgmt->reassociationConfirms == 4);
+        ASSERT(mgmt->lastReassociationResult == PRC_SUCCESS);
+        ASSERT(!mgmt->hasPeerHtState(address));
+        ASSERT(htNegotiationFailures == 6);
+        ASSERT(lastFailureWasReassociation);
+
+        // Exercise the complete response tuple through both production
+        // response handlers. Width/offset inconsistencies and a nonexistent
+        // secondary channel are invalid; both legal 2.4 GHz edge tuples are
+        // accepted and negotiate without a diagnostic.
+        int expectedAssociationConfirms = mgmt->associationConfirms;
+        int expectedReassociationConfirms = mgmt->reassociationConfirms;
+        int expectedFailures = htNegotiationFailures;
+        auto expectInvalidAssociationTuple = [&](int primaryChannel, int secondaryChannelOffset, int width) {
+            mgmt->resetAssociationState();
+            mgmt->prepareResponse(address, false);
+            mgmt->deliverResponse(address, false, SC_SUCCESSFUL,
+                    TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID, true,
+                    primaryChannel, secondaryChannelOffset, width);
+            expectedAssociationConfirms++;
+            expectedFailures++;
+            ASSERT(mgmt->associationConfirms == expectedAssociationConfirms);
+            ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
+            ASSERT(!mgmt->hasPeerHtState(address));
+            ASSERT(htNegotiationFailures == expectedFailures);
+        };
+        expectInvalidAssociationTuple(6, 1, 20);
+        expectInvalidAssociationTuple(6, 3, 20);
+        expectInvalidAssociationTuple(6, 0, 40);
+        expectInvalidAssociationTuple(13, 1, 40);
+
+        auto expectValidAssociationTuple = [&](int primaryChannel, int secondaryChannelOffset) {
+            mgmt->resetAssociationState();
+            mgmt->prepareResponse(address, false);
+            mgmt->deliverResponse(address, false, SC_SUCCESSFUL,
+                    TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID, true,
+                    primaryChannel, secondaryChannelOffset, 40);
+            expectedAssociationConfirms++;
+            ASSERT(mgmt->associationConfirms == expectedAssociationConfirms);
+            ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
+            ASSERT(mgmt->hasPeerHtState(address));
+            ASSERT(htNegotiationFailures == expectedFailures);
+        };
+        expectValidAssociationTuple(0, 1);
+        expectValidAssociationTuple(12, 3);
+
+        auto expectInvalidReassociationTuple = [&](int primaryChannel, int secondaryChannelOffset, int width) {
+            mgmt->prepareResponse(address, true);
+            mgmt->deliverResponse(address, true, SC_SUCCESSFUL,
+                    TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID, true,
+                    primaryChannel, secondaryChannelOffset, width);
+            expectedReassociationConfirms++;
+            expectedFailures++;
+            ASSERT(mgmt->reassociationConfirms == expectedReassociationConfirms);
+            ASSERT(mgmt->lastReassociationResult == PRC_SUCCESS);
+            ASSERT(!mgmt->hasPeerHtState(address));
+            ASSERT(htNegotiationFailures == expectedFailures);
+        };
+        expectInvalidReassociationTuple(6, 1, 20);
+        expectInvalidReassociationTuple(6, 3, 20);
+        expectInvalidReassociationTuple(6, 0, 40);
+        expectInvalidReassociationTuple(13, 1, 40);
+
+        auto expectValidReassociationTuple = [&](int primaryChannel, int secondaryChannelOffset) {
+            mgmt->prepareResponse(address, true);
+            mgmt->deliverResponse(address, true, SC_SUCCESSFUL,
+                    TestIeee80211MgmtStaDiscovery::ResponseHtForm::VALID, true,
+                    primaryChannel, secondaryChannelOffset, 40);
+            expectedReassociationConfirms++;
+            ASSERT(mgmt->reassociationConfirms == expectedReassociationConfirms);
+            ASSERT(mgmt->lastReassociationResult == PRC_SUCCESS);
+            ASSERT(mgmt->hasPeerHtState(address));
+            ASSERT(htNegotiationFailures == expectedFailures);
+        };
+        expectValidReassociationTuple(0, 1);
+        expectValidReassociationTuple(12, 3);
+
+        // An unmappable standards-facing primary is peer input: a successful
+        // association remains successful, but no negotiated HT state is kept
+        // and exactly one diagnostic is emitted.
+        mgmt->resetAssociationState();
+        mgmt->prepareResponse(address, false);
+        mgmt->deliverResponse(address, false, SC_SUCCESSFUL,
+                TestIeee80211MgmtStaDiscovery::ResponseHtForm::UNMAPPABLE_PRIMARY);
+        expectedAssociationConfirms++;
+        expectedFailures++;
+        ASSERT(mgmt->associationConfirms == expectedAssociationConfirms);
+        ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
+        ASSERT(!mgmt->hasPeerHtState(address));
+        ASSERT(htNegotiationFailures == expectedFailures);
+
+        // A production legacy STA ignores malformed optional HT elements in
+        // discovery and successful association/reassociation responses.
+        mgmt->resetAssociationState();
+        mgmt->setLegacyForTest();
+        const MacAddress legacyAddress("02:00:00:00:00:04");
+        mgmt->deliverDiscovery(legacyAddress, false, true, false, 11);
+        mgmt->deliverDiscovery(legacyAddress, true, false, true, 12);
+        auto legacyAp = mgmt->getCachedAp(legacyAddress);
+        ASSERT(legacyAp != nullptr);
+        ASSERT(legacyAp->channel == 12);
+        ASSERT(!legacyAp->htCapabilitiesPresent);
+        ASSERT(!legacyAp->htOperationPresent);
+        int failuresBeforeLegacyResponse = htNegotiationFailures;
+        mgmt->prepareResponse(legacyAddress, false);
+        mgmt->deliverResponse(legacyAddress, false, SC_SUCCESSFUL, TestIeee80211MgmtStaDiscovery::ResponseHtForm::MALFORMED_CAPABILITIES);
+        expectedAssociationConfirms++;
+        ASSERT(mgmt->associationConfirms == expectedAssociationConfirms);
+        ASSERT(mgmt->lastAssociationResult == PRC_SUCCESS);
+        ASSERT(!mgmt->hasPeerHtState(legacyAddress));
+        ASSERT(htNegotiationFailures == failuresBeforeLegacyResponse);
+        mgmt->prepareResponse(legacyAddress, true);
+        mgmt->deliverResponse(legacyAddress, true, SC_SUCCESSFUL,
+                TestIeee80211MgmtStaDiscovery::ResponseHtForm::MALFORMED_OPERATION);
+        ASSERT(mgmt->reassociationConfirms == expectedReassociationConfirms + 1);
+        ASSERT(mgmt->lastReassociationResult == PRC_SUCCESS);
+        ASSERT(!mgmt->hasPeerHtState(legacyAddress));
+        ASSERT(htNegotiationFailures == failuresBeforeLegacyResponse);
 
         std::cout << "Serialized Beacon and Probe Response HT discovery drive production tuning to advertised channels.\n";
         std::cout << "Association and reassociation HT response semantics preserve success and diagnose invalid negotiation.\n";
