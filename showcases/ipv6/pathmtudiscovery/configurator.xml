@@ -1,0 +1,33 @@
+<config>
+    <interface hosts="hostA"    names="eth0" address="2001:db8:1::a"/>
+    <interface hosts="firewall" names="eth0" address="2001:db8:1::1"/>
+    <interface hosts="firewall" names="eth1" address="2001:db8:2::1"/>
+    <interface hosts="borderA"  names="eth0" address="2001:db8:2::2"/>
+    <interface hosts="borderA"  names="eth1" address="2001:db8:3::1"/>
+    <interface hosts="transit"  names="eth0" address="2001:db8:3::2"/>
+    <interface hosts="transit"  names="eth1" address="2001:db8:4::1"/>
+    <interface hosts="borderB"  names="eth0" address="2001:db8:4::2"/>
+    <interface hosts="borderB"  names="eth1" address="2001:db8:5::1"/>
+    <interface hosts="hostB"    names="eth0" address="2001:db8:5::b"/>
+
+    <route hosts="hostA" destination="::" prefixLength="0" gateway="2001:db8:1::1" interface="eth0"/>
+    <route hosts="hostB" destination="::" prefixLength="0" gateway="2001:db8:5::1" interface="eth0"/>
+
+    <route hosts="firewall" destination="2001:db8:1::/64" interface="eth0"/>
+    <route hosts="firewall" destination="2001:db8:2::/64" interface="eth1"/>
+    <route hosts="firewall" destination="::" prefixLength="0" gateway="2001:db8:2::2" interface="eth1"/>
+
+    <route hosts="borderA" destination="2001:db8:2::/64" interface="eth0"/>
+    <route hosts="borderA" destination="2001:db8:3::/64" interface="eth1"/>
+    <route hosts="borderA" destination="2001:db8:1::/64" gateway="2001:db8:2::1" interface="eth0"/>
+    <route hosts="borderA" destination="::" prefixLength="0" gateway="2001:db8:3::2" interface="eth1"/>
+    <route hosts="borderA" destination="2001:db8:5::/64" interface="tun0"/>
+
+    <route hosts="transit" destination="2001:db8:3::/64" interface="eth0"/>
+    <route hosts="transit" destination="2001:db8:4::/64" interface="eth1"/>
+
+    <route hosts="borderB" destination="2001:db8:4::/64" interface="eth0"/>
+    <route hosts="borderB" destination="2001:db8:5::/64" interface="eth1"/>
+    <route hosts="borderB" destination="::" prefixLength="0" gateway="2001:db8:4::1" interface="eth0"/>
+    <route hosts="borderB" destination="2001:db8:1::/64" interface="tun0"/>
+</config>

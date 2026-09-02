@@ -1,0 +1,25 @@
+<ipsecConfig>
+    <Devices>
+        <Device id="firewall">
+            <SecurityPolicy>
+                <Selector>
+                    <LocalAddress>2001:db8:2::-2001:db8:5:0:ffff:ffff:ffff:ffff</LocalAddress>
+                    <RemoteAddress>2001:db8:1::-2001:db8:1:0:ffff:ffff:ffff:ffff</RemoteAddress>
+                    <Protocol>58</Protocol>
+                </Selector>
+                <Direction>OUT</Direction>
+                <Action>DISCARD</Action>
+            </SecurityPolicy>
+            <SecurityPolicy>
+                <Selector/>
+                <Direction>OUT</Direction>
+                <Action>BYPASS</Action>
+            </SecurityPolicy>
+            <SecurityPolicy>
+                <Selector/>
+                <Direction>IN</Direction>
+                <Action>BYPASS</Action>
+            </SecurityPolicy>
+        </Device>
+    </Devices>
+</ipsecConfig>

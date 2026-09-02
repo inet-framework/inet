@@ -59,12 +59,17 @@ Addresses are the rough equivalent of the private address ranges in IPv4: they a
 meant for traffic inside an organisation, and they never appear in the global routing
 table.
 
-They are not merely discouraged from the global routing table — they cannot be in it.
 An organisation creates its own Unique Local Address prefix by choosing 40 random
-bits. There is no registry and no allocation authority, so no record exists of which
-organisation holds which prefix, and two organisations may choose the same one. A
-router receiving a route for such a prefix would have no way to decide whose network
-it leads to. Public networks therefore discard these addresses at their borders.
+bits. RFC 4193 makes that choice random so that two organisations are very unlikely
+to pick the same prefix, which is what makes the addresses safe to use privately and
+even between co-operating organisations.
+
+What they are not is *globally* routable, and that is a matter of policy rather than
+of any technical ambiguity. RFC 4193 states that these addresses are not expected to
+be routed on the global Internet. No registry records who holds which prefix, no
+provider has any reason to carry them, and providers filter them at their borders as
+a matter of course. The consequence is the one that matters here: a packet carrying
+these addresses will not cross a public network.
 
 So an organisation with two sites, both numbered from Unique Local Addresses, has a
 concrete problem. Each site works internally. Neither site can reach the other across
@@ -101,6 +106,25 @@ The interface says *where the tunnel goes*. The route says *what goes into it*. 
 two are configured independently, and changing only the route changes what the tunnel
 is used for, without touching the tunnel itself.
 
+How the configuration is written
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Two kinds of file describe the scenario, and it helps to know which is which before
+reading the fragments below.
+
+``omnetpp.ini`` sets module parameters. Each line is a pattern naming one or more
+modules, then the parameter and its value. In ``*.borderA.tun[0].mtu``, the leading
+``*`` stands for the network, so the line sets the ``mtu`` parameter of the first
+tunnel interface of the node called ``borderA``. The file is divided into sections:
+``[General]`` applies to everything, and each ``[Config ...]`` section describes one
+scenario. ``extends`` lets one section inherit another's settings.
+
+Addresses and routes are not module parameters, so they come from a separate XML file
+read by a module called ``Ipv6NetworkConfigurator``. The ini points at that file with
+``xmldoc("...")``. This showcase has four such XML files, one per configuration. They
+are identical except for the one or two routes that lead into the tunnel, which is the
+only thing the configurations actually vary.
+
 Configuring the interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -109,6 +133,7 @@ Setting ``numTunInterfaces`` creates the slots, and each slot's type and paramet
 are set individually:
 
 .. literalinclude:: ../omnetpp.ini
+   :caption: omnetpp.ini
    :start-at: *.borderA.numTunInterfaces
    :end-at: *.borderA.tun[0].destination
    :language: ini
@@ -119,9 +144,18 @@ The interface takes three parameters:
   becomes the source address of the outer header.
 - ``destination`` — the tunnel exit point. It becomes the destination address of the
   outer header.
-- ``mtu`` — the largest packet the tunnel will accept, 1500 bytes by default.
+- ``mtu`` — the largest packet the tunnel will accept, 1500 bytes by default. This
+  showcase leaves it at the default, which is why the ini fragment above does not
+  mention it.
 
-The interface is created with the name ``tun0``, which is how routes refer to it.
+The submodule is written ``tun[0]`` in the ini because it is the first element of a
+vector, but the network interface it registers is named ``tun0``, without the
+brackets. That is the name routes use.
+
+Unlike a tunnel interface on most router operating systems, this one needs no address
+of its own. It never appears as a source or destination — the addresses in the outer
+header are the ``source`` and ``destination`` above, which belong to the node's real
+interfaces.
 
 Each end is configured separately, and each end describes only its own direction. The
 tunnel in this showcase is used in both directions, so both border routers declare an
@@ -136,6 +170,7 @@ arrives and sends it to its far end. What decides which traffic arrives is an or
 route whose output interface is the tunnel:
 
 .. literalinclude:: ../tunnel.xml
+   :caption: tunnel.xml
    :start-at: <route hosts="borderA" destination="fd00:b::/64"
    :end-at: <route hosts="borderB" destination="fd00:a::/64"
    :language: xml
@@ -152,8 +187,10 @@ The outer header is 40 bytes, and those bytes are added to every packet the tunn
 carries. A packet that exactly filled the outgoing link before encapsulation no longer
 fits after it, and the entry point must then split it into fragments that the exit
 point reassembles. Setting the tunnel's ``mtu`` to the link's limit minus 40 avoids
-this, by refusing oversized packets instead of splitting them. This showcase keeps the
-default and uses small packets, so no fragmentation occurs.
+this: an oversized packet is then refused rather than split, and the sender is told so
+with an ICMPv6 Packet Too Big message, which is what allows it to send smaller packets
+instead. This showcase keeps the default and uses 100-byte packets, so nothing is ever
+fragmented here.
 
 The Model
 ---------
@@ -163,11 +200,32 @@ All four configurations use the same network:
 .. figure:: media/network.png
    :align: center
 
+   The network, with the address each interface holds. The ``configurator`` and
+   ``visualizer`` modules have no part in the protocol: the first assigns the
+   addresses and routes, and the second draws the address labels.
+
 .. FIGURE RECIPE: launch `inet -u Qtenv -c NoTunnel --mcp-server-address localhost:8799`,
    then over the MCP server: run_simulation time_limit 1.9s mode express (so addresses are
    assigned and no packet is in flight), then get_canvas_image with module_path "<root>",
    area "module_rectangle", margin 5. NoTunnel is used deliberately: in the tunnel configs
    the tunnel interface adds an "fe80::" label that means nothing to a reader.
+
+The tunnel itself is not part of the topology. It is drawn here as a dashed line, but
+there is no link between the two border routers — only an interface on each of them
+and a route that leads to it:
+
+.. figure:: media/tunnel-overlay.png
+   :align: center
+
+   The tunnel between the two border routers. The dashed line is drawn on the figure
+   to show where the tunnel goes; it is not a link in the model.
+
+.. FIGURE RECIPE: derived from media/network.png. The dashed arc, its two arrow heads
+   and the label are drawn with PIL: a quadratic Bezier from (258,168) through
+   (478,28) to (700,168) in the 1024x409 image, 3px wide, colour (0,90,200), dashes of
+   9 samples out of 400, with a white label box centred at x=478, y=40. Redraw it
+   whenever network.png is recaptured, since the coordinates follow the node
+   positions.
 
 ``hostA`` is in site A and ``hostB1`` and ``hostB2`` are in site B. ``borderA`` and
 ``borderB`` are the two site border routers, and ``transit`` is a router in the public
@@ -212,15 +270,29 @@ routing table is this, and nothing else:
       2001:db8:1::/64 via <unspec> dev eth0
       2001:db8:2::/64 via <unspec> dev eth1
 
-Two entries, both for public prefixes. There is no route for ``fd00::/8``, so any
-packet carrying those addresses that reaches ``transit`` is discarded. In a real
+That is the output of the configurator's ``dumpRoutes`` option, which prints every
+node's routing table at the start of the run. ``<unspec>`` means the route has no next
+hop because the destination is on a directly attached link.
+
+Two entries, both for public prefixes, and nothing that matches either site's
+addresses. Any packet carrying them that reaches ``transit`` is discarded. In a real
 network the absence is not a configuration choice — it is unavoidable, for the reasons
 given above. Here it has to be arranged deliberately, because a shortest-path
 configurator would happily install routes that reality would not.
 
-In every configuration, ``hostA`` sends 100-byte UDP packets to both site B hosts,
-twice a second, from 2 s to the end of the 10 s simulation. That is 16 packets to each
-host. The two receiving hosts run ``UdpSink``.
+The rest of the scenario is the same in every configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :caption: omnetpp.ini
+   :start-at: [General]
+   :end-before: [Config NoTunnel]
+   :language: ini
+
+``hostA`` sends 100-byte UDP packets to both site B hosts, twice a second, from 2 s to
+the end of the 10 s simulation. That is 16 packets to each host, and the two receiving
+hosts run ``UdpSink``. Traffic starts at 2 s so that Neighbor Discovery has finished
+first; a packet sent before a node knows its neighbours would be delayed or dropped
+for reasons that have nothing to do with tunneling.
 
 NoTunnel Configuration
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -229,6 +301,7 @@ The ``NoTunnel`` configuration is the baseline. There is no tunnel, and the two 
 are left to reach each other directly:
 
 .. literalinclude:: ../omnetpp.ini
+   :caption: omnetpp.ini
    :start-at: [Config NoTunnel]
    :end-before: [Config Tunnel]
    :language: ini
@@ -251,6 +324,7 @@ The ``Tunnel`` configuration adds a tunnel interface to each border router and a
 for the whole remote site pointing into it:
 
 .. literalinclude:: ../omnetpp.ini
+   :caption: omnetpp.ini
    :start-at: [Config Tunnel]
    :end-before: [Config SelectiveTunnel]
    :language: ini
@@ -268,39 +342,48 @@ route. Instead of a prefix route for the whole of site B, ``borderA`` gets a rou
 one host address:
 
 .. literalinclude:: ../selective.xml
+   :caption: selective.xml
    :start-at: <route hosts="borderA" destination="fd00:b::b1"
    :end-at: <route hosts="borderA" destination="fd00:b::b1"
    :language: xml
 
 .. literalinclude:: ../omnetpp.ini
+   :caption: omnetpp.ini
    :start-at: [Config SelectiveTunnel]
-   :end-before: [Config RecursiveRouting]
+   :end-before: [Config RoutingLoop]
    :language: ini
 
 Traffic to ``hostB1`` now matches that route and enters the tunnel. Traffic to
 ``hostB2`` matches nothing that leads into the tunnel, so it takes the ordinary path
 and dies at ``transit`` exactly as in the baseline.
 
-RecursiveRouting Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RoutingLoop Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Because the tunnel is fed by ordinary routes, an ordinary routing mistake can feed it
-the wrong traffic. The ``RecursiveRouting`` configuration adds one wrong route on
-``borderB``: a host route for ``hostB1``, a host that is directly attached to
-``borderB``, pointing into the tunnel back to ``borderA``:
+the wrong traffic. The ``RoutingLoop`` configuration adds one wrong route on
+``borderB``: a host route for ``hostB1`` — a host directly attached to ``borderB`` —
+pointing into the tunnel back towards ``borderA``:
 
-.. literalinclude:: ../recursive.xml
+.. literalinclude:: ../routing-loop.xml
+   :caption: routing-loop.xml
    :start-at: <route hosts="borderB" destination="fd00:b::b1"
    :end-at: <route hosts="borderB" destination="fd00:b::b1"
    :language: xml
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: [Config RecursiveRouting]
+   :caption: omnetpp.ini
+   :start-at: [Config RoutingLoop]
    :language: ini
 
-A packet for ``hostB1`` now travels to ``borderB`` through the tunnel, and ``borderB``
+The wrong route is longer than the on-link route covering the rest of site B, so it
+wins. A packet for ``hostB1`` reaches ``borderB`` through the tunnel, and ``borderB``
 sends it straight back through the tunnel to ``borderA``, which sends it forward
 again. The packet bounces between the two border routers.
+
+The headers do not pile up. Each router removes the outer header before it looks at
+the inner packet, and adds a fresh one when it sends it back, so there is never more
+than one outer header on the wire and the packet does not grow.
 
 What stops it is the hop limit. Each border router forwards the inner packet, and
 forwarding decrements its hop limit. INET starts an IPv6 packet with a hop limit of
@@ -308,8 +391,15 @@ forwarding decrements its hop limit. INET starts an IPv6 packet with a hop limit
 trips before it is discarded. The loop is self-limiting, which is why this
 configuration terminates rather than running forever.
 
-Real routers detect this situation, which is called *recursive routing*, and shut the
-tunnel down rather than let it consume the link. INET has no such protection.
+This is an ordinary routing loop that happens to run through a tunnel. It is worth
+separating from a different failure with a similar-sounding name. In *recursive
+routing*, the route towards the tunnel's own exit point leads through the tunnel
+itself: the entry point wraps the packet, looks up the outer destination, finds the
+tunnel again, and wraps it once more, without ever putting anything on the wire. That
+one has no hop limit to stop it, which is why router operating systems detect it
+specifically and shut the tunnel down. It is not what happens here — each border
+router reaches the other's public address by the ordinary route out of its Ethernet
+interface.
 
 Results
 -------
@@ -332,7 +422,7 @@ site B host received, out of 16 sent to each:
    * - ``SelectiveTunnel``
      - 16
      - 0
-   * - ``RecursiveRouting``
+   * - ``RoutingLoop``
      - 0
      - 16
 
@@ -346,7 +436,7 @@ difference is that one of them is named by a route and the other is not. This is
 clearest demonstration on the page that the tunnel carries whatever the routing gives
 it, and nothing else.
 
-``RecursiveRouting`` inverts the pattern: the host with the wrong route is the one that
+``RoutingLoop`` inverts the pattern: the host with the wrong route is the one that
 gets nothing, while ``hostB2``, whose routing is untouched, keeps receiving all 16
 packets. A tunnel does not "break"; one route breaks one destination.
 
@@ -370,10 +460,16 @@ inspector:
    which is why the screenshot must be tall and then cropped.
 
 The two middle entries are the point. Chunk ``[2]`` is the outer IPv6 header: it runs
-from ``2001:db8:1::1`` to ``2001:db8:2::2``, the two public tunnel endpoints, and its
-protocol field says ``ipv6``, meaning the payload is another IPv6 datagram. Chunk
+from ``2001:db8:1::1`` to ``2001:db8:2::2``, the two public tunnel endpoints. Chunk
 ``[3]`` is the inner header, still carrying the original ``fd00:a::a`` and
-``fd00:b::b2`` addresses, with its protocol field naming ``udp``.
+``fd00:b::b2`` addresses.
+
+The field the figure calls ``protocol`` is the header's Next Header field, the one
+described earlier. On the outer header it reads ``ipv6(41)``, which is what tells the
+exit point that the payload is another IPv6 datagram; 41 is the number assigned to
+IPv6 for exactly this purpose. On the inner header it reads ``udp(69)``. The 69 is an
+internal identifier used inside INET, not the number that appears on the wire, which
+for UDP is 17.
 
 The transit network forwards this frame using the addresses in chunk ``[2]``, which it
 has routes for. The addresses in chunk ``[3]``, which it has no routes for, are just
@@ -386,8 +482,8 @@ application's own data, and ``[6]`` is the Ethernet frame check sequence.
 The cost of the loop
 ~~~~~~~~~~~~~~~~~~~~
 
-Delivery counts do not show the whole effect of ``RecursiveRouting``. Counting the
-packets that crossed the link between ``transit`` and ``borderA`` does:
+Delivery counts do not show the whole effect of ``RoutingLoop``. Counting the packets
+that crossed the link between ``transit`` and ``borderA`` does:
 
 .. list-table::
    :header-rows: 1
@@ -396,12 +492,17 @@ packets that crossed the link between ``transit`` and ``borderA`` does:
      - packets sent by ``transit`` toward ``borderA``
    * - ``Tunnel``
      - 4
-   * - ``RecursiveRouting``
+   * - ``RoutingLoop``
      - 244
+
+The four packets in the first row are not application traffic — the receiving hosts
+never reply. They are Neighbor Discovery messages, which every node exchanges to
+resolve its neighbours' link-layer addresses. The 240 packets above that baseline are
+the loop.
 
 Sixteen packets, each making about fifteen round trips before its hop limit runs out,
 put roughly 240 extra packets onto the transit link — traffic that is never delivered
-to anyone. This is why recursive routing matters in practice. The visible symptom is
+to anyone. This is why a routing loop through a tunnel matters in practice. The visible symptom is
 that one destination is unreachable; the expensive consequence is that the link
 between the sites carries many times its normal load to accomplish nothing.
 
@@ -410,7 +511,7 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`no-tunnel.xml <../no-tunnel.xml>`,
 :download:`tunnel.xml <../tunnel.xml>`,
 :download:`selective.xml <../selective.xml>`,
-:download:`recursive.xml <../recursive.xml>`
+:download:`routing-loop.xml <../routing-loop.xml>`
 
 Try It Yourself
 ---------------
@@ -422,6 +523,8 @@ INET root directory:
 
     $ cd showcases/ipv6/tunneling
     $ inet
+
+``inet`` with no arguments offers a list of the four configurations to choose from.
 
 Otherwise, there is an easy way to install INET and OMNeT++ using ``opp_env``, and run
 the simulation interactively.
