@@ -22,6 +22,7 @@ AMBIENT_CLOCKS = {
     ("std", "chrono", "high_resolution_clock"),
 }
 GROUPING_PREFIX_KEYWORDS = {"case", "co_return", "co_yield", "return", "throw"}
+UNEVALUATED_OPERATORS = {"decltype", "noexcept", "sizeof"}
 
 
 @dataclass(frozen=True)
@@ -245,13 +246,53 @@ def grouping_parentheses_before(tokens: list[Token], index: int) -> int:
     return count - 1 if is_call or previous.text in {")", "]", "}", ">"} else count
 
 
+def parenthesized_unevaluated_context(tokens: list[Token]) -> list[bool]:
+    """Mark tokens enclosed by a parenthesized unevaluated operand."""
+    context = [False] * len(tokens)
+    parentheses: list[bool] = []
+    unevaluated_depth = 0
+    for index, token in enumerate(tokens):
+        context[index] = unevaluated_depth > 0
+        if token.text == "(":
+            begins_unevaluated = index > 0 and tokens[index - 1].text in UNEVALUATED_OPERATORS
+            parentheses.append(begins_unevaluated)
+            if begins_unevaluated:
+                unevaluated_depth += 1
+        elif token.text == ")" and parentheses:
+            if parentheses.pop():
+                unevaluated_depth -= 1
+    return context
+
+
+def is_in_unevaluated_operand(
+    tokens: list[Token],
+    name_start: int,
+    parenthesized_context: list[bool],
+) -> bool:
+    if parenthesized_context[name_start]:
+        return True
+    cursor = name_start - 1
+    if (
+        cursor >= 0
+        and tokens[cursor].text == "::"
+        and (cursor == 0 or not is_identifier(tokens[cursor - 1]))
+    ):
+        cursor -= 1
+    return cursor >= 0 and tokens[cursor].text == "sizeof"
+
+
 def constructed_clock_now_line(
     tokens: list[Token],
     name_start: int,
     name_end: int,
     candidates: set[tuple[str, ...]],
+    parenthesized_context: list[bool],
 ) -> int | None:
-    if not any(candidate in AMBIENT_CLOCKS for candidate in candidates) or name_end + 1 >= len(tokens):
+    if (
+        not any(candidate in AMBIENT_CLOCKS for candidate in candidates)
+        or name_end + 1 >= len(tokens)
+        or is_in_unevaluated_operand(tokens, name_start, parenthesized_context)
+    ):
         return None
     if (tokens[name_end].text, tokens[name_end + 1].text) not in {("{", "}"), ("(", ")")}:
         return None
@@ -270,6 +311,7 @@ def constructed_clock_now_line(
 
 def forbidden_lines(code: str) -> set[int]:
     tokens = cpp_tokens(code)
+    parenthesized_context = parenthesized_unevaluated_context(tokens)
     lines: set[int] = set()
     scopes = [Scope()]
     index = 0
@@ -301,7 +343,9 @@ def forbidden_lines(code: str) -> set[int]:
             if end < len(tokens) and tokens[end].text == "(" and name[-1] == "now":
                 if any(candidate[:-1] in AMBIENT_CLOCKS for candidate in candidates):
                     lines.add(tokens[end - 1].line)
-            object_now_line = constructed_clock_now_line(tokens, index, end, candidates)
+            object_now_line = constructed_clock_now_line(
+                tokens, index, end, candidates, parenthesized_context
+            )
             if object_now_line is not None:
                 lines.add(object_now_line)
             index = end

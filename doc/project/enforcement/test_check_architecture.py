@@ -203,6 +203,40 @@ consume((ParenClock()).now());
         for line in range(5, 10):
             self.assertIn(f"AliasedClockObjects.cc:{line}:", result.stdout)
 
+    def test_chrono_clock_object_reads_in_unevaluated_operands_are_ignored(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/UnevaluatedClockObjects.cc",
+            """using Clock = std::chrono::system_clock;
+decltype(Clock{}.now()) first;
+constexpr auto second = sizeof(std::chrono::steady_clock().now());
+constexpr bool third = noexcept((Clock{}).now());
+decltype(inspect(((std::chrono::high_resolution_clock())).now())) fourth;
+constexpr auto fifth = sizeof((Clock()).now());
+constexpr auto sixth = sizeof Clock{}.now();
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_chrono_clock_object_reads_in_evaluated_nested_expressions_are_reported(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/EvaluatedClockObjects.cc",
+            """using Clock = std::chrono::system_clock;
+consume((Clock{}).now());
+auto second = sizeof(int) ? Clock{}.now() : fallback();
+auto third = noexcept(fallback()) ? std::chrono::steady_clock{}.now() : fallback();
+auto fourth = decltype(existing)(Clock().now());
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        for line in range(2, 6):
+            self.assertIn(f"EvaluatedClockObjects.cc:{line}:", result.stdout)
+
     def test_random_device_imports_and_aliases_are_forbidden_without_a_draw(self) -> None:
         self.write(
             "src/inet/linklayer/ethernet/ImportedRandom.cc",
