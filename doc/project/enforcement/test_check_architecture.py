@@ -129,6 +129,11 @@ using TimePoint = Clock::time_point;
 auto duration = Duration{1};
 auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
 auto epoch = TimePoint{};
+auto count = Duration{}.count();
+auto unrelated = OtherClock{}.now();
+auto member = clockObject.now();
+auto wrapped = makeClock(Clock{}).now();
+auto wrappedGrouped = makeClock((Clock{})).now();
 """,
         )
 
@@ -158,6 +163,45 @@ auto seed = EntropySource{}();
             with self.subTest(name=name):
                 use_line = len(source.splitlines())
                 self.assertIn(f"{name}:{use_line}:", result.stdout)
+
+    def test_direct_chrono_clock_object_reads_are_reported(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/DirectClockObjects.cc",
+            """auto first = std::chrono::system_clock{}.now();
+auto second = std::chrono::steady_clock().now();
+auto third = (std::chrono::high_resolution_clock{}).now();
+auto fourth = ((std::chrono::system_clock())).now();
+consume((std::chrono::steady_clock{}).now());
+auto sixth = (::std::chrono::system_clock{}).now();
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        for line in range(1, 7):
+            self.assertIn(f"DirectClockObjects.cc:{line}:", result.stdout)
+
+    def test_aliased_chrono_clock_object_reads_are_reported(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/AliasedClockObjects.cc",
+            """using BraceClock = std::chrono::system_clock;
+using ParenClock = std::chrono::steady_clock;
+namespace chrono = std::chrono;
+using GroupedClock = chrono::high_resolution_clock;
+auto first = BraceClock{}.now();
+auto second = ParenClock().now();
+auto third = (GroupedClock{}).now();
+auto fourth = ((BraceClock())).now();
+consume((ParenClock()).now());
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        for line in range(5, 10):
+            self.assertIn(f"AliasedClockObjects.cc:{line}:", result.stdout)
 
     def test_random_device_imports_and_aliases_are_forbidden_without_a_draw(self) -> None:
         self.write(
@@ -224,6 +268,8 @@ auto fourth = object.rand();
 auto fifth = pointer -> rand();
 auto sixth = other::rand();
 auto seventh = other::std::chrono::steady_clock::now();
+auto eighth = object.now();
+auto ninth = other::std::chrono::steady_clock{}.now();
 """,
         )
 

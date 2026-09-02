@@ -21,6 +21,7 @@ AMBIENT_CLOCKS = {
     ("std", "chrono", "steady_clock"),
     ("std", "chrono", "high_resolution_clock"),
 }
+GROUPING_PREFIX_KEYWORDS = {"case", "co_return", "co_yield", "return", "throw"}
 
 
 @dataclass(frozen=True)
@@ -229,6 +230,44 @@ def parse_typedef(tokens: list[Token], index: int, scopes: list[Scope], lines: s
     return semicolon + 1
 
 
+def grouping_parentheses_before(tokens: list[Token], index: int) -> int:
+    count = 0
+    cursor = index - 1
+    if cursor >= 0 and tokens[cursor].text == "::" and (cursor == 0 or not is_identifier(tokens[cursor - 1])):
+        cursor -= 1
+    while cursor >= 0 and tokens[cursor].text == "(":
+        count += 1
+        cursor -= 1
+    if count == 0 or cursor < 0:
+        return count
+    previous = tokens[cursor]
+    is_call = is_identifier(previous) and previous.text not in GROUPING_PREFIX_KEYWORDS
+    return count - 1 if is_call or previous.text in {")", "]", "}", ">"} else count
+
+
+def constructed_clock_now_line(
+    tokens: list[Token],
+    name_start: int,
+    name_end: int,
+    candidates: set[tuple[str, ...]],
+) -> int | None:
+    if not any(candidate in AMBIENT_CLOCKS for candidate in candidates) or name_end + 1 >= len(tokens):
+        return None
+    if (tokens[name_end].text, tokens[name_end + 1].text) not in {("{", "}"), ("(", ")")}:
+        return None
+
+    cursor = name_end + 2
+    for _ in range(grouping_parentheses_before(tokens, name_start)):
+        if cursor >= len(tokens) or tokens[cursor].text != ")":
+            return None
+        cursor += 1
+    if cursor + 2 >= len(tokens):
+        return None
+    if tokens[cursor].text == "." and tokens[cursor + 1].text == "now" and tokens[cursor + 2].text == "(":
+        return tokens[cursor + 1].line
+    return None
+
+
 def forbidden_lines(code: str) -> set[int]:
     tokens = cpp_tokens(code)
     lines: set[int] = set()
@@ -262,6 +301,9 @@ def forbidden_lines(code: str) -> set[int]:
             if end < len(tokens) and tokens[end].text == "(" and name[-1] == "now":
                 if any(candidate[:-1] in AMBIENT_CLOCKS for candidate in candidates):
                     lines.add(tokens[end - 1].line)
+            object_now_line = constructed_clock_now_line(tokens, index, end, candidates)
+            if object_now_line is not None:
+                lines.add(object_now_line)
             index = end
             continue
         index += 1
