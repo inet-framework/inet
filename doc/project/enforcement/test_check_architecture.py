@@ -237,6 +237,101 @@ auto fourth = decltype(existing)(Clock().now());
         for line in range(2, 6):
             self.assertIn(f"EvaluatedClockObjects.cc:{line}:", result.stdout)
 
+    def test_static_chrono_clock_reads_in_unevaluated_operands_are_ignored(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/UnevaluatedStaticClocks.cc",
+            """using Clock = std::chrono::system_clock;
+namespace chrono = std::chrono;
+decltype(std::chrono::system_clock::now()) first;
+constexpr bool second = noexcept(Clock::now());
+constexpr auto third = sizeof(chrono::steady_clock::now());
+constexpr auto fourth = sizeof Clock::now();
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_chrono_clock_reads_in_requires_expressions_are_ignored(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/RequiresClockReads.cc",
+            """using Clock = std::chrono::system_clock;
+namespace chrono = std::chrono;
+static_assert(requires {
+    std::chrono::steady_clock{}.now();
+    Clock::now();
+});
+template <typename T>
+concept HasClockReads = requires(T value) {
+    chrono::high_resolution_clock().now();
+    Clock{}.now();
+};
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_chrono_clock_reads_after_requires_expressions_are_reported(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/EvaluatedAfterRequires.cc",
+            """using Clock = std::chrono::system_clock;
+constexpr bool objectSupported = requires { Clock{}.now(); };
+auto objectRead = Clock{}.now();
+constexpr bool staticSupported = requires { Clock::now(); };
+auto staticRead = Clock::now();
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        for line in (3, 5):
+            self.assertIn(f"EvaluatedAfterRequires.cc:{line}:", result.stdout)
+        for line in (2, 4):
+            self.assertNotIn(f"EvaluatedAfterRequires.cc:{line}:", result.stdout)
+
+    def test_chrono_clock_reads_in_deferred_lambda_bodies_are_reported(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/DeferredLambda.cc",
+            """using Clock = std::chrono::system_clock;
+using Reader = decltype([] { return Clock{}.now(); });
+using ExplicitReader = decltype([]() -> Clock::time_point { return Clock::now(); });
+using SizeReader = decltype([] { return sizeof(Clock{}.now()); });
+auto reader = Reader{};
+auto explicitReader = ExplicitReader{};
+auto sizeReader = SizeReader{};
+auto value = reader();
+auto explicitValue = explicitReader();
+auto size = sizeReader();
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("DeferredLambda.cc:2:", result.stdout)
+        self.assertIn("DeferredLambda.cc:3:", result.stdout)
+        self.assertNotIn("DeferredLambda.cc:4:", result.stdout)
+
+    def test_chrono_clock_reads_in_constrained_function_bodies_are_reported(self) -> None:
+        self.write(
+            "src/inet/linklayer/ethernet/ConstrainedFunction.cc",
+            """using Clock = std::chrono::system_clock;
+template <typename T>
+void readClock() requires (sizeof(T) > 0) {
+    auto value = Clock{}.now();
+}
+""",
+        )
+
+        result = self.check("src/inet/linklayer/ethernet")
+
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("ConstrainedFunction.cc:4:", result.stdout)
+
     def test_random_device_imports_and_aliases_are_forbidden_without_a_draw(self) -> None:
         self.write(
             "src/inet/linklayer/ethernet/ImportedRandom.cc",
