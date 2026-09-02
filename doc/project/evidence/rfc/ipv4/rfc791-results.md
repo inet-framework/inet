@@ -1,6 +1,9 @@
 # RFC 791 checks — run results and model analysis (pass 1)
 
-Step 5 artifact of the RFC test workflow (see [`../../RFC-WORKFLOW.md`](../../RFC-WORKFLOW.md)).
+> **Kind:** report · **Status:** snapshot 2026-09-02 · **Seal:** none · **Owns:** — · **Stands on:** [rfc791-checklist.md](rfc791-checklist.md), [rfc791-checks.md](rfc791-checks.md)
+
+Step 5 artifact of the RFC test workflow (see
+[derive-tests-from-an-rfc.md](../../../guide/derive-tests-from-an-rfc.md)).
 This is the first document of the workflow that may reference code.
 
 - Date: 2026-09-02. Tree: inet-master (branch `master`, docs at commit `6208e77255`,
@@ -34,7 +37,7 @@ workflow: fix the test, not the expectation.
    matched nothing, OMNeT++ applied the default 1500-octet MTU, and the router forwarded
    the 1028-octet datagram in one piece. The MTU parameter lives on the MAC module:
    `*.router.eth[1].mac.mtu = 576B`
-   ([EthernetMacPhy.ned:126](../../../../src/inet/linklayer/ethernet/basic/EthernetMacPhy.ned#L126)).
+   ([EthernetMacPhy.ned:126](../../../../../src/inet/linklayer/ethernet/basic/EthernetMacPhy.ned#L126)).
    Lesson: a scenario knob that fails silently voids the stimulus. The fragment test caught
    it because its second step demands a fragment; a weaker test would have passed for the
    wrong reason.
@@ -50,24 +53,24 @@ workflow: fix the test, not the expectation.
 ## Model analysis — where INET implements the checked behavior
 
 - **TTL decrement (RFC791-TTL-1):** the forward path decrements once per hop —
-  [Ipv4.cc:323](../../../../src/inet/networklayer/ipv4/Ipv4.cc#L323). Observed: 32 on
+  [Ipv4.cc:323](../../../../../src/inet/networklayer/ipv4/Ipv4.cc#L323). Observed: 32 on
   link 1, 31 on link 2 and at host B.
 - **TTL zero handling (RFC791-TTL-2, candidate):**
-  [Ipv4.cc:943-951](../../../../src/inet/networklayer/ipv4/Ipv4.cc#L943-L951) drops and
+  [Ipv4.cc:943-951](../../../../../src/inet/networklayer/ipv4/Ipv4.cc#L943-L951) drops and
   sends ICMP time exceeded. A future test can reuse the mockup with TTL 1.
 - **Fragmentation (RFC791-FRAG-2..4):**
-  [Ipv4.cc:931](../../../../src/inet/networklayer/ipv4/Ipv4.cc#L931) `fragmentAndSend`;
+  [Ipv4.cc:931](../../../../../src/inet/networklayer/ipv4/Ipv4.cc#L931) `fragmentAndSend`;
   line 990 computes `fragmentLength = ((mtu - headerLength) / 8) * 8` — exactly the RFC
   8-octet rule. Observed: fragments at octet offsets 0 and 552 with one identification
   value, MF pattern true/false.
 - **DF discard with report (RFC791-FRAG-5, RFC792-DU-4):**
-  [Ipv4.cc:976-985](../../../../src/inet/networklayer/ipv4/Ipv4.cc#L976-L985) discards and
+  [Ipv4.cc:976-985](../../../../../src/inet/networklayer/ipv4/Ipv4.cc#L976-L985) discards and
   calls `icmp->sendPtbMessage(packet, mtu)`. Observed: an `IcmpPtb` chunk with type 3,
   code 4 toward host A. The chunk also carries the next-hop MTU (576) — that is the RFC
   1191 extension of the field that RFC 792 leaves unused. A catalog entry for RFC 1191 can
   pick this up in a later pass.
 - **Reassembly (RFC791-REASM-1):**
-  [Ipv4.cc:819-852](../../../../src/inet/networklayer/ipv4/Ipv4.cc#L819-L852)
+  [Ipv4.cc:819-852](../../../../../src/inet/networklayer/ipv4/Ipv4.cc#L819-L852)
   `reassembleAndDeliver` with the fragment buffer. Observed: host B's UDP received one
   1008-octet datagram; the sink application received the 1000-octet payload.
 

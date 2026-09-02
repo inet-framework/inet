@@ -3,8 +3,8 @@
 RFC 791 — a gateway fragments a large datagram and the destination reassembles it.
 
 Checks RFC791-FRAG-1, RFC791-FRAG-2, RFC791-FRAG-3, RFC791-FRAG-4, and RFC791-REASM-1 from
-rfc/rfc791-checklist.md. The English procedure, the mockup, and the size arithmetic are in
-rfc/rfc791-checks.md#fragment-and-reassembly. A 1028-octet datagram meets a 576-octet MTU on link 2:
+doc/project/evidence/rfc/ipv4/rfc791-checklist.md. The English procedure, the mockup, and the size arithmetic are in
+doc/project/evidence/rfc/ipv4/rfc791-checks.md#fragment-and-reassembly. A 1028-octet datagram meets a 576-octet MTU on link 2:
 the expected split is 552 + 456 data octets, so the last fragment sits at octet offset 552.
 Mapping of the mockup: host A = hostA, gateway R = router, host B = hostB.
 
@@ -12,7 +12,7 @@ Note: expected observation 4 of the check document ("no further part after the l
 fragment") maps to the final never step only in part. The never window opens after the
 reassembled datagram reaches host B, some tens of microseconds after the last fragment
 left the router. An extra fragment inside that short gap would escape the step. See
-rfc/results.md for this sharpening candidate.
+doc/project/evidence/rfc/ipv4/rfc791-results.md for this sharpening candidate.
 
 %includes:
 #include "ProtocolTest.h"
@@ -69,7 +69,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of rfc/rfc791-checks.md#fragment-and-reassembly: hostA -- router -- hostB.
+// The mockup of doc/project/evidence/rfc/ipv4/rfc791-checks.md#fragment-and-reassembly: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:

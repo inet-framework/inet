@@ -3,15 +3,15 @@
 RFC 791 / RFC 792 — a gateway discards a too-large datagram that carries the don't
 fragment flag, and it reports the drop to the source.
 
-Checks RFC791-FRAG-5 (must) and RFC792-DU-4 (must + may) from rfc/rfc791-checklist.md. The English
-procedure and the mockup are in rfc/rfc791-checks.md#dont-fragment. The 1028-octet DF datagram
+Checks RFC791-FRAG-5 (must) and RFC792-DU-4 (must + may) from doc/project/evidence/rfc/ipv4/rfc791-checklist.md. The English
+procedure and the mockup are in doc/project/evidence/rfc/ipv4/rfc791-checks.md#dont-fragment. The 1028-octet DF datagram
 meets a 576-octet MTU on link 2: the gateway must not fragment it, so nothing of it may
 appear on link 2, and a cooperative gateway returns ICMP destination unreachable, code 4.
 Mapping of the mockup: host A = hostA, gateway R = router, host B = hostB.
 
 The ICMP step asserts a "may" clause of RFC 792. A silent discard also conforms to the
 RFCs. If this step fails on some implementation, record an implementation gap against the
-"may" clause, not a specification violation (see rfc/rfc791-checks.md#dont-fragment, Notes).
+"may" clause, not a specification violation (see doc/project/evidence/rfc/ipv4/rfc791-checks.md#dont-fragment, Notes).
 
 %includes:
 #include "ProtocolTest.h"
@@ -56,7 +56,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of rfc/rfc791-checks.md#dont-fragment: hostA -- router -- hostB.
+// The mockup of doc/project/evidence/rfc/ipv4/rfc791-checks.md#dont-fragment: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:

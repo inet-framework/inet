@@ -53,7 +53,9 @@ history/       How did the current state come to be?
 6. **Comparing or plotting simulation results** —
    [guide/analyze-simulation-results.md](guide/analyze-simulation-results.md).
 7. **Asking "why does INET not do X?"** — [design/rejected-designs.md](design/rejected-designs.md).
-8. **Writing in this folder** — [rule/documentation.md](rule/documentation.md).
+8. **About to derive protocol tests from an RFC** —
+   [guide/derive-tests-from-an-rfc.md](guide/derive-tests-from-an-rfc.md).
+9. **Writing in this folder** — [rule/documentation.md](rule/documentation.md).
 
 ## Every document
 
@@ -89,11 +91,13 @@ In the order of the chain.
 | [audit/seal-list.md](audit/seal-list.md) | ledger | — | Which paths are sealed, against which audit? |
 | [audit/report/](audit/README.md) | report | — | What did one audit find, on one date? |
 | [evidence/claim-coverage.md](evidence/claim-coverage.md) | measurement | — | Which test demonstrates each requirement? |
+| [evidence/rfc/](evidence/rfc/ipv4/rfc791-checklist.md) | what · procedure · report · decision | `RFC<N>-*` | Which RFC clause is checkable, how is it checked, and what did the run show? |
 | [guide/contribute-a-change.md](guide/contribute-a-change.md) | procedure | — | The nine steps from scope to seal. |
 | [guide/add-a-protocol.md](guide/add-a-protocol.md) | procedure | — | How do I add a protocol without touching the core? |
 | [guide/audit-a-subsystem.md](guide/audit-a-subsystem.md) | procedure | — | How do I audit a directory and take it to a seal? |
 | [guide/review-a-pull-request.md](guide/review-a-pull-request.md) | procedure | — | How do I audit a branch against the `PR-*` rules? |
 | [guide/change-a-baseline.md](guide/change-a-baseline.md) | procedure | — | How do I change a recorded expectation? |
+| [guide/derive-tests-from-an-rfc.md](guide/derive-tests-from-an-rfc.md) | procedure | — | How do I turn an RFC into protocol tests? |
 | [guide/run-the-gates.md](guide/run-the-gates.md) | procedure | — | What do I run before a push? |
 | [guide/diagnose-a-simulation.md](guide/diagnose-a-simulation.md) | procedure | — | How do I explain a failed run or implausible result with reproducible evidence? |
 | [guide/analyze-simulation-results.md](guide/analyze-simulation-results.md) | procedure | — | How do I compare, summarize, and plot simulation results without false repetitions? |

@@ -2,8 +2,8 @@
 
 RFC 791 — a gateway decreases the TTL of a forwarded datagram.
 
-Checks RFC791-TTL-1 (must) and RFC791-TTL-3 (description) from rfc/rfc791-checklist.md. The English
-procedure and the mockup are in rfc/rfc791-checks.md#ttl-decrement; the program steps below map
+Checks RFC791-TTL-1 (must) and RFC791-TTL-3 (description) from doc/project/evidence/rfc/ipv4/rfc791-checklist.md. The English
+procedure and the mockup are in doc/project/evidence/rfc/ipv4/rfc791-checks.md#ttl-decrement; the program steps below map
 one to one onto its expected observations. Mapping of the mockup: host A = hostA,
 gateway R = router, host B = hostB; link 1 = hostA-router, link 2 = router-hostB.
 
@@ -47,7 +47,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
-// The mockup of rfc/rfc791-checks.md#ttl-decrement: hostA -- router -- hostB.
+// The mockup of doc/project/evidence/rfc/ipv4/rfc791-checks.md#ttl-decrement: hostA -- router -- hostB.
 network Rfc791Net
 {
     submodules:

@@ -1,9 +1,13 @@
 # RFC 791 checks — category decisions
 
-Step 6 artifact of the RFC test workflow (see [`../../RFC-WORKFLOW.md`](../../RFC-WORKFLOW.md)).
-For each check, this document records the test category and the reason. The INET test tree
-offers these categories: protocol, unit, module, packet, fingerprint, statistical,
-validation, and others under `tests/`.
+> **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc791-results.md](rfc791-results.md), [test-anatomy.md](../../../design/test-anatomy.md)
+
+Step 6 artifact of the RFC test workflow (see
+[derive-tests-from-an-rfc.md](../../../guide/derive-tests-from-an-rfc.md)).
+For each check, this document records the test category and the reason. The categories and
+what each one can establish are
+[test-anatomy.md](../../../design/test-anatomy.md#the-categories); the mapping from
+observation class to category is in the guide, step 6.
 
 ## Decisions for the selected checks
 
@@ -40,14 +44,3 @@ documentation concern (see the check document), not a category concern.
 | RFC791-CKSUM-1 | unit + protocol | the algorithm is a serializer concern; the change across a hop is wire-visible |
 | RFC791-CKSUM-2 | protocol (interception) | needs corruption of a datagram in flight |
 | RFC791-ID-1 | protocol | compare the identification of two successive datagrams |
-
-## General rule of thumb
-
-| Observation class (rfc791-checklist.md) | Usual category |
-| --- | --- |
-| wire, end-to-end, error-signal | protocol test |
-| encoding, algorithm on one message | unit test |
-| internal state with a scalar signal | protocol test with a state-signal step |
-| internal state without a signal | module test |
-| distributions, long-run averages | statistical test |
-| whole-trajectory regression lock | fingerprint test |

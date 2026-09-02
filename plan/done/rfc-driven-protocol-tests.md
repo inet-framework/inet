@@ -48,3 +48,8 @@ is permitted only to select practical candidates. INET names first appear in the
   R791-), the per-RFC artifacts carry the RFC number in the file name (rfc791-checklist.md,
   rfc791-checks.md, rfc791-results.md, rfc791-categories.md), and all English procedures
   live in one file with one section per check.
+- 2026-09-02: Relocation on user request: the document artifacts moved to
+  doc/project/evidence/rfc/ipv4/, and the workflow description became
+  doc/project/guide/derive-tests-from-an-rfc.md. Each document received the doc/project
+  header line, the checklist follows DR-INDEX and DR-ID-HEADING, and the README map lists
+  both entries. The tests stay in tests/protocol/ipv4/.

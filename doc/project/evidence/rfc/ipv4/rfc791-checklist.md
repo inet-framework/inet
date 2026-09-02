@@ -1,9 +1,10 @@
 # RFC 791 (IPv4) — catalog of checkable statements
 
-This document is the step 2 artifact of the RFC test workflow (see
-[`../../RFC-WORKFLOW.md`](../../RFC-WORKFLOW.md)). It lists statements from the RFC that a
-test can check. The catalog comes from the RFC text only. It contains no simulation model
-names and no code references — that mapping happens in later steps.
+> **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC791-*`, `RFC792-*` · **Stands on:** [derive-tests-from-an-rfc.md](../../../guide/derive-tests-from-an-rfc.md)
+
+This document is the step 2 artifact of the RFC test workflow. It lists statements from the
+RFC that a test can check. The catalog comes from the RFC text only. It contains no
+simulation model names and no code references — that mapping happens in later steps.
 
 Sources, cached in this folder:
 
@@ -15,6 +16,28 @@ Sources, cached in this folder:
 
 Quotes are verbatim. A reference such as `rfc791.txt:1012` points to a line of the cached
 file in this folder.
+
+## Index
+
+| ID | Statement |
+| --- | --- |
+| [RFC791-TTL-1](#rfc791-ttl-1) | Each module that processes a datagram decreases the TTL. |
+| [RFC791-TTL-2](#rfc791-ttl-2) | A datagram with TTL zero is destroyed. |
+| [RFC791-TTL-3](#rfc791-ttl-3) | The sender sets the TTL. |
+| [RFC791-FRAG-1](#rfc791-frag-1) | An unfragmented datagram carries zero fragmentation information. |
+| [RFC791-FRAG-2](#rfc791-frag-2) | Fragment data splits on 8-octet boundaries. |
+| [RFC791-FRAG-3](#rfc791-frag-3) | Each fragment keeps the identification of the original datagram. |
+| [RFC791-FRAG-4](#rfc791-frag-4) | The first fragment has offset 0 with MF = 1; the last has MF = 0. |
+| [RFC791-FRAG-5](#rfc791-frag-5) | The don't fragment flag prohibits fragmentation. |
+| [RFC791-FRAG-6](#rfc791-frag-6) | A 68-octet datagram passes every module without fragmentation. |
+| [RFC791-REASM-1](#rfc791-reasm-1) | The destination reassembles the original datagram. |
+| [RFC791-REASM-2](#rfc791-reasm-2) | Every destination accepts a 576-octet datagram. |
+| [RFC791-REASM-3](#rfc791-reasm-3) | Fragments of different datagrams do not mix. |
+| [RFC791-CKSUM-1](#rfc791-cksum-1) | The header checksum is recomputed at each hop. |
+| [RFC791-CKSUM-2](#rfc791-cksum-2) | A datagram with a bad header checksum is discarded. |
+| [RFC791-ID-1](#rfc791-id-1) | Identification is unique per source, destination, and protocol. |
+| [RFC792-TE-1](#rfc792-te-1) | TTL zero at a gateway: discard, and possibly a Time Exceeded message. |
+| [RFC792-DU-4](#rfc792-du-4) | DF drop: destination unreachable, code 4. |
 
 ## How to read an entry
 
@@ -32,7 +55,9 @@ file in this folder.
 
 ## Time to live
 
-### RFC791-TTL-1 — each module that processes a datagram decreases TTL
+### RFC791-TTL-1
+
+**Each module that processes a datagram decreases the TTL.**
 
 > "This field must be decreased at each point that the internet header is processed to
 > reflect the time spent processing the datagram. Even if no local information is available
@@ -42,9 +67,11 @@ file in this folder.
 - Strength: must. Class: wire.
 - Check idea: send one datagram through a gateway. Compare the TTL on the link before the
   gateway with the TTL on the link after the gateway. The value must decrease by 1.
-- Status: **selected** → [`rfc791-checks.md#ttl-decrement`](rfc791-checks.md#ttl-decrement)
+- Status: **selected** → [rfc791-checks.md#ttl-decrement](rfc791-checks.md#ttl-decrement)
 
-### RFC791-TTL-2 — a datagram with TTL zero is destroyed
+### RFC791-TTL-2
+
+**A datagram with TTL zero is destroyed.**
 
 > "If this field contains the value zero, then the datagram must be destroyed."
 > — §3.2 Time to Live, `rfc791.txt:1013-1014`
@@ -54,7 +81,9 @@ file in this folder.
   receive it.
 - Status: candidate
 
-### RFC791-TTL-3 — the sender sets the TTL
+### RFC791-TTL-3
+
+**The sender sets the TTL.**
 
 > "The time to live is set by the sender to the maximum time the datagram is allowed to be
 > in the internet system." — §3.2, `rfc791.txt:1976-1977`
@@ -62,11 +91,14 @@ file in this folder.
 - Strength: description. Class: wire.
 - Check idea: the first observed hop shows the value that the sender selected, and the value
   is greater than zero.
-- Status: **covered** by [`rfc791-checks.md#ttl-decrement`](rfc791-checks.md#ttl-decrement) (its first step)
+- Status: **covered** by [rfc791-checks.md#ttl-decrement](rfc791-checks.md#ttl-decrement)
+  (its first step)
 
 ## Fragmentation
 
-### RFC791-FRAG-1 — an unfragmented datagram carries zero fragmentation information
+### RFC791-FRAG-1
+
+**An unfragmented datagram carries zero fragmentation information.**
 
 > "The originating protocol module of a complete datagram sets the more-fragments flag to
 > zero and the fragment offset to zero." — §2.3, `rfc791.txt:688-689`
@@ -76,9 +108,11 @@ file in this folder.
 - Strength: description. Class: wire.
 - Check idea: a datagram that fits the first link must leave the source with MF = 0 and
   offset = 0.
-- Status: **selected** → [`rfc791-checks.md#fragment-and-reassembly`](rfc791-checks.md#fragment-and-reassembly)
+- Status: **selected** → [rfc791-checks.md#fragment-and-reassembly](rfc791-checks.md#fragment-and-reassembly)
 
-### RFC791-FRAG-2 — fragment data splits on 8-octet boundaries
+### RFC791-FRAG-2
+
+**Fragment data splits on 8-octet boundaries.**
 
 > "If an internet datagram is fragmented, its data portion must be broken on 8 octet
 > boundaries." — §3.2, `rfc791.txt:1658-1659`
@@ -88,9 +122,11 @@ file in this folder.
 - Strength: must. Class: wire.
 - Check idea: with a known datagram size and a known MTU, the fragment sizes and offsets
   follow from arithmetic. Compare the observed offsets with the computed values.
-- Status: **selected** → [`rfc791-checks.md#fragment-and-reassembly`](rfc791-checks.md#fragment-and-reassembly)
+- Status: **selected** → [rfc791-checks.md#fragment-and-reassembly](rfc791-checks.md#fragment-and-reassembly)
 
-### RFC791-FRAG-3 — each fragment keeps the identification of the original datagram
+### RFC791-FRAG-3
+
+**Each fragment keeps the identification of the original datagram.**
 
 > "creates two new internet datagrams and copies the contents of the internet header fields
 > from the long datagram into both new internet headers" — §2.3, `rfc791.txt:692-694`
@@ -99,9 +135,11 @@ file in this folder.
 
 - Strength: description. Class: wire.
 - Check idea: all fragments of one datagram must show one identification value.
-- Status: **selected** → [`rfc791-checks.md#fragment-and-reassembly`](rfc791-checks.md#fragment-and-reassembly)
+- Status: **selected** → [rfc791-checks.md#fragment-and-reassembly](rfc791-checks.md#fragment-and-reassembly)
 
-### RFC791-FRAG-4 — the flag pattern across a fragment train
+### RFC791-FRAG-4
+
+**The first fragment has offset 0 with MF = 1; the last fragment has MF = 0.**
 
 > "The more-fragments flag is set to one." (first new datagram) — §2.3, `rfc791.txt:712`
 > "The first fragment will have the fragment offset zero, and the last fragment will have
@@ -110,9 +148,11 @@ file in this folder.
 - Strength: description. Class: wire.
 - Check idea: the first fragment shows offset 0 with MF = 1; the last fragment shows a
   non-zero offset with MF = 0.
-- Status: **selected** → [`rfc791-checks.md#fragment-and-reassembly`](rfc791-checks.md#fragment-and-reassembly)
+- Status: **selected** → [rfc791-checks.md#fragment-and-reassembly](rfc791-checks.md#fragment-and-reassembly)
 
-### RFC791-FRAG-5 — the don't fragment flag prohibits fragmentation
+### RFC791-FRAG-5
+
+**The don't fragment flag prohibits fragmentation.**
 
 > "An internet datagram can be marked 'don't fragment.' Any internet datagram so marked is
 > not to be internet fragmented under any circumstances. If internet datagram marked don't
@@ -123,9 +163,11 @@ file in this folder.
   error-signal (RFC792-DU-4).
 - Check idea: send a datagram with DF = 1 that is larger than the MTU of the second link.
   No fragment of it may appear after the gateway, and the destination must not receive it.
-- Status: **selected** → [`rfc791-checks.md#dont-fragment`](rfc791-checks.md#dont-fragment)
+- Status: **selected** → [rfc791-checks.md#dont-fragment](rfc791-checks.md#dont-fragment)
 
-### RFC791-FRAG-6 — a 68-octet datagram passes every module without fragmentation
+### RFC791-FRAG-6
+
+**A 68-octet datagram passes every module without fragmentation.**
 
 > "Every internet module must be able to forward a datagram of 68 octets without further
 > fragmentation." — §3.2, `rfc791.txt:1669-1671`
@@ -135,7 +177,9 @@ file in this folder.
 
 ## Reassembly
 
-### RFC791-REASM-1 — the destination reassembles the original datagram
+### RFC791-REASM-1
+
+**The destination reassembles the original datagram.**
 
 > "To assemble the fragments of an internet datagram, an internet protocol module (for
 > example at a destination host) combines internet datagrams that all have the same value
@@ -146,9 +190,11 @@ file in this folder.
 - Strength: description. Class: end-to-end.
 - Check idea: after fragmentation on the path, the destination must deliver the complete
   original data to the next protocol layer in one piece.
-- Status: **selected** → [`rfc791-checks.md#fragment-and-reassembly`](rfc791-checks.md#fragment-and-reassembly)
+- Status: **selected** → [rfc791-checks.md#fragment-and-reassembly](rfc791-checks.md#fragment-and-reassembly)
 
-### RFC791-REASM-2 — every destination accepts a 576-octet datagram
+### RFC791-REASM-2
+
+**Every destination accepts a 576-octet datagram.**
 
 > "All hosts must be prepared to accept datagrams of up to 576 octets (whether they arrive
 > whole or in fragments)." — §3.1, `rfc791.txt:961-963`
@@ -156,7 +202,9 @@ file in this folder.
 - Strength: must. Class: end-to-end.
 - Status: candidate
 
-### RFC791-REASM-3 — fragments of different datagrams do not mix
+### RFC791-REASM-3
+
+**Fragments of different datagrams do not mix.**
 
 > "The receiver of the fragments uses the identification field to ensure that fragments of
 > different datagrams are not mixed." — §2.3, `rfc791.txt:674-676`
@@ -166,7 +214,9 @@ file in this folder.
 
 ## Header checksum
 
-### RFC791-CKSUM-1 — the checksum is recomputed at each hop
+### RFC791-CKSUM-1
+
+**The header checksum is recomputed at each hop.**
 
 > "Since some header fields change (e.g., time to live), this is recomputed and verified at
 > each point that the internet header is processed." — §3.1, `rfc791.txt:1031-1033`
@@ -176,7 +226,9 @@ file in this folder.
   checksum algorithm itself is an encoding concern and points to a different test category.
 - Status: candidate
 
-### RFC791-CKSUM-2 — a datagram with a bad header checksum is discarded
+### RFC791-CKSUM-2
+
+**A datagram with a bad header checksum is discarded.**
 
 > "If the header checksum fails, the internet datagram is discarded at once by the entity
 > which detects the error." — §1.4, `rfc791.txt:365-366`
@@ -186,7 +238,10 @@ file in this folder.
 
 ## Identification
 
-### RFC791-ID-1 — identification is unique per source, destination, and protocol
+### RFC791-ID-1
+
+**Identification is unique per source, destination, and protocol while the datagram is
+active.**
 
 > "The originating protocol module of an internet datagram sets the identification field to
 > a value that must be unique for that source-destination pair and protocol for the time the
@@ -199,7 +254,10 @@ file in this folder.
 
 ## Error signals (RFC 792 companions)
 
-### RFC792-TE-1 — TTL zero at a gateway: discard, and possibly a Time Exceeded message
+### RFC792-TE-1
+
+**TTL zero at a gateway: the gateway discards the datagram, and it may send a Time Exceeded
+message.**
 
 > "If the gateway processing a datagram finds the time to live field is zero it must discard
 > the datagram. The gateway may also notify the source host via the time exceeded message."
@@ -209,7 +267,10 @@ file in this folder.
 - Pairs with RFC791-TTL-2.
 - Status: candidate
 
-### RFC792-DU-4 — DF drop: destination unreachable, code 4
+### RFC792-DU-4
+
+**DF drop: the gateway discards the datagram, and it may send destination unreachable,
+code 4.**
 
 > "Another case is when a datagram must be fragmented to be forwarded by a gateway yet the
 > Don't Fragment flag is on. In this case the gateway must discard the datagram and may
@@ -220,32 +281,33 @@ file in this folder.
 - Strength: discard is must; the message is may. Class: error-signal.
 - Pairs with RFC791-FRAG-5. A gateway that sends the message shows the expected cooperative
   behavior; the RFC permits silence.
-- Status: **selected** → [`rfc791-checks.md#dont-fragment`](rfc791-checks.md#dont-fragment)
+- Status: **selected** → [rfc791-checks.md#dont-fragment](rfc791-checks.md#dont-fragment)
 
 ## Coverage ledger
 
-The ledger connects catalog entries to check documents and test files. Later steps and later
-iterations extend this table; the catalog above stays stable.
+The ledger connects catalog entries to check sections and test files. Later steps and later
+iterations extend this table; the catalog above stays stable. The test files live in
+[`tests/protocol/ipv4/`](../../../../../tests/protocol/ipv4/).
 
-| ID | Strength | Class | Status | Check document | Test file |
+| ID | Strength | Class | Status | Check section | Test file |
 | --- | --- | --- | --- | --- | --- |
-| RFC791-TTL-1 | must | wire | selected | rfc791-checks.md#ttl-decrement | Rfc791TtlDecrement.test |
+| RFC791-TTL-1 | must | wire | selected | [ttl-decrement](rfc791-checks.md#ttl-decrement) | Rfc791TtlDecrement.test |
 | RFC791-TTL-2 | must | wire, error-signal | candidate | — | — |
-| RFC791-TTL-3 | description | wire | covered | rfc791-checks.md#ttl-decrement | Rfc791TtlDecrement.test |
-| RFC791-FRAG-1 | description | wire | selected | rfc791-checks.md#fragment-and-reassembly | Rfc791FragmentReassembly.test |
-| RFC791-FRAG-2 | must | wire | selected | rfc791-checks.md#fragment-and-reassembly | Rfc791FragmentReassembly.test |
-| RFC791-FRAG-3 | description | wire | selected | rfc791-checks.md#fragment-and-reassembly | Rfc791FragmentReassembly.test |
-| RFC791-FRAG-4 | description | wire | selected | rfc791-checks.md#fragment-and-reassembly | Rfc791FragmentReassembly.test |
-| RFC791-FRAG-5 | must | wire, error-signal | selected | rfc791-checks.md#dont-fragment | Rfc791DontFragment.test |
+| RFC791-TTL-3 | description | wire | covered | [ttl-decrement](rfc791-checks.md#ttl-decrement) | Rfc791TtlDecrement.test |
+| RFC791-FRAG-1 | description | wire | selected | [fragment-and-reassembly](rfc791-checks.md#fragment-and-reassembly) | Rfc791FragmentReassembly.test |
+| RFC791-FRAG-2 | must | wire | selected | [fragment-and-reassembly](rfc791-checks.md#fragment-and-reassembly) | Rfc791FragmentReassembly.test |
+| RFC791-FRAG-3 | description | wire | selected | [fragment-and-reassembly](rfc791-checks.md#fragment-and-reassembly) | Rfc791FragmentReassembly.test |
+| RFC791-FRAG-4 | description | wire | selected | [fragment-and-reassembly](rfc791-checks.md#fragment-and-reassembly) | Rfc791FragmentReassembly.test |
+| RFC791-FRAG-5 | must | wire, error-signal | selected | [dont-fragment](rfc791-checks.md#dont-fragment) | Rfc791DontFragment.test |
 | RFC791-FRAG-6 | must | wire | candidate | — | — |
-| RFC791-REASM-1 | description | end-to-end | selected | rfc791-checks.md#fragment-and-reassembly | Rfc791FragmentReassembly.test |
+| RFC791-REASM-1 | description | end-to-end | selected | [fragment-and-reassembly](rfc791-checks.md#fragment-and-reassembly) | Rfc791FragmentReassembly.test |
 | RFC791-REASM-2 | must | end-to-end | candidate | — | — |
 | RFC791-REASM-3 | description | end-to-end | later | — | — |
 | RFC791-CKSUM-1 | description | wire, encoding | candidate | — | — |
 | RFC791-CKSUM-2 | description | wire | later | — | — |
 | RFC791-ID-1 | must | wire | candidate | — | — |
 | RFC792-TE-1 | must + may | error-signal | candidate | — | — |
-| RFC792-DU-4 | must + may | error-signal | selected | rfc791-checks.md#dont-fragment | Rfc791DontFragment.test |
+| RFC792-DU-4 | must + may | error-signal | selected | [dont-fragment](rfc791-checks.md#dont-fragment) | Rfc791DontFragment.test |
 
 Out of scope in this iteration: options (§3.1 Options), type of service and precedence,
 security annex, and the reassembly timer details. Add them in a later pass.
