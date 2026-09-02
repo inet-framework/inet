@@ -9,7 +9,7 @@
 
 # MIPv6 example — the primary test
 /examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,            aa29-a8c5/~tNlb, PASS, wireless EthernetMac
-/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,            068b-23aa/~tNlb, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,            b108-5896/~tNlb, PASS, wireless EthernetMac
 /examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,            7ed8-bee3/~tNlb, PASS, wireless EthernetMac
 
 # IPv6 examples
@@ -23,7 +23,7 @@
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            06b9-ff17/~tNlb, PASS,
 
 # IPv6 networking examples
-/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          f206-a0e2/~tNlb, PASS, EthernetMac
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          1cbb-1534/~tNlb, PASS, EthernetMac
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             8feb-3936/~tNlb, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             9661-c1f5/~tNlb, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             6360-9ed1/~tNlb, PASS,
