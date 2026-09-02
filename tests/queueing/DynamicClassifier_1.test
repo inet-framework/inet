@@ -1,0 +1,130 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source (ActivePacketSource)
+and are classified into two classes by a dynamic classifier (DynamicClassifier). The classifier
+creates the branch of a class when the first packet of that class arrives, as one element of the
+branch submodule vector, and wires it into the packet multiplexer that aggregates the branches.
+
+The producer is connected to the classifier directly, so the test also covers that a classifier
+which has no branch yet accepts a packet, rather than stopping the producer before the first
+branch is created.
+
+The branch is created with its final name and index, so the test checks that an ini file
+assignment addressing a submodule of a branch (the delay of the packet delayer in it) takes
+effect, and that the statistics of the branch submodules are recorded under the branch path.
+Empty output vectors are turned off, so a vector appears in the result file only if data was
+recorded into it.
+
+%file: test.ned
+
+import inet.queueing.classifier.DynamicClassifier;
+import inet.queueing.common.BackPressureBarrier;
+import inet.queueing.common.PacketDelayer;
+import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+module TestBranch
+{
+    gates:
+        input in;
+        output out;
+    submodules:
+        first: BackPressureBarrier {
+            @display("p=100,100");
+        }
+        second: PacketDelayer {
+            delay = default(0s);
+            @display("p=200,100");
+        }
+    connections:
+        in --> first.in;
+        first.out --> second.in;
+        second.out --> out;
+}
+
+module TestDemultiplexer
+{
+    gates:
+        input in;
+        output out;
+    submodules:
+        classifier: DynamicClassifier {
+            moduleType = "TestBranch";
+            submoduleName = "branch";
+            @display("p=100,100");
+        }
+        branch[0]: TestBranch { // grown on demand, one branch per class
+            @display("p=250,100,column,80");
+        }
+        multiplexer: PacketMultiplexer {
+            @display("p=400,100");
+        }
+    connections allowunconnected:
+        in --> classifier.in;
+        multiplexer.out --> out;
+}
+
+network TestDynamicClassifier
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        demultiplexer: TestDemultiplexer {
+            @display("p=200,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections:
+        producer.out --> demultiplexer.in;
+        demultiplexer.out --> consumer.in;
+}
+
+%file: Test.cc
+#include "inet/queueing/function/PacketClassifierFunction.h"
+#include "inet/common/packet/Packet.h"
+
+using namespace inet;
+
+static int testClassify(Packet *packet)
+{
+    return packet->getId() % 2;
+}
+
+Register_Packet_Classifier_Function(TestClassifier, testClassify);
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestDynamicClassifier
+sim-time-limit = 10s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+**.vector-record-empty = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.demultiplexer.classifier.classifierClass = "TestClassifier"
+*.demultiplexer.branch[*].second.delay = 2s
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+%#--------------------------------------------------------------------------------------------------------------
+%# the delay assigned to the branch submodule from the ini file must be applied
+%contains-regex: stdout
+At 0s producer: Producing packet, .*?producer-0.*?
+At 1s producer: Producing packet, .*?producer-1.*?
+At 2s consumer: Consuming packet, .*?producer-0.*?
+At 3s consumer: Consuming packet, .*?producer-1.*?
+%#--------------------------------------------------------------------------------------------------------------
+%# the modules that have data in an output vector, and the branch submodules among them
+%postrun-command: grep "^vector " results/*.vec | cut -d ' ' -f 3 | sort -u > modules.out
+%postrun-command: grep -E "\.branch\[" modules.out > branchmodules.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%contains: branchmodules.out
+TestDynamicClassifier.demultiplexer.branch[0].first
+TestDynamicClassifier.demultiplexer.branch[1].first
+%#--------------------------------------------------------------------------------------------------------------

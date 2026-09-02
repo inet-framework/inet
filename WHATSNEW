@@ -56,6 +56,22 @@ Notable backward compatible changes are the following:
    owns a MAC address, by the host's path relative to the network, and falls back
    to the MAC address string when no host owns the address.
 
+4. Dynamic packet classifier branches
+
+   DynamicClassifier creates the branch of each traffic class the first time a
+   packet of that class arrives. It creates it on the delivery path now, instead
+   of as a side effect of classifying a packet, which also happens whenever the
+   classifier is merely asked whether it can take one.
+
+   It also gained an aggregatorSubmoduleName parameter that names the submodule
+   its branches are wired into, which was previously a submodule named
+   "multiplexer"; the aggregator may now be a pull scheduler as well as a push
+   multiplexer. The inherited reverseOrder parameter is refused, because the
+   classifier no longer maps class indices through the output gate order.
+
+   Existing simulation models are unaffected: the defaults reproduce the previous
+   behavior.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
