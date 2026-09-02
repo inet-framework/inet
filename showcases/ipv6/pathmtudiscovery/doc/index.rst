@@ -8,8 +8,10 @@ Every link has a limit on how large a packet it will carry, its Maximum Transmis
 Unit (MTU). A path made of several links can carry no more than its smallest link, and
 the sender has no way of knowing that number in advance.
 
-IPv6 handles this differently from IPv4, and the difference is strict. A router may
-not split a packet it is forwarding. Only the original sender may split a packet.
+IPv6 handles this differently from IPv4, and the difference is strict. In IPv4 a
+router that met an oversized packet could split it up itself and forward the pieces,
+so the transfer merely got slower. IPv6 removed that: a router may not split a packet
+it is forwarding. Only the original sender may split a packet.
 So when a packet is too large for the next link, the router has no way to deliver it:
 it discards the packet and sends an ICMPv6 Packet Too Big message back to the sender,
 naming the size that would have fitted. The sender remembers that number and sends
@@ -114,7 +116,19 @@ The ``Ipv6`` module carries out Path MTU Discovery and has two parameters for it
 
 A learned value is never raised by an incoming message, only lowered, and it is never
 taken below 1280 bytes, which RFC 8201 fixes as the smallest MTU any IPv6 link must
-support.
+support. The ten-minute retry has no effect in a ten-second run; it matters in longer
+ones.
+
+The learned value is held in the node's routing table, alongside the cached next hop
+for that destination, and the node reports it in its log when it changes — ``Path MTU
+towards ... is now 1460``. That log line is the most direct way to watch the mechanism
+work.
+
+Note that switching ``pathMtuDiscovery`` off would produce the same *observable*
+outcome as the black hole below: a sender that never adapts. This showcase does not
+take that shortcut, because the interesting question is not what a node does when the
+feature is disabled but what happens when the feature is enabled and the network eats
+the message anyway. That is the case that occurs in practice.
 
 What this means for an application: the sending program is not involved and does not
 change. It keeps writing the same amount of data. The IPv6 layer underneath it splits
@@ -126,10 +140,15 @@ Filtering the message
 ~~~~~~~~~~~~~~~~~~~~~
 
 To show what happens when the Packet Too Big message never arrives, one node discards
-it. INET has no firewall module, but it does have a Security Policy Database, which is
-a packet filter by definition — it matches traffic against selectors and applies one
-of three verdicts, one of which is to discard. Enabling it on a node and giving it a
-policy is enough:
+it. That node is called ``firewall`` and sits between the sending host and the tunnel
+entry point, which is where such a filter usually sits in a real network; the next
+section shows the topology.
+
+INET has no firewall module, but it does have a Security Policy Database, which is a
+packet filter by definition — it matches traffic against selectors and applies one of
+three verdicts: protect it, let it pass, or discard it. Enabling it on a node and
+giving it a policy is enough. These two lines belong to the ``BlackHole``
+configuration only; in the other three the firewall forwards everything:
 
 .. literalinclude:: ../omnetpp.ini
    :caption: omnetpp.ini
@@ -148,6 +167,11 @@ the firewall towards ``hostA``'s network. The selector matches on addresses rath
 than on the message type, because the type selector only works for IPv4's ICMP. So
 this filter drops *all* ICMPv6 between those two address ranges, not only Packet Too
 Big. That is realistic: firewalls that cause this problem block ICMP broadly.
+
+``LocalAddress`` and ``RemoteAddress`` are named from the point of view of the
+direction, not of the node. For an ``OUT`` policy, ``LocalAddress`` matches the
+packet's source and ``RemoteAddress`` its destination. On a node that is neither
+endpoint, as here, that is easy to get backwards.
 
 The two ``BYPASS`` entries are not optional. When no policy matches, the default is to
 discard, so a policy file with only the first entry would silence the node completely.
@@ -193,6 +217,20 @@ a route leading to it:
    (505,218) through (695,88) to (893,218) in the 1194x344 image, 3px wide, colour
    (0,90,200), dashes of 9 samples out of 400, arrow heads at both ends, and a white
    label box centred at x=695, y=96. Redraw whenever network.png is recaptured.
+
+Traffic enters the tunnel the way it enters any interface — an ordinary route whose
+output interface is the tunnel. This single line is what sends ``hostA``'s packets
+through it, and without it nothing in this showcase would happen:
+
+.. literalinclude:: ../configurator.xml
+   :caption: configurator.xml
+   :start-at: <route hosts="borderA" destination="2001:db8:5::/64"
+   :end-at: <route hosts="borderA" destination="2001:db8:5::/64"
+   :language: xml
+
+``tun0`` is the name of the tunnel interface created by the ``tun[0]`` settings in the
+``[General]`` section above. The tunneling showcase goes into why a tunnel is built
+this way; here it is enough to know that the route is what feeds it.
 
 Every link is Ethernet with the usual 1500-byte limit. Nothing in this network has a
 narrow link. The only thing that narrows the path is the tunnel, and how much it
@@ -325,36 +363,39 @@ Results
 
    * - Configuration
      - Delivered, of 16
-     - Packets ``hostA`` → ``firewall``
-     - Packets ``borderA`` → ``transit``
+     - Frames ``hostA`` → ``firewall``
+     - Frames ``borderA`` → ``transit``
    * - ``Fragmentation``
      - 16
-     - 20
-     - 36
+     - 20 (16 data)
+     - 36 (32 data)
    * - ``BlackHole``
      - 0
-     - 21
-     - 4
+     - 21 (16 data)
+     - 4 (0 data)
    * - ``Discovery``
      - 15
-     - 36
-     - 34
+     - 36 (31 data)
+     - 34 (30 data)
    * - ``SizedToFit``
      - 16
-     - 20
-     - 20
+     - 20 (16 data)
+     - 20 (16 data)
 
-Four packets on each link are Neighbor Discovery rather than application traffic;
-``SizedToFit`` shows that baseline plainly, at 16 data packets plus 4 on both links.
+The frame counts are ``eth[n].mac`` transmission counts, so they include control
+traffic as well as application data. Four or five frames per link are Neighbor
+Discovery, depending on the configuration, which is why the data figure is given
+separately in brackets. It is the data figures that carry the argument.
 
-Read down the last two columns and the counts say where the fragmentation happened.
+Read down those two columns and they say where the fragmentation happened.
 
-In ``SizedToFit`` the two numbers match: one packet leaves the sender and one packet
-crosses the tunnel. In ``Fragmentation`` the sender's link carries 20 and the tunnel's
-carries 36 — the extra sixteen appear only after ``borderA``, because that is where
-the splitting happens. In ``Discovery`` the doubling has moved to the other end: 36 on
-the sender's link and 34 beyond it, because ``hostA`` is now doing the splitting and
-``borderA`` merely forwards what it is given.
+In ``SizedToFit`` the two numbers match: 16 packets leave the sender and 16 cross the
+tunnel, because nothing is ever split. In ``Fragmentation`` the sender emits 16 and the
+tunnel link carries 32 — the doubling appears only after ``borderA``, because that is
+where the splitting happens. In ``Discovery`` the doubling has moved to the other end:
+31 leave the sender and 30 go beyond it. ``hostA`` is now doing the splitting — one
+full-size packet that was refused, then fifteen split into two apiece — and ``borderA``
+merely forwards what it is given.
 
 That is the real effect of Path MTU Discovery here. It did not remove the
 fragmentation, because the application still writes 1452 bytes and UDP has no way to
@@ -365,10 +406,10 @@ routers are forbidden to fragment in the first place.
 ``SizedToFit`` is the only configuration with no fragmentation anywhere, and it is the
 one an operator should aim for.
 
-``BlackHole`` carries almost nothing on the tunnel link — 4 packets, all Neighbor
-Discovery. No application data ever gets past ``borderA``. The sender's link still
+``BlackHole`` carries no application data at all on the tunnel link; the four frames
+there are control traffic. Nothing gets past ``borderA``. The sender's link still
 carries its 16 packets, so from ``hostA``'s point of view everything is being sent
-normally.
+normally, which is exactly what makes this failure hard to diagnose on real equipment.
 
 What a fragment looks like
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -378,6 +419,9 @@ configuration, taken from the link to ``transit``:
 
 .. figure:: media/fragment.png
    :align: center
+
+   The chunks of the second fragment. The Fragment header in ``[3]`` is the one chunk
+   that would not be there had the packet not been split.
 
 .. FIGURE RECIPE: launch `inet -u Qtenv -c Fragmentation --mcp-server-address
    localhost:8799`, run_simulation to 2.6s in "fast" mode, list_logged_packets with
@@ -389,21 +433,38 @@ configuration, taken from the link to ``transit``:
 
 Chunk ``[2]`` is the outer header, addressed from ``2001:db8:3::1`` to
 ``2001:db8:4::2`` — the two tunnel endpoints. Chunk ``[3]`` is an IPv6 Fragment header,
-which only appears on a packet that has been split. Its ``fragmentOffset`` of 1448
-says this piece starts 1448 bytes into the original, and its ``nextHeaderProtocol`` of
-41 says that what was split was an IPv6 datagram, which is what a tunnel carries.
-Chunk ``[4]`` is the tail of the original packet, and ``[0]``, ``[1]`` and ``[5]`` are
-the Ethernet framing around it.
+which only appears on a packet that has been split. Its ``nextHeaderProtocol`` of 41
+says that what was split was an IPv6 datagram, which is what a tunnel carries. Chunk
+``[4]`` is the tail of the original packet, and ``[0]``, ``[1]`` and ``[5]`` are the
+Ethernet framing around it.
+
+Two offsets appear here and they count from different places. The Fragment header's
+``fragmentOffset`` of 1448 counts from the start of the inner IPv6 datagram, while
+chunk ``[4]``'s ``offset`` of 1400 counts from the start of the application's own
+data. They differ by the 48 bytes of inner IPv6 and UDP header that sit between the
+two starting points.
+
+The value 1448 itself is worth a word, because the obvious arithmetic gives 1452: the
+link's 1500 bytes, less the 40-byte outer header, less the 8-byte Fragment header.
+IPv6 requires every fragment except the last to carry a multiple of 8 bytes, so 1452
+is rounded down to 1448.
 
 The packet names in the simulation show the same thing more briefly. One
 ``UdpBasicAppData-1`` of 1526 bytes arrives at ``borderA``, and two packets leave it:
 ``UdpBasicAppData-1-frag-0`` of 1522 bytes and ``UdpBasicAppData-1-frag-1448-last`` of
 126 bytes.
 
+Those sizes count differently from every other number on this page. An MTU limits the
+IPv6 datagram, while a logged frame size adds the Ethernet framing around it — 14
+bytes of header, 4 of frame check sequence and 8 of preamble, 26 in all. So the
+1500-byte datagram that arrives at ``borderA`` is logged as 1526 bytes, and it does
+fit a link whose MTU is 1500.
+
 That second one is the point of the whole exercise. It carries 52 bytes of data in a
-126-byte frame. Splitting a packet does not cost much in bytes — about 4% here — but it
-doubles the number of packets, and a runt like this one costs a router as much to
-handle as a full-size one.
+126-byte frame. Splitting a packet does not cost much in bytes: the two fragments
+carry 1596 bytes of IPv6 datagram where one unsplit packet would have carried 1540, an
+extra 56 bytes or about 3.6%. What it does is double the number of packets, and a runt
+like this one costs a router as much to handle as a full-size one.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`PathMtuDiscoveryShowcase.ned <../PathMtuDiscoveryShowcase.ned>`,
