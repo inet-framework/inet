@@ -22,6 +22,8 @@ Then use the entry point for the task:
   [test-anatomy.md](doc/project/design/test-anatomy.md), and
   [run-the-gates.md](doc/project/guide/run-the-gates.md);
 - recorded expectations: [change-a-baseline.md](doc/project/guide/change-a-baseline.md);
-- pull-request review: [review-a-pull-request.md](doc/project/guide/review-a-pull-request.md) and the
-  [canonical checklists](doc/project/enforcement/checklist/general.md); and
+- code review: [review-a-code-change.md](doc/project/guide/review-a-code-change.md), additionally
+  [review-a-pull-request.md](doc/project/guide/review-a-pull-request.md) for a pull request or branch
+  series, and the [general](doc/project/enforcement/checklist/general.md) and
+  [IEEE 802.11](doc/project/enforcement/checklist/ieee80211.md) checklists for rule compliance; and
 - repository layout: [repository-layout.md](doc/project/design/repository-layout.md).
