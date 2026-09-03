@@ -27,10 +27,10 @@ filtering is the usual cause. Routers also rate-limit the ICMP errors they gener
 as the standard requires them to, so under load the message can be lost even where
 nothing filters it — which makes the failure intermittent.
 
-When the message goes missing the sender never learns. It keeps sending the same size,
-every large packet is discarded, and the small ones still arrive — so the path looks
-healthy while large transfers hang, and the fault is hardest to find when the network
-is busiest. That failure has a name, the *Path MTU Discovery black hole*, and it is
+When the message does not arrive, the sender does not learn the path MTU. It keeps
+sending the same size, every large packet is discarded, and the small ones still
+arrive — so the path looks healthy while large transfers hang, and the fault is hardest
+to find when the network is busiest. That failure has a name, the *Path MTU Discovery black hole*, and it is
 what this showcase reproduces.
 
 This showcase creates a path whose limit is lower than the sender's own link. The four
@@ -153,7 +153,7 @@ The ``Ipv6`` module carries out Path MTU Discovery and has two parameters for it
 
 - ``pathMtuDiscovery`` — whether the node records what an incoming Packet Too Big
   message reports, and whether it uses what it has recorded when sending. Enabled by
-  default. Turning it off restores the behaviour of a node that never learns.
+  default. Turning it off restores the behaviour of a node that never learns a path MTU.
 - ``pathMtuAgingTime`` — how long a learned value is kept before the node tries a
   larger size again, ten minutes by default. A path can widen, and nothing would tell
   the sender if it never retried.
