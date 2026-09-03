@@ -91,16 +91,15 @@ be easy to read and to tell apart. A real prefix has 40 pseudo-random bits in th
 middle and looks more like ``fd2b:47a1:9c3e::/48``, and a single organisation numbers
 all of its sites out of one such prefix.
 
-A tunnel is not a Virtual Private Network
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. note::
 
-The arrangement in this showcase looks like a Virtual Private Network, and the shape
-is indeed the same. The difference matters: a plain IPv6-in-IPv6 tunnel gives
-*reachability*, not *confidentiality*. Nothing in it is encrypted or authenticated.
-Anyone who can observe the transit network can read every inner packet, and anyone who
-can inject traffic toward the exit point can inject inner packets. In a real
-deployment the encapsulation is what a security protocol such as IPsec is layered on
-top of; the tunnel by itself carries traffic, it does not protect it.
+   A tunnel is not a Virtual Private Network. The arrangement in this showcase looks
+   like one, and the shape is indeed the same, but a plain IPv6-in-IPv6 tunnel gives
+   *reachability*, not *confidentiality*. Nothing in it is encrypted or authenticated.
+   Anyone who can observe the transit network can read every inner packet, and anyone
+   who can inject traffic toward the exit point can inject inner packets. In a real
+   deployment the encapsulation is what a security protocol such as IPsec is layered
+   on top of; the tunnel by itself carries traffic, it does not protect it.
 
 IPv6-in-IPv6 tunneling in INET
 ------------------------------
