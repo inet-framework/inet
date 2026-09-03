@@ -18,13 +18,13 @@ ICMPv6 Packet Too Big message back to the sender, naming the size that would hav
 fitted. The sender's IPv6 layer remembers that number and sends smaller packets from
 then on. This exchange is Path MTU Discovery, defined in RFC 8201.
 
-Path MTU Discovery rests on that one message getting back. IPv6 has other exchanges that
-need a reply — Neighbour Discovery learns a neighbour's link-layer address that way —
-but those run between neighbours on a single link, and when one fails nothing works at
-all. The Packet Too Big message has to cross every network between the two ends, any
-of which can discard it, and when it goes missing the sender never learns: it keeps
-sending the same size, every large packet is discarded, and the small ones still
-arrive — so the path looks healthy while large transfers hang. That failure has a name,
+Path MTU Discovery rests on the Packet Too Big message getting back to the sender.
+IPv6 has other exchanges that need a reply — Neighbour Discovery learns a neighbour's
+link-layer address that way — but those run between neighbours on a single link, and
+when one fails nothing works at all. This message has to cross every network between
+the two ends, any of which can discard it, and when it goes missing the sender never
+learns: it keeps sending the same size, every large packet is discarded, and the small
+ones still arrive — so the path looks healthy while large transfers hang. That failure has a name,
 the Path MTU Discovery black hole, and it is what this showcase reproduces.
 
 This showcase creates a path whose limit is lower than the sender's own link. The four
