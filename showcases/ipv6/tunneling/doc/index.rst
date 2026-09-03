@@ -286,20 +286,24 @@ Routing is configured by hand rather than computed, using
 ``*.configurator.addStaticRoutes = false`` and an explicit route for every node. The
 transit router's routing table is the following:
 
-.. code-block:: none
+.. figure:: media/transit-routes.png
+   :align: center
 
-    transit:
-      2001:db8:1::/64 via <unspec> dev eth0
-      2001:db8:2::/64 via <unspec> dev eth1
+The first two routes are the ones configured for it, covering the links it is attached
+to. The other two are the link-local ``fe80::/10`` routes that every IPv6 interface
+gets, which never carry traffic between sites. ``S`` marks a route as static.
 
-That is the output of the configurator's ``dumpRoutes`` option, which prints every
-node's routing table at the start of the run. ``<unspec>`` means the route has no next
-hop because the destination is on a directly attached link.
+What matters is that nothing in the table matches either site's addresses, so any
+packet carrying them that reaches ``transit`` is discarded.
 
-Those are the routes the configurator created. The table also holds the link-local
-``fe80::/10`` route that every IPv6 interface gets, which never carries traffic between
-sites. What matters is that nothing in it matches either site's addresses, so any
-packet carrying them that reaches ``transit`` is discarded. In a real
+.. FIGURE RECIPE: launch `inet -u Qtenv -c Tunnel --mcp-server-address localhost:8799`,
+   then over the MCP server: run_simulation time_limit 2.6s mode express, then
+   expand_inspector_tree depth 2 and get_inspector_screenshot width 1000 height 150 on
+   object_path "Ipv6TunnelingShowcase.transit.ipv6.routingTable.routeList" with type
+   "object". Use the FULL path including the network name -- a non-module object is not
+   found by the network-relative path that works for modules. Inspecting the
+   routingTable module itself instead shows its parameters, and expanding that far
+   enough to reach the routes buries them. In a real
 network the absence is not a configuration choice — it is unavoidable, for the reasons
 given above. Here it has to be arranged deliberately, because a shortest-path
 configurator would happily install routes that reality would not.
