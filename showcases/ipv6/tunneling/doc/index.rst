@@ -512,7 +512,8 @@ looping packets draw no path at all, because none of them ever arrives anywhere.
 Every one of these paths begins at ``borderA`` rather than at ``hostA``. That is the
 encapsulation showing through: the packet ``hostA`` sent stops existing at the tunnel
 entry point, where it becomes the payload of a new one, and it is that new packet whose
-journey is drawn. The span with no arrow is exactly the span the tunnel covers.
+journey is drawn. The span with no arrow is the one before the tunnel entry point,
+where the original packet was still travelling under its own header.
 
 Watching one packet
 ~~~~~~~~~~~~~~~~~~~
