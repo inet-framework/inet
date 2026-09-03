@@ -59,8 +59,7 @@ Addresses the network will not carry
 
 The Unique Local Address range mentioned above, ``fc00::/7``, is defined in RFC 4193;
 in practice organisations use the ``fd00::/8`` half of it. It is worth being precise
-about why these addresses never appear in the global routing table, because that is
-the premise the whole showcase rests on.
+about why these addresses never appear in the global routing table.
 
 An organisation creates its own Unique Local Address prefix by choosing 40 random
 bits. RFC 4193 makes that choice random so that two organisations are very unlikely
