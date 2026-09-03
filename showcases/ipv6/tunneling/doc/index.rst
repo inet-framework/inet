@@ -9,9 +9,9 @@ the destination address. Some IPv6 addresses are, by design, ones that routers o
 public Internet hold no routes for. One such range is ``fc00::/7``, the Unique Local
 Addresses — the IPv6 counterpart of the private addresses used inside IPv4 networks. A
 company can number its internal networks out of that range, and providers filter those
-addresses at their borders as a matter of course. So a company with two offices, each
-numbered this way, cannot simply send packets from one to the other across the
-Internet: the first Internet router that sees such a packet discards it.
+addresses at their borders by default. So a company with two offices, each numbered
+this way, cannot simply send packets from one to the other across the Internet: the
+first Internet router that sees such a packet discards it.
 
 Tunneling solves this by wrapping the packet. The border router of the first office
 puts the whole original packet inside a second IPv6 header, addressed from itself to
@@ -75,9 +75,9 @@ even between co-operating organisations.
 What they are not is *globally* routable, and that is a matter of policy rather than
 of any technical ambiguity. RFC 4193 states that these addresses are not expected to
 be routed on the global Internet. No registry records who holds which prefix, no
-provider has any reason to carry them, and providers filter them at their borders as
-a matter of course. The consequence is the one that matters here: a packet carrying
-these addresses will not cross a public network.
+provider has any reason to carry them, and providers filter them at their borders by
+default. The consequence is the one that matters here: a packet carrying these
+addresses will not cross a public network.
 
 So two networks that both use Unique Local Addresses have a concrete problem. Each
 works internally. Neither can reach the other across a public network, because that
