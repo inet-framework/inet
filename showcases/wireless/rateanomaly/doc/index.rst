@@ -349,8 +349,8 @@ less than one at 6 Mbps — but the mechanism is the same at every gap, so the s
 gap at the worst case the 802.11g rate set allows, 6 against 54 Mbps, and spends its
 configurations on the *fixes* instead.
 
-Solving the Anomaly with Airtime Fairness
------------------------------------------
+Solving the Uplink Anomaly: Airtime Fairness through the 802.11e TXOP
+---------------------------------------------------------------------
 
 The anomaly follows from DCF sharing *transmission opportunities* equally. The IEEE 802.11e
 amendment adds a mechanism that shares *airtime* instead: the **transmission opportunity
