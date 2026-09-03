@@ -22,7 +22,7 @@ Path MTU Discovery rests on the Packet Too Big message getting back to the sende
 IPv6 has other exchanges that need a reply — *Neighbor Discovery* learns a neighbor's
 link-layer address that way — but those run between neighbors on a single link, and
 when one fails nothing works at all. The Packet Too Big message has to cross every
-network between the two ends, and networks discard ICMP traffic: some filter it
+network between the two ends, and many networks discard ICMP traffic: some filter it
 deliberately, and others drop it only when they are busy, which makes the loss come and
 go.
 
