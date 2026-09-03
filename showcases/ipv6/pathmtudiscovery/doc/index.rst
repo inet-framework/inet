@@ -27,8 +27,8 @@ shows four outcomes: paying for fragmentation, losing everything when the messag
 filtered, recovering when the message gets through, and the quiet case where the
 sender was sized correctly from the start.
 
-A tunnel is used to make the path narrower, because that is the most common way a path
-ends up narrower than its links. What the tunnel is for does not matter here; the
+A tunnel is used to make the path narrower, because encapsulation is a common reason
+a path carries less than the links at either end of it. What the tunnel is for does not matter here; the
 :doc:`../../tunneling/doc/index` showcase covers that.
 
 | Verified with INET version: ``4.7``
@@ -140,8 +140,7 @@ this parameter.
 
 The learned value is held in the node's routing table, alongside the cached next hop
 for that destination, and the node reports it in its log when it changes — ``Path MTU
-towards ... is now 1460``. That log line is the most direct way to watch the mechanism
-work.
+towards ... is now 1460``. That log line shows the mechanism working.
 
 Note that switching ``pathMtuDiscovery`` off would produce the same *observable*
 outcome as the black hole below: a sender that never adapts. This showcase does not

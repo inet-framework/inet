@@ -110,14 +110,14 @@ What makes it virtual is that it has no link underneath: instead of putting the 
 on a wire, it hands it back to the node's own IPv6 layer with the tunnel endpoints
 attached, and IPv6 wraps it in the outer header and forwards the result toward the
 exit point like any other locally originated packet. The wrapping is done by the
-ordinary IPv6 code that encapsulates any payload; the tunnel interface only says which
-addresses to use.
+``Ipv6`` module, which treats the inner packet like any other payload it has to
+encapsulate; the tunnel interface only says which addresses to use.
 
 At the far end, IPv6 sees a datagram addressed to itself whose Next Header field says
 ``IPv6``, removes the outer header, and processes the inner packet as if it had just
 arrived from the network.
 
-This leads to the single most useful idea on this page:
+In short:
 
     A tunnel is one network interface plus one route.
 
