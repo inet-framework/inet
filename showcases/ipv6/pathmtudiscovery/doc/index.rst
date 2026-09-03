@@ -232,7 +232,7 @@ The rest of the scenario is the same in every configuration:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: [General]
-   :end-before: [Config Fragmentation]
+   :end-before: *.visualizer.interfaceTableVisualizer.displayInterfaceTables
    :language: ini
 
 ``hostA`` sends UDP packets to ``hostB`` twice a second from 2 s to 9.75 s, which is 16
