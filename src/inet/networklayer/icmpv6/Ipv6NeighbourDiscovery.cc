@@ -16,6 +16,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
@@ -755,6 +756,12 @@ void Ipv6NeighbourDiscovery::sendPacketToIpv6Module(Packet *msg, const Ipv6Addre
 {
     msg->removeTagIfPresent<DispatchProtocolReq>();
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    /*RFC 4861 Section 5.2: a Neighbour Discovery message is always addressed to a
+       neighbour on the link it goes out on, so its next hop is its destination. Pinning
+       the output interface makes the Ipv6 module skip next-hop determination, so state
+       the next hop here; without it the Ipv6 module has no address to look up in the
+       Neighbour Cache and has to fall back to the broadcast address.*/
+    msg->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(destAddr);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     auto addressReq = msg->addTagIfAbsent<L3AddressReq>();
     addressReq->setSrcAddress(srcAddr);

@@ -8,9 +8,9 @@
 # empty-shim step, which kept these fingerprints bit-for-bit identical.
 
 # MIPv6 example — the primary test
-/examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,            aa29-a8c5/~tNlb, PASS, wireless EthernetMac
-/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,            068b-23aa/~tNlb, PASS, wireless EthernetMac
-/examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,            7ed8-bee3/~tNlb, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c Handover -r 0,                70s,            1111-e1a2/~tNlb, PASS, wireless EthernetMac
+/examples/ipv6/mipv6/,               -f omnetpp.ini -c RouteOptimizationTwoCNs -r 0,  60s,            4edc-d219/~tNlb, PASS, wireless EthernetMac
+/examples/ipv6/mipv6roaming/,        -f omnetpp.ini -c Roaming -r 0,                 70s,            c5cf-3451/~tNlb, PASS, wireless EthernetMac
 
 # IPv6 examples
 # MLD example — new PASS row; ~tNl locks the MLD Report/Query/Done/MAS-Query packet exchange (traffic+lengths);
@@ -18,7 +18,7 @@
 # causes parsimPack() to abort — use ~tNl (no parsim serialization) instead; tyf excluded as unreliable
 /examples/ipv6/mld/,            -f omnetpp.ini -c MldDemo -r 0,              30s,             f1b1-b523/~tNl, PASS, EthernetMac MLD
 /examples/ipv6/mld/,            -f omnetpp.ini -c MldV2Ssm -r 0,            30s,             a22a-81c9/~tNl, PASS, EthernetMac MLD
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           50c9-9bb3/~tNlb, PASS, EthernetMac
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           01b2-59f7/~tNlb, PASS, EthernetMac
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           0e0c-b800/~tNlb, PASS,
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            06b9-ff17/~tNlb, PASS,
 
