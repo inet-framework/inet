@@ -37,10 +37,9 @@ configurations show:
 4. the quiet case where the sender was sized correctly from the start.
 
 An IPv6-in-IPv6 tunnel is used to make the path narrower, because encapsulation is a
-common reason a path carries less than the links at either end of it. Here the tunnel
-is only a way to produce that narrowing. Why a site would build one — to reach another
-site whose addresses the network between them will not carry — is the subject of the
-:doc:`../../tunneling/doc/index` showcase.
+common reason a path carries less than the links at either end of it. What the tunnel
+is for does not matter here; the :doc:`../../tunneling/doc/index` showcase covers
+that.
 
 | Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/ipv6/pathmtudiscovery <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/pathmtudiscovery>`__
