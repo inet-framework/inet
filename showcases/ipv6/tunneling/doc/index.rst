@@ -38,9 +38,10 @@ following:
 About IPv6-in-IPv6 tunneling
 ----------------------------
 
-A tunnel puts one packet inside another. The node that adds the outer header is the
-*tunnel entry point*, and the node that removes it is the *tunnel exit point*. The
-original packet is the *inner packet*; the packet that actually travels is the *outer
+An IPv6-in-IPv6 tunnel carries a complete IPv6 datagram as the payload of another IPv6
+datagram. The node that adds the outer header is the *tunnel entry point*, and the
+node that removes it is the *tunnel exit point*. The original datagram is the *inner
+packet*; the datagram that actually travels between the two endpoints is the *outer
 packet*.
 
 The outer header is an ordinary IPv6 header. Its source address is the entry point,
