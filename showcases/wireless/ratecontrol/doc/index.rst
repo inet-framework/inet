@@ -150,7 +150,7 @@ access point serves five 802.11g clients and a wall stands in front of ``sta[0]`
 only.
 
 The video covers the first 180 ms of the simulation. The bar chart above the
-access point is the :ned:`Ieee80211RateVisualizer`, showing the PHY rate
+access point is the :ned:`Ieee80211RateCanvasVisualizer`, showing the PHY rate
 :ned:`AarfRateControl` currently uses for each client; the arrows come from the
 :ned:`DataLinkCanvasVisualizer`. The :ned:`PacketDropCanvasVisualizer` marks
 dropped frames, filtered down to genuine reception errors — every station also
