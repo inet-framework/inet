@@ -436,12 +436,14 @@ address was actually accepted.
    then: set_animation_parameters {"profile":"normal","playback_speed":1,
    "min_animation_speed":0.5} -- without min_animation_speed you get one frame per
    event -- then record_video {"time_limit":"8s","fps":20,"crop_area":"network_area",
-   "output_dir":"<this doc>/media"}. Encode the frames with the ffmpeg command the
-   tool returns, but replace its crop filter with "crop=930:446:150:54", which drops
-   the Qtenv toolbar at the top and the configurator/visualizer/scenarioManager icons
-   on the left, leaving the network alone. Then delete the PNG frames. Determinism
-   self-check: host[3] must complete DAD for 2001:db8:1:1:8aa:ff:fe00:c at 7.094921,
-   and the first frame must show five fe80:: labels.
+   "output_dir":"<this doc>/media"}. Encode the frames with ffmpeg, chaining two crop
+   filters: first the crop_rect the tool reports for network_area (it depends on the
+   Qtenv window layout, so take it from the tool rather than hardcoding it), then
+   "crop=960:446:112:54" to drop the toolbar and the configurator/visualizer/
+   scenarioManager icons. Use -crf 16 so the address labels stay sharp, then delete
+   the PNG frames. Determinism self-check: host[3] must complete DAD for
+   2001:db8:1:1:8aa:ff:fe00:c at 7.094921, the first frame must show five fe80::
+   labels, and host[0]'s label must not be clipped at the left edge.
 
 The log excerpts below come from a Cmdenv run of each configuration with
 ``--cmdenv-log-level=detail``, with the module paths shortened to the node name for
