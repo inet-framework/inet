@@ -125,15 +125,10 @@ The interface says *where the tunnel goes*. The route says *what goes into it*. 
 two are configured independently, and changing only the route changes what the tunnel
 is used for, without touching the tunnel itself.
 
-Where the addresses and routes come from
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Addresses and routes are not module parameters, so they are not set in
-``omnetpp.ini``. They come from a separate XML file read by a module called
-``Ipv6NetworkConfigurator``, which the ini points at with ``xmldoc("...")``. This
-showcase has four such XML files, one per configuration. They are identical except for
-the one or two routes that lead into the tunnel, which is the only thing the
-configurations actually vary.
+The addresses and routes are configured by the ``Ipv6NetworkConfigurator`` module from
+an XML file. This showcase has four of them, one per configuration; they are identical
+except for the one or two routes that lead into the tunnel, which is the only thing
+the configurations vary.
 
 Configuring the interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~
