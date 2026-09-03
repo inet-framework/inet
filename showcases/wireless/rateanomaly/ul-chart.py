@@ -5,12 +5,11 @@
 # the RNG), so both are averaged the same way.
 #
 # Plotted as the fast-station GROUP average and the slow station, with the aggregates carried
-# in the legend -- deliberately NOT per station. Under permanent saturation INET's EDCA
-# sometimes locks one station out entirely (in these runs UplinkTxop rep #1 leaves sta[1] at
-# 0 Mbps while its neighbours absorb the share), so a per-station plot would be dominated by
-# that run-to-run artifact rather than by the effect being shown. The downlink counterpart
-# (dl-chart.py) DOES plot per station, because a single transmitter running a deterministic
-# scheduler has no contention lockout to average away.
+# in the legend -- deliberately NOT per station. EDCA allocates wins at random and only bounds
+# what a win is worth, so over ten seeds the four fast stations scatter between 4.1 and 6.8 Mbps
+# around a 5.6 Mbps mean; a per-station plot would show that scatter rather than the effect
+# being demonstrated. The downlink counterpart (dl-chart.py) DOES plot per station, because a
+# single transmitter running a deterministic scheduler has no contention scatter to average away.
 #
 # The dashed line is the all-fast reference: UplinkHomogeneous, the same cell with no rate gap.
 #

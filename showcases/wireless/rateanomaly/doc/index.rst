@@ -84,8 +84,11 @@ The Model
 The network uses three kinds of node:
 
 - :ned:`WirelessHost` — the contending stations, each with an 802.11 interface;
-- :ned:`AccessPoint` — the access point the stations associate with; it bridges the
-  wireless cell to a wired Ethernet segment;
+- :ned:`AccessPoint` — the access point the stations are associated with; it bridges the
+  wireless cell to a wired Ethernet segment. The stations are pre-associated
+  (:ned:`Ieee80211MgmtStaSimplified`), so no scanning or association exchange runs: this
+  showcase is about channel access, and under saturation the association frames of a
+  joining station compete with the very traffic under study;
 - :ned:`StandardHost` — a wired server that receives the stations' traffic.
 
 Each station's data rate is pinned with the wlan interface's ``bitrate`` parameter, and
@@ -203,7 +206,7 @@ Results
 -------
 
 Each station's application-level throughput is measured at the server over the
-steady-state interval, after association settles. Each run lasts 5 s, with the first
+steady-state interval, once the traffic has ramped up. Each run lasts 5 s, with the first
 1 s discarded as warmup, so throughput is averaged over the remaining 4 s.
 
 DCF is not deterministic — the random backoff draws from the RNG — so results vary from
@@ -434,7 +437,7 @@ their throughput back:
              comparison results are kept out of results/ root so they don't contaminate the
              single-run .anf charts (whose filters match packetReceived:count of any config).
    plot:     ../ul-chart.py (matplotlib; DCF red, TXOP blue; 8x6 in @ dpi 150). Deliberately
-             NOT per station -- see the lockout caveat below; the downlink counterpart
+             NOT per station -- the per-station scatter is large, see the caveat below; the downlink counterpart
              ../dl-chart.py DOES plot per station because that scheduler is deterministic.
    stamp:    captured 2026-07, INET 4.6
 
@@ -454,7 +457,7 @@ more efficient than one that contends for every frame. It is the same reason mod
 a TXOP, amortises exactly that overhead. The showcase keeps a plain-DCF baseline only to isolate
 the rate-anomaly mechanism from this efficiency bonus. The TXOP limit is still a tradeoff, not
 "bigger is always better": longer bursts raise the other stations' latency and, under permanent
-saturation, can starve a station outright — the EDCA lockout noted below.
+saturation, widen the spread between what individual stations get — the caveat noted below.
 
 TXOP and the access-point airtime scheduler noted earlier are two fixes for two faces of the
 same anomaly, not the same fix twice. TXOP is *distributed* — it bounds each *contending*
@@ -464,17 +467,13 @@ its own destinations, so it is the fix for the *downlink*, AP-to-clients form. B
 same principle — allocate channel *time*, not transmission *count* — but in different places.
 
 One honest caveat — and the reason the chart above plots a *group* average rather than the five
-stations separately. TXOP restores the aggregate capacity and the fast-station group reliably,
-but it does **not** hand each individual station equal airtime here. Under this permanent,
-extreme saturation INET's EDCA sometimes locks a station out completely: in one of the three
-TXOP repetitions ``sta[1]`` receives *zero* throughput for the whole measurement window while
-its neighbours climb to 6.6–7.5 Mbps and absorb its share. The aggregate for that run is
-22.3 Mbps — barely different from the other two — so the system-level result is untouched by
-which station happens to lose. Averaging over repetitions is what keeps the group figures
-steady; a per-station plot would be dominated by that run-to-run lockout, so it is deliberately
-left out. The system-level result (capacity recovered, the fast group no longer penalised) is
-robust; perfect per-station fairness is not. The downlink fix below *is* per-station fair, for
-a reason that is worth the contrast.
+stations separately. TXOP restores the aggregate capacity and the fast-station group reliably, but
+it does **not** hand each individual station equal airtime. Over ten seeds the four fast stations
+land anywhere between 4.1 and 6.8 Mbps around their 5.6 Mbps mean, because EDCA still allocates
+*wins* at random and only bounds what a win is worth; a station that wins a few more times in four
+seconds keeps the difference. The group average is steady across the same seeds — the aggregate
+stays within 22.2 to 24.6 Mbps — so the system-level result is robust where the per-station one is
+not. The downlink fix below *is* per-station fair, for a reason that is worth the contrast.
 
 The Downlink Form: Airtime Fairness at the Access Point
 -------------------------------------------------------
@@ -690,7 +689,7 @@ while the aggregate *rises* from ~14 to ~22 Mbps, so nothing is taken from anyon
 clients' recovery is precisely the airtime ``sta[0]`` was monopolising, handed back.
 
 And unlike the uplink TXOP result, this fix is cleanly *per-station* fair: a single transmitter
-running a deterministic scheduler has no contention lockout to average away, so all four fast
+running a deterministic scheduler has no contention scatter to average away, so all four fast
 clients land on the same throughput.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
