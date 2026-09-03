@@ -117,6 +117,23 @@ At the far end, IPv6 sees a datagram addressed to itself whose Next Header field
 ``IPv6``, removes the outer header, and processes the inner packet as if it had just
 arrived from the network.
 
+Inside a border router, the tunnel sits in the interface layer with the node's other
+interfaces:
+
+.. figure:: media/borderA-interfaces.png
+   :align: center
+
+   The interface layer of ``borderA``. ``tun[0]`` stands alongside the two Ethernet
+   interfaces and the loopback, but has no link leading out of the node.
+
+.. FIGURE RECIPE: launch `inet -u Qtenv -c Tunnel --mcp-server-address localhost:8799`,
+   then over the MCP server: run_simulation time_limit 2.6s mode express, then
+   open_inspector on "borderA" with type "graphical" (get_canvas_image fails without an
+   open graphical inspector), then get_canvas_image with module_path "borderA", area
+   "all_elements", margin 5. Crop the interface-layer band at the bottom -- (640, 890)
+   to (1266, 1070) of the 1270x1139 capture -- since the layer boxes above it are
+   mostly empty.
+
 In short:
 
     A tunnel is one network interface plus one route.
@@ -135,7 +152,8 @@ Configuring the interface
 
 Host and router node types have a ``tun`` submodule vector for tunnel interfaces.
 Setting ``numTunInterfaces`` creates the slots, and each slot's type and parameters
-are set individually:
+are set individually. This is how one end of this showcase's own tunnel is configured,
+on the border router named ``borderA`` in the network described below:
 
 .. literalinclude:: ../omnetpp.ini
    :caption: omnetpp.ini
@@ -150,13 +168,7 @@ network interface has):
   becomes the source address of the outer header.
 - ``destination`` — the tunnel exit point. It becomes the destination address of the
   outer header.
-- ``mtu`` — the largest packet the tunnel will accept, 1500 bytes by default. This
-  showcase leaves it at the default, which is why the ini fragment above does not
-  mention it.
-
-The submodule is written ``tun[0]`` in the ini because it is the first element of a
-vector, but the network interface it registers is named ``tun0``, without the
-brackets. That is the name routes use.
+- ``mtu`` — the largest packet the tunnel will accept, 1500 bytes by default.
 
 Unlike a tunnel interface on most router operating systems, this one needs no address
 of its own. It never appears as a source or destination — the addresses in the outer
