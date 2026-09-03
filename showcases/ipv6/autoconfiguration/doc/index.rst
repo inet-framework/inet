@@ -486,6 +486,18 @@ host starts router discovery, and the router answers:
    2.137484  host[0]: Assigning new address to: eth0
    2.137484  host[1]: Assigning new address to: eth0
 
+Unedited:
+
+.. figure:: media/log_discovery.png
+   :align: center
+   :width: 100%
+
+.. FIGURE RECIPE: run the config under Cmdenv with --cmdenv-express-mode=false
+   --cmdenv-log-level=detail --cmdenv-log-prefix="%t %M: ", pick the lines quoted
+   in the code block above, and render them as an image: DejaVu Sans Mono 15px,
+   black on white, timestamp column in dark red. Determinism self-check:
+   the fourth line must be 2.13746363315 ... router ... Create and send RA invoked!
+
 ``host[0]`` never asked for this prefix: it obtains it from the Router Advertisement
 that ``host[1]`` solicited, because that advertisement is sent to the all-nodes
 multicast address rather than to ``host[1]`` alone. One answer therefore serves every
@@ -507,6 +519,18 @@ why the two gaps below differ so much: 0.14 s for ``host[3]``, 0.78 s for
    2.851464  host[3]: Initiating Router Discovery
    3.390352  host[2]: Initiating Router Discovery
 
+Unedited:
+
+.. figure:: media/log_latehosts.png
+   :align: center
+   :width: 100%
+
+.. FIGURE RECIPE: run the config under Cmdenv with --cmdenv-express-mode=false
+   --cmdenv-log-level=detail --cmdenv-log-prefix="%t %M: ", pick the lines quoted
+   in the code block above, and render them as an image: DejaVu Sans Mono 15px,
+   black on white, timestamp column in dark red. Determinism self-check:
+   the last line must be 3.39035245711 ... host[2] ... Initiating Router Discovery.
+
 Note that ``host[3]`` solicits first, at 2.851 s, and ``host[2]`` second, at
 3.390 s — but ``host[2]`` is answered first. The router had already sent a Router
 Advertisement to the all-nodes multicast address on this interface at 2.137 s, so it
@@ -521,6 +545,18 @@ the arrival order, decides which answer goes out first:
    5.374288  host[3]: Assigning new address to: eth0
    7.053168  host[2]: DAD completed for address 2001:db8:1:1:8aa:ff:fe00:b, address is unique
    7.094921  host[3]: DAD completed for address 2001:db8:1:1:8aa:ff:fe00:c, address is unique
+
+Unedited:
+
+.. figure:: media/log_lateanswer.png
+   :align: center
+   :width: 100%
+
+.. FIGURE RECIPE: run the config under Cmdenv with --cmdenv-express-mode=false
+   --cmdenv-log-level=detail --cmdenv-log-prefix="%t %M: ", pick the lines quoted
+   in the code block above, and render them as an image: DejaVu Sans Mono 15px,
+   black on white, timestamp column in dark red. Determinism self-check:
+   the first line must be 5.374267653159 ... router ... Create and send RA invoked!
 
 Because this advertisement goes to the all-nodes multicast address, it serves both
 hosts, exactly as the 2.137 s one served ``host[0]`` and ``host[1]``.
@@ -549,6 +585,18 @@ rate limit would have held this answer back until at least 5.14 s:
    3.538770  router:  Create and send RA invoked!
    3.538781  server:  Assigning new address to: eth0
    5.339691  server:  DAD completed for address 2001:db8:1:2:8aa:ff:fe00:1, address is unique
+
+Unedited:
+
+.. figure:: media/log_server.png
+   :align: center
+   :width: 100%
+
+.. FIGURE RECIPE: run the config under Cmdenv with --cmdenv-express-mode=false
+   --cmdenv-log-level=detail --cmdenv-log-prefix="%t %M: ", pick the lines quoted
+   in the code block above, and render them as an image: DejaVu Sans Mono 15px,
+   black on white, timestamp column in dark red. Determinism self-check:
+   the last line must be 5.33969191926 ... server ... 2001:db8:1:2:8aa:ff:fe00:1.
 
 This is why the server obtains its address from the second prefix, while the hosts
 obtain theirs from the first.
@@ -601,6 +649,18 @@ Advertisement cross the second link, and forwards it once the answer arrives:
    8.000028  router: Preparing to send NS to solicited-node multicast group
    8.000044  router: Sending queued packet UdpBasicAppData-0
 
+Unedited — the last line is longer than the version above, which drops the chunk detail:
+
+.. figure:: media/log_traffic.png
+   :align: center
+   :width: 100%
+
+.. FIGURE RECIPE: run the config under Cmdenv with --cmdenv-express-mode=false
+   --cmdenv-log-level=detail --cmdenv-log-prefix="%t %M: ", pick the lines quoted
+   in the code block above, and render them as an image: DejaVu Sans Mono 15px,
+   black on white, timestamp column in dark red. Determinism self-check:
+   the last line must be 8.00004372 ... Sending queued packet (inet::Packet)UdpBasicAppData-0.
+
 No packet is lost. A datagram whose next hop is not yet known is held rather than
 dropped, and sent as soon as the neighbor answers.
 
@@ -619,7 +679,7 @@ Address Detection (DAD) refuses it about 30 microseconds later:
    15.712316  host[3]: DAD failed for address fe80::8aa:ff:fe00:10 on eth0 --
               Loss of DAD, address will not be assigned
 
-The same four lines unedited:
+Unedited:
 
 .. figure:: media/log_dadfailure.png
    :align: center
