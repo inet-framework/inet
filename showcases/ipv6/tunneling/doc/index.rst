@@ -526,6 +526,12 @@ happened, so the only traffic on screen is the packet itself.
 
 Without a tunnel the packet reaches ``transit`` and goes no further.
 
+The same run again, with the packet drop visualizer switched on. ``transit`` marks each
+discarded packet with the reason its IPv6 module gave, ``NO_ROUTE_FOUND``:
+
+.. video:: media/notunnel-drops.mp4
+   :width: 100%
+
 .. video:: media/tunnel.mp4
    :width: 100%
 
@@ -543,6 +549,12 @@ never leaves ``borderA``.
 With the wrong route at the far end, the packet bounces between the two border routers.
 This clip covers a longer span than the others, because one packet's whole loop takes
 about fifteen crossings before its hop limit runs out.
+
+The same run with the drop visualizer, showing where the loop ends. The packets are
+discarded at ``borderB`` with the reason ``HOP_LIMIT_REACHED``:
+
+.. video:: media/routingloop-drops.mp4
+   :width: 100%
 
 ..
    VIDEO RECIPE (redo via the "video-recording" skill)
@@ -568,7 +580,23 @@ about fifteen crossings before its hop limit runs out.
              area, and the configurator/visualizer icons sit in the same strip. Input
              framerate is set so the clip lands near 13s; recording a 1.5ms window at
              fps=30 yields ~1300 frames, which is 43s at 30fps.
-   post:     none
+   variants: notunnel-drops.mp4 and routingloop-drops.mp4 are the same two windows with
+             packetDropVisualizer.displayPacketDrops=true, nodeFilter="not(host*)" so
+             only the routers annotate, labelFormat="%s" for the reason string, and
+             fadeOutMode="simulationTime" with fadeOutTime=1s -- the default realTime
+             fade lasts one wall-clock second, which is a handful of frames while
+             frame-grabbing, so the markers never reach the clip. These two need the
+             `packetDropped` emissions added to Ipv6::fragmentAndSend() and
+             Ipv6::determineOutputInterface(); stock INET signals neither, so the
+             visualizer has nothing to draw for an unroutable or expired unicast packet.
+             Their warm-up runs to 2.999s and records the t=3.0s send, not the t=2.5s
+             one: the first drop markers enlarge the canvas bounding box, Qtenv rescrolls
+             once, and a fixed crop then slides off the network. Warming up past an
+             earlier burst settles the bounds before recording starts.
+   post:     the encode chain ends with tpad=stop_mode=clone:stop_duration=1, which
+             holds the last frame for a second. Without it the closing state -- the
+             received-packet counter reaching its final value -- is on screen for one
+             frame before the player loops back to the start.
    stamp:    recorded 2026-09, INET 4.7
 
 .. FIGURE RECIPE (redo via the "video-recording" and "omnetpp-mcp-sim" skills)
