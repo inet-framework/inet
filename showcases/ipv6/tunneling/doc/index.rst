@@ -5,13 +5,13 @@ Goals
 -----
 
 An IPv6 router can only forward a packet if its routing table holds a route matching
-the destination address. Some IPv6 addresses are, by design, ones that no router on
-the public Internet will ever hold a route for. The clearest example is a company that
-numbers its internal networks out of the Unique Local Address range, ``fc00::/7`` —
-the IPv6 counterpart of the private addresses used inside IPv4 networks. Those
-addresses work inside the company and are filtered everywhere else. So a company with
-two offices, each numbered this way, cannot simply send packets from one to the other
-across the Internet: the first Internet router that sees such a packet discards it.
+the destination address. Some IPv6 addresses are, by design, ones that routers on the
+public Internet hold no routes for. One such range is ``fc00::/7``, the Unique Local
+Addresses — the IPv6 counterpart of the private addresses used inside IPv4 networks. A
+company can number its internal networks out of that range, and providers filter those
+addresses at their borders as a matter of course. So a company with two offices, each
+numbered this way, cannot simply send packets from one to the other across the
+Internet: the first Internet router that sees such a packet discards it.
 
 Tunneling solves this by wrapping the packet. The border router of the first office
 puts the whole original packet inside a second IPv6 header, addressed from itself to
@@ -65,7 +65,7 @@ Addresses the network will not carry
 
 The Unique Local Address range mentioned above, ``fc00::/7``, is defined in RFC 4193;
 in practice organisations use the ``fd00::/8`` half of it. It is worth being precise
-about why these addresses never appear in the global routing table.
+about why these addresses stay out of the global routing table.
 
 An organisation creates its own Unique Local Address prefix by choosing 40 random
 bits. RFC 4193 makes that choice random so that two organisations are very unlikely
