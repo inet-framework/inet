@@ -461,6 +461,185 @@ there are control traffic. Nothing gets past ``borderA``. The sender's link stil
 carries its 16 packets, so from ``hostA``'s point of view everything is being sent
 normally, which is exactly what makes this failure hard to diagnose on real equipment.
 
+Where the packets went
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+   Three versions of this figure set are shown below so that one can be chosen. Only
+   one of them will stay on the page.
+
+Every one of these paths begins at ``borderA`` rather than at ``hostA``. The packet
+``hostA`` sent stops existing at the tunnel entry point, where it becomes the payload
+of a new one, and it is that new packet whose journey the visualizer draws.
+
+**Version 1 — one figure per configuration.**
+
+.. figure:: media/result-v1-fragmentation.png
+   :width: 100%
+   :align: center
+
+``Fragmentation``: the path is complete and all 16 packets arrive.
+
+.. figure:: media/result-v1-blackhole.png
+   :width: 100%
+   :align: center
+
+``BlackHole``: no path and no counter, because nothing gets past ``borderA``.
+
+.. figure:: media/result-v1-discovery.png
+   :width: 100%
+   :align: center
+
+``Discovery``: the same complete path, one packet short — the one that was refused
+before ``hostA`` knew the limit.
+
+.. figure:: media/result-v1-sizedtofit.png
+   :width: 100%
+   :align: center
+
+``SizedToFit``: complete, and all 16 arrive.
+
+**Version 2 — the two configurations that differ, and a fragment on the wire.**
+
+.. figure:: media/result-v2-blackhole.png
+   :width: 100%
+   :align: center
+
+``BlackHole``: nothing arrives.
+
+.. figure:: media/result-v2-discovery.png
+   :width: 100%
+   :align: center
+
+``Discovery``: the same network, the same tunnel limit, and 15 of 16 packets
+delivered. The only difference between the two is whether the Packet Too Big message
+reaches ``hostA``.
+
+.. figure:: media/result-v2-inflight.png
+   :width: 100%
+   :align: center
+
+A fragment on the link to ``transit`` in ``Fragmentation``, named
+``UdpBasicAppData-1-frag-0``. The name is the visible evidence of the split.
+
+**Version 3 — version 1 with packet drops marked.**
+
+.. figure:: media/result-v3-fragmentation.png
+   :width: 100%
+   :align: center
+
+.. figure:: media/result-v3-blackhole.png
+   :width: 100%
+   :align: center
+
+Only ``BlackHole`` drops anything. The marker sits at ``borderA``, which refuses every
+oversized packet for as long as the run lasts. It reads ``OTHER_PACKET_DROP`` because
+INET's list of drop reasons has no entry for a packet larger than the next link will
+carry. The firewall's own discard of the Packet Too Big message is not marked at all:
+the IPsec module emits no packet drop signal.
+
+.. figure:: media/result-v3-discovery.png
+   :width: 100%
+   :align: center
+
+.. figure:: media/result-v3-sizedtofit.png
+   :width: 100%
+   :align: center
+
+``Discovery`` refuses exactly one packet, at 2 s, and by the end of the run that marker
+has faded.
+
+.. FIGURE RECIPE (redo via the "omnetpp-mcp-sim" skill)
+   For each config: launch `inet -u Qtenv -c <Config> --mcp-server-address
+   localhost:8801`, run_simulation time_limit 9.9s mode express, then get_canvas_image
+   with module_path "<root>", area "module_rectangle", margin 5. The route and
+   statistic visualizers come from the ini. Version 3 adds these overrides, and note
+   that string values need embedded quotes on the command line:
+     --*.visualizer.packetDropVisualizer.displayPacketDrops=true
+     --*.visualizer.packetDropVisualizer.labelFormat="%s"
+     --*.visualizer.packetDropVisualizer.fadeOutMode="simulationTime"
+     --*.visualizer.packetDropVisualizer.fadeOutTime=0.6s
+   The 0.6s fade is deliberate: sends are 0.5s apart, so a still at 9.9s carries the
+   most recent drop and not a pile of sixteen overlapping labels. The markers need the
+   `packetDropped` emissions added to Ipv6::fragmentAndSend(); stock INET signals
+   nothing when it refuses an oversized forwarded packet.
+   result-v2-inflight.png is a canvas image taken in normal mode at t=2.50030s, when a
+   fragment is on the borderA-to-transit link.
+
+Watching one packet
+~~~~~~~~~~~~~~~~~~~
+
+Each clip covers a single send at t = 2.5 s, except the last.
+
+.. video:: media/fragmentation.mp4
+   :width: 100%
+
+``Fragmentation``: the packet crosses to ``borderA`` whole. Two packets leave it,
+``UdpBasicAppData-1-frag-0`` and ``UdpBasicAppData-1-frag-1448-last``, and for part of
+the clip both are on the wire at once. ``borderB`` puts them back together, and one
+packet arrives at ``hostB``.
+
+.. video:: media/blackhole.mp4
+   :width: 100%
+
+``BlackHole``: the packet reaches ``borderA`` and stops there. A Packet Too Big message
+starts back towards ``hostA`` and gets no further than the firewall. No counter ever
+appears at ``hostB``.
+
+.. video:: media/discovery.mp4
+   :width: 100%
+
+``Discovery``: ``hostA`` sends two packets. The split has moved to the source, and the
+two pieces cross the tunnel as they are. The offset in the name is 1408 rather than
+1448 because ``hostA`` is fitting its packets to 1460 bytes, while ``borderA`` in the
+previous clip was fitting its own to 1500.
+
+.. video:: media/sizedtofit.mp4
+   :width: 100%
+
+``SizedToFit``: one packet, one name, the whole way across. Nothing is split and
+nothing is put back together.
+
+.. video:: media/discovery-exchange.mp4
+   :width: 100%
+
+The first send in ``Discovery``, at t = 2 s, is the exchange everything after it
+depends on. ``hostA`` resolves its first hop, sends ``UdpBasicAppData-0``, and
+``borderA`` refuses it — a Packet Too Big message travels back through the firewall to
+``hostA``, which splits every packet from then on. Neighbor Discovery traffic shares
+the clip, because address resolution has not finished at 2 s.
+
+..
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   Fragmentation / BlackHole / Discovery / SizedToFit in ../omnetpp.ini
+   seed:     default
+   shows:    one application packet crossing the network, per configuration, plus the
+             Packet Too Big exchange that Discovery depends on
+   anchors:  hostA sends every 0.5s from t=2s, so a send lands on t=2.5s exactly. The
+             fifth clip takes the FIRST send instead, at t=2s, because that is the only
+             one that is refused; Neighbour Discovery is still running then and appears
+             in frame.
+   window:   express to 2.499s, step one event to flush, record to 2.503s. The fifth
+             clip: express to 1.9995s, record to 2.006s. The route visualizer is off
+             for the videos.
+   view:     set_canvas_view fit=true then zoom_by=0.92 before recording. Without it
+             Qtenv's viewport is narrower than the network and the crop loses hostB
+             and its counter off the right edge.
+   anim:     playback_speed=1 (default)
+   capture:  fps=30, crop_area=with_padding
+   encode:   ffmpeg -framerate <frames/13> -i frames/<name>_%04d.png
+             -filter:v "crop=<w>:<h-86>:<x>:<y+86>,pad=ceil(iw/2)*2:ceil(ih/2)*2,
+             tpad=stop_mode=clone:stop_duration=1"
+             -r 30 -vcodec libx264 -pix_fmt yuv420p
+             The crop comes from the crop_rect that record_video reports for that run,
+             less 86px off the TOP: Qtenv's canvas toolbar floats over the top-right of
+             the canvas and is inside the captured area. The rect differs between runs,
+             so it cannot be hardcoded. tpad holds the last frame for a second, so the
+             closing counter value is readable before the player loops.
+   post:     none
+   stamp:    recorded 2026-09, INET 4.7
+
 What a fragment looks like
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
