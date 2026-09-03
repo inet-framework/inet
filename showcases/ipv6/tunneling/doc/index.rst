@@ -17,11 +17,8 @@ Tunneling solves this by wrapping the packet. The border router of the first off
 puts the whole original packet inside a second IPv6 header, addressed from itself to
 the border router of the second office — two addresses the Internet does have routes
 for. Every router in between then makes its forwarding decision from that outer header
-alone, which is all a router normally reads. Nothing prevents a router from looking
-further in; the packet is not encrypted, and equipment that inspects traffic does
-exactly that. It simply has no reason to, because the outer header already tells it
-where to send the packet. The border router at the far end strips that header off and
-delivers the original packet into the second office.
+alone, which is all a router normally reads. The border router at the far end strips
+that header off and delivers the original packet into the second office.
 
 This showcase demonstrates IPv6-in-IPv6 tunneling as defined in RFC 2473. Two sites
 use addresses the network between them cannot route, and a tunnel between the site
