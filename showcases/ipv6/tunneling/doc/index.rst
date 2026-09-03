@@ -47,8 +47,7 @@ The outer header is an ordinary IPv6 header. Its source address is the entry poi
 its destination address is the exit point, and its Next Header field says ``IPv6``.
 That last field is the whole trick: it tells the exit point that the payload is
 another IPv6 datagram rather than a transport protocol. Every router between the two
-endpoints treats the outer packet as normal traffic addressed to the exit point, and
-never looks at the inner packet at all.
+endpoints treats the outer packet as normal traffic addressed to the exit point.
 
 Nothing about this is specific to IPv6-in-IPv6. Putting a packet inside another packet
 and routing the outer one is the mechanism underneath every overlay network in use
