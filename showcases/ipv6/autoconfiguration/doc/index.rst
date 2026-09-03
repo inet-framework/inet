@@ -29,7 +29,7 @@ carrying a duplicated MAC address joins the same network, and Duplicate Address
 Detection refuses the address it tried to claim.
 
 | Verified with INET version: ``4.7``
-| Source files location: `inet/showcases/general/ipv6autoconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/general/ipv6autoconfiguration>`__
+| Source files location: `inet/showcases/ipv6/autoconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/autoconfiguration>`__
 
 About IPv6 Address Autoconfiguration
 ------------------------------------
@@ -690,7 +690,7 @@ The showcase contains two configurations, ``Autoconfiguration`` and
 
 If you already have INET and OMNeT++ installed, start the IDE by typing
 ``omnetpp``, import the INET project into the IDE, then navigate to the
-``inet/showcases/general/ipv6autoconfiguration`` folder in the `Project Explorer`.
+``inet/showcases/ipv6/autoconfiguration`` folder in the `Project Explorer`.
 There, you can view and edit the showcase files, run simulations, and analyze
 results.
 
@@ -701,7 +701,7 @@ Ensure that ``opp_env`` is installed on your system, then execute:
 .. code-block:: bash
 
     $ opp_env run inet-4.7 --init -w inet-workspace --install --build-modes=release --chdir \
-       -c 'cd inet-4.7.*/showcases/general/ipv6autoconfiguration && inet'
+       -c 'cd inet-4.7.*/showcases/ipv6/autoconfiguration && inet'
 
 This command creates an ``inet-workspace`` directory, installs the appropriate
 versions of INET and OMNeT++ within it, and launches the ``inet`` command in the

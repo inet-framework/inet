@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-package inet.showcases.general.ipv6autoconfiguration;
+package inet.showcases.ipv6.autoconfiguration;
 
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;

@@ -18,7 +18,7 @@ the simulations (NED, ini, and other files) and the web pages are in the
 
 Latest updates:
 
-- Added: :doc:`general/ipv6autoconfiguration/doc/index` (2026-09-01)
+- Added: :doc:`ipv6/autoconfiguration/doc/index` (2026-09-01)
 - Added: :doc:`quic/linksharing/doc/index` (2026-02-26)
 - Added: :doc:`emulation/webserver/doc/index` (2026-02-26)
 - Added: :doc:`emulation/mininet/doc/index` (2026-02-26)
@@ -48,6 +48,7 @@ All showcases:
    emulation/index
    tsn/index
    general/index
+   ipv6/index
    measurement/index
    mobility/index
    quic/index
