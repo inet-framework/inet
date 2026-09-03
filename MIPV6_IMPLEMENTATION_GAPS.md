@@ -149,7 +149,109 @@ work). (b) Mobile node: packets with a home-address source and no usable
 binding should be held or routed into the HA tunnel once it exists — the
 `Ipv6.cc:588` guard should only ever fire for genuinely unroutable leftovers.
 
-## 8. Minor bookkeeping (cleanups)
+## 8. Care-of address put into service without DAD (incorrect)
+
+**RFC 4862 §5.4 / RFC 6275 §11.5.1:** every unicast address a node autoconfigures
+is tentative until duplicate address detection clears it, and a mobile node
+arriving on a new link regenerates and probes its link-local address there. A
+care-of address that collides with another node's must be detected as such, not
+registered.
+
+**INET today:** at a handover the mobile node's interface already holds a
+link-local plus the home address, so
+`Ipv6NeighbourDiscovery::processRAPrefixInfoForAddrAutoConf()` takes its
+multi-address branch (`Ipv6NeighbourDiscovery.cc:2578–2594`): it marks *every*
+address on the interface tentative — the home address included — runs DAD on the
+link-local address alone, and defers the new care-of address to `dadGlobalList`.
+When that DAD completes, `makeTentativeAddressPermanent()` assigns the care-of
+address with `tentative = false` (`:911`) and then blanket-clears the tentative
+flag on all addresses (`:920–925`), so the "start DAD for a tentative global
+address" loop at `:967–975` — which is correct, and does run on the non-MIPv6
+path — finds nothing left to do. The care-of address therefore never gets a
+probe of its own. Both halves carry their own `// TODO improve this code...`
+(`:921`, `:2581`).
+
+Two consequences:
+
+- A care-of address that duplicates one already in use on the visited link is
+  never detected. The mobile node registers it with its home agent and the
+  tunnel is built onto a contested address.
+- The home address is marked tentative while the node is *abroad*, which is
+  precisely the address Mobile IPv6 exists to hold stable. Nothing may be sourced
+  from a tentative address, so this widens the window in gap 7 rather than
+  causing a separate visible failure — but it is wrong in principle, and it is
+  the home link, not the visited one, on which that address's uniqueness means
+  anything.
+
+**Concrete failure scenario:** give the foreign link a second host whose
+interface identifier matches the mobile node's (in the showcase, another node
+with MAC `0A-AA-00-00-00-0D`). Both end up with `2001:db8:0:3:8aa:ff:fe00:d`; a
+compliant mobile node would fail DAD and form another care-of address, INET's
+registers the colliding one.
+
+**Observed in the showcase runs:** at the handover the log shows the two
+existing addresses set tentative at t = 18.6255 s and exactly one completion —
+`DAD completed for address fe80::8aa:ff:fe00:d` at t = 20.0437 s. There is no
+completion line for the care-of address `2001:db8:0:3:8aa:ff:fe00:d` anywhere in
+the run, and the *Binding Update* leaves in the same event as the link-local
+completion.
+
+**Fix sketch:** in `makeTentativeAddressPermanent()`, assign the `dadGlobalList`
+address as tentative rather than permanent and let the existing `:967–975` loop
+probe it, holding `initiateMipv6Protocol()` until that second DAD completes;
+narrow both blanket loops to the addresses actually formed from the new prefix,
+which is what the two TODOs ask for. Note this *lengthens* the handover outage
+by another DAD interval — the RFC-compliant cost — so the showcase's latency
+budget would need re-deriving afterwards.
+
+### Verdict (2026-08-26): confirmed and fixed -- issue #1140, PR #1141
+
+Run through the `inet-bug-report` pipeline. Reproduced at the audit hash `fa3c69f237` and
+again on `origin/master` `7b0a6de5ce`, where `Ipv6NeighbourDiscovery.cc` is **byte-identical**
+to the audit hash. No branch fix, no existing issue, no existing pull request.
+
+What this report did not know:
+
+- **It is not showcase-dependent.** The stock example `examples/ipv6/mipv6roaming -c Roaming`
+  hands over three times and reproduces it with no showcase involved. Counting
+  `DAD completed for address` for `MN[0]`: link-local 4, home address 1, care-of addresses
+  `2001:db8:0:4:...` and `2001:db8:0:6:...` **0 each**.
+- **The decisive citation is RFC 4862 Section 5.4's third bullet**, not the section opening.
+  It names this implementation choice explicitly -- "implementations [...] that only perform
+  Duplicate Address Detection for the link-local address and skip the test for the global
+  address that uses the same interface identifier" -- and rules that "new implementations
+  MUST NOT do that optimization."
+- **The RFC 6275 citation in this section is wrong.** Section 11.5.1 is *Movement Detection*.
+  Care-of address formation is **Section 11.5.3, "Forming New Care-of Addresses"**, which
+  presupposes DAD is performed and only debates whether the initial delay may be skipped.
+- **The fix needed a second half this report did not identify.** Performing the DAD is not
+  enough: the registration was started when the *link-local* DAD completed, so the Binding
+  Update still left 1.67 s before the care-of address was verified. MIPv6 sets that
+  datagram's source address explicitly, and the RFC 4862 guard in
+  `Ipv6::fragmentPostRouting()` only covers datagrams whose source Ipv6 chooses itself, so
+  nothing held it back. The registration now waits for the care-of address's own DAD.
+  `dadHasFailed()` already erases the `dadGlobalList` entry, so a colliding care-of address
+  is never registered -- which is what the failure scenario above asked for.
+
+The predicted cost is real and measured: each handover is one DAD interval longer
+(+1.67 s and +1.36 s in `mipv6roaming`).
+
+The two consequences listed above were split off and **not** fixed, each with its own
+write-up (in `/home/user/inet/`):
+
+- the home address marked tentative while abroad ->
+  `bug-ipv6-home-address-tentative-while-abroad.md`. Not fixed because the current behaviour
+  may be load-bearing: while that address is tentative, packets sourced from it are deferred
+  rather than dropped by the `Ipv6.cc` guard, so narrowing the loops could widen gap 7's
+  outage instead of shrinking it. Needs measurement first.
+- the general tentative-source hole -> `bug-ipv6-tentative-source-guard-explicit-source.md`.
+
+Pre-existing failures on unmodified master, out of scope and not to be re-diagnosed:
+`MIPv6_tcp_handover.test`, `IPv6_packet_too_big.test`, and a stale `~tNlb` for
+`ipv6/mipv6roaming` in `mipv6-refactoring.csv` (expected `c8dc-27c2`, actual `7ed8-bee3`)
+that the re-recording in PR #1141 absorbs.
+
+## 9. Minor bookkeeping (cleanups)
 
 - `BindingUpdateList.cc:122/:145` — `remainingLifetime` fields never updated
   (`// TODO`), so BUL entries don't age visibly in the inspector.
