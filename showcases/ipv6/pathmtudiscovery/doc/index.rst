@@ -4,10 +4,10 @@ Path MTU Discovery
 Goals
 -----
 
-Every link has a limit on how large a packet it will carry, its Maximum Transmission
-Unit (MTU). For IPv6 that limit applies to the IPv6 datagram itself. A path made of
-several links can carry no more than its smallest link, and the sender has no way of
-knowing that number in advance.
+Every network link has a limit on how large a packet it will carry, its Maximum
+Transmission Unit (MTU); on Ethernet it is 1500 bytes. For IPv6 that limit applies to
+the IPv6 datagram itself. A path made of several links can carry no more than its
+smallest link, and the sender has no way of knowing that number in advance.
 
 IPv6 handles this differently from IPv4, and the difference is strict. In IPv4 a
 router that met an oversized packet could split it up itself and forward the pieces,
@@ -33,9 +33,10 @@ configurations show:
 3. recovering when the message gets through;
 4. the quiet case where the sender was sized correctly from the start.
 
-A tunnel is used to make the path narrower, because encapsulation is a common reason
-a path carries less than the links at either end of it. What the tunnel is for does not
-matter here; the :doc:`../../tunneling/doc/index` showcase covers that.
+An IPv6-in-IPv6 tunnel is used to make the path narrower, because encapsulation is a
+common reason a path carries less than the links at either end of it. What the tunnel
+is for does not matter here; the :doc:`../../tunneling/doc/index` showcase covers
+that.
 
 | Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/ipv6/pathmtudiscovery <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/pathmtudiscovery>`__
