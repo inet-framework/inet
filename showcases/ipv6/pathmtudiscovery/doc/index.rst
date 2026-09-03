@@ -25,10 +25,13 @@ it keeps sending the same size, every large packet is discarded, and the small o
 still arrive — so the path looks healthy while large transfers hang. That failure has a
 name, the Path MTU Discovery black hole, and it is what this showcase reproduces.
 
-This showcase creates a path whose limit is lower than the sender's own link, and then
-shows four outcomes: paying for fragmentation, losing everything when the message is
-filtered, recovering when the message gets through, and the quiet case where the
-sender was sized correctly from the start.
+This showcase creates a path whose limit is lower than the sender's own link. The four
+configurations show:
+
+1. paying for fragmentation;
+2. losing everything when the message is filtered;
+3. recovering when the message gets through;
+4. the quiet case where the sender was sized correctly from the start.
 
 A tunnel is used to make the path narrower, because encapsulation is a common reason
 a path carries less than the links at either end of it. What the tunnel is for does not
