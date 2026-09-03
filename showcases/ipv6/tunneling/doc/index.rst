@@ -52,8 +52,7 @@ endpoints treats the outer packet as normal traffic addressed to the exit point.
 
 Nothing about this is specific to IPv6-in-IPv6. Putting a packet inside another packet
 and routing the outer one is the mechanism underneath every overlay network in use
-today. IPv6-in-IPv6 is that mechanism in its simplest form, because the outer header
-is the same IPv6 header the reader already knows, with nothing added.
+today.
 
 Addresses the network will not carry
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
