@@ -228,14 +228,12 @@ by an IPv6-in-IPv6 tunnel, and ``transit`` is a router between them that carries
 the two addresses of the links it is attached to. ``firewall`` sits between ``hostA``
 and ``borderA``; in three of the four configurations it does nothing at all.
 
-The tunnel is not part of the topology — it is an interface on each border router plus
-a route leading to it:
+The tunnel is not part of the topology. The dashed line below shows where it runs, but
+there is no link between the border routers — only an interface on each of them and a
+route that leads to it:
 
 .. figure:: media/tunnel-overlay.png
    :align: center
-
-The dashed line is drawn on the figure to show where the tunnel runs. It is not a link
-in the model.
 
 .. FIGURE RECIPE: derived from media/network.png with PIL — a quadratic Bezier from
    (505,218) through (695,88) to (893,218) in the 1194x344 image, 3px wide, colour

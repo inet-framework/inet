@@ -236,15 +236,12 @@ Each interface is labelled with the IPv6 address it holds.
    area "module_rectangle", margin 5. NoTunnel is used deliberately: in the tunnel configs
    the tunnel interface adds an "fe80::" label that means nothing to a reader.
 
-The tunnel itself is not part of the topology. It is drawn here as a dashed line, but
-there is no link between the two border routers — only an interface on each of them
-and a route that leads to it:
+The tunnel itself is not part of the topology. The dashed line below shows where it
+runs, but there is no link between the two border routers — only an interface on each
+of them and a route that leads to it:
 
 .. figure:: media/tunnel-overlay.png
    :align: center
-
-The dashed line is drawn on the figure to show where the tunnel goes. It is not a link
-in the model.
 
 .. FIGURE RECIPE: derived from media/network.png. The dashed arc, its two arrow heads
    and the label are drawn with PIL: a quadratic Bezier from (258,168) through
