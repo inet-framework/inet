@@ -185,10 +185,16 @@ network interface has):
    plain Linux ``ip6tnl`` both work without one — but expect to see addresses on
    tunnel interfaces in a real configuration.
 
-Each end is configured separately, and each end describes only its own direction. The
-tunnel in this showcase is used in both directions, so both border routers declare an
-interface, with the ``source`` and ``destination`` values swapped. Configuring only
-one end would give a tunnel that carries traffic one way and nothing back.
+A tunnel interface encapsulates, so it is needed on the node that *sends* into the
+tunnel. The node at the far end needs no tunnel interface at all: any IPv6 node that
+receives a datagram addressed to itself whose Next Header says ``IPv6`` strips the
+outer header and routes what was inside, as described above. One interface therefore
+gives a tunnel that carries traffic in one direction only.
+
+Both border routers declare one here, with the ``source`` and ``destination`` values
+swapped, so that either can send into it. The application traffic runs from site A to
+site B, but the return direction is used too: it is what carries the ICMPv6 errors
+that site B's router sends back.
 
 Steering traffic into the tunnel
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
