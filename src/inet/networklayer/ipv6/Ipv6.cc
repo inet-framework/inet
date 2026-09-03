@@ -1101,6 +1101,9 @@ void Ipv6::fragmentAndSend(Packet *packet)
     if (ipv6Header->getHopLimit() <= 0) {
         // drop datagram, destruction responsibility in ICMP
         EV_INFO << "datagram hopLimit reached zero, sending ICMPv6_TIME_EXCEEDED\n";
+        PacketDropDetails details;
+        details.setReason(HOP_LIMIT_REACHED);
+        emit(packetDroppedSignal, packet, &details);
         sendIcmpError(packet, ICMPv6_TIME_EXCEEDED, 0); // FIXME check icmp 'code'
         return;
     }
@@ -1203,6 +1206,9 @@ bool Ipv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address&
             if (rt->isRouter()) {
                 EV_INFO << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
                 numUnroutable++;
+                PacketDropDetails details;
+                details.setReason(NO_ROUTE_FOUND);
+                emit(packetDroppedSignal, packet, &details);
                 sendIcmpError(packet, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
             }
             else { // host
