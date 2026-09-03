@@ -54,11 +54,11 @@ endpoints treats the outer packet as normal traffic addressed to the exit point.
 
 .. note::
 
-   The same idea appears throughout networking under other names. A mobile network's
-   GTP tunnels, a datacentre's VXLAN, and a broadband provider's Dual-Stack Lite all
-   wrap one packet in another and route the outer one; they differ in which headers
-   they use and what they carry. IPv6-in-IPv6 is the case where the outer header is
-   an ordinary IPv6 header.
+   Tunneling is widely used in networking, under many different names. A mobile
+   network's GTP tunnels, a datacentre's VXLAN, and a broadband provider's Dual-Stack
+   Lite all wrap one packet in another and route the outer one; they differ in which
+   headers they use and what they carry. IPv6-in-IPv6 is the case where the outer
+   header is an ordinary IPv6 header.
 
 Addresses the network will not carry
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
