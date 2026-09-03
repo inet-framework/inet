@@ -28,11 +28,11 @@ requires them to, so under load the message can be lost even where nothing filte
 — which makes the failure intermittent.
 
 When the message does not arrive, the sender does not learn the path MTU. It keeps
-sending the same size, every large packet is discarded, and the small ones still
-arrive — so the path looks healthy while large transfers hang, and the fault is hardest
-to find when the network is busiest. That failure has a name, the *Path MTU Discovery
-black hole*, and it is
-what this showcase reproduces.
+sending the same size, so the network carries every small packet and discards every
+large one: a name lookup succeeds and a web page starts to load, while a file transfer
+stops partway and never finishes. Nothing reports an error at either end, and the fault
+is hardest to find when the network is busiest. That failure has a name, the *Path MTU
+Discovery black hole*, and it is what this showcase reproduces.
 
 This showcase creates a path whose limit is lower than the sender's own link. The four
 configurations show:
