@@ -745,6 +745,11 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`,
 :download:`configurator.xml <../configurator.xml>`,
 :download:`clone.xml <../clone.xml>`
 
+.. TODO: the opp_env commands below name inet-4.7, the first release that can contain
+   this showcase -- 4.6 has no Ipv6NetworkConfigurator and no DAD statistics. As of
+   writing, opp_env's version database stops at 4.6.0, so these commands do not
+   resolve yet. Check them once the release that carries this showcase is published.
+
 Try It Yourself
 ---------------
 
