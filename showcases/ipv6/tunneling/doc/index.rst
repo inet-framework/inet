@@ -287,6 +287,7 @@ Routing is configured by hand rather than computed, using
 transit router's routing table is the following:
 
 .. figure:: media/transit-routes.png
+   :width: 100%
    :align: center
 
 The first two routes are the ones configured for it, covering the links it is attached
