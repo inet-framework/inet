@@ -377,44 +377,38 @@ What each one does:
 - ``mac.qosStation = true`` **brings EDCA into existence.** In :ned:`Ieee80211Mac` the ``hcf``
   submodule — the QoS coordination function that contains EDCA — is declared ``if qosStation``,
   so this parameter is what instantiates it. It is a per-interface switch, set here on the
-  stations and on the access point alike so the whole cell runs EDCA.
+  stations and on the access point alike so the whole cell runs EDCA. It also quietly retires
+  your DCF settings: the ``dcf`` submodule is unconditional in the NED and stays where it was,
+  but the MAC now hands every frame to ``hcf`` instead. Parameters set under ``mac.dcf.…`` still
+  assign real parameters of a real module; that module is simply no longer on the transmit path,
+  and nothing warns you. That is what becomes of ``[General]``'s
+  ``*.sta[*].wlan[*].mac.dcf.channelAccess.pendingQueue.packetCapacity = 10`` here, and why the
+  queue depth has to be restated under ``mac.hcf.…``.
 - ``mac.hcf.edca.edcaf[1]`` **picks the access category.** EDCA replaces DCF's single contention
   state machine with one per access category, held in the ``edcaf`` submodule vector. The order
   is fixed in ``Edca.ned``: ``edcaf[0]`` is AC_BK, ``edcaf[1]`` AC_BE, ``edcaf[2]`` AC_VI,
   ``edcaf[3]`` AC_VO. All of this showcase's traffic lands in AC_BE, so ``edcaf[1]`` is the only
-  category worth configuring here.
+  category worth configuring here. Traffic reaches AC_BE by default rather than by
+  configuration: the category is derived from the frame's user priority, and by default nothing
+  assigns one — the wlan interface's ``classifier`` slot holds an ``OmittedIeee8021dQosClassifier``,
+  so no UP is tagged, the TID stays 0, and 802.11's UP-to-AC mapping puts TID 0 in AC_BE. To
+  spread traffic over the other categories, install a real classifier
+  (``*.sta[*].wlan[*].classifier.typename = "QosClassifier"``), which maps UDP/TCP ports and IP
+  protocols to user priorities.
 - ``txopProcedure.txopLimit = 3.008ms`` **is the fix itself.** The parameter's default is
   ``-1s``, which does not mean "unlimited" — it means *use the standard's value for this access
   category and PHY*, and for AC_BE that value is **zero**: one frame per win, which is precisely
   the behaviour that produces the anomaly. Any nonzero limit turns the win into a time
   allocation. The 3.008 ms used here is the standard's own AC_VI figure for OFDM PHYs, borrowed
-  so the number is a sanctioned one rather than an invented one.
+  so the number is a sanctioned one rather than an invented one. It is also the only one of
+  EDCA's knobs that can do this job: ``Edcaf`` exposes ``aifsn``, ``cwMin`` and ``cwMax`` as well
+  (each ``-1`` by default, meaning the standard's per-category value), but those change how
+  *often* a category wins the channel, not how *long* it holds it, so they can prioritise a
+  station without equalising airtime.
 - ``pendingQueue.packetCapacity = 50`` **gives the burst something to carry.** A TXOP is worth
   only as much as the frames waiting behind it, and the ten-frame depth set in ``[General]`` is
   not enough to fill a 3.008 ms slice at 54 Mbps. Note the path: under EDCA the pending queue is
   per access category, at ``mac.hcf.edca.edcaf[1].pendingQueue``.
-
-.. admonition:: Fine print — three things that catch people out
-
-   **Your DCF settings go quiet.** Turning on ``qosStation`` does not remove the
-   ``dcf`` submodule — it is unconditional in the NED and stays where it was — but the MAC now
-   hands every frame to ``hcf`` instead. Parameters set under ``mac.dcf.…`` still assign real
-   parameters of a real module; that module is simply no longer on the transmit path, and
-   nothing warns you. That is exactly what becomes of ``[General]``'s
-   ``*.sta[*].wlan[*].mac.dcf.channelAccess.pendingQueue.packetCapacity = 10`` in this
-   configuration, and why the queue depth has to be restated under ``mac.hcf.…``.
-
-   **Traffic reaches AC_BE by default, not by configuration.** The access category is derived
-   from the frame's user priority, and by default nothing assigns one: the wlan interface's
-   ``classifier`` slot holds an ``OmittedIeee8021dQosClassifier``, so no UP is tagged, the TID
-   stays 0, and 802.11's UP-to-AC mapping puts TID 0 in AC_BE. To spread traffic over the other
-   categories, install a real classifier — ``*.sta[*].wlan[*].classifier.typename =
-   "QosClassifier"`` — which maps UDP/TCP ports and IP protocols to user priorities.
-
-   **The other EDCA knobs cannot do this job.** ``Edcaf`` also exposes ``aifsn``, ``cwMin`` and
-   ``cwMax`` (each ``-1`` by default, meaning the standard's per-category value). They change how
-   *often* a category wins the channel, not how *long* it holds it, so they can prioritise a
-   station but cannot equalise airtime. Of the four, only ``txopLimit`` allocates time.
 
 At a zero TXOP limit EDCA is *nearly* plain DCF — one frame per win either way — but not
 exactly: AC_BE contends with AIFSN 3, one slot time longer than DCF's DIFS. So this
@@ -573,27 +567,22 @@ payload — not the acknowledgment and interframe gaps around it. It is applied 
 per transmission, so retransmissions are charged too; here the links are error-free and the
 access point is the only transmitter, so there are effectively none.)
 
-.. admonition:: Fine print — tuning the queue
+Three further knobs are left at their defaults here. ``quantum`` sets how coarsely the clients
+interleave rather than what share they end up with: a client is eligible whenever its deficit is
+non-negative, and it is charged only *after* its frame goes out, so the quantum never blocks a
+frame — it sets how many top-up rounds a client waits after an expensive one. Smaller values
+interleave the clients more finely at the cost of more scheduler rounds; larger values serve more
+frames per visit and raise the other clients' latency.
 
-   ``quantum`` (1500 µs) is a granularity knob, not a fairness knob. A client is eligible whenever
-   its deficit is non-negative, and it is charged only *after* the frame goes out, so the quantum
-   can never block a frame — it only sets how many top-up rounds a client waits after an expensive
-   one. Smaller values interleave the clients more finely at the cost of more scheduler rounds;
-   larger values serve more frames per visit and raise the other clients' latency. The long-run
-   share is the same either way.
-
-   ``weight`` (1) scales that credit: a client topped up by ``quantum * weight`` gets a
-   proportionally larger time share, which is how *weighted* airtime fairness would be expressed.
-   Note that it is not yet per-station. The enclosing queue forwards ``quantum``, ``weight``,
-   ``fairnessEnabled`` and ``subqueueTypename`` to every per-station branch it creates, matching
-   them by parameter name — which is what lets the compound be configured as a whole, but also
-   means every branch receives the same values. Setting ``weight`` uniformly is therefore
-   equivalent to scaling ``quantum``; giving one client a different weight from another would need
-   the branch parameters to be individually addressable.
-
-   ``subqueueTypename`` selects the type of each per-station FIFO
-   (``inet.queueing.queue.PacketQueue`` by default) — swap it to give each client its own capacity
-   or an active queue-management discipline.
+``weight`` (1) scales that credit, so a client topped up by ``quantum * weight`` gets a
+proportionally larger time share — which is how *weighted* airtime fairness would be expressed.
+It is not yet per-station, though: the enclosing queue forwards ``quantum``, ``weight``,
+``fairnessEnabled`` and ``subqueueTypename`` to every per-station branch it creates, matching them
+by parameter name, so every branch receives the same values and setting ``weight`` uniformly is
+equivalent to scaling ``quantum``. Giving one client a different weight from another would need
+the branch parameters to be individually addressable. ``subqueueTypename`` selects the type of
+each per-station FIFO (``inet.queueing.queue.PacketQueue`` by default) — swap it to give each
+client its own capacity or an active queue-management discipline.
 
 That is also why the anomaly baseline here is a per-client round robin and not a plain FIFO. A
 stock access point with a single drop-tail FIFO does *not* reproduce the rate anomaly cleanly —
