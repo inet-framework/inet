@@ -711,7 +711,9 @@ The consequence is visible on the canvas at the end of the simulation:
 
 ``host[3]`` shows ``<unspec>``: it has no address at all. The failure stops it at
 the first step, so it never reaches router discovery and never builds a global
-address either. A host in this state cannot communicate.
+address either. With no address it may use as a source, it cannot exchange traffic
+with any other node — the only messages it can still send are the Duplicate Address
+Detection probes themselves, which are sent from the unspecified address.
 
 The statistics show the same result, and show that no other node is affected:
 
