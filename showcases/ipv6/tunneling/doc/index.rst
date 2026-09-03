@@ -22,8 +22,8 @@ that header off and delivers the original packet into the second office.
 
 This showcase demonstrates IPv6-in-IPv6 tunneling as defined in RFC 2473. Two sites
 use addresses the network between them cannot route, and a tunnel between the site
-border routers carries their traffic across. Four configurations then change one thing
-at a time:
+border routers carries their traffic across. The four configurations show the
+following:
 
 - what happens without the tunnel, so that the failure it fixes is visible;
 - the tunnel carrying a whole remote site;
