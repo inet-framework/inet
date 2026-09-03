@@ -1,7 +1,7 @@
 # INET Mobile IPv6 — implementation gaps report
 
 Audited 2026-08-13 on `master` (`fa3c69f237`), as the Phase 1.75 feasibility gate of
-the `showcases/general/mipv6` showcase. Verdict there: *suitable as-is* — none of
+the `showcases/ipv6/mipv6` showcase. Verdict there: *suitable as-is* — none of
 the gaps below blocks the showcase (no host ever sits on the home link in its
 scenario, the correspondent node supports MIPv6, and crypto fidelity is not what a
 behavior showcase demonstrates). They are recorded here as future implementation

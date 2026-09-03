@@ -47,6 +47,7 @@ All showcases:
    emulation/index
    tsn/index
    general/index
+   ipv6/index
    measurement/index
    mobility/index
    quic/index

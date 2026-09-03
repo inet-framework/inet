@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-package inet.showcases.general.mipv6;
+package inet.showcases.ipv6.mipv6;
 
 import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
 import inet.node.ipv6.Router6;
