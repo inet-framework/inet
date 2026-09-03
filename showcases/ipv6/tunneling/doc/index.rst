@@ -571,40 +571,94 @@ discarded at ``borderB`` with the reason ``HOP_LIMIT_REACHED``:
              the route visualizer is switched OFF for the videos, since its 10s
              simulationTime fade-out would leave arrows piling up across the clip.
    anim:     playback_speed=1 (default)
-   capture:  fps=30, crop_area=with_padding; canvas was 1034x418 at (750,87)
+   capture:  fps=30, crop_area=with_padding; canvas was 1034x418, but its x/y in the
+             window moves between runs -- always take crop_rect from that run's own
+             record_video JSON, never from this comment
    encode:   ffmpeg -framerate <frames/13> -i frames/<name>_%04d.png
              -filter:v "crop=1034:332:750:173,pad=ceil(iw/2)*2:ceil(ih/2)*2"
              -r 30 -vcodec libx264 -pix_fmt yuv420p
              The crop drops 86px off the TOP of the reported crop_rect: Qtenv's canvas
              toolbar floats over the top-right of the canvas and is inside the captured
              area, and the configurator/visualizer icons sit in the same strip. Input
-             framerate is set so the clip lands near 13s; recording a 1.5ms window at
-             fps=30 yields ~1300 frames, which is 43s at 30fps.
-   variants: notunnel-drops.mp4 and routingloop-drops.mp4 are the same two windows with
+             framerate is set so the clip lands near 13s. Do not trust a frame count
+             from an earlier recording: the number of frames a window yields depends on
+             the animation speed Qtenv's message animator asks for, and that has already
+             changed once under this recipe (re-running the plain RoutingLoop capture
+             unchanged now yields 5205 frames where the shipped clip has 422). Read the
+             count off the run and let <frames/13> absorb it.
+   variants: notunnel-drops.mp4 and routingloop-drops.mp4 are the same two windows --
+             both the t=2.5s send, like the plain clips -- with
              packetDropVisualizer.displayPacketDrops=true, nodeFilter="not(host*)" so
-             only the routers annotate, and labelFormat="%s" for the reason string.
+             only the routers annotate, labelFormat="%s" for the reason string, and
+             icon="msg/packet" instead of the default "msg/packet_s", which is too small
+             to read against a network this wide.
              They need the `packetDropped` emissions added to Ipv6::fragmentAndSend()
              and Ipv6::determineOutputInterface(); stock INET signals neither, so the
              visualizer has nothing to draw for an unroutable or expired unicast packet.
-             fadeOutMode="simulationTime" with fadeOutTime=1ms (NoTunnel) and 3ms
-             (RoutingLoop) -- one for each clip's own window. The other two modes both
-             fail, in opposite directions:
+
+             What the drop visualization IS matters here. PacketDropCanvasVisualizer
+             draws a LabeledIconFigure and setAlpha() derives BOTH its opacity and its
+             POSITION from the same alpha: px = 4*dx*(1-alpha) and py = a*px^2 + b*px,
+             so the icon flies out of the node along a parabola -- up over dx, back down
+             past the node, and away -- while it fades. The fade IS the animation; there
+             is no separate motion clock. A marker that sits at alpha ~ 1 does not move
+             at all, and a fade that completes in a handful of rendered frames makes the
+             icon teleport. Two things therefore have to be true at once.
+
+             1. The fade has to span many rendered frames. fadeOutAnimationSpeed does
+             exactly this: while any marker is on screen the visualizer pins the canvas
+             animation speed to it (Qtenv takes the minimum over all requesters), and
+             during recording sim_time_per_frame = (1/fps) * animation_speed *
+             playback_speed. So the arc lasts
+                 30 * fadeOutTime / (fadeOutAnimationSpeed * playback_speed)
+             frames -- a number you set, independent of how fast the model itself
+             animates. Measured here: 164 frames (5.5s of clip) for NoTunnel, 258 frames
+             (3.3s) for RoutingLoop. fadeOutAnimationSpeed has to be lower than the
+             model's own animation speed or the minimum picks the model's instead.
+
+             2. The run has to keep rendering frames after the last event of the burst.
+             It will not if the recording stops on a TIME limit: Qtenv's normal run loop
+             breaks straight out on `guessNextSimtime() >= runUntil.time` and skips the
+             tail animation (qtenv.cc, marked "TODO: animate until the target simtime"),
+             so the display freezes on the drop and the fade never advances. That is
+             what made every earlier attempt look frozen, whatever fadeOutTime was set
+             to. Stop on an EVENT limit instead: that branch calls
+             animateUntilNextEvent() before breaking, which keeps rendering until the
+             marker expires, the animation speed falls back to zero, and Qtenv jumps to
+             the next event. Take the event number from get_simulation_state after the
+             warm-up step and add the burst length -- 36 events for NoTunnel, 544 for
+             RoutingLoop (the whole loop plus the ICMPv6 Time Exceeded going home).
+
+             Settings used: fadeOutMode="simulationTime", dx=24,
+             fadeOutAnimationSpeed=2.4e-5 for both; fadeOutTime=40us with
+             playback_speed=1 for NoTunnel, fadeOutTime=2.4ms with playback_speed=12 for
+             RoutingLoop. The playback speed is only there to keep the RoutingLoop frame
+             count manageable -- its loop renders ~5200 frames at playback 1 on this
+             build -- and it scales journey and arc alike, so the arc's share of the clip
+             is fixed by fadeOutTime/fadeOutAnimationSpeed alone.
+
+             dx=24 rather than the default 32: the arc has to stay inside the crop and
+             inside the bgb. Note that dy is not usable -- PacketDropCanvasVisualizer's
+             initialize() reads par("dx") into dy, so the arc is always dx wide and dx
+             high and setting dy in the ini does nothing. At dx=24 the peak clears the
+             top of the frame above `transit` (the label is centred on the drop point,
+             about 17px of it above), and the far end of the arc, 96px right and 192px
+             below the node, still falls inside bgb=1010x395 for both transit and
+             borderB -- so the canvas bounding box never grows and Qtenv never rescrolls.
+             That is why these variants no longer need the t=3.0s window and the warm-up
+             to 2.999s that an earlier cut used to settle the bounds.
+
+             fadeOutMode: simulationTime is the only one of the three that works.
                realTime (the default) measures the fade in wall-clock seconds, and
                  frame-grabbing takes far longer than the 1s default, so a marker
                  survives a handful of frames and never reaches the clip.
                animationTime survives that, but an express warm-up advances animation
                  time by only a few seconds however much simulated time it covers, so
-                 the markers from the t=2.5s burst are still fresh when recording
+                 the markers from the previous burst are still fresh when recording
                  starts and sit on screen from frame one.
-             A simulationTime fade avoids both if the value is smaller than the 500ms
-             between bursts -- the earlier burst's markers are then already expired at
-             the first refreshDisplay -- and comparable to the recorded window, so the
-             marker appears when the packet dies and fades within the clip.
-             The variants record the t=3.0s send, not the t=2.5s one, and warm up by
-             running express to 2.999s. The first drop markers enlarge the canvas
-             bounding box and Qtenv rescrolls once; a fixed crop then slides off the
-             network partway through. Warming up past an earlier burst settles the
-             bounds before recording starts, and the crop matches the plain clips.
+             A simulationTime fade avoids both as long as it is well under the 500ms
+             between bursts, so the previous burst's markers are already expired at the
+             first refreshDisplay -- check frame 0000 of every capture for leftovers.
    post:     the encode chain ends with tpad=stop_mode=clone:stop_duration=1, which
              holds the last frame for a second. Without it the closing state -- the
              received-packet counter reaching its final value -- is on screen for one
