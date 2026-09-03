@@ -460,6 +460,19 @@ times drawn from :par:`hostBootupTime` and :par:`routerBootupTime`:
    0.686599  host[2]: Assigning Link Local Address
    0.875035  host[3]: Assigning Link Local Address
 
+The same lines as they come out of the simulation, with the module paths untouched:
+
+.. figure:: media/log_linklocal.png
+   :align: center
+   :width: 100%
+
+.. FIGURE RECIPE: run the Autoconfiguration config under Cmdenv with
+   --cmdenv-express-mode=false --cmdenv-log-level=detail --cmdenv-log-prefix="%t %M: ",
+   grep the "Assigning Link Local Address" lines, and render them as an image:
+   DejaVu Sans Mono 15px, black on white, timestamp column in dark red.
+   Determinism self-check: the first line must read
+   0.289098829217 ... router ... and the last 0.875035020057 ... host[3].
+
 Each of them is then checked by Duplicate Address Detection (DAD), which takes
 between one and two seconds. Once a host's link-local address is accepted, the
 host starts router discovery, and the router answers:
@@ -605,6 +618,16 @@ Address Detection (DAD) refuses it about 30 microseconds later:
    15.712316  host[3]: Received NA for tentative address fe80::8aa:ff:fe00:10 - Loss of DAD
    15.712316  host[3]: DAD failed for address fe80::8aa:ff:fe00:10 on eth0 --
               Loss of DAD, address will not be assigned
+
+The same four lines unedited:
+
+.. figure:: media/log_dadfailure.png
+   :align: center
+   :width: 100%
+
+.. FIGURE RECIPE: as above but on the DuplicateAddress config; grep the lines at
+   t=15.712286/15.712300/15.712316. Determinism self-check: the third line must read
+   "Received NA for tentative address fe80::8aa:ff:fe00:10 - Loss of DAD".
 
 ``host[0]`` already holds the address, so it answers the Neighbor Solicitation
 with a Neighbor Advertisement, and ``host[3]`` gives up the address. The contrast
