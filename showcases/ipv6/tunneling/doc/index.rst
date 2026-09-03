@@ -303,7 +303,8 @@ packet carrying them that reaches ``transit`` is discarded.
    "object". Use the FULL path including the network name -- a non-module object is not
    found by the network-relative path that works for modules. Inspecting the
    routingTable module itself instead shows its parameters, and expanding that far
-   enough to reach the routes buries them.
+   enough to reach the routes buries them. Crop the right 30% of the 1000x150 capture,
+   which is empty.
 
 In a real network that absence is not a configuration choice: providers filter these
 addresses, as described above. Here it has to be arranged deliberately, because a
