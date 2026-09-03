@@ -46,8 +46,10 @@ packet*.
 
 The outer header is an ordinary IPv6 header. Its source address is the entry point,
 its destination address is the exit point, and its Next Header field says ``IPv6``.
-That last field is the whole trick: it tells the exit point that the payload is
-another IPv6 datagram rather than a transport protocol. Every router between the two
+That value is what makes the tunnel work: any other value — TCP, UDP, ICMPv6 — would
+tell the exit point to hand the payload up to that protocol and be done with it.
+``IPv6`` tells it instead to strip the outer header and route the inner packet
+onwards, which is exactly what an exit point has to do. Every router between the two
 endpoints treats the outer packet as normal traffic addressed to the exit point.
 
 Nothing about this is specific to IPv6-in-IPv6. Putting a packet inside another packet
