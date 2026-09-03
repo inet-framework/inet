@@ -560,22 +560,23 @@ payload — not the acknowledgment and interframe gaps around it. It is applied 
 per transmission, so retransmissions are charged too; here the links are error-free and the
 access point is the only transmitter, so there are effectively none.)
 
-Three further knobs are left at their defaults here. ``quantum`` sets how coarsely the clients
-interleave rather than what share they end up with: a client is eligible whenever its deficit is
-non-negative, and it is charged only *after* its frame goes out, so the quantum never blocks a
-frame — it sets how many top-up rounds a client waits after an expensive one. Smaller values
-interleave the clients more finely at the cost of more scheduler rounds; larger values serve more
-frames per visit and raise the other clients' latency.
+Three further knobs are left at their defaults here. The ``quantum`` parameter sets how coarsely
+the clients interleave rather than what share they end up with: a client is eligible whenever its
+deficit is non-negative, and it is charged only *after* its frame goes out, so the quantum never
+blocks a frame — it sets how many top-up rounds a client waits after an expensive one. Smaller
+values interleave the clients more finely at the cost of more scheduler rounds; larger values
+serve more frames per visit and raise the other clients' latency.
 
-``weight`` (1) scales that credit, so a client topped up by ``quantum * weight`` gets a
-proportionally larger time share — which is how *weighted* airtime fairness would be expressed.
-It is not yet per-station, though: the enclosing queue forwards ``quantum``, ``weight``,
-``fairnessEnabled`` and ``subqueueTypename`` to every per-station branch it creates, matching them
-by parameter name, so every branch receives the same values and setting ``weight`` uniformly is
-equivalent to scaling ``quantum``. Giving one client a different weight from another would need
-the branch parameters to be individually addressable. ``subqueueTypename`` selects the type of
-each per-station FIFO (``inet.queueing.queue.PacketQueue`` by default) — swap it to give each
-client its own capacity or an active queue-management discipline.
+The ``weight`` parameter, 1 by default, scales that credit, so a client topped up by
+``quantum * weight`` gets a proportionally larger time share — which is how *weighted* airtime
+fairness would be expressed. It is not yet per-station, though: the enclosing queue forwards
+``quantum``, ``weight``, ``fairnessEnabled`` and ``subqueueTypename`` to every per-station branch
+it creates, matching them by parameter name, so every branch receives the same values and setting
+``weight`` uniformly is equivalent to scaling ``quantum``. Giving one client a different weight
+from another would need the branch parameters to be individually addressable. The
+``subqueueTypename`` parameter selects the type of each per-station FIFO
+(``inet.queueing.queue.PacketQueue`` by default) — swap it to give each client its own capacity or
+an active queue-management discipline.
 
 That is also why the anomaly baseline here is a per-client round robin and not a plain FIFO. A
 stock access point with a single drop-tail FIFO does *not* reproduce the rate anomaly cleanly —
