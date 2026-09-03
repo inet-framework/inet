@@ -228,7 +228,7 @@ All four configurations use the same network:
 .. figure:: media/network.png
    :align: center
 
-Each interface is labelled with the address it holds. The ``configurator`` and
+Each interface is labelled with the IPv6 address it holds. The ``configurator`` and
 ``visualizer`` modules have no part in the protocol: the first assigns the addresses
 and routes, and the second draws the labels.
 
