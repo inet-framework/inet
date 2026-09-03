@@ -9,9 +9,16 @@
 
 #include <algorithm> // min,max
 
+#include "inet/transportlayer/tcp_common/TcpHeader.h" // seqLE, seqLess
+
 namespace inet {
 
 namespace tcp {
+
+bool TcpSegmentTransmitInfoList::isInRange(uint32_t beg) const
+{
+    return regions.empty() || (seqLE(regions.front().beg, beg) && seqLE(beg, regions.back().end));
+}
 
 void TcpSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentTime)
 {

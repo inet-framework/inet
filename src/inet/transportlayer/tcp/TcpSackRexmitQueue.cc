@@ -7,6 +7,8 @@
 
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 
+#include "inet/transportlayer/tcp/TcpSendQueue.h"
+
 namespace inet {
 
 namespace tcp {
@@ -25,6 +27,7 @@ TcpSackRexmitQueue::~TcpSackRexmitQueue()
 
 void TcpSackRexmitQueue::init(uint32_t seqNum)
 {
+    invalidateCounters();
     begin = seqNum;
     end = seqNum;
 }
@@ -55,17 +58,40 @@ std::string TcpSackRexmitQueue::detailedInfo() const
 
 void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
 {
+    invalidateCounters();
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
 
     if (!rexmitQueue.empty()) {
         auto i = rexmitQueue.begin();
 
         while ((i != rexmitQueue.end()) && seqLE(i->endSeqNum, seqNum)) // discard/delete regions from rexmit queue, which have been acked
+        {
             i = rexmitQueue.erase(i);
+        }
+
+        // prune recorded transmission boundaries the same way
+        for (auto s = xmitSegmentStarts.begin(); s != xmitSegmentStarts.end(); )
+            s = seqLess(*s, seqNum) ? xmitSegmentStarts.erase(s) : std::next(s);
 
         if (i != rexmitQueue.end()) {
             ASSERT(seqLE(i->beginSeqNum, seqNum) && seqLess(seqNum, i->endSeqNum));
             i->beginSeqNum = seqNum;
+        }
+    }
+
+    // conn is null only when the queue is exercised standalone (unit tests); the
+    // Reno-dupack inferred-SACK emulation below is a connection-level concern.
+    if (conn != nullptr && !conn->getState()->sack_enabled && !rexmitQueue.empty())
+    {
+        auto& head = rexmitQueue.front();
+        if (head.sacked)
+        {
+            // It is not possible to have the UNA sacked; otherwise, it would
+            // have been ACKed. This is, most likely, our wrong guessing
+            // when adding Reno dupacks in the count.
+            head.lost = true;
+            head.sacked = false;
+            addInferredSack();
         }
     }
 
@@ -77,6 +103,7 @@ void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
 
 void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
 {
+    invalidateCounters();
     ASSERT(seqLE(begin, fromSeqNum) && seqLE(fromSeqNum, end));
 
     bool found = false;
@@ -87,10 +114,14 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
     ASSERT(seqLess(fromSeqNum, toSeqNum));
 
     if (rexmitQueue.empty() || (end == fromSeqNum)) {
+        xmitSegmentStarts.insert(fromSeqNum); // original transmission boundary (skb start)
         region.beginSeqNum = fromSeqNum;
         region.endSeqNum = toSeqNum;
+        region.lost = false;
         region.sacked = false;
         region.rexmitted = false;
+        region.firstSentTime = region.lastSentTime = simTime();
+        region.transmitCount = 1;
         rexmitQueue.push_back(region);
         found = true;
         fromSeqNum = toSeqNum;
@@ -114,6 +145,16 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
 
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
             i->rexmitted = true;
+            i->lastSentTime = simTime();
+            i->transmitCount++;
+            // Deliberately KEEP i->lost: a lost mark persists across the
+            // retransmission until the data is cumulatively or selectively
+            // acked (Linux keeps TCPCB_LOST alongside TCPCB_SACKED_RETRANS --
+            // lost_out and retrans_out coexist in tcp_packets_in_flight()).
+            // Clearing it here made setPipe() count a retransmitted lost head
+            // under BOTH its rules ((a) not-lost and (b) retransmitted), one
+            // segment high, which starved PRR's ssthresh-pipe cap right after
+            // the fast retransmit and stalled recovery into the RTO.
             fromSeqNum = i->endSeqNum;
             found = true;
             i++;
@@ -126,8 +167,15 @@ void TcpSackRexmitQueue::enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum)
 
             region.beginSeqNum = fromSeqNum;
             region.endSeqNum = toSeqNum;
+            region.lost = beforeEnd ? i->lost : false;
             region.sacked = beforeEnd ? i->sacked : false;
             region.rexmitted = beforeEnd;
+            // a fragment split off *i is a retransmission of *i, so it inherits its
+            // transmit history; firstSentTime must stay the ORIGINAL send time for
+            // RACK's Karn check and Vegas' RTT sampling
+            region.firstSentTime = beforeEnd ? i->firstSentTime : simTime();
+            region.lastSentTime = simTime();
+            region.transmitCount = beforeEnd ? i->transmitCount + 1 : 1;
             rexmitQueue.insert(i, region);
             found = true;
             fromSeqNum = toSeqNum;
@@ -174,8 +222,28 @@ bool TcpSackRexmitQueue::checkQueue() const
     return f;
 }
 
-void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
+void TcpSackRexmitQueue::addInferredSack()
 {
+    invalidateCounters();
+    // skip the head which is assumed to be lost
+    auto i = ++rexmitQueue.begin();
+    while (i != rexmitQueue.end() && i->sacked)
+        i++;
+    if (i != rexmitQueue.end()) {
+        i->lost = false;
+        i->sacked = true;
+    }
+}
+
+uint32_t TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
+{
+    invalidateCounters();
+    // lowest sequence number this call NEWLY marked sacked, skipping regions that
+    // were ever retransmitted (a SACK for a retransmission is ambiguous, Linux's
+    // !TCPCB_RETRANS rule); 0 = nothing new. Regions are kept in sequence order, so
+    // the first hit is the lowest. Consumed by the caller's reordering detection
+    // (a new SACK below the prior FACK proves reordering).
+    uint32_t newlySackedLow = 0;
     if (seqLess(fromSeqNum, begin))
         fromSeqNum = begin;
 
@@ -204,7 +272,10 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
         while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
             if (seqGE(i->beginSeqNum, fromSeqNum)) { // Search region in queue!
                 found = true;
-                i->sacked = true; // set sacked bit
+                if (!i->sacked && !i->rexmitted && newlySackedLow == 0)
+                    newlySackedLow = i->beginSeqNum;
+                i->lost = false;
+                i->sacked = true;
             }
 
             i++;
@@ -214,6 +285,7 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
             Region region = *i;
 
             region.endSeqNum = toSeqNum;
+            region.lost = false;
             region.sacked = true;
             rexmitQueue.insert(i, region);
             i->beginSeqNum = toSeqNum;
@@ -224,6 +296,7 @@ void TcpSackRexmitQueue::setSackedBit(uint32_t fromSeqNum, uint32_t toSeqNum)
         EV_DETAIL << "FAILED to set sacked bit for region: [" << fromSeqNum << ".." << toSeqNum << "). Not found in retransmission queue.\n";
 
     ASSERT(checkQueue());
+    return newlySackedLow;
 }
 
 bool TcpSackRexmitQueue::getSackedBit(uint32_t seqNum) const
@@ -287,14 +360,30 @@ uint32_t TcpSackRexmitQueue::checkRexmitQueueForSackedOrRexmittedSegments(uint32
     return bytes;
 }
 
+void TcpSackRexmitQueue::markHeadLost()
+{
+    invalidateCounters();
+    ASSERT(!rexmitQueue.empty());
+    rexmitQueue.begin()->lost = true;
+}
+
+void TcpSackRexmitQueue::resetLostBit()
+{
+    invalidateCounters();
+    for (auto& elem : rexmitQueue)
+        elem.lost = false;
+}
+
 void TcpSackRexmitQueue::resetSackedBit()
 {
+    invalidateCounters();
     for (auto& elem : rexmitQueue)
         elem.sacked = false; // reset sacked bit
 }
 
 void TcpSackRexmitQueue::resetRexmittedBit()
 {
+    invalidateCounters();
     for (auto& elem : rexmitQueue)
         elem.rexmitted = false; // reset rexmitted bit
 }
@@ -374,6 +463,144 @@ void TcpSackRexmitQueue::checkSackBlock(uint32_t fromSeqNum, uint32_t& length, b
     length = (i->endSeqNum - fromSeqNum);
     sacked = i->sacked;
     rexmitted = i->rexmitted;
+}
+
+void TcpSackRexmitQueue::updateLost()
+{
+    invalidateCounters();
+    int numSacked = 0;
+    for (auto it = rexmitQueue.rbegin(); it != rexmitQueue.rend(); it++) {
+        if (it->sacked)
+            numSacked++;
+        if (numSacked >= conn->getState()->dupthresh && !it->sacked)
+            it->lost = true;
+    }
+}
+
+void TcpSackRexmitQueue::updateCounters() const
+{
+    uint32_t lost = 0, sacked = 0, retrans = 0;
+
+    if (countersValid) {
+#ifdef NDEBUG
+        return;
+#endif
+    }
+
+    for (const auto& region : rexmitQueue) {
+        uint32_t length = region.endSeqNum - region.beginSeqNum;
+        if (region.lost)
+            lost += length;
+        if (region.sacked)
+            sacked += length;
+        if (region.rexmitted)
+            retrans += length;
+    }
+
+    // debug builds keep walking even when the cache claims to be valid, so a
+    // mutation that forgot to invalidate is caught here and not in a fingerprint
+    ASSERT(!countersValid || (lost == lostBytes && sacked == sackedBytes && retrans == retransBytes));
+
+    lostBytes = lost;
+    sackedBytes = sacked;
+    retransBytes = retrans;
+    countersValid = true;
+}
+
+uint32_t TcpSackRexmitQueue::getLost() const
+{
+    updateCounters();
+    return lostBytes;
+}
+
+uint32_t TcpSackRexmitQueue::getSacked() const
+{
+    updateCounters();
+    return sackedBytes;
+}
+
+uint32_t TcpSackRexmitQueue::getRetrans() const
+{
+    updateCounters();
+    return retransBytes;
+}
+
+const TcpSackRexmitQueue::Region& TcpSackRexmitQueue::getRegion(uint32_t seqNum) const
+{
+    ASSERT(seqLE(begin, seqNum) && seqLess(seqNum, end));
+
+    RexmitQueue::const_iterator i = rexmitQueue.begin();
+
+    while (i != rexmitQueue.end() && seqLE(i->endSeqNum, seqNum)) // search for seqNum
+        i++;
+
+    ASSERT(i != rexmitQueue.end());
+    ASSERT(seqLE(i->beginSeqNum, seqNum) && seqLess(seqNum, i->endSeqNum));
+
+    return *i;
+}
+
+void TcpSackRexmitQueue::markLost(uint32_t fromSeqNum, uint32_t toSeqNum)
+{
+    invalidateCounters();
+    if (seqLess(fromSeqNum, begin))
+        fromSeqNum = begin;
+
+    if (seqLE(toSeqNum, fromSeqNum))
+        return;
+
+    ASSERT(seqLess(fromSeqNum, end));
+    ASSERT(seqLE(toSeqNum, end));
+
+    if (!rexmitQueue.empty()) {
+        auto i = rexmitQueue.begin();
+
+        while (i != rexmitQueue.end() && seqLE(i->endSeqNum, fromSeqNum))
+            i++;
+
+        ASSERT(i != rexmitQueue.end() && seqLE(i->beginSeqNum, fromSeqNum) && seqLess(fromSeqNum, i->endSeqNum));
+
+        if (i->beginSeqNum != fromSeqNum) { // split off the tail so lost applies exactly from fromSeqNum
+            Region region = *i;
+
+            region.endSeqNum = fromSeqNum;
+            rexmitQueue.insert(i, region);
+            i->beginSeqNum = fromSeqNum;
+        }
+
+        while (i != rexmitQueue.end() && seqLE(i->endSeqNum, toSeqNum)) {
+            if (seqGE(i->beginSeqNum, fromSeqNum) && !i->sacked)
+                i->lost = true;
+
+            i++;
+        }
+
+        if (i != rexmitQueue.end() && seqLess(i->beginSeqNum, toSeqNum) && seqLess(toSeqNum, i->endSeqNum)) {
+            Region region = *i;
+
+            region.endSeqNum = toSeqNum;
+            region.lost = !region.sacked;
+            rexmitQueue.insert(i, region);
+            i->beginSeqNum = toSeqNum;
+        }
+    }
+
+    ASSERT(checkQueue());
+}
+
+void TcpSackRexmitQueue::clearRexmitted(uint32_t fromSeqNum, uint32_t toSeqNum)
+{
+    invalidateCounters();
+    // RACK decided a RETRANSMISSION itself was lost (its send time matured
+    // against the reordering window): Linux tcp_mark_skb_lost clears
+    // TCPCB_SACKED_RETRANS (retrans_out--), which is what re-arms
+    // tcp_xmit_retransmit_queue to send the range again. The lost mark stays.
+    for (auto& region : rexmitQueue) {
+        if (seqGE(region.beginSeqNum, toSeqNum))
+            break;
+        if (seqGE(region.beginSeqNum, fromSeqNum) && region.rexmitted && !region.sacked)
+            region.rexmitted = false;
+    }
 }
 
 } // namespace tcp

@@ -161,6 +161,36 @@ class INET_API Tcp : public TransportProtocolBase
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 
+    // TCP Fast Open (RFC 7413): per-module cookie generation secret and client-role
+    // cookie cache (destination address -> last-learned cookie). Not cryptographically
+    // strong -- RFC 7413's threat model (blind off-path attackers) doesn't apply to a
+    // non-adversarial simulator; see generateFastOpenCookie(). Seeded lazily, on first
+    // actual use, rather than in initialize(): an unconditional RNG draw at module init
+    // time would shift this module's RNG stream for every scenario -- including ones
+    // that never touch TFO -- breaking determinism for unrelated randomness sharing
+    // the same stream.
+    bool fastOpenSecretSeeded = false;
+    uint64_t fastOpenSecret = 0;
+    // Mirrors Linux's tcpm_fastopen: the cookie carries its OWN option form
+    // (cookie.exp), while tryExp is the separate escalation counter used while no
+    // cookie is cached -- 0 = request with kind 34, 1 = the kind-34 request went
+    // unanswered, retry as experimental, 2 = the experimental request went
+    // unanswered too, so stay with kind 34 for good. It only ever grows, which is
+    // what makes the retry a single retry (fallback-exp-opt: "first FO, then FOEXP
+    // once, then back to FO forever").
+    struct FastOpenCacheEntry { std::vector<uint8_t> cookie; uint32_t peerMss = 0; bool exp = false; uint8_t tryExp = 0; };
+    std::map<L3Address, FastOpenCacheEntry> fastOpenCookieCache; // per-destination cookie + learned peer MSS (~ Linux tcp_metrics)
+    int fastOpenCookieCacheSize = 0; // read once from the fastopenCookieCacheSize parameter at INITSTAGE_LOCAL
+
+    // TCP Fast Open active blackhole detection (RFC 7413 SS4.4-inspired; simplified
+    // two-trigger port of the kernel's tcp_fastopen_active_should_disable/_disable/
+    // _detect_blackhole design -- see recordFastOpenBlackhole()). Module-wide, not
+    // per-destination: a middlebox that blackholes TFO SYN+data for one destination
+    // is presumed likely to do so for others too, matching the kernel's own
+    // process-wide (not per-destination) disable state.
+    int fastOpenBlackholeDisableCount = 0;
+    simtime_t fastOpenBlackholeDisableUntil = SIMTIME_ZERO;
+
     ushort lastEphemeralPort = static_cast<ushort>(-1);
     std::multiset<ushort> usedEphemeralPorts;
     long numSegmentsSent = 0;
@@ -182,6 +212,8 @@ class INET_API Tcp : public TransportProtocolBase
   public:
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     int msl;
+    bool alignOptions = true;
+    bool sendMssOption = true;
 
   public:
     Tcp() {}
@@ -204,6 +236,72 @@ class INET_API Tcp : public TransportProtocolBase
      * during processing of OPEN_ACTIVE or OPEN_PASSIVE.
      */
     virtual void addSockPair(TcpConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort);
+
+    /**
+     * TCP Fast Open (RFC 7413): derive a cookie for remoteAddr from this module's
+     * secret. Deterministic for a fixed secret+address (a simple keyed mix, not a
+     * cryptographic MAC -- see fastOpenSecret). Not const: lazily seeds fastOpenSecret
+     * from the module's RNG on first call.
+     */
+    virtual std::vector<uint8_t> generateFastOpenCookie(const L3Address& localAddr, const L3Address& remoteAddr, int cookieBytes);
+
+    /** TCP Fast Open: client-role cookie cache lookup. Returns false if nothing is cached for remoteAddr. */
+    virtual bool getFastOpenCookie(const L3Address& remoteAddr, std::vector<uint8_t>& cookie) const;
+
+    /** TCP Fast Open: refresh the cached peer MSS without touching the cookie -- Linux
+     *  tcp_rcv_fastopen_synack() calls tcp_fastopen_cache_set() on EVERY TFO SYN-ACK,
+     *  updating the MSS even when the SYN-ACK carries no (new) cookie. No-op if nothing
+     *  is cached for remoteAddr. */
+    virtual void updateFastOpenCachedMss(const L3Address& remoteAddr, uint32_t peerMss);
+
+    /** TCP Fast Open: client-role cookie cache update, called on learning a cookie from a peer's SYN-ACK. */
+    virtual void setFastOpenCookie(const L3Address& remoteAddr, const std::vector<uint8_t>& cookie, uint32_t peerMss);
+
+    /** Peer MSS learned alongside the cached cookie; 0 if no cache entry. */
+    virtual uint32_t getFastOpenCachedMss(const L3Address& remoteAddr) const;
+
+    /**
+     * TCP Fast Open: drop every cached cookie, so the next active open falls back
+     * to a bare cookie REQUEST. This is what `ip tcp_metrics flush` does on Linux,
+     * and test harnesses need it to re-arm the cookie-request path mid-run.
+     */
+    virtual void clearFastOpenCookieCache();
+
+    /**
+     * TCP Fast Open option form for remoteAddr: true = the experimental kind-254 +
+     * 0xF989-magic encoding (RFC 7413 appendix A), false = the assigned kind 34.
+     * With a cookie cached, the form that cookie arrived in decides; without one,
+     * the unanswered-request escalation does (Linux tcp_fastopen_cache_get:
+     * "cookie->len <= 0 && tfom->try_exp == 1").
+     */
+    virtual bool getFastOpenUseExpOption(const L3Address& remoteAddr) const;
+
+    /** Record which option form the cached cookie for remoteAddr arrived in. */
+    virtual void setFastOpenCookieExpForm(const L3Address& remoteAddr, bool exp);
+
+    /**
+     * A cookie REQUEST to remoteAddr came back with no Fast Open option at all;
+     * usedExpOption tells which form it was sent in. Advances the escalation
+     * counter so the next request tries the other encoding exactly once.
+     */
+    virtual void noteFastOpenCookieRequestUnanswered(const L3Address& remoteAddr, bool usedExpOption);
+
+    /**
+     * TCP Fast Open active blackhole detection: true while active (data-attached)
+     * Fast Open is temporarily disabled module-wide after suspected middlebox
+     * interference. Checked from process_OPEN_ACTIVE's cache-lookup gate -- while
+     * true, a new connection attempt behaves as if no cookie were cached (an
+     * immediate bare cookie-request SYN, no deferral/data), even if one is.
+     */
+    virtual bool isActiveFastOpenDisabled() const;
+
+    /**
+     * TCP Fast Open active blackhole detection: record a suspected blackhole event
+     * (an RTO or an out-of-order RST on a connection whose SYN carried data/a
+     * cookie) and disable active Fast Open for an exponentially-growing (capped)
+     * duration. No-op if fastopenBlackholeTimeout == 0 (disabled by default).
+     */
+    virtual void recordFastOpenBlackhole();
 
     virtual void removeConnection(TcpConnection *conn);
     virtual void sendToIp(Packet *segment);

@@ -55,11 +55,11 @@ class INET_API DumbTcp : public TcpAlgorithm
 
     virtual void receiveSeqChanged() override;
 
-    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
-    virtual void receivedDuplicateAck() override;
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 
-    virtual void receivedAckForDataNotYetSent(uint32_t seq) override;
+    virtual void receivedAckForUnsentData(uint32_t seq) override;
 
     virtual void ackSent() override;
 
@@ -71,9 +71,13 @@ class INET_API DumbTcp : public TcpAlgorithm
 
     virtual void rttMeasurementCompleteUsingTS(uint32_t echoedTS) override;
 
+    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked) override {} // no RTT estimator in DumbTcp
+
     virtual bool shouldMarkAck() override;
 
     virtual void processEcnInEstablished() override;
+
+    virtual uint32_t getBytesInFlight() const override;
 };
 
 } // namespace tcp

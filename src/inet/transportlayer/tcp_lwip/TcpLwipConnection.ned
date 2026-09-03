@@ -19,14 +19,14 @@ simple TcpLwipConnection {
     parameters:
         @signal[state];    // FSM state
         @signal[sndWnd];    // Snd_wnd
-        @signal[sndNxt];    // Sent seqNo
+        @signal[sndSeq];    // Sent seqNo
         @signal[sndAck];    // Sent ackNo
         @signal[rcvWnd];    // Rcv_wnd
         @signal[rcvSeq];    // Received seqNo
         @signal[rcvAck];    // Received ackNo (=snd_una)
 
         @statistic[sndWnd](record=vector; interpolationmode=sample-hold);    // Snd_wnd
-        @statistic[sndNxt](record=vector; interpolationmode=sample-hold);    // Sent seqNo
+        @statistic[sndSeq](record=vector; interpolationmode=sample-hold);    // Sent seqNo
         @statistic[sndAck](record=vector; interpolationmode=sample-hold);    // Sent ackNo
         @statistic[rcvWnd](record=vector; interpolationmode=sample-hold);    // Rcv_wnd
         @statistic[rcvSeq](record=vector; interpolationmode=sample-hold);    // Received seqNo

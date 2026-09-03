@@ -91,9 +91,16 @@ class INET_API TcpReceiveQueue : public cObject
     virtual Packet *extractBytesUpTo(uint32_t seq);
 
     /**
+     * Returns the amount of contiguous data available for reading.
+     */
+    virtual uint32_t getAcknowledgedDataLength() const {
+        return B(reorderBuffer.getAvailableDataLength()).get();
+    }
+
+    /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-    virtual uint32_t getAmountOfBufferedBytes();
+    virtual uint32_t getAmountOfBufferedBytes() const;
 
     /**
      * Returns the number of bytes currently free (=available) in queue. freeRcvBuffer = maxRcvBuffer - usedRcvBuffer
@@ -113,12 +120,20 @@ class INET_API TcpReceiveQueue : public cObject
     /**
      * Returns left edge of enqueued region.
      */
-    virtual uint32_t getLE(uint32_t fromSeqNum);
+    /**
+     * Returns true and sets [dupStart, dupEnd) to the lowest-sequence part of
+     * [fromSeqNum, toSeqNum) that duplicates already-buffered data (RFC 2883:
+     * the first duplicate contiguous sequence, reported as a D-SACK block).
+     * Must be queried BEFORE the segment is inserted into the queue.
+     */
+    virtual bool findFirstDuplicateRange(uint32_t fromSeqNum, uint32_t toSeqNum, uint32_t& dupStart, uint32_t& dupEnd) const;
+
+    virtual uint32_t getLE(uint32_t fromSeqNum) const;
 
     /**
      * Returns right edge of enqueued region.
      */
-    virtual uint32_t getRE(uint32_t toSeqNum);
+    virtual uint32_t getRE(uint32_t toSeqNum) const;
 
     /** Returns the minimum of first byte seq.no. in queue and rcv_nxt */
     virtual uint32_t getFirstSeqNo();

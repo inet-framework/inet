@@ -5,11 +5,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_TCPBASEALG_H
-#define __INET_TCPBASEALG_H
+#ifndef __INET_TCPALGORITHMBASE_H
+#define __INET_TCPALGORITHMBASE_H
 
+#include "inet/transportlayer/tcp/flavours/TcpAlgorithmBaseState_m.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
-#include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
 
 namespace inet {
 namespace tcp {
@@ -22,7 +22,7 @@ namespace tcp {
  * Implements:
  *   - delayed ACK algorithm (RFC 1122)
  *   - Jacobson's and Karn's algorithms for adaptive retransmission
- *   - Nagle's algorithm (RFC 896) to prevent silly window syndrome
+ *   - Nagle's algorithm (RFC 1122) to prevent silly window syndrome
  *   - Increased Initial Window (RFC 3390)
  *   - PERSIST timer
  *
@@ -38,23 +38,17 @@ namespace tcp {
  * and not touched after that. Subclasses may redefine any of the virtual
  * functions here to add their congestion control code.
  */
-class INET_API TcpBaseAlg : public TcpAlgorithm
+class INET_API TcpAlgorithmBase : public TcpAlgorithm
 {
   protected:
-    TcpBaseAlgStateVariables *& state; // alias to TcpAlgorithm's 'state'
+    TcpAlgorithmBaseStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
     cMessage *rexmitTimer;
     cMessage *persistTimer;
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
-
-    static simsignal_t cwndSignal; // will record changes to snd_cwnd
-    static simsignal_t ssthreshSignal; // will record changes to ssthresh
-    static simsignal_t rttSignal; // will record measured RTT
-    static simsignal_t srttSignal; // will record smoothed RTT
-    static simsignal_t rttvarSignal; // will record RTT variance (rttvar)
-    static simsignal_t rtoSignal; // will record retransmission timeout
-    static simsignal_t numRtosSignal; // will record total number of RTOs
+    cMessage *tlpTimer; // Tail Loss Probe PTO (RFC 8985 7.2); shares the RTO's single-slot discipline
+    cMessage *corkTimer; // TCP_CORK/MSG_MORE flush timer (Linux ICSK_TIME_PROBE0); fires at the RTO
 
   protected:
     /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */
@@ -63,6 +57,12 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     virtual void processPersistTimer(TcpEventCode& event);
     virtual void processDelayedAckTimer(TcpEventCode& event);
     virtual void processKeepAliveTimer(TcpEventCode& event);
+    /** Tail Loss Probe timeout: send a probe and remember snd_max in tlpHighSeq. */
+    virtual void processPtoTimer(TcpEventCode& event);
+    /** Cork flush timeout: force out the withheld TCP_CORK/MSG_MORE partial with PSH. */
+    virtual void processCorkTimer(TcpEventCode& event);
+    /** Linux tcp_schedule_loss_probe(): arm the PTO if the connection is TLP-eligible. */
+    virtual void schedulePto();
     //@}
 
     /**
@@ -71,11 +71,20 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     virtual void startRexmitTimer();
 
     /**
+     * Re-establish the TCP RTO invariant (Linux tcp_rearm_rto): if any
+     * unacknowledged data is outstanding but no retransmission timer is
+     * running, arm it. Call after ACK processing has finished sending, to
+     * cover data transmitted by RFC 6675 recovery (stepC) or SWS-blocked
+     * sends that would otherwise leave outstanding data with no timer.
+     */
+    void ensureRexmitTimerArmed();
+
+    /**
      * Update state vars with new measured RTT value. Passing two simtime_t's
      * will allow rttMeasurementComplete() to do calculations in double or
      * in 200ms/500ms ticks, as needed)
      */
-    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked);
+    virtual void rttMeasurementComplete(simtime_t tSent, simtime_t tAcked) override;
 
     /**
      * Converting uint32_t echoedTS to simtime_t and calling rttMeasurementComplete()
@@ -88,6 +97,16 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
      */
     virtual bool sendData(bool sendCommandInvoked);
 
+    virtual void receivedDuplicateAck();
+
+    /**
+     * Returns the configured initial congestion window in bytes according to
+     * state->init_cwnd_mode (RFC 2001 / RFC 3390 / RFC 6928 IW10). Used both for
+     * the initial cwnd and for the restart window after an idle period.
+     */
+    virtual uint32_t initialWindow() const;
+
+
     /** Utility function */
     cMessage *cancelEvent(cMessage *msg) { return conn->cancelEvent(msg); }
 
@@ -95,12 +114,12 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     /**
      * Ctor.
      */
-    TcpBaseAlg();
+    TcpAlgorithmBase();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpBaseAlg();
+    virtual ~TcpAlgorithmBase();
 
     /**
      * Create timers, etc.
@@ -118,15 +137,32 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
 
     virtual void sendCommandInvoked() override;
 
+    virtual void scheduleCorkTimer() override;
+    virtual void cancelCorkTimer() override;
+
     virtual void receivedOutOfOrderSegment() override;
+
+    // Linux-shaped adaptive receiver ACK dynamics (adaptiveDelayedAcks param):
+    // quickack budget, adaptive delayed-ACK timeout (ATO), pingpong mode
+    virtual void incrQuickack(uint32_t maxQuickacks);
+    virtual void enterQuickackMode(uint32_t maxQuickacks);
+    virtual bool inQuickackMode() const;
+    virtual void dataArrivedAtoUpdate();
+    virtual void scheduleDelayedAck();
 
     virtual void receiveSeqChanged() override;
 
-    virtual void receivedDataAck(uint32_t firstSeqAcked) override;
+    virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;
 
-    virtual void receivedDuplicateAck() override;
+    /** RFC 5681 duplicate-ACK test; flavours owning a recovery object defer to it. */
+    virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength);
 
-    virtual void receivedAckForDataNotYetSent(uint32_t seq) override;
+    /** Maintains state->dupacks and dispatches receivedDuplicateAck(). */
+    virtual void countDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength);
+
+    virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
+
+    virtual void receivedAckForUnsentData(uint32_t seq) override;
 
     virtual void ackSent() override;
 
@@ -139,6 +175,14 @@ class INET_API TcpBaseAlg : public TcpAlgorithm
     virtual bool shouldMarkAck() override;
 
     virtual void processEcnInEstablished() override;
+
+    virtual uint32_t getBytesInFlight() const override;
+
+    virtual simtime_t getSrtt() const override { return state->srtt; }
+
+    virtual uint32_t calculateSsthreshForFastRecovery() override;
+
+    virtual uint32_t calculateSsthresh(uint32_t bytesInFlight) override;
 };
 
 } // namespace tcp

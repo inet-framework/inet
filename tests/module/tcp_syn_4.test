@@ -7,6 +7,11 @@ Test that:
 
 %inifile: omnetpp.ini
 [General]
+
+# This test documents INET's exponential-from-first-retransmit SYN backoff;
+# opt out of the Linux linear-timeouts default so the schedule stays 3s,6s,12s...
+*.*_tcp.synLinearTimeouts = 0
+**.tcp.synLinearTimeouts = 0
 record-vector-results = false
 ned-path = .;../../../../src;../../lib
 

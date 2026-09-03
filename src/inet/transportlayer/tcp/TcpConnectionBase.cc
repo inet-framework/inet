@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+#include <iomanip>
 #include <assert.h>
 #include <string.h>
 
@@ -13,35 +14,19 @@
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
+#include "inet/transportlayer/tcp/flavours/Rfc6675Recovery.h"
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
 
 Define_Module(TcpConnection);
 
-simsignal_t TcpConnection::stateSignal = registerSignal("state"); // FSM state
-simsignal_t TcpConnection::sndWndSignal = registerSignal("sndWnd"); // snd_wnd
-simsignal_t TcpConnection::rcvWndSignal = registerSignal("rcvWnd"); // rcv_wnd
-simsignal_t TcpConnection::rcvAdvSignal = registerSignal("rcvAdv"); // current advertised window (=rcv_adv)
-simsignal_t TcpConnection::sndNxtSignal = registerSignal("sndNxt"); // sent seqNo
-simsignal_t TcpConnection::sndAckSignal = registerSignal("sndAck"); // sent ackNo
-simsignal_t TcpConnection::rcvSeqSignal = registerSignal("rcvSeq"); // received seqNo
-simsignal_t TcpConnection::rcvAckSignal = registerSignal("rcvAck"); // received ackNo (=snd_una)
-simsignal_t TcpConnection::unackedSignal = registerSignal("unacked"); // number of bytes unacknowledged
-simsignal_t TcpConnection::dupAcksSignal = registerSignal("dupAcks"); // current number of received dupAcks
-simsignal_t TcpConnection::pipeSignal = registerSignal("pipe"); // current sender's estimate of bytes outstanding in the network
-simsignal_t TcpConnection::sndSacksSignal = registerSignal("sndSacks"); // number of sent Sacks
-simsignal_t TcpConnection::rcvSacksSignal = registerSignal("rcvSacks"); // number of received Sacks
-simsignal_t TcpConnection::rcvOooSegSignal = registerSignal("rcvOooSeg"); // number of received out-of-order segments
-simsignal_t TcpConnection::rcvNASegSignal = registerSignal("rcvNASeg"); // number of received not acceptable segments
-simsignal_t TcpConnection::sackedBytesSignal = registerSignal("sackedBytes"); // current number of received sacked bytes
-simsignal_t TcpConnection::tcpRcvQueueBytesSignal = registerSignal("tcpRcvQueueBytes"); // current amount of used bytes in tcp receive queue
-simsignal_t TcpConnection::tcpRcvQueueDropsSignal = registerSignal("tcpRcvQueueDrops"); // number of drops in tcp receive queue
-simsignal_t TcpConnection::tcpRcvPayloadBytesSignal = registerSignal("tcpRcvPayloadBytes"); // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
-
+simsignal_t TcpConnection::deliveredCeSignal = registerSignal("deliveredCe"); // AccECN: cumulative resolved count of CE-marked packets the peer has reported via the ACE field
+simsignal_t TcpConnection::deliveredCeBytesSignal = registerSignal("deliveredCeBytes"); // AccECN: cumulative CE byte count from AccECN option evidence only
 TcpStateVariables::~TcpStateVariables()
 {
 }
@@ -101,6 +86,25 @@ void TcpConnection::initialize()
     WATCH_EXPR("fsmState", stateName(fsm.getState()));
 }
 
+std::string TcpConnection::validationInfo() const
+{
+    auto baseState = static_cast<const TcpAlgorithmBaseStateVariables *>(state);
+    std::stringstream out;
+    out << "lostOut: " << rexmitQueue->getLost() << ", "
+        << "sackedOut: " << rexmitQueue->getSacked() << ", "
+        << "retrans: " << rexmitQueue->getRetrans() << ", "
+        << "bytesInFligh: " << tcpAlgorithm->getBytesInFlight() << ", "
+        << "ssthresh: " << static_cast<const TcpClassicAlgorithmBaseStateVariables *>(state)->ssthresh << ", "
+        << "cwnd: " << baseState->snd_cwnd << ", "
+        << "snd_una: " << state->snd_una << ", "
+        << "snd_max: " << state->snd_max << ", "
+        << "snd_wnd: " << state->snd_wnd << ", "
+        << "dup_ack: " << state->dupacks << ", "
+        << "recover: " << (baseState->recover != 0 ? baseState->recover + 1 : state->recoveryPoint) << ", "
+        << "recovery: " << (state->lossRecovery ? "true" : "false");
+    return out.str();
+}
+
 //
 // FSM framework, TCP FSM
 //
@@ -121,10 +125,12 @@ void TcpConnection::initConnection(Tcp *_mod, int _socketId)
     connEstabTimer = new cMessage("CONN-ESTAB");
     finWait2Timer = new cMessage("FIN-WAIT-2");
     synRexmitTimer = new cMessage("SYN-REXMIT");
+    rackReoTimer = new cMessage("RACK-REO");
 
     the2MSLTimer->setContextPointer(this);
     connEstabTimer->setContextPointer(this);
     finWait2Timer->setContextPointer(this);
+    rackReoTimer->setContextPointer(this);
     synRexmitTimer->setContextPointer(this);
 
     WATCH(socketId);
@@ -171,6 +177,8 @@ TcpConnection::~TcpConnection()
         delete cancelEvent(finWait2Timer);
     if (synRexmitTimer)
         delete cancelEvent(synRexmitTimer);
+    if (rackReoTimer)
+        delete cancelEvent(rackReoTimer);
 }
 
 void TcpConnection::handleMessage(cMessage *msg)
@@ -196,12 +204,33 @@ bool TcpConnection::processTimer(cMessage *msg)
         process_TIMEOUT_2MSL();
     }
     else if (msg == connEstabTimer) {
-        event = TCP_E_TIMEOUT_CONN_ESTAB;
-        process_TIMEOUT_CONN_ESTAB();
+        if (state->fastopenSynDeferred) {
+            // TCP Fast Open (RFC 7413): the app called connect(fastOpen=true) with a
+            // cached cookie but never SEND-triggered the deferred SYN (misuse of the
+            // paired API, or a legitimately data-less Fast Open attempt) -- this is
+            // not a real connection-establishment timeout. Send the fallback bare SYN
+            // now (fastopenSynDataLen stays 0, so sendSyn() degrades to its ordinary
+            // bare-SYN behavior; the cookie is still attached, matching RFC 7413's
+            // explicitly-allowed data-less-SYN-with-valid-cookie case) and give the
+            // connection a fresh, full establishment window, instead of aborting it.
+            sendSyn();
+            state->fastopenSynDeferred = false;
+            startSynRexmitTimer();
+            scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
+            event = TCP_E_IGNORE;
+        }
+        else {
+            event = TCP_E_TIMEOUT_CONN_ESTAB;
+            process_TIMEOUT_CONN_ESTAB();
+        }
     }
     else if (msg == finWait2Timer) {
         event = TCP_E_TIMEOUT_FIN_WAIT_2;
         process_TIMEOUT_FIN_WAIT_2();
+    }
+    else if (msg == rackReoTimer) {
+        event = TCP_E_IGNORE;
+        processRackReoTimeout();
     }
     else if (msg == synRexmitTimer) {
         event = TCP_E_IGNORE;
@@ -219,6 +248,7 @@ bool TcpConnection::processTimer(cMessage *msg)
 bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader, L3Address segSrcAddr, L3Address segDestAddr)
 {
     Enter_Method("processTCPSegment");
+
 
     take(tcpSegment);
     printConnBrief();
@@ -241,7 +271,10 @@ bool TcpConnection::processTCPSegment(Packet *tcpSegment, const Ptr<const TcpHea
     TcpEventCode event = process_RCV_SEGMENT(tcpSegment, tcpHeader, segSrcAddr, segDestAddr);
 
     // then state transitions
-    return performStateTransition(event);
+    auto r = performStateTransition(event);
+
+
+    return r;
 }
 
 bool TcpConnection::processAppCommand(cMessage *msg)
@@ -434,7 +467,16 @@ bool TcpConnection::performStateTransition(const TcpEventCode& event)
                     break;
 
                 case TCP_E_RCV_RST:
-                    FSM_Goto(fsm, state->active ? TCP_S_CLOSED : TCP_S_LISTEN);
+                    // Return-to-LISTEN is RFC 793's rule for a plain (single-
+                    // connection) passive open only. A FORKED connection is a
+                    // Linux child socket: it must die, or we would end up with
+                    // TWO listeners (the resolved long-standing FIXME from
+                    // processRstInSynReceived()). A TFO-ACCELERATED connection
+                    // has app-visible state (accepted/possibly-delivered SYN
+                    // data) -- Linux drives such a child to TCP_CLOSE
+                    // (tcp_reset/tcp_done), it never silently re-listens.
+                    FSM_Goto(fsm, (state->active || state->forked || state->fastopenAccelerated)
+                             ? TCP_S_CLOSED : TCP_S_LISTEN);
                     break;
 
                 case TCP_E_RCV_ACK:
@@ -629,6 +671,45 @@ bool TcpConnection::performStateTransition(const TcpEventCode& event)
     return fsm.getState() != TCP_S_CLOSED;
 }
 
+void TcpConnection::rescheduleRackReoTimer(simtime_t delay)
+{
+    if (rackReoTimer == nullptr)
+        return;
+    if (rackReoTimer->isScheduled())
+        cancelEvent(rackReoTimer);
+    // Jiffy quantization (Linux tcp_rack_mark_lost: usecs_to_jiffies(timeout)+1):
+    // a positive sub-tick deadline fires whole ticks later on a real kernel --
+    // which is what lets a dupthresh-worth of further SACKs enter recovery
+    // inline before the timer, instead of the timer marking a burst's holes a
+    // fraction of a millisecond after the first SACK. The zero-delay act-now
+    // defer (ACK-path marks) is left untouched.
+    if (delay > SIMTIME_ZERO) {
+        simtime_t granularity = tcpMain->par("rackReoTimerGranularity");
+        if (granularity > SIMTIME_ZERO)
+            delay = (std::ceil(delay / granularity) + 1) * granularity;
+    }
+    if (delay >= SIMTIME_ZERO)
+        scheduleAfter(delay, rackReoTimer);
+}
+
+void TcpConnection::processRackReoTimeout()
+{
+    // The reordering-window deadline of some still-unacked segment matured with no
+    // ACK arriving to re-run detection -- re-run it now and let the recovery
+    // strategy act on any newly lost marks (enter recovery / retransmit). Guarded:
+    // the timer can be stale if the connection moved on (recovery completed and the
+    // queue drained, algorithm torn down mid-close).
+    if (!state || !state->sack_enabled || state->lossDetectionMode != 1
+            || rexmitQueue == nullptr || tcpAlgorithm == nullptr)
+        return;
+    auto recovery = dynamic_cast<Rfc6675Recovery *>(tcpAlgorithm->getRecovery());
+    if (recovery == nullptr)
+        return;
+    recovery->rackDetectAndMarkLost(/*fromReoTimer=*/true);
+    if (rexmitQueue->getLost() > 0)
+        recovery->reoTimeout();
+}
+
 void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
 {
     // cancel timers
@@ -642,6 +723,12 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             ASSERT(connEstabTimer && synRexmitTimer);
             cancelEvent(connEstabTimer);
             cancelEvent(synRexmitTimer);
+            // A TCP Fast Open server may have sent response data from
+            // SYN_RCVD, arming the data-transfer timers (REXMIT etc.);
+            // the embryonic connection's send state is abandoned wholesale,
+            // so those timers must not survive the fall back to LISTEN (a
+            // late REXMIT firing in LISTEN walked freshly-reset queues).
+            tcpAlgorithm->connectionClosed();
             break;
 
         case TCP_S_SYN_RCVD:
@@ -653,6 +740,9 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             delete cancelEvent(connEstabTimer);
             delete cancelEvent(synRexmitTimer);
             connEstabTimer = synRexmitTimer = nullptr;
+            // The MSS is settled only now (both SYNs seen), which is where Linux
+            // arms the RFC 4821 search too (tcp_init_transfer -> tcp_mtup_init).
+            mtupInit();
             // TCP_I_ESTAB notification moved inside event processing
             break;
 
