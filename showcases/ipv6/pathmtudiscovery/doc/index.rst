@@ -19,9 +19,11 @@ fitted. The sender's IPv6 layer remembers that number and sends smaller packets 
 then on. This exchange is Path MTU Discovery, defined in RFC 8201.
 
 The whole scheme rests on one message travelling backwards along the path. Everything
-else in IPv6 forwarding only needs packets to travel forwards. That asymmetry is what
-makes Path MTU Discovery fragile, and it is why the failure it produces — traffic that
-vanishes silently while small packets work perfectly — is a familiar one.
+else in IPv6 forwarding only needs packets to travel forwards, and that asymmetry is
+what makes Path MTU Discovery fragile. If the message is lost, the sender never learns:
+it keeps sending the same size, every large packet is discarded, and the small ones
+still arrive — so the path looks healthy while large transfers hang. That failure has a
+name, the Path MTU Discovery black hole, and it is what this showcase reproduces.
 
 This showcase creates a path whose limit is lower than the sender's own link, and then
 shows four outcomes: paying for fragmentation, losing everything when the message is
@@ -29,8 +31,8 @@ filtered, recovering when the message gets through, and the quiet case where the
 sender was sized correctly from the start.
 
 A tunnel is used to make the path narrower, because encapsulation is a common reason
-a path carries less than the links at either end of it. What the tunnel is for does not matter here; the
-:doc:`../../tunneling/doc/index` showcase covers that.
+a path carries less than the links at either end of it. What the tunnel is for does not
+matter here; the :doc:`../../tunneling/doc/index` showcase covers that.
 
 | Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/ipv6/pathmtudiscovery <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/pathmtudiscovery>`__
@@ -70,11 +72,6 @@ breaks much more, because IPv6 depends on ICMPv6 for Neighbor Discovery, Router
 Discovery and Path MTU Discovery alike. The practice is common enough that RFC 4890
 was written to tell firewall administrators which ICMPv6 messages they must not
 filter; Packet Too Big is on that list.
-
-When the message does not arrive, the sender never learns and keeps sending the same
-size. Every one of those packets is discarded. Small packets continue to work, so the
-network looks healthy while large transfers hang. This is called a Path MTU Discovery
-black hole, and it is what this showcase demonstrates.
 
 A message travelling backwards can also be *invented* rather than lost. A node that
 accepts any Packet Too Big it receives can be told to shrink its packets by anyone who
