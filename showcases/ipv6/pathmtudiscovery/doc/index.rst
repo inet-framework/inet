@@ -4,8 +4,8 @@ Path MTU Discovery
 Goals
 -----
 
-Every network link has a limit on how large a packet it will carry, its Maximum
-Transmission Unit (MTU); on Ethernet it is 1500 bytes. For IPv6 that limit applies to
+Every network link has a limit on how large a packet it will carry, its *Maximum
+Transmission Unit (MTU)*; on Ethernet it is 1500 bytes. For IPv6 that limit applies to
 the IPv6 datagram itself. A path made of several links can carry no more than its
 smallest link, and the sender has no way of knowing that number in advance.
 
@@ -14,18 +14,18 @@ router that met an oversized packet could split it up itself and forward the pie
 so the transfer merely got slower. IPv6 removed that: only the original sender may
 split a packet, never a router forwarding one. So when a packet is too large for the
 next link, the router has no way to deliver it: it discards the packet and sends an
-ICMPv6 Packet Too Big message back to the sender, naming the size that would have
+ICMPv6 *Packet Too Big* message back to the sender, naming the size that would have
 fitted. The sender's IPv6 layer remembers that number and sends smaller packets from
-then on. This exchange is Path MTU Discovery, defined in RFC 8201.
+then on. This exchange is *Path MTU Discovery*, defined in RFC 8201.
 
 Path MTU Discovery rests on the Packet Too Big message getting back to the sender.
-IPv6 has other exchanges that need a reply — Neighbour Discovery learns a neighbour's
-link-layer address that way — but those run between neighbours on a single link, and
+IPv6 has other exchanges that need a reply — *Neighbor Discovery* learns a neighbor's
+link-layer address that way — but those run between neighbors on a single link, and
 when one fails nothing works at all. This message has to cross every network between
 the two ends, any of which can discard it, and when it goes missing the sender never
 learns: it keeps sending the same size, every large packet is discarded, and the small
 ones still arrive — so the path looks healthy while large transfers hang. That failure
-has a name, the Path MTU Discovery black hole, and it is what this showcase
+has a name, the *Path MTU Discovery black hole*, and it is what this showcase
 reproduces.
 
 This showcase creates a path whose limit is lower than the sender's own link. The four
@@ -40,7 +40,7 @@ configurations show:
 4. nothing split or discarded anywhere, because the sender's packets already fit the
    path.
 
-An IPv6-in-IPv6 tunnel is used to make the path narrower, because encapsulation is a
+An *IPv6-in-IPv6 tunnel* is used to make the path narrower, because encapsulation is a
 common reason a path carries less than the links at either end of it. For more
 information on IPv6 tunneling, see the :doc:`../../tunneling/doc/index` showcase.
 
@@ -219,7 +219,7 @@ discard, so a policy file with only the first entry would silence the node compl
 The address ranges have to be chosen with the firewall's own traffic in mind. Neighbor
 Discovery sends its unicast messages from a node's global address, so a filter written
 in terms of address *scope* — link-local against global — would discard the firewall's
-own Neighbour Advertisements and break the network.
+own Neighbor Advertisements and break the network.
 
 The ranges used here work, but not because the firewall's addresses are outside them:
 its ``eth1`` address ``2001:db8:2::1`` is in fact inside the source range. They work
@@ -294,7 +294,7 @@ The rest of the scenario is the same in every configuration:
 packets, and ``hostB`` runs ``UdpSink``. Traffic starts at 2 s so that Duplicate Address
 Detection
 has finished and every node holds a usable address, which takes about 1.6 s here.
-Address resolution has not finished by then — the first datagram triggers a Neighbour
+Address resolution has not finished by then — the first datagram triggers a Neighbor
 Solicitation and waits for the answer — but that only delays it briefly.
 
 Only two things differ between the configurations: how much data the application
@@ -427,9 +427,8 @@ Results
 
 The frame counts are the ``packetReceivedFromUpper:count`` statistic of each link's
 ``eth[n].mac`` module, so they include control traffic as well as application data. Four
-or five frames per link are Neighbor
-Discovery, depending on the configuration, which is why the data figure is given
-separately in brackets. It is the data figures that carry the argument.
+or five frames per link are Neighbor Discovery, depending on the configuration, which
+is why the data figure is given separately in brackets. It is the data figures that carry the argument.
 
 Read down those two columns and they say where the fragmentation happened.
 
