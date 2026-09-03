@@ -84,9 +84,13 @@ Path MTU Discovery works when the Packet Too Big message reaches the sender. The
 reason it does not is that something along the way discards ICMP traffic.
 Administrators often block ICMP as a matter of habit, which in IPv4 mostly broke
 diagnostic tools. In IPv6 it breaks much more, because IPv6 depends on ICMPv6 for
-Neighbor Discovery, Router Discovery and Path MTU Discovery alike. The practice is
-common enough that RFC 4890 was written to tell firewall administrators which ICMPv6
-messages they must not filter; Packet Too Big is on that list.
+Neighbor Discovery, Router Discovery and Path MTU Discovery alike.
+
+.. note::
+
+   The practice is common enough that RFC 4890 was written to tell firewall
+   administrators which ICMPv6 messages they must not filter. Packet Too Big is on
+   that list.
 
 Filtering is not the only way the message goes missing, and the other ways matter
 because they make the loss *intermittent* rather than permanent:
