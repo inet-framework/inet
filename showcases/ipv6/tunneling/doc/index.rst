@@ -125,24 +125,15 @@ The interface says *where the tunnel goes*. The route says *what goes into it*. 
 two are configured independently, and changing only the route changes what the tunnel
 is used for, without touching the tunnel itself.
 
-How the configuration is written
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Where the addresses and routes come from
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Two kinds of file describe the scenario, and it helps to know which is which before
-reading the fragments below.
-
-``omnetpp.ini`` sets module parameters. Each line is a pattern naming one or more
-modules, then the parameter and its value. In ``*.borderA.tun[0].mtu``, the leading
-``*`` stands for the network, so the line sets the ``mtu`` parameter of the first
-tunnel interface of the node called ``borderA``. The file is divided into sections:
-``[General]`` applies to everything, and each ``[Config ...]`` section describes one
-scenario. ``extends`` lets one section inherit another's settings.
-
-Addresses and routes are not module parameters, so they come from a separate XML file
-read by a module called ``Ipv6NetworkConfigurator``. The ini points at that file with
-``xmldoc("...")``. This showcase has four such XML files, one per configuration. They
-are identical except for the one or two routes that lead into the tunnel, which is the
-only thing the configurations actually vary.
+Addresses and routes are not module parameters, so they are not set in
+``omnetpp.ini``. They come from a separate XML file read by a module called
+``Ipv6NetworkConfigurator``, which the ini points at with ``xmldoc("...")``. This
+showcase has four such XML files, one per configuration. They are identical except for
+the one or two routes that lead into the tunnel, which is the only thing the
+configurations actually vary.
 
 Configuring the interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~
