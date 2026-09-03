@@ -24,8 +24,9 @@ link-layer address that way — but those run between neighbours on a single lin
 when one fails nothing works at all. This message has to cross every network between
 the two ends, any of which can discard it, and when it goes missing the sender never
 learns: it keeps sending the same size, every large packet is discarded, and the small
-ones still arrive — so the path looks healthy while large transfers hang. That failure has a name,
-the Path MTU Discovery black hole, and it is what this showcase reproduces.
+ones still arrive — so the path looks healthy while large transfers hang. That failure
+has a name, the Path MTU Discovery black hole, and it is what this showcase
+reproduces.
 
 This showcase creates a path whose limit is lower than the sender's own link. The four
 configurations show:
@@ -36,9 +37,10 @@ configurations show:
 4. the quiet case where the sender was sized correctly from the start.
 
 An IPv6-in-IPv6 tunnel is used to make the path narrower, because encapsulation is a
-common reason a path carries less than the links at either end of it. What the tunnel
-is for does not matter here; the :doc:`../../tunneling/doc/index` showcase covers
-that.
+common reason a path carries less than the links at either end of it. Here the tunnel
+is only a way to produce that narrowing. Why a site would build one — to reach another
+site whose addresses the network between them will not carry — is the subject of the
+:doc:`../../tunneling/doc/index` showcase.
 
 | Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/ipv6/pathmtudiscovery <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/pathmtudiscovery>`__
@@ -71,13 +73,34 @@ packet is fragmented or refused. Both behaviours appear in this showcase.
 What goes wrong
 ~~~~~~~~~~~~~~~
 
-Path MTU Discovery works when the Packet Too Big message reaches the sender. The most
-common reason it does not is that a firewall discards it. Administrators often block
-ICMP as a matter of habit, which in IPv4 mostly broke diagnostic tools. In IPv6 it
-breaks much more, because IPv6 depends on ICMPv6 for Neighbor Discovery, Router
-Discovery and Path MTU Discovery alike. The practice is common enough that RFC 4890
-was written to tell firewall administrators which ICMPv6 messages they must not
-filter; Packet Too Big is on that list.
+Path MTU Discovery works when the Packet Too Big message reaches the sender. The usual
+reason it does not is that something along the way discards ICMP traffic.
+Administrators often block ICMP as a matter of habit, which in IPv4 mostly broke
+diagnostic tools. In IPv6 it breaks much more, because IPv6 depends on ICMPv6 for
+Neighbor Discovery, Router Discovery and Path MTU Discovery alike. The practice is
+common enough that RFC 4890 was written to tell firewall administrators which ICMPv6
+messages they must not filter; Packet Too Big is on that list.
+
+Filtering is not the only way the message goes missing, and the other ways matter
+because they make the loss *intermittent* rather than permanent:
+
+- **Rate limiting.** A router limits how many ICMP errors it generates, so that it
+  cannot be used to flood a victim. Under load — exactly when packets are being
+  discarded — the errors are the first thing it stops sending.
+- **The reply has nowhere to go.** The error is addressed to the packet's source. If
+  that address is not reachable from the router that generated it, or the return path
+  differs from the forward one and passes through a filter, the message never arrives.
+- **The sender is not one machine.** Traffic sent from a load-balanced or anycast
+  address can have its error delivered to a different machine than the one that sent
+  the packet — which then has nothing to apply it to.
+- **Nobody generates it.** A tunnel entry point has to map an oversized outer packet
+  back to the inner packet's source and quote the adjusted size. Not every
+  implementation does, and INET's does not do it at all for a forwarded tunnel packet.
+
+The consequence of the intermittent cases is worse than of the permanent ones. A path
+that black-holes every large packet gets diagnosed. A path that loses the feedback only
+under load produces a fault that appears when the network is busy and disappears when
+anyone looks at it.
 
 A message travelling backwards can also be *invented* rather than lost. A node that
 accepts any Packet Too Big it receives can be told to shrink its packets by anyone who
@@ -266,7 +289,8 @@ The rest of the scenario is the same in every configuration:
    :language: ini
 
 ``hostA`` sends UDP packets to ``hostB`` twice a second from 2 s to 9.75 s, which is 16
-packets, and ``hostB`` runs ``UdpSink``. Traffic starts at 2 s so that Duplicate Address Detection
+packets, and ``hostB`` runs ``UdpSink``. Traffic starts at 2 s so that Duplicate Address
+Detection
 has finished and every node holds a usable address, which takes about 1.6 s here.
 Address resolution has not finished by then — the first datagram triggers a Neighbour
 Solicitation and waits for the answer — but that only delays it briefly.
@@ -328,7 +352,8 @@ BlackHole Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 The tunnel's limit is lowered to 1460 so that the tunnel never has to split anything,
-which is the correct thing to configure. The firewall discards ICMPv6 heading towards ``hostA``:
+which is the correct thing to configure. The firewall discards ICMPv6 heading towards
+``hostA``:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: [Config BlackHole]
@@ -399,7 +424,8 @@ Results
      - 20 (16 data)
 
 The frame counts are the ``packetReceivedFromUpper:count`` statistic of each link's
-``eth[n].mac`` module, so they include control traffic as well as application data. Four or five frames per link are Neighbor
+``eth[n].mac`` module, so they include control traffic as well as application data. Four
+or five frames per link are Neighbor
 Discovery, depending on the configuration, which is why the data figure is given
 separately in brackets. It is the data figures that carry the argument.
 
