@@ -514,6 +514,63 @@ encapsulation showing through: the packet ``hostA`` sent stops existing at the t
 entry point, where it becomes the payload of a new one, and it is that new packet whose
 journey is drawn. The span with no arrow is exactly the span the tunnel covers.
 
+Watching one packet
+~~~~~~~~~~~~~~~~~~~
+
+The figures above show where packets ended up. These clips show one packet on its way,
+each covering a single send at t = 2.5 s — by which time address resolution has already
+happened, so the only traffic on screen is the packet itself.
+
+.. video:: media/notunnel.mp4
+   :width: 100%
+
+Without a tunnel the packet reaches ``transit`` and goes no further.
+
+.. video:: media/tunnel.mp4
+   :width: 100%
+
+With the tunnel it crosses the transit network and arrives.
+
+.. video:: media/selectivetunnel.mp4
+   :width: 100%
+
+With a host route only, the packet for ``hostB1`` crosses and the one for ``hostB2``
+never leaves ``borderA``.
+
+.. video:: media/routingloop.mp4
+   :width: 100%
+
+With the wrong route at the far end, the packet bounces between the two border routers.
+This clip covers a longer span than the others, because one packet's whole loop takes
+about fifteen crossings before its hop limit runs out.
+
+..
+   VIDEO RECIPE (redo via the "video-recording" skill)
+   config:   NoTunnel / Tunnel / SelectiveTunnel / RoutingLoop in ../omnetpp.ini
+   seed:     default
+   shows:    one application packet crossing the network, per configuration
+   anchors:  hostA sends every 0.5s from t=2s (startTime=2s, sendInterval=0.5s), so a
+             send lands on t=2.5s exactly. Neighbour Discovery for hostB1/hostB2 has
+             completed by then -- recording the FIRST send at t=2.0 instead pulls
+             NeighbourSolicitation and NeighbourAdvertisement into frame, which is
+             protocol-correct but not what these clips are about.
+   window:   express to 2.499s, step one event to flush, record to 2.5015s
+             (RoutingLoop: to 2.520s, so one packet's whole loop fits). No fade wait --
+             the route visualizer is switched OFF for the videos, since its 10s
+             simulationTime fade-out would leave arrows piling up across the clip.
+   anim:     playback_speed=1 (default)
+   capture:  fps=30, crop_area=with_padding; canvas was 1034x418 at (750,87)
+   encode:   ffmpeg -framerate <frames/13> -i frames/<name>_%04d.png
+             -filter:v "crop=1034:332:750:173,pad=ceil(iw/2)*2:ceil(ih/2)*2"
+             -r 30 -vcodec libx264 -pix_fmt yuv420p
+             The crop drops 86px off the TOP of the reported crop_rect: Qtenv's canvas
+             toolbar floats over the top-right of the canvas and is inside the captured
+             area, and the configurator/visualizer icons sit in the same strip. Input
+             framerate is set so the clip lands near 13s; recording a 1.5ms window at
+             fps=30 yields ~1300 frames, which is 43s at 30fps.
+   post:     none
+   stamp:    recorded 2026-09, INET 4.7
+
 .. FIGURE RECIPE (redo via the "video-recording" and "omnetpp-mcp-sim" skills)
    For each of the four configs: launch `inet -u Qtenv -c <Config> --mcp-server-address
    localhost:8799` with these overrides, and note that string values need embedded
