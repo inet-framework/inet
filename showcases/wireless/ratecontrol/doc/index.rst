@@ -141,7 +141,7 @@ Here is the received packet count at ``sinkHost``:
    :width: 50%
 
 Different rates for different stations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Rate control works per receiver, not per interface: an access point keeps a
 separate rate for every client it talks to. The ``PerStationRates`` configuration
