@@ -414,16 +414,15 @@ address):
 
 The mobile node is a ``WirelessHost6`` in all three configurations below.
 They differ only in whether its Mobile IPv6 (MIPv6) engine is present at all
-and, when it is, whether route optimization is enabled (plus the format of
-its status label); everything else — network, movement, traffic — is
-identical.
+and, when it is, whether route optimization is enabled; everything else —
+network, movement, traffic — is identical.
 
 WithoutMipv6 configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: [Config WithoutMipv6]
-   :end-before: [Config BidirectionalTunneling]
+   :end-at: hasMipv6
    :language: ini
 
 Setting ``hasMipv6 = false`` removes the ``mipv6`` module from the mobile
@@ -441,7 +440,7 @@ BidirectionalTunneling configuration
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: [Config BidirectionalTunneling]
-   :end-before: [Config RouteOptimization]
+   :end-at: useRouteOptimization
    :language: ini
 
 The mobile node runs Mobile IPv6 with route optimization switched off — the
@@ -456,10 +455,12 @@ RouteOptimization configuration
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: [Config RouteOptimization]
+   :end-at: useRouteOptimization
    :language: ini
 
-Route optimization is left at its default (enabled); the config only sets the
-status label format. The first tunneled ping that reaches the mobile node
+The configuration states ``useRouteOptimization`` explicitly so that the one
+parameter separating this scenario from the previous one is visible in both
+listings. The first tunneled ping that reaches the mobile node
 triggers the return-routability procedure with the correspondent node, the
 Binding Update installs a binding there, and from the next ping onward the
 traffic takes the direct path (~20 ms) — until the return home tears
