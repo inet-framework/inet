@@ -217,9 +217,9 @@ The Model
 .. figure:: media/network.png
    :align: center
 
-   The network, with the address each interface holds. The ``configurator`` and
-   ``visualizer`` modules have no part in the protocol: the first assigns addresses
-   and routes, and the second draws the address labels.
+Each interface is labelled with the address it holds. The ``configurator`` and
+``visualizer`` modules have no part in the protocol: the first assigns addresses and
+routes, and the second draws the labels.
 
 .. FIGURE RECIPE: launch `inet -u Qtenv -c Fragmentation --mcp-server-address
    localhost:8799`, then over the MCP server: run_simulation time_limit 1.9s mode
@@ -238,8 +238,8 @@ a route leading to it:
 .. figure:: media/tunnel-overlay.png
    :align: center
 
-   Where the tunnel runs. The dashed line is drawn on the figure; it is not a link in
-   the model.
+The dashed line is drawn on the figure to show where the tunnel runs. It is not a link
+in the model.
 
 .. FIGURE RECIPE: derived from media/network.png with PIL — a quadratic Bezier from
    (505,218) through (695,88) to (893,218) in the 1194x344 image, 3px wide, colour
@@ -458,8 +458,8 @@ configuration, taken from the link to ``transit``:
 .. figure:: media/fragment.png
    :align: center
 
-   The chunks of the second fragment. The Fragment header in ``[3]`` is the one chunk
-   that would not be there had the packet not been split.
+The Fragment header in chunk ``[3]`` is the one chunk that would not be there had the
+packet not been split.
 
 .. FIGURE RECIPE: launch `inet -u Qtenv -c Fragmentation --mcp-server-address
    localhost:8799`, run_simulation to 2.6s in "fast" mode, list_logged_packets with

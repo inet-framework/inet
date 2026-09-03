@@ -123,10 +123,9 @@ interfaces:
 .. figure:: media/borderA-interfaces.png
    :align: center
 
-   The interface layer of ``borderA``. ``tun[0]`` stands alongside the two Ethernet
-   interfaces and the loopback, but has no link leading out of the node, and the
-   ``fe80::`` against it is the unset placeholder every interface starts with rather
-   than an address it holds.
+``tun[0]`` stands alongside the two Ethernet interfaces and the loopback, but has no
+link leading out of the node. The ``fe80::`` shown against it is the unset placeholder
+every interface starts with, not an address it holds.
 
 .. FIGURE RECIPE: launch `inet -u Qtenv -c Tunnel --mcp-server-address localhost:8799`,
    then over the MCP server: run_simulation time_limit 2.6s mode express, then
@@ -234,9 +233,9 @@ All four configurations use the same network:
 .. figure:: media/network.png
    :align: center
 
-   The network, with the address each interface holds. The ``configurator`` and
-   ``visualizer`` modules have no part in the protocol: the first assigns the
-   addresses and routes, and the second draws the address labels.
+Each interface is labelled with the address it holds. The ``configurator`` and
+``visualizer`` modules have no part in the protocol: the first assigns the addresses
+and routes, and the second draws the labels.
 
 .. FIGURE RECIPE: launch `inet -u Qtenv -c NoTunnel --mcp-server-address localhost:8799`,
    then over the MCP server: run_simulation time_limit 1.9s mode express (so addresses are
@@ -251,8 +250,8 @@ and a route that leads to it:
 .. figure:: media/tunnel-overlay.png
    :align: center
 
-   The tunnel between the two border routers. The dashed line is drawn on the figure
-   to show where the tunnel goes; it is not a link in the model.
+The dashed line is drawn on the figure to show where the tunnel goes. It is not a link
+in the model.
 
 .. FIGURE RECIPE: derived from media/network.png. The dashed arc, its two arrow heads
    and the label are drawn with PIL: a quadratic Bezier from (258,168) through
