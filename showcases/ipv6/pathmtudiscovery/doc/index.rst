@@ -119,9 +119,7 @@ The ``Ipv6`` module carries out Path MTU Discovery and has two parameters for it
 
 - ``pathMtuDiscovery`` — whether the node records what an incoming Packet Too Big
   message reports, and whether it uses what it has recorded when sending. Enabled by
-  default. Turning it off restores the behaviour of a node that never learns. A TCP
-  connection reacts to these messages on its own account and is not affected by this
-  parameter.
+  default. Turning it off restores the behaviour of a node that never learns.
 - ``pathMtuAgingTime`` — how long a learned value is kept before the node tries a
   larger size again, ten minutes by default. A path can widen, and nothing would tell
   the sender if it never retried.
@@ -142,17 +140,12 @@ The learned value is held in the node's routing table, alongside the cached next
 for that destination, and the node reports it in its log when it changes — ``Path MTU
 towards ... is now 1460``. That log line shows the mechanism working.
 
-Note that switching ``pathMtuDiscovery`` off would produce the same *observable*
-outcome as the black hole below: a sender that never adapts. This showcase does not
-take that shortcut, because the interesting question is not what a node does when the
-feature is disabled but what happens when the feature is enabled and the network eats
-the message anyway. That is the case that occurs in practice.
-
-What this means for an application: the sending program is not involved and does not
-change. It keeps writing the same amount of data. The IPv6 layer underneath it splits
-each write to fit what it has learned. A TCP connection would instead reduce its
-segment size and avoid splitting anything, but this showcase uses UDP, which has no
-equivalent, so the source has to fragment.
+The sending application is not involved and does not change. It keeps writing the same
+amount of data, and the IPv6 layer underneath it splits each write to fit what it has
+learned. A TCP connection would instead reduce its segment size and avoid splitting
+anything — it reacts to these messages on its own account, whatever
+``pathMtuDiscovery`` is set to — but this showcase uses UDP, which has no equivalent,
+so the source has to fragment.
 
 Filtering the message
 ~~~~~~~~~~~~~~~~~~~~~
