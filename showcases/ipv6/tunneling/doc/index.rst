@@ -479,6 +479,60 @@ it, and nothing else.
 gets nothing, while ``hostB2``, whose routing is untouched, keeps receiving all 16
 packets. A tunnel does not "break"; one route breaks one destination.
 
+The same four outcomes can be seen on the network itself. Each arrow below is the path
+a packet actually travelled, and the box beside a host is how many packets it has
+received so far:
+
+.. figure:: media/variants/route-notunnel.png
+   :width: 100%
+   :align: center
+
+``NoTunnel``: no arrows and no counters, because no packet completes a path.
+
+.. figure:: media/variants/route-tunnel.png
+   :width: 100%
+   :align: center
+
+``Tunnel``: two paths, one per destination host, and both hosts receiving.
+
+.. figure:: media/variants/route-selectivetunnel.png
+   :width: 100%
+   :align: center
+
+``SelectiveTunnel``: one path, to ``hostB1`` only. ``hostB2`` sits on the same link in
+the same site and is reached through the same tunnel, but no route names it.
+
+.. figure:: media/variants/route-routingloop.png
+   :width: 100%
+   :align: center
+
+``RoutingLoop``: the mirror image — ``hostB2`` is reached and ``hostB1`` is not. The
+looping packets draw no path at all, because none of them ever arrives anywhere.
+
+Every one of these paths begins at ``borderA`` rather than at ``hostA``. That is the
+encapsulation showing through: the packet ``hostA`` sent stops existing at the tunnel
+entry point, where it becomes the payload of a new one, and it is that new packet whose
+journey is drawn. The span with no arrow is exactly the span the tunnel covers.
+
+.. FIGURE RECIPE (redo via the "video-recording" and "omnetpp-mcp-sim" skills)
+   For each of the four configs: launch `inet -u Qtenv -c <Config> --mcp-server-address
+   localhost:8799` with these overrides, and note that string values need embedded
+   quotes on the command line or Qtenv stops on a parse dialog before binding the port:
+     '--*.visualizer.networkRouteVisualizer.labelFormat=""'
+     '--*.visualizer.interfaceTableVisualizer.interfaceFilter="eth*"'
+   The ini itself sets displayRoutes, the packet filter, fadeOutMode=simulationTime with
+   fadeOutTime=10s so the arrows persist for a still, and the statisticVisualizer with
+   statisticExpression="count" (the raw packetReceived signal carries a Packet object
+   and cannot be converted to a number). interfaceFilter="eth*" is a positive match
+   because it REPLACES the default not(lo*); a filter of "not(tun*)" alone brings the
+   loopback labels back.
+   Then: run_simulation time_limit 3.1s mode express, and get_canvas_image with
+   module_path "<root>", area "module_rectangle", margin 5.
+   Only one Qtenv may hold port 8799: several bind it simultaneously without error and
+   the kernel spreads requests across them, so captures get silently attributed to the
+   wrong config. Kill the previous instance, wait for the port to clear, and confirm
+   get_config reports the config you asked for before capturing.
+
 What an encapsulated packet looks like
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
