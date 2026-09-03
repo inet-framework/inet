@@ -41,8 +41,8 @@ configurations show:
    path.
 
 An IPv6-in-IPv6 tunnel is used to make the path narrower, because encapsulation is a
-common reason a path carries less than the links at either end of it. Tunneling itself
-is covered in the :doc:`../../tunneling/doc/index` showcase.
+common reason a path carries less than the links at either end of it. For more
+information on tunneling, see the :doc:`../../tunneling/doc/index` showcase.
 
 | Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/ipv6/pathmtudiscovery <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/pathmtudiscovery>`__
