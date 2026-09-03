@@ -159,8 +159,7 @@ on the border router named ``borderA`` in the network described below:
    :end-at: *.borderA.tun[0].destination
    :language: ini
 
-Three parameters describe the tunnel (the module declares two more that every
-network interface has):
+Three parameters describe the tunnel:
 
 - ``source`` — the tunnel entry point, which must be an address of this node. It
   becomes the source address of the outer header.
