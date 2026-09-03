@@ -582,17 +582,29 @@ discarded at ``borderB`` with the reason ``HOP_LIMIT_REACHED``:
              fps=30 yields ~1300 frames, which is 43s at 30fps.
    variants: notunnel-drops.mp4 and routingloop-drops.mp4 are the same two windows with
              packetDropVisualizer.displayPacketDrops=true, nodeFilter="not(host*)" so
-             only the routers annotate, labelFormat="%s" for the reason string, and
-             fadeOutMode="simulationTime" with fadeOutTime=1s -- the default realTime
-             fade lasts one wall-clock second, which is a handful of frames while
-             frame-grabbing, so the markers never reach the clip. These two need the
-             `packetDropped` emissions added to Ipv6::fragmentAndSend() and
-             Ipv6::determineOutputInterface(); stock INET signals neither, so the
+             only the routers annotate, and labelFormat="%s" for the reason string.
+             They need the `packetDropped` emissions added to Ipv6::fragmentAndSend()
+             and Ipv6::determineOutputInterface(); stock INET signals neither, so the
              visualizer has nothing to draw for an unroutable or expired unicast packet.
-             Their warm-up runs to 2.999s and records the t=3.0s send, not the t=2.5s
-             one: the first drop markers enlarge the canvas bounding box, Qtenv rescrolls
-             once, and a fixed crop then slides off the network. Warming up past an
-             earlier burst settles the bounds before recording starts.
+             fadeOutMode="simulationTime" with fadeOutTime=1ms (NoTunnel) and 3ms
+             (RoutingLoop) -- one for each clip's own window. The other two modes both
+             fail, in opposite directions:
+               realTime (the default) measures the fade in wall-clock seconds, and
+                 frame-grabbing takes far longer than the 1s default, so a marker
+                 survives a handful of frames and never reaches the clip.
+               animationTime survives that, but an express warm-up advances animation
+                 time by only a few seconds however much simulated time it covers, so
+                 the markers from the t=2.5s burst are still fresh when recording
+                 starts and sit on screen from frame one.
+             A simulationTime fade avoids both if the value is smaller than the 500ms
+             between bursts -- the earlier burst's markers are then already expired at
+             the first refreshDisplay -- and comparable to the recorded window, so the
+             marker appears when the packet dies and fades within the clip.
+             The variants record the t=3.0s send, not the t=2.5s one, and warm up by
+             running express to 2.999s. The first drop markers enlarge the canvas
+             bounding box and Qtenv rescrolls once; a fixed crop then slides off the
+             network partway through. Warming up past an earlier burst settles the
+             bounds before recording starts, and the crop matches the plain clips.
    post:     the encode chain ends with tpad=stop_mode=clone:stop_duration=1, which
              holds the last frame for a second. Without it the closing state -- the
              received-packet counter reaching its final value -- is on screen for one
