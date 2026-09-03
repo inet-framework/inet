@@ -176,61 +176,6 @@ anything — it reacts to these messages on its own account, whatever
 ``pathMtuDiscovery`` is set to — but this showcase uses UDP, which has no equivalent,
 so the source has to fragment.
 
-Filtering the message
-~~~~~~~~~~~~~~~~~~~~~
-
-To show what happens when the Packet Too Big message never arrives, one node discards
-it. That node is called ``firewall`` and sits between the sending host and the tunnel
-entry point, which is where such a filter usually sits in a real network; the next
-section shows the topology.
-
-INET has no firewall module, but it does have a Security Policy Database, which is a
-packet filter by definition — it matches traffic against selectors and applies one of
-three verdicts: protect it, let it pass, or discard it. Enabling it on a node and
-giving it a policy is enough. These two lines belong to the ``BlackHole``
-configuration only; in the other three the firewall forwards everything:
-
-.. literalinclude:: ../omnetpp.ini
-   :start-at: *.firewall.ipv6.hasIpsec
-   :end-at: *.firewall.ipv6.ipsec.spdConfig
-   :language: ini
-
-.. literalinclude:: ../firewall.xml
-   :language: xml
-
-Three things about that policy are worth knowing before adapting it.
-
-The first entry discards ICMPv6 — protocol number 58 — travelling from anywhere beyond
-the firewall towards ``hostA``'s network. The selector matches on addresses rather
-than on the message type, because the type selector only works for IPv4's ICMP. So
-this filter drops *all* ICMPv6 travelling from the far range towards ``hostA``'s
-network, not only Packet Too Big. It is a one-way rule: ICMPv6 that ``hostA`` sends
-outward is not affected. Dropping a whole class of ICMPv6 in one direction is
-realistic — firewalls that cause this problem block ICMP broadly.
-
-``LocalAddress`` and ``RemoteAddress`` are named from the point of view of the
-direction, not of the node. For an ``OUT`` policy, ``LocalAddress`` matches the
-packet's source and ``RemoteAddress`` its destination. On a node that is neither
-endpoint, as here, that is easy to get backwards.
-
-The two ``BYPASS`` entries are not optional. When no policy matches, the default is to
-discard, so a policy file with only the first entry would silence the node completely.
-
-The address ranges have to be chosen with the firewall's own traffic in mind. Neighbor
-Discovery sends its unicast messages from a node's global address, so a filter written
-in terms of address *scope* — link-local against global — would discard the firewall's
-own Neighbor Advertisements and break the network.
-
-The ranges used here work, but not because the firewall's addresses are outside them:
-its ``eth1`` address ``2001:db8:2::1`` is in fact inside the source range. They work
-because the firewall never *sources* anything towards ``hostA`` from that interface.
-When it answers ``hostA``, it uses its ``eth0`` address ``2001:db8:1::1``, which the
-rule does not match. That is a subtle thing to depend on, and it is worth checking
-rather than assuming when adapting this policy.
-
-Multicast Neighbor Discovery bypasses the policy database entirely, so Router
-Advertisements and Duplicate Address Detection are unaffected either way.
-
 The Model
 ---------
 
@@ -331,6 +276,60 @@ writes, and what the tunnel will accept.
 
 The inner packet is the application's data plus 8 bytes of UDP header and 40 bytes of
 IPv6 header, so 1452 bytes of data makes a 1500-byte packet.
+
+Filtering the message
+~~~~~~~~~~~~~~~~~~~~~
+
+To show what happens when the Packet Too Big message never arrives, ``firewall``
+discards it. Its position — between the sending host and the tunnel entry point — is
+where such a filter usually sits in a real network.
+
+INET has no firewall module, but it does have a Security Policy Database, which is a
+packet filter by definition — it matches traffic against selectors and applies one of
+three verdicts: protect it, let it pass, or discard it. Enabling it on a node and
+giving it a policy is enough. These two lines belong to the ``BlackHole``
+configuration only; in the other three the firewall forwards everything:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: *.firewall.ipv6.hasIpsec
+   :end-at: *.firewall.ipv6.ipsec.spdConfig
+   :language: ini
+
+.. literalinclude:: ../firewall.xml
+   :language: xml
+
+Three things about that policy are worth knowing before adapting it.
+
+The first entry discards ICMPv6 — protocol number 58 — travelling from anywhere beyond
+the firewall towards ``hostA``'s network. The selector matches on addresses rather
+than on the message type, because the type selector only works for IPv4's ICMP. So
+this filter drops *all* ICMPv6 travelling from the far range towards ``hostA``'s
+network, not only Packet Too Big. It is a one-way rule: ICMPv6 that ``hostA`` sends
+outward is not affected. Dropping a whole class of ICMPv6 in one direction is
+realistic — firewalls that cause this problem block ICMP broadly.
+
+``LocalAddress`` and ``RemoteAddress`` are named from the point of view of the
+direction, not of the node. For an ``OUT`` policy, ``LocalAddress`` matches the
+packet's source and ``RemoteAddress`` its destination. On a node that is neither
+endpoint, as here, that is easy to get backwards.
+
+The two ``BYPASS`` entries are not optional. When no policy matches, the default is to
+discard, so a policy file with only the first entry would silence the node completely.
+
+The address ranges have to be chosen with the firewall's own traffic in mind. Neighbor
+Discovery sends its unicast messages from a node's global address, so a filter written
+in terms of address *scope* — link-local against global — would discard the firewall's
+own Neighbor Advertisements and break the network.
+
+The ranges used here work, but not because the firewall's addresses are outside them:
+its ``eth1`` address ``2001:db8:2::1`` is in fact inside the source range. They work
+because the firewall never *sources* anything towards ``hostA`` from that interface.
+When it answers ``hostA``, it uses its ``eth0`` address ``2001:db8:1::1``, which the
+rule does not match. That is a subtle thing to depend on, and it is worth checking
+rather than assuming when adapting this policy.
+
+Multicast Neighbor Discovery bypasses the policy database entirely, so Router
+Advertisements and Duplicate Address Detection are unaffected either way.
 
 Fragmentation Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
