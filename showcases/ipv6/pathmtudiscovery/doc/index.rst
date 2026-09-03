@@ -5,49 +5,17 @@ Goals
 -----
 
 Every network link has a limit on how large a packet it will carry, its *Maximum
-Transmission Unit (MTU)*; on Ethernet it is 1500 bytes. For IPv6 that limit applies to
-the IPv6 datagram itself. A path made of several links can carry no more than its
-smallest link, and the sender has no way of knowing that number in advance.
+Transmission Unit (MTU)*, and a path made of several links can carry no more than its
+smallest link. In IPv6 only the original sender may split a packet to fit, so a router
+that meets one too large for the next link discards it and sends an ICMPv6 *Packet Too
+Big* message back to the sender, naming the size that would have fitted. The sender's
+IPv6 layer remembers that number and sends smaller packets from then on. This exchange
+is *Path MTU Discovery*, defined in RFC 8201.
 
-IPv6 handles this differently from IPv4, and the difference is strict. In IPv4 a
-router that met an oversized packet could split it up itself and forward the pieces,
-so the transfer merely got slower. IPv6 removed that: only the original sender may
-split a packet, never a router forwarding one. So when a packet is too large for the
-next link, the router has no way to deliver it: it discards the packet and sends an
-ICMPv6 *Packet Too Big* message back to the sender, naming the size that would have
-fitted. The sender's IPv6 layer remembers that number and sends smaller packets from
-then on. This exchange is *Path MTU Discovery*, defined in RFC 8201.
-
-Path MTU Discovery rests on the Packet Too Big message getting back to the sender.
-IPv6 has other exchanges that need a reply — *Neighbor Discovery* learns a neighbor's
-link-layer address that way — but those run between neighbors on a single link, and
-when one fails nothing works at all. The Packet Too Big message has to cross every
-network between the two ends, and many of them discard ICMP traffic at the firewall on
-their border. Routers also rate-limit the ICMP errors they generate, as the standard
-requires them to, so under load the message can be lost even where nothing filters it
-— which makes the failure intermittent.
-
-When the message does not arrive, the sender does not learn the path MTU. It keeps
-sending the same size, so the network carries small packets and discards large ones.
-For example, a name lookup succeeds and a web page starts to load, while a file
-transfer stops partway. This failure is called a *Path MTU Discovery black hole*,
-and one of the configurations below reproduces it.
-
-This showcase creates a path whose limit is lower than the sender's own link. The four
-configurations show:
-
-1. every oversized packet split at the tunnel and reassembled beyond it, which
-   delivers the traffic at twice the packet count;
-2. no packet arriving at all, because the Packet Too Big message is filtered and the
-   sender goes on sending the same size;
-3. a single packet lost, after which the sender learns the path MTU and splits its own
-   datagrams to fit;
-4. nothing split or discarded anywhere, because the sender's packets already fit the
-   path.
-
-An *IPv6-in-IPv6 tunnel* is used to make the path narrower, because encapsulation is a
-common reason a path carries less than the links at either end of it. For more
-information on IPv6 tunneling, see the :doc:`../../tunneling/doc/index` showcase.
+This showcase demonstrates Path MTU Discovery on a path narrowed by an *IPv6-in-IPv6
+tunnel*: what it costs to carry oversized traffic without it, how a sender finds the
+limit and adapts to it, and the *black hole* that appears when the Packet Too Big
+message is filtered on its way back.
 
 | Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/ipv6/pathmtudiscovery <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/pathmtudiscovery>`__
@@ -55,10 +23,23 @@ information on IPv6 tunneling, see the :doc:`../../tunneling/doc/index` showcase
 About Path MTU Discovery
 ------------------------
 
+Why the sender has to find the limit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+On Ethernet the MTU is 1500 bytes, and for IPv6 that limit applies to the IPv6
+datagram itself. A sender has no way of knowing in advance what the narrowest link
+along a path will accept.
+
+IPv4 dealt with that by letting a router split an oversized packet itself and forward
+the pieces, so the transfer merely got slower. IPv6 removed that: only the original
+sender may split a packet, never a router forwarding one. A router that meets an
+oversized packet therefore has no way to deliver it, and reports the problem instead.
+
 Why a tunnel narrows the path
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A tunnel wraps each packet in a second IPv6 header before sending it on. That header
+Encapsulation is a common reason a path carries less than the links at either end of
+it. A tunnel wraps each packet in a second IPv6 header before sending it on. That header
 is 40 bytes. A packet that exactly filled a 1500-byte link before it was wrapped
 becomes 1540 bytes afterwards, and no longer fits.
 
@@ -75,22 +56,32 @@ The node that does the wrapping has two roles at once, and the rules for them di
   far end of the tunnel puts the pieces back together.
 
 Which of the two limits is exceeded first therefore decides whether an oversized
-packet is fragmented or refused. Both behaviours appear in this showcase.
+packet is fragmented or refused. Both behaviours appear in this showcase. For more
+information on IPv6 tunneling, see the :doc:`../../tunneling/doc/index` showcase.
 
 What goes wrong
 ~~~~~~~~~~~~~~~
 
-Path MTU Discovery works when the Packet Too Big message reaches the sender. The usual
-reason it does not is that something along the way discards ICMP traffic.
-Administrators often block ICMP as a matter of habit, which in IPv4 mostly broke
-diagnostic tools. In IPv6 it breaks much more, because IPv6 depends on ICMPv6 for
-Neighbor Discovery, Router Discovery and Path MTU Discovery alike.
+Path MTU Discovery rests on the Packet Too Big message getting back to the sender.
+IPv6 has other exchanges that need a reply — *Neighbor Discovery* learns a neighbor's
+link-layer address that way — but those run between neighbors on a single link, and
+when one fails nothing works at all. The Packet Too Big message has to cross every
+network between the two ends, and many of them discard ICMP traffic at the firewall on
+their border. Administrators often block ICMP as a matter of habit, which in IPv4
+mostly broke diagnostic tools. In IPv6 it breaks much more, because IPv6 depends on
+ICMPv6 for Neighbor Discovery, Router Discovery and Path MTU Discovery alike.
 
 .. note::
 
    The practice is common enough that RFC 4890 was written to tell firewall
    administrators which ICMPv6 messages they must not filter. Packet Too Big is on
    that list.
+
+When the message does not arrive, the sender does not learn the path MTU. It keeps
+sending the same size, so the network carries small packets and discards large ones.
+For example, a name lookup succeeds and a web page starts to load, while a file
+transfer stops partway. This failure is called a *Path MTU Discovery black hole*, and
+the ``BlackHole`` configuration below reproduces it.
 
 Filtering is not the only way the message goes missing, and the other ways matter
 because they make the loss *intermittent* rather than permanent:
