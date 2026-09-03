@@ -52,9 +52,13 @@ tell the exit point to hand the payload up to that protocol and be done with it.
 onwards, which is exactly what an exit point has to do. Every router between the two
 endpoints treats the outer packet as normal traffic addressed to the exit point.
 
-Nothing about this is specific to IPv6-in-IPv6. Putting a packet inside another packet
-and routing the outer one is the mechanism underneath every overlay network in use
-today.
+.. note::
+
+   The same idea appears throughout networking under other names. A mobile network's
+   GTP tunnels, a datacentre's VXLAN, and a broadband provider's Dual-Stack Lite all
+   wrap one packet in another and route the outer one; they differ in which headers
+   they use and what they carry. IPv6-in-IPv6 is the case where the outer header is
+   an ordinary IPv6 header.
 
 Addresses the network will not carry
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
