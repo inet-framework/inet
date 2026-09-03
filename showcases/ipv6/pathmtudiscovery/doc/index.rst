@@ -15,8 +15,8 @@ so the transfer merely got slower. IPv6 removed that: only the original sender m
 split a packet, never a router forwarding one. So when a packet is too large for the
 next link, the router has no way to deliver it: it discards the packet and sends an
 ICMPv6 Packet Too Big message back to the sender, naming the size that would have
-fitted. The sender remembers that number and sends
-smaller packets from then on. This exchange is Path MTU Discovery, defined in RFC 8201.
+fitted. The sender's IPv6 layer remembers that number and sends smaller packets from
+then on. This exchange is Path MTU Discovery, defined in RFC 8201.
 
 The whole scheme rests on one message travelling backwards along the path. Everything
 else in IPv6 forwarding only needs packets to travel forwards. That asymmetry is what
