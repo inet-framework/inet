@@ -215,7 +215,7 @@ table in this section each come from **one run**, so they show a concrete realis
 rather than an average: the anomaly aggregate reads 12.0 Mbps here, against 12.4 Mbps for the
 mean of the three runs used in the TXOP comparison later. The effect being shown is far larger
 than that scatter, but the per-station detail is not — the frame counts below, which by theory
-should be equal, still spread by about ±10% within a single run.
+should be equal, still spread by about ±9% among the fast stations within a single run.
 The two later charts that compare a *fix* against the anomaly do average three
 repetitions, because there the differences being plotted are comparable to the scatter.
 
@@ -249,7 +249,8 @@ level, settling just above the floor it sets:
 
 The reason is visible in the raw frame counts: over the measurement interval every
 station — fast or slow — successfully transmits a similar *number* of frames, about
-1,090 to 1,270 in this run — within ±10% of each other, against the six-fold airtime
+1,080 to 1,480 in this run: the four fast stations agree within about 9%, and the slow
+station sits some 16% below them — small change against the six-fold airtime
 difference that follows. DCF hands out transmission opportunities at roughly the same
 rate to everyone, exactly as designed. But each of the
 slow station's frame exchanges tied up the channel several times longer — around six
@@ -268,8 +269,8 @@ included — so it consumed most of the channel time and left little for the oth
              four fast stations agree within 8% and the slow station sits ~16% below them.
              How flat ONE run reads is pure seed luck, and the seed moved twice as the
              sweep was cut (6 points -> 4 -> none), because seed-set defaults to the run
-             number: bars were +-4% at seed 5, +-8% at seed 3, and are 1087..1268 (+-10%)
-             at seed 0 now. That is honest -- the prose quotes the +-10% spread -- but if
+             number: bars were +-4% at seed 5, +-8% at seed 3, and are 1080..1482 (+-15%)
+             at seed 0 now. That is honest -- the prose quotes the +-15% spread -- but if
              the figure ever needs to read flat, record 10+ reps rather than hunting for a
              flattering seed. The chart script averages duplicates, so reps just work.
    record:   inet -u Cmdenv -c UplinkHomogeneous -r 0
@@ -334,8 +335,8 @@ frame-count chart above), the slow station's far longer frames let it swallow a
 correspondingly larger share of channel time — dragging every station's throughput down
 toward its own.
 
-The cost to the network as a whole is severe. The aggregate falls from 24.1 Mbps in the
-baseline to 12.0 Mbps here — **one slow station halves the capacity of the entire cell**,
+The cost to the network as a whole is severe. The aggregate falls from 24.4 Mbps in the
+baseline to 12.9 Mbps here — **one slow station halves the capacity of the entire cell**,
 and it does so without any of the other four being misconfigured, weak, or overloaded. The
 fast stations' own throughput falls almost in step with the slow station's even though their
 configuration never changes. That is the rate anomaly: equal access, unequal airtime.
@@ -426,13 +427,17 @@ their throughput back:
    shows:    fast-station-average and slow-station application throughput, plain DCF vs
              802.11e TXOP, at the single 6-vs-54 Mbps rate gap; aggregates carried in the
              legend, all-fast baseline as a dashed line
-   inputs:   results/solve/{UplinkAnomaly,UplinkTxop,UplinkHomogeneous}-#*.sca, ALL 3 reps
-             (DCF is not deterministic -- same RNG/backoff -- so all three are averaged alike)
-   record:   inet -u Cmdenv -c UplinkHomogeneous -r 0..2 --repeat=3 --result-dir=results/solve
-             inet -u Cmdenv -c UplinkAnomaly     -r 0..2 --repeat=3 --result-dir=results/solve
-             inet -u Cmdenv -c UplinkTxop        -r 0..2 --repeat=3 --result-dir=results/solve
+   inputs:   results/solve/{UplinkAnomaly,UplinkTxop,UplinkHomogeneous}-#*.sca, ALL 10 reps
+             (DCF is not deterministic -- same RNG/backoff -- so all ten are averaged alike;
+             ten rather than three because the bars carry error bars)
+   record:   inet -u Cmdenv -c UplinkHomogeneous -r 0..9 --repeat=10 --vector-recording=false --result-dir=results/solve
+             inet -u Cmdenv -c UplinkAnomaly     -r 0..9 --repeat=10 --vector-recording=false --result-dir=results/solve
+             inet -u Cmdenv -c UplinkTxop        -r 0..9 --repeat=10 --vector-recording=false --result-dir=results/solve
    metric:   server.app[*] packetReceived:count x 0.002 -> Mbps; aggregate = sum over the 5
-             apps per run, fast-avg = mean over app[1..4]; all configs averaged over 3 reps
+             apps per run, fast-avg = mean over app[1..4]; all configs averaged over 10 reps.
+             Error bars are +-1 s.d. of the INDIVIDUAL station values (every sta[1..4] reading
+             from every rep for the fast bar, sta[0]'s ten readings for the slow one), not the
+             uncertainty of the mean
    anchor:   structural -- if the UplinkAnomaly/UplinkTxop configs change, re-derive. The
              comparison results are kept out of results/ root so they don't contaminate the
              single-run .anf charts (whose filters match packetReceived:count of any config).
@@ -441,10 +446,10 @@ their throughput back:
              ../dl-chart.py DOES plot per station because that scheduler is deterministic.
    stamp:    captured 2026-07, INET 4.6
 
-The fast-station average recovers from 2.5 Mbps under DCF to 5.5 Mbps under TXOP — better than
+The fast-station average recovers from 2.6 Mbps under DCF to 5.6 Mbps under TXOP — better than
 double, and comfortably past the 4.8 Mbps each station gets in the no-rate-gap baseline (the
-dashed line). The aggregate climbs from 12.4 to 23.1 Mbps, recovering nearly all of the 24.1
-Mbps the cell manages with no slow station at all. The slow station itself falls from 2.3 to
+dashed line). The aggregate climbs from 12.6 to 23.1 Mbps, recovering nearly all of the 24.2
+Mbps the cell manages with no slow station at all. The slow station itself falls from 2.2 to
 0.9 Mbps — and that *is* airtime fairness, not a side-effect: given only its fair share of
 time, a 6 Mbps station can clock out proportionally fewer bits, so it stops monopolising the
 medium and the others get their time back.
@@ -468,12 +473,15 @@ same principle — allocate channel *time*, not transmission *count* — but in 
 
 One honest caveat — and the reason the chart above plots a *group* average rather than the five
 stations separately. TXOP restores the aggregate capacity and the fast-station group reliably, but
-it does **not** hand each individual station equal airtime. Over ten seeds the four fast stations
-land anywhere between 4.1 and 6.8 Mbps around their 5.6 Mbps mean, because EDCA still allocates
-*wins* at random and only bounds what a win is worth; a station that wins a few more times in four
-seconds keeps the difference. The group average is steady across the same seeds — the aggregate
-stays within 22.2 to 24.6 Mbps — so the system-level result is robust where the per-station one is
-not. The downlink fix below *is* per-station fair, for a reason that is worth the contrast.
+it does **not** hand each individual station equal airtime — which is what the error bars show.
+Over the ten repetitions the four fast stations land anywhere between 4.1 and 6.8 Mbps around
+their 5.6 Mbps mean, because EDCA still allocates *wins* at random and only bounds what a win is
+worth; a station that wins a few more times in four seconds keeps the difference. Plain DCF has no
+such spread — its stations are held together at ±0.2 Mbps precisely because equal frame counts is
+what it enforces — so the two configurations differ in their scatter as well as in their means.
+The group average is steady across the same repetitions — the aggregate stays within 22.2 to 24.6
+Mbps — so the system-level result is robust where the per-station one is not. The downlink fix
+below *is* per-station fair, for a reason that is worth the contrast.
 
 The Downlink Form: Airtime Fairness at the Access Point
 -------------------------------------------------------
@@ -667,7 +675,7 @@ longer, and serving them one-for-one with the fast clients' frames lets them swa
 airtime — so all five clients collapse to about 2.7 Mbps and the aggregate falls to ~14 Mbps.
 Airtime fairness reverses it: charged for the time they occupy, the four fast clients climb back
 to about 5.3 Mbps each — almost exactly double — and the aggregate recovers to ~22 Mbps. (They
-stop a little short of the ~5.5 Mbps a fast station reaches under uplink TXOP: here all five flows
+stop a little short of the ~5.6 Mbps a fast station reaches under uplink TXOP: here all five flows
 funnel through the one access-point queue rather than five independent radios.)
 
 The dashed line is what the same cell delivers with no rate gap at all — ``[Config
