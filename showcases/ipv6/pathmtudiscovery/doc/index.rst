@@ -284,10 +284,10 @@ To show what happens when the Packet Too Big message never arrives, ``firewall``
 discards it. Its position — between the sending host and the tunnel entry point — is
 where such a filter usually sits in a real network.
 
-INET has no firewall module, but it does have a Security Policy Database, which is a
-packet filter by definition — it matches traffic against selectors and applies one of
-three verdicts: protect it, let it pass, or discard it. Enabling it on a node and
-giving it a policy is enough. These two lines belong to the ``BlackHole``
+In INET the filtering is done with the Security Policy Database, which is a packet
+filter by definition — it matches traffic against selectors and applies one of three
+verdicts: protect it, let it pass, or discard it. Enabling it on a node and giving it
+a policy is enough. These two lines belong to the ``BlackHole``
 configuration only; in the other three the firewall forwards everything:
 
 .. literalinclude:: ../omnetpp.ini
