@@ -68,20 +68,20 @@ in practice organisations use the ``fd00::/8`` half of it. It is worth being pre
 about why these addresses stay out of the global routing table.
 
 An organisation creates its own Unique Local Address prefix by choosing 40 random
-bits. RFC 4193 makes that choice random so that two organisations are very unlikely
-to pick the same prefix, which is what makes the addresses safe to use privately and
+bits. The standard requires those bits to be random so that two organisations are
+very unlikely to pick the same prefix, which is what makes the addresses safe to use privately and
 even between co-operating organisations.
 
 What they are not is *globally* routable, and that is a matter of policy rather than
-of any technical ambiguity. RFC 4193 states that these addresses are not expected to
-be routed on the global Internet. No registry records who holds which prefix, no
+of any technical ambiguity. The standard states that these addresses are not expected
+to be routed on the global Internet. No registry records who holds which prefix, no
 provider has any reason to carry them, and providers filter them at their borders by
 default. The consequence is the one that matters here: a packet carrying these
 addresses will not cross a public network.
 
 So two networks that both use Unique Local Addresses have a concrete problem. Each
 works internally. Neither can reach the other across a public network, because that
-network will not carry the addresses. RFC 4193 anticipates this and allows the
+network will not carry the addresses. The standard anticipates this and allows the
 addresses to be routed between co-operating sites where the routes are deliberately
 set up — which is exactly what a tunnel does. The inner packet keeps the Unique Local
 Addresses, and the outer packet uses the border routers' public addresses.
@@ -426,9 +426,9 @@ Encapsulation Limit option that says how many further levels of encapsulation ar
 allowed, after which the packet is discarded. INET does not implement it. It would not
 have helped here in any case, because nothing in this configuration nests.
 
-Two other numbers here are INET's rather than the standard's. RFC 2473 says the outer
+Two other numbers here are INET's rather than the standard's. It says the outer
 header's hop limit should start at the usual IPv6 default of 64, where INET uses 30 —
-so on real equipment a loop like this one would run about twice as long. And RFC 2473
+so on real equipment a loop like this one would run about twice as long. And it
 expects a tunnel's MTU to be derived from the path between the endpoints and updated
 as that path changes, where ``Ipv6TunnelInterface`` has a fixed value you set
 yourself.
