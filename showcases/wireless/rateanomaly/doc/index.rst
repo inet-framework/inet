@@ -182,13 +182,6 @@ DownlinkAnomaly      the anomaly — frame-fair AP queue, ``sta[0]`` at 6 Mbps
 DownlinkAirtimeFair  the fix — airtime-fair AP queue, same rate gap
 ===================  ==========================================================
 
-Each is run from the showcase directory with, for example:
-
-.. code-block:: bash
-
-    $ inet -u Cmdenv -c UplinkAnomaly          # one run, no parameter study
-    $ inet -u Qtenv  -c DownlinkAirtimeFair    # watch it in the GUI
-
 The rate gap is the same 6-versus-54 Mbps everywhere, so the uplink and downlink halves are
 directly comparable. The sections below work through the uplink family first and the downlink
 family after it, each time establishing the anomaly before introducing the fix.
