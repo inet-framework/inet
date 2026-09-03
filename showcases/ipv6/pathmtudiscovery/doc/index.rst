@@ -30,7 +30,8 @@ nothing filters it — which makes the failure intermittent.
 When the message does not arrive, the sender does not learn the path MTU. It keeps
 sending the same size, every large packet is discarded, and the small ones still
 arrive — so the path looks healthy while large transfers hang, and the fault is hardest
-to find when the network is busiest. That failure has a name, the *Path MTU Discovery black hole*, and it is
+to find when the network is busiest. That failure has a name, the *Path MTU Discovery
+black hole*, and it is
 what this showcase reproduces.
 
 This showcase creates a path whose limit is lower than the sender's own link. The four
@@ -433,7 +434,8 @@ Results
 The frame counts are the ``packetReceivedFromUpper:count`` statistic of each link's
 ``eth[n].mac`` module, so they include control traffic as well as application data. Four
 or five frames per link are Neighbor Discovery, depending on the configuration, which
-is why the data figure is given separately in brackets. It is the data figures that carry the argument.
+is why the data figure is given separately in brackets. It is the data figures that
+carry the argument.
 
 Read down those two columns and they say where the fragmentation happened.
 
