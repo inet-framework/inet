@@ -126,7 +126,7 @@ two are configured independently, and changing only the route changes what the t
 is used for, without touching the tunnel itself.
 
 Where the addresses and routes come from
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Addresses and routes are not module parameters, so they are not set in
 ``omnetpp.ini``. They come from a separate XML file read by a module called
