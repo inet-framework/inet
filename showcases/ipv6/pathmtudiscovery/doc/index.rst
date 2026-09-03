@@ -169,13 +169,11 @@ giving it a policy is enough. These two lines belong to the ``BlackHole``
 configuration only; in the other three the firewall forwards everything:
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: *.firewall.ipv6.hasIpsec
    :end-at: *.firewall.ipv6.ipsec.spdConfig
    :language: ini
 
 .. literalinclude:: ../firewall.xml
-   :caption: firewall.xml
    :language: xml
 
 Three things about that policy are worth knowing before adapting it.
@@ -251,7 +249,6 @@ output interface is the tunnel. This single line is what sends ``hostA``'s packe
 through it, and without it nothing in this showcase would happen:
 
 .. literalinclude:: ../configurator.xml
-   :caption: configurator.xml
    :start-at: <route hosts="borderA" destination="2001:db8:5::/64"
    :end-at: <route hosts="borderA" destination="2001:db8:5::/64"
    :language: xml
@@ -271,7 +268,6 @@ holds only the two prefixes it is attached to and the tunnel is genuinely needed
 The rest of the scenario is the same in every configuration:
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: [General]
    :end-before: [Config Fragmentation]
    :language: ini
@@ -324,7 +320,6 @@ The tunnel's limit is set to 1500, which is also its default, so it accepts the
 1500-byte inner packet:
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: [Config Fragmentation]
    :end-before: [Config BlackHole]
    :language: ini
@@ -343,7 +338,6 @@ The tunnel's limit is lowered to 1460 so that the tunnel never has to split anyt
 which is the correct thing to configure. The firewall discards ICMPv6 heading towards ``hostA``:
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: [Config BlackHole]
    :end-before: [Config Discovery]
    :language: ini
@@ -359,7 +353,6 @@ Discovery Configuration
 The same network and the same tunnel limit, with the firewall doing nothing:
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: [Config Discovery]
    :end-before: [Config SizedToFit]
    :language: ini
@@ -379,7 +372,6 @@ The application writes 1412 bytes instead of 1452, which makes a 1460-byte inner
 packet:
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: [Config SizedToFit]
    :language: ini
 

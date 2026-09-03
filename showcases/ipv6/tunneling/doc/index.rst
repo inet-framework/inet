@@ -144,9 +144,7 @@ two are configured independently, and changing only the route changes what the t
 is used for, without touching the tunnel itself.
 
 The addresses and routes are configured by the ``Ipv6NetworkConfigurator`` module from
-an XML file. This showcase has four of them, one per configuration; they are identical
-except for the one or two routes that lead into the tunnel, which is the only thing
-the configurations vary.
+an XML file.
 
 Configuring the interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -157,7 +155,6 @@ are set individually. This is how one end of this showcase's own tunnel is confi
 on the border router named ``borderA`` in the network described below:
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: *.borderA.numTunInterfaces
    :end-at: *.borderA.tun[0].destination
    :language: ini
@@ -203,7 +200,6 @@ arrives and sends it to its far end. What decides which traffic arrives is an or
 route whose output interface is the tunnel:
 
 .. literalinclude:: ../tunnel.xml
-   :caption: tunnel.xml
    :start-at: <route hosts="borderA" destination="fd00:b::/64"
    :end-at: <route hosts="borderB" destination="fd00:a::/64"
    :language: xml
@@ -318,7 +314,6 @@ configurator would happily install routes that reality would not.
 The rest of the scenario is the same in every configuration:
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: [General]
    :end-before: [Config NoTunnel]
    :language: ini
@@ -336,7 +331,6 @@ The ``NoTunnel`` configuration is the baseline. There is no tunnel, and the two 
 are left to reach each other directly:
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: [Config NoTunnel]
    :end-before: [Config Tunnel]
    :language: ini
@@ -359,7 +353,6 @@ The ``Tunnel`` configuration adds a tunnel interface to each border router and a
 for the whole remote site pointing into it:
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: [Config Tunnel]
    :end-before: [Config SelectiveTunnel]
    :language: ini
@@ -377,13 +370,11 @@ route. Instead of a prefix route for the whole of site B, ``borderA`` gets a rou
 one host address:
 
 .. literalinclude:: ../selective.xml
-   :caption: selective.xml
    :start-at: <route hosts="borderA" destination="fd00:b::b1"
    :end-at: <route hosts="borderA" destination="fd00:b::b1"
    :language: xml
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: [Config SelectiveTunnel]
    :end-before: [Config RoutingLoop]
    :language: ini
@@ -401,13 +392,11 @@ the wrong traffic. The ``RoutingLoop`` configuration adds one wrong route on
 pointing into the tunnel back towards ``borderA``:
 
 .. literalinclude:: ../routing-loop.xml
-   :caption: routing-loop.xml
    :start-at: <route hosts="borderB" destination="fd00:b::b1"
    :end-at: <route hosts="borderB" destination="fd00:b::b1"
    :language: xml
 
 .. literalinclude:: ../omnetpp.ini
-   :caption: omnetpp.ini
    :start-at: [Config RoutingLoop]
    :language: ini
 
