@@ -228,9 +228,7 @@ All four configurations use the same network:
 .. figure:: media/network.png
    :align: center
 
-Each interface is labelled with the IPv6 address it holds. The ``configurator`` and
-``visualizer`` modules have no part in the protocol: the first assigns the addresses
-and routes, and the second draws the labels.
+Each interface is labelled with the IPv6 address it holds.
 
 .. FIGURE RECIPE: launch `inet -u Qtenv -c NoTunnel --mcp-server-address localhost:8799`,
    then over the MCP server: run_simulation time_limit 1.9s mode express (so addresses are
