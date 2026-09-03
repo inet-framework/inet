@@ -51,10 +51,22 @@ The mobile node acquires both of its addresses by *stateless address
 autoconfiguration* (SLAAC): routers periodically multicast Router
 Advertisements carrying the link's prefix (a freshly attached host solicits
 one immediately with a Router Solicitation), the host appends an interface
-identifier of its own making, and after a short duplicate address detection
-(DAD) probe the address is ready — no server involved. This is what makes
-mobility work in networks that have never heard of the mobile node: it can
-build itself a care-of address anywhere.
+identifier of its own making, and the address is ready — no server involved.
+This is what makes mobility work in networks that have never heard of the
+mobile node: it can build itself a care-of address anywhere.
+
+An address built that way is a guess until it is checked, so the host may not
+use it yet — the standard calls such an address *tentative* — and runs
+*duplicate address detection* (DAD, RFC 4862): it multicasts a *Neighbor
+Solicitation* naming that very address and waits. A Neighbor Solicitation is
+the question IPv6's *Neighbor Discovery* protocol asks about an address — the
+replacement for the ARP request — and a *Neighbor Advertisement* is the answer
+to it. Silence means the address is free and becomes usable; an answer means
+the guess collided and the address must be abandoned. Nothing may be sent from
+an address still being checked, and the wait is a fixed timeout rather than a
+round trip, so a host arriving on a new link pays duplicate address detection
+in full before it can do anything — which is why it dominates the handover
+outage measured below.
 
 What happens on a move
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -65,8 +77,8 @@ When the mobile node (MN) walks out of its home network into a foreign one:
    access point.
 2. **Movement detection** — a Router Advertisement on the new link reveals an
    unfamiliar prefix: "I have moved."
-3. **Care-of address formation** — normal SLAAC plus duplicate address
-   detection on the new link.
+3. **Care-of address formation** — normal SLAAC on the new link, once
+   duplicate address detection there has finished.
 4. **Registration** — the mobile node sends a *Binding Update (BU)* to its
    home agent (HA): "my home address is now reachable at this care-of
    address, for this lifetime." The home agent confirms with a *Binding
@@ -207,14 +219,11 @@ Configuration notes:
 
 - ``useRouteOptimization`` (on the mobile node's ``mipv6`` submodule, default
   ``true``) selects between bidirectional tunneling and route optimization —
-  the same scenario runs both ways with this one flag.
+  in this showcase the same scenario runs both ways with this one flag.
 - Movement detection does not depend on frequent Router Advertisements: on
   every layer-2 association the IPv6 neighbour discovery module immediately
   sends a Router Solicitation (its ``detectL2Movement`` parameter, default
   ``true``), so the mobile node never waits for a periodic advertisement.
-  This scenario advertises every 3–7 s, but that is not what makes detection
-  fast — even INET's 200–600 s defaults would detect the move just as
-  quickly.
 - The mobile node autoconfigures its addresses, so the address configurator
   must leave hosts alone: the network sets ``assignAddressesToHosts = false``
   on the ``Ipv6NetworkConfigurator``, which then assigns addresses and routes
@@ -238,21 +247,76 @@ it is:
   node (proxy Neighbor Discovery) is not implemented. In this scenario the
   distinction is invisible — no other host lives on the home link — but a
   host on the home link could not reach an away mobile node.
-- The home agent delays its first Binding Acknowledgement by one second — a
-  stand-in for the duplicate address detection that the standard requires it
-  to perform on the home address before answering (a real registration waits
-  comparably). Until the acknowledgement lands, the mobile node's reverse
-  tunnel is not up, and replies it sends from its home address are dropped by
-  its own topological-correctness check — the node refuses to emit a packet
-  whose home-address source would look spoofed outside the home network, its
-  private version of the ingress filtering discussed earlier — instead of
-  being queued or tunneled: one or two extra lost pings at the tail of each
-  handover outage. A visible side effect: the mobile node's one-second retransmission
-  timer fires just before the delayed acknowledgement arrives, so the home
-  registration in this scenario always takes *two* Binding Updates (the later
-  correspondent registration completes with one) — and the acknowledgement
-  that counts is the second, which is why the binding cache shown later
-  records sequence number 2.
+
+  .. todo::
+
+     This is gap 1 of MIPV6_IMPLEMENTATION_GAPS.md, and unlike the other gaps
+     the page refers to it is **not filed** — no issue, no branch, no fix in
+     progress as of 2026-08-27.
+
+     RFC 6275 Section 10.4.1 asks the home agent to impersonate the absent
+     mobile node on the home link: claim its home address with duplicate
+     address detection, announce the claim with a multicast Neighbor
+     Advertisement so neighbors replace their cache entries, and then answer
+     Neighbor Solicitations for it. INET does none of the three — there is no
+     on-link agent code anywhere in ``src/inet/networklayer/mipv6/``, the only
+     "proxy" matches being Proxy Mobile IPv6 message fields. They are missing
+     together because they are one capability, which is why the home agent's
+     duplicate address detection cannot be added on its own.
+
+     The next bullet's one-second delay is the workaround for the missing
+     first step, hardcoded as ``sendTime = existingBinding ? 0 : 1`` at
+     ``Mipv6.cc:859`` and applied at ``:645``, which carries its own
+     ``// TODO solve the HA DAD problem in a different way``. Fixing this gap
+     replaces that literal with a real probe, so the delay would then vary per
+     seed the way the mobile node's own duplicate address detection does, and
+     the handover budget in the Results section would need re-deriving.
+- The home agent delays its first Binding Acknowledgement by one second, as a
+  stand-in for the duplicate address detection the standard requires it to
+  perform on the home address before answering. The delay itself is not the
+  deviation: a compliant home agent waits about as long for real duplicate
+  address detection.
+- Until that acknowledgement lands the mobile node's reverse tunnel is not up,
+  and the replies it sends from its home address are dropped instead of being
+  queued or tunneled. The node refuses to emit a packet whose home-address
+  source would look spoofed outside the home network — its private version of
+  the ingress filtering discussed earlier. This is the part that departs from
+  the standard, and it costs one or two extra lost pings at the tail of each
+  handover outage.
+- The mobile node's one-second retransmission timer fires just before the
+  delayed acknowledgement arrives, so every home registration here takes *two*
+  Binding Updates; the later correspondent registration completes with one.
+  The two acknowledgements then arrive out of order — the second update
+  reaches a home agent that already holds a binding, so it is answered at once
+  and overtakes the held first one — and the mobile node accepts the
+  acknowledgement carrying sequence number 2, discarding the late sequence
+  number 1. That is why the binding cache shown later records sequence
+  number 2.
+
+  .. todo::
+
+     This bullet documents an INET defect as though it were scenario
+     behaviour, and the defect is already fixed on
+     ``topic/gy/mipv6-first-registration-timer`` — commits ``2e9fc0200a``
+     (issue #1132: RFC 6275 Section 11.8's first-registration branch was dead
+     code) and ``f513057d65`` (issue #1133: the timeout constant was 1 s
+     instead of the RFC 6275 Section 13 value of 1.5 s), pull request #1134.
+     Neither is an ancestor of this branch; fixing either alone changes
+     nothing.
+
+     With both, the retransmission timer fires at ~21.54 s, well after the
+     acknowledgement arrives at ~21.07 s: the registration completes with a
+     single Binding Update and the binding cache records sequence number 1.
+
+     So this bullet should go when #1134 lands — and with it the
+     two-Binding-Update story everywhere else the page tells it. As of
+     2026-08-27 that is eight places: the sequence-number gloss in
+     Terminology; the "signaling, message by message" prose and its
+     sequence-chart panel recipes; the Home Test Init retransmission
+     narrative; the "Step by step" panel and its recipe; and the binding
+     cache figure's explanation, which reads sequence number 2 off the
+     screenshot. The prose is cheap; the sequence-chart panels, the handover
+     video and the binding cache screenshot would all need re-capturing.
 - Routers in this network have ICMPv6 Redirect generation disabled
   (``sendRedirects = false``). A router sends a Redirect when it forwards a
   packet back out of the very interface that packet arrived on, to tell the
@@ -294,7 +358,7 @@ router:
 
 The status text above the mobile node is live: it shows the associated
 SSID and the mobility state (at home / away / route-optimized), and the green
-label on the right is its current wireless address. Both update as the
+label on the right is its current IP address. Both update as the
 simulation runs. Note that the foreign network's router is a plain
 ``Router6`` — the visited network needs no Mobile IPv6 support at all, just
 as promised above.
@@ -310,22 +374,25 @@ time — the sum of the link delays along its path:
    :end-at: correspondentNode.ethg
    :language: ned
 
-Predicted round-trip times, counting propagation only (the access LANs'
-0.1 µs is negligible, and the 2 Mbps wireless hop adds about 2 ms of
-transmission and channel-access overhead on top):
+Predicted round-trip times, adding up the link delays along each path (the
+access LANs' 0.1 µs is too small to matter):
 
 - **at home**: 2 × (1 + 5) = 12 ms
 - **tunneled**: 2 × (1 + 5) + 2 × (5 + 8) = 38 ms — every packet crosses the
   backbone twice, once to the home agent and once through the tunnel
 - **route-optimized**: 2 × (1 + 8) = 18 ms
 
-Add the wireless hop to each and these become the three plateaus the Results
-section measures: 14 ms at home, 40 ms tunneled, 20 ms route-optimized.
+Those are the wired links only. The wireless hop is crossed twice per round
+trip — once carrying the request to the mobile node, once carrying the reply
+back — and each crossing costs about 1 ms: at 2 Mbps a ping frame takes that
+long to clock out, plus the wait for a free channel. Adding the resulting 2 ms
+gives the three plateaus the Results section measures: 14 ms at home, 40 ms
+tunneled, 20 ms route-optimized.
 
 Note that the route-optimized value is below anything a path through the home
 agent could achieve: even the cheapest conceivable detour — out through the
 tunnel (1 + 5 + 5 + 8 = 19 ms) and straight back (8 + 1 = 9 ms) — costs 28 ms
-in propagation alone. Measuring 20 ms is proof by arithmetic that the home
+in link delays alone. Measuring 20 ms is proof by arithmetic that the home
 agent is out of the loop.
 
 The mobile node's movement has three acts (``movement.xml``): it dwells at
@@ -447,10 +514,57 @@ the way back. Its home address means nothing on the foreign link.
    stamp:    captured 2026-08, INET 4.7
 
 **Bidirectional tunneling restores reachability, at the cost of a detour.**
-After a ~4.5 s outage — scanning, association, movement detection, duplicate
-address detection on the new link, and the registration with its one-second
-acknowledgement delay from the implementation notes — replies resume on the
-40 ms plateau and stay there, every packet taking the long way through the home agent.
+After a ~4.5 s outage replies resume on the 40 ms plateau and stay there, every
+packet taking the long way through the home agent.
+
+Where those seconds go, from this run's event log — the last reply at home
+arrives at t = 17.014 s, the first tunneled one at t = 21.540 s:
+
+- **0.74 s** — still associated with the home access point, already out of
+  range. The requests sent at 17.5 s and 18.0 s are simply lost.
+- **0.65 s** — scanning both channels, then authenticating and associating
+  with ``apForeign``.
+- **0.22 s** — waiting for a Router Advertisement on the new link, which
+  reveals the unfamiliar prefix.
+- **1.42 s** — duplicate address detection on the new link, on the link-local
+  address the mobile node regenerates there. The *Binding Update* leaves in the
+  same event as its completion.
+- **1.03 s** — the home agent holding its *Binding Acknowledgement*, its
+  stand-in for the duplicate address detection it should run on the home
+  address (see the implementation notes), plus propagation.
+- **0.47 s** — the wait for the next ping. The one sent at 21.0 s missed the
+  binding by 71 ms; the one sent at 21.5 s got through.
+
+**More than half the outage — 2.45 s of 4.53 s — is duplicate address
+detection, at one end or the other.** It is a correctness check whose entire
+cost lands in handover latency, which is what motivates optimizations such as
+RFC 4429 Optimistic DAD. Both terms are timeouts rather than round trips, so
+neither shrinks on a faster link.
+
+That 1.42 s is this seed's value, not a constant: INET waits ``retransTimer``
+(1 s) plus a random 0–1 s standing for the solicited-node multicast group join
+of RFC 4862 Section 5.4.2, so the outage moves by up to a second from run to
+run.
+
+.. todo::
+
+   The 1.42 s term is DAD on the *link-local* address, not on the care-of
+   address, and that is an INET bug rather than a modelling choice — see gap 8
+   in MIPV6_IMPLEMENTATION_GAPS.md. At a handover the mobile node marks every
+   address on the interface tentative (the home address included), probes the
+   link-local one alone, and then assigns the care-of address permanently
+   without ever probing it
+   (``Ipv6NeighbourDiscovery.cc:2578-2594`` and ``:906-937``).
+
+   Two things to settle:
+
+   1. Whether the reader-facing implementation-notes list above should carry
+      this too. It is a real deviation, and the budget on this page leans on
+      the number it produces — but it is Neighbor Discovery, not Mobile IPv6,
+      so it may belong in an IPv6 page instead.
+   2. Fixing it in INET adds a second DAD interval to every handover, so this
+      budget, the ~4.5 s outage figure, the charts and the sequence-chart
+      panel anchors all need re-deriving once it lands.
 
 .. figure:: media/pingrtt-routeopt.png
    :align: center
