@@ -29,8 +29,8 @@ requires them to, so under load the message can be lost even where nothing filte
 
 When the message does not arrive, the sender does not learn the path MTU. It keeps
 sending the same size, so the network carries every small packet and discards every
-large one: a name lookup succeeds and a web page starts to load, while a file transfer
-stops partway and never finishes. Nothing reports an error at either end, and the fault
+large one. For example, a name lookup succeeds and a web page starts to load, while a
+file transfer stops partway and never finishes. Nothing reports an error at either end, and the fault
 is hardest to find when the network is busiest. This failure is called a *Path MTU
 Discovery black hole*, and one of the configurations below reproduces it.
 
