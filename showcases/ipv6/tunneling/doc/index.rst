@@ -541,6 +541,7 @@ The following is an Ethernet frame captured on the link between ``borderA`` and
 inspector:
 
 .. figure:: media/encapsulated-packet.png
+   :width: 100%
    :align: center
 
 .. FIGURE RECIPE: launch `inet -u Qtenv -c Tunnel --mcp-server-address localhost:8799`,
