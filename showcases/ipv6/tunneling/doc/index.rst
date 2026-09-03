@@ -104,14 +104,18 @@ all of its sites out of one such prefix.
 IPv6-in-IPv6 tunneling in INET
 ------------------------------
 
-In INET a tunnel is not a protocol module. It is a *virtual network interface* called
-``Ipv6TunnelInterface``. A packet routed to that interface is handed back to IPv6 with
-the tunnel endpoints attached to it, and IPv6 wraps it in the outer header and
-forwards the result toward the exit point like any other locally originated packet.
-The wrapping is done by the ordinary IPv6 code that encapsulates any payload; the
-tunnel interface only says which addresses to use. At the far end, IPv6 sees a datagram
-addressed to itself whose Next Header field says ``IPv6``, removes the outer header,
-and processes the inner packet as if it had just arrived from the network.
+In INET a tunnel is a *virtual network interface* called ``Ipv6TunnelInterface``. A
+node has it alongside its real interfaces and routes packets to it in the same way.
+What makes it virtual is that it has no link underneath: instead of putting the packet
+on a wire, it hands it back to the node's own IPv6 layer with the tunnel endpoints
+attached, and IPv6 wraps it in the outer header and forwards the result toward the
+exit point like any other locally originated packet. The wrapping is done by the
+ordinary IPv6 code that encapsulates any payload; the tunnel interface only says which
+addresses to use.
+
+At the far end, IPv6 sees a datagram addressed to itself whose Next Header field says
+``IPv6``, removes the outer header, and processes the inner packet as if it had just
+arrived from the network.
 
 This leads to the single most useful idea on this page:
 
