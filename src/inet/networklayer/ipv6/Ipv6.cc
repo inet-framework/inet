@@ -1119,6 +1119,9 @@ void Ipv6::fragmentAndSend(Packet *packet)
     // routed datagrams are not fragmented
     if (!fromHL) {
         // FIXME check for multicast datagrams, how many ICMP error should be sent
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP); // no reason code describes "larger than the MTU"
+        emit(packetDroppedSignal, packet, &details);
         sendIcmpPacketTooBigError(packet, mtu);
         return;
     }
