@@ -31,10 +31,14 @@ reproduces.
 This showcase creates a path whose limit is lower than the sender's own link. The four
 configurations show:
 
-1. paying for fragmentation;
-2. losing everything when the message is filtered;
-3. recovering when the message gets through;
-4. the quiet case where the sender was sized correctly from the start.
+1. every oversized packet split at the tunnel and reassembled beyond it, which
+   delivers the traffic at twice the packet count;
+2. no packet arriving at all, because the Packet Too Big message is filtered and the
+   sender goes on sending the same size;
+3. a single packet lost, after which the sender learns the path MTU and splits its own
+   datagrams to fit;
+4. nothing split or discarded anywhere, because the sender's packets already fit the
+   path.
 
 An IPv6-in-IPv6 tunnel is used to make the path narrower, because encapsulation is a
 common reason a path carries less than the links at either end of it. What the tunnel
