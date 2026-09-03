@@ -283,10 +283,8 @@ tunnel endpoints. ``2001:db8::/32`` is the range RFC 3849 reserves for documenta
 it stands in here for real provider-assigned addresses.
 
 Routing is configured by hand rather than computed, using
-``*.configurator.addStaticRoutes = false`` and an explicit route for every node. This
-is more verbose than letting the configurator compute shortest paths, but it makes the
-premise of the showcase visible instead of merely asserted. The transit router's
-routing table is this, and nothing else:
+``*.configurator.addStaticRoutes = false`` and an explicit route for every node. The
+transit router's routing table is the following:
 
 .. code-block:: none
 
@@ -299,8 +297,9 @@ node's routing table at the start of the run. ``<unspec>`` means the route has n
 hop because the destination is on a directly attached link.
 
 Those are the routes the configurator created. The table also holds the link-local
-``fe80::/10`` route that every IPv6 interface gets, which never carries traffic
-between sites. What matters is that nothing in it matches either site's addresses. Any packet carrying them that reaches ``transit`` is discarded. In a real
+``fe80::/10`` route that every IPv6 interface gets, which never carries traffic between
+sites. What matters is that nothing in it matches either site's addresses, so any
+packet carrying them that reaches ``transit`` is discarded. In a real
 network the absence is not a configuration choice — it is unavoidable, for the reasons
 given above. Here it has to be arranged deliberately, because a shortest-path
 configurator would happily install routes that reality would not.
@@ -406,8 +405,8 @@ than one outer header on the wire and the packet does not grow.
 What stops it is the hop limit. Each border router forwards the inner packet, and
 forwarding decrements its hop limit. INET starts an IPv6 packet with a hop limit of
 30, and each round trip costs two decrements, so a packet reaches ``borderB`` about
-fifteen times before it is discarded there. The loop is self-limiting: each individual packet dies
-on its own hop limit, rather than circulating for ever. New packets keep entering the
+fifteen times before it is discarded there. The loop is self-limiting: each individual
+packet dies on its own hop limit, rather than circulating for ever. New packets keep entering the
 loop until the sender stops, and the run itself ends on the simulation time limit.
 
 This is an ordinary routing loop that happens to run through a tunnel. It is worth
