@@ -124,7 +124,9 @@ interfaces:
    :align: center
 
    The interface layer of ``borderA``. ``tun[0]`` stands alongside the two Ethernet
-   interfaces and the loopback, but has no link leading out of the node.
+   interfaces and the loopback, but has no link leading out of the node, and the
+   ``fe80::`` against it is the unset placeholder every interface starts with rather
+   than an address it holds.
 
 .. FIGURE RECIPE: launch `inet -u Qtenv -c Tunnel --mcp-server-address localhost:8799`,
    then over the MCP server: run_simulation time_limit 2.6s mode express, then
@@ -170,10 +172,18 @@ network interface has):
   outer header.
 - ``mtu`` — the largest packet the tunnel will accept, 1500 bytes by default.
 
-Unlike a tunnel interface on most router operating systems, this one needs no address
-of its own. It never appears as a source or destination — the addresses in the outer
-header are the ``source`` and ``destination`` above, which belong to the node's real
-interfaces.
+.. note::
+
+   This tunnel interface holds no address of its own, and the configurator leaves it
+   without one. It never appears as a source or destination: the addresses in the
+   outer header are the ``source`` and ``destination`` above, which belong to the
+   node's real interfaces.
+
+   On real equipment a tunnel interface usually does carry an address, so that routing
+   protocols can form adjacencies over it and so that it answers ping and shows up in
+   a traceroute. It is not required for forwarding — Cisco's ``ip unnumbered`` and a
+   plain Linux ``ip6tnl`` both work without one — but expect to see addresses on
+   tunnel interfaces in a real configuration.
 
 Each end is configured separately, and each end describes only its own direction. The
 tunnel in this showcase is used in both directions, so both border routers declare an
