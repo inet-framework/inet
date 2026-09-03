@@ -4,28 +4,36 @@ IPv6-in-IPv6 Tunneling
 Goals
 -----
 
-A network can only forward a packet if it has a route for the destination address.
-Some addresses are, by design, ones that no public network will ever carry. A site
-that numbers its internal networks from such a range cannot simply send those packets
-across the Internet to another site.
+An IPv6 router can only forward a packet if its routing table holds a route matching
+the destination address. Some IPv6 addresses are, by design, ones that no router on
+the public Internet will ever hold a route for. The clearest example is a company that
+numbers its internal networks out of the Unique Local Address range, ``fc00::/7`` —
+the IPv6 counterpart of the private addresses used inside IPv4 networks. Those
+addresses work inside the company and are filtered everywhere else. So a company with
+two offices, each numbered this way, cannot simply send packets from one to the other
+across the Internet: the first Internet router that sees such a packet discards it.
 
-Tunneling solves this by hiding the packet. The site's border router wraps the whole
-packet inside a second IPv6 header that uses addresses the public network *does*
-carry. The network forwards the outer packet normally and never inspects what is
-inside. The router at the far end removes the outer header and delivers the original
-packet into the second site.
+Tunneling solves this by wrapping the packet. The border router of the first office
+puts the whole original packet inside a second IPv6 header, addressed from itself to
+the border router of the second office — two addresses the Internet does have routes
+for. Every router in between then makes its forwarding decision from that outer header
+alone, which is all a router normally reads. Nothing prevents a router from looking
+further in; the packet is not encrypted, and equipment that inspects traffic does
+exactly that. It simply has no reason to, because the outer header already tells it
+where to send the packet. The border router at the far end strips that header off and
+delivers the original packet into the second office.
 
 This showcase demonstrates IPv6-in-IPv6 tunneling as defined in RFC 2473. Two sites
 use addresses the network between them cannot route, and a tunnel between the site
-border routers carries their traffic across. The showcase then varies one thing at a
-time: which traffic the tunnel carries, and what happens when the routing that feeds
-the tunnel is wrong.
+border routers carries their traffic across. Four configurations then change one thing
+at a time:
 
-One point of scope, because the term is ambiguous. "IPv6 tunneling" often means
-carrying IPv6 across an IPv4-only network — the transition mechanisms 6in4, 6to4, 6rd
-and Teredo. This page is not about those, and INET does not model them. This page is
-about carrying IPv6 inside IPv6, which is a different mechanism solving a different
-problem.
+- what happens without the tunnel, so that the failure it fixes is visible;
+- the tunnel carrying a whole remote site;
+- the same tunnel carrying traffic to one host only, leaving a second host in that
+  site unreachable, which shows that the routing decides what the tunnel carries;
+- a single wrong route that sends packets back into the tunnel they arrived through,
+  so that they loop until their hop limit runs out.
 
 | Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/ipv6/tunneling <https://github.com/inet-framework/inet/tree/master/showcases/ipv6/tunneling>`__
@@ -53,11 +61,10 @@ is the same IPv6 header the reader already knows, with nothing added.
 Addresses the network will not carry
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-IPv6 reserves a range called Unique Local Addresses, ``fc00::/7``, defined in
-RFC 4193. In practice organisations use the ``fd00::/8`` half of it. Unique Local
-Addresses are the rough equivalent of the private address ranges in IPv4: they are
-meant for traffic inside an organisation, and they never appear in the global routing
-table.
+The Unique Local Address range mentioned above, ``fc00::/7``, is defined in RFC 4193;
+in practice organisations use the ``fd00::/8`` half of it. It is worth being precise
+about why these addresses never appear in the global routing table, because that is
+the premise the whole showcase rests on.
 
 An organisation creates its own Unique Local Address prefix by choosing 40 random
 bits. RFC 4193 makes that choice random so that two organisations are very unlikely
