@@ -303,10 +303,11 @@ packet carrying them that reaches ``transit`` is discarded.
    "object". Use the FULL path including the network name -- a non-module object is not
    found by the network-relative path that works for modules. Inspecting the
    routingTable module itself instead shows its parameters, and expanding that far
-   enough to reach the routes buries them. In a real
-network the absence is not a configuration choice — it is unavoidable, for the reasons
-given above. Here it has to be arranged deliberately, because a shortest-path
-configurator would happily install routes that reality would not.
+   enough to reach the routes buries them.
+
+In a real network that absence is not a configuration choice: providers filter these
+addresses, as described above. Here it has to be arranged deliberately, because a
+shortest-path configurator would happily install routes that reality would not.
 
 The rest of the scenario is the same in every configuration:
 
