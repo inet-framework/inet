@@ -18127,8 +18127,8 @@
   "sim_time_limit": "70s",
   "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "90f3-e2c4",
-  "timestamp": 1793788714.2648213,
+  "fingerprint": "74c2-6f04",
+  "timestamp": 1793788791.1067123,
   "itervars": "$repetition==0"
  },
  {
@@ -18151,8 +18151,8 @@
   "sim_time_limit": "70s",
   "test_result": "PASS",
   "ingredients": "~tND",
-  "fingerprint": "2112-120f",
-  "timestamp": 1793788714.2724047,
+  "fingerprint": "215b-ea04",
+  "timestamp": 1793788791.111918,
   "itervars": "$repetition==0"
  },
  {
@@ -18163,8 +18163,8 @@
   "sim_time_limit": "70s",
   "test_result": "PASS",
   "ingredients": "~tNl",
-  "fingerprint": "0455-802b",
-  "timestamp": 1793788714.2679503,
+  "fingerprint": "ca8b-afd0",
+  "timestamp": 1793788791.1093867,
   "itervars": "$repetition==0"
  },
  {
@@ -18247,8 +18247,8 @@
   "sim_time_limit": "70s",
   "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "d168-4111",
-  "timestamp": 1793788714.2844148,
+  "fingerprint": "684e-c8c6",
+  "timestamp": 1793788791.1262093,
   "itervars": "$repetition==0"
  },
  {
@@ -18271,8 +18271,8 @@
   "sim_time_limit": "70s",
   "test_result": "PASS",
   "ingredients": "~tND",
-  "fingerprint": "c628-0536",
-  "timestamp": 1793788714.2900252,
+  "fingerprint": "95b1-e8f8",
+  "timestamp": 1793788791.131725,
   "itervars": "$repetition==0"
  },
  {
@@ -18283,8 +18283,8 @@
   "sim_time_limit": "70s",
   "test_result": "PASS",
   "ingredients": "~tNl",
-  "fingerprint": "6022-1e93",
-  "timestamp": 1793788714.286591,
+  "fingerprint": "1513-0c5f",
+  "timestamp": 1793788791.129077,
   "itervars": "$repetition==0"
  },
  {
