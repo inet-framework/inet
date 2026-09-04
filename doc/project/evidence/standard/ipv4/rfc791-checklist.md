@@ -1,8 +1,8 @@
 # RFC 791 (IPv4) — catalog of checkable statements
 
-> **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC791-*`, `RFC792-*` · **Stands on:** [derive-tests-from-an-rfc.md](../../../guide/derive-tests-from-an-rfc.md)
+> **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC791-*`, `RFC792-*` · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 2 artifact of the RFC test workflow. It lists statements from the
+This document is the step 3 artifact of the standards test workflow. It lists statements from the
 RFC that a test can check. The catalog comes from the RFC text only. It contains no
 simulation model names and no code references — that mapping happens in later steps.
 

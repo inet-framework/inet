@@ -2,12 +2,12 @@
 
 > **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc791-results.md](rfc791-results.md), [test-anatomy.md](../../../design/test-anatomy.md)
 
-Step 6 artifact of the RFC test workflow (see
-[derive-tests-from-an-rfc.md](../../../guide/derive-tests-from-an-rfc.md)).
+Step 9 artifact of the standards test workflow (see
+[derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)).
 For each check, this document records the test category and the reason. The categories and
 what each one can establish are
 [test-anatomy.md](../../../design/test-anatomy.md#the-categories); the mapping from
-observation class to category is in the guide, step 6.
+observation class to category is in the guide, step 9.
 
 ## Decisions for the selected checks
 

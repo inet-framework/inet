@@ -2,8 +2,8 @@
 
 > **Kind:** report · **Status:** snapshot 2026-09-02 · **Seal:** none · **Owns:** — · **Stands on:** [rfc791-checklist.md](rfc791-checklist.md), [rfc791-checks.md](rfc791-checks.md)
 
-Step 5 artifact of the RFC test workflow (see
-[derive-tests-from-an-rfc.md](../../../guide/derive-tests-from-an-rfc.md)).
+Step 7 artifact of the standards test workflow (see
+[derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)).
 This is the first document of the workflow that may reference code.
 
 - Date: 2026-09-02. Tree: inet-master (branch `master`, docs at commit `6208e77255`,
@@ -47,7 +47,7 @@ workflow: fix the test, not the expectation.
    - The dissector protocol name for ICMP is `icmpv4`, not `icmp`:
      `icmpv4.type == 3 && icmpv4.code == 4`.
    In both cases the wrong expression is a silent non-match, and the step times out.
-   Lesson for step 4: on a deadline miss, first print the frames (a tester without
+   Lesson for step 6: on a deadline miss, first print the frames (a tester without
    `testName` logs the trace) and compare the field spellings.
 
 ## Model analysis — where INET implements the checked behavior

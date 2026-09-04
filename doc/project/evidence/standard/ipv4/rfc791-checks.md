@@ -2,8 +2,8 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc791-checklist.md](rfc791-checklist.md)
 
-Step 3 artifact of the RFC test workflow (see
-[derive-tests-from-an-rfc.md](../../../guide/derive-tests-from-an-rfc.md)).
+Step 5 artifact of the standards test workflow (see
+[derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)).
 This file holds all English check procedures for RFC 791, one section per check. The
 procedures come from the specification only. They name no simulation model and no code.
 The catalog entries are in [`rfc791-checklist.md`](rfc791-checklist.md).
