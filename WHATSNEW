@@ -347,6 +347,12 @@ Notable backward compatible changes are the following:
    ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
    Those two tags now survive the measurement.
 
+6. Finding an IPv6 tunnel interface by its endpoints
+
+   Ipv6RoutingTable::findTunnelNetworkInterface() returns the tunnel interface
+   configured with a given entry and exit point, and Ipv6Tunnel now exposes
+   those endpoints with getSource() and getDestination().
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
