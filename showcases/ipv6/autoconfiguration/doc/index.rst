@@ -445,6 +445,39 @@ address was actually accepted.
    2001:db8:1:1:8aa:ff:fe00:c at 7.094921, the first frame must show five fe80::
    labels, and host[0]'s label must not be clipped at the left edge.
 
+The same run again, with two things added: an arrow for every link-layer
+transmission, labelled with the message it carries, and Qtenv's own simulation-time
+readout along the top. It runs slightly longer, to 8.6 s, so that the first UDP
+packets are included.
+
+.. video:: media/autoconfiguration-datalink.mp4
+   :width: 100%
+   :align: center
+
+.. VIDEO RECIPE: as the previous video, plus these three command-line overrides:
+   --*.visualizer.dataLinkVisualizer.displayLinks=true
+   --*.visualizer.dataLinkVisualizer.fadeOutMode='"simulationTime"'
+   --*.visualizer.dataLinkVisualizer.fadeOutTime=0.4s
+   They are overrides rather than ini settings so that the configuration the page
+   documents stays as printed. Record with crop_area=whole_window (not network_area:
+   the simulation time is in the Qtenv toolbar, outside the canvas), time_limit 8.6s,
+   fps=20, playback_speed=1. Encode with two crops stacked -- the toolbar strip
+   crop=960:34:960:22 above the canvas crop=1098:500:749:99,crop=960:446:138:54 --
+   joined with vstack, at -r 20 -crf 16. The first crop's x offset is measured from
+   the right edge of a 1920-wide window; re-measure if the window size differs.
+   Determinism self-check: at 5.375 s six Neighbour Solicitations must be in flight
+   around the switch, and at 8.25 s a UdpBasicAppData-0 arrow must run host[0] ->
+   switch -> router -> server.
+
+Each message produces more than one arrow, because the switch is a link-layer hop of
+its own: a Router Advertisement leaving the router appears once on the router-to-switch
+link and again on each switch-to-host link. The arrows fade after 0.4 s of simulated
+time, so what is on screen is what has just been sent.
+
+Watching the time readout alongside the arrows shows how uneven the process is. The
+link is busy with Neighbour Solicitations up to about 3 s, quiet until the Router
+Advertisement at 5.37 s, then quiet again until the UDP packets at 8 s.
+
 The log excerpts below come from a Cmdenv run of each configuration with
 ``--cmdenv-log-level=detail``, with the module paths shortened to the node name for
 readability, and the trailing ``on eth0`` dropped from the address-check lines; the
