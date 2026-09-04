@@ -365,3 +365,4 @@ tests/protocol/<proto>/                 the tests
 | Pass | Date | Scope | Result |
 | --- | --- | --- | --- |
 | 1 | 2026-09-02 | RFC 791 + RFC 792 error signals; 17 catalog entries; 3 checks; 3 tests | see [`rfc791-results.md`](../evidence/standard/ipv4/rfc791-results.md) |
+| 2 | 2026-09-04 | Re-apply the 9 steps to the pass 1 scope, no new test: standards map, RFC 792 catalog split out per document, 8-feature map, conformance matrix | 3 features confirmed, 3 partial, 2 unverified; no defect; see [`conformance.md`](../evidence/standard/ipv4/conformance.md) |

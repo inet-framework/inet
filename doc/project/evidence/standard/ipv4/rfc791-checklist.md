@@ -1,18 +1,21 @@
 # RFC 791 (IPv4) — catalog of checkable statements
 
-> **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC791-*`, `RFC792-*` · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
+> **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC791-*` · **Stands on:** [standards.md](standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow. It lists statements from the
-RFC that a test can check. The catalog comes from the RFC text only. It contains no
-simulation model names and no code references — that mapping happens in later steps.
+This document is the step 3 artifact of the standards test workflow, for one document of
+the in-scope set: RFC 791. It lists statements of that document that a test can check. The
+catalog comes from the RFC text only. It contains no simulation model names and no code
+references — that mapping happens in later steps.
 
-Sources, cached in this folder:
+Source, cached in this folder:
 
 - `rfc791.txt` — Internet Protocol, September 1981. Downloaded 2026-09-02 from
   <https://www.rfc-editor.org/rfc/rfc791.txt>.
-- `rfc792.txt` — Internet Control Message Protocol, September 1981. Downloaded 2026-09-02
-  from <https://www.rfc-editor.org/rfc/rfc792.txt>. RFC 791 delegates error reports to ICMP,
-  so the two documents pair for error-signal checks.
+
+RFC 791 delegates error reports to ICMP. Those statements belong to RFC 792 and live in
+[`rfc792-checklist.md`](rfc792-checklist.md). The two documents, their relatives, and the
+in-scope set are in [`standards.md`](standards.md). A feature that spans both documents is
+in [`features.md`](features.md).
 
 Quotes are verbatim. A reference such as `rfc791.txt:1012` points to a line of the cached
 file in this folder.
@@ -36,8 +39,6 @@ file in this folder.
 | [RFC791-CKSUM-1](#rfc791-cksum-1) | The header checksum is recomputed at each hop. |
 | [RFC791-CKSUM-2](#rfc791-cksum-2) | A datagram with a bad header checksum is discarded. |
 | [RFC791-ID-1](#rfc791-id-1) | Identification is unique per source, destination, and protocol. |
-| [RFC792-TE-1](#rfc792-te-1) | TTL zero at a gateway: discard, and possibly a Time Exceeded message. |
-| [RFC792-DU-4](#rfc792-du-4) | DF drop: destination unreachable, code 4. |
 
 ## How to read an entry
 
@@ -52,6 +53,10 @@ file in this folder.
 - **Status** — `selected` (this iteration), `covered` (part of a selected check),
   `candidate` (practical, not yet selected), `later` (needs injection, faults, or several
   flows).
+- **Overridden by** — appears only when a later document of the in-scope set changes the
+  statement. No entry carries the field today, because the in-scope set is RFC 791 and
+  RFC 792 alone. The known future overrides, for example RFC 6864 over RFC791-ID-1, wait
+  in the override table of [`standards.md`](standards.md#override-table).
 
 ## Time to live
 
@@ -76,7 +81,8 @@ file in this folder.
 > "If this field contains the value zero, then the datagram must be destroyed."
 > — §3.2 Time to Live, `rfc791.txt:1013-1014`
 
-- Strength: must. Class: wire (absence after the gateway) plus error-signal (RFC792-TE-1).
+- Strength: must. Class: wire (absence after the gateway) plus error-signal
+  ([RFC792-TE-1](rfc792-checklist.md#rfc792-te-1)).
 - Check idea: send a datagram whose TTL is too small for the path. The destination must not
   receive it.
 - Status: candidate
@@ -160,7 +166,7 @@ file in this folder.
 > discarded instead." — §2.3, `rfc791.txt:662-666`
 
 - Strength: must. Class: wire (no fragments appear; the destination receives nothing) plus
-  error-signal (RFC792-DU-4).
+  error-signal ([RFC792-DU-4](rfc792-checklist.md#rfc792-du-4)).
 - Check idea: send a datagram with DF = 1 that is larger than the MTU of the second link.
   No fragment of it may appear after the gateway, and the destination must not receive it.
 - Status: **selected** → [rfc791-checks.md#dont-fragment](rfc791-checks.md#dont-fragment)
@@ -252,37 +258,6 @@ active.**
   identification values.
 - Status: candidate
 
-## Error signals (RFC 792 companions)
-
-### RFC792-TE-1
-
-**TTL zero at a gateway: the gateway discards the datagram, and it may send a Time Exceeded
-message.**
-
-> "If the gateway processing a datagram finds the time to live field is zero it must discard
-> the datagram. The gateway may also notify the source host via the time exceeded message."
-> — Time Exceeded Message, `rfc792.txt:344-356`
-
-- Strength: discard is must; the message is may. Class: error-signal.
-- Pairs with RFC791-TTL-2.
-- Status: candidate
-
-### RFC792-DU-4
-
-**DF drop: the gateway discards the datagram, and it may send destination unreachable,
-code 4.**
-
-> "Another case is when a datagram must be fragmented to be forwarded by a gateway yet the
-> Don't Fragment flag is on. In this case the gateway must discard the datagram and may
-> return a destination unreachable message." — Destination Unreachable Message,
-> `rfc792.txt:261-264`; code list: "4 = fragmentation needed and DF set",
-> `rfc792.txt:215`
-
-- Strength: discard is must; the message is may. Class: error-signal.
-- Pairs with RFC791-FRAG-5. A gateway that sends the message shows the expected cooperative
-  behavior; the RFC permits silence.
-- Status: **selected** → [rfc791-checks.md#dont-fragment](rfc791-checks.md#dont-fragment)
-
 ## Coverage ledger
 
 The ledger connects catalog entries to check sections and test files. Later steps and later
@@ -306,8 +281,14 @@ iterations extend this table; the catalog above stays stable. The test files liv
 | RFC791-CKSUM-1 | description | wire, encoding | candidate | — | — |
 | RFC791-CKSUM-2 | description | wire | later | — | — |
 | RFC791-ID-1 | must | wire | candidate | — | — |
-| RFC792-TE-1 | must + may | error-signal | candidate | — | — |
-| RFC792-DU-4 | must + may | error-signal | selected | [dont-fragment](rfc791-checks.md#dont-fragment) | Rfc791DontFragment.test |
+
+The RFC 792 half of the two error-signal pairs is in the ledger of
+[`rfc792-checklist.md`](rfc792-checklist.md#coverage-ledger).
 
 Out of scope in this iteration: options (§3.1 Options), type of service and precedence,
-security annex, and the reassembly timer details. Add them in a later pass.
+security annex, and the reassembly timer details. Add them in a later pass. The type of
+service area needs RFC 2474 in the in-scope set first; see
+[`standards.md`](standards.md#override-table).
+
+Every area of this catalog appears in at least one feature of
+[`features.md`](features.md), as step 4 requires.

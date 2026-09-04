@@ -1,6 +1,6 @@
 # RFC 791 checks — run results and model analysis (pass 1)
 
-> **Kind:** report · **Status:** snapshot 2026-09-02 · **Seal:** none · **Owns:** — · **Stands on:** [rfc791-checklist.md](rfc791-checklist.md), [rfc791-checks.md](rfc791-checks.md)
+> **Kind:** report · **Status:** snapshot 2026-09-02 · **Seal:** none · **Owns:** — · **Stands on:** [rfc791-checklist.md](rfc791-checklist.md), [rfc792-checklist.md](rfc792-checklist.md), [rfc791-checks.md](rfc791-checks.md)
 
 Step 7 artifact of the standards test workflow (see
 [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)).
@@ -73,6 +73,36 @@ workflow: fix the test, not the expectation.
   [Ipv4.cc:819-852](../../../../../src/inet/networklayer/ipv4/Ipv4.cc#L819-L852)
   `reassembleAndDeliver` with the fragment buffer. Observed: host B's UDP received one
   1008-octet datagram; the sink application received the 1000-octet payload.
+
+## Feature support derived from the verdicts
+
+Step 7 closes with the update of the support column of [`features.md`](features.md). The
+derivation is mechanical: a feature is `supported` when every core check ran and passed,
+`partial` when a core check passed and another core check failed as a model gap or did not
+run, `not supported` when every core check that ran failed as a model gap, and `untested`
+when no core check ran.
+
+| Feature | Core checks and their state | Support |
+| --- | --- | --- |
+| IPV4-F-TTL | RFC791-TTL-1 PASS; RFC791-TTL-2 did not run | partial |
+| IPV4-F-FRAGMENTATION | RFC791-FRAG-1..4 all PASS | supported |
+| IPV4-F-REASSEMBLY | RFC791-REASM-1 PASS | supported |
+| IPV4-F-DONT-FRAGMENT | RFC791-FRAG-5 PASS | supported |
+| IPV4-F-IDENTIFICATION | RFC791-FRAG-3 PASS; RFC791-ID-1 did not run | partial |
+| IPV4-F-HEADER-CHECKSUM | neither core check ran | untested |
+| IPV4-F-MIN-SIZE | neither core check ran | untested |
+| IPV4-F-ERROR-REPORT | RFC792-DU-4 PASS; RFC792-TE-1 did not run | partial |
+
+No feature is `not supported`, because no test failed against the model. Every `partial`
+and every `untested` value in this pass comes from a missing check, not from a model gap.
+
+Two bounds on these values:
+
+1. A `supported` feature is supported as far as its checks reach. IPV4-F-FRAGMENTATION
+   rests on one datagram size and one MTU.
+2. An observation that no check claims does not raise a support value. The run carried a
+   1008-octet datagram end to end, which exceeds the 576-octet floor of IPV4-F-MIN-SIZE,
+   yet that feature stays `untested`.
 
 ## Sharpening candidates for the next pass
 
