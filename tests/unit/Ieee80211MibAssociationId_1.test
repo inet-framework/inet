@@ -34,7 +34,9 @@ ASSERT(mib.bssAccessPointData.associationIds.count(second) == 0);
 ASSERT(mib.allocateAssociationId(fourth) == 2);
 
 mib.reserveAssociationId(first);
+mib.bssAccessPointData.stations[first] = Ieee80211Mib::ASSOCIATED;
 mib.clearAssociationIds();
+ASSERT(mib.bssAccessPointData.stations.empty());
 ASSERT(mib.bssAccessPointData.associationIds.empty());
 ASSERT(mib.reserveAssociationId(second) == 1);
 

@@ -539,6 +539,7 @@ void Ieee80211MgmtAp::stop()
 {
     cancelEvent(beaconTimer);
     staList.clear();
+    nextAssociationTransactionId = 0;
     mib->clearAssociationIds();
     Ieee80211MgmtApBase::stop();
 }
