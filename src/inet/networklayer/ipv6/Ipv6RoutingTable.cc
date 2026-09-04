@@ -17,6 +17,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
+#include "inet/networklayer/ipv6tunneling/Ipv6Tunnel.h"
 
 namespace inet {
 
@@ -441,6 +442,21 @@ void Ipv6RoutingTable::deleteTunnelNetworkInterface(NetworkInterface *networkInt
     // InterfaceTable::deleteInterface() removes the interface from the table and
     // deletes the module (which disconnects its gates), so nothing else is needed.
     ift->deleteInterface(networkInterface);
+}
+
+NetworkInterface *Ipv6RoutingTable::findTunnelNetworkInterface(const Ipv6Address& source, const Ipv6Address& destination) const
+{
+    Enter_Method("findTunnelNetworkInterface(%s, %s)=?", source.str().c_str(), destination.str().c_str());
+
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        NetworkInterface *ie = ift->getInterface(i);
+        for (cModule::SubmoduleIterator it(ie); !it.end(); ++it) {
+            auto *tunnel = dynamic_cast<Ipv6Tunnel *>(*it);
+            if (tunnel != nullptr && tunnel->getSource() == source && tunnel->getDestination() == destination)
+                return ie;
+        }
+    }
+    return nullptr;
 }
 
 NetworkInterface *Ipv6RoutingTable::getInterfaceByAddress(const Ipv6Address& addr) const
