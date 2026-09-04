@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/Simsignals_m.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 
@@ -70,6 +71,32 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
     ModuleRefByPar<BindingUpdateList> bul;
     ModuleRefByPar<BindingCache> bc;
     ModuleRefByPar<Ipv6NeighbourDiscovery> ipv6nd;
+
+    // The IPv6 module this one hooks into (set in initialize()), used to reinject or
+    // drop the datagrams held by holdUntilReverseTunnelExists(). A plain pointer is
+    // enough: it is a sibling submodule of the same Ipv6NetworkLayer, so it is created
+    // before and destroyed after this module, and it is never replaced at run time.
+    INetfilter *networkProtocol = nullptr;
+
+    // Home-address-sourced datagrams held while the reverse tunnel to the home agent
+    // does not exist yet, keyed by the home agent whose Binding Acknowledgement they
+    // are waiting for.
+    //
+    // Ownership: the datagrams belong to the IPv6 module's netfilter queue, and these
+    // are borrowed pointers. The IPv6 module frees that queue in flush() on stop and
+    // crash without telling the hooks, so this map must be cleared in the same
+    // lifecycle operations (handleStopOperation/handleCrashOperation) -- a pointer
+    // left here across a restart would be dereferenced after free by
+    // releaseHeldDatagrams().
+    std::multimap<Ipv6Address, Packet *> heldDatagrams;
+
+    // Upper bound on the datagrams held for one home agent. A Binding Update that is
+    // never acknowledged is retransmitted indefinitely (RFC 6275 Section 11.8) and its
+    // binding update list entry never expires, so the registration alone does not bound
+    // the hold; without a cap a home agent that stopped answering would make a mobile
+    // node accumulate every packet it sends for the rest of the run. On overflow the
+    // oldest held datagram is dropped, with a packetDropped signal.
+    static const unsigned int MAX_HELD_DATAGRAMS_PER_HOME_AGENT = 100;
 
     //
     // IP tunnel management (RFC 2473), moved here from the former Ipv6Tunneling
@@ -496,6 +523,42 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
      * hooks). Replaces the tunnel lookup that used to be in the Ipv6 module.
      */
     void requestTunnelOutputInterface(Packet *datagram);
+
+    /**
+     * RFC 6275 Section 11.3.1: while away from home and without a binding at the
+     * correspondent node, a mobile node MUST reverse-tunnel packets that it sources
+     * from its home address. If such a datagram is offered while the reverse tunnel
+     * to the home agent does not exist yet -- between sending a Binding Update for a
+     * new care-of address and receiving the Binding Acknowledgement -- hold it and
+     * return true, so the local-out hook can QUEUE it instead of letting it be routed
+     * onto the foreign link (where Ipv6 discards it as topologically incorrect).
+     * Returns false if the datagram can be sent as it is.
+     */
+    bool holdUntilReverseTunnelExists(Packet *datagram);
+
+    /**
+     * Reinject the datagrams held by holdUntilReverseTunnelExists() for the given home
+     * agent, now that the reverse tunnel to it exists.
+     */
+    void releaseHeldDatagrams(const Ipv6Address& homeAgentAddress);
+
+    /**
+     * Discard the datagrams held by holdUntilReverseTunnelExists() for the given home
+     * agent, because the registration they were waiting for will not complete.
+     */
+    void dropHeldDatagrams(const Ipv6Address& homeAgentAddress);
+
+    /**
+     * Detach the datagrams held for the given home agent from heldDatagrams and return
+     * them, so that a caller can reinject or drop them without the map being mutated
+     * underneath it by the re-entrant call that reinjection makes.
+     */
+    std::vector<Packet *> takeHeldDatagrams(const Ipv6Address& homeAgentAddress);
+
+    /**
+     * Discard one held datagram, reporting it with a packetDropped signal first.
+     */
+    void dropHeldDatagram(Packet *datagram, PacketDropReason reason);
 
     /**
      * A route-optimization extension-header insertion that the local-out hook
