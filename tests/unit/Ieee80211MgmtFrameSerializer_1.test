@@ -1,0 +1,136 @@
+%description:
+Test that raw IEEE 802.11 management frame bodies deserialize as the exact requested registered
+subtype, including derived/base pairs, and reject unsupported body types.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrameSerializer.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+
+class UnsupportedIeee80211MgmtFrame : public Ieee80211MgmtFrame
+{
+  public:
+    UnsupportedIeee80211MgmtFrame() = default;
+    UnsupportedIeee80211MgmtFrame(const UnsupportedIeee80211MgmtFrame& other) = default;
+    virtual UnsupportedIeee80211MgmtFrame *dup() const override { return new UnsupportedIeee80211MgmtFrame(*this); }
+};
+
+Register_Serializer(UnsupportedIeee80211MgmtFrame, Ieee80211MgmtFrameSerializer);
+
+template<typename T>
+static const Ptr<const T> deserializeBody(const std::vector<uint8_t>& bytes)
+{
+    Packet packet("body", makeShared<BytesChunk>(bytes));
+    auto frame = packet.popAtFront<T>(B(bytes.size()));
+    ASSERT(typeid(*frame) == typeid(T));
+    ASSERT(frame->getChunkLength() == B(bytes.size()));
+    ASSERT(packet.getDataLength() == B(0));
+    return frame;
+}
+
+%activity:
+
+{
+    auto frame = deserializeBody<Ieee80211AuthenticationFrame>({0x00, 0x00, 0x00, 0x02, 0x00, 0x00});
+    ASSERT(frame->getSequenceNumber() == 2);
+    ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211DeauthenticationFrame>({0x00, 0x03});
+    ASSERT(frame->getReasonCode() == RC_DEAUTH_MS_LEAVING);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211DisassociationFrame>({0x00, 0x04});
+    ASSERT(frame->getReasonCode() == RC_DISASS_INACTIVITY);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211ProbeRequestFrame>({0x00, 0x01, 'P', 0x01, 0x01, 0x0C});
+    ASSERT(std::string(frame->getSSID()) == "P");
+    ASSERT(frame->getSupportedRates().numRates == 1);
+    ASSERT(frame->getSupportedRates().rate[0] == 6);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211AssociationRequestFrame>({
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x01, 'A',
+        0x01, 0x01, 0x0C
+    });
+    ASSERT(std::string(frame->getSSID()) == "A");
+    ASSERT(frame->getSupportedRates().rate[0] == 6);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211ReassociationRequestFrame>({
+        0x00, 0x00, 0x00, 0x00,
+        0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
+        0x00, 0x01, 'R',
+        0x01, 0x01, 0x0C
+    });
+    ASSERT(frame->getCurrentAP() == MacAddress("02:00:00:00:00:01"));
+    ASSERT(std::string(frame->getSSID()) == "R");
+}
+
+{
+    auto frame = deserializeBody<Ieee80211AssociationResponseFrame>({
+        0x00, 0x00, 0x00, 0x00, 0x12, 0x34,
+        0x01, 0x01, 0x0C
+    });
+    ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
+    ASSERT(frame->getAid() == 0x1234);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211ReassociationResponseFrame>({
+        0x00, 0x00, 0x00, 0x00, 0x23, 0x45,
+        0x01, 0x01, 0x0C
+    });
+    ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
+    ASSERT(frame->getAid() == 0x2345);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211BeaconFrame>({
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+        0x00, 0x64, 0x00, 0x00,
+        0x00, 0x01, 'B',
+        0x01, 0x01, 0x0C
+    });
+    ASSERT(frame->getBeaconInterval() == SimTime(102400, SIMTIME_US));
+    ASSERT(std::string(frame->getSSID()) == "B");
+}
+
+{
+    auto frame = deserializeBody<Ieee80211ProbeResponseFrame>({
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+        0x00, 0x32, 0x00, 0x00,
+        0x00, 0x01, 'Q',
+        0x01, 0x01, 0x0C
+    });
+    ASSERT(frame->getBeaconInterval() == SimTime(51200, SIMTIME_US));
+    ASSERT(std::string(frame->getSSID()) == "Q");
+}
+
+bool unsupportedTypeRejected = false;
+try {
+    deserializeBody<UnsupportedIeee80211MgmtFrame>({0x00});
+}
+catch (const cRuntimeError&) {
+    unsupportedTypeRejected = true;
+}
+ASSERT(unsupportedTypeRejected);
+
+EV << "All registered management body types deserialize exactly.\n";
+
+%contains: stdout
+All registered management body types deserialize exactly.
