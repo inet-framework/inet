@@ -71,6 +71,19 @@ inline Ieee80211HtCapabilities makeHtCapabilities(const Ieee80211HtCapabilitiesE
     return capabilities;
 }
 
+inline bool decodeHtCapabilities(const Ieee80211HtCapabilitiesElement& element,
+        Ieee80211HtCapabilities& capabilities, std::string& reason)
+{
+    try {
+        capabilities = makeHtCapabilities(element);
+        return true;
+    }
+    catch (const cRuntimeError& error) {
+        reason = error.what();
+        return false;
+    }
+}
+
 inline Ieee80211HtOperationElement makeHtOperationElement(const physicallayer::IIeee80211Band *band, const Ieee80211HtOperation& operation)
 {
     if (band == nullptr)

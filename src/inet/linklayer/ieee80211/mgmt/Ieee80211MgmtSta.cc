@@ -47,19 +47,6 @@ simsignal_t Ieee80211MgmtSta::htNegotiationFailedSignal = cComponent::registerSi
 
 #define MAX_BEACONS_MISSED        3.5  // beacon lost timeout, in beacon intervals (doesn't need to be integer)
 
-static bool decodeHtCapabilities(const Ieee80211HtCapabilitiesElement& element,
-        Ieee80211HtCapabilities& capabilities, std::string& reason)
-{
-    try {
-        capabilities = makeHtCapabilities(element);
-        return true;
-    }
-    catch (const cRuntimeError& error) {
-        reason = error.what();
-        return false;
-    }
-}
-
 static bool decodeHtOperation(const IIeee80211Band *band,
         const Ieee80211HtOperationElement& element, Ieee80211HtOperation& operation, std::string& reason)
 {
