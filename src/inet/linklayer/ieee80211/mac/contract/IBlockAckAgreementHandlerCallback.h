@@ -11,6 +11,9 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
+
+class Packet;
+
 namespace ieee80211 {
 
 class INET_API IBlockAckAgreementHandlerCallback
@@ -19,10 +22,11 @@ class INET_API IBlockAckAgreementHandlerCallback
     virtual ~IBlockAckAgreementHandlerCallback() {}
 
     virtual void scheduleInactivityTimer(simtime_t timeout) = 0;
+    virtual void scheduleAddbaResponseTimer(simtime_t deadline) = 0;
+    virtual void cancelAddbaTransaction(uint64_t transactionId, Packet *excludedPacket) = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
 #endif
-

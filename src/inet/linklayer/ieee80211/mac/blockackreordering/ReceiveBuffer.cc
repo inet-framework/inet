@@ -22,33 +22,47 @@ ReceiveBuffer::ReceiveBuffer(int bufferSize, SequenceNumberCyclic nextExpectedSe
 // data frame, unless the sequence number of the frame is older than the NextExpectedSequenceNumber for that
 // Block Ack agreement, in which case the frame is discarded because it is either old or a duplicate.
 //
-bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
+bool ReceiveBuffer::canInsertFrame(const Ptr<const Ieee80211DataHeader>& dataHeader, SequenceNumberCyclic nextExpectedSequenceNumber) const
 {
     auto sequenceNumber = dataHeader->getSequenceNumber();
     auto fragmentNumber = dataHeader->getFragmentNumber();
-    // The total number of MPDUs in these MSDUs may not
-    // exceed the reorder buffer size in the receiver.
-    if (length < bufferSize && nextExpectedSequenceNumber <= sequenceNumber && sequenceNumber < nextExpectedSequenceNumber + bufferSize) {
-        auto it = buffer.find(sequenceNumber.get());
-        if (it != buffer.end()) {
-            auto& fragments = it->second;
-            // TODO efficiency
-            for (auto fragment : fragments) {
-                const auto& fragmentHeader = fragment->peekAtFront<Ieee80211DataHeader>();
-                if (fragmentHeader->getSequenceNumber() == sequenceNumber && fragmentHeader->getFragmentNumber() == fragmentNumber)
-                    return false;
-            }
-            fragments.push_back(dataPacket);
-        }
-        else {
-            buffer[sequenceNumber.get()].push_back(dataPacket);
-        }
-        // The total number of frames that can be sent depends on the total
-        // number of MPDUs in all the outstanding MSDUs.
-        length++;
-        return true;
+    if (!(nextExpectedSequenceNumber <= sequenceNumber && sequenceNumber < nextExpectedSequenceNumber + bufferSize))
+        return false;
+    int retainedLength = length;
+    for (const auto& entry : buffer) {
+        if (SequenceNumberCyclic(entry.first) < nextExpectedSequenceNumber)
+            retainedLength -= entry.second.size();
     }
-    return false;
+    // IEEE Std 802.11-2024, 9.4.1.13, footnote 26: each fragment
+    // occupies one receive-buffer slot.
+    if (retainedLength >= bufferSize)
+        return false;
+    auto it = buffer.find(sequenceNumber.get());
+    if (it != buffer.end()) {
+        for (auto fragment : it->second) {
+            const auto& fragmentHeader = fragment->peekAtFront<Ieee80211DataHeader>();
+            if (fragmentHeader->getSequenceNumber() == sequenceNumber && fragmentHeader->getFragmentNumber() == fragmentNumber)
+                return false;
+        }
+    }
+    return true;
+}
+
+bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
+{
+    return insertFrame(dataPacket, dataHeader, nextExpectedSequenceNumber);
+}
+
+bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, SequenceNumberCyclic nextExpectedSequenceNumber)
+{
+    if (!canInsertFrame(dataHeader, nextExpectedSequenceNumber))
+        return false;
+    auto sequenceNumber = dataHeader->getSequenceNumber();
+    buffer[sequenceNumber.get()].push_back(dataPacket);
+    // The total number of frames that can be sent depends on the total
+    // number of MPDUs in all the outstanding MSDUs.
+    length++;
+    return true;
 }
 
 void ReceiveBuffer::dropFramesUntil(SequenceNumberCyclic sequenceNumber)
@@ -77,6 +91,16 @@ void ReceiveBuffer::removeFrame(SequenceNumberCyclic sequenceNumber)
         throw cRuntimeError("Unknown sequence number: %d", sequenceNumber.get());
 }
 
+ReceiveBuffer::Fragments ReceiveBuffer::extractFrames()
+{
+    Fragments frames;
+    for (auto& [sequenceNumber, fragments] : buffer)
+        frames.insert(frames.end(), fragments.begin(), fragments.end());
+    buffer.clear();
+    length = 0;
+    return frames;
+}
+
 ReceiveBuffer::~ReceiveBuffer()
 {
     for (auto fragments : buffer) {
@@ -87,4 +111,3 @@ ReceiveBuffer::~ReceiveBuffer()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

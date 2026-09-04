@@ -72,6 +72,12 @@ void Dcf::channelGranted(IChannelAccess *channelAccess)
     Enter_Method("channelGranted");
     ASSERT(this->channelAccess == channelAccess);
     if (!frameSequenceHandler->isSequenceRunning()) {
+        if (this->channelAccess->getInProgressFrames()->getFrameToTransmit() == nullptr) {
+            EV_DETAIL << "Releasing channel because no frame is available.\n";
+            channelAccess->releaseChannel(this);
+            mac->sendDownPendingRadioConfigMsg();
+            return;
+        }
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
         emit(IFrameSequenceHandler::frameSequenceStartedSignal, frameSequenceHandler->getContext());
     }
@@ -391,4 +397,3 @@ Dcf::~Dcf()
 
 } // namespace ieee80211
 } // namespace inet
-

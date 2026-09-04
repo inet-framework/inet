@@ -396,8 +396,14 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
             auto receiverAddr = std::get<0>(blockAckReqParams);
             auto startingSequenceNumber = std::get<1>(blockAckReqParams);
             auto tid = std::get<2>(blockAckReqParams);
-            auto blockAckReq = context->getQoSContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
-            auto blockAckPacket = new Packet("BasicBlockAckReq", blockAckReq);
+            auto agreementHandler = context->getQoSContext()->blockAckAgreementHandler;
+            auto agreement = agreementHandler == nullptr ? nullptr : agreementHandler->getAgreement(receiverAddr, tid);
+            auto outstandingFrames = context->getInProgressFrames()->getOutstandingFrames();
+            bool useCompressedBlockAck = context->getQoSContext()->ackPolicy->isCompressedBlockAckReq(outstandingFrames, agreement);
+            auto blockAckReq = useCompressedBlockAck ?
+                    context->getQoSContext()->blockAckProcedure->buildCompressedBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber) :
+                    context->getQoSContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
+            auto blockAckPacket = new Packet(useCompressedBlockAck ? "CompressedBlockAckReq" : "BasicBlockAckReq", blockAckReq);
             blockAckPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
             return new TransmitStep(blockAckPacket, context->getIfs(), true);
         }
@@ -434,4 +440,3 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
 
 } // namespace ieee80211
 } // namespace inet
-

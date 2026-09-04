@@ -56,40 +56,61 @@ bool BasicMsduAggregationPolicy::isEligible(Packet *packet, const Ptr<const Ieee
     return true;
 }
 
-std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queueing::IPacketQueue *queue)
+std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queueing::IPacketQueue *queue, Packet *candidate, const std::function<bool(const Packet *)>& isFrameEligible)
 {
     Enter_Method("computeAggregateFrames");
-    ASSERT(!queue->isEmpty());
+    ASSERT(candidate != nullptr);
     b aMsduLength = b(0);
-    Ptr<const Ieee80211DataHeader> firstHeader = nullptr;
-    auto frames = new std::vector<Packet *>();
+    int candidateIndex = -1;
     for (int i = 0; i < queue->getNumPackets(); i++) {
-        auto dataPacket = queue->getPacket(i);
-        const auto& dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
-        if (dataHeader == nullptr)
-            break;
-        if (firstHeader == nullptr)
-            firstHeader = dataHeader;
-        const auto& dataTrailer = dataPacket->peekAtBack<Ieee80211MacTrailer>(B(4));
-        if (!isEligible(dataPacket, staticPtrCast<const Ieee80211DataHeader>(dataHeader), dataTrailer, firstHeader, aMsduLength)) {
-            EV_TRACE << "Queued " << *dataPacket << " is not eligible for A-MSDU aggregation.\n";
-            break;
-        }
-        EV_TRACE << "Queued " << *dataPacket << " is eligible for A-MSDU aggregation.\n";
-        frames->push_back(dataPacket);
-        aMsduLength += dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
+        if (queue->getPacket(i) == candidate) { candidateIndex = i; break; }
     }
+    if (candidateIndex == -1)
+        return nullptr;
+    const auto& firstHeader = dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211DataOrMgmtHeader>());
+    if (firstHeader == nullptr || !isFrameEligible(candidate))
+        return nullptr;
+    auto frames = new std::vector<Packet *>();
+    auto hasSameFlow = [&](const Ptr<const Ieee80211DataHeader>& dataHeader) {
+        return dataHeader != nullptr && dataHeader->getTid() == firstHeader->getTid() &&
+                dataHeader->getReceiverAddress() == firstHeader->getReceiverAddress() &&
+                dataHeader->getTransmitterAddress() == firstHeader->getTransmitterAddress();
+    };
+    auto appendIfEligible = [&](Packet *dataPacket) {
+        const auto& dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
+        if (!hasSameFlow(dataHeader))
+            return true;
+        // IEEE Std 802.11-2024, 5.1.3: preserve the ordering of MSDUs with the
+        // same traffic identifier. Enumeration order is the conservative
+        // intra-flow order for this built-in policy. Never overtake a
+        // same-flow packet which is held by transaction eligibility or cannot
+        // fit in the current A-MSDU.
+        if (!isFrameEligible(dataPacket))
+            return false;
+        const auto& dataTrailer = dataPacket->peekAtBack<Ieee80211MacTrailer>(B(4));
+        if (!isEligible(dataPacket, dataHeader, dataTrailer, firstHeader, aMsduLength))
+            return false;
+        frames->push_back(dataPacket);
+        aMsduLength += dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER);
+        return true;
+    };
+    if (!appendIfEligible(candidate)) {
+        delete frames;
+        return nullptr;
+    }
+    // Do not wrap around: providers may schedule in an order different from
+    // their IPacketCollection enumeration (for example reverse priority).
+    for (int i = candidateIndex + 1; i < queue->getNumPackets(); i++)
+        if (!appendIfEligible(queue->getPacket(i)))
+            break;
     if (frames->size() <= 1 || !isAggregationPossible(frames->size(), aMsduLength.get<B>())) {
         EV_DEBUG << "A-MSDU aggregation is not possible, collected " << frames->size() << " packets.\n";
         delete frames;
         return nullptr;
     }
-    else {
-        EV_DEBUG << "A-MSDU aggregation is possible, collected " << frames->size() << " packets.\n";
-        return frames;
-    }
+    EV_DEBUG << "A-MSDU aggregation is possible, collected " << frames->size() << " packets.\n";
+    return frames;
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-

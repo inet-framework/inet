@@ -76,6 +76,24 @@ void readSequenceControl(MemoryInputStream& stream, int& fragmentNumber, ieee802
     sequenceNumber = ieee80211::SequenceNumberCyclic((sequenceControl >> 4) & 0xFFF);
 }
 
+uint16_t packBlockAckControl(bool ackPolicy, bool multiTid, bool compressedBitmap, uint16_t reserved, uint8_t tidInfo)
+{
+    return (ackPolicy ? 0x0001 : 0) |
+            (multiTid ? 0x0002 : 0) |
+            (compressedBitmap ? 0x0004 : 0) |
+            ((reserved & 0x1FF) << 3) |
+            ((tidInfo & 0xF) << 12);
+}
+
+void unpackBlockAckControl(uint16_t control, bool& ackPolicy, bool& multiTid, bool& compressedBitmap, uint16_t& reserved, uint8_t& tidInfo)
+{
+    ackPolicy = (control & 0x0001) != 0;
+    multiTid = (control & 0x0002) != 0;
+    compressedBitmap = (control & 0x0004) != 0;
+    reserved = (control >> 3) & 0x1FF;
+    tidInfo = (control >> 12) & 0xF;
+}
+
 } // namespace
 
 namespace ieee80211 {
@@ -266,26 +284,20 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeUint16Le(blockAckReq->getDurationField().inUnit(SIMTIME_US));
             stream.writeMacAddress(blockAckReq->getReceiverAddress());
             stream.writeMacAddress(blockAckReq->getTransmitterAddress());
-            stream.writeBit(blockAckReq->getBarAckPolicy());
             bool multiTid = blockAckReq->getMultiTid();
             bool compressedBitmap = blockAckReq->getCompressedBitmap();
-            stream.writeBit(multiTid);
-            stream.writeBit(compressedBitmap);
-            stream.writeNBitsOfUint64Be(blockAckReq->getReserved(), 9);
             if (!multiTid && !compressedBitmap) {
                 auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(chunk);
-                stream.writeUint4(basicBlockAckReq->getTidInfo());
-                stream.writeUint32Be(basicBlockAckReq->getFragmentNumber());
-                stream.writeUint64Be(0);
-                stream.writeUint64Be(basicBlockAckReq->getStartingSequenceNumber().get());
+                stream.writeUint16Le(packBlockAckControl(blockAckReq->getBarAckPolicy(), multiTid, compressedBitmap, blockAckReq->getReserved(), basicBlockAckReq->getTidInfo()));
+                writeSequenceControl(stream, basicBlockAckReq->getFragmentNumber(), basicBlockAckReq->getStartingSequenceNumber().get());
                 ASSERT(stream.getLength() - startPos == basicBlockAckReq->getChunkLength());
             }
             else if (!multiTid && compressedBitmap) {
                 auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(chunk);
-                stream.writeUint4(compressedBlockAckReq->getTidInfo());
-                stream.writeUint32Be(compressedBlockAckReq->getFragmentNumber());
-                stream.writeUint64Be(0);
-                stream.writeUint64Be(compressedBlockAckReq->getStartingSequenceNumber().get());
+                // IEEE Std 802.11-2024, 9.3.1.7.2: one-TID compressed BAR Control and
+                // Starting Sequence Control are little-endian 16-bit on-wire fields.
+                stream.writeUint16Le(packBlockAckControl(blockAckReq->getBarAckPolicy(), multiTid, compressedBitmap, blockAckReq->getReserved(), compressedBlockAckReq->getTidInfo()));
+                writeSequenceControl(stream, compressedBlockAckReq->getFragmentNumber(), compressedBlockAckReq->getStartingSequenceNumber().get());
                 ASSERT(stream.getLength() - startPos == compressedBlockAckReq->getChunkLength());
             }
             else if (multiTid && compressedBitmap) {
@@ -300,16 +312,12 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             stream.writeUint16Le(blockAck->getDurationField().inUnit(SIMTIME_US));
             stream.writeMacAddress(blockAck->getReceiverAddress());
             stream.writeMacAddress(blockAck->getTransmitterAddress());
-            stream.writeBit(blockAck->getBlockAckPolicy());
             bool multiTid = blockAck->getMultiTid();
             bool compressedBitmap = blockAck->getCompressedBitmap();
-            stream.writeBit(multiTid);
-            stream.writeBit(compressedBitmap);
-            stream.writeNBitsOfUint64Be(blockAck->getReserved(), 9);
             if (!multiTid && !compressedBitmap) {
                 auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(chunk);
-                stream.writeUint4(basicBlockAck->getTidInfo());
-                stream.writeUint16Be(basicBlockAck->getStartingSequenceNumber().get());
+                stream.writeUint16Le(packBlockAckControl(blockAck->getBlockAckPolicy(), multiTid, compressedBitmap, blockAck->getReserved(), basicBlockAck->getTidInfo()));
+                writeSequenceControl(stream, basicBlockAck->getFragmentNumber(), basicBlockAck->getStartingSequenceNumber().get());
                 for (size_t i = 0; i < 64; ++i) {
                     stream.writeByte(basicBlockAck->getBlockAckBitmap(i).getBytes()[0]);
                     stream.writeByte(basicBlockAck->getBlockAckBitmap(i).getBytes()[1]);
@@ -318,8 +326,10 @@ void Ieee80211MacHeaderSerializer::serialize(MemoryOutputStream& stream, const P
             }
             else if (!multiTid && compressedBitmap) {
                 auto compressedBlockAck = dynamicPtrCast<const Ieee80211CompressedBlockAck>(chunk);
-                stream.writeUint4(compressedBlockAck->getTidInfo());
-                stream.writeUint16Be(compressedBlockAck->getStartingSequenceNumber().get());
+                // IEEE Std 802.11-2024, 9.3.1.8.2: the non-HE compressed BA carries
+                // one Starting Sequence Control field followed by a 64-bit bitmap.
+                stream.writeUint16Le(packBlockAckControl(blockAck->getBlockAckPolicy(), multiTid, compressedBitmap, blockAck->getReserved(), compressedBlockAck->getTidInfo()));
+                writeSequenceControl(stream, compressedBlockAck->getFragmentNumber(), compressedBlockAck->getStartingSequenceNumber().get());
                 for (size_t i = 0; i < 8; ++i) {
                     stream.writeByte(compressedBlockAck->getBlockAckBitmap().getBytes()[i]);
                 }
@@ -507,30 +517,38 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             blockAckReq->setDurationField(SimTime(stream.readUint16Le(), SIMTIME_US));
             blockAckReq->setReceiverAddress(stream.readMacAddress());
             blockAckReq->setTransmitterAddress(stream.readMacAddress());
-            blockAckReq->setBarAckPolicy(stream.readBit());
-            bool multiTid = stream.readBit();
-            bool compressedBitmap = stream.readBit();
+            bool barAckPolicy;
+            bool multiTid;
+            bool compressedBitmap;
+            uint16_t reserved;
+            uint8_t tidInfo;
+            unpackBlockAckControl(stream.readUint16Le(), barAckPolicy, multiTid, compressedBitmap, reserved, tidInfo);
+            blockAckReq->setBarAckPolicy(barAckPolicy);
             blockAckReq->setMultiTid(multiTid);
             blockAckReq->setCompressedBitmap(compressedBitmap);
-            blockAckReq->setReserved(stream.readNBitsToUint64Be(9));
+            blockAckReq->setReserved(reserved);
             if (!multiTid && !compressedBitmap) {
                 auto basicBlockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
                 copyBasicFields(basicBlockAckReq, macHeader);
                 copyBlockAckReqFrameFields(basicBlockAckReq, blockAckReq);
-                basicBlockAckReq->setTidInfo(stream.readUint4());
-                basicBlockAckReq->setFragmentNumber(stream.readUint32Be());
-                stream.readUint64Be();
-                basicBlockAckReq->setStartingSequenceNumber(SequenceNumberCyclic(stream.readUint64Be()));
+                basicBlockAckReq->setTidInfo(tidInfo);
+                int fragmentNumber;
+                SequenceNumberCyclic sequenceNumber;
+                readSequenceControl(stream, fragmentNumber, sequenceNumber);
+                basicBlockAckReq->setFragmentNumber(fragmentNumber);
+                basicBlockAckReq->setStartingSequenceNumber(sequenceNumber);
                 return basicBlockAckReq;
             }
             else if (!multiTid && compressedBitmap) {
                 auto compressedBlockAckReq = makeShared<Ieee80211CompressedBlockAckReq>();
                 copyBasicFields(compressedBlockAckReq, macHeader);
                 copyBlockAckReqFrameFields(compressedBlockAckReq, blockAckReq);
-                compressedBlockAckReq->setTidInfo(stream.readUint4());
-                compressedBlockAckReq->setFragmentNumber(stream.readUint32Be());
-                stream.readUint64Be();
-                compressedBlockAckReq->setStartingSequenceNumber(SequenceNumberCyclic(stream.readUint64Be()));
+                compressedBlockAckReq->setTidInfo(tidInfo);
+                int fragmentNumber;
+                SequenceNumberCyclic sequenceNumber;
+                readSequenceControl(stream, fragmentNumber, sequenceNumber);
+                compressedBlockAckReq->setFragmentNumber(fragmentNumber);
+                compressedBlockAckReq->setStartingSequenceNumber(sequenceNumber);
                 return compressedBlockAckReq;
             }
             else
@@ -543,24 +561,31 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
             blockAck->setDurationField(SimTime(stream.readUint16Le(), SIMTIME_US));
             blockAck->setReceiverAddress(stream.readMacAddress());
             blockAck->setTransmitterAddress(stream.readMacAddress());
-            blockAck->setBlockAckPolicy(stream.readBit());
-            bool multiTid = stream.readBit();
-            bool compressedBitmap = stream.readBit();
+            bool blockAckPolicy;
+            bool multiTid;
+            bool compressedBitmap;
+            uint16_t reserved;
+            uint8_t tidInfo;
+            unpackBlockAckControl(stream.readUint16Le(), blockAckPolicy, multiTid, compressedBitmap, reserved, tidInfo);
+            blockAck->setBlockAckPolicy(blockAckPolicy);
             blockAck->setMultiTid(multiTid);
             blockAck->setCompressedBitmap(compressedBitmap);
-            blockAck->setReserved(stream.readNBitsToUint64Be(9));
+            blockAck->setReserved(reserved);
             if (!multiTid && !compressedBitmap) {
                 auto basicBlockAck = makeShared<Ieee80211BasicBlockAck>();
                 copyBasicFields(basicBlockAck, macHeader);
                 copyBlockAckFrameFields(basicBlockAck, blockAck);
-                basicBlockAck->setTidInfo(stream.readUint4());
-                basicBlockAck->setStartingSequenceNumber(SequenceNumberCyclic(stream.readUint16Be()));
+                basicBlockAck->setTidInfo(tidInfo);
+                int fragmentNumber;
+                SequenceNumberCyclic sequenceNumber;
+                readSequenceControl(stream, fragmentNumber, sequenceNumber);
+                basicBlockAck->setFragmentNumber(fragmentNumber);
+                basicBlockAck->setStartingSequenceNumber(sequenceNumber);
                 for (size_t i = 0; i < 64; ++i) {
                     std::vector<uint8_t> bytes;
                     bytes.push_back(stream.readByte());
                     bytes.push_back(stream.readByte());
-                    BitVector *blockAckBitmap = new BitVector(bytes);
-                    basicBlockAck->setBlockAckBitmap(i, *blockAckBitmap);
+                    basicBlockAck->setBlockAckBitmap(i, BitVector(bytes));
                 }
                 return basicBlockAck;
             }
@@ -569,13 +594,17 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserialize(MemoryInputStream& st
                 copyBasicFields(compressedBlockAck, macHeader);
                 copyBlockAckFrameFields(compressedBlockAck, blockAck);
 
-                compressedBlockAck->setTidInfo(stream.readUint4());
-                compressedBlockAck->setStartingSequenceNumber(SequenceNumberCyclic(stream.readUint16Be()));
+                compressedBlockAck->setTidInfo(tidInfo);
+                int fragmentNumber;
+                SequenceNumberCyclic sequenceNumber;
+                readSequenceControl(stream, fragmentNumber, sequenceNumber);
+                compressedBlockAck->setFragmentNumber(fragmentNumber);
+                compressedBlockAck->setStartingSequenceNumber(sequenceNumber);
                 std::vector<uint8_t> bytes;
                 for (size_t i = 0; i < 8; ++i) {
                     bytes.push_back(stream.readByte());
                 }
-                compressedBlockAck->setBlockAckBitmap(*(new BitVector(bytes)));
+                compressedBlockAck->setBlockAckBitmap(BitVector(bytes));
                 return compressedBlockAck;
             }
             else {

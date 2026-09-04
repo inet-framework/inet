@@ -24,7 +24,7 @@ class INET_API BlockAckReordering
 {
   public:
     typedef std::vector<Packet *> Fragments;
-    typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
+    typedef std::vector<std::pair<SequenceNumber, Fragments>> ReorderBuffer;
 
   protected:
     std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
@@ -35,15 +35,15 @@ class INET_API BlockAckReordering
 
     std::vector<Packet *> getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer);
     bool isComplete(const Fragments& fragments);
-    void passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumberCyclic sequenceNumber);
-    void releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
+    void passedUp(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic sequenceNumber);
+    void releaseReceiveBuffer(ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
     ReceiveBuffer *createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement);
     bool addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer& reorderBuffer, SequenceNumberCyclic seqNum);
 
   public:
     virtual ~BlockAckReordering();
 
-    void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba);
+    std::vector<Packet *> resetReceiveBuffer(Tid tid, MacAddress originatorAddr);
     ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
     ReorderBuffer processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 };
@@ -52,4 +52,3 @@ class INET_API BlockAckReordering
 } /* namespace inet */
 
 #endif
-

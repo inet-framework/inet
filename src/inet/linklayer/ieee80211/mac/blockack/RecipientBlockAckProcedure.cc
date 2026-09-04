@@ -24,11 +24,22 @@ void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPack
         auto agreement = blockAckAgreementHandler->getAgreement(basicBlockAckReq->getTidInfo(), basicBlockAckReq->getTransmitterAddress());
         if (ackPolicy->isBlockAckNeeded(basicBlockAckReq, agreement)) {
             auto blockAck = buildBlockAck(basicBlockAckReq, agreement);
-            auto duration = ackPolicy->computeBasicBlockAckDurationField(blockAckPacketReq, basicBlockAckReq);
+            auto duration = ackPolicy->computeBlockAckDurationField(blockAckPacketReq, basicBlockAckReq);
             blockAck->setDurationField(duration);
             auto blockAckPacket = new Packet("BasicBlockAck", blockAck);
             EV_DEBUG << "Duration for " << blockAckPacket->getName() << " is set to " << duration << " s.\n";
             callback->transmitControlResponseFrame(blockAckPacket, blockAck, blockAckPacketReq, basicBlockAckReq);
+        }
+    }
+    else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
+        auto agreement = blockAckAgreementHandler->getAgreement(compressedBlockAckReq->getTidInfo(), compressedBlockAckReq->getTransmitterAddress());
+        if (ackPolicy->isBlockAckNeeded(compressedBlockAckReq, agreement)) {
+            auto blockAck = buildBlockAck(compressedBlockAckReq, agreement);
+            auto duration = ackPolicy->computeBlockAckDurationField(blockAckPacketReq, compressedBlockAckReq);
+            blockAck->setDurationField(duration);
+            auto blockAckPacket = new Packet("CompressedBlockAck", blockAck);
+            EV_DEBUG << "Duration for " << blockAckPacket->getName() << " is set to " << duration << " s.\n";
+            callback->transmitControlResponseFrame(blockAckPacket, blockAck, blockAckPacketReq, compressedBlockAckReq);
         }
     }
     else
@@ -65,10 +76,25 @@ const Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr
         blockAck->setTidInfo(basicBlockAckReq->getTidInfo());
         return blockAck;
     }
+    else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
+        auto blockAck = makeShared<Ieee80211CompressedBlockAck>();
+        auto startingSequenceNumber = compressedBlockAckReq->getStartingSequenceNumber();
+        BitVector bitmap(std::vector<uint8_t>(8, 0));
+        if (agreement != nullptr) {
+            // IEEE Std 802.11-2024, 10.25.6.1 and 10.25.6.5: a non-HE
+            // compressed BA reports 64 consecutive, unfragmented MPDUs.
+            for (int i = 0; i < 64; i++)
+                bitmap.setBit(i, agreement->getBlockAckRecord()->getCompressedAckState(startingSequenceNumber + i));
+        }
+        blockAck->setReceiverAddress(blockAckReq->getTransmitterAddress());
+        blockAck->setStartingSequenceNumber(startingSequenceNumber);
+        blockAck->setTidInfo(compressedBlockAckReq->getTidInfo());
+        blockAck->setBlockAckBitmap(bitmap);
+        return blockAck;
+    }
     else
         throw cRuntimeError("Unsupported Block Ack Request");
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
-
