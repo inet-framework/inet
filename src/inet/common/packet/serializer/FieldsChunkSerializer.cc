@@ -28,7 +28,7 @@ void FieldsChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
 const Ptr<Chunk> FieldsChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto startPosition = stream.getPosition();
-    auto fieldsChunk = staticPtrCast<FieldsChunk>(deserialize(stream));
+    auto fieldsChunk = staticPtrCast<FieldsChunk>(deserializeFields(stream, typeInfo));
     auto endPosition = stream.getPosition();
     auto chunkLength = endPosition - startPosition;
     ChunkSerializer::totalDeserializedLength += chunkLength;

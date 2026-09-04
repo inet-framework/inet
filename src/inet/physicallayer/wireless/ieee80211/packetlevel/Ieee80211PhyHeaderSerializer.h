@@ -21,7 +21,7 @@ class INET_API Ieee80211FhssPhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211FhssPhyHeaderSerializer() : FieldsChunkSerializer() {}
@@ -34,7 +34,7 @@ class INET_API Ieee80211IrPhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211IrPhyHeaderSerializer() : FieldsChunkSerializer() {}
@@ -47,7 +47,7 @@ class INET_API Ieee80211DsssPhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211DsssPhyHeaderSerializer() : FieldsChunkSerializer() {}
@@ -60,7 +60,7 @@ class INET_API Ieee80211HrDsssPhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211HrDsssPhyHeaderSerializer() : FieldsChunkSerializer() {}
@@ -73,7 +73,7 @@ class INET_API Ieee80211OfdmPhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211OfdmPhyHeaderSerializer() : FieldsChunkSerializer() {}
@@ -86,7 +86,7 @@ class INET_API Ieee80211ErpOfdmPhyHeaderSerializer : public FieldsChunkSerialize
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211ErpOfdmPhyHeaderSerializer() : FieldsChunkSerializer() {}
@@ -99,7 +99,7 @@ class INET_API Ieee80211HtPhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211HtPhyHeaderSerializer() : FieldsChunkSerializer() {}
@@ -112,7 +112,7 @@ class INET_API Ieee80211VhtPhyHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee80211VhtPhyHeaderSerializer() : FieldsChunkSerializer() {}

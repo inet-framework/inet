@@ -26,7 +26,7 @@ void OspfPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     throw cRuntimeError("OspfPacketBase is not serializable, should use specific OSPF chunks");
 }
 
-const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> OspfPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPos = stream.getPosition();
     int ospfVer = stream.readUint8();
@@ -36,12 +36,12 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
 #ifdef INET_WITH_OSPFv2
         case 2:
             stream.seek(startPos);
-            return ospfv2::Ospfv2PacketSerializer().deserialize(stream);
+            return ospfv2::Ospfv2PacketSerializer().deserializeFields(stream, typeid(ospfv2::Ospfv2Packet));
 #endif // #ifdef INET_WITH_OSPFv2
 #ifdef INET_WITH_OSPFv3
         case 3:
             stream.seek(startPos);
-            return ospfv3::Ospfv3PacketSerializer().deserialize(stream);
+            return ospfv3::Ospfv3PacketSerializer().deserializeFields(stream, typeid(ospfv3::Ospfv3Packet));
 #endif // #ifdef INET_WITH_OSPFv3
         default: {
             auto ospfPacket = makeShared<OspfPacketBase>();

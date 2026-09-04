@@ -15,7 +15,7 @@ class INET_API Ipv6HopByHopOptionsHeaderSerializer : public FieldsChunkSerialize
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
   public:
     Ipv6HopByHopOptionsHeaderSerializer() : FieldsChunkSerializer() {}
 };
@@ -24,7 +24,7 @@ class INET_API Ipv6DestinationOptionsHeaderSerializer : public FieldsChunkSerial
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
   public:
     Ipv6DestinationOptionsHeaderSerializer() : FieldsChunkSerializer() {}
 };
@@ -33,7 +33,7 @@ class INET_API Ipv6RoutingHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
   public:
     Ipv6RoutingHeaderSerializer() : FieldsChunkSerializer() {}
 };
@@ -42,7 +42,7 @@ class INET_API Ipv6FragmentHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
   public:
     Ipv6FragmentHeaderSerializer() : FieldsChunkSerializer() {}
 };
@@ -51,7 +51,7 @@ class INET_API Ipv6AuthenticationHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
   public:
     Ipv6AuthenticationHeaderSerializer() : FieldsChunkSerializer() {}
 };
@@ -60,7 +60,7 @@ class INET_API Ipv6EncapsulatingSecurityPayloadHeaderSerializer : public FieldsC
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
   public:
     Ipv6EncapsulatingSecurityPayloadHeaderSerializer() : FieldsChunkSerializer() {}
 };

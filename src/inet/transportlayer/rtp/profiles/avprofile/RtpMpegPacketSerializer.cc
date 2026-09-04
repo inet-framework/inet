@@ -33,7 +33,7 @@ void RtpMpegPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     stream.writeUint16Be(rtpMpegHeader->getPictureType());
 }
 
-const Ptr<Chunk> RtpMpegPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> RtpMpegPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto rtpMpegHeader = makeShared<RtpMpegHeader>();
     /*rtpMpegHeader->setMbz(stream.readNBitsToUint64Be(5));

@@ -40,7 +40,7 @@ void CfmContinuityCheckMessageSerializer::serialize(MemoryOutputStream& stream, 
     stream.writeUint8(0);  // End TLV
 }
 
-const Ptr<Chunk> CfmContinuityCheckMessageSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> CfmContinuityCheckMessageSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ccm = makeShared<CfmContinuityCheckMessage>();
     ccm->setMdLevel(stream.readUint8());

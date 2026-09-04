@@ -16,7 +16,7 @@ class INET_API Ieee8021aeTagTpidHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee8021aeTagTpidHeaderSerializer() : FieldsChunkSerializer() {}
@@ -26,7 +26,7 @@ class INET_API Ieee8021aeTagEpdHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     Ieee8021aeTagEpdHeaderSerializer() : FieldsChunkSerializer() {}

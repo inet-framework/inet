@@ -96,7 +96,7 @@ void ApplicationHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     stream.writeByteRepeatedly(0, (applicationHeader->getChunkLength() - stream.getLength() + position).get<B>());
 }
 
-const Ptr<Chunk> ApplicationHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> ApplicationHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto applicationHeader = makeShared<ApplicationHeader>();
     auto position = stream.getPosition();
@@ -118,7 +118,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     stream.writeByteRepeatedly(0, (tcpHeader->getChunkLength() - stream.getLength() + position).get<B>());
 }
 
-const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> TcpHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto tcpHeader = makeShared<TcpHeader>();
     auto position = stream.getPosition();
@@ -145,7 +145,7 @@ void IpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const C
     stream.writeByteRepeatedly(0, (ipHeader->getChunkLength() - stream.getLength() + position).get<B>());
 }
 
-const Ptr<Chunk> IpHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> IpHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ipHeader = makeShared<IpHeader>();
     auto position = stream.getPosition();
@@ -165,7 +165,7 @@ void EthernetHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
     stream.writeByteRepeatedly(0, (ethernetHeader->getChunkLength() - stream.getLength() + position).get<B>());
 }
 
-const Ptr<Chunk> EthernetHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ethernetHeader = makeShared<EthernetHeader>();
     auto position = stream.getPosition();
@@ -182,7 +182,7 @@ void EthernetTrailerSerializer::serialize(MemoryOutputStream& stream, const Ptr<
     stream.writeByteRepeatedly(0, (ethernetTrailer->getChunkLength() - stream.getLength() + position).get<B>());
 }
 
-const Ptr<Chunk> EthernetTrailerSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> EthernetTrailerSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ethernetTrailer = makeShared<EthernetTrailer>();
     auto position = stream.getPosition();
@@ -195,7 +195,7 @@ const Ptr<Chunk> CompoundHeaderSerializer::deserialize(MemoryInputStream& stream
 {
     auto compoundHeader = makeShared<CompoundHeader>();
     IpHeaderSerializer ipHeaderSerializer;
-    auto ipHeader = ipHeaderSerializer.deserialize(stream);
+    auto ipHeader = ipHeaderSerializer.deserializeFields(stream, typeid(IpHeader));
     compoundHeader->insertAtBack(ipHeader);
     return compoundHeader;
 }
@@ -205,15 +205,15 @@ void TlvHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     throw cRuntimeError("Invalid operation");
 }
 
-const Ptr<Chunk> TlvHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> TlvHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     uint8_t type = stream.readUint8();
     stream.seek(stream.getPosition() - B(1));
     switch (type) {
         case 1:
-            return TlvHeaderBoolSerializer().deserialize(stream);
+            return TlvHeaderBoolSerializer().deserializeFields(stream, typeid(TlvHeaderBool));
         case 2:
-            return TlvHeaderIntSerializer().deserialize(stream);
+            return TlvHeaderIntSerializer().deserializeFields(stream, typeid(TlvHeaderInt));
         default:
             throw cRuntimeError("Invalid TLV type");
     }
@@ -227,7 +227,7 @@ void TlvHeaderBoolSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     stream.writeUint8(tlvHeader->getBoolValue());
 }
 
-const Ptr<Chunk> TlvHeaderBoolSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> TlvHeaderBoolSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto tlvHeader = makeShared<TlvHeaderBool>();
     ASSERT(tlvHeader->getType() == stream.readUint8());
@@ -246,7 +246,7 @@ void TlvHeaderIntSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     stream.writeUint16Be(tlvHeader->getInt16Value());
 }
 
-const Ptr<Chunk> TlvHeaderIntSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> TlvHeaderIntSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto tlvHeader = makeShared<TlvHeaderInt>();
     ASSERT(tlvHeader->getType() == stream.readUint8());

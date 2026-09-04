@@ -1,0 +1,104 @@
+%description:
+Test that FieldsChunkSerializer forwards the requested chunk type to its field deserializer while
+preserving the common length accounting and original-byte cache.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
+
+using namespace inet;
+
+%global:
+
+class TypeAwareFieldsChunkA : public FieldsChunk
+{
+  public:
+    TypeAwareFieldsChunkA() = default;
+    TypeAwareFieldsChunkA(const TypeAwareFieldsChunkA& other) = default;
+    virtual TypeAwareFieldsChunkA *dup() const override { return new TypeAwareFieldsChunkA(*this); }
+};
+
+class TypeAwareFieldsChunkB : public FieldsChunk
+{
+  public:
+    TypeAwareFieldsChunkB() = default;
+    TypeAwareFieldsChunkB(const TypeAwareFieldsChunkB& other) = default;
+    virtual TypeAwareFieldsChunkB *dup() const override { return new TypeAwareFieldsChunkB(*this); }
+};
+
+class UnsupportedFieldsChunk : public FieldsChunk
+{
+  public:
+    UnsupportedFieldsChunk() = default;
+    UnsupportedFieldsChunk(const UnsupportedFieldsChunk& other) = default;
+    virtual UnsupportedFieldsChunk *dup() const override { return new UnsupportedFieldsChunk(*this); }
+};
+
+class TypeAwareFieldsChunkSerializer : public FieldsChunkSerializer
+{
+  protected:
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>&) const override
+    {
+        stream.writeByte(0);
+    }
+
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const override
+    {
+        stream.readByte();
+        if (typeInfo == typeid(TypeAwareFieldsChunkA))
+            return makeShared<TypeAwareFieldsChunkA>();
+        else if (typeInfo == typeid(TypeAwareFieldsChunkB))
+            return makeShared<TypeAwareFieldsChunkB>();
+        else
+            throw cRuntimeError("Unsupported test chunk type: %s", opp_typename(typeInfo));
+    }
+};
+
+Register_Serializer(TypeAwareFieldsChunkA, TypeAwareFieldsChunkSerializer);
+Register_Serializer(TypeAwareFieldsChunkB, TypeAwareFieldsChunkSerializer);
+Register_Serializer(UnsupportedFieldsChunk, TypeAwareFieldsChunkSerializer);
+
+template<typename T>
+static const Ptr<const T> deserializeTestChunk(const std::vector<uint8_t>& input)
+{
+    Packet packet("input", makeShared<BytesChunk>(input));
+    auto chunk = packet.popAtFront<T>(B(input.size()));
+    ASSERT(typeid(*chunk) == typeid(T));
+    ASSERT(chunk->getChunkLength() == B(input.size()));
+    ASSERT(packet.getDataLength() == B(0));
+    return chunk;
+}
+
+static void checkOriginalBytes(const Ptr<const Chunk>& chunk, const std::vector<uint8_t>& expected)
+{
+    Packet packet("output", chunk);
+    auto bytes = packet.peekAllAsBytes();
+    ASSERT(bytes->getBytes() == expected);
+}
+
+%activity:
+
+const std::vector<uint8_t> input = {0xA5};
+
+auto chunkA = deserializeTestChunk<TypeAwareFieldsChunkA>(input);
+checkOriginalBytes(chunkA, input);
+
+auto chunkB = deserializeTestChunk<TypeAwareFieldsChunkB>(input);
+checkOriginalBytes(chunkB, input);
+
+bool unsupportedTypeRejected = false;
+try {
+    deserializeTestChunk<UnsupportedFieldsChunk>(input);
+}
+catch (const cRuntimeError&) {
+    unsupportedTypeRejected = true;
+}
+ASSERT(unsupportedTypeRejected);
+
+EV << "Type-aware field deserialization preserved length and original bytes.\n";
+
+%contains: stdout
+Type-aware field deserialization preserved length and original bytes.
