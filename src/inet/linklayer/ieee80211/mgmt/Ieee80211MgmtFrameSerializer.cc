@@ -265,7 +265,8 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
     else if (auto beaconFrame = dynamicPtrCast<const Ieee80211BeaconFrame>(chunk)) {
 //        type = ST_BEACON;
         // 1    Timestamp
-        stream.writeUint64Le(simTime().raw()); // FIXME
+        // IEEE Std 802.11-2024, 9.4.1.10 and 11.1.3.1: the TSF timer counts in microseconds.
+        stream.writeUint64Le(simTime().inUnit(SIMTIME_US));
         // 2    Beacon interval
         stream.writeUint16Le((uint16_t)(beaconFrame->getBeaconInterval().inUnit(SIMTIME_US) / 1024));
         // 3    Capability
@@ -308,7 +309,8 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
     else if (auto probeResponseFrame = dynamicPtrCast<const Ieee80211ProbeResponseFrame>(chunk)) {
 //        type = ST_PROBERESPONSE;
         // 1      Timestamp
-        stream.writeUint64Le(simTime().raw()); // FIXME
+        // IEEE Std 802.11-2024, 9.4.1.10 and 11.1.3.1: the TSF timer counts in microseconds.
+        stream.writeUint64Le(simTime().inUnit(SIMTIME_US));
         // 2      Beacon interval
         stream.writeUint16Le((uint16_t)(probeResponseFrame->getBeaconInterval().inUnit(SIMTIME_US) / 1024));
         // 3      Capability
