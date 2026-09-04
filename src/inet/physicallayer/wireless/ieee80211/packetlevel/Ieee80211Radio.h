@@ -9,6 +9,7 @@
 #define __INET_IEEE80211RADIO_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatRadioBase.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/IIeee80211CcaProvider.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -18,7 +19,7 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API Ieee80211Radio : public FlatRadioBase
+class INET_API Ieee80211Radio : public FlatRadioBase, public IIeee80211CcaProvider
 {
   public:
     /**
@@ -31,6 +32,11 @@ class INET_API Ieee80211Radio : public FlatRadioBase
 
   protected:
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
+    Ieee80211SecondaryChannelOffset htSecondaryChannelOffset = IEEE80211_SECONDARY_CHANNEL_NONE;
+    std::unique_ptr<Ieee80211CcaSnapshot> ccaSnapshot;
+    std::string opMode;
+    const Ieee80211ModeSet *modeSet = nullptr;
+    const IIeee80211Band *band = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -43,8 +49,15 @@ class INET_API Ieee80211Radio : public FlatRadioBase
     virtual void encapsulate(Packet *packet) const override;
     virtual void decapsulate(Packet *packet) const override;
 
+    virtual bool computeIsBandBusy(Hz centerFrequency) const;
+    virtual void updateCcaState();
+    virtual void updateTransceiverState() override;
+
   public:
     Ieee80211Radio();
+
+    virtual const Ieee80211CcaSnapshot& getCcaSnapshot() const override { return *ccaSnapshot; }
+    virtual const Ieee80211Channel *getChannel() const { return check_and_cast<const Ieee80211Receiver *>(receiver)->getChannel(); }
 
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
     virtual void setMode(const IIeee80211Mode *mode);

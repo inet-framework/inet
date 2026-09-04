@@ -20,6 +20,7 @@ simple Ieee80211Mib extends SimpleModule
 {
     parameters:
         @class(Ieee80211Mib);
+        string htSecondaryChannelOffset @enum("none", "above", "below") = default("none");
         displayStringTextFormat = default("Address: {address}{ssidStr}\n{modeStr}{stationTypeStr}{qosStr}{associatedStr}");
         @display("i=block/table");
 }

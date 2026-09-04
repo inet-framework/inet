@@ -12,6 +12,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -95,7 +96,7 @@ void Ieee80211Transmitter::setBand(const IIeee80211Band *band)
     if (this->band != band) {
         this->band = band;
         if (channel != nullptr)
-            setChannel(new Ieee80211Channel(band, channel->getChannelNumber()));
+            setChannel(new Ieee80211Channel(band, channel->getChannelNumber(), channel->getSecondaryChannelOffset()));
     }
 }
 
@@ -111,7 +112,8 @@ void Ieee80211Transmitter::setChannel(const Ieee80211Channel *channel)
 void Ieee80211Transmitter::setChannelNumber(int channelNumber)
 {
     if (channel == nullptr || channelNumber != channel->getChannelNumber())
-        setChannel(new Ieee80211Channel(band, channelNumber));
+        setChannel(new Ieee80211Channel(band, channelNumber, channel == nullptr ?
+                IEEE80211_SECONDARY_CHANNEL_NONE : channel->getSecondaryChannelOffset()));
 }
 
 std::ostream& Ieee80211Transmitter::printToStream(std::ostream& stream, int level, int evFlags) const
@@ -145,7 +147,12 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    auto analogModel = getAnalogModel()->createAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, transmissionBandwidth, transmissionPower);
+    // IEEE Std 802.11-2024, 19.3.15.4: an HT40 PPDU occupies the primary
+    // and secondary 20 MHz channels and is centered halfway between them.
+    Hz transmissionCenterFrequency = dynamic_cast<const Ieee80211HtMode *>(transmissionMode) != nullptr &&
+            transmissionBandwidth == MHz(40) ? transmissionChannel->getBondedCenterFrequency() :
+            transmissionChannel->getCenterFrequency();
+    auto analogModel = getAnalogModel()->createAnalogModel(preambleDuration, headerDuration, dataDuration, transmissionCenterFrequency, transmissionBandwidth, transmissionPower);
     return new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, transmissionMode, transmissionChannel);
 }
 

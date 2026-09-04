@@ -159,11 +159,34 @@ void Rx::recomputeMediumFree()
 {
     bool oldMediumFree = mediumFree;
     // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
-    mediumFree = receptionState == IRadio::RECEPTION_STATE_IDLE && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
+    bool primaryPhysicallyIdle = (receptionState != IRadio::RECEPTION_STATE_RECEIVING) &&
+            (!ht40Cca ? (receptionState == IRadio::RECEPTION_STATE_IDLE) : !primaryCcaBusy);
+    mediumFree = primaryPhysicallyIdle && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
     if (mediumFree != oldMediumFree) {
         for (auto contention : contentions)
             contention->mediumStateChanged(mediumFree);
     }
+}
+
+bool Rx::isSecondaryChannelIdleFor(simtime_t interval) const
+{
+    return !ht40Cca || (!secondaryCcaBusy && secondaryCcaIdleSince >= SIMTIME_ZERO &&
+            simTime() - secondaryCcaIdleSince >= interval);
+}
+
+void Rx::ccaStateChanged(const Ieee80211CcaSnapshot& snapshot)
+{
+    Enter_Method("ccaStateChanged");
+    bool wasHt40Cca = ht40Cca;
+    bool wasSecondaryBusy = secondaryCcaBusy;
+    ht40Cca = snapshot.isHt40();
+    primaryCcaBusy = snapshot.isPrimaryBusy();
+    secondaryCcaBusy = snapshot.isSecondaryBusy();
+    if (!ht40Cca || secondaryCcaBusy)
+        secondaryCcaIdleSince = -1;
+    else if (!wasHt40Cca || wasSecondaryBusy)
+        secondaryCcaIdleSince = simTime();
+    recomputeMediumFree();
 }
 
 void Rx::receptionStateChanged(IRadio::ReceptionState state)

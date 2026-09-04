@@ -40,4 +40,5 @@ class Ieee80211Channel
     @descriptor(readonly);
     IIeee80211Band *band;
     int channelNumber;
+    int secondaryChannelOffset;
 }

@@ -15,6 +15,7 @@
 #include "inet/linklayer/ieee80211/mac/framesequence/HcfFs.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
@@ -194,6 +195,26 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     }
 }
 
+bool Hcf::shouldRestartHt40ChannelAccess(Edcaf *edcaf)
+{
+    Packet *frame = edcaf->getInProgressFrames()->getFrameToTransmit();
+    if (frame == nullptr)
+        return false;
+    const auto& header = frame->peekAtFront<Ieee80211MacHeader>();
+    auto modeReq = frame->findTag<Ieee80211ModeReq>();
+    auto mode = modeReq != nullptr ? modeReq->getMode() : rateSelection->computeMode(frame, header, edcaf->getTxopProcedure());
+    if (mode == nullptr || dynamic_cast<const Ieee80211HtMode *>(mode) == nullptr ||
+            mode->getDataMode()->getBandwidth() != MHz(40))
+        return false;
+    // IEEE Std 802.11-2024, 11.15.9 item b):
+    // Secondary channel must be idle during an interval of DIFS for the 2.4 GHz band
+    // and PIFS for the 5 GHz band immediately preceding the expiration of the backoff counter.
+    // If the secondary channel was busy during this interval, invoke the backoff procedure with the current CW[AC].
+    bool is24GHz = modeSet != nullptr && strstr(modeSet->getName(), "2.4Ghz") != nullptr;
+    simtime_t requiredIdle = modeSet->getSifsTime() + (is24GHz ? 2 : 1) * modeSet->getSlotTime();
+    return !rx->isSecondaryChannelIdleFor(requiredIdle);
+}
+
 void Hcf::channelGranted(IChannelAccess *channelAccess)
 {
     Enter_Method("channelGranted");
@@ -201,13 +222,18 @@ void Hcf::channelGranted(IChannelAccess *channelAccess)
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
         EV_DETAIL << "Channel access granted to the " << printAccessCategory(ac) << " queue" << std::endl;
-        edcaf->getTxopProcedure()->startTxop(ac);
         auto internallyCollidedEdcafs = edca->getInternallyCollidedEdcafs();
         if (internallyCollidedEdcafs.size() > 0) {
             EV_INFO << "Internal collision happened with the following queues:" << std::endl;
             handleInternalCollision(internallyCollidedEdcafs);
             emit(edcaCollisionDetectedSignal, (unsigned long)internallyCollidedEdcafs.size());
         }
+        if (shouldRestartHt40ChannelAccess(edcaf)) {
+            EV_INFO << "Secondary channel was busy during required interval before channel access for HT40 transmission, restarting backoff.\n";
+            edcaf->restartChannelAccess(this);
+            return;
+        }
+        edcaf->getTxopProcedure()->startTxop(ac);
         startFrameSequence(ac);
     }
     else
