@@ -6,6 +6,7 @@
 
 #include "inet/physicallayer/wireless/common/base/bitlevel/LayeredErrorModelBase.h"
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/wireless/common/modulation/ApskSymbol.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
@@ -28,6 +29,8 @@ const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const ITr
     auto transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
     auto transmittedPacket = transmissionPacketModel->getPacket();
     auto receivedPacket = transmittedPacket->dup();
+    receivedPacket->clearTags();
+    receivedPacket->addTag<PacketProtocolTag>()->setProtocol(transmittedPacket->getTag<PacketProtocolTag>()->getProtocol());
     if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
         receivedPacket->setBitError(true);
     receivedPacket->addTagIfAbsent<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
