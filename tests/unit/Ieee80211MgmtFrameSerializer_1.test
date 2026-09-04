@@ -1,7 +1,15 @@
 %description:
 Test that raw IEEE 802.11 management frame bodies deserialize as the exact requested registered
 subtype, consume and preserve trailing information elements, safely reject malformed SSID and
-supported-rate elements, use little-endian numeric fields, and round-trip through serialization.
+supported-rate elements, use little-endian numeric fields, serialize Timestamp fields in
+microseconds independently of the simulation-time resolution, and round-trip through serialization.
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+simtime-resolution = 1ns
+cmdenv-express-mode = false
+cmdenv-log-prefix = ""
 
 %includes:
 #include "inet/common/packet/Packet.h"
@@ -258,6 +266,10 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
     ASSERT(frame->getBeaconInterval() == SimTime((int64_t)0x1234 * 1024, SIMTIME_US));
     ASSERT(std::string(frame->getSSID()) == "B");
 
+    wait(SimTime(1234, SIMTIME_US));
+    ASSERT(simTime().inUnit(SIMTIME_US) == 1234);
+    ASSERT(simTime().raw() == 1234000);
+
     auto serializedFrame = makeShared<Ieee80211BeaconFrame>();
     serializedFrame->setBeaconInterval(SimTime((int64_t)0x1234 * 1024, SIMTIME_US));
     serializedFrame->setSSID("B");
@@ -266,7 +278,7 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
     supportedRates.rate[0] = 6;
     serializedFrame->setSupportedRates(supportedRates);
     assertSerializedBody(serializedFrame, {
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0xD2, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x34, 0x12, 0x00, 0x00,
         0x00, 0x01, 'B',
         0x01, 0x01, 0x0C
@@ -282,6 +294,20 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
     }));
     ASSERT(frame->getBeaconInterval() == SimTime(51200, SIMTIME_US));
     ASSERT(std::string(frame->getSSID()) == "Q");
+
+    auto serializedFrame = makeShared<Ieee80211ProbeResponseFrame>();
+    serializedFrame->setBeaconInterval(SimTime(51200, SIMTIME_US));
+    serializedFrame->setSSID("Q");
+    Ieee80211SupportedRatesElement supportedRates;
+    supportedRates.numRates = 1;
+    supportedRates.rate[0] = 6;
+    serializedFrame->setSupportedRates(supportedRates);
+    assertSerializedBody(serializedFrame, {
+        0xD2, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x32, 0x00, 0x00, 0x00,
+        0x00, 0x01, 'Q',
+        0x01, 0x01, 0x0C
+    });
 }
 
 checkMalformedSsid<Ieee80211ProbeRequestFrame>({});
