@@ -128,7 +128,7 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
         ASSERT(staTunedToInternalChannelSix);
         ASSERT(apMib->hasPrimaryChannel());
         ASSERT(apMib->requirePrimaryChannel() == 11);
-        ASSERT(apMib->findPeerHtState(staAddress)->negotiatedCapabilities.operation.primaryChannel == 6);
+        ASSERT(apMib->findPeerHtState(staAddress)->negotiatedCapabilities.operation.primaryChannel == 11);
         ASSERT(staMib->bssStationData.isAssociated);
         // IEEE Std 802.11-2024, 9.4.2.54.2/Figure 9-456 and Table 9-224: the n(mixed-2.4Ghz)
         // profile exposes short GI for the PHY-supported 20 MHz width. The

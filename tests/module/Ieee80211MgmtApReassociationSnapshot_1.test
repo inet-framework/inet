@@ -1,7 +1,7 @@
 %description:
-Verify that an AP reassociation response commits the exact HT Operation
-snapshot advertised when the response was constructed, even if the AP radio
-changes channel before the terminal ACK callback.
+Verify that an AP reassociation response reconciles the committed peer
+HT Operation with runtime channel changes at completion while preserving
+the advertised response element.
 
 %file: TestIeee80211MgmtApReassociationSnapshot.cc
 
@@ -119,8 +119,8 @@ class Ieee80211MgmtApReassociationSnapshotTest : public cSimpleModule
         ASSERT(mib->bssAccessPointData.stations.at(staAddress) == Ieee80211Mib::ASSOCIATED);
         const auto *peerState = mib->findPeerHtState(staAddress);
         ASSERT(peerState != nullptr);
-        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 6);
-        std::cout << "AP reassociation commits the response-time HT Operation snapshot after a channel change.\n";
+        ASSERT(peerState->negotiatedCapabilities.operation.primaryChannel == 11);
+        std::cout << "AP reassociation reconciles committed HT Operation with current channel after channel change.\n";
     }
 };
 
@@ -187,4 +187,4 @@ record-scalar-results = false
 *.ap.mobility.initialY = 0m
 
 %contains: stdout
-AP reassociation commits the response-time HT Operation snapshot after a channel change.
+AP reassociation reconciles committed HT Operation with current channel after channel change.

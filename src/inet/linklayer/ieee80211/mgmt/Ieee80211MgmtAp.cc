@@ -137,9 +137,12 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, Fra
             mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
             if (sta->second.pendingHtStateAvailable) {
                 // IEEE Std 802.11-2024, 11.3.5.3: association state becomes effective only after the successful response exchange.
-                if (sta->second.pendingHtCapabilitiesValid) {
-                    ASSERT(sta->second.pendingHtOperationValid);
-                    mib->setPeerHtCapabilities(address, sta->second.pendingHtCapabilities, sta->second.pendingHtOperation);
+                if (sta->second.pendingHtCapabilitiesValid && mib->isHtOperationSupported()) {
+                    const auto& currentOperation = mib->getHtOperation();
+                    if (supportsBasicHtMcsSet(sta->second.pendingHtCapabilities, currentOperation))
+                        mib->setPeerHtCapabilities(address, sta->second.pendingHtCapabilities, currentOperation);
+                    else
+                        mib->removePeerHtCapabilities(address);
                 }
                 else
                     mib->removePeerHtCapabilities(address);
