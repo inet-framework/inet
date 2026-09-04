@@ -357,12 +357,22 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     Ieee80211HtOperation pendingHtOperation;
     if (pendingHtOperationValid)
         pendingHtOperation = mib->getHtOperation();
-    bool pendingHtCapabilitiesValid = pendingHtOperationValid && requestBody->getHtCapabilitiesPresent();
+    bool htCapabilitiesPresent = requestBody->getHtCapabilitiesPresent();
+    bool pendingHtCapabilitiesValid = false;
     Ieee80211HtCapabilities pendingHtCapabilities;
-    if (pendingHtCapabilitiesValid)
-        pendingHtCapabilities = makeHtCapabilities(requestBody->getHtCapabilities());
-    bool basicHtMcsSupported = !pendingHtCapabilitiesValid ||
-            supportsBasicHtMcsSet(pendingHtCapabilities, pendingHtOperation);
+    bool htCapabilitiesMalformed = false;
+    std::string htCapabilitiesError;
+    if (pendingHtOperationValid && htCapabilitiesPresent) {
+        if (decodeHtCapabilities(requestBody->getHtCapabilities(), pendingHtCapabilities, htCapabilitiesError))
+            pendingHtCapabilitiesValid = true;
+        else {
+            EV_WARN << "Malformed HT Capabilities in AssociationRequest from "
+                    << header->getTransmitterAddress() << ": " << htCapabilitiesError << "\n";
+            htCapabilitiesMalformed = true;
+        }
+    }
+    bool basicHtMcsSupported = !htCapabilitiesMalformed &&
+            (!pendingHtCapabilitiesValid || supportsBasicHtMcsSet(pendingHtCapabilities, pendingHtOperation));
     delete packet;
 
     // IEEE Std 802.11-2024, 11.3.5.3 g): an HT STA must support every Basic HT-MCS.
@@ -375,10 +385,13 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
         responseHtOperation.basicMcsSupported.fill(false);
         setHtOperation(body, getHtOperationBand(), responseHtOperation);
     }
-    body->setStatusCode(basicHtMcsSupported ? SC_SUCCESSFUL : SC_DATARATE_UNSUP);
-    short associationId = basicHtMcsSupported ? mib->reserveAssociationId(sta->address) : 0;
+    Ieee80211StatusCode statusCode = htCapabilitiesMalformed ? SC_UNSUP_CAP :
+            (basicHtMcsSupported ? SC_SUCCESSFUL : SC_DATARATE_UNSUP);
+    body->setStatusCode(statusCode);
+    bool associationSuccessful = statusCode == SC_SUCCESSFUL;
+    short associationId = associationSuccessful ? mib->reserveAssociationId(sta->address) : 0;
     body->setAid(associationId);
-    sta->pendingAssociationSuccessful = basicHtMcsSupported;
+    sta->pendingAssociationSuccessful = associationSuccessful;
     sta->pendingHtStateAvailable = true;
     sta->pendingHtCapabilitiesValid = pendingHtCapabilitiesValid;
     sta->pendingHtCapabilities = pendingHtCapabilities;
@@ -388,7 +401,9 @@ void Ieee80211MgmtAp::handleAssociationRequestFrame(Packet *packet, const Ptr<co
     setSupportedRateElements(body);
     addHtCapabilities(body);
     body->setChunkLength(B(2 + 2 + 2) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
-    sendManagementFrame(basicHtMcsSupported ? "AssocResp-OK" : "AssocResp-UnsupportedHtMcs", body, ST_ASSOCIATIONRESPONSE, sta->address, sta->pendingAssociationTransactionId);
+    const char *frameName = associationSuccessful ? "AssocResp-OK" :
+            (htCapabilitiesMalformed ? "AssocResp-UnsupportedHtCap" : "AssocResp-UnsupportedHtMcs");
+    sendManagementFrame(frameName, body, ST_ASSOCIATIONRESPONSE, sta->address, sta->pendingAssociationTransactionId);
 }
 
 void Ieee80211MgmtAp::handleAssociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
@@ -422,12 +437,22 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     Ieee80211HtOperation pendingHtOperation;
     if (pendingHtOperationValid)
         pendingHtOperation = mib->getHtOperation();
-    bool pendingHtCapabilitiesValid = pendingHtOperationValid && requestBody->getHtCapabilitiesPresent();
+    bool htCapabilitiesPresent = requestBody->getHtCapabilitiesPresent();
+    bool pendingHtCapabilitiesValid = false;
     Ieee80211HtCapabilities pendingHtCapabilities;
-    if (pendingHtCapabilitiesValid)
-        pendingHtCapabilities = makeHtCapabilities(requestBody->getHtCapabilities());
-    bool basicHtMcsSupported = !pendingHtCapabilitiesValid ||
-            supportsBasicHtMcsSet(pendingHtCapabilities, pendingHtOperation);
+    bool htCapabilitiesMalformed = false;
+    std::string htCapabilitiesError;
+    if (pendingHtOperationValid && htCapabilitiesPresent) {
+        if (decodeHtCapabilities(requestBody->getHtCapabilities(), pendingHtCapabilities, htCapabilitiesError))
+            pendingHtCapabilitiesValid = true;
+        else {
+            EV_WARN << "Malformed HT Capabilities in ReassociationRequest from "
+                    << header->getTransmitterAddress() << ": " << htCapabilitiesError << "\n";
+            htCapabilitiesMalformed = true;
+        }
+    }
+    bool basicHtMcsSupported = !htCapabilitiesMalformed &&
+            (!pendingHtCapabilitiesValid || supportsBasicHtMcsSet(pendingHtCapabilities, pendingHtOperation));
     delete packet;
 
     // send OK response
@@ -439,10 +464,13 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
         responseHtOperation.basicMcsSupported.fill(false);
         setHtOperation(body, getHtOperationBand(), responseHtOperation);
     }
-    body->setStatusCode(basicHtMcsSupported ? SC_SUCCESSFUL : SC_DATARATE_UNSUP);
-    short associationId = basicHtMcsSupported ? mib->reserveAssociationId(sta->address) : 0;
+    Ieee80211StatusCode statusCode = htCapabilitiesMalformed ? SC_UNSUP_CAP :
+            (basicHtMcsSupported ? SC_SUCCESSFUL : SC_DATARATE_UNSUP);
+    body->setStatusCode(statusCode);
+    bool associationSuccessful = statusCode == SC_SUCCESSFUL;
+    short associationId = associationSuccessful ? mib->reserveAssociationId(sta->address) : 0;
     body->setAid(associationId);
-    sta->pendingAssociationSuccessful = basicHtMcsSupported;
+    sta->pendingAssociationSuccessful = associationSuccessful;
     sta->pendingHtStateAvailable = true;
     sta->pendingHtCapabilitiesValid = pendingHtCapabilitiesValid;
     sta->pendingHtCapabilities = pendingHtCapabilities;
@@ -452,7 +480,9 @@ void Ieee80211MgmtAp::handleReassociationRequestFrame(Packet *packet, const Ptr<
     setSupportedRateElements(body);
     addHtCapabilities(body);
     body->setChunkLength(B(2 + 2 + 2) + getSupportedRateElementsLength(body) + getHtMgmtElementsLength(body));
-    sendManagementFrame(basicHtMcsSupported ? "ReassocResp-OK" : "ReassocResp-UnsupportedHtMcs", body, ST_REASSOCIATIONRESPONSE, sta->address, sta->pendingAssociationTransactionId);
+    const char *frameName = associationSuccessful ? "ReassocResp-OK" :
+            (htCapabilitiesMalformed ? "ReassocResp-UnsupportedHtCap" : "ReassocResp-UnsupportedHtMcs");
+    sendManagementFrame(frameName, body, ST_REASSOCIATIONRESPONSE, sta->address, sta->pendingAssociationTransactionId);
 }
 
 void Ieee80211MgmtAp::handleReassociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header)
