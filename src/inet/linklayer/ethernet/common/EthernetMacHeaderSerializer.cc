@@ -88,13 +88,18 @@ void EthernetFcsSerializer::serialize(MemoryOutputStream& stream, const Ptr<cons
     stream.writeUint32Be(ethernetFcs->getFcs());
 }
 
-const Ptr<Chunk> EthernetFcsSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
+const Ptr<Chunk> EthernetFcsSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
-    auto ethernetFcs = makeShared<EthernetFcs>();
+    Ptr<EthernetFcs> ethernetFcs;
+    if (typeInfo == typeid(EthernetFragmentFcs))
+        ethernetFcs = makeShared<EthernetFragmentFcs>();
+    else if (typeInfo == typeid(EthernetFcs))
+        ethernetFcs = makeShared<EthernetFcs>();
+    else
+        throw cRuntimeError("Cannot deserialize Ethernet FCS of type %s", opp_typename(typeInfo));
     ethernetFcs->setFcs(stream.readUint32Be());
     ethernetFcs->setFcsMode(FCS_COMPUTED);
     return ethernetFcs;
 }
 
 } // namespace inet
-
