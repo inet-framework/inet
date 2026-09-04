@@ -1248,7 +1248,30 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     ap->isAuthenticated = candidate.isAuthenticated;
     ap->authSeqExpected = candidate.authSeqExpected;
     ap->authTimeoutMsg = candidate.authTimeoutMsg;
-    if (signalPowerInd != nullptr && currentAp)
+    bool currentAssociatedAp = mib != nullptr && mib->bssStationData.isAssociated && address == assocAP.address;
+    bool isBeacon = header->getType() == ST_BEACON ||
+            (header->getType() != ST_PROBERESPONSE && dynamicPtrCast<const Ieee80211ProbeResponseFrame>(body) == nullptr);
+    if (currentAssociatedAp && isBeacon) {
+        (ApInfo&)assocAP = *ap;
+        mib->bssData.ssid = ap->ssid;
+        if (mib->isHtOperationSupported() && candidate.htCapabilitiesPresent && candidate.htOperationPresent) {
+            auto negotiated = negotiateHtCapabilities(mib->localHtCapabilities, candidate.htCapabilities, candidate.htOperation);
+            if (supportsBasicHtMcsSet(mib->localHtCapabilities, candidate.htOperation) &&
+                    negotiated.localTxPeerRx.valid && negotiated.localRxPeerTx.valid) {
+                EV_INFO << "Refreshing authoritative HT state for associated AP address=" << address << "\n";
+                mib->setPeerHtCapabilities(address, candidate.htCapabilities, candidate.htOperation);
+            }
+            else {
+                EV_WARN << "Beacon from associated AP has unusable HT advertisement: removing peer HT state for AP address=" << address << "\n";
+                mib->removePeerHtCapabilities(address);
+            }
+        }
+        else {
+            EV_INFO << "Beacon from associated AP has no usable HT advertisement or STA is legacy: removing peer HT state for AP address=" << address << "\n";
+            mib->removePeerHtCapabilities(address);
+        }
+    }
+    else if (signalPowerInd != nullptr && currentAp)
         assocAP.rxPower = candidate.rxPower;
     return true;
 }
