@@ -7,7 +7,7 @@ stale, missing, and malformed responses are ignored.
 %includes:
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 
@@ -40,32 +40,31 @@ static Packet *makeAssociationResponse(uint64_t transactionId, bool moreFragment
 %activity:
 
 using Disposition = TestIeee80211MgmtAp::AssociationResponseDisposition;
-using Status = IFrameTransmissionCallback::Status;
 
 auto finalResponse = makeAssociationResponse(42);
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42, Status::ACKNOWLEDGED) == Disposition::COMPLETE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 42, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) == Disposition::COMPLETE);
 
 auto nonFinalResponse = makeAssociationResponse(42, true);
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, Status::ACKNOWLEDGED) == Disposition::RETAIN);
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, Status::RETRY_LIMIT_REACHED) == Disposition::COMPLETE);
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, Status::DROPPED_BEFORE_TRANSMISSION) == Disposition::COMPLETE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) == Disposition::RETAIN);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED) == Disposition::COMPLETE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nonFinalResponse, 42, FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION) == Disposition::COMPLETE);
 
 auto reassociationResponse = makeAssociationResponse(42, false, true, ST_REASSOCIATIONRESPONSE);
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(reassociationResponse, 42, Status::ACKNOWLEDGED) == Disposition::COMPLETE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(reassociationResponse, 42, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) == Disposition::COMPLETE);
 
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 41, Status::ACKNOWLEDGED) == Disposition::IGNORE);
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 0, Status::ACKNOWLEDGED) == Disposition::IGNORE);
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nullptr, 42, Status::ACKNOWLEDGED) == Disposition::IGNORE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 41, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) == Disposition::IGNORE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(finalResponse, 0, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) == Disposition::IGNORE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(nullptr, 42, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) == Disposition::IGNORE);
 
 auto zeroTokenResponse = makeAssociationResponse(0);
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(zeroTokenResponse, 42, Status::ACKNOWLEDGED) == Disposition::IGNORE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(zeroTokenResponse, 42, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) == Disposition::IGNORE);
 auto untaggedResponse = makeAssociationResponse(42, false, false);
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(untaggedResponse, 42, Status::ACKNOWLEDGED) == Disposition::IGNORE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(untaggedResponse, 42, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) == Disposition::IGNORE);
 
 auto aggregate = new Packet("A-MPDU-like");
 aggregate->insertAtBack(makeShared<Ieee80211MpduSubframeHeader>());
 aggregate->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(42);
-ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(aggregate, 42, Status::ACKNOWLEDGED) == Disposition::IGNORE);
+ASSERT(TestIeee80211MgmtAp::getAssociationResponseDisposition(aggregate, 42, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) == Disposition::IGNORE);
 
 delete aggregate;
 delete untaggedResponse;

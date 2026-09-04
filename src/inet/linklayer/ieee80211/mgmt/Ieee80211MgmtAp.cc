@@ -59,6 +59,11 @@ void Ieee80211MgmtAp::initialize(int stage)
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
+        if (myIface != nullptr) {
+            auto macModule = myIface->getSubmodule("mac");
+            if (macModule != nullptr)
+                macModule->subscribe(frameTransmissionFinishedSignal, this);
+        }
     }
 }
 
@@ -78,8 +83,20 @@ void Ieee80211MgmtAp::handleCommand(int msgkind, cObject *ctrl)
     throw cRuntimeError("handleCommand(): no commands supported");
 }
 
+void Ieee80211MgmtAp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    if (signalID == frameTransmissionFinishedSignal) {
+        Enter_Method("%s", cComponent::getSignalName(signalID));
+        auto packet = check_and_cast_nullable<const Packet *>(obj);
+        auto transDetails = check_and_cast<const FrameTransmissionDetails *>(details);
+        frameTransmissionFinished(packet, transDetails->getStatus());
+    }
+    else
+        Ieee80211MgmtApBase::receiveSignal(source, signalID, obj, details);
+}
+
 Ieee80211MgmtAp::AssociationResponseDisposition Ieee80211MgmtAp::getAssociationResponseDisposition(const Packet *responseFrame,
-        uint64_t pendingTransactionId, IFrameTransmissionCallback::Status status)
+        uint64_t pendingTransactionId, FrameTransmissionStatus status)
 {
     if (responseFrame == nullptr || pendingTransactionId == 0)
         return AssociationResponseDisposition::IGNORE;
@@ -90,15 +107,14 @@ Ieee80211MgmtAp::AssociationResponseDisposition Ieee80211MgmtAp::getAssociationR
     const auto& responseHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(frontChunk);
     if (responseHeader == nullptr || (responseHeader->getType() != ST_ASSOCIATIONRESPONSE && responseHeader->getType() != ST_REASSOCIATIONRESPONSE))
         return AssociationResponseDisposition::IGNORE;
-    if (status == IFrameTransmissionCallback::Status::ACKNOWLEDGED && responseHeader->getMoreFragments())
+    if (status == FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED && responseHeader->getMoreFragments())
         return AssociationResponseDisposition::RETAIN;
     return AssociationResponseDisposition::COMPLETE;
 }
 
-void Ieee80211MgmtAp::frameTransmissionFinished(const IFrameTransmissionCallback::Result& result)
+void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, FrameTransmissionStatus status)
 {
     Enter_Method("frameTransmissionFinished");
-    const Packet *responseFrame = result.getFrame();
     if (responseFrame == nullptr)
         return;
     const auto& responseHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(responseFrame->peekAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR));
@@ -107,14 +123,14 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const IFrameTransmissionCallback
     auto address = responseHeader->getReceiverAddress();
     auto sta = staList.find(address);
     uint64_t pendingTransactionId = sta == staList.end() ? 0 : sta->second.pendingAssociationTransactionId;
-    auto disposition = getAssociationResponseDisposition(responseFrame, pendingTransactionId, result.getStatus());
+    auto disposition = getAssociationResponseDisposition(responseFrame, pendingTransactionId, status);
     if (disposition == AssociationResponseDisposition::IGNORE)
         return;
     ASSERT(sta != staList.end());
     if (disposition == AssociationResponseDisposition::RETAIN)
         return;
 
-    if (result.getStatus() == IFrameTransmissionCallback::Status::ACKNOWLEDGED) {
+    if (status == FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) {
         if (sta->second.pendingAssociationSuccessful) {
             bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
             mib->commitAssociationId(address);

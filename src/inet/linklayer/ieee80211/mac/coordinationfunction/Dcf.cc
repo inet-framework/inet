@@ -126,7 +126,7 @@ void Dcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         Enter_Method("%s", cComponent::getSignalName(signalID));
         auto packet = check_and_cast<Packet *>(obj);
         if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr)
-            mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+            mac->notifyFrameTransmission(packet, FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
     }
     else
         ModeSetListener::receiveSignal(source, signalID, obj, details);
@@ -287,7 +287,7 @@ void Dcf::originatorProcessRtsProtectionFailed(Packet *packet)
         emit(packetDroppedSignal, packet, &details);
         emit(linkBrokenSignal, packet);
         if (dynamicPtrCast<const Ieee80211MgmtHeader>(protectedHeader))
-            mac->notifyFrameTransmission(packet, IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
+            mac->notifyFrameTransmission(packet, FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
     }
 }
 
@@ -333,7 +333,7 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
         channelAccess->getInProgressFrames()->dropFrame(lastTransmittedPacket);
         ackHandler->dropFrame(lastTransmittedDataOrMgmtHeader);
         if (dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedDataOrMgmtHeader))
-            mac->notifyFrameTransmission(lastTransmittedPacket, IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+            mac->notifyFrameTransmission(lastTransmittedPacket, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
     }
     else if (receivedHeader->getType() == ST_RTS)
         ; // void
@@ -368,7 +368,7 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
         emit(packetDroppedSignal, failedPacket, &details);
         emit(linkBrokenSignal, failedPacket);
         if (dynamicPtrCast<const Ieee80211MgmtHeader>(failedHeader))
-            mac->notifyFrameTransmission(failedPacket, IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
+            mac->notifyFrameTransmission(failedPacket, FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
     }
     else {
         EV_INFO << "Retrying frame " << failedPacket->getName() << ".\n";

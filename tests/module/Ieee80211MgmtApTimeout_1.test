@@ -13,7 +13,7 @@ recovers through a real response/ACK exchange and reuses the released AID.
 #include <vector>
 
 #include "inet/common/Simsignals.h"
-#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
@@ -114,7 +114,7 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         return aid;
     }
 
-    void finishAssociationResponse(const MacAddress& address, IFrameTransmissionCallback::Status status,
+    void finishAssociationResponse(const MacAddress& address, FrameTransmissionStatus status,
             bool moreFragments = false, uint64_t transactionId = 0)
     {
         if (transactionId == 0)
@@ -126,8 +126,7 @@ class TestIeee80211MgmtAp : public Ieee80211MgmtAp
         responseHeader->setMoreFragments(moreFragments);
         response->insertAtBack(responseHeader);
         response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(transactionId);
-        IFrameTransmissionCallback::Result result(response, status);
-        frameTransmissionFinished(result);
+        frameTransmissionFinished(response, status);
         delete response;
     }
 
@@ -352,22 +351,22 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
         ASSERT(mgmt->reserveAssociationId(notReusedWhilePending) == 2);
         mgmt->cancelAssociationIdReservation(notReusedWhilePending);
 
-        mgmt->finishAssociationResponse(expectedAssociatedAddress, IFrameTransmissionCallback::Status::ACKNOWLEDGED, true, delayedTransaction);
+        mgmt->finishAssociationResponse(expectedAssociatedAddress, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, true, delayedTransaction);
         ASSERT(mgmt->hasPendingAssociation(expectedAssociatedAddress));
         ASSERT(associationNotifications == 0);
-        mgmt->finishAssociationResponse(expectedAssociatedAddress, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, delayedTransaction);
+        mgmt->finishAssociationResponse(expectedAssociatedAddress, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, false, delayedTransaction);
         ASSERT(associationNotifications == 1);
         ASSERT(!mgmt->hasPendingAssociation(expectedAssociatedAddress));
         ASSERT(mgmt->getCommittedAssociationId(expectedAssociatedAddress) == delayedAid);
         // A duplicate terminal callback cannot commit or notify a second time.
-        mgmt->finishAssociationResponse(expectedAssociatedAddress, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, delayedTransaction);
+        mgmt->finishAssociationResponse(expectedAssociatedAddress, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, false, delayedTransaction);
         ASSERT(associationNotifications == 1);
 
         expectedAssociatedAddress = MacAddress("02:00:00:00:00:06");
         expectedAssociationId = mgmt->startSuccessfulReassociation(expectedAssociatedAddress, Ieee80211Mib::AUTHENTICATED);
         ASSERT(mgmt->getStationStatus(expectedAssociatedAddress) == Ieee80211Mib::AUTHENTICATED);
         ASSERT(!mgmt->hasCommittedAssociationId(expectedAssociatedAddress));
-        mgmt->finishAssociationResponse(expectedAssociatedAddress, IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+        mgmt->finishAssociationResponse(expectedAssociatedAddress, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
         ASSERT(associationNotifications == 2);
         ASSERT(!mgmt->hasPendingAssociation(expectedAssociatedAddress));
 
@@ -375,7 +374,7 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
         ASSERT(sameApAid == expectedAssociationId);
         ASSERT(mgmt->getStationStatus(expectedAssociatedAddress) == Ieee80211Mib::ASSOCIATED);
         ASSERT(mgmt->getCommittedAssociationId(expectedAssociatedAddress) == expectedAssociationId);
-        mgmt->finishAssociationResponse(expectedAssociatedAddress, IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+        mgmt->finishAssociationResponse(expectedAssociatedAddress, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
         ASSERT(associationNotifications == 2);
         ASSERT(!mgmt->hasPendingAssociation(expectedAssociatedAddress));
 
@@ -389,7 +388,7 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->hasPendingAssociation(deauthenticated));
         ASSERT(!mgmt->hasCommittedAssociationId(deauthenticated));
         ASSERT(mgmt->getStationStatus(deauthenticated) == Ieee80211Mib::NOT_AUTHENTICATED);
-        mgmt->finishAssociationResponse(deauthenticated, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, staleDeauthenticationTransaction);
+        mgmt->finishAssociationResponse(deauthenticated, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, false, staleDeauthenticationTransaction);
         ASSERT(!mgmt->hasCommittedAssociationId(deauthenticated));
 
         MacAddress disassociated("02:00:00:00:00:08");
@@ -402,7 +401,7 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->hasPendingAssociation(disassociated));
         ASSERT(!mgmt->hasCommittedAssociationId(disassociated));
         ASSERT(mgmt->getStationStatus(disassociated) == Ieee80211Mib::AUTHENTICATED);
-        mgmt->finishAssociationResponse(disassociated, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, staleDisassociationTransaction);
+        mgmt->finishAssociationResponse(disassociated, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, false, staleDisassociationTransaction);
         ASSERT(!mgmt->hasCommittedAssociationId(disassociated));
 
         // A terminal retry result clears a pending transaction and releases
@@ -410,12 +409,12 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
         MacAddress terminalFailure("02:00:00:00:00:0b");
         short terminalFailureAid = mgmt->startPendingAssociation(terminalFailure);
         uint64_t terminalFailureTransaction = mgmt->getPendingAssociationTransactionId(terminalFailure);
-        mgmt->finishAssociationResponse(terminalFailure, IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED, false, terminalFailureTransaction);
+        mgmt->finishAssociationResponse(terminalFailure, FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED, false, terminalFailureTransaction);
         ASSERT(!mgmt->hasPendingAssociation(terminalFailure));
         ASSERT(!mgmt->hasCommittedAssociationId(terminalFailure));
         ASSERT(mgmt->reserveAssociationId(terminalFailure) == terminalFailureAid);
         mgmt->cancelAssociationIdReservation(terminalFailure);
-        mgmt->finishAssociationResponse(MacAddress("02:00:00:00:00:0c"), IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, 1);
+        mgmt->finishAssociationResponse(MacAddress("02:00:00:00:00:0c"), FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, false, 1);
 
         // Exercise the real AP response path.  With actions "BBA", the tester
         // MAC consumes the AP's first two responses: the same response is
@@ -469,7 +468,7 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
         ASSERT(mgmt->getCommittedAssociationId(failed) == failedAid);
         // A stale completion from the failed transaction must not clear the
         // recovered transaction's committed association.
-        mgmt->finishAssociationResponse(failed, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, failedTransaction);
+        mgmt->finishAssociationResponse(failed, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, false, failedTransaction);
         ASSERT(associationNotifications == notificationsBeforeRetry + 1);
         ASSERT(!mgmt->hasPendingAssociation(failed));
         ASSERT(mgmt->getStationStatus(failed) == Ieee80211Mib::ASSOCIATED);
@@ -490,7 +489,7 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
         ASSERT(mgmt->reserveAssociationId(invalidAuthentication) == invalidAuthenticationAid);
         expectedAssociatedAddress = invalidAuthentication;
         expectedAssociationId = invalidAuthenticationAid;
-        mgmt->finishAssociationResponse(invalidAuthentication, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, invalidAuthenticationTransaction);
+        mgmt->finishAssociationResponse(invalidAuthentication, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, false, invalidAuthenticationTransaction);
         ASSERT(!mgmt->hasPendingAssociation(invalidAuthentication));
         ASSERT(mgmt->getStationStatus(invalidAuthentication) == Ieee80211Mib::ASSOCIATED);
         ASSERT(mgmt->getCommittedAssociationId(invalidAuthentication) == invalidAuthenticationAid);
@@ -506,7 +505,7 @@ class Ieee80211MgmtApTimeoutTest : public cSimpleModule, public cListener
         ASSERT(!mgmt->hasPendingAssociation(restartedAuthentication));
         ASSERT(mgmt->reserveAssociationId(restartedAuthentication) == restartedAuthenticationAid);
         mgmt->cancelAssociationIdReservation(restartedAuthentication);
-        mgmt->finishAssociationResponse(restartedAuthentication, IFrameTransmissionCallback::Status::ACKNOWLEDGED, false, restartedAuthenticationTransaction);
+        mgmt->finishAssociationResponse(restartedAuthentication, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, false, restartedAuthenticationTransaction);
         ASSERT(!mgmt->hasCommittedAssociationId(restartedAuthentication));
 
         std::cout << "AP association response delayed-completion lifecycle verified.\n";

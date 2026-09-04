@@ -10,7 +10,7 @@
 
 #include <map>
 
-#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtApBase.h"
 
 namespace inet {
@@ -21,7 +21,7 @@ namespace ieee80211 {
  * Used in 802.11 infrastructure mode: handles management frames for
  * an access point (AP). See corresponding NED file for a detailed description.
  */
-class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, public IFrameTransmissionCallback
+class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase
 {
   protected:
     enum class AssociationResponseDisposition {
@@ -88,7 +88,10 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, public IFrameTransm
     /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
     virtual void handleCommand(int msgkind, cObject *ctrl) override;
 
-    virtual void frameTransmissionFinished(const IFrameTransmissionCallback::Result& result) override;
+    using Ieee80211MgmtApBase::receiveSignal;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+
+    virtual void frameTransmissionFinished(const Packet *responseFrame, FrameTransmissionStatus status);
 
     /** Utility function: return sender STA's entry from our STA list, or nullptr if not in there */
     virtual StaInfo *lookupSenderSTA(const Ptr<const Ieee80211MgmtHeader>& header);
@@ -101,7 +104,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, public IFrameTransm
 
     /** Classifies a terminal management-MPDU result using its transaction tag and fragment state. */
     static AssociationResponseDisposition getAssociationResponseDisposition(const Packet *responseFrame,
-            uint64_t pendingTransactionId, IFrameTransmissionCallback::Status status);
+            uint64_t pendingTransactionId, FrameTransmissionStatus status);
 
     /** Utility function: creates and sends a beacon frame */
     virtual void sendBeacon();

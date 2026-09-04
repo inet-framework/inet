@@ -6,7 +6,7 @@ drop must occur, and the typed terminal callback must be delivered exactly once.
 %file: TestIeee80211HcfInternalCollision.cc
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 
@@ -41,14 +41,14 @@ class TestIeee80211MgmtApInternalCollision : public Ieee80211MgmtAp
 {
   public:
     int terminalCallbacks = 0;
-    IFrameTransmissionCallback::Status lastStatus = IFrameTransmissionCallback::Status::ACKNOWLEDGED;
+    FrameTransmissionStatus lastStatus = FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED;
 
   protected:
-    virtual void frameTransmissionFinished(const IFrameTransmissionCallback::Result& result) override
+    virtual void frameTransmissionFinished(const Packet *responseFrame, FrameTransmissionStatus status) override
     {
         terminalCallbacks++;
-        lastStatus = result.getStatus();
-        Ieee80211MgmtAp::frameTransmissionFinished(result);
+        lastStatus = status;
+        Ieee80211MgmtAp::frameTransmissionFinished(responseFrame, status);
     }
 };
 
@@ -72,7 +72,7 @@ class Ieee80211HcfInternalCollisionTest : public cSimpleModule
         ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_BE) == 0);
         ASSERT(hcf->getStationShortRetryCount(AccessCategory::AC_VO) == 1);
         ASSERT(mgmt->terminalCallbacks == 1);
-        ASSERT(mgmt->lastStatus == IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
+        ASSERT(mgmt->lastStatus == FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
         std::cout << "HCF AC_VO management internal-collision retry ownership verified.\n";
     }
 };

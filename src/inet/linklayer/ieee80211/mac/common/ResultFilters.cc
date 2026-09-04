@@ -72,6 +72,26 @@ void Ieee80211NotRetryFilter::receiveSignal(cResultFilter *prev, simtime_t_cref 
     }
 }
 
+void FrameTransmissionStatusFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto transDetails = dynamic_cast<FrameTransmissionDetails *>(details);
+    if (transDetails == nullptr)
+        transDetails = dynamic_cast<FrameTransmissionDetails *>(object);
+    if (transDetails != nullptr && transDetails->getStatus() == status) {
+        cObject *forwardObj = object != nullptr ? object : transDetails;
+        fire(this, t, forwardObj, details);
+    }
+}
+
+class FrameTransmissionStatusIsAcknowledgedFilter : public FrameTransmissionStatusFilter { public: FrameTransmissionStatusIsAcknowledgedFilter() : FrameTransmissionStatusFilter(FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) {} };
+Register_ResultFilter("frameTransmissionStatusIsAcknowledged", FrameTransmissionStatusIsAcknowledgedFilter);
+
+class FrameTransmissionStatusIsRetryLimitReachedFilter : public FrameTransmissionStatusFilter { public: FrameTransmissionStatusIsRetryLimitReachedFilter() : FrameTransmissionStatusFilter(FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED) {} };
+Register_ResultFilter("frameTransmissionStatusIsRetryLimitReached", FrameTransmissionStatusIsRetryLimitReachedFilter);
+
+class FrameTransmissionStatusIsDroppedBeforeTransmissionFilter : public FrameTransmissionStatusFilter { public: FrameTransmissionStatusIsDroppedBeforeTransmissionFilter() : FrameTransmissionStatusFilter(FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION) {} };
+Register_ResultFilter("frameTransmissionStatusIsDroppedBeforeTransmission", FrameTransmissionStatusIsDroppedBeforeTransmissionFilter);
+
 } // namespace ieee80211
 
 } // namespace inet

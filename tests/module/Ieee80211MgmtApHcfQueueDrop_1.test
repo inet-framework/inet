@@ -10,7 +10,7 @@ committed association.
 #include <vector>
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 #include "inet/queueing/queue/CompoundPacketQueueBase.h"
@@ -38,7 +38,7 @@ Define_Module(TestCompoundPendingQueueForHcf);
 class TestIeee80211MgmtApHcfQueueDrop : public Ieee80211MgmtAp
 {
   public:
-    std::vector<IFrameTransmissionCallback::Status> statuses;
+    std::vector<FrameTransmissionStatus> statuses;
     std::vector<uint64_t> transactionIds;
 
     void markAuthenticated(const MacAddress& address)
@@ -101,13 +101,12 @@ class TestIeee80211MgmtApHcfQueueDrop : public Ieee80211MgmtAp
     Ieee80211Mib::BssMemberStatus getStationStatus(const MacAddress& address) const { return mib->bssAccessPointData.stations.at(address); }
 
   protected:
-    virtual void frameTransmissionFinished(const IFrameTransmissionCallback::Result& result) override
+    virtual void frameTransmissionFinished(const Packet *responseFrame, FrameTransmissionStatus status) override
     {
-        statuses.push_back(result.getStatus());
-        auto frame = result.getFrame();
-        auto transactionTag = frame == nullptr ? nullptr : frame->findTag<Ieee80211MgmtTransactionTag>();
+        statuses.push_back(status);
+        auto transactionTag = responseFrame == nullptr ? nullptr : responseFrame->findTag<Ieee80211MgmtTransactionTag>();
         transactionIds.push_back(transactionTag == nullptr ? 0 : transactionTag->getTransactionId());
-        Ieee80211MgmtAp::frameTransmissionFinished(result);
+        Ieee80211MgmtAp::frameTransmissionFinished(responseFrame, status);
     }
 };
 
@@ -135,7 +134,7 @@ class Ieee80211MgmtApHcfQueueDropTest : public cSimpleModule
         for (int i = 0; i < 100 && mgmt->statuses.empty(); i++)
             wait(SimTime(1, SIMTIME_US));
         ASSERT(mgmt->statuses.size() == 1);
-        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(mgmt->statuses.back() == FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
         ASSERT(mgmt->transactionIds.back() != 0);
         auto firstTransactionId = mgmt->transactionIds.back();
         ASSERT(!mgmt->hasPendingAssociation(station));
@@ -154,7 +153,7 @@ class Ieee80211MgmtApHcfQueueDropTest : public cSimpleModule
         for (int i = 0; i < 10000 && mgmt->statuses.size() < 2; i++)
             wait(SimTime(1, SIMTIME_US));
         ASSERT(mgmt->statuses.size() == 2);
-        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+        ASSERT(mgmt->statuses.back() == FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
         ASSERT(mgmt->transactionIds.back() == secondTransactionId);
         ASSERT(!mgmt->hasPendingAssociation(station));
         ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::ASSOCIATED);
@@ -167,7 +166,7 @@ class Ieee80211MgmtApHcfQueueDropTest : public cSimpleModule
         for (int i = 0; i < 100 && mgmt->statuses.size() < 3; i++)
             wait(SimTime(1, SIMTIME_US));
         ASSERT(mgmt->statuses.size() == 3);
-        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::DROPPED_BEFORE_TRANSMISSION);
+        ASSERT(mgmt->statuses.back() == FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
         ASSERT(!mgmt->hasPendingAssociation(station));
         ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::ASSOCIATED);
         ASSERT(mgmt->getCommittedAssociationId(station) == committedAid);
@@ -181,7 +180,7 @@ class Ieee80211MgmtApHcfQueueDropTest : public cSimpleModule
         for (int i = 0; i < 10000 && mgmt->statuses.size() < 4; i++)
             wait(SimTime(1, SIMTIME_US));
         ASSERT(mgmt->statuses.size() == 4);
-        ASSERT(mgmt->statuses.back() == IFrameTransmissionCallback::Status::ACKNOWLEDGED);
+        ASSERT(mgmt->statuses.back() == FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
         ASSERT(mgmt->transactionIds.back() == reassociationTransactionId);
         ASSERT(!mgmt->hasPendingAssociation(station));
         ASSERT(mgmt->getStationStatus(station) == Ieee80211Mib::ASSOCIATED);
