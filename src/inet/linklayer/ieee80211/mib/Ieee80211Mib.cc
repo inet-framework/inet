@@ -260,6 +260,7 @@ void Ieee80211Mib::releaseAssociationId(const MacAddress& address)
 
 void Ieee80211Mib::clearAssociationIds()
 {
+    bssAccessPointData.stations.clear();
     associationIdReservations.clear();
     bssAccessPointData.associationIds.clear();
     clearPeerHtCapabilities();
