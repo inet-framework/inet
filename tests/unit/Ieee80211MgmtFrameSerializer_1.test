@@ -323,7 +323,7 @@ ASSERT(unsuccessfulNonzeroAssociationIdRejected);
 
     wait(SimTime(1234, SIMTIME_US));
     ASSERT(simTime().inUnit(SIMTIME_US) == 1234);
-    ASSERT(simTime().raw() == 1234000);
+    ASSERT(simTime().raw() == SimTime(1234, SIMTIME_US).raw());
 
     auto serializedFrame = makeShared<Ieee80211BeaconFrame>();
     serializedFrame->setBeaconInterval(SimTime((int64_t)0x1234 * 1024, SIMTIME_US));
@@ -453,7 +453,45 @@ catch (const cRuntimeError&) {
 }
 ASSERT(unsupportedTypeRejected);
 
+wait(SimTime(0x12345678, SIMTIME_US) - simTime());
+
+auto beacon = makeShared<Ieee80211BeaconFrame>();
+beacon->setSSID("abc");
+beacon->setBeaconInterval(SimTime(0x1234 * 1024, SIMTIME_US));
+Ieee80211SupportedRatesElement timestampSupportedRates;
+timestampSupportedRates.numRates = 1;
+timestampSupportedRates.rate[0] = 6;
+beacon->setSupportedRates(timestampSupportedRates);
+beacon->setChunkLength(B(20));
+Packet beaconPacket("serialized-beacon", beacon);
+auto beaconBytes = beaconPacket.peekAllAsBytes()->getBytes();
+ASSERT(beaconBytes.size() >= 8);
+ASSERT(std::vector<uint8_t>(beaconBytes.begin(), beaconBytes.begin() + 8) ==
+        std::vector<uint8_t>({0x78, 0x56, 0x34, 0x12, 0, 0, 0, 0}));
+
+wait(SimTime(0x10000000, SIMTIME_US));
+
+auto probeResponse = makeShared<Ieee80211ProbeResponseFrame>();
+probeResponse->setSSID("abc");
+probeResponse->setBeaconInterval(SimTime(0x1234 * 1024, SIMTIME_US));
+probeResponse->setSupportedRates(timestampSupportedRates);
+probeResponse->setChunkLength(B(20));
+Packet probeResponsePacket("serialized-probe-response", probeResponse);
+auto probeResponseBytes = probeResponsePacket.peekAllAsBytes()->getBytes();
+ASSERT(probeResponseBytes.size() >= 8);
+ASSERT(std::vector<uint8_t>(probeResponseBytes.begin(), probeResponseBytes.begin() + 8) ==
+        std::vector<uint8_t>({0x78, 0x56, 0x34, 0x22, 0, 0, 0, 0}));
+
 EV << "All registered management body types deserialize exactly.\n";
 
+%postrun-command: ./Ieee80211MgmtFrameSerializer_1* -u Cmdenv --check-signals=false -lINET -n ../../../../src:.:../../lib _defaults.ini --simtime-resolution=ns
+%postrun-command: ./Ieee80211MgmtFrameSerializer_1* -u Cmdenv --check-signals=false -lINET -n ../../../../src:.:../../lib _defaults.ini --simtime-resolution=us
+
 %contains: stdout
+All registered management body types deserialize exactly.
+
+%contains: postrun-command(1).out
+All registered management body types deserialize exactly.
+
+%contains: postrun-command(2).out
 All registered management body types deserialize exactly.
