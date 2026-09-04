@@ -1,0 +1,5 @@
+Finding an IPv6 tunnel interface by its endpoints
+
+Ipv6RoutingTable::findTunnelNetworkInterface() returns the tunnel interface
+configured with a given entry and exit point, and Ipv6Tunnel now exposes
+those endpoints with getSource() and getDestination().
