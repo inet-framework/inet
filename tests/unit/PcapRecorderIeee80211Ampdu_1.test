@@ -1,0 +1,267 @@
+%description:
+Test opt-in Radiotap link selection and one delimiter-free PCAP record per IEEE 802.11 A-MPDU MPDU.
+
+%includes:
+#include <algorithm>
+#include <vector>
+#include "inet/common/checksum/Checksum.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/recorder/PcapRecorder.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+
+%file: TestNetwork.ned
+
+import inet.common.packet.recorder.PcapRecorder;
+
+simple TestablePcapRecorder extends PcapRecorder
+{
+    parameters:
+        @class(TestablePcapRecorder);
+}
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        recorder: TestablePcapRecorder {
+            pcapFile = "";
+            verbose = false;
+        }
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+
+%global:
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+#define REQUIRE(...) do { if (!(__VA_ARGS__)) throw cRuntimeError("REQUIRE failed at line %d: %s", __LINE__, #__VA_ARGS__); } while (false)
+
+class RecordingPcapWriter : public IPcapWriter
+{
+  public:
+    std::vector<std::vector<uint8_t>> records;
+
+    virtual void open(const char *, unsigned int, int) override { }
+    virtual void close() override { }
+    virtual bool isOpen() const override { return true; }
+    virtual void setFlush(bool) override { }
+
+    virtual void writePacket(simtime_t, const Packet *packet, b frontOffset, b backOffset,
+            Direction, NetworkInterface *, PcapLinkType linkType) override
+    {
+        REQUIRE(linkType == LINKTYPE_IEEE802_11_RADIOTAP);
+        auto length = packet->getDataLength() - frontOffset - backOffset;
+        records.push_back(packet->peekDataAt<BytesChunk>(frontOffset, length)->getBytes());
+    }
+
+    virtual void writePacketWithPrefix(simtime_t, const std::vector<uint8_t>& prefix, const Packet *packet, b frontOffset, b backOffset,
+            Direction, NetworkInterface *, PcapLinkType linkType) override
+    {
+        REQUIRE(linkType == LINKTYPE_IEEE802_11_RADIOTAP);
+        auto bytes = prefix;
+        auto length = packet->getDataLength() - frontOffset - backOffset;
+        if (length != b(0)) {
+            auto packetBytes = packet->peekDataAt<BytesChunk>(frontOffset, length)->getBytes();
+            bytes.insert(bytes.end(), packetBytes.begin(), packetBytes.end());
+        }
+        records.push_back(bytes);
+    }
+};
+
+// Compiling these exact overrides protects the pre-existing extension points.
+class LegacyOverridePcapRecorder : public PcapRecorder
+{
+  protected:
+    virtual void recordPacket(const cPacket *, Direction, cComponent *) override { }
+    virtual void writePacket(const Protocol *, const Packet *, b, b, Direction, NetworkInterface *) override { }
+};
+
+class TestablePcapRecorder : public PcapRecorder
+{
+  public:
+    void setWriter(IPcapWriter *writer)
+    {
+        delete pcapWriter;
+        pcapWriter = writer;
+    }
+
+    PcapLinkType getIeee80211LinkType(bool enableAdapters, bool enableConversion)
+    {
+        enableProtocolSpecificCaptureAdapters = enableAdapters;
+        enableConvertingPackets = enableConversion;
+        return protocolToLinkType(&Protocol::ieee80211Mac);
+    }
+
+    void writeIeee80211(const Packet *packet, Direction direction)
+    {
+        enableProtocolSpecificCaptureAdapters = true;
+        enableConvertingPackets = true;
+        writePacket(&Protocol::ieee80211Mac, PcapCaptureObservation(packet, direction), b(0), b(0), nullptr);
+    }
+
+    void writeIeee80211Packet(const Packet *packet, Direction direction)
+    {
+        enableProtocolSpecificCaptureAdapters = true;
+        enableConvertingPackets = true;
+        writePacket(&Protocol::ieee80211Mac, packet, b(0), b(0), direction, nullptr);
+    }
+};
+
+Define_Module(TestablePcapRecorder);
+
+static void appendMpdu(Packet& aggregate, const std::vector<uint8_t>& bytes, bool appendPadding)
+{
+    auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+    delimiter->setLength(bytes.size() + 4);
+    aggregate.insertAtBack(delimiter);
+    aggregate.insertAtBack(makeShared<BytesChunk>(bytes));
+    auto trailer = makeShared<Ieee80211MacTrailer>();
+    trailer->setFcsMode(FCS_COMPUTED);
+    trailer->setFcs(ethernetFcs(bytes));
+    aggregate.insertAtBack(trailer);
+    auto paddingLength = (4 - (4 + bytes.size() + 4) % 4) % 4;
+    if (appendPadding && paddingLength != 0)
+        aggregate.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(paddingLength)));
+}
+
+static void appendZeroLengthDelimiter(Packet& aggregate)
+{
+    auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+    delimiter->setLength(0);
+    aggregate.insertAtBack(delimiter);
+}
+
+static uint16_t readUint16(const std::vector<uint8_t>& bytes, size_t offset)
+{
+    return bytes.at(offset) | bytes.at(offset + 1) << 8;
+}
+
+static uint32_t readUint32(const std::vector<uint8_t>& bytes, size_t offset)
+{
+    uint32_t value = 0;
+    for (size_t i = 0; i < 4; i++)
+        value |= static_cast<uint32_t>(bytes.at(offset + i)) << (8 * i);
+    return value;
+}
+
+static uint32_t readBigEndianUint32(const std::vector<uint8_t>& bytes, size_t offset)
+{
+    uint32_t value = 0;
+    for (size_t i = 0; i < 4; i++)
+        value = (value << 8) | bytes.at(offset + i);
+    return value;
+}
+
+static void requireWholePacketRecord(const std::vector<uint8_t>& record, const Packet& packet)
+{
+    auto radiotapLength = readUint16(record, 2);
+    auto packetBytes = packet.peekData<BytesChunk>()->getBytes();
+    REQUIRE(record.size() == radiotapLength + packetBytes.size());
+    REQUIRE(std::equal(packetBytes.begin(), packetBytes.end(), record.begin() + radiotapLength));
+}
+
+%activity:
+
+auto recorder = check_and_cast<TestablePcapRecorder *>(getModuleByPath("recorder"));
+REQUIRE(recorder->getIeee80211LinkType(false, true) == LINKTYPE_IEEE802_11);
+REQUIRE(recorder->getIeee80211LinkType(true, false) == LINKTYPE_IEEE802_11);
+REQUIRE(recorder->getIeee80211LinkType(true, true) == LINKTYPE_IEEE802_11_RADIOTAP);
+
+auto writer = new RecordingPcapWriter();
+recorder->setWriter(writer);
+
+const std::vector<uint8_t> packetBytes = {0x08, 0x41, 0x42, 0x43, 0x44};
+Packet packetOnly("packetOnly");
+packetOnly.insertAtBack(makeShared<BytesChunk>(packetBytes));
+recorder->writeIeee80211Packet(&packetOnly, DIRECTION_INBOUND);
+REQUIRE(writer->records.size() == 1);
+const auto& packetOnlyRecord = writer->records.front();
+REQUIRE(packetOnlyRecord.at(0) == 0); // Radiotap version
+REQUIRE(packetOnlyRecord.at(1) == 0); // Radiotap padding
+REQUIRE(readUint16(packetOnlyRecord, 2) == 12);
+REQUIRE(readUint32(packetOnlyRecord, 4) == ((1U << 1) | (1U << 14)));
+REQUIRE(packetOnlyRecord.size() == 12 + packetBytes.size());
+REQUIRE(std::equal(packetBytes.begin(), packetBytes.end(), packetOnlyRecord.begin() + 12));
+
+writer->records.clear();
+const std::vector<uint8_t> firstMpdu = {0x08, 0x01, 0x02, 0x03, 0x04};
+const std::vector<uint8_t> secondMpdu = {0x88, 0x11, 0x12, 0x13, 0x14, 0x15};
+Packet aggregate("ampdu");
+appendMpdu(aggregate, firstMpdu, true);
+appendMpdu(aggregate, secondMpdu, false);
+
+recorder->writeIeee80211(&aggregate, DIRECTION_INBOUND);
+REQUIRE(writer->records.size() == 2);
+auto expectedReference = static_cast<uint32_t>(aggregate.getTreeId()) ^ static_cast<uint32_t>(static_cast<uint64_t>(aggregate.getTreeId()) >> 32);
+for (size_t i = 0; i < writer->records.size(); i++) {
+    const auto& record = writer->records[i];
+    REQUIRE(readUint16(record, 2) == 20);
+    REQUIRE(record.at(8) == 0x10); // selected MPDU contains the four FCS octets
+    REQUIRE(readUint32(record, 12) == expectedReference);
+    REQUIRE(readUint16(record, 16) == (i == 0 ? 0x0004 : 0x000c));
+    const auto& expectedMpdu = i == 0 ? firstMpdu : secondMpdu;
+    REQUIRE(record.size() == 20 + expectedMpdu.size() + 4);
+    REQUIRE(std::equal(expectedMpdu.begin(), expectedMpdu.end(), record.begin() + 20));
+}
+
+writer->records.clear();
+recorder->writeIeee80211(&aggregate, DIRECTION_OUTBOUND);
+REQUIRE(writer->records.size() == 2);
+for (const auto& record : writer->records) {
+    REQUIRE(readUint16(record, 2) == 12);
+    REQUIRE((readUint32(record, 4) & (1U << 20)) == 0);
+    REQUIRE(record.at(8) == 0x10);
+}
+
+
+Packet before("before");
+recorder->writeIeee80211(&aggregate, DIRECTION_INBOUND);
+Packet after("after");
+REQUIRE(after.getId() == before.getId() + 1);
+REQUIRE(after.getTreeId() == before.getTreeId() + 1);
+
+writer->records.clear();
+Packet eofPadded("eofPadded");
+appendMpdu(eofPadded, {0x08, 0x21, 0x22, 0x23}, false);
+appendZeroLengthDelimiter(eofPadded);
+recorder->writeIeee80211(&eofPadded, DIRECTION_INBOUND);
+REQUIRE(writer->records.size() == 1);
+
+writer->records.clear();
+Packet onlyEofPadding("onlyEofPadding");
+appendZeroLengthDelimiter(onlyEofPadding);
+appendZeroLengthDelimiter(onlyEofPadding);
+recorder->writeIeee80211(&onlyEofPadding, DIRECTION_INBOUND);
+REQUIRE(writer->records.size() == 1);
+requireWholePacketRecord(writer->records.front(), onlyEofPadding);
+
+writer->records.clear();
+Packet malformed("malformed");
+appendMpdu(malformed, {0x08, 0x31, 0x32, 0x33}, false);
+auto malformedDelimiter = makeShared<Ieee80211MpduSubframeHeader>();
+malformedDelimiter->setLength(100);
+malformed.insertAtBack(malformedDelimiter);
+recorder->writeIeee80211(&malformed, DIRECTION_INBOUND);
+REQUIRE(writer->records.size() == 1);
+requireWholePacketRecord(writer->records.front(), malformed);
+
+writer->records.clear();
+Packet trailingPadding("trailingPadding");
+appendMpdu(trailingPadding, firstMpdu, true);
+recorder->writeIeee80211(&trailingPadding, DIRECTION_INBOUND);
+REQUIRE(writer->records.size() == 1);
+const auto& trailingPaddingRecord = writer->records.front();
+REQUIRE(readUint16(trailingPaddingRecord, 2) == 20);
+REQUIRE(trailingPaddingRecord.at(8) == 0x10);
+REQUIRE(trailingPaddingRecord.size() == 20 + firstMpdu.size() + 4);
+REQUIRE(std::equal(firstMpdu.begin(), firstMpdu.end(), trailingPaddingRecord.begin() + 20));
+REQUIRE(readBigEndianUint32(trailingPaddingRecord, 20 + firstMpdu.size()) == ethernetFcs(firstMpdu));
+
+EV << "PcapRecorder preserved compatibility, neutrality, and A-MPDU boundaries.\n";
+
+%contains: stdout
+PcapRecorder preserved compatibility, neutrality, and A-MPDU boundaries.
