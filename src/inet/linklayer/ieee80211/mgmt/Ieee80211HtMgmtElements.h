@@ -46,6 +46,14 @@ inline Ieee80211HtCapabilities makeHtCapabilities(const Ieee80211HtCapabilitiesE
 {
     if (element.maxAmpduLengthExponent < 0 || element.maxAmpduLengthExponent > 3)
         throw cRuntimeError("Invalid Maximum A-MPDU Length Exponent: %d", element.maxAmpduLengthExponent);
+    if (!element.txMcsSetDefined && (element.txRxMcsSetNotEqual || element.txMaxNss != 0 || element.txUnequalModulation))
+        throw cRuntimeError("Malformed undefined HT Tx MCS Set");
+    if (element.txMcsSetDefined && !element.txRxMcsSetNotEqual &&
+            (element.txMaxNss != 0 || element.txUnequalModulation))
+        throw cRuntimeError("Malformed equal HT Tx/Rx MCS Set");
+    if (element.txMcsSetDefined && element.txRxMcsSetNotEqual &&
+            (element.txMaxNss < 1 || element.txMaxNss > 4))
+        throw cRuntimeError("Malformed HT Tx Maximum Number of Spatial Streams: %d", element.txMaxNss);
     Ieee80211HtCapabilities capabilities;
     capabilities.supportedChannelWidths.insert(MHz(20));
     if (element.supportedChannelWidth40Mhz)

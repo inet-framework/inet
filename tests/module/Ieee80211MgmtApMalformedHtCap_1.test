@@ -87,6 +87,25 @@ class Ieee80211MgmtApMalformedHtCapAp : public Ieee80211MgmtAp
         handleAssociationRequestFrame(packet, header);
     }
 
+    void submitAssociationRequestWithElement(const MacAddress& address, const Ieee80211HtCapabilitiesElement& elem)
+    {
+        Enter_Method("submitAssociationRequestWithElement");
+        auto packet = new Packet("AssociationRequest");
+        auto body = makeShared<Ieee80211AssociationRequestFrame>();
+        body->setSSID("SSID");
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 1;
+        body->setSupportedRates(rates);
+        body->setHtCapabilitiesPresent(true);
+        body->setHtCapabilities(elem);
+        body->setChunkLength(B(1));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleAssociationRequestFrame(packet, header);
+    }
+
     void submitReassociationRequest(const MacAddress& address, bool malformed, short exponent = 4)
     {
         Enter_Method("submitReassociationRequest");
@@ -215,6 +234,21 @@ class Ieee80211MgmtApMalformedHtCapTest : public cSimpleModule
         ASSERT(mib->bssAccessPointData.stations.at(sta2) == Ieee80211Mib::AUTHENTICATED);
         ASSERT(mib->findPeerHtState(sta2) == nullptr);
         std::cout << "Malformed ReassociationRequest (exponent -1) refused with SC_UNSUP_CAP.\n";
+
+        // 6. Malformed AssociationRequest with contradictory Tx MCS set fields refused with SC_UNSUP_CAP
+        auto badTxElem = makeHtCapabilitiesElement(mib->localHtCapabilities);
+        badTxElem.txMcsSetDefined = false;
+        badTxElem.txRxMcsSetNotEqual = true;
+        mgmt->submitAssociationRequestWithElement(sta1, badTxElem);
+        ASSERT(mgmt->sentFrames.back().name == "AssocResp-UnsupportedHtCap");
+        ASSERT(mgmt->sentFrames.back().statusCode == SC_UNSUP_CAP);
+        ASSERT(mgmt->sentFrames.back().aid == 0);
+        ASSERT(mgmt->hasPendingAssociation(sta1));
+        mgmt->finishResponse(sta1, ST_ASSOCIATIONRESPONSE);
+        ASSERT(!mgmt->hasPendingAssociation(sta1));
+        ASSERT(mib->bssAccessPointData.stations.at(sta1) == Ieee80211Mib::AUTHENTICATED);
+        ASSERT(mib->findPeerHtState(sta1) == nullptr);
+        std::cout << "Malformed AssociationRequest (contradictory Tx MCS) refused with SC_UNSUP_CAP.\n";
     }
 };
 
@@ -294,3 +328,6 @@ Malformed ReassociationRequest (exponent 4) refused with SC_UNSUP_CAP and cleare
 
 %contains: stdout
 Malformed ReassociationRequest (exponent -1) refused with SC_UNSUP_CAP.
+
+%contains: stdout
+Malformed AssociationRequest (contradictory Tx MCS) refused with SC_UNSUP_CAP.

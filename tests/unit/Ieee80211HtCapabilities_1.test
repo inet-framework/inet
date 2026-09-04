@@ -103,6 +103,57 @@ for (bool unequalModulation : {false, true}) {
     ASSERT(!unequalNegotiated.localRxPeerTx.supportedMcs[0]);
 }
 
+auto expectRejected = [](const Ieee80211HtCapabilitiesElement& element, const char *expectedPrefix) {
+    bool caught = false;
+    try {
+        makeHtCapabilities(element);
+    }
+    catch (const cRuntimeError& error) {
+        caught = true;
+        ASSERT(std::string(error.what()).find(expectedPrefix) != std::string::npos);
+    }
+    ASSERT(caught);
+
+    Ieee80211HtCapabilities decoded;
+    std::string reason;
+    ASSERT(!decodeHtCapabilities(element, decoded, reason));
+    ASSERT(reason.find(expectedPrefix) != std::string::npos);
+};
+
+// 1. Undefined HT Tx MCS Set contradictions
+Ieee80211HtCapabilitiesElement malformedUndefined = rxOnlyElement;
+malformedUndefined.txRxMcsSetNotEqual = true;
+expectRejected(malformedUndefined, "Malformed undefined HT Tx MCS Set");
+
+malformedUndefined = rxOnlyElement;
+malformedUndefined.txMaxNss = 1;
+expectRejected(malformedUndefined, "Malformed undefined HT Tx MCS Set");
+
+malformedUndefined = rxOnlyElement;
+malformedUndefined.txUnequalModulation = true;
+expectRejected(malformedUndefined, "Malformed undefined HT Tx MCS Set");
+
+// 2. Equal HT Tx/Rx MCS Set contradictions
+Ieee80211HtCapabilitiesElement malformedEqual;
+malformedEqual.txMcsSetDefined = true;
+malformedEqual.txRxMcsSetNotEqual = false;
+malformedEqual.txMaxNss = 1;
+expectRejected(malformedEqual, "Malformed equal HT Tx/Rx MCS Set");
+
+malformedEqual.txMaxNss = 0;
+malformedEqual.txUnequalModulation = true;
+expectRejected(malformedEqual, "Malformed equal HT Tx/Rx MCS Set");
+
+// 3. Unequal HT Tx/Rx MCS Set spatial stream count out of bounds (valid 1..4)
+Ieee80211HtCapabilitiesElement malformedUnequal;
+malformedUnequal.txMcsSetDefined = true;
+malformedUnequal.txRxMcsSetNotEqual = true;
+malformedUnequal.txMaxNss = 0;
+expectRejected(malformedUnequal, "Malformed HT Tx Maximum Number of Spatial Streams: 0");
+
+malformedUnequal.txMaxNss = 5;
+expectRejected(malformedUnequal, "Malformed HT Tx Maximum Number of Spatial Streams: 5");
+
 EV << "HT directional and legacy association checks passed.\n";
 
 %contains: stdout
