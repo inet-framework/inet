@@ -293,6 +293,18 @@ Notable backward incompatible changes are the following:
    negotiation. The MacQosWithBlockAck example fingerprints are updated; the
    QoS and NonQos showcase fingerprint controls remain unchanged.
 
+17. A home agent routes a decapsulated datagram as arriving from the tunnel
+
+    An IPv6 node that decapsulates an IPv6-in-IPv6 datagram now routes the
+    inner datagram as arriving on the tunnel interface instead of the
+    physical interface the outer datagram came in on. A Mobile IPv6 home
+    agent no longer sends an ICMPv6 Redirect for each reverse-tunneled
+    datagram it forwards back out of the interface it arrived on; before,
+    Mobile IPv6 scenarios with bidirectional tunneling and the default
+    sendRedirects = true sent one per such datagram. Upper layers still see
+    the physical interface in the InterfaceInd tag. Fingerprints of the
+    Mobile IPv6 examples change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
