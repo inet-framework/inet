@@ -93,11 +93,16 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @class(Ieee80211Mac);
         @signal[linkBroken](type=inet::Packet); // TODO this signal is only present for the statistic to pass the signal check, to be removed
         @signal[modesetChanged](type=inet::physicallayer::Ieee80211ModeSet);
+        @signal[frameTransmissionFinished](type=inet::Packet);
         @statistic[packetSentToUpper](title="packets sent to upper layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetSentToLower](title="packets sent to lower layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetReceivedFromUpper](title="packets received from upper layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetReceivedFromLower](title="packets received from lower layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[linkBroken](title="link breaks"; record=count,vector?; interpolationmode=none);
+        @statistic[frameTransmissionFinished](title="frames finished transmission"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[frameAcked](title="frames acknowledged"; source=frameTransmissionStatusIsAcknowledged(frameTransmissionFinished); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[frameRetryLimitReached](title="frames dropped: retry limit reached"; source=frameTransmissionStatusIsRetryLimitReached(frameTransmissionFinished); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[frameDroppedBeforeTx](title="frames dropped: before transmission"; source=frameTransmissionStatusIsDroppedBeforeTransmission(frameTransmissionFinished); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDrop](title="packet drops"; source=packetDropped; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drops: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drops: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

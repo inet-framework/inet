@@ -11,7 +11,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDs.h"
-#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
@@ -55,7 +55,6 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     opp_component_ptr<Pcf> pcf;
     opp_component_ptr<Hcf> hcf;
     opp_component_ptr<Mcf> mcf;
-    IFrameTransmissionCallback *frameTransmissionCallback = nullptr;
 
     // The last change channel message received and not yet sent to the physical layer, or nullptr.
     cMessage *pendingRadioConfigMsg = nullptr;
@@ -107,10 +106,10 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     virtual void sendDownPendingRadioConfigMsg();
 
     /**
-     * Delivers a terminal management-frame transmission outcome while the
-     * frame is still owned by the coordination function.
+     * Emits a terminal frame transmission outcome via frameTransmissionFinishedSignal
+     * while the frame is still borrowed from the coordination function.
      */
-    virtual void notifyFrameTransmission(const Packet *frame, IFrameTransmissionCallback::Status status);
+    virtual void notifyFrameTransmission(const Packet *frame, FrameTransmissionStatus status);
 
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);

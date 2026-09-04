@@ -8,7 +8,7 @@ transaction, release its reserved AID, and emit no association notification.
 
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#include "inet/linklayer/ieee80211/mac/contract/IFrameTransmissionCallback.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 
@@ -20,7 +20,7 @@ class TestIeee80211MgmtApHcf : public Ieee80211MgmtAp
   public:
     int terminalCallbacks = 0;
     int associationResponseCallbacks = 0;
-    IFrameTransmissionCallback::Status lastStatus = IFrameTransmissionCallback::Status::ACKNOWLEDGED;
+    FrameTransmissionStatus lastStatus = FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED;
 
     virtual void start() override
     {
@@ -79,18 +79,17 @@ class TestIeee80211MgmtApHcf : public Ieee80211MgmtAp
     }
 
   protected:
-    virtual void frameTransmissionFinished(const IFrameTransmissionCallback::Result& result) override
+    virtual void frameTransmissionFinished(const Packet *responseFrame, FrameTransmissionStatus status) override
     {
         terminalCallbacks++;
-        lastStatus = result.getStatus();
-        const auto *frame = result.getFrame();
-        if (frame != nullptr) {
-            const auto& header = frame->peekAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR);
+        lastStatus = status;
+        if (responseFrame != nullptr) {
+            const auto& header = responseFrame->peekAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR);
             const auto& mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header);
             if (mgmtHeader != nullptr && (mgmtHeader->getType() == ST_ASSOCIATIONRESPONSE || mgmtHeader->getType() == ST_REASSOCIATIONRESPONSE))
                 associationResponseCallbacks++;
         }
-        Ieee80211MgmtAp::frameTransmissionFinished(result);
+        Ieee80211MgmtAp::frameTransmissionFinished(responseFrame, status);
     }
 };
 
@@ -179,7 +178,7 @@ class Ieee80211MgmtApHcfRtsTimeoutTest : public cSimpleModule, public cListener
         ASSERT(hcfDrops == 1);
         ASSERT(mgmt->terminalCallbacks == 1);
         ASSERT(mgmt->associationResponseCallbacks == 1);
-        ASSERT(mgmt->lastStatus == IFrameTransmissionCallback::Status::RETRY_LIMIT_REACHED);
+        ASSERT(mgmt->lastStatus == FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
         ASSERT(associationNotifications == 0);
         ASSERT(!mgmt->hasPendingAssociation(expectedAddress));
         ASSERT(!mgmt->hasCommittedAssociationId(expectedAddress));

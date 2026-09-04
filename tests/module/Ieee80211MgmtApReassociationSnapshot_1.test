@@ -8,6 +8,7 @@ changes channel before the terminal ACK callback.
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mac/contract/FrameTransmissionDetails_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
@@ -79,8 +80,7 @@ class Ieee80211MgmtApReassociationSnapshotAp : public Ieee80211MgmtAp
         header->setReceiverAddress(address);
         response->insertAtBack(header);
         response->addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(getPendingTransactionId(address));
-        IFrameTransmissionCallback::Result result(response, IFrameTransmissionCallback::Status::ACKNOWLEDGED);
-        frameTransmissionFinished(result);
+        frameTransmissionFinished(response, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
         delete response;
     }
 
