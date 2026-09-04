@@ -22,14 +22,24 @@ bool EthernetFragmentFcsChecker::checkComputedChecksum(const Packet *packet, Che
     auto bytes = data->getBytes();
     auto& fragmentTag = packet->getTag<FragmentTag>();
     currentFragmentCompleteFcs = ethernetFcs(bytes.data(), packet->getByteLength() - 4, fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
-    return receivedFcs == currentFragmentCompleteFcs || receivedFcs == (currentFragmentCompleteFcs ^ 0xFFFF0000);
+    if (receivedFcs == currentFragmentCompleteFcs) {
+        currentFragmentMFcs = false;
+        return true;
+    }
+    else if (receivedFcs == (currentFragmentCompleteFcs ^ 0xFFFF0000)) {
+        currentFragmentMFcs = true;
+        return true;
+    }
+    else
+        return false;
 }
 
 void EthernetFragmentFcsChecker::processPacket(Packet *packet)
 {
     const auto& trailer = packet->popAtBack<EthernetFragmentFcs>(B(4));
     auto& fragmentTag = packet->getTagForUpdate<FragmentTag>();
-    fragmentTag->setLastFragment(!trailer->getMFcs());
+    bool mFcs = trailer->getFcsMode() == CHECKSUM_COMPUTED ? currentFragmentMFcs : trailer->getMFcs();
+    fragmentTag->setLastFragment(!mFcs);
     auto packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
     packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
     lastFragmentCompleteFcs = currentFragmentCompleteFcs;

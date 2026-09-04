@@ -1,0 +1,130 @@
+%description:
+Checks that EthernetFragmentFcsChecker reconstructs the intermediate/final distinction from the
+XOR-adjusted and normal FCS values of raw Ethernet fragments.
+
+%file: TestSource.cc
+#include <vector>
+
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
+
+using namespace inet;
+namespace EthernetFragmentFcsChecker_1 {
+
+class TestSource : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *message) override;
+
+    Packet *createFragment(const char *name, const std::vector<uint8_t>& bytes, bool firstFragment);
+};
+
+Define_Module(TestSource);
+
+void TestSource::initialize()
+{
+    scheduleAt(simTime(), new cMessage("sendFragments"));
+}
+
+Packet *TestSource::createFragment(const char *name, const std::vector<uint8_t>& bytes, bool firstFragment)
+{
+    auto packet = new Packet(name, makeShared<BytesChunk>(bytes));
+    packet->addTag<PacketProtocolTag>();
+    auto fragmentTag = packet->addTag<FragmentTag>();
+    fragmentTag->setFirstFragment(firstFragment);
+    return packet;
+}
+
+void TestSource::handleMessage(cMessage *message)
+{
+    delete message;
+
+    // ethernetFcs({0x01, 0x02, 0x03}) ^ 0xFFFF0000 == 0xE27FBC55
+    send(createFragment("intermediate", {0x01, 0x02, 0x03, 0xE2, 0x7F, 0xBC, 0x55}, true), "out");
+
+    // ethernetFcs({0x04, 0x05}, ethernetFcs({0x01, 0x02, 0x03})) == 0xF4990B47
+    send(createFragment("final", {0x04, 0x05, 0xF4, 0x99, 0x0B, 0x47}, false), "out");
+}
+
+} // namespace EthernetFragmentFcsChecker_1
+
+%file: TestSource.ned
+simple TestSource
+{
+    gates:
+        output out;
+}
+
+%file: TestSink.cc
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
+
+using namespace inet;
+namespace EthernetFragmentFcsChecker_1 {
+
+class TestSink : public cSimpleModule
+{
+  protected:
+    int numReceivedPackets = 0;
+
+    virtual void handleMessage(cMessage *message) override;
+    virtual void finish() override;
+};
+
+Define_Module(TestSink);
+
+void TestSink::handleMessage(cMessage *message)
+{
+    auto packet = check_and_cast<Packet *>(message);
+    auto fragmentTag = packet->getTag<FragmentTag>();
+    bool expectedLastFragment = numReceivedPackets == 1;
+    ASSERT(fragmentTag->getLastFragment() == expectedLastFragment);
+    ASSERT(packet->getTag<PacketProtocolTag>()->getBackOffset() == B(4));
+    EV << packet->getName() << ": lastFragment=" << (fragmentTag->getLastFragment() ? "true" : "false") << EV_ENDL;
+    numReceivedPackets++;
+    delete packet;
+}
+
+void TestSink::finish()
+{
+    ASSERT(numReceivedPackets == 2);
+}
+
+} // namespace EthernetFragmentFcsChecker_1
+
+%file: TestSink.ned
+simple TestSink
+{
+    gates:
+        input in;
+}
+
+%file: TestNetwork.ned
+import inet.linklayer.ethernet.modular.EthernetFragmentFcsChecker;
+
+network TestNetwork
+{
+    submodules:
+        source: TestSource;
+        checker: EthernetFragmentFcsChecker;
+        sink: TestSink;
+    connections:
+        source.out --> checker.in;
+        checker.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+cmdenv-event-banners = false
+cmdenv-log-prefix = ""
+record-vector-results = false
+
+%contains: stdout
+intermediate: lastFragment=false.
+final: lastFragment=true.
