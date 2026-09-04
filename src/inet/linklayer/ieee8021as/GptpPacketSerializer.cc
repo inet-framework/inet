@@ -260,7 +260,7 @@ void GptpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-const Ptr<Chunk> GptpPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> GptpPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPos = stream.getPosition();
     stream.readUint4();

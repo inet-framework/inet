@@ -33,7 +33,7 @@ void Ieee8022LlcHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     }
 }
 
-const Ptr<Chunk> Ieee8022LlcHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee8022LlcHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     Ptr<Ieee8022LlcHeader> llcHeader = nullptr;
     uint8_t ssap = stream.readByte();

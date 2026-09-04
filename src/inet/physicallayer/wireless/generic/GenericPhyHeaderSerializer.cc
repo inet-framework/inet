@@ -27,7 +27,7 @@ void GenericPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr
     stream.writeBitRepeatedly(false, remainders);
 }
 
-const Ptr<Chunk> GenericPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> GenericPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto startPosition = stream.getPosition();
     auto header = makeShared<GenericPhyHeader>();

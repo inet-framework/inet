@@ -146,7 +146,7 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-const Ptr<Chunk> RtcpPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> RtcpPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto rtcpPacket = makeShared<RtcpPacket>();
     rtcpPacket->setVersion(stream.readUint2());

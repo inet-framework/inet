@@ -21,7 +21,7 @@ class INET_API EthernetPhyHeaderBaseSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     EthernetPhyHeaderBaseSerializer() : FieldsChunkSerializer() {}
@@ -36,7 +36,7 @@ class INET_API EthernetPhyHeaderSerializer : public FieldsChunkSerializer
 
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     EthernetPhyHeaderSerializer() : FieldsChunkSerializer() {}
@@ -51,7 +51,7 @@ class INET_API EthernetFragmentPhyHeaderSerializer : public FieldsChunkSerialize
 
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info&) const override;
 
   public:
     EthernetFragmentPhyHeaderSerializer() : FieldsChunkSerializer() {}

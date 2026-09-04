@@ -32,7 +32,7 @@ void RtpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> RtpPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> RtpPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto rtpHeader = makeShared<RtpHeader>();
     rtpHeader->setVersion(stream.readUint2());
