@@ -7,6 +7,7 @@
 
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
@@ -58,6 +59,8 @@ const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const I
     auto transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
     auto transmittedPacket = transmissionPacketModel->getPacket();
     auto receivedPacket = transmittedPacket->dup();
+    receivedPacket->clearTags();
+    receivedPacket->addTag<PacketProtocolTag>()->setProtocol(transmittedPacket->getTag<PacketProtocolTag>()->getProtocol());
     if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
         receivedPacket->setBitError(true);
     receivedPacket->addTagIfAbsent<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
