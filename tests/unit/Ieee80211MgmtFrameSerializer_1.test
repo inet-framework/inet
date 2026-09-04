@@ -1,6 +1,6 @@
 %description:
 Test that raw IEEE 802.11 management frame bodies deserialize as the exact requested registered
-subtype, including derived/base pairs, and reject unsupported body types.
+subtype and safely reject malformed SSID and supported-rate elements.
 
 %includes:
 #include "inet/common/packet/Packet.h"
@@ -33,6 +33,114 @@ static const Ptr<const T> deserializeBody(const std::vector<uint8_t>& bytes)
     ASSERT(frame->getChunkLength() == B(bytes.size()));
     ASSERT(packet.getDataLength() == B(0));
     return frame;
+}
+
+template<typename T>
+static const Ptr<const T> deserializeMalformedBody(const std::vector<uint8_t>& bytes)
+{
+    Packet packet("malformed-body", makeShared<BytesChunk>(bytes));
+    auto frame = packet.popAtFront<T>(B(bytes.size()), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+    ASSERT(typeid(*frame) == typeid(T));
+    ASSERT(frame->getChunkLength() == B(bytes.size()));
+    ASSERT(packet.getDataLength() == B(0));
+    return frame;
+}
+
+static std::vector<uint8_t> appendSupportedRates(const std::vector<uint8_t>& prefix, uint8_t elementId, uint8_t count, const std::vector<uint8_t>& rates)
+{
+    auto result = prefix;
+    result.push_back(elementId);
+    result.push_back(count);
+    result.insert(result.end(), rates.begin(), rates.end());
+    return result;
+}
+
+static std::vector<uint8_t> appendSsid(const std::vector<uint8_t>& prefix, uint8_t elementId, uint8_t length, const std::vector<uint8_t>& ssid)
+{
+    auto result = prefix;
+    result.push_back(elementId);
+    result.push_back(length);
+    result.insert(result.end(), ssid.begin(), ssid.end());
+    return result;
+}
+
+template<typename T>
+static void checkMalformedSsid(const std::vector<uint8_t>& prefix)
+{
+    const std::vector<uint8_t> maximumSsid(32, 'S');
+    auto maximum = deserializeBody<T>(appendSupportedRates(appendSsid(prefix, 0, 32, maximumSsid), 1, 1, {0x0C}));
+    ASSERT(maximum->isCorrect());
+    ASSERT(maximum->isComplete());
+    ASSERT(std::string(maximum->getSSID()) == std::string(32, 'S'));
+    ASSERT(maximum->getSupportedRates().numRates == 1);
+
+    auto wrongElement = deserializeMalformedBody<T>(appendSupportedRates(appendSsid(prefix, 1, 1, {'W'}), 1, 1, {0x0C}));
+    ASSERT(wrongElement->isIncorrect());
+    ASSERT(wrongElement->isComplete());
+    ASSERT(std::string(wrongElement->getSSID()).empty());
+    ASSERT(wrongElement->getSupportedRates().numRates == 1);
+
+    const std::vector<uint8_t> overlongSsid(33, 'L');
+    auto overlong = deserializeMalformedBody<T>(appendSupportedRates(appendSsid(prefix, 0, 33, overlongSsid), 1, 1, {0x0C}));
+    ASSERT(overlong->isIncorrect());
+    ASSERT(overlong->isComplete());
+    ASSERT(std::string(overlong->getSSID()).empty());
+    ASSERT(overlong->getSupportedRates().numRates == 1);
+
+    auto truncated = deserializeMalformedBody<T>(appendSsid(prefix, 0, 3, {'T'}));
+    ASSERT(truncated->isIncorrect());
+    ASSERT(truncated->isIncomplete());
+    ASSERT(std::string(truncated->getSSID()).empty());
+    ASSERT(truncated->getSupportedRates().numRates == 0);
+}
+
+template<typename T>
+static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
+{
+    const std::vector<uint8_t> eightRates = {0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10};
+    auto maximum = deserializeBody<T>(appendSupportedRates(prefix, 1, 8, eightRates));
+    ASSERT(maximum->isCorrect());
+    ASSERT(maximum->isComplete());
+    ASSERT(maximum->getSupportedRates().numRates == 8);
+    ASSERT(maximum->getSupportedRates().rate[7] == 8);
+
+    auto truncatedHeader = deserializeMalformedBody<T>(prefix);
+    ASSERT(truncatedHeader->isIncorrect());
+    ASSERT(truncatedHeader->isIncomplete());
+    ASSERT(truncatedHeader->getSupportedRates().numRates == 0);
+    ASSERT(truncatedHeader->getSupportedRates().rate[0] == 0);
+
+    auto oneByteHeader = prefix;
+    oneByteHeader.push_back(1);
+    auto truncatedHeaderWithElementId = deserializeMalformedBody<T>(oneByteHeader);
+    ASSERT(truncatedHeaderWithElementId->isIncorrect());
+    ASSERT(truncatedHeaderWithElementId->isIncomplete());
+    ASSERT(truncatedHeaderWithElementId->getSupportedRates().numRates == 0);
+    ASSERT(truncatedHeaderWithElementId->getSupportedRates().rate[0] == 0);
+
+    const std::vector<uint8_t> nineRates = {0x02, 0x04, 0x0B, 0x16, 0x24, 0x30, 0x48, 0x60, 0x6C};
+
+    auto overEight = deserializeMalformedBody<T>(appendSupportedRates(prefix, 1, 9, nineRates));
+    ASSERT(overEight->isIncorrect());
+    ASSERT(overEight->isComplete());
+    ASSERT(overEight->getSupportedRates().numRates == 0);
+    ASSERT(overEight->getSupportedRates().rate[0] == 0);
+
+    auto truncated = deserializeMalformedBody<T>(appendSupportedRates(prefix, 1, 3, {0x0C}));
+    ASSERT(truncated->isIncorrect());
+    ASSERT(truncated->isIncomplete());
+    ASSERT(truncated->getSupportedRates().numRates == 0);
+    ASSERT(truncated->getSupportedRates().rate[0] == 0);
+
+    auto wrongElement = deserializeMalformedBody<T>(appendSupportedRates(prefix, 0, 1, {0x0C}));
+    ASSERT(wrongElement->isIncorrect());
+    ASSERT(wrongElement->isComplete());
+    ASSERT(wrongElement->getSupportedRates().numRates == 0);
+
+    auto zeroLength = deserializeMalformedBody<T>(appendSupportedRates(prefix, 1, 0, {}));
+    ASSERT(zeroLength->isIncorrect());
+    ASSERT(zeroLength->isComplete());
+    ASSERT(zeroLength->getSupportedRates().numRates == 0);
 }
 
 %activity:
@@ -120,6 +228,56 @@ static const Ptr<const T> deserializeBody(const std::vector<uint8_t>& bytes)
     ASSERT(frame->getBeaconInterval() == SimTime(51200, SIMTIME_US));
     ASSERT(std::string(frame->getSSID()) == "Q");
 }
+
+checkMalformedSsid<Ieee80211ProbeRequestFrame>({});
+checkMalformedSsid<Ieee80211AssociationRequestFrame>({
+    0x00, 0x00, 0x00, 0x00
+});
+checkMalformedSsid<Ieee80211ReassociationRequestFrame>({
+    0x00, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x01
+});
+checkMalformedSsid<Ieee80211BeaconFrame>({
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    0x00, 0x64, 0x00, 0x00
+});
+checkMalformedSsid<Ieee80211ProbeResponseFrame>({
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+    0x00, 0x32, 0x00, 0x00
+});
+
+checkMalformedSupportedRates<Ieee80211ProbeRequestFrame>({0x00, 0x01, 'P'});
+checkMalformedSupportedRates<Ieee80211AssociationRequestFrame>({
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x01, 'A'
+});
+checkMalformedSupportedRates<Ieee80211ReassociationRequestFrame>({
+    0x00, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
+    0x00, 0x01, 'R'
+});
+checkMalformedSupportedRates<Ieee80211AssociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x12, 0x34});
+checkMalformedSupportedRates<Ieee80211ReassociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x23, 0x45});
+checkMalformedSupportedRates<Ieee80211BeaconFrame>({
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    0x00, 0x64, 0x00, 0x00,
+    0x00, 0x01, 'B'
+});
+checkMalformedSupportedRates<Ieee80211ProbeResponseFrame>({
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+    0x00, 0x32, 0x00, 0x00,
+    0x00, 0x01, 'Q'
+});
+
+bool malformedBodyRejected = false;
+try {
+    deserializeBody<Ieee80211ProbeRequestFrame>(appendSupportedRates({0x00, 0x01, 'P'}, 1, 9,
+            {0x02, 0x04, 0x0B, 0x16, 0x24, 0x30, 0x48, 0x60, 0x6C}));
+}
+catch (const cRuntimeError&) {
+    malformedBodyRejected = true;
+}
+ASSERT(malformedBodyRejected);
 
 bool unsupportedTypeRejected = false;
 try {
