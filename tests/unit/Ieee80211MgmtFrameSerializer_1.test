@@ -1,7 +1,7 @@
 %description:
 Test that raw IEEE 802.11 management frame bodies deserialize as the exact requested registered
 subtype, consume and preserve trailing information elements, safely reject malformed SSID and
-supported-rate elements, and round-trip through serialization.
+supported-rate elements, use little-endian numeric fields, and round-trip through serialization.
 
 %includes:
 #include "inet/common/packet/Packet.h"
@@ -48,6 +48,14 @@ static const Ptr<const T> deserializeMalformedBody(const std::vector<uint8_t>& b
     ASSERT(frame->getChunkLength() == B(bytes.size()));
     ASSERT(packet.getDataLength() == B(0));
     return frame;
+}
+
+template<typename T>
+static void assertSerializedBody(const Ptr<T>& frame, const std::vector<uint8_t>& expected)
+{
+    frame->setChunkLength(B(expected.size()));
+    Packet packet("serialized-body", frame);
+    ASSERT(packet.peekAllAsBytes()->getBytes() == expected);
 }
 
 static std::vector<uint8_t> appendSupportedRates(const std::vector<uint8_t>& prefix, uint8_t elementId, uint8_t count, const std::vector<uint8_t>& rates)
@@ -158,18 +166,29 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
 %activity:
 
 {
-    auto frame = deserializeBody<Ieee80211AuthenticationFrame>(appendTrailingInformationElement({0x00, 0x00, 0x00, 0x02, 0x00, 0x00}));
-    ASSERT(frame->getSequenceNumber() == 2);
-    ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
+    const std::vector<uint8_t> body = {0x00, 0x00, 0x34, 0x12, 0x0E, 0x00};
+    auto frame = deserializeBody<Ieee80211AuthenticationFrame>(appendTrailingInformationElement(body));
+    ASSERT(frame->getSequenceNumber() == 0x1234);
+    ASSERT(frame->getStatusCode() == SC_AUTH_OUT_OF_SEQ);
+
+    auto serializedFrame = makeShared<Ieee80211AuthenticationFrame>();
+    serializedFrame->setSequenceNumber(0x1234);
+    serializedFrame->setStatusCode(SC_AUTH_OUT_OF_SEQ);
+    assertSerializedBody(serializedFrame, body);
 }
 
 {
-    auto frame = deserializeBody<Ieee80211DeauthenticationFrame>(appendTrailingInformationElement({0x00, 0x03}));
+    const std::vector<uint8_t> body = {0x03, 0x00};
+    auto frame = deserializeBody<Ieee80211DeauthenticationFrame>(appendTrailingInformationElement(body));
     ASSERT(frame->getReasonCode() == RC_DEAUTH_MS_LEAVING);
+
+    auto serializedFrame = makeShared<Ieee80211DeauthenticationFrame>();
+    serializedFrame->setReasonCode(RC_DEAUTH_MS_LEAVING);
+    assertSerializedBody(serializedFrame, body);
 }
 
 {
-    auto frame = deserializeBody<Ieee80211DisassociationFrame>(appendTrailingInformationElement({0x00, 0x04}));
+    auto frame = deserializeBody<Ieee80211DisassociationFrame>(appendTrailingInformationElement({0x04, 0x00}));
     ASSERT(frame->getReasonCode() == RC_DISASS_INACTIVITY);
 }
 
@@ -202,17 +221,27 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
 }
 
 {
-    auto frame = deserializeBody<Ieee80211AssociationResponseFrame>(appendTrailingInformationElement({
-        0x00, 0x00, 0x00, 0x00, 0x12, 0x34,
+    const std::vector<uint8_t> body = {
+        0x00, 0x00, 0x00, 0x00, 0x34, 0x12,
         0x01, 0x01, 0x0C
-    }));
+    };
+    auto frame = deserializeBody<Ieee80211AssociationResponseFrame>(appendTrailingInformationElement(body));
     ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
     ASSERT(frame->getAid() == 0x1234);
+
+    auto serializedFrame = makeShared<Ieee80211AssociationResponseFrame>();
+    serializedFrame->setStatusCode(SC_SUCCESSFUL);
+    serializedFrame->setAid(0x1234);
+    Ieee80211SupportedRatesElement supportedRates;
+    supportedRates.numRates = 1;
+    supportedRates.rate[0] = 6;
+    serializedFrame->setSupportedRates(supportedRates);
+    assertSerializedBody(serializedFrame, body);
 }
 
 {
     auto frame = deserializeBody<Ieee80211ReassociationResponseFrame>(appendTrailingInformationElement({
-        0x00, 0x00, 0x00, 0x00, 0x23, 0x45,
+        0x00, 0x00, 0x00, 0x00, 0x45, 0x23,
         0x01, 0x01, 0x0C
     }));
     ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
@@ -221,19 +250,33 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
 
 {
     auto frame = deserializeBody<Ieee80211BeaconFrame>(appendTrailingInformationElement({
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
-        0x00, 0x64, 0x00, 0x00,
+        0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x34, 0x12, 0x00, 0x00,
         0x00, 0x01, 'B',
         0x01, 0x01, 0x0C
     }));
-    ASSERT(frame->getBeaconInterval() == SimTime(102400, SIMTIME_US));
+    ASSERT(frame->getBeaconInterval() == SimTime((int64_t)0x1234 * 1024, SIMTIME_US));
     ASSERT(std::string(frame->getSSID()) == "B");
+
+    auto serializedFrame = makeShared<Ieee80211BeaconFrame>();
+    serializedFrame->setBeaconInterval(SimTime((int64_t)0x1234 * 1024, SIMTIME_US));
+    serializedFrame->setSSID("B");
+    Ieee80211SupportedRatesElement supportedRates;
+    supportedRates.numRates = 1;
+    supportedRates.rate[0] = 6;
+    serializedFrame->setSupportedRates(supportedRates);
+    assertSerializedBody(serializedFrame, {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x34, 0x12, 0x00, 0x00,
+        0x00, 0x01, 'B',
+        0x01, 0x01, 0x0C
+    });
 }
 
 {
     auto frame = deserializeBody<Ieee80211ProbeResponseFrame>(appendTrailingInformationElement({
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
-        0x00, 0x32, 0x00, 0x00,
+        0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x32, 0x00, 0x00, 0x00,
         0x00, 0x01, 'Q',
         0x01, 0x01, 0x0C
     }));
@@ -250,12 +293,12 @@ checkMalformedSsid<Ieee80211ReassociationRequestFrame>({
     0x02, 0x00, 0x00, 0x00, 0x00, 0x01
 });
 checkMalformedSsid<Ieee80211BeaconFrame>({
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
-    0x00, 0x64, 0x00, 0x00
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x64, 0x00, 0x00, 0x00
 });
 checkMalformedSsid<Ieee80211ProbeResponseFrame>({
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
-    0x00, 0x32, 0x00, 0x00
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x32, 0x00, 0x00, 0x00
 });
 
 checkMalformedSupportedRates<Ieee80211ProbeRequestFrame>({0x00, 0x01, 'P'});
@@ -268,16 +311,16 @@ checkMalformedSupportedRates<Ieee80211ReassociationRequestFrame>({
     0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
     0x00, 0x01, 'R'
 });
-checkMalformedSupportedRates<Ieee80211AssociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x12, 0x34});
-checkMalformedSupportedRates<Ieee80211ReassociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x23, 0x45});
+checkMalformedSupportedRates<Ieee80211AssociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x34, 0x12});
+checkMalformedSupportedRates<Ieee80211ReassociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x45, 0x23});
 checkMalformedSupportedRates<Ieee80211BeaconFrame>({
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
-    0x00, 0x64, 0x00, 0x00,
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x64, 0x00, 0x00, 0x00,
     0x00, 0x01, 'B'
 });
 checkMalformedSupportedRates<Ieee80211ProbeResponseFrame>({
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
-    0x00, 0x32, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x32, 0x00, 0x00, 0x00,
     0x00, 0x01, 'Q'
 });
 
