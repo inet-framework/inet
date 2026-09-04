@@ -1,6 +1,7 @@
 %description:
 Test that raw IEEE 802.11 management frame bodies deserialize as the exact requested registered
-subtype and safely reject malformed SSID and supported-rate elements.
+subtype, consume and preserve trailing information elements, safely reject malformed SSID and
+supported-rate elements, and round-trip through serialization.
 
 %includes:
 #include "inet/common/packet/Packet.h"
@@ -32,6 +33,9 @@ static const Ptr<const T> deserializeBody(const std::vector<uint8_t>& bytes)
     ASSERT(typeid(*frame) == typeid(T));
     ASSERT(frame->getChunkLength() == B(bytes.size()));
     ASSERT(packet.getDataLength() == B(0));
+
+    Packet serializedPacket("serialized-body", frame);
+    ASSERT(serializedPacket.peekAllAsBytes()->getBytes() == bytes);
     return frame;
 }
 
@@ -61,6 +65,14 @@ static std::vector<uint8_t> appendSsid(const std::vector<uint8_t>& prefix, uint8
     result.push_back(elementId);
     result.push_back(length);
     result.insert(result.end(), ssid.begin(), ssid.end());
+    return result;
+}
+
+static std::vector<uint8_t> appendTrailingInformationElement(const std::vector<uint8_t>& body)
+{
+    auto result = body;
+    const std::vector<uint8_t> vendorSpecific = {0xDD, 0x04, 0x00, 0x11, 0x22, 0x01};
+    result.insert(result.end(), vendorSpecific.begin(), vendorSpecific.end());
     return result;
 }
 
@@ -146,85 +158,85 @@ static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
 %activity:
 
 {
-    auto frame = deserializeBody<Ieee80211AuthenticationFrame>({0x00, 0x00, 0x00, 0x02, 0x00, 0x00});
+    auto frame = deserializeBody<Ieee80211AuthenticationFrame>(appendTrailingInformationElement({0x00, 0x00, 0x00, 0x02, 0x00, 0x00}));
     ASSERT(frame->getSequenceNumber() == 2);
     ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
 }
 
 {
-    auto frame = deserializeBody<Ieee80211DeauthenticationFrame>({0x00, 0x03});
+    auto frame = deserializeBody<Ieee80211DeauthenticationFrame>(appendTrailingInformationElement({0x00, 0x03}));
     ASSERT(frame->getReasonCode() == RC_DEAUTH_MS_LEAVING);
 }
 
 {
-    auto frame = deserializeBody<Ieee80211DisassociationFrame>({0x00, 0x04});
+    auto frame = deserializeBody<Ieee80211DisassociationFrame>(appendTrailingInformationElement({0x00, 0x04}));
     ASSERT(frame->getReasonCode() == RC_DISASS_INACTIVITY);
 }
 
 {
-    auto frame = deserializeBody<Ieee80211ProbeRequestFrame>({0x00, 0x01, 'P', 0x01, 0x01, 0x0C});
+    auto frame = deserializeBody<Ieee80211ProbeRequestFrame>(appendTrailingInformationElement({0x00, 0x01, 'P', 0x01, 0x01, 0x0C}));
     ASSERT(std::string(frame->getSSID()) == "P");
     ASSERT(frame->getSupportedRates().numRates == 1);
     ASSERT(frame->getSupportedRates().rate[0] == 6);
 }
 
 {
-    auto frame = deserializeBody<Ieee80211AssociationRequestFrame>({
+    auto frame = deserializeBody<Ieee80211AssociationRequestFrame>(appendTrailingInformationElement({
         0x00, 0x00, 0x00, 0x00,
         0x00, 0x01, 'A',
         0x01, 0x01, 0x0C
-    });
+    }));
     ASSERT(std::string(frame->getSSID()) == "A");
     ASSERT(frame->getSupportedRates().rate[0] == 6);
 }
 
 {
-    auto frame = deserializeBody<Ieee80211ReassociationRequestFrame>({
+    auto frame = deserializeBody<Ieee80211ReassociationRequestFrame>(appendTrailingInformationElement({
         0x00, 0x00, 0x00, 0x00,
         0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
         0x00, 0x01, 'R',
         0x01, 0x01, 0x0C
-    });
+    }));
     ASSERT(frame->getCurrentAP() == MacAddress("02:00:00:00:00:01"));
     ASSERT(std::string(frame->getSSID()) == "R");
 }
 
 {
-    auto frame = deserializeBody<Ieee80211AssociationResponseFrame>({
+    auto frame = deserializeBody<Ieee80211AssociationResponseFrame>(appendTrailingInformationElement({
         0x00, 0x00, 0x00, 0x00, 0x12, 0x34,
         0x01, 0x01, 0x0C
-    });
+    }));
     ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
     ASSERT(frame->getAid() == 0x1234);
 }
 
 {
-    auto frame = deserializeBody<Ieee80211ReassociationResponseFrame>({
+    auto frame = deserializeBody<Ieee80211ReassociationResponseFrame>(appendTrailingInformationElement({
         0x00, 0x00, 0x00, 0x00, 0x23, 0x45,
         0x01, 0x01, 0x0C
-    });
+    }));
     ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
     ASSERT(frame->getAid() == 0x2345);
 }
 
 {
-    auto frame = deserializeBody<Ieee80211BeaconFrame>({
+    auto frame = deserializeBody<Ieee80211BeaconFrame>(appendTrailingInformationElement({
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
         0x00, 0x64, 0x00, 0x00,
         0x00, 0x01, 'B',
         0x01, 0x01, 0x0C
-    });
+    }));
     ASSERT(frame->getBeaconInterval() == SimTime(102400, SIMTIME_US));
     ASSERT(std::string(frame->getSSID()) == "B");
 }
 
 {
-    auto frame = deserializeBody<Ieee80211ProbeResponseFrame>({
+    auto frame = deserializeBody<Ieee80211ProbeResponseFrame>(appendTrailingInformationElement({
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
         0x00, 0x32, 0x00, 0x00,
         0x00, 0x01, 'Q',
         0x01, 0x01, 0x0C
-    });
+    }));
     ASSERT(frame->getBeaconInterval() == SimTime(51200, SIMTIME_US));
     ASSERT(std::string(frame->getSSID()) == "Q");
 }
@@ -278,6 +290,35 @@ catch (const cRuntimeError&) {
     malformedBodyRejected = true;
 }
 ASSERT(malformedBodyRejected);
+
+{
+    auto original = makeShared<Ieee80211ReassociationRequestFrame>();
+    original->setCurrentAP(MacAddress("02:00:00:00:00:01"));
+    original->setSSID("R");
+    Ieee80211SupportedRatesElement supportedRates;
+    supportedRates.numRates = 2;
+    supportedRates.rate[0] = 6;
+    supportedRates.rate[1] = 12;
+    original->setSupportedRates(supportedRates);
+    original->setChunkLength(B(17));
+
+    Packet packet("serialized", original);
+    auto bytes = packet.peekAllAsBytes();
+    const std::vector<uint8_t> expected = {
+        0x00, 0x00, 0x00, 0x00,
+        0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
+        0x00, 0x01, 'R',
+        0x01, 0x02, 0x0C, 0x18
+    };
+    ASSERT(bytes->getBytes() == expected);
+
+    auto roundTrip = deserializeBody<Ieee80211ReassociationRequestFrame>(bytes->getBytes());
+    ASSERT(roundTrip->getCurrentAP() == original->getCurrentAP());
+    ASSERT(std::string(roundTrip->getSSID()) == original->getSSID());
+    ASSERT(roundTrip->getSupportedRates().numRates == supportedRates.numRates);
+    ASSERT(roundTrip->getSupportedRates().rate[0] == supportedRates.rate[0]);
+    ASSERT(roundTrip->getSupportedRates().rate[1] == supportedRates.rate[1]);
+}
 
 bool unsupportedTypeRejected = false;
 try {
