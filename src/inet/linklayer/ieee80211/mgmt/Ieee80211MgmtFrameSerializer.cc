@@ -25,6 +25,94 @@ Register_Serializer(Ieee80211ProbeResponseFrame, Ieee80211MgmtFrameSerializer);
 Register_Serializer(Ieee80211ReassociationRequestFrame, Ieee80211MgmtFrameSerializer);
 Register_Serializer(Ieee80211ReassociationResponseFrame, Ieee80211MgmtFrameSerializer);
 
+namespace {
+
+// IEEE Std 802.11-2024, 9.4.2.1, 9.4.2.2, Table 9-130, and Figure 9-209:
+// SSID has EID 0, a one-octet length, and a 0-32 octet body.
+static std::string deserializeSsid(MemoryInputStream& stream, Ieee80211MgmtFrame& frame)
+{
+    constexpr uint8_t ssidElementId = 0;
+    constexpr uint8_t maxSsidLength = 32;
+    const b elementHeaderLength = B(2);
+
+    if (stream.getRemainingLength() < elementHeaderLength) {
+        stream.seek(stream.getLength());
+        frame.markIncorrect();
+        frame.markIncomplete();
+        return {};
+    }
+
+    const uint8_t elementId = stream.readByte();
+    const uint8_t length = stream.readByte();
+    const b declaredBodyLength = B(length);
+
+    if (elementId != ssidElementId || length > maxSsidLength) {
+        frame.markIncorrect();
+        if (stream.getRemainingLength() < declaredBodyLength) {
+            frame.markIncomplete();
+            stream.seek(stream.getLength());
+        }
+        else
+            stream.seek(stream.getPosition() + declaredBodyLength);
+        return {};
+    }
+
+    if (stream.getRemainingLength() < declaredBodyLength) {
+        frame.markIncorrect();
+        frame.markIncomplete();
+        stream.seek(stream.getLength());
+        return {};
+    }
+
+    char ssid[maxSsidLength + 1] = {};
+    stream.readBytes(reinterpret_cast<uint8_t *>(ssid), declaredBodyLength);
+    return std::string(ssid, length);
+}
+
+// IEEE Std 802.11-2024, 9.4.2.1, 9.4.2.3, Table 9-130, Figures 9-208 and 9-210:
+// Supported Rates has EID 1, a one-octet length, and one octet per rate, with length 1-8.
+static void deserializeSupportedRates(MemoryInputStream& stream, Ieee80211MgmtFrame& frame, Ieee80211SupportedRatesElement& supportedRates)
+{
+    constexpr uint8_t supportedRatesElementId = 1;
+    constexpr uint8_t maxSupportedRates = 8;
+    const b elementHeaderLength = B(2);
+
+    if (stream.getRemainingLength() < elementHeaderLength) {
+        stream.seek(stream.getLength());
+        frame.markIncorrect();
+        frame.markIncomplete();
+        return;
+    }
+
+    const uint8_t elementId = stream.readByte();
+    const uint8_t count = stream.readByte();
+    const b declaredBodyLength = B(count);
+
+    if (elementId != supportedRatesElementId || count == 0 || count > maxSupportedRates) {
+        frame.markIncorrect();
+        if (stream.getRemainingLength() < declaredBodyLength) {
+            frame.markIncomplete();
+            stream.seek(stream.getLength());
+        }
+        else
+            stream.seek(stream.getPosition() + declaredBodyLength);
+        return;
+    }
+
+    if (stream.getRemainingLength() < declaredBodyLength) {
+        frame.markIncorrect();
+        frame.markIncomplete();
+        stream.seek(stream.getLength());
+        return;
+    }
+
+    supportedRates.numRates = count;
+    for (uint8_t i = 0; i < count; i++)
+        supportedRates.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+}
+
+} // namespace
+
 void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     if (auto authenticationFrame = dynamicPtrCast<const Ieee80211AuthenticationFrame>(chunk)) {
@@ -255,6 +343,8 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         throw cRuntimeError("Cannot serialize frame");
 }
 
+// IEEE Std 802.11-2024, 9.3.3.2 and 9.3.3.5-9.3.3.10, Tables 9-62 and 9-64-9-69:
+// Supported-Rates-bearing management-body fields are decoded in the order specified for each frame layout.
 const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     if (typeInfo == typeid(Ieee80211AuthenticationFrame)) {
@@ -277,18 +367,10 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
     else if (typeInfo == typeid(Ieee80211ProbeRequestFrame)) {
         auto frame = makeShared<Ieee80211ProbeRequestFrame>();
 
-        char SSID[256];
-        stream.readByte();
-        unsigned int length = stream.readByte();
-        stream.readBytes((uint8_t *)SSID, B(length));
-        SSID[length] = '\0';
-        frame->setSSID(SSID);
+        frame->setSSID(deserializeSsid(stream, *frame).c_str());
 
         Ieee80211SupportedRatesElement supRat;
-        stream.readByte();
-        supRat.numRates = stream.readByte();
-        for (int i = 0; i < supRat.numRates; i++)
-            supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+        deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
         return frame;
     }
@@ -297,18 +379,10 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         stream.readUint16Be();
         stream.readUint16Be();
 
-        char SSID[256];
-        stream.readByte();
-        unsigned int length = stream.readByte();
-        stream.readBytes((uint8_t *)SSID, B(length));
-        SSID[length] = '\0';
-        frame->setSSID(SSID);
+        frame->setSSID(deserializeSsid(stream, *frame).c_str());
 
         Ieee80211SupportedRatesElement supRat;
-        stream.readByte();
-        supRat.numRates = stream.readByte();
-        for (int i = 0; i < supRat.numRates; i++)
-            supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+        deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
         return frame;
     }
@@ -319,18 +393,10 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
 
         frame->setCurrentAP(stream.readMacAddress());
 
-        char SSID[256];
-        stream.readByte();
-        unsigned int length = stream.readByte();
-        stream.readBytes((uint8_t *)SSID, B(length));
-        SSID[length] = '\0';
-        frame->setSSID(SSID);
+        frame->setSSID(deserializeSsid(stream, *frame).c_str());
 
         Ieee80211SupportedRatesElement supRat;
-        stream.readByte();
-        supRat.numRates = stream.readByte();
-        for (int i = 0; i < supRat.numRates; i++)
-            supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+        deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
         return frame;
     }
@@ -341,10 +407,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         frame->setAid(stream.readUint16Be());
 
         Ieee80211SupportedRatesElement supRat;
-        stream.readByte();
-        supRat.numRates = stream.readByte();
-        for (int i = 0; i < supRat.numRates; i++)
-            supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+        deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
         return frame;
     }
@@ -355,10 +418,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         frame->setAid(stream.readUint16Be());
 
         Ieee80211SupportedRatesElement supRat;
-        stream.readByte();
-        supRat.numRates = stream.readByte();
-        for (int i = 0; i < supRat.numRates; i++)
-            supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+        deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
         return frame;
     }
@@ -371,18 +431,10 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         frame->setBeaconInterval(SimTime((int64_t)stream.readUint16Be() * 1024, SIMTIME_US));
         stream.readUint16Be(); // Capability
 
-        char SSID[256];
-        stream.readByte();
-        unsigned int length = stream.readByte();
-        stream.readBytes((uint8_t *)SSID, B(length));
-        SSID[length] = '\0';
-        frame->setSSID(SSID);
+        frame->setSSID(deserializeSsid(stream, *frame).c_str());
 
         Ieee80211SupportedRatesElement supRat;
-        stream.readByte();
-        supRat.numRates = stream.readByte();
-        for (int i = 0; i < supRat.numRates; i++)
-            supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+        deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
         return frame;
     }
@@ -395,18 +447,10 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         frame->setBeaconInterval(SimTime((int64_t)stream.readUint16Be() * 1024, SIMTIME_US));
         stream.readUint16Be();
 
-        char SSID[256];
-        stream.readByte();
-        unsigned int length = stream.readByte();
-        stream.readBytes((uint8_t *)SSID, B(length));
-        SSID[length] = '\0';
-        frame->setSSID(SSID);
+        frame->setSSID(deserializeSsid(stream, *frame).c_str());
 
         Ieee80211SupportedRatesElement supRat;
-        stream.readByte();
-        supRat.numRates = stream.readByte();
-        for (int i = 0; i < supRat.numRates; i++)
-            supRat.rate[i] = (double)(stream.readByte() & 0x7F) * 0.5;
+        deserializeSupportedRates(stream, *frame, supRat);
         frame->setSupportedRates(supRat);
         return frame;
     }
