@@ -114,7 +114,7 @@ void Ipv6HopByHopOptionsHeaderSerializer::serialize(MemoryOutputStream& stream, 
     serializeIpv6TlvOptions(stream, hdr->getTlvOptions(), totalLen - B(2));
 }
 
-const Ptr<Chunk> Ipv6HopByHopOptionsHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv6HopByHopOptionsHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto hdr = makeShared<Ipv6HopByHopOptionsHeader>();
     hdr->setNextHeaderProtocol(static_cast<IpProtocolId>(stream.readByte()));
@@ -137,7 +137,7 @@ void Ipv6DestinationOptionsHeaderSerializer::serialize(MemoryOutputStream& strea
     serializeIpv6TlvOptions(stream, hdr->getTlvOptions(), totalLen - B(2));
 }
 
-const Ptr<Chunk> Ipv6DestinationOptionsHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv6DestinationOptionsHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto hdr = makeShared<Ipv6DestinationOptionsHeader>();
     hdr->setNextHeaderProtocol(static_cast<IpProtocolId>(stream.readByte()));
@@ -164,7 +164,7 @@ void Ipv6RoutingHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
         stream.writeIpv6Address(hdr->getAddress(j));
 }
 
-const Ptr<Chunk> Ipv6RoutingHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv6RoutingHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto hdr = makeShared<Ipv6RoutingHeader>();
     hdr->setNextHeaderProtocol(static_cast<IpProtocolId>(stream.readByte()));
@@ -196,7 +196,7 @@ void Ipv6FragmentHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     stream.writeUint32Be(hdr->getIdentification());
 }
 
-const Ptr<Chunk> Ipv6FragmentHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv6FragmentHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto hdr = makeShared<Ipv6FragmentHeader>();
     hdr->setNextHeaderProtocol(static_cast<IpProtocolId>(stream.readByte()));
@@ -220,7 +220,7 @@ void Ipv6AuthenticationHeaderSerializer::serialize(MemoryOutputStream& stream, c
     stream.writeByteRepeatedly(0, totalLen.get() - 2); // TODO
 }
 
-const Ptr<Chunk> Ipv6AuthenticationHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv6AuthenticationHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto hdr = makeShared<Ipv6AuthenticationHeader>();
     hdr->setNextHeaderProtocol(static_cast<IpProtocolId>(stream.readByte()));
@@ -243,7 +243,7 @@ void Ipv6EncapsulatingSecurityPayloadHeaderSerializer::serialize(MemoryOutputStr
     stream.writeByteRepeatedly(0, totalLen.get() - 2); // TODO
 }
 
-const Ptr<Chunk> Ipv6EncapsulatingSecurityPayloadHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ipv6EncapsulatingSecurityPayloadHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto hdr = makeShared<Ipv6EncapsulatingSecurityPayloadHeader>();
     hdr->setNextHeaderProtocol(static_cast<IpProtocolId>(stream.readByte()));

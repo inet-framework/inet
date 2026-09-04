@@ -41,7 +41,7 @@ void RipPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> RipPacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> RipPacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ripPacket = makeShared<RipPacket>();
 

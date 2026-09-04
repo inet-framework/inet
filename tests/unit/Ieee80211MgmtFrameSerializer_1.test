@@ -1,0 +1,404 @@
+%description:
+Test that raw IEEE 802.11 management frame bodies deserialize as the exact requested registered
+subtype, consume and preserve trailing information elements, safely reject malformed SSID and
+supported-rate elements, use little-endian numeric fields, serialize Timestamp fields in
+microseconds independently of the simulation-time resolution, and round-trip through serialization.
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+simtime-resolution = 1ns
+cmdenv-express-mode = false
+cmdenv-log-prefix = ""
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrameSerializer.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+
+class UnsupportedIeee80211MgmtFrame : public Ieee80211MgmtFrame
+{
+  public:
+    UnsupportedIeee80211MgmtFrame() = default;
+    UnsupportedIeee80211MgmtFrame(const UnsupportedIeee80211MgmtFrame& other) = default;
+    virtual UnsupportedIeee80211MgmtFrame *dup() const override { return new UnsupportedIeee80211MgmtFrame(*this); }
+};
+
+Register_Serializer(UnsupportedIeee80211MgmtFrame, Ieee80211MgmtFrameSerializer);
+
+template<typename T>
+static const Ptr<const T> deserializeBody(const std::vector<uint8_t>& bytes)
+{
+    Packet packet("body", makeShared<BytesChunk>(bytes));
+    auto frame = packet.popAtFront<T>(B(bytes.size()));
+    ASSERT(typeid(*frame) == typeid(T));
+    ASSERT(frame->getChunkLength() == B(bytes.size()));
+    ASSERT(packet.getDataLength() == B(0));
+
+    Packet serializedPacket("serialized-body", frame);
+    ASSERT(serializedPacket.peekAllAsBytes()->getBytes() == bytes);
+    return frame;
+}
+
+template<typename T>
+static const Ptr<const T> deserializeMalformedBody(const std::vector<uint8_t>& bytes)
+{
+    Packet packet("malformed-body", makeShared<BytesChunk>(bytes));
+    auto frame = packet.popAtFront<T>(B(bytes.size()), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+    ASSERT(typeid(*frame) == typeid(T));
+    ASSERT(frame->getChunkLength() == B(bytes.size()));
+    ASSERT(packet.getDataLength() == B(0));
+    return frame;
+}
+
+template<typename T>
+static void assertSerializedBody(const Ptr<T>& frame, const std::vector<uint8_t>& expected)
+{
+    frame->setChunkLength(B(expected.size()));
+    Packet packet("serialized-body", frame);
+    ASSERT(packet.peekAllAsBytes()->getBytes() == expected);
+}
+
+static std::vector<uint8_t> appendSupportedRates(const std::vector<uint8_t>& prefix, uint8_t elementId, uint8_t count, const std::vector<uint8_t>& rates)
+{
+    auto result = prefix;
+    result.push_back(elementId);
+    result.push_back(count);
+    result.insert(result.end(), rates.begin(), rates.end());
+    return result;
+}
+
+static std::vector<uint8_t> appendSsid(const std::vector<uint8_t>& prefix, uint8_t elementId, uint8_t length, const std::vector<uint8_t>& ssid)
+{
+    auto result = prefix;
+    result.push_back(elementId);
+    result.push_back(length);
+    result.insert(result.end(), ssid.begin(), ssid.end());
+    return result;
+}
+
+static std::vector<uint8_t> appendTrailingInformationElement(const std::vector<uint8_t>& body)
+{
+    auto result = body;
+    const std::vector<uint8_t> vendorSpecific = {0xDD, 0x04, 0x00, 0x11, 0x22, 0x01};
+    result.insert(result.end(), vendorSpecific.begin(), vendorSpecific.end());
+    return result;
+}
+
+template<typename T>
+static void checkMalformedSsid(const std::vector<uint8_t>& prefix)
+{
+    const std::vector<uint8_t> maximumSsid(32, 'S');
+    auto maximum = deserializeBody<T>(appendSupportedRates(appendSsid(prefix, 0, 32, maximumSsid), 1, 1, {0x0C}));
+    ASSERT(maximum->isCorrect());
+    ASSERT(maximum->isComplete());
+    ASSERT(std::string(maximum->getSSID()) == std::string(32, 'S'));
+    ASSERT(maximum->getSupportedRates().numRates == 1);
+
+    auto wrongElement = deserializeMalformedBody<T>(appendSupportedRates(appendSsid(prefix, 1, 1, {'W'}), 1, 1, {0x0C}));
+    ASSERT(wrongElement->isIncorrect());
+    ASSERT(wrongElement->isComplete());
+    ASSERT(std::string(wrongElement->getSSID()).empty());
+    ASSERT(wrongElement->getSupportedRates().numRates == 1);
+
+    const std::vector<uint8_t> overlongSsid(33, 'L');
+    auto overlong = deserializeMalformedBody<T>(appendSupportedRates(appendSsid(prefix, 0, 33, overlongSsid), 1, 1, {0x0C}));
+    ASSERT(overlong->isIncorrect());
+    ASSERT(overlong->isComplete());
+    ASSERT(std::string(overlong->getSSID()).empty());
+    ASSERT(overlong->getSupportedRates().numRates == 1);
+
+    auto truncated = deserializeMalformedBody<T>(appendSsid(prefix, 0, 3, {'T'}));
+    ASSERT(truncated->isIncorrect());
+    ASSERT(truncated->isIncomplete());
+    ASSERT(std::string(truncated->getSSID()).empty());
+    ASSERT(truncated->getSupportedRates().numRates == 0);
+}
+
+template<typename T>
+static void checkMalformedSupportedRates(const std::vector<uint8_t>& prefix)
+{
+    const std::vector<uint8_t> eightRates = {0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10};
+    auto maximum = deserializeBody<T>(appendSupportedRates(prefix, 1, 8, eightRates));
+    ASSERT(maximum->isCorrect());
+    ASSERT(maximum->isComplete());
+    ASSERT(maximum->getSupportedRates().numRates == 8);
+    ASSERT(maximum->getSupportedRates().rate[7] == 8);
+
+    auto truncatedHeader = deserializeMalformedBody<T>(prefix);
+    ASSERT(truncatedHeader->isIncorrect());
+    ASSERT(truncatedHeader->isIncomplete());
+    ASSERT(truncatedHeader->getSupportedRates().numRates == 0);
+    ASSERT(truncatedHeader->getSupportedRates().rate[0] == 0);
+
+    auto oneByteHeader = prefix;
+    oneByteHeader.push_back(1);
+    auto truncatedHeaderWithElementId = deserializeMalformedBody<T>(oneByteHeader);
+    ASSERT(truncatedHeaderWithElementId->isIncorrect());
+    ASSERT(truncatedHeaderWithElementId->isIncomplete());
+    ASSERT(truncatedHeaderWithElementId->getSupportedRates().numRates == 0);
+    ASSERT(truncatedHeaderWithElementId->getSupportedRates().rate[0] == 0);
+
+    const std::vector<uint8_t> nineRates = {0x02, 0x04, 0x0B, 0x16, 0x24, 0x30, 0x48, 0x60, 0x6C};
+
+    auto overEight = deserializeMalformedBody<T>(appendSupportedRates(prefix, 1, 9, nineRates));
+    ASSERT(overEight->isIncorrect());
+    ASSERT(overEight->isComplete());
+    ASSERT(overEight->getSupportedRates().numRates == 0);
+    ASSERT(overEight->getSupportedRates().rate[0] == 0);
+
+    auto truncated = deserializeMalformedBody<T>(appendSupportedRates(prefix, 1, 3, {0x0C}));
+    ASSERT(truncated->isIncorrect());
+    ASSERT(truncated->isIncomplete());
+    ASSERT(truncated->getSupportedRates().numRates == 0);
+    ASSERT(truncated->getSupportedRates().rate[0] == 0);
+
+    auto wrongElement = deserializeMalformedBody<T>(appendSupportedRates(prefix, 0, 1, {0x0C}));
+    ASSERT(wrongElement->isIncorrect());
+    ASSERT(wrongElement->isComplete());
+    ASSERT(wrongElement->getSupportedRates().numRates == 0);
+
+    auto zeroLength = deserializeMalformedBody<T>(appendSupportedRates(prefix, 1, 0, {}));
+    ASSERT(zeroLength->isIncorrect());
+    ASSERT(zeroLength->isComplete());
+    ASSERT(zeroLength->getSupportedRates().numRates == 0);
+}
+
+%activity:
+
+{
+    const std::vector<uint8_t> body = {0x00, 0x00, 0x34, 0x12, 0x0E, 0x00};
+    auto frame = deserializeBody<Ieee80211AuthenticationFrame>(appendTrailingInformationElement(body));
+    ASSERT(frame->getSequenceNumber() == 0x1234);
+    ASSERT(frame->getStatusCode() == SC_AUTH_OUT_OF_SEQ);
+
+    auto serializedFrame = makeShared<Ieee80211AuthenticationFrame>();
+    serializedFrame->setSequenceNumber(0x1234);
+    serializedFrame->setStatusCode(SC_AUTH_OUT_OF_SEQ);
+    assertSerializedBody(serializedFrame, body);
+}
+
+{
+    const std::vector<uint8_t> body = {0x03, 0x00};
+    auto frame = deserializeBody<Ieee80211DeauthenticationFrame>(appendTrailingInformationElement(body));
+    ASSERT(frame->getReasonCode() == RC_DEAUTH_MS_LEAVING);
+
+    auto serializedFrame = makeShared<Ieee80211DeauthenticationFrame>();
+    serializedFrame->setReasonCode(RC_DEAUTH_MS_LEAVING);
+    assertSerializedBody(serializedFrame, body);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211DisassociationFrame>(appendTrailingInformationElement({0x04, 0x00}));
+    ASSERT(frame->getReasonCode() == RC_DISASS_INACTIVITY);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211ProbeRequestFrame>(appendTrailingInformationElement({0x00, 0x01, 'P', 0x01, 0x01, 0x0C}));
+    ASSERT(std::string(frame->getSSID()) == "P");
+    ASSERT(frame->getSupportedRates().numRates == 1);
+    ASSERT(frame->getSupportedRates().rate[0] == 6);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211AssociationRequestFrame>(appendTrailingInformationElement({
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x01, 'A',
+        0x01, 0x01, 0x0C
+    }));
+    ASSERT(std::string(frame->getSSID()) == "A");
+    ASSERT(frame->getSupportedRates().rate[0] == 6);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211ReassociationRequestFrame>(appendTrailingInformationElement({
+        0x00, 0x00, 0x00, 0x00,
+        0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
+        0x00, 0x01, 'R',
+        0x01, 0x01, 0x0C
+    }));
+    ASSERT(frame->getCurrentAP() == MacAddress("02:00:00:00:00:01"));
+    ASSERT(std::string(frame->getSSID()) == "R");
+}
+
+{
+    const std::vector<uint8_t> body = {
+        0x00, 0x00, 0x00, 0x00, 0x34, 0x12,
+        0x01, 0x01, 0x0C
+    };
+    auto frame = deserializeBody<Ieee80211AssociationResponseFrame>(appendTrailingInformationElement(body));
+    ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
+    ASSERT(frame->getAid() == 0x1234);
+
+    auto serializedFrame = makeShared<Ieee80211AssociationResponseFrame>();
+    serializedFrame->setStatusCode(SC_SUCCESSFUL);
+    serializedFrame->setAid(0x1234);
+    Ieee80211SupportedRatesElement supportedRates;
+    supportedRates.numRates = 1;
+    supportedRates.rate[0] = 6;
+    serializedFrame->setSupportedRates(supportedRates);
+    assertSerializedBody(serializedFrame, body);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211ReassociationResponseFrame>(appendTrailingInformationElement({
+        0x00, 0x00, 0x00, 0x00, 0x45, 0x23,
+        0x01, 0x01, 0x0C
+    }));
+    ASSERT(frame->getStatusCode() == SC_SUCCESSFUL);
+    ASSERT(frame->getAid() == 0x2345);
+}
+
+{
+    auto frame = deserializeBody<Ieee80211BeaconFrame>(appendTrailingInformationElement({
+        0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x34, 0x12, 0x00, 0x00,
+        0x00, 0x01, 'B',
+        0x01, 0x01, 0x0C
+    }));
+    ASSERT(frame->getBeaconInterval() == SimTime((int64_t)0x1234 * 1024, SIMTIME_US));
+    ASSERT(std::string(frame->getSSID()) == "B");
+
+    wait(SimTime(1234, SIMTIME_US));
+    ASSERT(simTime().inUnit(SIMTIME_US) == 1234);
+    ASSERT(simTime().raw() == 1234000);
+
+    auto serializedFrame = makeShared<Ieee80211BeaconFrame>();
+    serializedFrame->setBeaconInterval(SimTime((int64_t)0x1234 * 1024, SIMTIME_US));
+    serializedFrame->setSSID("B");
+    Ieee80211SupportedRatesElement supportedRates;
+    supportedRates.numRates = 1;
+    supportedRates.rate[0] = 6;
+    serializedFrame->setSupportedRates(supportedRates);
+    assertSerializedBody(serializedFrame, {
+        0xD2, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x34, 0x12, 0x00, 0x00,
+        0x00, 0x01, 'B',
+        0x01, 0x01, 0x0C
+    });
+}
+
+{
+    auto frame = deserializeBody<Ieee80211ProbeResponseFrame>(appendTrailingInformationElement({
+        0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x32, 0x00, 0x00, 0x00,
+        0x00, 0x01, 'Q',
+        0x01, 0x01, 0x0C
+    }));
+    ASSERT(frame->getBeaconInterval() == SimTime(51200, SIMTIME_US));
+    ASSERT(std::string(frame->getSSID()) == "Q");
+
+    auto serializedFrame = makeShared<Ieee80211ProbeResponseFrame>();
+    serializedFrame->setBeaconInterval(SimTime(51200, SIMTIME_US));
+    serializedFrame->setSSID("Q");
+    Ieee80211SupportedRatesElement supportedRates;
+    supportedRates.numRates = 1;
+    supportedRates.rate[0] = 6;
+    serializedFrame->setSupportedRates(supportedRates);
+    assertSerializedBody(serializedFrame, {
+        0xD2, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x32, 0x00, 0x00, 0x00,
+        0x00, 0x01, 'Q',
+        0x01, 0x01, 0x0C
+    });
+}
+
+checkMalformedSsid<Ieee80211ProbeRequestFrame>({});
+checkMalformedSsid<Ieee80211AssociationRequestFrame>({
+    0x00, 0x00, 0x00, 0x00
+});
+checkMalformedSsid<Ieee80211ReassociationRequestFrame>({
+    0x00, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x01
+});
+checkMalformedSsid<Ieee80211BeaconFrame>({
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x64, 0x00, 0x00, 0x00
+});
+checkMalformedSsid<Ieee80211ProbeResponseFrame>({
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x32, 0x00, 0x00, 0x00
+});
+
+checkMalformedSupportedRates<Ieee80211ProbeRequestFrame>({0x00, 0x01, 'P'});
+checkMalformedSupportedRates<Ieee80211AssociationRequestFrame>({
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x01, 'A'
+});
+checkMalformedSupportedRates<Ieee80211ReassociationRequestFrame>({
+    0x00, 0x00, 0x00, 0x00,
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
+    0x00, 0x01, 'R'
+});
+checkMalformedSupportedRates<Ieee80211AssociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x34, 0x12});
+checkMalformedSupportedRates<Ieee80211ReassociationResponseFrame>({0x00, 0x00, 0x00, 0x00, 0x45, 0x23});
+checkMalformedSupportedRates<Ieee80211BeaconFrame>({
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x64, 0x00, 0x00, 0x00,
+    0x00, 0x01, 'B'
+});
+checkMalformedSupportedRates<Ieee80211ProbeResponseFrame>({
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x32, 0x00, 0x00, 0x00,
+    0x00, 0x01, 'Q'
+});
+
+bool malformedBodyRejected = false;
+try {
+    deserializeBody<Ieee80211ProbeRequestFrame>(appendSupportedRates({0x00, 0x01, 'P'}, 1, 9,
+            {0x02, 0x04, 0x0B, 0x16, 0x24, 0x30, 0x48, 0x60, 0x6C}));
+}
+catch (const cRuntimeError&) {
+    malformedBodyRejected = true;
+}
+ASSERT(malformedBodyRejected);
+
+{
+    auto original = makeShared<Ieee80211ReassociationRequestFrame>();
+    original->setCurrentAP(MacAddress("02:00:00:00:00:01"));
+    original->setSSID("R");
+    Ieee80211SupportedRatesElement supportedRates;
+    supportedRates.numRates = 2;
+    supportedRates.rate[0] = 6;
+    supportedRates.rate[1] = 12;
+    original->setSupportedRates(supportedRates);
+    original->setChunkLength(B(17));
+
+    Packet packet("serialized", original);
+    auto bytes = packet.peekAllAsBytes();
+    const std::vector<uint8_t> expected = {
+        0x00, 0x00, 0x00, 0x00,
+        0x02, 0x00, 0x00, 0x00, 0x00, 0x01,
+        0x00, 0x01, 'R',
+        0x01, 0x02, 0x0C, 0x18
+    };
+    ASSERT(bytes->getBytes() == expected);
+
+    auto roundTrip = deserializeBody<Ieee80211ReassociationRequestFrame>(bytes->getBytes());
+    ASSERT(roundTrip->getCurrentAP() == original->getCurrentAP());
+    ASSERT(std::string(roundTrip->getSSID()) == original->getSSID());
+    ASSERT(roundTrip->getSupportedRates().numRates == supportedRates.numRates);
+    ASSERT(roundTrip->getSupportedRates().rate[0] == supportedRates.rate[0]);
+    ASSERT(roundTrip->getSupportedRates().rate[1] == supportedRates.rate[1]);
+}
+
+bool unsupportedTypeRejected = false;
+try {
+    deserializeBody<UnsupportedIeee80211MgmtFrame>({0x00});
+}
+catch (const cRuntimeError&) {
+    unsupportedTypeRejected = true;
+}
+ASSERT(unsupportedTypeRejected);
+
+EV << "All registered management body types deserialize exactly.\n";
+
+%contains: stdout
+All registered management body types deserialize exactly.
