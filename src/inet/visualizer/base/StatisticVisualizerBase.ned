@@ -48,6 +48,31 @@ simple StatisticVisualizerBase extends VisualizerBase
         string placementHint = default("top"); // Annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // Determines the order of annotation positioning
 
+        // Determines whether the values a signal source emits are split into several
+        // statistics, and what identifies each of them:
+        //  - "none": the source emits the values of a single statistic
+        //  - "details": one statistic per distinct details object emitted with the value,
+        //    i.e. the live counterpart of the demux() result filter
+        //  - "flow": one statistic per packet flow of the source, in which case
+        //    `statisticExpression` must contain demuxFlow()
+        // Splitting requires `groupBy` = "source", because the statistics of one source are
+        // what is displayed together.
+        string splitBy @enum("none","details","flow") = default("none");
+
+        // Determines which statistics are displayed together as the items of a single
+        // figure, which then needs to be one that displays several items, such as a bar
+        // chart:
+        //  - "none": each statistic is displayed on a figure of its own
+        //  - "source": the statistics of one signal source are displayed together, i.e. the
+        //    ones `splitBy` split its values into; requires a `splitBy` other than "none",
+        //    because without splitting a source has a single statistic
+        //  - "networkNode": the matching signal sources of one network node are displayed
+        //    together, one item per source; requires `splitBy` = "none"
+        // With `groupBy` = "networkNode" and with `splitBy` = "flow" the values come from the
+        // result recorders built from `statisticExpression`, so an item can display e.g. a
+        // count or a throughput rather than the value of the signal.
+        string groupBy @enum("none","source","networkNode") = default("none");
+
         @class(StatisticVisualizerBase);
 }
 

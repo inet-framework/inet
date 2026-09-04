@@ -21,26 +21,26 @@ void FigureRecorder::init(Context *ctx)
     if (!figureSpec)
         figureSpec = ctx->statisticName;
     std::string figureName;
-    int series;
+    int index;
     if (const char *lastColon = strrchr(figureSpec, ':')) {
         figureName = std::string(figureSpec, lastColon - figureSpec).c_str();
-        series = utils::atoul(lastColon + 1);
+        index = utils::atoul(lastColon + 1);
     }
     else {
         figureName = figureSpec;
-        series = 0;
+        index = 0;
     }
     cFigure *figure = module->getCanvas()->getFigureByPath(figureName.c_str());
     if (!figure)
         throw cRuntimeError("Figure '%s' in module '%s' not found", figureName.c_str(), module->getFullPath().c_str());
     indicatorFigure = check_and_cast<IIndicatorFigure *>(figure);
-    if (series > indicatorFigure->getNumSeries())
-        throw cRuntimeError("series :%d is out of bounds, figure '%s' supports %d series", series, figureName.c_str(), indicatorFigure->getNumSeries());
+    if (index < 0 || index >= indicatorFigure->getNumItems())
+        throw cRuntimeError("Item index %d is out of bounds, figure '%s' displays %d items", index, figureName.c_str(), indicatorFigure->getNumItems());
 }
 
 void FigureRecorder::collect(simtime_t_cref t, double value, cObject *details)
 {
-    indicatorFigure->setValue(series, t, value);
+    indicatorFigure->setValue(index, t, value);
 }
 
 } // namespace inet

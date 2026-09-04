@@ -15,7 +15,7 @@ class INET_API FigureRecorder : public cNumericResultRecorder
 {
   protected:
     IIndicatorFigure *indicatorFigure = nullptr;
-    int series = 0;
+    int index = 0;
 
   protected:
     virtual void init(Context *ctx) override;
