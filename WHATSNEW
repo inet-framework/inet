@@ -305,6 +305,20 @@ Notable backward incompatible changes are the following:
     the physical interface in the InterfaceInd tag. Fingerprints of the
     Mobile IPv6 examples change.
 
+18. A mobile node holds home-address traffic until its reverse tunnel exists
+
+    A Mobile IPv6 mobile node that had just moved to a foreign network
+    discarded the packets it sent from its home address until the home agent
+    acknowledged its registration ("Using HoA instead of CoA... dropping
+    datagram"). It now holds them, at most 100 per home agent, and sends them
+    through the reverse tunnel once the tunnel exists; held packets are dropped
+    with a packetDropped signal if the registration does not complete. A held
+    Home Test Init is not retransmitted while it waits, so a late
+    acknowledgement does not make return routability run twice. In
+    examples/ipv6/mipv6roaming this recovers a Home Test Init and two echo
+    replies in run 0. Fingerprints of the Handover and Roaming configurations
+    change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

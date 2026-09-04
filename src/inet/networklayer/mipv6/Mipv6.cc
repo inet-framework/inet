@@ -126,6 +126,7 @@ void Mipv6::initialize(int stage)
         // the Home Address Option (MN->CN) on route-optimized outgoing traffic
         // (replacing the old T2RH/HA_OPT pseudo-tunnels).
         ipv6->registerHook(0, this);
+        networkProtocol = ipv6;
 
         // Register for Protocol::mobileipv6 so the dispatcher delivers mobility messages to us
         registerProtocol(Protocol::mobileipv6, gate("toIPv6"), gate("fromIPv6"));
@@ -1124,6 +1125,8 @@ void Mipv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowledg
 
                 // delete the entry from the BUL
                 bul->removeBinding(baSource);
+                // this registration is over, so nothing will release datagrams held for it
+                dropHeldDatagrams(baSource);
                 // remove all timers related to this BA address
                 removeTimerEntries(baSource, ifTag->getInterfaceId());
             }
@@ -1141,6 +1144,9 @@ void Mipv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowledg
                     interfaceCoAList[ie->getInterfaceId()] = entry->careOfAddress;
 
                     createTunnel(NORMAL, entry->careOfAddress, entry->destAddress);
+
+                    // the reverse tunnel now exists: send whatever was held for it
+                    releaseHeldDatagrams(entry->destAddress);
 
                     /**11.5.1
                          After updating its home registration, the mobile
@@ -1429,6 +1435,20 @@ void Mipv6::sendTestInit(cMessage *msg)
        when there are multiple home addresses.  In this case the mobile node
        MAY record the same information in multiple Binding Update List
        entries.*/
+
+    // RFC 6275 Section 11.8 retransmits a Test Init only when no response arrived within
+    // the retransmission interval. A Home Test Init still held by
+    // holdUntilReverseTunnelExists() has not been sent, so no response can be missing
+    // yet: sending another one now would release both at the Binding Acknowledgement and
+    // run return routability twice. Check again one interval later;
+    // releaseHeldDatagrams() restarts the timer when the held one is sent.
+    if (dynamicPtrCast<HomeTestInit>(tiIfEntry->testInitMsg) && isHomeTestInitHeld(tiIfEntry->dest)) {
+        EV_INFO << "The previous HoTI to " << tiIfEntry->dest << " is still held until the reverse "
+                << "tunnel exists; not retransmitting it\n";
+        tiIfEntry->nextScheduledTime = simTime() + tiIfEntry->ackTimeout;
+        scheduleAt(tiIfEntry->nextScheduledTime, msg);
+        return;
+    }
 
     // retrieve the cookie from the Test Init message
     if (auto homeTestInit = dynamicPtrCast<HomeTestInit>(tiIfEntry->testInitMsg)) {
@@ -2076,7 +2096,159 @@ INetfilter::IHook::Result Mipv6::datagramLocalOutHook(Packet *datagram)
 
     // a mobile node's own home-address-sourced traffic goes out the reverse tunnel
     requestTunnelOutputInterface(datagram);
+
+    if (holdUntilReverseTunnelExists(datagram))
+        return QUEUE;
+
     return ACCEPT;
+}
+
+bool Mipv6::holdUntilReverseTunnelExists(Packet *datagram)
+{
+    if (!rt6->isMobileNode())
+        return false;
+
+    const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();
+    if (datagram->findTag<InterfaceReq>() != nullptr)
+        return false; // an output interface (the reverse tunnel, or another one) is already pinned
+
+    /* RFC 6275 Section 11.3.1:
+         "If a binding exists, the mobile node SHOULD send the packets directly to
+          the correspondent node.  Otherwise, if a binding does not exist, the mobile
+          node MUST use reverse tunneling."
+       The standard licenses no third treatment, discarding least of all. The reverse
+       tunnel is created only when the home agent's Binding Acknowledgement arrives,
+       so between sending a Binding Update for a new care-of address and receiving
+       that acknowledgement requestTunnelOutputInterface() finds no tunnel to pin.
+       The datagram would then be routed onto the foreign link, where
+       Ipv6::resolveMACAddressAndSendPacket() discards it because a home address is
+       not a topologically correct source there. Hold it until the tunnel exists. */
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        NetworkInterface *ie = ift->getInterface(i);
+        auto mipv6Data = ie->findProtocolData<Mipv6InterfaceData>();
+        if (mipv6Data == nullptr || mipv6Data->getMNHomeAddress() != ipv6Header->getSrcAddress())
+            continue;
+
+        // Hold only what the drop guard would actually discard. That guard fires on an
+        // interface that has a care-of address, i.e. one the node is away from home on;
+        // a home-address-sourced datagram leaving an interface that has none is
+        // topologically correct and must be sent, not held.
+        auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+        if (ipv6Data == nullptr || ipv6Data->getGlobalAddress(Ipv6InterfaceData::CoA).isUnspecified())
+            continue;
+
+        // Hold only while a home registration is actually in flight -- otherwise
+        // nothing would ever release the datagram, and holding it would replace a
+        // visible drop with a silent leak.
+        const Ipv6Address& homeAgentAddress = mipv6Data->getHomeAgentAddress();
+        BindingUpdateList::BindingUpdateListEntry *entry = bul->lookup(homeAgentAddress);
+        if (entry == nullptr || entry->BAck)
+            continue;
+
+        // A Binding Update that is never acknowledged is retransmitted indefinitely and
+        // its binding update list entry never expires, so cap what one registration may
+        // accumulate and discard the oldest beyond it.
+        if (heldDatagrams.count(homeAgentAddress) >= MAX_HELD_DATAGRAMS_PER_HOME_AGENT) {
+            auto oldest = heldDatagrams.lower_bound(homeAgentAddress);
+            EV_WARN << "Already holding " << MAX_HELD_DATAGRAMS_PER_HOME_AGENT << " datagrams for home "
+                    << "agent " << homeAgentAddress << "; dropping the oldest\n";
+            dropHeldDatagram(oldest->second, QUEUE_OVERFLOW);
+            heldDatagrams.erase(oldest);
+        }
+
+        EV_INFO << "No reverse tunnel to home agent " << homeAgentAddress << " yet; holding the "
+                << "datagram from " << ipv6Header->getSrcAddress() << " to "
+                << ipv6Header->getDestAddress() << " until the registration completes\n";
+        heldDatagrams.insert({ homeAgentAddress, datagram });
+        return true;
+    }
+    return false;
+}
+
+std::vector<Packet *> Mipv6::takeHeldDatagrams(const Ipv6Address& homeAgentAddress)
+{
+    // Detach the datagrams from the map before doing anything with them: reinjecting
+    // one re-enters the IPv6 module synchronously, and anything it holds in turn would
+    // otherwise be erased by a range erase performed afterwards.
+    auto lower = heldDatagrams.lower_bound(homeAgentAddress);
+    auto upper = heldDatagrams.upper_bound(homeAgentAddress);
+    std::vector<Packet *> datagrams;
+    for (auto it = lower; it != upper; ++it)
+        datagrams.push_back(it->second);
+    heldDatagrams.erase(lower, upper);
+    return datagrams;
+}
+
+void Mipv6::releaseHeldDatagrams(const Ipv6Address& homeAgentAddress)
+{
+    for (Packet *datagram : takeHeldDatagrams(homeAgentAddress)) {
+        EV_INFO << "Reverse tunnel to home agent " << homeAgentAddress << " is up; sending the held "
+                << "datagram " << datagram->getName() << "\n";
+        // The local-out hook is not re-run on reinjection (reinjectQueuedDatagram()
+        // resumes at datagramLocalOut()), so pin the tunnel interface here, exactly
+        // as the hook would have done had the tunnel existed when the datagram was
+        // first offered.
+        requestTunnelOutputInterface(datagram);
+        // A held Home Test Init is transmitted only now, so its retransmission back-off
+        // starts now (RFC 6275 Section 11.8), not when it was first offered.
+        if (isHomeTestInit(datagram))
+            restartHomeTestInitTimer(datagram->peekAtFront<Ipv6Header>()->getDestAddress());
+        networkProtocol->reinjectQueuedDatagram(datagram);
+    }
+}
+
+bool Mipv6::isHomeTestInit(Packet *datagram) const
+{
+    const auto& ipv6Header = datagram->peekAtFront<Ipv6Header>();
+    if (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB)
+        return false;
+    const auto& mobilityHeader = datagram->peekDataAt<MobilityHeader>(ipv6Header->getChunkLength());
+    return mobilityHeader->getMobilityHeaderType() == HOME_TEST_INIT;
+}
+
+bool Mipv6::isHomeTestInitHeld(const Ipv6Address& cnAddress) const
+{
+    for (const auto& elem : heldDatagrams)
+        if (isHomeTestInit(elem.second) && elem.second->peekAtFront<Ipv6Header>()->getDestAddress() == cnAddress)
+            return true;
+    return false;
+}
+
+void Mipv6::restartHomeTestInitTimer(const Ipv6Address& cnAddress)
+{
+    for (auto& elem : transmitIfList) {
+        if (elem.first.type != KEY_HI || elem.first.dest != cnAddress)
+            continue;
+        TimerIfEntry *entry = elem.second;
+        if (entry->timer != nullptr && entry->timer->isScheduled()) {
+            // the transmission happening now is the first one, so start the back-off
+            // from the initial interval, as sendTestInit() does after a first send
+            auto mipv6Data = entry->ifEntry->getProtocolData<Mipv6InterfaceData>();
+            entry->nextScheduledTime = simTime() + mipv6Data->_getInitialBindAckTimeout();
+            entry->ackTimeout = std::min(2 * mipv6Data->_getInitialBindAckTimeout(), mipv6Data->_getMaxBindAckTimeout());
+            rescheduleAt(entry->nextScheduledTime, entry->timer);
+        }
+    }
+}
+
+void Mipv6::dropHeldDatagrams(const Ipv6Address& homeAgentAddress)
+{
+    for (Packet *datagram : takeHeldDatagrams(homeAgentAddress)) {
+        EV_WARN << "Registration with home agent " << homeAgentAddress << " will not complete; "
+                << "dropping the held datagram " << datagram->getName() << "\n";
+        dropHeldDatagram(datagram, OTHER_PACKET_DROP);
+    }
+}
+
+void Mipv6::dropHeldDatagram(Packet *datagram, PacketDropReason reason)
+{
+    // The path this replaces counted the loss (Ipv6::numDropped); report it the modern
+    // way instead, so a held datagram that is discarded is as visible to a statistic or
+    // a visualizer as one the IPv6 layer drops itself.
+    PacketDropDetails details;
+    details.setReason(reason);
+    emit(packetDroppedSignal, datagram, &details);
+    networkProtocol->dropQueuedDatagram(datagram);
 }
 
 void Mipv6::requestTunnelOutputInterface(Packet *datagram)
@@ -2788,6 +2960,8 @@ void Mipv6::handleBULExpiry(cMessage *msg)
         entry->state = BindingUpdateList::NONE;
         // remove binding
         bul->removeBinding(bulExpIfEntry->dest);
+        // the registration will not complete, so nothing will release datagrams held for it
+        dropHeldDatagrams(bulExpIfEntry->dest);
 
         // remove all timers
         int interfaceID = bulExpIfEntry->ifEntry->getInterfaceId();
@@ -2917,6 +3091,11 @@ void Mipv6::handleStopOperation(LifecycleOperation *operation)
     interfaceCoAList.clear();
     cnList.clear();
 
+    // Ipv6::flush() has freed (or is about to free) every datagram in its netfilter
+    // queue without telling the hooks, so only forget the borrowed pointers here --
+    // dropping them through the IPv6 module would touch memory it already owns.
+    heldDatagrams.clear();
+
     tunnels.clear();
     noOfNonSplitTunnels = 0;
 }
@@ -2932,6 +3111,11 @@ void Mipv6::handleCrashOperation(LifecycleOperation *operation)
 
     interfaceCoAList.clear();
     cnList.clear();
+
+    // Ipv6::flush() has freed (or is about to free) every datagram in its netfilter
+    // queue without telling the hooks, so only forget the borrowed pointers here --
+    // dropping them through the IPv6 module would touch memory it already owns.
+    heldDatagrams.clear();
 
     tunnels.clear();
     noOfNonSplitTunnels = 0;
