@@ -9,6 +9,7 @@
 
 #include <algorithm>
 
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 namespace inet {
@@ -20,10 +21,12 @@ Define_Module(Ieee80211Mib);
 void Ieee80211Mib::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        configuredSecondaryChannelOffset = par("htSecondaryChannelOffset");
         WATCH(address);
         WATCH(mode);
         WATCH(qos);
         WATCH(localHtCapabilitiesValid);
+        WATCH(configuredSecondaryChannelOffset);
         WATCH(primaryChannelAvailable);
         WATCH(bssData.bssid);
         WATCH(bssStationData.stationType);
@@ -50,10 +53,57 @@ int Ieee80211Mib::requirePrimaryChannel() const
 
 void Ieee80211Mib::setPrimaryChannel(int primaryChannel)
 {
+    setPrimaryChannel(primaryChannel, nullptr);
+}
+
+void Ieee80211Mib::setPrimaryChannel(int primaryChannel, const physicallayer::IIeee80211Band *band)
+{
     if (primaryChannel < 0 || primaryChannel > 255)
         throw cRuntimeError("IEEE 802.11 primary channel must be in the range 0..255, not %d", primaryChannel);
+
+    if (band != nullptr) {
+        try {
+            band->getStandardChannelNumber(primaryChannel);
+        }
+        catch (const cRuntimeError&) {
+            throw cRuntimeError("Invalid primary channel %d for band '%s'", primaryChannel, band->getName());
+        }
+
+        if (localHtCapabilitiesValid) {
+            if (configuredSecondaryChannelOffset != 0) {
+                if (band->isHt40OperationSupported(primaryChannel, configuredSecondaryChannelOffset)) {
+                    htOperation.secondaryChannelOffset = configuredSecondaryChannelOffset;
+                    htOperation.operatingChannelWidth = MHz(40);
+                }
+                else {
+                    // IEEE Std 802.11-2024, 11.15.2 and 11.15.3.1: fallback to 20 MHz BSS operation
+                    EV_WARN << "Configured 40 MHz HT operation (offset " << configuredSecondaryChannelOffset
+                            << ") is unsupported on primary channel " << primaryChannel
+                            << " in band '" << band->getName() << "'; falling back to 20 MHz BSS operation.\n";
+                    htOperation.secondaryChannelOffset = 0;
+                    htOperation.operatingChannelWidth = MHz(20);
+                }
+            }
+            else {
+                htOperation.secondaryChannelOffset = 0;
+                htOperation.operatingChannelWidth = MHz(20);
+            }
+        }
+    }
+
     htOperation.primaryChannel = primaryChannel;
     primaryChannelAvailable = true;
+
+    if (localHtCapabilitiesValid) {
+        for (auto& entry : peerHtStates) {
+            if (entry.second.valid) {
+                entry.second.negotiatedCapabilities = negotiateHtCapabilities(localHtCapabilities,
+                        entry.second.advertisedCapabilities, htOperation);
+                if (++entry.second.generation == 0)
+                    entry.second.generation = 1;
+            }
+        }
+    }
 }
 
 const Ieee80211HtOperation& Ieee80211Mib::getHtOperation() const
@@ -120,9 +170,10 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     if (localHtCapabilities.maxAmpduLengthExponent < 0 || localHtCapabilities.maxAmpduLengthExponent > 3)
         throw cRuntimeError("htMaxAmpduLengthExponent must be between 0 and 3");
 
-    htOperation.secondaryChannelOffset = par("htSecondaryChannelOffset");
-    if (htOperation.secondaryChannelOffset != 0 && htOperation.secondaryChannelOffset != 1 && htOperation.secondaryChannelOffset != 3)
+    configuredSecondaryChannelOffset = par("htSecondaryChannelOffset");
+    if (configuredSecondaryChannelOffset != 0 && configuredSecondaryChannelOffset != 1 && configuredSecondaryChannelOffset != 3)
         throw cRuntimeError("htSecondaryChannelOffset must be 0, 1, or 3");
+    htOperation.secondaryChannelOffset = configuredSecondaryChannelOffset;
     bool use40Mhz = htOperation.secondaryChannelOffset != 0;
     if (use40Mhz && localHtCapabilities.supportedChannelWidths.count(MHz(40)) == 0)
         throw cRuntimeError("40 MHz HT operation requires a configured PHY that can operate a 40 MHz channel width");
@@ -131,10 +182,14 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     if (protectionMode < 0 || protectionMode > 3)
         throw cRuntimeError("htProtectionMode must be between 0 and 3");
     htOperation.protectionMode = static_cast<Ieee80211HtProtectionMode>(protectionMode);
-    for (auto& entry : peerHtStates)
-        if (entry.second.valid)
+    for (auto& entry : peerHtStates) {
+        if (entry.second.valid) {
             entry.second.negotiatedCapabilities = negotiateHtCapabilities(localHtCapabilities,
-                    entry.second.advertisedCapabilities, entry.second.negotiatedCapabilities.operation);
+                    entry.second.advertisedCapabilities, htOperation);
+            if (++entry.second.generation == 0)
+                entry.second.generation = 1;
+        }
+    }
 }
 
 const Ieee80211Mib::PeerHtState *Ieee80211Mib::findPeerHtState(const MacAddress& address) const

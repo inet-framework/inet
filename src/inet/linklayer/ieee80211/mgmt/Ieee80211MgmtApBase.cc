@@ -43,6 +43,7 @@ void Ieee80211MgmtApBase::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER)
         mib->bssData.bssid = mib->address;
     else if (stage == INITSTAGE_LAST && mib->isHtOperationSupported()) {
+        mib->setPrimaryChannel(mib->requirePrimaryChannel(), getHtOperationBand());
         const auto& operation = mib->getHtOperation();
         if (operation.operatingChannelWidth == MHz(40) &&
                 !getHtOperationBand()->isHt40OperationSupported(operation.primaryChannel, operation.secondaryChannelOffset))
@@ -57,7 +58,10 @@ void Ieee80211MgmtApBase::receiveSignal(cComponent *source, simsignal_t signalID
 
     if (source == radio && signalID == ieee80211RadioChannelChangedSignal) {
         EV << "Updating AP primary channel to " << value << ".\n";
-        mib->setPrimaryChannel(value);
+        if (mib->isHtOperationSupported())
+            mib->setPrimaryChannel(value, getHtOperationBand());
+        else
+            mib->setPrimaryChannel(value);
     }
 }
 
@@ -80,4 +84,3 @@ const physicallayer::IIeee80211Band *Ieee80211MgmtApBase::getHtOperationBand() c
 } // namespace ieee80211
 
 } // namespace inet
-
