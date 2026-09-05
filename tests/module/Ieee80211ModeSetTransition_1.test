@@ -2,11 +2,13 @@
 Exercise both radio mode-set setters with DCF and HCF selectors. Successful
 HT/legacy transitions refresh PHY-limited capabilities and actual Beacon bodies.
 Fixed-rate failures restore all subscribed catalogs, caches, peer negotiations,
-and channel-access windows. Observer failures leave published state committed.
+and channel-access windows. Observer failures leave published state committed,
+publish both notifications, and reach RadioMedium's listening-change handler.
 
 %file: Ieee80211ModeSetTransition.cc
 
 #include "inet/common/Simsignals.h"
+#include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Dcaf.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edcaf.h"
@@ -19,6 +21,24 @@ and channel-access windows. Observer failures leave published state committed.
 using namespace inet;
 using namespace inet::ieee80211;
 using namespace inet::physicallayer;
+
+class TransitionRadioMedium : public RadioMedium
+{
+  public:
+    int listeningNotifications = 0;
+    cComponent *lastListeningSource = nullptr;
+  protected:
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override
+    {
+        Enter_Method_Silent();
+        RadioMedium::receiveSignal(source, signal, value, details);
+        if (signal == IRadio::listeningChangedSignal) {
+            listeningNotifications++;
+            lastListeningSource = source;
+        }
+    }
+};
+Define_Module(TransitionRadioMedium);
 
 class TransitionMgmtAp : public Ieee80211MgmtAp
 {
@@ -77,6 +97,8 @@ class CachingModeSetObserver : public cListener
 class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
 {
     bool rejectNotification = false;
+    bool rejectListeningNotification = false;
+    int listeningNotifications = 0;
     int notifications = 0;
     const Ieee80211ModeSet *observedModeSet = nullptr;
     CachingModeSetObserver cachingObserver;
@@ -141,6 +163,14 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
 
   protected:
     virtual void initialize() override { scheduleAt(SimTime(1, SIMTIME_US), new cMessage("switch")); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override
+    {
+        Enter_Method_Silent();
+        ASSERT(signal == IRadio::listeningChangedSignal);
+        listeningNotifications++;
+        if (rejectListeningNotification)
+            throw cRuntimeError("test observer rejects listening change");
+    }
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override
     {
         Enter_Method_Silent();
@@ -222,10 +252,14 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
             // Throw after an ordinary observer has cached the published set.
             // Both observers and all behavioral participants must retain it.
             rejectNotification = true;
+            auto medium = check_and_cast<TransitionRadioMedium *>(getParentModule()->getSubmodule("radioMedium"));
+            int oldListeningNotifications = medium->listeningNotifications;
             bool rejected = false;
             try { radio->setModeSetAndMode(legacy, legacy->getMode(Mbps(24))); }
             catch (const cRuntimeError&) { rejected = true; }
             ASSERT(rejected);
+            ASSERT(medium->listeningNotifications == oldListeningNotifications + 1);
+            ASSERT(medium->lastListeningSource == radio);
             ASSERT(notifications == 1);
             check(nic, legacy, false);
             ASSERT(tx->getMode() == legacy->getMode(Mbps(24)));
@@ -241,6 +275,44 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
             ASSERT(notifications == 3);
             ASSERT(cachingObserver.modeSet == tx->getModeSet());
             ASSERT(observedModeSet == tx->getModeSet());
+            // The medium subscribes on the radio, so it processes listening
+            // changes before the throwing observer on the parent interface.
+            radio->setMode(ht->getMode(Mbps(24)));
+            nic->subscribe(IRadio::listeningChangedSignal, this);
+            for (bool explicitMode : {false, true}) {
+                for (bool rejectModeSet : {false, true}) {
+                    rejectNotification = rejectModeSet;
+                    rejectListeningNotification = true;
+                    int oldNotifications = notifications;
+                    int oldListening = listeningNotifications;
+                    int oldMediumListening = medium->listeningNotifications;
+                    auto target = rejectModeSet ? ht : legacy;
+                    bool caught = false;
+                    try {
+                        if (explicitMode)
+                            radio->setModeSetAndMode(target, target->getMode(Mbps(24)));
+                        else
+                            radio->setModeSet(target);
+                    }
+                    catch (const cRuntimeError& error) {
+                        caught = true;
+                        const char *expected = rejectModeSet ? "test observer rejects mode set" : "test observer rejects listening change";
+                        ASSERT(std::string(error.what()).find(expected) != std::string::npos);
+                    }
+                    ASSERT(caught);
+                    ASSERT(notifications == oldNotifications + 1);
+                    ASSERT(listeningNotifications == oldListening + 1);
+                    ASSERT(medium->listeningNotifications == oldMediumListening + 1);
+                    ASSERT(medium->lastListeningSource == radio);
+                    check(nic, target, false);
+                }
+            }
+            rejectNotification = false;
+            rejectListeningNotification = false;
+            // A subsequent transition also proves the reentrancy guard cleared.
+            radio->setModeSet(ht);
+            check(nic, ht, false);
+            nic->unsubscribe(IRadio::listeningChangedSignal, this);
             nic->unsubscribe(modesetChangedSignal, this);
             radio->unsubscribe(modesetChangedSignal, &cachingObserver);
         }
@@ -262,6 +334,12 @@ simple TransitionMgmtAp extends Ieee80211MgmtAp
         @class(::TransitionMgmtAp);
 }
 
+module TransitionRadioMedium extends Ieee80211ScalarRadioMedium
+{
+    parameters:
+        @class(::TransitionRadioMedium);
+}
+
 simple Ieee80211ModeSetTransitionTest extends SimpleModule
 {
     parameters:
@@ -271,7 +349,7 @@ simple Ieee80211ModeSetTransitionTest extends SimpleModule
 network TransitionNetwork
 {
     submodules:
-        radioMedium: Ieee80211ScalarRadioMedium;
+        radioMedium: TransitionRadioMedium;
         ap[3]: AccessPoint;
         test: Ieee80211ModeSetTransitionTest;
 }
@@ -285,6 +363,7 @@ seed-set = 0
 cmdenv-express-mode = false
 record-vector-results = false
 record-scalar-results = false
+*.radioMedium.listeningFilter = true
 **.mobility.initFromDisplayString = false
 **.mobility.initialX = 10m
 **.mobility.initialY = 10m

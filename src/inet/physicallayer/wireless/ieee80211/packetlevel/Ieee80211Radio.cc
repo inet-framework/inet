@@ -8,6 +8,7 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
 #include <algorithm>
+#include <exception>
 
 #include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211ModeSetListener.h"
 
@@ -154,16 +155,26 @@ void Ieee80211Radio::changeModeSet(const Ieee80211ModeSet *modeSet, const IIeee8
     // The transaction is committed. Observer failures must not undo a state
     // already published to earlier listeners. Keep the reentrancy guard during
     // publication so every listener observes the same committed mode set.
+    std::exception_ptr observerFailure;
     try {
         if (modeSet != nullptr)
             emit(modesetChangedSignal, const_cast<Ieee80211ModeSet *>(modeSet));
+    }
+    catch (...) {
+        observerFailure = std::current_exception();
+    }
+    // Listening changes are independent committed facts: the medium must get
+    // its publication attempt even when a mode-set observer throws.
+    try {
         emit(listeningChangedSignal, 0);
     }
     catch (...) {
-        changingModeSet = false;
-        throw;
+        if (!observerFailure)
+            observerFailure = std::current_exception();
     }
     changingModeSet = false;
+    if (observerFailure)
+        std::rethrow_exception(observerFailure);
     EV << "Changing radio mode set to " << modeSet << " and mode to " << transmitter->getMode() << endl;
 }
 
