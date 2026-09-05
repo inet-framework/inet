@@ -108,6 +108,8 @@ class Ieee80211Prim_BssDescription extends cObject
     MacAddress BSSID;
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
+    bool extendedSupportedRatesPresent;
+    Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
     simtime_t beaconInterval;
 
     double rxPower; // received power from AP; not part of the standard

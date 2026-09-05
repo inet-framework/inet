@@ -1,0 +1,361 @@
+%description:
+Verify that detailed station management tears down production-reachable scan,
+authentication, association, reassociation, beacon, and negotiated peer HT
+state on shutdown and crash. The node remains down past every pending timer
+deadline and restarts without resurrecting the interrupted state.
+
+%file: TestIeee80211MgmtStaLifecycle.cc
+
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211MgmtSta : public Ieee80211MgmtSta
+{
+  protected:
+    static MacAddress getCurrentAccessPointAddress()
+    {
+        return MacAddress("02:00:00:00:00:01");
+    }
+
+    static MacAddress getTargetAccessPointAddress()
+    {
+        return MacAddress("02:00:00:00:00:02");
+    }
+
+    ApInfo *addAccessPoint(const MacAddress& address, bool authenticated)
+    {
+        ASSERT(lookupAP(address) == nullptr);
+        apList.push_back(ApInfo());
+        auto ap = &apList.back();
+        ap->channel = 6;
+        ap->address = address;
+        ap->ssid = "lifecycle-ssid";
+        ap->beaconInterval = SimTime(100, SIMTIME_US);
+        ap->isAuthenticated = authenticated;
+        return ap;
+    }
+
+    void assertCleanEntryState()
+    {
+        ASSERT(!isScanning);
+        ASSERT(scanTimer == nullptr);
+        ASSERT(apList.empty());
+        ASSERT(assocTimeoutMsg == nullptr);
+        ASSERT(!reassociationInProgress);
+        ASSERT(!mib->bssStationData.isAssociated);
+        ASSERT(assocAP.address.isUnspecified());
+        ASSERT(assocAP.beaconTimeoutMsg == nullptr);
+    }
+
+  public:
+    void startActiveScanPhase(simtime_t timerDelay)
+    {
+        Enter_Method("startActiveScanPhase");
+        assertCleanEntryState();
+
+        Ieee80211Prim_ScanRequest request;
+        request.setBSSType(BSSTYPE_INFRASTRUCTURE);
+        request.setActiveScan(true);
+        request.setProbeDelay(timerDelay);
+        request.setMinChannelTime(timerDelay);
+        request.setMaxChannelTime(timerDelay);
+        request.setChannelListArraySize(1);
+        request.setChannelList(0, 6);
+        processScanCommand(&request);
+    }
+
+    void startAuthenticationPhase(simtime_t timerDelay)
+    {
+        Enter_Method("startAuthenticationPhase");
+        assertCleanEntryState();
+        startAuthentication(addAccessPoint(getTargetAccessPointAddress(), false), timerDelay);
+    }
+
+    void startAssociationPhase(simtime_t timerDelay)
+    {
+        Enter_Method("startAssociationPhase");
+        assertCleanEntryState();
+        startAssociation(addAccessPoint(getTargetAccessPointAddress(), true), timerDelay);
+    }
+
+    void startReassociationPhase(simtime_t timerDelay)
+    {
+        Enter_Method("startReassociationPhase");
+        assertCleanEntryState();
+        ASSERT(mib->isHtOperationSupported());
+
+        const auto currentAddress = getCurrentAccessPointAddress();
+        auto targetAp = addAccessPoint(getTargetAccessPointAddress(), true);
+
+        // This is the coherent state produced by a successful Association
+        // Response: an associated AP, negotiated peer HT state, and beacon
+        // timeout. startReassociation() then enters the real pending path.
+        mib->bssData.ssid = "lifecycle-ssid";
+        mib->bssData.bssid = currentAddress;
+        mib->bssStationData.isAssociated = true;
+        assocAP = AssociatedApInfo();
+        assocAP.channel = 6;
+        assocAP.address = currentAddress;
+        assocAP.ssid = "lifecycle-ssid";
+        assocAP.beaconInterval = SimTime(100, SIMTIME_US);
+        assocAP.isAuthenticated = true;
+        assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", 6);
+        scheduleAfter(timerDelay, assocAP.beaconTimeoutMsg);
+
+        Ieee80211HtOperation operation;
+        operation.primaryChannel = 6;
+        operation.basicMcsSupported[0] = true;
+        mib->setPeerHtCapabilities(currentAddress, mib->localHtCapabilities, operation);
+        startReassociation(targetAp, timerDelay);
+    }
+
+    bool hasScanTimer() const { return scanTimer != nullptr; }
+    bool isActiveScanSubscribed() const { return host != nullptr && host->isSubscribed(physicallayer::IRadio::receptionStateChangedSignal, const_cast<TestIeee80211MgmtSta *>(this)); }
+    bool hasPendingAuthentication() const
+    {
+        for (const auto& ap : apList)
+            if (ap.authTimeoutMsg != nullptr)
+                return true;
+        return false;
+    }
+    bool hasPendingAssociation() const { return assocTimeoutMsg != nullptr; }
+    bool hasBeaconTimer() const { return assocAP.beaconTimeoutMsg != nullptr; }
+    bool hasCurrentPeerHtState() const { return mib->findPeerHtState(getCurrentAccessPointAddress()) != nullptr; }
+    bool isAssociated() const { return mib->bssStationData.isAssociated; }
+    bool isReassociationPending() const { return reassociationInProgress; }
+    bool isScanningNow() const { return isScanning; }
+    bool isApListEmpty() const { return apList.empty(); }
+    MacAddress getAssociatedAddress() const { return assocAP.address; }
+    const std::string& getCachedSsid() const { return mib->bssData.ssid; }
+    MacAddress getCachedBssid() const { return mib->bssData.bssid; }
+};
+
+Define_Module(TestIeee80211MgmtSta);
+
+class TestIeee80211AgentSta : public Ieee80211AgentSta
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        SimpleModule::initialize(stage);
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+    }
+};
+
+Define_Module(TestIeee80211AgentSta);
+
+class Ieee80211MgmtStaLifecycleTest : public cSimpleModule
+{
+  protected:
+    TestIeee80211MgmtSta *mgmt = nullptr;
+
+  public:
+    Ieee80211MgmtStaLifecycleTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void initialize() override
+    {
+        mgmt = check_and_cast<TestIeee80211MgmtSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+    }
+
+    virtual void activity() override
+    {
+        const auto timerDelay = SimTime(5, SIMTIME_US);
+        const auto downCheckDelay = SimTime(6, SIMTIME_US);
+        const auto restartOffset = SimTime(4500, SIMTIME_NS);
+        const auto nextDownCheckDelay = SimTime(5500, SIMTIME_NS);
+
+        mgmt->startActiveScanPhase(timerDelay);
+        ASSERT(mgmt->isScanningNow());
+        ASSERT(mgmt->hasScanTimer());
+        ASSERT(mgmt->isActiveScanSubscribed());
+        std::cout << "Detailed STA active scan entered through processScanCommand.\n";
+
+        wait(downCheckDelay); // shutdown at 1 us; old timer deadline at 5 us
+        checkClearedState(false, "active scan shutdown");
+        wait(restartOffset); // startup at 10 us
+        checkClearedState(false, "active scan restart");
+
+        mgmt->startAuthenticationPhase(timerDelay);
+        ASSERT(mgmt->hasPendingAuthentication());
+        ASSERT(!mgmt->isAssociated());
+        std::cout << "Detailed STA authentication entered through startAuthentication.\n";
+
+        wait(nextDownCheckDelay); // crash at 11.5 us; old deadline at 15.5 us
+        checkClearedState(false, "authentication crash");
+        wait(restartOffset); // startup at 20 us
+        checkClearedState(false, "authentication restart");
+
+        mgmt->startAssociationPhase(timerDelay);
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(!mgmt->isAssociated());
+        std::cout << "Detailed STA association entered through startAssociation.\n";
+
+        wait(nextDownCheckDelay); // shutdown at 21.5 us; old deadline at 25.5 us
+        checkClearedState(false, "association shutdown");
+        wait(restartOffset); // startup at 30 us
+        checkClearedState(false, "association restart");
+
+        mgmt->startReassociationPhase(timerDelay);
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(mgmt->isReassociationPending());
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->hasBeaconTimer());
+        ASSERT(mgmt->hasCurrentPeerHtState());
+        std::cout << "Detailed STA reassociation entered through startReassociation.\n";
+
+        wait(nextDownCheckDelay); // crash at 31.5 us; old deadlines at 35.5 us
+        checkClearedState(true, "reassociation crash");
+        wait(restartOffset); // startup at 40 us
+        checkClearedState(true, "reassociation restart");
+
+        std::cout << "Detailed STA reachable lifecycle teardown and restart cleanliness verified.\n";
+    }
+
+    void checkClearedState(bool expectCachedAssociation, const char *phase)
+    {
+        ASSERT(!mgmt->isScanningNow());
+        ASSERT(!mgmt->hasScanTimer());
+        ASSERT(!mgmt->isActiveScanSubscribed());
+        ASSERT(!mgmt->hasPendingAuthentication());
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress().isUnspecified());
+        ASSERT(!mgmt->hasBeaconTimer());
+        ASSERT(!mgmt->hasCurrentPeerHtState());
+        ASSERT(mgmt->isApListEmpty());
+        if (expectCachedAssociation) {
+            ASSERT(mgmt->getCachedSsid() == "lifecycle-ssid");
+            ASSERT(mgmt->getCachedBssid() == MacAddress("02:00:00:00:00:01"));
+        }
+        std::cout << "Detailed STA state cleared after " << phase << ".\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtStaLifecycleTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.common.scenario.ScenarioManager;
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple TestIeee80211MgmtSta extends Ieee80211MgmtSta
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtSta);
+}
+
+simple TestIeee80211AgentSta extends Ieee80211AgentSta
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211AgentSta);
+}
+
+simple Ieee80211MgmtStaLifecycleTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtStaLifecycleTest);
+}
+
+network Ieee80211MgmtStaLifecycleTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        scenarioManager: ScenarioManager;
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtSta";
+                wlan[*].agent.typename = "TestIeee80211AgentSta";
+        }
+        test: Ieee80211MgmtStaLifecycleTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtStaLifecycleTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 45us
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.sta.wlan[0].address = "02:00:00:00:00:09"
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 65Mbps
+*.sta.wlan[0].radio.channelNumber = 6
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%file: scenario.xml
+
+<scenario>
+    <at t="1us">
+        <shutdown module="sta"/>
+    </at>
+    <at t="10us">
+        <startup module="sta"/>
+    </at>
+    <at t="11500ns">
+        <crash module="sta"/>
+    </at>
+    <at t="20us">
+        <startup module="sta"/>
+    </at>
+    <at t="21500ns">
+        <shutdown module="sta"/>
+    </at>
+    <at t="30us">
+        <startup module="sta"/>
+    </at>
+    <at t="31500ns">
+        <crash module="sta"/>
+    </at>
+    <at t="40us">
+        <startup module="sta"/>
+    </at>
+</scenario>
+
+%contains: stdout
+Detailed STA active scan entered through processScanCommand.
+
+%contains: stdout
+Detailed STA authentication entered through startAuthentication.
+
+%contains: stdout
+Detailed STA association entered through startAssociation.
+
+%contains: stdout
+Detailed STA reassociation entered through startReassociation.
+
+%contains: stdout
+Detailed STA reachable lifecycle teardown and restart cleanliness verified.

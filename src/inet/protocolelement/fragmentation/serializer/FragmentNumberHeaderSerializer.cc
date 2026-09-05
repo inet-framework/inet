@@ -21,7 +21,7 @@ void FragmentNumberHeaderSerializer::serialize(MemoryOutputStream& stream, const
     stream.writeUint8(byte);
 }
 
-const Ptr<Chunk> FragmentNumberHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> FragmentNumberHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto fragmentNumberHeader = makeShared<FragmentNumberHeader>();
     uint8_t byte = stream.readUint8();

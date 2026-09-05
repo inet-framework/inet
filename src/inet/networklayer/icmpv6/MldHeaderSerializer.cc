@@ -69,7 +69,7 @@ void MldHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     }
 }
 
-const Ptr<Chunk> MldHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> MldHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     B start = stream.getRemainingLength();
     uint8_t type = stream.readByte();

@@ -114,8 +114,43 @@ enum Ieee80211HwmpCode
 //
 struct Ieee80211SupportedRatesElement
 {
-    short numRates; // number of rates (max 8)
+    short numRates; // number of rates (1..8)
     double rate[8]; // in Mbit/s; should be multiple of 500 kbit/s
+    bool basicRate[8]; // BSS membership/basic-rate bit
+}
+
+// IEEE Std 802.11-2024, 9.4.2.11: overflow of Supported Rates.
+struct Ieee80211ExtendedSupportedRatesElement
+{
+    short numRates; // number of rates (1..255)
+    double rate[255]; // in Mbit/s; should be multiple of 500 kbit/s
+    bool basicRate[255]; // BSS membership/basic-rate bit
+}
+
+// IEEE Std 802.11-2024, 9.4.2.54: modeled fields in the fixed 26-octet HT Capabilities body.
+struct Ieee80211HtCapabilitiesElement
+{
+    bool ldpc;
+    bool supportedChannelWidth40Mhz;
+    bool greenfield;
+    bool shortGi20;
+    bool shortGi40;
+    short maxAmpduLengthExponent;
+    bool rxMcsSupported[77];
+    bool txMcsSetDefined;
+    bool txRxMcsSetNotEqual;
+    short txMaxNss;
+    bool txUnequalModulation;
+}
+
+// IEEE Std 802.11-2024, 9.4.2.55: modeled fields in the fixed 22-octet HT Operation body.
+struct Ieee80211HtOperationElement
+{
+    short primaryChannel;
+    short secondaryChannelOffset;
+    bool staChannelWidth40Mhz;
+    short protectionMode;
+    bool basicMcsSupported[77];
 }
 
 //
@@ -123,6 +158,12 @@ struct Ieee80211SupportedRatesElement
 //
 class Ieee80211MgmtFrame extends FieldsChunk
 {
+    bool extendedSupportedRatesPresent;
+    Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
+    bool htCapabilitiesPresent;
+    Ieee80211HtCapabilitiesElement htCapabilities;
+    bool htOperationPresent;
+    Ieee80211HtOperationElement htOperation;
 }
 
 //

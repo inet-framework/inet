@@ -25,6 +25,33 @@ namespace ieee80211 {
 class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 {
   public:
+    enum class HtAssociationResponseStatus {
+        LEGACY,
+        VALID_HT,
+        INVALID_HT,
+    };
+
+    /** Describes a successful association response whose HT negotiation could not be used. */
+    class INET_API HtNegotiationFailure : public cObject {
+      private:
+        MacAddress peerAddress;
+        bool reassociation = false;
+        HtAssociationResponseStatus status = HtAssociationResponseStatus::INVALID_HT;
+        std::string reason;
+
+      public:
+        void setPeerAddress(const MacAddress& address) { peerAddress = address; }
+        void setReassociation(bool value) { reassociation = value; }
+        void setStatus(HtAssociationResponseStatus value) { status = value; }
+        void setReason(const std::string& value) { reason = value; }
+        const MacAddress& getPeerAddress() const { return peerAddress; }
+        bool isReassociation() const { return reassociation; }
+        HtAssociationResponseStatus getStatus() const { return status; }
+        const std::string& getReason() const { return reason; }
+    };
+
+    static simsignal_t htNegotiationFailedSignal;
+
     //
     // Encapsulates information about the ongoing scanning process
     //
@@ -44,10 +71,16 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
     // Stores AP info received during scanning
     //
     struct ApInfo : public cObject {
-        int channel;
+        int channel; // internal zero-based radio channel index
         MacAddress address; // alias bssid
         std::string ssid;
         Ieee80211SupportedRatesElement supportedRates;
+        bool extendedSupportedRatesPresent = false;
+        Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;
+        bool htCapabilitiesPresent = false;
+        Ieee80211HtCapabilities htCapabilities;
+        bool htOperationPresent = false;
+        Ieee80211HtOperation htOperation;
         simtime_t beaconInterval;
         double rxPower;
 
@@ -83,6 +116,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     // scanning status
     bool isScanning;
+    cMessage *scanTimer;
     ScanningInfo scanning;
 
     // ApInfo list: we collect scanning results and keep track of ongoing authentications here
@@ -92,10 +126,12 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     // associated Access Point
     cMessage *assocTimeoutMsg; // if non-nullptr: association is in progress
+    bool reassociationInProgress = false;
     AssociatedApInfo assocAP;
 
   public:
-    Ieee80211MgmtSta() : host(nullptr), numChannels(-1), isScanning(false), assocTimeoutMsg(nullptr) {}
+    Ieee80211MgmtSta() : host(nullptr), numChannels(-1), isScanning(false), scanTimer(nullptr), assocTimeoutMsg(nullptr) {}
+    virtual ~Ieee80211MgmtSta();
 
     virtual const ApInfo *getAssociatedAp() { return &assocAP; }
 
@@ -114,21 +150,49 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     /** Utility function: sends association request */
     virtual void startAssociation(ApInfo *ap, simtime_t timeout);
+    virtual void startReassociation(ApInfo *ap, simtime_t timeout);
 
     /** Utility function: looks up AP in our AP list. Returns nullptr if not found. */
     virtual ApInfo *lookupAP(const MacAddress& address);
 
-    /** Utility function: clear the AP list, and cancel any pending authentications. */
+    /** Utility function: clear the AP list and cancel pending association and authentication transactions. */
     virtual void clearAPList();
+
+    /** Utility function: cancel any pending association or reassociation. */
+    virtual void cancelPendingAssociation();
 
     /** Utility function: switches to the given radio channel. */
     virtual void changeChannel(int channelNum);
 
     /** Stores AP info received in a beacon or probe response */
-    virtual void storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body);
+    virtual bool storeAPInfo(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211BeaconFrame>& body);
+
+    /** Processes Association and Reassociation Responses using the selected BSS discovery state. */
+    virtual void processAssociationResponse(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool reassociation);
+
+    /** Returns whether the selected BSS's cached HT advertisement is usable locally. */
+    virtual bool isHtBssSupported(const ApInfo *ap, std::string& reason) const;
+
+    /** Classifies the HT elements in a successful association response. */
+    virtual HtAssociationResponseStatus classifyAssociationResponse(
+            const Ptr<const Ieee80211AssociationResponseFrame>& responseBody,
+            const physicallayer::IIeee80211Band *band,
+            const Ieee80211HtOperation *selectedBssHtOperation,
+            Ieee80211HtCapabilities& responseHtCapabilities, Ieee80211HtOperation& responseHtOperation,
+            std::string& reason) const;
+
+    static const char *getHtAssociationResponseStatusName(HtAssociationResponseStatus status);
+
+    /** Applies the failed-reassociation state transition for the target AP. */
+    virtual void handleReassociationFailure(ApInfo *ap);
+    static bool shouldDisassociateOnReassociationFailure(bool isAssociated,
+            const MacAddress& associatedApAddress, const MacAddress& targetApAddress);
 
     /** Switches to the next channel to scan; returns true if done (there wasn't any more channel to scan). */
     virtual bool scanNextChannel();
+
+    /** Utility function: cancels and deletes the outstanding scan timer, if any. */
+    virtual void cancelScanTimer();
 
     /** Broadcasts a Probe Request */
     virtual void sendProbeRequest();
@@ -144,9 +208,16 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     /** Sends back result of association to the agent */
     virtual void sendAssociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode);
+    virtual void sendReassociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode);
 
     /** Utility function: Cancel the existing association */
     virtual void disassociate();
+
+    /** Utility function: clear the existing association without touching a pending transition. */
+    virtual void clearCurrentAssociation();
+
+    /** Processes a peer-initiated termination of the current association. */
+    virtual bool terminateCurrentAssociationFromPeer(const MacAddress& address);
 
     /** Utility function: sends a confirmation to the agent */
     virtual void sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode resultCode);
@@ -156,6 +227,9 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 
     /** Called by the signal handler whenever a change occurs we're interested in */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+
+    /** lifecycle support */
+    virtual void stop() override;
 
     /** Utility function: converts Ieee80211StatusCode (->frame) to Ieee80211PrimResultCode (->primitive) */
     virtual Ieee80211PrimResultCode statusCodeToPrimResultCode(int statusCode);
@@ -190,4 +264,3 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
 } // namespace inet
 
 #endif
-

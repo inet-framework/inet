@@ -241,6 +241,13 @@ unsigned int Ieee80211VhtPreambleMode::computeNumberOfHTLongTrainings(unsigned i
     return numberOfSpaceTimeStreams == 3 ? 4 : numberOfSpaceTimeStreams;
 }
 
+const simtime_t Ieee80211VhtPreambleMode::getDurationBeforeHeader() const
+{
+    // IEEE Std 802.11-2024, 21.3.2: the L-SIG duration is part of the
+    // pre-header timing of the supported VHT mixed format.
+    return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + getLSIGDuration();
+}
+
 const simtime_t Ieee80211VhtPreambleMode::getDuration() const
 {
     // 21.3.4 Mathematical description of signals
@@ -251,12 +258,9 @@ const simtime_t Ieee80211VhtPreambleMode::getDuration() const
 bps Ieee80211VhtSignalMode::computeGrossBitrate() const
 {
     unsigned int numberOfCodedBitsPerSymbol = modulation->getSubcarrierModulation()->getCodeWordSize() * getNumberOfDataSubcarriers();
-    if (guardIntervalType == HT_GUARD_INTERVAL_LONG)
-        return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
-    else if (guardIntervalType == HT_GUARD_INTERVAL_SHORT)
-        return bps(numberOfCodedBitsPerSymbol / getShortGISymbolInterval());
-    else
-        throw cRuntimeError("Unknown guard interval type");
+    // IEEE Std 802.11-2024, Table 21-5: VHT-SIG fields use TSYML even
+    // when the Data field uses short GI; their signaling rate is GI-independent.
+    return bps(numberOfCodedBitsPerSymbol / getSymbolInterval());
 }
 
 bps Ieee80211VhtSignalMode::computeNetBitrate() const
@@ -639,6 +643,20 @@ const simtime_t Ieee80211VhtDataMode::getDuration(b dataLength) const
     return numberOfSymbols * getSymbolInterval();
 }
 
+const simtime_t Ieee80211VhtMode::getDataDuration(b dataBitLength) const
+{
+    auto dataDuration = dataMode->getDuration(dataBitLength);
+    if (dataMode->getGuardInterval() == dataMode->getShortGIDuration()) {
+        // IEEE Std 802.11-2024, 21.4.3, Eq. (21-109): short-GI VHT data
+        // airtime is the raw TSYMS train rounded up to a TSYML boundary.
+        // This corrects the previous implementation that used the raw short-GI symbol train.
+        const auto longGiSymbolInterval = dataMode->getDFTPeriod() + dataMode->getGIDuration();
+        const auto numberOfLongGiSymbols = (dataDuration.raw() + longGiSymbolInterval.raw() - 1) / longGiSymbolInterval.raw();
+        dataDuration = SimTime::fromRaw(numberOfLongGiSymbols * longGiSymbolInterval.raw());
+    }
+    return dataDuration;
+}
+
 const simtime_t Ieee80211VhtMode::getSlotTime() const
 {
     if (centerFrequencyMode == BAND_5GHZ)
@@ -672,9 +690,13 @@ Ieee80211VhtCompliantModes::~Ieee80211VhtCompliantModes()
 
 const Ieee80211VhtMode *Ieee80211VhtCompliantModes::getCompliantMode(const Ieee80211Vhtmcs *mcsMode, Ieee80211VhtMode::BandMode centerFrequencyMode, Ieee80211VhtPreambleMode::HighTroughputPreambleFormat preambleFormat, Ieee80211VhtModeBase::GuardIntervalType guardIntervalType)
 {
+    // IEEE Std 802.11-2024, 21.3.2 permits VHT PPDUs only in the mixed
+    // preamble format represented by this mode implementation.
+    if (preambleFormat != Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED)
+        throw cRuntimeError("Unsupported VHT preamble format: only HT_PREAMBLE_MIXED is supported (IEEE Std 802.11-2024, 21.3.2)");
     const char *name = ""; // TODO
     unsigned int nss = mcsMode->getNumNss();
-    auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType, nss);
+    auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType, nss, centerFrequencyMode, preambleFormat);
     auto mode = singleton.modeCache.find(htModeId);
     if (mode == singleton.modeCache.end()) {
         const Ieee80211OfdmSignalMode *legacySignal = nullptr;
@@ -693,7 +715,7 @@ const Ieee80211VhtMode *Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
         const Ieee80211VhtDataMode *dataMode = new Ieee80211VhtDataMode(mcsMode, mcsMode->getBandwidth(), guardIntervalType);
         const Ieee80211VhtPreambleMode *preambleMode = new Ieee80211VhtPreambleMode(htSignal, legacySignal, preambleFormat, dataMode->getNumberOfSpatialStreams());
         const Ieee80211VhtMode *htMode = new Ieee80211VhtMode(name, preambleMode, dataMode, centerFrequencyMode);
-        singleton.modeCache.insert(std::pair<std::tuple<Hz, unsigned int, Ieee80211VhtModeBase::GuardIntervalType, unsigned int>, const Ieee80211VhtMode *>(htModeId, htMode));
+        singleton.modeCache.insert(std::pair<decltype(htModeId), const Ieee80211VhtMode *>(htModeId, htMode));
         return htMode;
     }
     return mode->second;
@@ -1072,4 +1094,3 @@ const DI<Ieee80211Vhtmcs> Ieee80211VhtmcsTable::vhtMcs9BW160MHzNss8([](){ return
 
 } /* namespace physicallayer */
 } /* namespace inet */
-

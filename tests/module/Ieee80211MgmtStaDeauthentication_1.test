@@ -1,0 +1,409 @@
+%description:
+Verify that a station tears down its current association when the associated
+AP sends Deauthentication, while preserving unrelated AP transactions.
+
+%file: TestIeee80211MgmtStaDeauthentication.cc
+
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class TestIeee80211MgmtSta : public Ieee80211MgmtSta
+{
+  protected:
+    ApInfo *ensureAccessPoint(const MacAddress& address)
+    {
+        auto ap = lookupAP(address);
+        if (ap == nullptr) {
+            apList.push_back(ApInfo());
+            ap = &apList.back();
+            ap->address = address;
+            ap->channel = 1;
+            ap->ssid = "SSID";
+            ap->beaconInterval = SimTime(100, SIMTIME_MS);
+        }
+        ap->isAuthenticated = true;
+        return ap;
+    }
+
+  public:
+    int associationConfirms = 0;
+    int reassociationConfirms = 0;
+    Ieee80211PrimResultCode lastAssociationResult = PRC_SUCCESS;
+    Ieee80211PrimResultCode lastReassociationResult = PRC_SUCCESS;
+    MacAddress lastAssociationAddress;
+    MacAddress lastReassociationAddress;
+    bool confirmationSawClearedAssociation = false;
+    bool confirmationSawDeauthenticatedAssociation = false;
+    bool lastAssociationConfirmationSawTerminalState = false;
+    bool lastReassociationConfirmationSawTerminalState = false;
+
+    void setAssociated(const MacAddress& address, bool cacheAp = true)
+    {
+        Enter_Method("setAssociated");
+        ASSERT(!mib->bssStationData.isAssociated);
+        if (cacheAp)
+            ensureAccessPoint(address);
+        mib->bssData.bssid = address;
+        mib->bssStationData.isAssociated = true;
+        assocAP = AssociatedApInfo();
+        assocAP.address = address;
+        assocAP.channel = 1;
+        assocAP.ssid = "SSID";
+        assocAP.isAuthenticated = true;
+        assocAP.beaconInterval = SimTime(100, SIMTIME_MS);
+        assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", 6);
+        scheduleAfter(SimTime(1, SIMTIME_S), assocAP.beaconTimeoutMsg);
+    }
+
+    void installPeerHtState(const MacAddress& address)
+    {
+        Enter_Method("installPeerHtState");
+        mib->setPrimaryChannel(1);
+        mib->setPeerHtCapabilities(address, mib->localHtCapabilities, mib->getHtOperation());
+    }
+
+    void authenticatePeer(const MacAddress& address)
+    {
+        Enter_Method("authenticatePeer");
+        ensureAccessPoint(address);
+    }
+
+    void clearCachedAccessPoints()
+    {
+        Enter_Method("clearCachedAccessPoints");
+        clearAPList();
+    }
+
+    void preparePendingAssociation(const MacAddress& address, bool reassociation)
+    {
+        Enter_Method("preparePendingAssociation");
+        ASSERT(assocTimeoutMsg == nullptr);
+        auto ap = ensureAccessPoint(address);
+        assocTimeoutMsg = new cMessage("assocTimeout", 2);
+        assocTimeoutMsg->setContextPointer(ap);
+        reassociationInProgress = reassociation;
+        scheduleAfter(SimTime(1, SIMTIME_S), assocTimeoutMsg);
+    }
+
+    bool hasPendingAssociation() const { return assocTimeoutMsg != nullptr; }
+    bool isPendingAssociationScheduled() const { return assocTimeoutMsg != nullptr && assocTimeoutMsg->isScheduled(); }
+    bool isReassociationPending() const { return reassociationInProgress; }
+    bool isAssociated() const { return mib->bssStationData.isAssociated; }
+    bool hasBeaconTimer() const { return assocAP.beaconTimeoutMsg != nullptr; }
+    MacAddress getAssociatedAddress() const { return assocAP.address; }
+    bool isAuthenticated(const MacAddress& address) const
+    {
+        auto ap = const_cast<TestIeee80211MgmtSta *>(this)->lookupAP(address);
+        return ap != nullptr && ap->isAuthenticated;
+    }
+    bool hasPeerHtState(const MacAddress& address) const { return mib->findPeerHtState(address) != nullptr; }
+
+    void deliverDeauthentication(const MacAddress& transmitter, const MacAddress& address3)
+    {
+        Enter_Method("deliverDeauthentication");
+        auto packet = new Packet("Deauthentication");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(transmitter);
+        header->setAddress3(address3);
+        handleDeauthenticationFrame(packet, header);
+    }
+
+    void deliverAssociationResponse(const MacAddress& transmitter, bool reassociation, Ieee80211StatusCode statusCode)
+    {
+        Enter_Method("deliverAssociationResponse");
+        auto packet = new Packet("AssociationResponse");
+        auto body = makeShared<Ieee80211AssociationResponseFrame>();
+        body->setStatusCode(statusCode);
+        body->setChunkLength(B(6));
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(transmitter);
+        processAssociationResponse(packet, header, reassociation);
+    }
+
+  protected:
+    virtual void sendAssociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode) override
+    {
+        associationConfirms++;
+        lastAssociationAddress = ap->address;
+        lastAssociationResult = resultCode;
+        lastAssociationConfirmationSawTerminalState = !ap->isAuthenticated && assocTimeoutMsg == nullptr;
+        confirmationSawClearedAssociation = confirmationSawClearedAssociation ||
+                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified());
+        confirmationSawDeauthenticatedAssociation = confirmationSawDeauthenticatedAssociation ||
+                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified() && !ap->isAuthenticated);
+    }
+
+    virtual void sendReassociationConfirm(ApInfo *ap, Ieee80211PrimResultCode resultCode) override
+    {
+        reassociationConfirms++;
+        lastReassociationAddress = ap->address;
+        lastReassociationResult = resultCode;
+        lastReassociationConfirmationSawTerminalState = !ap->isAuthenticated && assocTimeoutMsg == nullptr;
+        confirmationSawClearedAssociation = confirmationSawClearedAssociation ||
+                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified());
+        confirmationSawDeauthenticatedAssociation = confirmationSawDeauthenticatedAssociation ||
+                (!mib->bssStationData.isAssociated && assocAP.address.isUnspecified() && !ap->isAuthenticated);
+    }
+};
+
+Define_Module(TestIeee80211MgmtSta);
+
+class Ieee80211MgmtStaDeauthenticationTest : public cSimpleModule
+{
+  protected:
+    TestIeee80211MgmtSta *mgmt = nullptr;
+
+  public:
+    Ieee80211MgmtStaDeauthenticationTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void initialize() override
+    {
+        mgmt = check_and_cast<TestIeee80211MgmtSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+    }
+
+    virtual void activity() override
+    {
+        const MacAddress currentAp("02:00:00:00:00:01");
+        const MacAddress targetAp("02:00:00:00:00:02");
+        const MacAddress foreignAp("02:00:00:00:00:03");
+
+        // Address 2 identifies the sender. A forged/different Address 3 must
+        // not tear down the current association.
+        mgmt->setAssociated(currentAp);
+        mgmt->installPeerHtState(currentAp);
+        mgmt->deliverDeauthentication(foreignAp, currentAp);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(mgmt->hasBeaconTimer());
+        ASSERT(mgmt->hasPeerHtState(currentAp));
+        mgmt->deliverDeauthentication(currentAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+
+        // The associated AP's discovery entry and negotiated HT state are
+        // both cleared, and the beacon timer and association snapshot vanish.
+        mgmt->setAssociated(currentAp);
+        mgmt->installPeerHtState(currentAp);
+        ASSERT(mgmt->isAuthenticated(currentAp));
+        mgmt->deliverDeauthentication(currentAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress().isUnspecified());
+        ASSERT(!mgmt->hasBeaconTimer());
+        ASSERT(!mgmt->isAuthenticated(currentAp));
+        ASSERT(!mgmt->hasPeerHtState(currentAp));
+        ASSERT(mgmt->associationConfirms == 0);
+        ASSERT(mgmt->reassociationConfirms == 0);
+
+        // Association state remains authoritative even when the AP is no
+        // longer present in the scan/authentication cache.
+        mgmt->clearCachedAccessPoints();
+        mgmt->setAssociated(currentAp, false);
+        mgmt->installPeerHtState(currentAp);
+        mgmt->deliverDeauthentication(currentAp, currentAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress().isUnspecified());
+        ASSERT(!mgmt->hasBeaconTimer());
+        ASSERT(!mgmt->hasPeerHtState(currentAp));
+
+        // An authenticated but non-associated AP keeps the current pair
+        // intact while its own authentication and HT state are removed.
+        mgmt->setAssociated(currentAp);
+        mgmt->installPeerHtState(currentAp);
+        mgmt->authenticatePeer(foreignAp);
+        mgmt->installPeerHtState(foreignAp);
+        mgmt->deliverDeauthentication(foreignAp, currentAp);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(mgmt->hasBeaconTimer());
+        ASSERT(mgmt->hasPeerHtState(currentAp));
+        ASSERT(!mgmt->isAuthenticated(foreignAp));
+        ASSERT(!mgmt->hasPeerHtState(foreignAp));
+        mgmt->deliverDeauthentication(currentAp, foreignAp);
+
+        // A current-AP deauthentication does not cancel a reassociation to a
+        // different AP; that transaction can still complete successfully.
+        mgmt->setAssociated(currentAp);
+        mgmt->preparePendingAssociation(targetAp, true);
+        mgmt->deliverDeauthentication(currentAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress().isUnspecified());
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(mgmt->isPendingAssociationScheduled());
+        ASSERT(mgmt->isReassociationPending());
+        mgmt->deliverAssociationResponse(targetAp, true, SC_SUCCESSFUL);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == targetAp);
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(mgmt->reassociationConfirms == 1);
+        ASSERT(mgmt->lastReassociationResult == PRC_SUCCESS);
+        mgmt->deliverDeauthentication(targetAp, foreignAp);
+
+        // A deauthentication from an unrelated AP does not cancel an initial
+        // association to the pending target, but the target's deauthentication
+        // cancels it and emits exactly one refusal.
+        ASSERT(!mgmt->isAssociated());
+        mgmt->preparePendingAssociation(targetAp, false);
+        mgmt->authenticatePeer(foreignAp);
+        mgmt->installPeerHtState(targetAp);
+        mgmt->installPeerHtState(foreignAp);
+        int associationConfirmsBeforeTargetDeauthentication = mgmt->associationConfirms;
+        mgmt->deliverDeauthentication(foreignAp, targetAp);
+        ASSERT(mgmt->hasPendingAssociation());
+        ASSERT(mgmt->isPendingAssociationScheduled());
+        ASSERT(mgmt->isAuthenticated(targetAp));
+        ASSERT(mgmt->hasPeerHtState(targetAp));
+        ASSERT(!mgmt->isAuthenticated(foreignAp));
+        ASSERT(!mgmt->hasPeerHtState(foreignAp));
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeTargetDeauthentication);
+        mgmt->deliverDeauthentication(targetAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(!mgmt->isAuthenticated(targetAp));
+        ASSERT(!mgmt->hasPeerHtState(targetAp));
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeTargetDeauthentication + 1);
+        ASSERT(mgmt->lastAssociationAddress == targetAp);
+        ASSERT(mgmt->lastAssociationResult == PRC_REFUSED);
+        ASSERT(mgmt->lastAssociationConfirmationSawTerminalState);
+        mgmt->deliverAssociationResponse(targetAp, false, SC_SUCCESSFUL);
+        ASSERT(!mgmt->isAssociated());
+        mgmt->deliverDeauthentication(targetAp, foreignAp);
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeTargetDeauthentication + 1);
+
+        // A target deauthentication cancels a reassociation without disturbing
+        // the current AP association or its negotiated HT state.
+        mgmt->setAssociated(currentAp);
+        mgmt->installPeerHtState(currentAp);
+        mgmt->preparePendingAssociation(targetAp, true);
+        mgmt->installPeerHtState(targetAp);
+        int reassociationConfirmsBeforeTargetDeauthentication = mgmt->reassociationConfirms;
+        associationConfirmsBeforeTargetDeauthentication = mgmt->associationConfirms;
+        mgmt->deliverDeauthentication(targetAp, currentAp);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(mgmt->hasBeaconTimer());
+        ASSERT(mgmt->hasPeerHtState(currentAp));
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(!mgmt->isAuthenticated(targetAp));
+        ASSERT(!mgmt->hasPeerHtState(targetAp));
+        ASSERT(mgmt->reassociationConfirms == reassociationConfirmsBeforeTargetDeauthentication + 1);
+        ASSERT(mgmt->lastReassociationAddress == targetAp);
+        ASSERT(mgmt->lastReassociationResult == PRC_REFUSED);
+        ASSERT(mgmt->lastReassociationConfirmationSawTerminalState);
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeTargetDeauthentication);
+        mgmt->deliverAssociationResponse(targetAp, true, SC_SUCCESSFUL);
+        mgmt->deliverDeauthentication(targetAp, currentAp);
+        ASSERT(mgmt->isAssociated());
+        ASSERT(mgmt->getAssociatedAddress() == currentAp);
+        ASSERT(mgmt->hasBeaconTimer());
+        ASSERT(mgmt->hasPeerHtState(currentAp));
+        ASSERT(mgmt->reassociationConfirms == reassociationConfirmsBeforeTargetDeauthentication + 1);
+        mgmt->deliverDeauthentication(currentAp, targetAp);
+
+        // A same-peer pending association is canceled once, and its refusal
+        // is observed only after current association state was cleared.
+        mgmt->setAssociated(currentAp);
+        mgmt->preparePendingAssociation(currentAp, false);
+        int associationConfirmsBeforeSamePeer = mgmt->associationConfirms;
+        mgmt->deliverDeauthentication(currentAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeSamePeer + 1);
+        ASSERT(mgmt->lastAssociationAddress == currentAp);
+        ASSERT(mgmt->lastAssociationResult == PRC_REFUSED);
+        ASSERT(mgmt->confirmationSawClearedAssociation);
+        ASSERT(mgmt->confirmationSawDeauthenticatedAssociation);
+        mgmt->deliverAssociationResponse(currentAp, false, SC_SUCCESSFUL);
+        ASSERT(mgmt->associationConfirms == associationConfirmsBeforeSamePeer + 1);
+
+        // The same transaction rule applies to a pending reassociation.
+        mgmt->setAssociated(currentAp);
+        mgmt->preparePendingAssociation(currentAp, true);
+        int reassociationConfirmsBeforeSamePeer = mgmt->reassociationConfirms;
+        mgmt->deliverDeauthentication(currentAp, foreignAp);
+        ASSERT(!mgmt->isAssociated());
+        ASSERT(!mgmt->hasPendingAssociation());
+        ASSERT(!mgmt->isReassociationPending());
+        ASSERT(mgmt->reassociationConfirms == reassociationConfirmsBeforeSamePeer + 1);
+        ASSERT(mgmt->lastReassociationAddress == currentAp);
+        ASSERT(mgmt->lastReassociationResult == PRC_REFUSED);
+        mgmt->deliverAssociationResponse(currentAp, true, SC_SUCCESSFUL);
+        ASSERT(mgmt->reassociationConfirms == reassociationConfirmsBeforeSamePeer + 1);
+
+        std::cout << "STA Deauthentication peer filtering and association teardown verified.\n";
+        std::cout << "STA deauthentication transaction cancellation and preservation verified.\n";
+    }
+};
+
+Define_Module(Ieee80211MgmtStaDeauthenticationTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+
+simple TestIeee80211MgmtSta extends Ieee80211MgmtSta
+{
+    parameters:
+        @class(::inet::ieee80211::TestIeee80211MgmtSta);
+}
+
+simple Ieee80211MgmtStaDeauthenticationTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211MgmtStaDeauthenticationTest);
+}
+
+network Ieee80211MgmtStaDeauthenticationTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtSta";
+        }
+        test: Ieee80211MgmtStaDeauthenticationTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211MgmtStaDeauthenticationTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+*.sta.wlan[0].address = "02:00:00:00:00:09"
+*.sta.wlan[0].agent.startingTime = 1s
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 65Mbps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.centerFrequency = 2.4GHz
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+STA Deauthentication peer filtering and association teardown verified.
+
+%contains: stdout
+STA deauthentication transaction cancellation and preservation verified.

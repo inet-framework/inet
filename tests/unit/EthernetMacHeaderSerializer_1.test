@@ -1,0 +1,52 @@
+%description:
+Test that EthernetFcsSerializer reconstructs the concrete FCS type requested through the chunk
+serializer registry while preserving the common on-wire representation.
+
+%includes:
+#include <string>
+#include <vector>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeaderSerializer.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+
+using namespace inet;
+
+%global:
+
+template<typename T>
+static const Ptr<const T> deserializeFcs(const std::vector<uint8_t>& bytes)
+{
+    Packet packet("input", makeShared<BytesChunk>(bytes));
+    auto fcs = packet.popAtFront<T>(B(bytes.size()));
+    ASSERT(typeid(*fcs) == typeid(T));
+    ASSERT(fcs->getChunkLength() == B(bytes.size()));
+    ASSERT(fcs->getFcs() == 0x01234567);
+    ASSERT(fcs->getFcsMode() == FCS_COMPUTED);
+    ASSERT(packet.getDataLength() == B(0));
+    return fcs;
+}
+
+%activity:
+
+const std::vector<uint8_t> bytes = {0x01, 0x23, 0x45, 0x67};
+
+deserializeFcs<EthernetFcs>(bytes);
+deserializeFcs<EthernetFragmentFcs>(bytes);
+
+EthernetFcsSerializer serializer;
+MemoryInputStream stream(bytes);
+bool unsupportedTypeRejected = false;
+try {
+    serializer.deserialize(stream, typeid(EthernetMacHeader));
+}
+catch (const cRuntimeError& error) {
+    unsupportedTypeRejected = std::string(error.what()).find("Cannot deserialize Ethernet FCS of type") != std::string::npos;
+}
+ASSERT(unsupportedTypeRejected);
+
+EV << "Ethernet FCS deserialization preserved the requested concrete type.\n";
+
+%contains: stdout
+Ethernet FCS deserialization preserved the requested concrete type.

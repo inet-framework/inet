@@ -19,7 +19,7 @@ void Ieee802EpdHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr
     stream.writeUint16Be(llcHeader->getEtherType());
 }
 
-const Ptr<Chunk> Ieee802EpdHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ieee802EpdHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     Ptr<Ieee802EpdHeader> llcHeader = makeShared<Ieee802EpdHeader>();
     llcHeader->setEtherType(stream.readUint16Be());

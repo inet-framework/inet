@@ -32,7 +32,7 @@ void ChecksumHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<c
     }
 }
 
-const Ptr<Chunk> ChecksumHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> ChecksumHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto checksumHeader = makeShared<ChecksumHeader>();
     B length = stream.getRemainingLength();

@@ -472,7 +472,7 @@ void Ospfv3PacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
     }
 }
 
-const Ptr<Chunk> Ospfv3PacketSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> Ospfv3PacketSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto ospfPacket = makeShared<Ospfv3Packet>();
     uint16_t packetLength = deserializeOspfHeader(stream, ospfPacket);

@@ -1,0 +1,87 @@
+%description:
+Verify explicit IEEE 802.11 standards channel-number mappings and rejection of
+bands without a representable mapping.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%activity:
+
+const auto *band = &Ieee80211CompliantBands::band2_4GHz;
+ASSERT(band->getStandardChannelNumber(0) == 1);
+ASSERT(band->getStandardChannelNumber(6) == 7);
+ASSERT(band->getStandardChannelNumber(13) == 14);
+ASSERT(band->getChannelIndex(1) == 0);
+ASSERT(band->getChannelIndex(7) == 6);
+ASSERT(band->getChannelIndex(14) == 13);
+
+for (int channelIndex = 0; channelIndex < band->getNumChannels(); channelIndex++)
+    ASSERT(band->getChannelIndex(band->getStandardChannelNumber(channelIndex)) == channelIndex);
+
+// IEEE Std 802.11-2024, Annex E, Table E-4: valid 2.4 GHz HT40
+// primary/secondary tuples. Offset 1 is secondary above; 3 is below.
+ASSERT(band->isHt40OperationSupported(band->getChannelIndex(1), 1));
+ASSERT(band->isHt40OperationSupported(band->getChannelIndex(9), 1));
+ASSERT(!band->isHt40OperationSupported(band->getChannelIndex(10), 1));
+ASSERT(!band->isHt40OperationSupported(band->getChannelIndex(13), 1));
+ASSERT(!band->isHt40OperationSupported(band->getChannelIndex(14), 1));
+ASSERT(band->isHt40OperationSupported(band->getChannelIndex(5), 3));
+ASSERT(band->isHt40OperationSupported(band->getChannelIndex(13), 3));
+ASSERT(!band->isHt40OperationSupported(band->getChannelIndex(1), 3));
+ASSERT(!band->isHt40OperationSupported(band->getChannelIndex(4), 3));
+ASSERT(!band->isHt40OperationSupported(band->getChannelIndex(14), 3));
+ASSERT(!band->isHt40OperationSupported(band->getChannelIndex(6), 0));
+
+bool rejected = false;
+try {
+    band->getStandardChannelNumber(-1);
+}
+catch (const cRuntimeError&) {
+    rejected = true;
+}
+ASSERT(rejected);
+
+rejected = false;
+try {
+    band->getChannelIndex(0);
+}
+catch (const cRuntimeError&) {
+    rejected = true;
+}
+ASSERT(rejected);
+
+rejected = false;
+try {
+    Ieee80211EnumeratedBand malformed("malformed", {GHz(2.412)}, {1, 2});
+}
+catch (const cRuntimeError&) {
+    rejected = true;
+}
+ASSERT(rejected);
+
+rejected = false;
+try {
+    Ieee80211CompliantBands::band5GHz.getStandardChannelNumber(35);
+}
+catch (const cRuntimeError&) {
+    rejected = true;
+}
+ASSERT(rejected);
+
+rejected = false;
+try {
+    Ieee80211CompliantBands::band5GHz.getChannelIndex(36);
+}
+catch (const cRuntimeError&) {
+    rejected = true;
+}
+ASSERT(rejected);
+
+EV << "IEEE 802.11 band channel mapping checks passed.\n";
+
+%contains: stdout
+IEEE 802.11 band channel mapping checks passed.

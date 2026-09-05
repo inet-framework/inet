@@ -47,7 +47,7 @@ void BMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         stream.writeBitRepeatedly(0, remainderBits & 7);
 }
 
-const Ptr<Chunk> BMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> BMacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     b startPos = stream.getPosition();
     BMacType type = static_cast<BMacType>(stream.readByte());

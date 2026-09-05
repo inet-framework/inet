@@ -14,6 +14,16 @@ using namespace inet::physicallayer;
 
 Define_Module(AarfRateControl);
 
+std::function<void()> AarfRateControl::saveModeSetState()
+{
+    Enter_Method_Silent();
+    auto restoreBase = ModeSetListener::saveModeSetState();
+    return [this, savedStations = stations, restoreBase]() mutable {
+        stations.swap(savedStations);
+        restoreBase();
+    };
+}
+
 void AarfRateControl::initialize(int stage)
 {
     RateControlBase::initialize(stage);
