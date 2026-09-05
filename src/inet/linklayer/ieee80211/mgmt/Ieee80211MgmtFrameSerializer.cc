@@ -471,18 +471,16 @@ static uint16_t encodeAssociationId(Ieee80211StatusCode statusCode, int aid)
     return 0;
 }
 
-static int decodeAssociationId(Ieee80211StatusCode statusCode, uint16_t wireAid)
+static int decodeAssociationId(Ieee80211AssociationResponseFrame& frame, uint16_t wireAid)
 {
-    if (statusCode == SC_SUCCESSFUL) {
-        if ((wireAid & ASSOCIATION_ID_MARKER) != ASSOCIATION_ID_MARKER)
-            throw cRuntimeError("Malformed successful Association Response AID: missing marker 0xC000");
+    if (frame.getStatusCode() == SC_SUCCESSFUL) {
         const int aid = wireAid & ASSOCIATION_ID_MASK;
-        if (aid < 1 || aid > MAX_LOGICAL_ASSOCIATION_ID)
-            throw cRuntimeError("Malformed successful Association Response AID: %d", aid);
-        return aid;
+        if ((wireAid & ASSOCIATION_ID_MARKER) == ASSOCIATION_ID_MARKER && aid >= 1 && aid <= MAX_LOGICAL_ASSOCIATION_ID)
+            return aid;
+        frame.markIncorrect();
     }
-    if (wireAid != 0)
-        throw cRuntimeError("Malformed unsuccessful Association Response AID: expected zero, got 0x%04x", wireAid);
+    else if (wireAid != 0)
+        frame.markIncorrect();
     return 0;
 }
 
@@ -733,7 +731,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         auto frame = makeShared<Ieee80211AssociationResponseFrame>();
         stream.readUint16Le();
         frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Le());
-        frame->setAid(decodeAssociationId(frame->getStatusCode(), stream.readUint16Le()));
+        frame->setAid(decodeAssociationId(*frame, stream.readUint16Le()));
 
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
@@ -745,7 +743,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserializeFields(MemoryInputStre
         auto frame = makeShared<Ieee80211ReassociationResponseFrame>();
         stream.readUint16Le();
         frame->setStatusCode((Ieee80211StatusCode)stream.readUint16Le());
-        frame->setAid(decodeAssociationId(frame->getStatusCode(), stream.readUint16Le()));
+        frame->setAid(decodeAssociationId(*frame, stream.readUint16Le()));
 
         Ieee80211SupportedRatesElement supRat;
         deserializeSupportedRates(stream, *frame, supRat);
