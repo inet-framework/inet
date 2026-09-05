@@ -1,8 +1,8 @@
 %description:
 Exercise both radio mode-set setters with DCF and HCF selectors. Successful
 HT/legacy transitions refresh PHY-limited capabilities and actual Beacon bodies.
-Fixed-rate and observer failures restore all subscribed catalogs, caches, peer
-negotiations, and channel-access windows. No signal replay is used for rollback.
+Fixed-rate failures restore all subscribed catalogs, caches, peer negotiations,
+and channel-access windows. Observer failures leave published state committed.
 
 %file: Ieee80211ModeSetTransition.cc
 
@@ -62,10 +62,24 @@ class TransitionMgmtAp : public Ieee80211MgmtAp
 };
 Define_Module(TransitionMgmtAp);
 
+class CachingModeSetObserver : public cListener
+{
+  public:
+    const Ieee80211ModeSet *modeSet = nullptr;
+    int notifications = 0;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override
+    {
+        modeSet = check_and_cast<Ieee80211ModeSet *>(value);
+        notifications++;
+    }
+};
+
 class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
 {
     bool rejectNotification = false;
     int notifications = 0;
+    const Ieee80211ModeSet *observedModeSet = nullptr;
+    CachingModeSetObserver cachingObserver;
     MacAddress peer = MacAddress("02:00:00:00:01:ff");
 
     std::vector<IIeee80211ModeSetListener *> participants(cModule *radio)
@@ -133,6 +147,9 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
         notifications++;
         auto radio = check_and_cast<Ieee80211Radio *>(source);
         auto target = check_and_cast<Ieee80211ModeSet *>(value);
+        observedModeSet = target;
+        ASSERT(cachingObserver.modeSet == target);
+        ASSERT(cachingObserver.notifications == notifications);
         // Publication must follow *all* internal updates, irrespective of where
         // this observer appears in the subscriber list.
         auto nic = radio->getParentModule();
@@ -154,7 +171,12 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
             auto ht = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
             auto legacy = Ieee80211ModeSet::getModeSet("g(mixed)");
             radio->setMode(ht->getMode(Mbps(24)));
-            radio->subscribe(modesetChangedSignal, this);
+            cachingObserver.modeSet = ht;
+            observedModeSet = ht;
+            radio->subscribe(modesetChangedSignal, &cachingObserver);
+            // Hierarchical delivery guarantees the radio's ordinary caching
+            // listener runs before this ordinary throwing listener on its parent.
+            nic->subscribe(modesetChangedSignal, this);
             mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
             check(nic, ht, true);
             auto oldGeneration = mib->findPeerHtState(peer)->generation;
@@ -193,21 +215,22 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
                     ASSERT(arf->getRate(peer) == oldArf);
                     ASSERT(onoe->getRate(peer) == oldOnoe);
                 }
-                radio->unsubscribe(modesetChangedSignal, this);
+                nic->unsubscribe(modesetChangedSignal, this);
+                radio->unsubscribe(modesetChangedSignal, &cachingObserver);
                 continue;
             }
-            // Reject after all internal updates have succeeded, to cover arbitrary
-            // notification-prefix failure in addition to fixed-rate lookup failure.
+            // Throw after an ordinary observer has cached the published set.
+            // Both observers and all behavioral participants must retain it.
             rejectNotification = true;
             bool rejected = false;
             try { radio->setModeSetAndMode(legacy, legacy->getMode(Mbps(24))); }
             catch (const cRuntimeError&) { rejected = true; }
             ASSERT(rejected);
             ASSERT(notifications == 1);
-            check(nic, ht, true);
-            ASSERT(mib->findPeerHtState(peer)->generation == oldGeneration);
-            ASSERT(channelAccess->getCw() == oldCw);
-            ASSERT(edcaf->getCw() == oldQosCw);
+            check(nic, legacy, false);
+            ASSERT(tx->getMode() == legacy->getMode(Mbps(24)));
+            ASSERT(cachingObserver.modeSet == tx->getModeSet());
+            ASSERT(observedModeSet == tx->getModeSet());
             rejectNotification = false;
             radio->setModeSet(legacy);
             check(nic, legacy, false);
@@ -216,7 +239,10 @@ class Ieee80211ModeSetTransitionTest : public cSimpleModule, public cListener
             mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
             check(nic, ht, true);
             ASSERT(notifications == 3);
-            radio->unsubscribe(modesetChangedSignal, this);
+            ASSERT(cachingObserver.modeSet == tx->getModeSet());
+            ASSERT(observedModeSet == tx->getModeSet());
+            nic->unsubscribe(modesetChangedSignal, this);
+            radio->unsubscribe(modesetChangedSignal, &cachingObserver);
         }
         std::cout << "Mode-set switching, advertisements, peer state, both selectors, and rollback verified.\n";
         endSimulation();
