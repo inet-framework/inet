@@ -1,0 +1,189 @@
+%description:
+Exercise production DCF/QoS configured response resolution, ambiguity rejection,
+qualifier preservation for HT-mixed CTS, and optional multicast rate ceilings.
+
+%file: Test.cc
+#include <iostream>
+#include <string>
+#include "inet/common/InitStages.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211QualifiedResponseRateSelection {
+
+template<typename Selector>
+static void checkSelector(Selector& selector, bool qos)
+{
+    for (const char *profile : {"n(mixed-2.4Ghz)", "n(greenfield-2.4Ghz)"}) {
+        auto modes = Ieee80211ModeSet::getModeSet(profile);
+        for (const char *kind : {"Ack", "Cts", "BlockAck"}) {
+            if (!qos && std::string(kind) == "BlockAck")
+                continue;
+            std::string stem = std::string("response") + kind + "Frame";
+            auto bitrate = stem + "Bitrate";
+            auto bandwidth = stem + "Bandwidth";
+            auto streams = stem + "NumSpatialStreams";
+            auto gi = stem + "GuardInterval";
+            selector.par(bitrate.c_str()).setDoubleValue(13e6);
+            bool rejected = false;
+            try { selector.applyModeSet(modes); }
+            catch (const cRuntimeError& error) {
+                rejected = error.getFormattedMessage().find("Ambiguous mode") != std::string::npos;
+            }
+            ASSERT(rejected);
+            selector.par(bandwidth.c_str()).setDoubleValue(20e6);
+            selector.par(gi.c_str()).setDoubleValue(800e-9);
+            for (int nss : {1, 2}) {
+                selector.par(streams.c_str()).setIntValue(nss);
+                selector.applyModeSet(modes);
+                auto configured = selector.configured(kind);
+                ASSERT(configured->getHtMcsIndex() == (nss == 1 ? 1 : 8));
+                ASSERT(configured->getDataMode()->getBandwidth() == MHz(20));
+                ASSERT(configured->getDataMode()->getGuardInterval() == SimTime(800, SIMTIME_NS));
+                if (std::string(kind) == "Cts") {
+                    Packet rts("rts");
+                    rts.addTag<Ieee80211ModeInd>()->setMode(configured);
+                    auto response = selector.computeResponseCtsFrameMode(&rts, nullptr);
+                    ASSERT(!response->isHtGreenfield());
+                    ASSERT(response->getHtMcsIndex() == configured->getHtMcsIndex());
+                    ASSERT(response->getDataMode()->getBandwidth() == configured->getDataMode()->getBandwidth());
+                    ASSERT(response->getDataMode()->getNumberOfSpatialStreams() == nss);
+                    ASSERT(response->getDataMode()->getGuardInterval() == configured->getDataMode()->getGuardInterval());
+                }
+            }
+            // A conflicting explicit GI must not silently choose another tuple.
+            selector.par(gi.c_str()).setDoubleValue(400e-9);
+            rejected = false;
+            try { selector.applyModeSet(modes); }
+            catch (const cRuntimeError&) { rejected = true; }
+            ASSERT(rejected);
+            // Width and short GI also distinguish a configured HT tuple. This
+            // exercises selection only; packet-level HT40 operation is unsupported.
+            selector.par(bitrate.c_str()).setDoubleValue(15e6);
+            selector.par(bandwidth.c_str()).setDoubleValue(40e6);
+            selector.par(streams.c_str()).setIntValue(1);
+            selector.applyModeSet(modes);
+            auto wideShort = selector.configured(kind);
+            ASSERT(wideShort->getHtMcsIndex() == 0);
+            ASSERT(wideShort->getDataMode()->getBandwidth() == MHz(40));
+            ASSERT(wideShort->isHtShortGuardInterval());
+            if (std::string(kind) == "Cts") {
+                Packet rts("wideShortRts");
+                rts.addTag<Ieee80211ModeInd>()->setMode(wideShort);
+                auto response = selector.computeResponseCtsFrameMode(&rts, nullptr);
+                ASSERT(!response->isHtGreenfield());
+                ASSERT(response->getHtMcsIndex() == 0);
+                ASSERT(response->getDataMode()->getBandwidth() == MHz(40));
+                ASSERT(response->getDataMode()->getNumberOfSpatialStreams() == 1);
+                ASSERT(response->isHtShortGuardInterval());
+            }
+            selector.par(bitrate.c_str()).setDoubleValue(-1);
+            selector.applyModeSet(modes); // automatic ignores the qualifiers
+            ASSERT(selector.configured(kind) == nullptr);
+            selector.par(bandwidth.c_str()).setDoubleValue(NaN);
+            selector.par(streams.c_str()).setIntValue(-1);
+            selector.par(gi.c_str()).setDoubleValue(-1);
+        }
+    }
+    for (const char *profile : {"a", "g(mixed)"}) {
+        for (int rate : {6, 9, 12, 18, 24}) {
+            selector.par("multicastFrameBitrate").setDoubleValue(rate * 1e6);
+            selector.applyModeSet(Ieee80211ModeSet::getModeSet(profile));
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
+            auto selected = selector.groupMode(header);
+            ASSERT(selected->getDataMode()->getNetBitrate() == Mbps(rate == 9 ? 6 : rate == 18 ? 12 : rate));
+        }
+    }
+}
+
+class DcfProbe : public RateSelection
+{
+  public:
+    const IIeee80211Mode *configured(const char *kind) const { return std::string(kind) == "Ack" ? responseAckFrameMode : responseCtsFrameMode; }
+    const IIeee80211Mode *groupMode(const Ptr<const Ieee80211DataHeader>& header) { return computeMode(nullptr, header); }
+  protected:
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_LINK_LAYER) {
+            checkSelector(*this, false);
+            std::cout << "DCF qualified responses and multicast ceilings verified.\n";
+        }
+    }
+};
+class QosProbe : public QosRateSelection
+{
+  public:
+    const IIeee80211Mode *configured(const char *kind) const { return std::string(kind) == "Ack" ? responseAckFrameMode : std::string(kind) == "Cts" ? responseCtsFrameMode : responseBlockAckFrameMode; }
+    const IIeee80211Mode *groupMode(const Ptr<const Ieee80211DataHeader>& header) { return computeMode(nullptr, header, nullptr); }
+  protected:
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_LINK_LAYER) {
+            checkSelector(*this, true);
+            std::cout << "QoS qualified responses and multicast ceilings verified.\n";
+        }
+    }
+};
+Define_Module(DcfProbe);
+Define_Module(QosProbe);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.rateselection.RateSelection;
+import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
+simple DcfProbe extends RateSelection
+{
+    parameters:
+        @class(DcfProbe);
+        rateControlModule = "";
+        mibModule = "";
+        multicastFrameBitrate @mutable;
+        responseAckFrameBitrate @mutable;
+        responseAckFrameBandwidth @mutable;
+        responseAckFrameNumSpatialStreams @mutable;
+        responseAckFrameGuardInterval @mutable;
+        responseCtsFrameBitrate @mutable;
+        responseCtsFrameBandwidth @mutable;
+        responseCtsFrameNumSpatialStreams @mutable;
+        responseCtsFrameGuardInterval @mutable;
+}
+simple QosProbe extends QosRateSelection
+{
+    parameters:
+        @class(QosProbe);
+        rateControlModule = "";
+        mibModule = "";
+        multicastFrameBitrate @mutable;
+        responseAckFrameBitrate @mutable;
+        responseAckFrameBandwidth @mutable;
+        responseAckFrameNumSpatialStreams @mutable;
+        responseAckFrameGuardInterval @mutable;
+        responseCtsFrameBitrate @mutable;
+        responseCtsFrameBandwidth @mutable;
+        responseCtsFrameNumSpatialStreams @mutable;
+        responseCtsFrameGuardInterval @mutable;
+        responseBlockAckFrameBitrate @mutable;
+        responseBlockAckFrameBandwidth @mutable;
+        responseBlockAckFrameNumSpatialStreams @mutable;
+        responseBlockAckFrameGuardInterval @mutable;
+}
+network Test
+{
+    submodules:
+        dcf: DcfProbe;
+        qos: QosProbe;
+}
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = true
+record-vector-results = false
+seed-set = 0
+%contains: stdout
+DCF qualified responses and multicast ceilings verified.
+%contains: stdout
+QoS qualified responses and multicast ceilings verified.
