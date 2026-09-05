@@ -1,0 +1,141 @@
+%description:
+Two mixed HT APs (DCF and HCF) advertise legacy basic-rate Beacons over the
+radio medium. Legacy STAs discover them by passive scanning and associate.
+The observation includes selected transmit modes, actual Beacon reception,
+and terminal association state, so an HT Beacon cannot pass this test.
+
+%file: Ieee80211MixedHtDiscovery.cc
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+class DiscoveryMac : public Ieee80211Mac
+{
+  public:
+    int beaconsSent = 0;
+    int beaconsReceived = 0;
+  protected:
+    virtual void sendDownFrame(Packet *packet) override
+    {
+        const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header->getType() == ST_BEACON) {
+            auto mode = packet->getTag<Ieee80211ModeReq>()->getMode();
+            ASSERT(mode->getHtMcsIndex() < 0);
+            ASSERT(modeSet->containsMode(mode));
+            ASSERT(modeSet->getIsMandatory(mode));
+            beaconsSent++;
+        }
+        Ieee80211Mac::sendDownFrame(packet);
+    }
+    virtual void handleLowerPacket(Packet *packet) override
+    {
+        const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header->getType() == ST_BEACON) {
+            ASSERT(packet->getTag<Ieee80211ModeInd>()->getMode()->getHtMcsIndex() < 0);
+            beaconsReceived++;
+        }
+        Ieee80211Mac::handleLowerPacket(packet);
+    }
+};
+Define_Module(DiscoveryMac);
+
+class Ieee80211MixedHtDiscoveryTest : public cSimpleModule
+{
+  protected:
+    virtual void finish() override
+    {
+        for (int i = 0; i < 2; i++) {
+            auto apNic = getParentModule()->getSubmodule("ap", i)->getSubmodule("wlan", 0);
+            auto staNic = getParentModule()->getSubmodule("sta", i)->getSubmodule("wlan", 0);
+            auto ap = check_and_cast<Ieee80211Mib *>(apNic->getSubmodule("mib"));
+            auto sta = check_and_cast<Ieee80211Mib *>(staNic->getSubmodule("mib"));
+            ASSERT(ap->isHtOperationSupported());
+            ASSERT(!sta->isHtOperationSupported());
+            ASSERT(sta->bssStationData.isAssociated);
+            ASSERT(sta->bssData.bssid == ap->address);
+            ASSERT(ap->bssAccessPointData.stations.at(sta->address) == Ieee80211Mib::ASSOCIATED);
+            ASSERT(ap->findPeerHtState(sta->address) == nullptr);
+            ASSERT(sta->findPeerHtState(ap->address) == nullptr);
+            ASSERT(check_and_cast<DiscoveryMac *>(apNic->getSubmodule("mac"))->beaconsSent > 0);
+            ASSERT(check_and_cast<DiscoveryMac *>(staNic->getSubmodule("mac"))->beaconsReceived > 0);
+        }
+        std::cout << "Legacy passive discovery and association with mixed HT DCF and HCF APs verified.\n";
+    }
+};
+Define_Module(Ieee80211MixedHtDiscoveryTest);
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+module DiscoveryMac extends Ieee80211Mac
+{
+    parameters:
+        @class(::DiscoveryMac);
+}
+
+simple Ieee80211MixedHtDiscoveryTest extends SimpleModule
+{
+    parameters:
+        @class(::Ieee80211MixedHtDiscoveryTest);
+}
+
+network DiscoveryNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap[2]: AccessPoint;
+        sta[2]: WirelessHost;
+        test: Ieee80211MixedHtDiscoveryTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DiscoveryNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 100ms
+seed-set = 0
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+*.ap[*].wlan[*].opMode = "n(mixed-2.4Ghz)"
+*.sta[*].wlan[*].opMode = "g(mixed)"
+**.wlan[*].bitrate = -1bps
+**.wlan[*].radio.bandName = "2.4 GHz"
+**.wlan[*].radio.channelNumber = 6
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+**.wlan[*].mac.typename = "DiscoveryMac"
+*.ap[0].wlan[0].mac.qosStation = false
+*.ap[1].wlan[0].mac.qosStation = true
+*.ap[*].wlan[0].mgmt.typename = "Ieee80211MgmtAp"
+*.ap[0].wlan[0].mgmt.ssid = "mixed-dcf"
+*.ap[1].wlan[0].mgmt.ssid = "mixed-hcf"
+*.ap[*].wlan[0].mgmt.beaconInterval = 5ms
+*.sta[*].wlan[0].mgmt.typename = "Ieee80211MgmtSta"
+*.sta[*].wlan[0].mgmt.numChannels = 1
+*.sta[*].wlan[0].agent.typename = "Ieee80211AgentSta"
+*.sta[*].wlan[0].agent.activeScan = false
+*.sta[0].wlan[0].agent.startingTime = 0s
+*.sta[1].wlan[0].agent.startingTime = 1ms
+*.sta[0].wlan[0].agent.defaultSsid = "mixed-dcf"
+*.sta[1].wlan[0].agent.defaultSsid = "mixed-hcf"
+*.sta[*].wlan[0].agent.channelsToScan = "6"
+*.sta[*].wlan[0].agent.minChannelTime = 10ms
+*.sta[*].wlan[0].agent.maxChannelTime = 10ms
+*.sta[*].wlan[0].agent.authenticationTimeout = 20ms
+*.sta[*].wlan[0].agent.associationTimeout = 20ms
+
+%contains: stdout
+Legacy passive discovery and association with mixed HT DCF and HCF APs verified.

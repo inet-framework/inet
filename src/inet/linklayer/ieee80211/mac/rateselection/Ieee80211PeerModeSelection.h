@@ -14,6 +14,9 @@
 namespace inet {
 namespace ieee80211 {
 
+INET_API const physicallayer::IIeee80211Mode *selectGroupAddressedMode(
+        const physicallayer::Ieee80211ModeSet *modeSet, const physicallayer::IIeee80211Mode *requestedMode);
+
 /**
  * Selects a mode that is compatible with the negotiated receive capabilities
  * of a peer. Non-HT modes are returned unchanged. A null peer state denotes

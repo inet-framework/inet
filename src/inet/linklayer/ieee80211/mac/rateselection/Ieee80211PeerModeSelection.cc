@@ -14,6 +14,22 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+const IIeee80211Mode *selectGroupAddressedMode(const Ieee80211ModeSet *modeSet, const IIeee80211Mode *requestedMode)
+{
+    // IEEE Std 802.11-2024, 10.6.5.1 and 10.6.5.4. The model advertises
+    // mandatory legacy operational modes as its BSS basic legacy rate set.
+    const IIeee80211Mode *legacyMode = nullptr;
+    for (const auto *candidate : modeSet->getLegacyOperationalModes()) {
+        if (!modeSet->getIsMandatory(candidate))
+            continue;
+        if (candidate == requestedMode)
+            return candidate;
+        if (legacyMode == nullptr || candidate->getDataMode()->getNetBitrate() > legacyMode->getDataMode()->getNetBitrate())
+            legacyMode = candidate;
+    }
+    return legacyMode != nullptr ? legacyMode : requestedMode;
+}
+
 namespace {
 
 static const IIeee80211Mode *getLegacyFallback(const Ieee80211ModeSet *modeSet,
